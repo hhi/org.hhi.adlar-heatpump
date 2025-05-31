@@ -1,0 +1,24 @@
+{
+  "id": "org.hhi.adlar-heatpump",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Adlar Castra Heatpump"
+  },
+  "description": {
+    "en": "Local access to the Aurora series heatpump device."
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  }
+}
