@@ -1,0 +1,45 @@
+{
+  "name": {
+    "en": "intelligent-heat-pump"
+  },
+  "class": "heatpump",
+  "capabilities": [
+    "measure_current",
+    "meter_power",
+    "measure_frequency",
+    "heater_operation_mode",
+    "hot_water_mode",
+    "operational_state",
+    "measure_power",
+    "measure_pressure",
+    "alarm_pump_device",
+    "pump_mode",
+    "pump_setpoint",
+    "alarm_pump_supply",
+    "volume_set",
+    "target_temperature",
+    "target_temperature_level",
+    "measure_temperature",
+    "thermostat_mode",
+    "onoff",
+    "measure_voltage",
+    "measure_water",
+    "meter_water"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "energy": {
+    "approximation": {
+      "usageConstant": 30
+    }
+  }
+}
