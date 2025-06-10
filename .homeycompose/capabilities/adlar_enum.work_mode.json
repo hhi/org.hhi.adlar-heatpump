@@ -1,0 +1,18 @@
+{
+  "id": "adlar_enum.work_mode",
+  "title": {
+    "en": "Working mode",
+    "nl": "Bedrijfsmodus"
+  },
+  "type": "enum",
+  "values": [
+    "ECO",
+    "Normal",
+    "Boost"
+  ],
+  "uiComponent": "picker",
+
+  "description": {
+    "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
+  }
+}

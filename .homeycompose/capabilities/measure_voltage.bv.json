@@ -1,0 +1,18 @@
+{
+  "id": "measure_voltage.bv",
+  "title": {
+    "en": "Voltage B",
+    "nl": "Voltage B"
+  },
+  "min": 0,
+  "max": 10000,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Voltage B",
+    "nl": "Voltage B"
+  },
+
+  "description": {
+    "nl": "dp 111 : bv - Voltage B"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "adlar_state.backwater",
+  "title": {
+    "en": "Backwater state",
+    "nl": "Retourwater status"
+  },
+  "type": "boolean",
+  "setable": false,
+  "getable": true,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Backwater is ON",
+    "nl": "Retourwater is AAN"
+  },
+  "insightsTitleFalse": {
+    "en": "Backwater is OFF",
+    "nl": "Retourwater is UIT"
+  },
+
+  "description": {
+    "nl": "dp 31 : backwater - Backwater state"
+  }
+}

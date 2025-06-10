@@ -1,0 +1,18 @@
+{
+  "id": "measure_current.cur_current",
+  "title": {
+    "en": "Current A",
+    "nl": "Hudige stroomsterkte"
+  },
+  "min": 0,
+  "max": 99999,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Current A",
+    "nl": "Hudige stroomsterkte"
+  },
+
+  "description": {
+    "nl": "dp 102 : cur_current - Current A"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "measure_temperature.around_temp_f",
+  "title": {
+    "en": "Tank temp",
+    "nl": "Tapwater temperatuur"
+  },
+  "min": -50,
+  "max": 150,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Tank temp",
+    "nl": "Tapwater temperatuur"
+  },
+
+  "description": {
+    "nl": "dp 38 : around_temp_f - Tank temp"
+  }
+}

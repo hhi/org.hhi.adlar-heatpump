@@ -1,0 +1,1 @@
+Local access to the Aurora series heatpump device.

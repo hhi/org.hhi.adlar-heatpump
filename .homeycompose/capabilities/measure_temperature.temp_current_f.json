@@ -1,0 +1,18 @@
+{
+  "id": "measure_temperature.temp_current_f",
+  "title": {
+    "en": "High pressure temp",
+    "nl": "Hogedruk verzadigingstemperatuur"
+  },
+  "min": -50,
+  "max": 150,
+  "insights": true,
+  "insightsTitle": {
+    "en": "High pressure temp",
+    "nl": "Hogedruk verzadigingstemperatuur"
+  },
+
+  "description": {
+    "nl": "dp 35 : temp_current_f - High pressure temp"
+  }
+}

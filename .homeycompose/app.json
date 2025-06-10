@@ -1,16 +1,18 @@
 {
   "id": "org.hhi.adlar-heatpump",
   "version": "1.0.0",
-  "compatibility": ">=5.0.0",
+  "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": [
     "local"
   ],
   "name": {
-    "en": "Adlar Castra Heatpump"
+    "en": "Adlar Castra Heatpump",
+    "nl": "Adlar Castra Warmtepomp"
   },
   "description": {
-    "en": "Local access to the Aurora series heatpump device."
+    "en": "Local access to the Aurora series heatpump device.",
+    "nl": "Lokale toegang tot het Aurora-serie warmtepompapparaat."
   },
   "category": [
     "climate"
@@ -20,5 +22,22 @@
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",
     "xlarge": "/assets/images/xlarge.png"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/hhi/org.hhi.adlar-heatpump/issues"
+  },
+  "source": "https://github.com/hhi/org.hhi.adlar-heatpump",
+  "tags": {
+    "en": [
+      "heatpump",
+      "adlar",
+      "aurora"
+    ],
+    "nl": [
+      "warmtepomp",
+      "adlar",
+      "aurora"
+    ]
+  },
+  "brandColor": "#f5a623"
 }

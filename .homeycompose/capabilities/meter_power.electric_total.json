@@ -1,0 +1,18 @@
+{
+  "id": "meter_power.electric_total",
+  "title": {
+    "en": "Total Electricity Consumption",
+    "nl": "Totaal stroomverbruik"
+  },
+  "min": 0,
+  "max": 9999999,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Total Electricity Consumption",
+    "nl": "Totaal stroomverbruik"
+  },
+
+  "description": {
+    "nl": "dp 105 : electric_total - Total Electricity Consumption"
+  }
+}

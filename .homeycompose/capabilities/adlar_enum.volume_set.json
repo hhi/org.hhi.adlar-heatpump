@@ -1,0 +1,15 @@
+{
+  "id": "adlar_enum.volume_set",
+  "title": {
+    "en": "Electricity Consumption Checking",
+    "nl": "Stroomverbruik controle"
+  },
+  "type": "enum",
+  "values": ["0", "1", "2"],
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  
+  "description": {
+    "nl": "dp 106: volume_set - Electricity Consumption Checking"
+}

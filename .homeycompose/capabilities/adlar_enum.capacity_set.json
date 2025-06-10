@@ -1,0 +1,23 @@
+{
+  "id": "adlar_enum.capacity_set",
+  "title": {
+    "en": "Hot water curve setting",
+    "nl": "Instelling warmwater curve"
+  },
+  "type": "enum",
+  "values": [
+    "OFF",
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ],
+  "uiComponent": "picker",
+  "getable": true,
+  "setable": true,
+  "insights": true,
+  
+  "description": {
+    "nl": "dp 11 : capacity_set - Hot water curve setting"
+  }
+}
