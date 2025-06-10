@@ -1,8 +1,0 @@
-{
-  "type": "mdns-sd",
-  "mdns-sd": {
-    "name": "*.localhost",
-    "protocol": "udp"
-  },
-  "id": "{{apparaatnaam}}"
-}

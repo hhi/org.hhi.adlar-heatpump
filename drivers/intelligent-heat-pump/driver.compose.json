@@ -1,31 +1,105 @@
 {
   "name": {
-    "en": "intelligent-heat-pump"
+    "en": "intelligent-heat-pump",
+    "nl": "intelligent-heat-pump"
   },
   "class": "heatpump",
+
   "capabilities": [
-    "measure_current",
-    "meter_power",
-    "measure_frequency",
-    "heater_operation_mode",
-    "hot_water_mode",
-    "operational_state",
-    "measure_power",
-    "measure_pressure",
-    "alarm_pump_device",
-    "pump_mode",
-    "pump_setpoint",
-    "alarm_pump_supply",
-    "volume_set",
-    "target_temperature",
-    "target_temperature_level",
-    "measure_temperature",
-    "thermostat_mode",
     "onoff",
-    "measure_voltage",
+    "target_temperature",
+    "measure_power",
     "measure_water",
-    "meter_water"
+
+    "meter_power.power_consumption",
+    "meter_power.electric_total",
+    "measure_current.cur_current",
+    "measure_current.b_cur",
+    "measure_current.c_cur",
+    "measure_voltage.voltage_current",
+    "measure_voltage.bv",
+    "measure_voltage.cv",
+    "measure_frequency.compressor_strength",
+    "measure_frequency.fan_motor_frequency",
+    "measure_temperature.temp_top",
+    "measure_temperature.temp_bottom",
+    "measure_temperature.coiler_temp",
+    "measure_temperature.venting_temp",
+    "measure_temperature.around_temp",
+    "measure_temperature.temp_current_f",
+    "measure_temperature.top_temp_f",
+    "measure_temperature.bottom_temp_f",
+    "measure_temperature.around_temp_f",
+    "measure_temperature.coiler_temp_f",
+    "measure_temperature.evlin",
+
+    "adlar_measure_pressure.temp_current",
+    "adlar_measure_pressure.effluent_temp",
+    "adlar_enum.mode",
+    "adlar_enum.work_mode",
+    "adlar_enum.water_mode",
+    "adlar_enum.capacity_set",
+    "adlar_enum.countdown_set",
+    "adlar_enum.volume_set",
+    "adlar_hotwater",
+    "adlar_state.compressor_state",
+    "adlar_state.backwater",
+    "adlar_state.defrost_state",
+    "adlar_countdowntimer",
+    "adlar_fault"
   ],
+
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": {
+        "nl": "Huidig vermogen",  
+        "en": "Current power"
+      },
+      "min": 0,
+      "max": 9999999,
+      "description": {
+        "nl": " dps_104: cur_power - Power"
+      }
+    },
+
+    "measure_water": {
+      "title": {
+        "nl": "Water flow",
+        "en": "Water flow"
+      },
+      "min": 0,
+      "max": 100,
+      "description": {
+        "nl": "dps_39: venting_temp_f - Water flow"
+      }
+    },
+
+    "target_temperature": {
+      "title": {
+        "nl": "Stel temperatuur",
+        "en": "Target temperature"
+      },
+      "min": 5,
+      "max": 75,
+      "step": 1,
+      "unit": "°C",
+      "description": {
+        "nl": "dps_4: temp_set - Stel temperatuur"
+      }
+    },
+
+    "onoff": {
+      "title": {
+        "nl": "Schakelaar",
+        "en": "Switch"
+      },
+      "description": {
+        "nl": "dps_1: switch - Schakelaar"
+      }
+    }
+  },
+
+
   "platforms": [
     "local"
   ],
@@ -40,6 +114,34 @@
   "energy": {
     "approximation": {
       "usageConstant": 30
+    }
+  },
+  "pair": [
+    "enter_device_info",
+    "list_devices"
+  ],
+  "views": {
+    "enter_device_info": {
+      "template": "form",
+      "title": {
+        "en": "Enter Device Information"
+      },
+      "fields": [
+        {
+          "id": "device_id",
+          "type": "text",
+          "label": {
+            "en": "Device ID"
+          }
+        },
+        {
+          "id": "local_key",
+          "type": "text",
+          "label": {
+            "en": "Local Key"
+          }
+        }
+      ]
     }
   }
 }

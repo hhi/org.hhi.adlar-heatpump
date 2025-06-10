@@ -1,0 +1,22 @@
+{
+  "id": "measure_voltage.voltage_current",
+  "title": {
+    "en": "Voltage A",
+    "nl": "Huidige spanning"
+  },
+  "min": 0,
+  "max": 10000,
+  "description": {
+    "en": "The current voltage in volts.",
+    "nl": "De huidige spanning in volt."
+  },
+  "insights": true,
+  "insightsTitle": {
+    "en": "Voltage A",
+    "nl": "Huidige spanning"
+  },
+
+  "description": {
+    "nl": "dp 103 : voltage_current - Voltage A"
+  }
+}

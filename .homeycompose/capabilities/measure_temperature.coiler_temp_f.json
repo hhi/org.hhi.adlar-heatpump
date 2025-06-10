@@ -1,0 +1,18 @@
+{
+  "id": "measure_temperature.coiler_temp_f",
+  "title": {
+    "en": "Suction Temp",
+    "nl": "Zuiggas temperatuur"
+  },
+  "min": -50,
+  "max": 150,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Suction Temp",
+    "nl": "Zuiggas temperatuur"
+  },
+
+  "description": {
+    "nl": "dp 41 : coiler_temp_f - Suction Temp"
+  }
+}

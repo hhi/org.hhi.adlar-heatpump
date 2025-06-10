@@ -1,0 +1,18 @@
+{
+  "id": "measure_temperature.temp_top",
+  "title": {
+    "en": "Inlet temp",
+    "nl": "Water intrede temperatuur"
+  },
+  "min": -50,
+  "max": 150,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Inlet temp",
+    "nl": "Water intrede temperatuur"
+  },
+
+  "description": {
+    "nl": "dp 21 : temp_top - Inlet temp"
+  }
+}

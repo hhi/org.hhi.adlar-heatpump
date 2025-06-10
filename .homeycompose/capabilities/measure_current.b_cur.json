@@ -1,0 +1,18 @@
+{
+  "id": "measure_current.b_cur",
+  "title": {
+    "en": "Current B",
+    "nl": "Amperage B"
+  },
+  "min": 0,
+  "max": 99999,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Current B",
+    "nl": "Amperage B"
+  },
+
+  "description": {
+    "nl": "dp 109 : b_cur - Current B"
+  }
+}

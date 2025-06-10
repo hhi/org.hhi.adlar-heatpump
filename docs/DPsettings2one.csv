@@ -1,0 +1,305 @@
+DP_ID;Name;Code;Adlar benaming;Type;Values;Voorbeeld uitlezing
+1;Switch;switch;schakelaar;Boolean;"""{true,false}""";true
+2;Mode;mode;(Verwarmings)modus;Enum;{;heating
+;;;;;"Ê ""range"": [";
+;;;;;"Ê Ê ""cold"",";
+;;;;;"Ê Ê ""heating"",";
+;;;;;"Ê Ê ""floor_heating"",";
+;;;;;"Ê Ê ""hot_water"",";
+;;;;;"Ê Ê ""cold_and_hotwater"",";
+;;;;;"Ê Ê ""heating_and_hot_water"",";
+;;;;;"Ê Ê ""floor_heatign_and_hot_water""";
+;;;;;Ê ];
+;;;;;};
+4;Target temp;temp_set;stel temperatuur;Integer;{;46
+;;;(thermostaat);;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": 5,";
+;;;;;"Ê ""max"": 75,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+5;Working mode;work_mode;Bedrijfsmodus;Enum;{;Normal
+;;;;;"Ê ""range"": [";
+;;;;;"Ê Ê ""ECO"",";
+;;;;;"Ê Ê ""Normal"",";
+;;;;;"Ê Ê ""Boost""";
+;;;;;Ê ];
+;;;;;};
+10;Control Temperature;water_set;[Temperatuur controle] ?;Integer;{;1
+;;;;;"Ê ""unit"": ""L"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 1,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+11;Hot water curve setting;capacity_set;Instelling warmwatercurve;Enum;{;OFF
+;;;;;"Ê ""range"": [";
+;;;;;"Ê Ê ""OFF"",";
+;;;;;"Ê Ê ""H1"",";
+;;;;;"Ê Ê ""H2"",";
+;;;;;"Ê Ê ""H3"",";
+;;;;;"Ê Ê ""H4""";
+;;;;;Ê ];
+;;;;;};
+13;Curve setting;countdown_set;Instellingen  verwarmingscurve;Enum;{;L8
+;;;;;"Ê ""range"": [";
+;;;;;"Ê Ê ""OFF"",";
+;;;;;"Ê Ê ""H1"",";
+;;;;;"Ê Ê ""H2"",";
+;;;;;"Ê Ê ""H3"",";
+;;;;;"Ê Ê ""H4"",";
+;;;;;"Ê Ê ""H5"",";
+;;;;;"Ê Ê ""H6"",";
+;;;;;"Ê Ê ""H7"",";
+;;;;;"Ê Ê ""H8"",";
+;;;;;"Ê Ê ""L1"",";
+;;;;;"Ê Ê ""L2"",";
+;;;;;"Ê Ê ""L3"",";
+;;;;;"Ê Ê ""L4"",";
+;;;;;"Ê Ê ""L5"",";
+;;;;;"Ê Ê ""L6"",";
+;;;;;"Ê Ê ""L7"",";
+;;;;;"Ê Ê ""L8""";
+;;;;;Ê ];
+;;;;;};
+14;Countdown Left;countdown_left;[Aftelling minuten] ?;Integer;{;415
+;;;;;"Ê ""unit"": """",";secondes in 24 uur?
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 2000,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+15;Fault;fault;Fout toestand;Bitmap;{;0
+;;;;;"Ê ""label"": [";
+;;;;;"Ê Ê ""1"",";
+;;;;;"Ê Ê ""2"",";
+;;;;;"Ê Ê ""3"",";
+;;;;;"Ê Ê ""4"",";
+;;;;;"Ê Ê ""5"",";
+;;;;;"Ê Ê ""6"",";
+;;;;;"Ê Ê ""7"",";
+;;;;;"Ê Ê ""8"",";
+;;;;;"Ê Ê ""9"",";
+;;;;;"Ê Ê ""10"",";
+;;;;;"Ê Ê ""11"",";
+;;;;;"Ê Ê ""12"",";
+;;;;;"Ê Ê ""13"",";
+;;;;;"Ê Ê ""14"",";
+;;;;;"Ê Ê ""15"",";
+;;;;;"Ê Ê ""16"",";
+;;;;;"Ê Ê ""17"",";
+;;;;;"Ê Ê ""18"",";
+;;;;;"Ê Ê ""19"",";
+;;;;;"Ê Ê ""20"",";
+;;;;;"Ê Ê ""21"",";
+;;;;;"Ê Ê ""22"",";
+;;;;;"Ê Ê ""23"",";
+;;;;;"Ê Ê ""24"",";
+;;;;;"Ê Ê ""25"",";
+;;;;;"Ê Ê ""26"",";
+;;;;;"Ê Ê ""27"",";
+;;;;;"Ê Ê ""28"",";
+;;;;;"Ê Ê ""29"",";
+;;;;;"Ê Ê ""30""";
+;;;;;Ê ],;
+;;;;;"Ê ""maxlen"": 30";
+;;;;;};
+16;EEV Open;temp_current;EEV Open;Integer;{;93
+;;;;;"Ê ""unit"": ""P"",";
+;;;;;"Ê ""min"": -500,";
+;;;;;"Ê ""max"": 500,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+18;Electricity Consumption of Today;power_consumption;[Stroom dagverbruik];Integer;{;0
+;;;;;"Ê ""unit"": ""kWáh"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 200000,";
+;;;;;"Ê ""scale"": 2,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+20;Compressor Frequency;compressor_strength;Compressor Frequentie;Integer;{;34
+;;;;;"Ê ""unit"": ""Hz"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 200,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+21;Inlet temp;temp_top;Water intrede temperatuur;Integer;{;41
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+22;Outlet temp;temp_bottom;Water uittrede temperatuur;Integer;{;46
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+23;Coiler temp;coiler_temp;Verdampingscondensor temperatuur;Integer;{;5
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+24;Discharge Temp;venting_temp;Persgas temperatuur;Integer;{;78
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+25;EVI Open;effluent_temp;EVI-openingsstop;Integer;{;0
+;;;;;"Ê ""unit"": ""P"",";
+;;;;;"Ê ""min"": -500,";
+;;;;;"Ê ""max"": 500,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+26;Ambient Temp;around_temp;Buitentemperatuur;Integer;{;9
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+27;Compressor state;compressor_state;[Compressor toestand];Boolean;"""{true,false}""";true
+31;Backwater State;backwater;[Binnenwater toestand];Boolean;"""{true,false}""";true
+33;Defrosting;defrost_state;[Ontdooien toestand];Boolean;"""{true,false}""";false
+35;High pressure temp;temp_current_f;Hogedruk verzadigingstemperatuur;Integer;{;44
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+36;Low pressure temp;top_temp_f;Lagedruk verzadigingstemperatuur;Integer;{;5
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+37;Incoiler Temp;bottom_temp_f;Condensor temperatuur;Integer;{;40
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+38;Tank Temp;around_temp_f;Tapwater temperatuur;Integer;{;15
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+39;Water flow;venting_temp_f;Water flow;Integer;{;8
+;;;;;"Ê ""unit"": ""L/min"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 100,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+40;Fan motor frequency;effluent_temp_f;Ventilator frequentie;Integer;{;50
+;;;;;"Ê ""unit"": ""Hz"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 100,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+41;Suction Temp;coiler_temp_f;Zuiggas temperatuur;Integer;{;6
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+101;Hot Water Set Temp;minitemp_set;[Warmwater stel temperatuur];Integer;{;55
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": 10,";
+;;;;;"Ê ""max"": 75,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+102;Current A;cur_current;[Huidige stroomsterkte];Integer;{;0
+;;;;;"Ê ""unit"": ""A"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 99999,";
+;;;;;"Ê ""scale"": 3,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+103;Voltage A;voltage_current;[Huidige voltage];Integer;{;0
+;;;;;"Ê ""unit"": ""V"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 9999,";
+;;;;;"Ê ""scale"": 1,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+104;Power;cur_power;[Huidige vefrmogen];Integer;{;0
+;;;;;"Ê ""unit"": ""W"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 500000,";
+;;;;;"Ê ""scale"": 1,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+105;Total Electricity Consumption;electric_total;[Totaal stroomverbruik];Integer;{;0
+;;;;;"Ê ""unit"": ""kWáh"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 9999999,";
+;;;;;"Ê ""scale"": 2,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+106;Electricity Consumption Checking;volume_set;[Stroomverbruik  controle];Integer;{;0
+;;;;;"Ê ""unit"": """",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 2,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+107;Economizer inlet temp;eviin;EVI warmtewisselaar zuiggas temperatuur;Integer;{;31
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+108;Economy outlet temp;eviout;EVI warmtewisselaar persgas temperatuur;Integer;{;30
+;;;;;"Ê ""unit"": ""_"",";
+;;;;;"Ê ""min"": -50,";
+;;;;;"Ê ""max"": 150,";
+;;;;;"Ê ""scale"": 0,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+109;Current B;b_cur;[Amperage B];Integer;{;0
+;;;;;"Ê ""unit"": ""A"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 99999,";
+;;;;;"Ê ""scale"": 3,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+110;Current C;c_cur;[Amperage C];Integer;{;0
+;;;;;"Ê ""unit"": ""A"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 99999,";
+;;;;;"Ê ""scale"": 3,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+111;Voltage B;bv;[Voltage B];Integer;{;0
+;;;;;"Ê ""unit"": ""V"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 10000,";
+;;;;;"Ê ""scale"": 1,";
+;;;;;"Ê ""step"": 1";
+;;;;;};
+112;Voltage C;cv;[Voltage C];Integer;{;0
+;;;;;"Ê ""unit"": ""V"",";
+;;;;;"Ê ""min"": 0,";
+;;;;;"Ê ""max"": 10000,";
+;;;;;"Ê ""scale"": 1,";
+;;;;;"Ê ""step"": 1";
+;;;;;};

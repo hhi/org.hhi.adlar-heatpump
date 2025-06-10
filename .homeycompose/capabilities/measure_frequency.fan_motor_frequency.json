@@ -1,0 +1,18 @@
+{
+  "id": "measure_frequency.fan_motor_frequency",
+  "title": {
+    "en": "Fan motor frequency",
+    "nl": "Ventilator frequentie"
+  },
+  "min": 0,
+  "max": 100,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Fan motor frequency",
+    "nl": "Ventilator frequentie"
+  },
+
+  "description": {
+    "nl": "dp 40 : effluent_temp_f - Fan motor frequency"
+  }
+}
