@@ -1,1 +1,1 @@
-Local access to the Aurora series heatpump device.
+Lokale toegang tot het Aurora-serie warmtepompapparaat.
