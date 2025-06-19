@@ -1,0 +1,135 @@
+{
+  "id": "adlar_enum_countdown_set",
+  "title": {
+    "en": "Curve setting",
+    "nl": "Instellingen verwarmingscurve"
+  },
+  "type": "enum",
+  "values": [
+    {
+      "id": "OFF",
+      "title": {
+        "en": "OFF",
+        "nl": "UIT"
+      }
+    },
+    {
+      "id": "H1",
+      "title": {
+        "en": "H1",
+        "nl": "H1"
+      }
+    },
+    {
+      "id": "H2",
+      "title": {
+        "en": "H2",
+        "nl": "H2"
+      }
+    },
+    {
+      "id": "H3",
+      "title": {
+        "en": "H3",
+        "nl": "H3"
+      }
+    },
+    {
+      "id": "H4",
+      "title": {
+        "en": "H4",
+        "nl": "H4"
+      }
+    },
+    {
+      "id": "H5",
+      "title": {
+        "en": "H5",
+        "nl": "H5"
+      }
+    },
+    {
+      "id": "H6",
+      "title": {
+        "en": "H6",
+        "nl": "H6"
+      }
+    },
+    {
+      "id": "H7",
+      "title": {
+        "en": "H7",
+        "nl": "H7"
+      }
+    },
+    {
+      "id": "H8",
+      "title": {
+        "en": "H8",
+        "nl": "H8"
+      }
+    },
+    {
+      "id": "L1",
+      "title": {
+        "en": "L1",
+        "nl": "L1"
+      }
+    },
+    {
+      "id": "L2",
+      "title": {
+        "en": "L2",
+        "nl": "L2"
+      }
+    },
+    {
+      "id": "L3",
+      "title": {
+        "en": "L3",
+        "nl": "L3"
+      }
+    },
+    {
+      "id": "L4",
+      "title": {
+        "en": "L4",
+        "nl": "L4"
+      }
+    },
+    {
+      "id": "L5",
+      "title": {
+        "en": "L5",
+        "nl": "L5"
+      }
+    },
+    {
+      "id": "L6",
+      "title": {
+        "en": "L6",
+        "nl": "L6"
+      }
+    },
+    {
+      "id": "L7",
+      "title": {
+        "en": "L7",
+        "nl": "L7"
+      }
+    },
+    {
+      "id": "L8",
+      "title": {
+        "en": "L8",
+        "nl": "L8"
+      }
+    }
+  ],
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "description": {
+    "nl": "dp 13: countdown_set - Curve setting"
+  }
+}

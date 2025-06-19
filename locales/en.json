@@ -1,2 +1,11 @@
-//locales EN
-{}
+{
+  "pair": {
+    "enter_device_info": {
+      "title": "Enter Device Information",
+      "description": "Please enter your Tuya device credentials",
+      "device_id": "Device ID",
+      "local_key": "Local Key",
+      "continue": "Continue"
+    }
+  }
+}

@@ -2,16 +2,18 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
   "version": "1.0.0",
-  "compatibility": ">=5.0.0",
+  "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
     "local"
   ],
   "name": {
-    "en": "Adlar Castra Heatpump"
+    "en": "Adlar Castra Heatpump",
+    "nl": "Adlar Castra Warmtepomp"
   },
   "description": {
-    "en": "Local access to the Aurora series heatpump device."
+    "en": "Local access to the Aurora series heatpump device.",
+    "nl": "Lokale toegang tot het Aurora-serie warmtepompapparaat."
   },
   "category": [
     "climate"
@@ -21,5 +23,1037 @@
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",
     "xlarge": "/assets/images/xlarge.png"
+  },
+  "bugs": {
+    "url": "https://github.com/hhi/org.hhi.adlar-heatpump/issues"
+  },
+  "source": "https://github.com/hhi/org.hhi.adlar-heatpump",
+  "tags": {
+    "en": [
+      "heatpump",
+      "adlar",
+      "aurora"
+    ],
+    "nl": [
+      "warmtepomp",
+      "adlar",
+      "aurora"
+    ]
+  },
+  "brandColor": "#f5a623",
+  "author": "Herman Hilberink <herman.Hilberink@gmail.com>",
+  "drivers": [
+    {
+      "name": {
+        "en": "intelligent-heat-pump",
+        "nl": "intelligent-heat-pump"
+      },
+      "class": "heatpump",
+      "capabilities": [
+        "onoff",
+        "target_temperature",
+        "measure_power",
+        "measure_water",
+        "meter_power.power_consumption",
+        "meter_power.electric_total",
+        "measure_current.cur_current",
+        "measure_current.b_cur",
+        "measure_current.c_cur",
+        "measure_voltage.voltage_current",
+        "measure_voltage.bv",
+        "measure_voltage.cv",
+        "measure_frequency.compressor_strength",
+        "measure_frequency.fan_motor_frequency",
+        "measure_temperature.temp_top",
+        "measure_temperature.temp_bottom",
+        "measure_temperature.coiler_temp",
+        "measure_temperature.venting_temp",
+        "measure_temperature.around_temp",
+        "measure_temperature.temp_current_f",
+        "measure_temperature.top_temp_f",
+        "measure_temperature.bottom_temp_f",
+        "measure_temperature.around_temp_f",
+        "measure_temperature.coiler_temp_f",
+        "measure_temperature.evlin",
+        "adlar_measure_pressure_temp_current",
+        "adlar_measure_pressure_effluent_temp",
+        "adlar_enum_mode",
+        "adlar_enum_work_mode",
+        "adlar_enum_water_mode",
+        "adlar_enum_capacity_set",
+        "adlar_enum_countdown_set",
+        "adlar_enum_volume_set",
+        "adlar_hotwater",
+        "adlar_state_compressor_state",
+        "adlar_state_backwater",
+        "adlar_state_defrost_state",
+        "adlar_countdowntimer",
+        "adlar_fault"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "nl": "Huidig vermogen",
+            "en": "Current power"
+          },
+          "min": 0,
+          "max": 9999999,
+          "description": {
+            "nl": " dps_104: cur_power - Power"
+          }
+        },
+        "measure_water": {
+          "title": {
+            "nl": "Water flow",
+            "en": "Water flow"
+          },
+          "min": 0,
+          "max": 100,
+          "description": {
+            "nl": "dps_39: venting_temp_f - Water flow"
+          }
+        },
+        "target_temperature": {
+          "title": {
+            "nl": "Stel temperatuur",
+            "en": "Target temperature"
+          },
+          "min": 5,
+          "max": 75,
+          "step": 1,
+          "unit": "°C",
+          "description": {
+            "nl": "dps_4: temp_set - Stel temperatuur"
+          }
+        },
+        "onoff": {
+          "title": {
+            "nl": "Schakelaar",
+            "en": "Switch"
+          },
+          "description": {
+            "nl": "dps_1: switch - Schakelaar"
+          }
+        },
+        "measure_voltage.bv": {
+          "title": {
+            "en": "Voltage B",
+            "nl": "Spanning B"
+          },
+          "min": 0,
+          "max": 99999,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Voltage B",
+            "nl": "Spanning B"
+          },
+          "description": {
+            "nl": "dp 111 : bv - Voltage B"
+          }
+        },
+        "measure_current.b_cur": {
+          "title": {
+            "en": "Current B",
+            "nl": "Amperage B"
+          },
+          "min": 0,
+          "max": 99999,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Current B",
+            "nl": "Amperage B"
+          },
+          "description": {
+            "nl": "dp 109 : b_cur - Current B"
+          }
+        },
+        "measure_current.c_cur": {
+          "title": {
+            "en": "Current C",
+            "nl": "Amperage C"
+          },
+          "min": 0,
+          "max": 99999,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Current C",
+            "nl": "Amperage C"
+          },
+          "description": {
+            "nl": "dp 110 : c_cur - Current C"
+          }
+        },
+        "measure_current.cur_current": {
+          "title": {
+            "en": "Current A",
+            "nl": "Hudige stroomsterkte"
+          },
+          "min": 0,
+          "max": 99999,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Current A",
+            "nl": "Hudige stroomsterkte"
+          },
+          "description": {
+            "nl": "dp 102 : cur_current - Current A"
+          }
+        },
+        "measure_frequency.compressor_strength": {
+          "title": {
+            "en": "Compressor Frequency",
+            "nl": "Compressor frequentie"
+          },
+          "type": "number",
+          "min": 0,
+          "max": 200,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Compressor Frequency",
+            "nl": "Compressor frequentie"
+          },
+          "description": {
+            "nl": "dp 20 : compressor_strength - Compressor Frequency"
+          }
+        },
+        "measure_frequency.fan_motor_frequency": {
+          "title": {
+            "en": "Fan motor frequency",
+            "nl": "Ventilator frequentie"
+          },
+          "min": 0,
+          "max": 100,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Fan motor frequency",
+            "nl": "Ventilator frequentie"
+          },
+          "description": {
+            "nl": "dp 40 : effluent_temp_f - Fan motor frequency"
+          }
+        },
+        "measure_temperature.around_temp_f": {
+          "title": {
+            "en": "Tank temp",
+            "nl": "Tapwater temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Tank temp",
+            "nl": "Tapwater temperatuur"
+          },
+          "description": {
+            "nl": "dp 38 : around_temp_f - Tank temp"
+          }
+        },
+        "measure_temperature.around_temp": {
+          "title": {
+            "en": "Ambient temp",
+            "nl": "Buitentemperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Ambient temp",
+            "nl": "Buitentemperatuur"
+          },
+          "description": {
+            "nl": "dp 26 : around_temp - Ambient temp"
+          }
+        },
+        "measure_temperature.temp_top": {
+          "title": {
+            "en": "Inlet temp",
+            "nl": "Water intrede temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Inlet temp",
+            "nl": "Water intrede temperatuur"
+          },
+          "description": {
+            "nl": "dp 21 : temp_top - Inlet temp"
+          }
+        },
+        "measure_temperature.temp_current_f": {
+          "title": {
+            "en": "High pressure temp",
+            "nl": "Hogedruk verzadigingstemperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "High pressure temp",
+            "nl": "Hogedruk verzadigingstemperatuur"
+          },
+          "description": {
+            "nl": "dp 35 : temp_current_f - High pressure temp"
+          }
+        },
+        "measure_temperature.bottom_temp_f": {
+          "title": {
+            "en": "Incoiler temp",
+            "nl": "Condensor temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Incoiler temp",
+            "nl": "Condensor temperatuur"
+          },
+          "description": {
+            "nl": "dp 37 : bottom_temp_f - Incoiler temp"
+          }
+        },
+        "measure_temperature.coiler_temp_f": {
+          "title": {
+            "en": "Suction Temp",
+            "nl": "Zuiggas temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Suction Temp",
+            "nl": "Zuiggas temperatuur"
+          },
+          "description": {
+            "nl": "dp 41 : coiler_temp_f - Suction Temp"
+          }
+        },
+        "measure_temperature.top_temp_f": {
+          "title": {
+            "en": "Low presure temp",
+            "nl": "Lagedruk verzadigingstemperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Low presure temp",
+            "nl": "Lagedruk verzadigingstemperatuur"
+          },
+          "description": {
+            "nl": "dp 36 : top_temp_f - Low presure temp"
+          }
+        },
+        "measure_temperature.coiler_temp": {
+          "title": {
+            "en": "Coiler temp",
+            "nl": "Verdampingscondensator temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Coiler temp",
+            "nl": "Verdampingscondensator temperatuur"
+          },
+          "description": {
+            "nl": "dp 23 : coiler_temp - Electricity Coiler temp"
+          }
+        },
+        "measure_temperature.evlin": {
+          "title": {
+            "en": "Economizer inlet Temp",
+            "nl": "EVI wamtewisselaar zuiggas temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Economizer inlet Temp",
+            "nl": "EVI wamtewisselaar zuiggas temperatuur"
+          },
+          "description": {
+            "nl": "dp 107 : evlin - Economizer inlet Temp"
+          }
+        },
+        "measure_temperature.venting_temp": {
+          "title": {
+            "en": "Discharge temp",
+            "nl": "Persgas temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Discharge temp",
+            "nl": "Persgas temperatuur"
+          },
+          "description": {
+            "nl": "dp 24 : venting_temp - Discharge temp"
+          }
+        },
+        "measure_temperature.temp_bottom": {
+          "title": {
+            "en": "Outlet temp",
+            "nl": "Water uittrede temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Outlet temp",
+            "nl": "Water uittrede temperatuur"
+          },
+          "description": {
+            "nl": "dp 22 : temp_bottom - Outlet temp"
+          }
+        },
+        "measure_temperature.eviout": {
+          "title": {
+            "en": "Economizer outlet Temp",
+            "nl": "EVI wamtewisselaar persgas temperatuur"
+          },
+          "min": -50,
+          "max": 150,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Economizer outlet Temp",
+            "nl": "EVI wamtewisselaar persgas temperatuurr"
+          },
+          "description": {
+            "nl": "dp 108 : eviout - Economy outlet temp"
+          }
+        },
+        "meter_power.power_consumption": {
+          "title": {
+            "en": "Electricity Consumption of Today",
+            "nl": "Stroom dagverbruik"
+          },
+          "min": 0,
+          "max": 200000,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Electricity Consumption of Today",
+            "nl": "Stroom dagverbruik"
+          },
+          "description": {
+            "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
+          }
+        },
+        "meter_power.electric_total": {
+          "title": {
+            "en": "Total Electricity Consumption",
+            "nl": "Totaal stroomverbruik"
+          },
+          "min": 0,
+          "max": 9999999,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Total Electricity Consumption",
+            "nl": "Totaal stroomverbruik"
+          },
+          "description": {
+            "nl": "dp 105 : electric_total - Total Electricity Consumption"
+          }
+        },
+        "measure_voltage.voltage_current": {
+          "title": {
+            "en": "Voltage A",
+            "nl": "Huidige spanning"
+          },
+          "min": 0,
+          "max": 10000,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Voltage A",
+            "nl": "Huidige spanning"
+          },
+          "description": {
+            "nl": "dp 103 : voltage_current - Voltage A"
+          }
+        },
+        "measure_voltage.cv": {
+          "title": {
+            "en": "Voltage C",
+            "nl": "Voltage C"
+          },
+          "min": 0,
+          "max": 10000,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Voltage C",
+            "nl": "Voltage C"
+          },
+          "description": {
+            "nl": "dp 112 : cv - Voltage C"
+          }
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/intelligent-heat-pump/assets/images/small.png",
+        "large": "/drivers/intelligent-heat-pump/assets/images/large.png",
+        "xlarge": "/drivers/intelligent-heat-pump/assets/images/xlarge.png"
+      },
+      "energy": {
+        "approximation": {
+          "usageConstant": 30
+        }
+      },
+      "pair": [
+        {
+          "id": "enter_device_info",
+          "template": "add_devices"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices"
+        }
+      ],
+      "id": "intelligent-heat-pump"
+    }
+  ],
+  "capabilities": {
+    "adlar_countdowntimer": {
+      "id": "adlar_countdowntimer",
+      "title": {
+        "en": "Automatic shutoff timer",
+        "nl": "Automatische sluitingstimer"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 2000,
+      "step": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Automatic shutoff timer",
+        "nl": "Automatische sluitingstimer"
+      },
+      "description": {
+        "nl": "dp 14 : countdown_left - Countdown Left"
+      }
+    },
+    "adlar_enum_capacity_set": {
+      "id": "adlar_enum_capacity_set",
+      "title": {
+        "en": "Hot water curve setting",
+        "nl": "Instelling warmwater curve"
+      },
+      "type": "enum",
+      "values": [
+        {
+          "id": "OFF",
+          "title": {
+            "en": "OFF",
+            "nl": "UIT"
+          }
+        },
+        {
+          "id": "H1",
+          "title": {
+            "en": "H1",
+            "nl": "H1"
+          }
+        },
+        {
+          "id": "H2",
+          "title": {
+            "en": "H2",
+            "nl": "H2"
+          }
+        },
+        {
+          "id": "H3",
+          "title": {
+            "en": "H3",
+            "nl": "H3"
+          }
+        },
+        {
+          "id": "H4",
+          "title": {
+            "en": "H4",
+            "nl": "H4"
+          }
+        }
+      ],
+      "uiComponent": "picker",
+      "getable": true,
+      "setable": true,
+      "insights": true,
+      "description": {
+        "nl": "dp 11 : capacity_set - Hot water curve setting"
+      }
+    },
+    "adlar_enum_countdown_set": {
+      "id": "adlar_enum_countdown_set",
+      "title": {
+        "en": "Curve setting",
+        "nl": "Instellingen verwarmingscurve"
+      },
+      "type": "enum",
+      "values": [
+        {
+          "id": "OFF",
+          "title": {
+            "en": "OFF",
+            "nl": "UIT"
+          }
+        },
+        {
+          "id": "H1",
+          "title": {
+            "en": "H1",
+            "nl": "H1"
+          }
+        },
+        {
+          "id": "H2",
+          "title": {
+            "en": "H2",
+            "nl": "H2"
+          }
+        },
+        {
+          "id": "H3",
+          "title": {
+            "en": "H3",
+            "nl": "H3"
+          }
+        },
+        {
+          "id": "H4",
+          "title": {
+            "en": "H4",
+            "nl": "H4"
+          }
+        },
+        {
+          "id": "H5",
+          "title": {
+            "en": "H5",
+            "nl": "H5"
+          }
+        },
+        {
+          "id": "H6",
+          "title": {
+            "en": "H6",
+            "nl": "H6"
+          }
+        },
+        {
+          "id": "H7",
+          "title": {
+            "en": "H7",
+            "nl": "H7"
+          }
+        },
+        {
+          "id": "H8",
+          "title": {
+            "en": "H8",
+            "nl": "H8"
+          }
+        },
+        {
+          "id": "L1",
+          "title": {
+            "en": "L1",
+            "nl": "L1"
+          }
+        },
+        {
+          "id": "L2",
+          "title": {
+            "en": "L2",
+            "nl": "L2"
+          }
+        },
+        {
+          "id": "L3",
+          "title": {
+            "en": "L3",
+            "nl": "L3"
+          }
+        },
+        {
+          "id": "L4",
+          "title": {
+            "en": "L4",
+            "nl": "L4"
+          }
+        },
+        {
+          "id": "L5",
+          "title": {
+            "en": "L5",
+            "nl": "L5"
+          }
+        },
+        {
+          "id": "L6",
+          "title": {
+            "en": "L6",
+            "nl": "L6"
+          }
+        },
+        {
+          "id": "L7",
+          "title": {
+            "en": "L7",
+            "nl": "L7"
+          }
+        },
+        {
+          "id": "L8",
+          "title": {
+            "en": "L8",
+            "nl": "L8"
+          }
+        }
+      ],
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "description": {
+        "nl": "dp 13: countdown_set - Curve setting"
+      }
+    },
+    "adlar_enum_mode": {
+      "id": "adlar_enum_mode",
+      "title": {
+        "en": "(Heating) mode",
+        "nl": "(Verwarmings)modus"
+      },
+      "type": "enum",
+      "getable": true,
+      "setable": true,
+      "values": [
+        {
+          "id": "cold",
+          "title": {
+            "en": "Cold",
+            "nl": "Koud"
+          }
+        },
+        {
+          "id": "heating",
+          "title": {
+            "en": "Heating",
+            "nl": "Verwarmen"
+          }
+        },
+        {
+          "id": "floor_heating",
+          "title": {
+            "en": "Floor heating",
+            "nl": "Vloerverwarming"
+          }
+        },
+        {
+          "id": "hot_water",
+          "title": {
+            "en": "Hot water",
+            "nl": "Warm water"
+          }
+        },
+        {
+          "id": "cold_and_hotwater",
+          "title": {
+            "en": "Cold and hot water",
+            "nl": "Koud en warm water"
+          }
+        },
+        {
+          "id": "heating_and_hot_water",
+          "title": {
+            "en": "Heating and hot water",
+            "nl": "Verwarmen en warm water"
+          }
+        },
+        {
+          "id": "floor_heatign_and_hot_water",
+          "title": {
+            "en": "Floor heating and hot water",
+            "nl": "Vloerverwarming en warm water"
+          }
+        }
+      ],
+      "uiComponent": "picker",
+      "insights": false,
+      "description": {
+        "nl": "dp 2 : mode - mode"
+      }
+    },
+    "adlar_enum_volume_set": {
+      "id": "adlar_enum_volume_set",
+      "title": {
+        "en": "Electricity Consumption Checking",
+        "nl": "Stroomverbruik controle"
+      },
+      "type": "enum",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "0",
+            "nl": "0"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "1",
+            "nl": "1"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "2",
+            "nl": "2"
+          }
+        }
+      ],
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "description": {
+        "nl": "dp 106: volume_set - Electricity Consumption Checking"
+      }
+    },
+    "adlar_enum_water_mode": {
+      "id": "adlar_enum_water_mode",
+      "title": {
+        "en": "Water Control Temperature",
+        "nl": "Temperatuurregeling water"
+      },
+      "type": "number",
+      "unit": "L",
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "description": {
+        "nl": "dp 10 : water_mode - Control Temperature"
+      }
+    },
+    "adlar_enum_work_mode": {
+      "id": "adlar_enum_work_mode",
+      "title": {
+        "en": "Working mode",
+        "nl": "Bedrijfsmodus"
+      },
+      "type": "enum",
+      "values": [
+        {
+          "id": "ECO",
+          "title": {
+            "en": "ECO",
+            "nl": "ECO"
+          }
+        },
+        {
+          "id": "Normal",
+          "title": {
+            "en": "Normal",
+            "nl": "Normaal"
+          }
+        },
+        {
+          "id": "Boost",
+          "title": {
+            "en": "Boost",
+            "nl": "Boost"
+          }
+        }
+      ],
+      "uiComponent": "picker",
+      "getable": true,
+      "setable": true,
+      "description": {
+        "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
+      }
+    },
+    "adlar_fault": {
+      "id": "adlar_fault",
+      "title": {
+        "en": "Fault Code",
+        "nl": "Foutcode"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 30,
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Fault Status Code",
+        "nl": "Foutstatus Code"
+      },
+      "description": {
+        "nl": "dp 15 : fault - Fault"
+      }
+    },
+    "adlar_hotwater": {
+      "id": "adlar_hotwater",
+      "title": {
+        "en": "Hot Water Set Temp",
+        "nl": "Warmwater stel temperatuur"
+      },
+      "type": "number",
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "units": {
+        "en": "℃",
+        "nl": "℃"
+      },
+      "min": 10,
+      "max": 75,
+      "step": 1,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Hot Water Set Temp",
+        "nl": "Warmwater stel temperatuur"
+      },
+      "description": {
+        "nl": "dp 101 : minitemp_set - Hot Water Set Temp"
+      }
+    },
+    "adlar_measure_pressure_effluent_temp": {
+      "id": "adlar_measure_pressure_effluent_temp",
+      "title": {
+        "en": "EVI Open",
+        "nl": "EVI-openingsstop"
+      },
+      "units": {
+        "en": "Pa"
+      },
+      "min": -500,
+      "max": 500,
+      "step": 1,
+      "type": "number",
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "EVI Open",
+        "nl": "EVI-openingsstop"
+      },
+      "description": {
+        "nl": "dp 25 : effluent_temp - EVI Open"
+      }
+    },
+    "adlar_measure_pressure_temp_current": {
+      "id": "adlar_measure_pressure_temp_current",
+      "title": {
+        "en": "EEV Open",
+        "nl": "EEV Open"
+      },
+      "type": "number",
+      "units": {
+        "en": "Pa",
+        "nl": "Pa"
+      },
+      "min": -500,
+      "max": 500,
+      "step": 1,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "EEV Open",
+        "nl": "EEV Open"
+      },
+      "description": {
+        "nl": "dp 16 : temp_current - EEV Open"
+      }
+    },
+    "adlar_state_backwater": {
+      "id": "adlar_state_backwater",
+      "title": {
+        "en": "Backwater state",
+        "nl": "Retourwater status"
+      },
+      "type": "boolean",
+      "setable": false,
+      "getable": true,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Backwater is ON",
+        "nl": "Retourwater is AAN"
+      },
+      "insightsTitleFalse": {
+        "en": "Backwater is OFF",
+        "nl": "Retourwater is UIT"
+      },
+      "description": {
+        "nl": "dp 31 : backwater - Backwater state"
+      }
+    },
+    "adlar_state_compressor_state": {
+      "id": "adlar_state_compressor_state",
+      "title": {
+        "en": "Compressor state",
+        "nl": "compressor_status"
+      },
+      "type": "boolean",
+      "setable": false,
+      "getable": true,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Compressor is ON",
+        "nl": "Compressor is AAN"
+      },
+      "insightsTitleFalse": {
+        "en": "Compressor is OFF",
+        "nl": "Compressor is UIT"
+      },
+      "description": {
+        "nl": "dp 27 : compressor_state - Compressor state"
+      }
+    },
+    "adlar_state_defrost_state": {
+      "id": "adlar_state_defrost_state",
+      "title": {
+        "en": "Defrosting",
+        "nl": "Ontdooi status"
+      },
+      "type": "boolean",
+      "setable": false,
+      "getable": true,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Defrosting active",
+        "nl": "Ontdooien actief"
+      },
+      "insightsTitleFalse": {
+        "en": "Defrosting inactive",
+        "nl": "Ontdooien niet actief"
+      },
+      "description": {
+        "nl": "dp 33 : defrost_state - Defrosting"
+      }
+    }
   }
 }

@@ -1,14 +1,11 @@
-'use strict';
+import { App } from 'homey';
 
-import Homey from 'homey';
-
-module.exports = class MyApp extends Homey.App {
-
-  /**
-   * onInit is called when the app is initialized.
-   */
+class MyApp extends App {
   async onInit() {
     this.log('MyApp has been initialized');
   }
-
 }
+
+// Export the app class exactly this way, so it can be used by Homey
+// This is necessary for Homey to recognize and run the app, when it starts up.
+module.exports = MyApp;

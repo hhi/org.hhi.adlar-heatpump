@@ -33,18 +33,18 @@
     "measure_temperature.coiler_temp_f",
     "measure_temperature.evlin",
 
-    "adlar_measure_pressure.temp_current",
-    "adlar_measure_pressure.effluent_temp",
-    "adlar_enum.mode",
-    "adlar_enum.work_mode",
-    "adlar_enum.water_mode",
-    "adlar_enum.capacity_set",
-    "adlar_enum.countdown_set",
-    "adlar_enum.volume_set",
+    "adlar_measure_pressure_temp_current",
+    "adlar_measure_pressure_effluent_temp",
+    "adlar_enum_mode",
+    "adlar_enum_work_mode",
+    "adlar_enum_water_mode",
+    "adlar_enum_capacity_set",
+    "adlar_enum_countdown_set",
+    "adlar_enum_volume_set",
     "adlar_hotwater",
-    "adlar_state.compressor_state",
-    "adlar_state.backwater",
-    "adlar_state.defrost_state",
+    "adlar_state_compressor_state",
+    "adlar_state_backwater",
+    "adlar_state_defrost_state",
     "adlar_countdowntimer",
     "adlar_fault"
   ],
@@ -52,7 +52,7 @@
   "capabilitiesOptions": {
     "measure_power": {
       "title": {
-        "nl": "Huidig vermogen",  
+        "nl": "Huidig vermogen",
         "en": "Current power"
       },
       "min": 0,
@@ -96,16 +96,372 @@
       "description": {
         "nl": "dps_1: switch - Schakelaar"
       }
+    },
+
+    "measure_voltage.bv": {
+      "title": {
+        "en": "Voltage B",
+        "nl": "Spanning B"
+      },
+      "min": 0,
+      "max": 99999,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Voltage B",
+        "nl": "Spanning B"
+      },
+      "description": {
+        "nl": "dp 111 : bv - Voltage B"
+      }
+    },
+
+    "measure_current.b_cur": {
+      "title": {
+        "en": "Current B",
+        "nl": "Amperage B"
+      },
+      "min": 0,
+      "max": 99999,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Current B",
+        "nl": "Amperage B"
+      },
+      "description": {
+        "nl": "dp 109 : b_cur - Current B"
+      }
+    },
+
+    "measure_current.c_cur": {
+      "title": {
+        "en": "Current C",
+        "nl": "Amperage C"
+      },
+      "min": 0,
+      "max": 99999,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Current C",
+        "nl": "Amperage C"
+      },
+      "description": {
+        "nl": "dp 110 : c_cur - Current C"
+      }
+    },
+
+    "measure_current.cur_current": {
+      "title": {
+        "en": "Current A",
+        "nl": "Hudige stroomsterkte"
+      },
+      "min": 0,
+      "max": 99999,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Current A",
+        "nl": "Hudige stroomsterkte"
+      },
+      "description": {
+        "nl": "dp 102 : cur_current - Current A"
+      }
+    },
+
+    "measure_frequency.compressor_strength": {
+      "title": {
+        "en": "Compressor Frequency",
+        "nl": "Compressor frequentie"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 200,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Compressor Frequency",
+        "nl": "Compressor frequentie"
+      },
+      "description": {
+        "nl": "dp 20 : compressor_strength - Compressor Frequency"
+      }
+    },
+
+    "measure_frequency.fan_motor_frequency": {
+      "title": {
+        "en": "Fan motor frequency",
+        "nl": "Ventilator frequentie"
+      },
+      "min": 0,
+      "max": 100,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Fan motor frequency",
+        "nl": "Ventilator frequentie"
+      },
+      "description": {
+        "nl": "dp 40 : effluent_temp_f - Fan motor frequency"
+      }
+    },
+
+    "measure_temperature.around_temp_f": {
+      "title": {
+        "en": "Tank temp",
+        "nl": "Tapwater temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Tank temp",
+        "nl": "Tapwater temperatuur"
+      },
+      "description": {
+        "nl": "dp 38 : around_temp_f - Tank temp"
+      }
+    },
+    "measure_temperature.around_temp": {
+      "title": {
+        "en": "Ambient temp",
+        "nl": "Buitentemperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Ambient temp",
+        "nl": "Buitentemperatuur"
+      },
+      "description": {
+        "nl": "dp 26 : around_temp - Ambient temp"
+      }
+    },
+    "measure_temperature.temp_top": {
+      "title": {
+        "en": "Inlet temp",
+        "nl": "Water intrede temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Inlet temp",
+        "nl": "Water intrede temperatuur"
+      },
+      "description": {
+        "nl": "dp 21 : temp_top - Inlet temp"
+      }
+    },
+    "measure_temperature.temp_current_f": {
+      "title": {
+        "en": "High pressure temp",
+        "nl": "Hogedruk verzadigingstemperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "High pressure temp",
+        "nl": "Hogedruk verzadigingstemperatuur"
+      },
+      "description": {
+        "nl": "dp 35 : temp_current_f - High pressure temp"
+      }
+    },
+    "measure_temperature.bottom_temp_f": {
+      "title": {
+        "en": "Incoiler temp",
+        "nl": "Condensor temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Incoiler temp",
+        "nl": "Condensor temperatuur"
+      },
+      "description": {
+        "nl": "dp 37 : bottom_temp_f - Incoiler temp"
+      }
+    },
+    "measure_temperature.coiler_temp_f": {
+      "title": {
+        "en": "Suction Temp",
+        "nl": "Zuiggas temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Suction Temp",
+        "nl": "Zuiggas temperatuur"
+      },
+      "description": {
+        "nl": "dp 41 : coiler_temp_f - Suction Temp"
+      }
+    },
+    "measure_temperature.top_temp_f": {
+      "title": {
+        "en": "Low presure temp",
+        "nl": "Lagedruk verzadigingstemperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Low presure temp",
+        "nl": "Lagedruk verzadigingstemperatuur"
+      },
+      "description": {
+        "nl": "dp 36 : top_temp_f - Low presure temp"
+      }
+    },
+    "measure_temperature.coiler_temp": {
+      "title": {
+        "en": "Coiler temp",
+        "nl": "Verdampingscondensator temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Coiler temp",
+        "nl": "Verdampingscondensator temperatuur"
+      },
+      "description": {
+        "nl": "dp 23 : coiler_temp - Electricity Coiler temp"
+      }
+    },
+    "measure_temperature.evlin": {
+      "title": {
+        "en": "Economizer inlet Temp",
+        "nl": "EVI wamtewisselaar zuiggas temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Economizer inlet Temp",
+        "nl": "EVI wamtewisselaar zuiggas temperatuur"
+      },
+      "description": {
+        "nl": "dp 107 : evlin - Economizer inlet Temp"
+      }
+    },
+    "measure_temperature.venting_temp": {
+      "title": {
+        "en": "Discharge temp",
+        "nl": "Persgas temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Discharge temp",
+        "nl": "Persgas temperatuur"
+      },
+      "description": {
+        "nl": "dp 24 : venting_temp - Discharge temp"
+      }
+    },
+    "measure_temperature.temp_bottom": {
+      "title": {
+        "en": "Outlet temp",
+        "nl": "Water uittrede temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Outlet temp",
+        "nl": "Water uittrede temperatuur"
+      },
+      "description": {
+        "nl": "dp 22 : temp_bottom - Outlet temp"
+      }
+    },
+    "measure_temperature.eviout": {
+      "title": {
+        "en": "Economizer outlet Temp",
+        "nl": "EVI wamtewisselaar persgas temperatuur"
+      },
+      "min": -50,
+      "max": 150,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Economizer outlet Temp",
+        "nl": "EVI wamtewisselaar persgas temperatuurr"
+      },
+      "description": {
+        "nl": "dp 108 : eviout - Economy outlet temp"
+      }
+    },
+
+    "meter_power.power_consumption": {
+      "title": {
+        "en": "Electricity Consumption of Today",
+        "nl": "Stroom dagverbruik"
+      },
+      "min": 0,
+      "max": 200000,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Electricity Consumption of Today",
+        "nl": "Stroom dagverbruik"
+      },
+      "description": {
+        "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
+      }
+    },
+    "meter_power.electric_total": {
+      "title": {
+        "en": "Total Electricity Consumption",
+        "nl": "Totaal stroomverbruik"
+      },
+      "min": 0,
+      "max": 9999999,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Total Electricity Consumption",
+        "nl": "Totaal stroomverbruik"
+      },
+      "description": {
+        "nl": "dp 105 : electric_total - Total Electricity Consumption"
+      }
+    },
+    "measure_voltage.voltage_current": {
+      "title": {
+        "en": "Voltage A",
+        "nl": "Huidige spanning"
+      },
+      "min": 0,
+      "max": 10000,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Voltage A",
+        "nl": "Huidige spanning"
+      },
+      "description": {
+        "nl": "dp 103 : voltage_current - Voltage A"
+      }
+    },
+    "measure_voltage.cv": {
+      "title": {
+        "en": "Voltage C",
+        "nl": "Voltage C"
+      },
+      "min": 0,
+      "max": 10000,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Voltage C",
+        "nl": "Voltage C"
+      },
+      "description": {
+        "nl": "dp 112 : cv - Voltage C"
+      }
     }
   },
 
-
-  "platforms": [
-    "local"
-  ],
-  "connectivity": [
-    "lan"
-  ],
+  "platforms": ["local"],
+  "connectivity": ["lan"],
   "images": {
     "small": "{{driverAssetsPath}}/images/small.png",
     "large": "{{driverAssetsPath}}/images/large.png",
@@ -116,32 +472,15 @@
       "usageConstant": 30
     }
   },
+
   "pair": [
-    "enter_device_info",
-    "list_devices"
-  ],
-  "views": {
-    "enter_device_info": {
-      "template": "form",
-      "title": {
-        "en": "Enter Device Information"
-      },
-      "fields": [
-        {
-          "id": "device_id",
-          "type": "text",
-          "label": {
-            "en": "Device ID"
-          }
-        },
-        {
-          "id": "local_key",
-          "type": "text",
-          "label": {
-            "en": "Local Key"
-          }
-        }
-      ]
+    {
+      "id": "enter_device_info",
+      "template": "add_devices"
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices"
     }
-  }
+  ]
 }

@@ -1,7 +1,7 @@
 {
   "id": "org.hhi.adlar-heatpump",
   "version": "1.0.0",
-  "compatibility": ">=12.0.0",
+  "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
     "local"
@@ -39,5 +39,6 @@
       "aurora"
     ]
   },
-  "brandColor": "#f5a623"
+  "brandColor": "#f5a623",
+  "author": "Herman Hilberink <herman.Hilberink@gmail.com>"
 }

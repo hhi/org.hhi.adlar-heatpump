@@ -1,0 +1,29 @@
+{
+  "id": "adlar_measure_pressure.temp_current",
+  "title": {
+    "en": "EEV Open",
+    "nl": "EEV Open"
+  },
+  "type": "number",
+  "units": {
+    "en": "Pa"
+  },
+
+  "min": -500,
+  "max": 500,
+  "step": 1,
+  "decimals": 0,
+
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "EEV Open",
+    "nl": "EEV Open"
+  },
+
+  "description": {
+    "nl": "dp 16 : temp_current - EEV Open"
+  }
+}

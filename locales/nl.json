@@ -1,2 +1,11 @@
-//locales NL
-{}
+{
+    "pair": {
+      "enter_device_info": {
+        "title": "Voer apparaatinformatie in",
+        "description": "Voer uw Tuya apparaat gegevens in",
+        "device_id": "Apparaat ID",
+        "local_key": "Lokale sleutel",
+        "continue": "Doorgaan"
+      }
+    }
+  }
