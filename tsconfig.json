@@ -1,8 +1,9 @@
 {
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "allowJs": true,
     "outDir": ".homeybuild/",
+    "sourceMap": true,
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true
   }
 }

@@ -1,0 +1,68 @@
+{
+  "id": "adlar_enum_mode",
+  "title": {
+    "en": "(Heating) mode",
+    "nl": "(Verwarmings)modus"
+  },
+  "type": "enum",
+  "getable": true,
+  "setable": true,
+  "values": [
+    {
+      "id": "cold",
+      "title": {
+        "en": "Cold",
+        "nl": "Koud"
+      }
+    },
+    {
+      "id": "heating",
+      "title": {
+        "en": "Heating",
+        "nl": "Verwarmen"
+      }
+    },
+    {
+      "id": "floor_heating",
+      "title": {
+        "en": "Floor heating",
+        "nl": "Vloerverwarming"
+      }
+    },
+    {
+      "id": "hot_water",
+      "title": {
+        "en": "Hot water",
+        "nl": "Warm water"
+      }
+    },
+    {
+      "id": "cold_and_hotwater",
+      "title": {
+        "en": "Cold and hot water",
+        "nl": "Koud en warm water"
+      }
+    },
+    {
+      "id": "heating_and_hot_water",
+      "title": {
+        "en": "Heating and hot water",
+        "nl": "Verwarmen en warm water"
+      }
+    },
+    {
+      "id": "floor_heatign_and_hot_water",
+      "title": {
+        "en": "Floor heating and hot water",
+        "nl": "Vloerverwarming en warm water"
+      }
+    }
+  ],
+  "uiComponent": "picker",
+  "insights": false,
+  "description": {
+    "nl": "dp 2 : mode - mode"
+  }
+}
+
+
