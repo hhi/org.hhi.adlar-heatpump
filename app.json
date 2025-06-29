@@ -508,14 +508,184 @@
       "pair": [
         {
           "id": "enter_device_info",
-          "template": "add_devices"
+          "template": "custom",
+          "next": "list_devices"
         },
         {
           "id": "list_devices",
-          "template": "list_devices"
+          "template": "list_devices",
+          "next": "add_devices"
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
       "id": "intelligent-heat-pump"
+    },
+    {
+      "name": {
+        "en": "Test View"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_temperature"
+      ],
+      "capabilitiesOptions": {
+        "measure_temperature": {
+          "title": {
+            "en": "Measured Temperature"
+          },
+          "min": -10,
+          "max": 50,
+          "unit": "°C",
+          "description": {
+            "en": "Displays the measured temperature"
+          }
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "minicust",
+          "template": "custom",
+          "options": {
+            "html": "/drivers/testview/assets/pair/minicust.html"
+          },
+          "next": "list_devices"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "options": {
+            "list_devices": {
+              "generate": true
+            }
+          },
+          "next": "add_devices"
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "testview"
+    },
+    {
+      "name": {
+        "en": "thermostat",
+        "nl": "thermostaat"
+      },
+      "class": "thermostat",
+      "capabilities": [
+        "onoff",
+        "target_temperature",
+        "measure_temperature"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Power",
+            "nl": "Aan/Uit"
+          },
+          "description": {
+            "en": "Turn the thermostat on or off",
+            "nl": "Zet de thermostaat aan of uit"
+          }
+        },
+        "target_temperature": {
+          "title": {
+            "en": "Target Temperature",
+            "nl": "Doeltemperatuur"
+          },
+          "min": 5,
+          "max": 30,
+          "step": 0.5,
+          "unit": "°C",
+          "description": {
+            "en": "Set the desired temperature",
+            "nl": "Stel de gewenste temperatuur in"
+          }
+        },
+        "measure_temperature": {
+          "title": {
+            "en": "Current Temperature",
+            "nl": "Huidige Temperatuur"
+          },
+          "min": -10,
+          "max": 50,
+          "unit": "°C",
+          "description": {
+            "en": "Displays the current temperature",
+            "nl": "Toont de huidige temperatuur"
+          }
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/thermostat/assets/images/small.png",
+        "large": "/drivers/thermostat/assets/images/large.png",
+        "xlarge": "/drivers/thermostat/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "enter_test_input",
+          "template": "custom",
+          "options": {
+            "title": {
+              "en": "Enter Test Input",
+              "nl": "Voer Testinvoer In"
+            },
+            "instructions": {
+              "en": "Please enter 'YES' to proceed with pairing.",
+              "nl": "Voer 'YES' in om door te gaan met koppelen."
+            },
+            "input": {
+              "type": "text",
+              "placeholder": {
+                "en": "Enter YES",
+                "nl": "Voer YES in"
+              }
+            }
+          },
+          "next": "validate_input"
+        },
+        {
+          "id": "validate_input",
+          "template": "custom",
+          "options": {
+            "validate": {
+              "type": "text",
+              "condition": "input === 'YES'",
+              "error": {
+                "en": "Invalid input. Please enter 'YES'.",
+                "nl": "Ongeldige invoer. Voer 'YES' in."
+              }
+            }
+          },
+          "next": "list_devices"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "next": "add_devices"
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "thermostat"
     }
   ],
   "capabilities": {

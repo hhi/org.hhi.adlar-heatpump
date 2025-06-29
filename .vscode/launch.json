@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Docker Node App",
+      "type": "node",
+      "request": "attach",
+      "address": "localhost", // or Docker host IP if not using Docker Desktop
+      "port": 9229,           // must match the --inspect port used in the container
+      "localRoot": "${workspaceFolder}/.homeybuild", // your project root on your machine
+      "remoteRoot": "/app",      // path to your app in the container
+      "outFiles": [
+        "${workspaceFolder}/.homeybuild/**/*.js"
+      ],
+      "sourceMaps": true,
+      "restart": true,
+      "env": {
+        "DEBUG": "1"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

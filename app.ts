@@ -1,7 +1,14 @@
 import { App } from 'homey';
+import enableDebugInspector from './app-debug';
 
 class MyApp extends App {
   async onInit() {
+
+    if (process.env.DEBUG === '1') {
+      this.log('Development mode detected, enabling debug features');
+      await enableDebugInspector();
+    }
+
     this.log('MyApp has been initialized');
   }
 }

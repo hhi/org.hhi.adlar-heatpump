@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validate Input</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Validate Input</h1>
+  <p>Please enter <strong>YES</strong> to proceed with pairing.</p>
+  <input type="text" id="inputField" placeholder="Enter YES">
+  <button onclick="validateInput()">Submit</button>
+  <p id="errorMessage" class="error" style="display: none;">Invalid input. Please enter 'YES'.</p>
+
+  <script>
+    function validateInput() {
+      const input = document.getElementById('inputField').value;
+      const errorMessage = document.getElementById('errorMessage');
+      if (input === 'YES') {
+        errorMessage.style.display = 'none';
+        // Proceed to the next step
+        alert('Input validated. Proceeding...');
+      } else {
+        errorMessage.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
