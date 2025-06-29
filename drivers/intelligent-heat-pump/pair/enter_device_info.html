@@ -14,3 +14,19 @@
   
   <button id="continue" data-i18n="pair.enter_device_info.continue">Continue</button>
 </div>
+<script>
+  document.getElementById('continue').addEventListener('click', async () => {
+    const deviceId = document.getElementById('device_id').value.trim();
+    const localKey = document.getElementById('local_key').value.trim();
+    if (!deviceId || !localKey) {
+      alert('Please enter both Device ID and Local Key.');
+      return;
+    }
+    try {
+      await Homey.emit('enter_device_info', { deviceId, localKey });
+      Homey.nextView();
+    } catch (err) {
+      alert('Failed to save device info: ' + err.message);
+    }
+  });
+</script>

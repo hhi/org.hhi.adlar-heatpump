@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Custom View</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Enter Device Name</h1>
+  <p>Please enter a name for the device and press "Acknowledge" to proceed.</p>
+  <input type="text" id="deviceName" placeholder="Enter device name">
+  <button onclick="submitDeviceName()">Acknowledge</button>
+  <p id="errorMessage" style="color: red; display: none;">Please enter a valid device name.</p>
+
+  <script>
+    function submitDeviceName() {
+      const deviceName = document.getElementById('deviceName').value.trim();
+      if (deviceName) {
+        Homey.emit('list_devices', { name: deviceName });
+        Homey.next();
+      } else {
+        document.getElementById('errorMessage').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -476,11 +476,17 @@
   "pair": [
     {
       "id": "enter_device_info",
-      "template": "add_devices"
+      "template": "custom",
+      "next": "list_devices"
     },
     {
       "id": "list_devices",
-      "template": "list_devices"
+      "template": "list_devices",
+      "next": "add_devices"
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
     }
   ]
 }
