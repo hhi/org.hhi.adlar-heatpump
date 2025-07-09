@@ -2,9 +2,15 @@ import Homey from 'homey';
 import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
 
+// Extract allCapabilities and allArraysSwapped from AdlarMapping
+const { allCapabilities, allArraysSwapped } = AdlarMapping;
+
 class MyDevice extends Homey.Device {
   tuya: TuyaDevice | undefined;
   tuyaConnected: boolean = false;
+  capabilityKeys: string[] = []; // Initialize as an empty array
+  allCapabilities: Record<string, number[]> = allCapabilities;
+  allArraysSwapped: Record<number, string> = allArraysSwapped;
 
   async connectTuya() {
     if (!this.tuyaConnected) {
@@ -24,6 +30,37 @@ class MyDevice extends Homey.Device {
         throw new Error('Could not find or connect to device');
       }
     }
+    this.homey.setTimeout(async () => {
+      await this.connectTuya();
+    }, 20000);
+  }
+
+  /**
+   * Helper function to replace dots with underscores in a string.
+   * @param {string} input The input string
+   * @returns {string} The modified string with dots replaced by underscores
+   */
+  private replaceDotWithUnderscore(input: string): string {
+    return input.replace(/\./g, '_');
+  }
+
+  /**
+   * Updates Homey capabilities based on fetched DPS data.
+   * @param {Record<string, unknown>} dpsFetched The DPS data fetched from the Tuya device.
+   * @param {Record<number, string>} allArraysSwapped The mapping of DPS IDs to Homey capability names.
+   */
+  private updateCapabilitiesFromDps(dpsFetched: Record<string, unknown>, allArraysSwapped: Record<number, string>): void {
+    Object.entries(dpsFetched).forEach(([dpsId, value]) => {
+      // Find the capability key for this dpsId
+      const capability = allArraysSwapped[Number(dpsId)];
+      this.log('Found capability for dpsId', dpsId, ':', capability);
+      if (capability) {
+        // Update the capability value in Homey
+        this.setCapabilityValue(capability, value)
+          .then(() => this.log(`Updated ${capability} to`, value))
+          .catch((err) => this.error(`Failed to update ${capability}:`, err));
+      }
+    });
   }
 
   /**
@@ -36,7 +73,6 @@ class MyDevice extends Homey.Device {
     const id = this.getStoreValue('device_id');
     const key = this.getStoreValue('local_key');
     const ip = this.getStoreValue('ip_address');
-
     const version = '3.3';
 
     // Initialize TuyaDevice
@@ -45,17 +81,18 @@ class MyDevice extends Homey.Device {
     // Connect once at startup
     await this.connectTuya();
 
-    // Flatten the capabilities object to get all capability keys
-    const { allCapabilities } = AdlarMapping;
-    const capabilityKeys = Object.keys(allCapabilities);
+    // // Flatten the capabilities object to get all capability keys
+    // const { allCapabilities, allArraysSwapped } = AdlarMapping;
+    // this.capabilityKeys = Object.keys(allCapabilities);
 
-    // Register a single listener for all capabilities
-    capabilityKeys.forEach((capability) => {
+    // Register a single listener for all capabilities (from capability name to dp i)
+    this.capabilityKeys.forEach((capability) => {
+      this.log(`Registering capability listener for ${capability}`);
       this.registerCapabilityListener(capability, async (value, opts) => {
         this.log(`${capability} set to`, value);
 
         // Map capability to Tuya DP (data point)
-        const dpArray = allCapabilities[capability];
+        const dpArray = this.allCapabilities[capability];
         const dp = Array.isArray(dpArray) ? dpArray[0] : undefined;
         if (dp !== undefined) {
           try {
@@ -75,22 +112,35 @@ class MyDevice extends Homey.Device {
       });
     });
 
-    // Example: Listen for state updates from the Tuya device
+    // TUYA ON EVENT (from dp id to capability name)
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
       // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
       const dpsFetched = data.dps || {};
-      Object.entries(dpsFetched).forEach(([dpsId, value]) => {
-        // Find the capability key for this dpsId
-        const capability = Object.keys(allCapabilities).find(
-          (key) => allCapabilities[key][0] === Number(dpsId),
-        );
-        if (capability) {
-          // Update the capability value in Homey
-          this.setCapabilityValue(capability, value)
-            .then(() => this.log(`Updated ${capability} to`, value))
-            .catch((err) => this.error(`Failed to update ${capability}:`, err));
-        }
-      });
+      this.log('Data received from Tuya:', dpsFetched);
+
+      // Update Homey capabilities based on the fetched DPS data
+      this.updateCapabilitiesFromDps(dpsFetched, this.allArraysSwapped);
+    });
+
+    // TUYA DP_REFRESH event (from dp id to capability name)
+    this.tuya.on('dp-refresh', (data: { dps: Record<number, unknown> }): void => {
+      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
+      const dpsFetched = data.dps || {};
+      this.log('DP-Refresh received from Tuya:', dpsFetched);
+
+      // Update Homey capabilities based on the fetched DPS data
+      this.updateCapabilitiesFromDps(dpsFetched, this.allArraysSwapped);
+    });
+
+    this.tuya.on('connected', () => {
+      this.log('Device', 'Connected to device!');
+      this.setAvailable();
+    });
+
+    this.tuya.on('disconnected', () => {
+      this.log('Device', 'Disconnected from device!');
+      this.tuyaConnected = false;
+      this.setUnavailable('Device disconnected');
     });
   }
 
@@ -146,4 +196,5 @@ class MyDevice extends Homey.Device {
   }
 
 }
+
 module.exports = MyDevice;
