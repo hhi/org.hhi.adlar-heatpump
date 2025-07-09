@@ -75,6 +75,7 @@
         "measure_temperature.around_temp_f",
         "measure_temperature.coiler_temp_f",
         "measure_temperature.evlin",
+        "measure_temperature.eviout",
         "adlar_measure_pressure_temp_current",
         "adlar_measure_pressure_effluent_temp",
         "adlar_enum_mode",
@@ -1109,6 +1110,27 @@
       },
       "description": {
         "nl": "dp 33 : defrost_state - Defrosting"
+      }
+    },
+    "adlar_time": {
+      "id": "adlar_time",
+      "title": {
+        "en": "Countdown Left",
+        "nl": "Overgebleven tijd"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 2000,
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Countdown Left",
+        "nl": "Overgebleven tijd"
+      },
+      "description": {
+        "nl": "dps_14: countdown_left - Countdown Left"
       }
     }
   }

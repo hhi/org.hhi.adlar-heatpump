@@ -32,6 +32,7 @@
     "measure_temperature.around_temp_f",
     "measure_temperature.coiler_temp_f",
     "measure_temperature.evlin",
+    "measure_temperature.eviout",
 
     "adlar_measure_pressure_temp_current",
     "adlar_measure_pressure_effluent_temp",
