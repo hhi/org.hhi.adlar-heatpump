@@ -1,0 +1,23 @@
+{
+  "id": "adlar_time",
+  "title": {
+    "en": "Countdown Left",
+    "nl": "Overgebleven tijd"
+  },
+  "type": "number",  
+  "min": 0,
+  "max": 2000, 
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Countdown Left",
+    "nl": "Overgebleven tijd"
+  },
+
+  "description": {
+    "nl": "dps_14: countdown_left - Countdown Left"
+  }
+
+}
