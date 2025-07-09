@@ -20,6 +20,7 @@
     "en": "EVI Open",
     "nl": "EVI-openingsstop"
   },
+  "icon": "/assets/pressure.svg",
 
   "description": {
     "nl": "dp 25 : effluent_temp - EVI Open"

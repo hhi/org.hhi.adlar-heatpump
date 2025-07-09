@@ -2,7 +2,7 @@
   "id": "adlar_state_compressor_state",
   "title": {
     "en": "Compressor state",
-    "nl": "compressor_status"
+    "nl": "compressor status"
   },
   "type": "boolean",
   "setable": false,

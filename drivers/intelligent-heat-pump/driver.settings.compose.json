@@ -1,0 +1,41 @@
+ [
+    {
+      "id": "device_id",
+      "type": "label",
+      "label": {
+        "en": "Device ID",
+        "nl": "Apparaat ID"
+      },
+      "hint": {
+        "en": "Enter the unique ID of the device.",
+        "nl": "Voer de unieke ID van het apparaat in."
+      },
+      "required": true
+    },
+    {
+      "id": "local_key",
+      "type": "label",
+      "label": {
+        "en": "Local Key",
+        "nl": "Lokale Sleutel"
+      },
+      "hint": {
+        "en": "Enter the local key for secure communication.",
+        "nl": "Voer de lokale sleutel in voor veilige communicatie."
+      },
+      "required": true
+    },
+    {
+      "id": "ip_address",
+      "type": "label",
+      "label": {
+        "en": "IP Address",
+        "nl": "IP-adres"
+      },
+      "hint": {
+        "en": "Enter the IP address of the device.",
+        "nl": "Voer het IP-adres van het apparaat in."
+      },
+      "required": true
+    }
+  ]
