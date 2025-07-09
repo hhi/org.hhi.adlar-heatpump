@@ -48,14 +48,20 @@ class MyDriver extends Homey.Driver {
   // }
 
   async onPair(session: PairSession) {
-    let deviceCredentials: { deviceId: string; localKey: string } | null = null;
+    let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string } | null = null;
+
+    this.log('Pairing session started');
 
     // Step 1: Show the custom view to input device credentials
-    session.showView('enter_device_info');
-    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string }) => {
+    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string }) => {
       // Store the credentials for later use
       deviceCredentials = data;
       return true;
+    });
+
+    // Received when a view has changed
+    session.setHandler('showView', async (viewId: unknown) => {
+      this.log(`View: ${viewId}`);
     });
 
     // Step 2: List the discovered device
@@ -73,6 +79,12 @@ class MyDriver extends Homey.Driver {
           store: {
             device_id: deviceCredentials.deviceId,
             local_key: deviceCredentials.localKey,
+            ip_address: deviceCredentials.ipAddress,
+          },
+          settings: {
+            device_id: deviceCredentials.deviceId,
+            local_key: deviceCredentials.localKey,
+            ip_address: deviceCredentials.ipAddress,
           },
         },
       ];

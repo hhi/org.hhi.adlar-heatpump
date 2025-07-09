@@ -6,6 +6,7 @@ class MyApp extends App {
 
     if (process.env.DEBUG === '1') {
       this.log('Development mode detected, enabling debug features');
+      this.log ('HOMEY_APP_RUNNER_DEVMODE=', process.env.HOMEY_APP_RUNNER_DEVMODE);
       await enableDebugInspector();
     }
 

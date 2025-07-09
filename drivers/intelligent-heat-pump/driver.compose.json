@@ -475,18 +475,26 @@
 
   "pair": [
     {
-      "id": "enter_device_info",
-      "template": "custom",
-      "next": "list_devices"
+      "id": "enter_device_info"
     },
     {
       "id": "list_devices",
       "template": "list_devices",
-      "next": "add_devices"
+      "navigation": {
+        "next": "add_devices"
+      }
     },
     {
       "id": "add_devices",
-      "template": "add_devices"
+      "template": "add_devices",
+      "navigation": {
+        "next": "done"
+      }
+    },
+    {
+      "id": "done",
+      "template": "done"
     }
+
   ]
 }

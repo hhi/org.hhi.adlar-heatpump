@@ -2,6 +2,27 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Homey App",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--inspect=9229", // Enable debugging on port 9229
+        "${workspaceFolder}/.homeybuild/app.js" // Path to your built app entry point
+      ],
+      "cwd": "${workspaceFolder}/.homeybuild", // Working directory for the app
+      "outFiles": [
+        "${workspaceFolder}/.homeybuild/**/*.js"
+      ],
+      "sourceMaps": true,
+      "env": {
+        "DEBUG": "1" // Enable debug logging
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
       "name": "Attach to Docker Node App",
       "type": "node",
       "request": "attach",
@@ -9,6 +30,26 @@
       "port": 9229,           // must match the --inspect port used in the container
       "localRoot": "${workspaceFolder}/.homeybuild", // your project root on your machine
       "remoteRoot": "/app",      // path to your app in the container
+      "outFiles": [
+        "${workspaceFolder}/.homeybuild/**/*.js"
+      ],
+      "sourceMaps": true,
+      "restart": true,
+      "env": {
+        "DEBUG": "1"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Attach to Homey Node remote App",
+      "type": "node",
+      "request": "attach",
+      "address": "192.168.50.137", // or Docker host IP if not using Docker Desktop
+      "port": 9225,           // must match the --inspect port used in the container
+      "localRoot": "${workspaceFolder}/.homeybuild", // your project root on your machine
+      "remoteRoot": "/",      // path to your app in the container
       "outFiles": [
         "${workspaceFolder}/.homeybuild/**/*.js"
       ],

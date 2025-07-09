@@ -35,16 +35,18 @@ class MyDevice extends Homey.Device {
     // Get Tuya device settings from Homey
     const id = this.getStoreValue('device_id');
     const key = this.getStoreValue('local_key');
+    const ip = this.getStoreValue('ip_address');
+
     const version = '3.3';
 
     // Initialize TuyaDevice
-    this.tuya = new TuyaDevice({ id, key, version });
+    this.tuya = new TuyaDevice({ id, key, ip, version });
 
     // Connect once at startup
     await this.connectTuya();
 
     // Flatten the capabilities object to get all capability keys
-    const allCapabilities = AdlarMapping.capabilities;
+    const { allCapabilities } = AdlarMapping;
     const capabilityKeys = Object.keys(allCapabilities);
 
     // Register a single listener for all capabilities
