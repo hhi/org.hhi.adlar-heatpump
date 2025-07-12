@@ -127,7 +127,7 @@
     }
   ],
   "getable": true,
-  "setable": false,
+  "setable": true,
   "uiComponent": "picker",
   "description": {
     "nl": "dp 13: countdown_set - Curve setting"

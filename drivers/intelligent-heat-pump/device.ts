@@ -1,4 +1,4 @@
-import Homey from 'homey';
+import Homey, { manifest } from 'homey';
 import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
 
@@ -8,9 +8,12 @@ const { allCapabilities, allArraysSwapped } = AdlarMapping;
 class MyDevice extends Homey.Device {
   tuya: TuyaDevice | undefined;
   tuyaConnected: boolean = false;
-  capabilityKeys: string[] = []; // Initialize as an empty array
   allCapabilities: Record<string, number[]> = allCapabilities;
   allArraysSwapped: Record<number, string> = allArraysSwapped;
+  settableCapabilities: string[] = [];
+
+  private capabilitiesArray: string[] = (manifest.capabilities || [])
+
 
   async connectTuya() {
     if (!this.tuyaConnected) {
@@ -56,8 +59,8 @@ class MyDevice extends Homey.Device {
       this.log('Found capability for dpsId', dpsId, ':', capability);
       if (capability) {
         // Update the capability value in Homey
-        this.setCapabilityValue(capability, value)
-          .then(() => this.log(`Updated ${capability} to`, value))
+        this.setCapabilityValue(capability, (value as boolean | number | string))
+          .then(() => this.log(`Updated ${capability} to`, String(value)))
           .catch((err) => this.error(`Failed to update ${capability}:`, err));
       }
     });
@@ -68,25 +71,34 @@ class MyDevice extends Homey.Device {
    */
   async onInit() {
     this.log('MyDevice has been initialized');
+    await this.setUnavailable(); // Set the device as unavailable initially
 
-    // Get Tuya device settings from Homey
-    const id = this.getStoreValue('device_id');
-    const key = this.getStoreValue('local_key');
-    const ip = this.getStoreValue('ip_address');
-    const version = '3.3';
+    const { manifest } = Homey;
+    const myDriver = manifest.drivers[0];
+    // this.log('MyDevice overview:', myDriver);
 
-    // Initialize TuyaDevice
-    this.tuya = new TuyaDevice({ id, key, ip, version });
+    const capList = myDriver.capabilities;
+    // this.log('Capabilities list:', capList);
 
-    // Connect once at startup
-    await this.connectTuya();
+    const builtinCapOptList = myDriver.capabilitiesOptions || {};
+    this.log('Capabilities options list:', builtinCapOptList);
 
-    // // Flatten the capabilities object to get all capability keys
-    // const { allCapabilities, allArraysSwapped } = AdlarMapping;
-    // this.capabilityKeys = Object.keys(allCapabilities);
+    // Extract keys where `setable` exists and is `true`
+    const setableBuiltInCapsKeys = Object.keys(builtinCapOptList).filter(
+      (key) => builtinCapOptList[key].setable === true,
+    );
+    this.log('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys); // Output: []
 
-    // Register a single listener for all capabilities (from capability name to dp i)
-    this.capabilityKeys.forEach((capability) => {
+    const setableCustomCapsKeys = Object.keys(manifest.capabilities).filter(
+      (key) => manifest.capabilities[key].setable === true,
+    );
+    this.log('Setable custom capabilities from app manifest:', setableCustomCapsKeys); // Output: []
+
+    this.settableCapabilities = [...setableBuiltInCapsKeys, ...setableCustomCapsKeys];
+    this.log('Setable capabilities:', this.settableCapabilities); // Output: []
+
+    // Register a single duty listener for all capabilities (from capability name to dp i)
+    this.settableCapabilities.forEach((capability: string) => {
       this.log(`Registering capability listener for ${capability}`);
       this.registerCapabilityListener(capability, async (value, opts) => {
         this.log(`${capability} set to`, value);
@@ -112,6 +124,23 @@ class MyDevice extends Homey.Device {
       });
     });
 
+    // Get Tuya device settings from Homey
+    const id = this.getStoreValue('device_id');
+    const key = this.getStoreValue('local_key');
+    const ip = this.getStoreValue('ip_address');
+    const version = '3.3';
+
+    // Initialize TuyaDevice
+    this.tuya = new TuyaDevice({
+      id,
+      key,
+      ip,
+      version,
+    });
+
+    // Connect once at startup
+    await this.connectTuya();
+
     // TUYA ON EVENT (from dp id to capability name)
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
       // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
@@ -120,6 +149,10 @@ class MyDevice extends Homey.Device {
 
       // Update Homey capabilities based on the fetched DPS data
       this.updateCapabilitiesFromDps(dpsFetched, this.allArraysSwapped);
+
+      this.setAvailable()
+        .then(() => this.log('Device set as available'))
+        .catch((err) => this.error('Error setting device as available:', err));
     });
 
     // TUYA DP_REFRESH event (from dp id to capability name)
@@ -132,15 +165,20 @@ class MyDevice extends Homey.Device {
       this.updateCapabilitiesFromDps(dpsFetched, this.allArraysSwapped);
     });
 
-    this.tuya.on('connected', () => {
+    // Fixing promise handling for setAvailable and setUnavailable
+    this.tuya.on('connected', (): void => {
       this.log('Device', 'Connected to device!');
-      this.setAvailable();
+      this.setAvailable()
+        .then(() => this.log('Device set as available'))
+        .catch((err) => this.error('Error setting device as available:', err));
     });
 
-    this.tuya.on('disconnected', () => {
+    this.tuya.on('disconnected', (): void => {
       this.log('Device', 'Disconnected from device!');
       this.tuyaConnected = false;
-      this.setUnavailable('Device disconnected');
+      this.setUnavailable('Device disconnected')
+        .then(() => this.log('Device set as unavailable'))
+        .catch((err) => this.error('Error setting device as unavailable:', err));
     });
   }
 
@@ -194,7 +232,6 @@ class MyDevice extends Homey.Device {
       }
     }
   }
-
 }
 
 module.exports = MyDevice;

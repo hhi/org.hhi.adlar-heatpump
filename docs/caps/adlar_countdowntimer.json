@@ -1,0 +1,23 @@
+{
+  "id": "adlar_countdowntimer",
+  "title": {
+    "en": "Automatic shutoff timer",
+    "nl": "Automatische sluitingstimer"
+  },
+  "type": "number",
+  "min": 0,
+  "max": 2000,
+  "step": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Automatic shutoff timer",
+    "nl": "Automatische sluitingstimer"
+  },
+  
+  "description": {
+    "nl": "dp 14 : countdown_left - Countdown Left"
+  }
+}

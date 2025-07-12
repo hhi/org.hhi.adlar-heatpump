@@ -44,7 +44,7 @@
   ],
   "uiComponent": "picker",
   "getable": true,
-  "setable": false,
+  "setable": true,
   "insights": true,
   "description": {
     "nl": "dp 11 : capacity_set - Hot water curve setting"

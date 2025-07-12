@@ -2,35 +2,17 @@
   "id": "adlar_enum_volume_set",
   "title": {
     "en": "Electricity Consumption Checking",
-    "nl": "Stroomverbruik controle"
+    "nl": "Stroomverbruik controleren"
   },
-  "type": "enum",
-  "values": [
-    {
-      "id": "0",
-      "title": {
-        "en": "0",
-        "nl": "0"
-      }
-    },
-    {
-      "id": "1",
-      "title": {
-        "en": "1",
-        "nl": "1"
-      }
-    },
-    {
-      "id": "2",
-      "title": {
-        "en": "2",
-        "nl": "2"
-      }
-    }
-  ],
+  "type": "number",
+  "min": 0,
+  "max": 2,
+  "step": 1,
+  "decimals": 0,
   "getable": true,
-  "setable": true,
-  "uiComponent": "picker",
+  "setable": false,
+  "uiComponent": "slider",
+
   "description": {
     "nl": "dp 106: volume_set - Electricity Consumption Checking"
   }
