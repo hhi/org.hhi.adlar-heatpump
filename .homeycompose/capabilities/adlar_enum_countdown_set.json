@@ -2,7 +2,7 @@
   "id": "adlar_enum_countdown_set",
   "title": {
     "en": "Curve setting",
-    "nl": "Instellingen verwarmingscurve"
+    "nl": "Instelling verwarmingscurve"
   },
   "type": "enum",
   "values": [
@@ -127,7 +127,7 @@
     }
   ],
   "getable": true,
-  "setable": true,
+  "setable": false,
   "uiComponent": "picker",
   "description": {
     "nl": "dp 13: countdown_set - Curve setting"

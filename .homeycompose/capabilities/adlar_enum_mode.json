@@ -6,7 +6,7 @@
   },
   "type": "enum",
   "getable": true,
-  "setable": true,
+  "setable": false,
   "values": [
     {
       "id": "cold",

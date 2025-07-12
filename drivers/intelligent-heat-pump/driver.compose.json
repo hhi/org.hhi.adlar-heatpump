@@ -6,26 +6,29 @@
   "class": "heatpump",
 
   "capabilities": [
-    "onoff",
     "target_temperature",
-    "measure_power",
-    "measure_water",
 
-    "meter_power.power_consumption",
-    "meter_power.electric_total",
-    "measure_current.cur_current",
-    "measure_current.b_cur",
-    "measure_current.c_cur",
-    "measure_voltage.voltage_current",
-    "measure_voltage.bv",
-    "measure_voltage.cv",
+    "onoff",
+
+    "adlar_hotwater",
+    "adlar_enum_water_mode",
+
+    "adlar_enum_mode",
+    "adlar_enum_work_mode",
+    "adlar_enum_capacity_set",
+    "adlar_enum_volume_set",
+    "adlar_enum_countdown_set",
+
     "measure_frequency.compressor_strength",
     "measure_frequency.fan_motor_frequency",
+
+    "measure_water",
+    "measure_temperature.around_temp",
     "measure_temperature.temp_top",
     "measure_temperature.temp_bottom",
     "measure_temperature.coiler_temp",
     "measure_temperature.venting_temp",
-    "measure_temperature.around_temp",
+
     "measure_temperature.temp_current_f",
     "measure_temperature.top_temp_f",
     "measure_temperature.bottom_temp_f",
@@ -36,18 +39,22 @@
 
     "adlar_measure_pressure_temp_current",
     "adlar_measure_pressure_effluent_temp",
-    "adlar_enum_mode",
-    "adlar_enum_work_mode",
-    "adlar_enum_water_mode",
-    "adlar_enum_capacity_set",
-    "adlar_enum_countdown_set",
-    "adlar_enum_volume_set",
-    "adlar_hotwater",
+
+    "measure_power",
+    "meter_power.power_consumption",
+    "meter_power.electric_total",
+    "measure_current.cur_current",
+    "measure_current.b_cur",
+    "measure_current.c_cur",
+    "measure_voltage.voltage_current",
+    "measure_voltage.bv",
+    "measure_voltage.cv",
+
+    "adlar_fault",
     "adlar_state_compressor_state",
-    "adlar_state_backwater",
     "adlar_state_defrost_state",
     "adlar_countdowntimer",
-    "adlar_fault"
+    "adlar_state_backwater"
   ],
 
   "capabilitiesOptions": {
@@ -94,6 +101,8 @@
         "nl": "Schakelaar",
         "en": "Switch"
       },
+      "setable": false,
+      "uiQuickAction": false,
       "description": {
         "nl": "dps_1: switch - Schakelaar"
       }

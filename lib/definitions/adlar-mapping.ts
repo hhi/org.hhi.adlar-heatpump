@@ -52,7 +52,7 @@ export class AdlarMapping {
     adlar_state_compressor_state: [27],
     adlar_state_backwater: [31],
     adlar_state_defrost_state: [33],
-    adlar_time: [14],
+    adlar_countdowntimer: [14],
     adlar_fault: [15],
   };
 
@@ -73,7 +73,7 @@ export class AdlarMapping {
     dps_5: { code: 'work_mode', name: 'Working mode', adlar: 'Bedrijfsmodus' },
     dps_10: { code: 'water_mode', name: 'Control Temperature', adlar: 'Temperatuurregeling Water' },
     dps_11: { code: 'capacity_set', name: 'Hot water curve setting', adlar: 'Instelling warmwater curve' },
-    dps_13: { code: 'countdown_set', name: 'Curve setting', adlar: 'Instellingen verwarmingscurve' },
+    dps_13: { code: 'countdown_set', name: 'Curve setting', adlar: 'Instelling verwarmingscurve' },
     dps_14: { code: 'countdown_left', name: 'Countdown Left', adlar: 'Overgebleven tijd' },
     dps_15: { code: 'fault', name: 'Fault', adlar: 'Fout toestand' },
     dps_16: { code: 'temp_current', name: 'EEV Open', adlar: 'EEV Open' },
