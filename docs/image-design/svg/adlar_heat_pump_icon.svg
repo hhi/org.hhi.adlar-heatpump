@@ -1,0 +1,48 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#f8f9fa" stroke="#e9ecef" stroke-width="2"/>
+  
+  <!-- Heat pump unit body -->
+  <rect x="25" y="40" width="50" height="35" rx="4" fill="#2c3e50" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Top vent grilles -->
+  <rect x="28" y="43" width="44" height="2" fill="#7f8c8d" rx="1"/>
+  <rect x="28" y="47" width="44" height="2" fill="#7f8c8d" rx="1"/>
+  <rect x="28" y="51" width="44" height="2" fill="#7f8c8d" rx="1"/>
+  
+  <!-- Control panel -->
+  <rect x="30" y="56" width="15" height="12" rx="2" fill="#34495e" stroke="#4a5f7a" stroke-width="1"/>
+  
+  <!-- Display screen -->
+  <rect x="32" y="58" width="11" height="8" rx="1" fill="#2ecc71"/>
+  
+  <!-- Temperature display -->
+  <text x="37.5" y="64" font-family="Arial, sans-serif" font-size="4" fill="#fff" text-anchor="middle">21°</text>
+  
+  <!-- Fan unit -->
+  <circle cx="60" cy="62" r="10" fill="#7f8c8d" stroke="#95a5a6" stroke-width="1"/>
+  <circle cx="60" cy="62" r="8" fill="#bdc3c7"/>
+  
+  <!-- Fan blades -->
+  <path d="M60 54 L60 70 M52 62 L68 62 M55 55 L65 69 M65 55 L55 69" stroke="#34495e" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Smart/WiFi indicator -->
+  <g transform="translate(77,45)">
+    <circle cx="0" cy="0" r="6" fill="#3498db" opacity="0.2"/>
+    <path d="M-3 2 Q0 -2 3 2 M-2 0 Q0 -1 2 0 M0 1 L0 1" stroke="#3498db" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Heat waves/air flow -->
+  <g opacity="0.6">
+    <!-- Warm air output -->
+    <path d="M15 25 Q20 20 25 25 Q30 30 35 25" stroke="#e74c3c" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M18 22 Q23 17 28 22 Q33 27 38 22" stroke="#e74c3c" stroke-width="2" fill="none" stroke-linecap="round"/>
+    
+    <!-- Cool air input -->
+    <path d="M65 25 Q70 20 75 25 Q80 30 85 25" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M62 22 Q67 17 72 22 Q77 27 82 22" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Brand indicator (A for Adlar) -->
+  <text x="50" y="88" font-family="Arial, sans-serif" font-size="8" fill="#7f8c8d" text-anchor="middle" font-weight="bold">A</text>
+</svg>
