@@ -1,48 +1,74 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle -->
-  <circle cx="50" cy="50" r="48" fill="#f8f9fa" stroke="#e9ecef" stroke-width="2"/>
-  
-  <!-- Heat pump unit body -->
-  <rect x="25" y="40" width="50" height="35" rx="4" fill="#2c3e50" stroke="#34495e" stroke-width="1"/>
-  
-  <!-- Top vent grilles -->
-  <rect x="28" y="43" width="44" height="2" fill="#7f8c8d" rx="1"/>
-  <rect x="28" y="47" width="44" height="2" fill="#7f8c8d" rx="1"/>
-  <rect x="28" y="51" width="44" height="2" fill="#7f8c8d" rx="1"/>
-  
-  <!-- Control panel -->
-  <rect x="30" y="56" width="15" height="12" rx="2" fill="#34495e" stroke="#4a5f7a" stroke-width="1"/>
-  
-  <!-- Display screen -->
-  <rect x="32" y="58" width="11" height="8" rx="1" fill="#2ecc71"/>
-  
-  <!-- Temperature display -->
-  <text x="37.5" y="64" font-family="Arial, sans-serif" font-size="4" fill="#fff" text-anchor="middle">21°</text>
-  
-  <!-- Fan unit -->
-  <circle cx="60" cy="62" r="10" fill="#7f8c8d" stroke="#95a5a6" stroke-width="1"/>
-  <circle cx="60" cy="62" r="8" fill="#bdc3c7"/>
-  
-  <!-- Fan blades -->
-  <path d="M60 54 L60 70 M52 62 L68 62 M55 55 L65 69 M65 55 L55 69" stroke="#34495e" stroke-width="1.5" stroke-linecap="round"/>
-  
-  <!-- Smart/WiFi indicator -->
-  <g transform="translate(77,45)">
-    <circle cx="0" cy="0" r="6" fill="#3498db" opacity="0.2"/>
-    <path d="M-3 2 Q0 -2 3 2 M-2 0 Q0 -1 2 0 M0 1 L0 1" stroke="#3498db" stroke-width="1" fill="none" stroke-linecap="round"/>
+<svg width="500" height="350" viewBox="0 0 1000 700"
+  xmlns="http://www.w3.org/2000/svg">
+  <!-- Same content as above, scaled down -->
+  <rect width="1000" height="400" fill="url(#skyGradient)"></rect>
+  <rect y="400" width="1000" height="300" fill="url(#groundGradient)"></rect>
+  <rect x="200" y="200" width="400" height="300" fill="url(#houseGradient)" stroke="#CCC" stroke-width="2"></rect>
+  <polygon points="180,200 400,100 620,200" fill="#8B4513" stroke="#654321" stroke-width="2"></polygon>
+  <rect x="250" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"></rect>
+  <rect x="470" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"></rect>
+  <line x1="290" y1="250" x2="290" y2="310" stroke="#666" stroke-width="1"></line>
+  <line x1="250" y1="280" x2="330" y2="280" stroke="#666" stroke-width="1"></line>
+  <line x1="510" y1="250" x2="510" y2="310" stroke="#666" stroke-width="1"></line>
+  <line x1="470" y1="280" x2="550" y2="280" stroke="#666" stroke-width="1"></line>
+  <rect x="360" y="400" width="80" height="100" fill="#8B4513" stroke="#654321" stroke-width="2"></rect>
+  <circle cx="420" cy="450" r="3" fill="#FFD700"></circle>
+
+  <g transform="translate(650,350)">
+    <rect x="-10" y="100" width="180" height="20" fill="#555" rx="2"></rect>
+    <rect x="0" y="0" width="160" height="100" fill="#4A4A4A" stroke="#3A3A3A" stroke-width="2" rx="3"></rect>
+    <rect x="5" y="5" width="150" height="15" fill="#5A5A5A" rx="2"></rect>
+    <text x="80" y="15" font-family="Arial, sans-serif" font-size="8" fill="#CCC" text-anchor="middle">ADLAR CASTRA</text>
+    <rect x="10" y="25" width="140" height="70" fill="#2A2A2A" stroke="#1A1A1A" stroke-width="1" rx="2"></rect>
+    <g stroke="#444" stroke-width="1">
+      <line x1="15" y1="30" x2="145" y2="30"></line>
+      <line x1="15" y1="35" x2="145" y2="35"></line>
+      <line x1="15" y1="40" x2="145" y2="40"></line>
+      <line x1="15" y1="45" x2="145" y2="45"></line>
+      <line x1="15" y1="50" x2="145" y2="50"></line>
+      <line x1="15" y1="55" x2="145" y2="55"></line>
+      <line x1="15" y1="60" x2="145" y2="60"></line>
+      <line x1="15" y1="65" x2="145" y2="65"></line>
+      <line x1="15" y1="70" x2="145" y2="70"></line>
+      <line x1="15" y1="75" x2="145" y2="75"></line>
+      <line x1="15" y1="80" x2="145" y2="80"></line>
+      <line x1="15" y1="85" x2="145" y2="85"></line>
+      <line x1="15" y1="90" x2="145" y2="90"></line>
+    </g>
+    <circle cx="80" cy="60" r="25" fill="#1A1A1A" stroke="#333" stroke-width="1"></circle>
+    <circle cx="80" cy="60" r="20" fill="#2A2A2A"></circle>
+    <g stroke="#444" stroke-width="2" fill="none">
+      <path d="M80 40 L80 80 M60 60 L100 60"></path>
+      <path d="M65 45 L95 75 M95 45 L65 75"></path>
+    </g>
+    <rect x="130" y="40" width="25" height="40" fill="#3A3A3A" stroke="#2A2A2A" stroke-width="1" rx="2"></rect>
+    <circle cx="142" cy="50" r="3" fill="#00FF00" opacity="0.8"></circle>
+    <rect x="5" y="95" width="20" height="3" fill="#FFD700"></rect>
   </g>
-  
-  <!-- Heat waves/air flow -->
-  <g opacity="0.6">
-    <!-- Warm air output -->
-    <path d="M15 25 Q20 20 25 25 Q30 30 35 25" stroke="#e74c3c" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M18 22 Q23 17 28 22 Q33 27 38 22" stroke="#e74c3c" stroke-width="2" fill="none" stroke-linecap="round"/>
-    
-    <!-- Cool air input -->
-    <path d="M65 25 Q70 20 75 25 Q80 30 85 25" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M62 22 Q67 17 72 22 Q77 27 82 22" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <ellipse cx="730" cy="480" rx="40" ry="15" fill="#228B22" opacity="0.8"></ellipse>
+  <ellipse cx="700" cy="485" rx="25" ry="10" fill="#32CD32" opacity="0.6"></ellipse>
+  <ellipse cx="760" cy="485" rx="30" ry="12" fill="#32CD32" opacity="0.6"></ellipse>
+
+  <circle cx="100" cy="350" r="50" fill="#228B22" opacity="0.8"></circle>
+  <rect x="95" y="380" width="10" height="40" fill="#8B4513"></rect>
+  <circle cx="850" cy="330" r="60" fill="#228B22" opacity="0.8"></circle>
+  <rect x="845" y="370" width="10" height="50" fill="#8B4513"></rect>
+
+  <g opacity="0.7">
+    <circle cx="300" cy="150" r="30" fill="white"></circle>
+    <circle cx="330" cy="150" r="35" fill="white"></circle>
+    <circle cx="360" cy="150" r="25" fill="white"></circle>
+    <circle cx="700" cy="120" r="25" fill="white"></circle>
+    <circle cx="725" cy="120" r="30" fill="white"></circle>
+    <circle cx="745" cy="120" r="20" fill="white"></circle>
   </g>
-  
-  <!-- Brand indicator (A for Adlar) -->
-  <text x="50" y="88" font-family="Arial, sans-serif" font-size="8" fill="#7f8c8d" text-anchor="middle" font-weight="bold">A</text>
+
+  <g opacity="0.4">
+    <path d="M600 400 Q580 380 560 400 Q540 420 520 400" stroke="#87CEEB" stroke-width="3" fill="none"></path>
+    <path d="M600 410 Q580 390 560 410 Q540 430 520 410" stroke="#87CEEB" stroke-width="3" fill="none"></path>
+  </g>
+
+  <rect x="600" y="440" width="50" height="8" fill="#666" opacity="0.6" rx="4"></rect>
+  <rect x="600" y="435" width="50" height="8" fill="#666" opacity="0.6" rx="4"></rect>
 </svg>

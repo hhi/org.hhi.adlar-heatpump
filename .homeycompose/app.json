@@ -19,9 +19,9 @@
   ],
   "permissions": [],
   "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png",
-    "xlarge": "/assets/images/xlarge.png"
+    "small": "/assets/images/app-small.png",
+    "large": "/assets/images/app-large.png",
+    "xlarge": "/assets/images/app-xlarge.png"
   },
   "bugs": {
     "url": "https://github.com/hhi/org.hhi.adlar-heatpump/issues"
@@ -40,5 +40,6 @@
     ]
   },
   "brandColor": "#f5a623",
-  "author": "Herman Hilberink <herman.Hilberink@gmail.com>"
+  "author": "Herman Hilberink <herman.Hilberink@gmail.com>",
+  "icon": "/assets/icon.svg"
 }

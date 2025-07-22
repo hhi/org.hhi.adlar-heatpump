@@ -1,0 +1,125 @@
+Based on my comprehensive analysis of all 41 capabilities, here are my top recommendations for flow cards:
+
+  Priority 1: Essential Safety & Control
+
+  Critical Triggers
+
+  - adlar_fault → "When fault occurs" - Essential for immediate alerts
+  - adlar_state_compressor_state → "When compressor starts/stops" - Key system monitoring
+  - adlar_state_defrost_state → "When defrost cycle begins/ends" - Performance tracking
+
+  Essential Actions
+
+  - target_temperature → "Set heating temperature" - Primary control
+  - adlar_hotwater → "Set hot water temperature" - Secondary control
+  - adlar_enum_work_mode → "Switch to ECO/Normal/Boost" - Efficiency control
+
+  Key Conditions
+
+  - adlar_fault → "If fault is active" - Safety checks
+  - adlar_state_compressor_state → "If compressor is running" - Status verification
+
+  Priority 2: Temperature Safety
+
+  Safety Triggers
+
+  - measure_temperature.around_temp → "When ambient temperature changes" - Weather automation
+  - measure_temperature.temp_top → "When inlet temperature exceeds limits" - Safety alerts
+  - measure_temperature.venting_temp → "When discharge temperature too high" - Critical safety
+
+  Priority 3: Energy Management
+
+  Monitoring Triggers
+
+  - measure_power → "When power consumption changes" - Energy tracking
+  - meter_power.power_consumption → "Daily consumption reached X kWh" - Usage alerts
+
+  Priority 4: Advanced Automation
+
+  Performance Triggers
+
+  - adlar_enum_mode → "When heating mode changes" - System state tracking
+  - measure_frequency.compressor_strength → "When compressor frequency changes" - Performance monitoring
+
+  Recommendation: Start with Priority 1 (9 flow cards) as they cover 80% of user automation needs, then expand
+  based on user feedback.
+
+
+  Here's the complete implementation process for Homey flow cards:
+
+  1. Directory Structure
+
+  Create these directories in your project:
+  .homeycompose/
+  ├── drivers/
+  │   └── intelligent-heat-pump/
+  │       └── flow/
+  │           ├── triggers/
+  │           ├── actions/
+  │           └── conditions/
+
+  2. Flow Card Definitions
+
+  Place JSON files in respective directories:
+  - .homeycompose/drivers/intelligent-heat-pump/flow/triggers/adlar_hotwater_changed.json
+  - .homeycompose/drivers/intelligent-heat-pump/flow/actions/adlar_hotwater_set.json
+  - .homeycompose/drivers/intelligent-heat-pump/flow/conditions/adlar_hotwater_is.json
+
+  3. Register in Driver Compose
+
+  Add to drivers/intelligent-heat-pump/driver.compose.json:
+  {
+    "flow": {
+      "triggers": [
+        { "$extends": "adlar_hotwater_changed" }
+      ],
+      "actions": [
+        { "$extends": "adlar_hotwater_set" }
+      ],
+      "conditions": [
+        { "$extends": "adlar_hotwater_is" }
+      ]
+    }
+  }
+
+  4. Implement Listeners in Device Code
+
+  Add to drivers/intelligent-heat-pump/device.ts:
+
+  async onInit() {
+    // Register flow card listeners
+    this.registerFlowCardListeners();
+    // ... existing code
+  }
+
+  private registerFlowCardListeners() {
+    // Action listener
+    this.homey.flow.getActionCard('adlar_hotwater_set')
+      .registerRunListener(async (args) => {
+        await this.setCapabilityValue('adlar_hotwater', args.temperature);
+        return true;
+      });
+
+    // Condition listener  
+    this.homey.flow.getConditionCard('adlar_hotwater_is')
+      .registerRunListener(async (args) => {
+        const currentTemp = this.getCapabilityValue('adlar_hotwater');
+        switch(args.operator) {
+          case '=': return currentTemp === args.temperature;
+          case '>': return currentTemp > args.temperature;
+          case '<': return currentTemp < args.temperature;
+          default: return false;
+        }
+      });
+  }
+
+  // Trigger flow cards when capability changes
+  async onCapabilityChanged(capability: string, value: any) {
+    if (capability === 'adlar_hotwater') {
+      this.homey.flow.getTriggerCard('adlar_hotwater_changed')
+        .trigger(this, { temperature: value })
+        .catch(this.error);
+    }
+  }
+
+  
