@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ],
+    "deny": []
+  }
+}
