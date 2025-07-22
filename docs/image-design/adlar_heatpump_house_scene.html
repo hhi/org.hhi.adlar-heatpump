@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adlar Heat Pump - House Environment</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .size-section {
+            margin-bottom: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .size-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .image-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .download-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #2c3e50; margin-bottom: 40px;">Adlar Castra Heat Pump - House Environment</h1>
+        
+        <!-- XLarge Version -->
+        <div class="size-section">
+            <div class="size-label">XLarge (1000x700px)</div>
+            <div class="image-container">
+                <svg width="1000" height="700" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Sky background -->
+                    <defs>
+                        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#98D4EA;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#90EE90;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#228B22;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="houseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#F5F5DC;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#DDD;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- Sky -->
+                    <rect width="1000" height="400" fill="url(#skyGradient)"/>
+                    
+                    <!-- Ground -->
+                    <rect y="400" width="1000" height="300" fill="url(#groundGradient)"/>
+                    
+                    <!-- House structure -->
+                    <rect x="200" y="200" width="400" height="300" fill="url(#houseGradient)" stroke="#CCC" stroke-width="2"/>
+                    
+                    <!-- Roof -->
+                    <polygon points="180,200 400,100 620,200" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    
+                    <!-- Windows -->
+                    <rect x="250" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <rect x="470" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    
+                    <!-- Window frames -->
+                    <line x1="290" y1="250" x2="290" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="250" y1="280" x2="330" y2="280" stroke="#666" stroke-width="1"/>
+                    <line x1="510" y1="250" x2="510" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="470" y1="280" x2="550" y2="280" stroke="#666" stroke-width="1"/>
+                    
+                    <!-- Door -->
+                    <rect x="360" y="400" width="80" height="100" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <circle cx="420" cy="450" r="3" fill="#FFD700"/>
+                    
+                    <!-- Heat pump positioned beside the house -->
+                    <g transform="translate(650,350)">
+                        <!-- Heat pump base/platform -->
+                        <rect x="-10" y="100" width="180" height="20" fill="#555" rx="2"/>
+                        
+                        <!-- Main heat pump unit (matching the reference image) -->
+                        <rect x="0" y="0" width="160" height="100" fill="#4A4A4A" stroke="#3A3A3A" stroke-width="2" rx="3"/>
+                        
+                        <!-- Top section with brand name area -->
+                        <rect x="5" y="5" width="150" height="15" fill="#5A5A5A" rx="2"/>
+                        <text x="80" y="15" font-family="Arial, sans-serif" font-size="8" fill="#CCC" text-anchor="middle">ADLAR CASTRA</text>
+                        
+                        <!-- Main grille area -->
+                        <rect x="10" y="25" width="140" height="70" fill="#2A2A2A" stroke="#1A1A1A" stroke-width="1" rx="2"/>
+                        
+                        <!-- Horizontal grille lines -->
+                        <g stroke="#444" stroke-width="1">
+                            <line x1="15" y1="30" x2="145" y2="30"/>
+                            <line x1="15" y1="35" x2="145" y2="35"/>
+                            <line x1="15" y1="40" x2="145" y2="40"/>
+                            <line x1="15" y1="45" x2="145" y2="45"/>
+                            <line x1="15" y1="50" x2="145" y2="50"/>
+                            <line x1="15" y1="55" x2="145" y2="55"/>
+                            <line x1="15" y1="60" x2="145" y2="60"/>
+                            <line x1="15" y1="65" x2="145" y2="65"/>
+                            <line x1="15" y1="70" x2="145" y2="70"/>
+                            <line x1="15" y1="75" x2="145" y2="75"/>
+                            <line x1="15" y1="80" x2="145" y2="80"/>
+                            <line x1="15" y1="85" x2="145" y2="85"/>
+                            <line x1="15" y1="90" x2="145" y2="90"/>
+                        </g>
+                        
+                        <!-- Central fan area -->
+                        <circle cx="80" cy="60" r="25" fill="#1A1A1A" stroke="#333" stroke-width="1"/>
+                        <circle cx="80" cy="60" r="20" fill="#2A2A2A"/>
+                        
+                        <!-- Fan blades -->
+                        <g stroke="#444" stroke-width="2" fill="none">
+                            <path d="M80 40 L80 80 M60 60 L100 60"/>
+                            <path d="M65 45 L95 75 M95 45 L65 75"/>
+                        </g>
+                        
+                        <!-- Side panel/controls -->
+                        <rect x="130" y="40" width="25" height="40" fill="#3A3A3A" stroke="#2A2A2A" stroke-width="1" rx="2"/>
+                        
+                        <!-- Status indicator -->
+                        <circle cx="142" cy="50" r="3" fill="#00FF00" opacity="0.8"/>
+                        
+                        <!-- Yellow accent (like in reference) -->
+                        <rect x="5" y="95" width="20" height="3" fill="#FFD700"/>
+                    </g>
+                    
+                    <!-- Landscaping around heat pump -->
+                    <ellipse cx="730" cy="480" rx="40" ry="15" fill="#228B22" opacity="0.8"/>
+                    <ellipse cx="700" cy="485" rx="25" ry="10" fill="#32CD32" opacity="0.6"/>
+                    <ellipse cx="760" cy="485" rx="30" ry="12" fill="#32CD32" opacity="0.6"/>
+                    
+                    <!-- Trees in background -->
+                    <circle cx="100" cy="350" r="50" fill="#228B22" opacity="0.8"/>
+                    <rect x="95" y="380" width="10" height="40" fill="#8B4513"/>
+                    
+                    <circle cx="850" cy="330" r="60" fill="#228B22" opacity="0.8"/>
+                    <rect x="845" y="370" width="10" height="50" fill="#8B4513"/>
+                    
+                    <!-- Clouds -->
+                    <g opacity="0.7">
+                        <circle cx="300" cy="150" r="30" fill="white"/>
+                        <circle cx="330" cy="150" r="35" fill="white"/>
+                        <circle cx="360" cy="150" r="25" fill="white"/>
+                        
+                        <circle cx="700" cy="120" r="25" fill="white"/>
+                        <circle cx="725" cy="120" r="30" fill="white"/>
+                        <circle cx="745" cy="120" r="20" fill="white"/>
+                    </g>
+                    
+                    <!-- Air flow visualization -->
+                    <g opacity="0.4">
+                        <path d="M600 400 Q580 380 560 400 Q540 420 520 400" stroke="#87CEEB" stroke-width="3" fill="none"/>
+                        <path d="M600 410 Q580 390 560 410 Q540 430 520 410" stroke="#87CEEB" stroke-width="3" fill="none"/>
+                    </g>
+                    
+                    <!-- Heat pump connection pipes (subtle) -->
+                    <rect x="600" y="440" width="50" height="8" fill="#666" opacity="0.6" rx="4"/>
+                    <rect x="600" y="435" width="50" height="8" fill="#666" opacity="0.6" rx="4"/>
+                </svg>
+            </div>
+            <button class="download-btn" onclick="downloadSVG('xlarge', 1000, 700)">Download XLarge</button>
+        </div>
+        
+        <!-- Large Version -->
+        <div class="size-section">
+            <div class="size-label">Large (500x350px)</div>
+            <div class="image-container">
+                <svg width="500" height="350" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Same content as above, scaled down -->
+                    <rect width="1000" height="400" fill="url(#skyGradient)"/>
+                    <rect y="400" width="1000" height="300" fill="url(#groundGradient)"/>
+                    <rect x="200" y="200" width="400" height="300" fill="url(#houseGradient)" stroke="#CCC" stroke-width="2"/>
+                    <polygon points="180,200 400,100 620,200" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <rect x="250" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <rect x="470" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <line x1="290" y1="250" x2="290" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="250" y1="280" x2="330" y2="280" stroke="#666" stroke-width="1"/>
+                    <line x1="510" y1="250" x2="510" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="470" y1="280" x2="550" y2="280" stroke="#666" stroke-width="1"/>
+                    <rect x="360" y="400" width="80" height="100" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <circle cx="420" cy="450" r="3" fill="#FFD700"/>
+                    
+                    <g transform="translate(650,350)">
+                        <rect x="-10" y="100" width="180" height="20" fill="#555" rx="2"/>
+                        <rect x="0" y="0" width="160" height="100" fill="#4A4A4A" stroke="#3A3A3A" stroke-width="2" rx="3"/>
+                        <rect x="5" y="5" width="150" height="15" fill="#5A5A5A" rx="2"/>
+                        <text x="80" y="15" font-family="Arial, sans-serif" font-size="8" fill="#CCC" text-anchor="middle">ADLAR CASTRA</text>
+                        <rect x="10" y="25" width="140" height="70" fill="#2A2A2A" stroke="#1A1A1A" stroke-width="1" rx="2"/>
+                        <g stroke="#444" stroke-width="1">
+                            <line x1="15" y1="30" x2="145" y2="30"/>
+                            <line x1="15" y1="35" x2="145" y2="35"/>
+                            <line x1="15" y1="40" x2="145" y2="40"/>
+                            <line x1="15" y1="45" x2="145" y2="45"/>
+                            <line x1="15" y1="50" x2="145" y2="50"/>
+                            <line x1="15" y1="55" x2="145" y2="55"/>
+                            <line x1="15" y1="60" x2="145" y2="60"/>
+                            <line x1="15" y1="65" x2="145" y2="65"/>
+                            <line x1="15" y1="70" x2="145" y2="70"/>
+                            <line x1="15" y1="75" x2="145" y2="75"/>
+                            <line x1="15" y1="80" x2="145" y2="80"/>
+                            <line x1="15" y1="85" x2="145" y2="85"/>
+                            <line x1="15" y1="90" x2="145" y2="90"/>
+                        </g>
+                        <circle cx="80" cy="60" r="25" fill="#1A1A1A" stroke="#333" stroke-width="1"/>
+                        <circle cx="80" cy="60" r="20" fill="#2A2A2A"/>
+                        <g stroke="#444" stroke-width="2" fill="none">
+                            <path d="M80 40 L80 80 M60 60 L100 60"/>
+                            <path d="M65 45 L95 75 M95 45 L65 75"/>
+                        </g>
+                        <rect x="130" y="40" width="25" height="40" fill="#3A3A3A" stroke="#2A2A2A" stroke-width="1" rx="2"/>
+                        <circle cx="142" cy="50" r="3" fill="#00FF00" opacity="0.8"/>
+                        <rect x="5" y="95" width="20" height="3" fill="#FFD700"/>
+                    </g>
+                    
+                    <ellipse cx="730" cy="480" rx="40" ry="15" fill="#228B22" opacity="0.8"/>
+                    <ellipse cx="700" cy="485" rx="25" ry="10" fill="#32CD32" opacity="0.6"/>
+                    <ellipse cx="760" cy="485" rx="30" ry="12" fill="#32CD32" opacity="0.6"/>
+                    
+                    <circle cx="100" cy="350" r="50" fill="#228B22" opacity="0.8"/>
+                    <rect x="95" y="380" width="10" height="40" fill="#8B4513"/>
+                    <circle cx="850" cy="330" r="60" fill="#228B22" opacity="0.8"/>
+                    <rect x="845" y="370" width="10" height="50" fill="#8B4513"/>
+                    
+                    <g opacity="0.7">
+                        <circle cx="300" cy="150" r="30" fill="white"/>
+                        <circle cx="330" cy="150" r="35" fill="white"/>
+                        <circle cx="360" cy="150" r="25" fill="white"/>
+                        <circle cx="700" cy="120" r="25" fill="white"/>
+                        <circle cx="725" cy="120" r="30" fill="white"/>
+                        <circle cx="745" cy="120" r="20" fill="white"/>
+                    </g>
+                    
+                    <g opacity="0.4">
+                        <path d="M600 400 Q580 380 560 400 Q540 420 520 400" stroke="#87CEEB" stroke-width="3" fill="none"/>
+                        <path d="M600 410 Q580 390 560 410 Q540 430 520 410" stroke="#87CEEB" stroke-width="3" fill="none"/>
+                    </g>
+                    
+                    <rect x="600" y="440" width="50" height="8" fill="#666" opacity="0.6" rx="4"/>
+                    <rect x="600" y="435" width="50" height="8" fill="#666" opacity="0.6" rx="4"/>
+                </svg>
+            </div>
+            <button class="download-btn" onclick="downloadSVG('large', 500, 350)">Download Large</button>
+        </div>
+        
+        <!-- Small Version -->
+        <div class="size-section">
+            <div class="size-label">Small (250x175px)</div>
+            <div class="image-container">
+                <svg width="250" height="175" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Same content as above, scaled down further -->
+                    <rect width="1000" height="400" fill="url(#skyGradient)"/>
+                    <rect y="400" width="1000" height="300" fill="url(#groundGradient)"/>
+                    <rect x="200" y="200" width="400" height="300" fill="url(#houseGradient)" stroke="#CCC" stroke-width="2"/>
+                    <polygon points="180,200 400,100 620,200" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <rect x="250" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <rect x="470" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <line x1="290" y1="250" x2="290" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="250" y1="280" x2="330" y2="280" stroke="#666" stroke-width="1"/>
+                    <line x1="510" y1="250" x2="510" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="470" y1="280" x2="550" y2="280" stroke="#666" stroke-width="1"/>
+                    <rect x="360" y="400" width="80" height="100" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <circle cx="420" cy="450" r="3" fill="#FFD700"/>
+                    
+                    <g transform="translate(650,350)">
+                        <rect x="-10" y="100" width="180" height="20" fill="#555" rx="2"/>
+                        <rect x="0" y="0" width="160" height="100" fill="#4A4A4A" stroke="#3A3A3A" stroke-width="2" rx="3"/>
+                        <rect x="5" y="5" width="150" height="15" fill="#5A5A5A" rx="2"/>
+                        <text x="80" y="15" font-family="Arial, sans-serif" font-size="8" fill="#CCC" text-anchor="middle">ADLAR CASTRA</text>
+                        <rect x="10" y="25" width="140" height="70" fill="#2A2A2A" stroke="#1A1A1A" stroke-width="1" rx="2"/>
+                        <g stroke="#444" stroke-width="1">
+                            <line x1="15" y1="30" x2="145" y2="30"/>
+                            <line x1="15" y1="40" x2="145" y2="40"/>
+                            <line x1="15" y1="50" x2="145" y2="50"/>
+                            <line x1="15" y1="60" x2="145" y2="60"/>
+                            <line x1="15" y1="70" x2="145" y2="70"/>
+                            <line x1="15" y1="80" x2="145" y2="80"/>
+                            <line x1="15" y1="90" x2="145" y2="90"/>
+                        </g>
+                        <circle cx="80" cy="60" r="25" fill="#1A1A1A" stroke="#333" stroke-width="1"/>
+                        <circle cx="80" cy="60" r="20" fill="#2A2A2A"/>
+                        <g stroke="#444" stroke-width="2" fill="none">
+                            <path d="M80 40 L80 80 M60 60 L100 60"/>
+                            <path d="M65 45 L95 75 M95 45 L65 75"/>
+                        </g>
+                        <rect x="130" y="40" width="25" height="40" fill="#3A3A3A" stroke="#2A2A2A" stroke-width="1" rx="2"/>
+                        <circle cx="142" cy="50" r="3" fill="#00FF00" opacity="0.8"/>
+                        <rect x="5" y="95" width="20" height="3" fill="#FFD700"/>
+                    </g>
+                    
+                    <ellipse cx="730" cy="480" rx="40" ry="15" fill="#228B22" opacity="0.8"/>
+                    <circle cx="100" cy="350" r="50" fill="#228B22" opacity="0.8"/>
+                    <rect x="95" y="380" width="10" height="40" fill="#8B4513"/>
+                    <circle cx="850" cy="330" r="60" fill="#228B22" opacity="0.8"/>
+                    <rect x="845" y="370" width="10" height="50" fill="#8B4513"/>
+                    
+                    <g opacity="0.7">
+                        <circle cx="300" cy="150" r="30" fill="white"/>
+                        <circle cx="330" cy="150" r="35" fill="white"/>
+                        <circle cx="700" cy="120" r="25" fill="white"/>
+                        <circle cx="725" cy="120" r="30" fill="white"/>
+                    </g>
+                </svg>
+            </div>
+            <button class="download-btn" onclick="downloadSVG('small', 250, 175)">Download Small</button>
+        </div>
+    </div>
+
+    <script>
+        function downloadSVG(size, width, height) {
+            // Create a new SVG with proper dimensions
+            const svgContent = `
+                <svg width="${width}" height="${height}" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#98D4EA;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#90EE90;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#228B22;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="houseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#F5F5DC;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#DDD;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="1000" height="400" fill="url(#skyGradient)"/>
+                    <rect y="400" width="1000" height="300" fill="url(#groundGradient)"/>
+                    <rect x="200" y="200" width="400" height="300" fill="url(#houseGradient)" stroke="#CCC" stroke-width="2"/>
+                    <polygon points="180,200 400,100 620,200" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <rect x="250" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <rect x="470" y="250" width="80" height="60" fill="#87CEEB" stroke="#666" stroke-width="2"/>
+                    <line x1="290" y1="250" x2="290" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="250" y1="280" x2="330" y2="280" stroke="#666" stroke-width="1"/>
+                    <line x1="510" y1="250" x2="510" y2="310" stroke="#666" stroke-width="1"/>
+                    <line x1="470" y1="280" x2="550" y2="280" stroke="#666" stroke-width="1"/>
+                    <rect x="360" y="400" width="80" height="100" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                    <circle cx="420" cy="450" r="3" fill="#FFD700"/>
+                    <g transform="translate(650,350)">
+                        <rect x="-10" y="100" width="180" height="20" fill="#555" rx="2"/>
+                        <rect x="0" y="0" width="160" height="100" fill="#4A4A4A" stroke="#3A3A3A" stroke-width="2" rx="3"/>
+                        <rect x="5" y="5" width="150" height="15" fill="#5A5A5A" rx="2"/>
+                        <text x="80" y="15" font-family="Arial, sans-serif" font-size="8" fill="#CCC" text-anchor="middle">ADLAR CASTRA</text>
+                        <rect x="10" y="25" width="140" height="70" fill="#2A2A2A" stroke="#1A1A1A" stroke-width="1" rx="2"/>
+                        <g stroke="#444" stroke-width="1">
+                            <line x1="15" y1="30" x2="145" y2="30"/>
+                            <line x1="15" y1="35" x2="145" y2="35"/>
+                            <line x1="15" y1="40" x2="145" y2="40"/>
+                            <line x1="15" y1="45" x2="145" y2="45"/>
+                            <line x1="15" y1="50" x2="145" y2="50"/>
+                            <line x1="15" y1="55" x2="145" y2="55"/>
+                            <line x1="15" y1="60" x2="145" y2="60"/>
+                            <line x1="15" y1="65" x2="145" y2="65"/>
+                            <line x1="15" y1="70" x2="145" y2="70"/>
+                            <line x1="15" y1="75" x2="145" y2="75"/>
+                            <line x1="15" y1="80" x2="145" y2="80"/>
+                            <line x1="15" y1="85" x2="145" y2="85"/>
+                            <line x1="15" y1="90" x2="145" y2="90"/>
+                        </g>
+                        <circle cx="80" cy="60" r="25" fill="#1A1A1A" stroke="#333" stroke-width="1"/>
+                        <circle cx="80" cy="60" r="20" fill="#2A2A2A"/>
+                        <g stroke="#444" stroke-width="2" fill="none">
+                            <path d="M80 40 L80 80 M60 60 L100 60"/>
+                            <path d="M65 45 L95 75 M95 45 L65 75"/>
+                        </g>
+                        <rect x="130" y="40" width="25" height="40" fill="#3A3A3A" stroke="#2A2A2A" stroke-width="1" rx="2"/>
+                        <circle cx="142" cy="50" r="3" fill="#00FF00" opacity="0.8"/>
+                

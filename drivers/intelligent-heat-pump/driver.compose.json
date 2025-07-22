@@ -473,9 +473,9 @@
   "platforms": ["local"],
   "connectivity": ["lan"],
   "images": {
-    "small": "{{driverAssetsPath}}/images/small.png",
-    "large": "{{driverAssetsPath}}/images/large.png",
-    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+    "small": "{{driverAssetsPath}}/images/Aurora2-drv-small.png",
+    "large": "{{driverAssetsPath}}/images/Aurora2-drv-large.png",
+    "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
   },
   "energy": {
     "approximation": {

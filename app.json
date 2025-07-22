@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.0.1",
+  "version": "0.10.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -20,9 +20,9 @@
   ],
   "permissions": [],
   "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png",
-    "xlarge": "/assets/images/xlarge.png"
+    "small": "/assets/images/app-small.png",
+    "large": "/assets/images/app-large.png",
+    "xlarge": "/assets/images/app-xlarge.png"
   },
   "bugs": {
     "url": "https://github.com/hhi/org.hhi.adlar-heatpump/issues"
@@ -42,6 +42,7 @@
   },
   "brandColor": "#f5a623",
   "author": "Herman Hilberink <herman.Hilberink@gmail.com>",
+  "icon": "/assets/icon.svg",
   "drivers": [
     {
       "name": {
@@ -499,9 +500,9 @@
         "lan"
       ],
       "images": {
-        "small": "/drivers/intelligent-heat-pump/assets/images/small.png",
-        "large": "/drivers/intelligent-heat-pump/assets/images/large.png",
-        "xlarge": "/drivers/intelligent-heat-pump/assets/images/xlarge.png"
+        "small": "/drivers/intelligent-heat-pump/assets/images/Aurora2-drv-small.png",
+        "large": "/drivers/intelligent-heat-pump/assets/images/Aurora2-drv-large.png",
+        "xlarge": "/drivers/intelligent-heat-pump/assets/images/Aurora2-drv-xlarge.png"
       },
       "energy": {
         "approximation": {
