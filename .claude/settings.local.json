@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:apps-sdk-v3.developer.homey.app)",
+      "WebFetch(domain:apps-sdk-v3.developer.homey.app)",
+      "WebFetch(domain:apps-sdk-v3.developer.homey.app)",
+      "WebFetch(domain:codetheweb.github.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": []
   }

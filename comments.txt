@@ -1,3 +1,34 @@
+
+
+
+  Priority 1: Essential Safety & Control ( Critical Triggers/ Essential Actions/Key Conditions)
+  Priority 2: Temperature Safety (Safety Triggers/)
+  Priority 3: Energy Management (Monitoring Triggers)
+  Priority 4: Advanced Automation (Performance Triggers)
+
+Essential (Tier 1):
+  - Temperature triggers - inlet/outlet/ambient temperature changes for efficiency optimization
+  - Fault monitoring - adlar_fault changes for immediate alerts
+  - Compressor state - ON/OFF transitions for system monitoring
+  - Power consumption - real-time usage tracking
+
+  High Value (Tier 2):
+  - Defrost cycle - automatic defrost state monitoring for winter optimization
+  - Mode changes - ECO/Normal/Boost automation based on conditions
+  - Hot water control - adlar_hotwater temperature adjustments
+  - System states - backwater pump, working modes
+
+  Advanced (Tier 3):
+  - Electrical monitoring - 3-phase current/voltage for system health
+  - Refrigerant pressures - EEV/EVI valve positions for diagnostics
+  - Flow rate - water flow monitoring for performance
+
+  Most valuable combinations: fault alerts, temperature-based mode switching, energy management during peak hours,
+  and defrost cycle optimization.
+
+
+
+
 Based on my comprehensive analysis of all 41 capabilities, here are my top recommendations for flow cards:
 
   Priority 1: Essential Safety & Control
@@ -121,5 +152,770 @@ Based on my comprehensive analysis of all 41 capabilities, here are my top recom
         .catch(this.error);
     }
   }
+
+  Based on the heat pump's 90+ capabilities, here are the most valuable flow cards:
+
+  Essential (Tier 1):
+  - Temperature triggers - inlet/outlet/ambient temperature changes for efficiency optimization
+  - Fault monitoring - adlar_fault changes for immediate alerts
+  - Compressor state - ON/OFF transitions for system monitoring
+  - Power consumption - real-time usage tracking
+
+  High Value (Tier 2):
+  - Defrost cycle - automatic defrost state monitoring for winter optimization
+  - Mode changes - ECO/Normal/Boost automation based on conditions
+  - Hot water control - adlar_hotwater temperature adjustments
+  - System states - backwater pump, working modes
+
+  Advanced (Tier 3):
+  - Electrical monitoring - 3-phase current/voltage for system health
+  - Refrigerant pressures - EEV/EVI valve positions for diagnostics
+  - Flow rate - water flow monitoring for performance
+
+  Most valuable combinations: fault alerts, temperature-based mode switching, energy management during peak hours,
+  and defrost cycle optimization.
+
+
+
+
+  please give me an overview of all the capabilities used and if the capability is a system 
+  (sub)capability or a custom capability
+
+  Standard Homey System Capabilities (4)
+
+  - onoff (DPS 1) - Main device power switch
+  - target_temperature (DPS 4) - Target temperature setting (5-75°C)
+  - measure_power (DPS 104) - Current power consumption
+  - measure_water (DPS 39) - Water flow measurement
+
+  Standard Homey Subcapabilities with Dot Notation (20)
+
+  Temperature Measurements (12):
+  - measure_temperature.around_temp (DPS 26) - Ambient temperature
+  - measure_temperature.temp_top (DPS 21) - Inlet water temperature
+  - measure_temperature.temp_bottom (DPS 22) - Outlet water temperature
+  - measure_temperature.coiler_temp (DPS 23) - Evaporation condenser temperature
+  - measure_temperature.venting_temp (DPS 24) - Discharge gas temperature
+  - measure_temperature.temp_current_f (DPS 35) - High pressure saturation temp
+  - measure_temperature.top_temp_f (DPS 36) - Low pressure saturation temp
+  - measure_temperature.bottom_temp_f (DPS 37) - Condenser temperature
+  - measure_temperature.around_temp_f (DPS 38) - Tank temperature
+  - measure_temperature.coiler_temp_f (DPS 41) - Suction gas temperature
+  - measure_temperature.evlin (DPS 107) - EVI heat exchanger inlet temp
+  - measure_temperature.eviout (DPS 108) - EVI heat exchanger outlet temp
+
+  Power/Energy (2):
+  - meter_power.power_consumption (DPS 18) - Daily electricity consumption
+  - meter_power.electric_total (DPS 105) - Total electricity consumption
+
+  Current (3):
+  - measure_current.cur_current (DPS 102) - Phase A current
+  - measure_current.b_cur (DPS 109) - Phase B current
+  - measure_current.c_cur (DPS 110) - Phase C current
+
+  Voltage (3):
+  - measure_voltage.voltage_current (DPS 103) - Phase A voltage
+  - measure_voltage.bv (DPS 111) - Phase B voltage
+  - measure_voltage.cv (DPS 112) - Phase C voltage
+
+  Custom Adlar-Specific Capabilities (14)
+
+  Control/Settings (8):
+  - adlar_hotwater (DPS 101) - Hot water set temperature (10-75°C)
+  - adlar_enum_mode (DPS 2) - Heating mode (cold, heating, floor heating, etc.)
+  - adlar_enum_work_mode (DPS 5) - Working mode (ECO, Normal, Boost)
+  - adlar_enum_water_mode (DPS 10) - Water temperature control
+  - adlar_enum_capacity_set (DPS 11) - Hot water curve setting (OFF, H1-H4)
+  - adlar_enum_countdown_set (DPS 13) - Heating curve setting (OFF, H1-H8, L1-L8)
+  - adlar_enum_volume_set (DPS 106) - Electricity consumption checking (0-2)
+  - adlar_countdowntimer (DPS 14) - Automatic shutoff timer
+
+  System States (3):
+  - adlar_state_compressor_state (DPS 27) - Compressor on/off status
+  - adlar_state_backwater (DPS 31) - Backwater pump status
+  - adlar_state_defrost_state (DPS 33) - Defrost cycle active status
+
+  Pressure/Valve (2):
+  - adlar_measure_pressure_temp_current (DPS 16) - EEV valve opening
+  - adlar_measure_pressure_effluent_temp (DPS 25) - EVI valve opening
+
+  Diagnostics (1):
+  - adlar_fault (DPS 15) - Fault code (0-30)
+
+  Plus 2 frequency measurements:
+  - measure_frequency.compressor_strength (DPS 20) - Compressor frequency
+  - measure_frequency.fan_motor_frequency (DPS 40) - Fan motor frequency
+
+  The architecture uses AdlarMapping class to centrally manage DPS-to-capability mappings, with
+  bidirectional communication between Homey and the Tuya heat pump device.
+
+
+
+
+  Based on my analysis of your Adlar heat pump app with 41 capabilities, here are my top flow card
+   recommendations organized by type and priority:
+
+  Priority 1: Critical System Control & Safety
+
+  Actions (User Control)
+
+  1. onoff - Heat pump on/off control
+  2. target_temperature - Temperature setpoint adjustment
+  3. adlar_hotwater - Hot water system toggle
+  4. adlar_enum_work_mode - Operating mode selection (heating/cooling)
+  5. adlar_enum_water_mode - Water temperature control mode
+
+  Triggers (Automated Responses)
+
+  1. adlar_fault - System fault detection (critical safety)
+  2. adlar_state_defrost_state - Defrost cycle monitoring
+  3. measure_temperature.around_temp - Ambient temperature changes
+  4. measure_power - Power consumption spikes
+  5. adlar_state_compressor_state - Compressor status changes
+
+  Conditions (Smart Logic)
+
+  1. measure_temperature.temp_top vs measure_temperature.temp_bottom - Temperature differential
+  monitoring
+  2. adlar_state_compressor_state - System operational status
+  3. measure_power - Energy efficiency thresholds
+
+  Priority 2: Energy Management & Optimization
+
+  Triggers
+
+  1. meter_power.power_consumption - Daily consumption tracking
+  2. measure_frequency.compressor_strength - Efficiency monitoring
+  3. measure_current.cur_current - Electrical load detection
+
+  Conditions
+
+  1. measure_power vs time-of-use pricing
+  2. measure_temperature.around_temp for weather compensation
+
+  Priority 3: Advanced Monitoring
+
+  Triggers
+
+  1. measure_temperature.venting_temp - Discharge temperature alerts
+  2. measure_water - Water flow issues
+  3. adlar_measure_pressure_temp_current - Pressure anomalies
+
+ Complete Implementation Process
+
+ # Create flow directories in .homeycompose/
+  mkdir -p .homeycompose/flow/actions
+  mkdir -p .homeycompose/flow/triggers
+  mkdir -p .homeycompose/flow/conditions
+
+  Step 2: Define Priority Flow Cards
+
+  Critical Actions (actions/set_target_temperature.json):
+  {
+    "id": "set_target_temperature",
+    "title": {
+      "en": "Set target temperature",
+      "nl": "Stel doeltemperatuur in"
+    },
+    "titleFormatted": {
+      "en": "Set target temperature to [[temperature]]°C",
+      "nl": "Stel doeltemperatuur in op [[temperature]]°C"
+    },
+    "args": [
+      {
+        "name": "temperature",
+        "type": "range",
+        "min": 5,
+        "max": 75,
+        "step": 1,
+        "label": "°C"
+      }
+    ]
+  }
+
+  Safety Triggers (triggers/fault_detected.json):
+  {
+    "id": "fault_detected",
+    "title": {
+      "en": "Fault detected",
+      "nl": "Fout gedetecteerd"
+    },
+    "tokens": [
+      {
+        "name": "fault_code",
+        "type": "string",
+        "title": {
+          "en": "Fault code",
+          "nl": "Foutcode"
+        }
+      }
+    ]
+  }
+
+  Step 3: Device Implementation
+
+  In device.ts add flow card registration in onInit():
+  // Register flow card listeners
+  this.registerCapabilityListener('target_temperature',
+  this.onCapabilityTargetTemperature.bind(this));
+
+  // Register flow cards
+  this.homey.flow.getActionCard('set_target_temperature')
+    .registerRunListener(async (args) => {
+      await this.setCapabilityValue('target_temperature', args.temperature);
+    });
+
+  this.homey.flow.getTriggerCard('fault_detected')
+    .registerRunListener((args, state) => {
+      return state.fault_code === args.fault_code;
+    });
+
+  Step 4: Trigger Implementation Pattern
+
+  private async onCapabilityChanged(capability: string, value: any) {
+    // Fault detection trigger
+    if (capability === 'adlar_fault' && value) {
+      this.homey.flow.getTriggerCard('fault_detected')
+        .trigger(this, { fault_code: value })
+        .catch(this.error);
+    }
+
+    // Temperature change triggers
+    if (capability.startsWith('measure_temperature.')) {
+      this.homey.flow.getTriggerCard('temperature_changed')
+        .trigger(this, { sensor: capability, temperature: value })
+        .catch(this.error);
+    }
+  }
+
+  Step 5: Build & Validate
+
+  npm run build
+  homey app validate -l debug
+
+  Implementation Priority Order:
+  1. Safety first: Fault detection, defrost monitoring
+  2. Basic control: Temperature, on/off, mode selection
+  3. Energy management: Power monitoring, consumption tracking
+  4. Advanced monitoring: All temperature sensors, pressure monitoring
+
+  This approach provides comprehensive automation while maintaining system safety and user
+  control.
+
+
+
+
+Comprehensive Flow Card Recommendations for 41 Capabilities
+
+  Priority 1: Essential Control & Safety (Must Have)
+
+  ACTIONS - User Control
+
+  | Capability           | Type     | Range/Values     | Justification
+       |
+  |----------------------|----------|------------------|------------------------------------------
+  -----|
+  | target_temperature   | range    | 5-75°C           | Core heating control - Primary user need
+       |
+  | adlar_hotwater       | range    | 10-75°C          | Hot water control - Essential comfort
+  feature |
+  | adlar_enum_mode      | dropdown | 7 heating modes  | Operation mode selection - Key system
+  control |
+  | adlar_enum_work_mode | dropdown | ECO/Normal/Boost | Efficiency control - Energy management
+       |
+
+  TRIGGERS - Critical Alerts
+
+  | Capability                   | Trigger Condition | Justification
+      |
+  |------------------------------|-------------------|--------------------------------------------
+  ----|
+  | adlar_fault                  | value > 0         | Safety critical - Immediate fault
+  notification |
+  | adlar_state_defrost_state    | state changes     | System maintenance - Performance monitoring
+      |
+  | adlar_state_compressor_state | state changes     | Core operation - System health tracking
+      |
+  | measure_power                | > threshold       | Energy spike detection - Efficiency
+  monitoring |
+
+  CONDITIONS - Smart Logic
+
+  | Capability                      | Condition Type          | Use Case
+         |
+  |---------------------------------|-------------------------|-----------------------------------
+  -------|
+  | adlar_fault                     | fault_active            | Safety automation - Disable when
+  faulted |
+  | measure_temperature.around_temp | temperature_above/below | Weather compensation - Smart
+  heating     |
+  | adlar_state_compressor_state    | is_running              | Load management - Peak shaving
+         |
+
+  Priority 2: Energy Management (High Value)
+
+  ACTIONS
+
+  | Capability              | Purpose                                    |
+  |-------------------------|--------------------------------------------|
+  | adlar_enum_capacity_set | Capacity control - Power output adjustment |
+  | adlar_enum_volume_set   | Flow control - System efficiency           |
+
+  TRIGGERS
+
+  | Capability                            | Monitoring Focus           |
+  |---------------------------------------|----------------------------|
+  | meter_power.power_consumption         | Daily consumption tracking |
+  | measure_frequency.compressor_strength | Efficiency monitoring      |
+  | measure_current.cur_current           | Electrical load detection  |
+
+  Priority 3: Advanced Temperature Monitoring (Medium Value)
+
+  TRIGGERS
+
+  | Capability                       | Temperature Focus            |
+  |----------------------------------|------------------------------|
+  | measure_temperature.temp_top     | Water inlet monitoring       |
+  | measure_temperature.temp_bottom  | Water outlet monitoring      |
+  | measure_temperature.venting_temp | Discharge temperature alerts |
+  | measure_temperature.around_temp  | Ambient temperature changes  |
+
+  CONDITIONS
+
+  | Capability               | Logic Purpose           |
+  |--------------------------|-------------------------|
+  | Temperature differential | System efficiency logic |
+  | measure_water            | Flow rate conditions    |
+
+  Complete Implementation Process
+
+⏺ Update Todos
+  ⎿  ☒ Analyze all 41 capabilities for flow card potential  
+     ☒ Categorize capabilities by flow card type suitability
+     ☒ Create priority-based recommendations
+     ☐ Design complete implementation roadmap
+
+⏺ Phase 1: Core Infrastructure (Week 1)
+
+  Step 1: Create Flow Directory Structure
+  mkdir -p .homeycompose/flow/{actions,triggers,conditions}
+
+  Step 2: Implement Essential Actions
+  Create these files in order of importance:
+
+  1. .homeycompose/flow/actions/target_temperature.json
+  2. .homeycompose/flow/actions/adlar_hotwater.json
+  3. .homeycompose/flow/actions/adlar_enum_mode.json
+  4. .homeycompose/flow/actions/adlar_enum_work_mode.json
+
+  Step 3: Critical Safety Triggers
+  1. .homeycompose/flow/triggers/adlar_fault.json
+  2. .homeycompose/flow/triggers/adlar_state_defrost_state.json
+  3. .homeycompose/flow/triggers/adlar_state_compressor_state.json
+
+  Phase 2: Energy Management (Week 2)
+
+  Step 4: Energy Monitoring Triggers
+  # Power consumption monitoring
+  .homeycompose/flow/triggers/measure_power_high.json
+  .homeycompose/flow/triggers/meter_power_daily_limit.json
+
+  # Electrical monitoring  
+  .homeycompose/flow/triggers/measure_current_spike.json
+
+  Step 5: Energy Control Actions
+  # Capacity and flow control
+  .homeycompose/flow/actions/adlar_enum_capacity_set.json
+  .homeycompose/flow/actions/adlar_enum_volume_set.json
+
+  Phase 3: Advanced Temperature Control (Week 3)
+
+  Step 6: Temperature Monitoring
+  # Key temperature triggers
+  .homeycompose/flow/triggers/measure_temperature_changed.json
+  .homeycompose/flow/triggers/measure_temperature_extreme.json
+
+  # Temperature conditions
+  .homeycompose/flow/conditions/temperature_differential.json
+  .homeycompose/flow/conditions/ambient_temperature_range.json
+
+  Implementation Templates
+
+  Template 1: Essential Action (target_temperature.json):
+  {
+    "id": "target_temperature",
+    "title": {
+      "en": "Set target temperature",
+      "nl": "Stel doeltemperatuur in"
+    },
+    "titleFormatted": {
+      "en": "Set target temperature to [[temperature]]°C",
+      "nl": "Stel doeltemperatuur in op [[temperature]]°C"
+    },
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=intelligent-heat-pump"
+      },
+      {
+        "name": "temperature",
+        "type": "range",
+        "min": 5,
+        "max": 75,
+        "step": 1,
+        "label": "°C",
+        "title": {
+          "en": "Target temperature",
+          "nl": "Stel temperatuur"
+        }
+      }
+    ]
+  }
+
+  Template 2: Safety Trigger (adlar_fault.json):
+  {
+    "id": "adlar_fault",
+    "title": {
+      "en": "System fault detected",
+      "nl": "Systeemfout gedetecteerd"
+    },
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=intelligent-heat-pump"
+      }
+    ],
+    "tokens": [
+      {
+        "name": "fault_code",
+        "type": "number",
+        "title": {
+          "en": "Fault Code",
+          "nl": "Foutcode"
+        }
+      },
+      {
+        "name": "fault_description",
+        "type": "string",
+        "title": {
+          "en": "Fault Description",
+          "nl": "Fout Beschrijving"
+        }
+      }
+    ]
+  }
+
+  Template 3: Smart Condition (temperature_differential.json):
+  {
+    "id": "temperature_differential",
+    "title": {
+      "en": "Temperature difference is above",
+      "nl": "Temperatuurverschil is boven"
+    },
+    "titleFormatted": {
+      "en": "Temperature difference between inlet and outlet is above [[difference]]°C",
+      "nl": "Temperatuurverschil tussen in- en uitlaat is boven [[difference]]°C"
+    },
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=intelligent-heat-pump"
+      },
+      {
+        "name": "difference",
+        "type": "range",
+        "min": 1,
+        "max": 50,
+        "step": 1,
+        "label": "°C"
+      }
+    ]
+  }
+
+  App Registration Pattern (app.ts):
+
+  async registerFlowCards() {
+    // Priority 1: Essential Actions
+    this.registerAction('target_temperature', async (args) => {
+      await args.device.setCapabilityValue('target_temperature', args.temperature);
+    });
+
+    this.registerAction('adlar_hotwater', async (args) => {
+      await args.device.setCapabilityValue('adlar_hotwater', args.temperature);
+    });
+
+    // Priority 1: Critical Conditions  
+    this.registerCondition('adlar_fault_active', async (args) => {
+      return args.device.getCapabilityValue('adlar_fault') > 0;
+    });
+
+    this.registerCondition('temperature_differential', async (args) => {
+      const inlet = args.device.getCapabilityValue('measure_temperature.temp_top');
+      const outlet = args.device.getCapabilityValue('measure_temperature.temp_bottom');
+      return Math.abs(inlet - outlet) > args.difference;
+    });
+  }
+
+  Device Trigger Pattern (device.ts):
+
+  private async triggerFlowCards(capability: string, value: any) {
+    // Critical safety triggers
+    if (capability === 'adlar_fault' && value > 0) {
+      this.homey.flow.getTriggerCard('adlar_fault')
+        .trigger(this, {
+          fault_code: value,
+          fault_description: this.getFaultDescription(value)
+        });
+    }
+
+    // State change triggers
+    if (capability === 'adlar_state_compressor_state') {
+      this.homey.flow.getTriggerCard('adlar_state_compressor_state')
+        .trigger(this, {
+          compressor_state: value,
+          state_description: value ? 'ON' : 'OFF'
+        });
+    }
+
+    // Energy monitoring triggers
+    if (capability === 'measure_power' && value > this.powerThreshold) {
+      this.homey.flow.getTriggerCard('measure_power_high')
+        .trigger(this, { power: value });
+    }
+  }
+
+  Testing & Validation Process
+
+  # After each phase
+  npm run build
+  homey app validate -l debug
+
+  # Test flow card registration
+  homey app run --clean
+
+  Implementation Priority: Focus on safety and essential control first, then energy management,
+  finally advanced monitoring. This approach ensures maximum user value with each release.
+
+⏺ Update Todos
+  ⎿  ☒ Analyze all 41 capabilities for flow card potential  
+     ☒ Categorize capabilities by flow card type suitability
+     ☒ Create priority-based recommendations
+     ☒ Design complete implementation roadmap
+
+⏺ This comprehensive analysis prioritizes the most valuable flow cards based on:
+
+  1. User Control Needs - Essential heating/cooling operations
+  2. Safety Requirements - Fault detection and system protection
+  3. Energy Efficiency - Consumption monitoring and optimization
+  4. System Intelligence - Smart automation conditions
+
+  The 3-phase implementation ensures you deliver maximum value incrementally while maintaining
+  system reliability.
+
+
+  - - - - - - - - - - - - 
+
+  Complete List of All 41 Capabilities
+
+  From driver.compose.json:8-58:
+
+  Control Capabilities (6)
+
+  1. target_temperature ✅ (covered)
+  2. onoff ❌ MISSING
+  3. adlar_hotwater ✅ (covered)
+  4. adlar_enum_water_mode ❌ MISSING
+  5. adlar_enum_mode ✅ (covered)
+  6. adlar_enum_work_mode ✅ (covered)
+
+  Configuration Capabilities (3)
+
+  7. adlar_enum_capacity_set ✅ (covered)
+  8. adlar_enum_volume_set ✅ (covered)
+  9. adlar_enum_countdown_set ❌ MISSING
+
+  Frequency Measurements (2)
+
+  10. measure_frequency.compressor_strength ✅ (covered)
+  11. measure_frequency.fan_motor_frequency ❌ MISSING
+
+  Water & Temperature Measurements (12)
+
+  12. measure_water ✅ (covered)
+  13. measure_temperature.around_temp ✅ (covered)
+  14. measure_temperature.temp_top ✅ (covered)
+  15. measure_temperature.temp_bottom ✅ (covered)
+  16. measure_temperature.coiler_temp ❌ MISSING
+  17. measure_temperature.venting_temp ✅ (covered)
+  18. measure_temperature.temp_current_f ❌ MISSING
+  19. measure_temperature.top_temp_f ❌ MISSING
+  20. measure_temperature.bottom_temp_f ❌ MISSING
+  21. measure_temperature.around_temp_f ❌ MISSING
+  22. measure_temperature.coiler_temp_f ❌ MISSING
+  23. measure_temperature.evlin ❌ MISSING
+  24. measure_temperature.eviout ❌ MISSING
+
+  Pressure Measurements (2)
+
+  25. adlar_measure_pressure_temp_current ❌ MISSING
+  26. adlar_measure_pressure_effluent_temp ❌ MISSING
+
+  Power & Electrical Measurements (7)
+
+  27. measure_power ✅ (covered)
+  28. meter_power.power_consumption ✅ (covered)
+  29. meter_power.electric_total ❌ MISSING
+  30. measure_current.cur_current ✅ (covered)
+  31. measure_current.b_cur ❌ MISSING
+  32. measure_current.c_cur ❌ MISSING
+  33. measure_voltage.voltage_current ❌ MISSING
+  34. measure_voltage.bv ❌ MISSING
+  35. measure_voltage.cv ❌ MISSING
+
+  System Status & Diagnostics (6)
+
+  36. adlar_fault ✅ (covered)
+  37. adlar_state_compressor_state ✅ (covered)
+  38. adlar_state_defrost_state ✅ (covered)
+  39. adlar_countdowntimer ❌ MISSING
+  40. adlar_state_backwater ❌ MISSING
+
+
+  COMPLETE Flow Card Recommendations for ALL Capabilities
+
+  MISSING HIGH-VALUE CAPABILITIES
+
+  Essential Control (MISSING)
+
+  | Capability               | Flow Type                    | Priority | Implementation                 |
+  |--------------------------|------------------------------|----------|--------------------------------|
+  | onoff                    | Action + Trigger + Condition | CRITICAL | Main power control             |
+  | adlar_enum_water_mode    | Action                       | HIGH     | Water temperature control mode |
+  | adlar_enum_countdown_set | Action                       | MEDIUM   | Heating curve settings         |
+
+  System Monitoring (MISSING)
+
+  | Capability                            | Flow Type           | Priority | Justification
+   |
+  |---------------------------------------|---------------------|----------|-------------------------------
+  -|
+  | adlar_countdowntimer                  | Trigger + Condition | HIGH     | Timer-based automation
+   |
+  | adlar_state_backwater                 | Trigger + Condition | HIGH     | Return water status monitoring
+   |
+  | measure_frequency.fan_motor_frequency | Trigger + Condition | MEDIUM   | Fan performance monitoring
+   |
+
+  Temperature Sensors (MISSING - 7 sensors)
+
+  | Capability                         | Flow Type           | Priority | Description            |
+  |------------------------------------|---------------------|----------|------------------------|
+  | measure_temperature.coiler_temp    | Trigger + Condition | HIGH     | Evaporator temperature |
+  | measure_temperature.temp_current_f | Trigger + Condition | HIGH     | High pressure temp     |
+  | measure_temperature.top_temp_f     | Trigger + Condition | HIGH     | Low pressure temp      |
+  | measure_temperature.bottom_temp_f  | Trigger + Condition | MEDIUM   | Condenser temp         |
+  | measure_temperature.around_temp_f  | Trigger + Condition | MEDIUM   | Tank temperature       |
+  | measure_temperature.coiler_temp_f  | Trigger + Condition | MEDIUM   | Suction temperature    |
+  | measure_temperature.evlin          | Trigger + Condition | LOW      | EVI inlet temp         |
+  | measure_temperature.eviout         | Trigger + Condition | LOW      | EVI outlet temp        |
+
+  Pressure Monitoring (MISSING)
+
+  | Capability                           | Flow Type           | Priority | Critical Use            |
+  |--------------------------------------|---------------------|----------|-------------------------|
+  | adlar_measure_pressure_temp_current  | Trigger + Condition | HIGH     | EEV pressure monitoring |
+  | adlar_measure_pressure_effluent_temp | Trigger + Condition | HIGH     | EVI pressure monitoring |
+
+  Electrical Monitoring (MISSING - 6 capabilities)
+
+  | Capability                      | Flow Type           | Priority | Use Case                   |
+  |---------------------------------|---------------------|----------|----------------------------|
+  | meter_power.electric_total      | Trigger + Condition | HIGH     | Total consumption tracking |
+  | measure_current.b_cur           | Trigger + Condition | MEDIUM   | Phase B current monitoring |
+  | measure_current.c_cur           | Trigger + Condition | MEDIUM   | Phase C current monitoring |
+  | measure_voltage.voltage_current | Trigger + Condition | MEDIUM   | Phase A voltage monitoring |
+  | measure_voltage.bv              | Trigger + Condition | MEDIUM   | Phase B voltage monitoring |
+  | measure_voltage.cv              | Trigger + Condition | MEDIUM   | Phase C voltage monitoring |
+
+  REVISED PRIORITY IMPLEMENTATION PLAN
+
+  Phase 1: Critical Missing Controls
+
+  Essential Actions:
+  // onoff.json - MOST CRITICAL
+  {
+    "id": "onoff",
+    "title": {"en": "Turn heat pump on/off", "nl": "Warmtepomp aan/uit"},
+    "args": [
+      {"type": "device", "filter": "driver_id=intelligent-heat-pump"},
+      {"name": "power", "type": "dropdown", "values": [
+        {"id": true, "title": {"en": "On", "nl": "Aan"}},
+        {"id": false, "title": {"en": "Off", "nl": "Uit"}}
+      ]}
+    ]
+  }
+
+  // adlar_enum_water_mode.json  
+  {
+    "id": "adlar_enum_water_mode",
+    "title": {"en": "Set water control mode", "nl": "Stel waterregelingsmodus in"},
+    "args": [
+      {"type": "device", "filter": "driver_id=intelligent-heat-pump"},
+      {"name": "mode", "type": "range", "min": 0, "max": 1, "step": 1}
+    ]
+  }
+
+  Critical Triggers:
+  // onoff.json trigger
+  {
+    "id": "onoff_changed",
+    "title": {"en": "Heat pump turned on/off", "nl": "Warmtepomp aan/uit geschakeld"},
+    "tokens": [
+      {"name": "power_state", "type": "boolean", "title": {"en": "Power state", "nl": "Voedingsstatus"}}
+    ]
+  }
+
+  // adlar_countdowntimer.json
+  {
+    "id": "adlar_countdowntimer",
+    "title": {"en": "Timer finished", "nl": "Timer afgelopen"},
+    "tokens": [
+      {"name": "remaining_time", "type": "number", "title": {"en": "Remaining time", "nl": "Resterende 
+  tijd"}}
+    ]
+  }
+
+  Phase 2: System Health Monitoring
+
+  High-Value Temperature Triggers:
+  // Critical refrigeration temperatures
+  measure_temperature.coiler_temp      // Evaporator
+  measure_temperature.temp_current_f   // High pressure
+  measure_temperature.top_temp_f       // Low pressure
+  measure_temperature.bottom_temp_f    // Condenser
+
+  Pressure Monitoring:
+  adlar_measure_pressure_temp_current    // EEV pressure
+  adlar_measure_pressure_effluent_temp   // EVI pressure
+
+  Phase 3: Complete Electrical Monitoring
+
+  Three-Phase Power Monitoring:
+  // Total consumption (most important)
+  meter_power.electric_total
+
+  // Phase monitoring (for balance detection)
+  measure_current.b_cur, measure_current.c_cur
+  measure_voltage.bv, measure_voltage.cv
+
+  Missing Implementation Count:
+  - 22 missing capabilities with flow card potential
+  - 5 CRITICAL (onoff, water_mode, countdowntimer, backwater, total_electric)
+  - 8 HIGH (temperature sensors, pressure monitoring)
+  - 9 MEDIUM (electrical monitoring, advanced temps)
+
 
   
