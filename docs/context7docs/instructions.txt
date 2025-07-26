@@ -1,0 +1,57 @@
+
+Context7 install:
+claude mcp add --transport http context7 https://mcp.context7.com/mcp
+
+Claude Code prompt (use plan mode):
+Analyze my codebase for required or recommneded apis, also those mentioned in @CLAUDE.md. Make a plan to use Concept7 MCP for all the involved APIs. Plan to add .md files to the @docs/context7docs directory per API.
+
+Result:
+Concept7 MCP API Documentation Plan                                                                                                                                                                                       │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Overview                                                                                                                                                                                                                  │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Create comprehensive API documentation using Concept7 MCP for all APIs identified in the Adlar heat pump Homey app codebase.                                                                                              │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Documentation Structure                                                                                                                                                                                                   │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Create .md files in docs/context7docs/ directory for each API:                                                                                                                                                            │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ 1. Core Platform APIs                                                                                                                                                                                                     │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ - homey-apps-sdk-v3.md - Complete Homey SDK documentation with classes, methods, examples                                                                                                                                 │ │
+│ │ - nodejs-core-apis.md - Node.js runtime APIs used (filesystem, networking, events)                                                                                                                                        │ │
+│ │ - typescript-compiler.md - TypeScript development and compilation APIs                                                                                                                                                    │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ 2. IoT Communication APIs                                                                                                                                                                                                 │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ - tuyapi-local.md - TuyAPI library for local Tuya device communication                                                                                                                                                    │ │
+│ │ - device-communication-patterns.md - DPS mapping and bidirectional data flow patterns                                                                                                                                     │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ 3. Data Validation & Schema APIs                                                                                                                                                                                          │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ - ajv-json-validation.md - AJV schema validation for capabilities and device data                                                                                                                                         │ │
+│ │ - homey-capabilities-schema.md - Capability definition schemas and validation                                                                                                                                             │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ 4. Development Tooling APIs                                                                                                                                                                                               │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ - eslint-athom-config.md - ESLint configuration and linting APIs for Homey apps                                                                                                                                           │ │
+│ │ - homey-compose-system.md - Build system for generating app.json from compose files                                                                                                                                       │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ 5. Automation & Integration APIs                                                                                                                                                                                          │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ - homey-flow-cards.md - Flow card development (triggers, conditions, actions)                                                                                                                                             │ │
+│ │ - homey-pairing-system.md - Device pairing and discovery APIs                                                                                                                                                             │ │
+│ │ - homey-settings-management.md - Device settings and configuration APIs                                                                                                                                                   │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Implementation Steps                                                                                                                                                                                                      │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ 1. Use Concept7 MCP to gather comprehensive API documentation for each identified API                                                                                                                                     │ │
+│ │ 2. Create structured markdown files with examples, best practices, and integration patterns                                                                                                                               │ │
+│ │ 3. Include code examples from the existing codebase where relevant                                                                                                                                                        │ │
+│ │ 4. Add cross-references between related APIs                                                                                                                                                                              │ │
+│ │ 5. Document heat pump-specific implementation patterns and mappings                                                                                                                                                       │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Expected Outcome                                                                                                                                                                                                          │ │
+│ │                                                                                                                                                                                                                           │ │
+│ │ Complete API reference documentation enabling efficient development and maintenance of the Adlar heat pump integration.
+
