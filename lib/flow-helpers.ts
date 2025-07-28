@@ -159,50 +159,61 @@ export function registerSimpleConditions(app: App, patterns: FlowCardPattern[]) 
   for (const pattern of patterns) {
     const conditionCard: FlowCardCondition = app.homey.flow.getConditionCard(pattern.cardId);
 
-    conditionCard.registerRunListener(async (args: { device: { getCapabilityValue: (capability: string) => unknown; hasCapability: (capability: string) => boolean }; [key: string]: unknown }, state: unknown) => {
-      const { device } = args;
-      const { capabilityName, requiresCapability } = pattern;
+    conditionCard.registerRunListener(
+      async (
+        args: {
+          device: {
+            getCapabilityValue: (capability: string) => unknown;
+            hasCapability: (capability: string) => boolean;
+          };
+          [key: string]: unknown;
+        },
+        state: unknown,
+      ) => {
+        const { device } = args;
+        const { capabilityName, requiresCapability } = pattern;
 
-      // Check if device supports required capability
-      if (requiresCapability && !device.hasCapability(requiresCapability)) {
-        if (process.env.DEBUG === '1') {
-          app.log(`Condition ${pattern.cardId} requires ${requiresCapability} capability, but device doesn't support it`);
+        // Check if device supports required capability
+        if (requiresCapability && !device.hasCapability(requiresCapability)) {
+          if (process.env.DEBUG === '1') {
+            app.log(`Condition ${pattern.cardId} requires ${requiresCapability} capability, but device doesn't support it`);
+          }
+          return false;
         }
-        return false;
-      }
 
-      if (!capabilityName) {
-        if (process.env.DEBUG === '1') {
-          app.log(`No capability mapping for condition ${pattern.cardId}`);
+        if (!capabilityName) {
+          if (process.env.DEBUG === '1') {
+            app.log(`No capability mapping for condition ${pattern.cardId}`);
+          }
+          return false;
         }
-        return false;
-      }
 
-      try {
-        const currentValue = device.getCapabilityValue(capabilityName);
+        try {
+          const currentValue = device.getCapabilityValue(capabilityName);
 
-        // Pattern-based condition logic
-        switch (pattern.pattern) {
-          case 'simple_condition': {
+          // Pattern-based condition logic
+          switch (pattern.pattern) {
+            case 'simple_condition': {
             // Extract threshold from args
-            const argKeys = Object.keys(args).filter((key) => key !== 'device');
-            const thresholdKey = argKeys[0];
-            const threshold = args[thresholdKey];
-            return Number(currentValue) > Number(threshold);
-          }
-
-          default: {
-            if (process.env.DEBUG === '1') {
-              app.log(`Unknown condition pattern: ${pattern.pattern}`);
+              const argKeys = Object.keys(args).filter((key) => key !== 'device');
+              const thresholdKey = argKeys[0];
+              const threshold = args[thresholdKey];
+              return Number(currentValue) > Number(threshold);
             }
-            return false;
+
+            default: {
+              if (process.env.DEBUG === '1') {
+                app.log(`Unknown condition pattern: ${pattern.pattern}`);
+              }
+              return false;
+            }
           }
+        } catch (error) {
+          app.error(`Failed to evaluate condition ${pattern.cardId}:`, error);
+          return false;
         }
-      } catch (error) {
-        app.error(`Failed to evaluate condition ${pattern.cardId}:`, error);
-        return false;
-      }
-    });
+      },
+    );
   }
 }
 
