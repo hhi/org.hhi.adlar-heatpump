@@ -1,0 +1,82 @@
+{
+  "id": "low_pressure_temperature_alert",
+  "title": {
+    "en": "Low pressure temperature alert",
+    "nl": "Lagedruk verzadigingstemperatuur alarm"
+  },
+  "titleFormatted": {
+    "en": "Low pressure temperature [[condition]] [[temperature]]°C",
+    "nl": "Lagedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggers when low pressure saturation temperature goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Temperature (°C)",
+        "nl": "Temperatuur (°C)"
+      },
+      "min": -30,
+      "max": 50,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current Low pressure temperature",
+        "nl": "Huidige Lagedruk verzadigingstemperatuur"
+      },
+      "example": 15.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_temperature",
+      "title": {
+        "en": "Threshold temperature",
+        "nl": "Drempel temperatuur"
+      },
+      "example": 20
+    }
+  ]
+}

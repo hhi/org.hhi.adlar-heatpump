@@ -1,0 +1,38 @@
+{
+  "id": "set_volume",
+  "title": {
+    "en": "Set electricity consumption checking",
+    "nl": "Stroomverbruik controleren instellen"
+  },
+  "titleFormatted": {
+    "en": "Set electricity consumption checking to [[volume]]",
+    "nl": "Stroomverbruik controleren instellen op [[volume]]"
+  },
+  "hint": {
+    "en": "Set the electricity consumption checking level",
+    "nl": "Stel de stroomverbruik controle niveau in"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "volume",
+      "title": {
+        "en": "Electricity consumption checking",
+        "nl": "Stroomverbruik controleren"
+      },
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "units": "",
+      "placeholder": {
+        "en": "Level (0-2)",
+        "nl": "Niveau (0-2)"
+      }
+    }
+  ]
+}

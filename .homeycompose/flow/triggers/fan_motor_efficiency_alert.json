@@ -1,0 +1,82 @@
+{
+  "id": "fan_motor_efficiency_alert",
+  "title": {
+    "en": "Fan motor efficiency alert",
+    "nl": "Ventilator motor efficiëntie alarm"
+  },
+  "titleFormatted": {
+    "en": "Fan motor frequency [[condition]] [[frequency]] Hz",
+    "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz"
+  },
+  "hint": {
+    "en": "Triggers when fan motor frequency goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "frequency",
+      "title": {
+        "en": "Frequency (Hz)",
+        "nl": "Frequentie (Hz)"
+      },
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "units": "Hz",
+      "placeholder": {
+        "en": "Frequency threshold in Hz",
+        "nl": "Frequentie drempel in Hz"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_fan_frequency",
+      "title": {
+        "en": "Current fan frequency",
+        "nl": "Huidige ventilator frequentie"
+      },
+      "example": 75
+    },
+    {
+      "type": "number",
+      "name": "threshold_frequency",
+      "title": {
+        "en": "Threshold frequency",
+        "nl": "Drempel frequentie"
+      },
+      "example": 80
+    }
+  ]
+}

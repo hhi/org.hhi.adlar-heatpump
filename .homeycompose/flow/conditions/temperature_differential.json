@@ -1,0 +1,38 @@
+{
+  "id": "temperature_differential",
+  "title": {
+    "en": "Temperature differential check",
+    "nl": "Temperatuur verschil controle"
+  },
+  "titleFormatted": {
+    "en": "Temperature differential is !{{above|below}} [[differential]]°C",
+    "nl": "Temperatuur verschil is !{{boven|onder}} [[differential]]°C"
+  },
+  "hint": {
+    "en": "Check if the temperature difference between inlet and outlet is above or below a threshold",
+    "nl": "Controleer of het temperatuurverschil tussen inlaat en uitlaat boven of onder een drempel is"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "differential",
+      "title": {
+        "en": "Temperature differential (°C)",
+        "nl": "Temperatuur verschil (°C)"
+      },
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature differential threshold",
+        "nl": "Temperatuur verschil drempel"
+      }
+    }
+  ]
+}

@@ -14,6 +14,13 @@ class MyDevice extends Homey.Device {
 
   private capabilitiesArray: string[] = (manifest.capabilities || [])
 
+  // Debug-conditional logging method
+  private debugLog(...args: unknown[]) {
+    if (process.env.DEBUG === '1') {
+      this.log(...args);
+    }
+  }
+
 
   async connectTuya() {
     if (!this.tuyaConnected) {
@@ -24,7 +31,7 @@ class MyDevice extends Homey.Device {
           // Then connect to the device
           await this.tuya.connect();
           this.tuyaConnected = true;
-          this.log('Connected to Tuya device');
+          this.debugLog('Connected to Tuya device');
         } else {
           throw new Error('Tuya device is not initialized');
         }
@@ -56,11 +63,11 @@ class MyDevice extends Homey.Device {
     Object.entries(dpsFetched).forEach(([dpsId, value]) => {
       // Find the capability key for this dpsId
       const capability = allArraysSwapped[Number(dpsId)];
-      this.log('Found capability for dpsId', dpsId, ':', capability);
+      this.debugLog('Found capability for dpsId', dpsId, ':', capability);
       if (capability) {
         // Update the capability value in Homey
         this.setCapabilityValue(capability, (value as boolean | number | string))
-          .then(() => this.log(`Updated ${capability} to`, String(value)))
+          .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
           .catch((err) => this.error(`Failed to update ${capability}:`, err));
       }
     });
@@ -70,7 +77,6 @@ class MyDevice extends Homey.Device {
    * onInit is called when the device is initialized.
    */
   async onInit() {
-    this.log('MyDevice has been initialized');
     await this.setUnavailable(); // Set the device as unavailable initially
 
     const { manifest } = Homey;
@@ -78,28 +84,28 @@ class MyDevice extends Homey.Device {
     // this.log('MyDevice overview:', myDriver);
 
     const capList = myDriver.capabilities;
-    // this.log('Capabilities list:', capList);
+    this.debugLog('Capabilities list:', capList);
 
     const builtinCapOptList = myDriver.capabilitiesOptions || {};
-    this.log('Capabilities options list:', builtinCapOptList);
+    this.debugLog('Capabilities options list:', builtinCapOptList);
 
     // Extract keys where `setable` exists and is `true`
     const setableBuiltInCapsKeys = Object.keys(builtinCapOptList).filter(
       (key) => builtinCapOptList[key].setable === true,
     );
-    this.log('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys); // Output: []
+    this.debugLog('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys); // Output: []
 
     const setableCustomCapsKeys = Object.keys(manifest.capabilities).filter(
       (key) => manifest.capabilities[key].setable === true,
     );
-    this.log('Setable custom capabilities from app manifest:', setableCustomCapsKeys); // Output: []
+    this.debugLog('Setable custom capabilities from app manifest:', setableCustomCapsKeys); // Output: []
 
     this.settableCapabilities = [...setableBuiltInCapsKeys, ...setableCustomCapsKeys];
-    this.log('Setable capabilities:', this.settableCapabilities); // Output: []
+    this.debugLog('Setable capabilities:', this.settableCapabilities); // Output: []
 
     // Register a single duty listener for all capabilities (from capability name to dp i)
     this.settableCapabilities.forEach((capability: string) => {
-      this.log(`Registering capability listener for ${capability}`);
+      this.debugLog(`Registering capability listener for ${capability}`);
       this.registerCapabilityListener(capability, async (value, opts) => {
         this.log(`${capability} set to`, value);
 
@@ -180,6 +186,7 @@ class MyDevice extends Homey.Device {
         .then(() => this.log('Device set as unavailable'))
         .catch((err) => this.error('Error setting device as unavailable:', err));
     });
+    
   }
 
   /**

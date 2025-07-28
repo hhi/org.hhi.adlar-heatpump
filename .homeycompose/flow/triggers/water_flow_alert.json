@@ -1,0 +1,82 @@
+{
+  "id": "water_flow_alert",
+  "title": {
+    "en": "Water flow rate alert",
+    "nl": "Water doorstroom alarm"
+  },
+  "titleFormatted": {
+    "en": "Water flow rate [[condition]] [[flow_rate]] L/min",
+    "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min"
+  },
+  "hint": {
+    "en": "Triggers when water flow rate goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "flow_rate",
+      "title": {
+        "en": "Flow rate (L/min)",
+        "nl": "Doorstroom (L/min)"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "units": "L/min",
+      "placeholder": {
+        "en": "Flow rate threshold in L/min",
+        "nl": "Doorstroom drempel in L/min"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_flow_rate",
+      "title": {
+        "en": "Current flow rate",
+        "nl": "Huidige doorstroom"
+      },
+      "example": 25
+    },
+    {
+      "type": "number",
+      "name": "threshold_flow_rate",
+      "title": {
+        "en": "Threshold flow rate",
+        "nl": "Drempel doorstroom"
+      },
+      "example": 20
+    }
+  ]
+}

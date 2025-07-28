@@ -1,0 +1,82 @@
+{
+  "id": "set_heating_mode",
+  "title": {
+    "en": "Set heating mode",
+    "nl": "Verwarmingsmodus instellen"
+  },
+  "titleFormatted": {
+    "en": "Set heating mode to [[mode]]",
+    "nl": "Verwarmingsmodus instellen op [[mode]]"
+  },
+  "hint": {
+    "en": "Set the heating operation mode",
+    "nl": "Stel de verwarming bedrijfsmodus in"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "mode",
+      "title": {
+        "en": "Heating mode",
+        "nl": "Verwarmingsmodus"
+      },
+      "values": [
+        {
+          "id": "cold",
+          "title": {
+            "en": "Cold",
+            "nl": "Koud"
+          }
+        },
+        {
+          "id": "heating",
+          "title": {
+            "en": "Heating",
+            "nl": "Verwarmen"
+          }
+        },
+        {
+          "id": "floor_heating",
+          "title": {
+            "en": "Floor heating",
+            "nl": "Vloerverwarming"
+          }
+        },
+        {
+          "id": "hot_water",
+          "title": {
+            "en": "Hot water",
+            "nl": "Warm water"
+          }
+        },
+        {
+          "id": "cold_and_hotwater",
+          "title": {
+            "en": "Cold and hot water",
+            "nl": "Koud en warm water"
+          }
+        },
+        {
+          "id": "heating_and_hot_water",
+          "title": {
+            "en": "Heating and hot water",
+            "nl": "Verwarmen en warm water"
+          }
+        },
+        {
+          "id": "floor_heatign_and_hot_water",
+          "title": {
+            "en": "Floor heating and hot water",
+            "nl": "Vloerverwarming en warm water"
+          }
+        }
+      ]
+    }
+  ]
+}

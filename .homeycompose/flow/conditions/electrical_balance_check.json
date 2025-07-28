@@ -1,0 +1,38 @@
+{
+  "id": "electrical_balance_check",
+  "title": {
+    "en": "Electrical balance check",
+    "nl": "Elektrische balans controle"
+  },
+  "titleFormatted": {
+    "en": "3-phase electrical balance is !{{within|outside}} [[tolerance]]% tolerance",
+    "nl": "3-fase elektrische balans is !{{binnen|buiten}} [[tolerance]]% tolerantie"
+  },
+  "hint": {
+    "en": "Check if the 3-phase electrical currents are balanced within specified tolerance",
+    "nl": "Controleer of de 3-fase elektrische stromen gebalanceerd zijn binnen de tolerantie"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "tolerance",
+      "title": {
+        "en": "Balance tolerance (%)",
+        "nl": "Balans tolerantie (%)"
+      },
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "units": "%",
+      "placeholder": {
+        "en": "Electrical balance tolerance percentage",
+        "nl": "Elektrische balans tolerantie percentage"
+      }
+    }
+  ]
+}

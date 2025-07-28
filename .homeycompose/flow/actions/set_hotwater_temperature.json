@@ -1,0 +1,39 @@
+{
+  "id": "set_hotwater_temperature",
+  "title": {
+    "en": "Set hot water temperature",
+    "nl": "Warm water temperatuur instellen"
+  },
+  "titleFormatted": {
+    "en": "Set hot water temperature to [[temperature]]",
+    "nl": "Warm water temperatuur instellen op [[temperature]]"
+  },
+  "hint": {
+    "en": "Set the hot water temperature setting",
+    "nl": "Stel de warm water temperatuur instelling in"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Hot water temperature (°C)",
+        "nl": "Warm water temperatuur (°C)"
+      },
+      "min": 30,
+      "max": 75,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Hot water temperature in °C",
+        "nl": "Warm water temperatuur in °C"
+      }
+    }
+  ]
+}
