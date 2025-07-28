@@ -12,4 +12,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: athombv/github-action-homey-app-validate@master
         with:
-          level: verified
+          level: publish
