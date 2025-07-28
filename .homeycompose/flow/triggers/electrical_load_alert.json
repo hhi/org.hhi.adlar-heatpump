@@ -1,0 +1,82 @@
+{
+  "id": "electrical_load_alert",
+  "title": {
+    "en": "Electrical load alert",
+    "nl": "Elektrische belasting alarm"
+  },
+  "titleFormatted": {
+    "en": "Current load [[condition]] [[current]] amperes",
+    "nl": "Stroomsterkte [[condition]] [[current]] ampère"
+  },
+  "hint": {
+    "en": "Triggers when electrical current goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "current",
+      "title": {
+        "en": "Current (A)",
+        "nl": "Stroom (A)"
+      },
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "units": "A",
+      "placeholder": {
+        "en": "Current threshold in amperes",
+        "nl": "Stroom drempel in ampère"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_amperage",
+      "title": {
+        "en": "Current amperage",
+        "nl": "Huidige stroomsterkte"
+      },
+      "example": 12.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_amperage",
+      "title": {
+        "en": "Threshold amperage",
+        "nl": "Drempel stroomsterkte"
+      },
+      "example": 15
+    }
+  ]
+}

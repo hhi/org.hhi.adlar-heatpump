@@ -1,0 +1,82 @@
+{
+  "id": "ambient_temperature_changed",
+  "title": {
+    "en": "Ambient temperature changed",
+    "nl": "Buitentemperatuur gewijzigd"
+  },
+  "titleFormatted": {
+    "en": "Ambient temperature [[condition]] [[temperature]]°C",
+    "nl": "Buitentemperatuur [[condition]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggers when ambient temperature goes above or below specified levels - useful for weather compensation",
+    "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder bepaalde niveaus gaat - nuttig voor weercompensatie"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Temperature (°C)",
+        "nl": "Temperatuur (°C)"
+      },
+      "min": -30,
+      "max": 50,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current ambient temperature",
+        "nl": "Huidige buitentemperatuur"
+      },
+      "example": 15.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_temperature",
+      "title": {
+        "en": "Threshold temperature",
+        "nl": "Drempel temperatuur"
+      },
+      "example": 10
+    }
+  ]
+}

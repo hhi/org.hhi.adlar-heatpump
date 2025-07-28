@@ -1,0 +1,38 @@
+{
+  "id": "set_water_mode",
+  "title": {
+    "en": "Set water control mode",
+    "nl": "Water controle modus instellen"
+  },
+  "titleFormatted": {
+    "en": "Set water control mode to [[mode]]",
+    "nl": "Water controle modus instellen op [[mode]]"
+  },
+  "hint": {
+    "en": "Set the water control mode setting",
+    "nl": "Stel de water controle modus instelling in"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "mode",
+      "title": {
+        "en": "Water control mode",
+        "nl": "Water controle modus"
+      },
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "units": "",
+      "placeholder": {
+        "en": "Mode (0-1)",
+        "nl": "Modus (0-1)"
+      }
+    }
+  ]
+}
