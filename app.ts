@@ -30,7 +30,7 @@ interface ElectricalBalanceArgs extends DeviceFlowArgs {
 }
 
 interface FlowRateArgs extends DeviceFlowArgs {
-  flow_rate: number;
+  flowRate: number;
 }
 
 interface PressureDifferentialArgs extends DeviceFlowArgs {
@@ -177,7 +177,7 @@ class MyApp extends App {
       async (args: FlowRateArgs, state: FlowState) => {
         const { device } = args;
         const currentFlowRate = device.getCapabilityValue('measure_water') || 0;
-        return currentFlowRate > args.flow_rate;
+        return currentFlowRate > args.flowRate;
       },
     );
 
