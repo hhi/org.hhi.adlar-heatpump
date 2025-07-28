@@ -21,7 +21,6 @@ class MyDevice extends Homey.Device {
     }
   }
 
-
   async connectTuya() {
     if (!this.tuyaConnected) {
       try {
@@ -186,7 +185,7 @@ class MyDevice extends Homey.Device {
         .then(() => this.log('Device set as unavailable'))
         .catch((err) => this.error('Error setting device as unavailable:', err));
     });
-    
+
   }
 
   /**
