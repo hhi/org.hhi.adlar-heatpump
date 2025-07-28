@@ -1,0 +1,82 @@
+{
+  "id": "eev_pressure_alert",
+  "title": {
+    "en": "EEV Open pressure alert",
+    "nl": "EEV-openingsstop druk alarm"
+  },
+  "titleFormatted": {
+    "en": "EEV pressure [[condition]] [[pressure]]",
+    "nl": "EEV druk [[condition]] [[pressure]]"
+  },
+  "hint": {
+    "en": "Triggers when Electronic Expansion Valve (EEV) pressure goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) druk boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "pressure",
+      "title": {
+        "en": "Pressure",
+        "nl": "Druk"
+      },
+      "min": -500,
+      "max": 500,
+      "step": 10,
+      "units": "Pa",
+      "placeholder": {
+        "en": "Pressure threshold",
+        "nl": "Druk drempel"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_pressure",
+      "title": {
+        "en": "Current EEV Open pressure",
+        "nl": "Huidige EEV-openingsstop druk"
+      },
+      "example": 450
+    },
+    {
+      "type": "number",
+      "name": "threshold_pressure",
+      "title": {
+        "en": "Threshold pressure",
+        "nl": "Drempel druk"
+      },
+      "example": 400
+    }
+  ]
+}

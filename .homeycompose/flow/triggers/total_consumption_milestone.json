@@ -1,0 +1,58 @@
+{
+  "id": "total_consumption_milestone",
+  "title": {
+    "en": "Total consumption milestone reached",
+    "nl": "Totaalverbruik mijlpaal bereikt"
+  },
+  "titleFormatted": {
+    "en": "Total consumption reached [[milestone]] kWh",
+    "nl": "Totaalverbruik bereikte [[milestone]] kWh"
+  },
+  "hint": {
+    "en": "Triggers when total electricity consumption reaches specified milestones",
+    "nl": "Wordt geactiveerd wanneer het totale stroomverbruik bepaalde mijlpalen bereikt"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "milestone",
+      "title": {
+        "en": "Consumption milestone (kWh)",
+        "nl": "Verbruik mijlpaal (kWh)"
+      },
+      "min": 100,
+      "max": 50000,
+      "step": 100,
+      "units": "kWh",
+      "placeholder": {
+        "en": "Total consumption milestone in kWh",
+        "nl": "Totaalverbruik mijlpaal in kWh"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "total_consumption",
+      "title": {
+        "en": "Total consumption",
+        "nl": "Totaalverbruik"
+      },
+      "example": 15000
+    },
+    {
+      "type": "number",
+      "name": "milestone_value",
+      "title": {
+        "en": "Milestone value",
+        "nl": "Mijlpaal waarde"
+      },
+      "example": 15000
+    }
+  ]
+}

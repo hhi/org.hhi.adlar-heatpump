@@ -1,0 +1,38 @@
+{
+  "id": "power_above_threshold",
+  "title": {
+    "en": "Power consumption above",
+    "nl": "Stroomverbruik boven"
+  },
+  "titleFormatted": {
+    "en": "Power consumption is !{{above|below}} [[threshold]] watts",
+    "nl": "Stroomverbruik is !{{boven|onder}} [[threshold]] watt"
+  },
+  "hint": {
+    "en": "Check if current power consumption is above or below a threshold (requires power monitoring support)",
+    "nl": "Controleer of het huidige stroomverbruik boven of onder een drempel is (vereist vermogen monitoring ondersteuning)"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "Power threshold (W)",
+        "nl": "Vermogen drempel (W)"
+      },
+      "min": 100,
+      "max": 10000,
+      "step": 100,
+      "units": "W",
+      "placeholder": {
+        "en": "Power threshold in watts",
+        "nl": "Vermogen drempel in watt"
+      }
+    }
+  ]
+}

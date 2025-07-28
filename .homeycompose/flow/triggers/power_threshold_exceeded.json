@@ -1,0 +1,58 @@
+{
+  "id": "power_threshold_exceeded",
+  "title": {
+    "en": "Power threshold exceeded",
+    "nl": "Vermogen drempel overschreden"
+  },
+  "titleFormatted": {
+    "en": "Power consumption exceeded [[threshold]] W",
+    "nl": "Stroomverbruik overschreed [[threshold]] W"
+  },
+  "hint": {
+    "en": "Triggers when power consumption exceeds specified threshold (requires power monitoring support)",
+    "nl": "Wordt geactiveerd wanneer stroomverbruik een drempel overschrijdt (vereist vermogen monitoring ondersteuning)"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "Power threshold (W)",
+        "nl": "Vermogen drempel (W)"
+      },
+      "min": 100,
+      "max": 10000,
+      "step": 100,
+      "units": "W",
+      "placeholder": {
+        "en": "Power threshold in watts",
+        "nl": "Vermogen drempel in watt"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_power",
+      "title": {
+        "en": "Current power consumption",
+        "nl": "Huidig stroomverbruik"
+      },
+      "example": 3500
+    },
+    {
+      "type": "number",
+      "name": "threshold_power",
+      "title": {
+        "en": "Threshold power",
+        "nl": "Drempel vermogen"
+      },
+      "example": 3000
+    }
+  ]
+}

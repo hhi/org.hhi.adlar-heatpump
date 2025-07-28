@@ -1,0 +1,82 @@
+{
+  "id": "high_pressure_temperature_alert",
+  "title": {
+    "en": "High pressure temperature alert",
+    "nl": "Hogedruk verzadigingstemperatuur alarm"
+  },
+  "titleFormatted": {
+    "en": "High pressure temperature [[condition]] [[temperature]]°C",
+    "nl": "Hogedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggers when high pressure saturation temperature goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Temperature (°C)",
+        "nl": "Temperatuur (°C)"
+      },
+      "min": -20,
+      "max": 100,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current High pressure temperature",
+        "nl": "Huidige Hogedruk verzadigingstemperatuur"
+      },
+      "example": 65.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_temperature",
+      "title": {
+        "en": "Threshold temperature",
+        "nl": "Drempel temperatuur"
+      },
+      "example": 70
+    }
+  ]
+}

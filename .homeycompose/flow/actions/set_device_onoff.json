@@ -1,0 +1,47 @@
+{
+  "id": "set_device_onoff",
+  "title": {
+    "en": "Set device power",
+    "nl": "Apparaat vermogen instellen"
+  },
+  "titleFormatted": {
+    "en": "Set device power to [[state]]",
+    "nl": "Apparaat vermogen instellen op [[state]]"
+  },
+  "hint": {
+    "en": "Set the device power state",
+    "nl": "Stel de apparaat vermogen status in"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "state",
+      "title": {
+        "en": "Power state",
+        "nl": "Vermogen status"
+      },
+      "values": [
+        {
+          "id": "on",
+          "title": {
+            "en": "On",
+            "nl": "Aan"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "nl": "Uit"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "countdown_timer_finished",
+  "title": {
+    "en": "Countdown timer finished",
+    "nl": "Afteltimer afgelopen"
+  },
+  "titleFormatted": {
+    "en": "Countdown timer finished",
+    "nl": "Afteltimer afgelopen"
+  },
+  "hint": {
+    "en": "Triggers when the system countdown timer reaches zero",
+    "nl": "Wordt geactiveerd wanneer de systeem afteltimer nul bereikt"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "timer_duration",
+      "title": {
+        "en": "Timer duration (minutes)",
+        "nl": "Timer duur (minuten)"
+      },
+      "example": 30
+    },
+    {
+      "type": "string",
+      "name": "timer_action",
+      "title": {
+        "en": "Timer action",
+        "nl": "Timer actie"
+      },
+      "example": "Heating cycle completed"
+    }
+  ]
+}

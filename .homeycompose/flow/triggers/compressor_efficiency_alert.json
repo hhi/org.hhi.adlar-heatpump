@@ -1,0 +1,82 @@
+{
+  "id": "compressor_efficiency_alert",
+  "title": {
+    "en": "Compressor efficiency alert",
+    "nl": "Compressor efficiëntie alarm"
+  },
+  "titleFormatted": {
+    "en": "Compressor frequency [[condition]] [[frequency]] Hz",
+    "nl": "Compressor frequentie [[condition]] [[frequency]] Hz"
+  },
+  "hint": {
+    "en": "Triggers when compressor frequency goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "frequency",
+      "title": {
+        "en": "Frequency (Hz)",
+        "nl": "Frequentie (Hz)"
+      },
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "units": "Hz",
+      "placeholder": {
+        "en": "Frequency threshold in Hz",
+        "nl": "Frequentie drempel in Hz"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_frequency",
+      "title": {
+        "en": "Current frequency",
+        "nl": "Huidige frequentie"
+      },
+      "example": 85
+    },
+    {
+      "type": "number",
+      "name": "threshold_frequency",
+      "title": {
+        "en": "Threshold frequency",
+        "nl": "Drempel frequentie"
+      },
+      "example": 90
+    }
+  ]
+}

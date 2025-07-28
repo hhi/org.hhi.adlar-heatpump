@@ -13,7 +13,11 @@
       "Bash(mv:*)",
       "Bash(find:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs"
+      "mcp__context7__get-library-docs",
+      "Bash(node:*)",
+      "Bash(homey app:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

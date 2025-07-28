@@ -1,0 +1,38 @@
+{
+  "id": "water_flow_rate_check",
+  "title": {
+    "en": "Water flow rate check",
+    "nl": "Water doorstroming controle"
+  },
+  "titleFormatted": {
+    "en": "Water flow rate is !{{above|below}} [[flow_rate]] L/min",
+    "nl": "Water doorstroming is !{{boven|onder}} [[flow_rate]] L/min"
+  },
+  "hint": {
+    "en": "Check if water flow rate is above or below specified threshold",
+    "nl": "Controleer of water doorstroming boven of onder een drempel is"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "flow_rate",
+      "title": {
+        "en": "Flow rate (L/min)",
+        "nl": "Doorstroming (L/min)"
+      },
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "units": "L/min",
+      "placeholder": {
+        "en": "Water flow rate threshold",
+        "nl": "Water doorstroming drempel"
+      }
+    }
+  ]
+}

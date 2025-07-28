@@ -1,0 +1,39 @@
+{
+  "id": "set_target_temperature",
+  "title": {
+    "en": "Set target temperature",
+    "nl": "Doel temperatuur instellen"
+  },
+  "titleFormatted": {
+    "en": "Set target temperature to [[temperature]]",
+    "nl": "Doel temperatuur instellen op [[temperature]]"
+  },
+  "hint": {
+    "en": "Set the target temperature for the heat pump",
+    "nl": "Stel de doel temperatuur voor de warmtepomp in"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Temperature (°C)",
+        "nl": "Temperatuur (°C)"
+      },
+      "min": 5,
+      "max": 60,
+      "step": 0.5,
+      "units": "°C",
+      "placeholder": {
+        "en": "Target temperature in °C",
+        "nl": "Doel temperatuur in °C"
+      }
+    }
+  ]
+}

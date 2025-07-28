@@ -1,0 +1,57 @@
+{
+  "id": "backwater_state_changed",
+  "title": {
+    "en": "Backwater state changed",
+    "nl": "Terugstroming status gewijzigd"
+  },
+  "titleFormatted": {
+    "en": "Backwater turned [[state]]",
+    "nl": "Terugstroming [[state]]"
+  },
+  "hint": {
+    "en": "Triggers when backwater system changes state",
+    "nl": "Wordt geactiveerd wanneer terugstroming systeem van status wijzigt"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "state",
+      "title": {
+        "en": "State",
+        "nl": "Status"
+      },
+      "values": [
+        {
+          "id": "flowing",
+          "title": {
+            "en": "flowing",
+            "nl": "stromend"
+          }
+        },
+        {
+          "id": "blocked",
+          "title": {
+            "en": "blocked",
+            "nl": "geblokkeerd"
+          }
+        }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "name": "current_state",
+      "title": {
+        "en": "Current Backwater state",
+        "nl": "Huidige Terugstroming status"
+      },
+      "example": "flowing"
+    }
+  ]
+}
