@@ -43,6 +43,3216 @@
   "brandColor": "#f5a623",
   "author": "Herman Hilberink <herman.Hilberink@gmail.com>",
   "icon": "/assets/icon.svg",
+  "flow": {
+    "triggers": [
+      {
+        "id": "ambient_temperature_changed",
+        "title": {
+          "en": "Ambient temperature changed",
+          "nl": "Buitentemperatuur gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Ambient temperature [[condition]] [[temperature]]°C",
+          "nl": "Buitentemperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when ambient temperature goes above or below specified levels - useful for weather compensation",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder bepaalde niveaus gaat - nuttig voor weercompensatie"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -30,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current ambient temperature",
+              "nl": "Huidige buitentemperatuur"
+            },
+            "example": 15.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 10
+          }
+        ]
+      },
+      {
+        "id": "backwater_state_changed",
+        "title": {
+          "en": "Backwater state changed",
+          "nl": "Terugstroming status gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Backwater turned [[state]]",
+          "nl": "Terugstroming [[state]]"
+        },
+        "hint": {
+          "en": "Triggers when backwater system changes state",
+          "nl": "Wordt geactiveerd wanneer terugstroming systeem van status wijzigt"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "State",
+              "nl": "Status"
+            },
+            "values": [
+              {
+                "id": "flowing",
+                "title": {
+                  "en": "flowing",
+                  "nl": "stromend"
+                }
+              },
+              {
+                "id": "blocked",
+                "title": {
+                  "en": "blocked",
+                  "nl": "geblokkeerd"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "current_state",
+            "title": {
+              "en": "Current Backwater state",
+              "nl": "Huidige Terugstroming status"
+            },
+            "example": "flowing"
+          }
+        ]
+      },
+      {
+        "id": "coiler_temperature_alert",
+        "title": {
+          "en": "Coiler temperature alert",
+          "nl": "Verdampingscondensator temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Coiler temperature [[condition]] [[temperature]]°C",
+          "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when electricity coiler temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Coiler temperature",
+              "nl": "Huidige Verdampingscondensator temperatuur"
+            },
+            "example": 45.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 50
+          }
+        ]
+      },
+      {
+        "id": "compressor_efficiency_alert",
+        "title": {
+          "en": "Compressor efficiency alert",
+          "nl": "Compressor efficiëntie alarm"
+        },
+        "titleFormatted": {
+          "en": "Compressor frequency [[condition]] [[frequency]] Hz",
+          "nl": "Compressor frequentie [[condition]] [[frequency]] Hz"
+        },
+        "hint": {
+          "en": "Triggers when compressor frequency goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "frequency",
+            "title": {
+              "en": "Frequency (Hz)",
+              "nl": "Frequentie (Hz)"
+            },
+            "min": 10,
+            "max": 200,
+            "step": 5,
+            "units": "Hz",
+            "placeholder": {
+              "en": "Frequency threshold in Hz",
+              "nl": "Frequentie drempel in Hz"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_frequency",
+            "title": {
+              "en": "Current frequency",
+              "nl": "Huidige frequentie"
+            },
+            "example": 85
+          },
+          {
+            "type": "number",
+            "name": "threshold_frequency",
+            "title": {
+              "en": "Threshold frequency",
+              "nl": "Drempel frequentie"
+            },
+            "example": 90
+          }
+        ]
+      },
+      {
+        "id": "compressor_state_changed",
+        "title": {
+          "en": "Compressor state changed",
+          "nl": "Compressor status gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Compressor turned [[state]]",
+          "nl": "Compressor [[state]]"
+        },
+        "hint": {
+          "en": "Triggers when compressor changes state",
+          "nl": "Wordt geactiveerd wanneer compressor van status wijzigt"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "State",
+              "nl": "Status"
+            },
+            "values": [
+              {
+                "id": "running",
+                "title": {
+                  "en": "running",
+                  "nl": "draaiend"
+                }
+              },
+              {
+                "id": "stopped",
+                "title": {
+                  "en": "stopped",
+                  "nl": "gestopt"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "current_state",
+            "title": {
+              "en": "Current Compressor state",
+              "nl": "Huidige Compressor status"
+            },
+            "example": "running"
+          }
+        ]
+      },
+      {
+        "id": "countdown_timer_finished",
+        "title": {
+          "en": "Countdown timer finished",
+          "nl": "Afteltimer afgelopen"
+        },
+        "titleFormatted": {
+          "en": "Countdown timer finished",
+          "nl": "Afteltimer afgelopen"
+        },
+        "hint": {
+          "en": "Triggers when the system countdown timer reaches zero",
+          "nl": "Wordt geactiveerd wanneer de systeem afteltimer nul bereikt"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "timer_duration",
+            "title": {
+              "en": "Timer duration (minutes)",
+              "nl": "Timer duur (minuten)"
+            },
+            "example": 30
+          },
+          {
+            "type": "string",
+            "name": "timer_action",
+            "title": {
+              "en": "Timer action",
+              "nl": "Timer actie"
+            },
+            "example": "Heating cycle completed"
+          }
+        ]
+      },
+      {
+        "id": "daily_consumption_threshold",
+        "title": {
+          "en": "Daily consumption threshold reached",
+          "nl": "Dagverbruik drempel bereikt"
+        },
+        "titleFormatted": {
+          "en": "Daily consumption reached [[threshold]] kWh",
+          "nl": "Dagverbruik bereikte [[threshold]] kWh"
+        },
+        "hint": {
+          "en": "Triggers when daily electricity consumption reaches specified threshold",
+          "nl": "Wordt geactiveerd wanneer het dagelijkse stroomverbruik een drempel bereikt"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Daily threshold (kWh)",
+              "nl": "Dagelijkse drempel (kWh)"
+            },
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "units": "kWh",
+            "placeholder": {
+              "en": "Daily consumption threshold",
+              "nl": "Dagverbruik drempel"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "daily_consumption",
+            "title": {
+              "en": "Daily consumption",
+              "nl": "Dagverbruik"
+            },
+            "example": 25
+          },
+          {
+            "type": "number",
+            "name": "threshold_value",
+            "title": {
+              "en": "Threshold value",
+              "nl": "Drempel waarde"
+            },
+            "example": 30
+          }
+        ]
+      },
+      {
+        "id": "defrost_state_changed",
+        "title": {
+          "en": "Defrost state changed",
+          "nl": "Ontdooien status gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Defrost turned [[state]]",
+          "nl": "Ontdooien [[state]]"
+        },
+        "hint": {
+          "en": "Triggers when defrost system changes state",
+          "nl": "Wordt geactiveerd wanneer ontdooi systeem van status wijzigt"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "State",
+              "nl": "Status"
+            },
+            "values": [
+              {
+                "id": "active",
+                "title": {
+                  "en": "active",
+                  "nl": "actief"
+                }
+              },
+              {
+                "id": "inactive",
+                "title": {
+                  "en": "inactive",
+                  "nl": "inactief"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "current_state",
+            "title": {
+              "en": "Current Defrost state",
+              "nl": "Huidige Ontdooien status"
+            },
+            "example": "active"
+          }
+        ]
+      },
+      {
+        "id": "discharge_temperature_alert",
+        "title": {
+          "en": "Discharge temperature alert",
+          "nl": "Persgas temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Discharge temperature [[condition]] [[temperature]]°C",
+          "nl": "Persgas temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when discharge temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": 0,
+            "max": 120,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Discharge temperature",
+              "nl": "Huidige Persgas temperatuur"
+            },
+            "example": 75.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 80
+          }
+        ]
+      },
+      {
+        "id": "economizer_inlet_temperature_alert",
+        "title": {
+          "en": "Economizer inlet temperature alert",
+          "nl": "EVI warmtewisselaar zuiggas temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Economizer inlet temperature [[condition]] [[temperature]]°C",
+          "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when economizer inlet temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -30,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Economizer inlet temperature",
+              "nl": "Huidige EVI warmtewisselaar zuiggas temperatuur"
+            },
+            "example": 25.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 30
+          }
+        ]
+      },
+      {
+        "id": "economizer_outlet_temperature_alert",
+        "title": {
+          "en": "Economizer outlet temperature alert",
+          "nl": "EVI warmtewisselaar persgas temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Economizer outlet temperature [[condition]] [[temperature]]°C",
+          "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when economizer outlet temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -30,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Economizer outlet temperature",
+              "nl": "Huidige EVI warmtewisselaar persgas temperatuur"
+            },
+            "example": 35.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 40
+          }
+        ]
+      },
+      {
+        "id": "eev_pressure_alert",
+        "title": {
+          "en": "EEV Open pressure alert",
+          "nl": "EEV-openingsstop druk alarm"
+        },
+        "titleFormatted": {
+          "en": "EEV pressure [[condition]] [[pressure]]",
+          "nl": "EEV druk [[condition]] [[pressure]]"
+        },
+        "hint": {
+          "en": "Triggers when Electronic Expansion Valve (EEV) pressure goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) druk boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "pressure",
+            "title": {
+              "en": "Pressure",
+              "nl": "Druk"
+            },
+            "min": -500,
+            "max": 500,
+            "step": 10,
+            "units": "Pa",
+            "placeholder": {
+              "en": "Pressure threshold",
+              "nl": "Druk drempel"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_pressure",
+            "title": {
+              "en": "Current EEV Open pressure",
+              "nl": "Huidige EEV-openingsstop druk"
+            },
+            "example": 450
+          },
+          {
+            "type": "number",
+            "name": "threshold_pressure",
+            "title": {
+              "en": "Threshold pressure",
+              "nl": "Drempel druk"
+            },
+            "example": 400
+          }
+        ]
+      },
+      {
+        "id": "electrical_load_alert",
+        "title": {
+          "en": "Electrical load alert",
+          "nl": "Elektrische belasting alarm"
+        },
+        "titleFormatted": {
+          "en": "Current load [[condition]] [[current]] amperes",
+          "nl": "Stroomsterkte [[condition]] [[current]] ampère"
+        },
+        "hint": {
+          "en": "Triggers when electrical current goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "current",
+            "title": {
+              "en": "Current (A)",
+              "nl": "Stroom (A)"
+            },
+            "min": 1,
+            "max": 50,
+            "step": 1,
+            "units": "A",
+            "placeholder": {
+              "en": "Current threshold in amperes",
+              "nl": "Stroom drempel in ampère"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_amperage",
+            "title": {
+              "en": "Current amperage",
+              "nl": "Huidige stroomsterkte"
+            },
+            "example": 12.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_amperage",
+            "title": {
+              "en": "Threshold amperage",
+              "nl": "Drempel stroomsterkte"
+            },
+            "example": 15
+          }
+        ]
+      },
+      {
+        "id": "evi_pressure_alert",
+        "title": {
+          "en": "EVI Open pressure alert",
+          "nl": "EVI-openingsstop druk alarm"
+        },
+        "titleFormatted": {
+          "en": "EVI Open pressure [[condition]] [[pressure]]",
+          "nl": "EVI-openingsstop druk [[condition]] [[pressure]]"
+        },
+        "hint": {
+          "en": "Triggers when Enhanced Vapor Injection (EVI) pressure goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) druk boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "pressure",
+            "title": {
+              "en": "Pressure",
+              "nl": "Druk"
+            },
+            "min": -500,
+            "max": 500,
+            "step": 10,
+            "units": "Pa",
+            "placeholder": {
+              "en": "Pressure threshold",
+              "nl": "Druk drempel"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_pressure",
+            "title": {
+              "en": "Current EVI Open pressure",
+              "nl": "Huidige EVI-openingsstop druk"
+            },
+            "example": 250
+          },
+          {
+            "type": "number",
+            "name": "threshold_pressure",
+            "title": {
+              "en": "Threshold pressure",
+              "nl": "Drempel druk"
+            },
+            "example": 200
+          }
+        ]
+      },
+      {
+        "id": "fan_motor_efficiency_alert",
+        "title": {
+          "en": "Fan motor efficiency alert",
+          "nl": "Ventilator motor efficiëntie alarm"
+        },
+        "titleFormatted": {
+          "en": "Fan motor frequency [[condition]] [[frequency]] Hz",
+          "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz"
+        },
+        "hint": {
+          "en": "Triggers when fan motor frequency goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "frequency",
+            "title": {
+              "en": "Frequency (Hz)",
+              "nl": "Frequentie (Hz)"
+            },
+            "min": 10,
+            "max": 100,
+            "step": 5,
+            "units": "Hz",
+            "placeholder": {
+              "en": "Frequency threshold in Hz",
+              "nl": "Frequentie drempel in Hz"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_fan_frequency",
+            "title": {
+              "en": "Current fan frequency",
+              "nl": "Huidige ventilator frequentie"
+            },
+            "example": 75
+          },
+          {
+            "type": "number",
+            "name": "threshold_frequency",
+            "title": {
+              "en": "Threshold frequency",
+              "nl": "Drempel frequentie"
+            },
+            "example": 80
+          }
+        ]
+      },
+      {
+        "id": "fault_detected",
+        "title": {
+          "en": "Fault detected",
+          "nl": "Storing gedetecteerd"
+        },
+        "titleFormatted": {
+          "en": "Fault code [[fault_code]] detected",
+          "nl": "Storing code [[fault_code]] gedetecteerd"
+        },
+        "hint": {
+          "en": "Triggers when a system fault is detected",
+          "nl": "Wordt geactiveerd wanneer een systeem storing wordt gedetecteerd"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "fault_code",
+            "title": {
+              "en": "Fault code",
+              "nl": "Storing code"
+            },
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "units": "",
+            "placeholder": {
+              "en": "Fault code to monitor",
+              "nl": "Storing code om te monitoren"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "fault_code",
+            "title": {
+              "en": "Fault code",
+              "nl": "Storing code"
+            },
+            "example": 15
+          },
+          {
+            "type": "string",
+            "name": "fault_description",
+            "title": {
+              "en": "Fault description",
+              "nl": "Storing beschrijving"
+            },
+            "example": "Compressor overheating"
+          }
+        ]
+      },
+      {
+        "id": "high_pressure_temperature_alert",
+        "title": {
+          "en": "High pressure temperature alert",
+          "nl": "Hogedruk verzadigingstemperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "High pressure temperature [[condition]] [[temperature]]°C",
+          "nl": "Hogedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when high pressure saturation temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -20,
+            "max": 100,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current High pressure temperature",
+              "nl": "Huidige Hogedruk verzadigingstemperatuur"
+            },
+            "example": 65.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 70
+          }
+        ]
+      },
+      {
+        "id": "incoiler_temperature_alert",
+        "title": {
+          "en": "Incoiler temperature alert",
+          "nl": "Condensor temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Incoiler temperature [[condition]] [[temperature]]°C",
+          "nl": "Condensor temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when incoiler temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Incoiler temperature",
+              "nl": "Huidige Condensor temperatuur"
+            },
+            "example": 35.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 40
+          }
+        ]
+      },
+      {
+        "id": "inlet_temperature_changed",
+        "title": {
+          "en": "Inlet temperature changed",
+          "nl": "Water intrede temperatuur gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Inlet temperature [[condition]] [[temperature]]°C",
+          "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when water inlet temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current inlet temperature",
+              "nl": "Huidige water intrede temperatuur"
+            },
+            "example": 45.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 40
+          }
+        ]
+      },
+      {
+        "id": "low_pressure_temperature_alert",
+        "title": {
+          "en": "Low pressure temperature alert",
+          "nl": "Lagedruk verzadigingstemperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Low pressure temperature [[condition]] [[temperature]]°C",
+          "nl": "Lagedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when low pressure saturation temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -30,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Low pressure temperature",
+              "nl": "Huidige Lagedruk verzadigingstemperatuur"
+            },
+            "example": 15.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 20
+          }
+        ]
+      },
+      {
+        "id": "outlet_temperature_changed",
+        "title": {
+          "en": "Outlet temperature changed",
+          "nl": "Water uittrede temperatuur gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Outlet temperature [[condition]] [[temperature]]°C",
+          "nl": "Water uittrede temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when water outlet temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current outlet temperature",
+              "nl": "Huidige water uittrede temperatuur"
+            },
+            "example": 25.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 30
+          }
+        ]
+      },
+      {
+        "id": "phase_a_voltage_alert",
+        "title": {
+          "en": "Phase A voltage alert",
+          "nl": "Fase A spanning alarm"
+        },
+        "titleFormatted": {
+          "en": "Phase A voltage [[condition]] [[voltage]] volts",
+          "nl": "Fase A spanning [[condition]] [[voltage]] volt"
+        },
+        "hint": {
+          "en": "Triggers when Phase A voltage goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "voltage",
+            "title": {
+              "en": "Voltage (V)",
+              "nl": "Spanning (V)"
+            },
+            "min": 180,
+            "max": 260,
+            "step": 5,
+            "units": "V",
+            "placeholder": {
+              "en": "Voltage threshold in volts",
+              "nl": "Spanning drempel in volt"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_voltage_a",
+            "title": {
+              "en": "Phase A voltage",
+              "nl": "Fase A spanning"
+            },
+            "example": 230
+          },
+          {
+            "type": "number",
+            "name": "threshold_voltage",
+            "title": {
+              "en": "Threshold voltage",
+              "nl": "Drempel spanning"
+            },
+            "example": 220
+          }
+        ]
+      },
+      {
+        "id": "phase_b_current_alert",
+        "title": {
+          "en": "Phase B current alert",
+          "nl": "Fase B stroom alarm"
+        },
+        "titleFormatted": {
+          "en": "Phase B current [[condition]] [[current]] amperes",
+          "nl": "Fase B stroom [[condition]] [[current]] ampère"
+        },
+        "hint": {
+          "en": "Triggers when Phase B current goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer Fase B stroom boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "current",
+            "title": {
+              "en": "Current (A)",
+              "nl": "Stroom (A)"
+            },
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "units": "A",
+            "placeholder": {
+              "en": "Current threshold in amperes",
+              "nl": "Stroom drempel in ampère"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_current_b",
+            "title": {
+              "en": "Phase B current",
+              "nl": "Fase B stroom"
+            },
+            "example": 15
+          },
+          {
+            "type": "number",
+            "name": "threshold_current",
+            "title": {
+              "en": "Threshold current",
+              "nl": "Drempel stroom"
+            },
+            "example": 20
+          }
+        ]
+      },
+      {
+        "id": "phase_b_voltage_alert",
+        "title": {
+          "en": "Phase B voltage alert",
+          "nl": "Fase B spanning alarm"
+        },
+        "titleFormatted": {
+          "en": "Phase B voltage [[condition]] [[voltage]] volts",
+          "nl": "Fase B spanning [[condition]] [[voltage]] volt"
+        },
+        "hint": {
+          "en": "Triggers when Phase B voltage goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "voltage",
+            "title": {
+              "en": "Voltage (V)",
+              "nl": "Spanning (V)"
+            },
+            "min": 180,
+            "max": 260,
+            "step": 5,
+            "units": "V",
+            "placeholder": {
+              "en": "Voltage threshold in volts",
+              "nl": "Spanning drempel in volt"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_voltage_b",
+            "title": {
+              "en": "Phase B voltage",
+              "nl": "Fase B spanning"
+            },
+            "example": 230
+          },
+          {
+            "type": "number",
+            "name": "threshold_voltage",
+            "title": {
+              "en": "Threshold voltage",
+              "nl": "Drempel spanning"
+            },
+            "example": 220
+          }
+        ]
+      },
+      {
+        "id": "phase_c_current_alert",
+        "title": {
+          "en": "Phase C current alert",
+          "nl": "Fase C stroom alarm"
+        },
+        "titleFormatted": {
+          "en": "Phase C current [[condition]] [[current]] amperes",
+          "nl": "Fase C stroom [[condition]] [[current]] ampère"
+        },
+        "hint": {
+          "en": "Triggers when Phase C current goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer Fase C stroom boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "current",
+            "title": {
+              "en": "Current (A)",
+              "nl": "Stroom (A)"
+            },
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "units": "A",
+            "placeholder": {
+              "en": "Current threshold in amperes",
+              "nl": "Stroom drempel in ampère"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_current_c",
+            "title": {
+              "en": "Phase C current",
+              "nl": "Fase C stroom"
+            },
+            "example": 15
+          },
+          {
+            "type": "number",
+            "name": "threshold_current",
+            "title": {
+              "en": "Threshold current",
+              "nl": "Drempel stroom"
+            },
+            "example": 20
+          }
+        ]
+      },
+      {
+        "id": "phase_c_voltage_alert",
+        "title": {
+          "en": "Phase C voltage alert",
+          "nl": "Fase C spanning alarm"
+        },
+        "titleFormatted": {
+          "en": "Phase C voltage [[condition]] [[voltage]] volts",
+          "nl": "Fase C spanning [[condition]] [[voltage]] volt"
+        },
+        "hint": {
+          "en": "Triggers when Phase C voltage goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer Fase C spanning boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "voltage",
+            "title": {
+              "en": "Voltage (V)",
+              "nl": "Spanning (V)"
+            },
+            "min": 180,
+            "max": 260,
+            "step": 5,
+            "units": "V",
+            "placeholder": {
+              "en": "Voltage threshold in volts",
+              "nl": "Spanning drempel in volt"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_voltage_c",
+            "title": {
+              "en": "Phase C voltage",
+              "nl": "Fase C spanning"
+            },
+            "example": 230
+          },
+          {
+            "type": "number",
+            "name": "threshold_voltage",
+            "title": {
+              "en": "Threshold voltage",
+              "nl": "Drempel spanning"
+            },
+            "example": 220
+          }
+        ]
+      },
+      {
+        "id": "power_threshold_exceeded",
+        "title": {
+          "en": "Power threshold exceeded",
+          "nl": "Vermogen drempel overschreden"
+        },
+        "titleFormatted": {
+          "en": "Power consumption exceeded [[threshold]] W",
+          "nl": "Stroomverbruik overschreed [[threshold]] W"
+        },
+        "hint": {
+          "en": "Triggers when power consumption exceeds specified threshold (requires power monitoring support)",
+          "nl": "Wordt geactiveerd wanneer stroomverbruik een drempel overschrijdt (vereist vermogen monitoring ondersteuning)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Power threshold (W)",
+              "nl": "Vermogen drempel (W)"
+            },
+            "min": 100,
+            "max": 10000,
+            "step": 100,
+            "units": "W",
+            "placeholder": {
+              "en": "Power threshold in watts",
+              "nl": "Vermogen drempel in watt"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_power",
+            "title": {
+              "en": "Current power consumption",
+              "nl": "Huidig stroomverbruik"
+            },
+            "example": 3500
+          },
+          {
+            "type": "number",
+            "name": "threshold_power",
+            "title": {
+              "en": "Threshold power",
+              "nl": "Drempel vermogen"
+            },
+            "example": 3000
+          }
+        ]
+      },
+      {
+        "id": "suction_temperature_alert",
+        "title": {
+          "en": "Suction temperature alert",
+          "nl": "Zuiggas temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Suction temperature [[condition]] [[temperature]]°C",
+          "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when suction temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": -30,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Suction temperature",
+              "nl": "Huidige Zuiggas temperatuur"
+            },
+            "example": 5.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 10
+          }
+        ]
+      },
+      {
+        "id": "tank_temperature_alert",
+        "title": {
+          "en": "Tank temperature alert",
+          "nl": "Tapwater temperatuur alarm"
+        },
+        "titleFormatted": {
+          "en": "Tank temperature [[condition]] [[temperature]]°C",
+          "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when water tank temperature goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": 0,
+            "max": 90,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Tank temperature",
+              "nl": "Huidige Tapwater temperatuur"
+            },
+            "example": 55.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur"
+            },
+            "example": 60
+          }
+        ]
+      },
+      {
+        "id": "total_consumption_milestone",
+        "title": {
+          "en": "Total consumption milestone reached",
+          "nl": "Totaalverbruik mijlpaal bereikt"
+        },
+        "titleFormatted": {
+          "en": "Total consumption reached [[milestone]] kWh",
+          "nl": "Totaalverbruik bereikte [[milestone]] kWh"
+        },
+        "hint": {
+          "en": "Triggers when total electricity consumption reaches specified milestones",
+          "nl": "Wordt geactiveerd wanneer het totale stroomverbruik bepaalde mijlpalen bereikt"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "milestone",
+            "title": {
+              "en": "Consumption milestone (kWh)",
+              "nl": "Verbruik mijlpaal (kWh)"
+            },
+            "min": 100,
+            "max": 50000,
+            "step": 100,
+            "units": "kWh",
+            "placeholder": {
+              "en": "Total consumption milestone in kWh",
+              "nl": "Totaalverbruik mijlpaal in kWh"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "total_consumption",
+            "title": {
+              "en": "Total consumption",
+              "nl": "Totaalverbruik"
+            },
+            "example": 15000
+          },
+          {
+            "type": "number",
+            "name": "milestone_value",
+            "title": {
+              "en": "Milestone value",
+              "nl": "Mijlpaal waarde"
+            },
+            "example": 15000
+          }
+        ]
+      },
+      {
+        "id": "water_flow_alert",
+        "title": {
+          "en": "Water flow rate alert",
+          "nl": "Water doorstroom alarm"
+        },
+        "titleFormatted": {
+          "en": "Water flow rate [[condition]] [[flow_rate]] L/min",
+          "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min"
+        },
+        "hint": {
+          "en": "Triggers when water flow rate goes above or below specified levels",
+          "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder bepaalde niveaus gaat"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "flow_rate",
+            "title": {
+              "en": "Flow rate (L/min)",
+              "nl": "Doorstroom (L/min)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "units": "L/min",
+            "placeholder": {
+              "en": "Flow rate threshold in L/min",
+              "nl": "Doorstroom drempel in L/min"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_flow_rate",
+            "title": {
+              "en": "Current flow rate",
+              "nl": "Huidige doorstroom"
+            },
+            "example": 25
+          },
+          {
+            "type": "number",
+            "name": "threshold_flow_rate",
+            "title": {
+              "en": "Threshold flow rate",
+              "nl": "Drempel doorstroom"
+            },
+            "example": 20
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "compressor_running",
+        "title": {
+          "en": "Compressor is running",
+          "nl": "Compressor draait"
+        },
+        "titleFormatted": {
+          "en": "Compressor is !{{running|stopped}}",
+          "nl": "Compressor is !{{draaiend|gestopt}}"
+        },
+        "hint": {
+          "en": "Check if the compressor is currently running",
+          "nl": "Controleer of de compressor momenteel draait"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
+        "id": "electrical_balance_check",
+        "title": {
+          "en": "Electrical balance check",
+          "nl": "Elektrische balans controle"
+        },
+        "titleFormatted": {
+          "en": "3-phase electrical balance is !{{within|outside}} [[tolerance]]% tolerance",
+          "nl": "3-fase elektrische balans is !{{binnen|buiten}} [[tolerance]]% tolerantie"
+        },
+        "hint": {
+          "en": "Check if the 3-phase electrical currents are balanced within specified tolerance",
+          "nl": "Controleer of de 3-fase elektrische stromen gebalanceerd zijn binnen de tolerantie"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "tolerance",
+            "title": {
+              "en": "Balance tolerance (%)",
+              "nl": "Balans tolerantie (%)"
+            },
+            "min": 1,
+            "max": 20,
+            "step": 1,
+            "units": "%",
+            "placeholder": {
+              "en": "Electrical balance tolerance percentage",
+              "nl": "Elektrische balans tolerantie percentage"
+            }
+          }
+        ]
+      },
+      {
+        "id": "fault_active",
+        "title": {
+          "en": "Fault is active",
+          "nl": "Fout is actief"
+        },
+        "titleFormatted": {
+          "en": "Fault is !{{active|inactive}}",
+          "nl": "Fout is !{{actief|inactief}}"
+        },
+        "hint": {
+          "en": "Check if a fault is currently active (fault code > 0)",
+          "nl": "Controleer of er momenteel een fout actief is (foutcode > 0)"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
+        "id": "power_above_threshold",
+        "title": {
+          "en": "Power consumption above",
+          "nl": "Stroomverbruik boven"
+        },
+        "titleFormatted": {
+          "en": "Power consumption is !{{above|below}} [[threshold]] watts",
+          "nl": "Stroomverbruik is !{{boven|onder}} [[threshold]] watt"
+        },
+        "hint": {
+          "en": "Check if current power consumption is above or below a threshold (requires power monitoring support)",
+          "nl": "Controleer of het huidige stroomverbruik boven of onder een drempel is (vereist vermogen monitoring ondersteuning)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Power threshold (W)",
+              "nl": "Vermogen drempel (W)"
+            },
+            "min": 100,
+            "max": 10000,
+            "step": 100,
+            "units": "W",
+            "placeholder": {
+              "en": "Power threshold in watts",
+              "nl": "Vermogen drempel in watt"
+            }
+          }
+        ]
+      },
+      {
+        "id": "system_pressure_differential",
+        "title": {
+          "en": "System pressure differential check",
+          "nl": "Systeem druk verschil controle"
+        },
+        "titleFormatted": {
+          "en": "System pressure differential is !{{above|below}} [[differential]]",
+          "nl": "Systeem druk verschil is !{{boven|onder}} [[differential]]"
+        },
+        "hint": {
+          "en": "Check if the pressure difference between EEV and EVI is above or below a threshold",
+          "nl": "Controleer of het drukverschil tussen EEV en EVI boven of onder een drempel is"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "differential",
+            "title": {
+              "en": "Pressure differential",
+              "nl": "Druk verschil"
+            },
+            "min": 0,
+            "max": 1000,
+            "step": 10,
+            "units": "Pa",
+            "placeholder": {
+              "en": "Pressure differential threshold",
+              "nl": "Druk verschil drempel"
+            }
+          }
+        ]
+      },
+      {
+        "id": "temperature_above",
+        "title": {
+          "en": "Ambient temperature above",
+          "nl": "Buitentemperatuur boven"
+        },
+        "titleFormatted": {
+          "en": "Ambient temperature is !{{above|below}} [[temperature]]°C",
+          "nl": "Buitentemperatuur is !{{boven|onder}} [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Check if the ambient temperature is above or below a specific value",
+          "nl": "Controleer of de buitentemperatuur boven of onder een specifieke waarde is"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature",
+              "nl": "Temperatuur"
+            },
+            "min": -30,
+            "max": 50,
+            "step": 0.5,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "temperature_differential",
+        "title": {
+          "en": "Temperature differential check",
+          "nl": "Temperatuur verschil controle"
+        },
+        "titleFormatted": {
+          "en": "Temperature differential is !{{above|below}} [[differential]]°C",
+          "nl": "Temperatuur verschil is !{{boven|onder}} [[differential]]°C"
+        },
+        "hint": {
+          "en": "Check if the temperature difference between inlet and outlet is above or below a threshold",
+          "nl": "Controleer of het temperatuurverschil tussen inlaat en uitlaat boven of onder een drempel is"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "differential",
+            "title": {
+              "en": "Temperature differential (°C)",
+              "nl": "Temperatuur verschil (°C)"
+            },
+            "min": 1,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature differential threshold",
+              "nl": "Temperatuur verschil drempel"
+            }
+          }
+        ]
+      },
+      {
+        "id": "total_consumption_above",
+        "title": {
+          "en": "Total consumption above threshold",
+          "nl": "Totaalverbruik boven drempel"
+        },
+        "titleFormatted": {
+          "en": "Total consumption is !{{above|below}} [[threshold]] kWh",
+          "nl": "Totaalverbruik is !{{boven|onder}} [[threshold]] kWh"
+        },
+        "hint": {
+          "en": "Check if total electricity consumption is above or below a threshold",
+          "nl": "Controleer of het totale stroomverbruik boven of onder een drempel is"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Consumption threshold (kWh)",
+              "nl": "Verbruiksdrempel (kWh)"
+            },
+            "min": 100,
+            "max": 50000,
+            "step": 100,
+            "units": "kWh",
+            "placeholder": {
+              "en": "Total consumption threshold in kWh",
+              "nl": "Totaalverbruik drempel in kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "water_flow_rate_check",
+        "title": {
+          "en": "Water flow rate check",
+          "nl": "Water doorstroming controle"
+        },
+        "titleFormatted": {
+          "en": "Water flow rate is !{{above|below}} [[flow_rate]] L/min",
+          "nl": "Water doorstroming is !{{boven|onder}} [[flow_rate]] L/min"
+        },
+        "hint": {
+          "en": "Check if water flow rate is above or below specified threshold",
+          "nl": "Controleer of water doorstroming boven of onder een drempel is"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "flow_rate",
+            "title": {
+              "en": "Flow rate (L/min)",
+              "nl": "Doorstroming (L/min)"
+            },
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "units": "L/min",
+            "placeholder": {
+              "en": "Water flow rate threshold",
+              "nl": "Water doorstroming drempel"
+            }
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "set_capacity",
+        "title": {
+          "en": "Set hot water curve setting",
+          "nl": "Warmwater curve instelling instellen"
+        },
+        "titleFormatted": {
+          "en": "Set hot water curve setting to [[capacity]]",
+          "nl": "Warmwater curve instelling instellen op [[capacity]]"
+        },
+        "hint": {
+          "en": "Set the hot water curve setting for optimal efficiency",
+          "nl": "Stel de warmwater curve instelling voor optimale efficiëntie in"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "capacity",
+            "title": {
+              "en": "Hot water curve setting",
+              "nl": "Instelling warmwater curve"
+            },
+            "values": [
+              {
+                "id": "OFF",
+                "title": {
+                  "en": "OFF",
+                  "nl": "UIT"
+                }
+              },
+              {
+                "id": "H1",
+                "title": {
+                  "en": "H1",
+                  "nl": "H1"
+                }
+              },
+              {
+                "id": "H2",
+                "title": {
+                  "en": "H2",
+                  "nl": "H2"
+                }
+              },
+              {
+                "id": "H3",
+                "title": {
+                  "en": "H3",
+                  "nl": "H3"
+                }
+              },
+              {
+                "id": "H4",
+                "title": {
+                  "en": "H4",
+                  "nl": "H4"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_device_onoff",
+        "title": {
+          "en": "Set device power",
+          "nl": "Apparaat vermogen instellen"
+        },
+        "titleFormatted": {
+          "en": "Set device power to [[state]]",
+          "nl": "Apparaat vermogen instellen op [[state]]"
+        },
+        "hint": {
+          "en": "Set the device power state",
+          "nl": "Stel de apparaat vermogen status in"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "Power state",
+              "nl": "Vermogen status"
+            },
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "On",
+                  "nl": "Aan"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "Off",
+                  "nl": "Uit"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_heating_curve",
+        "title": {
+          "en": "Set heating curve",
+          "nl": "Verwarmingscurve instellen"
+        },
+        "titleFormatted": {
+          "en": "Set heating curve to [[curve]]",
+          "nl": "Verwarmingscurve instellen op [[curve]]"
+        },
+        "hint": {
+          "en": "Set the heating curve setting",
+          "nl": "Stel de verwarmingscurve instelling in"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "curve",
+            "title": {
+              "en": "Heating curve",
+              "nl": "Verwarmingscurve"
+            },
+            "values": [
+              {
+                "id": "OFF",
+                "title": {
+                  "en": "OFF",
+                  "nl": "UIT"
+                }
+              },
+              {
+                "id": "H1",
+                "title": {
+                  "en": "H1",
+                  "nl": "H1"
+                }
+              },
+              {
+                "id": "H2",
+                "title": {
+                  "en": "H2",
+                  "nl": "H2"
+                }
+              },
+              {
+                "id": "H3",
+                "title": {
+                  "en": "H3",
+                  "nl": "H3"
+                }
+              },
+              {
+                "id": "H4",
+                "title": {
+                  "en": "H4",
+                  "nl": "H4"
+                }
+              },
+              {
+                "id": "H5",
+                "title": {
+                  "en": "H5",
+                  "nl": "H5"
+                }
+              },
+              {
+                "id": "H6",
+                "title": {
+                  "en": "H6",
+                  "nl": "H6"
+                }
+              },
+              {
+                "id": "H7",
+                "title": {
+                  "en": "H7",
+                  "nl": "H7"
+                }
+              },
+              {
+                "id": "H8",
+                "title": {
+                  "en": "H8",
+                  "nl": "H8"
+                }
+              },
+              {
+                "id": "L1",
+                "title": {
+                  "en": "L1",
+                  "nl": "L1"
+                }
+              },
+              {
+                "id": "L2",
+                "title": {
+                  "en": "L2",
+                  "nl": "L2"
+                }
+              },
+              {
+                "id": "L3",
+                "title": {
+                  "en": "L3",
+                  "nl": "L3"
+                }
+              },
+              {
+                "id": "L4",
+                "title": {
+                  "en": "L4",
+                  "nl": "L4"
+                }
+              },
+              {
+                "id": "L5",
+                "title": {
+                  "en": "L5",
+                  "nl": "L5"
+                }
+              },
+              {
+                "id": "L6",
+                "title": {
+                  "en": "L6",
+                  "nl": "L6"
+                }
+              },
+              {
+                "id": "L7",
+                "title": {
+                  "en": "L7",
+                  "nl": "L7"
+                }
+              },
+              {
+                "id": "L8",
+                "title": {
+                  "en": "L8",
+                  "nl": "L8"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_heating_mode",
+        "title": {
+          "en": "Set heating mode",
+          "nl": "Verwarmingsmodus instellen"
+        },
+        "titleFormatted": {
+          "en": "Set heating mode to [[mode]]",
+          "nl": "Verwarmingsmodus instellen op [[mode]]"
+        },
+        "hint": {
+          "en": "Set the heating operation mode",
+          "nl": "Stel de verwarming bedrijfsmodus in"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "title": {
+              "en": "Heating mode",
+              "nl": "Verwarmingsmodus"
+            },
+            "values": [
+              {
+                "id": "cold",
+                "title": {
+                  "en": "Cold",
+                  "nl": "Koud"
+                }
+              },
+              {
+                "id": "heating",
+                "title": {
+                  "en": "Heating",
+                  "nl": "Verwarmen"
+                }
+              },
+              {
+                "id": "floor_heating",
+                "title": {
+                  "en": "Floor heating",
+                  "nl": "Vloerverwarming"
+                }
+              },
+              {
+                "id": "hot_water",
+                "title": {
+                  "en": "Hot water",
+                  "nl": "Warm water"
+                }
+              },
+              {
+                "id": "cold_and_hotwater",
+                "title": {
+                  "en": "Cold and hot water",
+                  "nl": "Koud en warm water"
+                }
+              },
+              {
+                "id": "heating_and_hot_water",
+                "title": {
+                  "en": "Heating and hot water",
+                  "nl": "Verwarmen en warm water"
+                }
+              },
+              {
+                "id": "floor_heatign_and_hot_water",
+                "title": {
+                  "en": "Floor heating and hot water",
+                  "nl": "Vloerverwarming en warm water"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_hotwater_temperature",
+        "title": {
+          "en": "Set hot water temperature",
+          "nl": "Warm water temperatuur instellen"
+        },
+        "titleFormatted": {
+          "en": "Set hot water temperature to [[temperature]]",
+          "nl": "Warm water temperatuur instellen op [[temperature]]"
+        },
+        "hint": {
+          "en": "Set the hot water temperature setting",
+          "nl": "Stel de warm water temperatuur instelling in"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Hot water temperature (°C)",
+              "nl": "Warm water temperatuur (°C)"
+            },
+            "min": 30,
+            "max": 75,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Hot water temperature in °C",
+              "nl": "Warm water temperatuur in °C"
+            }
+          }
+        ]
+      },
+      {
+        "id": "set_target_temperature",
+        "title": {
+          "en": "Set target temperature",
+          "nl": "Doel temperatuur instellen"
+        },
+        "titleFormatted": {
+          "en": "Set target temperature to [[temperature]]",
+          "nl": "Doel temperatuur instellen op [[temperature]]"
+        },
+        "hint": {
+          "en": "Set the target temperature for the heat pump",
+          "nl": "Stel de doel temperatuur voor de warmtepomp in"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": 5,
+            "max": 60,
+            "step": 0.5,
+            "units": "°C",
+            "placeholder": {
+              "en": "Target temperature in °C",
+              "nl": "Doel temperatuur in °C"
+            }
+          }
+        ]
+      },
+      {
+        "id": "set_volume",
+        "title": {
+          "en": "Set electricity consumption checking",
+          "nl": "Stroomverbruik controleren instellen"
+        },
+        "titleFormatted": {
+          "en": "Set electricity consumption checking to [[volume]]",
+          "nl": "Stroomverbruik controleren instellen op [[volume]]"
+        },
+        "hint": {
+          "en": "Set the electricity consumption checking level",
+          "nl": "Stel de stroomverbruik controle niveau in"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "volume",
+            "title": {
+              "en": "Electricity consumption checking",
+              "nl": "Stroomverbruik controleren"
+            },
+            "min": 0,
+            "max": 2,
+            "step": 1,
+            "units": "",
+            "placeholder": {
+              "en": "Level (0-2)",
+              "nl": "Niveau (0-2)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "set_water_mode",
+        "title": {
+          "en": "Set water control mode",
+          "nl": "Water controle modus instellen"
+        },
+        "titleFormatted": {
+          "en": "Set water control mode to [[mode]]",
+          "nl": "Water controle modus instellen op [[mode]]"
+        },
+        "hint": {
+          "en": "Set the water control mode setting",
+          "nl": "Stel de water controle modus instelling in"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "mode",
+            "title": {
+              "en": "Water control mode",
+              "nl": "Water controle modus"
+            },
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "units": "",
+            "placeholder": {
+              "en": "Mode (0-1)",
+              "nl": "Modus (0-1)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "set_work_mode",
+        "title": {
+          "en": "Set work mode",
+          "nl": "Bedrijfsmodus instellen"
+        },
+        "titleFormatted": {
+          "en": "Set work mode to [[mode]]",
+          "nl": "Bedrijfsmodus instellen op [[mode]]"
+        },
+        "hint": {
+          "en": "Set the system work mode",
+          "nl": "Stel de systeem werkmodus in"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "title": {
+              "en": "Work mode",
+              "nl": "Werkmodus"
+            },
+            "values": [
+              {
+                "id": "ECO",
+                "title": {
+                  "en": "ECO",
+                  "nl": "ECO"
+                }
+              },
+              {
+                "id": "Normal",
+                "title": {
+                  "en": "Normal",
+                  "nl": "Normaal"
+                }
+              },
+              {
+                "id": "Boost",
+                "title": {
+                  "en": "Boost",
+                  "nl": "Boost"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "drivers": [
     {
       "name": {

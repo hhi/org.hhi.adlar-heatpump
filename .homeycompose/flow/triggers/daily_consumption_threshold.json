@@ -1,0 +1,58 @@
+{
+  "id": "daily_consumption_threshold",
+  "title": {
+    "en": "Daily consumption threshold reached",
+    "nl": "Dagverbruik drempel bereikt"
+  },
+  "titleFormatted": {
+    "en": "Daily consumption reached [[threshold]] kWh",
+    "nl": "Dagverbruik bereikte [[threshold]] kWh"
+  },
+  "hint": {
+    "en": "Triggers when daily electricity consumption reaches specified threshold",
+    "nl": "Wordt geactiveerd wanneer het dagelijkse stroomverbruik een drempel bereikt"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "Daily threshold (kWh)",
+        "nl": "Dagelijkse drempel (kWh)"
+      },
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "units": "kWh",
+      "placeholder": {
+        "en": "Daily consumption threshold",
+        "nl": "Dagverbruik drempel"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "daily_consumption",
+      "title": {
+        "en": "Daily consumption",
+        "nl": "Dagverbruik"
+      },
+      "example": 25
+    },
+    {
+      "type": "number",
+      "name": "threshold_value",
+      "title": {
+        "en": "Threshold value",
+        "nl": "Drempel waarde"
+      },
+      "example": 30
+    }
+  ]
+}

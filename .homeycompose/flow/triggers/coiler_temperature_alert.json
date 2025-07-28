@@ -1,0 +1,82 @@
+{
+  "id": "coiler_temperature_alert",
+  "title": {
+    "en": "Coiler temperature alert",
+    "nl": "Verdampingscondensator temperatuur alarm"
+  },
+  "titleFormatted": {
+    "en": "Coiler temperature [[condition]] [[temperature]]°C",
+    "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggers when electricity coiler temperature goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Temperature (°C)",
+        "nl": "Temperatuur (°C)"
+      },
+      "min": -20,
+      "max": 80,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current Coiler temperature",
+        "nl": "Huidige Verdampingscondensator temperatuur"
+      },
+      "example": 45.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_temperature",
+      "title": {
+        "en": "Threshold temperature",
+        "nl": "Drempel temperatuur"
+      },
+      "example": 50
+    }
+  ]
+}

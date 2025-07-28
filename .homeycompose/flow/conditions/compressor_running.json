@@ -1,0 +1,23 @@
+{
+  "id": "compressor_running",
+  "title": {
+    "en": "Compressor is running",
+    "nl": "Compressor draait"
+  },
+  "titleFormatted": {
+    "en": "Compressor is !{{running|stopped}}",
+    "nl": "Compressor is !{{draaiend|gestopt}}"
+  },
+  "hint": {
+    "en": "Check if the compressor is currently running",
+    "nl": "Controleer of de compressor momenteel draait"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ]
+}

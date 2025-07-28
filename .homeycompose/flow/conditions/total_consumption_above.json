@@ -1,0 +1,38 @@
+{
+  "id": "total_consumption_above",
+  "title": {
+    "en": "Total consumption above threshold",
+    "nl": "Totaalverbruik boven drempel"
+  },
+  "titleFormatted": {
+    "en": "Total consumption is !{{above|below}} [[threshold]] kWh",
+    "nl": "Totaalverbruik is !{{boven|onder}} [[threshold]] kWh"
+  },
+  "hint": {
+    "en": "Check if total electricity consumption is above or below a threshold",
+    "nl": "Controleer of het totale stroomverbruik boven of onder een drempel is"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "Consumption threshold (kWh)",
+        "nl": "Verbruiksdrempel (kWh)"
+      },
+      "min": 100,
+      "max": 50000,
+      "step": 100,
+      "units": "kWh",
+      "placeholder": {
+        "en": "Total consumption threshold in kWh",
+        "nl": "Totaalverbruik drempel in kWh"
+      }
+    }
+  ]
+}

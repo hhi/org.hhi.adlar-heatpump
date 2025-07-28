@@ -1,0 +1,23 @@
+{
+  "id": "fault_active",
+  "title": {
+    "en": "Fault is active",
+    "nl": "Fout is actief"
+  },
+  "titleFormatted": {
+    "en": "Fault is !{{active|inactive}}",
+    "nl": "Fout is !{{actief|inactief}}"
+  },
+  "hint": {
+    "en": "Check if a fault is currently active (fault code > 0)",
+    "nl": "Controleer of er momenteel een fout actief is (foutcode > 0)"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ]
+}

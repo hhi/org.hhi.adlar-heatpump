@@ -1,0 +1,82 @@
+{
+  "id": "phase_c_voltage_alert",
+  "title": {
+    "en": "Phase C voltage alert",
+    "nl": "Fase C spanning alarm"
+  },
+  "titleFormatted": {
+    "en": "Phase C voltage [[condition]] [[voltage]] volts",
+    "nl": "Fase C spanning [[condition]] [[voltage]] volt"
+  },
+  "hint": {
+    "en": "Triggers when Phase C voltage goes above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer Fase C spanning boven of onder bepaalde niveaus gaat"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "voltage",
+      "title": {
+        "en": "Voltage (V)",
+        "nl": "Spanning (V)"
+      },
+      "min": 180,
+      "max": 260,
+      "step": 5,
+      "units": "V",
+      "placeholder": {
+        "en": "Voltage threshold in volts",
+        "nl": "Spanning drempel in volt"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_voltage_c",
+      "title": {
+        "en": "Phase C voltage",
+        "nl": "Fase C spanning"
+      },
+      "example": 230
+    },
+    {
+      "type": "number",
+      "name": "threshold_voltage",
+      "title": {
+        "en": "Threshold voltage",
+        "nl": "Drempel spanning"
+      },
+      "example": 220
+    }
+  ]
+}

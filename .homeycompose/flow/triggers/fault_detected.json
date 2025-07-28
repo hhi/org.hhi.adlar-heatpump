@@ -1,0 +1,59 @@
+{
+  "id": "fault_detected",
+  "title": {
+    "en": "Fault detected",
+    "nl": "Storing gedetecteerd"
+  },
+  "titleFormatted": {
+    "en": "Fault code [[fault_code]] detected",
+    "nl": "Storing code [[fault_code]] gedetecteerd"
+  },
+  "hint": {
+    "en": "Triggers when a system fault is detected",
+    "nl": "Wordt geactiveerd wanneer een systeem storing wordt gedetecteerd"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "fault_code",
+      "title": {
+        "en": "Fault code",
+        "nl": "Storing code"
+      },
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "units": "",
+      "placeholder": {
+        "en": "Fault code to monitor",
+        "nl": "Storing code om te monitoren"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "fault_code",
+      "title": {
+        "en": "Fault code",
+        "nl": "Storing code"
+      },
+      "example": 15
+    },
+    {
+      "type": "string",
+      "name": "fault_description",
+      "title": {
+        "en": "Fault description",
+        "nl": "Storing beschrijving"
+      },
+      "example": "Compressor overheating"
+    }
+  ]
+}
