@@ -1,48 +1,46 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle -->
-  <circle cx="50" cy="50" r="48" fill="#f8f9fa" stroke="#e9ecef" stroke-width="2"/>
+<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
   
   <!-- Heat pump unit body -->
-  <rect x="25" y="40" width="50" height="35" rx="4" fill="#2c3e50" stroke="#34495e" stroke-width="1"/>
+  <rect x="87.5" y="212.5" width="825" height="577.5" rx="60" fill="none" stroke="#000000" stroke-width="15"/>
   
   <!-- Top vent grilles -->
-  <rect x="28" y="43" width="44" height="2" fill="#7f8c8d" rx="1"/>
-  <rect x="28" y="47" width="44" height="2" fill="#7f8c8d" rx="1"/>
-  <rect x="28" y="51" width="44" height="2" fill="#7f8c8d" rx="1"/>
-  
+  <rect x="126" y="280" width="726" height="33" fill="black" rx="15"/>
+  <rect x="126" y="340" width="726" height="33" fill="black" rx="15"/>
+  <rect x="126" y="400" width="726" height="33" fill="black" rx="15"/>
+
   <!-- Control panel -->
-  <rect x="30" y="56" width="15" height="12" rx="2" fill="#34495e" stroke="#4a5f7a" stroke-width="1"/>
+  <rect x="187.5" y="510" width="247.5" height="198" rx="30" fill="none" stroke="black" stroke-width="15"/>
   
   <!-- Display screen -->
-  <rect x="32" y="58" width="11" height="8" rx="1" fill="#2ecc71"/>
+  <rect x="219" y="540" width="181.5" height="132" rx="15" fill="none"/>
   
   <!-- Temperature display -->
-  <text x="37.5" y="64" font-family="Arial, sans-serif" font-size="4" fill="#fff" text-anchor="middle">21°</text>
+  <text x="309.5" y="634" font-family="Arial, sans-serif" font-size="66" fill="black" text-anchor="middle">21°</text>
   
   <!-- Fan unit -->
-  <circle cx="60" cy="62" r="10" fill="#7f8c8d" stroke="#95a5a6" stroke-width="1"/>
-  <circle cx="60" cy="62" r="8" fill="#bdc3c7"/>
+  <circle cx="675" cy="598" r="165" fill="none" stroke="black" stroke-width="15"/>
+  <circle cx="675" cy="598" r="132" fill="none"/>
   
   <!-- Fan blades -->
-  <path d="M60 54 L60 70 M52 62 L68 62 M55 55 L65 69 M65 55 L55 69" stroke="#34495e" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M675 433 L675 763 M510 598 L840 598 M544 531.5 L806 664.5 M806 531.5 L544 664.5" stroke="black" stroke-width="22.5" stroke-linecap="round"/>
   
   <!-- Smart/WiFi indicator -->
-  <g transform="translate(77,45)">
-    <circle cx="0" cy="0" r="6" fill="#3498db" opacity="0.2"/>
-    <path d="M-3 2 Q0 -2 3 2 M-2 0 Q0 -1 2 0 M0 1 L0 1" stroke="#3498db" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <g transform="translate(900,427)">
+    <circle cx="0" cy="0" r="66" fill="black" opacity="0.3"/>
+    <path d="M-33 22 Q0 -22 33 22 M-22 0 Q0 -11 22 0 M0 11 L0 11" stroke="black" stroke-width="10" fill="none" stroke-linecap="round"/>
   </g>
   
   <!-- Heat waves/air flow -->
   <g opacity="0.6">
     <!-- Warm air output -->
-    <path d="M15 25 Q20 20 25 25 Q30 30 35 25" stroke="#e74c3c" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M18 22 Q23 17 28 22 Q33 27 38 22" stroke="#e74c3c" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M80 120 Q140 60 200 120 Q260 180 320 120" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+    <path d="M100 90 Q160 30 220 90 Q280 150 340 90" stroke="#000000" stroke-width="20" fill="none" stroke-linecap="round"/>
     
     <!-- Cool air input -->
-    <path d="M65 25 Q70 20 75 25 Q80 30 85 25" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M62 22 Q67 17 72 22 Q77 27 82 22" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M680 120 Q740 60 800 120 Q860 180 920 120" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+    <path d="M660 90 Q720 30 780 90 Q840 150 900 90" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
   </g>
   
   <!-- Brand indicator (A for Adlar) -->
-  <text x="50" y="88" font-family="Arial, sans-serif" font-size="8" fill="#7f8c8d" text-anchor="middle" font-weight="bold">A</text>
+  <text x="500" y="940" font-family="Arial, sans-serif" font-size="150" fill="black" text-anchor="middle" font-weight="bold">Adlar</text>
 </svg>
