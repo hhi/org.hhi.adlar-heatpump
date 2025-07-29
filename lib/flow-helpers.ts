@@ -277,7 +277,11 @@ export const FLOW_PATTERNS = {
     { cardId: 'fault_active', pattern: 'simple_condition' as const, capabilityName: 'adlar_fault' },
     { cardId: 'temperature_above', pattern: 'simple_condition' as const, capabilityName: 'measure_temperature.around_temp' },
     { cardId: 'compressor_running', pattern: 'simple_condition' as const, capabilityName: 'adlar_state_compressor_state' },
-    { cardId: 'power_above_threshold', pattern: 'simple_condition' as const, capabilityName: 'measure_power', requiresCapability: 'measure_power' },
-    { cardId: 'total_consumption_above', pattern: 'simple_condition' as const, capabilityName: 'meter_power.electric_total', requiresCapability: 'meter_power.electric_total' },
+    {
+      cardId: 'power_above_threshold', pattern: 'simple_condition' as const, capabilityName: 'measure_power', requiresCapability: 'measure_power',
+    },
+    {
+      cardId: 'total_consumption_above', pattern: 'simple_condition' as const, capabilityName: 'meter_power.electric_total', requiresCapability: 'meter_power.electric_total',
+    },
   ],
 };

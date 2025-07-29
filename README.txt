@@ -38,3 +38,44 @@ Documentation Created (See /docs subdirectories)
 
   The documentation provides everything needed for users to understand and effectively use the heat pump's capabilities, from
   simple temperature control to sophisticated energy management and predictive maintenance automation.
+
+   
+   
+    ✅ Implemented Critical Notifications:
+
+  1. Connection Failures
+
+  - Triggers after 5 consecutive reconnection failures (100 seconds)
+  - Notifies: "Device Connection Lost - Heat pump disconnected for over 1 minute"
+
+  2. System Faults
+
+  - Monitors adlar_fault capability
+  - Notifies: "System Fault Detected - Fault code: X. Check system immediately"
+
+  3. Temperature Safety
+
+  - Extreme temperatures (>80°C or <-20°C)
+  - Notifies: "Temperature Alert - Extreme temperature detected. System safety compromised"
+
+  4. Pressure Safety
+
+  - Critical pressure readings (>50 or <0)
+  - Notifies: "Pressure Alert - Critical pressure reading. System requires attention"
+
+  Smart Features:
+
+  - Rate limiting: Max 1 notification per 30 minutes per device (prevents spam)
+  - Device-specific: Includes device name in notification
+  - Automatic monitoring: Checks all incoming sensor data
+  - Non-blocking: Won't crash app if notification fails
+
+  Additional Suggestions:
+
+  You could also add notifications for:
+  - Electrical imbalance from flow cards (3-phase current monitoring)
+  - Extended maintenance mode (compressor/defrost stuck states)
+  - Communication errors (invalid DPS data patterns)
+
+  The system now provides proactive user alerts for all critical heat pump conditions while
+  preventing notification spam!
