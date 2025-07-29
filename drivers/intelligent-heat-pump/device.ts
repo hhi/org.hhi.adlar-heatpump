@@ -11,6 +11,9 @@ class MyDevice extends Homey.Device {
   allCapabilities: Record<string, number[]> = allCapabilities;
   allArraysSwapped: Record<number, string> = allArraysSwapped;
   settableCapabilities: string[] = [];
+  reconnectInterval: NodeJS.Timeout | undefined;
+  consecutiveFailures: number = 0;
+  lastNotificationTime: number = 0;
 
   private capabilitiesArray: string[] = (manifest.capabilities || [])
 
@@ -18,6 +21,22 @@ class MyDevice extends Homey.Device {
   private debugLog(...args: unknown[]) {
     if (process.env.DEBUG === '1') {
       this.log(...args);
+    }
+  }
+
+  private async sendCriticalNotification(title: string, message: string) {
+    const now = Date.now();
+    // Prevent spam - only send notifications every 30 minutes for the same device
+    if (now - this.lastNotificationTime > 30 * 60 * 1000) {
+      try {
+        await this.homey.notifications.createNotification({
+          excerpt: `${this.getName()}: ${title}`,
+        });
+        this.lastNotificationTime = now;
+        this.log(`Critical notification sent: ${title}`);
+      } catch (err) {
+        this.error('Failed to send notification:', err);
+      }
     }
   }
 
@@ -36,12 +55,44 @@ class MyDevice extends Homey.Device {
         }
       } catch (err) {
         this.error('Failed to find or connect to Tuya device:', err);
-        throw new Error('Could not find or connect to device');
+        // Don't throw here to allow reconnection attempts
       }
     }
-    this.homey.setTimeout(async () => {
-      await this.connectTuya();
+  }
+
+  private startReconnectInterval() {
+    // Clear any existing interval
+    this.stopReconnectInterval();
+
+    // Start new interval for reconnection attempts
+    this.reconnectInterval = this.homey.setInterval(async () => {
+      if (!this.tuyaConnected) {
+        this.debugLog('Attempting to reconnect to Tuya device...');
+        try {
+          await this.connectTuya();
+          // Reset failure counter on successful connection
+          this.consecutiveFailures = 0;
+        } catch (err) {
+          this.debugLog('Reconnection attempt failed:', err);
+          this.consecutiveFailures++;
+
+          // Send notification after 5 consecutive failures (100 seconds)
+          if (this.consecutiveFailures === 5) {
+            await this.sendCriticalNotification(
+              'Device Connection Lost',
+              'Heat pump has been disconnected for over 1 minute. Please check device and network connectivity.',
+            );
+          }
+        }
+      }
     }, 20000);
+  }
+
+  private stopReconnectInterval() {
+    if (this.reconnectInterval) {
+      this.homey.clearInterval(this.reconnectInterval);
+      this.reconnectInterval = undefined;
+    }
   }
 
   /**
@@ -64,12 +115,55 @@ class MyDevice extends Homey.Device {
       const capability = allArraysSwapped[Number(dpsId)];
       this.debugLog('Found capability for dpsId', dpsId, ':', capability);
       if (capability) {
+        // Check for critical conditions before updating
+        this.checkForCriticalConditions(capability, value).catch((err) => this.error('Error checking critical conditions:', err));
         // Update the capability value in Homey
         this.setCapabilityValue(capability, (value as boolean | number | string))
           .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
           .catch((err) => this.error(`Failed to update ${capability}:`, err));
       }
     });
+  }
+
+  private async checkForCriticalConditions(capability: string, value: unknown) {
+    // System fault detection
+    if (capability === 'adlar_fault' && value !== 0) {
+      await this.sendCriticalNotification(
+        'System Fault Detected',
+        `Heat pump fault code: ${value}. Please check system immediately.`,
+      );
+    }
+
+    // Temperature safety checks
+    const tempCapabilities = [
+      'measure_temperature.temp_top',
+      'measure_temperature.temp_bottom',
+      'measure_temperature.ambient_temp',
+    ];
+
+    if (tempCapabilities.includes(capability) && typeof value === 'number') {
+      if (value > 80 || value < -20) {
+        await this.sendCriticalNotification(
+          'Temperature Alert',
+          `Extreme temperature detected (${value}°C). System safety may be compromised.`,
+        );
+      }
+    }
+
+    // Pressure alerts
+    const pressureCapabilities = [
+      'adlar_measure_pressure_temp_current',
+      'adlar_measure_pressure_effluent_temp',
+    ];
+
+    if (pressureCapabilities.includes(capability) && typeof value === 'number') {
+      if (value > 50 || value < 0) {
+        await this.sendCriticalNotification(
+          'Pressure Alert',
+          `Critical pressure reading (${value}). System may require immediate attention.`,
+        );
+      }
+    }
   }
 
   /**
@@ -145,6 +239,9 @@ class MyDevice extends Homey.Device {
 
     // Connect once at startup
     await this.connectTuya();
+
+    // Start reconnection interval
+    this.startReconnectInterval();
 
     // TUYA ON EVENT (from dp id to capability name)
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
@@ -229,14 +326,28 @@ class MyDevice extends Homey.Device {
    */
   async onDeleted() {
     this.log('MyDevice has been deleted');
-    if (this.tuya && this.tuyaConnected) {
+
+    // Stop reconnection interval
+    this.stopReconnectInterval();
+
+    if (this.tuya) {
       try {
-        await this.tuya.disconnect();
-        this.log('Disconnected from Tuya device');
+        // Remove all event listeners to prevent memory leaks
+        this.tuya.removeAllListeners();
+
+        // Disconnect if connected
+        if (this.tuyaConnected) {
+          await this.tuya.disconnect();
+          this.log('Disconnected from Tuya device');
+        }
       } catch (err) {
-        this.error('Error disconnecting from Tuya device:', err);
+        this.error('Error cleaning up Tuya device:', err);
       }
     }
+
+    // Reset connection state
+    this.tuyaConnected = false;
+    this.tuya = undefined;
   }
 }
 
