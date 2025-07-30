@@ -70,12 +70,5 @@ Documentation Created (See /docs subdirectories)
   - Automatic monitoring: Checks all incoming sensor data
   - Non-blocking: Won't crash app if notification fails
 
-  Additional Suggestions:
-
-  You could also add notifications for:
-  - Electrical imbalance from flow cards (3-phase current monitoring)
-  - Extended maintenance mode (compressor/defrost stuck states)
-  - Communication errors (invalid DPS data patterns)
-
   The system now provides proactive user alerts for all critical heat pump conditions while
   preventing notification spam!

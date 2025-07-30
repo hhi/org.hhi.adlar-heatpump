@@ -1,5 +1,14 @@
 {
+  "0.20.0": {
+    "en": "Version with flow control and warning/error state notifications."
+  }
+}{
+  "0.10.0": {
+    "en": "Version without flow control."
+  }
+}
+{
   "0.0.1": {
-    "en": "initial version without flow control."
+    "en": "Initial version without flow control."
   }
 }
