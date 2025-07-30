@@ -124,22 +124,22 @@ This document provides a comprehensive overview of all device capabilities suppo
 
 ### Pressure Measurement Capabilities
 
-#### adlar_measure_pressure_temp_current
+#### adlar_measure_pulse_steps_temp_current
 - **DPS**: 16 (temp_current)
 - **Type**: number
-- **Purpose**: Measures EEV (Electronic Expansion Valve) opening pressure
-- **Range**: -500 to 500 Pa (step 1)
+- **Purpose**: Measures EEV (Electronic Expansion Valve) opening pulse-steps
+- **Range**: 0 to 500 Pulse-steps (step 1)
 - **Units**: Pa (Pascals)
-- **Icon**: `/assets/pressure.svg`
+- **Icon**: `/assets/pulse-steps.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
 
-#### adlar_measure_pressure_effluent_temp
+#### adlar_measure_pulse_steps_effluent_temp
 - **DPS**: 25 (effluent_temp)
 - **Type**: number
-- **Purpose**: Measures EVI (Economizer Vapor Injection) valve opening pressure
-- **Range**: -500 to 500 Pa (step 1)
+- **Purpose**: Measures EVI (Economizer Vapor Injection) valve opening pulse-steps
+- **Range**: 0 to 500 Pulse-steps (step 1)
 - **Units**: Pa (Pascals)
-- **Icon**: `/assets/pressure.svg`
+- **Icon**: `/assets/pulse-steps.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
 
 ## Standard Homey Capabilities

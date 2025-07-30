@@ -37,8 +37,8 @@
     "measure_temperature.evlin",
     "measure_temperature.eviout",
 
-    "adlar_measure_pressure_temp_current",
-    "adlar_measure_pressure_effluent_temp",
+    "adlar_measure_pulse_steps_temp_current",
+    "adlar_measure_pulse_steps_effluent_temp",
 
     "measure_power",
     "meter_power.power_consumption",

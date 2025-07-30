@@ -1,0 +1,82 @@
+{
+  "id": "evi_pulse_steps_alert",
+  "title": {
+    "en": "EVI Open pulse-steps alert",
+    "nl": "EVI-openingsstop puls-stappen alarm"
+  },
+  "titleFormatted": {
+    "en": "EVI Open pulse-steps [[condition]] [[pulse_steps]]",
+    "nl": "EVI-openingsstop puls-stappen [[condition]] [[pulse_steps]]"
+  },
+  "hint": {
+    "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder bepaalde niveaus gaan"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "pulse_steps",
+      "title": {
+        "en": "Pulse-steps",
+        "nl": "Puls-stappen"
+      },
+      "min": 0,
+      "max": 500,
+      "step": 10,
+      "units": "Pulse-steps",
+      "placeholder": {
+        "en": "Pulse-steps threshold",
+        "nl": "Puls-stappen drempel"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_pulse_steps",
+      "title": {
+        "en": "Current EVI Open pulse-steps",
+        "nl": "Huidige EVI-openingsstop puls-stappen"
+      },
+      "example": 250
+    },
+    {
+      "type": "number",
+      "name": "threshold_pulse_steps",
+      "title": {
+        "en": "Threshold pulse-steps",
+        "nl": "Drempel puls-stappen"
+      },
+      "example": 200
+    }
+  ]
+}
