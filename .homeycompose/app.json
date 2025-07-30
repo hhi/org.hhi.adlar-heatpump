@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.10.0",
+  "version": "0.20.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -42,5 +42,15 @@
   "brandColor": "#4a4a4a",
   "author": "Herman Hilberink <herman.Hilberink@gmail.com>",
   "icon": "/assets/icon.svg",
-  "homeyCommunityTopicId": 140621
+  "homeyCommunityTopicId": 140621,
+  "contributors": {
+    "developers": [
+      {
+        "name": "Claude Code AI"
+      },
+      {
+        "name": ""
+      }
+    ]
+  }
 }
