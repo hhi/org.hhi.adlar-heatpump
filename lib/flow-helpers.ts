@@ -12,7 +12,7 @@ import {
 export interface FlowCardPattern {
   cardId: string;
   capabilityName?: string;
-  pattern: 'temperature_alert' | 'voltage_alert' | 'current_alert' | 'pressure_alert' | 'state_change' | 'simple_action' | 'simple_condition';
+  pattern: 'temperature_alert' | 'voltage_alert' | 'current_alert' | 'pulse_steps_alert' | 'state_change' | 'simple_action' | 'simple_condition';
   sensorType?: string;
   requiresCapability?: string; // Optional capability requirement check
 }
@@ -66,13 +66,13 @@ export function registerCurrentAlerts(app: AppWithDynamicTriggers, patterns: Flo
 }
 
 /**
- * Register pressure alert triggers with pattern-based logic
+ * Register pulse-steps alert triggers with pattern-based logic
  */
-interface AppWithPressureTriggers extends App {
+interface AppWithPulseStepsTriggers extends App {
   [key: string]: FlowCardTrigger | unknown;
 }
 
-export function registerPressureAlerts(app: AppWithPressureTriggers, patterns: FlowCardPattern[]) {
+export function registerPulseStepsAlerts(app: AppWithPulseStepsTriggers, patterns: FlowCardPattern[]) {
   for (const pattern of patterns) {
     const triggerCard: FlowCardTrigger = app.homey.flow.getTriggerCard(pattern.cardId);
     // Store reference for device instances to use
@@ -247,10 +247,10 @@ export const FLOW_PATTERNS = {
     { cardId: 'phase_c_current_alert', pattern: 'current_alert' as const, sensorType: 'phase_c' },
   ],
 
-  // Pressure alert triggers
-  pressureAlerts: [
-    { cardId: 'eev_pressure_alert', pattern: 'pressure_alert' as const, sensorType: 'eev' },
-    { cardId: 'evi_pressure_alert', pattern: 'pressure_alert' as const, sensorType: 'evi' },
+  // Pulse-steps alert triggers
+  pulseStepsAlerts: [
+    { cardId: 'eev_pulse_steps_alert', pattern: 'pulse_steps_alert' as const, sensorType: 'eev' },
+    { cardId: 'evi_pulse_steps_alert', pattern: 'pulse_steps_alert' as const, sensorType: 'evi' },
   ],
 
   // State change triggers

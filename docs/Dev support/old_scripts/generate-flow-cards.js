@@ -347,10 +347,10 @@ const TEMPLATES = {
   },
 
   // Pressure Alert Template
-  pressure_alert: {
+  pulse_steps_alert: {
     type: 'trigger',
     pattern: {
-      id: '{{sensor_id}}_pressure_alert',
+      id: '{{sensor_id}}_pulse_steps_alert',
       title: {
         en: '{{sensor_name}} pressure alert',
         nl: '{{sensor_name}} druk alarm'
@@ -375,7 +375,7 @@ const TEMPLATES = {
           min: -500,
           max: 500,
           step: 10,
-          units: "Pa",
+          units: "Pulse-steps",
           placeholder: {
             en: "Pressure threshold",
             nl: "Druk drempel"
@@ -986,13 +986,13 @@ const TEMPLATES = {
         ]
       },
       {
-        condition_id: 'system_pressure_differential',
-        title_en: 'System pressure differential check',
-        title_nl: 'Systeem druk verschil controle',
-        title_formatted_en: 'System pressure differential is !{{above|below}} [[differential]]',
-        title_formatted_nl: 'Systeem druk verschil is !{{boven|onder}} [[differential]]',
-        hint_en: 'Check if the pressure difference between EEV and EVI is above or below a threshold',
-        hint_nl: 'Controleer of het drukverschil tussen EEV en EVI boven of onder een drempel is',
+        condition_id: 'system_pulse_steps_differential',
+        title_en: 'System pulse-steps differential check',
+        title_nl: 'Systeem puls-stappen verschil controle',
+        title_formatted_en: 'System pulse-steps differential is !{{above|below}} [[differential]]',
+        title_formatted_nl: 'Systeem puls-stappen verschil is !{{boven|onder}} [[differential]]',
+        hint_en: 'Check if the pulse-steps difference between EEV and EVI is above or below a threshold',
+        hint_nl: 'Controleer of het puls-stappen verschil tussen EEV en EVI boven of onder een drempel is',
         args: [
           {
             type: "range",
@@ -1001,7 +1001,7 @@ const TEMPLATES = {
             min: 0,
             max: 1000,
             step: 10,
-            units: "Pa",
+            units: "Pulse-steps",
             placeholder: { en: "Pressure differential threshold", nl: "Druk verschil drempel" }
           }
         ]

@@ -9,7 +9,7 @@ import {
   registerTemperatureAlerts,
   registerVoltageAlerts,
   registerCurrentAlerts,
-  registerPressureAlerts,
+  registerPulseStepsAlerts,
   registerStateChanges,
   registerSimpleActions,
   registerSimpleConditions,
@@ -33,7 +33,7 @@ interface FlowRateArgs extends DeviceFlowArgs {
   flowRate: number;
 }
 
-interface PressureDifferentialArgs extends DeviceFlowArgs {
+interface PulseStepsDifferentialArgs extends DeviceFlowArgs {
   differential: number;
 }
 
@@ -76,9 +76,9 @@ class MyApp extends App {
   phasebcurrentalertTrigger!: FlowCardTrigger;
   phaseccurrentalertTrigger!: FlowCardTrigger;
 
-  // Pressure alerts
-  eevpressurealertTrigger!: FlowCardTrigger;
-  evipressurealertTrigger!: FlowCardTrigger;
+  // Pulse-steps alerts
+  eevpulsestepsalertTrigger!: FlowCardTrigger;
+  evipulsestepsalertTrigger!: FlowCardTrigger;
 
   // State changes
   defroststatechangedTrigger!: FlowCardTrigger;
@@ -117,7 +117,7 @@ class MyApp extends App {
     registerTemperatureAlerts(this, FLOW_PATTERNS.temperatureAlerts);
     registerVoltageAlerts(this, FLOW_PATTERNS.voltageAlerts);
     registerCurrentAlerts(this, FLOW_PATTERNS.currentAlerts);
-    registerPressureAlerts(this, FLOW_PATTERNS.pressureAlerts);
+    registerPulseStepsAlerts(this, FLOW_PATTERNS.pulseStepsAlerts);
     registerStateChanges(this, FLOW_PATTERNS.stateChanges);
 
     // Register all pattern-based actions
@@ -181,14 +181,14 @@ class MyApp extends App {
       },
     );
 
-    // System Pressure Differential Condition - custom logic
-    const systemPressureDifferentialCondition: FlowCardCondition = this.homey.flow.getConditionCard('system_pressure_differential');
-    systemPressureDifferentialCondition.registerRunListener(
-      async (args: PressureDifferentialArgs, state: FlowState) => {
+    // System Pulse-Steps Differential Condition - custom logic
+    const systemPulseStepsDifferentialCondition: FlowCardCondition = this.homey.flow.getConditionCard('system_pulse_steps_differential');
+    systemPulseStepsDifferentialCondition.registerRunListener(
+      async (args: PulseStepsDifferentialArgs, state: FlowState) => {
         const { device } = args;
-        const eevPressure = device.getCapabilityValue('adlar_measure_pressure_temp_current') || 0;
-        const eviPressure = device.getCapabilityValue('adlar_measure_pressure_effluent_temp') || 0;
-        const actualDifferential = Math.abs(eevPressure - eviPressure);
+        const eevPulseSteps = device.getCapabilityValue('adlar_measure_pulse_steps_temp_current') || 0;
+        const eviPulseSteps = device.getCapabilityValue('adlar_measure_pulse_steps_effluent_temp') || 0;
+        const actualDifferential = Math.abs(eevPulseSteps - eviPulseSteps);
         return actualDifferential > args.differential;
       },
     );

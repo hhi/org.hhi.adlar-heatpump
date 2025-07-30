@@ -182,14 +182,15 @@ const schema = {
 }
 
 const data = {
-  "id": "adlar_measure_pressure.temp_current",
+  "id": "adlar_measure_pulse_steps.temp_current",
   "title": {
     "en": "EEV Open",
     "nl": "EEV Open"
   },
   "type": "number",
   "units": {
-    "en": "Pa"
+    "en": "Pulse-steps",
+    "nl": "Puls-stappen"
   },
   
   "min": -500,

@@ -1,16 +1,16 @@
 {
-  "id": "eev_pressure_alert",
+  "id": "eev_pulse_steps_alert",
   "title": {
-    "en": "EEV Open pressure alert",
-    "nl": "EEV-openingsstop druk alarm"
+    "en": "EEV Open pulse-steps alert",
+    "nl": "EEV-openingsstop puls-stappen alarm"
   },
   "titleFormatted": {
-    "en": "EEV pressure [[condition]] [[pressure]]",
-    "nl": "EEV druk [[condition]] [[pressure]]"
+    "en": "EEV pulse-steps [[condition]] [[pulse_steps]]",
+    "nl": "EEV puls-stappen [[condition]] [[pulse_steps]]"
   },
   "hint": {
-    "en": "Triggers when Electronic Expansion Valve (EEV) pressure goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) druk boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below specified levels",
+    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder bepaalde niveaus gaan"
   },
   "args": [
     {
@@ -44,37 +44,37 @@
     },
     {
       "type": "range",
-      "name": "pressure",
+      "name": "pulse_steps",
       "title": {
-        "en": "Pressure",
-        "nl": "Druk"
+        "en": "Pulse-steps",
+        "nl": "Puls-stappen"
       },
-      "min": -500,
+      "min": 0,
       "max": 500,
       "step": 10,
-      "units": "Pa",
+      "units": "Pulse-steps",
       "placeholder": {
-        "en": "Pressure threshold",
-        "nl": "Druk drempel"
+        "en": "Pulse-steps threshold",
+        "nl": "Puls-stappen drempel"
       }
     }
   ],
   "tokens": [
     {
       "type": "number",
-      "name": "current_pressure",
+      "name": "current_pulse_steps",
       "title": {
-        "en": "Current EEV Open pressure",
-        "nl": "Huidige EEV-openingsstop druk"
+        "en": "Current EEV Open pulse-steps",
+        "nl": "Huidige EEV-openingsstop puls-stappen"
       },
       "example": 450
     },
     {
       "type": "number",
-      "name": "threshold_pressure",
+      "name": "threshold_pulse_steps",
       "title": {
-        "en": "Threshold pressure",
-        "nl": "Drempel druk"
+        "en": "Threshold pulse-steps",
+        "nl": "Drempel puls-stappen"
       },
       "example": 400
     }

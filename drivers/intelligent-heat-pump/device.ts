@@ -14,6 +14,7 @@ class MyDevice extends Homey.Device {
   reconnectInterval: NodeJS.Timeout | undefined;
   consecutiveFailures: number = 0;
   lastNotificationTime: number = 0;
+  lastNotificationKey: string = '';
 
   private capabilitiesArray: string[] = (manifest.capabilities || [])
 
@@ -26,13 +27,18 @@ class MyDevice extends Homey.Device {
 
   private async sendCriticalNotification(title: string, message: string) {
     const now = Date.now();
+    const notificationKey = `${title}:${message}`;
+    
     // Prevent spam - only send notifications every 30 minutes for the same device
-    if (now - this.lastNotificationTime > 30 * 60 * 1000) {
+    // Also prevent duplicate notifications within 5 seconds (for duplicate events)
+    if (now - this.lastNotificationTime > 30 * 60 * 1000 || 
+        (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > 5000)) {
       try {
         await this.homey.notifications.createNotification({
           excerpt: `${this.getName()}: ${title}`,
         });
         this.lastNotificationTime = now;
+        this.lastNotificationKey = notificationKey;
         this.log(`Critical notification sent: ${title}`);
       } catch (err) {
         this.error('Failed to send notification:', err);
@@ -150,17 +156,17 @@ class MyDevice extends Homey.Device {
       }
     }
 
-    // Pressure alerts
-    const pressureCapabilities = [
-      'adlar_measure_pressure_temp_current',
-      'adlar_measure_pressure_effluent_temp',
+    // Pulse-steps alerts
+    const pulseStepsCapabilities = [
+      'adlar_measure_pulse_steps_temp_current',
+      'adlar_measure_pulse_steps_effluent_temp',
     ];
 
-    if (pressureCapabilities.includes(capability) && typeof value === 'number') {
-      if (value > 50 || value < 0) {
+    if (pulseStepsCapabilities.includes(capability) && typeof value === 'number') {
+      if (value > 480 || value < 0) {
         await this.sendCriticalNotification(
-          'Pressure Alert',
-          `Critical pressure reading (${value}). System may require immediate attention.`,
+          'Pulse-Steps Alert',
+          `Critical pulse-steps reading (${value}). System may require immediate attention.`,
         );
       }
     }

@@ -40,8 +40,8 @@ export class AdlarMapping {
   };
 
   static adlarCapabilities: Record<string, number[]> = {
-    adlar_measure_pressure_temp_current: [16],
-    adlar_measure_pressure_effluent_temp: [25],
+    adlar_measure_pulse_steps_temp_current: [16],
+    adlar_measure_pulse_steps_effluent_temp: [25],
     adlar_enum_mode: [2],
     adlar_enum_work_mode: [5],
     adlar_enum_water_mode: [10],
