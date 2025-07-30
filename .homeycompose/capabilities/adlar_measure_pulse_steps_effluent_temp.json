@@ -1,11 +1,12 @@
 {
-  "id": "adlar_measure_pressure_effluent_temp",
+  "id": "adlar_measure_pulse_steps_effluent_temp",
   "title": {
     "en": "EVI Open",
     "nl": "EVI-openingsstop"
   },
   "units": {
-    "en": "Pa"
+    "en": "Pulse-steps",
+    "nl": "Puls-stappen"
   },
   "min": -500,
   "max": 500,
@@ -18,9 +19,9 @@
   "insights": true,
   "insightsTitle": {
     "en": "EVI Open",
-    "nl": "EVI-openingsstop"
+    "nl": "EVI-openingsstap"
   },
-  "icon": "/assets/pressure.svg",
+  "icon": "/assets/pulse-steps.svg",
 
   "description": {
     "nl": "dp 25 : effluent_temp - EVI Open"

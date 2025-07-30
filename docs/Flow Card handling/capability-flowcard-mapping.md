@@ -264,19 +264,19 @@ Multiple temperature sensors have dedicated alert triggers:
 
 ## Pressure Measurement Capabilities
 
-### adlar_measure_pressure_temp_current → Flow Cards
-**Capability**: `adlar_measure_pressure_temp_current` (DPS 16)
-- **Trigger**: `eev_pressure_alert`
+### adlar_measure_pulse_steps_temp_current → Flow Cards
+**Capability**: `adlar_measure_pulse_steps_temp_current` (DPS 16)
+- **Trigger**: `eev_pulse_steps_alert`
   - **Purpose**: Electronic expansion valve pressure monitoring
-  - **Range**: -500 to 500 Pa (10 Pa steps)
+  - **Range**: 0 to 500 Pulse-steps (10 pulse steps)
   - **Type**: Expert monitoring
   - **Usage**: Refrigeration system diagnostics
 
-### adlar_measure_pressure_effluent_temp → Flow Cards
-**Capability**: `adlar_measure_pressure_effluent_temp` (DPS 25)
-- **Trigger**: `evi_pressure_alert`
+### adlar_measure_pulse_steps_effluent_temp → Flow Cards
+**Capability**: `adlar_measure_pulse_steps_effluent_temp` (DPS 25)
+- **Trigger**: `evi_pulse_steps_alert`
   - **Purpose**: Economizer injection valve pressure monitoring
-  - **Range**: -500 to 500 Pa (10 Pa steps)
+  - **Range**: 0 to 500 Pulse-steps (10 pulse steps)
   - **Type**: Expert monitoring
   - **Usage**: EVI system performance monitoring
 
@@ -313,8 +313,8 @@ These flow cards combine multiple capabilities or provide advanced system analys
   - **Combines**: All voltage and current measurements
   - **Usage**: Professional electrical diagnostics
 
-- **system_pressure_differential**
-  - **Purpose**: EEV/EVI pressure difference (0-1000 Pa)
+- **system_pulse_steps_differential**
+  - **Purpose**: EEV/EVI pulse-steps difference (0-1000 Pulse-steps)
   - **Combines**: Both pressure measurement capabilities
   - **Usage**: Refrigeration system diagnostics
 

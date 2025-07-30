@@ -186,12 +186,12 @@ THEN set_work_mode to ECO
 
 #### **Refrigeration System Monitoring (5 cards)**
 
-##### **Pressure Alerts (2 cards)**
-- **eev_pressure_alert** - Electronic expansion valve pressure
-- **evi_pressure_alert** - Economizer injection valve pressure
+##### **Pulse-Steps Alerts (2 cards)**
+- **eev_pulse_steps_alert** - Electronic expansion valve pulse-steps
+- **evi_pulse_steps_alert** - Economizer injection valve pulse-steps
 
 **Common Properties**:
-- **Range**: -500 to 500 Pa (10 Pa steps)
+- **Range**: 0 to 500 Pulse-steps (10 pulse steps)
 - **Use Case**: Refrigeration system diagnostics
 - **Advanced Flow**: Refrigerant system health monitoring
 
@@ -385,9 +385,9 @@ THEN send notification "Electrical imbalance detected"
 AND set_device_onoff to off
 ```
 
-#### **system_pressure_differential**
-- **Purpose**: EEV/EVI pressure difference monitoring
-- **Range**: 0-1000 Pa (10 Pa steps)
+#### **system_pulse_steps_differential**
+- **Purpose**: EEV/EVI pulse-steps difference monitoring
+- **Range**: 0-1000 Pulse-steps (10 pulse steps)
 - **Use Case**: Refrigeration system diagnostics
 - **Advanced Flow**: Advanced refrigeration system monitoring
 

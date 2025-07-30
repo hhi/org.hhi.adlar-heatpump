@@ -58,10 +58,10 @@ Documentation Created (See /docs subdirectories)
   - Extreme temperatures (>80°C or <-20°C)
   - Notifies: "Temperature Alert - Extreme temperature detected. System safety compromised"
 
-  4. Pressure Safety
+  4. Pulse-Steps Safety
 
-  - Critical pressure readings (>50 or <0)
-  - Notifies: "Pressure Alert - Critical pressure reading. System requires attention"
+  - Critical pulse-steps readings (>480 or <0)
+  - Notifies: "Pulse-Steps Alert - Critical pulse-steps reading. System requires attention"
 
   Smart Features:
 

@@ -1,0 +1,38 @@
+{
+  "id": "system_pulse_steps_differential",
+  "title": {
+    "en": "System pulse-steps differential check",
+    "nl": "Systeem puls-stappen verschil controle"
+  },
+  "titleFormatted": {
+    "en": "System pulse-steps differential is !{{above|below}} [[differential]]",
+    "nl": "Systeem puls-stappen verschil is !{{boven|onder}} [[differential]]"
+  },
+  "hint": {
+    "en": "Check if the pulse-steps difference between EEV and EVI is above or below a threshold",
+    "nl": "Controleer of het puls-stappen verschil tussen EEV en EVI boven of onder een drempel is"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "differential",
+      "title": {
+        "en": "Pulse-steps differential",
+        "nl": "Puls-stappen verschil"
+      },
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "units": "Pulse-steps",
+      "placeholder": {
+        "en": "Pulse-steps differential threshold",
+        "nl": "Puls-stappen verschil drempel"
+      }
+    }
+  ]
+}
