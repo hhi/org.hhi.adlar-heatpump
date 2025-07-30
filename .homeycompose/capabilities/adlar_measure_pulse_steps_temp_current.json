@@ -1,13 +1,13 @@
 {
-  "id": "adlar_measure_pressure_temp_current",
+  "id": "adlar_measure_pulse_steps_temp_current",
   "title": {
     "en": "EEV Open",
     "nl": "EEV Open"
   },
   "type": "number",
   "units": {
-    "en": "Pa",
-    "nl": "Pa"
+    "en": "Pulse-steps",
+    "nl": "Puls-stappen"
   },
 
   "min": -500,
@@ -22,7 +22,7 @@
     "en": "EEV Open",
     "nl": "EEV Open"
   },
-  "icon": "/assets/pressure.svg",
+  "icon": "/assets/pulse-steps.svg",
   
   "description": {
     "nl": "dp 16 : temp_current - EEV Open"

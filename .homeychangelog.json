@@ -1,13 +1,13 @@
 {
+  "0.30.0": {
+    "en": "Major update: EEV/EVI pressure measurements converted to pulse-steps for accurate valve position monitoring. Updated alert thresholds for realistic operation (0-480 pulse-steps range)."
+  },
   "0.20.0": {
     "en": "Version with flow control and warning/error state notifications."
-  }
-}{
+  },
   "0.10.0": {
     "en": "Version without flow control."
-  }
-}
-{
+  },
   "0.0.1": {
     "en": "Initial version without flow control."
   }

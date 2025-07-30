@@ -17,7 +17,8 @@
       "Bash(node:*)",
       "Bash(homey app:*)",
       "Bash(rm:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }
