@@ -9,8 +9,8 @@
     "nl": "Compressor frequentie [[condition]] [[frequency]] Hz"
   },
   "hint": {
-    "en": "Triggers when compressor frequency goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when compressor frequency goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

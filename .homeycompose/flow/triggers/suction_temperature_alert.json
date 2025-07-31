@@ -9,8 +9,8 @@
     "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C"
   },
   "hint": {
-    "en": "Triggers when suction temperature goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when suction temperature goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

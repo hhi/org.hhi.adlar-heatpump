@@ -9,8 +9,8 @@
     "nl": "EVI-openingsstop puls-stappen [[condition]] [[pulse_steps]]"
   },
   "hint": {
-    "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder bepaalde niveaus gaan"
+    "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan"
   },
   "args": [
     {

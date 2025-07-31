@@ -9,8 +9,8 @@
     "nl": "Buitentemperatuur [[condition]] [[temperature]]°C"
   },
   "hint": {
-    "en": "Triggers when ambient temperature goes above or below specified levels - useful for weather compensation",
-    "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder bepaalde niveaus gaat - nuttig voor weercompensatie"
+    "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
+    "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie"
   },
   "args": [
     {

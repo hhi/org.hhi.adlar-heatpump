@@ -9,8 +9,8 @@
     "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min"
   },
   "hint": {
-    "en": "Triggers when water flow rate goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when water flow rate goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald nivo gaat"
   },
   "args": [
     {
