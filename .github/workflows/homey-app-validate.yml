@@ -1,8 +1,9 @@
 name: Validate Homey App
-on:
-  workflow_dispatch:
-  push:
-  pull_request:
+# Workflows disabled
+# on:
+#   workflow_dispatch:
+#   push:
+#   pull_request:
 
 jobs:
   main:

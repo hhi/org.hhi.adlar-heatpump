@@ -1,20 +1,21 @@
 name: Update Homey App Version
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        type: choice
-        description: Version
-        required: true
-        default: patch
-        options:
-          - major
-          - minor
-          - patch
-      changelog:
-        type: string
-        description: Changelog
-        required: true
+# Workflows disabled
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       version:
+#         type: choice
+#         description: Version
+#         required: true
+#         default: patch
+#         options:
+#           - major
+#           - minor
+#           - patch
+#       changelog:
+#         type: string
+#         description: Changelog
+#         required: true
 
 # Needed in order to push the commit and create a release
 permissions:

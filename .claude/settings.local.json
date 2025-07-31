@@ -18,7 +18,9 @@
       "Bash(homey app:*)",
       "Bash(rm:*)",
       "Bash(npm run build:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "WebFetch(domain:apps.developer.homey.app)",
+      "Bash(npx markdownlint:*)"
     ],
     "deny": []
   }
