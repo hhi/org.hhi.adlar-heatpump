@@ -9,8 +9,8 @@
     "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz"
   },
   "hint": {
-    "en": "Triggers when fan motor frequency goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when fan motor frequency goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

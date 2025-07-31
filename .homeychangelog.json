@@ -1,9 +1,12 @@
 {
+  "0.40.0": {
+    "en": "Major update: Added support for the Aurora series heatpump device. This version includes local access capabilities, enhancing the functionality and user experience."
+  },
   "0.30.0": {
     "en": "Major update: EEV/EVI pressure measurements converted to pulse-steps for accurate valve position monitoring. Updated alert thresholds for realistic operation (0-480 pulse-steps range)."
   },
   "0.20.0": {
-    "en": "Version with flow control and warning/error state notifications."
+    "en": "Version with initial flow control setup and warning/error state notifications."
   },
   "0.10.0": {
     "en": "Version without flow control."

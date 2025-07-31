@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.30.0",
+  "version": "0.40.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -67,8 +67,8 @@
           "nl": "Buitentemperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when ambient temperature goes above or below specified levels - useful for weather compensation",
-          "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder bepaalde niveaus gaat - nuttig voor weercompensatie"
+          "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie"
         },
         "args": [
           {
@@ -206,8 +206,8 @@
           "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when electricity coiler temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when electricity coiler temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -288,8 +288,8 @@
           "nl": "Compressor frequentie [[condition]] [[frequency]] Hz"
         },
         "hint": {
-          "en": "Triggers when compressor frequency goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when compressor frequency goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -586,8 +586,8 @@
           "nl": "Persgas temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when discharge temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when discharge temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -668,8 +668,8 @@
           "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when economizer inlet temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when economizer inlet temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -750,8 +750,8 @@
           "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when economizer outlet temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when economizer outlet temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -832,8 +832,8 @@
           "nl": "EEV puls-stappen [[condition]] [[pulse_steps]]"
         },
         "hint": {
-          "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder bepaalde niveaus gaan"
+          "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan"
         },
         "args": [
           {
@@ -914,8 +914,8 @@
           "nl": "Stroomsterkte [[condition]] [[current]] ampère"
         },
         "hint": {
-          "en": "Triggers when electrical current goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when electrical current goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -996,8 +996,8 @@
           "nl": "EVI-openingsstop puls-stappen [[condition]] [[pulse_steps]]"
         },
         "hint": {
-          "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder bepaalde niveaus gaan"
+          "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan"
         },
         "args": [
           {
@@ -1078,8 +1078,8 @@
           "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz"
         },
         "hint": {
-          "en": "Triggers when fan motor frequency goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when fan motor frequency goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1219,8 +1219,8 @@
           "nl": "Hogedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when high pressure saturation temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when high pressure saturation temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1301,8 +1301,8 @@
           "nl": "Condensor temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when incoiler temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when incoiler temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1383,8 +1383,8 @@
           "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when water inlet temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when water inlet temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1465,8 +1465,8 @@
           "nl": "Lagedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when low pressure saturation temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when low pressure saturation temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1547,8 +1547,8 @@
           "nl": "Water uittrede temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when water outlet temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when water outlet temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1629,8 +1629,8 @@
           "nl": "Fase A spanning [[condition]] [[voltage]] volt"
         },
         "hint": {
-          "en": "Triggers when Phase A voltage goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when Phase A voltage goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1711,8 +1711,8 @@
           "nl": "Fase B stroom [[condition]] [[current]] ampère"
         },
         "hint": {
-          "en": "Triggers when Phase B current goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer Fase B stroom boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when Phase B current goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Fase B stroom boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1793,8 +1793,8 @@
           "nl": "Fase B spanning [[condition]] [[voltage]] volt"
         },
         "hint": {
-          "en": "Triggers when Phase B voltage goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when Phase B voltage goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1875,8 +1875,8 @@
           "nl": "Fase C stroom [[condition]] [[current]] ampère"
         },
         "hint": {
-          "en": "Triggers when Phase C current goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer Fase C stroom boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when Phase C current goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Fase C stroom boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -1957,8 +1957,8 @@
           "nl": "Fase C spanning [[condition]] [[voltage]] volt"
         },
         "hint": {
-          "en": "Triggers when Phase C voltage goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer Fase C spanning boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when Phase C voltage goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Fase C spanning boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -2097,8 +2097,8 @@
           "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when suction temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when suction temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -2179,8 +2179,8 @@
           "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Triggers when water tank temperature goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when water tank temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -2319,8 +2319,8 @@
           "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min"
         },
         "hint": {
-          "en": "Triggers when water flow rate goes above or below specified levels",
-          "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder bepaalde niveaus gaat"
+          "en": "Triggers when water flow rate goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald nivo gaat"
         },
         "args": [
           {
@@ -3730,30 +3730,6 @@
           "usageConstant": 30
         }
       },
-      "pair": [
-        {
-          "id": "enter_device_info"
-        },
-        {
-          "id": "list_devices",
-          "template": "list_devices",
-          "navigation": {
-            "next": "add_devices"
-          }
-        },
-        {
-          "id": "add_devices",
-          "template": "add_devices",
-          "navigation": {
-            "next": "done"
-          }
-        },
-        {
-          "id": "done",
-          "template": "done"
-        }
-      ],
-      "id": "intelligent-heat-pump",
       "settings": [
         {
           "id": "device_id",
@@ -3794,7 +3770,31 @@
           },
           "required": true
         }
-      ]
+      ],
+      "pair": [
+        {
+          "id": "enter_device_info"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices",
+          "navigation": {
+            "next": "done"
+          }
+        },
+        {
+          "id": "done",
+          "template": "done"
+        }
+      ],
+      "id": "intelligent-heat-pump"
     }
   ],
   "capabilities": {
