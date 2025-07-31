@@ -1,6 +1,7 @@
 name: Publish Homey App
-on:
-  workflow_dispatch:
+# Workflows disabled
+# on:
+#   workflow_dispatch:
 
 jobs:
   main:
