@@ -1,21 +1,12 @@
 name: Update Homey App Version
-# Workflows disabled
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       version:
-#         type: choice
-#         description: Version
-#         required: true
-#         default: patch
-#         options:
-#           - major
-#           - minor
-#           - patch
-#       changelog:
-#         type: string
-#         description: Changelog
-#         required: true
+# Workflows disabled - using dummy trigger that never runs
+on:
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run (disabled)'
+        required: false
+        default: 'false'
 
 # Needed in order to push the commit and create a release
 permissions:
