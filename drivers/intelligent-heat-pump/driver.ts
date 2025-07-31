@@ -1,3 +1,6 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 import Homey from 'homey';
 import PairSession from 'homey/lib/PairSession';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
