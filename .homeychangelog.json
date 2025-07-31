@@ -1,4 +1,7 @@
 {
+  "0.45.0": {
+    "en": "Added flow card control settings to device settings page. Users can now configure temperature, voltage, current, power, pulse-steps, and state change alerts per device, plus enable advanced flow cards."
+  },
   "0.40.0": {
     "en": "Major update: Added support for the Aurora series heatpump device. This version includes local access capabilities, enhancing the functionality and user experience."
   },
