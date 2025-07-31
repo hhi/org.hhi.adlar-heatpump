@@ -9,8 +9,8 @@
     "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C"
   },
   "hint": {
-    "en": "Triggers when electricity coiler temperature goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when electricity coiler temperature goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

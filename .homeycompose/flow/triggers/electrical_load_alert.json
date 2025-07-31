@@ -9,8 +9,8 @@
     "nl": "Stroomsterkte [[condition]] [[current]] ampère"
   },
   "hint": {
-    "en": "Triggers when electrical current goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when electrical current goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

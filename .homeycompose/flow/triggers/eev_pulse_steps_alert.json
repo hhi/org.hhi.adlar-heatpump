@@ -9,8 +9,8 @@
     "nl": "EEV puls-stappen [[condition]] [[pulse_steps]]"
   },
   "hint": {
-    "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder bepaalde niveaus gaan"
+    "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan"
   },
   "args": [
     {

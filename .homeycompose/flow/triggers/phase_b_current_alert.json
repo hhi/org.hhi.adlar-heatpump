@@ -9,8 +9,8 @@
     "nl": "Fase B stroom [[condition]] [[current]] ampère"
   },
   "hint": {
-    "en": "Triggers when Phase B current goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer Fase B stroom boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when Phase B current goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer Fase B stroom boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

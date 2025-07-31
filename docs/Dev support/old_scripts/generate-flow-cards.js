@@ -73,8 +73,8 @@ const TEMPLATES = {
         nl: '{{sensor_name_nl}} temperatuur [[condition]] [[temperature]]°C'
       },
       hint: {
-        en: 'Triggers when {{sensor_description_en}} temperature goes above or below specified levels',
-        nl: 'Wordt geactiveerd wanneer {{sensor_description_nl}} temperatuur boven of onder bepaalde niveaus gaat'
+        en: 'Triggers when {{sensor_description_en}} temperature goes above or below a specified level',
+        nl: 'Wordt geactiveerd wanneer {{sensor_description_nl}} temperatuur boven of onder een bepaald nivo gaat'
       },
       args: [
         CONDITION_DROPDOWN,
@@ -233,8 +233,8 @@ const TEMPLATES = {
         nl: 'Fase {{phase_name}} spanning [[condition]] [[voltage]] volt'
       },
       hint: {
-        en: 'Triggers when Phase {{phase_name}} voltage goes above or below specified levels',
-        nl: 'Wordt geactiveerd wanneer Fase {{phase_name}} spanning boven of onder bepaalde niveaus gaat'
+        en: 'Triggers when Phase {{phase_name}} voltage goes above or below a specified level',
+        nl: 'Wordt geactiveerd wanneer Fase {{phase_name}} spanning boven of onder een bepaald nivo gaat'
       },
       args: [
         CONDITION_DROPDOWN,
@@ -297,8 +297,8 @@ const TEMPLATES = {
         nl: 'Fase {{phase_name}} stroom [[condition]] [[current]] ampère'
       },
       hint: {
-        en: 'Triggers when Phase {{phase_name}} current goes above or below specified levels',
-        nl: 'Wordt geactiveerd wanneer Fase {{phase_name}} stroom boven of onder bepaalde niveaus gaat'
+        en: 'Triggers when Phase {{phase_name}} current goes above or below a specified level',
+        nl: 'Wordt geactiveerd wanneer Fase {{phase_name}} stroom boven of onder een bepaald nivo gaat'
       },
       args: [
         CONDITION_DROPDOWN,
@@ -360,8 +360,8 @@ const TEMPLATES = {
         nl: '{{sensor_name}} druk [[condition]] [[pressure]]'
       },
       hint: {
-        en: 'Triggers when {{sensor_description_en}} pressure goes above or below specified levels',
-        nl: 'Wordt geactiveerd wanneer {{sensor_description_nl}} druk boven of onder bepaalde niveaus gaat'
+        en: 'Triggers when {{sensor_description_en}} pressure goes above or below a specified level',
+        nl: 'Wordt geactiveerd wanneer {{sensor_description_nl}} druk boven of onder een bepaald nivo gaat'
       },
       args: [
         CONDITION_DROPDOWN,

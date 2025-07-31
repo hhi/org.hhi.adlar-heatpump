@@ -9,8 +9,8 @@
     "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C"
   },
   "hint": {
-    "en": "Triggers when economizer outlet temperature goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when economizer outlet temperature goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder een bepaald nivo gaat"
   },
   "args": [
     {
