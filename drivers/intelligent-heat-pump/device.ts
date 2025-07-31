@@ -8,6 +8,28 @@ import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
 
+// Types for combined flow card management
+interface CapabilityCategories {
+  temperature: string[];
+  voltage: string[];
+  current: string[];
+  power: string[];
+  pulseSteps: string[];
+  states: string[];
+}
+
+/* eslint-disable camelcase */
+interface UserFlowPreferences {
+  flow_temperature_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_voltage_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_current_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_power_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_pulse_steps_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_state_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_advanced_mode: boolean;
+}
+/* eslint-enable camelcase */
+
 class MyDevice extends Homey.Device {
   tuya: TuyaDevice | undefined;
   tuyaConnected: boolean = false;
@@ -114,6 +136,97 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Get available capabilities organized by category (Option A)
+   */
+  private getAvailableCapabilities(): CapabilityCategories {
+    const caps = Object.keys(this.allCapabilities);
+
+    return {
+      temperature: caps.filter((cap) => cap.startsWith('measure_temperature')),
+      voltage: caps.filter((cap) => cap.startsWith('measure_voltage')),
+      current: caps.filter((cap) => cap.startsWith('measure_current')),
+      power: caps.filter((cap) => cap.includes('power')),
+      pulseSteps: caps.filter((cap) => cap.includes('pulse_steps')),
+      states: caps.filter((cap) => cap.startsWith('adlar_state')),
+    };
+  }
+
+  /**
+   * Get user flow preferences from device settings (Option B)
+   */
+  private getUserFlowPreferences(): UserFlowPreferences {
+    return {
+      flow_temperature_alerts: this.getSetting('flow_temperature_alerts') || 'auto',
+      flow_voltage_alerts: this.getSetting('flow_voltage_alerts') || 'auto',
+      flow_current_alerts: this.getSetting('flow_current_alerts') || 'auto',
+      flow_power_alerts: this.getSetting('flow_power_alerts') || 'auto',
+      flow_pulse_steps_alerts: this.getSetting('flow_pulse_steps_alerts') || 'auto',
+      flow_state_alerts: this.getSetting('flow_state_alerts') || 'auto',
+      flow_advanced_mode: this.getSetting('flow_advanced_mode') || false,
+    };
+  }
+
+  /**
+   * Detect capabilities that have actual data (Option C)
+   */
+  private async detectCapabilitiesWithData(): Promise<string[]> {
+    const capabilitiesWithData: string[] = [];
+
+    // Check which capabilities have actual data (not null/undefined)
+    for (const capability of Object.keys(this.allCapabilities)) {
+      try {
+        const value = this.getCapabilityValue(capability);
+        if (value !== null && value !== undefined) {
+          capabilitiesWithData.push(capability);
+          this.debugLog(`Capability ${capability} has data:`, value);
+        }
+      } catch (err) {
+        this.debugLog(`Capability ${capability} not available:`, err);
+      }
+    }
+
+    return capabilitiesWithData;
+  }
+
+  /**
+   * Determine if a category should register flow cards based on combined logic
+   */
+  private shouldRegisterCategory(
+    category: keyof CapabilityCategories,
+    availableCaps: string[],
+    userSetting: string,
+    capabilitiesWithData: string[],
+  ): boolean {
+
+    switch (userSetting) {
+      case 'disabled':
+        return false;
+
+      case 'enabled':
+        return availableCaps.length > 0; // Has capabilities
+
+      case 'auto':
+      default:
+        // Auto mode: require both capability AND data
+        return availableCaps.length > 0
+               && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
+    }
+  }
+
+  /**
+   * Get category for a capability
+   */
+  private getCapabilityCategory(capability: string): keyof CapabilityCategories {
+    if (capability.startsWith('measure_temperature')) return 'temperature';
+    if (capability.startsWith('measure_voltage')) return 'voltage';
+    if (capability.startsWith('measure_current')) return 'current';
+    if (capability.includes('power')) return 'power';
+    if (capability.includes('pulse_steps')) return 'pulseSteps';
+    if (capability.startsWith('adlar_state')) return 'states';
+    return 'temperature'; // Default fallback
+  }
+
+  /**
    * Updates Homey capabilities based on fetched DPS data.
    * @param {Record<string, unknown>} dpsFetched The DPS data fetched from the Tuya device.
    * @param {Record<number, string>} allArraysSwapped The mapping of DPS IDs to Homey capability names.
@@ -135,7 +248,35 @@ class MyDevice extends Homey.Device {
   }
 
   private async checkForCriticalConditions(capability: string, value: unknown) {
-    // System fault detection
+    // Check user preferences first
+    const category = this.getCapabilityCategory(capability);
+    const userSettings = this.getUserFlowPreferences();
+
+    // Map category to correct property name
+    const settingMap: Record<keyof CapabilityCategories, keyof UserFlowPreferences> = {
+      temperature: 'flow_temperature_alerts',
+      voltage: 'flow_voltage_alerts',
+      current: 'flow_current_alerts',
+      power: 'flow_power_alerts',
+      pulseSteps: 'flow_pulse_steps_alerts',
+      states: 'flow_state_alerts',
+    };
+
+    const userSetting = userSettings[settingMap[category]];
+
+    if (userSetting === 'disabled') {
+      return; // User disabled this category
+    }
+
+    // Check if capability should trigger based on combined logic
+    const availableCaps = this.getAvailableCapabilities();
+    const capabilitiesWithData = [capability]; // This capability clearly has data
+
+    if (!this.shouldRegisterCategory(category, availableCaps[category], userSetting as string, capabilitiesWithData)) {
+      return; // Doesn't meet combined criteria
+    }
+
+    // System fault detection (always enabled - critical for safety)
     if (capability === 'adlar_fault' && value !== 0) {
       await this.sendCriticalNotification(
         'System Fault Detected',
@@ -547,7 +688,25 @@ class MyDevice extends Homey.Device {
     newSettings: { [key: string]: boolean | string | number | undefined | null };
     changedKeys: string[];
   }): Promise<string | void> {
-    this.log('MyDevice settings where changed');
+    this.log('MyDevice settings changed:', changedKeys);
+
+    // Check if any flow card settings were changed
+    const flowSettingsChanged = changedKeys.some((key) => key.startsWith('flow_'));
+
+    if (flowSettingsChanged) {
+      this.log('Flow card settings changed, updating flow card availability');
+
+      // Log the changes for debugging
+      changedKeys.forEach((key) => {
+        if (key.startsWith('flow_')) {
+          this.log(`${key}: ${oldSettings[key]} → ${newSettings[key]}`);
+        }
+      });
+
+      return 'Flow card settings updated. Changes will take effect immediately.';
+    }
+
+    return undefined;
   }
 
   /**
