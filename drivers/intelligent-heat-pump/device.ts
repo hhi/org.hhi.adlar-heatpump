@@ -147,15 +147,15 @@ class MyDevice extends Homey.Device {
 
     // Temperature safety checks and flow triggers
     const temperatureCapabilityMap: Record<string, string> = {
-      'measure_temperature.temp_top': 'coiler_temperature_alert',
-      'measure_temperature.temp_bottom': 'incoiler_temperature_alert',
-      'measure_temperature.ambient_temp': 'tank_temperature_alert',
-      'measure_temperature.suction_temp': 'suction_temperature_alert',
-      'measure_temperature.discharge_temp': 'discharge_temperature_alert',
-      'measure_temperature.economizer_inlet_temp': 'economizer_inlet_temperature_alert',
-      'measure_temperature.economizer_outlet_temp': 'economizer_outlet_temperature_alert',
-      'measure_temperature.high_pressure_sensor_temp': 'high_pressure_temperature_alert',
-      'measure_temperature.low_pressure_sensor_temp': 'low_pressure_temperature_alert',
+      'measure_temperature.coiler_temp': 'coiler_temperature_alert',
+      'measure_temperature.bottom_temp_f': 'incoiler_temperature_alert',
+      'measure_temperature.around_temp_f': 'tank_temperature_alert',
+      'measure_temperature.coiler_temp_f': 'suction_temperature_alert',
+      'measure_temperature.venting_temp': 'discharge_temperature_alert',
+      'measure_temperature.evlin': 'economizer_inlet_temperature_alert',
+      'measure_temperature.eviout': 'economizer_outlet_temperature_alert',
+      'measure_temperature.temp_current_f': 'high_pressure_temperature_alert',
+      'measure_temperature.top_temp_f': 'low_pressure_temperature_alert',
     };
 
     if (temperatureCapabilityMap[capability] && typeof value === 'number') {
@@ -178,9 +178,9 @@ class MyDevice extends Homey.Device {
 
     // Voltage alert flow triggers
     const voltageCapabilityMap: Record<string, string> = {
-      'measure_voltage.voltage_a': 'phase_a_voltage_alert',
-      'measure_voltage.voltage_b': 'phase_b_voltage_alert',
-      'measure_voltage.voltage_c': 'phase_c_voltage_alert',
+      'measure_voltage.voltage_current': 'phase_a_voltage_alert',
+      'measure_voltage.bv': 'phase_b_voltage_alert',
+      'measure_voltage.cv': 'phase_c_voltage_alert',
     };
 
     if (voltageCapabilityMap[capability] && typeof value === 'number') {

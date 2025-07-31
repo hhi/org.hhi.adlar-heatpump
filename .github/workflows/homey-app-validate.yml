@@ -1,9 +1,12 @@
 name: Validate Homey App
-# Workflows disabled
-# on:
-#   workflow_dispatch:
-#   push:
-#   pull_request:
+# Workflows disabled - using dummy trigger that never runs
+on:
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run (disabled)'
+        required: false
+        default: 'false'
 
 jobs:
   main:
