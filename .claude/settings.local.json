@@ -27,7 +27,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh release create:*)"
+      "Bash(gh release create:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }
