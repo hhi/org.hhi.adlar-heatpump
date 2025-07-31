@@ -9,8 +9,8 @@
     "nl": "Hogedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
   },
   "hint": {
-    "en": "Triggers when high pressure saturation temperature goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when high pressure saturation temperature goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

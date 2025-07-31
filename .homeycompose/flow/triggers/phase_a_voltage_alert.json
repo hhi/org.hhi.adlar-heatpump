@@ -9,8 +9,8 @@
     "nl": "Fase A spanning [[condition]] [[voltage]] volt"
   },
   "hint": {
-    "en": "Triggers when Phase A voltage goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when Phase A voltage goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder een bepaald nivo gaat"
   },
   "args": [
     {

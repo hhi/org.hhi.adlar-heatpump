@@ -9,8 +9,8 @@
     "nl": "Fase B spanning [[condition]] [[voltage]] volt"
   },
   "hint": {
-    "en": "Triggers when Phase B voltage goes above or below specified levels",
-    "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder bepaalde niveaus gaat"
+    "en": "Triggers when Phase B voltage goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder een bepaald nivo gaat"
   },
   "args": [
     {
