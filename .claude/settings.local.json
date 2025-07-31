@@ -20,7 +20,11 @@
       "Bash(npm run build:*)",
       "Bash(sed:*)",
       "WebFetch(domain:apps.developer.homey.app)",
-      "Bash(npx markdownlint:*)"
+      "Bash(npx markdownlint:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo view:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
