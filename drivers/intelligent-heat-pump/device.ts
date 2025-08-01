@@ -41,6 +41,10 @@ class MyDevice extends Homey.Device {
   lastNotificationTime: number = 0;
   lastNotificationKey: string = '';
 
+  // Flow card management
+  private flowCardListeners: Map<string, unknown> = new Map();
+  private isFlowCardsInitialized: boolean = false;
+
   private capabilitiesArray: string[] = (manifest.capabilities || [])
 
   // Debug-conditional logging method
@@ -527,18 +531,442 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Initialize flow cards based on current settings (called once during device init)
+   */
+  private async initializeFlowCards(): Promise<void> {
+    try {
+      await this.updateFlowCards();
+      this.isFlowCardsInitialized = true;
+      this.log('Flow cards initialized successfully');
+    } catch (error) {
+      this.error('Error initializing flow cards:', error);
+    }
+  }
+
+  /**
+   * Update all flow cards based on current settings (called when settings change)
+   */
+  private async updateFlowCards(): Promise<void> {
+    try {
+      // Don't proceed if device isn't fully initialized yet
+      if (!this.isFlowCardsInitialized && Object.keys(this.homey.drivers.getDrivers()).length === 0) {
+        this.log('Skipping flow card update - system not ready');
+        return;
+      }
+
+      // Unregister all current flow card listeners
+      this.unregisterAllFlowCards();
+
+      // Get current user preferences and available capabilities
+      const userPrefs = this.getUserFlowPreferences();
+      const availableCaps = this.getAvailableCapabilities();
+      const capabilitiesWithData = await this.detectCapabilitiesWithData();
+
+      // Register flow cards based on settings
+      await this.registerFlowCardsByCategory('temperature', availableCaps.temperature, userPrefs.flow_temperature_alerts, capabilitiesWithData);
+      await this.registerFlowCardsByCategory('voltage', availableCaps.voltage, userPrefs.flow_voltage_alerts, capabilitiesWithData);
+      await this.registerFlowCardsByCategory('current', availableCaps.current, userPrefs.flow_current_alerts, capabilitiesWithData);
+      await this.registerFlowCardsByCategory('power', availableCaps.power, userPrefs.flow_power_alerts, capabilitiesWithData);
+      await this.registerFlowCardsByCategory('pulseSteps', availableCaps.pulseSteps, userPrefs.flow_pulse_steps_alerts, capabilitiesWithData);
+      await this.registerFlowCardsByCategory('states', availableCaps.states, userPrefs.flow_state_alerts, capabilitiesWithData);
+
+      // Advanced mode flow cards
+      if (userPrefs.flow_advanced_mode) {
+        await this.registerAdvancedFlowCards();
+      }
+
+      this.log('Flow cards updated successfully');
+    } catch (error) {
+      this.error('Error updating flow cards:', error);
+    }
+  }
+
+  /**
+   * Register flow cards for a specific category based on user setting
+   */
+  private async registerFlowCardsByCategory(
+    category: keyof CapabilityCategories,
+    availableCaps: string[],
+    userSetting: 'disabled' | 'auto' | 'enabled',
+    capabilitiesWithData: string[],
+  ): Promise<void> {
+    const shouldRegister = this.shouldRegisterCategory(category, availableCaps, userSetting, capabilitiesWithData);
+
+    if (!shouldRegister) {
+      this.log(`Skipping ${category} flow cards - setting: ${userSetting}, available: ${availableCaps.length}, with data: ${availableCaps.filter((cap) => capabilitiesWithData.includes(cap)).length}`);
+      return;
+    }
+
+    this.log(`Registering ${category} flow cards - available capabilities:`, availableCaps.filter((cap) => capabilitiesWithData.includes(cap)));
+
+    try {
+      switch (category) {
+        case 'temperature':
+          await this.registerTemperatureFlowCards(availableCaps);
+          break;
+        case 'voltage':
+          await this.registerVoltageFlowCards(availableCaps);
+          break;
+        case 'current':
+          await this.registerCurrentFlowCards(availableCaps);
+          break;
+        case 'power':
+          await this.registerPowerFlowCards(availableCaps);
+          break;
+        case 'pulseSteps':
+          await this.registerPulseStepsFlowCards(availableCaps);
+          break;
+        case 'states':
+          await this.registerStateFlowCards(availableCaps);
+          break;
+        default:
+          this.log(`Unknown category: ${category}`);
+          break;
+      }
+    } catch (error) {
+      this.error(`Error registering ${category} flow cards:`, error);
+    }
+  }
+
+  /**
+   * Register temperature-related flow cards
+   */
+  private async registerTemperatureFlowCards(availableCaps: string[]): Promise<void> {
+    try {
+      // Temperature threshold condition
+      if (availableCaps.some((cap) => cap.includes('temp'))) {
+        const tempThresholdCard = this.homey.flow.getConditionCard('temperature_above_threshold');
+        const tempListener = tempThresholdCard.registerRunListener(async (args) => {
+          const sensorCap = `measure_temperature.${args.sensor || 'around_temp'}`;
+          if (this.hasCapability(sensorCap)) {
+            const currentTemp = this.getCapabilityValue(sensorCap) || 0;
+            return currentTemp > (args.threshold || 25);
+          }
+          return false;
+        });
+        this.flowCardListeners.set('temperature_above_threshold', tempListener);
+      }
+
+      // Register trigger cards for each available temperature sensor
+      const tempTriggerCards = [
+        'coiler_temperature_alert',
+        'incoiler_temperature_alert',
+        'tank_temperature_alert',
+        'suction_temperature_alert',
+        'discharge_temperature_alert',
+        'ambient_temperature_changed',
+        'inlet_temperature_changed',
+        'outlet_temperature_changed',
+      ];
+
+      tempTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`Temperature trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('Temperature flow cards registered');
+    } catch (error) {
+      this.error('Error registering temperature flow cards:', error);
+    }
+  }
+
+  /**
+   * Register voltage-related flow cards
+   */
+  private async registerVoltageFlowCards(availableCaps: string[]): Promise<void> {
+    try {
+      // Voltage range condition
+      if (availableCaps.some((cap) => cap.includes('voltage'))) {
+        const voltageRangeCard = this.homey.flow.getConditionCard('voltage_in_range');
+        const voltageListener = voltageRangeCard.registerRunListener(async (args) => {
+          const phaseCap = `measure_voltage.${args.phase || 'voltage_current'}`;
+          if (this.hasCapability(phaseCap)) {
+            const currentVoltage = this.getCapabilityValue(phaseCap) || 0;
+            const minVoltage = args.min_voltage || 200;
+            const maxVoltage = args.max_voltage || 250;
+            return currentVoltage >= minVoltage && currentVoltage <= maxVoltage;
+          }
+          return false;
+        });
+        this.flowCardListeners.set('voltage_in_range', voltageListener);
+      }
+
+      // Voltage alert triggers
+      const voltageTriggerCards = [
+        'phase_a_voltage_alert',
+        'phase_b_voltage_alert',
+        'phase_c_voltage_alert',
+      ];
+
+      voltageTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`Voltage trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('Voltage flow cards registered');
+    } catch (error) {
+      this.error('Error registering voltage flow cards:', error);
+    }
+  }
+
+  /**
+   * Register current-related flow cards
+   */
+  private async registerCurrentFlowCards(availableCaps: string[]): Promise<void> {
+    try {
+      // Current threshold condition
+      if (availableCaps.some((cap) => cap.includes('current'))) {
+        const currentThresholdCard = this.homey.flow.getConditionCard('current_above_threshold');
+        const currentListener = currentThresholdCard.registerRunListener(async (args) => {
+          const phaseCap = `measure_current.${args.phase || 'cur_current'}`;
+          if (this.hasCapability(phaseCap)) {
+            const currentAmperage = this.getCapabilityValue(phaseCap) || 0;
+            return currentAmperage > (args.threshold || 10);
+          }
+          return false;
+        });
+        this.flowCardListeners.set('current_above_threshold', currentListener);
+      }
+
+      // Current alert triggers
+      const currentTriggerCards = [
+        'phase_b_current_alert',
+        'phase_c_current_alert',
+        'electrical_load_alert',
+      ];
+
+      currentTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`Current trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('Current flow cards registered');
+    } catch (error) {
+      this.error('Error registering current flow cards:', error);
+    }
+  }
+
+  /**
+   * Register power-related flow cards
+   */
+  private async registerPowerFlowCards(availableCaps: string[]): Promise<void> {
+    try {
+      // Power threshold condition
+      if (availableCaps.some((cap) => cap.includes('power'))) {
+        const powerThresholdCard = this.homey.flow.getConditionCard('power_above_threshold');
+        const powerListener = powerThresholdCard.registerRunListener(async (args) => {
+          const currentPower = this.getCapabilityValue('measure_power') || 0;
+          return currentPower > (args.threshold || 1000);
+        });
+        this.flowCardListeners.set('power_above_threshold', powerListener);
+      }
+
+      // Power alert triggers
+      const powerTriggerCards = [
+        'power_threshold_exceeded',
+        'total_consumption_milestone',
+        'daily_consumption_threshold',
+      ];
+
+      powerTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`Power trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('Power flow cards registered');
+    } catch (error) {
+      this.error('Error registering power flow cards:', error);
+    }
+  }
+
+  /**
+   * Register pulse-steps related flow cards
+   */
+  private async registerPulseStepsFlowCards(availableCaps: string[]): Promise<void> {
+    try {
+      // Pulse steps range condition
+      if (availableCaps.some((cap) => cap.includes('pulse_steps'))) {
+        const pulseStepsRangeCard = this.homey.flow.getConditionCard('pulse_steps_in_range');
+        const pulseStepsListener = pulseStepsRangeCard.registerRunListener(async (args) => {
+          const valve = args.valve || 'temp_current';
+          const capability = valve === 'temp_current' ? 'adlar_measure_pulse_steps_temp_current' : 'adlar_measure_pulse_steps_effluent_temp';
+
+          if (this.hasCapability(capability)) {
+            const pulseSteps = this.getCapabilityValue(capability) || 0;
+            const minSteps = args.min_steps || 10;
+            const maxSteps = args.max_steps || 450;
+            return pulseSteps >= minSteps && pulseSteps <= maxSteps;
+          }
+          return false;
+        });
+        this.flowCardListeners.set('pulse_steps_in_range', pulseStepsListener);
+      }
+
+      // Pulse steps alert triggers
+      const pulseStepsTriggerCards = [
+        'eev_pulse_steps_alert',
+        'evi_pulse_steps_alert',
+      ];
+
+      pulseStepsTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`Pulse steps trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('Pulse steps flow cards registered');
+    } catch (error) {
+      this.error('Error registering pulse steps flow cards:', error);
+    }
+  }
+
+  /**
+   * Register state-related flow cards
+   */
+  private async registerStateFlowCards(availableCaps: string[]): Promise<void> {
+    try {
+      // System state condition
+      if (availableCaps.some((cap) => cap.includes('state'))) {
+        const stateConditionCard = this.homey.flow.getConditionCard('system_in_state');
+        const stateListener = stateConditionCard.registerRunListener(async (args) => {
+          const stateType = args.state_type || 'compressor_state';
+          const capability = `adlar_state_${stateType}`;
+
+          if (this.hasCapability(capability)) {
+            const currentState = this.getCapabilityValue(capability) || 0;
+            return currentState === (args.expected_state || 1);
+          }
+          return false;
+        });
+        this.flowCardListeners.set('system_in_state', stateListener);
+      }
+
+      // State change triggers
+      const stateTriggerCards = [
+        'defrost_state_changed',
+        'compressor_state_changed',
+        'backwater_state_changed',
+        'fault_detected',
+        'countdown_timer_finished',
+      ];
+
+      stateTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`State trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('State flow cards registered');
+    } catch (error) {
+      this.error('Error registering state flow cards:', error);
+    }
+  }
+
+  /**
+   * Register advanced flow cards (when advanced mode is enabled)
+   */
+  private async registerAdvancedFlowCards(): Promise<void> {
+    try {
+      // Advanced efficiency condition
+      const efficiencyCard = this.homey.flow.getConditionCard('compressor_efficiency_above');
+      const efficiencyListener = efficiencyCard.registerRunListener(async (args) => {
+        const power = this.getCapabilityValue('measure_power') || 0;
+        const compressorState = this.getCapabilityValue('adlar_state_compressor_state') || 0;
+        const efficiency = compressorState > 0 && power > 0 ? (compressorState / power) * 100 : 0;
+        return efficiency > (args.threshold || 50);
+      });
+      this.flowCardListeners.set('compressor_efficiency_above', efficiencyListener);
+
+      // Advanced trigger cards
+      const advancedTriggerCards = [
+        'compressor_efficiency_alert',
+        'fan_motor_efficiency_alert',
+        'water_flow_alert',
+      ];
+
+      advancedTriggerCards.forEach((cardId) => {
+        try {
+          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+          this.flowCardListeners.set(cardId, triggerCard);
+        } catch (err) {
+          this.log(`Advanced trigger card ${cardId} not found, skipping`);
+        }
+      });
+
+      this.log('Advanced flow cards registered');
+    } catch (error) {
+      this.error('Error registering advanced flow cards:', error);
+    }
+  }
+
+  /**
+   * Unregister all flow card listeners
+   */
+  private unregisterAllFlowCards(): void {
+    this.flowCardListeners.forEach((listener, cardId) => {
+      try {
+        if (listener && typeof (listener as { unregister?: () => void }).unregister === 'function') {
+          (listener as { unregister: () => void }).unregister();
+        }
+        this.log(`Unregistered flow card: ${cardId}`);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        this.log(`Flow card ${cardId} was not registered or already unregistered:`, errorMessage);
+      }
+    });
+    this.flowCardListeners.clear();
+    this.log('All flow card listeners unregistered');
+  }
+
+  /**
    * Helper method to trigger flow cards safely
    */
   private async triggerFlowCard(cardId: string, tokens: Record<string, unknown>) {
     try {
-      const app = this.homey.app as unknown as { [key: string]: { trigger?: (device: unknown, tokens: unknown) => Promise<void> } };
-      const triggerName = `${cardId.replace(/_/g, '')}Trigger`;
+      // Check if the flow card is registered and should be triggered
+      const flowCard = this.flowCardListeners.get(cardId);
+      if (!flowCard) {
+        this.debugLog(`Flow card ${cardId} not registered, skipping trigger`);
+        return;
+      }
 
-      if (app[triggerName]?.trigger) {
-        await app[triggerName].trigger(this, tokens);
+      // Check if trigger method exists on the flow card
+      if (flowCard && typeof (flowCard as { trigger?: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger === 'function') {
+        await (flowCard as { trigger: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger(this, tokens, { device: this });
         this.debugLog(`Triggered flow card: ${cardId}`, tokens);
       } else {
-        this.debugLog(`Flow card trigger not found: ${triggerName}`);
+        // Fallback to app-level trigger for compatibility
+        const app = this.homey.app as unknown as { [key: string]: { trigger?: (device: unknown, tokens: unknown) => Promise<void> } };
+        const triggerName = `${cardId.replace(/_/g, '')}Trigger`;
+
+        if (app[triggerName]?.trigger) {
+          await app[triggerName].trigger(this, tokens);
+          this.debugLog(`Triggered flow card via app: ${cardId}`, tokens);
+        } else {
+          this.debugLog(`Flow card trigger method not found: ${cardId}`);
+        }
       }
     } catch (error) {
       this.error(`Failed to trigger flow card ${cardId}:`, error);
@@ -622,6 +1050,9 @@ class MyDevice extends Homey.Device {
     // Start reconnection interval
     this.startReconnectInterval();
 
+    // Initialize flow cards based on current settings
+    await this.initializeFlowCards();
+
     // TUYA ON EVENT (from dp id to capability name)
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
       // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
@@ -703,6 +1134,14 @@ class MyDevice extends Homey.Device {
         }
       });
 
+      // Update flow cards based on new settings
+      try {
+        await this.updateFlowCards();
+        this.log('Flow cards updated successfully');
+      } catch (error) {
+        this.error('Error updating flow cards:', error);
+      }
+
       return 'Flow card settings updated. Changes will take effect immediately.';
     }
 
@@ -741,6 +1180,9 @@ class MyDevice extends Homey.Device {
         this.error('Error cleaning up Tuya device:', err);
       }
     }
+
+    // Clean up flow card listeners
+    this.unregisterAllFlowCards();
 
     // Reset connection state
     this.tuyaConnected = false;
