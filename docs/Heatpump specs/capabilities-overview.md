@@ -122,14 +122,14 @@ This document provides a comprehensive overview of all device capabilities suppo
   - False: "Defrosting inactive"/"Ontdooien niet actief"
 - **Properties**: Read-only, sensor UI, insights enabled
 
-### Pressure Measurement Capabilities
+### Valve Position Measurement Capabilities
 
 #### adlar_measure_pulse_steps_temp_current
 - **DPS**: 16 (temp_current)
 - **Type**: number
 - **Purpose**: Measures EEV (Electronic Expansion Valve) opening pulse-steps
-- **Range**: 0 to 500 Pulse-steps (step 1)
-- **Units**: Pa (Pascals)
+- **Range**: 0 to 480 Pulse-steps (step 1)
+- **Units**: Pulse-steps
 - **Icon**: `/assets/pulse-steps.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
 
@@ -137,8 +137,8 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **DPS**: 25 (effluent_temp)
 - **Type**: number
 - **Purpose**: Measures EVI (Economizer Vapor Injection) valve opening pulse-steps
-- **Range**: 0 to 500 Pulse-steps (step 1)
-- **Units**: Pa (Pascals)
+- **Range**: 0 to 480 Pulse-steps (step 1) 
+- **Units**: Pulse-steps
 - **Icon**: `/assets/pulse-steps.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
 
@@ -281,3 +281,24 @@ Capabilities are organized into logical categories:
 
 ### Insights & Analytics
 Most sensor capabilities support Homey's insights system for historical data tracking and trend analysis. Boolean state capabilities include custom insight titles for better user experience.
+
+### Capability Health Monitoring (v0.70.0+)
+The app includes an intelligent capability health monitoring system that tracks the availability and reliability of sensor data:
+
+#### Health Tracking Features
+- **Null Value Detection**: Automatically identifies when capabilities return null values
+- **Data Availability Monitoring**: Tracks time since last valid data reception
+- **Health Status Classification**: Capabilities are classified as healthy or unhealthy based on data consistency
+- **Automatic Recovery**: Health status updates automatically when data becomes available
+
+#### Health Metrics
+- **Null Count Threshold**: Capabilities with >5 consecutive null readings are marked unhealthy
+- **Timeout Detection**: Capabilities without data for >5 minutes are considered unhealthy
+- **Health Persistence**: Health status is tracked across app restarts
+
+#### User-Facing Diagnostics
+- **Diagnostic Reports**: Generate detailed capability health reports via device settings
+- **Real-time Monitoring**: Health status updates continuously during operation
+- **Troubleshooting Support**: Clear identification of sensor connectivity issues
+
+This system ensures robust operation even when some capabilities are unavailable due to firmware variations, hardware limitations, or connectivity issues.

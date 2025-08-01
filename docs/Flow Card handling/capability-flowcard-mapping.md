@@ -5,10 +5,12 @@ This document provides a comprehensive mapping between device capabilities and t
 ## Mapping Overview
 
 - **Total Capabilities**: 41 (14 custom Adlar + 27 standard Homey)
-- **Total Flow Cards**: 38 (20 triggers, 9 actions, 9 conditions)
+- **Total Flow Cards**: 38 (30 triggers, 9 actions, 9 conditions)
 - **Capabilities with Flow Cards**: 28
 - **Capabilities without Flow Cards**: 13 (mostly measurement sensors)
 - **Flow Cards without Direct Capability Mapping**: 10 (complex triggers)
+- **Dynamic Registration**: Flow cards adapt to capability health status (v0.70.0+)
+- **Pattern-Based System**: Consistent behavior across similar flow cards
 
 ---
 
@@ -262,23 +264,23 @@ Multiple temperature sensors have dedicated alert triggers:
 
 ---
 
-## Pressure Measurement Capabilities
+## Valve Position Measurement Capabilities
 
 ### adlar_measure_pulse_steps_temp_current → Flow Cards
 **Capability**: `adlar_measure_pulse_steps_temp_current` (DPS 16)
 - **Trigger**: `eev_pulse_steps_alert`
-  - **Purpose**: Electronic expansion valve pressure monitoring
-  - **Range**: 0 to 500 Pulse-steps (10 pulse steps)
+  - **Purpose**: Electronic expansion valve position monitoring
+  - **Range**: 0 to 480 Pulse-steps (10 pulse steps)
   - **Type**: Expert monitoring
-  - **Usage**: Refrigeration system diagnostics
+  - **Usage**: Valve position and refrigeration system diagnostics
 
 ### adlar_measure_pulse_steps_effluent_temp → Flow Cards
 **Capability**: `adlar_measure_pulse_steps_effluent_temp` (DPS 25)
 - **Trigger**: `evi_pulse_steps_alert`
-  - **Purpose**: Economizer injection valve pressure monitoring
-  - **Range**: 0 to 500 Pulse-steps (10 pulse steps)
+  - **Purpose**: Economizer injection valve position monitoring
+  - **Range**: 0 to 480 Pulse-steps (10 pulse steps)
   - **Type**: Expert monitoring
-  - **Usage**: EVI system performance monitoring
+  - **Usage**: EVI valve position and system performance monitoring
 
 ---
 
@@ -314,9 +316,9 @@ These flow cards combine multiple capabilities or provide advanced system analys
   - **Usage**: Professional electrical diagnostics
 
 - **system_pulse_steps_differential**
-  - **Purpose**: EEV/EVI pulse-steps difference (0-1000 Pulse-steps)
-  - **Combines**: Both pressure measurement capabilities
-  - **Usage**: Refrigeration system diagnostics
+  - **Purpose**: EEV/EVI pulse-steps difference (0-480 Pulse-steps)
+  - **Combines**: Both valve position measurement capabilities
+  - **Usage**: Valve synchronization and refrigeration system diagnostics
 
 ### Advanced Triggers
 - **electrical_load_alert** ⚡
@@ -377,5 +379,31 @@ Always check device compatibility before using power management flow cards (mark
 3. **Implement progressive efficiency** (ECO → Normal → Boost)
 4. **Include fault conditions** in all critical automation flows
 5. **Monitor trends** rather than absolute values for efficiency analysis
+
+## Dynamic Flow Card Management (v0.70.0+)
+
+The app features intelligent flow card management that adapts to device capabilities and sensor health:
+
+### Health-Aware Flow Cards
+
+- **Automatic Detection**: Flow cards only appear for capabilities with healthy sensor data
+- **Real-time Updates**: Flow card availability updates based on sensor health status
+- **Fallback Handling**: Flow handlers provide fallback values when sensor data is temporarily unavailable
+
+### User Control Settings
+
+- **Auto Mode**: Flow cards automatically appear/disappear based on sensor health
+- **Force Enabled**: All flow cards available regardless of sensor status
+- **Disabled**: Flow cards completely disabled for the category
+
+### Capability Health Monitoring
+
+- **Health Tracking**: Monitors null values and data availability for all capabilities
+- **Diagnostic Reports**: Generate comprehensive capability health reports
+- **Troubleshooting**: Clear identification of sensor connectivity issues
+
+This intelligent system ensures robust automation even when some sensors are unavailable while providing transparency about system health.
+
+---
 
 This mapping provides the foundation for creating sophisticated heat pump automation flows, from basic comfort control to advanced system optimization and professional diagnostics.

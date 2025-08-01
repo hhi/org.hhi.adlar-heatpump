@@ -114,6 +114,10 @@ export function registerSimpleActions(app: App, patterns: FlowCardPattern[]) {
         },
         state: unknown,
       ) => {
+        if (process.env.DEBUG === '1') {
+          app.log(`Action flow card triggered: ${pattern.cardId}`, { args, state });
+        }
+
         const { device } = args;
         const { capabilityName, requiresCapability } = pattern;
 
@@ -140,7 +144,7 @@ export function registerSimpleActions(app: App, patterns: FlowCardPattern[]) {
         try {
           await device.setCapabilityValue(capabilityName, value);
           if (process.env.DEBUG === '1') {
-            app.log(`Set ${capabilityName} to ${value} for device ${device.getName()}`);
+            app.log(`Action flow card result: ${pattern.cardId} - Set ${capabilityName} to ${value} for device ${device.getName()}`);
           }
           return true;
         } catch (error) {
@@ -170,6 +174,10 @@ export function registerSimpleConditions(app: App, patterns: FlowCardPattern[]) 
         },
         state: unknown,
       ) => {
+        if (process.env.DEBUG === '1') {
+          app.log(`Condition flow card triggered: ${pattern.cardId}`, { args, state });
+        }
+
         const { device } = args;
         const { capabilityName, requiresCapability } = pattern;
 
@@ -198,7 +206,16 @@ export function registerSimpleConditions(app: App, patterns: FlowCardPattern[]) 
               const argKeys = Object.keys(args).filter((key) => key !== 'device');
               const thresholdKey = argKeys[0];
               const threshold = args[thresholdKey];
-              return Number(currentValue) > Number(threshold);
+              const result = Number(currentValue) > Number(threshold);
+              if (process.env.DEBUG === '1') {
+                app.log(`Condition flow card result: ${pattern.cardId}`, {
+                  capabilityName,
+                  currentValue,
+                  threshold,
+                  result,
+                });
+              }
+              return result;
             }
 
             default: {

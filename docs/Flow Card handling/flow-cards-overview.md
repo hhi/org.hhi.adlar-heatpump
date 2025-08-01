@@ -5,12 +5,14 @@ This document provides a comprehensive overview of all flow cards available in t
 ## Summary Statistics
 
 - **Total Flow Cards**: 38
-- **Triggers**: 20
+- **Triggers**: 30
 - **Actions**: 9  
 - **Conditions**: 9
 - **Highlighted Cards**: 8 (essential for basic operation)
 - **Power Management Dependent**: 6 cards
 - **Languages Supported**: English (EN) and Dutch (NL)
+- **Pattern-Based Registration**: All flow cards use intelligent pattern-based system
+- **Health-Aware**: Dynamic registration based on capability health (v0.70.0+)
 
 ## Flow Card Categories
 
@@ -191,8 +193,8 @@ THEN set_work_mode to ECO
 - **evi_pulse_steps_alert** - Economizer injection valve pulse-steps
 
 **Common Properties**:
-- **Range**: 0 to 500 Pulse-steps (10 pulse steps)
-- **Use Case**: Refrigeration system diagnostics
+- **Range**: 0 to 480 Pulse-steps (10 pulse steps)
+- **Use Case**: Valve position monitoring and refrigeration system diagnostics
 - **Advanced Flow**: Refrigerant system health monitoring
 
 ##### **Economizer Temperature Alerts (2 cards)**
@@ -466,5 +468,31 @@ AND set_target_temperature to [[current_temperature - 1]]°C
 4. **Time-Based Logic**: Combine with calendar and time conditions for seasonal automation
 5. **Safety Interlocks**: Always include fault conditions in critical automation flows
 6. **Progressive Efficiency**: Start with ECO mode, escalate to Normal/Boost as needed
+
+## Dynamic Flow Card Management (v0.70.0+)
+
+The app features an intelligent flow card management system that adapts to device capabilities and sensor health:
+
+### Capability-Based Registration
+- **Automatic Detection**: Flow cards are automatically registered only for available capabilities
+- **Health Monitoring**: Flow cards are dynamically enabled/disabled based on sensor health status
+- **User Settings**: Three modes for each category: Disabled, Auto (health-based), Force Enabled
+
+### Pattern-Based Architecture
+- **Consistent Behavior**: All similar flow cards follow standardized patterns
+- **Reduced Complexity**: Pattern-based system eliminates duplicate code
+- **Error Handling**: Automatic capability validation and graceful error handling
+- **Debug Support**: Enhanced logging with fallback values for troubleshooting
+
+### User Control
+Access flow card control via device settings:
+- **Temperature Alerts**: Control temperature-related flow card visibility
+- **Voltage/Current Alerts**: Manage electrical monitoring flow cards  
+- **Power/Pulse-steps Alerts**: Configure advanced monitoring cards
+- **Expert Mode**: Enable diagnostic cards for professional use
+
+This intelligent system ensures users only see flow cards for working sensors while providing comprehensive diagnostic information for troubleshooting connectivity issues.
+
+## Conclusion
 
 This comprehensive flow card system enables sophisticated heat pump automation from basic comfort control to professional-grade system optimization and diagnostics.

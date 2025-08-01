@@ -147,21 +147,56 @@ class MyApp extends App {
     // Temperature Differential Condition - custom logic
     const temperatureDifferentialCondition: FlowCardCondition = this.homey.flow.getConditionCard('temperature_differential');
     temperatureDifferentialCondition.registerRunListener(async (args: TemperatureDifferentialArgs, state: FlowState) => {
+      this.debugLog('Temperature differential condition triggered', { args, state });
       const { device } = args;
-      const inletTemp = device.getCapabilityValue('measure_temperature.temp_top') || 0;
-      const outletTemp = device.getCapabilityValue('measure_temperature.temp_bottom') || 0;
+      const rawInletTemp = device.getCapabilityValue('measure_temperature.temp_top');
+      const rawOutletTemp = device.getCapabilityValue('measure_temperature.temp_bottom');
+      const inletTempIsNull = rawInletTemp === null || rawInletTemp === undefined;
+      const outletTempIsNull = rawOutletTemp === null || rawOutletTemp === undefined;
+      const inletTemp = rawInletTemp || 0;
+      const outletTemp = rawOutletTemp || 0;
       const actualDifferential = Math.abs(inletTemp - outletTemp);
-      return actualDifferential > args.differential;
+      const result = actualDifferential > args.differential;
+
+      if (inletTempIsNull || outletTempIsNull) {
+        this.debugLog('Temperature differential condition: using fallback values for null capabilities', {
+          inletTempRaw: rawInletTemp,
+          inletTempFallback: inletTemp,
+          inletTempIsNull,
+          outletTempRaw: rawOutletTemp,
+          outletTempFallback: outletTemp,
+          outletTempIsNull,
+          actualDifferential,
+          threshold: args.differential,
+          result,
+        });
+      } else {
+        this.debugLog('Temperature differential condition result', {
+          inletTemp,
+          outletTemp,
+          actualDifferential,
+          threshold: args.differential,
+          result,
+        });
+      }
+      return result;
     });
 
     // 3-Phase Electrical Balance Check Condition - custom logic
     const electricalBalanceCheckCondition: FlowCardCondition = this.homey.flow.getConditionCard('electrical_balance_check');
     electricalBalanceCheckCondition.registerRunListener(
       async (args: ElectricalBalanceArgs, state: FlowState) => {
+        this.debugLog('Electrical balance condition triggered', { args, state });
         const { device } = args;
-        const currentA = device.getCapabilityValue('measure_current.cur_current') || 0;
-        const currentB = device.getCapabilityValue('measure_current.b_cur') || 0;
-        const currentC = device.getCapabilityValue('measure_current.c_cur') || 0;
+        const rawCurrentA = device.getCapabilityValue('measure_current.cur_current');
+        const rawCurrentB = device.getCapabilityValue('measure_current.b_cur');
+        const rawCurrentC = device.getCapabilityValue('measure_current.c_cur');
+        const currentAIsNull = rawCurrentA === null || rawCurrentA === undefined;
+        const currentBIsNull = rawCurrentB === null || rawCurrentB === undefined;
+        const currentCIsNull = rawCurrentC === null || rawCurrentC === undefined;
+        const currentA = rawCurrentA || 0;
+        const currentB = rawCurrentB || 0;
+        const currentC = rawCurrentC || 0;
 
         const avgCurrent = (currentA + currentB + currentC) / 3;
         const toleranceValue = (args.tolerance / 100) * avgCurrent;
@@ -170,7 +205,42 @@ class MyApp extends App {
         const balanceB = Math.abs(currentB - avgCurrent) <= toleranceValue;
         const balanceC = Math.abs(currentC - avgCurrent) <= toleranceValue;
 
-        return balanceA && balanceB && balanceC;
+        const result = balanceA && balanceB && balanceC;
+
+        if (currentAIsNull || currentBIsNull || currentCIsNull) {
+          this.debugLog('Electrical balance condition: using fallback values for null capabilities', {
+            currentARaw: rawCurrentA,
+            currentAFallback: currentA,
+            currentAIsNull,
+            currentBRaw: rawCurrentB,
+            currentBFallback: currentB,
+            currentBIsNull,
+            currentCRaw: rawCurrentC,
+            currentCFallback: currentC,
+            currentCIsNull,
+            avgCurrent,
+            tolerance: args.tolerance,
+            toleranceValue,
+            balanceA,
+            balanceB,
+            balanceC,
+            result,
+          });
+        } else {
+          this.debugLog('Electrical balance condition result', {
+            currentA,
+            currentB,
+            currentC,
+            avgCurrent,
+            tolerance: args.tolerance,
+            toleranceValue,
+            balanceA,
+            balanceB,
+            balanceC,
+            result,
+          });
+        }
+        return result;
       },
     );
 
@@ -178,9 +248,29 @@ class MyApp extends App {
     const waterFlowRateCheckCondition: FlowCardCondition = this.homey.flow.getConditionCard('water_flow_rate_check');
     waterFlowRateCheckCondition.registerRunListener(
       async (args: FlowRateArgs, state: FlowState) => {
+        this.debugLog('Water flow rate condition triggered', { args, state });
         const { device } = args;
-        const currentFlowRate = device.getCapabilityValue('measure_water') || 0;
-        return currentFlowRate > args.flowRate;
+        const rawFlowRate = device.getCapabilityValue('measure_water');
+        const flowRateIsNull = rawFlowRate === null || rawFlowRate === undefined;
+        const currentFlowRate = rawFlowRate || 0;
+        const result = currentFlowRate > args.flowRate;
+
+        if (flowRateIsNull) {
+          this.debugLog('Water flow rate condition: using fallback value for null capability', {
+            flowRateRaw: rawFlowRate,
+            flowRateFallback: currentFlowRate,
+            flowRateIsNull,
+            threshold: args.flowRate,
+            result,
+          });
+        } else {
+          this.debugLog('Water flow rate condition result', {
+            currentFlowRate,
+            threshold: args.flowRate,
+            result,
+          });
+        }
+        return result;
       },
     );
 
@@ -188,11 +278,39 @@ class MyApp extends App {
     const systemPulseStepsDifferentialCondition: FlowCardCondition = this.homey.flow.getConditionCard('system_pulse_steps_differential');
     systemPulseStepsDifferentialCondition.registerRunListener(
       async (args: PulseStepsDifferentialArgs, state: FlowState) => {
+        this.debugLog('Pulse steps differential condition triggered', { args, state });
         const { device } = args;
-        const eevPulseSteps = device.getCapabilityValue('adlar_measure_pulse_steps_temp_current') || 0;
-        const eviPulseSteps = device.getCapabilityValue('adlar_measure_pulse_steps_effluent_temp') || 0;
+        const rawEevPulseSteps = device.getCapabilityValue('adlar_measure_pulse_steps_temp_current');
+        const rawEviPulseSteps = device.getCapabilityValue('adlar_measure_pulse_steps_effluent_temp');
+        const eevPulseStepsIsNull = rawEevPulseSteps === null || rawEevPulseSteps === undefined;
+        const eviPulseStepsIsNull = rawEviPulseSteps === null || rawEviPulseSteps === undefined;
+        const eevPulseSteps = rawEevPulseSteps || 0;
+        const eviPulseSteps = rawEviPulseSteps || 0;
         const actualDifferential = Math.abs(eevPulseSteps - eviPulseSteps);
-        return actualDifferential > args.differential;
+        const result = actualDifferential > args.differential;
+
+        if (eevPulseStepsIsNull || eviPulseStepsIsNull) {
+          this.debugLog('Pulse steps differential condition: using fallback values for null capabilities', {
+            eevPulseStepsRaw: rawEevPulseSteps,
+            eevPulseStepsFallback: eevPulseSteps,
+            eevPulseStepsIsNull,
+            eviPulseStepsRaw: rawEviPulseSteps,
+            eviPulseStepsFallback: eviPulseSteps,
+            eviPulseStepsIsNull,
+            actualDifferential,
+            threshold: args.differential,
+            result,
+          });
+        } else {
+          this.debugLog('Pulse steps differential condition result', {
+            eevPulseSteps,
+            eviPulseSteps,
+            actualDifferential,
+            threshold: args.differential,
+            result,
+          });
+        }
+        return result;
       },
     );
   }
