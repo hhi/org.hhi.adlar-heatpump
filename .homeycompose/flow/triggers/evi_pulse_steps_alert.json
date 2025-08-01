@@ -2,11 +2,11 @@
   "id": "evi_pulse_steps_alert",
   "title": {
     "en": "EVI Open pulse-steps alert",
-    "nl": "EVI-openingsstop puls-stappen alarm"
+    "nl": "EVI-openingsstap puls-stappen alarm"
   },
   "titleFormatted": {
     "en": "EVI Open pulse-steps [[condition]] [[pulse_steps]]",
-    "nl": "EVI-openingsstop puls-stappen [[condition]] [[pulse_steps]]"
+    "nl": "EVI-openingsstap puls-stappen [[condition]] [[pulse_steps]]"
   },
   "hint": {
     "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
@@ -65,7 +65,7 @@
       "name": "current_pulse_steps",
       "title": {
         "en": "Current EVI Open pulse-steps",
-        "nl": "Huidige EVI-openingsstop puls-stappen"
+        "nl": "Huidige EVI-openingsstap puls-stappen"
       },
       "example": 250
     },

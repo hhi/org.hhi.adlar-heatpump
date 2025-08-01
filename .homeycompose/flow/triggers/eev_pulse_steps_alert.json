@@ -2,7 +2,7 @@
   "id": "eev_pulse_steps_alert",
   "title": {
     "en": "EEV Open pulse-steps alert",
-    "nl": "EEV-openingsstop puls-stappen alarm"
+    "nl": "EEV-openingsstap puls-stappen alarm"
   },
   "titleFormatted": {
     "en": "EEV pulse-steps [[condition]] [[pulse_steps]]",
@@ -65,7 +65,7 @@
       "name": "current_pulse_steps",
       "title": {
         "en": "Current EEV Open pulse-steps",
-        "nl": "Huidige EEV-openingsstop puls-stappen"
+        "nl": "Huidige EEV-openingsstap puls-stappen"
       },
       "example": 450
     },

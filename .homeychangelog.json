@@ -1,9 +1,21 @@
 {
+  "0.75.2": {
+    "en": "UX improvement: Diagnostic report now prioritizes unhealthy capabilities at the top for faster troubleshooting. Unhealthy capabilities are shown first with detailed failure reasons, followed by healthy capabilities grouped by category. This makes it easier to quickly identify and address sensor connectivity issues."
+  },
+  "0.75.1": {
+    "en": "Bug fix release: Fixed critical race condition in diagnostic report generation that was causing 'Cannot set Settings while this.onSettings is still pending' error. Users can now successfully generate capability health reports through device settings without encountering blocking errors. The diagnostic report checkbox now properly resets after report generation, ensuring reliable access to troubleshooting information."
+  },
+  "0.75.0": {
+    "en": "Quality and stability update: Fixed all invalid flow card registration errors that were causing startup issues. Resolved non-existent flow card references (current_above_threshold, voltage_in_range, pulse_steps_in_range, system_in_state) and streamlined flow card management through the proven pattern-based system. Enhanced code quality with comprehensive ESLint compliance and TypeScript error resolution. Added complete project documentation with professional README.md covering installation, configuration, troubleshooting, and development. Updated README.txt with latest feature highlights. Improved maintainability and user experience with cleaner architecture and comprehensive documentation."
+  },
+  "0.70.0": {
+    "en": "Major capability health monitoring update: Implemented intelligent null value detection and dynamic flow card management. Flow handlers now detect missing sensor data (null values) and provide detailed debug logging with fallback values. Added capability health monitoring system that tracks data availability over time. Flow cards automatically register/unregister based on sensor health status. New diagnostic tools allow users to generate capability health reports showing which sensors are working and which have connectivity issues. Enhanced user experience with smart flow card visibility and comprehensive troubleshooting information."
+  },
   "0.50.0": {
     "en": "Enhanced flow card control with dynamic registration system. Flow cards now register/unregister in real-time based on user settings without requiring app restart. Improved 'auto' mode intelligently shows cards only for capabilities with actual data, reducing interface clutter."
   },
   "0.45.0": {
-    "en": "Added flow card control settings to device settings page. Users can now configure temperature, voltage, current, power, pulse-steps, and state change alerts per device, plus enable advanced flow cards."
+    "en": "Added flow card control settings to device settings page. Users can now configure temperature, voltage, current, power, pulse-steps, and state change alerts per device, plus enable expert feature cards."
   },
   "0.40.0": {
     "en": "Major update: Added support for the Aurora series heatpump device. This version includes local access capabilities, enhancing the functionality and user experience."

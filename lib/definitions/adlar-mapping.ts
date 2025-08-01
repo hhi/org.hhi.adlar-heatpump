@@ -83,7 +83,7 @@ export class AdlarMapping {
     dps_22: { code: 'temp_bottom', name: 'Outlet temp', adlar: 'Water uittrede temperatuur' },
     dps_23: { code: 'coiler_temp', name: 'Coiler temp', adlar: 'Verdampingscondensator temperatuur' },
     dps_24: { code: 'venting_temp', name: 'Discharge temp', adlar: 'Persgas temperatuur' },
-    dps_25: { code: 'effluent_temp', name: 'EVI Open', adlar: 'EVI-openingsstop' },
+    dps_25: { code: 'effluent_temp', name: 'EVI Open', adlar: 'EVI-openingsstap' },
     dps_26: { code: 'around_temp', name: 'Ambient temp', adlar: 'Buitentemperatuur' },
     dps_27: { code: 'compressor_state', name: 'Compressor state', adlar: 'Compressor status' },
     dps_31: { code: 'backwater', name: 'Backwater state', adlar: 'Retourwater status' },

@@ -27,7 +27,7 @@ Documentation Created (See /docs subdirectories)
   - Progressive implementation recommendations
   - Usage best practices for different skill levels
 
-  🎯 Key Features
+  🎯 Key Features (v0.75.1)
 
   - Complete Coverage: All 41 capabilities and 38 flow cards documented
   - Tiered Approach: Essential (8 highlighted) → Advanced → Expert progression
@@ -36,8 +36,18 @@ Documentation Created (See /docs subdirectories)
   - Multi-Language: English/Dutch support throughout
   - Professional Grade: From basic comfort control to expert-level diagnostics
 
+  🔥 NEW in v0.70.0 - Intelligent Capability Health Monitoring:
+
+  - Smart Null Detection: Automatically detects missing sensor data (null values) in all flow handlers
+  - Dynamic Flow Cards: Flow cards automatically register/unregister based on sensor health status
+  - Health Tracking: Monitors data availability over time with null count and timeout detection
+  - Diagnostic Tools: User-facing capability health reports showing which sensors work/fail
+  - Debug Logging: Enhanced logging with fallback values for missing data
+  - Auto-Management: Intelligent flow card visibility reduces interface clutter
+  - Troubleshooting: Comprehensive sensor connectivity issue identification
+
   The documentation provides everything needed for users to understand and effectively use the heat pump's capabilities, from
-  simple temperature control to sophisticated energy management and predictive maintenance automation.
+  simple temperature control to sophisticated energy management and predictive maintenance automation with intelligent health monitoring.
 
    
    

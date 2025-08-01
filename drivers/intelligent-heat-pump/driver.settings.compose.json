@@ -42,15 +42,15 @@
     "type": "group",
     "label": {
       "en": "Flow Card Controls",
-      "nl": "Flow Kaart Instellingen"
+      "nl": "Flow Kaart Afhandeling Instellingen"
     },
     "children": [
       {
         "id": "flow_temperature_alerts",
         "type": "dropdown",
         "label": {
-          "en": "Temperature alerts",
-          "nl": "Temperatuur alarmen"
+          "en": "Temperature related alerts",
+          "nl": "Temperatuur gerelateerde alarm afhandeling"
         },
         "hint": {
           "en": "Control temperature alert flow cards visibility",
@@ -85,12 +85,12 @@
         "id": "flow_voltage_alerts",
         "type": "dropdown",
         "label": {
-          "en": "Voltage alerts",
-          "nl": "Spanning alarmen"
+          "en": "Voltage related alerts",
+          "nl": "Spanning gerelateerde alarm afhandeling"
         },
         "hint": {
-          "en": "Control voltage alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van spanning alarm flow kaarten"
+          "en": "Control voltage related alert flow cards visibility",
+          "nl": "Beheers zichtbaarheid van spanning gerelateerde alarm flow kaarten"
         },
         "value": "auto",
         "values": [
@@ -121,12 +121,12 @@
         "id": "flow_current_alerts",
         "type": "dropdown",
         "label": {
-          "en": "Current alerts",
-          "nl": "Stroom alarmen"
+          "en": "Current related alerts",
+          "nl": "Stroom gerelateerde alarm afhandeling"
         },
         "hint": {
-          "en": "Control current alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van stroom alarm flow kaarten"
+          "en": "Control current related alert flow cards visibility",
+          "nl": "Beheers zichtbaarheid van stroom gerelateerde alarm flow kaarten"
         },
         "value": "auto",
         "values": [
@@ -157,12 +157,12 @@
         "id": "flow_power_alerts",
         "type": "dropdown",
         "label": {
-          "en": "Power alerts",
-          "nl": "Vermogen alarmen"
+          "en": "Power related alerts",
+          "nl": "Vermogen gerelateerde alarm afhandeling"
         },
         "hint": {
-          "en": "Control power alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van vermogen alarm flow kaarten"
+          "en": "Control power related alert flow cards visibility",
+          "nl": "Beheers zichtbaarheid van vermogen gerelateerde alarm flow kaarten"
         },
         "value": "auto",
         "values": [
@@ -193,12 +193,12 @@
         "id": "flow_pulse_steps_alerts",
         "type": "dropdown",
         "label": {
-          "en": "Pulse-steps alerts",
-          "nl": "Pulse-stappen alarmen"
+          "en": "Pulse-steps related alerts",
+          "nl": "Pulse-stappen gerelateerde alarm afhandeling"
         },
         "hint": {
-          "en": "Control pulse-steps alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van pulse-stappen alarm flow kaarten"
+          "en": "Control pulse-steps related alert flow cards visibility",
+          "nl": "Beheers zichtbaarheid van pulse-stappen gerelateerde alarm flow kaarten"
         },
         "value": "auto",
         "values": [
@@ -229,12 +229,12 @@
         "id": "flow_state_alerts",
         "type": "dropdown",
         "label": {
-          "en": "State change alerts",
-          "nl": "Status wijziging alarmen"
+          "en": "State change related alerts",
+          "nl": "Status wijziging gerelateerde alarm afhandeling"
         },
         "hint": {
-          "en": "Control state change alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van status wijziging alarm flow kaarten"
+          "en": "Control state change related alert flow cards visibility",
+          "nl": "Beheers zichtbaarheid van status wijziging gerelateerde alarm flow kaarten"
         },
         "value": "auto",
         "values": [
@@ -262,15 +262,37 @@
         ]
       },
       {
-        "id": "flow_advanced_mode",
+        "id": "flow_expert_mode",
         "type": "checkbox",
         "label": {
-          "en": "Enable advanced flow cards",
-          "nl": "Geavanceerde flow kaarten inschakelen"
+          "en": "Enable expert feature cards",
+          "nl": "Expert functie kaarten inschakelen"
         },
         "hint": {
-          "en": "Enable experimental and advanced flow cards",
-          "nl": "Schakel experimentele en geavanceerde flow kaarten in"
+          "en": "Enable diagnostic and system analysis flow cards for HVAC experts",
+          "nl": "Schakel diagnose en systeem analyse flow kaarten in voor HVAC experts"
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Diagnostics",
+      "nl": "Diagnostiek"
+    },
+    "children": [
+      {
+        "id": "capability_diagnostics",
+        "type": "checkbox",
+        "label": {
+          "en": "Generate capability diagnostics report",
+          "nl": "Genereer capability diagnostiek rapport"
+        },
+        "hint": {
+          "en": "Click to generate a detailed report showing which capabilities are working and which have null values",
+          "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben"
         },
         "value": false
       }
