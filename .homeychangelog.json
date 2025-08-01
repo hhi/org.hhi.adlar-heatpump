@@ -1,4 +1,7 @@
 {
+  "0.50.0": {
+    "en": "Enhanced flow card control with dynamic registration system. Flow cards now register/unregister in real-time based on user settings without requiring app restart. Improved 'auto' mode intelligently shows cards only for capabilities with actual data, reducing interface clutter."
+  },
   "0.45.0": {
     "en": "Added flow card control settings to device settings page. Users can now configure temperature, voltage, current, power, pulse-steps, and state change alerts per device, plus enable advanced flow cards."
   },
