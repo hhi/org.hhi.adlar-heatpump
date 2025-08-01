@@ -2,7 +2,7 @@
   "id": "adlar_measure_pulse_steps_effluent_temp",
   "title": {
     "en": "EVI Open",
-    "nl": "EVI-openingsstop"
+    "nl": "EVI-openingsstap"
   },
   "units": {
     "en": "Pulse-steps",
