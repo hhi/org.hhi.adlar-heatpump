@@ -1,7 +1,6 @@
-# Flow Helpers Explanation
+# Flow Helpers System - Pattern-Based Flow Card Management
 
-  The lib/flow-helpers.ts file is a pattern-based flow card management system that simplifies and standardizes flow card
-  registration in the Homey heat pump app. Here's a comprehensive breakdown:
+The `lib/flow-helpers.ts` file implements a sophisticated pattern-based flow card management system that simplifies and standardizes flow card registration in the Homey heat pump app. This system was refined in v0.75.0 to eliminate invalid flow card references and improve reliability.
 
 ## Core Purpose
 
@@ -92,13 +91,30 @@
 
 ## Benefits of This Architecture
 
-  1. Code Reduction: ~40 flow cards managed with ~200 lines vs ~800+ lines manually
-  2. Consistency: All similar cards behave identically
-  3. Maintainability: Change behavior in one place, affects all similar cards
-  4. Type Safety: TypeScript ensures proper patterns and capabilities
-  5. Device Compatibility: Automatic capability checking prevents errors
-  6. Error Handling: Standardized error messages and logging
-  7. Extensibility: Easy to add new patterns or cards
+1. **Code Reduction**: ~40 flow cards managed with ~200 lines vs ~800+ lines manually
+2. **Consistency**: All similar cards behave identically
+3. **Maintainability**: Change behavior in one place, affects all similar cards
+4. **Type Safety**: TypeScript ensures proper patterns and capabilities
+5. **Device Compatibility**: Automatic capability checking prevents errors
+6. **Error Handling**: Standardized error messages and logging
+7. **Extensibility**: Easy to add new patterns or cards
+8. **Reliability**: v0.75.0 eliminated invalid flow card references
+9. **Health Awareness**: Integrates with capability health monitoring system
+
+## v0.75.0 Improvements
+
+### Removed Invalid Flow Cards
+The system was refined to eliminate non-existent flow card references:
+- ~~`current_above_threshold`~~ - Removed (didn't exist)
+- ~~`voltage_in_range`~~ - Removed (didn't exist)  
+- ~~`pulse_steps_in_range`~~ - Removed (didn't exist)
+- ~~`system_in_state`~~ - Removed (didn't exist)
+
+### Enhanced Reliability
+- **Streamlined Registration**: Device-level flow card registration simplified
+- **Pattern-Only System**: All flow cards now use proven pattern-based registration
+- **Eliminated Startup Errors**: No more "Invalid Flow Card ID" errors
+- **Cleaner Architecture**: Removed duplicate and conflicting registration code
 
 ### Usage in Main App
 
