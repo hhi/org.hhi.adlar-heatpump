@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(ls:*)",
@@ -30,9 +31,11 @@
       "Bash(gh release create:*)",
       "Bash(npx eslint:*)",
       "Bash(npm run:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(git restore:*)",
+      "Bash(gh release delete:*)",
+      "Bash(git pull:*)"
     ],
     "deny": []
-  },
-  "$schema": "https://json.schemastore.org/claude-code-settings.json"
+  }
 }
