@@ -21,7 +21,16 @@ ensuring reliable and secure operation.
   recovery
 - **Multi-language Support**: English and Dutch interface
 
-### New in v0.70.0+ - Intelligent Capability Health Monitoring
+### New in v0.80.0 - Action-Based Condition Flow Cards
+
+- **Complete Bidirectional Control**: Read current values of all controllable device settings
+- **9 New Condition Cards**: Check device power, temperatures, modes, and settings
+- **Advanced Comparisons**: Equal to, greater than, less than operators for numeric values
+- **Real-time Value Reading**: Live capability value checking for complex flow logic
+- **Enhanced Automation**: Create conditions based on current device states
+- **Always Available**: Independent of user preferences, always accessible
+
+### v0.70.0+ - Intelligent Capability Health Monitoring
 
 - **Smart Null Detection**: Automatically detects missing sensor data (null
   values) in all flow handlers
@@ -38,7 +47,8 @@ ensuring reliable and secure operation.
 
 ### Flow Card System
 
-- **38 Flow Cards**: Comprehensive automation triggers, conditions, and actions
+- **47+ Flow Cards**: Comprehensive automation triggers, conditions, and actions
+- **Action-Based Conditions**: Read capability values for all controllable settings
 - **Tiered Approach**: Essential → Advanced → Expert progression
 - **Pattern-based Registration**: Intelligent flow card management
 - **Expert Mode**: Advanced diagnostic and analysis cards for HVAC professionals
@@ -164,13 +174,27 @@ DEBUG=1
 - System state changes (compressor, defrost, backwater)
 - Fault detection and safety alerts
 
-### Conditions (9 cards)
+### Conditions (18 cards)
+
+**System Status Conditions:**
 
 - Temperature thresholds and differentials
 - Electrical balance checking
 - Power consumption limits
 - System state verification
 - Water flow rate validation
+
+**Action-Based Conditions (NEW v0.80.0):**
+
+- Device power state checking
+- Target temperature comparisons
+- Hot water temperature validation
+- Heating mode verification
+- Work mode status checking
+- Water control mode validation
+- Capacity setting verification
+- Heating curve status checking
+- Volume setting validation
 
 ### Actions (9 cards)
 

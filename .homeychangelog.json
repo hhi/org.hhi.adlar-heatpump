@@ -1,4 +1,7 @@
 {
+  "0.80.0": {
+    "en": "Major automation enhancement: Added 9 new action-based condition flow cards that enable reading current values of all controllable device settings. Users can now create conditions to check device power state, target temperatures, heating modes, work modes, water control modes, capacity settings, heating curves, and volume settings. Features advanced comparison operators (equal to, greater than, less than) for numeric values and real-time capability value reading. These cards are always available and provide complete bidirectional control for sophisticated automation flows, enabling users to create complex logic based on current device states."
+  },
   "0.75.2": {
     "en": "UX improvement: Diagnostic report now prioritizes unhealthy capabilities at the top for faster troubleshooting. Unhealthy capabilities are shown first with detailed failure reasons, followed by healthy capabilities grouped by category. This makes it easier to quickly identify and address sensor connectivity issues."
   },

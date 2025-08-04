@@ -1,0 +1,67 @@
+{
+  "id": "capacity_setting_is",
+  "title": {
+    "en": "Hot water curve setting is",
+    "nl": "Warmwater curve instelling is"
+  },
+  "titleFormatted": {
+    "en": "Hot water curve setting is [[capacity]]",
+    "nl": "Warmwater curve instelling is [[capacity]]"
+  },
+  "hint": {
+    "en": "Check if the hot water curve setting matches the selected setting",
+    "nl": "Controleer of de warmwater curve instelling overeenkomt met de geselecteerde instelling"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "capacity",
+      "title": {
+        "en": "Hot water curve setting",
+        "nl": "Instelling warmwater curve"
+      },
+      "values": [
+        {
+          "id": "OFF",
+          "title": {
+            "en": "OFF",
+            "nl": "UIT"
+          }
+        },
+        {
+          "id": "H1",
+          "title": {
+            "en": "H1",
+            "nl": "H1"
+          }
+        },
+        {
+          "id": "H2",
+          "title": {
+            "en": "H2",
+            "nl": "H2"
+          }
+        },
+        {
+          "id": "H3",
+          "title": {
+            "en": "H3",
+            "nl": "H3"
+          }
+        },
+        {
+          "id": "H4",
+          "title": {
+            "en": "H4",
+            "nl": "H4"
+          }
+        }
+      ]
+    }
+  ]
+}

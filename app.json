@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.75.2",
+  "version": "0.80.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -40,7 +40,7 @@
       "aurora"
     ]
   },
-  "brandColor": "#4a4a4a",
+  "brandColor": "#f5a623",
   "author": "H Hi <iphone.HHi@me.com>",
   "icon": "/assets/icon.svg",
   "homeyCommunityTopicId": 140621,
@@ -2393,6 +2393,73 @@
     ],
     "conditions": [
       {
+        "id": "capacity_setting_is",
+        "title": {
+          "en": "Hot water curve setting is",
+          "nl": "Warmwater curve instelling is"
+        },
+        "titleFormatted": {
+          "en": "Hot water curve setting is [[capacity]]",
+          "nl": "Warmwater curve instelling is [[capacity]]"
+        },
+        "hint": {
+          "en": "Check if the hot water curve setting matches the selected setting",
+          "nl": "Controleer of de warmwater curve instelling overeenkomt met de geselecteerde instelling"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "capacity",
+            "title": {
+              "en": "Hot water curve setting",
+              "nl": "Instelling warmwater curve"
+            },
+            "values": [
+              {
+                "id": "OFF",
+                "title": {
+                  "en": "OFF",
+                  "nl": "UIT"
+                }
+              },
+              {
+                "id": "H1",
+                "title": {
+                  "en": "H1",
+                  "nl": "H1"
+                }
+              },
+              {
+                "id": "H2",
+                "title": {
+                  "en": "H2",
+                  "nl": "H2"
+                }
+              },
+              {
+                "id": "H3",
+                "title": {
+                  "en": "H3",
+                  "nl": "H3"
+                }
+              },
+              {
+                "id": "H4",
+                "title": {
+                  "en": "H4",
+                  "nl": "H4"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "compressor_running",
         "title": {
           "en": "Compressor is running",
@@ -2412,6 +2479,52 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
+        "id": "device_power_is",
+        "title": {
+          "en": "Device power is",
+          "nl": "Apparaat vermogen is"
+        },
+        "titleFormatted": {
+          "en": "Device power is [[state]]",
+          "nl": "Apparaat vermogen is [[state]]"
+        },
+        "hint": {
+          "en": "Check if the device power state matches the selected state",
+          "nl": "Controleer of de apparaat vermogen status overeenkomt met de geselecteerde status"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "Power state",
+              "nl": "Vermogen status"
+            },
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "On",
+                  "nl": "Aan"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "Off",
+                  "nl": "Uit"
+                }
+              }
+            ]
           }
         ]
       },
@@ -2473,6 +2586,307 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
+        "id": "heating_curve_is",
+        "title": {
+          "en": "Heating curve is",
+          "nl": "Verwarmingscurve is"
+        },
+        "titleFormatted": {
+          "en": "Heating curve is [[curve]]",
+          "nl": "Verwarmingscurve is [[curve]]"
+        },
+        "hint": {
+          "en": "Check if the heating curve matches the selected curve",
+          "nl": "Controleer of de verwarmingscurve overeenkomt met de geselecteerde curve"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "curve",
+            "title": {
+              "en": "Heating curve",
+              "nl": "Verwarmingscurve"
+            },
+            "values": [
+              {
+                "id": "OFF",
+                "title": {
+                  "en": "OFF",
+                  "nl": "UIT"
+                }
+              },
+              {
+                "id": "H1",
+                "title": {
+                  "en": "H1",
+                  "nl": "H1"
+                }
+              },
+              {
+                "id": "H2",
+                "title": {
+                  "en": "H2",
+                  "nl": "H2"
+                }
+              },
+              {
+                "id": "H3",
+                "title": {
+                  "en": "H3",
+                  "nl": "H3"
+                }
+              },
+              {
+                "id": "H4",
+                "title": {
+                  "en": "H4",
+                  "nl": "H4"
+                }
+              },
+              {
+                "id": "H5",
+                "title": {
+                  "en": "H5",
+                  "nl": "H5"
+                }
+              },
+              {
+                "id": "H6",
+                "title": {
+                  "en": "H6",
+                  "nl": "H6"
+                }
+              },
+              {
+                "id": "H7",
+                "title": {
+                  "en": "H7",
+                  "nl": "H7"
+                }
+              },
+              {
+                "id": "H8",
+                "title": {
+                  "en": "H8",
+                  "nl": "H8"
+                }
+              },
+              {
+                "id": "L1",
+                "title": {
+                  "en": "L1",
+                  "nl": "L1"
+                }
+              },
+              {
+                "id": "L2",
+                "title": {
+                  "en": "L2",
+                  "nl": "L2"
+                }
+              },
+              {
+                "id": "L3",
+                "title": {
+                  "en": "L3",
+                  "nl": "L3"
+                }
+              },
+              {
+                "id": "L4",
+                "title": {
+                  "en": "L4",
+                  "nl": "L4"
+                }
+              },
+              {
+                "id": "L5",
+                "title": {
+                  "en": "L5",
+                  "nl": "L5"
+                }
+              },
+              {
+                "id": "L6",
+                "title": {
+                  "en": "L6",
+                  "nl": "L6"
+                }
+              },
+              {
+                "id": "L7",
+                "title": {
+                  "en": "L7",
+                  "nl": "L7"
+                }
+              },
+              {
+                "id": "L8",
+                "title": {
+                  "en": "L8",
+                  "nl": "L8"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heating_mode_is",
+        "title": {
+          "en": "Heating mode is",
+          "nl": "Verwarmingsmodus is"
+        },
+        "titleFormatted": {
+          "en": "Heating mode is [[mode]]",
+          "nl": "Verwarmingsmodus is [[mode]]"
+        },
+        "hint": {
+          "en": "Check if the heating mode matches the selected mode",
+          "nl": "Controleer of de verwarmingsmodus overeenkomt met de geselecteerde modus"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "title": {
+              "en": "Heating mode",
+              "nl": "Verwarmingsmodus"
+            },
+            "values": [
+              {
+                "id": "cold",
+                "title": {
+                  "en": "Cold",
+                  "nl": "Koud"
+                }
+              },
+              {
+                "id": "heating",
+                "title": {
+                  "en": "Heating",
+                  "nl": "Verwarmen"
+                }
+              },
+              {
+                "id": "floor_heating",
+                "title": {
+                  "en": "Floor heating",
+                  "nl": "Vloerverwarming"
+                }
+              },
+              {
+                "id": "hot_water",
+                "title": {
+                  "en": "Hot water",
+                  "nl": "Warm water"
+                }
+              },
+              {
+                "id": "cold_and_hotwater",
+                "title": {
+                  "en": "Cold and hot water",
+                  "nl": "Koud en warm water"
+                }
+              },
+              {
+                "id": "heating_and_hot_water",
+                "title": {
+                  "en": "Heating and hot water",
+                  "nl": "Verwarmen en warm water"
+                }
+              },
+              {
+                "id": "floor_heatign_and_hot_water",
+                "title": {
+                  "en": "Floor heating and hot water",
+                  "nl": "Vloerverwarming en warm water"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hotwater_temperature_is",
+        "title": {
+          "en": "Hot water temperature is",
+          "nl": "Warm water temperatuur is"
+        },
+        "titleFormatted": {
+          "en": "Hot water temperature is [[comparison]] [[temperature]]°C",
+          "nl": "Warm water temperatuur is [[comparison]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Check if the hot water temperature matches the specified condition",
+          "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "comparison",
+            "title": {
+              "en": "Comparison",
+              "nl": "Vergelijking"
+            },
+            "values": [
+              {
+                "id": "equal",
+                "title": {
+                  "en": "Equal to",
+                  "nl": "Gelijk aan"
+                }
+              },
+              {
+                "id": "greater",
+                "title": {
+                  "en": "Greater than",
+                  "nl": "Groter dan"
+                }
+              },
+              {
+                "id": "less",
+                "title": {
+                  "en": "Less than",
+                  "nl": "Kleiner dan"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Hot water temperature (°C)",
+              "nl": "Warm water temperatuur (°C)"
+            },
+            "min": 30,
+            "max": 75,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Hot water temperature in °C",
+              "nl": "Warm water temperatuur in °C"
+            }
           }
         ]
       },
@@ -2548,6 +2962,75 @@
             "placeholder": {
               "en": "Pulse-steps differential threshold",
               "nl": "Puls-stappen verschil drempel"
+            }
+          }
+        ]
+      },
+      {
+        "id": "target_temperature_is",
+        "title": {
+          "en": "Target temperature is",
+          "nl": "Doel temperatuur is"
+        },
+        "titleFormatted": {
+          "en": "Target temperature is [[comparison]] [[temperature]]°C",
+          "nl": "Doel temperatuur is [[comparison]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Check if the target temperature matches the specified condition",
+          "nl": "Controleer of de doel temperatuur voldoet aan de opgegeven voorwaarde"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "comparison",
+            "title": {
+              "en": "Comparison",
+              "nl": "Vergelijking"
+            },
+            "values": [
+              {
+                "id": "equal",
+                "title": {
+                  "en": "Equal to",
+                  "nl": "Gelijk aan"
+                }
+              },
+              {
+                "id": "greater",
+                "title": {
+                  "en": "Greater than",
+                  "nl": "Groter dan"
+                }
+              },
+              {
+                "id": "less",
+                "title": {
+                  "en": "Less than",
+                  "nl": "Kleiner dan"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)"
+            },
+            "min": 5,
+            "max": 60,
+            "step": 0.5,
+            "units": "°C",
+            "placeholder": {
+              "en": "Target temperature in °C",
+              "nl": "Doel temperatuur in °C"
             }
           }
         ]
@@ -2668,6 +3151,75 @@
         ]
       },
       {
+        "id": "volume_setting_is",
+        "title": {
+          "en": "Electricity consumption checking is",
+          "nl": "Stroomverbruik controleren is"
+        },
+        "titleFormatted": {
+          "en": "Electricity consumption checking is [[comparison]] [[level]]",
+          "nl": "Stroomverbruik controleren is [[comparison]] [[level]]"
+        },
+        "hint": {
+          "en": "Check if the electricity consumption checking level matches the specified condition",
+          "nl": "Controleer of het stroomverbruik controle niveau voldoet aan de opgegeven voorwaarde"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "comparison",
+            "title": {
+              "en": "Comparison",
+              "nl": "Vergelijking"
+            },
+            "values": [
+              {
+                "id": "equal",
+                "title": {
+                  "en": "Equal to",
+                  "nl": "Gelijk aan"
+                }
+              },
+              {
+                "id": "greater",
+                "title": {
+                  "en": "Greater than",
+                  "nl": "Groter dan"
+                }
+              },
+              {
+                "id": "less",
+                "title": {
+                  "en": "Less than",
+                  "nl": "Kleiner dan"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "level",
+            "title": {
+              "en": "Electricity consumption checking",
+              "nl": "Stroomverbruik controleren"
+            },
+            "min": 0,
+            "max": 2,
+            "step": 1,
+            "units": "",
+            "placeholder": {
+              "en": "Level (0-2)",
+              "nl": "Niveau (0-2)"
+            }
+          }
+        ]
+      },
+      {
         "id": "water_flow_rate_check",
         "title": {
           "en": "Water flow rate check",
@@ -2702,6 +3254,128 @@
               "en": "Water flow rate threshold",
               "nl": "Water doorstroming drempel"
             }
+          }
+        ]
+      },
+      {
+        "id": "water_mode_is",
+        "title": {
+          "en": "Water control mode is",
+          "nl": "Water controle modus is"
+        },
+        "titleFormatted": {
+          "en": "Water control mode is [[comparison]] [[mode]]",
+          "nl": "Water controle modus is [[comparison]] [[mode]]"
+        },
+        "hint": {
+          "en": "Check if the water control mode matches the specified condition",
+          "nl": "Controleer of de water controle modus voldoet aan de opgegeven voorwaarde"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "comparison",
+            "title": {
+              "en": "Comparison",
+              "nl": "Vergelijking"
+            },
+            "values": [
+              {
+                "id": "equal",
+                "title": {
+                  "en": "Equal to",
+                  "nl": "Gelijk aan"
+                }
+              },
+              {
+                "id": "greater",
+                "title": {
+                  "en": "Greater than",
+                  "nl": "Groter dan"
+                }
+              },
+              {
+                "id": "less",
+                "title": {
+                  "en": "Less than",
+                  "nl": "Kleiner dan"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "mode",
+            "title": {
+              "en": "Water control mode",
+              "nl": "Water controle modus"
+            },
+            "min": 0,
+            "max": 1,
+            "step": 1,
+            "units": "",
+            "placeholder": {
+              "en": "Mode (0-1)",
+              "nl": "Modus (0-1)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "work_mode_is",
+        "title": {
+          "en": "Work mode is",
+          "nl": "Bedrijfsmodus is"
+        },
+        "titleFormatted": {
+          "en": "Work mode is [[mode]]",
+          "nl": "Bedrijfsmodus is [[mode]]"
+        },
+        "hint": {
+          "en": "Check if the work mode matches the selected mode",
+          "nl": "Controleer of de bedrijfsmodus overeenkomt met de geselecteerde modus"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "title": {
+              "en": "Work mode",
+              "nl": "Werkmodus"
+            },
+            "values": [
+              {
+                "id": "ECO",
+                "title": {
+                  "en": "ECO",
+                  "nl": "ECO"
+                }
+              },
+              {
+                "id": "Normal",
+                "title": {
+                  "en": "Normal",
+                  "nl": "Normaal"
+                }
+              },
+              {
+                "id": "Boost",
+                "title": {
+                  "en": "Boost",
+                  "nl": "Boost"
+                }
+              }
+            ]
           }
         ]
       }

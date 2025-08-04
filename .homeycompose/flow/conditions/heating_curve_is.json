@@ -1,0 +1,151 @@
+{
+  "id": "heating_curve_is",
+  "title": {
+    "en": "Heating curve is",
+    "nl": "Verwarmingscurve is"
+  },
+  "titleFormatted": {
+    "en": "Heating curve is [[curve]]",
+    "nl": "Verwarmingscurve is [[curve]]"
+  },
+  "hint": {
+    "en": "Check if the heating curve matches the selected curve",
+    "nl": "Controleer of de verwarmingscurve overeenkomt met de geselecteerde curve"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "curve",
+      "title": {
+        "en": "Heating curve",
+        "nl": "Verwarmingscurve"
+      },
+      "values": [
+        {
+          "id": "OFF",
+          "title": {
+            "en": "OFF",
+            "nl": "UIT"
+          }
+        },
+        {
+          "id": "H1",
+          "title": {
+            "en": "H1",
+            "nl": "H1"
+          }
+        },
+        {
+          "id": "H2",
+          "title": {
+            "en": "H2",
+            "nl": "H2"
+          }
+        },
+        {
+          "id": "H3",
+          "title": {
+            "en": "H3",
+            "nl": "H3"
+          }
+        },
+        {
+          "id": "H4",
+          "title": {
+            "en": "H4",
+            "nl": "H4"
+          }
+        },
+        {
+          "id": "H5",
+          "title": {
+            "en": "H5",
+            "nl": "H5"
+          }
+        },
+        {
+          "id": "H6",
+          "title": {
+            "en": "H6",
+            "nl": "H6"
+          }
+        },
+        {
+          "id": "H7",
+          "title": {
+            "en": "H7",
+            "nl": "H7"
+          }
+        },
+        {
+          "id": "H8",
+          "title": {
+            "en": "H8",
+            "nl": "H8"
+          }
+        },
+        {
+          "id": "L1",
+          "title": {
+            "en": "L1",
+            "nl": "L1"
+          }
+        },
+        {
+          "id": "L2",
+          "title": {
+            "en": "L2",
+            "nl": "L2"
+          }
+        },
+        {
+          "id": "L3",
+          "title": {
+            "en": "L3",
+            "nl": "L3"
+          }
+        },
+        {
+          "id": "L4",
+          "title": {
+            "en": "L4",
+            "nl": "L4"
+          }
+        },
+        {
+          "id": "L5",
+          "title": {
+            "en": "L5",
+            "nl": "L5"
+          }
+        },
+        {
+          "id": "L6",
+          "title": {
+            "en": "L6",
+            "nl": "L6"
+          }
+        },
+        {
+          "id": "L7",
+          "title": {
+            "en": "L7",
+            "nl": "L7"
+          }
+        },
+        {
+          "id": "L8",
+          "title": {
+            "en": "L8",
+            "nl": "L8"
+          }
+        }
+      ]
+    }
+  ]
+}
