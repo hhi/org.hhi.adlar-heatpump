@@ -1,0 +1,69 @@
+{
+  "id": "water_mode_is",
+  "title": {
+    "en": "Water control mode is",
+    "nl": "Water controle modus is"
+  },
+  "titleFormatted": {
+    "en": "Water control mode is [[comparison]] [[mode]]",
+    "nl": "Water controle modus is [[comparison]] [[mode]]"
+  },
+  "hint": {
+    "en": "Check if the water control mode matches the specified condition",
+    "nl": "Controleer of de water controle modus voldoet aan de opgegeven voorwaarde"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "comparison",
+      "title": {
+        "en": "Comparison",
+        "nl": "Vergelijking"
+      },
+      "values": [
+        {
+          "id": "equal",
+          "title": {
+            "en": "Equal to",
+            "nl": "Gelijk aan"
+          }
+        },
+        {
+          "id": "greater",
+          "title": {
+            "en": "Greater than",
+            "nl": "Groter dan"
+          }
+        },
+        {
+          "id": "less",
+          "title": {
+            "en": "Less than",
+            "nl": "Kleiner dan"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "mode",
+      "title": {
+        "en": "Water control mode",
+        "nl": "Water controle modus"
+      },
+      "min": 0,
+      "max": 1,
+      "step": 1,
+      "units": "",
+      "placeholder": {
+        "en": "Mode (0-1)",
+        "nl": "Modus (0-1)"
+      }
+    }
+  ]
+}

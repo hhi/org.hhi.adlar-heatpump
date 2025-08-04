@@ -1,0 +1,46 @@
+{
+  "id": "device_power_is",
+  "title": {
+    "en": "Device power is",
+    "nl": "Apparaat vermogen is"
+  },
+  "titleFormatted": {
+    "en": "Device power is [[state]]",
+    "nl": "Apparaat vermogen is [[state]]"
+  },
+  "hint": {
+    "en": "Check if the device power state matches the selected state",
+    "nl": "Controleer of de apparaat vermogen status overeenkomt met de geselecteerde status"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "state",
+      "title": {
+        "en": "Power state",
+        "nl": "Vermogen status"
+      },
+      "values": [
+        {
+          "id": "on",
+          "title": {
+            "en": "On",
+            "nl": "Aan"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "nl": "Uit"
+          }
+        }
+      ]
+    }
+  ]
+}

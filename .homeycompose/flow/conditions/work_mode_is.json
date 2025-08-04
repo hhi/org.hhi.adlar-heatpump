@@ -1,0 +1,53 @@
+{
+  "id": "work_mode_is",
+  "title": {
+    "en": "Work mode is",
+    "nl": "Bedrijfsmodus is"
+  },
+  "titleFormatted": {
+    "en": "Work mode is [[mode]]",
+    "nl": "Bedrijfsmodus is [[mode]]"
+  },
+  "hint": {
+    "en": "Check if the work mode matches the selected mode",
+    "nl": "Controleer of de bedrijfsmodus overeenkomt met de geselecteerde modus"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "mode",
+      "title": {
+        "en": "Work mode",
+        "nl": "Werkmodus"
+      },
+      "values": [
+        {
+          "id": "ECO",
+          "title": {
+            "en": "ECO",
+            "nl": "ECO"
+          }
+        },
+        {
+          "id": "Normal",
+          "title": {
+            "en": "Normal",
+            "nl": "Normaal"
+          }
+        },
+        {
+          "id": "Boost",
+          "title": {
+            "en": "Boost",
+            "nl": "Boost"
+          }
+        }
+      ]
+    }
+  ]
+}

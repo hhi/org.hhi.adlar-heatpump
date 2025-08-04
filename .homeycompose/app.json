@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.75.2",
+  "version": "0.80.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -39,7 +39,7 @@
       "aurora"
     ]
   },
-  "brandColor": "#4a4a4a",
+  "brandColor": "#f5a623",
   "author": "H Hi <iphone.HHi@me.com>",
   "icon": "/assets/icon.svg",
   "homeyCommunityTopicId": 140621,
