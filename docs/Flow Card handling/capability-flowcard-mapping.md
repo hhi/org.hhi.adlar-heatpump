@@ -5,12 +5,13 @@ This document provides a comprehensive mapping between device capabilities and t
 ## Mapping Overview
 
 - **Total Capabilities**: 41 (14 custom Adlar + 27 standard Homey)
-- **Total Flow Cards**: 38 (30 triggers, 9 actions, 9 conditions)
-- **Capabilities with Flow Cards**: 28
-- **Capabilities without Flow Cards**: 13 (mostly measurement sensors)
+- **Total Flow Cards**: 58 (31 triggers, 9 actions, 18 conditions) - **Updated v0.80.0**
+- **Capabilities with Flow Cards**: 37 (+9 action-based condition cards)
+- **Capabilities without Flow Cards**: 4 (reduced from 13)
 - **Flow Cards without Direct Capability Mapping**: 10 (complex triggers)
 - **Dynamic Registration**: Flow cards adapt to capability health status (v0.70.0+)
 - **Pattern-Based System**: Consistent behavior across similar flow cards
+- **Bidirectional Control**: Complete read/write access via action-based conditions (v0.80.0+)
 
 ---
 
@@ -22,6 +23,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Purpose**: Power control (On/Off)
   - **Type**: Essential control
   - **Usage**: Basic system power management, emergency shutdown
+- **Condition**: `device_power_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Check current device power state
+  - **Arguments**: Power state (on/off)
+  - **Usage**: Conditional logic based on device power state, prevent conflicting commands
 
 ### target_temperature → Flow Cards  
 **Capability**: `target_temperature` (DPS 4)  
@@ -29,6 +34,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Purpose**: Temperature setpoint control (5-60°C)
   - **Type**: Essential control
   - **Usage**: Comfort control, weather compensation
+- **Condition**: `target_temperature_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Compare current target temperature setting
+  - **Arguments**: Comparison (equal/greater/less), Temperature (5-60°C, 0.5°C steps)
+  - **Usage**: Temperature-based flow control, dynamic temperature management
 
 ### adlar_hotwater → Flow Cards
 **Capability**: `adlar_hotwater` (DPS 101)
@@ -36,6 +45,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Purpose**: Hot water temperature control (30-75°C)
   - **Type**: Essential control  
   - **Usage**: Domestic hot water management, legionella prevention
+- **Condition**: `hotwater_temperature_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Compare current hot water temperature setting
+  - **Arguments**: Comparison (equal/greater/less), Temperature (30-75°C, 1°C steps)
+  - **Usage**: Hot water optimization flows, energy-efficient management
 
 ---
 
@@ -48,6 +61,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Values**: cold, heating, floor_heating, hot_water, combined modes
   - **Type**: Essential control
   - **Usage**: Seasonal mode switching, demand-based operation
+- **Condition**: `heating_mode_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Check current heating mode setting
+  - **Arguments**: Mode (cold/heating/floor_heating/hot_water/combined modes)
+  - **Usage**: Mode-dependent automation, seasonal mode transitions
 
 ### adlar_enum_work_mode → Flow Cards
 **Capability**: `adlar_enum_work_mode` (DPS 5)
@@ -56,6 +73,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Values**: ECO/Normal/Boost
   - **Type**: Advanced control
   - **Usage**: Efficiency optimization, demand response
+- **Condition**: `work_mode_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Check current work mode setting
+  - **Arguments**: Mode (ECO/Normal/Boost)
+  - **Usage**: Performance optimization flows, dynamic efficiency management
 
 ### adlar_enum_countdown_set → Flow Cards
 **Capability**: `adlar_enum_countdown_set` (DPS 13)
@@ -64,6 +85,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Values**: OFF, H1-H8 (high), L1-L8 (low)
   - **Type**: Advanced control
   - **Usage**: Seasonal adaptation, building-specific tuning
+- **Condition**: `heating_curve_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Check current heating curve setting
+  - **Arguments**: Curve (OFF/H1-H8/L1-L8)
+  - **Usage**: Curve-based heating optimization, weather-dependent curve adjustments
 
 ### adlar_enum_capacity_set → Flow Cards
 **Capability**: `adlar_enum_capacity_set` (DPS 11)
@@ -72,6 +97,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Values**: OFF, H1-H4
   - **Type**: Advanced control
   - **Usage**: Hot water demand optimization
+- **Condition**: `capacity_setting_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Check current hot water curve setting
+  - **Arguments**: Capacity (OFF/H1/H2/H3/H4)
+  - **Usage**: Capacity-dependent automation, load-based capacity adjustments
 
 ### adlar_enum_water_mode → Flow Cards
 **Capability**: `adlar_enum_water_mode` (DPS 10)
@@ -79,6 +108,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Purpose**: Water control mode (0-1)
   - **Type**: Expert configuration
   - **Usage**: Installation configuration, control system tuning
+- **Condition**: `water_mode_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Compare current water control mode setting
+  - **Arguments**: Comparison (equal/greater/less), Mode (0-1)
+  - **Usage**: Water control optimization, flow rate management
 
 ### adlar_enum_volume_set → Flow Cards
 **Capability**: `adlar_enum_volume_set` (DPS 106)
@@ -86,6 +119,10 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Purpose**: Electricity consumption monitoring level (0-2)
   - **Type**: Expert configuration
   - **Usage**: Power monitoring configuration
+- **Condition**: `volume_setting_is` ⭐ **NEW v0.80.0**
+  - **Purpose**: Compare current electricity consumption checking level
+  - **Arguments**: Comparison (equal/greater/less), Level (0-2)
+  - **Usage**: Power monitoring management, dynamic monitoring level adjustment
 
 ---
 
