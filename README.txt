@@ -27,16 +27,27 @@ Documentation Created (See /docs subdirectories)
   - Progressive implementation recommendations
   - Usage best practices for different skill levels
 
-  🎯 Key Features (v0.75.1)
+  🎯 Key Features (v0.80.0)
 
-  - Complete Coverage: All 41 capabilities and 38 flow cards documented
+  - Complete Coverage: All 41 capabilities and 47+ flow cards documented
+  - Action-Based Conditions: Read current values of all controllable device settings
+  - Enhanced Automation: 9 new condition cards for complete bidirectional control
   - Tiered Approach: Essential (8 highlighted) → Advanced → Expert progression
   - Practical Guidance: Real-world examples, advanced flow patterns, and processing tips
   - Compatibility Aware: Clear identification of power management requirements
   - Multi-Language: English/Dutch support throughout
   - Professional Grade: From basic comfort control to expert-level diagnostics
 
-  🔥 NEW in v0.70.0 - Intelligent Capability Health Monitoring:
+  🚀 NEW in v0.80.0 - Action-Based Condition Flow Cards:
+
+  - Complete Bidirectional Control: Read current values of all controllable device settings
+  - 9 New Condition Cards: Check device power, temperatures, modes, and settings
+  - Advanced Comparisons: Equal to, greater than, less than operators for numeric values
+  - Real-time Value Reading: Live capability value checking for complex flow logic
+  - Enhanced Automation: Create conditions based on current device states
+  - Always Available: Independent of user preferences, always accessible
+
+  🔥 v0.70.0 - Intelligent Capability Health Monitoring:
 
   - Smart Null Detection: Automatically detects missing sensor data (null values) in all flow handlers
   - Dynamic Flow Cards: Flow cards automatically register/unregister based on sensor health status

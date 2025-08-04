@@ -1,0 +1,69 @@
+{
+  "id": "hotwater_temperature_is",
+  "title": {
+    "en": "Hot water temperature is",
+    "nl": "Warm water temperatuur is"
+  },
+  "titleFormatted": {
+    "en": "Hot water temperature is [[comparison]] [[temperature]]°C",
+    "nl": "Warm water temperatuur is [[comparison]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Check if the hot water temperature matches the specified condition",
+    "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "comparison",
+      "title": {
+        "en": "Comparison",
+        "nl": "Vergelijking"
+      },
+      "values": [
+        {
+          "id": "equal",
+          "title": {
+            "en": "Equal to",
+            "nl": "Gelijk aan"
+          }
+        },
+        {
+          "id": "greater",
+          "title": {
+            "en": "Greater than",
+            "nl": "Groter dan"
+          }
+        },
+        {
+          "id": "less",
+          "title": {
+            "en": "Less than",
+            "nl": "Kleiner dan"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Hot water temperature (°C)",
+        "nl": "Warm water temperatuur (°C)"
+      },
+      "min": 30,
+      "max": 75,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Hot water temperature in °C",
+        "nl": "Warm water temperatuur in °C"
+      }
+    }
+  ]
+}
