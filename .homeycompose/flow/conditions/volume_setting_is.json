@@ -1,0 +1,69 @@
+{
+  "id": "volume_setting_is",
+  "title": {
+    "en": "Electricity consumption checking is",
+    "nl": "Stroomverbruik controleren is"
+  },
+  "titleFormatted": {
+    "en": "Electricity consumption checking is [[comparison]] [[level]]",
+    "nl": "Stroomverbruik controleren is [[comparison]] [[level]]"
+  },
+  "hint": {
+    "en": "Check if the electricity consumption checking level matches the specified condition",
+    "nl": "Controleer of het stroomverbruik controle niveau voldoet aan de opgegeven voorwaarde"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "comparison",
+      "title": {
+        "en": "Comparison",
+        "nl": "Vergelijking"
+      },
+      "values": [
+        {
+          "id": "equal",
+          "title": {
+            "en": "Equal to",
+            "nl": "Gelijk aan"
+          }
+        },
+        {
+          "id": "greater",
+          "title": {
+            "en": "Greater than",
+            "nl": "Groter dan"
+          }
+        },
+        {
+          "id": "less",
+          "title": {
+            "en": "Less than",
+            "nl": "Kleiner dan"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "level",
+      "title": {
+        "en": "Electricity consumption checking",
+        "nl": "Stroomverbruik controleren"
+      },
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "units": "",
+      "placeholder": {
+        "en": "Level (0-2)",
+        "nl": "Niveau (0-2)"
+      }
+    }
+  ]
+}

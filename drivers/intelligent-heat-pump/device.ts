@@ -929,6 +929,9 @@ class MyDevice extends Homey.Device {
         await this.registerExpertFeatureCards();
       }
 
+      // Register action-based condition cards (always available)
+      await this.registerActionBasedConditionCards();
+
       this.log('Flow cards updated successfully');
     } catch (error) {
       this.error('Error updating flow cards:', error);
@@ -1345,6 +1348,134 @@ class MyDevice extends Homey.Device {
       this.log('Expert feature cards registered');
     } catch (error) {
       this.error('Error registering expert feature cards:', error);
+    }
+  }
+
+  /**
+   * Register action-based condition flow cards
+   */
+  private async registerActionBasedConditionCards(): Promise<void> {
+    try {
+      // Device power state condition
+      const devicePowerCard = this.homey.flow.getConditionCard('device_power_is');
+      devicePowerCard.registerRunListener(async (args) => {
+        this.debugLog('Device power condition triggered', { args });
+        const currentValue = this.getCapabilityValue('onoff');
+        const expectedState = args.state === 'on';
+        return currentValue === expectedState;
+      });
+
+      // Target temperature condition
+      const targetTempCard = this.homey.flow.getConditionCard('target_temperature_is');
+      targetTempCard.registerRunListener(async (args) => {
+        this.debugLog('Target temperature condition triggered', { args });
+        const currentValue = this.getCapabilityValue('target_temperature') || 0;
+        const targetValue = args.temperature || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return Math.abs(currentValue - targetValue) < 0.5;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+
+      // Hot water temperature condition
+      const hotWaterTempCard = this.homey.flow.getConditionCard('hotwater_temperature_is');
+      hotWaterTempCard.registerRunListener(async (args) => {
+        this.debugLog('Hot water temperature condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_hotwater') || 0;
+        const targetValue = args.temperature || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return Math.abs(currentValue - targetValue) < 1;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+
+      // Heating mode condition
+      const heatingModeCard = this.homey.flow.getConditionCard('heating_mode_is');
+      heatingModeCard.registerRunListener(async (args) => {
+        this.debugLog('Heating mode condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_enum_mode');
+        return currentValue === args.mode;
+      });
+
+      // Work mode condition
+      const workModeCard = this.homey.flow.getConditionCard('work_mode_is');
+      workModeCard.registerRunListener(async (args) => {
+        this.debugLog('Work mode condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_enum_work_mode');
+        return currentValue === args.mode;
+      });
+
+      // Water mode condition
+      const waterModeCard = this.homey.flow.getConditionCard('water_mode_is');
+      waterModeCard.registerRunListener(async (args) => {
+        this.debugLog('Water mode condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_enum_water_mode') || 0;
+        const targetValue = args.mode || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return currentValue === targetValue;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+
+      // Capacity setting condition
+      const capacitySettingCard = this.homey.flow.getConditionCard('capacity_setting_is');
+      capacitySettingCard.registerRunListener(async (args) => {
+        this.debugLog('Capacity setting condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_enum_capacity_set');
+        return currentValue === args.capacity;
+      });
+
+      // Heating curve condition
+      const heatingCurveCard = this.homey.flow.getConditionCard('heating_curve_is');
+      heatingCurveCard.registerRunListener(async (args) => {
+        this.debugLog('Heating curve condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_enum_countdown_set');
+        return currentValue === args.curve;
+      });
+
+      // Volume setting condition
+      const volumeSettingCard = this.homey.flow.getConditionCard('volume_setting_is');
+      volumeSettingCard.registerRunListener(async (args) => {
+        this.debugLog('Volume setting condition triggered', { args });
+        const currentValue = this.getCapabilityValue('adlar_enum_volume_set') || 0;
+        const targetValue = args.level || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return currentValue === targetValue;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+
+      this.log('Action-based condition cards registered');
+    } catch (error) {
+      this.error('Error registering action-based condition cards:', error);
     }
   }
 
