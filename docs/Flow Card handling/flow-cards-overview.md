@@ -4,15 +4,16 @@ This document provides a comprehensive overview of all flow cards available in t
 
 ## Summary Statistics
 
-- **Total Flow Cards**: 38
-- **Triggers**: 30
+- **Total Flow Cards**: 58 (Updated v0.80.0)
+- **Triggers**: 31
 - **Actions**: 9  
-- **Conditions**: 9
+- **Conditions**: 18 (+9 action-based conditions in v0.80.0)
 - **Highlighted Cards**: 8 (essential for basic operation)
 - **Power Management Dependent**: 6 cards
 - **Languages Supported**: English (EN) and Dutch (NL)
-- **Pattern-Based Registration**: All flow cards use intelligent pattern-based system
+- **Pattern-Based Registration**: Intelligent pattern-based system + always-available action-based conditions
 - **Health-Aware**: Dynamic registration based on capability health (v0.70.0+)
+- **Bidirectional Control**: Complete read/write access to all controllable settings (v0.80.0+)
 
 ## Flow Card Categories
 
@@ -309,7 +310,7 @@ THEN set_heating_curve to H6
 
 ---
 
-## CONDITIONS (9 cards)
+## CONDITIONS (18 cards - Updated v0.80.0)
 
 ### Essential Tier - Basic Status Checks (3 cards)
 
@@ -373,6 +374,88 @@ THEN send notification "Poor heat transfer detected"
 - **Range**: 100-50,000 kWh (100 kWh steps)
 - **Use Case**: Long-term energy management
 - **Advanced Flow**: Maintenance scheduling based on usage
+
+### Advanced Tier - Action-Based Conditions **NEW v0.80.0** (9 cards)
+
+These condition cards enable reading current values of all controllable device settings, providing complete bidirectional control for sophisticated automation flows. Always available regardless of user preferences.
+
+#### **device_power_is**
+- **Purpose**: Check current device power state (on/off)
+- **Arguments**: Power state (on/off)
+- **Return**: Boolean (true if state matches)
+- **Use Case**: Conditional actions based on device power state
+- **Advanced Flow**: Prevent conflicting power commands
+```
+IF device_power_is off
+AND ambient_temperature_changed below 0°C
+THEN set_device_onoff to on
+```
+
+#### **target_temperature_is**
+- **Purpose**: Compare current target temperature setting
+- **Arguments**: Comparison (equal/greater/less), Temperature (5-60°C, 0.5°C steps)
+- **Return**: Boolean based on comparison result
+- **Use Case**: Temperature-based flow control
+- **Advanced Flow**: Dynamic temperature management
+```
+IF target_temperature_is greater than 25°C
+AND power_above_threshold 2000W
+THEN set_target_temperature to 22°C
+```
+
+#### **hotwater_temperature_is**
+- **Purpose**: Compare current hot water temperature setting
+- **Arguments**: Comparison (equal/greater/less), Temperature (30-75°C, 1°C steps)
+- **Return**: Boolean based on comparison result
+- **Use Case**: Hot water optimization flows
+- **Advanced Flow**: Energy-efficient hot water management
+
+#### **heating_mode_is**
+- **Purpose**: Check current heating mode setting
+- **Arguments**: Mode (cold/heating/floor_heating/hot_water/cold_and_hotwater/heating_and_hot_water/floor_heating_and_hot_water)
+- **Return**: Boolean (true if mode matches)
+- **Use Case**: Mode-dependent automation
+- **Advanced Flow**: Seasonal mode transitions
+```
+IF heating_mode_is floor_heating
+AND temperature_above 20°C
+THEN set_heating_mode to hot_water
+```
+
+#### **work_mode_is**
+- **Purpose**: Check current work mode setting
+- **Arguments**: Mode (ECO/Normal/Boost)
+- **Return**: Boolean (true if mode matches)
+- **Use Case**: Performance optimization flows
+- **Advanced Flow**: Dynamic efficiency management
+
+#### **water_mode_is**
+- **Purpose**: Compare current water control mode setting
+- **Arguments**: Comparison (equal/greater/less), Mode (0-1)
+- **Return**: Boolean based on comparison result
+- **Use Case**: Water control optimization
+- **Advanced Flow**: Flow rate management
+
+#### **capacity_setting_is**
+- **Purpose**: Check current hot water curve setting
+- **Arguments**: Capacity (OFF/H1/H2/H3/H4)
+- **Return**: Boolean (true if setting matches)
+- **Use Case**: Capacity-dependent automation
+- **Advanced Flow**: Load-based capacity adjustments
+
+#### **heating_curve_is**
+- **Purpose**: Check current heating curve setting
+- **Arguments**: Curve (OFF/H1-H8/L1-L8)
+- **Return**: Boolean (true if curve matches)
+- **Use Case**: Curve-based heating optimization
+- **Advanced Flow**: Weather-dependent curve adjustments
+
+#### **volume_setting_is**
+- **Purpose**: Compare current electricity consumption checking level
+- **Arguments**: Comparison (equal/greater/less), Level (0-2)
+- **Return**: Boolean based on comparison result
+- **Use Case**: Power monitoring management
+- **Advanced Flow**: Dynamic monitoring level adjustment
 
 ### Expert Tier - Technical Analysis (2 cards)
 
