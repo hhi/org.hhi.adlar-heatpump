@@ -34,7 +34,8 @@
       "Bash(git tag:*)",
       "Bash(git restore:*)",
       "Bash(gh release delete:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(gh release:*)"
     ],
     "deny": []
   }
