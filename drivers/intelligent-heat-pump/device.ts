@@ -513,8 +513,7 @@ class MyDevice extends Homey.Device {
             ? ` = ${health.lastValue}`
             : ' = null';
 
-          report.push(`   ✅ ${capability}${lastValue}`);
-          report.push(`      Last data: ${timeAgo}${nullCount}`);
+          report.push(`   ✅ ${capability}${lastValue}   Last data: ${timeAgo}${nullCount}`);
         } else {
           report.push(`   ⚠️  ${capability} = no health data`);
         }
