@@ -1,4 +1,7 @@
 {
+  "0.90.3": {
+    "en": "Flow Communication & Icon Updates: Fixed critical Flow ACTION card communication issue where set_heating_curve and other action cards weren't properly propagating commands to the physical heat pump device. Enhanced Flow card action system to use triggerCapabilityListener() instead of setCapabilityValue() for reliable bidirectional device communication. Updated heating-curve.svg icon design with enlarged coordinate system and mirrored curve direction from upper-left to bottom-right, removing H1-H8 section labels for cleaner professional visualization. All Flow action cards now ensure proper command propagation from Homey automation to physical device state changes."
+  },
   "0.90.2": {
     "en": "iOS Compatibility & Architecture Fixes: Resolved iOS-specific enum picker UI bugs that were causing capability value corruption when switching between device controls. Implemented simplified single-capability architecture for heating curve control that displays as read-only sensor while maintaining full Flow card functionality. Fixed Flow ACTION card registration conflicts by eliminating duplicate registrations and adopting unified app-level pattern-based system. Enhanced DPS-to-capability mapping with improved debugging for device data refresh issues. Added comprehensive Homey Compose architecture documentation to prevent manual app.json editing. All enum capabilities now use consistent iOS-safe UI components while preserving complete automation control."
   },
