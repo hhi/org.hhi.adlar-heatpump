@@ -27,7 +27,7 @@ Documentation Created (See /docs subdirectories)
   - Progressive implementation recommendations
   - Usage best practices for different skill levels
 
-  🎯 Key Features (v0.80.0)
+  🎯 Key Features (v0.90.0)
 
   - Complete Coverage: All 41 capabilities and 47+ flow cards documented
   - Action-Based Conditions: Read current values of all controllable device settings
@@ -46,6 +46,16 @@ Documentation Created (See /docs subdirectories)
   - Real-time Value Reading: Live capability value checking for complex flow logic
   - Enhanced Automation: Create conditions based on current device states
   - Always Available: Independent of user preferences, always accessible
+
+  🚀 NEW in v0.90.0 - Capability & Flow Control Fixes:
+
+  - Resolved Control Issues: Fixed all "missing capability listener" and "Not_setable" errors
+  - Reliable Device Communication: Temperature, on/off, heating mode, and heating curve controls now work properly
+  - Flow Card Actions Fixed: Flow cards now control the actual physical device, not just Homey values
+  - Enhanced Error Handling: User-friendly error messages for connection and validation issues
+  - Optional Power Measurements: Users can disable irrelevant power capabilities via device settings for cleaner interfaces
+  - Bidirectional Sync: All changes in Homey UI reliably update the physical heat pump
+  - Input Validation: Proper validation with temperature ranges and enum checking
 
   🔥 v0.70.0 - Intelligent Capability Health Monitoring:
 

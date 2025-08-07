@@ -105,7 +105,7 @@ Zodra de app geïnstalleerd is en je apparaat gekoppeld is, kun je live waarden 
 
 ### Belangrijke Opmerkingen
 
-- **Verwarmingscurve Keuzelijst**: De verwarmingscurve selectie is uitgeschakeld vanwege een bug die wordt waargenomen op iPhone apparaten. Om verwarmingscurve waarden te wijzigen, gebruik de speciale actie flow card.
+- **Verwarmingscurve (stooklijn) Keuzelijst**: De verwarmingscurve selectie is uitgeschakeld vanwege een bug die wordt waargenomen op iPhone apparaten. Om verwarmingscurve waarden te wijzigen, gebruik de speciale actie flow card.
 - **Flow Cards**: De meeste apparaatinstellingen kunnen worden beheerd via Homey's flow cards voor automatiseringsdoeleinden.
 
 ### Verkrijgen van Vereiste Gegevens

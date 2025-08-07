@@ -1,0 +1,39 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grid background for curve representation -->
+  <defs>
+    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    </pattern>
+  </defs>
+  <rect x="15" y="15" width="70" height="50" fill="url(#grid)"/>
+  
+  <!-- Axes -->
+  <path d="M15 65 L85 65" stroke="currentColor" stroke-width="2"/>  <!-- X-axis -->
+  <path d="M15 15 L15 65" stroke="currentColor" stroke-width="2"/>  <!-- Y-axis -->
+  
+  <!-- Heating curve - smooth curve from bottom-left to top-right -->
+  <path d="M15 65 Q30 55 45 45 Q60 35 85 25" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="3" 
+        stroke-linecap="round"/>
+  
+  <!-- Control points on the curve showing adjustable settings -->
+  <circle cx="25" cy="60" r="3" fill="currentColor"/>
+  <circle cx="35" cy="52" r="3" fill="currentColor"/>
+  <circle cx="50" cy="42" r="3" fill="currentColor"/>
+  <circle cx="65" cy="32" r="3" fill="currentColor"/>
+  <circle cx="75" cy="27" r="3" fill="currentColor"/>
+  
+  <!-- Setting indicator - shows H1-H8, L1-L8 levels -->
+  <rect x="20" y="75" width="60" height="15" fill="none" stroke="currentColor" stroke-width="2" rx="3"/>
+  <text x="50" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="currentColor">H1-H8</text>
+  
+  <!-- Temperature symbols -->
+  <text x="10" y="12" font-family="Arial, sans-serif" font-size="10" fill="currentColor">T°</text>
+  <text x="88" y="70" font-family="Arial, sans-serif" font-size="10" fill="currentColor">t</text>
+  
+  <!-- Adjustment arrows indicating control capability -->
+  <path d="M50 75 L47 72 M50 75 L53 72" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <path d="M50 90 L47 93 M50 90 L53 93" stroke="currentColor" stroke-width="1.5" fill="none"/>
+</svg>

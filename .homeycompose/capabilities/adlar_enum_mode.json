@@ -6,7 +6,7 @@
   },
   "type": "enum",
   "getable": true,
-  "setable": false,
+  "setable": true,
   "values": [
     {
       "id": "cold",
@@ -59,7 +59,7 @@
     }
   ],
   "uiComponent": "picker",
-  "insights": false,
+  "preventInsights": true,
   "description": {
     "nl": "dp 2 : mode - mode"
   }

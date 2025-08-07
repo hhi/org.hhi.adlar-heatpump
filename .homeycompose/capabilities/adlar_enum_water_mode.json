@@ -11,7 +11,7 @@
   "step": 1,
   "decimals": 0,
   "getable": true,
-  "setable": false,
+  "setable": true,
   "uiComponent": "slider",
 
   "description": {
