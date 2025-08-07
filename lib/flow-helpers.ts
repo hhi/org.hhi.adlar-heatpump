@@ -107,6 +107,7 @@ export function registerSimpleActions(app: App, patterns: FlowCardPattern[]) {
         args: {
           device: {
             setCapabilityValue: (capability: string, value: unknown) => Promise<void>;
+            triggerCapabilityListener?: (capability: string, value: unknown, opts: Record<string, unknown>) => Promise<void>;
             getName: () => string;
             hasCapability: (capability: string) => boolean;
           };
@@ -142,13 +143,21 @@ export function registerSimpleActions(app: App, patterns: FlowCardPattern[]) {
         const value = args[valueKey];
 
         try {
-          await device.setCapabilityValue(capabilityName, value);
+          // Trigger the capability listener to send command to device (not just update Homey value)
+          if (typeof device.triggerCapabilityListener === 'function') {
+            await device.triggerCapabilityListener(capabilityName, value, {});
+          } else {
+            // Fallback for devices without triggerCapabilityListener method
+            await device.setCapabilityValue(capabilityName, value);
+            app.log(`Warning: Using setCapabilityValue fallback for ${capabilityName} - device commands may not reach physical device`);
+          }
+          
           if (process.env.DEBUG === '1') {
-            app.log(`Action flow card result: ${pattern.cardId} - Set ${capabilityName} to ${value} for device ${device.getName()}`);
+            app.log(`Action flow card result: ${pattern.cardId} - Triggered ${capabilityName} to ${value} for device ${device.getName()}`);
           }
           return true;
         } catch (error) {
-          app.error(`Failed to set ${capabilityName} to ${value}:`, error);
+          app.error(`Failed to trigger ${capabilityName} to ${value}:`, error);
           throw error;
         }
       },
