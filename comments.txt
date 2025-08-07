@@ -1,4 +1,4 @@
-Alfa version. 
+Beta version. 
 
 Runs under  homey app run 
 

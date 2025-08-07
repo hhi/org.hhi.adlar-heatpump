@@ -2,15 +2,15 @@
   "id": "heating_curve_is",
   "title": {
     "en": "Heating curve is",
-    "nl": "Verwarmingscurve is"
+    "nl": "Stooklijn (verwarmingscurve) is"
   },
   "titleFormatted": {
     "en": "Heating curve is [[curve]]",
-    "nl": "Verwarmingscurve is [[curve]]"
+    "nl": "Stooklijn (verwarmingscurve) is [[curve]]"
   },
   "hint": {
     "en": "Check if the heating curve matches the selected curve",
-    "nl": "Controleer of de verwarmingscurve overeenkomt met de geselecteerde curve"
+    "nl": "Controleer of de stooklijn (verwarmingscurve) overeenkomt met de geselecteerde curve"
   },
   "args": [
     {
@@ -23,7 +23,7 @@
       "name": "curve",
       "title": {
         "en": "Heating curve",
-        "nl": "Verwarmingscurve"
+        "nl": "Stooklijn (verwarmingscurve)"
       },
       "values": [
         {
