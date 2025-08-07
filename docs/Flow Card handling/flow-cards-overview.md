@@ -4,7 +4,7 @@ This document provides a comprehensive overview of all flow cards available in t
 
 ## Summary Statistics
 
-- **Total Flow Cards**: 58 (Updated v0.90.0)
+- **Total Flow Cards**: 58 (Updated v0.90.3)
 - **Triggers**: 31
 - **Actions**: 9  
 - **Conditions**: 18 (+9 action-based conditions in v0.80.0)
@@ -15,6 +15,7 @@ This document provides a comprehensive overview of all flow cards available in t
 - **Health-Aware**: Dynamic registration based on capability health (v0.70.0+)
 - **Bidirectional Control**: Complete read/write access to all controllable settings (v0.80.0+)
 - **Fixed Control Issues**: All capability listener and flow card control issues resolved (v0.90.0+)
+- **Enhanced Communication**: Flow ACTION cards now use triggerCapabilityListener() for reliable device control (v0.90.3+)
 
 ## Flow Card Categories
 
@@ -604,6 +605,40 @@ This intelligent system ensures users only see flow cards for working sensors wh
 - **ESLint compliance** with clean code formatting
 
 All device controls now work reliably from both Homey UI and flow cards with proper physical device communication.
+
+## Enhanced Communication (v0.90.3)
+
+### Flow ACTION Card Communication Fix
+- **Fixed critical communication issue** where Flow ACTION cards (like `set_heating_curve`) weren't propagating to physical devices
+- **Root cause resolved**: Pattern-based action system was using `setCapabilityValue()` which only updates Homey's internal state
+- **Implemented proper device communication** using `triggerCapabilityListener()` to ensure commands reach the physical device via DPS
+
+### Technical Implementation
+- **Updated `registerSimpleActions` function** in `/lib/flow-helpers.ts` to use proper device communication methods
+- **Added fallback compatibility** for devices that may not support the new method signature
+- **Enhanced TypeScript typing** for improved code reliability and maintainability
+
+### Command Flow (Fixed)
+1. **Flow ACTION Card** execution (e.g., `set_heating_curve` with value "L8")
+2. **Pattern-Based Action Handler** triggers `triggerCapabilityListener()`
+3. **Device Capability Listener** processes the command and validates input
+4. **DPS Mapping** translates capability to appropriate device data point (e.g., DPS 13)
+5. **Tuya Communication** sends command to physical device via `tuya.set()`
+6. **Physical Device Update** ✅ Command successfully applied
+
+### Capabilities Benefiting from Fix
+All simple action Flow cards now properly communicate with the physical device:
+- `set_target_temperature` - Temperature control
+- `set_hotwater_temperature` - Hot water temperature  
+- `set_heating_mode` - Heating operation mode
+- `set_work_mode` - Work mode selection
+- `set_capacity` - System capacity settings
+- `set_volume` - Volume control
+- `set_device_onoff` - Power on/off
+- `set_water_mode` - Water control mode
+- **`set_heating_curve`** - Heating curve adjustment (original reported issue)
+
+This fix ensures complete bidirectional communication between Homey Flow cards and the physical heat pump device, resolving the issue where reading device values worked but controlling the device through Flow cards failed.
 
 ## Conclusion
 
