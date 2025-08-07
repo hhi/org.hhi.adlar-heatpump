@@ -178,9 +178,9 @@ class MyDevice extends Homey.Device {
       health.lastValue = value;
     }
 
-    // Update health status
+    // Update health status - consider capability unhealthy when DPS value is null
     const wasHealthy = health.isHealthy;
-    health.isHealthy = health.nullCount < this.NULL_THRESHOLD && (now - health.lastSeenData) < this.CAPABILITY_TIMEOUT_MS;
+    health.isHealthy = !isNull && health.nullCount < this.NULL_THRESHOLD && (now - health.lastSeenData) < this.CAPABILITY_TIMEOUT_MS;
 
     // Log health status changes
     if (wasHealthy !== health.isHealthy) {
@@ -587,19 +587,42 @@ class MyDevice extends Homey.Device {
    */
   private updateCapabilitiesFromDps(dpsFetched: Record<string, unknown>, allArraysSwapped: Record<number, string>): void {
     Object.entries(dpsFetched).forEach(([dpsId, value]) => {
-      // Find the capability key for this dpsId
-      const capability = allArraysSwapped[Number(dpsId)];
-      this.debugLog('Found capability for dpsId', dpsId, ':', capability);
-      if (capability) {
-        // Update capability health tracking
-        this.updateCapabilityHealth(capability, value);
+      const dpsNumber = Number(dpsId);
 
-        // Check for critical conditions before updating
-        this.checkForCriticalConditions(capability, value).catch((err) => this.error('Error checking critical conditions:', err));
-        // Update the capability value in Homey
-        this.setCapabilityValue(capability, (value as boolean | number | string))
-          .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
-          .catch((err) => this.error(`Failed to update ${capability}:`, err));
+      // Find all capabilities that map to this DPS ID (handle dual capabilities)
+      const matchingCapabilities: string[] = [];
+      Object.entries(this.allCapabilities).forEach(([capabilityName, dpsArray]) => {
+        if (dpsArray.includes(dpsNumber)) {
+          matchingCapabilities.push(capabilityName);
+        }
+      });
+
+      this.debugLog(`DPS ${dpsId} received with value:`, value);
+      this.debugLog(`Found ${matchingCapabilities.length} capabilities for dpsId ${dpsId}:`, matchingCapabilities);
+      
+      // Special debug for DPS 13 (heating curve)
+      if (dpsNumber === 13) {
+        this.log('DPS 13 (heating curve) update:', value);
+        this.log('All capabilities mapping:', Object.keys(this.allCapabilities));
+        this.log('adlar_enum_countdown_set mapping:', this.allCapabilities['adlar_enum_countdown_set']);
+      }
+
+      if (matchingCapabilities.length > 0) {
+        // Update all matching capabilities
+        matchingCapabilities.forEach((capability) => {
+          // Update capability health tracking
+          this.updateCapabilityHealth(capability, value);
+
+          // Check for critical conditions before updating
+          this.checkForCriticalConditions(capability, value).catch((err) => this.error('Error checking critical conditions:', err));
+
+          // Update the capability value in Homey
+          this.setCapabilityValue(capability, (value as boolean | number | string))
+            .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
+            .catch((err) => this.error(`Failed to update ${capability}:`, err));
+        });
+      } else {
+        this.debugLog(`No capability mapping found for DPS ${dpsId}`);
       }
     });
   }
@@ -1550,42 +1573,103 @@ class MyDevice extends Homey.Device {
     const setableBuiltInCapsKeys = Object.keys(builtinCapOptList).filter(
       (key) => builtinCapOptList[key].setable === true,
     );
-    this.debugLog('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys); // Output: []
+    this.debugLog('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys);
+
+    // Verify heating curve capability (single capability for both display and control)
+    const heatingCurveCapability = 'adlar_enum_countdown_set';
+    this.debugLog(`Checking heating curve capability: ${heatingCurveCapability}`);
+    this.debugLog('Capability exists in manifest:', capList.includes(heatingCurveCapability));
+    this.debugLog('Capability available on device:', this.hasCapability(heatingCurveCapability));
 
     const setableCustomCapsKeys = Object.keys(manifest.capabilities).filter(
       (key) => manifest.capabilities[key].setable === true,
     );
-    this.debugLog('Setable custom capabilities from app manifest:', setableCustomCapsKeys); // Output: []
+    this.debugLog('Setable custom capabilities from app manifest:', setableCustomCapsKeys);
 
-    this.settableCapabilities = [...setableBuiltInCapsKeys, ...setableCustomCapsKeys];
+    // Default setable built-in capabilities (per Homey SDK standards)
+    const defaultSetableBuiltInCaps = [
+      'target_temperature',
+      'onoff',
+    ];
+
+    // Filter only capabilities that are actually present in the device
+    const availableDefaultSetableCaps = defaultSetableBuiltInCaps.filter((cap) => capList.includes(cap));
+    this.debugLog('Available default setable built-in capabilities:', availableDefaultSetableCaps);
+
+    // Combine and deduplicate setable capabilities
+    this.settableCapabilities = [
+      ...new Set([
+        ...setableBuiltInCapsKeys,
+        ...setableCustomCapsKeys,
+        ...availableDefaultSetableCaps,
+      ]),
+    ];
     this.debugLog('Setable capabilities:', this.settableCapabilities); // Output: []
 
-    // Register a single duty listener for all capabilities (from capability name to dp i)
+    // Register enhanced capability listeners with validation and error handling
     this.settableCapabilities.forEach((capability: string) => {
       this.debugLog(`Registering capability listener for ${capability}`);
       this.registerCapabilityListener(capability, async (value, _opts) => {
         this.log(`${capability} set to`, value);
 
-        // Map capability to Tuya DP (data point)
-        const dpArray = this.allCapabilities[capability];
-        const dp = Array.isArray(dpArray) ? dpArray[0] : undefined;
-        if (dp !== undefined) {
-          try {
-            await this.connectTuya();
-            if (this.tuya) {
-              await this.tuya.set({ dps: dp, set: value });
-              this.log(`Sent to Tuya: dp ${dp} = ${value}`);
-            } else {
-              this.error('Tuya device is not initialized');
-              throw new Error('Tuya device is not initialized');
-            }
-          } catch (err) {
-            this.error(`Failed to send to Tuya: ${err}`);
-            throw new Error('Failed to update device');
+        try {
+          // Map capability to Tuya DP (data point)
+          const dpArray = this.allCapabilities[capability];
+          const dp = Array.isArray(dpArray) ? dpArray[0] : undefined;
+
+          if (dp === undefined) {
+            const errorMsg = `No Tuya DP mapping found for capability: ${capability}`;
+            this.error(errorMsg);
+            throw new Error(errorMsg);
           }
+
+          // Validate value based on capability type
+          const validatedValue = this.validateCapabilityValue(capability, value);
+
+          // Ensure Tuya connection
+          await this.connectTuya();
+
+          if (!this.tuya) {
+            throw new Error('Tuya device is not initialized');
+          }
+
+          // Send command to device
+          await this.tuya.set({ dps: dp, set: validatedValue as string | number | boolean });
+          this.log(`Successfully sent to Tuya: dp ${dp} = ${validatedValue}`);
+
+          // Update Homey capability value to confirm change
+          await this.setCapabilityValue(capability, validatedValue).catch((err) => {
+            this.error(`Failed to update Homey capability ${capability}:`, err);
+          });
+
+          // Note: Using single capability for heating curve - both display and control
+
+        } catch (error) {
+          this.error(`Failed to update ${capability} on device:`, error);
+
+          // Provide user-friendly error messages
+          let userMessage = 'Failed to update device';
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          if (errorMessage.includes('connection') || errorMessage.includes('timeout')) {
+            userMessage = 'Device connection lost. Please check network connectivity.';
+          } else if (errorMessage.includes('not initialized')) {
+            userMessage = 'Device not ready. Please try again in a moment.';
+          } else if (errorMessage.includes('mapping')) {
+            userMessage = 'Device capability not supported.';
+          } else if (errorMessage.includes('range') || errorMessage.includes('Invalid')) {
+            userMessage = errorMessage; // Use the specific validation error
+          }
+
+          throw new Error(userMessage);
         }
       });
     });
+
+    // Register flow card action listeners
+    await this.registerFlowCardActionListeners();
+
+    // Handle optional capabilities based on settings
+    await this.handleOptionalCapabilities();
 
     // Get Tuya device settings from Homey
     const id = this.getStoreValue('device_id');
@@ -1724,6 +1808,41 @@ class MyDevice extends Homey.Device {
       return `Capability Diagnostics Report:\n\n${diagnosticReport}`;
     }
 
+    // Handle power measurement settings
+    if (changedKeys.includes('enable_power_measurements')) {
+      const enablePower = newSettings.enable_power_measurements;
+
+      // Auto-manage all power-related flow alert settings
+      const powerFlowSettings = ['flow_power_alerts', 'flow_voltage_alerts', 'flow_current_alerts'];
+      const settingsToUpdate: Record<string, string> = {};
+
+      if (!enablePower) {
+        // Disable all power-related flow alerts when power measurements are disabled
+        for (const setting of powerFlowSettings) {
+          if (oldSettings[setting] !== 'disabled') {
+            settingsToUpdate[setting] = 'disabled';
+          }
+        }
+
+        if (Object.keys(settingsToUpdate).length > 0) {
+          await this.setSettings(settingsToUpdate);
+          this.log('Auto-disabled power-related flow alerts due to power measurements being disabled:', Object.keys(settingsToUpdate));
+        }
+      } else if (enablePower && oldSettings.enable_power_measurements === false) {
+        // Reset all to auto when power measurements are re-enabled
+        for (const setting of powerFlowSettings) {
+          settingsToUpdate[setting] = 'auto';
+        }
+
+        await this.setSettings(settingsToUpdate);
+        this.log('Auto-enabled power-related flow alerts due to power measurements being enabled:', Object.keys(settingsToUpdate));
+      }
+
+      await this.handleOptionalCapabilities();
+      this.log('Power measurement settings updated');
+      return 'Power measurement settings updated. Capabilities and flow cards have been updated.';
+    }
+
     return undefined;
   }
 
@@ -1734,6 +1853,102 @@ class MyDevice extends Homey.Device {
    */
   async onRenamed(_name: string) {
     this.log('MyDevice was renamed');
+  }
+
+  /**
+   * Handle optional capabilities based on settings
+   */
+  private async handleOptionalCapabilities(): Promise<void> {
+    const enablePowerMeasurements = this.getSetting('enable_power_measurements') ?? true;
+
+    const powerCapabilities = [
+      'measure_power',
+      'meter_power.power_consumption',
+      'meter_power.electric_total',
+      'measure_current.cur_current',
+      'measure_current.b_cur',
+      'measure_current.c_cur',
+      'measure_voltage.voltage_current',
+      'measure_voltage.bv',
+      'measure_voltage.cv',
+    ];
+
+    for (const capability of powerCapabilities) {
+      if (enablePowerMeasurements) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`Added optional capability: ${capability}`);
+          } catch (error) {
+            this.error(`Failed to add capability ${capability}:`, error);
+          }
+        }
+      } else if (this.hasCapability(capability)) {
+        try {
+          await this.removeCapability(capability);
+          this.log(`Removed optional capability: ${capability}`);
+        } catch (error) {
+          this.error(`Failed to remove capability ${capability}:`, error);
+        }
+      }
+    }
+  }
+
+  /**
+   * Validate capability values based on capability type
+   */
+  private validateCapabilityValue(capability: string, value: unknown): unknown {
+    switch (capability) {
+      case 'target_temperature': {
+        const temp = Number(value);
+        if (Number.isNaN(temp) || temp < 5 || temp > 75) {
+          throw new Error(`Temperature ${temp}°C is outside valid range (5-75°C)`);
+        }
+        return temp;
+      }
+
+      case 'onoff':
+        return Boolean(value);
+
+      case 'adlar_enum_mode':
+      case 'adlar_enum_countdown_set':
+      case 'adlar_enum_work_mode':
+        if (typeof value !== 'string') {
+          throw new Error(`Invalid enum value for ${capability}: ${value}`);
+        }
+        return value;
+
+      case 'adlar_hotwater': {
+        const hotWaterTemp = Number(value);
+        if (Number.isNaN(hotWaterTemp) || hotWaterTemp < 35 || hotWaterTemp > 75) {
+          throw new Error(`Hot water temperature ${hotWaterTemp}°C is outside valid range (35-75°C)`);
+        }
+        return hotWaterTemp;
+      }
+
+      default:
+        return value;
+    }
+  }
+
+  /**
+   * Register flow card action listeners
+   * Note: Most ACTION cards are now handled by the app-level pattern-based system in app.ts/flow-helpers.ts
+   * Only custom/complex ACTION cards should be registered here
+   */
+  private async registerFlowCardActionListeners(): Promise<void> {
+    this.debugLog('Registering device-level flow card action listeners');
+
+    try {
+      // All simple ACTION cards (set_target_temperature, set_device_onoff, set_heating_mode,
+      // set_heating_curve, set_work_mode) are now handled by the app-level pattern-based system
+      this.debugLog('Simple ACTION cards are managed by app-level pattern-based system');
+
+      // Reserve this method for custom/complex ACTION cards that need device-specific logic
+      // Currently no custom ACTION cards require device-level registration
+    } catch (error) {
+      this.error('Error registering flow card action listeners:', error);
+    }
   }
 
   /**

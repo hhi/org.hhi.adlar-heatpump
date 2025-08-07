@@ -21,7 +21,17 @@ ensuring reliable and secure operation.
   recovery
 - **Multi-language Support**: English and Dutch interface
 
-### New in v0.80.0 - Action-Based Condition Flow Cards
+### New in v0.90.0 - Capability & Flow Control Fixes
+
+- **Resolved Control Issues**: Fixed all "missing capability listener" and "Not_setable" errors
+- **Reliable Device Communication**: Temperature, on/off, heating mode, and heating curve controls now work properly
+- **Flow Card Actions Fixed**: Flow cards now control the actual physical device, not just Homey values
+- **Enhanced Error Handling**: User-friendly error messages for connection and validation issues
+- **Optional Power Measurements**: Users can disable irrelevant power capabilities via device settings
+- **Bidirectional Sync**: All changes in Homey UI reliably update the physical heat pump
+- **Input Validation**: Proper validation with temperature ranges and enum checking
+
+### v0.80.0 - Action-Based Condition Flow Cards
 
 - **Complete Bidirectional Control**: Read current values of all controllable device settings
 - **9 New Condition Cards**: Check device power, temperatures, modes, and settings
@@ -150,6 +160,10 @@ Each category offers three modes:
 - **Auto**: Flow cards appear only for healthy sensors with data
 - **Force Enabled**: All flow cards are available regardless of sensor
   status
+
+#### Feature Settings
+
+- **Enable Power Measurements**: Show/hide power consumption, voltage and current measurements for cleaner interfaces on devices without power monitoring
 
 #### Diagnostics
 

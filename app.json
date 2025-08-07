@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.80.0",
+  "version": "0.90.14",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -2593,15 +2593,15 @@
         "id": "heating_curve_is",
         "title": {
           "en": "Heating curve is",
-          "nl": "Verwarmingscurve is"
+          "nl": "Stooklijn (verwarmingscurve) is"
         },
         "titleFormatted": {
           "en": "Heating curve is [[curve]]",
-          "nl": "Verwarmingscurve is [[curve]]"
+          "nl": "Stooklijn (verwarmingscurve) is [[curve]]"
         },
         "hint": {
           "en": "Check if the heating curve matches the selected curve",
-          "nl": "Controleer of de verwarmingscurve overeenkomt met de geselecteerde curve"
+          "nl": "Controleer of de stooklijn (verwarmingscurve) overeenkomt met de geselecteerde curve"
         },
         "args": [
           {
@@ -2614,7 +2614,7 @@
             "name": "curve",
             "title": {
               "en": "Heating curve",
-              "nl": "Verwarmingscurve"
+              "nl": "Stooklijn (verwarmingscurve)"
             },
             "values": [
               {
@@ -3499,15 +3499,15 @@
         "id": "set_heating_curve",
         "title": {
           "en": "Set heating curve",
-          "nl": "Verwarmingscurve instellen"
+          "nl": "Stooklijn (verwarmingscurve) instellen"
         },
         "titleFormatted": {
           "en": "Set heating curve to [[curve]]",
-          "nl": "Verwarmingscurve instellen op [[curve]]"
+          "nl": "Stooklijn (verwarmingscurve) instellen op [[curve]]"
         },
         "hint": {
           "en": "Set the heating curve setting",
-          "nl": "Stel de verwarmingscurve instelling in"
+          "nl": "Stel de stooklijn (verwarmingscurve) instelling in"
         },
         "args": [
           {
@@ -3520,7 +3520,7 @@
             "name": "curve",
             "title": {
               "en": "Heating curve",
-              "nl": "Verwarmingscurve"
+              "nl": "Stooklijn (verwarmingscurve)"
             },
             "values": [
               {
@@ -4019,6 +4019,7 @@
           "max": 75,
           "step": 1,
           "unit": "°C",
+          "setable": true,
           "description": {
             "nl": "dps_4: temp_set - Stel temperatuur"
           }
@@ -4028,7 +4029,7 @@
             "nl": "Schakelaar",
             "en": "Switch"
           },
-          "setable": false,
+          "setable": true,
           "uiQuickAction": false,
           "description": {
             "nl": "dps_1: switch - Schakelaar"
@@ -4471,6 +4472,28 @@
         {
           "type": "group",
           "label": {
+            "en": "Feature Settings",
+            "nl": "Functie Instellingen"
+          },
+          "children": [
+            {
+              "id": "enable_power_measurements",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable power measurement capabilities",
+                "nl": "Vermogingsmeting capabilities inschakelen"
+              },
+              "hint": {
+                "en": "Show/hide 9 power measurement capabilities (power consumption, voltage, current). Disable for cleaner interface if your device lacks power monitoring. Requires app restart to take effect.",
+                "nl": "Toon/verberg 9 vermogingsmeting capabilities (stroomverbruik, spanning, stroomsterkte). Uitschakelen voor schonere interface als uw apparaat geen vermogingsmonitoring heeft. Vereist app herstart om effect te hebben."
+              },
+              "value": false
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
             "en": "Flow Card Controls",
             "nl": "Flow Kaart Afhandeling Instellingen"
           },
@@ -4800,8 +4823,8 @@
       ],
       "uiComponent": "picker",
       "getable": true,
-      "setable": false,
-      "insights": true,
+      "setable": true,
+      "preventInsights": true,
       "description": {
         "nl": "dp 11 : capacity_set - Hot water curve setting"
       }
@@ -4809,8 +4832,8 @@
     "adlar_enum_countdown_set": {
       "id": "adlar_enum_countdown_set",
       "title": {
-        "en": "Curve setting",
-        "nl": "Instelling verwarmingscurve"
+        "en": "Curve setting (display)",
+        "nl": "Stooklijn (verwarmingscurve) (weergave)"
       },
       "type": "enum",
       "values": [
@@ -4935,10 +4958,11 @@
         }
       ],
       "getable": true,
-      "setable": false,
-      "uiComponent": "picker",
+      "setable": true,
+      "uiComponent": "sensor",
+      "icon": "/assets/heating-curve.svg",
       "description": {
-        "nl": "dp 13: countdown_set - Curve setting"
+        "nl": "dp 13: countdown_set - Curve setting (display only)"
       }
     },
     "adlar_enum_mode": {
@@ -4949,7 +4973,7 @@
       },
       "type": "enum",
       "getable": true,
-      "setable": false,
+      "setable": true,
       "values": [
         {
           "id": "cold",
@@ -5002,7 +5026,7 @@
         }
       ],
       "uiComponent": "picker",
-      "insights": false,
+      "preventInsights": true,
       "description": {
         "nl": "dp 2 : mode - mode"
       }
@@ -5019,7 +5043,7 @@
       "step": 1,
       "decimals": 0,
       "getable": true,
-      "setable": false,
+      "setable": true,
       "uiComponent": "slider",
       "description": {
         "nl": "dp 106: volume_set - Electricity Consumption Checking"
@@ -5038,7 +5062,7 @@
       "step": 1,
       "decimals": 0,
       "getable": true,
-      "setable": false,
+      "setable": true,
       "uiComponent": "slider",
       "description": {
         "nl": "dp 10 : water_mode - Control Temperature"
@@ -5077,6 +5101,7 @@
       "uiComponent": "picker",
       "getable": true,
       "setable": true,
+      "preventInsights": true,
       "description": {
         "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
       }

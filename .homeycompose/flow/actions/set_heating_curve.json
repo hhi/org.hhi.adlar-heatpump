@@ -2,15 +2,15 @@
   "id": "set_heating_curve",
   "title": {
     "en": "Set heating curve",
-    "nl": "Verwarmingscurve instellen"
+    "nl": "Stooklijn (verwarmingscurve) instellen"
   },
   "titleFormatted": {
     "en": "Set heating curve to [[curve]]",
-    "nl": "Verwarmingscurve instellen op [[curve]]"
+    "nl": "Stooklijn (verwarmingscurve) instellen op [[curve]]"
   },
   "hint": {
     "en": "Set the heating curve setting",
-    "nl": "Stel de verwarmingscurve instelling in"
+    "nl": "Stel de stooklijn (verwarmingscurve) instelling in"
   },
   "args": [
     {
@@ -23,7 +23,7 @@
       "name": "curve",
       "title": {
         "en": "Heating curve",
-        "nl": "Verwarmingscurve"
+        "nl": "Stooklijn (verwarmingscurve)"
       },
       "values": [
         {

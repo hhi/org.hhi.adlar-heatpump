@@ -4,16 +4,17 @@ This document provides a comprehensive overview of all flow cards available in t
 
 ## Summary Statistics
 
-- **Total Flow Cards**: 58 (Updated v0.80.0)
+- **Total Flow Cards**: 58 (Updated v0.90.0)
 - **Triggers**: 31
 - **Actions**: 9  
 - **Conditions**: 18 (+9 action-based conditions in v0.80.0)
 - **Highlighted Cards**: 8 (essential for basic operation)
-- **Power Management Dependent**: 6 cards
+- **Power Management Dependent**: 6 cards (now optional via settings)
 - **Languages Supported**: English (EN) and Dutch (NL)
 - **Pattern-Based Registration**: Intelligent pattern-based system + always-available action-based conditions
 - **Health-Aware**: Dynamic registration based on capability health (v0.70.0+)
 - **Bidirectional Control**: Complete read/write access to all controllable settings (v0.80.0+)
+- **Fixed Control Issues**: All capability listener and flow card control issues resolved (v0.90.0+)
 
 ## Flow Card Categories
 
@@ -575,6 +576,34 @@ Access flow card control via device settings:
 - **Expert Mode**: Enable diagnostic cards for professional use
 
 This intelligent system ensures users only see flow cards for working sensors while providing comprehensive diagnostic information for troubleshooting connectivity issues.
+
+## Control Issues Fixed (v0.90.0)
+
+### Resolved Capability Listener Problems
+- **Fixed "missing capability listener" errors** for temperature and on/off controls that prevented device control
+- **Resolved "Not_setable" errors** for heating mode and heating curve capabilities
+- **Enhanced capability detection logic** to properly identify built-in and custom setable capabilities
+- **Improved bidirectional synchronization** ensuring UI changes update the physical device
+
+### Flow Card Action Reliability  
+- **Implemented comprehensive flow card action listeners** that ensure flow cards control the actual device
+- **Fixed flow actions only updating Homey values** without affecting physical device state
+- **Added proper error handling and validation** for all capability changes from flows
+- **Enhanced user feedback** with meaningful error messages for connection and validation issues
+
+### Optional Power Measurements
+- **Added device settings control** for power measurement capabilities
+- **Users can disable irrelevant power capabilities** for cleaner device interfaces
+- **Dynamic capability management** adds/removes capabilities based on user preferences
+- **Maintains backward compatibility** with existing automations
+
+### Technical Improvements
+- **Input validation** for all capability values (temperature ranges, enum validation)
+- **Robust error handling** with user-friendly messages for connection timeouts and device errors
+- **Type safety improvements** with proper TypeScript compliance
+- **ESLint compliance** with clean code formatting
+
+All device controls now work reliably from both Homey UI and flow cards with proper physical device communication.
 
 ## Conclusion
 
