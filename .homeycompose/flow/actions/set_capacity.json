@@ -2,11 +2,11 @@
   "id": "set_capacity",
   "title": {
     "en": "Set hot water curve setting",
-    "nl": "Warmwater curve instelling instellen"
+    "nl": "Warmwater curve instellen"
   },
   "titleFormatted": {
     "en": "Set hot water curve setting to [[capacity]]",
-    "nl": "Warmwater curve instelling instellen op [[capacity]]"
+    "nl": "Warmwater curve instellen op [[capacity]]"
   },
   "hint": {
     "en": "Set the hot water curve setting for optimal efficiency",
@@ -23,7 +23,7 @@
       "name": "capacity",
       "title": {
         "en": "Hot water curve setting",
-        "nl": "Instelling warmwater curve"
+        "nl": "Warmwater curve instelling"
       },
       "values": [
         {

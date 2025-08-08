@@ -1,8 +1,8 @@
 {
   "id": "adlar_enum_countdown_set",
   "title": {
-    "en": "Curve setting (display)",
-    "nl": "Stooklijn (verwarmingscurve) (weergave)"
+    "en": "Heating curve setting",
+    "nl": "Verwarmingscurve (stooklijn) instelling"
   },
   "type": "enum",
   "values": [
@@ -121,8 +121,8 @@
     {
       "id": "L8",
       "title": {
-        "en": "L8",
-        "nl": "L8"
+        "en": "L8 - custom curve",
+        "nl": "L8 - aangepaste curve"
       }
     }
   ],
@@ -131,6 +131,7 @@
   "uiComponent": "sensor",
   "icon": "/assets/heating-curve.svg",
   "description": {
-    "nl": "dp 13: countdown_set - Curve setting (display only)"
+    "en": "dp 13: countdown_set - Controls the heating curve settings (H1-H8, L1-L8) for temperature compensation",
+    "nl": "dp 13: countdown_set - Beheert de verwarmingscurve instellingen (H1-H8, L1-L8) voor temperatuurcompensatie"
   }
 }

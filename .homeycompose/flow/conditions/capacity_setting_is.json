@@ -5,8 +5,8 @@
     "nl": "Warmwater curve instelling is"
   },
   "titleFormatted": {
-    "en": "Hot water curve setting is [[capacity]]",
-    "nl": "Warmwater curve instelling is [[capacity]]"
+    "en": "Hot water curve setting !{{is|is not}} [[capacity]]",
+    "nl": "Warmwater curve instelling !{{is|is niet}} [[capacity]]"
   },
   "hint": {
     "en": "Check if the hot water curve setting matches the selected setting",

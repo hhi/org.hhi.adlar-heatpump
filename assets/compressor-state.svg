@@ -1,0 +1,9 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="36" fill="none" stroke="currentColor" stroke-width="5"/>
+  <circle cx="50" cy="50" r="8" fill="none" stroke="currentColor" stroke-width="5"/>
+  <line x1="50" y1="50" x2="50" y2="22" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  <line x1="50" y1="50" x2="72" y2="62" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  <line x1="50" y1="50" x2="28" y2="62" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  <line x1="7" y1="50" x2="17" y2="50" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  <line x1="83" y1="50" x2="93" y2="50" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+</svg>

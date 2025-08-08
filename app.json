@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.90.3",
+  "version": "0.92.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -2399,8 +2399,8 @@
           "nl": "Warmwater curve instelling is"
         },
         "titleFormatted": {
-          "en": "Hot water curve setting is [[capacity]]",
-          "nl": "Warmwater curve instelling is [[capacity]]"
+          "en": "Hot water curve setting !{{is|is not}} [[capacity]]",
+          "nl": "Warmwater curve instelling !{{is|is niet}} [[capacity]]"
         },
         "hint": {
           "en": "Check if the hot water curve setting matches the selected setting",
@@ -2489,8 +2489,8 @@
           "nl": "Apparaat vermogen is"
         },
         "titleFormatted": {
-          "en": "Device power is [[state]]",
-          "nl": "Apparaat vermogen is [[state]]"
+          "en": "Device power !{{is|is not}} [[state]]",
+          "nl": "Apparaat vermogen !{{is|is niet}} [[state]]"
         },
         "hint": {
           "en": "Check if the device power state matches the selected state",
@@ -2592,16 +2592,16 @@
       {
         "id": "heating_curve_is",
         "title": {
-          "en": "Heating curve is",
-          "nl": "Stooklijn (verwarmingscurve) is"
+          "en": "Heating curve setting is",
+          "nl": "Verwarmingscurve (stooklijn) instelling is"
         },
         "titleFormatted": {
-          "en": "Heating curve is [[curve]]",
-          "nl": "Stooklijn (verwarmingscurve) is [[curve]]"
+          "en": "Heating curve setting !{{is|is not}} [[curve]]",
+          "nl": "Verwarmingscurve (stooklijn) instelling !{{is|is niet}} [[curve]]"
         },
         "hint": {
-          "en": "Check if the heating curve matches the selected curve",
-          "nl": "Controleer of de stooklijn (verwarmingscurve) overeenkomt met de geselecteerde curve"
+          "en": "Check if the heating curve setting matches the selected curve",
+          "nl": "Controleer of de verwarmingscurve (stooklijn) instelling overeenkomt met de geselecteerde curve"
         },
         "args": [
           {
@@ -2732,8 +2732,8 @@
               {
                 "id": "L8",
                 "title": {
-                  "en": "L8",
-                  "nl": "L8"
+                  "en": "L8 - custom curve",
+                  "nl": "L8 - custom curve"
                 }
               }
             ]
@@ -2747,8 +2747,8 @@
           "nl": "Verwarmingsmodus is"
         },
         "titleFormatted": {
-          "en": "Heating mode is [[mode]]",
-          "nl": "Verwarmingsmodus is [[mode]]"
+          "en": "Heating mode !{{is|is not}} [[mode]]",
+          "nl": "Verwarmingsmodus !{{is|is niet}} [[mode]]"
         },
         "hint": {
           "en": "Check if the heating mode matches the selected mode",
@@ -2828,8 +2828,8 @@
           "nl": "Warm water temperatuur is"
         },
         "titleFormatted": {
-          "en": "Hot water temperature is [[comparison]] [[temperature]]°C",
-          "nl": "Warm water temperatuur is [[comparison]] [[temperature]]°C"
+          "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+          "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
         },
         "hint": {
           "en": "Check if the hot water temperature matches the specified condition",
@@ -2973,8 +2973,8 @@
           "nl": "Doel temperatuur is"
         },
         "titleFormatted": {
-          "en": "Target temperature is [[comparison]] [[temperature]]°C",
-          "nl": "Doel temperatuur is [[comparison]] [[temperature]]°C"
+          "en": "Target temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+          "nl": "Doel temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
         },
         "hint": {
           "en": "Check if the target temperature matches the specified condition",
@@ -3157,8 +3157,8 @@
           "nl": "Stroomverbruik controleren is"
         },
         "titleFormatted": {
-          "en": "Electricity consumption checking is [[comparison]] [[level]]",
-          "nl": "Stroomverbruik controleren is [[comparison]] [[level]]"
+          "en": "Electricity consumption checking !{{is|is not}} [[comparison]] [[level]]",
+          "nl": "Stroomverbruik controleren !{{is|is niet}} [[comparison]] [[level]]"
         },
         "hint": {
           "en": "Check if the electricity consumption checking level matches the specified condition",
@@ -3264,8 +3264,8 @@
           "nl": "Water controle modus is"
         },
         "titleFormatted": {
-          "en": "Water control mode is [[comparison]] [[mode]]",
-          "nl": "Water controle modus is [[comparison]] [[mode]]"
+          "en": "Water control mode !{{is|is not}} [[comparison]] [[mode]]",
+          "nl": "Water controle modus !{{is|is niet}} [[comparison]] [[mode]]"
         },
         "hint": {
           "en": "Check if the water control mode matches the specified condition",
@@ -3333,8 +3333,8 @@
           "nl": "Bedrijfsmodus is"
         },
         "titleFormatted": {
-          "en": "Work mode is [[mode]]",
-          "nl": "Bedrijfsmodus is [[mode]]"
+          "en": "Work mode !{{is|is not}} [[mode]]",
+          "nl": "Bedrijfsmodus !{{is|is niet}} [[mode]]"
         },
         "hint": {
           "en": "Check if the work mode matches the selected mode",
@@ -3385,11 +3385,11 @@
         "id": "set_capacity",
         "title": {
           "en": "Set hot water curve setting",
-          "nl": "Warmwater curve instelling instellen"
+          "nl": "Warmwater curve instellen"
         },
         "titleFormatted": {
           "en": "Set hot water curve setting to [[capacity]]",
-          "nl": "Warmwater curve instelling instellen op [[capacity]]"
+          "nl": "Warmwater curve instellen op [[capacity]]"
         },
         "hint": {
           "en": "Set the hot water curve setting for optimal efficiency",
@@ -3406,7 +3406,7 @@
             "name": "capacity",
             "title": {
               "en": "Hot water curve setting",
-              "nl": "Instelling warmwater curve"
+              "nl": "Warmwater curve instelling"
             },
             "values": [
               {
@@ -3498,17 +3498,18 @@
       {
         "id": "set_heating_curve",
         "title": {
-          "en": "Set heating curve",
-          "nl": "Stooklijn (verwarmingscurve) instellen"
+          "en": "Set heating curve setting",
+          "nl": "Verwarmingscurve (stooklijn) instellen"
         },
         "titleFormatted": {
-          "en": "Set heating curve to [[curve]]",
-          "nl": "Stooklijn (verwarmingscurve) instellen op [[curve]]"
+          "en": "Set heating curve setting to [[curve]]",
+          "nl": "Verwarmingscurve (stooklijn) instellen op [[curve]]"
         },
         "hint": {
           "en": "Set the heating curve setting",
-          "nl": "Stel de stooklijn (verwarmingscurve) instelling in"
+          "nl": "Stel de stooklijn instelling in"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -3519,8 +3520,8 @@
             "type": "dropdown",
             "name": "curve",
             "title": {
-              "en": "Heating curve",
-              "nl": "Stooklijn (verwarmingscurve)"
+              "en": "Heating curve setting",
+              "nl": "Verwarmingscurve instelling"
             },
             "values": [
               {
@@ -3638,8 +3639,8 @@
               {
                 "id": "L8",
                 "title": {
-                  "en": "L8",
-                  "nl": "L8"
+                  "en": "L8 - custom curve",
+                  "nl": "L8 - custom curve"
                 }
               }
             ]
@@ -4472,8 +4473,8 @@
         {
           "type": "group",
           "label": {
-            "en": "Feature Settings",
-            "nl": "Functie Instellingen"
+            "en": "Feature Settings (restart required)",
+            "nl": "Functie Instellingen (herstart vereist)"
           },
           "children": [
             {
@@ -4494,8 +4495,8 @@
         {
           "type": "group",
           "label": {
-            "en": "Flow Card Controls",
-            "nl": "Flow Kaart Afhandeling Instellingen"
+            "en": "Flow Card Controls (restart advised)",
+            "nl": "Flow Kaart Afhandeling Instellingen (herstart aanbevolen)"
           },
           "children": [
             {
@@ -4781,7 +4782,7 @@
       "id": "adlar_enum_capacity_set",
       "title": {
         "en": "Hot water curve setting",
-        "nl": "Instelling warmwater curve"
+        "nl": "Warmwater curve instelling"
       },
       "type": "enum",
       "values": [
@@ -4826,14 +4827,15 @@
       "setable": true,
       "preventInsights": true,
       "description": {
-        "nl": "dp 11 : capacity_set - Hot water curve setting"
+        "en": "dp 11: capacity_set - Controls the hot water curve settings (OFF, H1-H4) for domestic hot water heating",
+        "nl": "dp 11: capacity_set - Beheert de warmwater curve instellingen (UIT, H1-H4) voor sanitair warm water"
       }
     },
     "adlar_enum_countdown_set": {
       "id": "adlar_enum_countdown_set",
       "title": {
-        "en": "Curve setting (display)",
-        "nl": "Stooklijn (verwarmingscurve) (weergave)"
+        "en": "Heating curve setting",
+        "nl": "Verwarmingscurve (stooklijn) instelling"
       },
       "type": "enum",
       "values": [
@@ -4952,8 +4954,8 @@
         {
           "id": "L8",
           "title": {
-            "en": "L8",
-            "nl": "L8"
+            "en": "L8 - custom curve",
+            "nl": "L8 - aangepaste curve"
           }
         }
       ],
@@ -4962,7 +4964,8 @@
       "uiComponent": "sensor",
       "icon": "/assets/heating-curve.svg",
       "description": {
-        "nl": "dp 13: countdown_set - Curve setting (display only)"
+        "en": "dp 13: countdown_set - Controls the heating curve settings (H1-H8, L1-L8) for temperature compensation",
+        "nl": "dp 13: countdown_set - Beheert de verwarmingscurve instellingen (H1-H8, L1-L8) voor temperatuurcompensatie"
       }
     },
     "adlar_enum_mode": {
@@ -5116,6 +5119,7 @@
       "min": 0,
       "max": 30,
       "uiComponent": "sensor",
+      "icon": "/assets/fault.svg",
       "getable": true,
       "setable": false,
       "insights": true,
@@ -5242,6 +5246,7 @@
       "setable": false,
       "getable": true,
       "uiComponent": "sensor",
+      "icon": "/assets/compressor-state.svg",
       "insights": true,
       "insightsTitleTrue": {
         "en": "Compressor is ON",
@@ -5265,6 +5270,7 @@
       "setable": false,
       "getable": true,
       "uiComponent": "sensor",
+      "icon": "/assets/defrost-state.svg",
       "insights": true,
       "insightsTitleTrue": {
         "en": "Defrosting active",

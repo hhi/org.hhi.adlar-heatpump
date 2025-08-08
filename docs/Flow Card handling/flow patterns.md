@@ -96,10 +96,11 @@ The `lib/flow-helpers.ts` file implements a sophisticated pattern-based flow car
 3. **Maintainability**: Change behavior in one place, affects all similar cards
 4. **Type Safety**: TypeScript ensures proper patterns and capabilities
 5. **Device Compatibility**: Automatic capability checking prevents errors
-6. **Error Handling**: Standardized error messages and logging
+6. **Error Handling**: Standardized error messages and logging (enhanced in v0.90.3)
 7. **Extensibility**: Easy to add new patterns or cards
 8. **Reliability**: v0.75.0 eliminated invalid flow card references
 9. **Health Awareness**: Integrates with capability health monitoring system
+10. **Enhanced Error Categorization**: v0.90.3 adds comprehensive error handling with DeviceConstants and TuyaErrorCategorizer
 
 ## v0.75.0 Improvements
 
@@ -115,6 +116,44 @@ The system was refined to eliminate non-existent flow card references:
 - **Pattern-Only System**: All flow cards now use proven pattern-based registration
 - **Eliminated Startup Errors**: No more "Invalid Flow Card ID" errors
 - **Cleaner Architecture**: Removed duplicate and conflicting registration code
+
+## v0.90.3 Error Handling Improvements
+
+### Centralized Constants Integration
+Pattern-based flow cards now use `DeviceConstants` for consistent timing and thresholds:
+- **Timeout Management**: All flow operations use centralized timeout values
+- **Threshold Consistency**: Power, temperature, and efficiency thresholds from DeviceConstants
+- **Notification Throttling**: Centralized control of alert frequency
+
+### Enhanced Error Categorization
+Flow card operations benefit from comprehensive error handling:
+- **Smart Recovery**: Automatic retry for recoverable flow card registration failures
+- **Categorized Logging**: Structured error information for troubleshooting flow issues
+- **User-Friendly Messages**: Clear error explanations when flow cards fail to register
+- **Context-Aware Handling**: Different recovery strategies based on error type
+
+### Error Handling Pattern Integration
+```javascript
+try {
+  await device.setCapabilityValue(capabilityName, value);
+} catch (error) {
+  const categorizedError = TuyaErrorCategorizer.categorize(
+    error as Error, 
+    `Flow action: ${cardId}`
+  );
+  
+  // Structured logging for flow card errors
+  this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
+  
+  // Smart retry for retryable flow card errors
+  if (categorizedError.retryable) {
+    setTimeout(() => {
+      device.setCapabilityValue(capabilityName, value)
+        .catch(retryErr => this.error(`Flow retry failed: ${retryErr}`));
+    }, DeviceConstants.RETRY_DELAY_MS);
+  }
+}
+```
 
 ### Usage in Main App
 

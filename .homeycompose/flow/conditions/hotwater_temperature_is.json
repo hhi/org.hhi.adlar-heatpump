@@ -5,8 +5,8 @@
     "nl": "Warm water temperatuur is"
   },
   "titleFormatted": {
-    "en": "Hot water temperature is [[comparison]] [[temperature]]°C",
-    "nl": "Warm water temperatuur is [[comparison]] [[temperature]]°C"
+    "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+    "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
   },
   "hint": {
     "en": "Check if the hot water temperature matches the specified condition",
