@@ -4,6 +4,8 @@
 import Homey, { manifest } from 'homey';
 import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
+import { DeviceConstants } from '../../lib/constants';
+import { TuyaErrorCategorizer, type CategorizedError, TuyaErrorType } from '../../lib/error-types';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -54,13 +56,13 @@ class MyDevice extends Homey.Device {
     lastValue: unknown;
   }>();
 
-  private readonly CAPABILITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes without data = unhealthy
+  private readonly CAPABILITY_TIMEOUT_MS = DeviceConstants.CAPABILITY_TIMEOUT_MS;
 
-  private readonly NULL_THRESHOLD = 10; // Consider unhealthy after 10 consecutive nulls
+  private readonly NULL_THRESHOLD = DeviceConstants.NULL_THRESHOLD;
 
   private healthCheckInterval: NodeJS.Timeout | null = null;
 
-  private capabilitiesArray: string[] = (manifest.capabilities || [])
+  private readonly capabilitiesArray: string[] = (manifest.capabilities || []) as string[];
 
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
@@ -69,14 +71,40 @@ class MyDevice extends Homey.Device {
     }
   }
 
+  /**
+   * Handle and log categorized Tuya errors with enhanced information
+   * @param error - The original error
+   * @param context - Context where error occurred
+   * @returns Categorized error information
+   */
+  private handleTuyaError(error: Error, context: string): CategorizedError {
+    const categorizedError = TuyaErrorCategorizer.categorize(error, context);
+    
+    // Log the categorized error
+    this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
+    
+    // Log debug information if enabled
+    if (process.env.DEBUG === '1') {
+      this.debugLog('Error categorization details:', {
+        type: categorizedError.type,
+        recoverable: categorizedError.recoverable,
+        retryable: categorizedError.retryable,
+        userMessage: categorizedError.userMessage,
+        recoveryActions: categorizedError.recoveryActions
+      });
+    }
+    
+    return categorizedError;
+  }
+
   private async sendCriticalNotification(title: string, message: string) {
     const now = Date.now();
     const notificationKey = `${title}:${message}`;
 
     // Prevent spam - only send notifications every 30 minutes for the same device
     // Also prevent duplicate notifications within 5 seconds (for duplicate events)
-    if (now - this.lastNotificationTime > 30 * 60 * 1000
-        || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > 5000)) {
+    if (now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_THROTTLE_MS
+        || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_KEY_CHANGE_THRESHOLD_MS)) {
       try {
         await this.homey.notifications.createNotification({
           excerpt: `${this.getName()}: ${title}`,
@@ -90,7 +118,12 @@ class MyDevice extends Homey.Device {
     }
   }
 
-  async connectTuya() {
+  /**
+   * Connect to the Tuya device with proper error handling
+   * @returns Promise that resolves when connection is established
+   * @throws Error if connection fails or device is not initialized
+   */
+  async connectTuya(): Promise<void> {
     if (!this.tuyaConnected) {
       try {
         // Discover the device on the network first
@@ -104,7 +137,16 @@ class MyDevice extends Homey.Device {
           throw new Error('Tuya device is not initialized');
         }
       } catch (err) {
-        this.error('Failed to find or connect to Tuya device:', err);
+        const categorizedError = this.handleTuyaError(err as Error, 'Tuya device connection');
+        
+        // Send user notification for non-recoverable errors
+        if (!categorizedError.recoverable) {
+          await this.sendCriticalNotification(
+            'Device Connection Failed',
+            categorizedError.userMessage
+          );
+        }
+        
         // Don't throw here to allow reconnection attempts
       }
     }
@@ -123,19 +165,19 @@ class MyDevice extends Homey.Device {
           // Reset failure counter on successful connection
           this.consecutiveFailures = 0;
         } catch (err) {
-          this.debugLog('Reconnection attempt failed:', err);
+          const categorizedError = this.handleTuyaError(err as Error, 'Reconnection attempt');
           this.consecutiveFailures++;
 
-          // Send notification after 5 consecutive failures (100 seconds)
-          if (this.consecutiveFailures === 5) {
+          // Send notification after max consecutive failures (100 seconds)
+          if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
             await this.sendCriticalNotification(
               'Device Connection Lost',
-              'Heat pump has been disconnected for over 1 minute. Please check device and network connectivity.',
+              `Heat pump has been disconnected for over 1 minute. ${categorizedError.userMessage}`,
             );
           }
         }
       }
-    }, 20000);
+    }, DeviceConstants.RECONNECTION_INTERVAL_MS);
   }
 
   private stopReconnectInterval() {
@@ -420,7 +462,7 @@ class MyDevice extends Homey.Device {
         this.updateFlowCardsBasedOnHealth().catch((error) => {
           this.error('Error during health check update:', error);
         });
-      }, 2 * 60 * 1000);
+      }, DeviceConstants.HEALTH_CHECK_INTERVAL_MS);
       if (interval) {
         this.healthCheckInterval = interval;
         this.log('Started capability health check interval');
@@ -531,7 +573,7 @@ class MyDevice extends Homey.Device {
    * Format time difference in human-readable format
    */
   private formatTimeAgo(milliseconds: number): string {
-    const seconds = Math.floor(milliseconds / 1000);
+    const seconds = Math.floor(milliseconds / DeviceConstants.MS_PER_SECOND);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
@@ -599,7 +641,7 @@ class MyDevice extends Homey.Device {
 
       this.debugLog(`DPS ${dpsId} received with value:`, value);
       this.debugLog(`Found ${matchingCapabilities.length} capabilities for dpsId ${dpsId}:`, matchingCapabilities);
-      
+
       // Special debug for DPS 13 (heating curve)
       if (dpsNumber === 13) {
         this.log('DPS 13 (heating curve) update:', value);
@@ -619,7 +661,18 @@ class MyDevice extends Homey.Device {
           // Update the capability value in Homey
           this.setCapabilityValue(capability, (value as boolean | number | string))
             .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
-            .catch((err) => this.error(`Failed to update ${capability}:`, err));
+            .catch((err) => {
+              const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Setting capability ${capability}`);
+              this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
+              
+              // Only attempt recovery for retryable errors
+              if (categorizedError.retryable) {
+                setTimeout(() => {
+                  this.setCapabilityValue(capability, (value as boolean | number | string))
+                    .catch((retryErr) => this.error(`Retry failed for ${capability}:`, retryErr));
+                }, 1000);
+              }
+            });
         });
       } else {
         this.debugLog(`No capability mapping found for DPS ${dpsId}`);
@@ -797,10 +850,10 @@ class MyDevice extends Homey.Device {
     // Power and consumption threshold triggers
     if (capability === 'measure_power' && typeof value === 'number') {
       // Fire power threshold exceeded for values above 5kW
-      if (value > 5000) {
+      if (value > DeviceConstants.HIGH_POWER_ALERT_THRESHOLD_W) {
         await this.triggerFlowCard('power_threshold_exceeded', {
           power: value,
-          threshold: 5000,
+          threshold: DeviceConstants.HIGH_POWER_ALERT_THRESHOLD_W,
         });
       }
     }
@@ -848,11 +901,11 @@ class MyDevice extends Homey.Device {
       const power = this.getCapabilityValue('measure_power') || 0;
       const efficiency = value > 0 && power > 0 ? (value / power) * 100 : 0;
 
-      if (efficiency < 50 && power > 1000) { // Low efficiency with significant power draw
+      if (efficiency < DeviceConstants.LOW_EFFICIENCY_THRESHOLD_PERCENT && power > DeviceConstants.DEFAULT_POWER_THRESHOLD_W) { // Low efficiency with significant power draw
         await this.triggerFlowCard('compressor_efficiency_alert', {
           efficiency,
           power,
-          threshold: 50,
+          threshold: DeviceConstants.LOW_EFFICIENCY_THRESHOLD_PERCENT,
         });
       }
     }
@@ -915,7 +968,13 @@ class MyDevice extends Homey.Device {
       this.isFlowCardsInitialized = true;
       this.log('Flow cards initialized successfully');
     } catch (error) {
-      this.error('Error initializing flow cards:', error);
+      const categorizedError = TuyaErrorCategorizer.categorize(error as Error, 'Initializing flow cards');
+      this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
+      
+      if (categorizedError.retryable) {
+        this.log('Will retry flow card initialization in 5 seconds');
+        setTimeout(() => this.initializeFlowCards(), 5000);
+      }
     }
   }
 
@@ -1125,20 +1184,20 @@ class MyDevice extends Homey.Device {
           const rawValue = this.getCapabilityValue('measure_power');
           const isNull = rawValue === null || rawValue === undefined;
           const currentPower = rawValue || 0;
-          const result = currentPower > (args.threshold || 1000);
+          const result = currentPower > (args.threshold || DeviceConstants.DEFAULT_POWER_THRESHOLD_W);
 
           if (isNull) {
             this.debugLog('Power threshold condition: using fallback value for null capability', {
               capability: 'measure_power',
               rawValue,
               fallbackValue: currentPower,
-              threshold: args.threshold || 1000,
+              threshold: args.threshold || DeviceConstants.DEFAULT_POWER_THRESHOLD_W,
               result,
             });
           } else {
             this.debugLog('Power threshold condition result', {
               currentPower,
-              threshold: args.threshold || 1000,
+              threshold: args.threshold || DeviceConstants.DEFAULT_POWER_THRESHOLD_W,
               result,
             });
           }
@@ -1298,13 +1357,15 @@ class MyDevice extends Homey.Device {
           const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
           this.flowCardListeners.set(cardId, triggerCard);
         } catch (err) {
-          this.log(`State trigger card ${cardId} not found, skipping`);
+          const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Registering state trigger card ${cardId}`);
+          this.log(`State trigger card ${cardId} not found, skipping: ${categorizedError.userMessage}`);
         }
       });
 
       this.log('State flow cards registered');
     } catch (error) {
-      this.error('Error registering state flow cards:', error);
+      const categorizedError = TuyaErrorCategorizer.categorize(error as Error, 'Registering state flow cards');
+      this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
     }
   }
 
@@ -1645,20 +1706,10 @@ class MyDevice extends Homey.Device {
           // Note: Using single capability for heating curve - both display and control
 
         } catch (error) {
-          this.error(`Failed to update ${capability} on device:`, error);
-
-          // Provide user-friendly error messages
-          let userMessage = 'Failed to update device';
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes('connection') || errorMessage.includes('timeout')) {
-            userMessage = 'Device connection lost. Please check network connectivity.';
-          } else if (errorMessage.includes('not initialized')) {
-            userMessage = 'Device not ready. Please try again in a moment.';
-          } else if (errorMessage.includes('mapping')) {
-            userMessage = 'Device capability not supported.';
-          } else if (errorMessage.includes('range') || errorMessage.includes('Invalid')) {
-            userMessage = errorMessage; // Use the specific validation error
-          }
+          const categorizedError = this.handleTuyaError(error as Error, `Capability update: ${capability}`);
+          
+          // Use categorized error message for better user experience
+          const userMessage = categorizedError.userMessage;
 
           throw new Error(userMessage);
         }
@@ -1823,24 +1874,31 @@ class MyDevice extends Homey.Device {
             settingsToUpdate[setting] = 'disabled';
           }
         }
-
-        if (Object.keys(settingsToUpdate).length > 0) {
-          await this.setSettings(settingsToUpdate);
-          this.log('Auto-disabled power-related flow alerts due to power measurements being disabled:', Object.keys(settingsToUpdate));
-        }
       } else if (enablePower && oldSettings.enable_power_measurements === false) {
         // Reset all to auto when power measurements are re-enabled
         for (const setting of powerFlowSettings) {
           settingsToUpdate[setting] = 'auto';
         }
+      }
 
-        await this.setSettings(settingsToUpdate);
-        this.log('Auto-enabled power-related flow alerts due to power measurements being enabled:', Object.keys(settingsToUpdate));
+      // Only call setSettings once if there are settings to update
+      if (Object.keys(settingsToUpdate).length > 0) {
+        // Use setTimeout to avoid race condition with onSettings still being pending
+        this.homey.setTimeout(async () => {
+          try {
+            await this.setSettings(settingsToUpdate);
+            this.log('Auto-updated power-related flow alerts:', Object.keys(settingsToUpdate));
+            // Trigger flow cards update after settings are applied
+            await this.updateFlowCards();
+          } catch (error) {
+            this.error('Failed to update power-related flow alert settings:', error);
+          }
+        }, 100);
       }
 
       await this.handleOptionalCapabilities();
       this.log('Power measurement settings updated');
-      return 'Power measurement settings updated. Capabilities and flow cards have been updated.';
+      return 'Power measurement settings updated. Capabilities and flow cards will be updated shortly.';
     }
 
     return undefined;
@@ -1896,8 +1954,16 @@ class MyDevice extends Homey.Device {
 
   /**
    * Validate capability values based on capability type
+   * @param capability - The capability name to validate
+   * @param value - The value to validate
+   * @returns The validated and possibly converted value
+   * @throws Error if value is invalid for the capability
    */
   private validateCapabilityValue(capability: string, value: unknown): unknown {
+    // Check for null/undefined values first
+    if (value === null || value === undefined) {
+      throw new Error(`Value for capability ${capability} cannot be null or undefined`);
+    }
     switch (capability) {
       case 'target_temperature': {
         const temp = Number(value);

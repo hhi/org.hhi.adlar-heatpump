@@ -312,7 +312,7 @@ THEN set_heating_curve to H6
 
 ---
 
-## CONDITIONS (18 cards - Updated v0.80.0)
+## CONDITIONS (18 cards - Updated v0.90.3)
 
 ### Essential Tier - Basic Status Checks (3 cards)
 
@@ -381,34 +381,45 @@ THEN send notification "Poor heat transfer detected"
 
 These condition cards enable reading current values of all controllable device settings, providing complete bidirectional control for sophisticated automation flows. Always available regardless of user preferences.
 
+**✨ Inverse Operator Support (v0.90.3)**: All action-based condition cards now support inverse operators, allowing both "is" and "is not" logic for more flexible automation flows.
+
 #### **device_power_is**
 - **Purpose**: Check current device power state (on/off)
 - **Arguments**: Power state (on/off)
 - **Return**: Boolean (true if state matches)
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Conditional actions based on device power state
 - **Advanced Flow**: Prevent conflicting power commands
 ```
 IF device_power_is off
 AND ambient_temperature_changed below 0°C
 THEN set_device_onoff to on
+
+IF device_power_is NOT on (using inverse operator)
+THEN send notification "Heat pump is off"
 ```
 
 #### **target_temperature_is**
 - **Purpose**: Compare current target temperature setting
 - **Arguments**: Comparison (equal/greater/less), Temperature (5-60°C, 0.5°C steps)
 - **Return**: Boolean based on comparison result
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Temperature-based flow control
 - **Advanced Flow**: Dynamic temperature management
 ```
 IF target_temperature_is greater than 25°C
 AND power_above_threshold 2000W
 THEN set_target_temperature to 22°C
+
+IF target_temperature_is NOT equal to 22°C (using inverse operator)
+THEN send notification "Target temperature has changed"
 ```
 
 #### **hotwater_temperature_is**
 - **Purpose**: Compare current hot water temperature setting
 - **Arguments**: Comparison (equal/greater/less), Temperature (30-75°C, 1°C steps)
 - **Return**: Boolean based on comparison result
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Hot water optimization flows
 - **Advanced Flow**: Energy-efficient hot water management
 
@@ -416,11 +427,16 @@ THEN set_target_temperature to 22°C
 - **Purpose**: Check current heating mode setting
 - **Arguments**: Mode (cold/heating/floor_heating/hot_water/cold_and_hotwater/heating_and_hot_water/floor_heating_and_hot_water)
 - **Return**: Boolean (true if mode matches)
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Mode-dependent automation
 - **Advanced Flow**: Seasonal mode transitions
 ```
 IF heating_mode_is floor_heating
 AND temperature_above 20°C
+THEN set_heating_mode to hot_water
+
+IF heating_mode_is NOT hot_water (using inverse operator)
+AND time is between 22:00-06:00
 THEN set_heating_mode to hot_water
 ```
 
@@ -428,6 +444,7 @@ THEN set_heating_mode to hot_water
 - **Purpose**: Check current work mode setting
 - **Arguments**: Mode (ECO/Normal/Boost)
 - **Return**: Boolean (true if mode matches)
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Performance optimization flows
 - **Advanced Flow**: Dynamic efficiency management
 
@@ -435,6 +452,7 @@ THEN set_heating_mode to hot_water
 - **Purpose**: Compare current water control mode setting
 - **Arguments**: Comparison (equal/greater/less), Mode (0-1)
 - **Return**: Boolean based on comparison result
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Water control optimization
 - **Advanced Flow**: Flow rate management
 
@@ -442,6 +460,7 @@ THEN set_heating_mode to hot_water
 - **Purpose**: Check current hot water curve setting
 - **Arguments**: Capacity (OFF/H1/H2/H3/H4)
 - **Return**: Boolean (true if setting matches)
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Capacity-dependent automation
 - **Advanced Flow**: Load-based capacity adjustments
 
@@ -449,6 +468,7 @@ THEN set_heating_mode to hot_water
 - **Purpose**: Check current heating curve setting
 - **Arguments**: Curve (OFF/H1-H8/L1-L8)
 - **Return**: Boolean (true if curve matches)
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Curve-based heating optimization
 - **Advanced Flow**: Weather-dependent curve adjustments
 
@@ -456,6 +476,7 @@ THEN set_heating_mode to hot_water
 - **Purpose**: Compare current electricity consumption checking level
 - **Arguments**: Comparison (equal/greater/less), Level (0-2)
 - **Return**: Boolean based on comparison result
+- **Inverse Operator Support**: ✅ Supports "is" and "is not" logic
 - **Use Case**: Power monitoring management
 - **Advanced Flow**: Dynamic monitoring level adjustment
 
@@ -639,6 +660,49 @@ All simple action Flow cards now properly communicate with the physical device:
 - **`set_heating_curve`** - Heating curve adjustment (original reported issue)
 
 This fix ensures complete bidirectional communication between Homey Flow cards and the physical heat pump device, resolving the issue where reading device values worked but controlling the device through Flow cards failed.
+
+## Inverse Operator Support (v0.90.3)
+
+### Enhanced Condition Card Logic
+- **Added inverse operator support** to all 9 action-based condition cards
+- **Implemented "is" and "is not" logic** using `!{{is|is not}}` format in titleFormatted strings
+- **Improved flow automation flexibility** allowing negative condition checking
+
+### Updated Condition Cards with Inverse Support
+All action-based condition cards now support both positive and negative logic:
+
+1. **`device_power_is`** - Check if device power is/is not a specific state
+2. **`target_temperature_is`** - Check if target temperature is/is not within comparison criteria  
+3. **`hotwater_temperature_is`** - Check if hot water temperature is/is not within comparison criteria
+4. **`heating_mode_is`** - Check if heating mode is/is not a specific mode
+5. **`work_mode_is`** - Check if work mode is/is not a specific mode
+6. **`water_mode_is`** - Check if water control mode is/is not within comparison criteria
+7. **`capacity_setting_is`** - Check if hot water curve setting is/is not a specific capacity
+8. **`heating_curve_is`** - Check if heating curve is/is not a specific curve
+9. **`volume_setting_is`** - Check if electricity consumption level is/is not within comparison criteria
+
+### Enhanced Flow Examples
+```
+# Positive Logic (existing)
+IF heating_curve_is H6
+THEN set_work_mode to Normal
+
+# Negative Logic (new inverse operator support)
+IF heating_curve_is NOT H6  
+THEN send notification "Heating curve changed from H6"
+
+# Complex Logic Combinations
+IF device_power_is NOT on
+AND ambient_temperature_changed below 0°C
+THEN set_device_onoff to on
+AND send notification "Heat pump auto-started due to freezing conditions"
+```
+
+### Technical Implementation
+- **Updated titleFormatted strings** from `[[parameter]]` format to `!{{is|is not}} [[parameter]]` format
+- **Maintained backward compatibility** with existing flows
+- **Enhanced user experience** in Homey flow editor with clear inverse options
+- **Validates successfully** against Homey App Store publishing requirements
 
 ## Conclusion
 

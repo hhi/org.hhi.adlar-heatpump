@@ -2,7 +2,7 @@
   "id": "adlar_enum_capacity_set",
   "title": {
     "en": "Hot water curve setting",
-    "nl": "Instelling warmwater curve"
+    "nl": "Warmwater curve instelling"
   },
   "type": "enum",
   "values": [
@@ -47,6 +47,7 @@
   "setable": true,
   "preventInsights": true,
   "description": {
-    "nl": "dp 11 : capacity_set - Hot water curve setting"
+    "en": "dp 11: capacity_set - Controls the hot water curve settings (OFF, H1-H4) for domestic hot water heating",
+    "nl": "dp 11: capacity_set - Beheert de warmwater curve instellingen (UIT, H1-H4) voor sanitair warm water"
   }
 }

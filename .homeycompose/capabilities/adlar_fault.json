@@ -4,10 +4,11 @@
     "en": "Fault Code",
     "nl": "Foutcode"
   },
-  "type": "number",  
+  "type": "number",
   "min": 0,
-  "max": 30, 
+  "max": 30,
   "uiComponent": "sensor",
+  "icon": "/assets/fault.svg",
   "getable": true,
   "setable": false,
   "insights": true,
@@ -19,5 +20,4 @@
   "description": {
     "nl": "dp 15 : fault - Fault"
   }
-
 }

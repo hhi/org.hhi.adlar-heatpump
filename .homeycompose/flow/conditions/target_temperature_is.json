@@ -5,8 +5,8 @@
     "nl": "Doel temperatuur is"
   },
   "titleFormatted": {
-    "en": "Target temperature is [[comparison]] [[temperature]]°C",
-    "nl": "Doel temperatuur is [[comparison]] [[temperature]]°C"
+    "en": "Target temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+    "nl": "Doel temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
   },
   "hint": {
     "en": "Check if the target temperature matches the specified condition",

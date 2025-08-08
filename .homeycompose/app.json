@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.90.3",
+  "version": "0.92.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [

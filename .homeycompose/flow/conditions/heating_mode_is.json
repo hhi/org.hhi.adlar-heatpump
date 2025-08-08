@@ -5,8 +5,8 @@
     "nl": "Verwarmingsmodus is"
   },
   "titleFormatted": {
-    "en": "Heating mode is [[mode]]",
-    "nl": "Verwarmingsmodus is [[mode]]"
+    "en": "Heating mode !{{is|is not}} [[mode]]",
+    "nl": "Verwarmingsmodus !{{is|is niet}} [[mode]]"
   },
   "hint": {
     "en": "Check if the heating mode matches the selected mode",
