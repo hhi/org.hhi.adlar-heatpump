@@ -7,7 +7,8 @@ Local access to the Aurora series heatpump device for Homey Pro.
 This Homey app provides comprehensive local control and monitoring of Adlar Castra
 Aurora series heat pumps via Tuya's local API. The app enables direct
 communication with your heat pump without requiring internet connectivity,
-ensuring reliable and secure operation.
+ensuring reliable and secure operation with sophisticated user control over
+automation complexity.
 
 ## Features
 
@@ -21,15 +22,15 @@ ensuring reliable and secure operation.
   recovery
 - **Multi-language Support**: English and Dutch interface
 
-### New in v0.90.0 - Capability & Flow Control Fixes
+### Latest in v0.92.4+ - Settings Management & User Control
 
-- **Resolved Control Issues**: Fixed all "missing capability listener" and "Not_setable" errors
-- **Reliable Device Communication**: Temperature, on/off, heating mode, and heating curve controls now work properly
-- **Flow Card Actions Fixed**: Flow cards now control the actual physical device, not just Homey values
-- **Enhanced Error Handling**: User-friendly error messages for connection and validation issues
-- **Optional Power Measurements**: Users can disable irrelevant power capabilities via device settings
-- **Bidirectional Sync**: All changes in Homey UI reliably update the physical heat pump
-- **Input Validation**: Proper validation with temperature ranges and enum checking
+- **Flow Card Control System**: Individual control over 7 flow card categories with disabled/auto/enabled modes
+- **Race Condition Prevention**: Fixed "Cannot set Settings while this.onSettings is still pending" errors
+- **Power Settings Auto-Management**: Intelligent cascading when power measurements are toggled
+- **Enhanced Error Handling**: Comprehensive TuyaErrorCategorizer with smart retry logic and user-friendly messages
+- **Centralized Constants**: DeviceConstants class for consistent timeouts, thresholds, and configuration values
+- **Performance Optimizations**: Removed unused code, consolidated operations, improved memory efficiency
+- **Code Quality**: Cleaned up unused imports, variables, and methods for better maintainability
 
 ### v0.80.0 - Action-Based Condition Flow Cards
 
@@ -57,10 +58,11 @@ ensuring reliable and secure operation.
 
 ### Flow Card System
 
-- **47+ Flow Cards**: Comprehensive automation triggers, conditions, and actions
-- **Action-Based Conditions**: Read capability values for all controllable settings
-- **Tiered Approach**: Essential → Advanced → Expert progression
-- **Pattern-based Registration**: Intelligent flow card management
+- **58 Flow Cards**: Comprehensive automation triggers (31), conditions (18), and actions (9)
+- **User-Controlled Visibility**: Individual control over 7 flow card categories
+- **Three-Mode System**: Disabled, Auto (health-based), or Enabled for each category
+- **Action-Based Conditions**: Read capability values for all controllable settings with inverse operator support
+- **Pattern-based Registration**: Intelligent flow card management with health awareness
 - **Expert Mode**: Advanced diagnostic and analysis cards for HVAC professionals
 
 ### Safety & Monitoring
@@ -144,26 +146,29 @@ To obtain the required local key, refer to the documentation:
 
 Access device settings to configure:
 
-#### Flow Card Controls
+#### Flow Card Controls (v0.92.4+)
 
-- **Temperature Alerts**: Control temperature-related flow card visibility
-- **Voltage Alerts**: Manage voltage monitoring flow cards
-- **Current Alerts**: Configure electrical current flow cards
-- **Power Alerts**: Control power monitoring flow cards
-- **Pulse-steps Alerts**: Manage valve position flow cards
-- **State Alerts**: Configure system state change flow cards
-- **Expert Mode**: Enable advanced diagnostic flow cards
+- **Temperature Alerts** (11 cards): Control temperature-related flow card visibility
+- **Voltage Alerts** (3 cards): Manage voltage monitoring flow cards
+- **Current Alerts** (3 cards): Configure electrical current flow cards
+- **Power Alerts** (3 cards): Control power monitoring flow cards
+- **Pulse-steps Alerts** (2 cards): Manage valve position flow cards
+- **State Alerts** (5 cards): Configure system state change flow cards
+- **Expert Mode** (3 cards): Enable advanced diagnostic flow cards
 
 Each category offers three modes:
 
-- **Disabled**: Flow cards are not available
-- **Auto**: Flow cards appear only for healthy sensors with data
-- **Force Enabled**: All flow cards are available regardless of sensor
-  status
+- **Disabled**: Flow cards are not available - Clean interface, unused sensors
+- **Auto**: Flow cards appear only for healthy sensors with data - **Default** reliable alerts
+- **Enabled**: All flow cards are available regardless of sensor status - Safety critical, troubleshooting
 
-#### Feature Settings
+**Smart Integration**: Power measurements toggle automatically manages related flow card settings to prevent inconsistent configurations.
 
-- **Enable Power Measurements**: Show/hide power consumption, voltage and current measurements for cleaner interfaces on devices without power monitoring
+#### Feature Settings (App restart required)
+
+- **Enable Power Measurements**: Show/hide 9 power-related capabilities (power consumption, voltage, current) for cleaner interfaces on devices without power monitoring
+- **Automatic Flow Card Management**: When disabled, automatically sets related flow card categories to disabled mode
+- **Backward Compatibility**: Existing automations remain functional
 
 #### Diagnostics
 
@@ -180,7 +185,7 @@ DEBUG=1
 
 ## Flow Cards
 
-### Triggers (30 cards)
+### Triggers (31 cards)
 
 - Temperature alerts for all sensors
 - Voltage and current alerts for 3-phase monitoring
@@ -189,6 +194,8 @@ DEBUG=1
 - Fault detection and safety alerts
 
 ### Conditions (18 cards)
+
+**Enhanced v0.90.3**: All action-based condition cards now support inverse operators for "is" and "is not" logic
 
 **System Status Conditions:**
 
@@ -231,17 +238,30 @@ Comprehensive documentation is available in the `/docs` directory:
 
 ### 2. flow-cards-overview.md
 
-- Analysis of all 38 flow cards
+- Analysis of all 58 flow cards (31 triggers, 18 conditions, 9 actions)
+- Three-mode control system documentation
+- User-controlled dynamic registration
 - Categorized by type and complexity tier
 - Detailed use cases and value ranges
 - Advanced flow examples and best practices
+- Settings integration and health-based visibility
 
 ### 3. capability-flowcard-mapping.md
 
 - Direct mapping between capabilities and flow cards
+- Health-aware registration logic with code examples
+- Power management cascade logic
 - Integration guidelines for Homey's automation system
 - Progressive implementation recommendations
 - Usage best practices for different skill levels
+
+### 4. flow-patterns.md
+
+- Pattern-based flow card management system
+- Multi-level architecture (App vs Device level)
+- User-controlled dynamic registration
+- Settings-based pattern registration
+- Error handling integration
 
 ## Support
 
