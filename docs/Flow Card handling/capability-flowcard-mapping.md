@@ -418,29 +418,71 @@ Always check device compatibility before using power management flow cards (mark
 4. **Include fault conditions** in all critical automation flows
 5. **Monitor trends** rather than absolute values for efficiency analysis
 
-## Dynamic Flow Card Management (v0.70.0+)
+## Dynamic Flow Card Management (v0.70.0+ / Enhanced v0.92.4+)
 
-The app features intelligent flow card management that adapts to device capabilities and sensor health:
+The app features intelligent flow card management that adapts to device capabilities and sensor health with comprehensive user control:
 
-### Health-Aware Flow Cards
+### Three-Mode Control System (v0.92.4+)
 
-- **Automatic Detection**: Flow cards only appear for capabilities with healthy sensor data
-- **Real-time Updates**: Flow card availability updates based on sensor health status
-- **Fallback Handling**: Flow handlers provide fallback values when sensor data is temporarily unavailable
+Each flow card category can be individually controlled via device settings:
 
-### User Control Settings
+**Control Categories:**
+- `flow_temperature_alerts` - Temperature-related flow cards (11 alerts + conditions)
+- `flow_voltage_alerts` - Voltage monitoring flow cards (3 phase alerts)
+- `flow_current_alerts` - Current monitoring flow cards (3 phase alerts)
+- `flow_power_alerts` - Power consumption flow cards (3 energy triggers)
+- `flow_pulse_steps_alerts` - Valve position flow cards (2 valve alerts)
+- `flow_state_alerts` - System state change flow cards (5 state triggers)
+- `flow_expert_mode` - Advanced diagnostic flow cards (3 expert conditions)
 
-- **Auto Mode**: Flow cards automatically appear/disappear based on sensor health
-- **Force Enabled**: All flow cards available regardless of sensor status
-- **Disabled**: Flow cards completely disabled for the category
+**Mode Behaviors:**
+- **`disabled`**: No flow cards for this category - Clean interface, unused sensors
+- **`auto`**: Show only for healthy capabilities with data - **Default** reliable alerts
+- **`enabled`**: Force all capability flow cards active - Safety critical, troubleshooting
 
-### Capability Health Monitoring
+### Health-Aware Registration Logic
 
-- **Health Tracking**: Monitors null values and data availability for all capabilities
-- **Diagnostic Reports**: Generate comprehensive capability health reports
-- **Troubleshooting**: Clear identification of sensor connectivity issues
+```typescript
+// Auto mode registration decision
+shouldRegisterCategory(category, userSetting, availableCaps, healthyData) {
+  switch (userSetting) {
+    case 'disabled': return false;
+    case 'enabled':  return availableCaps.length > 0;
+    case 'auto':     return availableCaps.length > 0 
+                     && availableCaps.some(cap => healthyData.includes(cap));
+  }
+}
+```
 
-This intelligent system ensures robust automation even when some sensors are unavailable while providing transparency about system health.
+### Practical Examples
+
+**Temperature Alerts - `flow_temperature_alerts = "enabled"`:**
+- ✅ All 8 temperature alert triggers become available
+- ✅ Critical safety monitoring active (> 80°C, < -20°C)
+- ✅ Configurable threshold alerts for all sensors
+- ✅ `temperature_above` condition card available
+
+**Power Management - Cascade Logic:**
+- When `enable_power_measurements = false`:
+  - Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
+- When `enable_power_measurements = true`:
+  - Resets related flow settings to `auto` mode
+
+### Capability Health Detection
+
+- **Health Criteria**: Recent data (< 5 minutes), < 10 consecutive null values
+- **Real-time Monitoring**: Health checks every 2 minutes via background task
+- **Diagnostic Integration**: Health status visible in capability diagnostics report
+
+### User Interface Access
+
+**Device Settings → Flow Card Controls (restart advised):**
+- **Dropdown Controls**: disabled/auto/enabled for each category
+- **Expert Mode Toggle**: Single checkbox for diagnostic cards
+- **Live Updates**: Changes apply immediately with deferred settings management
+- **Clear Labels**: Restart guidance where needed
+
+This intelligent system provides complete control over flow card complexity while maintaining safety monitoring and automation reliability.
 
 ---
 
