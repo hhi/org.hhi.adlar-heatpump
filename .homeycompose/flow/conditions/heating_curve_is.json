@@ -1,16 +1,16 @@
 {
   "id": "heating_curve_is",
   "title": {
-    "en": "Heating curve is",
-    "nl": "Stooklijn (verwarmingscurve) is"
+    "en": "Heating curve setting is",
+    "nl": "Verwarmingscurve (stooklijn) instelling is"
   },
   "titleFormatted": {
-    "en": "Heating curve is [[curve]]",
-    "nl": "Stooklijn (verwarmingscurve) is [[curve]]"
+    "en": "Heating curve setting !{{is|is not}} [[curve]]",
+    "nl": "Verwarmingscurve (stooklijn) instelling !{{is|is niet}} [[curve]]"
   },
   "hint": {
-    "en": "Check if the heating curve matches the selected curve",
-    "nl": "Controleer of de stooklijn (verwarmingscurve) overeenkomt met de geselecteerde curve"
+    "en": "Check if the heating curve setting matches the selected curve",
+    "nl": "Controleer of de verwarmingscurve (stooklijn) instelling overeenkomt met de geselecteerde curve"
   },
   "args": [
     {
@@ -141,8 +141,8 @@
         {
           "id": "L8",
           "title": {
-            "en": "L8",
-            "nl": "L8"
+            "en": "L8 - custom curve",
+            "nl": "L8 - custom curve"
           }
         }
       ]

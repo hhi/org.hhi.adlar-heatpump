@@ -8,6 +8,7 @@
   "setable": false,
   "getable": true,
   "uiComponent": "sensor",
+  "icon": "/assets/defrost-state.svg",
   "insights": true,
   "insightsTitleTrue": {
     "en": "Defrosting active",

@@ -41,8 +41,8 @@
   {
     "type": "group",
     "label": {
-      "en": "Feature Settings",
-      "nl": "Functie Instellingen"
+      "en": "Feature Settings (app restart and exit required)",
+      "nl": "Functie Instellingen (herstart en afsluiten van app vereist)"
     },
     "children": [
       {
@@ -63,8 +63,8 @@
   {
     "type": "group",
     "label": {
-      "en": "Flow Card Controls",
-      "nl": "Flow Kaart Afhandeling Instellingen"
+      "en": "Flow Card Controls (restart advised)",
+      "nl": "Flow Kaart Afhandeling Instellingen (herstart en afsluiten van app aanbevolen)"
     },
     "children": [
       {

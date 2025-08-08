@@ -5,8 +5,8 @@
     "nl": "Bedrijfsmodus is"
   },
   "titleFormatted": {
-    "en": "Work mode is [[mode]]",
-    "nl": "Bedrijfsmodus is [[mode]]"
+    "en": "Work mode !{{is|is not}} [[mode]]",
+    "nl": "Bedrijfsmodus !{{is|is niet}} [[mode]]"
   },
   "hint": {
     "en": "Check if the work mode matches the selected mode",

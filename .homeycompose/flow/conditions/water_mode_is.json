@@ -5,8 +5,8 @@
     "nl": "Water controle modus is"
   },
   "titleFormatted": {
-    "en": "Water control mode is [[comparison]] [[mode]]",
-    "nl": "Water controle modus is [[comparison]] [[mode]]"
+    "en": "Water control mode !{{is|is not}} [[comparison]] [[mode]]",
+    "nl": "Water controle modus !{{is|is niet}} [[comparison]] [[mode]]"
   },
   "hint": {
     "en": "Check if the water control mode matches the specified condition",

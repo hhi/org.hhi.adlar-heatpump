@@ -1,4 +1,17 @@
-// Adlar mapping for Tuya devices
+/**
+ * Adlar mapping for Tuya devices
+ *
+ * This file maps Tuya DPS (Data Point Specification) numbers to Homey capabilities.
+ *
+ * IMPORTANT NAMING CONVENTION NOTE:
+ * Tuya determines the DPS codes (like 'countdown_set', 'capacity_set') and these cannot be changed.
+ * However, their functional purpose may not be immediately clear from the name:
+ * - DPS 11 'capacity_set' -> Controls hot water curve settings (not system capacity)
+ * - DPS 13 'countdown_set' -> Controls heating curve settings (not countdown timer)
+ *
+ * The capability names maintain the Tuya naming for compatibility, but titles and descriptions
+ * clarify the actual functional purpose.
+ */
 
 export interface DpsEntry {
   code: string;
@@ -39,13 +52,24 @@ export class AdlarMapping {
     'measure_temperature.evlin': [107],
   };
 
+  /**
+   * Adlar-specific capabilities mapped to DPS numbers
+   *
+   * NOTE ON CONFUSING NAMES (Tuya-determined, cannot be changed):
+   * - adlar_enum_capacity_set [11]: Despite name, controls HOT WATER curve settings (OFF, H1-H4)
+   * - adlar_enum_countdown_set [13]: Despite name, controls HEATING curve settings (H1-H8, L1-L8)
+   */
   static adlarCapabilities: Record<string, number[]> = {
     adlar_measure_pulse_steps_temp_current: [16],
     adlar_measure_pulse_steps_effluent_temp: [25],
     adlar_enum_mode: [2],
     adlar_enum_work_mode: [5],
     adlar_enum_water_mode: [10],
+    // DPS 11: Despite the name "capacity_set", this controls hot water curve settings
+    // Values: OFF, H1-H4 for domestic hot water temperature curves
     adlar_enum_capacity_set: [11],
+    // DPS 13: Despite the name "countdown_set", this controls heating curve settings
+    // Values: OFF, H1-H8 (high), L1-L8 (low) for weather compensation curves
     adlar_enum_countdown_set: [13],
     adlar_enum_volume_set: [106],
     adlar_hotwater: [101],
@@ -72,8 +96,8 @@ export class AdlarMapping {
     dps_4: { code: 'temp_set', name: 'Target temp', adlar: 'Stel temperatuur' },
     dps_5: { code: 'work_mode', name: 'Working mode', adlar: 'Bedrijfsmodus' },
     dps_10: { code: 'water_mode', name: 'Control Temperature', adlar: 'Temperatuurregeling Water' },
-    dps_11: { code: 'capacity_set', name: 'Hot water curve setting', adlar: 'Instelling warmwater curve' },
-    dps_13: { code: 'countdown_set', name: 'Curve setting', adlar: 'Instelling verwarmingscurve' },
+    dps_11: { code: 'capacity_set', name: 'Hot water curve setting', adlar: 'Instelling warmwater curve' }, // Functional: Hot water curves (OFF, H1-H4)
+    dps_13: { code: 'countdown_set', name: 'Heating curve setting', adlar: 'Instelling verwarmingscurve' }, // Functional: Heating curves (H1-H8, L1-L8)
     dps_14: { code: 'countdown_left', name: 'Countdown Left', adlar: 'Overgebleven tijd' },
     dps_15: { code: 'fault', name: 'Fault', adlar: 'Fout toestand' },
     dps_16: { code: 'temp_current', name: 'EEV Open', adlar: 'EEV Open' },
