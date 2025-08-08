@@ -1,6 +1,6 @@
 /**
  * Tuya communication error categorization system
- * 
+ *
  * Provides structured error handling for different types of Tuya device communication failures
  * to enable better debugging, user feedback, and recovery strategies.
  */
@@ -11,28 +11,28 @@
 export enum TuyaErrorType {
   /** Connection to device failed */
   CONNECTION_FAILED = 'connection_failed',
-  
+
   /** Operation timed out */
   TIMEOUT = 'timeout',
-  
+
   /** Device not found on network */
   DEVICE_NOT_FOUND = 'device_not_found',
-  
+
   /** Authentication or credentials error */
   AUTHENTICATION_ERROR = 'authentication_error',
-  
+
   /** DPS (data point) related error */
   DPS_ERROR = 'dps_error',
-  
+
   /** Network connectivity issue */
   NETWORK_ERROR = 'network_error',
-  
+
   /** Device is offline or unreachable */
   DEVICE_OFFLINE = 'device_offline',
-  
+
   /** Input validation error */
   VALIDATION_ERROR = 'validation_error',
-  
+
   /** Unknown or unhandled error type */
   UNKNOWN_ERROR = 'unknown_error'
 }
@@ -43,22 +43,22 @@ export enum TuyaErrorType {
 export interface CategorizedError {
   /** Error category */
   type: TuyaErrorType;
-  
+
   /** Original error object */
   originalError: Error;
-  
+
   /** Context where error occurred */
   context: string;
-  
+
   /** Whether the error is recoverable */
   recoverable: boolean;
-  
+
   /** Whether operation should be retried */
   retryable: boolean;
-  
+
   /** User-friendly error message */
   userMessage: string;
-  
+
   /** Suggested recovery actions */
   recoveryActions: string[];
 }
@@ -76,7 +76,7 @@ export class TuyaErrorCategorizer {
   static categorize(error: Error, context: string): CategorizedError {
     const errorMessage = error.message.toLowerCase();
     const errorString = error.toString().toLowerCase();
-    
+
     // Timeout errors
     if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
       return {
@@ -89,16 +89,16 @@ export class TuyaErrorCategorizer {
         recoveryActions: [
           'Check device network connectivity',
           'Wait a moment and try again',
-          'Verify device is powered on'
-        ]
+          'Verify device is powered on',
+        ],
       };
     }
-    
+
     // Connection errors
-    if (errorMessage.includes('connection') || 
-        errorMessage.includes('connect') || 
-        errorMessage.includes('refused') ||
-        errorMessage.includes('unreachable')) {
+    if (errorMessage.includes('connection')
+        || errorMessage.includes('connect')
+        || errorMessage.includes('refused')
+        || errorMessage.includes('unreachable')) {
       return {
         type: TuyaErrorType.CONNECTION_FAILED,
         originalError: error,
@@ -110,15 +110,15 @@ export class TuyaErrorCategorizer {
           'Verify device IP address is correct',
           'Check network connectivity',
           'Ensure device is on the same network',
-          'Restart the device if necessary'
-        ]
+          'Restart the device if necessary',
+        ],
       };
     }
-    
+
     // Device not found
-    if (errorMessage.includes('not found') || 
-        errorMessage.includes('no device') ||
-        errorMessage.includes('device discovery failed')) {
+    if (errorMessage.includes('not found')
+        || errorMessage.includes('no device')
+        || errorMessage.includes('device discovery failed')) {
       return {
         type: TuyaErrorType.DEVICE_NOT_FOUND,
         originalError: error,
@@ -130,16 +130,16 @@ export class TuyaErrorCategorizer {
           'Verify device is powered on',
           'Check device IP address',
           'Ensure device is connected to network',
-          'Re-pair device if necessary'
-        ]
+          'Re-pair device if necessary',
+        ],
       };
     }
-    
+
     // Authentication errors
-    if (errorMessage.includes('auth') ||
-        errorMessage.includes('credential') ||
-        errorMessage.includes('key') ||
-        errorMessage.includes('unauthorized')) {
+    if (errorMessage.includes('auth')
+        || errorMessage.includes('credential')
+        || errorMessage.includes('key')
+        || errorMessage.includes('unauthorized')) {
       return {
         type: TuyaErrorType.AUTHENTICATION_ERROR,
         originalError: error,
@@ -150,15 +150,15 @@ export class TuyaErrorCategorizer {
         recoveryActions: [
           'Verify local key is correct',
           'Check device ID is accurate',
-          'Re-pair device with correct credentials'
-        ]
+          'Re-pair device with correct credentials',
+        ],
       };
     }
-    
+
     // DPS/Data point errors
-    if (errorMessage.includes('dps') || 
-        errorMessage.includes('data point') ||
-        errorMessage.includes('invalid data')) {
+    if (errorMessage.includes('dps')
+        || errorMessage.includes('data point')
+        || errorMessage.includes('invalid data')) {
       return {
         type: TuyaErrorType.DPS_ERROR,
         originalError: error,
@@ -169,16 +169,16 @@ export class TuyaErrorCategorizer {
         recoveryActions: [
           'Check device firmware version',
           'Verify feature is supported by this device model',
-          'Contact support if issue persists'
-        ]
+          'Contact support if issue persists',
+        ],
       };
     }
-    
+
     // Network errors
-    if (errorMessage.includes('network') ||
-        errorMessage.includes('dns') ||
-        errorMessage.includes('host') ||
-        errorString.includes('enetwork')) {
+    if (errorMessage.includes('network')
+        || errorMessage.includes('dns')
+        || errorMessage.includes('host')
+        || errorString.includes('enetwork')) {
       return {
         type: TuyaErrorType.NETWORK_ERROR,
         originalError: error,
@@ -190,16 +190,16 @@ export class TuyaErrorCategorizer {
           'Check internet connectivity',
           'Verify local network is working',
           'Restart network router if necessary',
-          'Check firewall settings'
-        ]
+          'Check firewall settings',
+        ],
       };
     }
-    
+
     // Validation errors
-    if (errorMessage.includes('invalid') ||
-        errorMessage.includes('validation') ||
-        errorMessage.includes('range') ||
-        errorMessage.includes('format')) {
+    if (errorMessage.includes('invalid')
+        || errorMessage.includes('validation')
+        || errorMessage.includes('range')
+        || errorMessage.includes('format')) {
       return {
         type: TuyaErrorType.VALIDATION_ERROR,
         originalError: error,
@@ -210,11 +210,11 @@ export class TuyaErrorCategorizer {
         recoveryActions: [
           'Verify input values are within valid ranges',
           'Check data format is correct',
-          'Consult documentation for valid values'
-        ]
+          'Consult documentation for valid values',
+        ],
       };
     }
-    
+
     // Default: Unknown error
     return {
       type: TuyaErrorType.UNKNOWN_ERROR,
@@ -226,11 +226,11 @@ export class TuyaErrorCategorizer {
       recoveryActions: [
         'Try the operation again',
         'Check device status and connectivity',
-        'Contact support if the problem persists'
-      ]
+        'Contact support if the problem persists',
+      ],
     };
   }
-  
+
   /**
    * Get user-friendly error message for logging
    * @param categorizedError - The categorized error
@@ -239,16 +239,16 @@ export class TuyaErrorCategorizer {
   static formatForLogging(categorizedError: CategorizedError): string {
     return `[${categorizedError.type}] ${categorizedError.context}: ${categorizedError.userMessage} (Original: ${categorizedError.originalError.message})`;
   }
-  
+
   /**
    * Determine if error should trigger a reconnection attempt
    * @param categorizedError - The categorized error
    * @returns Whether to attempt reconnection
    */
   static shouldReconnect(categorizedError: CategorizedError): boolean {
-    return categorizedError.type === TuyaErrorType.CONNECTION_FAILED ||
-           categorizedError.type === TuyaErrorType.TIMEOUT ||
-           categorizedError.type === TuyaErrorType.DEVICE_OFFLINE ||
-           categorizedError.type === TuyaErrorType.NETWORK_ERROR;
+    return categorizedError.type === TuyaErrorType.CONNECTION_FAILED
+           || categorizedError.type === TuyaErrorType.TIMEOUT
+           || categorizedError.type === TuyaErrorType.DEVICE_OFFLINE
+           || categorizedError.type === TuyaErrorType.NETWORK_ERROR;
   }
 }
