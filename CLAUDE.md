@@ -172,6 +172,64 @@ Enhanced with error categorization for improved troubleshooting during pairing f
   
 **Rule**: If a user can change it in device settings UI, it belongs in `driver.settings.compose.json`
 
+#### Flow Card Control System (v0.92.4+)
+
+**Dynamic Flow Card Management**: Users can control flow card visibility per device through settings UI:
+
+**Settings Categories:**
+
+- `flow_temperature_alerts` - Temperature-related flow cards
+- `flow_voltage_alerts` - Voltage monitoring flow cards
+- `flow_current_alerts` - Current monitoring flow cards
+- `flow_power_alerts` - Power consumption flow cards
+- `flow_pulse_steps_alerts` - Valve position flow cards
+- `flow_state_alerts` - System state change flow cards
+- `flow_expert_mode` - Advanced diagnostic flow cards
+
+**Settings Values & Behavior:**
+
+| Setting | Behavior | Use Case |
+|---------|----------|----------|
+| **`disabled`** | No flow cards for this category | Clean interface, unused sensors |
+| **`auto`** | Show only for healthy capabilities with data | **Default** - Reliable alerts only |
+| **`enabled`** | Force all capability flow cards active | Safety critical, troubleshooting |
+
+**Flow Card Logic (`shouldRegisterCategory`):**
+
+```typescript
+switch (userSetting) {
+  case 'disabled':
+    return false; // No cards at all
+  
+  case 'enabled': 
+    return availableCaps.length > 0; // Show if ANY capabilities exist
+  
+  case 'auto':
+  default:
+    // Show only if capabilities exist AND have healthy data
+    return availableCaps.length > 0 
+           && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
+}
+```
+
+**Capability Health Detection:**
+
+- **Healthy**: Recent data (< 5 minutes), < 10 consecutive null values
+- **Unhealthy**: Stale data, too many null values, no recent updates
+- **Auto mode**: Excludes unhealthy capabilities from flow card registration
+- **Enabled mode**: Includes all capabilities regardless of health status
+
+**Temperature Alerts Example** (`flow_temperature_alerts = "enabled"`):
+- **Flow Triggers Available**: `coiler_temperature_alert`, `tank_temperature_alert`, `ambient_temperature_changed`, etc.
+- **Safety Monitoring**: Critical temperature thresholds (> 80°C, < -20°C) always active
+- **Alert Conditions**: Configurable thresholds per sensor type
+- **Notification System**: Critical alerts sent via Homey notifications
+
+**Power Settings Auto-Management:**
+- When `enable_power_measurements = false` → Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
+- When `enable_power_measurements = true` → Resets related flow settings to `auto`
+- Prevents inconsistent configuration states
+
 ### Capability System
 
 The app defines 41 capabilities across multiple categories:

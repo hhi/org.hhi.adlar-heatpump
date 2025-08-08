@@ -278,4 +278,139 @@ if (enablePower && wasDisabled) {
 4. **Auto-Consistency**: Related settings automatically stay synchronized
 5. **User Experience**: Settings changes apply smoothly without errors
 
-This architecture provides a solid foundation for reliable, maintainable, and extensible heat pump device integration while ensuring excellent error handling, race condition prevention, and seamless user experience.
+## Flow Card Control System Architecture
+
+### Dynamic Flow Card Management (`v0.92.4+`)
+
+The flow card control system provides users with granular control over which automation triggers and conditions are available in the Homey Flow editor on a per-device basis.
+
+#### Settings-Based Flow Card Registration
+
+**User Settings Categories:**
+```typescript
+interface UserFlowPreferences {
+  flow_temperature_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_voltage_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_current_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_power_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_pulse_steps_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_state_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_expert_mode: boolean;
+}
+```
+
+#### Registration Logic Decision Tree
+
+**`shouldRegisterCategory()` Method:**
+```typescript
+switch (userSetting) {
+  case 'disabled':
+    return false; // Completely disable category
+  
+  case 'enabled': 
+    return availableCaps.length > 0; // Show if capabilities exist
+  
+  case 'auto':
+  default:
+    // Intelligence: Only show for healthy capabilities
+    return availableCaps.length > 0 
+           && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
+}
+```
+
+#### Capability Health System Integration
+
+**Health Criteria for Flow Card Registration:**
+- **Recent Data**: Capability updated within `CAPABILITY_TIMEOUT_MS` (5 minutes)
+- **Data Quality**: Fewer than `NULL_THRESHOLD` (10) consecutive null values  
+- **Active Monitoring**: Regular health checks via `HEALTH_CHECK_INTERVAL_MS` (2 minutes)
+
+**Health-Based Flow Card Updates:**
+```typescript
+private async updateFlowCardsBasedOnHealth(): Promise<void> {
+  const healthyCapabilities = this.getHealthyCapabilitiesByCategory();
+  
+  // Re-register flow cards only for categories with health changes
+  for (const category of categoriesToUpdate) {
+    await this.unregisterFlowCardsForCategory(category);
+    await this.registerFlowCardsByCategory(
+      category,
+      healthyCapabilities[category],
+      userPrefs[`flow_${category}_alerts`],
+      capabilitiesWithData,
+    );
+  }
+}
+```
+
+#### Temperature Flow Cards Example
+
+**When `flow_temperature_alerts = "enabled"`:**
+
+**Available Flow Triggers:**
+- `coiler_temperature_alert` - Coiler sensor threshold alerts
+- `tank_temperature_alert` - Tank temperature monitoring
+- `ambient_temperature_changed` - Environmental changes
+- `inlet_temperature_changed` - System inlet monitoring
+- `discharge_temperature_alert` - High-pressure discharge alerts
+
+**Safety Integration:**
+```typescript
+// Critical temperature monitoring (always active)
+if (value > 80 || value < -20) {
+  await this.sendCriticalNotification(
+    'Temperature Alert',
+    `Extreme temperature detected (${value}°C). System safety may be compromised.`,
+  );
+}
+
+// Configurable threshold alerts
+if (value > 60 || value < 0) {
+  await this.triggerFlowCard(temperatureCapabilityMap[capability], {
+    temperature: value,
+    sensor_type: capability.split('.')[1] || 'unknown',
+  });
+}
+```
+
+#### Power Settings Auto-Management Logic
+
+**Cascading Settings Updates:**
+```typescript
+// When power measurements are disabled
+if (!enablePowerMeasurements) {
+  settingsToUpdate.flow_power_alerts = 'disabled';
+  settingsToUpdate.flow_voltage_alerts = 'disabled';  
+  settingsToUpdate.flow_current_alerts = 'disabled';
+}
+
+// When power measurements are re-enabled
+if (enablePowerMeasurements && wasDisabled) {
+  settingsToUpdate.flow_power_alerts = 'auto';
+  settingsToUpdate.flow_voltage_alerts = 'auto';
+  settingsToUpdate.flow_current_alerts = 'auto';
+}
+```
+
+#### Benefits of Flow Card Control Architecture
+
+1. **User Experience**: Reduces Flow editor clutter by hiding irrelevant cards
+2. **Safety**: Critical monitoring always active regardless of settings
+3. **Flexibility**: Per-device customization for different installation types
+4. **Intelligence**: Auto mode prevents false alerts from faulty sensors
+5. **Performance**: Only registers necessary flow card listeners
+6. **Troubleshooting**: Expert mode provides comprehensive diagnostic cards
+
+#### Flow Card Categories and Triggers
+
+| Category | Flow Cards | Typical Use Cases |
+|----------|------------|-------------------|
+| **Temperature** | 8 alert triggers, 3 change triggers | Safety monitoring, efficiency tracking |
+| **Voltage** | 3 phase alerts | Electrical system monitoring |
+| **Current** | 2 phase alerts, 1 load alert | Power consumption analysis |
+| **Power** | 3 threshold triggers | Energy management, cost optimization |
+| **Pulse-Steps** | 2 valve position alerts | HVAC system diagnostics |
+| **States** | 5 system state changes | System behavior automation |
+| **Expert** | 3 efficiency/diagnostic cards | Professional HVAC analysis |
+
+This architecture provides a solid foundation for reliable, maintainable, and extensible heat pump device integration while ensuring excellent error handling, race condition prevention, intelligent flow card management, and seamless user experience.

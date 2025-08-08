@@ -575,29 +575,58 @@ AND set_target_temperature to [[current_temperature - 1]]°C
 5. **Safety Interlocks**: Always include fault conditions in critical automation flows
 6. **Progressive Efficiency**: Start with ECO mode, escalate to Normal/Boost as needed
 
-## Dynamic Flow Card Management (v0.70.0+)
+## Dynamic Flow Card Management (v0.70.0+ / Enhanced v0.92.4+)
 
-The app features an intelligent flow card management system that adapts to device capabilities and sensor health:
+The app features an intelligent flow card management system that adapts to device capabilities and sensor health with comprehensive user control:
 
-### Capability-Based Registration
-- **Automatic Detection**: Flow cards are automatically registered only for available capabilities
-- **Health Monitoring**: Flow cards are dynamically enabled/disabled based on sensor health status
-- **User Settings**: Three modes for each category: Disabled, Auto (health-based), Force Enabled
+### Three-Mode Control System (v0.92.4+)
+Each flow card category can be controlled individually via device settings:
 
-### Pattern-Based Architecture
-- **Consistent Behavior**: All similar flow cards follow standardized patterns
-- **Reduced Complexity**: Pattern-based system eliminates duplicate code
-- **Error Handling**: Automatic capability validation and graceful error handling
-- **Debug Support**: Enhanced logging with fallback values for troubleshooting
+| Setting Mode | Behavior | Use Case |
+|-------------|----------|----------|
+| **`disabled`** | No flow cards for this category | Clean interface, unused sensors |
+| **`auto`** | Show only for healthy capabilities with data | **Default** - Reliable alerts only |
+| **`enabled`** | Force all capability flow cards active | Safety critical, troubleshooting |
 
-### User Control
-Access flow card control via device settings:
-- **Temperature Alerts**: Control temperature-related flow card visibility
-- **Voltage/Current Alerts**: Manage electrical monitoring flow cards  
-- **Power/Pulse-steps Alerts**: Configure advanced monitoring cards
-- **Expert Mode**: Enable diagnostic cards for professional use
+### Flow Card Categories with Individual Control
+- **`flow_temperature_alerts`** - Temperature-related flow cards (11 cards)
+- **`flow_voltage_alerts`** - Voltage monitoring flow cards (3 cards)
+- **`flow_current_alerts`** - Current monitoring flow cards (3 cards)
+- **`flow_power_alerts`** - Power consumption flow cards (3 cards)
+- **`flow_pulse_steps_alerts`** - Valve position flow cards (2 cards)
+- **`flow_state_alerts`** - System state change flow cards (5 cards)
+- **`flow_expert_mode`** - Advanced diagnostic flow cards (3 cards)
 
-This intelligent system ensures users only see flow cards for working sensors while providing comprehensive diagnostic information for troubleshooting connectivity issues.
+### Capability Health Detection
+- **Healthy Criteria**: Recent data (< 5 minutes), < 10 consecutive null values
+- **Auto Mode Logic**: Only registers flow cards for capabilities with healthy, recent data
+- **Enabled Mode Logic**: Registers all available capability flow cards regardless of health
+- **Real-time Updates**: Flow card availability updates every 2 minutes based on sensor health
+
+### Settings-Based Registration Example
+```typescript
+// When user sets flow_temperature_alerts = "enabled"
+switch (userSetting) {
+  case 'disabled': return false;           // No temperature cards
+  case 'enabled':  return caps.length > 0; // All temperature cards  
+  case 'auto':     return caps.length > 0  // Only healthy temperature cards
+                   && caps.some(cap => hasHealthyData(cap));
+}
+```
+
+### Power Settings Auto-Management
+- **Cascade Behavior**: When `enable_power_measurements = false` → Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
+- **Auto-Recovery**: When `enable_power_measurements = true` → Resets related flow settings to `auto`
+- **Consistency**: Prevents inconsistent configuration states
+
+### User Interface Integration
+Access via **Device Settings → Flow Card Controls**:
+- **Dropdown Controls**: Each category has disabled/auto/enabled options
+- **Expert Toggle**: Single checkbox for advanced diagnostic cards
+- **Live Updates**: Settings changes apply immediately
+- **Clear Guidance**: Settings labels indicate restart requirements
+
+This intelligent system ensures users only see relevant flow cards while providing complete control over automation complexity and safety monitoring coverage.
 
 ## Control Issues Fixed (v0.90.0)
 

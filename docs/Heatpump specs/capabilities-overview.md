@@ -282,23 +282,55 @@ Capabilities are organized into logical categories:
 ### Insights & Analytics
 Most sensor capabilities support Homey's insights system for historical data tracking and trend analysis. Boolean state capabilities include custom insight titles for better user experience.
 
-### Capability Health Monitoring (v0.70.0+)
-The app includes an intelligent capability health monitoring system that tracks the availability and reliability of sensor data:
+### Capability Health Monitoring (v0.70.0+ / Enhanced v0.92.4+)
+The app includes an intelligent capability health monitoring system that tracks the availability and reliability of sensor data with user-controlled power management:
 
 #### Health Tracking Features
 - **Null Value Detection**: Automatically identifies when capabilities return null values
 - **Data Availability Monitoring**: Tracks time since last valid data reception
 - **Health Status Classification**: Capabilities are classified as healthy or unhealthy based on data consistency
 - **Automatic Recovery**: Health status updates automatically when data becomes available
+- **User-Controlled Power Capabilities**: Optional power measurements can be disabled for cleaner interfaces
 
-#### Health Metrics
-- **Null Count Threshold**: Capabilities with >5 consecutive null readings are marked unhealthy
-- **Timeout Detection**: Capabilities without data for >5 minutes are considered unhealthy
+#### Health Metrics (DeviceConstants Integration)
+- **Null Count Threshold**: Capabilities with >10 consecutive null readings are marked unhealthy (`DeviceConstants.NULL_THRESHOLD`)
+- **Timeout Detection**: Capabilities without data for >5 minutes are considered unhealthy (`DeviceConstants.CAPABILITY_TIMEOUT_MS`)
+- **Health Check Frequency**: Status updates every 2 minutes (`DeviceConstants.HEALTH_CHECK_INTERVAL_MS`)
 - **Health Persistence**: Health status is tracked across app restarts
+
+#### User-Controlled Capability Management (v0.92.4+)
+- **Power Measurements Toggle**: Users can disable 9 power-related capabilities via device settings
+- **Cleaner Interface**: Disable irrelevant capabilities for devices without power monitoring
+- **Dynamic Management**: Capabilities added/removed based on user preferences
+- **Flow Card Integration**: Power capability visibility automatically manages related flow card settings
+
+#### Error Handling Integration (v0.92.4+)
+- **TuyaErrorCategorizer**: Structured error categorization for capability communication failures
+- **Smart Recovery**: Automatic retry for recoverable capability errors with appropriate delays
+- **User-Friendly Messages**: Clear error explanations when capabilities fail to update
+- **Context-Aware Handling**: Different recovery strategies based on error type and capability importance
 
 #### User-Facing Diagnostics
 - **Diagnostic Reports**: Generate detailed capability health reports via device settings
-- **Real-time Monitoring**: Health status updates continuously during operation
+- **Health-Based Reporting**: Unhealthy capabilities prioritized at top of diagnostic reports
+- **Real-time Monitoring**: Health status updates every 2 minutes during operation
 - **Troubleshooting Support**: Clear identification of sensor connectivity issues
+- **Flow Card Integration**: Health status controls flow card availability in "auto" mode
 
-This system ensures robust operation even when some capabilities are unavailable due to firmware variations, hardware limitations, or connectivity issues.
+#### Optional Power Capabilities
+These capabilities can be disabled via device settings for devices without power monitoring:
+
+**Power & Energy (9 capabilities):**
+- `measure_power` - Current power consumption
+- `meter_power.power_consumption` - Daily consumption
+- `meter_power.electric_total` - Total consumption
+- `measure_current.*` (3 capabilities) - 3-phase current measurements
+- `measure_voltage.*` (3 capabilities) - 3-phase voltage measurements
+
+**Benefits:**
+- **Cleaner Interface**: Hide non-functional capabilities
+- **Reduced Clutter**: Focus on relevant device features
+- **Flow Card Management**: Automatically disables related power flow cards
+- **Backward Compatibility**: Existing automations remain functional
+
+This comprehensive system ensures robust operation even when some capabilities are unavailable due to firmware variations, hardware limitations, or connectivity issues, while providing complete user control over capability visibility and automation complexity.

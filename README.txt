@@ -2,104 +2,117 @@ Local access to the Aurora series heatpump device.
 
 To figure out the local key to be used, read from Github source: docs/Get Local Keys - instruction.pdf
 
-Documentation Created (See /docs subdirectories)
+🎯 Key Features (v0.92.4+)
 
-  1. capabilities-overview.md
+✅ Flow Card Control System: Individual control over 7 flow card categories with 3-mode system
+✅ Settings Management: Race condition prevention with deferred updates and auto-management
+✅ Enhanced Error Handling: TuyaErrorCategorizer with smart retry and user-friendly messages
+✅ Performance Optimizations: Centralized constants, cleaned unused code, improved efficiency
+✅ User Control: Complete automation complexity control with disabled/auto/enabled modes
+✅ Health Awareness: Dynamic flow card registration based on sensor health status
 
-  - Complete overview of all 41 device capabilities
-  - Detailed properties, DPS mappings, and purposes
-  - Organized by capability type and function
-  - Device compatibility notes for power management features
+📊 Current Statistics (v0.92.4+)
 
-  2. flow-cards-overview.md
+- Total Flow Cards: 58 (31 triggers, 18 conditions, 9 actions)
+- Total Capabilities: 41 (14 custom Adlar + 27 standard/custom Homey)
+- User-Controllable Categories: 7 flow card categories + expert mode
+- Languages Supported: English/Dutch throughout
+- Health Monitoring: Real-time with 2-minute intervals
+- Error Categories: 9 comprehensive error types with recovery guidance
 
-  - Comprehensive analysis of all 38 flow cards
-  - Categorized by type (triggers/actions/conditions) and tier (Essential/Advanced/Expert)
-  - Detailed use cases, value ranges, and advanced flow examples
-  - Power management compatibility requirements
-  - Processing guidelines and best practices
+🚀 Latest Features (v0.92.4+)
 
-  3. capability-flowcard-mapping.md
+Settings Management & Race Condition Prevention:
+- Fixed "Cannot set Settings while this.onSettings is still pending" errors
+- Deferred settings updates using setTimeout to prevent concurrent access
+- Power settings auto-management with cascading flow card controls
+- Enhanced settings UI labels with clear restart guidance
 
-  - Direct mapping between capabilities and their flow cards
-  - Shows how each capability integrates with Homey's automation system
-  - Identifies capabilities without flow cards and complex flow cards
-  - Progressive implementation recommendations
-  - Usage best practices for different skill levels
+Flow Card Control System:
+- flow_temperature_alerts: Temperature-related flow cards (11 cards)
+- flow_voltage_alerts: Voltage monitoring flow cards (3 cards) 
+- flow_current_alerts: Current monitoring flow cards (3 cards)
+- flow_power_alerts: Power consumption flow cards (3 cards)
+- flow_pulse_steps_alerts: Valve position flow cards (2 cards)
+- flow_state_alerts: System state change flow cards (5 cards)
+- flow_expert_mode: Advanced diagnostic flow cards (3 cards)
 
-  🎯 Key Features (v0.90.0)
+Three-Mode System:
+- DISABLED: No flow cards for category (clean interface, unused sensors)
+- AUTO: Show only for healthy capabilities with data (DEFAULT - reliable alerts)
+- ENABLED: Force all capability flow cards active (safety critical, troubleshooting)
 
-  - Complete Coverage: All 41 capabilities and 47+ flow cards documented
-  - Action-Based Conditions: Read current values of all controllable device settings
-  - Enhanced Automation: 9 new condition cards for complete bidirectional control
-  - Tiered Approach: Essential (8 highlighted) → Advanced → Expert progression
-  - Practical Guidance: Real-world examples, advanced flow patterns, and processing tips
-  - Compatibility Aware: Clear identification of power management requirements
-  - Multi-Language: English/Dutch support throughout
-  - Professional Grade: From basic comfort control to expert-level diagnostics
+Enhanced Error Handling:
+- TuyaErrorCategorizer with 9 error categories (connection, timeout, auth, DPS, network, etc.)
+- Smart retry logic for recoverable errors with appropriate delays
+- User-friendly messages with specific recovery actions
+- Centralized constants in DeviceConstants class for consistent configuration
 
-  🚀 NEW in v0.80.0 - Action-Based Condition Flow Cards:
+Performance & Code Quality:
+- Removed ~300 lines of unused flow card registration methods
+- Fixed double flow card updates and race conditions
+- Consolidated hardcoded values into centralized constants
+- Cleaned up unused imports, variables, and parameters
 
-  - Complete Bidirectional Control: Read current values of all controllable device settings
-  - 9 New Condition Cards: Check device power, temperatures, modes, and settings
-  - Advanced Comparisons: Equal to, greater than, less than operators for numeric values
-  - Real-time Value Reading: Live capability value checking for complex flow logic
-  - Enhanced Automation: Create conditions based on current device states
-  - Always Available: Independent of user preferences, always accessible
+🔥 Previous Major Features
 
-  🚀 NEW in v0.90.0 - Capability & Flow Control Fixes:
+v0.90.3 - Flow Communication & Documentation Updates:
+- Fixed critical Flow ACTION card communication issue
+- Enhanced triggerCapabilityListener() for reliable device control
+- Comprehensive architecture documentation
+- Inverse operator support for condition cards
 
-  - Resolved Control Issues: Fixed all "missing capability listener" and "Not_setable" errors
-  - Reliable Device Communication: Temperature, on/off, heating mode, and heating curve controls now work properly
-  - Flow Card Actions Fixed: Flow cards now control the actual physical device, not just Homey values
-  - Enhanced Error Handling: User-friendly error messages for connection and validation issues
-  - Optional Power Measurements: Users can disable irrelevant power capabilities via device settings for cleaner interfaces
-  - Bidirectional Sync: All changes in Homey UI reliably update the physical heat pump
-  - Input Validation: Proper validation with temperature ranges and enum checking
+v0.90.0 - Capability & Flow Control Fixes:
+- Resolved all "missing capability listener" and "Not_setable" errors
+- Fixed flow cards to control actual physical device vs just Homey values
+- Optional power measurements via device settings
+- Enhanced error handling and input validation
 
-  🔥 v0.70.0 - Intelligent Capability Health Monitoring:
+v0.80.0 - Action-Based Condition Flow Cards:
+- 9 new condition cards for reading current device settings
+- Complete bidirectional control with inverse operator support
+- Advanced comparison operators (equal/greater/less than)
+- Real-time capability value checking
 
-  - Smart Null Detection: Automatically detects missing sensor data (null values) in all flow handlers
-  - Dynamic Flow Cards: Flow cards automatically register/unregister based on sensor health status
-  - Health Tracking: Monitors data availability over time with null count and timeout detection
-  - Diagnostic Tools: User-facing capability health reports showing which sensors work/fail
-  - Debug Logging: Enhanced logging with fallback values for missing data
-  - Auto-Management: Intelligent flow card visibility reduces interface clutter
-  - Troubleshooting: Comprehensive sensor connectivity issue identification
+v0.70.0 - Intelligent Capability Health Monitoring:
+- Smart null detection and health-based flow card registration
+- Diagnostic tools and capability health reports
+- Dynamic flow card management based on sensor status
+- Troubleshooting support for sensor connectivity issues
 
-  The documentation provides everything needed for users to understand and effectively use the heat pump's capabilities, from
-  simple temperature control to sophisticated energy management and predictive maintenance automation with intelligent health monitoring.
+📋 Documentation (Enhanced v0.92.4+)
 
-   
-   
-    ✅ Implemented Critical Notifications:
+1. capabilities-overview.md
+   - Complete overview of all 41 device capabilities
+   - User-controlled capability management with power measurements toggle
+   - Enhanced health monitoring with DeviceConstants integration
+   - Error handling integration and optional power capabilities
 
-  1. Connection Failures
+2. flow-cards-overview.md  
+   - Analysis of all 58 flow cards with three-mode control system
+   - User-controlled dynamic registration with health awareness
+   - Settings integration and power management auto-cascading
+   - Enhanced examples and troubleshooting guidance
 
-  - Triggers after 5 consecutive reconnection failures (100 seconds)
-  - Notifies: "Device Connection Lost - Heat pump disconnected for over 1 minute"
+3. capability-flowcard-mapping.md
+   - Health-aware registration logic with practical examples
+   - Power management cascade logic and user interface integration
+   - Updated with three-mode control system documentation
 
-  2. System Faults
+4. flow-patterns.md (Updated v0.92.4+)
+   - Pattern-based flow card management system
+   - User-controlled dynamic registration integration
+   - Multi-level architecture (App vs Device level)
+   - Settings-based pattern registration with health awareness
 
-  - Monitors adlar_fault capability
-  - Notifies: "System Fault Detected - Fault code: X. Check system immediately"
+🛡️ Critical Safety Monitoring
 
-  3. Temperature Safety
+Smart Notifications with Rate Limiting:
+- Connection failures (after 5 consecutive failures - 100 seconds)
+- System faults with specific fault codes and descriptions
+- Extreme temperature safety (>80°C or <-20°C)
+- Pulse-steps safety monitoring (critical valve positions)
+- Rate limited: Max 1 notification per 30 minutes per device
 
-  - Extreme temperatures (>80°C or <-20°C)
-  - Notifies: "Temperature Alert - Extreme temperature detected. System safety compromised"
-
-  4. Pulse-Steps Safety
-
-  - Critical pulse-steps readings (>480 or <0)
-  - Notifies: "Pulse-Steps Alert - Critical pulse-steps reading. System requires attention"
-
-  Smart Features:
-
-  - Rate limiting: Max 1 notification per 30 minutes per device (prevents spam)
-  - Device-specific: Includes device name in notification
-  - Automatic monitoring: Checks all incoming sensor data
-  - Non-blocking: Won't crash app if notification fails
-
-  The system now provides proactive user alerts for all critical heat pump conditions while
-  preventing notification spam!
+The system provides comprehensive heat pump automation from basic comfort control to
+professional-grade diagnostics with complete user control over complexity and automation scope.
