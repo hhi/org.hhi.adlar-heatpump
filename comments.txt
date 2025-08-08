@@ -51,3 +51,60 @@
   The app now provides a much clearer user experience while maintaining full technical compatibility with Tuya's naming
   requirements. Users will now see intuitive, descriptive names throughout the interface that clearly indicate whether they're
   working with heating curves or hot water curves.
+
+ ✅ Documentation Refresh Complete!
+
+  Both flow card documentation files have been updated with essential information about the Flow Card 
+  Control System (v0.92.4+):
+
+  Key Additions:
+
+  1. Three-Mode Control System - Clear explanation of disabled/auto/enabled modes
+  2. Individual Category Control - How users can control each flow card category separately
+  3. Practical Examples - Real use cases like flow_temperature_alerts = "enabled"
+  4. Power Settings Cascade Logic - How power measurements auto-manage related settings
+  5. User Interface Integration - Where to find and use the settings in Homey
+  6. Health-Aware Registration Logic - Code examples showing the decision tree
+
+  Enhanced Documentation:
+
+  flow-cards-overview.md:
+  - Comprehensive three-mode control system explanation
+  - 30 new lines of detailed flow card management documentation
+  - Real-world examples and code snippets
+  - User interface access instructions
+
+  capability-flowcard-mapping.md:
+  - Detailed control category breakdown
+  - Health-aware registration logic with code
+  - Practical temperature alerts example
+  - Power management cascade behavior
+
+  User Benefits:
+
+  - Clear Understanding of how to control flow card visibility
+  - Practical Examples showing when to use each mode
+  - Safety Guidance for when to use "enabled" vs "auto"
+  - Interface Instructions for accessing settings in Homey
+
+
+  Key Insights:
+
+  - App Level: Registers always-available patterns (actions/conditions)
+  - Device Level: Dynamic registration based on user settings + health
+  - Pattern Integration: The pattern system works seamlessly with the new user control system
+  - Performance Benefits: Only needed patterns register, reducing memory usage
+
+  Current Architecture:
+
+  App Level (app.ts)
+  ├── registerSimpleActions() ✅ Always available
+  ├── registerSimpleConditions() ✅ Always available
+  └── FLOW_PATTERNS object ✅ Pattern definitions
+
+  Device Level (device.ts)  
+  ├── registerFlowCardsByCategory() ✅ User-controlled
+  ├── shouldRegisterCategory() ✅ Three-mode logic
+  └── Pattern filtering by health ✅ Auto mode
+
+  
