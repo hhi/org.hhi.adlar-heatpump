@@ -1,17 +1,18 @@
 {
   "id": "set_heating_curve",
   "title": {
-    "en": "Set heating curve",
-    "nl": "Stooklijn (verwarmingscurve) instellen"
+    "en": "Set heating curve setting",
+    "nl": "Verwarmingscurve (stooklijn) instellen"
   },
   "titleFormatted": {
-    "en": "Set heating curve to [[curve]]",
-    "nl": "Stooklijn (verwarmingscurve) instellen op [[curve]]"
+    "en": "Set heating curve setting to [[curve]]",
+    "nl": "Verwarmingscurve (stooklijn) instellen op [[curve]]"
   },
   "hint": {
     "en": "Set the heating curve setting",
-    "nl": "Stel de stooklijn (verwarmingscurve) instelling in"
+    "nl": "Stel de stooklijn instelling in"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",
@@ -22,8 +23,8 @@
       "type": "dropdown",
       "name": "curve",
       "title": {
-        "en": "Heating curve",
-        "nl": "Stooklijn (verwarmingscurve)"
+        "en": "Heating curve setting",
+        "nl": "Verwarmingscurve instelling"
       },
       "values": [
         {
@@ -141,8 +142,8 @@
         {
           "id": "L8",
           "title": {
-            "en": "L8",
-            "nl": "L8"
+            "en": "L8 - custom curve",
+            "nl": "L8 - custom curve"
           }
         }
       ]

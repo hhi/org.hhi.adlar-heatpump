@@ -53,6 +53,8 @@ This is a Homey app for integrating Adlar heat pump devices via Tuya's local API
 - **Driver**: `drivers/intelligent-heat-pump/driver.ts` - Handles device discovery and pairing
 - **Device**: `drivers/intelligent-heat-pump/device.ts` - Manages individual heat pump device instances
 - **Mappings**: `lib/definitions/adlar-mapping.ts` - Maps Tuya DPS (data points) to Homey capabilities
+- **Constants**: `lib/constants.ts` - Centralized configuration constants and thresholds
+- **Error Handling**: `lib/error-types.ts` - Comprehensive error categorization and recovery system
 
 ### Key Architecture Patterns
 
@@ -68,9 +70,38 @@ The app uses a centralized mapping system in `AdlarMapping` class:
 #### Device Communication
 
 - Uses TuyAPI library for local device communication
-- Automatic reconnection every 20 seconds via `connectTuya()`
+- Automatic reconnection using DeviceConstants.RECONNECTION_INTERVAL_MS (20 seconds)
 - Bidirectional data flow: Homey capabilities ↔ Tuya DPS
 - Event-driven updates via 'data' and 'dp-refresh' events
+- Enhanced error handling with categorization and automatic retry for recoverable errors
+
+#### Constants Management System (v0.90.3+)
+
+Centralized configuration system in `DeviceConstants` class:
+
+- **Timing intervals**: Reconnection, health checks, notification throttling
+- **Power thresholds**: High consumption alerts, efficiency monitoring
+- **Health monitoring**: Capability timeouts, null value thresholds
+- **Performance limits**: Connection failure limits, efficiency thresholds
+
+#### Error Handling Architecture (v0.90.3+)
+
+Comprehensive error categorization via `TuyaErrorCategorizer`:
+
+- **9 Error Categories**: Connection, timeout, authentication, DPS, network, validation, device offline, device not found, unknown
+- **Recovery Guidance**: User-friendly messages with specific recovery actions
+- **Smart Retry Logic**: Automatic retry for recoverable errors with appropriate delays
+- **Structured Logging**: Consistent error formatting for debugging and monitoring
+
+#### Settings Management & Race Condition Prevention (v0.90.3+)
+
+Enhanced settings handling to prevent Homey's "Cannot set Settings while this.onSettings is still pending" error:
+
+- **Deferred Settings Updates**: Uses `setTimeout` to defer secondary settings updates until after `onSettings` completes
+- **Single Settings Call**: Consolidates multiple settings changes into a single `setSettings()` call
+- **Power Settings Auto-Management**: Automatically manages related flow card settings when power measurements are toggled
+- **Async Error Handling**: Proper error handling for deferred settings operations
+- **Race Condition Prevention**: Eliminates concurrent `setSettings()` calls that could corrupt device configuration
 
 #### Pairing Flow
 
@@ -79,6 +110,8 @@ Three-step pairing process:
 1. `enter_device_info` - Collect device credentials (ID, local key, IP)
 2. `list_devices` - Display discovered device
 3. `add_devices` - Finalize device registration
+
+Enhanced with error categorization for improved troubleshooting during pairing failures.
 
 ### Configuration Files
 

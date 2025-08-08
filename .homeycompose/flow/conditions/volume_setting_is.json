@@ -5,8 +5,8 @@
     "nl": "Stroomverbruik controleren is"
   },
   "titleFormatted": {
-    "en": "Electricity consumption checking is [[comparison]] [[level]]",
-    "nl": "Stroomverbruik controleren is [[comparison]] [[level]]"
+    "en": "Electricity consumption checking !{{is|is not}} [[comparison]] [[level]]",
+    "nl": "Stroomverbruik controleren !{{is|is niet}} [[comparison]] [[level]]"
   },
   "hint": {
     "en": "Check if the electricity consumption checking level matches the specified condition",

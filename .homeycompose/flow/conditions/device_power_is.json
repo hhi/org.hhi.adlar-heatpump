@@ -5,8 +5,8 @@
     "nl": "Apparaat vermogen is"
   },
   "titleFormatted": {
-    "en": "Device power is [[state]]",
-    "nl": "Apparaat vermogen is [[state]]"
+    "en": "Device power !{{is|is not}} [[state]]",
+    "nl": "Apparaat vermogen !{{is|is niet}} [[state]]"
   },
   "hint": {
     "en": "Check if the device power state matches the selected state",
