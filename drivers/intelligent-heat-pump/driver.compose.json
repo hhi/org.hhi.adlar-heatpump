@@ -116,7 +116,7 @@
       },
       "min": 0,
       "max": 99999,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Voltage B",
         "nl": "Spanning B"
@@ -133,7 +133,7 @@
       },
       "min": 0,
       "max": 99999,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Current B",
         "nl": "Amperage B"
@@ -150,7 +150,7 @@
       },
       "min": 0,
       "max": 99999,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Current C",
         "nl": "Amperage C"
@@ -167,7 +167,7 @@
       },
       "min": 0,
       "max": 99999,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Current A",
         "nl": "Hudige stroomsterkte"
@@ -412,7 +412,7 @@
       },
       "min": 0,
       "max": 200000,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Electricity Consumption of Today",
         "nl": "Stroom dagverbruik"
@@ -428,7 +428,7 @@
       },
       "min": 0,
       "max": 9999999,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Total Electricity Consumption",
         "nl": "Totaal stroomverbruik"
@@ -444,7 +444,7 @@
       },
       "min": 0,
       "max": 10000,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Voltage A",
         "nl": "Huidige spanning"
@@ -460,7 +460,7 @@
       },
       "min": 0,
       "max": 10000,
-      "insights": true,
+      "insights": false,
       "insightsTitle": {
         "en": "Voltage C",
         "nl": "Voltage C"
