@@ -1598,7 +1598,22 @@ class MyDevice extends Homey.Device {
             this.error(`Failed to add capability ${capability}:`, error);
           }
         }
+        // Enable insights when power measurements are enabled
+        try {
+          await this.setCapabilityOptions(capability, { insights: true });
+          this.debugLog(`Enabled insights for capability: ${capability}`);
+        } catch (error) {
+          this.debugLog(`Could not enable insights for ${capability}:`, error);
+        }
       } else if (this.hasCapability(capability)) {
+        // Disable insights before removing capability to clear historical data visibility
+        try {
+          await this.setCapabilityOptions(capability, { insights: false });
+          this.debugLog(`Disabled insights for capability: ${capability}`);
+        } catch (error) {
+          this.debugLog(`Could not disable insights for ${capability}:`, error);
+        }
+
         try {
           await this.removeCapability(capability);
           this.log(`Removed optional capability: ${capability}`);
