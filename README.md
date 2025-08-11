@@ -22,15 +22,57 @@ automation complexity.
   recovery
 - **Multi-language Support**: English and Dutch interface
 
-### Latest in v0.92.4+ - Settings Management & User Control
+### 🎯 Key Features (v0.92.6+)
 
-- **Flow Card Control System**: Individual control over 7 flow card categories with disabled/auto/enabled modes
-- **Race Condition Prevention**: Fixed "Cannot set Settings while this.onSettings is still pending" errors
-- **Power Settings Auto-Management**: Intelligent cascading when power measurements are toggled
-- **Enhanced Error Handling**: Comprehensive TuyaErrorCategorizer with smart retry logic and user-friendly messages
-- **Centralized Constants**: DeviceConstants class for consistent timeouts, thresholds, and configuration values
-- **Performance Optimizations**: Removed unused code, consolidated operations, improved memory efficiency
-- **Code Quality**: Cleaned up unused imports, variables, and methods for better maintainability
+✅ **Flow Card Control System**: Individual control over 7 flow card categories with 3-mode system (disabled/auto/enabled)  
+✅ **Settings Management**: Race condition prevention with deferred updates and auto-management  
+✅ **Enhanced Error Handling**: TuyaErrorCategorizer with 9 comprehensive error types, smart retry, and user-friendly messages  
+✅ **Performance Optimizations**: Centralized constants, cleaned unused code, improved efficiency (~300 lines removed)  
+✅ **User Control**: Complete automation complexity control with health-aware flow card registration  
+✅ **Insights Management**: Dynamic insights control with power measurement toggle integration  
+
+### 📊 Current Statistics (v0.92.6+)
+
+- **Total Flow Cards**: 58 (31 triggers, 18 conditions, 9 actions)
+- **Total Capabilities**: 41 (14 custom Adlar + 27 standard/custom Homey)  
+- **User-Controllable Categories**: 7 flow card categories + expert mode
+- **Languages Supported**: English/Dutch throughout
+- **Health Monitoring**: Real-time with 2-minute intervals
+- **Error Categories**: 9 comprehensive error types with recovery guidance
+
+### 🚀 Latest Features (v0.92.6+)
+
+**Settings Management & Race Condition Prevention:**
+- Fixed "Cannot set Settings while this.onSettings is still pending" errors
+- Deferred settings updates using setTimeout to prevent concurrent access  
+- Power settings auto-management with cascading flow card controls
+- Enhanced settings UI labels with clear restart guidance
+
+**Flow Card Control System:**
+- `flow_temperature_alerts`: Temperature-related flow cards (11 cards)
+- `flow_voltage_alerts`: Voltage monitoring flow cards (3 cards)
+- `flow_current_alerts`: Current monitoring flow cards (3 cards)  
+- `flow_power_alerts`: Power consumption flow cards (3 cards)
+- `flow_pulse_steps_alerts`: Valve position flow cards (2 cards)
+- `flow_state_alerts`: System state change flow cards (5 cards)
+- `flow_expert_mode`: Advanced diagnostic flow cards (3 cards)
+
+**Three-Mode System:**
+- **DISABLED**: No flow cards for category (clean interface, unused sensors)
+- **AUTO**: Show only for healthy capabilities with data (**DEFAULT** - reliable alerts)  
+- **ENABLED**: Force all capability flow cards active (safety critical, troubleshooting)
+
+**Enhanced Error Handling:**
+- TuyaErrorCategorizer with 9 error categories (connection, timeout, auth, DPS, network, etc.)
+- Smart retry logic for recoverable errors with appropriate delays
+- User-friendly messages with specific recovery actions  
+- Centralized constants in DeviceConstants class for consistent configuration
+
+**Insights Management (v0.92.6+):**
+- Dynamic insights control aligned with power measurement toggle
+- Default power insights disabled for cleaner user experience
+- Programmatic insights enable/disable when capabilities are added/removed
+- Prevents stale insights data visibility when power monitoring is disabled
 
 ### v0.80.0 - Action-Based Condition Flow Cards
 
@@ -225,43 +267,45 @@ DEBUG=1
 - Heating curve adjustments
 - Hot water temperature settings
 
-## Documentation
+## 🛡️ Critical Safety Monitoring
+
+**Smart Notifications with Rate Limiting:**
+- Connection failures (after 5 consecutive failures - 100 seconds)
+- System faults with specific fault codes and descriptions
+- Extreme temperature safety (>80°C or <-20°C)
+- Pulse-steps safety monitoring (critical valve positions)
+- Rate limited: Max 1 notification per 30 minutes per device
+
+The system provides comprehensive heat pump automation from basic comfort control to professional-grade diagnostics with complete user control over complexity and automation scope.
+
+## 📋 Documentation
 
 Comprehensive documentation is available in the `/docs` directory:
 
-### 1. capabilities-overview.md
+### Enhanced Documentation (v0.92.6+)
 
-- Complete overview of all 41 device capabilities
-- Detailed properties, DPS mappings, and purposes
-- Organized by capability type and function
-- Device compatibility notes
+**1. capabilities-overview.md**
+   - Complete overview of all 41 device capabilities
+   - User-controlled capability management with power measurements toggle
+   - Enhanced health monitoring with DeviceConstants integration
+   - Error handling integration and optional power capabilities
 
-### 2. flow-cards-overview.md
+**2. flow-cards-overview.md**  
+   - Analysis of all 58 flow cards with three-mode control system
+   - User-controlled dynamic registration with health awareness
+   - Settings integration and power management auto-cascading
+   - Enhanced examples and troubleshooting guidance
 
-- Analysis of all 58 flow cards (31 triggers, 18 conditions, 9 actions)
-- Three-mode control system documentation
-- User-controlled dynamic registration
-- Categorized by type and complexity tier
-- Detailed use cases and value ranges
-- Advanced flow examples and best practices
-- Settings integration and health-based visibility
+**3. capability-flowcard-mapping.md**
+   - Health-aware registration logic with practical examples
+   - Power management cascade logic and user interface integration
+   - Updated with three-mode control system documentation
 
-### 3. capability-flowcard-mapping.md
-
-- Direct mapping between capabilities and flow cards
-- Health-aware registration logic with code examples
-- Power management cascade logic
-- Integration guidelines for Homey's automation system
-- Progressive implementation recommendations
-- Usage best practices for different skill levels
-
-### 4. flow-patterns.md
-
-- Pattern-based flow card management system
-- Multi-level architecture (App vs Device level)
-- User-controlled dynamic registration
-- Settings-based pattern registration
-- Error handling integration
+**4. flow-patterns.md (Updated v0.92.7)**
+   - Pattern-based flow card management system
+   - User-controlled dynamic registration integration
+   - Multi-level architecture (App vs Device level)
+   - Settings-based pattern registration with health awareness
 
 ## Support
 

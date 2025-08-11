@@ -1,18 +1,20 @@
-# Adlar Heat Pump - Capability to Flow Card Mapping
+# Adlar Heat Pump - Capability to Flow Card Mapping (v0.92.7)
 
-This document provides a comprehensive mapping between device capabilities and their corresponding flow cards, showing how each capability can be used in Homey flows.
+This document provides a comprehensive mapping between device capabilities and their corresponding flow cards, showing how each capability can be used in Homey flows with advanced user control and insights integration.
 
-## Mapping Overview
+## Mapping Overview (v0.92.7)
 
 - **Total Capabilities**: 41 (14 custom Adlar + 27 standard Homey)
-- **Total Flow Cards**: 58 (31 triggers, 9 actions, 18 conditions) - **Updated v0.90.0**
+- **Total Flow Cards**: 58 (31 triggers, 9 actions, 18 conditions)
 - **Capabilities with Flow Cards**: 37 (+9 action-based condition cards)
 - **Capabilities without Flow Cards**: 4 (reduced from 13)
 - **Flow Cards without Direct Capability Mapping**: 10 (complex triggers)
-- **Dynamic Registration**: Flow cards adapt to capability health status (v0.70.0+)
+- **User-Controlled Categories**: 7 flow card categories with disabled/auto/enabled modes (v0.92.4+)
+- **Health-Aware Registration**: Dynamic flow card visibility based on capability health and data availability
+- **Insights Integration**: Flow card visibility aligned with insights management and power measurement toggle (v0.92.6+)
 - **Pattern-Based System**: Consistent behavior across similar flow cards
-- **Bidirectional Control**: Complete read/write access via action-based conditions (v0.80.0+)
-- **Reliable Control**: All capability listener and flow action issues resolved (v0.90.0+)
+- **Bidirectional Control**: Complete read/write access via action-based conditions
+- **Reliable Control**: All capability listener and flow action issues resolved
 
 ---
 
@@ -462,11 +464,15 @@ shouldRegisterCategory(category, userSetting, availableCaps, healthyData) {
 - ✅ Configurable threshold alerts for all sensors
 - ✅ `temperature_above` condition card available
 
-**Power Management - Cascade Logic:**
+**Power Management - Cascade Logic & Insights Integration (v0.92.6+):**
 - When `enable_power_measurements = false`:
   - Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
+  - Disables power insights before removing capabilities
+  - Prevents stale insights data visibility
 - When `enable_power_measurements = true`:
   - Resets related flow settings to `auto` mode
+  - Re-enables power insights with capability restoration
+  - Maintains capability-insights alignment
 
 ### Capability Health Detection
 
@@ -486,4 +492,38 @@ This intelligent system provides complete control over flow card complexity whil
 
 ---
 
-This mapping provides the foundation for creating sophisticated heat pump automation flows, from basic comfort control to advanced system optimization and professional diagnostics.
+## Insights-Flow Card Integration (v0.92.6+)
+
+### Unified Capability Management
+
+The system provides seamless integration between capabilities, flow cards, and insights visualization:
+
+#### Default Configuration Alignment
+
+| Capability Category | Flow Cards | Insights | Rationale |
+|-------------------|------------|----------|-----------|
+| **Temperature Sensors** | ✅ Enabled | ✅ Enabled | Core operational monitoring |
+| **Power Measurements** | ❌ Auto/Disabled | ❌ Disabled | Clean default experience |
+| **System States** | ✅ Enabled | ✅ Enabled | Safety and status awareness |
+| **Valve Positions** | ✅ Enabled | ✅ Enabled | System diagnostics |
+
+#### Advanced Integration Features
+
+**Dynamic Synchronization:**
+```typescript
+// When capability visibility changes
+await this.setCapabilityOptions(capability, { 
+  insights: enablePowerMeasurements 
+});
+
+// Flow card registration updates accordingly
+await this.updateFlowCardsBasedOnHealth();
+```
+
+**User Benefits:**
+- **Consistent Experience**: Flow cards and insights visibility stay synchronized
+- **Clean Interface**: Default configuration optimized for typical users
+- **Professional Flexibility**: Full control available for advanced monitoring
+- **Data Integrity**: No stale insights data when capabilities are disabled
+
+This comprehensive mapping provides the foundation for creating sophisticated heat pump automation flows, from basic comfort control to advanced system optimization and professional diagnostics, with seamless insights integration and intelligent capability management.

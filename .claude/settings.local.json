@@ -36,7 +36,8 @@
       "Bash(gh release delete:*)",
       "Bash(git pull:*)",
       "Bash(gh release:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
