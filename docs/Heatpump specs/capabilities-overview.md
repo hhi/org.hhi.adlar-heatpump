@@ -1,8 +1,8 @@
-# Adlar Heat Pump - Capabilities Overview
+# Adlar Heat Pump - Capabilities Overview (v0.92.7)
 
-This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app.
+This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management and dynamic capability control.
 
-## Summary Statistics
+## Summary Statistics (v0.92.7)
 
 - **Total Custom Adlar Capabilities**: 14
 - **Total Standard/Custom Capabilities**: 27  
@@ -11,6 +11,9 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Capability Types**: number (24), enum (4), boolean (3)
 - **Setable Capabilities**: 3 (adlar_enum_work_mode, adlar_hotwater, plus standard capabilities)
 - **Languages Supported**: English (EN) and Dutch (NL)
+- **Insights Management**: Dynamic control with power measurement toggle integration (v0.92.6+)
+- **Default Insights State**: Power capabilities disabled, core operations enabled
+- **Advanced Chart Features**: Custom colors, chart types, and styling options
 
 ## Custom Adlar Capabilities
 
@@ -333,4 +336,60 @@ These capabilities can be disabled via device settings for devices without power
 - **Flow Card Management**: Automatically disables related power flow cards
 - **Backward Compatibility**: Existing automations remain functional
 
-This comprehensive system ensures robust operation even when some capabilities are unavailable due to firmware variations, hardware limitations, or connectivity issues, while providing complete user control over capability visibility and automation complexity.
+## Insights Management System (v0.92.6+)
+
+### Dynamic Insights Control
+
+The app provides intelligent insights management aligned with capability visibility and user preferences:
+
+#### Default Insights Configuration
+
+**Power Capabilities** (insights disabled by default):
+- `measure_current.*` (3 capabilities) - 3-phase current measurements  
+- `measure_voltage.*` (3 capabilities) - 3-phase voltage measurements
+- `meter_power.*` (2 capabilities) - Power consumption tracking
+
+**Core Operational Capabilities** (insights enabled by default):
+- Temperature sensors (9 capabilities) - All temperature measurements
+- System states (4 capabilities) - Compressor, defrost, backwater states
+- Valve positions (2 capabilities) - EEV/EVI pulse-steps
+
+#### Advanced Insights Features
+
+**Chart Type Customization:**
+```json
+{
+  "insights": true,
+  "chartType": "spline",     // Smooth curves for temperature data
+  "color": "#6236FF",        // Custom brand colors
+  "decimals": 2,             // Precision control
+  "fillOpacity": 0.3         // Area chart transparency
+}
+```
+
+**Available Chart Types:**
+- `spline` - Smooth curved lines (ideal for temperature data)
+- `area` - Filled area charts (perfect for power consumption)
+- `column` - Bar charts (suitable for valve positions)
+- `line` - Straight line connections (system states)
+- `scatter` - Point plots (diagnostic data)
+
+#### Insights-Capability Integration
+
+**Power Measurement Toggle Integration:**
+- When `enable_power_measurements = false` → Power insights automatically disabled
+- When `enable_power_measurements = true` → Power insights re-enabled
+- Prevents stale insights data visibility when capabilities are removed
+- Maintains user flexibility for manual insights control
+
+#### Benefits of Insights Management
+
+| Feature | Implementation | User Benefit |
+|---------|----------------|--------------|
+| **Clean Default Interface** | Power insights disabled by default | Reduced data collection overhead |
+| **Dynamic Control** | Programmatic insights toggle | Aligned with capability availability |
+| **Stale Data Prevention** | Disable insights before capability removal | No confusing historical data |
+| **Professional Visualization** | Custom chart styling | Enhanced data presentation |
+| **User Flexibility** | Manual insights control available | Preserve detailed monitoring option |
+
+This comprehensive system ensures robust operation even when some capabilities are unavailable due to firmware variations, hardware limitations, or connectivity issues, while providing complete user control over capability visibility, automation complexity, and data visualization preferences.
