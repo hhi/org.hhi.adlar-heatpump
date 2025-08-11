@@ -22,7 +22,7 @@ automation complexity.
   recovery
 - **Multi-language Support**: English and Dutch interface
 
-### 🎯 Key Features (v0.92.6+)
+### 🎯 Key Features (v0.92.7)
 
 ✅ **Flow Card Control System**: Individual control over 7 flow card categories with 3-mode system (disabled/auto/enabled)  
 ✅ **Settings Management**: Race condition prevention with deferred updates and auto-management  
@@ -30,8 +30,9 @@ automation complexity.
 ✅ **Performance Optimizations**: Centralized constants, cleaned unused code, improved efficiency (~300 lines removed)  
 ✅ **User Control**: Complete automation complexity control with health-aware flow card registration  
 ✅ **Insights Management**: Dynamic insights control with power measurement toggle integration  
+✅ **Documentation Standardization**: Complete technical documentation revision to v0.92.7 standards with hyphenated naming conventions  
 
-### 📊 Current Statistics (v0.92.6+)
+### 📊 Current Statistics (v0.92.7)
 
 - **Total Flow Cards**: 58 (31 triggers, 18 conditions, 9 actions)
 - **Total Capabilities**: 41 (14 custom Adlar + 27 standard/custom Homey)  
@@ -40,7 +41,7 @@ automation complexity.
 - **Health Monitoring**: Real-time with 2-minute intervals
 - **Error Categories**: 9 comprehensive error types with recovery guidance
 
-### 🚀 Latest Features (v0.92.6+)
+### 🚀 Latest Features (v0.92.7)
 
 **Settings Management & Race Condition Prevention:**
 - Fixed "Cannot set Settings while this.onSettings is still pending" errors
@@ -68,7 +69,7 @@ automation complexity.
 - User-friendly messages with specific recovery actions  
 - Centralized constants in DeviceConstants class for consistent configuration
 
-**Insights Management (v0.92.6+):**
+**Insights Management (v0.92.7):**
 - Dynamic insights control aligned with power measurement toggle
 - Default power insights disabled for cleaner user experience
 - Programmatic insights enable/disable when capabilities are added/removed
@@ -282,7 +283,7 @@ The system provides comprehensive heat pump automation from basic comfort contro
 
 Comprehensive documentation is available in the `/docs` directory:
 
-### Enhanced Documentation (v0.92.6+)
+### Enhanced Documentation (v0.92.7)
 
 **1. capabilities-overview.md**
    - Complete overview of all 41 device capabilities
