@@ -1,21 +1,21 @@
-# Adlar Heat Pump - Flow Cards Overview
+# Adlar Heat Pump - Flow Cards Overview (v0.92.7)
 
-This document provides a comprehensive overview of all flow cards available in the Adlar Heat Pump app, categorized by type, tier, and use case.
+This document provides a comprehensive overview of all flow cards available in the Adlar Heat Pump app, categorized by type, tier, and use case, with advanced user control and insights management.
 
-## Summary Statistics
+## Summary Statistics (v0.92.7)
 
-- **Total Flow Cards**: 58 (Updated v0.90.3)
+- **Total Flow Cards**: 58 
 - **Triggers**: 31
 - **Actions**: 9  
-- **Conditions**: 18 (+9 action-based conditions in v0.80.0)
+- **Conditions**: 18 (+9 action-based conditions)
 - **Highlighted Cards**: 8 (essential for basic operation)
-- **Power Management Dependent**: 6 cards (now optional via settings)
+- **User-Controllable Categories**: 7 flow card categories + expert mode
 - **Languages Supported**: English (EN) and Dutch (NL)
-- **Pattern-Based Registration**: Intelligent pattern-based system + always-available action-based conditions
-- **Health-Aware**: Dynamic registration based on capability health (v0.70.0+)
-- **Bidirectional Control**: Complete read/write access to all controllable settings (v0.80.0+)
-- **Fixed Control Issues**: All capability listener and flow card control issues resolved (v0.90.0+)
-- **Enhanced Communication**: Flow ACTION cards now use triggerCapabilityListener() for reliable device control (v0.90.3+)
+- **Three-Mode Control System**: Disabled/Auto/Enabled per category (v0.92.4+)
+- **Health-Aware Registration**: Dynamic based on capability health and data availability
+- **Insights Integration**: Aligned with power measurement toggle and insights management (v0.92.6+)
+- **Bidirectional Control**: Complete read/write access to all controllable settings
+- **Enhanced Communication**: Flow ACTION cards use triggerCapabilityListener() for reliable device control
 
 ## Flow Card Categories
 
@@ -614,10 +614,13 @@ switch (userSetting) {
 }
 ```
 
-### Power Settings Auto-Management
+### Power Settings Auto-Management & Insights Integration (v0.92.6+)
 - **Cascade Behavior**: When `enable_power_measurements = false` → Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
 - **Auto-Recovery**: When `enable_power_measurements = true` → Resets related flow settings to `auto`
-- **Consistency**: Prevents inconsistent configuration states
+- **Insights Management**: Power insights dynamically disabled/enabled with capability changes
+- **Clean Default Experience**: Power insights disabled by default, aligned with flow card visibility
+- **User Flexibility**: Manual insights control preserved for users needing detailed monitoring
+- **Consistency**: Prevents inconsistent configuration states between capabilities, flow cards, and insights
 
 ### User Interface Integration
 Access via **Device Settings → Flow Card Controls**:
