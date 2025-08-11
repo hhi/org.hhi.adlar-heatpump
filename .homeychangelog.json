@@ -1,65 +1,14 @@
 {
-  "0.92.7": {
-    "en": "Documentation Standardization & System Maturity Update: Comprehensive documentation revision bringing all technical documentation to v0.92.7 standards. Standardized documentation file naming conventions with hyphenated format (flow-patterns.md) for consistency. Updated architecture-overview.md with complete insights management system documentation and enhanced settings management patterns. Enhanced flow-cards-overview.md with three-mode control system integration and power management cascading logic. Expanded capabilities-overview.md with advanced chart customization features and dynamic insights control. Updated capability-flowcard-mapping.md with insights-flow card integration examples and unified capability management. Revised flow-patterns.md with race condition prevention architecture and insights-aware pattern registration. All documentation now reflects the sophisticated pattern-based system with user-controlled automation complexity, dynamic insights management, and production-ready stability features."
-  },
-  "0.92.6": {
-    "en": "Insights Management & Configuration Update: Enhanced insights control system with dynamic management aligned to power measurement toggle functionality. Default power-related insights now disabled for cleaner user experience and reduced data collection overhead. Implemented programmatic insights enable/disable when capabilities are added/removed to prevent stale insights data visibility. Updated driver configuration to set insights: false for all power-related capabilities (voltage, current, electricity consumption) while maintaining full functionality. Users can still enable specific insights through device settings. This provides optimal default experience while preserving monitoring flexibility for users who need detailed power analysis."
-  },
-  "0.92.5": {
-    "en": "Power Measurements Insights Fix: Fixed insights visibility issue where power-related insights remained visible even after disabling power measurements via the enable_power_measurement toggle. Enhanced capability management in handleOptionalCapabilities() to properly disable insights before removing capabilities and enable insights when adding capabilities. This ensures clean insights interface management - when users disable power monitoring, related insights are properly hidden from the Homey interface, preventing confusion from stale power measurement data."
-  },
-  "0.92.4": {
-    "en": "Comprehensive Settings Management & System Maturity Update: Major architectural improvements with Flow Card Control System providing individual control over 7 flow card categories using disabled/auto/enabled modes. Fixed critical race condition prevention in settings management with deferred updates and auto-management. Added TuyaErrorCategorizer with 9 comprehensive error types, smart retry logic, and user-friendly recovery messages. Implemented centralized DeviceConstants class for consistent configuration. Major performance optimization removing ~300 lines of unused code. Enhanced user control with health-aware flow card registration. Added comprehensive documentation updates and system maturity improvements for production-ready operation."
-  },
-  "0.92.3": {
-    "en": "Settings Management & Code Quality Update: Fixed critical 'Cannot set Settings while this.onSettings is still pending' race condition that was blocking device settings changes. Implemented deferred settings update pattern using setTimeout to prevent concurrent settings modifications. Enhanced settings UI with clearer labels ('app restart and exit required' vs 'restart advised') for better user guidance. Added comprehensive error handling architecture with TuyaErrorCategorizer system providing structured error categorization, user-friendly messages, and smart retry logic for recoverable failures. Centralized configuration constants in DeviceConstants class for improved maintainability. Removed unused imports and improved code quality with proper ESLint rule management. Updated architecture documentation with detailed settings management patterns and race condition prevention strategies."
-  },
-  "0.90.3": {
-    "en": "Flow Communication & Icon Updates: Fixed critical Flow ACTION card communication issue where set_heating_curve and other action cards weren't properly propagating commands to the physical heat pump device. Enhanced Flow card action system to use triggerCapabilityListener() instead of setCapabilityValue() for reliable bidirectional device communication. Updated heating-curve.svg icon design with enlarged coordinate system and mirrored curve direction from upper-left to bottom-right, removing H1-H8 section labels for cleaner professional visualization. All Flow action cards now ensure proper command propagation from Homey automation to physical device state changes."
-  },
-  "0.90.2": {
-    "en": "iOS Compatibility & Architecture Fixes: Resolved iOS-specific enum picker UI bugs that were causing capability value corruption when switching between device controls. Implemented simplified single-capability architecture for heating curve control that displays as read-only sensor while maintaining full Flow card functionality. Fixed Flow ACTION card registration conflicts by eliminating duplicate registrations and adopting unified app-level pattern-based system. Enhanced DPS-to-capability mapping with improved debugging for device data refresh issues. Added comprehensive Homey Compose architecture documentation to prevent manual app.json editing. All enum capabilities now use consistent iOS-safe UI components while preserving complete automation control."
-  },
-  "0.90.1": {
-    "en": "Bug fix release: Enhanced capability detection logic to properly identify built-in setable capabilities like target_temperature and onoff. Fixed settings group organization with proper group ordering. Resolved ESLint formatting issues including arrow function parameter handling, trailing comma requirements, and whitespace compliance. Improved power measurements integration with flow card system for better device feature detection. These fixes ensure all setable capabilities have proper listeners registered for bidirectional device control."
+  "0.92.8": {
+    "en": "Improved documentation and app stability."
   },
   "0.90.0": {
-    "en": "Major capability and flow control fix: Resolved all 'missing capability listener' errors for temperature and on/off controls that were preventing device control. Fixed 'Not_setable' errors for heating mode and heating curve by enabling proper capability configuration. Implemented comprehensive flow card action listeners that ensure flow cards actually control the physical device, not just Homey values. Enhanced capability listeners with input validation, user-friendly error messages, and bidirectional synchronization. Added optional power measurements feature - users can now disable irrelevant power capabilities via device settings for cleaner interfaces. All device controls now work properly from both Homey UI and flow cards with reliable physical device communication."
+    "en": "Added option to enable/disable power monitoring."
   },
   "0.80.0": {
-    "en": "Major automation enhancement: Added 9 new action-based condition flow cards that enable reading current values of all controllable device settings. Users can now create conditions to check device power state, target temperatures, heating modes, work modes, water control modes, capacity settings, heating curves, and volume settings. Features advanced comparison operators (equal to, greater than, less than) for numeric values and real-time capability value reading. These cards are always available and provide complete bidirectional control for sophisticated automation flows, enabling users to create complex logic based on current device states."
-  },
-  "0.75.2": {
-    "en": "UX improvement: Diagnostic report now prioritizes unhealthy capabilities at the top for faster troubleshooting. Unhealthy capabilities are shown first with detailed failure reasons, followed by healthy capabilities grouped by category. This makes it easier to quickly identify and address sensor connectivity issues."
-  },
-  "0.75.1": {
-    "en": "Bug fix release: Fixed critical race condition in diagnostic report generation that was causing 'Cannot set Settings while this.onSettings is still pending' error. Users can now successfully generate capability health reports through device settings without encountering blocking errors. The diagnostic report checkbox now properly resets after report generation, ensuring reliable access to troubleshooting information."
-  },
-  "0.75.0": {
-    "en": "Quality and stability update: Fixed all invalid flow card registration errors that were causing startup issues. Resolved non-existent flow card references (current_above_threshold, voltage_in_range, pulse_steps_in_range, system_in_state) and streamlined flow card management through the proven pattern-based system. Enhanced code quality with comprehensive ESLint compliance and TypeScript error resolution. Added complete project documentation with professional README.md covering installation, configuration, troubleshooting, and development. Updated README.txt with latest feature highlights. Improved maintainability and user experience with cleaner architecture and comprehensive documentation."
+    "en": "Added flow cards to check current device settings for advanced automation."
   },
   "0.70.0": {
-    "en": "Major capability health monitoring update: Implemented intelligent null value detection and dynamic flow card management. Flow handlers now detect missing sensor data (null values) and provide detailed debug logging with fallback values. Added capability health monitoring system that tracks data availability over time. Flow cards automatically register/unregister based on sensor health status. New diagnostic tools allow users to generate capability health reports showing which sensors are working and which have connectivity issues. Enhanced user experience with smart flow card visibility and comprehensive troubleshooting information."
-  },
-  "0.50.0": {
-    "en": "Enhanced flow card control with dynamic registration system. Flow cards now register/unregister in real-time based on user settings without requiring app restart. Improved 'auto' mode intelligently shows cards only for capabilities with actual data, reducing interface clutter."
-  },
-  "0.45.0": {
-    "en": "Added flow card control settings to device settings page. Users can now configure temperature, voltage, current, power, pulse-steps, and state change alerts per device, plus enable expert feature cards."
-  },
-  "0.40.0": {
-    "en": "Major update: Added support for the Aurora series heatpump device. This version includes local access capabilities, enhancing the functionality and user experience."
-  },
-  "0.30.0": {
-    "en": "Major update: EEV/EVI pressure measurements converted to pulse-steps for accurate valve position monitoring. Updated alert thresholds for realistic operation (0-480 pulse-steps range)."
-  },
-  "0.20.0": {
-    "en": "Version with initial flow control setup and warning/error state notifications."
-  },
-  "0.10.0": {
-    "en": "Version without flow control."
-  },
-  "0.0.1": {
-    "en": "Initial version without flow control."
+    "en": "Added sensor health monitoring and diagnostic tools to troubleshoot connection issues."
   }
 }

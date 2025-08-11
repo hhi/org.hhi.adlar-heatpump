@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.92.7",
+  "version": "0.92.8",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -47,10 +47,8 @@
     "developers": [
       {
         "name": "Claude Code AI"
-      },
-      {
-        "name": ""
       }
     ]
-  }
+  },
+  "support": "mailto:iphone.HHi@me.com"
 }
