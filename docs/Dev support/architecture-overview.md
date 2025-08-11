@@ -1,6 +1,6 @@
-# Architecture Overview
+# Architecture Overview (v0.92.7)
 
-This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the utility libraries and core systems that provide reliability and maintainability.
+This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the utility libraries and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
 
 ## Constants Management System
 
@@ -413,4 +413,101 @@ if (enablePowerMeasurements && wasDisabled) {
 | **States** | 5 system state changes | System behavior automation |
 | **Expert** | 3 efficiency/diagnostic cards | Professional HVAC analysis |
 
-This architecture provides a solid foundation for reliable, maintainable, and extensible heat pump device integration while ensuring excellent error handling, race condition prevention, intelligent flow card management, and seamless user experience.
+## Insights Management Architecture (v0.92.6+)
+
+### Dynamic Insights Control System
+
+The insights management system provides intelligent control over Homey's data visualization features, aligning insights visibility with device capabilities and user preferences.
+
+#### Insights Control Integration
+
+**Power Measurement Toggle Integration:**
+```typescript
+// Enhanced capability management with insights control
+for (const capability of powerCapabilities) {
+  if (enablePowerMeasurements) {
+    // Add capability and enable insights
+    if (!this.hasCapability(capability)) {
+      await this.addCapability(capability);
+    }
+    await this.setCapabilityOptions(capability, { insights: true });
+  } else {
+    // Disable insights before removing capability
+    await this.setCapabilityOptions(capability, { insights: false });
+    await this.removeCapability(capability);
+  }
+}
+```
+
+#### Default Insights Configuration
+
+**Driver-Level Insights Settings (`driver.compose.json`):**
+```json
+{
+  "capabilitiesOptions": {
+    // Power-related capabilities - disabled by default for cleaner UX
+    "measure_current.cur_current": { "insights": false },
+    "measure_voltage.voltage_current": { "insights": false },
+    "meter_power.power_consumption": { "insights": false },
+    
+    // Core operational capabilities - enabled by default
+    "measure_temperature.temp_top": { "insights": true },
+    "measure_frequency.compressor_strength": { "insights": true }
+  }
+}
+```
+
+#### Advanced Insights Features (Undocumented)
+
+**Enhanced Chart Customization:**
+```json
+{
+  "insights": true,
+  "chartType": "spline",        // Smooth curves for temperature data
+  "color": "#6236FF",           // Custom brand colors
+  "decimals": 2,                // Precision control
+  "fillOpacity": 0.3,           // Area chart transparency
+  "dashed": true                // Line style options
+}
+```
+
+#### Insights Architecture Benefits
+
+| Feature | Implementation | User Benefit |
+|---------|----------------|--------------|
+| **Default Clean Interface** | Power insights disabled by default | Reduced data collection overhead |
+| **Dynamic Control** | Programmatic insights toggle | Aligned with power measurement settings |
+| **Stale Data Prevention** | Disable before capability removal | No confusing historical data |
+| **User Flexibility** | Manual insights enable/disable | Preserve monitoring for power users |
+| **Chart Customization** | Advanced styling options | Professional data visualization |
+
+### Capability-Insights Alignment Matrix
+
+| Capability Category | Default State | Toggle Behavior | Chart Type |
+|-------------------|---------------|-----------------|------------|
+| **Temperature Sensors** | ✅ Enabled | Static | `spline` |
+| **Power Measurements** | ❌ Disabled | Dynamic | `area` |
+| **System States** | ✅ Enabled | Static | `line` |
+| **Valve Positions** | ✅ Enabled | Static | `column` |
+
+## System Architecture Summary (v0.92.7)
+
+This architecture provides a comprehensive foundation for reliable, maintainable, and extensible heat pump device integration featuring:
+
+### Core Systems
+- **Enhanced Error Handling**: 9 categorized error types with smart retry logic
+- **Race Condition Prevention**: Deferred settings updates with atomic operations
+- **Intelligent Flow Card Management**: Health-aware dynamic registration system
+- **Advanced Insights Control**: Dynamic visibility aligned with user preferences
+
+### User Experience Features
+- **Clean Default Interface**: Power insights disabled by default
+- **Flexible Monitoring**: User-controlled insights visibility
+- **Professional Visualizations**: Advanced chart customization options
+- **Safety-First Design**: Critical monitoring always active regardless of settings
+
+### Developer Benefits
+- **Centralized Configuration**: Single source of truth for all constants
+- **Structured Error Handling**: Categorized debugging and recovery guidance
+- **Type Safety**: Full TypeScript integration with proper interfaces
+- **Extensible Design**: Easy addition of new capabilities, error types, and insights features

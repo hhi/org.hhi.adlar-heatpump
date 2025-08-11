@@ -1,7 +1,9 @@
-Local access to the Aurora series heatpump device.
+Local access to the Aurora series heat pump device.
 
-Set-up:
-To figure out the local key to be used, read from Github source: /docs/Get Local Keys - instruction.pdf
+Setup:
+To find out the local key to use, refer to the GitHub source: /docs/Get Local Keys - instruction.pdf
 
 Usage:
-See the file: /docs/Flow Card handling/flow-cards-overview.md how to apply the flow cards in your Advanced Flow.
+See the file: /docs/Flow Card handling/flow-cards-overview.md for instructions on how to use the flow cards in your Advanced Flow.
+For an overview of the Capabilities, see: docs/Heatpump specs/capabilities-overview.md
+For information about the mapping between Capabilities and Flow Cards, see: docs/Flow Card handling/capability-flowcard-mapping.md
