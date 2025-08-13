@@ -57,6 +57,19 @@
           "nl": "Toon/verberg 9 vermogingsmeting capabilities (stroomverbruik, spanning, stroomsterkte). Uitschakelen voor schonere interface als uw apparaat geen vermogingsmonitoring heeft. Vereist app herstart om effect te hebben."
         },
         "value": false
+      },
+      {
+        "id": "enable_slider_controls",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable slider (water/power) management capabilities",
+          "nl": "Slider (water/power) management capabilities inschakelen"
+        },
+        "hint": {
+          "en": "Show/hide 3 slider control capabilities (hot water temperature, water mode, volume settings). Disable for cleaner interface if you don't need manual control sliders. Requires app restart to take effect.",
+          "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben."
+        },
+        "value": false
       }
     ]
   },
