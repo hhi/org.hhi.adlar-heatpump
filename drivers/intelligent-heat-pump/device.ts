@@ -62,7 +62,6 @@ class MyDevice extends Homey.Device {
 
   private healthCheckInterval: NodeJS.Timeout | null = null;
 
-
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
     if (process.env.DEBUG === '1') {
@@ -185,7 +184,6 @@ class MyDevice extends Homey.Device {
       this.reconnectInterval = undefined;
     }
   }
-
 
   /**
    * Update capability health tracking when value changes
@@ -1028,12 +1026,6 @@ class MyDevice extends Homey.Device {
     this.log(`Skipping device-level registration for ${category} - managed by app-level pattern system`);
   }
 
-
-
-
-
-
-
   /**
    * Register expert feature cards (when expert mode is enabled)
    */
@@ -1558,6 +1550,33 @@ class MyDevice extends Homey.Device {
       return 'Power measurement settings updated. Capabilities and flow cards will be updated shortly.';
     }
 
+    // Handle slider controls settings
+    if (changedKeys.includes('enable_slider_controls')) {
+      // For now, no related flow settings to auto-manage for sliders
+      // But we use the same pattern for consistency and future extensibility
+      const settingsToUpdate: Record<string, string> = {};
+
+      // No additional settings to auto-manage currently, but pattern preserved
+      // for future enhancements (e.g., slider-related flow cards)
+
+      // Only call setSettings if there are settings to update
+      if (Object.keys(settingsToUpdate).length > 0) {
+        // Use setTimeout to avoid race condition with onSettings still being pending
+        this.homey.setTimeout(async () => {
+          try {
+            await this.setSettings(settingsToUpdate);
+            this.log('Auto-updated slider-related settings:', Object.keys(settingsToUpdate));
+          } catch (error) {
+            this.error('Failed to update slider-related settings:', error);
+          }
+        }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+      }
+
+      await this.handleOptionalCapabilities();
+      this.log('Slider control settings updated');
+      return 'Slider control settings updated. Capabilities will be updated shortly.';
+    }
+
     return undefined;
   }
 
@@ -1575,6 +1594,7 @@ class MyDevice extends Homey.Device {
    */
   private async handleOptionalCapabilities(): Promise<void> {
     const enablePowerMeasurements = this.getSetting('enable_power_measurements') ?? true;
+    const enableSliderControls = this.getSetting('enable_slider_controls') ?? true;
 
     const powerCapabilities = [
       'measure_power',
@@ -1588,6 +1608,12 @@ class MyDevice extends Homey.Device {
       'measure_voltage.cv',
     ];
 
+    const sliderCapabilities = [
+      'adlar_enum_volume_set',
+      'adlar_enum_water_mode',
+      'adlar_hotwater',
+    ];
+
     for (const capability of powerCapabilities) {
       if (enablePowerMeasurements) {
         if (!this.hasCapability(capability)) {
@@ -1599,6 +1625,42 @@ class MyDevice extends Homey.Device {
           }
         }
         // Enable insights when power measurements are enabled
+        try {
+          await this.setCapabilityOptions(capability, { insights: true });
+          this.debugLog(`Enabled insights for capability: ${capability}`);
+        } catch (error) {
+          this.debugLog(`Could not enable insights for ${capability}:`, error);
+        }
+      } else if (this.hasCapability(capability)) {
+        // Disable insights before removing capability to clear historical data visibility
+        try {
+          await this.setCapabilityOptions(capability, { insights: false });
+          this.debugLog(`Disabled insights for capability: ${capability}`);
+        } catch (error) {
+          this.debugLog(`Could not disable insights for ${capability}:`, error);
+        }
+
+        try {
+          await this.removeCapability(capability);
+          this.log(`Removed optional capability: ${capability}`);
+        } catch (error) {
+          this.error(`Failed to remove capability ${capability}:`, error);
+        }
+      }
+    }
+
+    // Handle slider capabilities
+    for (const capability of sliderCapabilities) {
+      if (enableSliderControls) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`Added optional capability: ${capability}`);
+          } catch (error) {
+            this.error(`Failed to add capability ${capability}:`, error);
+          }
+        }
+        // Enable insights when slider controls are enabled
         try {
           await this.setCapabilityOptions(capability, { insights: true });
           this.debugLog(`Enabled insights for capability: ${capability}`);

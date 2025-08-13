@@ -1,4 +1,7 @@
 {
+  "0.93.0": {
+    "en": "Added option to enable/disable slider control capabilities for cleaner interface."
+  },
   "0.92.8": {
     "en": "Improved documentation and app stability."
   },
