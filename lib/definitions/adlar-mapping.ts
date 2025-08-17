@@ -72,11 +72,13 @@ export class AdlarMapping {
     // Values: OFF, H1-H8 (high), L1-L8 (low) for weather compensation curves
     adlar_enum_countdown_set: [13],
     adlar_enum_volume_set: [106],
+    // DPS 106: 0: No Power Module, 1: Single-Phase Power Module, 2: Three-Phase Power Module
     adlar_hotwater: [101],
     adlar_state_compressor_state: [27],
     adlar_state_backwater: [31],
     adlar_state_defrost_state: [33],
     adlar_countdowntimer: [14],
+    // DPS 14: Mainboard Program
     adlar_fault: [15],
   };
 
