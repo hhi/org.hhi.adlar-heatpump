@@ -38,8 +38,15 @@
       "Bash(gh release:*)",
       "mcp__ide__getDiagnostics",
       "Bash(cat:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "WebFetch(domain:json.schemastore.org)",
+      "WebFetch(domain:www.schemastore.org)"
     ],
-    "deny": []
-  }
+    "deny": [],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "/Users/hermanhilberink/.claude"
+    ]
+  },
+  "outputStyle": "Explanatory"
 }

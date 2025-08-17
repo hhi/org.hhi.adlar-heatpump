@@ -4000,7 +4000,7 @@
         },
         "measure_water": {
           "title": {
-            "nl": "Water flow",
+            "nl": "Water doorstroming",
             "en": "Water flow"
           },
           "min": 0,
