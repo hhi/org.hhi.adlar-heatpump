@@ -641,21 +641,27 @@ class MyDevice extends Homey.Device {
           // Check for critical conditions before updating
           this.checkForCriticalConditions(capability, value).catch((err) => this.error('Error checking critical conditions:', err));
 
-          // Update the capability value in Homey
-          this.setCapabilityValue(capability, (value as boolean | number | string))
-            .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
-            .catch((err) => {
-              const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Setting capability ${capability}`);
-              this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
+          // Update the capability value in Homey - but only if capability exists
+          if (this.hasCapability(capability)) {
+            this.setCapabilityValue(capability, (value as boolean | number | string))
+              .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
+              .catch((err) => {
+                const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Setting capability ${capability}`);
+                this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
 
-              // Only attempt recovery for retryable errors
-              if (categorizedError.retryable) {
-                this.homey.setTimeout(() => {
-                  this.setCapabilityValue(capability, (value as boolean | number | string))
-                    .catch((retryErr) => this.error(`Retry failed for ${capability}:`, retryErr));
-                }, DeviceConstants.CAPABILITY_RETRY_DELAY_MS);
-              }
-            });
+                // Only attempt recovery for retryable errors
+                if (categorizedError.retryable) {
+                  this.homey.setTimeout(() => {
+                    if (this.hasCapability(capability)) {
+                      this.setCapabilityValue(capability, (value as boolean | number | string))
+                        .catch((retryErr) => this.error(`Retry failed for ${capability}:`, retryErr));
+                    }
+                  }, DeviceConstants.CAPABILITY_RETRY_DELAY_MS);
+                }
+              });
+          } else {
+            this.debugLog(`Skipping capability update for ${capability} - capability not available on device`);
+          }
         });
       } else {
         this.debugLog(`No capability mapping found for DPS ${dpsId}`);
@@ -1356,9 +1362,13 @@ class MyDevice extends Homey.Device {
           this.log(`Successfully sent to Tuya: dp ${dp} = ${validatedValue}`);
 
           // Update Homey capability value to confirm change
-          await this.setCapabilityValue(capability, validatedValue).catch((err) => {
-            this.error(`Failed to update Homey capability ${capability}:`, err);
-          });
+          if (this.hasCapability(capability)) {
+            await this.setCapabilityValue(capability, validatedValue).catch((err) => {
+              this.error(`Failed to update Homey capability ${capability}:`, err);
+            });
+          } else {
+            this.error(`Cannot update capability ${capability} - capability not available on device`);
+          }
 
           // Note: Using single capability for heating curve - both display and control
 

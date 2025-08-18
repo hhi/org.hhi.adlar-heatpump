@@ -1,5 +1,5 @@
 {
-  "0.94.0": {
+  "0.94.1": {
     "en": "Fixed capability validation errors during device initialization when optional features are disabled. Enhanced error handling and consolidated capability management code."
   },
   "0.93.0": {
