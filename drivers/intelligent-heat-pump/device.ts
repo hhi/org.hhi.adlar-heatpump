@@ -1614,73 +1614,57 @@ class MyDevice extends Homey.Device {
       'adlar_hotwater',
     ];
 
-    for (const capability of powerCapabilities) {
-      if (enablePowerMeasurements) {
-        if (!this.hasCapability(capability)) {
-          try {
+    // Process power capabilities
+    await this.processCapabilityGroup(powerCapabilities, enablePowerMeasurements, 'power measurement');
+
+    // Process slider capabilities
+    await this.processCapabilityGroup(sliderCapabilities, enableSliderControls, 'slider control');
+  }
+
+  /**
+   * Process a group of capabilities based on enable/disable setting
+   */
+  private async processCapabilityGroup(
+    capabilities: string[],
+    enableFeature: boolean,
+    featureName: string,
+  ): Promise<void> {
+    for (const capability of capabilities) {
+      try {
+        if (enableFeature) {
+          if (!this.hasCapability(capability)) {
             await this.addCapability(capability);
-            this.log(`Added optional capability: ${capability}`);
-          } catch (error) {
-            this.error(`Failed to add capability ${capability}:`, error);
+            this.log(`Added optional ${featureName} capability: ${capability}`);
           }
-        }
-        // Enable insights when power measurements are enabled
-        try {
-          await this.setCapabilityOptions(capability, { insights: true });
-          this.debugLog(`Enabled insights for capability: ${capability}`);
-        } catch (error) {
-          this.debugLog(`Could not enable insights for ${capability}:`, error);
-        }
-      } else if (this.hasCapability(capability)) {
-        // Disable insights before removing capability to clear historical data visibility
-        try {
-          await this.setCapabilityOptions(capability, { insights: false });
-          this.debugLog(`Disabled insights for capability: ${capability}`);
-        } catch (error) {
-          this.debugLog(`Could not disable insights for ${capability}:`, error);
-        }
-
-        try {
-          await this.removeCapability(capability);
-          this.log(`Removed optional capability: ${capability}`);
-        } catch (error) {
-          this.error(`Failed to remove capability ${capability}:`, error);
-        }
-      }
-    }
-
-    // Handle slider capabilities
-    for (const capability of sliderCapabilities) {
-      if (enableSliderControls) {
-        if (!this.hasCapability(capability)) {
+          // Enable insights when feature is enabled
           try {
-            await this.addCapability(capability);
-            this.log(`Added optional capability: ${capability}`);
+            await this.setCapabilityOptions(capability, { insights: true });
+            this.debugLog(`Enabled insights for ${featureName} capability: ${capability}`);
           } catch (error) {
-            this.error(`Failed to add capability ${capability}:`, error);
+            this.debugLog(`Could not enable insights for ${capability}:`, error);
           }
-        }
-        // Enable insights when slider controls are enabled
-        try {
-          await this.setCapabilityOptions(capability, { insights: true });
-          this.debugLog(`Enabled insights for capability: ${capability}`);
-        } catch (error) {
-          this.debugLog(`Could not enable insights for ${capability}:`, error);
-        }
-      } else if (this.hasCapability(capability)) {
-        // Disable insights before removing capability to clear historical data visibility
-        try {
-          await this.setCapabilityOptions(capability, { insights: false });
-          this.debugLog(`Disabled insights for capability: ${capability}`);
-        } catch (error) {
-          this.debugLog(`Could not disable insights for ${capability}:`, error);
-        }
+        } else if (this.hasCapability(capability)) {
+          // Feature is disabled - remove capability if it exists
+          // Disable insights before removing capability to clear historical data visibility
+          try {
+            await this.setCapabilityOptions(capability, { insights: false });
+            this.debugLog(`Disabled insights for ${featureName} capability: ${capability}`);
+          } catch (error) {
+            this.debugLog(`Could not disable insights for ${capability}:`, error);
+          }
 
-        try {
           await this.removeCapability(capability);
-          this.log(`Removed optional capability: ${capability}`);
-        } catch (error) {
-          this.error(`Failed to remove capability ${capability}:`, error);
+          this.log(`Removed optional ${featureName} capability: ${capability}`);
+        }
+      } catch (error) {
+        // Enhanced error handling with more context
+        const action = enableFeature ? 'add' : 'remove';
+        this.error(`Failed to ${action} ${featureName} capability ${capability}:`, error);
+
+        // For validation errors during capability operations, log additional context
+        if (error instanceof Error && error.message.includes('Invalid Capability')) {
+          this.error(`Capability validation error for ${capability}. This may be due to timing during device initialization.`);
+          this.log(`Settings: ${featureName} = ${enableFeature}, capability exists = ${this.hasCapability(capability)}`);
         }
       }
     }
