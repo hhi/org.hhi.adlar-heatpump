@@ -1,4 +1,7 @@
 {
+  "0.94.0": {
+    "en": "Fixed capability validation errors during device initialization when optional features are disabled. Enhanced error handling and consolidated capability management code."
+  },
   "0.93.0": {
     "en": "Added option to enable/disable slider control capabilities for cleaner interface."
   },
