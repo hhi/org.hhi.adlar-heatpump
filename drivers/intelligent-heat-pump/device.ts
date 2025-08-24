@@ -1390,10 +1390,16 @@ class MyDevice extends Homey.Device {
     await this.handleOptionalCapabilities();
 
     // Get Tuya device settings from Homey
-    const id = this.getStoreValue('device_id');
-    const key = this.getStoreValue('local_key');
-    const ip = this.getStoreValue('ip_address');
+    const id = (this.getStoreValue('device_id') || '').toString().trim();
+    const key = (this.getStoreValue('local_key') || '').toString().trim();
+    const ip = (this.getStoreValue('ip_address') || '').toString().trim();
     const version = '3.3';
+
+    if (!id || !key) {
+      this.error('Tuya credentials missing: device_id or local_key not set.');
+      await this.setUnavailable('Missing Tuya credentials');
+      return;
+    }
 
     // Initialize TuyaDevice
     this.tuya = new TuyaDevice({
