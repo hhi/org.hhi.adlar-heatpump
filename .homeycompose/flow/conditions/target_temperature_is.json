@@ -1,16 +1,16 @@
 {
   "id": "target_temperature_is",
   "title": {
-    "en": "Target temperature is",
-    "nl": "Doel temperatuur is"
+    "en": "Target (setpoint) temperature is",
+    "nl": "Doel (setpoint) temperatuur is"
   },
   "titleFormatted": {
-    "en": "Target temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-    "nl": "Doel temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
+    "en": "Target (setpoint) temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+    "nl": "Doel (setpoint) temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
   },
   "hint": {
-    "en": "Check if the target temperature matches the specified condition",
-    "nl": "Controleer of de doel temperatuur voldoet aan de opgegeven voorwaarde"
+    "en": "Check if the target (setpoint) temperature matches the specified condition",
+    "nl": "Controleer of de doel (setpoint) temperatuur voldoet aan de opgegeven voorwaarde"
   },
   "args": [
     {

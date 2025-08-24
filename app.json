@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.94.1",
+  "version": "0.94.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -68,6 +68,7 @@
           "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
           "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -2967,16 +2968,16 @@
       {
         "id": "target_temperature_is",
         "title": {
-          "en": "Target temperature is",
-          "nl": "Doel temperatuur is"
+          "en": "Target (setpoint) temperature is",
+          "nl": "Doel (setpoint) temperatuur is"
         },
         "titleFormatted": {
-          "en": "Target temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-          "nl": "Doel temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
+          "en": "Target (setpoint) temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+          "nl": "Doel (setpoint) temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
         },
         "hint": {
-          "en": "Check if the target temperature matches the specified condition",
-          "nl": "Controleer of de doel temperatuur voldoet aan de opgegeven voorwaarde"
+          "en": "Check if the target (setpoint) temperature matches the specified condition",
+          "nl": "Controleer of de doel (setpoint) temperatuur voldoet aan de opgegeven voorwaarde"
         },
         "args": [
           {
@@ -3739,7 +3740,7 @@
         },
         "hint": {
           "en": "Set the hot water temperature setting",
-          "nl": "Stel de warm water temperatuur instelling in"
+          "nl": "Stel de warm water temperatuur in"
         },
         "highlight": true,
         "args": [
@@ -3769,16 +3770,16 @@
       {
         "id": "set_target_temperature",
         "title": {
-          "en": "Set target temperature",
-          "nl": "Doel temperatuur instellen"
+          "en": "Set target (setpoint) temperature",
+          "nl": "Doel (setpoint) temperatuur instellen"
         },
         "titleFormatted": {
-          "en": "Set target temperature to [[temperature]]",
-          "nl": "Doel temperatuur instellen op [[temperature]]"
+          "en": "Set target (setpoint) temperature to [[temperature]]",
+          "nl": "Doel (setpoint) temperatuur instellen op [[temperature]]"
         },
         "hint": {
-          "en": "Set the target temperature for the heat pump",
-          "nl": "Stel de doel temperatuur voor de warmtepomp in"
+          "en": "Set the target (setpoint) temperature for the heat pump",
+          "nl": "Stel de doel (setpoint) temperatuur voor de warmtepomp in"
         },
         "highlight": true,
         "args": [
@@ -4011,8 +4012,8 @@
         },
         "target_temperature": {
           "title": {
-            "nl": "Stel temperatuur",
-            "en": "Target temperature"
+            "nl": "Setpoint temperatuur",
+            "en": "Setpoint temperature"
           },
           "min": 5,
           "max": 75,
