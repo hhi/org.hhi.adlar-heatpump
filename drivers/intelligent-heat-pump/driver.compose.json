@@ -84,8 +84,8 @@
 
     "target_temperature": {
       "title": {
-        "nl": "Stel temperatuur",
-        "en": "Target temperature"
+        "nl": "Setpoint temperatuur",
+        "en": "Setpoint temperature"
       },
       "min": 5,
       "max": 75,
