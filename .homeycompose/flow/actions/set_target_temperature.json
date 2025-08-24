@@ -1,16 +1,16 @@
 {
   "id": "set_target_temperature",
   "title": {
-    "en": "Set target temperature",
-    "nl": "Doel temperatuur instellen"
+    "en": "Set target (setpoint) temperature",
+    "nl": "Doel (setpoint) temperatuur instellen"
   },
   "titleFormatted": {
-    "en": "Set target temperature to [[temperature]]",
-    "nl": "Doel temperatuur instellen op [[temperature]]"
+    "en": "Set target (setpoint) temperature to [[temperature]]",
+    "nl": "Doel (setpoint) temperatuur instellen op [[temperature]]"
   },
   "hint": {
-    "en": "Set the target temperature for the heat pump",
-    "nl": "Stel de doel temperatuur voor de warmtepomp in"
+    "en": "Set the target (setpoint) temperature for the heat pump",
+    "nl": "Stel de doel (setpoint) temperatuur voor de warmtepomp in"
   },
   "highlight": true,
   "args": [

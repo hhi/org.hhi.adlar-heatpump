@@ -12,6 +12,7 @@
     "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
     "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",
