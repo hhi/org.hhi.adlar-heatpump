@@ -16,5 +16,43 @@
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
 
-* linguist-vendored
-*.js linguist-vendored=false
+# Prefer to adjust the lines below to exactly match this repository's source file types/dirs.
+
+# -- Force common file extensions to specific languages (edit to match your repo)
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+*.js linguist-language=JavaScript
+*.jsx linguist-language=JavaScript
+*.py linguist-language=Python
+*.go linguist-language=Go
+*.java linguist-language=Java
+*.c linguist-language=C
+*.h linguist-language=C
+*.cpp linguist-language=C++
+*.cc linguist-language=C++
+*.hpp linguist-language=C++
+*.rs linguist-language=Rust
+*.ino linguist-language=C++
+*.ino linguist-language=C++
+
+# -- Mark vendored / third-party code so it is excluded from language stats
+vendor/** linguist-vendored
+third_party/** linguist-vendored
+extern/** linguist-vendored
+node_modules/** linguist-vendored
+packages/** linguist-vendored
+
+# -- Mark build, generated and distribution output as generated
+build/** linguist-generated
+dist/** linguist-generated
+out/** linguist-generated
+generated/** linguist-generated
+
+# -- Ensure your source folders are not treated as vendored
+src/** linguist-vendored=false
+app/** linguist-vendored=false
+lib/** linguist-vendored=false
+
+# -- If there are only docs or examples and you want them excluded from language detection:
+docs/** linguist-documentation
+examples/** linguist-documentation
