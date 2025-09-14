@@ -1,0 +1,29 @@
+{
+  "id": "adlar_cop",
+  "title": {
+    "en": "Coefficient of Performance",
+    "nl": "Prestatiecoëfficiënt"
+  },
+  "type": "number",
+  "units": {
+    "en": "COP",
+    "nl": "COP"
+  },
+  "min": 0.0,
+  "max": 8.0,
+  "step": 0.01,
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Heat Pump Efficiency (COP)",
+    "nl": "Warmtepomp Efficiëntie (COP)"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "Calculated Coefficient of Performance - ratio of useful heat output to electrical energy input. Higher values indicate better efficiency.",
+    "nl": "Berekende prestatiecoëfficiënt - verhouding tussen nuttige warmte-output en elektrische energie-input. Hogere waarden duiden op betere efficiëntie."
+  }
+}

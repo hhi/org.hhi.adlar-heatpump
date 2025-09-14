@@ -3,8 +3,8 @@
   <rect x="20" y="35" width="60" height="30" fill="none" stroke="currentColor" stroke-width="5" rx="5"/>
   
   <!-- Flow direction arrow -->
-  <path d="M10 50 L20 50" stroke="currentColor" stroke-width="3" marker-end="url(#arrowhead)"/>
-  <path d="M80 50 L90 50" stroke="currentColor" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <path d="M10 50 L20 50" stroke="currentColor" stroke-width="3" marker-end="url(#arrowhead-solid)"/>
+  <path d="M80 50 L95 50" stroke="currentColor" stroke-width="3" marker-end="url(#arrowhead-outline)"/>
   
   <!-- Pulse steps - increasing bar heights representing incremental valve positions -->
   <rect x="25" y="55" width="8" height="10" fill="currentColor"/>
@@ -20,10 +20,15 @@
   <circle cx="60" cy="25" r="2" fill="currentColor"/>
   <circle cx="70" cy="25" r="2" fill="currentColor"/>
   
-  <!-- Arrow marker definition -->
+  <!-- Arrow marker definitions -->
   <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <!-- Solid arrowhead for left arrow -->
+    <marker id="arrowhead-solid" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/>
+    </marker>
+    <!-- Outline arrowhead for right arrow -->
+    <marker id="arrowhead-outline" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="none" stroke="currentColor" stroke-width="1"/>
     </marker>
   </defs>
 </svg>

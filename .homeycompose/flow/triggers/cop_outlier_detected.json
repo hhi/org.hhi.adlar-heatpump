@@ -1,0 +1,51 @@
+{
+  "id": "cop_outlier_detected",
+  "title": {
+    "en": "COP outlier detected",
+    "nl": "COP uitbijter gedetecteerd"
+  },
+  "titleFormatted": {
+    "en": "COP outlier detected",
+    "nl": "COP uitbijter gedetecteerd"
+  },
+  "hint": {
+    "en": "Triggers when an invalid or suspicious COP value is detected, indicating potential sensor issues",
+    "nl": "Wordt geactiveerd wanneer een ongeldige of verdachte COP waarde wordt gedetecteerd, wat wijst op mogelijke sensor problemen"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "outlier_cop",
+      "title": {
+        "en": "Outlier COP value",
+        "nl": "Uitbijter COP waarde"
+      },
+      "example": 15.2
+    },
+    {
+      "type": "string",
+      "name": "outlier_reason",
+      "title": {
+        "en": "Outlier reason",
+        "nl": "Reden uitbijter"
+      },
+      "example": "COP value above maximum threshold (8.0)"
+    },
+    {
+      "type": "string",
+      "name": "calculation_method",
+      "title": {
+        "en": "Calculation method used",
+        "nl": "Gebruikte berekeningsmethode"
+      },
+      "example": "direct_thermal"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "id": "receive_external_power_data",
+  "title": {
+    "en": "Send power data to heat pump",
+    "nl": "Stuur vermogensgegevens naar warmtepomp"
+  },
+  "titleFormatted": {
+    "en": "Send [[power_value]]W from [[device_name]] to heat pump (request: [[request_id]])",
+    "nl": "Stuur [[power_value]]W van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+  },
+  "hint": {
+    "en": "Sends power consumption data to the heat pump for COP calculations",
+    "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor COP-berekeningen"
+  },
+  "args": [
+    {
+      "type": "text",
+      "name": "request_id",
+      "title": {
+        "en": "Request ID",
+        "nl": "Verzoek ID"
+      },
+      "placeholder": {
+        "en": "Request ID from trigger",
+        "nl": "Verzoek ID van trigger"
+      }
+    },
+    {
+      "type": "number",
+      "name": "power_value",
+      "title": {
+        "en": "Power consumption (W)",
+        "nl": "Stroomverbruik (W)"
+      },
+      "placeholder": {
+        "en": "Current power consumption in watts",
+        "nl": "Huidig stroomverbruik in watt"
+      },
+      "min": 0,
+      "max": 50000,
+      "step": 0.1
+    },
+    {
+      "type": "text",
+      "name": "device_name",
+      "title": {
+        "en": "Device name",
+        "nl": "Apparaat naam"
+      },
+      "placeholder": {
+        "en": "Name of the power meter device",
+        "nl": "Naam van het vermogensmeter apparaat"
+      }
+    }
+  ]
+}

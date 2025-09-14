@@ -1,0 +1,39 @@
+{
+  "id": "cop_efficiency_check",
+  "title": {
+    "en": "COP efficiency is",
+    "nl": "COP efficiëntie is"
+  },
+  "titleFormatted": {
+    "en": "COP efficiency is !{{above|below}} [[threshold]]",
+    "nl": "COP efficiëntie is !{{boven|onder}} [[threshold]]"
+  },
+  "hint": {
+    "en": "Check if the current Coefficient of Performance (COP) is above or below a threshold",
+    "nl": "Controleer of de huidige prestatiecoëfficiënt (COP) boven of onder een drempel is"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "COP threshold",
+        "nl": "COP drempel"
+      },
+      "min": 1.0,
+      "max": 8.0,
+      "step": 0.1,
+      "units": "COP",
+      "placeholder": {
+        "en": "COP efficiency threshold",
+        "nl": "COP efficiëntie drempel"
+      }
+    }
+  ]
+}

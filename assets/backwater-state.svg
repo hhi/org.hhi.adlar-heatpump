@@ -1,0 +1,56 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main circulation pipe loop -->
+  <path d="M4 8h16a4 4 0 0 1 0 8H4a4 4 0 0 1 0-8z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linejoin="round"/>
+
+  <!-- Return flow arrows (bottom path) -->
+  <path d="m16 14-2 1.5 2 1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="m12 14-2 1.5 2 1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="m8 14-2 1.5 2 1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Supply flow arrows (top path) -->
+  <path d="m8 10 2-1.5-2-1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="m12 10 2-1.5-2-1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <path d="m16 10 2-1.5-2-1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Connection indicator dots -->
+  <circle cx="4" cy="12" r="1" fill="currentColor"/>
+  <circle cx="20" cy="12" r="1" fill="currentColor"/>
+</svg>
