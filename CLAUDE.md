@@ -144,11 +144,13 @@ Enhanced with error categorization for improved troubleshooting during pairing f
 ```
 
 **❌ NEVER manually edit `app.json`:**
+
 - File contains: `"_comment": "This file is generated. Please edit .homeycompose/app.json instead."`
 - Gets overwritten on every build
 - Manual changes will be lost
 
 **✅ Benefits of Homey Compose approach:**
+
 - **Consistency**: Ensures proper structure and validation
 - **Maintainability**: Modular files easier to manage
 - **Version Control**: Clear separation of concerns
@@ -220,12 +222,14 @@ switch (userSetting) {
 - **Enabled mode**: Includes all capabilities regardless of health status
 
 **Temperature Alerts Example** (`flow_temperature_alerts = "enabled"`):
+
 - **Flow Triggers Available**: `coiler_temperature_alert`, `tank_temperature_alert`, `ambient_temperature_changed`, etc.
 - **Safety Monitoring**: Critical temperature thresholds (> 80°C, < -20°C) always active
 - **Alert Conditions**: Configurable thresholds per sensor type
 - **Notification System**: Critical alerts sent via Homey notifications
 
 **Power Settings Auto-Management:**
+
 - When `enable_power_measurements = false` → Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
 - When `enable_power_measurements = true` → Resets related flow settings to `auto`
 - Prevents inconsistent configuration states
@@ -306,4 +310,7 @@ Each capability maps to specific Tuya DPS numbers and includes multilingual supp
 - [Device Pairing](https://apps.developer.homey.app/the-basics/devices/pairing) - Custom pairing flows
 - [Device Settings](https://apps.developer.homey.app/the-basics/devices/settings) - Device configuration management
 
-- for actualizing @.homeychangelog.json document, allways refer to @.homeycompose/app.json in stead of @app.json
+- for actualizing @.homeychangelog.json document, allways refer to @.homeycompose/app.json instead of @app.json
+- only suggest solution according official documentation
+
+- # do not let the content of the generated global @app.json be part of your context (in order to preserve tokens) unless explicitly asked or required to be processed

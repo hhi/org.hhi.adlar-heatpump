@@ -41,6 +41,175 @@
   {
     "type": "group",
     "label": {
+      "en": "COP (Coefficient of Performance) Settings",
+      "nl": "COP (Prestatiecoëfficiënt) Instellingen"
+    },
+    "children": [
+      {
+        "id": "cop_calculation_enabled",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable COP calculation",
+          "nl": "COP berekening inschakelen"
+        },
+        "hint": {
+          "en": "Enable automatic COP (efficiency) calculation using available data sources",
+          "nl": "Schakel automatische COP (efficiëntie) berekening in met beschikbare gegevensbronnen"
+        },
+        "value": true
+      },
+      {
+        "id": "cop_calculation_method",
+        "type": "dropdown",
+        "label": {
+          "en": "COP calculation method",
+          "nl": "COP berekenings methode"
+        },
+        "hint": {
+          "en": "Override calculation method (Auto uses best available data). All 6 methods: Direct thermal (±5%), Power module (±8%), Refrigerant circuit (±12%), Carnot estimation (±15%), Valve correlation (±20%), Temperature difference (±30%)",
+          "nl": "Overschrijf berekenings methode (Auto gebruikt best beschikbare data). Alle 6 methoden: Directe thermisch (±5%), Vermogen module (±8%), Koelmiddel circuit (±12%), Carnot schatting (±15%), Klep correlatie (±20%), Temperatuur verschil (±30%)"
+        },
+        "value": "auto",
+        "values": [
+          {
+            "id": "auto",
+            "label": {
+              "en": "Auto (best available method)",
+              "nl": "Automatisch (beste beschikbare methode)"
+            }
+          },
+          {
+            "id": "direct_thermal",
+            "label": {
+              "en": "Direct thermal (±5% - most accurate)",
+              "nl": "Directe thermisch (±5% - meest accuraat)"
+            }
+          },
+          {
+            "id": "power_module",
+            "label": {
+              "en": "Power module auto-detection (±8%)",
+              "nl": "Vermogen module auto-detectie (±8%)"
+            }
+          },
+          {
+            "id": "refrigerant_circuit",
+            "label": {
+              "en": "Refrigerant circuit analysis (±12%)",
+              "nl": "Koelmiddel circuit analyse (±12%)"
+            }
+          },
+          {
+            "id": "carnot_estimation",
+            "label": {
+              "en": "Carnot estimation (±15%)",
+              "nl": "Carnot schatting (±15%)"
+            }
+          },
+          {
+            "id": "valve_correlation",
+            "label": {
+              "en": "Valve position correlation (±20%)",
+              "nl": "Klep positie correlatie (±20%)"
+            }
+          },
+          {
+            "id": "temperature_difference",
+            "label": {
+              "en": "Temperature difference (±30% - basic)",
+              "nl": "Temperatuur verschil (±30% - basis)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "cop_outlier_detection_enabled",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable COP outlier detection",
+          "nl": "COP outlier detectie inschakelen"
+        },
+        "hint": {
+          "en": "Detect and flag unrealistic COP values that may indicate sensor malfunctions",
+          "nl": "Detecteer en markeer onrealistische COP waarden die sensor storingen kunnen aanduiden"
+        },
+        "value": true
+      },
+      {
+        "id": "cop_min_threshold",
+        "type": "number",
+        "label": {
+          "en": "Minimum valid COP",
+          "nl": "Minimale geldige COP"
+        },
+        "hint": {
+          "en": "COP values below this threshold will be flagged as outliers",
+          "nl": "COP waarden onder deze drempel worden gemarkeerd als uitbijters"
+        },
+        "value": 0.5,
+        "min": 0.1,
+        "max": 2.0,
+        "step": 0.1
+      },
+      {
+        "id": "cop_max_threshold",
+        "type": "number",
+        "label": {
+          "en": "Maximum valid COP",
+          "nl": "Maximale geldige COP"
+        },
+        "hint": {
+          "en": "COP values above this threshold will be flagged as outliers",
+          "nl": "COP waarden boven deze drempel worden gemarkeerd als uitbijters"
+        },
+        "value": 8.0,
+        "min": 4.0,
+        "max": 15.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Cross-App Integration Settings (Flow Card Based)",
+      "nl": "Cross-App Integratie Instellingen (Flow Kaart Gebaseerd)"
+    },
+    "children": [
+      {
+        "id": "external_data_timeout",
+        "type": "number",
+        "label": {
+          "en": "External data request timeout (seconds)",
+          "nl": "Externe data verzoek timeout (seconden)"
+        },
+        "hint": {
+          "en": "How long to wait for external device data responses via flow cards before using internal methods only",
+          "nl": "Hoe lang wachten op externe apparaat data reacties via flow kaarten voordat alleen interne methoden worden gebruikt"
+        },
+        "value": 5,
+        "min": 1,
+        "max": 30,
+        "step": 1
+      },
+      {
+        "id": "enable_external_data_requests",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable external data requests via flow cards",
+          "nl": "Schakel externe data verzoeken via flow kaarten in"
+        },
+        "hint": {
+          "en": "Allow this device to request data from other Homey devices using flow card triggers and actions for enhanced COP calculations",
+          "nl": "Sta toe dat dit apparaat data opvraagt van andere Homey apparaten via flow kaart triggers en acties voor verbeterde COP berekeningen"
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
       "en": "Feature Settings (app restart and exit required)",
       "nl": "Functie Instellingen (herstart en afsluiten van app vereist)"
     },
