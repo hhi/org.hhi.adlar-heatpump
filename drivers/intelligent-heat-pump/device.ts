@@ -6,6 +6,8 @@ import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
 import { DeviceConstants } from '../../lib/constants';
 import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-types';
+import { COPCalculator, type COPDataSources } from '../../lib/services/cop-calculator';
+import { FlowDataManager } from '../../lib/services/flow-data-manager';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -31,6 +33,21 @@ interface UserFlowPreferences {
   flow_expert_mode: boolean;
 }
 /* eslint-enable camelcase */
+
+interface COPSettings {
+  enableCOP: boolean;
+  calculationMethod: 'auto' | 'direct_thermal' | 'carnot_estimation' | 'temperature_difference';
+  enableOutlierDetection: boolean;
+  customOutlierThresholds: {
+    minCOP: number;
+    maxCOP: number;
+  };
+  externalDevices: {
+    power: { enabled: boolean; deviceId: string; capability: string };
+    flow: { enabled: boolean; deviceId: string; capability: string };
+    ambient: { enabled: boolean; deviceId: string; capability: string };
+  };
+}
 
 class MyDevice extends Homey.Device {
   tuya: TuyaDevice | undefined;
@@ -61,6 +78,11 @@ class MyDevice extends Homey.Device {
   private readonly NULL_THRESHOLD = DeviceConstants.NULL_THRESHOLD;
 
   private healthCheckInterval: NodeJS.Timeout | null = null;
+
+  // COP (Coefficient of Performance) calculation
+  private flowDataManager: FlowDataManager | null = null;
+  private copCalculationInterval: NodeJS.Timeout | null = null;
+  private copSettings: COPSettings | null = null;
 
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
@@ -566,6 +588,779 @@ class MyDevice extends Homey.Device {
     if (hours > 0) return `${hours}h ${minutes % 60}m ago`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s ago`;
     return `${seconds}s ago`;
+  }
+
+  /**
+   * Format COP method for user-friendly display
+   */
+  private formatCOPMethodDisplay(method: string, confidence: string): string {
+    const methodNames: Record<string, string> = {
+      direct_thermal: 'Direct Thermal',
+      power_module: 'Power Module',
+      power_estimation: 'Power Estimation',
+      refrigerant_circuit: 'Refrigerant Circuit',
+      carnot_estimation: 'Carnot Estimation',
+      valve_correlation: 'Valve Correlation',
+      temperature_difference: 'Temperature Difference',
+      insufficient_data: 'Insufficient Data',
+    };
+
+    const methodName = methodNames[method];
+    if (!methodName) {
+      return `Unknown Method (${confidence})`;
+    }
+
+    // Format with confidence indicator
+    let confidenceIndicator = '🔴'; // default low confidence
+    if (confidence === 'high') {
+      confidenceIndicator = '🟢';
+    } else if (confidence === 'medium') {
+      confidenceIndicator = '🟡';
+    }
+    return `${methodName} ${confidenceIndicator}`;
+  }
+
+  /**
+   * Initialize COP calculation system
+   */
+  private async initializeCOP(): Promise<void> {
+    try {
+      // Initialize flow data manager for cross-app communication
+      this.flowDataManager = new FlowDataManager(this.homey);
+      this.log('Flow data manager initialized');
+
+      // Load COP settings from device settings
+      await this.loadCOPSettings();
+
+      // Check if COP capability is available
+      if (this.hasCapability('adlar_cop')) {
+        // Start COP calculation interval if enabled
+        const copEnabled = this.copSettings?.enableCOP !== false; // default enabled
+        if (copEnabled) {
+          this.startCOPCalculationInterval();
+          this.log('COP calculation system initialized and started');
+        } else {
+          this.log('COP calculation disabled by settings');
+        }
+      } else {
+        this.log('COP capability not available on device');
+      }
+    } catch (error) {
+      this.error('Error initializing COP system:', error);
+    }
+  }
+
+  /**
+   * Load COP settings from device settings
+   */
+  private async loadCOPSettings(): Promise<void> {
+    try {
+      const settings = this.getSettings();
+
+      this.copSettings = {
+        enableCOP: settings.cop_calculation_enabled !== false, // default true
+        calculationMethod: settings.cop_calculation_method || 'auto',
+        enableOutlierDetection: settings.cop_outlier_detection_enabled !== false, // default true
+        customOutlierThresholds: {
+          minCOP: settings.cop_min_threshold || DeviceConstants.MIN_VALID_COP,
+          maxCOP: settings.cop_max_threshold || DeviceConstants.MAX_VALID_COP,
+        },
+        externalDevices: {
+          power: {
+            deviceId: settings.external_power_device_id || '',
+            capability: settings.external_power_capability || 'measure_power',
+            enabled: !!settings.external_power_enabled,
+          },
+          flow: {
+            deviceId: settings.external_flow_device_id || '',
+            capability: settings.external_flow_capability || 'measure_water',
+            enabled: !!settings.external_flow_enabled,
+          },
+          ambient: {
+            deviceId: settings.external_ambient_device_id || '',
+            capability: settings.external_ambient_capability || 'measure_temperature',
+            enabled: !!settings.external_ambient_enabled,
+          },
+        },
+      };
+
+      this.debugLog('COP settings loaded:', this.copSettings);
+
+      // Debug COP capability status immediately after loading settings
+      this.debugCOPCapabilityStatus();
+    } catch (error) {
+      this.error('Error loading COP settings:', error);
+      // Set default settings on error
+      this.copSettings = {
+        enableCOP: true,
+        calculationMethod: 'auto',
+        enableOutlierDetection: true,
+        customOutlierThresholds: {
+          minCOP: DeviceConstants.MIN_VALID_COP,
+          maxCOP: DeviceConstants.MAX_VALID_COP,
+        },
+        externalDevices: {
+          power: { deviceId: '', capability: 'measure_power', enabled: false },
+          flow: { deviceId: '', capability: 'measure_water', enabled: false },
+          ambient: { deviceId: '', capability: 'measure_temperature', enabled: false },
+        },
+      };
+    }
+  }
+
+  /**
+   * Debug method to check COP capability status and configuration
+   */
+  public debugCOPCapabilityStatus(): void {
+    this.log('🔧 COP Capability Debug Status:');
+    this.log(`  📋 hasCapability('adlar_cop'): ${this.hasCapability('adlar_cop')}`);
+    this.log(`  ⚙️  cop_calculation_enabled setting: ${this.getSetting('cop_calculation_enabled')}`);
+    this.log(`  🏗️  copSettings?.enableCOP: ${this.copSettings?.enableCOP}`);
+
+    // List all current capabilities
+    const allCaps = this.getCapabilities();
+    this.log(`  📊 Total capabilities: ${allCaps.length}`);
+    this.log(`  🔍 COP in capability list: ${allCaps.includes('adlar_cop')}`);
+
+    if (process.env.DEBUG === '1') {
+      this.log(`  📝 All capabilities: ${allCaps.join(', ')}`);
+    }
+
+    // Check if capability definition exists in app.json
+    try {
+      const capabilityDefinition = this.homey.manifest.capabilities?.adlar_cop;
+      this.log(`  📋 COP capability definition exists: ${!!capabilityDefinition}`);
+      if (capabilityDefinition) {
+        this.log(`  📋 COP definition type: ${capabilityDefinition.type}`);
+      }
+    } catch (error) {
+      this.log(`  ❌ Error checking capability definition: ${error}`);
+    }
+  }
+
+  /**
+   * Start COP calculation interval
+   */
+  private startCOPCalculationInterval(): void {
+    try {
+      const interval = this.homey.setInterval(async () => {
+        try {
+          await this.calculateAndUpdateCOP();
+        } catch (error) {
+          this.error('Error during COP calculation:', error);
+        }
+      }, DeviceConstants.COP_CALCULATION_INTERVAL_MS);
+
+      if (interval) {
+        this.copCalculationInterval = interval;
+        this.log('Started COP calculation interval');
+      } else {
+        this.copCalculationInterval = null;
+        this.error('Failed to start COP calculation interval: setInterval returned undefined');
+      }
+    } catch (err) {
+      this.copCalculationInterval = null;
+      this.error('Error starting COP calculation interval:', err);
+    }
+  }
+
+  /**
+   * Stop COP calculation interval
+   */
+  private stopCOPCalculationInterval(): void {
+    if (this.copCalculationInterval) {
+      clearInterval(this.copCalculationInterval);
+      this.copCalculationInterval = null;
+      this.log('Stopped COP calculation interval');
+    }
+  }
+
+  /**
+   * Calculate and update COP value with enhanced debugging
+   */
+  private async calculateAndUpdateCOP(): Promise<void> {
+    if (!this.hasCapability('adlar_cop') || !this.copSettings?.enableCOP) {
+      this.debugLog('COP calculation skipped - capability not available or disabled');
+      return;
+    }
+
+    try {
+      // Gather data sources from device capabilities
+      const deviceData = this.gatherDeviceDataSources();
+      this.debugLog('Device data sources gathered:', deviceData);
+
+      // Get external device data via flow cards if configured
+      let externalData = {};
+      const externalDeviceInfo: Record<string, { deviceName: string; value: number; source: string }> = {};
+      const externalDataSources: string[] = [];
+
+      if (this.flowDataManager && this.copSettings?.externalDevices) {
+        // Prepare flow data configuration
+        const flowConfig = {
+          powerEnabled: this.copSettings.externalDevices.power?.enabled || false,
+          flowEnabled: this.copSettings.externalDevices.flow?.enabled || false,
+          ambientEnabled: this.copSettings.externalDevices.ambient?.enabled || false,
+          requestTimeoutMs: 30000, // 30 second timeout
+        };
+
+        // Check if any external devices are enabled
+        const hasEnabledDevices = flowConfig.powerEnabled || flowConfig.flowEnabled || flowConfig.ambientEnabled;
+
+        if (hasEnabledDevices) {
+          this.debugLog(`Requesting external data via flow cards: ${[
+            flowConfig.powerEnabled && 'power',
+            flowConfig.flowEnabled && 'flow',
+            flowConfig.ambientEnabled && 'ambient',
+          ].filter(Boolean).join(', ')}`);
+
+          try {
+            const flowResult = await this.flowDataManager.getExternalDeviceData(flowConfig);
+
+            // Process power data
+            if (flowResult.electricalPower) {
+              externalData = { ...externalData, electricalPower: flowResult.electricalPower.value };
+              externalDeviceInfo.electricalPower = {
+                deviceName: flowResult.electricalPower.source,
+                value: flowResult.electricalPower.value,
+                source: 'flow_card',
+              };
+              externalDataSources.push('power(flow_card)');
+            }
+
+            // Process flow data
+            if (flowResult.waterFlowRate) {
+              externalData = { ...externalData, waterFlowRate: flowResult.waterFlowRate.value };
+              externalDeviceInfo.waterFlowRate = {
+                deviceName: flowResult.waterFlowRate.source,
+                value: flowResult.waterFlowRate.value,
+                source: 'flow_card',
+              };
+              externalDataSources.push('flow(flow_card)');
+            }
+
+            // Process ambient data
+            if (flowResult.ambientTemperature) {
+              externalData = { ...externalData, ambientTemperature: flowResult.ambientTemperature.value };
+              externalDeviceInfo.ambientTemperature = {
+                deviceName: flowResult.ambientTemperature.source,
+                value: flowResult.ambientTemperature.value,
+                source: 'flow_card',
+              };
+              externalDataSources.push('ambient(flow_card)');
+            }
+
+            this.debugLog('External data sources:', externalDataSources.length > 0 ? externalDataSources.join(', ') : 'none');
+            this.debugLog('External data retrieved via flow cards:', externalData);
+
+            // Enhanced external device logging with device names and current values
+            if (Object.keys(externalDeviceInfo).length > 0) {
+              this.log('🔗 External devices found for COP calculation via flow cards:');
+              Object.entries(externalDeviceInfo).forEach(([dataType, info]) => {
+                this.log(`  📍 ${dataType}: "${info.deviceName}" = ${info.value} (source: ${info.source})`);
+              });
+            }
+
+            // Log any errors from the flow request
+            if (flowResult.errors.length > 0) {
+              this.error('External device flow card errors:', flowResult.errors);
+            }
+          } catch (error) {
+            this.error('Failed to get external device data via flow cards:', error);
+          }
+        }
+      }
+
+      // Combine device and external data (external data takes precedence, unless undefined)
+      const combinedData = {
+        ...deviceData,
+        ...Object.fromEntries(
+          Object.entries(externalData ?? {}).filter(([, v]) => v !== undefined),
+        ),
+      };
+      this.debugLog('Combined data for COP calculation:', combinedData);
+
+      // Log data availability for each calculation method with detailed analysis
+      this.logDataAvailabilityForMethods(combinedData);
+
+      // Enhanced method selection logging
+      this.logCOPMethodSelection(combinedData);
+
+      // Calculate COP using the calculator service
+      const copConfig = {
+        forceMethod: this.copSettings.calculationMethod as 'auto' | 'direct_thermal' | 'carnot_estimation' | 'temperature_difference',
+        enableOutlierDetection: this.copSettings.enableOutlierDetection,
+        customOutlierThresholds: this.copSettings.customOutlierThresholds,
+      };
+
+      this.debugLog('COP calculation config:', copConfig);
+
+      const copResult = COPCalculator.calculateCOP(combinedData, copConfig);
+
+      // Enhance result with external device source information
+      this.enhanceCOPResultWithExternalSources(copResult, externalDeviceInfo);
+
+      // Enhanced result logging
+      this.logCOPCalculationResult(copResult);
+
+      // Update COP capability if valid
+      if (copResult.cop > 0 && !copResult.isOutlier) {
+        const roundedCOP = Math.round(copResult.cop * 100) / 100;
+        await this.setCapabilityValue('adlar_cop', roundedCOP);
+
+        // Update COP method capability
+        const methodDisplayName = this.formatCOPMethodDisplay(copResult.method, copResult.confidence);
+        await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
+
+        this.log(`✅ COP updated: ${roundedCOP} (method: ${copResult.method}, confidence: ${copResult.confidence})`);
+
+        // Log method description for debugging
+        this.debugLog('Method details:', COPCalculator.getMethodDescription(copResult.method));
+      } else if (copResult.isOutlier) {
+        this.log(`⚠️ COP outlier detected (${copResult.cop.toFixed(2)}): ${copResult.outlierReason}`);
+        this.debugLog('Outlier data sources:', copResult.dataSources);
+
+        // Update COP method capability to show outlier status
+        const methodDisplayName = `${this.formatCOPMethodDisplay(copResult.method, 'low')} (Outlier)`;
+        await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
+
+        // Trigger outlier flow card if configured
+        if (this.hasCapability('adlar_cop')) {
+          await this.triggerFlowCard('cop_outlier_detected', {
+            outlier_cop: copResult.cop,
+            outlier_reason: copResult.outlierReason || 'Unknown reason',
+            calculation_method: copResult.method,
+          });
+        }
+      } else {
+        this.log(`❌ COP calculation failed: ${copResult.method}`);
+        this.debugLog('Failed calculation data:', combinedData);
+      }
+
+      // Trigger COP efficiency flow card if thresholds are met
+      await this.checkCOPEfficiencyTriggers(copResult);
+
+    } catch (error) {
+      this.error('❌ Error calculating COP:', error);
+
+      // Log debugging information on error
+      if (process.env.DEBUG === '1') {
+        this.error('COP calculation error context:', {
+          hasCapability: this.hasCapability('adlar_cop'),
+          copSettings: this.copSettings,
+          flowDataManager: !!this.flowDataManager,
+        });
+      }
+    }
+  }
+
+  /**
+   * Log data availability for each COP calculation method
+   */
+  private logDataAvailabilityForMethods(data: COPDataSources): void {
+    const methodRequirements = {
+      'Direct Thermal': ['electricalPower', 'waterFlowRate', 'inletTemperature', 'outletTemperature'],
+      'Carnot Estimation': ['outletTemperature', 'ambientTemperature', 'compressorFrequency'],
+      'Temperature Difference': ['inletTemperature', 'outletTemperature'],
+    };
+
+    this.debugLog('🔍 COP Method Data Availability:');
+
+    Object.entries(methodRequirements).forEach(([method, required]) => {
+      const available = required.filter((field) => {
+        const value = data[field as keyof COPDataSources];
+        return value !== undefined && value !== null && value !== 0;
+      });
+
+      const canUse = available.length === required.length;
+      const status = canUse ? '✅' : '❌';
+
+      this.debugLog(`  ${status} ${method}: ${available.length}/${required.length} fields available`);
+
+      if (!canUse) {
+        const missing = required.filter((field) => {
+          const value = data[field as keyof COPDataSources];
+          return value === undefined || value === null || value === 0;
+        });
+        this.debugLog(`      Missing: ${missing.join(', ')}`);
+      }
+    });
+  }
+
+  /**
+   * Log comprehensive COP calculation result with calculation expressions
+   */
+  private logCOPCalculationResult(result: {
+    method: string;
+    cop: number;
+    confidence: string;
+    isOutlier: boolean;
+    outlierReason?: string;
+    dataSources: Record<string, { value: number | string; source: string }>;
+    calculationDetails?: Record<string, unknown>;
+  }): void {
+    const methodIcons = {
+      direct_thermal: '🎯',
+      carnot_estimation: '🧮',
+      temperature_difference: '📏',
+      insufficient_data: '❌',
+    };
+
+    const confidenceIcons = {
+      high: '🟢',
+      medium: '🟡',
+      low: '🔴',
+    };
+
+    this.log('📊 COP Calculation Result:');
+    this.log(`  ${methodIcons[result.method as keyof typeof methodIcons]} Method: ${result.method}`);
+    this.log(`  🎯 COP Value: ${result.cop.toFixed(3)}`);
+    this.log(`  ${confidenceIcons[result.confidence as keyof typeof confidenceIcons]} Confidence: ${result.confidence}`);
+
+    if (result.isOutlier) {
+      this.log(`  ⚠️ Outlier: ${result.outlierReason}`);
+    }
+
+    // Log calculation expression and formula used
+    this.logCalculationExpression(result);
+
+    // Log data sources used
+    if (Object.keys(result.dataSources).length > 0) {
+      this.log('  📊 Data Sources Used:');
+      Object.entries(result.dataSources).forEach(([key, value]) => {
+        this.log(`    • ${key}: ${value.value} (${value.source})`);
+      });
+    }
+
+    // Log calculation details if available
+    if (result.calculationDetails && Object.keys(result.calculationDetails).length > 0) {
+      this.log('  🔬 Calculation Details:');
+      Object.entries(result.calculationDetails).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          this.log(`    • ${key}: ${value.toFixed(3)}`);
+        } else {
+          this.log(`    • ${key}: ${value}`);
+        }
+      });
+    }
+
+    // Log method description for context
+    const methodDescription = this.getCOPMethodDescription(result.method);
+    if (methodDescription) {
+      this.log(`  📖 Method Info: ${methodDescription}`);
+    }
+  }
+
+  /**
+   * Log COP method selection logic with detailed reasoning
+   */
+  private logCOPMethodSelection(data: COPDataSources): void {
+    this.log('🎯 COP Method Selection Analysis:');
+
+    // Check Direct Thermal method
+    const canDirectThermal = !!(
+      data.waterFlowRate && data.waterFlowRate > 0
+      && data.inletTemperature !== undefined && data.inletTemperature !== null
+      && data.outletTemperature !== undefined && data.outletTemperature !== null
+      && data.electricalPower && data.electricalPower > 0
+    );
+
+    this.log(`  🎯 Direct Thermal: ${canDirectThermal ? '✅ Available' : '❌ Not available'}`);
+    if (!canDirectThermal) {
+      const missing = [];
+      if (!data.waterFlowRate || data.waterFlowRate <= 0) missing.push('waterFlowRate');
+      if (data.inletTemperature === undefined || data.inletTemperature === null) missing.push('inletTemperature');
+      if (data.outletTemperature === undefined || data.outletTemperature === null) missing.push('outletTemperature');
+      if (!data.electricalPower || data.electricalPower <= 0) missing.push('electricalPower');
+      this.log(`    Missing: ${missing.join(', ')}`);
+    }
+
+    // Check Carnot Estimation method
+    const canCarnot = !!(
+      data.outletTemperature !== undefined && data.outletTemperature !== null
+      && data.ambientTemperature !== undefined && data.ambientTemperature !== null
+      && data.compressorFrequency && data.compressorFrequency > 0
+    );
+
+    this.log(`  🧮 Carnot Estimation: ${canCarnot ? '✅ Available' : '❌ Not available'}`);
+    if (!canCarnot) {
+      const missing = [];
+      if (data.outletTemperature === undefined || data.outletTemperature === null) missing.push('outletTemperature');
+      if (data.ambientTemperature === undefined || data.ambientTemperature === null) missing.push('ambientTemperature');
+      if (!data.compressorFrequency || data.compressorFrequency <= 0) missing.push('compressorFrequency');
+      this.log(`    Missing: ${missing.join(', ')}`);
+    } else {
+      this.log('    ✅ All required data available:');
+      this.log(`      • outletTemperature: ${data.outletTemperature}°C`);
+      this.log(`      • ambientTemperature: ${data.ambientTemperature}°C`);
+      this.log(`      • compressorFrequency: ${data.compressorFrequency}Hz`);
+    }
+
+    // Check Temperature Difference method
+    const canTempDiff = !!(
+      data.inletTemperature !== undefined && data.inletTemperature !== null
+      && data.outletTemperature !== undefined && data.outletTemperature !== null
+    );
+
+    this.log(`  📏 Temperature Difference: ${canTempDiff ? '✅ Available' : '❌ Not available'}`);
+    if (!canTempDiff) {
+      const missing = [];
+      if (data.inletTemperature === undefined || data.inletTemperature === null) missing.push('inletTemperature');
+      if (data.outletTemperature === undefined || data.outletTemperature === null) missing.push('outletTemperature');
+      this.log(`    Missing: ${missing.join(', ')}`);
+    }
+
+    // Determine which method will be selected
+    let selectedMethod = 'insufficient_data';
+    if (canDirectThermal) {
+      selectedMethod = 'direct_thermal';
+    } else if (canCarnot) {
+      selectedMethod = 'carnot_estimation';
+    } else if (canTempDiff) {
+      selectedMethod = 'temperature_difference';
+    }
+
+    this.log(`  🏆 Selected Method: ${selectedMethod}`);
+
+    // Special case analysis for your scenario
+    if (!canDirectThermal && canCarnot) {
+      this.log('  💡 Analysis: Direct thermal unavailable due to missing electrical power, using Carnot estimation (good choice!)');
+    } else if (!canDirectThermal && !canCarnot && canTempDiff) {
+      this.log('  ⚠️  Analysis: Both direct thermal and Carnot unavailable, falling back to less accurate temperature difference method');
+    }
+  }
+
+  /**
+   * Enhance COP result with external device source information
+   */
+  private enhanceCOPResultWithExternalSources(
+    copResult: { dataSources: Record<string, { value: number | string; source: string }> },
+    externalDeviceInfo: Record<string, { deviceName: string; value: number; source: string }>,
+  ): void {
+    // Update data sources to include external device names where applicable
+    Object.entries(copResult.dataSources).forEach(([key, dataSource]) => {
+      const externalInfo = externalDeviceInfo[key];
+      if (externalInfo && dataSource.source.startsWith('external:')) {
+        // Replace generic external source with device name
+        dataSource.source = `${externalInfo.deviceName} (${externalInfo.source})`;
+      }
+    });
+  }
+
+  /**
+   * Log the specific calculation expression used for the COP calculation
+   */
+  private logCalculationExpression(result: {
+    method: string;
+    cop: number;
+    dataSources: Record<string, { value: number | string; source: string }>;
+    calculationDetails?: Record<string, unknown>;
+  }): void {
+    const ds = result.dataSources;
+    const cd = result.calculationDetails;
+
+    switch (result.method) {
+      case 'direct_thermal': {
+        if (ds.electricalPower && ds.waterFlowRate && ds.temperatureDifference && cd?.massFlowRate && cd?.thermalOutput) {
+          this.log('  🧮 Formula: COP = Q_thermal / P_electrical');
+          this.log('  📐 Expression: Q_thermal = ṁ × Cp × ΔT');
+          this.log(`    Where: ṁ = ${(cd.massFlowRate as number).toFixed(3)} kg/s (${ds.waterFlowRate.value} L/min)`);
+          this.log(`           Cp = ${DeviceConstants.WATER_SPECIFIC_HEAT_CAPACITY} J/(kg·K) (water specific heat)`);
+          this.log(`           ΔT = ${ds.temperatureDifference.value}°C (outlet - inlet temp)`);
+          this.log(`  🔢 Calculation: ${(cd.thermalOutput as number).toFixed(1)} W / ${ds.electricalPower.value} W = ${result.cop.toFixed(3)}`);
+        }
+        break;
+      }
+
+      case 'carnot_estimation': {
+        if (ds.ambientTemperature && cd?.carnotCOP && cd?.efficiencyFactor) {
+          const ambientValue = typeof ds.ambientTemperature.value === 'number' ? ds.ambientTemperature.value : 0;
+          const tempDiffValue = ds.temperatureDifference && typeof ds.temperatureDifference.value === 'number'
+            ? ds.temperatureDifference.value : 0;
+          const outletTemp = ds.temperatureDifference
+            ? (ambientValue + tempDiffValue) : 'unknown';
+          this.log('  🧮 Formula: COP = Carnot_COP × η_practical');
+          this.log('  📐 Expression: Carnot_COP = T_hot / (T_hot - T_cold)');
+          this.log(`    Where: T_hot = ${outletTemp}K, T_cold = ${(ambientValue + 273.15).toFixed(1)}K`);
+          this.log(`           η_practical = ${(cd.efficiencyFactor as number).toFixed(3)} (efficiency factor)`);
+          this.log(`  🔢 Calculation: ${(cd.carnotCOP as number).toFixed(3)} × ${(cd.efficiencyFactor as number).toFixed(3)} = ${result.cop.toFixed(3)}`);
+        }
+        break;
+      }
+
+      case 'temperature_difference': {
+        if (ds.temperatureDifference) {
+          this.log('  🧮 Formula: COP = f(ΔT) using empirical relationships');
+          this.log(`  📐 Expression: Based on ΔT = ${ds.temperatureDifference.value}°C`);
+
+          const tempDiff = typeof ds.temperatureDifference.value === 'number' ? ds.temperatureDifference.value : 0;
+          const thresholds = DeviceConstants.COP_TEMP_DIFF_THRESHOLDS;
+
+          if (tempDiff < thresholds.LOW_EFFICIENCY_TEMP_DIFF) {
+            const logMsg = `  🔢 Calculation: ΔT < ${thresholds.LOW_EFFICIENCY_TEMP_DIFF}°C → COP = ${thresholds.LOW_EFFICIENCY_COP}`;
+            this.log(logMsg);
+          } else if (tempDiff < thresholds.MODERATE_EFFICIENCY_TEMP_DIFF) {
+            const calculatedCOP = thresholds.MODERATE_EFFICIENCY_COP_BASE
+              + (tempDiff - thresholds.LOW_EFFICIENCY_TEMP_DIFF) * thresholds.MODERATE_EFFICIENCY_SLOPE;
+            const formula = `COP = ${thresholds.MODERATE_EFFICIENCY_COP_BASE} + (${tempDiff} - ${thresholds.LOW_EFFICIENCY_TEMP_DIFF}) × ${thresholds.MODERATE_EFFICIENCY_SLOPE}`;
+            this.log(`  🔢 Calculation: ${formula} = ${calculatedCOP.toFixed(3)}`);
+          } else {
+            const logMsg = `  🔢 Calculation: ΔT ≥ ${thresholds.MODERATE_EFFICIENCY_TEMP_DIFF}°C → COP = ${thresholds.HIGH_EFFICIENCY_COP} (capped)`;
+            this.log(logMsg);
+          }
+        }
+        break;
+      }
+
+      case 'insufficient_data': {
+        this.log('  ❌ Expression: No calculation performed - insufficient data available');
+        break;
+      }
+
+      default: {
+        this.log(`  ❓ Expression: Unknown method '${result.method}'`);
+        break;
+      }
+    }
+  }
+
+  /**
+   * Get human-readable description of COP calculation method
+   */
+  private getCOPMethodDescription(method: string): string | null {
+    switch (method) {
+      case 'direct_thermal':
+        return 'Direct thermal calculation using water flow and temperature difference (±5% accuracy)';
+      case 'carnot_estimation':
+        return 'Carnot-based estimation using compressor frequency and ambient temperature (±15% accuracy)';
+      case 'temperature_difference':
+        return 'Temperature difference estimation using empirical relationships (±30% accuracy)';
+      case 'insufficient_data':
+        return 'Insufficient data available for any COP calculation method';
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Check and trigger COP efficiency flow cards
+   */
+  private async checkCOPEfficiencyTriggers(copResult: { cop: number; isOutlier: boolean; method: string; confidence: string }): Promise<void> {
+    if (!copResult.cop || copResult.cop <= 0 || copResult.isOutlier) {
+      return;
+    }
+
+    try {
+      // Get previous COP value to detect significant changes
+      const previousCOP = this.getCapabilityValue('adlar_cop') || 0;
+      const copChange = Math.abs(copResult.cop - previousCOP);
+
+      // Trigger COP efficiency changed if change is significant (> 0.5)
+      if (copChange > 0.5 && previousCOP > 0) {
+        // Determine condition based on thresholds
+        const goodEfficiencyThreshold = 3.0;
+        const excellentEfficiencyThreshold = 4.0;
+
+        let condition: 'above' | 'below';
+        let threshold: number;
+
+        if (copResult.cop >= excellentEfficiencyThreshold) {
+          condition = 'above';
+          threshold = excellentEfficiencyThreshold;
+        } else if (copResult.cop < goodEfficiencyThreshold) {
+          condition = 'below';
+          threshold = goodEfficiencyThreshold;
+        } else {
+          // In middle range, use previous value to determine direction
+          condition = copResult.cop > previousCOP ? 'above' : 'below';
+          threshold = goodEfficiencyThreshold;
+        }
+
+        await this.triggerFlowCard('cop_efficiency_changed', {
+          current_cop: copResult.cop,
+          threshold_cop: threshold,
+          calculation_method: copResult.method,
+          confidence_level: copResult.confidence,
+        });
+
+        this.debugLog(`🎯 COP efficiency trigger fired: ${copResult.cop.toFixed(2)} ${condition} ${threshold}`);
+      }
+
+    } catch (error) {
+      this.debugLog('Error checking COP efficiency triggers:', error);
+    }
+  }
+
+  /**
+   * Gather data sources from device capabilities
+   */
+  private gatherDeviceDataSources(): COPDataSources {
+    const data: COPDataSources = {};
+
+    try {
+      // Electrical power (from internal or external source)
+      if (this.hasCapability('measure_power')) {
+        const power = this.getCapabilityValue('measure_power');
+        if (typeof power === 'number' && power > 0) {
+          data.electricalPower = power;
+        }
+      }
+
+      // Water flow rate
+      if (this.hasCapability('measure_water')) {
+        const flow = this.getCapabilityValue('measure_water');
+        if (typeof flow === 'number' && flow > 0) {
+          data.waterFlowRate = flow;
+        }
+      }
+
+      // Temperature measurements
+      if (this.hasCapability('measure_temperature.temp_top')) {
+        const temp = this.getCapabilityValue('measure_temperature.temp_top');
+        if (typeof temp === 'number') {
+          data.inletTemperature = temp;
+        }
+      }
+
+      if (this.hasCapability('measure_temperature.temp_bottom')) {
+        const temp = this.getCapabilityValue('measure_temperature.temp_bottom');
+        if (typeof temp === 'number') {
+          data.outletTemperature = temp;
+        }
+      }
+
+      if (this.hasCapability('measure_temperature.around_temp')) {
+        const temp = this.getCapabilityValue('measure_temperature.around_temp');
+        if (typeof temp === 'number') {
+          data.ambientTemperature = temp;
+        }
+      }
+
+      // Compressor frequency for Carnot estimation
+      if (this.hasCapability('measure_frequency.compressor_strength')) {
+        const freq = this.getCapabilityValue('measure_frequency.compressor_strength');
+        if (typeof freq === 'number') {
+          data.compressorFrequency = freq;
+        }
+      }
+
+      // System states
+      if (this.hasCapability('adlar_state_defrost_state')) {
+        const defrost = this.getCapabilityValue('adlar_state_defrost_state');
+        data.isDefrosting = Boolean(defrost);
+      }
+
+      if (this.hasCapability('adlar_enum_mode')) {
+        const mode = this.getCapabilityValue('adlar_enum_mode');
+        if (typeof mode === 'string') {
+          data.systemMode = mode;
+        }
+      }
+
+    } catch (error) {
+      this.error('Error gathering device data sources:', error);
+    }
+
+    return data;
   }
 
   /**
@@ -1421,6 +2216,9 @@ class MyDevice extends Homey.Device {
     // Start periodic health checks for dynamic flow card management
     this.startHealthCheckInterval();
 
+    // Initialize COP calculation system
+    await this.initializeCOP();
+
     // TUYA ON EVENT (from dp id to capability name)
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
       // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
@@ -1593,6 +2391,28 @@ class MyDevice extends Homey.Device {
       return 'Slider control settings updated. Capabilities will be updated shortly.';
     }
 
+    // Handle COP settings changes
+    const copSettingsChanged = changedKeys.some((key) => key.startsWith('cop_') || key.startsWith('enable_cop') || key.startsWith('external_'));
+
+    if (copSettingsChanged) {
+      this.log('COP settings changed, reloading COP configuration');
+
+      // Reload COP settings
+      await this.loadCOPSettings();
+
+      // Restart COP calculation if enabled
+      if (this.copSettings?.enableCOP && this.hasCapability('adlar_cop')) {
+        this.stopCOPCalculationInterval();
+        this.startCOPCalculationInterval();
+        this.log('COP calculation restarted with new settings');
+      } else {
+        this.stopCOPCalculationInterval();
+        this.log('COP calculation stopped');
+      }
+
+      return 'COP settings updated and calculation system restarted.';
+    }
+
     return undefined;
   }
 
@@ -1611,6 +2431,7 @@ class MyDevice extends Homey.Device {
   private async handleOptionalCapabilities(): Promise<void> {
     const enablePowerMeasurements = this.getSetting('enable_power_measurements') ?? true;
     const enableSliderControls = this.getSetting('enable_slider_controls') ?? true;
+    const enableCOPCalculation = this.getSetting('cop_calculation_enabled') !== false; // default true
 
     const powerCapabilities = [
       'measure_power',
@@ -1630,11 +2451,19 @@ class MyDevice extends Homey.Device {
       'adlar_hotwater',
     ];
 
+    const copCapabilities = [
+      'adlar_cop',
+      'adlar_cop_method',
+    ];
+
     // Process power capabilities
     await this.processCapabilityGroup(powerCapabilities, enablePowerMeasurements, 'power measurement');
 
     // Process slider capabilities
     await this.processCapabilityGroup(sliderCapabilities, enableSliderControls, 'slider control');
+
+    // Process COP capabilities
+    await this.processCapabilityGroup(copCapabilities, enableCOPCalculation, 'COP calculation');
   }
 
   /**
@@ -1762,6 +2591,9 @@ class MyDevice extends Homey.Device {
 
     // Stop health check interval
     this.stopHealthCheckInterval();
+
+    // Stop COP calculation interval
+    this.stopCOPCalculationInterval();
 
     if (this.tuya) {
       try {

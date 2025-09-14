@@ -1,0 +1,101 @@
+{
+  "id": "cop_efficiency_changed",
+  "title": {
+    "en": "COP efficiency changed",
+    "nl": "COP efficiëntie gewijzigd"
+  },
+  "titleFormatted": {
+    "en": "COP efficiency [[condition]] [[threshold]]",
+    "nl": "COP efficiëntie [[condition]] [[threshold]]"
+  },
+  "hint": {
+    "en": "Triggers when the Coefficient of Performance (COP) goes above or below a specified threshold",
+    "nl": "Wordt geactiveerd wanneer de prestatiecoëfficiënt (COP) boven of onder een opgegeven drempel gaat"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "COP threshold",
+        "nl": "COP drempel"
+      },
+      "min": 1.0,
+      "max": 8.0,
+      "step": 0.1,
+      "units": "COP",
+      "placeholder": {
+        "en": "COP efficiency threshold",
+        "nl": "COP efficiëntie drempel"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_cop",
+      "title": {
+        "en": "Current COP",
+        "nl": "Huidige COP"
+      },
+      "example": 3.2
+    },
+    {
+      "type": "number",
+      "name": "threshold_cop",
+      "title": {
+        "en": "Threshold COP",
+        "nl": "Drempel COP"
+      },
+      "example": 3.0
+    },
+    {
+      "type": "string",
+      "name": "calculation_method",
+      "title": {
+        "en": "Calculation method used",
+        "nl": "Gebruikte berekeningsmethode"
+      },
+      "example": "direct_thermal"
+    },
+    {
+      "type": "string",
+      "name": "confidence_level",
+      "title": {
+        "en": "Confidence level",
+        "nl": "Betrouwbaarheidsniveau"
+      },
+      "example": "high"
+    }
+  ]
+}

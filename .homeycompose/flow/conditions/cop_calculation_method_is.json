@@ -1,0 +1,60 @@
+{
+  "id": "cop_calculation_method_is",
+  "title": {
+    "en": "COP calculation method is",
+    "nl": "COP berekeningsmethode is"
+  },
+  "titleFormatted": {
+    "en": "COP calculation method !{{is|is not}} [[method]]",
+    "nl": "COP berekeningsmethode !{{is|is niet}} [[method]]"
+  },
+  "hint": {
+    "en": "Check which calculation method was used for the current COP value - useful for automation based on data availability",
+    "nl": "Controleer welke berekeningsmethode werd gebruikt voor de huidige COP waarde - nuttig voor automatisering op basis van data beschikbaarheid"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "method",
+      "title": {
+        "en": "Calculation method",
+        "nl": "Berekeningsmethode"
+      },
+      "values": [
+        {
+          "id": "direct_thermal",
+          "title": {
+            "en": "Direct thermal (most accurate)",
+            "nl": "Directe thermische (meest nauwkeurig)"
+          }
+        },
+        {
+          "id": "carnot_estimation",
+          "title": {
+            "en": "Carnot estimation (medium accuracy)",
+            "nl": "Carnot schatting (gemiddelde nauwkeurigheid)"
+          }
+        },
+        {
+          "id": "temperature_difference",
+          "title": {
+            "en": "Temperature difference (basic)",
+            "nl": "Temperatuurverschil (basis)"
+          }
+        },
+        {
+          "id": "insufficient_data",
+          "title": {
+            "en": "Insufficient data",
+            "nl": "Onvoldoende data"
+          }
+        }
+      ]
+    }
+  ]
+}

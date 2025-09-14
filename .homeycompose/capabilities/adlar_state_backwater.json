@@ -8,6 +8,7 @@
   "setable": false,
   "getable": true,
   "uiComponent": "sensor",
+  "icon": "/assets/backwater-state.svg",
   "insights": true,
   "insightsTitleTrue": {
     "en": "Backwater is ON",

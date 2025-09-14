@@ -1,0 +1,44 @@
+{
+  "id": "request_external_power_data",
+  "title": {
+    "en": "Heat pump requests power data",
+    "nl": "Warmtepomp vraagt vermogensgegevens"
+  },
+  "titleFormatted": {
+    "en": "Heat pump requests power data",
+    "nl": "Warmtepomp vraagt vermogensgegevens"
+  },
+  "hint": {
+    "en": "Triggers when the heat pump needs external power consumption data for COP calculations",
+    "nl": "Wordt geactiveerd wanneer de warmtepomp externe stroomverbruikgegevens nodig heeft voor COP-berekeningen"
+  },
+  "tokens": [
+    {
+      "type": "string",
+      "name": "request_id",
+      "title": {
+        "en": "Request ID",
+        "nl": "Verzoek ID"
+      },
+      "example": "power_1694634123456_abc123"
+    },
+    {
+      "type": "string",
+      "name": "requester",
+      "title": {
+        "en": "Requesting app",
+        "nl": "Aanvragende app"
+      },
+      "example": "heat_pump_app"
+    },
+    {
+      "type": "number",
+      "name": "timestamp",
+      "title": {
+        "en": "Request timestamp",
+        "nl": "Verzoek tijdstempel"
+      },
+      "example": 1694634123456
+    }
+  ]
+}

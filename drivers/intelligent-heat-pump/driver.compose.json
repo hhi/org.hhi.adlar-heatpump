@@ -53,8 +53,13 @@
     "adlar_fault",
     "adlar_state_compressor_state",
     "adlar_state_defrost_state",
-    "adlar_countdowntimer",
-    "adlar_state_backwater"
+   
+    "adlar_state_backwater",
+
+    "adlar_cop",
+    "adlar_cop_method",
+
+     "adlar_countdowntimer"
   ],
 
   "capabilitiesOptions": {
@@ -467,6 +472,44 @@
       },
       "description": {
         "nl": "dp 112 : cv - Voltage C"
+      }
+    },
+
+    "adlar_cop": {
+      "title": {
+        "en": "Coefficient of Performance (COP)",
+        "nl": "Prestatiecoëfficiënt (COP)"
+      },
+      "type": "number",
+      "min": 0.0,
+      "max": 8.0,
+      "step": 0.01,
+      "decimals": 2,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Heat Pump Efficiency (COP)",
+        "nl": "Warmtepomp Efficiëntie (COP)"
+      },
+      "description": {
+        "en": "Calculated efficiency ratio of useful heat output to electrical energy input",
+        "nl": "Berekende efficiëntieverhouding van nuttige warmte-output tot elektrische energie-input"
+      }
+    },
+
+    "adlar_cop_method": {
+      "title": {
+        "en": "COP Calculation Method",
+        "nl": "COP Berekenings Methode"
+      },
+      "type": "string",
+      "insights": false,
+      "insightsTitle": {
+        "en": "COP Method Used",
+        "nl": "COP Methode Gebruikt"
+      },
+      "description": {
+        "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level",
+        "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft"
       }
     }
   },
