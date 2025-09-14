@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.94.2",
+  "version": "0.96.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -413,6 +413,158 @@
               "nl": "Huidige Compressor status"
             },
             "example": "running"
+          }
+        ]
+      },
+      {
+        "id": "cop_efficiency_changed",
+        "title": {
+          "en": "COP efficiency changed",
+          "nl": "COP efficiëntie gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "COP efficiency [[condition]] [[threshold]]",
+          "nl": "COP efficiëntie [[condition]] [[threshold]]"
+        },
+        "hint": {
+          "en": "Triggers when the Coefficient of Performance (COP) goes above or below a specified threshold",
+          "nl": "Wordt geactiveerd wanneer de prestatiecoëfficiënt (COP) boven of onder een opgegeven drempel gaat"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "COP threshold",
+              "nl": "COP drempel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "COP efficiency threshold",
+              "nl": "COP efficiëntie drempel"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_cop",
+            "title": {
+              "en": "Current COP",
+              "nl": "Huidige COP"
+            },
+            "example": 3.2
+          },
+          {
+            "type": "number",
+            "name": "threshold_cop",
+            "title": {
+              "en": "Threshold COP",
+              "nl": "Drempel COP"
+            },
+            "example": 3
+          },
+          {
+            "type": "string",
+            "name": "calculation_method",
+            "title": {
+              "en": "Calculation method used",
+              "nl": "Gebruikte berekeningsmethode"
+            },
+            "example": "direct_thermal"
+          },
+          {
+            "type": "string",
+            "name": "confidence_level",
+            "title": {
+              "en": "Confidence level",
+              "nl": "Betrouwbaarheidsniveau"
+            },
+            "example": "high"
+          }
+        ]
+      },
+      {
+        "id": "cop_outlier_detected",
+        "title": {
+          "en": "COP outlier detected",
+          "nl": "COP uitbijter gedetecteerd"
+        },
+        "titleFormatted": {
+          "en": "COP outlier detected",
+          "nl": "COP uitbijter gedetecteerd"
+        },
+        "hint": {
+          "en": "Triggers when an invalid or suspicious COP value is detected, indicating potential sensor issues",
+          "nl": "Wordt geactiveerd wanneer een ongeldige of verdachte COP waarde wordt gedetecteerd, wat wijst op mogelijke sensor problemen"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "outlier_cop",
+            "title": {
+              "en": "Outlier COP value",
+              "nl": "Uitbijter COP waarde"
+            },
+            "example": 15.2
+          },
+          {
+            "type": "string",
+            "name": "outlier_reason",
+            "title": {
+              "en": "Outlier reason",
+              "nl": "Reden uitbijter"
+            },
+            "example": "COP value above maximum threshold (8.0)"
+          },
+          {
+            "type": "string",
+            "name": "calculation_method",
+            "title": {
+              "en": "Calculation method used",
+              "nl": "Gebruikte berekeningsmethode"
+            },
+            "example": "direct_thermal"
           }
         ]
       },
@@ -2086,6 +2238,138 @@
         ]
       },
       {
+        "id": "request_external_ambient_data",
+        "title": {
+          "en": "Heat pump requests ambient temperature data",
+          "nl": "Warmtepomp vraagt buitentemperatuur gegevens"
+        },
+        "titleFormatted": {
+          "en": "Heat pump requests ambient temperature data",
+          "nl": "Warmtepomp vraagt buitentemperatuur gegevens"
+        },
+        "hint": {
+          "en": "Triggers when the heat pump needs external ambient temperature data for COP calculations",
+          "nl": "Wordt geactiveerd wanneer de warmtepomp externe buitentemperatuurgegevens nodig heeft voor COP-berekeningen"
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "request_id",
+            "title": {
+              "en": "Request ID",
+              "nl": "Verzoek ID"
+            },
+            "example": "ambient_1694634123456_ghi789"
+          },
+          {
+            "type": "string",
+            "name": "requester",
+            "title": {
+              "en": "Requesting app",
+              "nl": "Aanvragende app"
+            },
+            "example": "heat_pump_app"
+          },
+          {
+            "type": "number",
+            "name": "timestamp",
+            "title": {
+              "en": "Request timestamp",
+              "nl": "Verzoek tijdstempel"
+            },
+            "example": 1694634123456
+          }
+        ]
+      },
+      {
+        "id": "request_external_flow_data",
+        "title": {
+          "en": "Heat pump requests flow data",
+          "nl": "Warmtepomp vraagt doorstroomgegevens"
+        },
+        "titleFormatted": {
+          "en": "Heat pump requests flow data",
+          "nl": "Warmtepomp vraagt doorstroomgegevens"
+        },
+        "hint": {
+          "en": "Triggers when the heat pump needs external water flow data for COP calculations",
+          "nl": "Wordt geactiveerd wanneer de warmtepomp externe water doorstroomgegevens nodig heeft voor COP-berekeningen"
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "request_id",
+            "title": {
+              "en": "Request ID",
+              "nl": "Verzoek ID"
+            },
+            "example": "flow_1694634123456_def456"
+          },
+          {
+            "type": "string",
+            "name": "requester",
+            "title": {
+              "en": "Requesting app",
+              "nl": "Aanvragende app"
+            },
+            "example": "heat_pump_app"
+          },
+          {
+            "type": "number",
+            "name": "timestamp",
+            "title": {
+              "en": "Request timestamp",
+              "nl": "Verzoek tijdstempel"
+            },
+            "example": 1694634123456
+          }
+        ]
+      },
+      {
+        "id": "request_external_power_data",
+        "title": {
+          "en": "Heat pump requests power data",
+          "nl": "Warmtepomp vraagt vermogensgegevens"
+        },
+        "titleFormatted": {
+          "en": "Heat pump requests power data",
+          "nl": "Warmtepomp vraagt vermogensgegevens"
+        },
+        "hint": {
+          "en": "Triggers when the heat pump needs external power consumption data for COP calculations",
+          "nl": "Wordt geactiveerd wanneer de warmtepomp externe stroomverbruikgegevens nodig heeft voor COP-berekeningen"
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "request_id",
+            "title": {
+              "en": "Request ID",
+              "nl": "Verzoek ID"
+            },
+            "example": "power_1694634123456_abc123"
+          },
+          {
+            "type": "string",
+            "name": "requester",
+            "title": {
+              "en": "Requesting app",
+              "nl": "Aanvragende app"
+            },
+            "example": "heat_pump_app"
+          },
+          {
+            "type": "number",
+            "name": "timestamp",
+            "title": {
+              "en": "Request timestamp",
+              "nl": "Verzoek tijdstempel"
+            },
+            "example": 1694634123456
+          }
+        ]
+      },
+      {
         "id": "suction_temperature_alert",
         "title": {
           "en": "Suction temperature alert",
@@ -2478,6 +2762,105 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
+        "id": "cop_calculation_method_is",
+        "title": {
+          "en": "COP calculation method is",
+          "nl": "COP berekeningsmethode is"
+        },
+        "titleFormatted": {
+          "en": "COP calculation method !{{is|is not}} [[method]]",
+          "nl": "COP berekeningsmethode !{{is|is niet}} [[method]]"
+        },
+        "hint": {
+          "en": "Check which calculation method was used for the current COP value - useful for automation based on data availability",
+          "nl": "Controleer welke berekeningsmethode werd gebruikt voor de huidige COP waarde - nuttig voor automatisering op basis van data beschikbaarheid"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "method",
+            "title": {
+              "en": "Calculation method",
+              "nl": "Berekeningsmethode"
+            },
+            "values": [
+              {
+                "id": "direct_thermal",
+                "title": {
+                  "en": "Direct thermal (most accurate)",
+                  "nl": "Directe thermische (meest nauwkeurig)"
+                }
+              },
+              {
+                "id": "carnot_estimation",
+                "title": {
+                  "en": "Carnot estimation (medium accuracy)",
+                  "nl": "Carnot schatting (gemiddelde nauwkeurigheid)"
+                }
+              },
+              {
+                "id": "temperature_difference",
+                "title": {
+                  "en": "Temperature difference (basic)",
+                  "nl": "Temperatuurverschil (basis)"
+                }
+              },
+              {
+                "id": "insufficient_data",
+                "title": {
+                  "en": "Insufficient data",
+                  "nl": "Onvoldoende data"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cop_efficiency_check",
+        "title": {
+          "en": "COP efficiency is",
+          "nl": "COP efficiëntie is"
+        },
+        "titleFormatted": {
+          "en": "COP efficiency is !{{above|below}} [[threshold]]",
+          "nl": "COP efficiëntie is !{{boven|onder}} [[threshold]]"
+        },
+        "hint": {
+          "en": "Check if the current Coefficient of Performance (COP) is above or below a threshold",
+          "nl": "Controleer of de huidige prestatiecoëfficiënt (COP) boven of onder een drempel is"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "COP threshold",
+              "nl": "COP drempel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "COP efficiency threshold",
+              "nl": "COP efficiëntie drempel"
+            }
           }
         ]
       },
@@ -3381,6 +3764,174 @@
     ],
     "actions": [
       {
+        "id": "receive_external_ambient_data",
+        "title": {
+          "en": "Send ambient temperature data to heat pump",
+          "nl": "Stuur buitentemperatuur gegevens naar warmtepomp"
+        },
+        "titleFormatted": {
+          "en": "Send [[temperature_value]]°C from [[device_name]] to heat pump (request: [[request_id]])",
+          "nl": "Stuur [[temperature_value]]°C van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+        },
+        "hint": {
+          "en": "Sends ambient temperature data to the heat pump for COP calculations",
+          "nl": "Stuurt buitentemperatuurgegevens naar de warmtepomp voor COP-berekeningen"
+        },
+        "args": [
+          {
+            "type": "text",
+            "name": "request_id",
+            "title": {
+              "en": "Request ID",
+              "nl": "Verzoek ID"
+            },
+            "placeholder": {
+              "en": "Request ID from trigger",
+              "nl": "Verzoek ID van trigger"
+            }
+          },
+          {
+            "type": "number",
+            "name": "temperature_value",
+            "title": {
+              "en": "Ambient temperature (°C)",
+              "nl": "Buitentemperatuur (°C)"
+            },
+            "placeholder": {
+              "en": "Current ambient temperature in °C",
+              "nl": "Huidige buitentemperatuur in °C"
+            },
+            "min": -50,
+            "max": 60,
+            "step": 0.1
+          },
+          {
+            "type": "text",
+            "name": "device_name",
+            "title": {
+              "en": "Device name",
+              "nl": "Apparaat naam"
+            },
+            "placeholder": {
+              "en": "Name of the temperature sensor device",
+              "nl": "Naam van het temperatuursensor apparaat"
+            }
+          }
+        ]
+      },
+      {
+        "id": "receive_external_flow_data",
+        "title": {
+          "en": "Send flow data to heat pump",
+          "nl": "Stuur doorstroomgegevens naar warmtepomp"
+        },
+        "titleFormatted": {
+          "en": "Send [[flow_value]]L/min from [[device_name]] to heat pump (request: [[request_id]])",
+          "nl": "Stuur [[flow_value]]L/min van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+        },
+        "hint": {
+          "en": "Sends water flow rate data to the heat pump for COP calculations",
+          "nl": "Stuurt water doorstroomgegevens naar de warmtepomp voor COP-berekeningen"
+        },
+        "args": [
+          {
+            "type": "text",
+            "name": "request_id",
+            "title": {
+              "en": "Request ID",
+              "nl": "Verzoek ID"
+            },
+            "placeholder": {
+              "en": "Request ID from trigger",
+              "nl": "Verzoek ID van trigger"
+            }
+          },
+          {
+            "type": "number",
+            "name": "flow_value",
+            "title": {
+              "en": "Water flow rate (L/min)",
+              "nl": "Water doorstroom (L/min)"
+            },
+            "placeholder": {
+              "en": "Current water flow rate in L/min",
+              "nl": "Huidige water doorstroom in L/min"
+            },
+            "min": 0,
+            "max": 200,
+            "step": 0.1
+          },
+          {
+            "type": "text",
+            "name": "device_name",
+            "title": {
+              "en": "Device name",
+              "nl": "Apparaat naam"
+            },
+            "placeholder": {
+              "en": "Name of the flow sensor device",
+              "nl": "Naam van het doorstroom sensor apparaat"
+            }
+          }
+        ]
+      },
+      {
+        "id": "receive_external_power_data",
+        "title": {
+          "en": "Send power data to heat pump",
+          "nl": "Stuur vermogensgegevens naar warmtepomp"
+        },
+        "titleFormatted": {
+          "en": "Send [[power_value]]W from [[device_name]] to heat pump (request: [[request_id]])",
+          "nl": "Stuur [[power_value]]W van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+        },
+        "hint": {
+          "en": "Sends power consumption data to the heat pump for COP calculations",
+          "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor COP-berekeningen"
+        },
+        "args": [
+          {
+            "type": "text",
+            "name": "request_id",
+            "title": {
+              "en": "Request ID",
+              "nl": "Verzoek ID"
+            },
+            "placeholder": {
+              "en": "Request ID from trigger",
+              "nl": "Verzoek ID van trigger"
+            }
+          },
+          {
+            "type": "number",
+            "name": "power_value",
+            "title": {
+              "en": "Power consumption (W)",
+              "nl": "Stroomverbruik (W)"
+            },
+            "placeholder": {
+              "en": "Current power consumption in watts",
+              "nl": "Huidig stroomverbruik in watt"
+            },
+            "min": 0,
+            "max": 50000,
+            "step": 0.1
+          },
+          {
+            "type": "text",
+            "name": "device_name",
+            "title": {
+              "en": "Device name",
+              "nl": "Apparaat naam"
+            },
+            "placeholder": {
+              "en": "Name of the power meter device",
+              "nl": "Naam van het vermogensmeter apparaat"
+            }
+          }
+        ]
+      },
+      {
         "id": "set_capacity",
         "title": {
           "en": "Set hot water curve setting",
@@ -3984,8 +4535,10 @@
         "adlar_fault",
         "adlar_state_compressor_state",
         "adlar_state_defrost_state",
-        "adlar_countdowntimer",
-        "adlar_state_backwater"
+        "adlar_state_backwater",
+        "adlar_cop",
+        "adlar_cop_method",
+        "adlar_countdowntimer"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -4387,6 +4940,42 @@
           "description": {
             "nl": "dp 112 : cv - Voltage C"
           }
+        },
+        "adlar_cop": {
+          "title": {
+            "en": "Coefficient of Performance (COP)",
+            "nl": "Prestatiecoëfficiënt (COP)"
+          },
+          "type": "number",
+          "min": 0,
+          "max": 8,
+          "step": 0.01,
+          "decimals": 2,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Heat Pump Efficiency (COP)",
+            "nl": "Warmtepomp Efficiëntie (COP)"
+          },
+          "description": {
+            "en": "Calculated efficiency ratio of useful heat output to electrical energy input",
+            "nl": "Berekende efficiëntieverhouding van nuttige warmte-output tot elektrische energie-input"
+          }
+        },
+        "adlar_cop_method": {
+          "title": {
+            "en": "COP Calculation Method",
+            "nl": "COP Berekenings Methode"
+          },
+          "type": "string",
+          "insights": false,
+          "insightsTitle": {
+            "en": "COP Method Used",
+            "nl": "COP Methode Gebruikt"
+          },
+          "description": {
+            "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level",
+            "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft"
+          }
         }
       },
       "platforms": [
@@ -4468,6 +5057,175 @@
             "nl": "Voer het IP-adres van het apparaat in."
           },
           "required": true
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "COP (Coefficient of Performance) Settings",
+            "nl": "COP (Prestatiecoëfficiënt) Instellingen"
+          },
+          "children": [
+            {
+              "id": "cop_calculation_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable COP calculation",
+                "nl": "COP berekening inschakelen"
+              },
+              "hint": {
+                "en": "Enable automatic COP (efficiency) calculation using available data sources",
+                "nl": "Schakel automatische COP (efficiëntie) berekening in met beschikbare gegevensbronnen"
+              },
+              "value": true
+            },
+            {
+              "id": "cop_calculation_method",
+              "type": "dropdown",
+              "label": {
+                "en": "COP calculation method",
+                "nl": "COP berekenings methode"
+              },
+              "hint": {
+                "en": "Override calculation method (Auto uses best available data). All 6 methods: Direct thermal (±5%), Power module (±8%), Refrigerant circuit (±12%), Carnot estimation (±15%), Valve correlation (±20%), Temperature difference (±30%)",
+                "nl": "Overschrijf berekenings methode (Auto gebruikt best beschikbare data). Alle 6 methoden: Directe thermisch (±5%), Vermogen module (±8%), Koelmiddel circuit (±12%), Carnot schatting (±15%), Klep correlatie (±20%), Temperatuur verschil (±30%)"
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Auto (best available method)",
+                    "nl": "Automatisch (beste beschikbare methode)"
+                  }
+                },
+                {
+                  "id": "direct_thermal",
+                  "label": {
+                    "en": "Direct thermal (±5% - most accurate)",
+                    "nl": "Directe thermisch (±5% - meest accuraat)"
+                  }
+                },
+                {
+                  "id": "power_module",
+                  "label": {
+                    "en": "Power module auto-detection (±8%)",
+                    "nl": "Vermogen module auto-detectie (±8%)"
+                  }
+                },
+                {
+                  "id": "refrigerant_circuit",
+                  "label": {
+                    "en": "Refrigerant circuit analysis (±12%)",
+                    "nl": "Koelmiddel circuit analyse (±12%)"
+                  }
+                },
+                {
+                  "id": "carnot_estimation",
+                  "label": {
+                    "en": "Carnot estimation (±15%)",
+                    "nl": "Carnot schatting (±15%)"
+                  }
+                },
+                {
+                  "id": "valve_correlation",
+                  "label": {
+                    "en": "Valve position correlation (±20%)",
+                    "nl": "Klep positie correlatie (±20%)"
+                  }
+                },
+                {
+                  "id": "temperature_difference",
+                  "label": {
+                    "en": "Temperature difference (±30% - basic)",
+                    "nl": "Temperatuur verschil (±30% - basis)"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cop_outlier_detection_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable COP outlier detection",
+                "nl": "COP outlier detectie inschakelen"
+              },
+              "hint": {
+                "en": "Detect and flag unrealistic COP values that may indicate sensor malfunctions",
+                "nl": "Detecteer en markeer onrealistische COP waarden die sensor storingen kunnen aanduiden"
+              },
+              "value": true
+            },
+            {
+              "id": "cop_min_threshold",
+              "type": "number",
+              "label": {
+                "en": "Minimum valid COP",
+                "nl": "Minimale geldige COP"
+              },
+              "hint": {
+                "en": "COP values below this threshold will be flagged as outliers",
+                "nl": "COP waarden onder deze drempel worden gemarkeerd als uitbijters"
+              },
+              "value": 0.5,
+              "min": 0.1,
+              "max": 2,
+              "step": 0.1
+            },
+            {
+              "id": "cop_max_threshold",
+              "type": "number",
+              "label": {
+                "en": "Maximum valid COP",
+                "nl": "Maximale geldige COP"
+              },
+              "hint": {
+                "en": "COP values above this threshold will be flagged as outliers",
+                "nl": "COP waarden boven deze drempel worden gemarkeerd als uitbijters"
+              },
+              "value": 8,
+              "min": 4,
+              "max": 15,
+              "step": 0.5
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Cross-App Integration Settings (Flow Card Based)",
+            "nl": "Cross-App Integratie Instellingen (Flow Kaart Gebaseerd)"
+          },
+          "children": [
+            {
+              "id": "external_data_timeout",
+              "type": "number",
+              "label": {
+                "en": "External data request timeout (seconds)",
+                "nl": "Externe data verzoek timeout (seconden)"
+              },
+              "hint": {
+                "en": "How long to wait for external device data responses via flow cards before using internal methods only",
+                "nl": "Hoe lang wachten op externe apparaat data reacties via flow kaarten voordat alleen interne methoden worden gebruikt"
+              },
+              "value": 5,
+              "min": 1,
+              "max": 30,
+              "step": 1
+            },
+            {
+              "id": "enable_external_data_requests",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable external data requests via flow cards",
+                "nl": "Schakel externe data verzoeken via flow kaarten in"
+              },
+              "hint": {
+                "en": "Allow this device to request data from other Homey devices using flow card triggers and actions for enhanced COP calculations",
+                "nl": "Sta toe dat dit apparaat data opvraagt van andere Homey apparaten via flow kaart triggers en acties voor verbeterde COP berekeningen"
+              },
+              "value": true
+            }
+          ]
         },
         {
           "type": "group",
@@ -4768,6 +5526,52 @@
     }
   ],
   "capabilities": {
+    "adlar_cop": {
+      "id": "adlar_cop",
+      "title": {
+        "en": "Coefficient of Performance",
+        "nl": "Prestatiecoëfficiënt"
+      },
+      "type": "number",
+      "units": {
+        "en": "COP",
+        "nl": "COP"
+      },
+      "min": 0,
+      "max": 8,
+      "step": 0.01,
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Heat Pump Efficiency (COP)",
+        "nl": "Warmtepomp Efficiëntie (COP)"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "Calculated Coefficient of Performance - ratio of useful heat output to electrical energy input. Higher values indicate better efficiency.",
+        "nl": "Berekende prestatiecoëfficiënt - verhouding tussen nuttige warmte-output en elektrische energie-input. Hogere waarden duiden op betere efficiëntie."
+      }
+    },
+    "adlar_cop_method": {
+      "id": "adlar_cop_method",
+      "title": {
+        "en": "COP Calculation Method",
+        "nl": "COP Berekenings Methode"
+      },
+      "type": "string",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": false,
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level.",
+        "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft."
+      }
+    },
     "adlar_countdowntimer": {
       "id": "adlar_countdowntimer",
       "title": {
@@ -5235,6 +6039,7 @@
       "setable": false,
       "getable": true,
       "uiComponent": "sensor",
+      "icon": "/assets/backwater-state.svg",
       "insights": true,
       "insightsTitleTrue": {
         "en": "Backwater is ON",

@@ -1,0 +1,56 @@
+{
+  "id": "receive_external_flow_data",
+  "title": {
+    "en": "Send flow data to heat pump",
+    "nl": "Stuur doorstroomgegevens naar warmtepomp"
+  },
+  "titleFormatted": {
+    "en": "Send [[flow_value]]L/min from [[device_name]] to heat pump (request: [[request_id]])",
+    "nl": "Stuur [[flow_value]]L/min van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+  },
+  "hint": {
+    "en": "Sends water flow rate data to the heat pump for COP calculations",
+    "nl": "Stuurt water doorstroomgegevens naar de warmtepomp voor COP-berekeningen"
+  },
+  "args": [
+    {
+      "type": "text",
+      "name": "request_id",
+      "title": {
+        "en": "Request ID",
+        "nl": "Verzoek ID"
+      },
+      "placeholder": {
+        "en": "Request ID from trigger",
+        "nl": "Verzoek ID van trigger"
+      }
+    },
+    {
+      "type": "number",
+      "name": "flow_value",
+      "title": {
+        "en": "Water flow rate (L/min)",
+        "nl": "Water doorstroom (L/min)"
+      },
+      "placeholder": {
+        "en": "Current water flow rate in L/min",
+        "nl": "Huidige water doorstroom in L/min"
+      },
+      "min": 0,
+      "max": 200,
+      "step": 0.1
+    },
+    {
+      "type": "text",
+      "name": "device_name",
+      "title": {
+        "en": "Device name",
+        "nl": "Apparaat naam"
+      },
+      "placeholder": {
+        "en": "Name of the flow sensor device",
+        "nl": "Naam van het doorstroom sensor apparaat"
+      }
+    }
+  ]
+}

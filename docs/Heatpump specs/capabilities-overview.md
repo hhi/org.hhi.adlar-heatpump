@@ -1,19 +1,21 @@
-# Adlar Heat Pump - Capabilities Overview (v0.92.7)
+# Adlar Heat Pump - Capabilities Overview (v0.96.3)
 
 This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management and dynamic capability control.
 
-## Summary Statistics (v0.92.7)
+## Summary Statistics (v0.96.3)
 
-- **Total Custom Adlar Capabilities**: 14
-- **Total Standard/Custom Capabilities**: 27  
-- **Total All Capabilities**: 41
+- **Total Custom Adlar Capabilities**: 15 (added COP method sensor in v0.96.3)
+- **Total Standard/Custom Capabilities**: 28
+- **Total All Capabilities**: 42
 - **DPS Range**: 1-112
-- **Capability Types**: number (24), enum (4), boolean (3)
+- **Capability Types**: number (24), enum (4), boolean (3), string (1)
 - **Setable Capabilities**: 3 (adlar_enum_work_mode, adlar_hotwater, plus standard capabilities)
 - **Languages Supported**: English (EN) and Dutch (NL)
 - **Insights Management**: Dynamic control with power measurement toggle integration (v0.92.6+)
 - **Default Insights State**: Power capabilities disabled, core operations enabled
 - **Advanced Chart Features**: Custom colors, chart types, and styling options
+- **Enhanced Capability Validation**: Improved error handling for missing capabilities (v0.94.0-0.94.1)
+- **Temperature Label Clarity**: Updated labels for improved flow card readability (v0.94.2)
 
 ## Custom Adlar Capabilities
 
@@ -144,6 +146,30 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: Pulse-steps
 - **Icon**: `/assets/pulse-steps.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
+
+### Efficiency & Performance Monitoring
+
+#### adlar_cop
+- **Type**: number
+- **Purpose**: Displays the calculated Coefficient of Performance (COP) - efficiency ratio of useful heat output to electrical energy input
+- **Range**: 0.0 to 8.0 (step 0.01, 2 decimals)
+- **Units**: COP
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Note**: Higher values indicate better efficiency. Uses multiple calculation methods for accuracy.
+
+#### adlar_cop_method
+- **Type**: string
+- **Purpose**: Shows which COP calculation method is currently being used for transparency in efficiency calculations
+- **Values**:
+  - `"Direct Thermal 🟢"` (most accurate, uses temperature and flow data)
+  - `"Carnot Estimation 🟡"` (medium accuracy, thermodynamic estimation)
+  - `"Temperature Difference 🔴"` (basic accuracy, simple temperature delta)
+  - `"Insufficient Data 🔴"` (calculation not possible)
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights disabled
+- **Added**: v0.96.3 for calculation method transparency
+- **Note**: Confidence indicators (🟢🟡🔴) show data quality level. Display format updated in v0.96.3 to remove accuracy percentages for cleaner UI.
 
 ## Standard Homey Capabilities
 

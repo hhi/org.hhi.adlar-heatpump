@@ -1,0 +1,17 @@
+{
+  "id": "adlar_cop_method",
+  "title": {
+    "en": "COP Calculation Method",
+    "nl": "COP Berekenings Methode"
+  },
+  "type": "string",
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": false,
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level.",
+    "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft."
+  }
+}
