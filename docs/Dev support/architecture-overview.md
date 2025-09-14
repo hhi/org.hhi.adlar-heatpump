@@ -1,4 +1,4 @@
-# Architecture Overview (v0.92.7)
+# Architecture Overview (v0.96.3)
 
 This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the utility libraries and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
 
@@ -61,6 +61,179 @@ setTimeout(() => this.reconnect(), 20000); // ❌ Magic number
 setTimeout(() => this.reconnect(), DeviceConstants.RECONNECTION_INTERVAL_MS); // ✅
 ```
 
+## COP (Coefficient of Performance) System Architecture (v0.96.3+)
+
+### COP Calculation Engine (`lib/services/cop-calculator.ts`)
+
+The COP calculation system provides intelligent heat pump efficiency monitoring with multiple calculation methods and automatic data source selection.
+
+#### Calculation Methods Hierarchy
+
+| Method | Accuracy | Requirements | Description |
+|--------|----------|--------------|-------------|
+| **Direct Thermal** | ±5% | Power, flow, inlet/outlet temps | Most accurate using direct heat transfer |
+| **Power Module** | ±8% | Auto-detected power module | Hardware-based power measurement |
+| **Refrigerant Circuit** | ±12% | Pressure/temperature sensors | Refrigerant state analysis |
+| **Carnot Estimation** | ±15% | Compressor freq, temperatures | Theoretical efficiency estimation |
+| **Valve Correlation** | ±20% | Valve positions, temperatures | Valve state correlation |
+| **Temperature Difference** | ±30% | Inlet/outlet temperatures only | Basic temperature rise calculation |
+
+#### COP Constants in DeviceConstants Class
+
+```typescript
+// COP calculation constants
+static readonly COP_CALCULATION_INTERVAL_MS = 30 * 1000; // 30 seconds
+static readonly EXTERNAL_DEVICE_QUERY_TIMEOUT_MS = 5 * 1000; // 5 seconds
+static readonly WATER_SPECIFIC_HEAT_CAPACITY = 4186; // J/(kg·K)
+static readonly CELSIUS_TO_KELVIN = 273.15;
+static readonly MIN_VALID_COP = 0.5;
+static readonly MAX_VALID_COP = 8.0;
+
+// COP ranges for validation
+static readonly COP_RANGES = {
+  AIR_TO_WATER_MIN: 2.5,
+  AIR_TO_WATER_MAX: 4.5,
+  GROUND_SOURCE_MIN: 3.5,
+  GROUND_SOURCE_MAX: 5.5,
+  DURING_DEFROST_MIN: 1.0,
+  DURING_DEFROST_MAX: 2.0,
+  IDEAL_CONDITIONS_MIN: 4.0,
+  IDEAL_CONDITIONS_MAX: 6.0,
+};
+
+// Carnot efficiency factors
+static readonly CARNOT_EFFICIENCY = {
+  BASE_EFFICIENCY: 0.4, // Base practical efficiency (40% of Carnot)
+  FREQUENCY_FACTOR: 0.1, // Additional efficiency per 100Hz
+  MIN_EFFICIENCY: 0.3, // Minimum practical efficiency
+  MAX_EFFICIENCY: 0.5, // Maximum practical efficiency
+};
+```
+
+#### COP Method Transparency System
+
+**Method Visibility Capability (`adlar_cop_method`):**
+
+```typescript
+// COP method display with confidence indicators
+private formatCOPMethodDisplay(method: string, confidence: string): string {
+  const methodNames: Record<string, string> = {
+    direct_thermal: 'Direct Thermal',
+    power_module: 'Power Module',
+    refrigerant_circuit: 'Refrigerant Circuit',
+    carnot_estimation: 'Carnot Estimation',
+    valve_correlation: 'Valve Correlation',
+    temperature_difference: 'Temperature Difference',
+    insufficient_data: 'Insufficient Data'
+  };
+
+  const confidenceIndicators: Record<string, string> = {
+    high: '🟢',
+    medium: '🟡',
+    low: '🔴'
+  };
+
+  const methodName = methodNames[method] || method;
+  const confidenceIndicator = confidenceIndicators[confidence] || '';
+
+  return `${methodName} ${confidenceIndicator}`;
+}
+```
+
+#### Cross-App Data Integration
+
+**External Data Request System:**
+
+The COP system can request data from other Homey apps/devices via flow card triggers:
+
+```typescript
+// External data request flow triggers
+request_external_power_data     // Request power consumption data
+request_external_ambient_data   // Request ambient temperature data
+request_external_flow_data     // Request water flow rate data
+
+// Corresponding response flow actions
+receive_external_power_data    // Receive power data from external device
+receive_external_ambient_data  // Receive ambient data from external device
+receive_external_flow_data     // Receive flow data from external device
+```
+
+#### COP Outlier Detection System
+
+**Outlier Detection Constants:**
+
+```typescript
+static readonly COP_TEMP_DIFF_THRESHOLDS = {
+  LOW_EFFICIENCY_TEMP_DIFF: 5, // °C - below this use low efficiency COP
+  MODERATE_EFFICIENCY_TEMP_DIFF: 15, // °C - between low and high efficiency
+  LOW_EFFICIENCY_COP: 2.0,
+  MODERATE_EFFICIENCY_COP_BASE: 2.5,
+  MODERATE_EFFICIENCY_SLOPE: 0.15, // COP increase per °C
+  HIGH_EFFICIENCY_COP: 4.0,
+};
+
+static readonly POWER_ESTIMATION = {
+  COMPRESSOR_BASE_POWER: 500, // Watts at minimum frequency
+  COMPRESSOR_MAX_POWER: 4000, // Watts at maximum frequency
+  COMPRESSOR_MIN_FREQUENCY: 20, // Hz minimum operating frequency
+  COMPRESSOR_MAX_FREQUENCY: 120, // Hz maximum operating frequency
+  COMPRESSOR_POWER_CURVE_EXPONENT: 1.8, // Power scales non-linearly
+
+  FAN_BASE_POWER: 50, // Watts at minimum speed
+  FAN_MAX_POWER: 300, // Watts at maximum speed
+  AUXILIARY_POWER_BASE: 150, // System electronics and pumps
+  DEFROST_POWER_MULTIPLIER: 1.3, // 30% increase during defrost
+};
+```
+
+#### COP User Settings Integration
+
+**Device Settings for COP Control (`driver.settings.compose.json`):**
+
+```json
+{
+  "id": "cop_calculation_enabled",
+  "type": "checkbox",
+  "value": true
+},
+{
+  "id": "cop_calculation_method",
+  "type": "dropdown",
+  "value": "auto",
+  "values": ["auto", "direct_thermal", "carnot_estimation", "temperature_difference"]
+},
+{
+  "id": "cop_outlier_detection_enabled",
+  "type": "checkbox",
+  "value": true
+},
+{
+  "id": "external_data_timeout",
+  "type": "number",
+  "value": 5,
+  "min": 1,
+  "max": 30
+}
+```
+
+#### COP Debug and Testing Framework
+
+**Comprehensive Debug Tool (`debug-cop.js`):**
+
+- **Real-time Simulation**: Test all 6 calculation methods with sample data
+- **Outlier Detection**: Test extreme values and sensor failure scenarios
+- **Method Comparison**: Side-by-side accuracy comparison of different methods
+- **Data Source Analysis**: Identify which data sources are available/missing
+- **Performance Profiling**: Measure calculation timing and accuracy
+
+### Benefits of COP System Architecture
+
+1. **Method Transparency**: Users can see which calculation method was used
+2. **Data Quality Awareness**: Confidence indicators show reliability level
+3. **Cross-App Integration**: Can utilize external sensors for better accuracy
+4. **Outlier Detection**: Prevents unrealistic values from sensor malfunctions
+5. **Comprehensive Testing**: Full debug framework for development and troubleshooting
+
 ## Error Handling Architecture
 
 ### TuyaErrorCategorizer (`lib/error-types.ts`)
@@ -98,12 +271,15 @@ interface CategorizedError {
 #### TuyaErrorCategorizer Methods
 
 ##### `categorize(error: Error, context: string): CategorizedError`
+
 Analyzes error and returns categorized information with recovery guidance.
 
 ##### `formatForLogging(categorizedError: CategorizedError): string`
+
 Creates structured log messages for debugging and monitoring.
 
 ##### `shouldReconnect(categorizedError: CategorizedError): boolean`
+
 Determines if error should trigger device reconnection attempt.
 
 ### Error Handling Pattern
@@ -161,21 +337,25 @@ Constants are used consistently across:
 ## Benefits of This Architecture
 
 ### Enhanced Reliability
+
 - **Smart Error Recovery**: Automatic retry for recoverable failures
 - **Categorized Debugging**: Structured error information for troubleshooting
 - **Consistent Timeouts**: Centralized timeout management prevents conflicts
 
 ### Improved Maintainability  
+
 - **Single Configuration Point**: All constants in one location
 - **Type Safety**: TypeScript prevents configuration errors
 - **Self-Documenting**: Clear constant names and error categories
 
 ### Better User Experience
+
 - **User-Friendly Error Messages**: Clear explanations instead of technical errors
 - **Recovery Guidance**: Specific actions users can take to resolve issues
 - **Reduced Error Spam**: Intelligent throttling and retry logic
 
 ### Developer Productivity
+
 - **Structured Debugging**: Categorized errors make troubleshooting faster
 - **Consistent Patterns**: Standardized error handling across codebase
 - **Easy Extension**: Simple to add new error categories or constants
@@ -183,6 +363,7 @@ Constants are used consistently across:
 ## Future Extensibility
 
 ### Adding New Constants
+
 ```typescript
 export class DeviceConstants {
   // Add new constant with descriptive comment
@@ -192,6 +373,7 @@ export class DeviceConstants {
 ```
 
 ### Adding New Error Categories
+
 ```typescript
 export enum TuyaErrorType {
   // Add new error type
@@ -216,6 +398,7 @@ The settings management system prevents Homey's "Cannot set Settings while this.
 #### Race Condition Problem
 
 Homey prevents concurrent settings modifications to avoid configuration corruption:
+
 - Multiple `setSettings()` calls within `onSettings()` create race conditions
 - Secondary settings updates must wait for primary operation to complete
 - Concurrent access results in "Cannot set Settings while this.onSettings is still pending" error
@@ -223,6 +406,7 @@ Homey prevents concurrent settings modifications to avoid configuration corrupti
 #### Solution Architecture
 
 **Deferred Settings Pattern:**
+
 ```typescript
 // ❌ Race condition - concurrent setSettings calls
 await this.setSettings(primarySettings);
@@ -254,6 +438,7 @@ if (Object.keys(settingsToUpdate).length > 0) {
 #### Settings Auto-Management Logic
 
 **Power Measurements Toggle:**
+
 ```typescript
 // When power measurements disabled → auto-disable related flow alerts
 if (!enablePower) {
@@ -287,6 +472,7 @@ The flow card control system provides users with granular control over which aut
 #### Settings-Based Flow Card Registration
 
 **User Settings Categories:**
+
 ```typescript
 interface UserFlowPreferences {
   flow_temperature_alerts: 'disabled' | 'auto' | 'enabled';
@@ -302,6 +488,7 @@ interface UserFlowPreferences {
 #### Registration Logic Decision Tree
 
 **`shouldRegisterCategory()` Method:**
+
 ```typescript
 switch (userSetting) {
   case 'disabled':
@@ -321,11 +508,13 @@ switch (userSetting) {
 #### Capability Health System Integration
 
 **Health Criteria for Flow Card Registration:**
+
 - **Recent Data**: Capability updated within `CAPABILITY_TIMEOUT_MS` (5 minutes)
 - **Data Quality**: Fewer than `NULL_THRESHOLD` (10) consecutive null values  
 - **Active Monitoring**: Regular health checks via `HEALTH_CHECK_INTERVAL_MS` (2 minutes)
 
 **Health-Based Flow Card Updates:**
+
 ```typescript
 private async updateFlowCardsBasedOnHealth(): Promise<void> {
   const healthyCapabilities = this.getHealthyCapabilitiesByCategory();
@@ -348,6 +537,7 @@ private async updateFlowCardsBasedOnHealth(): Promise<void> {
 **When `flow_temperature_alerts = "enabled"`:**
 
 **Available Flow Triggers:**
+
 - `coiler_temperature_alert` - Coiler sensor threshold alerts
 - `tank_temperature_alert` - Tank temperature monitoring
 - `ambient_temperature_changed` - Environmental changes
@@ -355,6 +545,7 @@ private async updateFlowCardsBasedOnHealth(): Promise<void> {
 - `discharge_temperature_alert` - High-pressure discharge alerts
 
 **Safety Integration:**
+
 ```typescript
 // Critical temperature monitoring (always active)
 if (value > 80 || value < -20) {
@@ -376,6 +567,7 @@ if (value > 60 || value < 0) {
 #### Power Settings Auto-Management Logic
 
 **Cascading Settings Updates:**
+
 ```typescript
 // When power measurements are disabled
 if (!enablePowerMeasurements) {
@@ -422,6 +614,7 @@ The insights management system provides intelligent control over Homey's data vi
 #### Insights Control Integration
 
 **Power Measurement Toggle Integration:**
+
 ```typescript
 // Enhanced capability management with insights control
 for (const capability of powerCapabilities) {
@@ -442,6 +635,7 @@ for (const capability of powerCapabilities) {
 #### Default Insights Configuration
 
 **Driver-Level Insights Settings (`driver.compose.json`):**
+
 ```json
 {
   "capabilitiesOptions": {
@@ -460,6 +654,7 @@ for (const capability of powerCapabilities) {
 #### Advanced Insights Features (Undocumented)
 
 **Enhanced Chart Customization:**
+
 ```json
 {
   "insights": true,
@@ -490,24 +685,32 @@ for (const capability of powerCapabilities) {
 | **System States** | ✅ Enabled | Static | `line` |
 | **Valve Positions** | ✅ Enabled | Static | `column` |
 
-## System Architecture Summary (v0.92.7)
+## System Architecture Summary (v0.96.3)
 
 This architecture provides a comprehensive foundation for reliable, maintainable, and extensible heat pump device integration featuring:
 
 ### Core Systems
+
 - **Enhanced Error Handling**: 9 categorized error types with smart retry logic
 - **Race Condition Prevention**: Deferred settings updates with atomic operations
 - **Intelligent Flow Card Management**: Health-aware dynamic registration system
 - **Advanced Insights Control**: Dynamic visibility aligned with user preferences
+- **COP Calculation System**: Multi-method efficiency monitoring with transparency and outlier detection
 
 ### User Experience Features
+
 - **Clean Default Interface**: Power insights disabled by default
 - **Flexible Monitoring**: User-controlled insights visibility
 - **Professional Visualizations**: Advanced chart customization options
 - **Safety-First Design**: Critical monitoring always active regardless of settings
+- **Method Transparency**: COP calculation method visibility with confidence indicators
+- **Cross-App Integration**: External data integration via flow cards for enhanced accuracy
 
 ### Developer Benefits
+
 - **Centralized Configuration**: Single source of truth for all constants
 - **Structured Error Handling**: Categorized debugging and recovery guidance
 - **Type Safety**: Full TypeScript integration with proper interfaces
 - **Extensible Design**: Easy addition of new capabilities, error types, and insights features
+- **Comprehensive COP Testing**: Debug framework with real-time simulation and method validation
+- **Docker Debug Support**: Full debugging environment for development and troubleshooting
