@@ -1,6 +1,6 @@
 {
   "0.96.3": {
-    "en": "Added COP method transparency sensor showing which calculation method was used. Enhanced SVG icons for backwater state and pulse-steps capabilities. Includes comprehensive COP debugging tools and Docker development environment."
+    "en": "Added COP calculation with accompanying flow card for enhanced user feedback."
   },
   "0.94.2": {
     "en": "Updated temperature-related labels for improved clarity in flow cards and device controls."
