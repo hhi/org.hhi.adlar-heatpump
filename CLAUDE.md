@@ -310,7 +310,8 @@ Each capability maps to specific Tuya DPS numbers and includes multilingual supp
 - [Device Pairing](https://apps.developer.homey.app/the-basics/devices/pairing) - Custom pairing flows
 - [Device Settings](https://apps.developer.homey.app/the-basics/devices/settings) - Device configuration management
 
-- for actualizing @.homeychangelog.json document, allways refer to @.homeycompose/app.json instead of @app.json
-- only suggest solution according official documentation
+### handling of global app.json
 
-- # do not let the content of the generated global @app.json be part of your context (in order to preserve tokens) unless explicitly asked or required to be processed
+- for actualizing @.homeychangelog.json document, always refer to @.homeycompose/app.json instead of @app.json
+- only suggest solution according official documentation
+- ignore /app.json to be part of your context (in order to preserve tokens) unless explicitly asked or required

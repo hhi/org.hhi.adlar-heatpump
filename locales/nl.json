@@ -1,11 +1,38 @@
 {
-    "pair": {
-      "enter_device_info": {
-        "title": "Voer apparaatinformatie in",
-        "description": "Voer uw Tuya apparaat gegevens in",
-        "device_id": "Apparaat ID",
-        "local_key": "Lokale sleutel",
-        "continue": "Doorgaan"
-      }
+  "pair": {
+    "enter_device_info": {
+      "title": "Voer apparaatinformatie in",
+      "description": "Voer uw Tuya apparaat gegevens in",
+      "device_id": "Apparaat ID",
+      "local_key": "Lokale sleutel",
+      "continue": "Doorgaan"
     }
-  }
+  },
+  "cop_method": {
+    "direct_thermal": "Directe Thermisch",
+    "power_module": "Vermogen Module",
+    "power_estimation": "Vermogen Schatting",
+    "refrigerant_circuit": "Koelmiddel Circuit",
+    "carnot_estimation": "Carnot Schatting",
+    "valve_correlation": "Klep Correlatie",
+    "temperature_difference": "Temperatuur Verschil",
+    "insufficient_data": "Onvoldoende Gegevens"
+  },
+  "cop_method_description": {
+    "direct_thermal": "Directe thermische berekening met water doorstroming en temperatuur verschil (±5% nauwkeurigheid)",
+    "power_module": "Vermogen module schatting met interne sensoren en externe validatie (±8% nauwkeurigheid)",
+    "power_estimation": "Stroomverbruik schatting met compressor en ventilator gegevens (±10% nauwkeurigheid)",
+    "refrigerant_circuit": "Koelmiddel circuit analyse met druk en temperatuur sensoren (±12% nauwkeurigheid)",
+    "carnot_estimation": "Carnot-gebaseerde schatting met compressor frequentie en buitentemperatuur (±15% nauwkeurigheid)",
+    "valve_correlation": "Klep positie correlatie met expansieklep gegevens (±20% nauwkeurigheid)",
+    "temperature_difference": "Temperatuur verschil schatting met empirische relaties (±30% nauwkeurigheid)",
+    "insufficient_data": "Onvoldoende gegevens beschikbaar voor enige COP berekenings methode"
+  },
+  "scop_status": {
+    "initializing": "Initialiseren...",
+    "collecting": "Data verzamelen",
+    "insufficient_data": "7+ dagen data nodig",
+    "calculating": "Berekenen..."
+  },
+  "COP calculation disabled": "COP berekening uitgeschakeld"
+}

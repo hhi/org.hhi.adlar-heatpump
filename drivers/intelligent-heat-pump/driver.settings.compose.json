@@ -172,44 +172,6 @@
   {
     "type": "group",
     "label": {
-      "en": "Cross-App Integration Settings (Flow Card Based)",
-      "nl": "Cross-App Integratie Instellingen (Flow Kaart Gebaseerd)"
-    },
-    "children": [
-      {
-        "id": "external_data_timeout",
-        "type": "number",
-        "label": {
-          "en": "External data request timeout (seconds)",
-          "nl": "Externe data verzoek timeout (seconden)"
-        },
-        "hint": {
-          "en": "How long to wait for external device data responses via flow cards before using internal methods only",
-          "nl": "Hoe lang wachten op externe apparaat data reacties via flow kaarten voordat alleen interne methoden worden gebruikt"
-        },
-        "value": 5,
-        "min": 1,
-        "max": 30,
-        "step": 1
-      },
-      {
-        "id": "enable_external_data_requests",
-        "type": "checkbox",
-        "label": {
-          "en": "Enable external data requests via flow cards",
-          "nl": "Schakel externe data verzoeken via flow kaarten in"
-        },
-        "hint": {
-          "en": "Allow this device to request data from other Homey devices using flow card triggers and actions for enhanced COP calculations",
-          "nl": "Sta toe dat dit apparaat data opvraagt van andere Homey apparaten via flow kaart triggers en acties voor verbeterde COP berekeningen"
-        },
-        "value": true
-      }
-    ]
-  },
-  {
-    "type": "group",
-    "label": {
       "en": "Feature Settings (app restart and exit required)",
       "nl": "Functie Instellingen (herstart en afsluiten van app vereist)"
     },
@@ -466,6 +428,42 @@
         ]
       },
       {
+        "id": "flow_efficiency_alerts",
+        "type": "dropdown",
+        "label": {
+          "en": "Efficiency related alerts",
+          "nl": "Efficiëntie gerelateerde alarm afhandeling"
+        },
+        "hint": {
+          "en": "Control COP and SCOP efficiency alert flow cards visibility",
+          "nl": "Beheers zichtbaarheid van COP en SCOP efficiëntie alarm flow kaarten"
+        },
+        "value": "auto",
+        "values": [
+          {
+            "id": "disabled",
+            "label": {
+              "en": "Disabled",
+              "nl": "Uitgeschakeld"
+            }
+          },
+          {
+            "id": "auto",
+            "label": {
+              "en": "Auto (based on available sensors)",
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+            }
+          },
+          {
+            "id": "enabled",
+            "label": {
+              "en": "Force enabled",
+              "nl": "Geforceerd ingeschakeld"
+            }
+          }
+        ]
+      },
+      {
         "id": "flow_expert_mode",
         "type": "checkbox",
         "label": {
@@ -497,6 +495,19 @@
         "hint": {
           "en": "Click to generate a detailed report showing which capabilities are working and which have null values",
           "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben"
+        },
+        "value": false
+      },
+      {
+        "id": "flow_trigger_test",
+        "type": "checkbox",
+        "label": {
+          "en": "Test external data flow triggers",
+          "nl": "Test externe data flow triggers"
+        },
+        "hint": {
+          "en": "Click to test the external power, flow, and ambient data flow trigger system - check logs for results",
+          "nl": "Klik om het externe vermogen, doorstroom en buitentemperatuur flow trigger systeem te testen - controleer logs voor resultaten"
         },
         "value": false
       }

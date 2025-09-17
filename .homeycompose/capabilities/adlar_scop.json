@@ -1,0 +1,29 @@
+{
+  "id": "adlar_scop",
+  "title": {
+    "en": "Seasonal Coefficient of Performance",
+    "nl": "Seizoensgebonden Prestatiecoëfficiënt"
+  },
+  "type": "number",
+  "units": {
+    "en": "SCOP",
+    "nl": "SCOP"
+  },
+  "min": 2.0,
+  "max": 6.0,
+  "step": 0.1,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Seasonal Heat Pump Efficiency",
+    "nl": "Seizoensgebonden Warmtepomp Efficiëntie"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "Calculated Seasonal Coefficient of Performance according to EN 14825 - average efficiency over heating season. Higher values indicate better seasonal performance.",
+    "nl": "Berekende Seizoensgebonden Prestatiecoëfficiënt volgens EN 14825 - gemiddelde efficiëntie over verwarmingsseizoen. Hogere waarden duiden op betere seizoensprestaties."
+  }
+}

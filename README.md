@@ -13,7 +13,10 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 - **Real-time Monitoring**: Live sensor data and system status updates
 - **Automated Reconnection**: Robust connection handling with automatic recovery
 - **Multi-language Support**: English and Dutch interface
-- **Flow Card Control**: Individual control over 7 flow card categories (58 total cards)
+- **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 7 different methods
+- **SCOP Seasonal Analysis**: Seasonal coefficient of performance according to EN 14825 standards
+- **Cross-App Integration**: External data exchange via flow cards for enhanced accuracy
+- **Flow Card Control**: Individual control over 8 flow card categories (64 total cards)
 - **Enhanced Error Handling**: Smart retry logic with user-friendly recovery guidance
 - **Settings Management**: Race condition prevention with deferred updates
 - **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration
@@ -21,14 +24,15 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Capabilities
 
-The app provides access to **41 capabilities** across six categories:
+The app provides access to **44 capabilities** across seven categories:
 
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
-- **Power & Electrical (7)**: 3-phase voltage/current monitoring, power consumption, energy usage
+- **Power & Electrical (8)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input
 - **System Control (8)**: Heating modes, temperature setpoints, capacity settings, timer control
 - **System States (6)**: Compressor status, defrost state, backwater state, fault detection
 - **Valve Control (2)**: EEV and EVI pulse steps monitoring
-- **Additional Monitoring (9)**: Water flow, efficiency metrics, diagnostic parameters
+- **Efficiency Monitoring (3)**: Real-time COP, calculation method, seasonal SCOP with data quality
+- **Additional Monitoring (8)**: Water flow, diagnostic parameters, system optimization
 
 ## Installation & Setup
 
@@ -60,10 +64,11 @@ To obtain the required local key, refer to the documentation:
 
 #### Flow Card Controls
 
-Control visibility for 7 flow card categories with **58 total cards**:
+Control visibility for 8 flow card categories with **64 total cards**:
 
 - **Temperature Alerts** (11 cards), **Voltage Alerts** (3 cards), **Current Alerts** (3 cards)
 - **Power Alerts** (3 cards), **Pulse-steps Alerts** (2 cards), **State Alerts** (5 cards)
+- **Efficiency Alerts** (3 cards): COP thresholds, outlier detection, method-based automation
 - **Expert Mode** (3 cards)
 
 Three modes per category:
@@ -72,37 +77,72 @@ Three modes per category:
 - **Auto**: Only healthy sensors with data (default)
 - **Enabled**: All cards regardless of sensor status
 
+#### COP (Coefficient of Performance) Settings
+
+- **COP Calculation**: Enable/disable efficiency monitoring with 7 calculation methods
+- **Calculation Method**: Auto-selection or manual override (Direct Thermal ±5% to Temperature Difference ±30%)
+- **Outlier Detection**: Identify unrealistic COP values indicating sensor issues
+- **External Data Integration**: Request power, flow, and ambient data from other Homey devices
+- **Cross-App Timeout**: Configure response timeout for external data requests (1-30 seconds)
+
 #### Feature Settings
 
 - **Enable Power Measurements**: Toggle 9 power-related capabilities
+- **Enable Slider Controls**: Toggle 3 manual control sliders (water/power management)
 - **Capability Diagnostics**: Generate sensor health reports
 
 ## Flow Cards
 
-**58 Total Cards**: 31 triggers, 18 conditions, 9 actions
+**64 Total Cards**: 34 triggers, 18 conditions, 12 actions
 
-### Triggers (31)
+### Triggers (34)
 
-- Temperature, voltage, current, and power alerts
-- System state changes and fault detection
-- Safety monitoring with rate limiting
+- **Temperature, voltage, current, and power alerts**
+- **System state changes and fault detection**
+- **COP Efficiency Monitoring**: COP thresholds, outlier detection, method-based automation
+- **External Data Requests**: Automatic requests for power, flow, and ambient data from other devices
+- **Safety monitoring with rate limiting**
 
 ### Conditions (18)
 
-- Temperature thresholds and system status verification
-- Action-based conditions for all controllable settings
-- Inverse operator support for "is" and "is not" logic
+- **Temperature thresholds and system status verification**
+- **COP efficiency checks** with threshold-based logic
+- **Calculation method verification** for automation based on data quality
+- **Action-based conditions** for all controllable settings
+- **Inverse operator support** for "is" and "is not" logic
 
-### Actions (9)
+### Actions (12)
 
-- Temperature setpoint and mode control
-- System on/off and heating curve adjustments
+- **Temperature setpoint and mode control**
+- **System on/off and heating curve adjustments**
+- **External Data Integration**: Send power, flow, and ambient data to heat pump for enhanced COP calculations
+
+### Cross-App Integration
+
+**External Data Flow Pattern**:
+1. Heat pump triggers `request_external_power_data` when COP calculation needs external power data
+2. Your power meter flow responds with `receive_external_power_data` action
+3. Enhanced COP calculation uses both internal sensors and external measurements
+4. Similar patterns for `request_external_flow_data` and `request_external_ambient_data`
+
+## Internationalization
+
+**Fully Localized Experience** in English and Dutch:
+
+- **COP Method Names**: All 8 calculation methods with localized descriptions
+- **COP Method Descriptions**: Detailed accuracy information (±5% to ±30%) in both languages
+- **SCOP Status Messages**: Seasonal calculation progress with mobile-optimized text (≤22 chars)
+- **Flow Card Labels**: All triggers, conditions, and actions with proper translations
+- **Settings Interface**: Complete settings UI in both languages with context-appropriate hints
+
+**Mobile Optimization**: All sensor values and status messages optimized for iPhone display constraints.
 
 ## Safety & Monitoring
 
 - **Connection Monitoring**: Alerts after 5 consecutive failures
 - **System Faults**: Specific fault codes and descriptions
 - **Temperature Safety**: Extreme temperature detection (>80°C or <-20°C)
+- **COP Outlier Detection**: Identify unrealistic efficiency values (< 0.5 or > 8.0 COP)
 - **Valve Monitoring**: Critical pulse-steps safety alerts
 - **Rate Limiting**: Maximum 1 notification per 30 minutes per device
 
