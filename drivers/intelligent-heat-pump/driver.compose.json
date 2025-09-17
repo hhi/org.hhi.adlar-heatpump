@@ -58,6 +58,7 @@
 
     "adlar_cop",
     "adlar_cop_method",
+    "adlar_external_power",
 
      "adlar_countdowntimer"
   ],
@@ -511,6 +512,27 @@
         "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level",
         "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft"
       }
+    },
+
+    "adlar_external_power": {
+      "title": {
+        "en": "External Power Measurement",
+        "nl": "Externe Vermogen Meting"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 50000,
+      "step": 0.1,
+      "decimals": 1,
+      "insights": true,
+      "insightsTitle": {
+        "en": "External Power Input for COP",
+        "nl": "Externe Vermogen Input voor COP"
+      },
+      "description": {
+        "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations",
+        "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen"
+      }
     }
   },
 
@@ -550,6 +572,5 @@
       "id": "done",
       "template": "done"
     }
-
   ]
 }

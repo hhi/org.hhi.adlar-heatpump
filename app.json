@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.96.3",
+  "version": "0.98.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -553,7 +553,7 @@
             "name": "outlier_reason",
             "title": {
               "en": "Outlier reason",
-              "nl": "Reden uitbijter"
+              "nl": "Reden uitschieter"
             },
             "example": "COP value above maximum threshold (8.0)"
           },
@@ -2238,138 +2238,6 @@
         ]
       },
       {
-        "id": "request_external_ambient_data",
-        "title": {
-          "en": "Heat pump requests ambient temperature data",
-          "nl": "Warmtepomp vraagt buitentemperatuur gegevens"
-        },
-        "titleFormatted": {
-          "en": "Heat pump requests ambient temperature data",
-          "nl": "Warmtepomp vraagt buitentemperatuur gegevens"
-        },
-        "hint": {
-          "en": "Triggers when the heat pump needs external ambient temperature data for COP calculations",
-          "nl": "Wordt geactiveerd wanneer de warmtepomp externe buitentemperatuurgegevens nodig heeft voor COP-berekeningen"
-        },
-        "tokens": [
-          {
-            "type": "string",
-            "name": "request_id",
-            "title": {
-              "en": "Request ID",
-              "nl": "Verzoek ID"
-            },
-            "example": "ambient_1694634123456_ghi789"
-          },
-          {
-            "type": "string",
-            "name": "requester",
-            "title": {
-              "en": "Requesting app",
-              "nl": "Aanvragende app"
-            },
-            "example": "heat_pump_app"
-          },
-          {
-            "type": "number",
-            "name": "timestamp",
-            "title": {
-              "en": "Request timestamp",
-              "nl": "Verzoek tijdstempel"
-            },
-            "example": 1694634123456
-          }
-        ]
-      },
-      {
-        "id": "request_external_flow_data",
-        "title": {
-          "en": "Heat pump requests flow data",
-          "nl": "Warmtepomp vraagt doorstroomgegevens"
-        },
-        "titleFormatted": {
-          "en": "Heat pump requests flow data",
-          "nl": "Warmtepomp vraagt doorstroomgegevens"
-        },
-        "hint": {
-          "en": "Triggers when the heat pump needs external water flow data for COP calculations",
-          "nl": "Wordt geactiveerd wanneer de warmtepomp externe water doorstroomgegevens nodig heeft voor COP-berekeningen"
-        },
-        "tokens": [
-          {
-            "type": "string",
-            "name": "request_id",
-            "title": {
-              "en": "Request ID",
-              "nl": "Verzoek ID"
-            },
-            "example": "flow_1694634123456_def456"
-          },
-          {
-            "type": "string",
-            "name": "requester",
-            "title": {
-              "en": "Requesting app",
-              "nl": "Aanvragende app"
-            },
-            "example": "heat_pump_app"
-          },
-          {
-            "type": "number",
-            "name": "timestamp",
-            "title": {
-              "en": "Request timestamp",
-              "nl": "Verzoek tijdstempel"
-            },
-            "example": 1694634123456
-          }
-        ]
-      },
-      {
-        "id": "request_external_power_data",
-        "title": {
-          "en": "Heat pump requests power data",
-          "nl": "Warmtepomp vraagt vermogensgegevens"
-        },
-        "titleFormatted": {
-          "en": "Heat pump requests power data",
-          "nl": "Warmtepomp vraagt vermogensgegevens"
-        },
-        "hint": {
-          "en": "Triggers when the heat pump needs external power consumption data for COP calculations",
-          "nl": "Wordt geactiveerd wanneer de warmtepomp externe stroomverbruikgegevens nodig heeft voor COP-berekeningen"
-        },
-        "tokens": [
-          {
-            "type": "string",
-            "name": "request_id",
-            "title": {
-              "en": "Request ID",
-              "nl": "Verzoek ID"
-            },
-            "example": "power_1694634123456_abc123"
-          },
-          {
-            "type": "string",
-            "name": "requester",
-            "title": {
-              "en": "Requesting app",
-              "nl": "Aanvragende app"
-            },
-            "example": "heat_pump_app"
-          },
-          {
-            "type": "number",
-            "name": "timestamp",
-            "title": {
-              "en": "Request timestamp",
-              "nl": "Verzoek tijdstempel"
-            },
-            "example": 1694634123456
-          }
-        ]
-      },
-      {
         "id": "suction_temperature_alert",
         "title": {
           "en": "Suction temperature alert",
@@ -3764,143 +3632,25 @@
     ],
     "actions": [
       {
-        "id": "receive_external_ambient_data",
-        "title": {
-          "en": "Send ambient temperature data to heat pump",
-          "nl": "Stuur buitentemperatuur gegevens naar warmtepomp"
-        },
-        "titleFormatted": {
-          "en": "Send [[temperature_value]]°C from [[device_name]] to heat pump (request: [[request_id]])",
-          "nl": "Stuur [[temperature_value]]°C van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
-        },
-        "hint": {
-          "en": "Sends ambient temperature data to the heat pump for COP calculations",
-          "nl": "Stuurt buitentemperatuurgegevens naar de warmtepomp voor COP-berekeningen"
-        },
-        "args": [
-          {
-            "type": "text",
-            "name": "request_id",
-            "title": {
-              "en": "Request ID",
-              "nl": "Verzoek ID"
-            },
-            "placeholder": {
-              "en": "Request ID from trigger",
-              "nl": "Verzoek ID van trigger"
-            }
-          },
-          {
-            "type": "number",
-            "name": "temperature_value",
-            "title": {
-              "en": "Ambient temperature (°C)",
-              "nl": "Buitentemperatuur (°C)"
-            },
-            "placeholder": {
-              "en": "Current ambient temperature in °C",
-              "nl": "Huidige buitentemperatuur in °C"
-            },
-            "min": -50,
-            "max": 60,
-            "step": 0.1
-          },
-          {
-            "type": "text",
-            "name": "device_name",
-            "title": {
-              "en": "Device name",
-              "nl": "Apparaat naam"
-            },
-            "placeholder": {
-              "en": "Name of the temperature sensor device",
-              "nl": "Naam van het temperatuursensor apparaat"
-            }
-          }
-        ]
-      },
-      {
-        "id": "receive_external_flow_data",
-        "title": {
-          "en": "Send flow data to heat pump",
-          "nl": "Stuur doorstroomgegevens naar warmtepomp"
-        },
-        "titleFormatted": {
-          "en": "Send [[flow_value]]L/min from [[device_name]] to heat pump (request: [[request_id]])",
-          "nl": "Stuur [[flow_value]]L/min van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
-        },
-        "hint": {
-          "en": "Sends water flow rate data to the heat pump for COP calculations",
-          "nl": "Stuurt water doorstroomgegevens naar de warmtepomp voor COP-berekeningen"
-        },
-        "args": [
-          {
-            "type": "text",
-            "name": "request_id",
-            "title": {
-              "en": "Request ID",
-              "nl": "Verzoek ID"
-            },
-            "placeholder": {
-              "en": "Request ID from trigger",
-              "nl": "Verzoek ID van trigger"
-            }
-          },
-          {
-            "type": "number",
-            "name": "flow_value",
-            "title": {
-              "en": "Water flow rate (L/min)",
-              "nl": "Water doorstroom (L/min)"
-            },
-            "placeholder": {
-              "en": "Current water flow rate in L/min",
-              "nl": "Huidige water doorstroom in L/min"
-            },
-            "min": 0,
-            "max": 200,
-            "step": 0.1
-          },
-          {
-            "type": "text",
-            "name": "device_name",
-            "title": {
-              "en": "Device name",
-              "nl": "Apparaat naam"
-            },
-            "placeholder": {
-              "en": "Name of the flow sensor device",
-              "nl": "Naam van het doorstroom sensor apparaat"
-            }
-          }
-        ]
-      },
-      {
         "id": "receive_external_power_data",
         "title": {
           "en": "Send power data to heat pump",
           "nl": "Stuur vermogensgegevens naar warmtepomp"
         },
         "titleFormatted": {
-          "en": "Send [[power_value]]W from [[device_name]] to heat pump (request: [[request_id]])",
-          "nl": "Stuur [[power_value]]W van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+          "en": "Send [[power_value]]W to heat pump for COP calculation",
+          "nl": "Stuur [[power_value]]W naar warmtepomp voor COP berekening"
         },
         "hint": {
-          "en": "Sends power consumption data to the heat pump for COP calculations",
-          "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor COP-berekeningen"
+          "en": "Sends power consumption data to the heat pump for enhanced COP calculations",
+          "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor verbeterde COP-berekeningen"
         },
+        "highlight": true,
         "args": [
           {
-            "type": "text",
-            "name": "request_id",
-            "title": {
-              "en": "Request ID",
-              "nl": "Verzoek ID"
-            },
-            "placeholder": {
-              "en": "Request ID from trigger",
-              "nl": "Verzoek ID van trigger"
-            }
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
           },
           {
             "type": "number",
@@ -3916,18 +3666,6 @@
             "min": 0,
             "max": 50000,
             "step": 0.1
-          },
-          {
-            "type": "text",
-            "name": "device_name",
-            "title": {
-              "en": "Device name",
-              "nl": "Apparaat naam"
-            },
-            "placeholder": {
-              "en": "Name of the power meter device",
-              "nl": "Naam van het vermogensmeter apparaat"
-            }
           }
         ]
       },
@@ -4538,6 +4276,7 @@
         "adlar_state_backwater",
         "adlar_cop",
         "adlar_cop_method",
+        "adlar_external_power",
         "adlar_countdowntimer"
       ],
       "capabilitiesOptions": {
@@ -4976,6 +4715,26 @@
             "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level",
             "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft"
           }
+        },
+        "adlar_external_power": {
+          "title": {
+            "en": "External Power Measurement",
+            "nl": "Externe Vermogen Meting"
+          },
+          "type": "number",
+          "min": 0,
+          "max": 50000,
+          "step": 0.1,
+          "decimals": 1,
+          "insights": true,
+          "insightsTitle": {
+            "en": "External Power Input for COP",
+            "nl": "Externe Vermogen Input voor COP"
+          },
+          "description": {
+            "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations",
+            "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen"
+          }
         }
       },
       "platforms": [
@@ -5186,44 +4945,6 @@
               "min": 4,
               "max": 15,
               "step": 0.5
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Cross-App Integration Settings (Flow Card Based)",
-            "nl": "Cross-App Integratie Instellingen (Flow Kaart Gebaseerd)"
-          },
-          "children": [
-            {
-              "id": "external_data_timeout",
-              "type": "number",
-              "label": {
-                "en": "External data request timeout (seconds)",
-                "nl": "Externe data verzoek timeout (seconden)"
-              },
-              "hint": {
-                "en": "How long to wait for external device data responses via flow cards before using internal methods only",
-                "nl": "Hoe lang wachten op externe apparaat data reacties via flow kaarten voordat alleen interne methoden worden gebruikt"
-              },
-              "value": 5,
-              "min": 1,
-              "max": 30,
-              "step": 1
-            },
-            {
-              "id": "enable_external_data_requests",
-              "type": "checkbox",
-              "label": {
-                "en": "Enable external data requests via flow cards",
-                "nl": "Schakel externe data verzoeken via flow kaarten in"
-              },
-              "hint": {
-                "en": "Allow this device to request data from other Homey devices using flow card triggers and actions for enhanced COP calculations",
-                "nl": "Sta toe dat dit apparaat data opvraagt van andere Homey apparaten via flow kaart triggers en acties voor verbeterde COP berekeningen"
-              },
-              "value": true
             }
           ]
         },
@@ -5486,6 +5207,42 @@
               ]
             },
             {
+              "id": "flow_efficiency_alerts",
+              "type": "dropdown",
+              "label": {
+                "en": "Efficiency related alerts",
+                "nl": "Efficiëntie gerelateerde alarm afhandeling"
+              },
+              "hint": {
+                "en": "Control COP and SCOP efficiency alert flow cards visibility",
+                "nl": "Beheers zichtbaarheid van COP en SCOP efficiëntie alarm flow kaarten"
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "disabled",
+                  "label": {
+                    "en": "Disabled",
+                    "nl": "Uitgeschakeld"
+                  }
+                },
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Auto (based on available sensors)",
+                    "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+                  }
+                },
+                {
+                  "id": "enabled",
+                  "label": {
+                    "en": "Force enabled",
+                    "nl": "Geforceerd ingeschakeld"
+                  }
+                }
+              ]
+            },
+            {
               "id": "flow_expert_mode",
               "type": "checkbox",
               "label": {
@@ -5517,6 +5274,19 @@
               "hint": {
                 "en": "Click to generate a detailed report showing which capabilities are working and which have null values",
                 "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben"
+              },
+              "value": false
+            },
+            {
+              "id": "flow_trigger_test",
+              "type": "checkbox",
+              "label": {
+                "en": "Test external data flow triggers",
+                "nl": "Test externe data flow triggers"
+              },
+              "hint": {
+                "en": "Click to test the external power, flow, and ambient data flow trigger system - check logs for results",
+                "nl": "Klik om het externe vermogen, doorstroom en buitentemperatuur flow trigger systeem te testen - controleer logs voor resultaten"
               },
               "value": false
             }
@@ -5925,6 +5695,35 @@
         "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
       }
     },
+    "adlar_external_power": {
+      "id": "adlar_external_power",
+      "title": {
+        "en": "External Power Measurement",
+        "nl": "Externe Vermogen Meting"
+      },
+      "type": "number",
+      "units": {
+        "en": "W",
+        "nl": "W"
+      },
+      "min": 0,
+      "max": 50000,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "External Power Input for COP",
+        "nl": "Externe Vermogen Input voor COP"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external power meter data",
+        "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe vermogensmeter gegevens"
+      }
+    },
     "adlar_fault": {
       "id": "adlar_fault",
       "title": {
@@ -6027,6 +5826,52 @@
       "icon": "/assets/pulse-steps.svg",
       "description": {
         "nl": "dp 16 : temp_current - EEV Open"
+      }
+    },
+    "adlar_scop": {
+      "id": "adlar_scop",
+      "title": {
+        "en": "Seasonal Coefficient of Performance",
+        "nl": "Seizoensgebonden Prestatiecoëfficiënt"
+      },
+      "type": "number",
+      "units": {
+        "en": "SCOP",
+        "nl": "SCOP"
+      },
+      "min": 2,
+      "max": 6,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Seasonal Heat Pump Efficiency",
+        "nl": "Seizoensgebonden Warmtepomp Efficiëntie"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "Calculated Seasonal Coefficient of Performance according to EN 14825 - average efficiency over heating season. Higher values indicate better seasonal performance.",
+        "nl": "Berekende Seizoensgebonden Prestatiecoëfficiënt volgens EN 14825 - gemiddelde efficiëntie over verwarmingsseizoen. Hogere waarden duiden op betere seizoensprestaties."
+      }
+    },
+    "adlar_scop_quality": {
+      "id": "adlar_scop_quality",
+      "title": {
+        "en": "SCOP Quality",
+        "nl": "SCOP Kwaliteit"
+      },
+      "type": "string",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": false,
+      "icon": "/assets/data-quality.svg",
+      "description": {
+        "en": "SCOP calculation data quality indicator showing confidence level and method mix used for seasonal calculation",
+        "nl": "SCOP berekening data kwaliteit indicator die betrouwbaarheidsniveau en methode mix toont gebruikt voor seizoensberekening"
       }
     },
     "adlar_state_backwater": {
