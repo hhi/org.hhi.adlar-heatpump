@@ -1,0 +1,17 @@
+{
+  "id": "adlar_cop_trend",
+  "title": {
+    "en": "COP Trend",
+    "nl": "COP Trend"
+  },
+  "type": "string",
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": false,
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "COP performance trend over the last 24 hours: improving, stable, or degrading. Used for predictive maintenance and optimization guidance.",
+    "nl": "COP prestatie trend over de laatste 24 uur: verbeterend, stabiel, of verslechterend. Gebruikt voor voorspellend onderhoud en optimalisatie begeleiding."
+  }
+}

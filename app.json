@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.98.2",
+  "version": "0.98.5",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -569,6 +569,97 @@
         ]
       },
       {
+        "id": "cop_trend_detected",
+        "title": {
+          "en": "COP trend detected",
+          "nl": "COP trend gedetecteerd"
+        },
+        "titleFormatted": {
+          "en": "COP trend detected: [[trend_type]]",
+          "nl": "COP trend gedetecteerd: [[trend_type]]"
+        },
+        "hint": {
+          "en": "Triggers when COP shows a significant improving or degrading trend over the last 24 hours",
+          "nl": "Wordt geactiveerd wanneer COP een significante verbeterende of verslechterende trend toont over de laatste 24 uur"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "trend_type",
+            "title": {
+              "en": "Trend type",
+              "nl": "Trend type"
+            },
+            "values": [
+              {
+                "id": "improving",
+                "title": {
+                  "en": "improving",
+                  "nl": "verbeterend"
+                }
+              },
+              {
+                "id": "degrading",
+                "title": {
+                  "en": "degrading",
+                  "nl": "verslechterend"
+                }
+              },
+              {
+                "id": "any",
+                "title": {
+                  "en": "any trend change",
+                  "nl": "elke trendverandering"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "trend_direction",
+            "title": {
+              "en": "Trend direction",
+              "nl": "Trend richting"
+            },
+            "example": "improving"
+          },
+          {
+            "type": "number",
+            "name": "trend_strength",
+            "title": {
+              "en": "Trend strength",
+              "nl": "Trend sterkte"
+            },
+            "example": 0.25
+          },
+          {
+            "type": "string",
+            "name": "trend_description",
+            "title": {
+              "en": "Trend description",
+              "nl": "Trend beschrijving"
+            },
+            "example": "Strong improvement in efficiency"
+          },
+          {
+            "type": "number",
+            "name": "current_daily_cop",
+            "title": {
+              "en": "Current daily COP",
+              "nl": "Huidige dagelijkse COP"
+            },
+            "example": 3.4
+          }
+        ]
+      },
+      {
         "id": "countdown_timer_finished",
         "title": {
           "en": "Countdown timer finished",
@@ -665,6 +756,107 @@
               "nl": "Drempel waarde"
             },
             "example": 30
+          }
+        ]
+      },
+      {
+        "id": "daily_cop_efficiency_changed",
+        "title": {
+          "en": "Daily COP efficiency changed",
+          "nl": "Dagelijkse COP efficiëntie gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Daily COP efficiency [[condition]] [[threshold]]",
+          "nl": "Dagelijkse COP efficiëntie [[condition]] [[threshold]]"
+        },
+        "hint": {
+          "en": "Triggers when the 24-hour average COP goes above or below a specified threshold",
+          "nl": "Wordt geactiveerd wanneer de 24-uur gemiddelde COP boven of onder een opgegeven drempel gaat"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Daily COP threshold",
+              "nl": "Dagelijkse COP drempel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "Daily COP efficiency threshold",
+              "nl": "Dagelijkse COP efficiëntie drempel"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_daily_cop",
+            "title": {
+              "en": "Current daily COP",
+              "nl": "Huidige dagelijkse COP"
+            },
+            "example": 3.2
+          },
+          {
+            "type": "number",
+            "name": "threshold_cop",
+            "title": {
+              "en": "Threshold COP",
+              "nl": "Drempel COP"
+            },
+            "example": 3
+          },
+          {
+            "type": "number",
+            "name": "data_points",
+            "title": {
+              "en": "Data points used",
+              "nl": "Gebruikte datapunten"
+            },
+            "example": 48
+          },
+          {
+            "type": "string",
+            "name": "confidence_level",
+            "title": {
+              "en": "Confidence level",
+              "nl": "Betrouwbaarheidsniveau"
+            },
+            "example": "high"
           }
         ]
       },
@@ -2733,6 +2925,83 @@
         ]
       },
       {
+        "id": "cop_trend_analysis",
+        "title": {
+          "en": "COP trend analysis",
+          "nl": "COP trend analyse"
+        },
+        "titleFormatted": {
+          "en": "COP trend is !{{improving|stable|degrading}} over [[hours]] hours",
+          "nl": "COP trend is !{{verbeterend|stabiel|verslechterend}} over [[hours]] uur"
+        },
+        "hint": {
+          "en": "Check the COP performance trend over a specified time period",
+          "nl": "Controleer de COP prestatie trend over een opgegeven tijdsperiode"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "hours",
+            "title": {
+              "en": "Time period (hours)",
+              "nl": "Tijdsperiode (uur)"
+            },
+            "min": 1,
+            "max": 168,
+            "step": 1,
+            "units": "h",
+            "placeholder": {
+              "en": "Number of hours to analyze",
+              "nl": "Aantal uur om te analyseren"
+            }
+          }
+        ]
+      },
+      {
+        "id": "daily_cop_above_threshold",
+        "title": {
+          "en": "Daily COP above threshold",
+          "nl": "Dagelijkse COP boven drempel"
+        },
+        "titleFormatted": {
+          "en": "Daily COP is !{{above|below}} [[threshold]]",
+          "nl": "Dagelijkse COP is !{{boven|onder}} [[threshold]]"
+        },
+        "hint": {
+          "en": "Check if the 24-hour average COP is above or below a threshold",
+          "nl": "Controleer of de 24-uur gemiddelde COP boven of onder een drempel is"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Daily COP threshold",
+              "nl": "Dagelijkse COP drempel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "Daily COP efficiency threshold",
+              "nl": "Dagelijkse COP efficiëntie drempel"
+            }
+          }
+        ]
+      },
+      {
         "id": "device_power_is",
         "title": {
           "en": "Device power is",
@@ -4277,6 +4546,9 @@
         "adlar_cop",
         "adlar_cop_method",
         "adlar_external_power",
+        "adlar_cop_daily",
+        "adlar_cop_weekly",
+        "adlar_cop_trend",
         "adlar_countdowntimer"
       ],
       "capabilitiesOptions": {
@@ -4734,6 +5006,58 @@
           "description": {
             "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations",
             "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen"
+          }
+        },
+        "adlar_cop_daily": {
+          "title": {
+            "en": "Daily Average COP",
+            "nl": "Dagelijkse Gemiddelde COP"
+          },
+          "type": "number",
+          "min": 0,
+          "max": 8,
+          "step": 0.01,
+          "decimals": 2,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Daily Heat Pump Efficiency (COP)",
+            "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+          },
+          "description": {
+            "en": "24-hour rolling average Coefficient of Performance for trend analysis and daily optimization",
+            "nl": "24-uurs voortschrijdend gemiddelde prestatiecoëfficiënt voor trendanalyse en dagelijkse optimalisatie"
+          }
+        },
+        "adlar_cop_weekly": {
+          "title": {
+            "en": "Weekly Average COP",
+            "nl": "Wekelijkse Gemiddelde COP"
+          },
+          "type": "number",
+          "min": 0,
+          "max": 8,
+          "step": 0.01,
+          "decimals": 2,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Weekly Heat Pump Efficiency (COP)",
+            "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)"
+          },
+          "description": {
+            "en": "7-day rolling average Coefficient of Performance for seasonal pattern identification",
+            "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie"
+          }
+        },
+        "adlar_cop_trend": {
+          "title": {
+            "en": "COP Efficiency Trend",
+            "nl": "COP Efficiëntie Trend"
+          },
+          "type": "string",
+          "insights": false,
+          "description": {
+            "en": "Current heat pump efficiency trend analysis showing performance direction and strength",
+            "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont"
           }
         }
       },
@@ -5325,6 +5649,35 @@
         "nl": "Berekende prestatiecoëfficiënt - verhouding tussen nuttige warmte-output en elektrische energie-input. Hogere waarden duiden op betere efficiëntie."
       }
     },
+    "adlar_cop_daily": {
+      "id": "adlar_cop_daily",
+      "title": {
+        "en": "Daily Average COP",
+        "nl": "Dagelijkse Gemiddelde COP"
+      },
+      "type": "number",
+      "units": {
+        "en": "COP",
+        "nl": "COP"
+      },
+      "min": 0,
+      "max": 8,
+      "step": 0.01,
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Daily Heat Pump Efficiency (COP)",
+        "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "24-hour rolling average COP for trend analysis and daily performance monitoring. Weighted by compressor runtime for accurate efficiency representation.",
+        "nl": "24-uur voortschrijdend gemiddelde COP voor trendanalyse en dagelijkse prestatiemonitoring. Gewogen op compressor looptijd voor nauwkeurige efficiëntie weergave."
+      }
+    },
     "adlar_cop_method": {
       "id": "adlar_cop_method",
       "title": {
@@ -5340,6 +5693,52 @@
       "description": {
         "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level.",
         "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft."
+      }
+    },
+    "adlar_cop_trend": {
+      "id": "adlar_cop_trend",
+      "title": {
+        "en": "COP Trend",
+        "nl": "COP Trend"
+      },
+      "type": "string",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": false,
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "COP performance trend over the last 24 hours: improving, stable, or degrading. Used for predictive maintenance and optimization guidance.",
+        "nl": "COP prestatie trend over de laatste 24 uur: verbeterend, stabiel, of verslechterend. Gebruikt voor voorspellend onderhoud en optimalisatie begeleiding."
+      }
+    },
+    "adlar_cop_weekly": {
+      "id": "adlar_cop_weekly",
+      "title": {
+        "en": "Weekly Average COP",
+        "nl": "Wekelijkse Gemiddelde COP"
+      },
+      "type": "number",
+      "units": {
+        "en": "COP",
+        "nl": "COP"
+      },
+      "min": 0,
+      "max": 8,
+      "step": 0.01,
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Weekly Heat Pump Efficiency (COP)",
+        "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "7-day rolling average COP for seasonal pattern identification and long-term efficiency monitoring. Helps identify optimal operating conditions.",
+        "nl": "7-dagen voortschrijdend gemiddelde COP voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring. Helpt optimale bedrijfscondities identificeren."
       }
     },
     "adlar_countdowntimer": {

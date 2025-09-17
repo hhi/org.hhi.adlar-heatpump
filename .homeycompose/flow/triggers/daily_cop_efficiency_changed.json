@@ -1,0 +1,101 @@
+{
+  "id": "daily_cop_efficiency_changed",
+  "title": {
+    "en": "Daily COP efficiency changed",
+    "nl": "Dagelijkse COP efficiëntie gewijzigd"
+  },
+  "titleFormatted": {
+    "en": "Daily COP efficiency [[condition]] [[threshold]]",
+    "nl": "Dagelijkse COP efficiëntie [[condition]] [[threshold]]"
+  },
+  "hint": {
+    "en": "Triggers when the 24-hour average COP goes above or below a specified threshold",
+    "nl": "Wordt geactiveerd wanneer de 24-uur gemiddelde COP boven of onder een opgegeven drempel gaat"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "threshold",
+      "title": {
+        "en": "Daily COP threshold",
+        "nl": "Dagelijkse COP drempel"
+      },
+      "min": 1,
+      "max": 8,
+      "step": 0.1,
+      "units": "COP",
+      "placeholder": {
+        "en": "Daily COP efficiency threshold",
+        "nl": "Dagelijkse COP efficiëntie drempel"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_daily_cop",
+      "title": {
+        "en": "Current daily COP",
+        "nl": "Huidige dagelijkse COP"
+      },
+      "example": 3.2
+    },
+    {
+      "type": "number",
+      "name": "threshold_cop",
+      "title": {
+        "en": "Threshold COP",
+        "nl": "Drempel COP"
+      },
+      "example": 3
+    },
+    {
+      "type": "number",
+      "name": "data_points",
+      "title": {
+        "en": "Data points used",
+        "nl": "Gebruikte datapunten"
+      },
+      "example": 48
+    },
+    {
+      "type": "string",
+      "name": "confidence_level",
+      "title": {
+        "en": "Confidence level",
+        "nl": "Betrouwbaarheidsniveau"
+      },
+      "example": "high"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "adlar_cop_daily",
+  "title": {
+    "en": "Daily Average COP",
+    "nl": "Dagelijkse Gemiddelde COP"
+  },
+  "type": "number",
+  "units": {
+    "en": "COP",
+    "nl": "COP"
+  },
+  "min": 0,
+  "max": 8,
+  "step": 0.01,
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Daily Heat Pump Efficiency (COP)",
+    "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "24-hour rolling average COP for trend analysis and daily performance monitoring. Weighted by compressor runtime for accurate efficiency representation.",
+    "nl": "24-uur voortschrijdend gemiddelde COP voor trendanalyse en dagelijkse prestatiemonitoring. Gewogen op compressor looptijd voor nauwkeurige efficiëntie weergave."
+  }
+}

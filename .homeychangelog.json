@@ -1,6 +1,6 @@
 {
-  "0.98.3": {
-    "en": "Updated README documentation with COP calculation references and external power meter setup guidance."
+  "0.98.5": {
+    "en": "Added rolling COP system with time-series analysis: daily/weekly average COP calculations, efficiency trend detection, statistical outlier filtering, and new flow cards for advanced automation and performance monitoring."
   },
   "0.98.2": {
     "en": "Added cross-app integration with external data measurement flow cards for enhanced COP accuracy. Added COP outlier detection, full internationalization for all COP/SCOP capabilities, and mobile-optimized sensor values. Fixed device initialization issues and improved connection resilience."
