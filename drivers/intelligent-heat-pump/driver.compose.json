@@ -59,6 +59,9 @@
     "adlar_cop",
     "adlar_cop_method",
     "adlar_external_power",
+    "adlar_cop_daily",
+    "adlar_cop_weekly",
+    "adlar_cop_trend",
 
      "adlar_countdowntimer"
   ],
@@ -532,6 +535,61 @@
       "description": {
         "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations",
         "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen"
+      }
+    },
+
+    "adlar_cop_daily": {
+      "title": {
+        "en": "Daily Average COP",
+        "nl": "Dagelijkse Gemiddelde COP"
+      },
+      "type": "number",
+      "min": 0.0,
+      "max": 8.0,
+      "step": 0.01,
+      "decimals": 2,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Daily Heat Pump Efficiency (COP)",
+        "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+      },
+      "description": {
+        "en": "24-hour rolling average Coefficient of Performance for trend analysis and daily optimization",
+        "nl": "24-uurs voortschrijdend gemiddelde prestatiecoëfficiënt voor trendanalyse en dagelijkse optimalisatie"
+      }
+    },
+
+    "adlar_cop_weekly": {
+      "title": {
+        "en": "Weekly Average COP",
+        "nl": "Wekelijkse Gemiddelde COP"
+      },
+      "type": "number",
+      "min": 0.0,
+      "max": 8.0,
+      "step": 0.01,
+      "decimals": 2,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Weekly Heat Pump Efficiency (COP)",
+        "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)"
+      },
+      "description": {
+        "en": "7-day rolling average Coefficient of Performance for seasonal pattern identification",
+        "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie"
+      }
+    },
+
+    "adlar_cop_trend": {
+      "title": {
+        "en": "COP Efficiency Trend",
+        "nl": "COP Efficiëntie Trend"
+      },
+      "type": "string",
+      "insights": false,
+      "description": {
+        "en": "Current heat pump efficiency trend analysis showing performance direction and strength",
+        "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont"
       }
     }
   },

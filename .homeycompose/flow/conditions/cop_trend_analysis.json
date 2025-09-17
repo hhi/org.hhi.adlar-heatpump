@@ -1,0 +1,38 @@
+{
+  "id": "cop_trend_analysis",
+  "title": {
+    "en": "COP trend analysis",
+    "nl": "COP trend analyse"
+  },
+  "titleFormatted": {
+    "en": "COP trend is !{{improving|stable|degrading}} over [[hours]] hours",
+    "nl": "COP trend is !{{verbeterend|stabiel|verslechterend}} over [[hours]] uur"
+  },
+  "hint": {
+    "en": "Check the COP performance trend over a specified time period",
+    "nl": "Controleer de COP prestatie trend over een opgegeven tijdsperiode"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "hours",
+      "title": {
+        "en": "Time period (hours)",
+        "nl": "Tijdsperiode (uur)"
+      },
+      "min": 1,
+      "max": 168,
+      "step": 1,
+      "units": "h",
+      "placeholder": {
+        "en": "Number of hours to analyze",
+        "nl": "Aantal uur om te analyseren"
+      }
+    }
+  ]
+}
