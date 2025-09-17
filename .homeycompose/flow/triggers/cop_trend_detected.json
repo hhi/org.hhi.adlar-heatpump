@@ -1,0 +1,91 @@
+{
+  "id": "cop_trend_detected",
+  "title": {
+    "en": "COP trend detected",
+    "nl": "COP trend gedetecteerd"
+  },
+  "titleFormatted": {
+    "en": "COP trend detected: [[trend_type]]",
+    "nl": "COP trend gedetecteerd: [[trend_type]]"
+  },
+  "hint": {
+    "en": "Triggers when COP shows a significant improving or degrading trend over the last 24 hours",
+    "nl": "Wordt geactiveerd wanneer COP een significante verbeterende of verslechterende trend toont over de laatste 24 uur"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "dropdown",
+      "name": "trend_type",
+      "title": {
+        "en": "Trend type",
+        "nl": "Trend type"
+      },
+      "values": [
+        {
+          "id": "improving",
+          "title": {
+            "en": "improving",
+            "nl": "verbeterend"
+          }
+        },
+        {
+          "id": "degrading",
+          "title": {
+            "en": "degrading",
+            "nl": "verslechterend"
+          }
+        },
+        {
+          "id": "any",
+          "title": {
+            "en": "any trend change",
+            "nl": "elke trendverandering"
+          }
+        }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "name": "trend_direction",
+      "title": {
+        "en": "Trend direction",
+        "nl": "Trend richting"
+      },
+      "example": "improving"
+    },
+    {
+      "type": "number",
+      "name": "trend_strength",
+      "title": {
+        "en": "Trend strength",
+        "nl": "Trend sterkte"
+      },
+      "example": 0.25
+    },
+    {
+      "type": "string",
+      "name": "trend_description",
+      "title": {
+        "en": "Trend description",
+        "nl": "Trend beschrijving"
+      },
+      "example": "Strong improvement in efficiency"
+    },
+    {
+      "type": "number",
+      "name": "current_daily_cop",
+      "title": {
+        "en": "Current daily COP",
+        "nl": "Huidige dagelijkse COP"
+      },
+      "example": 3.4
+    }
+  ]
+}
