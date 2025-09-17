@@ -1,6 +1,12 @@
 {
+  "0.98.2": {
+    "en": "Added cross-app integration with external data measurement flow cards for enhanced COP accuracy. Added COP outlier detection, full internationalization for all COP/SCOP capabilities, and mobile-optimized sensor values. Fixed device initialization issues and improved connection resilience."
+  },
+  "0.98.1": {
+    "en": "Added SCOP calculation."
+  },
   "0.96.3": {
-    "en": "Added COP calculation with accompanying flow card for enhanced user feedback."
+    "en": "Added COP calculation."
   },
   "0.94.2": {
     "en": "Updated temperature-related labels for improved clarity in flow cards and device controls."

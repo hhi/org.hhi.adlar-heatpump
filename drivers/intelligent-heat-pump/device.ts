@@ -6,8 +6,8 @@ import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
 import { DeviceConstants } from '../../lib/constants';
 import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-types';
-import { COPCalculator, type COPDataSources } from '../../lib/services/cop-calculator';
-import { FlowDataManager } from '../../lib/services/flow-data-manager';
+import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/services/cop-calculator';
+import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -20,6 +20,7 @@ interface CapabilityCategories {
   power: string[];
   pulseSteps: string[];
   states: string[];
+  efficiency: string[];
 }
 
 /* eslint-disable camelcase */
@@ -30,6 +31,7 @@ interface UserFlowPreferences {
   flow_power_alerts: 'disabled' | 'auto' | 'enabled';
   flow_pulse_steps_alerts: 'disabled' | 'auto' | 'enabled';
   flow_state_alerts: 'disabled' | 'auto' | 'enabled';
+  flow_efficiency_alerts: 'disabled' | 'auto' | 'enabled';
   flow_expert_mode: boolean;
 }
 /* eslint-enable camelcase */
@@ -80,9 +82,12 @@ class MyDevice extends Homey.Device {
   private healthCheckInterval: NodeJS.Timeout | null = null;
 
   // COP (Coefficient of Performance) calculation
-  private flowDataManager: FlowDataManager | null = null;
   private copCalculationInterval: NodeJS.Timeout | null = null;
   private copSettings: COPSettings | null = null;
+
+  // SCOP (Seasonal Coefficient of Performance) calculation
+  private scopCalculator: SCOPCalculator | null = null;
+  private scopUpdateInterval: NodeJS.Timeout | null = null;
 
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
@@ -208,6 +213,53 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Set up Tuya device event handlers
+   * Extracted for reuse during connection recreation
+   */
+  private setupTuyaEventHandlers(): void {
+    if (!this.tuya) {
+      throw new Error('Cannot setup event handlers: Tuya device not initialized');
+    }
+
+    // TUYA ON EVENT (from dp id to capability name)
+    this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
+      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
+      const dpsFetched = data.dps || {};
+      this.log('Data received from Tuya:', dpsFetched);
+      // Update Homey capabilities based on the fetched DPS data
+      this.updateCapabilitiesFromDps(dpsFetched);
+      this.setAvailable()
+        .then(() => this.log('Device set as available'))
+        .catch((err) => this.error('Error setting device as available:', err));
+    });
+
+    // TUYA DP_REFRESH event (from dp id to capability name)
+    this.tuya.on('dp-refresh', (data: { dps: Record<number, unknown> }): void => {
+      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
+      const dpsFetched = data.dps || {};
+      this.log('DP-Refresh received from Tuya:', dpsFetched);
+      // Update Homey capabilities based on the fetched DPS data
+      this.updateCapabilitiesFromDps(dpsFetched);
+    });
+
+    // Fixing promise handling for setAvailable and setUnavailable
+    this.tuya.on('connected', (): void => {
+      this.log('Device', 'Connected to device!');
+      this.setAvailable()
+        .then(() => this.log('Device set as available'))
+        .catch((err) => this.error('Error setting device as available:', err));
+    });
+
+    this.tuya.on('disconnected', (): void => {
+      this.log('Device', 'Disconnected from device!');
+      this.tuyaConnected = false;
+      this.setUnavailable('Device disconnected')
+        .then(() => this.log('Device set as unavailable'))
+        .catch((err) => this.error('Error setting device as unavailable:', err));
+    });
+  }
+
+  /**
    * Update capability health tracking when value changes
    */
   private updateCapabilityHealth(capability: string, value: unknown): void {
@@ -310,6 +362,7 @@ class MyDevice extends Homey.Device {
       power: caps.filter((cap) => cap.includes('power')),
       pulseSteps: caps.filter((cap) => cap.includes('pulse_steps')),
       states: caps.filter((cap) => cap.startsWith('adlar_state')),
+      efficiency: caps.filter((cap) => cap.includes('cop') || cap.includes('scop')),
     };
   }
 
@@ -324,6 +377,7 @@ class MyDevice extends Homey.Device {
       flow_power_alerts: this.getSetting('flow_power_alerts') || 'auto',
       flow_pulse_steps_alerts: this.getSetting('flow_pulse_steps_alerts') || 'auto',
       flow_state_alerts: this.getSetting('flow_state_alerts') || 'auto',
+      flow_efficiency_alerts: this.getSetting('flow_efficiency_alerts') || 'auto',
       flow_expert_mode: this.getSetting('flow_expert_mode') || false,
     };
   }
@@ -369,6 +423,7 @@ class MyDevice extends Homey.Device {
       power: caps.filter((cap) => cap.includes('power')),
       pulseSteps: caps.filter((cap) => cap.includes('pulse_steps')),
       states: caps.filter((cap) => cap.startsWith('adlar_state')),
+      efficiency: caps.filter((cap) => cap.includes('cop') || cap.includes('scop')),
     };
   }
 
@@ -458,6 +513,11 @@ class MyDevice extends Homey.Device {
       power: ['power_above_threshold', 'power_threshold_exceeded', 'total_consumption_above'],
       pulseSteps: ['eev_pulse_steps_alert', 'evi_pulse_steps_alert'],
       states: ['compressor_running', 'compressor_state_changed', 'defrost_state_changed', 'backwater_state_changed'],
+      efficiency: [
+        'cop_efficiency_changed', 'cop_outlier_detected', 'cop_calculation_method_is',
+        'cop_efficiency_check',
+        'request_external_ambient_data', 'request_external_flow_data', 'request_external_power_data',
+      ],
     };
 
     return categoryCards[category] || [];
@@ -591,24 +651,31 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Format COP method for user-friendly display
+   * Format COP method for user-friendly display with internationalization
    */
   private formatCOPMethodDisplay(method: string, confidence: string): string {
-    const methodNames: Record<string, string> = {
-      direct_thermal: 'Direct Thermal',
-      power_module: 'Power Module',
-      power_estimation: 'Power Estimation',
-      refrigerant_circuit: 'Refrigerant Circuit',
-      carnot_estimation: 'Carnot Estimation',
-      valve_correlation: 'Valve Correlation',
-      temperature_difference: 'Temperature Difference',
-      insufficient_data: 'Insufficient Data',
+    // Get localized method names using Homey's i18n system
+    const getLocalizedMethodName = (methodKey: string): string => {
+      const i18nKey = `cop_method.${methodKey}`;
+      try {
+        return this.homey.__(i18nKey) || methodKey;
+      } catch (error) {
+        // Fallback to English if translation fails
+        const fallbackNames: Record<string, string> = {
+          direct_thermal: 'Direct Thermal',
+          power_module: 'Power Module',
+          power_estimation: 'Power Estimation',
+          refrigerant_circuit: 'Refrigerant Circuit',
+          carnot_estimation: 'Carnot Estimation',
+          valve_correlation: 'Valve Correlation',
+          temperature_difference: 'Temperature Difference',
+          insufficient_data: 'Insufficient Data',
+        };
+        return fallbackNames[methodKey] || methodKey;
+      }
     };
 
-    const methodName = methodNames[method];
-    if (!methodName) {
-      return `Unknown Method (${confidence})`;
-    }
+    const methodName = getLocalizedMethodName(method);
 
     // Format with confidence indicator
     let confidenceIndicator = '🔴'; // default low confidence
@@ -617,7 +684,221 @@ class MyDevice extends Homey.Device {
     } else if (confidence === 'medium') {
       confidenceIndicator = '🟡';
     }
+
     return `${methodName} ${confidenceIndicator}`;
+  }
+
+  /**
+   * Add COP measurement to SCOP calculator and update seasonal performance
+   */
+  private async addCOPMeasurementToSCOP(copResult: COPCalculationResult, combinedData: COPDataSources): Promise<void> {
+    if (!this.scopCalculator || !this.hasCapability('adlar_scop')) {
+      return;
+    }
+
+    try {
+      // Map COP calculation method to SCOP-compatible method
+      const getSCOPMethod = (method: COPCalculationResult['method']): COPMeasurement['method'] => {
+        switch (method) {
+          case 'power_estimation':
+            return 'power_module'; // Map power estimation to power module
+          case 'insufficient_data':
+            return 'temperature_difference'; // Fallback to basic method
+          default:
+            return method as COPMeasurement['method'];
+        }
+      };
+
+      // Create SCOP measurement from COP result
+      const scopMeasurement: COPMeasurement = {
+        cop: copResult.cop,
+        method: getSCOPMethod(copResult.method),
+        timestamp: Date.now(),
+        ambientTemperature: combinedData.ambientTemperature || 10, // Default if not available
+        loadRatio: this.estimateLoadRatio(combinedData),
+        confidence: copResult.confidence,
+      };
+
+      // Add measurement to SCOP calculator
+      this.scopCalculator.addCOPMeasurement(scopMeasurement);
+
+      // Calculate current SCOP
+      const scopResult = this.scopCalculator.calculateSCOP();
+
+      if (scopResult) {
+        // Update SCOP capabilities
+        const roundedSCOP = Math.round(scopResult.scop * 10) / 10;
+        await this.setCapabilityValue('adlar_scop', roundedSCOP);
+        await this.setCapabilityValue('adlar_scop_quality', scopResult.dataQuality);
+
+        this.debugLog(`📊 SCOP updated: ${roundedSCOP} (confidence: ${scopResult.confidence}, coverage: ${Math.round(scopResult.seasonalCoverage * 100)}%)`);
+      } else {
+        // Update status to show insufficient data with localized message
+        const insufficientStatus = this.getSCOPStatusMessage('insufficient_data');
+        await this.setCapabilityValue('adlar_scop_quality', insufficientStatus);
+        this.debugLog('📊 SCOP: Insufficient seasonal data for calculation');
+      }
+    } catch (error) {
+      this.error('Failed to add COP measurement to SCOP calculator:', error);
+    }
+  }
+
+  /**
+   * Estimate load ratio based on current system conditions
+   */
+  private estimateLoadRatio(data: COPDataSources): number {
+    // Simple load ratio estimation based on compressor frequency and ambient conditions
+    if (data.compressorFrequency && data.compressorFrequency > 0) {
+      const maxFrequency = 120; // Typical max compressor frequency
+      const baseLoadRatio = Math.min(data.compressorFrequency / maxFrequency, 1.0);
+
+      // Adjust for ambient temperature (colder = higher load)
+      if (data.ambientTemperature !== undefined) {
+        let tempAdjustment = 0;
+        if (data.ambientTemperature < 0) {
+          tempAdjustment = 0.2;
+        } else if (data.ambientTemperature < 5) {
+          tempAdjustment = 0.1;
+        }
+        return Math.min(baseLoadRatio + tempAdjustment, 1.0);
+      }
+
+      return baseLoadRatio;
+    }
+
+    // Default load ratio if no frequency data
+    return 0.5;
+  }
+
+  /**
+   * Simple direct external device access methods
+   */
+
+  /**
+   * Get external power data from capability (fed via flow card)
+   */
+  private async getExternalPowerData(): Promise<number | null> {
+    // Check if we have external power data from flow card
+    if (this.hasCapability('adlar_external_power')) {
+      const value = this.getCapabilityValue('adlar_external_power');
+      if (typeof value === 'number' && !Number.isNaN(value) && value > 0) {
+        this.debugLog(`📊 Using external power data: ${value}W (from flow card)`);
+        return value;
+      }
+    }
+
+    this.debugLog('📊 No external power data available - use "Send power data to heat pump" flow card to provide external power');
+    return null;
+  }
+
+  /**
+   * Get external flow data directly from configured device
+   */
+  private async getExternalFlowData(): Promise<number | null> {
+    const deviceId = this.getSetting('external_flow_device_id');
+    const capability = this.getSetting('external_flow_capability') || 'measure_water';
+
+    if (!deviceId || deviceId.trim() === '') {
+      return null;
+    }
+
+    try {
+      // Use getAllDevices to find the device by ID
+      const allDevices = Object.values(this.homey.drivers.getDrivers())
+        .flatMap((driver) => Object.values(driver.getDevices()));
+      const device = allDevices.find((d) => d.getData().id === deviceId);
+      if (device && device.hasCapability(capability)) {
+        const value = device.getCapabilityValue(capability);
+        if (typeof value === 'number' && !Number.isNaN(value)) {
+          this.debugLog(`💧 External flow data: ${value}L/min from device ${deviceId}`);
+          return value;
+        }
+      }
+    } catch (error) {
+      this.error(`Failed to read external flow from device ${deviceId}:`, error);
+    }
+
+    return null;
+  }
+
+  /**
+   * Get external ambient temperature data directly from configured device
+   */
+  private async getExternalAmbientData(): Promise<number | null> {
+    const deviceId = this.getSetting('external_ambient_device_id');
+    const capability = this.getSetting('external_ambient_capability') || 'measure_temperature';
+
+    if (!deviceId || deviceId.trim() === '') {
+      return null;
+    }
+
+    try {
+      // Use getAllDevices to find the device by ID
+      const allDevices = Object.values(this.homey.drivers.getDrivers())
+        .flatMap((driver) => Object.values(driver.getDevices()));
+      const device = allDevices.find((d) => d.getData().id === deviceId);
+      if (device && device.hasCapability(capability)) {
+        const value = device.getCapabilityValue(capability);
+        if (typeof value === 'number' && !Number.isNaN(value)) {
+          this.debugLog(`🌡️ External ambient data: ${value}°C from device ${deviceId}`);
+          return value;
+        }
+      }
+    } catch (error) {
+      this.error(`Failed to read external ambient temperature from device ${deviceId}:`, error);
+    }
+
+    return null;
+  }
+
+  /**
+   * Get all external data in a simple, efficient way
+   */
+  private async getExternalDeviceData(): Promise<{
+    electricalPower?: number;
+    waterFlowRate?: number;
+    ambientTemperature?: number;
+  }> {
+    const externalData: { electricalPower?: number; waterFlowRate?: number; ambientTemperature?: number } = {};
+
+    // Get external power data
+    const powerData = await this.getExternalPowerData();
+    if (powerData !== null) {
+      externalData.electricalPower = powerData;
+    }
+
+    // Get external flow data
+    const flowData = await this.getExternalFlowData();
+    if (flowData !== null) {
+      externalData.waterFlowRate = flowData;
+    }
+
+    // Get external ambient data
+    const ambientData = await this.getExternalAmbientData();
+    if (ambientData !== null) {
+      externalData.ambientTemperature = ambientData;
+    }
+
+    return externalData;
+  }
+
+  /**
+   * Get localized SCOP status message
+   */
+  private getSCOPStatusMessage(statusKey: string): string {
+    const i18nKey = `scop_status.${statusKey}`;
+    try {
+      return this.homey.__(i18nKey) || statusKey;
+    } catch (error) {
+      // Fallback to English if translation fails
+      const fallbackMessages: Record<string, string> = {
+        initializing: 'Initializing seasonal data collection...',
+        collecting: 'Collecting seasonal performance data',
+        insufficient_data: 'Insufficient seasonal data (need 7+ days)',
+        calculating: 'Calculating seasonal performance...',
+      };
+      return fallbackMessages[statusKey] || statusKey;
+    }
   }
 
   /**
@@ -625,9 +906,16 @@ class MyDevice extends Homey.Device {
    */
   private async initializeCOP(): Promise<void> {
     try {
-      // Initialize flow data manager for cross-app communication
-      this.flowDataManager = new FlowDataManager(this.homey);
-      this.log('Flow data manager initialized');
+      // Initialize SCOP calculator for seasonal performance tracking
+      this.scopCalculator = new SCOPCalculator(this.homey);
+      this.log('SCOP calculator initialized');
+
+      // Initialize SCOP quality capability with localized message
+      if (this.hasCapability('adlar_scop_quality')) {
+        const initialStatus = this.getSCOPStatusMessage('initializing');
+        await this.setCapabilityValue('adlar_scop_quality', initialStatus);
+        this.log('SCOP quality capability initialized with status message');
+      }
 
       // Load COP settings from device settings
       await this.loadCOPSettings();
@@ -638,12 +926,34 @@ class MyDevice extends Homey.Device {
         const copEnabled = this.copSettings?.enableCOP !== false; // default enabled
         if (copEnabled) {
           this.startCOPCalculationInterval();
+          // Update SCOP quality to collecting status once COP starts
+          if (this.hasCapability('adlar_scop_quality')) {
+            const collectingStatus = this.getSCOPStatusMessage('collecting');
+            await this.setCapabilityValue('adlar_scop_quality', collectingStatus);
+          }
           this.log('COP calculation system initialized and started');
         } else {
+          // Update SCOP quality to show COP is disabled
+          if (this.hasCapability('adlar_scop_quality')) {
+            const disabledMessage = this.homey.__('COP calculation disabled') || 'COP calculation disabled';
+            await this.setCapabilityValue('adlar_scop_quality', disabledMessage);
+          }
           this.log('COP calculation disabled by settings');
         }
       } else {
         this.log('COP capability not available on device');
+      }
+
+      // Initialize SCOP updates if capability is available
+      if (this.hasCapability('adlar_scop') && this.scopCalculator) {
+        this.startSCOPUpdateInterval();
+        this.log('SCOP update system initialized');
+      }
+
+      // Initialize external power capability with default value
+      if (this.hasCapability('adlar_external_power')) {
+        await this.setCapabilityValue('adlar_external_power', 0);
+        this.log('External power capability initialized with default value (0W)');
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -776,6 +1086,72 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Start SCOP update interval for daily/periodic SCOP recalculation
+   */
+  private startSCOPUpdateInterval(): void {
+    try {
+      const interval = this.homey.setInterval(async () => {
+        try {
+          await this.updateSCOPCapabilities();
+        } catch (error) {
+          this.error('Error during SCOP update:', error);
+        }
+      }, DeviceConstants.SCOP_CALCULATION_INTERVAL_MS);
+
+      if (interval) {
+        this.scopUpdateInterval = interval;
+        this.log('Started SCOP update interval (daily)');
+      } else {
+        this.error('Failed to start SCOP update interval: setInterval returned undefined');
+      }
+    } catch (err) {
+      this.error('Error starting SCOP update interval:', err);
+    }
+  }
+
+  /**
+   * Stop SCOP update interval
+   */
+  private stopSCOPUpdateInterval(): void {
+    if (this.scopUpdateInterval) {
+      clearInterval(this.scopUpdateInterval);
+      this.scopUpdateInterval = null;
+      this.log('Stopped SCOP update interval');
+    }
+  }
+
+  /**
+   * Update SCOP capabilities with latest seasonal calculation
+   */
+  private async updateSCOPCapabilities(): Promise<void> {
+    if (!this.scopCalculator || !this.hasCapability('adlar_scop')) {
+      return;
+    }
+
+    try {
+      const scopResult = this.scopCalculator.calculateSCOP();
+
+      if (scopResult) {
+        const roundedSCOP = Math.round(scopResult.scop * 10) / 10;
+        await this.setCapabilityValue('adlar_scop', roundedSCOP);
+        await this.setCapabilityValue('adlar_scop_quality', scopResult.dataQuality);
+
+        this.log(`📊 SCOP daily update: ${roundedSCOP} (confidence: ${scopResult.confidence}, ${Math.round(scopResult.seasonalCoverage * 100)}% coverage)`);
+
+        // Log seasonal summary in debug mode
+        this.debugLog('SCOP seasonal summary:', this.scopCalculator.getSeasonalSummary());
+      } else {
+        // Update status to show insufficient data with localized message
+        const insufficientStatus = this.getSCOPStatusMessage('insufficient_data');
+        await this.setCapabilityValue('adlar_scop_quality', insufficientStatus);
+        this.debugLog('📊 SCOP daily update: Insufficient data for calculation');
+      }
+    } catch (error) {
+      this.error('Failed to update SCOP capabilities:', error);
+    }
+  }
+
+  /**
    * Calculate and update COP value with enhanced debugging
    */
   private async calculateAndUpdateCOP(): Promise<void> {
@@ -789,86 +1165,32 @@ class MyDevice extends Homey.Device {
       const deviceData = this.gatherDeviceDataSources();
       this.debugLog('Device data sources gathered:', deviceData);
 
-      // Get external device data via flow cards if configured
+      // Get external device data via direct access if configured
       let externalData = {};
-      const externalDeviceInfo: Record<string, { deviceName: string; value: number; source: string }> = {};
       const externalDataSources: string[] = [];
 
-      if (this.flowDataManager && this.copSettings?.externalDevices) {
-        // Prepare flow data configuration
-        const flowConfig = {
-          powerEnabled: this.copSettings.externalDevices.power?.enabled || false,
-          flowEnabled: this.copSettings.externalDevices.flow?.enabled || false,
-          ambientEnabled: this.copSettings.externalDevices.ambient?.enabled || false,
-          requestTimeoutMs: 30000, // 30 second timeout
-        };
+      this.log('🔍 Checking external device configurations...');
 
-        // Check if any external devices are enabled
-        const hasEnabledDevices = flowConfig.powerEnabled || flowConfig.flowEnabled || flowConfig.ambientEnabled;
+      // Use simplified direct device access
+      const externalDeviceData = await this.getExternalDeviceData();
 
-        if (hasEnabledDevices) {
-          this.debugLog(`Requesting external data via flow cards: ${[
-            flowConfig.powerEnabled && 'power',
-            flowConfig.flowEnabled && 'flow',
-            flowConfig.ambientEnabled && 'ambient',
-          ].filter(Boolean).join(', ')}`);
-
-          try {
-            const flowResult = await this.flowDataManager.getExternalDeviceData(flowConfig);
-
-            // Process power data
-            if (flowResult.electricalPower) {
-              externalData = { ...externalData, electricalPower: flowResult.electricalPower.value };
-              externalDeviceInfo.electricalPower = {
-                deviceName: flowResult.electricalPower.source,
-                value: flowResult.electricalPower.value,
-                source: 'flow_card',
-              };
-              externalDataSources.push('power(flow_card)');
-            }
-
-            // Process flow data
-            if (flowResult.waterFlowRate) {
-              externalData = { ...externalData, waterFlowRate: flowResult.waterFlowRate.value };
-              externalDeviceInfo.waterFlowRate = {
-                deviceName: flowResult.waterFlowRate.source,
-                value: flowResult.waterFlowRate.value,
-                source: 'flow_card',
-              };
-              externalDataSources.push('flow(flow_card)');
-            }
-
-            // Process ambient data
-            if (flowResult.ambientTemperature) {
-              externalData = { ...externalData, ambientTemperature: flowResult.ambientTemperature.value };
-              externalDeviceInfo.ambientTemperature = {
-                deviceName: flowResult.ambientTemperature.source,
-                value: flowResult.ambientTemperature.value,
-                source: 'flow_card',
-              };
-              externalDataSources.push('ambient(flow_card)');
-            }
-
-            this.debugLog('External data sources:', externalDataSources.length > 0 ? externalDataSources.join(', ') : 'none');
-            this.debugLog('External data retrieved via flow cards:', externalData);
-
-            // Enhanced external device logging with device names and current values
-            if (Object.keys(externalDeviceInfo).length > 0) {
-              this.log('🔗 External devices found for COP calculation via flow cards:');
-              Object.entries(externalDeviceInfo).forEach(([dataType, info]) => {
-                this.log(`  📍 ${dataType}: "${info.deviceName}" = ${info.value} (source: ${info.source})`);
-              });
-            }
-
-            // Log any errors from the flow request
-            if (flowResult.errors.length > 0) {
-              this.error('External device flow card errors:', flowResult.errors);
-            }
-          } catch (error) {
-            this.error('Failed to get external device data via flow cards:', error);
-          }
-        }
+      if (externalDeviceData.electricalPower !== null) {
+        externalData = { ...externalData, electricalPower: externalDeviceData.electricalPower };
+        externalDataSources.push('power(direct)');
       }
+
+      if (externalDeviceData.waterFlowRate !== null) {
+        externalData = { ...externalData, waterFlowRate: externalDeviceData.waterFlowRate };
+        externalDataSources.push('flow(direct)');
+      }
+
+      if (externalDeviceData.ambientTemperature !== null) {
+        externalData = { ...externalData, ambientTemperature: externalDeviceData.ambientTemperature };
+        externalDataSources.push('ambient(direct)');
+      }
+
+      this.debugLog('External data sources:', externalDataSources.length > 0 ? externalDataSources.join(', ') : 'none');
+      this.debugLog('External data retrieved via direct access:', externalData);
 
       // Combine device and external data (external data takes precedence, unless undefined)
       const combinedData = {
@@ -896,8 +1218,7 @@ class MyDevice extends Homey.Device {
 
       const copResult = COPCalculator.calculateCOP(combinedData, copConfig);
 
-      // Enhance result with external device source information
-      this.enhanceCOPResultWithExternalSources(copResult, externalDeviceInfo);
+      // Note: External device source enhancement removed in simplified approach
 
       // Enhanced result logging
       this.logCOPCalculationResult(copResult);
@@ -915,6 +1236,9 @@ class MyDevice extends Homey.Device {
 
         // Log method description for debugging
         this.debugLog('Method details:', COPCalculator.getMethodDescription(copResult.method));
+
+        // Add measurement to SCOP calculator if available
+        await this.addCOPMeasurementToSCOP(copResult, combinedData);
       } else if (copResult.isOutlier) {
         this.log(`⚠️ COP outlier detected (${copResult.cop.toFixed(2)}): ${copResult.outlierReason}`);
         this.debugLog('Outlier data sources:', copResult.dataSources);
@@ -934,6 +1258,14 @@ class MyDevice extends Homey.Device {
       } else {
         this.log(`❌ COP calculation failed: ${copResult.method}`);
         this.debugLog('Failed calculation data:', combinedData);
+
+        // Update capabilities to reflect failed calculation
+        if (copResult.method === 'insufficient_data') {
+          await this.setCapabilityValue('adlar_cop', 0);
+          const failedMethodName = this.formatCOPMethodDisplay('insufficient_data', 'low');
+          await this.setCapabilityValue('adlar_cop_method', failedMethodName);
+          this.log('✅ COP capabilities updated to reflect insufficient data condition');
+        }
       }
 
       // Trigger COP efficiency flow card if thresholds are met
@@ -947,7 +1279,6 @@ class MyDevice extends Homey.Device {
         this.error('COP calculation error context:', {
           hasCapability: this.hasCapability('adlar_cop'),
           copSettings: this.copSettings,
-          flowDataManager: !!this.flowDataManager,
         });
       }
     }
@@ -1224,9 +1555,20 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Get human-readable description of COP calculation method
+   * Get human-readable description of COP calculation method with internationalization
    */
   private getCOPMethodDescription(method: string): string | null {
+    const i18nKey = `cop_method_description.${method}`;
+    try {
+      const description = this.homey.__(i18nKey);
+      if (description && description !== i18nKey) {
+        return description;
+      }
+    } catch (error) {
+      // Fall through to fallback descriptions
+    }
+
+    // Fallback to English descriptions if translation not available
     switch (method) {
       case 'direct_thermal':
         return 'Direct thermal calculation using water flow and temperature difference (±5% accuracy)';
@@ -1398,6 +1740,7 @@ class MyDevice extends Homey.Device {
     if (capability.includes('power')) return 'power';
     if (capability.includes('pulse_steps')) return 'pulseSteps';
     if (capability.startsWith('adlar_state')) return 'states';
+    if (capability.includes('cop') || capability.includes('scop')) return 'efficiency';
     return 'temperature'; // Default fallback
   }
 
@@ -1477,6 +1820,7 @@ class MyDevice extends Homey.Device {
       power: 'flow_power_alerts',
       pulseSteps: 'flow_pulse_steps_alerts',
       states: 'flow_state_alerts',
+      efficiency: 'flow_efficiency_alerts',
     };
 
     const userSetting = userSettings[settingMap[category]];
@@ -2204,8 +2548,15 @@ class MyDevice extends Homey.Device {
       version,
     });
 
-    // Connect once at startup
-    await this.connectTuya();
+    // Attempt initial connection (non-blocking to allow device initialization)
+    try {
+      await this.connectTuya();
+      this.log('Initial Tuya connection established during startup');
+    } catch (error) {
+      this.error('Initial Tuya connection failed during startup, will retry via reconnection interval:', error);
+      // Don't throw - allow device initialization to continue
+      // The reconnection interval will handle establishing connection
+    }
 
     // Start reconnection interval
     this.startReconnectInterval();
@@ -2219,45 +2570,12 @@ class MyDevice extends Homey.Device {
     // Initialize COP calculation system
     await this.initializeCOP();
 
-    // TUYA ON EVENT (from dp id to capability name)
-    this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
-      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
-      const dpsFetched = data.dps || {};
-      this.log('Data received from Tuya:', dpsFetched);
+    // Set up Tuya device event handlers
+    this.setupTuyaEventHandlers();
 
-      // Update Homey capabilities based on the fetched DPS data
-      this.updateCapabilitiesFromDps(dpsFetched);
-
-      this.setAvailable()
-        .then(() => this.log('Device set as available'))
-        .catch((err) => this.error('Error setting device as available:', err));
-    });
-
-    // TUYA DP_REFRESH event (from dp id to capability name)
-    this.tuya.on('dp-refresh', (data: { dps: Record<number, unknown> }): void => {
-      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
-      const dpsFetched = data.dps || {};
-      this.log('DP-Refresh received from Tuya:', dpsFetched);
-
-      // Update Homey capabilities based on the fetched DPS data
-      this.updateCapabilitiesFromDps(dpsFetched);
-    });
-
-    // Fixing promise handling for setAvailable and setUnavailable
-    this.tuya.on('connected', (): void => {
-      this.log('Device', 'Connected to device!');
-      this.setAvailable()
-        .then(() => this.log('Device set as available'))
-        .catch((err) => this.error('Error setting device as available:', err));
-    });
-
-    this.tuya.on('disconnected', (): void => {
-      this.log('Device', 'Disconnected from device!');
-      this.tuyaConnected = false;
-      this.setUnavailable('Device disconnected')
-        .then(() => this.log('Device set as unavailable'))
-        .catch((err) => this.error('Error setting device as unavailable:', err));
-    });
+    // Set device as available after successful initialization
+    await this.setAvailable();
+    this.log('✅ Device initialization completed - device is now available in Homey');
 
   }
 
@@ -2286,6 +2604,27 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+
+    // Handle device credential changes (for repair scenarios)
+    const credentialKeysChanged = changedKeys.filter(
+      (key) => ['device_id', 'local_key', 'ip_address'].includes(key),
+    );
+
+    if (credentialKeysChanged.length > 0) {
+      this.log('🔧 Device credentials changed:', credentialKeysChanged);
+
+      // Update store values to match settings
+      for (const key of credentialKeysChanged) {
+        const newValue = newSettings[key];
+        if (newValue && typeof newValue === 'string') {
+          await this.setStoreValue(key, newValue);
+          this.log(`Updated store value: ${key} = ${newValue}`);
+        }
+      }
+
+      this.log('Device credentials updated, connection will be re-established automatically');
+      return `Device credentials updated successfully. New ${credentialKeysChanged.join(', ')} will be used on next connection attempt.`;
+    }
 
     // Check if any flow card settings were changed
     const flowSettingsChanged = changedKeys.some((key) => key.startsWith('flow_'));
@@ -2320,6 +2659,31 @@ class MyDevice extends Homey.Device {
       }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
 
       return `Capability Diagnostics Report:\n\n${diagnosticReport}`;
+    }
+
+    // Handle flow trigger test
+    if (changedKeys.includes('flow_trigger_test') && newSettings.flow_trigger_test === true) {
+      this.log('🧪 Flow trigger test requested via settings');
+
+      // Execute test asynchronously
+      this.testExternalDataFlowTriggers()
+        .then(() => {
+          this.log('✅ Flow trigger test completed - check logs for detailed results');
+        })
+        .catch((error) => {
+          this.error('❌ Flow trigger test failed:', error);
+        });
+
+      // Reset the checkbox after a short delay
+      this.homey.setTimeout(async () => {
+        try {
+          await this.setSettings({ flow_trigger_test: false });
+        } catch (error) {
+          this.error('Failed to reset flow trigger test checkbox:', error);
+        }
+      }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+
+      return 'Flow trigger test started - check device logs for detailed results';
     }
 
     // Handle power measurement settings
@@ -2405,12 +2769,20 @@ class MyDevice extends Homey.Device {
         this.stopCOPCalculationInterval();
         this.startCOPCalculationInterval();
         this.log('COP calculation restarted with new settings');
+
+        // Also restart SCOP updates if available
+        if (this.hasCapability('adlar_scop') && this.scopCalculator) {
+          this.stopSCOPUpdateInterval();
+          this.startSCOPUpdateInterval();
+          this.log('SCOP updates restarted with COP settings');
+        }
       } else {
         this.stopCOPCalculationInterval();
-        this.log('COP calculation stopped');
+        this.stopSCOPUpdateInterval();
+        this.log('COP calculation and SCOP updates stopped');
       }
 
-      return 'COP settings updated and calculation system restarted.';
+      return 'COP and SCOP settings updated and calculation systems restarted.';
     }
 
     return undefined;
@@ -2454,6 +2826,8 @@ class MyDevice extends Homey.Device {
     const copCapabilities = [
       'adlar_cop',
       'adlar_cop_method',
+      'adlar_scop',
+      'adlar_scop_quality',
     ];
 
     // Process power capabilities
@@ -2574,10 +2948,71 @@ class MyDevice extends Homey.Device {
       this.debugLog('Simple ACTION cards are managed by app-level pattern-based system');
 
       // Reserve this method for custom/complex ACTION cards that need device-specific logic
+
+      // Register external power data action card
+      const receiveExternalPowerAction = this.homey.flow.getActionCard('receive_external_power_data');
+      receiveExternalPowerAction.registerRunListener(async (args: { device: any; power_value: number }) => {
+        this.debugLog(`📊 Received external power data: ${args.power_value}W`);
+
+        // Store the external power value in the capability
+        if (this.hasCapability('adlar_external_power')) {
+          await this.setCapabilityValue('adlar_external_power', args.power_value);
+        }
+
+        this.log(`✅ External power data updated: ${args.power_value}W`);
+      });
       // Currently no custom ACTION cards require device-level registration
     } catch (error) {
       this.error('Error registering flow card action listeners:', error);
     }
+  }
+
+  /**
+   * Diagnostic method to test external device direct access system
+   * This method can be called to manually test if direct device access is working
+   */
+  async testExternalDataFlowTriggers(): Promise<void> {
+    this.log('🧪 Starting external device direct access diagnostic test...');
+
+    try {
+      // Test direct device access
+      this.log('📡 Testing direct device access...');
+      const externalData = await this.getExternalDeviceData();
+
+      this.log('📊 External device access test results:', JSON.stringify({
+        hasPowerData: externalData.electricalPower !== null,
+        hasFlowData: externalData.waterFlowRate !== null,
+        hasAmbientData: externalData.ambientTemperature !== null,
+        powerValue: externalData.electricalPower,
+        flowValue: externalData.waterFlowRate,
+        ambientValue: externalData.ambientTemperature,
+      }));
+
+      // Test individual device configurations
+      const powerDeviceId = this.getSetting('external_power_device_id');
+      const flowDeviceId = this.getSetting('external_flow_device_id');
+      const ambientDeviceId = this.getSetting('external_ambient_device_id');
+
+      this.log('🔍 Device configuration:', JSON.stringify({
+        powerDeviceConfigured: !!(powerDeviceId && powerDeviceId.trim()),
+        flowDeviceConfigured: !!(flowDeviceId && flowDeviceId.trim()),
+        ambientDeviceConfigured: !!(ambientDeviceId && ambientDeviceId.trim()),
+        powerDeviceId: powerDeviceId || 'not configured',
+        flowDeviceId: flowDeviceId || 'not configured',
+        ambientDeviceId: ambientDeviceId || 'not configured',
+      }));
+
+      if (externalData.electricalPower === null && externalData.waterFlowRate === null && externalData.ambientTemperature === null) {
+        this.log('ℹ️ No external devices configured - this is normal if you want to use internal sensors only');
+      } else {
+        this.log('✅ External device access test completed successfully');
+      }
+
+    } catch (error) {
+      this.error('❌ Error during external device diagnostic test:', error);
+    }
+
+    this.log('🧪 External device direct access diagnostic test completed');
   }
 
   /**
@@ -2594,6 +3029,9 @@ class MyDevice extends Homey.Device {
 
     // Stop COP calculation interval
     this.stopCOPCalculationInterval();
+
+    // Stop SCOP update interval
+    this.stopSCOPUpdateInterval();
 
     if (this.tuya) {
       try {

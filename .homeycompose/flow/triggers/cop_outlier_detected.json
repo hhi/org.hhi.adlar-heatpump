@@ -34,7 +34,7 @@
       "name": "outlier_reason",
       "title": {
         "en": "Outlier reason",
-        "nl": "Reden uitbijter"
+        "nl": "Reden uitschieter"
       },
       "example": "COP value above maximum threshold (8.0)"
     },

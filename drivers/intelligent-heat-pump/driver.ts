@@ -50,6 +50,46 @@ class MyDriver extends Homey.Driver {
   //   ];
   // }
 
+  async onRepair(session: PairSession) {
+    let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string } | null = null;
+
+    this.log('Repair session started');
+
+    // Step 1: Show the repair view to update device credentials
+    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string }) => {
+      // Store the updated credentials for later use
+      deviceCredentials = data;
+      return true;
+    });
+
+    // Received when a view has changed
+    session.setHandler('showView', async (viewId: unknown) => {
+      this.log(`Repair View: ${viewId}`);
+    });
+
+    // Step 2: Apply the updated credentials
+    session.setHandler('update_device', async (device: any) => {
+      if (!deviceCredentials) {
+        throw new Error('Device credentials not provided during repair');
+      }
+
+      // Update device settings with new credentials
+      await device.setSettings({
+        device_id: deviceCredentials.deviceId,
+        local_key: deviceCredentials.localKey,
+        ip_address: deviceCredentials.ipAddress,
+      });
+
+      // Update store data for internal use
+      await device.setStoreValue('device_id', deviceCredentials.deviceId);
+      await device.setStoreValue('local_key', deviceCredentials.localKey);
+      await device.setStoreValue('ip_address', deviceCredentials.ipAddress);
+
+      this.log(`Device repaired with new credentials: ${deviceCredentials.deviceId} @ ${deviceCredentials.ipAddress}`);
+      return true;
+    });
+  }
+
   async onPair(session: PairSession) {
     let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string } | null = null;
 

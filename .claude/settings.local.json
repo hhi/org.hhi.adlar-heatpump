@@ -40,7 +40,12 @@
       "Bash(cat:*)",
       "Bash(git reset:*)",
       "WebFetch(domain:json.schemastore.org)",
-      "WebFetch(domain:www.schemastore.org)"
+      "WebFetch(domain:www.schemastore.org)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "WebSearch",
+      "Bash(npx tsc:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
