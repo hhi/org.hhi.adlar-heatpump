@@ -8,6 +8,7 @@ import { DeviceConstants } from '../../lib/constants';
 import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-types';
 import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/services/cop-calculator';
 import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
+import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -88,6 +89,10 @@ class MyDevice extends Homey.Device {
   // SCOP (Seasonal Coefficient of Performance) calculation
   private scopCalculator: SCOPCalculator | null = null;
   private scopUpdateInterval: NodeJS.Timeout | null = null;
+
+  // Rolling COP calculation
+  private rollingCOPCalculator: RollingCOPCalculator | null = null;
+  private lastRollingCOPUpdate: number = 0;
 
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
@@ -516,6 +521,8 @@ class MyDevice extends Homey.Device {
       efficiency: [
         'cop_efficiency_changed', 'cop_outlier_detected', 'cop_calculation_method_is',
         'cop_efficiency_check',
+        'daily_cop_efficiency_changed', 'cop_trend_detected',
+        'daily_cop_above_threshold', 'cop_trend_analysis',
         'request_external_ambient_data', 'request_external_flow_data', 'request_external_power_data',
       ],
     };
@@ -768,6 +775,181 @@ class MyDevice extends Homey.Device {
 
     // Default load ratio if no frequency data
     return 0.5;
+  }
+
+  /**
+   * Add COP measurement to rolling COP calculator
+   */
+  private async addCOPMeasurementToRolling(copResult: COPCalculationResult, combinedData: COPDataSources): Promise<void> {
+    if (!this.rollingCOPCalculator) {
+      return;
+    }
+
+    try {
+      // Create rolling COP data point
+      const dataPoint: COPDataPoint = {
+        timestamp: Date.now(),
+        cop: copResult.cop,
+        method: copResult.method,
+        confidence: copResult.confidence,
+        electricalPower: combinedData.electricalPower,
+        thermalOutput: copResult.calculationDetails?.thermalOutput,
+        ambientTemperature: combinedData.ambientTemperature,
+        compressorRuntime: this.getCompressorRuntime(),
+      };
+
+      // Add data point to rolling calculator
+      this.rollingCOPCalculator.addDataPoint(dataPoint);
+
+      // Update rolling COP capabilities (every 5 minutes to avoid excessive updates)
+      const now = Date.now();
+      if (now - this.lastRollingCOPUpdate >= 5 * 60 * 1000) { // 5 minutes
+        await this.updateRollingCOPCapabilities();
+        this.lastRollingCOPUpdate = now;
+      }
+
+      this.debugLog('📈 Rolling COP: Added data point with COP', copResult.cop);
+    } catch (error) {
+      this.error('Failed to add COP measurement to rolling calculator:', error);
+    }
+  }
+
+  /**
+   * Update rolling COP capabilities with latest calculations
+   */
+  private async updateRollingCOPCapabilities(): Promise<void> {
+    if (!this.rollingCOPCalculator) {
+      return;
+    }
+
+    try {
+      // Calculate daily COP
+      const dailyCOP = this.rollingCOPCalculator.getDailyCOP();
+      if (dailyCOP && this.hasCapability('adlar_cop_daily')) {
+        await this.setCapabilityValue('adlar_cop_daily', dailyCOP.averageCOP);
+        this.debugLog('📅 Daily COP updated:', dailyCOP.averageCOP, `(${dailyCOP.dataPoints} points, ${dailyCOP.confidenceLevel} confidence)`);
+
+        // Trigger daily COP efficiency flow cards
+        await this.triggerDailyCOPFlowCards(dailyCOP);
+      }
+
+      // Calculate weekly COP
+      const weeklyCOP = this.rollingCOPCalculator.getWeeklyCOP();
+      if (weeklyCOP && this.hasCapability('adlar_cop_weekly')) {
+        await this.setCapabilityValue('adlar_cop_weekly', weeklyCOP.averageCOP);
+        this.debugLog('📊 Weekly COP updated:', weeklyCOP.averageCOP, `(${weeklyCOP.dataPoints} points, ${weeklyCOP.confidenceLevel} confidence)`);
+      }
+
+      // Update trend analysis
+      const trendAnalysis = this.rollingCOPCalculator.getTrendAnalysis(24);
+      if (trendAnalysis && this.hasCapability('adlar_cop_trend')) {
+        await this.setCapabilityValue('adlar_cop_trend', trendAnalysis.description);
+        this.debugLog('📈 COP Trend updated:', trendAnalysis.description, `(${trendAnalysis.strength.toFixed(3)} strength)`);
+
+        // Trigger trend flow cards
+        await this.triggerCOPTrendFlowCards(trendAnalysis, dailyCOP);
+      }
+    } catch (error) {
+      this.error('Failed to update rolling COP capabilities:', error);
+    }
+  }
+
+  /**
+   * Trigger daily COP efficiency flow cards
+   */
+  private async triggerDailyCOPFlowCards(dailyCOP: RollingCOPResult): Promise<void> {
+    // Check for threshold crossing triggers (simplified - would need to store previous values)
+    // This is a basic implementation - could be enhanced with threshold storage
+    if (this.hasCapability('adlar_cop_daily')) {
+      const tokens = {
+        current_daily_cop: dailyCOP.averageCOP,
+        threshold_cop: 3.0, // Example threshold - would be configurable
+        data_points: dailyCOP.dataPoints,
+        confidence_level: dailyCOP.confidenceLevel,
+      };
+
+      // Note: Actual threshold comparison would be done in flow card listener
+      this.debugLog('📅 Daily COP flow tokens ready:', tokens);
+    }
+  }
+
+  /**
+   * Trigger COP trend flow cards
+   */
+  private async triggerCOPTrendFlowCards(trendAnalysis: { trend: string; strength: number; description: string }, dailyCOP: RollingCOPResult | null): Promise<void> {
+    if (trendAnalysis.strength > 0.15) { // Only trigger for significant trends
+      const tokens = {
+        trend_direction: trendAnalysis.trend,
+        trend_strength: trendAnalysis.strength,
+        trend_description: trendAnalysis.description,
+        current_daily_cop: dailyCOP?.averageCOP || 0,
+      };
+
+      await this.triggerFlowCard('cop_trend_detected', tokens);
+      this.debugLog('📈 COP trend flow card triggered:', tokens);
+    }
+  }
+
+  /**
+   * Get current compressor runtime (simplified estimation)
+   */
+  private getCompressorRuntime(): number {
+    // This is a simplified implementation
+    // In a real system, you'd track actual runtime
+    const compressorState = this.getCapabilityValue('adlar_state_compressor_state');
+    return compressorState ? 30 : 0; // 30 minutes if running, 0 if not
+  }
+
+  /**
+   * Initialize rolling COP calculator
+   */
+  private async initializeRollingCOP(): Promise<void> {
+    try {
+      // Initialize with default config - could be made configurable
+      this.rollingCOPCalculator = new RollingCOPCalculator({
+        timeWindow: 24 * 60, // 24 hours
+        minDataPoints: 12, // Minimum 12 points (6 hours worth)
+        weightingMethod: 'runtime_weighted',
+        trendSensitivity: 0.15, // 15% change for trend detection
+      });
+
+      // Try to restore data from settings
+      await this.restoreRollingCOPData();
+
+      this.debugLog('📈 Rolling COP calculator initialized');
+    } catch (error) {
+      this.error('Failed to initialize rolling COP calculator:', error);
+    }
+  }
+
+  /**
+   * Restore rolling COP data from device settings
+   */
+  private async restoreRollingCOPData(): Promise<void> {
+    try {
+      const savedData = this.getSetting('rolling_cop_data');
+      if (savedData && this.rollingCOPCalculator) {
+        this.rollingCOPCalculator.importData(savedData);
+        this.debugLog('📈 Rolling COP data restored from settings');
+      }
+    } catch (error) {
+      this.debugLog('No rolling COP data to restore:', error);
+    }
+  }
+
+  /**
+   * Save rolling COP data to device settings
+   */
+  private async saveRollingCOPData(): Promise<void> {
+    try {
+      if (this.rollingCOPCalculator) {
+        const dataToSave = this.rollingCOPCalculator.exportData();
+        await this.setSettings({ rolling_cop_data: dataToSave });
+        this.debugLog('📈 Rolling COP data saved to settings');
+      }
+    } catch (error) {
+      this.error('Failed to save rolling COP data:', error);
+    }
   }
 
   /**
@@ -1239,6 +1421,9 @@ class MyDevice extends Homey.Device {
 
         // Add measurement to SCOP calculator if available
         await this.addCOPMeasurementToSCOP(copResult, combinedData);
+
+        // Add measurement to rolling COP calculator
+        await this.addCOPMeasurementToRolling(copResult, combinedData);
       } else if (copResult.isOutlier) {
         this.log(`⚠️ COP outlier detected (${copResult.cop.toFixed(2)}): ${copResult.outlierReason}`);
         this.debugLog('Outlier data sources:', copResult.dataSources);
@@ -2132,6 +2317,7 @@ class MyDevice extends Homey.Device {
       await this.registerFlowCardsByCategory('power', availableCaps.power, userPrefs.flow_power_alerts, capabilitiesWithData);
       await this.registerFlowCardsByCategory('pulseSteps', availableCaps.pulseSteps, userPrefs.flow_pulse_steps_alerts, capabilitiesWithData);
       await this.registerFlowCardsByCategory('states', availableCaps.states, userPrefs.flow_state_alerts, capabilitiesWithData);
+      await this.registerFlowCardsByCategory('efficiency', availableCaps.efficiency, userPrefs.flow_efficiency_alerts, capabilitiesWithData);
 
       // Expert feature cards
       if (userPrefs.flow_expert_mode) {
@@ -2570,6 +2756,9 @@ class MyDevice extends Homey.Device {
     // Initialize COP calculation system
     await this.initializeCOP();
 
+    // Initialize rolling COP calculator
+    await this.initializeRollingCOP();
+
     // Set up Tuya device event handlers
     this.setupTuyaEventHandlers();
 
@@ -2828,6 +3017,9 @@ class MyDevice extends Homey.Device {
       'adlar_cop_method',
       'adlar_scop',
       'adlar_scop_quality',
+      'adlar_cop_daily',
+      'adlar_cop_weekly',
+      'adlar_cop_trend',
     ];
 
     // Process power capabilities
@@ -2951,7 +3143,8 @@ class MyDevice extends Homey.Device {
 
       // Register external power data action card
       const receiveExternalPowerAction = this.homey.flow.getActionCard('receive_external_power_data');
-      receiveExternalPowerAction.registerRunListener(async (args: { device: any; power_value: number }) => {
+      // eslint-disable-next-line camelcase
+      receiveExternalPowerAction.registerRunListener(async (args: { device: MyDevice; power_value: number }) => {
         this.debugLog(`📊 Received external power data: ${args.power_value}W`);
 
         // Store the external power value in the capability
@@ -3029,6 +3222,9 @@ class MyDevice extends Homey.Device {
 
     // Stop COP calculation interval
     this.stopCOPCalculationInterval();
+
+    // Save rolling COP data before shutdown
+    await this.saveRollingCOPData();
 
     // Stop SCOP update interval
     this.stopSCOPUpdateInterval();
