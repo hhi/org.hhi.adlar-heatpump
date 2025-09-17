@@ -1,4 +1,7 @@
 {
+  "0.98.6": {
+    "en": "App configuration updates and version maintenance for rolling COP system stability."
+  },
   "0.98.5": {
     "en": "Added rolling COP system with time-series analysis: daily/weekly average COP calculations, efficiency trend detection, statistical outlier filtering, and new flow cards for advanced automation and performance monitoring."
   },
