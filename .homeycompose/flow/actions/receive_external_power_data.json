@@ -5,25 +5,19 @@
     "nl": "Stuur vermogensgegevens naar warmtepomp"
   },
   "titleFormatted": {
-    "en": "Send [[power_value]]W from [[device_name]] to heat pump (request: [[request_id]])",
-    "nl": "Stuur [[power_value]]W van [[device_name]] naar warmtepomp (verzoek: [[request_id]])"
+    "en": "Send [[power_value]]W to heat pump for COP calculation",
+    "nl": "Stuur [[power_value]]W naar warmtepomp voor COP berekening"
   },
   "hint": {
-    "en": "Sends power consumption data to the heat pump for COP calculations",
-    "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor COP-berekeningen"
+    "en": "Sends power consumption data to the heat pump for enhanced COP calculations",
+    "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor verbeterde COP-berekeningen"
   },
+  "highlight": true,
   "args": [
     {
-      "type": "text",
-      "name": "request_id",
-      "title": {
-        "en": "Request ID",
-        "nl": "Verzoek ID"
-      },
-      "placeholder": {
-        "en": "Request ID from trigger",
-        "nl": "Verzoek ID van trigger"
-      }
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
     },
     {
       "type": "number",
@@ -39,18 +33,6 @@
       "min": 0,
       "max": 50000,
       "step": 0.1
-    },
-    {
-      "type": "text",
-      "name": "device_name",
-      "title": {
-        "en": "Device name",
-        "nl": "Apparaat naam"
-      },
-      "placeholder": {
-        "en": "Name of the power meter device",
-        "nl": "Naam van het vermogensmeter apparaat"
-      }
     }
   ]
 }

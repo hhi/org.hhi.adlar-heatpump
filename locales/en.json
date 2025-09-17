@@ -7,5 +7,32 @@
       "local_key": "Local Key",
       "continue": "Continue"
     }
-  }
+  },
+  "cop_method": {
+    "direct_thermal": "Direct Thermal",
+    "power_module": "Power Module",
+    "power_estimation": "Power Estimation",
+    "refrigerant_circuit": "Refrigerant Circuit",
+    "carnot_estimation": "Carnot Estimation",
+    "valve_correlation": "Valve Correlation",
+    "temperature_difference": "Temperature Difference",
+    "insufficient_data": "Insufficient Data"
+  },
+  "cop_method_description": {
+    "direct_thermal": "Direct thermal calculation using water flow and temperature difference (±5% accuracy)",
+    "power_module": "Power module estimation using internal sensors and external validation (±8% accuracy)",
+    "power_estimation": "Power consumption estimation using compressor and fan data (±10% accuracy)",
+    "refrigerant_circuit": "Refrigerant circuit analysis using pressure and temperature sensors (±12% accuracy)",
+    "carnot_estimation": "Carnot-based estimation using compressor frequency and ambient temperature (±15% accuracy)",
+    "valve_correlation": "Valve position correlation using expansion valve data (±20% accuracy)",
+    "temperature_difference": "Temperature difference estimation using empirical relationships (±30% accuracy)",
+    "insufficient_data": "Insufficient data available for any COP calculation method"
+  },
+  "scop_status": {
+    "initializing": "Initializing...",
+    "collecting": "Collecting data",
+    "insufficient_data": "7+ days of data needed",
+    "calculating": "Calculating..."
+  },
+  "COP calculation disabled": "COP calculation disabled"
 }

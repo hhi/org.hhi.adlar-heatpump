@@ -157,4 +157,75 @@ export class DeviceConstants {
     // Defrost cycle power adjustments
     DEFROST_POWER_MULTIPLIER: 1.3, // 30% increase during defrost
   };
+
+  // SCOP (Seasonal Coefficient of Performance) calculation constants
+  /** SCOP calculation interval - daily updates during heating season */
+  static readonly SCOP_CALCULATION_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  /** Heating season start day of year (October 1st) */
+  static readonly SCOP_SEASON_START_DAY = 274; // Oct 1st
+
+  /** Heating season end day of year (May 15th) */
+  static readonly SCOP_SEASON_END_DAY = 135; // May 15th
+
+  /** Minimum valid SCOP value */
+  static readonly SCOP_MIN_VALID = 2.0;
+
+  /** Maximum valid SCOP value */
+  static readonly SCOP_MAX_VALID = 6.0;
+
+  /** Method quality weighting factors for SCOP calculation */
+  static readonly SCOP_METHOD_WEIGHTS = {
+    direct_thermal: 1.0, // Full weight - most accurate
+    power_module: 0.95, // Slight discount
+    refrigerant_circuit: 0.90, // Moderate discount
+    carnot_estimation: 0.85, // Higher discount
+    valve_correlation: 0.75, // Significant discount
+    temperature_difference: 0.60, // Heavy discount due to ±30% accuracy
+  };
+
+  /** SCOP quality requirements */
+  static readonly SCOP_QUALITY_REQUIREMENTS = {
+    HIGH_QUALITY_HOURS_MIN: 400, // Require 400+ hours of quality data
+    METHOD3_MAX_CONTRIBUTION: 0.30, // Limit temp-diff method to 30%
+    MIN_DATA_COVERAGE: 0.70, // 70% seasonal coverage required
+    HIGH_CONFIDENCE_THRESHOLD: 0.80, // 80%+ quality methods = high confidence
+    MEDIUM_CONFIDENCE_THRESHOLD: 0.50, // 50-79% quality methods = medium confidence
+  };
+
+  /** EN 14825 climate zones */
+  static readonly SCOP_CLIMATE_ZONES = {
+    AVERAGE: 'strasbourg', // European average climate
+    WARMER: 'athens', // Southern European climate
+    COLDER: 'helsinki', // Northern European climate
+  };
+
+  /** EN 14825 temperature bins for Average climate (Strasbourg) */
+  static readonly SCOP_TEMPERATURE_BINS = [
+    {
+      temp: -10, hours: 1, load_ratio: 0.88, bin_name: 'extreme_cold',
+    },
+    {
+      temp: -7, hours: 25, load_ratio: 0.78, bin_name: 'very_cold',
+    },
+    {
+      temp: 2, hours: 167, load_ratio: 0.55, bin_name: 'cold',
+    },
+    {
+      temp: 7, hours: 250, load_ratio: 0.42, bin_name: 'cool',
+    },
+    {
+      temp: 12, hours: 250, load_ratio: 0.29, bin_name: 'mild',
+    },
+    {
+      temp: 20, hours: 0, load_ratio: 0.10, bin_name: 'bivalent',
+    }, // Bivalent temperature
+  ];
+
+  /** SCOP data storage limits */
+  static readonly SCOP_DATA_LIMITS = {
+    MAX_DAILY_RECORDS: 200, // Maximum daily COP records to store
+    MAX_SEASONAL_HISTORY: 5, // Keep 5 years of seasonal data
+    DATA_CLEANUP_INTERVAL_MS: 7 * 24 * 60 * 60 * 1000, // Weekly cleanup
+  };
 }
