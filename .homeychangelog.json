@@ -1,6 +1,6 @@
 {
-  "0.98.9": {
-    "en": "Organized changelog entries in proper descending version order for better readability."
+  "0.98.10": {
+    "en": "Info voor APP in readme toegevoegd."
   },
   "0.98.8": {
     "en": "Fixed internationalization for COP trend descriptions - all efficiency trend messages now properly display in user's selected language with mobile-optimized text."
