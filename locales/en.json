@@ -16,7 +16,7 @@
     "carnot_estimation": "Carnot Estimation",
     "valve_correlation": "Valve Correlation",
     "temperature_difference": "Temperature Difference",
-    "insufficient_data": "Insufficient Data"
+    "insufficient_data": "No Data"
   },
   "cop_method_description": {
     "direct_thermal": "Direct thermal calculation using water flow and temperature difference (±5% accuracy)",
@@ -33,6 +33,28 @@
     "collecting": "Collecting data",
     "insufficient_data": "7+ days of data needed",
     "calculating": "Calculating..."
+  },
+  "trend_descriptions": {
+    "strong_improvement": "Strong improvement in efficiency",
+    "moderate_improvement": "Moderate improvement in efficiency",
+    "slight_improvement": "Slight improvement in efficiency",
+    "significant_decline": "Significant decline in efficiency - check system",
+    "moderate_decline": "Moderate decline in efficiency",
+    "slight_decline": "Slight decline in efficiency",
+    "stable": "Stable efficiency performance"
+  },
+  "cop_diagnostics": {
+    "no_power_measurement": "No Power",
+    "no_thermal_measurement": "No Thermal",
+    "no_water_flow": "No Flow",
+    "no_temperature_difference": "No Temp Δ",
+    "no_compressor_data": "No Comp",
+    "insufficient_sensor_data": "Multi Fail",
+    "enable_power_monitoring": "Enable power monitoring in settings",
+    "check_temperature_sensors": "Check temperature sensors",
+    "check_flow_sensor": "Check water flow sensor",
+    "check_compressor_communication": "Check compressor communication",
+    "check_multiple_sensors": "Check sensor connections"
   },
   "COP calculation disabled": "COP calculation disabled"
 }
