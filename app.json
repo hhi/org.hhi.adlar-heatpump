@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.98.7",
+  "version": "0.98.8",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -4549,6 +4549,8 @@
         "adlar_cop_daily",
         "adlar_cop_weekly",
         "adlar_cop_trend",
+        "adlar_scop",
+        "adlar_scop_quality",
         "adlar_countdowntimer"
       ],
       "capabilitiesOptions": {
@@ -5706,7 +5708,7 @@
       "setable": false,
       "uiComponent": "sensor",
       "insights": false,
-      "icon": "/assets/cop-efficiency.svg",
+      "icon": "/assets/data-quality.svg",
       "description": {
         "en": "COP performance trend over the last 24 hours: improving, stable, or degrading. Used for predictive maintenance and optimization guidance.",
         "nl": "COP prestatie trend over de laatste 24 uur: verbeterend, stabiel, of verslechterend. Gebruikt voor voorspellend onderhoud en optimalisatie begeleiding."

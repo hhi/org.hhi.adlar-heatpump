@@ -73,28 +73,49 @@ In typical daily use, you'll see:
 
 ---
 
-## COP Method Visibility
+## COP Method Visibility and Diagnostics
 
-**New in v0.96.3**:
+**Enhanced in v0.98.7**:
 
 - The `adlar_cop_method` capability displays which calculation method is currently being used, providing transparency into the COP calculation process
 - **Enhanced compressor operation validation**: All COP methods now automatically return `COP = 0` when compressor is not running (frequency ≤ 0 Hz), ensuring physically accurate results
+- **Diagnostic Information**: When insufficient data is available, specific diagnostic messages show exactly what's missing
 
 The sensor shows:
 
 - **Method Name**: Direct Thermal, Carnot Estimation, Temperature Difference, etc.
+- **Diagnostic Info**: Specific indicators when data is insufficient ("No Power", "No Flow", "No Temp Δ", "Multi Fail")
 - **Confidence Indicator**:
   - 🟢 High confidence (most accurate data available)
   - 🟡 Medium confidence (some data limitations)
   - 🔴 Low confidence (limited data, estimation required)
 
-This helps users understand the accuracy and reliability of the displayed COP value.
+### Diagnostic Messages
+
+When COP calculation fails, you'll see specific 22-character diagnostic messages:
+
+- **"No Power"**: Power measurement unavailable for direct thermal method
+- **"No Thermal"**: Water flow or temperature difference unavailable
+- **"No Flow"**: Water flow measurement missing
+- **"No Temp Δ"**: Temperature difference between inlet/outlet too small
+- **"No Comp"**: Compressor frequency data unavailable
+- **"Multi Fail"**: Multiple sensor issues detected
+
+This helps users understand exactly why COP calculation isn't possible and what sensors need attention.
 
 ---
 
 ## COP Calculation Methods - Quality Hierarchy
 
-**The methods below are organized by accuracy from best (±5%) to worst (±30%)**. The system automatically selects the highest accuracy method available based on sensor data.
+**The methods below are organized by accuracy from best (±5%) to worst (±30%)**. The system automatically selects the highest accuracy method available based on sensor data. When data is insufficient, diagnostic information shows exactly what's missing.
+
+### Enhanced Diagnostic System
+
+All calculation methods now provide specific diagnostic feedback when data requirements aren't met. Instead of generic "Insufficient Data", you'll see:
+
+- **Specific Missing Components**: "No Power", "No Flow", "No Temp Δ"
+- **Multiple Issue Detection**: "Multi Fail" when several sensors are problematic
+- **Actionable Guidance**: Each diagnostic suggests what to check or enable
 
 ### Quality Priority (Best to Worst):
 1. **Direct Thermal** (±5%) - External power meter + water flow
@@ -1110,15 +1131,15 @@ Note: This high COP indicates very efficient operation!
 
 ### Data Requirements by Method
 
-| Method | Required Data | Optional Data | Accuracy |
-|--------|---------------|---------------|----------|
-| **Method 1** | Water flow, inlet/outlet temps, electrical power, **compressor running** | - | ±5% |
-| **Method 2** | Water flow, inlet/outlet temps, power module type, **compressor running** | 3-phase voltages/currents | ±8% |
-| **Method 3** | **Compressor freq > 0**, fan freq, water flow, inlet/outlet temps | Defrost state | ±10% |
-| **Method 4** | HP/LP saturation temps, suction/discharge temps, **compressor freq > 0** | - | ±12% |
-| **Method 5** | Outlet temp, ambient temp, **compressor frequency > 0** | - | ±15% |
-| **Method 6** | EEV/EVI pulse-steps, inlet/outlet temps, **compressor freq > 0** | - | ±20% |
-| **Method 7** | Inlet/outlet temperatures, **compressor frequency > 0** | - | ±30% |
+| Method | Required Data | Optional Data | Accuracy | Diagnostic When Missing |
+|--------|---------------|---------------|----------|------------------------|
+| **Method 1** | Water flow, inlet/outlet temps, electrical power, **compressor running** | - | ±5% | "No Power", "No Flow", "No Temp Δ" |
+| **Method 2** | Water flow, inlet/outlet temps, power module type, **compressor running** | 3-phase voltages/currents | ±8% | "No Power", "No Flow", "No Thermal" |
+| **Method 3** | **Compressor freq > 0**, fan freq, water flow, inlet/outlet temps | Defrost state | ±10% | "No Comp", "No Flow", "No Thermal" |
+| **Method 4** | HP/LP saturation temps, suction/discharge temps, **compressor freq > 0** | - | ±12% | "No Comp", "No Thermal" |
+| **Method 5** | Outlet temp, ambient temp, **compressor frequency > 0** | - | ±15% | "No Comp", "No Thermal" |
+| **Method 6** | EEV/EVI pulse-steps, inlet/outlet temps, **compressor freq > 0** | - | ±20% | "No Comp", "No Thermal" |
+| **Method 7** | Inlet/outlet temperatures, **compressor frequency > 0** | - | ±30% | "No Comp", "No Temp Δ" |
 
 ---
 

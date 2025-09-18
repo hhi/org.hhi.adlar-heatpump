@@ -9,11 +9,11 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 ## Features
 
 - **Local API Integration**: Direct communication via Tuya local protocol
-- **Complete Device Control**: Access to all 41 device capabilities
+- **Complete Device Control**: Access to all 46+ device capabilities including enhanced diagnostics
 - **Real-time Monitoring**: Live sensor data and system status updates
 - **Automated Reconnection**: Robust connection handling with automatic recovery
 - **Multi-language Support**: English and Dutch interface
-- **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 7 different methods
+- **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 8 different methods and diagnostic feedback
 - **SCOP Seasonal Analysis**: Seasonal coefficient of performance according to EN 14825 standards
 - **Cross-App Integration**: External data exchange via flow cards for enhanced accuracy
 - **Flow Card Control**: Individual control over 8 flow card categories (64 total cards)
@@ -24,15 +24,15 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Capabilities
 
-The app provides access to **44 capabilities** across seven categories:
+The app provides access to **46+ capabilities** across seven categories:
 
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
 - **Power & Electrical (8)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input
 - **System Control (8)**: Heating modes, temperature setpoints, capacity settings, timer control
 - **System States (6)**: Compressor status, defrost state, backwater state, fault detection
 - **Valve Control (2)**: EEV and EVI pulse steps monitoring
-- **Efficiency Monitoring (3)**: Real-time COP, calculation method, seasonal SCOP with data quality
-- **Additional Monitoring (8)**: Water flow, diagnostic parameters, system optimization
+- **Efficiency Monitoring (5)**: Real-time COP with diagnostics, calculation method, seasonal SCOP with data quality, rolling averages (daily/weekly), trend analysis
+- **Additional Monitoring (9+)**: Water flow, diagnostic parameters, system optimization, external power integration
 
 ## Installation & Setup
 
@@ -80,7 +80,8 @@ Three modes per category:
 #### COP (Coefficient of Performance) Settings
 
 - **COP Calculation**: Enable/disable efficiency monitoring with 7 calculation methods
-- **Calculation Method**: Auto-selection or manual override (Direct Thermal ±5% to Temperature Difference ±30%)
+- **Calculation Method**: Auto-selection or manual override (8 methods: Direct Thermal ±5% to Temperature Difference ±30%)
+- **Diagnostic Information**: Specific feedback about missing data ("No Power", "No Flow", "No Temp Δ", etc.)
 - **Outlier Detection**: Identify unrealistic COP values indicating sensor issues
 - **External Data Integration**: Request power, flow, and ambient data from other Homey devices
 - **Cross-App Timeout**: Configure response timeout for external data requests (1-30 seconds)
@@ -131,6 +132,8 @@ Three modes per category:
 
 - **COP Method Names**: All 8 calculation methods with localized descriptions
 - **COP Method Descriptions**: Detailed accuracy information (±5% to ±30%) in both languages
+- **COP Diagnostic Messages**: Specific error indicators ("No Power", "No Flow", "No Temp Δ", "Multi Fail") optimized for 22-character display
+- **Trend Analysis**: 7 efficiency trend descriptions ("Strong improvement", "Moderate decline", etc.)
 - **SCOP Status Messages**: Seasonal calculation progress with mobile-optimized text (≤22 chars)
 - **Flow Card Labels**: All triggers, conditions, and actions with proper translations
 - **Settings Interface**: Complete settings UI in both languages with context-appropriate hints

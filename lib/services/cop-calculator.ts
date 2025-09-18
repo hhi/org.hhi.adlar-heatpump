@@ -59,6 +59,12 @@ export interface COPCalculationResult {
   confidence: 'high' | 'medium' | 'low';
   isOutlier: boolean;
   outlierReason?: string;
+  diagnosticInfo?: {
+    missingRequiredData?: string[]; // Array of missing data keys
+    primaryIssue?: string; // Main diagnostic issue key
+    secondaryIssues?: string[]; // Additional issues
+    troubleshootingHint?: string; // Specific troubleshooting advice key
+  };
   dataSources: {
     electricalPower?: { value: number; source: string };
     waterFlowRate?: { value: number; source: string };
@@ -156,12 +162,16 @@ export class COPCalculator {
       return this.calculateWithMethod(data, 'temperature_difference', config);
     }
 
+    // Generate diagnostic information about why calculation failed
+    const diagnosticInfo = this.generateDiagnosticInfo(data);
+
     return {
       cop: 0,
       method: 'insufficient_data',
       confidence: 'low',
       isOutlier: false,
       dataSources: {},
+      diagnosticInfo,
     };
   }
 
@@ -997,6 +1007,81 @@ export class COPCalculator {
       result.isOutlier = true;
       result.outlierReason = 'Extremely high COP suggests measurement error (flow meter or power meter malfunction)';
     }
+  }
+
+  /**
+   * Check if a value is valid for calculations (not null, undefined, and > 0 for numeric values)
+   */
+  private static isValidValue(value: any): boolean {
+    return value !== null && value !== undefined && typeof value === 'number' && value > 0;
+  }
+
+  /**
+   * Generate diagnostic information about why COP calculation failed
+   */
+  private static generateDiagnosticInfo(data: COPDataSources): {
+    missingRequiredData: string[];
+    primaryIssue: string;
+    secondaryIssues: string[];
+    troubleshootingHint: string;
+  } {
+    const missingRequiredData: string[] = [];
+    const secondaryIssues: string[] = [];
+    let primaryIssue = 'unknown_issue';
+    let troubleshootingHint = 'check_all_sensors';
+
+    // Check basic data availability
+    const hasElectricalPower = this.isValidValue(data.electricalPower);
+    const hasWaterFlow = this.isValidValue(data.waterFlowRate);
+    const hasTemperatureDifference = this.isValidValue(data.inletTemperature) && this.isValidValue(data.outletTemperature);
+    const hasCompressorData = this.isValidValue(data.compressorFrequency);
+    const hasAmbientTemp = this.isValidValue(data.ambientTemperature);
+    const hasRefrigerantData = this.isValidValue(data.highPressureTemperature) && this.isValidValue(data.lowPressureTemperature);
+
+    // Determine primary issue
+    if (!hasElectricalPower) {
+      primaryIssue = 'no_power_measurement';
+      troubleshootingHint = 'enable_power_monitoring';
+      missingRequiredData.push('electrical_power');
+    } else if (!hasWaterFlow && !hasTemperatureDifference) {
+      primaryIssue = 'no_thermal_measurement';
+      troubleshootingHint = 'check_temperature_sensors';
+      if (!hasWaterFlow) missingRequiredData.push('water_flow_rate');
+      if (!hasTemperatureDifference) missingRequiredData.push('temperature_difference');
+    } else if (!hasWaterFlow) {
+      primaryIssue = 'no_water_flow';
+      troubleshootingHint = 'check_flow_sensor';
+      missingRequiredData.push('water_flow_rate');
+    } else if (!hasTemperatureDifference) {
+      primaryIssue = 'no_temperature_difference';
+      troubleshootingHint = 'check_temperature_sensors';
+      missingRequiredData.push('temperature_difference');
+    } else if (!hasCompressorData) {
+      primaryIssue = 'no_compressor_data';
+      troubleshootingHint = 'check_compressor_communication';
+      missingRequiredData.push('compressor_frequency');
+    } else {
+      primaryIssue = 'insufficient_sensor_data';
+      troubleshootingHint = 'check_multiple_sensors';
+    }
+
+    // Check for secondary issues
+    if (!hasAmbientTemp) {
+      secondaryIssues.push('no_ambient_temperature');
+    }
+    if (!hasRefrigerantData) {
+      secondaryIssues.push('no_refrigerant_circuit_data');
+    }
+    if (!this.isValidValue(data.fanMotorFrequency)) {
+      secondaryIssues.push('no_fan_data');
+    }
+
+    return {
+      missingRequiredData,
+      primaryIssue,
+      secondaryIssues,
+      troubleshootingHint,
+    };
   }
 
   /**

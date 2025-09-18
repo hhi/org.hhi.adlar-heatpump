@@ -1,21 +1,25 @@
-# Adlar Heat Pump - Capabilities Overview (v0.96.3)
+# Adlar Heat Pump - Capabilities Overview (v0.98.7)
 
 This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management and dynamic capability control.
 
-## Summary Statistics (v0.96.3)
+## Summary Statistics (v0.98.7)
 
-- **Total Custom Adlar Capabilities**: 15 (added COP method sensor in v0.96.3)
-- **Total Standard/Custom Capabilities**: 28
-- **Total All Capabilities**: 42
+- **Total Custom Adlar Capabilities**: 17 (added COP enhancements in v0.98.7)
+- **Total Standard/Custom Capabilities**: 30
+- **Total All Capabilities**: 46+
 - **DPS Range**: 1-112
 - **Capability Types**: number (24), enum (4), boolean (3), string (1)
 - **Setable Capabilities**: 3 (adlar_enum_work_mode, adlar_hotwater, plus standard capabilities)
-- **Languages Supported**: English (EN) and Dutch (NL)
+- **Languages Supported**: English (EN) and Dutch (NL) with full internationalization including diagnostic messages and trend descriptions
 - **Insights Management**: Dynamic control with power measurement toggle integration (v0.92.6+)
 - **Default Insights State**: Power capabilities disabled, core operations enabled
 - **Advanced Chart Features**: Custom colors, chart types, and styling options
 - **Enhanced Capability Validation**: Improved error handling for missing capabilities (v0.94.0-0.94.1)
 - **Temperature Label Clarity**: Updated labels for improved flow card readability (v0.94.2)
+- **Rolling COP System**: Time-series analysis with daily/weekly averages and trend detection (v0.98.5)
+- **COP Diagnostic System**: Specific feedback for missing data with 22-character display optimization (v0.98.7)
+- **External Data Integration**: Cross-app power measurement for enhanced COP accuracy (v0.98.2)
+- **Full Internationalization**: Complete translation support for all COP features and diagnostics (v0.98.7)
 
 ## Custom Adlar Capabilities
 
@@ -156,20 +160,84 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
-- **Note**: Higher values indicate better efficiency. Uses multiple calculation methods for accuracy.
+- **Note**: Higher values indicate better efficiency. Uses 8 calculation methods with automatic quality selection and diagnostic feedback.
+
+#### adlar_cop_daily
+- **Type**: number
+- **Purpose**: 24-hour rolling average COP for trend analysis and daily performance monitoring
+- **Range**: 0.0 to 8.0 (step 0.01, 2 decimals)
+- **Units**: COP
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Added**: v0.98.5 for rolling time-series analysis
+- **Note**: Weighted by compressor runtime for accurate efficiency representation.
+
+#### adlar_cop_weekly
+- **Type**: number
+- **Purpose**: 7-day rolling average COP for seasonal pattern identification and long-term monitoring
+- **Range**: 0.0 to 8.0 (step 0.01, 2 decimals)
+- **Units**: COP
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Added**: v0.98.5 for long-term efficiency analysis
+- **Note**: Helps identify optimal operating conditions and seasonal patterns.
+
+#### adlar_cop_trend
+- **Type**: string
+- **Purpose**: COP performance trend analysis showing efficiency direction and strength
+- **Values**: "Strong improvement", "Moderate improvement", "Slight improvement", "Stable", "Slight decline", "Moderate decline", "Significant decline"
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights disabled
+- **Added**: v0.98.5 for predictive maintenance
+- **Enhanced**: v0.98.7 with full internationalization support
+- **Note**: Analyzes 24-hour COP trends for optimization guidance and maintenance alerts.
+
+#### adlar_external_power
+- **Type**: number
+- **Purpose**: External power measurement received via flow cards from other Homey devices for enhanced COP calculations
+- **Range**: 0 to 50000 W (step 0.1, 1 decimal)
+- **Units**: W
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Added**: v0.98.2 for cross-app integration
+- **Note**: Enables enhanced COP accuracy using external power meter data from other Homey devices.
+
+#### adlar_scop
+- **Type**: number
+- **Purpose**: Seasonal Coefficient of Performance according to EN 14825 - average efficiency over heating season
+- **Range**: 2.0 to 6.0 (step 0.1, 1 decimal)
+- **Units**: SCOP
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Added**: v0.98.1 for seasonal efficiency monitoring
+- **Note**: Calculated using European standard EN 14825 with temperature bin method over 6+ month heating season.
+
+#### adlar_scop_quality
+- **Type**: string
+- **Purpose**: SCOP calculation data quality indicator showing confidence level and method mix
+- **Values**: Quality percentages and confidence levels ("High confidence", "Medium confidence", "Low confidence")
+- **Icon**: `/assets/data-quality.svg`
+- **Properties**: Read-only, sensor UI, insights disabled
+- **Added**: v0.98.1 for SCOP reliability assessment
+- **Note**: Shows data quality based on measurement method mix, seasonal coverage, and total data hours available.
 
 #### adlar_cop_method
 - **Type**: string
 - **Purpose**: Shows which COP calculation method is currently being used for transparency in efficiency calculations
 - **Values**:
-  - `"Direct Thermal 🟢"` (most accurate, uses temperature and flow data)
-  - `"Carnot Estimation 🟡"` (medium accuracy, thermodynamic estimation)
-  - `"Temperature Difference 🔴"` (basic accuracy, simple temperature delta)
-  - `"Insufficient Data 🔴"` (calculation not possible)
+  - `"Direct Thermal"` (±5% accuracy, uses temperature and flow data)
+  - `"Power Module"` (±8% accuracy, internal power calculation)
+  - `"Power Estimation"` (±10% accuracy, physics-based modeling)
+  - `"Refrigerant Circuit"` (±12% accuracy, thermodynamic analysis)
+  - `"Carnot Estimation"` (±15% accuracy, theoretical calculation)
+  - `"Valve Correlation"` (±20% accuracy, valve position analysis)
+  - `"Temperature Difference"` (±30% accuracy, basic fallback)
+  - `"No Data"` (insufficient data with diagnostic info)
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
 - **Added**: v0.96.3 for calculation method transparency
-- **Note**: Confidence indicators (🟢🟡🔴) show data quality level. Display format updated in v0.96.3 to remove accuracy percentages for cleaner UI.
+- **Enhanced**: v0.98.7 with diagnostic information and 8 calculation methods
+- **Note**: Enhanced with diagnostic feedback showing specific missing data ("No Power", "No Flow", "No Temp Δ", "Multi Fail") within 22-character display limit.
 
 ## Standard Homey Capabilities
 

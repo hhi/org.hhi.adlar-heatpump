@@ -658,9 +658,9 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Format COP method for user-friendly display with internationalization
+   * Format COP method for user-friendly display with internationalization and diagnostics
    */
-  private formatCOPMethodDisplay(method: string, confidence: string): string {
+  private formatCOPMethodDisplay(method: string, confidence: string, diagnosticInfo?: any): string {
     // Get localized method names using Homey's i18n system
     const getLocalizedMethodName = (methodKey: string): string => {
       const i18nKey = `cop_method.${methodKey}`;
@@ -682,7 +682,14 @@ class MyDevice extends Homey.Device {
       }
     };
 
-    const methodName = getLocalizedMethodName(method);
+    let methodName = getLocalizedMethodName(method);
+
+    // For insufficient_data, add diagnostic information if available
+    if (method === 'insufficient_data' && diagnosticInfo?.primaryIssue) {
+      const diagnosticKey = `cop_diagnostics.${diagnosticInfo.primaryIssue}`;
+      const localizedDiagnostic = this.homey.__(diagnosticKey) || diagnosticInfo.primaryIssue;
+      methodName = `${methodName}: ${localizedDiagnostic}`;
+    }
 
     // Format with confidence indicator
     let confidenceIndicator = '🔴'; // default low confidence
@@ -815,6 +822,43 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Force refresh of trend capability with translation - for debugging
+   */
+  public async forceRefreshTrendCapability(): Promise<void> {
+    try {
+      if (!this.hasCapability('adlar_cop_trend')) {
+        this.log('⚠️ adlar_cop_trend capability not available');
+        return;
+      }
+
+      const trendAnalysis = this.rollingCOPCalculator?.getTrendAnalysis(24);
+      if (trendAnalysis) {
+        const translatedDescription = this.homey.__(`trend_descriptions.${trendAnalysis.trendKey}`);
+        this.log('🔄 Force refreshing trend capability:');
+        this.log('  - trendKey:', trendAnalysis.trendKey);
+        this.log('  - translated:', translatedDescription);
+        this.log('  - fallback test (stable):', this.homey.__('trend_descriptions.stable'));
+
+        await this.setCapabilityValue('adlar_cop_trend', translatedDescription);
+        this.log('✅ Trend capability force refreshed');
+      } else {
+        // Set a test translation to verify the system works
+        const testTranslation = this.homey.__('trend_descriptions.stable');
+        this.log('🧪 Setting test translation:', testTranslation);
+        this.log('🧪 Direct translation test:', this.homey.__('trend_descriptions.stable'));
+        this.log('🧪 All available keys check:', {
+          stable: this.homey.__('trend_descriptions.stable'),
+          strong_improvement: this.homey.__('trend_descriptions.strong_improvement'),
+          moderate_decline: this.homey.__('trend_descriptions.moderate_decline')
+        });
+        await this.setCapabilityValue('adlar_cop_trend', testTranslation);
+      }
+    } catch (error) {
+      this.error('Failed to force refresh trend capability:', error);
+    }
+  }
+
+  /**
    * Update rolling COP capabilities with latest calculations
    */
   private async updateRollingCOPCapabilities(): Promise<void> {
@@ -843,11 +887,20 @@ class MyDevice extends Homey.Device {
       // Update trend analysis
       const trendAnalysis = this.rollingCOPCalculator.getTrendAnalysis(24);
       if (trendAnalysis && this.hasCapability('adlar_cop_trend')) {
-        await this.setCapabilityValue('adlar_cop_trend', trendAnalysis.description);
-        this.debugLog('📈 COP Trend updated:', trendAnalysis.description, `(${trendAnalysis.strength.toFixed(3)} strength)`);
+        // Translate the trend description using the device's translation system
+        const translatedDescription = this.homey.__(`trend_descriptions.${trendAnalysis.trendKey}`);
 
-        // Trigger trend flow cards
-        await this.triggerCOPTrendFlowCards(trendAnalysis, dailyCOP);
+        // Debug logging to help troubleshoot internationalization
+        this.log('🔍 Trend Analysis Debug:');
+        this.log('  - trendKey:', trendAnalysis.trendKey);
+        this.log('  - translation result:', translatedDescription);
+        this.log('  - current locale:', this.homey.i18n.getLanguage());
+
+        await this.setCapabilityValue('adlar_cop_trend', translatedDescription);
+        this.debugLog('📈 COP Trend updated:', translatedDescription, `(${trendAnalysis.strength.toFixed(3)} strength)`);
+
+        // Trigger trend flow cards (need to pass the translated description)
+        await this.triggerCOPTrendFlowCards({ ...trendAnalysis, description: translatedDescription }, dailyCOP);
       }
     } catch (error) {
       this.error('Failed to update rolling COP capabilities:', error);
@@ -1411,7 +1464,7 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_cop', roundedCOP);
 
         // Update COP method capability
-        const methodDisplayName = this.formatCOPMethodDisplay(copResult.method, copResult.confidence);
+        const methodDisplayName = this.formatCOPMethodDisplay(copResult.method, copResult.confidence, copResult.diagnosticInfo);
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
         this.log(`✅ COP updated: ${roundedCOP} (method: ${copResult.method}, confidence: ${copResult.confidence})`);
@@ -1429,7 +1482,7 @@ class MyDevice extends Homey.Device {
         this.debugLog('Outlier data sources:', copResult.dataSources);
 
         // Update COP method capability to show outlier status
-        const methodDisplayName = `${this.formatCOPMethodDisplay(copResult.method, 'low')} (Outlier)`;
+        const methodDisplayName = `${this.formatCOPMethodDisplay(copResult.method, 'low', copResult.diagnosticInfo)} (Outlier)`;
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
         // Trigger outlier flow card if configured
@@ -1447,7 +1500,7 @@ class MyDevice extends Homey.Device {
         // Update capabilities to reflect failed calculation
         if (copResult.method === 'insufficient_data') {
           await this.setCapabilityValue('adlar_cop', 0);
-          const failedMethodName = this.formatCOPMethodDisplay('insufficient_data', 'low');
+          const failedMethodName = this.formatCOPMethodDisplay('insufficient_data', 'low', copResult.diagnosticInfo);
           await this.setCapabilityValue('adlar_cop_method', failedMethodName);
           this.log('✅ COP capabilities updated to reflect insufficient data condition');
         }
@@ -2758,6 +2811,9 @@ class MyDevice extends Homey.Device {
 
     // Initialize rolling COP calculator
     await this.initializeRollingCOP();
+
+    // Force refresh trend capability to ensure proper translation
+    await this.forceRefreshTrendCapability();
 
     // Set up Tuya device event handlers
     this.setupTuyaEventHandlers();
