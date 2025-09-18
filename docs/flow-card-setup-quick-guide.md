@@ -27,8 +27,6 @@ The Adlar Heat Pump can receive external measurement data from other Homey devic
 
 ### Step 1: Create External Data Flow
 
-![External Power Measurement Setup](Flow%20Card%20handling/COP%20-%20external%20power%20measure.png)
-
 #### WHEN (Trigger)
 
 - [Your Power Meter] The power has changed
