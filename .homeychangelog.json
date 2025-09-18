@@ -1,4 +1,13 @@
 {
+  "0.98.9": {
+    "en": "Organized changelog entries in proper descending version order for better readability."
+  },
+  "0.98.8": {
+    "en": "Fixed internationalization for COP trend descriptions - all efficiency trend messages now properly display in user's selected language with mobile-optimized text."
+  },
+  "0.98.7": {
+    "en": "update of readme"
+  },
   "0.98.6": {
     "en": "App configuration updates and version maintenance for rolling COP system stability."
   },
@@ -34,11 +43,5 @@
   },
   "0.70.0": {
     "en": "Added sensor health monitoring and diagnostic tools to troubleshoot connection issues."
-  },
-  "0.98.8": {
-    "en": "Fixed internationalization for COP trend descriptions - all efficiency trend messages now properly display in user's selected language with mobile-optimized text."
-  },
-  "0.98.7": {
-    "en": "update of readme"
   }
 }
