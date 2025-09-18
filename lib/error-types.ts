@@ -98,7 +98,10 @@ export class TuyaErrorCategorizer {
     if (errorMessage.includes('connection')
         || errorMessage.includes('connect')
         || errorMessage.includes('refused')
-        || errorMessage.includes('unreachable')) {
+        || errorMessage.includes('unreachable')
+        || errorMessage.includes('econnreset')
+        || errorString.includes('socket')
+        || errorMessage.includes('reset')) {
       return {
         type: TuyaErrorType.CONNECTION_FAILED,
         originalError: error,
