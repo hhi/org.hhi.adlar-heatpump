@@ -195,29 +195,29 @@ export class RollingCOPCalculator {
   /**
    * Get trend analysis for a specific time period
    */
-  public getTrendAnalysis(hours: number = 24): { trend: string; strength: number; description: string } | null {
+  public getTrendAnalysis(hours: number = 24): { trend: string; strength: number; trendKey: string } | null {
     const result = this.calculateRollingCOP(hours * 60);
     if (!result) return null;
 
-    let description: string;
+    let trendKey: string;
     const strength = result.trendStrength;
 
     if (result.trend === 'improving') {
-      if (strength > 0.3) description = 'Strong improvement in efficiency';
-      else if (strength > 0.15) description = 'Moderate improvement in efficiency';
-      else description = 'Slight improvement in efficiency';
+      if (strength > 0.3) trendKey = 'strong_improvement';
+      else if (strength > 0.15) trendKey = 'moderate_improvement';
+      else trendKey = 'slight_improvement';
     } else if (result.trend === 'degrading') {
-      if (strength > 0.3) description = 'Significant decline in efficiency - check system';
-      else if (strength > 0.15) description = 'Moderate decline in efficiency';
-      else description = 'Slight decline in efficiency';
+      if (strength > 0.3) trendKey = 'significant_decline';
+      else if (strength > 0.15) trendKey = 'moderate_decline';
+      else trendKey = 'slight_decline';
     } else {
-      description = 'Stable efficiency performance';
+      trendKey = 'stable';
     }
 
     return {
       trend: result.trend,
       strength,
-      description,
+      trendKey, // Return the translation key instead of translated text
     };
   }
 

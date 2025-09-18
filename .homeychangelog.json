@@ -35,6 +35,9 @@
   "0.70.0": {
     "en": "Added sensor health monitoring and diagnostic tools to troubleshoot connection issues."
   },
+  "0.98.8": {
+    "en": "Fixed internationalization for COP trend descriptions - all efficiency trend messages now properly display in user's selected language with mobile-optimized text."
+  },
   "0.98.7": {
     "en": "update of readme"
   }

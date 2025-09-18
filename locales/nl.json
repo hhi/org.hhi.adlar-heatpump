@@ -16,7 +16,7 @@
     "carnot_estimation": "Carnot Schatting",
     "valve_correlation": "Klep Correlatie",
     "temperature_difference": "Temperatuur Verschil",
-    "insufficient_data": "Onvoldoende Gegevens"
+    "insufficient_data": "Geen Data"
   },
   "cop_method_description": {
     "direct_thermal": "Directe thermische berekening met water doorstroming en temperatuur verschil (±5% nauwkeurigheid)",
@@ -33,6 +33,28 @@
     "collecting": "Data verzamelen",
     "insufficient_data": "7+ dagen data nodig",
     "calculating": "Berekenen..."
+  },
+  "trend_descriptions": {
+    "strong_improvement": "Sterke verbetering in efficiëntie",
+    "moderate_improvement": "Matige verbetering in efficiëntie",
+    "slight_improvement": "Lichte verbetering in efficiëntie",
+    "significant_decline": "Significante afname in efficiëntie - controleer systeem",
+    "moderate_decline": "Matige afname in efficiëntie",
+    "slight_decline": "Lichte afname in efficiëntie",
+    "stable": "Stabiele efficiëntie prestatie"
+  },
+  "cop_diagnostics": {
+    "no_power_measurement": "Geen Vermogen",
+    "no_thermal_measurement": "Geen Therm",
+    "no_water_flow": "Geen Flow",
+    "no_temperature_difference": "Geen Temp Δ",
+    "no_compressor_data": "Geen Comp",
+    "insufficient_sensor_data": "Multi Fout",
+    "enable_power_monitoring": "Schakel vermogen monitoring in via instellingen",
+    "check_temperature_sensors": "Controleer temperatuur sensoren",
+    "check_flow_sensor": "Controleer water doorstroom sensor",
+    "check_compressor_communication": "Controleer compressor communicatie",
+    "check_multiple_sensors": "Controleer sensor verbindingen"
   },
   "COP calculation disabled": "COP berekening uitgeschakeld"
 }
