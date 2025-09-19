@@ -1187,8 +1187,20 @@ class MyDevice extends Homey.Device {
 
       // Initialize external power capability with default value
       if (this.hasCapability('adlar_external_power')) {
-        await this.setCapabilityValue('adlar_external_power', 0);
-        this.log('External power capability initialized with default value (0W)');
+        await this.setCapabilityValue('adlar_external_power', null);
+        this.log('External power capability initialized with default value (null W)');
+      }
+
+      // Initialize external flow capability with default value
+      if (this.hasCapability('adlar_external_flow')) {
+        await this.setCapabilityValue('adlar_external_flow', null);
+        this.log('External flow capability initialized with default value (null L/min)');
+      }
+
+      // Initialize external ambient temperature capability with default value
+      if (this.hasCapability('adlar_external_ambient')) {
+        await this.setCapabilityValue('adlar_external_ambient', null);
+        this.log('External ambient capability initialized with default value (null°C)');
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -3071,6 +3083,9 @@ class MyDevice extends Homey.Device {
     const copCapabilities = [
       'adlar_cop',
       'adlar_cop_method',
+      'adlar_external_power',
+      'adlar_external_flow',
+      'adlar_external_ambient',
       'adlar_scop',
       'adlar_scop_quality',
       'adlar_cop_daily',
@@ -3210,6 +3225,35 @@ class MyDevice extends Homey.Device {
 
         this.log(`✅ External power data updated: ${args.power_value}W`);
       });
+
+      // Register external flow data action card
+      const receiveExternalFlowAction = this.homey.flow.getActionCard('receive_external_flow_data');
+      // eslint-disable-next-line camelcase
+      receiveExternalFlowAction.registerRunListener(async (args: { device: MyDevice; flow_value: number }) => {
+        this.debugLog(`🌊 Received external flow data: ${args.flow_value}L/min`);
+
+        // Store the external flow value in the capability
+        if (this.hasCapability('adlar_external_flow')) {
+          await this.setCapabilityValue('adlar_external_flow', args.flow_value);
+        }
+
+        this.log(`✅ External flow data updated: ${args.flow_value}L/min`);
+      });
+
+      // Register external ambient temperature data action card
+      const receiveExternalAmbientAction = this.homey.flow.getActionCard('receive_external_ambient_data');
+      // eslint-disable-next-line camelcase
+      receiveExternalAmbientAction.registerRunListener(async (args: { device: MyDevice; temperature_value: number }) => {
+        this.debugLog(`🌡️ Received external ambient data: ${args.temperature_value}°C`);
+
+        // Store the external ambient temperature value in the capability
+        if (this.hasCapability('adlar_external_ambient')) {
+          await this.setCapabilityValue('adlar_external_ambient', args.temperature_value);
+        }
+
+        this.log(`✅ External ambient data updated: ${args.temperature_value}°C`);
+      });
+
       // Currently no custom ACTION cards require device-level registration
     } catch (error) {
       this.error('Error registering flow card action listeners:', error);
