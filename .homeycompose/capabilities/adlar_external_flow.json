@@ -1,0 +1,29 @@
+{
+  "id": "adlar_external_flow",
+  "title": {
+    "en": "External Flow Measurement",
+    "nl": "Externe Doorstroom Meting"
+  },
+  "type": "number",
+  "units": {
+    "en": "L/min",
+    "nl": "L/min"
+  },
+  "min": 0,
+  "max": 200,
+  "step": 0.1,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "External Flow Input for COP",
+    "nl": "Externe Doorstroom Input voor COP"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "External flow measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external flow meter data",
+    "nl": "Externe doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens"
+  }
+}

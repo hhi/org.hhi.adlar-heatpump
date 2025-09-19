@@ -16,7 +16,7 @@
     "carnot_estimation": "Carnot Schatting",
     "valve_correlation": "Klep Correlatie",
     "temperature_difference": "Temperatuur Verschil",
-    "insufficient_data": "Geen Data"
+    "insufficient_data": "Oorzaak"
   },
   "cop_method_description": {
     "direct_thermal": "Directe thermische berekening met water doorstroming en temperatuur verschil (±5% nauwkeurigheid)",
@@ -35,26 +35,26 @@
     "calculating": "Berekenen..."
   },
   "trend_descriptions": {
-    "strong_improvement": "Sterke verbetering in efficiëntie",
-    "moderate_improvement": "Matige verbetering in efficiëntie",
-    "slight_improvement": "Lichte verbetering in efficiëntie",
-    "significant_decline": "Significante afname in efficiëntie - controleer systeem",
-    "moderate_decline": "Matige afname in efficiëntie",
-    "slight_decline": "Lichte afname in efficiëntie",
-    "stable": "Stabiele efficiëntie prestatie"
+    "strong_improvement": "+++ Efficiëntie Stijging",
+    "moderate_improvement": "++ Efficiëntie stijging",
+    "slight_improvement": "+ Efficiëntie Stijging",
+    "significant_decline": "--- Efficiëntie Daling",
+    "moderate_decline": "-- Efficiëntie Daling",
+    "slight_decline": "- Efficiëntie Daling",
+    "stable": "= Stabiele Prestatie"
   },
   "cop_diagnostics": {
-    "no_power_measurement": "Geen Vermogen",
-    "no_thermal_measurement": "Geen Therm",
-    "no_water_flow": "Geen Flow",
-    "no_temperature_difference": "Geen Temp Δ",
-    "no_compressor_data": "Geen Comp",
-    "insufficient_sensor_data": "Multi Fout",
-    "enable_power_monitoring": "Schakel vermogen monitoring in via instellingen",
-    "check_temperature_sensors": "Controleer temperatuur sensoren",
-    "check_flow_sensor": "Controleer water doorstroom sensor",
-    "check_compressor_communication": "Controleer compressor communicatie",
-    "check_multiple_sensors": "Controleer sensor verbindingen"
+    "no_power_measurement": "Geen Vermogen Data",
+    "no_thermal_measurement": "Geen Thermisch Data",
+    "no_water_flow": "Geen Flow Data",
+    "no_temperature_difference": "Geen Temp Delta",
+    "no_compressor_data": "Geen Compressor Data",
+    "insufficient_sensor_data": "Meerdere Fouten",
+    "enable_power_monitoring": "Schakel Vermogen In",
+    "check_temperature_sensors": "Check Temp Sensoren",
+    "check_flow_sensor": "Check Flow Sensor",
+    "check_compressor_communication": "Check Compressor Link",
+    "check_multiple_sensors": "Check Alle Sensoren"
   },
   "COP calculation disabled": "COP berekening uitgeschakeld"
 }

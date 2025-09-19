@@ -1,0 +1,38 @@
+{
+  "id": "receive_external_flow_data",
+  "title": {
+    "en": "Send flow data to heat pump",
+    "nl": "Stuur doorstroom gegevens naar warmtepomp"
+  },
+  "titleFormatted": {
+    "en": "Send [[flow_value]]L/min to heat pump for COP calculation",
+    "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening"
+  },
+  "hint": {
+    "en": "Sends water flow data to the heat pump for enhanced COP calculations",
+    "nl": "Stuurt water doorstroom gegevens naar de warmtepomp voor verbeterde COP-berekeningen"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "number",
+      "name": "flow_value",
+      "title": {
+        "en": "Water flow rate (L/min)",
+        "nl": "Water doorstroom (L/min)"
+      },
+      "placeholder": {
+        "en": "Current water flow rate in L/min",
+        "nl": "Huidige water doorstroom in L/min"
+      },
+      "min": 0,
+      "max": 200,
+      "step": 0.1
+    }
+  ]
+}

@@ -59,6 +59,8 @@
     "adlar_cop",
     "adlar_cop_method",
     "adlar_external_power",
+    "adlar_external_flow",
+    "adlar_external_ambient",
     "adlar_cop_daily",
     "adlar_cop_weekly",
     "adlar_cop_trend",
