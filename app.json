@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.98.10",
+  "version": "0.98.11",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -3901,6 +3901,82 @@
     ],
     "actions": [
       {
+        "id": "receive_external_ambient_data",
+        "title": {
+          "en": "Send ambient temperature to heat pump",
+          "nl": "Stuur buitentemperatuur naar warmtepomp"
+        },
+        "titleFormatted": {
+          "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
+          "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening"
+        },
+        "hint": {
+          "en": "Sends ambient temperature data to the heat pump for enhanced COP calculations",
+          "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP-berekeningen"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "temperature_value",
+            "title": {
+              "en": "Ambient temperature (°C)",
+              "nl": "Buitentemperatuur (°C)"
+            },
+            "placeholder": {
+              "en": "Current ambient temperature in °C",
+              "nl": "Huidige buitentemperatuur in °C"
+            },
+            "min": -50,
+            "max": 50,
+            "step": 0.1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_flow_data",
+        "title": {
+          "en": "Send flow data to heat pump",
+          "nl": "Stuur doorstroom gegevens naar warmtepomp"
+        },
+        "titleFormatted": {
+          "en": "Send [[flow_value]]L/min to heat pump for COP calculation",
+          "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening"
+        },
+        "hint": {
+          "en": "Sends water flow data to the heat pump for enhanced COP calculations",
+          "nl": "Stuurt water doorstroom gegevens naar de warmtepomp voor verbeterde COP-berekeningen"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "flow_value",
+            "title": {
+              "en": "Water flow rate (L/min)",
+              "nl": "Water doorstroom (L/min)"
+            },
+            "placeholder": {
+              "en": "Current water flow rate in L/min",
+              "nl": "Huidige water doorstroom in L/min"
+            },
+            "min": 0,
+            "max": 200,
+            "step": 0.1
+          }
+        ]
+      },
+      {
         "id": "receive_external_power_data",
         "title": {
           "en": "Send power data to heat pump",
@@ -4546,6 +4622,8 @@
         "adlar_cop",
         "adlar_cop_method",
         "adlar_external_power",
+        "adlar_external_flow",
+        "adlar_external_ambient",
         "adlar_cop_daily",
         "adlar_cop_weekly",
         "adlar_cop_trend",
@@ -6094,6 +6172,64 @@
       "preventInsights": true,
       "description": {
         "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
+      }
+    },
+    "adlar_external_ambient": {
+      "id": "adlar_external_ambient",
+      "title": {
+        "en": "External Ambient Temperature",
+        "nl": "Externe Buitentemperatuur"
+      },
+      "type": "number",
+      "units": {
+        "en": "°C",
+        "nl": "°C"
+      },
+      "min": -50,
+      "max": 50,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "External Ambient for COP",
+        "nl": "Externe Buitentemp voor COP"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "External ambient temperature received via flow cards from other Homey devices, used for enhanced COP calculations with external temperature sensor data",
+        "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens"
+      }
+    },
+    "adlar_external_flow": {
+      "id": "adlar_external_flow",
+      "title": {
+        "en": "External Flow Measurement",
+        "nl": "Externe Doorstroom Meting"
+      },
+      "type": "number",
+      "units": {
+        "en": "L/min",
+        "nl": "L/min"
+      },
+      "min": 0,
+      "max": 200,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "External Flow Input for COP",
+        "nl": "Externe Doorstroom Input voor COP"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "External flow measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external flow meter data",
+        "nl": "Externe doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens"
       }
     },
     "adlar_external_power": {
