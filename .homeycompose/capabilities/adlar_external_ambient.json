@@ -1,0 +1,29 @@
+{
+  "id": "adlar_external_ambient",
+  "title": {
+    "en": "External Ambient Temperature",
+    "nl": "Externe Buitentemperatuur"
+  },
+  "type": "number",
+  "units": {
+    "en": "°C",
+    "nl": "°C"
+  },
+  "min": -50,
+  "max": 50,
+  "step": 0.1,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "External Ambient for COP",
+    "nl": "Externe Buitentemp voor COP"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "External ambient temperature received via flow cards from other Homey devices, used for enhanced COP calculations with external temperature sensor data",
+    "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens"
+  }
+}

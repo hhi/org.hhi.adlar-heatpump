@@ -1,0 +1,38 @@
+{
+  "id": "receive_external_ambient_data",
+  "title": {
+    "en": "Send ambient temperature to heat pump",
+    "nl": "Stuur buitentemperatuur naar warmtepomp"
+  },
+  "titleFormatted": {
+    "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
+    "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening"
+  },
+  "hint": {
+    "en": "Sends ambient temperature data to the heat pump for enhanced COP calculations",
+    "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP-berekeningen"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "number",
+      "name": "temperature_value",
+      "title": {
+        "en": "Ambient temperature (°C)",
+        "nl": "Buitentemperatuur (°C)"
+      },
+      "placeholder": {
+        "en": "Current ambient temperature in °C",
+        "nl": "Huidige buitentemperatuur in °C"
+      },
+      "min": -50,
+      "max": 50,
+      "step": 0.1
+    }
+  ]
+}
