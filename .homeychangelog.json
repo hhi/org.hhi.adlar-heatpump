@@ -1,6 +1,9 @@
 {
+  "0.98.12": {
+    "en": "Fixed minor typo in Dutch translation for COP trend descriptions, external ambient temp and flow data."
+  },
   "0.98.10": {
-    "en": "Info voor APP in readme toegevoegd."
+    "en": "Introduction text in readme improved."
   },
   "0.98.8": {
     "en": "Fixed internationalization for COP trend descriptions - all efficiency trend messages now properly display in user's selected language with mobile-optimized text."
