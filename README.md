@@ -9,7 +9,7 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 ## Features
 
 - **Local API Integration**: Direct communication via Tuya local protocol
-- **Complete Device Control**: Access to all 46+ device capabilities including enhanced diagnostics
+- **Complete Device Control**: Access to all 47+ device capabilities including enhanced diagnostics
 - **Real-time Monitoring**: Live sensor data and system status updates
 - **Automated Reconnection**: Robust connection handling with automatic recovery
 - **Multi-language Support**: English and Dutch interface
@@ -24,10 +24,10 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Capabilities
 
-The app provides access to **46+ capabilities** across seven categories:
+The app provides access to **47+ capabilities** across seven categories:
 
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
-- **Power & Electrical (8)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input
+- **Power & Electrical (9)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input, calculated external energy total
 - **System Control (8)**: Heating modes, temperature setpoints, capacity settings, timer control
 - **System States (6)**: Compressor status, defrost state, backwater state, fault detection
 - **Valve Control (2)**: EEV and EVI pulse steps monitoring

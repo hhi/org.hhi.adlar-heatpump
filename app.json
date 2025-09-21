@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.98.12",
+  "version": "0.99.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -4622,6 +4622,7 @@
         "adlar_cop",
         "adlar_cop_method",
         "adlar_external_power",
+        "adlar_external_energy_total",
         "adlar_external_flow",
         "adlar_external_ambient",
         "adlar_cop_daily",
@@ -5153,8 +5154,10 @@
         "xlarge": "/drivers/intelligent-heat-pump/assets/images/Aurora2-drv-xlarge.png"
       },
       "energy": {
+        "cumulative": true,
+        "cumulativeImportedCapability": "meter_power.electric_total",
         "approximation": {
-          "usageConstant": 30
+          "usageConstant": 2500
         }
       },
       "pair": [
@@ -5384,6 +5387,19 @@
                 "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben."
               },
               "value": false
+            },
+            {
+              "id": "enable_intelligent_energy_tracking",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable intelligent energy tracking",
+                "nl": "Intelligente energie tracking inschakelen"
+              },
+              "hint": {
+                "en": "Automatically prioritize external power measurements when available via flow cards, fall back to internal sensors. Makes device appear in Homey Energy dashboard with accurate power consumption data.",
+                "nl": "Prioriteer automatisch externe vermogensmetingen wanneer beschikbaar via flow kaarten, val terug op interne sensoren. Laat apparaat verschijnen in Homey Energie dashboard met nauwkeurige stroomverbruik data."
+              },
+              "value": true
             }
           ]
         },
@@ -5678,19 +5694,6 @@
               "hint": {
                 "en": "Click to generate a detailed report showing which capabilities are working and which have null values",
                 "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben"
-              },
-              "value": false
-            },
-            {
-              "id": "flow_trigger_test",
-              "type": "checkbox",
-              "label": {
-                "en": "Test external data flow triggers",
-                "nl": "Test externe data flow triggers"
-              },
-              "hint": {
-                "en": "Click to test the external power, flow, and ambient data flow trigger system - check logs for results",
-                "nl": "Klik om het externe vermogen, doorstroom en buitentemperatuur flow trigger systeem te testen - controleer logs voor resultaten"
               },
               "value": false
             }
@@ -6203,6 +6206,35 @@
         "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens"
       }
     },
+    "adlar_external_energy_total": {
+      "id": "adlar_external_energy_total",
+      "title": {
+        "en": "External Total Energy Consumption",
+        "nl": "Extern Totaal Energieverbruik"
+      },
+      "type": "number",
+      "units": {
+        "en": "kWh",
+        "nl": "kWh"
+      },
+      "min": 0,
+      "max": 999999,
+      "step": 0.001,
+      "decimals": 3,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "External Energy Cumulative",
+        "nl": "Extern Energie Cumulatief"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "Total energy consumption calculated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
+        "nl": "Totaal energieverbruik berekend uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
+      }
+    },
     "adlar_external_flow": {
       "id": "adlar_external_flow",
       "title": {
@@ -6228,8 +6260,8 @@
       },
       "icon": "/assets/cop-efficiency.svg",
       "description": {
-        "en": "External flow measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external flow meter data",
-        "nl": "Externe doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens"
+        "en": "External water flow measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external flow meter data",
+        "nl": "Externe water doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens"
       }
     },
     "adlar_external_power": {
