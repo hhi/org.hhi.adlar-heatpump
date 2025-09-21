@@ -6209,8 +6209,8 @@
     "adlar_external_energy_total": {
       "id": "adlar_external_energy_total",
       "title": {
-        "en": "External Total Energy Consumption",
-        "nl": "Extern Totaal Energieverbruik"
+        "en": "Calculated Total Energy Consumption",
+        "nl": "Berekend Totaal Energieverbruik"
       },
       "type": "number",
       "units": {
