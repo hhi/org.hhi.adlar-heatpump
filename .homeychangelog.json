@@ -1,6 +1,9 @@
 {
+  "0.99.2": {
+    "en": "Calculated total energy consumption."
+  },
   "0.98.12": {
-    "en": "Fixed minor typo in Dutch translation for COP trend descriptions, external ambient temp and flow data."
+    "en": "External ambient temp and flow data."
   },
   "0.98.10": {
     "en": "Introduction text in readme improved."
@@ -9,7 +12,7 @@
     "en": "Fixed internationalization for COP trend descriptions - all efficiency trend messages now properly display in user's selected language with mobile-optimized text."
   },
   "0.98.7": {
-    "en": "update of readme"
+    "en": "Update of readme"
   },
   "0.98.6": {
     "en": "App configuration updates and version maintenance for rolling COP system stability."

@@ -540,6 +540,13 @@ class MyDevice extends Homey.Device {
         this.updateFlowCardsBasedOnHealth().catch((error) => {
           this.error('Error during health check update:', error);
         });
+
+        // Update intelligent power measurement periodically
+        if (this.getSetting('enable_intelligent_energy_tracking')) {
+          this.updateIntelligentPowerMeasurement().catch((error) => {
+            this.error('Error during intelligent power update:', error);
+          });
+        }
       }, DeviceConstants.HEALTH_CHECK_INTERVAL_MS);
       if (interval) {
         this.healthCheckInterval = interval;
@@ -1201,6 +1208,12 @@ class MyDevice extends Homey.Device {
       if (this.hasCapability('adlar_external_ambient')) {
         await this.setCapabilityValue('adlar_external_ambient', null);
         this.log('External ambient capability initialized with default value (null°C)');
+      }
+
+      // Initialize external energy total capability with default value
+      if (this.hasCapability('adlar_external_energy_total')) {
+        await this.setCapabilityValue('adlar_external_energy_total', 0);
+        this.log('External energy total capability initialized with default value (0 kWh)');
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -2031,22 +2044,30 @@ class MyDevice extends Homey.Device {
 
           // Update the capability value in Homey - but only if capability exists
           if (this.hasCapability(capability)) {
-            this.setCapabilityValue(capability, (value as boolean | number | string))
-              .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
-              .catch((err) => {
-                const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Setting capability ${capability}`);
-                this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
+            // Special handling for measure_power when intelligent tracking is enabled
+            if (capability === 'measure_power' && this.getSetting('enable_intelligent_energy_tracking')) {
+              this.debugLog(`🔋 Skipping direct measure_power update (intelligent tracking enabled), triggering smart update instead`);
+              // Trigger intelligent power update which will consider all sources
+              this.updateIntelligentPowerMeasurement().catch((err) => this.error('Error in intelligent power update:', err));
+            } else {
+              // Normal capability update for all other capabilities
+              this.setCapabilityValue(capability, (value as boolean | number | string))
+                .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
+                .catch((err) => {
+                  const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Setting capability ${capability}`);
+                  this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
 
-                // Only attempt recovery for retryable errors
-                if (categorizedError.retryable) {
-                  this.homey.setTimeout(() => {
-                    if (this.hasCapability(capability)) {
-                      this.setCapabilityValue(capability, (value as boolean | number | string))
-                        .catch((retryErr) => this.error(`Retry failed for ${capability}:`, retryErr));
-                    }
-                  }, DeviceConstants.CAPABILITY_RETRY_DELAY_MS);
-                }
-              });
+                  // Only attempt recovery for retryable errors
+                  if (categorizedError.retryable) {
+                    this.homey.setTimeout(() => {
+                      if (this.hasCapability(capability)) {
+                        this.setCapabilityValue(capability, (value as boolean | number | string))
+                          .catch((retryErr) => this.error(`Retry failed for ${capability}:`, retryErr));
+                      }
+                    }, DeviceConstants.CAPABILITY_RETRY_DELAY_MS);
+                  }
+                });
+            }
           } else {
             this.debugLog(`Skipping capability update for ${capability} - capability not available on device`);
           }
@@ -2830,6 +2851,12 @@ class MyDevice extends Homey.Device {
     // Set up Tuya device event handlers
     this.setupTuyaEventHandlers();
 
+    // Initialize intelligent energy tracking if enabled
+    if (this.getSetting('enable_intelligent_energy_tracking')) {
+      await this.initializeEnergyTracking();
+      this.log('🔋 Intelligent energy tracking initialized');
+    }
+
     // Set device as available after successful initialization
     await this.setAvailable();
     this.log('✅ Device initialization completed - device is now available in Homey');
@@ -2861,6 +2888,9 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+
+    // Handle energy tracking settings changes first
+    await this.handleEnergyTrackingSettings(changedKeys, newSettings);
 
     // Handle device credential changes (for repair scenarios)
     const credentialKeysChanged = changedKeys.filter(
@@ -2918,30 +2948,6 @@ class MyDevice extends Homey.Device {
       return `Capability Diagnostics Report:\n\n${diagnosticReport}`;
     }
 
-    // Handle flow trigger test
-    if (changedKeys.includes('flow_trigger_test') && newSettings.flow_trigger_test === true) {
-      this.log('🧪 Flow trigger test requested via settings');
-
-      // Execute test asynchronously
-      this.testExternalDataFlowTriggers()
-        .then(() => {
-          this.log('✅ Flow trigger test completed - check logs for detailed results');
-        })
-        .catch((error) => {
-          this.error('❌ Flow trigger test failed:', error);
-        });
-
-      // Reset the checkbox after a short delay
-      this.homey.setTimeout(async () => {
-        try {
-          await this.setSettings({ flow_trigger_test: false });
-        } catch (error) {
-          this.error('Failed to reset flow trigger test checkbox:', error);
-        }
-      }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
-
-      return 'Flow trigger test started - check device logs for detailed results';
-    }
 
     // Handle power measurement settings
     if (changedKeys.includes('enable_power_measurements')) {
@@ -3084,6 +3090,7 @@ class MyDevice extends Homey.Device {
       'adlar_cop',
       'adlar_cop_method',
       'adlar_external_power',
+      'adlar_external_energy_total',
       'adlar_external_flow',
       'adlar_external_ambient',
       'adlar_scop',
@@ -3223,6 +3230,11 @@ class MyDevice extends Homey.Device {
           await this.setCapabilityValue('adlar_external_power', args.power_value);
         }
 
+        // Trigger intelligent power update to potentially use this new external data
+        if (this.getSetting('enable_intelligent_energy_tracking')) {
+          await this.updateIntelligentPowerMeasurement();
+        }
+
         this.log(`✅ External power data updated: ${args.power_value}W`);
       });
 
@@ -3261,51 +3273,292 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Diagnostic method to test external device direct access system
-   * This method can be called to manually test if direct device access is working
+   * Intelligent power source selection for measure_power capability
+   * Prioritizes external power measurements when available, falls back to internal sensors
    */
-  async testExternalDataFlowTriggers(): Promise<void> {
-    this.log('🧪 Starting external device direct access diagnostic test...');
+  private async updateIntelligentPowerMeasurement(): Promise<void> {
+    if (!this.getSetting('enable_intelligent_energy_tracking')) {
+      return;
+    }
 
     try {
-      // Test direct device access
-      this.log('📡 Testing direct device access...');
-      const externalData = await this.getExternalDeviceData();
+      let powerValue: number | null = null;
+      let powerSource = 'none';
+      let dataAge = 'unknown';
 
-      this.log('📊 External device access test results:', JSON.stringify({
-        hasPowerData: externalData.electricalPower !== null,
-        hasFlowData: externalData.waterFlowRate !== null,
-        hasAmbientData: externalData.ambientTemperature !== null,
-        powerValue: externalData.electricalPower,
-        flowValue: externalData.waterFlowRate,
-        ambientValue: externalData.ambientTemperature,
-      }));
+      // Priority 1: External power measurement (from flow cards)
+      const externalPower = this.getCapabilityValue('adlar_external_power');
+      if (externalPower !== null && externalPower > 0) {
+        powerValue = externalPower;
+        powerSource = 'external';
+        dataAge = 'real-time';
+      }
 
-      // Test individual device configurations
-      const powerDeviceId = this.getSetting('external_power_device_id');
-      const flowDeviceId = this.getSetting('external_flow_device_id');
-      const ambientDeviceId = this.getSetting('external_ambient_device_id');
+      // Priority 2: Internal power measurement (DPS 104)
+      if (powerValue === null) {
+        const internalPower = this.getInternalPowerMeasurement();
+        if (internalPower !== null && internalPower > 0) {
+          powerValue = internalPower;
+          powerSource = 'internal';
+          dataAge = 'real-time';
+        }
+      }
 
-      this.log('🔍 Device configuration:', JSON.stringify({
-        powerDeviceConfigured: !!(powerDeviceId && powerDeviceId.trim()),
-        flowDeviceConfigured: !!(flowDeviceId && flowDeviceId.trim()),
-        ambientDeviceConfigured: !!(ambientDeviceId && ambientDeviceId.trim()),
-        powerDeviceId: powerDeviceId || 'not configured',
-        flowDeviceId: flowDeviceId || 'not configured',
-        ambientDeviceId: ambientDeviceId || 'not configured',
-      }));
+      // Priority 3: Calculated estimation based on system state
+      if (powerValue === null) {
+        powerValue = this.calculateEstimatedPower();
+        powerSource = 'calculated';
+        dataAge = 'estimated';
+      }
 
-      if (externalData.electricalPower === null && externalData.waterFlowRate === null && externalData.ambientTemperature === null) {
-        this.log('ℹ️ No external devices configured - this is normal if you want to use internal sensors only');
-      } else {
-        this.log('✅ External device access test completed successfully');
+      // Update measure_power capability with the selected power source
+      if (powerValue !== null && this.hasCapability('measure_power')) {
+        await this.setCapabilityValue('measure_power', Math.round(powerValue));
+        this.debugLog(`🔋 Power updated: ${Math.round(powerValue)}W (source: ${powerSource}, age: ${dataAge})`);
+
+        // Update cumulative energy based on the new power measurement
+        await this.updateCumulativeEnergy();
       }
 
     } catch (error) {
-      this.error('❌ Error during external device diagnostic test:', error);
+      this.error('Error in intelligent power measurement update:', error);
+    }
+  }
+
+  /**
+   * Get internal power measurement from DPS 104 without triggering capability update
+   */
+  private getInternalPowerMeasurement(): number | null {
+    try {
+      // Try to access the raw DPS data to avoid recursive updates
+      // Note: TuyAPI structure may vary, so we use multiple approaches
+      if (this.tuya) {
+        // Method 1: Try to access via tuya instance properties
+        const tuyaInstance = this.tuya as any;
+        if (tuyaInstance.dps && typeof tuyaInstance.dps['104'] === 'number') {
+          const rawPower = tuyaInstance.dps['104'];
+          if (rawPower > 0) {
+            return rawPower;
+          }
+        }
+
+        // Method 2: Check if tuya has a get method for DPS
+        if (typeof tuyaInstance.get === 'function') {
+          const rawPower = tuyaInstance.get({ dps: 104 });
+          if (typeof rawPower === 'number' && rawPower > 0) {
+            return rawPower;
+          }
+        }
+      }
+    } catch (error) {
+      this.debugLog('Could not access internal power DPS 104:', error);
     }
 
-    this.log('🧪 External device direct access diagnostic test completed');
+    // Fallback: Return null to trigger calculated estimation
+    return null;
+  }
+
+  /**
+   * Calculate estimated power consumption based on system state
+   */
+  private calculateEstimatedPower(): number {
+    try {
+      const compressorRunning = this.getCapabilityValue('adlar_state_compressor_state');
+      const compressorFreq = this.getCapabilityValue('measure_frequency.compressor_strength') || 0;
+      const fanFreq = this.getCapabilityValue('measure_frequency.fan_motor_frequency') || 0;
+      const defrosting = this.getCapabilityValue('adlar_state_defrost_state');
+
+      // Base standby power
+      let estimatedPower = 150;
+
+      if (compressorRunning) {
+        // Compressor power estimation based on frequency
+        // Typical heat pump: 15-80Hz = 800-4000W
+        const normalizedFreq = Math.max(0, Math.min(1, (compressorFreq - 15) / 65));
+        const compressorPower = 800 + (normalizedFreq * 3200);
+        estimatedPower += compressorPower;
+
+        // Fan motor contribution
+        const fanPower = (fanFreq / 100) * 200; // 0-200W based on fan speed
+        estimatedPower += fanPower;
+
+        // Defrost mode adds extra power
+        if (defrosting) {
+          estimatedPower += 500;
+        }
+      }
+
+      this.debugLog(`💡 Estimated power: ${Math.round(estimatedPower)}W (compressor: ${compressorRunning}, freq: ${compressorFreq}Hz)`);
+      return Math.round(estimatedPower);
+
+    } catch (error) {
+      this.debugLog('Error calculating estimated power, using default:', error);
+      return 2500; // Default average consumption
+    }
+  }
+
+  /**
+   * Handle settings changes for intelligent energy tracking
+   */
+  private async handleEnergyTrackingSettings(changedKeys: string[], newSettings: Record<string, unknown>): Promise<void> {
+    if (changedKeys.includes('enable_intelligent_energy_tracking')) {
+      const enabled = newSettings.enable_intelligent_energy_tracking;
+      this.log(`🔋 Intelligent energy tracking ${enabled ? 'enabled' : 'disabled'}`);
+
+      if (enabled) {
+        // Initialize energy tracking when enabled
+        await this.initializeEnergyTracking();
+        // Immediately update power measurement when enabled
+        await this.updateIntelligentPowerMeasurement();
+      }
+    }
+  }
+
+  /**
+   * Initialize software energy tracking system
+   */
+  private async initializeEnergyTracking(): Promise<void> {
+    try {
+      // Initialize energy tracking timestamp if not exists
+      const lastUpdate = await this.getStoreValue('last_energy_update');
+      if (!lastUpdate) {
+        await this.setStoreValue('last_energy_update', Date.now());
+        this.log('🔋 Energy tracking initialized');
+      }
+
+      // Initialize cumulative energy if meter capabilities are zero/null
+      if (this.hasCapability('meter_power.electric_total')) {
+        const currentTotal = this.getCapabilityValue('meter_power.electric_total');
+        if (!currentTotal || currentTotal === 0) {
+          // Check if we have stored cumulative energy from previous sessions
+          const storedTotal = await this.getStoreValue('cumulative_energy_kwh') || 0;
+          if (storedTotal > 0) {
+            await this.setCapabilityValue('meter_power.electric_total', storedTotal);
+            this.log(`🔋 Restored cumulative energy: ${storedTotal} kWh`);
+          }
+        }
+      }
+
+      // Initialize external energy tracking capability
+      if (this.hasCapability('adlar_external_energy_total')) {
+        const currentExternalTotal = this.getCapabilityValue('adlar_external_energy_total');
+        if (!currentExternalTotal || currentExternalTotal === 0) {
+          // Check if we have stored external energy from previous sessions
+          const storedExternalTotal = await this.getStoreValue('external_cumulative_energy_kwh') || 0;
+          if (storedExternalTotal > 0) {
+            await this.setCapabilityValue('adlar_external_energy_total', storedExternalTotal);
+            this.log(`🔌 Restored external energy: ${storedExternalTotal} kWh`);
+          }
+        }
+      }
+
+      // Reset daily energy at midnight
+      this.scheduleDailyEnergyReset();
+
+    } catch (error) {
+      this.error('Error initializing energy tracking:', error);
+    }
+  }
+
+  /**
+   * Update cumulative energy based on current power consumption
+   */
+  private async updateCumulativeEnergy(): Promise<void> {
+    if (!this.getSetting('enable_intelligent_energy_tracking')) {
+      return;
+    }
+
+    try {
+      const currentPower = this.getCapabilityValue('measure_power') || 0;
+      const externalPower = this.getCapabilityValue('adlar_external_power') || 0;
+
+      // Only accumulate energy when we have reliable power data
+      if (currentPower > 0) {
+        const lastUpdate = await this.getStoreValue('last_energy_update') || Date.now();
+        const currentTime = Date.now();
+        const hoursElapsed = (currentTime - lastUpdate) / (1000 * 60 * 60);
+
+        // Calculate energy increment in kWh
+        const energyIncrement = (currentPower / 1000) * hoursElapsed;
+
+        // Update total cumulative energy
+        if (this.hasCapability('meter_power.electric_total')) {
+          const currentTotal = this.getCapabilityValue('meter_power.electric_total') || 0;
+          const newTotal = currentTotal + energyIncrement;
+          await this.setCapabilityValue('meter_power.electric_total', Math.round(newTotal * 100) / 100);
+
+          // Store in device storage for persistence
+          await this.setStoreValue('cumulative_energy_kwh', newTotal);
+        }
+
+        // Update daily consumption
+        if (this.hasCapability('meter_power.power_consumption')) {
+          const dailyConsumption = await this.getStoreValue('daily_consumption_kwh') || 0;
+          const newDailyTotal = dailyConsumption + energyIncrement;
+          await this.setCapabilityValue('meter_power.power_consumption', Math.round(newDailyTotal * 100) / 100);
+          await this.setStoreValue('daily_consumption_kwh', newDailyTotal);
+        }
+
+        // Track external energy separately when external power is being used
+        if (externalPower > 0 && this.hasCapability('adlar_external_energy_total')) {
+          const externalEnergyIncrement = (externalPower / 1000) * hoursElapsed;
+          const currentExternalTotal = this.getCapabilityValue('adlar_external_energy_total') || 0;
+          const newExternalTotal = currentExternalTotal + externalEnergyIncrement;
+          await this.setCapabilityValue('adlar_external_energy_total', Math.round(newExternalTotal * 1000) / 1000);
+
+          // Store external energy in device storage for persistence
+          await this.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
+
+          this.debugLog(`🔌 External energy updated: +${(externalEnergyIncrement * 1000).toFixed(1)}Wh (external power: ${externalPower}W)`);
+        }
+
+        // Update timestamp for next calculation
+        await this.setStoreValue('last_energy_update', currentTime);
+
+        this.debugLog(`⚡ Energy updated: +${(energyIncrement * 1000).toFixed(1)}Wh (power: ${currentPower}W, time: ${(hoursElapsed * 60).toFixed(1)}min)`);
+      }
+
+    } catch (error) {
+      this.error('Error updating cumulative energy:', error);
+    }
+  }
+
+  /**
+   * Schedule daily energy reset at midnight
+   */
+  private scheduleDailyEnergyReset(): void {
+    // Calculate milliseconds until next midnight
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+    // Schedule reset
+    this.homey.setTimeout(() => {
+      this.resetDailyEnergy();
+      // Schedule recurring daily resets
+      this.homey.setInterval(() => {
+        this.resetDailyEnergy();
+      }, 24 * 60 * 60 * 1000); // 24 hours
+    }, msUntilMidnight);
+
+    this.log(`🕛 Daily energy reset scheduled for ${tomorrow.toLocaleString()}`);
+  }
+
+  /**
+   * Reset daily energy consumption at midnight
+   */
+  private async resetDailyEnergy(): Promise<void> {
+    try {
+      if (this.hasCapability('meter_power.power_consumption')) {
+        await this.setCapabilityValue('meter_power.power_consumption', 0);
+        await this.setStoreValue('daily_consumption_kwh', 0);
+        this.log('🔄 Daily energy consumption reset to 0 kWh');
+      }
+    } catch (error) {
+      this.error('Error resetting daily energy:', error);
+    }
   }
 
   /**
