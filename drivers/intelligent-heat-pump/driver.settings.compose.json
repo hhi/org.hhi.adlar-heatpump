@@ -201,6 +201,19 @@
           "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben."
         },
         "value": false
+      },
+      {
+        "id": "enable_intelligent_energy_tracking",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable intelligent energy tracking",
+          "nl": "Intelligente energie tracking inschakelen"
+        },
+        "hint": {
+          "en": "Automatically prioritize external power measurements when available via flow cards, fall back to internal sensors. Makes device appear in Homey Energy dashboard with accurate power consumption data.",
+          "nl": "Prioriteer automatisch externe vermogensmetingen wanneer beschikbaar via flow kaarten, val terug op interne sensoren. Laat apparaat verschijnen in Homey Energie dashboard met nauwkeurige stroomverbruik data."
+        },
+        "value": true
       }
     ]
   },
@@ -495,19 +508,6 @@
         "hint": {
           "en": "Click to generate a detailed report showing which capabilities are working and which have null values",
           "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben"
-        },
-        "value": false
-      },
-      {
-        "id": "flow_trigger_test",
-        "type": "checkbox",
-        "label": {
-          "en": "Test external data flow triggers",
-          "nl": "Test externe data flow triggers"
-        },
-        "hint": {
-          "en": "Click to test the external power, flow, and ambient data flow trigger system - check logs for results",
-          "nl": "Klik om het externe vermogen, doorstroom en buitentemperatuur flow trigger systeem te testen - controleer logs voor resultaten"
         },
         "value": false
       }

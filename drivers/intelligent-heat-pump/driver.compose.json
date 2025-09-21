@@ -59,6 +59,7 @@
     "adlar_cop",
     "adlar_cop_method",
     "adlar_external_power",
+    "adlar_external_energy_total",
     "adlar_external_flow",
     "adlar_external_ambient",
     "adlar_cop_daily",
@@ -606,11 +607,12 @@
     "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
   },
   "energy": {
+    "cumulative": true,
+    "cumulativeImportedCapability": "meter_power.electric_total",
     "approximation": {
-      "usageConstant": 30
+      "usageConstant": 2500
     }
   },
-
 
   "pair": [
     {

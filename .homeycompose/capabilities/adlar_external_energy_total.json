@@ -1,0 +1,29 @@
+{
+  "id": "adlar_external_energy_total",
+  "title": {
+    "en": "Calculated Total Energy Consumption",
+    "nl": "Berekend Totaal Energieverbruik"
+  },
+  "type": "number",
+  "units": {
+    "en": "kWh",
+    "nl": "kWh"
+  },
+  "min": 0,
+  "max": 999999,
+  "step": 0.001,
+  "decimals": 3,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "External Energy Cumulative",
+    "nl": "Extern Energie Cumulatief"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "Total energy consumption calculated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
+    "nl": "Totaal energieverbruik berekend uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
+  }
+}
