@@ -17,6 +17,9 @@ export class DeviceConstants {
   /** Capability health check interval */
   static readonly HEALTH_CHECK_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
+  /** Energy tracking update interval - frequent updates for accurate energy accumulation */
+  static readonly ENERGY_TRACKING_INTERVAL_MS = 10 * 1000; // 10 seconds
+
   /** Allow notification key change if longer than this threshold */
   static readonly NOTIFICATION_KEY_CHANGE_THRESHOLD_MS = 5 * 1000; // 5 seconds
 
