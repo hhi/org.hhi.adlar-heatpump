@@ -1,4 +1,7 @@
 {
+  "0.99.6": {
+    "en": "Fixed external energy accumulation with accurate timestamp-based calculation and enhanced precision for small power increments."
+  },
   "0.99.2": {
     "en": "Calculated total energy consumption."
   },
