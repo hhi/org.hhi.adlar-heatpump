@@ -1,13 +1,13 @@
-# Adlar Heat Pump - Flow Cards Overview (v0.92.7)
+# Adlar Heat Pump - Flow Cards Overview (v0.99.8)
 
 This document provides a comprehensive overview of all flow cards available in the Adlar Heat Pump app, categorized by type, tier, and use case, with advanced user control and insights management.
 
-## Summary Statistics (v0.92.7)
+## Summary Statistics (v0.99.8)
 
-- **Total Flow Cards**: 58 
-- **Triggers**: 31
-- **Actions**: 9  
-- **Conditions**: 18 (+9 action-based conditions)
+- **Total Flow Cards**: 60
+- **Triggers**: 32
+- **Actions**: 9
+- **Conditions**: 19 (+9 action-based conditions)
 - **Highlighted Cards**: 8 (essential for basic operation)
 - **User-Controllable Categories**: 7 flow card categories + expert mode
 - **Languages Supported**: English (EN) and Dutch (NL)

@@ -15,6 +15,7 @@ export interface COPDataPoint {
   thermalOutput?: number; // Heat output (Watts)
   ambientTemperature?: number; // Ambient temperature (°C)
   compressorRuntime?: number; // Minutes compressor was running
+  isIdlePeriod?: boolean; // Flag indicating this represents an idle period
 }
 
 /**
@@ -179,6 +180,48 @@ export class RollingCOPCalculator {
   }
 
   /**
+   * Get daily COP with idle period awareness
+   * Returns null if system has been mostly idle, adjusted COP if partially idle
+   */
+  public getDailyCOPWithIdleAwareness(): RollingCOPResult | null {
+    const result = this.calculateRollingCOP(24 * 60);
+    if (!result) return null;
+
+    // Get data points in the 24-hour window
+    const windowData = this.getDataPointsInWindow(24 * 60);
+
+    // Calculate idle characteristics
+    const idlePoints = windowData.filter((p) => p.isIdlePeriod === true || (p.cop === 0 && p.method === 'idle_period')).length;
+    const idleRatio = windowData.length > 0 ? idlePoints / windowData.length : 0;
+
+    // Check for data freshness - if newest data point is > 4 hours old, consider stale
+    const newestDataPoint = windowData.length > 0 ? Math.max(...windowData.map((p) => p.timestamp)) : 0;
+    const dataAge = (Date.now() - newestDataPoint) / (1000 * 60 * 60); // Hours
+    const isStaleData = dataAge > 4; // More than 4 hours old
+
+    // Return null (no meaningful COP) if:
+    // 1. More than 70% of window is idle periods, or
+    // 2. Data is stale (> 4 hours old), or
+    // 3. Very few data points suggesting limited operation
+    if (idleRatio > 0.7 || isStaleData || windowData.length < 6) {
+      return null;
+    }
+
+    // If 30-70% idle, adjust the COP downward to reflect reduced operation
+    if (idleRatio > 0.3) {
+      const adjustmentFactor = 1 - (idleRatio * 0.5); // Reduce by up to 50%
+      result.averageCOP = Number((result.averageCOP * adjustmentFactor).toFixed(2));
+      result.confidenceLevel = 'medium'; // Lower confidence for mixed operation
+
+      // Update calculation details to show adjustment
+      result.calculationDetails.weightedAverage = Number((result.calculationDetails.weightedAverage * adjustmentFactor).toFixed(2));
+      result.calculationDetails.excludedOutliers = result.calculationDetails.excludedOutliers + idlePoints;
+    }
+
+    return result;
+  }
+
+  /**
    * Get hourly COP (60-minute rolling average)
    */
   public getHourlyCOP(): RollingCOPResult | null {
@@ -190,6 +233,13 @@ export class RollingCOPCalculator {
    */
   public getWeeklyCOP(): RollingCOPResult | null {
     return this.calculateRollingCOP(7 * 24 * 60); // 7 days
+  }
+
+  /**
+   * Get monthly COP (30-day rolling average)
+   */
+  public getMonthlyCOP(): RollingCOPResult | null {
+    return this.calculateRollingCOP(30 * 24 * 60); // 30 days
   }
 
   /**
@@ -222,6 +272,14 @@ export class RollingCOPCalculator {
   }
 
   /**
+   * Get data points within a specific time window (in minutes)
+   */
+  public getDataPointsInWindow(timeWindow: number): COPDataPoint[] {
+    const cutoffTime = Date.now() - (timeWindow * 60 * 1000); // Convert minutes to milliseconds
+    return this.dataPoints.filter((point) => point.timestamp >= cutoffTime);
+  }
+
+  /**
    * Export data for persistence (e.g., to device settings)
    */
   public exportData(): { dataPoints: COPDataPoint[]; config: RollingCOPConfig } {
@@ -240,6 +298,58 @@ export class RollingCOPCalculator {
       Object.assign(this.config, data.config);
     }
     this.cleanOldDataPoints();
+  }
+
+  /**
+   * Get diagnostic information about the rolling COP data
+   */
+  public getDiagnosticInfo(): {
+    totalDataPoints: number;
+    dataPointsInWindow: number;
+    oldestDataPoint: number;
+    newestDataPoint: number;
+    averageInterval: number;
+    confidenceDistribution: Record<string, number>;
+    idleRatio: number;
+    dataFreshness: number; // Hours since newest data point
+  } {
+    const now = Date.now();
+    const windowData = this.getDataPointsInWindow(this.config.timeWindow);
+
+    // Calculate average interval between data points
+    let totalInterval = 0;
+    if (windowData.length > 1) {
+      const sortedData = [...windowData].sort((a, b) => a.timestamp - b.timestamp);
+      for (let i = 1; i < sortedData.length; i++) {
+        totalInterval = totalInterval + sortedData[i].timestamp - sortedData[i - 1].timestamp;
+      }
+    }
+    const averageInterval = windowData.length > 1 ? totalInterval / (windowData.length - 1) / (1000 * 60) : 0; // Minutes
+
+    // Calculate confidence distribution
+    const confidenceDistribution: Record<string, number> = { high: 0, medium: 0, low: 0 };
+    windowData.forEach((point) => {
+      confidenceDistribution[point.confidence] = (confidenceDistribution[point.confidence] || 0) + 1;
+    });
+
+    // Calculate idle ratio
+    const idlePoints = windowData.filter((p) => p.isIdlePeriod === true || (p.cop === 0 && p.method === 'idle_period')).length;
+    const idleRatio = windowData.length > 0 ? idlePoints / windowData.length : 0;
+
+    // Calculate data freshness
+    const newestDataPoint = windowData.length > 0 ? Math.max(...windowData.map((p) => p.timestamp)) : 0;
+    const dataFreshness = newestDataPoint > 0 ? (now - newestDataPoint) / (1000 * 60 * 60) : 999; // Hours
+
+    return {
+      totalDataPoints: this.dataPoints.length,
+      dataPointsInWindow: windowData.length,
+      oldestDataPoint: windowData.length > 0 ? Math.min(...windowData.map((p) => p.timestamp)) : 0,
+      newestDataPoint,
+      averageInterval: Number(averageInterval.toFixed(1)),
+      confidenceDistribution,
+      idleRatio: Number(idleRatio.toFixed(3)),
+      dataFreshness: Number(dataFreshness.toFixed(1)),
+    };
   }
 
   /**

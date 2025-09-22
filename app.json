@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.99.5",
+  "version": "0.99.10",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -1880,6 +1880,107 @@
         ]
       },
       {
+        "id": "monthly_cop_efficiency_changed",
+        "title": {
+          "en": "Monthly COP efficiency changed",
+          "nl": "Maandelijkse COP efficiëntie gewijzigd"
+        },
+        "titleFormatted": {
+          "en": "Monthly COP efficiency [[condition]] [[threshold]]",
+          "nl": "Maandelijkse COP efficiëntie [[condition]] [[threshold]]"
+        },
+        "hint": {
+          "en": "Triggers when the 30-day average COP goes above or below a specified threshold",
+          "nl": "Wordt geactiveerd wanneer de 30-dagen gemiddelde COP boven of onder een opgegeven drempel gaat"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Monthly COP threshold",
+              "nl": "Maandelijkse COP drempel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "Monthly COP efficiency threshold",
+              "nl": "Maandelijkse COP efficiëntie drempel"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_monthly_cop",
+            "title": {
+              "en": "Current monthly COP",
+              "nl": "Huidige maandelijkse COP"
+            },
+            "example": 3.1
+          },
+          {
+            "type": "number",
+            "name": "threshold_cop",
+            "title": {
+              "en": "Threshold COP",
+              "nl": "Drempel COP"
+            },
+            "example": 3
+          },
+          {
+            "type": "number",
+            "name": "data_points",
+            "title": {
+              "en": "Data points used",
+              "nl": "Gebruikte datapunten"
+            },
+            "example": 1440
+          },
+          {
+            "type": "string",
+            "name": "confidence_level",
+            "title": {
+              "en": "Confidence level",
+              "nl": "Betrouwbaarheidsniveau"
+            },
+            "example": "high"
+          }
+        ]
+      },
+      {
         "id": "outlet_temperature_changed",
         "title": {
           "en": "Outlet temperature changed",
@@ -3410,6 +3511,45 @@
         ]
       },
       {
+        "id": "monthly_cop_above_threshold",
+        "title": {
+          "en": "Monthly COP above threshold",
+          "nl": "Maandelijkse COP boven drempel"
+        },
+        "titleFormatted": {
+          "en": "Monthly COP is !{{above|below}} [[threshold]]",
+          "nl": "Maandelijkse COP is !{{boven|onder}} [[threshold]]"
+        },
+        "hint": {
+          "en": "Check if the 30-day average COP is above or below a threshold",
+          "nl": "Controleer of de 30-dagen gemiddelde COP boven of onder een drempel is"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": "Monthly COP threshold",
+              "nl": "Maandelijkse COP drempel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "Monthly COP efficiency threshold",
+              "nl": "Maandelijkse COP efficiëntie drempel"
+            }
+          }
+        ]
+      },
+      {
         "id": "power_above_threshold",
         "title": {
           "en": "Power consumption above",
@@ -4627,6 +4767,7 @@
         "adlar_external_ambient",
         "adlar_cop_daily",
         "adlar_cop_weekly",
+        "adlar_cop_monthly",
         "adlar_cop_trend",
         "adlar_scop",
         "adlar_scop_quality",
@@ -5127,6 +5268,26 @@
           "description": {
             "en": "7-day rolling average Coefficient of Performance for seasonal pattern identification",
             "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie"
+          }
+        },
+        "adlar_cop_monthly": {
+          "title": {
+            "en": "Monthly Average COP",
+            "nl": "Maandelijkse Gemiddelde COP"
+          },
+          "type": "number",
+          "min": 0,
+          "max": 8,
+          "step": 0.01,
+          "decimals": 2,
+          "insights": true,
+          "insightsTitle": {
+            "en": "Monthly Heat Pump Efficiency (COP)",
+            "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)"
+          },
+          "description": {
+            "en": "30-day rolling average Coefficient of Performance for seasonal pattern identification and long-term efficiency monitoring",
+            "nl": "30-dagen voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring"
           }
         },
         "adlar_cop_trend": {
@@ -5630,8 +5791,8 @@
               "id": "flow_efficiency_alerts",
               "type": "dropdown",
               "label": {
-                "en": "Efficiency related alerts",
-                "nl": "Efficiëntie gerelateerde alarm afhandeling"
+                "en": "Efficiency (S)COP related alerts",
+                "nl": "Efficiëntie (S)COP gerelateerde alarm afhandeling"
               },
               "hint": {
                 "en": "Control COP and SCOP efficiency alert flow cards visibility",
@@ -5672,6 +5833,28 @@
               "hint": {
                 "en": "Enable diagnostic and system analysis flow cards for HVAC experts",
                 "nl": "Schakel diagnose en systeem analyse flow kaarten in voor HVAC experts"
+              },
+              "value": false
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Energy Management",
+            "nl": "Energie Beheer"
+          },
+          "children": [
+            {
+              "id": "reset_external_energy_total",
+              "type": "checkbox",
+              "label": {
+                "en": "Reset external energy total counter",
+                "nl": "Reset externe energie totaal teller"
+              },
+              "hint": {
+                "en": "Click to reset the external energy total counter to zero. This will clear all accumulated energy measurements from flow cards.",
+                "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten."
               },
               "value": false
             }
@@ -5735,8 +5918,8 @@
     "adlar_cop_daily": {
       "id": "adlar_cop_daily",
       "title": {
-        "en": "Daily Average COP",
-        "nl": "Dagelijkse Gemiddelde COP"
+        "en": "Rolling Daily Average COP",
+        "nl": "Voortschrijdend Dagelijks Gemiddelde COP"
       },
       "type": "number",
       "units": {
@@ -5778,6 +5961,35 @@
         "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft."
       }
     },
+    "adlar_cop_monthly": {
+      "id": "adlar_cop_monthly",
+      "title": {
+        "en": "Rolling Monthly Average COP",
+        "nl": "Voortschrijdend Maandelijkse Gemiddelde COP"
+      },
+      "type": "number",
+      "units": {
+        "en": "COP",
+        "nl": "COP"
+      },
+      "min": 0,
+      "max": 8,
+      "step": 0.01,
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Monthly Heat Pump Efficiency (COP)",
+        "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "description": {
+        "en": "30-day rolling average COP for seasonal pattern identification and long-term efficiency monitoring. Ideal for detecting gradual performance changes and seasonal optimization opportunities.",
+        "nl": "30-dagen voortschrijdend gemiddelde COP voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring. Ideaal voor het detecteren van geleidelijke prestatieveranderingen en seizoensoptimalisatie mogelijkheden."
+      }
+    },
     "adlar_cop_trend": {
       "id": "adlar_cop_trend",
       "title": {
@@ -5798,8 +6010,8 @@
     "adlar_cop_weekly": {
       "id": "adlar_cop_weekly",
       "title": {
-        "en": "Weekly Average COP",
-        "nl": "Wekelijkse Gemiddelde COP"
+        "en": "Rolling Weekly Average COP",
+        "nl": "Voortschrijdend Wekelijks Gemiddelde COP"
       },
       "type": "number",
       "units": {
@@ -6200,7 +6412,7 @@
         "en": "External Ambient for COP",
         "nl": "Externe Buitentemp voor COP"
       },
-      "icon": "/assets/cop-efficiency.svg",
+      "icon": "/assets/external-ambient.svg",
       "description": {
         "en": "External ambient temperature received via flow cards from other Homey devices, used for enhanced COP calculations with external temperature sensor data",
         "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens"
@@ -6229,7 +6441,7 @@
         "en": "External Energy Cumulative",
         "nl": "Extern Energie Cumulatief"
       },
-      "icon": "/assets/cop-efficiency.svg",
+      "icon": "/assets/external-energy-total.svg",
       "description": {
         "en": "Total energy consumption calculated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
         "nl": "Totaal energieverbruik berekend uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
@@ -6258,7 +6470,7 @@
         "en": "External Flow Input for COP",
         "nl": "Externe Doorstroom Input voor COP"
       },
-      "icon": "/assets/cop-efficiency.svg",
+      "icon": "/assets/external-flow.svg",
       "description": {
         "en": "External water flow measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external flow meter data",
         "nl": "Externe water doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens"
@@ -6287,7 +6499,7 @@
         "en": "External Power Input for COP",
         "nl": "Externe Vermogen Input voor COP"
       },
-      "icon": "/assets/cop-efficiency.svg",
+      "icon": "/assets/external-power.svg",
       "description": {
         "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external power meter data",
         "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe vermogensmeter gegevens"

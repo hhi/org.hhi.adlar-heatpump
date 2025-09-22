@@ -95,9 +95,16 @@ class MyDevice extends Homey.Device {
   // Rolling COP calculation
   private rollingCOPCalculator: RollingCOPCalculator | null = null;
   private lastRollingCOPUpdate: number = 0;
+  // Idle period monitoring
+  private idleCheckInterval: NodeJS.Timeout | null = null;
+  private lastCOPDataPointTime: number = 0;
+  private compressorStateHistory: Array<{timestamp: number, running: boolean}> = [];
 
   // External power energy tracking
   private lastExternalPowerTimestamp: number | null = null;
+
+  // Debounce map for temperature critical alerts (per capability)
+  private lastTempAlertAt: Map<string, number> = new Map();
 
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
@@ -860,6 +867,9 @@ class MyDevice extends Homey.Device {
       const totalDataPoints = this.rollingCOPCalculator.exportData().dataPoints.length;
       this.log('📈 Rolling COP: Added data point with COP', copResult.cop, `(total points: ${totalDataPoints})`);
 
+      // Track when we last added a COP data point for idle monitoring
+      this.lastCOPDataPointTime = Date.now();
+
       // Update rolling COP capabilities (every 5 minutes to avoid excessive updates)
       const now = Date.now();
       if (now - this.lastRollingCOPUpdate >= 5 * 60 * 1000) { // 5 minutes
@@ -921,9 +931,18 @@ class MyDevice extends Homey.Device {
     }
 
     try {
-      // Calculate daily COP
-      const dailyCOP = this.rollingCOPCalculator.getDailyCOP();
+      // Use idle-aware calculation for daily COP
+      const dailyCOP = this.rollingCOPCalculator.getDailyCOPWithIdleAwareness?.() ||
+                       this.rollingCOPCalculator.getDailyCOP();
+
+      // Get diagnostic info for better logging
+      const diagnostics = this.rollingCOPCalculator.getDiagnosticInfo?.();
+
       this.log(`📅 Daily COP calculation result: ${dailyCOP ? `${dailyCOP.averageCOP} (${dailyCOP.dataPoints} points)` : 'null/undefined'}`);
+
+      if (diagnostics) {
+        this.log(`📊 COP Diagnostics: ${diagnostics.dataPointsInWindow} points in window, ${(diagnostics.idleRatio * 100).toFixed(1)}% idle, data age: ${diagnostics.dataFreshness}h`);
+      }
 
       if (dailyCOP && this.hasCapability('adlar_cop_daily')) {
         await this.setCapabilityValue('adlar_cop_daily', dailyCOP.averageCOP);
@@ -932,7 +951,15 @@ class MyDevice extends Homey.Device {
         // Trigger daily COP efficiency flow cards
         await this.triggerDailyCOPFlowCards(dailyCOP);
       } else if (!dailyCOP) {
-        this.log('⚠️ Daily COP calculation returned null - no data points in rolling window');
+        // Explicitly set to null when no meaningful data (mostly idle or stale)
+        if (this.hasCapability('adlar_cop_daily')) {
+          await this.setCapabilityValue('adlar_cop_daily', null);
+        }
+
+        const reason = diagnostics ?
+          `idle ratio: ${(diagnostics.idleRatio * 100).toFixed(1)}%, data age: ${diagnostics.dataFreshness.toFixed(1)}h` :
+          'no data points in rolling window';
+        this.log(`⚠️ Daily COP set to null - ${reason}`);
       } else if (!this.hasCapability('adlar_cop_daily')) {
         this.log('⚠️ Daily COP capability not available');
       }
@@ -942,6 +969,13 @@ class MyDevice extends Homey.Device {
       if (weeklyCOP && this.hasCapability('adlar_cop_weekly')) {
         await this.setCapabilityValue('adlar_cop_weekly', weeklyCOP.averageCOP);
         this.debugLog('📊 Weekly COP updated:', weeklyCOP.averageCOP, `(${weeklyCOP.dataPoints} points, ${weeklyCOP.confidenceLevel} confidence)`);
+      }
+
+      // Calculate monthly COP
+      const monthlyCOP = this.rollingCOPCalculator.getMonthlyCOP();
+      if (monthlyCOP && this.hasCapability('adlar_cop_monthly')) {
+        await this.setCapabilityValue('adlar_cop_monthly', monthlyCOP.averageCOP);
+        this.debugLog('📅 Monthly COP updated:', monthlyCOP.averageCOP, `(${monthlyCOP.dataPoints} points, ${monthlyCOP.confidenceLevel} confidence)`);
       }
 
       // Update trend analysis
@@ -1004,13 +1038,126 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Get current compressor runtime (simplified estimation)
+   * Get current compressor runtime with enhanced tracking
    */
   private getCompressorRuntime(): number {
-    // This is a simplified implementation
-    // In a real system, you'd track actual runtime
+    const currentState = this.getCapabilityValue('adlar_state_compressor_state');
+    const now = Date.now();
+
+    // Track state changes for better runtime calculation
+    if (this.compressorStateHistory.length === 0 ||
+        this.compressorStateHistory[this.compressorStateHistory.length - 1].running !== currentState) {
+      this.compressorStateHistory.push({timestamp: now, running: currentState});
+
+      // Keep only last 48 hours of state history
+      const cutoff = now - (48 * 60 * 60 * 1000);
+      this.compressorStateHistory = this.compressorStateHistory.filter(entry => entry.timestamp >= cutoff);
+    }
+
+    // Calculate actual runtime in the last period (30 minutes for COP calculation)
+    const periodStart = now - (30 * 60 * 1000); // 30 minutes ago
+    let runtimeMinutes = 0;
+
+    for (let i = this.compressorStateHistory.length - 1; i >= 0; i--) {
+      const entry = this.compressorStateHistory[i];
+      if (entry.timestamp < periodStart) break;
+
+      const nextEntry = this.compressorStateHistory[i + 1];
+      const periodEnd = nextEntry ? nextEntry.timestamp : now;
+      const duration = (periodEnd - Math.max(entry.timestamp, periodStart)) / (1000 * 60);
+
+      if (entry.running && duration > 0) {
+        runtimeMinutes += duration;
+      }
+    }
+
+    return Math.round(Math.max(0, Math.min(30, runtimeMinutes))); // Clamp between 0 and 30 minutes
+  }
+
+  /**
+   * Start idle period monitoring
+   */
+  private startIdleMonitoring(): void {
+    try {
+      // Check every 30 minutes if we should add idle data points
+      const interval = this.homey.setInterval(async () => {
+        try {
+          await this.handleIdlePeriodTracking();
+        } catch (error) {
+          this.error('Error during idle period tracking:', error);
+        }
+      }, 30 * 60 * 1000); // 30 minutes
+
+      if (interval) {
+        this.idleCheckInterval = interval;
+        this.log('Started idle period monitoring (30 minute intervals)');
+      } else {
+        this.idleCheckInterval = null;
+        this.error('Failed to start idle monitoring interval');
+      }
+    } catch (err) {
+      this.idleCheckInterval = null;
+      this.error('Error starting idle monitoring interval:', err);
+    }
+  }
+
+  /**
+   * Stop idle period monitoring
+   */
+  private stopIdleMonitoring(): void {
+    if (this.idleCheckInterval) {
+      this.homey.clearInterval(this.idleCheckInterval);
+      this.idleCheckInterval = null;
+      this.log('Stopped idle period monitoring');
+    }
+  }
+
+  /**
+   * Handle idle period tracking and add zero-COP data points when needed
+   */
+  private async handleIdlePeriodTracking(): Promise<void> {
+    if (!this.rollingCOPCalculator) return;
+
+    const now = Date.now();
     const compressorState = this.getCapabilityValue('adlar_state_compressor_state');
-    return compressorState ? 30 : 0; // 30 minutes if running, 0 if not
+    const timeSinceLastCOP = this.lastCOPDataPointTime > 0 ? now - this.lastCOPDataPointTime : 0;
+
+    // If compressor is idle for > 1 hour AND no COP data added recently, add idle data point
+    if (!compressorState && timeSinceLastCOP > 60 * 60 * 1000) { // 1 hour
+      const idleDataPoint: COPDataPoint = {
+        timestamp: now,
+        cop: 0, // Zero COP during idle
+        method: 'idle_period',
+        confidence: 'high', // High confidence that COP is 0 when idle
+        compressorRuntime: 0,
+        electricalPower: this.getIdlePowerConsumption(),
+        isIdlePeriod: true, // Mark as idle period
+      };
+
+      this.rollingCOPCalculator.addDataPoint(idleDataPoint);
+      this.lastCOPDataPointTime = now; // Update tracking time
+      this.log('🕒 Added idle period data point (COP: 0) - compressor idle for > 1 hour');
+
+      // Update rolling COP capabilities to reflect the idle state
+      await this.updateRollingCOPCapabilities();
+    }
+  }
+
+  /**
+   * Get idle power consumption (standby power)
+   */
+  private getIdlePowerConsumption(): number {
+    // Get actual standby power or estimate (pumps, controls, etc.)
+    const powerValue = this.getCapabilityValue('measure_power');
+
+    // If we have a power reading and it's low (< 500W), use it
+    // Otherwise estimate typical standby consumption
+    if (powerValue && powerValue < 500) {
+      return powerValue;
+    }
+
+    // Estimate standby power: pumps (20W) + controls (10W) + electronics (20W)
+    return 50; // 50W estimated standby
   }
 
   /**
@@ -1221,6 +1368,7 @@ class MyDevice extends Homey.Device {
         const copEnabled = this.copSettings?.enableCOP !== false; // default enabled
         if (copEnabled) {
           this.startCOPCalculationInterval();
+          this.startIdleMonitoring(); // Start idle period monitoring
           // Update SCOP quality to collecting status once COP starts
           if (this.hasCapability('adlar_scop_quality')) {
             const collectingStatus = this.getSCOPStatusMessage('collecting');
@@ -1408,7 +1556,48 @@ class MyDevice extends Homey.Device {
     this.log(`📋 Has adlar_external_power capability: ${this.hasCapability('adlar_external_power')}`);
     this.log(`📋 Has adlar_external_energy_total capability: ${this.hasCapability('adlar_external_energy_total')}`);
 
+    // Show reset functionality
+    this.log(`💡 To reset energy counter: Use device settings > Energy Management > Reset external energy total counter`);
+
     this.log('🔋 === END DEBUG ===');
+  }
+
+  /**
+   * Reset external energy total counter to zero
+   */
+  public async resetExternalEnergyTotal(): Promise<void> {
+    this.log('🔄 Resetting external energy total counter...');
+
+    try {
+      // Check if capability exists
+      if (!this.hasCapability('adlar_external_energy_total')) {
+        this.log('⚠️ External energy total capability not available');
+        return;
+      }
+
+      // Reset the capability value to zero
+      await this.setCapabilityValue('adlar_external_energy_total', 0);
+
+      // Reset the timestamp to start fresh accumulation
+      this.lastExternalPowerTimestamp = null;
+
+      this.log('✅ External energy total reset to 0.000000 kWh');
+      this.log('✅ Energy accumulation timestamp reset - next measurement will use default interval');
+
+      // Reset the setting back to false to prevent repeated triggers
+      setTimeout(async () => {
+        try {
+          await this.setSettings({ reset_external_energy_total: false });
+          this.log('🔄 Reset setting cleared');
+        } catch (error) {
+          this.error('Failed to clear reset setting:', error);
+        }
+      }, 1000);
+
+    } catch (error) {
+      this.error('Failed to reset external energy total:', error);
+      throw new Error(`Failed to reset external energy total: ${error}`);
+    }
   }
 
   /**
@@ -2194,6 +2383,34 @@ class MyDevice extends Homey.Device {
     });
   }
 
+  private getCapabilityFriendlyTitle(capability: string): string {
+    try {
+    // Prefer the title from driver.compose.json capabilitiesOptions if present
+      const opt = (this as any)?.driver?.manifest?.capabilitiesOptions?.[capability];
+      const title = opt?.title?.en || opt?.title?.nl;
+      if (title) return title;
+    } catch {
+    // ignore typing/runtime issues and fall back below
+    }
+
+    // Fallback mapping by capability suffix
+    const part = capability.split('.')[1] || capability;
+    const map: Record<string, string> = {
+      around_temp: 'Ambient temp',
+      temp_top: 'Inlet temp',
+      temp_bottom: 'Outlet temp',
+      coiler_temp: 'Coiler temp',
+      venting_temp: 'Discharge temp',
+      temp_current_f: 'High pressure temp',
+      top_temp_f: 'Low pressure temp',
+      bottom_temp_f: 'Incoiler temp',
+      coiler_temp_f: 'Suction temp',
+      evlin: 'Economizer inlet',
+      eviout: 'Economizer outlet',
+    };
+    return map[part] || capability;
+  }
+
   private async checkForCriticalConditions(capability: string, value: unknown) {
     // Check user preferences first
     const category = this.getCapabilityCategory(capability);
@@ -2248,20 +2465,71 @@ class MyDevice extends Homey.Device {
     };
 
     if (temperatureCapabilityMap[capability] && typeof value === 'number') {
-      // Fire temperature alert flow cards for any significant threshold (customize as needed)
-      if (value > 60 || value < 0) {
+      // 1) Per-sensor WARN thresholds for flow triggers (non-critical)
+      const warnThresholds: Record<string, { high?: number; low?: number }> = {
+        'measure_temperature.venting_temp': { high: 105 }, // discharge can be high
+        'measure_temperature.coiler_temp': { high: 65, low: -25 },
+        'measure_temperature.temp_current_f': { high: 90 },
+        'measure_temperature.around_temp': { high: 45, low: -25 },
+        // default fallback
+        default: { high: 60, low: 0 },
+      };
+      const warn = warnThresholds[capability] || warnThresholds.default;
+
+      const warnBreach =
+        (warn.high !== undefined && value > warn.high) ||
+        (warn.low !== undefined && value < warn.low);
+
+      if (warnBreach) {
         await this.triggerFlowCard(temperatureCapabilityMap[capability], {
           temperature: value,
           sensor_type: capability.split('.')[1] || 'unknown',
         });
       }
 
-      // Critical temperature safety checks
-      if (value > 80 || value < -20) {
-        await this.sendCriticalNotification(
-          'Temperature Alert',
-          `Extreme temperature detected (${value}°C). System safety may be compromised.`,
-        );
+      // 2) Skip critical alerts during defrost to avoid intentional spikes
+      const isDefrosting = this.hasCapability('adlar_state_defrost_state')
+        ? !!this.getCapabilityValue('adlar_state_defrost_state')
+        : false;
+      if (isDefrosting) {
+        this.debugLog('Skipping temperature critical alert during defrost:', capability, value);
+        return;
+      }
+
+      // 3) Per-sensor CRITICAL thresholds for notifications
+      const criticalThresholds: Record<string, { high?: number; low?: number }> = {
+        'measure_temperature.venting_temp': { high: 115 }, // Discharge critical
+        'measure_temperature.coiler_temp': { high: 75, low: -30 },
+        'measure_temperature.temp_current_f': { high: 100 },
+        'measure_temperature.around_temp': { low: -30 }, // ambient extremely low
+        // fallback
+        default: { high: 80, low: -20 },
+      };
+      const crit = criticalThresholds[capability] || criticalThresholds.default;
+
+      const isHighCrit = crit.high !== undefined && value > crit.high;
+      const isLowCrit = crit.low !== undefined && value < crit.low;
+      const isCritical = isHighCrit || isLowCrit;
+
+      if (isCritical) {
+        // Debounce: don’t alert more than once per 30s per sensor
+        const now = Date.now();
+        const lastAt = this.lastTempAlertAt.get(capability) || 0;
+        if (now - lastAt < 30_000) {
+          this.debugLog('Debounced temperature critical alert:', capability, value);
+          return;
+        }
+        this.lastTempAlertAt.set(capability, now);
+
+        // Friendly name and detailed title/message
+        const sensorName = this.getCapabilityFriendlyTitle(capability);
+        const direction = isHighCrit ? 'high' : 'low';
+        const thresholdText = isHighCrit ? `>${crit.high}°C` : `<${crit.low}°C`;
+
+        const title = `Temperature Alert: ${sensorName} ${value.toFixed(1)}°C`;
+        const message = `${sensorName} is critically ${direction} at ${value.toFixed(1)}°C (threshold ${thresholdText}). System safety may be compromised.`;
+
+        await this.sendCriticalNotification(title, message);
       }
     }
 
@@ -3014,6 +3282,11 @@ class MyDevice extends Homey.Device {
     // Handle energy tracking settings changes first
     await this.handleEnergyTrackingSettings(changedKeys, newSettings);
 
+    // Handle reset external energy total
+    if (changedKeys.includes('reset_external_energy_total') && newSettings.reset_external_energy_total === true) {
+      await this.resetExternalEnergyTotal();
+    }
+
     // Handle device credential changes (for repair scenarios)
     const credentialKeysChanged = changedKeys.filter(
       (key) => ['device_id', 'local_key', 'ip_address'].includes(key),
@@ -3152,8 +3425,10 @@ class MyDevice extends Homey.Device {
       // Restart COP calculation if enabled
       if (this.copSettings?.enableCOP && this.hasCapability('adlar_cop')) {
         this.stopCOPCalculationInterval();
+        this.stopIdleMonitoring();
         this.startCOPCalculationInterval();
-        this.log('COP calculation restarted with new settings');
+        this.startIdleMonitoring();
+        this.log('COP calculation and idle monitoring restarted with new settings');
 
         // Also restart SCOP updates if available
         if (this.hasCapability('adlar_scop') && this.scopCalculator) {
@@ -3163,8 +3438,9 @@ class MyDevice extends Homey.Device {
         }
       } else {
         this.stopCOPCalculationInterval();
+        this.stopIdleMonitoring();
         this.stopSCOPUpdateInterval();
-        this.log('COP calculation and SCOP updates stopped');
+        this.log('COP calculation, idle monitoring, and SCOP updates stopped');
       }
 
       return 'COP and SCOP settings updated and calculation systems restarted.';
@@ -3219,6 +3495,7 @@ class MyDevice extends Homey.Device {
       'adlar_scop_quality',
       'adlar_cop_daily',
       'adlar_cop_weekly',
+      'adlar_cop_monthly',
       'adlar_cop_trend',
     ];
 
@@ -3269,8 +3546,7 @@ class MyDevice extends Homey.Device {
         }
       } catch (error) {
         // Enhanced error handling with more context
-        const action = enableFeature ? 'add' : 'remove';
-        this.error(`Failed to ${action} ${featureName} capability ${capability}:`, error);
+        this.error(`Failed to process ${featureName} capability ${capability}:`, error);
 
         // For validation errors during capability operations, log additional context
         if (error instanceof Error && error.message.includes('Invalid Capability')) {
@@ -3493,7 +3769,7 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Get internal power measurement from DPS 104 without triggering capability update
+   * Get internal power measurement from DPS  104 without triggering capability update
    */
   private getInternalPowerMeasurement(): number | null {
     try {
@@ -3732,67 +4008,6 @@ class MyDevice extends Homey.Device {
       }
 
     } catch (error) {
-      this.error('Error updating cumulative energy:', error);
-    }
-  }
-
-  /**
-   * Update ONLY external energy calculation - independent of intelligent energy tracking setting
-   * This method is called immediately when external power data is received via flow cards
-   */
-  private async updateExternalEnergyOnly(): Promise<void> {
-    try {
-      const externalPower = this.getCapabilityValue('adlar_external_power') || 0;
-      const currentTime = Date.now();
-
-      // Track external energy separately when external power is being used (independent of internal power)
-      // Use separate timestamp for external energy to avoid interference with internal energy calculations
-      const lastExternalUpdate = await this.getStoreValue('last_external_energy_update') || (currentTime - 10000); // Default to 10 seconds ago if not set
-      const externalHoursElapsed = (currentTime - lastExternalUpdate) / (1000 * 60 * 60);
-
-      this.log(`🔌 External energy check: power=${externalPower}W, ` +
-        `hasCapability=${this.hasCapability('adlar_external_energy_total')}, ` +
-        `externalHoursElapsed=${externalHoursElapsed.toFixed(6)}h (${(externalHoursElapsed * 60).toFixed(2)}min), ` +
-        `lastExternalUpdate=${lastExternalUpdate}, currentTime=${currentTime}, timeDiff=${currentTime - lastExternalUpdate}ms`);
-
-      if (externalPower > 0 && this.hasCapability('adlar_external_energy_total')) {
-        this.log(`🔌 External power condition met: ${externalPower}W > 0, checking time elapsed...`);
-
-        // Check if this is the first external energy update (no previous timestamp)
-        const isFirstExternalUpdate = !(await this.getStoreValue('last_external_energy_update'));
-
-        // Use a small threshold to handle floating-point precision with frequent updates (10 seconds = 0.00278 hours)
-        // Always allow first update regardless of time elapsed
-        if (externalHoursElapsed > 0.001 || isFirstExternalUpdate) { // Minimum 3.6 seconds OR first update
-          // For first update, use minimum time increment to avoid zero energy calculation
-          const effectiveHoursElapsed = isFirstExternalUpdate ? 0.002778 : externalHoursElapsed; // 10 seconds minimum
-
-          const externalEnergyIncrement = (externalPower / 1000) * effectiveHoursElapsed;
-          const currentExternalTotal = this.getCapabilityValue('adlar_external_energy_total') || 0;
-          const newExternalTotal = currentExternalTotal + externalEnergyIncrement;
-          await this.setCapabilityValue('adlar_external_energy_total', Math.round(newExternalTotal * 1000) / 1000);
-
-          // Store external energy in device storage for persistence
-          await this.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
-          // Update external energy timestamp
-          await this.setStoreValue('last_external_energy_update', currentTime);
-
-          this.log(`🔌 External energy updated: +${(externalEnergyIncrement * 1000).toFixed(1)}Wh ` +
-            `(external power: ${externalPower}W, time: ${(effectiveHoursElapsed * 60).toFixed(2)}min, ` +
-            `total: ${newExternalTotal.toFixed(3)}kWh)${isFirstExternalUpdate ? ' [FIRST UPDATE]' : ''}`);
-        } else {
-          this.log(`🔌 External energy skipped: externalHoursElapsed=${externalHoursElapsed.toFixed(6)} (≤ 0.001), ` +
-            `timeDiff=${currentTime - lastExternalUpdate}ms, ` +
-            `lastExternalUpdate=${new Date(lastExternalUpdate).toISOString()}, ` +
-            `currentTime=${new Date(currentTime).toISOString()}`);
-        }
-      } else if (externalPower > 0) {
-        this.debugLog('🔌 External energy not tracked: missing capability');
-      } else {
-        this.debugLog('🔌 External energy not tracked: no external power data');
-      }
-
-    } catch (error) {
       this.error('Error updating external energy:', error);
     }
   }
@@ -3852,6 +4067,9 @@ class MyDevice extends Homey.Device {
 
     // Stop COP calculation interval
     this.stopCOPCalculationInterval();
+
+    // Stop idle monitoring
+    this.stopIdleMonitoring();
 
     // Save rolling COP data before shutdown
     await this.saveRollingCOPData();

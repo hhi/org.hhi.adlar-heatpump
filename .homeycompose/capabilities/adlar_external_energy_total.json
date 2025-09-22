@@ -21,7 +21,7 @@
     "en": "External Energy Cumulative",
     "nl": "Extern Energie Cumulatief"
   },
-  "icon": "/assets/cop-efficiency.svg",
+  "icon": "/assets/external-energy-total.svg",
   "description": {
     "en": "Total energy consumption calculated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
     "nl": "Totaal energieverbruik berekend uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
