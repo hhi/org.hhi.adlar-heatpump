@@ -64,6 +64,7 @@
     "adlar_external_ambient",
     "adlar_cop_daily",
     "adlar_cop_weekly",
+    "adlar_cop_monthly",
     "adlar_cop_trend",
     "adlar_scop",
     "adlar_scop_quality",
@@ -582,6 +583,27 @@
       "description": {
         "en": "7-day rolling average Coefficient of Performance for seasonal pattern identification",
         "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie"
+      }
+    },
+
+    "adlar_cop_monthly": {
+      "title": {
+        "en": "Monthly Average COP",
+        "nl": "Maandelijkse Gemiddelde COP"
+      },
+      "type": "number",
+      "min": 0.0,
+      "max": 8.0,
+      "step": 0.01,
+      "decimals": 2,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Monthly Heat Pump Efficiency (COP)",
+        "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)"
+      },
+      "description": {
+        "en": "30-day rolling average Coefficient of Performance for seasonal pattern identification and long-term efficiency monitoring",
+        "nl": "30-dagen voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring"
       }
     },
 

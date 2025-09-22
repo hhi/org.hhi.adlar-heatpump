@@ -16,7 +16,7 @@
     "carnot_estimation": "Carnot Estimation",
     "valve_correlation": "Valve Correlation",
     "temperature_difference": "Temperature Difference",
-    "insufficient_data": "Cause"
+    "insufficient_data": "! "
   },
   "cop_method_description": {
     "direct_thermal": "Direct thermal calculation using water flow and temperature difference (±5% accuracy)",

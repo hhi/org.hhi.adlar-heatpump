@@ -444,8 +444,8 @@
         "id": "flow_efficiency_alerts",
         "type": "dropdown",
         "label": {
-          "en": "Efficiency related alerts",
-          "nl": "Efficiëntie gerelateerde alarm afhandeling"
+          "en": "Efficiency (S)COP related alerts",
+          "nl": "Efficiëntie (S)COP gerelateerde alarm afhandeling"
         },
         "hint": {
           "en": "Control COP and SCOP efficiency alert flow cards visibility",
@@ -486,6 +486,28 @@
         "hint": {
           "en": "Enable diagnostic and system analysis flow cards for HVAC experts",
           "nl": "Schakel diagnose en systeem analyse flow kaarten in voor HVAC experts"
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Energy Management",
+      "nl": "Energie Beheer"
+    },
+    "children": [
+      {
+        "id": "reset_external_energy_total",
+        "type": "checkbox",
+        "label": {
+          "en": "Reset external energy total counter",
+          "nl": "Reset externe energie totaal teller"
+        },
+        "hint": {
+          "en": "Click to reset the external energy total counter to zero. This will clear all accumulated energy measurements from flow cards.",
+          "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten."
         },
         "value": false
       }

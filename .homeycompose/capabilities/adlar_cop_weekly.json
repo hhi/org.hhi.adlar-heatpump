@@ -1,8 +1,8 @@
 {
   "id": "adlar_cop_weekly",
   "title": {
-    "en": "Weekly Average COP",
-    "nl": "Wekelijkse Gemiddelde COP"
+    "en": "Rolling Weekly Average COP",
+    "nl": "Voortschrijdend Wekelijks Gemiddelde COP"
   },
   "type": "number",
   "units": {

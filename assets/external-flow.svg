@@ -1,0 +1,35 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flow measurement background circle -->
+  <circle cx="50" cy="50" r="33.3" fill="currentColor" stroke="currentColor" stroke-width="6.25" opacity="0.8"/>
+
+  <!-- Water flow pipes -->
+  <rect x="25" y="41.7" width="50" height="16.7" rx="8.3" fill="currentColor" opacity="0.2"/>
+  <rect x="29.2" y="45.8" width="41.7" height="8.3" rx="4.2" fill="currentColor" opacity="0.5"/>
+
+  <!-- Flow direction arrows -->
+  <path d="M33.3 50L41.7 43.8V47.9H45.8V52.1H41.7V56.3L33.3 50Z" fill="currentColor" opacity="0.3"/>
+  <path d="M54.2 50L62.5 43.8V47.9H66.7V52.1H62.5V56.3L54.2 50Z" fill="currentColor" opacity="0.3"/>
+
+  <!-- Flow rate indicator lines -->
+  <line x1="37.5" y1="47.1" x2="37.5" y2="52.9" stroke="currentColor" stroke-width="4.2" opacity="0.6"/>
+  <line x1="47.9" y1="47.1" x2="47.9" y2="52.9" stroke="currentColor" stroke-width="4.2" opacity="0.6"/>
+  <line x1="58.3" y1="47.1" x2="58.3" y2="52.9" stroke="currentColor" stroke-width="4.2" opacity="0.6"/>
+
+  <!-- External connectivity indicators -->
+  <!-- Left external arrow -->
+  <path d="M4.2 50L14.6 39.6L20.8 45.8L16.7 50L20.8 54.2L14.6 60.4L4.2 50Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+
+  <!-- Right external arrow -->
+  <path d="M95.8 50L85.4 60.4L79.2 54.2L83.3 50L79.2 45.8L85.4 39.6L95.8 50Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+
+  <!-- External data connection lines -->
+  <line x1="16.7" y1="50" x2="25" y2="50" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+  <line x1="75" y1="50" x2="83.3" y2="50" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+
+  <!-- External device indicators -->
+  <rect x="4.2" y="16.7" width="10.4" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
+  <text x="9.4" y="23.8" font-family="Arial" font-size="33.3" text-anchor="middle" fill="currentColor" opacity="0.3">F</text>
+
+  <rect x="85.4" y="75" width="10.4" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
+  <text x="90.6" y="82.1" font-family="Arial" font-size="33.3" text-anchor="middle" fill="currentColor" opacity="0.3">M</text>
+</svg>

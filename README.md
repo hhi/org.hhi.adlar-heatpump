@@ -24,14 +24,14 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Capabilities
 
-The app provides access to **47+ capabilities** across seven categories:
+The app provides access to **48+ capabilities** across seven categories:
 
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
 - **Power & Electrical (9)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input, calculated external energy total
 - **System Control (8)**: Heating modes, temperature setpoints, capacity settings, timer control
 - **System States (6)**: Compressor status, defrost state, backwater state, fault detection
 - **Valve Control (2)**: EEV and EVI pulse steps monitoring
-- **Efficiency Monitoring (5)**: Real-time COP with diagnostics, calculation method, seasonal SCOP with data quality, rolling averages (daily/weekly), trend analysis
+- **Efficiency Monitoring (6)**: Real-time COP with diagnostics, calculation method, seasonal SCOP with data quality, rolling averages (daily/weekly/monthly), trend analysis
 - **Additional Monitoring (9+)**: Water flow, diagnostic parameters, system optimization, external power integration
 
 ## Installation & Setup
@@ -94,9 +94,9 @@ Three modes per category:
 
 ## Flow Cards
 
-**64 Total Cards**: 34 triggers, 18 conditions, 12 actions
+**66 Total Cards**: 35 triggers, 19 conditions, 12 actions
 
-### Triggers (34)
+### Triggers (35)
 
 - **Temperature, voltage, current, and power alerts**
 - **System state changes and fault detection**
@@ -104,7 +104,7 @@ Three modes per category:
 - **External Data Requests**: Automatic requests for power, flow, and ambient data from other devices
 - **Safety monitoring with rate limiting**
 
-### Conditions (18)
+### Conditions (19)
 
 - **Temperature thresholds and system status verification**
 - **COP efficiency checks** with threshold-based logic

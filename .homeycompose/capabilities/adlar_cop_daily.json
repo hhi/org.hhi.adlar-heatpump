@@ -1,8 +1,8 @@
 {
   "id": "adlar_cop_daily",
   "title": {
-    "en": "Daily Average COP",
-    "nl": "Dagelijkse Gemiddelde COP"
+    "en": "Rolling Daily Average COP",
+    "nl": "Voortschrijdend Dagelijks Gemiddelde COP"
   },
   "type": "number",
   "units": {

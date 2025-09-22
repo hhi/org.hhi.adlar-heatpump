@@ -1,12 +1,12 @@
-# Adlar Heat Pump - Capabilities Overview (v0.98.7)
+# Adlar Heat Pump - Capabilities Overview (v0.99.8)
 
 This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management and dynamic capability control.
 
-## Summary Statistics (v0.98.7)
+## Summary Statistics (v0.99.8)
 
-- **Total Custom Adlar Capabilities**: 17 (added COP enhancements in v0.98.7)
-- **Total Standard/Custom Capabilities**: 30
-- **Total All Capabilities**: 46+
+- **Total Custom Adlar Capabilities**: 18 (added monthly COP in v0.99.8)
+- **Total Standard/Custom Capabilities**: 31
+- **Total All Capabilities**: 47+
 - **DPS Range**: 1-112
 - **Capability Types**: number (24), enum (4), boolean (3), string (1)
 - **Setable Capabilities**: 3 (adlar_enum_work_mode, adlar_hotwater, plus standard capabilities)
@@ -16,7 +16,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Advanced Chart Features**: Custom colors, chart types, and styling options
 - **Enhanced Capability Validation**: Improved error handling for missing capabilities (v0.94.0-0.94.1)
 - **Temperature Label Clarity**: Updated labels for improved flow card readability (v0.94.2)
-- **Rolling COP System**: Time-series analysis with daily/weekly averages and trend detection (v0.98.5)
+- **Rolling COP System**: Time-series analysis with daily/weekly/monthly averages and trend detection (v0.98.5, extended v0.99.8)
 - **COP Diagnostic System**: Specific feedback for missing data with 22-character display optimization (v0.98.7)
 - **External Data Integration**: Cross-app power measurement for enhanced COP accuracy (v0.98.2)
 - **Full Internationalization**: Complete translation support for all COP features and diagnostics (v0.98.7)
@@ -181,6 +181,16 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Properties**: Read-only, sensor UI, insights enabled
 - **Added**: v0.98.5 for long-term efficiency analysis
 - **Note**: Helps identify optimal operating conditions and seasonal patterns.
+
+#### adlar_cop_monthly
+- **Type**: number
+- **Purpose**: 30-day rolling average COP for seasonal trend analysis and long-term efficiency monitoring
+- **Range**: 0.0 to 8.0 (step 0.01, 2 decimals)
+- **Units**: COP
+- **Icon**: `/assets/cop-efficiency.svg`
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Added**: v0.99.8 for extended seasonal analysis
+- **Note**: Ideal for detecting gradual performance changes, seasonal baseline establishment, and maintenance scheduling based on long-term efficiency trends.
 
 #### adlar_cop_trend
 - **Type**: string

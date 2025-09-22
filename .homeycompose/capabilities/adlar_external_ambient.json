@@ -21,7 +21,7 @@
     "en": "External Ambient for COP",
     "nl": "Externe Buitentemp voor COP"
   },
-  "icon": "/assets/cop-efficiency.svg",
+  "icon": "/assets/external-ambient.svg",
   "description": {
     "en": "External ambient temperature received via flow cards from other Homey devices, used for enhanced COP calculations with external temperature sensor data",
     "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens"
