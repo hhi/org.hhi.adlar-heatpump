@@ -68,7 +68,7 @@ class MyDriver extends Homey.Driver {
     });
 
     // Step 2: Apply the updated credentials
-    session.setHandler('update_device', async (device: any) => {
+    session.setHandler('update_device', async (device: { setSettings: (settings: Record<string, unknown>) => Promise<void>; setStoreValue: (key: string, value: unknown) => Promise<void> }) => {
       if (!deviceCredentials) {
         throw new Error('Device credentials not provided during repair');
       }

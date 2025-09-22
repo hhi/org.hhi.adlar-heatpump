@@ -215,7 +215,7 @@ export class RollingCOPCalculator {
 
       // Update calculation details to show adjustment
       result.calculationDetails.weightedAverage = Number((result.calculationDetails.weightedAverage * adjustmentFactor).toFixed(2));
-      result.calculationDetails.excludedOutliers = result.calculationDetails.excludedOutliers + idlePoints;
+      result.calculationDetails.excludedOutliers += idlePoints;
     }
 
     return result;
@@ -312,7 +312,7 @@ export class RollingCOPCalculator {
     confidenceDistribution: Record<string, number>;
     idleRatio: number;
     dataFreshness: number; // Hours since newest data point
-  } {
+    } {
     const now = Date.now();
     const windowData = this.getDataPointsInWindow(this.config.timeWindow);
 
