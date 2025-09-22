@@ -1,4 +1,35 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 import { DeviceConstants } from '../constants';
+
+/**
+ * Minimal Homey interface for logging functionality
+ */
+interface HomeyLogger {
+  log: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}
+
+/**
+ * Temperature bin data structure for SCOP calculation
+ */
+interface TemperatureBin {
+  temp: number; // matches usage in line 287
+  hours: number;
+  weightedCOP: number; // matches usage in line 290
+  binName: string; // based on error message
+}
+
+/**
+ * Quality metrics for SCOP calculation confidence assessment
+ */
+interface QualityMetrics {
+  highQualityHours: number; // matches usage in error
+  method3Contribution: number;
+  overallQualityScore: number; // matches usage in error
+}
 
 /**
  * Individual COP measurement with metadata
@@ -54,11 +85,11 @@ export interface SCOPResult {
  * with quality weighting to mitigate Method 3 accuracy issues
  */
 export class SCOPCalculator {
-  private homey: any;
+  private homey: HomeyLogger;
   private dailyData: Map<string, DailyCOPSummary> = new Map();
   private currentSeasonStart: number = 0;
 
-  constructor(homey: any) {
+  constructor(homey: HomeyLogger) {
     this.homey = homey;
     this.initializeCurrentSeason();
   }
@@ -245,7 +276,7 @@ export class SCOPCalculator {
   /**
    * Calculate weighted SCOP using EN 14825 methodology
    */
-  private calculateWeightedSCOP(temperatureBins: any[]): number {
+  private calculateWeightedSCOP(temperatureBins: TemperatureBin[]): number {
     let totalWeightedEfficiency = 0;
     let totalHours = 0;
 
@@ -289,7 +320,7 @@ export class SCOPCalculator {
   /**
    * Determine confidence level based on data quality
    */
-  private determineConfidence(qualityMetrics: any, totalHours: number): 'high' | 'medium' | 'low' {
+  private determineConfidence(qualityMetrics: QualityMetrics, totalHours: number): 'high' | 'medium' | 'low' {
     const { overallQualityScore, method3Contribution } = qualityMetrics;
 
     if (totalHours < DeviceConstants.SCOP_QUALITY_REQUIREMENTS.HIGH_QUALITY_HOURS_MIN) {
@@ -409,7 +440,7 @@ export class SCOPCalculator {
     return Math.min(actualDays / maxSeasonDays, 1.0);
   }
 
-  private formatDataQualityDescription(qualityMetrics: any, totalHours: number): string {
+  private formatDataQualityDescription(qualityMetrics: QualityMetrics, totalHours: number): string {
     const { overallQualityScore, method3Contribution } = qualityMetrics;
 
     if (totalHours < 100) {

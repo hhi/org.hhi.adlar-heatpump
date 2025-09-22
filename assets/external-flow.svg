@@ -1,35 +1,38 @@
-<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Flow measurement background circle -->
-  <circle cx="50" cy="50" r="33.3" fill="currentColor" stroke="currentColor" stroke-width="6.25" opacity="0.8"/>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flow measurement area -->
+  <rect x="16" y="8" width="6" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
 
-  <!-- Water flow pipes -->
-  <rect x="25" y="41.7" width="50" height="16.7" rx="8.3" fill="currentColor" opacity="0.2"/>
-  <rect x="29.2" y="45.8" width="41.7" height="8.3" rx="4.2" fill="currentColor" opacity="0.5"/>
+  <!-- Flow wave patterns (3 waves) -->
+  <path d="M17 10.5 C17.5 10 18 10 18.5 10.5 C19 11 19.5 11 20 10.5 C20.5 10 21 10 21.5 10.5"
+        stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8" stroke-linecap="round"/>
+  <path d="M17 12 C17.5 11.5 18 11.5 18.5 12 C19 12.5 19.5 12.5 20 12 C20.5 11.5 21 11.5 21.5 12"
+        stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8" stroke-linecap="round"/>
+  <path d="M17 13.5 C17.5 13 18 13 18.5 13.5 C19 14 19.5 14 20 13.5 C20.5 13 21 13 21.5 13.5"
+        stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8" stroke-linecap="round"/>
 
-  <!-- Flow direction arrows -->
-  <path d="M33.3 50L41.7 43.8V47.9H45.8V52.1H41.7V56.3L33.3 50Z" fill="currentColor" opacity="0.3"/>
-  <path d="M54.2 50L62.5 43.8V47.9H66.7V52.1H62.5V56.3L54.2 50Z" fill="currentColor" opacity="0.3"/>
+  <!-- L/min indicator -->
+  <text x="19" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="2.5" font-weight="bold" fill="currentColor">L/min</text>
 
-  <!-- Flow rate indicator lines -->
-  <line x1="37.5" y1="47.1" x2="37.5" y2="52.9" stroke="currentColor" stroke-width="4.2" opacity="0.6"/>
-  <line x1="47.9" y1="47.1" x2="47.9" y2="52.9" stroke="currentColor" stroke-width="4.2" opacity="0.6"/>
-  <line x1="58.3" y1="47.1" x2="58.3" y2="52.9" stroke="currentColor" stroke-width="4.2" opacity="0.6"/>
+  <!-- External data flow arrow -->
+  <path d="M2 12 L12 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M9 9 L12 12 L9 15" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
 
-  <!-- External connectivity indicators -->
-  <!-- Left external arrow -->
-  <path d="M4.2 50L14.6 39.6L20.8 45.8L16.7 50L20.8 54.2L14.6 60.4L4.2 50Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+  <!-- Data source indicator (external device) -->
+  <rect x="2" y="9.5" width="5" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1" opacity="0.8"/>
+  <circle cx="4.5" cy="12" r="1" fill="currentColor" opacity="0.6"/>
 
-  <!-- Right external arrow -->
-  <path d="M95.8 50L85.4 60.4L79.2 54.2L83.3 50L79.2 45.8L85.4 39.6L95.8 50Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+  <!-- Data flow animation dots -->
+  <circle cx="6" cy="11" r="0.4" fill="currentColor" opacity="0.7">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="8" cy="12.5" r="0.4" fill="currentColor" opacity="0.5">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="10" cy="11.5" r="0.4" fill="currentColor" opacity="0.4">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
 
-  <!-- External data connection lines -->
-  <line x1="16.7" y1="50" x2="25" y2="50" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
-  <line x1="75" y1="50" x2="83.3" y2="50" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
-
-  <!-- External device indicators -->
-  <rect x="4.2" y="16.7" width="10.4" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
-  <text x="9.4" y="23.8" font-family="Arial" font-size="33.3" text-anchor="middle" fill="currentColor" opacity="0.3">F</text>
-
-  <rect x="85.4" y="75" width="10.4" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
-  <text x="90.6" y="82.1" font-family="Arial" font-size="33.3" text-anchor="middle" fill="currentColor" opacity="0.3">M</text>
+  <!-- Flow direction indicator inside measurement area -->
+  <path d="M18.5 9.5 L19.5 9.5" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.6" stroke-linecap="round"/>
+  <path d="M19 9.2 L19.5 9.5 L19 9.8" stroke="currentColor" stroke-width="0.8" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity="0.6"/>
 </svg>
