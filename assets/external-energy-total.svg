@@ -1,0 +1,30 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Energy accumulation background -->
+  <circle cx="50" cy="50" r="33.3" fill="currentColor" stroke="currentColor" stroke-width="6.25" opacity="0.8"/>
+
+  <!-- Sigma symbol for total/cumulative -->
+  <path d="M33.3 33.3H62.5L45.8 50L62.5 66.7H33.3L43.8 58.3H37.5V41.7H43.8L33.3 33.3Z" fill="currentColor" stroke="currentColor" stroke-width="2.1" opacity="0.2"/>
+
+  <!-- Energy waves/accumulation lines -->
+  <path d="M37.5 39.6C41.7 37.5 45.8 37.5 50 39.6C54.2 37.5 58.3 37.5 62.5 39.6" stroke="currentColor" stroke-width="4.2" fill="none" opacity="0.3"/>
+  <path d="M37.5 60.4C41.7 62.5 45.8 62.5 50 60.4C54.2 62.5 58.3 62.5 62.5 60.4" stroke="currentColor" stroke-width="4.2" fill="none" opacity="0.3"/>
+
+  <!-- External connectivity indicators -->
+  <!-- Top external arrow -->
+  <path d="M50 4.2L60.4 14.6L54.2 20.8L50 16.7L45.8 20.8L39.6 14.6L50 4.2Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+
+  <!-- Bottom external arrow -->
+  <path d="M50 95.8L39.6 85.4L45.8 79.2L50 83.3L54.2 79.2L60.4 85.4L50 95.8Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+
+  <!-- External data connection lines -->
+  <line x1="50" y1="16.7" x2="50" y2="25" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+  <line x1="50" y1="75" x2="50" y2="83.3" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+
+  <!-- Accumulation indicator dots -->
+  <circle cx="25" cy="25" r="4.2" fill="currentColor" opacity="0.4"/>
+  <circle cx="75" cy="25" r="5" fill="currentColor" opacity="0.5"/>
+  <circle cx="25" cy="75" r="5.8" fill="currentColor" opacity="0.6"/>
+
+  <!-- Plus signs for accumulation -->
+  <path d="M70.8 70.8H79.2M75 66.7V75" stroke="currentColor" stroke-width="4.2"/>
+</svg>

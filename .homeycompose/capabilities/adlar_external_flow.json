@@ -21,7 +21,7 @@
     "en": "External Flow Input for COP",
     "nl": "Externe Doorstroom Input voor COP"
   },
-  "icon": "/assets/cop-efficiency.svg",
+  "icon": "/assets/external-flow.svg",
   "description": {
     "en": "External water flow measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external flow meter data",
     "nl": "Externe water doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens"
