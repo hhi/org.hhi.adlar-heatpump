@@ -1,22 +1,35 @@
-<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Power symbol background circle -->
-  <circle cx="50" cy="50" r="33.3" fill="currentColor" stroke="currentColor" stroke-width="6.25" opacity="0.8"/>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Power measurement area -->
+  <rect x="16" y="8" width="6" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
 
-  <!-- Lightning bolt for power -->
-  <path d="M41.7 29.2L58.3 50H45.8L54.2 70.8L37.5 50H50L41.7 29.2Z" fill="currentColor" opacity="0.2"/>
+  <!-- Lightning bolt symbol for power -->
+  <path d="M18.5 9.5 L19.5 12 L20.5 12 L19 15.5 L18.5 13 L17.5 13 Z"
+        fill="currentColor" opacity="0.8" stroke="currentColor" stroke-width="0.3"/>
 
-  <!-- External connectivity indicators -->
-  <!-- Top external arrow -->
-  <path d="M50 4.2L60.4 14.6L54.2 20.8L50 16.7L45.8 20.8L39.6 14.6L50 4.2Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+  <!-- Power indicator lines -->
+  <line x1="20.5" y1="10" x2="21.5" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.6"/>
+  <line x1="20.5" y1="12" x2="21.5" y2="12" stroke="currentColor" stroke-width="0.5" opacity="0.6"/>
+  <line x1="20.5" y1="14" x2="21.5" y2="14" stroke="currentColor" stroke-width="0.5" opacity="0.6"/>
 
-  <!-- Right external arrow -->
-  <path d="M95.8 50L85.4 60.4L79.2 54.2L83.3 50L79.2 45.8L85.4 39.6L95.8 50Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+  <!-- W indicator -->
+  <text x="19" y="21" text-anchor="middle" font-family="Arial, sans-serif" font-size="2.5" font-weight="bold" fill="currentColor">W</text>
 
-  <!-- External data connection lines -->
-  <line x1="50" y1="16.7" x2="50" y2="25" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
-  <line x1="83.3" y1="50" x2="75" y2="50" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+  <!-- External data flow arrow -->
+  <path d="M2 12 L12 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M9 9 L12 12 L9 15" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
 
-  <!-- Small external device indicator -->
-  <rect x="8.3" y="8.3" width="12.5" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
-  <rect x="79.2" y="83.3" width="12.5" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
+  <!-- Data source indicator (external device) -->
+  <rect x="2" y="9.5" width="5" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1" opacity="0.8"/>
+  <circle cx="4.5" cy="12" r="1" fill="currentColor" opacity="0.6"/>
+
+  <!-- Data flow animation dots -->
+  <circle cx="6" cy="11" r="0.4" fill="currentColor" opacity="0.7">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="8" cy="12.5" r="0.4" fill="currentColor" opacity="0.5">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="10" cy="11.5" r="0.4" fill="currentColor" opacity="0.4">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
 </svg>

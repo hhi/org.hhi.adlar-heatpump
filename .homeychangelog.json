@@ -1,4 +1,10 @@
 {
+  "0.99.13": {
+    "en": "Updated external measurement icons with improved visual design and consistency across all measurement types for better user experience."
+  },
+  "0.99.12": {
+    "en": "Redesigned external measurement icons with consistent visual pattern and enhanced temperature alert notifications with detailed sensor information."
+  },
   "0.99.9": {
     "en": "Added monthly rolling COP capability with 30-day efficiency analysis, new flow cards for long-term monitoring, and automation support for seasonal performance tracking and maintenance scheduling."
   },
