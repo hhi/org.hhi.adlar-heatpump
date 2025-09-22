@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Power symbol background circle -->
+  <circle cx="50" cy="50" r="33.3" fill="currentColor" stroke="currentColor" stroke-width="6.25" opacity="0.8"/>
+
+  <!-- Lightning bolt for power -->
+  <path d="M41.7 29.2L58.3 50H45.8L54.2 70.8L37.5 50H50L41.7 29.2Z" fill="currentColor" opacity="0.2"/>
+
+  <!-- External connectivity indicators -->
+  <!-- Top external arrow -->
+  <path d="M50 4.2L60.4 14.6L54.2 20.8L50 16.7L45.8 20.8L39.6 14.6L50 4.2Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+
+  <!-- Right external arrow -->
+  <path d="M95.8 50L85.4 60.4L79.2 54.2L83.3 50L79.2 45.8L85.4 39.6L95.8 50Z" fill="currentColor" stroke="currentColor" stroke-width="2.1"/>
+
+  <!-- External data connection lines -->
+  <line x1="50" y1="16.7" x2="50" y2="25" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+  <line x1="83.3" y1="50" x2="75" y2="50" stroke="currentColor" stroke-width="6.25" stroke-dasharray="8.3,4.2" opacity="0.7"/>
+
+  <!-- Small external device indicator -->
+  <rect x="8.3" y="8.3" width="12.5" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
+  <rect x="79.2" y="83.3" width="12.5" height="8.3" rx="2.1" fill="currentColor" opacity="0.6"/>
+</svg>

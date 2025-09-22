@@ -1,4 +1,10 @@
 {
+  "0.99.9": {
+    "en": "Added monthly rolling COP capability with 30-day efficiency analysis, new flow cards for long-term monitoring, and automation support for seasonal performance tracking and maintenance scheduling."
+  },
+  "0.99.7": {
+    "en": "Added convenient reset button for external energy total counter in device settings."
+  },
   "0.99.6": {
     "en": "Fixed external energy accumulation with accurate timestamp-based calculation and enhanced precision for small power increments."
   },

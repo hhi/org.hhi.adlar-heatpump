@@ -21,7 +21,7 @@
     "en": "External Power Input for COP",
     "nl": "Externe Vermogen Input voor COP"
   },
-  "icon": "/assets/cop-efficiency.svg",
+  "icon": "/assets/external-power.svg",
   "description": {
     "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations with external power meter data",
     "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe vermogensmeter gegevens"

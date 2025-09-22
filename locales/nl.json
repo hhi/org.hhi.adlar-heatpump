@@ -16,7 +16,7 @@
     "carnot_estimation": "Carnot Schatting",
     "valve_correlation": "Klep Correlatie",
     "temperature_difference": "Temperatuur Verschil",
-    "insufficient_data": "Oorzaak"
+    "insufficient_data": "! "
   },
   "cop_method_description": {
     "direct_thermal": "Directe thermische berekening met water doorstroming en temperatuur verschil (±5% nauwkeurigheid)",

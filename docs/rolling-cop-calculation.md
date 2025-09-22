@@ -9,6 +9,7 @@ The Rolling COP (Coefficient of Performance) system provides time-series analysi
 ### Time-Based Averages
 - **Daily COP**: 24-hour rolling average for day-to-day optimization
 - **Weekly COP**: 7-day rolling average for seasonal pattern identification
+- **Monthly COP**: 30-day rolling average for seasonal trend analysis and long-term monitoring
 - **Hourly COP**: 60-minute rolling average for immediate trend analysis
 
 ### Trend Analysis
@@ -24,16 +25,36 @@ The Rolling COP (Coefficient of Performance) system provides time-series analysi
 ## New Capabilities
 
 ### `adlar_cop_daily`
-- **Purpose**: 24-hour rolling average COP
+- **Purpose**: 24-hour rolling average COP with intelligent idle period handling
 - **Update frequency**: Every 5 minutes (when new data is available)
 - **Minimum data**: 12 data points (6 hours worth at 30-minute intervals)
 - **Weighting**: Runtime-weighted by compressor operation time
+- **Idle Awareness**: Returns `null` for predominantly idle periods instead of misleading averages
+
+### Idle-Aware Daily COP Behavior
+- **Null Return Conditions**:
+  - >70% of 24-hour window contains idle periods
+  - Newest data point is >4 hours old (stale data)
+  - <6 data points available (insufficient operation)
+- **Partial Idle Handling**: For 30-70% idle periods, applies adjustment factor (reduces COP by up to 50%)
+- **Confidence Adjustment**: Lowers confidence level to 'medium' for mixed idle/active periods
 
 ### `adlar_cop_weekly`
 - **Purpose**: 7-day rolling average COP
 - **Update frequency**: Every 5 minutes (when new data is available)
 - **Minimum data**: 48 data points (24 hours worth)
 - **Use case**: Seasonal pattern identification and long-term monitoring
+
+### `adlar_cop_monthly`
+- **Purpose**: 30-day rolling average COP for seasonal trend analysis
+- **Update frequency**: Every 5 minutes (when new data is available)
+- **Minimum data**: 48 data points (24 hours worth)
+- **Use case**: Long-term efficiency monitoring, seasonal pattern identification, and performance baseline establishment
+- **Benefits**:
+  - Identifies gradual performance degradation over time
+  - Establishes seasonal efficiency baselines
+  - Helps optimize maintenance schedules
+  - Provides data for warranty and performance claims
 
 ### `adlar_cop_trend`
 - **Purpose**: Text description of current efficiency trend
@@ -58,6 +79,33 @@ Triggers when 24-hour average COP crosses user-defined thresholds.
 - `data_points`: Number of measurements used
 - `confidence_level`: Data quality indicator
 
+**Important Behavior Changes:**
+- **Null Handling**: Flow cards will NOT trigger when daily COP is null due to:
+  - Excessive idle periods (>70%)
+  - Stale data (>4 hours old)
+  - Insufficient operation data (<6 points)
+- **Mixed Idle Periods**: Flow cards trigger with adjusted COP values for 30-70% idle periods
+- **Confidence Impact**: Idle-adjusted COPs always have 'medium' or lower confidence
+
+#### `monthly_cop_efficiency_changed`
+Triggers when 30-day average COP crosses user-defined thresholds.
+
+**Arguments:**
+- Condition: above/below
+- Threshold: COP value (1.0-8.0)
+
+**Tokens:**
+- `current_monthly_cop`: Current 30-day average
+- `threshold_cop`: User-defined threshold
+- `data_points`: Number of measurements used
+- `confidence_level`: Data quality indicator
+
+**Use Cases:**
+- Long-term performance monitoring
+- Seasonal efficiency tracking
+- Maintenance scheduling based on gradual degradation
+- Performance warranty validation
+
 #### `cop_trend_detected`
 Triggers when significant efficiency trends are detected.
 
@@ -78,6 +126,18 @@ Checks if 24-hour average COP is above/below a threshold.
 **Arguments:**
 - Threshold: COP value to compare against
 
+#### `monthly_cop_above_threshold`
+Checks if 30-day average COP is above/below a threshold.
+
+**Arguments:**
+- Threshold: COP value to compare against
+
+**Use Cases:**
+- Long-term performance validation
+- Seasonal efficiency comparisons
+- Maintenance decision automation
+- Performance contract verification
+
 #### `cop_trend_analysis`
 Analyzes COP trend over a specified time period.
 
@@ -90,6 +150,32 @@ Analyzes COP trend over a specified time period.
 - **Circular buffer**: Stores last 1440 COP readings (24h × 60min intervals)
 - **Persistence**: Data saved to device settings for app restart survival
 - **Memory management**: Automatic cleanup of old data points
+
+### Enhanced COPDataPoint Interface
+```typescript
+interface COPDataPoint {
+  timestamp: number;        // Unix timestamp
+  cop: number;             // Calculated COP value
+  method: string;          // Calculation method used ('idle_period' for idle tracking)
+  confidence: string;      // Data confidence level
+  electricalPower?: number; // Power consumption (Watts)
+  thermalOutput?: number;   // Heat output (Watts)
+  ambientTemperature?: number; // Ambient temperature (°C)
+  compressorRuntime?: number; // Minutes compressor was running
+  isIdlePeriod?: boolean;   // NEW: Flag indicating idle period data point
+}
+```
+
+### Automatic Idle Period Monitoring
+- **Monitoring Frequency**: Checks every 30 minutes for extended idle periods
+- **Idle Detection**: Compressor off + no COP data points for >1 hour
+- **Auto Data Points**: Automatically adds COP=0 data points during extended idle
+- **Data Point Properties**:
+  - `cop: 0` (zero efficiency during idle)
+  - `method: 'idle_period'`
+  - `confidence: 'high'` (high confidence that idle = 0 COP)
+  - `isIdlePeriod: true`
+- **Purpose**: Prevents gaps in time-series data and enables accurate idle ratio calculations
 
 ### Calculation Methods
 
@@ -106,11 +192,17 @@ weight_i = exp(-age_hours / 12)  // 12-hour half-life
 COP_weighted = Σ(COP_i × weight_i) / Σ(weight_i)
 ```
 
-#### 3. Runtime-Weighted Average (Default)
+#### 3. Enhanced Runtime-Weighted Average (Default)
 Weight by compressor runtime for accurate efficiency representation.
 ```
 COP_runtime = Σ(COP_i × runtime_i) / Σ(runtime_i)
 ```
+
+**Enhanced Implementation:**
+- **State History**: Maintains 48-hour compressor on/off state history
+- **Precision Tracking**: Calculates exact runtime minutes in 30-minute windows
+- **State Changes**: Automatically detects and records compressor state transitions
+- **Runtime Bounds**: Clamps runtime between 0-30 minutes per calculation period
 
 #### 4. Thermal-Weighted Average
 Weight by actual heat output for most accurate representation.
@@ -184,6 +276,27 @@ AND:  Weekly COP above threshold 3.8
 THEN: Log "Optimal performance period - record settings"
 ```
 
+### Long-Term Monitoring
+```
+WHEN: Monthly COP efficiency changed below 2.8
+AND:  Monthly COP confidence level is high
+THEN: Send notification "Monthly efficiency below baseline - investigate"
+```
+
+### Seasonal Performance Tracking
+```
+WHEN: Monthly COP above threshold 3.5
+AND:  Current month is between October and March
+THEN: Log "Excellent winter season performance"
+```
+
+### Maintenance Scheduling
+```
+WHEN: Monthly COP efficiency changed below 3.0
+AND:  Monthly COP data points > 1000
+THEN: Create task "Schedule heat pump maintenance - efficiency declining"
+```
+
 ## Performance Considerations
 
 ### Update Frequency
@@ -220,12 +333,31 @@ THEN: Log "Optimal performance period - record settings"
 - **Solution**: Lower trend sensitivity or increase operation time
 - **Threshold**: Default 15% change required for trend classification
 
+### Enhanced Diagnostic Information
+The `getDiagnosticInfo()` method now provides:
+- **idleRatio**: Percentage of data points representing idle periods (0-1)
+- **dataFreshness**: Hours since newest data point (indicates stale data)
+- **averageInterval**: Time between data point collection (minutes)
+- **confidenceDistribution**: Breakdown of high/medium/low confidence data points
+
+Example diagnostic output:
+```
+Rolling COP Diagnostics:
+- Data points in window: 48
+- Idle ratio: 45.2%
+- Data freshness: 1.2 hours
+- Average interval: 30.5 minutes
+- Confidence: 60% high, 30% medium, 10% low
+```
+
 ### Debug Information
 Enable debug mode (`DEBUG=1`) to see detailed logging:
 - Data point additions with COP values
 - Rolling calculation results with confidence levels
 - Trend analysis with strength calculations
 - Flow card trigger conditions and tokens
+- Idle period detection and data point additions
+- Data freshness and idle ratio calculations
 
 ## Future Enhancements
 
