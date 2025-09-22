@@ -63,6 +63,13 @@ class MyDevice extends Homey.Device {
   lastNotificationTime: number = 0;
   lastNotificationKey: string = '';
 
+  // Enhanced error recovery state
+  private backoffMultiplier: number = 1;
+  private maxBackoffSeconds: number = 300; // 5 minutes max
+  private circuitBreakerOpen: boolean = false;
+  private circuitBreakerOpenTime: number = 0;
+  private circuitBreakerResetTime: number = 60000; // 1 minute before attempting reset
+
   // Flow card management
   private flowCardListeners: Map<string, unknown> = new Map();
   private isFlowCardsInitialized: boolean = false;
@@ -198,32 +205,145 @@ class MyDevice extends Homey.Device {
     // Clear any existing interval
     this.stopReconnectInterval();
 
-    // Start new interval for reconnection attempts
-    this.reconnectInterval = this.homey.setInterval(async () => {
-      if (!this.tuyaConnected) {
-        this.debugLog('Attempting to reconnect to Tuya device...');
-        try {
-          await this.connectTuya();
-          // Reset failure counter on successful connection
-          this.consecutiveFailures = 0;
-        } catch (err) {
-          const categorizedError = this.handleTuyaError(err as Error, 'Reconnection attempt');
-          this.consecutiveFailures++;
+    // Start enhanced reconnection with adaptive interval
+    this.scheduleNextReconnectionAttempt();
+  }
 
-          // Send notification after max consecutive failures (100 seconds)
-          if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
-            await this.sendCriticalNotification(
-              'Device Connection Lost',
-              `Heat pump has been disconnected for over 1 minute. ${categorizedError.userMessage}`,
-            );
-          }
-        }
+  /**
+   * Enhanced reconnection logic with exponential backoff and circuit breaker
+   */
+  private scheduleNextReconnectionAttempt() {
+    // Check circuit breaker state
+    if (this.circuitBreakerOpen) {
+      const timeSinceOpen = Date.now() - this.circuitBreakerOpenTime;
+      if (timeSinceOpen < this.circuitBreakerResetTime) {
+        // Still in cooldown period
+        this.debugLog(`Circuit breaker open, cooling down for ${Math.round((this.circuitBreakerResetTime - timeSinceOpen) / 1000)}s more`);
+        this.reconnectInterval = this.homey.setTimeout(() => {
+          this.scheduleNextReconnectionAttempt();
+        }, 10000); // Check every 10 seconds during cooldown
+        return;
       }
-    }, DeviceConstants.RECONNECTION_INTERVAL_MS);
+      // Try to reset circuit breaker
+      this.debugLog('Attempting to reset circuit breaker...');
+      this.circuitBreakerOpen = false;
+      this.backoffMultiplier = 1; // Reset backoff
+
+    }
+
+    // Calculate adaptive interval with exponential backoff
+    const baseInterval = DeviceConstants.RECONNECTION_INTERVAL_MS;
+    const adaptiveInterval = Math.min(
+      baseInterval * this.backoffMultiplier,
+      this.maxBackoffSeconds * 1000,
+    );
+
+    this.debugLog(`Next reconnection attempt in ${Math.round(adaptiveInterval / 1000)}s (backoff: ${this.backoffMultiplier}x)`);
+
+    this.reconnectInterval = this.homey.setTimeout(async () => {
+      await this.attemptReconnectionWithRecovery();
+    }, adaptiveInterval);
+  }
+
+  /**
+   * Attempt reconnection with enhanced error recovery
+   */
+  private async attemptReconnectionWithRecovery(): Promise<void> {
+    if (this.tuyaConnected) {
+      // Already connected, reset backoff and exit
+      this.resetErrorRecoveryState();
+      return;
+    }
+
+    this.debugLog(`Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
+
+    try {
+      await this.connectTuya();
+
+      // Success! Reset all error recovery state
+      this.resetErrorRecoveryState();
+      this.debugLog('Reconnection successful, error recovery state reset');
+
+    } catch (err) {
+      const categorizedError = this.handleTuyaError(err as Error, 'Enhanced reconnection attempt');
+      this.consecutiveFailures++;
+
+      // Determine recovery strategy based on error type
+      this.updateRecoveryStrategy(categorizedError);
+
+      // Send notifications based on failure patterns
+      await this.handleReconnectionFailureNotification(categorizedError);
+
+      // Schedule next attempt with updated strategy
+      this.scheduleNextReconnectionAttempt();
+    }
+  }
+
+  /**
+   * Update recovery strategy based on error patterns
+   */
+  private updateRecoveryStrategy(error: CategorizedError): void {
+    // Exponential backoff for recoverable errors
+    if (error.recoverable) {
+      this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 16); // Cap at 16x
+    } else {
+      // For non-recoverable errors, use more aggressive backoff
+      this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32); // Cap at 32x
+    }
+
+    // Activate circuit breaker after severe failure patterns
+    if (this.consecutiveFailures >= DeviceConstants.MAX_CONSECUTIVE_FAILURES * 2) {
+      this.debugLog(`Activating circuit breaker after ${this.consecutiveFailures} consecutive failures`);
+      this.circuitBreakerOpen = true;
+      this.circuitBreakerOpenTime = Date.now();
+    }
+  }
+
+  /**
+   * Handle notifications for reconnection failures with smart throttling
+   */
+  private async handleReconnectionFailureNotification(error: CategorizedError): Promise<void> {
+    // Immediate notification for critical infrastructure failures
+    if (!error.recoverable && this.consecutiveFailures <= 3) {
+      await this.sendCriticalNotification(
+        'Critical Device Error',
+        `Heat pump connection failed: ${error.userMessage}. Manual intervention may be required.`,
+      );
+      return;
+    }
+
+    // Standard notification after initial failure threshold
+    if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
+      await this.sendCriticalNotification(
+        'Device Connection Lost',
+        `Heat pump has been disconnected for over 1 minute. ${error.userMessage}`,
+      );
+      return;
+    }
+
+    // Extended outage notification
+    if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES * 3) {
+      await this.sendCriticalNotification(
+        'Extended Device Outage',
+        `Heat pump has been offline for over 5 minutes. Connection issues persist: ${error.userMessage}`,
+      );
+    }
+  }
+
+  /**
+   * Reset error recovery state after successful connection
+   */
+  private resetErrorRecoveryState(): void {
+    this.consecutiveFailures = 0;
+    this.backoffMultiplier = 1;
+    this.circuitBreakerOpen = false;
+    this.circuitBreakerOpenTime = 0;
   }
 
   private stopReconnectInterval() {
     if (this.reconnectInterval) {
+      // Enhanced interval can be either setTimeout or setInterval
+      this.homey.clearTimeout(this.reconnectInterval);
       this.homey.clearInterval(this.reconnectInterval);
       this.reconnectInterval = undefined;
     }
@@ -237,6 +357,37 @@ class MyDevice extends Homey.Device {
     if (!this.tuya) {
       throw new Error('Cannot setup event handlers: Tuya device not initialized');
     }
+
+    // TUYA ERROR event - CRITICAL: Handle socket errors to prevent app crashes
+    this.tuya.on('error', (error: Error): void => {
+      const categorizedError = this.handleTuyaError(error, 'TuyAPI socket error');
+
+      // Mark device as disconnected for socket connection errors
+      this.tuyaConnected = false;
+
+      // Update recovery strategy based on error type (but don't increment consecutiveFailures here)
+      // The reconnection logic will handle failure counting
+      if (!categorizedError.recoverable) {
+        // For non-recoverable errors, immediately apply backoff pressure
+        this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 8);
+        this.debugLog(`Non-recoverable socket error detected, applying immediate backoff: ${this.backoffMultiplier}x`);
+      }
+
+      // Set device unavailable for connection-related errors
+      if (TuyaErrorCategorizer.shouldReconnect(categorizedError)) {
+        this.setUnavailable('Connection lost - attempting to reconnect')
+          .then(() => this.debugLog('Device marked as unavailable due to socket error'))
+          .catch((err) => this.error('Error setting device unavailable:', err));
+      } else {
+        // For non-recoverable errors, provide more specific status
+        this.setUnavailable(`Connection error: ${categorizedError.userMessage}`)
+          .then(() => this.debugLog('Device marked as unavailable due to non-recoverable socket error'))
+          .catch((err) => this.error('Error setting device unavailable:', err));
+      }
+
+      // Log the error but don't crash the app - enhanced reconnection will handle recovery
+      this.debugLog('TuyAPI error handled gracefully, enhanced recovery system will manage reconnection');
+    });
 
     // TUYA ON EVENT (from dp id to capability name)
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
@@ -262,16 +413,31 @@ class MyDevice extends Homey.Device {
     // Fixing promise handling for setAvailable and setUnavailable
     this.tuya.on('connected', (): void => {
       this.log('Device', 'Connected to device!');
+      this.tuyaConnected = true;
+
+      // Reset error recovery state on successful connection
+      this.resetErrorRecoveryState();
+
       this.setAvailable()
-        .then(() => this.log('Device set as available'))
+        .then(() => {
+          this.log('Device set as available - error recovery state reset');
+          this.debugLog('Enhanced recovery system: connection restored successfully');
+        })
         .catch((err) => this.error('Error setting device as available:', err));
     });
 
     this.tuya.on('disconnected', (): void => {
       this.log('Device', 'Disconnected from device!');
       this.tuyaConnected = false;
-      this.setUnavailable('Device disconnected')
-        .then(() => this.log('Device set as unavailable'))
+
+      // Apply minimal backoff for clean disconnections (less aggressive than errors)
+      this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.2, 4);
+
+      this.setUnavailable('Device disconnected - attempting to reconnect')
+        .then(() => {
+          this.log('Device set as unavailable due to disconnection');
+          this.debugLog('Enhanced recovery system: will attempt reconnection with current backoff');
+        })
         .catch((err) => this.error('Error setting device as unavailable:', err));
     });
   }
@@ -589,7 +755,7 @@ class MyDevice extends Homey.Device {
     }
 
     try {
-      const interval = setInterval(async () => {
+      const interval = this.homey.setInterval(async () => {
         try {
           await this.updateIntelligentPowerMeasurement();
         } catch (error) {
@@ -620,7 +786,6 @@ class MyDevice extends Homey.Device {
       this.log('Stopped energy tracking interval');
     }
   }
-
 
   /**
    * Generate a human-readable capability diagnostic report
@@ -717,7 +882,7 @@ class MyDevice extends Homey.Device {
   /**
    * Format COP method for user-friendly display with internationalization and diagnostics
    */
-  private formatCOPMethodDisplay(method: string, confidence: string, diagnosticInfo?: any): string {
+  private formatCOPMethodDisplay(method: string, confidence: string, diagnosticInfo?: { primaryIssue?: string }): string {
     // Get localized method names using Homey's i18n system
     const getLocalizedMethodName = (methodKey: string): string => {
       const i18nKey = `cop_method.${methodKey}`;
@@ -913,7 +1078,7 @@ class MyDevice extends Homey.Device {
         this.log('🧪 All available keys check:', {
           stable: this.homey.__('trend_descriptions.stable'),
           strong_improvement: this.homey.__('trend_descriptions.strong_improvement'),
-          moderate_decline: this.homey.__('trend_descriptions.moderate_decline')
+          moderate_decline: this.homey.__('trend_descriptions.moderate_decline'),
         });
         await this.setCapabilityValue('adlar_cop_trend', testTranslation);
       }
@@ -932,8 +1097,8 @@ class MyDevice extends Homey.Device {
 
     try {
       // Use idle-aware calculation for daily COP
-      const dailyCOP = this.rollingCOPCalculator.getDailyCOPWithIdleAwareness?.() ||
-                       this.rollingCOPCalculator.getDailyCOP();
+      const dailyCOP = this.rollingCOPCalculator.getDailyCOPWithIdleAwareness?.()
+                       || this.rollingCOPCalculator.getDailyCOP();
 
       // Get diagnostic info for better logging
       const diagnostics = this.rollingCOPCalculator.getDiagnosticInfo?.();
@@ -956,9 +1121,9 @@ class MyDevice extends Homey.Device {
           await this.setCapabilityValue('adlar_cop_daily', null);
         }
 
-        const reason = diagnostics ?
-          `idle ratio: ${(diagnostics.idleRatio * 100).toFixed(1)}%, data age: ${diagnostics.dataFreshness.toFixed(1)}h` :
-          'no data points in rolling window';
+        const reason = diagnostics
+          ? `idle ratio: ${(diagnostics.idleRatio * 100).toFixed(1)}%, data age: ${diagnostics.dataFreshness.toFixed(1)}h`
+          : 'no data points in rolling window';
         this.log(`⚠️ Daily COP set to null - ${reason}`);
       } else if (!this.hasCapability('adlar_cop_daily')) {
         this.log('⚠️ Daily COP capability not available');
@@ -1045,13 +1210,13 @@ class MyDevice extends Homey.Device {
     const now = Date.now();
 
     // Track state changes for better runtime calculation
-    if (this.compressorStateHistory.length === 0 ||
-        this.compressorStateHistory[this.compressorStateHistory.length - 1].running !== currentState) {
-      this.compressorStateHistory.push({timestamp: now, running: currentState});
+    if (this.compressorStateHistory.length === 0
+        || this.compressorStateHistory[this.compressorStateHistory.length - 1].running !== currentState) {
+      this.compressorStateHistory.push({ timestamp: now, running: currentState });
 
       // Keep only last 48 hours of state history
       const cutoff = now - (48 * 60 * 60 * 1000);
-      this.compressorStateHistory = this.compressorStateHistory.filter(entry => entry.timestamp >= cutoff);
+      this.compressorStateHistory = this.compressorStateHistory.filter((entry) => entry.timestamp >= cutoff);
     }
 
     // Calculate actual runtime in the last period (30 minutes for COP calculation)
@@ -1557,7 +1722,7 @@ class MyDevice extends Homey.Device {
     this.log(`📋 Has adlar_external_energy_total capability: ${this.hasCapability('adlar_external_energy_total')}`);
 
     // Show reset functionality
-    this.log(`💡 To reset energy counter: Use device settings > Energy Management > Reset external energy total counter`);
+    this.log('💡 To reset energy counter: Use device settings > Energy Management > Reset external energy total counter');
 
     this.log('🔋 === END DEBUG ===');
   }
@@ -1585,13 +1750,10 @@ class MyDevice extends Homey.Device {
       this.log('✅ Energy accumulation timestamp reset - next measurement will use default interval');
 
       // Reset the setting back to false to prevent repeated triggers
-      setTimeout(async () => {
-        try {
-          await this.setSettings({ reset_external_energy_total: false });
-          this.log('🔄 Reset setting cleared');
-        } catch (error) {
-          this.error('Failed to clear reset setting:', error);
-        }
+      setTimeout(() => {
+        this.setSettings({ reset_external_energy_total: false })
+          .then(() => this.log('🔄 Reset setting cleared'))
+          .catch((error) => this.error('Failed to clear reset setting:', error));
       }, 1000);
 
     } catch (error) {
@@ -2351,7 +2513,7 @@ class MyDevice extends Homey.Device {
           if (this.hasCapability(capability)) {
             // Special handling for measure_power when intelligent tracking is enabled
             if (capability === 'measure_power' && this.getSetting('enable_intelligent_energy_tracking')) {
-              this.debugLog(`🔋 Skipping direct measure_power update (intelligent tracking enabled), triggering smart update instead`);
+              this.debugLog('🔋 Skipping direct measure_power update (intelligent tracking enabled), triggering smart update instead');
               // Trigger intelligent power update which will consider all sources
               this.updateIntelligentPowerMeasurement().catch((err) => this.error('Error in intelligent power update:', err));
             } else {
@@ -2386,7 +2548,8 @@ class MyDevice extends Homey.Device {
   private getCapabilityFriendlyTitle(capability: string): string {
     try {
     // Prefer the title from driver.compose.json capabilitiesOptions if present
-      const opt = (this as any)?.driver?.manifest?.capabilitiesOptions?.[capability];
+      const deviceWithDriver = this as unknown as { driver?: { manifest?: { capabilitiesOptions?: Record<string, { title?: { en?: string; nl?: string } }> } } };
+      const opt = deviceWithDriver?.driver?.manifest?.capabilitiesOptions?.[capability];
       const title = opt?.title?.en || opt?.title?.nl;
       if (title) return title;
     } catch {
@@ -2476,9 +2639,8 @@ class MyDevice extends Homey.Device {
       };
       const warn = warnThresholds[capability] || warnThresholds.default;
 
-      const warnBreach =
-        (warn.high !== undefined && value > warn.high) ||
-        (warn.low !== undefined && value < warn.low);
+      const warnBreach = (warn.high !== undefined && value > warn.high)
+        || (warn.low !== undefined && value < warn.low);
 
       if (warnBreach) {
         await this.triggerFlowCard(temperatureCapabilityMap[capability], {
@@ -3343,7 +3505,6 @@ class MyDevice extends Homey.Device {
       return `Capability Diagnostics Report:\n\n${diagnosticReport}`;
     }
 
-
     // Handle power measurement settings
     if (changedKeys.includes('enable_power_measurements')) {
       const enablePower = newSettings.enable_power_measurements;
@@ -3644,7 +3805,7 @@ class MyDevice extends Homey.Device {
             } else {
               // First measurement - use a default 10-second interval
               energyIncrement = (args.power_value / 1000) * 0.002778; // kWh (10 seconds)
-              this.log(`🆕 First external power measurement - using default 10s interval`);
+              this.log('🆕 First external power measurement - using default 10s interval');
             }
 
             this.lastExternalPowerTimestamp = now;
@@ -3656,12 +3817,12 @@ class MyDevice extends Homey.Device {
 
             // Better display formatting for small values
             const incrementWh = energyIncrement * 1000;
-            const incrementDisplay = incrementWh < 0.1 ?
-              `+${(incrementWh * 1000).toFixed(1)}mWh` :
-              `+${incrementWh.toFixed(1)}Wh`;
+            const incrementDisplay = incrementWh < 0.1
+              ? `+${(incrementWh * 1000).toFixed(1)}mWh`
+              : `+${incrementWh.toFixed(1)}Wh`;
 
-            this.log(`🔌 External energy updated: ${incrementDisplay} ` +
-              `(power: ${args.power_value}W, total: ${roundedTotal.toFixed(6)}kWh)`);
+            this.log(`🔌 External energy updated: ${incrementDisplay} `
+              + `(power: ${args.power_value}W, total: ${roundedTotal.toFixed(6)}kWh)`);
           }
         } else {
           this.error('📊 External power capability not available!');
@@ -3777,7 +3938,7 @@ class MyDevice extends Homey.Device {
       // Note: TuyAPI structure may vary, so we use multiple approaches
       if (this.tuya) {
         // Method 1: Try to access via tuya instance properties
-        const tuyaInstance = this.tuya as any;
+        const tuyaInstance = this.tuya as TuyaDevice & { dps?: Record<string, unknown> };
         if (tuyaInstance.dps && typeof tuyaInstance.dps['104'] === 'number') {
           const rawPower = tuyaInstance.dps['104'];
           if (rawPower > 0) {
@@ -3962,10 +4123,10 @@ class MyDevice extends Homey.Device {
       const lastExternalUpdate = await this.getStoreValue('last_external_energy_update') || (currentTime - 10000); // Default to 10 seconds ago if not set
       const externalHoursElapsed = (currentTime - lastExternalUpdate) / (1000 * 60 * 60);
 
-      this.log(`🔌 External energy check: power=${externalPower}W, ` +
-        `hasCapability=${this.hasCapability('adlar_external_energy_total')}, ` +
-        `externalHoursElapsed=${externalHoursElapsed.toFixed(6)}h (${(externalHoursElapsed * 60).toFixed(2)}min), ` +
-        `lastExternalUpdate=${lastExternalUpdate}, currentTime=${currentTime}, timeDiff=${currentTime - lastExternalUpdate}ms`);
+      this.log(`🔌 External energy check: power=${externalPower}W, `
+        + `hasCapability=${this.hasCapability('adlar_external_energy_total')}, `
+        + `externalHoursElapsed=${externalHoursElapsed.toFixed(6)}h (${(externalHoursElapsed * 60).toFixed(2)}min), `
+        + `lastExternalUpdate=${lastExternalUpdate}, currentTime=${currentTime}, timeDiff=${currentTime - lastExternalUpdate}ms`);
 
       if (externalPower > 0 && this.hasCapability('adlar_external_energy_total')) {
         this.log(`🔌 External power condition met: ${externalPower}W > 0, checking time elapsed...`);
@@ -3989,14 +4150,14 @@ class MyDevice extends Homey.Device {
           // Update external energy timestamp
           await this.setStoreValue('last_external_energy_update', currentTime);
 
-          this.log(`🔌 External energy updated: +${(externalEnergyIncrement * 1000).toFixed(1)}Wh ` +
-            `(external power: ${externalPower}W, time: ${(effectiveHoursElapsed * 60).toFixed(2)}min, ` +
-            `total: ${newExternalTotal.toFixed(3)}kWh)${isFirstExternalUpdate ? ' [FIRST UPDATE]' : ''}`);
+          this.log(`🔌 External energy updated: +${(externalEnergyIncrement * 1000).toFixed(1)}Wh `
+            + `(external power: ${externalPower}W, time: ${(effectiveHoursElapsed * 60).toFixed(2)}min, `
+            + `total: ${newExternalTotal.toFixed(3)}kWh)${isFirstExternalUpdate ? ' [FIRST UPDATE]' : ''}`);
         } else {
-          this.log(`🔌 External energy skipped: externalHoursElapsed=${externalHoursElapsed.toFixed(6)} (≤ 0.001), ` +
-            `timeDiff=${currentTime - lastExternalUpdate}ms, ` +
-            `lastExternalUpdate=${new Date(lastExternalUpdate).toISOString()}, ` +
-            `currentTime=${new Date(currentTime).toISOString()}`);
+          this.log(`🔌 External energy skipped: externalHoursElapsed=${externalHoursElapsed.toFixed(6)} (≤ 0.001), `
+            + `timeDiff=${currentTime - lastExternalUpdate}ms, `
+            + `lastExternalUpdate=${new Date(lastExternalUpdate).toISOString()}, `
+            + `currentTime=${new Date(currentTime).toISOString()}`);
         }
       } else if (externalPower > 0) {
         this.debugLog('🔌 External energy not tracked: missing capability or zero time elapsed');
@@ -4025,10 +4186,12 @@ class MyDevice extends Homey.Device {
 
     // Schedule reset
     this.homey.setTimeout(() => {
-      this.resetDailyEnergy();
+      this.resetDailyEnergy()
+        .catch((error) => this.error('Failed to reset daily energy at midnight:', error));
       // Schedule recurring daily resets
       this.homey.setInterval(() => {
-        this.resetDailyEnergy();
+        this.resetDailyEnergy()
+          .catch((error) => this.error('Failed to reset daily energy on schedule:', error));
       }, 24 * 60 * 60 * 1000); // 24 hours
     }, msUntilMidnight);
 

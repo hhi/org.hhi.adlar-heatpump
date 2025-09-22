@@ -1012,7 +1012,7 @@ export class COPCalculator {
   /**
    * Check if a value is valid for calculations (not null, undefined, and > 0 for numeric values)
    */
-  private static isValidValue(value: any): boolean {
+  private static isValidValue(value: number | null | undefined): boolean {
     return value !== null && value !== undefined && typeof value === 'number' && value > 0;
   }
 
