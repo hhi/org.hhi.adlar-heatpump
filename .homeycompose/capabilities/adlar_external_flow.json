@@ -1,8 +1,8 @@
 {
   "id": "adlar_external_flow",
   "title": {
-    "en": "External Flow Measurement",
-    "nl": "Externe Doorstroom Meting"
+    "en": "External Water Flow Measurement",
+    "nl": "Externe Water Doorstroom Meting"
   },
   "type": "number",
   "units": {

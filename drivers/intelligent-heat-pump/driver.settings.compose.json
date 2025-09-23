@@ -510,6 +510,19 @@
           "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten."
         },
         "value": false
+      },
+      {
+        "id": "reset_external_energy_daily",
+        "type": "checkbox",
+        "label": {
+          "en": "Reset external energy daily counter",
+          "nl": "Reset externe energie dagelijkse teller"
+        },
+        "hint": {
+          "en": "Click to reset the external daily energy counter to zero. This will clear today's accumulated energy measurements from flow cards.",
+          "nl": "Klik om de externe dagelijkse energie teller naar nul te resetten. Dit wist de geaccumuleerde energie metingen van vandaag van flow kaarten."
+        },
+        "value": false
       }
     ]
   },

@@ -1,17 +1,17 @@
-<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <!-- Flow measurement area -->
-  <rect x="16" y="8" width="6" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+<svg viewBox="0 0 26 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flow measurement area (expanded) -->
+  <rect x="15" y="7" width="9" height="10" rx="1.2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
 
-  <!-- Flow wave patterns (3 waves) -->
-  <path d="M17 10.5 C17.5 10 18 10 18.5 10.5 C19 11 19.5 11 20 10.5 C20.5 10 21 10 21.5 10.5"
-        stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8" stroke-linecap="round"/>
-  <path d="M17 12 C17.5 11.5 18 11.5 18.5 12 C19 12.5 19.5 12.5 20 12 C20.5 11.5 21 11.5 21.5 12"
-        stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8" stroke-linecap="round"/>
-  <path d="M17 13.5 C17.5 13 18 13 18.5 13.5 C19 14 19.5 14 20 13.5 C20.5 13 21 13 21.5 13.5"
-        stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8" stroke-linecap="round"/>
+  <!-- Flow wave patterns (4 longer waves) -->
+  <path d="M16.5 9.5 C17 9 17.5 9 18 9.5 C18.5 10 19 10 19.5 9.5 C20 9 20.5 9 21 9.5 C21.5 10 22 10 22.5 9.5 C23 9 23.5 9 24 9.5"
+        stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.9" stroke-linecap="round"/>
+  <path d="M16.5 12 C17 11.5 17.5 11.5 18 12 C18.5 12.5 19 12.5 19.5 12 C20 11.5 20.5 11.5 21 12 C21.5 12.5 22 12.5 22.5 12 C23 11.5 23.5 11.5 24 12"
+        stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.9" stroke-linecap="round"/>
+  <path d="M16.5 14.5 C17 14 17.5 14 18 14.5 C18.5 15 19 15 19.5 14.5 C20 14 20.5 14 21 14.5 C21.5 15 22 15 22.5 14.5 C23 14 23.5 14 24 14.5"
+        stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.9" stroke-linecap="round"/>
 
-  <!-- L/min indicator -->
-  <text x="19" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="2.5" font-weight="bold" fill="currentColor">L/min</text>
+  <!-- L/min indicator (larger) -->
+  <text x="19.5" y="21.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.5" font-weight="bold" fill="currentColor">L/min</text>
 
   <!-- External data flow arrow -->
   <path d="M2 12 L12 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
@@ -32,7 +32,4 @@
     <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" begin="0.8s" repeatCount="indefinite"/>
   </circle>
 
-  <!-- Flow direction indicator inside measurement area -->
-  <path d="M18.5 9.5 L19.5 9.5" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.6" stroke-linecap="round"/>
-  <path d="M19 9.2 L19.5 9.5 L19 9.8" stroke="currentColor" stroke-width="0.8" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity="0.6"/>
 </svg>

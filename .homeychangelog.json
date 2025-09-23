@@ -1,4 +1,7 @@
 {
+  "0.99.14": {
+    "en": "Added daily external energy consumption tracking with automatic midnight reset and enhanced external measurement icons with improved visual hierarchy and prominence."
+  },
   "0.99.13": {
     "en": "Updated external measurement icons with improved visual design and consistency across all measurement types for better user experience."
   },
