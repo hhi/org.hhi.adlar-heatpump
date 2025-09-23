@@ -1,18 +1,18 @@
-<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <!-- Power measurement area -->
-  <rect x="16" y="8" width="6" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+<svg viewBox="0 0 26 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Power measurement area (expanded) -->
+  <rect x="15" y="7" width="9" height="10" rx="1.2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
 
-  <!-- Lightning bolt symbol for power -->
-  <path d="M18.5 9.5 L19.5 12 L20.5 12 L19 15.5 L18.5 13 L17.5 13 Z"
-        fill="currentColor" opacity="0.8" stroke="currentColor" stroke-width="0.3"/>
+  <!-- Lightning bolt symbol for power (larger and repositioned) -->
+  <path d="M18 8.5 L19.2 11.5 L20.8 11.5 L18.8 16 L18.2 13.5 L16.8 13.5 Z"
+        fill="currentColor" opacity="0.9" stroke="currentColor" stroke-width="0.4"/>
 
-  <!-- Power indicator lines -->
-  <line x1="20.5" y1="10" x2="21.5" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.6"/>
-  <line x1="20.5" y1="12" x2="21.5" y2="12" stroke="currentColor" stroke-width="0.5" opacity="0.6"/>
-  <line x1="20.5" y1="14" x2="21.5" y2="14" stroke="currentColor" stroke-width="0.5" opacity="0.6"/>
+  <!-- Second lightning bolt for more power indication -->
+  <path d="M21 8.5 L22.2 11.5 L23.8 11.5 L21.8 16 L21.2 13.5 L19.8 13.5 Z"
+        fill="currentColor" opacity="0.9" stroke="currentColor" stroke-width="0.4"/>
 
-  <!-- W indicator -->
-  <text x="19" y="21" text-anchor="middle" font-family="Arial, sans-serif" font-size="2.5" font-weight="bold" fill="currentColor">W</text>
+
+  <!-- W indicator (larger) -->
+  <text x="19.5" y="21" text-anchor="middle" font-family="Arial, sans-serif" font-size="3" font-weight="bold" fill="currentColor">W</text>
 
   <!-- External data flow arrow -->
   <path d="M2 12 L12 12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
