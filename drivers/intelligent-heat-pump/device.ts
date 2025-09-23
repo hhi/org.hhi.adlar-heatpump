@@ -3865,7 +3865,7 @@ class MyDevice extends Homey.Device {
             if (this.hasCapability('adlar_external_energy_daily')) {
               const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
               const newExternalDaily = currentExternalDaily + energyIncrement;
-              const roundedDaily = Math.round(newExternalDaily * 1000) / 1000; // 3 decimal places for daily
+              const roundedDaily = Math.round(newExternalDaily * 1000000) / 1000000; // 6 decimal places for daily (matches total)
               await this.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
 
               // Store external daily energy for persistence and reset functionality
@@ -4219,7 +4219,7 @@ class MyDevice extends Homey.Device {
           if (this.hasCapability('adlar_external_energy_daily')) {
             const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
             const newExternalDaily = currentExternalDaily + externalEnergyIncrement;
-            const roundedDaily = Math.round(newExternalDaily * 1000) / 1000; // 3 decimal places for daily
+            const roundedDaily = Math.round(newExternalDaily * 1000000) / 1000000; // 6 decimal places for daily (matches total)
             await this.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
 
             // Store external daily energy for persistence and reset functionality
