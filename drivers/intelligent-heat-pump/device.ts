@@ -1581,6 +1581,12 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_external_energy_total', 0);
         this.log('External energy total capability initialized with default value (0 kWh)');
       }
+
+      // Initialize external energy daily capability with default value
+      if (this.hasCapability('adlar_external_energy_daily')) {
+        await this.setCapabilityValue('adlar_external_energy_daily', 0);
+        this.log('External energy daily capability initialized with default value (0 kWh)');
+      }
     } catch (error) {
       this.error('Error initializing COP system:', error);
     }
@@ -1759,6 +1765,40 @@ class MyDevice extends Homey.Device {
     } catch (error) {
       this.error('Failed to reset external energy total:', error);
       throw new Error(`Failed to reset external energy total: ${error}`);
+    }
+  }
+
+  /**
+   * Reset external daily energy counter to zero
+   */
+  public async resetExternalEnergyDaily(): Promise<void> {
+    this.log('🔄 Resetting external energy daily counter...');
+
+    try {
+      // Check if capability exists
+      if (!this.hasCapability('adlar_external_energy_daily')) {
+        this.log('⚠️ External energy daily capability not available');
+        return;
+      }
+
+      // Reset the capability value to zero
+      await this.setCapabilityValue('adlar_external_energy_daily', 0);
+
+      // Reset the stored value for persistence
+      await this.setStoreValue('external_daily_consumption_kwh', 0);
+
+      this.log('✅ External energy daily reset to 0.000 kWh');
+
+      // Reset the setting back to false to prevent repeated triggers
+      setTimeout(() => {
+        this.setSettings({ reset_external_energy_daily: false })
+          .then(() => this.log('🔄 Daily reset setting cleared'))
+          .catch((error) => this.error('Failed to clear daily reset setting:', error));
+      }, 1000);
+
+    } catch (error) {
+      this.error('Failed to reset external energy daily:', error);
+      throw new Error(`Failed to reset external energy daily: ${error}`);
     }
   }
 
@@ -3449,6 +3489,11 @@ class MyDevice extends Homey.Device {
       await this.resetExternalEnergyTotal();
     }
 
+    // Handle reset external energy daily
+    if (changedKeys.includes('reset_external_energy_daily') && newSettings.reset_external_energy_daily === true) {
+      await this.resetExternalEnergyDaily();
+    }
+
     // Handle device credential changes (for repair scenarios)
     const credentialKeysChanged = changedKeys.filter(
       (key) => ['device_id', 'local_key', 'ip_address'].includes(key),
@@ -3650,6 +3695,7 @@ class MyDevice extends Homey.Device {
       'adlar_cop_method',
       'adlar_external_power',
       'adlar_external_energy_total',
+      'adlar_external_energy_daily',
       'adlar_external_flow',
       'adlar_external_ambient',
       'adlar_scop',
@@ -3814,6 +3860,17 @@ class MyDevice extends Homey.Device {
             // Use higher precision for small energy increments
             const roundedTotal = Math.round(newExternalTotal * 1000000) / 1000000; // 6 decimal places
             await this.setCapabilityValue('adlar_external_energy_total', roundedTotal);
+
+            // Also update external daily energy consumption
+            if (this.hasCapability('adlar_external_energy_daily')) {
+              const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
+              const newExternalDaily = currentExternalDaily + energyIncrement;
+              const roundedDaily = Math.round(newExternalDaily * 1000) / 1000; // 3 decimal places for daily
+              await this.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
+
+              // Store external daily energy for persistence and reset functionality
+              await this.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
+            }
 
             // Better display formatting for small values
             const incrementWh = energyIncrement * 1000;
@@ -4068,6 +4125,19 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Initialize external daily energy tracking capability
+      if (this.hasCapability('adlar_external_energy_daily')) {
+        const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily');
+        if (!currentExternalDaily || currentExternalDaily === 0) {
+          // Check if we have stored external daily energy from previous sessions
+          const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
+          if (storedExternalDaily > 0) {
+            await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
+            this.log(`🔌 Restored external daily energy: ${storedExternalDaily} kWh`);
+          }
+        }
+      }
+
       // Reset daily energy at midnight
       this.scheduleDailyEnergyReset();
 
@@ -4145,6 +4215,17 @@ class MyDevice extends Homey.Device {
           const newExternalTotal = currentExternalTotal + externalEnergyIncrement;
           await this.setCapabilityValue('adlar_external_energy_total', Math.round(newExternalTotal * 1000) / 1000);
 
+          // Also update external daily energy consumption
+          if (this.hasCapability('adlar_external_energy_daily')) {
+            const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
+            const newExternalDaily = currentExternalDaily + externalEnergyIncrement;
+            const roundedDaily = Math.round(newExternalDaily * 1000) / 1000; // 3 decimal places for daily
+            await this.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
+
+            // Store external daily energy for persistence and reset functionality
+            await this.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
+          }
+
           // Store external energy in device storage for persistence
           await this.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
           // Update external energy timestamp
@@ -4203,10 +4284,18 @@ class MyDevice extends Homey.Device {
    */
   private async resetDailyEnergy(): Promise<void> {
     try {
+      // Reset internal daily energy consumption
       if (this.hasCapability('meter_power.power_consumption')) {
         await this.setCapabilityValue('meter_power.power_consumption', 0);
         await this.setStoreValue('daily_consumption_kwh', 0);
-        this.log('🔄 Daily energy consumption reset to 0 kWh');
+        this.log('🔄 Internal daily energy consumption reset to 0 kWh');
+      }
+
+      // Reset external daily energy consumption
+      if (this.hasCapability('adlar_external_energy_daily')) {
+        await this.setCapabilityValue('adlar_external_energy_daily', 0);
+        await this.setStoreValue('external_daily_consumption_kwh', 0);
+        this.log('🔄 External daily energy consumption reset to 0 kWh');
       }
     } catch (error) {
       this.error('Error resetting daily energy:', error);

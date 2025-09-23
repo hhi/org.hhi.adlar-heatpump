@@ -1,0 +1,38 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Energy meter housing -->
+  <rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+
+  <!-- Meter dial/gauge background -->
+  <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.1"/>
+
+  <!-- Gauge markings -->
+  <line x1="8.5" y1="9.5" x2="9" y2="10" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="15.5" y1="9.5" x2="15" y2="10" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="8.5" y1="14.5" x2="9" y2="14" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="15.5" y1="14.5" x2="15" y2="14" stroke="currentColor" stroke-width="0.8"/>
+
+  <!-- Meter needle pointing to daily consumption -->
+  <line x1="12" y1="12" x2="13.5" y2="9.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="12" cy="12" r="1" fill="currentColor"/>
+
+  <!-- Digital display showing daily -->
+  <rect x="6" y="15" width="12" height="2" rx="0.5" fill="currentColor" opacity="0.3"/>
+  <text x="12" y="16.3" font-family="monospace" font-size="2" text-anchor="middle" fill="currentColor" opacity="0.8">kWh</text>
+
+  <!-- External data indicator -->
+  <circle cx="18" cy="6" r="1.5" fill="currentColor" opacity="0.6"/>
+  <path d="M18 4.5L19.5 6L18 7.5L16.5 6Z" fill="white" opacity="0.9"/>
+
+  <!-- Reset indicator - enhanced curved arrow (foreground layer) -->
+  <path d="M20.5 18C20.5 19.8 19 21.5 17 21.5C15 21.5 13.5 20 13.5 18C13.5 16.8 14.2 16 15.5 16H18.5"
+        stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M17.5 15.2L18.5 16L17.5 16.8" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Reset dot indicator (foreground layer) -->
+  <circle cx="17" cy="18" r="0.8" fill="currentColor" opacity="0.6"/>
+
+  <!-- Daily indicator - calendar with "24h" -->
+  <rect x="2" y="18" width="6" height="4" rx="0.5" stroke="currentColor" stroke-width="0.8" fill="currentColor" opacity="0.1"/>
+  <line x1="3" y1="19" x2="7" y2="19" stroke="currentColor" stroke-width="0.5"/>
+  <text x="5" y="21.2" font-family="sans-serif" font-size="1.8" text-anchor="middle" fill="currentColor" opacity="0.7">24h</text>
+</svg>
