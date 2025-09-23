@@ -60,6 +60,7 @@
     "adlar_cop_method",
     "adlar_external_power",
     "adlar_external_energy_total",
+    "adlar_external_energy_daily",
     "adlar_external_flow",
     "adlar_external_ambient",
     "adlar_cop_daily",
