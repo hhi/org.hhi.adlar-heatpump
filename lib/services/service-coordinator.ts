@@ -9,6 +9,7 @@ import { EnergyTrackingService } from './energy-tracking-service';
 import { TuyaConnectionService, TuyaDeviceConfig } from './tuya-connection-service';
 import { FlowCardManagerService } from './flow-card-manager-service';
 import { CategorizedError } from '../error-types';
+import { AdlarMapping } from '../definitions/adlar-mapping';
 
 export interface ServiceCoordinatorOptions {
   device: Homey.Device;
@@ -231,10 +232,16 @@ export class ServiceCoordinator {
 
   /**
    * Tuya data handler invoked by TuyaConnectionService.
-   * Updates capability health and triggers energy tracking updates.
+   * Forwards DPS data to device for capability updates, updates capability health,
+   * and triggers energy tracking updates.
    * @param data - object containing `dps: Record<number, unknown>`
    */
   private handleTuyaData(data: { dps: Record<number, unknown> }): void {
+    // Forward DPS data to device for capability updates
+    if (typeof (this.device as unknown as { updateCapabilitiesFromDps?: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps === 'function') {
+      (this.device as unknown as { updateCapabilitiesFromDps: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps(data.dps);
+    }
+
     // Update capability health for each DPS value
     Object.entries(data.dps).forEach(([dpsId, value]) => {
       const id = Number(dpsId);
@@ -371,14 +378,11 @@ export class ServiceCoordinator {
   }
 
   /**
-   * Utility to map DPS id to capability id. NOTE: currently a stub in this file;
-   * real mapping should use AdlarMapping/definitions.
+   * Utility to map DPS id to capability id using AdlarMapping.
    */
   private mapDpsToCapability(dpsId: number): string | null {
-    // This would contain the full DPS to capability mapping
-    // For now, returning null to avoid import dependencies
-    // In practice, this would use the AdlarMapping class
-    return null;
+    const { allArraysSwapped } = AdlarMapping;
+    return allArraysSwapped[dpsId] || null;
   }
 
   /**
