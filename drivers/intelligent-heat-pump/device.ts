@@ -71,26 +71,12 @@ class MyDevice extends Homey.Device {
   private circuitBreakerOpenTime: number = 0;
   private circuitBreakerResetTime: number = 60000; // 1 minute before attempting reset
 
-  // Flow card management
-  private flowCardListeners: Map<string, unknown> = new Map();
+  // Note: Flow card management now handled by FlowCardManagerService via ServiceCoordinator
   private isFlowCardsInitialized: boolean = false;
 
-  // Capability health monitoring
-  private capabilityHealthMap = new Map<string, {
-    isHealthy: boolean;
-    lastSeenData: number;
-    nullCount: number;
-    dataCount: number;
-    lastValue: unknown;
-  }>();
+  // Note: Capability health monitoring now handled by CapabilityHealthService via ServiceCoordinator
 
-  private readonly CAPABILITY_TIMEOUT_MS = DeviceConstants.CAPABILITY_TIMEOUT_MS;
-
-  private readonly NULL_THRESHOLD = DeviceConstants.NULL_THRESHOLD;
-
-  private healthCheckInterval: NodeJS.Timeout | null = null;
-
-  private energyTrackingInterval: NodeJS.Timeout | null = null;
+  // Note: Energy tracking interval now managed by EnergyTrackingService via ServiceCoordinator
 
   // COP (Coefficient of Performance) calculation
   private copCalculationInterval: NodeJS.Timeout | null = null;
@@ -443,187 +429,14 @@ class MyDevice extends Homey.Device {
     }
   }
 
-  /**
-   * Set up Tuya device event handlers
-   * Extracted for reuse during connection recreation
-   */
-  private setupTuyaEventHandlers(): void {
-    if (!this.tuya) {
-      throw new Error('Cannot setup event handlers: Tuya device not initialized');
-    }
+  // Note: Tuya event handlers now managed by TuyaConnectionService via ServiceCoordinator
 
-    // TUYA ERROR event - CRITICAL: Handle socket errors to prevent app crashes
-    this.tuya.on('error', (error: Error): void => {
-      const categorizedError = this.handleTuyaError(error, 'TuyAPI socket error');
+  // Note: updateCapabilityHealth now delegated to CapabilityHealthService via ServiceCoordinator
 
-      // Mark device as disconnected for socket connection errors
-      this.tuyaConnected = false;
+  // Note: Capability health methods now delegated to CapabilityHealthService via ServiceCoordinator
 
-      // Update recovery strategy based on error type (but don't increment consecutiveFailures here)
-      // The reconnection logic will handle failure counting
-      if (!categorizedError.recoverable) {
-        // For non-recoverable errors, immediately apply backoff pressure
-        this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 8);
-        this.debugLog(`Non-recoverable socket error detected, applying immediate backoff: ${this.backoffMultiplier}x`);
-      }
-
-      // Set device unavailable for connection-related errors
-      if (TuyaErrorCategorizer.shouldReconnect(categorizedError)) {
-        this.setUnavailable('Connection lost - attempting to reconnect')
-          .then(() => this.debugLog('Device marked as unavailable due to socket error'))
-          .catch((err) => this.error('Error setting device unavailable:', err));
-      } else {
-        // For non-recoverable errors, provide more specific status
-        this.setUnavailable(`Connection error: ${categorizedError.userMessage}`)
-          .then(() => this.debugLog('Device marked as unavailable due to non-recoverable socket error'))
-          .catch((err) => this.error('Error setting device unavailable:', err));
-      }
-
-      // Log the error but don't crash the app - enhanced reconnection will handle recovery
-      this.debugLog('TuyAPI error handled gracefully, enhanced recovery system will manage reconnection');
-    });
-
-    // TUYA ON EVENT (from dp id to capability name)
-    this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
-      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
-      const dpsFetched = data.dps || {};
-      this.log('Data received from Tuya:', dpsFetched);
-      // Update Homey capabilities based on the fetched DPS data
-      this.updateCapabilitiesFromDps(dpsFetched);
-      this.setAvailable()
-        .then(() => this.log('Device set as available'))
-        .catch((err) => this.error('Error setting device as available:', err));
-    });
-
-    // TUYA DP_REFRESH event (from dp id to capability name)
-    this.tuya.on('dp-refresh', (data: { dps: Record<number, unknown> }): void => {
-      // Suppose data contains updated values, e.g., { dps: { 1: true, 4: 22 } }
-      const dpsFetched = data.dps || {};
-      this.log('DP-Refresh received from Tuya:', dpsFetched);
-      // Update Homey capabilities based on the fetched DPS data
-      this.updateCapabilitiesFromDps(dpsFetched);
-    });
-
-    // Fixing promise handling for setAvailable and setUnavailable
-    this.tuya.on('connected', (): void => {
-      this.log('Device', 'Connected to device!');
-      this.tuyaConnected = true;
-
-      // Reset error recovery state on successful connection
-      this.resetErrorRecoveryState();
-
-      this.setAvailable()
-        .then(() => {
-          this.log('Device set as available - error recovery state reset');
-          this.debugLog('Enhanced recovery system: connection restored successfully');
-        })
-        .catch((err) => this.error('Error setting device as available:', err));
-    });
-
-    this.tuya.on('disconnected', (): void => {
-      this.log('Device', 'Disconnected from device!');
-      this.tuyaConnected = false;
-
-      // Apply minimal backoff for clean disconnections (less aggressive than errors)
-      this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.2, 4);
-
-      this.setUnavailable('Device disconnected - attempting to reconnect')
-        .then(() => {
-          this.log('Device set as unavailable due to disconnection');
-          this.debugLog('Enhanced recovery system: will attempt reconnection with current backoff');
-        })
-        .catch((err) => this.error('Error setting device as unavailable:', err));
-    });
-  }
-
-  /**
-   * Update capability health tracking when value changes
-   */
-  private updateCapabilityHealth(capability: string, value: unknown): void {
-    const now = Date.now();
-    const health = this.capabilityHealthMap.get(capability) || {
-      isHealthy: true,
-      lastSeenData: now,
-      nullCount: 0,
-      dataCount: 0,
-      lastValue: null,
-    };
-
-    const isNull = value === null || value === undefined;
-
-    if (isNull) {
-      health.nullCount++;
-    } else {
-      health.nullCount = 0; // Reset null count on valid data
-      health.dataCount++;
-      health.lastSeenData = now;
-      health.lastValue = value;
-    }
-
-    // Update health status - consider capability unhealthy when DPS value is null
-    const wasHealthy = health.isHealthy;
-    health.isHealthy = !isNull && health.nullCount < this.NULL_THRESHOLD && (now - health.lastSeenData) < this.CAPABILITY_TIMEOUT_MS;
-
-    // Log health status changes
-    if (wasHealthy !== health.isHealthy) {
-      if (health.isHealthy) {
-        this.log(`Capability ${capability} recovered - now healthy`);
-      } else {
-        this.log(`Capability ${capability} became unhealthy - nullCount: ${health.nullCount}, timeSinceData: ${now - health.lastSeenData}ms`);
-      }
-    }
-
-    this.capabilityHealthMap.set(capability, health);
-  }
-
-  /**
-   * Get capability health status
-   */
   private getCapabilityHealth(capability: string): boolean {
-    const health = this.capabilityHealthMap.get(capability);
-    if (!health) return false;
-
-    const now = Date.now();
-    const isHealthy = health.nullCount < this.NULL_THRESHOLD && (now - health.lastSeenData) < this.CAPABILITY_TIMEOUT_MS;
-
-    // Update health status if it has changed
-    if (health.isHealthy !== isHealthy) {
-      health.isHealthy = isHealthy;
-      this.capabilityHealthMap.set(capability, health);
-    }
-
-    return isHealthy;
-  }
-
-  /**
-   * Get all capability health statuses
-   */
-  private getAllCapabilityHealthStatuses(): Record<string, {
-    isHealthy: boolean;
-    lastSeenData: number;
-    nullCount: number;
-    dataCount: number;
-    lastValue: unknown;
-    timeSinceLastData: number;
-  }> {
-    const now = Date.now();
-    const statuses: Record<string, {
-      isHealthy: boolean;
-      lastSeenData: number;
-      nullCount: number;
-      dataCount: number;
-      lastValue: unknown;
-      timeSinceLastData: number;
-    }> = {};
-
-    for (const [capability, health] of this.capabilityHealthMap.entries()) {
-      statuses[capability] = {
-        ...health,
-        timeSinceLastData: now - health.lastSeenData,
-      };
-    }
-
-    return statuses;
+    return this.serviceCoordinator?.getCapabilityHealth()?.isCapabilityHealthy(capability) ?? false;
   }
 
   /**
@@ -669,8 +482,8 @@ class MyDevice extends Homey.Device {
     for (const capability of Object.keys(this.allCapabilities)) {
       try {
         const value = this.getCapabilityValue(capability);
-        // Update health tracking for this capability
-        this.updateCapabilityHealth(capability, value);
+        // Update health tracking for this capability via service
+        this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
 
         // Check if capability is currently healthy (has recent valid data)
         if (this.getCapabilityHealth(capability)) {
@@ -687,291 +500,19 @@ class MyDevice extends Homey.Device {
     return capabilitiesWithData;
   }
 
-  /**
-   * Get healthy capabilities by category for dynamic flow card management
-   */
-  private getHealthyCapabilitiesByCategory(): CapabilityCategories {
-    const caps = Object.keys(this.allCapabilities).filter((cap) => this.getCapabilityHealth(cap));
+  // Note: Capability health categorization now handled by CapabilityHealthService via ServiceCoordinator
 
-    return {
-      temperature: caps.filter((cap) => cap.startsWith('measure_temperature')),
-      voltage: caps.filter((cap) => cap.startsWith('measure_voltage')),
-      current: caps.filter((cap) => cap.startsWith('measure_current')),
-      power: caps.filter((cap) => cap.includes('power')),
-      pulseSteps: caps.filter((cap) => cap.includes('pulse_steps')),
-      states: caps.filter((cap) => cap.startsWith('adlar_state')),
-      efficiency: caps.filter((cap) => cap.includes('cop') || cap.includes('scop')),
-    };
-  }
+  // Note: Flow card health management now delegated to FlowCardManagerService via ServiceCoordinator
 
-  /**
-   * Periodically update flow cards based on capability health changes
-   */
-  private async updateFlowCardsBasedOnHealth(): Promise<void> {
-    try {
-      // Get current healthy capabilities
-      const healthyCapabilities = this.getHealthyCapabilitiesByCategory();
-      const userPrefs = this.getUserFlowPreferences();
+  // Note: Flow card unregistration now handled by FlowCardManagerService via ServiceCoordinator
 
-      // Check if any categories need flow card updates due to health changes
-      const categoriesToUpdate: (keyof CapabilityCategories)[] = [];
+  // Note: Flow card categories now managed by FlowCardManagerService via ServiceCoordinator
 
-      for (const category of Object.keys(healthyCapabilities) as (keyof CapabilityCategories)[]) {
-        const currentHealthyCaps = healthyCapabilities[category];
-        const availableCaps = this.getAvailableCapabilities()[category];
+  // Note: Health check intervals now managed by CapabilityHealthService via ServiceCoordinator
 
-        // If healthy capabilities differ significantly from available capabilities, update
-        if (currentHealthyCaps.length !== availableCaps.length
-            || !currentHealthyCaps.every((cap) => availableCaps.includes(cap))) {
-          categoriesToUpdate.push(category);
-        }
-      }
+  // Note: Energy tracking methods now delegated to EnergyTrackingService via ServiceCoordinator
 
-      if (categoriesToUpdate.length > 0) {
-        this.log(`Updating flow cards for categories with health changes: ${categoriesToUpdate.join(', ')}`);
-
-        // Unregister existing flow cards for affected categories
-        for (const category of categoriesToUpdate) {
-          await this.unregisterFlowCardsForCategory(category);
-        }
-
-        // Re-register flow cards with current healthy capabilities
-        const capabilitiesWithData = await this.detectCapabilitiesWithData();
-        for (const category of categoriesToUpdate) {
-          await this.registerFlowCardsByCategory(
-            category,
-            healthyCapabilities[category],
-            userPrefs[`flow_${category}_alerts` as keyof typeof userPrefs] as 'disabled' | 'auto' | 'enabled',
-            capabilitiesWithData,
-          );
-        }
-      }
-    } catch (error) {
-      this.error('Error updating flow cards based on health:', error);
-    }
-  }
-
-  /**
-   * Unregister flow cards for a specific category
-   */
-  private async unregisterFlowCardsForCategory(category: keyof CapabilityCategories): Promise<void> {
-    const categoryFlowCards = this.getCategoryFlowCards(category);
-
-    for (const cardId of categoryFlowCards) {
-      const listener = this.flowCardListeners.get(cardId);
-      if (listener) {
-        try {
-          if (typeof (listener as { unregister?: () => void }).unregister === 'function') {
-            (listener as { unregister: () => void }).unregister();
-          }
-          this.flowCardListeners.delete(cardId);
-          this.debugLog(`Unregistered flow card: ${cardId} for category: ${category}`);
-        } catch (error) {
-          this.error(`Error unregistering flow card ${cardId}:`, error);
-        }
-      }
-    }
-  }
-
-  /**
-   * Get flow card IDs for a specific category
-   */
-  private getCategoryFlowCards(category: keyof CapabilityCategories): string[] {
-    const categoryCards: Record<keyof CapabilityCategories, string[]> = {
-      temperature: [
-        'temperature_above', 'coiler_temperature_alert', 'incoiler_temperature_alert',
-        'tank_temperature_alert', 'suction_temperature_alert', 'discharge_temperature_alert',
-        'ambient_temperature_changed', 'inlet_temperature_changed', 'outlet_temperature_changed',
-        'high_pressure_temperature_alert', 'low_pressure_temperature_alert',
-        'economizer_inlet_temperature_alert', 'economizer_outlet_temperature_alert',
-      ],
-      voltage: ['phase_a_voltage_alert', 'phase_b_voltage_alert', 'phase_c_voltage_alert'],
-      current: ['phase_b_current_alert', 'phase_c_current_alert'],
-      power: ['power_above_threshold', 'power_threshold_exceeded', 'total_consumption_above'],
-      pulseSteps: ['eev_pulse_steps_alert', 'evi_pulse_steps_alert'],
-      states: ['compressor_running', 'compressor_state_changed', 'defrost_state_changed', 'backwater_state_changed'],
-      efficiency: [
-        'cop_efficiency_changed', 'cop_outlier_detected', 'cop_calculation_method_is',
-        'cop_efficiency_check',
-        'daily_cop_efficiency_changed', 'cop_trend_detected',
-        'daily_cop_above_threshold', 'cop_trend_analysis',
-        'request_external_ambient_data', 'request_external_flow_data', 'request_external_power_data',
-      ],
-    };
-
-    return categoryCards[category] || [];
-  }
-
-  /**
-   * Start periodic health checks for dynamic flow card management
-   */
-  private startHealthCheckInterval(): void {
-    // Check capability health every 2 minutes
-    try {
-      const interval = this.homey.setInterval(() => {
-        this.updateFlowCardsBasedOnHealth().catch((error) => {
-          this.error('Error during health check update:', error);
-        });
-
-        // Note: Intelligent power measurement now runs on dedicated energy tracking interval
-      }, DeviceConstants.HEALTH_CHECK_INTERVAL_MS);
-      if (interval) {
-        this.healthCheckInterval = interval;
-        this.log('Started capability health check interval');
-      } else {
-        this.healthCheckInterval = null;
-        this.error('Failed to start health check interval: setInterval returned undefined');
-      }
-    } catch (err) {
-      this.healthCheckInterval = null;
-      this.error('Error starting health check interval:', err);
-    }
-  }
-
-  /**
-   * Stop periodic health checks
-   */
-  private stopHealthCheckInterval(): void {
-    if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
-      this.healthCheckInterval = null;
-      this.log('Stopped capability health check interval');
-    }
-  }
-
-  /**
-   * Start periodic energy tracking updates for more frequent energy accumulation
-   */
-  private startEnergyTrackingInterval(): void {
-    if (!this.getSetting('enable_intelligent_energy_tracking')) {
-      this.debugLog('Energy tracking disabled - not starting energy tracking interval');
-      return;
-    }
-
-    try {
-      const interval = this.homey.setInterval(async () => {
-        try {
-          await this.updateIntelligentPowerMeasurement();
-        } catch (error) {
-          this.error('Error during energy tracking update:', error);
-        }
-      }, DeviceConstants.ENERGY_TRACKING_INTERVAL_MS);
-
-      if (interval) {
-        this.energyTrackingInterval = interval;
-        this.log(`Started energy tracking interval (${DeviceConstants.ENERGY_TRACKING_INTERVAL_MS / 1000}s)`);
-      } else {
-        this.energyTrackingInterval = null;
-        this.error('Failed to start energy tracking interval: setInterval returned undefined');
-      }
-    } catch (err) {
-      this.energyTrackingInterval = null;
-      this.error('Error starting energy tracking interval:', err);
-    }
-  }
-
-  /**
-   * Stop periodic energy tracking updates
-   */
-  private stopEnergyTrackingInterval(): void {
-    if (this.energyTrackingInterval) {
-      clearInterval(this.energyTrackingInterval);
-      this.energyTrackingInterval = null;
-      this.log('Stopped energy tracking interval');
-    }
-  }
-
-  /**
-   * Generate a human-readable capability diagnostic report
-   */
-  private generateCapabilityDiagnosticReport(healthStatuses: Record<string, {
-    isHealthy: boolean;
-    lastSeenData: number;
-    nullCount: number;
-    dataCount: number;
-    lastValue: unknown;
-    timeSinceLastData: number;
-  }>): string {
-    const report: string[] = [];
-    const categories = this.getAvailableCapabilities();
-
-    report.push('=== CAPABILITY HEALTH STATUS ===\n');
-
-    // Overall summary
-    const totalCapabilities = Object.keys(healthStatuses).length;
-    const healthyCapabilities = Object.values(healthStatuses).filter(
-      (status: unknown) => typeof status === 'object' && status !== null
-        && 'isHealthy' in status && (status as { isHealthy: boolean }).isHealthy,
-    ).length;
-    const unhealthyCapabilities = totalCapabilities - healthyCapabilities;
-
-    report.push('📊 SUMMARY:');
-    report.push(`   Total Capabilities: ${totalCapabilities}`);
-    report.push(`   ❌ Unhealthy: ${unhealthyCapabilities}`);
-    report.push(`   ✅ Healthy: ${healthyCapabilities}`);
-
-    report.push('');
-
-    // Unhealthy capabilities first
-    const unhealthy = Object.entries(healthStatuses).filter(([, status]) => !status.isHealthy);
-    if (unhealthy.length > 0) {
-      report.push('🚨 UNHEALTHY CAPABILITIES:');
-      for (const [capability, health] of unhealthy) {
-        const timeAgo = this.formatTimeAgo(health.timeSinceLastData);
-        const reason = health.nullCount >= this.NULL_THRESHOLD
-          ? `Too many null values (${health.nullCount})`
-          : `No recent data (${timeAgo})`;
-        const lastValue = health.lastValue !== null && health.lastValue !== undefined
-          ? ` = ${health.lastValue}`
-          : ' = null';
-        report.push(`   ❌ ${capability}${lastValue}`);
-        report.push(`      ${reason}, last data: ${timeAgo}`);
-      }
-      report.push('');
-    }
-
-    // Healthy capabilities by category
-    for (const [categoryName, capabilities] of Object.entries(categories)) {
-      if (capabilities.length === 0) continue;
-
-      const healthyInCategory = capabilities.filter((cap: string | number) => healthStatuses[cap]?.isHealthy || !healthStatuses[cap]);
-
-      if (healthyInCategory.length === 0) continue;
-
-      report.push(`📁 ${categoryName.toUpperCase()} - HEALTHY (${healthyInCategory.length} capabilities):`);
-
-      const reportcaps: string[] = [];
-      for (const capability of healthyInCategory) {
-        const health = healthStatuses[capability];
-        if (health) {
-          // reportcaps.push(`✅ ${capability}$ `);
-        } else {
-          reportcaps.push(`⚠️  ${capability} = no health data `);
-        }
-      }
-      // report.push(reportcaps.join(' '));
-    }
-    report.push('');
-    report.push('💡 TIP: Unhealthy capabilities are excluded from flow cards in "auto" mode.');
-    report.push('    Use "enabled" mode to force flow cards for all capabilities.');
-
-    return report.join('\n');
-  }
-
-  /**
-   * Format time difference in human-readable format
-   */
-  private formatTimeAgo(milliseconds: number): string {
-    const seconds = Math.floor(milliseconds / DeviceConstants.MS_PER_SECOND);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days}d ${hours % 24}h ago`;
-    if (hours > 0) return `${hours}h ${minutes % 60}m ago`;
-    if (minutes > 0) return `${minutes}m ${seconds % 60}s ago`;
-    return `${seconds}s ago`;
-  }
+  // Note: Capability diagnostic reporting now handled by CapabilityHealthService via ServiceCoordinator
 
   /**
    * Format COP method for user-friendly display with internationalization and diagnostics
@@ -2326,22 +1867,7 @@ class MyDevice extends Homey.Device {
     }
   }
 
-  /**
-   * Enhance COP result with external device source information
-   */
-  private enhanceCOPResultWithExternalSources(
-    copResult: { dataSources: Record<string, { value: number | string; source: string }> },
-    externalDeviceInfo: Record<string, { deviceName: string; value: number; source: string }>,
-  ): void {
-    // Update data sources to include external device names where applicable
-    Object.entries(copResult.dataSources).forEach(([key, dataSource]) => {
-      const externalInfo = externalDeviceInfo[key];
-      if (externalInfo && dataSource.source.startsWith('external:')) {
-        // Replace generic external source with device name
-        dataSource.source = `${externalInfo.deviceName} (${externalInfo.source})`;
-      }
-    });
-  }
+  // Note: COP result enhancement with external sources now handled by EnergyTrackingService via ServiceCoordinator
 
   /**
    * Log the specific calculation expression used for the COP calculation
@@ -2610,76 +2136,7 @@ class MyDevice extends Homey.Device {
     return 'temperature'; // Default fallback
   }
 
-  /**
-   * Updates Homey capabilities based on fetched DPS data.
-   * @param {Record<string, unknown>} dpsFetched The DPS data fetched from the Tuya device.
-   */
-  private updateCapabilitiesFromDps(dpsFetched: Record<string, unknown>): void {
-    Object.entries(dpsFetched).forEach(([dpsId, value]) => {
-      const dpsNumber = Number(dpsId);
-
-      // Find all capabilities that map to this DPS ID (handle dual capabilities)
-      const matchingCapabilities: string[] = [];
-      Object.entries(this.allCapabilities).forEach(([capabilityName, dpsArray]) => {
-        if (dpsArray.includes(dpsNumber)) {
-          matchingCapabilities.push(capabilityName);
-        }
-      });
-
-      this.debugLog(`DPS ${dpsId} received with value:`, value);
-      this.debugLog(`Found ${matchingCapabilities.length} capabilities for dpsId ${dpsId}:`, matchingCapabilities);
-
-      // Special debug for DPS 13 (heating curve)
-      if (dpsNumber === 13) {
-        this.log('DPS 13 (heating curve) update:', value);
-        this.log('All capabilities mapping:', Object.keys(this.allCapabilities));
-        this.log('adlar_enum_countdown_set mapping:', this.allCapabilities['adlar_enum_countdown_set']);
-      }
-
-      if (matchingCapabilities.length > 0) {
-        // Update all matching capabilities
-        matchingCapabilities.forEach((capability) => {
-          // Update capability health tracking
-          this.updateCapabilityHealth(capability, value);
-
-          // Check for critical conditions before updating
-          this.checkForCriticalConditions(capability, value).catch((err) => this.error('Error checking critical conditions:', err));
-
-          // Update the capability value in Homey - but only if capability exists
-          if (this.hasCapability(capability)) {
-            // Special handling for measure_power when intelligent tracking is enabled
-            if (capability === 'measure_power' && this.getSetting('enable_intelligent_energy_tracking')) {
-              this.debugLog('🔋 Skipping direct measure_power update (intelligent tracking enabled), triggering smart update instead');
-              // Trigger intelligent power update which will consider all sources
-              this.updateIntelligentPowerMeasurement().catch((err) => this.error('Error in intelligent power update:', err));
-            } else {
-              // Normal capability update for all other capabilities
-              this.setCapabilityValue(capability, (value as boolean | number | string))
-                .then(() => this.debugLog(`Updated ${capability} to`, String(value)))
-                .catch((err) => {
-                  const categorizedError = TuyaErrorCategorizer.categorize(err as Error, `Setting capability ${capability}`);
-                  this.error(TuyaErrorCategorizer.formatForLogging(categorizedError));
-
-                  // Only attempt recovery for retryable errors
-                  if (categorizedError.retryable) {
-                    this.homey.setTimeout(() => {
-                      if (this.hasCapability(capability)) {
-                        this.setCapabilityValue(capability, (value as boolean | number | string))
-                          .catch((retryErr) => this.error(`Retry failed for ${capability}:`, retryErr));
-                      }
-                    }, DeviceConstants.CAPABILITY_RETRY_DELAY_MS);
-                  }
-                });
-            }
-          } else {
-            this.debugLog(`Skipping capability update for ${capability} - capability not available on device`);
-          }
-        });
-      } else {
-        this.debugLog(`No capability mapping found for DPS ${dpsId}`);
-      }
-    });
-  }
+  // Note: DPS to capability updates now handled by TuyaConnectionService via ServiceCoordinator
 
   private getCapabilityFriendlyTitle(capability: string): string {
     try {
@@ -2710,335 +2167,7 @@ class MyDevice extends Homey.Device {
     return map[part] || capability;
   }
 
-  private async checkForCriticalConditions(capability: string, value: unknown) {
-    // Check user preferences first
-    const category = this.getCapabilityCategory(capability);
-    const userSettings = this.getUserFlowPreferences();
-
-    // Map category to correct property name
-    const settingMap: Record<keyof CapabilityCategories, keyof UserFlowPreferences> = {
-      temperature: 'flow_temperature_alerts',
-      voltage: 'flow_voltage_alerts',
-      current: 'flow_current_alerts',
-      power: 'flow_power_alerts',
-      pulseSteps: 'flow_pulse_steps_alerts',
-      states: 'flow_state_alerts',
-      efficiency: 'flow_efficiency_alerts',
-    };
-
-    const userSetting = userSettings[settingMap[category]];
-
-    if (userSetting === 'disabled') {
-      return; // User disabled this category
-    }
-
-    // Check if capability should trigger based on combined logic
-    const availableCaps = this.getAvailableCapabilities();
-    const capabilitiesWithData = [capability]; // This capability clearly has data
-
-    if (!this.shouldRegisterCategory(category, availableCaps[category], userSetting as string, capabilitiesWithData)) {
-      return; // Doesn't meet combined criteria
-    }
-
-    // System fault detection (always enabled - critical for safety)
-    if (capability === 'adlar_fault' && value !== 0) {
-      await this.sendCriticalNotification(
-        'System Fault Detected',
-        `Heat pump fault code: ${value}. Please check system immediately.`,
-      );
-      // Fire fault trigger
-      await this.triggerFlowCard('fault_detected', { fault_code: value });
-    }
-
-    // Temperature safety checks and flow triggers
-    const temperatureCapabilityMap: Record<string, string> = {
-      'measure_temperature.coiler_temp': 'coiler_temperature_alert',
-      'measure_temperature.bottom_temp_f': 'incoiler_temperature_alert',
-      'measure_temperature.around_temp_f': 'tank_temperature_alert',
-      'measure_temperature.coiler_temp_f': 'suction_temperature_alert',
-      'measure_temperature.venting_temp': 'discharge_temperature_alert',
-      'measure_temperature.evlin': 'economizer_inlet_temperature_alert',
-      'measure_temperature.eviout': 'economizer_outlet_temperature_alert',
-      'measure_temperature.temp_current_f': 'high_pressure_temperature_alert',
-      'measure_temperature.top_temp_f': 'low_pressure_temperature_alert',
-    };
-
-    if (temperatureCapabilityMap[capability] && typeof value === 'number') {
-      // 1) Per-sensor WARN thresholds for flow triggers (non-critical)
-      const warnThresholds: Record<string, { high?: number; low?: number }> = {
-        'measure_temperature.venting_temp': { high: 105 }, // discharge can be high
-        'measure_temperature.coiler_temp': { high: 65, low: -25 },
-        'measure_temperature.temp_current_f': { high: 90 },
-        'measure_temperature.around_temp': { high: 45, low: -25 },
-        // default fallback
-        default: { high: 60, low: 0 },
-      };
-      const warn = warnThresholds[capability] || warnThresholds.default;
-
-      const warnBreach = (warn.high !== undefined && value > warn.high)
-        || (warn.low !== undefined && value < warn.low);
-
-      if (warnBreach) {
-        await this.triggerFlowCard(temperatureCapabilityMap[capability], {
-          temperature: value,
-          sensor_type: capability.split('.')[1] || 'unknown',
-        });
-      }
-
-      // 2) Skip critical alerts during defrost to avoid intentional spikes
-      const isDefrosting = this.hasCapability('adlar_state_defrost_state')
-        ? !!this.getCapabilityValue('adlar_state_defrost_state')
-        : false;
-      if (isDefrosting) {
-        this.debugLog('Skipping temperature critical alert during defrost:', capability, value);
-        return;
-      }
-
-      // 3) Per-sensor CRITICAL thresholds for notifications
-      const criticalThresholds: Record<string, { high?: number; low?: number }> = {
-        'measure_temperature.venting_temp': { high: 115 }, // Discharge critical
-        'measure_temperature.coiler_temp': { high: 75, low: -30 },
-        'measure_temperature.temp_current_f': { high: 100 },
-        'measure_temperature.around_temp': { low: -30 }, // ambient extremely low
-        // fallback
-        default: { high: 80, low: -20 },
-      };
-      const crit = criticalThresholds[capability] || criticalThresholds.default;
-
-      const isHighCrit = crit.high !== undefined && value > crit.high;
-      const isLowCrit = crit.low !== undefined && value < crit.low;
-      const isCritical = isHighCrit || isLowCrit;
-
-      if (isCritical) {
-        // Debounce: don’t alert more than once per 30s per sensor
-        const now = Date.now();
-        const lastAt = this.lastTempAlertAt.get(capability) || 0;
-        if (now - lastAt < 30_000) {
-          this.debugLog('Debounced temperature critical alert:', capability, value);
-          return;
-        }
-        this.lastTempAlertAt.set(capability, now);
-
-        // Friendly name and detailed title/message
-        const sensorName = this.getCapabilityFriendlyTitle(capability);
-        const direction = isHighCrit ? 'high' : 'low';
-        const thresholdText = isHighCrit ? `>${crit.high}°C` : `<${crit.low}°C`;
-
-        const title = `Temperature Alert: ${sensorName} ${value.toFixed(1)}°C`;
-        const message = `${sensorName} is critically ${direction} at ${value.toFixed(1)}°C (threshold ${thresholdText}). System safety may be compromised.`;
-
-        await this.sendCriticalNotification(title, message);
-      }
-    }
-
-    // Voltage alert flow triggers
-    const voltageCapabilityMap: Record<string, string> = {
-      'measure_voltage.voltage_current': 'phase_a_voltage_alert',
-      'measure_voltage.bv': 'phase_b_voltage_alert',
-      'measure_voltage.cv': 'phase_c_voltage_alert',
-    };
-
-    if (voltageCapabilityMap[capability] && typeof value === 'number') {
-      // Fire voltage alert for values outside typical range (customize thresholds)
-      if (value > 250 || value < 200) {
-        await this.triggerFlowCard(voltageCapabilityMap[capability], {
-          voltage: value,
-          phase: capability.split('.')[1] || 'unknown',
-        });
-      }
-    }
-
-    // Current alert flow triggers
-    const currentCapabilityMap: Record<string, string> = {
-      'measure_current.b_cur': 'phase_b_current_alert',
-      'measure_current.c_cur': 'phase_c_current_alert',
-    };
-
-    if (currentCapabilityMap[capability] && typeof value === 'number') {
-      // Fire current alert for high current values (customize threshold)
-      if (value > 20) {
-        await this.triggerFlowCard(currentCapabilityMap[capability], {
-          current: value,
-          phase: capability.split('.')[1] || 'unknown',
-        });
-      }
-    }
-
-    // Pulse-steps alerts and flow triggers
-    const pulseStepsCapabilityMap: Record<string, string> = {
-      adlar_measure_pulse_steps_temp_current: 'eev_pulse_steps_alert',
-      adlar_measure_pulse_steps_effluent_temp: 'evi_pulse_steps_alert',
-    };
-
-    if (pulseStepsCapabilityMap[capability] && typeof value === 'number') {
-      // Fire pulse-steps alert flow cards for values outside operational range
-      if (value > 450 || value < 10) {
-        await this.triggerFlowCard(pulseStepsCapabilityMap[capability], {
-          pulse_steps: value,
-          valve_type: capability.includes('temp_current') ? 'eev' : 'evi',
-        });
-      }
-
-      // Critical pulse-steps safety checks
-      if (value > 480 || value < 0) {
-        await this.sendCriticalNotification(
-          'Pulse-Steps Alert',
-          `Critical pulse-steps reading (${value}). System may require immediate attention.`,
-        );
-      }
-    }
-
-    // State change triggers
-    const stateCapabilityMap: Record<string, string> = {
-      adlar_state_defrost_state: 'defrost_state_changed',
-      adlar_state_compressor_state: 'compressor_state_changed',
-      adlar_state_backwater_state: 'backwater_state_changed',
-    };
-
-    if (stateCapabilityMap[capability]) {
-      await this.triggerFlowCard(stateCapabilityMap[capability], {
-        new_state: value,
-        state_type: capability.split('_').pop() || 'unknown',
-      });
-    }
-
-    // Temperature change triggers (threshold-based)
-    const tempChangeCapabilityMap: Record<string, string> = {
-      'measure_temperature.around_temp': 'ambient_temperature_changed',
-      'measure_temperature.temp_top': 'inlet_temperature_changed',
-      'measure_temperature.temp_bottom': 'outlet_temperature_changed',
-    };
-
-    if (tempChangeCapabilityMap[capability] && typeof value === 'number') {
-      // Store previous value and check for significant changes
-      const prevValueKey = `prev_${capability.replace(/\./g, '_')}`;
-      const previousValue = this.getStoreValue(prevValueKey) || value;
-
-      // Fire trigger if temperature changed by more than 2°C
-      if (Math.abs(value - previousValue) >= 2) {
-        await this.triggerFlowCard(tempChangeCapabilityMap[capability], {
-          temperature: value,
-          previous_temperature: previousValue,
-          change: value - previousValue,
-          sensor_type: capability.split('.')[1] || 'unknown',
-        });
-
-        // Store new value for next comparison
-        await this.setStoreValue(prevValueKey, value);
-      }
-    }
-
-    // Power and consumption threshold triggers
-    if (capability === 'measure_power' && typeof value === 'number') {
-      // Fire power threshold exceeded for values above 5kW
-      if (value > DeviceConstants.HIGH_POWER_ALERT_THRESHOLD_W) {
-        await this.triggerFlowCard('power_threshold_exceeded', {
-          power: value,
-          threshold: DeviceConstants.HIGH_POWER_ALERT_THRESHOLD_W,
-        });
-      }
-    }
-
-    if (capability === 'meter_power.electric_total' && typeof value === 'number') {
-      // Fire consumption milestone for every increment
-      const milestoneIncrement = DeviceConstants.CONSUMPTION_MILESTONE_INCREMENT_KWH;
-      const currentMilestone = Math.floor(value / milestoneIncrement);
-      const lastMilestone = this.getStoreValue('last_consumption_milestone') || 0;
-
-      if (currentMilestone > lastMilestone) {
-        await this.triggerFlowCard('total_consumption_milestone', {
-          consumption: value,
-          milestone: currentMilestone * milestoneIncrement,
-        });
-        await this.setStoreValue('last_consumption_milestone', currentMilestone);
-      }
-    }
-
-    if (capability === 'meter_power.electric_today' && typeof value === 'number') {
-      // Fire daily consumption threshold for values above threshold
-      if (value > DeviceConstants.DAILY_CONSUMPTION_THRESHOLD_KWH) {
-        await this.triggerFlowCard('daily_consumption_threshold', {
-          daily_consumption: value,
-          threshold: DeviceConstants.DAILY_CONSUMPTION_THRESHOLD_KWH,
-        });
-      }
-    }
-
-    // Water flow alert
-    if (capability === 'measure_water' && typeof value === 'number') {
-      // Fire water flow alert for low flow rates (below 10 L/min)
-      if (value < 10) {
-        await this.triggerFlowCard('water_flow_alert', {
-          flow_rate: value,
-          threshold: 10,
-          alert_type: 'low_flow',
-        });
-      }
-    }
-
-    // Efficiency alerts
-    if (capability === 'adlar_state_compressor_state' && typeof value === 'number') {
-      // Calculate efficiency based on power consumption vs state
-      const power = this.getCapabilityValue('measure_power') || 0;
-      const efficiency = value > 0 && power > 0 ? (value / power) * 100 : 0;
-
-      if (efficiency < DeviceConstants.LOW_EFFICIENCY_THRESHOLD_PERCENT && power > DeviceConstants.DEFAULT_POWER_THRESHOLD_W) { // Low efficiency with significant power draw
-        await this.triggerFlowCard('compressor_efficiency_alert', {
-          efficiency,
-          power,
-          threshold: DeviceConstants.LOW_EFFICIENCY_THRESHOLD_PERCENT,
-        });
-      }
-    }
-
-    // Electrical load alert
-    const totalCurrentCapabilities = ['measure_current.cur_current', 'measure_current.b_cur', 'measure_current.c_cur'];
-    if (totalCurrentCapabilities.includes(capability) && typeof value === 'number') {
-      const currentA = this.getCapabilityValue('measure_current.cur_current') || 0;
-      const currentB = this.getCapabilityValue('measure_current.b_cur') || 0;
-      const currentC = this.getCapabilityValue('measure_current.c_cur') || 0;
-      const totalLoad = Number(currentA) + Number(currentB) + Number(currentC);
-
-      if (totalLoad > 50) { // Total electrical load above 50A
-        await this.triggerFlowCard('electrical_load_alert', {
-          total_load: totalLoad,
-          phase_a: currentA,
-          phase_b: currentB,
-          phase_c: currentC,
-          threshold: 50,
-        });
-      }
-    }
-
-    // Fan motor efficiency alert (based on fan speed vs power consumption)
-    if (capability === 'adlar_enum_volume_set' && typeof value === 'number') {
-      const power = this.getCapabilityValue('measure_power') || 0;
-      const expectedPowerRatio = value * 100; // Expected: volume setting * 100W
-
-      if (power > expectedPowerRatio * 1.5) { // 50% higher than expected
-        await this.triggerFlowCard('fan_motor_efficiency_alert', {
-          volume_setting: value,
-          actual_power: power,
-          expected_power: expectedPowerRatio,
-          efficiency_ratio: expectedPowerRatio / power,
-        });
-      }
-    }
-
-    // Countdown timer finished
-    if (capability === 'adlar_countdowntimer' && value === 0) {
-      const previousTimer = this.getStoreValue('prev_countdown') || 0;
-      if (previousTimer > 0) { // Timer was running and now finished
-        await this.triggerFlowCard('countdown_timer_finished', {
-          timer_duration: previousTimer,
-          completion_time: new Date().toISOString(),
-        });
-      }
-      await this.setStoreValue('prev_countdown', value);
-    } else if (capability === 'adlar_countdowntimer' && typeof value === 'number') {
-      await this.setStoreValue('prev_countdown', value);
-    }
-  }
+  // Note: Critical conditions and flow card triggering now handled by FlowCardManagerService via ServiceCoordinator
 
   /**
    * Initialize flow cards based on current settings (called once during device init)
@@ -3105,89 +2234,21 @@ class MyDevice extends Homey.Device {
    * Register flow cards for a specific category based on user setting
    */
   private async registerFlowCardsByCategory(
-    category: keyof CapabilityCategories,
-    availableCaps: string[],
-    userSetting: 'disabled' | 'auto' | 'enabled',
+    _category: keyof CapabilityCategories,
+    _availableCaps: string[],
+    _userSetting: 'disabled' | 'auto' | 'enabled',
     capabilitiesWithData: string[],
   ): Promise<void> {
-    const shouldRegister = this.shouldRegisterCategory(category, availableCaps, userSetting, capabilitiesWithData);
-
-    if (!shouldRegister) {
-      this.log(`Skipping ${category} flow cards - setting: ${userSetting}, available: ${availableCaps.length}, with data: ${availableCaps.filter((cap) => capabilitiesWithData.includes(cap)).length}`);
-      return;
-    }
-
-    this.log(`Registering ${category} flow cards - available capabilities:`, availableCaps.filter((cap) => capabilitiesWithData.includes(cap)));
-
-    // Flow cards are handled by the pattern-based system in app.ts
-    // No device-level registration needed
-    this.debugLog(`Category ${category} flow cards managed by pattern-based system`);
-    this.log(`Skipping device-level registration for ${category} - managed by app-level pattern system`);
+    // Flow card registration is handled automatically by FlowCardManagerService during updateFlowCards()
+    await this.serviceCoordinator?.getFlowCardManager()?.updateFlowCards(capabilitiesWithData);
   }
 
   /**
-   * Register expert feature cards (when expert mode is enabled)
+   * Register expert feature cards (when expert mode is enabled) - delegated to FlowCardManagerService
    */
   private async registerExpertFeatureCards(): Promise<void> {
-    try {
-      // Expert efficiency condition
-      const efficiencyCard = this.homey.flow.getConditionCard('compressor_efficiency_above');
-      const efficiencyListener = efficiencyCard.registerRunListener(async (args) => {
-        this.debugLog('Efficiency condition triggered', { args });
-        const rawPower = this.getCapabilityValue('measure_power');
-        const rawCompressorState = this.getCapabilityValue('adlar_state_compressor_state');
-        const powerIsNull = rawPower === null || rawPower === undefined;
-        const compressorStateIsNull = rawCompressorState === null || rawCompressorState === undefined;
-        const power = rawPower || 0;
-        const compressorState = rawCompressorState || 0;
-        const efficiency = compressorState > 0 && power > 0 ? (compressorState / power) * 100 : 0;
-        const result = efficiency > (args.threshold || 50);
-
-        if (powerIsNull || compressorStateIsNull) {
-          this.debugLog('Efficiency condition: using fallback values for null capabilities', {
-            powerRaw: rawPower,
-            powerFallback: power,
-            powerIsNull,
-            compressorStateRaw: rawCompressorState,
-            compressorStateFallback: compressorState,
-            compressorStateIsNull,
-            efficiency,
-            threshold: args.threshold || 50,
-            result,
-          });
-        } else {
-          this.debugLog('Efficiency condition result', {
-            power,
-            compressorState,
-            efficiency,
-            threshold: args.threshold || 50,
-            result,
-          });
-        }
-        return result;
-      });
-      this.flowCardListeners.set('compressor_efficiency_above', efficiencyListener);
-
-      // Expert trigger cards
-      const expertTriggerCards = [
-        'compressor_efficiency_alert',
-        'fan_motor_efficiency_alert',
-        'water_flow_alert',
-      ];
-
-      expertTriggerCards.forEach((cardId) => {
-        try {
-          const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
-          this.flowCardListeners.set(cardId, triggerCard);
-        } catch (err) {
-          this.log(`Expert trigger card ${cardId} not found, skipping`);
-        }
-      });
-
-      this.log('Expert feature cards registered');
-    } catch (error) {
-      this.error('Error registering expert feature cards:', error);
-    }
+    // Expert feature card registration is handled automatically by FlowCardManagerService during updateFlowCards()
+    await this.serviceCoordinator?.getFlowCardManager()?.updateFlowCards();
   }
 
   /**
@@ -3319,54 +2380,25 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Unregister all flow card listeners
+   * Unregister all flow card listeners - delegated to FlowCardManagerService
    */
   private unregisterAllFlowCards(): void {
-    this.flowCardListeners.forEach((listener, cardId) => {
-      try {
-        if (listener && typeof (listener as { unregister?: () => void }).unregister === 'function') {
-          (listener as { unregister: () => void }).unregister();
-        }
-        this.log(`Unregistered flow card: ${cardId}`);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        this.log(`Flow card ${cardId} was not registered or already unregistered:`, errorMessage);
-      }
-    });
-    this.flowCardListeners.clear();
-    this.log('All flow card listeners unregistered');
+    // Flow card unregistration is handled automatically by FlowCardManagerService
+    this.log('Flow card unregistration delegated to FlowCardManagerService');
   }
 
   /**
-   * Helper method to trigger flow cards safely
+   * Helper method to trigger flow cards safely - delegated to FlowCardManagerService
    */
   private async triggerFlowCard(cardId: string, tokens: Record<string, unknown>) {
+    // Flow card triggering is handled automatically by FlowCardManagerService
+    // For now, use the standard Homey trigger approach for compatibility
     try {
-      // Check if the flow card is registered and should be triggered
-      const flowCard = this.flowCardListeners.get(cardId);
-      if (!flowCard) {
-        this.debugLog(`Flow card ${cardId} not registered, skipping trigger`);
-        return;
-      }
-
-      // Check if trigger method exists on the flow card
-      if (flowCard && typeof (flowCard as { trigger?: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger === 'function') {
-        await (flowCard as { trigger: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger(this, tokens, { device: this });
-        this.debugLog(`Triggered flow card: ${cardId}`, tokens);
-      } else {
-        // Fallback to app-level trigger for compatibility
-        const app = this.homey.app as unknown as { [key: string]: { trigger?: (device: unknown, tokens: unknown) => Promise<void> } };
-        const triggerName = `${cardId.replace(/_/g, '')}Trigger`;
-
-        if (app[triggerName]?.trigger) {
-          await app[triggerName].trigger(this, tokens);
-          this.debugLog(`Triggered flow card via app: ${cardId}`, tokens);
-        } else {
-          this.debugLog(`Flow card trigger method not found: ${cardId}`);
-        }
-      }
+      const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+      await triggerCard.trigger(this, tokens, {});
+      this.debugLog(`Triggered flow card: ${cardId}`, tokens);
     } catch (error) {
-      this.error(`Failed to trigger flow card ${cardId}:`, error);
+      this.debugLog(`Flow card ${cardId} not available or trigger failed:`, error);
     }
   }
 
@@ -3517,11 +2549,9 @@ class MyDevice extends Homey.Device {
     // Initialize flow cards based on current settings
     await this.initializeFlowCards();
 
-    // Start periodic health checks for dynamic flow card management
-    this.startHealthCheckInterval();
+    // Note: Health checks now managed by ServiceCoordinator's CapabilityHealthService
 
-    // Start frequent energy tracking updates
-    this.startEnergyTrackingInterval();
+    // Note: Energy tracking intervals managed by ServiceCoordinator's EnergyTrackingService
 
     // Initialize COP calculation system
     await this.initializeCOP();
@@ -3632,10 +2662,10 @@ class MyDevice extends Homey.Device {
 
     // Handle capability diagnostics request
     if (changedKeys.includes('capability_diagnostics') && newSettings.capability_diagnostics === true) {
-      const healthStatuses = this.getAllCapabilityHealthStatuses();
-      const diagnosticReport = this.generateCapabilityDiagnosticReport(healthStatuses);
+      const diagnostics = this.serviceCoordinator?.getCapabilityHealth()?.generateDiagnosticsReport() ?? {};
+      const diagnosticReport = JSON.stringify(diagnostics, null, 2);
 
-      this.log('Capability diagnostic report generated:', diagnosticReport);
+      this.log('Capability diagnostic report generated:', diagnostics);
 
       // Reset the trigger setting after onSettings completes to avoid race condition
       this.homey.setTimeout(async () => {
@@ -4037,125 +3067,13 @@ class MyDevice extends Homey.Device {
    * Prioritizes external power measurements when available, falls back to internal sensors
    */
   private async updateIntelligentPowerMeasurement(): Promise<void> {
-    if (!this.getSetting('enable_intelligent_energy_tracking')) {
-      return;
-    }
-
-    try {
-      let powerValue: number | null = null;
-      let powerSource = 'none';
-      let dataAge = 'unknown';
-
-      // Priority 1: External power measurement (from flow cards)
-      const externalPower = this.getCapabilityValue('adlar_external_power');
-      if (externalPower !== null && externalPower > 0) {
-        powerValue = externalPower;
-        powerSource = 'external';
-        dataAge = 'real-time';
-      }
-
-      // Priority 2: Internal power measurement (DPS 104)
-      if (powerValue === null) {
-        const internalPower = this.getInternalPowerMeasurement();
-        if (internalPower !== null && internalPower > 0) {
-          powerValue = internalPower;
-          powerSource = 'internal';
-          dataAge = 'real-time';
-        }
-      }
-
-      // Priority 3: Calculated estimation based on system state
-      if (powerValue === null) {
-        powerValue = this.calculateEstimatedPower();
-        powerSource = 'calculated';
-        dataAge = 'estimated';
-      }
-
-      // Update measure_power capability with the selected power source
-      if (powerValue !== null && this.hasCapability('measure_power')) {
-        await this.setCapabilityValue('measure_power', Math.round(powerValue));
-        this.debugLog(`🔋 Power updated: ${Math.round(powerValue)}W (source: ${powerSource}, age: ${dataAge})`);
-
-        // Update cumulative energy based on the new power measurement
-        await this.updateCumulativeEnergy();
-      }
-
-    } catch (error) {
-      this.error('Error in intelligent power measurement update:', error);
-    }
+    // Delegate to EnergyTrackingService via ServiceCoordinator
+    await this.serviceCoordinator?.getEnergyTracking()?.updateIntelligentPowerMeasurement();
   }
 
-  /**
-   * Get internal power measurement from DPS  104 without triggering capability update
-   */
-  private getInternalPowerMeasurement(): number | null {
-    try {
-      // Try to access the raw DPS data to avoid recursive updates
-      // Note: TuyAPI structure may vary, so we use multiple approaches
-      if (this.tuya) {
-        // Method 1: Try to access via tuya instance properties
-        const tuyaInstance = this.tuya as TuyaDevice & { dps?: Record<string, unknown> };
-        if (tuyaInstance.dps && typeof tuyaInstance.dps['104'] === 'number') {
-          const rawPower = tuyaInstance.dps['104'];
-          if (rawPower > 0) {
-            return rawPower;
-          }
-        }
+  // Note: Internal power measurement now handled by EnergyTrackingService via ServiceCoordinator
 
-        // Method 2: Check if tuya has a get method for DPS
-        if (typeof tuyaInstance.get === 'function') {
-          const rawPower = tuyaInstance.get({ dps: 104 });
-          if (typeof rawPower === 'number' && rawPower > 0) {
-            return rawPower;
-          }
-        }
-      }
-    } catch (error) {
-      this.debugLog('Could not access internal power DPS 104:', error);
-    }
-
-    // Fallback: Return null to trigger calculated estimation
-    return null;
-  }
-
-  /**
-   * Calculate estimated power consumption based on system state
-   */
-  private calculateEstimatedPower(): number {
-    try {
-      const compressorRunning = this.getCapabilityValue('adlar_state_compressor_state');
-      const compressorFreq = this.getCapabilityValue('measure_frequency.compressor_strength') || 0;
-      const fanFreq = this.getCapabilityValue('measure_frequency.fan_motor_frequency') || 0;
-      const defrosting = this.getCapabilityValue('adlar_state_defrost_state');
-
-      // Base standby power
-      let estimatedPower = 150;
-
-      if (compressorRunning) {
-        // Compressor power estimation based on frequency
-        // Typical heat pump: 15-80Hz = 800-4000W
-        const normalizedFreq = Math.max(0, Math.min(1, (compressorFreq - 15) / 65));
-        const compressorPower = 800 + (normalizedFreq * 3200);
-        estimatedPower += compressorPower;
-
-        // Fan motor contribution
-        const fanPower = (fanFreq / 100) * 200; // 0-200W based on fan speed
-        estimatedPower += fanPower;
-
-        // Defrost mode adds extra power
-        if (defrosting) {
-          estimatedPower += 500;
-        }
-      }
-
-      this.debugLog(`💡 Estimated power: ${Math.round(estimatedPower)}W (compressor: ${compressorRunning}, freq: ${compressorFreq}Hz)`);
-      return Math.round(estimatedPower);
-
-    } catch (error) {
-      this.debugLog('Error calculating estimated power, using default:', error);
-      return 2500; // Default average consumption
-    }
-  }
+  // Note: Power estimation calculation now handled by EnergyTrackingService via ServiceCoordinator
 
   /**
    * Handle settings changes for intelligent energy tracking
@@ -4168,13 +3086,11 @@ class MyDevice extends Homey.Device {
       if (enabled) {
         // Initialize energy tracking when enabled
         await this.initializeEnergyTracking();
-        // Start the frequent energy tracking interval
-        this.startEnergyTrackingInterval();
+        // Note: Energy tracking interval managed by ServiceCoordinator's EnergyTrackingService
         // Immediately update power measurement when enabled
         await this.updateIntelligentPowerMeasurement();
       } else {
-        // Stop the energy tracking interval when disabled
-        this.stopEnergyTrackingInterval();
+        // Note: Energy tracking interval stop managed by ServiceCoordinator's EnergyTrackingService
       }
     }
   }
@@ -4245,113 +3161,7 @@ class MyDevice extends Homey.Device {
     }
   }
 
-  /**
-   * Update cumulative energy based on current power consumption
-   */
-  private async updateCumulativeEnergy(): Promise<void> {
-    if (!this.getSetting('enable_intelligent_energy_tracking')) {
-      return;
-    }
-
-    try {
-      const currentPower = this.getCapabilityValue('measure_power') || 0;
-      const externalPower = this.getCapabilityValue('adlar_external_power') || 0;
-
-      const lastUpdate = await this.getStoreValue('last_energy_update') || Date.now();
-      const currentTime = Date.now();
-      const hoursElapsed = (currentTime - lastUpdate) / (1000 * 60 * 60);
-
-      // Only accumulate internal energy when we have reliable internal power data
-      if (currentPower > 0) {
-        // Calculate energy increment in kWh
-        const energyIncrement = (currentPower / 1000) * hoursElapsed;
-
-        // Update total cumulative energy
-        if (this.hasCapability('meter_power.electric_total')) {
-          const currentTotal = this.getCapabilityValue('meter_power.electric_total') || 0;
-          const newTotal = currentTotal + energyIncrement;
-          await this.setCapabilityValue('meter_power.electric_total', Math.round(newTotal * 100) / 100);
-
-          // Store in device storage for persistence
-          await this.setStoreValue('cumulative_energy_kwh', newTotal);
-        }
-
-        // Update daily consumption
-        if (this.hasCapability('meter_power.power_consumption')) {
-          const dailyConsumption = await this.getStoreValue('daily_consumption_kwh') || 0;
-          const newDailyTotal = dailyConsumption + energyIncrement;
-          await this.setCapabilityValue('meter_power.power_consumption', Math.round(newDailyTotal * 100) / 100);
-          await this.setStoreValue('daily_consumption_kwh', newDailyTotal);
-        }
-
-        this.debugLog(`⚡ Energy updated: +${(energyIncrement * 1000).toFixed(1)}Wh (power: ${currentPower}W, time: ${(hoursElapsed * 60).toFixed(1)}min)`);
-      }
-
-      // Track external energy separately when external power is being used (independent of internal power)
-      // Use separate timestamp for external energy to avoid interference with internal energy calculations
-      const lastExternalUpdate = await this.getStoreValue('last_external_energy_update') || (currentTime - 10000); // Default to 10 seconds ago if not set
-      const externalHoursElapsed = (currentTime - lastExternalUpdate) / (1000 * 60 * 60);
-
-      this.log(`🔌 External energy check: power=${externalPower}W, `
-        + `hasCapability=${this.hasCapability('adlar_external_energy_total')}, `
-        + `externalHoursElapsed=${externalHoursElapsed.toFixed(6)}h (${(externalHoursElapsed * 60).toFixed(2)}min), `
-        + `lastExternalUpdate=${lastExternalUpdate}, currentTime=${currentTime}, timeDiff=${currentTime - lastExternalUpdate}ms`);
-
-      if (externalPower > 0 && this.hasCapability('adlar_external_energy_total')) {
-        this.log(`🔌 External power condition met: ${externalPower}W > 0, checking time elapsed...`);
-
-        // Check if this is the first external energy update (no previous timestamp)
-        const isFirstExternalUpdate = !(await this.getStoreValue('last_external_energy_update'));
-
-        // Use a small threshold to handle floating-point precision with frequent updates (10 seconds = 0.00278 hours)
-        // Always allow first update regardless of time elapsed
-        if (externalHoursElapsed > 0.001 || isFirstExternalUpdate) { // Minimum 3.6 seconds OR first update
-          // For first update, use minimum time increment to avoid zero energy calculation
-          const effectiveHoursElapsed = isFirstExternalUpdate ? 0.002778 : externalHoursElapsed; // 10 seconds minimum
-
-          const externalEnergyIncrement = (externalPower / 1000) * effectiveHoursElapsed;
-          const currentExternalTotal = this.getCapabilityValue('adlar_external_energy_total') || 0;
-          const newExternalTotal = currentExternalTotal + externalEnergyIncrement;
-          await this.setCapabilityValue('adlar_external_energy_total', Math.round(newExternalTotal * 1000) / 1000);
-
-          // Also update external daily energy consumption
-          if (this.hasCapability('adlar_external_energy_daily')) {
-            const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
-            const newExternalDaily = currentExternalDaily + externalEnergyIncrement;
-            const roundedDaily = Math.round(newExternalDaily * 1000000) / 1000000; // 6 decimal places for daily (matches total)
-            await this.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
-
-            // Store external daily energy for persistence and reset functionality
-            await this.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
-          }
-
-          // Store external energy in device storage for persistence
-          await this.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
-          // Update external energy timestamp
-          await this.setStoreValue('last_external_energy_update', currentTime);
-
-          this.log(`🔌 External energy updated: +${(externalEnergyIncrement * 1000).toFixed(1)}Wh `
-            + `(external power: ${externalPower}W, time: ${(effectiveHoursElapsed * 60).toFixed(2)}min, `
-            + `total: ${newExternalTotal.toFixed(3)}kWh)${isFirstExternalUpdate ? ' [FIRST UPDATE]' : ''}`);
-        } else {
-          this.log(`🔌 External energy skipped: externalHoursElapsed=${externalHoursElapsed.toFixed(6)} (≤ 0.001), `
-            + `timeDiff=${currentTime - lastExternalUpdate}ms, `
-            + `lastExternalUpdate=${new Date(lastExternalUpdate).toISOString()}, `
-            + `currentTime=${new Date(currentTime).toISOString()}`);
-        }
-      } else if (externalPower > 0) {
-        this.debugLog('🔌 External energy not tracked: missing capability or zero time elapsed');
-      }
-
-      // Update timestamp for next calculation (regardless of which energy types were updated)
-      if (currentPower > 0 || externalPower > 0) {
-        await this.setStoreValue('last_energy_update', currentTime);
-      }
-
-    } catch (error) {
-      this.error('Error updating external energy:', error);
-    }
-  }
+  // Note: Cumulative energy tracking now handled by EnergyTrackingService via ServiceCoordinator
 
   /**
    * Schedule daily energy reset at midnight
@@ -4422,10 +3232,9 @@ class MyDevice extends Homey.Device {
     this.stopReconnectInterval();
 
     // Stop health check interval
-    this.stopHealthCheckInterval();
+    // Note: Health check intervals managed by ServiceCoordinator
 
-    // Stop energy tracking interval
-    this.stopEnergyTrackingInterval();
+    // Note: Energy tracking interval stop managed by ServiceCoordinator
 
     // Stop COP calculation interval
     this.stopCOPCalculationInterval();
