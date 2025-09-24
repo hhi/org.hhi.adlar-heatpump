@@ -9,6 +9,7 @@ import { EnergyTrackingService } from './energy-tracking-service';
 import { TuyaConnectionService, TuyaDeviceConfig } from './tuya-connection-service';
 import { FlowCardManagerService } from './flow-card-manager-service';
 import { CategorizedError } from '../error-types';
+import { AdlarMapping } from '../definitions/adlar-mapping';
 
 export interface ServiceCoordinatorOptions {
   device: Homey.Device;
@@ -371,14 +372,11 @@ export class ServiceCoordinator {
   }
 
   /**
-   * Utility to map DPS id to capability id. NOTE: currently a stub in this file;
-   * real mapping should use AdlarMapping/definitions.
+   * Utility to map DPS id to capability id using AdlarMapping.
    */
   private mapDpsToCapability(dpsId: number): string | null {
-    // This would contain the full DPS to capability mapping
-    // For now, returning null to avoid import dependencies
-    // In practice, this would use the AdlarMapping class
-    return null;
+    const { allArraysSwapped } = AdlarMapping;
+    return allArraysSwapped[dpsId] || null;
   }
 
   /**
