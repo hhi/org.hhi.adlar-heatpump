@@ -1,8 +1,8 @@
 {
   "id": "adlar_cop",
   "title": {
-    "en": "Coefficient of Performance",
-    "nl": "Prestatiecoëfficiënt"
+    "en": "Instant Coefficient of Performance",
+    "nl": "Momentopname Prestatiecoëfficiënt"
   },
   "type": "number",
   "units": {

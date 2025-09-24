@@ -312,6 +312,11 @@ Each capability maps to specific Tuya DPS numbers and includes multilingual supp
 
 ### handling of global app.json
 
-- for actualizing @.homeychangelog.json document, always refer to @.homeycompose/app.json instead of @app.json
-- only suggest solution according official documentation
-- ignore /app.json to be part of your context (in order to preserve tokens) unless explicitly asked or required
+**Context Token Optimization**: The auto-generated `app.json` file (199KB) should be handled by specialized agents to reduce context overhead:
+
+- **For app.json analysis**: Use the `homey-automation-tutor` agent which has full tool access and Homey expertise
+- **For changelog updates**: Always refer to `.homeycompose/app.json` instead of `app.json`
+- **For general development**: Focus on editable source files in `.homeycompose/` directory
+- **When app.json access needed**: Delegate to `homey-automation-tutor` agent rather than including in main context
+
+**Rationale**: `app.json` is auto-generated from `.homeycompose/` files, creating 200KB+ of redundant context. Agent delegation provides access when needed while keeping general context lean.
