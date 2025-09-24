@@ -1670,16 +1670,18 @@ class MyDevice extends Homey.Device {
         this.log('External ambient capability initialized with default value (null°C)');
       }
 
-      // Initialize external energy total capability with default value
+      // Initialize external energy total capability with storage-aware restoration
       if (this.hasCapability('adlar_external_energy_total')) {
-        await this.setCapabilityValue('adlar_external_energy_total', 0);
-        this.log('External energy total capability initialized with default value (0 kWh)');
+        const storedExternalTotal = await this.getStoreValue('external_cumulative_energy_kwh') || 0;
+        await this.setCapabilityValue('adlar_external_energy_total', storedExternalTotal);
+        this.log(`External energy total capability initialized: ${storedExternalTotal} kWh ${storedExternalTotal > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
 
-      // Initialize external energy daily capability with default value
+      // Initialize external energy daily capability with storage-aware restoration
       if (this.hasCapability('adlar_external_energy_daily')) {
-        await this.setCapabilityValue('adlar_external_energy_daily', 0);
-        this.log('External energy daily capability initialized with default value (0 kWh)');
+        const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
+        await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
+        this.log(`External energy daily capability initialized: ${storedExternalDaily} kWh ${storedExternalDaily > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -3529,9 +3531,6 @@ class MyDevice extends Homey.Device {
 
     // Force refresh trend capability to ensure proper translation
     await this.forceRefreshTrendCapability();
-
-    // Set up Tuya device event handlers
-    this.setupTuyaEventHandlers();
 
     // Initialize intelligent energy tracking if enabled
     if (this.getSetting('enable_intelligent_energy_tracking')) {
