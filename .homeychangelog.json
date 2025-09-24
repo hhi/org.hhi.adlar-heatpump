@@ -1,5 +1,5 @@
 {
-  "0.99.22": {
+  "0.99.23": {
     "en": "Separation of Concerns: Device code refactoring, derive services from monolithic structure."
   },
   
