@@ -125,6 +125,31 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Initialize direct Tuya device for fallback purposes
+   */
+  private async initializeFallbackTuyaDevice(): Promise<void> {
+    if (this.tuya) return; // Already initialized
+
+    const id = (this.getStoreValue('device_id') || '').toString().trim();
+    const key = (this.getStoreValue('local_key') || '').toString().trim();
+    const ip = (this.getStoreValue('ip_address') || '').toString().trim();
+    const version = '3.3';
+
+    if (!id || !key) {
+      throw new Error('Tuya credentials missing for fallback initialization');
+    }
+
+    this.tuya = new TuyaDevice({
+      id,
+      key,
+      ip,
+      version,
+    });
+
+    this.debugLog('Initialized fallback TuyaDevice for direct communication');
+  }
+
+  /**
    * Send a command to Tuya device via ServiceCoordinator or direct fallback
    * @param dp - Tuya data point number
    * @param value - Value to send
@@ -145,10 +170,11 @@ class MyDevice extends Homey.Device {
     }
 
     // Fallback to direct Tuya command
+    await this.initializeFallbackTuyaDevice();
     await this.connectTuya();
 
     if (!this.tuya) {
-      throw new Error('Tuya device is not initialized');
+      throw new Error('Tuya device is not initialized for fallback');
     }
 
     await this.tuya.set({ dps: dp, set: value });
@@ -225,6 +251,9 @@ class MyDevice extends Homey.Device {
     // Fallback to original direct connection method
     if (!this.tuyaConnected) {
       try {
+        // Initialize fallback Tuya device if not already done
+        await this.initializeFallbackTuyaDevice();
+
         // Discover the device on the network first
         if (this.tuya) {
           await this.tuya.find();
@@ -233,7 +262,7 @@ class MyDevice extends Homey.Device {
           this.tuyaConnected = true;
           this.debugLog('Connected to Tuya device (direct fallback)');
         } else {
-          throw new Error('Tuya device is not initialized');
+          throw new Error('Tuya device fallback initialization failed');
         }
       } catch (err) {
         const categorizedError = this.handleTuyaError(err as Error, 'Tuya device connection');
@@ -3456,24 +3485,6 @@ class MyDevice extends Homey.Device {
       this.error('Tuya credentials missing: device_id or local_key not set.');
       await this.setUnavailable('Missing Tuya credentials');
       return;
-    }
-
-    // Initialize TuyaDevice
-    this.tuya = new TuyaDevice({
-      id,
-      key,
-      ip,
-      version,
-    });
-
-    // Attempt initial connection (non-blocking to allow device initialization)
-    try {
-      await this.connectTuya();
-      this.log('Initial Tuya connection established during startup');
-    } catch (error) {
-      this.error('Initial Tuya connection failed during startup, will retry via reconnection interval:', error);
-      // Don't throw - allow device initialization to continue
-      // The reconnection interval will handle establishing connection
     }
 
     // Initialize Service Coordinator with Tuya configuration
