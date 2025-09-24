@@ -53,7 +53,7 @@ You'll need these credentials from your heat pump setup:
 
 1. **Download the App**
    - Go to the [GitHub Releases page](https://github.com/hhi/org.hhi.adlar-heatpump/releases)
-   - Download the **ZIP file** from the latest release **v0.92.4**
+   - Download the **ZIP file** from the latest release
 
 2. **Extract the ZIP file**
    - Extract to an easily accessible location (e.g., Desktop or Downloads folder)
