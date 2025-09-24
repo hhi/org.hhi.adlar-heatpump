@@ -1,4 +1,7 @@
 {
+  "0.99.32": {
+    "en": "Added TypeScript as dev dependency to ensure consistent development environment and improved code quality with explicit TypeScript tooling."
+  },
   "0.99.31": {
     "en": "Critical fix for DPS sensor updates: Restored missing updateCapabilitiesFromDps method that was accidentally removed during service architecture refactoring, ensuring all Tuya device sensors now update properly."
   },
