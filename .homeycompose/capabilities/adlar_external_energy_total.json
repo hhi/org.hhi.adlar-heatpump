@@ -1,8 +1,8 @@
 {
   "id": "adlar_external_energy_total",
   "title": {
-    "en": "Calculated Total Energy Consumption",
-    "nl": "Berekend Totaal Energieverbruik"
+    "en": "Estimated Total Energy Consumption",
+    "nl": "Geschat Totaal Energieverbruik"
   },
   "type": "number",
   "units": {
@@ -23,7 +23,7 @@
   },
   "icon": "/assets/external-energy-total.svg",
   "description": {
-    "en": "Total energy consumption calculated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
-    "nl": "Totaal energieverbruik berekend uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
+    "en": "Total energy consumption estimated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
+    "nl": "Totaal energieverbruik geschat uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
   }
 }

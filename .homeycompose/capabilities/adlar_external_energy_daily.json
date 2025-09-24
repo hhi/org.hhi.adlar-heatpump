@@ -1,8 +1,8 @@
 {
   "id": "adlar_external_energy_daily",
   "title": {
-    "en": "Daily Berekend Energy Consumption",
-    "nl": "Dagelijks Berekend Energieverbruik"
+    "en": "Daily Estimated Energy Consumption",
+    "nl": "Dagelijks Geschat Energieverbruik"
   },
   "type": "number",
   "units": {
@@ -23,7 +23,7 @@
   },
   "icon": "/assets/external-energy-daily.svg",
   "description": {
-    "en": "Daily energy consumption calculated from external power measurements received via flow cards. Resets automatically at midnight for accurate daily tracking.",
-    "nl": "Dagelijks energieverbruik berekend uit externe vermogensmetingen ontvangen via flow kaarten. Reset automatisch om middernacht voor nauwkeurige dagelijkse tracking."
+    "en": "Daily energy consumption estimated from external power measurements received via flow cards. Resets automatically at midnight for accurate daily tracking.",
+    "nl": "Dagelijks energieverbruik geschat uit externe vermogensmetingen ontvangen via flow kaarten. Reset automatisch om middernacht voor nauwkeurige dagelijkse tracking."
   }
 }

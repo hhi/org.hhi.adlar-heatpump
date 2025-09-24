@@ -2,15 +2,15 @@
   "id": "backwater_state_changed",
   "title": {
     "en": "Backwater state changed",
-    "nl": "Terugstroming status gewijzigd"
+    "nl": "Water Terugstroming status gewijzigd"
   },
   "titleFormatted": {
     "en": "Backwater turned [[state]]",
-    "nl": "Terugstroming [[state]]"
+    "nl": "Water Terugstroming [[state]]"
   },
   "hint": {
     "en": "Triggers when backwater system changes state",
-    "nl": "Wordt geactiveerd wanneer terugstroming systeem van status wijzigt"
+    "nl": "Wordt geactiveerd wanneer water terugstroming systeem van status wijzigt"
   },
   "args": [
     {
@@ -49,7 +49,7 @@
       "name": "current_state",
       "title": {
         "en": "Current Backwater state",
-        "nl": "Huidige Terugstroming status"
+        "nl": "Huidige Water Terugstroming status"
       },
       "example": "flowing"
     }

@@ -53,7 +53,7 @@ Je hebt deze gegevens nodig van je warmtepomp setup:
 
 1. **Download de App**
    - Ga naar de [GitHub Releases pagina](https://github.com/hhi/org.hhi.adlar-heatpump/releases)
-   - Download het **ZIP bestand** van de laatste release **v0.92.4**
+   - Download het **ZIP bestand** van de laatste release
 
 2. **Pak het ZIP bestand uit**
    - Pak uit naar een gemakkelijk toegankelijke locatie (bijv. Bureaublad of Downloads map)
