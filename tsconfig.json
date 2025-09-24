@@ -4,9 +4,11 @@
     "outDir": ".homeybuild/",
     "sourceMap": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
   "exclude": [
-    "*.bak"
+    "*.bak", "node_modules", "dist", "build"
   ]
 }

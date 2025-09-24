@@ -1756,7 +1756,7 @@ class MyDevice extends Homey.Device {
       this.log('✅ Energy accumulation timestamp reset - next measurement will use default interval');
 
       // Reset the setting back to false to prevent repeated triggers
-      setTimeout(() => {
+      this.homey.setTimeout(() => {
         this.setSettings({ reset_external_energy_total: false })
           .then(() => this.log('🔄 Reset setting cleared'))
           .catch((error) => this.error('Failed to clear reset setting:', error));
@@ -1790,7 +1790,7 @@ class MyDevice extends Homey.Device {
       this.log('✅ External energy daily reset to 0.000 kWh');
 
       // Reset the setting back to false to prevent repeated triggers
-      setTimeout(() => {
+      this.homey.setTimeout(() => {
         this.setSettings({ reset_external_energy_daily: false })
           .then(() => this.log('🔄 Daily reset setting cleared'))
           .catch((error) => this.error('Failed to clear daily reset setting:', error));
