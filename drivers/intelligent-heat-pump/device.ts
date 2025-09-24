@@ -9,6 +9,7 @@ import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-typ
 import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/services/cop-calculator';
 import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
+import { ServiceCoordinator } from '../../lib/services/service-coordinator';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -112,6 +113,9 @@ class MyDevice extends Homey.Device {
 
   // Debounce map for temperature critical alerts (per capability)
   private lastTempAlertAt: Map<string, number> = new Map();
+
+  // Service Coordinator - manages all device services
+  private serviceCoordinator: ServiceCoordinator | null = null;
 
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
@@ -3419,7 +3423,29 @@ class MyDevice extends Homey.Device {
       // The reconnection interval will handle establishing connection
     }
 
-    // Start reconnection interval
+    // Initialize Service Coordinator with Tuya configuration
+    this.serviceCoordinator = new ServiceCoordinator({
+      device: this,
+      logger: this.debugLog.bind(this),
+    });
+
+    // Initialize services via coordinator
+    const initResult = await this.serviceCoordinator.initialize({
+      id,
+      key,
+      ip,
+      version,
+    });
+
+    if (!initResult.success || initResult.failedServices.length > 0) {
+      this.error('Service initialization issues:', {
+        failedServices: initResult.failedServices,
+        errors: initResult.errors.map((e) => e.message),
+      });
+      // Continue with fallback to direct methods for failed services
+    }
+
+    // Start reconnection interval (will be managed by ServiceCoordinator in future)
     this.startReconnectInterval();
 
     // Initialize flow cards based on current settings
@@ -3480,6 +3506,16 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+
+    // Delegate settings changes to ServiceCoordinator first
+    if (this.serviceCoordinator) {
+      try {
+        await this.serviceCoordinator.onSettings(oldSettings, newSettings, changedKeys);
+      } catch (error) {
+        this.error('ServiceCoordinator settings handling failed:', error);
+        // Continue with fallback to direct method handling
+      }
+    }
 
     // Handle energy tracking settings changes first
     await this.handleEnergyTrackingSettings(changedKeys, newSettings);
@@ -4308,6 +4344,17 @@ class MyDevice extends Homey.Device {
   async onDeleted() {
     this.log('MyDevice has been deleted');
 
+    // Cleanup ServiceCoordinator and all managed services
+    if (this.serviceCoordinator) {
+      try {
+        this.serviceCoordinator.destroy();
+        this.serviceCoordinator = null;
+        this.log('ServiceCoordinator destroyed successfully');
+      } catch (error) {
+        this.error('Error destroying ServiceCoordinator:', error);
+      }
+    }
+
     // Stop reconnection interval
     this.stopReconnectInterval();
 
@@ -4350,6 +4397,47 @@ class MyDevice extends Homey.Device {
     // Reset connection state
     this.tuyaConnected = false;
     this.tuya = undefined;
+  }
+
+  /**
+   * ServiceCoordinator integration methods - expose service functionality
+   */
+
+  /**
+   * Get service health status from ServiceCoordinator
+   */
+  public getServiceHealth(): Record<string, boolean> | null {
+    return this.serviceCoordinator?.getServiceHealth() || null;
+  }
+
+  /**
+   * Get comprehensive service diagnostics
+   */
+  public getServiceDiagnostics(): Record<string, unknown> | null {
+    return this.serviceCoordinator?.getServiceDiagnostics() || null;
+  }
+
+  /**
+   * Force Tuya reconnection via ServiceCoordinator
+   */
+  public async forceServiceReconnection(): Promise<void> {
+    if (this.serviceCoordinator) {
+      await this.serviceCoordinator.forceReconnection();
+    } else {
+      throw new Error('ServiceCoordinator not initialized');
+    }
+  }
+
+  /**
+   * Receive external power data via ServiceCoordinator
+   */
+  public async receiveExternalPowerDataViaService(powerValue: number): Promise<void> {
+    if (this.serviceCoordinator) {
+      await this.serviceCoordinator.receiveExternalPowerData(powerValue);
+    } else if (this.hasCapability('adlar_external_power')) {
+      // Fallback to direct capability update
+      await this.setCapabilityValue('adlar_external_power', powerValue);
+    }
   }
 }
 
