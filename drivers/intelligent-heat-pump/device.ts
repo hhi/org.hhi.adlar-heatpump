@@ -9,6 +9,7 @@ import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-typ
 import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/services/cop-calculator';
 import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
+import { ServiceCoordinator } from '../../lib/services/service-coordinator';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -113,11 +114,71 @@ class MyDevice extends Homey.Device {
   // Debounce map for temperature critical alerts (per capability)
   private lastTempAlertAt: Map<string, number> = new Map();
 
+  // Service Coordinator - manages all device services
+  private serviceCoordinator: ServiceCoordinator | null = null;
+
   // Debug-conditional logging method
   private debugLog(...args: unknown[]) {
     if (process.env.DEBUG === '1') {
       this.log(...args);
     }
+  }
+
+  /**
+   * Initialize direct Tuya device for fallback purposes
+   */
+  private async initializeFallbackTuyaDevice(): Promise<void> {
+    if (this.tuya) return; // Already initialized
+
+    const id = (this.getStoreValue('device_id') || '').toString().trim();
+    const key = (this.getStoreValue('local_key') || '').toString().trim();
+    const ip = (this.getStoreValue('ip_address') || '').toString().trim();
+    const version = '3.3';
+
+    if (!id || !key) {
+      throw new Error('Tuya credentials missing for fallback initialization');
+    }
+
+    this.tuya = new TuyaDevice({
+      id,
+      key,
+      ip,
+      version,
+    });
+
+    this.debugLog('Initialized fallback TuyaDevice for direct communication');
+  }
+
+  /**
+   * Send a command to Tuya device via ServiceCoordinator or direct fallback
+   * @param dp - Tuya data point number
+   * @param value - Value to send
+   * @returns Promise that resolves when command is sent
+   */
+  private async sendTuyaCommand(dp: number, value: string | number | boolean): Promise<void> {
+    // Try to send via ServiceCoordinator's TuyaConnectionService
+    if (this.serviceCoordinator) {
+      try {
+        const tuyaService = this.serviceCoordinator.getTuyaConnection();
+        await tuyaService.sendCommand({ [dp]: value.toString() });
+        this.log(`Successfully sent to Tuya via ServiceCoordinator: dp ${dp} = ${value}`);
+        return;
+      } catch (err) {
+        this.error('ServiceCoordinator Tuya command failed, falling back to direct method:', err);
+        // Fall through to direct method
+      }
+    }
+
+    // Fallback to direct Tuya command
+    await this.initializeFallbackTuyaDevice();
+    await this.connectTuya();
+
+    if (!this.tuya) {
+      throw new Error('Tuya device is not initialized for fallback');
+    }
+
+    await this.tuya.set({ dps: dp, set: value });
+    this.log(`Successfully sent to Tuya (direct fallback): dp ${dp} = ${value}`);
   }
 
   /**
@@ -173,17 +234,35 @@ class MyDevice extends Homey.Device {
    * @throws Error if connection fails or device is not initialized
    */
   async connectTuya(): Promise<void> {
+    // Delegate to ServiceCoordinator's TuyaConnectionService if available
+    if (this.serviceCoordinator) {
+      try {
+        const tuyaService = this.serviceCoordinator.getTuyaConnection();
+        await tuyaService.connectTuya();
+        this.tuyaConnected = tuyaService.isDeviceConnected();
+        this.debugLog('Connected to Tuya device via ServiceCoordinator');
+        return;
+      } catch (err) {
+        this.error('ServiceCoordinator Tuya connection failed, falling back to direct method:', err);
+        // Fall through to original implementation
+      }
+    }
+
+    // Fallback to original direct connection method
     if (!this.tuyaConnected) {
       try {
+        // Initialize fallback Tuya device if not already done
+        await this.initializeFallbackTuyaDevice();
+
         // Discover the device on the network first
         if (this.tuya) {
           await this.tuya.find();
           // Then connect to the device
           await this.tuya.connect();
           this.tuyaConnected = true;
-          this.debugLog('Connected to Tuya device');
+          this.debugLog('Connected to Tuya device (direct fallback)');
         } else {
-          throw new Error('Tuya device is not initialized');
+          throw new Error('Tuya device fallback initialization failed');
         }
       } catch (err) {
         const categorizedError = this.handleTuyaError(err as Error, 'Tuya device connection');
@@ -202,6 +281,14 @@ class MyDevice extends Homey.Device {
   }
 
   private startReconnectInterval() {
+    // If ServiceCoordinator is available, it handles reconnection internally
+    if (this.serviceCoordinator) {
+      this.debugLog('Reconnection managed by ServiceCoordinator TuyaConnectionService');
+      return;
+    }
+
+    // Fallback to direct reconnection management
+    this.debugLog('Using direct reconnection fallback');
     // Clear any existing interval
     this.stopReconnectInterval();
 
@@ -341,6 +428,13 @@ class MyDevice extends Homey.Device {
   }
 
   private stopReconnectInterval() {
+    // If ServiceCoordinator is available, it manages reconnection internally
+    if (this.serviceCoordinator) {
+      this.debugLog('Reconnection stop managed by ServiceCoordinator');
+      return;
+    }
+
+    // Fallback to direct interval cleanup
     if (this.reconnectInterval) {
       // Enhanced interval can be either setTimeout or setInterval
       this.homey.clearTimeout(this.reconnectInterval);
@@ -1576,16 +1670,18 @@ class MyDevice extends Homey.Device {
         this.log('External ambient capability initialized with default value (null°C)');
       }
 
-      // Initialize external energy total capability with default value
+      // Initialize external energy total capability with storage-aware restoration
       if (this.hasCapability('adlar_external_energy_total')) {
-        await this.setCapabilityValue('adlar_external_energy_total', 0);
-        this.log('External energy total capability initialized with default value (0 kWh)');
+        const storedExternalTotal = await this.getStoreValue('external_cumulative_energy_kwh') || 0;
+        await this.setCapabilityValue('adlar_external_energy_total', storedExternalTotal);
+        this.log(`External energy total capability initialized: ${storedExternalTotal} kWh ${storedExternalTotal > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
 
-      // Initialize external energy daily capability with default value
+      // Initialize external energy daily capability with storage-aware restoration
       if (this.hasCapability('adlar_external_energy_daily')) {
-        await this.setCapabilityValue('adlar_external_energy_daily', 0);
-        this.log('External energy daily capability initialized with default value (0 kWh)');
+        const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
+        await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
+        this.log(`External energy daily capability initialized: ${storedExternalDaily} kWh ${storedExternalDaily > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -3347,16 +3443,8 @@ class MyDevice extends Homey.Device {
           // Validate value based on capability type
           const validatedValue = this.validateCapabilityValue(capability, value);
 
-          // Ensure Tuya connection
-          await this.connectTuya();
-
-          if (!this.tuya) {
-            throw new Error('Tuya device is not initialized');
-          }
-
-          // Send command to device
-          await this.tuya.set({ dps: dp, set: validatedValue as string | number | boolean });
-          this.log(`Successfully sent to Tuya: dp ${dp} = ${validatedValue}`);
+          // Send command to device via ServiceCoordinator or fallback
+          await this.sendTuyaCommand(dp, validatedValue as string | number | boolean);
 
           // Update Homey capability value to confirm change
           if (this.hasCapability(capability)) {
@@ -3401,25 +3489,29 @@ class MyDevice extends Homey.Device {
       return;
     }
 
-    // Initialize TuyaDevice
-    this.tuya = new TuyaDevice({
+    // Initialize Service Coordinator with Tuya configuration
+    this.serviceCoordinator = new ServiceCoordinator({
+      device: this,
+      logger: this.debugLog.bind(this),
+    });
+
+    // Initialize services via coordinator
+    const initResult = await this.serviceCoordinator.initialize({
       id,
       key,
       ip,
       version,
     });
 
-    // Attempt initial connection (non-blocking to allow device initialization)
-    try {
-      await this.connectTuya();
-      this.log('Initial Tuya connection established during startup');
-    } catch (error) {
-      this.error('Initial Tuya connection failed during startup, will retry via reconnection interval:', error);
-      // Don't throw - allow device initialization to continue
-      // The reconnection interval will handle establishing connection
+    if (!initResult.success || initResult.failedServices.length > 0) {
+      this.error('Service initialization issues:', {
+        failedServices: initResult.failedServices,
+        errors: initResult.errors.map((e) => e.message),
+      });
+      // Continue with fallback to direct methods for failed services
     }
 
-    // Start reconnection interval
+    // Start reconnection interval (will be managed by ServiceCoordinator in future)
     this.startReconnectInterval();
 
     // Initialize flow cards based on current settings
@@ -3439,9 +3531,6 @@ class MyDevice extends Homey.Device {
 
     // Force refresh trend capability to ensure proper translation
     await this.forceRefreshTrendCapability();
-
-    // Set up Tuya device event handlers
-    this.setupTuyaEventHandlers();
 
     // Initialize intelligent energy tracking if enabled
     if (this.getSetting('enable_intelligent_energy_tracking')) {
@@ -3480,6 +3569,16 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+
+    // Delegate settings changes to ServiceCoordinator first
+    if (this.serviceCoordinator) {
+      try {
+        await this.serviceCoordinator.onSettings(oldSettings, newSettings, changedKeys);
+      } catch (error) {
+        this.error('ServiceCoordinator settings handling failed:', error);
+        // Continue with fallback to direct method handling
+      }
+    }
 
     // Handle energy tracking settings changes first
     await this.handleEnergyTrackingSettings(changedKeys, newSettings);
@@ -4308,6 +4407,17 @@ class MyDevice extends Homey.Device {
   async onDeleted() {
     this.log('MyDevice has been deleted');
 
+    // Cleanup ServiceCoordinator and all managed services
+    if (this.serviceCoordinator) {
+      try {
+        this.serviceCoordinator.destroy();
+        this.serviceCoordinator = null;
+        this.log('ServiceCoordinator destroyed successfully');
+      } catch (error) {
+        this.error('Error destroying ServiceCoordinator:', error);
+      }
+    }
+
     // Stop reconnection interval
     this.stopReconnectInterval();
 
@@ -4350,6 +4460,47 @@ class MyDevice extends Homey.Device {
     // Reset connection state
     this.tuyaConnected = false;
     this.tuya = undefined;
+  }
+
+  /**
+   * ServiceCoordinator integration methods - expose service functionality
+   */
+
+  /**
+   * Get service health status from ServiceCoordinator
+   */
+  public getServiceHealth(): Record<string, boolean> | null {
+    return this.serviceCoordinator?.getServiceHealth() || null;
+  }
+
+  /**
+   * Get comprehensive service diagnostics
+   */
+  public getServiceDiagnostics(): Record<string, unknown> | null {
+    return this.serviceCoordinator?.getServiceDiagnostics() || null;
+  }
+
+  /**
+   * Force Tuya reconnection via ServiceCoordinator
+   */
+  public async forceServiceReconnection(): Promise<void> {
+    if (this.serviceCoordinator) {
+      await this.serviceCoordinator.forceReconnection();
+    } else {
+      throw new Error('ServiceCoordinator not initialized');
+    }
+  }
+
+  /**
+   * Receive external power data via ServiceCoordinator
+   */
+  public async receiveExternalPowerDataViaService(powerValue: number): Promise<void> {
+    if (this.serviceCoordinator) {
+      await this.serviceCoordinator.receiveExternalPowerData(powerValue);
+    } else if (this.hasCapability('adlar_external_power')) {
+      // Fallback to direct capability update
+      await this.setCapabilityValue('adlar_external_power', powerValue);
+    }
   }
 }
 
