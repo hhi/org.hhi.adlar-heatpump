@@ -1,6 +1,99 @@
-# Architecture Overview (v0.96.3)
+# Architecture Overview (v0.99.27)
 
-This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the utility libraries and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
+This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the Service Coordinator pattern, utility libraries, and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
+
+## Service-Oriented Architecture (v0.99.23+)
+
+### ServiceCoordinator Pattern (`lib/services/service-coordinator.ts`)
+
+The app has been refactored from a monolithic device class to a service-oriented architecture using the ServiceCoordinator pattern. This eliminates code duplication and provides clear separation of concerns.
+
+#### Architecture Overview
+
+```typescript
+class MyDevice extends Homey.Device {
+  private serviceCoordinator: ServiceCoordinator | null = null;
+
+  async onInit() {
+    // Initialize ServiceCoordinator with all managed services
+    this.serviceCoordinator = new ServiceCoordinator({
+      device: this,
+      logger: this.debugLog.bind(this),
+    });
+
+    await this.serviceCoordinator.initialize({
+      deviceConfig: tuyaConfig,
+      settings: this.getSettings(),
+    });
+  }
+}
+```
+
+#### Service Delegation Pattern
+
+The device class now delegates functionality to specialized services:
+
+| Service | Purpose | Eliminates Duplication |
+|---------|---------|----------------------|
+| **TuyaConnectionService** | Device communication & reconnection | ✅ Connection logic |
+| **CapabilityHealthService** | Health monitoring & diagnostics | ✅ Health check patterns |
+| **FlowCardManagerService** | Dynamic flow card management | ✅ Flow card registration |
+| **EnergyTrackingService** | Energy calculations & COP | ✅ Energy computation |
+| **SettingsManagerService** | Settings validation & race condition prevention | ✅ Settings handling |
+
+#### ServiceCoordinator Interface
+
+```typescript
+export class ServiceCoordinator {
+  // Service getters for delegation
+  getTuyaConnection(): TuyaConnectionService;
+  getCapabilityHealth(): CapabilityHealthService;
+  getFlowCardManager(): FlowCardManagerService;
+  getEnergyTracking(): EnergyTrackingService;
+  getSettingsManager(): SettingsManagerService;
+
+  // Unified lifecycle management
+  async initialize(config: ServiceConfig): Promise<void>;
+  async onSettings(oldSettings: any, newSettings: any, changedKeys: string[]): Promise<void>;
+  destroy(): void;
+
+  // Health monitoring
+  getServiceHealth(): ServiceHealthStatus | null;
+  getServiceDiagnostics(): ServiceDiagnostics | null;
+}
+```
+
+#### Fallback Pattern for Backward Compatibility
+
+The device maintains fallback methods for graceful degradation:
+
+```typescript
+private async sendTuyaCommand(dp: number, value: string | number | boolean): Promise<void> {
+  // Try ServiceCoordinator's TuyaConnectionService first
+  if (this.serviceCoordinator) {
+    try {
+      const tuyaService = this.serviceCoordinator.getTuyaConnection();
+      await tuyaService.sendCommand({[dp]: value});
+      return;
+    } catch (err) {
+      this.error('ServiceCoordinator Tuya command failed, falling back to direct method:', err);
+    }
+  }
+
+  // Fallback to direct method if service unavailable
+  await this.initializeFallbackTuyaDevice();
+  await this.tuya?.set({[dp]: value});
+}
+```
+
+### Benefits of Service-Oriented Architecture
+
+1. **Code Duplication Eliminated**: No more repeated logic across the codebase
+2. **Single Responsibility**: Each service handles one specific domain
+3. **Testability**: Services can be unit tested independently
+4. **Maintainability**: Changes isolated to relevant service
+5. **Extensibility**: New services easily added without modifying existing code
+6. **Fallback Safety**: Graceful degradation when services unavailable
 
 ## Constants Management System
 
@@ -685,12 +778,13 @@ for (const capability of powerCapabilities) {
 | **System States** | ✅ Enabled | Static | `line` |
 | **Valve Positions** | ✅ Enabled | Static | `column` |
 
-## System Architecture Summary (v0.96.3)
+## System Architecture Summary (v0.99.27)
 
 This architecture provides a comprehensive foundation for reliable, maintainable, and extensible heat pump device integration featuring:
 
 ### Core Systems
 
+- **Service-Oriented Architecture**: ServiceCoordinator pattern eliminates code duplication
 - **Enhanced Error Handling**: 9 categorized error types with smart retry logic
 - **Race Condition Prevention**: Deferred settings updates with atomic operations
 - **Intelligent Flow Card Management**: Health-aware dynamic registration system
@@ -708,9 +802,11 @@ This architecture provides a comprehensive foundation for reliable, maintainable
 
 ### Developer Benefits
 
+- **Service-Oriented Design**: Clear separation of concerns with zero code duplication
 - **Centralized Configuration**: Single source of truth for all constants
 - **Structured Error Handling**: Categorized debugging and recovery guidance
 - **Type Safety**: Full TypeScript integration with proper interfaces
-- **Extensible Design**: Easy addition of new capabilities, error types, and insights features
+- **Extensible Design**: Easy addition of new services, capabilities, and features
 - **Comprehensive COP Testing**: Debug framework with real-time simulation and method validation
 - **Docker Debug Support**: Full debugging environment for development and troubleshooting
+- **Fallback Patterns**: Graceful degradation when services are unavailable
