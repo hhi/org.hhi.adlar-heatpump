@@ -1,13 +1,10 @@
 {
+  "0.99.31": {
+    "en": "Critical fix for DPS sensor updates: Restored missing updateCapabilitiesFromDps method that was accidentally removed during service architecture refactoring, ensuring all Tuya device sensors now update properly."
+  },
   "0.99.30": {
     "en": "Version bump with dependency updates including TypeScript 5.9.2 for enhanced development experience and improved external energy measurement capabilities."
   },
-  "0.99.27": {
-    "en": "Eliminating code duplication while maintaining backward compatibility through fallback patterns."
-  },
-  "0.99.23": {
-    "en": "Separation of Concerns: Device code refactoring, derive services from monolithic structure."
-  }, 
   "0.99.15": {
     "en": "Added daily external energy consumption tracking with automatic midnight reset and enhanced external measurement icons with improved visual hierarchy and prominence."
   },
