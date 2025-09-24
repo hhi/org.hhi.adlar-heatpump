@@ -2136,7 +2136,51 @@ class MyDevice extends Homey.Device {
     return 'temperature'; // Default fallback
   }
 
-  // Note: DPS to capability updates now handled by TuyaConnectionService via ServiceCoordinator
+  /**
+   * Process DPS data received from Tuya device and update corresponding Homey capabilities
+   * This method is called by the ServiceCoordinator when TuyAPI receives data or dp-refresh events
+   * @param dps - DPS data object from Tuya device
+   */
+  updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
+    this.debugLog('Processing DPS data:', dps);
+
+    // Convert string keys to numbers and process each DPS value
+    Object.entries(dps).forEach(([dpsKey, value]) => {
+      const dpsId = Number(dpsKey);
+      if (Number.isNaN(dpsId)) {
+        this.debugLog(`Skipping invalid DPS key: ${dpsKey}`);
+        return;
+      }
+
+      // Map DPS ID to capability name using AdlarMapping
+      const capability = this.allArraysSwapped[dpsId];
+      if (!capability) {
+        this.debugLog(`No capability mapping found for DPS ${dpsId} (value: ${value})`);
+        return;
+      }
+
+      // Check if device has this capability
+      if (!this.hasCapability(capability)) {
+        this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
+        return;
+      }
+
+      try {
+        // Update the capability value
+        this.setCapabilityValue(capability, value).then(() => {
+          this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
+        }).catch((error) => {
+          this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
+        });
+
+        // Update capability health tracking via service coordinator
+        this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
+
+      } catch (error) {
+        this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
+      }
+    });
+  }
 
   private getCapabilityFriendlyTitle(capability: string): string {
     try {
