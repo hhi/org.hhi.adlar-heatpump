@@ -1,4 +1,7 @@
 {
+  "0.99.30": {
+    "en": "Version bump with dependency updates including TypeScript 5.9.2 for enhanced development experience and improved external energy measurement capabilities."
+  },
   "0.99.27": {
     "en": "Eliminating code duplication while maintaining backward compatibility through fallback patterns."
   },
