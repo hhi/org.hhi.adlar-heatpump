@@ -3033,6 +3033,7 @@ class MyDevice extends Homey.Device {
             // Use higher precision for small energy increments
             const roundedTotal = Math.round(newExternalTotal * 1000000) / 1000000; // 6 decimal places
             await this.setCapabilityValue('adlar_external_energy_total', roundedTotal);
+            await this.setStoreValue('external_cumulative_energy_kwh', roundedTotal);
 
             // Also update external daily energy consumption
             if (this.hasCapability('adlar_external_energy_daily')) {
