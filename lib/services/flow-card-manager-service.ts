@@ -4,32 +4,11 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { TuyaErrorCategorizer } from '../error-types';
+import { CapabilityCategories, UserFlowPreferences } from '../types/shared-interfaces';
 
 export interface FlowCardManagerOptions {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
-}
-
-/* eslint-disable camelcase */
-export interface UserFlowPreferences {
-  flow_temperature_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_voltage_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_current_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_power_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_pulse_steps_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_state_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_efficiency_alerts: 'disabled' | 'auto' | 'enabled';
-  flow_expert_mode: boolean;
-}
-
-export interface CapabilityCategories {
-  temperature: string[];
-  voltage: string[];
-  current: string[];
-  power: string[];
-  pulseSteps: string[];
-  states: string[];
-  efficiency: string[];
 }
 
 export class FlowCardManagerService {
@@ -486,11 +465,12 @@ export class FlowCardManagerService {
    * Updates the device using FlowCardManagerService -> EnergyTrackingService.
    * @param args - { temperature_value }
    */
+  // eslint-disable-next-line camelcase
   async handleReceiveExternalAmbientData(args: { temperature_value: number }): Promise<void> {
     try {
       if (this.device.hasCapability('adlar_external_ambient')) {
-        await this.device.setCapabilityValue('adlar_external_ambient', args.temperature_value);
-        this.logger(`FlowCardManagerService: External ambient temperature updated: ${args.temperature_value}°C`);
+        await this.device.setCapabilityValue('adlar_external_ambient', args.temperature_value); // eslint-disable-line camelcase
+        this.logger(`FlowCardManagerService: External ambient temperature updated: ${args.temperature_value}°C`); // eslint-disable-line camelcase
 
         // Emit event for other services
         this.device.emit('external-data:ambient', args.temperature_value);
@@ -504,11 +484,12 @@ export class FlowCardManagerService {
   /**
    * Handler for receive external flow action flow.
    */
+  // eslint-disable-next-line camelcase
   async handleReceiveExternalFlowData(args: { flow_value: number }): Promise<void> {
     try {
       if (this.device.hasCapability('adlar_external_flow')) {
-        await this.device.setCapabilityValue('adlar_external_flow', args.flow_value);
-        this.logger(`FlowCardManagerService: External flow data updated: ${args.flow_value} L/min`);
+        await this.device.setCapabilityValue('adlar_external_flow', args.flow_value); // eslint-disable-line camelcase
+        this.logger(`FlowCardManagerService: External flow data updated: ${args.flow_value} L/min`); // eslint-disable-line camelcase
 
         // Emit event for other services
         this.device.emit('external-data:flow', args.flow_value);
@@ -522,11 +503,12 @@ export class FlowCardManagerService {
   /**
    * Handler for receive external power action flow.
    */
+  // eslint-disable-next-line camelcase
   async handleReceiveExternalPowerData(args: { power_value: number }): Promise<void> {
     try {
       if (this.device.hasCapability('adlar_external_power')) {
-        await this.device.setCapabilityValue('adlar_external_power', args.power_value);
-        this.logger(`FlowCardManagerService: External power data updated: ${args.power_value}W`);
+        await this.device.setCapabilityValue('adlar_external_power', args.power_value); // eslint-disable-line camelcase
+        this.logger(`FlowCardManagerService: External power data updated: ${args.power_value}W`); // eslint-disable-line camelcase
 
         // Emit event for other services (especially EnergyTrackingService)
         this.device.emit('external-data:power', args.power_value);

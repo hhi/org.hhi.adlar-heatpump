@@ -3,7 +3,6 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
 import Homey from 'homey';
-import TuyaDevice from 'tuyapi';
 import { DeviceConstants } from '../constants';
 
 export interface EnergyTrackingOptions {
@@ -18,18 +17,8 @@ export interface PowerMeasurement {
   timestamp: number;
 }
 
-export interface EnergyData {
-  totalEnergy: number;
-  dailyEnergy: number;
-  externalTotalEnergy: number;
-  externalDailyEnergy: number;
-  lastUpdate: number;
-  lastExternalUpdate: number;
-}
-
 export class EnergyTrackingService {
   private device: Homey.Device;
-  tuya: TuyaDevice | undefined;
   private logger: (message: string, ...args: unknown[]) => void;
   private energyTrackingInterval: NodeJS.Timeout | null = null;
   private dailyResetTimeout: NodeJS.Timeout | null = null;
@@ -167,32 +156,19 @@ export class EnergyTrackingService {
   }
 
   /**
-   * Get internal power measurement from DPS  104 without triggering capability update
+   * Get internal power measurement from DPS 104 via device capability.
+   * Note: Direct TuyAPI access removed - now uses device capabilities only.
    */
   private getInternalPowerMeasurement(): number | null {
     try {
-      // Try to access the raw DPS data to avoid recursive updates
-      // Note: TuyAPI structure may vary, so we use multiple approaches
-      if (this.tuya) {
-        // Method 1: Try to access via tuya instance properties
-        const tuyaInstance = this.tuya as TuyaDevice & { dps?: Record<string, unknown> };
-        if (tuyaInstance.dps && typeof tuyaInstance.dps['104'] === 'number') {
-          const rawPower = tuyaInstance.dps['104'];
-          if (rawPower > 0) {
-            return rawPower;
-          }
-        }
-
-        // Method 2: Check if tuya has a get method for DPS
-        if (typeof tuyaInstance.get === 'function') {
-          const rawPower = tuyaInstance.get({ dps: 104 });
-          if (typeof rawPower === 'number' && rawPower > 0) {
-            return rawPower;
-          }
-        }
+      // Access internal power through device capability if available
+      // This avoids direct TuyAPI dependency and uses proper device abstraction
+      const internalPower = this.device.getCapabilityValue('measure_power.internal');
+      if (typeof internalPower === 'number' && internalPower > 0) {
+        return internalPower;
       }
     } catch (error) {
-      this.logger('Could not access internal power DPS 104:', error);
+      this.logger('Could not access internal power capability:', error);
     }
 
     // Fallback: Return null to trigger calculated estimation
