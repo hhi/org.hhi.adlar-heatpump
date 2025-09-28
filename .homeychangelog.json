@@ -1,4 +1,7 @@
 {
+  "0.99.35": {
+    "en": "Fixed external energy total persistence during app updates: External energy consumption totals now properly survive app updates by implementing missing storage synchronization, ensuring continuity of energy tracking data across version upgrades."
+  },
   "0.99.32": {
     "en": "Added TypeScript as dev dependency to ensure consistent development environment and improved code quality with explicit TypeScript tooling."
   },

@@ -4,6 +4,7 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { DeviceConstants } from '../constants';
+import { CapabilityCategories } from '../types/shared-interfaces';
 
 export interface CapabilityHealthOptions {
   device: Homey.Device;
@@ -17,16 +18,6 @@ export interface CapabilityHealthData {
   nullCount: number;
   lastValue: unknown;
   category: string;
-}
-
-export interface CapabilityCategories {
-  temperature: string[];
-  voltage: string[];
-  current: string[];
-  power: string[];
-  pulseSteps: string[];
-  states: string[];
-  efficiency: string[];
 }
 
 export interface HealthReport {
