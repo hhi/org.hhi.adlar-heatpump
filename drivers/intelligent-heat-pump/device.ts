@@ -1034,62 +1034,36 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Get external flow data directly from configured device
+   * Get external flow rate data from flow card input
+   * Note: External flow data must be provided via Advanced Flow using the
+   * "Send Flow Rate to heat pump for COP calculation" action card
    */
   private async getExternalFlowData(): Promise<number | null> {
-    const deviceId = this.getSetting('external_flow_device_id');
-    const capability = this.getSetting('external_flow_capability') || 'measure_water';
-
-    if (!deviceId || deviceId.trim() === '') {
-      return null;
-    }
-
-    try {
-      // Use getAllDevices to find the device by ID
-      const allDevices = Object.values(this.homey.drivers.getDrivers())
-        .flatMap((driver) => Object.values(driver.getDevices()));
-      const device = allDevices.find((d) => d.getData().id === deviceId);
-      if (device && device.hasCapability(capability)) {
-        const value = device.getCapabilityValue(capability);
-        if (typeof value === 'number' && !Number.isNaN(value)) {
-          this.debugLog(`💧 External flow data: ${value}L/min from device ${deviceId}`);
-          return value;
-        }
+    if (this.hasCapability('adlar_external_flow')) {
+      const value = this.getCapabilityValue('adlar_external_flow');
+      if (typeof value === 'number' && !Number.isNaN(value)) {
+        this.debugLog(`💧 External flow data: ${value}L/min (from flow card)`);
+        return value;
       }
-    } catch (error) {
-      this.error(`Failed to read external flow from device ${deviceId}:`, error);
     }
-
+    this.debugLog('💧 No external flow data - use "Send Flow Rate" flow card to provide data');
     return null;
   }
 
   /**
-   * Get external ambient temperature data directly from configured device
+   * Get external ambient temperature data from flow card input
+   * Note: External ambient data must be provided via Advanced Flow using the
+   * "Send Ambient Temperature to heat pump for COP calculation" action card
    */
   private async getExternalAmbientData(): Promise<number | null> {
-    const deviceId = this.getSetting('external_ambient_device_id');
-    const capability = this.getSetting('external_ambient_capability') || 'measure_temperature';
-
-    if (!deviceId || deviceId.trim() === '') {
-      return null;
-    }
-
-    try {
-      // Use getAllDevices to find the device by ID
-      const allDevices = Object.values(this.homey.drivers.getDrivers())
-        .flatMap((driver) => Object.values(driver.getDevices()));
-      const device = allDevices.find((d) => d.getData().id === deviceId);
-      if (device && device.hasCapability(capability)) {
-        const value = device.getCapabilityValue(capability);
-        if (typeof value === 'number' && !Number.isNaN(value)) {
-          this.debugLog(`🌡️ External ambient data: ${value}°C from device ${deviceId}`);
-          return value;
-        }
+    if (this.hasCapability('adlar_external_ambient')) {
+      const value = this.getCapabilityValue('adlar_external_ambient');
+      if (typeof value === 'number' && !Number.isNaN(value)) {
+        this.debugLog(`🌡️ External ambient data: ${value}°C (from flow card)`);
+        return value;
       }
-    } catch (error) {
-      this.error(`Failed to read external ambient temperature from device ${deviceId}:`, error);
     }
-
+    this.debugLog('🌡️ No external ambient data - use "Send Ambient Temperature" flow card to provide data');
     return null;
   }
 
