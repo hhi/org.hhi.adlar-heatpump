@@ -1,4 +1,7 @@
 {
+  "0.99.40": {
+    "en": "Major code optimization: Removed 565+ lines of unused service methods and fixed external data architecture. External flow and ambient temperature data now correctly use flow-card based pattern instead of faulty cross-device access. Simplified SettingsManagerService to minimal stub. All changes verified with comprehensive testing."
+  },
   "0.99.35": {
     "en": "Fixed external energy total persistence during app updates: External energy consumption totals now properly survive app updates by implementing missing storage synchronization, ensuring continuity of energy tracking data across version upgrades."
   },
