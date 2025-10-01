@@ -9,7 +9,7 @@
     }
   },
   "cop_method": {
-    "direct_thermal": "Directe Thermisch",
+    "direct_thermal": "Direct Thermisch",
     "power_module": "Vermogen Module",
     "power_estimation": "Vermogen Schatting",
     "refrigerant_circuit": "Koelmiddel Circuit",
@@ -45,14 +45,14 @@
   },
   "cop_diagnostics": {
     "no_power_measurement": "Geen Vermogen Data",
-    "no_thermal_measurement": "Geen Thermisch Data",
-    "no_water_flow": "Geen Flow Data",
+    "no_thermal_measurement": "Geen Thermische Data",
+    "no_water_flow": "Geen Water Flow Data",
     "no_temperature_difference": "Geen Temp Delta",
     "no_compressor_data": "Geen Compressor Data",
     "insufficient_sensor_data": "Meerdere Fouten",
     "enable_power_monitoring": "Schakel Vermogen In",
     "check_temperature_sensors": "Check Temp Sensoren",
-    "check_flow_sensor": "Check Flow Sensor",
+    "check_flow_sensor": "Check Water Flow Sensor",
     "check_compressor_communication": "Check Compressor Link",
     "check_multiple_sensors": "Check Alle Sensoren"
   },
