@@ -47,7 +47,9 @@
       "Bash(npx tsc:*)",
       "Bash(git log:*)",
       "Bash(git checkout:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(git stash push:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
