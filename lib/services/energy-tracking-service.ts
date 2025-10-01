@@ -39,57 +39,6 @@ export class EnergyTrackingService {
   }
 
   /**
-   * Start energy tracking if the device setting `enable_intelligent_energy_tracking` is enabled.
-   * Initializes internal state and schedules periodic updates and daily reset.
-   */
-  async start(): Promise<void> {
-    const enabled = this.device.getSetting('enable_intelligent_energy_tracking');
-    if (!enabled) {
-      this.logger('EnergyTrackingService: Intelligent energy tracking disabled');
-      return;
-    }
-
-    this.isEnabled = true;
-    this.logger('EnergyTrackingService: Starting energy tracking');
-
-    await this.initializeEnergyTracking();
-    this.startEnergyTrackingInterval();
-    this.scheduleDailyEnergyReset();
-
-    // Initial power measurement update
-    await this.updateIntelligentPowerMeasurement();
-  }
-
-  /**
-   * Stop any running energy tracking intervals and pending timers.
-   */
-  stop(): void {
-    this.logger('EnergyTrackingService: Stopping energy tracking');
-    this.isEnabled = false;
-
-    this.stopEnergyTrackingInterval();
-    this.clearDailyResetSchedule();
-  }
-
-  /**
-   * React to settings changes that affect energy tracking (enable/disable).
-   * @param changedKeys - keys that changed in settings
-   * @param newSettings - the updated settings object
-   */
-  async updateSettings(changedKeys: string[], newSettings: Record<string, unknown>): Promise<void> {
-    if (changedKeys.includes('enable_intelligent_energy_tracking')) {
-      const enabled = newSettings.enable_intelligent_energy_tracking;
-      this.logger(`EnergyTrackingService: Intelligent energy tracking ${enabled ? 'enabled' : 'disabled'}`);
-
-      if (enabled && !this.isEnabled) {
-        await this.start();
-      } else if (!enabled && this.isEnabled) {
-        this.stop();
-      }
-    }
-  }
-
-  /**
    * Calculate and return the most reliable power measurement using:
    * 1) external flow card value (`adlar_external_power`),
    * 2) internal DPS-based measurement,
@@ -411,92 +360,6 @@ export class EnergyTrackingService {
   }
 
   /**
-   * Schedule a timer to reset daily counters at local midnight.
-   */
-  private scheduleDailyEnergyReset(): void {
-    // Calculate milliseconds until next midnight
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    const msUntilMidnight = tomorrow.getTime() - now.getTime();
-
-    // Schedule reset
-    this.dailyResetTimeout = this.device.homey.setTimeout(() => {
-      this.resetDailyEnergy()
-        .catch((error) => this.logger('EnergyTrackingService: Failed to reset daily energy at midnight:', error));
-
-      // Schedule recurring daily resets
-      this.dailyResetInterval = this.device.homey.setInterval(() => {
-        this.resetDailyEnergy()
-          .catch((error) => this.logger('EnergyTrackingService: Failed to reset daily energy on schedule:', error));
-      }, 24 * 60 * 60 * 1000); // 24 hours
-    }, msUntilMidnight);
-
-    this.logger(`EnergyTrackingService: Daily energy reset scheduled for ${tomorrow.toLocaleString()}`);
-  }
-
-  /**
-   * Clear scheduled daily reset timers.
-   */
-  private clearDailyResetSchedule(): void {
-    if (this.dailyResetTimeout) {
-      clearTimeout(this.dailyResetTimeout);
-      this.dailyResetTimeout = null;
-    }
-
-    if (this.dailyResetInterval) {
-      clearInterval(this.dailyResetInterval);
-      this.dailyResetInterval = null;
-    }
-  }
-
-  /**
-   * Force reset of daily energy counters and emit the appropriate device events.
-   */
-  async resetDailyEnergy(): Promise<void> {
-    try {
-      // Reset internal daily energy consumption
-      if (this.device.hasCapability('meter_power.power_consumption')) {
-        await this.device.setCapabilityValue('meter_power.power_consumption', 0);
-        await this.device.setStoreValue('daily_consumption_kwh', 0);
-        this.logger('EnergyTrackingService: Internal daily energy consumption reset to 0 kWh');
-      }
-
-      // Reset external daily energy consumption
-      if (this.device.hasCapability('adlar_external_energy_daily')) {
-        await this.device.setCapabilityValue('adlar_external_energy_daily', 0);
-        await this.device.setStoreValue('external_daily_consumption_kwh', 0);
-        this.logger('EnergyTrackingService: External daily energy consumption reset to 0 kWh');
-      }
-
-      // Emit event for other services
-      this.device.emit('energy:daily-reset');
-
-    } catch (error) {
-      this.logger('EnergyTrackingService: Error resetting daily energy:', error);
-    }
-  }
-
-  /**
-   * Reset the external energy total capability back to zero.
-   */
-  async resetExternalEnergyTotal(): Promise<void> {
-    try {
-      if (this.device.hasCapability('adlar_external_energy_total')) {
-        await this.device.setCapabilityValue('adlar_external_energy_total', 0);
-        await this.device.setStoreValue('external_cumulative_energy_kwh', 0);
-        this.logger('EnergyTrackingService: External energy total reset to 0');
-
-        // Emit event for other services
-        this.device.emit('energy:total-reset');
-      }
-    } catch (error) {
-      this.logger('EnergyTrackingService: Error resetting external energy total:', error);
-    }
-  }
-
-  /**
    * Receive and process external power data pushed via flow/action cards.
    * Updates the external-power capability and triggers energy recalculation.
    * @param powerValue - power in Watts
@@ -526,40 +389,9 @@ export class EnergyTrackingService {
   }
 
   /**
-   * Accept incoming external ambient temperature updates (e.g. from external sensors).
-   */
-  async receiveExternalAmbientData(temperature: number): Promise<void> {
-    await this.device.setCapabilityValue('adlar_external_ambient', temperature);
-    this.logger('EnergyTrackingService: External ambient temperature updated:', temperature);
-  }
-
-  /**
-   * Accept incoming external flow rate updates.
-   */
-  async receiveExternalFlowData(flowRate: number): Promise<void> {
-    await this.device.setCapabilityValue('adlar_external_flow', flowRate);
-    this.logger('EnergyTrackingService: External flow rate updated:', flowRate);
-  }
-
-  /**
-   * Return current diagnostic state of the energy tracking service.
-   */
-  getDiagnostics(): Record<string, unknown> {
-    return {
-      lastExternalPowerUpdate: this.lastExternalPowerUpdate,
-      externalPowerData: this.device.getCapabilityValue('adlar_external_power'),
-      externalEnergyTotal: this.device.getCapabilityValue('adlar_external_energy_total'),
-      externalEnergyDaily: this.device.getCapabilityValue('adlar_external_energy_daily'),
-      lastEnergyCalculation: this.lastEnergyCalculation,
-      isEnabled: this.isEnabled,
-    };
-  }
-
-  /**
    * Stop timers and cleanup; safe to call during device destruction.
    */
   destroy(): void {
-    this.stop();
     this.logger('EnergyTrackingService: Service destroyed');
   }
 }

@@ -346,14 +346,6 @@ export class ServiceCoordinator {
     return this.energyTracking.receiveExternalPowerData(powerValue);
   }
 
-  async receiveExternalAmbientData(temperature: number): Promise<void> {
-    return this.energyTracking.receiveExternalAmbientData(temperature);
-  }
-
-  async receiveExternalFlowData(flowRate: number): Promise<void> {
-    return this.energyTracking.receiveExternalFlowData(flowRate);
-  }
-
   /**
    * Return the last-known health map for services.
    */
@@ -373,7 +365,6 @@ export class ServiceCoordinator {
       },
       tuya: this.tuyaConnection.getDiagnostics(),
       capabilityHealth: this.capabilityHealth.generateDiagnosticsReport(),
-      energyTracking: this.energyTracking.getDiagnostics(),
     };
   }
 
