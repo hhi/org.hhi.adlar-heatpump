@@ -9,6 +9,6 @@
     "typeRoots": ["./node_modules/@types", "./types"]
   },
   "exclude": [
-    "*.bak", "node_modules", "dist", "build"
+    "*.bak", "node_modules", "dist", "build", "todo/*"
   ]
 }
