@@ -8,18 +8,19 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Features
 
+- **Production-Ready Stability (v0.99.46)**: Crash-proof error handling with triple-layer protection, automatic device status sync, and global error handlers
 - **Service-Oriented Architecture (v0.99.23+)**: 8 specialized services managed by ServiceCoordinator for code organization, testability, and maintainability
 - **Local API Integration**: Direct communication via Tuya local protocol
 - **Complete Device Control**: Access to all 47+ device capabilities including enhanced diagnostics
 - **Real-time Monitoring**: Live sensor data and system status updates managed by TuyaConnectionService
-- **Automated Reconnection**: Robust connection handling with automatic recovery
+- **Automated Reconnection**: Robust connection handling with automatic recovery and device availability status sync
 - **Multi-language Support**: English and Dutch interface
 - **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 8 different methods and diagnostic feedback (COPCalculator service)
 - **SCOP Seasonal Analysis**: Seasonal coefficient of performance according to EN 14825 standards (SCOPCalculator service)
 - **Rolling COP Analysis**: Time-series efficiency tracking with daily/weekly/monthly averages (RollingCOPCalculator service)
 - **Cross-App Integration**: External data exchange via flow cards for enhanced accuracy
 - **Flow Card Control**: Individual control over 8 flow card categories (64 total cards) via FlowCardManagerService
-- **Enhanced Error Handling**: Smart retry logic with user-friendly recovery guidance
+- **Enhanced Error Handling**: Smart retry logic with user-friendly recovery guidance, crash prevention, and ECONNRESET resilience
 - **Settings Management**: Race condition prevention with deferred updates (SettingsManagerService)
 - **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration (CapabilityHealthService)
 - **Safety Monitoring**: Critical temperature, connection, and system fault alerts
@@ -159,7 +160,9 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 ## Safety & Monitoring
 
-- **Connection Monitoring**: Alerts after 5 consecutive failures
+- **Connection Monitoring**: Alerts after 5 consecutive failures with automatic device unavailable status
+- **Crash Prevention (v0.99.46)**: Triple-layer error handling prevents app crashes from network issues
+- **Device Status Sync**: Automatic unavailable/available status updates based on connection state
 - **System Faults**: Specific fault codes and descriptions
 - **Temperature Safety**: Extreme temperature detection (>80°C or <-20°C)
 - **COP Outlier Detection**: Identify unrealistic efficiency values (< 0.5 or > 8.0 COP)
@@ -182,6 +185,34 @@ Detailed documentation available in `/docs` directory:
 - **Issues**: Report bugs and feature requests on GitHub
 - **Community**: Homey Community Forum (Topic ID: 140621)
 - **Installation Guide**: `docs/Get Local Keys - instruction.pdf`
+
+## Release Notes
+
+### v0.99.46 - Production-Ready Release (Current)
+
+**Critical Fixes:**
+- ✅ Fixed ECONNRESET crash bug during connection failures
+- ✅ Implemented unhandled promise rejection protection in async callbacks
+- ✅ Added global error handlers (`unhandledRejection`, `uncaughtException`)
+
+**Enhanced User Experience:**
+- ✅ Automatic device status updates (unavailable during outages, available after reconnection)
+- ✅ Triple-layer crash prevention architecture
+- ✅ Enhanced connection resilience with improved recovery notifications
+
+**Technical Improvements:**
+- ✅ `.catch()` handlers on all setTimeout/setInterval async callbacks
+- ✅ Device availability sync with TuyaConnectionService connection state
+- ✅ Comprehensive error logging for production diagnostics
+
+**Icon Updates:**
+- ✅ Added custom countdown timer icon (`adlar_countdowntimer`) matching app visual style
+
+This release marks the transition from beta to production-ready stability.
+
+### Previous Releases
+
+See [.homeychangelog.json](.homeychangelog.json) for complete release history.
 
 ## License
 

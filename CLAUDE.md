@@ -49,7 +49,7 @@ This is a Homey app for integrating Adlar heat pump devices via Tuya's local API
 
 ### Core Components
 
-- **App Entry**: `app.ts` - Main Homey app class with debug mode support
+- **App Entry**: `app.ts` - Main Homey app class with debug mode support and global error handlers (v0.99.46)
 - **Driver**: `drivers/intelligent-heat-pump/driver.ts` - Handles device discovery and pairing
 - **Device**: `drivers/intelligent-heat-pump/device.ts` - Manages individual device instances, delegates to services
 - **Service Coordinator**: `lib/services/service-coordinator.ts` - Manages lifecycle of all 8 services
@@ -65,9 +65,11 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
 
 1. **TuyaConnectionService** (`lib/services/tuya-connection-service.ts`)
    - Device communication via TuyAPI
-   - Automatic reconnection handling
+   - Automatic reconnection handling with crash-proof error recovery (v0.99.46)
    - Connection health monitoring
    - Event-driven sensor data updates
+   - Auto device availability status sync (unavailable during outages, available on reconnect)
+   - Unhandled promise rejection protection in async setTimeout callbacks
 
 2. **CapabilityHealthService** (`lib/services/capability-health-service.ts`)
    - Real-time capability health tracking
@@ -187,7 +189,7 @@ Centralized configuration system in `DeviceConstants` class:
 - **Health monitoring**: Capability timeouts, null value thresholds
 - **Performance limits**: Connection failure limits, efficiency thresholds
 
-#### Error Handling Architecture (v0.90.3+)
+#### Error Handling Architecture (v0.90.3+, Enhanced v0.99.46)
 
 Comprehensive error categorization via `TuyaErrorCategorizer`:
 
@@ -195,6 +197,18 @@ Comprehensive error categorization via `TuyaErrorCategorizer`:
 - **Recovery Guidance**: User-friendly messages with specific recovery actions
 - **Smart Retry Logic**: Automatic retry for recoverable errors with appropriate delays
 - **Structured Logging**: Consistent error formatting for debugging and monitoring
+
+**Production-Ready Enhancements (v0.99.46)**:
+
+- **Crash Prevention**: Unhandled promise rejection protection in async setTimeout/setInterval callbacks
+- **Global Error Handlers**: Process-level `unhandledRejection` and `uncaughtException` handlers in app.ts
+- **Device Status Sync**: Automatic `setUnavailable()` after 5 consecutive failures, `setAvailable()` on reconnection
+- **Triple-Layer Protection**:
+  1. Specific `.catch()` handlers on setTimeout async callbacks (TuyaConnectionService, Device)
+  2. Try-catch blocks for synchronous operations (circuit breaker cooldown)
+  3. Global process handlers as last resort safety net
+- **Enhanced User Notifications**: Push notifications + device availability status + service health monitoring
+- **ECONNRESET Resilience**: Specific handling for connection reset errors without app crashes
 
 #### Settings Management & Race Condition Prevention (v0.90.3+)
 

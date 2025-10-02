@@ -293,7 +293,11 @@ class MyDevice extends Homey.Device {
         // Still in cooldown period
         this.debugLog(`Circuit breaker open, cooling down for ${Math.round((this.circuitBreakerResetTime - timeSinceOpen) / 1000)}s more`);
         this.reconnectInterval = this.homey.setTimeout(() => {
-          this.scheduleNextReconnectionAttempt();
+          try {
+            this.scheduleNextReconnectionAttempt();
+          } catch (error) {
+            this.error('MyDevice: Error during circuit breaker cooldown check:', error);
+          }
         }, 10000); // Check every 10 seconds during cooldown
         return;
       }
@@ -313,8 +317,16 @@ class MyDevice extends Homey.Device {
 
     this.debugLog(`Next reconnection attempt in ${Math.round(adaptiveInterval / 1000)}s (backoff: ${this.backoffMultiplier}x)`);
 
-    this.reconnectInterval = this.homey.setTimeout(async () => {
-      await this.attemptReconnectionWithRecovery();
+    this.reconnectInterval = this.homey.setTimeout(() => {
+      this.attemptReconnectionWithRecovery().catch((error) => {
+        // Prevent unhandled rejection crash
+        this.error('MyDevice: Critical error in scheduled reconnection:', error);
+
+        // Apply aggressive backoff and schedule retry
+        this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32);
+        this.consecutiveFailures++;
+        this.scheduleNextReconnectionAttempt();
+      });
     }, adaptiveInterval);
   }
 

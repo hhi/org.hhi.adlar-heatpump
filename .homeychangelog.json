@@ -1,4 +1,7 @@
 {
+  "0.99.46": {
+    "en": "Production-ready release: Fixed critical crash bug with ECONNRESET errors during connection failures. Added automatic device availability status updates (unavailable during outages, available after reconnection). Implemented global error handlers for unhandled promise rejections. Enhanced connection resilience with improved error recovery and user notifications."
+  },
   "0.99.41": {
     "en": "Documentation overhaul."
   },
