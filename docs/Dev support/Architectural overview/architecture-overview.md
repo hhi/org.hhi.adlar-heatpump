@@ -1,4 +1,4 @@
-# Architecture Overview (v0.99.27)
+# Architecture Overview (v0.99.40)
 
 This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the Service Coordinator pattern, utility libraries, and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
 
@@ -38,8 +38,11 @@ The device class now delegates functionality to specialized services:
 | **TuyaConnectionService** | Device communication & reconnection | ✅ Connection logic |
 | **CapabilityHealthService** | Health monitoring & diagnostics | ✅ Health check patterns |
 | **FlowCardManagerService** | Dynamic flow card management | ✅ Flow card registration |
-| **EnergyTrackingService** | Energy calculations & COP | ✅ Energy computation |
+| **EnergyTrackingService** | Energy calculations & tracking | ✅ Energy computation |
 | **SettingsManagerService** | Settings validation & race condition prevention | ✅ Settings handling |
+| **COPCalculator** | Real-time COP calculations with 8 methods | ✅ Efficiency calculation logic |
+| **SCOPCalculator** | Seasonal efficiency per EN 14825 standard | ✅ SCOP calculation patterns |
+| **RollingCOPCalculator** | Time-series COP analysis (daily/weekly/monthly) | ✅ Rolling average computations |
 
 #### ServiceCoordinator Interface
 
@@ -51,6 +54,9 @@ export class ServiceCoordinator {
   getFlowCardManager(): FlowCardManagerService;
   getEnergyTracking(): EnergyTrackingService;
   getSettingsManager(): SettingsManagerService;
+  getCOPCalculator(): COPCalculator;
+  getSCOPCalculator(): SCOPCalculator;
+  getRollingCOPCalculator(): RollingCOPCalculator;
 
   // Unified lifecycle management
   async initialize(config: ServiceConfig): Promise<void>;
@@ -88,12 +94,20 @@ private async sendTuyaCommand(dp: number, value: string | number | boolean): Pro
 
 ### Benefits of Service-Oriented Architecture
 
-1. **Code Duplication Eliminated**: No more repeated logic across the codebase
+1. **Code Duplication Eliminated**: No more repeated logic across the codebase (8 specialized services)
 2. **Single Responsibility**: Each service handles one specific domain
 3. **Testability**: Services can be unit tested independently
 4. **Maintainability**: Changes isolated to relevant service
 5. **Extensibility**: New services easily added without modifying existing code
 6. **Fallback Safety**: Graceful degradation when services unavailable
+
+### Service Count Summary (v0.99.40)
+
+**8 Core Services + 1 Coordinator:**
+
+- **Infrastructure Services** (5): TuyaConnection, CapabilityHealth, FlowCardManager, EnergyTracking, SettingsManager
+- **Calculation Services** (3): COPCalculator, SCOPCalculator, RollingCOPCalculator
+- **Coordinator** (1): ServiceCoordinator (manages lifecycle of all 8 services)
 
 ## Constants Management System
 
@@ -153,6 +167,151 @@ setTimeout(() => this.reconnect(), 20000); // ❌ Magic number
 // Use centralized constants:
 setTimeout(() => this.reconnect(), DeviceConstants.RECONNECTION_INTERVAL_MS); // ✅
 ```
+
+## COP Calculation Services Architecture (v0.96.3+ / Enhanced v0.99.23+)
+
+The heat pump efficiency monitoring system uses three specialized calculation services, all managed by the ServiceCoordinator, providing comprehensive real-time, time-series, and seasonal efficiency analysis.
+
+### Service Integration Architecture
+
+```typescript
+class ServiceCoordinator {
+  private copCalculator: COPCalculator | null = null;
+  private scopCalculator: SCOPCalculator | null = null;
+  private rollingCOPCalculator: RollingCOPCalculator | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    // Initialize calculation services in dependency order
+    this.copCalculator = new COPCalculator(device, logger);
+    this.rollingCOPCalculator = new RollingCOPCalculator(device, logger);
+    this.scopCalculator = new SCOPCalculator(device, logger);
+
+    // Cross-service event wiring
+    this.copCalculator.on('cop-calculated', (data) => {
+      this.rollingCOPCalculator.addDataPoint(data);
+      this.scopCalculator.processCOPData(data);
+    });
+  }
+}
+```
+
+### COPCalculator Service (`lib/services/cop-calculator.ts`)
+
+**Purpose**: Real-time efficiency calculations with 8 different methods and automatic quality selection.
+
+**Service Integration**:
+- **TuyaConnectionService**: Receives sensor data (DPS values) for calculations
+- **CapabilityHealthService**: Validates sensor data quality before using in calculations
+- **EnergyTrackingService**: Supplies external power measurement data
+- **SettingsManagerService**: Manages user preferences (method override, outlier detection)
+
+**Key Features**:
+- Automatic method selection based on data availability (±5% to ±30% accuracy range)
+- Compressor operation validation (returns COP = 0 when compressor not running)
+- Method transparency via `adlar_cop_method` capability
+- Diagnostic feedback for insufficient data ("No Power", "No Flow", "No Temp Δ")
+- Outlier detection prevents sensor malfunction from corrupting results
+
+**Calculation Lifecycle**:
+1. ServiceCoordinator initializes COPCalculator with device reference
+2. Service registers for sensor data updates (every 30 seconds)
+3. Method selection logic chooses highest accuracy method with sufficient data
+4. Result published to `adlar_cop` capability with confidence indicators
+5. Events emitted to RollingCOPCalculator and SCOPCalculator for aggregation
+
+### RollingCOPCalculator Service (`lib/services/rolling-cop-calculator.ts`)
+
+**Purpose**: Time-series analysis with daily (24h), weekly (7d), and monthly (30d) rolling averages.
+
+**Service Integration**:
+- **COPCalculator**: Subscribes to real-time COP calculation events
+- **CapabilityHealthService**: Validates data point quality before storage
+- **SettingsManagerService**: Persists circular buffer (1440 data points) across restarts
+
+**Key Features**:
+- Runtime-weighted averaging for accurate efficiency representation
+- Idle period awareness with automatic COP = 0 data point insertion
+- Trend detection (7 levels: strong improvement → significant decline)
+- Statistical outlier filtering (2.5 standard deviation threshold)
+- Memory-efficient circular buffer with automatic cleanup
+
+**Data Management**:
+- Stores 1440 COP data points (24h × 60min intervals) ≈ 288KB per device
+- Automatic data point generation during extended idle periods (>1 hour compressor off)
+- Persistence via SettingsManagerService for app restart survival
+- Incremental calculation updates (O(n) complexity) every 5 minutes
+
+**Published Capabilities**:
+- `adlar_cop_daily`: 24-hour rolling average (null during excessive idle periods)
+- `adlar_cop_weekly`: 7-day rolling average
+- `adlar_cop_monthly`: 30-day rolling average
+- `adlar_cop_trend`: Text description with 7 trend classifications
+
+### SCOPCalculator Service (`lib/services/scop-calculator.ts`)
+
+**Purpose**: Seasonal Coefficient of Performance per European standard EN 14825.
+
+**Service Integration**:
+- **COPCalculator**: Consumes COP data points for temperature bin classification
+- **RollingCOPCalculator**: Shares data point collection infrastructure
+- **SettingsManagerService**: Persists seasonal data across heating season (Oct 1 - May 15)
+- **ServiceCoordinator**: Manages initialization and seasonal boundary detection
+
+**Key Features**:
+- Temperature bin method (6 bins: -10°C to +20°C per EN 14825)
+- Quality-weighted averaging (direct thermal = 100%, temperature difference = 60%)
+- Seasonal coverage tracking (minimum 100 hours, recommended 400+ hours)
+- Confidence levels (high/medium/low) based on data quality and coverage
+
+**European Standard Compliance**:
+- Heating season: October 1st to May 15th (228 days)
+- Temperature bins with load ratio weighting
+- Method contribution breakdown for quality assessment
+- Real-world SCOP vs. laboratory ratings comparison
+
+**Published Capabilities**:
+- `adlar_scop`: Seasonal COP average (2.0-6.0 typical range)
+- `adlar_scop_quality`: Data quality indicator with confidence level
+
+### Cross-Service Event Flow
+
+**Real-Time COP Calculation Event Chain**:
+1. **TuyaConnectionService** receives sensor update (DPS change)
+2. **COPCalculator** triggered with new sensor values
+3. **CapabilityHealthService** validates sensor data quality
+4. **COPCalculator** selects best method and calculates COP
+5. **COPCalculator** emits `cop-calculated` event with data
+6. **RollingCOPCalculator** adds data point to circular buffer
+7. **SCOPCalculator** processes for temperature bin classification
+8. **Device** publishes to capabilities (`adlar_cop`, `adlar_cop_daily`, etc.)
+
+**Service Dependency Graph**:
+```
+ServiceCoordinator
+├── TuyaConnectionService (provides sensor data)
+├── CapabilityHealthService (validates data quality)
+├── SettingsManagerService (persists calculation data)
+├── EnergyTrackingService (provides power measurements)
+├── COPCalculator (emits cop-calculated events)
+│   ├── Consumes: Tuya sensor data
+│   └── Produces: Real-time COP values
+├── RollingCOPCalculator (listens to cop-calculated)
+│   ├── Consumes: COPCalculator events
+│   └── Produces: Daily/weekly/monthly averages, trends
+└── SCOPCalculator (listens to cop-calculated)
+    ├── Consumes: COPCalculator events
+    └── Produces: Seasonal efficiency (EN 14825)
+```
+
+### Benefits of COP Services Architecture
+
+1. **Separation of Concerns**: Each calculation type isolated in dedicated service
+2. **Event-Driven Updates**: Automatic propagation of COP data through system
+3. **Data Persistence**: Services manage their own storage via SettingsManagerService
+4. **Independent Testing**: Each calculation service can be unit tested independently
+5. **Memory Efficiency**: Shared data infrastructure with optimized storage
+6. **Extensibility**: New calculation services (e.g., annual COP) easily added
+7. **Service Health Monitoring**: ServiceCoordinator tracks calculation service status
 
 ## COP (Coefficient of Performance) System Architecture (v0.96.3+)
 
@@ -778,7 +937,7 @@ for (const capability of powerCapabilities) {
 | **System States** | ✅ Enabled | Static | `line` |
 | **Valve Positions** | ✅ Enabled | Static | `column` |
 
-## System Architecture Summary (v0.99.27)
+## System Architecture Summary (v0.99.40)
 
 This architecture provides a comprehensive foundation for reliable, maintainable, and extensible heat pump device integration featuring:
 

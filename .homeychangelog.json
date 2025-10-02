@@ -1,4 +1,7 @@
 {
+  "0.99.41": {
+    "en": "Documentation overhaul."
+  },
   "0.99.40": {
     "en": "Major code optimization: Removed 565+ lines of unused service methods and fixed external data architecture. External flow and ambient temperature data now correctly use flow-card based pattern instead of faulty cross-device access. Simplified SettingsManagerService to minimal stub. All changes verified with comprehensive testing."
   },

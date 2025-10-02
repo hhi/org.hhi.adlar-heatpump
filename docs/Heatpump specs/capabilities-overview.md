@@ -1,8 +1,8 @@
-# Adlar Heat Pump - Capabilities Overview (v0.99.8)
+# Adlar Heat Pump - Capabilities Overview (v0.99.40)
 
 This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management and dynamic capability control.
 
-## Summary Statistics (v0.99.8)
+## Summary Statistics (v0.99.40)
 
 - **Total Custom Adlar Capabilities**: 18 (added monthly COP in v0.99.8)
 - **Total Standard/Custom Capabilities**: 31
@@ -160,6 +160,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
+- **Service**: Calculated by **COPCalculator** service (`lib/services/cop-calculator.ts`)
 - **Note**: Higher values indicate better efficiency. Uses 8 calculation methods with automatic quality selection and diagnostic feedback.
 
 #### adlar_cop_daily
@@ -169,6 +170,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
 - **Added**: v0.98.5 for rolling time-series analysis
 - **Note**: Weighted by compressor runtime for accurate efficiency representation.
 
@@ -179,6 +181,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
 - **Added**: v0.98.5 for long-term efficiency analysis
 - **Note**: Helps identify optimal operating conditions and seasonal patterns.
 
@@ -189,6 +192,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
 - **Added**: v0.99.8 for extended seasonal analysis
 - **Note**: Ideal for detecting gradual performance changes, seasonal baseline establishment, and maintenance scheduling based on long-term efficiency trends.
 
@@ -198,6 +202,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Values**: "Strong improvement", "Moderate improvement", "Slight improvement", "Stable", "Slight decline", "Moderate decline", "Significant decline"
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
 - **Added**: v0.98.5 for predictive maintenance
 - **Enhanced**: v0.98.7 with full internationalization support
 - **Note**: Analyzes 24-hour COP trends for optimization guidance and maintenance alerts.
@@ -219,6 +224,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: SCOP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
+- **Service**: Calculated by **SCOPCalculator** service (`lib/services/scop-calculator.ts`)
 - **Added**: v0.98.1 for seasonal efficiency monitoring
 - **Note**: Calculated using European standard EN 14825 with temperature bin method over 6+ month heating season.
 
@@ -228,6 +234,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Values**: Quality percentages and confidence levels ("High confidence", "Medium confidence", "Low confidence")
 - **Icon**: `/assets/data-quality.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
+- **Service**: Calculated by **SCOPCalculator** service (`lib/services/scop-calculator.ts`)
 - **Added**: v0.98.1 for SCOP reliability assessment
 - **Note**: Shows data quality based on measurement method mix, seasonal coverage, and total data hours available.
 
@@ -245,6 +252,7 @@ This document provides a comprehensive overview of all device capabilities suppo
   - `"No Data"` (insufficient data with diagnostic info)
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
+- **Service**: Published by **COPCalculator** service (`lib/services/cop-calculator.ts`)
 - **Added**: v0.96.3 for calculation method transparency
 - **Enhanced**: v0.98.7 with diagnostic information and 8 calculation methods
 - **Note**: Enhanced with diagnostic feedback showing specific missing data ("No Power", "No Flow", "No Temp Δ", "Multi Fail") within 22-character display limit.
@@ -389,40 +397,97 @@ Capabilities are organized into logical categories:
 ### Insights & Analytics
 Most sensor capabilities support Homey's insights system for historical data tracking and trend analysis. Boolean state capabilities include custom insight titles for better user experience.
 
-### Capability Health Monitoring (v0.70.0+ / Enhanced v0.92.4+)
-The app includes an intelligent capability health monitoring system that tracks the availability and reliability of sensor data with user-controlled power management:
+### Capability Health Monitoring (v0.70.0+ / Service Architecture v0.99.23+)
+
+The app uses the **CapabilityHealthService** (`lib/services/capability-health-service.ts`) to track the availability and reliability of sensor data. This service is managed by the ServiceCoordinator and provides intelligent health monitoring with user-controlled power management.
+
+#### Service Architecture Integration
+
+**CapabilityHealthService** is one of 8 core services managed by ServiceCoordinator:
+
+```typescript
+class ServiceCoordinator {
+  private capabilityHealth: CapabilityHealthService | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    this.capabilityHealth = new CapabilityHealthService(device, logger);
+    await this.capabilityHealth.startMonitoring();
+  }
+
+  destroy(): void {
+    this.capabilityHealth?.stopMonitoring();
+  }
+}
+```
+
+**Cross-Service Integration**:
+
+- **TuyaConnectionService**: Provides capability update events for health tracking
+- **FlowCardManagerService**: Consumes health status for dynamic flow card registration
+- **SettingsManagerService**: Manages user preferences for power capability visibility
+- **COPCalculator**: Validates sensor data quality before using in efficiency calculations
 
 #### Health Tracking Features
+
 - **Null Value Detection**: Automatically identifies when capabilities return null values
-- **Data Availability Monitoring**: Tracks time since last valid data reception
-- **Health Status Classification**: Capabilities are classified as healthy or unhealthy based on data consistency
+- **Data Availability Monitoring**: Tracks time since last valid data reception (via service timestamps)
+- **Health Status Classification**: Service classifies capabilities as healthy or unhealthy based on data consistency
 - **Automatic Recovery**: Health status updates automatically when data becomes available
-- **User-Controlled Power Capabilities**: Optional power measurements can be disabled for cleaner interfaces
+- **Service-Level Persistence**: Health state tracked across app restarts via SettingsManagerService
 
 #### Health Metrics (DeviceConstants Integration)
+
+The CapabilityHealthService uses centralized constants for consistent thresholds:
+
 - **Null Count Threshold**: Capabilities with >10 consecutive null readings are marked unhealthy (`DeviceConstants.NULL_THRESHOLD`)
 - **Timeout Detection**: Capabilities without data for >5 minutes are considered unhealthy (`DeviceConstants.CAPABILITY_TIMEOUT_MS`)
-- **Health Check Frequency**: Status updates every 2 minutes (`DeviceConstants.HEALTH_CHECK_INTERVAL_MS`)
-- **Health Persistence**: Health status is tracked across app restarts
+- **Health Check Frequency**: Service updates status every 2 minutes (`DeviceConstants.HEALTH_CHECK_INTERVAL_MS`)
+- **Service Lifecycle**: Monitoring starts/stops with ServiceCoordinator lifecycle
 
 #### User-Controlled Capability Management (v0.92.4+)
-- **Power Measurements Toggle**: Users can disable 9 power-related capabilities via device settings
-- **Cleaner Interface**: Disable irrelevant capabilities for devices without power monitoring
-- **Dynamic Management**: Capabilities added/removed based on user preferences
-- **Flow Card Integration**: Power capability visibility automatically manages related flow card settings
+
+**Power Measurements Toggle** (via SettingsManagerService):
+
+- Users can disable 9 power-related capabilities via device settings
+- SettingsManagerService handles race condition prevention during capability changes
+- CapabilityHealthService automatically adjusts monitoring for dynamic capability lists
+- FlowCardManagerService receives capability change events for flow card updates
+
+**Service Event Flow**:
+
+1. User changes `enable_power_measurements` setting in UI
+2. **SettingsManagerService** validates and applies setting (deferred update pattern)
+3. **Device** adds/removes power capabilities
+4. **CapabilityHealthService** updates monitoring list
+5. **FlowCardManagerService** adjusts flow card registration
+6. **ServiceCoordinator** logs service health diagnostics
 
 #### Error Handling Integration (v0.92.4+)
-- **TuyaErrorCategorizer**: Structured error categorization for capability communication failures
-- **Smart Recovery**: Automatic retry for recoverable capability errors with appropriate delays
+
+**TuyaErrorCategorizer** integration:
+
+- **Structured error categorization** for capability communication failures
+- **Smart Recovery**: CapabilityHealthService marks capabilities unhealthy after recoverable errors
 - **User-Friendly Messages**: Clear error explanations when capabilities fail to update
 - **Context-Aware Handling**: Different recovery strategies based on error type and capability importance
 
 #### User-Facing Diagnostics
-- **Diagnostic Reports**: Generate detailed capability health reports via device settings
+
+**Service-Based Diagnostic Reports**:
+
+- **Diagnostic Reports**: CapabilityHealthService generates detailed health reports via device settings
 - **Health-Based Reporting**: Unhealthy capabilities prioritized at top of diagnostic reports
-- **Real-time Monitoring**: Health status updates every 2 minutes during operation
+- **Real-time Monitoring**: Service updates status every 2 minutes during operation
 - **Troubleshooting Support**: Clear identification of sensor connectivity issues
-- **Flow Card Integration**: Health status controls flow card availability in "auto" mode
+- **Flow Card Integration**: FlowCardManagerService consumes health status for "auto" mode registration
+
+#### Service Architecture Benefits
+
+1. **Separation of Concerns**: Health monitoring isolated in dedicated service
+2. **Centralized Logic**: Single source of truth for capability health status
+3. **Event-Driven Updates**: Automatic propagation of health changes to dependent services
+4. **Independent Testing**: Service can be unit tested independently of device class
+5. **Service Diagnostics**: ServiceCoordinator tracks CapabilityHealthService status
 
 #### Optional Power Capabilities
 These capabilities can be disabled via device settings for devices without power monitoring:

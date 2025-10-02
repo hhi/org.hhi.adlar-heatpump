@@ -1,3 +1,9 @@
+I used this test to validate the structure of flow card against the Homey flow schema. 
+One test succeeds and one test fails on purpose. 
+
+
+You need to install the schema validation facility:
+
 npm install -g ajv
 npm install -g ajv-cli
 #removed the _comment line from the capability-schema.json
