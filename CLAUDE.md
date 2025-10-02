@@ -45,16 +45,119 @@ Set `DEBUG=1` environment variable to enable debug features in the Homey app.
 
 ## Project Architecture
 
-This is a Homey app for integrating Adlar heat pump devices via Tuya's local API. The architecture follows Homey's app development patterns with TypeScript.
+This is a Homey app for integrating Adlar heat pump devices via Tuya's local API. The architecture follows Homey's app development patterns with TypeScript and implements a **Service-Oriented Architecture (v0.99.23+)** for code organization, testability, and maintainability.
 
 ### Core Components
 
 - **App Entry**: `app.ts` - Main Homey app class with debug mode support
 - **Driver**: `drivers/intelligent-heat-pump/driver.ts` - Handles device discovery and pairing
-- **Device**: `drivers/intelligent-heat-pump/device.ts` - Manages individual heat pump device instances
+- **Device**: `drivers/intelligent-heat-pump/device.ts` - Manages individual device instances, delegates to services
+- **Service Coordinator**: `lib/services/service-coordinator.ts` - Manages lifecycle of all 8 services
 - **Mappings**: `lib/definitions/adlar-mapping.ts` - Maps Tuya DPS (data points) to Homey capabilities
 - **Constants**: `lib/constants.ts` - Centralized configuration constants and thresholds
 - **Error Handling**: `lib/error-types.ts` - Comprehensive error categorization and recovery system
+
+### Service-Oriented Architecture (v0.99.23+)
+
+The app uses **8 specialized services** managed by ServiceCoordinator, eliminating code duplication and providing clear separation of concerns:
+
+#### Infrastructure Services (5)
+
+1. **TuyaConnectionService** (`lib/services/tuya-connection-service.ts`)
+   - Device communication via TuyAPI
+   - Automatic reconnection handling
+   - Connection health monitoring
+   - Event-driven sensor data updates
+
+2. **CapabilityHealthService** (`lib/services/capability-health-service.ts`)
+   - Real-time capability health tracking
+   - Null value detection and monitoring
+   - Data availability validation
+   - Health-based flow card registration
+
+3. **FlowCardManagerService** (`lib/services/flow-card-manager-service.ts`)
+   - Dynamic flow card registration (64 cards across 8 categories)
+   - Health-based auto-registration
+   - User preference management (disabled/auto/enabled modes)
+   - Cross-service event handling
+
+4. **EnergyTrackingService** (`lib/services/energy-tracking-service.ts`)
+   - External power measurement integration
+   - Energy consumption calculations
+   - Power capability management
+   - External device data validation
+
+5. **SettingsManagerService** (`lib/services/settings-manager-service.ts`)
+   - Race condition prevention (deferred updates pattern)
+   - Settings validation and persistence
+   - Power settings auto-management
+   - Seasonal data storage
+
+#### Calculation Services (3)
+
+6. **COPCalculator** (`lib/services/cop-calculator.ts`)
+   - Real-time COP calculations with 8 methods (±5% to ±30% accuracy)
+   - Automatic method selection based on data availability
+   - Compressor operation validation (COP = 0 when idle)
+   - Diagnostic feedback ("No Power", "No Flow", etc.)
+   - Outlier detection and confidence levels
+
+7. **RollingCOPCalculator** (`lib/services/rolling-cop-calculator.ts`)
+   - Time-series analysis (daily/weekly/monthly rolling averages)
+   - Trend detection (7 levels: strong improvement → significant decline)
+   - Runtime-weighted averaging
+   - Idle period awareness
+   - Circular buffer management (1440 data points)
+
+8. **SCOPCalculator** (`lib/services/scop-calculator.ts`)
+   - Seasonal COP per EN 14825 European standard
+   - Temperature bin method (6 bins: -10°C to +20°C)
+   - Quality-weighted averaging
+   - Seasonal coverage tracking (Oct 1 - May 15)
+   - Method contribution analysis
+
+#### Service Coordinator
+
+**ServiceCoordinator** (`lib/services/service-coordinator.ts`) manages initialization, lifecycle, and cross-service communication:
+
+```typescript
+class ServiceCoordinator {
+  // Service getters
+  getTuyaConnection(): TuyaConnectionService;
+  getCapabilityHealth(): CapabilityHealthService;
+  getFlowCardManager(): FlowCardManagerService;
+  getEnergyTracking(): EnergyTrackingService;
+  getSettingsManager(): SettingsManagerService;
+  getCOPCalculator(): COPCalculator;
+  getSCOPCalculator(): SCOPCalculator;
+  getRollingCOPCalculator(): RollingCOPCalculator;
+
+  // Unified lifecycle
+  async initialize(config: ServiceConfig): Promise<void>;
+  async onSettings(oldSettings, newSettings, changedKeys): Promise<void>;
+  destroy(): void;
+}
+```
+
+**Cross-Service Event Flow Example** (COP Calculation):
+
+1. **TuyaConnectionService** receives sensor update (DPS change)
+2. **COPCalculator** triggered with new sensor values
+3. **CapabilityHealthService** validates sensor data quality
+4. **COPCalculator** calculates COP and emits `cop-calculated` event
+5. **RollingCOPCalculator** adds data point to circular buffer
+6. **SCOPCalculator** processes for temperature bin classification
+7. **SettingsManagerService** persists updated data
+8. **Device** publishes to capabilities (`adlar_cop`, `adlar_cop_daily`, etc.)
+
+**Service Architecture Benefits:**
+
+- **Code Duplication Eliminated**: Shared functionality centralized in services
+- **Single Responsibility**: Each service handles one specific domain
+- **Testability**: Services can be unit tested independently
+- **Maintainability**: Changes isolated to relevant service
+- **Extensibility**: New services easily added without modifying existing code
+- **Fallback Safety**: Graceful degradation when services unavailable
 
 ### Key Architecture Patterns
 

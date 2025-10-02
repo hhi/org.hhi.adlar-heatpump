@@ -2,7 +2,97 @@
 
 ## Overview
 
-The Rolling COP (Coefficient of Performance) system provides time-series analysis of heat pump efficiency, enabling trend monitoring, performance optimization, and predictive maintenance. This system complements the existing real-time COP calculations by providing historical context and pattern analysis.
+The Rolling COP (Coefficient of Performance) system provides time-series analysis of heat pump efficiency, enabling trend monitoring, performance optimization, and predictive maintenance. This system is implemented as the **RollingCOPCalculator service** (`lib/services/rolling-cop-calculator.ts`), which complements the real-time COPCalculator service by providing historical context and pattern analysis.
+
+## RollingCOPCalculator Service Architecture (v0.99.23+)
+
+The Rolling COP calculation system is implemented as a dedicated service managed by the ServiceCoordinator, providing time-series analysis with daily, weekly, and monthly rolling averages.
+
+### Service Integration
+
+**RollingCOPCalculator** is one of 8 core services managed by ServiceCoordinator:
+
+```typescript
+class ServiceCoordinator {
+  private rollingCOPCalculator: RollingCOPCalculator | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    this.rollingCOPCalculator = new RollingCOPCalculator(device, logger);
+    await this.rollingCOPCalculator.initialize();
+
+    // Wire cross-service events
+    this.copCalculator.on('cop-calculated', (data) => {
+      this.rollingCOPCalculator.addDataPoint(data);
+    });
+  }
+}
+```
+
+**Cross-Service Integration**:
+
+- **COPCalculator**: RollingCOPCalculator subscribes to `cop-calculated` events for real-time data collection
+- **CapabilityHealthService**: Validates data point quality before storage in circular buffer
+- **SettingsManagerService**: Persists circular buffer (1440 data points ≈ 288KB) across app restarts
+- **ServiceCoordinator**: Manages initialization, lifecycle, and cross-service event wiring
+
+### Event-Driven Data Flow
+
+```typescript
+// Real-time data collection via service events
+class COPCalculator {
+  calculateCOP() {
+    const cop = this.performCalculation();
+
+    // Emit event for other services
+    this.emit('cop-calculated', {
+      timestamp: Date.now(),
+      cop: cop.value,
+      method: cop.method,
+      confidence: cop.confidence,
+      compressorRuntime: this.getCompressorRuntime()
+    });
+  }
+}
+
+// RollingCOPCalculator listens for events
+class RollingCOPCalculator {
+  initialize() {
+    // Subscribe to COPCalculator events via ServiceCoordinator
+    this.serviceCoordinator.getCOPCalculator().on('cop-calculated', (data) => {
+      this.addDataPoint(data);
+      this.updateRollingAverages();
+    });
+  }
+}
+```
+
+### Service Memory Management
+
+**Circular Buffer Architecture**:
+
+- Service maintains 1440 data points in memory (24h × 60min intervals)
+- Automatic cleanup of stale data older than 2× time window
+- Persistence via SettingsManagerService for app restart survival
+- Memory-efficient incremental updates (O(n) complexity)
+
+**Service Constants Integration**:
+
+```typescript
+// Rolling COP calculation constants from DeviceConstants
+static readonly ROLLING_COP_DATA_POINTS = 1440;        // 24h × 60min
+static readonly ROLLING_COP_MIN_DATA_POINTS = 12;     // 6 hours minimum
+static readonly ROLLING_COP_UPDATE_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+static readonly ROLLING_COP_OUTLIER_THRESHOLD = 2.5;  // Standard deviations
+static readonly ROLLING_COP_IDLE_MONITOR_INTERVAL_MS = 30 * 60 * 1000; // 30 min
+```
+
+### Service Benefits
+
+1. **Separation of Concerns**: Time-series analysis isolated from real-time COP calculations
+2. **Event-Driven Updates**: Automatic data collection via COPCalculator event subscription
+3. **Data Persistence**: SettingsManagerService handles circular buffer storage across restarts
+4. **Independent Testing**: Service can be unit tested independently of device class
+5. **Service Health Monitoring**: ServiceCoordinator tracks data collection and calculation status
 
 ## Key Features
 
@@ -144,12 +234,41 @@ Analyzes COP trend over a specified time period.
 **Arguments:**
 - Hours: Time period to analyze (1-168 hours)
 
-## Technical Implementation
+## Technical Implementation (Service Architecture)
 
-### Data Storage
-- **Circular buffer**: Stores last 1440 COP readings (24h × 60min intervals)
-- **Persistence**: Data saved to device settings for app restart survival
-- **Memory management**: Automatic cleanup of old data points
+### Data Storage (RollingCOPCalculator Service)
+
+**Service-Managed Circular Buffer**:
+
+- **Storage**: RollingCOPCalculator maintains circular buffer of 1440 data points in memory
+- **Persistence**: SettingsManagerService handles storage for app restart survival
+- **Memory management**: Service performs automatic cleanup of old data points
+- **Event-Driven Collection**: Adds data points on `cop-calculated` events from COPCalculator
+
+**Service Storage Pattern**:
+
+```typescript
+class RollingCOPCalculator {
+  private dataPoints: COPDataPoint[] = [];
+
+  async addDataPoint(data: COPDataPoint): Promise<void> {
+    // Validate via CapabilityHealthService
+    const isHealthy = this.serviceCoordinator
+      .getCapabilityHealth()
+      .isDataHealthy(data);
+
+    if (isHealthy) {
+      this.dataPoints.push(data);
+      this.trimOldData();
+
+      // Persist via SettingsManagerService
+      await this.serviceCoordinator
+        .getSettingsManager()
+        .saveRollingCOPData(this.dataPoints);
+    }
+  }
+}
+```
 
 ### Enhanced COPDataPoint Interface
 ```typescript
@@ -240,18 +359,37 @@ Statistical filtering using configurable standard deviation thresholds:
 }
 ```
 
-## Integration with Existing Systems
+## Integration with Existing Systems (Service Architecture)
 
-### Real-Time COP Integration
-- **Data collection**: Every valid COP calculation adds a data point
-- **Unified confidence**: Uses same confidence levels as real-time COP
-- **Method tracking**: Records which calculation method was used
-- **External data**: Integrates with external device measurements
+### Real-Time COP Integration (Service Events)
 
-### SCOP Integration
-- **Complementary analysis**: Rolling COP for short-term, SCOP for seasonal
-- **Shared data sources**: Uses same measurement infrastructure
-- **Consistency**: Aligned calculation confidence and quality indicators
+**Event-Driven Data Collection**:
+
+- **Event Subscription**: RollingCOPCalculator subscribes to COPCalculator's `cop-calculated` events
+- **Unified confidence**: Uses same confidence levels from COPCalculator service
+- **Method tracking**: Records which calculation method was used (direct thermal, power module, etc.)
+- **External data**: Integrates with external device measurements via EnergyTrackingService
+- **Service Coordination**: ServiceCoordinator manages event wiring between services
+
+**Cross-Service Event Flow**:
+
+1. COPCalculator calculates COP value
+2. COPCalculator emits `cop-calculated` event
+3. ServiceCoordinator routes event to subscribers
+4. RollingCOPCalculator receives event
+5. CapabilityHealthService validates data quality
+6. RollingCOPCalculator adds data point to buffer
+7. SettingsManagerService persists updated buffer
+
+### SCOP Integration (Service Collaboration)
+
+**Complementary Service Architecture**:
+
+- **Rolling COP**: Short-term efficiency trends (RollingCOPCalculator service)
+- **SCOP**: Seasonal efficiency averages (SCOPCalculator service)
+- **Shared data sources**: Both services consume COPCalculator `cop-calculated` events
+- **Consistency**: Aligned calculation confidence and quality indicators via CapabilityHealthService
+- **Service Coordination**: ServiceCoordinator manages lifecycle and data sharing
 
 ## Automation Examples
 

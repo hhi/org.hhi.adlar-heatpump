@@ -73,12 +73,72 @@ In typical daily use, you'll see:
 
 ---
 
+## COPCalculator Service Architecture (v0.99.23+)
+
+The COP calculation system is implemented as the **COPCalculator service** (`lib/services/cop-calculator.ts`), which is managed by the ServiceCoordinator and integrates with other services for data collection and quality assessment.
+
+### Service Integration
+
+**COPCalculator** is one of 8 core services managed by ServiceCoordinator:
+
+```typescript
+class ServiceCoordinator {
+  private copCalculator: COPCalculator | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    this.copCalculator = new COPCalculator(device, logger);
+    await this.copCalculator.startCalculations();
+  }
+}
+```
+
+**Cross-Service Integration**:
+
+- **TuyaConnectionService**: Provides real-time sensor data (DPS values) for calculations
+- **CapabilityHealthService**: Validates sensor data quality before using in calculations
+- **EnergyTrackingService**: Supplies external power measurement data for Method 1 (Direct Thermal)
+- **SettingsManagerService**: Manages user preferences (method override, outlier detection settings)
+- **RollingCOPCalculator**: Subscribes to `cop-calculated` events for time-series analysis
+- **SCOPCalculator**: Subscribes to `cop-calculated` events for seasonal efficiency tracking
+
+### Calculation Lifecycle
+
+1. **Initialization**: ServiceCoordinator initializes COPCalculator with device reference
+2. **Data Collection**: TuyaConnectionService emits sensor update events (every 30 seconds)
+3. **Health Validation**: CapabilityHealthService confirms sensor data quality
+4. **Method Selection**: COPCalculator chooses highest accuracy method with sufficient data
+5. **Calculation**: Selected method calculates COP value with confidence level
+6. **Publishing**: Result published to `adlar_cop` capability with method transparency
+7. **Event Emission**: `cop-calculated` event emitted for RollingCOPCalculator and SCOPCalculator
+8. **Service Diagnostics**: ServiceCoordinator tracks calculation service health
+
+### Service Constants Integration
+
+COPCalculator uses centralized constants from `DeviceConstants` class:
+
+```typescript
+// COP calculation constants
+static readonly COP_CALCULATION_INTERVAL_MS = 30 * 1000; // 30 seconds
+static readonly EXTERNAL_DEVICE_QUERY_TIMEOUT_MS = 5 * 1000; // 5 seconds
+static readonly MIN_VALID_COP = 0.5;
+static readonly MAX_VALID_COP = 8.0;
+
+// COP ranges for validation
+static readonly COP_RANGES = {
+  AIR_TO_WATER_MIN: 2.5,
+  AIR_TO_WATER_MAX: 4.5,
+  GROUND_SOURCE_MIN: 3.5,
+  GROUND_SOURCE_MAX: 5.5,
+  // ... additional ranges
+};
+```
+
 ## COP Method Visibility and Diagnostics
 
-**Enhanced in v0.98.7**:
+**Enhanced in v0.98.7** with service architecture:
 
 - The `adlar_cop_method` capability displays which calculation method is currently being used, providing transparency into the COP calculation process
-- **Enhanced compressor operation validation**: All COP methods now automatically return `COP = 0` when compressor is not running (frequency ≤ 0 Hz), ensuring physically accurate results
+- **Enhanced compressor operation validation**: COPCalculator service automatically returns `COP = 0` when compressor is not running (frequency ≤ 0 Hz), ensuring physically accurate results
 - **Diagnostic Information**: When insufficient data is available, specific diagnostic messages show exactly what's missing
 
 The sensor shows:
@@ -92,7 +152,7 @@ The sensor shows:
 
 ### Diagnostic Messages
 
-When COP calculation fails, you'll see specific 22-character diagnostic messages:
+When COP calculation fails, COPCalculator service provides specific 22-character diagnostic messages:
 
 - **"No Power"**: Power measurement unavailable for direct thermal method
 - **"No Thermal"**: Water flow or temperature difference unavailable
@@ -748,343 +808,6 @@ Final COP = 2.9 × 1.13 × 0.95 × 1.03 × 1.04 = 3.37
 - System age and maintenance
 - Refrigerant charge variations
 - Control system tuning
-
----
-
-## Method 4: Refrigerant Circuit Analysis (Advanced)
-
-### Formula
-
-```
-COP = Carnot_theoretical × η_refrigerant
-
-Where:
-Carnot_theoretical = T_hot / (T_hot - T_cold)
-η_refrigerant = refrigerant_efficiency_factor
-```
-
-### Variables
-
-- **T_hot** = High-pressure saturation temperature in Kelvin (DPS 35)
-- **T_cold** = Low-pressure saturation temperature in Kelvin (DPS 36)
-- **η_refrigerant** = Refrigerant efficiency factor (0.25 to 0.65)
-- **T_suction** = Suction temperature (DPS 41)
-- **T_discharge** = Discharge temperature (DPS 24)
-
-### Step-by-Step Calculation
-
-1. **Convert temperatures to Kelvin**:
-
-   ```
-   T_hot = high_pressure_temp + 273.15
-   T_cold = low_pressure_temp + 273.15
-   ```
-
-2. **Calculate theoretical Carnot COP**:
-
-   ```
-   Carnot_COP = T_hot ÷ (T_hot - T_cold)
-   ```
-
-3. **Calculate refrigerant efficiency**:
-
-   ```
-   base_efficiency = 0.45
-   temp_span = T_hot - T_cold
-
-   if temp_span > 60K: efficiency *= 0.9
-   elif temp_span < 30K: efficiency *= 0.85
-   else: efficiency *= 1.05
-   ```
-
-4. **Apply compressor frequency adjustment**:
-
-   ```
-   efficiency += (compressor_freq / 100 - 0.5) × 0.1
-   efficiency = clamp(efficiency, 0.25, 0.65)
-   ```
-
-5. **Calculate final COP**:
-
-   ```
-   COP = Carnot_COP × efficiency
-   ```
-
-### Example
-
-```
-Given:
-- High pressure temperature: 65°C (DPS 35)
-- Low pressure temperature: -10°C (DPS 36)
-- Compressor frequency: 75 Hz
-
-Calculation:
-T_hot = 65 + 273.15 = 338.15 K
-T_cold = -10 + 273.15 = 263.15 K
-Carnot_COP = 338.15 ÷ (338.15 - 263.15) = 338.15 ÷ 75 = 4.51
-temp_span = 75K → efficiency = 0.45 × 0.9 = 0.405 (penalty for high span)
-compressor_adj = (75/100 - 0.5) × 0.1 = 0.025
-final_efficiency = 0.405 + 0.025 = 0.43
-COP = 4.51 × 0.43 = 1.94
-```
-
----
-
-## Method 5: Valve Position Correlation (Advanced)
-
-### Formula
-
-```
-COP = base_COP × valve_efficiency_factor × frequency_factor
-
-Where:
-base_COP = f(temperature_difference)
-valve_efficiency_factor = f(EEV_position, EVI_position)
-```
-
-### Variables
-
-- **EEV_steps** = Electronic Expansion Valve pulse-steps (DPS 16)
-- **EVI_steps** = Enhanced Vapor Injection valve pulse-steps (DPS 25)
-- **ΔT** = Temperature difference = T_outlet - T_inlet
-- **compressor_freq** = Compressor frequency (Hz)
-
-### Step-by-Step Calculation
-
-1. **Calculate base COP from temperature difference**:
-
-   ```
-   if ΔT > 5°C:
-       base_COP = 2.5 + (ΔT - 5) × 0.12
-   else:
-       base_COP = 2.0
-   ```
-
-2. **Calculate EEV efficiency factor**:
-
-   ```
-   if EEV_steps < 100: eev_factor = 0.7
-   elif EEV_steps > 450: eev_factor = 0.8
-   else: eev_factor = 1.0 + sin((EEV_steps - 100)/350 × π) × 0.15
-   ```
-
-3. **Calculate EVI efficiency factor**:
-
-   ```
-   if EVI_steps < 50: evi_factor = 0.85
-   elif EVI_steps > 350: evi_factor = 0.9
-   else: evi_factor = 1.0 + sin((EVI_steps - 50)/300 × π) × 0.1
-   ```
-
-4. **Apply frequency factor**:
-
-   ```
-   frequency_factor = 0.9 + (compressor_freq / 100) × 0.2
-   ```
-
-5. **Calculate final COP**:
-
-   ```
-   COP = base_COP × eev_factor × evi_factor × frequency_factor
-   COP = min(COP, 6.5)  // Cap at realistic maximum
-   ```
-
-### Example
-
-```
-Given:
-- EEV position: 300 pulse-steps (DPS 16)
-- EVI position: 200 pulse-steps (DPS 25)
-- Temperature difference: 25°C
-- Compressor frequency: 80 Hz
-
-Calculation:
-base_COP = 2.5 + (25 - 5) × 0.12 = 2.5 + 2.4 = 4.9
-eev_factor = 1.0 + sin((300-100)/350 × π) × 0.15 = 1.0 + 0.14 = 1.14
-evi_factor = 1.0 + sin((200-50)/300 × π) × 0.1 = 1.0 + 0.09 = 1.09
-frequency_factor = 0.9 + (80/100) × 0.2 = 0.9 + 0.16 = 1.06
-COP = 4.9 × 1.14 × 1.09 × 1.06 = 6.5 (capped)
-```
-
----
-
-## Method 6: Power Module Auto-Detection (Advanced)
-
-### Formula
-
-```
-For Single-phase: COP = Q_thermal / P_internal
-For Three-phase: COP = Q_thermal / P_calculated
-
-Where:
-P_calculated = √3 × V_avg × I_avg × cos(φ)
-Q_thermal = ṁ × Cp × ΔT
-```
-
-### Variables
-
-- **power_module_type** = 0 (none), 1 (single-phase), 2 (three-phase) (DPS 106)
-- **P_internal** = Internal power measurement (DPS 104)
-- **V_A, V_B, V_C** = Phase voltages (DPS 103, 111, 112)
-- **I_A, I_B, I_C** = Phase currents (DPS 102, 109, 110)
-- **cos(φ)** = Power factor (typically 0.85 for heat pump compressors)
-
-### Step-by-Step Calculation
-
-1. **Determine power calculation method**:
-
-   ```
-   if power_module_type == 1 AND P_internal > 0:
-       calculated_power = P_internal
-       power_source = "single_phase_internal"
-
-   elif power_module_type == 2:
-       V_avg = (V_A + V_B + V_C) / 3
-       I_avg = (I_A + I_B + I_C) / 3
-       calculated_power = √3 × V_avg × I_avg × 0.85
-       power_source = "three_phase_calculated"
-   ```
-
-2. **Calculate thermal output**:
-
-   ```
-   mass_flow_rate = water_flow_L/min ÷ 60  // kg/s
-   thermal_output = mass_flow_rate × 4186 × ΔT
-   ```
-
-3. **Calculate COP**:
-
-   ```
-   COP = thermal_output ÷ calculated_power
-   ```
-
-### Example
-
-```
-Given (Three-phase):
-- Power module type: 2 (three-phase)
-- Phase A: 230V, 8.5A
-- Phase B: 225V, 8.2A
-- Phase C: 235V, 8.8A
-- Water flow: 15 L/min
-- Temperature difference: 20°C
-
-Calculation:
-V_avg = (230 + 225 + 235) ÷ 3 = 230V
-I_avg = (8.5 + 8.2 + 8.8) ÷ 3 = 8.5A
-calculated_power = √3 × 230 × 8.5 × 0.85 = 2873W
-mass_flow_rate = 15 ÷ 60 = 0.25 kg/s
-thermal_output = 0.25 × 4186 × 20 = 20,930W
-COP = 20,930 ÷ 2873 = 7.28
-
-Note: This high COP suggests very favorable conditions!
-```
-
----
-
-## Method 7: Power Estimation (Advanced)
-
-### Formula
-
-```
-COP = Q_thermal / P_estimated
-
-Where:
-P_estimated = P_compressor + P_fan + P_auxiliary
-P_compressor = P_base + (P_max - P_base) × (freq_normalized^1.8)
-P_fan = P_base + (P_max - P_base) × (freq_normalized^2.2)
-Q_thermal = ṁ × Cp × ΔT
-```
-
-### Variables
-
-- **P_compressor** = Estimated compressor power (500-4000W based on frequency)
-- **P_fan** = Estimated fan motor power (50-300W based on speed)
-- **P_auxiliary** = Auxiliary systems power (150-200W for pumps, controls)
-- **compressor_freq** = Compressor frequency in Hz (DPS 20)
-- **fan_freq** = Fan motor frequency in Hz (DPS 40)
-- **freq_normalized** = Normalized frequency (0-1 range)
-
-### Step-by-Step Calculation
-
-1. **Normalize compressor frequency**:
-
-   ```
-   comp_freq_norm = (comp_freq - 20) / (120 - 20)
-   comp_freq_norm = clamp(comp_freq_norm, 0, 1)
-   ```
-
-2. **Calculate compressor power** (using power curve):
-
-   ```
-   P_compressor = 500 + (4000 - 500) × (comp_freq_norm^1.8)
-   ```
-
-3. **Normalize fan frequency**:
-
-   ```
-   fan_freq_norm = (fan_freq - 10) / (100 - 10)
-   fan_freq_norm = clamp(fan_freq_norm, 0, 1)
-   ```
-
-4. **Calculate fan power** (using fan laws):
-
-   ```
-   P_fan = 50 + (300 - 50) × (fan_freq_norm^2.2)
-   ```
-
-5. **Calculate auxiliary power**:
-
-   ```
-   flow_normalized = min(1, water_flow / 50)
-   P_auxiliary = 150 + 50 × flow_normalized
-   ```
-
-6. **Apply defrost multiplier** (if defrosting):
-
-   ```
-   if defrosting:
-       P_total = (P_compressor + P_fan + P_auxiliary) × 1.3
-   else:
-       P_total = P_compressor + P_fan + P_auxiliary
-   ```
-
-7. **Calculate thermal output and COP**:
-
-   ```
-   mass_flow_rate = water_flow_L/min ÷ 60  // kg/s
-   thermal_output = mass_flow_rate × 4186 × ΔT
-   COP = thermal_output ÷ P_total
-   ```
-
-### Example
-
-```
-Given:
-- Compressor frequency: 75 Hz
-- Fan motor frequency: 60 Hz
-- Water flow: 20 L/min
-- Temperature difference: 18°C
-- Defrosting: No
-
-Calculation:
-comp_freq_norm = (75 - 20) / (120 - 20) = 55/100 = 0.55
-P_compressor = 500 + 3500 × (0.55^1.8) = 500 + 3500 × 0.42 = 1970W
-
-fan_freq_norm = (60 - 10) / (100 - 10) = 50/90 = 0.56
-P_fan = 50 + 250 × (0.56^2.2) = 50 + 250 × 0.28 = 120W
-
-flow_normalized = min(1, 20/50) = 0.4
-P_auxiliary = 150 + 50 × 0.4 = 170W
-
-P_total = 1970 + 120 + 170 = 2260W
-
-mass_flow_rate = 20 ÷ 60 = 0.33 kg/s
-thermal_output = 0.33 × 4186 × 18 = 24,885W
-COP = 24,885 ÷ 2260 = 11.0
-
-Note: This high COP indicates very efficient operation!
-```
 
 ---
 

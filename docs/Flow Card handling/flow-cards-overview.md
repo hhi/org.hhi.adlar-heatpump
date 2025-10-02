@@ -1,8 +1,8 @@
-# Adlar Heat Pump - Flow Cards Overview (v0.99.8)
+# Adlar Heat Pump - Flow Cards Overview (v0.99.40)
 
 This document provides a comprehensive overview of all flow cards available in the Adlar Heat Pump app, categorized by type, tier, and use case, with advanced user control and insights management.
 
-## Summary Statistics (v0.99.8)
+## Summary Statistics (v0.99.40)
 
 - **Total Flow Cards**: 60
 - **Triggers**: 32
@@ -575,9 +575,49 @@ AND set_target_temperature to [[current_temperature - 1]]°C
 5. **Safety Interlocks**: Always include fault conditions in critical automation flows
 6. **Progressive Efficiency**: Start with ECO mode, escalate to Normal/Boost as needed
 
-## Dynamic Flow Card Management (v0.70.0+ / Enhanced v0.92.4+)
+## Dynamic Flow Card Management (v0.70.0+ / Service Architecture v0.99.23+)
 
-The app features an intelligent flow card management system that adapts to device capabilities and sensor health with comprehensive user control:
+The app uses the **FlowCardManagerService** (`lib/services/flow-card-manager-service.ts`) to intelligently manage flow card registration based on device capabilities and sensor health. This service is managed by the ServiceCoordinator and provides comprehensive user control over automation complexity.
+
+#### Service Architecture Integration
+
+**FlowCardManagerService** is one of 8 core services managed by ServiceCoordinator:
+
+```typescript
+class ServiceCoordinator {
+  private flowCardManager: FlowCardManagerService | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    this.flowCardManager = new FlowCardManagerService(device, logger);
+    await this.flowCardManager.registerFlowCards(settings);
+  }
+
+  async onSettings(oldSettings: any, newSettings: any, changedKeys: string[]): Promise<void> {
+    // Re-register flow cards when user changes preferences
+    if (changedKeys.some(key => key.startsWith('flow_'))) {
+      await this.flowCardManager?.updateFlowCardRegistration(newSettings);
+    }
+  }
+}
+```
+
+**Cross-Service Integration**:
+
+- **CapabilityHealthService**: Provides capability health status for "auto" mode registration
+- **SettingsManagerService**: Manages user flow card preferences and power measurement settings
+- **TuyaConnectionService**: Listens for trigger events (temperature alerts, state changes, etc.)
+- **COPCalculator/RollingCOPCalculator**: Provide efficiency data for COP-related flow cards
+
+**Registration Event Flow**:
+
+1. User changes flow card setting (`flow_temperature_alerts = "enabled"`)
+2. **SettingsManagerService** validates and applies setting (deferred pattern)
+3. **ServiceCoordinator** triggers `onSettings` with changed keys
+4. **FlowCardManagerService** receives update request
+5. **CapabilityHealthService** queries capability health (for auto mode)
+6. **FlowCardManagerService** unregisters old flow cards for category
+7. **FlowCardManagerService** registers new flow cards based on setting + health
+8. Flow cards become available/unavailable in Homey Flow editor
 
 ### Three-Mode Control System (v0.92.4+)
 Each flow card category can be controlled individually via device settings:
@@ -597,30 +637,109 @@ Each flow card category can be controlled individually via device settings:
 - **`flow_state_alerts`** - System state change flow cards (5 cards)
 - **`flow_expert_mode`** - Advanced diagnostic flow cards (3 cards)
 
-### Capability Health Detection
-- **Healthy Criteria**: Recent data (< 5 minutes), < 10 consecutive null values
-- **Auto Mode Logic**: Only registers flow cards for capabilities with healthy, recent data
-- **Enabled Mode Logic**: Registers all available capability flow cards regardless of health
-- **Real-time Updates**: Flow card availability updates every 2 minutes based on sensor health
+### Capability Health Detection (Service Integration)
 
-### Settings-Based Registration Example
+**Health Data Source**: FlowCardManagerService queries CapabilityHealthService for real-time health status:
+
 ```typescript
-// When user sets flow_temperature_alerts = "enabled"
-switch (userSetting) {
-  case 'disabled': return false;           // No temperature cards
-  case 'enabled':  return caps.length > 0; // All temperature cards  
-  case 'auto':     return caps.length > 0  // Only healthy temperature cards
-                   && caps.some(cap => hasHealthyData(cap));
+// FlowCardManagerService delegates to CapabilityHealthService
+const healthyCapabilities = this.serviceCoordinator
+  .getCapabilityHealth()
+  .getHealthyCapabilities();
+
+const capabilitiesWithData = this.serviceCoordinator
+  .getCapabilityHealth()
+  .getCapabilitiesWithRecentData();
+```
+
+**Healthy Criteria** (from CapabilityHealthService):
+
+- Recent data (< 5 minutes, `DeviceConstants.CAPABILITY_TIMEOUT_MS`)
+- < 10 consecutive null values (`DeviceConstants.NULL_THRESHOLD`)
+- Service monitoring active (health checks every 2 minutes)
+
+**Registration Logic by Mode**:
+
+- **Auto Mode**: FlowCardManagerService only registers cards for capabilities with healthy, recent data (queries CapabilityHealthService)
+- **Enabled Mode**: Registers all available capability flow cards regardless of health (bypasses health check)
+- **Real-time Updates**: Flow card availability updates every 2 minutes when CapabilityHealthService health check runs
+
+### Settings-Based Registration Example (Service Architecture)
+
+```typescript
+// FlowCardManagerService.shouldRegisterCategory()
+// Called by ServiceCoordinator during onSettings
+async shouldRegisterCategory(category: string, userSetting: string): Promise<boolean> {
+  const availableCaps = this.getCapabilitiesForCategory(category);
+
+  switch (userSetting) {
+    case 'disabled':
+      return false;  // No cards for this category
+
+    case 'enabled':
+      return availableCaps.length > 0;  // All cards if capabilities exist
+
+    case 'auto':
+    default:
+      // Query CapabilityHealthService for health status
+      const healthyCapabilities = this.serviceCoordinator
+        .getCapabilityHealth()
+        .getHealthyCapabilities();
+
+      const capabilitiesWithData = this.serviceCoordinator
+        .getCapabilityHealth()
+        .getCapabilitiesWithRecentData();
+
+      // Only register if capabilities exist AND have healthy data
+      return availableCaps.length > 0
+             && availableCaps.some(cap => capabilitiesWithData.includes(cap));
+  }
 }
 ```
 
 ### Power Settings Auto-Management & Insights Integration (v0.92.6+)
-- **Cascade Behavior**: When `enable_power_measurements = false` → Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
-- **Auto-Recovery**: When `enable_power_measurements = true` → Resets related flow settings to `auto`
-- **Insights Management**: Power insights dynamically disabled/enabled with capability changes
+
+**Service Coordination Pattern**:
+
+```typescript
+// ServiceCoordinator.onSettings() orchestrates cross-service updates
+async onSettings(oldSettings: any, newSettings: any, changedKeys: string[]): Promise<void> {
+  if (changedKeys.includes('enable_power_measurements')) {
+    const enablePower = newSettings.enable_power_measurements;
+
+    // 1. SettingsManagerService handles race condition prevention
+    const settingsToUpdate = this.settingsManager.preparePowerSettingsUpdate(enablePower);
+
+    // 2. Device adds/removes power capabilities
+    await this.device.managePowerCapabilities(enablePower);
+
+    // 3. CapabilityHealthService updates monitoring list
+    this.capabilityHealth.refreshMonitoringList();
+
+    // 4. FlowCardManagerService adjusts flow card registration
+    await this.flowCardManager.updatePowerFlowCards(enablePower, settingsToUpdate);
+
+    // 5. SettingsManagerService applies deferred settings update
+    this.settingsManager.applyDeferredSettings(settingsToUpdate);
+  }
+}
+```
+
+**Cascade Behavior** (via SettingsManagerService and FlowCardManagerService):
+
+- When `enable_power_measurements = false` → Auto-disables `flow_power_alerts`, `flow_voltage_alerts`, `flow_current_alerts`
+- When `enable_power_measurements = true` → Resets related flow settings to `auto`
+- **Insights Management**: Power insights dynamically disabled/enabled with capability changes (device-level)
 - **Clean Default Experience**: Power insights disabled by default, aligned with flow card visibility
 - **User Flexibility**: Manual insights control preserved for users needing detailed monitoring
 - **Consistency**: Prevents inconsistent configuration states between capabilities, flow cards, and insights
+
+**Service Benefits**:
+
+1. **Atomic Updates**: All related services updated in coordinated transaction
+2. **Race Condition Prevention**: SettingsManagerService ensures single settings call
+3. **Event Propagation**: ServiceCoordinator orchestrates cross-service communication
+4. **Service Isolation**: Each service handles its domain (settings, health, flow cards)
 
 ### User Interface Integration
 Access via **Device Settings → Flow Card Controls**:
