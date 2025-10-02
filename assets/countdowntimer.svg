@@ -1,0 +1,39 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle for visual balance -->
+  <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="4" opacity="0.1"/>
+
+  <!-- Main clock face circle -->
+  <circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" stroke-width="5"/>
+
+  <!-- Progress ring segments (countdown indicator) -->
+  <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="8" opacity="0.4" stroke-dasharray="12 4" stroke-linecap="round"/>
+
+  <!-- Hour markers at 12, 3, 6, 9 positions -->
+  <line x1="50" y1="13" x2="50" y2="20" stroke="currentColor" stroke-width="4" opacity="0.8"/>
+  <line x1="87" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="4" opacity="0.8"/>
+  <line x1="50" y1="87" x2="50" y2="80" stroke="currentColor" stroke-width="4" opacity="0.8"/>
+  <line x1="13" y1="50" x2="20" y2="50" stroke="currentColor" stroke-width="4" opacity="0.8"/>
+
+  <!-- Small hour indicators between main markers -->
+  <line x1="64" y1="20" x2="64" y2="24" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+  <line x1="76" y1="36" x2="72" y2="36" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+  <line x1="76" y1="64" x2="72" y2="64" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+  <line x1="64" y1="80" x2="64" y2="76" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+
+  <!-- Clock center dot -->
+  <circle cx="50" cy="50" r="3.5" fill="currentColor" opacity="0.9"/>
+
+  <!-- Clock hands (hour and minute) showing countdown -->
+  <!-- Hour hand pointing to ~10 o'clock position -->
+  <line x1="50" y1="50" x2="41" y2="32" stroke="currentColor" stroke-width="5" opacity="0.9" stroke-linecap="round"/>
+  <!-- Minute hand pointing to ~2 o'clock position -->
+  <line x1="50" y1="50" x2="65" y2="38" stroke="currentColor" stroke-width="4" opacity="0.8" stroke-linecap="round"/>
+
+  <!-- Countdown flow indicators (arrows showing time progression) -->
+  <path d="M16 22 L10 15 L14 15 L14 10 L22 10 L22 15 L26 15 Z" fill="currentColor" opacity="0.8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M84 78 L90 85 L86 85 L86 90 L78 90 L78 85 L74 85 Z" fill="currentColor" opacity="0.8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Time segment indicator bar (showing elapsed/remaining time) -->
+  <rect x="6" y="46" width="8" height="20" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+  <rect x="7" y="54" width="6" height="11" rx="3" ry="3" fill="currentColor" opacity="0.7"/>
+</svg>

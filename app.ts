@@ -99,8 +99,38 @@ class MyApp extends App {
       await enableDebugInspector(); // Uncomment if enableDebugInspector is available
     }
 
+    // Global safety net for unhandled promise rejections (production crash prevention)
+    process.on('unhandledRejection', (reason, promise) => {
+      this.error('⚠️ UNHANDLED PROMISE REJECTION - App crash prevented:', reason);
+      this.error('Promise:', promise);
+
+      // Send notification to user for critical errors
+      this.homey.notifications.createNotification({
+        excerpt: 'Heat Pump App: Internal error detected - check app diagnostics',
+      }).catch(() => {
+        this.error('Failed to send unhandledRejection notification');
+      });
+    });
+
+    // Global safety net for uncaught exceptions (last resort crash prevention)
+    process.on('uncaughtException', (error) => {
+      this.error('⚠️ UNCAUGHT EXCEPTION - Critical error:', error);
+
+      // Send critical notification to user
+      this.homey.notifications.createNotification({
+        excerpt: 'Heat Pump App: Critical error - app may be unstable, please restart',
+      }).catch(() => {
+        this.error('Failed to send uncaughtException notification');
+      });
+
+      // Log stack trace for debugging
+      if (error.stack) {
+        this.error('Stack trace:', error.stack);
+      }
+    });
+
     await this.initFlowCards();
-    this.log('MyApp has been initialized');
+    this.log('MyApp has been initialized with production-ready error handlers');
   }
 
   async initFlowCards() {
