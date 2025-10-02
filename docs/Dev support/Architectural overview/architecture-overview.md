@@ -1,4 +1,4 @@
-# Architecture Overview (v0.99.40)
+# Architecture Overview (v0.99.46)
 
 This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the Service Coordinator pattern, utility libraries, and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
 
@@ -486,11 +486,17 @@ static readonly POWER_ESTIMATION = {
 4. **Outlier Detection**: Prevents unrealistic values from sensor malfunctions
 5. **Comprehensive Testing**: Full debug framework for development and troubleshooting
 
-## Error Handling Architecture
+## Error Handling Architecture (Enhanced v0.99.46)
 
 ### TuyaErrorCategorizer (`lib/error-types.ts`)
 
 The error handling system provides structured error categorization, recovery guidance, and improved debugging capabilities.
+
+**Production-Ready Enhancements (v0.99.46)**:
+- **Crash Prevention**: Triple-layer error handling architecture
+- **Global Error Handlers**: Process-level unhandled rejection protection
+- **Device Status Sync**: Automatic availability updates based on connection state
+- **ECONNRESET Resilience**: Specific handling for connection reset errors
 
 #### Error Categories (TuyaErrorType)
 
@@ -533,6 +539,115 @@ Creates structured log messages for debugging and monitoring.
 ##### `shouldReconnect(categorizedError: CategorizedError): boolean`
 
 Determines if error should trigger device reconnection attempt.
+
+### Triple-Layer Crash Prevention (v0.99.46)
+
+The production-ready architecture implements three layers of error protection to prevent app crashes:
+
+#### Layer 1: Specific Error Handlers
+
+**Async setTimeout/setInterval Protection**:
+```typescript
+// TuyaConnectionService reconnection (lib/services/tuya-connection-service.ts:357)
+this.reconnectInterval = this.device.homey.setTimeout(() => {
+  this.attemptReconnectionWithRecovery().catch((error) => {
+    // Prevent unhandled rejection crash
+    this.logger('Critical error in scheduled reconnection:', error);
+
+    // Apply aggressive backoff and schedule retry
+    this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32);
+    this.consecutiveFailures++;
+    this.scheduleNextReconnectionAttempt();
+  });
+}, adaptiveInterval);
+```
+
+**Circuit Breaker Protection**:
+```typescript
+// Synchronous error handling for circuit breaker cooldown
+this.reconnectInterval = this.device.homey.setTimeout(() => {
+  try {
+    this.scheduleNextReconnectionAttempt();
+  } catch (error) {
+    this.logger('Error during circuit breaker cooldown check:', error);
+  }
+}, 10000);
+```
+
+#### Layer 2: Device Status Synchronization
+
+**Automatic Unavailable Status** (lib/services/tuya-connection-service.ts:440-462):
+```typescript
+// Mark device unavailable on non-recoverable errors
+if (!error.recoverable && this.consecutiveFailures <= 3) {
+  await this.device.setUnavailable(`Connection failed: ${error.userMessage}`);
+}
+
+// Mark device unavailable after 1 minute offline (5 consecutive failures)
+if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
+  await this.device.setUnavailable('Heat pump disconnected - attempting reconnection...');
+}
+```
+
+**Automatic Available Status** (lib/services/tuya-connection-service.ts:393-399):
+```typescript
+// Restore availability on successful reconnection
+try {
+  await this.device.setAvailable();
+  this.logger('Device marked as available after successful reconnection');
+} catch (err) {
+  this.logger('Failed to set device available:', err);
+}
+```
+
+#### Layer 3: Global Error Handlers
+
+**Process-Level Safety Net** (app.ts:102-130):
+```typescript
+// Unhandled Promise Rejection Handler
+process.on('unhandledRejection', (reason, promise) => {
+  this.error('⚠️ UNHANDLED PROMISE REJECTION - App crash prevented:', reason);
+
+  // Notify user
+  this.homey.notifications.createNotification({
+    excerpt: 'Heat Pump App: Internal error detected - check app diagnostics',
+  }).catch(() => {});
+});
+
+// Uncaught Exception Handler
+process.on('uncaughtException', (error) => {
+  this.error('⚠️ UNCAUGHT EXCEPTION - Critical error:', error);
+
+  // Critical notification + stack trace logging
+  this.homey.notifications.createNotification({
+    excerpt: 'Heat Pump App: Critical error - app may be unstable, please restart',
+  }).catch(() => {});
+
+  if (error.stack) {
+    this.error('Stack trace:', error.stack);
+  }
+});
+```
+
+#### Error Flow Diagram
+
+```
+Network Error (ECONNRESET)
+         ↓
+Layer 1: setTimeout .catch() handler
+    → Logs error, applies backoff, schedules retry
+    → If still fails ↓
+
+Layer 2: Device Status Sync
+    → setUnavailable() after 5 failures
+    → User sees red status in Homey UI
+    → If still fails ↓
+
+Layer 3: Global Process Handler
+    → unhandledRejection catches any missed errors
+    → Logs + notifies user
+    → App continues running (no crash)
+```
 
 ### Error Handling Pattern
 

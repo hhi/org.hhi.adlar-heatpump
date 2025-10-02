@@ -335,7 +335,11 @@ export class TuyaConnectionService {
         // Still in cooldown period
         this.logger(`TuyaConnectionService: Circuit breaker open, cooling down for ${Math.round((this.circuitBreakerResetTime - timeSinceOpen) / 1000)}s more`);
         this.reconnectInterval = this.device.homey.setTimeout(() => {
-          this.scheduleNextReconnectionAttempt();
+          try {
+            this.scheduleNextReconnectionAttempt();
+          } catch (error) {
+            this.logger('TuyaConnectionService: Error during circuit breaker cooldown check:', error);
+          }
         }, 10000); // Check every 10 seconds during cooldown
         return;
       }
@@ -354,8 +358,16 @@ export class TuyaConnectionService {
 
     this.logger(`TuyaConnectionService: Next reconnection attempt in ${Math.round(adaptiveInterval / 1000)}s (backoff: ${this.backoffMultiplier}x)`);
 
-    this.reconnectInterval = this.device.homey.setTimeout(async () => {
-      await this.attemptReconnectionWithRecovery();
+    this.reconnectInterval = this.device.homey.setTimeout(() => {
+      this.attemptReconnectionWithRecovery().catch((error) => {
+        // Prevent unhandled rejection crash
+        this.logger('TuyaConnectionService: Critical error in scheduled reconnection:', error);
+
+        // Apply aggressive backoff and schedule retry
+        this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32);
+        this.consecutiveFailures++;
+        this.scheduleNextReconnectionAttempt();
+      });
     }, adaptiveInterval);
   }
 
@@ -377,6 +389,14 @@ export class TuyaConnectionService {
       // Success! Reset all error recovery state
       this.resetErrorRecoveryState();
       this.logger('TuyaConnectionService: Reconnection successful, error recovery state reset');
+
+      // Mark device as available again after successful reconnection
+      try {
+        await this.device.setAvailable();
+        this.logger('TuyaConnectionService: Device marked as available after successful reconnection');
+      } catch (err) {
+        this.logger('TuyaConnectionService: Failed to set device available:', err);
+      }
 
     } catch (error) {
       const categorizedError = error as CategorizedError;
@@ -423,6 +443,14 @@ export class TuyaConnectionService {
         'Critical Device Error',
         `Heat pump connection failed: ${error.userMessage}. Manual intervention may be required.`,
       );
+
+      // Mark device as unavailable for non-recoverable errors
+      try {
+        await this.device.setUnavailable(`Connection failed: ${error.userMessage}`);
+        this.logger('TuyaConnectionService: Device marked as unavailable due to non-recoverable error');
+      } catch (err) {
+        this.logger('TuyaConnectionService: Failed to set device unavailable:', err);
+      }
       return;
     }
 
@@ -432,6 +460,14 @@ export class TuyaConnectionService {
         'Device Connection Lost',
         `Heat pump has been disconnected for over 1 minute. ${error.userMessage}`,
       );
+
+      // Mark device as unavailable after 1 minute offline
+      try {
+        await this.device.setUnavailable('Heat pump disconnected - attempting reconnection...');
+        this.logger('TuyaConnectionService: Device marked as unavailable after connection loss');
+      } catch (err) {
+        this.logger('TuyaConnectionService: Failed to set device unavailable:', err);
+      }
       return;
     }
 
@@ -441,6 +477,7 @@ export class TuyaConnectionService {
         'Extended Device Outage',
         `Heat pump has been offline for over 5 minutes. Connection issues persist: ${error.userMessage}`,
       );
+      // Device already marked unavailable at failure #5
     }
   }
 
