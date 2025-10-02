@@ -1,16 +1,20 @@
-# Adlar Heat Pump - Capability to Flow Card Mapping (v0.92.7)
+# Adlar Heat Pump - Capability to Flow Card Mapping (v0.99.40)
 
 This document provides a comprehensive mapping between device capabilities and their corresponding flow cards, showing how each capability can be used in Homey flows with advanced user control and insights integration.
 
-## Mapping Overview (v0.92.7)
+**Service Architecture (v0.99.23+)**: Flow card registration and management is handled by the **FlowCardManagerService**, which dynamically registers cards based on capability health (via **CapabilityHealthService**) and user preferences (via **SettingsManagerService**).
+
+## Mapping Overview (v0.99.40)
 
 - **Total Capabilities**: 41 (14 custom Adlar + 27 standard Homey)
-- **Total Flow Cards**: 58 (31 triggers, 9 actions, 18 conditions)
+- **Total Flow Cards**: 58+ (31 triggers, 9 actions, 18 conditions)
 - **Capabilities with Flow Cards**: 37 (+9 action-based condition cards)
 - **Capabilities without Flow Cards**: 4 (reduced from 13)
 - **Flow Cards without Direct Capability Mapping**: 10 (complex triggers)
-- **User-Controlled Categories**: 7 flow card categories with disabled/auto/enabled modes (v0.92.4+)
-- **Health-Aware Registration**: Dynamic flow card visibility based on capability health and data availability
+- **User-Controlled Categories**: 8 flow card categories with disabled/auto/enabled modes (v0.92.4+)
+- **Service-Based Registration**: FlowCardManagerService handles dynamic registration (v0.99.23+)
+- **Health-Aware Registration**: CapabilityHealthService provides health status for auto mode
+- **Settings Integration**: SettingsManagerService manages user preferences and race condition prevention
 - **Insights Integration**: Flow card visibility aligned with insights management and power measurement toggle (v0.92.6+)
 - **Pattern-Based System**: Consistent behavior across similar flow cards
 - **Bidirectional Control**: Complete read/write access via action-based conditions

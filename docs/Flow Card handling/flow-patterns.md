@@ -1,6 +1,8 @@
-# Flow Helpers System - Pattern-Based Flow Card Management (v0.92.7)
+# Flow Helpers System - Pattern-Based Flow Card Management (v0.99.40)
 
-The `lib/flow-helpers.ts` file implements a sophisticated pattern-based flow card management system that simplifies and standardizes flow card registration in the Homey heat pump app. This system was refined in v0.75.0 to eliminate invalid flow card references, enhanced in v0.90.3 with robust error handling, expanded in v0.92.4+ with user-controlled dynamic registration, and integrated with insights management in v0.92.6+.
+The pattern-based flow card management system simplifies and standardizes flow card registration in the Homey heat pump app. This system was refined in v0.75.0 to eliminate invalid flow card references, enhanced in v0.90.3 with robust error handling, expanded in v0.92.4+ with user-controlled dynamic registration, integrated with insights management in v0.92.6+, and transitioned to **service-oriented architecture in v0.99.23+**.
+
+**Service Architecture (v0.99.23+)**: Flow card management is now handled by the **FlowCardManagerService** (`lib/services/flow-card-manager-service.ts`), which uses the flow helpers pattern system while integrating with **CapabilityHealthService** for health-based registration and **SettingsManagerService** for user preference management.
 
 ## Core Purpose
 
@@ -99,8 +101,11 @@ The `lib/flow-helpers.ts` file implements a sophisticated pattern-based flow car
 6. **Error Handling**: Standardized error messages and logging (enhanced in v0.90.3)
 7. **Extensibility**: Easy to add new patterns or cards
 8. **Reliability**: v0.75.0 eliminated invalid flow card references
-9. **Health Awareness**: Integrates with capability health monitoring system
+9. **Health Awareness**: Integrates with capability health monitoring via CapabilityHealthService
 10. **Enhanced Error Categorization**: v0.90.3 adds comprehensive error handling with DeviceConstants and TuyaErrorCategorizer
+11. **Service Integration (v0.99.23+)**: FlowCardManagerService centralizes pattern-based registration
+12. **Dynamic Registration**: Health-based auto-registration via service coordination
+13. **Settings Integration**: User preferences managed via SettingsManagerService
 
 ## v0.75.0 Improvements
 

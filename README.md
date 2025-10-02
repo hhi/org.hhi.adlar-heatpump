@@ -8,18 +8,20 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Features
 
+- **Service-Oriented Architecture (v0.99.23+)**: 8 specialized services managed by ServiceCoordinator for code organization, testability, and maintainability
 - **Local API Integration**: Direct communication via Tuya local protocol
 - **Complete Device Control**: Access to all 47+ device capabilities including enhanced diagnostics
-- **Real-time Monitoring**: Live sensor data and system status updates
+- **Real-time Monitoring**: Live sensor data and system status updates managed by TuyaConnectionService
 - **Automated Reconnection**: Robust connection handling with automatic recovery
 - **Multi-language Support**: English and Dutch interface
-- **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 8 different methods and diagnostic feedback
-- **SCOP Seasonal Analysis**: Seasonal coefficient of performance according to EN 14825 standards
+- **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 8 different methods and diagnostic feedback (COPCalculator service)
+- **SCOP Seasonal Analysis**: Seasonal coefficient of performance according to EN 14825 standards (SCOPCalculator service)
+- **Rolling COP Analysis**: Time-series efficiency tracking with daily/weekly/monthly averages (RollingCOPCalculator service)
 - **Cross-App Integration**: External data exchange via flow cards for enhanced accuracy
-- **Flow Card Control**: Individual control over 8 flow card categories (64 total cards)
+- **Flow Card Control**: Individual control over 8 flow card categories (64 total cards) via FlowCardManagerService
 - **Enhanced Error Handling**: Smart retry logic with user-friendly recovery guidance
-- **Settings Management**: Race condition prevention with deferred updates
-- **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration
+- **Settings Management**: Race condition prevention with deferred updates (SettingsManagerService)
+- **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration (CapabilityHealthService)
 - **Safety Monitoring**: Critical temperature, connection, and system fault alerts
 
 ## Capabilities
@@ -64,27 +66,42 @@ To obtain the required local key, refer to the documentation:
 
 #### Flow Card Controls
 
-Control visibility for 8 flow card categories with **64 total cards**:
+**FlowCardManagerService** dynamically manages 64 total flow cards across 8 categories:
 
 - **Temperature Alerts** (11 cards), **Voltage Alerts** (3 cards), **Current Alerts** (3 cards)
 - **Power Alerts** (3 cards), **Pulse-steps Alerts** (2 cards), **State Alerts** (5 cards)
 - **Efficiency Alerts** (3 cards): COP thresholds, outlier detection, method-based automation
 - **Expert Mode** (3 cards)
 
-Three modes per category:
+Three modes per category (managed via SettingsManagerService + CapabilityHealthService):
 
 - **Disabled**: No flow cards (clean interface)
-- **Auto**: Only healthy sensors with data (default)
+- **Auto**: Only healthy sensors with data (health-based registration, default)
 - **Enabled**: All cards regardless of sensor status
 
 #### COP (Coefficient of Performance) Settings
 
-- **COP Calculation**: Enable/disable efficiency monitoring with 7 calculation methods
-- **Calculation Method**: Auto-selection or manual override (8 methods: Direct Thermal ±5% to Temperature Difference ±30%)
+**COPCalculator Service** provides 8-method efficiency monitoring with automatic quality selection:
+
+- **COP Calculation**: Enable/disable efficiency monitoring with 8 calculation methods (±5% to ±30% accuracy)
+- **Calculation Method**: Auto-selection or manual override (Direct Thermal → Temperature Difference)
 - **Diagnostic Information**: Specific feedback about missing data ("No Power", "No Flow", "No Temp Δ", etc.)
 - **Outlier Detection**: Identify unrealistic COP values indicating sensor issues
 - **External Data Integration**: Request power, flow, and ambient data from other Homey devices
 - **Cross-App Timeout**: Configure response timeout for external data requests (1-30 seconds)
+
+**RollingCOPCalculator Service** provides time-series analysis:
+
+- **Daily COP**: 24-hour rolling average with idle period awareness
+- **Weekly COP**: 7-day rolling average for seasonal pattern identification
+- **Monthly COP**: 30-day rolling average for long-term trend analysis
+- **Trend Detection**: 7-level classification (strong improvement → significant decline)
+
+**SCOPCalculator Service** provides seasonal efficiency per EN 14825:
+
+- **SCOP Calculation**: Heating season average (Oct 1 - May 15, 228 days)
+- **Temperature Bin Method**: 6 temperature bins with load ratio weighting
+- **Quality Assessment**: High/medium/low confidence based on data coverage
 
 #### Feature Settings
 
