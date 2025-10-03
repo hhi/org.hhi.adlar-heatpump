@@ -1,4 +1,7 @@
 {
+  "0.99.47": {
+    "en": "Added real-time connection status monitoring: New adlar_connection_status capability displays live device connection state (connected, disconnected, reconnecting, error) with automatic updates every 5 seconds. Enhanced user visibility into Tuya connection health with distinct status indicators for different connection scenarios."
+  },
   "0.99.46": {
     "en": "Production-ready release: Fixed critical crash bug with ECONNRESET errors during connection failures. Added automatic device availability status updates (unavailable during outages, available after reconnection). Implemented global error handlers for unhandled promise rejections. Enhanced connection resilience with improved error recovery and user notifications."
   },

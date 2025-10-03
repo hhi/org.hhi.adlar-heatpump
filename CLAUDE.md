@@ -67,6 +67,7 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
    - Device communication via TuyAPI
    - Automatic reconnection handling with crash-proof error recovery (v0.99.46)
    - Connection health monitoring
+   - Real-time connection status tracking (v0.99.47) - 4 states: connected, disconnected, reconnecting, error
    - Event-driven sensor data updates
    - Auto device availability status sync (unavailable during outages, available on reconnect)
    - Unhandled promise rejection protection in async setTimeout callbacks
