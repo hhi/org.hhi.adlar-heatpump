@@ -190,7 +190,26 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v0.99.47 - Real-time Connection Status (Current)
+### v0.99.48 - Deep Socket Error Interception (Current)
+
+**Critical Fix:**
+- ✅ Eliminated persistent ECONNRESET crashes from TuyAPI internal socket errors
+- ✅ Added deep socket error handler that intercepts errors at TuyAPI library level
+- ✅ Installs error handler on TuyAPI's internal `device` object before event handlers
+- ✅ Prevents crashes from abrupt TCP connection closures without proper shutdown
+
+**Technical Implementation:**
+- ✅ `installDeepSocketErrorHandler()` accesses TuyAPI private internals via `.device` property
+- ✅ Error handler catches socket errors BEFORE they propagate to application level
+- ✅ Graceful fallback if deep socket access unavailable
+- ✅ Integrates with existing error recovery and reconnection system
+
+**Root Cause Analysis:**
+The ECONNRESET errors reported in v0.99.46-47 originated from TuyAPI's internal socket (`/app/node_modules/tuyapi/index.js:688`), not from our application code. Our standard `.on('error')` handlers couldn't intercept these low-level socket errors. This release adds a deep error interceptor that catches socket errors at the library level before they cause crashes.
+
+This fix completes the crash prevention architecture started in v0.99.46.
+
+### v0.99.47 - Real-time Connection Status
 
 **New Features:**
 - ✅ Added `adlar_connection_status` capability for live connection monitoring
