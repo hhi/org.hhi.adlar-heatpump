@@ -190,24 +190,41 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v0.99.48 - Deep Socket Error Interception (Current)
+### v0.99.49 - Deep Socket Handler Timing Fix (Current)
 
-**Critical Fix:**
-- ✅ Eliminated persistent ECONNRESET crashes from TuyAPI internal socket errors
-- ✅ Added deep socket error handler that intercepts errors at TuyAPI library level
-- ✅ Installs error handler on TuyAPI's internal `device` object before event handlers
-- ✅ Prevents crashes from abrupt TCP connection closures without proper shutdown
+**Critical Timing Fix:**
+- ✅ Fixed v0.99.48 handler installation timing - now installs AFTER `.connect()` when socket exists
+- ✅ TuyAPI only creates `.device` object during connection, not during constructor
+- ✅ Handler now reinstalls after EVERY successful reconnection (not just initial connection)
+- ✅ Added idempotent listener cleanup with `removeAllListeners('error')` to prevent duplicates
+- ✅ Enhanced logging with emoji indicators (🛡️ ✅ ⚠️) for easier troubleshooting
 
-**Technical Implementation:**
-- ✅ `installDeepSocketErrorHandler()` accesses TuyAPI private internals via `.device` property
-- ✅ Error handler catches socket errors BEFORE they propagate to application level
-- ✅ Graceful fallback if deep socket access unavailable
-- ✅ Integrates with existing error recovery and reconnection system
+**Why v0.99.48 Didn't Work:**
+v0.99.48 installed the deep socket handler BEFORE calling `this.tuya.connect()`, but TuyAPI only creates the internal `.device` object DURING the connect call. Result: handler tried to attach to a non-existent object, leaving socket errors unhandled.
 
-**Root Cause Analysis:**
-The ECONNRESET errors reported in v0.99.46-47 originated from TuyAPI's internal socket (`/app/node_modules/tuyapi/index.js:688`), not from our application code. Our standard `.on('error')` handlers couldn't intercept these low-level socket errors. This release adds a deep error interceptor that catches socket errors at the library level before they cause crashes.
+**v0.99.49 Solution:**
+```typescript
+await this.tuya.connect();              // Socket created HERE
+this.installDeepSocketErrorHandler();   // Handler installed AFTER socket exists
+```
 
-This fix completes the crash prevention architecture started in v0.99.46.
+Handler now installed at two critical points:
+1. After initial connection in `initialize()`
+2. After every successful reconnection in `connectTuya()`
+
+This ensures the deep socket error handler is ALWAYS active on the actual socket.
+
+### v0.99.48 - Deep Socket Error Interception (Timing Issue)
+
+**Note:** This version had a timing bug - handler installed before socket existed. See v0.99.49 for fix.
+
+**Attempted Fix:**
+- Added deep socket error handler concept
+- Accessed TuyAPI's internal `.device` object
+- Integration with error recovery system
+
+**Issue Identified:**
+Handler installed too early (before `.connect()`), so `.device` object didn't exist yet.
 
 ### v0.99.47 - Real-time Connection Status
 
