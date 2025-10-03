@@ -40,6 +40,9 @@ export class TuyaConnectionService {
   private tuya: TuyAPI | null = null;
   private isConnected = false;
 
+  // Connection status tracking (v0.99.47)
+  private currentStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error' = 'disconnected';
+
   // Error recovery state
   private consecutiveFailures = 0;
   private backoffMultiplier = 1;
@@ -208,6 +211,14 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Get the current connection status enum value for adlar_connection_status capability.
+   * @returns One of: 'connected', 'disconnected', 'reconnecting', 'error'
+   */
+  getCurrentConnectionStatus(): 'connected' | 'disconnected' | 'reconnecting' | 'error' {
+    return this.currentStatus;
+  }
+
+  /**
    * Return the underlying Tuya/TuyAPI instance if available (nullable).
    */
   getTuyaInstance(): TuyAPI | null {
@@ -277,6 +288,7 @@ export class TuyaConnectionService {
     this.tuya.on('connected', (): void => {
       this.logger('TuyaConnectionService: Device connected');
       this.isConnected = true;
+      this.currentStatus = 'connected';
 
       // Reset error recovery state on successful connection
       this.resetErrorRecoveryState();
@@ -291,6 +303,7 @@ export class TuyaConnectionService {
     this.tuya.on('disconnected', (): void => {
       this.logger('TuyaConnectionService: Device disconnected');
       this.isConnected = false;
+      this.currentStatus = 'disconnected';
 
       // Apply minimal backoff for clean disconnections
       this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.2, 4);
@@ -382,6 +395,7 @@ export class TuyaConnectionService {
     }
 
     this.logger(`TuyaConnectionService: Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
+    this.currentStatus = 'reconnecting';
 
     try {
       await this.connectTuya();
@@ -417,6 +431,11 @@ export class TuyaConnectionService {
    * Adjust internal recovery strategy (backoff, circuit breaker) based on categorized error.
    */
   private updateRecoveryStrategy(error: CategorizedError): void {
+    // Set status to 'error' for non-recoverable errors
+    if (!error.recoverable) {
+      this.currentStatus = 'error';
+    }
+
     // Exponential backoff for recoverable errors
     if (error.recoverable) {
       this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 16); // Cap at 16x

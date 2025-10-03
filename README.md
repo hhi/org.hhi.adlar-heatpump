@@ -8,10 +8,11 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Features
 
+- **Real-time Connection Status (v0.99.47)**: Live device connection monitoring with 4 distinct states (connected, disconnected, reconnecting, error) updated every 5 seconds
 - **Production-Ready Stability (v0.99.46)**: Crash-proof error handling with triple-layer protection, automatic device status sync, and global error handlers
 - **Service-Oriented Architecture (v0.99.23+)**: 8 specialized services managed by ServiceCoordinator for code organization, testability, and maintainability
 - **Local API Integration**: Direct communication via Tuya local protocol
-- **Complete Device Control**: Access to all 47+ device capabilities including enhanced diagnostics
+- **Complete Device Control**: Access to all 48+ device capabilities including enhanced diagnostics
 - **Real-time Monitoring**: Live sensor data and system status updates managed by TuyaConnectionService
 - **Automated Reconnection**: Robust connection handling with automatic recovery and device availability status sync
 - **Multi-language Support**: English and Dutch interface
@@ -27,15 +28,16 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Capabilities
 
-The app provides access to **48+ capabilities** across seven categories:
+The app provides access to **49 capabilities** across eight categories:
 
+- **Connection Status (1)**: Real-time Tuya connection state (connected/disconnected/reconnecting/error)
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
 - **Power & Electrical (9)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input, calculated external energy total
 - **System Control (8)**: Heating modes, temperature setpoints, capacity settings, timer control
 - **System States (6)**: Compressor status, defrost state, backwater state, fault detection
 - **Valve Control (2)**: EEV and EVI pulse steps monitoring
 - **Efficiency Monitoring (6)**: Real-time COP with diagnostics, calculation method, seasonal SCOP with data quality, rolling averages (daily/weekly/monthly), trend analysis
-- **Additional Monitoring (9+)**: Water flow, diagnostic parameters, system optimization, external power integration
+- **Additional Monitoring (7)**: Water flow, diagnostic parameters, system optimization, external power integration
 
 ## Installation & Setup
 
@@ -188,7 +190,22 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v0.99.46 - Production-Ready Release (Current)
+### v0.99.47 - Real-time Connection Status (Current)
+
+**New Features:**
+- ✅ Added `adlar_connection_status` capability for live connection monitoring
+- ✅ Real-time status updates every 5 seconds (connected/disconnected/reconnecting/error)
+- ✅ Visual connection status icon with matching app design style
+- ✅ Enhanced user visibility into Tuya device connection health
+
+**Technical Implementation:**
+- ✅ TuyaConnectionService tracks connection state changes at all transition points
+- ✅ Device.ts polls status via ServiceCoordinator every 5 seconds
+- ✅ Status enum properly differentiates recoverable reconnections from critical errors
+
+This release provides users with immediate visibility into device connectivity status.
+
+### v0.99.46 - Production-Ready Release
 
 **Critical Fixes:**
 - ✅ Fixed ECONNRESET crash bug during connection failures
