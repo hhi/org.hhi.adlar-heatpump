@@ -1,0 +1,46 @@
+{
+  "id": "adlar_connection_status",
+  "type": "enum",
+  "title": {
+    "en": "Connection Status",
+    "nl": "Verbindingsstatus"
+  },
+  "desc": {
+    "en": "Current Tuya device connection state",
+    "nl": "Huidige Tuya apparaat verbindingsstatus"
+  },
+  "values": [
+    {
+      "id": "connected",
+      "title": {
+        "en": "Connected",
+        "nl": "Verbonden"
+      }
+    },
+    {
+      "id": "disconnected",
+      "title": {
+        "en": "Disconnected",
+        "nl": "Losgekoppeld"
+      }
+    },
+    {
+      "id": "reconnecting",
+      "title": {
+        "en": "Reconnecting",
+        "nl": "Opnieuw verbinden"
+      }
+    },
+    {
+      "id": "error",
+      "title": {
+        "en": "Error",
+        "nl": "Fout"
+      }
+    }
+  ],
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/connection-status.svg"
+}
