@@ -1,4 +1,7 @@
 {
+  "0.99.48": {
+    "en": "Critical ECONNRESET fix: Added deep socket error handler to intercept TuyAPI library internal socket errors that bypassed standard error handling. Installs error handler directly on TuyAPI's internal device object to prevent crashes from abrupt TCP connection closures. Resolves persistent ECONNRESET crash reports from v0.99.46-47."
+  },
   "0.99.47": {
     "en": "Added real-time connection status monitoring: New adlar_connection_status capability displays live device connection state (connected, disconnected, reconnecting, error) with automatic updates every 5 seconds. Enhanced user visibility into Tuya connection health with distinct status indicators for different connection scenarios."
   },
