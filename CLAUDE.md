@@ -66,6 +66,7 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
 1. **TuyaConnectionService** (`lib/services/tuya-connection-service.ts`)
    - Device communication via TuyAPI
    - Automatic reconnection handling with crash-proof error recovery (v0.99.46)
+   - Deep socket error interception (v0.99.48) - intercepts TuyAPI internal socket ECONNRESET errors
    - Connection health monitoring
    - Real-time connection status tracking (v0.99.47) - 4 states: connected, disconnected, reconnecting, error
    - Event-driven sensor data updates
