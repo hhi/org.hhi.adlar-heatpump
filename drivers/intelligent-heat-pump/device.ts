@@ -2219,6 +2219,42 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Initialize connection status tracking (v0.99.47)
+   * Updates adlar_connection_status capability every 5 seconds
+   */
+  private async initializeConnectionStatusTracking(): Promise<void> {
+    // Immediate initial update
+    await this.updateConnectionStatus();
+
+    // Set up periodic updates (every 5 seconds)
+    this.homey.setInterval(async () => {
+      await this.updateConnectionStatus();
+    }, 5000);
+
+    this.log('Connection status tracking initialized');
+  }
+
+  /**
+   * Update the adlar_connection_status capability based on TuyaConnectionService state
+   */
+  private async updateConnectionStatus(): Promise<void> {
+    if (!this.hasCapability('adlar_connection_status')) {
+      return;
+    }
+
+    try {
+      // Get status from ServiceCoordinator if available
+      if (this.serviceCoordinator) {
+        const tuyaService = this.serviceCoordinator.getTuyaConnection();
+        const status = tuyaService.getCurrentConnectionStatus();
+        await this.setCapabilityValue('adlar_connection_status', status);
+      }
+    } catch (error) {
+      this.error('Failed to update connection status capability:', error);
+    }
+  }
+
+  /**
    * Update all flow cards based on current settings (called when settings change)
    */
   private async updateFlowCards(): Promise<void> {
@@ -2438,6 +2474,16 @@ class MyDevice extends Homey.Device {
   async onInit() {
     await this.setUnavailable(); // Set the device as unavailable initially
 
+    // Add missing capability for existing devices (v0.99.47 migration)
+    if (!this.hasCapability('adlar_connection_status')) {
+      try {
+        await this.addCapability('adlar_connection_status');
+        this.log('✅ Added adlar_connection_status capability to existing device');
+      } catch (error) {
+        this.error('Failed to add adlar_connection_status capability:', error);
+      }
+    }
+
     const { manifest } = Homey;
     const myDriver = manifest.drivers[0];
     // this.log('MyDevice overview:', myDriver);
@@ -2578,6 +2624,9 @@ class MyDevice extends Homey.Device {
 
     // Initialize flow cards based on current settings
     await this.initializeFlowCards();
+
+    // Initialize connection status tracking (v0.99.47)
+    await this.initializeConnectionStatusTracking();
 
     // Note: Health checks now managed by ServiceCoordinator's CapabilityHealthService
 

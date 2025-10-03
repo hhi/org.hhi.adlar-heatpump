@@ -70,7 +70,8 @@
     "adlar_scop",
     "adlar_scop_quality",
 
-     "adlar_countdowntimer"
+    "adlar_countdowntimer",
+    "adlar_connection_status"
   ],
 
   "capabilitiesOptions": {
@@ -618,6 +619,23 @@
       "description": {
         "en": "Current heat pump efficiency trend analysis showing performance direction and strength",
         "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont"
+      }
+    },
+
+    "adlar_connection_status": {
+      "title": {
+        "en": "Connection Status",
+        "nl": "Verbindingsstatus"
+      },
+      "type": "string",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Device Connection State",
+        "nl": "Apparaat Verbindingsstatus"
+      },
+      "description": {
+        "en": "Real-time Tuya device connection state: connected, disconnected, reconnecting, or error",
+        "nl": "Realtime Tuya apparaat verbindingsstatus: verbonden, losgekoppeld, opnieuw verbinden, of fout"
       }
     }
   },
