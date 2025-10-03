@@ -101,13 +101,15 @@ export class TuyaConnectionService {
         version: config.version || '3.3',
       });
 
-      // Install deep socket error handler BEFORE event handlers (v0.99.48)
-      this.installDeepSocketErrorHandler();
-
       this.setupTuyaEventHandlers();
 
       // Attempt initial connection
       await this.connectTuya();
+
+      // Install deep socket error handler AFTER connection (v0.99.49)
+      // CRITICAL: TuyAPI creates the .device object during .connect(), not during constructor
+      // We must install the handler AFTER the socket is created
+      this.installDeepSocketErrorHandler();
 
       // Start reconnection monitoring
       this.startReconnectInterval();
@@ -142,6 +144,10 @@ export class TuyaConnectionService {
 
       this.isConnected = true;
       this.logger('TuyaConnectionService: Connected to Tuya device successfully');
+
+      // Install deep socket error handler after successful connection (v0.99.49)
+      // CRITICAL: Must reinstall after every reconnection because TuyAPI recreates the socket
+      this.installDeepSocketErrorHandler();
 
     } catch (error) {
       const categorizedError = this.handleTuyaError(error as Error, 'Tuya device connection');
@@ -236,7 +242,7 @@ export class TuyaConnectionService {
   }
 
   /**
-   * Install deep socket error handler to intercept TuyAPI internal socket errors (v0.99.48)
+   * Install deep socket error handler to intercept TuyAPI internal socket errors (v0.99.49)
    *
    * CRITICAL FIX: TuyAPI library's internal socket can throw ECONNRESET errors that bypass
    * our standard .on('error') handler. This method accesses TuyAPI's internal device object
@@ -245,6 +251,9 @@ export class TuyaConnectionService {
    * Error from socket: read ECONNRESET at /app/node_modules/tuyapi/index.js:688:26
    * This error occurs when the Tuya device abruptly closes the TCP connection without
    * proper shutdown, causing Node.js to emit ECONNRESET on the raw socket.
+   *
+   * TIMING: Must be called AFTER this.tuya.connect() because TuyAPI creates the .device
+   * object during connection, not during constructor. Should be called after every reconnection.
    */
   private installDeepSocketErrorHandler(): void {
     if (!this.tuya) {
@@ -258,10 +267,13 @@ export class TuyaConnectionService {
       const tuyaDevice = this.tuya.device;
 
       if (tuyaDevice) {
+        // Remove any existing error listeners to prevent duplicates (idempotent)
+        tuyaDevice.removeAllListeners('error');
+
         // Install error handler on TuyAPI's internal device object
         // This catches errors BEFORE they bubble up to our .on('error') handler
         tuyaDevice.on('error', (error: Error) => {
-          this.logger('TuyaConnectionService: Deep socket error intercepted (prevented crash):', error.message);
+          this.logger('TuyaConnectionService: 🛡️ Deep socket error intercepted (crash prevented):', error.message);
 
           // Categorize the error for proper handling
           const categorizedError = TuyaErrorCategorizer.categorize(error, 'Deep socket error');
@@ -276,16 +288,16 @@ export class TuyaConnectionService {
           }
 
           // Let our standard error recovery system handle reconnection
-          this.logger('TuyaConnectionService: Deep socket error handled, reconnection system will recover');
+          this.logger('TuyaConnectionService: Deep socket error handled gracefully - reconnection system will recover');
         });
 
-        this.logger('TuyaConnectionService: Deep socket error handler installed successfully');
+        this.logger('TuyaConnectionService: ✅ Deep socket error handler installed successfully on TuyAPI device object');
       } else {
-        this.logger('TuyaConnectionService: TuyAPI device object not accessible, relying on standard error handling');
+        this.logger('TuyaConnectionService: ⚠️ TuyAPI .device object not yet created - handler will be installed after connect()');
       }
     } catch (error) {
       // If we can't install the deep handler, log but don't crash
-      this.logger('TuyaConnectionService: Could not install deep socket error handler:', error);
+      this.logger('TuyaConnectionService: ⚠️ Could not install deep socket error handler:', error);
       this.logger('TuyaConnectionService: Falling back to standard error handling');
     }
   }
