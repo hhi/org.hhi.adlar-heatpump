@@ -2127,45 +2127,44 @@ class MyDevice extends Homey.Device {
    * This method is called by the ServiceCoordinator when TuyAPI receives data or dp-refresh events
    * @param dps - DPS data object from Tuya device
    */
-  updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
+  async updateCapabilitiesFromDps(dps: Record<string, unknown>): Promise<void> {
     this.debugLog('Processing DPS data:', dps);
 
     // Convert string keys to numbers and process each DPS value
-    Object.entries(dps).forEach(([dpsKey, value]) => {
+    // Use for...of to support async/await properly
+    for (const [dpsKey, value] of Object.entries(dps)) {
       const dpsId = Number(dpsKey);
       if (Number.isNaN(dpsId)) {
         this.debugLog(`Skipping invalid DPS key: ${dpsKey}`);
-        return;
+        continue;
       }
 
       // Map DPS ID to capability name using AdlarMapping
       const capability = this.allArraysSwapped[dpsId];
       if (!capability) {
         this.debugLog(`No capability mapping found for DPS ${dpsId} (value: ${value})`);
-        return;
+        continue;
       }
 
       // Check if device has this capability
       if (!this.hasCapability(capability)) {
         this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
-        return;
+        continue;
       }
 
       try {
-        // Update the capability value
-        this.setCapabilityValue(capability, value).then(() => {
-          this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
-        }).catch((error) => {
-          this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
-        });
+        // Update the capability value - AWAIT to ensure internal value is updated
+        // before any subsequent code (like getCapabilityValue) reads it
+        await this.setCapabilityValue(capability, value);
+        this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
 
         // Update capability health tracking via service coordinator
         this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
 
       } catch (error) {
-        this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
+        this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
       }
-    });
+    }
   }
 
   private getCapabilityFriendlyTitle(capability: string): string {
