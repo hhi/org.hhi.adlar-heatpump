@@ -186,10 +186,11 @@ export class TuyaConnectionService {
   }
 
   /**
-   * Send a command to the device in DPS format (map from number to string).
+   * Send a command to the device in DPS format (map from number to value).
+   * Accepts string, number, or boolean values as required by different DPS types.
    * Throws if not connected or on underlying send error.
    */
-  async sendCommand(dps: Record<number, string>): Promise<void> {
+  async sendCommand(dps: Record<number, string | number | boolean>): Promise<void> {
     if (!this.tuya || !this.isConnected) {
       throw new Error('Device not connected');
     }

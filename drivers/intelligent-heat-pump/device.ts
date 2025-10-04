@@ -146,8 +146,9 @@ class MyDevice extends Homey.Device {
     if (this.serviceCoordinator) {
       try {
         const tuyaService = this.serviceCoordinator.getTuyaConnection();
-        await tuyaService.sendCommand({ [dp]: value.toString() });
-        this.log(`Successfully sent to Tuya via ServiceCoordinator: dp ${dp} = ${value}`);
+        // Send value with correct type (string/number/boolean) - DO NOT convert to string!
+        await tuyaService.sendCommand({ [dp]: value });
+        this.log(`Successfully sent to Tuya via ServiceCoordinator: dp ${dp} = ${value} (${typeof value})`);
         return;
       } catch (err) {
         this.error('ServiceCoordinator Tuya command failed, falling back to direct method:', err);
@@ -163,8 +164,9 @@ class MyDevice extends Homey.Device {
       throw new Error('Tuya device is not initialized for fallback');
     }
 
-    await this.tuya.set({ dps: dp, set: value });
-    this.log(`Successfully sent to Tuya (direct fallback): dp ${dp} = ${value}`);
+    // TuyAPI syntax: set({ multiple: true, data: { [dp]: value } })
+    await this.tuya.set({ multiple: true, data: { [dp]: value } });
+    this.log(`Successfully sent to Tuya (direct fallback): dp ${dp} = ${value} (${typeof value})`);
   }
 
   /**
