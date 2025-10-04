@@ -2551,24 +2551,30 @@ class MyDevice extends Homey.Device {
           // Validate value based on capability type
           const validatedValue = this.validateCapabilityValue(capability, value);
 
+          // OPTIMISTIC UPDATE (v0.99.52): Set capability value immediately for responsive UI
+          // This ensures getCapabilityValue() returns the new value right away, even before
+          // the device confirms the change. If device responds with different value,
+          // updateCapabilitiesFromDps() will override this optimistic value.
+          await this.setCapabilityValue(capability, validatedValue);
+          this.debugLog(`Optimistic update: ${capability} = ${validatedValue}`);
+
           // Send command to device via ServiceCoordinator or fallback
           await this.sendTuyaCommand(dp, validatedValue as string | number | boolean);
 
-          // DO NOT call setCapabilityValue() here - this creates a feedback loop!
-          // The capability value will be updated automatically when the device responds
-          // via updateCapabilitiesFromDps() which processes incoming DPS data.
+          // Device response will arrive via updateCapabilitiesFromDps() and will:
+          // 1. Confirm the optimistic update (same value) - no visible change
+          // 2. Override with actual device value if different - ensures device is source of truth
           //
-          // Calling setCapabilityValue() here causes race conditions:
-          // 1. External app (Tuya) changes DPS 4 to 15°C
-          // 2. updateCapabilitiesFromDps() sets target_temperature to 15°C
-          // 3. This triggers capability listener (if value changed)
-          // 4. Listener would call setCapabilityValue(33°C) - WRONG!
-          // 5. This overwrites the correct value from Tuya
+          // WHY THIS WORKS:
+          // - Homey SDK: setCapabilityValue() does NOT trigger listeners when called programmatically
+          // - Only USER-initiated changes (via UI/Flow cards) trigger capability listeners
+          // - Therefore: updateCapabilitiesFromDps() calling setCapabilityValue() is SAFE
+          // - No feedback loop, no circular dependencies
           //
-          // By removing setCapabilityValue(), we rely on the device's response
-          // to update the UI, ensuring bidirectional sync works correctly.
-
-          // Note: Using single capability for heating curve - both display and control
+          // BIDIRECTIONAL SYNC:
+          // - User changes Homey UI → Listener fires → Optimistic update → Send to device → Device confirms
+          // - Tuya app changes device → DPS update → updateCapabilitiesFromDps() → setCapabilityValue() → Homey UI updates
+          // - Both flows work correctly without interference
 
         } catch (error) {
           const categorizedError = this.handleTuyaError(error as Error, `Capability update: ${capability}`);
