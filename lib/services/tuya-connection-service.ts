@@ -10,8 +10,8 @@ import { TuyaErrorCategorizer, CategorizedError } from '../error-types';
 export interface TuyaConnectionOptions {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
-  onData?: (data: { dps: Record<number, unknown> }) => Promise<void>;
-  onDpRefresh?: (data: { dps: Record<number, unknown> }) => Promise<void>;
+  onData?: (data: { dps: Record<number, unknown> }) => void;
+  onDpRefresh?: (data: { dps: Record<number, unknown> }) => void;
   onConnected?: () => void;
   onDisconnected?: () => void;
   onError?: (error: CategorizedError) => void;
@@ -58,8 +58,8 @@ export class TuyaConnectionService {
   private lastNotificationKey: string | null = null;
 
   // Event handlers
-  private onDataHandler?: (data: { dps: Record<number, unknown> }) => Promise<void>;
-  private onDpRefreshHandler?: (data: { dps: Record<number, unknown> }) => Promise<void>;
+  private onDataHandler?: (data: { dps: Record<number, unknown> }) => void;
+  private onDpRefreshHandler?: (data: { dps: Record<number, unknown> }) => void;
   private onConnectedHandler?: () => void;
   private onDisconnectedHandler?: () => void;
   private onErrorHandler?: (error: CategorizedError) => void;
@@ -337,11 +337,9 @@ export class TuyaConnectionService {
       const dpsFetched = data.dps || {};
       this.logger('TuyaConnectionService: Data received from Tuya:', dpsFetched);
 
-      // Forward to data handler - execute async handler without blocking event loop
+      // Forward to data handler
       if (this.onDataHandler) {
-        this.onDataHandler(data).catch((error) => {
-          this.logger('TuyaConnectionService: Error in data handler:', error);
-        });
+        this.onDataHandler(data);
       }
     });
 
@@ -350,11 +348,9 @@ export class TuyaConnectionService {
       const dpsFetched = data.dps || {};
       this.logger('TuyaConnectionService: DP-Refresh received from Tuya:', dpsFetched);
 
-      // Forward to dp-refresh handler - execute async handler without blocking event loop
+      // Forward to dp-refresh handler
       if (this.onDpRefreshHandler) {
-        this.onDpRefreshHandler(data).catch((error) => {
-          this.logger('TuyaConnectionService: Error in dp-refresh handler:', error);
-        });
+        this.onDpRefreshHandler(data);
       }
     });
 
