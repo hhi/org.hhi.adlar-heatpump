@@ -2554,14 +2554,19 @@ class MyDevice extends Homey.Device {
           // Send command to device via ServiceCoordinator or fallback
           await this.sendTuyaCommand(dp, validatedValue as string | number | boolean);
 
-          // Update Homey capability value to confirm change
-          if (this.hasCapability(capability)) {
-            await this.setCapabilityValue(capability, validatedValue).catch((err) => {
-              this.error(`Failed to update Homey capability ${capability}:`, err);
-            });
-          } else {
-            this.error(`Cannot update capability ${capability} - capability not available on device`);
-          }
+          // DO NOT call setCapabilityValue() here - this creates a feedback loop!
+          // The capability value will be updated automatically when the device responds
+          // via updateCapabilitiesFromDps() which processes incoming DPS data.
+          //
+          // Calling setCapabilityValue() here causes race conditions:
+          // 1. External app (Tuya) changes DPS 4 to 15°C
+          // 2. updateCapabilitiesFromDps() sets target_temperature to 15°C
+          // 3. This triggers capability listener (if value changed)
+          // 4. Listener would call setCapabilityValue(33°C) - WRONG!
+          // 5. This overwrites the correct value from Tuya
+          //
+          // By removing setCapabilityValue(), we rely on the device's response
+          // to update the UI, ensuring bidirectional sync works correctly.
 
           // Note: Using single capability for heating curve - both display and control
 
