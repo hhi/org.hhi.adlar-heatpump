@@ -1,4 +1,10 @@
 {
+  "0.99.52": {
+    "en": "CRITICAL FIX: Optimistic updates for responsive UI and reliable sync. Reverted v0.99.51 (caused crashes and deadlocks). Capability listeners now use optimistic pattern: immediately set value, then send to device. Device response confirms or overrides. Fixes: GUI updates instantly, internal values stay in sync, Tuya app changes propagate correctly, no crashes. Homey SDK setCapabilityValue() does NOT trigger listeners programmatically - no feedback loops."
+  },
+  "0.99.51": {
+    "en": "REVERTED - Caused app crashes and deadlocks. Async/await in DPS processing created circular dependencies. Use v0.99.52 instead."
+  },
   "0.99.50": {
     "en": "Critical bidirectional sync fix: Removed setCapabilityValue() call from capability listeners to prevent feedback loops. When external apps (Tuya) change device state, updates now flow correctly: Device → DPS update → Homey UI. Fixes issue where target_temperature stayed at old value when countdown timer set to OFF."
   },
