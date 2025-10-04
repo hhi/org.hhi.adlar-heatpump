@@ -1,7 +1,4 @@
 {
-  "0.99.51": {
-    "en": "Critical async fix for capability updates: Fixed race condition in updateCapabilitiesFromDps() by changing from .then() to await pattern. This ensures setCapabilityValue() completes before getCapabilityValue() reads the value. Fixes issue where GUI showed correct value (15°C) but internal capability value remained stale (33°C) causing sync problems with external Tuya app changes."
-  },
   "0.99.50": {
     "en": "Critical bidirectional sync fix: Removed setCapabilityValue() call from capability listeners to prevent feedback loops. When external apps (Tuya) change device state, updates now flow correctly: Device → DPS update → Homey UI. Fixes issue where target_temperature stayed at old value when countdown timer set to OFF."
   },
