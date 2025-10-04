@@ -236,11 +236,10 @@ export class ServiceCoordinator {
    * and triggers energy tracking updates.
    * @param data - object containing `dps: Record<number, unknown>`
    */
-  private async handleTuyaData(data: { dps: Record<number, unknown> }): Promise<void> {
+  private handleTuyaData(data: { dps: Record<number, unknown> }): void {
     // Forward DPS data to device for capability updates
-    // Now awaiting to ensure internal capability values are updated before subsequent reads
-    if (typeof (this.device as unknown as { updateCapabilitiesFromDps?: (dps: Record<string, unknown>) => Promise<void> }).updateCapabilitiesFromDps === 'function') {
-      await (this.device as unknown as { updateCapabilitiesFromDps: (dps: Record<string, unknown>) => Promise<void> }).updateCapabilitiesFromDps(data.dps);
+    if (typeof (this.device as unknown as { updateCapabilitiesFromDps?: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps === 'function') {
+      (this.device as unknown as { updateCapabilitiesFromDps: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps(data.dps);
     }
 
     // Update capability health for each DPS value
