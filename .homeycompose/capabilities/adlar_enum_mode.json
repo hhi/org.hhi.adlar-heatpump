@@ -1,8 +1,8 @@
 {
   "id": "adlar_enum_mode",
   "title": {
-    "en": "(Heating) mode",
-    "nl": "(Verwarmings)modus"
+    "en": "Set (Heating) mode",
+    "nl": "(Verwarmings)modus instellen"
   },
   "type": "enum",
   "getable": true,

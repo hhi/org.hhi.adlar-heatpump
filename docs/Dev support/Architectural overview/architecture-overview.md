@@ -1,6 +1,6 @@
-# Architecture Overview (v0.99.46)
+# Architecture Overview (v0.99.56)
 
-This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the Service Coordinator pattern, utility libraries, and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management.
+This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the Service Coordinator pattern, utility libraries, and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management and dual picker/sensor architecture for curve controls.
 
 ## Service-Oriented Architecture (v0.99.23+)
 
@@ -829,6 +829,113 @@ if (enablePower && wasDisabled) {
 3. **Error Recovery**: Proper error handling for deferred operations
 4. **Auto-Consistency**: Related settings automatically stay synchronized
 5. **User Experience**: Settings changes apply smoothly without errors
+
+## Dual Picker/Sensor Architecture (v0.99.54+)
+
+### Multi-Capability DPS Mapping
+
+The app implements a **dual picker/sensor architecture** for curve control capabilities, where a single DPS updates multiple capabilities simultaneously for enhanced user experience and data accuracy.
+
+#### Architecture Pattern
+
+**Traditional Single-Capability Mapping:**
+```typescript
+// Old: One DPS → One capability
+DPS 11 → adlar_enum_capacity_set (picker only)
+DPS 13 → adlar_enum_countdown_set (sensor only)
+```
+
+**New Multi-Capability Mapping (v0.99.54+):**
+```typescript
+// New: One DPS → Multiple capabilities
+DPS 11 → adlar_enum_capacity_set (picker control) + adlar_sensor_capacity_set (read-only sensor)
+DPS 13 → adlar_enum_countdown_set (read-only sensor) + adlar_picker_countdown_set (picker control)
+```
+
+#### Enhanced DPS Mapping System
+
+**`AdlarMapping.dpsToCapabilities` (lib/definitions/adlar-mapping.ts:117-132):**
+
+```typescript
+/**
+ * Multi-capability DPS mapping (v0.99.54+)
+ * Maps each DPS ID to an array of ALL capabilities that should be updated.
+ * This enables dual picker/sensor architecture where one DPS updates multiple capabilities.
+ */
+static dpsToCapabilities: Record<number, string[]> = {
+  11: ['adlar_enum_capacity_set', 'adlar_sensor_capacity_set'],      // Hot water curve
+  13: ['adlar_enum_countdown_set', 'adlar_picker_countdown_set'],   // Heating curve
+  // ... other single-capability mappings
+};
+```
+
+#### Device Update Logic
+
+**Enhanced `updateCapabilitiesFromDps()` (device.ts:2140-2175):**
+
+```typescript
+// Update ALL capabilities mapped to this DPS
+const capabilities = AdlarMapping.dpsToCapabilities[dpsId];
+capabilities.forEach((capability) => {
+  if (this.hasCapability(capability)) {
+    this.setCapabilityValue(capability, value);
+    this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
+  }
+});
+```
+
+#### User Control Setting
+
+**`enable_curve_controls` Setting (v0.99.54+):**
+
+```json
+{
+  "id": "enable_curve_controls",
+  "type": "checkbox",
+  "label": "Show curve picker controls in device UI",
+  "value": false,
+  "hint": "Show picker controls for heating and hot water curves in device UI. When disabled, only sensor displays are visible (read-only). Flow cards always work regardless of this setting."
+}
+```
+
+**Capability Visibility Matrix:**
+
+| Setting | Sensors (Always Visible) | Pickers (Conditional) | Flow Cards |
+|---------|-------------------------|----------------------|------------|
+| **Disabled** | `adlar_enum_countdown_set`, `adlar_sensor_capacity_set` | Hidden | ✅ Active |
+| **Enabled** | `adlar_enum_countdown_set`, `adlar_sensor_capacity_set` | `adlar_picker_countdown_set`, `adlar_enum_capacity_set` | ✅ Active |
+
+#### Benefits of Dual Architecture
+
+1. **Always-Visible Status**: Users always see current curve settings via sensor capabilities
+2. **Optional Control**: Advanced users can enable picker controls when needed
+3. **Data Consistency**: Single DPS update maintains sync between sensor and picker
+4. **Flow Card Independence**: Automation works regardless of UI picker visibility
+5. **Reduced UI Clutter**: Default installation shows read-only values only
+6. **User Choice**: Power users can enable full control when desired
+
+#### Automatic Capability Migration
+
+**Existing Device Upgrade (device.ts:2489-2510):**
+
+```typescript
+// Add missing curve sensor capabilities for existing devices (v0.99.54 migration)
+if (!this.hasCapability('adlar_sensor_capacity_set')) {
+  await this.addCapability('adlar_sensor_capacity_set');
+  this.log('✅ Added adlar_sensor_capacity_set capability');
+}
+
+if (!this.hasCapability('adlar_picker_countdown_set')) {
+  await this.addCapability('adlar_picker_countdown_set');
+  this.log('✅ Added adlar_picker_countdown_set capability');
+}
+```
+
+**Seamless User Experience:**
+- Existing devices automatically receive new capabilities on app update
+- No user intervention required
+- Sensors immediately display current device state
+- Pickers remain hidden until user enables them via settings
 
 ## Flow Card Control System Architecture
 

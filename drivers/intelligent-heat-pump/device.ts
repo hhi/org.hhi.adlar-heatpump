@@ -2140,33 +2140,38 @@ class MyDevice extends Homey.Device {
         return;
       }
 
-      // Map DPS ID to capability name using AdlarMapping
-      const capability = this.allArraysSwapped[dpsId];
-      if (!capability) {
+      // Map DPS ID to ALL associated capabilities using multi-capability mapping (v0.99.54+)
+      // This supports dual picker/sensor architecture where one DPS updates multiple capabilities
+      const capabilities = AdlarMapping.dpsToCapabilities[dpsId];
+      if (!capabilities || capabilities.length === 0) {
         this.debugLog(`No capability mapping found for DPS ${dpsId} (value: ${value})`);
         return;
       }
 
-      // Check if device has this capability
-      if (!this.hasCapability(capability)) {
-        this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
-        return;
-      }
+      // Update ALL capabilities mapped to this DPS
+      // Example: DPS 11 updates both adlar_enum_capacity_set (picker) and adlar_sensor_capacity_set (sensor)
+      capabilities.forEach((capability) => {
+        // Check if device has this capability
+        if (!this.hasCapability(capability)) {
+          this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
+          return;
+        }
 
-      try {
-        // Update the capability value
-        this.setCapabilityValue(capability, value).then(() => {
-          this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
-        }).catch((error) => {
-          this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
-        });
+        try {
+          // Update the capability value
+          this.setCapabilityValue(capability, value).then(() => {
+            this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
+          }).catch((error) => {
+            this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
+          });
 
-        // Update capability health tracking via service coordinator
-        this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
+          // Update capability health tracking via service coordinator
+          this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
 
-      } catch (error) {
-        this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
-      }
+        } catch (error) {
+          this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
+        }
+      });
     });
   }
 
@@ -2483,6 +2488,25 @@ class MyDevice extends Homey.Device {
         this.log('✅ Added adlar_connection_status capability to existing device');
       } catch (error) {
         this.error('Failed to add adlar_connection_status capability:', error);
+      }
+    }
+
+    // Add missing curve sensor capabilities for existing devices (v0.99.54 migration)
+    if (!this.hasCapability('adlar_sensor_capacity_set')) {
+      try {
+        await this.addCapability('adlar_sensor_capacity_set');
+        this.log('✅ Added adlar_sensor_capacity_set capability to existing device (v0.99.54 migration)');
+      } catch (error) {
+        this.error('Failed to add adlar_sensor_capacity_set capability:', error);
+      }
+    }
+
+    if (!this.hasCapability('adlar_picker_countdown_set')) {
+      try {
+        await this.addCapability('adlar_picker_countdown_set');
+        this.log('✅ Added adlar_picker_countdown_set capability to existing device (v0.99.54 migration)');
+      } catch (error) {
+        this.error('Failed to add adlar_picker_countdown_set capability:', error);
       }
     }
 
@@ -2840,6 +2864,13 @@ class MyDevice extends Homey.Device {
       return 'Slider control settings updated. Capabilities will be updated shortly.';
     }
 
+    // Handle curve controls settings (v0.99.54+)
+    if (changedKeys.includes('enable_curve_controls')) {
+      await this.handleOptionalCapabilities();
+      this.log('Curve control picker settings updated');
+      return 'Curve control picker settings updated. Picker capabilities visibility will be updated shortly. Sensor capabilities remain always visible.';
+    }
+
     // Handle COP settings changes
     const copSettingsChanged = changedKeys.some((key) => key.startsWith('cop_') || key.startsWith('enable_cop') || key.startsWith('external_'));
 
@@ -2892,6 +2923,7 @@ class MyDevice extends Homey.Device {
     const enablePowerMeasurements = this.getSetting('enable_power_measurements') ?? true;
     const enableSliderControls = this.getSetting('enable_slider_controls') ?? true;
     const enableCOPCalculation = this.getSetting('cop_calculation_enabled') !== false; // default true
+    const enableCurveControls = this.getSetting('enable_curve_controls') ?? false; // default false (v0.99.54+)
 
     const powerCapabilities = [
       'measure_power',
@@ -2927,6 +2959,13 @@ class MyDevice extends Homey.Device {
       'adlar_cop_trend',
     ];
 
+    // Curve control picker capabilities (v0.99.54+)
+    // Sensor capabilities (adlar_enum_countdown_set, adlar_sensor_capacity_set) always remain visible
+    const curvePickerCapabilities = [
+      'adlar_enum_capacity_set',     // Hot water curve picker
+      'adlar_picker_countdown_set',  // Heating curve picker
+    ];
+
     // Process power capabilities
     await this.processCapabilityGroup(powerCapabilities, enablePowerMeasurements, 'power measurement');
 
@@ -2935,6 +2974,9 @@ class MyDevice extends Homey.Device {
 
     // Process COP capabilities
     await this.processCapabilityGroup(copCapabilities, enableCOPCalculation, 'COP calculation');
+
+    // Process curve control picker capabilities (v0.99.54+)
+    await this.processCapabilityGroup(curvePickerCapabilities, enableCurveControls, 'curve control picker');
   }
 
   /**
