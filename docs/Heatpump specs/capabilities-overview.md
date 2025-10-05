@@ -1,12 +1,12 @@
-# Adlar Heat Pump - Capabilities Overview (v0.99.40)
+# Adlar Heat Pump - Capabilities Overview (v0.99.56)
 
-This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management and dynamic capability control.
+This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management, dynamic capability control, and dual picker/sensor architecture for curve controls.
 
-## Summary Statistics (v0.99.40)
+## Summary Statistics (v0.99.56)
 
-- **Total Custom Adlar Capabilities**: 18 (added monthly COP in v0.99.8)
-- **Total Standard/Custom Capabilities**: 31
-- **Total All Capabilities**: 47+
+- **Total Custom Adlar Capabilities**: 20 (added dual curve controls in v0.99.54)
+- **Total Standard/Custom Capabilities**: 33
+- **Total All Capabilities**: 49+
 - **DPS Range**: 1-112
 - **Capability Types**: number (24), enum (4), boolean (3), string (1)
 - **Setable Capabilities**: 3 (adlar_enum_work_mode, adlar_hotwater, plus standard capabilities)
@@ -61,16 +61,40 @@ This document provides a comprehensive overview of all device capabilities suppo
 #### adlar_enum_capacity_set
 - **DPS**: 11 (capacity_set)
 - **Type**: enum
-- **Purpose**: Controls hot water heating curve settings
+- **Purpose**: Hot water curve picker control (user can set values)
 - **Values**: OFF, H1, H2, H3, H4
-- **Properties**: Read-only, picker UI, insights enabled
+- **Properties**: Setable, picker UI, insights enabled
+- **Visibility**: Controlled by `enable_curve_controls` setting (v0.99.54+)
+- **Dual Architecture**: Pairs with `adlar_sensor_capacity_set` for read-only display
+
+#### adlar_sensor_capacity_set
+- **DPS**: 11 (capacity_set)
+- **Type**: enum
+- **Purpose**: Hot water curve sensor (displays actual device setting, read-only)
+- **Values**: OFF, H1, H2, H3, H4
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Added**: v0.99.54 for dual picker/sensor architecture
+- **Visibility**: Always visible regardless of settings
+- **Dual Architecture**: Pairs with `adlar_enum_capacity_set` for user control
 
 #### adlar_enum_countdown_set
 - **DPS**: 13 (countdown_set)
 - **Type**: enum
-- **Purpose**: Controls heating curve settings with high (H) and low (L) options
+- **Purpose**: Heating curve sensor (displays actual device setting, read-only)
 - **Values**: OFF, H1-H8, L1-L8 (16 total values)
-- **Properties**: Read-only, picker UI
+- **Properties**: Read-only, sensor UI, insights enabled
+- **Visibility**: Always visible regardless of settings
+- **Dual Architecture**: Pairs with `adlar_picker_countdown_set` for user control
+
+#### adlar_picker_countdown_set
+- **DPS**: 13 (countdown_set)
+- **Type**: enum
+- **Purpose**: Heating curve picker control (user can set values)
+- **Values**: OFF, H1-H8, L1-L8 (16 total values)
+- **Properties**: Setable, picker UI, insights enabled
+- **Added**: v0.99.54 for dual picker/sensor architecture
+- **Visibility**: Controlled by `enable_curve_controls` setting (v0.99.54+)
+- **Dual Architecture**: Pairs with `adlar_enum_countdown_set` for read-only display
 
 #### adlar_enum_volume_set
 - **DPS**: 106 (volume_set)

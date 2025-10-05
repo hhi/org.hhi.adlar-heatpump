@@ -1,8 +1,8 @@
 {
-  "id": "adlar_enum_capacity_set",
+  "id": "adlar_sensor_capacity_set",
   "title": {
-    "en": "Set Hot Water curve",
-    "nl": "Warmwater curve instellen"
+    "en": "Hot Water curve setting",
+    "nl": "Warmwater curve instelling"
   },
   "type": "enum",
   "values": [
@@ -42,12 +42,13 @@
       }
     }
   ],
-  "uiComponent": "picker",
+  "uiComponent": "sensor",
+  "icon": "/assets/heating-curve.svg",
   "getable": true,
-  "setable": true,
+  "setable": false,
   "preventInsights": true,
   "description": {
-    "en": "dp 11: capacity_set - Controls the hot water curve settings (OFF, H1-H4) for domestic hot water heating",
-    "nl": "dp 11: capacity_set - Beheert de warmwater curve instellingen (UIT, H1-H4) voor sanitair warm water"
+    "en": "dp 11: capacity_set - Displays actual hot water curve setting from device (read-only sensor)",
+    "nl": "dp 11: capacity_set - Toont actuele warmwater curve instelling van apparaat (alleen-lezen sensor)"
   }
 }

@@ -166,14 +166,27 @@ class ServiceCoordinator {
 
 ### Key Architecture Patterns
 
-#### DPS to Capability Mapping
+#### DPS to Capability Mapping (Enhanced v0.99.54+)
 
 The app uses a centralized mapping system in `AdlarMapping` class:
 
 - `capabilities` - Standard Homey capabilities (onoff, target_temperature, etc.)
 - `customCapabilities` - Extended capabilities with dot notation (measure_temperature.temp_top)
 - `adlarCapabilities` - Device-specific capabilities (adlar_hotwater, adlar_fault, etc.)
-- `allArraysSwapped` - Reverse mapping from DPS ID to capability name
+- `allArraysSwapped` - Reverse mapping from DPS ID to capability name (legacy single-capability)
+- `dpsToCapabilities` - **NEW (v0.99.54+)** Multi-capability mapping for dual picker/sensor architecture
+
+**Dual Picker/Sensor Architecture (v0.99.54+)**:
+
+Some DPS now update multiple capabilities simultaneously for enhanced UX:
+- **DPS 11** → `adlar_enum_capacity_set` (picker) + `adlar_sensor_capacity_set` (sensor)
+- **DPS 13** → `adlar_enum_countdown_set` (sensor) + `adlar_picker_countdown_set` (picker)
+
+This enables:
+- Always-visible read-only status display via sensor capabilities
+- Optional user-controllable pickers (toggled via `enable_curve_controls` setting)
+- Single DPS update maintains data consistency across both capabilities
+- Flow cards work regardless of picker visibility setting
 
 #### Device Communication
 
@@ -354,15 +367,29 @@ switch (userSetting) {
 - When `enable_power_measurements = true` → Resets related flow settings to `auto`
 - Prevents inconsistent configuration states
 
-### Capability System
+### Capability System (Updated v0.99.56)
 
-The app defines 41 capabilities across multiple categories:
+The app defines 49+ capabilities across multiple categories:
 
 - Temperature sensors (inlet, outlet, ambient, etc.)
 - Power/electrical measurements (voltage, current, consumption)
 - Pressure sensors and valve positions
 - System states (compressor, defrost, backwater)
 - Control settings (modes, curves, timers)
+- **Dual picker/sensor controls** (v0.99.54+) - heating/hot water curves
+
+**Dual Picker/Sensor Capabilities (v0.99.54+)**:
+
+| DPS | Sensor (Always Visible) | Picker (Optional) | User Setting |
+|-----|------------------------|-------------------|--------------|
+| 11 | `adlar_sensor_capacity_set` | `adlar_enum_capacity_set` | `enable_curve_controls` |
+| 13 | `adlar_enum_countdown_set` | `adlar_picker_countdown_set` | `enable_curve_controls` |
+
+**Benefits**:
+- Users always see current curve settings (sensor capabilities)
+- Advanced users can enable picker controls for direct adjustment
+- Cleaner default UI (pickers hidden by default)
+- Flow cards always functional regardless of UI visibility
 
 Each capability maps to specific Tuya DPS numbers and includes multilingual support (EN/NL).
 

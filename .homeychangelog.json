@@ -1,4 +1,7 @@
 {
+  "0.99.56": {
+    "en": "Added dual picker/sensor architecture for heating and hot water curve controls with new enable_curve_controls setting."
+  },
   "0.99.53": {
     "en": "CRITICAL BUG FIX: Commands now send correct data types to device. Fixed sendCommand to accept string/number/boolean instead of forcing string conversion. This bug prevented device from accepting temperature changes and other numeric/boolean commands. Also fixed fallback TuyAPI syntax. Without this fix, UI changes don't propagate to device! Hardened Tuya connection error handling annotations to satisfy TypeScript tooling."
   },
