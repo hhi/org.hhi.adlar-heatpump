@@ -1,0 +1,54 @@
+{
+  "id": "adlar_sensor_capacity_set",
+  "title": {
+    "en": "Hot Water curve setting",
+    "nl": "Warmwater curve instelling"
+  },
+  "type": "enum",
+  "values": [
+    {
+      "id": "OFF",
+      "title": {
+        "en": "OFF",
+        "nl": "UIT"
+      }
+    },
+    {
+      "id": "H1",
+      "title": {
+        "en": "H1",
+        "nl": "H1"
+      }
+    },
+    {
+      "id": "H2",
+      "title": {
+        "en": "H2",
+        "nl": "H2"
+      }
+    },
+    {
+      "id": "H3",
+      "title": {
+        "en": "H3",
+        "nl": "H3"
+      }
+    },
+    {
+      "id": "H4",
+      "title": {
+        "en": "H4",
+        "nl": "H4"
+      }
+    }
+  ],
+  "uiComponent": "sensor",
+  "icon": "/assets/heating-curve.svg",
+  "getable": true,
+  "setable": false,
+  "preventInsights": true,
+  "description": {
+    "en": "dp 11: capacity_set - Displays actual hot water curve setting from device (read-only sensor)",
+    "nl": "dp 11: capacity_set - Toont actuele warmwater curve instelling van apparaat (alleen-lezen sensor)"
+  }
+}

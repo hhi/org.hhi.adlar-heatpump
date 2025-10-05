@@ -1,8 +1,8 @@
 {
   "id": "adlar_enum_capacity_set",
   "title": {
-    "en": "Hot water curve setting",
-    "nl": "Warmwater curve instelling"
+    "en": "Set Hot Water curve",
+    "nl": "Warmwater curve instellen"
   },
   "type": "enum",
   "values": [
