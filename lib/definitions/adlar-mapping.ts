@@ -58,6 +58,11 @@ export class AdlarMapping {
    * NOTE ON CONFUSING NAMES (Tuya-determined, cannot be changed):
    * - adlar_enum_capacity_set [11]: Despite name, controls HOT WATER curve settings (OFF, H1-H4)
    * - adlar_enum_countdown_set [13]: Despite name, controls HEATING curve settings (H1-H8, L1-L8)
+   *
+   * DUAL CAPABILITY ARCHITECTURE (v0.99.54+):
+   * Some DPS have both picker (user control) and sensor (status display) capabilities:
+   * - DPS 11: adlar_enum_capacity_set (picker) + adlar_sensor_capacity_set (sensor)
+   * - DPS 13: adlar_enum_countdown_set (sensor) + adlar_picker_countdown_set (picker)
    */
   static adlarCapabilities: Record<string, number[]> = {
     adlar_measure_pulse_steps_temp_current: [16],
@@ -65,12 +70,14 @@ export class AdlarMapping {
     adlar_enum_mode: [2],
     adlar_enum_work_mode: [5],
     adlar_enum_water_mode: [10],
-    // DPS 11: Despite the name "capacity_set", this controls hot water curve settings
+    // DPS 11: Hot water curve - DUAL CAPABILITIES (picker + sensor)
     // Values: OFF, H1-H4 for domestic hot water temperature curves
-    adlar_enum_capacity_set: [11],
-    // DPS 13: Despite the name "countdown_set", this controls heating curve settings
+    adlar_enum_capacity_set: [11],      // Picker: user can set hot water curve
+    adlar_sensor_capacity_set: [11],    // Sensor: displays actual hot water curve from device
+    // DPS 13: Heating curve - DUAL CAPABILITIES (sensor + picker)
     // Values: OFF, H1-H8 (high), L1-L8 (low) for weather compensation curves
-    adlar_enum_countdown_set: [13],
+    adlar_enum_countdown_set: [13],     // Sensor: displays actual heating curve from device
+    adlar_picker_countdown_set: [13],   // Picker: user can set heating curve
     adlar_enum_volume_set: [106],
     // DPS 106: 0: No Power Module, 1: Single-Phase Power Module, 2: Three-Phase Power Module
     adlar_hotwater: [101],
@@ -91,6 +98,39 @@ export class AdlarMapping {
   static allArraysSwapped: Record<number, string> = Object.fromEntries(
     Object.entries(AdlarMapping.allCapabilities).map(([key, value]) => [value[0], key]),
   );
+
+  /**
+   * Multi-capability DPS mapping (v0.99.54+)
+   *
+   * Maps each DPS ID to an array of ALL capabilities that should be updated when that DPS changes.
+   * This enables dual picker/sensor architecture where one DPS updates multiple capabilities.
+   *
+   * IMPORTANT: This is the PRIMARY mapping for DPS-to-capability updates.
+   * Use this instead of allArraysSwapped for multi-capability support.
+   *
+   * Example use cases:
+   * - DPS 11: Updates both hot water picker and sensor capabilities
+   * - DPS 13: Updates both heating curve sensor and picker capabilities
+   * - All other DPS: Single capability mapping (backward compatible)
+   */
+  static dpsToCapabilities: Record<number, string[]> = (() => {
+    const mapping: Record<number, string[]> = {};
+
+    // Build mapping from allCapabilities - each DPS gets an array of capabilities
+    Object.entries(AdlarMapping.allCapabilities).forEach(([capability, dpsArray]) => {
+      const dpsId = dpsArray[0];
+
+      // Initialize array if not exists
+      if (!mapping[dpsId]) {
+        mapping[dpsId] = [];
+      }
+
+      // Add capability to array (allows multiple capabilities per DPS)
+      mapping[dpsId].push(capability);
+    });
+
+    return mapping;
+  })();
 
   static dps: Record<string, DpsEntry> = {
     dps_1: { code: 'switch', name: 'Switch', adlar: 'Schakelaar' },

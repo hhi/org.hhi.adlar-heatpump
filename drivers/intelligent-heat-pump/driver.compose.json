@@ -16,8 +16,10 @@
     "adlar_enum_mode",
     "adlar_enum_work_mode",
     "adlar_enum_capacity_set",
+    "adlar_sensor_capacity_set",
     "adlar_enum_volume_set",
     "adlar_enum_countdown_set",
+    "adlar_picker_countdown_set",
 
     "measure_frequency.compressor_strength",
     "measure_frequency.fan_motor_frequency",

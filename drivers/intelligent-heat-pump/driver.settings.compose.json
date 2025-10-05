@@ -177,6 +177,19 @@
     },
     "children": [
       {
+        "id": "enable_curve_controls",
+        "type": "checkbox",
+        "label": {
+          "en": "Show curve picker controls in device UI",
+          "nl": "Toon curve instelbediening in apparaat UI"
+        },
+        "hint": {
+          "en": "Show picker controls for heating and hot water curves in device UI. When disabled, only sensor displays are visible (read-only). Flow cards always work regardless of this setting. Requires app restart to take effect.",
+          "nl": "Toon instelbediening voor verwarmings- en warmwater curves in apparaat UI. Indien uitgeschakeld zijn alleen sensor weergaven zichtbaar (alleen-lezen). Flow kaarten werken altijd ongeacht deze instelling. Vereist app herstart om effect te hebben."
+        },
+        "value": false
+      },
+      {
         "id": "enable_power_measurements",
         "type": "checkbox",
         "label": {
