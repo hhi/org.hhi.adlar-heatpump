@@ -264,7 +264,7 @@ export class TuyaConnectionService {
 
     try {
       // Access TuyAPI's internal device object (contains the raw socket)
-      // @ts-ignore - Accessing private TuyAPI internals for crash prevention
+      // @ts-expect-error - Accessing private TuyAPI internals for crash prevention
       const tuyaDevice = this.tuya.device;
 
       if (tuyaDevice) {
