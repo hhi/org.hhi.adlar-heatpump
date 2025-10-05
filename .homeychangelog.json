@@ -2,15 +2,6 @@
   "0.99.53": {
     "en": "CRITICAL BUG FIX: Commands now send correct data types to device. Fixed sendCommand to accept string/number/boolean instead of forcing string conversion. This bug prevented device from accepting temperature changes and other numeric/boolean commands. Also fixed fallback TuyAPI syntax. Without this fix, UI changes don't propagate to device!"
   },
-  "0.99.52": {
-    "en": "CRITICAL FIX: Optimistic updates for responsive UI and reliable sync. Reverted v0.99.51 (caused crashes and deadlocks). Capability listeners now use optimistic pattern: immediately set value, then send to device. Device response confirms or overrides. Fixes: GUI updates instantly, internal values stay in sync, Tuya app changes propagate correctly, no crashes. Homey SDK setCapabilityValue() does NOT trigger listeners programmatically - no feedback loops."
-  },
-  "0.99.51": {
-    "en": "REVERTED - Caused app crashes and deadlocks. Async/await in DPS processing created circular dependencies. Use v0.99.52 instead."
-  },
-  "0.99.50": {
-    "en": "Critical bidirectional sync fix: Removed setCapabilityValue() call from capability listeners to prevent feedback loops. When external apps (Tuya) change device state, updates now flow correctly: Device → DPS update → Homey UI. Fixes issue where target_temperature stayed at old value when countdown timer set to OFF."
-  },
   "0.99.49": {
     "en": "Critical timing fix for deep socket handler: Fixed v0.99.48 handler installation timing - now installs AFTER connect() when TuyAPI creates the .device object, not before. Handler reinstalls after every reconnection. Added idempotent listener cleanup to prevent duplicates. This fix ensures ECONNRESET errors are actually intercepted."
   },
@@ -19,9 +10,6 @@
   },
   "0.99.47": {
     "en": "Added real-time connection status monitoring: New adlar_connection_status capability displays live device connection state (connected, disconnected, reconnecting, error) with automatic updates every 5 seconds. Enhanced user visibility into Tuya connection health with distinct status indicators for different connection scenarios."
-  },
-  "0.99.46": {
-    "en": "Production-ready release: Fixed critical crash bug with ECONNRESET errors during connection failures. Added automatic device availability status updates (unavailable during outages, available after reconnection). Implemented global error handlers for unhandled promise rejections. Enhanced connection resilience with improved error recovery and user notifications."
   },
   "0.99.41": {
     "en": "Documentation overhaul."
