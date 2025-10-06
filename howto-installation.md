@@ -52,7 +52,7 @@ You'll need these credentials from your heat pump setup:
 ### 2. Download and Extract the App
 
 1. **Download the App**
-   - Go to the [GitHub Releases page](https://github.com/hhi/org.hhi.adlar-heatpump/releases)
+   - Go to the GitHub Releases page for this repository
    - Download the **ZIP file** from the latest release
 
 2. **Extract the ZIP file**
@@ -105,7 +105,11 @@ Once the app is installed and your device is paired, you can monitor live values
 
 ### Important Notes
 
-- **Heating Curve Picklist**: The heating curve selection has been disabled due to a bug observed on iPhone devices. To change heating curve values, use the dedicated action flow card instead.
+- **Heating Curve Controls (v0.99.56+)**: The app uses a dual picker/sensor architecture for curve controls:
+  - **Sensor capabilities** are always visible, showing current curve settings
+  - **Picker controls** are hidden by default (cleaner UI)
+  - Enable pickers via device settings: `enable_curve_controls` setting
+  - This resolves the previous iPhone picker bug while maintaining full functionality
 - **Flow Cards**: Most device settings can be controlled through Homey's flow cards for automation purposes.
 
 ### Obtaining Required Credentials
@@ -165,6 +169,6 @@ After successful installation:
 
 For additional help:
 
-- **GitHub Issues**: [Report problems here](https://github.com/hhi/org.hhi.adlar-heatpump/issues)
-- **Homey Community**: Search for existing solutions or ask questions
+- **GitHub Issues**: Check the repository's Issues page to report problems
+- **Homey Community**: Search for existing solutions or ask questions (Topic ID: 143690)
 - **Documentation**: Review the app's README and documentation files

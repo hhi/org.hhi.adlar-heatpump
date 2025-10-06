@@ -28,7 +28,7 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Capabilities
 
-The app provides access to **49 capabilities** across eight categories:
+The app provides access to **56 capabilities** across eight categories:
 
 - **Connection Status (1)**: Real-time Tuya connection state (connected/disconnected/reconnecting/error)
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
@@ -114,9 +114,9 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 ## Flow Cards
 
-**66 Total Cards**: 35 triggers, 19 conditions, 12 actions
+**71 Total Cards**: 36 triggers, 23 conditions, 12 actions
 
-### Triggers (35)
+### Triggers (36)
 
 - **Temperature, voltage, current, and power alerts**
 - **System state changes and fault detection**
@@ -124,7 +124,7 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **External Data Requests**: Automatic requests for power, flow, and ambient data from other devices
 - **Safety monitoring with rate limiting**
 
-### Conditions (19)
+### Conditions (23)
 
 - **Temperature thresholds and system status verification**
 - **COP efficiency checks** with threshold-based logic
@@ -185,12 +185,31 @@ Detailed documentation available in `/docs` directory:
 ### Support
 
 - **Issues**: Report bugs and feature requests on GitHub
-- **Community**: Homey Community Forum (Topic ID: 140621)
+- **Community**: Homey Community Forum (Topic ID: 143690)
 - **Installation Guide**: `docs/Get Local Keys - instruction.pdf`
 
 ## Release Notes
 
-### v0.99.49 - Deep Socket Handler Timing Fix (Current)
+### v0.99.56 - Dual Picker/Sensor Architecture (Current)
+
+**Enhanced UX:**
+
+- ✅ Added dual picker/sensor architecture for heating and hot water curve controls
+- ✅ New `enable_curve_controls` setting toggles picker visibility (default: disabled)
+- ✅ Sensor capabilities always visible for status monitoring
+- ✅ Picker capabilities optional for advanced users
+- ✅ Flow cards functional regardless of picker visibility
+
+**Technical Implementation:**
+
+- ✅ DPS 11: `adlar_enum_capacity_set` (picker) + `adlar_sensor_capacity_set` (sensor)
+- ✅ DPS 13: `adlar_enum_countdown_set` (sensor) + `adlar_picker_countdown_set` (picker)
+- ✅ Single DPS update maintains consistency across both capabilities
+- ✅ Cleaner default UI while preserving full control for power users
+
+This release resolves the iPhone picker bug by providing always-visible read-only status displays with optional control pickers.
+
+### v0.99.49 - Deep Socket Handler Timing Fix
 
 **Critical Timing Fix:**
 - ✅ Fixed v0.99.48 handler installation timing - now installs AFTER `.connect()` when socket exists
