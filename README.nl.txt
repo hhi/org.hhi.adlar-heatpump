@@ -86,7 +86,7 @@ AUTOMATISERING MET FLOW KAARTEN
 
 COP (PRESTATIECOËFFICIËNT) MONITORING
 
-De app berekent automatisch hoe efficiënt uw warmtepomp werkt (zie /docs/COP-calculation.md in de broncode):
+De app berekent automatisch hoe efficiënt uw warmtepomp werkt (zie de directory /docs/COP calculation/ in de broncode):
 - COP waarde: Verhouding tussen opgewekte warmte en verbruikte stroom
 - Dagelijkse gemiddelden: 24-uurs trends
 - Wekelijkse analyse: Langetermijn prestaties
@@ -113,7 +113,7 @@ HULP NODIG?
 GEAVANCEERDE FUNCTIES
 
 FLOW KAART CATEGORIEËN
-U kunt de zichtbaarheid van flow kaarten aanpassen:
+U kunt de zichtbaarheid van flow kaarten aanpassen (app instellingen):
 - Temperatuur waarschuwingen
 - Spanning en stroom monitoring
 - Vermogen waarschuwingen
@@ -122,7 +122,7 @@ U kunt de zichtbaarheid van flow kaarten aanpassen:
 - Expert functies
 
 CROSS-APP INTEGRATIE
-Verbind met andere Homey apps voor verbeterde COP berekening (zie docs/flow-card-setup-quick-guide.md):
+Verbind met andere Homey apps voor verbeterde COP berekening (zie /docs/COP flow-card-setup.md):
 - Externe vermogensmetingen (van uw slimme meter)
 - Externe water doorstroom gegevens
 - Externe buitentemperatuur gegevens

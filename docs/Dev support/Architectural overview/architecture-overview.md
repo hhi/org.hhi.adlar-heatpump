@@ -854,7 +854,7 @@ DPS 13 → adlar_enum_countdown_set (read-only sensor) + adlar_picker_countdown_
 
 #### Enhanced DPS Mapping System
 
-**`AdlarMapping.dpsToCapabilities` (lib/definitions/adlar-mapping.ts:117-132):**
+**`AdlarMapping.dpsToCapabilities` (lib/definitions/adlar-mapping.ts:116-133):**
 
 ```typescript
 /**

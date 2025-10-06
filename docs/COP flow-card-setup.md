@@ -6,7 +6,7 @@ The Adlar Heat Pump can receive external measurement data from other Homey devic
 
 **Service Architecture (v0.99.23+)**: External data integration is managed by the **EnergyTrackingService** and processed by the **COPCalculator** service for enhanced efficiency calculations.
 
-![External Power Measurement Setup](Flow%20Card%20handling/COP%20-%20external%20power%20measure.png)
+![External Power Measurement Setup](/docs/COP%20calculation/COP%20-%20external%20power%20measure.png)
 
 ## Required vs Optional Components
 

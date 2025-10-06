@@ -10,159 +10,6 @@ COP = Useful Heat Output / Electrical Energy Input
 
 The higher the COP, the more efficient the heat pump. A COP of 3.0 means the heat pump produces 3 units of heat for every 1 unit of electricity consumed.
 
-## Understanding When COP = 0 (Zero Efficiency)
-
-**🔴 Important: Your heat pump shows COP = 0 when it's not actually operating**
-
-### When Will You See COP = 0?
-
-The system displays **COP = 0** in these specific situations:
-
-1. **Heat pump is turned off**
-   - System is switched off completely
-   - No power to the compressor
-
-2. **Heat pump is idle/standby mode**
-   - Target temperature is reached
-   - System is waiting for heat demand
-   - Compressor frequency shows 0 Hz
-
-3. **System startup/shutdown**
-   - Brief periods during system startup
-   - Natural pauses between heating cycles
-
-4. **Backup heating only**
-   - Electric backup heaters are running
-   - Heat pump compressor is not active
-   - You may still see warm water, but this is not heat pump efficiency
-
-### Why COP = 0 is Correct
-
-**This is normal and expected behavior!** Here's why:
-
-- **COP measures heat pump efficiency only** - when the compressor isn't running, there's no heat pump operation to measure
-- **Zero doesn't mean broken** - it means the heat pump is not currently pumping heat
-- **High confidence reading** - the system is certain about this measurement
-
-### What Creates Heat When COP = 0?
-
-If you notice warm water but see COP = 0, the heat is coming from:
-
-- **Electric backup heaters** (not heat pump operation)
-- **Residual heat** from previous heating cycles
-- **Hot water tank storage** maintaining temperature
-- **Passive solar gain** or building heat
-
-### Heat Pump Physics Simplified
-
-Think of your heat pump like a bicycle:
-
-- **COP = efficiency** is like "distance per pedal stroke"
-- **When you stop pedaling** (compressor off), there's no "pedal efficiency" to measure
-- **Coasting downhill** (backup heaters) still moves you, but it's not pedaling efficiency
-
-### Normal Operation Pattern
-
-In typical daily use, you'll see:
-
-- **COP = 0** during idle periods (normal)
-- **COP = 2.5-4.5** during active heating (good efficiency)
-- **COP = 1.5-2.5** during defrost cycles (temporary)
-
-**✅ Seeing COP = 0 regularly is completely normal and indicates your system is working correctly!**
-
----
-
-## COPCalculator Service Architecture (v0.99.23+)
-
-The COP calculation system is implemented as the **COPCalculator service** (`lib/services/cop-calculator.ts`), which is managed by the ServiceCoordinator and integrates with other services for data collection and quality assessment.
-
-### Service Integration
-
-**COPCalculator** is one of 8 core services managed by ServiceCoordinator:
-
-```typescript
-class ServiceCoordinator {
-  private copCalculator: COPCalculator | null = null;
-
-  async initialize(config: ServiceConfig): Promise<void> {
-    this.copCalculator = new COPCalculator(device, logger);
-    await this.copCalculator.startCalculations();
-  }
-}
-```
-
-**Cross-Service Integration**:
-
-- **TuyaConnectionService**: Provides real-time sensor data (DPS values) for calculations
-- **CapabilityHealthService**: Validates sensor data quality before using in calculations
-- **EnergyTrackingService**: Supplies external power measurement data for Method 1 (Direct Thermal)
-- **SettingsManagerService**: Manages user preferences (method override, outlier detection settings)
-- **RollingCOPCalculator**: Subscribes to `cop-calculated` events for time-series analysis
-- **SCOPCalculator**: Subscribes to `cop-calculated` events for seasonal efficiency tracking
-
-### Calculation Lifecycle
-
-1. **Initialization**: ServiceCoordinator initializes COPCalculator with device reference
-2. **Data Collection**: TuyaConnectionService emits sensor update events (every 30 seconds)
-3. **Health Validation**: CapabilityHealthService confirms sensor data quality
-4. **Method Selection**: COPCalculator chooses highest accuracy method with sufficient data
-5. **Calculation**: Selected method calculates COP value with confidence level
-6. **Publishing**: Result published to `adlar_cop` capability with method transparency
-7. **Event Emission**: `cop-calculated` event emitted for RollingCOPCalculator and SCOPCalculator
-8. **Service Diagnostics**: ServiceCoordinator tracks calculation service health
-
-### Service Constants Integration
-
-COPCalculator uses centralized constants from `DeviceConstants` class:
-
-```typescript
-// COP calculation constants
-static readonly COP_CALCULATION_INTERVAL_MS = 30 * 1000; // 30 seconds
-static readonly EXTERNAL_DEVICE_QUERY_TIMEOUT_MS = 5 * 1000; // 5 seconds
-static readonly MIN_VALID_COP = 0.5;
-static readonly MAX_VALID_COP = 8.0;
-
-// COP ranges for validation
-static readonly COP_RANGES = {
-  AIR_TO_WATER_MIN: 2.5,
-  AIR_TO_WATER_MAX: 4.5,
-  GROUND_SOURCE_MIN: 3.5,
-  GROUND_SOURCE_MAX: 5.5,
-  // ... additional ranges
-};
-```
-
-## COP Method Visibility and Diagnostics
-
-**Enhanced in v0.98.7** with service architecture:
-
-- The `adlar_cop_method` capability displays which calculation method is currently being used, providing transparency into the COP calculation process
-- **Enhanced compressor operation validation**: COPCalculator service automatically returns `COP = 0` when compressor is not running (frequency ≤ 0 Hz), ensuring physically accurate results
-- **Diagnostic Information**: When insufficient data is available, specific diagnostic messages show exactly what's missing
-
-The sensor shows:
-
-- **Method Name**: Direct Thermal, Carnot Estimation, Temperature Difference, etc.
-- **Diagnostic Info**: Specific indicators when data is insufficient ("No Power", "No Flow", "No Temp Δ", "Multi Fail")
-- **Confidence Indicator**:
-  - 🟢 High confidence (most accurate data available)
-  - 🟡 Medium confidence (some data limitations)
-  - 🔴 Low confidence (limited data, estimation required)
-
-### Diagnostic Messages
-
-When COP calculation fails, COPCalculator service provides specific 22-character diagnostic messages:
-
-- **"No Power"**: Power measurement unavailable for direct thermal method
-- **"No Thermal"**: Water flow or temperature difference unavailable
-- **"No Flow"**: Water flow measurement missing
-- **"No Temp Δ"**: Temperature difference between inlet/outlet too small
-- **"No Comp"**: Compressor frequency data unavailable
-- **"Multi Fail"**: Multiple sensor issues detected
-
-This helps users understand exactly why COP calculation isn't possible and what sensors need attention.
-
 ---
 
 ## COP Calculation Methods - Quality Hierarchy
@@ -178,6 +25,7 @@ All calculation methods now provide specific diagnostic feedback when data requi
 - **Actionable Guidance**: Each diagnostic suggests what to check or enable
 
 ### Quality Priority (Best to Worst):
+
 1. **Direct Thermal** (±5%) - External power meter + water flow
 2. **Power Module Auto-Detection** (±8%) - Internal power calculation
 3. **Power Estimation** (±10%) - Physics-based power modeling
@@ -641,7 +489,7 @@ COP = 4.9 × 1.14 × 1.09 × 1.06 = 6.5 (capped)
 
 The improved method considers multiple real-world factors for realistic COP variation:
 
-#### Base COP from Temperature Difference
+### Base COP from Temperature Difference
 
 ```javascript
 // Progressive curve based on actual heat pump performance data
@@ -661,7 +509,7 @@ if (ΔT ≤ 1) {
 }
 ```
 
-#### Ambient Temperature Correction
+### Ambient Temperature Correction
 
 ```javascript
 // Heat pump efficiency varies significantly with outdoor conditions
@@ -678,7 +526,7 @@ if (ambient_temp ≥ 15°C) {
 }
 ```
 
-#### Load-Based Correction
+### Load-Based Correction
 
 ```javascript
 // Heat pumps are most efficient at 60-80% load
@@ -695,7 +543,7 @@ if (load_deviation ≤ 0.1) {
 }
 ```
 
-#### System Operation Correction
+### System Operation Correction
 
 ```javascript
 // Temperature lift and supply temperature optimization
@@ -717,7 +565,7 @@ if (outlet_temp ≥ 35 && outlet_temp ≤ 45) {
 }
 ```
 
-#### Environmental Variation
+### Environmental Variation
 
 ```javascript
 // Add realistic ±8% variation for unmeasured factors
@@ -866,6 +714,69 @@ Final COP = 2.9 × 1.13 × 0.95 × 1.03 × 1.04 = 3.37
 
 ---
 
+## Understanding When COP = 0 (Zero Efficiency)
+
+**🔴 Important: Your heat pump shows COP = 0 when it's not actually operating**
+
+### When Will You See COP = 0?
+
+The system displays **COP = 0** in these specific situations:
+
+1. **Heat pump is turned off**
+   - System is switched off completely
+   - No power to the compressor
+
+2. **Heat pump is idle/standby mode**
+   - Target temperature is reached
+   - System is waiting for heat demand
+   - Compressor frequency shows 0 Hz
+
+3. **System startup/shutdown**
+   - Brief periods during system startup
+   - Natural pauses between heating cycles
+
+4. **Backup heating only**
+   - Electric backup heaters are running
+   - Heat pump compressor is not active
+   - You may still see warm water, but this is not heat pump efficiency
+
+### Why COP = 0 is Correct
+
+**This is normal and expected behavior!** Here's why:
+
+- **COP measures heat pump efficiency only** - when the compressor isn't running, there's no heat pump operation to measure
+- **Zero doesn't mean broken** - it means the heat pump is not currently pumping heat
+- **High confidence reading** - the system is certain about this measurement
+
+### What Creates Heat When COP = 0?
+
+If you notice warm water but see COP = 0, the heat is coming from:
+
+- **Electric backup heaters** (not heat pump operation)
+- **Residual heat** from previous heating cycles
+- **Hot water tank storage** maintaining temperature
+- **Passive solar gain** or building heat
+
+### Heat Pump Physics Simplified
+
+Think of your heat pump like a bicycle:
+
+- **COP = efficiency** is like "distance per pedal stroke"
+- **When you stop pedaling** (compressor off), there's no "pedal efficiency" to measure
+- **Coasting downhill** (backup heaters) still moves you, but it's not pedaling efficiency
+
+### Normal Operation Pattern
+
+In typical daily use, you'll see:
+
+- **COP = 0** during idle periods (normal)
+- **COP = 2.5-4.5** during active heating (good efficiency)
+- **COP = 1.5-2.5** during defrost cycles (temporary)
+
+**✅ Seeing COP = 0 regularly is completely normal and indicates your system is working correctly!**
+
+---
+
 ## Common Issues and Validation
 
 ### Unrealistic Results
@@ -889,7 +800,7 @@ Final COP = 2.9 × 1.13 × 0.95 × 1.03 × 1.04 = 3.37
 ### Typical COP Ranges
 
 - **Air-to-water heat pumps**: 2.5 - 4.5
-- **Ground-source heat pumps**: 3.5 - 5.5  
+- **Ground-source heat pumps**: 3.5 - 5.5
 - **During defrost**: 1.0 - 2.0
 - **Ideal conditions**: 4.0 - 6.0
 
@@ -898,6 +809,38 @@ Final COP = 2.9 × 1.13 × 0.95 × 1.03 × 1.04 = 3.37
 - **Carnot limit**: Theoretical maximum based on temperatures
 - **Practical limit**: 50-60% of Carnot efficiency
 - **Real-world**: Usually 30-50% of Carnot efficiency
+
+---
+
+## COP Method Visibility and Diagnostics
+
+**Enhanced in v0.98.7** with service architecture:
+
+- The `adlar_cop_method` capability displays which calculation method is currently being used, providing transparency into the COP calculation process
+- **Enhanced compressor operation validation**: COPCalculator service automatically returns `COP = 0` when compressor is not running (frequency ≤ 0 Hz), ensuring physically accurate results
+- **Diagnostic Information**: When insufficient data is available, specific diagnostic messages show exactly what's missing
+
+The sensor shows:
+
+- **Method Name**: Direct Thermal, Carnot Estimation, Temperature Difference, etc.
+- **Diagnostic Info**: Specific indicators when data is insufficient ("No Power", "No Flow", "No Temp Δ", "Multi Fail")
+- **Confidence Indicator**:
+  - 🟢 High confidence (most accurate data available)
+  - 🟡 Medium confidence (some data limitations)
+  - 🔴 Low confidence (limited data, estimation required)
+
+### Diagnostic Messages
+
+When COP calculation fails, COPCalculator service provides specific 22-character diagnostic messages:
+
+- **"No Power"**: Power measurement unavailable for direct thermal method
+- **"No Thermal"**: Water flow or temperature difference unavailable
+- **"No Flow"**: Water flow measurement missing
+- **"No Temp Δ"**: Temperature difference between inlet/outlet too small
+- **"No Comp"**: Compressor frequency data unavailable
+- **"Multi Fail"**: Multiple sensor issues detected
+
+This helps users understand exactly why COP calculation isn't possible and what sensors need attention.
 
 ---
 
@@ -942,7 +885,6 @@ The advanced methods (2, 3, 4, 5, 6) provide significant advantages over basic t
 - **Predictive maintenance** - valve position patterns indicate system health
 - **No additional sensors needed** - uses existing control system data
 
-
 ### Combined Intelligence
 
 The system automatically selects the best available method based on:
@@ -953,3 +895,65 @@ The system automatically selects the best available method based on:
 - **Validation checks** - flags unrealistic results for user attention
 
 This comprehensive approach with **7 different COP calculation methods** ensures **reliable COP monitoring across all installation scenarios**, from basic temperature-only setups to advanced systems with full sensor suites, including innovative power estimation using operational frequencies!
+
+---
+
+## COPCalculator Service Architecture (v0.99.23+)
+
+The COP calculation system is implemented as the **COPCalculator service** (`lib/services/cop-calculator.ts`), which is managed by the ServiceCoordinator and integrates with other services for data collection and quality assessment.
+
+### Service Integration
+
+**COPCalculator** is one of 8 core services managed by ServiceCoordinator:
+
+```typescript
+class ServiceCoordinator {
+  private copCalculator: COPCalculator | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    this.copCalculator = new COPCalculator(device, logger);
+    await this.copCalculator.startCalculations();
+  }
+}
+```
+
+**Cross-Service Integration**:
+
+- **TuyaConnectionService**: Provides real-time sensor data (DPS values) for calculations
+- **CapabilityHealthService**: Validates sensor data quality before using in calculations
+- **EnergyTrackingService**: Supplies external power measurement data for Method 1 (Direct Thermal)
+- **SettingsManagerService**: Manages user preferences (method override, outlier detection settings)
+- **RollingCOPCalculator**: Subscribes to `cop-calculated` events for time-series analysis
+- **SCOPCalculator**: Subscribes to `cop-calculated` events for seasonal efficiency tracking
+
+### Calculation Lifecycle
+
+1. **Initialization**: ServiceCoordinator initializes COPCalculator with device reference
+2. **Data Collection**: TuyaConnectionService emits sensor update events (every 30 seconds)
+3. **Health Validation**: CapabilityHealthService confirms sensor data quality
+4. **Method Selection**: COPCalculator chooses highest accuracy method with sufficient data
+5. **Calculation**: Selected method calculates COP value with confidence level
+6. **Publishing**: Result published to `adlar_cop` capability with method transparency
+7. **Event Emission**: `cop-calculated` event emitted for RollingCOPCalculator and SCOPCalculator
+8. **Service Diagnostics**: ServiceCoordinator tracks calculation service health
+
+### Service Constants Integration
+
+COPCalculator uses centralized constants from `DeviceConstants` class:
+
+```typescript
+// COP calculation constants
+static readonly COP_CALCULATION_INTERVAL_MS = 30 * 1000; // 30 seconds
+static readonly EXTERNAL_DEVICE_QUERY_TIMEOUT_MS = 5 * 1000; // 5 seconds
+static readonly MIN_VALID_COP = 0.5;
+static readonly MAX_VALID_COP = 8.0;
+
+// COP ranges for validation
+static readonly COP_RANGES = {
+  AIR_TO_WATER_MIN: 2.5,
+  AIR_TO_WATER_MAX: 4.5,
+  GROUND_SOURCE_MIN: 3.5,
+  GROUND_SOURCE_MAX: 5.5,
+  // ... additional ranges
+};
+```
