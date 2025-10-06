@@ -52,7 +52,7 @@ Je hebt deze gegevens nodig van je warmtepomp setup:
 ### 2. Download en Pak de App uit
 
 1. **Download de App**
-   - Ga naar de [GitHub Releases pagina](https://github.com/hhi/org.hhi.adlar-heatpump/releases)
+   - Ga naar de GitHub Releases pagina van deze repository
    - Download het **ZIP bestand** van de laatste release
 
 2. **Pak het ZIP bestand uit**
@@ -105,7 +105,11 @@ Zodra de app geïnstalleerd is en je apparaat gekoppeld is, kun je live waarden 
 
 ### Belangrijke Opmerkingen
 
-- **Verwarmingscurve (stooklijn) Keuzelijst**: De verwarmingscurve selectie is uitgeschakeld vanwege een bug die wordt waargenomen op iPhone apparaten. Om verwarmingscurve waarden te wijzigen, gebruik de speciale actie flow card.
+- **Verwarmingscurve Bediening (v0.99.56+)**: De app gebruikt een dubbele picker/sensor architectuur voor curve bediening:
+  - **Sensor capabilities** zijn altijd zichtbaar en tonen de huidige curve instellingen
+  - **Picker bediening** is standaard verborgen (schonere UI)
+  - Schakel pickers in via apparaatinstellingen: `enable_curve_controls` instelling
+  - Dit lost het eerdere iPhone picker probleem op met behoud van volledige functionaliteit
 - **Flow Cards**: De meeste apparaatinstellingen kunnen worden beheerd via Homey's flow cards voor automatiseringsdoeleinden.
 
 ### Verkrijgen van Vereiste Gegevens
@@ -165,6 +169,6 @@ Na succesvolle installatie:
 
 Voor extra hulp:
 
-- **GitHub Issues**: [Rapporteer problemen hier](https://github.com/hhi/org.hhi.adlar-heatpump/issues)
-- **Homey Community**: Zoek naar bestaande oplossingen of stel vragen
+- **GitHub Issues**: Controleer de Issues pagina van de repository om problemen te melden
+- **Homey Community**: Zoek naar bestaande oplossingen of stel vragen (Topic ID: 143690)
 - **Documentatie**: Bekijk de app's README en documentatiebestanden

@@ -1,4 +1,4 @@
-# Service Architecture Guide (v0.99.40)
+# Service Architecture Guide (v0.99.56)
 
 This comprehensive guide documents the service-oriented architecture implemented in the Adlar Heat Pump Homey app, providing patterns, best practices, and implementation details for working with the 8 specialized services managed by ServiceCoordinator.
 
@@ -64,8 +64,13 @@ The Adlar Heat Pump app transitioned from a monolithic device class (v0.99.22 an
 - Manages TuyAPI connection lifecycle (connect, disconnect, reconnect)
 - Automatic reconnection with configurable interval (20 seconds)
 - Connection health monitoring and diagnostics
+- Real-time connection status tracking (v0.99.47) - 4 states: connected, disconnected, reconnecting, error
 - Event-driven sensor data updates (DPS changes)
 - Error categorization and recovery (via TuyaErrorCategorizer)
+- Crash-proof error recovery (v0.99.46) - Triple-layer protection with unhandled promise rejection prevention
+- Deep socket error interception (v0.99.49) - Intercepts TuyAPI internal socket ECONNRESET errors
+- Automatic device availability status sync (unavailable during outages, available on reconnect)
+- Idempotent error handler installation with listener cleanup
 
 **Public Interface**:
 
@@ -75,6 +80,7 @@ class TuyaConnectionService {
   async disconnect(): Promise<void>;
   async set(dps: number, value: any): Promise<void>;
   isConnected(): boolean;
+  getConnectionStatus(): 'connected' | 'disconnected' | 'reconnecting' | 'error'; // v0.99.47
   getConnectionHealth(): ConnectionHealth;
   on(event: 'data' | 'connected' | 'disconnected' | 'error', handler): void;
 }
@@ -128,7 +134,7 @@ class CapabilityHealthService {
 
 **Key Features**:
 
-- Manages 64 flow cards across 8 categories
+- Manages 71 flow cards across 8 categories
 - Three-mode control per category (disabled/auto/enabled)
 - Health-based auto-registration (queries CapabilityHealthService)
 - User preference management via SettingsManagerService
@@ -1038,6 +1044,448 @@ class MyService {
   }
 }
 ```
+
+---
+
+## Dual Picker/Sensor Architecture (v0.99.54+)
+
+### Overview
+
+The app implements a **dual picker/sensor architecture** for curve control capabilities, enabling a single DPS to update multiple capabilities simultaneously. This architecture resolves the iPhone picker bug while providing enhanced UX through always-visible status displays with optional user controls.
+
+### Multi-Capability DPS Mapping
+
+**Traditional Approach (Pre-v0.99.54):**
+
+```typescript
+// One DPS → One capability (allArraysSwapped pattern)
+DPS 11 → adlar_enum_capacity_set (picker only)
+DPS 13 → adlar_enum_countdown_set (sensor only)
+```
+
+**New Multi-Capability Mapping (v0.99.54+):**
+
+```typescript
+// One DPS → Multiple capabilities (dpsToCapabilities pattern)
+DPS 11 → adlar_enum_capacity_set (picker) + adlar_sensor_capacity_set (sensor)
+DPS 13 → adlar_enum_countdown_set (sensor) + adlar_picker_countdown_set (picker)
+```
+
+### AdlarMapping Enhancement
+
+**File**: `lib/definitions/adlar-mapping.ts`
+
+**New Primary Mapping System (Lines 102-133):**
+
+```typescript
+/**
+ * Multi-capability DPS mapping (v0.99.54+)
+ *
+ * Maps each DPS ID to an array of ALL capabilities that should be updated when that DPS changes.
+ * This enables dual picker/sensor architecture where one DPS updates multiple capabilities.
+ *
+ * IMPORTANT: This is the PRIMARY mapping for DPS-to-capability updates.
+ * Use this instead of allArraysSwapped for multi-capability support.
+ */
+static dpsToCapabilities: Record<number, string[]> = (() => {
+  const mapping: Record<number, string[]> = {};
+
+  // Build mapping from allCapabilities - each DPS gets an array of capabilities
+  Object.entries(AdlarMapping.allCapabilities).forEach(([capability, dpsArray]) => {
+    const dpsId = dpsArray[0];
+
+    if (!mapping[dpsId]) {
+      mapping[dpsId] = [];
+    }
+
+    // Add capability to array (allows multiple capabilities per DPS)
+    mapping[dpsId].push(capability);
+  });
+
+  return mapping;
+})();
+```
+
+**Key Features:**
+
+- **Auto-Generated**: Mapping built automatically from `allCapabilities`
+- **Backward Compatible**: Single-capability DPS have arrays with one element
+- **Type-Safe**: TypeScript ensures correct DPS ID and capability name matching
+- **Extensible**: New dual capabilities added by declaring them in `adlarCapabilities`
+
+### Device Update Logic
+
+**Enhanced `updateCapabilitiesFromDps()` (device.ts:2140-2175):**
+
+```typescript
+private updateCapabilitiesFromDps(dpsFetched: Record<number, unknown>): void {
+  Object.entries(dpsFetched).forEach(([dpsIdStr, value]) => {
+    const dpsId = Number(dpsIdStr);
+
+    // Use NEW multi-capability mapping (v0.99.54+)
+    const capabilities = AdlarMapping.dpsToCapabilities[dpsId];
+
+    if (!capabilities || capabilities.length === 0) {
+      this.log(`No capability mapping for DPS ${dpsId}`);
+      return;
+    }
+
+    // Update ALL capabilities mapped to this DPS
+    capabilities.forEach((capability) => {
+      if (this.hasCapability(capability)) {
+        this.setCapabilityValue(capability, value)
+          .then(() => {
+            this.log(`✅ Updated ${capability} to ${value} (DPS ${dpsId})`);
+
+            // Notify CapabilityHealthService about update
+            this.serviceCoordinator
+              ?.getCapabilityHealth()
+              ?.updateCapabilityHealth(capability, value);
+          })
+          .catch((err) => {
+            this.error(`Failed to update ${capability}:`, err);
+          });
+      }
+    });
+  });
+}
+```
+
+**Flow:**
+
+1. **DPS Change Received** from Tuya device (e.g., DPS 11 = "H2")
+2. **Multi-Capability Lookup** via `dpsToCapabilities[11]`
+3. **Returns Array** `['adlar_enum_capacity_set', 'adlar_sensor_capacity_set']`
+4. **Updates Both Capabilities** with same value from single DPS
+5. **Health Tracking** notifies CapabilityHealthService for each capability
+6. **Data Consistency** guaranteed - both capabilities always synchronized
+
+### User Control Setting
+
+**Setting Definition (driver.settings.compose.json):**
+
+```json
+{
+  "id": "enable_curve_controls",
+  "type": "checkbox",
+  "label": {
+    "en": "Show curve picker controls in device UI",
+    "nl": "Toon curve picker besturing in apparaat UI"
+  },
+  "value": false,
+  "hint": {
+    "en": "Show picker controls for heating and hot water curves in device UI. When disabled, only sensor displays are visible (read-only). Flow cards always work regardless of this setting.",
+    "nl": "Toon picker besturing voor verwarmings- en warmwatercurves in apparaat UI. Wanneer uitgeschakeld zijn alleen sensor weergaves zichtbaar (alleen-lezen). Flow cards werken altijd ongeacht deze instelling."
+  }
+}
+```
+
+**Capability Visibility Matrix:**
+
+| Setting State | Sensor Capabilities (Always Visible) | Picker Capabilities (Conditional) | Flow Cards |
+|---------------|-------------------------------------|----------------------------------|------------|
+| **Disabled (Default)** | `adlar_enum_countdown_set`<br>`adlar_sensor_capacity_set` | Hidden | ✅ Active |
+| **Enabled** | `adlar_enum_countdown_set`<br>`adlar_sensor_capacity_set` | `adlar_picker_countdown_set`<br>`adlar_enum_capacity_set` | ✅ Active |
+
+### Architecture Benefits
+
+1. **Always-Visible Status**: Users always see current curve settings via sensor capabilities
+2. **Optional Control**: Advanced users can enable picker controls when needed
+3. **Data Consistency**: Single DPS update maintains perfect sync between sensor and picker
+4. **Flow Card Independence**: Automation works regardless of UI picker visibility setting
+5. **Reduced UI Clutter**: Default installation shows read-only values only (cleaner interface)
+6. **User Choice**: Power users can enable full control via device settings
+7. **iPhone Bug Resolution**: Solves picker crash issue by making pickers optional
+8. **Backward Compatible**: Existing devices upgrade automatically with migration logic
+
+### Automatic Capability Migration
+
+**Migration Logic (device.ts:2489-2510):**
+
+```typescript
+// Add missing curve sensor capabilities for existing devices (v0.99.54 migration)
+if (!this.hasCapability('adlar_sensor_capacity_set')) {
+  await this.addCapability('adlar_sensor_capacity_set');
+  this.log('✅ Added adlar_sensor_capacity_set capability (hot water curve sensor)');
+}
+
+if (!this.hasCapability('adlar_picker_countdown_set')) {
+  await this.addCapability('adlar_picker_countdown_set');
+  this.log('✅ Added adlar_picker_countdown_set capability (heating curve picker)');
+}
+
+// Initialize values from existing capabilities
+const currentHotWater = this.getCapabilityValue('adlar_enum_capacity_set');
+if (currentHotWater !== null) {
+  await this.setCapabilityValue('adlar_sensor_capacity_set', currentHotWater);
+}
+
+const currentHeating = this.getCapabilityValue('adlar_enum_countdown_set');
+if (currentHeating !== null) {
+  await this.setCapabilityValue('adlar_picker_countdown_set', currentHeating);
+}
+```
+
+**Migration Features:**
+
+- ✅ Detects missing capabilities during `onInit()`
+- ✅ Adds new sensor/picker capabilities automatically
+- ✅ Copies current values from existing capabilities
+- ✅ Zero user intervention required
+- ✅ Preserves existing curve settings during upgrade
+
+### Usage Pattern for Developers
+
+**Adding New Dual Capability:**
+
+1. **Define Both Capabilities** in `adlarCapabilities` (adlar-mapping.ts):
+
+```typescript
+static adlarCapabilities: Record<string, number[]> = {
+  // Sensor capability (always visible)
+  my_sensor_capability: [42],
+
+  // Picker capability (conditional visibility)
+  my_picker_capability: [42],  // Same DPS ID!
+};
+```
+
+2. **Define Capability JSON Files** in `.homeycompose/capabilities/`:
+
+```json
+// my_sensor_capability.json
+{
+  "type": "enum",
+  "title": { "en": "My Sensor" },
+  "getable": true,
+  "setable": false,  // Read-only sensor
+  "uiComponent": "sensor",
+  "values": [...]
+}
+
+// my_picker_capability.json
+{
+  "type": "enum",
+  "title": { "en": "My Control" },
+  "getable": true,
+  "setable": true,   // User can change
+  "uiComponent": "picker",
+  "values": [...]
+}
+```
+
+3. **`dpsToCapabilities` Auto-Generates** the mapping:
+
+```typescript
+// Automatic result:
+dpsToCapabilities[42] = ['my_sensor_capability', 'my_picker_capability']
+```
+
+4. **Device Update Logic Handles** the rest automatically!
+
+### Testing Multi-Capability Updates
+
+```typescript
+describe('Multi-Capability DPS Updates', () => {
+  it('should update both sensor and picker when DPS 11 changes', async () => {
+    const device = new MyDevice();
+    await device.onInit();
+
+    // Simulate DPS 11 change from Tuya device
+    device.updateCapabilitiesFromDps({ 11: 'H3' });
+
+    // Verify BOTH capabilities updated
+    expect(device.getCapabilityValue('adlar_enum_capacity_set')).toBe('H3');
+    expect(device.getCapabilityValue('adlar_sensor_capacity_set')).toBe('H3');
+  });
+
+  it('should maintain data consistency across capabilities', () => {
+    // Both capabilities should always have identical values
+    const sensorValue = device.getCapabilityValue('adlar_sensor_capacity_set');
+    const pickerValue = device.getCapabilityValue('adlar_enum_capacity_set');
+
+    expect(sensorValue).toBe(pickerValue);
+  });
+});
+```
+
+---
+
+## Production-Ready Enhancements (v0.99.46-v0.99.49)
+
+### TuyaConnectionService Updates
+
+The TuyaConnectionService has been significantly enhanced with production-ready features for crash prevention and real-time connection monitoring.
+
+#### Crash Prevention (v0.99.46)
+
+**Triple-Layer Error Protection:**
+
+```typescript
+// Layer 1: Specific .catch() handlers on async setTimeout callbacks
+setTimeout(async () => {
+  try {
+    await this.reconnect();
+  } catch (err) {
+    this.logger('Reconnection failed:', err);
+  }
+}, DeviceConstants.RECONNECTION_INTERVAL_MS).catch((err) => {
+  // CRITICAL: Prevents unhandled promise rejection crashes
+  this.logger('⚠️ Async setTimeout error caught:', err);
+});
+
+// Layer 2: Device status sync (5 consecutive failures)
+if (this.consecutiveFailures >= DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
+  await this.device.setUnavailable('Connection lost - attempting reconnection');
+}
+
+// On successful reconnection:
+await this.device.setAvailable();
+this.consecutiveFailures = 0;
+
+// Layer 3: Global process handlers (app.ts)
+process.on('unhandledRejection', (reason) => {
+  this.error('⚠️ UNHANDLED PROMISE REJECTION prevented app crash:', reason);
+});
+```
+
+#### Real-Time Connection Status (v0.99.47)
+
+**Four Connection States:**
+
+```typescript
+type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting' | 'error';
+
+class TuyaConnectionService {
+  private currentStatus: ConnectionStatus = 'disconnected';
+
+  // Status updates at all transition points
+  async connectTuya(): Promise<void> {
+    this.currentStatus = 'reconnecting';
+
+    try {
+      await this.tuya.connect();
+      this.currentStatus = 'connected';
+    } catch (err) {
+      this.currentStatus = 'error';
+    }
+  }
+
+  getConnectionStatus(): ConnectionStatus {
+    return this.currentStatus;
+  }
+}
+```
+
+**Device Integration:**
+
+```typescript
+// Device polls connection status every 5 seconds
+setInterval(() => {
+  const status = this.serviceCoordinator?.getTuyaConnection()?.getConnectionStatus();
+
+  if (status && this.hasCapability('adlar_connection_status')) {
+    this.setCapabilityValue('adlar_connection_status', status);
+  }
+}, 5000);
+```
+
+#### Deep Socket Error Handler (v0.99.49)
+
+**CRITICAL FIX for ECONNRESET errors:**
+
+```typescript
+/**
+ * Install deep socket error handler (v0.99.49)
+ *
+ * TIMING CRITICAL: Must be called AFTER this.tuya.connect()
+ * TuyAPI only creates the internal .device object DURING connect(), not in constructor
+ */
+private installDeepSocketErrorHandler(): void {
+  if (!this.tuya || !(this.tuya as any).device) {
+    this.logger('⚠️ Cannot install socket handler - TuyAPI .device not created yet');
+    return;
+  }
+
+  const tuyaDevice = (this.tuya as any).device;
+
+  // Remove existing error listeners (idempotent installation)
+  tuyaDevice.removeAllListeners('error');
+
+  // Install new handler with crash protection
+  tuyaDevice.on('error', (err: Error) => {
+    this.logger('🛡️ Deep socket error intercepted:', err.message);
+
+    // Categorize and handle error
+    const categorizedError = TuyaErrorCategorizer.categorize(err, 'Socket');
+
+    if (categorizedError.shouldReconnect) {
+      this.currentStatus = 'reconnecting';
+      this.scheduleReconnection();
+    }
+  });
+
+  this.logger('✅ Deep socket error handler installed');
+}
+```
+
+**Installation Points:**
+
+1. After initial connection in `initialize()`
+2. After every successful reconnection in `connectTuya()`
+
+**Why v0.99.48 Failed:**
+
+```typescript
+// ❌ v0.99.48 - WRONG: Handler installed BEFORE connect
+this.tuya = new TuyAPI({ ... });
+this.installDeepSocketErrorHandler();  // .device doesn't exist yet!
+await this.tuya.connect();
+
+// ✅ v0.99.49 - CORRECT: Handler installed AFTER connect
+this.tuya = new TuyAPI({ ... });
+await this.tuya.connect();              // .device created HERE
+this.installDeepSocketErrorHandler();   // Now .device exists
+```
+
+### Updated TuyaConnectionService Interface
+
+```typescript
+class TuyaConnectionService {
+  async connect(deviceConfig): Promise<void>;
+  async disconnect(): Promise<void>;
+  async set(dps: number, value: any): Promise<void>;
+
+  // Connection state (v0.99.47)
+  isConnected(): boolean;
+  getConnectionStatus(): 'connected' | 'disconnected' | 'reconnecting' | 'error';
+
+  // Connection health (v0.99.46)
+  getConnectionHealth(): ConnectionHealth;
+
+  // Events
+  on(event: 'data' | 'connected' | 'disconnected' | 'error', handler): void;
+}
+```
+
+### Updated Flow Card Count (v0.99.56)
+
+**Total: 71 Flow Cards** (Updated from 64):
+
+- **Triggers**: 36 cards (was 35)
+- **Conditions**: 23 cards (was 19)
+- **Actions**: 12 cards (unchanged)
+
+**Categories:**
+
+1. `flow_temperature_alerts` - 11 trigger cards
+2. `flow_voltage_alerts` - 3 trigger cards
+3. `flow_current_alerts` - 3 trigger cards
+4. `flow_power_alerts` - 3 trigger cards
+5. `flow_pulse_steps_alerts` - 2 trigger cards
+6. `flow_state_alerts` - 5 trigger cards
+7. `flow_efficiency_alerts` - 3 trigger cards
+8. `flow_expert_mode` - 3 trigger cards
 
 ---
 
