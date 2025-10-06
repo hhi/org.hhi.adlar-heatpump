@@ -1,4 +1,7 @@
 {
+  "0.99.58": {
+    "en": "CRITICAL BUG FIX: Fixed deep socket error handler attaching to wrong TuyAPI property. Changed from this.tuya.device (config object) to this.tuya.client (actual TCP socket). This bug caused ECONNRESET crashes despite v0.99.49 protection claims. Now correctly intercepts socket-level errors before they crash the app. Without this fix, all v0.99.48-v0.99.57 crash protection was non-functional."
+  },
   "0.99.57": {
     "en": "Documentation revision: Updated all markdown documentation to v0.99.56 standards. Fixed factual errors (Community Topic ID, capability counts, flow card counts). Added comprehensive dual picker/sensor architecture documentation (+262 lines), production-ready enhancements section (+175 lines) covering crash prevention, real-time connection monitoring, and deep socket error handling. Total documentation expansion: +447 lines across service architecture guide."
   },

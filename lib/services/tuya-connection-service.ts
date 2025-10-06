@@ -246,15 +246,16 @@ export class TuyaConnectionService {
    * Install deep socket error handler to intercept TuyAPI internal socket errors (v0.99.49)
    *
    * CRITICAL FIX: TuyAPI library's internal socket can throw ECONNRESET errors that bypass
-   * our standard .on('error') handler. This method accesses TuyAPI's internal device object
-   * and attaches error handlers directly to the underlying socket to prevent crashes.
+   * our standard .on('error') handler. This method accesses TuyAPI's internal .client property
+   * (the raw TCP socket) and attaches error handlers directly to prevent crashes.
    *
    * Error from socket: read ECONNRESET at /app/node_modules/tuyapi/index.js:688:26
    * This error occurs when the Tuya device abruptly closes the TCP connection without
    * proper shutdown, causing Node.js to emit ECONNRESET on the raw socket.
    *
-   * TIMING: Must be called AFTER this.tuya.connect() because TuyAPI creates the .device
-   * object during connection, not during constructor. Should be called after every reconnection.
+   * TIMING: Must be called AFTER this.tuya.connect() because TuyAPI creates the .client socket
+   * during connection (line 619: this.client = new net.Socket()), not during constructor.
+   * Should be called after every reconnection.
    */
   private installDeepSocketErrorHandler(): void {
     if (!this.tuya) {
@@ -263,17 +264,17 @@ export class TuyaConnectionService {
     }
 
     try {
-      // Access TuyAPI's internal device object (contains the raw socket)
+      // Access TuyAPI's internal socket object (the raw TCP socket)
       // @ts-expect-error - Accessing private TuyAPI internals for crash prevention
-      const tuyaDevice = this.tuya.device;
+      const tuyaSocket = this.tuya.client;
 
-      if (tuyaDevice) {
+      if (tuyaSocket) {
         // Remove any existing error listeners to prevent duplicates (idempotent)
-        tuyaDevice.removeAllListeners('error');
+        tuyaSocket.removeAllListeners('error');
 
-        // Install error handler on TuyAPI's internal device object
-        // This catches errors BEFORE they bubble up to our .on('error') handler
-        tuyaDevice.on('error', (error: Error) => {
+        // Install error handler on TuyAPI's internal socket
+        // This catches socket-level errors (ECONNRESET, etc.) BEFORE they bubble up
+        tuyaSocket.on('error', (error: Error) => {
           this.logger('TuyaConnectionService: 🛡️ Deep socket error intercepted (crash prevented):', error.message);
 
           // Categorize the error for proper handling
@@ -288,13 +289,15 @@ export class TuyaConnectionService {
             this.currentStatus = 'error';
           }
 
-          // Let our standard error recovery system handle reconnection
-          this.logger('TuyaConnectionService: Deep socket error handled gracefully - reconnection system will recover');
+          // Trigger reconnection via our standard system
+          this.scheduleNextReconnectionAttempt();
+
+          this.logger('TuyaConnectionService: Deep socket error handled gracefully - reconnection scheduled');
         });
 
-        this.logger('TuyaConnectionService: ✅ Deep socket error handler installed successfully on TuyAPI device object');
+        this.logger('TuyaConnectionService: ✅ Deep socket error handler installed successfully on TuyAPI socket');
       } else {
-        this.logger('TuyaConnectionService: ⚠️ TuyAPI .device object not yet created - handler will be installed after connect()');
+        this.logger('TuyaConnectionService: ⚠️ TuyAPI socket not yet created - handler will be installed after connect()');
       }
     } catch (error) {
       // If we can't install the deep handler, log but don't crash
