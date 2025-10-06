@@ -49,74 +49,6 @@ Declining SCOP over years indicates:
 
 ---
 
-## SCOPCalculator Service Architecture (v0.99.23+)
-
-The SCOP calculation system is implemented as the **SCOPCalculator service** (`lib/services/scop-calculator.ts`), which operates independently within the ServiceCoordinator lifecycle, providing seasonal efficiency monitoring according to the EN 14825 European standard.
-
-### Service Integration
-
-**SCOPCalculator** is one of 8 core services managed by ServiceCoordinator:
-
-```typescript
-class ServiceCoordinator {
-  private scopCalculator: SCOPCalculator | null = null;
-
-  async initialize(config: ServiceConfig): Promise<void> {
-    this.scopCalculator = new SCOPCalculator(device, logger);
-    await this.scopCalculator.initialize();
-  }
-}
-```
-
-**Cross-Service Integration**:
-
-- **COPCalculator**: SCOPCalculator subscribes to `cop-calculated` events for temperature bin classification
-- **RollingCOPCalculator**: Shares data point collection infrastructure and quality assessment patterns
-- **SettingsManagerService**: Persists seasonal data across heating season (Oct 1 - May 15, 228 days)
-- **ServiceCoordinator**: Manages initialization, seasonal boundary detection, and lifecycle
-- **CapabilityHealthService**: Validates COP data quality before seasonal aggregation
-
-### Data Persistence (Service Architecture)
-
-```typescript
-// SCOPCalculator persists seasonal data via SettingsManagerService
-class SCOPCalculator {
-  async saveSeasonalData(): Promise<void> {
-    const seasonalData = {
-      temperatureBins: this.temperatureBins,
-      methodContribution: this.methodContribution,
-      seasonalCoverage: this.coverage,
-      dataQuality: this.qualityScore
-    };
-
-    await this.settingsManager.persistSeasonalData(seasonalData);
-  }
-}
-```
-
-**Service Benefits**:
-
-1. **Separation of Concerns**: Seasonal efficiency isolated from real-time COP calculations
-2. **Event-Driven Updates**: Automatic processing of new COP data via COPCalculator events
-3. **Data Persistence**: SettingsManagerService handles storage across app restarts
-4. **Service Health Monitoring**: ServiceCoordinator tracks SCOPCalculator status and data collection progress
-
-### Service Constants Integration
-
-SCOPCalculator uses centralized constants from `DeviceConstants` class:
-
-```typescript
-// SCOP calculation constants
-static readonly SCOP_MIN_HOURS = 100;           // Minimum data hours for calculation
-static readonly SCOP_RECOMMENDED_HOURS = 400;   // Recommended for high confidence
-static readonly SCOP_HIGH_CONFIDENCE_THRESHOLD = 0.8;  // 80%+ reliable methods
-static readonly SCOP_MEDIUM_CONFIDENCE_THRESHOLD = 0.5; // 50%+ reliable methods
-static readonly SCOP_SEASONAL_COVERAGE_HIGH = 0.7;     // 70%+ of heating season
-static readonly SCOP_SEASONAL_COVERAGE_MEDIUM = 0.4;   // 40%+ of heating season
-```
-
----
-
 ## How SCOP is Calculated
 
 ### EN 14825 European Standard
@@ -463,6 +395,74 @@ Heat pumps are rated A+++ to D based on SCOP:
 - All temperature sensors calibrated
 - Flow measurement accuracy verified
 - Regular system diagnostics
+
+---
+
+## SCOPCalculator Service Architecture (v0.99.23+)
+
+The SCOP calculation system is implemented as the **SCOPCalculator service** (`lib/services/scop-calculator.ts`), which operates independently within the ServiceCoordinator lifecycle, providing seasonal efficiency monitoring according to the EN 14825 European standard.
+
+### Service Integration
+
+**SCOPCalculator** is one of 8 core services managed by ServiceCoordinator:
+
+```typescript
+class ServiceCoordinator {
+  private scopCalculator: SCOPCalculator | null = null;
+
+  async initialize(config: ServiceConfig): Promise<void> {
+    this.scopCalculator = new SCOPCalculator(device, logger);
+    await this.scopCalculator.initialize();
+  }
+}
+```
+
+**Cross-Service Integration**:
+
+- **COPCalculator**: SCOPCalculator subscribes to `cop-calculated` events for temperature bin classification
+- **RollingCOPCalculator**: Shares data point collection infrastructure and quality assessment patterns
+- **SettingsManagerService**: Persists seasonal data across heating season (Oct 1 - May 15, 228 days)
+- **ServiceCoordinator**: Manages initialization, seasonal boundary detection, and lifecycle
+- **CapabilityHealthService**: Validates COP data quality before seasonal aggregation
+
+### Data Persistence (Service Architecture)
+
+```typescript
+// SCOPCalculator persists seasonal data via SettingsManagerService
+class SCOPCalculator {
+  async saveSeasonalData(): Promise<void> {
+    const seasonalData = {
+      temperatureBins: this.temperatureBins,
+      methodContribution: this.methodContribution,
+      seasonalCoverage: this.coverage,
+      dataQuality: this.qualityScore
+    };
+
+    await this.settingsManager.persistSeasonalData(seasonalData);
+  }
+}
+```
+
+**Service Benefits**:
+
+1. **Separation of Concerns**: Seasonal efficiency isolated from real-time COP calculations
+2. **Event-Driven Updates**: Automatic processing of new COP data via COPCalculator events
+3. **Data Persistence**: SettingsManagerService handles storage across app restarts
+4. **Service Health Monitoring**: ServiceCoordinator tracks SCOPCalculator status and data collection progress
+
+### Service Constants Integration
+
+SCOPCalculator uses centralized constants from `DeviceConstants` class:
+
+```typescript
+// SCOP calculation constants
+static readonly SCOP_MIN_HOURS = 100;           // Minimum data hours for calculation
+static readonly SCOP_RECOMMENDED_HOURS = 400;   // Recommended for high confidence
+static readonly SCOP_HIGH_CONFIDENCE_THRESHOLD = 0.8;  // 80%+ reliable methods
+static readonly SCOP_MEDIUM_CONFIDENCE_THRESHOLD = 0.5; // 50%+ reliable methods
+static readonly SCOP_SEASONAL_COVERAGE_HIGH = 0.7;     // 70%+ of heating season
+static readonly SCOP_SEASONAL_COVERAGE_MEDIUM = 0.4;   // 40%+ of heating season
+```
 
 ---
 
