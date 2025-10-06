@@ -86,7 +86,7 @@ AUTOMATION WITH FLOW CARDS
 
 COP (COEFFICIENT OF PERFORMANCE) MONITORING
 
-The app automatically calculates how efficiently your heat pump works (see /docs/COP-calculation.md at sourcecode):
+The app automatically calculates how efficiently your heat pump works (see directory /docs/COP calculation at sourcecode):
 - COP value: Ratio between generated heat and consumed electricity
 - Daily averages: 24-hour trends
 - Weekly analysis: Long-term performance
@@ -113,7 +113,7 @@ NEED HELP?
 ADVANCED FEATURES
 
 FLOW CARD CATEGORIES
-You can adjust the visibility of flow cards:
+You can adjust the visibility of flow cards (app settings):
 - Temperature warnings
 - Voltage and current monitoring
 - Power warnings
@@ -122,7 +122,7 @@ You can adjust the visibility of flow cards:
 - Expert functions
 
 CROSS-APP INTEGRATION
-Connect with other Homey apps for enhanced COP calculation (see docs/flow-card-setup-quick-guide.md):
+Connect with other Homey apps for enhanced COP calculation (see /docs/COP flow-card-setup.md):
 - External power measurements (from your smart meter)
 - External water flow data
 - External ambient temperature data
