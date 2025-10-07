@@ -1,12 +1,95 @@
-# Repair Mechanism Validation Report
+# Credential Management & Repair Mechanism Evolution
 
-## Issues Found & Resolved
+## Current State (v0.99.62+): Settings-Based Credential Updates
 
-### Critical Issue #1: Missing Repair Flow Definition ❌ → ✅
-**Problem:** `onRepair` handler existed in driver.ts, but no `repair` array in driver.compose.json
-**Impact:** Homey UI wouldn't show "Repair device" option
-**Fix:** Added repair flow to [driver.compose.json:683-687](drivers/intelligent-heat-pump/driver.compose.json)
+**Status**: ✅ **REPAIR FLOW REMOVED** - Replaced by direct settings form editing
 
+### Architecture Change
+
+The traditional Homey "Repair Device" flow has been **removed** in favor of direct credential editing via the device settings form. This simplification provides:
+
+- **Single Source of Truth**: One way to update credentials (settings form)
+- **Simpler UX**: No intermediary repair dialog
+- **Transparent Updates**: Users see current values and edit directly
+- **Same Functionality**: Auto-reconnection still works via `onSettings()` handler
+
+### How Credential Updates Work (v0.99.62+)
+
+**User Path**:
+```
+Device Settings → Scroll to top → Edit credential fields → Save
+```
+
+**Available Fields**:
+- `device_id` (type: "text") - Tuya Device ID
+- `local_key` (type: "text") - Tuya Local Key for encryption
+- `ip_address` (type: "text") - Device IP address on local network
+- `protocol_version` (type: "dropdown") - Tuya protocol version (3.3, 3.4, 3.5)
+
+**Technical Flow**:
+```typescript
+1. User edits credential field(s) in settings form
+   ↓
+2. Homey calls device.onSettings(oldSettings, newSettings, changedKeys)
+   ↓
+3. Handler detects credential changes (device.ts:2527-2530)
+   const credentialKeysChanged = changedKeys.filter(
+     (key) => ['device_id', 'local_key', 'ip_address', 'protocol_version'].includes(key)
+   );
+   ↓
+4. If credentials changed, reinitialize Tuya connection (device.ts:2544-2562)
+   await this.serviceCoordinator.getTuyaConnection()?.reinitialize(newConfig);
+   ↓
+5. Device disconnects from old connection
+   ↓
+6. Device creates new TuyAPI instance with updated credentials
+   ↓
+7. Device reconnects automatically
+   ↓
+8. Status updates to "Connected (timestamp)"
+```
+
+**Implementation Reference**:
+- **Settings Schema**: [driver.settings.compose.json:2-76](../../drivers/intelligent-heat-pump/driver.settings.compose.json)
+- **Credential Detection**: [device.ts:2527-2530](../../drivers/intelligent-heat-pump/device.ts)
+- **Auto-Reconnection**: [device.ts:2544-2569](../../drivers/intelligent-heat-pump/device.ts)
+- **Reinitialize Method**: [tuya-connection-service.ts:125-193](../../lib/services/tuya-connection-service.ts)
+
+---
+
+## Historical Context: Repair Flow Evolution
+
+### Version 0.99.59 and Earlier ❌
+**Problem**: Settings fields were `type: "label"` (read-only)
+**Solution**: Repair flow was the **only way** to update credentials
+**Issue**: Repair flow had `"unknown_error_getting_file"` errors
+
+### Version 0.99.61 ✅
+**Change**: Fixed settings fields to `type: "text"` and `type: "dropdown"` (editable)
+**Change**: Added `session.showView('enter_device_info')` to `onRepair()` method
+**Result**: Both repair flow and settings form worked
+
+### Version 0.99.62 ✅ (Current)
+**Change**: Removed repair flow entirely
+**Rationale**:
+- Settings form now provides same functionality
+- Simpler UX with one clear path
+- Less code to maintain
+- No platform convention requirements for credential updates
+
+**Removed Components**:
+- `"repair": [...]` section from [driver.compose.json](../../drivers/intelligent-heat-pump/driver.compose.json)
+- `onRepair()` method from [driver.ts](../../drivers/intelligent-heat-pump/driver.ts) (commented out with explanation)
+- Custom repair HTML view still exists at [enter_device_info.html](../../drivers/intelligent-heat-pump/pair/enter_device_info.html) but only used for pairing
+
+---
+
+## For Developers: Restoring Repair Flow (If Needed)
+
+If you need to restore the repair flow in the future:
+
+### Step 1: Restore Repair Configuration
+Add to `driver.compose.json`:
 ```json
 "repair": [
   {
@@ -15,222 +98,77 @@
 ]
 ```
 
-### Critical Issue #2: Incorrect Handler Implementation ❌ → ✅
-**Problem:** Used `update_device` handler which doesn't exist in repair flow
-**Impact:** Repair would fail after user entered credentials
-**Root Cause:** Misunderstanding of Homey repair API - device is passed as parameter, not via handler
+### Step 2: Uncomment onRepair Method
+In `driver.ts`, uncomment the `onRepair()` method (currently at lines ~53-97)
 
-**Before (Incorrect):**
+### Step 3: Ensure showView Call Exists
+Make sure the method ends with:
 ```typescript
-async onRepair(session: PairSession) {
-  let deviceCredentials = null;
-
-  session.setHandler('enter_device_info', async (data) => {
-    deviceCredentials = data;  // Just stores data
-    return true;
-  });
-
-  session.setHandler('update_device', async (device) => {
-    // This handler NEVER gets called!
-    await device.setSettings(deviceCredentials);
-  });
-}
+await session.showView('enter_device_info');
 ```
 
-**After (Correct):**
-```typescript
-async onRepair(session: PairSession, device: any) {  // ← Device passed as parameter
-  session.setHandler('enter_device_info', async (data) => {
-    // Immediately update device when data is received
-    await device.setSettings({
-      device_id: data.deviceId,
-      local_key: data.localKey,
-      ip_address: data.ipAddress,
-      protocol_version: data.protocolVersion || '3.3',
-    });
-
-    await device.setStoreValue('protocol_version', data.protocolVersion || '3.3');
-    // ... other store values
-
-    return true;  // Closes repair flow
-  });
-}
-```
-
-## How Repair Now Works
-
-### User Flow
-1. User opens device in Homey app
-2. Taps ⚙️ Settings → Scrolls down
-3. Taps **"Repair device"** button (now visible!)
-4. Sees same `enter_device_info` form as pairing
-5. Enters/updates credentials + **selects protocol version**
-6. Taps "Continue"
-7. Device credentials update immediately
-8. Repair flow closes automatically
-
-### Technical Flow
-```
-User taps "Repair device"
-    ↓
-Homey reads repair array from driver.compose.json
-    ↓
-Shows view: enter_device_info.html
-    ↓
-User submits form → emit('enter_device_info', {deviceId, localKey, ipAddress, protocolVersion})
-    ↓
-Driver.onRepair handler receives data
-    ↓
-Immediately updates device.setSettings() and device.setStoreValue()
-    ↓
-Returns true → Repair flow closes
-    ↓
-Device reconnects with new protocol version
-```
-
-## Key Differences: Pairing vs Repair
-
-| Aspect | Pairing (`onPair`) | Repair (`onRepair`) |
-|--------|-------------------|---------------------|
-| **Device object** | Created via `list_devices` handler | Passed as parameter |
-| **Flow steps** | Multiple views (enter → list → add) | Single view (enter only) |
-| **Completion** | `Homey.createDevice()` | Return `true` from handler |
-| **Purpose** | Create new device | Update existing device |
-
-## Protocol Version Update Flow
-
-When user changes protocol version via repair:
-
-1. **Settings updated** ([driver.ts:62-67](drivers/intelligent-heat-pump/driver.ts))
-   ```typescript
-   await device.setSettings({
-     protocol_version: data.protocolVersion || '3.3'
-   });
-   ```
-
-2. **Store updated** ([driver.ts:70-73](drivers/intelligent-heat-pump/driver.ts))
-   ```typescript
-   await device.setStoreValue('protocol_version', data.protocolVersion || '3.3');
-   ```
-
-3. **Device detects change** via `onSettings` handler in device.ts
-   ```typescript
-   async onSettings({ newSettings, changedKeys }) {
-     if (changedKeys.includes('protocol_version')) {
-       // ServiceCoordinator handles reconnection with new version
-       await this.serviceCoordinator.onSettings(oldSettings, newSettings, changedKeys);
-     }
-   }
-   ```
-
-4. **ServiceCoordinator reinitializes** TuyaConnectionService with new version
-5. **Connection established** with correct protocol
-6. **ECONNRESET errors stop** ✅
-
-## Validation Results
-
-### Build ✅
+### Step 4: Rebuild
 ```bash
-> tsc
-# No errors
+npm run build
+homey app validate
 ```
-
-### Validation ✅
-```bash
-> homey app validate
-✓ App validated successfully against level `publish`
-```
-
-### Repair Flow Structure ✅
-- ✓ `repair` array defined in driver.compose.json
-- ✓ Reuses `enter_device_info` view from pairing
-- ✓ Protocol version dropdown included
-- ✓ Translations (EN/NL) present
-
-### Handler Implementation ✅
-- ✓ Device received as parameter
-- ✓ Settings updated immediately
-- ✓ Store updated immediately
-- ✓ Error handling included
-- ✓ Success logging included
-
-## Testing Recommendations
-
-### Manual Testing Checklist
-- [ ] Install app version 0.99.59
-- [ ] Pair a device with protocol 3.3
-- [ ] Open device settings
-- [ ] Verify "Repair device" button is visible
-- [ ] Tap "Repair device"
-- [ ] Verify protocol dropdown shows current value (3.3)
-- [ ] Change to 3.4
-- [ ] Submit repair form
-- [ ] Verify device reconnects
-- [ ] Check device settings shows protocol_version = 3.4
-- [ ] Monitor connection stability for 5 minutes
-- [ ] Verify no ECONNRESET errors in logs
-
-### ECONNRESET Resolution Test
-For users experiencing ECONNRESET:
-- [ ] Note current protocol version (likely 3.3)
-- [ ] Note ECONNRESET frequency (e.g., every 30 seconds)
-- [ ] Perform repair → change to 3.4
-- [ ] Monitor for 10 minutes
-- [ ] Expected: No ECONNRESET errors
-- [ ] Expected: Connection status = "connected"
-- [ ] Expected: Sensor data updating normally
-
-## Edge Cases Handled
-
-1. **Missing protocol version in form submission**
-   - Fallback: `data.protocolVersion || '3.3'`
-   - Ensures backward compatibility
-
-2. **Repair fails during settings update**
-   - Try-catch block wraps all operations
-   - Throws descriptive error to user
-   - Doesn't leave device in broken state
-
-3. **User cancels repair**
-   - No settings changed
-   - Device continues with existing credentials
-
-4. **Repair with same credentials**
-   - Settings still updated (idempotent)
-   - Ensures store/settings sync
-
-## Known Limitations
-
-1. **Device must restart connection** after repair
-   - Settings change triggers `onSettings`
-   - ServiceCoordinator destroys and reinitializes
-   - Brief unavailability (1-2 seconds) is normal
-
-2. **No pre-population of current values**
-   - Repair form doesn't show current credentials
-   - User must re-enter all values
-   - **Improvement opportunity:** Use `session.emit()` to pre-populate
-
-3. **No validation of protocol version compatibility**
-   - Any version (3.3, 3.4, 3.5) allowed
-   - No device-specific version detection
-   - User must try different versions if connection fails
-   - **Future enhancement:** Auto-detection (see PROTOCOL_AUTO_DETECTION_DESIGN.md)
-
-## Conclusion
-
-✅ **Repair mechanism is now fully functional**
-✅ **Protocol version updates work correctly**
-✅ **User can resolve ECONNRESET issues in < 2 minutes**
-✅ **Implementation follows Homey SDK best practices**
-
-The repair mechanism provides immediate relief for users experiencing protocol mismatch issues while we develop automatic detection for future releases.
 
 ---
 
-**Files Modified:**
-- [driver.compose.json](drivers/intelligent-heat-pump/driver.compose.json) - Added repair flow
-- [driver.ts](drivers/intelligent-heat-pump/driver.ts) - Fixed onRepair implementation
+## Testing Credential Updates
 
-**Version:** 0.99.59
-**Status:** Ready for release
+### Test Case 1: Change Device ID
+1. Go to Device Settings
+2. Edit "Device ID" field at top
+3. Click Save
+4. ✅ Verify: Device status changes to "Reconnecting"
+5. ✅ Verify: Device reconnects with new ID (or shows appropriate error)
+
+### Test Case 2: Change IP Address
+1. Change device's actual IP on network (router/DHCP)
+2. Go to Device Settings → Edit "IP Address" field
+3. Click Save
+4. ✅ Verify: Device reconnects with new IP
+
+### Test Case 3: Change Protocol Version
+1. Go to Device Settings → "Protocol Version" dropdown
+2. Select different version (e.g., 3.3 → 3.4)
+3. Click Save
+4. ✅ Verify: Device attempts reconnection with new protocol
+
+### Test Case 4: Invalid Credentials
+1. Enter invalid Device ID or Local Key
+2. Click Save
+3. ✅ Verify: Device shows "Unavailable" with error message
+4. ✅ Verify: Can correct credentials via settings form
+5. ✅ Verify: Device reconnects after correction
+
+---
+
+## Benefits of Settings-Based Approach
+
+**For Users**:
+- ✅ One clear way to update credentials (no confusion)
+- ✅ See current values directly
+- ✅ Edit in-place without separate dialog
+- ✅ Standard settings UI (familiar pattern)
+
+**For Developers**:
+- ✅ ~40 lines less code to maintain
+- ✅ Single code path for credential updates
+- ✅ Easier to test and debug
+- ✅ No dual UI maintenance
+
+**For Support**:
+- ✅ Simpler user instructions: "Edit credentials in settings"
+- ✅ No repair flow troubleshooting needed
+- ✅ Clear error messages in settings form
+
+---
+
+## Related Documentation
+
+- [CLAUDE.md - Credential Management](../../CLAUDE.md#credential-management-v09962) - Developer guide
+- [Settings Configuration](../../drivers/intelligent-heat-pump/driver.settings.compose.json) - Settings schema
+- [Device onSettings Handler](../../drivers/intelligent-heat-pump/device.ts#L2527) - Implementation
+- [TuyaConnectionService.reinitialize()](../../lib/services/tuya-connection-service.ts#L125) - Reconnection logic

@@ -46,8 +46,8 @@
       "nl": "Protocolversie"
     },
     "hint": {
-      "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Change via device repair if needed.",
-      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Wijzig via apparaatreparatie indien nodig."
+      "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Device will reconnect automatically after changing credentials.",
+      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Apparaat maakt automatisch opnieuw verbinding na wijzigen van inloggegevens."
     },
     "value": "3.3",
     "values": [

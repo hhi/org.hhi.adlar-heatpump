@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.99.61",
+  "version": "0.99.62",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -5364,11 +5364,6 @@
           "template": "done"
         }
       ],
-      "repair": [
-        {
-          "id": "enter_device_info"
-        }
-      ],
       "id": "intelligent-heat-pump",
       "settings": [
         {
@@ -5418,8 +5413,8 @@
             "nl": "Protocolversie"
           },
           "hint": {
-            "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Change via device repair if needed.",
-            "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Wijzig via apparaatreparatie indien nodig."
+            "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Device will reconnect automatically after changing credentials.",
+            "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Apparaat maakt automatisch opnieuw verbinding na wijzigen van inloggegevens."
           },
           "value": "3.3",
           "values": [
