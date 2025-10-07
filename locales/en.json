@@ -5,6 +5,8 @@
       "description": "Please enter your Tuya device credentials",
       "device_id": "Device ID",
       "local_key": "Local Key",
+      "ip_address": "IP Address",
+      "protocol_version": "Protocol Version",
       "continue": "Continue"
     }
   },
