@@ -87,6 +87,9 @@ class MyDriver extends Homey.Driver {
     session.setHandler('showView', async (viewId: unknown) => {
       this.log(`Repair View: ${viewId}`);
     });
+
+    // CRITICAL: Show the repair view to the user
+    await session.showView('enter_device_info');
   }
 
   async onPair(session: PairSession) {
