@@ -499,7 +499,7 @@ class MyDevice extends Homey.Device {
     if (method === 'insufficient_data' && diagnosticInfo?.primaryIssue) {
       const diagnosticKey = `cop_diagnostics.${diagnosticInfo.primaryIssue}`;
       const localizedDiagnostic = this.homey.__(diagnosticKey) || diagnosticInfo.primaryIssue;
-      methodName = `${methodName}: ${localizedDiagnostic}`;
+      methodName = `${methodName} ${localizedDiagnostic}`;
     }
 
     // Format with confidence indicator
