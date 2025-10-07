@@ -119,7 +119,7 @@ class MyDevice extends Homey.Device {
     const id = (this.getStoreValue('device_id') || '').toString().trim();
     const key = (this.getStoreValue('local_key') || '').toString().trim();
     const ip = (this.getStoreValue('ip_address') || '').toString().trim();
-    const version = '3.3';
+    const version = (this.getStoreValue('protocol_version') || '3.3').toString().trim();
 
     if (!id || !key) {
       throw new Error('Tuya credentials missing for fallback initialization');
@@ -132,7 +132,7 @@ class MyDevice extends Homey.Device {
       version,
     });
 
-    this.debugLog('Initialized fallback TuyaDevice for direct communication');
+    this.debugLog(`Initialized fallback TuyaDevice for direct communication (Protocol: ${version})`);
   }
 
   /**
@@ -2626,7 +2626,7 @@ class MyDevice extends Homey.Device {
     const id = (this.getStoreValue('device_id') || '').toString().trim();
     const key = (this.getStoreValue('local_key') || '').toString().trim();
     const ip = (this.getStoreValue('ip_address') || '').toString().trim();
-    const version = '3.3';
+    const version = (this.getStoreValue('protocol_version') || '3.3').toString().trim();
 
     if (!id || !key) {
       this.error('Tuya credentials missing: device_id or local_key not set.');
@@ -2741,7 +2741,7 @@ class MyDevice extends Homey.Device {
 
     // Handle device credential changes (for repair scenarios)
     const credentialKeysChanged = changedKeys.filter(
-      (key) => ['device_id', 'local_key', 'ip_address'].includes(key),
+      (key) => ['device_id', 'local_key', 'ip_address', 'protocol_version'].includes(key),
     );
 
     if (credentialKeysChanged.length > 0) {
@@ -2962,8 +2962,8 @@ class MyDevice extends Homey.Device {
     // Curve control picker capabilities (v0.99.54+)
     // Sensor capabilities (adlar_enum_countdown_set, adlar_sensor_capacity_set) always remain visible
     const curvePickerCapabilities = [
-      'adlar_enum_capacity_set',     // Hot water curve picker
-      'adlar_picker_countdown_set',  // Heating curve picker
+      'adlar_enum_capacity_set', // Hot water curve picker
+      'adlar_picker_countdown_set', // Heating curve picker
     ];
 
     // Process power capabilities

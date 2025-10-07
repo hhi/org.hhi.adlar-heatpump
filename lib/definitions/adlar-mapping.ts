@@ -72,12 +72,12 @@ export class AdlarMapping {
     adlar_enum_water_mode: [10],
     // DPS 11: Hot water curve - DUAL CAPABILITIES (picker + sensor)
     // Values: OFF, H1-H4 for domestic hot water temperature curves
-    adlar_enum_capacity_set: [11],      // Picker: user can set hot water curve
-    adlar_sensor_capacity_set: [11],    // Sensor: displays actual hot water curve from device
+    adlar_enum_capacity_set: [11], // Picker: user can set hot water curve
+    adlar_sensor_capacity_set: [11], // Sensor: displays actual hot water curve from device
     // DPS 13: Heating curve - DUAL CAPABILITIES (sensor + picker)
     // Values: OFF, H1-H8 (high), L1-L8 (low) for weather compensation curves
-    adlar_enum_countdown_set: [13],     // Sensor: displays actual heating curve from device
-    adlar_picker_countdown_set: [13],   // Picker: user can set heating curve
+    adlar_enum_countdown_set: [13], // Sensor: displays actual heating curve from device
+    adlar_picker_countdown_set: [13], // Picker: user can set heating curve
     adlar_enum_volume_set: [106],
     // DPS 106: 0: No Power Module, 1: Single-Phase Power Module, 2: Three-Phase Power Module
     adlar_hotwater: [101],
