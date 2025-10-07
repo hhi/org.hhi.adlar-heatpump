@@ -50,47 +50,51 @@ class MyDriver extends Homey.Driver {
   //   ];
   // }
 
-  async onRepair(session: PairSession, device: Homey.Device) {
-    this.log('Repair session started for device:', device.getName());
+  // REPAIR FLOW DISABLED - Use device settings form to update credentials instead
+  // Credential changes in settings trigger the same onSettings() handler which calls
+  // TuyaConnectionService.reinitialize() automatically (see device.ts lines 2527-2569)
 
-    // Handler for when user submits updated credentials
-    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string; protocolVersion: string }) => {
-      this.log('Repair: Received updated credentials');
+  // async onRepair(session: PairSession, device: Homey.Device) {
+  //   this.log('Repair session started for device:', device.getName());
 
-      try {
-        // Update device settings with new credentials
-        await device.setSettings({
-          device_id: data.deviceId,
-          local_key: data.localKey,
-          ip_address: data.ipAddress,
-          protocol_version: data.protocolVersion || '3.3',
-        });
+  //   // Handler for when user submits updated credentials
+  //   session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string; protocolVersion: string }) => {
+  //     this.log('Repair: Received updated credentials');
 
-        // Update store data for internal use
-        await device.setStoreValue('device_id', data.deviceId);
-        await device.setStoreValue('local_key', data.localKey);
-        await device.setStoreValue('ip_address', data.ipAddress);
-        await device.setStoreValue('protocol_version', data.protocolVersion || '3.3');
+  //     try {
+  //       // Update device settings with new credentials
+  //       await device.setSettings({
+  //         device_id: data.deviceId,
+  //         local_key: data.localKey,
+  //         ip_address: data.ipAddress,
+  //         protocol_version: data.protocolVersion || '3.3',
+  //       });
 
-        this.log(`Device repaired successfully: ${data.deviceId} @ ${data.ipAddress} (Protocol: ${data.protocolVersion || '3.3'})`);
+  //       // Update store data for internal use
+  //       await device.setStoreValue('device_id', data.deviceId);
+  //       await device.setStoreValue('local_key', data.localKey);
+  //       await device.setStoreValue('ip_address', data.ipAddress);
+  //       await device.setStoreValue('protocol_version', data.protocolVersion || '3.3');
 
-        // Return true to indicate success and close repair flow
-        return true;
+  //       this.log(`Device repaired successfully: ${data.deviceId} @ ${data.ipAddress} (Protocol: ${data.protocolVersion || '3.3'})`);
 
-      } catch (error) {
-        this.error('Repair failed:', error);
-        throw new Error(`Failed to update device credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    });
+  //       // Return true to indicate success and close repair flow
+  //       return true;
 
-    // Optional: Log view changes for debugging
-    session.setHandler('showView', async (viewId: unknown) => {
-      this.log(`Repair View: ${viewId}`);
-    });
+  //     } catch (error) {
+  //       this.error('Repair failed:', error);
+  //       throw new Error(`Failed to update device credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  //     }
+  //   });
 
-    // CRITICAL: Show the repair view to the user
-    await session.showView('enter_device_info');
-  }
+  //   // Optional: Log view changes for debugging
+  //   session.setHandler('showView', async (viewId: unknown) => {
+  //     this.log(`Repair View: ${viewId}`);
+  //   });
+
+  //   // CRITICAL: Show the repair view to the user
+  //   await session.showView('enter_device_info');
+  // }
 
   async onPair(session: PairSession) {
     let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string; protocolVersion: string } | null = null;
