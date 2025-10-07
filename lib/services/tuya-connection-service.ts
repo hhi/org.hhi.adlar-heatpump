@@ -40,8 +40,9 @@ export class TuyaConnectionService {
   private tuya: TuyAPI | null = null;
   private isConnected = false;
 
-  // Connection status tracking (v0.99.47)
+  // Connection status tracking (v0.99.47, enhanced v0.99.61 with timestamps)
   private currentStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error' = 'disconnected';
+  private lastStatusChangeTime: number = Date.now(); // Timestamp of last status change
 
   // Error recovery state
   private consecutiveFailures = 0;
@@ -152,6 +153,7 @@ export class TuyaConnectionService {
         this.tuya = null;
         this.isConnected = false;
         this.currentStatus = 'disconnected';
+        this.lastStatusChangeTime = Date.now();
       }
 
       // Step 3: Reset error recovery state for fresh start
@@ -299,6 +301,48 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Get formatted connection status with timestamp for display (v0.99.61).
+   * Format: "Status (HH:MM:SS)" or "Status (DD-MM HH:MM)" for older timestamps
+   * @returns Formatted status string with timestamp
+   */
+  getFormattedConnectionStatus(): string {
+    const statusLabels = {
+      connected: 'Connected',
+      disconnected: 'Disconnected',
+      reconnecting: 'Reconnecting',
+      error: 'Error',
+    };
+
+    const statusLabel = statusLabels[this.currentStatus];
+    const timestamp = new Date(this.lastStatusChangeTime);
+    const now = new Date();
+
+    // If status changed today, show only time (HH:MM:SS)
+    // If status changed on a different day, show date and time (DD-MM HH:MM)
+    const isSameDay = timestamp.toDateString() === now.toDateString();
+
+    let timeString: string;
+    if (isSameDay) {
+      // Same day: show only time
+      timeString = timestamp.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    } else {
+      // Different day: show date and time
+      timeString = timestamp.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+
+    return `${statusLabel} (${timeString})`;
+  }
+
+  /**
    * Return the underlying Tuya/TuyAPI instance if available (nullable).
    */
   getTuyaInstance(): TuyAPI | null {
@@ -353,10 +397,12 @@ export class TuyaConnectionService {
           // Mark as disconnected
           this.isConnected = false;
           this.currentStatus = 'disconnected';
+          this.lastStatusChangeTime = Date.now();
 
           // Apply recovery strategy
           if (!categorizedError.recoverable) {
             this.currentStatus = 'error';
+            this.lastStatusChangeTime = Date.now();
           }
 
           // Trigger reconnection via our standard system
@@ -433,6 +479,7 @@ export class TuyaConnectionService {
       this.logger('TuyaConnectionService: Device connected');
       this.isConnected = true;
       this.currentStatus = 'connected';
+      this.lastStatusChangeTime = Date.now();
 
       // Reset error recovery state on successful connection
       this.resetErrorRecoveryState();
@@ -448,6 +495,7 @@ export class TuyaConnectionService {
       this.logger('TuyaConnectionService: Device disconnected');
       this.isConnected = false;
       this.currentStatus = 'disconnected';
+      this.lastStatusChangeTime = Date.now();
 
       // Apply minimal backoff for clean disconnections
       this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.2, 4);
@@ -540,6 +588,7 @@ export class TuyaConnectionService {
 
     this.logger(`TuyaConnectionService: Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
     this.currentStatus = 'reconnecting';
+    this.lastStatusChangeTime = Date.now();
 
     try {
       await this.connectTuya();
@@ -578,6 +627,7 @@ export class TuyaConnectionService {
     // Set status to 'error' for non-recoverable errors
     if (!error.recoverable) {
       this.currentStatus = 'error';
+      this.lastStatusChangeTime = Date.now();
     }
 
     // Exponential backoff for recoverable errors

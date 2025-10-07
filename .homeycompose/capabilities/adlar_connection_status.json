@@ -1,44 +1,14 @@
 {
   "id": "adlar_connection_status",
-  "type": "enum",
+  "type": "string",
   "title": {
     "en": "Connection Status",
     "nl": "Verbindingsstatus"
   },
   "desc": {
-    "en": "Current Tuya device connection state",
-    "nl": "Huidige Tuya apparaat verbindingsstatus"
+    "en": "Current Tuya device connection state with timestamp",
+    "nl": "Huidige Tuya apparaat verbindingsstatus met tijdstempel"
   },
-  "values": [
-    {
-      "id": "connected",
-      "title": {
-        "en": "Connected",
-        "nl": "Verbonden"
-      }
-    },
-    {
-      "id": "disconnected",
-      "title": {
-        "en": "Disconnected",
-        "nl": "Losgekoppeld"
-      }
-    },
-    {
-      "id": "reconnecting",
-      "title": {
-        "en": "Reconnecting",
-        "nl": "Opnieuw verbinden"
-      }
-    },
-    {
-      "id": "error",
-      "title": {
-        "en": "Error",
-        "nl": "Fout"
-      }
-    }
-  ],
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",

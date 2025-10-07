@@ -2182,7 +2182,7 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Update the adlar_connection_status capability based on TuyaConnectionService state
+   * Update the adlar_connection_status capability based on TuyaConnectionService state (v0.99.61: now includes timestamp)
    */
   private async updateConnectionStatus(): Promise<void> {
     if (!this.hasCapability('adlar_connection_status')) {
@@ -2190,11 +2190,11 @@ class MyDevice extends Homey.Device {
     }
 
     try {
-      // Get status from ServiceCoordinator if available
+      // Get formatted status with timestamp from ServiceCoordinator if available
       if (this.serviceCoordinator) {
         const tuyaService = this.serviceCoordinator.getTuyaConnection();
-        const status = tuyaService.getCurrentConnectionStatus();
-        await this.setCapabilityValue('adlar_connection_status', status);
+        const formattedStatus = tuyaService.getFormattedConnectionStatus();
+        await this.setCapabilityValue('adlar_connection_status', formattedStatus);
       }
     } catch (error) {
       this.error('Failed to update connection status capability:', error);
@@ -2249,11 +2249,28 @@ class MyDevice extends Homey.Device {
   async onInit() {
     await this.setUnavailable(); // Set the device as unavailable initially
 
-    // Add missing capability for existing devices (v0.99.47 migration)
-    if (!this.hasCapability('adlar_connection_status')) {
+    // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
+    // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
+    if (this.hasCapability('adlar_connection_status')) {
+      try {
+        // Check if migration flag exists to avoid repeated migrations
+        const migrationFlag = this.getStoreValue('connection_status_migrated_v0_99_61');
+        if (!migrationFlag) {
+          this.log('🔄 Migrating adlar_connection_status capability from enum to string type...');
+          await this.removeCapability('adlar_connection_status');
+          await this.addCapability('adlar_connection_status');
+          await this.setStoreValue('connection_status_migrated_v0_99_61', true);
+          this.log('✅ Successfully migrated adlar_connection_status capability to string type');
+        }
+      } catch (error) {
+        this.error('Failed to migrate adlar_connection_status capability:', error);
+      }
+    } else {
+      // Add capability for brand new devices
       try {
         await this.addCapability('adlar_connection_status');
-        this.log('✅ Added adlar_connection_status capability to existing device');
+        await this.setStoreValue('connection_status_migrated_v0_99_61', true);
+        this.log('✅ Added adlar_connection_status capability to new device');
       } catch (error) {
         this.error('Failed to add adlar_connection_status capability:', error);
       }
