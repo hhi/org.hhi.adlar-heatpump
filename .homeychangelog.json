@@ -1,4 +1,7 @@
 {
+  "0.99.59": {
+    "en": "Added protocol version selection during pairing (3.3, 3.4, 3.5). Users with connection issues can now use device repair to change protocol version. Default remains 3.3 for compatibility."
+  },
   "0.99.58": {
     "en": "Critical fix: App no longer crashes on network interruptions. Fixes connection reset errors that caused app to become unresponsive. Automatic reconnection now works correctly."
   },

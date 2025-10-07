@@ -50,53 +50,52 @@ class MyDriver extends Homey.Driver {
   //   ];
   // }
 
-  async onRepair(session: PairSession) {
-    let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string } | null = null;
+  async onRepair(session: PairSession, device: Homey.Device) {
+    this.log('Repair session started for device:', device.getName());
 
-    this.log('Repair session started');
+    // Handler for when user submits updated credentials
+    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string; protocolVersion: string }) => {
+      this.log('Repair: Received updated credentials');
 
-    // Step 1: Show the repair view to update device credentials
-    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string }) => {
-      // Store the updated credentials for later use
-      deviceCredentials = data;
-      return true;
+      try {
+        // Update device settings with new credentials
+        await device.setSettings({
+          device_id: data.deviceId,
+          local_key: data.localKey,
+          ip_address: data.ipAddress,
+          protocol_version: data.protocolVersion || '3.3',
+        });
+
+        // Update store data for internal use
+        await device.setStoreValue('device_id', data.deviceId);
+        await device.setStoreValue('local_key', data.localKey);
+        await device.setStoreValue('ip_address', data.ipAddress);
+        await device.setStoreValue('protocol_version', data.protocolVersion || '3.3');
+
+        this.log(`Device repaired successfully: ${data.deviceId} @ ${data.ipAddress} (Protocol: ${data.protocolVersion || '3.3'})`);
+
+        // Return true to indicate success and close repair flow
+        return true;
+
+      } catch (error) {
+        this.error('Repair failed:', error);
+        throw new Error(`Failed to update device credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     });
 
-    // Received when a view has changed
+    // Optional: Log view changes for debugging
     session.setHandler('showView', async (viewId: unknown) => {
       this.log(`Repair View: ${viewId}`);
-    });
-
-    // Step 2: Apply the updated credentials
-    session.setHandler('update_device', async (device: { setSettings: (settings: Record<string, unknown>) => Promise<void>; setStoreValue: (key: string, value: unknown) => Promise<void> }) => {
-      if (!deviceCredentials) {
-        throw new Error('Device credentials not provided during repair');
-      }
-
-      // Update device settings with new credentials
-      await device.setSettings({
-        device_id: deviceCredentials.deviceId,
-        local_key: deviceCredentials.localKey,
-        ip_address: deviceCredentials.ipAddress,
-      });
-
-      // Update store data for internal use
-      await device.setStoreValue('device_id', deviceCredentials.deviceId);
-      await device.setStoreValue('local_key', deviceCredentials.localKey);
-      await device.setStoreValue('ip_address', deviceCredentials.ipAddress);
-
-      this.log(`Device repaired with new credentials: ${deviceCredentials.deviceId} @ ${deviceCredentials.ipAddress}`);
-      return true;
     });
   }
 
   async onPair(session: PairSession) {
-    let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string } | null = null;
+    let deviceCredentials: { deviceId: string; localKey: string; ipAddress: string; protocolVersion: string } | null = null;
 
     this.log('Pairing session started');
 
     // Step 1: Show the custom view to input device credentials
-    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string }) => {
+    session.setHandler('enter_device_info', async (data: { deviceId: string; localKey: string; ipAddress: string; protocolVersion: string }) => {
       // Store the credentials for later use
       deviceCredentials = data;
       return true;
@@ -123,11 +122,13 @@ class MyDriver extends Homey.Driver {
             device_id: deviceCredentials.deviceId,
             local_key: deviceCredentials.localKey,
             ip_address: deviceCredentials.ipAddress,
+            protocol_version: deviceCredentials.protocolVersion || '3.3',
           },
           settings: {
             device_id: deviceCredentials.deviceId,
             local_key: deviceCredentials.localKey,
             ip_address: deviceCredentials.ipAddress,
+            protocol_version: deviceCredentials.protocolVersion || '3.3',
           },
         },
       ];
