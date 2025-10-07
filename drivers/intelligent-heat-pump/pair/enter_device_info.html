@@ -20,6 +20,15 @@
       <input class="homey-form-input" type="text" id="ip_address" placeholder="Enter IP address" aria-describedby="deviceError" required>
     </div>
 
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="protocol_version" data-i18n="pair.enter_device_info.protocol_version">Protocol Version:</label>
+      <select class="homey-form-input" id="protocol_version" aria-describedby="deviceError">
+        <option value="3.3" selected>3.3 (Default)</option>
+        <option value="3.4">3.4</option>
+        <option value="3.5">3.5</option>
+      </select>
+    </div>
+
     <p id="deviceError" class="homey-form-error homey-form-error-hidden" role="alert">
       Please enter Device ID, Local Key, and IP Address.
     </p>
@@ -34,6 +43,7 @@
     const deviceId = document.getElementById('device_id').value.trim();
     const localKey = document.getElementById('local_key').value.trim();
     const ipAddress = document.getElementById('ip_address').value.trim();
+    const protocolVersion = document.getElementById('protocol_version').value;
     const errorElement = document.getElementById('deviceError');
 
     if (!deviceId || !localKey || !ipAddress) {
@@ -45,7 +55,7 @@
     errorElement.classList.add('homey-form-error-hidden');
 
     try {
-      await Homey.emit('enter_device_info', { deviceId, localKey, ipAddress });
+      await Homey.emit('enter_device_info', { deviceId, localKey, ipAddress, protocolVersion });
       Homey.nextView();
     } catch (err) {
       errorElement.textContent = 'Failed to save device info: ' + err.message;

@@ -39,6 +39,19 @@
     "required": true
   },
   {
+    "id": "protocol_version",
+    "type": "label",
+    "label": {
+      "en": "Protocol Version",
+      "nl": "Protocolversie"
+    },
+    "hint": {
+      "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Use device repair to change.",
+      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Gebruik apparaatreparatie om te wijzigen."
+    },
+    "value": "3.3"
+  },
+  {
     "type": "group",
     "label": {
       "en": "COP (Coefficient of Performance) Settings",

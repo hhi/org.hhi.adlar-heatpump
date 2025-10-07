@@ -10,6 +10,8 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 - **Real-time Connection Status (v0.99.47)**: Live device connection monitoring with 4 distinct states (connected, disconnected, reconnecting, error) updated every 5 seconds
 - **Production-Ready Stability (v0.99.46)**: Crash-proof error handling with triple-layer protection, automatic device status sync, and global error handlers
+- **Protocol Version Selection (v0.99.59)**: Choose Tuya protocol version during pairing (3.3, 3.4, 3.5) to resolve ECONNRESET connection issues
+- **Device Repair (v0.99.59)**: Update device credentials and protocol version without re-pairing
 - **Service-Oriented Architecture (v0.99.23+)**: 8 specialized services managed by ServiceCoordinator for code organization, testability, and maintainability
 - **Local API Integration**: Direct communication via Tuya local protocol
 - **Complete Device Control**: Access to all 48+ device capabilities including enhanced diagnostics
@@ -61,7 +63,10 @@ To obtain the required local key, refer to the documentation:
    - **Device ID**: Unique identifier for your heat pump
    - **Local Key**: Security key for encrypted communication
    - **IP Address**: Local network IP of your heat pump
+   - **Protocol Version**: Tuya protocol version (3.3, 3.4, or 3.5) - Default: 3.3
 4. Complete the pairing process
+
+**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version via device repair (Settings → Repair device). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.md](USER_QUICK_FIX.md) for troubleshooting guidance.
 
 ## Configuration
 
@@ -171,6 +176,42 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Valve Monitoring**: Critical pulse-steps safety alerts
 - **Rate Limiting**: Maximum 1 notification per 30 minutes per device
 
+## Troubleshooting
+
+### Connection Issues (ECONNRESET Errors)
+
+If your device repeatedly disconnects or shows ECONNRESET errors:
+
+**Quick Fix (< 2 minutes):**
+
+1. Open device Settings in Homey app
+2. Tap "Repair device"
+3. Re-enter credentials
+4. **Change Protocol Version to 3.4** (or try 3.5 if 3.4 doesn't work)
+5. Save and wait 1-2 minutes
+
+**Success Indicators:**
+
+- ✅ Connection status shows "connected"
+- ✅ No ECONNRESET errors in logs
+- ✅ Sensor data updates normally
+- ✅ Device stays available
+
+**Detailed Guides:**
+
+- [USER_QUICK_FIX.md](USER_QUICK_FIX.md) - Step-by-step repair instructions
+- [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md) - Comprehensive troubleshooting
+
+### Device Pairing Issues
+
+If pairing fails:
+
+1. Verify device credentials (ID, Local Key, IP)
+2. Ensure heat pump is on local network
+3. Try different protocol versions (3.3 → 3.4 → 3.5)
+4. Check firewall/network restrictions
+5. See `docs/Get Local Keys - instruction.pdf` for credential retrieval
+
 ## Documentation & Support
 
 ### Technical Documentation
@@ -181,6 +222,14 @@ Detailed documentation available in `/docs` directory:
 - **flow-cards-overview.md**: Flow card system analysis
 - **capability-flowcard-mapping.md**: Registration logic and examples
 - **flow-patterns.md**: Pattern-based management system
+- **REPAIR_MECHANISM_VALIDATION.md**: Repair flow technical details
+- **PROTOCOL_AUTO_DETECTION_DESIGN.md**: Future auto-detection enhancement
+
+### User Guides
+
+- **USER_QUICK_FIX.md**: Quick fix for ECONNRESET errors
+- **PROTOCOL_VERSION_GUIDE.md**: Protocol version troubleshooting
+- **Get Local Keys - instruction.pdf**: Credential retrieval guide
 
 ### Support
 
@@ -190,7 +239,50 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v0.99.56 - Dual Picker/Sensor Architecture (Current)
+### v0.99.59 - Protocol Version Selection & Device Repair (Current)
+
+**Critical Feature:**
+
+- ✅ **Protocol Version Selection**: Choose Tuya protocol version (3.3, 3.4, 3.5) during pairing
+- ✅ **Device Repair Mechanism**: Update credentials and protocol version without re-pairing
+- ✅ **ECONNRESET Resolution**: Solves persistent connection issues caused by protocol mismatch
+- ✅ **Backward Compatible**: Existing devices continue using protocol 3.3 automatically
+
+**Technical Implementation:**
+
+- ✅ Protocol version stored in both device store and settings for reliability
+- ✅ Repair flow properly implemented following Homey SDK patterns
+- ✅ Automatic reconnection when protocol version changes
+- ✅ Comprehensive user documentation ([USER_QUICK_FIX.md](USER_QUICK_FIX.md), [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md))
+
+**User Experience:**
+
+- ✅ Protocol dropdown in pairing flow with clear default (3.3)
+- ✅ Settings UI shows current protocol version
+- ✅ Repair via Settings → Repair device in < 2 minutes
+- ✅ No device re-pairing required to change protocol
+
+This release resolves connection stability issues for users with devices requiring non-default protocol versions.
+
+### v0.99.58 - ECONNRESET Stability Improvements
+
+**Critical Fix:**
+
+- ✅ App no longer crashes on network interruptions
+- ✅ Fixed connection reset errors causing app unresponsiveness
+- ✅ Automatic reconnection now works correctly after ECONNRESET
+
+This version improved stability but required manual app reinstall if protocol version was incorrect. v0.99.59 adds user-controllable protocol selection.
+
+### v0.99.57 - Documentation Update
+
+**Improvements:**
+
+- ✅ Enhanced installation guides
+- ✅ Updated technical documentation
+- ✅ Improved architecture overview
+
+### v0.99.56 - Dual Picker/Sensor Architecture
 
 **Enhanced UX:**
 

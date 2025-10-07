@@ -679,5 +679,10 @@
       "id": "done",
       "template": "done"
     }
+  ],
+  "repair": [
+    {
+      "id": "enter_device_info"
+    }
   ]
 }

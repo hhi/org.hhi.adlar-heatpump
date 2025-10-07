@@ -52,7 +52,17 @@ INSTALLATIESTAPPEN
    - Apparaat ID
    - Lokale Sleutel
    - IP-adres
+   - Protocolversie (kies 3.3, 3.4 of 3.5)
 4. Voltooi het koppelingsproces
+
+PROTOCOLVERSIE SELECTIE
+De protocolversie bepaalt hoe de app communiceert met uw warmtepomp:
+- 3.3 (Standaard): Werkt voor de meeste Adlar/Aurora warmtepompen
+- 3.4: Vereist voor sommige nieuwere modellen
+- 3.5: Vereist voor nieuwste firmware versies
+
+Bij verbindingsproblemen (frequente onderbrekingen, ECONNRESET fouten),
+probeer een andere protocolversie via apparaatreparatie (zie Troubleshooting).
 
 BELANGRIJKE MOGELIJKHEDEN
 
@@ -101,25 +111,77 @@ WAT BETEKENEN COP WAARDEN?
 TROUBLESHOOTING EN ONDERSTEUNING
 
 VEELVOORKOMENDE PROBLEMEN
-- Geen verbinding: Controleer IP-adres en lokale sleutel
+
+Verbindingsproblemen (ECONNRESET Fouten)
+Als uw apparaat steeds opnieuw verbinding verbreekt of reset fouten toont:
+
+SNELLE OPLOSSING (duurt minder dan 2 minuten):
+1. Open apparaat Instellingen in Homey app
+2. Tik op "Repareer apparaat"
+3. Voer opnieuw uw gegevens in (dezelfde als voorheen)
+4. Wijzig Protocolversie naar 3.4 (of probeer 3.5 als 3.4 niet werkt)
+5. Opslaan en wacht 1-2 minuten voor herverbinding
+
+Succes indicatoren:
+- Verbindingsstatus toont "verbonden"
+- Geen ECONNRESET fouten meer
+- Sensor gegevens worden normaal bijgewerkt
+- Apparaat blijft beschikbaar
+
+Andere Veelvoorkomende Problemen:
+- Geen verbinding: Controleer IP-adres, lokale sleutel en netwerkverbinding
 - Wisselende waarden: Normaal tijdens opstarten van het systeem
 - Foutcodes: Zie de app voor specifieke uitleg per foutcode
+- Koppelen mislukt: Probeer verschillende protocolversies (3.3, 3.4, 3.5)
+
+APPARAATREPARATIE
+U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
+1. Ga naar apparaat Instellingen in Homey app
+2. Scroll naar beneden en tik op "Repareer apparaat"
+3. Werk gegevens en/of protocolversie bij
+4. Voltooi reparatie - apparaat verbindt automatisch opnieuw
 
 HULP NODIG?
 - Documentatie: Bekijk de /docs map in de broncode op Github voor gedetailleerde informatie
-- Community: Homey Community Forum (Topic ID: 140621)
+- Community: Homey Community Forum (Topic ID: 143690)
 - Issues: Meld problemen op GitHub
 
 GEAVANCEERDE FUNCTIES
 
-FLOW KAART CATEGORIEËN
-U kunt de zichtbaarheid van flow kaarten aanpassen (app instellingen):
-- Temperatuur waarschuwingen
-- Spanning en stroom monitoring
-- Vermogen waarschuwingen
-- Systeemstatus wijzigingen
-- Efficiëntie monitoring
-- Expert functies
+APPARAAT INSTELLINGEN (Configureer per apparaat)
+Toegang via apparaat Instellingen in Homey app:
+
+Verbindingsinstellingen:
+- Protocolversie: Tuya protocolversie (3.3, 3.4, 3.5)
+- Apparaat ID, Lokale Sleutel, IP-adres: Verbindingsgegevens
+
+COP Berekeningsinstellingen:
+- COP berekening in-/uitschakelen
+- Externe vermogensmetingintegratie
+- Externe doorstroomgegevens integratie
+- Externe buitentemperatuur integratie
+
+Flow Kaart Controle:
+U kunt regelen welke flow kaarten zichtbaar zijn (uitgeschakeld/auto/ingeschakeld):
+- Temperatuurwaarschuwingen: Temperatuurdrempel meldingen
+- Spanning/stroommonitoring: Elektrisch systeem monitoring
+- Vermogenwaarschuwingen: Stroomverbruik meldingen
+- Systeemstatuswijzigingen: Compressor, ontdooien, systeem toestanden
+- Efficiëntiemonitoring: COP trends en afwijkingen
+- Expertfuncties: Geavanceerde diagnostische flow kaarten
+
+Auto Modus (aanbevolen):
+Toont alleen flow kaarten voor sensoren met adequate gegevens (recent bijgewerkt, geen fouten).
+
+Curve Controles (optioneel):
+- Schakel picker controles in voor verwarmings- en warmwatercurves
+- Standaard: Uitgeschakeld (sensoren altijd zichtbaar, pickers verborgen)
+- Inschakelen voor gevorderde gebruikers die directe curve aanpassing willen
+
+Vermogensmetingsinstellingen:
+- Vermogensmetingen van warmtepomp in-/uitschakelen
+- Beheert automatisch gerelateerde flow kaart zichtbaarheid
+- Nuttig als u externe vermogensmonitoring heeft
 
 CROSS-APP INTEGRATIE
 Verbind met andere Homey apps voor verbeterde COP berekening (zie /docs/COP flow-card-setup.md):
