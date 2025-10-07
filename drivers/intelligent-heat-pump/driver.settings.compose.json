@@ -1,7 +1,7 @@
 [
   {
     "id": "device_id",
-    "type": "label",
+    "type": "text",
     "label": {
       "en": "Device ID",
       "nl": "Apparaat ID"
@@ -10,11 +10,11 @@
       "en": "Enter the unique ID of the device.",
       "nl": "Voer de unieke ID van het apparaat in."
     },
-    "required": true
+    "value": ""
   },
   {
     "id": "local_key",
-    "type": "label",
+    "type": "text",
     "label": {
       "en": "Local Key",
       "nl": "Lokale Sleutel"
@@ -23,11 +23,11 @@
       "en": "Enter the local key for secure communication.",
       "nl": "Voer de lokale sleutel in voor veilige communicatie."
     },
-    "required": true
+    "value": ""
   },
   {
     "id": "ip_address",
-    "type": "label",
+    "type": "text",
     "label": {
       "en": "IP Address",
       "nl": "IP-adres"
@@ -36,20 +36,43 @@
       "en": "Enter the IP address of the device.",
       "nl": "Voer het IP-adres van het apparaat in."
     },
-    "required": true
+    "value": ""
   },
   {
     "id": "protocol_version",
-    "type": "label",
+    "type": "dropdown",
     "label": {
       "en": "Protocol Version",
       "nl": "Protocolversie"
     },
     "hint": {
-      "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Use device repair to change.",
-      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Gebruik apparaatreparatie om te wijzigen."
+      "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Change via device repair if needed.",
+      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Wijzig via apparaatreparatie indien nodig."
     },
-    "value": "3.3"
+    "value": "3.3",
+    "values": [
+      {
+        "id": "3.3",
+        "label": {
+          "en": "3.3 (default)",
+          "nl": "3.3 (standaard)"
+        }
+      },
+      {
+        "id": "3.4",
+        "label": {
+          "en": "3.4",
+          "nl": "3.4"
+        }
+      },
+      {
+        "id": "3.5",
+        "label": {
+          "en": "3.5",
+          "nl": "3.5"
+        }
+      }
+    ]
   },
   {
     "type": "group",
