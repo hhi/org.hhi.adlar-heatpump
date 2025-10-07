@@ -123,6 +123,76 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Reinitialize TuyaConnectionService with new credentials (for repair mode).
+   * - Disconnects and destroys the old Tuya instance
+   * - Creates a new TuyAPI instance with updated credentials
+   * - Reattaches event handlers and attempts connection
+   * @param config - Updated Tuya device config (id, key, ip, version)
+   */
+  async reinitialize(config: TuyaDeviceConfig): Promise<void> {
+    this.logger('TuyaConnectionService: Reinitializing with new credentials (repair mode)');
+
+    try {
+      // Step 1: Stop reconnection interval to prevent interference
+      this.stopReconnectInterval();
+
+      // Step 2: Disconnect and cleanup old instance
+      if (this.tuya) {
+        this.logger('TuyaConnectionService: Cleaning up old Tuya instance');
+        this.tuya.removeAllListeners();
+
+        if (this.isConnected) {
+          try {
+            await this.tuya.disconnect();
+          } catch (error) {
+            this.logger('TuyaConnectionService: Error disconnecting old instance:', error);
+          }
+        }
+
+        this.tuya = null;
+        this.isConnected = false;
+        this.currentStatus = 'disconnected';
+      }
+
+      // Step 3: Reset error recovery state for fresh start
+      this.resetErrorRecoveryState();
+
+      // Step 4: Create new TuyAPI instance with new credentials
+      this.logger('TuyaConnectionService: Creating new Tuya instance with updated credentials');
+      this.tuya = new TuyAPI({
+        id: config.id,
+        key: config.key,
+        ip: config.ip,
+        version: config.version || '3.3',
+      });
+
+      // Step 5: Reattach event handlers
+      this.setupTuyaEventHandlers();
+
+      // Step 6: Attempt connection with new credentials
+      this.logger('TuyaConnectionService: Attempting connection with new credentials');
+      await this.connectTuya();
+
+      // Step 7: Install deep socket error handler
+      this.installDeepSocketErrorHandler();
+
+      // Step 8: Restart reconnection monitoring
+      this.startReconnectInterval();
+
+      this.logger('TuyaConnectionService: Reinitialization completed successfully');
+      this.logger(`TuyaConnectionService: Now using device ${config.id} at ${config.ip} (Protocol: ${config.version || '3.3'})`);
+
+    } catch (error) {
+      this.logger('TuyaConnectionService: Error during reinitialization:', error);
+
+      // Even if connection fails, ensure reconnection monitoring is active
+      this.startReconnectInterval();
+
+      throw error;
+    }
+  }
+
+  /**
    * Connect to the Tuya device and set up event handlers.
    * Uses a circuit breaker/backoff strategy on repeated failures.
    */

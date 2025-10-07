@@ -453,66 +453,6 @@ class MyDevice extends Homey.Device {
     return this.serviceCoordinator?.getCapabilityHealth()?.isCapabilityHealthy(capability) ?? false;
   }
 
-  /**
-   * Get available capabilities organized by category (Option A)
-   */
-  private getAvailableCapabilities(): CapabilityCategories {
-    const caps = Object.keys(this.allCapabilities);
-
-    return {
-      temperature: caps.filter((cap) => cap.startsWith('measure_temperature')),
-      voltage: caps.filter((cap) => cap.startsWith('measure_voltage')),
-      current: caps.filter((cap) => cap.startsWith('measure_current')),
-      power: caps.filter((cap) => cap.includes('power')),
-      pulseSteps: caps.filter((cap) => cap.includes('pulse_steps')),
-      states: caps.filter((cap) => cap.startsWith('adlar_state')),
-      efficiency: caps.filter((cap) => cap.includes('cop') || cap.includes('scop')),
-    };
-  }
-
-  /**
-   * Get user flow preferences from device settings (Option B)
-   */
-  private getUserFlowPreferences(): UserFlowPreferences {
-    return {
-      flow_temperature_alerts: this.getSetting('flow_temperature_alerts') || 'auto',
-      flow_voltage_alerts: this.getSetting('flow_voltage_alerts') || 'auto',
-      flow_current_alerts: this.getSetting('flow_current_alerts') || 'auto',
-      flow_power_alerts: this.getSetting('flow_power_alerts') || 'auto',
-      flow_pulse_steps_alerts: this.getSetting('flow_pulse_steps_alerts') || 'auto',
-      flow_state_alerts: this.getSetting('flow_state_alerts') || 'auto',
-      flow_efficiency_alerts: this.getSetting('flow_efficiency_alerts') || 'auto',
-      flow_expert_mode: this.getSetting('flow_expert_mode') || false,
-    };
-  }
-
-  /**
-   * Detect capabilities that have actual data (Option C)
-   */
-  private async detectCapabilitiesWithData(): Promise<string[]> {
-    const capabilitiesWithData: string[] = [];
-
-    // Check which capabilities have actual data (not null/undefined)
-    for (const capability of Object.keys(this.allCapabilities)) {
-      try {
-        const value = this.getCapabilityValue(capability);
-        // Update health tracking for this capability via service
-        this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
-
-        // Check if capability is currently healthy (has recent valid data)
-        if (this.getCapabilityHealth(capability)) {
-          capabilitiesWithData.push(capability);
-          this.debugLog(`Capability ${capability} is healthy with data:`, value);
-        } else {
-          this.debugLog(`Capability ${capability} is unhealthy - excluding from flow cards`);
-        }
-      } catch (err) {
-        this.debugLog(`Capability ${capability} not available:`, err);
-      }
-    }
-
-    return capabilitiesWithData;
-  }
 
   // Note: Capability health categorization now handled by CapabilityHealthService via ServiceCoordinator
 
@@ -2266,191 +2206,19 @@ class MyDevice extends Homey.Device {
    */
   private async updateFlowCards(): Promise<void> {
     try {
-      // Don't proceed if device isn't fully initialized yet
-      if (!this.isFlowCardsInitialized && Object.keys(this.homey.drivers.getDrivers()).length === 0) {
-        this.log('Skipping flow card update - system not ready');
-        return;
+      // Flow card registration is fully handled by FlowCardManagerService via ServiceCoordinator
+      // ServiceCoordinator automatically updates flow cards based on capability health events
+      if (this.serviceCoordinator) {
+        await this.serviceCoordinator.getFlowCardManager()?.updateFlowCards();
+        this.log('Flow cards updated via FlowCardManagerService');
+      } else {
+        this.log('ServiceCoordinator not available, skipping flow card update');
       }
-
-      // Unregister all current flow card listeners
-      this.unregisterAllFlowCards();
-
-      // Get current user preferences and available capabilities
-      const userPrefs = this.getUserFlowPreferences();
-      const availableCaps = this.getAvailableCapabilities();
-      const capabilitiesWithData = await this.detectCapabilitiesWithData();
-
-      // Register flow cards based on settings
-      await this.registerFlowCardsByCategory('temperature', availableCaps.temperature, userPrefs.flow_temperature_alerts, capabilitiesWithData);
-      await this.registerFlowCardsByCategory('voltage', availableCaps.voltage, userPrefs.flow_voltage_alerts, capabilitiesWithData);
-      await this.registerFlowCardsByCategory('current', availableCaps.current, userPrefs.flow_current_alerts, capabilitiesWithData);
-      await this.registerFlowCardsByCategory('power', availableCaps.power, userPrefs.flow_power_alerts, capabilitiesWithData);
-      await this.registerFlowCardsByCategory('pulseSteps', availableCaps.pulseSteps, userPrefs.flow_pulse_steps_alerts, capabilitiesWithData);
-      await this.registerFlowCardsByCategory('states', availableCaps.states, userPrefs.flow_state_alerts, capabilitiesWithData);
-      await this.registerFlowCardsByCategory('efficiency', availableCaps.efficiency, userPrefs.flow_efficiency_alerts, capabilitiesWithData);
-
-      // Expert feature cards
-      if (userPrefs.flow_expert_mode) {
-        await this.registerExpertFeatureCards();
-      }
-
-      // Register action-based condition cards (always available)
-      await this.registerActionBasedConditionCards();
-
-      this.log('Flow cards updated successfully');
     } catch (error) {
       this.error('Error updating flow cards:', error);
     }
   }
 
-  /**
-   * Register flow cards for a specific category based on user setting
-   */
-  private async registerFlowCardsByCategory(
-    _category: keyof CapabilityCategories,
-    _availableCaps: string[],
-    _userSetting: 'disabled' | 'auto' | 'enabled',
-    capabilitiesWithData: string[],
-  ): Promise<void> {
-    // Flow card registration is handled automatically by FlowCardManagerService during updateFlowCards()
-    await this.serviceCoordinator?.getFlowCardManager()?.updateFlowCards(capabilitiesWithData);
-  }
-
-  /**
-   * Register expert feature cards (when expert mode is enabled) - delegated to FlowCardManagerService
-   */
-  private async registerExpertFeatureCards(): Promise<void> {
-    // Expert feature card registration is handled automatically by FlowCardManagerService during updateFlowCards()
-    await this.serviceCoordinator?.getFlowCardManager()?.updateFlowCards();
-  }
-
-  /**
-   * Register action-based condition flow cards
-   */
-  private async registerActionBasedConditionCards(): Promise<void> {
-    try {
-      // Device power state condition
-      const devicePowerCard = this.homey.flow.getConditionCard('device_power_is');
-      devicePowerCard.registerRunListener(async (args) => {
-        this.debugLog('Device power condition triggered', { args });
-        const currentValue = this.getCapabilityValue('onoff');
-        const expectedState = args.state === 'on';
-        return currentValue === expectedState;
-      });
-
-      // Target temperature condition
-      const targetTempCard = this.homey.flow.getConditionCard('target_temperature_is');
-      targetTempCard.registerRunListener(async (args) => {
-        this.debugLog('Target temperature condition triggered', { args });
-        const currentValue = this.getCapabilityValue('target_temperature') || 0;
-        const targetValue = args.temperature || 0;
-
-        switch (args.comparison) {
-          case 'equal':
-            return Math.abs(currentValue - targetValue) < 0.5;
-          case 'greater':
-            return currentValue > targetValue;
-          case 'less':
-            return currentValue < targetValue;
-          default:
-            return false;
-        }
-      });
-
-      // Hot water temperature condition
-      const hotWaterTempCard = this.homey.flow.getConditionCard('hotwater_temperature_is');
-      hotWaterTempCard.registerRunListener(async (args) => {
-        this.debugLog('Hot water temperature condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_hotwater') || 0;
-        const targetValue = args.temperature || 0;
-
-        switch (args.comparison) {
-          case 'equal':
-            return Math.abs(currentValue - targetValue) < 1;
-          case 'greater':
-            return currentValue > targetValue;
-          case 'less':
-            return currentValue < targetValue;
-          default:
-            return false;
-        }
-      });
-
-      // Heating mode condition
-      const heatingModeCard = this.homey.flow.getConditionCard('heating_mode_is');
-      heatingModeCard.registerRunListener(async (args) => {
-        this.debugLog('Heating mode condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_enum_mode');
-        return currentValue === args.mode;
-      });
-
-      // Work mode condition
-      const workModeCard = this.homey.flow.getConditionCard('work_mode_is');
-      workModeCard.registerRunListener(async (args) => {
-        this.debugLog('Work mode condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_enum_work_mode');
-        return currentValue === args.mode;
-      });
-
-      // Water mode condition
-      const waterModeCard = this.homey.flow.getConditionCard('water_mode_is');
-      waterModeCard.registerRunListener(async (args) => {
-        this.debugLog('Water mode condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_enum_water_mode') || 0;
-        const targetValue = args.mode || 0;
-
-        switch (args.comparison) {
-          case 'equal':
-            return currentValue === targetValue;
-          case 'greater':
-            return currentValue > targetValue;
-          case 'less':
-            return currentValue < targetValue;
-          default:
-            return false;
-        }
-      });
-
-      // Capacity setting condition
-      const capacitySettingCard = this.homey.flow.getConditionCard('capacity_setting_is');
-      capacitySettingCard.registerRunListener(async (args) => {
-        this.debugLog('Capacity setting condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_enum_capacity_set');
-        return currentValue === args.capacity;
-      });
-
-      // Heating curve condition
-      const heatingCurveCard = this.homey.flow.getConditionCard('heating_curve_is');
-      heatingCurveCard.registerRunListener(async (args) => {
-        this.debugLog('Heating curve condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_enum_countdown_set');
-        return currentValue === args.curve;
-      });
-
-      // Volume setting condition
-      const volumeSettingCard = this.homey.flow.getConditionCard('volume_setting_is');
-      volumeSettingCard.registerRunListener(async (args) => {
-        this.debugLog('Volume setting condition triggered', { args });
-        const currentValue = this.getCapabilityValue('adlar_enum_volume_set') || 0;
-        const targetValue = args.level || 0;
-
-        switch (args.comparison) {
-          case 'equal':
-            return currentValue === targetValue;
-          case 'greater':
-            return currentValue > targetValue;
-          case 'less':
-            return currentValue < targetValue;
-          default:
-            return false;
-        }
-      });
-
-      this.log('Action-based condition cards registered');
-    } catch (error) {
-      this.error('Error registering action-based condition cards:', error);
-    }
-  }
 
   /**
    * Unregister all flow card listeners - delegated to FlowCardManagerService
@@ -2745,7 +2513,7 @@ class MyDevice extends Homey.Device {
     );
 
     if (credentialKeysChanged.length > 0) {
-      this.log('🔧 Device credentials changed:', credentialKeysChanged);
+      this.log('🔧 Device credentials changed (repair mode):', credentialKeysChanged);
 
       // Update store values to match settings
       for (const key of credentialKeysChanged) {
@@ -2756,8 +2524,38 @@ class MyDevice extends Homey.Device {
         }
       }
 
-      this.log('Device credentials updated, connection will be re-established automatically');
-      return `Device credentials updated successfully. New ${credentialKeysChanged.join(', ')} will be used on next connection attempt.`;
+      // Reinitialize TuyaConnectionService with new credentials
+      if (this.serviceCoordinator) {
+        try {
+          const newConfig = {
+            id: (newSettings.device_id || '').toString().trim(),
+            key: (newSettings.local_key || '').toString().trim(),
+            ip: (newSettings.ip_address || '').toString().trim(),
+            version: (newSettings.protocol_version || '3.3').toString().trim(),
+          };
+
+          this.log('Reinitializing Tuya connection with new credentials...');
+          this.log(`New device: ${newConfig.id} @ ${newConfig.ip} (Protocol: ${newConfig.version})`);
+
+          await this.serviceCoordinator.getTuyaConnection()?.reinitialize(newConfig);
+
+          this.log('✅ Device repaired successfully - reconnected with new credentials');
+          await this.setAvailable();
+
+          return `Device repaired successfully!\n\nNew credentials active:\n- Device ID: ${newConfig.id}\n- IP Address: ${newConfig.ip}\n- Protocol: ${newConfig.version}\n\nConnection established.`;
+
+        } catch (error) {
+          this.error('Failed to reinitialize Tuya connection:', error);
+
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          await this.setUnavailable(`Repair failed: ${errorMessage}`);
+
+          return `Repair failed: ${errorMessage}\n\nPlease verify:\n- Device ID and Local Key are correct\n- IP address is reachable\n- Protocol version matches your device\n\nConnection will retry automatically.`;
+        }
+      } else {
+        this.log('ServiceCoordinator not available - credentials updated but connection not reinitialized');
+        return `Credentials updated in settings. Please restart the device to apply changes.`;
+      }
     }
 
     // Check if any flow card settings were changed
