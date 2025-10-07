@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.99.60",
+  "version": "0.99.61",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -5373,7 +5373,7 @@
       "settings": [
         {
           "id": "device_id",
-          "type": "label",
+          "type": "text",
           "label": {
             "en": "Device ID",
             "nl": "Apparaat ID"
@@ -5382,11 +5382,11 @@
             "en": "Enter the unique ID of the device.",
             "nl": "Voer de unieke ID van het apparaat in."
           },
-          "required": true
+          "value": ""
         },
         {
           "id": "local_key",
-          "type": "label",
+          "type": "text",
           "label": {
             "en": "Local Key",
             "nl": "Lokale Sleutel"
@@ -5395,11 +5395,11 @@
             "en": "Enter the local key for secure communication.",
             "nl": "Voer de lokale sleutel in voor veilige communicatie."
           },
-          "required": true
+          "value": ""
         },
         {
           "id": "ip_address",
-          "type": "label",
+          "type": "text",
           "label": {
             "en": "IP Address",
             "nl": "IP-adres"
@@ -5408,20 +5408,43 @@
             "en": "Enter the IP address of the device.",
             "nl": "Voer het IP-adres van het apparaat in."
           },
-          "required": true
+          "value": ""
         },
         {
           "id": "protocol_version",
-          "type": "label",
+          "type": "dropdown",
           "label": {
             "en": "Protocol Version",
             "nl": "Protocolversie"
           },
           "hint": {
-            "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Use device repair to change.",
-            "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Gebruik apparaatreparatie om te wijzigen."
+            "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Change via device repair if needed.",
+            "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Wijzig via apparaatreparatie indien nodig."
           },
-          "value": "3.3"
+          "value": "3.3",
+          "values": [
+            {
+              "id": "3.3",
+              "label": {
+                "en": "3.3 (default)",
+                "nl": "3.3 (standaard)"
+              }
+            },
+            {
+              "id": "3.4",
+              "label": {
+                "en": "3.4",
+                "nl": "3.4"
+              }
+            },
+            {
+              "id": "3.5",
+              "label": {
+                "en": "3.5",
+                "nl": "3.5"
+              }
+            }
+          ]
         },
         {
           "type": "group",
@@ -5952,45 +5975,15 @@
   "capabilities": {
     "adlar_connection_status": {
       "id": "adlar_connection_status",
-      "type": "enum",
+      "type": "string",
       "title": {
         "en": "Connection Status",
         "nl": "Verbindingsstatus"
       },
       "desc": {
-        "en": "Current Tuya device connection state",
-        "nl": "Huidige Tuya apparaat verbindingsstatus"
+        "en": "Current Tuya device connection state with timestamp",
+        "nl": "Huidige Tuya apparaat verbindingsstatus met tijdstempel"
       },
-      "values": [
-        {
-          "id": "connected",
-          "title": {
-            "en": "Connected",
-            "nl": "Verbonden"
-          }
-        },
-        {
-          "id": "disconnected",
-          "title": {
-            "en": "Disconnected",
-            "nl": "Losgekoppeld"
-          }
-        },
-        {
-          "id": "reconnecting",
-          "title": {
-            "en": "Reconnecting",
-            "nl": "Opnieuw verbinden"
-          }
-        },
-        {
-          "id": "error",
-          "title": {
-            "en": "Error",
-            "nl": "Fout"
-          }
-        }
-      ],
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
