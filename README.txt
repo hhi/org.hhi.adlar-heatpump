@@ -117,10 +117,10 @@ If your device keeps disconnecting or shows connection reset errors:
 
 QUICK FIX (takes less than 2 minutes):
 1. Open device Settings in Homey app
-2. Tap "Repair device"
-3. Re-enter your credentials (same as before)
-4. Change Protocol Version to 3.4 (or try 3.5 if 3.4 doesn't work)
-5. Save and wait 1-2 minutes for reconnection
+2. Scroll to the top to the connection settings
+3. Change Protocol Version to 3.4 (or try 3.5 if 3.4 doesn't work)
+4. Optional: update other credentials (IP Address, Local Key, Device ID)
+5. Click "Save" and wait 1-2 minutes for reconnection
 
 Success indicators:
 - Connection status shows "connected"
@@ -134,12 +134,12 @@ Other Common Problems:
 - Error codes: See the app for specific explanation per error code
 - Pairing fails: Try different protocol versions (3.3, 3.4, 3.5)
 
-DEVICE REPAIR
+UPDATE DEVICE CREDENTIALS
 You can update device credentials without re-pairing:
 1. Go to device Settings in Homey app
-2. Scroll down and tap "Repair device"
-3. Update credentials and/or protocol version
-4. Complete repair - device reconnects automatically
+2. Scroll to the top to the connection settings
+3. Update credentials (IP Address, Local Key, Device ID, Protocol Version)
+4. Click "Save" - device reconnects automatically
 
 NEED HELP?
 - Documentation: Check the /docs folder within the sourcecode at Github for detailed information

@@ -1,6 +1,9 @@
 {
+  "0.99.63": {
+    "en": "Connection status shows month abbreviations (e.g., '3-Oct 14:25'). Connection timestamp now persists across app updates."
+  },
   "0.99.62": {
-    "en": "Simplified credential management: Update device credentials directly in settings (Device ID, Local Key, IP, Protocol). Device automatically reconnects when credentials change. Removed separate repair flow for cleaner interface."
+    "en": "Device credentials can now be updated directly in settings. Device automatically reconnects when credentials change."
   },
   "0.99.61": {
     "en": "Added connection status timestamps showing when device last connected. Fixed device repair functionality. Connection status now displays as 'Connected (14:23:45)' with real-time updates."

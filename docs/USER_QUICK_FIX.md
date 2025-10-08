@@ -9,14 +9,14 @@ If your heat pump keeps disconnecting with ECONNRESET errors, the issue is likel
 ### Steps (Takes 2 minutes):
 
 1. Open **Homey app** → Go to your heat pump device
-2. Tap **⚙️ Settings** (top right) → Scroll down
-3. Tap **"Repair device"**
-4. Enter your existing credentials:
-   - Device ID: *(same as before)*
-   - Local Key: *(same as before)*
-   - IP Address: *(same as before)*
+2. Tap **⚙️ Settings** (top right)
+3. Scroll to the **top** to the connection settings section
+4. Update your settings:
    - **Protocol Version: SELECT 3.4** ← **CHANGE THIS**
-5. Tap **Continue**
+   - Device ID: *(keep same or update if needed)*
+   - Local Key: *(keep same or update if needed)*
+   - IP Address: *(keep same or update if needed)*
+5. Tap **Save**
 6. Wait 1-2 minutes for reconnection
 
 ### Expected Result:
@@ -26,7 +26,7 @@ If your heat pump keeps disconnecting with ECONNRESET errors, the issue is likel
 - ✓ Device stays connected
 
 ### Still Not Working?
-Try protocol version **3.5** using the same repair steps.
+Try protocol version **3.5** using the same steps (change Protocol Version in Settings to 3.5).
 
 ### Why Does This Happen?
 Different heat pump models use different Tuya protocol versions. The app previously defaulted to 3.3, but many newer models need 3.4 or 3.5.

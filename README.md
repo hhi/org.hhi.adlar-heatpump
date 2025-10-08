@@ -11,7 +11,7 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 - **Real-time Connection Status (v0.99.47)**: Live device connection monitoring with 4 distinct states (connected, disconnected, reconnecting, error) updated every 5 seconds
 - **Production-Ready Stability (v0.99.46)**: Crash-proof error handling with triple-layer protection, automatic device status sync, and global error handlers
 - **Protocol Version Selection (v0.99.59)**: Choose Tuya protocol version during pairing (3.3, 3.4, 3.5) to resolve ECONNRESET connection issues
-- **Device Repair (v0.99.59)**: Update device credentials and protocol version without re-pairing
+- **Settings-Based Credential Updates (v0.99.62)**: Update device credentials and protocol version directly in settings without re-pairing
 - **Service-Oriented Architecture (v0.99.23+)**: 8 specialized services managed by ServiceCoordinator for code organization, testability, and maintainability
 - **Local API Integration**: Direct communication via Tuya local protocol
 - **Complete Device Control**: Access to all 48+ device capabilities including enhanced diagnostics
@@ -66,7 +66,7 @@ To obtain the required local key, refer to the documentation:
    - **Protocol Version**: Tuya protocol version (3.3, 3.4, or 3.5) - Default: 3.3
 4. Complete the pairing process
 
-**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version via device repair (Settings → Repair device). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.md](USER_QUICK_FIX.md) for troubleshooting guidance.
+**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version in device settings (Settings → Connection Settings → Protocol Version). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.md](docs/USER_QUICK_FIX.md) for troubleshooting guidance.
 
 ## Configuration
 
@@ -185,10 +185,10 @@ If your device repeatedly disconnects or shows ECONNRESET errors:
 **Quick Fix (< 2 minutes):**
 
 1. Open device Settings in Homey app
-2. Tap "Repair device"
-3. Re-enter credentials
-4. **Change Protocol Version to 3.4** (or try 3.5 if 3.4 doesn't work)
-5. Save and wait 1-2 minutes
+2. Scroll to the top to the connection settings
+3. **Change Protocol Version to 3.4** (or try 3.5 if 3.4 doesn't work)
+4. Optional: update other credentials (IP Address, Local Key, Device ID)
+5. Click "Save" and wait 1-2 minutes
 
 **Success Indicators:**
 
@@ -199,8 +199,8 @@ If your device repeatedly disconnects or shows ECONNRESET errors:
 
 **Detailed Guides:**
 
-- [USER_QUICK_FIX.md](USER_QUICK_FIX.md) - Step-by-step repair instructions
-- [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md) - Comprehensive troubleshooting
+- [USER_QUICK_FIX.md](docs/USER_QUICK_FIX.md) - Step-by-step instructions
+- [PROTOCOL_VERSION_GUIDE.md](docs/PROTOCOL_VERSION_GUIDE.md) - Comprehensive troubleshooting
 
 ### Device Pairing Issues
 
@@ -222,7 +222,7 @@ Detailed documentation available in `/docs` directory:
 - **flow-cards-overview.md**: Flow card system analysis
 - **capability-flowcard-mapping.md**: Registration logic and examples
 - **flow-patterns.md**: Pattern-based management system
-- **REPAIR_MECHANISM_VALIDATION.md**: Repair flow technical details
+- **REPAIR_MECHANISM_VALIDATION.md**: Credential management evolution and technical details
 - **PROTOCOL_AUTO_DETECTION_DESIGN.md**: Future auto-detection enhancement
 
 ### User Guides
@@ -239,30 +239,43 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v0.99.59 - Protocol Version Selection & Device Repair (Current)
+### v0.99.62 - Settings-Based Credential Management (Current)
+
+**Simplified User Experience:**
+
+- ✅ **Direct Settings Editing**: Update credentials directly in device settings form (no separate repair flow)
+- ✅ **Single Source of Truth**: One clear way to update Device ID, Local Key, IP Address, Protocol Version
+- ✅ **Auto-Reconnection**: Device reconnects automatically when credentials are saved
+- ✅ **Backward Compatible**: All existing functionality preserved with simpler UX
+
+**Technical Changes:**
+
+- ✅ Removed repair flow - credentials now editable via `type: "text"` and `type: "dropdown"` settings fields
+- ✅ Credential change detection in `device.onSettings()` triggers automatic reconnection
+- ✅ ~40 lines less code to maintain
+- ✅ Updated documentation ([REPAIR_MECHANISM_VALIDATION.md](docs/Dev%20support/Architectural%20overview/REPAIR_MECHANISM_VALIDATION.md))
+
+**User Path:**
+
+Device Settings → Scroll to top → Edit credentials → Save → Auto-reconnect (1-2 minutes)
+
+This release simplifies credential management by eliminating the intermediary repair dialog.
+
+### v0.99.59 - Protocol Version Selection
 
 **Critical Feature:**
 
 - ✅ **Protocol Version Selection**: Choose Tuya protocol version (3.3, 3.4, 3.5) during pairing
-- ✅ **Device Repair Mechanism**: Update credentials and protocol version without re-pairing
 - ✅ **ECONNRESET Resolution**: Solves persistent connection issues caused by protocol mismatch
 - ✅ **Backward Compatible**: Existing devices continue using protocol 3.3 automatically
 
 **Technical Implementation:**
 
 - ✅ Protocol version stored in both device store and settings for reliability
-- ✅ Repair flow properly implemented following Homey SDK patterns
 - ✅ Automatic reconnection when protocol version changes
-- ✅ Comprehensive user documentation ([USER_QUICK_FIX.md](USER_QUICK_FIX.md), [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md))
+- ✅ Comprehensive user documentation ([USER_QUICK_FIX.md](docs/USER_QUICK_FIX.md), [PROTOCOL_VERSION_GUIDE.md](docs/PROTOCOL_VERSION_GUIDE.md))
 
-**User Experience:**
-
-- ✅ Protocol dropdown in pairing flow with clear default (3.3)
-- ✅ Settings UI shows current protocol version
-- ✅ Repair via Settings → Repair device in < 2 minutes
-- ✅ No device re-pairing required to change protocol
-
-This release resolves connection stability issues for users with devices requiring non-default protocol versions.
+This release resolved connection stability issues for users with devices requiring non-default protocol versions.
 
 ### v0.99.58 - ECONNRESET Stability Improvements
 
