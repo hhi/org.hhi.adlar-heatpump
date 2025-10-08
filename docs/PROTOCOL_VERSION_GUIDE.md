@@ -23,24 +23,24 @@ Most Adlar/Castra heat pumps use protocol version **3.3** (default), but some ne
 - Contact Adlar support with your device model number
 - Try the versions in order: 3.4 first (most common alternative), then 3.5
 
-#### Step 2: Use Device Repair to Update Protocol Version
+#### Step 2: Update Protocol Version in Device Settings
 
 1. **Open the Homey app** on your phone/tablet
 2. **Navigate to your heat pump device**
 3. **Tap the settings (gear) icon** in the top right
-4. **Scroll down and tap "Repair device"**
-5. **Enter your device credentials:**
-   - Device ID (same as before)
-   - Local Key (same as before)
-   - IP Address (same as before)
+4. **Scroll to the top** to the connection settings section
+5. **Update your device credentials:**
    - **Protocol Version** ← **SELECT THE CORRECT VERSION HERE**
      - Try **3.4** if you're having connection issues
      - Try **3.5** if 3.4 doesn't work
-6. **Tap "Continue"** and complete the repair process
+   - Device ID (keep same or update if needed)
+   - Local Key (keep same or update if needed)
+   - IP Address (keep same or update if needed)
+6. **Tap "Save"** and wait for reconnection
 
 #### Step 3: Verify the Connection
 
-After repair:
+After updating settings:
 - Check the device status - it should show "connected" within 1-2 minutes
 - Check the connection status capability: `adlar_connection_status`
 - Monitor for 10-15 minutes to ensure stable connection
@@ -92,7 +92,7 @@ When pairing a new device, you'll now see the protocol version dropdown:
    - **3.5** - Try if 3.4 has connection issues
 3. Continue with pairing
 
-**Tip:** If unsure, start with 3.3. You can always change it later using device repair.
+**Tip:** If unsure, start with 3.3. You can always change it later in device settings.
 
 ## Technical Background
 
@@ -102,11 +102,12 @@ The Tuya protocol version determines how the app communicates with your device a
 - Authentication failures
 - Data corruption
 
-Different heat pump models/firmware versions require different protocol versions. There's no harm in trying different versions - just use device repair to switch.
+Different heat pump models/firmware versions require different protocol versions. There's no harm in trying different versions - just update the protocol version in device settings to switch.
 
 ## Version History
 
-- **v0.99.59** - Added protocol version selection during pairing and repair
+- **v0.99.62** - Removed repair flow, credentials now editable directly in device settings
+- **v0.99.59** - Added protocol version selection during pairing
 - **v0.99.58 and earlier** - Hardcoded to version 3.3 (caused issues for some users)
 
 ---
