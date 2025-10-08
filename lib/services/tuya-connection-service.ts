@@ -94,6 +94,19 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Initializing Tuya device connection');
 
     try {
+      // Restore last connection timestamp from store (persists across app updates)
+      const storedTimestamp = await this.device.getStoreValue('last_connection_timestamp');
+      if (storedTimestamp && typeof storedTimestamp === 'number') {
+        const daysSinceLastConnection = (Date.now() - storedTimestamp) / (1000 * 60 * 60 * 24);
+        // Only restore if less than 7 days old (prevent showing very stale timestamps)
+        if (daysSinceLastConnection < 7) {
+          this.lastStatusChangeTime = storedTimestamp;
+          this.logger(`TuyaConnectionService: Restored connection timestamp from ${new Date(storedTimestamp).toISOString()}`);
+        } else {
+          this.logger(`TuyaConnectionService: Stored timestamp too old (${Math.round(daysSinceLastConnection)} days), using current time`);
+        }
+      }
+
       // Create Tuya device instance
       this.tuya = new TuyAPI({
         id: config.id,
@@ -152,8 +165,7 @@ export class TuyaConnectionService {
 
         this.tuya = null;
         this.isConnected = false;
-        this.currentStatus = 'disconnected';
-        this.lastStatusChangeTime = Date.now();
+        await this.updateStatusTimestamp('disconnected');
       }
 
       // Step 3: Reset error recovery state for fresh start
@@ -318,7 +330,7 @@ export class TuyaConnectionService {
     const now = new Date();
 
     // If status changed today, show only time (HH:MM:SS)
-    // If status changed on a different day, show date and time (DD-MM HH:MM)
+    // If status changed on a different day, show date and time (D-MMM HH:MM)
     const isSameDay = timestamp.toDateString() === now.toDateString();
 
     let timeString: string;
@@ -330,16 +342,45 @@ export class TuyaConnectionService {
         second: '2-digit',
       });
     } else {
-      // Different day: show date and time
-      timeString = timestamp.toLocaleString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
+      // Different day: show date and time with short month abbreviation
+      // Format: "3-oct 14:25" (English) or "3-okt 14:25" (Dutch)
+      const monthAbbreviations = {
+        en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        nl: ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+      };
+
+      // Detect language from Homey (fallback to 'en' if not available)
+      const language = this.device.homey.i18n.getLanguage() === 'nl' ? 'nl' : 'en';
+      const monthAbbr = monthAbbreviations[language][timestamp.getMonth()];
+
+      const day = timestamp.getDate();
+      const time = timestamp.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
       });
+
+      timeString = `${day}-${monthAbbr} ${time}`;
     }
 
     return `${statusLabel} (${timeString})`;
+  }
+
+  /**
+   * Update status change timestamp and persist to device store (v0.99.63).
+   * This ensures the timestamp survives app updates and restarts.
+   * @param newStatus - The new connection status
+   */
+  private async updateStatusTimestamp(newStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error'): Promise<void> {
+    this.currentStatus = newStatus;
+    this.lastStatusChangeTime = Date.now();
+
+    // Persist timestamp to device store (survives app updates)
+    try {
+      await this.device.setStoreValue('last_connection_timestamp', this.lastStatusChangeTime);
+    } catch (error) {
+      this.logger(`TuyaConnectionService: Failed to persist connection timestamp: ${error}`);
+      // Non-critical error, continue operation
+    }
   }
 
   /**
@@ -388,7 +429,7 @@ export class TuyaConnectionService {
 
         // Install error handler on TuyAPI's internal socket
         // This catches socket-level errors (ECONNRESET, etc.) BEFORE they bubble up
-        tuyaSocket.on('error', (error: Error) => {
+        tuyaSocket.on('error', async (error: Error) => {
           this.logger('TuyaConnectionService: 🛡️ Deep socket error intercepted (crash prevented):', error.message);
 
           // Categorize the error for proper handling
@@ -396,13 +437,11 @@ export class TuyaConnectionService {
 
           // Mark as disconnected
           this.isConnected = false;
-          this.currentStatus = 'disconnected';
-          this.lastStatusChangeTime = Date.now();
+          await this.updateStatusTimestamp('disconnected');
 
           // Apply recovery strategy
           if (!categorizedError.recoverable) {
-            this.currentStatus = 'error';
-            this.lastStatusChangeTime = Date.now();
+            await this.updateStatusTimestamp('error');
           }
 
           // Trigger reconnection via our standard system
@@ -475,11 +514,10 @@ export class TuyaConnectionService {
     });
 
     // Connected event
-    this.tuya.on('connected', (): void => {
+    this.tuya.on('connected', async (): Promise<void> => {
       this.logger('TuyaConnectionService: Device connected');
       this.isConnected = true;
-      this.currentStatus = 'connected';
-      this.lastStatusChangeTime = Date.now();
+      await this.updateStatusTimestamp('connected');
 
       // Reset error recovery state on successful connection
       this.resetErrorRecoveryState();
@@ -491,11 +529,10 @@ export class TuyaConnectionService {
     });
 
     // Disconnected event
-    this.tuya.on('disconnected', (): void => {
+    this.tuya.on('disconnected', async (): Promise<void> => {
       this.logger('TuyaConnectionService: Device disconnected');
       this.isConnected = false;
-      this.currentStatus = 'disconnected';
-      this.lastStatusChangeTime = Date.now();
+      await this.updateStatusTimestamp('disconnected');
 
       // Apply minimal backoff for clean disconnections
       this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.2, 4);
@@ -587,8 +624,7 @@ export class TuyaConnectionService {
     }
 
     this.logger(`TuyaConnectionService: Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
-    this.currentStatus = 'reconnecting';
-    this.lastStatusChangeTime = Date.now();
+    await this.updateStatusTimestamp('reconnecting');
 
     try {
       await this.connectTuya();
@@ -610,7 +646,7 @@ export class TuyaConnectionService {
       this.consecutiveFailures++;
 
       // Determine recovery strategy based on error type
-      this.updateRecoveryStrategy(categorizedError);
+      await this.updateRecoveryStrategy(categorizedError);
 
       // Send notifications based on failure patterns
       await this.handleReconnectionFailureNotification(categorizedError);
@@ -623,11 +659,10 @@ export class TuyaConnectionService {
   /**
    * Adjust internal recovery strategy (backoff, circuit breaker) based on categorized error.
    */
-  private updateRecoveryStrategy(error: CategorizedError): void {
+  private async updateRecoveryStrategy(error: CategorizedError): Promise<void> {
     // Set status to 'error' for non-recoverable errors
     if (!error.recoverable) {
-      this.currentStatus = 'error';
-      this.lastStatusChangeTime = Date.now();
+      await this.updateStatusTimestamp('error');
     }
 
     // Exponential backoff for recoverable errors

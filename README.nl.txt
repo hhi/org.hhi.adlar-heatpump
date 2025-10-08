@@ -117,10 +117,10 @@ Als uw apparaat steeds opnieuw verbinding verbreekt of reset fouten toont:
 
 SNELLE OPLOSSING (duurt minder dan 2 minuten):
 1. Open apparaat Instellingen in Homey app
-2. Tik op "Repareer apparaat"
-3. Voer opnieuw uw gegevens in (dezelfde als voorheen)
-4. Wijzig Protocolversie naar 3.4 (of probeer 3.5 als 3.4 niet werkt)
-5. Opslaan en wacht 1-2 minuten voor herverbinding
+2. Scroll naar boven naar de verbindingsinstellingen
+3. Wijzig Protocolversie naar 3.4 (of probeer 3.5 als 3.4 niet werkt)
+4. Optioneel: werk andere gegevens bij (IP-adres, Lokale Sleutel, Apparaat ID)
+5. Klik op "Opslaan" en wacht 1-2 minuten voor herverbinding
 
 Succes indicatoren:
 - Verbindingsstatus toont "verbonden"
@@ -134,12 +134,12 @@ Andere Veelvoorkomende Problemen:
 - Foutcodes: Zie de app voor specifieke uitleg per foutcode
 - Koppelen mislukt: Probeer verschillende protocolversies (3.3, 3.4, 3.5)
 
-APPARAATREPARATIE
+APPARAAT GEGEVENS BIJWERKEN
 U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
 1. Ga naar apparaat Instellingen in Homey app
-2. Scroll naar beneden en tik op "Repareer apparaat"
-3. Werk gegevens en/of protocolversie bij
-4. Voltooi reparatie - apparaat verbindt automatisch opnieuw
+2. Scroll naar boven naar de verbindingsinstellingen
+3. Werk gegevens bij (IP-adres, Lokale Sleutel, Apparaat ID, Protocolversie)
+4. Klik op "Opslaan" - apparaat verbindt automatisch opnieuw
 
 HULP NODIG?
 - Documentatie: Bekijk de /docs map in de broncode op Github voor gedetailleerde informatie
