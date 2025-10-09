@@ -368,11 +368,22 @@ export class TuyaConnectionService {
   /**
    * Update status change timestamp and persist to device store (v0.99.63).
    * This ensures the timestamp survives app updates and restarts.
+   * IMPORTANT: Only updates timestamp if status actually changes (prevents overwriting restored timestamps)
    * @param newStatus - The new connection status
    */
   private async updateStatusTimestamp(newStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error'): Promise<void> {
+    // Only update timestamp if status actually changed
+    if (this.currentStatus === newStatus) {
+      // Status unchanged - preserve existing timestamp (important for app updates)
+      this.logger(`TuyaConnectionService: Status unchanged (${newStatus}), preserving timestamp`);
+      return;
+    }
+
+    // Status changed - update both status and timestamp
     this.currentStatus = newStatus;
     this.lastStatusChangeTime = Date.now();
+
+    this.logger(`TuyaConnectionService: Status changed to ${newStatus}, updating timestamp`);
 
     // Persist timestamp to device store (survives app updates)
     try {
@@ -496,9 +507,11 @@ export class TuyaConnectionService {
       const dpsFetched = data.dps || {};
       this.logger('TuyaConnectionService: Data received from Tuya:', dpsFetched);
 
-      // Forward to data handler
-      if (this.onDataHandler) {
+      // Forward to data handler only if dps is valid (v0.99.63 - crash fix)
+      if (this.onDataHandler && data.dps && typeof data.dps === 'object') {
         this.onDataHandler(data);
+      } else if (this.onDataHandler && !data.dps) {
+        this.logger('TuyaConnectionService: Skipping data handler - received event with null/undefined dps');
       }
     });
 
@@ -507,9 +520,11 @@ export class TuyaConnectionService {
       const dpsFetched = data.dps || {};
       this.logger('TuyaConnectionService: DP-Refresh received from Tuya:', dpsFetched);
 
-      // Forward to dp-refresh handler
-      if (this.onDpRefreshHandler) {
+      // Forward to dp-refresh handler only if dps is valid (v0.99.63 - crash fix)
+      if (this.onDpRefreshHandler && data.dps && typeof data.dps === 'object') {
         this.onDpRefreshHandler(data);
+      } else if (this.onDpRefreshHandler && !data.dps) {
+        this.logger('TuyaConnectionService: Skipping dp-refresh handler - received event with null/undefined dps');
       }
     });
 

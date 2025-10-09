@@ -651,9 +651,8 @@
     "large": "{{driverAssetsPath}}/images/Aurora2-drv-large.png",
     "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
   },
+
   "energy": {
-    "cumulative": true,
-    "cumulativeImportedCapability": "meter_power.electric_total",
     "approximation": {
       "usageConstant": 2500
     }

@@ -2070,6 +2070,12 @@ class MyDevice extends Homey.Device {
    * @param dps - DPS data object from Tuya device
    */
   updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
+    // Defensive guard: handle null/undefined dps parameter (v0.99.63 - crash fix)
+    if (!dps || typeof dps !== 'object') {
+      this.error('updateCapabilitiesFromDps called with invalid dps parameter:', dps);
+      return;
+    }
+
     this.debugLog('Processing DPS data:', dps);
 
     // Convert string keys to numbers and process each DPS value
