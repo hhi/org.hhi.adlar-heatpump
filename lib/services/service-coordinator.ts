@@ -237,6 +237,12 @@ export class ServiceCoordinator {
    * @param data - object containing `dps: Record<number, unknown>`
    */
   private handleTuyaData(data: { dps: Record<number, unknown> }): void {
+    // Validate dps parameter exists (v0.99.63 - crash fix, defense layer 2.5)
+    if (!data.dps || typeof data.dps !== 'object') {
+      this.logger('ServiceCoordinator: handleTuyaData received invalid dps, skipping processing', { dps: data.dps });
+      return;
+    }
+
     // Forward DPS data to device for capability updates
     if (typeof (this.device as unknown as { updateCapabilitiesFromDps?: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps === 'function') {
       (this.device as unknown as { updateCapabilitiesFromDps: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps(data.dps);
