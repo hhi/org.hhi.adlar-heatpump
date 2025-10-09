@@ -1,4 +1,10 @@
 {
+  "0.99.65": {
+    "en": "Connection status timestamp now correctly persists after app updates. Status only updates when connection state actually changes."
+  },
+  "0.99.64": {
+    "en": "Critical fix: App no longer crashes when device sends empty data packets. Added triple-layer validation for data processing."
+  },
   "0.99.63": {
     "en": "Connection status shows month abbreviations (e.g., '3-Oct 14:25'). Connection timestamp now persists across app updates."
   },
