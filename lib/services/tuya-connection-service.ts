@@ -345,19 +345,15 @@ export class TuyaConnectionService {
   }
 
   /**
-   * Get formatted connection status with timestamp for display (v0.99.61).
+   * Get formatted connection status with timestamp for display (v0.99.61, localized v0.99.68).
    * Format: "Status (HH:MM:SS)" or "Status (DD-MM HH:MM)" for older timestamps
-   * @returns Formatted status string with timestamp
+   * @returns Formatted status string with timestamp in local timezone
    */
   getFormattedConnectionStatus(): string {
-    const statusLabels = {
-      connected: 'Connected',
-      disconnected: 'Disconnected',
-      reconnecting: 'Reconnecting',
-      error: 'Error',
-    };
+    // Get localized status label
+    const statusLabel = this.device.homey.__(`connection_status.${this.currentStatus}`);
 
-    const statusLabel = statusLabels[this.currentStatus];
+    // Create timestamp in local timezone (not UTC)
     const timestamp = new Date(this.lastStatusChangeTime);
     const now = new Date();
 
@@ -365,30 +361,32 @@ export class TuyaConnectionService {
     // If status changed on a different day, show date and time (D-MMM HH:MM)
     const isSameDay = timestamp.toDateString() === now.toDateString();
 
+    // Detect language from Homey (fallback to 'en' if not available)
+    const language = this.device.homey.i18n.getLanguage() === 'nl' ? 'nl' : 'en';
+
     let timeString: string;
     if (isSameDay) {
-      // Same day: show only time
-      timeString = timestamp.toLocaleTimeString('en-GB', {
+      // Same day: show only time in local timezone
+      timeString = timestamp.toLocaleTimeString(language, {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Local timezone
       });
     } else {
       // Different day: show date and time with short month abbreviation
-      // Format: "3-oct 14:25" (English) or "3-okt 14:25" (Dutch)
+      // Format: "3-Oct 14:25" (English) or "3-okt 14:25" (Dutch)
       const monthAbbreviations = {
         en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         nl: ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
       };
 
-      // Detect language from Homey (fallback to 'en' if not available)
-      const language = this.device.homey.i18n.getLanguage() === 'nl' ? 'nl' : 'en';
       const monthAbbr = monthAbbreviations[language][timestamp.getMonth()];
-
       const day = timestamp.getDate();
-      const time = timestamp.toLocaleTimeString('en-GB', {
+      const time = timestamp.toLocaleTimeString(language, {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Local timezone
       });
 
       timeString = `${day}-${monthAbbr} ${time}`;
