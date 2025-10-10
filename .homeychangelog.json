@@ -1,4 +1,7 @@
 {
+  "0.99.67": {
+    "en": "Fixed connection stability issue where device would disconnect after several hours. Connection status timestamps still persist across app updates."
+  },
   "0.99.66": {
     "en": "Added manual reconnect button in device settings. Use this to force immediate reconnection when device shows disconnected status."
   },
