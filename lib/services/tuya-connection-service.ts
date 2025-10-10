@@ -270,6 +270,38 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Force immediate reconnection to the device (v0.99.66).
+   * Bypasses automatic reconnection delays, resets error recovery state, and attempts fresh connection.
+   * Use this when user manually triggers reconnection from device settings.
+   * @returns Promise that resolves when reconnection attempt completes (success or failure)
+   */
+  async forceReconnect(): Promise<void> {
+    this.logger('TuyaConnectionService: Force reconnect triggered by user');
+
+    // Step 1: Stop any pending reconnection attempts
+    this.stopReconnectInterval();
+
+    // Step 2: Disconnect cleanly from current connection (if any)
+    await this.disconnect();
+
+    // Step 3: Reset all error recovery state (bypass backoff/circuit breaker)
+    this.resetErrorRecoveryState();
+    this.logger('TuyaConnectionService: Error recovery state reset - ready for fresh connection');
+
+    // Step 4: Attempt immediate reconnection
+    try {
+      await this.connectTuya();
+      this.logger('TuyaConnectionService: Force reconnect successful');
+    } catch (error) {
+      this.logger('TuyaConnectionService: Force reconnect failed:', error);
+      // Don't throw - let normal reconnection logic handle retry
+    }
+
+    // Step 5: Resume normal reconnection monitoring
+    this.startReconnectInterval();
+  }
+
+  /**
    * Send a command to the device in DPS format (map from number to value).
    * Accepts string, number, or boolean values as required by different DPS types.
    * Throws if not connected or on underlying send error.
@@ -785,23 +817,6 @@ export class TuyaConnectionService {
     }
   }
 
-  /**
-   * Force an immediate reconnect attempt (resets recovery state first).
-   */
-  async forceReconnect(): Promise<void> {
-    this.logger('TuyaConnectionService: Force reconnection requested');
-
-    // Reset error recovery state
-    this.resetErrorRecoveryState();
-
-    // Disconnect first if connected
-    if (this.isConnected) {
-      await this.disconnect();
-    }
-
-    // Attempt immediate reconnection
-    await this.connectTuya();
-  }
 
   /**
    * Return diagnostics for the Tuya connection manager.
