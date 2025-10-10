@@ -109,8 +109,10 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
    - Deep socket error interception (v0.99.49) - intercepts TuyAPI internal socket ECONNRESET errors after connection
    - Connection health monitoring
    - Real-time connection status tracking (v0.99.47) - 4 states: connected, disconnected, reconnecting, error
+   - Connection timestamp persistence (v0.99.63+) - survives app updates and restarts
    - Event-driven sensor data updates
    - Auto device availability status sync (unavailable during outages, available on reconnect)
+   - Synchronous event handlers (v0.99.67) - prevents async Promise blocking TuyAPI state machine
    - Unhandled promise rejection protection in async setTimeout callbacks
    - Idempotent error handler installation with listener cleanup (v0.99.49)
 
@@ -316,6 +318,60 @@ Enhanced with error categorization for improved troubleshooting during pairing f
   6. Checkbox auto-resets after operation completes
 - **Status Feedback**: Check `adlar_connection_status` capability for result ("Connected" or "Reconnecting")
 - **Implementation**: See `TuyaConnectionService.forceReconnect()` and `device.ts` lines 2600-2640
+
+#### Connection Status Persistence (v0.99.63+, Fixed v0.99.67)
+
+**Timestamp Persistence Across App Updates**: Connection status timestamps survive app updates and Homey restarts through a three-layer mechanism:
+
+**Layer 1: Store Restoration (Initialization)**
+- On app startup, `TuyaConnectionService.initialize()` restores last connection timestamp from device store
+- Only restores timestamps less than 7 days old (prevents showing stale data)
+- Preserves user's view of "when device was last connected" through updates
+
+**Layer 2: State-Aware Updates (v0.99.65)**
+- `updateStatusTimestamp()` compares current status vs new status before updating
+- Early return if status unchanged (prevents overwriting restored timestamps)
+- Critical for preserving historical timestamps when device reconnects with same status
+- Example: Device "Connected 2 hours ago" → App update → Still shows "Connected 2 hours ago"
+
+**Layer 3: Non-Blocking Event Handlers (v0.99.67)**
+- TuyAPI event handlers (`'connected'`, `'disconnected'`) are synchronous for immediate completion
+- Call `updateStatusTimestamp()` without `await` (fire-and-forget pattern)
+- Background persistence via `.catch()` handlers prevents floating promises
+- Critical fix: Async event handlers were blocking TuyAPI's state machine, causing disconnections
+
+**Why Async Event Handlers Failed (v0.99.63-v0.99.66)**:
+- TuyAPI expects synchronous event handlers that complete immediately
+- Async handlers return Promises that can reject during `setStoreValue()` operations
+- Promise rejections disrupted TuyAPI's internal connection state machine
+- Failure was non-deterministic (worked initially, failed after hours due to I/O slowdown)
+- Race conditions occurred during rapid connect/disconnect cycles
+
+**Current Implementation (v0.99.67)**:
+```typescript
+// Event handler (synchronous, completes in nanoseconds)
+this.tuya.on('connected', (): void => {
+  this.isConnected = true;
+  this.updateStatusTimestamp('connected').catch((err) => {
+    this.logger('Failed to update timestamp:', err);
+  });
+  // Handler returns immediately - TuyAPI can process next event safely
+});
+
+// Persistence function (async, runs in background)
+private async updateStatusTimestamp(newStatus: string): Promise<void> {
+  if (this.currentStatus === newStatus) return; // Preserve timestamp
+  this.currentStatus = newStatus;
+  this.lastStatusChangeTime = Date.now();
+  await this.device.setStoreValue('last_connection_timestamp', this.lastStatusChangeTime);
+}
+```
+
+**Benefits**:
+- ✅ Timestamps persist across app updates and restarts
+- ✅ No Promise blocking TuyAPI event queue
+- ✅ Failures in store operations don't affect connection state
+- ✅ Works reliably under all load conditions and timing scenarios
 
 ### Configuration Files
 
