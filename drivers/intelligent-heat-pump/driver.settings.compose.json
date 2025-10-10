@@ -583,6 +583,19 @@
     },
     "children": [
       {
+        "id": "force_reconnect",
+        "type": "checkbox",
+        "label": {
+          "en": "Force reconnect to device",
+          "nl": "Forceer herverbinding met apparaat"
+        },
+        "hint": {
+          "en": "Click to immediately reconnect to the Tuya device. Use this when the device shows 'Disconnected' status. Bypasses automatic reconnection delays and resets error recovery state.",
+          "nl": "Klik om direct opnieuw verbinding te maken met het Tuya apparaat. Gebruik dit wanneer het apparaat 'Disconnected' status toont. Omzeilt automatische herverbindings vertragingen en reset fout herstel status."
+        },
+        "value": false
+      },
+      {
         "id": "capability_diagnostics",
         "type": "checkbox",
         "label": {

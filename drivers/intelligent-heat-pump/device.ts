@@ -2597,6 +2597,48 @@ class MyDevice extends Homey.Device {
       return 'Flow card settings updated. Changes will take effect immediately.';
     }
 
+    // Handle force reconnect request (v0.99.66)
+    if (changedKeys.includes('force_reconnect') && newSettings.force_reconnect === true) {
+      this.log('🔄 Manual reconnect triggered by user');
+
+      try {
+        // Get TuyaConnectionService from ServiceCoordinator
+        const tuyaService = this.serviceCoordinator?.getTuyaConnection();
+        if (!tuyaService) {
+          throw new Error('TuyaConnectionService not available');
+        }
+
+        // Trigger force reconnect
+        await tuyaService.forceReconnect();
+        this.log('✅ Force reconnect completed');
+
+        // Reset the checkbox after operation completes
+        this.homey.setTimeout(async () => {
+          try {
+            await this.setSettings({ force_reconnect: false });
+            this.log('🔄 Force reconnect checkbox reset');
+          } catch (error) {
+            this.error('Failed to reset force reconnect checkbox:', error);
+          }
+        }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+
+        return 'Force reconnect initiated. Check connection status capability for result.';
+      } catch (error) {
+        this.error('Failed to force reconnect:', error);
+
+        // Still reset the checkbox even on failure
+        this.homey.setTimeout(async () => {
+          try {
+            await this.setSettings({ force_reconnect: false });
+          } catch (err) {
+            this.error('Failed to reset force reconnect checkbox after error:', err);
+          }
+        }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+
+        throw new Error(`Failed to reconnect: ${error}`);
+      }
+    }
+
     // Handle capability diagnostics request
     if (changedKeys.includes('capability_diagnostics') && newSettings.capability_diagnostics === true) {
       const diagnostics = this.serviceCoordinator?.getCapabilityHealth()?.generateDiagnosticsReport() ?? {};
