@@ -1,4 +1,8 @@
 {
+  "0.99.68": {
+    "en": "Connection status now displays in your language (EN/NL). Timestamps now show correct local time instead of UTC.",
+    "nl": "Verbindingsstatus wordt nu weergegeven in uw taal (EN/NL). Tijdstempels tonen nu de juiste lokale tijd in plaats van UTC."
+  },
   "0.99.67": {
     "en": "Fixed connection stability issue where device would disconnect after several hours. Connection status timestamps still persist across app updates."
   },

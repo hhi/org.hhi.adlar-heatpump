@@ -58,5 +58,11 @@
     "check_compressor_communication": "Check Compressor Link",
     "check_multiple_sensors": "Check All Sensors"
   },
-  "COP calculation disabled": "COP calculation disabled"
+  "COP calculation disabled": "COP calculation disabled",
+  "connection_status": {
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "reconnecting": "Reconnecting",
+    "error": "Error"
+  }
 }
