@@ -1,6 +1,9 @@
-comments.txt
-comments.md
-claude.md
+comments.*
+README.md
+CLAUDE.md
+AGENTS.md
 docs/*
 *.code-workspace
 todo/*
+.claude/*
+.github/*
