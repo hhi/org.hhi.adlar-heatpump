@@ -25,7 +25,7 @@ interface CapabilityCategories {
   efficiency: string[];
 }
 
-/* eslint-disable camelcase */
+/* eslint-disable camelcase, @typescript-eslint/no-unused-vars */
 interface UserFlowPreferences {
   flow_temperature_alerts: 'disabled' | 'auto' | 'enabled';
   flow_voltage_alerts: 'disabled' | 'auto' | 'enabled';
@@ -36,7 +36,7 @@ interface UserFlowPreferences {
   flow_efficiency_alerts: 'disabled' | 'auto' | 'enabled';
   flow_expert_mode: boolean;
 }
-/* eslint-enable camelcase */
+/* eslint-enable camelcase, @typescript-eslint/no-unused-vars */
 
 interface COPSettings {
   enableCOP: boolean;
@@ -452,7 +452,6 @@ class MyDevice extends Homey.Device {
   private getCapabilityHealth(capability: string): boolean {
     return this.serviceCoordinator?.getCapabilityHealth()?.isCapabilityHealthy(capability) ?? false;
   }
-
 
   // Note: Capability health categorization now handled by CapabilityHealthService via ServiceCoordinator
 
@@ -2225,7 +2224,6 @@ class MyDevice extends Homey.Device {
     }
   }
 
-
   /**
    * Unregister all flow card listeners - delegated to FlowCardManagerService
    */
@@ -2573,11 +2571,18 @@ class MyDevice extends Homey.Device {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           await this.setUnavailable(`Repair failed: ${errorMessage}`);
 
-          return `Repair failed: ${errorMessage}\n\nPlease verify:\n- Device ID and Local Key are correct\n- IP address is reachable\n- Protocol version matches your device\n\nConnection will retry automatically.`;
+          return (
+            `Repair failed: ${errorMessage}\n\n`
+            + 'Please verify:\n'
+            + '- Device ID and Local Key are correct\n'
+            + '- IP address is reachable\n'
+            + '- Protocol version matches your device\n\n'
+            + 'Connection will retry automatically.'
+          );
         }
       } else {
         this.log('ServiceCoordinator not available - credentials updated but connection not reinitialized');
-        return `Credentials updated in settings. Please restart the device to apply changes.`;
+        return 'Credentials updated in settings. Please restart the device to apply changes.';
       }
     }
 

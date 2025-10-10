@@ -472,7 +472,7 @@ export class TuyaConnectionService {
 
         // Install error handler on TuyAPI's internal socket
         // This catches socket-level errors (ECONNRESET, etc.) BEFORE they bubble up
-        tuyaSocket.on('error', async (error: Error) => {
+        tuyaSocket.on('error', (error: Error) => {
           this.logger('TuyaConnectionService: 🛡️ Deep socket error intercepted (crash prevented):', error.message);
 
           // Categorize the error for proper handling
@@ -480,11 +480,15 @@ export class TuyaConnectionService {
 
           // Mark as disconnected
           this.isConnected = false;
-          await this.updateStatusTimestamp('disconnected');
+          this.updateStatusTimestamp('disconnected').catch((err) => {
+            this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
+          });
 
           // Apply recovery strategy
           if (!categorizedError.recoverable) {
-            await this.updateStatusTimestamp('error');
+            this.updateStatusTimestamp('error').catch((err) => {
+              this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
+            });
           }
 
           // Trigger reconnection via our standard system
@@ -561,10 +565,12 @@ export class TuyaConnectionService {
     });
 
     // Connected event
-    this.tuya.on('connected', async (): Promise<void> => {
+    this.tuya.on('connected', (): void => {
       this.logger('TuyaConnectionService: Device connected');
       this.isConnected = true;
-      await this.updateStatusTimestamp('connected');
+      this.updateStatusTimestamp('connected').catch((err) => {
+        this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
+      });
 
       // Reset error recovery state on successful connection
       this.resetErrorRecoveryState();
@@ -576,10 +582,12 @@ export class TuyaConnectionService {
     });
 
     // Disconnected event
-    this.tuya.on('disconnected', async (): Promise<void> => {
+    this.tuya.on('disconnected', (): void => {
       this.logger('TuyaConnectionService: Device disconnected');
       this.isConnected = false;
-      await this.updateStatusTimestamp('disconnected');
+      this.updateStatusTimestamp('disconnected').catch((err) => {
+        this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
+      });
 
       // Apply minimal backoff for clean disconnections
       this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.2, 4);
@@ -816,7 +824,6 @@ export class TuyaConnectionService {
       }
     }
   }
-
 
   /**
    * Return diagnostics for the Tuya connection manager.
