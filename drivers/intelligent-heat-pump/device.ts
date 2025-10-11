@@ -2066,6 +2066,7 @@ class MyDevice extends Homey.Device {
   /**
    * Process DPS data received from Tuya device and update corresponding Homey capabilities
    * This method is called by the ServiceCoordinator when TuyAPI receives data or dp-refresh events
+   * v0.99.96: Refactored to batch async operations to prevent TuyAPI event loop blocking
    * @param dps - DPS data object from Tuya device
    */
   updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
@@ -2076,6 +2077,9 @@ class MyDevice extends Homey.Device {
     }
 
     this.debugLog('Processing DPS data:', dps);
+
+    // Collect all capability updates as promises for batching (v0.99.96)
+    const updatePromises: Promise<void>[] = [];
 
     // Convert string keys to numbers and process each DPS value
     Object.entries(dps).forEach(([dpsKey, value]) => {
@@ -2103,14 +2107,18 @@ class MyDevice extends Homey.Device {
         }
 
         try {
-          // Update the capability value
-          this.setCapabilityValue(capability, value).then(() => {
-            this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
-          }).catch((error) => {
-            this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
-          });
+          // Collect capability update promise for batching
+          const updatePromise = this.setCapabilityValue(capability, value)
+            .then(() => {
+              this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
+            })
+            .catch((error) => {
+              this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
+            });
 
-          // Update capability health tracking via service coordinator
+          updatePromises.push(updatePromise);
+
+          // Update capability health tracking via service coordinator (synchronous)
           this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
 
         } catch (error) {
@@ -2118,6 +2126,24 @@ class MyDevice extends Homey.Device {
         }
       });
     });
+
+    // Execute all updates in parallel with proper error isolation (v0.99.96)
+    // Use fire-and-forget pattern to prevent blocking TuyAPI event loop
+    if (updatePromises.length > 0) {
+      Promise.allSettled(updatePromises)
+        .then((results) => {
+          const failures = results.filter((r) => r.status === 'rejected').length;
+          if (failures > 0) {
+            this.error(`DPS update completed with ${failures} failures out of ${results.length} operations`);
+          } else {
+            this.debugLog(`✅ Successfully batched ${results.length} capability updates`);
+          }
+        })
+        .catch((error) => {
+          // This should never happen with allSettled, but defensive catch for safety
+          this.error('Unexpected error in batched capability updates:', error);
+        });
+    }
   }
 
   private getCapabilityFriendlyTitle(capability: string): string {
