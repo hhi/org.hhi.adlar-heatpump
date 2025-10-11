@@ -1,4 +1,8 @@
 {
+  "0.99.96": {
+    "en": "Critical connection stability fix: Device no longer disconnects during sensor updates. All data updates now processed efficiently in batches.",
+    "nl": "Kritieke verbindingsstabiliteitsfix: Apparaat verbreekt verbinding niet meer tijdens sensor-updates. Alle data-updates worden nu efficiënt in batches verwerkt."
+  },
   "0.99.68": {
     "en": "Connection status now displays in your language (EN/NL). Timestamps now show correct local time instead of UTC.",
     "nl": "Verbindingsstatus wordt nu weergegeven in uw taal (EN/NL). Tijdstempels tonen nu de juiste lokale tijd in plaats van UTC."
