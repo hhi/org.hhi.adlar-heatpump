@@ -1,4 +1,8 @@
 {
+  "0.99.97": {
+    "en": "Updated app images showing modern home with solar panels and heat pump installation.",
+    "nl": "App-afbeeldingen bijgewerkt met modern huis met zonnepanelen en warmtepomp-installatie."
+  },
   "0.99.96": {
     "en": "Critical connection stability fix: Device no longer disconnects during sensor updates. All data updates now processed efficiently in batches.",
     "nl": "Kritieke verbindingsstabiliteitsfix: Apparaat verbreekt verbinding niet meer tijdens sensor-updates. Alle data-updates worden nu efficiënt in batches verwerkt."
