@@ -1,5 +1,3 @@
-ADLAR CASTRA WARMTEPOMP - HOMEY APP
-
 Deze app geeft u volledige controle over uw Adlar Castra Aurora warmtepomp rechtstreeks via uw Homey smart home systeem. U kunt uw warmtepomp monitoren, bedienen en optimaliseren zonder afhankelijk te zijn van internetverbindingen.
 
 BELANGRIJKSTE VOORDELEN
