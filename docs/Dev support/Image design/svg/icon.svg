@@ -1,0 +1,46 @@
+<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+  
+  <!-- Heat pump unit body -->
+  <rect x="87.5" y="212.5" width="825" height="577.5" rx="60" fill="none" stroke="#000000" stroke-width="15"/>
+  
+  <!-- Top vent grilles -->
+  <rect x="126" y="280" width="726" height="33" fill="black" rx="15"/>
+  <rect x="126" y="340" width="726" height="33" fill="black" rx="15"/>
+  <rect x="126" y="400" width="726" height="33" fill="black" rx="15"/>
+
+  <!-- Control panel -->
+  <rect x="187.5" y="510" width="247.5" height="198" rx="30" fill="none" stroke="black" stroke-width="15"/>
+  
+  <!-- Display screen -->
+  <rect x="219" y="540" width="181.5" height="132" rx="15" fill="none"/>
+  
+  <!-- Temperature display -->
+  <text x="309.5" y="634" font-family="Arial, sans-serif" font-size="66" fill="black" text-anchor="middle">21°</text>
+  
+  <!-- Fan unit -->
+  <circle cx="675" cy="598" r="165" fill="none" stroke="black" stroke-width="15"/>
+  <circle cx="675" cy="598" r="132" fill="none"/>
+  
+  <!-- Fan blades -->
+  <path d="M675 433 L675 763 M510 598 L840 598 M544 531.5 L806 664.5 M806 531.5 L544 664.5" stroke="black" stroke-width="22.5" stroke-linecap="round"/>
+  
+  <!-- Smart/WiFi indicator -->
+  <g transform="translate(900,427)">
+    <circle cx="0" cy="0" r="66" fill="black" opacity="0.3"/>
+    <path d="M-33 22 Q0 -22 33 22 M-22 0 Q0 -11 22 0 M0 11 L0 11" stroke="black" stroke-width="10" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Heat waves/air flow -->
+  <g opacity="0.6">
+    <!-- Warm air output -->
+    <path d="M80 120 Q140 60 200 120 Q260 180 320 120" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+    <path d="M100 90 Q160 30 220 90 Q280 150 340 90" stroke="#000000" stroke-width="20" fill="none" stroke-linecap="round"/>
+    
+    <!-- Cool air input -->
+    <path d="M680 120 Q740 60 800 120 Q860 180 920 120" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+    <path d="M660 90 Q720 30 780 90 Q840 150 900 90" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Brand indicator (A for Adlar) -->
+  <text x="500" y="940" font-family="Arial, sans-serif" font-size="150" fill="black" text-anchor="middle" font-weight="bold">Adlar</text>
+</svg>
