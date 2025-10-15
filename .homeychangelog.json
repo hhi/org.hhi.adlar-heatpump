@@ -1,4 +1,12 @@
 {
+  "0.99.99": {
+    "en": "Fixed: Device no longer remains disconnected for extended periods after network issues. Connection management now uses single reliable source, automatically reconnects within minutes instead of hours.",
+    "nl": "Opgelost: Apparaat blijft niet langer langdurig losgekoppeld na netwerkproblemen. Verbindingsbeheer gebruikt nu één betrouwbare bron, herverbindt automatisch binnen minuten in plaats van uren."
+  },
+  "0.99.98": {
+    "en": "Device now detects zombie connections during idle periods. Intelligent heartbeat monitors connection health every 5 minutes, automatically reconnects after 10 minutes without data.",
+    "nl": "Apparaat detecteert nu zombie-verbindingen tijdens inactieve periodes. Intelligente heartbeat controleert verbindingsgezondheid elke 5 minuten, herverbindt automatisch na 10 minuten zonder data."
+  },
   "0.99.97": {
     "en": "Updated app images showing modern home with solar panels and heat pump installation.",
     "nl": "App-afbeeldingen bijgewerkt met modern huis met zonnepanelen en warmtepomp-installatie."

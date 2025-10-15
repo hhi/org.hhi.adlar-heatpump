@@ -55,8 +55,14 @@ export class TuyaConnectionService {
 
   // Intervals
   private reconnectInterval: NodeJS.Timeout | null = null;
+  private heartbeatInterval: NodeJS.Timeout | null = null;
   private lastNotificationTime: number = 0;
   private lastNotificationKey: string | null = null;
+
+  // Connection health tracking (v0.99.98)
+  private lastDataEventTime: number = Date.now();
+  private lastHeartbeatTime: number = 0;
+  private heartbeatInProgress = false;
 
   // Event handlers
   private onDataHandler?: (data: { dps: Record<number, unknown> }) => void;
@@ -128,6 +134,9 @@ export class TuyaConnectionService {
       // Start reconnection monitoring
       this.startReconnectInterval();
 
+      // Start heartbeat monitoring (v0.99.98)
+      this.startHeartbeat();
+
       this.logger('TuyaConnectionService: Initialization completed successfully');
 
     } catch (error) {
@@ -147,8 +156,9 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Reinitializing with new credentials (repair mode)');
 
     try {
-      // Step 1: Stop reconnection interval to prevent interference
+      // Step 1: Stop reconnection interval and heartbeat to prevent interference
       this.stopReconnectInterval();
+      this.stopHeartbeat();
 
       // Step 2: Disconnect and cleanup old instance
       if (this.tuya) {
@@ -192,6 +202,9 @@ export class TuyaConnectionService {
 
       // Step 8: Restart reconnection monitoring
       this.startReconnectInterval();
+
+      // Step 9: Restart heartbeat monitoring (v0.99.98)
+      this.startHeartbeat();
 
       this.logger('TuyaConnectionService: Reinitialization completed successfully');
       this.logger(`TuyaConnectionService: Now using device ${config.id} at ${config.ip} (Protocol: ${config.version || '3.3'})`);
@@ -278,8 +291,9 @@ export class TuyaConnectionService {
   async forceReconnect(): Promise<void> {
     this.logger('TuyaConnectionService: Force reconnect triggered by user');
 
-    // Step 1: Stop any pending reconnection attempts
+    // Step 1: Stop any pending reconnection attempts and heartbeat
     this.stopReconnectInterval();
+    this.stopHeartbeat();
 
     // Step 2: Disconnect cleanly from current connection (if any)
     await this.disconnect();
@@ -297,8 +311,9 @@ export class TuyaConnectionService {
       // Don't throw - let normal reconnection logic handle retry
     }
 
-    // Step 5: Resume normal reconnection monitoring
+    // Step 5: Resume normal reconnection monitoring and heartbeat
     this.startReconnectInterval();
+    this.startHeartbeat();
   }
 
   /**
@@ -541,6 +556,9 @@ export class TuyaConnectionService {
       const dpsFetched = data.dps || {};
       this.logger('TuyaConnectionService: Data received from Tuya:', dpsFetched);
 
+      // Update last data event timestamp (v0.99.98 - stale connection detection)
+      this.lastDataEventTime = Date.now();
+
       // Forward to data handler only if dps is valid (v0.99.63 - crash fix)
       if (this.onDataHandler && data.dps && typeof data.dps === 'object') {
         this.onDataHandler(data);
@@ -553,6 +571,9 @@ export class TuyaConnectionService {
     this.tuya.on('dp-refresh', (data: { dps: Record<number, unknown> }): void => {
       const dpsFetched = data.dps || {};
       this.logger('TuyaConnectionService: DP-Refresh received from Tuya:', dpsFetched);
+
+      // Update last data event timestamp (v0.99.98 - stale connection detection)
+      this.lastDataEventTime = Date.now();
 
       // Forward to dp-refresh handler only if dps is valid (v0.99.63 - crash fix)
       if (this.onDpRefreshHandler && data.dps && typeof data.dps === 'object') {
@@ -620,9 +641,137 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Start heartbeat monitoring to proactively detect zombie connections (v0.99.98).
+   * Uses intelligent skip logic to avoid unnecessary network traffic when device is active.
+   */
+  private startHeartbeat(): void {
+    // Clear any existing heartbeat
+    this.stopHeartbeat();
+
+    this.logger(`TuyaConnectionService: Starting heartbeat monitoring (interval: ${DeviceConstants.CONNECTION_HEARTBEAT_INTERVAL_MS / 1000}s)`);
+
+    this.heartbeatInterval = this.device.homey.setInterval(() => {
+      this.performHeartbeat().catch((error) => {
+        this.logger('TuyaConnectionService: Heartbeat error:', error);
+        // Error handling is done within performHeartbeat, this catch prevents unhandled rejection
+      });
+    }, DeviceConstants.CONNECTION_HEARTBEAT_INTERVAL_MS);
+  }
+
+  /**
+   * Stop heartbeat monitoring.
+   */
+  private stopHeartbeat(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  /**
+   * Perform a single heartbeat check with intelligent skip logic (v0.99.98).
+   * Skips heartbeat if device has sent data recently (avoids unnecessary traffic).
+   * Detects zombie connections by attempting a lightweight get() query.
+   */
+  private async performHeartbeat(): Promise<void> {
+    // Skip if already disconnected (reconnection logic handles this)
+    if (!this.isConnected) {
+      this.logger('TuyaConnectionService: Heartbeat skipped - already disconnected');
+      return;
+    }
+
+    // Skip if heartbeat already in progress (prevent concurrent probes)
+    if (this.heartbeatInProgress) {
+      this.logger('TuyaConnectionService: Heartbeat skipped - probe already in progress');
+      return;
+    }
+
+    // Check if we've received data recently (intelligent skip logic)
+    const timeSinceLastData = Date.now() - this.lastDataEventTime;
+    const recentDataThreshold = DeviceConstants.CONNECTION_HEARTBEAT_INTERVAL_MS * 0.8; // 80% of heartbeat interval
+
+    if (timeSinceLastData < recentDataThreshold) {
+      this.logger(`TuyaConnectionService: Heartbeat skipped - device active (data received ${Math.round(timeSinceLastData / 1000)}s ago)`);
+      return;
+    }
+
+    // Device appears idle - perform proactive health check
+    this.logger(`TuyaConnectionService: Heartbeat probe - no data for ${Math.round(timeSinceLastData / 1000)}s, checking connection health...`);
+    this.heartbeatInProgress = true;
+    this.lastHeartbeatTime = Date.now();
+
+    try {
+      // Attempt lightweight get() query with timeout
+      if (!this.tuya) {
+        throw new Error('TuyAPI instance not available');
+      }
+
+      // Use TuyAPI's get() method to probe connection health
+      // This will throw an error if connection is dead
+      await Promise.race([
+        this.tuya.get({ schema: true }),
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Heartbeat timeout')), DeviceConstants.HEARTBEAT_TIMEOUT_MS);
+        }),
+      ]);
+
+      this.logger('TuyaConnectionService: ✅ Heartbeat successful - connection healthy');
+
+      // Update last data event time (successful probe counts as activity)
+      this.lastDataEventTime = Date.now();
+
+    } catch (error) {
+      this.logger(`TuyaConnectionService: ❌ Heartbeat failed - zombie connection detected: ${error}`);
+
+      // Mark as disconnected to trigger reconnection
+      this.isConnected = false;
+      this.updateStatusTimestamp('disconnected').catch((err) => {
+        this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
+      });
+
+      // Increment failure counter for backoff logic
+      this.consecutiveFailures++;
+
+      // Trigger reconnection
+      this.scheduleNextReconnectionAttempt();
+
+    } finally {
+      this.heartbeatInProgress = false;
+    }
+  }
+
+  /**
    * Schedule the next reconnection attempt using exponential backoff and circuit breaker.
+   * Enhanced with stale connection detection (v0.99.98).
    */
   private scheduleNextReconnectionAttempt(): void {
+    // LAYER 2: Stale Connection Detection (v0.99.98)
+    // Check if connection claims to be active but hasn't received data in a long time
+    if (this.isConnected) {
+      const timeSinceLastData = Date.now() - this.lastDataEventTime;
+
+      // If no data for longer than stale threshold, connection is likely dead
+      if (timeSinceLastData > DeviceConstants.STALE_CONNECTION_THRESHOLD_MS) {
+        this.logger(`TuyaConnectionService: 🚨 Stale connection detected - no data for ${Math.round(timeSinceLastData / 1000)}s (threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 1000}s)`);
+        this.logger('TuyaConnectionService: Forcing reconnection for stale connection');
+
+        // Force disconnection to trigger reconnection
+        this.isConnected = false;
+        this.updateStatusTimestamp('error').catch((err) => {
+          this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
+        });
+
+        // Apply moderate backoff (not as aggressive as failure-based)
+        this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 8);
+
+        // Continue to reconnection attempt below
+      } else {
+        // Connection is healthy and has recent data - skip reconnection
+        this.logger(`TuyaConnectionService: Connection healthy (data received ${Math.round(timeSinceLastData / 1000)}s ago), skipping reconnection`);
+        return;
+      }
+    }
+
     // Check circuit breaker state
     if (this.circuitBreakerOpen) {
       const timeSinceOpen = Date.now() - this.circuitBreakerOpenTime;
@@ -846,6 +995,7 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Destroying service');
 
     this.stopReconnectInterval();
+    this.stopHeartbeat();
 
     if (this.tuya) {
       this.tuya.removeAllListeners();

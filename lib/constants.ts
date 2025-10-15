@@ -17,6 +17,15 @@ export class DeviceConstants {
   /** Capability health check interval */
   static readonly HEALTH_CHECK_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
+  /** Connection heartbeat interval - proactive connection health check (v0.99.98) */
+  static readonly CONNECTION_HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+  /** Heartbeat timeout - consider connection dead if no response within this time (v0.99.98) */
+  static readonly HEARTBEAT_TIMEOUT_MS = 10 * 1000; // 10 seconds
+
+  /** Stale connection threshold - force reconnect if no data received for this period (v0.99.98) */
+  static readonly STALE_CONNECTION_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+
   /** Energy tracking update interval - frequent updates for accurate energy accumulation */
   static readonly ENERGY_TRACKING_INTERVAL_MS = 10 * 1000; // 10 seconds
 
