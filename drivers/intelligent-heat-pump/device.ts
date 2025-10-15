@@ -55,7 +55,6 @@ interface COPSettings {
 
 class MyDevice extends Homey.Device {
   tuya: TuyaDevice | undefined;
-  tuyaConnected: boolean = false;
   allCapabilities: Record<string, number[]> = allCapabilities;
   allArraysSwapped: Record<number, string> = allArraysSwapped;
   settableCapabilities: string[] = [];
@@ -217,6 +216,22 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Check if device is currently connected to Tuya
+   * Delegates to ServiceCoordinator for authoritative connection state
+   * @returns true if device is connected, false otherwise
+   */
+  private isDeviceConnected(): boolean {
+    // Primary path: ServiceCoordinator's TuyaConnectionService (v0.99.23+)
+    if (this.serviceCoordinator) {
+      return this.serviceCoordinator.getTuyaConnection()?.isDeviceConnected() ?? false;
+    }
+
+    // Fallback path: Legacy tuya instance (should be rare/never used)
+    // Only reached if ServiceCoordinator initialization failed
+    return this.tuya?.isConnected() ?? false;
+  }
+
+  /**
    * Connect to the Tuya device with proper error handling
    * @returns Promise that resolves when connection is established
    * @throws Error if connection fails or device is not initialized
@@ -227,7 +242,7 @@ class MyDevice extends Homey.Device {
       try {
         const tuyaService = this.serviceCoordinator.getTuyaConnection();
         await tuyaService.connectTuya();
-        this.tuyaConnected = tuyaService.isDeviceConnected();
+        // No need to sync state - isDeviceConnected() will query service directly
         this.debugLog('Connected to Tuya device via ServiceCoordinator');
         return;
       } catch (err) {
@@ -237,7 +252,7 @@ class MyDevice extends Homey.Device {
     }
 
     // Fallback to original direct connection method
-    if (!this.tuyaConnected) {
+    if (!this.isDeviceConnected()) {
       try {
         // Initialize fallback Tuya device if not already done
         await this.initializeFallbackTuyaDevice();
@@ -247,7 +262,7 @@ class MyDevice extends Homey.Device {
           await this.tuya.find();
           // Then connect to the device
           await this.tuya.connect();
-          this.tuyaConnected = true;
+          // No need to sync state - isDeviceConnected() will check tuya.isConnected()
           this.debugLog('Connected to Tuya device (direct fallback)');
         } else {
           throw new Error('Tuya device fallback initialization failed');
@@ -336,7 +351,7 @@ class MyDevice extends Homey.Device {
    * Attempt reconnection with enhanced error recovery
    */
   private async attemptReconnectionWithRecovery(): Promise<void> {
-    if (this.tuyaConnected) {
+    if (this.isDeviceConnected()) {
       // Already connected, reset backoff and exit
       this.resetErrorRecoveryState();
       return;
@@ -2471,8 +2486,8 @@ class MyDevice extends Homey.Device {
       // Continue with fallback to direct methods for failed services
     }
 
-    // Start reconnection interval (will be managed by ServiceCoordinator in future)
-    this.startReconnectInterval();
+    // Note: Reconnection interval is managed by ServiceCoordinator's TuyaConnectionService (v0.99.23+)
+    // No need for duplicate legacy reconnection interval
 
     // Initialize flow cards based on current settings
     await this.initializeFlowCards();
@@ -3282,8 +3297,8 @@ class MyDevice extends Homey.Device {
         // Remove all event listeners to prevent memory leaks
         this.tuya.removeAllListeners();
 
-        // Disconnect if connected
-        if (this.tuyaConnected) {
+        // Disconnect if instance exists (ServiceCoordinator handles its own cleanup)
+        if (this.tuya) {
           this.tuya.disconnect();
           this.log('Disconnected from Tuya device');
         }
@@ -3295,8 +3310,7 @@ class MyDevice extends Homey.Device {
     // Clean up flow card listeners
     this.unregisterAllFlowCards();
 
-    // Reset connection state
-    this.tuyaConnected = false;
+    // Reset connection state (ServiceCoordinator handles its own cleanup)
     this.tuya = undefined;
   }
 
