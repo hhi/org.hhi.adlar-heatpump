@@ -2,12 +2,16 @@
   "id": "adlar_cop_monthly",
   "title": {
     "en": "Rolling Monthly Average COP",
-    "nl": "Voortschrijdend Maandelijkse Gemiddelde COP"
+    "nl": "Voortschrijdend Maandelijkse Gemiddelde COP",
+    "de": "Gleitender Monatsdurchschnitt COP",
+    "fr": "Moyenne mobile mensuelle COP"
   },
   "type": "number",
   "units": {
     "en": "COP",
-    "nl": "COP"
+    "nl": "COP",
+    "de": "COP",
+    "fr": "COP"
   },
   "min": 0,
   "max": 8,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "Monthly Heat Pump Efficiency (COP)",
-    "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)"
+    "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)",
+    "de": "Monatliche Wärmepumpen Effizienz (COP)",
+    "fr": "Efficacité mensuelle de la pompe à chaleur (COP)"
   },
   "icon": "/assets/cop-efficiency.svg",
   "description": {
     "en": "30-day rolling average COP for seasonal pattern identification and long-term efficiency monitoring. Ideal for detecting gradual performance changes and seasonal optimization opportunities.",
-    "nl": "30-dagen voortschrijdend gemiddelde COP voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring. Ideaal voor het detecteren van geleidelijke prestatieveranderingen en seizoensoptimalisatie mogelijkheden."
+    "nl": "30-dagen voortschrijdend gemiddelde COP voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring. Ideaal voor het detecteren van geleidelijke prestatieveranderingen en seizoensoptimalisatie mogelijkheden.",
+    "de": "30-Tage gleitender Durchschnitt COP zur Identifizierung saisonaler Muster und Langzeitüberwachung der Effizienz. Ideal zur Erkennung allmählicher Leistungsveränderungen und saisonaler Optimierungsmöglichkeiten.",
+    "fr": "Moyenne mobile COP sur 30 jours pour l'identification des tendances saisonnières et la surveillance de l'efficacité à long terme. Idéal pour détecter les changements progressifs de performance et les opportunités d'optimisation saisonnière."
   }
 }

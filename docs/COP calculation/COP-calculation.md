@@ -110,12 +110,12 @@ Q_thermal = ṁ × Cp × ΔT
 
 1. **Determine power calculation method**:
 
-   ```
+   ```typescript
    if power_module_type == 1 AND P_internal > 0:
        calculated_power = P_internal
        power_source = "single_phase_internal"
 
-   elif power_module_type == 2:
+   else if power_module_type == 2:
        V_avg = (V_A + V_B + V_C) / 3
        I_avg = (I_A + I_B + I_C) / 3
        calculated_power = √3 × V_avg × I_avg × 0.85
@@ -124,14 +124,14 @@ Q_thermal = ṁ × Cp × ΔT
 
 2. **Calculate thermal output**:
 
-   ```
+   ```typescript
    mass_flow_rate = water_flow_L/min ÷ 60  // kg/s
    thermal_output = mass_flow_rate × 4186 × ΔT
    ```
 
 3. **Calculate COP**:
 
-   ```
+   ```typescript
    COP = thermal_output ÷ calculated_power
    ```
 
@@ -186,40 +186,40 @@ Q_thermal = ṁ × Cp × ΔT
 
 1. **Normalize compressor frequency**:
 
-   ```
+   ```typescript
    comp_freq_norm = (comp_freq - 20) / (120 - 20)
    comp_freq_norm = clamp(comp_freq_norm, 0, 1)
    ```
 
 2. **Calculate compressor power** (using power curve):
 
-   ```
+   ```typescript
    P_compressor = 500 + (4000 - 500) × (comp_freq_norm^1.8)
    ```
 
 3. **Normalize fan frequency**:
 
-   ```
+   ```typescript
    fan_freq_norm = (fan_freq - 10) / (100 - 10)
    fan_freq_norm = clamp(fan_freq_norm, 0, 1)
    ```
 
 4. **Calculate fan power** (using fan laws):
 
-   ```
+   ```typescript
    P_fan = 50 + (300 - 50) × (fan_freq_norm^2.2)
    ```
 
 5. **Calculate auxiliary power**:
 
-   ```
+   ```typescript
    flow_normalized = min(1, water_flow / 50)
    P_auxiliary = 150 + 50 × flow_normalized
    ```
 
 6. **Apply defrost multiplier** (if defrosting):
 
-   ```
+   ```typescript
    if defrosting:
        P_total = (P_compressor + P_fan + P_auxiliary) × 1.3
    else:
@@ -228,7 +228,7 @@ Q_thermal = ṁ × Cp × ΔT
 
 7. **Calculate thermal output and COP**:
 
-   ```
+   ```typescript
    mass_flow_rate = water_flow_L/min ÷ 60  // kg/s
    thermal_output = mass_flow_rate × 4186 × ΔT
    COP = thermal_output ÷ P_total
@@ -289,38 +289,38 @@ Carnot_theoretical = T_hot / (T_hot - T_cold)
 
 1. **Convert temperatures to Kelvin**:
 
-   ```
+   ```typescript
    T_hot = high_pressure_temp + 273.15
    T_cold = low_pressure_temp + 273.15
    ```
 
 2. **Calculate theoretical Carnot COP**:
 
-   ```
+   ```typescript
    Carnot_COP = T_hot ÷ (T_hot - T_cold)
    ```
 
 3. **Calculate refrigerant efficiency**:
 
-   ```
+   ```typescript
    base_efficiency = 0.45
    temp_span = T_hot - T_cold
 
    if temp_span > 60K: efficiency *= 0.9
-   elif temp_span < 30K: efficiency *= 0.85
+   else if temp_span < 30K: efficiency *= 0.85
    else: efficiency *= 1.05
    ```
 
 4. **Apply compressor frequency adjustment**:
 
-   ```
+   ```typescript
    efficiency += (compressor_freq / 100 - 0.5) × 0.1
    efficiency = clamp(efficiency, 0.25, 0.65)
    ```
 
 5. **Calculate final COP**:
 
-   ```
+   ```typescript
    COP = Carnot_COP × efficiency
    ```
 
@@ -366,26 +366,26 @@ Carnot_COP = T_hot / (T_hot - T_cold)
 
 1. **Convert to Kelvin**:
 
-   ```
+   ```typescript
    T_hot = T_outlet + 273.15
    T_cold = T_ambient + 273.15
    ```
 
 2. **Calculate Carnot COP**:
 
-   ```
+   ```typescript
    Carnot_COP = T_hot ÷ (T_hot - T_cold)
    ```
 
 3. **Determine efficiency factor**:
 
-   ```
+   ```typescript
    η_practical = 0.4 + (compressor_frequency ÷ 100) × 0.1
    ```
 
 4. **Calculate practical COP**:
 
-   ```
+   ```typescript
    COP = Carnot_COP × η_practical
    ```
 
@@ -430,7 +430,7 @@ valve_efficiency_factor = f(EEV_position, EVI_position)
 
 1. **Calculate base COP from temperature difference**:
 
-   ```
+   ```typescript
    if ΔT > 5°C:
        base_COP = 2.5 + (ΔT - 5) × 0.12
    else:
@@ -439,29 +439,29 @@ valve_efficiency_factor = f(EEV_position, EVI_position)
 
 2. **Calculate EEV efficiency factor**:
 
-   ```
+   ```typescript
    if EEV_steps < 100: eev_factor = 0.7
-   elif EEV_steps > 450: eev_factor = 0.8
+   else if EEV_steps > 450: eev_factor = 0.8
    else: eev_factor = 1.0 + sin((EEV_steps - 100)/350 × π) × 0.15
    ```
 
 3. **Calculate EVI efficiency factor**:
 
-   ```
+   ```typescript
    if EVI_steps < 50: evi_factor = 0.85
-   elif EVI_steps > 350: evi_factor = 0.9
+   else if EVI_steps > 350: evi_factor = 0.9
    else: evi_factor = 1.0 + sin((EVI_steps - 50)/300 × π) × 0.1
    ```
 
 4. **Apply frequency factor**:
 
-   ```
+   ```typescript
    frequency_factor = 0.9 + (compressor_freq / 100) × 0.2
    ```
 
 5. **Calculate final COP**:
 
-   ```
+   ```typescript
    COP = base_COP × eev_factor × evi_factor × frequency_factor
    COP = min(COP, 6.5)  // Cap at realistic maximum
    ```
@@ -491,7 +491,7 @@ The improved method considers multiple real-world factors for realistic COP vari
 
 ### Base COP from Temperature Difference
 
-```javascript
+```typescript
 // Progressive curve based on actual heat pump performance data
 if (ΔT ≤ 1) {
     base_COP = 1.8 + random(0.4)  // 1.8-2.2 (low load/system issues)
@@ -511,7 +511,7 @@ if (ΔT ≤ 1) {
 
 ### Ambient Temperature Correction
 
-```javascript
+```typescript
 // Heat pump efficiency varies significantly with outdoor conditions
 if (ambient_temp ≥ 15°C) {
     correction = 1.1 + (ambient_temp - 15) × 0.01  // +10% bonus for warm weather
@@ -528,7 +528,7 @@ if (ambient_temp ≥ 15°C) {
 
 ### Load-Based Correction
 
-```javascript
+```typescript
 // Heat pumps are most efficient at 60-80% load
 normalized_freq = clamp((compressor_freq / 80), 0.2, 1.0)
 optimal_load = 0.7
@@ -545,7 +545,7 @@ if (load_deviation ≤ 0.1) {
 
 ### System Operation Correction
 
-```javascript
+```typescript
 // Temperature lift and supply temperature optimization
 temperature_lift = abs(outlet_temp - ambient_temp)
 correction = 1.0
@@ -567,7 +567,7 @@ if (outlet_temp ≥ 35 && outlet_temp ≤ 45) {
 
 ### Environmental Variation
 
-```javascript
+```typescript
 // Add realistic ±8% variation for unmeasured factors
 base_variation = 0.08
 variation_range = base_variation

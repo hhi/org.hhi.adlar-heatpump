@@ -2,15 +2,21 @@
   "id": "incoiler_temperature_alert",
   "title": {
     "en": "Incoiler temperature alert",
-    "nl": "Condensor temperatuur alarm"
+    "nl": "Condensor temperatuur alarm",
+    "de": "Kondensator-Temperaturalarm",
+    "fr": "Alerte de température du condenseur"
   },
   "titleFormatted": {
     "en": "Incoiler temperature [[condition]] [[temperature]]°C",
-    "nl": "Condensor temperatuur [[condition]] [[temperature]]°C"
+    "nl": "Condensor temperatuur [[condition]] [[temperature]]°C",
+    "de": "Kondensator-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température du condenseur [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when incoiler temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Kondensator-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température du condenseur dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Incoiler temperature",
-        "nl": "Huidige Condensor temperatuur"
+        "nl": "Huidige Condensor temperatuur",
+        "de": "Aktuelle Kondensator-Temperatur",
+        "fr": "Température actuelle du condenseur"
       },
       "example": 35.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 40
     }

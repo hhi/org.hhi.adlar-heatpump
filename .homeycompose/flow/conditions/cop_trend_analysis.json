@@ -2,15 +2,21 @@
   "id": "cop_trend_analysis",
   "title": {
     "en": "COP trend analysis",
-    "nl": "COP trend analyse"
+    "nl": "COP trend analyse",
+    "de": "COP-Trendanalyse",
+    "fr": "Analyse de tendance COP"
   },
   "titleFormatted": {
     "en": "COP trend is !{{improving|stable|degrading}} over [[hours]] hours",
-    "nl": "COP trend is !{{verbeterend|stabiel|verslechterend}} over [[hours]] uur"
+    "nl": "COP trend is !{{verbeterend|stabiel|verslechterend}} over [[hours]] uur",
+    "de": "COP-Trend ist !{{verbessernd|stabil|verschlechternd}} über [[hours]] Stunden",
+    "fr": "La tendance COP est !{{en amélioration|stable|en dégradation}} sur [[hours]] heures"
   },
   "hint": {
     "en": "Check the COP performance trend over a specified time period",
-    "nl": "Controleer de COP prestatie trend over een opgegeven tijdsperiode"
+    "nl": "Controleer de COP prestatie trend over een opgegeven tijdsperiode",
+    "de": "Prüfen Sie den COP-Leistungstrend über einen bestimmten Zeitraum",
+    "fr": "Vérifier la tendance de performance COP sur une période spécifiée"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "hours",
       "title": {
         "en": "Time period (hours)",
-        "nl": "Tijdsperiode (uur)"
+        "nl": "Tijdsperiode (uur)",
+        "de": "Zeitraum (Stunden)",
+        "fr": "Période (heures)"
       },
       "min": 1,
       "max": 168,
@@ -31,7 +39,9 @@
       "units": "h",
       "placeholder": {
         "en": "Number of hours to analyze",
-        "nl": "Aantal uur om te analyseren"
+        "nl": "Aantal uur om te analyseren",
+        "de": "Anzahl der zu analysierenden Stunden",
+        "fr": "Nombre d'heures à analyser"
       }
     }
   ]

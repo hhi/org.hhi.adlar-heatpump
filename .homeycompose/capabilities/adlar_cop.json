@@ -2,12 +2,16 @@
   "id": "adlar_cop",
   "title": {
     "en": "Instant Coefficient of Performance",
-    "nl": "Momentopname Prestatiecoëfficiënt"
+    "nl": "Momentopname Prestatiecoëfficiënt",
+    "de": "Momentane Leistungszahl",
+    "fr": "Coefficient de performance instantané"
   },
   "type": "number",
   "units": {
     "en": "COP",
-    "nl": "COP"
+    "nl": "COP",
+    "de": "COP",
+    "fr": "COP"
   },
   "min": 0.0,
   "max": 8.0,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "Heat Pump Efficiency (COP)",
-    "nl": "Warmtepomp Efficiëntie (COP)"
+    "nl": "Warmtepomp Efficiëntie (COP)",
+    "de": "Wärmepumpen Effizienz (COP)",
+    "fr": "Efficacité de la pompe à chaleur (COP)"
   },
   "icon": "/assets/cop-efficiency.svg",
   "description": {
     "en": "Calculated Coefficient of Performance - ratio of useful heat output to electrical energy input. Higher values indicate better efficiency.",
-    "nl": "Berekende prestatiecoëfficiënt - verhouding tussen nuttige warmte-output en elektrische energie-input. Hogere waarden duiden op betere efficiëntie."
+    "nl": "Berekende prestatiecoëfficiënt - verhouding tussen nuttige warmte-output en elektrische energie-input. Hogere waarden duiden op betere efficiëntie.",
+    "de": "Berechnete Leistungszahl - Verhältnis zwischen nutzbarer Wärmeleistung und elektrischem Energieverbrauch. Höhere Werte bedeuten bessere Effizienz.",
+    "fr": "Coefficient de performance calculé - rapport entre la production de chaleur utile et la consommation d'énergie électrique. Des valeurs plus élevées indiquent une meilleure efficacité."
   }
 }

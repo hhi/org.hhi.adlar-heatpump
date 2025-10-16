@@ -2,15 +2,21 @@
   "id": "capacity_setting_is",
   "title": {
     "en": "Hot water curve setting is",
-    "nl": "Warmwater curve instelling is"
+    "nl": "Warmwater curve instelling is",
+    "de": "Warmwasser-Kurveneinstellung ist",
+    "fr": "Le réglage de la courbe d'eau chaude est"
   },
   "titleFormatted": {
     "en": "Hot water curve setting !{{is|is not}} [[capacity]]",
-    "nl": "Warmwater curve instelling !{{is|is niet}} [[capacity]]"
+    "nl": "Warmwater curve instelling !{{is|is niet}} [[capacity]]",
+    "de": "Warmwasser-Kurveneinstellung !{{ist|ist nicht}} [[capacity]]",
+    "fr": "Le réglage de la courbe d'eau chaude !{{est|n'est pas}} [[capacity]]"
   },
   "hint": {
     "en": "Check if the hot water curve setting matches the selected setting",
-    "nl": "Controleer of de warmwater curve instelling overeenkomt met de geselecteerde instelling"
+    "nl": "Controleer of de warmwater curve instelling overeenkomt met de geselecteerde instelling",
+    "de": "Prüfen Sie, ob die Warmwasser-Kurveneinstellung mit der ausgewählten Einstellung übereinstimmt",
+    "fr": "Vérifier si le réglage de la courbe d'eau chaude correspond au réglage sélectionné"
   },
   "args": [
     {
@@ -23,42 +29,54 @@
       "name": "capacity",
       "title": {
         "en": "Hot water curve setting",
-        "nl": "Instelling warmwater curve"
+        "nl": "Instelling warmwater curve",
+        "de": "Warmwasser-Kurveneinstellung",
+        "fr": "Réglage de la courbe d'eau chaude"
       },
       "values": [
         {
           "id": "OFF",
           "title": {
             "en": "OFF",
-            "nl": "UIT"
+            "nl": "UIT",
+            "de": "AUS",
+            "fr": "ARRÊT"
           }
         },
         {
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "H1",
+            "fr": "H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "H2",
+            "fr": "H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "H3",
+            "fr": "H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "H4",
+            "fr": "H4"
           }
         }
       ]

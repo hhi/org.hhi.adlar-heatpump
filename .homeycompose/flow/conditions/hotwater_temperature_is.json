@@ -2,15 +2,21 @@
   "id": "hotwater_temperature_is",
   "title": {
     "en": "Hot water temperature is",
-    "nl": "Warm water temperatuur is"
+    "nl": "Warm water temperatuur is",
+    "de": "Warmwassertemperatur ist",
+    "fr": "La température de l'eau chaude est"
   },
   "titleFormatted": {
     "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-    "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C"
+    "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+    "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
+    "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
   },
   "hint": {
     "en": "Check if the hot water temperature matches the specified condition",
-    "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde"
+    "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+    "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
+    "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
   },
   "args": [
     {
@@ -23,28 +29,36 @@
       "name": "comparison",
       "title": {
         "en": "Comparison",
-        "nl": "Vergelijking"
+        "nl": "Vergelijking",
+        "de": "Vergleich",
+        "fr": "Comparaison"
       },
       "values": [
         {
           "id": "equal",
           "title": {
             "en": "Equal to",
-            "nl": "Gelijk aan"
+            "nl": "Gelijk aan",
+            "de": "Gleich",
+            "fr": "Égal à"
           }
         },
         {
           "id": "greater",
           "title": {
             "en": "Greater than",
-            "nl": "Groter dan"
+            "nl": "Groter dan",
+            "de": "Größer als",
+            "fr": "Supérieur à"
           }
         },
         {
           "id": "less",
           "title": {
             "en": "Less than",
-            "nl": "Kleiner dan"
+            "nl": "Kleiner dan",
+            "de": "Kleiner als",
+            "fr": "Inférieur à"
           }
         }
       ]
@@ -54,7 +68,9 @@
       "name": "temperature",
       "title": {
         "en": "Hot water temperature (°C)",
-        "nl": "Warm water temperatuur (°C)"
+        "nl": "Warm water temperatuur (°C)",
+        "de": "Warmwassertemperatur (°C)",
+        "fr": "Température de l'eau chaude (°C)"
       },
       "min": 30,
       "max": 75,
@@ -62,7 +78,9 @@
       "units": "°C",
       "placeholder": {
         "en": "Hot water temperature in °C",
-        "nl": "Warm water temperatuur in °C"
+        "nl": "Warm water temperatuur in °C",
+        "de": "Warmwassertemperatur in °C",
+        "fr": "Température de l'eau chaude en °C"
       }
     }
   ]

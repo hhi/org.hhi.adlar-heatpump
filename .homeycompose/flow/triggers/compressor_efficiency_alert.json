@@ -2,15 +2,21 @@
   "id": "compressor_efficiency_alert",
   "title": {
     "en": "Compressor efficiency alert",
-    "nl": "Compressor efficiëntie alarm"
+    "nl": "Compressor efficiëntie alarm",
+    "de": "Kompressor-Effizienzalarm",
+    "fr": "Alerte d'efficacité du compresseur"
   },
   "titleFormatted": {
     "en": "Compressor frequency [[condition]] [[frequency]] Hz",
-    "nl": "Compressor frequentie [[condition]] [[frequency]] Hz"
+    "nl": "Compressor frequentie [[condition]] [[frequency]] Hz",
+    "de": "Kompressor-Frequenz [[condition]] [[frequency]] Hz",
+    "fr": "Fréquence du compresseur [[condition]] [[frequency]] Hz"
   },
   "hint": {
     "en": "Triggers when compressor frequency goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Kompressor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la fréquence du compresseur dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_frequency",
       "title": {
         "en": "Current frequency",
-        "nl": "Huidige frequentie"
+        "nl": "Huidige frequentie",
+        "de": "Aktuelle Frequenz",
+        "fr": "Fréquence actuelle"
       },
       "example": 85
     },
@@ -74,7 +82,9 @@
       "name": "threshold_frequency",
       "title": {
         "en": "Threshold frequency",
-        "nl": "Drempel frequentie"
+        "nl": "Drempel frequentie",
+        "de": "Schwellenwert Frequenz",
+        "fr": "Fréquence seuil"
       },
       "example": 90
     }

@@ -2,15 +2,21 @@
   "id": "volume_setting_is",
   "title": {
     "en": "Electricity consumption checking is",
-    "nl": "Stroomverbruik controleren is"
+    "nl": "Stroomverbruik controleren is",
+    "de": "Stromverbrauchsüberwachung ist",
+    "fr": "La vérification de la consommation électrique est"
   },
   "titleFormatted": {
     "en": "Electricity consumption checking !{{is|is not}} [[comparison]] [[level]]",
-    "nl": "Stroomverbruik controleren !{{is|is niet}} [[comparison]] [[level]]"
+    "nl": "Stroomverbruik controleren !{{is|is niet}} [[comparison]] [[level]]",
+    "de": "Stromverbrauchsüberwachung !{{ist|ist nicht}} [[comparison]] [[level]]",
+    "fr": "La vérification de la consommation électrique !{{est|n'est pas}} [[comparison]] [[level]]"
   },
   "hint": {
     "en": "Check if the electricity consumption checking level matches the specified condition",
-    "nl": "Controleer of het stroomverbruik controle niveau voldoet aan de opgegeven voorwaarde"
+    "nl": "Controleer of het stroomverbruik controle niveau voldoet aan de opgegeven voorwaarde",
+    "de": "Prüfen Sie, ob die Stromverbrauchsüberwachungsstufe der angegebenen Bedingung entspricht",
+    "fr": "Vérifier si le niveau de vérification de la consommation électrique correspond à la condition spécifiée"
   },
   "args": [
     {
@@ -23,28 +29,36 @@
       "name": "comparison",
       "title": {
         "en": "Comparison",
-        "nl": "Vergelijking"
+        "nl": "Vergelijking",
+        "de": "Vergleich",
+        "fr": "Comparaison"
       },
       "values": [
         {
           "id": "equal",
           "title": {
             "en": "Equal to",
-            "nl": "Gelijk aan"
+            "nl": "Gelijk aan",
+            "de": "Gleich",
+            "fr": "Égal à"
           }
         },
         {
           "id": "greater",
           "title": {
             "en": "Greater than",
-            "nl": "Groter dan"
+            "nl": "Groter dan",
+            "de": "Größer als",
+            "fr": "Supérieur à"
           }
         },
         {
           "id": "less",
           "title": {
             "en": "Less than",
-            "nl": "Kleiner dan"
+            "nl": "Kleiner dan",
+            "de": "Kleiner als",
+            "fr": "Inférieur à"
           }
         }
       ]
@@ -54,7 +68,9 @@
       "name": "level",
       "title": {
         "en": "Electricity consumption checking",
-        "nl": "Stroomverbruik controleren"
+        "nl": "Stroomverbruik controleren",
+        "de": "Stromverbrauchsüberwachung",
+        "fr": "Vérification de la consommation électrique"
       },
       "min": 0,
       "max": 2,
@@ -62,7 +78,9 @@
       "units": "",
       "placeholder": {
         "en": "Level (0-2)",
-        "nl": "Niveau (0-2)"
+        "nl": "Niveau (0-2)",
+        "de": "Stufe (0-2)",
+        "fr": "Niveau (0-2)"
       }
     }
   ]

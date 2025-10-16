@@ -2,15 +2,21 @@
   "id": "phase_a_voltage_alert",
   "title": {
     "en": "Phase A voltage alert",
-    "nl": "Fase A spanning alarm"
+    "nl": "Fase A spanning alarm",
+    "de": "Phase-A-Spannungsalarm",
+    "fr": "Alerte de tension phase A"
   },
   "titleFormatted": {
     "en": "Phase A voltage [[condition]] [[voltage]] volts",
-    "nl": "Fase A spanning [[condition]] [[voltage]] volt"
+    "nl": "Fase A spanning [[condition]] [[voltage]] volt",
+    "de": "Phase-A-Spannung [[condition]] [[voltage]] Volt",
+    "fr": "Tension phase A [[condition]] [[voltage]] volts"
   },
   "hint": {
     "en": "Triggers when Phase A voltage goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer Fase A spanning boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Phase-A-Spannung einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la tension de la phase A dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_voltage_a",
       "title": {
         "en": "Phase A voltage",
-        "nl": "Fase A spanning"
+        "nl": "Fase A spanning",
+        "de": "Phase-A-Spannung",
+        "fr": "Tension phase A"
       },
       "example": 230
     },
@@ -74,7 +82,9 @@
       "name": "threshold_voltage",
       "title": {
         "en": "Threshold voltage",
-        "nl": "Drempel spanning"
+        "nl": "Drempel spanning",
+        "de": "Schwellenwert Spannung",
+        "fr": "Tension seuil"
       },
       "example": 220
     }

@@ -3,11 +3,15 @@
   "type": "string",
   "title": {
     "en": "Connection Status",
-    "nl": "Verbindingsstatus"
+    "nl": "Verbindingsstatus",
+    "de": "Verbindungsstatus",
+    "fr": "État de connexion"
   },
   "desc": {
     "en": "Current Tuya device connection state with timestamp",
-    "nl": "Huidige Tuya apparaat verbindingsstatus met tijdstempel"
+    "nl": "Huidige Tuya apparaat verbindingsstatus met tijdstempel",
+    "de": "Aktueller Tuya-Geräteverbindungsstatus mit Zeitstempel",
+    "fr": "État de connexion actuel du périphérique Tuya avec horodatage"
   },
   "getable": true,
   "setable": false,

@@ -2,15 +2,21 @@
   "id": "cop_outlier_detected",
   "title": {
     "en": "COP outlier detected",
-    "nl": "COP uitbijter gedetecteerd"
+    "nl": "COP uitbijter gedetecteerd",
+    "de": "COP-Ausreißer erkannt",
+    "fr": "Valeur aberrante COP détectée"
   },
   "titleFormatted": {
     "en": "COP outlier detected",
-    "nl": "COP uitbijter gedetecteerd"
+    "nl": "COP uitbijter gedetecteerd",
+    "de": "COP-Ausreißer erkannt",
+    "fr": "Valeur aberrante COP détectée"
   },
   "hint": {
     "en": "Triggers when an invalid or suspicious COP value is detected, indicating potential sensor issues",
-    "nl": "Wordt geactiveerd wanneer een ongeldige of verdachte COP waarde wordt gedetecteerd, wat wijst op mogelijke sensor problemen"
+    "nl": "Wordt geactiveerd wanneer een ongeldige of verdachte COP waarde wordt gedetecteerd, wat wijst op mogelijke sensor problemen",
+    "de": "Wird ausgelöst, wenn ein ungültiger oder verdächtiger COP-Wert erkannt wird, was auf mögliche Sensorprobleme hinweist",
+    "fr": "Se déclenche lorsqu'une valeur COP invalide ou suspecte est détectée, indiquant des problèmes potentiels de capteur"
   },
   "args": [
     {
@@ -25,7 +31,9 @@
       "name": "outlier_cop",
       "title": {
         "en": "Outlier COP value",
-        "nl": "Uitbijter COP waarde"
+        "nl": "Uitbijter COP waarde",
+        "de": "Ausreißer-COP-Wert",
+        "fr": "Valeur COP aberrante"
       },
       "example": 15.2
     },
@@ -34,7 +42,9 @@
       "name": "outlier_reason",
       "title": {
         "en": "Outlier reason",
-        "nl": "Reden uitschieter"
+        "nl": "Reden uitschieter",
+        "de": "Ausreißergrund",
+        "fr": "Raison de l'aberration"
       },
       "example": "COP value above maximum threshold (8.0)"
     },
@@ -43,7 +53,9 @@
       "name": "calculation_method",
       "title": {
         "en": "Calculation method used",
-        "nl": "Gebruikte berekeningsmethode"
+        "nl": "Gebruikte berekeningsmethode",
+        "de": "Verwendete Berechnungsmethode",
+        "fr": "Méthode de calcul utilisée"
       },
       "example": "direct_thermal"
     }

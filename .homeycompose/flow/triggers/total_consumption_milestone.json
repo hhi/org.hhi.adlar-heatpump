@@ -2,15 +2,21 @@
   "id": "total_consumption_milestone",
   "title": {
     "en": "Total consumption milestone reached",
-    "nl": "Totaalverbruik mijlpaal bereikt"
+    "nl": "Totaalverbruik mijlpaal bereikt",
+    "de": "Gesamtverbrauchs-Meilenstein erreicht",
+    "fr": "Jalon de consommation totale atteint"
   },
   "titleFormatted": {
     "en": "Total consumption reached [[milestone]] kWh",
-    "nl": "Totaalverbruik bereikte [[milestone]] kWh"
+    "nl": "Totaalverbruik bereikte [[milestone]] kWh",
+    "de": "Gesamtverbrauch erreichte [[milestone]] kWh",
+    "fr": "Consommation totale atteinte [[milestone]] kWh"
   },
   "hint": {
     "en": "Triggers when total electricity consumption reaches specified milestones",
-    "nl": "Wordt geactiveerd wanneer het totale stroomverbruik bepaalde mijlpalen bereikt"
+    "nl": "Wordt geactiveerd wanneer het totale stroomverbruik bepaalde mijlpalen bereikt",
+    "de": "Wird ausgelöst, wenn der gesamte Stromverbrauch die angegebenen Meilensteine erreicht",
+    "fr": "Se déclenche lorsque la consommation totale d'électricité atteint les jalons spécifiés"
   },
   "args": [
     {
@@ -41,7 +47,9 @@
       "name": "total_consumption",
       "title": {
         "en": "Total consumption",
-        "nl": "Totaalverbruik"
+        "nl": "Totaalverbruik",
+        "de": "Gesamtverbrauch",
+        "fr": "Consommation totale"
       },
       "example": 15000
     },
@@ -50,7 +58,9 @@
       "name": "milestone_value",
       "title": {
         "en": "Milestone value",
-        "nl": "Mijlpaal waarde"
+        "nl": "Mijlpaal waarde",
+        "de": "Meilenstein-Wert",
+        "fr": "Valeur jalon"
       },
       "example": 15000
     }

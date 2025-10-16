@@ -2,7 +2,9 @@
   "id": "adlar_enum_work_mode",
   "title": {
     "en": "Set Working mode",
-    "nl": "Bedrijfsmodus instellen"
+    "nl": "Bedrijfsmodus instellen",
+    "de": "Betriebsmodus einstellen",
+    "fr": "Définir le mode de fonctionnement"
   },
   "type": "enum",
   "values": [
@@ -17,7 +19,9 @@
       "id": "Normal",
       "title": {
         "en": "Normal",
-        "nl": "Normaal"
+        "nl": "Normaal",
+        "de": "Normal",
+        "fr": "Normal"
       }
     },
     {

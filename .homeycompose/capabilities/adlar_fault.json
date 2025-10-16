@@ -2,7 +2,9 @@
   "id": "adlar_fault",
   "title": {
     "en": "Fault Code",
-    "nl": "Foutcode"
+    "nl": "Foutcode",
+    "de": "Fehlercode",
+    "fr": "Code de défaut"
   },
   "type": "number",
   "min": 0,
@@ -14,7 +16,9 @@
   "insights": true,
   "insightsTitle": {
     "en": "Fault Status Code",
-    "nl": "Foutstatus Code"
+    "nl": "Foutstatus Code",
+    "de": "Fehlerstatuscode",
+    "fr": "Code d'état de défaut"
   },
 
   "description": {

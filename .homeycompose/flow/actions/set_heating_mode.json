@@ -2,15 +2,21 @@
   "id": "set_heating_mode",
   "title": {
     "en": "Set heating mode",
-    "nl": "Verwarmingsmodus instellen"
+    "nl": "Verwarmingsmodus instellen",
+    "de": "Heizmodus einstellen",
+    "fr": "Régler le mode de chauffage"
   },
   "titleFormatted": {
     "en": "Set heating mode to [[mode]]",
-    "nl": "Verwarmingsmodus instellen op [[mode]]"
+    "nl": "Verwarmingsmodus instellen op [[mode]]",
+    "de": "Heizmodus einstellen auf [[mode]]",
+    "fr": "Régler le mode de chauffage sur [[mode]]"
   },
   "hint": {
     "en": "Set the heating operation mode",
-    "nl": "Stel de verwarming bedrijfsmodus in"
+    "nl": "Stel de verwarming bedrijfsmodus in",
+    "de": "Heizbetriebsmodus einstellen",
+    "fr": "Régler le mode de fonctionnement du chauffage"
   },
   "highlight": true,
   "args": [
@@ -24,56 +30,72 @@
       "name": "mode",
       "title": {
         "en": "Heating mode",
-        "nl": "Verwarmingsmodus"
+        "nl": "Verwarmingsmodus",
+        "de": "Heizmodus",
+        "fr": "Mode de chauffage"
       },
       "values": [
         {
           "id": "cold",
           "title": {
             "en": "Cold",
-            "nl": "Koud"
+            "nl": "Koud",
+            "de": "Kalt",
+            "fr": "Froid"
           }
         },
         {
           "id": "heating",
           "title": {
             "en": "Heating",
-            "nl": "Verwarmen"
+            "nl": "Verwarmen",
+            "de": "Heizung",
+            "fr": "Chauffage"
           }
         },
         {
           "id": "floor_heating",
           "title": {
             "en": "Floor heating",
-            "nl": "Vloerverwarming"
+            "nl": "Vloerverwarming",
+            "de": "Fußbodenheizung",
+            "fr": "Chauffage au sol"
           }
         },
         {
           "id": "hot_water",
           "title": {
             "en": "Hot water",
-            "nl": "Warm water"
+            "nl": "Warm water",
+            "de": "Warmwasser",
+            "fr": "Eau chaude"
           }
         },
         {
           "id": "cold_and_hotwater",
           "title": {
             "en": "Cold and hot water",
-            "nl": "Koud en warm water"
+            "nl": "Koud en warm water",
+            "de": "Kalt- und Warmwasser",
+            "fr": "Eau froide et eau chaude"
           }
         },
         {
           "id": "heating_and_hot_water",
           "title": {
             "en": "Heating and hot water",
-            "nl": "Verwarmen en warm water"
+            "nl": "Verwarmen en warm water",
+            "de": "Heizung und Warmwasser",
+            "fr": "Chauffage et eau chaude"
           }
         },
         {
           "id": "floor_heatign_and_hot_water",
           "title": {
             "en": "Floor heating and hot water",
-            "nl": "Vloerverwarming en warm water"
+            "nl": "Vloerverwarming en warm water",
+            "de": "Fußbodenheizung und Warmwasser",
+            "fr": "Chauffage au sol et eau chaude"
           }
         }
       ]

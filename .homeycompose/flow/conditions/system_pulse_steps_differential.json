@@ -2,15 +2,21 @@
   "id": "system_pulse_steps_differential",
   "title": {
     "en": "System pulse-steps differential check",
-    "nl": "Systeem puls-stappen verschil controle"
+    "nl": "Systeem puls-stappen verschil controle",
+    "de": "System-Pulsschritte-Differenz prüfen",
+    "fr": "Vérification du différentiel des pas d'impulsion"
   },
   "titleFormatted": {
     "en": "System pulse-steps differential is !{{above|below}} [[differential]]",
-    "nl": "Systeem puls-stappen verschil is !{{boven|onder}} [[differential]]"
+    "nl": "Systeem puls-stappen verschil is !{{boven|onder}} [[differential]]",
+    "de": "System-Pulsschritte-Differenz ist !{{über|unter}} [[differential]]",
+    "fr": "Le différentiel des pas d'impulsion est !{{au-dessus|en dessous}} de [[differential]]"
   },
   "hint": {
     "en": "Check if the pulse-steps difference between EEV and EVI is above or below a threshold",
-    "nl": "Controleer of het puls-stappen verschil tussen EEV en EVI boven of onder een drempel is"
+    "nl": "Controleer of het puls-stappen verschil tussen EEV en EVI boven of onder een drempel is",
+    "de": "Prüfen Sie, ob die Pulsschritte-Differenz zwischen EEV und EVI über oder unter einem Schwellenwert liegt",
+    "fr": "Vérifier si la différence des pas d'impulsion entre EEV et EVI est au-dessus ou en dessous d'un seuil"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "differential",
       "title": {
         "en": "Pulse-steps differential",
-        "nl": "Puls-stappen verschil"
+        "nl": "Puls-stappen verschil",
+        "de": "Pulsschritte-Differenz",
+        "fr": "Différentiel des pas d'impulsion"
       },
       "min": 0,
       "max": 1000,
@@ -31,7 +39,9 @@
       "units": "Pulse-steps",
       "placeholder": {
         "en": "Pulse-steps differential threshold",
-        "nl": "Puls-stappen verschil drempel"
+        "nl": "Puls-stappen verschil drempel",
+        "de": "Pulsschritte-Differenz-Schwellenwert",
+        "fr": "Seuil du différentiel des pas d'impulsion"
       }
     }
   ]

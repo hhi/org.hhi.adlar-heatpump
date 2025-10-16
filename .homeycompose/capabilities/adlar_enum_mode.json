@@ -2,7 +2,9 @@
   "id": "adlar_enum_mode",
   "title": {
     "en": "Set (Heating) mode",
-    "nl": "(Verwarmings)modus instellen"
+    "nl": "(Verwarmings)modus instellen",
+    "de": "(Heiz-)Modus einstellen",
+    "fr": "Définir le mode (de chauffage)"
   },
   "type": "enum",
   "getable": true,
@@ -12,49 +14,63 @@
       "id": "cold",
       "title": {
         "en": "Cold",
-        "nl": "Koud"
+        "nl": "Koud",
+        "de": "Kalt",
+        "fr": "Froid"
       }
     },
     {
       "id": "heating",
       "title": {
         "en": "Heating",
-        "nl": "Verwarmen"
+        "nl": "Verwarmen",
+        "de": "Heizen",
+        "fr": "Chauffage"
       }
     },
     {
       "id": "floor_heating",
       "title": {
         "en": "Floor heating",
-        "nl": "Vloerverwarming"
+        "nl": "Vloerverwarming",
+        "de": "Fußbodenheizung",
+        "fr": "Chauffage au sol"
       }
     },
     {
       "id": "hot_water",
       "title": {
         "en": "Hot water",
-        "nl": "Warm water"
+        "nl": "Warm water",
+        "de": "Warmwasser",
+        "fr": "Eau chaude"
       }
     },
     {
       "id": "cold_and_hotwater",
       "title": {
         "en": "Cold and hot water",
-        "nl": "Koud en warm water"
+        "nl": "Koud en warm water",
+        "de": "Kalt- und Warmwasser",
+        "fr": "Eau froide et chaude"
       }
     },
     {
       "id": "heating_and_hot_water",
       "title": {
         "en": "Heating and hot water",
-        "nl": "Verwarmen en warm water"
+        "nl": "Verwarmen en warm water",
+        "de": "Heizen und Warmwasser",
+        "fr": "Chauffage et eau chaude"
       }
     },
     {
       "id": "floor_heatign_and_hot_water",
       "title": {
         "en": "Floor heating and hot water",
-        "nl": "Vloerverwarming en warm water"
+        "nl": "Vloerverwarming en warm water",
+        "de": "Fußbodenheizung und Warmwasser",
+        "fr": "Chauffage au sol et eau chaude"
       }
     }
   ],
