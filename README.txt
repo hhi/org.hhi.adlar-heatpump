@@ -1,5 +1,11 @@
 This app gives you complete control over your Adlar Castra Aurora heat pump directly via your Homey smart home system. You can monitor, operate and optimize your heat pump without depending on internet connections.
 
+Supported Languages
+🇬🇧 English
+🇩🇪 Deutsch
+🇫🇷 Français
+🇳🇱 Nederlands
+
 KEY BENEFITS
 
 LOCAL CONTROL

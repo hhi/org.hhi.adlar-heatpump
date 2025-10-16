@@ -2,15 +2,21 @@
   "id": "fault_active",
   "title": {
     "en": "Fault is active",
-    "nl": "Fout is actief"
+    "nl": "Fout is actief",
+    "de": "Störung ist aktiv",
+    "fr": "Un défaut est actif"
   },
   "titleFormatted": {
     "en": "Fault is !{{active|inactive}}",
-    "nl": "Fout is !{{actief|inactief}}"
+    "nl": "Fout is !{{actief|inactief}}",
+    "de": "Störung ist !{{aktiv|inaktiv}}",
+    "fr": "Le défaut est !{{actif|inactif}}"
   },
   "hint": {
     "en": "Check if a fault is currently active (fault code > 0)",
-    "nl": "Controleer of er momenteel een fout actief is (foutcode > 0)"
+    "nl": "Controleer of er momenteel een fout actief is (foutcode > 0)",
+    "de": "Prüfen Sie, ob derzeit eine Störung aktiv ist (Fehlercode > 0)",
+    "fr": "Vérifier si un défaut est actuellement actif (code défaut > 0)"
   },
   "highlight": true,
   "args": [

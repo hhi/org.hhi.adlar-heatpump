@@ -2,15 +2,21 @@
   "id": "total_consumption_above",
   "title": {
     "en": "Total consumption above threshold",
-    "nl": "Totaalverbruik boven drempel"
+    "nl": "Totaalverbruik boven drempel",
+    "de": "Gesamtverbrauch über Schwellenwert",
+    "fr": "Consommation totale au-dessus du seuil"
   },
   "titleFormatted": {
     "en": "Total consumption is !{{above|below}} [[threshold]] kWh",
-    "nl": "Totaalverbruik is !{{boven|onder}} [[threshold]] kWh"
+    "nl": "Totaalverbruik is !{{boven|onder}} [[threshold]] kWh",
+    "de": "Gesamtverbrauch ist !{{über|unter}} [[threshold]] kWh",
+    "fr": "La consommation totale est !{{au-dessus|en dessous}} de [[threshold]] kWh"
   },
   "hint": {
     "en": "Check if total electricity consumption is above or below a threshold",
-    "nl": "Controleer of het totale stroomverbruik boven of onder een drempel is"
+    "nl": "Controleer of het totale stroomverbruik boven of onder een drempel is",
+    "de": "Prüfen Sie, ob der gesamte Stromverbrauch über oder unter einem Schwellenwert liegt",
+    "fr": "Vérifier si la consommation électrique totale est au-dessus ou en dessous d'un seuil"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "threshold",
       "title": {
         "en": "Consumption threshold (kWh)",
-        "nl": "Verbruiksdrempel (kWh)"
+        "nl": "Verbruiksdrempel (kWh)",
+        "de": "Verbrauchsschwellenwert (kWh)",
+        "fr": "Seuil de consommation (kWh)"
       },
       "min": 100,
       "max": 50000,
@@ -31,7 +39,9 @@
       "units": "kWh",
       "placeholder": {
         "en": "Total consumption threshold in kWh",
-        "nl": "Totaalverbruik drempel in kWh"
+        "nl": "Totaalverbruik drempel in kWh",
+        "de": "Gesamtverbrauchsschwellenwert in kWh",
+        "fr": "Seuil de consommation totale en kWh"
       }
     }
   ]

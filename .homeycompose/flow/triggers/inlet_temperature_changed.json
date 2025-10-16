@@ -2,15 +2,21 @@
   "id": "inlet_temperature_changed",
   "title": {
     "en": "Inlet temperature changed",
-    "nl": "Water intrede temperatuur gewijzigd"
+    "nl": "Water intrede temperatuur gewijzigd",
+    "de": "Vorlauftemperatur geändert",
+    "fr": "Température d'entrée changée"
   },
   "titleFormatted": {
     "en": "Inlet temperature [[condition]] [[temperature]]°C",
-    "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C"
+    "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C",
+    "de": "Vorlauftemperatur [[condition]] [[temperature]]°C",
+    "fr": "Température d'entrée [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when water inlet temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Vorlauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température d'entrée d'eau dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current inlet temperature",
-        "nl": "Huidige water intrede temperatuur"
+        "nl": "Huidige water intrede temperatuur",
+        "de": "Aktuelle Vorlauftemperatur",
+        "fr": "Température d'entrée actuelle"
       },
       "example": 45.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 40
     }

@@ -2,15 +2,21 @@
   "id": "daily_cop_above_threshold",
   "title": {
     "en": "Daily COP above threshold",
-    "nl": "Dagelijkse COP boven drempel"
+    "nl": "Dagelijkse COP boven drempel",
+    "de": "Tägliche COP über Schwellenwert",
+    "fr": "COP quotidien au-dessus du seuil"
   },
   "titleFormatted": {
     "en": "Daily COP is !{{above|below}} [[threshold]]",
-    "nl": "Dagelijkse COP is !{{boven|onder}} [[threshold]]"
+    "nl": "Dagelijkse COP is !{{boven|onder}} [[threshold]]",
+    "de": "Tägliche COP ist !{{über|unter}} [[threshold]]",
+    "fr": "Le COP quotidien est !{{au-dessus|en dessous}} de [[threshold]]"
   },
   "hint": {
     "en": "Check if the 24-hour average COP is above or below a threshold",
-    "nl": "Controleer of de 24-uur gemiddelde COP boven of onder een drempel is"
+    "nl": "Controleer of de 24-uur gemiddelde COP boven of onder een drempel is",
+    "de": "Prüfen Sie, ob die 24-Stunden-Durchschnitts-COP über oder unter einem Schwellenwert liegt",
+    "fr": "Vérifier si le COP moyen sur 24 heures est au-dessus ou en dessous d'un seuil"
   },
   "highlight": true,
   "args": [
@@ -24,7 +30,9 @@
       "name": "threshold",
       "title": {
         "en": "Daily COP threshold",
-        "nl": "Dagelijkse COP drempel"
+        "nl": "Dagelijkse COP drempel",
+        "de": "Täglicher COP-Schwellenwert",
+        "fr": "Seuil COP quotidien"
       },
       "min": 1,
       "max": 8,
@@ -32,7 +40,9 @@
       "units": "COP",
       "placeholder": {
         "en": "Daily COP efficiency threshold",
-        "nl": "Dagelijkse COP efficiëntie drempel"
+        "nl": "Dagelijkse COP efficiëntie drempel",
+        "de": "Täglicher COP-Effizienzschwellenwert",
+        "fr": "Seuil d'efficacité COP quotidien"
       }
     }
   ]

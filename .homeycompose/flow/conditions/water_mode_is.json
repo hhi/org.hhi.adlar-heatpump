@@ -2,15 +2,21 @@
   "id": "water_mode_is",
   "title": {
     "en": "Water control mode is",
-    "nl": "Water controle modus is"
+    "nl": "Water controle modus is",
+    "de": "Wassersteuerungsmodus ist",
+    "fr": "Le mode de contrôle de l'eau est"
   },
   "titleFormatted": {
     "en": "Water control mode !{{is|is not}} [[comparison]] [[mode]]",
-    "nl": "Water controle modus !{{is|is niet}} [[comparison]] [[mode]]"
+    "nl": "Water controle modus !{{is|is niet}} [[comparison]] [[mode]]",
+    "de": "Wassersteuerungsmodus !{{ist|ist nicht}} [[comparison]] [[mode]]",
+    "fr": "Le mode de contrôle de l'eau !{{est|n'est pas}} [[comparison]] [[mode]]"
   },
   "hint": {
     "en": "Check if the water control mode matches the specified condition",
-    "nl": "Controleer of de water controle modus voldoet aan de opgegeven voorwaarde"
+    "nl": "Controleer of de water controle modus voldoet aan de opgegeven voorwaarde",
+    "de": "Prüfen Sie, ob der Wassersteuerungsmodus der angegebenen Bedingung entspricht",
+    "fr": "Vérifier si le mode de contrôle de l'eau correspond à la condition spécifiée"
   },
   "args": [
     {
@@ -23,28 +29,36 @@
       "name": "comparison",
       "title": {
         "en": "Comparison",
-        "nl": "Vergelijking"
+        "nl": "Vergelijking",
+        "de": "Vergleich",
+        "fr": "Comparaison"
       },
       "values": [
         {
           "id": "equal",
           "title": {
             "en": "Equal to",
-            "nl": "Gelijk aan"
+            "nl": "Gelijk aan",
+            "de": "Gleich",
+            "fr": "Égal à"
           }
         },
         {
           "id": "greater",
           "title": {
             "en": "Greater than",
-            "nl": "Groter dan"
+            "nl": "Groter dan",
+            "de": "Größer als",
+            "fr": "Supérieur à"
           }
         },
         {
           "id": "less",
           "title": {
             "en": "Less than",
-            "nl": "Kleiner dan"
+            "nl": "Kleiner dan",
+            "de": "Kleiner als",
+            "fr": "Inférieur à"
           }
         }
       ]
@@ -54,7 +68,9 @@
       "name": "mode",
       "title": {
         "en": "Water control mode",
-        "nl": "Water controle modus"
+        "nl": "Water controle modus",
+        "de": "Wassersteuerungsmodus",
+        "fr": "Mode de contrôle de l'eau"
       },
       "min": 0,
       "max": 1,
@@ -62,7 +78,9 @@
       "units": "",
       "placeholder": {
         "en": "Mode (0-1)",
-        "nl": "Modus (0-1)"
+        "nl": "Modus (0-1)",
+        "de": "Modus (0-1)",
+        "fr": "Mode (0-1)"
       }
     }
   ]

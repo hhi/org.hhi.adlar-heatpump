@@ -94,6 +94,81 @@ static readonly RECONNECTION_INTERVAL_MS = 45 * 1000; // 45 seconds
 - Increase for noisy networks (up to 10)
 - Decrease for critical monitoring (down to 3)
 
+### CONNECTION_HEARTBEAT_INTERVAL_MS
+
+**Value**: `5 * 60 * 1000` (5 minutes)
+
+**Purpose**: Interval for proactive connection health checks during idle periods (v0.99.98+)
+
+**Used By**:
+- TuyaConnectionService - Heartbeat timer
+
+**Rationale**:
+- Too frequent (<2min): Unnecessary network traffic and CPU overhead
+- Too infrequent (>10min): Slow detection of zombie connections
+- 5 minutes: Balance between quick detection and minimal overhead
+- Intelligent skip logic reduces actual probes by 80-90% when device is active
+
+**Customization**:
+- Increase for low-priority monitoring (up to 10 minutes)
+- Decrease for critical systems requiring faster detection (down to 3 minutes)
+- **Note**: Affects both detection speed and network traffic
+
+**Related Constants**:
+- `HEARTBEAT_TIMEOUT_MS` - How long to wait for heartbeat response
+- `STALE_CONNECTION_THRESHOLD_MS` - Layer 2 backup detection threshold
+
+### HEARTBEAT_TIMEOUT_MS
+
+**Value**: `10 * 1000` (10 seconds)
+
+**Purpose**: Maximum time to wait for heartbeat probe response before considering connection dead (v0.99.98+)
+
+**Used By**:
+- TuyaConnectionService - Heartbeat probe timeout
+
+**Rationale**:
+- Too short (<5s): False positives from temporary network slowness
+- Too long (>15s): Delays zombie connection detection
+- 10 seconds: Generous enough for network latency, short enough for timely detection
+- Prevents heartbeat from blocking indefinitely on dead connections
+
+**Customization**:
+- Increase for high-latency networks (up to 15 seconds)
+- Decrease for low-latency LAN (down to 7 seconds)
+- **Not recommended below 5 seconds** - too sensitive to transient issues
+
+**Technical Details**:
+- Uses `Promise.race()` pattern with timeout promise
+- Timeout triggers immediate reconnection attempt
+- Does not affect normal device communication timeouts
+
+### STALE_CONNECTION_THRESHOLD_MS
+
+**Value**: `10 * 60 * 1000` (10 minutes)
+
+**Purpose**: Maximum idle time before forcing reconnection (Layer 2 backup protection) (v0.99.98+)
+
+**Used By**:
+- TuyaConnectionService - Stale connection detection in `scheduleNextReconnectionAttempt()`
+
+**Rationale**:
+- Provides absolute maximum idle threshold
+- Backup protection if heartbeat mechanism fails
+- 10 minutes = 2× heartbeat interval (defense-in-depth)
+- Catches edge cases where heartbeat timer itself fails
+
+**Customization**:
+- **Must be >= 2× CONNECTION_HEARTBEAT_INTERVAL_MS**
+- Increase for extremely stable networks (up to 15 minutes)
+- Decrease for critical systems (down to 8 minutes minimum)
+- **Warning**: Too low causes unnecessary reconnections
+
+**Relationship to Heartbeat**:
+- Layer 1: Heartbeat detects zombie connections (5-10 min)
+- Layer 2: Stale threshold catches missed detections (10 min max)
+- Together: Ensure no connection remains idle undetected
+
 ---
 
 ## Health Monitoring Constants
@@ -604,6 +679,9 @@ export class DeviceConstants {
 - `RECONNECTION_INTERVAL_MS`
 - `CONNECTION_FAILURE_THRESHOLD`
 - `NOTIFICATION_THROTTLE_MS`
+- `CONNECTION_HEARTBEAT_INTERVAL_MS` (v0.99.98+)
+- `HEARTBEAT_TIMEOUT_MS` (v0.99.98+)
+- `STALE_CONNECTION_THRESHOLD_MS` (v0.99.98+)
 
 ### CapabilityHealthService
 

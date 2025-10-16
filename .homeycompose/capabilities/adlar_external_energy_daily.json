@@ -2,12 +2,16 @@
   "id": "adlar_external_energy_daily",
   "title": {
     "en": "Daily Estimated Energy Consumption",
-    "nl": "Dagelijks Geschat Energieverbruik"
+    "nl": "Dagelijks Geschat Energieverbruik",
+    "de": "Geschätzter täglicher Energieverbrauch",
+    "fr": "Consommation d'énergie quotidienne estimée"
   },
   "type": "number",
   "units": {
     "en": "kWh",
-    "nl": "kWh"
+    "nl": "kWh",
+    "de": "kWh",
+    "fr": "kWh"
   },
   "min": 0,
   "max": 500,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "Daily External Energy Consumption",
-    "nl": "Dagelijks Extern Energieverbruik"
+    "nl": "Dagelijks Extern Energieverbruik",
+    "de": "Täglicher externer Energieverbrauch",
+    "fr": "Consommation d'énergie externe quotidienne"
   },
   "icon": "/assets/external-energy-daily.svg",
   "description": {
     "en": "Daily energy consumption estimated from external power measurements received via flow cards. Resets automatically at midnight for accurate daily tracking.",
-    "nl": "Dagelijks energieverbruik geschat uit externe vermogensmetingen ontvangen via flow kaarten. Reset automatisch om middernacht voor nauwkeurige dagelijkse tracking."
+    "nl": "Dagelijks energieverbruik geschat uit externe vermogensmetingen ontvangen via flow kaarten. Reset automatisch om middernacht voor nauwkeurige dagelijkse tracking.",
+    "de": "Täglicher Energieverbrauch geschätzt aus externen Leistungsmessungen über Flow-Karten. Wird automatisch um Mitternacht zurückgesetzt für genaue tägliche Erfassung.",
+    "fr": "Consommation d'énergie quotidienne estimée à partir de mesures de puissance externes reçues via des cartes de flux. Se réinitialise automatiquement à minuit pour un suivi quotidien précis."
   }
 }

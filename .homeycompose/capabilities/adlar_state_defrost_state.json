@@ -2,7 +2,9 @@
   "id": "adlar_state_defrost_state",
   "title": {
     "en": "Defrosting",
-    "nl": "Ontdooi status"
+    "nl": "Ontdooi status",
+    "de": "Abtaustatus",
+    "fr": "État de dégivrage"
   },
   "type": "boolean",
   "setable": false,
@@ -12,11 +14,15 @@
   "insights": true,
   "insightsTitleTrue": {
     "en": "Defrosting active",
-    "nl": "Ontdooien actief"
+    "nl": "Ontdooien actief",
+    "de": "Abtauen aktiv",
+    "fr": "Dégivrage actif"
   },
   "insightsTitleFalse": {
     "en": "Defrosting inactive",
-    "nl": "Ontdooien niet actief"
+    "nl": "Ontdooien niet actief",
+    "de": "Abtauen inaktiv",
+    "fr": "Dégivrage inactif"
   },
 
   "description": {

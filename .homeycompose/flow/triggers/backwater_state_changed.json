@@ -2,15 +2,21 @@
   "id": "backwater_state_changed",
   "title": {
     "en": "Backwater state changed",
-    "nl": "Water Terugstroming status gewijzigd"
+    "nl": "Water Terugstroming status gewijzigd",
+    "de": "Rückström-Zustand geändert",
+    "fr": "État du reflux changé"
   },
   "titleFormatted": {
     "en": "Backwater turned [[state]]",
-    "nl": "Water Terugstroming [[state]]"
+    "nl": "Water Terugstroming [[state]]",
+    "de": "Rückströmung [[state]]",
+    "fr": "Reflux [[state]]"
   },
   "hint": {
     "en": "Triggers when backwater system changes state",
-    "nl": "Wordt geactiveerd wanneer water terugstroming systeem van status wijzigt"
+    "nl": "Wordt geactiveerd wanneer water terugstroming systeem van status wijzigt",
+    "de": "Wird ausgelöst, wenn das Rückströmsystem den Zustand ändert",
+    "fr": "Se déclenche lorsque le système de reflux change d'état"
   },
   "args": [
     {
@@ -49,7 +55,9 @@
       "name": "current_state",
       "title": {
         "en": "Current Backwater state",
-        "nl": "Huidige Water Terugstroming status"
+        "nl": "Huidige Water Terugstroming status",
+        "de": "Aktueller Rückström-Zustand",
+        "fr": "État actuel du reflux"
       },
       "example": "flowing"
     }

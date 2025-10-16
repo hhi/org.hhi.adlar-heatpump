@@ -2,11 +2,15 @@
   "id": "adlar_measure_pulse_steps_effluent_temp",
   "title": {
     "en": "EVI Open",
-    "nl": "EVI-openingsstap"
+    "nl": "EVI-openingsstap",
+    "de": "EVI-Öffnung",
+    "fr": "Ouverture EVI"
   },
   "units": {
     "en": "Pulse-steps",
-    "nl": "Puls-stappen"
+    "nl": "Puls-stappen",
+    "de": "Pulsschritte",
+    "fr": "Pas d'impulsion"
   },
   "min": -500,
   "max": 500,
@@ -19,7 +23,9 @@
   "insights": true,
   "insightsTitle": {
     "en": "EVI Open",
-    "nl": "EVI-openingsstap"
+    "nl": "EVI-openingsstap",
+    "de": "EVI-Öffnung",
+    "fr": "Ouverture EVI"
   },
   "icon": "/assets/pulse-steps.svg",
 

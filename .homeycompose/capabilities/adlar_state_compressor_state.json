@@ -2,7 +2,9 @@
   "id": "adlar_state_compressor_state",
   "title": {
     "en": "Compressor state",
-    "nl": "Compressor status"
+    "nl": "Compressor status",
+    "de": "Kompressorstatus",
+    "fr": "État du compresseur"
   },
   "type": "boolean",
   "setable": false,
@@ -12,11 +14,15 @@
   "insights": true,
   "insightsTitleTrue": {
     "en": "Compressor is ON",
-    "nl": "Compressor is AAN"
+    "nl": "Compressor is AAN",
+    "de": "Kompressor ist EIN",
+    "fr": "Compresseur est ALLUMÉ"
   },
   "insightsTitleFalse": {
     "en": "Compressor is OFF",
-    "nl": "Compressor is UIT"
+    "nl": "Compressor is UIT",
+    "de": "Kompressor ist AUS",
+    "fr": "Compresseur est ÉTEINT"
   },
 
   "description": {

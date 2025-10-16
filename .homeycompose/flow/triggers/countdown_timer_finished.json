@@ -2,15 +2,21 @@
   "id": "countdown_timer_finished",
   "title": {
     "en": "Countdown timer finished",
-    "nl": "Afteltimer afgelopen"
+    "nl": "Afteltimer afgelopen",
+    "de": "Countdown-Timer beendet",
+    "fr": "Minuterie de compte à rebours terminée"
   },
   "titleFormatted": {
     "en": "Countdown timer finished",
-    "nl": "Afteltimer afgelopen"
+    "nl": "Afteltimer afgelopen",
+    "de": "Countdown-Timer beendet",
+    "fr": "Minuterie de compte à rebours terminée"
   },
   "hint": {
     "en": "Triggers when the system countdown timer reaches zero",
-    "nl": "Wordt geactiveerd wanneer de systeem afteltimer nul bereikt"
+    "nl": "Wordt geactiveerd wanneer de systeem afteltimer nul bereikt",
+    "de": "Wird ausgelöst, wenn der System-Countdown-Timer Null erreicht",
+    "fr": "Se déclenche lorsque la minuterie de compte à rebours du système atteint zéro"
   },
   "args": [
     {
@@ -25,7 +31,9 @@
       "name": "timer_duration",
       "title": {
         "en": "Timer duration (minutes)",
-        "nl": "Timer duur (minuten)"
+        "nl": "Timer duur (minuten)",
+        "de": "Timer-Dauer (Minuten)",
+        "fr": "Durée du minuteur (minutes)"
       },
       "example": 30
     },
@@ -34,7 +42,9 @@
       "name": "timer_action",
       "title": {
         "en": "Timer action",
-        "nl": "Timer actie"
+        "nl": "Timer actie",
+        "de": "Timer-Aktion",
+        "fr": "Action du minuteur"
       },
       "example": "Heating cycle completed"
     }

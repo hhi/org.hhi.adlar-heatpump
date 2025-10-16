@@ -2,15 +2,21 @@
   "id": "phase_b_voltage_alert",
   "title": {
     "en": "Phase B voltage alert",
-    "nl": "Fase B spanning alarm"
+    "nl": "Fase B spanning alarm",
+    "de": "Phase-B-Spannungsalarm",
+    "fr": "Alerte de tension phase B"
   },
   "titleFormatted": {
     "en": "Phase B voltage [[condition]] [[voltage]] volts",
-    "nl": "Fase B spanning [[condition]] [[voltage]] volt"
+    "nl": "Fase B spanning [[condition]] [[voltage]] volt",
+    "de": "Phase-B-Spannung [[condition]] [[voltage]] Volt",
+    "fr": "Tension phase B [[condition]] [[voltage]] volts"
   },
   "hint": {
     "en": "Triggers when Phase B voltage goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer Fase B spanning boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Phase-B-Spannung einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la tension de la phase B dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_voltage_b",
       "title": {
         "en": "Phase B voltage",
-        "nl": "Fase B spanning"
+        "nl": "Fase B spanning",
+        "de": "Phase-B-Spannung",
+        "fr": "Tension phase B"
       },
       "example": 230
     },
@@ -74,7 +82,9 @@
       "name": "threshold_voltage",
       "title": {
         "en": "Threshold voltage",
-        "nl": "Drempel spanning"
+        "nl": "Drempel spanning",
+        "de": "Schwellenwert Spannung",
+        "fr": "Tension seuil"
       },
       "example": 220
     }

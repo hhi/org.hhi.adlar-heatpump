@@ -2,15 +2,21 @@
   "id": "low_pressure_temperature_alert",
   "title": {
     "en": "Low pressure temperature alert",
-    "nl": "Lagedruk verzadigingstemperatuur alarm"
+    "nl": "Lagedruk verzadigingstemperatuur alarm",
+    "de": "Niederdruck-Temperaturalarm",
+    "fr": "Alerte de température basse pression"
   },
   "titleFormatted": {
     "en": "Low pressure temperature [[condition]] [[temperature]]°C",
-    "nl": "Lagedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
+    "nl": "Lagedruk verzadigingstemperatuur [[condition]] [[temperature]]°C",
+    "de": "Niederdruck-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température basse pression [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when low pressure saturation temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Niederdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température de saturation basse pression dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Low pressure temperature",
-        "nl": "Huidige Lagedruk verzadigingstemperatuur"
+        "nl": "Huidige Lagedruk verzadigingstemperatuur",
+        "de": "Aktuelle Niederdruck-Temperatur",
+        "fr": "Température basse pression actuelle"
       },
       "example": 15.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 20
     }

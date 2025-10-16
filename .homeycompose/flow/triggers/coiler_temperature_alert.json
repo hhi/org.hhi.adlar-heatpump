@@ -2,15 +2,21 @@
   "id": "coiler_temperature_alert",
   "title": {
     "en": "Coiler temperature alert",
-    "nl": "Verdampingscondensator temperatuur alarm"
+    "nl": "Verdampingscondensator temperatuur alarm",
+    "de": "Verdampfer-Temperaturalarm",
+    "fr": "Alerte de température du serpentin"
   },
   "titleFormatted": {
     "en": "Coiler temperature [[condition]] [[temperature]]°C",
-    "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C"
+    "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+    "de": "Verdampfer-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température du serpentin [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when electricity coiler temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Verdampfer-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température du serpentin dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Coiler temperature",
-        "nl": "Huidige Verdampingscondensator temperatuur"
+        "nl": "Huidige Verdampingscondensator temperatuur",
+        "de": "Aktuelle Verdampfer-Temperatur",
+        "fr": "Température actuelle du serpentin"
       },
       "example": 45.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 50
     }

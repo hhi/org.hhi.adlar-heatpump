@@ -2,15 +2,21 @@
   "id": "fault_detected",
   "title": {
     "en": "Fault detected",
-    "nl": "Storing gedetecteerd"
+    "nl": "Storing gedetecteerd",
+    "de": "Störung erkannt",
+    "fr": "Défaut détecté"
   },
   "titleFormatted": {
     "en": "Fault code [[fault_code]] detected",
-    "nl": "Storing code [[fault_code]] gedetecteerd"
+    "nl": "Storing code [[fault_code]] gedetecteerd",
+    "de": "Störungscode [[fault_code]] erkannt",
+    "fr": "Code de défaut [[fault_code]] détecté"
   },
   "hint": {
     "en": "Triggers when a system fault is detected",
-    "nl": "Wordt geactiveerd wanneer een systeem storing wordt gedetecteerd"
+    "nl": "Wordt geactiveerd wanneer een systeem storing wordt gedetecteerd",
+    "de": "Wird ausgelöst, wenn eine Systemstörung erkannt wird",
+    "fr": "Se déclenche lorsqu'un défaut du système est détecté"
   },
   "highlight": true,
   "args": [
@@ -42,7 +48,9 @@
       "name": "fault_code",
       "title": {
         "en": "Fault code",
-        "nl": "Storing code"
+        "nl": "Storing code",
+        "de": "Störungscode",
+        "fr": "Code de défaut"
       },
       "example": 15
     },
@@ -51,7 +59,9 @@
       "name": "fault_description",
       "title": {
         "en": "Fault description",
-        "nl": "Storing beschrijving"
+        "nl": "Storing beschrijving",
+        "de": "Störungsbeschreibung",
+        "fr": "Description du défaut"
       },
       "example": "Compressor overheating"
     }

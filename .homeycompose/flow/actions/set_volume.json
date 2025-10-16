@@ -2,15 +2,21 @@
   "id": "set_volume",
   "title": {
     "en": "Set electricity consumption checking",
-    "nl": "Stroomverbruik controleren instellen"
+    "nl": "Stroomverbruik controleren instellen",
+    "de": "Stromverbrauchsprüfung einstellen",
+    "fr": "Régler le contrôle de la consommation électrique"
   },
   "titleFormatted": {
     "en": "Set electricity consumption checking to [[volume]]",
-    "nl": "Stroomverbruik controleren instellen op [[volume]]"
+    "nl": "Stroomverbruik controleren instellen op [[volume]]",
+    "de": "Stromverbrauchsprüfung einstellen auf [[volume]]",
+    "fr": "Régler le contrôle de la consommation électrique sur [[volume]]"
   },
   "hint": {
     "en": "Set the electricity consumption checking level",
-    "nl": "Stel de stroomverbruik controle niveau in"
+    "nl": "Stel de stroomverbruik controle niveau in",
+    "de": "Stromverbrauchsprüfungsstufe einstellen",
+    "fr": "Régler le niveau de contrôle de la consommation électrique"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "volume",
       "title": {
         "en": "Electricity consumption checking",
-        "nl": "Stroomverbruik controleren"
+        "nl": "Stroomverbruik controleren",
+        "de": "Stromverbrauchsprüfung",
+        "fr": "Contrôle de la consommation électrique"
       },
       "min": 0,
       "max": 2,
@@ -31,7 +39,9 @@
       "units": "",
       "placeholder": {
         "en": "Level (0-2)",
-        "nl": "Niveau (0-2)"
+        "nl": "Niveau (0-2)",
+        "de": "Stufe (0-2)",
+        "fr": "Niveau (0-2)"
       }
     }
   ]

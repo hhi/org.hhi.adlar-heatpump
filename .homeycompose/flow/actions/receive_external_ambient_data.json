@@ -2,15 +2,21 @@
   "id": "receive_external_ambient_data",
   "title": {
     "en": "Send ambient temperature to heat pump",
-    "nl": "Stuur buitentemperatuur naar warmtepomp"
+    "nl": "Stuur buitentemperatuur naar warmtepomp",
+    "de": "Umgebungstemperatur an Wärmepumpe senden",
+    "fr": "Envoyer la température ambiante à la pompe à chaleur"
   },
   "titleFormatted": {
     "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
-    "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening"
+    "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening",
+    "de": "[[temperature_value]]°C an Wärmepumpe für COP-Berechnung senden",
+    "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP"
   },
   "hint": {
     "en": "Sends ambient temperature data to the heat pump for enhanced COP calculations",
-    "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP-berekeningen"
+    "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP-berekeningen",
+    "de": "Sendet Umgebungstemperaturdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
+    "fr": "Envoie les données de température ambiante à la pompe à chaleur pour des calculs COP améliorés"
   },
   "highlight": true,
   "args": [
@@ -24,11 +30,15 @@
       "name": "temperature_value",
       "title": {
         "en": "Ambient temperature (°C)",
-        "nl": "Buitentemperatuur (°C)"
+        "nl": "Buitentemperatuur (°C)",
+        "de": "Umgebungstemperatur (°C)",
+        "fr": "Température ambiante (°C)"
       },
       "placeholder": {
         "en": "Current ambient temperature in °C",
-        "nl": "Huidige buitentemperatuur in °C"
+        "nl": "Huidige buitentemperatuur in °C",
+        "de": "Aktuelle Umgebungstemperatur in °C",
+        "fr": "Température ambiante actuelle en °C"
       },
       "min": -50,
       "max": 50,

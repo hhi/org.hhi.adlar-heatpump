@@ -2,12 +2,16 @@
   "id": "adlar_scop",
   "title": {
     "en": "Seasonal Coefficient of Performance",
-    "nl": "Seizoensgebonden Prestatiecoëfficiënt"
+    "nl": "Seizoensgebonden Prestatiecoëfficiënt",
+    "de": "Saisonale Leistungszahl",
+    "fr": "Coefficient de performance saisonnier"
   },
   "type": "number",
   "units": {
     "en": "SCOP",
-    "nl": "SCOP"
+    "nl": "SCOP",
+    "de": "SCOP",
+    "fr": "SCOP"
   },
   "min": 2.0,
   "max": 6.0,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "Seasonal Heat Pump Efficiency",
-    "nl": "Seizoensgebonden Warmtepomp Efficiëntie"
+    "nl": "Seizoensgebonden Warmtepomp Efficiëntie",
+    "de": "Saisonale Wärmepumpen Effizienz",
+    "fr": "Efficacité saisonnière de la pompe à chaleur"
   },
   "icon": "/assets/cop-efficiency.svg",
   "description": {
     "en": "Calculated Seasonal Coefficient of Performance according to EN 14825 - average efficiency over heating season. Higher values indicate better seasonal performance.",
-    "nl": "Berekende Seizoensgebonden Prestatiecoëfficiënt volgens EN 14825 - gemiddelde efficiëntie over verwarmingsseizoen. Hogere waarden duiden op betere seizoensprestaties."
+    "nl": "Berekende Seizoensgebonden Prestatiecoëfficiënt volgens EN 14825 - gemiddelde efficiëntie over verwarmingsseizoen. Hogere waarden duiden op betere seizoensprestaties.",
+    "de": "Berechnete Saisonale Leistungszahl nach EN 14825 - durchschnittliche Effizienz über die Heizsaison. Höhere Werte bedeuten bessere saisonale Leistung.",
+    "fr": "Coefficient de performance saisonnier calculé selon EN 14825 - efficacité moyenne sur la saison de chauffage. Des valeurs plus élevées indiquent une meilleure performance saisonnière."
   }
 }

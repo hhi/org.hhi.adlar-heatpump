@@ -2,15 +2,21 @@
   "id": "water_flow_alert",
   "title": {
     "en": "Water flow rate alert",
-    "nl": "Water doorstroom alarm"
+    "nl": "Water doorstroom alarm",
+    "de": "Wasserdurchfluss-Alarm",
+    "fr": "Alerte de débit d'eau"
   },
   "titleFormatted": {
     "en": "Water flow rate [[condition]] [[flow_rate]] L/min",
-    "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min"
+    "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min",
+    "de": "Wasserdurchfluss [[condition]] [[flow_rate]] L/min",
+    "fr": "Débit d'eau [[condition]] [[flow_rate]] L/min"
   },
   "hint": {
     "en": "Triggers when water flow rate goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn der Wasserdurchfluss einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque le débit d'eau dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_flow_rate",
       "title": {
         "en": "Current flow rate",
-        "nl": "Huidige doorstroom"
+        "nl": "Huidige doorstroom",
+        "de": "Aktueller Durchfluss",
+        "fr": "Débit actuel"
       },
       "example": 25
     },
@@ -74,7 +82,9 @@
       "name": "threshold_flow_rate",
       "title": {
         "en": "Threshold flow rate",
-        "nl": "Drempel doorstroom"
+        "nl": "Drempel doorstroom",
+        "de": "Schwellenwert Durchfluss",
+        "fr": "Débit seuil"
       },
       "example": 20
     }

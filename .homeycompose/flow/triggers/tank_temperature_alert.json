@@ -2,15 +2,21 @@
   "id": "tank_temperature_alert",
   "title": {
     "en": "Tank temperature alert",
-    "nl": "Tapwater temperatuur alarm"
+    "nl": "Tapwater temperatuur alarm",
+    "de": "Warmwasser-Temperaturalarm",
+    "fr": "Alerte de température du ballon"
   },
   "titleFormatted": {
     "en": "Tank temperature [[condition]] [[temperature]]°C",
-    "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C"
+    "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C",
+    "de": "Warmwasser-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température du ballon [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when water tank temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Warmwasser-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température du ballon dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Tank temperature",
-        "nl": "Huidige Tapwater temperatuur"
+        "nl": "Huidige Tapwater temperatuur",
+        "de": "Aktuelle Warmwasser-Temperatur",
+        "fr": "Température actuelle du ballon"
       },
       "example": 55.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 60
     }

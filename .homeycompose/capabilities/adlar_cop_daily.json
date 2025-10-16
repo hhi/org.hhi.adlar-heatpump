@@ -2,12 +2,16 @@
   "id": "adlar_cop_daily",
   "title": {
     "en": "Rolling Daily Average COP",
-    "nl": "Voortschrijdend Dagelijks Gemiddelde COP"
+    "nl": "Voortschrijdend Dagelijks Gemiddelde COP",
+    "de": "Gleitender Tagesdurchschnitt COP",
+    "fr": "Moyenne mobile quotidienne COP"
   },
   "type": "number",
   "units": {
     "en": "COP",
-    "nl": "COP"
+    "nl": "COP",
+    "de": "COP",
+    "fr": "COP"
   },
   "min": 0,
   "max": 8,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "Daily Heat Pump Efficiency (COP)",
-    "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+    "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)",
+    "de": "Tägliche Wärmepumpen Effizienz (COP)",
+    "fr": "Efficacité quotidienne de la pompe à chaleur (COP)"
   },
   "icon": "/assets/cop-efficiency.svg",
   "description": {
     "en": "24-hour rolling average COP for trend analysis and daily performance monitoring. Weighted by compressor runtime for accurate efficiency representation.",
-    "nl": "24-uur voortschrijdend gemiddelde COP voor trendanalyse en dagelijkse prestatiemonitoring. Gewogen op compressor looptijd voor nauwkeurige efficiëntie weergave."
+    "nl": "24-uur voortschrijdend gemiddelde COP voor trendanalyse en dagelijkse prestatiemonitoring. Gewogen op compressor looptijd voor nauwkeurige efficiëntie weergave.",
+    "de": "24-Stunden gleitender Durchschnitt COP für Trendanalyse und tägliche Leistungsüberwachung. Gewichtet nach Kompressorlaufzeit für genaue Effizienzdarstellung.",
+    "fr": "Moyenne mobile COP sur 24 heures pour l'analyse des tendances et la surveillance quotidienne des performances. Pondérée par le temps de fonctionnement du compresseur pour une représentation précise de l'efficacité."
   }
 }
