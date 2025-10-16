@@ -2,15 +2,21 @@
   "id": "power_above_threshold",
   "title": {
     "en": "Power consumption above",
-    "nl": "Stroomverbruik boven"
+    "nl": "Stroomverbruik boven",
+    "de": "Stromverbrauch über",
+    "fr": "Consommation électrique au-dessus"
   },
   "titleFormatted": {
     "en": "Power consumption is !{{above|below}} [[threshold]] watts",
-    "nl": "Stroomverbruik is !{{boven|onder}} [[threshold]] watt"
+    "nl": "Stroomverbruik is !{{boven|onder}} [[threshold]] watt",
+    "de": "Stromverbrauch ist !{{über|unter}} [[threshold]] Watt",
+    "fr": "La consommation électrique est !{{au-dessus|en dessous}} de [[threshold]] watts"
   },
   "hint": {
     "en": "Check if current power consumption is above or below a threshold (requires power monitoring support)",
-    "nl": "Controleer of het huidige stroomverbruik boven of onder een drempel is (vereist vermogen monitoring ondersteuning)"
+    "nl": "Controleer of het huidige stroomverbruik boven of onder een drempel is (vereist vermogen monitoring ondersteuning)",
+    "de": "Prüfen Sie, ob der aktuelle Stromverbrauch über oder unter einem Schwellenwert liegt (erfordert Leistungsüberwachung)",
+    "fr": "Vérifier si la consommation électrique actuelle est au-dessus ou en dessous d'un seuil (nécessite le support de surveillance de puissance)"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "threshold",
       "title": {
         "en": "Power threshold (W)",
-        "nl": "Vermogen drempel (W)"
+        "nl": "Vermogen drempel (W)",
+        "de": "Leistungsschwellenwert (W)",
+        "fr": "Seuil de puissance (W)"
       },
       "min": 100,
       "max": 10000,
@@ -31,7 +39,9 @@
       "units": "W",
       "placeholder": {
         "en": "Power threshold in watts",
-        "nl": "Vermogen drempel in watt"
+        "nl": "Vermogen drempel in watt",
+        "de": "Leistungsschwellenwert in Watt",
+        "fr": "Seuil de puissance en watts"
       }
     }
   ]

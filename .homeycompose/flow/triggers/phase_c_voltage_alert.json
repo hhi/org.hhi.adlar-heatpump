@@ -2,15 +2,21 @@
   "id": "phase_c_voltage_alert",
   "title": {
     "en": "Phase C voltage alert",
-    "nl": "Fase C spanning alarm"
+    "nl": "Fase C spanning alarm",
+    "de": "Phase-C-Spannungsalarm",
+    "fr": "Alerte de tension phase C"
   },
   "titleFormatted": {
     "en": "Phase C voltage [[condition]] [[voltage]] volts",
-    "nl": "Fase C spanning [[condition]] [[voltage]] volt"
+    "nl": "Fase C spanning [[condition]] [[voltage]] volt",
+    "de": "Phase-C-Spannung [[condition]] [[voltage]] Volt",
+    "fr": "Tension phase C [[condition]] [[voltage]] volts"
   },
   "hint": {
     "en": "Triggers when Phase C voltage goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer Fase C spanning boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer Fase C spanning boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Phase-C-Spannung einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la tension de la phase C dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_voltage_c",
       "title": {
         "en": "Phase C voltage",
-        "nl": "Fase C spanning"
+        "nl": "Fase C spanning",
+        "de": "Phase-C-Spannung",
+        "fr": "Tension phase C"
       },
       "example": 230
     },
@@ -74,7 +82,9 @@
       "name": "threshold_voltage",
       "title": {
         "en": "Threshold voltage",
-        "nl": "Drempel spanning"
+        "nl": "Drempel spanning",
+        "de": "Schwellenwert Spannung",
+        "fr": "Tension seuil"
       },
       "example": 220
     }

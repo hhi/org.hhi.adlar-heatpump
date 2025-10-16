@@ -2,15 +2,21 @@
   "id": "ambient_temperature_changed",
   "title": {
     "en": "Ambient temperature changed",
-    "nl": "Buitentemperatuur gewijzigd"
+    "nl": "Buitentemperatuur gewijzigd",
+    "de": "Außentemperatur geändert",
+    "fr": "Température ambiante changée"
   },
   "titleFormatted": {
     "en": "Ambient temperature [[condition]] [[temperature]]°C",
-    "nl": "Buitentemperatuur [[condition]] [[temperature]]°C"
+    "nl": "Buitentemperatuur [[condition]] [[temperature]]°C",
+    "de": "Außentemperatur [[condition]] [[temperature]]°C",
+    "fr": "Température ambiante [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
-    "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie"
+    "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie",
+    "de": "Wird ausgelöst, wenn die Außentemperatur einen angegebenen Schwellenwert über- oder unterschreitet - nützlich für Wettersteuerung",
+    "fr": "Se déclenche lorsque la température ambiante dépasse ou descend en dessous d'un niveau spécifié - utile pour la compensation météorologique"
   },
   "highlight": true,
   "args": [
@@ -66,7 +72,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current ambient temperature",
-        "nl": "Huidige buitentemperatuur"
+        "nl": "Huidige buitentemperatuur",
+        "de": "Aktuelle Außentemperatur",
+        "fr": "Température ambiante actuelle"
       },
       "example": 15.5
     },
@@ -75,7 +83,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 10
     }

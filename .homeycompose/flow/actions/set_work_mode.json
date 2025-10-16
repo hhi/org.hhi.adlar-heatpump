@@ -2,15 +2,21 @@
   "id": "set_work_mode",
   "title": {
     "en": "Set work mode",
-    "nl": "Bedrijfsmodus instellen"
+    "nl": "Bedrijfsmodus instellen",
+    "de": "Betriebsmodus einstellen",
+    "fr": "Régler le mode de fonctionnement"
   },
   "titleFormatted": {
     "en": "Set work mode to [[mode]]",
-    "nl": "Bedrijfsmodus instellen op [[mode]]"
+    "nl": "Bedrijfsmodus instellen op [[mode]]",
+    "de": "Betriebsmodus einstellen auf [[mode]]",
+    "fr": "Régler le mode de fonctionnement sur [[mode]]"
   },
   "hint": {
     "en": "Set the system work mode",
-    "nl": "Stel de systeem werkmodus in"
+    "nl": "Stel de systeem werkmodus in",
+    "de": "Systembetriebsmodus einstellen",
+    "fr": "Régler le mode de fonctionnement du système"
   },
   "highlight": true,
   "args": [
@@ -24,28 +30,36 @@
       "name": "mode",
       "title": {
         "en": "Work mode",
-        "nl": "Werkmodus"
+        "nl": "Werkmodus",
+        "de": "Betriebsmodus",
+        "fr": "Mode de fonctionnement"
       },
       "values": [
         {
           "id": "ECO",
           "title": {
             "en": "ECO",
-            "nl": "ECO"
+            "nl": "ECO",
+            "de": "ECO",
+            "fr": "ECO"
           }
         },
         {
           "id": "Normal",
           "title": {
             "en": "Normal",
-            "nl": "Normaal"
+            "nl": "Normaal",
+            "de": "Normal",
+            "fr": "Normal"
           }
         },
         {
           "id": "Boost",
           "title": {
             "en": "Boost",
-            "nl": "Boost"
+            "nl": "Boost",
+            "de": "Boost",
+            "fr": "Boost"
           }
         }
       ]

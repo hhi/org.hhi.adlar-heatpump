@@ -4,11 +4,15 @@
     "type": "text",
     "label": {
       "en": "Device ID",
-      "nl": "Apparaat ID"
+      "nl": "Apparaat ID",
+      "de": "Geräte-ID",
+      "fr": "ID de l'appareil"
     },
     "hint": {
       "en": "Enter the unique ID of the device.",
-      "nl": "Voer de unieke ID van het apparaat in."
+      "nl": "Voer de unieke ID van het apparaat in.",
+      "de": "Geben Sie die eindeutige ID des Geräts ein.",
+      "fr": "Saisissez l'identifiant unique de l'appareil."
     },
     "value": ""
   },
@@ -17,11 +21,15 @@
     "type": "text",
     "label": {
       "en": "Local Key",
-      "nl": "Lokale Sleutel"
+      "nl": "Lokale Sleutel",
+      "de": "Lokaler Schlüssel",
+      "fr": "Clé locale"
     },
     "hint": {
       "en": "Enter the local key for secure communication.",
-      "nl": "Voer de lokale sleutel in voor veilige communicatie."
+      "nl": "Voer de lokale sleutel in voor veilige communicatie.",
+      "de": "Geben Sie den lokalen Schlüssel für sichere Kommunikation ein.",
+      "fr": "Saisissez la clé locale pour une communication sécurisée."
     },
     "value": ""
   },
@@ -30,11 +38,15 @@
     "type": "text",
     "label": {
       "en": "IP Address",
-      "nl": "IP-adres"
+      "nl": "IP-adres",
+      "de": "IP-Adresse",
+      "fr": "Adresse IP"
     },
     "hint": {
       "en": "Enter the IP address of the device.",
-      "nl": "Voer het IP-adres van het apparaat in."
+      "nl": "Voer het IP-adres van het apparaat in.",
+      "de": "Geben Sie die IP-Adresse des Geräts ein.",
+      "fr": "Saisissez l'adresse IP de l'appareil."
     },
     "value": ""
   },
@@ -43,11 +55,15 @@
     "type": "dropdown",
     "label": {
       "en": "Protocol Version",
-      "nl": "Protocolversie"
+      "nl": "Protocolversie",
+      "de": "Protokollversion",
+      "fr": "Version du protocole"
     },
     "hint": {
       "en": "Tuya protocol version (3.3, 3.4, or 3.5). Default is 3.3. Device will reconnect automatically after changing credentials.",
-      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Apparaat maakt automatisch opnieuw verbinding na wijzigen van inloggegevens."
+      "nl": "Tuya protocolversie (3.3, 3.4 of 3.5). Standaard is 3.3. Apparaat maakt automatisch opnieuw verbinding na wijzigen van inloggegevens.",
+      "de": "Tuya-Protokollversion (3.3, 3.4 oder 3.5). Standard ist 3.3. Das Gerät verbindet sich automatisch neu nach Änderung der Anmeldedaten.",
+      "fr": "Version du protocole Tuya (3.3, 3.4 ou 3.5). La valeur par défaut est 3.3. L'appareil se reconnectera automatiquement après modification des identifiants."
     },
     "value": "3.3",
     "values": [
@@ -55,21 +71,27 @@
         "id": "3.3",
         "label": {
           "en": "3.3 (default)",
-          "nl": "3.3 (standaard)"
+          "nl": "3.3 (standaard)",
+          "de": "3.3 (Standard)",
+          "fr": "3.3 (par défaut)"
         }
       },
       {
         "id": "3.4",
         "label": {
           "en": "3.4",
-          "nl": "3.4"
+          "nl": "3.4",
+          "de": "3.4",
+          "fr": "3.4"
         }
       },
       {
         "id": "3.5",
         "label": {
           "en": "3.5",
-          "nl": "3.5"
+          "nl": "3.5",
+          "de": "3.5",
+          "fr": "3.5"
         }
       }
     ]
@@ -78,7 +100,9 @@
     "type": "group",
     "label": {
       "en": "COP (Coefficient of Performance) Settings",
-      "nl": "COP (Prestatiecoëfficiënt) Instellingen"
+      "nl": "COP (Prestatiecoëfficiënt) Instellingen",
+      "de": "COP (Leistungszahl) Einstellungen",
+      "fr": "Paramètres COP (Coefficient de Performance)"
     },
     "children": [
       {
@@ -86,11 +110,15 @@
         "type": "checkbox",
         "label": {
           "en": "Enable COP calculation",
-          "nl": "COP berekening inschakelen"
+          "nl": "COP berekening inschakelen",
+          "de": "COP-Berechnung aktivieren",
+          "fr": "Activer le calcul du COP"
         },
         "hint": {
           "en": "Enable automatic COP (efficiency) calculation using available data sources",
-          "nl": "Schakel automatische COP (efficiëntie) berekening in met beschikbare gegevensbronnen"
+          "nl": "Schakel automatische COP (efficiëntie) berekening in met beschikbare gegevensbronnen",
+          "de": "Aktivieren Sie die automatische COP (Effizienz) Berechnung unter Verwendung verfügbarer Datenquellen",
+          "fr": "Activer le calcul automatique du COP (efficacité) en utilisant les sources de données disponibles"
         },
         "value": true
       },
@@ -99,11 +127,15 @@
         "type": "dropdown",
         "label": {
           "en": "COP calculation method",
-          "nl": "COP berekenings methode"
+          "nl": "COP berekenings methode",
+          "de": "COP-Berechnungsmethode",
+          "fr": "Méthode de calcul du COP"
         },
         "hint": {
           "en": "Override calculation method (Auto uses best available data). All 6 methods: Direct thermal (±5%), Power module (±8%), Refrigerant circuit (±12%), Carnot estimation (±15%), Valve correlation (±20%), Temperature difference (±30%)",
-          "nl": "Overschrijf berekenings methode (Auto gebruikt best beschikbare data). Alle 6 methoden: Directe thermisch (±5%), Vermogen module (±8%), Koelmiddel circuit (±12%), Carnot schatting (±15%), Klep correlatie (±20%), Temperatuur verschil (±30%)"
+          "nl": "Overschrijf berekenings methode (Auto gebruikt best beschikbare data). Alle 6 methoden: Directe thermisch (±5%), Vermogen module (±8%), Koelmiddel circuit (±12%), Carnot schatting (±15%), Klep correlatie (±20%), Temperatuur verschil (±30%)",
+          "de": "Berechnungsmethode überschreiben (Auto verwendet beste verfügbare Daten). Alle 6 Methoden: Direkt thermisch (±5%), Leistungsmodul (±8%), Kältemittelkreislauf (±12%), Carnot-Schätzung (±15%), Ventilkorrelation (±20%), Temperaturdifferenz (±30%)",
+          "fr": "Remplacer la méthode de calcul (Auto utilise les meilleures données disponibles). Les 6 méthodes : Thermique direct (±5%), Module de puissance (±8%), Circuit frigorifique (±12%), Estimation de Carnot (±15%), Corrélation de vanne (±20%), Différence de température (±30%)"
         },
         "value": "auto",
         "values": [
@@ -111,49 +143,63 @@
             "id": "auto",
             "label": {
               "en": "Auto (best available method)",
-              "nl": "Automatisch (beste beschikbare methode)"
+              "nl": "Automatisch (beste beschikbare methode)",
+              "de": "Automatisch (beste verfügbare Methode)",
+              "fr": "Auto (meilleure méthode disponible)"
             }
           },
           {
             "id": "direct_thermal",
             "label": {
               "en": "Direct thermal (±5% - most accurate)",
-              "nl": "Directe thermisch (±5% - meest accuraat)"
+              "nl": "Directe thermisch (±5% - meest accuraat)",
+              "de": "Direkt thermisch (±5% - am genauesten)",
+              "fr": "Thermique direct (±5% - plus précis)"
             }
           },
           {
             "id": "power_module",
             "label": {
               "en": "Power module auto-detection (±8%)",
-              "nl": "Vermogen module auto-detectie (±8%)"
+              "nl": "Vermogen module auto-detectie (±8%)",
+              "de": "Leistungsmodul Autoerkennung (±8%)",
+              "fr": "Détection automatique module de puissance (±8%)"
             }
           },
           {
             "id": "refrigerant_circuit",
             "label": {
               "en": "Refrigerant circuit analysis (±12%)",
-              "nl": "Koelmiddel circuit analyse (±12%)"
+              "nl": "Koelmiddel circuit analyse (±12%)",
+              "de": "Kältemittelkreislauf-Analyse (±12%)",
+              "fr": "Analyse circuit frigorifique (±12%)"
             }
           },
           {
             "id": "carnot_estimation",
             "label": {
               "en": "Carnot estimation (±15%)",
-              "nl": "Carnot schatting (±15%)"
+              "nl": "Carnot schatting (±15%)",
+              "de": "Carnot-Schätzung (±15%)",
+              "fr": "Estimation de Carnot (±15%)"
             }
           },
           {
             "id": "valve_correlation",
             "label": {
               "en": "Valve position correlation (±20%)",
-              "nl": "Klep positie correlatie (±20%)"
+              "nl": "Klep positie correlatie (±20%)",
+              "de": "Ventilpositionskorrelation (±20%)",
+              "fr": "Corrélation position de vanne (±20%)"
             }
           },
           {
             "id": "temperature_difference",
             "label": {
               "en": "Temperature difference (±30% - basic)",
-              "nl": "Temperatuur verschil (±30% - basis)"
+              "nl": "Temperatuur verschil (±30% - basis)",
+              "de": "Temperaturdifferenz (±30% - einfach)",
+              "fr": "Différence de température (±30% - basique)"
             }
           }
         ]
@@ -163,11 +209,15 @@
         "type": "checkbox",
         "label": {
           "en": "Enable COP outlier detection",
-          "nl": "COP outlier detectie inschakelen"
+          "nl": "COP outlier detectie inschakelen",
+          "de": "COP-Ausreißererkennung aktivieren",
+          "fr": "Activer la détection des valeurs aberrantes du COP"
         },
         "hint": {
           "en": "Detect and flag unrealistic COP values that may indicate sensor malfunctions",
-          "nl": "Detecteer en markeer onrealistische COP waarden die sensor storingen kunnen aanduiden"
+          "nl": "Detecteer en markeer onrealistische COP waarden die sensor storingen kunnen aanduiden",
+          "de": "Erkennen und markieren Sie unrealistische COP-Werte, die auf Sensorstörungen hinweisen können",
+          "fr": "Détecter et signaler les valeurs COP irréalistes pouvant indiquer des dysfonctionnements de capteur"
         },
         "value": true
       },
@@ -176,11 +226,15 @@
         "type": "number",
         "label": {
           "en": "Minimum valid COP",
-          "nl": "Minimale geldige COP"
+          "nl": "Minimale geldige COP",
+          "de": "Minimaler gültiger COP",
+          "fr": "COP minimum valide"
         },
         "hint": {
           "en": "COP values below this threshold will be flagged as outliers",
-          "nl": "COP waarden onder deze drempel worden gemarkeerd als uitbijters"
+          "nl": "COP waarden onder deze drempel worden gemarkeerd als uitbijters",
+          "de": "COP-Werte unter diesem Schwellenwert werden als Ausreißer markiert",
+          "fr": "Les valeurs COP inférieures à ce seuil seront signalées comme aberrantes"
         },
         "value": 0.5,
         "min": 0.1,
@@ -192,11 +246,15 @@
         "type": "number",
         "label": {
           "en": "Maximum valid COP",
-          "nl": "Maximale geldige COP"
+          "nl": "Maximale geldige COP",
+          "de": "Maximaler gültiger COP",
+          "fr": "COP maximum valide"
         },
         "hint": {
           "en": "COP values above this threshold will be flagged as outliers",
-          "nl": "COP waarden boven deze drempel worden gemarkeerd als uitbijters"
+          "nl": "COP waarden boven deze drempel worden gemarkeerd als uitbijters",
+          "de": "COP-Werte über diesem Schwellenwert werden als Ausreißer markiert",
+          "fr": "Les valeurs COP supérieures à ce seuil seront signalées comme aberrantes"
         },
         "value": 8.0,
         "min": 4.0,
@@ -209,7 +267,9 @@
     "type": "group",
     "label": {
       "en": "Feature Settings (app restart and exit required)",
-      "nl": "Functie Instellingen (herstart en afsluiten van app vereist)"
+      "nl": "Functie Instellingen (herstart en afsluiten van app vereist)",
+      "de": "Funktionseinstellungen (App-Neustart erforderlich)",
+      "fr": "Paramètres des fonctionnalités (redémarrage de l'app requis)"
     },
     "children": [
       {
@@ -217,11 +277,15 @@
         "type": "checkbox",
         "label": {
           "en": "Show curve picker controls in device UI",
-          "nl": "Toon curve instelbediening in apparaat UI"
+          "nl": "Toon curve instelbediening in apparaat UI",
+          "de": "Kurvensteuerung in Geräte-UI anzeigen",
+          "fr": "Afficher les contrôles de courbe dans l'interface"
         },
         "hint": {
           "en": "Show picker controls for heating and hot water curves in device UI. When disabled, only sensor displays are visible (read-only). Flow cards always work regardless of this setting. Requires app restart to take effect.",
-          "nl": "Toon instelbediening voor verwarmings- en warmwater curves in apparaat UI. Indien uitgeschakeld zijn alleen sensor weergaven zichtbaar (alleen-lezen). Flow kaarten werken altijd ongeacht deze instelling. Vereist app herstart om effect te hebben."
+          "nl": "Toon instelbediening voor verwarmings- en warmwater curves in apparaat UI. Indien uitgeschakeld zijn alleen sensor weergaven zichtbaar (alleen-lezen). Flow kaarten werken altijd ongeacht deze instelling. Vereist app herstart om effect te hebben.",
+          "de": "Zeigen Sie Auswahlsteuerungen für Heizungs- und Warmwasserkurven in der Geräte-UI an. Wenn deaktiviert, sind nur Sensoranzeigen sichtbar (schreibgeschützt). Flow-Karten funktionieren immer unabhängig von dieser Einstellung. Erfordert App-Neustart zur Aktivierung.",
+          "fr": "Afficher les contrôles de sélection pour les courbes de chauffage et d'eau chaude dans l'interface de l'appareil. Lorsque désactivé, seuls les affichages de capteur sont visibles (lecture seule). Les cartes de flux fonctionnent toujours indépendamment de ce paramètre. Nécessite un redémarrage de l'app pour prendre effet."
         },
         "value": false
       },
@@ -230,11 +294,15 @@
         "type": "checkbox",
         "label": {
           "en": "Enable power measurement capabilities",
-          "nl": "Vermogingsmeting capabilities inschakelen"
+          "nl": "Vermogingsmeting capabilities inschakelen",
+          "de": "Leistungsmessungen aktivieren",
+          "fr": "Activer les mesures de puissance"
         },
         "hint": {
           "en": "Show/hide 9 power measurement capabilities (power consumption, voltage, current). Disable for cleaner interface if your device lacks power monitoring. Requires app restart to take effect.",
-          "nl": "Toon/verberg 9 vermogingsmeting capabilities (stroomverbruik, spanning, stroomsterkte). Uitschakelen voor schonere interface als uw apparaat geen vermogingsmonitoring heeft. Vereist app herstart om effect te hebben."
+          "nl": "Toon/verberg 9 vermogingsmeting capabilities (stroomverbruik, spanning, stroomsterkte). Uitschakelen voor schonere interface als uw apparaat geen vermogingsmonitoring heeft. Vereist app herstart om effect te hebben.",
+          "de": "Zeigen/Verbergen Sie 9 Leistungsmessfunktionen (Stromverbrauch, Spannung, Strom). Deaktivieren Sie für eine übersichtlichere Oberfläche, wenn Ihr Gerät keine Leistungsüberwachung hat. Erfordert App-Neustart zur Aktivierung.",
+          "fr": "Afficher/Masquer 9 capacités de mesure de puissance (consommation, tension, courant). Désactiver pour une interface plus claire si votre appareil n'a pas de surveillance de puissance. Nécessite un redémarrage de l'app pour prendre effet."
         },
         "value": false
       },
@@ -243,11 +311,15 @@
         "type": "checkbox",
         "label": {
           "en": "Enable slider (water/power) management capabilities",
-          "nl": "Slider (water/power) management capabilities inschakelen"
+          "nl": "Slider (water/power) management capabilities inschakelen",
+          "de": "Schieberegler-Steuerung aktivieren",
+          "fr": "Activer les contrôles curseur"
         },
         "hint": {
           "en": "Show/hide 3 slider control capabilities (hot water temperature, water mode, volume settings). Disable for cleaner interface if you don't need manual control sliders. Requires app restart to take effect.",
-          "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben."
+          "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben.",
+          "de": "Zeigen/Verbergen Sie 3 Schieberegler-Steuerungen (Warmwassertemperatur, Wassermodus, Volumeneinstellungen). Deaktivieren Sie für eine übersichtlichere Oberfläche, wenn Sie keine manuellen Schieberegler benötigen. Erfordert App-Neustart zur Aktivierung.",
+          "fr": "Afficher/Masquer 3 contrôles curseur (température eau chaude, mode eau, réglages volume). Désactiver pour une interface plus claire si vous n'avez pas besoin de curseurs de contrôle manuel. Nécessite un redémarrage de l'app pour prendre effet."
         },
         "value": false
       },
@@ -256,11 +328,15 @@
         "type": "checkbox",
         "label": {
           "en": "Enable intelligent energy tracking",
-          "nl": "Intelligente energie tracking inschakelen"
+          "nl": "Intelligente energie tracking inschakelen",
+          "de": "Intelligente Energieverfolgung aktivieren",
+          "fr": "Activer le suivi intelligent de l'énergie"
         },
         "hint": {
           "en": "Automatically prioritize external power measurements when available via flow cards, fall back to internal sensors. Makes device appear in Homey Energy dashboard with accurate power consumption data.",
-          "nl": "Prioriteer automatisch externe vermogensmetingen wanneer beschikbaar via flow kaarten, val terug op interne sensoren. Laat apparaat verschijnen in Homey Energie dashboard met nauwkeurige stroomverbruik data."
+          "nl": "Prioriteer automatisch externe vermogensmetingen wanneer beschikbaar via flow kaarten, val terug op interne sensoren. Laat apparaat verschijnen in Homey Energie dashboard met nauwkeurige stroomverbruik data.",
+          "de": "Priorisieren Sie automatisch externe Leistungsmessungen, wenn über Flow-Karten verfügbar, greifen Sie auf interne Sensoren zurück. Lässt das Gerät im Homey Energie-Dashboard mit genauen Stromverbrauchsdaten erscheinen.",
+          "fr": "Prioriser automatiquement les mesures de puissance externes lorsqu'elles sont disponibles via les cartes de flux, revenir aux capteurs internes. Fait apparaître l'appareil dans le tableau de bord Homey Énergie avec des données de consommation précises."
         },
         "value": true
       }
@@ -270,7 +346,9 @@
     "type": "group",
     "label": {
       "en": "Flow Card Controls (restart advised)",
-      "nl": "Flow Kaart Afhandeling Instellingen (herstart en afsluiten van app aanbevolen)"
+      "nl": "Flow Kaart Afhandeling Instellingen (herstart en afsluiten van app aanbevolen)",
+      "de": "Flow-Karten-Steuerung (Neustart empfohlen)",
+      "fr": "Contrôles des cartes de flux (redémarrage conseillé)"
     },
     "children": [
       {
@@ -278,11 +356,15 @@
         "type": "dropdown",
         "label": {
           "en": "Temperature related alerts",
-          "nl": "Temperatuur gerelateerde alarm afhandeling"
+          "nl": "Temperatuur gerelateerde alarm afhandeling",
+          "de": "Temperaturbezogene Alarme",
+          "fr": "Alertes liées à la température"
         },
         "hint": {
           "en": "Control temperature alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van temperatuur alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van temperatuur alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von Temperaturalarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte de température"
         },
         "value": "auto",
         "values": [
@@ -290,21 +372,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -314,11 +402,15 @@
         "type": "dropdown",
         "label": {
           "en": "Voltage related alerts",
-          "nl": "Spanning gerelateerde alarm afhandeling"
+          "nl": "Spanning gerelateerde alarm afhandeling",
+          "de": "Spannungsbezogene Alarme",
+          "fr": "Alertes liées à la tension"
         },
         "hint": {
           "en": "Control voltage related alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van spanning gerelateerde alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van spanning gerelateerde alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von Spannungsalarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte de tension"
         },
         "value": "auto",
         "values": [
@@ -326,21 +418,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -350,11 +448,15 @@
         "type": "dropdown",
         "label": {
           "en": "Current related alerts",
-          "nl": "Stroom gerelateerde alarm afhandeling"
+          "nl": "Stroom gerelateerde alarm afhandeling",
+          "de": "Strombezogene Alarme",
+          "fr": "Alertes liées au courant"
         },
         "hint": {
           "en": "Control current related alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van stroom gerelateerde alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van stroom gerelateerde alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von Stromalarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte de courant"
         },
         "value": "auto",
         "values": [
@@ -362,21 +464,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -386,11 +494,15 @@
         "type": "dropdown",
         "label": {
           "en": "Power related alerts",
-          "nl": "Vermogen gerelateerde alarm afhandeling"
+          "nl": "Vermogen gerelateerde alarm afhandeling",
+          "de": "Leistungsbezogene Alarme",
+          "fr": "Alertes liées à la puissance"
         },
         "hint": {
           "en": "Control power related alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van vermogen gerelateerde alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van vermogen gerelateerde alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von Leistungsalarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte de puissance"
         },
         "value": "auto",
         "values": [
@@ -398,21 +510,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -422,11 +540,15 @@
         "type": "dropdown",
         "label": {
           "en": "Pulse-steps related alerts",
-          "nl": "Pulse-stappen gerelateerde alarm afhandeling"
+          "nl": "Pulse-stappen gerelateerde alarm afhandeling",
+          "de": "Impulsschrittbezogene Alarme",
+          "fr": "Alertes liées aux pas d'impulsion"
         },
         "hint": {
           "en": "Control pulse-steps related alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van pulse-stappen gerelateerde alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van pulse-stappen gerelateerde alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von Impulsschritt-Alarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte de pas d'impulsion"
         },
         "value": "auto",
         "values": [
@@ -434,21 +556,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -458,11 +586,15 @@
         "type": "dropdown",
         "label": {
           "en": "State change related alerts",
-          "nl": "Status wijziging gerelateerde alarm afhandeling"
+          "nl": "Status wijziging gerelateerde alarm afhandeling",
+          "de": "Statusänderungsbezogene Alarme",
+          "fr": "Alertes liées aux changements d'état"
         },
         "hint": {
           "en": "Control state change related alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van status wijziging gerelateerde alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van status wijziging gerelateerde alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von Statusänderungs-Alarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte de changement d'état"
         },
         "value": "auto",
         "values": [
@@ -470,21 +602,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -494,11 +632,15 @@
         "type": "dropdown",
         "label": {
           "en": "Efficiency (S)COP related alerts",
-          "nl": "Efficiëntie (S)COP gerelateerde alarm afhandeling"
+          "nl": "Efficiëntie (S)COP gerelateerde alarm afhandeling",
+          "de": "Effizienz (S)COP-bezogene Alarme",
+          "fr": "Alertes liées à l'efficacité (S)COP"
         },
         "hint": {
           "en": "Control COP and SCOP efficiency alert flow cards visibility",
-          "nl": "Beheers zichtbaarheid van COP en SCOP efficiëntie alarm flow kaarten"
+          "nl": "Beheers zichtbaarheid van COP en SCOP efficiëntie alarm flow kaarten",
+          "de": "Steuern Sie die Sichtbarkeit von COP- und SCOP-Effizienz-Alarm-Flow-Karten",
+          "fr": "Contrôler la visibilité des cartes de flux d'alerte d'efficacité COP et SCOP"
         },
         "value": "auto",
         "values": [
@@ -506,21 +648,27 @@
             "id": "disabled",
             "label": {
               "en": "Disabled",
-              "nl": "Uitgeschakeld"
+              "nl": "Uitgeschakeld",
+              "de": "Deaktiviert",
+              "fr": "Désactivé"
             }
           },
           {
             "id": "auto",
             "label": {
               "en": "Auto (based on available sensors)",
-              "nl": "Automatisch (gebaseerd op beschikbare sensoren)"
+              "nl": "Automatisch (gebaseerd op beschikbare sensoren)",
+              "de": "Automatisch (basierend auf verfügbaren Sensoren)",
+              "fr": "Auto (selon les capteurs disponibles)"
             }
           },
           {
             "id": "enabled",
             "label": {
               "en": "Force enabled",
-              "nl": "Geforceerd ingeschakeld"
+              "nl": "Geforceerd ingeschakeld",
+              "de": "Erzwungen aktiviert",
+              "fr": "Forcé activé"
             }
           }
         ]
@@ -530,11 +678,15 @@
         "type": "checkbox",
         "label": {
           "en": "Enable expert feature cards",
-          "nl": "Expert functie kaarten inschakelen"
+          "nl": "Expert functie kaarten inschakelen",
+          "de": "Expertenfunktionskarten aktivieren",
+          "fr": "Activer les cartes de fonctionnalités d'expert"
         },
         "hint": {
           "en": "Enable diagnostic and system analysis flow cards for HVAC experts",
-          "nl": "Schakel diagnose en systeem analyse flow kaarten in voor HVAC experts"
+          "nl": "Schakel diagnose en systeem analyse flow kaarten in voor HVAC experts",
+          "de": "Aktivieren Sie Diagnose- und Systemanalyse-Flow-Karten für HVAC-Experten",
+          "fr": "Activer les cartes de flux de diagnostic et d'analyse système pour les experts HVAC"
         },
         "value": false
       }
@@ -544,7 +696,9 @@
     "type": "group",
     "label": {
       "en": "Energy Management",
-      "nl": "Energie Beheer"
+      "nl": "Energie Beheer",
+      "de": "Energieverwaltung",
+      "fr": "Gestion de l'énergie"
     },
     "children": [
       {
@@ -552,11 +706,15 @@
         "type": "checkbox",
         "label": {
           "en": "Reset external energy total counter",
-          "nl": "Reset externe energie totaal teller"
+          "nl": "Reset externe energie totaal teller",
+          "de": "Externe Gesamtenergiezähler zurücksetzen",
+          "fr": "Réinitialiser le compteur d'énergie totale externe"
         },
         "hint": {
           "en": "Click to reset the external energy total counter to zero. This will clear all accumulated energy measurements from flow cards.",
-          "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten."
+          "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten.",
+          "de": "Klicken Sie, um den externen Gesamtenergiezähler auf Null zurückzusetzen. Dies löscht alle akkumulierten Energiemessungen von Flow-Karten.",
+          "fr": "Cliquez pour réinitialiser le compteur d'énergie totale externe à zéro. Cela effacera toutes les mesures d'énergie accumulées des cartes de flux."
         },
         "value": false
       },
@@ -565,11 +723,15 @@
         "type": "checkbox",
         "label": {
           "en": "Reset external energy daily counter",
-          "nl": "Reset externe energie dagelijkse teller"
+          "nl": "Reset externe energie dagelijkse teller",
+          "de": "Externe Tagesenergiezähler zurücksetzen",
+          "fr": "Réinitialiser le compteur d'énergie quotidienne externe"
         },
         "hint": {
           "en": "Click to reset the external daily energy counter to zero. This will clear today's accumulated energy measurements from flow cards.",
-          "nl": "Klik om de externe dagelijkse energie teller naar nul te resetten. Dit wist de geaccumuleerde energie metingen van vandaag van flow kaarten."
+          "nl": "Klik om de externe dagelijkse energie teller naar nul te resetten. Dit wist de geaccumuleerde energie metingen van vandaag van flow kaarten.",
+          "de": "Klicken Sie, um den externen Tagesenergiezähler auf Null zurückzusetzen. Dies löscht die heutigen akkumulierten Energiemessungen von Flow-Karten.",
+          "fr": "Cliquez pour réinitialiser le compteur d'énergie quotidienne externe à zéro. Cela effacera les mesures d'énergie accumulées d'aujourd'hui des cartes de flux."
         },
         "value": false
       }
@@ -579,7 +741,9 @@
     "type": "group",
     "label": {
       "en": "Diagnostics",
-      "nl": "Diagnostiek"
+      "nl": "Diagnostiek",
+      "de": "Diagnose",
+      "fr": "Diagnostics"
     },
     "children": [
       {
@@ -587,11 +751,15 @@
         "type": "checkbox",
         "label": {
           "en": "Force reconnect to device",
-          "nl": "Forceer herverbinding met apparaat"
+          "nl": "Forceer herverbinding met apparaat",
+          "de": "Erzwungene Neuverbindung zum Gerät",
+          "fr": "Forcer la reconnexion à l'appareil"
         },
         "hint": {
           "en": "Click to immediately reconnect to the Tuya device. Use this when the device shows 'Disconnected' status. Bypasses automatic reconnection delays and resets error recovery state.",
-          "nl": "Klik om direct opnieuw verbinding te maken met het Tuya apparaat. Gebruik dit wanneer het apparaat 'Disconnected' status toont. Omzeilt automatische herverbindings vertragingen en reset fout herstel status."
+          "nl": "Klik om direct opnieuw verbinding te maken met het Tuya apparaat. Gebruik dit wanneer het apparaat 'Disconnected' status toont. Omzeilt automatische herverbindings vertragingen en reset fout herstel status.",
+          "de": "Klicken Sie, um sofort eine Neuverbindung zum Tuya-Gerät herzustellen. Verwenden Sie dies, wenn das Gerät den Status 'Getrennt' anzeigt. Umgeht automatische Neuverbindungsverzögerungen und setzt den Fehlerwiederherstellungsstatus zurück.",
+          "fr": "Cliquez pour reconnecter immédiatement à l'appareil Tuya. Utilisez ceci lorsque l'appareil affiche le statut 'Déconnecté'. Contourne les délais de reconnexion automatique et réinitialise l'état de récupération d'erreur."
         },
         "value": false
       },
@@ -600,11 +768,15 @@
         "type": "checkbox",
         "label": {
           "en": "Generate capability diagnostics report",
-          "nl": "Genereer capability diagnostiek rapport"
+          "nl": "Genereer capability diagnostiek rapport",
+          "de": "Diagnose-Bericht für Funktionen erstellen",
+          "fr": "Générer un rapport de diagnostic des capacités"
         },
         "hint": {
           "en": "Click to generate a detailed report showing which capabilities are working and which have null values",
-          "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben"
+          "nl": "Klik om een gedetailleerd rapport te genereren dat toont welke capabilities werken en welke null waarden hebben",
+          "de": "Klicken Sie, um einen detaillierten Bericht zu erstellen, der zeigt, welche Funktionen funktionieren und welche Nullwerte haben",
+          "fr": "Cliquez pour générer un rapport détaillé montrant quelles capacités fonctionnent et lesquelles ont des valeurs nulles"
         },
         "value": false
       }

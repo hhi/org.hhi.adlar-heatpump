@@ -2,15 +2,21 @@
   "id": "economizer_outlet_temperature_alert",
   "title": {
     "en": "Economizer outlet temperature alert",
-    "nl": "EVI warmtewisselaar persgas temperatuur alarm"
+    "nl": "EVI warmtewisselaar persgas temperatuur alarm",
+    "de": "Economizer-Auslass-Temperaturalarm",
+    "fr": "Alerte de température de sortie de l'économiseur"
   },
   "titleFormatted": {
     "en": "Economizer outlet temperature [[condition]] [[temperature]]°C",
-    "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C"
+    "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C",
+    "de": "Economizer-Auslass-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température de sortie de l'économiseur [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when economizer outlet temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Economizer-Auslass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température de sortie de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Economizer outlet temperature",
-        "nl": "Huidige EVI warmtewisselaar persgas temperatuur"
+        "nl": "Huidige EVI warmtewisselaar persgas temperatuur",
+        "de": "Aktuelle Economizer-Auslass-Temperatur",
+        "fr": "Température de sortie actuelle de l'économiseur"
       },
       "example": 35.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 40
     }

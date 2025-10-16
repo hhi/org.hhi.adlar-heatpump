@@ -372,28 +372,39 @@ export class TuyaConnectionService {
     const timestamp = new Date(this.lastStatusChangeTime);
     const now = new Date();
 
+    // Get Homey's configured timezone (fallback to auto-detection)
+    // Homey stores timezone in system settings, prefer this over Node.js process timezone
+    const homeyTimezone = this.device.homey.clock.getTimezone() || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     // If status changed today, show only time (HH:MM:SS)
     // If status changed on a different day, show date and time (D-MMM HH:MM)
     const isSameDay = timestamp.toDateString() === now.toDateString();
 
-    // Detect language from Homey (fallback to 'en' if not available)
-    const language = this.device.homey.i18n.getLanguage() === 'nl' ? 'nl' : 'en';
+    // Detect language from Homey (support en, nl, de, fr with fallback to 'en')
+    const detectedLanguage = this.device.homey.i18n.getLanguage();
+    const supportedLanguages = ['en', 'nl', 'de', 'fr'] as const;
+    type SupportedLanguage = typeof supportedLanguages[number];
+    const language: SupportedLanguage = supportedLanguages.includes(detectedLanguage as SupportedLanguage)
+      ? (detectedLanguage as SupportedLanguage)
+      : 'en';
 
     let timeString: string;
     if (isSameDay) {
-      // Same day: show only time in local timezone
+      // Same day: show only time in Homey's configured timezone
       timeString = timestamp.toLocaleTimeString(language, {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Local timezone
+        timeZone: homeyTimezone, // Use Homey's timezone
       });
     } else {
       // Different day: show date and time with short month abbreviation
-      // Format: "3-Oct 14:25" (English) or "3-okt 14:25" (Dutch)
-      const monthAbbreviations = {
+      // Format: "3-Oct 14:25" (English), "3-okt 14:25" (Dutch), "3-Okt 14:25" (German), "3-oct 14:25" (French)
+      const monthAbbreviations: Record<SupportedLanguage, string[]> = {
         en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         nl: ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+        de: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+        fr: ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'],
       };
 
       const monthAbbr = monthAbbreviations[language][timestamp.getMonth()];
@@ -401,7 +412,7 @@ export class TuyaConnectionService {
       const time = timestamp.toLocaleTimeString(language, {
         hour: '2-digit',
         minute: '2-digit',
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Local timezone
+        timeZone: homeyTimezone, // Use Homey's timezone
       });
 
       timeString = `${day}-${monthAbbr} ${time}`;

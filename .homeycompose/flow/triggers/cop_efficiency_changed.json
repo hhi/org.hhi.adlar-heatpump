@@ -2,15 +2,21 @@
   "id": "cop_efficiency_changed",
   "title": {
     "en": "COP efficiency changed",
-    "nl": "COP efficiëntie gewijzigd"
+    "nl": "COP efficiëntie gewijzigd",
+    "de": "COP-Effizienz geändert",
+    "fr": "Efficacité COP changée"
   },
   "titleFormatted": {
     "en": "COP efficiency [[condition]] [[threshold]]",
-    "nl": "COP efficiëntie [[condition]] [[threshold]]"
+    "nl": "COP efficiëntie [[condition]] [[threshold]]",
+    "de": "COP-Effizienz [[condition]] [[threshold]]",
+    "fr": "Efficacité COP [[condition]] [[threshold]]"
   },
   "hint": {
     "en": "Triggers when the Coefficient of Performance (COP) goes above or below a specified threshold",
-    "nl": "Wordt geactiveerd wanneer de prestatiecoëfficiënt (COP) boven of onder een opgegeven drempel gaat"
+    "nl": "Wordt geactiveerd wanneer de prestatiecoëfficiënt (COP) boven of onder een opgegeven drempel gaat",
+    "de": "Wird ausgelöst, wenn die Leistungszahl (COP) einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque le coefficient de performance (COP) dépasse ou descend en dessous d'un seuil spécifié"
   },
   "highlight": true,
   "args": [
@@ -66,7 +72,9 @@
       "name": "current_cop",
       "title": {
         "en": "Current COP",
-        "nl": "Huidige COP"
+        "nl": "Huidige COP",
+        "de": "Aktuelle COP",
+        "fr": "COP actuel"
       },
       "example": 3.2
     },
@@ -75,7 +83,9 @@
       "name": "threshold_cop",
       "title": {
         "en": "Threshold COP",
-        "nl": "Drempel COP"
+        "nl": "Drempel COP",
+        "de": "Schwellenwert COP",
+        "fr": "COP seuil"
       },
       "example": 3.0
     },
@@ -84,7 +94,9 @@
       "name": "calculation_method",
       "title": {
         "en": "Calculation method used",
-        "nl": "Gebruikte berekeningsmethode"
+        "nl": "Gebruikte berekeningsmethode",
+        "de": "Verwendete Berechnungsmethode",
+        "fr": "Méthode de calcul utilisée"
       },
       "example": "direct_thermal"
     },
@@ -93,7 +105,9 @@
       "name": "confidence_level",
       "title": {
         "en": "Confidence level",
-        "nl": "Betrouwbaarheidsniveau"
+        "nl": "Betrouwbaarheidsniveau",
+        "de": "Vertrauensniveau",
+        "fr": "Niveau de confiance"
       },
       "example": "high"
     }

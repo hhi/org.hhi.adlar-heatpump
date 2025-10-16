@@ -2,15 +2,21 @@
   "id": "daily_cop_efficiency_changed",
   "title": {
     "en": "Daily COP efficiency changed",
-    "nl": "Dagelijkse COP efficiëntie gewijzigd"
+    "nl": "Dagelijkse COP efficiëntie gewijzigd",
+    "de": "Tägliche COP-Effizienz geändert",
+    "fr": "Efficacité COP quotidienne changée"
   },
   "titleFormatted": {
     "en": "Daily COP efficiency [[condition]] [[threshold]]",
-    "nl": "Dagelijkse COP efficiëntie [[condition]] [[threshold]]"
+    "nl": "Dagelijkse COP efficiëntie [[condition]] [[threshold]]",
+    "de": "Tägliche COP-Effizienz [[condition]] [[threshold]]",
+    "fr": "Efficacité COP quotidienne [[condition]] [[threshold]]"
   },
   "hint": {
     "en": "Triggers when the 24-hour average COP goes above or below a specified threshold",
-    "nl": "Wordt geactiveerd wanneer de 24-uur gemiddelde COP boven of onder een opgegeven drempel gaat"
+    "nl": "Wordt geactiveerd wanneer de 24-uur gemiddelde COP boven of onder een opgegeven drempel gaat",
+    "de": "Wird ausgelöst, wenn die 24-Stunden-Durchschnitts-COP einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque le COP moyen sur 24 heures dépasse ou descend en dessous d'un seuil spécifié"
   },
   "highlight": true,
   "args": [
@@ -66,7 +72,9 @@
       "name": "current_daily_cop",
       "title": {
         "en": "Current daily COP",
-        "nl": "Huidige dagelijkse COP"
+        "nl": "Huidige dagelijkse COP",
+        "de": "Aktueller täglicher COP",
+        "fr": "COP quotidien actuel"
       },
       "example": 3.2
     },
@@ -75,7 +83,9 @@
       "name": "threshold_cop",
       "title": {
         "en": "Threshold COP",
-        "nl": "Drempel COP"
+        "nl": "Drempel COP",
+        "de": "Schwellenwert COP",
+        "fr": "COP seuil"
       },
       "example": 3
     },
@@ -84,7 +94,9 @@
       "name": "data_points",
       "title": {
         "en": "Data points used",
-        "nl": "Gebruikte datapunten"
+        "nl": "Gebruikte datapunten",
+        "de": "Verwendete Datenpunkte",
+        "fr": "Points de données utilisés"
       },
       "example": 48
     },
@@ -93,7 +105,9 @@
       "name": "confidence_level",
       "title": {
         "en": "Confidence level",
-        "nl": "Betrouwbaarheidsniveau"
+        "nl": "Betrouwbaarheidsniveau",
+        "de": "Vertrauensniveau",
+        "fr": "Niveau de confiance"
       },
       "example": "high"
     }

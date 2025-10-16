@@ -1,0 +1,68 @@
+{
+  "pair": {
+    "enter_device_info": {
+      "title": "Geräteinformationen eingeben",
+      "description": "Bitte geben Sie Ihre Tuya-Gerätedaten ein",
+      "device_id": "Geräte-ID",
+      "local_key": "Lokaler Schlüssel",
+      "ip_address": "IP-Adresse",
+      "protocol_version": "Protokollversion",
+      "continue": "Fortfahren"
+    }
+  },
+  "cop_method": {
+    "direct_thermal": "Direkt Thermisch",
+    "power_module": "Leistungsmodul",
+    "power_estimation": "Leistungsschätzung",
+    "refrigerant_circuit": "Kältemittelkreislauf",
+    "carnot_estimation": "Carnot-Schätzung",
+    "valve_correlation": "Ventil-Korrelation",
+    "temperature_difference": "Temperaturdifferenz",
+    "insufficient_data": "!"
+  },
+  "cop_method_description": {
+    "direct_thermal": "Direkte thermische Berechnung mit Wasserdurchfluss und Temperaturdifferenz (±5% Genauigkeit)",
+    "power_module": "Leistungsmodul-Schätzung mit internen Sensoren und externer Validierung (±8% Genauigkeit)",
+    "power_estimation": "Stromverbrauchsschätzung mit Kompressor- und Lüfterdaten (±10% Genauigkeit)",
+    "refrigerant_circuit": "Kältemittelkreislauf-Analyse mit Druck- und Temperatursensoren (±12% Genauigkeit)",
+    "carnot_estimation": "Carnot-basierte Schätzung mit Kompressorfrequenz und Umgebungstemperatur (±15% Genauigkeit)",
+    "valve_correlation": "Ventilpositions-Korrelation mit Expansionsventildaten (±20% Genauigkeit)",
+    "temperature_difference": "Temperaturdifferenz-Schätzung mit empirischen Beziehungen (±30% Genauigkeit)",
+    "insufficient_data": "Unzureichende Daten für jede COP-Berechnungsmethode verfügbar"
+  },
+  "scop_status": {
+    "initializing": "Initialisierung...",
+    "collecting": "Daten sammeln",
+    "insufficient_data": "7+ Tage Daten erforderlich",
+    "calculating": "Berechnung..."
+  },
+  "trend_descriptions": {
+    "strong_improvement": "Starke Effizienzsteigerung",
+    "moderate_improvement": "Moderate Effizienzsteigerung",
+    "slight_improvement": "Leichte Effizienzsteigerung",
+    "significant_decline": "Erheblicher Effizienzverlust",
+    "moderate_decline": "Moderater Effizienzverlust",
+    "slight_decline": "Leichter Effizienzverlust",
+    "stable": "Stabile Leistung"
+  },
+  "cop_diagnostics": {
+    "no_power_measurement": "Keine Leistungsdaten",
+    "no_thermal_measurement": "Keine thermischen Daten",
+    "no_water_flow": "Keine Durchflussdaten",
+    "no_temperature_difference": "Kein Temperatur-Delta",
+    "no_compressor_data": "Keine Kompressordaten",
+    "insufficient_sensor_data": "Mehrere Ausfälle",
+    "enable_power_monitoring": "Leistungsüberwachung aktivieren",
+    "check_temperature_sensors": "Temperatursensoren prüfen",
+    "check_flow_sensor": "Durchflusssensor prüfen",
+    "check_compressor_communication": "Kompressor-Verbindung prüfen",
+    "check_multiple_sensors": "Alle Sensoren prüfen"
+  },
+  "COP calculation disabled": "COP-Berechnung deaktiviert",
+  "connection_status": {
+    "connected": "Verbunden",
+    "disconnected": "Getrennt",
+    "reconnecting": "Wiederverbinden",
+    "error": "Fehler"
+  }
+}

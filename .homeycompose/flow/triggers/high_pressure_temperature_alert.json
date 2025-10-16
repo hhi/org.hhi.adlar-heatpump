@@ -2,15 +2,21 @@
   "id": "high_pressure_temperature_alert",
   "title": {
     "en": "High pressure temperature alert",
-    "nl": "Hogedruk verzadigingstemperatuur alarm"
+    "nl": "Hogedruk verzadigingstemperatuur alarm",
+    "de": "Hochdruck-Temperaturalarm",
+    "fr": "Alerte de température haute pression"
   },
   "titleFormatted": {
     "en": "High pressure temperature [[condition]] [[temperature]]°C",
-    "nl": "Hogedruk verzadigingstemperatuur [[condition]] [[temperature]]°C"
+    "nl": "Hogedruk verzadigingstemperatuur [[condition]] [[temperature]]°C",
+    "de": "Hochdruck-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température haute pression [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when high pressure saturation temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Hochdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température de saturation haute pression dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current High pressure temperature",
-        "nl": "Huidige Hogedruk verzadigingstemperatuur"
+        "nl": "Huidige Hogedruk verzadigingstemperatuur",
+        "de": "Aktuelle Hochdruck-Temperatur",
+        "fr": "Température haute pression actuelle"
       },
       "example": 65.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 70
     }

@@ -2,15 +2,21 @@
   "id": "cop_efficiency_check",
   "title": {
     "en": "COP efficiency is",
-    "nl": "COP efficiëntie is"
+    "nl": "COP efficiëntie is",
+    "de": "COP-Effizienz ist",
+    "fr": "L'efficacité COP est"
   },
   "titleFormatted": {
     "en": "COP efficiency is !{{above|below}} [[threshold]]",
-    "nl": "COP efficiëntie is !{{boven|onder}} [[threshold]]"
+    "nl": "COP efficiëntie is !{{boven|onder}} [[threshold]]",
+    "de": "COP-Effizienz ist !{{über|unter}} [[threshold]]",
+    "fr": "L'efficacité COP est !{{au-dessus|en dessous}} de [[threshold]]"
   },
   "hint": {
     "en": "Check if the current Coefficient of Performance (COP) is above or below a threshold",
-    "nl": "Controleer of de huidige prestatiecoëfficiënt (COP) boven of onder een drempel is"
+    "nl": "Controleer of de huidige prestatiecoëfficiënt (COP) boven of onder een drempel is",
+    "de": "Prüfen Sie, ob die aktuelle Leistungszahl (COP) über oder unter einem Schwellenwert liegt",
+    "fr": "Vérifier si le coefficient de performance (COP) actuel est au-dessus ou en dessous d'un seuil"
   },
   "highlight": true,
   "args": [
@@ -24,7 +30,9 @@
       "name": "threshold",
       "title": {
         "en": "COP threshold",
-        "nl": "COP drempel"
+        "nl": "COP drempel",
+        "de": "COP-Schwellenwert",
+        "fr": "Seuil COP"
       },
       "min": 1.0,
       "max": 8.0,
@@ -32,7 +40,9 @@
       "units": "COP",
       "placeholder": {
         "en": "COP efficiency threshold",
-        "nl": "COP efficiëntie drempel"
+        "nl": "COP efficiëntie drempel",
+        "de": "COP-Effizienzschwellenwert",
+        "fr": "Seuil d'efficacité COP"
       }
     }
   ]

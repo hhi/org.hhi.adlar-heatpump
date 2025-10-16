@@ -2,12 +2,16 @@
   "id": "adlar_measure_pressure_temp_current",
   "title": {
     "en": "EEV Open",
-    "nl": "EEV Open"
+    "nl": "EEV Open",
+    "de": "EEV-Öffnung",
+    "fr": "Ouverture EEV"
   },
   "type": "number",
   "units": {
     "en": "Pa",
-    "nl": "Pa"
+    "nl": "Pa",
+    "de": "Pa",
+    "fr": "Pa"
   },
 
   "min": -500,
@@ -20,7 +24,9 @@
   "insights": true,
   "insightsTitle": {
     "en": "EEV Open",
-    "nl": "EEV Open"
+    "nl": "EEV Open",
+    "de": "EEV-Öffnung",
+    "fr": "Ouverture EEV"
   },
   "icon": "/assets/pressure.svg",
   

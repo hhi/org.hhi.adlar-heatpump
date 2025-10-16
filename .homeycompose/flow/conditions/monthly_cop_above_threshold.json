@@ -2,15 +2,21 @@
   "id": "monthly_cop_above_threshold",
   "title": {
     "en": "Monthly COP above threshold",
-    "nl": "Maandelijkse COP boven drempel"
+    "nl": "Maandelijkse COP boven drempel",
+    "de": "Monatliche COP über Schwellenwert",
+    "fr": "COP mensuel au-dessus du seuil"
   },
   "titleFormatted": {
     "en": "Monthly COP is !{{above|below}} [[threshold]]",
-    "nl": "Maandelijkse COP is !{{boven|onder}} [[threshold]]"
+    "nl": "Maandelijkse COP is !{{boven|onder}} [[threshold]]",
+    "de": "Monatliche COP ist !{{über|unter}} [[threshold]]",
+    "fr": "Le COP mensuel est !{{au-dessus|en dessous}} de [[threshold]]"
   },
   "hint": {
     "en": "Check if the 30-day average COP is above or below a threshold",
-    "nl": "Controleer of de 30-dagen gemiddelde COP boven of onder een drempel is"
+    "nl": "Controleer of de 30-dagen gemiddelde COP boven of onder een drempel is",
+    "de": "Prüfen Sie, ob die 30-Tage-Durchschnitts-COP über oder unter einem Schwellenwert liegt",
+    "fr": "Vérifier si le COP moyen sur 30 jours est au-dessus ou en dessous d'un seuil"
   },
   "highlight": true,
   "args": [
@@ -24,7 +30,9 @@
       "name": "threshold",
       "title": {
         "en": "Monthly COP threshold",
-        "nl": "Maandelijkse COP drempel"
+        "nl": "Maandelijkse COP drempel",
+        "de": "Monatlicher COP-Schwellenwert",
+        "fr": "Seuil COP mensuel"
       },
       "min": 1,
       "max": 8,
@@ -32,7 +40,9 @@
       "units": "COP",
       "placeholder": {
         "en": "Monthly COP efficiency threshold",
-        "nl": "Maandelijkse COP efficiëntie drempel"
+        "nl": "Maandelijkse COP efficiëntie drempel",
+        "de": "Monatlicher COP-Effizienzschwellenwert",
+        "fr": "Seuil d'efficacité COP mensuel"
       }
     }
   ]

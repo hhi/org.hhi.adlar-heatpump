@@ -2,15 +2,21 @@
   "id": "daily_consumption_threshold",
   "title": {
     "en": "Daily consumption threshold reached",
-    "nl": "Dagverbruik drempel bereikt"
+    "nl": "Dagverbruik drempel bereikt",
+    "de": "Tagesverbrauchs-Schwellenwert erreicht",
+    "fr": "Seuil de consommation quotidienne atteint"
   },
   "titleFormatted": {
     "en": "Daily consumption reached [[threshold]] kWh",
-    "nl": "Dagverbruik bereikte [[threshold]] kWh"
+    "nl": "Dagverbruik bereikte [[threshold]] kWh",
+    "de": "Tagesverbrauch erreichte [[threshold]] kWh",
+    "fr": "Consommation quotidienne atteinte [[threshold]] kWh"
   },
   "hint": {
     "en": "Triggers when daily electricity consumption reaches specified threshold",
-    "nl": "Wordt geactiveerd wanneer het dagelijkse stroomverbruik een drempel bereikt"
+    "nl": "Wordt geactiveerd wanneer het dagelijkse stroomverbruik een drempel bereikt",
+    "de": "Wird ausgelöst, wenn der tägliche Stromverbrauch den angegebenen Schwellenwert erreicht",
+    "fr": "Se déclenche lorsque la consommation d'électricité quotidienne atteint le seuil spécifié"
   },
   "args": [
     {
@@ -41,7 +47,9 @@
       "name": "daily_consumption",
       "title": {
         "en": "Daily consumption",
-        "nl": "Dagverbruik"
+        "nl": "Dagverbruik",
+        "de": "Tagesverbrauch",
+        "fr": "Consommation quotidienne"
       },
       "example": 25
     },
@@ -50,7 +58,9 @@
       "name": "threshold_value",
       "title": {
         "en": "Threshold value",
-        "nl": "Drempel waarde"
+        "nl": "Drempel waarde",
+        "de": "Schwellenwert",
+        "fr": "Valeur seuil"
       },
       "example": 30
     }

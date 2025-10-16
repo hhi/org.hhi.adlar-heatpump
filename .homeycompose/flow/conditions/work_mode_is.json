@@ -2,15 +2,21 @@
   "id": "work_mode_is",
   "title": {
     "en": "Work mode is",
-    "nl": "Bedrijfsmodus is"
+    "nl": "Bedrijfsmodus is",
+    "de": "Betriebsmodus ist",
+    "fr": "Le mode de fonctionnement est"
   },
   "titleFormatted": {
     "en": "Work mode !{{is|is not}} [[mode]]",
-    "nl": "Bedrijfsmodus !{{is|is niet}} [[mode]]"
+    "nl": "Bedrijfsmodus !{{is|is niet}} [[mode]]",
+    "de": "Betriebsmodus !{{ist|ist nicht}} [[mode]]",
+    "fr": "Le mode de fonctionnement !{{est|n'est pas}} [[mode]]"
   },
   "hint": {
     "en": "Check if the work mode matches the selected mode",
-    "nl": "Controleer of de bedrijfsmodus overeenkomt met de geselecteerde modus"
+    "nl": "Controleer of de bedrijfsmodus overeenkomt met de geselecteerde modus",
+    "de": "Prüfen Sie, ob der Betriebsmodus mit dem ausgewählten Modus übereinstimmt",
+    "fr": "Vérifier si le mode de fonctionnement correspond au mode sélectionné"
   },
   "args": [
     {
@@ -23,28 +29,36 @@
       "name": "mode",
       "title": {
         "en": "Work mode",
-        "nl": "Werkmodus"
+        "nl": "Werkmodus",
+        "de": "Betriebsmodus",
+        "fr": "Mode de fonctionnement"
       },
       "values": [
         {
           "id": "ECO",
           "title": {
             "en": "ECO",
-            "nl": "ECO"
+            "nl": "ECO",
+            "de": "ECO",
+            "fr": "ECO"
           }
         },
         {
           "id": "Normal",
           "title": {
             "en": "Normal",
-            "nl": "Normaal"
+            "nl": "Normaal",
+            "de": "Normal",
+            "fr": "Normal"
           }
         },
         {
           "id": "Boost",
           "title": {
             "en": "Boost",
-            "nl": "Boost"
+            "nl": "Boost",
+            "de": "Boost",
+            "fr": "Boost"
           }
         }
       ]

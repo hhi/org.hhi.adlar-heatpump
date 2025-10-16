@@ -2,12 +2,16 @@
   "id": "adlar_cop_weekly",
   "title": {
     "en": "Rolling Weekly Average COP",
-    "nl": "Voortschrijdend Wekelijks Gemiddelde COP"
+    "nl": "Voortschrijdend Wekelijks Gemiddelde COP",
+    "de": "Gleitender Wochendurchschnitt COP",
+    "fr": "Moyenne mobile hebdomadaire COP"
   },
   "type": "number",
   "units": {
     "en": "COP",
-    "nl": "COP"
+    "nl": "COP",
+    "de": "COP",
+    "fr": "COP"
   },
   "min": 0,
   "max": 8,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "Weekly Heat Pump Efficiency (COP)",
-    "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)"
+    "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)",
+    "de": "Wöchentliche Wärmepumpen Effizienz (COP)",
+    "fr": "Efficacité hebdomadaire de la pompe à chaleur (COP)"
   },
   "icon": "/assets/cop-efficiency.svg",
   "description": {
     "en": "7-day rolling average COP for seasonal pattern identification and long-term efficiency monitoring. Helps identify optimal operating conditions.",
-    "nl": "7-dagen voortschrijdend gemiddelde COP voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring. Helpt optimale bedrijfscondities identificeren."
+    "nl": "7-dagen voortschrijdend gemiddelde COP voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring. Helpt optimale bedrijfscondities identificeren.",
+    "de": "7-Tage gleitender Durchschnitt COP zur Identifizierung saisonaler Muster und Langzeitüberwachung der Effizienz. Hilft optimale Betriebsbedingungen zu identifizieren.",
+    "fr": "Moyenne mobile COP sur 7 jours pour l'identification des tendances saisonnières et la surveillance de l'efficacité à long terme. Aide à identifier les conditions de fonctionnement optimales."
   }
 }

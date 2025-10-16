@@ -2,15 +2,21 @@
   "id": "compressor_state_changed",
   "title": {
     "en": "Compressor state changed",
-    "nl": "Compressor status gewijzigd"
+    "nl": "Compressor status gewijzigd",
+    "de": "Kompressor-Zustand geändert",
+    "fr": "État du compresseur changé"
   },
   "titleFormatted": {
     "en": "Compressor turned [[state]]",
-    "nl": "Compressor [[state]]"
+    "nl": "Compressor [[state]]",
+    "de": "Kompressor [[state]]",
+    "fr": "Compresseur [[state]]"
   },
   "hint": {
     "en": "Triggers when compressor changes state",
-    "nl": "Wordt geactiveerd wanneer compressor van status wijzigt"
+    "nl": "Wordt geactiveerd wanneer compressor van status wijzigt",
+    "de": "Wird ausgelöst, wenn der Kompressor den Zustand ändert",
+    "fr": "Se déclenche lorsque le compresseur change d'état"
   },
   "highlight": true,
   "args": [
@@ -50,7 +56,9 @@
       "name": "current_state",
       "title": {
         "en": "Current Compressor state",
-        "nl": "Huidige Compressor status"
+        "nl": "Huidige Compressor status",
+        "de": "Aktueller Kompressor-Zustand",
+        "fr": "État actuel du compresseur"
       },
       "example": "running"
     }

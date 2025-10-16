@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "0.99.99",
+  "version": "1.0.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -8,20 +8,24 @@
   ],
   "name": {
     "en": "Adlar Castra Heatpump",
-    "nl": "Adlar Castra Warmtepomp"
+    "nl": "Adlar Castra Warmtepomp",
+    "de": "Adlar Castra Wärmepumpe",
+    "fr": "Pompe à chaleur Adlar Castra"
   },
   "description": {
     "en": "Local access to the Aurora series heatpump device.",
-    "nl": "Lokale toegang tot het Aurora-serie warmtepompapparaat."
+    "nl": "Lokale toegang tot het Aurora-serie warmtepompapparaat.",
+    "de": "Lokaler Zugriff auf das Wärmepumpengerät der Aurora-Serie.",
+    "fr": "Accès local à la pompe à chaleur de la série Aurora."
   },
   "category": [
     "climate"
   ],
   "permissions": [],
   "images": {
-    "small": "/assets/images/app-small.png",
-    "large": "/assets/images/app-large.png",
-    "xlarge": "/assets/images/app-xlarge.png"
+    "small": "/assets/images/WP-adlar-newhome-250x175.png",
+    "large": "/assets/images/WP-adlar-newhome-500x350.png",
+    "xlarge": "/assets/images/WP-adlar-newhome-1000x700.png"
   },
   "bugs": {
     "url": "https://github.com/hhi/org.hhi.adlar-heatpump/issues"
@@ -37,11 +41,21 @@
       "warmtepomp",
       "adlar",
       "aurora"
+    ],
+    "de": [
+      "wärmepumpe",
+      "adlar",
+      "aurora"
+    ],
+    "fr": [
+      "pompe à chaleur",
+      "adlar",
+      "aurora"
     ]
   },
   "brandColor": "#f5a623",
   "author": "H Hi <iphone.HHi@me.com>",
-  "icon": "/assets/icon.svg",
+  "icon": "/assets/adlar-icon-white.svg",
   "homeyCommunityTopicId": 143690,
   "contributors": {
     "developers": [

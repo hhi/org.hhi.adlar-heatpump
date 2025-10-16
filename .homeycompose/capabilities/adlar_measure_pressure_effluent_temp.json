@@ -2,10 +2,15 @@
   "id": "adlar_measure_pressure_effluent_temp",
   "title": {
     "en": "EVI Open",
-    "nl": "EVI-openingsstop"
+    "nl": "EVI-openingsstop",
+    "de": "EVI-Öffnung",
+    "fr": "Ouverture EVI"
   },
   "units": {
-    "en": "Pa"
+    "en": "Pa",
+    "nl": "Pa",
+    "de": "Pa",
+    "fr": "Pa"
   },
   "min": -500,
   "max": 500,
@@ -18,7 +23,9 @@
   "insights": true,
   "insightsTitle": {
     "en": "EVI Open",
-    "nl": "EVI-openingsstop"
+    "nl": "EVI-openingsstop",
+    "de": "EVI-Öffnung",
+    "fr": "Ouverture EVI"
   },
   "icon": "/assets/pressure.svg",
 

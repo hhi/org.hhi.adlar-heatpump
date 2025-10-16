@@ -2,15 +2,21 @@
   "id": "defrost_state_changed",
   "title": {
     "en": "Defrost state changed",
-    "nl": "Ontdooien status gewijzigd"
+    "nl": "Ontdooien status gewijzigd",
+    "de": "Abtau-Zustand geändert",
+    "fr": "État du dégivrage changé"
   },
   "titleFormatted": {
     "en": "Defrost turned [[state]]",
-    "nl": "Ontdooien [[state]]"
+    "nl": "Ontdooien [[state]]",
+    "de": "Abtauung [[state]]",
+    "fr": "Dégivrage [[state]]"
   },
   "hint": {
     "en": "Triggers when defrost system changes state",
-    "nl": "Wordt geactiveerd wanneer ontdooi systeem van status wijzigt"
+    "nl": "Wordt geactiveerd wanneer ontdooi systeem van status wijzigt",
+    "de": "Wird ausgelöst, wenn das Abtausystem den Zustand ändert",
+    "fr": "Se déclenche lorsque le système de dégivrage change d'état"
   },
   "highlight": true,
   "args": [
@@ -50,7 +56,9 @@
       "name": "current_state",
       "title": {
         "en": "Current Defrost state",
-        "nl": "Huidige Ontdooien status"
+        "nl": "Huidige Ontdooien status",
+        "de": "Aktueller Abtau-Zustand",
+        "fr": "État actuel du dégivrage"
       },
       "example": "active"
     }

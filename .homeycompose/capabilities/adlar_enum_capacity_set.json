@@ -2,7 +2,9 @@
   "id": "adlar_enum_capacity_set",
   "title": {
     "en": "Set Hot Water curve",
-    "nl": "Warmwater curve instellen"
+    "nl": "Warmwater curve instellen",
+    "de": "Warmwasserkurve einstellen",
+    "fr": "Définir la courbe d'eau chaude"
   },
   "type": "enum",
   "values": [
@@ -10,7 +12,9 @@
       "id": "OFF",
       "title": {
         "en": "OFF",
-        "nl": "UIT"
+        "nl": "UIT",
+        "de": "AUS",
+        "fr": "ARRÊT"
       }
     },
     {
@@ -48,6 +52,8 @@
   "preventInsights": true,
   "description": {
     "en": "dp 11: capacity_set - Controls the hot water curve settings (OFF, H1-H4) for domestic hot water heating",
-    "nl": "dp 11: capacity_set - Beheert de warmwater curve instellingen (UIT, H1-H4) voor sanitair warm water"
+    "nl": "dp 11: capacity_set - Beheert de warmwater curve instellingen (UIT, H1-H4) voor sanitair warm water",
+    "de": "dp 11: capacity_set - Steuert die Warmwasserkurveneinstellungen (AUS, H1-H4) für Brauchwarmwasserbereitung",
+    "fr": "dp 11: capacity_set - Contrôle les paramètres de courbe d'eau chaude (ARRÊT, H1-H4) pour le chauffage de l'eau chaude sanitaire"
   }
 }
