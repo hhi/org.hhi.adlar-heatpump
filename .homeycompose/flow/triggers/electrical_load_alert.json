@@ -2,15 +2,21 @@
   "id": "electrical_load_alert",
   "title": {
     "en": "Electrical load alert",
-    "nl": "Elektrische belasting alarm"
+    "nl": "Elektrische belasting alarm",
+    "de": "Elektrische Lastalarm",
+    "fr": "Alerte de charge électrique"
   },
   "titleFormatted": {
     "en": "Current load [[condition]] [[current]] amperes",
-    "nl": "Stroomsterkte [[condition]] [[current]] ampère"
+    "nl": "Stroomsterkte [[condition]] [[current]] ampère",
+    "de": "Stromstärke [[condition]] [[current]] Ampere",
+    "fr": "Charge de courant [[condition]] [[current]] ampères"
   },
   "hint": {
     "en": "Triggers when electrical current goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer elektrische stroom boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn der elektrische Strom einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque le courant électrique dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_amperage",
       "title": {
         "en": "Current amperage",
-        "nl": "Huidige stroomsterkte"
+        "nl": "Huidige stroomsterkte",
+        "de": "Aktuelle Stromstärke",
+        "fr": "Intensité actuelle"
       },
       "example": 12.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_amperage",
       "title": {
         "en": "Threshold amperage",
-        "nl": "Drempel stroomsterkte"
+        "nl": "Drempel stroomsterkte",
+        "de": "Schwellenwert Stromstärke",
+        "fr": "Intensité seuil"
       },
       "example": 15
     }

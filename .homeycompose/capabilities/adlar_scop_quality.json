@@ -2,7 +2,9 @@
   "id": "adlar_scop_quality",
   "title": {
     "en": "SCOP Quality",
-    "nl": "SCOP Kwaliteit"
+    "nl": "SCOP Kwaliteit",
+    "de": "SCOP-Qualität",
+    "fr": "Qualité SCOP"
   },
   "type": "string",
   "getable": true,
@@ -12,6 +14,8 @@
   "icon": "/assets/data-quality.svg",
   "description": {
     "en": "SCOP calculation data quality indicator showing confidence level and method mix used for seasonal calculation",
-    "nl": "SCOP berekening data kwaliteit indicator die betrouwbaarheidsniveau en methode mix toont gebruikt voor seizoensberekening"
+    "nl": "SCOP berekening data kwaliteit indicator die betrouwbaarheidsniveau en methode mix toont gebruikt voor seizoensberekening",
+    "de": "SCOP-Berechnungs-Datenqualitätsindikator, der das Vertrauensniveau und die für die saisonale Berechnung verwendete Methodenmischung anzeigt",
+    "fr": "Indicateur de qualité des données de calcul SCOP montrant le niveau de confiance et la combinaison de méthodes utilisée pour le calcul saisonnier"
   }
 }

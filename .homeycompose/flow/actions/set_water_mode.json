@@ -2,15 +2,21 @@
   "id": "set_water_mode",
   "title": {
     "en": "Set water control mode",
-    "nl": "Water controle modus instellen"
+    "nl": "Water controle modus instellen",
+    "de": "Wassersteuermodus einstellen",
+    "fr": "Régler le mode de contrôle de l'eau"
   },
   "titleFormatted": {
     "en": "Set water control mode to [[mode]]",
-    "nl": "Water controle modus instellen op [[mode]]"
+    "nl": "Water controle modus instellen op [[mode]]",
+    "de": "Wassersteuermodus einstellen auf [[mode]]",
+    "fr": "Régler le mode de contrôle de l'eau sur [[mode]]"
   },
   "hint": {
     "en": "Set the water control mode setting",
-    "nl": "Stel de water controle modus instelling in"
+    "nl": "Stel de water controle modus instelling in",
+    "de": "Wassersteuermoduseinstellung einstellen",
+    "fr": "Régler le paramètre du mode de contrôle de l'eau"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "mode",
       "title": {
         "en": "Water control mode",
-        "nl": "Water controle modus"
+        "nl": "Water controle modus",
+        "de": "Wassersteuermodus",
+        "fr": "Mode de contrôle de l'eau"
       },
       "min": 0,
       "max": 1,
@@ -31,7 +39,9 @@
       "units": "",
       "placeholder": {
         "en": "Mode (0-1)",
-        "nl": "Modus (0-1)"
+        "nl": "Modus (0-1)",
+        "de": "Modus (0-1)",
+        "fr": "Mode (0-1)"
       }
     }
   ]

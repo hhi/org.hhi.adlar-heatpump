@@ -1,4 +1,10 @@
 {
+  "1.0.0": {
+    "en": "Added German and French language support. All text and timestamps now display in your Homey's language (EN/NL/DE/FR).",
+    "nl": "Duitse en Franse taalondersteuning toegevoegd. Alle tekst en tijdstempels worden nu weergegeven in de taal van je Homey (EN/NL/DE/FR).",
+    "de": "Deutsche und französische Sprachunterstützung hinzugefügt. Alle Texte und Zeitstempel werden jetzt in der Sprache Ihres Homey angezeigt (EN/NL/DE/FR).",
+    "fr": "Prise en charge des langues allemande et française ajoutée. Tous les textes et horodatages s'affichent désormais dans la langue de votre Homey (EN/NL/DE/FR)."
+  },
   "0.99.99": {
     "en": "Fixed: Device no longer remains disconnected for extended periods after network issues. Connection management now uses single reliable source, automatically reconnects within minutes instead of hours.",
     "nl": "Opgelost: Apparaat blijft niet langer langdurig losgekoppeld na netwerkproblemen. Verbindingsbeheer gebruikt nu één betrouwbare bron, herverbindt automatisch binnen minuten in plaats van uren."

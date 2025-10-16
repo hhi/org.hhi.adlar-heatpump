@@ -1,0 +1,68 @@
+{
+  "pair": {
+    "enter_device_info": {
+      "title": "Entrer les informations de l'appareil",
+      "description": "Veuillez saisir vos identifiants de l'appareil Tuya",
+      "device_id": "ID de l'appareil",
+      "local_key": "Clé locale",
+      "ip_address": "Adresse IP",
+      "protocol_version": "Version du protocole",
+      "continue": "Continuer"
+    }
+  },
+  "cop_method": {
+    "direct_thermal": "Thermique Direct",
+    "power_module": "Module de Puissance",
+    "power_estimation": "Estimation de Puissance",
+    "refrigerant_circuit": "Circuit Frigorifique",
+    "carnot_estimation": "Estimation de Carnot",
+    "valve_correlation": "Corrélation de Vanne",
+    "temperature_difference": "Différence de Température",
+    "insufficient_data": "!"
+  },
+  "cop_method_description": {
+    "direct_thermal": "Calcul thermique direct utilisant le débit d'eau et la différence de température (précision ±5%)",
+    "power_module": "Estimation du module de puissance utilisant des capteurs internes et validation externe (précision ±8%)",
+    "power_estimation": "Estimation de consommation électrique utilisant les données du compresseur et du ventilateur (précision ±10%)",
+    "refrigerant_circuit": "Analyse du circuit frigorifique utilisant des capteurs de pression et température (précision ±12%)",
+    "carnot_estimation": "Estimation basée sur Carnot utilisant la fréquence du compresseur et température ambiante (précision ±15%)",
+    "valve_correlation": "Corrélation de position de vanne utilisant les données de vanne d'expansion (précision ±20%)",
+    "temperature_difference": "Estimation de différence de température utilisant des relations empiriques (précision ±30%)",
+    "insufficient_data": "Données insuffisantes disponibles pour toute méthode de calcul COP"
+  },
+  "scop_status": {
+    "initializing": "Initialisation...",
+    "collecting": "Collecte de données",
+    "insufficient_data": "7+ jours de données nécessaires",
+    "calculating": "Calcul en cours..."
+  },
+  "trend_descriptions": {
+    "strong_improvement": "Forte Amélioration d'Efficacité",
+    "moderate_improvement": "Amélioration d'Efficacité Modérée",
+    "slight_improvement": "Légère Amélioration d'Efficacité",
+    "significant_decline": "Baisse d'Efficacité Importante",
+    "moderate_decline": "Baisse d'Efficacité Modérée",
+    "slight_decline": "Légère Baisse d'Efficacité",
+    "stable": "Performance Stable"
+  },
+  "cop_diagnostics": {
+    "no_power_measurement": "Aucune Donnée de Puissance",
+    "no_thermal_measurement": "Aucune Donnée Thermique",
+    "no_water_flow": "Aucune Donnée de Débit",
+    "no_temperature_difference": "Aucun Delta de Température",
+    "no_compressor_data": "Aucune Donnée de Compresseur",
+    "insufficient_sensor_data": "Multiples Défaillances",
+    "enable_power_monitoring": "Activer la Surveillance de Puissance",
+    "check_temperature_sensors": "Vérifier les Capteurs de Température",
+    "check_flow_sensor": "Vérifier le Capteur de Débit",
+    "check_compressor_communication": "Vérifier la Liaison Compresseur",
+    "check_multiple_sensors": "Vérifier Tous les Capteurs"
+  },
+  "COP calculation disabled": "Calcul COP désactivé",
+  "connection_status": {
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "reconnecting": "Reconnexion",
+    "error": "Erreur"
+  }
+}

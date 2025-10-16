@@ -2,7 +2,9 @@
   "id": "adlar_enum_water_mode",
   "title": {
     "en": "Water Control Temperature",
-    "nl": "Temperatuurregeling water"
+    "nl": "Temperatuurregeling water",
+    "de": "Wassertemperaturregelung",
+    "fr": "Régulation de la température de l'eau"
   },
   "type": "number",
   "unit": "L",

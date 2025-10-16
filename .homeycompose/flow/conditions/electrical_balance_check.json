@@ -2,15 +2,21 @@
   "id": "electrical_balance_check",
   "title": {
     "en": "Electrical balance check",
-    "nl": "Elektrische balans controle"
+    "nl": "Elektrische balans controle",
+    "de": "Elektrische Bilanz prüfen",
+    "fr": "Vérification de l'équilibre électrique"
   },
   "titleFormatted": {
     "en": "3-phase electrical balance is !{{within|outside}} [[tolerance]]% tolerance",
-    "nl": "3-fase elektrische balans is !{{binnen|buiten}} [[tolerance]]% tolerantie"
+    "nl": "3-fase elektrische balans is !{{binnen|buiten}} [[tolerance]]% tolerantie",
+    "de": "3-Phasen-Elektrische Bilanz ist !{{innerhalb|außerhalb}} [[tolerance]]% Toleranz",
+    "fr": "L'équilibre électrique triphasé est !{{dans|hors}} de [[tolerance]]% de tolérance"
   },
   "hint": {
     "en": "Check if the 3-phase electrical currents are balanced within specified tolerance",
-    "nl": "Controleer of de 3-fase elektrische stromen gebalanceerd zijn binnen de tolerantie"
+    "nl": "Controleer of de 3-fase elektrische stromen gebalanceerd zijn binnen de tolerantie",
+    "de": "Prüfen Sie, ob die 3-Phasen-Elektrischen Ströme innerhalb der angegebenen Toleranz ausgeglichen sind",
+    "fr": "Vérifier si les courants électriques triphasés sont équilibrés dans la tolérance spécifiée"
   },
   "args": [
     {
@@ -23,7 +29,9 @@
       "name": "tolerance",
       "title": {
         "en": "Balance tolerance (%)",
-        "nl": "Balans tolerantie (%)"
+        "nl": "Balans tolerantie (%)",
+        "de": "Bilanztoleranz (%)",
+        "fr": "Tolérance d'équilibre (%)"
       },
       "min": 1,
       "max": 20,
@@ -31,7 +39,9 @@
       "units": "%",
       "placeholder": {
         "en": "Electrical balance tolerance percentage",
-        "nl": "Elektrische balans tolerantie percentage"
+        "nl": "Elektrische balans tolerantie percentage",
+        "de": "Elektrische Bilanztoleranz-Prozentsatz",
+        "fr": "Pourcentage de tolérance d'équilibre électrique"
       }
     }
   ]

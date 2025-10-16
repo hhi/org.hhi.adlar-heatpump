@@ -2,15 +2,21 @@
   "id": "economizer_inlet_temperature_alert",
   "title": {
     "en": "Economizer inlet temperature alert",
-    "nl": "EVI warmtewisselaar zuiggas temperatuur alarm"
+    "nl": "EVI warmtewisselaar zuiggas temperatuur alarm",
+    "de": "Economizer-Einlass-Temperaturalarm",
+    "fr": "Alerte de température d'entrée de l'économiseur"
   },
   "titleFormatted": {
     "en": "Economizer inlet temperature [[condition]] [[temperature]]°C",
-    "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C"
+    "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C",
+    "de": "Economizer-Einlass-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température d'entrée de l'économiseur [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when economizer inlet temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Economizer-Einlass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température d'entrée de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Economizer inlet temperature",
-        "nl": "Huidige EVI warmtewisselaar zuiggas temperatuur"
+        "nl": "Huidige EVI warmtewisselaar zuiggas temperatuur",
+        "de": "Aktuelle Economizer-Einlass-Temperatur",
+        "fr": "Température d'entrée actuelle de l'économiseur"
       },
       "example": 25.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 30
     }

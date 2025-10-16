@@ -2,7 +2,9 @@
   "id": "adlar_enum_volume_set",
   "title": {
     "en": "Electricity Consumption Checking",
-    "nl": "Stroomverbruik controleren"
+    "nl": "Stroomverbruik controleren",
+    "de": "Stromverbrauchsprüfung",
+    "fr": "Vérification de la consommation électrique"
   },
   "type": "number",
   "min": 0,

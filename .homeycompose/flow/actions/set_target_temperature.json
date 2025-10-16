@@ -2,15 +2,21 @@
   "id": "set_target_temperature",
   "title": {
     "en": "Set target (setpoint) temperature",
-    "nl": "Doel (setpoint) temperatuur instellen"
+    "nl": "Doel (setpoint) temperatuur instellen",
+    "de": "Zieltemperatur (Sollwert) einstellen",
+    "fr": "Régler la température cible (consigne)"
   },
   "titleFormatted": {
     "en": "Set target (setpoint) temperature to [[temperature]]",
-    "nl": "Doel (setpoint) temperatuur instellen op [[temperature]]"
+    "nl": "Doel (setpoint) temperatuur instellen op [[temperature]]",
+    "de": "Zieltemperatur (Sollwert) einstellen auf [[temperature]]",
+    "fr": "Régler la température cible (consigne) sur [[temperature]]"
   },
   "hint": {
     "en": "Set the target (setpoint) temperature for the heat pump",
-    "nl": "Stel de doel (setpoint) temperatuur voor de warmtepomp in"
+    "nl": "Stel de doel (setpoint) temperatuur voor de warmtepomp in",
+    "de": "Zieltemperatur (Sollwert) für die Wärmepumpe einstellen",
+    "fr": "Régler la température cible (consigne) pour la pompe à chaleur"
   },
   "highlight": true,
   "args": [
@@ -24,7 +30,9 @@
       "name": "temperature",
       "title": {
         "en": "Temperature (°C)",
-        "nl": "Temperatuur (°C)"
+        "nl": "Temperatuur (°C)",
+        "de": "Temperatur (°C)",
+        "fr": "Température (°C)"
       },
       "min": 5,
       "max": 60,
@@ -32,7 +40,9 @@
       "units": "°C",
       "placeholder": {
         "en": "Target temperature in °C",
-        "nl": "Doel temperatuur in °C"
+        "nl": "Doel temperatuur in °C",
+        "de": "Zieltemperatur in °C",
+        "fr": "Température cible en °C"
       }
     }
   ]

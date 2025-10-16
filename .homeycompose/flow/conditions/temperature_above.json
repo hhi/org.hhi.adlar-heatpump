@@ -2,15 +2,21 @@
   "id": "temperature_above",
   "title": {
     "en": "Ambient temperature above",
-    "nl": "Buitentemperatuur boven"
+    "nl": "Buitentemperatuur boven",
+    "de": "Umgebungstemperatur über",
+    "fr": "Température ambiante au-dessus"
   },
   "titleFormatted": {
     "en": "Ambient temperature is !{{above|below}} [[temperature]]°C",
-    "nl": "Buitentemperatuur is !{{boven|onder}} [[temperature]]°C"
+    "nl": "Buitentemperatuur is !{{boven|onder}} [[temperature]]°C",
+    "de": "Umgebungstemperatur ist !{{über|unter}} [[temperature]]°C",
+    "fr": "La température ambiante est !{{au-dessus|en dessous}} de [[temperature]]°C"
   },
   "hint": {
     "en": "Check if the ambient temperature is above or below a specific value",
-    "nl": "Controleer of de buitentemperatuur boven of onder een specifieke waarde is"
+    "nl": "Controleer of de buitentemperatuur boven of onder een specifieke waarde is",
+    "de": "Prüfen Sie, ob die Umgebungstemperatur über oder unter einem bestimmten Wert liegt",
+    "fr": "Vérifier si la température ambiante est au-dessus ou en dessous d'une valeur spécifique"
   },
   "highlight": true,
   "args": [
@@ -24,7 +30,9 @@
       "name": "temperature",
       "title": {
         "en": "Temperature",
-        "nl": "Temperatuur"
+        "nl": "Temperatuur",
+        "de": "Temperatur",
+        "fr": "Température"
       },
       "min": -30,
       "max": 50,
@@ -32,7 +40,9 @@
       "units": "°C",
       "placeholder": {
         "en": "Temperature (°C)",
-        "nl": "Temperatuur (°C)"
+        "nl": "Temperatuur (°C)",
+        "de": "Temperatur (°C)",
+        "fr": "Température (°C)"
       }
     }
   ]

@@ -2,7 +2,9 @@
   "id": "adlar_picker_countdown_set",
   "title": {
     "en": "Set Heating curve",
-    "nl": "Verwarmingscurve instellen"
+    "nl": "Verwarmingscurve instellen",
+    "de": "Heizkurve einstellen",
+    "fr": "Définir la courbe de chauffage"
   },
   "type": "enum",
   "values": [
@@ -10,7 +12,9 @@
       "id": "OFF",
       "title": {
         "en": "OFF",
-        "nl": "UIT"
+        "nl": "UIT",
+        "de": "AUS",
+        "fr": "ARRÊT"
       }
     },
     {
@@ -122,7 +126,9 @@
       "id": "L8",
       "title": {
         "en": "L8 - custom curve",
-        "nl": "L8 - aangepaste curve"
+        "nl": "L8 - aangepaste curve",
+        "de": "L8 - benutzerdefinierte Kurve",
+        "fr": "L8 - courbe personnalisée"
       }
     }
   ],
@@ -133,6 +139,8 @@
   "icon": "/assets/heating-curve.svg",
   "description": {
     "en": "dp 13: countdown_set - Set heating curve for temperature compensation (user-controllable picker)",
-    "nl": "dp 13: countdown_set - Stel verwarmingscurve in voor temperatuurcompensatie (gebruiker-instelbare picker)"
+    "nl": "dp 13: countdown_set - Stel verwarmingscurve in voor temperatuurcompensatie (gebruiker-instelbare picker)",
+    "de": "dp 13: countdown_set - Heizkurve für Temperaturkompensation einstellen (benutzersteuerbare Auswahl)",
+    "fr": "dp 13: countdown_set - Définir la courbe de chauffage pour la compensation de température (sélecteur contrôlable par l'utilisateur)"
   }
 }

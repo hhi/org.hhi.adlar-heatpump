@@ -2,12 +2,16 @@
   "id": "adlar_external_energy_total",
   "title": {
     "en": "Estimated Total Energy Consumption",
-    "nl": "Geschat Totaal Energieverbruik"
+    "nl": "Geschat Totaal Energieverbruik",
+    "de": "Geschätzter Gesamtenergieverbrauch",
+    "fr": "Consommation d'énergie totale estimée"
   },
   "type": "number",
   "units": {
     "en": "kWh",
-    "nl": "kWh"
+    "nl": "kWh",
+    "de": "kWh",
+    "fr": "kWh"
   },
   "min": 0,
   "max": 999999,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "External Energy Cumulative",
-    "nl": "Extern Energie Cumulatief"
+    "nl": "Extern Energie Cumulatief",
+    "de": "Externe Energie kumulativ",
+    "fr": "Énergie externe cumulative"
   },
   "icon": "/assets/external-energy-total.svg",
   "description": {
     "en": "Total energy consumption estimated from external power measurements received via flow cards. Only tracks energy when external power data is available.",
-    "nl": "Totaal energieverbruik geschat uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn."
+    "nl": "Totaal energieverbruik geschat uit externe vermogensmetingen ontvangen via flow kaarten. Volgt alleen energie wanneer externe vermogensgegevens beschikbaar zijn.",
+    "de": "Gesamtenergieverbrauch geschätzt aus externen Leistungsmessungen über Flow-Karten. Erfasst nur Energie wenn externe Leistungsdaten verfügbar sind.",
+    "fr": "Consommation d'énergie totale estimée à partir de mesures de puissance externes reçues via des cartes de flux. Ne suit l'énergie que lorsque des données de puissance externes sont disponibles."
   }
 }

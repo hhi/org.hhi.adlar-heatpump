@@ -2,7 +2,9 @@
   "id": "adlar_cop_method",
   "title": {
     "en": "COP Calculation Method",
-    "nl": "COP Berekenings Methode"
+    "nl": "COP Berekenings Methode",
+    "de": "COP-Berechnungsmethode",
+    "fr": "Méthode de Calcul COP"
   },
   "type": "string",
   "getable": true,
@@ -12,6 +14,8 @@
   "icon": "/assets/cop-efficiency.svg",
   "description": {
     "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level.",
-    "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft."
+    "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft.",
+    "de": "Zeigt, welche Berechnungsmethode zur Bestimmung des COP-Werts verwendet wurde, was die Datenqualität und das Genauigkeitsniveau angibt.",
+    "fr": "Indique quelle méthode de calcul a été utilisée pour déterminer la valeur COP, indiquant la qualité des données et le niveau de précision."
   }
 }

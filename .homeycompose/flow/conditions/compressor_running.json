@@ -2,15 +2,21 @@
   "id": "compressor_running",
   "title": {
     "en": "Compressor is running",
-    "nl": "Compressor draait"
+    "nl": "Compressor draait",
+    "de": "Kompressor läuft",
+    "fr": "Le compresseur est en marche"
   },
   "titleFormatted": {
     "en": "Compressor is !{{running|stopped}}",
-    "nl": "Compressor is !{{draaiend|gestopt}}"
+    "nl": "Compressor is !{{draaiend|gestopt}}",
+    "de": "Kompressor ist !{{läuft|gestoppt}}",
+    "fr": "Le compresseur est !{{en marche|arrêté}}"
   },
   "hint": {
     "en": "Check if the compressor is currently running",
-    "nl": "Controleer of de compressor momenteel draait"
+    "nl": "Controleer of de compressor momenteel draait",
+    "de": "Prüfen Sie, ob der Kompressor derzeit läuft",
+    "fr": "Vérifier si le compresseur est actuellement en marche"
   },
   "highlight": true,
   "args": [

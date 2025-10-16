@@ -2,15 +2,21 @@
   "id": "device_power_is",
   "title": {
     "en": "Device power is",
-    "nl": "Apparaat vermogen is"
+    "nl": "Apparaat vermogen is",
+    "de": "Geräteleistung ist",
+    "fr": "L'alimentation de l'appareil est"
   },
   "titleFormatted": {
     "en": "Device power !{{is|is not}} [[state]]",
-    "nl": "Apparaat vermogen !{{is|is niet}} [[state]]"
+    "nl": "Apparaat vermogen !{{is|is niet}} [[state]]",
+    "de": "Geräteleistung !{{ist|ist nicht}} [[state]]",
+    "fr": "L'alimentation de l'appareil !{{est|n'est pas}} [[state]]"
   },
   "hint": {
     "en": "Check if the device power state matches the selected state",
-    "nl": "Controleer of de apparaat vermogen status overeenkomt met de geselecteerde status"
+    "nl": "Controleer of de apparaat vermogen status overeenkomt met de geselecteerde status",
+    "de": "Prüfen Sie, ob der Geräteleistungsstatus mit dem ausgewählten Status übereinstimmt",
+    "fr": "Vérifier si l'état d'alimentation de l'appareil correspond à l'état sélectionné"
   },
   "args": [
     {
@@ -23,21 +29,27 @@
       "name": "state",
       "title": {
         "en": "Power state",
-        "nl": "Vermogen status"
+        "nl": "Vermogen status",
+        "de": "Leistungsstatus",
+        "fr": "État d'alimentation"
       },
       "values": [
         {
           "id": "on",
           "title": {
             "en": "On",
-            "nl": "Aan"
+            "nl": "Aan",
+            "de": "Ein",
+            "fr": "Marche"
           }
         },
         {
           "id": "off",
           "title": {
             "en": "Off",
-            "nl": "Uit"
+            "nl": "Uit",
+            "de": "Aus",
+            "fr": "Arrêt"
           }
         }
       ]

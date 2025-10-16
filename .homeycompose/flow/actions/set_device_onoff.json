@@ -2,15 +2,21 @@
   "id": "set_device_onoff",
   "title": {
     "en": "Set device power",
-    "nl": "Apparaat vermogen instellen"
+    "nl": "Apparaat vermogen instellen",
+    "de": "Geräteleistung einstellen",
+    "fr": "Régler l'alimentation de l'appareil"
   },
   "titleFormatted": {
     "en": "Set device power to [[state]]",
-    "nl": "Apparaat vermogen instellen op [[state]]"
+    "nl": "Apparaat vermogen instellen op [[state]]",
+    "de": "Geräteleistung einstellen auf [[state]]",
+    "fr": "Régler l'alimentation de l'appareil sur [[state]]"
   },
   "hint": {
     "en": "Set the device power state",
-    "nl": "Stel de apparaat vermogen status in"
+    "nl": "Stel de apparaat vermogen status in",
+    "de": "Gerätestromstatus einstellen",
+    "fr": "Régler l'état d'alimentation de l'appareil"
   },
   "highlight": true,
   "args": [
@@ -24,21 +30,27 @@
       "name": "state",
       "title": {
         "en": "Power state",
-        "nl": "Vermogen status"
+        "nl": "Vermogen status",
+        "de": "Stromstatus",
+        "fr": "État d'alimentation"
       },
       "values": [
         {
           "id": "on",
           "title": {
             "en": "On",
-            "nl": "Aan"
+            "nl": "Aan",
+            "de": "Ein",
+            "fr": "Allumé"
           }
         },
         {
           "id": "off",
           "title": {
             "en": "Off",
-            "nl": "Uit"
+            "nl": "Uit",
+            "de": "Aus",
+            "fr": "Éteint"
           }
         }
       ]

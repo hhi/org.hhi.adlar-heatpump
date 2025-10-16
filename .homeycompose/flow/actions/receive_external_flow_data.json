@@ -2,15 +2,21 @@
   "id": "receive_external_flow_data",
   "title": {
     "en": "Send flow data to heat pump",
-    "nl": "Stuur doorstroom gegevens naar warmtepomp"
+    "nl": "Stuur doorstroom gegevens naar warmtepomp",
+    "de": "Durchflussdaten an Wärmepumpe senden",
+    "fr": "Envoyer les données de débit à la pompe à chaleur"
   },
   "titleFormatted": {
     "en": "Send [[flow_value]]L/min to heat pump for COP calculation",
-    "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening"
+    "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening",
+    "de": "[[flow_value]]L/min an Wärmepumpe für COP-Berechnung senden",
+    "fr": "Envoyer [[flow_value]]L/min à la pompe à chaleur pour le calcul COP"
   },
   "hint": {
     "en": "Sends water flow data to the heat pump for enhanced COP calculations",
-    "nl": "Stuurt water doorstroom gegevens naar de warmtepomp voor verbeterde COP-berekeningen"
+    "nl": "Stuurt water doorstroom gegevens naar de warmtepomp voor verbeterde COP-berekeningen",
+    "de": "Sendet Wasserdurchflussdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
+    "fr": "Envoie les données de débit d'eau à la pompe à chaleur pour des calculs COP améliorés"
   },
   "highlight": true,
   "args": [
@@ -24,11 +30,15 @@
       "name": "flow_value",
       "title": {
         "en": "Water flow rate (L/min)",
-        "nl": "Water doorstroom (L/min)"
+        "nl": "Water doorstroom (L/min)",
+        "de": "Wasserdurchflussrate (L/min)",
+        "fr": "Débit d'eau (L/min)"
       },
       "placeholder": {
         "en": "Current water flow rate in L/min",
-        "nl": "Huidige water doorstroom in L/min"
+        "nl": "Huidige water doorstroom in L/min",
+        "de": "Aktuelle Wasserdurchflussrate in L/min",
+        "fr": "Débit d'eau actuel en L/min"
       },
       "min": 0,
       "max": 200,

@@ -2,15 +2,21 @@
   "id": "power_threshold_exceeded",
   "title": {
     "en": "Power threshold exceeded",
-    "nl": "Vermogen drempel overschreden"
+    "nl": "Vermogen drempel overschreden",
+    "de": "Leistungs-Schwellenwert überschritten",
+    "fr": "Seuil de puissance dépassé"
   },
   "titleFormatted": {
     "en": "Power consumption exceeded [[threshold]] W",
-    "nl": "Stroomverbruik overschreed [[threshold]] W"
+    "nl": "Stroomverbruik overschreed [[threshold]] W",
+    "de": "Leistungsaufnahme überschritt [[threshold]] W",
+    "fr": "Consommation dépassée [[threshold]] W"
   },
   "hint": {
     "en": "Triggers when power consumption exceeds specified threshold (requires power monitoring support)",
-    "nl": "Wordt geactiveerd wanneer stroomverbruik een drempel overschrijdt (vereist vermogen monitoring ondersteuning)"
+    "nl": "Wordt geactiveerd wanneer stroomverbruik een drempel overschrijdt (vereist vermogen monitoring ondersteuning)",
+    "de": "Wird ausgelöst, wenn die Leistungsaufnahme den angegebenen Schwellenwert überschreitet (erfordert Leistungsüberwachung)",
+    "fr": "Se déclenche lorsque la consommation dépasse le seuil spécifié (nécessite la surveillance de la puissance)"
   },
   "args": [
     {
@@ -41,7 +47,9 @@
       "name": "current_power",
       "title": {
         "en": "Current power consumption",
-        "nl": "Huidig stroomverbruik"
+        "nl": "Huidig stroomverbruik",
+        "de": "Aktuelle Leistungsaufnahme",
+        "fr": "Consommation actuelle"
       },
       "example": 3500
     },
@@ -50,7 +58,9 @@
       "name": "threshold_power",
       "title": {
         "en": "Threshold power",
-        "nl": "Drempel vermogen"
+        "nl": "Drempel vermogen",
+        "de": "Schwellenwert Leistung",
+        "fr": "Puissance seuil"
       },
       "example": 3000
     }

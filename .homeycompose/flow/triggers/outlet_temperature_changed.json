@@ -2,15 +2,21 @@
   "id": "outlet_temperature_changed",
   "title": {
     "en": "Outlet temperature changed",
-    "nl": "Water uittrede temperatuur gewijzigd"
+    "nl": "Water uittrede temperatuur gewijzigd",
+    "de": "Rücklauftemperatur geändert",
+    "fr": "Température de sortie changée"
   },
   "titleFormatted": {
     "en": "Outlet temperature [[condition]] [[temperature]]°C",
-    "nl": "Water uittrede temperatuur [[condition]] [[temperature]]°C"
+    "nl": "Water uittrede temperatuur [[condition]] [[temperature]]°C",
+    "de": "Rücklauftemperatur [[condition]] [[temperature]]°C",
+    "fr": "Température de sortie [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when water outlet temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Rücklauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température de sortie d'eau dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_temperature",
       "title": {
         "en": "Current outlet temperature",
-        "nl": "Huidige water uittrede temperatuur"
+        "nl": "Huidige water uittrede temperatuur",
+        "de": "Aktuelle Rücklauftemperatur",
+        "fr": "Température de sortie actuelle"
       },
       "example": 25.5
     },
@@ -74,7 +82,9 @@
       "name": "threshold_temperature",
       "title": {
         "en": "Threshold temperature",
-        "nl": "Drempel temperatuur"
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
       },
       "example": 30
     }

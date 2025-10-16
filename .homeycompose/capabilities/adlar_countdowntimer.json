@@ -2,7 +2,9 @@
   "id": "adlar_countdowntimer",
   "title": {
     "en": "Automatic shutoff timer",
-    "nl": "Automatische sluitingstimer"
+    "nl": "Automatische sluitingstimer",
+    "de": "Automatischer Abschalttimer",
+    "fr": "Minuterie d'arrêt automatique"
   },
   "type": "number",
   "min": 0,
@@ -10,7 +12,9 @@
   "step": 1,
   "units": {
     "en": "min",
-    "nl": "min"
+    "nl": "min",
+    "de": "min",
+    "fr": "min"
   },
   "getable": true,
   "setable": false,
@@ -19,7 +23,9 @@
   "insights": true,
   "insightsTitle": {
     "en": "Automatic shutoff timer",
-    "nl": "Automatische sluitingstimer"
+    "nl": "Automatische sluitingstimer",
+    "de": "Automatischer Abschalttimer",
+    "fr": "Minuterie d'arrêt automatique"
   },
   "description": {
     "nl": "dp 14 : countdown_left - Countdown Left"

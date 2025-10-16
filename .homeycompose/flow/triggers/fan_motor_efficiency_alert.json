@@ -2,15 +2,21 @@
   "id": "fan_motor_efficiency_alert",
   "title": {
     "en": "Fan motor efficiency alert",
-    "nl": "Ventilator motor efficiëntie alarm"
+    "nl": "Ventilator motor efficiëntie alarm",
+    "de": "Lüftermotor-Effizienzalarm",
+    "fr": "Alerte d'efficacité du moteur de ventilateur"
   },
   "titleFormatted": {
     "en": "Fan motor frequency [[condition]] [[frequency]] Hz",
-    "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz"
+    "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz",
+    "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz",
+    "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz"
   },
   "hint": {
     "en": "Triggers when fan motor frequency goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald nivo gaat"
+    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_fan_frequency",
       "title": {
         "en": "Current fan frequency",
-        "nl": "Huidige ventilator frequentie"
+        "nl": "Huidige ventilator frequentie",
+        "de": "Aktuelle Lüfterfrequenz",
+        "fr": "Fréquence actuelle du ventilateur"
       },
       "example": 75
     },
@@ -74,7 +82,9 @@
       "name": "threshold_frequency",
       "title": {
         "en": "Threshold frequency",
-        "nl": "Drempel frequentie"
+        "nl": "Drempel frequentie",
+        "de": "Schwellenwert Frequenz",
+        "fr": "Fréquence seuil"
       },
       "example": 80
     }

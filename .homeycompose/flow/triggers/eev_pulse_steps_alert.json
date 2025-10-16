@@ -2,15 +2,21 @@
   "id": "eev_pulse_steps_alert",
   "title": {
     "en": "EEV Open pulse-steps alert",
-    "nl": "EEV-openingsstap puls-stappen alarm"
+    "nl": "EEV-openingsstap puls-stappen alarm",
+    "de": "EEV-Öffnungspuls-Alarm",
+    "fr": "Alerte de pas d'impulsion EEV"
   },
   "titleFormatted": {
     "en": "EEV pulse-steps [[condition]] [[pulse_steps]]",
-    "nl": "EEV puls-stappen [[condition]] [[pulse_steps]]"
+    "nl": "EEV puls-stappen [[condition]] [[pulse_steps]]",
+    "de": "EEV-Pulsschritte [[condition]] [[pulse_steps]]",
+    "fr": "Pas d'impulsion EEV [[condition]] [[pulse_steps]]"
   },
   "hint": {
     "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan"
+    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan",
+    "de": "Wird ausgelöst, wenn die elektronischen Expansionsventil (EEV) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
+    "fr": "Se déclenche lorsque les pas d'impulsion du détendeur électronique (EEV) dépassent ou descendent en dessous d'un niveau spécifié"
   },
   "args": [
     {
@@ -65,7 +71,9 @@
       "name": "current_pulse_steps",
       "title": {
         "en": "Current EEV Open pulse-steps",
-        "nl": "Huidige EEV-openingsstap puls-stappen"
+        "nl": "Huidige EEV-openingsstap puls-stappen",
+        "de": "Aktuelle EEV-Öffnungspulsschritte",
+        "fr": "Pas d'impulsion d'ouverture EEV actuels"
       },
       "example": 450
     },
@@ -74,7 +82,9 @@
       "name": "threshold_pulse_steps",
       "title": {
         "en": "Threshold pulse-steps",
-        "nl": "Drempel puls-stappen"
+        "nl": "Drempel puls-stappen",
+        "de": "Schwellenwert Pulsschritte",
+        "fr": "Pas d'impulsion seuil"
       },
       "example": 400
     }

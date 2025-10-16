@@ -2,12 +2,16 @@
   "id": "adlar_external_ambient",
   "title": {
     "en": "External Ambient Temperature",
-    "nl": "Externe Buitentemperatuur"
+    "nl": "Externe Buitentemperatuur",
+    "de": "Externe Umgebungstemperatur",
+    "fr": "Température ambiante externe"
   },
   "type": "number",
   "units": {
     "en": "°C",
-    "nl": "°C"
+    "nl": "°C",
+    "de": "°C",
+    "fr": "°C"
   },
   "min": -50,
   "max": 50,
@@ -19,11 +23,15 @@
   "insights": true,
   "insightsTitle": {
     "en": "External Ambient for COP",
-    "nl": "Externe Buitentemp voor COP"
+    "nl": "Externe Buitentemp voor COP",
+    "de": "Externe Umgebung für COP",
+    "fr": "Ambiance externe pour COP"
   },
   "icon": "/assets/external-ambient.svg",
   "description": {
     "en": "External ambient temperature received via flow cards from other Homey devices, used for enhanced COP calculations with external temperature sensor data",
-    "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens"
+    "nl": "Externe buitentemperatuur ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe temperatuur sensor gegevens",
+    "de": "Externe Umgebungstemperatur empfangen über Flow-Karten von anderen Homey-Geräten, verwendet für erweiterte COP-Berechnungen mit externen Temperatursensordaten",
+    "fr": "Température ambiante externe reçue via des cartes de flux d'autres appareils Homey, utilisée pour des calculs COP améliorés avec des données de capteur de température externe"
   }
 }

@@ -2,15 +2,21 @@
   "id": "heating_curve_is",
   "title": {
     "en": "Heating curve setting is",
-    "nl": "Verwarmingscurve (stooklijn) instelling is"
+    "nl": "Verwarmingscurve (stooklijn) instelling is",
+    "de": "Heizkurveneinstellung ist",
+    "fr": "Le réglage de la courbe de chauffage est"
   },
   "titleFormatted": {
     "en": "Heating curve setting !{{is|is not}} [[curve]]",
-    "nl": "Verwarmingscurve (stooklijn) instelling !{{is|is niet}} [[curve]]"
+    "nl": "Verwarmingscurve (stooklijn) instelling !{{is|is niet}} [[curve]]",
+    "de": "Heizkurveneinstellung !{{ist|ist nicht}} [[curve]]",
+    "fr": "Le réglage de la courbe de chauffage !{{est|n'est pas}} [[curve]]"
   },
   "hint": {
     "en": "Check if the heating curve setting matches the selected curve",
-    "nl": "Controleer of de verwarmingscurve (stooklijn) instelling overeenkomt met de geselecteerde curve"
+    "nl": "Controleer of de verwarmingscurve (stooklijn) instelling overeenkomt met de geselecteerde curve",
+    "de": "Prüfen Sie, ob die Heizkurveneinstellung mit der ausgewählten Kurve übereinstimmt",
+    "fr": "Vérifier si le réglage de la courbe de chauffage correspond à la courbe sélectionnée"
   },
   "args": [
     {
@@ -23,126 +29,162 @@
       "name": "curve",
       "title": {
         "en": "Heating curve",
-        "nl": "Stooklijn (verwarmingscurve)"
+        "nl": "Stooklijn (verwarmingscurve)",
+        "de": "Heizkurve",
+        "fr": "Courbe de chauffage"
       },
       "values": [
         {
           "id": "OFF",
           "title": {
             "en": "OFF",
-            "nl": "UIT"
+            "nl": "UIT",
+            "de": "AUS",
+            "fr": "ARRÊT"
           }
         },
         {
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "H1",
+            "fr": "H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "H2",
+            "fr": "H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "H3",
+            "fr": "H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "H4",
+            "fr": "H4"
           }
         },
         {
           "id": "H5",
           "title": {
             "en": "H5",
-            "nl": "H5"
+            "nl": "H5",
+            "de": "H5",
+            "fr": "H5"
           }
         },
         {
           "id": "H6",
           "title": {
             "en": "H6",
-            "nl": "H6"
+            "nl": "H6",
+            "de": "H6",
+            "fr": "H6"
           }
         },
         {
           "id": "H7",
           "title": {
             "en": "H7",
-            "nl": "H7"
+            "nl": "H7",
+            "de": "H7",
+            "fr": "H7"
           }
         },
         {
           "id": "H8",
           "title": {
             "en": "H8",
-            "nl": "H8"
+            "nl": "H8",
+            "de": "H8",
+            "fr": "H8"
           }
         },
         {
           "id": "L1",
           "title": {
             "en": "L1",
-            "nl": "L1"
+            "nl": "L1",
+            "de": "L1",
+            "fr": "L1"
           }
         },
         {
           "id": "L2",
           "title": {
             "en": "L2",
-            "nl": "L2"
+            "nl": "L2",
+            "de": "L2",
+            "fr": "L2"
           }
         },
         {
           "id": "L3",
           "title": {
             "en": "L3",
-            "nl": "L3"
+            "nl": "L3",
+            "de": "L3",
+            "fr": "L3"
           }
         },
         {
           "id": "L4",
           "title": {
             "en": "L4",
-            "nl": "L4"
+            "nl": "L4",
+            "de": "L4",
+            "fr": "L4"
           }
         },
         {
           "id": "L5",
           "title": {
             "en": "L5",
-            "nl": "L5"
+            "nl": "L5",
+            "de": "L5",
+            "fr": "L5"
           }
         },
         {
           "id": "L6",
           "title": {
             "en": "L6",
-            "nl": "L6"
+            "nl": "L6",
+            "de": "L6",
+            "fr": "L6"
           }
         },
         {
           "id": "L7",
           "title": {
             "en": "L7",
-            "nl": "L7"
+            "nl": "L7",
+            "de": "L7",
+            "fr": "L7"
           }
         },
         {
           "id": "L8",
           "title": {
             "en": "L8 - custom curve",
-            "nl": "L8 - custom curve"
+            "nl": "L8 - custom curve",
+            "de": "L8 - Benutzerdefinierte Kurve",
+            "fr": "L8 - Courbe personnalisée"
           }
         }
       ]

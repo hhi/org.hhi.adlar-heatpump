@@ -2,15 +2,21 @@
   "id": "cop_calculation_method_is",
   "title": {
     "en": "COP calculation method is",
-    "nl": "COP berekeningsmethode is"
+    "nl": "COP berekeningsmethode is",
+    "de": "COP-Berechnungsmethode ist",
+    "fr": "La méthode de calcul COP est"
   },
   "titleFormatted": {
     "en": "COP calculation method !{{is|is not}} [[method]]",
-    "nl": "COP berekeningsmethode !{{is|is niet}} [[method]]"
+    "nl": "COP berekeningsmethode !{{is|is niet}} [[method]]",
+    "de": "COP-Berechnungsmethode !{{ist|ist nicht}} [[method]]",
+    "fr": "La méthode de calcul COP !{{est|n'est pas}} [[method]]"
   },
   "hint": {
     "en": "Check which calculation method was used for the current COP value - useful for automation based on data availability",
-    "nl": "Controleer welke berekeningsmethode werd gebruikt voor de huidige COP waarde - nuttig voor automatisering op basis van data beschikbaarheid"
+    "nl": "Controleer welke berekeningsmethode werd gebruikt voor de huidige COP waarde - nuttig voor automatisering op basis van data beschikbaarheid",
+    "de": "Prüfen Sie, welche Berechnungsmethode für den aktuellen COP-Wert verwendet wurde - nützlich für Automatisierung basierend auf Datenverfügbarkeit",
+    "fr": "Vérifier quelle méthode de calcul a été utilisée pour la valeur COP actuelle - utile pour l'automatisation basée sur la disponibilité des données"
   },
   "args": [
     {
@@ -23,35 +29,45 @@
       "name": "method",
       "title": {
         "en": "Calculation method",
-        "nl": "Berekeningsmethode"
+        "nl": "Berekeningsmethode",
+        "de": "Berechnungsmethode",
+        "fr": "Méthode de calcul"
       },
       "values": [
         {
           "id": "direct_thermal",
           "title": {
             "en": "Direct thermal (most accurate)",
-            "nl": "Directe thermische (meest nauwkeurig)"
+            "nl": "Directe thermische (meest nauwkeurig)",
+            "de": "Direkt thermisch (höchste Genauigkeit)",
+            "fr": "Thermique direct (plus précis)"
           }
         },
         {
           "id": "carnot_estimation",
           "title": {
             "en": "Carnot estimation (medium accuracy)",
-            "nl": "Carnot schatting (gemiddelde nauwkeurigheid)"
+            "nl": "Carnot schatting (gemiddelde nauwkeurigheid)",
+            "de": "Carnot-Schätzung (mittlere Genauigkeit)",
+            "fr": "Estimation Carnot (précision moyenne)"
           }
         },
         {
           "id": "temperature_difference",
           "title": {
             "en": "Temperature difference (basic)",
-            "nl": "Temperatuurverschil (basis)"
+            "nl": "Temperatuurverschil (basis)",
+            "de": "Temperaturdifferenz (einfach)",
+            "fr": "Différence de température (basique)"
           }
         },
         {
           "id": "insufficient_data",
           "title": {
             "en": "Insufficient data",
-            "nl": "Onvoldoende data"
+            "nl": "Onvoldoende data",
+            "de": "Unzureichende Daten",
+            "fr": "Données insuffisantes"
           }
         }
       ]

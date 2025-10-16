@@ -2,15 +2,21 @@
   "id": "set_hotwater_temperature",
   "title": {
     "en": "Set hot water temperature",
-    "nl": "Warm water temperatuur instellen"
+    "nl": "Warm water temperatuur instellen",
+    "de": "Warmwassertemperatur einstellen",
+    "fr": "Régler la température de l'eau chaude"
   },
   "titleFormatted": {
     "en": "Set hot water temperature to [[temperature]]",
-    "nl": "Warm water temperatuur instellen op [[temperature]]"
+    "nl": "Warm water temperatuur instellen op [[temperature]]",
+    "de": "Warmwassertemperatur einstellen auf [[temperature]]",
+    "fr": "Régler la température de l'eau chaude sur [[temperature]]"
   },
   "hint": {
     "en": "Set the hot water temperature setting",
-    "nl": "Stel de warm water temperatuur in"
+    "nl": "Stel de warm water temperatuur in",
+    "de": "Warmwassertemperatureinstellung einstellen",
+    "fr": "Régler la température de l'eau chaude"
   },
   "highlight": true,
   "args": [
@@ -24,7 +30,9 @@
       "name": "temperature",
       "title": {
         "en": "Hot water temperature (°C)",
-        "nl": "Warm water temperatuur (°C)"
+        "nl": "Warm water temperatuur (°C)",
+        "de": "Warmwassertemperatur (°C)",
+        "fr": "Température de l'eau chaude (°C)"
       },
       "min": 30,
       "max": 75,
@@ -32,7 +40,9 @@
       "units": "°C",
       "placeholder": {
         "en": "Hot water temperature in °C",
-        "nl": "Warm water temperatuur in °C"
+        "nl": "Warm water temperatuur in °C",
+        "de": "Warmwassertemperatur in °C",
+        "fr": "Température de l'eau chaude en °C"
       }
     }
   ]

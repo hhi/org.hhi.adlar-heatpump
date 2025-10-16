@@ -115,6 +115,11 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
    - Synchronous event handlers (v0.99.67) - prevents async Promise blocking TuyAPI state machine
    - Unhandled promise rejection protection in async setTimeout callbacks
    - Idempotent error handler installation with listener cleanup (v0.99.49)
+   - Heartbeat monitoring (v0.99.98) - proactive connection health checks every 5 minutes
+   - Intelligent skip logic (v0.99.98) - avoids heartbeat when device active (recent data)
+   - Zombie connection detection (v0.99.98) - automatic reconnect after 10 minutes without data
+   - Stale connection force-reconnect (v0.99.98) - detects idle connections claiming to be active
+   - Single-source connection truth (v0.99.99) - eliminates extended disconnection periods
 
 2. **CapabilityHealthService** (`lib/services/capability-health-service.ts`)
    - Real-time capability health tracking
@@ -246,6 +251,10 @@ Centralized configuration system in `DeviceConstants` class:
 - **Power thresholds**: High consumption alerts, efficiency monitoring
 - **Health monitoring**: Capability timeouts, null value thresholds
 - **Performance limits**: Connection failure limits, efficiency thresholds
+- **Connection health monitoring** (v0.99.98+):
+  - `CONNECTION_HEARTBEAT_INTERVAL_MS` (5 minutes): Proactive connection health check interval
+  - `HEARTBEAT_TIMEOUT_MS` (10 seconds): Consider connection dead if no heartbeat response
+  - `STALE_CONNECTION_THRESHOLD_MS` (10 minutes): Force reconnect after this idle period
 
 #### Error Handling Architecture (v0.90.3+, Enhanced v0.99.46)
 
@@ -419,6 +428,130 @@ updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
 - ✅ **Performance Monitoring**: Single log entry shows batch success/failure rate
 - ✅ **Connection Stability**: Eliminates disconnections caused by async operation pile-up
 - ✅ **Scalability**: Handles 49+ capabilities efficiently without blocking
+
+#### Heartbeat Mechanism (v0.99.98-v0.99.99)
+
+**Purpose**: Proactively detect zombie connections during idle periods when device appears connected but data flow has stopped.
+
+**Problem Solved**: Prior to v0.99.98, devices could remain in "Connected" state for hours while the underlying TuyAPI connection was dead, requiring manual user intervention via "Force Reconnect" button. The heartbeat mechanism detects and recovers from these zombie connections automatically within 5-15 minutes.
+
+**Architecture**:
+
+1. **Heartbeat Interval**: Every 5 minutes (`CONNECTION_HEARTBEAT_INTERVAL_MS`)
+2. **Intelligent Skip Logic**:
+   - Skips heartbeat if device sent data within last 4 minutes (80% of interval)
+   - Prevents unnecessary network traffic for active connections
+   - Only probes when device appears idle
+3. **Zombie Detection**:
+   - Uses lightweight `tuya.get({ schema: true })` query
+   - 10-second timeout (`HEARTBEAT_TIMEOUT_MS`)
+   - Failure triggers reconnection via standard system
+4. **Stale Connection Detection**:
+   - Secondary protection layer in `scheduleNextReconnectionAttempt()`
+   - Forces reconnection if no data for 10+ minutes (`STALE_CONNECTION_THRESHOLD_MS`)
+   - Applies moderate backoff (1.5x multiplier) instead of aggressive exponential backoff
+   - Single-source connection truth (v0.99.99) - eliminates race conditions
+
+**Implementation**:
+
+```typescript
+private async performHeartbeat(): Promise<void> {
+  // Skip if already disconnected
+  if (!this.isConnected) return;
+
+  // Skip if heartbeat already running (prevent concurrent probes)
+  if (this.heartbeatInProgress) return;
+
+  // Intelligent skip: Check if device active (data within 80% of interval)
+  const timeSinceLastData = Date.now() - this.lastDataEventTime;
+  if (timeSinceLastData < CONNECTION_HEARTBEAT_INTERVAL_MS * 0.8) {
+    this.logger('Heartbeat skipped - device active');
+    return;
+  }
+
+  // Device idle - probe connection health
+  this.heartbeatInProgress = true;
+  try {
+    await Promise.race([
+      this.tuya.get({ schema: true }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Heartbeat timeout')),
+        HEARTBEAT_TIMEOUT_MS)
+      )
+    ]);
+
+    this.logger('✅ Heartbeat successful - connection healthy');
+    this.lastDataEventTime = Date.now(); // Update activity timestamp
+
+  } catch (error) {
+    this.logger('❌ Heartbeat failed - zombie connection detected');
+    this.isConnected = false;
+    this.consecutiveFailures++;
+    this.scheduleNextReconnectionAttempt();
+  } finally {
+    this.heartbeatInProgress = false;
+  }
+}
+```
+
+**Connection Health Tracking**:
+
+Three timestamps track connection activity:
+- `lastDataEventTime` - Last time device sent sensor data (any DPS update)
+- `lastHeartbeatTime` - Last successful heartbeat probe
+- `lastStatusChangeTime` - Last connection status change (connected/disconnected)
+
+**Stale Connection Force-Reconnect (v0.99.98)**:
+
+The `scheduleNextReconnectionAttempt()` method includes Layer 2 protection:
+
+```typescript
+// Layer 2: Stale connection detection
+if (this.isConnected) {
+  const timeSinceLastData = Date.now() - this.lastDataEventTime;
+  if (timeSinceLastData > STALE_CONNECTION_THRESHOLD_MS) {
+    this.logger('⚠️ Stale connection detected - forcing reconnect');
+    this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 3);
+    await this.disconnect();
+    await this.connect();
+    return;
+  }
+}
+```
+
+**Single-Source Connection Truth (v0.99.99)**:
+
+Prior to v0.99.99, the heartbeat timer and reconnection timer could conflict, causing extended disconnection periods. The fix ensures only one reconnection source:
+
+```typescript
+scheduleNextReconnectionAttempt(): void {
+  // Clear existing timers to ensure single source of truth
+  if (this.reconnectionTimer) {
+    clearTimeout(this.reconnectionTimer);
+    this.reconnectionTimer = null;
+  }
+
+  // Only schedule new timer if disconnected
+  if (this.isConnected) return;
+
+  // ... rest of reconnection logic
+}
+```
+
+**Benefits**:
+- ✅ Detects zombie connections within 5-15 minutes (vs hours without heartbeat)
+- ✅ Minimal network overhead (skips when device active)
+- ✅ Works alongside reactive error handling (double protection)
+- ✅ Automatic recovery without user intervention
+- ✅ Eliminates extended disconnection periods reported in v0.99.97 and earlier
+- ✅ Reduces need for manual "Force Reconnect" button usage
+- ✅ Single-source connection management prevents race conditions (v0.99.99)
+
+**User Impact**:
+- Device automatically recovers from idle connection failures
+- "Connected" status remains accurate during idle periods
+- Sensor data resumes automatically after network disruptions
+- Reduced support burden (fewer manual interventions needed)
 
 ### Configuration Files
 
