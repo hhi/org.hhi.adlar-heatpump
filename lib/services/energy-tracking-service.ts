@@ -27,6 +27,9 @@ export class EnergyTrackingService {
   private lastEnergyCalculation: number = 0;
   private isEnabled = false;
 
+  // Overlap protection guard (v1.0.2)
+  private energyCalculationInProgress = false;
+
   /**
    * EnergyTrackingService tracks energy/power measurements, updates power-related capabilities,
    * and maintains daily/cumulative energy totals.
@@ -229,11 +232,20 @@ export class EnergyTrackingService {
 
   /**
    * Update cumulative energy totals (daily/total) based on new power measurement(s).
+   * Protected against overlapping executions (v1.0.2)
    */
   private async updateCumulativeEnergy(): Promise<void> {
     if (!this.isEnabled) {
       return;
     }
+
+    // Prevent overlapping executions (v1.0.2 - fixes queue buildup)
+    if (this.energyCalculationInProgress) {
+      this.logger('EnergyTrackingService: Skipping update - calculation already in progress');
+      return;
+    }
+
+    this.energyCalculationInProgress = true;
 
     try {
       const currentPower = this.device.getCapabilityValue('measure_power') || 0;
@@ -279,6 +291,9 @@ export class EnergyTrackingService {
 
     } catch (error) {
       this.logger('EnergyTrackingService: Error updating cumulative energy:', error);
+    } finally {
+      // Always release guard (v1.0.2)
+      this.energyCalculationInProgress = false;
     }
   }
 

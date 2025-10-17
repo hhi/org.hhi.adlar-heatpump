@@ -37,6 +37,10 @@ export class CapabilityHealthService {
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private lastHealthReport: HealthReport | null = null;
 
+  // Store bound event handler reference to prevent memory leaks (v1.0.2)
+  // bind() creates new function each time → removeListener fails without stored reference
+  private onCapabilityValueChangedBound?: (capability: string, value: unknown) => void;
+
   /**
    * Create a CapabilityHealthService to track capability freshness/health for a device.
    * @param options.device - The Homey device instance that owns this service.
@@ -60,8 +64,9 @@ export class CapabilityHealthService {
     // Start periodic health checks
     this.startHealthCheckInterval();
 
-    // Listen for capability updates
-    this.device.on('capability_value_changed', this.onCapabilityValueChanged.bind(this));
+    // Listen for capability updates - store bound reference for proper cleanup (v1.0.2)
+    this.onCapabilityValueChangedBound = this.onCapabilityValueChanged.bind(this);
+    this.device.on('capability_value_changed', this.onCapabilityValueChangedBound);
   }
 
   /**
@@ -76,7 +81,11 @@ export class CapabilityHealthService {
       this.healthCheckInterval = null;
     }
 
-    this.device.removeListener('capability_value_changed', this.onCapabilityValueChanged.bind(this));
+    // Remove listener using stored bound reference (v1.0.2 - fixes memory leak)
+    if (this.onCapabilityValueChangedBound) {
+      this.device.removeListener('capability_value_changed', this.onCapabilityValueChangedBound);
+      this.onCapabilityValueChangedBound = undefined;
+    }
   }
 
   /**

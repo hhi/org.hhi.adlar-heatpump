@@ -500,11 +500,15 @@ export class RollingCOPCalculator {
    * Clears all accumulated data points
    */
   public destroy(): void {
+    // Log buffer size before clearing (v1.0.2 - diagnostics)
+    const bufferSize = this.dataPoints.length;
+    const estimatedMemoryMB = (bufferSize * 200) / (1024 * 1024); // ~200 bytes per data point
+
     // Clear the circular buffer containing all COP data points
     // This releases ~10-20 MB (1440 data points × ~200 bytes each)
     this.dataPoints = [];
 
     // Log for debugging memory management
-    console.log('RollingCOPCalculator: Destroyed - all data points cleared');
+    console.log(`RollingCOPCalculator: Destroyed - cleared ${bufferSize} data points (~${estimatedMemoryMB.toFixed(1)} MB)`);
   }
 }

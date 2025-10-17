@@ -38,6 +38,14 @@ export class ServiceCoordinator {
   private serviceHealth = new Map<string, boolean>();
   private healthCheckInterval: NodeJS.Timeout | null = null;
 
+  // Event handler references (v1.0.2 - prevent memory leaks from inline arrow functions)
+  private onHealthDegradedHandler?: (data: { capability: string; healthData: unknown }) => void;
+  private onHealthRecoveredHandler?: (data: { capability: string; healthData: unknown }) => void;
+  private onHealthReportHandler?: (report: unknown) => void;
+  private onEnergyTotalResetHandler?: () => void;
+  private onEnergyDailyResetHandler?: () => void;
+  private onDiagnosticsReportHandler?: (diagnostics: unknown) => void;
+
   /**
    * Orchestrates initialization and interaction between internal services
    * (SettingsManager, CapabilityHealth, EnergyTracking, TuyaConnection, FlowCardManager).
@@ -403,6 +411,32 @@ export class ServiceCoordinator {
       this.flowCardManager.destroy();
     } catch (error) {
       this.logger('ServiceCoordinator: Error during service cleanup', error);
+    }
+
+    // Remove event listeners to prevent memory leaks (v1.0.2)
+    if (this.onHealthDegradedHandler) {
+      this.device.removeListener('capability:health-degraded', this.onHealthDegradedHandler);
+      this.onHealthDegradedHandler = undefined;
+    }
+    if (this.onHealthRecoveredHandler) {
+      this.device.removeListener('capability:health-recovered', this.onHealthRecoveredHandler);
+      this.onHealthRecoveredHandler = undefined;
+    }
+    if (this.onHealthReportHandler) {
+      this.device.removeListener('capability:health-report', this.onHealthReportHandler);
+      this.onHealthReportHandler = undefined;
+    }
+    if (this.onEnergyTotalResetHandler) {
+      this.device.removeListener('energy:total-reset', this.onEnergyTotalResetHandler);
+      this.onEnergyTotalResetHandler = undefined;
+    }
+    if (this.onEnergyDailyResetHandler) {
+      this.device.removeListener('energy:daily-reset', this.onEnergyDailyResetHandler);
+      this.onEnergyDailyResetHandler = undefined;
+    }
+    if (this.onDiagnosticsReportHandler) {
+      this.device.removeListener('diagnostics:capability-report', this.onDiagnosticsReportHandler);
+      this.onDiagnosticsReportHandler = undefined;
     }
 
     // Clear service health tracking

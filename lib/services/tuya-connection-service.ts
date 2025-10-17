@@ -1001,6 +1001,7 @@ export class TuyaConnectionService {
 
   /**
    * Cleanup timers, event handlers and release the Tuya instance.
+   * Enhanced cleanup for deep socket handlers (v1.0.2)
    */
   destroy(): void {
     this.logger('TuyaConnectionService: Destroying service');
@@ -1009,7 +1010,21 @@ export class TuyaConnectionService {
     this.stopHeartbeat();
 
     if (this.tuya) {
+      // Remove deep socket error handler BEFORE removeAllListeners (v1.0.2)
+      try {
+        const tuyaSocket = (this.tuya as any).device?.client;
+        if (tuyaSocket) {
+          tuyaSocket.removeAllListeners('error');
+          this.logger('TuyaConnectionService: Deep socket error handler removed');
+        }
+      } catch (error) {
+        this.logger('TuyaConnectionService: Error removing deep socket handler:', error);
+      }
+
+      // Remove all TuyAPI event listeners
       this.tuya.removeAllListeners();
+
+      // Disconnect if connected
       if (this.isConnected) {
         try {
           this.tuya.disconnect();
