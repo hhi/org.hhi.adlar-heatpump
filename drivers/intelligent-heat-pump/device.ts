@@ -3292,6 +3292,27 @@ class MyDevice extends Homey.Device {
     // Stop SCOP update interval
     this.stopSCOPUpdateInterval();
 
+    // Destroy calculator services to release memory (prevent memory leaks)
+    if (this.scopCalculator) {
+      try {
+        this.scopCalculator.destroy();
+        this.scopCalculator = null;
+        this.log('SCOP calculator destroyed - memory released');
+      } catch (error) {
+        this.error('Error destroying SCOP calculator:', error);
+      }
+    }
+
+    if (this.rollingCOPCalculator) {
+      try {
+        this.rollingCOPCalculator.destroy();
+        this.rollingCOPCalculator = null;
+        this.log('Rolling COP calculator destroyed - memory released');
+      } catch (error) {
+        this.error('Error destroying Rolling COP calculator:', error);
+      }
+    }
+
     if (this.tuya) {
       try {
         // Remove all event listeners to prevent memory leaks

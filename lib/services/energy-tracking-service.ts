@@ -392,6 +392,22 @@ export class EnergyTrackingService {
    * Stop timers and cleanup; safe to call during device destruction.
    */
   destroy(): void {
-    this.logger('EnergyTrackingService: Service destroyed');
+    this.logger('EnergyTrackingService: Destroying service');
+
+    // Stop energy tracking interval
+    this.stopEnergyTrackingInterval();
+
+    // Clear daily reset timers if they exist
+    if (this.dailyResetTimeout) {
+      clearTimeout(this.dailyResetTimeout);
+      this.dailyResetTimeout = null;
+    }
+
+    if (this.dailyResetInterval) {
+      clearInterval(this.dailyResetInterval);
+      this.dailyResetInterval = null;
+    }
+
+    this.logger('EnergyTrackingService: Service destroyed - all timers cleared');
   }
 }
