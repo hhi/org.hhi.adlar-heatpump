@@ -495,7 +495,11 @@ export class SCOPCalculator {
    * Clears all accumulated seasonal data and resets state
    */
   public destroy(): void {
-    this.homey.log('SCOPCalculator: Destroying service - clearing all seasonal data');
+    // Log Map size before clearing (v1.0.2 - diagnostics)
+    const mapSize = this.dailyData.size;
+    const estimatedMemoryMB = (mapSize * 7.5) / 1024; // ~7.5 KB per daily summary
+
+    this.homey.log(`SCOPCalculator: Destroying service - clearing ${mapSize} daily summaries (~${estimatedMemoryMB.toFixed(1)} MB)`);
 
     // Clear the Map containing all daily COP summaries
     // This releases ~2.5 MB per device (330 days × 7.5 KB average)
