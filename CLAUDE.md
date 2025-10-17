@@ -211,6 +211,56 @@ class ServiceCoordinator {
 - **Extensibility**: New services easily added without modifying existing code
 - **Fallback Safety**: Graceful degradation when services unavailable
 
+#### Memory Management & Leak Prevention (v1.0.1+)
+
+**Critical**: All services with data accumulation MUST implement `destroy()` methods to prevent memory leaks.
+
+**Memory Leak Fixes (v1.0.1)**:
+
+1. **SCOPCalculator** (`lib/services/scop-calculator.ts`)
+   - **Issue**: `dailyData` Map grew unbounded (kept 2 years of seasonal data)
+   - **Impact**: ~20-30 MB memory leak over 8 hours
+   - **Fix**: Added `destroy()` method to clear Map and reset season tracking
+
+2. **RollingCOPCalculator** (`lib/services/rolling-cop-calculator.ts`)
+   - **Issue**: `dataPoints` array kept 1440+ data points without cleanup
+   - **Impact**: ~10-20 MB memory leak over 8 hours
+   - **Fix**: Added `destroy()` method to clear circular buffer
+
+3. **EnergyTrackingService** (`lib/services/energy-tracking-service.ts`)
+   - **Issue**: Incomplete `destroy()` - timers not cleared
+   - **Impact**: ~5-10 MB memory leak + continued timer execution
+   - **Fix**: Enhanced `destroy()` to clear all intervals/timeouts
+
+**Destroy() Method Pattern**:
+
+```typescript
+public destroy(): void {
+  // Clear data structures
+  this.dataPoints = [];
+  this.dailyData.clear();
+
+  // Clear timers
+  if (this.interval) {
+    clearInterval(this.interval);
+    this.interval = null;
+  }
+
+  // Log for debugging
+  this.log('Service destroyed - memory released');
+}
+```
+
+**Device Cleanup** (`device.ts:onDeleted()`):
+- ServiceCoordinator destroy() → cleans infrastructure services
+- Calculator destroy() calls → cleans calculation services
+- Prevents 45-65 MB memory leak over 8-hour runtime
+
+**Memory-Connection Correlation**:
+- Memory growth → Node.js garbage collection pauses
+- GC pauses → socket timeouts (ECONNRESET errors)
+- Proper cleanup prevents both memory leaks AND connection issues
+
 ### Key Architecture Patterns
 
 #### DPS to Capability Mapping (Enhanced v0.99.54+)

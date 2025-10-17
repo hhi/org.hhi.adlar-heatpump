@@ -489,4 +489,21 @@ export class SCOPCalculator {
       currentSCOP: this.calculateSCOP(),
     };
   }
+
+  /**
+   * Cleanup method to release memory and prevent leaks
+   * Clears all accumulated seasonal data and resets state
+   */
+  public destroy(): void {
+    this.homey.log('SCOPCalculator: Destroying service - clearing all seasonal data');
+
+    // Clear the Map containing all daily COP summaries
+    // This releases ~2.5 MB per device (330 days × 7.5 KB average)
+    this.dailyData.clear();
+
+    // Reset season tracking
+    this.currentSeasonStart = 0;
+
+    this.homey.log('SCOPCalculator: Service destroyed - memory released');
+  }
 }

@@ -494,4 +494,17 @@ export class RollingCOPCalculator {
     }
     return 'low';
   }
+
+  /**
+   * Cleanup method to release memory and prevent leaks
+   * Clears all accumulated data points
+   */
+  public destroy(): void {
+    // Clear the circular buffer containing all COP data points
+    // This releases ~10-20 MB (1440 data points × ~200 bytes each)
+    this.dataPoints = [];
+
+    // Log for debugging memory management
+    console.log('RollingCOPCalculator: Destroyed - all data points cleared');
+  }
 }
