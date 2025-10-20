@@ -1,16 +1,4 @@
 {
-  "1.0.2": {
-    "en": "Fixed critical event listener leaks in all services. Added overlap protection to prevent async operation buildup during reconnects.",
-    "nl": "Kritieke event listener-lekken opgelost in alle services. Overlap-bescherming toegevoegd om async operatie-ophoping bij herverbindingen te voorkomen.",
-    "de": "Kritische Event-Listener-Lecks in allen Services behoben. Überlappungsschutz hinzugefügt, um asynchrone Operationsansammlung bei Neuverbindungen zu verhindern.",
-    "fr": "Correction des fuites critiques d'écouteurs d'événements dans tous les services. Protection contre le chevauchement ajoutée pour éviter l'accumulation d'opérations asynchrones lors des reconnexions."
-  },
-  "1.0.1": {
-    "en": "Fixed memory leaks causing app memory to grow from 0 to 70MB over 8 hours. App now properly releases memory when device is removed.",
-    "nl": "Geheugenlekken opgelost die zorgden voor groei van 0 naar 70MB over 8 uur. App geeft nu correct geheugen vrij bij verwijderen apparaat.",
-    "de": "Speicherlecks behoben, die zu Speicherwachstum von 0 auf 70MB über 8 Stunden führten. App gibt jetzt Speicher beim Entfernen des Geräts ordnungsgemäß frei.",
-    "fr": "Correction des fuites mémoire provoquant une croissance de 0 à 70Mo sur 8 heures. L'application libère désormais correctement la mémoire lors de la suppression de l'appareil."
-  },
   "1.0.0": {
     "en": "Added German and French language support. All text and timestamps now display in your Homey's language (EN/NL/DE/FR).",
     "nl": "Duitse en Franse taalondersteuning toegevoegd. Alle tekst en tijdstempels worden nu weergegeven in de taal van je Homey (EN/NL/DE/FR).",
