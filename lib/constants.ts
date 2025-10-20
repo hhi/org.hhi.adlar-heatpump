@@ -26,6 +26,9 @@ export class DeviceConstants {
   /** Stale connection threshold - force reconnect if no data received for this period (v0.99.98) */
   static readonly STALE_CONNECTION_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
 
+  /** Periodic DPS refresh interval - prevent heartbeat timeouts during idle periods (v1.0.3) */
+  static readonly DPS_REFRESH_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
+
   /** Energy tracking update interval - frequent updates for accurate energy accumulation */
   static readonly ENERGY_TRACKING_INTERVAL_MS = 10 * 1000; // 10 seconds
 
