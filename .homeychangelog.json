@@ -1,4 +1,16 @@
 {
+  "1.0.4": {
+    "en": "Enhanced diagnostic logging for connection troubleshooting. Device logs now include precise timestamps and disconnect source tracking to help identify connectivity issues.",
+    "nl": "Verbeterde diagnostische logging voor verbindingsproblemen. Apparaat-logs bevatten nu precieze tijdstempels en tracking van verbreken-bronnen.",
+    "de": "Verbesserte Diagnoseprotokollierung zur Verbindungsproblembehandlung. Geräteprotokolle enthalten nun präzise Zeitstempel und Trennungsquellen-Verfolgung.",
+    "fr": "Journalisation de diagnostic améliorée pour la résolution des problèmes de connectivité. Les journaux d'appareil incluent désormais des horodatages précis et le suivi de la source de déconnexion."
+  },
+  "1.0.1": {
+    "en": "Fixed progressive memory leak causing up to 70MB growth over 8 hours. App memory now remains stable and well-behaved. Device stability dramatically improved during extended use.",
+    "nl": "Progressieve geheugenlek opgelost die tot 70 MB groei over 8 uur veroorzaakte. App-geheugen blijft nu stabiel. Apparaatstabiliteit sterk verbeterd.",
+    "de": "Progressives Speicherleck behoben, das bis zu 70 MB Wachstum über 8 Stunden verursachte. App-Speicher bleibt jetzt stabil und behält sich gut.",
+    "fr": "Fuite mémoire progressive corrigée causant jusqu'à 70 Mo de croissance sur 8 heures. La mémoire de l'application reste stable. Stabilité considérablement améliorée."
+  },
   "1.0.0": {
     "en": "Added German and French language support. All text and timestamps now display in your Homey's language (EN/NL/DE/FR).",
     "nl": "Duitse en Franse taalondersteuning toegevoegd. Alle tekst en tijdstempels worden nu weergegeven in de taal van je Homey (EN/NL/DE/FR).",
