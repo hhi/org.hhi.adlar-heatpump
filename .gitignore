@@ -6,3 +6,4 @@ roadmap.txt
 /.vscode/
 zzz_*
 todo/
+.claude/settings.local.json
