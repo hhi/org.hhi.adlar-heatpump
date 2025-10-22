@@ -4,6 +4,7 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import TuyAPI from 'tuyapi';
+import { promises as dnsPromises } from 'dns';
 import { DeviceConstants } from '../constants';
 import { TuyaErrorCategorizer, CategorizedError } from '../error-types';
 
@@ -52,6 +53,19 @@ export class TuyaConnectionService {
   private circuitBreakerResetTime = 5 * 60 * 1000; // 5 minutes
   private maxBackoffSeconds = 300; // 5 minutes
   private connectionAttempts = 0;
+
+  // Persistent outage tracking (v1.0.5 - Proposal 1)
+  private outageStartTime = 0; // When current outage began
+  private totalOutageDuration = 0; // Cumulative outage duration
+
+  // Circuit breaker cycle limit (v1.0.5 - Proposal 2)
+  private circuitBreakerCycles = 0;
+  private readonly MAX_CIRCUIT_BREAKER_CYCLES = 3; // 3 cycles = 15 min total
+
+  // Time-based notification tracking (v1.0.5 - Proposal 5)
+  private notificationSent2Min = false;
+  private notificationSent10Min = false;
+  private notificationSent30Min = false;
 
   // Intervals
   private reconnectInterval: NodeJS.Timeout | null = null;
@@ -375,12 +389,25 @@ export class TuyaConnectionService {
 
   /**
    * Get formatted connection status with timestamp for display (v0.99.61, localized v0.99.68).
+   * Enhanced with outage duration and circuit breaker info (v1.0.5 - Proposal 4).
    * Format: "Status (HH:MM:SS)" or "Status (DD-MM HH:MM)" for older timestamps
    * @returns Formatted status string with timestamp in local timezone
    */
   getFormattedConnectionStatus(): string {
     // Get localized status label
     const statusLabel = this.device.homey.__(`connection_status.${this.currentStatus}`);
+
+    // Add context for circuit breaker or outage duration (v1.0.5)
+    let contextInfo = '';
+    if (this.currentStatus === 'reconnecting' && this.circuitBreakerOpen) {
+      const remainingCooldown = Math.ceil(
+        (this.circuitBreakerResetTime - (Date.now() - this.circuitBreakerOpenTime)) / 1000,
+      );
+      contextInfo = ` [retry in ${remainingCooldown}s]`;
+    } else if ((this.currentStatus === 'disconnected' || this.currentStatus === 'error') && this.outageStartTime > 0) {
+      const outageMinutes = Math.floor((Date.now() - this.outageStartTime) / 60000);
+      contextInfo = ` [${outageMinutes} min]`;
+    }
 
     // Create timestamp in local timezone (not UTC)
     const timestamp = new Date(this.lastStatusChangeTime);
@@ -432,7 +459,7 @@ export class TuyaConnectionService {
       timeString = `${day}-${monthAbbr} ${time}`;
     }
 
-    return `${statusLabel} (${timeString})`;
+    return `${statusLabel}${contextInfo} (${timeString})`;
   }
 
   /**
@@ -800,12 +827,23 @@ export class TuyaConnectionService {
 
       // Use TuyAPI's get() method to probe connection health
       // This will throw an error if connection is dead
-      await Promise.race([
-        this.tuya.get({ schema: true }),
-        new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Heartbeat timeout')), DeviceConstants.HEARTBEAT_TIMEOUT_MS);
-        }),
-      ]);
+      let timeoutHandle: NodeJS.Timeout | null = null;
+      try {
+        await Promise.race([
+          this.tuya.get({ schema: true }),
+          new Promise((_, reject) => {
+            timeoutHandle = this.device.homey.setTimeout(
+              () => reject(new Error('Heartbeat timeout')),
+              DeviceConstants.HEARTBEAT_TIMEOUT_MS,
+            );
+          }),
+        ]);
+      } finally {
+        // Clean up timeout if get() resolved first
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+        }
+      }
 
       this.logger('TuyaConnectionService: ✅ Heartbeat successful - connection healthy');
 
@@ -840,8 +878,16 @@ export class TuyaConnectionService {
   /**
    * Schedule the next reconnection attempt using exponential backoff and circuit breaker.
    * Enhanced with stale connection detection (v0.99.98).
+   * Enhanced with persistent outage tracking, circuit breaker limits, heartbeat probing,
+   * and time-based notifications (v1.0.5 - Proposals 1-5).
    */
   private scheduleNextReconnectionAttempt(): void {
+    // LAYER 1: Track outage start time (v1.0.5 - Proposal 1)
+    if (!this.isConnected && this.outageStartTime === 0) {
+      this.outageStartTime = Date.now();
+      this.logger('TuyaConnectionService: Outage tracking started');
+    }
+
     // LAYER 2: Stale Connection Detection (v0.99.98)
     // Check if connection claims to be active but hasn't received data in a long time
     if (this.isConnected) {
@@ -869,12 +915,61 @@ export class TuyaConnectionService {
       }
     }
 
-    // Check circuit breaker state
+    // LAYER 3: Time-based notifications (v1.0.5 - Proposal 5)
+    if (this.outageStartTime > 0) {
+      const outageDuration = Date.now() - this.outageStartTime;
+
+      // 2-minute notification
+      if (outageDuration >= 2 * 60 * 1000 && !this.notificationSent2Min) {
+        this.sendCriticalNotification(
+          'Device Connection Lost',
+          'Heat pump has been offline for 2 minutes. Automatic recovery in progress.',
+        ).catch((err) => this.logger('Failed to send 2-min notification:', err));
+        this.notificationSent2Min = true;
+      }
+
+      // 10-minute notification
+      if (outageDuration >= 10 * 60 * 1000 && !this.notificationSent10Min) {
+        this.sendCriticalNotification(
+          'Extended Device Outage',
+          'Heat pump has been offline for 10 minutes. Please check network connectivity.',
+        ).catch((err) => this.logger('Failed to send 10-min notification:', err));
+        this.notificationSent10Min = true;
+      }
+
+      // 30-minute notification
+      if (outageDuration >= 30 * 60 * 1000 && !this.notificationSent30Min) {
+        this.sendCriticalNotification(
+          'Critical Outage',
+          'Heat pump has been offline for 30 minutes. Manual intervention may be required.',
+        ).catch((err) => this.logger('Failed to send 30-min notification:', err));
+        this.notificationSent30Min = true;
+      }
+    }
+
+    // LAYER 4: Circuit breaker with cycle limit (v1.0.5 - Proposal 2)
     if (this.circuitBreakerOpen) {
       const timeSinceOpen = Date.now() - this.circuitBreakerOpenTime;
+
       if (timeSinceOpen < this.circuitBreakerResetTime) {
-        // Still in cooldown period
+        // Still in cooldown period - check for early internet recovery (Proposal 3)
         this.logger(`TuyaConnectionService: Circuit breaker open, cooling down for ${Math.round((this.circuitBreakerResetTime - timeSinceOpen) / 1000)}s more`);
+
+        // Proposal 3: Lightweight connectivity probe every 30 seconds during cooldown
+        if (timeSinceOpen % 30000 < 10000) {
+          dnsPromises.resolve('google.com')
+            .then(() => {
+              this.logger('TuyaConnectionService: ✅ Internet recovered during cooldown - attempting immediate reconnection');
+              this.circuitBreakerOpen = false;
+              this.circuitBreakerCycles = 0;
+              this.consecutiveFailures = 0;
+              this.scheduleNextReconnectionAttempt();
+            })
+            .catch(() => {
+              // Still offline, continue cooldown
+            });
+        }
+
         this.reconnectInterval = this.device.homey.setTimeout(() => {
           try {
             this.scheduleNextReconnectionAttempt();
@@ -884,10 +979,24 @@ export class TuyaConnectionService {
         }, 10000); // Check every 10 seconds during cooldown
         return;
       }
-      // Try to reset circuit breaker
-      this.logger('TuyaConnectionService: Attempting to reset circuit breaker...');
-      this.circuitBreakerOpen = false;
-      this.backoffMultiplier = 1; // Reset backoff
+
+      // Cooldown period ended - check cycle limit (Proposal 2)
+      this.circuitBreakerCycles++;
+      this.logger(`TuyaConnectionService: Circuit breaker reset attempt ${this.circuitBreakerCycles}/${this.MAX_CIRCUIT_BREAKER_CYCLES}`);
+
+      if (this.circuitBreakerCycles >= this.MAX_CIRCUIT_BREAKER_CYCLES) {
+        // Max cycles reached - switch to continuous slow retry
+        this.logger('TuyaConnectionService: ⚠️ Max circuit breaker cycles reached - switching to slow continuous retry');
+        this.circuitBreakerOpen = false;
+        this.backoffMultiplier = 8; // 2.5 min retry interval (20s * 8 = 160s)
+        // Keep trying indefinitely at slower rate
+      } else {
+        // Reset circuit breaker for another cycle
+        this.logger('TuyaConnectionService: Circuit breaker reset - attempting reconnection');
+        this.circuitBreakerOpen = false;
+        this.consecutiveFailures = 0;
+        this.backoffMultiplier = 1; // Reset backoff for fresh cycle
+      }
     }
 
     // Calculate adaptive interval with exponential backoff
@@ -1004,16 +1113,11 @@ export class TuyaConnectionService {
 
   /**
    * Notify users/devices about reconnection failures according to thresholds.
+   * Enhanced with time-based notifications (v1.0.5 - notifications moved to scheduleNextReconnectionAttempt).
    */
   private async handleReconnectionFailureNotification(error: CategorizedError): Promise<void> {
-    // Immediate notification for critical infrastructure failures
+    // Mark device as unavailable for non-recoverable errors
     if (!error.recoverable && this.consecutiveFailures <= 3) {
-      await this.sendCriticalNotification(
-        'Critical Device Error',
-        `Heat pump connection failed: ${error.userMessage}. Manual intervention may be required.`,
-      );
-
-      // Mark device as unavailable for non-recoverable errors
       try {
         await this.device.setUnavailable(`Connection failed: ${error.userMessage}`);
         this.logger('TuyaConnectionService: Device marked as unavailable due to non-recoverable error');
@@ -1023,31 +1127,18 @@ export class TuyaConnectionService {
       return;
     }
 
-    // Standard notification after initial failure threshold
+    // Mark device as unavailable after initial failure threshold
     if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
-      await this.sendCriticalNotification(
-        'Device Connection Lost',
-        `Heat pump has been disconnected for over 1 minute. ${error.userMessage}`,
-      );
-
-      // Mark device as unavailable after 1 minute offline
       try {
         await this.device.setUnavailable('Heat pump disconnected - attempting reconnection...');
         this.logger('TuyaConnectionService: Device marked as unavailable after connection loss');
       } catch (err) {
         this.logger('TuyaConnectionService: Failed to set device unavailable:', err);
       }
-      return;
     }
 
-    // Extended outage notification
-    if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES * 3) {
-      await this.sendCriticalNotification(
-        'Extended Device Outage',
-        `Heat pump has been offline for over 5 minutes. Connection issues persist: ${error.userMessage}`,
-      );
-      // Device already marked unavailable at failure #5
-    }
+    // Note: Time-based notifications (2min, 10min, 30min) are now sent from scheduleNextReconnectionAttempt()
+    // based on outage duration instead of failure count (v1.0.5 - Proposal 5)
   }
 
   /**
@@ -1058,6 +1149,16 @@ export class TuyaConnectionService {
     this.backoffMultiplier = 1;
     this.circuitBreakerOpen = false;
     this.circuitBreakerOpenTime = 0;
+
+    // Reset outage tracking (v1.0.5)
+    this.outageStartTime = 0;
+    this.totalOutageDuration = 0;
+    this.circuitBreakerCycles = 0;
+
+    // Reset notification flags (v1.0.5)
+    this.notificationSent2Min = false;
+    this.notificationSent10Min = false;
+    this.notificationSent30Min = false;
   }
 
   /**
@@ -1121,7 +1222,8 @@ export class TuyaConnectionService {
     if (this.tuya) {
       // Remove deep socket error handler BEFORE removeAllListeners (v1.0.2)
       try {
-        const tuyaSocket = (this.tuya as any).device?.client;
+        // @ts-expect-error - Accessing TuyAPI internal socket for cleanup
+        const tuyaSocket = this.tuya.device?.client;
         if (tuyaSocket) {
           tuyaSocket.removeAllListeners('error');
           this.logger('TuyaConnectionService: Deep socket error handler removed');

@@ -2,7 +2,7 @@
 name: homey-automation-tutor
 description: Use this agent when you need expert guidance on Homey or Home Assistant development, architecture decisions, or troubleshooting automation systems. Examples: <example>Context: User is struggling with implementing a custom capability in their Homey app. user: 'I'm trying to create a custom capability for my heat pump but I'm not sure about the proper structure and naming conventions' assistant: 'I'll use the homey-automation-tutor agent to provide step-by-step guidance on custom capability implementation with references to official documentation.'</example> <example>Context: User needs help understanding the difference between Homey device classes and capabilities. user: 'What's the difference between device classes and capabilities in Homey? I'm confused about when to use each' assistant: 'Let me use the homey-automation-tutor agent to explain these concepts clearly with practical examples and official documentation references.'</example> <example>Context: User is designing the architecture for a complex home automation system. user: 'I need to integrate multiple protocols (Zigbee, Z-Wave, WiFi) in my home automation setup. What's the best architectural approach?' assistant: 'I'll engage the homey-automation-tutor agent to guide you through the architectural considerations and best practices for multi-protocol integration.'</example>
 tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, Bash, mcp__ide__getDiagnostics, mcp__ide__executeCode, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
-model: sonnet
+model: haiku
 color: blue
 ---
 

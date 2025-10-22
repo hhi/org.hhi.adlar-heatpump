@@ -33,11 +33,77 @@ npm run lint
 
 Runs ESLint on `.js` and `.ts` files using the Athom configuration.
 
-### coding and formatting
+### Coding and Formatting
 
 All coding should be Typescript compliant
 The code should adhere eslint rules (for example whitespacing)
 For Markdown files adhere to markdownlint rules
+
+#### Homey-Specific Best Practices
+
+**Timer Management**:
+- **ALWAYS** use `this.device.homey.setTimeout()` instead of global `setTimeout()`
+- **ALWAYS** use `this.device.homey.setInterval()` instead of global `setInterval()`
+- **WHY**: Homey's timer management provides automatic cleanup during app updates/restarts and prevents memory leaks
+- **Pattern for Promise.race() with timeout**:
+  ```typescript
+  let timeoutHandle: NodeJS.Timeout | null = null;
+  try {
+    await Promise.race([
+      asyncOperation(),
+      new Promise((_, reject) => {
+        timeoutHandle = this.device.homey.setTimeout(
+          () => reject(new Error('Timeout')),
+          timeoutMs,
+        );
+      }),
+    ]);
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+  }
+  ```
+
+**Type Safety**:
+- **NEVER** use `as any` - it disables TypeScript's type checking entirely
+- **PREFER** `@ts-expect-error` with explanatory comment when accessing library internals
+- **Example**:
+  ```typescript
+  // ❌ BAD: No explanation, disables all type checking
+  const socket = (this.tuya as any).client;
+
+  // ✅ GOOD: Documented reason, TypeScript still validates rest of line
+  // @ts-expect-error - Accessing TuyAPI internal socket for crash prevention
+  const socket = this.tuya.client;
+  ```
+
+**Logging**:
+- **NEVER** use `console.log()` - logs don't appear in Homey's app logs
+- **ALWAYS** use Homey's logging system via logger callbacks or `this.log()`
+- **Pattern for service classes without Homey.Device access**:
+  ```typescript
+  export interface ServiceConfig {
+    // ... other config
+    logger?: (message: string, ...args: unknown[]) => void;
+  }
+
+  export class MyService {
+    private logger: (message: string, ...args: unknown[]) => void;
+
+    constructor(config: ServiceConfig) {
+      // Fallback to no-op if logger not provided
+      this.logger = config.logger || (() => {});
+    }
+
+    someMethod(): void {
+      this.logger('MyService: Something happened', { detail: 'value' });
+    }
+  }
+
+  // In device.ts or other code with Homey access:
+  new MyService({
+    logger: (msg, ...args) => this.log(msg, ...args),
+  });
+  ```
 
 ### Debug Mode
 
@@ -260,6 +326,55 @@ public destroy(): void {
 - Memory growth → Node.js garbage collection pauses
 - GC pauses → socket timeouts (ECONNRESET errors)
 - Proper cleanup prevents both memory leaks AND connection issues
+
+#### Reconnection Resilience (v1.0.5+)
+
+**Critical**: Extended internet outages must auto-recover without manual intervention.
+
+**Problem (Pre-v1.0.5)**: Circuit breaker entered infinite loop during sustained outages:
+- Failed 10x → 5min cooldown → reset counter → failed 10x → repeat forever
+- Notification #15 unreachable (counter reset before reaching 15)
+- Required manual `force_reconnect` after hours-long disconnection
+
+**Solution (v1.0.5)**: 5 integrated improvements eliminate infinite loops and guarantee auto-recovery:
+
+1. **Persistent Outage Tracking** (`lib/services/tuya-connection-service.ts:57-58`)
+   - Tracks cumulative outage duration independent of circuit breaker resets
+   - Enables time-based notifications and user-visible outage timer
+
+2. **Circuit Breaker Cycle Limit** (`tuya-connection-service.ts:973-989`)
+   - Maximum 3 cooldown cycles (15 minutes total)
+   - After 3 cycles: switches to slow continuous retry (2.5 min interval)
+   - Eliminates infinite loop, guarantees ongoing recovery attempts
+
+3. **Internet Recovery Detection** (`tuya-connection-service.ts:947-960`)
+   - DNS probe every 30s during cooldown
+   - Immediate reconnection when internet restored (within 30s)
+   - Avoids waiting full 5-minute cooldown period
+
+4. **User-Visible Outage Timer** (`tuya-connection-service.ts:399-409`)
+   - Connection status shows outage duration: `"Disconnected [12 min]"`
+   - Circuit breaker countdown: `"Reconnecting [retry in 245s]"`
+   - Provides transparency into reconnection process
+
+5. **Time-Based Notifications** (`tuya-connection-service.ts:906-936`)
+   - Notifications at fixed intervals: 2min, 10min, 30min
+   - Independent of failure counter (not affected by circuit breaker resets)
+   - Progressive escalation: info → warning → critical
+
+**Recovery Timeline Example** (5-hour internet outage):
+```
+T+0:00   - Disconnect detected
+T+2:00   - Notification "Connection Lost"
+T+10:00  - Notification "Extended Outage"
+T+15:00  - Max cycles → slow continuous retry (2.5 min)
+T+30:00  - Notification "Critical Outage"
+...continues retrying every 2.5 min...
+T+5:00:15 - DNS probe detects internet recovery
+T+5:00:20 - Auto-reconnected (no manual intervention)
+```
+
+**For detailed architecture**: See [Service Architecture Guide - v1.0.5 Reconnection Improvements](docs/Dev%20support/Architectural%20overview/service-architecture-guide.md#tuyaconnectionservice-v105-reconnection-improvements)
 
 ### Key Architecture Patterns
 

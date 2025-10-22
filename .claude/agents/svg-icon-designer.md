@@ -1,7 +1,7 @@
 ---
 name: svg-icon-designer
 description: Use this agent when you need to create new SVG icons, modify existing SVG icons, optimize SVG code for better performance, convert other image formats to SVG, adjust icon styling (colors, sizes, shapes), create icon variations, or troubleshoot SVG rendering issues. Examples: <example>Context: User needs a custom icon for their Homey app. user: "I need an SVG icon for a heat pump device that shows a house with heating coils inside" assistant: "I'll use the svg-icon-designer agent to create a custom heat pump icon for your Homey app" <commentary>The user needs a custom SVG icon created, which is exactly what the svg-icon-designer agent specializes in.</commentary></example> <example>Context: User has an existing SVG that needs color adjustments. user: "This SVG icon is too dark, can you make it lighter and change the blue to green?" assistant: "I'll use the svg-icon-designer agent to adjust the colors in your SVG icon" <commentary>The user needs SVG modifications, which the svg-icon-designer agent can handle expertly.</commentary></example>
-model: sonnet
+model: haiku
 color: purple
 ---
 

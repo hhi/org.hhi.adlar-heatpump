@@ -1,4 +1,10 @@
 {
+  "1.0.5": {
+    "en": "Connection auto-recovers within 15 minutes after internet outage. Notifications sent at 2, 10, and 30 minutes of downtime. Connection status shows outage duration (e.g., 'disconnected [5 min]').",
+    "nl": "Verbinding herstelt automatisch binnen 15 minuten na internetuitval. Meldingen verzonden na 2, 10 en 30 minuten uitval. Verbindingsstatus toont uitval-duur (bijv. 'disconnected [5 min]').",
+    "de": "Verbindung stellt sich automatisch innerhalb von 15 Minuten nach Internetausfall wieder her. Benachrichtigungen nach 2, 10 und 30 Minuten Ausfall. Verbindungsstatus zeigt Ausfallzeit (z.B. 'disconnected [5 min]').",
+    "fr": "La connexion se rétablit automatiquement dans les 15 minutes après une panne Internet. Notifications envoyées après 2, 10 et 30 minutes de panne. Le statut de connexion affiche la durée de la panne (par ex. 'disconnected [5 min]')."
+  },
   "1.0.4": {
     "en": "Enhanced diagnostic logging for connection troubleshooting. Device logs now include precise timestamps and disconnect source tracking to help identify connectivity issues.",
     "nl": "Verbeterde diagnostische logging voor verbindingsproblemen. Apparaat-logs bevatten nu precieze tijdstempels en tracking van verbreken-bronnen.",
