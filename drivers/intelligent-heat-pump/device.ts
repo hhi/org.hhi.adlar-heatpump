@@ -939,6 +939,7 @@ class MyDevice extends Homey.Device {
         minDataPoints: 12, // Minimum 12 points (6 hours worth)
         weightingMethod: 'runtime_weighted',
         trendSensitivity: 0.15, // 15% change for trend detection
+        logger: (message: string, ...args: unknown[]) => this.log(message, ...args),
       });
 
       // Try to restore data from settings

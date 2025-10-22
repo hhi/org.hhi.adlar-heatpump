@@ -2,7 +2,7 @@
 name: homey-implementation-guide
 description: Use this agent when you have a Homey app implementation plan or task list and need expert guidance on how to execute specific items, resolve implementation challenges, or understand the technical approach for Homey development tasks. Examples: <example>Context: User has an implementation plan for adding flow cards to their Homey app and needs guidance on specific steps. user: 'I have this implementation plan for adding trigger flow cards but I'm stuck on step 3 about registering flow card listeners. Can you explain how to implement this?' assistant: 'I'll use the homey-implementation-guide agent to provide detailed guidance on implementing flow card listeners in your Homey app.' <commentary>The user needs expert guidance on a specific implementation step from their plan, which is exactly what this agent is designed for.</commentary></example> <example>Context: User encounters errors while following their implementation plan. user: 'My implementation plan says to update the driver.compose.json but I'm getting validation errors. Here's what I tried...' assistant: 'Let me use the homey-implementation-guide agent to help diagnose and fix these validation errors in your Homey app configuration.' <commentary>The user needs expert help resolving issues encountered while following their implementation plan.</commentary></example>
 tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, mcp__ide__getDiagnostics, mcp__ide__executeCode, mcp__context7__resolve-library-id, mcp__context7__get-library-docs, Bash
-model: sonnet
+model: haiku
 color: orange
 ---
 

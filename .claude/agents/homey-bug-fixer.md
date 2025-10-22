@@ -1,7 +1,7 @@
 ---
 name: homey-bug-fixer
 description: Use this agent when you need to fix bugs in Homey app development based on user feedback, error reports, or testing results. Examples: <example>Context: The user has discovered that their Homey app is crashing when trying to connect to a device. user: 'My app keeps crashing when I try to pair a new device. The logs show a TypeError about undefined properties.' assistant: 'I'll use the homey-bug-fixer agent to analyze this crash and implement a fix.' <commentary>Since the user is reporting a specific bug with crash logs, use the homey-bug-fixer agent to diagnose and resolve the issue.</commentary></example> <example>Context: User reports that flow cards are not working as expected in their Homey app. user: 'Users are complaining that the temperature trigger flow card never fires, even when the temperature changes.' assistant: 'Let me use the homey-bug-fixer agent to investigate this flow card issue and implement a solution.' <commentary>Since this is a bug report about flow card functionality, use the homey-bug-fixer agent to debug and fix the flow card implementation.</commentary></example>
-model: sonnet
+model: haiku
 color: red
 ---
 

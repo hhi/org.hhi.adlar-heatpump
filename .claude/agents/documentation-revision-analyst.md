@@ -1,7 +1,7 @@
 ---
 name: documentation-revision-analyst
 description: Use this agent when you need to assess which documentation files require updates, revisions, or improvements. Examples: <example>Context: User has made significant code changes and wants to ensure documentation stays current. user: 'I just refactored the device pairing flow and added new capabilities. Which docs need updating?' assistant: 'I'll use the documentation-revision-analyst agent to identify which documentation files need revision based on your code changes.' <commentary>Since the user made code changes that may affect documentation, use the documentation-revision-analyst agent to assess which docs need updates.</commentary></example> <example>Context: User is preparing for a release and wants to ensure all documentation is accurate. user: 'We're about to release version 2.0. Can you check if our documentation is up to date?' assistant: 'Let me use the documentation-revision-analyst agent to review all documentation and identify what needs revision before your release.' <commentary>Since the user is preparing for a release and needs documentation review, use the documentation-revision-analyst agent to assess documentation currency.</commentary></example>
-model: sonnet
+model: haiku
 color: green
 ---
 

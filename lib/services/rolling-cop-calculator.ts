@@ -51,6 +51,7 @@ export interface RollingCOPConfig {
     high: number; // Minimum percentage of high-confidence data points
     medium: number; // Minimum percentage of medium+ confidence data points
   };
+  logger?: (message: string, ...args: unknown[]) => void; // Optional logger function
 }
 
 /**
@@ -60,6 +61,7 @@ export class RollingCOPCalculator {
   private dataPoints: COPDataPoint[] = [];
   private readonly maxDataPoints: number;
   private readonly config: RollingCOPConfig;
+  private logger: (message: string, ...args: unknown[]) => void;
 
   constructor(config: Partial<RollingCOPConfig> = {}) {
     // Default configuration
@@ -75,6 +77,9 @@ export class RollingCOPCalculator {
       },
       ...config,
     };
+
+    // Initialize logger (fallback to no-op if not provided)
+    this.logger = this.config.logger || (() => {});
 
     // Calculate max data points to store (with some buffer)
     this.maxDataPoints = Math.ceil((this.config.timeWindow * 1.5) / 30); // Assume 30min intervals
@@ -509,6 +514,6 @@ export class RollingCOPCalculator {
     this.dataPoints = [];
 
     // Log for debugging memory management
-    console.log(`RollingCOPCalculator: Destroyed - cleared ${bufferSize} data points (~${estimatedMemoryMB.toFixed(1)} MB)`);
+    this.logger(`RollingCOPCalculator: Destroyed - cleared ${bufferSize} data points (~${estimatedMemoryMB.toFixed(1)} MB)`);
   }
 }

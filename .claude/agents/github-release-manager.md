@@ -1,7 +1,7 @@
 ---
 name: github-release-manager
 description: Use this agent when you need to create GitHub releases with proper version tagging based on app version information. Examples: <example>Context: User has updated their Homey app version and wants to create a GitHub release. user: 'I've updated the app version to 1.2.3 in app.json and want to create a GitHub release' assistant: 'I'll use the github-release-manager agent to handle the version extraction and GitHub release creation' <commentary>Since the user wants to create a GitHub release based on app version, use the github-release-manager agent to extract version info and create the release.</commentary></example> <example>Context: User has finished development work and wants to tag and release. user: 'Ready to release the latest changes, can you handle the GitHub release process?' assistant: 'I'll use the github-release-manager agent to determine the version and create the GitHub release' <commentary>User is ready for release, use the github-release-manager agent to handle version detection and release creation.</commentary></example>
-model: sonnet
+model: haiku
 color: cyan
 ---
 

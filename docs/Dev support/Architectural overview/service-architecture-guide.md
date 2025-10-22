@@ -1,4 +1,4 @@
-# Service Architecture Guide (v0.99.99)
+# Service Architecture Guide (v1.0.5)
 
 This comprehensive guide documents the service-oriented architecture implemented in the Adlar Heat Pump Homey app, providing patterns, best practices, and implementation details for working with the 8 specialized services managed by ServiceCoordinator.
 
@@ -75,6 +75,11 @@ The Adlar Heat Pump app transitioned from a monolithic device class (v0.99.22 an
 - **Intelligent skip logic** (v0.99.98) - Avoids heartbeat when device active (recent data within 4 minutes)
 - **Stale connection force-reconnect** (v0.99.98) - Automatic reconnect after 10 minutes idle
 - **Single-source connection truth** (v0.99.99) - Eliminates timer conflicts and race conditions
+- **Persistent outage tracking** (v1.0.5) - Tracks cumulative outage duration independent of circuit breaker resets
+- **Circuit breaker cycle limit** (v1.0.5) - Maximum 3 cycles (15 min) before switching to slow continuous retry
+- **Internet recovery detection** (v1.0.5) - DNS probes every 30s during cooldown for immediate reconnection
+- **User-visible outage timer** (v1.0.5) - Connection status shows outage duration and circuit breaker countdown
+- **Time-based notifications** (v1.0.5) - Notifications at 2, 10, and 30 minutes instead of failure-count-based
 
 **Public Interface**:
 
@@ -1710,6 +1715,395 @@ describe('TuyaConnectionService Heartbeat', () => {
 6. `flow_state_alerts` - 5 trigger cards
 7. `flow_efficiency_alerts` - 3 trigger cards
 8. `flow_expert_mode` - 3 trigger cards
+
+---
+
+## TuyaConnectionService v1.0.5 Reconnection Improvements
+
+Version 1.0.5 introduces comprehensive improvements to the reconnection mechanism, eliminating the need for manual intervention during extended internet outages.
+
+### Problem Statement (Pre-v1.0.5)
+
+**Reported Issue**: Device remained disconnected for 5+ hours after internet outage without auto-recovery:
+- Circuit breaker entered infinite loop (fail 10x → 5min cooldown → reset → fail 10x → repeat)
+- No notifications after initial "Connection Lost" at failure #5
+- Notification #15 ("Extended Outage") was unreachable due to counter resets
+- Manual `force_reconnect` button required to restore connection
+- User experience: "intolerable"
+
+**Root Cause**: Circuit breaker pattern designed for *transient failures* (brief hiccups), not *sustained outages* (hours-long internet downtime).
+
+### Solution Architecture: 5 Integrated Proposals
+
+#### Proposal 1: Persistent Outage Tracking
+
+**Implementation**: [`tuya-connection-service.ts:57-58`](../../../lib/services/tuya-connection-service.ts#L57-L58)
+
+```typescript
+// Persistent outage tracking (v1.0.5 - Proposal 1)
+private outageStartTime = 0; // When current outage began
+private totalOutageDuration = 0; // Cumulative outage duration
+```
+
+**Behavior**:
+- Starts tracking when disconnect detected
+- Persists through circuit breaker resets
+- Only resets on successful reconnection
+- Enables accurate outage duration reporting
+
+**Use Cases**:
+- Time-based notifications (Proposal 5)
+- User-visible outage timer (Proposal 4)
+- Diagnostic logging and analytics
+
+---
+
+#### Proposal 2: Circuit Breaker Cycle Limit
+
+**Implementation**: [`tuya-connection-service.ts:61-62`](../../../lib/services/tuya-connection-service.ts#L61-L62), [`tuya-connection-service.ts:973-989`](../../../lib/services/tuya-connection-service.ts#L973-L989)
+
+```typescript
+// Circuit breaker cycle limit (v1.0.5 - Proposal 2)
+private circuitBreakerCycles = 0;
+private readonly MAX_CIRCUIT_BREAKER_CYCLES = 3; // 3 cycles = 15 min total
+
+// In scheduleNextReconnectionAttempt():
+if (this.circuitBreakerCycles >= this.MAX_CIRCUIT_BREAKER_CYCLES) {
+  // Max cycles reached - switch to continuous slow retry
+  this.logger('⚠️ Max circuit breaker cycles reached - switching to slow continuous retry');
+  this.circuitBreakerOpen = false;
+  this.backoffMultiplier = 8; // 2.5 min retry interval (20s * 8 = 160s)
+  // Keep trying indefinitely at slower rate
+} else {
+  // Reset circuit breaker for another cycle
+  this.circuitBreakerOpen = false;
+  this.consecutiveFailures = 0;
+  this.backoffMultiplier = 1; // Reset backoff for fresh cycle
+}
+```
+
+**Behavior**:
+- Allows **maximum 3 circuit breaker cycles** (3 × 5min = 15 minutes total)
+- After 3 cycles, switches to **slow continuous retry** mode:
+  - Retry interval: 2.5 minutes (160 seconds)
+  - No more circuit breaker cooldowns
+  - Continues indefinitely until connection restored
+
+**Benefits**:
+- Eliminates infinite cooldown loop
+- Guarantees continuous recovery attempts
+- Prevents hours-long disconnection periods
+
+---
+
+#### Proposal 3: Internet Recovery Detection During Cooldown
+
+**Implementation**: [`tuya-connection-service.ts:947-960`](../../../lib/services/tuya-connection-service.ts#L947-L960)
+
+```typescript
+// Proposal 3: Lightweight connectivity probe every 30 seconds during cooldown
+if (timeSinceOpen % 30000 < 10000) {
+  dnsPromises.resolve('google.com')
+    .then(() => {
+      this.logger('✅ Internet recovered during cooldown - attempting immediate reconnection');
+      this.circuitBreakerOpen = false;
+      this.circuitBreakerCycles = 0;
+      this.consecutiveFailures = 0;
+      this.scheduleNextReconnectionAttempt();
+    })
+    .catch(() => {
+      // Still offline, continue cooldown
+    });
+}
+```
+
+**Behavior**:
+- **Every 30 seconds** during circuit breaker cooldown: lightweight DNS probe
+- **If internet restored**: immediately exits cooldown and attempts reconnection
+- **If internet still down**: continues cooldown period
+
+**Benefits**:
+- Recovery within seconds instead of waiting for full 5-minute cooldown
+- Minimal network overhead (DNS query only)
+- Works during any circuit breaker cycle
+
+**Example Timeline**:
+```
+T+0:00  - Internet restored
+T+0:15  - DNS probe detects recovery
+T+0:16  - Circuit breaker reset
+T+0:17  - Reconnection attempt starts
+T+0:20  - Device connected
+```
+
+Versus old behavior: wait until T+5:00 for cooldown to expire.
+
+---
+
+#### Proposal 4: User-Visible Outage Timer
+
+**Implementation**: [`tuya-connection-service.ts:399-409`](../../../lib/services/tuya-connection-service.ts#L399-L409)
+
+```typescript
+// Add context for circuit breaker or outage duration (v1.0.5)
+let contextInfo = '';
+if (this.currentStatus === 'reconnecting' && this.circuitBreakerOpen) {
+  const remainingCooldown = Math.ceil(
+    (this.circuitBreakerResetTime - (Date.now() - this.circuitBreakerOpenTime)) / 1000,
+  );
+  contextInfo = ` [retry in ${remainingCooldown}s]`;
+} else if ((this.currentStatus === 'disconnected' || this.currentStatus === 'error') && this.outageStartTime > 0) {
+  const outageMinutes = Math.floor((Date.now() - this.outageStartTime) / 60000);
+  contextInfo = ` [${outageMinutes} min]`;
+}
+
+return `${statusLabel}${contextInfo} (${timeString})`;
+```
+
+**Display Examples**:
+```
+"Connected (14:25:30)"
+"Disconnected [5 min] (14:20:15)"
+"Reconnecting [retry in 245s] (14:25:30)"
+"Error [30 min] (14:00:00)"
+```
+
+**Benefits**:
+- Users see **real-time outage duration**
+- Circuit breaker countdown shows **when next retry happens**
+- Provides transparency into reconnection process
+- Reduces support requests ("how long has it been down?")
+
+---
+
+#### Proposal 5: Time-Based Outage Notifications
+
+**Implementation**: [`tuya-connection-service.ts:906-936`](../../../lib/services/tuya-connection-service.ts#L906-L936)
+
+**Old System** (Failure-Count-Based):
+```typescript
+// ❌ PROBLEM: Unreachable after circuit breaker resets counter
+if (consecutiveFailures === 5) {
+  notify("Device Connection Lost");
+}
+if (consecutiveFailures === 15) {  // NEVER REACHED!
+  notify("Extended Device Outage");
+}
+```
+
+**New System** (Time-Based):
+```typescript
+// ✅ SOLUTION: Time-based notifications independent of circuit breaker
+const outageDuration = Date.now() - this.outageStartTime;
+
+if (outageDuration >= 2 * 60 * 1000 && !this.notificationSent2Min) {
+  await this.sendCriticalNotification(
+    'Device Connection Lost',
+    'Heat pump has been offline for 2 minutes. Automatic recovery in progress.',
+  );
+  this.notificationSent2Min = true;
+}
+
+if (outageDuration >= 10 * 60 * 1000 && !this.notificationSent10Min) {
+  await this.sendCriticalNotification(
+    'Extended Device Outage',
+    'Heat pump has been offline for 10 minutes. Please check network connectivity.',
+  );
+  this.notificationSent10Min = true;
+}
+
+if (outageDuration >= 30 * 60 * 1000 && !this.notificationSent30Min) {
+  await this.sendCriticalNotification(
+    'Critical Outage',
+    'Heat pump has been offline for 30 minutes. Manual intervention may be required.',
+  );
+  this.notificationSent30Min = true;
+}
+```
+
+**Notification Timeline**:
+- **T+2 min**: "Device Connection Lost - Automatic recovery in progress"
+- **T+10 min**: "Extended Device Outage - Please check network connectivity"
+- **T+30 min**: "Critical Outage - Manual intervention may be required"
+
+**Benefits**:
+- Notifications **guaranteed** to arrive at specific outage durations
+- Works **independently** of circuit breaker state
+- Users stay informed during extended outages
+- Progressive escalation (info → warning → critical)
+
+---
+
+### Integration & Interaction
+
+The 5 proposals work together as a **unified system**:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  Disconnect Detected (T+0)                  │
+└──────────────────┬──────────────────────────────────────────┘
+                   │
+                   ▼
+        ┌──────────────────────┐
+        │ Proposal 1: Start    │
+        │ Outage Tracking      │
+        └──────────┬───────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────────────────────────────┐
+│              Reconnection Attempts (Layer 1)                  │
+│  - Exponential backoff (1.5x multiplier)                      │
+│  - Circuit breaker after 10 failures                          │
+└──────────────────┬───────────────────────────────────────────┘
+                   │
+                   ▼
+        ┌──────────────────────┐
+        │ Circuit Breaker      │
+        │ Cooldown (5 min)     │
+        └──────┬──────┬────────┘
+               │      │
+               │      └─────────────────┐
+               │                        │
+               ▼                        ▼
+    ┌─────────────────────┐  ┌─────────────────────┐
+    │ Proposal 3: DNS     │  │ Proposal 4: Show    │
+    │ Probe (every 30s)   │  │ Countdown Timer     │
+    └─────────┬───────────┘  └─────────────────────┘
+              │
+              ▼
+    Internet recovered?
+              │
+              ├─ YES → Immediate reconnection
+              │
+              └─ NO  → Continue cooldown
+                        │
+                        ▼
+              ┌─────────────────────┐
+              │ Cooldown expires    │
+              │ (5 minutes)         │
+              └─────────┬───────────┘
+                        │
+                        ▼
+              ┌─────────────────────┐
+              │ Proposal 2:         │
+              │ Cycle Limit Check   │
+              └─────────┬───────────┘
+                        │
+                        ├─ Cycle 1-3 → Reset & retry
+                        │
+                        └─ Cycle 3+ → Slow continuous retry (2.5 min)
+
+                                      ┌─────────────────────┐
+                                      │ Proposal 5:         │
+                                      │ Time-Based Notify   │
+                                      └─────────────────────┘
+                                      - T+2min  (info)
+                                      - T+10min (warning)
+                                      - T+30min (critical)
+```
+
+### Example Timeline: 5-Hour Internet Outage
+
+**Pre-v1.0.5 Behavior**:
+```
+T+0:00  - Disconnect
+T+4:23  - Notification #5 "Connection Lost"
+T+4:40  - Circuit breaker (10 failures)
+T+9:40  - Circuit breaker reset, counter → 0
+T+14:03 - Circuit breaker again (10 failures)
+T+19:03 - Circuit breaker reset, counter → 0
+... infinite loop, no more notifications ...
+T+5:00:00 - Still disconnected, user must force_reconnect
+```
+
+**v1.0.5 Behavior**:
+```
+T+0:00  - Disconnect, outage tracking started
+T+2:00  - Notification "Connection Lost" (time-based)
+T+4:40  - Circuit breaker cycle 1 (10 failures)
+T+4:45  - DNS probe detects internet still down
+T+5:15  - DNS probe detects internet still down
+T+9:40  - Circuit breaker cycle 2
+T+10:00 - Notification "Extended Outage" (time-based)
+T+14:40 - Circuit breaker cycle 3
+T+19:40 - Max cycles reached → slow continuous retry (2.5 min)
+T+22:10 - Retry attempt (2.5 min interval)
+T+24:40 - Retry attempt
+T+27:10 - Retry attempt
+T+29:40 - Retry attempt
+T+30:00 - Notification "Critical Outage" (time-based)
+T+32:10 - Retry attempt
+...continues until internet restored...
+T+5:00:00 - Internet restored
+T+5:00:15 - DNS probe detects recovery
+T+5:00:20 - Device reconnected automatically
+```
+
+**Key Improvements**:
+- ✅ 3 notifications instead of 1
+- ✅ Continuous retry every 2.5 minutes after 15 minutes
+- ✅ Automatic recovery when internet restored
+- ✅ No manual intervention required
+
+---
+
+### Performance & Resource Impact
+
+**Memory**:
+- Additional tracking variables: ~24 bytes total
+  - `outageStartTime`: 8 bytes (number)
+  - `totalOutageDuration`: 8 bytes (number)
+  - `circuitBreakerCycles`: 8 bytes (number)
+  - Notification flags (3x boolean): negligible
+
+**Network Overhead**:
+- DNS probes: ~100 bytes per query, every 30s during cooldown only
+- Max overhead during 15-min cooldown: ~30 probes = 3KB total
+- Negligible impact
+
+**CPU**:
+- DNS queries: async, non-blocking
+- Time calculations: nanosecond-level operations
+- No measurable CPU impact
+
+---
+
+### Testing & Validation
+
+**Unit Tests Required**:
+1. Persistent outage tracking across circuit breaker resets
+2. Circuit breaker cycle limit enforcement
+3. DNS probe success/failure handling
+4. Notification timing accuracy
+5. Status display format correctness
+
+**Integration Tests Required**:
+1. Full reconnection cycle with simulated internet outage
+2. Circuit breaker → slow retry transition
+3. Internet recovery during various cooldown phases
+4. Notification delivery at correct timestamps
+
+**Manual Testing Scenarios**:
+1. **Short outage** (< 2 min): Should auto-recover without notifications
+2. **Medium outage** (5-10 min): Should receive 1-2 notifications, auto-recover
+3. **Extended outage** (30+ min): Should receive all 3 notifications, continuous retry
+4. **Internet restoration during cooldown**: Should detect within 30s and reconnect
+
+---
+
+### Migration Notes
+
+**Breaking Changes**: None - fully backward compatible
+
+**Automatic Migration**:
+- New tracking variables initialize to 0 on first run
+- Existing reconnection logic preserved
+- No settings changes required
+
+**User Impact**:
+- Improved UX: status now shows outage duration
+- Better notification system: time-based instead of count-based
+- No action required from users
 
 ---
 
