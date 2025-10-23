@@ -57,6 +57,11 @@ export class TuyaConnectionService {
   // Persistent outage tracking (v1.0.5 - Proposal 1)
   private outageStartTime = 0; // When current outage began
   private totalOutageDuration = 0; // Cumulative outage duration
+  private hasEverConnected = false; // Track if we've successfully connected at least once (v1.0.6 bugfix)
+
+  // Next reconnection tracking (v1.0.6 - UX improvement)
+  private nextReconnectionTime = 0; // When next reconnection attempt is scheduled
+  private readonly MAX_RECONNECTION_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes guaranteed max (v1.0.6)
 
   // Circuit breaker cycle limit (v1.0.5 - Proposal 2)
   private circuitBreakerCycles = 0;
@@ -119,14 +124,24 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Initializing Tuya device connection');
 
     try {
-      // Restore last connection timestamp from store (persists across app updates)
+      // Restore last connection timestamp AND status from store (persists across app updates)
       const storedTimestamp = await this.device.getStoreValue('last_connection_timestamp');
+      const storedStatus = await this.device.getStoreValue('last_connection_status');
+
       if (storedTimestamp && typeof storedTimestamp === 'number') {
         const daysSinceLastConnection = (Date.now() - storedTimestamp) / (1000 * 60 * 60 * 24);
         // Only restore if less than 7 days old (prevent showing very stale timestamps)
         if (daysSinceLastConnection < 7) {
           this.lastStatusChangeTime = storedTimestamp;
-          this.logger(`TuyaConnectionService: Restored connection timestamp from ${new Date(storedTimestamp).toISOString()}`);
+
+          // Restore status if valid (v1.0.6 - prevents showing stale "disconnected" at startup)
+          if (storedStatus && typeof storedStatus === 'string' &&
+              ['connected', 'disconnected', 'reconnecting', 'error'].includes(storedStatus)) {
+            this.currentStatus = storedStatus as 'connected' | 'disconnected' | 'reconnecting' | 'error';
+            this.logger(`TuyaConnectionService: Restored connection status '${storedStatus}' from ${new Date(storedTimestamp).toISOString()}`);
+          } else {
+            this.logger(`TuyaConnectionService: Restored timestamp from ${new Date(storedTimestamp).toISOString()}`);
+          }
         } else {
           this.logger(`TuyaConnectionService: Stored timestamp too old (${Math.round(daysSinceLastConnection)} days), using current time`);
         }
@@ -266,7 +281,12 @@ export class TuyaConnectionService {
       await this.tuya.connect();
 
       this.isConnected = true;
+      this.hasEverConnected = true; // Mark successful connection (v1.0.6)
+      this.lastDataEventTime = Date.now(); // Update activity timestamp immediately (v1.0.6)
       this.logger('TuyaConnectionService: Connected to Tuya device successfully');
+
+      // Synchronously update status to prevent race condition with initializeConnectionStatusTracking() (v1.0.6)
+      await this.updateStatusTimestamp('connected');
 
       // Install deep socket error handler after successful connection (v0.99.49)
       // CRITICAL: Must reinstall after every reconnection because TuyAPI recreates the socket
@@ -388,8 +408,26 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Format time interval in human-readable format (v1.0.6 - UX improvement).
+   * @param seconds - Time interval in seconds
+   * @returns Formatted string like "2m 30s" or "45s"
+   */
+  private formatTimeInterval(seconds: number): string {
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (remainingSeconds === 0) {
+      return `${minutes}m`;
+    }
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+
+  /**
    * Get formatted connection status with timestamp for display (v0.99.61, localized v0.99.68).
    * Enhanced with outage duration and circuit breaker info (v1.0.5 - Proposal 4).
+   * Enhanced to always show next reconnection time (v1.0.6 - UX improvement).
    * Format: "Status (HH:MM:SS)" or "Status (DD-MM HH:MM)" for older timestamps
    * @returns Formatted status string with timestamp in local timezone
    */
@@ -397,21 +435,37 @@ export class TuyaConnectionService {
     // Get localized status label
     const statusLabel = this.device.homey.__(`connection_status.${this.currentStatus}`);
 
-    // Add context for circuit breaker or outage duration (v1.0.5)
+    // Add context for outage duration and next reconnection time (v1.0.5, enhanced v1.0.6)
     let contextInfo = '';
-    if (this.currentStatus === 'reconnecting' && this.circuitBreakerOpen) {
-      const remainingCooldown = Math.ceil(
-        (this.circuitBreakerResetTime - (Date.now() - this.circuitBreakerOpenTime)) / 1000,
-      );
-      contextInfo = ` [retry in ${remainingCooldown}s]`;
-    } else if ((this.currentStatus === 'disconnected' || this.currentStatus === 'error') && this.outageStartTime > 0) {
-      const outageMinutes = Math.floor((Date.now() - this.outageStartTime) / 60000);
-      contextInfo = ` [${outageMinutes} min]`;
+    const now = Date.now();
+
+    // Show outage duration for disconnected/error states
+    if ((this.currentStatus === 'disconnected' || this.currentStatus === 'error') && this.outageStartTime > 0) {
+      const outageMinutes = Math.floor((now - this.outageStartTime) / 60000);
+      contextInfo = ` [${outageMinutes} min`;
+
+      // Add next reconnection time if scheduled
+      if (this.nextReconnectionTime > now) {
+        const secondsUntilRetry = Math.ceil((this.nextReconnectionTime - now) / 1000);
+        contextInfo += `, retry in ${this.formatTimeInterval(secondsUntilRetry)}`;
+      }
+      contextInfo += ']';
+    } else if (this.currentStatus === 'reconnecting') {
+      // Show countdown for reconnecting state
+      if (this.circuitBreakerOpen) {
+        const remainingCooldown = Math.ceil(
+          (this.circuitBreakerResetTime - (now - this.circuitBreakerOpenTime)) / 1000,
+        );
+        contextInfo = ` [retry in ${this.formatTimeInterval(remainingCooldown)}]`;
+      } else if (this.nextReconnectionTime > now) {
+        const secondsUntilRetry = Math.ceil((this.nextReconnectionTime - now) / 1000);
+        contextInfo = ` [retry in ${this.formatTimeInterval(secondsUntilRetry)}]`;
+      }
     }
 
     // Create timestamp in local timezone (not UTC)
     const timestamp = new Date(this.lastStatusChangeTime);
-    const now = new Date();
+    const nowDate = new Date();
 
     // Get Homey's configured timezone (fallback to auto-detection)
     // Homey stores timezone in system settings, prefer this over Node.js process timezone
@@ -419,7 +473,7 @@ export class TuyaConnectionService {
 
     // If status changed today, show only time (HH:MM:SS)
     // If status changed on a different day, show date and time (D-MMM HH:MM)
-    const isSameDay = timestamp.toDateString() === now.toDateString();
+    const isSameDay = timestamp.toDateString() === nowDate.toDateString();
 
     // Detect language from Homey (support en, nl, de, fr with fallback to 'en')
     const detectedLanguage = this.device.homey.i18n.getLanguage();
@@ -482,11 +536,12 @@ export class TuyaConnectionService {
 
     this.logger(`TuyaConnectionService: Status changed to ${newStatus}, updating timestamp`);
 
-    // Persist timestamp to device store (survives app updates)
+    // Persist both timestamp AND status to device store (survives app updates) - v1.0.6
     try {
       await this.device.setStoreValue('last_connection_timestamp', this.lastStatusChangeTime);
+      await this.device.setStoreValue('last_connection_status', this.currentStatus);
     } catch (error) {
-      this.logger(`TuyaConnectionService: Failed to persist connection timestamp: ${error}`);
+      this.logger(`TuyaConnectionService: Failed to persist connection state: ${error}`);
       // Non-critical error, continue operation
     }
   }
@@ -648,6 +703,7 @@ export class TuyaConnectionService {
     this.tuya.on('connected', (): void => {
       this.logger('TuyaConnectionService: Device connected');
       this.isConnected = true;
+      this.hasEverConnected = true; // Mark that we've successfully connected at least once (v1.0.6 bugfix)
       this.updateStatusTimestamp('connected').catch((err) => {
         this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
       });
@@ -882,8 +938,9 @@ export class TuyaConnectionService {
    * and time-based notifications (v1.0.5 - Proposals 1-5).
    */
   private scheduleNextReconnectionAttempt(): void {
-    // LAYER 1: Track outage start time (v1.0.5 - Proposal 1)
-    if (!this.isConnected && this.outageStartTime === 0) {
+    // LAYER 1: Track outage start time (v1.0.5 - Proposal 1, fixed v1.0.6)
+    // Only start tracking if we've ever connected successfully before
+    if (this.hasEverConnected && !this.isConnected && this.outageStartTime === 0) {
       this.outageStartTime = Date.now();
       this.logger('TuyaConnectionService: Outage tracking started');
     }
@@ -1001,10 +1058,21 @@ export class TuyaConnectionService {
 
     // Calculate adaptive interval with exponential backoff
     const baseInterval = DeviceConstants.RECONNECTION_INTERVAL_MS;
-    const adaptiveInterval = Math.min(
+    let adaptiveInterval = Math.min(
       baseInterval * this.backoffMultiplier,
       this.maxBackoffSeconds * 1000,
     );
+
+    // Enforce 30-minute maximum guarantee (v1.0.6 - user requirement)
+    // If it's been longer than 30 minutes since last attempt, force immediate retry
+    const timeSinceLastAttempt = this.nextReconnectionTime > 0 ? Date.now() - this.nextReconnectionTime : 0;
+    if (timeSinceLastAttempt > this.MAX_RECONNECTION_INTERVAL_MS) {
+      this.logger('TuyaConnectionService: ⚠️ 30-minute maximum exceeded - forcing immediate retry');
+      adaptiveInterval = 1000; // 1 second
+    }
+
+    // Set next reconnection time for status display (v1.0.6)
+    this.nextReconnectionTime = Date.now() + adaptiveInterval;
 
     this.logger(`TuyaConnectionService: Next reconnection attempt in ${Math.round(adaptiveInterval / 1000)}s (backoff: ${this.backoffMultiplier}x)`);
 
@@ -1026,6 +1094,13 @@ export class TuyaConnectionService {
    * Enhanced with forced disconnect to fix TuyAPI state desynchronization (v1.0.3).
    */
   private async attemptReconnectionWithRecovery(): Promise<void> {
+    // CHECK 1: If already connected, reset backoff and exit (v1.0.6 - MUST check BEFORE disconnect)
+    if (this.isConnected) {
+      this.logger('TuyaConnectionService: Already connected, skipping reconnection attempt');
+      this.resetErrorRecoveryState();
+      return;
+    }
+
     // FIX 1: Force disconnect to reset TuyAPI internal state before reconnect attempt
     // This prevents "Already connected" errors when app state and TuyAPI state are out of sync
     if (this.tuya) {
@@ -1036,12 +1111,6 @@ export class TuyaConnectionService {
         // Expected error if socket was already closed - safe to ignore
         this.logger('TuyaConnectionService: Disconnect failed (socket already closed):', err);
       }
-    }
-
-    if (this.isConnected) {
-      // Already connected, reset backoff and exit
-      this.resetErrorRecoveryState();
-      return;
     }
 
     this.logger(`TuyaConnectionService: Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
@@ -1159,6 +1228,9 @@ export class TuyaConnectionService {
     this.notificationSent2Min = false;
     this.notificationSent10Min = false;
     this.notificationSent30Min = false;
+
+    // Reset next reconnection time (v1.0.6)
+    this.nextReconnectionTime = 0;
   }
 
   /**
