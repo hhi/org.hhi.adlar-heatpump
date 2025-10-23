@@ -1,4 +1,10 @@
 {
+  "1.0.6": {
+    "en": "Fixed: Device now automatically reconnects after network issues without requiring manual force reconnect button. Connection status displays countdown to next reconnection attempt (e.g., 'disconnected [5 min, retry in 2m 30s]'). System attempts reconnection at least every 30 minutes.",
+    "nl": "Opgelost: Apparaat herverbindt nu automatisch na netwerkproblemen zonder handmatige herverbinding-knop. Verbindingsstatus toont aftelling tot volgende poging (bijv. 'disconnected [5 min, retry in 2m 30s]'). Systeem probeert herverbinding minstens elke 30 minuten.",
+    "de": "Behoben: Gerät verbindet sich jetzt automatisch nach Netzwerkproblemen ohne manuelle Wiederverbindungs-Taste. Verbindungsstatus zeigt Countdown bis zum nächsten Versuch (z.B. 'disconnected [5 min, retry in 2m 30s]'). System versucht Wiederverbindung mindestens alle 30 Minuten.",
+    "fr": "Corrigé: L'appareil se reconnecte automatiquement après des problèmes réseau sans bouton de reconnexion manuelle. Le statut de connexion affiche le compte à rebours jusqu'à la prochaine tentative (par ex. 'disconnected [5 min, retry in 2m 30s]'). Le système tente une reconnexion au moins toutes les 30 minutes."
+  },
   "1.0.5": {
     "en": "Connection auto-recovers within 15 minutes after internet outage. Notifications sent at 2, 10, and 30 minutes of downtime. Connection status shows outage duration (e.g., 'disconnected [5 min]').",
     "nl": "Verbinding herstelt automatisch binnen 15 minuten na internetuitval. Meldingen verzonden na 2, 10 en 30 minuten uitval. Verbindingsstatus toont uitval-duur (bijv. 'disconnected [5 min]').",
