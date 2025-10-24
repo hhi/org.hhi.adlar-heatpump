@@ -52,6 +52,11 @@ export interface RollingCOPConfig {
     medium: number; // Minimum percentage of medium+ confidence data points
   };
   logger?: (message: string, ...args: unknown[]) => void; // Optional logger function
+  device?: {
+    // Device reference for triggering flow cards (v1.0.8)
+    triggerFlowCard: (cardId: string, tokens: Record<string, unknown>) => Promise<void>;
+    getCapabilityValue: (capability: string) => unknown;
+  };
 }
 
 /**
@@ -62,6 +67,11 @@ export class RollingCOPCalculator {
   private readonly maxDataPoints: number;
   private readonly config: RollingCOPConfig;
   private logger: (message: string, ...args: unknown[]) => void;
+
+  // State tracking for triggers (v1.0.8)
+  private lastTrend: 'improving' | 'stable' | 'degrading' | null = null;
+  private lastDailyCOP = 0;
+  private lastMonthlyCOP = 0;
 
   constructor(config: Partial<RollingCOPConfig> = {}) {
     // Default configuration
@@ -159,7 +169,7 @@ export class RollingCOPCalculator {
     // Determine overall confidence level
     const confidenceLevel = this.calculateConfidenceLevel(validData);
 
-    return {
+    const result: RollingCOPResult = {
       averageCOP: Number(primaryAverage.toFixed(2)),
       dataPoints: validData.length,
       timeSpan: Math.round(window),
@@ -175,6 +185,14 @@ export class RollingCOPCalculator {
         excludedOutliers: excludedCount,
       },
     };
+
+    // Check and trigger trend change flow card (v1.0.8)
+    // Fire and forget - don't await to avoid blocking calculation
+    this.checkAndTriggerTrendChange(result).catch((err) => {
+      this.logger('Error checking trend change:', err);
+    });
+
+    return result;
   }
 
   /**
@@ -498,6 +516,90 @@ export class RollingCOPCalculator {
       return 'medium';
     }
     return 'low';
+  }
+
+  /**
+   * Check and trigger COP trend detection flow card (v1.0.8)
+   * Fires when trend changes from one state to another
+   * @param result - Rolling COP calculation result with trend information
+   */
+  private async checkAndTriggerTrendChange(result: RollingCOPResult): Promise<void> {
+    if (!this.config.device) return;
+
+    const currentTrend = result.trend;
+
+    // Only trigger if trend actually changed
+    if (this.lastTrend !== null && currentTrend !== this.lastTrend) {
+      // Get trend description based on strength
+      let trendDescription = '';
+      const strength = result.trendStrength;
+
+      if (currentTrend === 'improving') {
+        if (strength > 0.3) trendDescription = 'Strong improvement in efficiency';
+        else if (strength > 0.15) trendDescription = 'Moderate improvement in efficiency';
+        else trendDescription = 'Slight improvement in efficiency';
+      } else if (currentTrend === 'degrading') {
+        if (strength > 0.3) trendDescription = 'Significant decline in efficiency';
+        else if (strength > 0.15) trendDescription = 'Moderate decline in efficiency';
+        else trendDescription = 'Slight decline in efficiency';
+      } else {
+        trendDescription = 'Efficiency stable';
+      }
+
+      // Get current daily COP for token
+      const dailyCOP = (this.config.device.getCapabilityValue('adlar_cop_daily') as number) || 0;
+
+      // Fire and forget pattern - don't block calculation
+      this.config.device.triggerFlowCard('cop_trend_detected', {
+        trend_direction: currentTrend,
+        trend_strength: Math.round(strength * 100) / 100,
+        trend_description: trendDescription,
+        current_daily_cop: Math.round(dailyCOP * 100) / 100,
+      }).catch((err) => {
+        this.logger('Failed to trigger cop_trend_detected flow card:', err);
+      });
+
+      this.logger(`COP Trend Changed: ${this.lastTrend} → ${currentTrend} (strength: ${(strength * 100).toFixed(1)}%)`);
+    }
+
+    // Update last trend
+    this.lastTrend = currentTrend;
+  }
+
+  /**
+   * Check and trigger daily/monthly COP efficiency change triggers (v1.0.8)
+   * Fires when daily or monthly average COP changes significantly
+   * @param dailyCOP - Current daily COP average
+   * @param monthlyCOP - Current monthly COP average
+   */
+  private async checkAndTriggerCOPChanges(dailyCOP: number, monthlyCOP: number): Promise<void> {
+    if (!this.config.device) return;
+
+    const COP_CHANGE_THRESHOLD = 0.2; // ±0.2 threshold for daily/monthly changes
+
+    // Daily COP efficiency changed
+    if (this.lastDailyCOP > 0 && Math.abs(dailyCOP - this.lastDailyCOP) >= COP_CHANGE_THRESHOLD) {
+      this.config.device.triggerFlowCard('daily_cop_efficiency_changed', {
+        current_daily_cop: Math.round(dailyCOP * 100) / 100,
+        previous_daily_cop: Math.round(this.lastDailyCOP * 100) / 100,
+        change: Math.round((dailyCOP - this.lastDailyCOP) * 100) / 100,
+      }).catch((err) => {
+        this.logger('Failed to trigger daily_cop_efficiency_changed:', err);
+      });
+    }
+    this.lastDailyCOP = dailyCOP;
+
+    // Monthly COP efficiency changed
+    if (this.lastMonthlyCOP > 0 && Math.abs(monthlyCOP - this.lastMonthlyCOP) >= COP_CHANGE_THRESHOLD) {
+      this.config.device.triggerFlowCard('monthly_cop_efficiency_changed', {
+        current_monthly_cop: Math.round(monthlyCOP * 100) / 100,
+        previous_monthly_cop: Math.round(this.lastMonthlyCOP * 100) / 100,
+        change: Math.round((monthlyCOP - this.lastMonthlyCOP) * 100) / 100,
+      }).catch((err) => {
+        this.logger('Failed to trigger monthly_cop_efficiency_changed:', err);
+      });
+    }
+    this.lastMonthlyCOP = monthlyCOP;
   }
 
   /**

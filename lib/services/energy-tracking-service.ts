@@ -27,6 +27,12 @@ export class EnergyTrackingService {
   private lastEnergyCalculation: number = 0;
   private isEnabled = false;
 
+  // State tracking for flow card triggers (v1.0.8)
+  private dailyThresholdTriggered = false; // Reset daily at midnight
+  private lastDailyConsumptionCheck = 0;    // For rate limiting
+  // TODO (v1.0.9): Implement automatic midnight reset via dailyResetInterval
+  // Currently resets when service is reinitialized (app restart)
+
   // Overlap protection guard (v1.0.2)
   private energyCalculationInProgress = false;
 
@@ -288,6 +294,9 @@ export class EnergyTrackingService {
           const newDailyTotal = dailyConsumption + energyIncrement;
           await this.device.setCapabilityValue('meter_power.power_consumption', Math.round(newDailyTotal * 100) / 100);
           await this.device.setStoreValue('daily_consumption_kwh', newDailyTotal);
+
+          // Check daily consumption threshold (v1.0.8)
+          await this.checkDailyConsumptionThreshold(newDailyTotal);
         }
 
         this.logger(`EnergyTrackingService: Energy updated: +${(energyIncrement * 1000).toFixed(1)}Wh (power: ${currentPower}W, time: ${(hoursElapsed * 60).toFixed(1)}min)`);
@@ -460,6 +469,37 @@ export class EnergyTrackingService {
       }
     } catch (error) {
       this.logger('EnergyTrackingService: Error in power threshold check:', error);
+    }
+  }
+
+  /**
+   * Check and trigger daily consumption threshold (v1.0.8)
+   * Fires when daily energy consumption exceeds specified threshold
+   * Resets daily at midnight
+   */
+  private async checkDailyConsumptionThreshold(dailyConsumption: number): Promise<void> {
+    try {
+      const settings = await this.device.getSettings();
+      const threshold = settings.daily_consumption_threshold_kwh || 50; // Default 50 kWh
+
+      // Only trigger once per day when threshold is exceeded
+      if (!this.dailyThresholdTriggered && dailyConsumption >= threshold) {
+        // Fire trigger - cast device to access triggerFlowCard method
+        const deviceWithTrigger = this.device as unknown as {
+          triggerFlowCard: (cardId: string, tokens: Record<string, unknown>) => Promise<void>;
+        };
+
+        await deviceWithTrigger.triggerFlowCard('daily_consumption_threshold', {
+          daily_consumption: Math.round(dailyConsumption * 100) / 100,
+          threshold_value: threshold,
+          exceeded_by: Math.round((dailyConsumption - threshold) * 100) / 100,
+        });
+
+        this.dailyThresholdTriggered = true;
+        this.logger(`Daily consumption threshold exceeded: ${dailyConsumption.toFixed(2)} kWh >= ${threshold} kWh`);
+      }
+    } catch (error) {
+      this.logger('Error in checkDailyConsumptionThreshold:', error);
     }
   }
 

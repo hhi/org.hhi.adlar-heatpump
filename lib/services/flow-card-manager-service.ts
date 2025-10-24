@@ -454,6 +454,49 @@ export class FlowCardManagerService {
         return monthlyCOP > threshold;
       });
 
+      // COP trend analysis condition (v1.0.8)
+      const copTrendCard = this.device.homey.flow.getConditionCard('cop_trend_analysis');
+      copTrendCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: COP trend analysis triggered', { args });
+
+        // Get service coordinator to access RollingCOPCalculator
+        const serviceCoordinator = (this.device as unknown as { serviceCoordinator?: { getRollingCOPCalculator: () => { getTrendAnalysis: (hours: number) => { trend: string; strength: number; trendKey: string } | null } } }).serviceCoordinator;
+
+        if (!serviceCoordinator) {
+          this.logger('FlowCardManagerService: Service coordinator not available');
+          return false;
+        }
+
+        const rollingCOPCalculator = serviceCoordinator.getRollingCOPCalculator();
+        if (!rollingCOPCalculator) {
+          this.logger('FlowCardManagerService: RollingCOPCalculator not available');
+          return false;
+        }
+
+        const hours = args.hours || 24;
+        const trendAnalysis = rollingCOPCalculator.getTrendAnalysis(hours);
+
+        if (!trendAnalysis) {
+          this.logger('FlowCardManagerService: COP trend analysis skipped - insufficient data');
+          return false;
+        }
+
+        // The flow card uses !{{improving|stable|degrading}} syntax
+        // This means args will have the selected value, and we check if it matches
+        // The trend value from getTrendAnalysis is 'improving', 'stable', or 'degrading'
+        this.logger('FlowCardManagerService: COP trend analysis result', {
+          hours,
+          trend: trendAnalysis.trend,
+          strength: trendAnalysis.strength,
+          trendKey: trendAnalysis.trendKey,
+        });
+
+        // Note: Homey's !{{option1|option2|option3}} returns true for first option, false for others
+        // So we return true if trend matches the "improving" state, false otherwise
+        // This is controlled by the flow card UI selection
+        return trendAnalysis.trend === 'improving';
+      });
+
       this.logger('FlowCardManagerService: Action-based condition cards registered');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering action-based condition cards:', error);
