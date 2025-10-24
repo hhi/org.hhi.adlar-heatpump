@@ -182,6 +182,13 @@ class MyDevice extends Homey.Device {
   private lastCOPDataPointTime: number = 0;
   private compressorStateHistory: Array<{timestamp: number, running: boolean}> = [];
 
+  // State tracking for flow card triggers (v1.0.8)
+  private lastCOPOutlierStatus = false;  // For cop_outlier_detected trigger
+  private lastCOPValue = 0;              // For cop_efficiency_changed trigger
+  private lastInletTemp: number | null = null;   // For inlet_temperature_changed
+  private lastOutletTemp: number | null = null;  // For outlet_temperature_changed
+  private lastAmbientTemp: number | null = null; // For ambient_temperature_changed
+
   // External power energy tracking
   private lastExternalPowerTimestamp: number | null = null;
 
@@ -838,6 +845,22 @@ class MyDevice extends Homey.Device {
         this.debugLog('📅 Monthly COP updated:', monthlyCOP.averageCOP, `(${monthlyCOP.dataPoints} points, ${monthlyCOP.confidenceLevel} confidence)`);
       }
 
+      // Check and trigger daily/monthly COP change flow cards (v1.0.8)
+      const dailyValue = dailyCOP?.averageCOP || 0;
+      const monthlyValue = monthlyCOP?.averageCOP || 0;
+      if (dailyValue > 0 && monthlyValue > 0) {
+        // Call through the service method (non-blocking)
+        // Note: This is a workaround since rollingCOPCalculator already has device reference
+        // In v1.0.9+, consider refactoring to use event emitter pattern
+        if (this.rollingCOPCalculator) {
+          (this.rollingCOPCalculator as unknown as {
+            checkAndTriggerCOPChanges?: (daily: number, monthly: number) => Promise<void>;
+          }).checkAndTriggerCOPChanges?.(dailyValue, monthlyValue)?.catch((err) => {
+            this.error('Failed to trigger COP change checks:', err);
+          });
+        }
+      }
+
       // Update trend analysis
       const trendAnalysis = this.rollingCOPCalculator.getTrendAnalysis(24);
       if (trendAnalysis && this.hasCapability('adlar_cop_trend')) {
@@ -1032,6 +1055,11 @@ class MyDevice extends Homey.Device {
         weightingMethod: 'runtime_weighted',
         trendSensitivity: 0.15, // 15% change for trend detection
         logger: (message: string, ...args: unknown[]) => this.log(message, ...args),
+        device: {
+          // Device reference for flow card triggers (v1.0.8)
+          triggerFlowCard: (cardId: string, tokens: Record<string, unknown>) => this.triggerFlowCard(cardId, tokens),
+          getCapabilityValue: (capability: string) => this.getCapabilityValue(capability),
+        },
       });
 
       // Try to restore data from settings
@@ -1661,10 +1689,39 @@ class MyDevice extends Homey.Device {
       // Enhanced result logging
       this.logCOPCalculationResult(copResult);
 
+      // Check and trigger COP outlier detection (v1.0.8)
+      if (copResult.isOutlier && !this.lastCOPOutlierStatus) {
+        // Fire and forget pattern - don't block COP calculation
+        this.triggerFlowCard('cop_outlier_detected', {
+          outlier_cop: Math.round(copResult.cop * 100) / 100,
+          outlier_reason: copResult.outlierReason || 'Unknown reason',
+          calculation_method: copResult.method,
+        }).catch((err) => {
+          this.error('Failed to trigger cop_outlier_detected flow card:', err);
+        });
+
+        this.log(`🚨 COP Outlier Detected: ${copResult.cop.toFixed(2)} - ${copResult.outlierReason}`);
+      }
+      this.lastCOPOutlierStatus = copResult.isOutlier;
+
       // Update COP capability if valid
       if (copResult.cop > 0 && !copResult.isOutlier) {
         const roundedCOP = Math.round(copResult.cop * 100) / 100;
         await this.setCapabilityValue('adlar_cop', roundedCOP);
+
+        // COP efficiency changed trigger (v1.0.8)
+        // Trigger when COP changes significantly (±0.3 threshold)
+        const COP_CHANGE_THRESHOLD = 0.3;
+        if (this.lastCOPValue > 0 && Math.abs(roundedCOP - this.lastCOPValue) >= COP_CHANGE_THRESHOLD) {
+          this.triggerFlowCard('cop_efficiency_changed', {
+            current_cop: roundedCOP,
+            previous_cop: Math.round(this.lastCOPValue * 100) / 100,
+            change: Math.round((roundedCOP - this.lastCOPValue) * 100) / 100,
+          }).catch((err) => {
+            this.error('Failed to trigger cop_efficiency_changed:', err);
+          });
+        }
+        this.lastCOPValue = roundedCOP;
 
         // Update COP method capability
         const methodDisplayName = this.formatCOPMethodDisplay(copResult.method, copResult.confidence, copResult.diagnosticInfo);
@@ -2252,6 +2309,49 @@ class MyDevice extends Homey.Device {
               this.log(`✅ Fault cleared: Previous code ${this.lastFaultCode} resolved`);
               this.lastFaultCode = 0;
             }
+          }
+
+          // Temperature change detection (v1.0.8) - inlet, outlet, ambient
+          // Trigger when temperature changes significantly (±0.5°C threshold)
+          const TEMP_CHANGE_THRESHOLD = 0.5; // Minimum °C change to trigger
+
+          // Inlet temperature (measure_temperature.temp_top)
+          if (capability === 'measure_temperature.temp_top' && typeof value === 'number') {
+            if (this.lastInletTemp !== null && Math.abs(value - this.lastInletTemp) >= TEMP_CHANGE_THRESHOLD) {
+              this.triggerFlowCard('inlet_temperature_changed', {
+                current_temperature: Math.round(value * 10) / 10,
+                previous_temperature: Math.round(this.lastInletTemp * 10) / 10,
+              }).catch((err) => {
+                this.error('Failed to trigger inlet_temperature_changed:', err);
+              });
+            }
+            this.lastInletTemp = value;
+          }
+
+          // Outlet temperature (measure_temperature.temp_bottom)
+          if (capability === 'measure_temperature.temp_bottom' && typeof value === 'number') {
+            if (this.lastOutletTemp !== null && Math.abs(value - this.lastOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
+              this.triggerFlowCard('outlet_temperature_changed', {
+                current_temperature: Math.round(value * 10) / 10,
+                previous_temperature: Math.round(this.lastOutletTemp * 10) / 10,
+              }).catch((err) => {
+                this.error('Failed to trigger outlet_temperature_changed:', err);
+              });
+            }
+            this.lastOutletTemp = value;
+          }
+
+          // Ambient temperature (measure_temperature.around_temp)
+          if (capability === 'measure_temperature.around_temp' && typeof value === 'number') {
+            if (this.lastAmbientTemp !== null && Math.abs(value - this.lastAmbientTemp) >= TEMP_CHANGE_THRESHOLD) {
+              this.triggerFlowCard('ambient_temperature_changed', {
+                current_temperature: Math.round(value * 10) / 10,
+                previous_temperature: Math.round(this.lastAmbientTemp * 10) / 10,
+              }).catch((err) => {
+                this.error('Failed to trigger ambient_temperature_changed:', err);
+              });
+            }
+            this.lastAmbientTemp = value;
           }
 
         } catch (error) {
