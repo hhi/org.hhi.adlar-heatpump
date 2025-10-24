@@ -1,4 +1,10 @@
 {
+  "1.0.7": {
+    "en": "New flow cards for safety monitoring and performance tracking. Added fault detection alerts with 15 fault codes, power threshold exceeded notifications, energy milestone tracking (100 kWh intervals), and COP efficiency conditions for real-time performance checks.",
+    "nl": "Nieuwe stroomkaarten voor veiligheid en prestatie-monitoring. Storing detectie toegevoegd met 15 storing codes, vermogen drempel overschreden meldingen, energie mijlpaal tracking (100 kWh intervallen), en COP efficiëntie voorwaarden voor realtime prestatie controles.",
+    "de": "Neue Flow-Karten für Sicherheitsüberwachung und Leistungsverfolgung. Störungserkennung mit 15 Störungscodes, Benachrichtigungen bei Leistungsschwellen, Energiemeilenstein-Tracking (100-kWh-Intervalle) und COP-Effizienzbedingungen für Echtzeit-Leistungschecks hinzugefügt.",
+    "fr": "Nouvelles cartes de flux pour la surveillance de sécurité et le suivi des performances. Détection de défauts avec 15 codes de défaut, notifications de dépassement de seuil de puissance, suivi des jalons d'énergie (intervalles de 100 kWh) et conditions d'efficacité COP pour vérifications en temps réel."
+  },
   "1.0.6": {
     "en": "Fixed: Device now automatically reconnects after network issues without requiring manual force reconnect button. Connection status displays countdown to next reconnection attempt (e.g., 'disconnected [5 min, retry in 2m 30s]'). System attempts reconnection at least every 30 minutes.",
     "nl": "Opgelost: Apparaat herverbindt nu automatisch na netwerkproblemen zonder handmatige herverbinding-knop. Verbindingsstatus toont aftelling tot volgende poging (bijv. 'disconnected [5 min, retry in 2m 30s]'). Systeem probeert herverbinding minstens elke 30 minuten.",

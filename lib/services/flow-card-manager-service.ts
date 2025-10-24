@@ -399,6 +399,61 @@ export class FlowCardManagerService {
         }
       });
 
+      // COP efficiency check condition (v1.0.7)
+      const copEfficiencyCard = this.device.homey.flow.getConditionCard('cop_efficiency_check');
+      copEfficiencyCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: COP efficiency check triggered', { args });
+
+        // Get current COP value from capability
+        const currentCOP = this.device.getCapabilityValue('adlar_cop') as number || 0;
+        const threshold = args.threshold || 2.0;
+
+        // Check if compressor is actually running (COP only meaningful when active)
+        const compressorFrequency = this.device.getCapabilityValue('measure_frequency.compressor_strength') as number || 0;
+
+        if (compressorFrequency === 0) {
+          // Compressor idle - COP not meaningful
+          this.logger('FlowCardManagerService: COP check skipped - compressor idle');
+          return false;
+        }
+
+        return currentCOP > threshold;
+      });
+
+      // Daily COP above threshold condition (v1.0.7)
+      const dailyCOPCard = this.device.homey.flow.getConditionCard('daily_cop_above_threshold');
+      dailyCOPCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Daily COP check triggered', { args });
+
+        const dailyCOP = this.device.getCapabilityValue('adlar_cop_daily') as number || 0;
+        const threshold = args.threshold || 2.5;
+
+        // Need sufficient data for reliable daily average
+        if (dailyCOP === 0) {
+          this.logger('FlowCardManagerService: Daily COP check skipped - insufficient data');
+          return false;
+        }
+
+        return dailyCOP > threshold;
+      });
+
+      // Monthly COP above threshold condition (v1.0.7)
+      const monthlyCOPCard = this.device.homey.flow.getConditionCard('monthly_cop_above_threshold');
+      monthlyCOPCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Monthly COP check triggered', { args });
+
+        const monthlyCOP = this.device.getCapabilityValue('adlar_cop_monthly') as number || 0;
+        const threshold = args.threshold || 3.0;
+
+        // Need sufficient data for reliable monthly average
+        if (monthlyCOP === 0) {
+          this.logger('FlowCardManagerService: Monthly COP check skipped - insufficient data');
+          return false;
+        }
+
+        return monthlyCOP > threshold;
+      });
+
       this.logger('FlowCardManagerService: Action-based condition cards registered');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering action-based condition cards:', error);
