@@ -53,6 +53,95 @@ interface COPSettings {
   };
 }
 
+/**
+ * Fault code mapping for DPS 15 (adlar_fault)
+ * Maps numeric fault codes to human-readable descriptions
+ * Note: These codes are specific to Adlar heat pump systems
+ */
+const FAULT_CODE_DESCRIPTIONS: Record<number, { en: string; nl: string }> = {
+  0: {
+    en: 'No fault',
+    nl: 'Geen storing',
+  },
+  1: {
+    en: 'High pressure protection',
+    nl: 'Hogedrukbeveiliging',
+  },
+  2: {
+    en: 'Low pressure protection',
+    nl: 'Lagedrukbeveiliging',
+  },
+  3: {
+    en: 'Compressor overheating',
+    nl: 'Compressor oververhitting',
+  },
+  4: {
+    en: 'Discharge temperature too high',
+    nl: 'Uitlaattemperatuur te hoog',
+  },
+  5: {
+    en: 'Water flow sensor fault',
+    nl: 'Waterdoorstroomsensor storing',
+  },
+  6: {
+    en: 'Inlet temperature sensor fault',
+    nl: 'Inlaattemperatuursensor storing',
+  },
+  7: {
+    en: 'Outlet temperature sensor fault',
+    nl: 'Uitlaattemperatuursensor storing',
+  },
+  8: {
+    en: 'Ambient temperature sensor fault',
+    nl: 'Omgevingstemperatuursensor storing',
+  },
+  9: {
+    en: 'Coil temperature sensor fault',
+    nl: 'Spoeltemperatuursensor storing',
+  },
+  10: {
+    en: 'Low water flow protection',
+    nl: 'Lage waterdoorstroom beveiliging',
+  },
+  11: {
+    en: 'Antifreeze protection active',
+    nl: 'Vorstbeveiliging actief',
+  },
+  12: {
+    en: 'Phase loss or reverse phase',
+    nl: 'Faseuitval of omkeerde fase',
+  },
+  13: {
+    en: 'Communication error',
+    nl: 'Communicatiefout',
+  },
+  14: {
+    en: 'EEV valve fault',
+    nl: 'EEV-klep storing',
+  },
+  15: {
+    en: 'System pressure abnormal',
+    nl: 'Systeemdruk abnormaal',
+  },
+};
+
+/**
+ * Get fault description in user's language
+ * @param faultCode - Numeric fault code from DPS 15
+ * @param language - Language code ('en' or 'nl')
+ * @returns Human-readable fault description
+ */
+function getFaultDescription(faultCode: number, language: 'en' | 'nl' = 'en'): string {
+  const description = FAULT_CODE_DESCRIPTIONS[faultCode];
+  if (description) {
+    return description[language];
+  }
+  // Fallback for unknown fault codes
+  return language === 'nl'
+    ? `Onbekende storing (code: ${faultCode})`
+    : `Unknown fault (code: ${faultCode})`;
+}
+
 class MyDevice extends Homey.Device {
   tuya: TuyaDevice | undefined;
   allCapabilities: Record<string, number[]> = allCapabilities;
@@ -98,6 +187,9 @@ class MyDevice extends Homey.Device {
 
   // Debounce map for temperature critical alerts (per capability)
   private lastTempAlertAt: Map<string, number> = new Map();
+
+  // Fault detection state tracking (v1.0.7 - fault_detected trigger)
+  private lastFaultCode: number = 0;
 
   // Service Coordinator - manages all device services
   private serviceCoordinator: ServiceCoordinator | null = null;
@@ -2136,6 +2228,31 @@ class MyDevice extends Homey.Device {
 
           // Update capability health tracking via service coordinator (synchronous)
           this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
+
+          // Fault detection for DPS 15 (adlar_fault) - v1.0.7 feature
+          // Trigger fault_detected flow card when new fault code appears
+          if (dpsId === 15 && capability === 'adlar_fault') {
+            const faultCode = typeof value === 'number' ? value : 0;
+
+            // Only trigger on NEW faults (not on every DPS update)
+            // faultCode > 0 = active fault, faultCode changed = new/different fault
+            if (faultCode > 0 && faultCode !== this.lastFaultCode) {
+              // Fire-and-forget pattern to prevent blocking DPS processing
+              this.triggerFlowCard('fault_detected', {
+                fault_code: faultCode,
+                fault_description: getFaultDescription(faultCode, this.homey.i18n.getLanguage() as 'en' | 'nl'),
+              }).catch((err) => {
+                this.error('Failed to trigger fault_detected flow card:', err);
+              });
+
+              this.log(`🚨 Fault detected: Code ${faultCode} - ${getFaultDescription(faultCode, 'en')}`);
+              this.lastFaultCode = faultCode;
+            } else if (faultCode === 0 && this.lastFaultCode !== 0) {
+              // Fault cleared - log but don't trigger (users may want separate "fault_cleared" trigger in future)
+              this.log(`✅ Fault cleared: Previous code ${this.lastFaultCode} resolved`);
+              this.lastFaultCode = 0;
+            }
+          }
 
         } catch (error) {
           this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);

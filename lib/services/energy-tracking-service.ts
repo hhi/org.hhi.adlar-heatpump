@@ -30,6 +30,12 @@ export class EnergyTrackingService {
   // Overlap protection guard (v1.0.2)
   private energyCalculationInProgress = false;
 
+  // Power threshold monitoring (v1.0.7 - power_threshold_exceeded trigger)
+  private powerAboveThreshold = false;
+  private lastPowerThresholdTrigger = 0;
+  private readonly POWER_THRESHOLD_HYSTERESIS = 0.05; // 5% hysteresis
+  private readonly POWER_THRESHOLD_RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+
   /**
    * EnergyTrackingService tracks energy/power measurements, updates power-related capabilities,
    * and maintains daily/cumulative energy totals.
@@ -94,6 +100,9 @@ export class EnergyTrackingService {
       if (powerValue !== null && this.device.hasCapability('measure_power')) {
         await this.device.setCapabilityValue('measure_power', Math.round(powerValue));
         this.logger(`EnergyTrackingService: Power updated: ${Math.round(powerValue)}W (source: ${powerSource}, confidence: ${confidence})`);
+
+        // Check power threshold for trigger (v1.0.7 - power_threshold_exceeded)
+        await this.checkPowerThreshold(powerValue);
 
         // Update cumulative energy based on the new power measurement
         await this.updateCumulativeEnergy();
@@ -268,6 +277,9 @@ export class EnergyTrackingService {
 
           // Store in device storage for persistence
           await this.device.setStoreValue('cumulative_energy_kwh', newTotal);
+
+          // Check for energy milestones (v1.0.7 - total_consumption_milestone trigger)
+          await this.checkEnergyMilestones(newTotal);
         }
 
         // Update daily consumption
@@ -401,6 +413,103 @@ export class EnergyTrackingService {
     // Start energy tracking updates
     await this.updateIntelligentPowerMeasurement();
     this.logger('EnergyTrackingService: Energy tracking service initialized');
+  }
+
+  /**
+   * Check if power exceeds user-defined threshold and trigger flow card (v1.0.7)
+   * Implements hysteresis and rate limiting to prevent trigger spam
+   * @param currentPower - Current power consumption in watts
+   */
+  private async checkPowerThreshold(currentPower: number): Promise<void> {
+    try {
+      // Get user-defined threshold from settings (default 3000W)
+      const userThreshold = (this.device.getSetting('power_threshold_watts') as number) || 3000;
+      const now = Date.now();
+
+      // Hysteresis calculation: 5% below threshold = reset state
+      const thresholdReset = userThreshold * (1 - this.POWER_THRESHOLD_HYSTERESIS);
+      const isAboveThreshold = currentPower > userThreshold;
+      const isBelowReset = currentPower < thresholdReset;
+
+      // Check if we should trigger (crossing threshold upward)
+      if (isAboveThreshold && !this.powerAboveThreshold) {
+        // Rate limiting: max 1 trigger per 5 minutes
+        if (now - this.lastPowerThresholdTrigger > this.POWER_THRESHOLD_RATE_LIMIT_MS) {
+          // Trigger the flow card
+          try {
+            const triggerCard = this.device.homey.flow.getDeviceTriggerCard('power_threshold_exceeded');
+            await triggerCard.trigger(this.device, {
+              current_power: Math.round(currentPower),
+              threshold_power: userThreshold,
+            }, {});
+
+            this.logger(`EnergyTrackingService: ⚡ Power threshold exceeded: ${Math.round(currentPower)}W > ${userThreshold}W`);
+            this.lastPowerThresholdTrigger = now;
+          } catch (err) {
+            this.logger('EnergyTrackingService: Failed to trigger power_threshold_exceeded:', err);
+          }
+        } else {
+          this.logger(`EnergyTrackingService: Power threshold exceeded but rate limited (${Math.round((now - this.lastPowerThresholdTrigger) / 1000)}s since last trigger)`);
+        }
+
+        this.powerAboveThreshold = true;
+      } else if (isBelowReset && this.powerAboveThreshold) {
+        // Reset state when power drops below hysteresis threshold
+        this.powerAboveThreshold = false;
+        this.logger(`EnergyTrackingService: Power below reset threshold: ${Math.round(currentPower)}W < ${Math.round(thresholdReset)}W`);
+      }
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error in power threshold check:', error);
+    }
+  }
+
+  /**
+   * Check if cumulative energy has reached milestone thresholds and trigger flow card (v1.0.7)
+   * Milestones are triggered at 100 kWh increments (100, 200, 300, etc.)
+   * Uses deduplication to prevent multiple triggers for the same milestone
+   * @param currentTotal - Current cumulative energy in kWh
+   */
+  private async checkEnergyMilestones(currentTotal: number): Promise<void> {
+    try {
+      // Milestone increment (100 kWh steps)
+      const MILESTONE_INCREMENT = 100;
+
+      // Get list of already triggered milestones from store
+      const triggeredMilestones = (await this.device.getStoreValue('triggered_energy_milestones') as number[]) || [];
+
+      // Calculate which milestones have been reached
+      // Example: currentTotal = 523 kWh → milestones reached: 100, 200, 300, 400, 500
+      const highestMilestone = Math.floor(currentTotal / MILESTONE_INCREMENT) * MILESTONE_INCREMENT;
+
+      // Check each milestone from last triggered to current
+      for (let milestone = MILESTONE_INCREMENT; milestone <= highestMilestone; milestone += MILESTONE_INCREMENT) {
+        // Only trigger if this milestone hasn't been triggered before
+        if (!triggeredMilestones.includes(milestone)) {
+          try {
+            // Trigger the flow card
+            const triggerCard = this.device.homey.flow.getDeviceTriggerCard('total_consumption_milestone');
+            await triggerCard.trigger(this.device, {
+              total_consumption: Math.round(currentTotal * 100) / 100,
+              milestone_value: milestone,
+            }, {});
+
+            this.logger(`EnergyTrackingService: 🎯 Energy milestone reached: ${milestone} kWh (total: ${Math.round(currentTotal * 100) / 100} kWh)`);
+
+            // Add to triggered list
+            triggeredMilestones.push(milestone);
+          } catch (err) {
+            this.logger(`EnergyTrackingService: Failed to trigger milestone ${milestone}:`, err);
+          }
+        }
+      }
+
+      // Save updated triggered milestones list (if any new milestones were added)
+      if (triggeredMilestones.length > 0) {
+        await this.device.setStoreValue('triggered_energy_milestones', triggeredMilestones);
+      }
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error checking energy milestones:', error);
+    }
   }
 
   /**
