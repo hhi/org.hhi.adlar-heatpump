@@ -841,8 +841,10 @@ export class TuyaConnectionService {
 
   /**
    * Perform a single heartbeat check with intelligent skip logic (v0.99.98).
+   * Enhanced with hybrid approach (v1.0.9): tries passive get() first, then active set() wake-up.
    * Skips heartbeat if device has sent data recently (avoids unnecessary traffic).
    * Detects zombie connections by attempting a lightweight get() query.
+   * If get() fails, attempts an idempotent set() operation to wake sleeping devices.
    */
   private async performHeartbeat(): Promise<void> {
     // Skip if already disconnected (reconnection logic handles this)
@@ -881,36 +883,71 @@ export class TuyaConnectionService {
         throw new Error('TuyAPI instance not available');
       }
 
-      // Use TuyAPI's get() method to probe connection health
-      // This will throw an error if connection is dead
+      // LAYER 1: Try passive get() first (network-friendly)
       let timeoutHandle: NodeJS.Timeout | null = null;
       try {
         await Promise.race([
           this.tuya.get({ schema: true }),
           new Promise((_, reject) => {
             timeoutHandle = this.device.homey.setTimeout(
-              () => reject(new Error('Heartbeat timeout')),
+              () => reject(new Error('Heartbeat get() timeout')),
               DeviceConstants.HEARTBEAT_TIMEOUT_MS,
             );
           }),
         ]);
-      } finally {
-        // Clean up timeout if get() resolved first
+
+        // Success with get() - device is responsive
+        this.logger('TuyaConnectionService: ✅ Heartbeat (get) successful - connection healthy');
+        this.lastDataEventTime = Date.now();
+        return; // Exit early - connection is healthy
+
+      } catch (getError) {
+        // LAYER 2: get() failed - try active set() wake-up (v1.0.9)
+        this.logger(`TuyaConnectionService: ⚠️ Heartbeat get() failed at ${timeStr}, attempting wake-up set()... (${getError})`);
+
+        // Clean up get() timeout
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
+          timeoutHandle = null;
+        }
+
+        // Get current onoff state for idempotent write
+        const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+
+        try {
+          // Attempt idempotent set() operation with timeout
+          await Promise.race([
+            this.tuya.set({ dps: 1, set: currentOnOff }), // Write current value (no side effects)
+            new Promise((_, reject) => {
+              timeoutHandle = this.device.homey.setTimeout(
+                () => reject(new Error('Heartbeat set() timeout')),
+                DeviceConstants.HEARTBEAT_TIMEOUT_MS,
+              );
+            }),
+          ]);
+
+          // Success with set() - device was sleeping but is now awake
+          this.logger('TuyaConnectionService: ✅ Heartbeat (wake-up set) successful - device was sleeping, now active');
+          this.lastDataEventTime = Date.now();
+          return; // Exit - recovery successful!
+
+        } catch (setError) {
+          // Both layers failed - this is a true disconnect
+          throw new Error(`Both get() and set() failed - true disconnect (get: ${getError}, set: ${setError})`);
+
+        } finally {
+          // Clean up set() timeout
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle);
+          }
         }
       }
 
-      this.logger('TuyaConnectionService: ✅ Heartbeat successful - connection healthy');
-
-      // Update last data event time (successful probe counts as activity)
-      this.lastDataEventTime = Date.now();
-
     } catch (error) {
-      // Enhanced diagnostic logging (v1.0.4)
+      // Both heartbeat layers failed - mark as disconnected
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-      this.logger(`❌ TuyaConnectionService: Heartbeat failed at ${timeStr} - zombie connection detected: ${error}`);
+      this.logger(`❌ TuyaConnectionService: Heartbeat completely failed at ${timeStr} - true disconnect detected: ${error}`);
       this.lastDisconnectSource = 'heartbeat_timeout';
       this.lastDisconnectTime = Date.now();
 

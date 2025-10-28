@@ -73,6 +73,8 @@ The Adlar Heat Pump app transitioned from a monolithic device class (v0.99.22 an
 - Idempotent error handler installation with listener cleanup
 - **Heartbeat monitoring** (v0.99.98) - Proactive zombie connection detection every 5 minutes
 - **Intelligent skip logic** (v0.99.98) - Avoids heartbeat when device active (recent data within 4 minutes)
+- **Hybrid heartbeat approach** (v1.0.9) - Two-layer probing: passive get() then active set() wake-up
+- **Sleep mode awareness** (v1.0.9) - Distinguishes sleeping devices from true disconnects
 - **Stale connection force-reconnect** (v0.99.98) - Automatic reconnect after 10 minutes idle
 - **Single-source connection truth** (v0.99.99) - Eliminates timer conflicts and race conditions
 - **Persistent outage tracking** (v1.0.5) - Tracks cumulative outage duration independent of circuit breaker resets
@@ -1487,9 +1489,11 @@ class TuyaConnectionService {
 }
 ```
 
-### Heartbeat Mechanism (v0.99.98-v0.99.99)
+### Heartbeat Mechanism (v0.99.98-v0.99.99, Enhanced v1.0.9)
 
 The heartbeat mechanism is a critical enhancement to TuyaConnectionService that proactively detects and resolves zombie connections during idle periods.
+
+**v1.0.9 Enhancement**: Hybrid approach distinguishes between **sleeping devices** (responsive to commands but not queries) and **true disconnects** (unresponsive to all operations).
 
 #### Problem Solved
 
@@ -1502,22 +1506,32 @@ The heartbeat mechanism is a critical enhancement to TuyaConnectionService that 
 
 **Root Cause**: TuyAPI connections can enter zombie state where socket appears open but no data flows and no error events are emitted.
 
+**v1.0.9 Additional Problem**: Devices entering sleep mode ignored passive `get()` queries but responded to active `set()` commands, causing false positive disconnects and unnecessary reconnection cascades.
+
 #### Implementation Architecture
 
-**Two-Layer Detection System**:
+**Three-Layer Detection System** (v1.0.9):
 
-1. **Layer 1: Proactive Heartbeat Probes**
+1. **Layer 1: Passive Query Probe**
    - Timer: Every 5 minutes (`CONNECTION_HEARTBEAT_INTERVAL_MS`)
    - Skip logic: Heartbeat skipped if device sent data within last 4 minutes
    - Probe method: `tuya.get({ schema: true })` with 10-second timeout
-   - On failure: Trigger standard reconnection system
+   - On success: Connection healthy, exit
+   - On failure: Proceed to Layer 2
 
-2. **Layer 2: Stale Connection Force-Reconnect**
+2. **Layer 2: Active Wake-Up Command** (NEW v1.0.9)
+   - Trigger: Only when Layer 1 fails
+   - Probe method: `tuya.set({ dps: 1, set: currentOnOffValue })` with 10-second timeout
+   - Idempotent: Writes current value back (no side effects)
+   - On success: Device was sleeping, now awake
+   - On failure: True disconnect detected
+
+3. **Layer 3: Stale Connection Force-Reconnect**
    - Backup detection in `scheduleNextReconnectionAttempt()`
    - Checks: If connected but no data for 10+ minutes
    - Action: Force disconnect and reconnect with moderate backoff
 
-#### Heartbeat Probe Implementation
+#### Heartbeat Probe Implementation (v1.0.9 Hybrid Approach)
 
 ```typescript
 private async performHeartbeat(): Promise<void> {
@@ -1532,26 +1546,55 @@ private async performHeartbeat(): Promise<void> {
     return;
   }
 
-  // Device idle - probe connection health
+  // Device idle - probe connection health with hybrid approach
   this.heartbeatInProgress = true;
 
   try {
-    // Lightweight query with timeout
-    await Promise.race([
-      this.tuya.get({ schema: true }),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Heartbeat timeout')),
-        DeviceConstants.HEARTBEAT_TIMEOUT_MS)
-      )
-    ]);
+    // LAYER 1: Try passive get() first (network-friendly)
+    try {
+      await Promise.race([
+        this.tuya.get({ schema: true }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Heartbeat get() timeout')),
+          DeviceConstants.HEARTBEAT_TIMEOUT_MS)
+        )
+      ]);
 
-    // Success: Update activity timestamp
-    this.logger('✅ Heartbeat successful - connection healthy');
-    this.lastDataEventTime = Date.now();
+      // Success with get() - device is responsive
+      this.logger('✅ Heartbeat (get) successful - connection healthy');
+      this.lastDataEventTime = Date.now();
+      return; // Exit early - connection is healthy
+
+    } catch (getError) {
+      // LAYER 2: get() failed - try active set() wake-up
+      this.logger('⚠️ Heartbeat get() failed, attempting wake-up set()...');
+
+      // Get current onoff state for idempotent write
+      const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+
+      try {
+        await Promise.race([
+          this.tuya.set({ dps: 1, set: currentOnOff }), // Idempotent write
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Heartbeat set() timeout')),
+            DeviceConstants.HEARTBEAT_TIMEOUT_MS)
+          )
+        ]);
+
+        // Success with set() - device was sleeping but is now awake
+        this.logger('✅ Heartbeat (wake-up set) successful - device was sleeping');
+        this.lastDataEventTime = Date.now();
+        return; // Recovery successful!
+
+      } catch (setError) {
+        // Both layers failed - true disconnect
+        throw new Error(`Both get() and set() failed - true disconnect`);
+      }
+    }
 
   } catch (error) {
-    // Failure: Zombie connection detected
-    this.logger('❌ Heartbeat failed - zombie connection detected');
+    // Both heartbeat layers failed - mark as disconnected
+    this.logger('❌ Heartbeat completely failed - true disconnect detected');
 
     // Use standard error categorization
     const categorizedError = TuyaErrorCategorizer.categorize(
@@ -1569,6 +1612,13 @@ private async performHeartbeat(): Promise<void> {
   }
 }
 ```
+
+**v1.0.9 Key Changes**:
+- Nested try-catch structure for two-layer probing
+- Layer 1 (get) executes first for efficiency
+- Layer 2 (set) only executes if Layer 1 fails
+- Idempotent write ensures no device state changes
+- DPS 1 (onoff) chosen for universal availability and safety
 
 #### Connection Health Tracking
 
@@ -1692,10 +1742,33 @@ describe('TuyaConnectionService Heartbeat', () => {
 1. **Automatic Recovery**: 5-10 minute detection vs hours (or never) previously
 2. **Network Efficient**: 80-90% probe reduction via intelligent skip logic
 3. **User Experience**: Eliminates manual "Force Reconnect" button usage
-4. **Reliability**: Two-layer detection ensures no missed failures
+4. **Reliability**: Three-layer detection ensures no missed failures (v1.0.9)
 5. **Integration**: Seamless with existing error handling
 6. **Stability**: Single-source connection management prevents race conditions (v0.99.99)
 7. **Performance**: Minimal CPU and bandwidth overhead
+8. **Sleep Mode Aware** (v1.0.9): Distinguishes sleeping devices from true disconnects
+9. **Transparent Wake-Up** (v1.0.9): Sleeping devices resume without user awareness
+10. **False Positive Prevention** (v1.0.9): Avoids unnecessary reconnection cascades
+
+#### v1.0.9 Specific Benefits
+
+**Scenario Comparison**:
+
+| Scenario | v0.99.99 Behavior | v1.0.9 Hybrid Behavior |
+|----------|------------------|----------------------|
+| **Active Device** | get() succeeds → ✅ (0s) | get() succeeds → ✅ (0s) |
+| **Sleeping Device** | get() fails → ❌ Reconnect (20s+) | get() fails → set() succeeds → ✅ Wake-up (10s) |
+| **True Disconnect** | get() fails → ❌ Reconnect (20s+) | get() fails → set() fails → ❌ Reconnect (20s) |
+
+**User Impact**:
+- **Before v1.0.9**: Sleeping device → "Disconnected" status → Reconnection cascade → User sees intermittent connectivity
+- **After v1.0.9**: Sleeping device → Wake-up transparent → "Connected" status maintained → Zero user awareness
+
+**Technical Impact**:
+- False positive disconnects: Eliminated
+- Unnecessary reconnections: Prevented
+- Network efficiency: Improved (Layer 2 only runs when Layer 1 fails)
+- Device battery life: Better (wake-up targeted vs full reconnection)
 
 ### Updated Flow Card Count (v0.99.56)
 

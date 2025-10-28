@@ -1,4 +1,10 @@
 {
+  "1.0.9": {
+    "en": "Connection status stays accurate when device enters sleep mode. Device now distinguishes between sleeping mode and actual network issues, avoiding unnecessary disconnect notifications.",
+    "nl": "Verbindingsstatus blijft accuraat wanneer apparaat in slaapstand gaat. Apparaat onderscheidt nu tussen slaapstand en echte netwerkproblemen, vermijdt onnodige verbreek-meldingen.",
+    "de": "Verbindungsstatus bleibt genau, wenn Gerät in den Ruhemodus wechselt. Gerät unterscheidet jetzt zwischen Ruhemodus und tatsächlichen Netzwerkproblemen, vermeidet unnötige Trennungsbenachrichtigungen.",
+    "fr": "Le statut de connexion reste précis lorsque l'appareil entre en mode veille. L'appareil distingue maintenant le mode veille des problèmes réseau réels, évitant les notifications de déconnexion inutiles."
+  },
   "1.0.8": {
     "en": "Added 10 advanced flow cards for performance monitoring and temperature automation. COP trend analysis shows efficiency patterns over time. Temperature change triggers for inlet, outlet, and ambient sensors. Efficiency monitoring for real-time, daily, and monthly COP values. Daily energy consumption threshold alerts.",
     "nl": "10 geavanceerde stroomkaarten toegevoegd voor prestatie-monitoring en temperatuur automatisering. COP trend analyse toont efficiëntie patronen over tijd. Temperatuur wijziging triggers voor inlaat, uitlaat en omgevingssensoren. Efficiëntie monitoring voor realtime, dagelijkse en maandelijkse COP waarden. Dagelijkse energie verbruik drempel waarschuwingen.",

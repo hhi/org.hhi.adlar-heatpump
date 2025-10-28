@@ -67,6 +67,10 @@ De protocolversie bepaalt hoe de app communiceert met uw warmtepomp:
 
 Bij verbindingsproblemen (frequente onderbrekingen, ECONNRESET fouten),
 probeer een andere protocolversie via apparaatreparatie (zie Troubleshooting).
+- ECONNRESET om 00:00 uur treedt doorgaans op vanwege dagelijkse reset van je router;
+- HMAKC mismatch, default is protocol versie 3.3, ga over naar 3.4 (of 3.5)
+- ECONNREFUSED <ip-adres> na alle weaarschijnlijkheid een verkeerd ip adres bepaalt,
+  ken een statisch (DHCP) adres toe aan je warmtepomp  
 
 BELANGRIJKE MOGELIJKHEDEN
 
