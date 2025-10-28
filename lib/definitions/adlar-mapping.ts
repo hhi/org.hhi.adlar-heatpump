@@ -132,6 +132,85 @@ export class AdlarMapping {
     return mapping;
   })();
 
+  /**
+   * DPS Scale Factors (v1.0.10+)
+   *
+   * Tuya compresses decimal values as integers for transmission efficiency.
+   * Scale factor indicates the divisor needed to convert raw DPS value to actual value.
+   *
+   * Scale calculation: actualValue = rawDpsValue / (10 ^ scale)
+   *
+   * Examples:
+   * - Scale 1: 25000 / 10 = 2500 W
+   * - Scale 2: 12345 / 100 = 123.45 kWh
+   * - Scale 3: 2305 / 1000 = 230.5 V
+   *
+   * DPS without scale entry are passed through unchanged (no transformation).
+   */
+  static dpsScales: Record<number, number> = {
+    // Power measurements (Scale 1: divide by 10)
+    104: 1, // measure_power (Watt)
+
+    // Energy measurements (Scale 2: divide by 100)
+    18: 2,  // meter_power.power_consumption (kWh)
+    105: 2, // meter_power.electric_total (kWh)
+
+    // Current measurements (Scale 3: divide by 1000)
+    102: 3, // measure_current.cur_current (Ampère A)
+    109: 3, // measure_current.b_cur (Ampère B)
+    110: 3, // measure_current.c_cur (Ampère C)
+
+    // Voltage measurements (Scale 3: divide by 1000)
+    103: 3, // measure_voltage.voltage_current (Volt A)
+    111: 3, // measure_voltage.bv (Volt B)
+    112: 3, // measure_voltage.cv (Volt C)
+  };
+
+  /**
+   * Transform raw DPS value using scale factor (v1.0.10+)
+   *
+   * Converts Tuya's compressed integer values to actual decimal values.
+   * Non-numeric values are passed through unchanged.
+   *
+   * @param dpsId - DPS identifier
+   * @param rawValue - Raw value from Tuya device
+   * @returns Transformed value (scaled if numeric and scale defined)
+   *
+   * @example
+   * // Power: Scale 1 (÷ 10)
+   * transformDpsValue(104, 25000) // Returns: 2500 (2500 W)
+   *
+   * @example
+   * // Voltage: Scale 3 (÷ 1000)
+   * transformDpsValue(103, 2305) // Returns: 230.5 (230.5 V)
+   *
+   * @example
+   * // No scale defined - pass through
+   * transformDpsValue(1, true) // Returns: true (onoff capability)
+   */
+  static transformDpsValue(dpsId: number, rawValue: unknown): unknown {
+    // Pass through non-numeric values unchanged (booleans, strings, enums)
+    if (typeof rawValue !== 'number') {
+      return rawValue;
+    }
+
+    // Get scale factor for this DPS
+    const scale = this.dpsScales[dpsId];
+
+    // No scale defined - pass through unchanged
+    if (scale === undefined) {
+      return rawValue;
+    }
+
+    // Calculate divisor: 10^scale (scale 1 = 10, scale 2 = 100, scale 3 = 1000)
+    const divisor = 10 ** scale;
+
+    // Transform: rawValue / divisor
+    const transformedValue = rawValue / divisor;
+
+    return transformedValue;
+  }
+
   static dps: Record<string, DpsEntry> = {
     dps_1: { code: 'switch', name: 'Switch', adlar: 'Schakelaar' },
     dps_2: { code: 'mode', name: 'Mode', adlar: '(Verwarmings)modus' },

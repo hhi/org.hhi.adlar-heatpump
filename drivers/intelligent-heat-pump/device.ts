@@ -2272,24 +2272,32 @@ class MyDevice extends Homey.Device {
         }
 
         try {
+          // Apply DPS scale transformation (v1.0.10+)
+          // Transforms raw Tuya integer values to actual decimal values
+          // Example: DPS 104 (power) raw 25000 → 2500 W (scale 1: ÷ 10)
+          // Example: DPS 103 (voltage) raw 2305 → 230.5 V (scale 3: ÷ 1000)
+          const transformedValue = AdlarMapping.transformDpsValue(dpsId, value);
+
           // Collect capability update promise for batching
-          const updatePromise = this.setCapabilityValue(capability, value)
+          const updatePromise = this.setCapabilityValue(capability, transformedValue)
             .then(() => {
-              this.debugLog(`✅ Updated capability ${capability} = ${value} (DPS ${dpsId})`);
+              this.debugLog(`✅ Updated capability ${capability} = ${transformedValue} (DPS ${dpsId}, raw: ${value})`);
             })
             .catch((error) => {
-              this.error(`Failed to update capability ${capability} with value ${value} (DPS ${dpsId}):`, error);
+              this.error(`Failed to update capability ${capability} with value ${transformedValue} (DPS ${dpsId}):`, error);
             });
 
           updatePromises.push(updatePromise);
 
           // Update capability health tracking via service coordinator (synchronous)
-          this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, value);
+          // Use transformed value for health checks
+          this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, transformedValue);
 
           // Fault detection for DPS 15 (adlar_fault) - v1.0.7 feature
           // Trigger fault_detected flow card when new fault code appears
           if (dpsId === 15 && capability === 'adlar_fault') {
-            const faultCode = typeof value === 'number' ? value : 0;
+            // Use transformedValue for consistency (DPS 15 has no scale, so same as raw value)
+            const faultCode = typeof transformedValue === 'number' ? transformedValue : 0;
 
             // Only trigger on NEW faults (not on every DPS update)
             // faultCode > 0 = active fault, faultCode changed = new/different fault
@@ -2316,42 +2324,42 @@ class MyDevice extends Homey.Device {
           const TEMP_CHANGE_THRESHOLD = 0.5; // Minimum °C change to trigger
 
           // Inlet temperature (measure_temperature.temp_top)
-          if (capability === 'measure_temperature.temp_top' && typeof value === 'number') {
-            if (this.lastInletTemp !== null && Math.abs(value - this.lastInletTemp) >= TEMP_CHANGE_THRESHOLD) {
+          if (capability === 'measure_temperature.temp_top' && typeof transformedValue === 'number') {
+            if (this.lastInletTemp !== null && Math.abs(transformedValue - this.lastInletTemp) >= TEMP_CHANGE_THRESHOLD) {
               this.triggerFlowCard('inlet_temperature_changed', {
-                current_temperature: Math.round(value * 10) / 10,
+                current_temperature: Math.round(transformedValue * 10) / 10,
                 previous_temperature: Math.round(this.lastInletTemp * 10) / 10,
               }).catch((err) => {
                 this.error('Failed to trigger inlet_temperature_changed:', err);
               });
             }
-            this.lastInletTemp = value;
+            this.lastInletTemp = transformedValue;
           }
 
           // Outlet temperature (measure_temperature.temp_bottom)
-          if (capability === 'measure_temperature.temp_bottom' && typeof value === 'number') {
-            if (this.lastOutletTemp !== null && Math.abs(value - this.lastOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
+          if (capability === 'measure_temperature.temp_bottom' && typeof transformedValue === 'number') {
+            if (this.lastOutletTemp !== null && Math.abs(transformedValue - this.lastOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
               this.triggerFlowCard('outlet_temperature_changed', {
-                current_temperature: Math.round(value * 10) / 10,
+                current_temperature: Math.round(transformedValue * 10) / 10,
                 previous_temperature: Math.round(this.lastOutletTemp * 10) / 10,
               }).catch((err) => {
                 this.error('Failed to trigger outlet_temperature_changed:', err);
               });
             }
-            this.lastOutletTemp = value;
+            this.lastOutletTemp = transformedValue;
           }
 
           // Ambient temperature (measure_temperature.around_temp)
-          if (capability === 'measure_temperature.around_temp' && typeof value === 'number') {
-            if (this.lastAmbientTemp !== null && Math.abs(value - this.lastAmbientTemp) >= TEMP_CHANGE_THRESHOLD) {
+          if (capability === 'measure_temperature.around_temp' && typeof transformedValue === 'number') {
+            if (this.lastAmbientTemp !== null && Math.abs(transformedValue - this.lastAmbientTemp) >= TEMP_CHANGE_THRESHOLD) {
               this.triggerFlowCard('ambient_temperature_changed', {
-                current_temperature: Math.round(value * 10) / 10,
+                current_temperature: Math.round(transformedValue * 10) / 10,
                 previous_temperature: Math.round(this.lastAmbientTemp * 10) / 10,
               }).catch((err) => {
                 this.error('Failed to trigger ambient_temperature_changed:', err);
               });
             }
-            this.lastAmbientTemp = value;
+            this.lastAmbientTemp = transformedValue;
           }
 
         } catch (error) {

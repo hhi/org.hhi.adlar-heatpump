@@ -68,7 +68,7 @@ La version du protocole détermine comment l'application communique avec votre p
 Si vous rencontrez des problèmes de connexion (déconnexions fréquentes, erreurs ECONNRESET),
 essayez une version de protocole différente via la réparation de l'appareil (voir section Dépannage).
 - ECONNRESET à 00:00 heure se produit généralement en raison de la réinitialisation quotidienne de votre routeur ;
-- HMAKC mismatch, la valeur par défaut est la version de protocole 3.3, passez à 3.4 (ou 3.5)
+- HMAC mismatch, la valeur par défaut est la version de protocole 3.3, passez à 3.4 (ou 3.5)
 - ECONNREFUSED <adresse-ip> probablement dû à une adresse IP incorrecte,
    attribuez une adresse statique (DHCP) à votre pompe à chaleur  
 

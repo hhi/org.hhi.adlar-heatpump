@@ -400,6 +400,75 @@ This enables:
 - Single DPS update maintains data consistency across both capabilities
 - Flow cards work regardless of picker visibility setting
 
+#### DPS Scale Transformation (v1.0.10+)
+
+**Critical Fix**: Tuya compresses decimal values as integers for transmission efficiency. Raw DPS values must be transformed using scale factors before display.
+
+**Scale Factor System** (`lib/definitions/adlar-mapping.ts`):
+
+```typescript
+static dpsScales: Record<number, number> = {
+  // Power measurements (Scale 1: divide by 10)
+  104: 1, // measure_power (Watt)
+
+  // Energy measurements (Scale 2: divide by 100)
+  18: 2,  // meter_power.power_consumption (kWh)
+  105: 2, // meter_power.electric_total (kWh)
+
+  // Current measurements (Scale 3: divide by 1000)
+  102: 3, // measure_current.cur_current (Ampère A)
+  109: 3, // measure_current.b_cur (Ampère B)
+  110: 3, // measure_current.c_cur (Ampère C)
+
+  // Voltage measurements (Scale 3: divide by 1000)
+  103: 3, // measure_voltage.voltage_current (Volt A)
+  111: 3, // measure_voltage.bv (Volt B)
+  112: 3, // measure_voltage.cv (Volt C)
+};
+```
+
+**Transformation Formula**: `actualValue = rawDpsValue / (10 ^ scale)`
+
+**Examples**:
+- Scale 1: `25000 / 10 = 2500 W` (power)
+- Scale 2: `12345 / 100 = 123.45 kWh` (energy)
+- Scale 3: `2305 / 1000 = 230.5 V` (voltage)
+- Scale 3: `1050 / 1000 = 10.50 A` (current)
+
+**Implementation** (`AdlarMapping.transformDpsValue()`):
+```typescript
+static transformDpsValue(dpsId: number, rawValue: unknown): unknown {
+  if (typeof rawValue !== 'number') return rawValue; // Pass through non-numeric
+
+  const scale = this.dpsScales[dpsId];
+  if (scale === undefined) return rawValue; // No scale defined
+
+  const divisor = 10 ** scale; // 10^1=10, 10^2=100, 10^3=1000
+  return rawValue / divisor;
+}
+```
+
+**Application** (`device.ts:updateCapabilitiesFromDps()`):
+```typescript
+// Transform raw DPS value before capability update
+const transformedValue = AdlarMapping.transformDpsValue(dpsId, value);
+await this.setCapabilityValue(capability, transformedValue);
+```
+
+**Impact Before Fix**:
+- Voltage: `2305 V` displayed (should be `230.5 V`) - 1000x too high ❌
+- Current: `1050 A` displayed (should be `10.5 A`) - 1000x too high ❌
+- Power: `25000 W` displayed (should be `2500 W`) - 10x too high ❌
+- Energy: `12345 kWh` displayed (should be `123.45 kWh`) - 100x too high ❌
+
+**Impact After Fix**:
+- All electrical measurements display correct values ✓
+- COP calculations use accurate power/energy data ✓
+- Flow card thresholds work as expected ✓
+- Energy tracking reflects actual consumption ✓
+
+**Maintenance Note**: When adding new DPS with decimal values, check device protocol documentation for scale factor and add entry to `dpsScales` mapping.
+
 #### Device Communication
 
 - Uses TuyAPI library for local device communication
