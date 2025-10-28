@@ -67,6 +67,10 @@ The protocol version determines how the app communicates with your heat pump:
 
 If you experience connection problems (frequent disconnects, ECONNRESET errors),
 try a different protocol version via device repair (see Troubleshooting section).
+- ECONNRESET at 00:00 usually occurs due to daily reset of your router;
+- HMAKC mismatch, default is protocol version 3.3, switch to 3.4 (or 3.5)
+- ECONNREFUSED <ip-address> most likely indicates an incorrect IP address,
+   assign a static (DHCP) address to your heat pump
 
 IMPORTANT CAPABILITIES
 

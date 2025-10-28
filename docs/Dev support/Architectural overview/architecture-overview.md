@@ -683,11 +683,13 @@ try {
 }
 ```
 
-## Heartbeat Mechanism (v0.99.98-v0.99.99)
+## Heartbeat Mechanism (v0.99.98-v0.99.99, Enhanced v1.0.9)
 
 ### Overview
 
 The heartbeat mechanism proactively detects zombie connections during idle periods when the device appears connected but data flow has stopped. Prior to v0.99.98, devices could remain in "Connected" state for hours while the underlying TuyAPI connection was dead, requiring manual user intervention.
+
+**v1.0.9 Enhancement**: Hybrid approach distinguishes between **sleeping devices** (responsive to commands but not queries) and **true disconnects** (unresponsive to all operations), eliminating false positive disconnects.
 
 ### Problem Statement
 
@@ -698,17 +700,24 @@ The heartbeat mechanism proactively detects zombie connections during idle perio
 - Users must manually click "Force Reconnect" button
 - Unacceptable downtime for critical heating control
 
+**v0.99.98-v0.99.99 Issue** (resolved in v1.0.9):
+- Devices entering sleep mode ignored passive `get()` queries
+- Heartbeat probe failed even though device was reachable
+- Caused false positive "disconnected" status
+- Triggered unnecessary reconnection cascades
+
 **Root Cause**: TuyAPI connections can enter zombie state where:
 - Socket appears open but no data transmission
 - No error events emitted (silent failure)
 - Only detected when attempting communication
 - Can persist indefinitely without proactive monitoring
+- **NEW**: Devices can also enter sleep mode (responsive to commands but not queries)
 
 ### Architecture
 
-The heartbeat system implements a two-layer detection mechanism:
+The heartbeat system implements a three-layer detection mechanism (v1.0.9):
 
-#### Layer 1: Proactive Heartbeat Probes
+#### Layer 1: Passive Query Probe
 
 **Interval**: Every 5 minutes (`CONNECTION_HEARTBEAT_INTERVAL_MS`)
 
@@ -726,28 +735,63 @@ if (timeSinceLastData < CONNECTION_HEARTBEAT_INTERVAL_MS * 0.8) {
 - Only probes during idle periods (> 4 minutes without data)
 - Reduces network traffic by 80% compared to always-probe approach
 
-**Heartbeat Probe Method**:
+**Heartbeat Probe Method (Layer 1)**:
 ```typescript
 await Promise.race([
   this.tuya.get({ schema: true }),  // Lightweight query
   new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Heartbeat timeout')),
+    setTimeout(() => reject(new Error('Heartbeat get() timeout')),
     HEARTBEAT_TIMEOUT_MS)  // 10 seconds
   )
 ]);
 ```
 
-**On Success**:
+**On Layer 1 Success**:
 - Update `lastDataEventTime` (treats heartbeat as activity proof)
 - Connection confirmed healthy
 - Continue normal operation
+- **Exit immediately** (Layer 2 not needed)
 
-**On Failure**:
+**On Layer 1 Failure** (v1.0.9):
+- **Do NOT mark disconnected yet**
+- Proceed to Layer 2: Active Wake-Up Command
+
+#### Layer 2: Active Wake-Up Command (NEW v1.0.9)
+
+**Trigger**: Only when Layer 1 passive query fails
+
+**Wake-Up Method**:
+```typescript
+const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+
+await Promise.race([
+  this.tuya.set({ dps: 1, set: currentOnOff }),  // Idempotent write
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Heartbeat set() timeout')),
+    HEARTBEAT_TIMEOUT_MS)  // 10 seconds
+  )
+]);
+```
+
+**Why This Works**:
+- Device in sleep mode ignores passive queries but responds to active commands
+- Writing current value back is idempotent (no side effects)
+- DPS 1 (onoff) is universally available on all devices
+- Acts as "wake-up signal" forcing device to respond
+
+**On Layer 2 Success**:
+- Update `lastDataEventTime` (device was sleeping, now awake)
+- Connection confirmed healthy
+- **Transparent to user** (no disconnect notification)
+- Continue normal operation
+
+**On Layer 2 Failure**:
+- Both probing methods failed → **True disconnect detected**
 - Mark connection as disconnected
 - Increment `consecutiveFailures` counter
 - Trigger automatic reconnection via standard system
 
-#### Layer 2: Stale Connection Force-Reconnect
+#### Layer 3: Stale Connection Force-Reconnect
 
 **Secondary Protection** in `scheduleNextReconnectionAttempt()`:
 
@@ -1410,7 +1454,7 @@ This architecture provides a comprehensive foundation for reliable, maintainable
 
 - **Service-Oriented Architecture**: ServiceCoordinator pattern eliminates code duplication
 - **Enhanced Error Handling**: 9 categorized error types with smart retry logic
-- **Heartbeat Mechanism** (v0.99.98-v0.99.99): Proactive zombie connection detection with two-layer protection
+- **Heartbeat Mechanism** (v0.99.98-v0.99.99, Enhanced v1.0.9): Proactive zombie connection detection with three-layer protection and sleep mode awareness
 - **Race Condition Prevention**: Deferred settings updates with atomic operations
 - **Intelligent Flow Card Management**: Health-aware dynamic registration system
 - **Advanced Insights Control**: Dynamic visibility aligned with user preferences

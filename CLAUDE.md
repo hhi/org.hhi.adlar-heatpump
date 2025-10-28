@@ -594,11 +594,13 @@ updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
 - ✅ **Connection Stability**: Eliminates disconnections caused by async operation pile-up
 - ✅ **Scalability**: Handles 49+ capabilities efficiently without blocking
 
-#### Heartbeat Mechanism (v0.99.98-v0.99.99)
+#### Heartbeat Mechanism (v0.99.98-v0.99.99, Enhanced v1.0.9)
 
 **Purpose**: Proactively detect zombie connections during idle periods when device appears connected but data flow has stopped.
 
 **Problem Solved**: Prior to v0.99.98, devices could remain in "Connected" state for hours while the underlying TuyAPI connection was dead, requiring manual user intervention via "Force Reconnect" button. The heartbeat mechanism detects and recovers from these zombie connections automatically within 5-15 minutes.
+
+**Enhanced v1.0.9 - Hybrid Approach**: Distinguishes between **sleeping devices** (responsive to commands but not queries) and **true disconnects** (unresponsive to all operations).
 
 **Architecture**:
 
@@ -607,17 +609,18 @@ updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
    - Skips heartbeat if device sent data within last 4 minutes (80% of interval)
    - Prevents unnecessary network traffic for active connections
    - Only probes when device appears idle
-3. **Zombie Detection**:
-   - Uses lightweight `tuya.get({ schema: true })` query
-   - 10-second timeout (`HEARTBEAT_TIMEOUT_MS`)
-   - Failure triggers reconnection via standard system
+3. **Hybrid Zombie Detection (v1.0.9)**:
+   - **Layer 1**: Passive `tuya.get({ schema: true })` query (network-friendly)
+   - **Layer 2**: Active `tuya.set({ dps: 1 })` wake-up (idempotent write)
+   - 10-second timeout per layer (`HEARTBEAT_TIMEOUT_MS`)
+   - Only marks disconnected if both layers fail
 4. **Stale Connection Detection**:
    - Secondary protection layer in `scheduleNextReconnectionAttempt()`
    - Forces reconnection if no data for 10+ minutes (`STALE_CONNECTION_THRESHOLD_MS`)
    - Applies moderate backoff (1.5x multiplier) instead of aggressive exponential backoff
    - Single-source connection truth (v0.99.99) - eliminates race conditions
 
-**Implementation**:
+**Implementation (v1.0.9)**:
 
 ```typescript
 private async performHeartbeat(): Promise<void> {
@@ -637,19 +640,47 @@ private async performHeartbeat(): Promise<void> {
   // Device idle - probe connection health
   this.heartbeatInProgress = true;
   try {
-    await Promise.race([
-      this.tuya.get({ schema: true }),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Heartbeat timeout')),
-        HEARTBEAT_TIMEOUT_MS)
-      )
-    ]);
+    // LAYER 1: Try passive get() first (network-friendly)
+    try {
+      await Promise.race([
+        this.tuya.get({ schema: true }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Heartbeat get() timeout')),
+          HEARTBEAT_TIMEOUT_MS)
+        )
+      ]);
 
-    this.logger('✅ Heartbeat successful - connection healthy');
-    this.lastDataEventTime = Date.now(); // Update activity timestamp
+      this.logger('✅ Heartbeat (get) successful - connection healthy');
+      this.lastDataEventTime = Date.now();
+      return; // Exit early - connection is healthy
+
+    } catch (getError) {
+      // LAYER 2: get() failed - try active set() wake-up
+      this.logger('⚠️ Heartbeat get() failed, attempting wake-up set()...');
+
+      const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+
+      try {
+        await Promise.race([
+          this.tuya.set({ dps: 1, set: currentOnOff }), // Idempotent write
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Heartbeat set() timeout')),
+            HEARTBEAT_TIMEOUT_MS)
+          )
+        ]);
+
+        this.logger('✅ Heartbeat (wake-up set) successful - device was sleeping');
+        this.lastDataEventTime = Date.now();
+        return; // Recovery successful!
+
+      } catch (setError) {
+        // Both layers failed - true disconnect
+        throw new Error(`Both get() and set() failed - true disconnect`);
+      }
+    }
 
   } catch (error) {
-    this.logger('❌ Heartbeat failed - zombie connection detected');
+    this.logger('❌ Heartbeat completely failed - true disconnect detected');
     this.isConnected = false;
     this.consecutiveFailures++;
     this.scheduleNextReconnectionAttempt();
@@ -658,6 +689,33 @@ private async performHeartbeat(): Promise<void> {
   }
 }
 ```
+
+**Hybrid Approach Benefits (v1.0.9)**:
+
+**Problem**: Devices can enter "sleep mode" where:
+- Socket remains technically connected (TuyAPI state = connected)
+- Device ignores passive queries (`get()` operations timeout)
+- Device responds to active commands (`set()` operations succeed)
+- Result: False positive disconnects → unnecessary reconnection cascades
+
+**Solution**: Two-layer heartbeat strategy:
+
+| Layer | Operation | Purpose | Latency | Network Impact |
+|-------|-----------|---------|---------|----------------|
+| **1** | `get({ schema: true })` | Test passive query response | 10s timeout | Minimal (read-only) |
+| **2** | `set({ dps: 1, set: currentValue })` | Wake-up sleeping device | 10s timeout | Idempotent (no side effects) |
+
+**Scenarios**:
+
+1. **Active Device**: Layer 1 succeeds → Exit (0s latency, optimal)
+2. **Sleeping Device**: Layer 1 fails → Layer 2 succeeds → Device wakes up (10s latency, avoids reconnect)
+3. **True Disconnect**: Both layers fail → Mark disconnected → Reconnect cascade (20s latency, correct behavior)
+
+**Why DPS 1 (onoff) is Safe**:
+- Idempotent operation: Writing current value doesn't change device state
+- Device ON + write `true` = no effect
+- Device OFF + write `false` = no effect
+- Zero user impact, pure wake-up signal
 
 **Connection Health Tracking**:
 
@@ -711,12 +769,16 @@ scheduleNextReconnectionAttempt(): void {
 - ✅ Eliminates extended disconnection periods reported in v0.99.97 and earlier
 - ✅ Reduces need for manual "Force Reconnect" button usage
 - ✅ Single-source connection management prevents race conditions (v0.99.99)
+- ✅ **Distinguishes sleeping devices from true disconnects (v1.0.9)** - avoids unnecessary reconnection cascades
+- ✅ **Transparent wake-up mechanism (v1.0.9)** - sleeping devices resume without user awareness
+- ✅ **Zero user impact (v1.0.9)** - idempotent operations don't affect device state
 
 **User Impact**:
 - Device automatically recovers from idle connection failures
 - "Connected" status remains accurate during idle periods
 - Sensor data resumes automatically after network disruptions
 - Reduced support burden (fewer manual interventions needed)
+- **Sleeping devices wake up transparently (v1.0.9)** - no false disconnect notifications
 
 ### Configuration Files
 
