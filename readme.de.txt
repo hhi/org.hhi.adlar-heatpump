@@ -68,7 +68,7 @@ Die Protokollversion bestimmt, wie die App mit Ihrer Wärmepumpe kommuniziert:
 Wenn Sie Verbindungsprobleme haben (häufige Verbindungsabbrüche, ECONNRESET-Fehler),
 versuchen Sie eine andere Protokollversion über die Gerätereparatur (siehe Abschnitt Fehlerbehebung).
 - ECONNRESET um 00:00 Uhr tritt normalerweise aufgrund eines täglichen Neustarts Ihres Routers auf;
-- HMAKC-Mismatch, Standard ist Protokollversion 3.3, wechseln Sie zu 3.4 (oder 3.5)
+- HMAC-Mismatch, Standard ist Protokollversion 3.3, wechseln Sie zu 3.4 (oder 3.5)
 - ECONNREFUSED <ip-adresse> bestimmt höchstwahrscheinlich eine falsche IP-Adresse,
    weisen Sie Ihrer Wärmepumpe eine statische (DHCP) Adresse zu  
 

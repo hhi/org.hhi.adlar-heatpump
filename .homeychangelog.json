@@ -1,4 +1,10 @@
 {
+  "1.0.10": {
+    "en": "Fixed: Electrical measurements now show correct values. Voltage displays in V (was 1000x too high), current in A (was 1000x too high), power in W (was 10x too high), and energy in kWh (was 100x too high). All readings now match actual device values.",
+    "nl": "Opgelost: Elektrische metingen tonen nu correcte waarden. Spanning weergegeven in V (was 1000x te hoog), stroom in A (was 1000x te hoog), vermogen in W (was 10x te hoog), en energie in kWh (was 100x te hoog). Alle metingen komen nu overeen met werkelijke apparaat waarden.",
+    "de": "Behoben: Elektrische Messungen zeigen jetzt korrekte Werte. Spannung in V (war 1000x zu hoch), Strom in A (war 1000x zu hoch), Leistung in W (war 10x zu hoch) und Energie in kWh (war 100x zu hoch). Alle Messwerte entsprechen jetzt tatsächlichen Gerätewerten.",
+    "fr": "Corrigé: Les mesures électriques affichent maintenant des valeurs correctes. Tension en V (était 1000x trop élevée), courant en A (était 1000x trop élevé), puissance en W (était 10x trop élevée) et énergie en kWh (était 100x trop élevée). Toutes les lectures correspondent maintenant aux valeurs réelles de l'appareil."
+  },
   "1.0.9": {
     "en": "Connection status stays accurate when device enters sleep mode. Device now distinguishes between sleeping mode and actual network issues, avoiding unnecessary disconnect notifications.",
     "nl": "Verbindingsstatus blijft accuraat wanneer apparaat in slaapstand gaat. Apparaat onderscheidt nu tussen slaapstand en echte netwerkproblemen, vermijdt onnodige verbreek-meldingen.",
