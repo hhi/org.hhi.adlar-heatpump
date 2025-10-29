@@ -47,7 +47,7 @@ DE QUOI AVEZ-VOUS BESOIN ?
 
 COMMENT OBTENIR LES IDENTIFIANTS DE L'APPAREIL ?
 Vous pouvez obtenir la clé locale requise et d'autres données en suivant les instructions dans :
-docs/Get Local Keys - instruction.pdf
+/docs/Tuya_LocalKey_Homey_Guide_FR.pdf
 
 ÉTAPES D'INSTALLATION
 1. Installez l'application via le Homey App Store

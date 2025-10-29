@@ -47,7 +47,7 @@ WAS BENÖTIGEN SIE?
 
 WIE ERHALTEN SIE DIE GERÄTEANMELDEDATEN?
 Sie können den erforderlichen lokalen Schlüssel und andere Daten erhalten, indem Sie die Anweisungen befolgen in:
-docs/Get Local Keys - instruction.pdf
+/docs/Tuya_LocalKey_Homey_Guide_DE.pdf
 
 INSTALLATIONSSCHRITTE
 1. Installieren Sie die App über den Homey App Store

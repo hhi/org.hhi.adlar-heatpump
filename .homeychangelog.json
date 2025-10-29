@@ -1,4 +1,10 @@
 {
+  "1.0.11": {
+    "en": "Updated documentation references. All README files now point to language-specific PDF guides for obtaining local keys (EN, NL, DE, FR).",
+    "nl": "Documentatie referenties bijgewerkt. Alle README bestanden verwijzen nu naar taalspecifieke PDF handleidingen voor het verkrijgen van lokale sleutels (EN, NL, DE, FR).",
+    "de": "Dokumentationsreferenzen aktualisiert. Alle README-Dateien verweisen jetzt auf sprachspezifische PDF-Anleitungen zum Abrufen lokaler Schlüssel (EN, NL, DE, FR).",
+    "fr": "Références de documentation mises à jour. Tous les fichiers README pointent maintenant vers des guides PDF spécifiques à chaque langue pour obtenir des clés locales (EN, NL, DE, FR)."
+  },
   "1.0.10": {
     "en": "Fixed: Electrical measurements now show correct values. Voltage displays in V (was 1000x too high), current in A (was 1000x too high), power in W (was 10x too high), and energy in kWh (was 100x too high). All readings now match actual device values.",
     "nl": "Opgelost: Elektrische metingen tonen nu correcte waarden. Spanning weergegeven in V (was 1000x te hoog), stroom in A (was 1000x te hoog), vermogen in W (was 10x te hoog), en energie in kWh (was 100x te hoog). Alle metingen komen nu overeen met werkelijke apparaat waarden.",
