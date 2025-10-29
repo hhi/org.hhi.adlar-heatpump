@@ -47,7 +47,7 @@ WHAT DO YOU NEED?
 
 HOW TO OBTAIN DEVICE CREDENTIALS?
 You can obtain the required local key and other data by following the instructions in:
-docs/Get Local Keys - instruction.pdf
+/docs/Tuya_LocalKey_Homey_Guide_EN.pdf
 
 INSTALLATION STEPS
 1. Install the app via the Homey App Store

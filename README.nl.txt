@@ -47,7 +47,7 @@ WAT HEEFT U NODIG?
 
 HOE VERKRIJGT U DE APPARAAT GEGEVENS?
 De benodigde lokale sleutel en andere gegevens kunt u verkrijgen door de instructies te volgen in:
-docs/Get Local Keys - instruction.pdf
+/docs/Tuya_LocalKey_Homey_Guide_NL.pdf
 
 INSTALLATIESTAPPEN
 1. Installeer de app via de Homey App Store
