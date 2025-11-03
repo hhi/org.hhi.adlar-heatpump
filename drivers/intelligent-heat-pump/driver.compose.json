@@ -75,7 +75,8 @@
     "adlar_scop_quality",
 
     "adlar_countdowntimer",
-    "adlar_connection_status"
+    "adlar_connection_status",
+    "adlar_connection_active"
   ],
 
   "capabilitiesOptions": {

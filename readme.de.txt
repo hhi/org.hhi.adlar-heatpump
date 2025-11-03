@@ -142,6 +142,22 @@ Andere häufige Probleme:
 - Fehlercodes: Siehe App für spezifische Erklärung pro Fehlercode
 - Kopplung schlägt fehl: Versuchen Sie verschiedene Protokollversionen (3.3, 3.4, 3.5)
 
+MANUELLE VERBINDUNGSRÜCKSETZUNG (Temporäre Problemlösung)
+Wenn Ihr Gerät den Status 'Getrennt' anzeigt und sich nicht automatisch neu verbindet:
+
+ALTERNATIVE SCHNELLE LÖSUNG:
+1. Öffnen Sie die Gerätesteuerung in der Homey-App
+2. Ändern Sie den Arbeitsmodus auf einen anderen Wert (z.B. von "Heizen" zu "Kühlen")
+3. Warten Sie 5-10 Sekunden
+4. Ändern Sie den Arbeitsmodus zurück auf den ursprünglichen Wert
+5. Die Verbindung wird normalerweise innerhalb von Sekunden wiederhergestellt
+
+Diese Methode funktioniert, weil das Ändern des Arbeitsmodus einen aktiven Befehl
+an das Gerät sendet, wodurch schlafende Verbindungen reaktiviert werden.
+
+HINWEIS: Ab v1.0.12 löst die App dies automatisch innerhalb von 10 Minuten. Diese
+manuelle Methode ist nur für ältere App-Versionen oder als Notfall-Rückfall nötig.
+
 GERÄTEANMELDEDATEN AKTUALISIEREN
 Sie können Geräteanmeldedaten ohne erneute Kopplung aktualisieren:
 1. Gehen Sie zu den Geräteeinstellungen in der Homey-App

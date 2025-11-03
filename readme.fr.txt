@@ -142,6 +142,23 @@ Autres problèmes courants :
 - Codes d'erreur : Voir l'application pour une explication spécifique par code d'erreur
 - L'appairage échoue : Essayez différentes versions de protocole (3.3, 3.4, 3.5)
 
+RÉINITIALISATION MANUELLE DE LA CONNEXION (Solution temporaire)
+Si votre appareil affiche l'état 'Déconnecté' et ne se reconnecte pas automatiquement :
+
+SOLUTION RAPIDE ALTERNATIVE :
+1. Ouvrez les commandes de l'appareil dans l'application Homey
+2. Changez le Mode de travail vers une valeur différente (par ex. de "Chauffage" à "Refroidissement")
+3. Attendez 5-10 secondes
+4. Changez le Mode de travail vers la valeur d'origine
+5. La connexion se rétablit généralement en quelques secondes
+
+Cette méthode fonctionne car changer le mode de travail envoie une commande active à
+l'appareil, ce qui réactive les connexions endormies.
+
+REMARQUE : À partir de la v1.0.12, l'application résout cela automatiquement dans les
+10 minutes. Cette méthode manuelle n'est nécessaire que pour les anciennes versions
+ou comme solution de secours d'urgence.
+
 METTRE À JOUR LES IDENTIFIANTS DE L'APPAREIL
 Vous pouvez mettre à jour les identifiants de l'appareil sans réappairage :
 1. Accédez aux Paramètres de l'appareil dans l'application Homey

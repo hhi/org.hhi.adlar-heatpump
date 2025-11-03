@@ -1,4 +1,10 @@
 {
+  "1.0.12": {
+    "en": "Progressive wake-up strategy sends active commands after 5 failed passive reconnection attempts. Extended heartbeat monitoring detects sleeping devices after 15 minutes. Connection status now tracked in Insights for historical visualization of connectivity patterns.",
+    "nl": "Progressieve wake-up strategie stuurt actieve commando's na 5 mislukte passieve herverbindingen. Verlengde heartbeat monitoring detecteert slapende apparaten na 15 minuten. Verbindingsstatus nu bijgehouden in Insights voor historische visualisatie van verbindingspatronen.",
+    "de": "Progressive Aufweck-Strategie sendet aktive Befehle nach 5 fehlgeschlagenen passiven Wiederverbindungsversuchen. Erweiterte Heartbeat-Überwachung erkennt schlafende Geräte nach 15 Minuten. Verbindungsstatus wird jetzt in Insights für historische Visualisierung von Verbindungsmustern verfolgt.",
+    "fr": "Stratégie de réveil progressive envoie des commandes actives après 5 tentatives de reconnexion passive échouées. Surveillance heartbeat étendue détecte les appareils endormis après 15 minutes. L'état de connexion est maintenant suivi dans Insights pour la visualisation historique des modèles de connectivité."
+  },
   "1.0.11": {
     "en": "Updated documentation references. All README files now point to language-specific PDF guides for obtaining local keys (EN, NL, DE, FR).",
     "nl": "Documentatie referenties bijgewerkt. Alle README bestanden verwijzen nu naar taalspecifieke PDF handleidingen voor het verkrijgen van lokale sleutels (EN, NL, DE, FR).",

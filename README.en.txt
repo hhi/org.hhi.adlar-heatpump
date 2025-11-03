@@ -142,6 +142,22 @@ Other Common Problems:
 - Error codes: See the app for specific explanation per error code
 - Pairing fails: Try different protocol versions (3.3, 3.4, 3.5)
 
+MANUAL CONNECTION RESET (Temporary Workaround)
+If your device shows 'Disconnected' status and doesn't automatically reconnect:
+
+ALTERNATIVE QUICK FIX:
+1. Open device controls in Homey app
+2. Change the Work Mode to a different value (e.g., from "Heating" to "Cooling")
+3. Wait 5-10 seconds
+4. Change the Work Mode back to the original value
+5. Connection usually restores within seconds
+
+This method works because changing the work mode sends an active command to the
+device, which reactivates sleeping connections.
+
+NOTE: From v1.0.12 onwards, the app resolves this automatically within 10 minutes.
+This manual method is only needed for older app versions or as emergency fallback.
+
 UPDATE DEVICE CREDENTIALS
 You can update device credentials without re-pairing:
 1. Go to device Settings in Homey app

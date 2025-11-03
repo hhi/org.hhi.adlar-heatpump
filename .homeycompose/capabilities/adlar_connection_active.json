@@ -1,0 +1,33 @@
+{
+  "id": "adlar_connection_active",
+  "type": "boolean",
+  "title": {
+    "en": "Connection Active",
+    "nl": "Verbinding Actief",
+    "de": "Verbindung Aktiv",
+    "fr": "Connexion Active"
+  },
+  "desc": {
+    "en": "Device connection state for insights tracking",
+    "nl": "Apparaat verbindingsstatus voor insights tracking",
+    "de": "Geräteverbindungsstatus für Insights-Verfolgung",
+    "fr": "État de connexion de l'appareil pour le suivi des insights"
+  },
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Connected",
+    "nl": "Verbonden",
+    "de": "Verbunden",
+    "fr": "Connecté"
+  },
+  "insightsTitleFalse": {
+    "en": "Disconnected",
+    "nl": "Verbroken",
+    "de": "Getrennt",
+    "fr": "Déconnecté"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/connection-status.svg"
+}
