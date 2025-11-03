@@ -142,6 +142,22 @@ Andere Veelvoorkomende Problemen:
 - Foutcodes: Zie de app voor specifieke uitleg per foutcode
 - Koppelen mislukt: Probeer verschillende protocolversies (3.3, 3.4, 3.5)
 
+HANDMATIGE VERBINDING RESET (Tijdelijke Oplossing)
+Als uw apparaat 'Verbroken' status toont en niet automatisch herverbindt:
+
+ALTERNATIEVE SNELLE OPLOSSING:
+1. Open apparaat besturing in Homey app
+2. Wijzig de Bedrijfsmodus naar een andere waarde (bijv. van "Verwarmen" naar "Koelen")
+3. Wacht 5-10 seconden
+4. Wijzig de Bedrijfsmodus terug naar de oorspronkelijke waarde
+5. De verbinding wordt meestal binnen enkele seconden hersteld
+
+Deze methode werkt omdat het wijzigen van de bedrijfsmodus een actief commando naar
+het apparaat stuurt, waardoor slapende verbindingen opnieuw worden geactiveerd.
+
+LET OP: Vanaf v1.0.12 lost de app dit automatisch op binnen 10 minuten. Deze
+handmatige methode is alleen nodig voor oudere app-versies of als noodoplossing.
+
 APPARAAT GEGEVENS BIJWERKEN
 U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
 1. Ga naar apparaat Instellingen in Homey app

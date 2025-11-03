@@ -53,6 +53,7 @@ export class TuyaConnectionService {
   private circuitBreakerResetTime = 5 * 60 * 1000; // 5 minutes
   private maxBackoffSeconds = 300; // 5 minutes
   private connectionAttempts = 0;
+  private passiveReconnectionAttempts = 0; // v1.0.12 - Track passive (find+connect) attempts
 
   // Persistent outage tracking (v1.0.5 - Proposal 1)
   private outageStartTime = 0; // When current outage began
@@ -263,6 +264,7 @@ export class TuyaConnectionService {
   /**
    * Connect to the Tuya device and set up event handlers.
    * Uses a circuit breaker/backoff strategy on repeated failures.
+   * Enhanced with wake-up mechanism for sleeping devices (v1.0.12).
    */
   async connectTuya(): Promise<void> {
     if (this.isConnected || !this.tuya) {
@@ -270,15 +272,67 @@ export class TuyaConnectionService {
     }
 
     this.connectionAttempts++;
+    this.passiveReconnectionAttempts++; // v1.0.12
 
     try {
       this.logger('TuyaConnectionService: Attempting connection...');
 
-      // Discover the device on the network first
-      await this.tuya.find();
+      // v1.0.12: Progressive reconnection strategy
+      // After WAKE_UP_ATTEMPT_THRESHOLD failed passive attempts, try active wake-up first
+      const shouldTryWakeUp = this.passiveReconnectionAttempts >= DeviceConstants.WAKE_UP_ATTEMPT_THRESHOLD;
 
-      // Then connect to the device
-      await this.tuya.connect();
+      if (shouldTryWakeUp) {
+        this.logger(`TuyaConnectionService: 🔔 Attempting wake-up (after ${this.passiveReconnectionAttempts} passive attempts)...`);
+
+        try {
+          // Get current onoff state for idempotent write
+          const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+
+          // Attempt wake-up with timeout
+          let wakeUpTimeoutHandle: NodeJS.Timeout | null = null;
+          try {
+            await Promise.race([
+              this.tuya.set({ dps: 1, set: currentOnOff }), // Idempotent write
+              new Promise((_, reject) => {
+                wakeUpTimeoutHandle = this.device.homey.setTimeout(
+                  () => reject(new Error('Wake-up timeout')),
+                  DeviceConstants.WAKE_UP_TIMEOUT_MS,
+                );
+              }),
+            ]);
+
+            // Wake-up successful! Device is responsive
+            this.logger('TuyaConnectionService: ✅ Wake-up successful - device responsive to commands');
+
+            // Now connect normally (device should be awake and discoverable)
+            await this.tuya.find();
+            await this.tuya.connect();
+
+          } finally {
+            if (wakeUpTimeoutHandle) {
+              clearTimeout(wakeUpTimeoutHandle);
+            }
+          }
+
+        } catch (wakeUpError) {
+          // Wake-up failed - fall back to standard passive reconnection
+          this.logger(`TuyaConnectionService: ⚠️ Wake-up failed: ${wakeUpError} - trying passive reconnection...`);
+
+          // Continue with standard passive discovery
+          await this.tuya.find();
+          await this.tuya.connect();
+        }
+
+      } else {
+        // Standard passive reconnection (first 5 attempts)
+        this.logger(`TuyaConnectionService: Passive reconnection attempt ${this.passiveReconnectionAttempts}/${DeviceConstants.WAKE_UP_ATTEMPT_THRESHOLD}...`);
+
+        // Discover the device on the network first
+        await this.tuya.find();
+
+        // Then connect to the device
+        await this.tuya.connect();
+      }
 
       this.isConnected = true;
       this.hasEverConnected = true; // Mark successful connection (v1.0.6)
@@ -535,6 +589,15 @@ export class TuyaConnectionService {
     this.lastStatusChangeTime = Date.now();
 
     this.logger(`TuyaConnectionService: Status changed to ${newStatus}, updating timestamp`);
+
+    // Update boolean capability for insights tracking (v1.0.12)
+    const isConnected = (newStatus === 'connected');
+    try {
+      await this.device.setCapabilityValue('adlar_connection_active', isConnected);
+    } catch (error) {
+      this.logger(`TuyaConnectionService: Failed to update connection_active capability: ${error}`);
+      // Non-critical error, continue operation
+    }
 
     // Persist both timestamp AND status to device store (survives app updates) - v1.0.6
     try {
@@ -847,10 +910,61 @@ export class TuyaConnectionService {
    * If get() fails, attempts an idempotent set() operation to wake sleeping devices.
    */
   private async performHeartbeat(): Promise<void> {
-    // Skip if already disconnected (reconnection logic handles this)
+    // v1.0.12: Enhanced disconnection handling - allow wake-up probes after extended outage
     if (!this.isConnected) {
-      this.logger('TuyaConnectionService: Heartbeat skipped - already disconnected');
-      return;
+      // Check if we should attempt wake-up probe during extended disconnection
+      const outageDuration = this.outageStartTime > 0 ? Date.now() - this.outageStartTime : 0;
+      const shouldProbeDisconnected = outageDuration >= DeviceConstants.HEARTBEAT_DISCONNECTED_DELAY_MS;
+
+      if (!shouldProbeDisconnected) {
+        // Too early - let normal reconnection logic handle it
+        this.logger('TuyaConnectionService: Heartbeat skipped - disconnected (normal reconnection active)');
+        return;
+      }
+
+      // Extended outage (15+ minutes) - attempt wake-up probe
+      this.logger(`TuyaConnectionService: 🔍 Heartbeat wake-up probe during extended outage (${Math.round(outageDuration / 60000)} minutes)...`);
+
+      // Attempt wake-up probe (same as reconnection wake-up)
+      if (!this.tuya) {
+        this.logger('TuyaConnectionService: TuyAPI instance not available');
+        return;
+      }
+
+      try {
+        const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+
+        let wakeUpTimeoutHandle: NodeJS.Timeout | null = null;
+        try {
+          await Promise.race([
+            this.tuya.set({ dps: 1, set: currentOnOff }),
+            new Promise((_, reject) => {
+              wakeUpTimeoutHandle = this.device.homey.setTimeout(
+                () => reject(new Error('Heartbeat wake-up timeout')),
+                DeviceConstants.WAKE_UP_TIMEOUT_MS,
+              );
+            }),
+          ]);
+
+          // Wake-up probe successful!
+          this.logger('TuyaConnectionService: ✅ Heartbeat wake-up probe successful - device responsive!');
+          this.lastDataEventTime = Date.now();
+
+          // Don't change isConnected here - let normal reconnection flow handle it
+          // This wake-up just proves device is responsive, triggering faster reconnection
+
+        } finally {
+          if (wakeUpTimeoutHandle) {
+            clearTimeout(wakeUpTimeoutHandle);
+          }
+        }
+
+      } catch (error) {
+        this.logger(`TuyaConnectionService: ⚠️ Heartbeat wake-up probe failed: ${error}`);
+        // Continue with normal reconnection logic
+      }
+
+      return; // Exit - don't run normal heartbeat logic when disconnected
     }
 
     // Skip if heartbeat already in progress (prevent concurrent probes)
@@ -1268,6 +1382,9 @@ export class TuyaConnectionService {
 
     // Reset next reconnection time (v1.0.6)
     this.nextReconnectionTime = 0;
+
+    // Reset passive reconnection attempts (v1.0.12)
+    this.passiveReconnectionAttempts = 0;
   }
 
   /**
