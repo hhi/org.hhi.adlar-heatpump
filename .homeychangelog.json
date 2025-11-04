@@ -1,4 +1,10 @@
 {
+  "1.0.13": {
+    "en": "Connection insights capability now automatically added to existing devices. Upgrade seamlessly enables historical connection tracking without device re-pairing.",
+    "nl": "Verbindingsinzichten-capability wordt nu automatisch toegevoegd aan bestaande apparaten. Upgrade schakelt naadloos historische verbindingstracking in zonder apparaat opnieuw te koppelen.",
+    "de": "Verbindungseinblicke-Fähigkeit wird jetzt automatisch zu bestehenden Geräten hinzugefügt. Upgrade ermöglicht nahtlos historisches Verbindungstracking ohne Geräteneukopplung.",
+    "fr": "La capacité d'aperçu de connexion est maintenant ajoutée automatiquement aux appareils existants. La mise à niveau active de manière transparente le suivi historique des connexions sans réappairage de l'appareil."
+  },
   "1.0.12": {
     "en": "Progressive wake-up strategy sends active commands after 5 failed passive reconnection attempts. Extended heartbeat monitoring detects sleeping devices after 15 minutes. Connection status now tracked in Insights for historical visualization of connectivity patterns.",
     "nl": "Progressieve wake-up strategie stuurt actieve commando's na 5 mislukte passieve herverbindingen. Verlengde heartbeat monitoring detecteert slapende apparaten na 15 minuten. Verbindingsstatus nu bijgehouden in Insights voor historische visualisatie van verbindingspatronen.",
