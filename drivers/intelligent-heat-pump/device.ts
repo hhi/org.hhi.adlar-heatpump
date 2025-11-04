@@ -2572,10 +2572,12 @@ class MyDevice extends Homey.Device {
         await this.addCapability('adlar_connection_active');
         this.log('✅ Added adlar_connection_active capability to existing device (v1.0.12 migration)');
 
-        // Initialize with current connection status
-        // Note: Services not yet initialized at this point, will be set correctly after service init
-        await this.setCapabilityValue('adlar_connection_active', false);
-        this.log('🔄 Connection insights capability initialized (will update after service initialization)');
+        // Initialize with current connection status (v1.0.14 fix - sync with actual status)
+        const currentStatus = this.getCapabilityValue('adlar_connection_status') as string || '';
+        const isCurrentlyConnected = currentStatus.toLowerCase().includes('connected')
+                                   || currentStatus.toLowerCase().includes('verbonden');
+        await this.setCapabilityValue('adlar_connection_active', isCurrentlyConnected);
+        this.log(`🔄 Connection insights capability initialized: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'} (from status: "${currentStatus}")`);
       } catch (error) {
         this.error('Failed to add adlar_connection_active capability:', error);
       }

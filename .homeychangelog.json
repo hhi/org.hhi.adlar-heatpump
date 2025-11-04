@@ -1,4 +1,10 @@
 {
+  "1.0.14": {
+    "en": "Fixed connection insights synchronization. Boolean capability now correctly reflects actual connection state during migration, showing 'Yes' when connected instead of 'No'.",
+    "nl": "Verbindingsinzichten synchronisatie opgelost. Boolean capability toont nu correct de werkelijke verbindingsstatus tijdens migratie, toont 'Ja' wanneer verbonden in plaats van 'Nee'.",
+    "de": "Verbindungseinblicke-Synchronisation behoben. Boolean-Fähigkeit spiegelt nun korrekt den tatsächlichen Verbindungsstatus während der Migration wider und zeigt 'Ja' an, wenn verbunden, anstatt 'Nein'.",
+    "fr": "Synchronisation des aperçus de connexion corrigée. La capacité booléenne reflète maintenant correctement l'état de connexion réel pendant la migration, affichant 'Oui' lorsque connecté au lieu de 'Non'."
+  },
   "1.0.13": {
     "en": "Connection insights capability now automatically added to existing devices. Upgrade seamlessly enables historical connection tracking without device re-pairing.",
     "nl": "Verbindingsinzichten-capability wordt nu automatisch toegevoegd aan bestaande apparaten. Upgrade schakelt naadloos historische verbindingstracking in zonder apparaat opnieuw te koppelen.",
