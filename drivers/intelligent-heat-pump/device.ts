@@ -2571,15 +2571,29 @@ class MyDevice extends Homey.Device {
       try {
         await this.addCapability('adlar_connection_active');
         this.log('✅ Added adlar_connection_active capability to existing device (v1.0.12 migration)');
+      } catch (error) {
+        this.error('Failed to add adlar_connection_active capability:', error);
+      }
+    }
 
-        // Initialize with current connection status (v1.0.14 fix - sync with actual status)
+    // Always synchronize connection boolean with status string (v1.0.14 fix)
+    // This ensures correct state even if capability was added in previous version
+    if (this.hasCapability('adlar_connection_active')) {
+      try {
         const currentStatus = this.getCapabilityValue('adlar_connection_status') as string || '';
         const isCurrentlyConnected = currentStatus.toLowerCase().includes('connected')
                                    || currentStatus.toLowerCase().includes('verbonden');
-        await this.setCapabilityValue('adlar_connection_active', isCurrentlyConnected);
-        this.log(`🔄 Connection insights capability initialized: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'} (from status: "${currentStatus}")`);
+        const currentBooleanValue = this.getCapabilityValue('adlar_connection_active');
+
+        // Only update if out of sync
+        if (currentBooleanValue !== isCurrentlyConnected) {
+          await this.setCapabilityValue('adlar_connection_active', isCurrentlyConnected);
+          this.log(`🔄 Synchronized connection boolean: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'} (was: ${currentBooleanValue}, status: "${currentStatus}")`);
+        } else {
+          this.log(`✓ Connection boolean already synchronized: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'}`);
+        }
       } catch (error) {
-        this.error('Failed to add adlar_connection_active capability:', error);
+        this.error('Failed to synchronize connection_active capability:', error);
       }
     }
 
