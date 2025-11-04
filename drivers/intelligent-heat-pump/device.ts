@@ -2566,6 +2566,21 @@ class MyDevice extends Homey.Device {
       }
     }
 
+    // Add connection insights capability for existing devices (v1.0.12 migration)
+    if (!this.hasCapability('adlar_connection_active')) {
+      try {
+        await this.addCapability('adlar_connection_active');
+        this.log('✅ Added adlar_connection_active capability to existing device (v1.0.12 migration)');
+
+        // Initialize with current connection status
+        // Note: Services not yet initialized at this point, will be set correctly after service init
+        await this.setCapabilityValue('adlar_connection_active', false);
+        this.log('🔄 Connection insights capability initialized (will update after service initialization)');
+      } catch (error) {
+        this.error('Failed to add adlar_connection_active capability:', error);
+      }
+    }
+
     const { manifest } = Homey;
     const myDriver = manifest.drivers[0];
     // this.log('MyDevice overview:', myDriver);
