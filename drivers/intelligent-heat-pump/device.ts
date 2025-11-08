@@ -1709,14 +1709,17 @@ class MyDevice extends Homey.Device {
         const roundedCOP = Math.round(copResult.cop * 100) / 100;
         await this.setCapabilityValue('adlar_cop', roundedCOP);
 
-        // COP efficiency changed trigger (v1.0.8)
+        // COP efficiency changed trigger (v1.0.8, fixed v1.0.21)
         // Trigger when COP changes significantly (±0.3 threshold)
         const COP_CHANGE_THRESHOLD = 0.3;
         if (this.lastCOPValue > 0 && Math.abs(roundedCOP - this.lastCOPValue) >= COP_CHANGE_THRESHOLD) {
+          // Determine threshold for flow card (use goodEfficiencyThreshold as baseline)
+          const goodEfficiencyThreshold = 3.0;
           this.triggerFlowCard('cop_efficiency_changed', {
             current_cop: roundedCOP,
-            previous_cop: Math.round(this.lastCOPValue * 100) / 100,
-            change: Math.round((roundedCOP - this.lastCOPValue) * 100) / 100,
+            threshold_cop: goodEfficiencyThreshold,
+            calculation_method: copResult.method,
+            confidence_level: copResult.confidence,
           }).catch((err) => {
             this.error('Failed to trigger cop_efficiency_changed:', err);
           });
