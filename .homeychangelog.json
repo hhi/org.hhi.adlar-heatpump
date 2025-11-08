@@ -1,4 +1,10 @@
 {
+  "1.0.19": {
+    "en": "Fixed: Daily and monthly COP efficiency change flow cards now trigger correctly with proper value tokens (current, previous, and change amounts). App stability improved.",
+    "nl": "Opgelost: Dagelijkse en maandelijkse COP efficiëntie wijzigings flow cards activeren nu correct met waarde tokens (huidiging, vorig en wijzigingsbedragen). App stabiliteit verbeterd.",
+    "de": "Behoben: Tägliche und monatliche COP-Effizienzänderungs-Flow-Karten werden jetzt mit korrekten Wert-Tokens ausgelöst (aktuell, vorherig und Änderungsbeträge). App-Stabilität verbessert.",
+    "fr": "Corrigé: Les cartes de flux de changement d'efficacité COP quotidienne et mensuelle se déclenchent maintenant correctement avec les jetons de valeur appropriés (courant, précédent et montants de changement). Stabilité de l'application améliorée."
+  },
   "1.0.17": {
     "en": "Device now recovers more reliably from network disconnections.",
     "nl": "Apparaat herstelt zich nu betrouwbaarder van netwerkverstoringen.",
@@ -6,10 +12,10 @@
     "fr": "L'appareil récupère désormais plus fiablement des interruptions réseau."
   },
   "1.0.15": {
-    "en": "Connection status now tracked in Insights for historical visualization of connectivity patterns.",
-    "nl": "Verbindingsstatus nu bijgehouden in Insights voor historische visualisatie van verbindingspatronen.",
-    "de": "Verbindungsstatus wird jetzt in Insights für historische Visualisierung von Verbindungsmustern verfolgt.",
-    "fr": "L'état de connexion est maintenant suivi dans Insights pour la visualisation historique des modèles de connectivité."
+    "en": "Connection status now tracked in Insights Timeline for historical visualization of connectivity patterns.",
+    "nl": "Verbindingsstatus nu bijgehouden in Insights Tijdlijn voor historische visualisatie van verbindingspatronen.",
+    "de": "Verbindungsstatus wird jetzt in Insights-Zeitleiste für historische Visualisierung von Verbindungsmustern verfolgt.",
+    "fr": "L'état de connexion est maintenant suivi dans la chronologie Insights pour la visualisation historique des modèles de connectivité."
   },
   "1.0.11": {
     "en": "Updated documentation references. All README files now point to language-specific PDF guides for obtaining local keys (EN, NL, DE, FR).",
