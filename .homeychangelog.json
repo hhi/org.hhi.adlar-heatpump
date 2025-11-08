@@ -1,15 +1,9 @@
 {
   "1.0.17": {
-    "en": "Fixed: Device detects zombie connections (socket open but no data) during idle periods. Automatic health checks every 1 hour ensure device recovers from extended disconnections within minutes. Temperature triggers now work correctly without token errors.",
-    "nl": "Opgelost: Apparaat detecteert zombie-verbindingen (socket open maar geen data) tijdens inactieve periodes. Automatische controles elk uur zorgen ervoor dat apparaat zich binnen minuten herstelt. Temperatuur triggers werken nu correct zonder token-fouten.",
-    "de": "Behoben: Gerät erkennt Zombie-Verbindungen (Socket offen, aber keine Daten) während Leerlaufperioden. Automatische Kontrollen jede Stunde stellen sicher, dass das Gerät sich innerhalb von Minuten wiederherstellt. Temperatur-Trigger funktionieren jetzt korrekt ohne Token-Fehler.",
-    "fr": "Corrigé: L'appareil détecte les connexions zombie (socket ouverte mais pas de données) pendant les périodes inactives. Les vérifications de santé automatiques toutes les heures garantissent que l'appareil récupère en quelques minutes. Les déclencheurs de température fonctionnent désormais correctement sans erreurs de token."
-  },
-  "1.0.16": {
-    "en": "Added heartbeat monitoring to detect stalled connections. Device now automatically wakes up from sleep mode and recovers from network issues within 5 minutes instead of waiting for manual intervention.",
-    "nl": "Heartbeat-monitoring toegevoegd om vastgelopen verbindingen te detecteren. Apparaat wordt nu automatisch uit slaapstand gewekt en herstelt zich van netwerkproblemen binnen 5 minuten in plaats van handmatige ingreep.",
-    "de": "Heartbeat-Überwachung hinzugefügt, um blockierte Verbindungen zu erkennen. Gerät wacht jetzt automatisch aus dem Ruhemodus auf und erholt sich von Netzwerkproblemen innerhalb von 5 Minuten.",
-    "fr": "Surveillance par heartbeat ajoutée pour détecter les connexions bloquées. L'appareil se réveille maintenant automatiquement du mode veille et récupère des problèmes réseau en quelques minutes."
+    "en": "Enhanced connection monitoring with heartbeat detection and zombie connection prevention. Device automatically wakes from sleep mode and recovers from network issues within minutes. Health checks every 1 hour ensure long-term stability during extended disconnections.",
+    "nl": "Verbeterde verbindingsmonitoring met heartbeat-detectie en zombie-verbinding preventie. Apparaat wordt automatisch uit slaapstand gewekt en herstelt zich van netwerkproblemen binnen minuten. Controles elk uur zorgen voor stabiliteit tijdens langdurige verbreking.",
+    "de": "Verbesserte Verbindungsüberwachung mit Heartbeat-Erkennung und Zombie-Verbindungsvermeidung. Gerät wacht automatisch aus dem Ruhemodus auf und erholt sich von Netzwerkproblemen innerhalb von Minuten. Stündliche Kontrollen gewährleisten Stabilität während längerer Trennungen.",
+    "fr": "Surveillance de connexion améliorée avec détection de heartbeat et prévention des connexions zombie. L'appareil se réveille automatiquement du mode veille et récupère en quelques minutes. Les vérifications horaires garantissent la stabilité lors des déconnexions prolongées."
   },
   "1.0.15": {
     "en": "Connection status now tracked in Insights for historical visualization of connectivity patterns.",
