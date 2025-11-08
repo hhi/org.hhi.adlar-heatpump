@@ -348,7 +348,6 @@ export class TuyaConnectionService {
 
       this.isConnected = true;
       this.hasEverConnected = true; // Mark successful connection (v1.0.6)
-      this.lastDataEventTime = Date.now(); // Update activity timestamp immediately (v1.0.6)
       this.logger('TuyaConnectionService: Connected to Tuya device successfully');
 
       // Synchronously update status to prevent race condition with initializeConnectionStatusTracking() (v1.0.6)
@@ -357,6 +356,19 @@ export class TuyaConnectionService {
       // Install deep socket error handler after successful connection (v0.99.49)
       // CRITICAL: Must reinstall after every reconnection because TuyAPI recreates the socket
       this.installDeepSocketErrorHandler();
+
+      // Verify connection health after successful connection (v1.0.18)
+      // CRITICAL: Prevents zombie connections (socket open but no data events)
+      const healthCheckPassed = await this.verifyConnectionHealth();
+      if (!healthCheckPassed) {
+        this.logger('⚠️ TuyaConnectionService: Post-reconnect health check failed - connection appears to be zombie');
+        this.isConnected = false;
+        throw new Error('Connection verification failed - no data events after query');
+      }
+
+      // Only update timestamp AFTER health verification succeeds (v1.0.18)
+      this.lastDataEventTime = Date.now();
+      this.logger('✅ TuyaConnectionService: Connection verified and healthy');
 
     } catch (error) {
       const categorizedError = this.handleTuyaError(error as Error, 'Tuya device connection');
@@ -395,6 +407,41 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Verify connection health after reconnection (v1.0.18).
+   * Confirms that both the socket is responsive AND data events are actually firing.
+   * This prevents zombie connections (open socket but no data flow).
+   *
+   * @returns true if connection is healthy (data event received), false otherwise
+   */
+  private async verifyConnectionHealth(): Promise<boolean> {
+    const preQueryDataTime = this.lastDataEventReceived;
+
+    try {
+      this.logger('TuyaConnectionService: Verifying connection health with DPS query...');
+      await this.tuya!.get({ schema: true });
+
+      // Wait max 2 seconds for data event to fire
+      const startWait = Date.now();
+      while (Date.now() - startWait < 2000) {
+        if (this.lastDataEventReceived > preQueryDataTime) {
+          this.logger('✅ Connection health verified - data event received');
+          return true;
+        }
+
+        await new Promise((resolve) => {
+          this.device.homey.setTimeout(resolve, 100);
+        });
+      }
+
+      this.logger('❌ Connection health check failed - no data event received within 2 seconds');
+      return false;
+    } catch (error) {
+      this.logger('❌ Connection health check error:', error);
+      return false;
+    }
+  }
+
+  /**
    * Force immediate reconnection to the device (v0.99.66).
    * Bypasses automatic reconnection delays, resets error recovery state, and attempts fresh connection.
    * Use this when user manually triggers reconnection from device settings.
@@ -411,6 +458,13 @@ export class TuyaConnectionService {
 
     // Step 2: Disconnect cleanly from current connection (if any)
     await this.disconnect();
+
+    // Step 2.5: Stabilization delay to allow socket cleanup (v1.0.18)
+    // CRITICAL: Prevents reusing corrupted socket state immediately after disconnect
+    await new Promise((resolve) => {
+      this.device.homey.setTimeout(resolve, 2000);
+    });
+    this.logger('TuyaConnectionService: Socket stabilization delay complete - proceeding with reconnection');
 
     // Step 3: Reset all error recovery state (bypass backoff/circuit breaker)
     this.resetErrorRecoveryState();
@@ -1403,6 +1457,13 @@ export class TuyaConnectionService {
         this.logger('TuyaConnectionService: Disconnect failed (socket already closed):', err);
       }
     }
+
+    // FIX 1.5: Stabilization delay to allow socket cleanup (v1.0.18)
+    // CRITICAL: Prevents reusing corrupted socket state immediately after disconnect
+    await new Promise((resolve) => {
+      this.device.homey.setTimeout(resolve, 2000);
+    });
+    this.logger('TuyaConnectionService: Socket stabilization delay complete');
 
     this.logger(`TuyaConnectionService: Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
     await this.updateStatusTimestamp('reconnecting');
