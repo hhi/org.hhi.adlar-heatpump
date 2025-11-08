@@ -768,6 +768,11 @@ export class TuyaConnectionService {
       throw new Error('Cannot setup event handlers: Tuya device not initialized');
     }
 
+    // CRITICAL: Remove all existing listeners before adding new ones (v1.0.20)
+    // This prevents duplicate listeners that accumulate on reconnect attempts
+    // Without this, each reconnect adds another listener, causing conflicts
+    this.tuya.removeAllListeners();
+
     // Error event - handle socket errors to prevent app crashes
     this.tuya.on('error', (error: Error): void => {
       // Enhanced diagnostic logging (v1.0.4)
