@@ -80,36 +80,25 @@
     },
     {
       "type": "number",
-      "name": "threshold_cop",
+      "name": "previous_daily_cop",
       "title": {
-        "en": "Threshold COP",
-        "nl": "Drempel COP",
-        "de": "Schwellenwert COP",
-        "fr": "COP seuil"
+        "en": "Previous daily COP",
+        "nl": "Vorige dagelijkse COP",
+        "de": "Vorheriger täglicher COP",
+        "fr": "COP quotidien précédent"
       },
-      "example": 3
+      "example": 3.0
     },
     {
       "type": "number",
-      "name": "data_points",
+      "name": "change",
       "title": {
-        "en": "Data points used",
-        "nl": "Gebruikte datapunten",
-        "de": "Verwendete Datenpunkte",
-        "fr": "Points de données utilisés"
+        "en": "Change in COP",
+        "nl": "Verandering in COP",
+        "de": "Änderung des COP",
+        "fr": "Changement du COP"
       },
-      "example": 48
-    },
-    {
-      "type": "string",
-      "name": "confidence_level",
-      "title": {
-        "en": "Confidence level",
-        "nl": "Betrouwbaarheidsniveau",
-        "de": "Vertrauensniveau",
-        "fr": "Niveau de confiance"
-      },
-      "example": "high"
+      "example": 0.2
     }
   ]
 }
