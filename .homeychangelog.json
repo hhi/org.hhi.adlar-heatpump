@@ -1,4 +1,10 @@
 {
+  "1.0.21": {
+    "en": "Fixed: COP efficiency change notifications now include correct data tokens (method and confidence). Consolidated duplicate flow card implementations that were sending conflicting tokens.",
+    "nl": "Opgelost: COP efficiëntie wijzigingsmeldingen bevatten nu correcte gegevenstokens (methode en vertrouwen). Geconsolideerde dubbele flow card implementaties die conflicterende tokens verzonden.",
+    "de": "Behoben: COP-Effizienzänderungsbenachrichtigungen enthalten nun korrekte Daten-Tokens (Methode und Vertrauen). Konsolidierte doppelte Flow-Card-Implementierungen, die in Konflikt stehende Tokens sendeten.",
+    "fr": "Corrigé: Les notifications de changement d'efficacité COP incluent désormais les jetons de données corrects (méthode et confiance). Implémentations de cartes de flux dupliquées consolidées qui envoyaient des jetons en conflit."
+  },
   "1.0.20": {
     "en": "Fixed: Device no longer becomes unavailable during reconnection attempts. Prevented duplicate event listeners from accumulating and blocking connection recovery. Connection stability significantly improved.",
     "nl": "Opgelost: Apparaat wordt niet langer onbeschikbaar tijdens heroppoging. Voorkomen dat dubbele event listeners zich ophopen en verbindingsherstel blokkeren. Verbindingsstabiliteit aanzienlijk verbeterd.",
