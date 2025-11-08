@@ -1,9 +1,9 @@
 {
   "1.0.17": {
-    "en": "Enhanced connection monitoring with heartbeat detection and zombie connection prevention. Device automatically wakes from sleep mode and recovers from network issues within minutes. Health checks every 1 hour ensure long-term stability during extended disconnections.",
-    "nl": "Verbeterde verbindingsmonitoring met heartbeat-detectie en zombie-verbinding preventie. Apparaat wordt automatisch uit slaapstand gewekt en herstelt zich van netwerkproblemen binnen minuten. Controles elk uur zorgen voor stabiliteit tijdens langdurige verbreking.",
-    "de": "Verbesserte Verbindungsüberwachung mit Heartbeat-Erkennung und Zombie-Verbindungsvermeidung. Gerät wacht automatisch aus dem Ruhemodus auf und erholt sich von Netzwerkproblemen innerhalb von Minuten. Stündliche Kontrollen gewährleisten Stabilität während längerer Trennungen.",
-    "fr": "Surveillance de connexion améliorée avec détection de heartbeat et prévention des connexions zombie. L'appareil se réveille automatiquement du mode veille et récupère en quelques minutes. Les vérifications horaires garantissent la stabilité lors des déconnexions prolongées."
+    "en": "Device now recovers more reliably from network disconnections.",
+    "nl": "Apparaat herstelt zich nu betrouwbaarder van netwerkverstoringen.",
+    "de": "Gerät stellt sich jetzt zuverlässiger von Netzwerkunterbrechungen wieder her.",
+    "fr": "L'appareil récupère désormais plus fiablement des interruptions réseau."
   },
   "1.0.15": {
     "en": "Connection status now tracked in Insights for historical visualization of connectivity patterns.",
