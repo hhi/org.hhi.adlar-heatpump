@@ -2328,7 +2328,7 @@ class MyDevice extends Homey.Device {
             if (this.lastInletTemp !== null && Math.abs(transformedValue - this.lastInletTemp) >= TEMP_CHANGE_THRESHOLD) {
               this.triggerFlowCard('inlet_temperature_changed', {
                 current_temperature: Math.round(transformedValue * 10) / 10,
-                previous_temperature: Math.round(this.lastInletTemp * 10) / 10,
+                threshold_temperature: TEMP_CHANGE_THRESHOLD,
               }).catch((err) => {
                 this.error('Failed to trigger inlet_temperature_changed:', err);
               });
@@ -2341,7 +2341,7 @@ class MyDevice extends Homey.Device {
             if (this.lastOutletTemp !== null && Math.abs(transformedValue - this.lastOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
               this.triggerFlowCard('outlet_temperature_changed', {
                 current_temperature: Math.round(transformedValue * 10) / 10,
-                previous_temperature: Math.round(this.lastOutletTemp * 10) / 10,
+                threshold_temperature: TEMP_CHANGE_THRESHOLD,
               }).catch((err) => {
                 this.error('Failed to trigger outlet_temperature_changed:', err);
               });
@@ -2354,7 +2354,7 @@ class MyDevice extends Homey.Device {
             if (this.lastAmbientTemp !== null && Math.abs(transformedValue - this.lastAmbientTemp) >= TEMP_CHANGE_THRESHOLD) {
               this.triggerFlowCard('ambient_temperature_changed', {
                 current_temperature: Math.round(transformedValue * 10) / 10,
-                previous_temperature: Math.round(this.lastAmbientTemp * 10) / 10,
+                threshold_temperature: TEMP_CHANGE_THRESHOLD,
               }).catch((err) => {
                 this.error('Failed to trigger ambient_temperature_changed:', err);
               });
