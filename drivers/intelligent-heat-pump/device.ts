@@ -718,12 +718,12 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_scop', roundedSCOP);
         await this.setCapabilityValue('adlar_scop_quality', scopResult.dataQuality);
 
-        this.debugLog(`📊 SCOP updated: ${roundedSCOP} (confidence: ${scopResult.confidence}, coverage: ${Math.round(scopResult.seasonalCoverage * 100)}%)`);
+        this.categoryLog('scop', `📊 SCOP updated: ${roundedSCOP} (confidence: ${scopResult.confidence}, coverage: ${Math.round(scopResult.seasonalCoverage * 100)}%)`);
       } else {
         // Update status to show insufficient data with localized message
         const insufficientStatus = this.getSCOPStatusMessage('insufficient_data');
         await this.setCapabilityValue('adlar_scop_quality', insufficientStatus);
-        this.debugLog('📊 SCOP: Insufficient seasonal data for calculation');
+        this.categoryLog('scop', '📊 SCOP: Insufficient seasonal data for calculation');
       }
     } catch (error) {
       this.error('Failed to add COP measurement to SCOP calculator:', error);
@@ -794,7 +794,7 @@ class MyDevice extends Homey.Device {
         this.lastRollingCOPUpdate = now;
       } else {
         const timeUntilUpdate = Math.round((5 * 60 * 1000 - (now - this.lastRollingCOPUpdate)) / 1000);
-        this.debugLog(`⏳ Next rolling COP update in ${timeUntilUpdate} seconds`);
+        this.categoryLog('cop', `⏳ Next rolling COP update in ${timeUntilUpdate} seconds`);
       }
     } catch (error) {
       this.error('Failed to add COP measurement to rolling calculator:', error);
@@ -807,26 +807,26 @@ class MyDevice extends Homey.Device {
   public async forceRefreshTrendCapability(): Promise<void> {
     try {
       if (!this.hasCapability('adlar_cop_trend')) {
-        this.log('⚠️ adlar_cop_trend capability not available');
+        this.categoryLog('cop', '⚠️ adlar_cop_trend capability not available');
         return;
       }
 
       const trendAnalysis = this.rollingCOPCalculator?.getTrendAnalysis(24);
       if (trendAnalysis) {
         const translatedDescription = this.homey.__(`trend_descriptions.${trendAnalysis.trendKey}`);
-        this.log('🔄 Force refreshing trend capability:');
-        this.log('  - trendKey:', trendAnalysis.trendKey);
-        this.log('  - translated:', translatedDescription);
-        this.log('  - fallback test (stable):', this.homey.__('trend_descriptions.stable'));
+        this.categoryLog('cop', '🔄 Force refreshing trend capability:');
+        this.categoryLog('cop', '  - trendKey:', trendAnalysis.trendKey);
+        this.categoryLog('cop', '  - translated:', translatedDescription);
+        this.categoryLog('cop', '  - fallback test (stable):', this.homey.__('trend_descriptions.stable'));
 
         await this.setCapabilityValue('adlar_cop_trend', translatedDescription);
-        this.log('✅ Trend capability force refreshed');
+        this.categoryLog('cop', '✅ Trend capability force refreshed');
       } else {
         // Set a test translation to verify the system works
         const testTranslation = this.homey.__('trend_descriptions.stable');
-        this.log('🧪 Setting test translation:', testTranslation);
-        this.log('🧪 Direct translation test:', this.homey.__('trend_descriptions.stable'));
-        this.log('🧪 All available keys check:', {
+        this.categoryLog('cop', '🧪 Setting test translation:', testTranslation);
+        this.categoryLog('cop', '🧪 Direct translation test:', this.homey.__('trend_descriptions.stable'));
+        this.categoryLog('cop', '🧪 All available keys check:', {
           stable: this.homey.__('trend_descriptions.stable'),
           strong_improvement: this.homey.__('trend_descriptions.strong_improvement'),
           moderate_decline: this.homey.__('trend_descriptions.moderate_decline'),
@@ -884,14 +884,14 @@ class MyDevice extends Homey.Device {
       const weeklyCOP = this.rollingCOPCalculator.getWeeklyCOP();
       if (weeklyCOP && this.hasCapability('adlar_cop_weekly')) {
         await this.setCapabilityValue('adlar_cop_weekly', weeklyCOP.averageCOP);
-        this.debugLog('📊 Weekly COP updated:', weeklyCOP.averageCOP, `(${weeklyCOP.dataPoints} points, ${weeklyCOP.confidenceLevel} confidence)`);
+        this.categoryLog('cop', '📊 Weekly COP updated:', weeklyCOP.averageCOP, `(${weeklyCOP.dataPoints} points, ${weeklyCOP.confidenceLevel} confidence)`);
       }
 
       // Calculate monthly COP
       const monthlyCOP = this.rollingCOPCalculator.getMonthlyCOP();
       if (monthlyCOP && this.hasCapability('adlar_cop_monthly')) {
         await this.setCapabilityValue('adlar_cop_monthly', monthlyCOP.averageCOP);
-        this.debugLog('📅 Monthly COP updated:', monthlyCOP.averageCOP, `(${monthlyCOP.dataPoints} points, ${monthlyCOP.confidenceLevel} confidence)`);
+        this.categoryLog('cop', '📅 Monthly COP updated:', monthlyCOP.averageCOP, `(${monthlyCOP.dataPoints} points, ${monthlyCOP.confidenceLevel} confidence)`);
       }
 
       // Check and trigger daily/monthly COP change flow cards (v1.0.8)
@@ -917,13 +917,13 @@ class MyDevice extends Homey.Device {
         const translatedDescription = this.homey.__(`trend_descriptions.${trendAnalysis.trendKey}`);
 
         // Debug logging to help troubleshoot internationalization
-        this.log('🔍 Trend Analysis Debug:');
-        this.log('  - trendKey:', trendAnalysis.trendKey);
-        this.log('  - translation result:', translatedDescription);
-        this.log('  - current locale:', this.homey.i18n.getLanguage());
+        this.categoryLog('cop', '🔍 Trend Analysis Debug:');
+        this.categoryLog('cop', '  - trendKey:', trendAnalysis.trendKey);
+        this.categoryLog('cop', '  - translation result:', translatedDescription);
+        this.categoryLog('cop', '  - current locale:', this.homey.i18n.getLanguage());
 
         await this.setCapabilityValue('adlar_cop_trend', translatedDescription);
-        this.debugLog('📈 COP Trend updated:', translatedDescription, `(${trendAnalysis.strength.toFixed(3)} strength)`);
+        this.categoryLog('cop', '📈 COP Trend updated:', translatedDescription, `(${trendAnalysis.strength.toFixed(3)} strength)`);
 
         // Trigger trend flow cards (need to pass the translated description)
         await this.triggerCOPTrendFlowCards({ ...trendAnalysis, description: translatedDescription }, dailyCOP);
@@ -948,7 +948,7 @@ class MyDevice extends Homey.Device {
       };
 
       // Note: Actual threshold comparison would be done in flow card listener
-      this.debugLog('📅 Daily COP flow tokens ready:', tokens);
+      this.categoryLog('cop', '📅 Daily COP flow tokens ready:', tokens);
     }
   }
 
@@ -965,7 +965,7 @@ class MyDevice extends Homey.Device {
       };
 
       await this.triggerFlowCard('cop_trend_detected', tokens);
-      this.debugLog('📈 COP trend flow card triggered:', tokens);
+      this.categoryLog('cop', '📈 COP trend flow card triggered:', tokens);
     }
   }
 
@@ -1114,7 +1114,7 @@ class MyDevice extends Homey.Device {
       // Try to restore data from settings
       await this.restoreRollingCOPData();
 
-      this.debugLog('📈 Rolling COP calculator initialized');
+      this.categoryLog('cop', '📈 Rolling COP calculator initialized');
     } catch (error) {
       this.error('Failed to initialize rolling COP calculator:', error);
     }
@@ -1128,10 +1128,10 @@ class MyDevice extends Homey.Device {
       const savedData = this.getSetting('rolling_cop_data');
       if (savedData && this.rollingCOPCalculator) {
         this.rollingCOPCalculator.importData(savedData);
-        this.debugLog('📈 Rolling COP data restored from settings');
+        this.categoryLog('cop', '📈 Rolling COP data restored from settings');
       }
     } catch (error) {
-      this.debugLog('No rolling COP data to restore:', error);
+      this.categoryLog('cop', 'No rolling COP data to restore:', error);
     }
   }
 
@@ -1143,7 +1143,7 @@ class MyDevice extends Homey.Device {
       if (this.rollingCOPCalculator) {
         const dataToSave = this.rollingCOPCalculator.exportData();
         await this.setSettings({ rolling_cop_data: dataToSave });
-        this.debugLog('📈 Rolling COP data saved to settings');
+        this.categoryLog('cop', '📈 Rolling COP data saved to settings');
       }
     } catch (error) {
       this.error('Failed to save rolling COP data:', error);
@@ -1162,12 +1162,12 @@ class MyDevice extends Homey.Device {
     if (this.hasCapability('adlar_external_power')) {
       const value = this.getCapabilityValue('adlar_external_power');
       if (typeof value === 'number' && !Number.isNaN(value) && value > 0) {
-        this.debugLog(`📊 Using external power data: ${value}W (from flow card)`);
+        this.categoryLog('cop', `📊 Using external power data: ${value}W (from flow card)`);
         return value;
       }
     }
 
-    this.debugLog('📊 No external power data available - use "Send power data to heat pump" flow card to provide external power');
+    this.categoryLog('cop', '📊 No external power data available - use "Send power data to heat pump" flow card to provide external power');
     return null;
   }
 
@@ -1302,39 +1302,39 @@ class MyDevice extends Homey.Device {
       // Initialize SCOP updates if capability is available
       if (this.hasCapability('adlar_scop') && this.scopCalculator) {
         this.startSCOPUpdateInterval();
-        this.log('SCOP update system initialized');
+        this.categoryLog('scop', 'SCOP update system initialized');
       }
 
       // Initialize external power capability with default value
       if (this.hasCapability('adlar_external_power')) {
         await this.setCapabilityValue('adlar_external_power', null);
-        this.log('External power capability initialized with default value (null W)');
+        this.categoryLog('cop', 'External power capability initialized with default value (null W)');
       }
 
       // Initialize external flow capability with default value
       if (this.hasCapability('adlar_external_flow')) {
         await this.setCapabilityValue('adlar_external_flow', null);
-        this.log('External flow capability initialized with default value (null L/min)');
+        this.categoryLog('cop', 'External flow capability initialized with default value (null L/min)');
       }
 
       // Initialize external ambient temperature capability with default value
       if (this.hasCapability('adlar_external_ambient')) {
         await this.setCapabilityValue('adlar_external_ambient', null);
-        this.log('External ambient capability initialized with default value (null°C)');
+        this.categoryLog('cop', 'External ambient capability initialized with default value (null°C)');
       }
 
       // Initialize external energy total capability with storage-aware restoration
       if (this.hasCapability('adlar_external_energy_total')) {
         const storedExternalTotal = await this.getStoreValue('external_cumulative_energy_kwh') || 0;
         await this.setCapabilityValue('adlar_external_energy_total', storedExternalTotal);
-        this.log(`External energy total capability initialized: ${storedExternalTotal} kWh ${storedExternalTotal > 0 ? '(restored from storage)' : '(starting fresh)'}`);
+        this.categoryLog('cop', `External energy total capability initialized: ${storedExternalTotal} kWh ${storedExternalTotal > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
 
       // Initialize external energy daily capability with storage-aware restoration
       if (this.hasCapability('adlar_external_energy_daily')) {
         const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
         await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
-        this.log(`External energy daily capability initialized: ${storedExternalDaily} kWh ${storedExternalDaily > 0 ? '(restored from storage)' : '(starting fresh)'}`);
+        this.categoryLog('cop', `External energy daily capability initialized: ${storedExternalDaily} kWh ${storedExternalDaily > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -1375,7 +1375,7 @@ class MyDevice extends Homey.Device {
         },
       };
 
-      this.debugLog('COP settings loaded:', this.copSettings);
+      this.categoryLog('cop', 'COP settings loaded:', this.copSettings);
 
       // Debug COP capability status immediately after loading settings
       this.debugCOPCapabilityStatus();
@@ -1403,29 +1403,29 @@ class MyDevice extends Homey.Device {
    * Debug method to check COP capability status and configuration
    */
   public debugCOPCapabilityStatus(): void {
-    this.log('🔧 COP Capability Debug Status:');
-    this.log(`  📋 hasCapability('adlar_cop'): ${this.hasCapability('adlar_cop')}`);
-    this.log(`  ⚙️  cop_calculation_enabled setting: ${this.getSetting('cop_calculation_enabled')}`);
-    this.log(`  🏗️  copSettings?.enableCOP: ${this.copSettings?.enableCOP}`);
+    this.categoryLog('cop', '🔧 COP Capability Debug Status:');
+    this.categoryLog('cop', `  📋 hasCapability('adlar_cop'): ${this.hasCapability('adlar_cop')}`);
+    this.categoryLog('cop', `  ⚙️  cop_calculation_enabled setting: ${this.getSetting('cop_calculation_enabled')}`);
+    this.categoryLog('cop', `  🏗️  copSettings?.enableCOP: ${this.copSettings?.enableCOP}`);
 
     // List all current capabilities
     const allCaps = this.getCapabilities();
-    this.log(`  📊 Total capabilities: ${allCaps.length}`);
-    this.log(`  🔍 COP in capability list: ${allCaps.includes('adlar_cop')}`);
+    this.categoryLog('cop', `  📊 Total capabilities: ${allCaps.length}`);
+    this.categoryLog('cop', `  🔍 COP in capability list: ${allCaps.includes('adlar_cop')}`);
 
     if (process.env.DEBUG === '1') {
-      this.log(`  📝 All capabilities: ${allCaps.join(', ')}`);
+      this.categoryLog('cop', `  📝 All capabilities: ${allCaps.join(', ')}`);
     }
 
     // Check if capability definition exists in app.json
     try {
       const capabilityDefinition = this.homey.manifest.capabilities?.adlar_cop;
-      this.log(`  📋 COP capability definition exists: ${!!capabilityDefinition}`);
+      this.categoryLog('cop', `  📋 COP capability definition exists: ${!!capabilityDefinition}`);
       if (capabilityDefinition) {
-        this.log(`  📋 COP definition type: ${capabilityDefinition.type}`);
+        this.categoryLog('cop', `  📋 COP definition type: ${capabilityDefinition.type}`);
       }
     } catch (error) {
-      this.log(`  ❌ Error checking capability definition: ${error}`);
+      this.categoryLog('cop', `  ❌ Error checking capability definition: ${error}`);
     }
   }
 
@@ -1433,7 +1433,7 @@ class MyDevice extends Homey.Device {
    * Public method to manually trigger and debug COP calculation process
    */
   public async debugDailyCOPIssue(): Promise<void> {
-    this.log('🔍 === DEBUGGING DAILY COP ISSUE ===');
+    this.categoryLog('cop', '🔍 === DEBUGGING DAILY COP ISSUE ===');
 
     // Check COP calculation status
     this.debugCOPCapabilityStatus();
@@ -1441,57 +1441,57 @@ class MyDevice extends Homey.Device {
     // Check if the rolling calculator exists and has data
     if (this.rollingCOPCalculator) {
       const totalDataPoints = this.rollingCOPCalculator.exportData().dataPoints.length;
-      this.log(`📊 Rolling COP calculator exists with ${totalDataPoints} data points`);
+      this.categoryLog('cop', `📊 Rolling COP calculator exists with ${totalDataPoints} data points`);
 
       // Try to get daily COP manually
       const dailyCOP = this.rollingCOPCalculator.getDailyCOP();
-      this.log(`📅 Manual daily COP check: ${dailyCOP ? `${dailyCOP.averageCOP} (${dailyCOP.dataPoints} points)` : 'null/undefined'}`);
+      this.categoryLog('cop', `📅 Manual daily COP check: ${dailyCOP ? `${dailyCOP.averageCOP} (${dailyCOP.dataPoints} points)` : 'null/undefined'}`);
     } else {
-      this.log('❌ Rolling COP calculator not initialized');
+      this.categoryLog('cop', '❌ Rolling COP calculator not initialized');
     }
 
     // Force a COP calculation attempt
     this.categoryLog('cop', '🚀 Forcing COP calculation attempt...');
     await this.calculateAndUpdateCOP();
 
-    this.log('🔍 === END DEBUG ===');
+    this.categoryLog('cop', '🔍 === END DEBUG ===');
   }
 
   /**
    * Public method to debug external energy accumulation
    */
   public async debugExternalEnergyAccumulation(): Promise<void> {
-    this.log('🔋 === DEBUGGING EXTERNAL ENERGY ACCUMULATION ===');
+    this.categoryLog('cop', '🔋 === DEBUGGING EXTERNAL ENERGY ACCUMULATION ===');
 
     // Check current values
     const currentPower = this.getCapabilityValue('adlar_external_power');
     const currentEnergy = this.getCapabilityValue('adlar_external_energy_total');
     const lastTimestamp = this.lastExternalPowerTimestamp;
 
-    this.log(`📊 Current external power: ${currentPower}W`);
-    this.log(`🔋 Current external energy total: ${currentEnergy?.toFixed ? currentEnergy.toFixed(6) : currentEnergy}kWh`);
-    this.log(`⏱️ Last power timestamp: ${lastTimestamp ? new Date(lastTimestamp).toISOString() : 'none'}`);
+    this.categoryLog('cop', `📊 Current external power: ${currentPower}W`);
+    this.categoryLog('cop', `🔋 Current external energy total: ${currentEnergy?.toFixed ? currentEnergy.toFixed(6) : currentEnergy}kWh`);
+    this.categoryLog('cop', `⏱️ Last power timestamp: ${lastTimestamp ? new Date(lastTimestamp).toISOString() : 'none'}`);
 
     // Check capabilities
-    this.log(`📋 Has adlar_external_power capability: ${this.hasCapability('adlar_external_power')}`);
-    this.log(`📋 Has adlar_external_energy_total capability: ${this.hasCapability('adlar_external_energy_total')}`);
+    this.categoryLog('cop', `📋 Has adlar_external_power capability: ${this.hasCapability('adlar_external_power')}`);
+    this.categoryLog('cop', `📋 Has adlar_external_energy_total capability: ${this.hasCapability('adlar_external_energy_total')}`);
 
     // Show reset functionality
-    this.log('💡 To reset energy counter: Use device settings > Energy Management > Reset external energy total counter');
+    this.categoryLog('cop', '💡 To reset energy counter: Use device settings > Energy Management > Reset external energy total counter');
 
-    this.log('🔋 === END DEBUG ===');
+    this.categoryLog('cop', '🔋 === END DEBUG ===');
   }
 
   /**
    * Reset external energy total counter to zero
    */
   public async resetExternalEnergyTotal(): Promise<void> {
-    this.log('🔄 Resetting external energy total counter...');
+    this.categoryLog('cop', '🔄 Resetting external energy total counter...');
 
     try {
       // Check if capability exists
       if (!this.hasCapability('adlar_external_energy_total')) {
-        this.log('⚠️ External energy total capability not available');
+        this.categoryLog('cop', '⚠️ External energy total capability not available');
         return;
       }
 
@@ -1501,13 +1501,13 @@ class MyDevice extends Homey.Device {
       // Reset the timestamp to start fresh accumulation
       this.lastExternalPowerTimestamp = null;
 
-      this.log('✅ External energy total reset to 0.000000 kWh');
-      this.log('✅ Energy accumulation timestamp reset - next measurement will use default interval');
+      this.categoryLog('cop', '✅ External energy total reset to 0.000000 kWh');
+      this.categoryLog('cop', '✅ Energy accumulation timestamp reset - next measurement will use default interval');
 
       // Reset the setting back to false to prevent repeated triggers
       this.homey.setTimeout(() => {
         this.setSettings({ reset_external_energy_total: false })
-          .then(() => this.log('🔄 Reset setting cleared'))
+          .then(() => this.categoryLog('cop', '🔄 Reset setting cleared'))
           .catch((error) => this.error('Failed to clear reset setting:', error));
       }, 1000);
 
@@ -1704,8 +1704,8 @@ class MyDevice extends Homey.Device {
         externalDataSources.push('ambient(direct)');
       }
 
-      this.debugLog('External data sources:', externalDataSources.length > 0 ? externalDataSources.join(', ') : 'none');
-      this.debugLog('External data retrieved via direct access:', externalData);
+      this.categoryLog('cop', 'External data sources:', externalDataSources.length > 0 ? externalDataSources.join(', ') : 'none');
+      this.categoryLog('cop', 'External data retrieved via direct access:', externalData);
 
       // Combine device and external data (external data takes precedence, unless undefined)
       const combinedData = {
@@ -1714,7 +1714,7 @@ class MyDevice extends Homey.Device {
           Object.entries(externalData ?? {}).filter(([, v]) => v !== undefined),
         ),
       };
-      this.debugLog('Combined data for COP calculation:', combinedData);
+      this.categoryLog('cop', 'Combined data for COP calculation:', combinedData);
 
       // Log data availability for each calculation method with detailed analysis
       this.logDataAvailabilityForMethods(combinedData);
@@ -1729,7 +1729,7 @@ class MyDevice extends Homey.Device {
         customOutlierThresholds: this.copSettings?.customOutlierThresholds || { minCOP: 0.5, maxCOP: 8.0 },
       };
 
-      this.debugLog('COP calculation config:', copConfig);
+      this.categoryLog('cop', 'COP calculation config:', copConfig);
 
       const copResult = COPCalculator.calculateCOP(combinedData, copConfig);
 
@@ -1749,7 +1749,7 @@ class MyDevice extends Homey.Device {
           this.error('Failed to trigger cop_outlier_detected flow card:', err);
         });
 
-        this.log(`🚨 COP Outlier Detected: ${copResult.cop.toFixed(2)} - ${copResult.outlierReason}`);
+        this.categoryLog('cop', `🚨 COP Outlier Detected: ${copResult.cop.toFixed(2)} - ${copResult.outlierReason}`);
       }
       this.lastCOPOutlierStatus = copResult.isOutlier;
 
@@ -1779,20 +1779,20 @@ class MyDevice extends Homey.Device {
         const methodDisplayName = this.formatCOPMethodDisplay(copResult.method, copResult.confidence, copResult.diagnosticInfo);
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
-        this.log(`✅ COP updated: ${roundedCOP} (method: ${copResult.method}, confidence: ${copResult.confidence})`);
+        this.categoryLog('cop', `✅ COP updated: ${roundedCOP} (method: ${copResult.method}, confidence: ${copResult.confidence})`);
 
         // Log method description for debugging
-        this.debugLog('Method details:', COPCalculator.getMethodDescription(copResult.method));
+        this.categoryLog('cop', 'Method details:', COPCalculator.getMethodDescription(copResult.method));
 
         // Add measurement to SCOP calculator if available
         await this.addCOPMeasurementToSCOP(copResult, combinedData);
 
         // Add measurement to rolling COP calculator
-        this.log('📊 Adding COP measurement to rolling calculator:', roundedCOP);
+        this.categoryLog('cop', '📊 Adding COP measurement to rolling calculator:', roundedCOP);
         await this.addCOPMeasurementToRolling(copResult, combinedData);
       } else if (copResult.isOutlier) {
-        this.log(`⚠️ COP outlier detected (${copResult.cop.toFixed(2)}): ${copResult.outlierReason}`);
-        this.debugLog('Outlier data sources:', copResult.dataSources);
+        this.categoryLog('cop', `⚠️ COP outlier detected (${copResult.cop.toFixed(2)}): ${copResult.outlierReason}`);
+        this.categoryLog('cop', 'Outlier data sources:', copResult.dataSources);
 
         // Update COP method capability to show outlier status
         const methodDisplayName = `${this.formatCOPMethodDisplay(copResult.method, 'low', copResult.diagnosticInfo)} (Outlier)`;
@@ -1808,14 +1808,14 @@ class MyDevice extends Homey.Device {
         }
       } else {
         this.categoryLog('cop', `❌ COP calculation failed: ${copResult.method}`);
-        this.debugLog('Failed calculation data:', combinedData);
+        this.categoryLog('cop', 'Failed calculation data:', combinedData);
 
         // Update capabilities to reflect failed calculation
         if (copResult.method === 'insufficient_data') {
           await this.setCapabilityValue('adlar_cop', 0);
           const failedMethodName = this.formatCOPMethodDisplay('insufficient_data', 'low', copResult.diagnosticInfo);
           await this.setCapabilityValue('adlar_cop_method', failedMethodName);
-          this.log('✅ COP capabilities updated to reflect insufficient data condition');
+          this.categoryLog('cop', '✅ COP capabilities updated to reflect insufficient data condition');
         }
       }
 
@@ -1845,7 +1845,7 @@ class MyDevice extends Homey.Device {
       'Temperature Difference': ['inletTemperature', 'outletTemperature'],
     };
 
-    this.debugLog('🔍 COP Method Data Availability:');
+    this.categoryLog('cop', '🔍 COP Method Data Availability:');
 
     Object.entries(methodRequirements).forEach(([method, required]) => {
       const available = required.filter((field) => {
@@ -1856,14 +1856,14 @@ class MyDevice extends Homey.Device {
       const canUse = available.length === required.length;
       const status = canUse ? '✅' : '❌';
 
-      this.debugLog(`  ${status} ${method}: ${available.length}/${required.length} fields available`);
+      this.categoryLog('cop', `  ${status} ${method}: ${available.length}/${required.length} fields available`);
 
       if (!canUse) {
         const missing = required.filter((field) => {
           const value = data[field as keyof COPDataSources];
           return value === undefined || value === null || value === 0;
         });
-        this.debugLog(`      Missing: ${missing.join(', ')}`);
+        this.categoryLog('cop', `      Missing: ${missing.join(', ')}`);
       }
     });
   }
@@ -1893,13 +1893,13 @@ class MyDevice extends Homey.Device {
       low: '🔴',
     };
 
-    this.log('📊 COP Calculation Result:');
-    this.log(`  ${methodIcons[result.method as keyof typeof methodIcons]} Method: ${result.method}`);
-    this.log(`  🎯 COP Value: ${result.cop.toFixed(3)}`);
-    this.log(`  ${confidenceIcons[result.confidence as keyof typeof confidenceIcons]} Confidence: ${result.confidence}`);
+    this.categoryLog('cop', '📊 COP Calculation Result:');
+    this.categoryLog('cop', `  ${methodIcons[result.method as keyof typeof methodIcons]} Method: ${result.method}`);
+    this.categoryLog('cop', `  🎯 COP Value: ${result.cop.toFixed(3)}`);
+    this.categoryLog('cop', `  ${confidenceIcons[result.confidence as keyof typeof confidenceIcons]} Confidence: ${result.confidence}`);
 
     if (result.isOutlier) {
-      this.log(`  ⚠️ Outlier: ${result.outlierReason}`);
+      this.categoryLog('cop', `  ⚠️ Outlier: ${result.outlierReason}`);
     }
 
     // Log calculation expression and formula used
@@ -1907,20 +1907,20 @@ class MyDevice extends Homey.Device {
 
     // Log data sources used
     if (Object.keys(result.dataSources).length > 0) {
-      this.log('  📊 Data Sources Used:');
+      this.categoryLog('cop', '  📊 Data Sources Used:');
       Object.entries(result.dataSources).forEach(([key, value]) => {
-        this.log(`    • ${key}: ${value.value} (${value.source})`);
+        this.categoryLog('cop', `    • ${key}: ${value.value} (${value.source})`);
       });
     }
 
     // Log calculation details if available
     if (result.calculationDetails && Object.keys(result.calculationDetails).length > 0) {
-      this.log('  🔬 Calculation Details:');
+      this.categoryLog('cop', '  🔬 Calculation Details:');
       Object.entries(result.calculationDetails).forEach(([key, value]) => {
         if (typeof value === 'number') {
-          this.log(`    • ${key}: ${value.toFixed(3)}`);
+          this.categoryLog('cop', `    • ${key}: ${value.toFixed(3)}`);
         } else {
-          this.log(`    • ${key}: ${value}`);
+          this.categoryLog('cop', `    • ${key}: ${value}`);
         }
       });
     }
@@ -1928,7 +1928,7 @@ class MyDevice extends Homey.Device {
     // Log method description for context
     const methodDescription = this.getCOPMethodDescription(result.method);
     if (methodDescription) {
-      this.log(`  📖 Method Info: ${methodDescription}`);
+      this.categoryLog('cop', `  📖 Method Info: ${methodDescription}`);
     }
   }
 
@@ -1936,7 +1936,7 @@ class MyDevice extends Homey.Device {
    * Log COP method selection logic with detailed reasoning
    */
   private logCOPMethodSelection(data: COPDataSources): void {
-    this.log('🎯 COP Method Selection Analysis:');
+    this.categoryLog('cop', '🎯 COP Method Selection Analysis:');
 
     // Check Direct Thermal method
     const canDirectThermal = !!(
@@ -1946,14 +1946,14 @@ class MyDevice extends Homey.Device {
       && data.electricalPower && data.electricalPower > 0
     );
 
-    this.log(`  🎯 Direct Thermal: ${canDirectThermal ? '✅ Available' : '❌ Not available'}`);
+    this.categoryLog('cop', `  🎯 Direct Thermal: ${canDirectThermal ? '✅ Available' : '❌ Not available'}`);
     if (!canDirectThermal) {
       const missing = [];
       if (!data.waterFlowRate || data.waterFlowRate <= 0) missing.push('waterFlowRate');
       if (data.inletTemperature === undefined || data.inletTemperature === null) missing.push('inletTemperature');
       if (data.outletTemperature === undefined || data.outletTemperature === null) missing.push('outletTemperature');
       if (!data.electricalPower || data.electricalPower <= 0) missing.push('electricalPower');
-      this.log(`    Missing: ${missing.join(', ')}`);
+      this.categoryLog('cop', `    Missing: ${missing.join(', ')}`);
     }
 
     // Check Carnot Estimation method
@@ -1963,18 +1963,18 @@ class MyDevice extends Homey.Device {
       && data.compressorFrequency && data.compressorFrequency > 0
     );
 
-    this.log(`  🧮 Carnot Estimation: ${canCarnot ? '✅ Available' : '❌ Not available'}`);
+    this.categoryLog('cop', `  🧮 Carnot Estimation: ${canCarnot ? '✅ Available' : '❌ Not available'}`);
     if (!canCarnot) {
       const missing = [];
       if (data.outletTemperature === undefined || data.outletTemperature === null) missing.push('outletTemperature');
       if (data.ambientTemperature === undefined || data.ambientTemperature === null) missing.push('ambientTemperature');
       if (!data.compressorFrequency || data.compressorFrequency <= 0) missing.push('compressorFrequency');
-      this.log(`    Missing: ${missing.join(', ')}`);
+      this.categoryLog('cop', `    Missing: ${missing.join(', ')}`);
     } else {
-      this.log('    ✅ All required data available:');
-      this.log(`      • outletTemperature: ${data.outletTemperature}°C`);
-      this.log(`      • ambientTemperature: ${data.ambientTemperature}°C`);
-      this.log(`      • compressorFrequency: ${data.compressorFrequency}Hz`);
+      this.categoryLog('cop', '    ✅ All required data available:');
+      this.categoryLog('cop', `      • outletTemperature: ${data.outletTemperature}°C`);
+      this.categoryLog('cop', `      • ambientTemperature: ${data.ambientTemperature}°C`);
+      this.categoryLog('cop', `      • compressorFrequency: ${data.compressorFrequency}Hz`);
     }
 
     // Check Temperature Difference method
@@ -1983,12 +1983,12 @@ class MyDevice extends Homey.Device {
       && data.outletTemperature !== undefined && data.outletTemperature !== null
     );
 
-    this.log(`  📏 Temperature Difference: ${canTempDiff ? '✅ Available' : '❌ Not available'}`);
+    this.categoryLog('cop', `  📏 Temperature Difference: ${canTempDiff ? '✅ Available' : '❌ Not available'}`);
     if (!canTempDiff) {
       const missing = [];
       if (data.inletTemperature === undefined || data.inletTemperature === null) missing.push('inletTemperature');
       if (data.outletTemperature === undefined || data.outletTemperature === null) missing.push('outletTemperature');
-      this.log(`    Missing: ${missing.join(', ')}`);
+      this.categoryLog('cop', `    Missing: ${missing.join(', ')}`);
     }
 
     // Determine which method will be selected
@@ -2001,13 +2001,13 @@ class MyDevice extends Homey.Device {
       selectedMethod = 'temperature_difference';
     }
 
-    this.log(`  🏆 Selected Method: ${selectedMethod}`);
+    this.categoryLog('cop', `  🏆 Selected Method: ${selectedMethod}`);
 
     // Special case analysis for your scenario
     if (!canDirectThermal && canCarnot) {
-      this.log('  💡 Analysis: Direct thermal unavailable due to missing electrical power, using Carnot estimation (good choice!)');
+      this.categoryLog('cop', '  💡 Analysis: Direct thermal unavailable due to missing electrical power, using Carnot estimation (good choice!)');
     } else if (!canDirectThermal && !canCarnot && canTempDiff) {
-      this.log('  ⚠️  Analysis: Both direct thermal and Carnot unavailable, falling back to less accurate temperature difference method');
+      this.categoryLog('cop', '  ⚠️  Analysis: Both direct thermal and Carnot unavailable, falling back to less accurate temperature difference method');
     }
   }
 
@@ -2028,12 +2028,12 @@ class MyDevice extends Homey.Device {
     switch (result.method) {
       case 'direct_thermal': {
         if (ds.electricalPower && ds.waterFlowRate && ds.temperatureDifference && cd?.massFlowRate && cd?.thermalOutput) {
-          this.log('  🧮 Formula: COP = Q_thermal / P_electrical');
-          this.log('  📐 Expression: Q_thermal = ṁ × Cp × ΔT');
-          this.log(`    Where: ṁ = ${(cd.massFlowRate as number).toFixed(3)} kg/s (${ds.waterFlowRate.value} L/min)`);
-          this.log(`           Cp = ${DeviceConstants.WATER_SPECIFIC_HEAT_CAPACITY} J/(kg·K) (water specific heat)`);
-          this.log(`           ΔT = ${ds.temperatureDifference.value}°C (outlet - inlet temp)`);
-          this.log(`  🔢 Calculation: ${(cd.thermalOutput as number).toFixed(1)} W / ${ds.electricalPower.value} W = ${result.cop.toFixed(3)}`);
+          this.categoryLog('cop', '  🧮 Formula: COP = Q_thermal / P_electrical');
+          this.categoryLog('cop', '  📐 Expression: Q_thermal = ṁ × Cp × ΔT');
+          this.categoryLog('cop', `    Where: ṁ = ${(cd.massFlowRate as number).toFixed(3)} kg/s (${ds.waterFlowRate.value} L/min)`);
+          this.categoryLog('cop', `           Cp = ${DeviceConstants.WATER_SPECIFIC_HEAT_CAPACITY} J/(kg·K) (water specific heat)`);
+          this.categoryLog('cop', `           ΔT = ${ds.temperatureDifference.value}°C (outlet - inlet temp)`);
+          this.categoryLog('cop', `  🔢 Calculation: ${(cd.thermalOutput as number).toFixed(1)} W / ${ds.electricalPower.value} W = ${result.cop.toFixed(3)}`);
         }
         break;
       }
@@ -2045,46 +2045,46 @@ class MyDevice extends Homey.Device {
             ? ds.temperatureDifference.value : 0;
           const outletTemp = ds.temperatureDifference
             ? (ambientValue + tempDiffValue) : 'unknown';
-          this.log('  🧮 Formula: COP = Carnot_COP × η_practical');
-          this.log('  📐 Expression: Carnot_COP = T_hot / (T_hot - T_cold)');
-          this.log(`    Where: T_hot = ${outletTemp}K, T_cold = ${(ambientValue + 273.15).toFixed(1)}K`);
-          this.log(`           η_practical = ${(cd.efficiencyFactor as number).toFixed(3)} (efficiency factor)`);
-          this.log(`  🔢 Calculation: ${(cd.carnotCOP as number).toFixed(3)} × ${(cd.efficiencyFactor as number).toFixed(3)} = ${result.cop.toFixed(3)}`);
+          this.categoryLog('cop', '  🧮 Formula: COP = Carnot_COP × η_practical');
+          this.categoryLog('cop', '  📐 Expression: Carnot_COP = T_hot / (T_hot - T_cold)');
+          this.categoryLog('cop', `    Where: T_hot = ${outletTemp}K, T_cold = ${(ambientValue + 273.15).toFixed(1)}K`);
+          this.categoryLog('cop', `           η_practical = ${(cd.efficiencyFactor as number).toFixed(3)} (efficiency factor)`);
+          this.categoryLog('cop', `  🔢 Calculation: ${(cd.carnotCOP as number).toFixed(3)} × ${(cd.efficiencyFactor as number).toFixed(3)} = ${result.cop.toFixed(3)}`);
         }
         break;
       }
 
       case 'temperature_difference': {
         if (ds.temperatureDifference) {
-          this.log('  🧮 Formula: COP = f(ΔT) using empirical relationships');
-          this.log(`  📐 Expression: Based on ΔT = ${ds.temperatureDifference.value}°C`);
+          this.categoryLog('cop', '  🧮 Formula: COP = f(ΔT) using empirical relationships');
+          this.categoryLog('cop', `  📐 Expression: Based on ΔT = ${ds.temperatureDifference.value}°C`);
 
           const tempDiff = typeof ds.temperatureDifference.value === 'number' ? ds.temperatureDifference.value : 0;
           const thresholds = DeviceConstants.COP_TEMP_DIFF_THRESHOLDS;
 
           if (tempDiff < thresholds.LOW_EFFICIENCY_TEMP_DIFF) {
             const logMsg = `  🔢 Calculation: ΔT < ${thresholds.LOW_EFFICIENCY_TEMP_DIFF}°C → COP = ${thresholds.LOW_EFFICIENCY_COP}`;
-            this.log(logMsg);
+            this.categoryLog('cop', logMsg);
           } else if (tempDiff < thresholds.MODERATE_EFFICIENCY_TEMP_DIFF) {
             const calculatedCOP = thresholds.MODERATE_EFFICIENCY_COP_BASE
               + (tempDiff - thresholds.LOW_EFFICIENCY_TEMP_DIFF) * thresholds.MODERATE_EFFICIENCY_SLOPE;
             const formula = `COP = ${thresholds.MODERATE_EFFICIENCY_COP_BASE} + (${tempDiff} - ${thresholds.LOW_EFFICIENCY_TEMP_DIFF}) × ${thresholds.MODERATE_EFFICIENCY_SLOPE}`;
-            this.log(`  🔢 Calculation: ${formula} = ${calculatedCOP.toFixed(3)}`);
+            this.categoryLog('cop', `  🔢 Calculation: ${formula} = ${calculatedCOP.toFixed(3)}`);
           } else {
             const logMsg = `  🔢 Calculation: ΔT ≥ ${thresholds.MODERATE_EFFICIENCY_TEMP_DIFF}°C → COP = ${thresholds.HIGH_EFFICIENCY_COP} (capped)`;
-            this.log(logMsg);
+            this.categoryLog('cop', logMsg);
           }
         }
         break;
       }
 
       case 'insufficient_data': {
-        this.log('  ❌ Expression: No calculation performed - insufficient data available');
+        this.categoryLog('cop', '  ❌ Expression: No calculation performed - insufficient data available');
         break;
       }
 
       default: {
-        this.log(`  ❓ Expression: Unknown method '${result.method}'`);
+        this.categoryLog('cop', `  ❓ Expression: Unknown method '${result.method}'`);
         break;
       }
     }
