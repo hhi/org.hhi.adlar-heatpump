@@ -1,4 +1,16 @@
 {
+  "1.0.28": {
+    "en": "Fixed: COP and SCOP calculation logging now respects DEBUG_LEVEL filtering for cleaner troubleshooting logs.",
+    "nl": "Opgelost: COP en SCOP berekening logging respecteert nu DEBUG_LEVEL filtering voor schonere probleemoplossingslogs.",
+    "de": "Behoben: COP- und SCOP-Berechnungsprotokollierung respektiert nun DEBUG_LEVEL-Filterung für saubere Fehlerbehebungsprotokolle.",
+    "fr": "Corrigé: La journalisation des calculs COP et SCOP respecte maintenant le filtrage DEBUG_LEVEL pour des journaux de dépannage plus propres."
+  },
+  "1.0.27": {
+    "en": "Internal improvements to logging system for better diagnostics and troubleshooting.",
+    "nl": "Interne verbeteringen aan het loggingsysteem voor betere diagnostiek en probleemoplossing.",
+    "de": "Interne Verbesserungen am Protokollierungssystem für bessere Diagnose und Fehlerbehebung.",
+    "fr": "Améliorations internes du système d'enregistrement pour un meilleur diagnostic et dépannage."
+  },
   "1.0.26": {
     "en": "Internal improvements to logging system for better diagnostics and troubleshooting.",
     "nl": "Interne verbeteringen aan het loggingsysteem voor betere diagnostiek en probleemoplossing.",
