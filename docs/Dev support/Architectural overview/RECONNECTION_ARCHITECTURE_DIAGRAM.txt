@@ -1,0 +1,394 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║          TuyaConnectionService - Reconnection Architecture Diagram            ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         IMMEDIATE TRIGGERS (< 1 second)                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────┐
+    │  Socket Error    │  Line 719-742
+    │  (ECONNRESET)    │  
+    └────────┬─────────┘
+             │
+             ├─> Categorize error
+             ├─> Mark isConnected = false
+             ├─> Update status (disconnected/error)
+             └─> scheduleNextReconnectionAttempt() ◄── IMMEDIATE
+                 ↓
+             [Core Reconnection Loop starts]
+
+
+    ┌──────────────────┐
+    │ Heartbeat Fail   │  Line 1227-1245
+    │ (Both get+set)   │  (zombie detected)
+    └────────┬─────────┘
+             │
+             ├─> Mark isConnected = false
+             ├─> Increment consecutiveFailures
+             ├─> Update status
+             └─> scheduleNextReconnectionAttempt() ◄── IMMEDIATE
+                 ↓
+             [Core Reconnection Loop starts]
+
+
+    ┌──────────────────┐
+    │ DPS Refresh      │  Line 975-982
+    │ Zombie Detected  │  (every 3 min)
+    └────────┬─────────┘
+             │
+             ├─> Query succeeded but NO data event
+             ├─> Log: "🧟 ZOMBIE CONNECTION DETECTED"
+             └─> forceReconnect() ◄── IMMEDIATE
+                 ↓
+             [Full reconnect with reset state]
+
+
+    ┌──────────────────┐
+    │ User Force       │  Line 443-480
+    │ Reconnect Click  │  
+    └────────┬─────────┘
+             │
+             ├─> Stop all timers
+             ├─> Disconnect cleanly
+             ├─> Wait 2 seconds (socket cleanup)
+             ├─> Reset all error recovery state
+             └─> connectTuya() ◄── IMMEDIATE
+                 ↓
+             [Attempt connection with 1x backoff]
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   CORE RECONNECTION LOOP (Orchestrator)                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    scheduleNextReconnectionAttempt() [Line 1287-1437]
+    │
+    ├─── LAYER 1: Outage Tracking (Line 1288-1293)
+    │    └─> Record when disconnection started
+    │
+    ├─── LAYER 2: Stale Connection Detection (Line 1295-1320)
+    │    │
+    │    ├─ if (isConnected) {
+    │    │    timeSinceLastData = Date.now() - lastDataEventTime
+    │    │
+    │    │    if (timeSinceLastData > 10 minutes) {
+    │    │        // ZOMBIE: claimed connected, no data
+    │    │        mark disconnected + apply 1.5x backoff
+    │    │    } else {
+    │    │        return; // Skip reconnection
+    │    │    }
+    │    └─ }
+    │
+    ├─── LAYER 3: Time-Based Notifications (Line 1322-1352)
+    │    │
+    │    ├─ if (outage >= 2 min)  → send "Connection Lost" notification
+    │    ├─ if (outage >= 10 min) → send "Extended Outage" notification
+    │    └─ if (outage >= 30 min) → send "Critical Outage" notification
+    │
+    ├─── LAYER 4: Circuit Breaker (Line 1354-1404)
+    │    │
+    │    ├─ if (circuitBreakerOpen) {
+    │    │    if (timeSinceOpen < 5 minutes) {
+    │    │        // COOLDOWN PERIOD
+    │    │        DNS probe every 30s (detect internet recovery)
+    │    │        if (internet recovered) {
+    │    │            close circuit breaker + retry immediately
+    │    │        }
+    │    │    } else {
+    │    │        // COOLDOWN EXPIRED
+    │    │        circuitBreakerCycles++
+    │    │        
+    │    │        if (cycles >= 3) {
+    │    │            // MAX CYCLES REACHED
+    │    │            switch to continuous slow retry (2.5 min)
+    │    │        } else {
+    │    │            // RESET FOR ANOTHER CYCLE
+    │    │            reset backoffMultiplier to 1x
+    │    │            open another 5-min cooldown
+    │    │        }
+    │    │    }
+    │    └─ }
+    │
+    ├─── LAYER 5: Exponential Backoff Calculation (Line 1406-1436)
+    │    │
+    │    ├─ adaptiveInterval = baseInterval (20s) * backoffMultiplier
+    │    ├─ Cap at maxBackoff (5 minutes)
+    │    ├─ Enforce 30-minute maximum guarantee
+    │    │  (if stuck > 30 min, force immediate retry)
+    │    │
+    │    ├─ BACKOFF MULTIPLIERS:
+    │    │  ├─ Recoverable error:     1.5x (cap 16x)
+    │    │  ├─ Non-recoverable error: 2.0x (cap 32x)
+    │    │  └─ Circuit breaker cycle: 8x = 2.5 min after max cycles
+    │    │
+    │    └─ setTimeout(attemptReconnectionWithRecovery, adaptiveInterval)
+    │
+    └─> NEXT ATTEMPT (exponential backoff)
+        ↓
+        ┌──────────────────────────────────────────┐
+        │ attemptReconnectionWithRecovery()         │ Line 1443-1510
+        │ (Scheduled after timeout)                │
+        └──────────────────────────────────────────┘
+        │
+        ├─ PRE-CHECK: If already connected → exit
+        │
+        ├─ FORCE DISCONNECT: Clean TuyAPI state
+        │
+        ├─ WAIT: 2 seconds (socket stabilization)
+        │
+        ├─ TRY: connectTuya()
+        │
+        ├─ IF SUCCESS ──→ Reset error recovery state
+        │                 Mark device available
+        │                 Send recovery notification
+        │                 Return (exit gracefully)
+        │
+        └─ IF FAILURE ──→ consecutiveFailures++
+                        updateRecoveryStrategy()
+                        handleReconnectionFailureNotification()
+                        scheduleNextReconnectionAttempt() ◄── RECURSIVE
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     PROACTIVE MONITORING (Background)                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    HEARTBEAT (Every 5 minutes)  Line 1047-1250
+    │
+    ├─ PRE-CHECKS:
+    │  ├─ if (!isConnected) → skip (or try wake-up if outage > 15 min)
+    │  ├─ if (heartbeatInProgress) → skip (prevent concurrent probes)
+    │  └─ if (data received in last 4 min) → skip (device active)
+    │
+    ├─ LAYER 1: Passive Query (get)
+    │  │
+    │  └─ tuya.get({ schema: true }) with 10-second timeout
+    │     ├─ IF succeeds + data event received
+    │     │  └─ ✓ Connection healthy → exit
+    │     └─ IF fails or no data event
+    │        └─ Proceed to Layer 2
+    │
+    ├─ LAYER 2: Active Wake-up (set)
+    │  │
+    │  └─ tuya.set({ dps: 1, set: currentOnOff }) with 10-second timeout
+    │     ├─ IF succeeds + data event received
+    │     │  └─ ✓ Device woken → exit
+    │     └─ IF fails or no data event
+    │        └─ ZOMBIE DETECTED
+    │
+    └─ FAILURE: forceReconnect() ◄── IMMEDIATE
+       (Full reconnect with state reset)
+
+
+    DPS REFRESH (Every 3 minutes)  Line 935-990
+    │
+    ├─ if (!isConnected) → skip
+    │
+    ├─ tuya.get({ schema: true })
+    │
+    ├─ WAIT: up to 10 seconds for data event
+    │
+    ├─ IF data event received ──→ ✓ Normal operation
+    │                             Update timestamp
+    │
+    └─ IF NO data event ──────→ ❌ ZOMBIE DETECTED
+                               Log: "🧟 ZOMBIE CONNECTION"
+                               forceReconnect() ◄── IMMEDIATE
+
+
+    PERIODIC HEALTH CHECK (Every 1 hour)  Line 1008-1026
+    │
+    └─ forceReconnect() ◄── IMMEDIATE
+       (Ultimate safety net against zombie connections)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        SYSTEM STATE TIMELINE                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    SCENARIO: Device loses internet connection
+
+    T+0:00    Socket error or disconnected event
+              → Mark disconnected
+              → scheduleNextReconnectionAttempt() [IMMEDIATE SCHEDULE]
+              │
+    T+0:20    First reconnection attempt (20 seconds delay)
+              └─ connectTuya() fails
+                 → Mark disconnected
+                 → scheduleNextReconnectionAttempt() [30 seconds, 1.5x backoff]
+
+    T+0:50    Second attempt (30 seconds)
+              └─ connectTuya() fails
+                 → scheduleNextReconnectionAttempt() [45 seconds, 1.5x backoff]
+
+    T+1:35    Third attempt (45 seconds)
+              └─ connectTuya() fails
+              └─ scheduleNextReconnectionAttempt() [67 seconds, 1.5x backoff]
+
+    T+2:42    Fourth attempt (67 seconds)
+              └─ connectTuya() fails
+              └─ scheduleNextReconnectionAttempt() [100 seconds, 1.5x backoff]
+
+    T+4:22    Fifth attempt (100 seconds)
+              └─ connectTuya() FAILS - CIRCUIT BREAKER TRIGGERED
+                 → consecutiveFailures = 5
+                 → circuitBreakerOpen = true
+                 → 5-minute cooldown begins
+                 → Status: 'error'
+                 → DNS probes every 30 seconds
+
+    T+5:00    Heartbeat runs, attempts wake-up probe
+              └─ device = responsive (internet recovered)
+                 └─ Do NOT mark connected, just update lastDataEventTime
+                    (Let normal reconnection flow handle connection)
+
+    T+5:00    During circuit breaker cooldown:
+              DNS probe succeeds (internet recovered)
+              → Close circuit breaker
+              → Reset consecutiveFailures
+              → scheduleNextReconnectionAttempt() [IMMEDIATE RETRY]
+
+    T+5:10    Sixth attempt (immediate after internet recovery)
+              └─ connectTuya() succeeds!
+                 → Mark connected
+                 → Reset all error recovery state
+                 → Mark device available
+                 → Send recovery notification
+                 → Heartbeat, DPS refresh, health check resume
+
+
+    ALTERNATIVE: If internet still down at T+5:00
+
+    T+5:00    Circuit breaker cooldown expires
+              → circuitBreakerCycles = 1
+              → Open another 5-minute cooldown
+              → backoffMultiplier reset to 1x
+              → scheduleNextReconnectionAttempt() [20 seconds]
+
+    T+5:20    Sixth attempt
+              └─ connectTuya() fails
+                 → scheduleNextReconnectionAttempt() [30 seconds]
+
+    ... (repeats for cycles 2 and 3, 15 minutes total) ...
+
+    T+15:00   After 3rd cycle expires
+              → circuitBreakerCycles = 3 (MAX)
+              → Switch to slow continuous retry
+              → backoffMultiplier = 8 (2.5 minutes)
+              → Keep trying every 2.5 minutes indefinitely
+              → Guaranteed to recover within 2.5 min of internet restoration
+
+
+    SAFETY NETS:
+
+    T+3:00    Heartbeat probe (every 5 min)
+              ├─ If detects zombie → forceReconnect() (immediate)
+              └─ If detects wake-up capable → update timestamp
+
+    T+3:00    DPS refresh (every 3 min)
+              ├─ If no data event → forceReconnect() (immediate)
+              └─ Otherwise update timestamp
+
+    T+30:00   Periodic health check (every 1 hour)
+              └─ forceReconnect() (ultimate safety net)
+
+    T+30:00   User notification
+              └─ "Critical Outage - 30 minutes" (if not recovered yet)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           DECISION FLOWCHART                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────┐
+    │ Event: Socket Error Detected    │
+    └──────────────┬──────────────────┘
+                   ↓
+    ┌─────────────────────────────────┐
+    │ Categorize Error Type           │
+    │ (Recoverable vs Non-Recoverable)│
+    └──────────────┬──────────────────┘
+                   ↓
+    ┌──────────────────────────────────────────┐
+    │ scheduleNextReconnectionAttempt()        │
+    │ (Core Reconnection Loop)                 │
+    └──────────────┬───────────────────────────┘
+                   ↓
+    ┌──────────────────────────────────────────┐
+    │ Check: isConnected?                      │
+    └──────────┬──────────────────┬────────────┘
+            YES│                  │NO
+               │                  │
+               ↓                  ↓
+    ┌────────────────────────┐  ┌──────────────────────────┐
+    │ Check: Time since      │  │ Continue with            │
+    │ last data > 10 min?    │  │ circuit breaker logic    │
+    └────────┬───────┬───────┘  └──────────────────────────┘
+         YES │       │ NO
+            │        └─→ Return (skip reconnection)
+            ↓
+    ┌────────────────────────┐
+    │ STALE CONNECTION!      │
+    │ Mark disconnected      │
+    │ Apply 1.5x backoff     │
+    └────────┬───────────────┘
+             ↓
+    ┌───────────────────────────────┐
+    │ Check: Circuit breaker open?  │
+    └───────┬──────────────────┬────┘
+         YES│                  │NO
+            ↓                  ↓
+    ┌──────────────────────┐  ┌───────────────────────────┐
+    │ Check: Cooldown      │  │ Calculate exponential     │
+    │ period expired?      │  │ backoff interval          │
+    └─────┬────────┬────┬──┘  │ baseInterval * multiplier │
+       YES│       │    │ NO   └──────────┬────────────────┘
+          │       │    └──→ Probe DNS        │
+          │       │        every 30s         ↓
+          │       │        (internet recovery)┌─────────────────────┐
+          │       │                          │ Schedule timeout    │
+          │       │                          │ setTimeout(...)     │
+          ↓       ↓                          └──────────┬──────────┘
+    ┌──────────────────────┐                          ↓
+    │ Cycles >= 3?         │                 ┌────────────────────┐
+    │ Switch to slow retry │                 │ attemptReconnect...│
+    │ (2.5 min constant)   │                 │ ()                 │
+    └──────────────────────┘                 └────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        CRITICAL PATHS SUMMARY                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    FASTEST RECOVERY (< 1 second):
+    └─ User presses "Force Reconnect" button
+       → Stop all timers
+       → Reset error state
+       → Attempt connection immediately
+       → Result: 1-2 seconds to reconnect (if device available)
+
+    FAST ZOMBIE RECOVERY (3-10 seconds):
+    └─ Heartbeat detects zombie (no data event)
+       → forceReconnect() [IMMEDIATE]
+       → Full reconnect cycle starts
+       → Result: 3-5 minutes to full recovery
+
+    NORMAL RECOVERY (20s - 5 min exponential):
+    └─ Socket error detected
+       → scheduleNextReconnectionAttempt()
+       → Exponential backoff: 20s → 30s → 45s → etc.
+       → Result: 1-2 minutes typical recovery
+
+    EXTENDED OUTAGE RECOVERY (2.5 minutes guaranteed):
+    └─ After 3 circuit breaker cycles (15 min)
+       → Switch to continuous slow retry
+       → Attempt every 2.5 minutes indefinitely
+       → Result: Guaranteed recovery within 2.5 min of internet return
+
+    ULTIMATE SAFETY NET (60 minutes max):
+    └─ Periodic health check runs every 1 hour
+       → forceReconnect() [ABSOLUTE GUARANTEE]
+       → Result: Maximum 60 minutes until forced reconnect
+

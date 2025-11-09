@@ -141,8 +141,8 @@ export class TuyaConnectionService {
           this.lastStatusChangeTime = storedTimestamp;
 
           // Restore status if valid (v1.0.6 - prevents showing stale "disconnected" at startup)
-          if (storedStatus && typeof storedStatus === 'string' &&
-              ['connected', 'disconnected', 'reconnecting', 'error'].includes(storedStatus)) {
+          if (storedStatus && typeof storedStatus === 'string'
+              && ['connected', 'disconnected', 'reconnecting', 'error'].includes(storedStatus)) {
             this.currentStatus = storedStatus as 'connected' | 'disconnected' | 'reconnecting' | 'error';
             this.logger(`TuyaConnectionService: Restored connection status '${storedStatus}' from ${new Date(storedTimestamp).toISOString()}`);
           } else {
@@ -973,7 +973,8 @@ export class TuyaConnectionService {
           }
 
           // ZOMBIE DETECTED: get() succeeded but NO data event received (v1.0.22 - after increased timeout)
-          this.logger(`🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED at ${timeStr} - DPS refresh get() succeeded but NO data event within ${DeviceConstants.DPS_REFRESH_DATA_EVENT_TIMEOUT_MS / 1000}s!`);
+          const timeoutSeconds = DeviceConstants.DPS_REFRESH_DATA_EVENT_TIMEOUT_MS / 1000;
+          this.logger(`🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED at ${timeStr} - DPS refresh get() succeeded but NO data event within ${timeoutSeconds}s!`);
           this.logger('TuyaConnectionService: This may indicate true connection death or severe network congestion. Forcing full reconnect to recover...');
 
           // Force reconnection to clear zombie state
