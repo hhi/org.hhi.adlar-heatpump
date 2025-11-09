@@ -1,75 +1,9 @@
 {
-  "1.0.29": {
-    "en": "External power data logging now respects DEBUG_LEVEL filtering for cleaner troubleshooting logs.",
-    "nl": "Externe stroominvoer logging respecteert nu DEBUG_LEVEL filtering voor schonere probleemoplossingslogs.",
-    "de": "Externe Stromversorgungsdaten-Protokollierung respektiert nun DEBUG_LEVEL-Filterung für saubere Fehlerbehebungsprotokolle.",
-    "fr": "La journalisation des données de puissance externe respecte maintenant le filtrage DEBUG_LEVEL pour des journaux de dépannage plus propres."
-  },
-  "1.0.28": {
-    "en": "Fixed: COP and SCOP calculation logging now respects DEBUG_LEVEL filtering for cleaner troubleshooting logs.",
-    "nl": "Opgelost: COP en SCOP berekening logging respecteert nu DEBUG_LEVEL filtering voor schonere probleemoplossingslogs.",
-    "de": "Behoben: COP- und SCOP-Berechnungsprotokollierung respektiert nun DEBUG_LEVEL-Filterung für saubere Fehlerbehebungsprotokolle.",
-    "fr": "Corrigé: La journalisation des calculs COP et SCOP respecte maintenant le filtrage DEBUG_LEVEL pour des journaux de dépannage plus propres."
-  },
-  "1.0.27": {
-    "en": "Internal improvements to logging system for better diagnostics and troubleshooting.",
-    "nl": "Interne verbeteringen aan het loggingsysteem voor betere diagnostiek en probleemoplossing.",
-    "de": "Interne Verbesserungen am Protokollierungssystem für bessere Diagnose und Fehlerbehebung.",
-    "fr": "Améliorations internes du système d'enregistrement pour un meilleur diagnostic et dépannage."
-  },
-  "1.0.26": {
-    "en": "Internal improvements to logging system for better diagnostics and troubleshooting.",
-    "nl": "Interne verbeteringen aan het loggingsysteem voor betere diagnostiek en probleemoplossing.",
-    "de": "Interne Verbesserungen am Protokollierungssystem für bessere Diagnose und Fehlerbehebung.",
-    "fr": "Améliorations internes du système d'enregistrement pour un meilleur diagnostic et dépannage."
-  },
-  "1.0.25": {
-    "en": "Improved reconnection reliability by removing blocking verification that caused false unavailable states.",
-    "nl": "Verbeterde betrouwbaarheid van reconnectie door verwijdering van blokkerende verificatie die vals onbeschikbare status veroorzaakte.",
-    "de": "Verbesserte Zuverlässigkeit der Wiederverbindung durch Entfernung der blockierenden Verifikation, die falsche Nicht-Verfügbarkeits-Status verursachte.",
-    "fr": "Fiabilité de reconnexion améliorée en supprimant la vérification bloquante qui causait des états faux indisponibles."
-  },
-  "1.0.24": {
-    "en": "Device no longer becomes unavailable shortly after reconnecting.",
-    "nl": "Apparaat wordt niet langer onbeschikbaar kort na het heropstarten.",
-    "de": "Gerät wird nicht länger kurz nach der Wiederverbindung nicht verfügbar.",
-    "fr": "L'appareil ne devient plus indisponible peu après la reconnexion."
-  },
-  "1.0.23": {
-    "en": "Improved stability on slow or congested networks.",
-    "nl": "Verbeterde stabiliteit op langzame of overbelaste netwerken.",
-    "de": "Verbesserte Stabilität bei langsamen oder überlasteten Netzwerken.",
-    "fr": "Stabilité améliorée sur les réseaux lents ou congestionnés."
-  },
-  "1.0.22": {
-    "en": "Device no longer incorrectly shows as offline during slow network responses.",
-    "nl": "Apparaat toont niet langer ten onrechte als offline wanneer het netwerk traag reageert.",
-    "de": "Gerät wird nicht länger fälschlicherweise als offline angezeigt, wenn das Netzwerk langsam reagiert.",
-    "fr": "L'appareil n'affiche plus à tort comme hors ligne lors de réponses réseau lentes."
-  },
-  "1.0.21": {
-    "en": "Fixed: COP efficiency change notifications now include correct data tokens (method and confidence). Consolidated duplicate flow card implementations that were sending conflicting tokens.",
-    "nl": "Opgelost: COP efficiëntie wijzigingsmeldingen bevatten nu correcte gegevenstokens (methode en vertrouwen). Geconsolideerde dubbele flow card implementaties die conflicterende tokens verzonden.",
-    "de": "Behoben: COP-Effizienzänderungsbenachrichtigungen enthalten nun korrekte Daten-Tokens (Methode und Vertrauen). Konsolidierte doppelte Flow-Card-Implementierungen, die in Konflikt stehende Tokens sendeten.",
-    "fr": "Corrigé: Les notifications de changement d'efficacité COP incluent désormais les jetons de données corrects (méthode et confiance). Implémentations de cartes de flux dupliquées consolidées qui envoyaient des jetons en conflit."
-  },
-  "1.0.20": {
-    "en": "Fixed: Device no longer becomes unavailable during reconnection attempts. Prevented duplicate event listeners from accumulating and blocking connection recovery. Connection stability significantly improved.",
-    "nl": "Opgelost: Apparaat wordt niet langer onbeschikbaar tijdens heroppoging. Voorkomen dat dubbele event listeners zich ophopen en verbindingsherstel blokkeren. Verbindingsstabiliteit aanzienlijk verbeterd.",
-    "de": "Behoben: Gerät wird während Wiederverbindungsversuchen nicht mehr unavailable. Verhindert, dass sich doppelte Event-Listener anhäufen und die Verbindungswiederherstellung blockieren. Verbindungsstabilität deutlich verbessert.",
-    "fr": "Corrigé: L'appareil ne devient plus indisponible lors des tentatives de reconnexion. Prévention de l'accumulation de listeners d'événements dupliqués qui bloquaient la récupération de la connexion. Stabilité de la connexion considérablement améliorée."
-  },
-  "1.0.19": {
-    "en": "Fixed: Daily and monthly COP efficiency change flow cards now trigger correctly with proper value tokens (current, previous, and change amounts). App stability improved.",
-    "nl": "Opgelost: Dagelijkse en maandelijkse COP efficiëntie wijzigings flow cards activeren nu correct met waarde tokens (huidiging, vorig en wijzigingsbedragen). App stabiliteit verbeterd.",
-    "de": "Behoben: Tägliche und monatliche COP-Effizienzänderungs-Flow-Karten werden jetzt mit korrekten Wert-Tokens ausgelöst (aktuell, vorherig und Änderungsbeträge). App-Stabilität verbessert.",
-    "fr": "Corrigé: Les cartes de flux de changement d'efficacité COP quotidienne et mensuelle se déclenchent maintenant correctement avec les jetons de valeur appropriés (courant, précédent et montants de changement). Stabilité de l'application améliorée."
-  },
-  "1.0.17": {
-    "en": "Device now recovers more reliably from network disconnections.",
-    "nl": "Apparaat herstelt zich nu betrouwbaarder van netwerkverstoringen.",
-    "de": "Gerät stellt sich jetzt zuverlässiger von Netzwerkunterbrechungen wieder her.",
-    "fr": "L'appareil récupère désormais plus fiablement des interruptions réseau."
+  "1.0.30": {
+    "en": "Fixed: Daily and monthly COP efficiency change flow cards now trigger correctly with proper value tokens (current, previous, and change amounts). Consolidated duplicate flow card implementations that were sending conflicting tokens. Internal improvements to logging system for better diagnostics and troubleshooting.",
+    "nl": "Opgelost: Dagelijkse en maandelijkse COP efficiëntie wijzigings flow cards activeren nu correct met waarde tokens (huidiging, vorig en wijzigingsbedragen). Geconsolideerde dubbele flow card implementaties die conflicterende tokens verzonden. Interne verbeteringen aan het loggingsysteem voor betere diagnostiek en probleemoplossing.",
+    "de": "Behoben: Tägliche und monatliche COP-Effizienzänderungs-Flow-Karten werden jetzt mit korrekten Wert-Tokens ausgelöst (aktuell, vorherig und Änderungsbeträge). Konsolidierte doppelte Flow-Card-Implementierungen, die in Konflikt stehende Tokens sendeten. Interne Verbesserungen am Protokollierungssystem für bessere Diagnose und Fehlerbehebung.",
+    "fr": "Corrigé: Les cartes de flux de changement d'efficacité COP quotidienne et mensuelle se déclenchent maintenant correctement avec les jetons de valeur appropriés (courant, précédent et montants de changement). Implémentations de cartes de flux dupliquées consolidées qui envoyaient des jetons en conflit. Améliorations internes du système d'enregistrement pour un meilleur diagnostic et dépannage."
   },
   "1.0.15": {
     "en": "Connection status now tracked in Insights Timeline for historical visualization of connectivity patterns.",
