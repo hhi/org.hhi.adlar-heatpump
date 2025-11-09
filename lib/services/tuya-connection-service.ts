@@ -77,7 +77,6 @@ export class TuyaConnectionService {
   private reconnectInterval: NodeJS.Timeout | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private dpsRefreshInterval: NodeJS.Timeout | null = null; // v1.0.3
-  private healthCheckInterval: NodeJS.Timeout | null = null; // v1.0.16 - Periodic full reconnect
 
   // Data event tracking for zombie detection (v1.0.16)
   private lastDataEventReceived = 0;
@@ -171,6 +170,11 @@ export class TuyaConnectionService {
       // We must install the handler AFTER the socket is created
       this.installDeepSocketErrorHandler();
 
+      // Install TCP keep-alive to prevent silent socket closes (v1.0.32)
+      // NAT gateways/firewalls close idle TCP connections after 15-30 minutes
+      // Keep-alive probes every 5 minutes to keep connection alive
+      this.installTCPKeepAlive();
+
       // Start reconnection monitoring
       this.startReconnectInterval();
 
@@ -179,9 +183,6 @@ export class TuyaConnectionService {
 
       // Start periodic DPS refresh to prevent idle timeouts (v1.0.3)
       this.startPeriodicDpsRefresh();
-
-      // Start periodic health check to prevent zombie connections (v1.0.16 - Oplossing 1)
-      this.startPeriodicHealthCheck();
 
       this.logger('TuyaConnectionService: Initialization completed successfully');
 
@@ -202,11 +203,10 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Reinitializing with new credentials (repair mode)');
 
     try {
-      // Step 1: Stop reconnection interval, heartbeat, DPS refresh, and health check to prevent interference
+      // Step 1: Stop reconnection interval, heartbeat, DPS refresh to prevent interference
       this.stopReconnectInterval();
       this.stopHeartbeat();
       this.stopPeriodicDpsRefresh();
-      this.stopPeriodicHealthCheck();
 
       // Step 2: Disconnect and cleanup old instance
       if (this.tuya) {
@@ -256,9 +256,6 @@ export class TuyaConnectionService {
 
       // Step 10: Restart periodic DPS refresh (v1.0.3)
       this.startPeriodicDpsRefresh();
-
-      // Step 11: Restart periodic health check (v1.0.16)
-      this.startPeriodicHealthCheck();
 
       this.logger('TuyaConnectionService: Reinitialization completed successfully');
       this.logger(`TuyaConnectionService: Now using device ${config.id} at ${config.ip} (Protocol: ${config.version || '3.3'})`);
@@ -357,6 +354,10 @@ export class TuyaConnectionService {
       // CRITICAL: Must reinstall after every reconnection because TuyAPI recreates the socket
       this.installDeepSocketErrorHandler();
 
+      // Install TCP keep-alive after successful connection (v1.0.32)
+      // CRITICAL: Must reinstall after every reconnection because TuyAPI recreates the socket
+      this.installTCPKeepAlive();
+
       // Update timestamp immediately on successful connection (v1.0.25)
       // Zombie detection handled by heartbeat mechanism (5min interval) + DPS refresh (3min interval)
       // Pre-v1.0.18 health check was causing false-positive unavailable states on slow networks
@@ -443,11 +444,10 @@ export class TuyaConnectionService {
   async forceReconnect(): Promise<void> {
     this.logger('TuyaConnectionService: Force reconnect triggered by user');
 
-    // Step 1: Stop any pending reconnection attempts, heartbeat, DPS refresh, and health check
+    // Step 1: Stop any pending reconnection attempts, heartbeat, and DPS refresh
     this.stopReconnectInterval();
     this.stopHeartbeat();
     this.stopPeriodicDpsRefresh();
-    this.stopPeriodicHealthCheck();
 
     // Step 2: Disconnect cleanly from current connection (if any)
     await this.disconnect();
@@ -472,11 +472,10 @@ export class TuyaConnectionService {
       // Don't throw - let normal reconnection logic handle retry
     }
 
-    // Step 5: Resume normal reconnection monitoring, heartbeat, DPS refresh, and health check
+    // Step 5: Resume normal reconnection monitoring, heartbeat, and DPS refresh
     this.startReconnectInterval();
     this.startHeartbeat();
     this.startPeriodicDpsRefresh();
-    this.startPeriodicHealthCheck();
   }
 
   /**
@@ -753,6 +752,46 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Install TCP keep-alive on the underlying socket to prevent silent NAT/firewall closes (v1.0.32).
+   *
+   * PROBLEM: NAT gateways and ISP firewalls silently close idle TCP connections after 15-30 minutes
+   * of inactivity. Without keep-alive, the socket appears "connected" but is actually dead.
+   *
+   * SOLUTION: Enable OS-level TCP keep-alive with 5-minute idle threshold. This sends periodic
+   * probe packets to detect and prevent silent closes before app thinks connection is alive.
+   *
+   * IMPORTANT: Must be called AFTER this.tuya.connect() because the socket is created during
+   * connection, not during constructor.
+   */
+  private installTCPKeepAlive(): void {
+    if (!this.tuya) {
+      this.logger('TuyaConnectionService: Cannot install TCP keep-alive - TuyAPI not initialized');
+      return;
+    }
+
+    try {
+      // Access TuyAPI's internal TCP socket
+      // @ts-expect-error - Accessing private TuyAPI internals for TCP keep-alive
+      const tuyaSocket = this.tuya.client;
+
+      if (tuyaSocket) {
+        // Enable TCP keep-alive with 5-minute idle threshold
+        // This tells the OS to probe the socket if idle for 5 minutes
+        // If probe fails, connection is marked dead and reconnection triggered
+        tuyaSocket.setKeepAlive(true, 5 * 60 * 1000); // 5 minutes = 300,000 ms
+
+        this.logger('TuyaConnectionService: ✅ TCP keep-alive enabled (5-minute idle probe)');
+      } else {
+        this.logger('TuyaConnectionService: ⚠️ TuyAPI socket not yet created - keep-alive will be installed after reconnect');
+      }
+    } catch (error) {
+      // If we can't install keep-alive, log but don't crash
+      this.logger('TuyaConnectionService: ⚠️ Could not install TCP keep-alive:', error);
+      this.logger('TuyaConnectionService: Device may experience disconnections during extended idle periods');
+    }
+  }
+
+  /**
    * Attach internal event handlers to the underlying Tuya instance:
    * - 'data', 'dp-refresh', 'error', 'connected', 'disconnected'
    */
@@ -1001,44 +1040,6 @@ export class TuyaConnectionService {
   }
 
   /**
-   * Start periodic health check - full reconnect every 1 hour to prevent zombie connections (v1.0.16, reduced in v1.0.17).
-   * This is a safety net that guarantees recovery even if zombie detection fails.
-   * Prevents indefinite frozen state by forcing connection refresh.
-   * Interval reduced from 12 hours to 1 hour for faster recovery guarantee.
-   */
-  private startPeriodicHealthCheck(): void {
-    // Clear existing interval if any
-    this.stopPeriodicHealthCheck();
-
-    const healthCheckIntervalMs = 1 * 60 * 60 * 1000; // 1 hour (was 12 hours in v1.0.16)
-    this.logger(`TuyaConnectionService: Starting periodic health check (interval: ${healthCheckIntervalMs / (60 * 60 * 1000)} hours)`);
-
-    this.healthCheckInterval = this.device.homey.setInterval(() => {
-      const now = new Date();
-      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-      this.logger(`🔄 TuyaConnectionService: Periodic health check at ${timeStr} - forcing full reconnect to prevent zombie state`);
-
-      // Force full disconnect + reconnect cycle
-      this.forceReconnect().catch((error) => {
-        this.logger('TuyaConnectionService: Periodic health check reconnect failed:', error);
-        // Not critical - next heartbeat or health check will retry
-      });
-    }, healthCheckIntervalMs);
-  }
-
-  /**
-   * Stop periodic health check.
-   */
-  private stopPeriodicHealthCheck(): void {
-    if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
-      this.healthCheckInterval = null;
-      this.logger('TuyaConnectionService: Stopped periodic health check');
-    }
-  }
-
-  /**
    * Perform a single heartbeat check with intelligent skip logic (v0.99.98).
    * Enhanced with hybrid approach (v1.0.9): tries passive get() first, then active set() wake-up.
    * Skips heartbeat if device has sent data recently (avoids unnecessary traffic).
@@ -1109,9 +1110,9 @@ export class TuyaConnectionService {
       return;
     }
 
-    // Check if we've received data recently (intelligent skip logic)
+    // Check if we've received data recently (intelligent skip logic - v1.0.32: 50% for TCP resilience)
     const timeSinceLastData = Date.now() - this.lastDataEventTime;
-    const recentDataThreshold = DeviceConstants.CONNECTION_HEARTBEAT_INTERVAL_MS * 0.8; // 80% of heartbeat interval
+    const recentDataThreshold = DeviceConstants.CONNECTION_HEARTBEAT_INTERVAL_MS * 0.5; // 50% of heartbeat interval (more aggressive probing with TCP keep-alive)
 
     // Enhanced diagnostic logging (v1.0.4)
     const now = new Date();
@@ -1135,6 +1136,8 @@ export class TuyaConnectionService {
 
       // LAYER 1: Try passive get() first (network-friendly)
       let timeoutHandle: NodeJS.Timeout | null = null;
+      let layer1GetError: Error | null = null;
+
       try {
         await Promise.race([
           this.tuya.get({ schema: true }),
@@ -1147,83 +1150,87 @@ export class TuyaConnectionService {
         ]);
 
         // Success with get() - device is responsive
-        this.logger('TuyaConnectionService: ✅ Heartbeat (get) successful - verifying data event reception...');
-
-        // ZOMBIE DETECTION (v1.0.16): Verify that get() actually triggers data event
-        const dataEventReceived = await this.waitForDataEvent(
-          DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
-        );
-
-        if (!dataEventReceived) {
-          this.logger('🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED - get() succeeded but NO data event received!');
-          this.logger('TuyaConnectionService: Forcing full reconnect to recover from zombie state...');
-
-          // Force reconnection to clear zombie state
-          await this.forceReconnect();
-          return;
-        }
-
-        this.logger('TuyaConnectionService: ✓ Data event confirmed - connection truly healthy');
-        this.lastDataEventTime = Date.now();
-        return; // Exit early - connection is healthy
+        this.logger('TuyaConnectionService: ✅ LAYER 1 (get) successful - verifying data event reception...');
 
       } catch (getError) {
-        // LAYER 2: get() failed - try active set() wake-up (v1.0.9)
-        this.logger(`TuyaConnectionService: ⚠️ Heartbeat get() failed at ${timeStr}, attempting wake-up set()... (${getError})`);
-
+        // Layer 1 failed
+        layer1GetError = getError as Error;
+        this.logger(`TuyaConnectionService: ⚠️ LAYER 1 (get) failed: ${layer1GetError.message}`);
+      } finally {
         // Clean up get() timeout
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
           timeoutHandle = null;
         }
+      }
 
-        // Get current onoff state for idempotent write
-        const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+      // Now check if Layer 1 succeeded in triggering data event
+      const layer1DataEventReceived = await this.waitForDataEvent(
+        DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+      );
 
-        try {
-          // Attempt idempotent set() operation with timeout
-          await Promise.race([
-            this.tuya.set({ dps: 1, set: currentOnOff }), // Write current value (no side effects)
-            new Promise((_, reject) => {
-              timeoutHandle = this.device.homey.setTimeout(
-                () => reject(new Error('Heartbeat set() timeout')),
-                DeviceConstants.HEARTBEAT_TIMEOUT_MS,
-              );
-            }),
-          ]);
+      if (layer1DataEventReceived) {
+        // Layer 1 succeeded - data event confirmed
+        this.logger('TuyaConnectionService: ✓ LAYER 1 success - Data event confirmed, connection healthy');
+        this.lastDataEventTime = Date.now();
+        this.heartbeatInProgress = false;
+        return; // Exit early - connection is healthy
+      }
 
-          // Success with set() - device was sleeping but is now awake
-          this.logger('TuyaConnectionService: ✅ Heartbeat (wake-up set) successful - verifying data event reception...');
+      // Layer 1 didn't trigger data event - try Layer 2: active set() wake-up (v1.0.26)
+      this.logger('TuyaConnectionService: ⚠️ LAYER 1 no data event - attempting LAYER 2 (wake-up set)...');
 
-          // ZOMBIE DETECTION (v1.0.16): Verify that set() actually triggers data event
-          const dataEventReceived = await this.waitForDataEvent(
-            DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
-          );
+      let layer2SetError: Error | null = null;
+      const currentOnOff = this.device.getCapabilityValue('onoff') || false;
 
-          if (!dataEventReceived) {
-            this.logger('🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED - set() succeeded but NO data event received!');
-            this.logger('TuyaConnectionService: Forcing full reconnect to recover from zombie state...');
+      try {
+        // Attempt idempotent set() operation with timeout
+        await Promise.race([
+          this.tuya.set({ dps: 1, set: currentOnOff }), // Write current value (no side effects)
+          new Promise((_, reject) => {
+            timeoutHandle = this.device.homey.setTimeout(
+              () => reject(new Error('Heartbeat set() timeout')),
+              DeviceConstants.HEARTBEAT_TIMEOUT_MS,
+            );
+          }),
+        ]);
 
-            // Force reconnection to clear zombie state
-            await this.forceReconnect();
-            return;
-          }
+        // Success with set() - device was sleeping but responded to command
+        this.logger('TuyaConnectionService: ✅ LAYER 2 (set) successful - verifying data event reception...');
 
-          this.logger('TuyaConnectionService: ✓ Data event confirmed - device successfully woken and responsive');
-          this.lastDataEventTime = Date.now();
-          return; // Exit - recovery successful!
-
-        } catch (setError) {
-          // Both layers failed - this is a true disconnect
-          throw new Error(`Both get() and set() failed - true disconnect (get: ${getError}, set: ${setError})`);
-
-        } finally {
-          // Clean up set() timeout
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle);
-          }
+      } catch (setError) {
+        // Layer 2 also failed
+        layer2SetError = setError as Error;
+        this.logger(`TuyaConnectionService: ⚠️ LAYER 2 (set) also failed: ${layer2SetError.message}`);
+      } finally {
+        // Clean up set() timeout
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+          timeoutHandle = null;
         }
       }
+
+      // Now check if Layer 2 succeeded in triggering data event
+      const layer2DataEventReceived = await this.waitForDataEvent(
+        DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+      );
+
+      if (layer2DataEventReceived) {
+        // Layer 2 succeeded - data event confirmed after set()
+        this.logger('TuyaConnectionService: ✓ LAYER 2 success - Device woken and responding');
+        this.lastDataEventTime = Date.now();
+        this.heartbeatInProgress = false;
+        return; // Exit - recovery successful!
+      }
+
+      // Both layers failed to trigger data event - this is a zombie connection
+      this.logger('🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED (v1.0.26)');
+      this.logger(`  LAYER 1 (get): ${layer1GetError ? `failed to execute: ${layer1GetError.message}` : 'executed but no data'}`);
+      this.logger(`  LAYER 2 (set): ${layer2SetError ? `failed to execute: ${layer2SetError.message}` : 'executed but no data'}`);
+      this.logger('TuyaConnectionService: Forcing full reconnect to recover from zombie state...');
+
+      // Force reconnection to clear zombie state
+      await this.forceReconnect();
 
     } catch (error) {
       // Both heartbeat layers failed - mark as disconnected
@@ -1648,7 +1655,6 @@ export class TuyaConnectionService {
     this.stopReconnectInterval();
     this.stopHeartbeat();
     this.stopPeriodicDpsRefresh();
-    this.stopPeriodicHealthCheck();
 
     if (this.tuya) {
       // Remove deep socket error handler BEFORE removeAllListeners (v1.0.2)

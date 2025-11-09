@@ -147,12 +147,17 @@ class MyDevice extends Homey.Device {
   allCapabilities: Record<string, number[]> = allCapabilities;
   allArraysSwapped: Record<number, string> = allArraysSwapped;
   settableCapabilities: string[] = [];
+  // TODO: DEAD CODE - Fallback reconnection mechanism (never executed)
+  // TuyaConnectionService via ServiceCoordinator handles all active reconnection
+  // These properties are kept for reference but serve no purpose
   reconnectInterval: NodeJS.Timeout | undefined;
   consecutiveFailures: number = 0;
   lastNotificationTime: number = 0;
   lastNotificationKey: string = '';
 
-  // Enhanced error recovery state
+  // TODO: DEAD CODE - Enhanced error recovery state (never executed)
+  // TuyaConnectionService implements active exponential backoff and circuit breaker
+  // These properties are kept for reference but serve no purpose
   private backoffMultiplier: number = 1;
   private maxBackoffSeconds: number = 300; // 5 minutes max
   private circuitBreakerOpen: boolean = false;
@@ -431,6 +436,9 @@ class MyDevice extends Homey.Device {
     }
   }
 
+  // TODO: DEAD CODE - startReconnectInterval() is never called
+  // ServiceCoordinator always initializes successfully, making this method unreachable
+  // Kept for reference only - see TuyaConnectionService.startReconnectInterval() for active implementation
   private startReconnectInterval() {
     // If ServiceCoordinator is available, it handles reconnection internally
     if (this.serviceCoordinator) {
@@ -448,7 +456,9 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * TODO: DEAD CODE - scheduleNextReconnectionAttempt() is never called
    * Enhanced reconnection logic with exponential backoff and circuit breaker
+   * Kept for reference only - see TuyaConnectionService.scheduleNextReconnectionAttempt() for active implementation
    */
   private scheduleNextReconnectionAttempt() {
     // Check circuit breaker state
@@ -496,7 +506,9 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * TODO: DEAD CODE - attemptReconnectionWithRecovery() is never called
    * Attempt reconnection with enhanced error recovery
+   * Kept for reference only - see TuyaConnectionService.attemptReconnectionWithRecovery() for active implementation
    */
   private async attemptReconnectionWithRecovery(): Promise<void> {
     if (this.isDeviceConnected()) {
@@ -530,7 +542,9 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * TODO: DEAD CODE - updateRecoveryStrategy() is never called
    * Update recovery strategy based on error patterns
+   * Kept for reference only - see TuyaConnectionService.updateRecoveryStrategy() for active implementation
    */
   private updateRecoveryStrategy(error: CategorizedError): void {
     // Exponential backoff for recoverable errors
@@ -550,7 +564,9 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * TODO: DEAD CODE - handleReconnectionFailureNotification() is never called
    * Handle notifications for reconnection failures with smart throttling
+   * Kept for reference only - see TuyaConnectionService notifications (handleReconnectionFailureNotification) for active implementation
    */
   private async handleReconnectionFailureNotification(error: CategorizedError): Promise<void> {
     // Immediate notification for critical infrastructure failures
@@ -581,7 +597,9 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * TODO: DEAD CODE - resetErrorRecoveryState() is never called
    * Reset error recovery state after successful connection
+   * Kept for reference only - see TuyaConnectionService.resetErrorRecoveryState() for active implementation
    */
   private resetErrorRecoveryState(): void {
     this.consecutiveFailures = 0;
@@ -590,6 +608,9 @@ class MyDevice extends Homey.Device {
     this.circuitBreakerOpenTime = 0;
   }
 
+  // TODO: DEAD CODE - stopReconnectInterval() body never executes
+  // Guard clause always returns early since ServiceCoordinator always exists
+  // Called from onDeleted() but the fallback cleanup code is unreachable (harmless no-op)
   private stopReconnectInterval() {
     // If ServiceCoordinator is available, it manages reconnection internally
     if (this.serviceCoordinator) {
@@ -597,6 +618,7 @@ class MyDevice extends Homey.Device {
       return;
     }
 
+    // TODO: DEAD CODE - This fallback never executes
     // Fallback to direct interval cleanup
     if (this.reconnectInterval) {
       // Enhanced interval can be either setTimeout or setInterval

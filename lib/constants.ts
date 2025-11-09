@@ -17,14 +17,14 @@ export class DeviceConstants {
   /** Capability health check interval */
   static readonly HEALTH_CHECK_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
-  /** Connection heartbeat interval - proactive connection health check (v0.99.98, v1.0.25 adjusted to 10min) */
-  static readonly CONNECTION_HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+  /** Connection heartbeat interval - proactive connection health check (v0.99.98, v1.0.25→10min, v1.0.32→5min for TCP resilience) */
+  static readonly CONNECTION_HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
   /** Heartbeat timeout - consider connection dead if no response within this time (v0.99.98) */
   static readonly HEARTBEAT_TIMEOUT_MS = 10 * 1000; // 10 seconds
 
-  /** Stale connection threshold - force reconnect if no data received for this period (v0.99.98, v1.0.25 adjusted to 30min) */
-  static readonly STALE_CONNECTION_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
+  /** Stale connection threshold - force reconnect if no data received for this period (v0.99.98, v1.0.25→30min, v1.0.32→15min for TCP resilience) */
+  static readonly STALE_CONNECTION_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
 
   /** Heartbeat data event timeout - max wait for data event after heartbeat probes (v1.0.23 fix) */
   static readonly HEARTBEAT_DATA_EVENT_TIMEOUT_MS = 10 * 1000; // 10 seconds (was hardcoded 5s - too aggressive for high latency)
@@ -38,8 +38,8 @@ export class DeviceConstants {
   /** Heartbeat disconnected delay - start wake-up probes after this period of disconnection (v1.0.12) */
   static readonly HEARTBEAT_DISCONNECTED_DELAY_MS = 15 * 60 * 1000; // 15 minutes
 
-  /** Periodic DPS refresh interval - prevent heartbeat timeouts during idle periods (v1.0.3, v1.0.25 adjusted to 15min) */
-  static readonly DPS_REFRESH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+  /** Periodic DPS refresh interval - prevent NAT timeouts during idle periods (v1.0.3→3min, v1.0.25→15min, v1.0.32→5min for TCP resilience) */
+  static readonly DPS_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
   /** DPS Refresh data event timeout - max wait for data event after query (v1.0.22 fix) */
   static readonly DPS_REFRESH_DATA_EVENT_TIMEOUT_MS = 10 * 1000; // 10 seconds (was hardcoded 2s - too aggressive for high latency)

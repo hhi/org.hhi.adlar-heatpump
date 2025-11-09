@@ -4,7 +4,7 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { DeviceConstants } from '../constants';
-import { CapabilityCategories } from '../types/shared-interfaces';
+import { CapabilityCategories, UserFlowPreferences } from '../types/shared-interfaces';
 
 export interface CapabilityHealthOptions {
   device: Homey.Device;
@@ -248,8 +248,54 @@ export class CapabilityHealthService {
   }
 
   /**
+   * Read user preferences related to flow card registration (settings-aware filtering).
+   * Returns defaults if settings are missing.
+   */
+  private getUserFlowPreferences(): UserFlowPreferences {
+    return {
+      flow_temperature_alerts: this.device.getSetting('flow_temperature_alerts') || 'auto',
+      flow_voltage_alerts: this.device.getSetting('flow_voltage_alerts') || 'auto',
+      flow_current_alerts: this.device.getSetting('flow_current_alerts') || 'auto',
+      flow_power_alerts: this.device.getSetting('flow_power_alerts') || 'auto',
+      flow_pulse_steps_alerts: this.device.getSetting('flow_pulse_steps_alerts') || 'auto',
+      flow_state_alerts: this.device.getSetting('flow_state_alerts') || 'auto',
+      flow_efficiency_alerts: this.device.getSetting('flow_efficiency_alerts') || 'auto',
+      flow_expert_mode: this.device.getSetting('flow_expert_mode') || false,
+    };
+  }
+
+  /**
+   * Determine if a capability category is enabled via user settings.
+   * Settings can be 'disabled', 'auto', or 'enabled'.
+   * Returns false only if explicitly disabled.
+   */
+  private isCategoryEnabled(category: keyof CapabilityCategories): boolean {
+    const userPrefs = this.getUserFlowPreferences();
+
+    switch (category) {
+      case 'temperature':
+        return userPrefs.flow_temperature_alerts !== 'disabled';
+      case 'voltage':
+        return userPrefs.flow_voltage_alerts !== 'disabled';
+      case 'current':
+        return userPrefs.flow_current_alerts !== 'disabled';
+      case 'power':
+        return userPrefs.flow_power_alerts !== 'disabled';
+      case 'pulseSteps':
+        return userPrefs.flow_pulse_steps_alerts !== 'disabled';
+      case 'states':
+        return userPrefs.flow_state_alerts !== 'disabled';
+      case 'efficiency':
+        return userPrefs.flow_efficiency_alerts !== 'disabled';
+      default:
+        return true; // Unknown categories are enabled by default
+    }
+  }
+
+  /**
    * Generate a consolidated health report for all capabilities.
    * The report includes summary counts and grouped capability health data.
+   * Only counts ENABLED capabilities in health metrics (settings-aware).
    * @returns HealthReport
    */
   generateHealthReport(): HealthReport {
@@ -261,7 +307,18 @@ export class CapabilityHealthService {
     let nullCapabilities = 0;
 
     // Group capabilities by category and count health status
+    // v1.0.31: FIXED - Only count capabilities that are enabled via settings
     this.capabilityHealthMap.forEach((healthData) => {
+      const category = healthData.category as keyof CapabilityCategories;
+
+      // Skip disabled capability categories
+      if (!this.isCategoryEnabled(category)) {
+        this.logger(
+          `CapabilityHealthService: Excluding disabled category '${category}' from health report`,
+        );
+        return; // Skip this capability - it's disabled
+      }
+
       totalCapabilities++;
 
       if (healthData.isHealthy) {
@@ -303,7 +360,7 @@ export class CapabilityHealthService {
 
     this.lastHealthReport = report;
 
-    this.logger('CapabilityHealthService: Health report generated', {
+    this.logger('CapabilityHealthService: Health report generated (settings-aware)', {
       overall,
       healthy: healthyCapabilities,
       total: totalCapabilities,
@@ -344,6 +401,7 @@ export class CapabilityHealthService {
 
   /**
    * Inspect stored health data and detect which capabilities currently have healthy data.
+   * v1.0.31: FIXED - Only returns capabilities from ENABLED categories (settings-aware).
    * @returns array of capability ids considered to have healthy/recent data
    */
   async detectCapabilitiesWithData(): Promise<string[]> {
@@ -351,6 +409,13 @@ export class CapabilityHealthService {
     const now = Date.now();
 
     this.capabilityHealthMap.forEach((healthData, capability) => {
+      const category = healthData.category as keyof CapabilityCategories;
+
+      // v1.0.31: Skip capabilities from disabled categories
+      if (!this.isCategoryEnabled(category)) {
+        return; // Skip this capability - its category is disabled
+      }
+
       const timeSinceUpdate = now - healthData.lastUpdated;
       const hasRecentData = timeSinceUpdate < DeviceConstants.CAPABILITY_TIMEOUT_MS;
       const hasHealthyValue = this.isCapabilityValueHealthy(healthData.lastValue);
@@ -361,7 +426,7 @@ export class CapabilityHealthService {
       }
     });
 
-    this.logger('CapabilityHealthService: Detected capabilities with healthy data', capabilitiesWithData.length);
+    this.logger('CapabilityHealthService: Detected capabilities with healthy data (settings-aware)', capabilitiesWithData.length);
     return capabilitiesWithData;
   }
 
