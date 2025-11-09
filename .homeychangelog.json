@@ -1,4 +1,10 @@
 {
+  "1.0.25": {
+    "en": "Improved reconnection reliability by removing blocking verification that caused false unavailable states.",
+    "nl": "Verbeterde betrouwbaarheid van reconnectie door verwijdering van blokkerende verificatie die vals onbeschikbare status veroorzaakte.",
+    "de": "Verbesserte Zuverlässigkeit der Wiederverbindung durch Entfernung der blockierenden Verifikation, die falsche Nicht-Verfügbarkeits-Status verursachte.",
+    "fr": "Fiabilité de reconnexion améliorée en supprimant la vérification bloquante qui causait des états faux indisponibles."
+  },
   "1.0.24": {
     "en": "Device no longer becomes unavailable shortly after reconnecting.",
     "nl": "Apparaat wordt niet langer onbeschikbaar kort na het heropstarten.",

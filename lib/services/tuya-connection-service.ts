@@ -357,16 +357,9 @@ export class TuyaConnectionService {
       // CRITICAL: Must reinstall after every reconnection because TuyAPI recreates the socket
       this.installDeepSocketErrorHandler();
 
-      // Verify connection health after successful connection (v1.0.18)
-      // CRITICAL: Prevents zombie connections (socket open but no data events)
-      const healthCheckPassed = await this.verifyConnectionHealth();
-      if (!healthCheckPassed) {
-        this.logger('⚠️ TuyaConnectionService: Post-reconnect health check failed - connection appears to be zombie');
-        this.isConnected = false;
-        throw new Error('Connection verification failed - no data events after query');
-      }
-
-      // Only update timestamp AFTER health verification succeeds (v1.0.18)
+      // Update timestamp immediately on successful connection (v1.0.25)
+      // Zombie detection handled by heartbeat mechanism (5min interval) + DPS refresh (3min interval)
+      // Pre-v1.0.18 health check was causing false-positive unavailable states on slow networks
       this.lastDataEventTime = Date.now();
       this.logger('✅ TuyaConnectionService: Connection verified and healthy');
 
