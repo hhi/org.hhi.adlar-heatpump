@@ -1184,7 +1184,7 @@ class MyDevice extends Homey.Device {
         return value;
       }
     }
-    this.debugLog('💧 No external flow data - use "Send Flow Rate" flow card to provide data');
+    this.categoryLog('energy', '💧 No external flow data - use "Send Flow Rate" flow card to provide data');
     return null;
   }
 
@@ -3385,28 +3385,28 @@ class MyDevice extends Homey.Device {
       const receiveExternalFlowAction = this.homey.flow.getActionCard('receive_external_flow_data');
       // eslint-disable-next-line camelcase
       receiveExternalFlowAction.registerRunListener(async (args: { device: MyDevice; flow_value: number }) => {
-        this.debugLog(`🌊 Received external flow data: ${args.flow_value}L/min`);
+        this.categoryLog('energy', `🌊 Received external flow data: ${args.flow_value}L/min`);
 
         // Store the external flow value in the capability
         if (this.hasCapability('adlar_external_flow')) {
           await this.setCapabilityValue('adlar_external_flow', args.flow_value);
         }
 
-        this.log(`✅ External flow data updated: ${args.flow_value}L/min`);
+        this.categoryLog('energy', `✅ External flow data updated: ${args.flow_value}L/min`);
       });
 
       // Register external ambient temperature data action card
       const receiveExternalAmbientAction = this.homey.flow.getActionCard('receive_external_ambient_data');
       // eslint-disable-next-line camelcase
       receiveExternalAmbientAction.registerRunListener(async (args: { device: MyDevice; temperature_value: number }) => {
-        this.debugLog(`🌡️ Received external ambient data: ${args.temperature_value}°C`);
+        this.categoryLog('energy', `🌡️ Received external ambient data: ${args.temperature_value}°C`);
 
         // Store the external ambient temperature value in the capability
         if (this.hasCapability('adlar_external_ambient')) {
           await this.setCapabilityValue('adlar_external_ambient', args.temperature_value);
         }
 
-        this.log(`✅ External ambient data updated: ${args.temperature_value}°C`);
+        this.categoryLog('energy', `✅ External ambient data updated: ${args.temperature_value}°C`);
       });
 
       // Currently no custom ACTION cards require device-level registration
