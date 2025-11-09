@@ -3309,12 +3309,12 @@ class MyDevice extends Homey.Device {
       const receiveExternalPowerAction = this.homey.flow.getActionCard('receive_external_power_data');
       // eslint-disable-next-line camelcase
       receiveExternalPowerAction.registerRunListener(async (args: { device: MyDevice; power_value: number }) => {
-        this.log(`📊 Received external power data: ${args.power_value}W`);
+        this.categoryLog('energy', `📊 Received external power data: ${args.power_value}W`);
 
         // Store the external power value in the capability
         if (this.hasCapability('adlar_external_power')) {
           await this.setCapabilityValue('adlar_external_power', args.power_value);
-          this.debugLog(`📊 External power capability updated to: ${args.power_value}W`);
+          this.categoryLog('energy', `📊 External power capability updated to: ${args.power_value}W`);
 
           // IMMEDIATELY update external energy total when external power is received
           if (this.hasCapability('adlar_external_energy_total')) {
@@ -3328,11 +3328,11 @@ class MyDevice extends Homey.Device {
               const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60); // Convert to hours
               energyIncrement = (args.power_value / 1000) * timeDifferenceHours; // kWh
 
-              this.log(`⏱️ Time since last power update: ${(timeDifferenceMs / 1000).toFixed(1)}s`);
+              this.categoryLog('energy', `⏱️ Time since last power update: ${(timeDifferenceMs / 1000).toFixed(1)}s`);
             } else {
               // First measurement - use a default 10-second interval
               energyIncrement = (args.power_value / 1000) * 0.002778; // kWh (10 seconds)
-              this.log('🆕 First external power measurement - using default 10s interval');
+              this.categoryLog('energy', '🆕 First external power measurement - using default 10s interval');
             }
 
             this.lastExternalPowerTimestamp = now;
@@ -3360,7 +3360,7 @@ class MyDevice extends Homey.Device {
               ? `+${(incrementWh * 1000).toFixed(1)}mWh`
               : `+${incrementWh.toFixed(1)}Wh`;
 
-            this.log(`🔌 External energy updated: ${incrementDisplay} `
+            this.categoryLog('energy', `🔌 External energy updated: ${incrementDisplay} `
               + `(power: ${args.power_value}W, total: ${roundedTotal.toFixed(6)}kWh)`);
           }
         } else {
@@ -3369,16 +3369,16 @@ class MyDevice extends Homey.Device {
 
         // Trigger intelligent power update to potentially use this new external data
         const energyTrackingEnabled = this.getSetting('enable_intelligent_energy_tracking');
-        this.debugLog(`📊 Energy tracking enabled: ${energyTrackingEnabled}`);
+        this.categoryLog('energy', `📊 Energy tracking enabled: ${energyTrackingEnabled}`);
 
         if (energyTrackingEnabled) {
-          this.log('📊 Triggering intelligent power measurement update...');
+          this.categoryLog('energy', '📊 Triggering intelligent power measurement update...');
           await this.updateIntelligentPowerMeasurement();
         } else {
-          this.debugLog('📊 Skipping intelligent power update - energy tracking disabled');
+          this.categoryLog('energy', '📊 Skipping intelligent power update - energy tracking disabled');
         }
 
-        this.log(`✅ External power data updated: ${args.power_value}W (energy tracking: ${energyTrackingEnabled})`);
+        this.categoryLog('energy', `✅ External power data updated: ${args.power_value}W (energy tracking: ${energyTrackingEnabled})`);
       });
 
       // Register external flow data action card
