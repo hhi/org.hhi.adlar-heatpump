@@ -96,6 +96,38 @@ export class RollingCOPCalculator {
   }
 
   /**
+   * Category-based logging with DEBUG_LEVEL filtering (v1.0.26)
+   * Respects DEBUG_LEVEL env var: all, cop, none
+   */
+  private categoryLog(category: 'cop' | 'scop', message: string, ...args: unknown[]) {
+    // Check DEBUG_LEVEL environment variable
+    const level = process.env.DEBUG_LEVEL || 'none';
+
+    // Legacy DEBUG=1 enablement
+    if (process.env.DEBUG === '1') {
+      this.logger(message, ...args);
+      return;
+    }
+
+    // Level=all includes everything
+    if (level === 'all') {
+      this.logger(message, ...args);
+      return;
+    }
+
+    // Level=cop includes both cop and scop
+    if (level === 'cop' && (category === 'cop' || category === 'scop')) {
+      this.logger(message, ...args);
+      return;
+    }
+
+    // Exact category match
+    if (level === category) {
+      this.logger(message, ...args);
+    }
+  }
+
+  /**
    * Add a new COP data point to the rolling calculation
    */
   public addDataPoint(dataPoint: COPDataPoint): void {
@@ -559,7 +591,7 @@ export class RollingCOPCalculator {
         this.logger('Failed to trigger cop_trend_detected flow card:', err);
       });
 
-      this.logger(`COP Trend Changed: ${this.lastTrend} → ${currentTrend} (strength: ${(strength * 100).toFixed(1)}%)`);
+      this.categoryLog('cop', `COP Trend Changed: ${this.lastTrend} → ${currentTrend} (strength: ${(strength * 100).toFixed(1)}%)`);
     }
 
     // Update last trend
@@ -616,6 +648,6 @@ export class RollingCOPCalculator {
     this.dataPoints = [];
 
     // Log for debugging memory management
-    this.logger(`RollingCOPCalculator: Destroyed - cleared ${bufferSize} data points (~${estimatedMemoryMB.toFixed(1)} MB)`);
+    this.categoryLog('cop', `RollingCOPCalculator: Destroyed - cleared ${bufferSize} data points (~${estimatedMemoryMB.toFixed(1)} MB)`);
   }
 }

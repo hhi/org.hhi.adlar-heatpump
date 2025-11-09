@@ -209,6 +209,52 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Granular category-based logging with DEBUG_LEVEL support (v1.0.26)
+   *
+   * Environment variables:
+   * - DEBUG_LEVEL=all     → Log all categories
+   * - DEBUG_LEVEL=core    → Connection/core functionality only
+   * - DEBUG_LEVEL=cop     → COP/SCOP/Energy calculations only
+   * - DEBUG_LEVEL=none    → No logging (default)
+   *
+   * Also respects legacy DEBUG=1 for backwards compatibility
+   */
+  private shouldLog(category: 'core' | 'cop' | 'scop' | 'energy'): boolean {
+    // Legacy DEBUG=1 enablement
+    if (process.env.DEBUG === '1') {
+      return true;
+    }
+
+    const level = process.env.DEBUG_LEVEL || 'none';
+
+    // Level=all includes everything
+    if (level === 'all') {
+      return true;
+    }
+
+    // Exact category match
+    if (level === category) {
+      return true;
+    }
+
+    // Grouped categories
+    if (level === 'cop' && (category === 'cop' || category === 'scop' || category === 'energy')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Category-based logging with DEBUG_LEVEL filtering
+   */
+  private categoryLog(category: 'core' | 'cop' | 'scop' | 'energy', message: string, ...args: unknown[]) {
+    if (this.shouldLog(category)) {
+      this.log(message, ...args);
+    }
+  }
+
+  /**
    * Initialize direct Tuya device for fallback purposes
    */
   private async initializeFallbackTuyaDevice(): Promise<void> {
@@ -732,7 +778,7 @@ class MyDevice extends Homey.Device {
       // Add data point to rolling calculator
       this.rollingCOPCalculator.addDataPoint(dataPoint);
       const totalDataPoints = this.rollingCOPCalculator.exportData().dataPoints.length;
-      this.log('📈 Rolling COP: Added data point with COP', copResult.cop, `(total points: ${totalDataPoints})`);
+      this.categoryLog('cop', '📈 Rolling COP: Added data point with COP', copResult.cop, `(total points: ${totalDataPoints})`);
 
       // Track when we last added a COP data point for idle monitoring
       this.lastCOPDataPointTime = Date.now();
@@ -740,7 +786,7 @@ class MyDevice extends Homey.Device {
       // Update rolling COP capabilities (every 5 minutes to avoid excessive updates)
       const now = Date.now();
       if (now - this.lastRollingCOPUpdate >= 5 * 60 * 1000) { // 5 minutes
-        this.log('🔄 Updating rolling COP capabilities (5 minute interval reached)');
+        this.categoryLog('cop', '🔄 Updating rolling COP capabilities (5 minute interval reached)');
         await this.updateRollingCOPCapabilities();
         this.lastRollingCOPUpdate = now;
       } else {
@@ -805,15 +851,15 @@ class MyDevice extends Homey.Device {
       // Get diagnostic info for better logging
       const diagnostics = this.rollingCOPCalculator.getDiagnosticInfo?.();
 
-      this.log(`📅 Daily COP calculation result: ${dailyCOP ? `${dailyCOP.averageCOP} (${dailyCOP.dataPoints} points)` : 'null/undefined'}`);
+      this.categoryLog('cop', `📅 Daily COP calculation result: ${dailyCOP ? `${dailyCOP.averageCOP} (${dailyCOP.dataPoints} points)` : 'null/undefined'}`);
 
       if (diagnostics) {
-        this.log(`📊 COP Diagnostics: ${diagnostics.dataPointsInWindow} points in window, ${(diagnostics.idleRatio * 100).toFixed(1)}% idle, data age: ${diagnostics.dataFreshness}h`);
+        this.categoryLog('cop', `📊 COP Diagnostics: ${diagnostics.dataPointsInWindow} points in window, ${(diagnostics.idleRatio * 100).toFixed(1)}% idle, data age: ${diagnostics.dataFreshness}h`);
       }
 
       if (dailyCOP && this.hasCapability('adlar_cop_daily')) {
         await this.setCapabilityValue('adlar_cop_daily', dailyCOP.averageCOP);
-        this.log('📅 Daily COP updated:', dailyCOP.averageCOP, `(${dailyCOP.dataPoints} points, ${dailyCOP.confidenceLevel} confidence)`);
+        this.categoryLog('cop', '📅 Daily COP updated:', dailyCOP.averageCOP, `(${dailyCOP.dataPoints} points, ${dailyCOP.confidenceLevel} confidence)`);
 
         // Trigger daily COP efficiency flow cards
         await this.triggerDailyCOPFlowCards(dailyCOP);
@@ -826,9 +872,9 @@ class MyDevice extends Homey.Device {
         const reason = diagnostics
           ? `idle ratio: ${(diagnostics.idleRatio * 100).toFixed(1)}%, data age: ${diagnostics.dataFreshness.toFixed(1)}h`
           : 'no data points in rolling window';
-        this.log(`⚠️ Daily COP set to null - ${reason}`);
+        this.categoryLog('cop', `⚠️ Daily COP set to null - ${reason}`);
       } else if (!this.hasCapability('adlar_cop_daily')) {
-        this.log('⚠️ Daily COP capability not available');
+        this.categoryLog('cop', '⚠️ Daily COP capability not available');
       }
 
       // Calculate weekly COP
@@ -1019,7 +1065,7 @@ class MyDevice extends Homey.Device {
 
       this.rollingCOPCalculator.addDataPoint(idleDataPoint);
       this.lastCOPDataPointTime = now; // Update tracking time
-      this.log('🕒 Added idle period data point (COP: 0) - compressor idle for > 1 hour');
+      this.categoryLog('cop', '🕒 Added idle period data point (COP: 0) - compressor idle for > 1 hour');
 
       // Update rolling COP capabilities to reflect the idle state
       await this.updateRollingCOPCapabilities();
@@ -1213,13 +1259,13 @@ class MyDevice extends Homey.Device {
     try {
       // Initialize SCOP calculator for seasonal performance tracking
       this.scopCalculator = new SCOPCalculator(this.homey);
-      this.log('SCOP calculator initialized');
+      this.categoryLog('scop', 'SCOP calculator initialized');
 
       // Initialize SCOP quality capability with localized message
       if (this.hasCapability('adlar_scop_quality')) {
         const initialStatus = this.getSCOPStatusMessage('initializing');
         await this.setCapabilityValue('adlar_scop_quality', initialStatus);
-        this.log('SCOP quality capability initialized with status message');
+        this.categoryLog('scop', 'SCOP quality capability initialized with status message');
       }
 
       // Load COP settings from device settings
@@ -1237,17 +1283,17 @@ class MyDevice extends Homey.Device {
             const collectingStatus = this.getSCOPStatusMessage('collecting');
             await this.setCapabilityValue('adlar_scop_quality', collectingStatus);
           }
-          this.log('COP calculation system initialized and started');
+          this.categoryLog('cop', 'COP calculation system initialized and started');
         } else {
           // Update SCOP quality to show COP is disabled
           if (this.hasCapability('adlar_scop_quality')) {
             const disabledMessage = this.homey.__('COP calculation disabled') || 'COP calculation disabled';
             await this.setCapabilityValue('adlar_scop_quality', disabledMessage);
           }
-          this.log('COP calculation disabled by settings');
+          this.categoryLog('cop', 'COP calculation disabled by settings');
         }
       } else {
-        this.log('COP capability not available on device');
+        this.categoryLog('cop', 'COP capability not available on device');
       }
 
       // Initialize SCOP updates if capability is available
@@ -1402,7 +1448,7 @@ class MyDevice extends Homey.Device {
     }
 
     // Force a COP calculation attempt
-    this.log('🚀 Forcing COP calculation attempt...');
+    this.categoryLog('cop', '🚀 Forcing COP calculation attempt...');
     await this.calculateAndUpdateCOP();
 
     this.log('🔍 === END DEBUG ===');
@@ -1517,7 +1563,7 @@ class MyDevice extends Homey.Device {
 
       if (interval) {
         this.copCalculationInterval = interval;
-        this.log('Started COP calculation interval');
+        this.categoryLog('cop', 'Started COP calculation interval');
       } else {
         this.copCalculationInterval = null;
         this.error('Failed to start COP calculation interval: setInterval returned undefined');
@@ -1535,7 +1581,7 @@ class MyDevice extends Homey.Device {
     if (this.copCalculationInterval) {
       clearInterval(this.copCalculationInterval);
       this.copCalculationInterval = null;
-      this.log('Stopped COP calculation interval');
+      this.categoryLog('cop', 'Stopped COP calculation interval');
     }
   }
 
@@ -1590,7 +1636,7 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_scop', roundedSCOP);
         await this.setCapabilityValue('adlar_scop_quality', scopResult.dataQuality);
 
-        this.log(`📊 SCOP daily update: ${roundedSCOP} (confidence: ${scopResult.confidence}, ${Math.round(scopResult.seasonalCoverage * 100)}% coverage)`);
+        this.categoryLog('scop', `📊 SCOP daily update: ${roundedSCOP} (confidence: ${scopResult.confidence}, ${Math.round(scopResult.seasonalCoverage * 100)}% coverage)`);
 
         // Log seasonal summary in debug mode
         this.debugLog('SCOP seasonal summary:', this.scopCalculator.getSeasonalSummary());
@@ -1613,18 +1659,18 @@ class MyDevice extends Homey.Device {
     const hasCapability = this.hasCapability('adlar_cop');
     const copEnabled = this.copSettings?.enableCOP;
 
-    this.log('🔍 COP calculation attempt:');
-    this.log(`  📋 hasCapability('adlar_cop'): ${hasCapability}`);
-    this.log(`  ⚙️  copSettings?.enableCOP: ${copEnabled}`);
-    this.log(`  🎯 Will calculate COP: ${hasCapability && copEnabled}`);
+    this.categoryLog('cop', '🔍 COP calculation attempt:');
+    this.categoryLog('cop', `  📋 hasCapability('adlar_cop'): ${hasCapability}`);
+    this.categoryLog('cop', `  ⚙️  copSettings?.enableCOP: ${copEnabled}`);
+    this.categoryLog('cop', `  🎯 Will calculate COP: ${hasCapability && copEnabled}`);
 
     if (!hasCapability || !copEnabled) {
-      this.log('❌ COP calculation skipped - capability not available or disabled');
+      this.categoryLog('cop', '❌ COP calculation skipped - capability not available or disabled');
       this.debugCOPCapabilityStatus();
       return;
     }
 
-    this.log('✅ Proceeding with COP calculation...');
+    this.categoryLog('cop', '✅ Proceeding with COP calculation...');
 
     try {
       // Gather data sources from device capabilities
@@ -1758,7 +1804,7 @@ class MyDevice extends Homey.Device {
           });
         }
       } else {
-        this.log(`❌ COP calculation failed: ${copResult.method}`);
+        this.categoryLog('cop', `❌ COP calculation failed: ${copResult.method}`);
         this.debugLog('Failed calculation data:', combinedData);
 
         // Update capabilities to reflect failed calculation
@@ -3055,19 +3101,19 @@ class MyDevice extends Homey.Device {
         this.stopIdleMonitoring();
         this.startCOPCalculationInterval();
         this.startIdleMonitoring();
-        this.log('COP calculation and idle monitoring restarted with new settings');
+        this.categoryLog('cop', 'COP calculation and idle monitoring restarted with new settings');
 
         // Also restart SCOP updates if available
         if (this.hasCapability('adlar_scop') && this.scopCalculator) {
           this.stopSCOPUpdateInterval();
           this.startSCOPUpdateInterval();
-          this.log('SCOP updates restarted with COP settings');
+          this.categoryLog('scop', 'SCOP updates restarted with COP settings');
         }
       } else {
         this.stopCOPCalculationInterval();
         this.stopIdleMonitoring();
         this.stopSCOPUpdateInterval();
-        this.log('COP calculation, idle monitoring, and SCOP updates stopped');
+        this.categoryLog('cop', 'COP calculation, idle monitoring, and SCOP updates stopped');
       }
 
       return 'COP and SCOP settings updated and calculation systems restarted.';
@@ -3557,7 +3603,7 @@ class MyDevice extends Homey.Device {
       try {
         this.scopCalculator.destroy();
         this.scopCalculator = null;
-        this.log('SCOP calculator destroyed - memory released');
+        this.categoryLog('scop', 'SCOP calculator destroyed - memory released');
       } catch (error) {
         this.error('Error destroying SCOP calculator:', error);
       }
