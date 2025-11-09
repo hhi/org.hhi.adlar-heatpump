@@ -1,4 +1,10 @@
 {
+  "1.0.26": {
+    "en": "COP and SCOP logging can now be controlled separately. Use environment variable DEBUG_LEVEL=cop to see only energy efficiency logs, or DEBUG_LEVEL=all for all debug messages. Cleaner logs during troubleshooting.",
+    "nl": "COP en SCOP logging kunnen nu afzonderlijk worden beheerd. Gebruik omgevingsvariabele DEBUG_LEVEL=cop om alleen energiefficiëntie logs te zien, of DEBUG_LEVEL=all voor alle debug berichten. Schonere logs bij probleemoplossing.",
+    "de": "COP- und SCOP-Protokollierung können jetzt separat gesteuert werden. Verwenden Sie die Umgebungsvariable DEBUG_LEVEL=cop, um nur Energieeffizienzprotokolle anzuzeigen, oder DEBUG_LEVEL=all für alle Debug-Meldungen. Saubere Protokolle bei der Fehlerbehebung.",
+    "fr": "L'enregistrement COP et SCOP peut maintenant être contrôlé séparément. Utilisez la variable d'environnement DEBUG_LEVEL=cop pour voir uniquement les journaux d'efficacité énergétique, ou DEBUG_LEVEL=all pour tous les messages de débogage. Journaux plus propres lors du dépannage."
+  },
   "1.0.25": {
     "en": "Improved reconnection reliability by removing blocking verification that caused false unavailable states.",
     "nl": "Verbeterde betrouwbaarheid van reconnectie door verwijdering van blokkerende verificatie die vals onbeschikbare status veroorzaakte.",
