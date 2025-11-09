@@ -1,4 +1,10 @@
 {
+  "1.0.29": {
+    "en": "External power data logging now respects DEBUG_LEVEL filtering for cleaner troubleshooting logs.",
+    "nl": "Externe stroominvoer logging respecteert nu DEBUG_LEVEL filtering voor schonere probleemoplossingslogs.",
+    "de": "Externe Stromversorgungsdaten-Protokollierung respektiert nun DEBUG_LEVEL-Filterung für saubere Fehlerbehebungsprotokolle.",
+    "fr": "La journalisation des données de puissance externe respecte maintenant le filtrage DEBUG_LEVEL pour des journaux de dépannage plus propres."
+  },
   "1.0.28": {
     "en": "Fixed: COP and SCOP calculation logging now respects DEBUG_LEVEL filtering for cleaner troubleshooting logs.",
     "nl": "Opgelost: COP en SCOP berekening logging respecteert nu DEBUG_LEVEL filtering voor schonere probleemoplossingslogs.",
