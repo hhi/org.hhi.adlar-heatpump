@@ -1678,13 +1678,13 @@ class MyDevice extends Homey.Device {
     try {
       // Gather data sources from device capabilities
       const deviceData = this.gatherDeviceDataSources();
-      this.debugLog('Device data sources gathered:', deviceData);
+      this.categoryLog('cop', 'Device data sources gathered:', deviceData);
 
       // Get external device data via direct access if configured
       let externalData = {};
       const externalDataSources: string[] = [];
 
-      this.log('🔍 Checking external device configurations...');
+      this.categoryLog('cop', '🔍 Checking external device configurations...');
 
       // Use simplified direct device access
       const externalDeviceData = await this.getExternalDeviceData();
