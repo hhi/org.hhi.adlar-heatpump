@@ -1156,7 +1156,9 @@ export class TuyaConnectionService {
         this.logger('TuyaConnectionService: ✅ Heartbeat (get) successful - verifying data event reception...');
 
         // ZOMBIE DETECTION (v1.0.16): Verify that get() actually triggers data event
-        const dataEventReceived = await this.waitForDataEvent(5000); // 5 second timeout
+        const dataEventReceived = await this.waitForDataEvent(
+          DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+        );
 
         if (!dataEventReceived) {
           this.logger('🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED - get() succeeded but NO data event received!');
@@ -1200,7 +1202,9 @@ export class TuyaConnectionService {
           this.logger('TuyaConnectionService: ✅ Heartbeat (wake-up set) successful - verifying data event reception...');
 
           // ZOMBIE DETECTION (v1.0.16): Verify that set() actually triggers data event
-          const dataEventReceived = await this.waitForDataEvent(5000); // 5 second timeout
+          const dataEventReceived = await this.waitForDataEvent(
+            DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+          );
 
           if (!dataEventReceived) {
             this.logger('🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED - set() succeeded but NO data event received!');

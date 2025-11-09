@@ -1,4 +1,10 @@
 {
+  "1.0.23": {
+    "en": "Fixed: Heartbeat connection monitoring no longer times out prematurely on high-latency networks. Increased timeout from 5 to 10 seconds to accommodate slower device responses and temporary network congestion.",
+    "nl": "Opgelost: Heartbeat verbindingsmonitoring timed niet langer voortijdig uit op netwerken met hoge latentie. Verhoogde timeout van 5 naar 10 seconden voor tragere apparaatresponses en tijdelijke netwerkcongestie.",
+    "de": "Behoben: Heartbeat-Verbindungsüberwachung timed nicht mehr vorzeitig bei Hochlatenz-Netzwerken aus. Timeout von 5 auf 10 Sekunden erhöht, um langsamere Geräteresponses und vorübergehende Netzwerküberlastung zu berücksichtigen.",
+    "fr": "Corrigé: La surveillance du cœur de connexion ne s'éteint plus prématurément sur les réseaux à latence élevée. Délai d'attente augmenté de 5 à 10 secondes pour accommoder les réponses d'appareil plus lentes et la congestion réseau temporaire."
+  },
   "1.0.22": {
     "en": "Fixed: Device no longer misidentified as offline due to network latency. Increased timeout for connection health checks to handle slow devices and temporary network congestion properly.",
     "nl": "Opgelost: Apparaat wordt niet langer ten onrechte als offline geclassificeerd vanwege netwerklatentie. Verhoogde timeout voor verbindingshealthchecks om langzame apparaten en tijdelijke netwerkcongestie correct te verwerken.",
