@@ -26,6 +26,9 @@ export class DeviceConstants {
   /** Stale connection threshold - force reconnect if no data received for this period (v0.99.98) */
   static readonly STALE_CONNECTION_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
 
+  /** Heartbeat data event timeout - max wait for data event after heartbeat probes (v1.0.23 fix) */
+  static readonly HEARTBEAT_DATA_EVENT_TIMEOUT_MS = 10 * 1000; // 10 seconds (was hardcoded 5s - too aggressive for high latency)
+
   /** Wake-up attempt threshold - try active wake-up after this many failed passive reconnections (v1.0.12) */
   static readonly WAKE_UP_ATTEMPT_THRESHOLD = 5; // attempts
 
