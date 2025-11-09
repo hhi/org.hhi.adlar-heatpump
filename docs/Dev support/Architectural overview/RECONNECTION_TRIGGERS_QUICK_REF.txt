@@ -1,0 +1,306 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║        TuyaConnectionService - Reconnection Triggers Quick Reference          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. EVENT-BASED TRIGGERS (Reactive - Immediate or Fast)                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  [A] TuyAPI Error Event (Line 770-797)
+      Trigger: Socket error (ECONNRESET, timeout, etc.)
+      Action:  Mark disconnected, apply backoff
+      Backoff: 1.5x (capped at 8x)
+      Type:    EVENT-BASED, <1 second response
+      Call:    Does NOT directly schedule reconnection; relies on interval
+
+  [B] TuyAPI Disconnected Event (Line 854-876)
+      Trigger: Clean disconnect signal from device
+      Action:  Mark disconnected, minimal backoff
+      Backoff: 1.2x (capped at 4x)
+      Type:    EVENT-BASED, <1 second response
+      Call:    Does NOT directly schedule reconnection; relies on interval
+
+  [C] Deep Socket Error Handler (Line 719-742)
+      Trigger: Raw socket ECONNRESET (bypasses TuyAPI handler)
+      Action:  Mark disconnected, IMMEDIATELY schedule reconnection
+      Backoff: Determined by categorized error type
+      Type:    EVENT-BASED, <1 second response
+      Call:    ✓ DIRECTLY calls scheduleNextReconnectionAttempt() (Line 739)
+      Status:  Recoverable → 'disconnected', Non-recoverable → 'error'
+
+  [D] Heartbeat Failure - Both get() and set() Failed (Line 1227-1245)
+      Trigger: Proactive heartbeat detects zombie (socket alive, no data)
+      Action:  Mark disconnected, increment failure counter
+      Backoff: 1.5x (capped at 16x)
+      Type:    TIME-BASED (5-min interval) + EVENT-BASED (failure reaction)
+      Call:    ✓ DIRECTLY calls scheduleNextReconnectionAttempt() (Line 1245)
+      Purpose: Detect and recover from zombie connections
+
+  [E] Force Reconnect User Action (Line 443-480)
+      Trigger: User clicks "Force reconnect" button in device settings
+      Action:  Stop all timers, disconnect, reset backoff, retry immediately
+      Backoff: RESET to 1x (bypass all exponential backoff)
+      Type:    EVENT-BASED (user action), IMMEDIATE
+      Call:    ✓ DIRECTLY attempts connectTuya() (Line 468)
+      Result:  Bypass circuit breaker, immediate connection attempt
+
+  [F] DPS Refresh Zombie Detection (Line 975-982)
+      Trigger: Query succeeded but NO data event within 10 seconds
+      Action:  Detect zombie connection, force full reconnect
+      Backoff: RESET via forceReconnect()
+      Type:    TIME-BASED (3-min interval) + EVENT-BASED (detection)
+      Call:    ✓ DIRECTLY calls forceReconnect() (Line 980)
+      Purpose: Detect and recover from zombie connections
+      Status:  Marked with "🧟" emoji in logs
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. TIME-BASED TRIGGERS (Scheduled - Regular Intervals)                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  [G] Scheduled Reconnection Loop (Line 1287-1437)
+      Trigger: Periodic call from reconnection interval (exponential backoff)
+      Type:    TIME-BASED (scheduled via setTimeout)
+      Interval: 20s → 300s (exponential), capped at 30 minutes max
+      Layers:
+        • LAYER 1 (1288-1293):   Track outage start time
+        • LAYER 2 (1295-1320):   Detect stale connections (>10 min no data)
+        • LAYER 3 (1322-1352):   Send notifications (2m, 10m, 30m milestones)
+        • LAYER 4 (1354-1404):   Circuit breaker (5-min cooldown, max 3 cycles)
+        • LAYER 5 (1406-1436):   Calculate backoff + schedule next attempt
+      Call:    ✓ Calls attemptReconnectionWithRecovery() (Line 1426)
+      Purpose: Core reconnection engine with exponential backoff
+
+      Circuit Breaker Details:
+        - Triggered after: 5 consecutive failures
+        - Cooldown: 5 minutes per cycle
+        - Max cycles: 3 (15 minutes total before slow retry)
+        - After max: Switch to 2.5-minute continuous retry
+        - Internet detection: DNS probe every 30s during cooldown
+
+      Stale Connection Threshold:
+        - Check: if (no data for > 10 minutes)
+        - Action: Force reconnection with 1.5x backoff
+
+      Notification Milestones:
+        - 2 min:  "Connection Lost - Automatic recovery in progress"
+        - 10 min: "Extended Outage - Check network connectivity"
+        - 30 min: "Critical Outage - Manual intervention may be required"
+
+      30-Minute Maximum Guarantee:
+        - If stuck for > 30 minutes: Force immediate retry (1 second)
+
+  [H] Heartbeat Monitoring (Line 1047-1250)
+      Trigger: Every 5 minutes (CONNECTION_HEARTBEAT_INTERVAL_MS)
+      Type:    TIME-BASED (periodic) + EVENT-BASED (failure reaction)
+      Mechanism:
+        • LAYER 1: Passive get() query with 10-second timeout
+        • LAYER 2: Active set() wake-up call with 10-second timeout
+        • DETECTION: Verify data event actually fires
+      Call:    ✓ DIRECTLY calls forceReconnect() if both layers fail (Line 1161, 1207)
+      Purpose: Detect zombie connections, wake sleeping devices
+      Backoff: Applied by scheduleNextReconnectionAttempt()
+
+  [I] Periodic Health Check (Line 1008-1026)
+      Trigger: Every 1 hour (3,600,000ms)
+      Type:    TIME-BASED (safety net)
+      Action:  Force full disconnect + reconnect cycle
+      Call:    ✓ DIRECTLY calls forceReconnect() (Line 1022)
+      Purpose: Ultimate safety net against zombie connections
+      Guarantee: Ensures reconnection attempt even if zombie detection fails
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. HYBRID TRIGGERS (Time-Based + Event-Based Detection)                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  [J] Stale Connection Detection (Line 1295-1320)
+      Trigger: Scheduled check within reconnection loop
+      Condition: isConnected=true AND no data for > 10 minutes
+      Type:    TIME-BASED check with EVENT-BASED decision
+      Action:  Mark disconnected, apply 1.5x backoff
+      Call:    Continues within scheduleNextReconnectionAttempt() (Line 1306-1312)
+      Purpose: Detect "stuck" connections claiming to be active
+      Status:  Changed to 'error' for non-recoverable
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 4. TRIGGER DEPENDENCY TREE                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    [A] TuyAPI Error
+        └─> No direct schedule, waits for [G] Reconnection Loop
+
+    [B] Disconnected Event
+        └─> No direct schedule, waits for [G] Reconnection Loop
+
+    [C] Deep Socket Error
+        └──> scheduleNextReconnectionAttempt() (IMMEDIATE)
+             └──> [G] Reconnection Loop
+
+    [D] Heartbeat Failure
+        └──> scheduleNextReconnectionAttempt() (IMMEDIATE)
+             └──> [G] Reconnection Loop
+
+    [E] Force Reconnect (User)
+        └──> connectTuya() (IMMEDIATE)
+             └──> Bypass circuit breaker
+
+    [F] DPS Refresh Zombie
+        └──> forceReconnect() (IMMEDIATE)
+             └──> Reconnect now, bypass delays
+
+    [G] Reconnection Loop (CORE ENGINE)
+        ├── Stale detection [J]
+        ├── Backoff calculation
+        └──> attemptReconnectionWithRecovery()
+             ├──> connectTuya()
+             ├──> Success: Reset state
+             └──> Failure: scheduleNextReconnectionAttempt() (RECURSIVE)
+
+    [H] Heartbeat (5-min interval)
+        ├── Layer 1: get() probe
+        ├── Layer 2: set() wake-up
+        └──> On both fail: forceReconnect() (IMMEDIATE)
+
+    [I] Health Check (1-hour interval)
+        └──> forceReconnect() (IMMEDIATE)
+
+    [J] Stale Detection
+        └──> Part of [G] Reconnection Loop
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 5. RESPONSE TIME HIERARCHY                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    FASTEST (< 1 second):
+    ├─ [C] Deep Socket Error ................. IMMEDIATE schedule (Line 739)
+    ├─ [E] Force Reconnect .................. IMMEDIATE attempt (Line 468)
+    ├─ [D] Heartbeat Failure ................ IMMEDIATE schedule (Line 1245)
+    ├─ [F] DPS Refresh Zombie ............... IMMEDIATE reconnect (Line 980)
+    └─ [H] Heartbeat Failure ................ IMMEDIATE schedule (Line 1161/1207)
+
+    FAST (1-5 seconds):
+    ├─ [A] TuyAPI Error ..................... Waits for next interval check
+    └─ [B] Disconnected Event ............... Waits for next interval check
+
+    MEDIUM (3-5 minutes):
+    ├─ [F] DPS Refresh ...................... Every 3 minutes
+    ├─ [H] Heartbeat ........................ Every 5 minutes
+    └─ [G] Reconnection Loop ................ 20s-300s (exponential)
+
+    SLOW (1 hour):
+    └─ [I] Health Check ..................... Every 1 hour (safety net)
+
+    MAXIMUM GUARANTEED:
+    └─ 30-minute max ........................ Forced immediate retry if stuck
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 6. BACKOFF STRATEGIES                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Socket Error [A]:
+    └─ 1.5x multiplier (capped at 8x)
+
+    Disconnected Event [B]:
+    └─ 1.2x multiplier (capped at 4x)
+
+    Deep Socket Error [C]:
+    ├─ Recoverable:     1.5x (capped at 16x)
+    └─ Non-recoverable: 2.0x (capped at 32x)
+
+    Heartbeat Failure [D]:
+    └─ Applied via [G] Reconnection Loop
+
+    DPS Refresh Zombie [F]:
+    └─ RESET to 1x (forceReconnect bypasses backoff)
+
+    Force Reconnect [E]:
+    └─ RESET to 1x (immediate bypass)
+
+    Stale Connection [J]:
+    └─ 1.5x multiplier (capped at 8x)
+
+    Circuit Breaker [G]:
+    ├─ First cycle:  1x (5-min cooldown)
+    ├─ Second cycle: 1x (5-min cooldown)
+    ├─ Third cycle:  1x (5-min cooldown)
+    └─ After max:    8x = 2.5-minute intervals forever
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 7. ZOMBIE CONNECTION DETECTION (Multiple Layers)                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Layer 1 - Heartbeat get() + data event [H]:
+    └─ Every 5 minutes: tuya.get() → wait for data event
+       If no data event within 10s → proceed to Layer 2
+
+    Layer 2 - Heartbeat set() + data event [H]:
+    └─ Idempotent write: tuya.set({ dps: 1, set: currentOnOff })
+       If no data event within 10s → ZOMBIE DETECTED
+       Action: forceReconnect() (immediate)
+
+    Layer 3 - DPS Refresh monitoring [F]:
+    └─ Every 3 minutes: tuya.get() → wait for data event
+       If no data event within 10s → ZOMBIE DETECTED
+       Action: forceReconnect() (immediate)
+
+    Layer 4 - Stale connection detection [J]:
+    └─ Every reconnection check: time since last data > 10 minutes
+       Action: Force reconnection with 1.5x backoff
+
+    Layer 5 - Health check safety net [I]:
+    └─ Every 1 hour: Force full reconnect cycle
+       Purpose: Ultimate safety net
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 8. STATUS ENUM TRANSITIONS                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    'connected' ← tuya.on('connected')
+    ├── ACTIVE STATE
+    ├── Heartbeat monitoring: every 5 minutes
+    ├── DPS refresh: every 3 minutes
+    └── Health check: every 1 hour
+
+    'disconnected' ← Socket error, disconnect event, stale detection
+    ├── RECOVERY STATE
+    ├── Exponential backoff: 1.2x - 2.0x multiplier
+    ├── Circuit breaker: triggered after 5 failures
+    └── Recovery path: attemptReconnectionWithRecovery()
+
+    'reconnecting' ← During active reconnection attempt
+    ├── TRANSIENT STATE
+    ├── Shows retry countdown to user
+    ├── Can transition to: 'connected' or 'error'
+    └── Status display: "Reconnecting [retry in Xs]"
+
+    'error' ← Non-recoverable error categorized
+    ├── FAILURE STATE
+    ├── More aggressive backoff: 2.0x multiplier
+    ├── User notification: "Device Connection Failed"
+    └── Recovery path: Same as disconnected
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 9. KEY CONSTANTS                                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    RECONNECTION_INTERVAL_MS ........... 20 seconds (base interval)
+    CONNECTION_HEARTBEAT_INTERVAL_MS ... 5 minutes (proactive probe)
+    DPS_REFRESH_INTERVAL_MS ........... 3 minutes (data flow keep-alive)
+    STALE_CONNECTION_THRESHOLD_MS ..... 10 minutes (no data limit)
+    CIRCUIT_BREAKER_RESET_TIME ........ 5 minutes (per cycle cooldown)
+    MAX_CIRCUIT_BREAKER_CYCLES ........ 3 (15 minutes total)
+    HEARTBEAT_TIMEOUT_MS ............. 10 seconds (per probe)
+    MAX_RECONNECTION_INTERVAL_MS ...... 30 minutes (absolute max)
+    WAKE_UP_TIMEOUT_MS ............... Variable (device-specific)
+    HEARTBEAT_DISCONNECTED_DELAY_MS ... 15 minutes (before wake-up probe)
+    DPS_REFRESH_DATA_EVENT_TIMEOUT_MS . 10 seconds (zombie detection)
+    HEARTBEAT_DATA_EVENT_TIMEOUT_MS ... 10 seconds (zombie detection)
+    MAX_CONSECUTIVE_FAILURES .......... 5 (triggers circuit breaker)
+

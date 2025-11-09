@@ -29,7 +29,7 @@ export class EnergyTrackingService {
 
   // State tracking for flow card triggers (v1.0.8)
   private dailyThresholdTriggered = false; // Reset daily at midnight
-  private lastDailyConsumptionCheck = 0;    // For rate limiting
+  private lastDailyConsumptionCheck = 0; // For rate limiting
   // TODO (v1.0.9): Implement automatic midnight reset via dailyResetInterval
   // Currently resets when service is reinitialized (app restart)
 

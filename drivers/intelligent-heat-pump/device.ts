@@ -183,10 +183,10 @@ class MyDevice extends Homey.Device {
   private compressorStateHistory: Array<{timestamp: number, running: boolean}> = [];
 
   // State tracking for flow card triggers (v1.0.8)
-  private lastCOPOutlierStatus = false;  // For cop_outlier_detected trigger
-  private lastCOPValue = 0;              // For cop_efficiency_changed trigger
-  private lastInletTemp: number | null = null;   // For inlet_temperature_changed
-  private lastOutletTemp: number | null = null;  // For outlet_temperature_changed
+  private lastCOPOutlierStatus = false; // For cop_outlier_detected trigger
+  private lastCOPValue = 0; // For cop_efficiency_changed trigger
+  private lastInletTemp: number | null = null; // For inlet_temperature_changed
+  private lastOutletTemp: number | null = null; // For outlet_temperature_changed
   private lastAmbientTemp: number | null = null; // For ambient_temperature_changed
 
   // External power energy tracking

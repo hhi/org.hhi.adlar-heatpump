@@ -460,7 +460,13 @@ export class FlowCardManagerService {
         this.logger('FlowCardManagerService: COP trend analysis triggered', { args });
 
         // Get service coordinator to access RollingCOPCalculator
-        const serviceCoordinator = (this.device as unknown as { serviceCoordinator?: { getRollingCOPCalculator: () => { getTrendAnalysis: (hours: number) => { trend: string; strength: number; trendKey: string } | null } } }).serviceCoordinator;
+        const { serviceCoordinator } = this.device as unknown as {
+          serviceCoordinator?: {
+            getRollingCOPCalculator: () => {
+              getTrendAnalysis: (hours: number) => { trend: string; strength: number; trendKey: string } | null;
+            };
+          };
+        };
 
         if (!serviceCoordinator) {
           this.logger('FlowCardManagerService: Service coordinator not available');
