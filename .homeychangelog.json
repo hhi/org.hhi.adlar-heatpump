@@ -1,21 +1,21 @@
 {
   "1.0.24": {
-    "en": "Fixed: Device no longer stuck in unavailable state after reconnection. Post-reconnect health check timeout increased from 2 to 10 seconds, preventing false-positive zombie detection that caused infinite reconnection loops.",
-    "nl": "Opgelost: Apparaat blijft niet langer vast in onbeschikbare staat na reconnectie. Post-reconnect health check timeout verhoogd van 2 naar 10 seconden, voorkomt fout-positieve zombie detectie die oneindige reconnectie lussen veroorzaakte.",
-    "de": "Behoben: Gerät bleibt nicht länger in unavailable-Zustand nach Wiederverbindung fest. Post-Reconnect Health-Check-Timeout von 2 auf 10 Sekunden erhöht, verhindert falsch-positive Zombie-Erkennung, die unendliche Wiederverbindungsschleifen verursachte.",
-    "fr": "Corrigé: L'appareil ne reste plus bloqué dans l'état indisponible après reconnexion. Le délai d'expiration du contrôle de santé post-reconnexion augmenté de 2 à 10 secondes, prévient la détection de zombie faux-positif qui causait des boucles de reconnexion infinies."
+    "en": "Device no longer becomes unavailable shortly after reconnecting.",
+    "nl": "Apparaat wordt niet langer onbeschikbaar kort na het heropstarten.",
+    "de": "Gerät wird nicht länger kurz nach der Wiederverbindung nicht verfügbar.",
+    "fr": "L'appareil ne devient plus indisponible peu après la reconnexion."
   },
   "1.0.23": {
-    "en": "Fixed: Heartbeat connection monitoring no longer times out prematurely on high-latency networks. Increased timeout from 5 to 10 seconds to accommodate slower device responses and temporary network congestion.",
-    "nl": "Opgelost: Heartbeat verbindingsmonitoring timed niet langer voortijdig uit op netwerken met hoge latentie. Verhoogde timeout van 5 naar 10 seconden voor tragere apparaatresponses en tijdelijke netwerkcongestie.",
-    "de": "Behoben: Heartbeat-Verbindungsüberwachung timed nicht mehr vorzeitig bei Hochlatenz-Netzwerken aus. Timeout von 5 auf 10 Sekunden erhöht, um langsamere Geräteresponses und vorübergehende Netzwerküberlastung zu berücksichtigen.",
-    "fr": "Corrigé: La surveillance du cœur de connexion ne s'éteint plus prématurément sur les réseaux à latence élevée. Délai d'attente augmenté de 5 à 10 secondes pour accommoder les réponses d'appareil plus lentes et la congestion réseau temporaire."
+    "en": "Improved stability on slow or congested networks.",
+    "nl": "Verbeterde stabiliteit op langzame of overbelaste netwerken.",
+    "de": "Verbesserte Stabilität bei langsamen oder überlasteten Netzwerken.",
+    "fr": "Stabilité améliorée sur les réseaux lents ou congestionnés."
   },
   "1.0.22": {
-    "en": "Fixed: Device no longer misidentified as offline due to network latency. Increased timeout for connection health checks to handle slow devices and temporary network congestion properly.",
-    "nl": "Opgelost: Apparaat wordt niet langer ten onrechte als offline geclassificeerd vanwege netwerklatentie. Verhoogde timeout voor verbindingshealthchecks om langzame apparaten en tijdelijke netwerkcongestie correct te verwerken.",
-    "de": "Behoben: Gerät wird nicht länger fälschlicherweise als offline klassifiziert. Erhöhte Timeouts für Verbindungs-Healthchecks zur korrekten Handhabung langsamer Geräte und vorübergehender Netzwerküberlastung.",
-    "fr": "Corrigé: L'appareil n'est plus classé à tort comme hors ligne en raison de la latence réseau. Délai d'expiration augmenté pour les contrôles d'état de connexion pour gérer correctement les appareils lents."
+    "en": "Device no longer incorrectly shows as offline during slow network responses.",
+    "nl": "Apparaat toont niet langer ten onrechte als offline wanneer het netwerk traag reageert.",
+    "de": "Gerät wird nicht länger fälschlicherweise als offline angezeigt, wenn das Netzwerk langsam reagiert.",
+    "fr": "L'appareil n'affiche plus à tort comme hors ligne lors de réponses réseau lentes."
   },
   "1.0.21": {
     "en": "Fixed: COP efficiency change notifications now include correct data tokens (method and confidence). Consolidated duplicate flow card implementations that were sending conflicting tokens.",
