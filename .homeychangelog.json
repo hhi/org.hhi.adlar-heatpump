@@ -1,4 +1,10 @@
 {
+  "1.0.24": {
+    "en": "Fixed: Device no longer stuck in unavailable state after reconnection. Post-reconnect health check timeout increased from 2 to 10 seconds, preventing false-positive zombie detection that caused infinite reconnection loops.",
+    "nl": "Opgelost: Apparaat blijft niet langer vast in onbeschikbare staat na reconnectie. Post-reconnect health check timeout verhoogd van 2 naar 10 seconden, voorkomt fout-positieve zombie detectie die oneindige reconnectie lussen veroorzaakte.",
+    "de": "Behoben: Gerät bleibt nicht länger in unavailable-Zustand nach Wiederverbindung fest. Post-Reconnect Health-Check-Timeout von 2 auf 10 Sekunden erhöht, verhindert falsch-positive Zombie-Erkennung, die unendliche Wiederverbindungsschleifen verursachte.",
+    "fr": "Corrigé: L'appareil ne reste plus bloqué dans l'état indisponible après reconnexion. Le délai d'expiration du contrôle de santé post-reconnexion augmenté de 2 à 10 secondes, prévient la détection de zombie faux-positif qui causait des boucles de reconnexion infinies."
+  },
   "1.0.23": {
     "en": "Fixed: Heartbeat connection monitoring no longer times out prematurely on high-latency networks. Increased timeout from 5 to 10 seconds to accommodate slower device responses and temporary network congestion.",
     "nl": "Opgelost: Heartbeat verbindingsmonitoring timed niet langer voortijdig uit op netwerken met hoge latentie. Verhoogde timeout van 5 naar 10 seconden voor tragere apparaatresponses en tijdelijke netwerkcongestie.",

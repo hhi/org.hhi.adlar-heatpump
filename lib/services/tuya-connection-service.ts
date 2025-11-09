@@ -420,9 +420,9 @@ export class TuyaConnectionService {
       this.logger('TuyaConnectionService: Verifying connection health with DPS query...');
       await this.tuya!.get({ schema: true });
 
-      // Wait max 2 seconds for data event to fire
+      // Wait for data event to fire (v1.0.24: increased to 10s from 2s to handle high-latency networks)
       const startWait = Date.now();
-      while (Date.now() - startWait < 2000) {
+      while (Date.now() - startWait < DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS) {
         if (this.lastDataEventReceived > preQueryDataTime) {
           this.logger('✅ Connection health verified - data event received');
           return true;
@@ -433,7 +433,7 @@ export class TuyaConnectionService {
         });
       }
 
-      this.logger('❌ Connection health check failed - no data event received within 2 seconds');
+      this.logger(`❌ Connection health check failed - no data event received within ${DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS / 1000}s`);
       return false;
     } catch (error) {
       this.logger('❌ Connection health check error:', error);
