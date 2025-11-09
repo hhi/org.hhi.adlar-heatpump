@@ -220,12 +220,15 @@ class MyDevice extends Homey.Device {
    * Also respects legacy DEBUG=1 for backwards compatibility
    */
   private shouldLog(category: 'core' | 'cop' | 'scop' | 'energy'): boolean {
-    // Legacy DEBUG=1 enablement
-    if (process.env.DEBUG === '1') {
-      return true;
+    // Determine effective DEBUG_LEVEL
+    // Legacy: DEBUG=1 without explicit DEBUG_LEVEL → default to 'core'
+    // This shows connection logs while filtering out COP/SCOP spam
+    let level: string;
+    if (process.env.DEBUG === '1' && !process.env.DEBUG_LEVEL) {
+      level = 'core'; // Legacy DEBUG=1 mode: show core logs only
+    } else {
+      level = process.env.DEBUG_LEVEL || 'none';
     }
-
-    const level = process.env.DEBUG_LEVEL || 'none';
 
     // Level=all includes everything
     if (level === 'all') {
@@ -237,7 +240,7 @@ class MyDevice extends Homey.Device {
       return true;
     }
 
-    // Grouped categories
+    // Grouped categories: cop level includes cop/scop/energy
     if (level === 'cop' && (category === 'cop' || category === 'scop' || category === 'energy')) {
       return true;
     }

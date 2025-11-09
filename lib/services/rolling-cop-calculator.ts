@@ -100,13 +100,14 @@ export class RollingCOPCalculator {
    * Respects DEBUG_LEVEL env var: all, cop, none
    */
   private categoryLog(category: 'cop' | 'scop', message: string, ...args: unknown[]) {
-    // Check DEBUG_LEVEL environment variable
-    const level = process.env.DEBUG_LEVEL || 'none';
-
-    // Legacy DEBUG=1 enablement
-    if (process.env.DEBUG === '1') {
-      this.logger(message, ...args);
-      return;
+    // Determine effective DEBUG_LEVEL
+    // Legacy: DEBUG=1 without explicit DEBUG_LEVEL → default to 'core'
+    // This filters out COP/SCOP logging unless explicitly requested
+    let level: string;
+    if (process.env.DEBUG === '1' && !process.env.DEBUG_LEVEL) {
+      level = 'core'; // Legacy DEBUG=1 mode: show core logs only (not COP/SCOP)
+    } else {
+      level = process.env.DEBUG_LEVEL || 'none';
     }
 
     // Level=all includes everything
