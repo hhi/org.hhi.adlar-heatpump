@@ -38,6 +38,9 @@ export class DeviceConstants {
   /** Periodic DPS refresh interval - prevent heartbeat timeouts during idle periods (v1.0.3) */
   static readonly DPS_REFRESH_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
 
+  /** DPS Refresh data event timeout - max wait for data event after query (v1.0.22 fix) */
+  static readonly DPS_REFRESH_DATA_EVENT_TIMEOUT_MS = 10 * 1000; // 10 seconds (was hardcoded 2s - too aggressive for high latency)
+
   /** Energy tracking update interval - frequent updates for accurate energy accumulation */
   static readonly ENERGY_TRACKING_INTERVAL_MS = 10 * 1000; // 10 seconds
 

@@ -961,8 +961,8 @@ export class TuyaConnectionService {
       // Perform lightweight DPS query
       this.tuya.get({ schema: true })
         .then(async () => {
-          // Wait briefly for data event to fire (max 2 seconds)
-          const maxWaitTime = 2000;
+          // Wait for data event to fire (max 10 seconds, v1.0.22 - was 2s, too aggressive for high latency)
+          const maxWaitTime = DeviceConstants.DPS_REFRESH_DATA_EVENT_TIMEOUT_MS;
           const startWait = Date.now();
 
           while (Date.now() - startWait < maxWaitTime) {
@@ -979,9 +979,9 @@ export class TuyaConnectionService {
             });
           }
 
-          // ZOMBIE DETECTED: get() succeeded but NO data event received
-          this.logger(`🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED at ${timeStr} - DPS refresh get() succeeded but NO data event received!`);
-          this.logger('TuyaConnectionService: Forcing full reconnect to recover from zombie state...');
+          // ZOMBIE DETECTED: get() succeeded but NO data event received (v1.0.22 - after increased timeout)
+          this.logger(`🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED at ${timeStr} - DPS refresh get() succeeded but NO data event within ${DeviceConstants.DPS_REFRESH_DATA_EVENT_TIMEOUT_MS / 1000}s!`);
+          this.logger('TuyaConnectionService: This may indicate true connection death or severe network congestion. Forcing full reconnect to recover...');
 
           // Force reconnection to clear zombie state
           await this.forceReconnect().catch((error) => {
