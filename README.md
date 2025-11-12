@@ -239,7 +239,36 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v0.99.62 - Settings-Based Credential Management (Current)
+### v1.0.31 - Comprehensive Connection Recovery System Overhaul (Current)
+
+**Critical Stability Fix:**
+
+- ✅ **Fixed 4-Hour Disconnection Bug**: Devices no longer stay offline for extended periods without automatic recovery
+- ✅ **Reconnection Loop Always Active**: Timer management overhauled - monitoring continues even when connection appears "healthy"
+- ✅ **Synergistic Architecture**: TCP keep-alive (OS-level) + Heartbeat (app-level verification) + DPS refresh (NAT maintenance)
+- ✅ **Eliminated Race Conditions**: Removed self-terminating callbacks and concurrent operation conflicts
+- ✅ **Proper Error Recovery**: Failed reconnection attempts now properly trigger exponential backoff instead of silent failure
+
+**Technical Changes:**
+
+- 🔧 Fixed early exit break in `scheduleNextReconnectionAttempt()` (always reschedule, never break recursion)
+- 🔧 Removed DPS refresh zombie detection (heartbeat handles this, prevents temporal paradoxes)
+- 🔧 Added recovery path on `forceReconnect()` failure (proper backoff on reconnection failure)
+- 🔧 Simplified DPS refresh (NAT keep-alive only, no wait loops)
+- 🔧 Added concurrent `forceReconnect()` safeguard (prevents race conditions)
+
+**Impact:**
+
+- Devices now auto-recover from extended outages (previously required manual "Force Reconnect")
+- Zero race conditions between monitoring mechanisms
+- Clear timer loop that never breaks or gets stuck
+- Heartbeat and DPS refresh work together without interference
+
+**Reference:** See `docs/Dev support/Architectural overview/v1.0.31-connection-recovery-overhaul.md` for complete technical documentation.
+
+---
+
+### v0.99.62 - Settings-Based Credential Management
 
 **Simplified User Experience:**
 
