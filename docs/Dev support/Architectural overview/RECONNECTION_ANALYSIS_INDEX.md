@@ -1,5 +1,16 @@
 # TuyaConnectionService Reconnection Analysis - Complete Documentation Index
 
+> ⚠️ **DEPRECATION NOTICE - v1.0.31 Architectural Changes**
+>
+> This document series describes reconnection logic from v1.0.25-v1.0.30.
+> **Critical changes in v1.0.31** have modified:
+> - DPS refresh no longer calls `forceReconnect()` (zombie detection moved to heartbeat only)
+> - `scheduleNextReconnectionAttempt()` now reschedules even when connection appears "healthy"
+> - `forceReconnect()` now triggers normal reconnection loop with backoff on failure
+> - Option B synergistic architecture: TCP keep-alive + Heartbeat + DPS refresh (NAT only)
+>
+> **For current information, see**: `CLAUDE.md` section "Heartbeat Mechanism (v0.99.98+, Enhanced v1.0.31)"
+
 ## Overview
 This folder contains a comprehensive analysis of all reconnection decision points in the TuyaConnectionService. The analysis identifies how, when, and where reconnection is triggered, including event-based triggers, time-based mechanisms, error recovery strategies, and multi-layer zombie connection detection.
 

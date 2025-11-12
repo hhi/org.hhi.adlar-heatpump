@@ -1,4 +1,4 @@
-# Adlar Heat Pump - Capabilities Overview (v0.99.56+, verified through v1.0.30)
+# Adlar Heat Pump - Capabilities Overview (v0.99.56+, verified through v1.0.31)
 
 This document provides a comprehensive overview of all device capabilities supported by the Adlar Heat Pump app, including advanced insights management, dynamic capability control, and dual picker/sensor architecture for curve controls.
 

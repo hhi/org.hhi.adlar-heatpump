@@ -1,4 +1,4 @@
-# Architecture Overview (v0.99.99+, verified through v1.0.30)
+# Architecture Overview (v0.99.99+, verified through v1.0.31)
 
 This document provides a comprehensive overview of the Adlar Heat Pump Homey app architecture, focusing on the Service Coordinator pattern, utility libraries, and core systems that provide reliability, maintainability, and enhanced user experience through intelligent insights management and dual picker/sensor architecture for curve controls.
 

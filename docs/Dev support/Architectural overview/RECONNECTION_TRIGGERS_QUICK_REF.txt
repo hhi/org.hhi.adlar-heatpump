@@ -2,6 +2,16 @@
 ║        TuyaConnectionService - Reconnection Triggers Quick Reference          ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
+⚠️  DEPRECATION NOTICE - v1.0.31 ARCHITECTURAL CHANGES ⚠️
+
+This document describes v1.0.25-v1.0.30 architecture.
+CRITICAL CHANGES IN v1.0.31:
+  • DPS refresh no longer calls forceReconnect() - zombie detection moved to heartbeat
+  • scheduleNextReconnectionAttempt() always reschedules (even when "healthy")
+  • Line number references are OUTDATED after v1.0.31 code changes
+
+CURRENT REFERENCE: See CLAUDE.md "Heartbeat Mechanism (v1.0.31)" section
+
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 1. EVENT-BASED TRIGGERS (Reactive - Immediate or Fast)                      │
 └─────────────────────────────────────────────────────────────────────────────┘
