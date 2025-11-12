@@ -1,14 +1,14 @@
 {
   "1.0.31": {
-    "en": "Fixed critical connection recovery system. Device no longer stays disconnected for extended periods (4+ hours). Reconnection monitoring now continues indefinitely even when connection appears healthy. Aligned heartbeat monitoring with TCP keep-alive strategy for synergistic operation.",
-    "nl": "Kritiek verbindingsherstelsysteem opgelost. Apparaat blijft niet langer voor lange perioden verbroken (4+ uur). Herverbindingscontrole loopt nu oneindig door, zelfs als verbinding gezond lijkt. Hartslag-monitoring afgestemd op TCP keep-alive strategie voor synergetische werking.",
-    "de": "Kritisches Verbindungswiederherstellungssystem behoben. Gerät bleibt nicht mehr über längere Zeiträume getrennt (4+ Stunden). Wiederverbindungsüberwachung läuft jetzt unbegrenzt weiter, auch wenn die Verbindung gesund aussieht. Herzschlag-Überwachung auf TCP Keep-Alive-Strategie ausgerichtet für synergistische Funktion.",
-    "fr": "Système de récupération de connexion critique corrigé. L'appareil ne reste plus déconnecté pendant de longues périodes (4+ heures). La surveillance de reconnexion s'exécute maintenant indéfiniment, même lorsque la connexion semble saine. Surveillance des battements alignée sur la stratégie TCP keep-alive pour un fonctionnement synergique."
+    "en": "Aligned heartbeat monitoring with TCP keep-alive strategy for synergistic operation.",
+    "nl": "Hartslag-monitoring afgestemd op TCP keep-alive strategie voor synergetische werking.",
+    "de": "Herzschlag-Überwachung auf TCP Keep-Alive-Strategie ausgerichtet für synergistische Funktion.",
+    "fr": "Surveillance des battements alignée sur la stratégie TCP keep-alive pour un fonctionnement synergique."
   },
   "1.0.30": {
     "en": "Fixed: Daily and monthly COP efficiency change flow cards now trigger correctly with proper value tokens (current, previous, and change amounts). Consolidated duplicate flow card implementations that were sending conflicting tokens. Internal improvements to logging system for better diagnostics and troubleshooting.",
     "nl": "Opgelost: Dagelijkse en maandelijkse COP efficiëntie wijzigings flow cards activeren nu correct met waarde tokens (huidiging, vorig en wijzigingsbedragen). Geconsolideerde dubbele flow card implementaties die conflicterende tokens verzonden. Interne verbeteringen aan het loggingsysteem voor betere diagnostiek en probleemoplossing.",
-    "de": "Behoben: Tägliche und monatliche COP-Effizienzänderungs-Flow-Karten werden jetzt mit korrekten Wert-Tokens ausgelöst (aktuell, vorherig und Änderungsbeträge). Konsolidierte doppelte Flow-Card-Implementierungen, die in Konflikt stehende Tokens sendeten. Interne Verbesserungen am Protokollierungssystem für bessere Diagnose und Fehlerbehebung.",
+    "de": "Behoben: Tägliche und monatliche COP-Effizienzänderungs-Flow-Karten wurden jetzt mit korrekten Wert-Tokens ausgelöst (aktuell, vorherig und Änderungsbeträge). Konsolidierte doppelte Flow-Card-Implementierungen, die in Konflikt stehende Tokens sendeten. Interne Verbesserungen am Protokollierungssystem für bessere Diagnose und Fehlerbehebung.",
     "fr": "Corrigé: Les cartes de flux de changement d'efficacité COP quotidienne et mensuelle se déclenchent maintenant correctement avec les jetons de valeur appropriés (courant, précédent et montants de changement). Implémentations de cartes de flux dupliquées consolidées qui envoyaient des jetons en conflit. Améliorations internes du système d'enregistrement pour un meilleur diagnostic et dépannage."
   },
   "1.0.15": {
