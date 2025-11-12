@@ -88,6 +88,7 @@ export class TuyaConnectionService {
   private lastDataEventTime: number = Date.now();
   private lastHeartbeatTime: number = 0;
   private heartbeatInProgress = false;
+  private forceReconnectInProgress = false; // v1.0.31 - Prevent concurrent forceReconnect calls
 
   // Diagnostic tracking for 06:35 disconnect investigation (v1.0.4)
   private lastDisconnectSource: string | null = null;
@@ -286,6 +287,13 @@ export class TuyaConnectionService {
     try {
       this.logger('TuyaConnectionService: Attempting connection...');
 
+      // Install deep socket error handler PROACTIVELY before connection attempt (v1.0.33)
+      // CRITICAL FIX: TuyAPI creates the internal TCP socket during find()/connect() calls
+      // without our error handler attached yet. This race condition window allows ECONNRESET
+      // to occur on the unprotected socket and become an unhandled rejection (crash report).
+      // Installing the handler here (before any socket operations) prevents the crash.
+      this.installDeepSocketErrorHandler();
+
       // v1.0.12: Progressive reconnection strategy
       // After WAKE_UP_ATTEMPT_THRESHOLD failed passive attempts, try active wake-up first
       const shouldTryWakeUp = this.passiveReconnectionAttempts >= DeviceConstants.WAKE_UP_ATTEMPT_THRESHOLD;
@@ -442,6 +450,21 @@ export class TuyaConnectionService {
    * @returns Promise that resolves when reconnection attempt completes (success or failure)
    */
   async forceReconnect(): Promise<void> {
+    // Prevent concurrent forceReconnect calls (v1.0.31)
+    if (this.forceReconnectInProgress) {
+      this.logger('TuyaConnectionService: Force reconnect already in progress, skipping duplicate call');
+      return;
+    }
+
+    this.forceReconnectInProgress = true;
+    try {
+      await this.forceReconnectImpl();
+    } finally {
+      this.forceReconnectInProgress = false;
+    }
+  }
+
+  private async forceReconnectImpl(): Promise<void> {
     this.logger('TuyaConnectionService: Force reconnect triggered by user');
 
     // Step 1: Stop any pending reconnection attempts, heartbeat, and DPS refresh
@@ -464,18 +487,31 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Error recovery state reset - ready for fresh connection');
 
     // Step 4: Attempt immediate reconnection
+    let connectSuccess = false;
     try {
       await this.connectTuya();
-      this.logger('TuyaConnectionService: Force reconnect successful');
+      connectSuccess = true;
+      this.logger('TuyaConnectionService: Force reconnect successful - intervals resumed');
     } catch (error) {
-      this.logger('TuyaConnectionService: Force reconnect failed:', error);
-      // Don't throw - let normal reconnection logic handle retry
+      this.logger('TuyaConnectionService: Force reconnect attempt failed, triggering normal reconnection loop:', error);
+
+      // CRITICAL FIX (v1.0.31): Mark as disconnected and trigger reconnection loop
+      // This ensures failures don't silently restart intervals with device still offline
+      this.isConnected = false;
+      this.consecutiveFailures++;
+
+      // Let the normal reconnection loop handle retry with proper backoff
+      this.scheduleNextReconnectionAttempt();
+      return; // Exit early - don't restart intervals
     }
 
     // Step 5: Resume normal reconnection monitoring, heartbeat, and DPS refresh
-    this.startReconnectInterval();
-    this.startHeartbeat();
-    this.startPeriodicDpsRefresh();
+    // ONLY if connection was successful
+    if (connectSuccess) {
+      this.startReconnectInterval();
+      this.startHeartbeat();
+      this.startPeriodicDpsRefresh();
+    }
   }
 
   /**
@@ -987,39 +1023,15 @@ export class TuyaConnectionService {
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-      // ZOMBIE DETECTION (v1.0.17): Track data event reception BEFORE query
-      const preQueryDataTime = this.lastDataEventReceived;
 
-      // Perform lightweight DPS query
+      // Perform lightweight DPS query (NAT keep-alive only, v1.0.31)
+      // CHANGE (v1.0.31): DPS refresh is NOW NAT keep-alive only - heartbeat handles zombie detection
+      // This removes the 10-second wait loop and forceReconnect call that caused temporal paradoxes
       this.tuya.get({ schema: true })
-        .then(async () => {
-          // Wait for data event to fire (max 10 seconds, v1.0.22 - was 2s, too aggressive for high latency)
-          const maxWaitTime = DeviceConstants.DPS_REFRESH_DATA_EVENT_TIMEOUT_MS;
-          const startWait = Date.now();
-
-          while (Date.now() - startWait < maxWaitTime) {
-            if (this.lastDataEventReceived > preQueryDataTime) {
-              // Data event received - normal operation
-              this.lastDataEventTime = Date.now();
-              this.logger(`TuyaConnectionService: ✅ Periodic DPS refresh at ${timeStr} - data event confirmed, timestamp updated`);
-              return; // Exit early - success
-            }
-
-            // Wait 100ms before next check
-            await new Promise((resolve) => {
-              this.device.homey.setTimeout(resolve, 100);
-            });
-          }
-
-          // ZOMBIE DETECTED: get() succeeded but NO data event received (v1.0.22 - after increased timeout)
-          const timeoutSeconds = DeviceConstants.DPS_REFRESH_DATA_EVENT_TIMEOUT_MS / 1000;
-          this.logger(`🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED at ${timeStr} - DPS refresh get() succeeded but NO data event within ${timeoutSeconds}s!`);
-          this.logger('TuyaConnectionService: This may indicate true connection death or severe network congestion. Forcing full reconnect to recover...');
-
-          // Force reconnection to clear zombie state
-          await this.forceReconnect().catch((error) => {
-            this.logger('TuyaConnectionService: DPS Refresh zombie recovery failed:', error);
-          });
+        .then(() => {
+          // Query succeeded - update timestamp for NAT keep-alive tracking
+          this.lastDataEventTime = Date.now();
+          this.logger(`TuyaConnectionService: ✅ Periodic DPS refresh at ${timeStr} - query succeeded, NAT mapping maintained`);
         })
         .catch((error) => {
           // Query failed - don't mark as disconnected, let heartbeat handle failures
@@ -1040,10 +1052,22 @@ export class TuyaConnectionService {
   }
 
   /**
-   * Perform a single heartbeat check with intelligent skip logic (v0.99.98).
-   * Enhanced with hybrid approach (v1.0.9): tries passive get() first, then active set() wake-up.
+   * Perform heartbeat check to verify TCP keep-alive is working (v1.0.31 - Synergistic Strategy).
+   *
+   * ARCHITECTURE (v1.0.31 - Option B):
+   * - TCP keep-alive (5-min OS-level): Sends packets to detect dead sockets
+   * - Heartbeat (5-min app-level): Verifies device responds to keep-alive probes
+   * - DPS refresh (5-min): NAT timeout prevention ONLY, no zombie detection
+   *
+   * Heartbeat runs at same 5-minute interval as TCP keep-alive to complement it:
+   * Layer 1: get() query - tests if socket is responsive (confirms keep-alive working)
+   * Layer 2: set(dps:1) wake-up - tests if sleeping device responds to commands
+   *
+   * If both layers fail → device is unresponsive (true disconnect)
+   * If either succeeds → device is responsive (keep-alive working)
+   *
    * Skips heartbeat if device has sent data recently (avoids unnecessary traffic).
-   * Detects zombie connections by attempting a lightweight get() query.
+   * Enhanced with hybrid approach (v1.0.9): tries passive get() first, then active set() wake-up.
    * If get() fails, attempts an idempotent set() operation to wake sleeping devices.
    */
   private async performHeartbeat(): Promise<void> {
@@ -1321,8 +1345,14 @@ export class TuyaConnectionService {
 
         // Continue to reconnection attempt below
       } else {
-        // Connection is healthy and has recent data - skip reconnection
-        this.logger(`TuyaConnectionService: Connection healthy (data received ${Math.round(timeSinceLastData / 1000)}s ago), skipping reconnection`);
+        // Connection is healthy and has recent data - reschedule next health check
+        // CRITICAL (v1.0.31): MUST always schedule next check to keep monitoring loop alive
+        this.logger(`TuyaConnectionService: Connection healthy (data received ${Math.round(timeSinceLastData / 1000)}s ago), scheduling next health check in ${DeviceConstants.RECONNECTION_INTERVAL_MS / 1000}s`);
+
+        // Schedule next health check at normal interval (don't apply backoff for healthy connections)
+        this.reconnectInterval = this.device.homey.setTimeout(() => {
+          this.scheduleNextReconnectionAttempt();
+        }, DeviceConstants.RECONNECTION_INTERVAL_MS);
         return;
       }
     }
@@ -1684,6 +1714,9 @@ export class TuyaConnectionService {
 
     this.tuya = null;
     this.isConnected = false;
+
+    // Reset in-progress flags (v1.0.31)
+    this.forceReconnectInProgress = false;
 
     this.logger('TuyaConnectionService: Service destroyed');
   }
