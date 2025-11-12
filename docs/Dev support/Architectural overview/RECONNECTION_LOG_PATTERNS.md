@@ -1,5 +1,13 @@
 # Reconnection Log Patterns - Distinguishing Trigger Types
 
+> ⚠️ **DEPRECATION NOTICE - v1.0.31 Architectural Changes**
+>
+> This document describes log patterns from v1.0.25-v1.0.30.
+> **v1.0.31 changes** have modified when and how certain log messages appear.
+> Log patterns for DPS refresh and stale connection detection may differ.
+>
+> **For current diagnostics**: See `CLAUDE.md` "Heartbeat Mechanism (v1.0.31)" for current log patterns.
+
 ## Overview
 
 The TuyaConnectionService generates logs with **distinct signatures** that reveal which reconnection trigger was activated. This guide helps you quickly identify whether a reconnection was triggered by:

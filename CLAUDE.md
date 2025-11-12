@@ -663,7 +663,7 @@ updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
 - ✅ **Connection Stability**: Eliminates disconnections caused by async operation pile-up
 - ✅ **Scalability**: Handles 49+ capabilities efficiently without blocking
 
-#### Heartbeat Mechanism (v0.99.98-v0.99.99, Enhanced v1.0.9)
+#### Heartbeat Mechanism (v0.99.98-v0.99.99, Enhanced v1.0.9, Overhauled v1.0.31)
 
 **Purpose**: Proactively detect zombie connections during idle periods when device appears connected but data flow has stopped.
 

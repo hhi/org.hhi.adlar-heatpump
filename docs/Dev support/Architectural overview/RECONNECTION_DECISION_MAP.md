@@ -1,5 +1,13 @@
 # TuyaConnectionService - Complete Reconnection Decision Map
 
+> ⚠️ **DEPRECATION NOTICE - v1.0.31 Architectural Changes**
+>
+> This document describes v1.0.25-v1.0.30 architecture.
+> **v1.0.31 critical fixes removed**: DPS refresh `forceReconnect()` calls, early exit breaks, missing recovery paths.
+> **Line number references may be inaccurate** after v1.0.31 changes.
+>
+> **Current reference**: See `CLAUDE.md` "Comprehensive Timer Management QA Audit" section.
+
 ## Overview
 
 The TuyaConnectionService implements a multi-layered reconnection system with 7 distinct triggers across event-based and time-based mechanisms. This analysis maps every decision point that initiates reconnection logic.
