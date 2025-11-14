@@ -1143,14 +1143,14 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Restore rolling COP data from device settings
+   * Restore rolling COP data from device store (unbounded, persistent storage)
    */
   private async restoreRollingCOPData(): Promise<void> {
     try {
-      const savedData = this.getSetting('rolling_cop_data');
+      const savedData = await this.getStoreValue('rolling_cop_data');
       if (savedData && this.rollingCOPCalculator) {
         this.rollingCOPCalculator.importData(savedData);
-        this.categoryLog('cop', '📈 Rolling COP data restored from settings');
+        this.categoryLog('cop', '📈 Rolling COP data restored from device store');
       }
     } catch (error) {
       this.categoryLog('cop', 'No rolling COP data to restore:', error);
@@ -1158,17 +1158,47 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Save rolling COP data to device settings
+   * Save rolling COP data to device store (unbounded, persistent storage)
    */
   private async saveRollingCOPData(): Promise<void> {
     try {
       if (this.rollingCOPCalculator) {
         const dataToSave = this.rollingCOPCalculator.exportData();
-        await this.setSettings({ rolling_cop_data: dataToSave });
-        this.categoryLog('cop', '📈 Rolling COP data saved to settings');
+        await this.setStoreValue('rolling_cop_data', dataToSave);
+        this.categoryLog('cop', '📈 Rolling COP data saved to device store');
       }
     } catch (error) {
       this.error('Failed to save rolling COP data:', error);
+    }
+  }
+
+  /**
+   * Restore SCOP seasonal data from device store (v1.0.31+, unbounded storage)
+   */
+  private async restoreSCOPData(): Promise<void> {
+    try {
+      const savedData = await this.getStoreValue('scop_daily_data');
+      if (savedData && this.scopCalculator) {
+        this.scopCalculator.importData(savedData);
+        this.categoryLog('scop', '🌤️ SCOP seasonal data restored from device store');
+      }
+    } catch (error) {
+      this.categoryLog('scop', 'No SCOP data to restore:', error);
+    }
+  }
+
+  /**
+   * Save SCOP seasonal data to device store (v1.0.31+, unbounded storage)
+   */
+  private async saveSCOPData(): Promise<void> {
+    try {
+      if (this.scopCalculator) {
+        const dataToSave = this.scopCalculator.exportData();
+        await this.setStoreValue('scop_daily_data', dataToSave);
+        this.categoryLog('scop', '🌤️ SCOP seasonal data saved to device store');
+      }
+    } catch (error) {
+      this.error('Failed to save SCOP seasonal data:', error);
     }
   }
 
@@ -1285,6 +1315,9 @@ class MyDevice extends Homey.Device {
       // Initialize SCOP calculator for seasonal performance tracking
       this.scopCalculator = new SCOPCalculator(this.homey);
       this.categoryLog('scop', 'SCOP calculator initialized');
+
+      // Try to restore seasonal data from settings (v1.0.31+)
+      await this.restoreSCOPData();
 
       // Initialize SCOP quality capability with localized message
       if (this.hasCapability('adlar_scop_quality')) {
@@ -3619,6 +3652,9 @@ class MyDevice extends Homey.Device {
 
     // Save rolling COP data before shutdown
     await this.saveRollingCOPData();
+
+    // Save SCOP seasonal data before shutdown (v1.0.31+)
+    await this.saveSCOPData();
 
     // Stop SCOP update interval
     this.stopSCOPUpdateInterval();

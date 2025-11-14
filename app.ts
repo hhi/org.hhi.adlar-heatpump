@@ -133,6 +133,15 @@ class MyApp extends App {
     this.log('MyApp has been initialized with production-ready error handlers');
   }
 
+  async onUninit() {
+    // Clean up global error handlers to prevent stacking during app updates
+    // If we don't remove these, each app update adds another handler → duplicates
+    process.removeAllListeners('unhandledRejection');
+    process.removeAllListeners('uncaughtException');
+
+    this.log('MyApp uninitialized - global error handlers cleaned up');
+  }
+
   async initFlowCards() {
     this.debugLog('Initializing flow cards with pattern-based registration...');
 
