@@ -1,5 +1,5 @@
 {
-  "1.0.31": {
+  "1.0.35": {
     "en": "Aligned heartbeat monitoring with TCP keep-alive strategy for synergistic operation. Device now preserves COP calculation history and seasonal data across app restarts and updates. Service timers improved for stability.",
     "nl": "Hartslag-monitoring afgestemd op TCP keep-alive strategie voor synergetische werking. Apparaat bewaart nu COP berekeningsgeschiedenis en seizoensdata bij app restart en updates. Service timers verbeterd voor stabiliteit.",
     "de": "Herzschlag-Überwachung auf TCP Keep-Alive-Strategie ausgerichtet für synergistische Funktion. Gerät speichert jetzt COP-Berechnungsverlauf und Saisondaten über App-Neustart und Updates. Service-Timer für Stabilität verbessert.",
