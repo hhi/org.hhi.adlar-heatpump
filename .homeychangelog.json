@@ -1,9 +1,9 @@
 {
   "1.0.31": {
-    "en": "Aligned heartbeat monitoring with TCP keep-alive strategy for synergistic operation.",
-    "nl": "Hartslag-monitoring afgestemd op TCP keep-alive strategie voor synergetische werking.",
-    "de": "Herzschlag-Überwachung auf TCP Keep-Alive-Strategie ausgerichtet für synergistische Funktion.",
-    "fr": "Surveillance des battements alignée sur la stratégie TCP keep-alive pour un fonctionnement synergique."
+    "en": "Aligned heartbeat monitoring with TCP keep-alive strategy for synergistic operation. Device now preserves COP calculation history and seasonal data across app restarts and updates. Service timers improved for stability.",
+    "nl": "Hartslag-monitoring afgestemd op TCP keep-alive strategie voor synergetische werking. Apparaat bewaart nu COP berekeningsgeschiedenis en seizoensdata bij app restart en updates. Service timers verbeterd voor stabiliteit.",
+    "de": "Herzschlag-Überwachung auf TCP Keep-Alive-Strategie ausgerichtet für synergistische Funktion. Gerät speichert jetzt COP-Berechnungsverlauf und Saisondaten über App-Neustart und Updates. Service-Timer für Stabilität verbessert.",
+    "fr": "Surveillance des battements alignée sur la stratégie TCP keep-alive pour un fonctionnement synergique. L'appareil conserve maintenant l'historique des calculs COP et les données saisonnières lors des redémarrages et mises à jour d'application. Minuteurs de service améliorés pour la stabilité."
   },
   "1.0.30": {
     "en": "Fixed: Daily and monthly COP efficiency change flow cards now trigger correctly with proper value tokens (current, previous, and change amounts). Consolidated duplicate flow card implementations that were sending conflicting tokens. Internal improvements to logging system for better diagnostics and troubleshooting.",
