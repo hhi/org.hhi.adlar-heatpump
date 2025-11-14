@@ -491,6 +491,39 @@ export class SCOPCalculator {
   }
 
   /**
+   * Export seasonal data for persistence (v1.0.31+)
+   * Converts Map to serializable array format for storage
+   */
+  public exportData(): {
+    dailyData: Array<[string, DailyCOPSummary]>;
+    currentSeasonStart: number;
+  } {
+    return {
+      dailyData: Array.from(this.dailyData.entries()),
+      currentSeasonStart: this.currentSeasonStart,
+    };
+  }
+
+  /**
+   * Import seasonal data from persistent storage (v1.0.31+)
+   * Restores Map from serialized array format
+   */
+  public importData(data: {
+    dailyData?: Array<[string, DailyCOPSummary]>;
+    currentSeasonStart?: number;
+  }): void {
+    if (data.dailyData && Array.isArray(data.dailyData)) {
+      this.dailyData = new Map(data.dailyData);
+      this.homey.log(`SCOPCalculator: Imported ${this.dailyData.size} daily summaries from storage`);
+    }
+
+    if (typeof data.currentSeasonStart === 'number') {
+      this.currentSeasonStart = data.currentSeasonStart;
+      this.homey.log(`SCOPCalculator: Restored season start year: ${this.currentSeasonStart}`);
+    }
+  }
+
+  /**
    * Cleanup method to release memory and prevent leaks
    * Clears all accumulated seasonal data and resets state
    */

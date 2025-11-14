@@ -16,6 +16,7 @@ export class FlowCardManagerService {
   private logger: (message: string, ...args: unknown[]) => void;
   private flowCardListeners = new Map<string, unknown>();
   private isInitialized = false;
+  private initializationRetryTimer: NodeJS.Timeout | null = null;
 
   /**
    * FlowCardManagerService manages registering/unregistering and invoking flow cards
@@ -45,7 +46,7 @@ export class FlowCardManagerService {
 
       if (categorizedError.retryable) {
         this.logger('FlowCardManagerService: Will retry flow card initialization in 5 seconds');
-        this.device.homey.setTimeout(() => this.initialize(), 5000);
+        this.initializationRetryTimer = this.device.homey.setTimeout(() => this.initialize(), 5000);
       }
     }
   }
@@ -667,6 +668,13 @@ export class FlowCardManagerService {
    */
   destroy(): void {
     this.logger('FlowCardManagerService: Destroying service');
+
+    // Clear any pending retry timer to prevent orphaned setTimeout callbacks
+    if (this.initializationRetryTimer) {
+      clearTimeout(this.initializationRetryTimer);
+      this.initializationRetryTimer = null;
+    }
+
     this.unregisterAllFlowCards();
     this.isInitialized = false;
     this.logger('FlowCardManagerService: Service destroyed');
