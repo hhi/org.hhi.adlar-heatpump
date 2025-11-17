@@ -401,6 +401,7 @@ export class TuyaConnectionService {
         this.tuya.removeAllListeners();
         await this.tuya.disconnect();
         this.isConnected = false;
+        this.tuya = null; // CRITICAL FIX (v1.0.36): Clear stale TuyAPI instance to allow fresh reconnection
         this.logger('TuyaConnectionService: Disconnected from Tuya device');
       } catch (error) {
         this.logger('TuyaConnectionService: Error during disconnect:', error);
