@@ -1,4 +1,10 @@
 {
+  "1.0.36": {
+    "en": "Fixed: Device now reconnects automatically within 1 minute after temporary network issues instead of becoming stuck. Previously required manual app restart after 3+ hour outages.",
+    "nl": "Opgelost: Apparaat herverbindt nu automatisch binnen 1 minuut na tijdelijke netwerkonderbrekingen in plaats van vast te lopen. Eerder vereist handmatige app-herstart na 3+ uur uitval.",
+    "de": "Behoben: Gerät verbindet sich jetzt automatisch innerhalb von 1 Minute nach vorübergehenden Netzwerkproblemen statt stecken zu bleiben. Früher war manueller App-Neustart nach 3+ Stunden Ausfall erforderlich.",
+    "fr": "Corrigé: L'appareil se reconnecte maintenant automatiquement dans 1 minute après les problèmes réseau temporaires au lieu de rester bloqué. Nécessitait auparavant un redémarrage manuel de l'application après 3+ heures de panne."
+  },
   "1.0.35": {
     "en": "Aligned heartbeat monitoring with TCP keep-alive strategy for synergistic operation. Device now preserves COP calculation history and seasonal data across app restarts and updates. Service timers improved for stability.",
     "nl": "Hartslag-monitoring afgestemd op TCP keep-alive strategie voor synergetische werking. Apparaat bewaart nu COP berekeningsgeschiedenis en seizoensdata bij app restart en updates. Service timers verbeterd voor stabiliteit.",
