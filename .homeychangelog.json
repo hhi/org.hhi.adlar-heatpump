@@ -1,4 +1,10 @@
 {
+  "1.0.37": {
+    "en": "Security update: Fixed prototype pollution vulnerability in YAML parsing (CVE-2025-64718). Updated js-yaml and related dependencies to latest secure versions.",
+    "nl": "Beveiligingsupdate: Prototype pollution kwetsbaarheid in YAML-parsing opgelost (CVE-2025-64718). js-yaml en gerelateerde afhankelijkheden bijgewerkt naar nieuwste veilige versies.",
+    "de": "Sicherheitsupdate: Prototype-Pollution-Anfälligkeit beim YAML-Parsen behoben (CVE-2025-64718). js-yaml und zugehörige Abhängigkeiten auf neueste sichere Versionen aktualisiert.",
+    "fr": "Mise à jour de sécurité: Vulnérabilité de pollution de prototype dans l'analyse YAML corrigée (CVE-2025-64718). js-yaml et les dépendances associées mises à jour vers les dernières versions sécurisées."
+  },
   "1.0.36": {
     "en": "Fixed: Device now reconnects automatically within 1 minute after temporary network issues instead of becoming stuck. Previously required manual app restart after 3+ hour outages.",
     "nl": "Opgelost: Apparaat herverbindt nu automatisch binnen 1 minuut na tijdelijke netwerkonderbrekingen in plaats van vast te lopen. Eerder vereist handmatige app-herstart na 3+ uur uitval.",
