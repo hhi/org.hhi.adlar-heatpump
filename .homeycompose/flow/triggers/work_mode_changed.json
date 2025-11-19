@@ -1,0 +1,53 @@
+{
+  "id": "work_mode_changed",
+  "title": {
+    "en": "Work mode changed",
+    "nl": "Werkingsmodus gewijzigd",
+    "de": "Betriebsmodus geändert",
+    "fr": "Mode de fonctionnement changé"
+  },
+  "titleFormatted": {
+    "en": "Work mode changed to [[mode]]",
+    "nl": "Werkingsmodus gewijzigd naar [[mode]]",
+    "de": "Betriebsmodus geändert auf [[mode]]",
+    "fr": "Mode de fonctionnement changé en [[mode]]"
+  },
+  "hint": {
+    "en": "Triggers when the work mode changes (ECO, Normal, Boost)",
+    "nl": "Wordt geactiveerd wanneer de werkingsmodus wijzigt (ECO, Normaal, Boost)",
+    "de": "Wird ausgelöst, wenn sich der Betriebsmodus ändert (ECO, Normal, Boost)",
+    "fr": "Se déclenche lorsque le mode de fonctionnement change (ECO, Normal, Boost)"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "name": "mode",
+      "title": {
+        "en": "Work mode",
+        "nl": "Werkingsmodus",
+        "de": "Betriebsmodus",
+        "fr": "Mode de fonctionnement"
+      },
+      "example": "normal"
+    },
+    {
+      "type": "string",
+      "name": "previous_mode",
+      "title": {
+        "en": "Previous work mode",
+        "nl": "Vorige werkingsmodus",
+        "de": "Vorheriger Betriebsmodus",
+        "fr": "Mode de fonctionnement précédent"
+      },
+      "example": "eco"
+    }
+  ]
+}
