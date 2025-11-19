@@ -1,4 +1,10 @@
 {
+  "1.1.0": {
+    "en": "Added 6 new flow card triggers: Heating mode changed, work mode changed, water mode changed, compressor state changed, defrost state changed, and backwater state changed. Enables advanced automations based on device mode transitions and system state changes.",
+    "nl": "6 nieuwe flow card triggers toegevoegd: Verwarmingsmodus gewijzigd, werkingsmodus gewijzigd, watermodus gewijzigd, compressor status gewijzigd, defrost status gewijzigd en terugwater status gewijzigd. Maakt geavanceerde automatisering op basis van apparaatmodus overgangen en systeemstatuswijzigingen mogelijk.",
+    "de": "6 neue Flow-Card-Trigger hinzugefügt: Heizmodus geändert, Betriebsmodus geändert, Wassermodus geändert, Kompressorstatus geändert, Abtaustatus geändert und Rückwasserstatus geändert. Ermöglicht erweiterte Automatisierung basierend auf Gerätemodusübergängen und Systemstatusänderungen.",
+    "fr": "6 nouveaux déclencheurs de carte de flux ajoutés: Mode de chauffage changé, mode de fonctionnement changé, mode d'eau changé, état du compresseur changé, état du dégivrage changé et état de l'eau de retour changé. Permet une automatisation avancée basée sur les transitions de mode d'appareil et les changements d'état du système."
+  },
   "1.0.37": {
     "en": "Security update: Fixed prototype pollution vulnerability in YAML parsing (CVE-2025-64718). Updated js-yaml and related dependencies to latest secure versions.",
     "nl": "Beveiligingsupdate: Prototype pollution kwetsbaarheid in YAML-parsing opgelost (CVE-2025-64718). js-yaml en gerelateerde afhankelijkheden bijgewerkt naar nieuwste veilige versies.",

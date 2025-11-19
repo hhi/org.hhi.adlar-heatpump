@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.0.37",
+  "version": "1.1.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -1763,6 +1763,59 @@
         ]
       },
       {
+        "id": "heating_mode_changed",
+        "title": {
+          "en": "Heating mode changed",
+          "nl": "Verwarmingsmodus gewijzigd",
+          "de": "Heizmodus geändert",
+          "fr": "Mode de chauffage changé"
+        },
+        "titleFormatted": {
+          "en": "Heating mode changed to [[mode]]",
+          "nl": "Verwarmingsmodus gewijzigd naar [[mode]]",
+          "de": "Heizmodus geändert auf [[mode]]",
+          "fr": "Mode de chauffage changé en [[mode]]"
+        },
+        "hint": {
+          "en": "Triggers when the heating mode changes",
+          "nl": "Wordt geactiveerd wanneer de verwarmingsmodus wijzigt",
+          "de": "Wird ausgelöst, wenn sich der Heizmodus ändert",
+          "fr": "Se déclenche lorsque le mode de chauffage change"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "mode",
+            "title": {
+              "en": "Heating mode",
+              "nl": "Verwarmingsmodus",
+              "de": "Heizmodus",
+              "fr": "Mode de chauffage"
+            },
+            "example": "heating"
+          },
+          {
+            "type": "string",
+            "name": "previous_mode",
+            "title": {
+              "en": "Previous heating mode",
+              "nl": "Vorige verwarmingsmodus",
+              "de": "Vorheriger Heizmodus",
+              "fr": "Mode de chauffage précédent"
+            },
+            "example": "cold"
+          }
+        ]
+      },
+      {
         "id": "high_pressure_temperature_alert",
         "title": {
           "en": "High pressure temperature alert",
@@ -3195,6 +3248,112 @@
               "fr": "Débit seuil"
             },
             "example": 20
+          }
+        ]
+      },
+      {
+        "id": "water_mode_changed",
+        "title": {
+          "en": "Water mode changed",
+          "nl": "Watermodus gewijzigd",
+          "de": "Wassermodus geändert",
+          "fr": "Mode d'eau changé"
+        },
+        "titleFormatted": {
+          "en": "Water mode changed to [[mode]]",
+          "nl": "Watermodus gewijzigd naar [[mode]]",
+          "de": "Wassermodus geändert auf [[mode]]",
+          "fr": "Mode d'eau changé en [[mode]]"
+        },
+        "hint": {
+          "en": "Triggers when the water control temperature mode changes",
+          "nl": "Wordt geactiveerd wanneer de watermodus wijzigt",
+          "de": "Wird ausgelöst, wenn sich der Wassermodus ändert",
+          "fr": "Se déclenche lorsque le mode d'eau change"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "mode",
+            "title": {
+              "en": "Water mode",
+              "nl": "Watermodus",
+              "de": "Wassermodus",
+              "fr": "Mode d'eau"
+            },
+            "example": "flowing"
+          },
+          {
+            "type": "string",
+            "name": "previous_mode",
+            "title": {
+              "en": "Previous water mode",
+              "nl": "Vorige watermodus",
+              "de": "Vorheriger Wassermodus",
+              "fr": "Mode d'eau précédent"
+            },
+            "example": "blocked"
+          }
+        ]
+      },
+      {
+        "id": "work_mode_changed",
+        "title": {
+          "en": "Work mode changed",
+          "nl": "Werkingsmodus gewijzigd",
+          "de": "Betriebsmodus geändert",
+          "fr": "Mode de fonctionnement changé"
+        },
+        "titleFormatted": {
+          "en": "Work mode changed to [[mode]]",
+          "nl": "Werkingsmodus gewijzigd naar [[mode]]",
+          "de": "Betriebsmodus geändert auf [[mode]]",
+          "fr": "Mode de fonctionnement changé en [[mode]]"
+        },
+        "hint": {
+          "en": "Triggers when the work mode changes (ECO, Normal, Boost)",
+          "nl": "Wordt geactiveerd wanneer de werkingsmodus wijzigt (ECO, Normaal, Boost)",
+          "de": "Wird ausgelöst, wenn sich der Betriebsmodus ändert (ECO, Normal, Boost)",
+          "fr": "Se déclenche lorsque le mode de fonctionnement change (ECO, Normal, Boost)"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "mode",
+            "title": {
+              "en": "Work mode",
+              "nl": "Werkingsmodus",
+              "de": "Betriebsmodus",
+              "fr": "Mode de fonctionnement"
+            },
+            "example": "normal"
+          },
+          {
+            "type": "string",
+            "name": "previous_mode",
+            "title": {
+              "en": "Previous work mode",
+              "nl": "Vorige werkingsmodus",
+              "de": "Vorheriger Betriebsmodus",
+              "fr": "Mode de fonctionnement précédent"
+            },
+            "example": "eco"
           }
         ]
       }

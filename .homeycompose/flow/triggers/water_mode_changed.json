@@ -1,0 +1,53 @@
+{
+  "id": "water_mode_changed",
+  "title": {
+    "en": "Water mode changed",
+    "nl": "Watermodus gewijzigd",
+    "de": "Wassermodus geändert",
+    "fr": "Mode d'eau changé"
+  },
+  "titleFormatted": {
+    "en": "Water mode changed to [[mode]]",
+    "nl": "Watermodus gewijzigd naar [[mode]]",
+    "de": "Wassermodus geändert auf [[mode]]",
+    "fr": "Mode d'eau changé en [[mode]]"
+  },
+  "hint": {
+    "en": "Triggers when the water control temperature mode changes",
+    "nl": "Wordt geactiveerd wanneer de watermodus wijzigt",
+    "de": "Wird ausgelöst, wenn sich der Wassermodus ändert",
+    "fr": "Se déclenche lorsque le mode d'eau change"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "name": "mode",
+      "title": {
+        "en": "Water mode",
+        "nl": "Watermodus",
+        "de": "Wassermodus",
+        "fr": "Mode d'eau"
+      },
+      "example": "flowing"
+    },
+    {
+      "type": "string",
+      "name": "previous_mode",
+      "title": {
+        "en": "Previous water mode",
+        "nl": "Vorige watermodus",
+        "de": "Vorheriger Wassermodus",
+        "fr": "Mode d'eau précédent"
+      },
+      "example": "blocked"
+    }
+  ]
+}

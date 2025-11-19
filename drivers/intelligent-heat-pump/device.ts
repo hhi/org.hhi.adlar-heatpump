@@ -203,6 +203,16 @@ class MyDevice extends Homey.Device {
   // Fault detection state tracking (v1.0.7 - fault_detected trigger)
   private lastFaultCode: number = 0;
 
+  // Boolean state change tracking (v1.1.0 - state change triggers)
+  private lastCompressorState: boolean | null = null;
+  private lastDefrostState: boolean | null = null;
+  private lastBackwaterState: boolean | null = null;
+
+  // Enum mode change tracking (v1.1.0 - enum state change triggers)
+  private lastHeatingMode: string | null = null;
+  private lastWorkMode: string | null = null;
+  private lastWaterMode: string | null = null;
+
   // Service Coordinator - manages all device services
   private serviceCoordinator: ServiceCoordinator | null = null;
 
@@ -2424,6 +2434,117 @@ class MyDevice extends Homey.Device {
               this.log(`✅ Fault cleared: Previous code ${this.lastFaultCode} resolved`);
               this.lastFaultCode = 0;
             }
+          }
+
+          // Boolean state change detection (v1.1.0) - compressor, defrost, backwater
+          // Triggers when these boolean states transition from true→false or false→true
+
+          // Compressor state (adlar_state_compressor_state) - DPS 27
+          if (dpsId === 27 && capability === 'adlar_state_compressor_state') {
+            const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
+
+            // Only trigger on state CHANGE (not on initialization)
+            if (this.lastCompressorState !== null && currentState !== this.lastCompressorState) {
+              const stateLabel = currentState ? 'running' : 'stopped';
+              this.triggerFlowCard('compressor_state_changed', {
+                state: stateLabel,
+                current_state: stateLabel,
+              }).catch((err) => {
+                this.error('Failed to trigger compressor_state_changed:', err);
+              });
+              this.log(`Compressor state changed to: ${stateLabel}`);
+            }
+            this.lastCompressorState = currentState;
+          }
+
+          // Defrost state (adlar_state_defrost_state) - DPS 33
+          if (dpsId === 33 && capability === 'adlar_state_defrost_state') {
+            const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
+
+            // Only trigger on state CHANGE (not on initialization)
+            if (this.lastDefrostState !== null && currentState !== this.lastDefrostState) {
+              const stateLabel = currentState ? 'active' : 'inactive';
+              this.triggerFlowCard('defrost_state_changed', {
+                state: stateLabel,
+                current_state: stateLabel,
+              }).catch((err) => {
+                this.error('Failed to trigger defrost_state_changed:', err);
+              });
+              this.log(`Defrost state changed to: ${stateLabel}`);
+            }
+            this.lastDefrostState = currentState;
+          }
+
+          // Backwater state (adlar_state_backwater) - DPS 31
+          if (dpsId === 31 && capability === 'adlar_state_backwater') {
+            const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
+
+            // Only trigger on state CHANGE (not on initialization)
+            if (this.lastBackwaterState !== null && currentState !== this.lastBackwaterState) {
+              const stateLabel = currentState ? 'flowing' : 'blocked';
+              this.triggerFlowCard('backwater_state_changed', {
+                state: stateLabel,
+                current_state: stateLabel,
+              }).catch((err) => {
+                this.error('Failed to trigger backwater_state_changed:', err);
+              });
+              this.log(`Backwater state changed to: ${stateLabel}`);
+            }
+            this.lastBackwaterState = currentState;
+          }
+
+          // Enum mode change detection (v1.1.0) - heating mode, work mode, water mode
+          // Triggers when these enum values change
+
+          // Heating mode (adlar_enum_mode) - DPS 2
+          if (dpsId === 2 && capability === 'adlar_enum_mode') {
+            const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
+
+            // Only trigger on mode CHANGE (not on initialization)
+            if (this.lastHeatingMode !== null && currentMode !== this.lastHeatingMode) {
+              this.triggerFlowCard('heating_mode_changed', {
+                mode: currentMode,
+                previous_mode: this.lastHeatingMode,
+              }).catch((err) => {
+                this.error('Failed to trigger heating_mode_changed:', err);
+              });
+              this.log(`Heating mode changed from ${this.lastHeatingMode} to ${currentMode}`);
+            }
+            this.lastHeatingMode = currentMode;
+          }
+
+          // Work mode (adlar_enum_work_mode) - DPS 5
+          if (dpsId === 5 && capability === 'adlar_enum_work_mode') {
+            const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
+
+            // Only trigger on mode CHANGE (not on initialization)
+            if (this.lastWorkMode !== null && currentMode !== this.lastWorkMode) {
+              this.triggerFlowCard('work_mode_changed', {
+                mode: currentMode,
+                previous_mode: this.lastWorkMode,
+              }).catch((err) => {
+                this.error('Failed to trigger work_mode_changed:', err);
+              });
+              this.log(`Work mode changed from ${this.lastWorkMode} to ${currentMode}`);
+            }
+            this.lastWorkMode = currentMode;
+          }
+
+          // Water mode (adlar_enum_water_mode) - DPS 10
+          if (dpsId === 10 && capability === 'adlar_enum_water_mode') {
+            const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
+
+            // Only trigger on mode CHANGE (not on initialization)
+            if (this.lastWaterMode !== null && currentMode !== this.lastWaterMode) {
+              this.triggerFlowCard('water_mode_changed', {
+                mode: currentMode,
+                previous_mode: this.lastWaterMode,
+              }).catch((err) => {
+                this.error('Failed to trigger water_mode_changed:', err);
+              });
+              this.log(`Water mode changed from ${this.lastWaterMode} to ${currentMode}`);
+            }
+            this.lastWaterMode = currentMode;
           }
 
           // Temperature change detection (v1.0.8) - inlet, outlet, ambient

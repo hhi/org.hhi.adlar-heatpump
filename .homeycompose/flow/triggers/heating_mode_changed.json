@@ -1,0 +1,53 @@
+{
+  "id": "heating_mode_changed",
+  "title": {
+    "en": "Heating mode changed",
+    "nl": "Verwarmingsmodus gewijzigd",
+    "de": "Heizmodus geändert",
+    "fr": "Mode de chauffage changé"
+  },
+  "titleFormatted": {
+    "en": "Heating mode changed to [[mode]]",
+    "nl": "Verwarmingsmodus gewijzigd naar [[mode]]",
+    "de": "Heizmodus geändert auf [[mode]]",
+    "fr": "Mode de chauffage changé en [[mode]]"
+  },
+  "hint": {
+    "en": "Triggers when the heating mode changes",
+    "nl": "Wordt geactiveerd wanneer de verwarmingsmodus wijzigt",
+    "de": "Wird ausgelöst, wenn sich der Heizmodus ändert",
+    "fr": "Se déclenche lorsque le mode de chauffage change"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "name": "mode",
+      "title": {
+        "en": "Heating mode",
+        "nl": "Verwarmingsmodus",
+        "de": "Heizmodus",
+        "fr": "Mode de chauffage"
+      },
+      "example": "heating"
+    },
+    {
+      "type": "string",
+      "name": "previous_mode",
+      "title": {
+        "en": "Previous heating mode",
+        "nl": "Vorige verwarmingsmodus",
+        "de": "Vorheriger Heizmodus",
+        "fr": "Mode de chauffage précédent"
+      },
+      "example": "cold"
+    }
+  ]
+}
