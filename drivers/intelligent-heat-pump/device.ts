@@ -2966,7 +2966,15 @@ class MyDevice extends Homey.Device {
     if (!initResult.success || initResult.failedServices.length > 0) {
       this.error('Service initialization issues:', {
         failedServices: initResult.failedServices,
-        errors: initResult.errors.map((e) => e.message),
+        errors: initResult.errors.map((e) => {
+          if (e instanceof Error) {
+            return e.message;
+          }
+          if (typeof e === 'object' && e !== null) {
+            return JSON.stringify(e);
+          }
+          return String(e);
+        }),
       });
       // Continue with fallback to direct methods for failed services
     }

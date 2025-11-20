@@ -285,16 +285,17 @@ export class FlowCardManagerService {
     try {
       // Device power state condition
       const devicePowerCard = this.device.homey.flow.getConditionCard('device_power_is');
-      devicePowerCard.registerRunListener(async (args) => {
+      const devicePowerListener = devicePowerCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Device power condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('onoff');
         const expectedState = args.state === 'on';
         return currentValue === expectedState;
       });
+      this.flowCardListeners.set('device_power_is', devicePowerListener);
 
       // Target temperature condition
       const targetTempCard = this.device.homey.flow.getConditionCard('target_temperature_is');
-      targetTempCard.registerRunListener(async (args) => {
+      const targetTempListener = targetTempCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Target temperature condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('target_temperature') || 0;
         const targetValue = args.temperature || 0;
@@ -310,10 +311,11 @@ export class FlowCardManagerService {
             return false;
         }
       });
+      this.flowCardListeners.set('target_temperature_is', targetTempListener);
 
       // Hot water temperature condition
       const hotWaterTempCard = this.device.homey.flow.getConditionCard('hotwater_temperature_is');
-      hotWaterTempCard.registerRunListener(async (args) => {
+      const hotWaterTempListener = hotWaterTempCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Hot water temperature condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_hotwater') || 0;
         const targetValue = args.temperature || 0;
@@ -329,26 +331,29 @@ export class FlowCardManagerService {
             return false;
         }
       });
+      this.flowCardListeners.set('hotwater_temperature_is', hotWaterTempListener);
 
       // Heating mode condition
       const heatingModeCard = this.device.homey.flow.getConditionCard('heating_mode_is');
-      heatingModeCard.registerRunListener(async (args) => {
+      const heatingModeListener = heatingModeCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Heating mode condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_enum_mode');
         return currentValue === args.mode;
       });
+      this.flowCardListeners.set('heating_mode_is', heatingModeListener);
 
       // Work mode condition
       const workModeCard = this.device.homey.flow.getConditionCard('work_mode_is');
-      workModeCard.registerRunListener(async (args) => {
+      const workModeListener = workModeCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Work mode condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_enum_work_mode');
         return currentValue === args.mode;
       });
+      this.flowCardListeners.set('work_mode_is', workModeListener);
 
       // Water mode condition
       const waterModeCard = this.device.homey.flow.getConditionCard('water_mode_is');
-      waterModeCard.registerRunListener(async (args) => {
+      const waterModeListener = waterModeCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Water mode condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_enum_water_mode') || 0;
         const targetValue = args.mode || 0;
@@ -364,26 +369,29 @@ export class FlowCardManagerService {
             return false;
         }
       });
+      this.flowCardListeners.set('water_mode_is', waterModeListener);
 
       // Capacity setting condition
       const capacitySettingCard = this.device.homey.flow.getConditionCard('capacity_setting_is');
-      capacitySettingCard.registerRunListener(async (args) => {
+      const capacitySettingListener = capacitySettingCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Capacity setting condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_enum_capacity_set');
         return currentValue === args.capacity;
       });
+      this.flowCardListeners.set('capacity_setting_is', capacitySettingListener);
 
       // Heating curve condition
       const heatingCurveCard = this.device.homey.flow.getConditionCard('heating_curve_is');
-      heatingCurveCard.registerRunListener(async (args) => {
+      const heatingCurveListener = heatingCurveCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Heating curve condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_enum_countdown_set');
         return currentValue === args.curve;
       });
+      this.flowCardListeners.set('heating_curve_is', heatingCurveListener);
 
       // Volume setting condition
       const volumeSettingCard = this.device.homey.flow.getConditionCard('volume_setting_is');
-      volumeSettingCard.registerRunListener(async (args) => {
+      const volumeSettingListener = volumeSettingCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Volume setting condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('adlar_enum_volume_set') || 0;
         const targetValue = args.level || 0;
@@ -399,10 +407,11 @@ export class FlowCardManagerService {
             return false;
         }
       });
+      this.flowCardListeners.set('volume_setting_is', volumeSettingListener);
 
       // COP efficiency check condition (v1.0.7)
       const copEfficiencyCard = this.device.homey.flow.getConditionCard('cop_efficiency_check');
-      copEfficiencyCard.registerRunListener(async (args) => {
+      const copEfficiencyListener = copEfficiencyCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: COP efficiency check triggered', { args });
 
         // Get current COP value from capability
@@ -420,10 +429,11 @@ export class FlowCardManagerService {
 
         return currentCOP > threshold;
       });
+      this.flowCardListeners.set('cop_efficiency_check', copEfficiencyListener);
 
       // Daily COP above threshold condition (v1.0.7)
       const dailyCOPCard = this.device.homey.flow.getConditionCard('daily_cop_above_threshold');
-      dailyCOPCard.registerRunListener(async (args) => {
+      const dailyCOPListener = dailyCOPCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Daily COP check triggered', { args });
 
         const dailyCOP = this.device.getCapabilityValue('adlar_cop_daily') as number || 0;
@@ -437,10 +447,11 @@ export class FlowCardManagerService {
 
         return dailyCOP > threshold;
       });
+      this.flowCardListeners.set('daily_cop_above_threshold', dailyCOPListener);
 
       // Monthly COP above threshold condition (v1.0.7)
       const monthlyCOPCard = this.device.homey.flow.getConditionCard('monthly_cop_above_threshold');
-      monthlyCOPCard.registerRunListener(async (args) => {
+      const monthlyCOPListener = monthlyCOPCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Monthly COP check triggered', { args });
 
         const monthlyCOP = this.device.getCapabilityValue('adlar_cop_monthly') as number || 0;
@@ -454,10 +465,11 @@ export class FlowCardManagerService {
 
         return monthlyCOP > threshold;
       });
+      this.flowCardListeners.set('monthly_cop_above_threshold', monthlyCOPListener);
 
       // COP trend analysis condition (v1.0.8)
       const copTrendCard = this.device.homey.flow.getConditionCard('cop_trend_analysis');
-      copTrendCard.registerRunListener(async (args) => {
+      const copTrendListener = copTrendCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: COP trend analysis triggered', { args });
 
         // Get service coordinator to access RollingCOPCalculator
@@ -503,6 +515,7 @@ export class FlowCardManagerService {
         // This is controlled by the flow card UI selection
         return trendAnalysis.trend === 'improving';
       });
+      this.flowCardListeners.set('cop_trend_analysis', copTrendListener);
 
       this.logger('FlowCardManagerService: Action-based condition cards registered');
     } catch (error) {

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -1771,10 +1771,10 @@
           "fr": "Mode de chauffage changé"
         },
         "titleFormatted": {
-          "en": "Heating mode changed to [[mode]]",
-          "nl": "Verwarmingsmodus gewijzigd naar [[mode]]",
-          "de": "Heizmodus geändert auf [[mode]]",
-          "fr": "Mode de chauffage changé en [[mode]]"
+          "en": "Heating mode changed [[mode]]",
+          "nl": "Verwarmingsmodus gewijzigd [[mode]]",
+          "de": "Heizmodus geändert [[mode]]",
+          "fr": "Mode de chauffage changé [[mode]]"
         },
         "hint": {
           "en": "Triggers when the heating mode changes",
@@ -3260,10 +3260,10 @@
           "fr": "Mode d'eau changé"
         },
         "titleFormatted": {
-          "en": "Water mode changed to [[mode]]",
-          "nl": "Watermodus gewijzigd naar [[mode]]",
-          "de": "Wassermodus geändert auf [[mode]]",
-          "fr": "Mode d'eau changé en [[mode]]"
+          "en": "Water mode changed [[mode]]",
+          "nl": "Watermodus gewijzigd [[mode]]",
+          "de": "Wassermodus geändert [[mode]]",
+          "fr": "Mode d'eau changé [[mode]]"
         },
         "hint": {
           "en": "Triggers when the water control temperature mode changes",
@@ -3308,19 +3308,19 @@
         "id": "work_mode_changed",
         "title": {
           "en": "Work mode changed",
-          "nl": "Werkingsmodus gewijzigd",
+          "nl": "Bedrijfsmodus gewijzigd",
           "de": "Betriebsmodus geändert",
           "fr": "Mode de fonctionnement changé"
         },
         "titleFormatted": {
-          "en": "Work mode changed to [[mode]]",
-          "nl": "Werkingsmodus gewijzigd naar [[mode]]",
-          "de": "Betriebsmodus geändert auf [[mode]]",
-          "fr": "Mode de fonctionnement changé en [[mode]]"
+          "en": "Work mode changed [[mode]]",
+          "nl": "Bedrijfsmodus gewijzigd [[mode]]",
+          "de": "Betriebsmodus geändert [[mode]]",
+          "fr": "Mode de fonctionnement changé [[mode]]"
         },
         "hint": {
           "en": "Triggers when the work mode changes (ECO, Normal, Boost)",
-          "nl": "Wordt geactiveerd wanneer de werkingsmodus wijzigt (ECO, Normaal, Boost)",
+          "nl": "Wordt geactiveerd wanneer de bedrijfsmodus wijzigt (ECO, Normaal, Boost)",
           "de": "Wird ausgelöst, wenn sich der Betriebsmodus ändert (ECO, Normal, Boost)",
           "fr": "Se déclenche lorsque le mode de fonctionnement change (ECO, Normal, Boost)"
         },
@@ -3338,7 +3338,7 @@
             "name": "mode",
             "title": {
               "en": "Work mode",
-              "nl": "Werkingsmodus",
+              "nl": "Bedrijfsmodus",
               "de": "Betriebsmodus",
               "fr": "Mode de fonctionnement"
             },
@@ -3349,7 +3349,7 @@
             "name": "previous_mode",
             "title": {
               "en": "Previous work mode",
-              "nl": "Vorige werkingsmodus",
+              "nl": "Vorige bedrijfsmodus",
               "de": "Vorheriger Betriebsmodus",
               "fr": "Mode de fonctionnement précédent"
             },

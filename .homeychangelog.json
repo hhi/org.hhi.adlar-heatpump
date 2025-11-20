@@ -1,4 +1,10 @@
 {
+  "1.1.1": {
+    "en": "Textual adjustments",
+    "nl": "tekstuele aanpasingen",
+    "de": "Textliche Anpassungen",
+    "fr": "Ajustements textuels"
+  },
   "1.1.0": {
     "en": "Added 6 new flow card triggers: Heating mode changed, work mode changed, water mode changed, compressor state changed, defrost state changed, and backwater state changed. Enables advanced automations based on device mode transitions and system state changes.",
     "nl": "6 nieuwe flow card triggers toegevoegd: Verwarmingsmodus gewijzigd, werkingsmodus gewijzigd, watermodus gewijzigd, compressor status gewijzigd, defrost status gewijzigd en terugwater status gewijzigd. Maakt geavanceerde automatisering op basis van apparaatmodus overgangen en systeemstatuswijzigingen mogelijk.",
