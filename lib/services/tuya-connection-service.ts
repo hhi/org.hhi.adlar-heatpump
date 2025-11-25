@@ -696,10 +696,28 @@ export class TuyaConnectionService {
       // Non-critical error, continue operation
     }
 
+    // Update disconnect source capability for timeline visibility (v1.0.37+)
+    if (newStatus === 'disconnected' && this.lastDisconnectSource) {
+      try {
+        // Only update if capability exists (added in v1.0.37+)
+        if (this.device.hasCapability('adlar_disconnect_source')) {
+          await this.device.setCapabilityValue('adlar_disconnect_source', this.lastDisconnectSource);
+          this.logger(`TuyaConnectionService: Disconnect source updated to: ${this.lastDisconnectSource}`);
+        }
+      } catch (error) {
+        this.logger(`TuyaConnectionService: Failed to update disconnect_source capability: ${error}`);
+        // Non-critical error, continue operation
+      }
+    }
+
     // Persist both timestamp AND status to device store (survives app updates) - v1.0.6
     try {
       await this.device.setStoreValue('last_connection_timestamp', this.lastStatusChangeTime);
       await this.device.setStoreValue('last_connection_status', this.currentStatus);
+      // Also persist disconnect source for diagnostics
+      if (this.lastDisconnectSource) {
+        await this.device.setStoreValue('last_disconnect_source', this.lastDisconnectSource);
+      }
     } catch (error) {
       this.logger(`TuyaConnectionService: Failed to persist connection state: ${error}`);
       // Non-critical error, continue operation
@@ -858,6 +876,14 @@ export class TuyaConnectionService {
       // Mark device as disconnected for socket connection errors
       this.isConnected = false;
 
+      // Send specific notification about socket error
+      this.sendCriticalNotification(
+        'Socket Error Disconnect',
+        `Socket fout om ${timeStr}: ${errorMsg}. ${categorizedError.recoverable ? 'Automatisch herverbinden...' : 'Handmatige interventie mogelijk vereist.'}`,
+      ).catch((err) => {
+        this.logger('Failed to send socket error notification:', err);
+      });
+
       // Update recovery strategy based on error type
       if (!categorizedError.recoverable) {
         this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 8);
@@ -934,8 +960,16 @@ export class TuyaConnectionService {
       const timeSinceLastData = Date.now() - this.lastDataEventTime;
 
       this.logger(`🔴 TuyaConnectionService: Device disconnected at ${timeStr} (no data for ${Math.round(timeSinceLastData / 1000)}s)`);
-      this.lastDisconnectSource = 'disconnected_event';
+      this.lastDisconnectSource = `tuya_disconnected_event (idle: ${Math.round(timeSinceLastData / 1000)}s)`;
       this.lastDisconnectTime = Date.now();
+
+      // Send specific notification about TuyAPI disconnect event
+      this.sendCriticalNotification(
+        'TuyAPI Disconnect Event',
+        `Device verbroken om ${timeStr}. Geen data ontvangen voor ${Math.round(timeSinceLastData / 1000)}s. Automatisch herverbinden...`,
+      ).catch((err) => {
+        this.logger('Failed to send disconnect notification:', err);
+      });
 
       this.isConnected = false;
       this.updateStatusTimestamp('disconnected').catch((err) => {
@@ -1028,11 +1062,35 @@ export class TuyaConnectionService {
       // Perform lightweight DPS query (NAT keep-alive only, v1.0.31)
       // CHANGE (v1.0.31): DPS refresh is NOW NAT keep-alive only - heartbeat handles zombie detection
       // This removes the 10-second wait loop and forceReconnect call that caused temporal paradoxes
+
+      // DIAGNOSTIC TEST (v1.0.37): Track if DPS refresh triggers actual data events
+      const preRefreshDataTime = this.lastDataEventReceived;
+      const preRefreshTimestamp = Date.now();
+
       this.tuya.get({ schema: true })
-        .then(() => {
-          // Query succeeded - update timestamp for NAT keep-alive tracking
-          this.lastDataEventTime = Date.now();
-          this.logger(`TuyaConnectionService: ✅ Periodic DPS refresh at ${timeStr} - query succeeded, NAT mapping maintained`);
+        .then(async () => {
+          // Query succeeded - but did it trigger a data event?
+          this.logger(`TuyaConnectionService: ✅ Periodic DPS refresh at ${timeStr} - query succeeded`);
+
+          // Wait 500ms to see if data event arrives
+          await new Promise((resolve) => {
+            this.device.homey.setTimeout(resolve, 500);
+          });
+
+          // Check if data event was received
+          const dataEventReceived = this.lastDataEventReceived > preRefreshDataTime;
+          const elapsedMs = Date.now() - preRefreshTimestamp;
+
+          if (dataEventReceived) {
+            // Data event confirmed - update timestamp
+            this.lastDataEventTime = Date.now();
+            this.logger(`TuyaConnectionService: ✅ DPS refresh triggered data event (${elapsedMs}ms) - NAT mapping maintained`);
+          } else {
+            // NO data event - this is critical diagnostic info!
+            this.logger(`TuyaConnectionService: ⚠️ DPS refresh did NOT trigger data event after ${elapsedMs}ms`);
+            this.logger(`TuyaConnectionService: ⚠️ Query succeeded but device sent no response - possible idempotent query issue`);
+            // Don't update lastDataEventTime - let heartbeat detect this as stale
+          }
         })
         .catch((error) => {
           // Query failed - don't mark as disconnected, let heartbeat handle failures
@@ -1148,6 +1206,13 @@ export class TuyaConnectionService {
       return;
     }
 
+    // DIAGNOSTIC (v1.0.37): Log when heartbeat runs despite DPS refresh potentially running
+    const timeSinceDpsRefresh = Date.now() % DeviceConstants.DPS_REFRESH_INTERVAL_MS;
+    if (timeSinceDpsRefresh < 10000) { // Within 10 seconds of DPS refresh cycle
+      this.logger(`TuyaConnectionService: ⚠️ Heartbeat running close to DPS refresh cycle (${Math.round(timeSinceDpsRefresh / 1000)}s offset)`);
+      this.logger(`TuyaConnectionService: ⚠️ This may indicate DPS refresh is not updating lastDataEventTime correctly`);
+    }
+
     // Device appears idle - perform proactive health check
     this.logger(`🔍 TuyaConnectionService: Heartbeat probe at ${timeStr} - no data for ${Math.round(timeSinceLastData / 1000)}s, checking connection health...`);
     this.heartbeatInProgress = true;
@@ -1254,6 +1319,18 @@ export class TuyaConnectionService {
       this.logger(`  LAYER 2 (set): ${layer2SetError ? `failed to execute: ${layer2SetError.message}` : 'executed but no data'}`);
       this.logger('TuyaConnectionService: Forcing full reconnect to recover from zombie state...');
 
+      // Store detailed disconnect source for diagnostics
+      const layer1Status = layer1GetError ? `failed: ${layer1GetError.message}` : 'no data event';
+      const layer2Status = layer2SetError ? `failed: ${layer2SetError.message}` : 'no data event';
+      this.lastDisconnectSource = `zombie_heartbeat (Layer1=${layer1Status}, Layer2=${layer2Status})`;
+      this.lastDisconnectTime = Date.now();
+
+      // Send specific notification about zombie detection
+      await this.sendCriticalNotification(
+        'Zombie Verbinding Gedetecteerd',
+        `Heartbeat detecteerde geen data events. Layer1(get): ${layer1Status}, Layer2(set): ${layer2Status}. Automatisch herverbinden...`,
+      );
+
       // Force reconnection to clear zombie state
       await this.forceReconnect();
 
@@ -1261,9 +1338,16 @@ export class TuyaConnectionService {
       // Both heartbeat layers failed - mark as disconnected
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-      this.logger(`❌ TuyaConnectionService: Heartbeat completely failed at ${timeStr} - true disconnect detected: ${error}`);
-      this.lastDisconnectSource = 'heartbeat_timeout';
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      this.logger(`❌ TuyaConnectionService: Heartbeat completely failed at ${timeStr} - true disconnect detected: ${errorMsg}`);
+      this.lastDisconnectSource = `heartbeat_exception (${errorMsg})`;
       this.lastDisconnectTime = Date.now();
+
+      // Send specific notification about heartbeat failure
+      await this.sendCriticalNotification(
+        'Heartbeat Timeout Disconnect',
+        `Heartbeat probe gefaald om ${timeStr}. Fout: ${errorMsg}. Automatisch herverbinden...`,
+      );
 
       // Mark as disconnected to trigger reconnection
       this.isConnected = false;
@@ -1332,8 +1416,21 @@ export class TuyaConnectionService {
 
       // If no data for longer than stale threshold, connection is likely dead
       if (timeSinceLastData > DeviceConstants.STALE_CONNECTION_THRESHOLD_MS) {
+        const idleMinutes = Math.round(timeSinceLastData / 60000);
         this.logger(`TuyaConnectionService: 🚨 Stale connection detected - no data for ${Math.round(timeSinceLastData / 1000)}s (threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 1000}s)`);
         this.logger('TuyaConnectionService: Forcing reconnection for stale connection');
+
+        // Store detailed disconnect source
+        this.lastDisconnectSource = `stale_connection (idle: ${idleMinutes}min, threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 60000}min)`;
+        this.lastDisconnectTime = Date.now();
+
+        // Send specific notification about stale connection
+        this.sendCriticalNotification(
+          'Stale Connection Detected',
+          `Geen data ontvangen voor ${idleMinutes} minuten. Verbinding wordt als inactief beschouwd. Automatisch herverbinden...`,
+        ).catch((err) => {
+          this.logger('Failed to send stale connection notification:', err);
+        });
 
         // Force disconnection to trigger reconnection
         this.isConnected = false;
