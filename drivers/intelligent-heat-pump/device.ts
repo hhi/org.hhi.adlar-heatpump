@@ -896,8 +896,10 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_cop_daily', dailyCOP.averageCOP);
         this.categoryLog('cop', '📅 Daily COP updated:', dailyCOP.averageCOP, `(${dailyCOP.dataPoints} points, ${dailyCOP.confidenceLevel} confidence)`);
 
-        // Trigger daily COP efficiency flow cards
-        await this.triggerDailyCOPFlowCards(dailyCOP);
+        // Trigger daily COP efficiency flow cards (fire-and-forget)
+        this.triggerDailyCOPFlowCards(dailyCOP).catch((err) => {
+          this.error('Failed to trigger daily COP flow cards:', err);
+        });
       } else if (!dailyCOP) {
         // Explicitly set to null when no meaningful data (mostly idle or stale)
         if (this.hasCapability('adlar_cop_daily')) {
@@ -957,8 +959,10 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_cop_trend', translatedDescription);
         this.categoryLog('cop', '📈 COP Trend updated:', translatedDescription, `(${trendAnalysis.strength.toFixed(3)} strength)`);
 
-        // Trigger trend flow cards (need to pass the translated description)
-        await this.triggerCOPTrendFlowCards({ ...trendAnalysis, description: translatedDescription }, dailyCOP);
+        // Trigger trend flow cards (fire-and-forget to prevent blocking)
+        this.triggerCOPTrendFlowCards({ ...trendAnalysis, description: translatedDescription }, dailyCOP).catch((err) => {
+          this.error('Failed to trigger COP trend flow cards:', err);
+        });
       }
     } catch (error) {
       this.error('Failed to update rolling COP capabilities:', error);
@@ -996,7 +1000,10 @@ class MyDevice extends Homey.Device {
         current_daily_cop: dailyCOP?.averageCOP || 0,
       };
 
-      await this.triggerFlowCard('cop_trend_detected', tokens);
+      // Fire-and-forget to prevent blocking
+      this.triggerFlowCard('cop_trend_detected', tokens).catch((err) => {
+        this.error('Failed to trigger cop_trend_detected:', err);
+      });
       this.categoryLog('cop', '📈 COP trend flow card triggered:', tokens);
     }
   }
@@ -1863,12 +1870,14 @@ class MyDevice extends Homey.Device {
         const methodDisplayName = `${this.formatCOPMethodDisplay(copResult.method, 'low', copResult.diagnosticInfo)} (Outlier)`;
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
-        // Trigger outlier flow card if configured
+        // Trigger outlier flow card if configured (fire-and-forget)
         if (this.hasCapability('adlar_cop')) {
-          await this.triggerFlowCard('cop_outlier_detected', {
+          this.triggerFlowCard('cop_outlier_detected', {
             outlier_cop: copResult.cop,
             outlier_reason: copResult.outlierReason || 'Unknown reason',
             calculation_method: copResult.method,
+          }).catch((err) => {
+            this.error('Failed to trigger cop_outlier_detected:', err);
           });
         }
       } else {
@@ -2218,11 +2227,14 @@ class MyDevice extends Homey.Device {
           threshold = goodEfficiencyThreshold;
         }
 
-        await this.triggerFlowCard('cop_efficiency_changed', {
+        // Fire-and-forget to prevent blocking
+        this.triggerFlowCard('cop_efficiency_changed', {
           current_cop: copResult.cop,
           threshold_cop: threshold,
           calculation_method: copResult.method,
           confidence_level: copResult.confidence,
+        }).catch((err) => {
+          this.error('Failed to trigger cop_efficiency_changed:', err);
         });
 
         this.debugLog(`🎯 COP efficiency trigger fired: ${copResult.cop.toFixed(2)} ${condition} ${threshold}`);
@@ -2352,11 +2364,12 @@ class MyDevice extends Homey.Device {
    * @param dps - DPS data object from Tuya device
    */
   updateCapabilitiesFromDps(dps: Record<string, unknown>): void {
-    // Defensive guard: handle null/undefined dps parameter (v0.99.63 - crash fix)
-    if (!dps || typeof dps !== 'object') {
-      this.error('updateCapabilitiesFromDps called with invalid dps parameter:', dps);
-      return;
-    }
+    try {
+      // Defensive guard: handle null/undefined dps parameter (v0.99.63 - crash fix)
+      if (!dps || typeof dps !== 'object') {
+        this.error('updateCapabilitiesFromDps called with invalid dps parameter:', dps);
+        return;
+      }
 
     this.debugLog('Processing DPS data:', dps);
 
@@ -2613,6 +2626,10 @@ class MyDevice extends Homey.Device {
           this.error('Unexpected error in batched capability updates:', error);
         });
     }
+    } catch (error) {
+      this.error('❌ Critical error in updateCapabilitiesFromDps:', error);
+      // Don't rethrow - allow device to continue operating even if one DPS update fails
+    }
   }
 
   private getCapabilityFriendlyTitle(capability: string): string {
@@ -2746,7 +2763,8 @@ class MyDevice extends Homey.Device {
    * onInit is called when the device is initialized.
    */
   async onInit() {
-    await this.setUnavailable(); // Set the device as unavailable initially
+    try {
+      await this.setUnavailable(); // Set the device as unavailable initially
 
     // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
     // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
@@ -3007,10 +3025,17 @@ class MyDevice extends Homey.Device {
       this.log('🔋 Intelligent energy tracking initialized');
     }
 
-    // Set device as available after successful initialization
-    await this.setAvailable();
-    this.log('✅ Device initialization completed - device is now available in Homey');
+      // Set device as available after successful initialization
+      await this.setAvailable();
+      this.log('✅ Device initialization completed - device is now available in Homey');
 
+    } catch (error) {
+      this.error('❌ Critical error during device initialization:', error);
+      await this.setUnavailable(`Initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`).catch(() => {
+        // Ignore setUnavailable errors during initialization failure
+      });
+      throw error; // Re-throw to let Homey know initialization failed
+    }
   }
 
   /**

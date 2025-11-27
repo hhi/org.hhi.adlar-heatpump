@@ -209,7 +209,19 @@ export class COPCalculator {
         result = this.calculatePowerEstimation(data);
         break;
       default:
-        throw new Error(`Unknown COP calculation method: ${method}`);
+        // Fallback for unknown methods - don't throw, return safe default
+        result = {
+          cop: 0,
+          method: 'insufficient_data',
+          confidence: 'low',
+          isOutlier: false,
+          diagnosticInfo: {
+            primaryIssue: 'unknown_method',
+            troubleshootingHint: `Invalid COP calculation method: ${method}`,
+          },
+          dataSources: {},
+        };
+        break;
     }
 
     // Apply outlier detection

@@ -90,6 +90,11 @@ export class TuyaConnectionService {
   private heartbeatInProgress = false;
   private forceReconnectInProgress = false; // v1.0.31 - Prevent concurrent forceReconnect calls
 
+  // Layer 0: Native heartbeat monitoring (v1.1.2)
+  private lastNativeHeartbeatTime: number = 0;
+  private nativeHeartbeatMonitorInterval: NodeJS.Timeout | null = null;
+  private readonly NATIVE_HEARTBEAT_TIMEOUT_MS = 35000; // 35 seconds (TuyaAPI heartbeat is ~10s, allow 3.5x margin)
+
   // Diagnostic tracking for 06:35 disconnect investigation (v1.0.4)
   private lastDisconnectSource: string | null = null;
   private lastDisconnectTime: number = 0;
@@ -398,6 +403,9 @@ export class TuyaConnectionService {
   async disconnect(): Promise<void> {
     if (this.tuya && this.isConnected) {
       try {
+        // Stop Layer 0 monitoring before disconnecting
+        this.stopNativeHeartbeatMonitoring();
+
         this.tuya.removeAllListeners();
         await this.tuya.disconnect();
         this.isConnected = false;
@@ -946,10 +954,21 @@ export class TuyaConnectionService {
       // Reset error recovery state on successful connection
       this.resetErrorRecoveryState();
 
+      // Start Layer 0 native heartbeat monitoring (v1.1.2)
+      this.startNativeHeartbeatMonitoring();
+
       // Notify connected handler
       if (this.onConnectedHandler) {
         this.onConnectedHandler();
       }
+    });
+
+    // Layer 0: Native heartbeat event (v1.1.2)
+    // TuyaAPI sends heartbeat every ~10 seconds when connected
+    // This is the fastest disconnection detection layer
+    this.tuya.on('heartbeat', (): void => {
+      this.lastNativeHeartbeatTime = Date.now();
+      this.logger('💓 Native heartbeat received');
     });
 
     // Disconnected event
@@ -1037,6 +1056,65 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Start Layer 0 native heartbeat monitoring (v1.1.2).
+   * Monitors TuyaAPI's native heartbeat event to detect connection loss within 35 seconds.
+   * This is the fastest disconnection detection layer (Layer 0).
+   */
+  private startNativeHeartbeatMonitoring(): void {
+    // Clear any existing monitor
+    this.stopNativeHeartbeatMonitoring();
+
+    // Initialize timestamp
+    this.lastNativeHeartbeatTime = Date.now();
+
+    this.logger('🔵 TuyaConnectionService: Starting Layer 0 native heartbeat monitoring (timeout: 35s)');
+
+    // Check every 10 seconds if native heartbeats have stopped
+    this.nativeHeartbeatMonitorInterval = this.device.homey.setInterval(() => {
+      if (!this.isConnected) {
+        return; // Skip check if already disconnected
+      }
+
+      const timeSinceLastHeartbeat = Date.now() - this.lastNativeHeartbeatTime;
+
+      if (timeSinceLastHeartbeat > this.NATIVE_HEARTBEAT_TIMEOUT_MS) {
+        // Native heartbeats have stopped - connection is dead
+        this.logger(`❌ Layer 0: Native heartbeat timeout (${Math.round(timeSinceLastHeartbeat / 1000)}s since last heartbeat)`);
+        this.logger('🔴 Layer 0: Zombie connection detected - forcing reconnect');
+
+        // Mark as disconnected
+        this.isConnected = false;
+        this.lastDisconnectSource = `layer0_native_heartbeat_timeout (${Math.round(timeSinceLastHeartbeat / 1000)}s)`;
+        this.lastDisconnectTime = Date.now();
+
+        // Update status timestamp (fire-and-forget)
+        this.updateStatusTimestamp('disconnected').catch((err) => {
+          this.logger('Failed to update status timestamp:', err);
+        });
+
+        // Trigger reconnection
+        this.consecutiveFailures++;
+        this.scheduleNextReconnectionAttempt();
+
+        // Notify handlers
+        if (this.onDisconnectedHandler) {
+          this.onDisconnectedHandler();
+        }
+      }
+    }, 10000); // Check every 10 seconds
+  }
+
+  /**
+   * Stop Layer 0 native heartbeat monitoring.
+   */
+  private stopNativeHeartbeatMonitoring(): void {
+    if (this.nativeHeartbeatMonitorInterval) {
+      clearInterval(this.nativeHeartbeatMonitorInterval);
+      this.nativeHeartbeatMonitorInterval = null;
+    }
+  }
+
+  /**
    * Start periodic DPS refresh to prevent heartbeat timeouts during idle periods (v1.0.3).
    * This queries device state every 3 minutes to keep lastDataEventTime current,
    * ensuring heartbeat probes are skipped even when device is idle or externally controlled.
@@ -1057,7 +1135,6 @@ export class TuyaConnectionService {
       // Enhanced diagnostic logging (v1.0.4)
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
 
       // Perform lightweight DPS query (NAT keep-alive only, v1.0.31)
       // CHANGE (v1.0.31): DPS refresh is NOW NAT keep-alive only - heartbeat handles zombie detection
@@ -1088,7 +1165,7 @@ export class TuyaConnectionService {
           } else {
             // NO data event - this is critical diagnostic info!
             this.logger(`TuyaConnectionService: ⚠️ DPS refresh did NOT trigger data event after ${elapsedMs}ms`);
-            this.logger(`TuyaConnectionService: ⚠️ Query succeeded but device sent no response - possible idempotent query issue`);
+            this.logger('TuyaConnectionService: ⚠️ Query succeeded but device sent no response - possible idempotent query issue');
             // Don't update lastDataEventTime - let heartbeat detect this as stale
           }
         })
@@ -1210,7 +1287,7 @@ export class TuyaConnectionService {
     const timeSinceDpsRefresh = Date.now() % DeviceConstants.DPS_REFRESH_INTERVAL_MS;
     if (timeSinceDpsRefresh < 10000) { // Within 10 seconds of DPS refresh cycle
       this.logger(`TuyaConnectionService: ⚠️ Heartbeat running close to DPS refresh cycle (${Math.round(timeSinceDpsRefresh / 1000)}s offset)`);
-      this.logger(`TuyaConnectionService: ⚠️ This may indicate DPS refresh is not updating lastDataEventTime correctly`);
+      this.logger('TuyaConnectionService: ⚠️ This may indicate DPS refresh is not updating lastDataEventTime correctly');
     }
 
     // Device appears idle - perform proactive health check
@@ -1445,7 +1522,9 @@ export class TuyaConnectionService {
       } else {
         // Connection is healthy and has recent data - reschedule next health check
         // CRITICAL (v1.0.31): MUST always schedule next check to keep monitoring loop alive
-        this.logger(`TuyaConnectionService: Connection healthy (data received ${Math.round(timeSinceLastData / 1000)}s ago), scheduling next health check in ${DeviceConstants.RECONNECTION_INTERVAL_MS / 1000}s`);
+        const secondsSinceData = Math.round(timeSinceLastData / 1000);
+        const nextCheckIn = Math.round(DeviceConstants.RECONNECTION_INTERVAL_MS / 1000);
+        this.logger(`TuyaConnectionService: Connection healthy (data received ${secondsSinceData}s ago), next health check in ${nextCheckIn}s`);
 
         // Schedule next health check at normal interval (don't apply backoff for healthy connections)
         this.reconnectInterval = this.device.homey.setTimeout(() => {
@@ -1782,6 +1861,7 @@ export class TuyaConnectionService {
 
     this.stopReconnectInterval();
     this.stopHeartbeat();
+    this.stopNativeHeartbeatMonitoring(); // v1.1.2
     this.stopPeriodicDpsRefresh();
 
     if (this.tuya) {
