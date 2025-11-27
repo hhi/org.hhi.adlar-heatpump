@@ -1,4 +1,10 @@
 {
+  "1.1.2": {
+    "en": "Connection stability improved with faster disconnection detection (35 seconds instead of 5-15 minutes). Device recovery from network issues now more reliable.",
+    "nl": "Verbindingsstabiliteit verbeterd met snellere detectie van verbroken verbinding (35 seconden in plaats van 5-15 minuten). Apparaat herstel na netwerkproblemen nu betrouwbaarder.",
+    "de": "Verbindungsstabilität verbessert mit schnellerer Erkennung von Trennungen (35 Sekunden statt 5-15 Minuten). Gerätwiederherstellung nach Netzwerkproblemen jetzt zuverlässiger.",
+    "fr": "Stabilité de connexion améliorée avec détection plus rapide des déconnexions (35 secondes au lieu de 5-15 minutes). Récupération de l'appareil après problèmes réseau maintenant plus fiable."
+  },
   "1.1.1": {
     "en": "Textual adjustments",
     "nl": "tekstuele aanpasingen",
