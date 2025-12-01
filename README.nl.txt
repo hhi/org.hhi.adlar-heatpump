@@ -101,6 +101,21 @@ AUTOMATISERING MET FLOW KAARTEN
 - Efficiëntie optimalisatie
 - Weersafhankelijke aanpassingen
 - Systeem timer meldingen
+- Dynamische curve calculator voor geavanceerde optimalisatie
+
+CURVE CALCULATOR (Geavanceerde Functie)
+Bereken outputwaarden op basis van configureerbare curves voor intelligente automatisering:
+- Weerafhankelijke verwarming: Automatische setpoint aanpassing op basis van buitentemperatuur
+- Tijdgebonden optimalisatie: Instellingen aanpassen per uur/dag/seizoen
+- COP-gebaseerde fine-tuning: Dynamische temperatuur aanpassingen op basis van efficiëntie
+- Ondersteunt 6 operatoren: >, >=, <, <=, ==, != met standaard fallback
+- Maximum 50 curve entries voor complexe scenario's
+- Real-time berekening met gebruiksvriendelijke foutmeldingen
+
+Voorbeeld: Weerafhankelijke Verwarming
+"Wanneer buitentemperatuur verandert, bereken verwarmingssetpoint met curve:
+< -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
+Resultaat: Past verwarming automatisch aan op basis van weersomstandigheden
 
 COP (PRESTATIECOËFFICIËNT) MONITORING
 

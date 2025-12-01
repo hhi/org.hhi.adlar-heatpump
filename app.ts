@@ -18,6 +18,7 @@ import {
   registerSimpleConditions,
   FLOW_PATTERNS,
 } from './lib/flow-helpers';
+import { CurveCalculator } from './lib/curve-calculator';
 
 // Type definitions for flow card arguments
 interface DeviceFlowArgs {
@@ -178,6 +179,9 @@ class MyApp extends App {
 
     // Custom conditions with complex logic
     this.registerComplexConditions();
+
+    // Curve calculator action card
+    this.registerCurveCalculatorCard();
 
     this.debugLog('Custom cards registered successfully');
   }
@@ -352,6 +356,56 @@ class MyApp extends App {
         return result;
       },
     );
+  }
+
+  /**
+   * Register curve calculator action card with production-ready error handling
+   *
+   * Allows users to calculate values dynamically based on configurable curves.
+   * Primary use case: Weather-compensated heating (outdoor temp → heating setpoint)
+   */
+  registerCurveCalculatorCard() {
+    const curveCard = this.homey.flow.getActionCard('calculate_curve_value');
+
+    curveCard.registerRunListener(async (args, state) => {
+      const { input_value: inputValue, curve } = args;
+
+      try {
+        // Input validation
+        if (typeof inputValue !== 'number' || Number.isNaN(inputValue)) {
+          throw new Error('Input value must be a valid number');
+        }
+
+        if (!curve || typeof curve !== 'string' || curve.trim() === '') {
+          throw new Error('Curve definition cannot be empty');
+        }
+
+        // Evaluate curve using CurveCalculator utility
+        const resultValue = CurveCalculator.evaluate(inputValue, curve);
+
+        // Log result (only in debug mode)
+        this.debugLog(`Curve calculation: ${inputValue} → ${resultValue}`, {
+          inputValue,
+          curve: curve.substring(0, 100), // Truncate long curves in logs
+          resultValue,
+        });
+
+        // Standard logging for production
+        this.log(`Curve calculation successful: ${inputValue} → ${resultValue}`);
+
+        return { result_value: resultValue };
+
+      } catch (error) {
+        // Error logging
+        this.error('Curve calculation failed:', error);
+
+        // Re-throw with user-friendly message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Curve calculation failed: ${errorMessage}`);
+      }
+    });
+
+    this.debugLog('Curve calculator card registered successfully');
   }
 }
 

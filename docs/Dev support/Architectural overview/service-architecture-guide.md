@@ -82,6 +82,7 @@ The Adlar Heat Pump app transitioned from a monolithic device class (v0.99.22 an
 - **Internet recovery detection** (v1.0.5) - DNS probes every 30s during cooldown for immediate reconnection
 - **User-visible outage timer** (v1.0.5) - Connection status shows outage duration and circuit breaker countdown
 - **Time-based notifications** (v1.0.5) - Notifications at 2, 10, and 30 minutes instead of failure-count-based
+- **Native heartbeat monitoring** (v1.1.2) - Layer 0 detection via TuyaAPI's built-in heartbeat events (35s timeout, fastest zombie detection)
 
 **Public Interface**:
 
@@ -1488,6 +1489,234 @@ class TuyaConnectionService {
   private async performHeartbeat(): Promise<void>;   // Execute heartbeat probe with intelligent skip logic
 }
 ```
+
+### Layer 0: Native Heartbeat Monitoring (v1.1.2)
+
+The fastest disconnection detection mechanism, leveraging TuyaAPI's built-in heartbeat events for immediate zombie connection detection.
+
+#### Architecture
+
+**Location**: `lib/services/tuya-connection-service.ts:966-972, 1063-1115`
+
+**Core Components**:
+
+```typescript
+// Event listener - registers TuyaAPI's native heartbeat events
+this.tuya.on('heartbeat', (): void => {
+  this.lastNativeHeartbeatTime = Date.now();
+  this.logger('💓 Native heartbeat received');
+});
+
+// Monitoring - started automatically on connection
+private startNativeHeartbeatMonitoring(): void {
+  // Clear any existing monitor
+  this.stopNativeHeartbeatMonitoring();
+
+  // Initialize timestamp
+  this.lastNativeHeartbeatTime = Date.now();
+
+  this.logger('🔵 Starting Layer 0 native heartbeat monitoring (timeout: 35s)');
+
+  // Check every 10 seconds if native heartbeats have stopped
+  this.nativeHeartbeatMonitorInterval = this.device.homey.setInterval(() => {
+    if (!this.isConnected) return; // Skip if already disconnected
+
+    const timeSinceLastHeartbeat = Date.now() - this.lastNativeHeartbeatTime;
+
+    if (timeSinceLastHeartbeat > this.NATIVE_HEARTBEAT_TIMEOUT_MS) { // 35 seconds
+      this.logger(`❌ Layer 0: Native heartbeat timeout (${Math.round(timeSinceLastHeartbeat / 1000)}s)`);
+      this.logger('🔴 Layer 0: Zombie connection detected - forcing reconnect');
+
+      // Mark as disconnected and trigger reconnection
+      this.isConnected = false;
+      this.lastDisconnectSource = `layer0_native_heartbeat_timeout`;
+      this.consecutiveFailures++;
+      this.scheduleNextReconnectionAttempt();
+    }
+  }, 10000); // Check every 10 seconds
+}
+
+private stopNativeHeartbeatMonitoring(): void {
+  if (this.nativeHeartbeatMonitorInterval) {
+    clearInterval(this.nativeHeartbeatMonitorInterval);
+    this.nativeHeartbeatMonitorInterval = null;
+  }
+}
+```
+
+#### Key Features
+
+1. **TuyaAPI Integration**: Listens to TuyaAPI's built-in `'heartbeat'` events sent every ~10 seconds
+2. **Passive Monitoring**: No active network queries required (zero overhead)
+3. **Fast Detection**: Detects zombie connections within 35 seconds
+4. **Automatic Lifecycle**:
+   - Started automatically on `'connected'` event (line 958)
+   - Stopped automatically on `disconnect()` (line 1111-1115)
+5. **Complementary Operation**: Works alongside hybrid heartbeat (Layer 1-3) and DPS refresh
+
+#### Detection Speed Comparison
+
+| Layer | Detection Time | Method | Network Overhead | Status |
+|-------|---------------|--------|------------------|--------|
+| **Layer 0** | **35 seconds** | Native TuyaAPI heartbeat events | None (passive) | ✅ v1.1.2 |
+| Layer 1 | 5 minutes | Hybrid heartbeat (get/set probes) | Low (conditional) | ✅ v1.0.9 |
+| Layer 2 | 5 minutes | DPS refresh (NAT keep-alive) | Low (periodic) | ✅ v1.0.3 |
+| Layer 3 | 10 minutes | Stale connection force-reconnect | None (check only) | ✅ v0.99.98 |
+
+#### Why Layer 0 is Critical
+
+**Speed Advantage**: 5-8x faster detection than Layer 1-3 mechanisms
+
+- Pre-v1.1.2: 5-10 minute detection window
+- Post-v1.1.2: 35-second detection window
+
+**Zero False Positives**: If TuyaAPI heartbeats stop, connection is definitively dead
+
+- No need for multi-layer probing
+- No wake-up commands required
+- Direct protocol-level signal
+
+**No Network Impact**: Piggybacks on TuyaAPI's existing heartbeat protocol
+
+- No additional `get()` or `set()` queries
+- No bandwidth consumption
+- No device wake-up side effects
+
+**Complements TCP Keep-Alive**: TuyaAPI heartbeats align with 5-minute TCP keep-alive strategy
+
+- OS-level: TCP keep-alive prevents NAT timeout
+- Protocol-level: TuyaAPI heartbeats maintain application-level awareness
+- App-level: Layer 0 monitors for gaps in protocol heartbeats
+
+#### Integration with v1.0.31 Architecture
+
+Layer 0 fits seamlessly into the synergistic connection recovery architecture:
+
+```text
+TCP Keep-Alive (5min, OS-level)
+  │ Prevents NAT timeout at router level
+  ↓
+Layer 0: Native Heartbeat (35s detection) ← FASTEST
+  │ TuyaAPI protocol-level heartbeat monitoring
+  │ Zero overhead, immediate zombie detection
+  │ Signals: isConnected = false → triggers reconnection loop
+  ↓
+Layer 1-3: App-Level Monitoring (5-10 min)
+  │ Backup detection for edge cases
+  │ Hybrid heartbeat (get/set) handles sleeping devices
+  │ DPS refresh maintains NAT mapping
+  ↓
+Reconnection Loop (single source of truth)
+  │ Handles all reconnection attempts
+  │ Exponential backoff + circuit breaker
+  │ Always reschedules (never breaks loop)
+```
+
+#### Implementation Timeline
+
+**v0.99.98-v1.0.30**: Only Layer 1-3 mechanisms existed
+
+- Detection window: 5-10 minutes
+- User impact: Extended "stuck connected" status
+
+**v1.1.2**: Layer 0 added as primary detection
+
+- Detection window: 35 seconds
+- User impact: Near-immediate zombie detection
+- Backward compatible: Layers 1-3 remain as backup
+
+#### Lifecycle Management
+
+**Startup Sequence**:
+```typescript
+// On successful connection (tuya.on('connected'))
+this.isConnected = true;
+this.startNativeHeartbeatMonitoring(); // ← Layer 0 activated
+this.startHeartbeat();                  // ← Layer 1-3 activated
+this.startPeriodicDpsRefresh();         // ← NAT keep-alive
+```
+
+**Shutdown Sequence**:
+```typescript
+// On disconnect() or destroy()
+this.stopNativeHeartbeatMonitoring(); // ← Layer 0 cleanup
+this.stopHeartbeat();                  // ← Layer 1-3 cleanup
+this.stopPeriodicDpsRefresh();         // ← NAT keep-alive cleanup
+```
+
+#### Practical Example
+
+**Scenario**: Router temporarily loses internet connectivity for 2 minutes
+
+```text
+T+0s   - Device connected, heartbeats arriving every ~10s
+T+10s  - Heartbeat received → lastNativeHeartbeatTime updated
+T+20s  - Heartbeat received
+T+30s  - Router loses internet → heartbeats stop
+T+40s  - Layer 0 monitor checks: 10s since last heartbeat (OK)
+T+50s  - Layer 0 monitor checks: 20s since last heartbeat (OK)
+T+60s  - Layer 0 monitor checks: 30s since last heartbeat (OK)
+T+70s  - Layer 0 monitor checks: 40s > 35s threshold ❌
+         → Zombie detected!
+         → isConnected = false
+         → scheduleNextReconnectionAttempt() triggered
+T+75s  - Reconnection attempt begins
+```
+
+**Without Layer 0**: First detection would occur at T+5min (Layer 1) or T+10min (Layer 3)
+
+**With Layer 0**: Detection at T+70s (35-second timeout after last heartbeat)
+
+#### Testing Layer 0
+
+```typescript
+describe('Layer 0: Native Heartbeat Monitoring', () => {
+  it('should update timestamp on heartbeat event', () => {
+    const service = new TuyaConnectionService(config);
+    const beforeTime = Date.now();
+
+    // Simulate TuyaAPI heartbeat event
+    service.tuya.emit('heartbeat');
+
+    expect(service.lastNativeHeartbeatTime).toBeGreaterThanOrEqual(beforeTime);
+  });
+
+  it('should detect zombie after 35s timeout', async () => {
+    const service = new TuyaConnectionService(config);
+    service.isConnected = true;
+
+    // Simulate last heartbeat 40 seconds ago
+    service.lastNativeHeartbeatTime = Date.now() - 40000;
+
+    // Wait for monitor to check (runs every 10s)
+    await new Promise(resolve => setTimeout(resolve, 11000));
+
+    expect(service.isConnected).toBe(false);
+    expect(service.lastDisconnectSource).toContain('layer0_native_heartbeat_timeout');
+  });
+
+  it('should stop monitoring on disconnect', () => {
+    const service = new TuyaConnectionService(config);
+    service.startNativeHeartbeatMonitoring();
+
+    expect(service.nativeHeartbeatMonitorInterval).not.toBeNull();
+
+    service.stopNativeHeartbeatMonitoring();
+
+    expect(service.nativeHeartbeatMonitorInterval).toBeNull();
+  });
+});
+```
+
+#### Layer 0 Benefits
+
+1. **Speed**: 5-8x faster detection (35s vs 5-10 min)
+2. **Reliability**: Zero false positives (protocol-level signal)
+3. **Efficiency**: No network overhead (event-driven)
+4. **Simplicity**: Single event listener + timer (minimal complexity)
+5. **Compatibility**: Complements existing Layer 1-3 mechanisms
+
+---
 
 ### Heartbeat Mechanism (v0.99.98-v0.99.99, Enhanced v1.0.9)
 

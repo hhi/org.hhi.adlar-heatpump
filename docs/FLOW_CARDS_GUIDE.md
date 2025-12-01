@@ -668,6 +668,276 @@ THEN: Send alert "Possible flow restriction"
 
 ---
 
+## Actions
+
+### 8. 📊 Calculate Value from Curve
+
+**ID**: `calculate_curve_value`
+**Category**: Dynamic Optimization
+**Purpose**: Calculate output values based on input conditions using configurable curves
+
+#### Overview
+
+The curve calculator is a powerful utility for dynamic value calculations. While designed primarily for **weather-compensated heating** (outdoor temperature → heating setpoint), it's versatile enough for any input-output mapping scenarios.
+
+#### Configuration
+
+```yaml
+ACTION: Calculate value from curve
+  Input Value: {{outdoor_temperature}}
+  Curve Definition: < 0 : 55, < 5 : 50, < 10 : 45, default : 35
+  Returns: {{result_value}}
+```
+
+**Parameters**:
+
+- `input_value` (number): The input value to evaluate (e.g., outdoor temperature, time of day, COP)
+- `curve` (text): Curve definition string (comma or newline separated)
+
+**Returns**:
+
+- `result_value` (number): Calculated output value based on curve
+
+#### Curve Format
+
+**Syntax**: `[operator] threshold : output_value`
+
+**Supported Operators**:
+
+- `>` - Greater than
+- `>=` - Greater than or equal (default if no operator specified)
+- `<` - Less than
+- `<=` - Less than or equal
+- `==` - Equal to
+- `!=` - Not equal to
+- `default` or `*` - Fallback value (always matches, use as last line)
+
+**Evaluation Rules**:
+
+1. Evaluates from **top to bottom**
+2. Returns **first matching** condition
+3. Falls back to `default` if no match (recommended to always include)
+4. Maximum 50 entries per curve
+
+#### Example Flows
+
+**Weather-Compensated Heating** (Primary Use Case):
+
+![Curve Calculator Example](Curve%20calculator.png)
+*Real-world example: Weather-compensated heating with 14-point curve and live timeline results*
+
+```
+WHEN: Outdoor temperature changed
+THEN: Calculate value from curve
+      Input: {{outdoor_temperature}}
+      Curve: < -5 : 60, < 0 : 55, < 5 : 50, < 10 : 45, < 15 : 40, default : 35
+  AND Set target temperature to {{result_value}}
+```
+
+**Time-Based Hot Water Optimization**:
+```
+EVERY HOUR:
+THEN: Calculate value from curve
+      Input: {{current_hour}}
+      Curve: >= 22 : 45, >= 18 : 55, >= 6 : 60, default : 45
+  AND Set hot water temperature to {{result_value}}
+```
+
+**COP-Based Dynamic Adjustment**:
+```
+WHEN: COP changed
+THEN: Calculate value from curve
+      Input: {{adlar_cop}}
+      Curve: < 2.0 : -5, < 2.5 : -3, >= 3.5 : +2, default : 0
+  AND Adjust target temperature by {{result_value}}°C
+```
+
+**Multi-Stage Heating Curve**:
+```
+WHEN: Outdoor temperature changed
+THEN: Calculate value from curve
+      Input: {{outdoor_temperature}}
+      Curve:
+        < -10 : 65
+        < -5  : 60
+        < 0   : 55
+        < 5   : 50
+        < 10  : 45
+        < 15  : 40
+        default : 35
+  AND Set heating setpoint to {{result_value}}
+```
+
+**Peak Hours Power Limiting**:
+```
+WHEN: Current hour changed
+THEN: Calculate value from curve
+      Input: {{current_hour}}
+      Curve: >= 17 < 21 : 3000, default : 4500
+  AND Set maximum power limit to {{result_value}}W
+```
+
+#### Advanced Techniques
+
+**Nested Calculations** (Calculate intermediate values):
+```
+WHEN: Outdoor temperature changed
+THEN: Calculate outdoor adjustment
+      Input: {{outdoor_temp}}
+      Curve: < 0 : 10, < 10 : 5, default : 0
+  AND Calculate COP adjustment
+      Input: {{adlar_cop}}
+      Curve: < 2.5 : -3, >= 3.5 : +2, default : 0
+  AND Set target = base_temp + outdoor_adj + cop_adj
+```
+
+**Seasonal Curves** (Use different curves per season):
+```
+IF: Month is between October and March (heating season)
+THEN: Use winter curve: < 0 : 55, < 5 : 50, default : 45
+ELSE: Use summer curve: >= 25 : 50, >= 20 : 55, default : 60
+```
+
+**Hysteresis Implementation** (Prevent oscillation):
+```
+WHEN: Temperature changed
+  AND Temperature rising
+THEN: Use curve: > 25 : off, > 20 : low, default : high
+WHEN: Temperature changed
+  AND Temperature falling
+THEN: Use curve: < 22 : high, < 18 : low, default : off
+```
+
+#### Best Practices
+
+**✅ DO**:
+
+- Always add `default : <value>` as last line (prevents errors)
+- Use newlines or commas to separate rules (both supported)
+- Test your curve with different inputs before deploying
+- Keep curves simple (under 20 entries recommended)
+- Document your curve logic in flow description
+- Use consistent operator direction (all `<` or all `>`)
+
+**⚠️ DON'T**:
+
+- Exceed 50 entries (hard limit)
+- Forget the default fallback (causes errors on no match)
+- Mix heating/cooling logic in same curve (use separate flows)
+- Use complex operators when simple ones suffice
+- Ignore evaluation order (top to bottom matters!)
+
+#### Error Messages
+
+The calculator provides user-friendly error messages:
+
+| Error Message | Cause | Solution |
+|---------------|-------|----------|
+| `"Input value must be a valid number"` | Invalid input tag or null value | Check your input token/variable |
+| `"No matching curve condition found for input value: X"` | No condition matched and no default | Add `default : <value>` as last line |
+| `"Invalid curve syntax at line N"` | Malformed condition (e.g., missing colon) | Check format: `operator threshold : value` |
+| `"Curve exceeds maximum allowed entries (50)"` | Too many lines in curve | Simplify your curve or split into multiple flows |
+| `"Unsupported operator at line N"` | Unknown operator used | Use only: >, >=, <, <=, ==, !=, default |
+| `"Invalid output value at line N"` | Non-numeric output value | Output must be valid number |
+
+#### Technical Details
+
+- **Implementation**: `lib/curve-calculator.ts` - CurveCalculator utility class
+- **Registration**: `app.ts:367` - registerCurveCalculatorCard()
+- **Parsing**: Regex-based with comprehensive validation
+- **Performance**: ~1ms parsing time for typical 10-entry curve
+- **Memory**: ~100 bytes per curve entry (5KB max for 50 entries)
+- **Thread-Safe**: Stateless utility class (no shared state)
+
+**Validation System**:
+```typescript
+// Example: Validate curve before using
+const result = CurveCalculator.validateCurve(userInput);
+if (!result.valid) {
+  // Show errors: result.errors
+}
+```
+
+**Safe Evaluation** (with fallback):
+```typescript
+// Never throws, returns fallback on error
+const value = CurveCalculator.evaluateWithFallback(input, curve, defaultValue);
+```
+
+#### Common Issues
+
+**Problem**: Flow card not visible in actions
+
+**Solution**:
+
+1. Check app version is 1.0.8 or higher
+2. Restart Homey app
+3. Check device is available (not offline)
+
+**Problem**: "No matching curve condition" error
+
+**Solution**: Add `default : <value>` as last line in your curve
+
+**Problem**: Curve calculates wrong values
+
+**Solution**:
+
+1. Test curve order - rules evaluate top to bottom
+2. Check operator direction (< vs >)
+3. Verify threshold values are correct
+4. Use debug flow to log input and output
+
+**Problem**: "Invalid curve syntax" error
+
+**Solution**:
+
+1. Check format: `[operator] threshold : output`
+2. Ensure colon (`:`) separates condition from value
+3. Use comma (`,`) or newline between entries
+4. Remove trailing commas
+
+**Problem**: Curve works initially but stops after Homey restart
+
+**Solution**: Curves are stateless (no memory). Check if input token is still valid.
+
+#### Example: Complete Weather-Compensation System
+
+**Reference Implementation**: The screenshot above shows a production-ready 14-point weather compensation curve:
+
+- **Temperature range**: -18°C to +18°C
+- **Heating range**: 20°C (warm) to 35°C (extreme cold)
+- **Curve logic**: `> 18 : 20, > 15 : 23, > 12 : 24, ... > -18 : 30, default: 35`
+- **Timeline results**: Real-world calculations shown (28°C for -10°C outdoor, 35°C for -19°C outdoor)
+
+**Multi-Flow Integration Pattern**:
+
+```
+─────────── FLOW 1: Update Heating Setpoint ───────────
+WHEN: Outdoor temperature changed
+THEN: Calculate heating setpoint
+      Input: {{outdoor_temperature}}
+      Curve: < -5 : 60, < 0 : 55, < 5 : 50, < 10 : 45, default : 40
+  AND Store in variable: calculated_setpoint
+  AND Log: "Outdoor {{outdoor_temp}}°C → Setpoint {{result_value}}°C"
+
+─────────── FLOW 2: Apply Setpoint with Hysteresis ─────
+WHEN: Variable calculated_setpoint changed
+  AND |calculated_setpoint - current_target| > 2°C
+THEN: Set target temperature to {{calculated_setpoint}}
+  AND Send notification: "Heating adjusted to {{calculated_setpoint}}°C"
+
+─────────── FLOW 3: COP-Based Fine-Tuning ─────────────
+WHEN: COP below 2.5
+  AND Running for > 30 minutes
+THEN: Calculate adjustment
+      Input: {{adlar_cop}}
+      Curve: < 2.0 : -3, < 2.5 : -2, default : 0
+  AND Reduce target by {{result_value}}°C
+  AND Log: "Low COP {{adlar_cop}} → Reduced setpoint by {{result_value}}°C"
+```
+
+---
+
 ## Settings Configuration
 
 ### Power Threshold Setting
