@@ -1,9 +1,9 @@
 {
-  "1.1.2": {
-    "en": "Connection stability improved with faster disconnection detection (35 seconds instead of 5-15 minutes). Device recovery from network issues now more reliable.",
-    "nl": "Verbindingsstabiliteit verbeterd met snellere detectie van verbroken verbinding (35 seconden in plaats van 5-15 minuten). Apparaat herstel na netwerkproblemen nu betrouwbaarder.",
-    "de": "Verbindungsstabilität verbessert mit schnellerer Erkennung von Trennungen (35 Sekunden statt 5-15 Minuten). Gerätwiederherstellung nach Netzwerkproblemen jetzt zuverlässiger.",
-    "fr": "Stabilité de connexion améliorée avec détection plus rapide des déconnexions (35 secondes au lieu de 5-15 minutes). Récupération de l'appareil après problèmes réseau maintenant plus fiable."
+  "1.2.0": {
+    "en": "Added Calculate Value from Curve flow card. Maps input values (e.g., outdoor temperature) to output values using curve definitions for weather-compensated heating curves and time-based setpoint automation. Connection stability improved with faster disconnection detection",
+    "nl": "Calculate Value from Curve flow card toegevoegd. Koppelt invoerwaarden (bijv. buitentemperatuur) aan uitvoerwaarden met curve definities voor weerafhankelijke verwarmingscurves en tijdsgebaseerde setpoint automatisering. Verbindingsstabiliteit verbeterd met snellere detectie van verbroken verbinding",
+    "de": "Calculate Value from Curve Flow-Karte hinzugefügt. Ordnet Eingabewerte (z.B. Außentemperatur) Ausgabewerten mit Kurvdefinitionen für wetterkompensierte Heizkurven und zeitbasierte Sollwert-Automatisierung zu. Verbesserte Verbindungsstabilität mit schnellerer Erkennung von Verbindungsabbrüchen",
+    "fr": "Carte de flux Calculate Value from Curve ajoutée. Mappe les valeurs d'entrée (par ex. température extérieure) aux valeurs de sortie avec définitions de courbe pour courbes de chauffage compensées par météo et automatisation de consignes temporelles. Stabilité de connexion améliorée avec détection plus rapide des déconnexions"
   },
   "1.1.1": {
     "en": "Textual adjustments",

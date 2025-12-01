@@ -137,11 +137,99 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Action-based conditions** for all controllable settings
 - **Inverse operator support** for "is" and "is not" logic
 
-### Actions (12)
+### Actions (13)
 
 - **Temperature setpoint and mode control**
 - **System on/off and heating curve adjustments**
 - **External Data Integration**: Send power, flow, and ambient data to heat pump for enhanced COP calculations
+- **Dynamic Curve Calculator**: Calculate values based on configurable curves (e.g., weather-compensated heating)
+
+#### Advanced: Calculate Value from Curve
+
+Dynamically calculate output values based on input conditions using configurable curves.
+
+##### Primary Use Case: Weather-Compensated Heating
+
+Automatically adjust heating setpoint based on outdoor temperature for optimal efficiency:
+
+![Curve Calculator in Action](docs/Curve%20calculator.png)
+*Screenshot: Weather-compensated heating flow with real-time results*
+
+```text
+WHEN   Outdoor temperature changed
+THEN   Calculate value from curve
+       Input: {{outdoor_temperature}}
+       Curve: < 0 : 55, < 5 : 50, < 10 : 45, < 15 : 40, default : 35
+AND    Set target temperature to {{result_value}}
+```
+
+##### Curve Format
+
+Each line: `[operator] threshold : output_value`
+
+##### Supported Operators
+
+- `>` - Greater than
+- `>=` - Greater than or equal (default if no operator specified)
+- `<` - Less than
+- `<=` - Less than or equal
+- `==` - Equal to
+- `!=` - Not equal to
+- `default` or `*` - Fallback value (always use as last line)
+
+##### Evaluation Rules
+
+1. Evaluates from **top to bottom**
+2. Returns **first matching** condition
+3. Falls back to `default` if no match
+
+##### Example Curves
+
+Basic Heating Curve (outdoor temp → heating setpoint):
+
+```text
+< -5 : 60    (Extreme cold → maximum heating)
+< 0  : 55    (Freezing → high heating)
+< 5  : 50    (Cold → medium heating)
+< 10 : 45    (Cool → moderate heating)
+< 15 : 40    (Mild → low heating)
+default : 35 (Warm → minimal heating)
+```
+
+Time-Based Hot Water (hour of day → hot water temp):
+
+```text
+>= 22 : 45   (Night → energy saving mode)
+>= 18 : 55   (Evening → normal)
+>= 6  : 60   (Morning/day → comfort mode)
+default : 45 (Default → energy saving)
+```
+
+COP-Based Optimization (current COP → temp adjustment):
+
+```text
+< 2.0 : -5   (Low efficiency → reduce 5°C)
+< 2.5 : -3   (Moderate → reduce 3°C)
+>= 3.5 : +2  (High efficiency → increase 2°C)
+default : 0  (Normal → no change)
+```
+
+##### Best Practices
+
+- ✅ Always add `default : <value>` as last line (prevents errors)
+- ✅ Use newlines or commas to separate rules
+- ✅ Test your curve with different inputs before deploying
+- ✅ Keep curves simple (max 50 entries)
+- ⚠️ Curves evaluate top to bottom - order matters!
+
+##### Error Messages
+
+The calculator provides clear error messages:
+
+- `"Input value must be a valid number"` - Check your input tag
+- `"No matching curve condition found for input value: X"` - Add a `default` line
+- `"Invalid curve syntax at line N"` - Check operator and format
+- `"Curve exceeds maximum allowed entries (50)"` - Simplify your curve
 
 ### Cross-App Integration
 

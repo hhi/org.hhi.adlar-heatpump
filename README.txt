@@ -101,6 +101,21 @@ AUTOMATION WITH FLOW CARDS
 - Efficiency optimization
 - Weather-dependent adjustments
 - System timer notifications
+- Dynamic curve calculator for advanced optimization
+
+CURVE CALCULATOR (Advanced Feature)
+Calculate output values based on configurable curves for intelligent automation:
+- Weather-compensated heating: Automatic setpoint adjustment based on outdoor temperature
+- Time-based optimization: Adjust settings by hour/day/season
+- COP-based fine-tuning: Dynamic temperature adjustments based on efficiency
+- Supports 6 operators: >, >=, <, <=, ==, != with default fallback
+- Maximum 50 curve entries for complex scenarios
+- Real-time calculation with user-friendly error messages
+
+Example: Weather-Compensated Heating
+"When outdoor temperature changes, calculate heating setpoint using curve:
+< -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
+Result: Automatically adjusts heating based on weather conditions
 
 COP (COEFFICIENT OF PERFORMANCE) MONITORING
 
