@@ -38,8 +38,8 @@ export class DeviceConstants {
   /** Heartbeat disconnected delay - start wake-up probes after this period of disconnection (v1.0.12) */
   static readonly HEARTBEAT_DISCONNECTED_DELAY_MS = 15 * 60 * 1000; // 15 minutes
 
-  /** Periodic DPS refresh interval - prevent NAT timeouts during idle periods (v1.0.3→3min, v1.0.25→15min, v1.0.32→5min for TCP resilience) */
-  static readonly DPS_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+  /** Periodic DPS refresh interval - prevent NAT timeouts during idle periods (v1.0.3→3min, v1.0.25→15min, v1.0.32→5min for TCP resilience, v1.2.1→15min redundant with Layer 0 heartbeat) */
+  static readonly DPS_REFRESH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
   /** DPS Refresh data event timeout - max wait for data event after query (v1.0.22 fix) */
   static readonly DPS_REFRESH_DATA_EVENT_TIMEOUT_MS = 10 * 1000; // 10 seconds (was hardcoded 2s - too aggressive for high latency)
@@ -52,6 +52,14 @@ export class DeviceConstants {
 
   /** Capability timeout - consider unhealthy after this period without data */
   static readonly CAPABILITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+  /** Capability timeouts by type (v1.2.1 - differentiated timeouts) */
+  static readonly CAPABILITY_TIMEOUTS = {
+    SENSOR: 5 * 60 * 1000, // 5 minutes - measure_*, meter_* capabilities
+    STATUS: 15 * 60 * 1000, // 15 minutes - adlar_connection_status, adlar_fault, etc.
+    CALCULATED: 10 * 60 * 1000, // 10 minutes - adlar_cop, adlar_scop, etc.
+    CONTROL: Infinity, // Never timeout - target_temperature, onoff, adlar_enum_*, etc.
+  };
 
   // Power thresholds (in watts)
   /** High power consumption alert threshold */

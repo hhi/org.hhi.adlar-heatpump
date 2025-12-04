@@ -1,4 +1,10 @@
 {
+  "1.2.3": {
+    "en": "Enhanced connection diagnostics with detailed reconnection attempt logging and health state monitoring.",
+    "nl": "Verbeterde verbindingsdiagnostiek met gedetailleerde logging van herverbindingspogingen en health state monitoring.",
+    "de": "Erweiterte Verbindungsdiagnostik mit detaillierter Protokollierung von Wiederverbindungsversuchen und Zustandsüberwachung.",
+    "fr": "Diagnostics de connexion améliorés avec journalisation détaillée des tentatives de reconnexion et surveillance de l'état de santé."
+  },
   "1.2.0": {
     "en": "Added Calculate Value from Curve flow card. Maps input values (e.g., outdoor temperature) to output values using curve definitions for weather-compensated heating curves and time-based setpoint automation. Connection stability improved with faster disconnection detection",
     "nl": "Calculate Value from Curve flow card toegevoegd. Koppelt invoerwaarden (bijv. buitentemperatuur) aan uitvoerwaarden met curve definities voor weerafhankelijke verwarmingscurves en tijdsgebaseerde setpoint automatisering. Verbindingsstabiliteit verbeterd met snellere detectie van verbroken verbinding",
