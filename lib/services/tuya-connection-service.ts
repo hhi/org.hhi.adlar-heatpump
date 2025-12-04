@@ -1076,11 +1076,24 @@ export class TuyaConnectionService {
       }
 
       const timeSinceLastHeartbeat = Date.now() - this.lastNativeHeartbeatTime;
+      const timeSinceLastData = Date.now() - this.lastDataEventTime;
+
+      // DIAGNOSTIC: Log health check every interval
+      this.logger(`🔍 Layer 0 Health Check: Heartbeat ${Math.round(timeSinceLastHeartbeat / 1000)}s ago, Data ${Math.round(timeSinceLastData / 1000)}s ago`);
 
       if (timeSinceLastHeartbeat > this.NATIVE_HEARTBEAT_TIMEOUT_MS) {
         // Native heartbeats have stopped - connection is dead
-        this.logger(`❌ Layer 0: Native heartbeat timeout (${Math.round(timeSinceLastHeartbeat / 1000)}s since last heartbeat)`);
-        this.logger('🔴 Layer 0: Zombie connection detected - forcing reconnect');
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+        this.logger('═════════════════════════════════════════════════════');
+        this.logger(`❌ LAYER 0 DISCONNECT DETECTED at ${timeStr}`);
+        this.logger(`   Last heartbeat: ${Math.round(timeSinceLastHeartbeat / 1000)}s ago (threshold: 35s)`);
+        this.logger(`   Last data event: ${Math.round(timeSinceLastData / 1000)}s ago`);
+        this.logger(`   Consecutive failures: ${this.consecutiveFailures}`);
+        this.logger(`   Backoff multiplier: ${this.backoffMultiplier}x`);
+        this.logger('🔴 Layer 0: Triggering reconnection attempt...');
+        this.logger('═════════════════════════════════════════════════════');
 
         // Mark as disconnected
         this.isConnected = false;
@@ -1094,6 +1107,7 @@ export class TuyaConnectionService {
 
         // Trigger reconnection
         this.consecutiveFailures++;
+        this.logger(`➡️  Layer 0: Calling scheduleNextReconnectionAttempt() (failures: ${this.consecutiveFailures})`);
         this.scheduleNextReconnectionAttempt();
 
         // Notify handlers
@@ -1190,10 +1204,11 @@ export class TuyaConnectionService {
   /**
    * Perform heartbeat check to verify TCP keep-alive is working (v1.0.31 - Synergistic Strategy).
    *
-   * ARCHITECTURE (v1.0.31 - Option B):
+   * ARCHITECTURE (v1.0.31 - Option B, v1.2.1 - Layer 0 redundancy):
+   * - Layer 0 (10-sec): TuyaAPI native heartbeat - fastest zombie detection
    * - TCP keep-alive (5-min OS-level): Sends packets to detect dead sockets
    * - Heartbeat (5-min app-level): Verifies device responds to keep-alive probes
-   * - DPS refresh (5-min): NAT timeout prevention ONLY, no zombie detection
+   * - DPS refresh (15-min): NAT timeout prevention ONLY, redundant with Layer 0 (v1.2.1)
    *
    * Heartbeat runs at same 5-minute interval as TCP keep-alive to complement it:
    * Layer 1: get() query - tests if socket is responsive (confirms keep-alive working)
@@ -1391,10 +1406,15 @@ export class TuyaConnectionService {
       }
 
       // Both layers failed to trigger data event - this is a zombie connection
-      this.logger('🧟 TuyaConnectionService: ZOMBIE CONNECTION DETECTED (v1.0.26)');
-      this.logger(`  LAYER 1 (get): ${layer1GetError ? `failed to execute: ${layer1GetError.message}` : 'executed but no data'}`);
-      this.logger(`  LAYER 2 (set): ${layer2SetError ? `failed to execute: ${layer2SetError.message}` : 'executed but no data'}`);
-      this.logger('TuyaConnectionService: Forcing full reconnect to recover from zombie state...');
+      this.logger('═════════════════════════════════════════════════════');
+      this.logger(`🧟 LAYER 1-2 ZOMBIE DETECTED at ${timeStr}`);
+      this.logger(`   LAYER 1 (get): ${layer1GetError ? `FAILED - ${layer1GetError.message}` : 'OK but NO data event'}`);
+      this.logger(`   LAYER 2 (set): ${layer2SetError ? `FAILED - ${layer2SetError.message}` : 'OK but NO data event'}`);
+      this.logger(`   Last data event: ${Math.round(timeSinceLastData / 1000)}s ago`);
+      this.logger(`   Consecutive failures: ${this.consecutiveFailures}`);
+      this.logger(`   Backoff multiplier: ${this.backoffMultiplier}x`);
+      this.logger('🔴 Layer 1-2: Triggering force reconnect...');
+      this.logger('═════════════════════════════════════════════════════');
 
       // Store detailed disconnect source for diagnostics
       const layer1Status = layer1GetError ? `failed: ${layer1GetError.message}` : 'no data event';
@@ -1479,11 +1499,22 @@ export class TuyaConnectionService {
    * and time-based notifications (v1.0.5 - Proposals 1-5).
    */
   private scheduleNextReconnectionAttempt(): void {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+    this.logger('┌─────────────────────────────────────────────────────┐');
+    this.logger(`│ SCHEDULE RECONNECTION CALLED at ${timeStr}        │`);
+    this.logger(`│ isConnected: ${this.isConnected ? 'true ' : 'false'}                              │`);
+    this.logger(`│ consecutiveFailures: ${this.consecutiveFailures.toString().padEnd(28)}│`);
+    this.logger(`│ backoffMultiplier: ${this.backoffMultiplier}x${' '.repeat(28 - this.backoffMultiplier.toString().length - 1)}│`);
+    this.logger(`│ circuitBreakerOpen: ${this.circuitBreakerOpen ? 'true ' : 'false'}${' '.repeat(24)}│`);
+    this.logger('└─────────────────────────────────────────────────────┘');
+
     // LAYER 1: Track outage start time (v1.0.5 - Proposal 1, fixed v1.0.6)
     // Only start tracking if we've ever connected successfully before
     if (this.hasEverConnected && !this.isConnected && this.outageStartTime === 0) {
       this.outageStartTime = Date.now();
-      this.logger('TuyaConnectionService: Outage tracking started');
+      this.logger('📊 Outage tracking started');
     }
 
     // LAYER 2: Stale Connection Detection (v0.99.98)
@@ -1547,8 +1578,10 @@ export class TuyaConnectionService {
         this.notificationSent2Min = true;
       }
 
-      // 10-minute notification
+      // 10-minute notification + DIAGNOSTIC REPORT
       if (outageDuration >= 10 * 60 * 1000 && !this.notificationSent10Min) {
+        this.logger('🔍 10-MINUTE OUTAGE - Generating diagnostic report...');
+        this.logDiagnosticReport();
         this.sendCriticalNotification(
           'Extended Device Outage',
           'Heat pump has been offline for 10 minutes. Please check network connectivity.',
@@ -1556,13 +1589,22 @@ export class TuyaConnectionService {
         this.notificationSent10Min = true;
       }
 
-      // 30-minute notification
+      // 30-minute notification + DIAGNOSTIC REPORT
       if (outageDuration >= 30 * 60 * 1000 && !this.notificationSent30Min) {
+        this.logger('🔍 30-MINUTE OUTAGE - Generating diagnostic report...');
+        this.logDiagnosticReport();
         this.sendCriticalNotification(
           'Critical Outage',
           'Heat pump has been offline for 30 minutes. Manual intervention may be required.',
         ).catch((err) => this.logger('Failed to send 30-min notification:', err));
         this.notificationSent30Min = true;
+      }
+
+      // 1-hour diagnostic (logging only, no notification)
+      const oneHour = 60 * 60 * 1000;
+      if (outageDuration >= oneHour && outageDuration < oneHour + 30000) { // Only log once around 1-hour mark
+        this.logger('🔍 1-HOUR OUTAGE - Generating diagnostic report...');
+        this.logDiagnosticReport();
       }
     }
 
@@ -1636,16 +1678,26 @@ export class TuyaConnectionService {
     // Set next reconnection time for status display (v1.0.6)
     this.nextReconnectionTime = Date.now() + adaptiveInterval;
 
-    this.logger(`TuyaConnectionService: Next reconnection attempt in ${Math.round(adaptiveInterval / 1000)}s (backoff: ${this.backoffMultiplier}x)`);
+    const nextAttemptTime = new Date(this.nextReconnectionTime);
+    const nextTimeStr = `${nextAttemptTime.getHours().toString().padStart(2, '0')}:${nextAttemptTime.getMinutes().toString().padStart(2, '0')}:${nextAttemptTime.getSeconds().toString().padStart(2, '0')}`;
+
+    this.logger('╔═════════════════════════════════════════════════════╗');
+    this.logger(`║ RECONNECTION SCHEDULED                              ║`);
+    this.logger(`║ Next attempt in: ${Math.round(adaptiveInterval / 1000)}s (at ${nextTimeStr})${' '.repeat(Math.max(0, 14 - Math.round(adaptiveInterval / 1000).toString().length - nextTimeStr.length))}║`);
+    this.logger(`║ Backoff multiplier: ${this.backoffMultiplier}x${' '.repeat(29 - this.backoffMultiplier.toString().length)}║`);
+    this.logger(`║ Circuit breaker: ${this.circuitBreakerOpen ? 'OPEN' : 'CLOSED'}${' '.repeat(28 - (this.circuitBreakerOpen ? 4 : 6))}║`);
+    this.logger('╚═════════════════════════════════════════════════════╝');
 
     this.reconnectInterval = this.device.homey.setTimeout(() => {
+      this.logger('⏰ Reconnection timer FIRED - executing attemptReconnectionWithRecovery()...');
       this.attemptReconnectionWithRecovery().catch((error) => {
         // Prevent unhandled rejection crash
-        this.logger('TuyaConnectionService: Critical error in scheduled reconnection:', error);
+        this.logger('TuyaConnectionService: ❌ Critical error in scheduled reconnection:', error);
 
         // Apply aggressive backoff and schedule retry
         this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32);
         this.consecutiveFailures++;
+        this.logger(`➡️  Rescheduling after error (failures: ${this.consecutiveFailures}, backoff: ${this.backoffMultiplier}x)`);
         this.scheduleNextReconnectionAttempt();
       });
     }, adaptiveInterval);
@@ -1708,6 +1760,12 @@ export class TuyaConnectionService {
           'Warmtepomp is weer online na verbindingsprobleem.',
         );
       }
+
+      // CRITICAL FIX (v1.2.1): Restart health check loop after successful reconnection
+      // Without this, stale connection detection and periodic health monitoring stops
+      // until next disconnect/reconnect cycle
+      this.scheduleNextReconnectionAttempt();
+      this.logger('TuyaConnectionService: Health check loop restarted after successful reconnection');
 
     } catch (error) {
       const categorizedError = error as CategorizedError;
@@ -1850,6 +1908,64 @@ export class TuyaConnectionService {
       hasReconnectInterval: !!this.reconnectInterval,
       tuyaInstanceExists: !!this.tuya,
     };
+  }
+
+  /**
+   * Log comprehensive diagnostic report of all timer states and connection status.
+   * Use this when connection is stuck to see what timers are active/inactive.
+   */
+  logDiagnosticReport(): void {
+    const now = Date.now();
+    const formatTime = (timestamp: number): string => {
+      if (timestamp === 0) return 'NEVER';
+      const secondsAgo = Math.round((now - timestamp) / 1000);
+      return `${secondsAgo}s ago`;
+    };
+
+    this.logger('╔═══════════════════════════════════════════════════════════╗');
+    this.logger('║           CONNECTION DIAGNOSTIC REPORT                    ║');
+    this.logger('╠═══════════════════════════════════════════════════════════╣');
+    this.logger('║ CONNECTION STATE                                          ║');
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger(`║ isConnected: ${(this.isConnected ? 'true ' : 'false').padEnd(46)}║`);
+    this.logger(`║ hasEverConnected: ${(this.hasEverConnected ? 'true' : 'false').padEnd(42)}║`);
+    this.logger(`║ currentStatus: ${this.currentStatus.padEnd(45)}║`);
+    this.logger(`║ lastDisconnectSource: ${(this.lastDisconnectSource || 'N/A').padEnd(36)}║`);
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger('║ TIMESTAMPS                                                ║');
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger(`║ lastDataEventTime: ${formatTime(this.lastDataEventTime).padEnd(39)}║`);
+    this.logger(`║ lastHeartbeatTime: ${formatTime(this.lastHeartbeatTime).padEnd(39)}║`);
+    this.logger(`║ lastNativeHeartbeatTime: ${formatTime(this.lastNativeHeartbeatTime).padEnd(33)}║`);
+    this.logger(`║ lastStatusChangeTime: ${formatTime(this.lastStatusChangeTime).padEnd(38)}║`);
+    this.logger(`║ lastDisconnectTime: ${formatTime(this.lastDisconnectTime).padEnd(40)}║`);
+    this.logger(`║ outageStartTime: ${formatTime(this.outageStartTime).padEnd(43)}║`);
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger('║ TIMER STATES                                              ║');
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger(`║ reconnectInterval: ${(this.reconnectInterval ? 'ACTIVE' : 'INACTIVE').padEnd(41)}║`);
+    this.logger(`║ heartbeatInterval: ${(this.heartbeatInterval ? 'ACTIVE' : 'INACTIVE').padEnd(41)}║`);
+    this.logger(`║ nativeHeartbeatMonitorInterval: ${(this.nativeHeartbeatMonitorInterval ? 'ACTIVE' : 'INACTIVE').padEnd(28)}║`);
+    this.logger(`║ dpsRefreshInterval: ${(this.dpsRefreshInterval ? 'ACTIVE' : 'INACTIVE').padEnd(40)}║`);
+    this.logger(`║ heartbeatInProgress: ${(this.heartbeatInProgress ? 'true' : 'false').padEnd(39)}║`);
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger('║ RECONNECTION STATE                                        ║');
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger(`║ consecutiveFailures: ${this.consecutiveFailures.toString().padEnd(38)}║`);
+    this.logger(`║ backoffMultiplier: ${this.backoffMultiplier.toString().padEnd(40)}x║`);
+    this.logger(`║ connectionAttempts: ${this.connectionAttempts.toString().padEnd(40)}║`);
+    this.logger(`║ passiveReconnectionAttempts: ${this.passiveReconnectionAttempts.toString().padEnd(31)}║`);
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger('║ CIRCUIT BREAKER                                           ║');
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger(`║ circuitBreakerOpen: ${(this.circuitBreakerOpen ? 'OPEN' : 'CLOSED').padEnd(40)}║`);
+    this.logger(`║ circuitBreakerCycles: ${this.circuitBreakerCycles.toString().padEnd(38)}║`);
+    this.logger(`║ circuitBreakerOpenTime: ${formatTime(this.circuitBreakerOpenTime).padEnd(36)}║`);
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger('║ TUYA INSTANCE                                             ║');
+    this.logger('╟───────────────────────────────────────────────────────────╢');
+    this.logger(`║ tuyaInstanceExists: ${(this.tuya ? 'true' : 'false').padEnd(40)}║`);
+    this.logger('╚═══════════════════════════════════════════════════════════╝');
   }
 
   /**

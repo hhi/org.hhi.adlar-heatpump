@@ -224,13 +224,16 @@ export class CapabilityHealthService {
       const timeSinceUpdate = now - healthData.lastUpdated;
       const wasHealthy = healthData.isHealthy;
 
+      // v1.2.1: Use capability-specific timeout instead of global timeout
+      const timeout = this.getCapabilityTimeout(capability);
+
       // Check for stale data (no updates for extended period)
       // and recovery (recent update after being stale)
-      if (timeSinceUpdate > DeviceConstants.CAPABILITY_TIMEOUT_MS) {
+      if (timeSinceUpdate > timeout) {
         if (healthData.isHealthy) {
           healthData.isHealthy = false;
           healthChanges++;
-          this.logger(`CapabilityHealthService: Capability ${capability} marked as stale (${Math.round(timeSinceUpdate / 1000)}s since update)`);
+          this.logger(`CapabilityHealthService: Capability ${capability} marked as stale (${Math.round(timeSinceUpdate / 1000)}s since update, timeout: ${Math.round(timeout / 1000)}s)`);
           this.device.emit('capability:health-stale', { capability, healthData, timeSinceUpdate });
         }
       } else if (!wasHealthy && this.isCapabilityValueHealthy(healthData.lastValue)) {
@@ -245,6 +248,50 @@ export class CapabilityHealthService {
     if (healthChanges > 0) {
       this.generateHealthReport();
     }
+  }
+
+  /**
+   * Determine the appropriate timeout for a capability based on its type (v1.2.1).
+   * Control capabilities never timeout, sensors have short timeouts, status/calculated have longer timeouts.
+   * @param capability - The capability ID
+   * @returns Timeout in milliseconds
+   */
+  private getCapabilityTimeout(capability: string): number {
+    // Control capabilities - NEVER timeout (user-controlled, not auto-updating)
+    if (
+      capability === 'onoff'
+      || capability === 'target_temperature'
+      || capability === 'dim'
+      || capability.startsWith('adlar_enum_') // All enum pickers (mode, water_mode, work_mode, etc.)
+      || capability.startsWith('adlar_picker_') // All picker controls (countdown, capacity, volume)
+      || capability === 'adlar_hotwater' // Hot water setpoint
+    ) {
+      return DeviceConstants.CAPABILITY_TIMEOUTS.CONTROL; // Infinity
+    }
+
+    // Calculated capabilities - Medium timeout (periodic calculations)
+    if (
+      capability.startsWith('adlar_cop') // COP calculations
+      || capability.startsWith('adlar_scop') // SCOP calculations
+      || capability.startsWith('adlar_external_') // External data integrations
+    ) {
+      return DeviceConstants.CAPABILITY_TIMEOUTS.CALCULATED; // 10 minutes
+    }
+
+    // Status capabilities - Longer timeout (event-driven)
+    if (
+      capability === 'adlar_connection_status'
+      || capability === 'adlar_connection_active'
+      || capability === 'adlar_fault'
+      || capability.startsWith('adlar_state_') // State indicators
+      || capability.startsWith('adlar_sensor_') // Read-only sensor displays
+    ) {
+      return DeviceConstants.CAPABILITY_TIMEOUTS.STATUS; // 15 minutes
+    }
+
+    // Sensor capabilities - Short timeout (frequent updates expected)
+    // measure_*, meter_*, adlar_measure_*, adlar_countdowntimer, etc.
+    return DeviceConstants.CAPABILITY_TIMEOUTS.SENSOR; // 5 minutes
   }
 
   /**
@@ -266,27 +313,40 @@ export class CapabilityHealthService {
 
   /**
    * Determine if a capability category is enabled via user settings.
+   * v1.2.1 FIX: Checks BOTH feature enablement AND flow card settings.
    * Settings can be 'disabled', 'auto', or 'enabled'.
    * Returns false only if explicitly disabled.
    */
   private isCategoryEnabled(category: keyof CapabilityCategories): boolean {
     const userPrefs = this.getUserFlowPreferences();
 
+    // v1.2.1: First check feature enablement settings (master switches)
+    const enablePowerMeasurements = this.device.getSetting('enable_power_measurements') ?? true;
+    const enableCOPCalculation = this.device.getSetting('cop_calculation_enabled') !== false; // default true
+
     switch (category) {
       case 'temperature':
         return userPrefs.flow_temperature_alerts !== 'disabled';
+
       case 'voltage':
-        return userPrefs.flow_voltage_alerts !== 'disabled';
       case 'current':
-        return userPrefs.flow_current_alerts !== 'disabled';
       case 'power':
+        // v1.2.1 FIX: If power measurements disabled, these categories are ALWAYS disabled
+        if (!enablePowerMeasurements) return false;
+        // Otherwise check flow card settings
+        if (category === 'voltage') return userPrefs.flow_voltage_alerts !== 'disabled';
+        if (category === 'current') return userPrefs.flow_current_alerts !== 'disabled';
         return userPrefs.flow_power_alerts !== 'disabled';
+
+      case 'efficiency':
+        // v1.2.1 FIX: If COP calculation disabled, efficiency category is ALWAYS disabled
+        if (!enableCOPCalculation) return false;
+        return userPrefs.flow_efficiency_alerts !== 'disabled';
+
       case 'pulseSteps':
         return userPrefs.flow_pulse_steps_alerts !== 'disabled';
       case 'states':
         return userPrefs.flow_state_alerts !== 'disabled';
-      case 'efficiency':
-        return userPrefs.flow_efficiency_alerts !== 'disabled';
       default:
         return true; // Unknown categories are enabled by default
     }
@@ -417,7 +477,9 @@ export class CapabilityHealthService {
       }
 
       const timeSinceUpdate = now - healthData.lastUpdated;
-      const hasRecentData = timeSinceUpdate < DeviceConstants.CAPABILITY_TIMEOUT_MS;
+      // v1.2.1: Use capability-specific timeout
+      const timeout = this.getCapabilityTimeout(capability);
+      const hasRecentData = timeSinceUpdate < timeout;
       const hasHealthyValue = this.isCapabilityValueHealthy(healthData.lastValue);
       const lowNullCount = healthData.nullCount < DeviceConstants.NULL_THRESHOLD;
 
@@ -495,9 +557,16 @@ export class CapabilityHealthService {
 
     this.capabilityHealthMap.forEach((healthData, capability) => {
       const timeSinceUpdate = now - healthData.lastUpdated;
+      // v1.2.1: Use capability-specific timeout
+      const timeout = this.getCapabilityTimeout(capability);
 
-      // Critical: No data for extended period
-      if (timeSinceUpdate > DeviceConstants.CAPABILITY_TIMEOUT_MS * 2) {
+      // Skip control capabilities (they never timeout)
+      if (timeout === Infinity) {
+        return; // Control capabilities don't have critical conditions based on staleness
+      }
+
+      // Critical: No data for extended period (2x timeout)
+      if (timeSinceUpdate > timeout * 2) {
         conditions.push({
           capability,
           condition: `No data for ${Math.round(timeSinceUpdate / 60000)} minutes`,
@@ -509,7 +578,7 @@ export class CapabilityHealthService {
           condition: `${healthData.nullCount} consecutive null values`,
           severity: 'warning',
         });
-      } else if (timeSinceUpdate > DeviceConstants.CAPABILITY_TIMEOUT_MS) {
+      } else if (timeSinceUpdate > timeout) {
         conditions.push({
           capability,
           condition: `Stale data (${Math.round(timeSinceUpdate / 1000)}s old)`,
@@ -535,7 +604,7 @@ export class CapabilityHealthService {
       capabilityDetails: Object.fromEntries(this.capabilityHealthMap),
       diagnosticInfo: {
         healthCheckInterval: DeviceConstants.HEALTH_CHECK_INTERVAL_MS,
-        capabilityTimeout: DeviceConstants.CAPABILITY_TIMEOUT_MS,
+        capabilityTimeouts: DeviceConstants.CAPABILITY_TIMEOUTS, // v1.2.1: Show all timeout types
         nullThreshold: DeviceConstants.NULL_THRESHOLD,
         generatedAt: new Date().toISOString(),
       },
