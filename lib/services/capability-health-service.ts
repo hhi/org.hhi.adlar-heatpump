@@ -185,17 +185,28 @@ export class CapabilityHealthService {
 
   /**
    * Map a capability id to a logical category used for grouping (temperature, voltage, etc).
+   * v1.2.3: Separates calculated/external capabilities from DPS-based device data.
+   * Only DPS-based capabilities (sensor/status) are included in device health metrics.
    * @param capability - the capability identifier
    * @returns category name
    */
   private getCapabilityCategory(capability: string): string {
+    // Calculated capabilities - excluded from health metrics (not DPS data)
+    if (capability.includes('cop') || capability.includes('scop')) return 'calculated';
+
+    // External integration capabilities - excluded from health metrics (user configuration)
+    if (capability.startsWith('adlar_external_')) return 'external';
+
+    // DPS-based sensor capabilities - included in health metrics
     if (capability.startsWith('measure_temperature')) return 'temperature';
     if (capability.startsWith('measure_voltage')) return 'voltage';
     if (capability.startsWith('measure_current')) return 'current';
     if (capability.includes('power') || capability.includes('energy')) return 'power';
     if (capability.includes('pulse_steps')) return 'pulseSteps';
+
+    // DPS-based status capabilities - included in health metrics
     if (capability.startsWith('adlar_state')) return 'states';
-    if (capability.includes('cop') || capability.includes('scop')) return 'efficiency';
+
     return 'other';
   }
 
@@ -314,6 +325,7 @@ export class CapabilityHealthService {
   /**
    * Determine if a capability category is enabled via user settings.
    * v1.2.1 FIX: Checks BOTH feature enablement AND flow card settings.
+   * v1.2.3: Calculated/external categories always return true (excluded from health tracking elsewhere).
    * Settings can be 'disabled', 'auto', or 'enabled'.
    * Returns false only if explicitly disabled.
    */
@@ -343,6 +355,12 @@ export class CapabilityHealthService {
         if (!enableCOPCalculation) return false;
         return userPrefs.flow_efficiency_alerts !== 'disabled';
 
+      case 'calculated':
+      case 'external':
+        // v1.2.3: These categories are excluded from health metrics via explicit checks
+        // Return true here for flow card compatibility
+        return true;
+
       case 'pulseSteps':
         return userPrefs.flow_pulse_steps_alerts !== 'disabled';
       case 'states':
@@ -368,8 +386,14 @@ export class CapabilityHealthService {
 
     // Group capabilities by category and count health status
     // v1.0.31: FIXED - Only count capabilities that are enabled via settings
+    // v1.2.3: FIXED - Exclude calculated/external capabilities (DPS-only health tracking)
     this.capabilityHealthMap.forEach((healthData) => {
       const category = healthData.category as keyof CapabilityCategories;
+
+      // v1.2.3: Skip calculated and external capabilities (not DPS device data)
+      if (category === 'calculated' || category === 'external') {
+        return; // Skip - health check tracks DPS communication only
+      }
 
       // Skip disabled capability categories
       if (!this.isCategoryEnabled(category)) {
@@ -420,7 +444,7 @@ export class CapabilityHealthService {
 
     this.lastHealthReport = report;
 
-    this.logger('CapabilityHealthService: Health report generated (settings-aware)', {
+    this.logger('CapabilityHealthService: Health report generated (DPS-only, settings-aware)', {
       overall,
       healthy: healthyCapabilities,
       total: totalCapabilities,
@@ -436,6 +460,7 @@ export class CapabilityHealthService {
   /**
    * Return the available capabilities grouped by category.
    * Useful for determining which flow cards to register.
+   * v1.2.3: Added calculated/external categories.
    */
   getAvailableCapabilities(): CapabilityCategories {
     const capabilities = this.device.getCapabilities();
@@ -446,7 +471,9 @@ export class CapabilityHealthService {
       power: [],
       pulseSteps: [],
       states: [],
-      efficiency: [],
+      efficiency: [], // Legacy - kept for flow card compatibility
+      calculated: [], // v1.2.3: COP/SCOP calculations
+      external: [], // v1.2.3: External integrations
     };
 
     capabilities.forEach((capability) => {
@@ -462,6 +489,7 @@ export class CapabilityHealthService {
   /**
    * Inspect stored health data and detect which capabilities currently have healthy data.
    * v1.0.31: FIXED - Only returns capabilities from ENABLED categories (settings-aware).
+   * v1.2.3: FIXED - Excludes calculated/external capabilities (DPS-only tracking).
    * @returns array of capability ids considered to have healthy/recent data
    */
   async detectCapabilitiesWithData(): Promise<string[]> {
@@ -470,6 +498,11 @@ export class CapabilityHealthService {
 
     this.capabilityHealthMap.forEach((healthData, capability) => {
       const category = healthData.category as keyof CapabilityCategories;
+
+      // v1.2.3: Skip calculated and external capabilities (not DPS device data)
+      if (category === 'calculated' || category === 'external') {
+        return; // Skip - only track DPS communication health
+      }
 
       // v1.0.31: Skip capabilities from disabled categories
       if (!this.isCategoryEnabled(category)) {
@@ -488,7 +521,7 @@ export class CapabilityHealthService {
       }
     });
 
-    this.logger('CapabilityHealthService: Detected capabilities with healthy data (settings-aware)', capabilitiesWithData.length);
+    this.logger('CapabilityHealthService: Detected capabilities with healthy data (DPS-only, settings-aware)', capabilitiesWithData.length);
     return capabilitiesWithData;
   }
 

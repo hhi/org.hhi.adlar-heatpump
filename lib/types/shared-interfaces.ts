@@ -8,6 +8,7 @@
 /**
  * Categories for grouping device capabilities by functional type.
  * Used by CapabilityHealthService and FlowCardManagerService.
+ * v1.2.3: Added 'calculated' and 'external' categories (excluded from DPS health tracking).
  */
 export interface CapabilityCategories {
   temperature: string[];
@@ -16,7 +17,9 @@ export interface CapabilityCategories {
   power: string[];
   pulseSteps: string[];
   states: string[];
-  efficiency: string[];
+  efficiency: string[]; // Flow card category (still used for user preferences)
+  calculated: string[]; // COP/SCOP calculations (excluded from health metrics)
+  external: string[]; // External integrations (excluded from health metrics)
 }
 
 /**

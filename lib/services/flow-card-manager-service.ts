@@ -123,6 +123,8 @@ export class FlowCardManagerService {
       pulseSteps: [],
       states: [],
       efficiency: [],
+      calculated: [], // v1.2.3: COP/SCOP calculations
+      external: [], // v1.2.3: External integrations
     };
 
     capabilities.forEach((capability) => {

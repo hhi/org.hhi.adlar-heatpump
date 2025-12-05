@@ -190,7 +190,9 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
    - Single-source connection truth (v0.99.99) - eliminates extended disconnection periods
 
 2. **CapabilityHealthService** (`lib/services/capability-health-service.ts`)
-   - Real-time capability health tracking
+   - Real-time capability health tracking (DPS-only, v1.2.3)
+   - Excludes calculated values (COP/SCOP) and external integrations from health metrics
+   - Tracks device communication health, not application logic health
    - Null value detection and monitoring
    - Data availability validation
    - Health-based flow card registration
@@ -491,6 +493,43 @@ Centralized configuration system in `DeviceConstants` class:
   - `CONNECTION_HEARTBEAT_INTERVAL_MS` (5 minutes): Proactive connection health check interval
   - `HEARTBEAT_TIMEOUT_MS` (10 seconds): Consider connection dead if no heartbeat response
   - `STALE_CONNECTION_THRESHOLD_MS` (10 minutes): Force reconnect after this idle period
+
+#### DPS-Only Health Tracking (v1.2.3)
+
+**Purpose**: Health metrics track **device communication health** (DPS data from Tuya device), not application logic health (calculated values or user configurations).
+
+**What's Included in Health Metrics**:
+
+- ✅ **SENSOR capabilities**: `measure_*`, `meter_*` - Direct device sensor data (5-minute timeout)
+- ✅ **STATUS capabilities**: `adlar_connection_status`, `adlar_fault`, `adlar_state_*` - Device status (15-minute timeout)
+- ✅ **POWER capabilities**: Power/voltage/current measurements from device (5-minute timeout)
+- ✅ **CONTROL capabilities**: Never timeout (user-controlled, not auto-updating)
+
+**What's Excluded from Health Metrics** (v1.2.3):
+
+- ❌ **CALCULATED capabilities**: `adlar_cop*`, `adlar_scop*` - Derived from sensor data (application logic)
+- ❌ **EXTERNAL capabilities**: `adlar_external_*` - User configuration, not device data
+
+**Health Status Thresholds**:
+
+- **Healthy**: ≥90% of DPS capabilities have recent valid data
+- **Degraded**: 70-89% of DPS capabilities healthy
+- **Critical**: <70% of DPS capabilities healthy
+
+**Example**: Device with 44 total capabilities:
+
+- 13 calculated/external (excluded from health check)
+- 31 DPS capabilities (included in health check)
+- If 30/31 DPS capabilities healthy → **97% = "healthy"** ✅
+- Previously 30/44 total → 68% = "critical" ❌ (incorrect assessment)
+
+**Rationale**:
+
+1. **Device vs Application**: Health check answers "Is the device communicating?" not "Are my automations working?"
+2. **Dependency Chain**: Calculated values depend on sensor health - if sensors healthy but COP=null, that's a calculation issue not a communication issue
+3. **Optional Features**: External integrations are user configuration choices, not device functionality
+
+**Implementation**: [capability-health-service.ts:186-211](lib/services/capability-health-service.ts#L186-L211)
 
 #### Error Handling Architecture (v0.90.3+, Enhanced v0.99.46)
 
