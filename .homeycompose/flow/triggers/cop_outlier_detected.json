@@ -2,13 +2,13 @@
   "id": "cop_outlier_detected",
   "title": {
     "en": "COP outlier detected",
-    "nl": "COP uitbijter gedetecteerd",
+    "nl": "COP uitschieter gedetecteerd",
     "de": "COP-Ausreißer erkannt",
     "fr": "Valeur aberrante COP détectée"
   },
   "titleFormatted": {
     "en": "COP outlier detected",
-    "nl": "COP uitbijter gedetecteerd",
+    "nl": "COP uitschieter gedetecteerd",
     "de": "COP-Ausreißer erkannt",
     "fr": "Valeur aberrante COP détectée"
   },
@@ -31,7 +31,7 @@
       "name": "outlier_cop",
       "title": {
         "en": "Outlier COP value",
-        "nl": "Uitbijter COP waarde",
+        "nl": "Uitschieter COP waarde",
         "de": "Ausreißer-COP-Wert",
         "fr": "Valeur COP aberrante"
       },

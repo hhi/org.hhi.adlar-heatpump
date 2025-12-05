@@ -670,7 +670,293 @@ THEN: Send alert "Possible flow restriction"
 
 ## Actions
 
-### 8. 📊 Calculate Value from Curve
+### 8. 🕐 Calculate Value from Time Schedule
+
+**ID**: `calculate_time_based_value`
+**Category**: Time-Based Automation
+**Purpose**: Evaluate current time against daily schedules to calculate output values
+
+#### Overview
+
+The time schedule calculator enables **time-of-day programming** for automated temperature schedules, time-of-use optimization, and daily routines. Unlike curve-based calculations, this uses time ranges to determine output values.
+
+#### Configuration
+
+```yaml
+ACTION: Calculate value from time schedule
+  Time Schedule: 06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18
+  Returns: {{result_value}}
+```
+
+**Parameters**:
+
+- `schedule` (text): Time schedule definition string (comma or newline separated)
+
+**Returns**:
+
+- `result_value` (number): Calculated output value based on current time
+
+#### Schedule Format
+
+**Syntax**: `HH:MM-HH:MM: output_value`
+
+**Features**:
+- Supports **overnight ranges** (e.g., `23:00-06:00` spans midnight)
+- Maximum **30 time ranges** per schedule
+- **Default fallback** support (`default: value`)
+- Comma or newline separated entries
+
+**Evaluation Rules**:
+1. Evaluates from **top to bottom**
+2. Returns **first matching** time range
+3. Falls back to `default` if no match
+
+#### Example Flows
+
+**Daily Temperature Programming**:
+```
+EVERY 5 MINUTES:
+THEN: Calculate value from time schedule
+      Schedule: 06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18
+  AND Set target temperature to {{result_value}}
+```
+
+**Time-of-Use Optimization**:
+```
+EVERY HOUR:
+THEN: Calculate value from time schedule
+      Schedule: 17:00-21:00: 2500, default: 4000
+  AND Set maximum power limit to {{result_value}}W
+```
+
+**Hot Water Schedule**:
+```
+EVERY 30 MINUTES:
+THEN: Calculate value from time schedule
+      Schedule: 06:00-09:00: 60, 17:00-23:00: 55, default: 45
+  AND Set hot water temperature to {{result_value}}°C
+```
+
+**Weekend vs Weekday**:
+```
+IF: Day is Saturday or Sunday
+THEN: Use weekend schedule: 08:00-12:00: 22, 12:00-20:00: 21, default: 19
+ELSE: Use weekday schedule: 06:00-09:00: 22, 09:00-17:00: 19, default: 20
+```
+
+**Overnight Range Example**:
+```
+EVERY 15 MINUTES:
+THEN: Calculate comfort level
+      Schedule: 23:00-06:00: 18, 06:00-23:00: 21
+  AND Adjust heating to {{result_value}}°C
+```
+
+#### Best Practices
+
+**✅ DO**:
+- Always include `default: <value>` as fallback
+- Use 24-hour format (HH:MM)
+- Test overnight ranges carefully (23:00-06:00)
+- Keep schedules under 20 entries for readability
+- Document time zones if relevant
+
+**⚠️ DON'T**:
+- Exceed 30 time ranges (hard limit)
+- Forget default fallback (causes errors)
+- Use overlapping time ranges (first match wins)
+- Mix 12-hour and 24-hour formats
+
+#### Error Messages
+
+| Error Message | Cause | Solution |
+|---------------|-------|----------|
+| `"Invalid schedule syntax at line N"` | Malformed time range | Use format: `HH:MM-HH:MM: value` |
+| `"Invalid time component at line N"` | Hour/minute out of range | Hours: 0-23, Minutes: 0-59 |
+| `"Schedule exceeds maximum entries (30)"` | Too many ranges | Simplify schedule or use multiple flows |
+| `"No matching time range found for current time"` | No match and no default | Add `default: <value>` as last line |
+| `"Invalid output value at line N"` | Non-numeric output | Output must be valid number |
+
+#### Technical Details
+
+- **Implementation**: `lib/time-schedule-calculator.ts` - TimeScheduleCalculator utility class
+- **Registration**: `app.ts` - registerTimeScheduleCard()
+- **Update Frequency**: Evaluates on-demand (use timer-based flows)
+- **Overnight Logic**: `isOvernight = endMinutes <= startMinutes`
+- **Performance**: ~1ms parsing time for typical 10-range schedule
+- **Thread-Safe**: Stateless utility class
+
+#### Troubleshooting
+
+**Problem**: "No matching time range" error despite valid time
+
+**Solution**: Add `default: <value>` as last line in schedule
+
+**Problem**: Overnight range (23:00-06:00) not working correctly
+
+**Solution**:
+1. Verify end time is earlier than start time (triggers overnight mode)
+2. Test at boundary times (22:59, 23:00, 06:00, 06:01)
+3. Check for overlapping ranges
+
+**Problem**: Schedule works initially but stops after time
+
+**Solution**: Time schedule needs periodic re-evaluation. Use timer trigger (every 5-15 minutes)
+
+---
+
+### 9. 🌡️ Get Seasonal Mode
+
+**ID**: `get_seasonal_mode`
+**Category**: Seasonal Automation
+**Purpose**: Automatically detect heating/cooling season based on current date
+
+#### Overview
+
+The seasonal mode calculator provides **automatic season detection** aligned with the EN 14825 SCOP standard. Perfect for switching between winter and summer schedules without manual intervention.
+
+#### Configuration
+
+```yaml
+ACTION: Get seasonal mode
+  Returns 4 tokens:
+    - {{mode}} - "heating" or "cooling"
+    - {{is_heating_season}} - true/false
+    - {{is_cooling_season}} - true/false
+    - {{days_until_season_change}} - number
+```
+
+**Parameters**: None (uses current date)
+
+**Returns**:
+
+- `mode` (string): Current seasonal mode ("heating" or "cooling")
+- `is_heating_season` (boolean): True if Oct 1 - May 15
+- `is_cooling_season` (boolean): True if May 16 - Sep 30
+- `days_until_season_change` (number): Days until next season starts
+
+#### Season Definitions
+
+**Heating Season**: October 1 - May 15 (227 days)
+- Aligned with **EN 14825 SCOP standard**
+- Matches existing SCOP calculation period
+- Typical European heating season
+
+**Cooling Season**: May 16 - September 30 (138 days)
+- Shoulder season + summer
+- Reduced heating demand period
+
+#### Example Flows
+
+**Automatic Schedule Switching**:
+```
+EVERY DAY at 00:00:
+THEN: Get seasonal mode
+  AND IF {{is_heating_season}} is true
+    THEN: Enable winter schedule (high temperatures)
+    ELSE: Enable summer schedule (lower temperatures)
+```
+
+**Combined with Time Schedule**:
+```
+EVERY 15 MINUTES:
+THEN: Get seasonal mode
+  AND IF {{is_heating_season}} is true
+    THEN: Use winter schedule: 06:00-09:00: 22, 09:00-17:00: 19, default: 18
+    ELSE: Use summer schedule: 06:00-09:00: 20, 09:00-17:00: 18, default: 16
+```
+
+**Season Change Notification**:
+```
+EVERY DAY at 09:00:
+THEN: Get seasonal mode
+  AND IF {{days_until_season_change}} < 7
+    THEN: Send notification "Season changes in {{days_until_season_change}} days"
+```
+
+**Weather + Season Optimization**:
+```
+WHEN: Outdoor temperature changed
+THEN: Get seasonal mode
+  AND IF {{mode}} is "heating"
+    THEN: Calculate from curve: < 0 : 55, < 5 : 50, < 10 : 45, default : 40
+    ELSE: Calculate from curve: > 25 : 18, > 20 : 20, default : 22
+  AND Set target temperature to {{result_value}}
+```
+
+**Maintenance Scheduling**:
+```
+EVERY WEEK:
+THEN: Get seasonal mode
+  AND IF {{is_heating_season}} is true
+    AND {{days_until_season_change}} < 30
+    THEN: Send notification "Schedule pre-summer maintenance"
+```
+
+#### Use Cases
+
+1. **Automatic Schedule Switching**: Different temperatures for winter/summer
+2. **Energy Management**: Seasonal power limits and optimization
+3. **Maintenance Planning**: Pre-season service reminders
+4. **Hot Water Control**: Seasonal hot water temperature adjustment
+5. **Flow Card Logic**: Season-aware automation rules
+
+#### Best Practices
+
+**✅ DO**:
+- Use daily or periodic checks (not continuous polling)
+- Combine with time schedules for comprehensive automation
+- Set up pre-season notifications (7-14 days before change)
+- Test flows before season boundaries (around May 15 and Oct 1)
+
+**⚠️ DON'T**:
+- Poll every minute (once per day is sufficient)
+- Assume calendar year = heating season (spans Oct-May)
+- Forget leap years (calculator handles automatically)
+
+#### Technical Details
+
+- **Implementation**: `lib/seasonal-mode-calculator.ts` - SeasonalModeCalculator utility class
+- **Registration**: `app.ts` - registerSeasonalModeCard()
+- **Heating Season**: Oct 1 (month 10, day 1) to May 15 (month 5, day 15)
+- **Cooling Season**: Inverse of heating season
+- **Day Calculation**: Accounts for year boundaries and leap years
+- **Performance**: <1ms calculation time
+- **Thread-Safe**: Stateless utility class
+
+#### Season Boundary Behavior
+
+**May 15 → May 16 Transition**:
+- May 15 23:59: `is_heating_season = true`, `days_until_season_change = 0`
+- May 16 00:00: `is_cooling_season = true`, `days_until_season_change = 138`
+
+**September 30 → October 1 Transition**:
+- Sep 30 23:59: `is_cooling_season = true`, `days_until_season_change = 0`
+- Oct 1 00:00: `is_heating_season = true`, `days_until_season_change = 227`
+
+#### Troubleshooting
+
+**Problem**: Season doesn't match local climate
+
+**Solution**:
+- EN 14825 standard is European-focused
+- For other regions, use curve calculator with local date ranges
+- Consider creating custom logic based on `{{mode}}` token
+
+**Problem**: `days_until_season_change` shows unexpected value
+
+**Solution**:
+1. Check current date is correct on Homey
+2. Verify timezone settings
+3. Remember: Calculation uses UTC date internally
+
+**Problem**: Flow doesn't trigger at season boundary
+
+**Solution**: Set up daily check flow (e.g., 00:00) to detect season changes
+
+---
+
+### 10. 📊 Calculate Value from Curve
 
 **ID**: `calculate_curve_value`
 **Category**: Dynamic Optimization

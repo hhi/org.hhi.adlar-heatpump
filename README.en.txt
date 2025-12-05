@@ -26,10 +26,11 @@ COMPLETE OPERATION
 - Timer and automatic functions
 
 INTELLIGENT AUTOMATION
-- 67 flow cards for advanced automation
+- 77 flow cards for advanced automation
 - Smart error detection and recovery
 - Weather-dependent optimization
 - Energy efficiency trends and warnings
+- Time-based scheduling and seasonal mode detection
 
 USER-FRIENDLY
 - Fully localized interface (English/Dutch)
@@ -43,7 +44,7 @@ WHAT DO YOU NEED?
 - Homey Pro (firmware version 12.2.0 or higher)
 - Adlar Castra Aurora heat pump
 - Local network connection to the heat pump
-- Device credentials (ID, Local Key, IP address)
+- Device credentials (ID, Local Key, local IP address)
 
 HOW TO OBTAIN DEVICE CREDENTIALS?
 You can obtain the required local key and other data by following the instructions in:
@@ -55,7 +56,7 @@ INSTALLATION STEPS
 3. Enter your device credentials:
    - Device ID
    - Local Key
-   - IP address
+   - local IP address
    - Protocol Version (choose 3.3, 3.4, or 3.5)
 4. Complete the pairing process
 
@@ -117,6 +118,27 @@ Example: Weather-Compensated Heating
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
 Result: Automatically adjusts heating based on weather conditions
 
+TIME-BASED SCHEDULER & SEASONAL MODE (Advanced Features)
+Two new calculators for intelligent time and season-based automation:
+
+Time-Based Scheduler:
+Calculate values based on time-of-day schedules for daily temperature programming.
+Example: "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18"
+- Supports overnight ranges (e.g., 23:00-06:00)
+- Maximum 30 time ranges with default fallback
+- Perfect for comfort scheduling and time-of-use optimization
+
+Seasonal Mode Detection:
+Automatically detect heating/cooling season based on date.
+- Heating season: Oct 1 - May 15 (aligned with EN 14825 SCOP standard)
+- Returns mode, season flags, and days until season change
+- Perfect for automatic winter/summer schedule switching
+
+Combined Example:
+Use all three calculators together for ultimate automation:
+Weather compensation (outdoor temp) + Time scheduling (comfort) + Seasonal mode (winter/summer)
+Result: Dynamic heating that adapts to weather, time of day, and season
+
 COP (COEFFICIENT OF PERFORMANCE) MONITORING
 
 The app automatically calculates how efficiently your heat pump works (see directory /docs/COP calculation at sourcecode):
@@ -142,7 +164,7 @@ QUICK FIX (takes less than 2 minutes):
 1. Open device Settings in Homey app
 2. Scroll to the top to the connection settings
 3. Change Protocol Version to 3.4 (or try 3.5 if 3.4 doesn't work)
-4. Optional: update other credentials (IP Address, Local Key, Device ID)
+4. Optional: update other credentials (Local IP Address, Local Key, Device ID)
 5. Click "Save" and wait 1-2 minutes for reconnection
 
 Success indicators:
@@ -152,7 +174,7 @@ Success indicators:
 - Device stays available
 
 Other Common Problems:
-- No connection: Check IP address, local key, and network connectivity
+- No connection: Check local IP address, local key, and network connectivity
 - Fluctuating values: Normal during system startup
 - Error codes: See the app for specific explanation per error code
 - Pairing fails: Try different protocol versions (3.3, 3.4, 3.5)
@@ -177,7 +199,7 @@ UPDATE DEVICE CREDENTIALS
 You can update device credentials without re-pairing:
 1. Go to device Settings in Homey app
 2. Scroll to the top to the connection settings
-3. Update credentials (IP Address, Local Key, Device ID, Protocol Version)
+3. Update credentials (Local IP Address, Local Key, Device ID, Protocol Version)
 4. Click "Save" - device reconnects automatically
 
 NEED HELP?
@@ -192,7 +214,7 @@ Access via device Settings in Homey app:
 
 Connection Settings:
 - Protocol Version: Tuya protocol version (3.3, 3.4, 3.5)
-- Device ID, Local Key, IP Address: Connection credentials
+- Device ID, Local Key, Local IP Address: Connection credentials
 
 COP Calculation Settings:
 - Enable/disable COP calculation

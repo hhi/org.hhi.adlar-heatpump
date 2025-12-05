@@ -1,4 +1,10 @@
 {
+  "1.3.0": {
+    "en": "Added two new flow cards: Calculate Value from Time Schedule (daily temperature programming with 24-hour time ranges) and Get Seasonal Mode (automatic heating/cooling season detection based on EN 14825 standard, Oct 1 - May 15).",
+    "nl": "Twee nieuwe flow cards toegevoegd: Calculate Value from Time Schedule (dagelijkse temperatuurprogrammering met 24-uurs tijdsbereiken) en Get Seasonal Mode (automatische detectie van verwarmings-/koelseizoen op basis van EN 14825 standaard, 1 okt - 15 mei).",
+    "de": "Zwei neue Flow-Karten hinzugefügt: Calculate Value from Time Schedule (tägliche Temperaturprogrammierung mit 24-Stunden-Zeitbereichen) und Get Seasonal Mode (automatische Heiz-/Kühlsaison-Erkennung basierend auf EN 14825 Standard, 1. Okt - 15. Mai).",
+    "fr": "Deux nouvelles cartes de flux ajoutées: Calculate Value from Time Schedule (programmation quotidienne de température avec plages horaires 24h) et Get Seasonal Mode (détection automatique de saison chauffage/refroidissement basée sur norme EN 14825, 1er oct - 15 mai)."
+  },
   "1.2.3": {
     "en": "Enhanced connection diagnostics with detailed reconnection attempt logging and health state monitoring.",
     "nl": "Verbeterde verbindingsdiagnostiek met gedetailleerde logging van herverbindingspogingen en health state monitoring.",

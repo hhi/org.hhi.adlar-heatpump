@@ -232,7 +232,7 @@
         },
         "hint": {
           "en": "COP values below this threshold will be flagged as outliers",
-          "nl": "COP waarden onder deze drempel worden gemarkeerd als uitbijters",
+          "nl": "COP waarden onder deze drempel worden gemarkeerd als uitschieters",
           "de": "COP-Werte unter diesem Schwellenwert werden als Ausreißer markiert",
           "fr": "Les valeurs COP inférieures à ce seuil seront signalées comme aberrantes"
         },
@@ -252,7 +252,7 @@
         },
         "hint": {
           "en": "COP values above this threshold will be flagged as outliers",
-          "nl": "COP waarden boven deze drempel worden gemarkeerd als uitbijters",
+          "nl": "COP waarden boven deze drempel worden gemarkeerd als uitschieters",
           "de": "COP-Werte über diesem Schwellenwert werden als Ausreißer markiert",
           "fr": "Les valeurs COP supérieures à ce seuil seront signalées comme aberrantes"
         },

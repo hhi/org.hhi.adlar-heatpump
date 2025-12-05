@@ -1,0 +1,89 @@
+{
+  "id": "get_seasonal_mode",
+  "title": {
+    "en": "Get current seasonal mode",
+    "nl": "Haal huidig seizoensmodus op",
+    "de": "Aktuellen Saisonmodus abrufen",
+    "fr": "Obtenir le mode saisonnier actuel"
+  },
+  "titleFormatted": {
+    "en": "Get seasonal mode",
+    "nl": "Haal seizoensmodus op",
+    "de": "Saisonmodus abrufen",
+    "fr": "Obtenir le mode saisonnier"
+  },
+  "hint": {
+    "en": "Returns heating/cooling mode based on current date. Heating season: Oct 1 - May 15 (aligned with EN 14825 SCOP standard). Perfect for automatically switching between winter and summer schedules.",
+    "nl": "Retourneert verwarmings/koelmodus op basis van huidige datum. Stookseizoen: 1 okt - 15 mei (conform EN 14825 SCOP standaard). Perfect voor automatisch schakelen tussen winter- en zomerschema's.",
+    "de": "Gibt den Heiz-/Kühlmodus basierend auf dem aktuellen Datum zurück. Heizsaison: 1. Okt - 15. Mai (gemäß EN 14825 SCOP-Standard). Perfekt zum automatischen Umschalten zwischen Winter- und Sommerplänen.",
+    "fr": "Renvoie le mode chauffage/refroidissement basé sur la date actuelle. Saison de chauffage : 1er oct - 15 mai (conforme à la norme EN 14825 SCOP). Parfait pour basculer automatiquement entre les programmes d'hiver et d'été."
+  },
+  "highlight": true,
+  "args": [],
+  "tokens": [
+    {
+      "name": "mode",
+      "type": "string",
+      "title": {
+        "en": "Mode",
+        "nl": "Modus",
+        "de": "Modus",
+        "fr": "Mode"
+      },
+      "example": {
+        "en": "heating",
+        "nl": "heating",
+        "de": "heating",
+        "fr": "heating"
+      }
+    },
+    {
+      "name": "is_heating_season",
+      "type": "boolean",
+      "title": {
+        "en": "Is heating season",
+        "nl": "Is stookseizoen",
+        "de": "Ist Heizsaison",
+        "fr": "Est saison de chauffage"
+      },
+      "example": {
+        "en": "true",
+        "nl": "true",
+        "de": "true",
+        "fr": "true"
+      }
+    },
+    {
+      "name": "is_cooling_season",
+      "type": "boolean",
+      "title": {
+        "en": "Is cooling season",
+        "nl": "Is koelseizoen",
+        "de": "Ist Kühlsaison",
+        "fr": "Est saison de refroidissement"
+      },
+      "example": {
+        "en": "false",
+        "nl": "false",
+        "de": "false",
+        "fr": "false"
+      }
+    },
+    {
+      "name": "days_until_season_change",
+      "type": "number",
+      "title": {
+        "en": "Days until season change",
+        "nl": "Dagen tot seizoenswissel",
+        "de": "Tage bis zum Saisonwechsel",
+        "fr": "Jours avant le changement de saison"
+      },
+      "example": {
+        "en": "45",
+        "nl": "45",
+        "de": "45",
+        "fr": "45"
+      }
+    }
+  ]
+}
