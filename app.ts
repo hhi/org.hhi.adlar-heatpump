@@ -19,6 +19,8 @@ import {
   FLOW_PATTERNS,
 } from './lib/flow-helpers';
 import { CurveCalculator } from './lib/curve-calculator';
+import { TimeScheduleCalculator } from './lib/time-schedule-calculator';
+import { SeasonalModeCalculator } from './lib/seasonal-mode-calculator';
 
 // Type definitions for flow card arguments
 interface DeviceFlowArgs {
@@ -180,8 +182,10 @@ class MyApp extends App {
     // Custom conditions with complex logic
     this.registerComplexConditions();
 
-    // Curve calculator action card
+    // Calculator action cards
     this.registerCurveCalculatorCard();
+    this.registerTimeScheduleCard();
+    this.registerSeasonalModeCard();
 
     this.debugLog('Custom cards registered successfully');
   }
@@ -406,6 +410,98 @@ class MyApp extends App {
     });
 
     this.debugLog('Curve calculator card registered successfully');
+  }
+
+  /**
+   * Register time schedule calculator action card
+   *
+   * Allows users to calculate values dynamically based on time-of-day schedules.
+   * Primary use case: Daily temperature scheduling (morning/day/evening/night setpoints)
+   */
+  registerTimeScheduleCard() {
+    const timeScheduleCard = this.homey.flow.getActionCard('calculate_time_based_value');
+
+    timeScheduleCard.registerRunListener(async (args, state) => {
+      const { schedule } = args;
+
+      try {
+        // Input validation
+        if (!schedule || typeof schedule !== 'string' || schedule.trim() === '') {
+          throw new Error('Schedule definition cannot be empty');
+        }
+
+        // Evaluate schedule using TimeScheduleCalculator utility
+        const resultValue = TimeScheduleCalculator.evaluate(schedule);
+
+        // Log result (only in debug mode)
+        this.debugLog(`Time schedule calculation: ${resultValue}`, {
+          schedule: schedule.substring(0, 100), // Truncate long schedules in logs
+          currentTime: new Date().toTimeString(),
+          resultValue,
+        });
+
+        // Standard logging for production
+        this.log(`Time schedule calculation successful: ${resultValue}`);
+
+        return { result_value: resultValue };
+
+      } catch (error) {
+        // Error logging
+        this.error('Time schedule calculation failed:', error);
+
+        // Re-throw with user-friendly message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Time schedule calculation failed: ${errorMessage}`);
+      }
+    });
+
+    this.debugLog('Time schedule calculator card registered successfully');
+  }
+
+  /**
+   * Register seasonal mode action card
+   *
+   * Returns current seasonal mode (heating/cooling) based on date.
+   * Heating season: Oct 1 - May 15 (aligned with EN 14825 SCOP standard)
+   */
+  registerSeasonalModeCard() {
+    const seasonalModeCard = this.homey.flow.getActionCard('get_seasonal_mode');
+
+    seasonalModeCard.registerRunListener(async (args, state) => {
+      try {
+        // Get current seasonal mode using SeasonalModeCalculator utility
+        const seasonResult = SeasonalModeCalculator.getCurrentSeason();
+
+        // Log result (only in debug mode)
+        this.debugLog('Seasonal mode calculation:', {
+          mode: seasonResult.mode,
+          isHeatingSeason: seasonResult.isHeatingSeason,
+          month: seasonResult.month,
+          day: seasonResult.day,
+          daysUntilSeasonChange: seasonResult.daysUntilSeasonChange,
+        });
+
+        // Standard logging for production
+        this.log(`Seasonal mode: ${seasonResult.mode} (${seasonResult.daysUntilSeasonChange} days until change)`);
+
+        return {
+          mode: seasonResult.mode,
+          is_heating_season: seasonResult.isHeatingSeason,
+          is_cooling_season: seasonResult.isCoolingSeason,
+          days_until_season_change: seasonResult.daysUntilSeasonChange,
+        };
+
+      } catch (error) {
+        // Error logging
+        this.error('Seasonal mode calculation failed:', error);
+
+        // Re-throw with user-friendly message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Seasonal mode calculation failed: ${errorMessage}`);
+      }
+    });
+
+    this.debugLog('Seasonal mode calculator card registered successfully');
   }
 }
 

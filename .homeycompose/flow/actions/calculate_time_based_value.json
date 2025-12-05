@@ -1,0 +1,58 @@
+{
+  "id": "calculate_time_based_value",
+  "title": {
+    "en": "Calculate value from time schedule",
+    "nl": "Bereken waarde uit tijdschema",
+    "de": "Wert aus Zeitplan berechnen",
+    "fr": "Calculer la valeur à partir du planning horaire"
+  },
+  "titleFormatted": {
+    "en": "Calculate value from time [[schedule]]",
+    "nl": "Bereken waarde uit tijd [[schedule]]",
+    "de": "Wert aus Zeit [[schedule]] berechnen",
+    "fr": "Calculer la valeur à partir du temps [[schedule]]"
+  },
+  "hint": {
+    "en": "Evaluates current time against a daily schedule to calculate output values. Perfect for time-based temperature scheduling, time-of-use pricing, and automated daily routines.",
+    "nl": "Evalueert de huidige tijd tegen een dagschema om uitvoerwaarden te berekenen. Perfect voor tijdgebaseerde temperatuurschema's, tijd-van-gebruik tarieven en geautomatiseerde dagelijkse routines.",
+    "de": "Bewertet die aktuelle Zeit anhand eines Tagesplans, um Ausgabewerte zu berechnen. Perfekt für zeitbasierte Temperaturplanung, zeitabhängige Tarife und automatisierte tägliche Routinen.",
+    "fr": "Évalue l'heure actuelle par rapport à un planning quotidien pour calculer les valeurs de sortie. Parfait pour la planification de température basée sur le temps, la tarification à l'heure d'utilisation et les routines quotidiennes automatisées."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "text",
+      "name": "schedule",
+      "title": {
+        "en": "Time schedule",
+        "nl": "Tijdschema",
+        "de": "Zeitplan",
+        "fr": "Planning horaire"
+      },
+      "placeholder": {
+        "en": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18",
+        "nl": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18",
+        "de": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18",
+        "fr": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "result_value",
+      "type": "number",
+      "title": {
+        "en": "Result value",
+        "nl": "Resultaat waarde",
+        "de": "Ergebniswert",
+        "fr": "Valeur résultante"
+      },
+      "example": {
+        "en": "22",
+        "nl": "22",
+        "de": "22",
+        "fr": "22"
+      }
+    }
+  ]
+}

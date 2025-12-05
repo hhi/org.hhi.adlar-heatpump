@@ -119,9 +119,9 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 ## Flow Cards
 
-**71 Total Cards**: 36 triggers, 23 conditions, 12 actions
+**77 Total Cards**: 39 triggers, 23 conditions, 15 actions
 
-### Triggers (36)
+### Triggers (39)
 
 - **Temperature, voltage, current, and power alerts**
 - **System state changes and fault detection**
@@ -137,12 +137,14 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Action-based conditions** for all controllable settings
 - **Inverse operator support** for "is" and "is not" logic
 
-### Actions (13)
+### Actions (15)
 
 - **Temperature setpoint and mode control**
 - **System on/off and heating curve adjustments**
 - **External Data Integration**: Send power, flow, and ambient data to heat pump for enhanced COP calculations
 - **Dynamic Curve Calculator**: Calculate values based on configurable curves (e.g., weather-compensated heating)
+- **Time-Based Scheduler**: Calculate values based on time-of-day schedules (e.g., daily temperature programming)
+- **Seasonal Mode Detection**: Automatic heating/cooling season determination (Oct 1 - May 15)
 
 #### Advanced: Calculate Value from Curve
 
@@ -230,6 +232,117 @@ The calculator provides clear error messages:
 - `"No matching curve condition found for input value: X"` - Add a `default` line
 - `"Invalid curve syntax at line N"` - Check operator and format
 - `"Curve exceeds maximum allowed entries (50)"` - Simplify your curve
+
+#### Advanced: Time-Based Scheduling & Seasonal Modes
+
+Two new powerful calculators for time-based automation and seasonal switching.
+
+##### Calculate Value from Time Schedule
+
+Dynamically calculate output values based on time-of-day for daily temperature programming and time-of-use optimization.
+
+**Basic Example: Daily Temperature Schedule**
+
+```text
+WHEN   Time is 06:00, 09:00, 17:00, 23:00
+THEN   Calculate time-based value
+       Schedule: 06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18
+AND    Set target temperature to {{result_value}}
+```
+
+**Schedule Format**: `HH:MM-HH:MM: output_value`
+
+**Features**:
+- ✅ Overnight ranges supported (e.g., `23:00-06:00: 18`)
+- ✅ Default fallback (e.g., `default: 20`)
+- ✅ Maximum 30 time ranges
+- ✅ Comma or newline separated
+- ✅ Comprehensive validation with line-specific error messages
+
+**Example Schedules**:
+
+Comfort-Based Heating:
+```text
+06:00-09:00: 22  (Morning comfort)
+09:00-17:00: 19  (Energy saving while away)
+17:00-23:00: 21  (Evening comfort)
+23:00-06:00: 18  (Night setback)
+```
+
+Time-of-Use Pricing:
+```text
+00:00-06:00: 45  (Night tariff - lower temp)
+06:00-23:00: 55  (Day tariff - normal temp)
+23:00-00:00: 45  (Pre-night tariff)
+```
+
+##### Get Seasonal Mode
+
+Automatically detect heating/cooling season based on date (Oct 1 - May 15 = heating season, aligned with EN 14825 SCOP standard).
+
+**Example: Seasonal Schedule Switching**
+
+```text
+WHEN   Time is 06:00
+AND    Get seasonal mode → is_heating_season = true
+THEN   Calculate time-based value: "06:00-09:00: 22, 09:00-17:00: 19, default: 18"
+       Set target temperature to {{result_value}}
+
+WHEN   Time is 06:00
+AND    Get seasonal mode → is_heating_season = false
+THEN   Calculate time-based value: "06:00-22:00: 18, default: 16"
+       Set target temperature to {{result_value}}
+```
+
+**Tokens Returned**:
+- `mode`: "heating" or "cooling"
+- `is_heating_season`: true during Oct 1 - May 15
+- `is_cooling_season`: true during May 16 - Sep 30
+- `days_until_season_change`: Days remaining until next season
+
+**Use Cases**:
+- Automatic winter/summer schedule switching
+- Season change notifications (e.g., "Heating season ends in 7 days")
+- Mode-based flow logic without manual date checking
+
+##### Combined Example: Weather + Time + Season
+
+Complete automation combining all three calculators:
+
+```text
+// Flow 1: Weather-compensated base setpoint (only during heating season)
+WHEN   Outdoor temperature changes
+AND    Get seasonal mode → is_heating_season = true
+THEN   Calculate curve value:
+       Input: {{outdoor_temperature}}
+       Curve: "< -5: 60, < 0: 55, < 5: 50, < 10: 45, default: 40"
+       Store result in variable: base_setpoint
+
+// Flow 2: Time-based adjustment
+WHEN   Time is 06:00, 09:00, 17:00, 23:00
+THEN   Calculate time-based value:
+       Schedule: "06:00-09:00: 2, 09:00-17:00: -3, 17:00-23:00: 1, default: -2"
+       Store result in variable: time_adjustment
+
+// Flow 3: Apply combined setpoint
+WHEN   Variables changed
+THEN   Set target temperature: {{base_setpoint}} + {{time_adjustment}}
+```
+
+**Result**: Dynamic heating that adjusts for outdoor temperature (weather compensation), time of day (comfort scheduling), and only operates during heating season.
+
+##### Best Practices
+
+**Time Schedules**:
+- ✅ Always include `default: <value>` for 24-hour coverage
+- ✅ Test overnight ranges (23:00-06:00) before deployment
+- ✅ Keep schedules under 15 entries for readability
+- ❌ Don't exceed 30 entries (hard limit)
+
+**Seasonal Mode**:
+- ✅ Combine with time schedules for automatic winter/summer switching
+- ✅ Use for season change notifications
+- ⚠️ Fixed dates (Oct 1 - May 15) optimized for European climate
 
 ### Cross-App Integration
 

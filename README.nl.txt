@@ -26,10 +26,11 @@ VOLLEDIGE BEDIENING
 - Timer en automatische functies
 
 INTELLIGENTE AUTOMATISERING
-- 67 flow kaarten voor geavanceerde automatisering
+- 77 flow kaarten voor geavanceerde automatisering
 - Slimme foutdetectie en herstel
 - Weersafhankelijke optimalisatie
 - Energie-efficiëntie trends en waarschuwingen
+- Tijdgebaseerde planning en seizoensmodus detectie
 
 GEBRUIKSVRIENDELIJK
 - Volledig Nederlandse interface (Engels/Nederlands)
@@ -43,7 +44,7 @@ WAT HEEFT U NODIG?
 - Homey Pro (firmware versie 12.2.0 of hoger)
 - Adlar Castra Aurora warmtepomp
 - Lokale netwerkverbinding met de warmtepomp
-- Apparaat gegevens (ID, Lokale Sleutel, IP-adres)
+- Apparaat gegevens (ID, Lokale Sleutel, lokaal IP-adres)
 
 HOE VERKRIJGT U DE APPARAAT GEGEVENS?
 De benodigde lokale sleutel en andere gegevens kunt u verkrijgen door de instructies te volgen in:
@@ -55,7 +56,7 @@ INSTALLATIESTAPPEN
 3. Voer uw apparaat gegevens in:
    - Apparaat ID
    - Lokale Sleutel
-   - IP-adres
+   - lokaal IP-adres
    - Protocolversie (kies 3.3, 3.4 of 3.5)
 4. Voltooi het koppelingsproces
 
@@ -117,6 +118,27 @@ Voorbeeld: Weerafhankelijke Verwarming
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
 Resultaat: Past verwarming automatisch aan op basis van weersomstandigheden
 
+TIJDGEBASEERDE PLANNING & SEIZOENSMODUS (Geavanceerde Functies)
+Twee nieuwe calculators voor intelligente tijd- en seizoensgebonden automatisering:
+
+Tijdgebaseerde Planning:
+Bereken waarden op basis van dagschema's voor dagelijkse temperatuurprogrammering.
+Voorbeeld: "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18"
+- Ondersteunt nachtelijke bereiken (bijv. 23:00-06:00)
+- Maximum 30 tijdsbereiken met standaard fallback
+- Perfect voor comfortplanning en tijd-van-gebruik optimalisatie
+
+Seizoensmodus Detectie:
+Automatische detectie van verwarmings-/koelseizoen op basis van datum.
+- Stookseizoen: 1 okt - 15 mei (conform EN 14825 SCOP standaard)
+- Retourneert modus, seizoensvlaggen en dagen tot seizoenswissel
+- Perfect voor automatisch schakelen tussen winter-/zomerschema's
+
+Gecombineerd Voorbeeld:
+Gebruik alle drie calculators samen voor ultieme automatisering:
+Weerscompensatie (buitentemp) + Tijdplanning (comfort) + Seizoensmodus (winter/zomer)
+Resultaat: Dynamische verwarming die zich aanpast aan weer, tijdstip en seizoen
+
 COP (PRESTATIECOËFFICIËNT) MONITORING
 
 De app berekent automatisch hoe efficiënt uw warmtepomp werkt (zie de directory /docs/COP calculation/ in de broncode):
@@ -142,7 +164,7 @@ SNELLE OPLOSSING (duurt minder dan 2 minuten):
 1. Open apparaat Instellingen in Homey app
 2. Scroll naar boven naar de verbindingsinstellingen
 3. Wijzig Protocolversie naar 3.4 (of probeer 3.5 als 3.4 niet werkt)
-4. Optioneel: werk andere gegevens bij (IP-adres, Lokale Sleutel, Apparaat ID)
+4. Optioneel: werk andere gegevens bij (lokaal IP-adres, Lokale Sleutel, Apparaat ID)
 5. Klik op "Opslaan" en wacht 1-2 minuten voor herverbinding
 
 Succes indicatoren:
@@ -152,7 +174,7 @@ Succes indicatoren:
 - Apparaat blijft beschikbaar
 
 Andere Veelvoorkomende Problemen:
-- Geen verbinding: Controleer IP-adres, lokale sleutel en netwerkverbinding
+- Geen verbinding: Controleer lokaal IP-adres, lokale sleutel en netwerkverbinding
 - Wisselende waarden: Normaal tijdens opstarten van het systeem
 - Foutcodes: Zie de app voor specifieke uitleg per foutcode
 - Koppelen mislukt: Probeer verschillende protocolversies (3.3, 3.4, 3.5)
@@ -177,7 +199,7 @@ APPARAAT GEGEVENS BIJWERKEN
 U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
 1. Ga naar apparaat Instellingen in Homey app
 2. Scroll naar boven naar de verbindingsinstellingen
-3. Werk gegevens bij (IP-adres, Lokale Sleutel, Apparaat ID, Protocolversie)
+3. Werk gegevens bij (lokaal IP-adres, Lokale Sleutel, Apparaat ID, Protocolversie)
 4. Klik op "Opslaan" - apparaat verbindt automatisch opnieuw
 
 HULP NODIG?
@@ -192,7 +214,7 @@ Toegang via apparaat Instellingen in Homey app:
 
 Verbindingsinstellingen:
 - Protocolversie: Tuya protocolversie (3.3, 3.4, 3.5)
-- Apparaat ID, Lokale Sleutel, IP-adres: Verbindingsgegevens
+- Apparaat ID, Lokale Sleutel, lokaal IP-adres: Verbindingsgegevens
 
 COP Berekeningsinstellingen:
 - COP berekening in-/uitschakelen
