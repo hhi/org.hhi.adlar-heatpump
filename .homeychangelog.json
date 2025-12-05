@@ -1,4 +1,10 @@
 {
+  "1.3.1": {
+    "en": "Fixed: Calculator flow cards (Calculate Value from Time Schedule, Get Seasonal Mode) now appear in device-specific actions alongside Calculate Value from Curve.",
+    "nl": "Opgelost: Calculator flow cards (Calculate Value from Time Schedule, Get Seasonal Mode) verschijnen nu bij apparaat-specifieke acties naast Calculate Value from Curve.",
+    "de": "Behoben: Rechner-Flow-Karten (Calculate Value from Time Schedule, Get Seasonal Mode) erscheinen jetzt in gerätespezifischen Aktionen neben Calculate Value from Curve.",
+    "fr": "Corrigé: Les cartes de flux calculateur (Calculate Value from Time Schedule, Get Seasonal Mode) apparaissent maintenant dans les actions spécifiques à l'appareil à côté de Calculate Value from Curve."
+  },
   "1.3.0": {
     "en": "Added two new flow cards: Calculate Value from Time Schedule (daily temperature programming with 24-hour time ranges) and Get Seasonal Mode (automatic heating/cooling season detection based on EN 14825 standard, Oct 1 - May 15).",
     "nl": "Twee nieuwe flow cards toegevoegd: Calculate Value from Time Schedule (dagelijkse temperatuurprogrammering met 24-uurs tijdsbereiken) en Get Seasonal Mode (automatische detectie van verwarmings-/koelseizoen op basis van EN 14825 standaard, 1 okt - 15 mei).",
