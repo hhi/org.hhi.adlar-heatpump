@@ -4978,6 +4978,11 @@
         "highlight": true,
         "args": [
           {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
             "type": "text",
             "name": "schedule",
             "title": {
@@ -5034,7 +5039,13 @@
           "fr": "Renvoie le mode chauffage/refroidissement basé sur la date actuelle. Saison de chauffage : 1er oct - 15 mai (conforme à la norme EN 14825 SCOP). Parfait pour basculer automatiquement entre les programmes d'hiver et d'été."
         },
         "highlight": true,
-        "args": [],
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
         "tokens": [
           {
             "name": "mode",
