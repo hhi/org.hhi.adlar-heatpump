@@ -29,28 +29,36 @@
       "name": "trend_type",
       "title": {
         "en": "Trend type",
-        "nl": "Trend type"
+        "nl": "Trend type",
+        "de": "Trend-Typ",
+        "fr": "Type de tendance"
       },
       "values": [
         {
           "id": "improving",
           "title": {
             "en": "improving",
-            "nl": "verbeterend"
+            "nl": "verbeterend",
+            "de": "Verbesserung",
+            "fr": "amélioration"
           }
         },
         {
           "id": "degrading",
           "title": {
             "en": "degrading",
-            "nl": "verslechterend"
+            "nl": "verslechterend",
+            "de": "Verschlechterung",
+            "fr": "détérioration"
           }
         },
         {
           "id": "any",
           "title": {
             "en": "any trend change",
-            "nl": "elke trendverandering"
+            "nl": "elke trendverandering",
+            "de": "jede Trendänderung",
+            "fr": "tout changement de tendance"
           }
         }
       ]

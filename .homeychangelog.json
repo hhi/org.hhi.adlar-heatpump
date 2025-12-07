@@ -1,4 +1,10 @@
 {
+  "1.3.3": {
+    "en": "Improved flow card tokens: Temperature change triggers (ambient, inlet, outlet) now show only current temperature. COP efficiency trigger shows performance trend with previous value and change amount (e.g., 3.0 → 3.2, +0.2).",
+    "nl": "Verbeterde flow card tokens: Temperatuur wijziging triggers (omgeving, inlaat, uitlaat) tonen nu alleen huidige temperatuur. COP efficiëntie trigger toont prestatie trend met vorige waarde en wijzigingsbedrag (bijv. 3.0 → 3.2, +0.2).",
+    "de": "Verbesserte Flow-Card-Tokens: Temperaturänderungs-Trigger (Umgebung, Einlass, Auslass) zeigen jetzt nur aktuelle Temperatur. COP-Effizienz-Trigger zeigt Leistungstrend mit vorherigem Wert und Änderungsbetrag (z.B. 3.0 → 3.2, +0.2).",
+    "fr": "Jetons de carte de flux améliorés: Les déclencheurs de changement de température (ambiante, entrée, sortie) affichent maintenant uniquement la température actuelle. Le déclencheur d'efficacité COP affiche la tendance de performance avec la valeur précédente et le montant de changement (par ex. 3.0 → 3.2, +0.2)."
+  },
   "1.3.1": {
     "en": "Fixed: Calculator flow cards (Calculate Value from Time Schedule, Get Seasonal Mode) now appear in device-specific actions alongside Calculate Value from Curve.",
     "nl": "Opgelost: Calculator flow cards (Calculate Value from Time Schedule, Get Seasonal Mode) verschijnen nu bij apparaat-specifieke acties naast Calculate Value from Curve.",

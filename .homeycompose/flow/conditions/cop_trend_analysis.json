@@ -28,10 +28,10 @@
       "type": "range",
       "name": "hours",
       "title": {
-        "en": "Time period (hours)",
-        "nl": "Tijdsperiode (uur)",
-        "de": "Zeitraum (Stunden)",
-        "fr": "Période (heures)"
+        "en": " Time period ",
+        "nl": " Tijdsperiode ",
+        "de": " Zeitraum ",
+        "fr": " Période "
       },
       "min": 1,
       "max": 168,

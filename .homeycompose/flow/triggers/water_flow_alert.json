@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "flow_rate",
       "title": {
-        "en": "Flow rate (L/min)",
-        "nl": "Doorstroom (L/min)"
+        "en": " Flow rate (L/min)",
+        "nl": " Doorstroom (L/min)",
+        "de": " Durchflussrate (L/min)",
+        "fr": " Débit (L/min)"
       },
       "min": 0,
       "max": 100,
@@ -61,7 +69,9 @@
       "units": "L/min",
       "placeholder": {
         "en": "Flow rate threshold in L/min",
-        "nl": "Doorstroom drempel in L/min"
+        "nl": "Doorstroom drempel in L/min",
+        "de": "Durchflussschwellenwert in L/min",
+        "fr": "Seuil de débit en L/min"
       }
     }
   ],

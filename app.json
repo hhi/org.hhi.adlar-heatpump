@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.3.1",
+  "version": "1.3.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -77,10 +77,10 @@
           "fr": "Température ambiante changée"
         },
         "titleFormatted": {
-          "en": "Ambient temperature [[condition]] [[temperature]]°C",
-          "nl": "Buitentemperatuur [[condition]] [[temperature]]°C",
-          "de": "Außentemperatur [[condition]] [[temperature]]°C",
-          "fr": "Température ambiante [[condition]] [[temperature]]°C"
+          "en": "Ambient temperature [[condition]] [[temperature]]°C ",
+          "nl": "Buitentemperatuur [[condition]] [[temperature]]°C ",
+          "de": "Außentemperatur [[condition]] [[temperature]]°C ",
+          "fr": "Température ambiante [[condition]] [[temperature]]°C "
         },
         "hint": {
           "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
@@ -100,21 +100,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -123,8 +129,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -30,
             "max": 50,
@@ -132,7 +140,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -147,17 +157,6 @@
               "fr": "Température ambiante actuelle"
             },
             "example": 15.5
-          },
-          {
-            "type": "number",
-            "name": "threshold_temperature",
-            "title": {
-              "en": "Threshold temperature",
-              "nl": "Drempel temperatuur",
-              "de": "Schwellenwert Temperatur",
-              "fr": "Température seuil"
-            },
-            "example": 10
           }
         ]
       },
@@ -192,21 +191,27 @@
             "name": "state",
             "title": {
               "en": "State",
-              "nl": "Status"
+              "nl": "Status",
+              "de": "Zustand",
+              "fr": "État"
             },
             "values": [
               {
                 "id": "flowing",
                 "title": {
                   "en": "flowing",
-                  "nl": "stromend"
+                  "nl": "stromend",
+                  "de": "fließend",
+                  "fr": "en écoulement"
                 }
               },
               {
                 "id": "blocked",
                 "title": {
                   "en": "blocked",
-                  "nl": "geblokkeerd"
+                  "nl": "geblokkeerd",
+                  "de": "blockiert",
+                  "fr": "bloqué"
                 }
               }
             ]
@@ -235,10 +240,10 @@
           "fr": "Alerte de température du serpentin"
         },
         "titleFormatted": {
-          "en": "Coiler temperature [[condition]] [[temperature]]°C",
-          "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
-          "de": "Verdampfer-Temperatur [[condition]] [[temperature]]°C",
-          "fr": "Température du serpentin [[condition]] [[temperature]]°C"
+          "en": " Coiler temperature [[condition]] [[temperature]]°C",
+          "nl": " Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+          "de": " Verdampfer-Temperatur [[condition]] [[temperature]]°C",
+          "fr": " Température du serpentin [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when electricity coiler temperature goes above or below a specified level",
@@ -257,21 +262,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -280,8 +291,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -20,
             "max": 80,
@@ -289,7 +302,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -349,21 +364,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -372,8 +393,10 @@
             "type": "range",
             "name": "frequency",
             "title": {
-              "en": "Frequency (Hz)",
-              "nl": "Frequentie (Hz)"
+              "en": " Frequency ",
+              "nl": " Frequentie ",
+              "de": " Frequenz ",
+              "fr": " Fréquence "
             },
             "min": 10,
             "max": 200,
@@ -381,7 +404,9 @@
             "units": "Hz",
             "placeholder": {
               "en": "Frequency threshold in Hz",
-              "nl": "Frequentie drempel in Hz"
+              "nl": "Frequentie drempel in Hz",
+              "de": "Frequenzschwellenwert in Hz",
+              "fr": "Seuil de fréquence en Hz"
             }
           }
         ],
@@ -442,21 +467,27 @@
             "name": "state",
             "title": {
               "en": "State",
-              "nl": "Status"
+              "nl": "Status",
+              "de": "Zustand",
+              "fr": "État"
             },
             "values": [
               {
                 "id": "running",
                 "title": {
                   "en": "running",
-                  "nl": "draaiend"
+                  "nl": "draaiend",
+                  "de": "läuft",
+                  "fr": "en marche"
                 }
               },
               {
                 "id": "stopped",
                 "title": {
                   "en": "stopped",
-                  "nl": "gestopt"
+                  "nl": "gestopt",
+                  "de": "aus",
+                  "fr": "arrêté"
                 }
               }
             ]
@@ -508,21 +539,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -531,8 +568,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "COP threshold",
-              "nl": "COP drempel"
+              "en": " COP threshold",
+              "nl": " COP drempel",
+              "de": " COP-Schwellenwert",
+              "fr": " Seuil COP"
             },
             "min": 1,
             "max": 8,
@@ -540,7 +579,9 @@
             "units": "COP",
             "placeholder": {
               "en": "COP efficiency threshold",
-              "nl": "COP efficiëntie drempel"
+              "nl": "COP efficiëntie drempel",
+              "de": "COP-Effizienz-Schwellenwert",
+              "fr": "Seuil d'efficacité COP"
             }
           }
         ],
@@ -558,14 +599,25 @@
           },
           {
             "type": "number",
-            "name": "threshold_cop",
+            "name": "previous_cop",
             "title": {
-              "en": "Threshold COP",
-              "nl": "Drempel COP",
-              "de": "Schwellenwert COP",
-              "fr": "COP seuil"
+              "en": "Previous COP",
+              "nl": "Vorige COP",
+              "de": "Vorherige COP",
+              "fr": "COP précédent"
             },
             "example": 3
+          },
+          {
+            "type": "number",
+            "name": "change",
+            "title": {
+              "en": "Change in COP",
+              "nl": "Verandering in COP",
+              "de": "Änderung des COP",
+              "fr": "Changement du COP"
+            },
+            "example": 0.2
           },
           {
             "type": "string",
@@ -685,28 +737,36 @@
             "name": "trend_type",
             "title": {
               "en": "Trend type",
-              "nl": "Trend type"
+              "nl": "Trend type",
+              "de": "Trend-Typ",
+              "fr": "Type de tendance"
             },
             "values": [
               {
                 "id": "improving",
                 "title": {
                   "en": "improving",
-                  "nl": "verbeterend"
+                  "nl": "verbeterend",
+                  "de": "Verbesserung",
+                  "fr": "amélioration"
                 }
               },
               {
                 "id": "degrading",
                 "title": {
                   "en": "degrading",
-                  "nl": "verslechterend"
+                  "nl": "verslechterend",
+                  "de": "Verschlechterung",
+                  "fr": "détérioration"
                 }
               },
               {
                 "id": "any",
                 "title": {
                   "en": "any trend change",
-                  "nl": "elke trendverandering"
+                  "nl": "elke trendverandering",
+                  "de": "jede Trendänderung",
+                  "fr": "tout changement de tendance"
                 }
               }
             ]
@@ -841,8 +901,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Daily threshold (kWh)",
-              "nl": "Dagelijkse drempel (kWh)"
+              "en": " Daily threshold (kWh)",
+              "nl": " Dagelijkse drempel (kWh)",
+              "de": " Täglicher Schwellenwert (kWh)",
+              "fr": " Seuil quotidien (kWh)"
             },
             "min": 1,
             "max": 100,
@@ -850,7 +912,9 @@
             "units": "kWh",
             "placeholder": {
               "en": "Daily consumption threshold",
-              "nl": "Dagverbruik drempel"
+              "nl": "Dagverbruik drempel",
+              "de": "Tagesverbrauchs-Schwellenwert",
+              "fr": "Seuil de consommation quotidienne"
             }
           }
         ],
@@ -911,21 +975,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -934,8 +1004,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Daily COP threshold",
-              "nl": "Dagelijkse COP drempel"
+              "en": " Daily COP threshold",
+              "nl": " Dagelijkse COP drempel",
+              "de": " Täglicher COP-Schwellenwert",
+              "fr": " Seuil COP quotidien"
             },
             "min": 1,
             "max": 8,
@@ -943,7 +1015,9 @@
             "units": "COP",
             "placeholder": {
               "en": "Daily COP efficiency threshold",
-              "nl": "Dagelijkse COP efficiëntie drempel"
+              "nl": "Dagelijkse COP efficiëntie drempel",
+              "de": "Täglicher COP-Effizienz-Schwellenwert",
+              "fr": "Seuil d'efficacité COP quotidien"
             }
           }
         ],
@@ -1015,21 +1089,27 @@
             "name": "state",
             "title": {
               "en": "State",
-              "nl": "Status"
+              "nl": "Status",
+              "de": "Zustand",
+              "fr": "État"
             },
             "values": [
               {
                 "id": "active",
                 "title": {
                   "en": "active",
-                  "nl": "actief"
+                  "nl": "actief",
+                  "de": "aktiv",
+                  "fr": "actif"
                 }
               },
               {
                 "id": "inactive",
                 "title": {
                   "en": "inactive",
-                  "nl": "inactief"
+                  "nl": "inactief",
+                  "de": "inaktiv",
+                  "fr": "inactif"
                 }
               }
             ]
@@ -1080,21 +1160,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1103,8 +1189,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": 0,
             "max": 120,
@@ -1112,7 +1200,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -1172,21 +1262,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1195,8 +1291,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -30,
             "max": 80,
@@ -1204,7 +1302,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -1264,21 +1364,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1287,8 +1393,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -30,
             "max": 80,
@@ -1296,7 +1404,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -1356,21 +1466,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1379,8 +1495,10 @@
             "type": "range",
             "name": "pulse_steps",
             "title": {
-              "en": "Pulse-steps",
-              "nl": "Puls-stappen"
+              "en": " Pulse-steps",
+              "nl": " Puls-stappen",
+              "de": " Schritte",
+              "fr": " Pas"
             },
             "min": 0,
             "max": 500,
@@ -1388,7 +1506,9 @@
             "units": "Pulse-steps",
             "placeholder": {
               "en": "Pulse-steps threshold",
-              "nl": "Puls-stappen drempel"
+              "nl": "Puls-stappen drempel",
+              "de": "Schwellenwert für Ventilschritte",
+              "fr": "Seuil de pas de valve"
             }
           }
         ],
@@ -1448,21 +1568,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1471,8 +1597,10 @@
             "type": "range",
             "name": "current",
             "title": {
-              "en": "Current (A)",
-              "nl": "Stroom (A)"
+              "en": " Current (A)",
+              "nl": " Stroom (A)",
+              "de": " Strom (A)",
+              "fr": " Courant (A)"
             },
             "min": 1,
             "max": 50,
@@ -1480,7 +1608,9 @@
             "units": "A",
             "placeholder": {
               "en": "Current threshold in amperes",
-              "nl": "Stroom drempel in ampère"
+              "nl": "Stroom drempel in ampère",
+              "de": "Stromschwellenwert in Ampere",
+              "fr": "Seuil de courant en ampères"
             }
           }
         ],
@@ -1540,21 +1670,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1563,8 +1699,10 @@
             "type": "range",
             "name": "pulse_steps",
             "title": {
-              "en": "Pulse-steps",
-              "nl": "Puls-stappen"
+              "en": " Pulse-steps",
+              "nl": " Puls-stappen",
+              "de": " Schritte",
+              "fr": " Pas"
             },
             "min": 0,
             "max": 500,
@@ -1572,7 +1710,9 @@
             "units": "Pulse-steps",
             "placeholder": {
               "en": "Pulse-steps threshold",
-              "nl": "Puls-stappen drempel"
+              "nl": "Puls-stappen drempel",
+              "de": "Schwellenwert für Ventilschritte",
+              "fr": "Seuil de pas de valve"
             }
           }
         ],
@@ -1632,21 +1772,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1655,8 +1801,10 @@
             "type": "range",
             "name": "frequency",
             "title": {
-              "en": "Frequency (Hz)",
-              "nl": "Frequentie (Hz)"
+              "en": " Frequency ",
+              "nl": " Frequentie ",
+              "de": " Frequenz ",
+              "fr": " Fréquence "
             },
             "min": 10,
             "max": 100,
@@ -1664,7 +1812,9 @@
             "units": "Hz",
             "placeholder": {
               "en": "Frequency threshold in Hz",
-              "nl": "Frequentie drempel in Hz"
+              "nl": "Frequentie drempel in Hz",
+              "de": "Frequenzschwellenwert in Hz",
+              "fr": "Seuil de fréquence en Hz"
             }
           }
         ],
@@ -1702,10 +1852,10 @@
           "fr": "Défaut détecté"
         },
         "titleFormatted": {
-          "en": "Fault code [[fault_code]] detected",
-          "nl": "Storing code [[fault_code]] gedetecteerd",
-          "de": "Störungscode [[fault_code]] erkannt",
-          "fr": "Code de défaut [[fault_code]] détecté"
+          "en": "Fault [[fault_code]] detected",
+          "nl": "Storing [[fault_code]] gedetecteerd",
+          "de": "Störung [[fault_code]] erkannt",
+          "fr": "Défaut [[fault_code]] détecté"
         },
         "hint": {
           "en": "Triggers when a system fault is detected",
@@ -1724,8 +1874,10 @@
             "type": "range",
             "name": "fault_code",
             "title": {
-              "en": "Fault code",
-              "nl": "Storing code"
+              "en": " code",
+              "nl": " code",
+              "de": " code",
+              "fr": " code"
             },
             "min": 1,
             "max": 100,
@@ -1733,7 +1885,9 @@
             "units": "",
             "placeholder": {
               "en": "Fault code to monitor",
-              "nl": "Storing code om te monitoren"
+              "nl": "Storing code om te monitoren",
+              "de": "Störungscode zur Überwachung",
+              "fr": "Code de défaut à surveiller"
             }
           }
         ],
@@ -1846,21 +2000,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1869,8 +2029,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -20,
             "max": 100,
@@ -1878,7 +2040,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -1938,21 +2102,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -1961,8 +2131,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -20,
             "max": 80,
@@ -1970,7 +2142,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -2008,10 +2182,10 @@
           "fr": "Température d'entrée changée"
         },
         "titleFormatted": {
-          "en": "Inlet temperature [[condition]] [[temperature]]°C",
-          "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C",
-          "de": "Vorlauftemperatur [[condition]] [[temperature]]°C",
-          "fr": "Température d'entrée [[condition]] [[temperature]]°C"
+          "en": "Inlet temperature [[condition]] [[temperature]]°C ",
+          "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C ",
+          "de": "Vorlauftemperatur [[condition]] [[temperature]]°C ",
+          "fr": "Température d'entrée [[condition]] [[temperature]]°C "
         },
         "hint": {
           "en": "Triggers when water inlet temperature goes above or below a specified level",
@@ -2030,21 +2204,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2053,8 +2233,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -20,
             "max": 80,
@@ -2062,7 +2244,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -2077,17 +2261,6 @@
               "fr": "Température d'entrée actuelle"
             },
             "example": 45.5
-          },
-          {
-            "type": "number",
-            "name": "threshold_temperature",
-            "title": {
-              "en": "Threshold temperature",
-              "nl": "Drempel temperatuur",
-              "de": "Schwellenwert Temperatur",
-              "fr": "Température seuil"
-            },
-            "example": 40
           }
         ]
       },
@@ -2122,21 +2295,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2145,8 +2324,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -30,
             "max": 50,
@@ -2154,7 +2335,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -2215,21 +2398,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2238,8 +2427,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Monthly COP threshold",
-              "nl": "Maandelijkse COP drempel"
+              "en": " Monthly COP threshold",
+              "nl": " Maandelijkse COP drempel",
+              "de": " Monatlicher COP-Schwellenwert",
+              "fr": " Seuil COP mensuel"
             },
             "min": 1,
             "max": 8,
@@ -2247,7 +2438,9 @@
             "units": "COP",
             "placeholder": {
               "en": "Monthly COP efficiency threshold",
-              "nl": "Maandelijkse COP efficiëntie drempel"
+              "nl": "Maandelijkse COP efficiëntie drempel",
+              "de": "Monatlicher COP-Effizienz-Schwellenwert",
+              "fr": "Seuil d'efficacité COP mensuel"
             }
           }
         ],
@@ -2318,21 +2511,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2341,8 +2540,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -20,
             "max": 80,
@@ -2350,7 +2551,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -2365,17 +2568,6 @@
               "fr": "Température de sortie actuelle"
             },
             "example": 25.5
-          },
-          {
-            "type": "number",
-            "name": "threshold_temperature",
-            "title": {
-              "en": "Threshold temperature",
-              "nl": "Drempel temperatuur",
-              "de": "Schwellenwert Temperatur",
-              "fr": "Température seuil"
-            },
-            "example": 30
           }
         ]
       },
@@ -2410,21 +2602,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2433,8 +2631,10 @@
             "type": "range",
             "name": "voltage",
             "title": {
-              "en": "Voltage (V)",
-              "nl": "Spanning (V)"
+              "en": " Voltage (V)",
+              "nl": " Spanning (V)",
+              "de": " Spannung (V)",
+              "fr": " Tension (V)"
             },
             "min": 180,
             "max": 260,
@@ -2442,7 +2642,9 @@
             "units": "V",
             "placeholder": {
               "en": "Voltage threshold in volts",
-              "nl": "Spanning drempel in volt"
+              "nl": "Spanning drempel in volt",
+              "de": "Spannungsschwellenwert in Volt",
+              "fr": "Seuil de tension en volts"
             }
           }
         ],
@@ -2502,21 +2704,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2525,8 +2733,10 @@
             "type": "range",
             "name": "current",
             "title": {
-              "en": "Current (A)",
-              "nl": "Stroom (A)"
+              "en": " Current (A)",
+              "nl": " Stroom (A)",
+              "de": " Strom (A)",
+              "fr": " Courant (A)"
             },
             "min": 0,
             "max": 50,
@@ -2534,7 +2744,9 @@
             "units": "A",
             "placeholder": {
               "en": "Current threshold in amperes",
-              "nl": "Stroom drempel in ampère"
+              "nl": "Stroom drempel in ampère",
+              "de": "Stromschwellenwert in Ampere",
+              "fr": "Seuil de courant en ampères"
             }
           }
         ],
@@ -2594,21 +2806,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2617,8 +2835,10 @@
             "type": "range",
             "name": "voltage",
             "title": {
-              "en": "Voltage (V)",
-              "nl": "Spanning (V)"
+              "en": " Voltage (V)",
+              "nl": " Spanning (V)",
+              "de": " Spannung (V)",
+              "fr": " Tension (V)"
             },
             "min": 180,
             "max": 260,
@@ -2626,7 +2846,9 @@
             "units": "V",
             "placeholder": {
               "en": "Voltage threshold in volts",
-              "nl": "Spanning drempel in volt"
+              "nl": "Spanning drempel in volt",
+              "de": "Spannungsschwellenwert in Volt",
+              "fr": "Seuil de tension en volts"
             }
           }
         ],
@@ -2686,21 +2908,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2709,8 +2937,10 @@
             "type": "range",
             "name": "current",
             "title": {
-              "en": "Current (A)",
-              "nl": "Stroom (A)"
+              "en": " Current (A)",
+              "nl": " Stroom (A)",
+              "de": " Strom (A)",
+              "fr": " Courant (A)"
             },
             "min": 0,
             "max": 50,
@@ -2718,7 +2948,9 @@
             "units": "A",
             "placeholder": {
               "en": "Current threshold in amperes",
-              "nl": "Stroom drempel in ampère"
+              "nl": "Stroom drempel in ampère",
+              "de": "Stromschwellenwert in Ampere",
+              "fr": "Seuil de courant en ampères"
             }
           }
         ],
@@ -2778,21 +3010,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2801,8 +3039,10 @@
             "type": "range",
             "name": "voltage",
             "title": {
-              "en": "Voltage (V)",
-              "nl": "Spanning (V)"
+              "en": " Voltage (V)",
+              "nl": " Spanning (V)",
+              "de": " Spannung (V)",
+              "fr": " Tension (V)"
             },
             "min": 180,
             "max": 260,
@@ -2810,7 +3050,9 @@
             "units": "V",
             "placeholder": {
               "en": "Voltage threshold in volts",
-              "nl": "Spanning drempel in volt"
+              "nl": "Spanning drempel in volt",
+              "de": "Spannungsschwellenwert in Volt",
+              "fr": "Seuil de tension en volts"
             }
           }
         ],
@@ -2869,8 +3111,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Power threshold (W)",
-              "nl": "Vermogen drempel (W)"
+              "en": " Power threshold (W)",
+              "nl": " Vermogen drempel (W)",
+              "de": " Leistungs-Schwellenwert (W)",
+              "fr": " Seuil de puissance (W)"
             },
             "min": 100,
             "max": 10000,
@@ -2878,7 +3122,9 @@
             "units": "W",
             "placeholder": {
               "en": "Power threshold in watts",
-              "nl": "Vermogen drempel in watt"
+              "nl": "Vermogen drempel in watt",
+              "de": "Leistungs-Schwellenwert in Watt",
+              "fr": "Seuil de puissance en watts"
             }
           }
         ],
@@ -2938,21 +3184,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -2961,8 +3213,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": -30,
             "max": 50,
@@ -2970,7 +3224,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -3030,21 +3286,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -3053,8 +3315,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": 0,
             "max": 90,
@@ -3062,7 +3326,9 @@
             "units": "°C",
             "placeholder": {
               "en": "Temperature threshold in °C",
-              "nl": "Temperatuur drempel in °C"
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
             }
           }
         ],
@@ -3121,8 +3387,10 @@
             "type": "range",
             "name": "milestone",
             "title": {
-              "en": "Consumption milestone (kWh)",
-              "nl": "Verbruik mijlpaal (kWh)"
+              "en": " Consumption milestone (kWh)",
+              "nl": " Verbruik mijlpaal (kWh)",
+              "de": " Verbrauchs-Meilenstein (kWh)",
+              "fr": " Jalon de consommation (kWh)"
             },
             "min": 100,
             "max": 50000,
@@ -3130,7 +3398,9 @@
             "units": "kWh",
             "placeholder": {
               "en": "Total consumption milestone in kWh",
-              "nl": "Totaalverbruik mijlpaal in kWh"
+              "nl": "Totaalverbruik mijlpaal in kWh",
+              "de": "Gesamtverbrauchs-Meilenstein in kWh",
+              "fr": "Jalon de consommation totale en kWh"
             }
           }
         ],
@@ -3190,21 +3460,27 @@
             "name": "condition",
             "title": {
               "en": "Condition",
-              "nl": "Conditie"
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
             },
             "values": [
               {
                 "id": "above",
                 "title": {
                   "en": "above",
-                  "nl": "boven"
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
                 }
               },
               {
                 "id": "below",
                 "title": {
                   "en": "below",
-                  "nl": "onder"
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
                 }
               }
             ]
@@ -3213,8 +3489,10 @@
             "type": "range",
             "name": "flow_rate",
             "title": {
-              "en": "Flow rate (L/min)",
-              "nl": "Doorstroom (L/min)"
+              "en": " Flow rate (L/min)",
+              "nl": " Doorstroom (L/min)",
+              "de": " Durchflussrate (L/min)",
+              "fr": " Débit (L/min)"
             },
             "min": 0,
             "max": 100,
@@ -3222,7 +3500,9 @@
             "units": "L/min",
             "placeholder": {
               "en": "Flow rate threshold in L/min",
-              "nl": "Doorstroom drempel in L/min"
+              "nl": "Doorstroom drempel in L/min",
+              "de": "Durchflussschwellenwert in L/min",
+              "fr": "Seuil de débit en L/min"
             }
           }
         ],
@@ -3580,10 +3860,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "COP threshold",
-              "nl": "COP drempel",
-              "de": "COP-Schwellenwert",
-              "fr": "Seuil COP"
+              "en": " COP threshold",
+              "nl": " COP drempel",
+              "de": " COP-Schwellenwert",
+              "fr": " Seuil COP"
             },
             "min": 1,
             "max": 8,
@@ -3628,10 +3908,10 @@
             "type": "range",
             "name": "hours",
             "title": {
-              "en": "Time period (hours)",
-              "nl": "Tijdsperiode (uur)",
-              "de": "Zeitraum (Stunden)",
-              "fr": "Période (heures)"
+              "en": " Time period ",
+              "nl": " Tijdsperiode ",
+              "de": " Zeitraum ",
+              "fr": " Période "
             },
             "min": 1,
             "max": 168,
@@ -3677,10 +3957,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Daily COP threshold",
-              "nl": "Dagelijkse COP drempel",
-              "de": "Täglicher COP-Schwellenwert",
-              "fr": "Seuil COP quotidien"
+              "en": " Daily COP threshold",
+              "nl": " Dagelijkse COP drempel",
+              "de": " Täglicher COP-Schwellenwert",
+              "fr": " Seuil COP quotidien"
             },
             "min": 1,
             "max": 8,
@@ -3783,10 +4063,10 @@
             "type": "range",
             "name": "tolerance",
             "title": {
-              "en": "Balance tolerance (%)",
-              "nl": "Balans tolerantie (%)",
-              "de": "Bilanztoleranz (%)",
-              "fr": "Tolérance d'équilibre (%)"
+              "en": " Balance tolerance ",
+              "nl": " Balans tolerantie ",
+              "de": " Bilanztoleranz ",
+              "fr": " Tolérance d'équilibre "
             },
             "min": 1,
             "max": 20,
@@ -4195,10 +4475,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Hot water temperature (°C)",
-              "nl": "Warm water temperatuur (°C)",
-              "de": "Warmwassertemperatur (°C)",
-              "fr": "Température de l'eau chaude (°C)"
+              "en": " Hot water temperature ",
+              "nl": " Warm water temperatuur ",
+              "de": " Warmwassertemperatur ",
+              "fr": " Température de l'eau chaude "
             },
             "min": 30,
             "max": 75,
@@ -4244,10 +4524,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Monthly COP threshold",
-              "nl": "Maandelijkse COP drempel",
-              "de": "Monatlicher COP-Schwellenwert",
-              "fr": "Seuil COP mensuel"
+              "en": " Monthly COP threshold",
+              "nl": " Maandelijkse COP drempel",
+              "de": " Monatlicher COP-Schwellenwert",
+              "fr": " Seuil COP mensuel"
             },
             "min": 1,
             "max": 8,
@@ -4292,10 +4572,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Power threshold (W)",
-              "nl": "Vermogen drempel (W)",
-              "de": "Leistungsschwellenwert (W)",
-              "fr": "Seuil de puissance (W)"
+              "en": " Power threshold (W)",
+              "nl": " Vermogen drempel (W)",
+              "de": " Leistungsschwellenwert (W)",
+              "fr": " Seuil de puissance (W)"
             },
             "min": 100,
             "max": 10000,
@@ -4340,10 +4620,10 @@
             "type": "range",
             "name": "differential",
             "title": {
-              "en": "Pulse-steps differential",
-              "nl": "Puls-stappen verschil",
-              "de": "Pulsschritte-Differenz",
-              "fr": "Différentiel des pas d'impulsion"
+              "en": " Pulse-steps differential",
+              "nl": " Puls-stappen verschil",
+              "de": " Pulsschritte-Differenz",
+              "fr": " Différentiel des pas d'impulsion"
             },
             "min": 0,
             "max": 1000,
@@ -4427,10 +4707,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)",
-              "de": "Temperatur (°C)",
-              "fr": "Température (°C)"
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
             },
             "min": 5,
             "max": 60,
@@ -4476,10 +4756,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature",
-              "nl": "Temperatuur",
-              "de": "Temperatur",
-              "fr": "Température"
+              "en": " Temperature",
+              "nl": " Temperatuur",
+              "de": " Temperatur",
+              "fr": " Température"
             },
             "min": -30,
             "max": 50,
@@ -4524,10 +4804,10 @@
             "type": "range",
             "name": "differential",
             "title": {
-              "en": "Temperature differential (°C)",
-              "nl": "Temperatuur verschil (°C)",
-              "de": "Temperaturdifferenz (°C)",
-              "fr": "Différentiel de température (°C)"
+              "en": " Temperature differential ",
+              "nl": " Temperatuur verschil ",
+              "de": " Temperaturdifferenz ",
+              "fr": " Différentiel de température "
             },
             "min": 1,
             "max": 50,
@@ -4572,10 +4852,10 @@
             "type": "range",
             "name": "threshold",
             "title": {
-              "en": "Consumption threshold (kWh)",
-              "nl": "Verbruiksdrempel (kWh)",
-              "de": "Verbrauchsschwellenwert (kWh)",
-              "fr": "Seuil de consommation (kWh)"
+              "en": " Consumption threshold (kWh)",
+              "nl": " Verbruiksdrempel (kWh)",
+              "de": " Verbrauchsschwellenwert (kWh)",
+              "fr": " Seuil de consommation (kWh)"
             },
             "min": 100,
             "max": 50000,
@@ -4659,10 +4939,10 @@
             "type": "range",
             "name": "level",
             "title": {
-              "en": "Electricity consumption checking",
-              "nl": "Stroomverbruik controleren",
-              "de": "Stromverbrauchsüberwachung",
-              "fr": "Vérification de la consommation électrique"
+              "en": " Electricity consumption checking",
+              "nl": " Stroomverbruik controleren",
+              "de": " Stromverbrauchsüberwachung",
+              "fr": " Vérification de la consommation électrique"
             },
             "min": 0,
             "max": 2,
@@ -4707,10 +4987,10 @@
             "type": "range",
             "name": "flow_rate",
             "title": {
-              "en": "Flow rate (L/min)",
-              "nl": "Doorstroming (L/min)",
-              "de": "Durchflussrate (L/min)",
-              "fr": "Débit (L/min)"
+              "en": " Flow rate (L/min)",
+              "nl": " Doorstroming (L/min)",
+              "de": " Durchflussrate (L/min)",
+              "fr": " Débit (L/min)"
             },
             "min": 1,
             "max": 100,
@@ -4794,10 +5074,10 @@
             "type": "range",
             "name": "mode",
             "title": {
-              "en": "Water control mode",
-              "nl": "Water controle modus",
-              "de": "Wassersteuerungsmodus",
-              "fr": "Mode de contrôle de l'eau"
+              "en": " Water control mode",
+              "nl": " Water controle modus",
+              "de": " Wassersteuerungsmodus",
+              "fr": " Mode de contrôle de l'eau"
             },
             "min": 0,
             "max": 1,
@@ -4884,16 +5164,16 @@
       {
         "id": "calculate_curve_value",
         "title": {
-          "en": "Calculate value from curve",
-          "nl": "Bereken waarde uit curve",
-          "de": "Wert aus Kurve berechnen",
-          "fr": "Calculer une valeur à partir d'une courbe"
+          "en": "Calculate value from curve rules",
+          "nl": "Bereken waarde uit curveregels",
+          "de": "Wert aus Kurvenregeln berechnen",
+          "fr": "Calculer une valeur à partir de règles de courbe"
         },
         "titleFormatted": {
-          "en": "Calculate value for [[input_value]] using curve [[curve]]",
-          "nl": "Bereken waarde voor [[input_value]] met curve [[curve]]",
-          "de": "Berechne Wert für [[input_value]] mit Kurve [[curve]]",
-          "fr": "Calculer une valeur pour [[input_value]] avec courbe [[curve]]"
+          "en": "Calculate value for [[input_value]] using curve rules [[curve]]",
+          "nl": "Bereken waarde voor [[input_value]] met curveregels [[curve]]",
+          "de": "Berechne Wert für [[input_value]] mit Kurvenregeln [[curve]]",
+          "fr": "Calculer une valeur pour [[input_value]] avec règles de courbe [[curve]]"
         },
         "hint": {
           "en": "Calculates output values based on input (e.g., outdoor temperature → heating setpoint). Format: '[operator] threshold : value'. Operators: >, >=, <, <=, ==, !=. Evaluates top to bottom, returns first match. Use 'default : value' as fallback. Example heating curve: '< 0 : 55, < 5 : 50, < 10 : 45, default : 35'",
@@ -4964,10 +5244,10 @@
           "fr": "Calculer la valeur à partir du planning horaire"
         },
         "titleFormatted": {
-          "en": "Calculate value from time [[schedule]]",
-          "nl": "Bereken waarde uit tijd [[schedule]]",
-          "de": "Wert aus Zeit [[schedule]] berechnen",
-          "fr": "Calculer la valeur à partir du temps [[schedule]]"
+          "en": "Calculate value from time periods [[schedule]]",
+          "nl": "Bereken waarde uit tijdsperioden [[schedule]]",
+          "de": "Wert aus Zeiträumen [[schedule]] berechnen",
+          "fr": "Calculer la valeur à partir des périodes de temps [[schedule]]"
         },
         "hint": {
           "en": "Evaluates current time against a daily schedule to calculate output values. Perfect for time-based temperature scheduling, time-of-use pricing, and automated daily routines.",
@@ -5124,7 +5404,7 @@
         "titleFormatted": {
           "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
           "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening",
-          "de": "[[temperature_value]]°C an Wärmepumpe für COP-Berechnung senden",
+          "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP-Berechnung",
           "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP"
         },
         "hint": {
@@ -5172,7 +5452,7 @@
         "titleFormatted": {
           "en": "Send [[flow_value]]L/min to heat pump for COP calculation",
           "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening",
-          "de": "[[flow_value]]L/min an Wärmepumpe für COP-Berechnung senden",
+          "de": "Sende [[flow_value]]L/min an Wärmepumpe für COP-Berechnung",
           "fr": "Envoyer [[flow_value]]L/min à la pompe à chaleur pour le calcul COP"
         },
         "hint": {
@@ -5220,7 +5500,7 @@
         "titleFormatted": {
           "en": "Send [[power_value]]W to heat pump for COP calculation",
           "nl": "Stuur [[power_value]]W naar warmtepomp voor COP berekening",
-          "de": "[[power_value]]W an Wärmepumpe für COP-Berechnung senden",
+          "de": "Sende [[power_value]]W an Wärmepumpe für COP-Berechnung",
           "fr": "Envoyer [[power_value]]W à la pompe à chaleur pour le calcul COP"
         },
         "hint": {
@@ -5730,10 +6010,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Hot water temperature (°C)",
-              "nl": "Warm water temperatuur (°C)",
-              "de": "Warmwassertemperatur (°C)",
-              "fr": "Température de l'eau chaude (°C)"
+              "en": " Hot water temperature (°C)",
+              "nl": " Warm water temperatuur (°C)",
+              "de": " Warmwassertemperatur (°C)",
+              "fr": " Température de l'eau chaude (°C)"
             },
             "min": 30,
             "max": 75,
@@ -5779,10 +6059,10 @@
             "type": "range",
             "name": "temperature",
             "title": {
-              "en": "Temperature (°C)",
-              "nl": "Temperatuur (°C)",
-              "de": "Temperatur (°C)",
-              "fr": "Température (°C)"
+              "en": " Temperature (°C)",
+              "nl": " Temperatuur (°C)",
+              "de": " Temperatur (°C)",
+              "fr": " Température (°C)"
             },
             "min": 5,
             "max": 60,
@@ -5827,10 +6107,10 @@
             "type": "range",
             "name": "volume",
             "title": {
-              "en": "Electricity consumption checking",
-              "nl": "Stroomverbruik controleren",
-              "de": "Stromverbrauchsprüfung",
-              "fr": "Contrôle de la consommation électrique"
+              "en": " Electricity consumption checking",
+              "nl": " Stroomverbruik controleren",
+              "de": " Stromverbrauchsprüfung",
+              "fr": " Contrôle de la consommation électrique"
             },
             "min": 0,
             "max": 2,
@@ -5875,10 +6155,10 @@
             "type": "range",
             "name": "mode",
             "title": {
-              "en": "Water control mode",
-              "nl": "Water controle modus",
-              "de": "Wassersteuermodus",
-              "fr": "Mode de contrôle de l'eau"
+              "en": " Water control mode",
+              "nl": " Water controle modus",
+              "de": " Wassersteuermodus",
+              "fr": " Mode de contrôle de l'eau"
             },
             "min": 0,
             "max": 1,
@@ -6032,8 +6312,10 @@
       "capabilitiesOptions": {
         "measure_power": {
           "title": {
+            "en": "Current power",
             "nl": "Huidig vermogen",
-            "en": "Current power"
+            "de": "Aktuelle Leistung",
+            "fr": "Puissance actuelle"
           },
           "min": 0,
           "max": 9999999,
@@ -6043,8 +6325,10 @@
         },
         "measure_water": {
           "title": {
+            "en": "Water flow",
             "nl": "Water doorstroming",
-            "en": "Water flow"
+            "de": "Wasserdurchfluss",
+            "fr": "Débit d'eau"
           },
           "min": 0,
           "max": 100,
@@ -6054,8 +6338,10 @@
         },
         "target_temperature": {
           "title": {
+            "en": "Setpoint temperature",
             "nl": "Setpoint temperatuur",
-            "en": "Setpoint temperature"
+            "de": "Solltemperatur",
+            "fr": "Température de consigne"
           },
           "min": 5,
           "max": 75,
@@ -6068,8 +6354,10 @@
         },
         "onoff": {
           "title": {
+            "en": "Switch",
             "nl": "Schakelaar",
-            "en": "Switch"
+            "de": "Schalter",
+            "fr": "Interrupteur"
           },
           "setable": true,
           "uiQuickAction": false,
@@ -6080,14 +6368,18 @@
         "measure_voltage.bv": {
           "title": {
             "en": "Voltage B",
-            "nl": "Spanning B"
+            "nl": "Spanning B",
+            "de": "Spannung B",
+            "fr": "Tension B"
           },
           "min": 0,
           "max": 99999,
           "insights": false,
           "insightsTitle": {
             "en": "Voltage B",
-            "nl": "Spanning B"
+            "nl": "Spanning B",
+            "de": "Spannung B",
+            "fr": "Tension B"
           },
           "description": {
             "nl": "dp 111 : bv - Voltage B"
@@ -6096,14 +6388,18 @@
         "measure_current.b_cur": {
           "title": {
             "en": "Current B",
-            "nl": "Amperage B"
+            "nl": "Amperage B",
+            "de": "Strom B",
+            "fr": "Courant B"
           },
           "min": 0,
           "max": 99999,
           "insights": false,
           "insightsTitle": {
             "en": "Current B",
-            "nl": "Amperage B"
+            "nl": "Amperage B",
+            "de": "Strom B",
+            "fr": "Courant B"
           },
           "description": {
             "nl": "dp 109 : b_cur - Current B"
@@ -6112,14 +6408,18 @@
         "measure_current.c_cur": {
           "title": {
             "en": "Current C",
-            "nl": "Amperage C"
+            "nl": "Amperage C",
+            "de": "Strom C",
+            "fr": "Courant C"
           },
           "min": 0,
           "max": 99999,
           "insights": false,
           "insightsTitle": {
             "en": "Current C",
-            "nl": "Amperage C"
+            "nl": "Amperage C",
+            "de": "Strom C",
+            "fr": "Courant C"
           },
           "description": {
             "nl": "dp 110 : c_cur - Current C"
@@ -6128,14 +6428,18 @@
         "measure_current.cur_current": {
           "title": {
             "en": "Current A",
-            "nl": "Hudige stroomsterkte"
+            "nl": "Hudige stroomsterkte",
+            "de": "Strom A",
+            "fr": "Courant A"
           },
           "min": 0,
           "max": 99999,
           "insights": false,
           "insightsTitle": {
             "en": "Current A",
-            "nl": "Hudige stroomsterkte"
+            "nl": "Hudige stroomsterkte",
+            "de": "Strom A",
+            "fr": "Courant A"
           },
           "description": {
             "nl": "dp 102 : cur_current - Current A"
@@ -6144,7 +6448,9 @@
         "measure_frequency.compressor_strength": {
           "title": {
             "en": "Compressor Frequency",
-            "nl": "Compressor frequentie"
+            "nl": "Compressor frequentie",
+            "de": "Kompressorfrequenz",
+            "fr": "Fréquence du compresseur"
           },
           "type": "number",
           "min": 0,
@@ -6152,7 +6458,9 @@
           "insights": true,
           "insightsTitle": {
             "en": "Compressor Frequency",
-            "nl": "Compressor frequentie"
+            "nl": "Compressor frequentie",
+            "de": "Kompressorfrequenz",
+            "fr": "Fréquence du compresseur"
           },
           "description": {
             "nl": "dp 20 : compressor_strength - Compressor Frequency"
@@ -6161,14 +6469,18 @@
         "measure_frequency.fan_motor_frequency": {
           "title": {
             "en": "Fan motor frequency",
-            "nl": "Ventilator frequentie"
+            "nl": "Ventilator frequentie",
+            "de": "Lüftermotorfrequenz",
+            "fr": "Fréquence du moteur du ventilateur"
           },
           "min": 0,
           "max": 100,
           "insights": true,
           "insightsTitle": {
             "en": "Fan motor frequency",
-            "nl": "Ventilator frequentie"
+            "nl": "Ventilator frequentie",
+            "de": "Lüftermotorfrequenz",
+            "fr": "Fréquence du moteur du ventilateur"
           },
           "description": {
             "nl": "dp 40 : effluent_temp_f - Fan motor frequency"
@@ -6177,14 +6489,18 @@
         "measure_temperature.around_temp_f": {
           "title": {
             "en": "Tank temp",
-            "nl": "Tapwater temperatuur"
+            "nl": "Tapwater temperatuur",
+            "de": "Tanktemperatur",
+            "fr": "Température du réservoir"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Tank temp",
-            "nl": "Tapwater temperatuur"
+            "nl": "Tapwater temperatuur",
+            "de": "Tanktemperatur",
+            "fr": "Température du réservoir"
           },
           "description": {
             "nl": "dp 38 : around_temp_f - Tank temp"
@@ -6193,14 +6509,18 @@
         "measure_temperature.around_temp": {
           "title": {
             "en": "Ambient temp",
-            "nl": "Buitentemperatuur"
+            "nl": "Buitentemperatuur",
+            "de": "Umgebungstemperatur",
+            "fr": "Température ambiante"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Ambient temp",
-            "nl": "Buitentemperatuur"
+            "nl": "Buitentemperatuur",
+            "de": "Umgebungstemperatur",
+            "fr": "Température ambiante"
           },
           "description": {
             "nl": "dp 26 : around_temp - Ambient temp"
@@ -6209,14 +6529,18 @@
         "measure_temperature.temp_top": {
           "title": {
             "en": "Inlet temp",
-            "nl": "Water intrede temperatuur"
+            "nl": "Water intrede temperatuur",
+            "de": "Einlasstemperatur",
+            "fr": "Température d'entrée"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Inlet temp",
-            "nl": "Water intrede temperatuur"
+            "nl": "Water intrede temperatuur",
+            "de": "Einlasstemperatur",
+            "fr": "Température d'entrée"
           },
           "description": {
             "nl": "dp 21 : temp_top - Inlet temp"
@@ -6225,14 +6549,18 @@
         "measure_temperature.temp_current_f": {
           "title": {
             "en": "High pressure temp",
-            "nl": "Hogedruk verzadigingstemperatuur"
+            "nl": "Hogedruk verzadigingstemperatuur",
+            "de": "Hochdrucktemperatur",
+            "fr": "Température haute pression"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "High pressure temp",
-            "nl": "Hogedruk verzadigingstemperatuur"
+            "nl": "Hogedruk verzadigingstemperatuur",
+            "de": "Hochdrucktemperatur",
+            "fr": "Température haute pression"
           },
           "description": {
             "nl": "dp 35 : temp_current_f - High pressure temp"
@@ -6241,14 +6569,18 @@
         "measure_temperature.bottom_temp_f": {
           "title": {
             "en": "Incoiler temp",
-            "nl": "Condensor temperatuur"
+            "nl": "Condensor temperatuur",
+            "de": "Kondensatortemperatur",
+            "fr": "Température du condenseur"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Incoiler temp",
-            "nl": "Condensor temperatuur"
+            "nl": "Condensor temperatuur",
+            "de": "Kondensatortemperatur",
+            "fr": "Température du condenseur"
           },
           "description": {
             "nl": "dp 37 : bottom_temp_f - Incoiler temp"
@@ -6257,14 +6589,18 @@
         "measure_temperature.coiler_temp_f": {
           "title": {
             "en": "Suction Temp",
-            "nl": "Zuiggas temperatuur"
+            "nl": "Zuiggas temperatuur",
+            "de": "Saugtemperatur",
+            "fr": "Température d'aspiration"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Suction Temp",
-            "nl": "Zuiggas temperatuur"
+            "nl": "Zuiggas temperatuur",
+            "de": "Saugtemperatur",
+            "fr": "Température d'aspiration"
           },
           "description": {
             "nl": "dp 41 : coiler_temp_f - Suction Temp"
@@ -6273,14 +6609,18 @@
         "measure_temperature.top_temp_f": {
           "title": {
             "en": "Low presure temp",
-            "nl": "Lagedruk verzadigingstemperatuur"
+            "nl": "Lagedruk verzadigingstemperatuur",
+            "de": "Niederdrucktemperatur",
+            "fr": "Température basse pression"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Low presure temp",
-            "nl": "Lagedruk verzadigingstemperatuur"
+            "nl": "Lagedruk verzadigingstemperatuur",
+            "de": "Niederdrucktemperatur",
+            "fr": "Température basse pression"
           },
           "description": {
             "nl": "dp 36 : top_temp_f - Low presure temp"
@@ -6289,14 +6629,18 @@
         "measure_temperature.coiler_temp": {
           "title": {
             "en": "Coiler temp",
-            "nl": "Verdampingscondensator temperatuur"
+            "nl": "Verdampingscondensator temperatuur",
+            "de": "Verdampfer-Kondensatortemperatur",
+            "fr": "Température du condenseur évaporateur"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Coiler temp",
-            "nl": "Verdampingscondensator temperatuur"
+            "nl": "Verdampingscondensator temperatuur",
+            "de": "Verdampfer-Kondensatortemperatur",
+            "fr": "Température du condenseur évaporateur"
           },
           "description": {
             "nl": "dp 23 : coiler_temp - Electricity Coiler temp"
@@ -6305,14 +6649,18 @@
         "measure_temperature.evlin": {
           "title": {
             "en": "Economizer inlet Temp",
-            "nl": "EVI wamtewisselaar zuiggas temperatuur"
+            "nl": "EVI wamtewisselaar zuiggas temperatuur",
+            "de": "Economizer-Einlasstemperatur",
+            "fr": "Température d'entrée de l'économiseur"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Economizer inlet Temp",
-            "nl": "EVI wamtewisselaar zuiggas temperatuur"
+            "nl": "EVI wamtewisselaar zuiggas temperatuur",
+            "de": "Economizer-Einlasstemperatur",
+            "fr": "Température d'entrée de l'économiseur"
           },
           "description": {
             "nl": "dp 107 : evlin - Economizer inlet Temp"
@@ -6321,14 +6669,18 @@
         "measure_temperature.venting_temp": {
           "title": {
             "en": "Discharge temp",
-            "nl": "Persgas temperatuur"
+            "nl": "Persgas temperatuur",
+            "de": "Austrittstemperatur",
+            "fr": "Température de refoulement"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Discharge temp",
-            "nl": "Persgas temperatuur"
+            "nl": "Persgas temperatuur",
+            "de": "Austrittstemperatur",
+            "fr": "Température de refoulement"
           },
           "description": {
             "nl": "dp 24 : venting_temp - Discharge temp"
@@ -6337,14 +6689,18 @@
         "measure_temperature.temp_bottom": {
           "title": {
             "en": "Outlet temp",
-            "nl": "Water uittrede temperatuur"
+            "nl": "Water uittrede temperatuur",
+            "de": "Auslasstemperatur",
+            "fr": "Température de sortie"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Outlet temp",
-            "nl": "Water uittrede temperatuur"
+            "nl": "Water uittrede temperatuur",
+            "de": "Auslasstemperatur",
+            "fr": "Température de sortie"
           },
           "description": {
             "nl": "dp 22 : temp_bottom - Outlet temp"
@@ -6353,14 +6709,18 @@
         "measure_temperature.eviout": {
           "title": {
             "en": "Economizer outlet Temp",
-            "nl": "EVI wamtewisselaar persgas temperatuur"
+            "nl": "EVI wamtewisselaar persgas temperatuur",
+            "de": "Economizer-Auslasstemperatur",
+            "fr": "Température de sortie de l'économiseur"
           },
           "min": -50,
           "max": 150,
           "insights": true,
           "insightsTitle": {
             "en": "Economizer outlet Temp",
-            "nl": "EVI wamtewisselaar persgas temperatuurr"
+            "nl": "EVI wamtewisselaar persgas temperatuur",
+            "de": "Economizer-Auslasstemperatur",
+            "fr": "Température de sortie de l'économiseur"
           },
           "description": {
             "nl": "dp 108 : eviout - Economy outlet temp"
@@ -6369,14 +6729,18 @@
         "meter_power.power_consumption": {
           "title": {
             "en": "Electricity Consumption of Today",
-            "nl": "Stroom dagverbruik"
+            "nl": "Stroom dagverbruik",
+            "de": "Stromverbrauch heute",
+            "fr": "Consommation électrique du jour"
           },
           "min": 0,
           "max": 200000,
           "insights": false,
           "insightsTitle": {
             "en": "Electricity Consumption of Today",
-            "nl": "Stroom dagverbruik"
+            "nl": "Stroom dagverbruik",
+            "de": "Stromverbrauch heute",
+            "fr": "Consommation électrique du jour"
           },
           "description": {
             "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
@@ -6385,14 +6749,18 @@
         "meter_power.electric_total": {
           "title": {
             "en": "Total Electricity Consumption",
-            "nl": "Totaal stroomverbruik"
+            "nl": "Totaal stroomverbruik",
+            "de": "Gesamtstromverbrauch",
+            "fr": "Consommation électrique totale"
           },
           "min": 0,
           "max": 9999999,
           "insights": false,
           "insightsTitle": {
             "en": "Total Electricity Consumption",
-            "nl": "Totaal stroomverbruik"
+            "nl": "Totaal stroomverbruik",
+            "de": "Gesamtstromverbrauch",
+            "fr": "Consommation électrique totale"
           },
           "description": {
             "nl": "dp 105 : electric_total - Total Electricity Consumption"
@@ -6401,14 +6769,18 @@
         "measure_voltage.voltage_current": {
           "title": {
             "en": "Voltage A",
-            "nl": "Huidige spanning"
+            "nl": "Huidige spanning",
+            "de": "Spannung A",
+            "fr": "Tension A"
           },
           "min": 0,
           "max": 10000,
           "insights": false,
           "insightsTitle": {
             "en": "Voltage A",
-            "nl": "Huidige spanning"
+            "nl": "Huidige spanning",
+            "de": "Spannung A",
+            "fr": "Tension A"
           },
           "description": {
             "nl": "dp 103 : voltage_current - Voltage A"
@@ -6417,14 +6789,18 @@
         "measure_voltage.cv": {
           "title": {
             "en": "Voltage C",
-            "nl": "Voltage C"
+            "nl": "Voltage C",
+            "de": "Spannung C",
+            "fr": "Tension C"
           },
           "min": 0,
           "max": 10000,
           "insights": false,
           "insightsTitle": {
             "en": "Voltage C",
-            "nl": "Voltage C"
+            "nl": "Voltage C",
+            "de": "Spannung C",
+            "fr": "Tension C"
           },
           "description": {
             "nl": "dp 112 : cv - Voltage C"
@@ -6433,7 +6809,9 @@
         "adlar_cop": {
           "title": {
             "en": "Coefficient of Performance (COP)",
-            "nl": "Prestatiecoëfficiënt (COP)"
+            "nl": "Prestatiecoëfficiënt (COP)",
+            "de": "Leistungszahl (COP)",
+            "fr": "Coefficient de performance (COP)"
           },
           "type": "number",
           "min": 0,
@@ -6443,33 +6821,45 @@
           "insights": true,
           "insightsTitle": {
             "en": "Heat Pump Efficiency (COP)",
-            "nl": "Warmtepomp Efficiëntie (COP)"
+            "nl": "Warmtepomp Efficiëntie (COP)",
+            "de": "Wärmepumpen Effizienz (COP)",
+            "fr": "Efficacité de la pompe à chaleur (COP)"
           },
           "description": {
             "en": "Calculated efficiency ratio of useful heat output to electrical energy input",
-            "nl": "Berekende efficiëntieverhouding van nuttige warmte-output tot elektrische energie-input"
+            "nl": "Berekende efficiëntieverhouding van nuttige warmte-output tot elektrische energie-input",
+            "de": "Berechnete Effizienzverhältnis zwischen nutzbarer Wärmeleistung und elektrischem Energieverbrauch",
+            "fr": "Rapport d'efficacité calculé entre la production de chaleur utile et la consommation d'énergie électrique"
           }
         },
         "adlar_cop_method": {
           "title": {
             "en": "COP Calculation Method",
-            "nl": "COP Berekenings Methode"
+            "nl": "COP Berekenings Methode",
+            "de": "COP-Berechnungsmethode",
+            "fr": "Méthode de Calcul COP"
           },
           "type": "string",
           "insights": false,
           "insightsTitle": {
             "en": "COP Method Used",
-            "nl": "COP Methode Gebruikt"
+            "nl": "COP Methode Gebruikt",
+            "de": "Verwendete COP-Methode",
+            "fr": "Méthode COP utilisée"
           },
           "description": {
             "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level",
-            "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft"
+            "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft",
+            "de": "Zeigt, welche Berechnungsmethode zur Bestimmung des COP-Werts verwendet wurde, was die Datenqualität und das Genauigkeitsniveau angibt",
+            "fr": "Indique quelle méthode de calcul a été utilisée pour déterminer la valeur COP, indiquant la qualité des données et le niveau de précision"
           }
         },
         "adlar_external_power": {
           "title": {
             "en": "External Power Measurement",
-            "nl": "Externe Vermogen Meting"
+            "nl": "Externe Vermogen Meting",
+            "de": "Externe Leistungsmessung",
+            "fr": "Mesure de puissance externe"
           },
           "type": "number",
           "min": 0,
@@ -6479,17 +6869,23 @@
           "insights": true,
           "insightsTitle": {
             "en": "External Power Input for COP",
-            "nl": "Externe Vermogen Input voor COP"
+            "nl": "Externe Vermogen Input voor COP",
+            "de": "Externe Leistungseingabe für COP",
+            "fr": "Entrée de puissance externe pour COP"
           },
           "description": {
             "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations",
-            "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen"
+            "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen",
+            "de": "Externe Leistungsmessung empfangen über Flow-Karten von anderen Homey-Geräten, verwendet für erweiterte COP-Berechnungen",
+            "fr": "Mesure de puissance externe reçue via des cartes de flux d'autres appareils Homey, utilisée pour des calculs COP améliorés"
           }
         },
         "adlar_cop_daily": {
           "title": {
             "en": "Daily Average COP",
-            "nl": "Dagelijkse Gemiddelde COP"
+            "nl": "Dagelijkse Gemiddelde COP",
+            "de": "Tägliche durchschnittliche COP",
+            "fr": "COP moyen quotidien"
           },
           "type": "number",
           "min": 0,
@@ -6499,17 +6895,23 @@
           "insights": true,
           "insightsTitle": {
             "en": "Daily Heat Pump Efficiency (COP)",
-            "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+            "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)",
+            "de": "Tägliche Wärmepumpen Effizienz (COP)",
+            "fr": "Efficacité quotidienne de la pompe à chaleur (COP)"
           },
           "description": {
             "en": "24-hour rolling average Coefficient of Performance for trend analysis and daily optimization",
-            "nl": "24-uurs voortschrijdend gemiddelde prestatiecoëfficiënt voor trendanalyse en dagelijkse optimalisatie"
+            "nl": "24-uurs voortschrijdend gemiddelde prestatiecoëfficiënt voor trendanalyse en dagelijkse optimalisatie",
+            "de": "24-Stunden gleitender Durchschnitt der Leistungszahl für Trendanalyse und tägliche Optimierung",
+            "fr": "Moyenne mobile COP sur 24 heures pour l'analyse des tendances et l'optimisation quotidienne"
           }
         },
         "adlar_cop_weekly": {
           "title": {
             "en": "Weekly Average COP",
-            "nl": "Wekelijkse Gemiddelde COP"
+            "nl": "Wekelijkse Gemiddelde COP",
+            "de": "Wöchentliche durchschnittliche COP",
+            "fr": "COP moyen hebdomadaire"
           },
           "type": "number",
           "min": 0,
@@ -6519,17 +6921,23 @@
           "insights": true,
           "insightsTitle": {
             "en": "Weekly Heat Pump Efficiency (COP)",
-            "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)"
+            "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)",
+            "de": "Wöchentliche Wärmepumpen Effizienz (COP)",
+            "fr": "Efficacité hebdomadaire de la pompe à chaleur (COP)"
           },
           "description": {
             "en": "7-day rolling average Coefficient of Performance for seasonal pattern identification",
-            "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie"
+            "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie",
+            "de": "7-Tage gleitender Durchschnitt der Leistungszahl zur Identifizierung saisonaler Muster",
+            "fr": "Moyenne mobile COP sur 7 jours pour l'identification des tendances saisonnières"
           }
         },
         "adlar_cop_monthly": {
           "title": {
             "en": "Monthly Average COP",
-            "nl": "Maandelijkse Gemiddelde COP"
+            "nl": "Maandelijkse Gemiddelde COP",
+            "de": "Monatliche durchschnittliche COP",
+            "fr": "COP moyen mensuel"
           },
           "type": "number",
           "min": 0,
@@ -6539,39 +6947,53 @@
           "insights": true,
           "insightsTitle": {
             "en": "Monthly Heat Pump Efficiency (COP)",
-            "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)"
+            "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)",
+            "de": "Monatliche Wärmepumpen Effizienz (COP)",
+            "fr": "Efficacité mensuelle de la pompe à chaleur (COP)"
           },
           "description": {
             "en": "30-day rolling average Coefficient of Performance for seasonal pattern identification and long-term efficiency monitoring",
-            "nl": "30-dagen voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring"
+            "nl": "30-dagen voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring",
+            "de": "30-Tage gleitender Durchschnitt der Leistungszahl zur Identifizierung saisonaler Muster und Langzeitüberwachung der Effizienz",
+            "fr": "Moyenne mobile COP sur 30 jours pour l'identification des tendances saisonnières et la surveillance de l'efficacité à long terme"
           }
         },
         "adlar_cop_trend": {
           "title": {
             "en": "COP Efficiency Trend",
-            "nl": "COP Efficiëntie Trend"
+            "nl": "COP Efficiëntie Trend",
+            "de": "COP-Effizienztrend",
+            "fr": "Tendance d'efficacité COP"
           },
           "type": "string",
           "insights": false,
           "description": {
             "en": "Current heat pump efficiency trend analysis showing performance direction and strength",
-            "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont"
+            "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont",
+            "de": "Aktuelle Wärmepumpen-Effizienztrend-Analyse zeigt Leistungsrichtung und -stärke",
+            "fr": "Analyse actuelle de la tendance de l'efficacité de la pompe à chaleur montrant la direction et la force des performances"
           }
         },
         "adlar_connection_status": {
           "title": {
             "en": "Connection Status",
-            "nl": "Verbindingsstatus"
+            "nl": "Verbindingsstatus",
+            "de": "Verbindungsstatus",
+            "fr": "État de connexion"
           },
           "type": "string",
           "insights": true,
           "insightsTitle": {
             "en": "Device Connection State",
-            "nl": "Apparaat Verbindingsstatus"
+            "nl": "Apparaat Verbindingsstatus",
+            "de": "Geräteverbindungsstatus",
+            "fr": "État de connexion de l'appareil"
           },
           "description": {
             "en": "Real-time Tuya device connection state: connected, disconnected, reconnecting, or error",
-            "nl": "Realtime Tuya apparaat verbindingsstatus: verbonden, losgekoppeld, opnieuw verbinden, of fout"
+            "nl": "Realtime Tuya apparaat verbindingsstatus: verbonden, losgekoppeld, opnieuw verbinden, of fout",
+            "de": "Echtzeit Tuya-Geräteverbindungsstatus: verbunden, getrennt, erneut verbinden oder Fehler",
+            "fr": "État de connexion en temps réel du périphérique Tuya : connecté, déconnecté, reconnexion ou erreur"
           }
         }
       },

@@ -29,10 +29,10 @@
       "type": "range",
       "name": "temperature",
       "title": {
-        "en": "Temperature",
-        "nl": "Temperatuur",
-        "de": "Temperatur",
-        "fr": "Température"
+        "en": " Temperature",
+        "nl": " Temperatuur",
+        "de": " Temperatur",
+        "fr": " Température"
       },
       "min": -30,
       "max": 50,

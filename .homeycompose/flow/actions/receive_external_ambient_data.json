@@ -9,7 +9,7 @@
   "titleFormatted": {
     "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
     "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening",
-    "de": "[[temperature_value]]°C an Wärmepumpe für COP-Berechnung senden",
+    "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP-Berechnung",
     "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP"
   },
   "hint": {

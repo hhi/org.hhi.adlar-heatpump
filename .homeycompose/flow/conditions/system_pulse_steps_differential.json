@@ -28,10 +28,10 @@
       "type": "range",
       "name": "differential",
       "title": {
-        "en": "Pulse-steps differential",
-        "nl": "Puls-stappen verschil",
-        "de": "Pulsschritte-Differenz",
-        "fr": "Différentiel des pas d'impulsion"
+        "en": " Pulse-steps differential",
+        "nl": " Puls-stappen verschil",
+        "de": " Pulsschritte-Differenz",
+        "fr": " Différentiel des pas d'impulsion"
       },
       "min": 0,
       "max": 1000,

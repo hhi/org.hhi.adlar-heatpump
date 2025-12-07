@@ -28,10 +28,10 @@
       "type": "range",
       "name": "tolerance",
       "title": {
-        "en": "Balance tolerance (%)",
-        "nl": "Balans tolerantie (%)",
-        "de": "Bilanztoleranz (%)",
-        "fr": "Tolérance d'équilibre (%)"
+        "en": " Balance tolerance ",
+        "nl": " Balans tolerantie ",
+        "de": " Bilanztoleranz ",
+        "fr": " Tolérance d'équilibre "
       },
       "min": 1,
       "max": 20,

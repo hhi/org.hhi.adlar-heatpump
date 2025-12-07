@@ -29,10 +29,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "COP threshold",
-        "nl": "COP drempel",
-        "de": "COP-Schwellenwert",
-        "fr": "Seuil COP"
+        "en": " COP threshold",
+        "nl": " COP drempel",
+        "de": " COP-Schwellenwert",
+        "fr": " Seuil COP"
       },
       "min": 1.0,
       "max": 8.0,

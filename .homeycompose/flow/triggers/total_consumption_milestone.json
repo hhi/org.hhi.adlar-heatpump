@@ -28,8 +28,10 @@
       "type": "range",
       "name": "milestone",
       "title": {
-        "en": "Consumption milestone (kWh)",
-        "nl": "Verbruik mijlpaal (kWh)"
+        "en": " Consumption milestone (kWh)",
+        "nl": " Verbruik mijlpaal (kWh)",
+        "de": " Verbrauchs-Meilenstein (kWh)",
+        "fr": " Jalon de consommation (kWh)"
       },
       "min": 100,
       "max": 50000,
@@ -37,7 +39,9 @@
       "units": "kWh",
       "placeholder": {
         "en": "Total consumption milestone in kWh",
-        "nl": "Totaalverbruik mijlpaal in kWh"
+        "nl": "Totaalverbruik mijlpaal in kWh",
+        "de": "Gesamtverbrauchs-Meilenstein in kWh",
+        "fr": "Jalon de consommation totale en kWh"
       }
     }
   ],

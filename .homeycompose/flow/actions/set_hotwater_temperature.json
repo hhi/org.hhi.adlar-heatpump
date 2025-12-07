@@ -29,10 +29,10 @@
       "type": "range",
       "name": "temperature",
       "title": {
-        "en": "Hot water temperature (°C)",
-        "nl": "Warm water temperatuur (°C)",
-        "de": "Warmwassertemperatur (°C)",
-        "fr": "Température de l'eau chaude (°C)"
+        "en": " Hot water temperature (°C)",
+        "nl": " Warm water temperatuur (°C)",
+        "de": " Warmwassertemperatur (°C)",
+        "fr": " Température de l'eau chaude (°C)"
       },
       "min": 30,
       "max": 75,

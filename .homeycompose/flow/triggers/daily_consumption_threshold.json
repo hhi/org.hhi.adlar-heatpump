@@ -28,8 +28,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "Daily threshold (kWh)",
-        "nl": "Dagelijkse drempel (kWh)"
+        "en": " Daily threshold (kWh)",
+        "nl": " Dagelijkse drempel (kWh)",
+        "de": " Täglicher Schwellenwert (kWh)",
+        "fr": " Seuil quotidien (kWh)"
       },
       "min": 1,
       "max": 100,
@@ -37,7 +39,9 @@
       "units": "kWh",
       "placeholder": {
         "en": "Daily consumption threshold",
-        "nl": "Dagverbruik drempel"
+        "nl": "Dagverbruik drempel",
+        "de": "Tagesverbrauchs-Schwellenwert",
+        "fr": "Seuil de consommation quotidienne"
       }
     }
   ],

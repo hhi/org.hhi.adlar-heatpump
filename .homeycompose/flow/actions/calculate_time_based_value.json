@@ -7,10 +7,10 @@
     "fr": "Calculer la valeur à partir du planning horaire"
   },
   "titleFormatted": {
-    "en": "Calculate value from time [[schedule]]",
-    "nl": "Bereken waarde uit tijd [[schedule]]",
-    "de": "Wert aus Zeit [[schedule]] berechnen",
-    "fr": "Calculer la valeur à partir du temps [[schedule]]"
+    "en": "Calculate value from time periods [[schedule]]",
+    "nl": "Bereken waarde uit tijdsperioden [[schedule]]",
+    "de": "Wert aus Zeiträumen [[schedule]] berechnen",
+    "fr": "Calculer la valeur à partir des périodes de temps [[schedule]]"
   },
   "hint": {
     "en": "Evaluates current time against a daily schedule to calculate output values. Perfect for time-based temperature scheduling, time-of-use pricing, and automated daily routines.",

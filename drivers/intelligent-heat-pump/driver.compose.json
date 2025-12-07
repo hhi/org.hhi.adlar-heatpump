@@ -82,8 +82,10 @@
   "capabilitiesOptions": {
     "measure_power": {
       "title": {
+        "en": "Current power",
         "nl": "Huidig vermogen",
-        "en": "Current power"
+        "de": "Aktuelle Leistung",
+        "fr": "Puissance actuelle"
       },
       "min": 0,
       "max": 9999999,
@@ -94,8 +96,10 @@
 
     "measure_water": {
       "title": {
+        "en": "Water flow",
         "nl": "Water doorstroming",
-        "en": "Water flow"
+        "de": "Wasserdurchfluss",
+        "fr": "Débit d'eau"
       },
       "min": 0,
       "max": 100,
@@ -106,8 +110,10 @@
 
     "target_temperature": {
       "title": {
+        "en": "Setpoint temperature",
         "nl": "Setpoint temperatuur",
-        "en": "Setpoint temperature"
+        "de": "Solltemperatur",
+        "fr": "Température de consigne"
       },
       "min": 5,
       "max": 75,
@@ -121,8 +127,10 @@
 
     "onoff": {
       "title": {
+        "en": "Switch",
         "nl": "Schakelaar",
-        "en": "Switch"
+        "de": "Schalter",
+        "fr": "Interrupteur"
       },
       "setable": true,
       "uiQuickAction": false,
@@ -134,14 +142,18 @@
     "measure_voltage.bv": {
       "title": {
         "en": "Voltage B",
-        "nl": "Spanning B"
+        "nl": "Spanning B",
+        "de": "Spannung B",
+        "fr": "Tension B"
       },
       "min": 0,
       "max": 99999,
       "insights": false,
       "insightsTitle": {
         "en": "Voltage B",
-        "nl": "Spanning B"
+        "nl": "Spanning B",
+        "de": "Spannung B",
+        "fr": "Tension B"
       },
       "description": {
         "nl": "dp 111 : bv - Voltage B"
@@ -151,14 +163,18 @@
     "measure_current.b_cur": {
       "title": {
         "en": "Current B",
-        "nl": "Amperage B"
+        "nl": "Amperage B",
+        "de": "Strom B",
+        "fr": "Courant B"
       },
       "min": 0,
       "max": 99999,
       "insights": false,
       "insightsTitle": {
         "en": "Current B",
-        "nl": "Amperage B"
+        "nl": "Amperage B",
+        "de": "Strom B",
+        "fr": "Courant B"
       },
       "description": {
         "nl": "dp 109 : b_cur - Current B"
@@ -168,14 +184,18 @@
     "measure_current.c_cur": {
       "title": {
         "en": "Current C",
-        "nl": "Amperage C"
+        "nl": "Amperage C",
+        "de": "Strom C",
+        "fr": "Courant C"
       },
       "min": 0,
       "max": 99999,
       "insights": false,
       "insightsTitle": {
         "en": "Current C",
-        "nl": "Amperage C"
+        "nl": "Amperage C",
+        "de": "Strom C",
+        "fr": "Courant C"
       },
       "description": {
         "nl": "dp 110 : c_cur - Current C"
@@ -185,14 +205,18 @@
     "measure_current.cur_current": {
       "title": {
         "en": "Current A",
-        "nl": "Hudige stroomsterkte"
+        "nl": "Hudige stroomsterkte",
+        "de": "Strom A",
+        "fr": "Courant A"
       },
       "min": 0,
       "max": 99999,
       "insights": false,
       "insightsTitle": {
         "en": "Current A",
-        "nl": "Hudige stroomsterkte"
+        "nl": "Hudige stroomsterkte",
+        "de": "Strom A",
+        "fr": "Courant A"
       },
       "description": {
         "nl": "dp 102 : cur_current - Current A"
@@ -202,7 +226,9 @@
     "measure_frequency.compressor_strength": {
       "title": {
         "en": "Compressor Frequency",
-        "nl": "Compressor frequentie"
+        "nl": "Compressor frequentie",
+        "de": "Kompressorfrequenz",
+        "fr": "Fréquence du compresseur"
       },
       "type": "number",
       "min": 0,
@@ -210,7 +236,9 @@
       "insights": true,
       "insightsTitle": {
         "en": "Compressor Frequency",
-        "nl": "Compressor frequentie"
+        "nl": "Compressor frequentie",
+        "de": "Kompressorfrequenz",
+        "fr": "Fréquence du compresseur"
       },
       "description": {
         "nl": "dp 20 : compressor_strength - Compressor Frequency"
@@ -220,14 +248,18 @@
     "measure_frequency.fan_motor_frequency": {
       "title": {
         "en": "Fan motor frequency",
-        "nl": "Ventilator frequentie"
+        "nl": "Ventilator frequentie",
+        "de": "Lüftermotorfrequenz",
+        "fr": "Fréquence du moteur du ventilateur"
       },
       "min": 0,
       "max": 100,
       "insights": true,
       "insightsTitle": {
         "en": "Fan motor frequency",
-        "nl": "Ventilator frequentie"
+        "nl": "Ventilator frequentie",
+        "de": "Lüftermotorfrequenz",
+        "fr": "Fréquence du moteur du ventilateur"
       },
       "description": {
         "nl": "dp 40 : effluent_temp_f - Fan motor frequency"
@@ -237,14 +269,18 @@
     "measure_temperature.around_temp_f": {
       "title": {
         "en": "Tank temp",
-        "nl": "Tapwater temperatuur"
+        "nl": "Tapwater temperatuur",
+        "de": "Tanktemperatur",
+        "fr": "Température du réservoir"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Tank temp",
-        "nl": "Tapwater temperatuur"
+        "nl": "Tapwater temperatuur",
+        "de": "Tanktemperatur",
+        "fr": "Température du réservoir"
       },
       "description": {
         "nl": "dp 38 : around_temp_f - Tank temp"
@@ -253,14 +289,18 @@
     "measure_temperature.around_temp": {
       "title": {
         "en": "Ambient temp",
-        "nl": "Buitentemperatuur"
+        "nl": "Buitentemperatuur",
+        "de": "Umgebungstemperatur",
+        "fr": "Température ambiante"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Ambient temp",
-        "nl": "Buitentemperatuur"
+        "nl": "Buitentemperatuur",
+        "de": "Umgebungstemperatur",
+        "fr": "Température ambiante"
       },
       "description": {
         "nl": "dp 26 : around_temp - Ambient temp"
@@ -269,14 +309,18 @@
     "measure_temperature.temp_top": {
       "title": {
         "en": "Inlet temp",
-        "nl": "Water intrede temperatuur"
+        "nl": "Water intrede temperatuur",
+        "de": "Einlasstemperatur",
+        "fr": "Température d'entrée"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Inlet temp",
-        "nl": "Water intrede temperatuur"
+        "nl": "Water intrede temperatuur",
+        "de": "Einlasstemperatur",
+        "fr": "Température d'entrée"
       },
       "description": {
         "nl": "dp 21 : temp_top - Inlet temp"
@@ -285,14 +329,18 @@
     "measure_temperature.temp_current_f": {
       "title": {
         "en": "High pressure temp",
-        "nl": "Hogedruk verzadigingstemperatuur"
+        "nl": "Hogedruk verzadigingstemperatuur",
+        "de": "Hochdrucktemperatur",
+        "fr": "Température haute pression"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "High pressure temp",
-        "nl": "Hogedruk verzadigingstemperatuur"
+        "nl": "Hogedruk verzadigingstemperatuur",
+        "de": "Hochdrucktemperatur",
+        "fr": "Température haute pression"
       },
       "description": {
         "nl": "dp 35 : temp_current_f - High pressure temp"
@@ -301,14 +349,18 @@
     "measure_temperature.bottom_temp_f": {
       "title": {
         "en": "Incoiler temp",
-        "nl": "Condensor temperatuur"
+        "nl": "Condensor temperatuur",
+        "de": "Kondensatortemperatur",
+        "fr": "Température du condenseur"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Incoiler temp",
-        "nl": "Condensor temperatuur"
+        "nl": "Condensor temperatuur",
+        "de": "Kondensatortemperatur",
+        "fr": "Température du condenseur"
       },
       "description": {
         "nl": "dp 37 : bottom_temp_f - Incoiler temp"
@@ -317,14 +369,18 @@
     "measure_temperature.coiler_temp_f": {
       "title": {
         "en": "Suction Temp",
-        "nl": "Zuiggas temperatuur"
+        "nl": "Zuiggas temperatuur",
+        "de": "Saugtemperatur",
+        "fr": "Température d'aspiration"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Suction Temp",
-        "nl": "Zuiggas temperatuur"
+        "nl": "Zuiggas temperatuur",
+        "de": "Saugtemperatur",
+        "fr": "Température d'aspiration"
       },
       "description": {
         "nl": "dp 41 : coiler_temp_f - Suction Temp"
@@ -333,14 +389,18 @@
     "measure_temperature.top_temp_f": {
       "title": {
         "en": "Low presure temp",
-        "nl": "Lagedruk verzadigingstemperatuur"
+        "nl": "Lagedruk verzadigingstemperatuur",
+        "de": "Niederdrucktemperatur",
+        "fr": "Température basse pression"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Low presure temp",
-        "nl": "Lagedruk verzadigingstemperatuur"
+        "nl": "Lagedruk verzadigingstemperatuur",
+        "de": "Niederdrucktemperatur",
+        "fr": "Température basse pression"
       },
       "description": {
         "nl": "dp 36 : top_temp_f - Low presure temp"
@@ -349,14 +409,18 @@
     "measure_temperature.coiler_temp": {
       "title": {
         "en": "Coiler temp",
-        "nl": "Verdampingscondensator temperatuur"
+        "nl": "Verdampingscondensator temperatuur",
+        "de": "Verdampfer-Kondensatortemperatur",
+        "fr": "Température du condenseur évaporateur"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Coiler temp",
-        "nl": "Verdampingscondensator temperatuur"
+        "nl": "Verdampingscondensator temperatuur",
+        "de": "Verdampfer-Kondensatortemperatur",
+        "fr": "Température du condenseur évaporateur"
       },
       "description": {
         "nl": "dp 23 : coiler_temp - Electricity Coiler temp"
@@ -365,14 +429,18 @@
     "measure_temperature.evlin": {
       "title": {
         "en": "Economizer inlet Temp",
-        "nl": "EVI wamtewisselaar zuiggas temperatuur"
+        "nl": "EVI wamtewisselaar zuiggas temperatuur",
+        "de": "Economizer-Einlasstemperatur",
+        "fr": "Température d'entrée de l'économiseur"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Economizer inlet Temp",
-        "nl": "EVI wamtewisselaar zuiggas temperatuur"
+        "nl": "EVI wamtewisselaar zuiggas temperatuur",
+        "de": "Economizer-Einlasstemperatur",
+        "fr": "Température d'entrée de l'économiseur"
       },
       "description": {
         "nl": "dp 107 : evlin - Economizer inlet Temp"
@@ -381,14 +449,18 @@
     "measure_temperature.venting_temp": {
       "title": {
         "en": "Discharge temp",
-        "nl": "Persgas temperatuur"
+        "nl": "Persgas temperatuur",
+        "de": "Austrittstemperatur",
+        "fr": "Température de refoulement"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Discharge temp",
-        "nl": "Persgas temperatuur"
+        "nl": "Persgas temperatuur",
+        "de": "Austrittstemperatur",
+        "fr": "Température de refoulement"
       },
       "description": {
         "nl": "dp 24 : venting_temp - Discharge temp"
@@ -397,14 +469,18 @@
     "measure_temperature.temp_bottom": {
       "title": {
         "en": "Outlet temp",
-        "nl": "Water uittrede temperatuur"
+        "nl": "Water uittrede temperatuur",
+        "de": "Auslasstemperatur",
+        "fr": "Température de sortie"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Outlet temp",
-        "nl": "Water uittrede temperatuur"
+        "nl": "Water uittrede temperatuur",
+        "de": "Auslasstemperatur",
+        "fr": "Température de sortie"
       },
       "description": {
         "nl": "dp 22 : temp_bottom - Outlet temp"
@@ -413,14 +489,18 @@
     "measure_temperature.eviout": {
       "title": {
         "en": "Economizer outlet Temp",
-        "nl": "EVI wamtewisselaar persgas temperatuur"
+        "nl": "EVI wamtewisselaar persgas temperatuur",
+        "de": "Economizer-Auslasstemperatur",
+        "fr": "Température de sortie de l'économiseur"
       },
       "min": -50,
       "max": 150,
       "insights": true,
       "insightsTitle": {
         "en": "Economizer outlet Temp",
-        "nl": "EVI wamtewisselaar persgas temperatuurr"
+        "nl": "EVI wamtewisselaar persgas temperatuur",
+        "de": "Economizer-Auslasstemperatur",
+        "fr": "Température de sortie de l'économiseur"
       },
       "description": {
         "nl": "dp 108 : eviout - Economy outlet temp"
@@ -430,14 +510,18 @@
     "meter_power.power_consumption": {
       "title": {
         "en": "Electricity Consumption of Today",
-        "nl": "Stroom dagverbruik"
+        "nl": "Stroom dagverbruik",
+        "de": "Stromverbrauch heute",
+        "fr": "Consommation électrique du jour"
       },
       "min": 0,
       "max": 200000,
       "insights": false,
       "insightsTitle": {
         "en": "Electricity Consumption of Today",
-        "nl": "Stroom dagverbruik"
+        "nl": "Stroom dagverbruik",
+        "de": "Stromverbrauch heute",
+        "fr": "Consommation électrique du jour"
       },
       "description": {
         "nl": "dp 18 : power_consumption - Electricity Consumption of Today"
@@ -446,14 +530,18 @@
     "meter_power.electric_total": {
       "title": {
         "en": "Total Electricity Consumption",
-        "nl": "Totaal stroomverbruik"
+        "nl": "Totaal stroomverbruik",
+        "de": "Gesamtstromverbrauch",
+        "fr": "Consommation électrique totale"
       },
       "min": 0,
       "max": 9999999,
       "insights": false,
       "insightsTitle": {
         "en": "Total Electricity Consumption",
-        "nl": "Totaal stroomverbruik"
+        "nl": "Totaal stroomverbruik",
+        "de": "Gesamtstromverbrauch",
+        "fr": "Consommation électrique totale"
       },
       "description": {
         "nl": "dp 105 : electric_total - Total Electricity Consumption"
@@ -462,14 +550,18 @@
     "measure_voltage.voltage_current": {
       "title": {
         "en": "Voltage A",
-        "nl": "Huidige spanning"
+        "nl": "Huidige spanning",
+        "de": "Spannung A",
+        "fr": "Tension A"
       },
       "min": 0,
       "max": 10000,
       "insights": false,
       "insightsTitle": {
         "en": "Voltage A",
-        "nl": "Huidige spanning"
+        "nl": "Huidige spanning",
+        "de": "Spannung A",
+        "fr": "Tension A"
       },
       "description": {
         "nl": "dp 103 : voltage_current - Voltage A"
@@ -478,14 +570,18 @@
     "measure_voltage.cv": {
       "title": {
         "en": "Voltage C",
-        "nl": "Voltage C"
+        "nl": "Voltage C",
+        "de": "Spannung C",
+        "fr": "Tension C"
       },
       "min": 0,
       "max": 10000,
       "insights": false,
       "insightsTitle": {
         "en": "Voltage C",
-        "nl": "Voltage C"
+        "nl": "Voltage C",
+        "de": "Spannung C",
+        "fr": "Tension C"
       },
       "description": {
         "nl": "dp 112 : cv - Voltage C"
@@ -495,7 +591,9 @@
     "adlar_cop": {
       "title": {
         "en": "Coefficient of Performance (COP)",
-        "nl": "Prestatiecoëfficiënt (COP)"
+        "nl": "Prestatiecoëfficiënt (COP)",
+        "de": "Leistungszahl (COP)",
+        "fr": "Coefficient de performance (COP)"
       },
       "type": "number",
       "min": 0.0,
@@ -505,35 +603,47 @@
       "insights": true,
       "insightsTitle": {
         "en": "Heat Pump Efficiency (COP)",
-        "nl": "Warmtepomp Efficiëntie (COP)"
+        "nl": "Warmtepomp Efficiëntie (COP)",
+        "de": "Wärmepumpen Effizienz (COP)",
+        "fr": "Efficacité de la pompe à chaleur (COP)"
       },
       "description": {
         "en": "Calculated efficiency ratio of useful heat output to electrical energy input",
-        "nl": "Berekende efficiëntieverhouding van nuttige warmte-output tot elektrische energie-input"
+        "nl": "Berekende efficiëntieverhouding van nuttige warmte-output tot elektrische energie-input",
+        "de": "Berechnete Effizienzverhältnis zwischen nutzbarer Wärmeleistung und elektrischem Energieverbrauch",
+        "fr": "Rapport d'efficacité calculé entre la production de chaleur utile et la consommation d'énergie électrique"
       }
     },
 
     "adlar_cop_method": {
       "title": {
         "en": "COP Calculation Method",
-        "nl": "COP Berekenings Methode"
+        "nl": "COP Berekenings Methode",
+        "de": "COP-Berechnungsmethode",
+        "fr": "Méthode de Calcul COP"
       },
       "type": "string",
       "insights": false,
       "insightsTitle": {
         "en": "COP Method Used",
-        "nl": "COP Methode Gebruikt"
+        "nl": "COP Methode Gebruikt",
+        "de": "Verwendete COP-Methode",
+        "fr": "Méthode COP utilisée"
       },
       "description": {
         "en": "Shows which calculation method was used to determine the COP value, indicating data quality and accuracy level",
-        "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft"
+        "nl": "Toont welke berekeningsmethode werd gebruikt om de COP waarde te bepalen, wat de datakwaliteit en nauwkeurigheidsniveau aangeeft",
+        "de": "Zeigt, welche Berechnungsmethode zur Bestimmung des COP-Werts verwendet wurde, was die Datenqualität und das Genauigkeitsniveau angibt",
+        "fr": "Indique quelle méthode de calcul a été utilisée pour déterminer la valeur COP, indiquant la qualité des données et le niveau de précision"
       }
     },
 
     "adlar_external_power": {
       "title": {
         "en": "External Power Measurement",
-        "nl": "Externe Vermogen Meting"
+        "nl": "Externe Vermogen Meting",
+        "de": "Externe Leistungsmessung",
+        "fr": "Mesure de puissance externe"
       },
       "type": "number",
       "min": 0,
@@ -543,18 +653,24 @@
       "insights": true,
       "insightsTitle": {
         "en": "External Power Input for COP",
-        "nl": "Externe Vermogen Input voor COP"
+        "nl": "Externe Vermogen Input voor COP",
+        "de": "Externe Leistungseingabe für COP",
+        "fr": "Entrée de puissance externe pour COP"
       },
       "description": {
         "en": "External power measurement received via flow cards from other Homey devices, used for enhanced COP calculations",
-        "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen"
+        "nl": "Externe vermogensmeting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen",
+        "de": "Externe Leistungsmessung empfangen über Flow-Karten von anderen Homey-Geräten, verwendet für erweiterte COP-Berechnungen",
+        "fr": "Mesure de puissance externe reçue via des cartes de flux d'autres appareils Homey, utilisée pour des calculs COP améliorés"
       }
     },
 
     "adlar_cop_daily": {
       "title": {
         "en": "Daily Average COP",
-        "nl": "Dagelijkse Gemiddelde COP"
+        "nl": "Dagelijkse Gemiddelde COP",
+        "de": "Tägliche durchschnittliche COP",
+        "fr": "COP moyen quotidien"
       },
       "type": "number",
       "min": 0.0,
@@ -564,18 +680,24 @@
       "insights": true,
       "insightsTitle": {
         "en": "Daily Heat Pump Efficiency (COP)",
-        "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)"
+        "nl": "Dagelijkse Warmtepomp Efficiëntie (COP)",
+        "de": "Tägliche Wärmepumpen Effizienz (COP)",
+        "fr": "Efficacité quotidienne de la pompe à chaleur (COP)"
       },
       "description": {
         "en": "24-hour rolling average Coefficient of Performance for trend analysis and daily optimization",
-        "nl": "24-uurs voortschrijdend gemiddelde prestatiecoëfficiënt voor trendanalyse en dagelijkse optimalisatie"
+        "nl": "24-uurs voortschrijdend gemiddelde prestatiecoëfficiënt voor trendanalyse en dagelijkse optimalisatie",
+        "de": "24-Stunden gleitender Durchschnitt der Leistungszahl für Trendanalyse und tägliche Optimierung",
+        "fr": "Moyenne mobile COP sur 24 heures pour l'analyse des tendances et l'optimisation quotidienne"
       }
     },
 
     "adlar_cop_weekly": {
       "title": {
         "en": "Weekly Average COP",
-        "nl": "Wekelijkse Gemiddelde COP"
+        "nl": "Wekelijkse Gemiddelde COP",
+        "de": "Wöchentliche durchschnittliche COP",
+        "fr": "COP moyen hebdomadaire"
       },
       "type": "number",
       "min": 0.0,
@@ -585,18 +707,24 @@
       "insights": true,
       "insightsTitle": {
         "en": "Weekly Heat Pump Efficiency (COP)",
-        "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)"
+        "nl": "Wekelijkse Warmtepomp Efficiëntie (COP)",
+        "de": "Wöchentliche Wärmepumpen Effizienz (COP)",
+        "fr": "Efficacité hebdomadaire de la pompe à chaleur (COP)"
       },
       "description": {
         "en": "7-day rolling average Coefficient of Performance for seasonal pattern identification",
-        "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie"
+        "nl": "7-daags voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie",
+        "de": "7-Tage gleitender Durchschnitt der Leistungszahl zur Identifizierung saisonaler Muster",
+        "fr": "Moyenne mobile COP sur 7 jours pour l'identification des tendances saisonnières"
       }
     },
 
     "adlar_cop_monthly": {
       "title": {
         "en": "Monthly Average COP",
-        "nl": "Maandelijkse Gemiddelde COP"
+        "nl": "Maandelijkse Gemiddelde COP",
+        "de": "Monatliche durchschnittliche COP",
+        "fr": "COP moyen mensuel"
       },
       "type": "number",
       "min": 0.0,
@@ -606,41 +734,55 @@
       "insights": true,
       "insightsTitle": {
         "en": "Monthly Heat Pump Efficiency (COP)",
-        "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)"
+        "nl": "Maandelijkse Warmtepomp Efficiëntie (COP)",
+        "de": "Monatliche Wärmepumpen Effizienz (COP)",
+        "fr": "Efficacité mensuelle de la pompe à chaleur (COP)"
       },
       "description": {
         "en": "30-day rolling average Coefficient of Performance for seasonal pattern identification and long-term efficiency monitoring",
-        "nl": "30-dagen voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring"
+        "nl": "30-dagen voortschrijdend gemiddelde prestatiecoëfficiënt voor seizoenspatroon identificatie en langetermijn efficiëntie monitoring",
+        "de": "30-Tage gleitender Durchschnitt der Leistungszahl zur Identifizierung saisonaler Muster und Langzeitüberwachung der Effizienz",
+        "fr": "Moyenne mobile COP sur 30 jours pour l'identification des tendances saisonnières et la surveillance de l'efficacité à long terme"
       }
     },
 
     "adlar_cop_trend": {
       "title": {
         "en": "COP Efficiency Trend",
-        "nl": "COP Efficiëntie Trend"
+        "nl": "COP Efficiëntie Trend",
+        "de": "COP-Effizienztrend",
+        "fr": "Tendance d'efficacité COP"
       },
       "type": "string",
       "insights": false,
       "description": {
         "en": "Current heat pump efficiency trend analysis showing performance direction and strength",
-        "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont"
+        "nl": "Huidige warmtepomp efficiëntie trendanalyse die prestatie richting en sterkte toont",
+        "de": "Aktuelle Wärmepumpen-Effizienztrend-Analyse zeigt Leistungsrichtung und -stärke",
+        "fr": "Analyse actuelle de la tendance de l'efficacité de la pompe à chaleur montrant la direction et la force des performances"
       }
     },
 
     "adlar_connection_status": {
       "title": {
         "en": "Connection Status",
-        "nl": "Verbindingsstatus"
+        "nl": "Verbindingsstatus",
+        "de": "Verbindungsstatus",
+        "fr": "État de connexion"
       },
       "type": "string",
       "insights": true,
       "insightsTitle": {
         "en": "Device Connection State",
-        "nl": "Apparaat Verbindingsstatus"
+        "nl": "Apparaat Verbindingsstatus",
+        "de": "Geräteverbindungsstatus",
+        "fr": "État de connexion de l'appareil"
       },
       "description": {
         "en": "Real-time Tuya device connection state: connected, disconnected, reconnecting, or error",
-        "nl": "Realtime Tuya apparaat verbindingsstatus: verbonden, losgekoppeld, opnieuw verbinden, of fout"
+        "nl": "Realtime Tuya apparaat verbindingsstatus: verbonden, losgekoppeld, opnieuw verbinden, of fout",
+        "de": "Echtzeit Tuya-Geräteverbindungsstatus: verbunden, getrennt, erneut verbinden oder Fehler",
+        "fr": "État de connexion en temps réel du périphérique Tuya : connecté, déconnecté, reconnexion ou erreur"
       }
     }
   },

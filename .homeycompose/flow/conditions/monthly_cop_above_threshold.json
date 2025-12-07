@@ -29,10 +29,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "Monthly COP threshold",
-        "nl": "Maandelijkse COP drempel",
-        "de": "Monatlicher COP-Schwellenwert",
-        "fr": "Seuil COP mensuel"
+        "en": " Monthly COP threshold",
+        "nl": " Maandelijkse COP drempel",
+        "de": " Monatlicher COP-Schwellenwert",
+        "fr": " Seuil COP mensuel"
       },
       "min": 1,
       "max": 8,

@@ -30,21 +30,27 @@
       "name": "state",
       "title": {
         "en": "State",
-        "nl": "Status"
+        "nl": "Status",
+        "de": "Zustand",
+        "fr": "État"
       },
       "values": [
         {
           "id": "running",
           "title": {
             "en": "running",
-            "nl": "draaiend"
+            "nl": "draaiend",
+            "de": "läuft",
+            "fr": "en marche"
           }
         },
         {
           "id": "stopped",
           "title": {
             "en": "stopped",
-            "nl": "gestopt"
+            "nl": "gestopt",
+            "de": "aus",
+            "fr": "arrêté"
           }
         }
       ]

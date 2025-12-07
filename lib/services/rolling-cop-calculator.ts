@@ -53,8 +53,8 @@ export interface RollingCOPConfig {
   };
   logger?: (message: string, ...args: unknown[]) => void; // Optional logger function
   device?: {
-    // Device reference for triggering flow cards (v1.0.8)
-    triggerFlowCard: (cardId: string, tokens: Record<string, unknown>) => Promise<void>;
+    // Device reference for triggering flow cards (v1.0.8, v1.3.2 state params)
+    triggerFlowCard: (cardId: string, tokens: Record<string, unknown>, state?: Record<string, unknown>) => Promise<void>;
     getCapabilityValue: (capability: string) => unknown;
   };
 }
@@ -612,10 +612,16 @@ export class RollingCOPCalculator {
 
     // Daily COP efficiency changed
     if (this.lastDailyCOP > 0 && Math.abs(dailyCOP - this.lastDailyCOP) >= COP_CHANGE_THRESHOLD) {
+      const delta = dailyCOP - this.lastDailyCOP;
+      const condition = delta > 0 ? 'above' : 'below';
+
       this.config.device.triggerFlowCard('daily_cop_efficiency_changed', {
         current_daily_cop: Math.round(dailyCOP * 100) / 100,
         previous_daily_cop: Math.round(this.lastDailyCOP * 100) / 100,
-        change: Math.round((dailyCOP - this.lastDailyCOP) * 100) / 100,
+        change: Math.round(delta * 100) / 100,
+      }, {
+        condition,
+        cop_value: dailyCOP,
       }).catch((err) => {
         this.logger('Failed to trigger daily_cop_efficiency_changed:', err);
       });
@@ -624,10 +630,16 @@ export class RollingCOPCalculator {
 
     // Monthly COP efficiency changed
     if (this.lastMonthlyCOP > 0 && Math.abs(monthlyCOP - this.lastMonthlyCOP) >= COP_CHANGE_THRESHOLD) {
+      const delta = monthlyCOP - this.lastMonthlyCOP;
+      const condition = delta > 0 ? 'above' : 'below';
+
       this.config.device.triggerFlowCard('monthly_cop_efficiency_changed', {
         current_monthly_cop: Math.round(monthlyCOP * 100) / 100,
         previous_monthly_cop: Math.round(this.lastMonthlyCOP * 100) / 100,
-        change: Math.round((monthlyCOP - this.lastMonthlyCOP) * 100) / 100,
+        change: Math.round(delta * 100) / 100,
+      }, {
+        condition,
+        cop_value: monthlyCOP,
       }).catch((err) => {
         this.logger('Failed to trigger monthly_cop_efficiency_changed:', err);
       });

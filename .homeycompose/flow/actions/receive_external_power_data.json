@@ -9,7 +9,7 @@
   "titleFormatted": {
     "en": "Send [[power_value]]W to heat pump for COP calculation",
     "nl": "Stuur [[power_value]]W naar warmtepomp voor COP berekening",
-    "de": "[[power_value]]W an Wärmepumpe für COP-Berechnung senden",
+    "de": "Sende [[power_value]]W an Wärmepumpe für COP-Berechnung",
     "fr": "Envoyer [[power_value]]W à la pompe à chaleur pour le calcul COP"
   },
   "hint": {

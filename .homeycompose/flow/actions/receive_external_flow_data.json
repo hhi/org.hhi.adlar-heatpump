@@ -9,7 +9,7 @@
   "titleFormatted": {
     "en": "Send [[flow_value]]L/min to heat pump for COP calculation",
     "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening",
-    "de": "[[flow_value]]L/min an Wärmepumpe für COP-Berechnung senden",
+    "de": "Sende [[flow_value]]L/min an Wärmepumpe für COP-Berechnung",
     "fr": "Envoyer [[flow_value]]L/min à la pompe à chaleur pour le calcul COP"
   },
   "hint": {

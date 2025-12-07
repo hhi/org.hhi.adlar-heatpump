@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "temperature",
       "title": {
-        "en": "Temperature (°C)",
-        "nl": "Temperatuur (°C)"
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température "
       },
       "min": 0,
       "max": 120,
@@ -61,7 +69,9 @@
       "units": "°C",
       "placeholder": {
         "en": "Temperature threshold in °C",
-        "nl": "Temperatuur drempel in °C"
+        "nl": "Temperatuur drempel in °C",
+        "de": "Temperaturschwellenwert in °C",
+        "fr": "Seuil de température en °C"
       }
     }
   ],

@@ -67,10 +67,10 @@
       "type": "range",
       "name": "temperature",
       "title": {
-        "en": "Temperature (°C)",
-        "nl": "Temperatuur (°C)",
-        "de": "Temperatur (°C)",
-        "fr": "Température (°C)"
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température "
       },
       "min": 5,
       "max": 60,

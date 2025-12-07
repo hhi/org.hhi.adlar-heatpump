@@ -29,10 +29,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "Daily COP threshold",
-        "nl": "Dagelijkse COP drempel",
-        "de": "Täglicher COP-Schwellenwert",
-        "fr": "Seuil COP quotidien"
+        "en": " Daily COP threshold",
+        "nl": " Dagelijkse COP drempel",
+        "de": " Täglicher COP-Schwellenwert",
+        "fr": " Seuil COP quotidien"
       },
       "min": 1,
       "max": 8,
