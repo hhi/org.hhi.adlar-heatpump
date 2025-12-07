@@ -28,10 +28,10 @@
       "type": "range",
       "name": "flow_rate",
       "title": {
-        "en": "Flow rate (L/min)",
-        "nl": "Doorstroming (L/min)",
-        "de": "Durchflussrate (L/min)",
-        "fr": "Débit (L/min)"
+        "en": " Flow rate (L/min)",
+        "nl": " Doorstroming (L/min)",
+        "de": " Durchflussrate (L/min)",
+        "fr": " Débit (L/min)"
       },
       "min": 1,
       "max": 100,

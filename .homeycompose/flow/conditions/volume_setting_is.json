@@ -67,10 +67,10 @@
       "type": "range",
       "name": "level",
       "title": {
-        "en": "Electricity consumption checking",
-        "nl": "Stroomverbruik controleren",
-        "de": "Stromverbrauchsüberwachung",
-        "fr": "Vérification de la consommation électrique"
+        "en": " Electricity consumption checking",
+        "nl": " Stroomverbruik controleren",
+        "de": " Stromverbrauchsüberwachung",
+        "fr": " Vérification de la consommation électrique"
       },
       "min": 0,
       "max": 2,

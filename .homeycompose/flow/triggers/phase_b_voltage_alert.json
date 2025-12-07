@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "voltage",
       "title": {
-        "en": "Voltage (V)",
-        "nl": "Spanning (V)"
+        "en": " Voltage (V)",
+        "nl": " Spanning (V)",
+        "de": " Spannung (V)",
+        "fr": " Tension (V)"
       },
       "min": 180,
       "max": 260,
@@ -61,7 +69,9 @@
       "units": "V",
       "placeholder": {
         "en": "Voltage threshold in volts",
-        "nl": "Spanning drempel in volt"
+        "nl": "Spanning drempel in volt",
+        "de": "Spannungsschwellenwert in Volt",
+        "fr": "Seuil de tension en volts"
       }
     }
   ],

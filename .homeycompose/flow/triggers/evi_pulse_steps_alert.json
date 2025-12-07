@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "pulse_steps",
       "title": {
-        "en": "Pulse-steps",
-        "nl": "Puls-stappen"
+        "en": " Pulse-steps",
+        "nl": " Puls-stappen",
+        "de": " Schritte",
+        "fr": " Pas"
       },
       "min": 0,
       "max": 500,
@@ -61,7 +69,9 @@
       "units": "Pulse-steps",
       "placeholder": {
         "en": "Pulse-steps threshold",
-        "nl": "Puls-stappen drempel"
+        "nl": "Puls-stappen drempel",
+        "de": "Schwellenwert für Ventilschritte",
+        "fr": "Seuil de pas de valve"
       }
     }
   ],

@@ -1830,17 +1830,22 @@ class MyDevice extends Homey.Device {
         const roundedCOP = Math.round(copResult.cop * 100) / 100;
         await this.setCapabilityValue('adlar_cop', roundedCOP);
 
-        // COP efficiency changed trigger (v1.0.8, fixed v1.0.21)
+        // COP efficiency changed trigger (v1.0.8, fixed v1.0.21, v1.3.2 state params)
         // Trigger when COP changes significantly (±0.3 threshold)
         const COP_CHANGE_THRESHOLD = 0.3;
         if (this.lastCOPValue > 0 && Math.abs(roundedCOP - this.lastCOPValue) >= COP_CHANGE_THRESHOLD) {
-          // Determine threshold for flow card (use goodEfficiencyThreshold as baseline)
-          const goodEfficiencyThreshold = 3.0;
+          const delta = roundedCOP - this.lastCOPValue;
+          const condition = delta > 0 ? 'above' : 'below';
+
           this.triggerFlowCard('cop_efficiency_changed', {
             current_cop: roundedCOP,
-            threshold_cop: goodEfficiencyThreshold,
+            previous_cop: this.lastCOPValue,
+            change: Math.round(delta * 100) / 100,
             calculation_method: copResult.method,
             confidence_level: copResult.confidence,
+          }, {
+            condition,
+            cop_value: roundedCOP,
           }).catch((err) => {
             this.error('Failed to trigger cop_efficiency_changed:', err);
           });
@@ -2233,6 +2238,9 @@ class MyDevice extends Homey.Device {
           threshold_cop: threshold,
           calculation_method: copResult.method,
           confidence_level: copResult.confidence,
+        }, {
+          condition,
+          cop_value: copResult.cop,
         }).catch((err) => {
           this.error('Failed to trigger cop_efficiency_changed:', err);
         });
@@ -2371,261 +2379,284 @@ class MyDevice extends Homey.Device {
         return;
       }
 
-    this.debugLog('Processing DPS data:', dps);
+      this.debugLog('Processing DPS data:', dps);
 
-    // Collect all capability updates as promises for batching (v0.99.96)
-    const updatePromises: Promise<void>[] = [];
+      // Collect all capability updates as promises for batching (v0.99.96)
+      const updatePromises: Promise<void>[] = [];
 
-    // Convert string keys to numbers and process each DPS value
-    Object.entries(dps).forEach(([dpsKey, value]) => {
-      const dpsId = Number(dpsKey);
-      if (Number.isNaN(dpsId)) {
-        this.debugLog(`Skipping invalid DPS key: ${dpsKey}`);
-        return;
-      }
-
-      // Map DPS ID to ALL associated capabilities using multi-capability mapping (v0.99.54+)
-      // This supports dual picker/sensor architecture where one DPS updates multiple capabilities
-      const capabilities = AdlarMapping.dpsToCapabilities[dpsId];
-      if (!capabilities || capabilities.length === 0) {
-        this.debugLog(`No capability mapping found for DPS ${dpsId} (value: ${value})`);
-        return;
-      }
-
-      // Update ALL capabilities mapped to this DPS
-      // Example: DPS 11 updates both adlar_enum_capacity_set (picker) and adlar_sensor_capacity_set (sensor)
-      capabilities.forEach((capability) => {
-        // Check if device has this capability
-        if (!this.hasCapability(capability)) {
-          this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
+      // Convert string keys to numbers and process each DPS value
+      Object.entries(dps).forEach(([dpsKey, value]) => {
+        const dpsId = Number(dpsKey);
+        if (Number.isNaN(dpsId)) {
+          this.debugLog(`Skipping invalid DPS key: ${dpsKey}`);
           return;
         }
 
-        try {
+        // Map DPS ID to ALL associated capabilities using multi-capability mapping (v0.99.54+)
+        // This supports dual picker/sensor architecture where one DPS updates multiple capabilities
+        const capabilities = AdlarMapping.dpsToCapabilities[dpsId];
+        if (!capabilities || capabilities.length === 0) {
+          this.debugLog(`No capability mapping found for DPS ${dpsId} (value: ${value})`);
+          return;
+        }
+
+        // Update ALL capabilities mapped to this DPS
+        // Example: DPS 11 updates both adlar_enum_capacity_set (picker) and adlar_sensor_capacity_set (sensor)
+        capabilities.forEach((capability) => {
+        // Check if device has this capability
+          if (!this.hasCapability(capability)) {
+            this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
+            return;
+          }
+
+          try {
           // Apply DPS scale transformation (v1.0.10+)
           // Transforms raw Tuya integer values to actual decimal values
           // Example: DPS 104 (power) raw 25000 → 2500 W (scale 1: ÷ 10)
           // Example: DPS 103 (voltage) raw 2305 → 230.5 V (scale 3: ÷ 1000)
-          const transformedValue = AdlarMapping.transformDpsValue(dpsId, value);
+            const transformedValue = AdlarMapping.transformDpsValue(dpsId, value);
 
-          // Collect capability update promise for batching
-          const updatePromise = this.setCapabilityValue(capability, transformedValue)
-            .then(() => {
-              this.debugLog(`✅ Updated capability ${capability} = ${transformedValue} (DPS ${dpsId}, raw: ${value})`);
-            })
-            .catch((error) => {
-              this.error(`Failed to update capability ${capability} with value ${transformedValue} (DPS ${dpsId}):`, error);
-            });
+            // Collect capability update promise for batching
+            const updatePromise = this.setCapabilityValue(capability, transformedValue)
+              .then(() => {
+                this.debugLog(`✅ Updated capability ${capability} = ${transformedValue} (DPS ${dpsId}, raw: ${value})`);
+              })
+              .catch((error) => {
+                this.error(`Failed to update capability ${capability} with value ${transformedValue} (DPS ${dpsId}):`, error);
+              });
 
-          updatePromises.push(updatePromise);
+            updatePromises.push(updatePromise);
 
-          // Update capability health tracking via service coordinator (synchronous)
-          // Use transformed value for health checks
-          this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, transformedValue);
+            // Update capability health tracking via service coordinator (synchronous)
+            // Use transformed value for health checks
+            this.serviceCoordinator?.getCapabilityHealth()?.updateCapabilityHealth(capability, transformedValue);
 
-          // Fault detection for DPS 15 (adlar_fault) - v1.0.7 feature
-          // Trigger fault_detected flow card when new fault code appears
-          if (dpsId === 15 && capability === 'adlar_fault') {
+            // Fault detection for DPS 15 (adlar_fault) - v1.0.7 feature
+            // Trigger fault_detected flow card when new fault code appears
+            if (dpsId === 15 && capability === 'adlar_fault') {
             // Use transformedValue for consistency (DPS 15 has no scale, so same as raw value)
-            const faultCode = typeof transformedValue === 'number' ? transformedValue : 0;
+              const faultCode = typeof transformedValue === 'number' ? transformedValue : 0;
 
-            // Only trigger on NEW faults (not on every DPS update)
-            // faultCode > 0 = active fault, faultCode changed = new/different fault
-            if (faultCode > 0 && faultCode !== this.lastFaultCode) {
+              // Only trigger on NEW faults (not on every DPS update)
+              // faultCode > 0 = active fault, faultCode changed = new/different fault
+              if (faultCode > 0 && faultCode !== this.lastFaultCode) {
               // Fire-and-forget pattern to prevent blocking DPS processing
-              this.triggerFlowCard('fault_detected', {
-                fault_code: faultCode,
-                fault_description: getFaultDescription(faultCode, this.homey.i18n.getLanguage() as 'en' | 'nl'),
-              }).catch((err) => {
-                this.error('Failed to trigger fault_detected flow card:', err);
-              });
+                this.triggerFlowCard('fault_detected', {
+                  fault_code: faultCode,
+                  fault_description: getFaultDescription(faultCode, this.homey.i18n.getLanguage() as 'en' | 'nl'),
+                }).catch((err) => {
+                  this.error('Failed to trigger fault_detected flow card:', err);
+                });
 
-              this.log(`🚨 Fault detected: Code ${faultCode} - ${getFaultDescription(faultCode, 'en')}`);
-              this.lastFaultCode = faultCode;
-            } else if (faultCode === 0 && this.lastFaultCode !== 0) {
+                this.log(`🚨 Fault detected: Code ${faultCode} - ${getFaultDescription(faultCode, 'en')}`);
+                this.lastFaultCode = faultCode;
+              } else if (faultCode === 0 && this.lastFaultCode !== 0) {
               // Fault cleared - log but don't trigger (users may want separate "fault_cleared" trigger in future)
-              this.log(`✅ Fault cleared: Previous code ${this.lastFaultCode} resolved`);
-              this.lastFaultCode = 0;
+                this.log(`✅ Fault cleared: Previous code ${this.lastFaultCode} resolved`);
+                this.lastFaultCode = 0;
+              }
             }
-          }
 
-          // Boolean state change detection (v1.1.0) - compressor, defrost, backwater
-          // Triggers when these boolean states transition from true→false or false→true
+            // Boolean state change detection (v1.1.0) - compressor, defrost, backwater
+            // Triggers when these boolean states transition from true→false or false→true
 
-          // Compressor state (adlar_state_compressor_state) - DPS 27
-          if (dpsId === 27 && capability === 'adlar_state_compressor_state') {
-            const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
+            // Compressor state (adlar_state_compressor_state) - DPS 27
+            if (dpsId === 27 && capability === 'adlar_state_compressor_state') {
+              const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
 
-            // Only trigger on state CHANGE (not on initialization)
-            if (this.lastCompressorState !== null && currentState !== this.lastCompressorState) {
-              const stateLabel = currentState ? 'running' : 'stopped';
-              this.triggerFlowCard('compressor_state_changed', {
-                state: stateLabel,
-                current_state: stateLabel,
-              }).catch((err) => {
-                this.error('Failed to trigger compressor_state_changed:', err);
-              });
-              this.log(`Compressor state changed to: ${stateLabel}`);
+              // Only trigger on state CHANGE (not on initialization)
+              if (this.lastCompressorState !== null && currentState !== this.lastCompressorState) {
+                const stateLabel = currentState ? 'running' : 'stopped';
+                this.triggerFlowCard('compressor_state_changed', {
+                  state: stateLabel,
+                  current_state: stateLabel,
+                }, {
+                  state: stateLabel, // Pass state for runListener filtering
+                }).catch((err) => {
+                  this.error('Failed to trigger compressor_state_changed:', err);
+                });
+                this.log(`Compressor state changed to: ${stateLabel}`);
+              }
+              this.lastCompressorState = currentState;
             }
-            this.lastCompressorState = currentState;
-          }
 
-          // Defrost state (adlar_state_defrost_state) - DPS 33
-          if (dpsId === 33 && capability === 'adlar_state_defrost_state') {
-            const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
+            // Defrost state (adlar_state_defrost_state) - DPS 33
+            if (dpsId === 33 && capability === 'adlar_state_defrost_state') {
+              const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
 
-            // Only trigger on state CHANGE (not on initialization)
-            if (this.lastDefrostState !== null && currentState !== this.lastDefrostState) {
-              const stateLabel = currentState ? 'active' : 'inactive';
-              this.triggerFlowCard('defrost_state_changed', {
-                state: stateLabel,
-                current_state: stateLabel,
-              }).catch((err) => {
-                this.error('Failed to trigger defrost_state_changed:', err);
-              });
-              this.log(`Defrost state changed to: ${stateLabel}`);
+              // Only trigger on state CHANGE (not on initialization)
+              if (this.lastDefrostState !== null && currentState !== this.lastDefrostState) {
+                const stateLabel = currentState ? 'active' : 'inactive';
+                this.triggerFlowCard('defrost_state_changed', {
+                  state: stateLabel,
+                  current_state: stateLabel,
+                }, {
+                  state: stateLabel, // Pass state for runListener filtering
+                }).catch((err) => {
+                  this.error('Failed to trigger defrost_state_changed:', err);
+                });
+                this.log(`Defrost state changed to: ${stateLabel}`);
+              }
+              this.lastDefrostState = currentState;
             }
-            this.lastDefrostState = currentState;
-          }
 
-          // Backwater state (adlar_state_backwater) - DPS 31
-          if (dpsId === 31 && capability === 'adlar_state_backwater') {
-            const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
+            // Backwater state (adlar_state_backwater) - DPS 31
+            if (dpsId === 31 && capability === 'adlar_state_backwater') {
+              const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
 
-            // Only trigger on state CHANGE (not on initialization)
-            if (this.lastBackwaterState !== null && currentState !== this.lastBackwaterState) {
-              const stateLabel = currentState ? 'flowing' : 'blocked';
-              this.triggerFlowCard('backwater_state_changed', {
-                state: stateLabel,
-                current_state: stateLabel,
-              }).catch((err) => {
-                this.error('Failed to trigger backwater_state_changed:', err);
-              });
-              this.log(`Backwater state changed to: ${stateLabel}`);
+              // Only trigger on state CHANGE (not on initialization)
+              if (this.lastBackwaterState !== null && currentState !== this.lastBackwaterState) {
+                const stateLabel = currentState ? 'flowing' : 'blocked';
+                this.triggerFlowCard('backwater_state_changed', {
+                  state: stateLabel,
+                  current_state: stateLabel,
+                }, {
+                  state: stateLabel, // Pass state for runListener filtering
+                }).catch((err) => {
+                  this.error('Failed to trigger backwater_state_changed:', err);
+                });
+                this.log(`Backwater state changed to: ${stateLabel}`);
+              }
+              this.lastBackwaterState = currentState;
             }
-            this.lastBackwaterState = currentState;
-          }
 
-          // Enum mode change detection (v1.1.0) - heating mode, work mode, water mode
-          // Triggers when these enum values change
+            // Enum mode change detection (v1.1.0) - heating mode, work mode, water mode
+            // Triggers when these enum values change
 
-          // Heating mode (adlar_enum_mode) - DPS 2
-          if (dpsId === 2 && capability === 'adlar_enum_mode') {
-            const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
+            // Heating mode (adlar_enum_mode) - DPS 2
+            if (dpsId === 2 && capability === 'adlar_enum_mode') {
+              const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
 
-            // Only trigger on mode CHANGE (not on initialization)
-            if (this.lastHeatingMode !== null && currentMode !== this.lastHeatingMode) {
-              this.triggerFlowCard('heating_mode_changed', {
-                mode: currentMode,
-                previous_mode: this.lastHeatingMode,
-              }).catch((err) => {
-                this.error('Failed to trigger heating_mode_changed:', err);
-              });
-              this.log(`Heating mode changed from ${this.lastHeatingMode} to ${currentMode}`);
+              // Only trigger on mode CHANGE (not on initialization)
+              if (this.lastHeatingMode !== null && currentMode !== this.lastHeatingMode) {
+                this.triggerFlowCard('heating_mode_changed', {
+                  mode: currentMode,
+                  previous_mode: this.lastHeatingMode,
+                }).catch((err) => {
+                  this.error('Failed to trigger heating_mode_changed:', err);
+                });
+                this.log(`Heating mode changed from ${this.lastHeatingMode} to ${currentMode}`);
+              }
+              this.lastHeatingMode = currentMode;
             }
-            this.lastHeatingMode = currentMode;
-          }
 
-          // Work mode (adlar_enum_work_mode) - DPS 5
-          if (dpsId === 5 && capability === 'adlar_enum_work_mode') {
-            const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
+            // Work mode (adlar_enum_work_mode) - DPS 5
+            if (dpsId === 5 && capability === 'adlar_enum_work_mode') {
+              const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
 
-            // Only trigger on mode CHANGE (not on initialization)
-            if (this.lastWorkMode !== null && currentMode !== this.lastWorkMode) {
-              this.triggerFlowCard('work_mode_changed', {
-                mode: currentMode,
-                previous_mode: this.lastWorkMode,
-              }).catch((err) => {
-                this.error('Failed to trigger work_mode_changed:', err);
-              });
-              this.log(`Work mode changed from ${this.lastWorkMode} to ${currentMode}`);
+              // Only trigger on mode CHANGE (not on initialization)
+              if (this.lastWorkMode !== null && currentMode !== this.lastWorkMode) {
+                this.triggerFlowCard('work_mode_changed', {
+                  mode: currentMode,
+                  previous_mode: this.lastWorkMode,
+                }).catch((err) => {
+                  this.error('Failed to trigger work_mode_changed:', err);
+                });
+                this.log(`Work mode changed from ${this.lastWorkMode} to ${currentMode}`);
+              }
+              this.lastWorkMode = currentMode;
             }
-            this.lastWorkMode = currentMode;
-          }
 
-          // Water mode (adlar_enum_water_mode) - DPS 10
-          if (dpsId === 10 && capability === 'adlar_enum_water_mode') {
-            const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
+            // Water mode (adlar_enum_water_mode) - DPS 10
+            if (dpsId === 10 && capability === 'adlar_enum_water_mode') {
+              const currentMode = typeof transformedValue === 'string' ? transformedValue : 'unknown';
 
-            // Only trigger on mode CHANGE (not on initialization)
-            if (this.lastWaterMode !== null && currentMode !== this.lastWaterMode) {
-              this.triggerFlowCard('water_mode_changed', {
-                mode: currentMode,
-                previous_mode: this.lastWaterMode,
-              }).catch((err) => {
-                this.error('Failed to trigger water_mode_changed:', err);
-              });
-              this.log(`Water mode changed from ${this.lastWaterMode} to ${currentMode}`);
+              // Only trigger on mode CHANGE (not on initialization)
+              if (this.lastWaterMode !== null && currentMode !== this.lastWaterMode) {
+                this.triggerFlowCard('water_mode_changed', {
+                  mode: currentMode,
+                  previous_mode: this.lastWaterMode,
+                }).catch((err) => {
+                  this.error('Failed to trigger water_mode_changed:', err);
+                });
+                this.log(`Water mode changed from ${this.lastWaterMode} to ${currentMode}`);
+              }
+              this.lastWaterMode = currentMode;
             }
-            this.lastWaterMode = currentMode;
-          }
 
-          // Temperature change detection (v1.0.8) - inlet, outlet, ambient
-          // Trigger when temperature changes significantly (±0.5°C threshold)
-          const TEMP_CHANGE_THRESHOLD = 0.5; // Minimum °C change to trigger
+            // Temperature change detection (v1.0.8) - inlet, outlet, ambient
+            // Trigger when temperature changes significantly (±0.5°C threshold)
+            const TEMP_CHANGE_THRESHOLD = 0.5; // Minimum °C change to trigger
 
-          // Inlet temperature (measure_temperature.temp_top)
-          if (capability === 'measure_temperature.temp_top' && typeof transformedValue === 'number') {
-            if (this.lastInletTemp !== null && Math.abs(transformedValue - this.lastInletTemp) >= TEMP_CHANGE_THRESHOLD) {
-              this.triggerFlowCard('inlet_temperature_changed', {
-                current_temperature: Math.round(transformedValue * 10) / 10,
-                threshold_temperature: TEMP_CHANGE_THRESHOLD,
-              }).catch((err) => {
-                this.error('Failed to trigger inlet_temperature_changed:', err);
-              });
+            // Inlet temperature (measure_temperature.temp_top)
+            if (capability === 'measure_temperature.temp_top' && typeof transformedValue === 'number') {
+              if (this.lastInletTemp !== null && Math.abs(transformedValue - this.lastInletTemp) >= TEMP_CHANGE_THRESHOLD) {
+                const delta = transformedValue - this.lastInletTemp;
+                const condition = delta > 0 ? 'above' : 'below';
+
+                this.triggerFlowCard('inlet_temperature_changed', {
+                  current_temperature: Math.round(transformedValue * 10) / 10,
+                }, {
+                  condition,
+                  temperature: transformedValue,
+                }).catch((err) => {
+                  this.error('Failed to trigger inlet_temperature_changed:', err);
+                });
+              }
+              this.lastInletTemp = transformedValue;
             }
-            this.lastInletTemp = transformedValue;
-          }
 
-          // Outlet temperature (measure_temperature.temp_bottom)
-          if (capability === 'measure_temperature.temp_bottom' && typeof transformedValue === 'number') {
-            if (this.lastOutletTemp !== null && Math.abs(transformedValue - this.lastOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
-              this.triggerFlowCard('outlet_temperature_changed', {
-                current_temperature: Math.round(transformedValue * 10) / 10,
-                threshold_temperature: TEMP_CHANGE_THRESHOLD,
-              }).catch((err) => {
-                this.error('Failed to trigger outlet_temperature_changed:', err);
-              });
+            // Outlet temperature (measure_temperature.temp_bottom)
+            if (capability === 'measure_temperature.temp_bottom' && typeof transformedValue === 'number') {
+              if (this.lastOutletTemp !== null && Math.abs(transformedValue - this.lastOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
+                const delta = transformedValue - this.lastOutletTemp;
+                const condition = delta > 0 ? 'above' : 'below';
+
+                this.triggerFlowCard('outlet_temperature_changed', {
+                  current_temperature: Math.round(transformedValue * 10) / 10,
+                }, {
+                  condition,
+                  temperature: transformedValue,
+                }).catch((err) => {
+                  this.error('Failed to trigger outlet_temperature_changed:', err);
+                });
+              }
+              this.lastOutletTemp = transformedValue;
             }
-            this.lastOutletTemp = transformedValue;
-          }
 
-          // Ambient temperature (measure_temperature.around_temp)
-          if (capability === 'measure_temperature.around_temp' && typeof transformedValue === 'number') {
-            if (this.lastAmbientTemp !== null && Math.abs(transformedValue - this.lastAmbientTemp) >= TEMP_CHANGE_THRESHOLD) {
-              this.triggerFlowCard('ambient_temperature_changed', {
-                current_temperature: Math.round(transformedValue * 10) / 10,
-                threshold_temperature: TEMP_CHANGE_THRESHOLD,
-              }).catch((err) => {
-                this.error('Failed to trigger ambient_temperature_changed:', err);
-              });
+            // Ambient temperature (measure_temperature.around_temp)
+            if (capability === 'measure_temperature.around_temp' && typeof transformedValue === 'number') {
+              if (this.lastAmbientTemp !== null && Math.abs(transformedValue - this.lastAmbientTemp) >= TEMP_CHANGE_THRESHOLD) {
+                const delta = transformedValue - this.lastAmbientTemp;
+                const condition = delta > 0 ? 'above' : 'below';
+
+                this.log(`🌡️  ambient_temperature_changed TRIGGER: ${this.lastAmbientTemp}°C → ${transformedValue}°C (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)}°C, condition: ${condition})`);
+
+                this.triggerFlowCard('ambient_temperature_changed', {
+                  current_temperature: Math.round(transformedValue * 10) / 10,
+                }, {
+                  condition,
+                  temperature: transformedValue,
+                }).catch((err) => {
+                  this.error('Failed to trigger ambient_temperature_changed:', err);
+                });
+              }
+              this.lastAmbientTemp = transformedValue;
             }
-            this.lastAmbientTemp = transformedValue;
-          }
 
-        } catch (error) {
-          this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
-        }
-      });
-    });
-
-    // Execute all updates in parallel with proper error isolation (v0.99.96)
-    // Use fire-and-forget pattern to prevent blocking TuyAPI event loop
-    if (updatePromises.length > 0) {
-      Promise.allSettled(updatePromises)
-        .then((results) => {
-          const failures = results.filter((r) => r.status === 'rejected').length;
-          if (failures > 0) {
-            this.error(`DPS update completed with ${failures} failures out of ${results.length} operations`);
-          } else {
-            this.debugLog(`✅ Successfully batched ${results.length} capability updates`);
+          } catch (error) {
+            this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
           }
-        })
-        .catch((error) => {
-          // This should never happen with allSettled, but defensive catch for safety
-          this.error('Unexpected error in batched capability updates:', error);
         });
-    }
+      });
+
+      // Execute all updates in parallel with proper error isolation (v0.99.96)
+      // Use fire-and-forget pattern to prevent blocking TuyAPI event loop
+      if (updatePromises.length > 0) {
+        Promise.allSettled(updatePromises)
+          .then((results) => {
+            const failures = results.filter((r) => r.status === 'rejected').length;
+            if (failures > 0) {
+              this.error(`DPS update completed with ${failures} failures out of ${results.length} operations`);
+            } else {
+              this.debugLog(`✅ Successfully batched ${results.length} capability updates`);
+            }
+          })
+          .catch((error) => {
+          // This should never happen with allSettled, but defensive catch for safety
+            this.error('Unexpected error in batched capability updates:', error);
+          });
+      }
     } catch (error) {
       this.error('❌ Critical error in updateCapabilitiesFromDps:', error);
       // Don't rethrow - allow device to continue operating even if one DPS update fails
@@ -2746,14 +2777,21 @@ class MyDevice extends Homey.Device {
 
   /**
    * Helper method to trigger flow cards safely - delegated to FlowCardManagerService
+   * @param cardId - Flow card ID
+   * @param tokens - Token values to pass to flow
+   * @param state - Optional state parameter for runListener filtering (v1.3.2+)
    */
-  private async triggerFlowCard(cardId: string, tokens: Record<string, unknown>) {
+  private async triggerFlowCard(
+    cardId: string,
+    tokens: Record<string, unknown>,
+    state: Record<string, unknown> = {},
+  ) {
     // Flow card triggering is handled automatically by FlowCardManagerService
     // For now, use the standard Homey trigger approach for compatibility
     try {
       const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
-      await triggerCard.trigger(this, tokens, {});
-      this.debugLog(`Triggered flow card: ${cardId}`, tokens);
+      await triggerCard.trigger(this, tokens, state);
+      this.debugLog(`Triggered flow card: ${cardId}`, tokens, 'state:', state);
     } catch (error) {
       this.debugLog(`Flow card ${cardId} not available or trigger failed:`, error);
     }
@@ -2766,264 +2804,264 @@ class MyDevice extends Homey.Device {
     try {
       await this.setUnavailable(); // Set the device as unavailable initially
 
-    // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
-    // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
-    if (this.hasCapability('adlar_connection_status')) {
-      try {
+      // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
+      // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
+      if (this.hasCapability('adlar_connection_status')) {
+        try {
         // Check if migration flag exists to avoid repeated migrations
-        const migrationFlag = this.getStoreValue('connection_status_migrated_v0_99_61');
-        if (!migrationFlag) {
-          this.log('🔄 Migrating adlar_connection_status capability from enum to string type...');
-          await this.removeCapability('adlar_connection_status');
+          const migrationFlag = this.getStoreValue('connection_status_migrated_v0_99_61');
+          if (!migrationFlag) {
+            this.log('🔄 Migrating adlar_connection_status capability from enum to string type...');
+            await this.removeCapability('adlar_connection_status');
+            await this.addCapability('adlar_connection_status');
+            await this.setStoreValue('connection_status_migrated_v0_99_61', true);
+            this.log('✅ Successfully migrated adlar_connection_status capability to string type');
+          }
+        } catch (error) {
+          this.error('Failed to migrate adlar_connection_status capability:', error);
+        }
+      } else {
+      // Add capability for brand new devices
+        try {
           await this.addCapability('adlar_connection_status');
           await this.setStoreValue('connection_status_migrated_v0_99_61', true);
-          this.log('✅ Successfully migrated adlar_connection_status capability to string type');
-        }
-      } catch (error) {
-        this.error('Failed to migrate adlar_connection_status capability:', error);
-      }
-    } else {
-      // Add capability for brand new devices
-      try {
-        await this.addCapability('adlar_connection_status');
-        await this.setStoreValue('connection_status_migrated_v0_99_61', true);
-        this.log('✅ Added adlar_connection_status capability to new device');
-      } catch (error) {
-        this.error('Failed to add adlar_connection_status capability:', error);
-      }
-    }
-
-    // Add missing curve sensor capabilities for existing devices (v0.99.54 migration)
-    if (!this.hasCapability('adlar_sensor_capacity_set')) {
-      try {
-        await this.addCapability('adlar_sensor_capacity_set');
-        this.log('✅ Added adlar_sensor_capacity_set capability to existing device (v0.99.54 migration)');
-      } catch (error) {
-        this.error('Failed to add adlar_sensor_capacity_set capability:', error);
-      }
-    }
-
-    if (!this.hasCapability('adlar_picker_countdown_set')) {
-      try {
-        await this.addCapability('adlar_picker_countdown_set');
-        this.log('✅ Added adlar_picker_countdown_set capability to existing device (v0.99.54 migration)');
-      } catch (error) {
-        this.error('Failed to add adlar_picker_countdown_set capability:', error);
-      }
-    }
-
-    // Add connection insights capability for existing devices (v1.0.12 migration)
-    if (!this.hasCapability('adlar_connection_active')) {
-      try {
-        await this.addCapability('adlar_connection_active');
-        this.log('✅ Added adlar_connection_active capability to existing device (v1.0.12 migration)');
-      } catch (error) {
-        this.error('Failed to add adlar_connection_active capability:', error);
-      }
-    }
-
-    // Always synchronize connection boolean with status string (v1.0.14 fix)
-    // This ensures correct state even if capability was added in previous version
-    if (this.hasCapability('adlar_connection_active')) {
-      try {
-        const currentStatus = this.getCapabilityValue('adlar_connection_status') as string || '';
-        const isCurrentlyConnected = currentStatus.toLowerCase().includes('connected')
-                                   || currentStatus.toLowerCase().includes('verbonden');
-        const currentBooleanValue = this.getCapabilityValue('adlar_connection_active');
-
-        // Only update if out of sync
-        if (currentBooleanValue !== isCurrentlyConnected) {
-          await this.setCapabilityValue('adlar_connection_active', isCurrentlyConnected);
-          this.log(`🔄 Synchronized connection boolean: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'} (was: ${currentBooleanValue}, status: "${currentStatus}")`);
-        } else {
-          this.log(`✓ Connection boolean already synchronized: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'}`);
-        }
-      } catch (error) {
-        this.error('Failed to synchronize connection_active capability:', error);
-      }
-    }
-
-    const { manifest } = Homey;
-    const myDriver = manifest.drivers[0];
-    // this.log('MyDevice overview:', myDriver);
-
-    const capList = myDriver.capabilities;
-    this.debugLog('Capabilities list:', capList);
-
-    const builtinCapOptList = myDriver.capabilitiesOptions || {};
-    this.debugLog('Capabilities options list:', builtinCapOptList);
-
-    // Extract keys where `setable` exists and is `true`
-    const setableBuiltInCapsKeys = Object.keys(builtinCapOptList).filter(
-      (key) => builtinCapOptList[key].setable === true,
-    );
-    this.debugLog('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys);
-
-    // Verify heating curve capability (single capability for both display and control)
-    const heatingCurveCapability = 'adlar_enum_countdown_set';
-    this.debugLog(`Checking heating curve capability: ${heatingCurveCapability}`);
-    this.debugLog('Capability exists in manifest:', capList.includes(heatingCurveCapability));
-    this.debugLog('Capability available on device:', this.hasCapability(heatingCurveCapability));
-
-    const setableCustomCapsKeys = Object.keys(manifest.capabilities).filter(
-      (key) => manifest.capabilities[key].setable === true,
-    );
-    this.debugLog('Setable custom capabilities from app manifest:', setableCustomCapsKeys);
-
-    // Default setable built-in capabilities (per Homey SDK standards)
-    const defaultSetableBuiltInCaps = [
-      'target_temperature',
-      'onoff',
-    ];
-
-    // Filter only capabilities that are actually present in the device
-    const availableDefaultSetableCaps = defaultSetableBuiltInCaps.filter((cap) => capList.includes(cap));
-    this.debugLog('Available default setable built-in capabilities:', availableDefaultSetableCaps);
-
-    // Combine and deduplicate setable capabilities
-    this.settableCapabilities = [
-      ...new Set([
-        ...setableBuiltInCapsKeys,
-        ...setableCustomCapsKeys,
-        ...availableDefaultSetableCaps,
-      ]),
-    ];
-    this.debugLog('Setable capabilities:', this.settableCapabilities); // Output: []
-
-    // Register enhanced capability listeners with validation and error handling
-    this.settableCapabilities.forEach((capability: string) => {
-      this.debugLog(`Registering capability listener for ${capability}`);
-      this.registerCapabilityListener(capability, async (value, _opts) => {
-        this.log(`${capability} set to`, value);
-
-        try {
-          // Map capability to Tuya DP (data point)
-          const dpArray = this.allCapabilities[capability];
-          const dp = Array.isArray(dpArray) ? dpArray[0] : undefined;
-
-          if (dp === undefined) {
-            const errorMsg = `No Tuya DP mapping found for capability: ${capability}`;
-            this.error(errorMsg);
-            throw new Error(errorMsg);
-          }
-
-          // Validate value based on capability type
-          const validatedValue = this.validateCapabilityValue(capability, value);
-
-          // OPTIMISTIC UPDATE (v0.99.52): Set capability value immediately for responsive UI
-          // This ensures getCapabilityValue() returns the new value right away, even before
-          // the device confirms the change. If device responds with different value,
-          // updateCapabilitiesFromDps() will override this optimistic value.
-          await this.setCapabilityValue(capability, validatedValue);
-          this.debugLog(`Optimistic update: ${capability} = ${validatedValue}`);
-
-          // Send command to device via ServiceCoordinator or fallback
-          await this.sendTuyaCommand(dp, validatedValue as string | number | boolean);
-
-          // Device response will arrive via updateCapabilitiesFromDps() and will:
-          // 1. Confirm the optimistic update (same value) - no visible change
-          // 2. Override with actual device value if different - ensures device is source of truth
-          //
-          // WHY THIS WORKS:
-          // - Homey SDK: setCapabilityValue() does NOT trigger listeners when called programmatically
-          // - Only USER-initiated changes (via UI/Flow cards) trigger capability listeners
-          // - Therefore: updateCapabilitiesFromDps() calling setCapabilityValue() is SAFE
-          // - No feedback loop, no circular dependencies
-          //
-          // BIDIRECTIONAL SYNC:
-          // - User changes Homey UI → Listener fires → Optimistic update → Send to device → Device confirms
-          // - Tuya app changes device → DPS update → updateCapabilitiesFromDps() → setCapabilityValue() → Homey UI updates
-          // - Both flows work correctly without interference
-
+          this.log('✅ Added adlar_connection_status capability to new device');
         } catch (error) {
-          const categorizedError = this.handleTuyaError(error as Error, `Capability update: ${capability}`);
-
-          // Use categorized error message for better user experience
-          const { userMessage } = categorizedError;
-
-          throw new Error(userMessage);
+          this.error('Failed to add adlar_connection_status capability:', error);
         }
-      });
-    });
+      }
 
-    // Register flow card action listeners
-    await this.registerFlowCardActionListeners();
+      // Add missing curve sensor capabilities for existing devices (v0.99.54 migration)
+      if (!this.hasCapability('adlar_sensor_capacity_set')) {
+        try {
+          await this.addCapability('adlar_sensor_capacity_set');
+          this.log('✅ Added adlar_sensor_capacity_set capability to existing device (v0.99.54 migration)');
+        } catch (error) {
+          this.error('Failed to add adlar_sensor_capacity_set capability:', error);
+        }
+      }
 
-    // Handle optional capabilities based on settings
-    await this.handleOptionalCapabilities();
+      if (!this.hasCapability('adlar_picker_countdown_set')) {
+        try {
+          await this.addCapability('adlar_picker_countdown_set');
+          this.log('✅ Added adlar_picker_countdown_set capability to existing device (v0.99.54 migration)');
+        } catch (error) {
+          this.error('Failed to add adlar_picker_countdown_set capability:', error);
+        }
+      }
 
-    // Reset external power timestamp on device initialization
-    this.lastExternalPowerTimestamp = null;
+      // Add connection insights capability for existing devices (v1.0.12 migration)
+      if (!this.hasCapability('adlar_connection_active')) {
+        try {
+          await this.addCapability('adlar_connection_active');
+          this.log('✅ Added adlar_connection_active capability to existing device (v1.0.12 migration)');
+        } catch (error) {
+          this.error('Failed to add adlar_connection_active capability:', error);
+        }
+      }
 
-    // Get Tuya device settings from Homey
-    const id = (this.getStoreValue('device_id') || '').toString().trim();
-    const key = (this.getStoreValue('local_key') || '').toString().trim();
-    const ip = (this.getStoreValue('ip_address') || '').toString().trim();
-    const version = (this.getStoreValue('protocol_version') || '3.3').toString().trim();
+      // Always synchronize connection boolean with status string (v1.0.14 fix)
+      // This ensures correct state even if capability was added in previous version
+      if (this.hasCapability('adlar_connection_active')) {
+        try {
+          const currentStatus = this.getCapabilityValue('adlar_connection_status') as string || '';
+          const isCurrentlyConnected = currentStatus.toLowerCase().includes('connected')
+                                   || currentStatus.toLowerCase().includes('verbonden');
+          const currentBooleanValue = this.getCapabilityValue('adlar_connection_active');
 
-    if (!id || !key) {
-      this.error('Tuya credentials missing: device_id or local_key not set.');
-      await this.setUnavailable('Missing Tuya credentials');
-      return;
-    }
-
-    // Initialize Service Coordinator with Tuya configuration
-    this.serviceCoordinator = new ServiceCoordinator({
-      device: this,
-      logger: this.debugLog.bind(this),
-    });
-
-    // Initialize services via coordinator
-    const initResult = await this.serviceCoordinator.initialize({
-      id,
-      key,
-      ip,
-      version,
-    });
-
-    if (!initResult.success || initResult.failedServices.length > 0) {
-      this.error('Service initialization issues:', {
-        failedServices: initResult.failedServices,
-        errors: initResult.errors.map((e) => {
-          if (e instanceof Error) {
-            return e.message;
+          // Only update if out of sync
+          if (currentBooleanValue !== isCurrentlyConnected) {
+            await this.setCapabilityValue('adlar_connection_active', isCurrentlyConnected);
+            this.log(`🔄 Synchronized connection boolean: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'} (was: ${currentBooleanValue}, status: "${currentStatus}")`);
+          } else {
+            this.log(`✓ Connection boolean already synchronized: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'}`);
           }
-          if (typeof e === 'object' && e !== null) {
-            return JSON.stringify(e);
+        } catch (error) {
+          this.error('Failed to synchronize connection_active capability:', error);
+        }
+      }
+
+      const { manifest } = Homey;
+      const myDriver = manifest.drivers[0];
+      // this.log('MyDevice overview:', myDriver);
+
+      const capList = myDriver.capabilities;
+      this.debugLog('Capabilities list:', capList);
+
+      const builtinCapOptList = myDriver.capabilitiesOptions || {};
+      this.debugLog('Capabilities options list:', builtinCapOptList);
+
+      // Extract keys where `setable` exists and is `true`
+      const setableBuiltInCapsKeys = Object.keys(builtinCapOptList).filter(
+        (key) => builtinCapOptList[key].setable === true,
+      );
+      this.debugLog('Setable built-in capabilities from driver manifest:', setableBuiltInCapsKeys);
+
+      // Verify heating curve capability (single capability for both display and control)
+      const heatingCurveCapability = 'adlar_enum_countdown_set';
+      this.debugLog(`Checking heating curve capability: ${heatingCurveCapability}`);
+      this.debugLog('Capability exists in manifest:', capList.includes(heatingCurveCapability));
+      this.debugLog('Capability available on device:', this.hasCapability(heatingCurveCapability));
+
+      const setableCustomCapsKeys = Object.keys(manifest.capabilities).filter(
+        (key) => manifest.capabilities[key].setable === true,
+      );
+      this.debugLog('Setable custom capabilities from app manifest:', setableCustomCapsKeys);
+
+      // Default setable built-in capabilities (per Homey SDK standards)
+      const defaultSetableBuiltInCaps = [
+        'target_temperature',
+        'onoff',
+      ];
+
+      // Filter only capabilities that are actually present in the device
+      const availableDefaultSetableCaps = defaultSetableBuiltInCaps.filter((cap) => capList.includes(cap));
+      this.debugLog('Available default setable built-in capabilities:', availableDefaultSetableCaps);
+
+      // Combine and deduplicate setable capabilities
+      this.settableCapabilities = [
+        ...new Set([
+          ...setableBuiltInCapsKeys,
+          ...setableCustomCapsKeys,
+          ...availableDefaultSetableCaps,
+        ]),
+      ];
+      this.debugLog('Setable capabilities:', this.settableCapabilities); // Output: []
+
+      // Register enhanced capability listeners with validation and error handling
+      this.settableCapabilities.forEach((capability: string) => {
+        this.debugLog(`Registering capability listener for ${capability}`);
+        this.registerCapabilityListener(capability, async (value, _opts) => {
+          this.log(`${capability} set to`, value);
+
+          try {
+          // Map capability to Tuya DP (data point)
+            const dpArray = this.allCapabilities[capability];
+            const dp = Array.isArray(dpArray) ? dpArray[0] : undefined;
+
+            if (dp === undefined) {
+              const errorMsg = `No Tuya DP mapping found for capability: ${capability}`;
+              this.error(errorMsg);
+              throw new Error(errorMsg);
+            }
+
+            // Validate value based on capability type
+            const validatedValue = this.validateCapabilityValue(capability, value);
+
+            // OPTIMISTIC UPDATE (v0.99.52): Set capability value immediately for responsive UI
+            // This ensures getCapabilityValue() returns the new value right away, even before
+            // the device confirms the change. If device responds with different value,
+            // updateCapabilitiesFromDps() will override this optimistic value.
+            await this.setCapabilityValue(capability, validatedValue);
+            this.debugLog(`Optimistic update: ${capability} = ${validatedValue}`);
+
+            // Send command to device via ServiceCoordinator or fallback
+            await this.sendTuyaCommand(dp, validatedValue as string | number | boolean);
+
+            // Device response will arrive via updateCapabilitiesFromDps() and will:
+            // 1. Confirm the optimistic update (same value) - no visible change
+            // 2. Override with actual device value if different - ensures device is source of truth
+            //
+            // WHY THIS WORKS:
+            // - Homey SDK: setCapabilityValue() does NOT trigger listeners when called programmatically
+            // - Only USER-initiated changes (via UI/Flow cards) trigger capability listeners
+            // - Therefore: updateCapabilitiesFromDps() calling setCapabilityValue() is SAFE
+            // - No feedback loop, no circular dependencies
+            //
+            // BIDIRECTIONAL SYNC:
+            // - User changes Homey UI → Listener fires → Optimistic update → Send to device → Device confirms
+            // - Tuya app changes device → DPS update → updateCapabilitiesFromDps() → setCapabilityValue() → Homey UI updates
+            // - Both flows work correctly without interference
+
+          } catch (error) {
+            const categorizedError = this.handleTuyaError(error as Error, `Capability update: ${capability}`);
+
+            // Use categorized error message for better user experience
+            const { userMessage } = categorizedError;
+
+            throw new Error(userMessage);
           }
-          return String(e);
-        }),
+        });
       });
+
+      // Register flow card action listeners
+      await this.registerFlowCardActionListeners();
+
+      // Handle optional capabilities based on settings
+      await this.handleOptionalCapabilities();
+
+      // Reset external power timestamp on device initialization
+      this.lastExternalPowerTimestamp = null;
+
+      // Get Tuya device settings from Homey
+      const id = (this.getStoreValue('device_id') || '').toString().trim();
+      const key = (this.getStoreValue('local_key') || '').toString().trim();
+      const ip = (this.getStoreValue('ip_address') || '').toString().trim();
+      const version = (this.getStoreValue('protocol_version') || '3.3').toString().trim();
+
+      if (!id || !key) {
+        this.error('Tuya credentials missing: device_id or local_key not set.');
+        await this.setUnavailable('Missing Tuya credentials');
+        return;
+      }
+
+      // Initialize Service Coordinator with Tuya configuration
+      this.serviceCoordinator = new ServiceCoordinator({
+        device: this,
+        logger: this.debugLog.bind(this),
+      });
+
+      // Initialize services via coordinator
+      const initResult = await this.serviceCoordinator.initialize({
+        id,
+        key,
+        ip,
+        version,
+      });
+
+      if (!initResult.success || initResult.failedServices.length > 0) {
+        this.error('Service initialization issues:', {
+          failedServices: initResult.failedServices,
+          errors: initResult.errors.map((e) => {
+            if (e instanceof Error) {
+              return e.message;
+            }
+            if (typeof e === 'object' && e !== null) {
+              return JSON.stringify(e);
+            }
+            return String(e);
+          }),
+        });
       // Continue with fallback to direct methods for failed services
-    }
+      }
 
-    // Note: Reconnection interval is managed by ServiceCoordinator's TuyaConnectionService (v0.99.23+)
-    // No need for duplicate legacy reconnection interval
+      // Note: Reconnection interval is managed by ServiceCoordinator's TuyaConnectionService (v0.99.23+)
+      // No need for duplicate legacy reconnection interval
 
-    // Initialize flow cards based on current settings
-    await this.initializeFlowCards();
+      // Initialize flow cards based on current settings
+      await this.initializeFlowCards();
 
-    // Initialize connection status tracking (v0.99.47)
-    await this.initializeConnectionStatusTracking();
+      // Initialize connection status tracking (v0.99.47)
+      await this.initializeConnectionStatusTracking();
 
-    // Note: Health checks now managed by ServiceCoordinator's CapabilityHealthService
+      // Note: Health checks now managed by ServiceCoordinator's CapabilityHealthService
 
-    // Note: Energy tracking intervals managed by ServiceCoordinator's EnergyTrackingService
+      // Note: Energy tracking intervals managed by ServiceCoordinator's EnergyTrackingService
 
-    // Initialize COP calculation system
-    await this.initializeCOP();
+      // Initialize COP calculation system
+      await this.initializeCOP();
 
-    // Initialize rolling COP calculator
-    await this.initializeRollingCOP();
+      // Initialize rolling COP calculator
+      await this.initializeRollingCOP();
 
-    // Force refresh trend capability to ensure proper translation
-    await this.forceRefreshTrendCapability();
+      // Force refresh trend capability to ensure proper translation
+      await this.forceRefreshTrendCapability();
 
-    // Initialize intelligent energy tracking if enabled
-    if (this.getSetting('enable_intelligent_energy_tracking')) {
-      await this.initializeEnergyTracking();
-      this.log('🔋 Intelligent energy tracking initialized');
-    }
+      // Initialize intelligent energy tracking if enabled
+      if (this.getSetting('enable_intelligent_energy_tracking')) {
+        await this.initializeEnergyTracking();
+        this.log('🔋 Intelligent energy tracking initialized');
+      }
 
       // Set device as available after successful initialization
       await this.setAvailable();

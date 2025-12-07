@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "frequency",
       "title": {
-        "en": "Frequency (Hz)",
-        "nl": "Frequentie (Hz)"
+        "en": " Frequency ",
+        "nl": " Frequentie ",
+        "de": " Frequenz ",
+        "fr": " Fréquence "
       },
       "min": 10,
       "max": 100,
@@ -61,7 +69,9 @@
       "units": "Hz",
       "placeholder": {
         "en": "Frequency threshold in Hz",
-        "nl": "Frequentie drempel in Hz"
+        "nl": "Frequentie drempel in Hz",
+        "de": "Frequenzschwellenwert in Hz",
+        "fr": "Seuil de fréquence en Hz"
       }
     }
   ],

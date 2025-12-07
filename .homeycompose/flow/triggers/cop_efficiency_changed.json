@@ -30,21 +30,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -53,8 +59,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "COP threshold",
-        "nl": "COP drempel"
+        "en": " COP threshold",
+        "nl": " COP drempel",
+        "de": " COP-Schwellenwert",
+        "fr": " Seuil COP"
       },
       "min": 1.0,
       "max": 8.0,
@@ -62,7 +70,9 @@
       "units": "COP",
       "placeholder": {
         "en": "COP efficiency threshold",
-        "nl": "COP efficiëntie drempel"
+        "nl": "COP efficiëntie drempel",
+        "de": "COP-Effizienz-Schwellenwert",
+        "fr": "Seuil d'efficacité COP"
       }
     }
   ],
@@ -80,14 +90,25 @@
     },
     {
       "type": "number",
-      "name": "threshold_cop",
+      "name": "previous_cop",
       "title": {
-        "en": "Threshold COP",
-        "nl": "Drempel COP",
-        "de": "Schwellenwert COP",
-        "fr": "COP seuil"
+        "en": "Previous COP",
+        "nl": "Vorige COP",
+        "de": "Vorherige COP",
+        "fr": "COP précédent"
       },
       "example": 3.0
+    },
+    {
+      "type": "number",
+      "name": "change",
+      "title": {
+        "en": "Change in COP",
+        "nl": "Verandering in COP",
+        "de": "Änderung des COP",
+        "fr": "Changement du COP"
+      },
+      "example": 0.2
     },
     {
       "type": "string",

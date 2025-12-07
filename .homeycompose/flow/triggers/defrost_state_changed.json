@@ -30,21 +30,27 @@
       "name": "state",
       "title": {
         "en": "State",
-        "nl": "Status"
+        "nl": "Status",
+        "de": "Zustand",
+        "fr": "État"
       },
       "values": [
         {
           "id": "active",
           "title": {
             "en": "active",
-            "nl": "actief"
+            "nl": "actief",
+            "de": "aktiv",
+            "fr": "actif"
           }
         },
         {
           "id": "inactive",
           "title": {
             "en": "inactive",
-            "nl": "inactief"
+            "nl": "inactief",
+            "de": "inaktiv",
+            "fr": "inactif"
           }
         }
       ]

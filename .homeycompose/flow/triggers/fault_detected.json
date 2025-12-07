@@ -7,10 +7,10 @@
     "fr": "Défaut détecté"
   },
   "titleFormatted": {
-    "en": "Fault code [[fault_code]] detected",
-    "nl": "Storing code [[fault_code]] gedetecteerd",
-    "de": "Störungscode [[fault_code]] erkannt",
-    "fr": "Code de défaut [[fault_code]] détecté"
+    "en": "Fault [[fault_code]] detected",
+    "nl": "Storing [[fault_code]] gedetecteerd",
+    "de": "Störung [[fault_code]] erkannt",
+    "fr": "Défaut [[fault_code]] détecté"
   },
   "hint": {
     "en": "Triggers when a system fault is detected",
@@ -29,8 +29,10 @@
       "type": "range",
       "name": "fault_code",
       "title": {
-        "en": "Fault code",
-        "nl": "Storing code"
+        "en": " code",
+        "nl": " code",
+        "de": " code",
+        "fr": " code"
       },
       "min": 1,
       "max": 100,
@@ -38,7 +40,9 @@
       "units": "",
       "placeholder": {
         "en": "Fault code to monitor",
-        "nl": "Storing code om te monitoren"
+        "nl": "Storing code om te monitoren",
+        "de": "Störungscode zur Überwachung",
+        "fr": "Code de défaut à surveiller"
       }
     }
   ],

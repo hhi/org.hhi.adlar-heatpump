@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "current",
       "title": {
-        "en": "Current (A)",
-        "nl": "Stroom (A)"
+        "en": " Current (A)",
+        "nl": " Stroom (A)",
+        "de": " Strom (A)",
+        "fr": " Courant (A)"
       },
       "min": 1,
       "max": 50,
@@ -61,7 +69,9 @@
       "units": "A",
       "placeholder": {
         "en": "Current threshold in amperes",
-        "nl": "Stroom drempel in ampère"
+        "nl": "Stroom drempel in ampère",
+        "de": "Stromschwellenwert in Ampere",
+        "fr": "Seuil de courant en ampères"
       }
     }
   ],

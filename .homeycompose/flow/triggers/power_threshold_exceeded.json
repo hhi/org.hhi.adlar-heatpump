@@ -28,8 +28,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "Power threshold (W)",
-        "nl": "Vermogen drempel (W)"
+        "en": " Power threshold (W)",
+        "nl": " Vermogen drempel (W)",
+        "de": " Leistungs-Schwellenwert (W)",
+        "fr": " Seuil de puissance (W)"
       },
       "min": 100,
       "max": 10000,
@@ -37,7 +39,9 @@
       "units": "W",
       "placeholder": {
         "en": "Power threshold in watts",
-        "nl": "Vermogen drempel in watt"
+        "nl": "Vermogen drempel in watt",
+        "de": "Leistungs-Schwellenwert in Watt",
+        "fr": "Seuil de puissance en watts"
       }
     }
   ],

@@ -1,16 +1,16 @@
 {
   "id": "calculate_curve_value",
   "title": {
-    "en": "Calculate value from curve",
-    "nl": "Bereken waarde uit curve",
-    "de": "Wert aus Kurve berechnen",
-    "fr": "Calculer une valeur à partir d'une courbe"
+    "en": "Calculate value from curve rules",
+    "nl": "Bereken waarde uit curveregels",
+    "de": "Wert aus Kurvenregeln berechnen",
+    "fr": "Calculer une valeur à partir de règles de courbe"
   },
   "titleFormatted": {
-    "en": "Calculate value for [[input_value]] using curve [[curve]]",
-    "nl": "Bereken waarde voor [[input_value]] met curve [[curve]]",
-    "de": "Berechne Wert für [[input_value]] mit Kurve [[curve]]",
-    "fr": "Calculer une valeur pour [[input_value]] avec courbe [[curve]]"
+    "en": "Calculate value for [[input_value]] using curve rules [[curve]]",
+    "nl": "Bereken waarde voor [[input_value]] met curveregels [[curve]]",
+    "de": "Berechne Wert für [[input_value]] mit Kurvenregeln [[curve]]",
+    "fr": "Calculer une valeur pour [[input_value]] avec règles de courbe [[curve]]"
   },
   "hint": {
     "en": "Calculates output values based on input (e.g., outdoor temperature → heating setpoint). Format: '[operator] threshold : value'. Operators: >, >=, <, <=, ==, !=. Evaluates top to bottom, returns first match. Use 'default : value' as fallback. Example heating curve: '< 0 : 55, < 5 : 50, < 10 : 45, default : 35'",

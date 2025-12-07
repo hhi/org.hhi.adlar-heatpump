@@ -182,6 +182,9 @@ class MyApp extends App {
     // Custom conditions with complex logic
     this.registerComplexConditions();
 
+    // RunListeners for "changed" triggers (v1.3.2+)
+    this.registerChangedTriggerRunListeners();
+
     // Calculator action cards
     this.registerCurveCalculatorCard();
     this.registerTimeScheduleCard();
@@ -502,6 +505,172 @@ class MyApp extends App {
     });
 
     this.debugLog('Seasonal mode calculator card registered successfully');
+  }
+
+  /**
+   * Register runListeners for "changed" trigger cards (v1.3.2+)
+   *
+   * CRITICAL FIX: These triggers have user args (condition + threshold/state)
+   * but were missing runListeners to filter flows based on user-specified values.
+   *
+   * Without runListeners:
+   * - Trigger fires on ANY change
+   * - User args (above/below, threshold) are IGNORED
+   * - Flows execute regardless of condition
+   *
+   * With runListeners:
+   * - Homey evaluates args.condition vs state.condition
+   * - Flow only executes if user-specified threshold is crossed
+   * - Proper filtering based on user intent
+   *
+   * Affected triggers (9 total):
+   * - Temperature-based (3): ambient, inlet, outlet
+   * - COP-based (3): real-time, daily, monthly
+   * - State-based (3): compressor, defrost, backwater
+   */
+  registerChangedTriggerRunListeners() {
+    // ========================================
+    // CATEGORY 1: Temperature-Based Triggers (3)
+    // ========================================
+
+    // Ambient Temperature Changed
+    const ambientTempCard = this.homey.flow.getDeviceTriggerCard('ambient_temperature_changed');
+    ambientTempCard.registerRunListener(async (args, state) => {
+      const userCondition = args.condition; // User-specified: 'above' or 'below'
+      const userThreshold = args.temperature; // User-specified: e.g., 20°C
+      const currentTemp = state.temperature; // Actual temp from state: e.g., 11°C
+      const triggerCondition = state.condition; // State condition: 'above' or 'below'
+
+      this.log('🔍 ambient_temperature_changed runListener:', {
+        userCondition,
+        userThreshold,
+        currentTemp,
+        triggerCondition,
+      });
+
+      let shouldExecute = false;
+
+      // Only execute flow if:
+      // 1. User wants 'above' AND temp crossed above threshold
+      // 2. User wants 'below' AND temp crossed below threshold
+      if (userCondition === 'above') {
+        shouldExecute = triggerCondition === 'above' && currentTemp >= userThreshold;
+        this.log(`  → User wants ABOVE ${userThreshold}°C, temp crossed ${triggerCondition.toUpperCase()} at ${currentTemp}°C → ${shouldExecute ? '✅ EXECUTE' : '❌ SKIP'}`);
+      } else {
+        shouldExecute = triggerCondition === 'below' && currentTemp <= userThreshold;
+        this.log(`  → User wants BELOW ${userThreshold}°C, temp crossed ${triggerCondition.toUpperCase()} at ${currentTemp}°C → ${shouldExecute ? '✅ EXECUTE' : '❌ SKIP'}`);
+      }
+
+      return shouldExecute;
+    });
+
+    // Inlet Temperature Changed
+    const inletTempCard = this.homey.flow.getDeviceTriggerCard('inlet_temperature_changed');
+    inletTempCard.registerRunListener(async (args, state) => {
+      const userCondition = args.condition;
+      const userThreshold = args.temperature;
+      const currentTemp = state.temperature;
+      const triggerCondition = state.condition;
+
+      if (userCondition === 'above') {
+        return triggerCondition === 'above' && currentTemp >= userThreshold;
+      }
+      return triggerCondition === 'below' && currentTemp <= userThreshold;
+    });
+
+    // Outlet Temperature Changed
+    const outletTempCard = this.homey.flow.getDeviceTriggerCard('outlet_temperature_changed');
+    outletTempCard.registerRunListener(async (args, state) => {
+      const userCondition = args.condition;
+      const userThreshold = args.temperature;
+      const currentTemp = state.temperature;
+      const triggerCondition = state.condition;
+
+      if (userCondition === 'above') {
+        return triggerCondition === 'above' && currentTemp >= userThreshold;
+      }
+      return triggerCondition === 'below' && currentTemp <= userThreshold;
+    });
+
+    // ========================================
+    // CATEGORY 2: COP Efficiency Triggers (3)
+    // ========================================
+
+    // Real-Time COP Efficiency Changed
+    const copEfficiencyCard = this.homey.flow.getDeviceTriggerCard('cop_efficiency_changed');
+    copEfficiencyCard.registerRunListener(async (args, state) => {
+      const userCondition = args.condition; // User-specified: 'above' or 'below'
+      const userThreshold = args.threshold; // User-specified: e.g., 2.5 COP
+      const currentCOP = state.cop_value; // Actual COP from state: e.g., 3.2
+      const triggerCondition = state.condition; // State condition: 'above' or 'below'
+
+      if (userCondition === 'above') {
+        return triggerCondition === 'above' && currentCOP >= userThreshold;
+      }
+      return triggerCondition === 'below' && currentCOP <= userThreshold;
+    });
+
+    // Daily COP Efficiency Changed
+    const dailyCOPCard = this.homey.flow.getDeviceTriggerCard('daily_cop_efficiency_changed');
+    dailyCOPCard.registerRunListener(async (args, state) => {
+      const userCondition = args.condition;
+      const userThreshold = args.threshold;
+      const currentCOP = state.cop_value;
+      const triggerCondition = state.condition;
+
+      if (userCondition === 'above') {
+        return triggerCondition === 'above' && currentCOP >= userThreshold;
+      }
+      return triggerCondition === 'below' && currentCOP <= userThreshold;
+    });
+
+    // Monthly COP Efficiency Changed
+    const monthlyCOPCard = this.homey.flow.getDeviceTriggerCard('monthly_cop_efficiency_changed');
+    monthlyCOPCard.registerRunListener(async (args, state) => {
+      const userCondition = args.condition;
+      const userThreshold = args.threshold;
+      const currentCOP = state.cop_value;
+      const triggerCondition = state.condition;
+
+      if (userCondition === 'above') {
+        return triggerCondition === 'above' && currentCOP >= userThreshold;
+      }
+      return triggerCondition === 'below' && currentCOP <= userThreshold;
+    });
+
+    // ========================================
+    // CATEGORY 3: State-Based Triggers (3)
+    // ========================================
+
+    // Compressor State Changed
+    const compressorStateCard = this.homey.flow.getDeviceTriggerCard('compressor_state_changed');
+    compressorStateCard.registerRunListener(async (args, state) => {
+      const userState = args.state; // User-specified: 'running' or 'stopped'
+      const currentState = state.state; // Actual state from state: 'running' or 'stopped'
+
+      // Only execute flow if user's desired state matches current state
+      return userState === currentState;
+    });
+
+    // Defrost State Changed
+    const defrostStateCard = this.homey.flow.getDeviceTriggerCard('defrost_state_changed');
+    defrostStateCard.registerRunListener(async (args, state) => {
+      const userState = args.state; // User-specified: 'active' or 'inactive'
+      const currentState = state.state; // Actual state from state: 'active' or 'inactive'
+
+      return userState === currentState;
+    });
+
+    // Backwater State Changed
+    const backwaterStateCard = this.homey.flow.getDeviceTriggerCard('backwater_state_changed');
+    backwaterStateCard.registerRunListener(async (args, state) => {
+      const userState = args.state; // User-specified: 'flowing' or 'blocked'
+      const currentState = state.state; // Actual state from state: 'flowing' or 'blocked'
+
+      return userState === currentState;
+    });
+
+    this.debugLog('Changed trigger runListeners registered successfully (9 triggers)');
   }
 }
 

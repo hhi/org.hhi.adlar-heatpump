@@ -7,10 +7,10 @@
     "fr": "Alerte de température du serpentin"
   },
   "titleFormatted": {
-    "en": "Coiler temperature [[condition]] [[temperature]]°C",
-    "nl": "Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
-    "de": "Verdampfer-Temperatur [[condition]] [[temperature]]°C",
-    "fr": "Température du serpentin [[condition]] [[temperature]]°C"
+    "en": " Coiler temperature [[condition]] [[temperature]]°C",
+    "nl": " Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+    "de": " Verdampfer-Temperatur [[condition]] [[temperature]]°C",
+    "fr": " Température du serpentin [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when electricity coiler temperature goes above or below a specified level",
@@ -29,21 +29,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -52,8 +58,10 @@
       "type": "range",
       "name": "temperature",
       "title": {
-        "en": "Temperature (°C)",
-        "nl": "Temperatuur (°C)"
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température " 
       },
       "min": -20,
       "max": 80,
@@ -61,7 +69,9 @@
       "units": "°C",
       "placeholder": {
         "en": "Temperature threshold in °C",
-        "nl": "Temperatuur drempel in °C"
+        "nl": "Temperatuur drempel in °C",
+        "de": "Temperaturschwellenwert in °C",
+        "fr": "Seuil de température en °C"
       }
     }
   ],

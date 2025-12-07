@@ -28,10 +28,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "Power threshold (W)",
-        "nl": "Vermogen drempel (W)",
-        "de": "Leistungsschwellenwert (W)",
-        "fr": "Seuil de puissance (W)"
+        "en": " Power threshold (W)",
+        "nl": " Vermogen drempel (W)",
+        "de": " Leistungsschwellenwert (W)",
+        "fr": " Seuil de puissance (W)"
       },
       "min": 100,
       "max": 10000,

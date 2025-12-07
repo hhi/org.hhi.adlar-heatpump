@@ -29,21 +29,27 @@
       "name": "state",
       "title": {
         "en": "State",
-        "nl": "Status"
+        "nl": "Status",
+        "de": "Zustand",
+        "fr": "État"
       },
       "values": [
         {
           "id": "flowing",
           "title": {
             "en": "flowing",
-            "nl": "stromend"
+            "nl": "stromend",
+            "de": "fließend",
+            "fr": "en écoulement"
           }
         },
         {
           "id": "blocked",
           "title": {
             "en": "blocked",
-            "nl": "geblokkeerd"
+            "nl": "geblokkeerd",
+            "de": "blockiert",
+            "fr": "bloqué"
           }
         }
       ]

@@ -30,21 +30,27 @@
       "name": "condition",
       "title": {
         "en": "Condition",
-        "nl": "Conditie"
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
       },
       "values": [
         {
           "id": "above",
           "title": {
             "en": "above",
-            "nl": "boven"
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
           }
         },
         {
           "id": "below",
           "title": {
             "en": "below",
-            "nl": "onder"
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
           }
         }
       ]
@@ -53,8 +59,10 @@
       "type": "range",
       "name": "threshold",
       "title": {
-        "en": "Monthly COP threshold",
-        "nl": "Maandelijkse COP drempel"
+        "en": " Monthly COP threshold",
+        "nl": " Maandelijkse COP drempel",
+        "de": " Monatlicher COP-Schwellenwert",
+        "fr": " Seuil COP mensuel"
       },
       "min": 1,
       "max": 8,
@@ -62,7 +70,9 @@
       "units": "COP",
       "placeholder": {
         "en": "Monthly COP efficiency threshold",
-        "nl": "Maandelijkse COP efficiëntie drempel"
+        "nl": "Maandelijkse COP efficiëntie drempel",
+        "de": "Monatlicher COP-Effizienz-Schwellenwert",
+        "fr": "Seuil d'efficacité COP mensuel"
       }
     }
   ],
