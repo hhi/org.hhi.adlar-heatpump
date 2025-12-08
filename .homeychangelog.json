@@ -1,4 +1,10 @@
 {
+  "1.3.6": {
+    "en": "Extended self-healing to 4 condition flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Complete defense-in-depth protection for all runListeners prevents crashes from unexpected errors.",
+    "nl": "Self-healing uitgebreid naar 4 conditie flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Volledige defense-in-depth bescherming voor alle runListeners voorkomt crashes door onverwachte fouten.",
+    "de": "Selbstheilung auf 4 Bedingung-Flow-Karten erweitert (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Vollständiger Defense-in-Depth-Schutz für alle runListeners verhindert Abstürze durch unerwartete Fehler.",
+    "fr": "Auto-guérison étendue à 4 cartes de flux de condition (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Protection défense en profondeur complète pour tous les runListeners empêche les plantages dus à des erreurs inattendues."
+  },
   "1.3.5": {
     "en": "Self-healing registry prevents permanent device failure from recurring bugs. Automatically disables problematic features after 50 errors/hour, re-enables after 1-hour cooldown. Device continues operating with graceful degradation instead of crash loops.",
     "nl": "Zelf-herstellend register voorkomt permanente apparaatstoring door terugkerende bugs. Schakelt problematische functies automatisch uit na 50 fouten/uur, herschakelt na 1 uur afkoeling. Apparaat blijft werken met veilige degradatie in plaats van crash loops.",
