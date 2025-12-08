@@ -1,22 +1,22 @@
 {
   "id": "water_flow_alert",
   "title": {
-    "en": "Water flow rate alert",
-    "nl": "Water doorstroom alarm",
-    "de": "Wasserdurchfluss-Alarm",
-    "fr": "Alerte de débit d'eau"
+    "en": "Water flow rate alert (Expert)",
+    "nl": "Water doorstroom alarm (Expert)",
+    "de": "Wasserdurchfluss-Alarm (Experte)",
+    "fr": "Alerte de débit d'eau (Expert)"
   },
   "titleFormatted": {
-    "en": "Water flow rate [[condition]] [[flow_rate]] L/min",
-    "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min",
-    "de": "Wasserdurchfluss [[condition]] [[flow_rate]] L/min",
-    "fr": "Débit d'eau [[condition]] [[flow_rate]] L/min"
+    "en": "Water flow rate [[condition]] [[flow_rate]] L/min (Expert)",
+    "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min (Expert)",
+    "de": "Wasserdurchfluss [[condition]] [[flow_rate]] L/min (Experte)",
+    "fr": "Débit d'eau [[condition]] [[flow_rate]] L/min (Expert)"
   },
   "hint": {
-    "en": "Triggers when water flow rate goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald nivo gaat",
-    "de": "Wird ausgelöst, wenn der Wasserdurchfluss einen angegebenen Schwellenwert über- oder unterschreitet",
-    "fr": "Se déclenche lorsque le débit d'eau dépasse ou descend en dessous d'un niveau spécifié"
+    "en": "Triggers when water flow rate goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+    "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+    "de": "Wird ausgelöst, wenn der Wasserdurchfluss einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+    "fr": "Se déclenche lorsque le débit d'eau dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
   },
   "args": [
     {

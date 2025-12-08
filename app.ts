@@ -101,7 +101,10 @@ class MyApp extends App {
 
   async onInit() {
     // Initialize self-healing registry (v1.3.5 - automatic error recovery)
-    this.selfHealing = new SelfHealingRegistry((message, ...args) => this.log(message, ...args));
+    this.selfHealing = new SelfHealingRegistry(
+      (message, ...args) => this.log(message, ...args),
+      this.homey,
+    );
     this.log('✅ Self-Healing Registry initialized');
 
     if (process.env.DEBUG === '1') {

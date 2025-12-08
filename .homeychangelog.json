@@ -1,5 +1,5 @@
 {
-  "1.3.6": {
+  "1.3.7": {
     "en": "Extended self-healing to 4 condition flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Complete defense-in-depth protection for all runListeners prevents crashes from unexpected errors.",
     "nl": "Self-healing uitgebreid naar 4 conditie flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Volledige defense-in-depth bescherming voor alle runListeners voorkomt crashes door onverwachte fouten.",
     "de": "Selbstheilung auf 4 Bedingung-Flow-Karten erweitert (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Vollständiger Defense-in-Depth-Schutz für alle runListeners verhindert Abstürze durch unerwartete Fehler.",
