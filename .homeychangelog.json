@@ -1,4 +1,10 @@
 {
+  "1.3.5": {
+    "en": "Self-healing registry prevents permanent device failure from recurring bugs. Automatically disables problematic features after 50 errors/hour, re-enables after 1-hour cooldown. Device continues operating with graceful degradation instead of crash loops.",
+    "nl": "Zelf-herstellend register voorkomt permanente apparaatstoring door terugkerende bugs. Schakelt problematische functies automatisch uit na 50 fouten/uur, herschakelt na 1 uur afkoeling. Apparaat blijft werken met veilige degradatie in plaats van crash loops.",
+    "de": "Selbstheilungs-Register verhindert dauerhaften Geräteausfall durch wiederkehrende Fehler. Deaktiviert automatisch problematische Funktionen nach 50 Fehlern/Stunde, reaktiviert nach 1-stündiger Abkühlung. Gerät läuft weiter mit sicherer Degradation statt Absturzschleifen.",
+    "fr": "Le registre d'auto-guérison empêche la défaillance permanente de l'appareil due à des bugs récurrents. Désactive automatiquement les fonctionnalités problématiques après 50 erreurs/heure, réactive après 1 heure de refroidissement. L'appareil continue de fonctionner avec dégradation sécurisée au lieu de boucles de plantage."
+  },
   "1.3.4": {
     "en": "CRITICAL FIX: Resolved zombie connection crash caused by flow card runListener errors. Added comprehensive error handling to all 9 changed triggers (temperature, COP, state). Improved stability and prevents memory leaks from unhandled Promise rejections.",
     "nl": "KRITIEKE FIX: Zombie verbindingscrash opgelost veroorzaakt door flow card runListener fouten. Uitgebreide foutafhandeling toegevoegd aan alle 9 gewijzigde triggers (temperatuur, COP, status). Verbeterde stabiliteit en voorkomt geheugenlekken door onafgehandelde Promise rejections.",

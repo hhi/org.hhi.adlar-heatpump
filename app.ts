@@ -21,6 +21,7 @@ import {
 import { CurveCalculator } from './lib/curve-calculator';
 import { TimeScheduleCalculator } from './lib/time-schedule-calculator';
 import { SeasonalModeCalculator } from './lib/seasonal-mode-calculator';
+import { SelfHealingRegistry } from './lib/self-healing-registry';
 
 // Type definitions for flow card arguments
 interface DeviceFlowArgs {
@@ -50,6 +51,9 @@ interface FlowState {
 class MyApp extends App {
   // Additional storage for pattern-based triggers
   triggers: { [key: string]: FlowCardTrigger } = {};
+
+  // Self-healing registry for automatic error recovery (v1.3.5)
+  private selfHealing!: SelfHealingRegistry;
 
   // Index signature to support dynamic trigger assignment
   [key: string]: FlowCardTrigger | ((...args: unknown[]) => unknown) | unknown;
@@ -96,6 +100,10 @@ class MyApp extends App {
   powerThresholdExceededTrigger!: FlowCardTrigger;
 
   async onInit() {
+    // Initialize self-healing registry (v1.3.5 - automatic error recovery)
+    this.selfHealing = new SelfHealingRegistry((message, ...args) => this.log(message, ...args));
+    this.log('✅ Self-Healing Registry initialized');
+
     if (process.env.DEBUG === '1') {
       this.log('Development mode detected, enabling debug features');
       this.log('HOMEY_APP_RUNNER_DEVMODE=', process.env.HOMEY_APP_RUNNER_DEVMODE);
@@ -137,6 +145,12 @@ class MyApp extends App {
   }
 
   async onUninit() {
+    // Clean up self-healing registry (v1.3.5)
+    if (this.selfHealing) {
+      this.selfHealing.destroy();
+      this.log('Self-Healing Registry destroyed');
+    }
+
     // Clean up global error handlers to prevent stacking during app updates
     // If we don't remove these, each app update adds another handler → duplicates
     process.removeAllListeners('unhandledRejection');
@@ -508,7 +522,7 @@ class MyApp extends App {
   }
 
   /**
-   * Register runListeners for "changed" trigger cards (v1.3.2+, fixed v1.3.4)
+   * Register runListeners for "changed" trigger cards (v1.3.2+, fixed v1.3.4, enhanced v1.3.5)
    *
    * CRITICAL FIX: These triggers have user args (condition + threshold/state)
    * but were missing runListeners to filter flows based on user-specified values.
@@ -529,6 +543,12 @@ class MyApp extends App {
    * - Removed unsafe .toUpperCase() calls that could throw on undefined
    * - All runListeners now fail-safe (return false on error)
    *
+   * v1.3.5 Self-Healing:
+   * - Auto-disables runListeners after 50 errors/hour (prevents crash loops)
+   * - Graceful degradation: disabled features fall back to "execute all flows" mode
+   * - Auto-re-enables after 1 hour cooldown (automatic recovery)
+   * - Prevents permanent device failure from recurring bugs
+   *
    * Affected triggers (9 total):
    * - Temperature-based (3): ambient, inlet, outlet
    * - COP-based (3): real-time, daily, monthly
@@ -542,14 +562,24 @@ class MyApp extends App {
     // Ambient Temperature Changed
     const ambientTempCard = this.homey.flow.getDeviceTriggerCard('ambient_temperature_changed');
     ambientTempCard.registerRunListener(async (args, state) => {
+      const featureName = 'ambient_temperature_changed';
+
       try {
+        // Self-healing: Check if feature disabled due to excessive errors (v1.3.5)
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.debugLog(`${featureName}: Disabled by self-healing - executing flow without filtering (degraded mode)`);
+          return true; // Fail-open: execute all flows when filtering disabled
+        }
+
         // Validate inputs (fail-safe: return false if invalid)
         if (!state?.condition || !state?.temperature || typeof state.temperature !== 'number') {
-          this.error('ambient_temperature_changed: Invalid state object', { state });
+          this.error(`${featureName}: Invalid state object`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.temperature || typeof args.temperature !== 'number') {
-          this.error('ambient_temperature_changed: Invalid args object', { args });
+          this.error(`${featureName}: Invalid args object`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -558,7 +588,7 @@ class MyApp extends App {
         const currentTemp = state.temperature; // Actual temp from state: e.g., 11°C
         const triggerCondition = state.condition; // State condition: 'above' or 'below'
 
-        this.debugLog('🔍 ambient_temperature_changed runListener:', {
+        this.debugLog(`🔍 ${featureName} runListener:`, {
           userCondition,
           userThreshold,
           currentTemp,
@@ -575,7 +605,8 @@ class MyApp extends App {
         this.debugLog(`  → User wants BELOW ${userThreshold}°C, temp crossed ${triggerCondition} at ${currentTemp}°C → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
         return shouldExecute;
       } catch (error) {
-        this.error('ambient_temperature_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false; // Fail-safe: don't execute flow on error
       }
     });
@@ -583,13 +614,20 @@ class MyApp extends App {
     // Inlet Temperature Changed
     const inletTempCard = this.homey.flow.getDeviceTriggerCard('inlet_temperature_changed');
     inletTempCard.registerRunListener(async (args, state) => {
+      const featureName = 'inlet_temperature_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          return true; // Degraded mode: execute all flows
+        }
+
         if (!state?.condition || !state?.temperature || typeof state.temperature !== 'number') {
-          this.error('inlet_temperature_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.temperature || typeof args.temperature !== 'number') {
-          this.error('inlet_temperature_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -603,7 +641,8 @@ class MyApp extends App {
         }
         return triggerCondition === 'below' && currentTemp <= userThreshold;
       } catch (error) {
-        this.error('inlet_temperature_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -611,13 +650,20 @@ class MyApp extends App {
     // Outlet Temperature Changed
     const outletTempCard = this.homey.flow.getDeviceTriggerCard('outlet_temperature_changed');
     outletTempCard.registerRunListener(async (args, state) => {
+      const featureName = 'outlet_temperature_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          return true; // Degraded mode: execute all flows
+        }
+
         if (!state?.condition || !state?.temperature || typeof state.temperature !== 'number') {
-          this.error('outlet_temperature_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.temperature || typeof args.temperature !== 'number') {
-          this.error('outlet_temperature_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -631,7 +677,8 @@ class MyApp extends App {
         }
         return triggerCondition === 'below' && currentTemp <= userThreshold;
       } catch (error) {
-        this.error('outlet_temperature_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -643,13 +690,18 @@ class MyApp extends App {
     // Real-Time COP Efficiency Changed
     const copEfficiencyCard = this.homey.flow.getDeviceTriggerCard('cop_efficiency_changed');
     copEfficiencyCard.registerRunListener(async (args, state) => {
+      const featureName = 'cop_efficiency_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+
         if (!state?.condition || typeof state?.cop_value !== 'number') {
-          this.error('cop_efficiency_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || typeof args?.threshold !== 'number') {
-          this.error('cop_efficiency_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -663,7 +715,8 @@ class MyApp extends App {
         }
         return triggerCondition === 'below' && currentCOP <= userThreshold;
       } catch (error) {
-        this.error('cop_efficiency_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -671,13 +724,18 @@ class MyApp extends App {
     // Daily COP Efficiency Changed
     const dailyCOPCard = this.homey.flow.getDeviceTriggerCard('daily_cop_efficiency_changed');
     dailyCOPCard.registerRunListener(async (args, state) => {
+      const featureName = 'daily_cop_efficiency_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+
         if (!state?.condition || typeof state?.cop_value !== 'number') {
-          this.error('daily_cop_efficiency_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || typeof args?.threshold !== 'number') {
-          this.error('daily_cop_efficiency_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -691,7 +749,8 @@ class MyApp extends App {
         }
         return triggerCondition === 'below' && currentCOP <= userThreshold;
       } catch (error) {
-        this.error('daily_cop_efficiency_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -699,13 +758,18 @@ class MyApp extends App {
     // Monthly COP Efficiency Changed
     const monthlyCOPCard = this.homey.flow.getDeviceTriggerCard('monthly_cop_efficiency_changed');
     monthlyCOPCard.registerRunListener(async (args, state) => {
+      const featureName = 'monthly_cop_efficiency_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+
         if (!state?.condition || typeof state?.cop_value !== 'number') {
-          this.error('monthly_cop_efficiency_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || typeof args?.threshold !== 'number') {
-          this.error('monthly_cop_efficiency_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -719,7 +783,8 @@ class MyApp extends App {
         }
         return triggerCondition === 'below' && currentCOP <= userThreshold;
       } catch (error) {
-        this.error('monthly_cop_efficiency_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -731,13 +796,18 @@ class MyApp extends App {
     // Compressor State Changed
     const compressorStateCard = this.homey.flow.getDeviceTriggerCard('compressor_state_changed');
     compressorStateCard.registerRunListener(async (args, state) => {
+      const featureName = 'compressor_state_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+
         if (!state?.state || typeof state.state !== 'string') {
-          this.error('compressor_state_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.state || typeof args.state !== 'string') {
-          this.error('compressor_state_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -747,7 +817,8 @@ class MyApp extends App {
         // Only execute flow if user's desired state matches current state
         return userState === currentState;
       } catch (error) {
-        this.error('compressor_state_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -755,13 +826,18 @@ class MyApp extends App {
     // Defrost State Changed
     const defrostStateCard = this.homey.flow.getDeviceTriggerCard('defrost_state_changed');
     defrostStateCard.registerRunListener(async (args, state) => {
+      const featureName = 'defrost_state_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+
         if (!state?.state || typeof state.state !== 'string') {
-          this.error('defrost_state_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.state || typeof args.state !== 'string') {
-          this.error('defrost_state_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -770,7 +846,8 @@ class MyApp extends App {
 
         return userState === currentState;
       } catch (error) {
-        this.error('defrost_state_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
@@ -778,13 +855,18 @@ class MyApp extends App {
     // Backwater State Changed
     const backwaterStateCard = this.homey.flow.getDeviceTriggerCard('backwater_state_changed');
     backwaterStateCard.registerRunListener(async (args, state) => {
+      const featureName = 'backwater_state_changed';
       try {
+        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+
         if (!state?.state || typeof state.state !== 'string') {
-          this.error('backwater_state_changed: Invalid state', { state });
+          this.error(`${featureName}: Invalid state`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
         if (!args?.state || typeof args.state !== 'string') {
-          this.error('backwater_state_changed: Invalid args', { args });
+          this.error(`${featureName}: Invalid args`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
@@ -793,12 +875,13 @@ class MyApp extends App {
 
         return userState === currentState;
       } catch (error) {
-        this.error('backwater_state_changed runListener error:', error);
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
         return false;
       }
     });
 
-    this.log('Changed trigger runListeners registered successfully (9 triggers with error handling)');
+    this.log(`Changed trigger runListeners registered successfully (9 triggers with self-healing, threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`);
   }
 }
 
