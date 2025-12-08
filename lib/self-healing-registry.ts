@@ -1,3 +1,12 @@
+/* eslint-disable import/prefer-default-export */
+/**
+ * Interface for Homey timer management methods
+ */
+interface HomeyTimers {
+  setTimeout: (callback: () => void, ms: number) => NodeJS.Timeout;
+  setInterval: (callback: () => void, ms: number) => NodeJS.Timeout;
+}
+
 /**
  * Self-Healing Feature Registry (v1.3.5)
  *
@@ -39,6 +48,7 @@ export class SelfHealingRegistry {
   private errorCounts: Map<string, ErrorData> = new Map();
   private disabledFeatures: Map<string, DisabledFeature> = new Map();
   private logger: (message: string, ...args: unknown[]) => void;
+  private homey: HomeyTimers; // Homey instance for managed timers
 
   // Configuration
   private readonly MAX_ERRORS_PER_HOUR = 50; // Threshold for auto-disable
@@ -47,9 +57,18 @@ export class SelfHealingRegistry {
   private readonly CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
   private cleanupTimer: NodeJS.Timeout | null = null;
+  private reenableTimers: Map<string, NodeJS.Timeout> = new Map(); // Track re-enable timers
 
-  constructor(logger?: (message: string, ...args: unknown[]) => void) {
+  constructor(
+    logger?: (message: string, ...args: unknown[]) => void,
+    homey?: HomeyTimers,
+  ) {
     this.logger = logger || (() => {}); // No-op if no logger provided
+
+    if (!homey) {
+      throw new Error('Homey instance is required for timer management');
+    }
+    this.homey = homey;
 
     // Start periodic cleanup of old error data
     this.startCleanup();
@@ -127,10 +146,14 @@ export class SelfHealingRegistry {
       reason,
     });
 
-    // Schedule auto-re-enable after cooldown
-    setTimeout(() => {
+    // Schedule auto-re-enable after cooldown using Homey's managed timer
+    const timer = this.homey.setTimeout(() => {
+      this.reenableTimers.delete(featureName);
       this.reenableFeature(featureName);
     }, this.DISABLE_DURATION_MS);
+
+    // Track timer for cleanup
+    this.reenableTimers.set(featureName, timer);
   }
 
   /**
@@ -237,7 +260,7 @@ export class SelfHealingRegistry {
    * Start periodic cleanup of stale error data.
    */
   private startCleanup(): void {
-    this.cleanupTimer = setInterval(() => {
+    this.cleanupTimer = this.homey.setInterval(() => {
       this.cleanup();
     }, this.CLEANUP_INTERVAL_MS);
   }
@@ -266,10 +289,17 @@ export class SelfHealingRegistry {
    * Stop cleanup timer and release resources.
    */
   destroy(): void {
+    // Clear cleanup interval timer
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = null;
     }
+
+    // Clear all re-enable timeout timers
+    this.reenableTimers.forEach((timer) => {
+      clearTimeout(timer);
+    });
+    this.reenableTimers.clear();
 
     this.errorCounts.clear();
     this.disabledFeatures.clear();

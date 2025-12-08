@@ -944,7 +944,24 @@ export class TuyaConnectionService {
 
     // Connected event
     this.tuya.on('connected', (): void => {
-      this.logger('TuyaConnectionService: Device connected');
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+      // Enhanced recovery logging with layer detection context
+      if (this.lastDisconnectSource) {
+        this.logger('╔═══════════════════════════════════════════════════╗');
+        this.logger(`║ ✅ [RECOVERY] CONNECTION RESTORED at ${timeStr} ║`);
+        this.logger('╠═══════════════════════════════════════════════════╣');
+        this.logger(`║  Previous disconnect: ${this.lastDisconnectSource}`);
+        if (this.lastDisconnectTime > 0) {
+          const outageSeconds = Math.round((Date.now() - this.lastDisconnectTime) / 1000);
+          this.logger(`║  Outage duration: ${outageSeconds}s`);
+        }
+        this.logger('╚═══════════════════════════════════════════════════╝');
+      } else {
+        this.logger(`TuyaConnectionService: ✅ Device connected at ${timeStr}`);
+      }
+
       this.isConnected = true;
       this.hasEverConnected = true; // Mark that we've successfully connected at least once (v1.0.6 bugfix)
       this.updateStatusTimestamp('connected').catch((err) => {
@@ -1086,14 +1103,16 @@ export class TuyaConnectionService {
         const now = new Date();
         const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-        this.logger('═════════════════════════════════════════════════════');
-        this.logger(`❌ LAYER 0 DISCONNECT DETECTED at ${timeStr}`);
-        this.logger(`   Last heartbeat: ${Math.round(timeSinceLastHeartbeat / 1000)}s ago (threshold: 35s)`);
-        this.logger(`   Last data event: ${Math.round(timeSinceLastData / 1000)}s ago`);
-        this.logger(`   Consecutive failures: ${this.consecutiveFailures}`);
-        this.logger(`   Backoff multiplier: ${this.backoffMultiplier}x`);
-        this.logger('🔴 Layer 0: Triggering reconnection attempt...');
-        this.logger('═════════════════════════════════════════════════════');
+        this.logger('╔═══════════════════════════════════════════════════╗');
+        this.logger(`║ 🔴 [LAYER 0] ZOMBIE DETECTED at ${timeStr}      ║`);
+        this.logger('╠═══════════════════════════════════════════════════╣');
+        this.logger(`║  Last heartbeat: ${Math.round(timeSinceLastHeartbeat / 1000)}s ago (threshold: 35s)`);
+        this.logger(`║  Last data event: ${Math.round(timeSinceLastData / 1000)}s ago`);
+        this.logger(`║  Consecutive failures: ${this.consecutiveFailures}`);
+        this.logger(`║  Backoff multiplier: ${this.backoffMultiplier}x`);
+        this.logger('╠═══════════════════════════════════════════════════╣');
+        this.logger('║  🔄 Triggering reconnection attempt...');
+        this.logger('╚═══════════════════════════════════════════════════╝');
 
         // Mark as disconnected
         this.isConnected = false;
@@ -1406,15 +1425,17 @@ export class TuyaConnectionService {
       }
 
       // Both layers failed to trigger data event - this is a zombie connection
-      this.logger('═════════════════════════════════════════════════════');
-      this.logger(`🧟 LAYER 1-2 ZOMBIE DETECTED at ${timeStr}`);
-      this.logger(`   LAYER 1 (get): ${layer1GetError ? `FAILED - ${layer1GetError.message}` : 'OK but NO data event'}`);
-      this.logger(`   LAYER 2 (set): ${layer2SetError ? `FAILED - ${layer2SetError.message}` : 'OK but NO data event'}`);
-      this.logger(`   Last data event: ${Math.round(timeSinceLastData / 1000)}s ago`);
-      this.logger(`   Consecutive failures: ${this.consecutiveFailures}`);
-      this.logger(`   Backoff multiplier: ${this.backoffMultiplier}x`);
-      this.logger('🔴 Layer 1-2: Triggering force reconnect...');
-      this.logger('═════════════════════════════════════════════════════');
+      this.logger('╔═══════════════════════════════════════════════════╗');
+      this.logger(`║ 🧟 [LAYER 1-2] ZOMBIE DETECTED at ${timeStr}    ║`);
+      this.logger('╠═══════════════════════════════════════════════════╣');
+      this.logger(`║  LAYER 1 (get): ${layer1GetError ? `FAILED - ${layer1GetError.message}` : 'OK but NO data event'}`);
+      this.logger(`║  LAYER 2 (set): ${layer2SetError ? `FAILED - ${layer2SetError.message}` : 'OK but NO data event'}`);
+      this.logger(`║  Last data event: ${Math.round(timeSinceLastData / 1000)}s ago`);
+      this.logger(`║  Consecutive failures: ${this.consecutiveFailures}`);
+      this.logger(`║  Backoff multiplier: ${this.backoffMultiplier}x`);
+      this.logger('╠═══════════════════════════════════════════════════╣');
+      this.logger('║  🔄 Triggering force reconnect...');
+      this.logger('╚═══════════════════════════════════════════════════╝');
 
       // Store detailed disconnect source for diagnostics
       const layer1Status = layer1GetError ? `failed: ${layer1GetError.message}` : 'no data event';
@@ -1525,8 +1546,17 @@ export class TuyaConnectionService {
       // If no data for longer than stale threshold, connection is likely dead
       if (timeSinceLastData > DeviceConstants.STALE_CONNECTION_THRESHOLD_MS) {
         const idleMinutes = Math.round(timeSinceLastData / 60000);
-        this.logger(`TuyaConnectionService: 🚨 Stale connection detected - no data for ${Math.round(timeSinceLastData / 1000)}s (threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 1000}s)`);
-        this.logger('TuyaConnectionService: Forcing reconnection for stale connection');
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+        this.logger('╔═══════════════════════════════════════════════════╗');
+        this.logger(`║ ⏰ [LAYER 3] STALE CONNECTION at ${timeStr}     ║`);
+        this.logger('╠═══════════════════════════════════════════════════╣');
+        this.logger(`║  Idle time: ${Math.round(timeSinceLastData / 1000)}s (${idleMinutes} min)`);
+        this.logger(`║  Threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 1000}s`);
+        this.logger('╠═══════════════════════════════════════════════════╣');
+        this.logger('║  🔄 Forcing reconnection for stale connection');
+        this.logger('╚═══════════════════════════════════════════════════╝');
 
         // Store detailed disconnect source
         this.lastDisconnectSource = `stale_connection (idle: ${idleMinutes}min, threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 60000}min)`;

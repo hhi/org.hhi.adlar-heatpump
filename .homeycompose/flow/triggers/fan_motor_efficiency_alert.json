@@ -1,22 +1,22 @@
 {
   "id": "fan_motor_efficiency_alert",
   "title": {
-    "en": "Fan motor efficiency alert",
-    "nl": "Ventilator motor efficiëntie alarm",
-    "de": "Lüftermotor-Effizienzalarm",
-    "fr": "Alerte d'efficacité du moteur de ventilateur"
+    "en": "Fan motor efficiency alert (Expert)",
+    "nl": "Ventilator motor efficiëntie alarm (Expert)",
+    "de": "Lüftermotor-Effizienzalarm (Experte)",
+    "fr": "Alerte d'efficacité du moteur de ventilateur (Expert)"
   },
   "titleFormatted": {
-    "en": "Fan motor frequency [[condition]] [[frequency]] Hz",
-    "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz",
-    "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz",
-    "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz"
+    "en": "Fan motor frequency [[condition]] [[frequency]] Hz (Expert)",
+    "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz (Expert)",
+    "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+    "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz (Expert)"
   },
   "hint": {
-    "en": "Triggers when fan motor frequency goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald nivo gaat",
-    "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet",
-    "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié"
+    "en": "Triggers when fan motor frequency goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+    "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+    "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
   },
   "args": [
     {

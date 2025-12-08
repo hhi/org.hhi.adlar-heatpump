@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -336,22 +336,22 @@
       {
         "id": "compressor_efficiency_alert",
         "title": {
-          "en": "Compressor efficiency alert",
-          "nl": "Compressor efficiëntie alarm",
-          "de": "Kompressor-Effizienzalarm",
-          "fr": "Alerte d'efficacité du compresseur"
+          "en": "Compressor efficiency alert (Expert)",
+          "nl": "Compressor efficiëntie alarm (Expert)",
+          "de": "Kompressor-Effizienzalarm (Experte)",
+          "fr": "Alerte d'efficacité du compresseur (Expert)"
         },
         "titleFormatted": {
-          "en": "Compressor frequency [[condition]] [[frequency]] Hz",
-          "nl": "Compressor frequentie [[condition]] [[frequency]] Hz",
-          "de": "Kompressor-Frequenz [[condition]] [[frequency]] Hz",
-          "fr": "Fréquence du compresseur [[condition]] [[frequency]] Hz"
+          "en": "Compressor frequency [[condition]] [[frequency]] Hz (Expert)",
+          "nl": "Compressor frequentie [[condition]] [[frequency]] Hz (Expert)",
+          "de": "Kompressor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+          "fr": "Fréquence du compresseur [[condition]] [[frequency]] Hz (Expert)"
         },
         "hint": {
-          "en": "Triggers when compressor frequency goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald nivo gaat",
-          "de": "Wird ausgelöst, wenn die Kompressor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet",
-          "fr": "Se déclenche lorsque la fréquence du compresseur dépasse ou descend en dessous d'un niveau spécifié"
+          "en": "Triggers when compressor frequency goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+          "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+          "de": "Wird ausgelöst, wenn die Kompressor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+          "fr": "Se déclenche lorsque la fréquence du compresseur dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
         },
         "args": [
           {
@@ -1744,22 +1744,22 @@
       {
         "id": "fan_motor_efficiency_alert",
         "title": {
-          "en": "Fan motor efficiency alert",
-          "nl": "Ventilator motor efficiëntie alarm",
-          "de": "Lüftermotor-Effizienzalarm",
-          "fr": "Alerte d'efficacité du moteur de ventilateur"
+          "en": "Fan motor efficiency alert (Expert)",
+          "nl": "Ventilator motor efficiëntie alarm (Expert)",
+          "de": "Lüftermotor-Effizienzalarm (Experte)",
+          "fr": "Alerte d'efficacité du moteur de ventilateur (Expert)"
         },
         "titleFormatted": {
-          "en": "Fan motor frequency [[condition]] [[frequency]] Hz",
-          "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz",
-          "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz",
-          "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz"
+          "en": "Fan motor frequency [[condition]] [[frequency]] Hz (Expert)",
+          "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz (Expert)",
+          "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+          "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz (Expert)"
         },
         "hint": {
-          "en": "Triggers when fan motor frequency goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald nivo gaat",
-          "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet",
-          "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié"
+          "en": "Triggers when fan motor frequency goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+          "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+          "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+          "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
         },
         "args": [
           {
@@ -3432,22 +3432,22 @@
       {
         "id": "water_flow_alert",
         "title": {
-          "en": "Water flow rate alert",
-          "nl": "Water doorstroom alarm",
-          "de": "Wasserdurchfluss-Alarm",
-          "fr": "Alerte de débit d'eau"
+          "en": "Water flow rate alert (Expert)",
+          "nl": "Water doorstroom alarm (Expert)",
+          "de": "Wasserdurchfluss-Alarm (Experte)",
+          "fr": "Alerte de débit d'eau (Expert)"
         },
         "titleFormatted": {
-          "en": "Water flow rate [[condition]] [[flow_rate]] L/min",
-          "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min",
-          "de": "Wasserdurchfluss [[condition]] [[flow_rate]] L/min",
-          "fr": "Débit d'eau [[condition]] [[flow_rate]] L/min"
+          "en": "Water flow rate [[condition]] [[flow_rate]] L/min (Expert)",
+          "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min (Expert)",
+          "de": "Wasserdurchfluss [[condition]] [[flow_rate]] L/min (Experte)",
+          "fr": "Débit d'eau [[condition]] [[flow_rate]] L/min (Expert)"
         },
         "hint": {
-          "en": "Triggers when water flow rate goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald nivo gaat",
-          "de": "Wird ausgelöst, wenn der Wasserdurchfluss einen angegebenen Schwellenwert über- oder unterschreitet",
-          "fr": "Se déclenche lorsque le débit d'eau dépasse ou descend en dessous d'un niveau spécifié"
+          "en": "Triggers when water flow rate goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+          "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+          "de": "Wird ausgelöst, wenn der Wasserdurchfluss einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+          "fr": "Se déclenche lorsque le débit d'eau dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
         },
         "args": [
           {
