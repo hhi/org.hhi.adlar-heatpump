@@ -1,4 +1,10 @@
 {
+  "1.3.4": {
+    "en": "CRITICAL FIX: Resolved zombie connection crash caused by flow card runListener errors. Added comprehensive error handling to all 9 changed triggers (temperature, COP, state). Improved stability and prevents memory leaks from unhandled Promise rejections.",
+    "nl": "KRITIEKE FIX: Zombie verbindingscrash opgelost veroorzaakt door flow card runListener fouten. Uitgebreide foutafhandeling toegevoegd aan alle 9 gewijzigde triggers (temperatuur, COP, status). Verbeterde stabiliteit en voorkomt geheugenlekken door onafgehandelde Promise rejections.",
+    "de": "KRITISCHER FIX: Zombie-Verbindungsabsturz behoben, verursacht durch Flow-Card-runListener-Fehler. Umfassende Fehlerbehandlung zu allen 9 geänderten Triggern hinzugefügt (Temperatur, COP, Status). Verbesserte Stabilität und verhindert Speicherlecks durch nicht behandelte Promise-Rejections.",
+    "fr": "CORRECTIF CRITIQUE: Crash de connexion zombie résolu causé par des erreurs de runListener de carte de flux. Gestion d'erreurs complète ajoutée à tous les 9 déclencheurs modifiés (température, COP, état). Stabilité améliorée et empêche les fuites de mémoire dues aux rejets de Promise non gérés."
+  },
   "1.3.3": {
     "en": "Improved flow card tokens: Temperature change triggers (ambient, inlet, outlet) now show only current temperature. COP efficiency trigger shows performance trend with previous value and change amount (e.g., 3.0 → 3.2, +0.2).",
     "nl": "Verbeterde flow card tokens: Temperatuur wijziging triggers (omgeving, inlaat, uitlaat) tonen nu alleen huidige temperatuur. COP efficiëntie trigger toont prestatie trend met vorige waarde en wijzigingsbedrag (bijv. 3.0 → 3.2, +0.2).",
