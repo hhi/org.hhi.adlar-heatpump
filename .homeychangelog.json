@@ -1,4 +1,10 @@
 {
+  "1.3.8": {
+    "en": "CRITICAL FIX: Automatic reconnection now works after zombie connection detection. Resolves infinite retry loop where device showed 'reconnecting every 20s' but never recovered (v1.0.36 regression). Device config now stored for TuyAPI instance recreation.",
+    "nl": "KRITIEKE FIX: Automatische herverbinding werkt nu na zombie verbindingsdetectie. Lost oneindige retry loop op waarbij apparaat 'elke 20s herverbinden' toonde maar nooit herstelde (v1.0.36 regressie). Apparaat config nu opgeslagen voor TuyAPI instance recreatie.",
+    "de": "KRITISCHER FIX: Automatische Wiederverbindung funktioniert jetzt nach Zombie-Verbindungserkennung. Behebt Endlosschleife, bei der Gerät 'alle 20s Wiederverbindung' anzeigte, aber nie wiederherstellte (v1.0.36-Regression). Gerätekonfiguration jetzt gespeichert für TuyAPI-Instanz-Neuerstellung.",
+    "fr": "CORRECTIF CRITIQUE: La reconnexion automatique fonctionne maintenant après la détection de connexion zombie. Résout la boucle de réessai infinie où l'appareil affichait 'reconnexion toutes les 20s' mais ne récupérait jamais (régression v1.0.36). Configuration de l'appareil maintenant stockée pour recréation de l'instance TuyAPI."
+  },
   "1.3.7": {
     "en": "Extended self-healing to 4 condition flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Complete defense-in-depth protection for all runListeners prevents crashes from unexpected errors.",
     "nl": "Self-healing uitgebreid naar 4 conditie flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Volledige defense-in-depth bescherming voor alle runListeners voorkomt crashes door onverwachte fouten.",

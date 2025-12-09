@@ -99,6 +99,11 @@ export class TuyaConnectionService {
   private lastDisconnectSource: string | null = null;
   private lastDisconnectTime: number = 0;
 
+  // Device configuration storage for TuyAPI instance recreation (v1.3.8 - critical bugfix)
+  // CRITICAL: Store config to allow TuyAPI instance recreation after disconnect() sets tuya=null
+  // Without this, reconnection attempts silently fail when tuya is null (v1.0.36 regression)
+  private deviceConfig: TuyaDeviceConfig | null = null;
+
   // Event handlers
   private onDataHandler?: (data: { dps: Record<number, unknown> }) => void;
   private onDpRefreshHandler?: (data: { dps: Record<number, unknown> }) => void;
@@ -135,6 +140,10 @@ export class TuyaConnectionService {
     this.logger('TuyaConnectionService: Initializing Tuya device connection');
 
     try {
+      // Store config for TuyAPI instance recreation (v1.3.8 - critical bugfix)
+      // CRITICAL: Allows reconnection after disconnect() sets tuya=null (v1.0.36 regression fix)
+      this.deviceConfig = config;
+
       // Restore last connection timestamp AND status from store (persists across app updates)
       const storedTimestamp = await this.device.getStoreValue('last_connection_timestamp');
       const storedStatus = await this.device.getStoreValue('last_connection_status');
@@ -235,7 +244,10 @@ export class TuyaConnectionService {
       // Step 3: Reset error recovery state for fresh start
       this.resetErrorRecoveryState();
 
-      // Step 4: Create new TuyAPI instance with new credentials
+      // Step 4: Store new config for future reconnections (v1.3.8)
+      this.deviceConfig = config;
+
+      // Step 5: Create new TuyAPI instance with new credentials
       this.logger('TuyaConnectionService: Creating new Tuya instance with updated credentials');
       this.tuya = new TuyAPI({
         id: config.id,
@@ -280,10 +292,33 @@ export class TuyaConnectionService {
    * Connect to the Tuya device and set up event handlers.
    * Uses a circuit breaker/backoff strategy on repeated failures.
    * Enhanced with wake-up mechanism for sleeping devices (v1.0.12).
+   * v1.3.8: Recreates TuyAPI instance if null (fixes v1.0.36 regression)
    */
   async connectTuya(): Promise<void> {
-    if (this.isConnected || !this.tuya) {
+    if (this.isConnected) {
       return;
+    }
+
+    // v1.3.8 CRITICAL FIX: Recreate TuyAPI instance if null
+    // Fixes v1.0.36 regression where disconnect() sets tuya=null but reconnection fails
+    // because connectTuya() would return early without recreating the instance
+    if (!this.tuya) {
+      if (!this.deviceConfig) {
+        this.logger('TuyaConnectionService: ❌ Cannot connect - device config not initialized');
+        throw new Error('Cannot connect: device config not initialized');
+      }
+
+      this.logger('TuyaConnectionService: 🔄 Recreating TuyAPI instance (was null after disconnect)');
+      this.tuya = new TuyAPI({
+        id: this.deviceConfig.id,
+        key: this.deviceConfig.key,
+        ip: this.deviceConfig.ip,
+        version: this.deviceConfig.version || '3.3',
+      });
+
+      // Reattach event handlers to new instance
+      this.setupTuyaEventHandlers();
+      this.logger('TuyaConnectionService: ✅ TuyAPI instance recreated, event handlers attached');
     }
 
     this.connectionAttempts++;
