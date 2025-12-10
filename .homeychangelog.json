@@ -1,27 +1,9 @@
 {
-  "1.3.8": {
-    "en": "CRITICAL FIX: Automatic reconnection now works after zombie connection detection. Resolves infinite retry loop where device showed 'reconnecting every 20s' but never recovered (v1.0.36 regression). Device config now stored for TuyAPI instance recreation.",
-    "nl": "KRITIEKE FIX: Automatische herverbinding werkt nu na zombie verbindingsdetectie. Lost oneindige retry loop op waarbij apparaat 'elke 20s herverbinden' toonde maar nooit herstelde (v1.0.36 regressie). Apparaat config nu opgeslagen voor TuyAPI instance recreatie.",
-    "de": "KRITISCHER FIX: Automatische Wiederverbindung funktioniert jetzt nach Zombie-Verbindungserkennung. Behebt Endlosschleife, bei der Gerät 'alle 20s Wiederverbindung' anzeigte, aber nie wiederherstellte (v1.0.36-Regression). Gerätekonfiguration jetzt gespeichert für TuyAPI-Instanz-Neuerstellung.",
-    "fr": "CORRECTIF CRITIQUE: La reconnexion automatique fonctionne maintenant après la détection de connexion zombie. Résout la boucle de réessai infinie où l'appareil affichait 'reconnexion toutes les 20s' mais ne récupérait jamais (régression v1.0.36). Configuration de l'appareil maintenant stockée pour recréation de l'instance TuyAPI."
-  },
-  "1.3.7": {
-    "en": "Extended self-healing to 4 condition flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Complete defense-in-depth protection for all runListeners prevents crashes from unexpected errors.",
-    "nl": "Self-healing uitgebreid naar 4 conditie flow cards (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Volledige defense-in-depth bescherming voor alle runListeners voorkomt crashes door onverwachte fouten.",
-    "de": "Selbstheilung auf 4 Bedingung-Flow-Karten erweitert (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Vollständiger Defense-in-Depth-Schutz für alle runListeners verhindert Abstürze durch unerwartete Fehler.",
-    "fr": "Auto-guérison étendue à 4 cartes de flux de condition (temperature_differential, electrical_balance_check, water_flow_rate_check, system_pulse_steps_differential). Protection défense en profondeur complète pour tous les runListeners empêche les plantages dus à des erreurs inattendues."
-  },
-  "1.3.5": {
-    "en": "Self-healing registry prevents permanent device failure from recurring bugs. Automatically disables problematic features after 50 errors/hour, re-enables after 1-hour cooldown. Device continues operating with graceful degradation instead of crash loops.",
-    "nl": "Zelf-herstellend register voorkomt permanente apparaatstoring door terugkerende bugs. Schakelt problematische functies automatisch uit na 50 fouten/uur, herschakelt na 1 uur afkoeling. Apparaat blijft werken met veilige degradatie in plaats van crash loops.",
-    "de": "Selbstheilungs-Register verhindert dauerhaften Geräteausfall durch wiederkehrende Fehler. Deaktiviert automatisch problematische Funktionen nach 50 Fehlern/Stunde, reaktiviert nach 1-stündiger Abkühlung. Gerät läuft weiter mit sicherer Degradation statt Absturzschleifen.",
-    "fr": "Le registre d'auto-guérison empêche la défaillance permanente de l'appareil due à des bugs récurrents. Désactive automatiquement les fonctionnalités problématiques après 50 erreurs/heure, réactive après 1 heure de refroidissement. L'appareil continue de fonctionner avec dégradation sécurisée au lieu de boucles de plantage."
-  },
-  "1.3.4": {
-    "en": "CRITICAL FIX: Resolved zombie connection crash caused by flow card runListener errors. Added comprehensive error handling to all 9 changed triggers (temperature, COP, state). Improved stability and prevents memory leaks from unhandled Promise rejections.",
-    "nl": "KRITIEKE FIX: Zombie verbindingscrash opgelost veroorzaakt door flow card runListener fouten. Uitgebreide foutafhandeling toegevoegd aan alle 9 gewijzigde triggers (temperatuur, COP, status). Verbeterde stabiliteit en voorkomt geheugenlekken door onafgehandelde Promise rejections.",
-    "de": "KRITISCHER FIX: Zombie-Verbindungsabsturz behoben, verursacht durch Flow-Card-runListener-Fehler. Umfassende Fehlerbehandlung zu allen 9 geänderten Triggern hinzugefügt (Temperatur, COP, Status). Verbesserte Stabilität und verhindert Speicherlecks durch nicht behandelte Promise-Rejections.",
-    "fr": "CORRECTIF CRITIQUE: Crash de connexion zombie résolu causé par des erreurs de runListener de carte de flux. Gestion d'erreurs complète ajoutée à tous les 9 déclencheurs modifiés (température, COP, état). Stabilité améliorée et empêche les fuites de mémoire dues aux rejets de Promise non gérés."
+   "1.3.9": {
+    "en": "CRITICAL FIX: Resolved zombie connection crash caused by flow card runListener errors. Added comprehensive error handling to all 9 changed triggers (temperature, COP, state). Added R290 and R32 heat pump technical specifications.",
+    "nl": "KRITIEKE FIX: Zombie verbindingscrash opgelost veroorzaakt door flow card runListener fouten. Uitgebreide foutafhandeling toegevoegd aan alle 9 gewijzigde triggers (temperatuur, COP, status). Technische specificaties voor R290 en R32 warmtepompen toegevoegd.",
+    "de": "KRITISCHER FIX: Zombie-Verbindungsabsturz behoben, verursacht durch Flow-Card-runListener-Fehler. Umfassende Fehlerbehandlung zu allen 9 geänderten Triggern hinzugefügt (Temperatur, COP, Status). Technische Spezifikationen für R290- und R32-Wärmepumpen hinzugefügt.",
+    "fr": "CORRECTIF CRITIQUE: Crash de connexion zombie résolu causé par des erreurs de runListener de carte de flux. Gestion d'erreurs complète ajoutée à tous les 9 déclencheurs modifiés (température, COP, état). Spécifications techniques des pompes à chaleur R290 et R32 ajoutées."
   },
   "1.3.3": {
     "en": "Improved flow card tokens: Temperature change triggers (ambient, inlet, outlet) now show only current temperature. COP efficiency trigger shows performance trend with previous value and change amount (e.g., 3.0 → 3.2, +0.2).",
