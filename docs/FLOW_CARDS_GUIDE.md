@@ -977,7 +977,10 @@ ACTION: Calculate value from curve
 
 **Parameters**:
 
-- `input_value` (number): The input value to evaluate (e.g., outdoor temperature, time of day, COP)
+- `input_value` (number or expression): The input value to evaluate. Accepts:
+  - Direct numbers: `5.2`, `-10`, `20.5`
+  - Token expressions: `{{ outdoor_temperature }}`, `{{ logic|temperature }}`
+  - Calculated expressions: `{{ outdoor_temperature + 2 }}`, `{{ ambient_temp - 5 }}`
 - `curve` (text): Curve definition string (comma or newline separated)
 
 **Returns**:

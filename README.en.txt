@@ -117,6 +117,7 @@ Example: Weather-Compensated Heating
 "When outdoor temperature changes, calculate heating setpoint using curve:
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
 Result: Automatically adjusts heating based on weather conditions
+The input field accepts numbers, variables, or Homey-supported {{ expression }} syntax.
 
 TIME-BASED SCHEDULER & SEASONAL MODE (Advanced Features)
 Two new calculators for intelligent time and season-based automation:

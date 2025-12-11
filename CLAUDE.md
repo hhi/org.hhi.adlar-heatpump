@@ -1392,14 +1392,14 @@ await this.updateCumulativeEnergy(); // Existing, enhanced with milestone check
 - Performance characteristics
 - Maintenance guidelines
 
-### Curve Calculator Utility (v1.0.8+)
+### Curve Calculator Utility (v1.0.8+, Enhanced v1.3.10)
 
 **Purpose**: Production-ready utility for dynamic value calculation based on configurable curves in flow cards.
 
 #### Architecture
 
 **Location**: `lib/curve-calculator.ts`
-**Registration**: `app.ts:367-409` - `registerCurveCalculatorCard()`
+**Registration**: `app.ts:475-514` - `registerCurveCalculatorCard()`
 **Flow Card**: `.homeycompose/flow/actions/calculate_curve_value.json`
 
 **Key Features**:
@@ -1408,6 +1408,7 @@ await this.updateCumulativeEnergy(); // Existing, enhanced with milestone check
 - Default fallback support (`default` or `*` keyword)
 - Maximum 50 entries per curve (abuse prevention)
 - Comma or newline separated entries
+- **Input flexibility (v1.3.10)**: Accepts direct numbers, token expressions, and calculated expressions
 - Comprehensive error handling with user-friendly messages
 - Multilingual support (EN/NL/DE/FR)
 
@@ -1435,18 +1436,28 @@ export class CurveCalculator {
 }
 ```
 
-**Flow Card Registration** (`app.ts`):
+**Flow Card Registration** (`app.ts`) - Enhanced v1.3.10:
 
 ```typescript
 registerCurveCalculatorCard() {
   const curveCard = this.homey.flow.getActionCard('calculate_curve_value');
 
   curveCard.registerRunListener(async (args, state) => {
-    const { input_value: inputValue, curve } = args;
+    const { input_value: inputValueRaw, curve } = args;
 
-    // Input validation
-    if (typeof inputValue !== 'number' || Number.isNaN(inputValue)) {
-      throw new Error('Input value must be a valid number');
+    // Parse input value (supports number, string, and expressions)
+    let inputValue: number;
+    if (typeof inputValueRaw === 'number') {
+      inputValue = inputValueRaw;
+    } else if (typeof inputValueRaw === 'string') {
+      inputValue = parseFloat(inputValueRaw);
+    } else {
+      throw new Error('Input value must be a number or numeric string');
+    }
+
+    // Validate parsed number
+    if (Number.isNaN(inputValue) || !Number.isFinite(inputValue)) {
+      throw new Error(`Input value must be a valid number (received: "${inputValueRaw}")`);
     }
 
     // Evaluate curve using CurveCalculator utility
@@ -1457,6 +1468,16 @@ registerCurveCalculatorCard() {
   });
 }
 ```
+
+**Input Format Support (v1.3.10)**:
+
+The `input_value` field accepts:
+
+- **Direct numbers**: `5.2`, `-10`, `20.5`
+- **Token expressions**: `{{ outdoor_temperature }}`, `{{ logic|temperature }}`
+- **Calculated expressions**: `{{ outdoor_temperature + 2 }}`, `{{ ambient_temp - 5 }}`
+
+All expressions are evaluated by Homey before reaching the flow card listener, then parsed as numbers using `parseFloat()`.
 
 #### Use Cases
 

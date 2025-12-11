@@ -101,6 +101,43 @@ AUTOMATISIERUNG MIT FLOW-KARTEN
 - Effizienzoptimierung
 - Wetterabhängige Anpassungen
 - Systemtimer-Benachrichtigungen
+- Dynamischer Kurvenrechner für erweiterte Optimierung
+
+KURVENRECHNER (Erweiterte Funktion)
+Berechnen Sie Ausgabewerte basierend auf konfigurierbaren Kurven für intelligente Automatisierung:
+- Wetterabhängige Heizung: Automatische Sollwertanpassung basierend auf Außentemperatur
+- Zeitbasierte Optimierung: Einstellungen nach Stunde/Tag/Saison anpassen
+- COP-basierte Feinabstimmung: Dynamische Temperaturanpassungen basierend auf Effizienz
+- Unterstützt 6 Operatoren: >, >=, <, <=, ==, != mit Standard-Fallback
+- Maximum 50 Kurveneinträge für komplexe Szenarien
+- Echtzeitberechnung mit benutzerfreundlichen Fehlermeldungen
+
+Beispiel: Wetterabhängige Heizung
+"Wenn sich die Außentemperatur ändert, berechnen Sie den Heizsollwert mit Kurve:
+< -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
+Ergebnis: Passt die Heizung automatisch an die Wetterbedingungen an
+Das Eingabefeld akzeptiert Zahlen, Variablen oder Homey-unterstützte {{ Ausdruck }} Syntax.
+
+ZEITBASIERTER PLANER & SAISONMODUS (Erweiterte Funktionen)
+Zwei neue Rechner für intelligente zeit- und saisonbasierte Automatisierung:
+
+Zeitbasierter Planer:
+Berechnen Sie Werte basierend auf Tageszeit-Zeitplänen für tägliche Temperaturprogrammierung.
+Beispiel: "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18"
+- Unterstützt Nachtbereiche (z.B. 23:00-06:00)
+- Maximum 30 Zeitbereiche mit Standard-Fallback
+- Perfekt für Komfortplanung und Nutzungszeitoptimierung
+
+Saisonmoduserkennung:
+Automatische Erkennung der Heiz-/Kühlsaison basierend auf Datum.
+- Heizsaison: 1. Okt - 15. Mai (ausgerichtet auf EN 14825 SCOP-Standard)
+- Gibt Modus, Saisonflags und Tage bis zum Saisonwechsel zurück
+- Perfekt für automatische Winter-/Sommerplan-Umschaltung
+
+Kombiniertes Beispiel:
+Verwenden Sie alle drei Rechner zusammen für ultimative Automatisierung:
+Wetterkompensation (Außentemp.) + Zeitplanung (Komfort) + Saisonmodus (Winter/Sommer)
+Ergebnis: Dynamische Heizung, die sich an Wetter, Tageszeit und Saison anpasst
 
 COP (LEISTUNGSZAHL) ÜBERWACHUNG
 
@@ -141,6 +178,22 @@ Andere häufige Probleme:
 - Schwankende Werte: Normal während des Systemstarts
 - Fehlercodes: Siehe App für spezifische Erklärung pro Fehlercode
 - Kopplung schlägt fehl: Versuchen Sie verschiedene Protokollversionen (3.3, 3.4, 3.5)
+
+MANUELLE VERBINDUNGSRÜCKSETZUNG (Temporäre Problemumgehung)
+Wenn Ihr Gerät den Status „Verbindung getrennt" anzeigt und sich nicht automatisch neu verbindet:
+
+ALTERNATIVE SCHNELLLÖSUNG:
+1. Öffnen Sie die Gerätesteuerung in der Homey-App
+2. Ändern Sie den Arbeitsmodus auf einen anderen Wert (z.B. von „Heizen" auf „Kühlen")
+3. Warten Sie 5-10 Sekunden
+4. Ändern Sie den Arbeitsmodus zurück auf den ursprünglichen Wert
+5. Die Verbindung wird normalerweise innerhalb von Sekunden wiederhergestellt
+
+Diese Methode funktioniert, weil das Ändern des Arbeitsmodus einen aktiven Befehl an
+das Gerät sendet, wodurch schlafende Verbindungen reaktiviert werden.
+
+HINWEIS: Ab v1.0.12 löst die App dies automatisch innerhalb von 10 Minuten.
+Diese manuelle Methode ist nur für ältere App-Versionen oder als Notfall-Fallback erforderlich.
 
 GERÄTEANMELDEDATEN AKTUALISIEREN
 Sie können Geräteanmeldedaten ohne erneute Kopplung aktualisieren:
