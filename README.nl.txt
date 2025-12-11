@@ -117,6 +117,7 @@ Voorbeeld: Weerafhankelijke Verwarming
 "Wanneer buitentemperatuur verandert, bereken verwarmingssetpoint met curve:
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
 Resultaat: Past verwarming automatisch aan op basis van weersomstandigheden
+Het invoerveld accepteert getallen, variabelen of Homey-ondersteunde {{ expression }} syntax.
 
 TIJDGEBASEERDE PLANNING & SEIZOENSMODUS (Geavanceerde Functies)
 Twee nieuwe calculators voor intelligente tijd- en seizoensgebonden automatisering:

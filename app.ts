@@ -476,12 +476,22 @@ class MyApp extends App {
     const curveCard = this.homey.flow.getActionCard('calculate_curve_value');
 
     curveCard.registerRunListener(async (args, state) => {
-      const { input_value: inputValue, curve } = args;
+      const { input_value: inputValueRaw, curve } = args;
 
       try {
-        // Input validation
-        if (typeof inputValue !== 'number' || Number.isNaN(inputValue)) {
-          throw new Error('Input value must be a valid number');
+        // Parse input value (supports both number and string with number)
+        let inputValue: number;
+        if (typeof inputValueRaw === 'number') {
+          inputValue = inputValueRaw;
+        } else if (typeof inputValueRaw === 'string') {
+          inputValue = parseFloat(inputValueRaw);
+        } else {
+          throw new Error('Input value must be a number or numeric string');
+        }
+
+        // Validate parsed number
+        if (Number.isNaN(inputValue) || !Number.isFinite(inputValue)) {
+          throw new Error(`Input value must be a valid number (received: "${inputValueRaw}")`);
         }
 
         if (!curve || typeof curve !== 'string' || curve.trim() === '') {

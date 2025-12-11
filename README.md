@@ -185,6 +185,16 @@ Each line: `[operator] threshold : output_value`
 2. Returns **first matching** condition
 3. Falls back to `default` if no match
 
+##### Input Flexibility
+
+The **Input Value** field accepts multiple formats for maximum flexibility:
+
+- **Direct numbers**: `5.2`, `-10`, `20.5`
+- **Token expressions**: `{{ outdoor_temperature }}`, `{{ logic|temperature }}`
+- **Calculated expressions**: `{{ outdoor_temperature + 2 }}`, `{{ ambient_temp - 5 }}`
+
+All expressions are evaluated by Homey before the curve calculation, giving you powerful automation possibilities.
+
 ##### Example Curves
 
 Basic Heating Curve (outdoor temp → heating setpoint):

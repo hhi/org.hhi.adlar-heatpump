@@ -101,6 +101,43 @@ AUTOMATISATION AVEC DES CARTES DE FLUX
 - Optimisation de l'efficacité
 - Ajustements en fonction de la météo
 - Notifications de minuterie du système
+- Calculateur de courbe dynamique pour optimisation avancée
+
+CALCULATEUR DE COURBE (Fonctionnalité avancée)
+Calculez des valeurs de sortie basées sur des courbes configurables pour une automatisation intelligente :
+- Chauffage compensé par la météo : Ajustement automatique du point de consigne basé sur la température extérieure
+- Optimisation temporelle : Ajuster les paramètres par heure/jour/saison
+- Réglage fin basé sur le COP : Ajustements dynamiques de température basés sur l'efficacité
+- Prend en charge 6 opérateurs : >, >=, <, <=, ==, != avec solution de repli par défaut
+- Maximum 50 entrées de courbe pour des scénarios complexes
+- Calcul en temps réel avec messages d'erreur conviviaux
+
+Exemple : Chauffage compensé par la météo
+"Lorsque la température extérieure change, calculez le point de consigne de chauffage avec la courbe :
+< -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
+Résultat : Ajuste automatiquement le chauffage en fonction des conditions météorologiques
+Le champ d'entrée accepte des nombres, des variables ou la syntaxe {{ expression }} prise en charge par Homey.
+
+PLANIFICATEUR TEMPOREL & MODE SAISONNIER (Fonctionnalités avancées)
+Deux nouveaux calculateurs pour une automatisation intelligente basée sur le temps et la saison :
+
+Planificateur temporel :
+Calculez des valeurs basées sur des horaires journaliers pour la programmation quotidienne de température.
+Exemple : "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18"
+- Prend en charge les plages nocturnes (par ex. 23:00-06:00)
+- Maximum 30 plages horaires avec solution de repli par défaut
+- Parfait pour la planification du confort et l'optimisation des heures d'utilisation
+
+Détection du mode saisonnier :
+Détection automatique de la saison de chauffage/refroidissement basée sur la date.
+- Saison de chauffage : 1er oct - 15 mai (aligné sur la norme EN 14825 SCOP)
+- Renvoie le mode, les indicateurs de saison et les jours jusqu'au changement de saison
+- Parfait pour le basculement automatique des plannings hiver/été
+
+Exemple combiné :
+Utilisez les trois calculateurs ensemble pour une automatisation ultime :
+Compensation météo (temp. extérieure) + Planification temporelle (confort) + Mode saisonnier (hiver/été)
+Résultat : Chauffage dynamique qui s'adapte à la météo, à l'heure de la journée et à la saison
 
 SURVEILLANCE DU COP (COEFFICIENT DE PERFORMANCE)
 
@@ -141,6 +178,22 @@ Autres problèmes courants :
 - Valeurs fluctuantes : Normal pendant le démarrage du système
 - Codes d'erreur : Voir l'application pour une explication spécifique par code d'erreur
 - L'appairage échoue : Essayez différentes versions de protocole (3.3, 3.4, 3.5)
+
+RÉINITIALISATION MANUELLE DE LA CONNEXION (Solution temporaire)
+Si votre appareil affiche l'état « Déconnecté » et ne se reconnecte pas automatiquement :
+
+SOLUTION RAPIDE ALTERNATIVE :
+1. Ouvrez les commandes de l'appareil dans l'application Homey
+2. Changez le Mode de fonctionnement vers une valeur différente (par ex. de « Chauffage » à « Refroidissement »)
+3. Attendez 5-10 secondes
+4. Remettez le Mode de fonctionnement à la valeur d'origine
+5. La connexion se rétablit généralement en quelques secondes
+
+Cette méthode fonctionne car changer le mode de fonctionnement envoie une commande active
+à l'appareil, ce qui réactive les connexions en veille.
+
+NOTE : À partir de la v1.0.12, l'application résout cela automatiquement en 10 minutes.
+Cette méthode manuelle n'est nécessaire que pour les anciennes versions de l'application ou comme solution de secours d'urgence.
 
 METTRE À JOUR LES IDENTIFIANTS DE L'APPAREIL
 Vous pouvez mettre à jour les identifiants de l'appareil sans réappairage :
