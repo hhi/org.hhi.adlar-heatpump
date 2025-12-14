@@ -20,8 +20,8 @@ export class DeviceConstants {
   /** Connection heartbeat interval - proactive connection health check (v0.99.98, v1.0.25→10min, v1.0.32→5min for TCP resilience) */
   static readonly CONNECTION_HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
-  /** Heartbeat timeout - consider connection dead if no response within this time (v0.99.98) */
-  static readonly HEARTBEAT_TIMEOUT_MS = 10 * 1000; // 10 seconds
+  /** Heartbeat timeout - consider connection dead if no response within this time (v0.99.98, v1.3.11→20s for poor WiFi) */
+  static readonly HEARTBEAT_TIMEOUT_MS = 20 * 1000; // 20 seconds (increased for poor signal conditions)
 
   /** Stale connection threshold - force reconnect if no data received for this period (v0.99.98, v1.0.25→30min, v1.0.32→15min for TCP resilience) */
   static readonly STALE_CONNECTION_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
