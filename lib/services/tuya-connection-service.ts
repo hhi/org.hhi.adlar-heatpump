@@ -89,6 +89,7 @@ export class TuyaConnectionService {
   private lastHeartbeatTime: number = 0;
   private heartbeatInProgress = false;
   private forceReconnectInProgress = false; // v1.0.31 - Prevent concurrent forceReconnect calls
+  private queryInProgress = false; // v1.3.11 - Prevent concurrent TuyaAPI queries that cause disconnect events
 
   // Layer 0: Native heartbeat monitoring (v1.1.2)
   private lastNativeHeartbeatTime: number = 0;
@@ -568,6 +569,22 @@ export class TuyaConnectionService {
       throw new Error('Device not connected');
     }
 
+    // v1.3.11: Wait for existing query to complete (max 5 seconds for poor WiFi conditions)
+    const maxWaitMs = 5000;
+    const startWait = Date.now();
+    while (this.queryInProgress && (Date.now() - startWait) < maxWaitMs) {
+      await new Promise((resolve) => {
+        this.device.homey.setTimeout(resolve, 100); // Wait 100ms between checks
+      });
+    }
+
+    if (this.queryInProgress) {
+      this.logger('TuyaConnectionService: ⚠️ Query still in progress after 3s wait, proceeding anyway');
+    }
+
+    // Set query lock
+    this.queryInProgress = true;
+
     try {
       await this.tuya.set({ multiple: true, data: dps });
       this.logger('TuyaConnectionService: Command sent successfully:', dps);
@@ -575,6 +592,9 @@ export class TuyaConnectionService {
       const categorizedError = this.handleTuyaError(error as Error, 'Send command');
       this.logger('TuyaConnectionService: Error sending command:', categorizedError.userMessage);
       throw categorizedError;
+    } finally {
+      // v1.3.11: Release query lock
+      this.queryInProgress = false;
     }
   }
 
@@ -1200,6 +1220,12 @@ export class TuyaConnectionService {
         return;
       }
 
+      // v1.3.11: Skip if another query is in progress to prevent concurrent TuyaAPI calls
+      if (this.queryInProgress) {
+        this.logger('TuyaConnectionService: DPS refresh skipped - query already in progress');
+        return;
+      }
+
       // Enhanced diagnostic logging (v1.0.4)
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
@@ -1211,6 +1237,9 @@ export class TuyaConnectionService {
       // DIAGNOSTIC TEST (v1.0.37): Track if DPS refresh triggers actual data events
       const preRefreshDataTime = this.lastDataEventReceived;
       const preRefreshTimestamp = Date.now();
+
+      // v1.3.11: Set query lock before TuyaAPI call
+      this.queryInProgress = true;
 
       this.tuya.get({ schema: true })
         .then(async () => {
@@ -1236,11 +1265,17 @@ export class TuyaConnectionService {
             this.logger('TuyaConnectionService: ⚠️ Query succeeded but device sent no response - possible idempotent query issue');
             // Don't update lastDataEventTime - let heartbeat detect this as stale
           }
+
+          // v1.3.11: Release query lock
+          this.queryInProgress = false;
         })
         .catch((error) => {
           // Query failed - don't mark as disconnected, let heartbeat handle failures
           // This prevents false positives from temporary network hiccups
           this.logger(`TuyaConnectionService: ⚠️ Periodic DPS refresh at ${timeStr} failed:`, error);
+
+          // v1.3.11: Release query lock
+          this.queryInProgress = false;
         });
     }, DeviceConstants.DPS_REFRESH_INTERVAL_MS);
   }
@@ -1339,6 +1374,12 @@ export class TuyaConnectionService {
       return;
     }
 
+    // v1.3.11: Skip if another query is in progress to prevent concurrent TuyaAPI calls
+    if (this.queryInProgress) {
+      this.logger('TuyaConnectionService: Heartbeat skipped - query already in progress');
+      return;
+    }
+
     // Check if we've received data recently (intelligent skip logic - v1.0.32: 50% for TCP resilience)
     const timeSinceLastData = Date.now() - this.lastDataEventTime;
     const recentDataThreshold = DeviceConstants.CONNECTION_HEARTBEAT_INTERVAL_MS * 0.5; // 50% of heartbeat interval (more aggressive probing with TCP keep-alive)
@@ -1362,6 +1403,7 @@ export class TuyaConnectionService {
     // Device appears idle - perform proactive health check
     this.logger(`🔍 TuyaConnectionService: Heartbeat probe at ${timeStr} - no data for ${Math.round(timeSinceLastData / 1000)}s, checking connection health...`);
     this.heartbeatInProgress = true;
+    this.queryInProgress = true; // v1.3.11: Set query lock before TuyaAPI call
     this.lastHeartbeatTime = Date.now();
 
     try {
@@ -1516,6 +1558,7 @@ export class TuyaConnectionService {
 
     } finally {
       this.heartbeatInProgress = false;
+      this.queryInProgress = false; // v1.3.11: Release query lock
     }
   }
 
@@ -1972,6 +2015,7 @@ export class TuyaConnectionService {
       connectionAttempts: this.connectionAttempts,
       hasReconnectInterval: !!this.reconnectInterval,
       tuyaInstanceExists: !!this.tuya,
+      queryInProgress: this.queryInProgress, // v1.3.11
     };
   }
 
@@ -2013,6 +2057,7 @@ export class TuyaConnectionService {
     this.logger(`║ nativeHeartbeatMonitorInterval: ${(this.nativeHeartbeatMonitorInterval ? 'ACTIVE' : 'INACTIVE').padEnd(28)}║`);
     this.logger(`║ dpsRefreshInterval: ${(this.dpsRefreshInterval ? 'ACTIVE' : 'INACTIVE').padEnd(40)}║`);
     this.logger(`║ heartbeatInProgress: ${(this.heartbeatInProgress ? 'true' : 'false').padEnd(39)}║`);
+    this.logger(`║ queryInProgress (v1.3.11): ${(this.queryInProgress ? 'true' : 'false').padEnd(32)}║`);
     this.logger('╟───────────────────────────────────────────────────────────╢');
     this.logger('║ RECONNECTION STATE                                        ║');
     this.logger('╟───────────────────────────────────────────────────────────╢');
@@ -2074,8 +2119,9 @@ export class TuyaConnectionService {
     this.tuya = null;
     this.isConnected = false;
 
-    // Reset in-progress flags (v1.0.31)
+    // Reset in-progress flags (v1.0.31, v1.3.11)
     this.forceReconnectInProgress = false;
+    this.queryInProgress = false;
 
     this.logger('TuyaConnectionService: Service destroyed');
   }

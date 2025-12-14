@@ -1,5 +1,11 @@
 {
-   "1.3.10": {
+  "1.3.11": {
+    "en": "Connection timeout increased from 10 to 20 seconds for poor WiFi conditions. Device commands now wait for ongoing queries to complete, preventing connection interruptions.",
+    "nl": "Verbindingstimeout verhoogd van 10 naar 20 seconden voor zwakke WiFi. Apparaatcommando's wachten nu tot lopende queries compleet zijn, voorkomt verbrekingen.",
+    "de": "Verbindungs-Timeout von 10 auf 20 Sekunden für schlechte WLAN-Bedingungen erhöht. Gerätebefehle warten jetzt auf laufende Abfragen, verhindert Verbindungsunterbrechungen.",
+    "fr": "Délai de connexion augmenté de 10 à 20 secondes pour les conditions WiFi faibles. Les commandes d'appareil attendent maintenant la fin des requêtes en cours, évitant les interruptions de connexion."
+  },
+  "1.3.10": {
     "en": "Calculate Value from Curve now accepts token expressions (e.g., {{ outdoor_temperature }}) and calculated values (e.g., {{ 10 - 5 }}) in the input field. German and French language support added.",
     "nl": "Bereken Waarde uit Curve accepteert nu token expressies (bijv. {{ buitentemperatuur }}) en berekende waarden (bijv. {{ 10 - 5 }}) in het invoerveld. Duitse en Franse taalondersteuning toegevoegd.",
     "de": "Wert aus Kurvenregeln berechnen akzeptiert jetzt Token-Ausdrücke (z.B. {{ Außentemperatur }}) und berechnete Werte (z.B. {{ 10 - 5 }}) im Eingabefeld. Deutsche und französische Sprachunterstützung hinzugefügt.",
