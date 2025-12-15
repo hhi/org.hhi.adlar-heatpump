@@ -689,6 +689,23 @@
           "fr": "Activer les cartes de flux de diagnostic et d'analyse système pour les experts HVAC"
         },
         "value": false
+      },
+      {
+        "id": "show_disconnect_diagnostic",
+        "type": "checkbox",
+        "label": {
+          "en": "Show daily disconnect count",
+          "nl": "Toon dagelijkse disconnect telling",
+          "de": "Tägliche Verbindungsabbrüche anzeigen",
+          "fr": "Afficher le nombre quotidien de déconnexions"
+        },
+        "hint": {
+          "en": "Display a sensor that counts daily device disconnections. Only useful for diagnosing connection stability issues.",
+          "nl": "Toon een sensor die dagelijkse apparaat disconnecties telt. Alleen nuttig voor diagnose van verbindingsstabiliteitsproblemen.",
+          "de": "Zeigen Sie einen Sensor an, der tägliche Gerätetrennungen zählt. Nur nützlich zur Diagnose von Verbindungsstabilitätsproblemen.",
+          "fr": "Afficher un capteur qui compte les déconnexions quotidiennes de l'appareil. Utile uniquement pour diagnostiquer les problèmes de stabilité de connexion."
+        },
+        "value": false
       }
     ]
   },

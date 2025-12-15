@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.3.11",
+  "version": "1.3.12",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -77,16 +77,16 @@
           "fr": "Température ambiante changée"
         },
         "titleFormatted": {
-          "en": "Ambient temperature [[condition]] [[temperature]]°C ",
-          "nl": "Buitentemperatuur [[condition]] [[temperature]]°C ",
-          "de": "Außentemperatur [[condition]] [[temperature]]°C ",
-          "fr": "Température ambiante [[condition]] [[temperature]]°C "
+          "en": "Ambient temperature changed [[condition]] [[temperature]]°C ",
+          "nl": "Buitentemperatuur gewijzigd [[condition]] [[temperature]]°C ",
+          "de": "Außentemperatur geändert [[condition]] [[temperature]]°C ",
+          "fr": "Température ambiante changée [[condition]] [[temperature]]°C "
         },
         "hint": {
-          "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
-          "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie",
-          "de": "Wird ausgelöst, wenn die Außentemperatur einen angegebenen Schwellenwert über- oder unterschreitet - nützlich für Wettersteuerung",
-          "fr": "Se déclenche lorsque la température ambiante dépasse ou descend en dessous d'un niveau spécifié - utile pour la compensation météorologique"
+          "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+          "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
+          "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
         },
         "highlight": true,
         "args": [
@@ -7728,6 +7728,23 @@
                 "fr": "Activer les cartes de flux de diagnostic et d'analyse système pour les experts HVAC"
               },
               "value": false
+            },
+            {
+              "id": "show_disconnect_diagnostic",
+              "type": "checkbox",
+              "label": {
+                "en": "Show daily disconnect count",
+                "nl": "Toon dagelijkse disconnect telling",
+                "de": "Tägliche Verbindungsabbrüche anzeigen",
+                "fr": "Afficher le nombre quotidien de déconnexions"
+              },
+              "hint": {
+                "en": "Display a sensor that counts daily device disconnections. Only useful for diagnosing connection stability issues.",
+                "nl": "Toon een sensor die dagelijkse apparaat disconnecties telt. Alleen nuttig voor diagnose van verbindingsstabiliteitsproblemen.",
+                "de": "Zeigen Sie einen Sensor an, der tägliche Gerätetrennungen zählt. Nur nützlich zur Diagnose von Verbindungsstabilitätsproblemen.",
+                "fr": "Afficher un capteur qui compte les déconnexions quotidiennes de l'appareil. Utile uniquement pour diagnostiquer les problèmes de stabilité de connexion."
+              },
+              "value": false
             }
           ]
         },
@@ -8099,6 +8116,37 @@
       },
       "description": {
         "nl": "dp 14 : countdown_left - Countdown Left"
+      }
+    },
+    "adlar_daily_disconnect_count": {
+      "id": "adlar_daily_disconnect_count",
+      "title": {
+        "en": "Daily Disconnect Count",
+        "nl": "Dagelijkse Disconnect Telling",
+        "de": "Tägliche Verbindungsabbrüche",
+        "fr": "Nombre quotidien de déconnexions"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 9999,
+      "step": 1,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Daily disconnects",
+        "nl": "Dagelijkse disconnects",
+        "de": "Tägliche Verbindungsabbrüche",
+        "fr": "Déconnexions quotidiennes"
+      },
+      "icon": "/assets/connection-status.svg",
+      "description": {
+        "en": "Counts how many times the device disconnected today (Homey timezone). Resets automatically each day.",
+        "nl": "Telt hoe vaak het apparaat vandaag is verbroken (Homey-tijdzone). Reset automatisch elke dag.",
+        "de": "Zählt, wie oft das Gerät heute getrennt wurde (Homey-Zeitzone). Setzt sich täglich automatisch zurück.",
+        "fr": "Compte le nombre de déconnexions aujourd'hui (fuseau horaire Homey). Réinitialisation automatique chaque jour."
       }
     },
     "adlar_enum_capacity_set": {

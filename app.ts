@@ -692,14 +692,13 @@ class MyApp extends App {
           triggerCondition,
         });
 
-        // Filter logic: Only execute flow if user's condition matches trigger condition
-        if (userCondition === 'above') {
-          const shouldExecute = triggerCondition === 'above' && currentTemp >= userThreshold;
-          this.debugLog(`  → User wants ABOVE ${userThreshold}°C, temp crossed ${triggerCondition} at ${currentTemp}°C → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
-          return shouldExecute;
-        }
-        const shouldExecute = triggerCondition === 'below' && currentTemp <= userThreshold;
-        this.debugLog(`  → User wants BELOW ${userThreshold}°C, temp crossed ${triggerCondition} at ${currentTemp}°C → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        // v1.3.12: Simple threshold check (ignore trigger direction)
+        // User expectation: "below 15°C" means "whenever temp < 15°C", not "only when crossing below"
+        const shouldExecute = (userCondition === 'above')
+          ? currentTemp >= userThreshold
+          : currentTemp <= userThreshold;
+
+        this.debugLog(`  → User wants ${userCondition.toUpperCase()} ${userThreshold}°C, current temp: ${currentTemp}°C (crossed ${triggerCondition}) → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
@@ -733,10 +732,14 @@ class MyApp extends App {
         const currentTemp = state.temperature;
         const triggerCondition = state.condition;
 
-        if (userCondition === 'above') {
-          return triggerCondition === 'above' && currentTemp >= userThreshold;
-        }
-        return triggerCondition === 'below' && currentTemp <= userThreshold;
+        // v1.3.12: Simple threshold check (ignore trigger direction)
+        // User expectation: "above 60°C" means "whenever temp > 60°C", not "only when crossing above"
+        const shouldExecute = (userCondition === 'above')
+          ? currentTemp >= userThreshold
+          : currentTemp <= userThreshold;
+
+        this.debugLog(`🔍 ${featureName}: User wants ${userCondition.toUpperCase()} ${userThreshold}°C, current: ${currentTemp}°C (crossed ${triggerCondition}) → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
         this.selfHealing.trackError(featureName, { error });
@@ -769,10 +772,14 @@ class MyApp extends App {
         const currentTemp = state.temperature;
         const triggerCondition = state.condition;
 
-        if (userCondition === 'above') {
-          return triggerCondition === 'above' && currentTemp >= userThreshold;
-        }
-        return triggerCondition === 'below' && currentTemp <= userThreshold;
+        // v1.3.12: Simple threshold check (ignore trigger direction)
+        // User expectation: "below 30°C" means "whenever temp < 30°C", not "only when crossing below"
+        const shouldExecute = (userCondition === 'above')
+          ? currentTemp >= userThreshold
+          : currentTemp <= userThreshold;
+
+        this.debugLog(`🔍 ${featureName}: User wants ${userCondition.toUpperCase()} ${userThreshold}°C, current: ${currentTemp}°C (crossed ${triggerCondition}) → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
         this.selfHealing.trackError(featureName, { error });
@@ -978,7 +985,155 @@ class MyApp extends App {
       }
     });
 
-    this.log(`Changed trigger runListeners registered successfully (9 triggers with self-healing, threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`);
+    // === EXPERT MODE TRIGGERS (v1.3.12) ===
+    // Compressor efficiency alert
+    const compressorEfficiencyCard = this.homey.flow.getDeviceTriggerCard('compressor_efficiency_alert');
+    compressorEfficiencyCard.registerRunListener(async (args, state) => {
+      const featureName = 'compressor_efficiency_alert';
+
+      try {
+        // Self-healing check
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.debugLog(`${featureName}: Disabled by self-healing - executing flow (degraded mode)`);
+          return true;
+        }
+
+        // Validate inputs
+        if (!state?.condition || !state?.frequency || typeof state.frequency !== 'number') {
+          this.error(`${featureName}: Invalid state object`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          return false;
+        }
+        if (!args?.condition || !args?.frequency || typeof args.frequency !== 'number') {
+          this.error(`${featureName}: Invalid args object`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          return false;
+        }
+
+        const userCondition = args.condition; // 'above' or 'below'
+        const userThreshold = args.frequency; // e.g., 150 Hz
+        const currentFrequency = state.frequency; // e.g., 160 Hz
+
+        this.debugLog(`🔍 ${featureName} runListener:`, {
+          userCondition,
+          userThreshold,
+          currentFrequency,
+        });
+
+        // v1.3.12: Threshold monitoring (ignore crossing direction)
+        // User expectation: "above 150 Hz" means "whenever frequency > 150 Hz"
+        const shouldExecute = (userCondition === 'above')
+          ? currentFrequency >= userThreshold
+          : currentFrequency <= userThreshold;
+
+        this.debugLog(`  → User wants ${userCondition.toUpperCase()} ${userThreshold} Hz, current: ${currentFrequency} Hz → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        return shouldExecute;
+      } catch (error) {
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
+        return false;
+      }
+    });
+
+    // Fan motor efficiency alert
+    const fanMotorEfficiencyCard = this.homey.flow.getDeviceTriggerCard('fan_motor_efficiency_alert');
+    fanMotorEfficiencyCard.registerRunListener(async (args, state) => {
+      const featureName = 'fan_motor_efficiency_alert';
+
+      try {
+        // Self-healing check
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.debugLog(`${featureName}: Disabled by self-healing - executing flow (degraded mode)`);
+          return true;
+        }
+
+        // Validate inputs
+        if (!state?.condition || !state?.frequency || typeof state.frequency !== 'number') {
+          this.error(`${featureName}: Invalid state object`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          return false;
+        }
+        if (!args?.condition || !args?.frequency || typeof args.frequency !== 'number') {
+          this.error(`${featureName}: Invalid args object`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          return false;
+        }
+
+        const userCondition = args.condition; // 'above' or 'below'
+        const userThreshold = args.frequency; // e.g., 80 Hz
+        const currentFrequency = state.frequency; // e.g., 75 Hz
+
+        this.debugLog(`🔍 ${featureName} runListener:`, {
+          userCondition,
+          userThreshold,
+          currentFrequency,
+        });
+
+        // v1.3.12: Threshold monitoring (ignore crossing direction)
+        // User expectation: "below 30 Hz" means "whenever frequency < 30 Hz"
+        const shouldExecute = (userCondition === 'above')
+          ? currentFrequency >= userThreshold
+          : currentFrequency <= userThreshold;
+
+        this.debugLog(`  → User wants ${userCondition.toUpperCase()} ${userThreshold} Hz, current: ${currentFrequency} Hz → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        return shouldExecute;
+      } catch (error) {
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
+        return false;
+      }
+    });
+
+    // Water flow alert
+    const waterFlowCard = this.homey.flow.getDeviceTriggerCard('water_flow_alert');
+    waterFlowCard.registerRunListener(async (args, state) => {
+      const featureName = 'water_flow_alert';
+
+      try {
+        // Self-healing check
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.debugLog(`${featureName}: Disabled by self-healing - executing flow (degraded mode)`);
+          return true;
+        }
+
+        // Validate inputs
+        if (!state?.condition || !state?.flow_rate || typeof state.flow_rate !== 'number') {
+          this.error(`${featureName}: Invalid state object`, { state });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          return false;
+        }
+        if (!args?.condition || !args?.flow_rate || typeof args.flow_rate !== 'number') {
+          this.error(`${featureName}: Invalid args object`, { args });
+          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          return false;
+        }
+
+        const userCondition = args.condition; // 'above' or 'below'
+        const userThreshold = args.flow_rate; // e.g., 15 L/min
+        const currentFlowRate = state.flow_rate; // e.g., 12 L/min
+
+        this.debugLog(`🔍 ${featureName} runListener:`, {
+          userCondition,
+          userThreshold,
+          currentFlowRate,
+        });
+
+        // v1.3.12: Threshold monitoring (ignore crossing direction)
+        // User expectation: "below 15 L/min" means "whenever flow < 15 L/min"
+        const shouldExecute = (userCondition === 'above')
+          ? currentFlowRate >= userThreshold
+          : currentFlowRate <= userThreshold;
+
+        this.debugLog(`  → User wants ${userCondition.toUpperCase()} ${userThreshold} L/min, current: ${currentFlowRate} L/min → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        return shouldExecute;
+      } catch (error) {
+        this.error(`${featureName} runListener error:`, error);
+        this.selfHealing.trackError(featureName, { error });
+        return false;
+      }
+    });
+
+    this.log(`Changed trigger runListeners registered successfully (12 triggers with self-healing: 9 standard + 3 expert mode, threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`);
   }
 }
 

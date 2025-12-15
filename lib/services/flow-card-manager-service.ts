@@ -226,57 +226,13 @@ export class FlowCardManagerService {
    */
   private async registerExpertFeatureCards(): Promise<void> {
     try {
-      // Expert efficiency condition
-      const efficiencyCard = this.device.homey.flow.getConditionCard('compressor_efficiency_above');
-      const efficiencyListener = efficiencyCard.registerRunListener(async (args) => {
-        this.logger('FlowCardManagerService: Efficiency condition triggered', { args });
+      // v1.3.12: Expert trigger cards now registered in app.ts with full threshold monitoring
+      // This method kept for compatibility but no longer registers cards here
+      // Cards: compressor_efficiency_alert, fan_motor_efficiency_alert, water_flow_alert
 
-        const rawPower = this.device.getCapabilityValue('measure_power');
-        const rawCompressorState = this.device.getCapabilityValue('adlar_state_compressor_state');
-        const powerIsNull = rawPower === null || rawPower === undefined;
-        const compressorStateIsNull = rawCompressorState === null || rawCompressorState === undefined;
-        const power = rawPower || 0;
-        const compressorState = rawCompressorState || 0;
-        const efficiency = compressorState > 0 && power > 0 ? (compressorState / power) * 100 : 0;
-        const result = efficiency > (args.threshold || 50);
-
-        if (powerIsNull || compressorStateIsNull) {
-          this.logger('FlowCardManagerService: Efficiency condition using fallback values for null capabilities', {
-            powerRaw: rawPower,
-            powerFallback: power,
-            powerIsNull,
-            compressorStateRaw: rawCompressorState,
-            compressorStateFallback: compressorState,
-            compressorStateIsNull,
-            efficiency,
-            threshold: args.threshold || 50,
-            result,
-          });
-        }
-
-        return result;
-      });
-      this.flowCardListeners.set('compressor_efficiency_above', efficiencyListener);
-
-      // Expert trigger cards
-      const expertTriggerCards = [
-        'compressor_efficiency_alert',
-        'fan_motor_efficiency_alert',
-        'water_flow_alert',
-      ];
-
-      expertTriggerCards.forEach((cardId) => {
-        try {
-          const triggerCard = this.device.homey.flow.getDeviceTriggerCard(cardId);
-          this.flowCardListeners.set(cardId, triggerCard);
-        } catch (err) {
-          this.logger(`FlowCardManagerService: Expert trigger card ${cardId} not found, skipping`);
-        }
-      });
-
-      this.logger('FlowCardManagerService: Expert feature cards registered');
+      this.logger('FlowCardManagerService: Expert feature cards registration skipped (handled in app.ts)');
     } catch (error) {
-      this.logger('FlowCardManagerService: Error registering expert feature cards:', error);
+      this.logger('FlowCardManagerService: Error in registerExpertFeatureCards:', error);
     }
   }
 
