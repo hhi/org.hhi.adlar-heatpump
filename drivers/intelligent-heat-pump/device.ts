@@ -35,6 +35,7 @@ interface UserFlowPreferences {
   flow_state_alerts: 'disabled' | 'auto' | 'enabled';
   flow_efficiency_alerts: 'disabled' | 'auto' | 'enabled';
   flow_expert_mode: boolean;
+  show_disconnect_diagnostic: boolean;
 }
 /* eslint-enable camelcase, @typescript-eslint/no-unused-vars */
 
@@ -193,6 +194,11 @@ class MyDevice extends Homey.Device {
   private lastInletTemp: number | null = null; // For inlet_temperature_changed
   private lastOutletTemp: number | null = null; // For outlet_temperature_changed
   private lastAmbientTemp: number | null = null; // For ambient_temperature_changed
+
+  // Expert mode flow card triggers (v1.3.12)
+  private lastCompressorFreq: number | null = null; // For compressor_efficiency_alert
+  private lastFanMotorFreq: number | null = null; // For fan_motor_efficiency_alert
+  private lastWaterFlow: number | null = null; // For water_flow_alert
 
   // External power energy tracking
   private lastExternalPowerTimestamp: number | null = null;
@@ -2634,6 +2640,78 @@ class MyDevice extends Homey.Device {
               this.lastAmbientTemp = transformedValue;
             }
 
+            // === EXPERT MODE TRIGGERS (v1.3.12) ===
+            // Only fire if flow_expert_mode setting is enabled
+            const expertModeEnabled = this.getSettings().flow_expert_mode === true;
+
+            if (expertModeEnabled) {
+              const FREQUENCY_CHANGE_THRESHOLD = 5; // Minimum Hz change to trigger
+              const FLOW_CHANGE_THRESHOLD = 1; // Minimum L/min change to trigger
+
+              // Compressor frequency (measure_frequency.compressor_strength)
+              if (capability === 'measure_frequency.compressor_strength' && typeof transformedValue === 'number') {
+                if (this.lastCompressorFreq !== null && Math.abs(transformedValue - this.lastCompressorFreq) >= FREQUENCY_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastCompressorFreq;
+                  const condition = delta > 0 ? 'above' : 'below';
+
+                  this.log(`⚙️  compressor_efficiency_alert TRIGGER: ${this.lastCompressorFreq} Hz → ${transformedValue} Hz (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`);
+
+                  this.triggerFlowCard('compressor_efficiency_alert', {
+                    current_frequency: Math.round(transformedValue * 10) / 10,
+                    threshold_frequency: transformedValue,
+                  }, {
+                    condition,
+                    frequency: transformedValue,
+                  }).catch((err) => {
+                    this.error('Failed to trigger compressor_efficiency_alert:', err);
+                  });
+                }
+                this.lastCompressorFreq = transformedValue;
+              }
+
+              // Fan motor frequency (measure_frequency.fan_motor_frequency)
+              if (capability === 'measure_frequency.fan_motor_frequency' && typeof transformedValue === 'number') {
+                if (this.lastFanMotorFreq !== null && Math.abs(transformedValue - this.lastFanMotorFreq) >= FREQUENCY_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastFanMotorFreq;
+                  const condition = delta > 0 ? 'above' : 'below';
+
+                  this.log(`💨 fan_motor_efficiency_alert TRIGGER: ${this.lastFanMotorFreq} Hz → ${transformedValue} Hz (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`);
+
+                  this.triggerFlowCard('fan_motor_efficiency_alert', {
+                    current_fan_frequency: Math.round(transformedValue * 10) / 10,
+                    threshold_frequency: transformedValue,
+                  }, {
+                    condition,
+                    frequency: transformedValue,
+                  }).catch((err) => {
+                    this.error('Failed to trigger fan_motor_efficiency_alert:', err);
+                  });
+                }
+                this.lastFanMotorFreq = transformedValue;
+              }
+
+              // Water flow rate (measure_water)
+              if (capability === 'measure_water' && typeof transformedValue === 'number') {
+                if (this.lastWaterFlow !== null && Math.abs(transformedValue - this.lastWaterFlow) >= FLOW_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastWaterFlow;
+                  const condition = delta > 0 ? 'above' : 'below';
+
+                  this.log(`💧 water_flow_alert TRIGGER: ${this.lastWaterFlow} L/min → ${transformedValue} L/min (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} L/min, condition: ${condition})`);
+
+                  this.triggerFlowCard('water_flow_alert', {
+                    current_flow_rate: Math.round(transformedValue * 10) / 10,
+                    threshold_flow_rate: transformedValue,
+                  }, {
+                    condition,
+                    flow_rate: transformedValue,
+                  }).catch((err) => {
+                    this.error('Failed to trigger water_flow_alert:', err);
+                  });
+                }
+                this.lastWaterFlow = transformedValue;
+              }
+            }
+
           } catch (error) {
             this.error(`Error processing DPS ${dpsId} -> ${capability}:`, error);
           }
@@ -2857,6 +2935,26 @@ class MyDevice extends Homey.Device {
           this.log('✅ Added adlar_connection_active capability to existing device (v1.0.12 migration)');
         } catch (error) {
           this.error('Failed to add adlar_connection_active capability:', error);
+        }
+      }
+
+      // Add daily disconnect counter capability for existing devices (v1.3.12: now optional via setting)
+      // Only add if setting enabled (defaults to false for new installs)
+      const showDisconnectDiagnostic = this.getSettings().show_disconnect_diagnostic === true;
+      if (showDisconnectDiagnostic && !this.hasCapability('adlar_daily_disconnect_count')) {
+        try {
+          await this.addCapability('adlar_daily_disconnect_count');
+          this.log('✅ Added adlar_daily_disconnect_count capability to existing device (setting enabled)');
+        } catch (error) {
+          this.error('Failed to add adlar_daily_disconnect_count capability:', error);
+        }
+      } else if (!showDisconnectDiagnostic && this.hasCapability('adlar_daily_disconnect_count')) {
+        // Remove if setting disabled (cleanup for devices that had it)
+        try {
+          await this.removeCapability('adlar_daily_disconnect_count');
+          this.log('🗑️ Removed adlar_daily_disconnect_count capability (setting disabled)');
+        } catch (error) {
+          this.error('Failed to remove adlar_daily_disconnect_count capability:', error);
         }
       }
 
@@ -3180,6 +3278,35 @@ class MyDevice extends Homey.Device {
       } else {
         this.log('ServiceCoordinator not available - credentials updated but connection not reinitialized');
         return 'Credentials updated in settings. Please restart the device to apply changes.';
+      }
+    }
+
+    // Handle disconnect diagnostic capability visibility (v1.3.12)
+    if (changedKeys.includes('show_disconnect_diagnostic')) {
+      const showDisconnectDiagnostic = newSettings.show_disconnect_diagnostic === true;
+
+      if (showDisconnectDiagnostic && !this.hasCapability('adlar_daily_disconnect_count')) {
+        // Enable: Add capability
+        try {
+          await this.addCapability('adlar_daily_disconnect_count');
+          this.log('✅ Enabled daily disconnect count capability');
+
+          // Initialize with current count from TuyaConnectionService
+          if (this.serviceCoordinator) {
+            const count = await this.getStoreValue('daily_disconnect_count') || 0;
+            await this.setCapabilityValue('adlar_daily_disconnect_count', count);
+          }
+        } catch (error) {
+          this.error('Failed to add adlar_daily_disconnect_count capability:', error);
+        }
+      } else if (!showDisconnectDiagnostic && this.hasCapability('adlar_daily_disconnect_count')) {
+        // Disable: Remove capability
+        try {
+          await this.removeCapability('adlar_daily_disconnect_count');
+          this.log('🗑️ Disabled daily disconnect count capability');
+        } catch (error) {
+          this.error('Failed to remove adlar_daily_disconnect_count capability:', error);
+        }
       }
     }
 

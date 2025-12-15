@@ -41,6 +41,10 @@ export class TuyaConnectionService {
   private tuya: TuyAPI | null = null;
   private isConnected = false;
 
+  // Daily disconnect counter tracking (vNext)
+  private readonly DAILY_DISCONNECT_COUNT_KEY = 'daily_disconnect_count';
+  private readonly DAILY_DISCONNECT_DATE_KEY = 'daily_disconnect_date';
+
   // Connection status tracking (v0.99.47, enhanced v0.99.61 with timestamps)
   private currentStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error' = 'disconnected';
   private lastStatusChangeTime: number = Date.now(); // Timestamp of last status change
@@ -167,6 +171,9 @@ export class TuyaConnectionService {
           this.logger(`TuyaConnectionService: Stored timestamp too old (${Math.round(daysSinceLastConnection)} days), using current time`);
         }
       }
+
+      // Initialize daily disconnect counter from store (vNext)
+      await this.initializeDailyDisconnectCounter();
 
       // Create Tuya device instance
       this.tuya = new TuyAPI({
@@ -744,6 +751,8 @@ export class TuyaConnectionService {
       return;
     }
 
+    const previousStatus = this.currentStatus;
+
     // Status changed - update both status and timestamp
     this.currentStatus = newStatus;
     this.lastStatusChangeTime = Date.now();
@@ -773,6 +782,13 @@ export class TuyaConnectionService {
       }
     }
 
+    // Count real disconnects (connected -> disconnected) per day (vNext)
+    if (previousStatus === 'connected' && newStatus === 'disconnected') {
+      this.incrementDailyDisconnectCount().catch((error) => {
+        this.logger(`TuyaConnectionService: Failed to increment daily disconnect count: ${error}`);
+      });
+    }
+
     // Persist both timestamp AND status to device store (survives app updates) - v1.0.6
     try {
       await this.device.setStoreValue('last_connection_timestamp', this.lastStatusChangeTime);
@@ -784,6 +800,80 @@ export class TuyaConnectionService {
     } catch (error) {
       this.logger(`TuyaConnectionService: Failed to persist connection state: ${error}`);
       // Non-critical error, continue operation
+    }
+  }
+
+  private getTodayKeyInHomeyTimezone(): string {
+    const timeZone = this.device.homey.clock.getTimezone() || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formatter = new Intl.DateTimeFormat('en', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone,
+    });
+
+    const parts = formatter.formatToParts(new Date());
+    const year = parts.find((p) => p.type === 'year')?.value;
+    const month = parts.find((p) => p.type === 'month')?.value;
+    const day = parts.find((p) => p.type === 'day')?.value;
+
+    if (!year || !month || !day) {
+      // Fallback: local date key (best-effort)
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = (now.getMonth() + 1).toString().padStart(2, '0');
+      const d = now.getDate().toString().padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    return `${year}-${month}-${day}`;
+  }
+
+  private async initializeDailyDisconnectCounter(): Promise<void> {
+    const todayKey = this.getTodayKeyInHomeyTimezone();
+    const storedDate = await this.device.getStoreValue(this.DAILY_DISCONNECT_DATE_KEY);
+    const storedCount = await this.device.getStoreValue(this.DAILY_DISCONNECT_COUNT_KEY);
+
+    const isStoredDateValid = typeof storedDate === 'string' && storedDate.length > 0;
+    const isStoredCountValid = typeof storedCount === 'number' && Number.isFinite(storedCount);
+
+    let countForToday = isStoredCountValid ? storedCount : 0;
+
+    if (!isStoredDateValid || storedDate !== todayKey) {
+      countForToday = 0;
+      await this.device.setStoreValue(this.DAILY_DISCONNECT_DATE_KEY, todayKey);
+      await this.device.setStoreValue(this.DAILY_DISCONNECT_COUNT_KEY, 0);
+    }
+
+    if (this.device.hasCapability('adlar_daily_disconnect_count')) {
+      try {
+        await this.device.setCapabilityValue('adlar_daily_disconnect_count', countForToday);
+      } catch (error) {
+        this.logger(`TuyaConnectionService: Failed to initialize adlar_daily_disconnect_count: ${error}`);
+      }
+    }
+  }
+
+  private async incrementDailyDisconnectCount(): Promise<void> {
+    const todayKey = this.getTodayKeyInHomeyTimezone();
+    const storedDate = await this.device.getStoreValue(this.DAILY_DISCONNECT_DATE_KEY);
+    const storedCount = await this.device.getStoreValue(this.DAILY_DISCONNECT_COUNT_KEY);
+
+    const isStoredDateValid = typeof storedDate === 'string' && storedDate.length > 0;
+    const isStoredCountValid = typeof storedCount === 'number' && Number.isFinite(storedCount);
+
+    let newCount: number;
+    if (!isStoredDateValid || storedDate !== todayKey) {
+      newCount = 1;
+    } else {
+      newCount = (isStoredCountValid ? storedCount : 0) + 1;
+    }
+
+    await this.device.setStoreValue(this.DAILY_DISCONNECT_DATE_KEY, todayKey);
+    await this.device.setStoreValue(this.DAILY_DISCONNECT_COUNT_KEY, newCount);
+
+    if (this.device.hasCapability('adlar_daily_disconnect_count')) {
+      await this.device.setCapabilityValue('adlar_daily_disconnect_count', newCount);
     }
   }
 
@@ -1790,7 +1880,7 @@ export class TuyaConnectionService {
     const nextTimeStr = `${nextAttemptTime.getHours().toString().padStart(2, '0')}:${nextAttemptTime.getMinutes().toString().padStart(2, '0')}:${nextAttemptTime.getSeconds().toString().padStart(2, '0')}`;
 
     this.logger('╔═════════════════════════════════════════════════════╗');
-    this.logger(`║ RECONNECTION SCHEDULED                              ║`);
+    this.logger('║ RECONNECTION SCHEDULED                              ║');
     this.logger(`║ Next attempt in: ${Math.round(adaptiveInterval / 1000)}s (at ${nextTimeStr})${' '.repeat(Math.max(0, 14 - Math.round(adaptiveInterval / 1000).toString().length - nextTimeStr.length))}║`);
     this.logger(`║ Backoff multiplier: ${this.backoffMultiplier}x${' '.repeat(29 - this.backoffMultiplier.toString().length)}║`);
     this.logger(`║ Circuit breaker: ${this.circuitBreakerOpen ? 'OPEN' : 'CLOSED'}${' '.repeat(28 - (this.circuitBreakerOpen ? 4 : 6))}║`);

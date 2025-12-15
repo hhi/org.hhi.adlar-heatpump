@@ -1,0 +1,31 @@
+{
+  "id": "adlar_daily_disconnect_count",
+  "title": {
+    "en": "Daily Disconnect Count",
+    "nl": "Dagelijkse Disconnect Telling",
+    "de": "Tägliche Verbindungsabbrüche",
+    "fr": "Nombre quotidien de déconnexions"
+  },
+  "type": "number",
+  "min": 0,
+  "max": 9999,
+  "step": 1,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Daily disconnects",
+    "nl": "Dagelijkse disconnects",
+    "de": "Tägliche Verbindungsabbrüche",
+    "fr": "Déconnexions quotidiennes"
+  },
+  "icon": "/assets/connection-status.svg",
+  "description": {
+    "en": "Counts how many times the device disconnected today (Homey timezone). Resets automatically each day.",
+    "nl": "Telt hoe vaak het apparaat vandaag is verbroken (Homey-tijdzone). Reset automatisch elke dag.",
+    "de": "Zählt, wie oft das Gerät heute getrennt wurde (Homey-Zeitzone). Setzt sich täglich automatisch zurück.",
+    "fr": "Compte le nombre de déconnexions aujourd'hui (fuseau horaire Homey). Réinitialisation automatique chaque jour."
+  }
+}

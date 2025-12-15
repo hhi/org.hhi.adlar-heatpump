@@ -7,16 +7,16 @@
     "fr": "Température ambiante changée"
   },
   "titleFormatted": {
-    "en": "Ambient temperature [[condition]] [[temperature]]°C ",
-    "nl": "Buitentemperatuur [[condition]] [[temperature]]°C ",
-    "de": "Außentemperatur [[condition]] [[temperature]]°C ",
-    "fr": "Température ambiante [[condition]] [[temperature]]°C "
+    "en": "Ambient temperature changed [[condition]] [[temperature]]°C ",
+    "nl": "Buitentemperatuur gewijzigd [[condition]] [[temperature]]°C ",
+    "de": "Außentemperatur geändert [[condition]] [[temperature]]°C ",
+    "fr": "Température ambiante changée [[condition]] [[temperature]]°C "
   },
   "hint": {
-    "en": "Triggers when ambient temperature goes above or below a specified level - useful for weather compensation",
-    "nl": "Wordt geactiveerd wanneer buitentemperatuur boven of onder een bepaald nivo gaat - nuttig voor weercompensatie",
-    "de": "Wird ausgelöst, wenn die Außentemperatur einen angegebenen Schwellenwert über- oder unterschreitet - nützlich für Wettersteuerung",
-    "fr": "Se déclenche lorsque la température ambiante dépasse ou descend en dessous d'un niveau spécifié - utile pour la compensation météorologique"
+    "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
+    "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+    "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
+    "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
   },
   "highlight": true,
   "args": [
