@@ -7,10 +7,10 @@
     "fr": "Mode de fonctionnement changé"
   },
   "titleFormatted": {
-    "en": "Work mode changed [[mode]]",
-    "nl": "Bedrijfsmodus gewijzigd [[mode]]",
-    "de": "Betriebsmodus geändert [[mode]]",
-    "fr": "Mode de fonctionnement changé [[mode]]"
+    "en": "Work mode changed to [[mode]]",
+    "nl": "Bedrijfsmodus gewijzigd naar [[mode]]",
+    "de": "Betriebsmodus zu [[mode]] geändert",
+    "fr": "Mode de fonctionnement changé à [[mode]]"
   },
   "hint": {
     "en": "Triggers when the work mode changes (ECO, Normal, Boost)",

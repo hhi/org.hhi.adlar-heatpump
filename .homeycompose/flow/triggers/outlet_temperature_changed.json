@@ -7,10 +7,10 @@
     "fr": "Température de sortie changée"
   },
   "titleFormatted": {
-    "en": "Outlet temperature [[condition]] [[temperature]]°C",
-    "nl": "Water uittrede temperatuur [[condition]] [[temperature]]°C",
-    "de": "Rücklauftemperatur [[condition]] [[temperature]]°C",
-    "fr": "Température de sortie [[condition]] [[temperature]]°C"
+    "en": "Outlet temperature changed [[condition]] [[temperature]]°C",
+    "nl": "Water uittrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+    "de": "Rücklauftemperatur geändert [[condition]] [[temperature]]°C",
+    "fr": "Température de sortie changée [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when water outlet temperature goes above or below a specified level",

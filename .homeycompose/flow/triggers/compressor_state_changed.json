@@ -8,9 +8,9 @@
   },
   "titleFormatted": {
     "en": "Compressor turned [[state]]",
-    "nl": "Compressor [[state]]",
-    "de": "Kompressor [[state]]",
-    "fr": "Compresseur [[state]]"
+    "nl": "Compressor is gewijzigd naar [[state]]",
+    "de": "Kompressor hat sich zu [[state]] geändert",
+    "fr": "Compresseur est devenu [[state]]"
   },
   "hint": {
     "en": "Triggers when compressor changes state",

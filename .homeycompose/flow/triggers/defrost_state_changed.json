@@ -8,9 +8,9 @@
   },
   "titleFormatted": {
     "en": "Defrost turned [[state]]",
-    "nl": "Ontdooien [[state]]",
-    "de": "Abtauung [[state]]",
-    "fr": "Dégivrage [[state]]"
+    "nl": "Ontdooien is gewijzigd naar [[state]]",
+    "de": "Abtauung hat sich zu [[state]] geändert",
+    "fr": "Dégivrage est devenu [[state]]"
   },
   "hint": {
     "en": "Triggers when defrost system changes state",

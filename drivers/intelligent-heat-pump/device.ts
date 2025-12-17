@@ -2385,7 +2385,8 @@ class MyDevice extends Homey.Device {
         return;
       }
 
-      this.debugLog('Processing DPS data:', dps);
+      // Production logging (v1.3.13 - trigger debugging: changed from debugLog to log)
+      this.log('Device: Processing DPS update with keys:', Object.keys(dps).join(', '));
 
       // Collect all capability updates as promises for batching (v0.99.96)
       const updatePromises: Promise<void>[] = [];

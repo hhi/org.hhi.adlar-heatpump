@@ -8,9 +8,9 @@
   },
   "titleFormatted": {
     "en": "Backwater turned [[state]]",
-    "nl": "Water Terugstroming [[state]]",
-    "de": "Rückströmung [[state]]",
-    "fr": "Reflux [[state]]"
+    "nl": "Water Terugstroming is gewijzigd in [[state]]",
+    "de": "Rückströmung hat sich zu [[state]] geändert",
+    "fr": "Reflux est devenu [[state]]"
   },
   "hint": {
     "en": "Triggers when backwater system changes state",
