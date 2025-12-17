@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.3.12",
+  "version": "1.3.13",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -170,9 +170,9 @@
         },
         "titleFormatted": {
           "en": "Backwater turned [[state]]",
-          "nl": "Water Terugstroming [[state]]",
-          "de": "Rückströmung [[state]]",
-          "fr": "Reflux [[state]]"
+          "nl": "Water Terugstroming is gewijzigd in [[state]]",
+          "de": "Rückströmung hat sich zu [[state]] geändert",
+          "fr": "Reflux est devenu [[state]]"
         },
         "hint": {
           "en": "Triggers when backwater system changes state",
@@ -445,9 +445,9 @@
         },
         "titleFormatted": {
           "en": "Compressor turned [[state]]",
-          "nl": "Compressor [[state]]",
-          "de": "Kompressor [[state]]",
-          "fr": "Compresseur [[state]]"
+          "nl": "Compressor is gewijzigd naar [[state]]",
+          "de": "Kompressor hat sich zu [[state]] geändert",
+          "fr": "Compresseur est devenu [[state]]"
         },
         "hint": {
           "en": "Triggers when compressor changes state",
@@ -516,10 +516,10 @@
           "fr": "Efficacité COP changée"
         },
         "titleFormatted": {
-          "en": "COP efficiency [[condition]] [[threshold]]",
-          "nl": "COP efficiëntie [[condition]] [[threshold]]",
-          "de": "COP-Effizienz [[condition]] [[threshold]]",
-          "fr": "Efficacité COP [[condition]] [[threshold]]"
+          "en": "COP efficiency changed [[condition]] [[threshold]]",
+          "nl": "COP efficiëntie gewijzigd [[condition]] [[threshold]]",
+          "de": "COP-Effizienz geändert [[condition]] [[threshold]]",
+          "fr": "Efficacité COP changée [[condition]] [[threshold]]"
         },
         "hint": {
           "en": "Triggers when the Coefficient of Performance (COP) goes above or below a specified threshold",
@@ -952,10 +952,10 @@
           "fr": "Efficacité COP quotidienne changée"
         },
         "titleFormatted": {
-          "en": "Daily COP efficiency [[condition]] [[threshold]]",
-          "nl": "Dagelijkse COP efficiëntie [[condition]] [[threshold]]",
-          "de": "Tägliche COP-Effizienz [[condition]] [[threshold]]",
-          "fr": "Efficacité COP quotidienne [[condition]] [[threshold]]"
+          "en": "Daily COP efficiency changed [[condition]] [[threshold]]",
+          "nl": "Dagelijkse COP efficiëntie gewijzigd [[condition]] [[threshold]]",
+          "de": "Tägliche COP-Effizienz geändert [[condition]] [[threshold]]",
+          "fr": "Efficacité COP quotidienne changée [[condition]] [[threshold]]"
         },
         "hint": {
           "en": "Triggers when the 24-hour average COP goes above or below a specified threshold",
@@ -1067,9 +1067,9 @@
         },
         "titleFormatted": {
           "en": "Defrost turned [[state]]",
-          "nl": "Ontdooien [[state]]",
-          "de": "Abtauung [[state]]",
-          "fr": "Dégivrage [[state]]"
+          "nl": "Ontdooien is gewijzigd naar [[state]]",
+          "de": "Abtauung hat sich zu [[state]] geändert",
+          "fr": "Dégivrage est devenu [[state]]"
         },
         "hint": {
           "en": "Triggers when defrost system changes state",
@@ -1925,10 +1925,10 @@
           "fr": "Mode de chauffage changé"
         },
         "titleFormatted": {
-          "en": "Heating mode changed [[mode]]",
-          "nl": "Verwarmingsmodus gewijzigd [[mode]]",
-          "de": "Heizmodus geändert [[mode]]",
-          "fr": "Mode de chauffage changé [[mode]]"
+          "en": "Heating mode changed to [[mode]]",
+          "nl": "Verwarmingsmodus gewijzigd naar [[mode]]",
+          "de": "Heizmodus zu [[mode]] geändert",
+          "fr": "Mode de chauffage changé à [[mode]]"
         },
         "hint": {
           "en": "Triggers when the heating mode changes",
@@ -2182,10 +2182,10 @@
           "fr": "Température d'entrée changée"
         },
         "titleFormatted": {
-          "en": "Inlet temperature [[condition]] [[temperature]]°C ",
-          "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C ",
-          "de": "Vorlauftemperatur [[condition]] [[temperature]]°C ",
-          "fr": "Température d'entrée [[condition]] [[temperature]]°C "
+          "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
+          "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
+          "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water inlet temperature goes above or below a specified level",
@@ -2375,10 +2375,10 @@
           "fr": "Efficacité COP mensuelle changée"
         },
         "titleFormatted": {
-          "en": "Monthly COP efficiency [[condition]] [[threshold]]",
-          "nl": "Maandelijkse COP efficiëntie [[condition]] [[threshold]]",
-          "de": "Monatliche COP-Effizienz [[condition]] [[threshold]]",
-          "fr": "Efficacité COP mensuelle [[condition]] [[threshold]]"
+          "en": "Monthly COP efficiency changed [[condition]] [[threshold]]",
+          "nl": "Maandelijkse COP efficiëntie gewijzigd [[condition]] [[threshold]]",
+          "de": "Monatliche COP-Effizienz geändert [[condition]] [[threshold]]",
+          "fr": "Efficacité COP mensuelle changée [[condition]] [[threshold]]"
         },
         "hint": {
           "en": "Triggers when the 30-day average COP goes above or below a specified threshold",
@@ -2489,10 +2489,10 @@
           "fr": "Température de sortie changée"
         },
         "titleFormatted": {
-          "en": "Outlet temperature [[condition]] [[temperature]]°C",
-          "nl": "Water uittrede temperatuur [[condition]] [[temperature]]°C",
-          "de": "Rücklauftemperatur [[condition]] [[temperature]]°C",
-          "fr": "Température de sortie [[condition]] [[temperature]]°C"
+          "en": "Outlet temperature changed [[condition]] [[temperature]]°C",
+          "nl": "Water uittrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "de": "Rücklauftemperatur geändert [[condition]] [[temperature]]°C",
+          "fr": "Température de sortie changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water outlet temperature goes above or below a specified level",
@@ -3540,10 +3540,10 @@
           "fr": "Mode d'eau changé"
         },
         "titleFormatted": {
-          "en": "Water mode changed [[mode]]",
-          "nl": "Watermodus gewijzigd [[mode]]",
-          "de": "Wassermodus geändert [[mode]]",
-          "fr": "Mode d'eau changé [[mode]]"
+          "en": "Water mode changed to [[mode]]",
+          "nl": "Watermodus gewijzigd naar [[mode]]",
+          "de": "Wassermodus zu [[mode]] geändert",
+          "fr": "Mode d'eau changé à [[mode]]"
         },
         "hint": {
           "en": "Triggers when the water control temperature mode changes",
@@ -3593,10 +3593,10 @@
           "fr": "Mode de fonctionnement changé"
         },
         "titleFormatted": {
-          "en": "Work mode changed [[mode]]",
-          "nl": "Bedrijfsmodus gewijzigd [[mode]]",
-          "de": "Betriebsmodus geändert [[mode]]",
-          "fr": "Mode de fonctionnement changé [[mode]]"
+          "en": "Work mode changed to [[mode]]",
+          "nl": "Bedrijfsmodus gewijzigd naar [[mode]]",
+          "de": "Betriebsmodus zu [[mode]] geändert",
+          "fr": "Mode de fonctionnement changé à [[mode]]"
         },
         "hint": {
           "en": "Triggers when the work mode changes (ECO, Normal, Boost)",

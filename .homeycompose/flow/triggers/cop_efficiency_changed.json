@@ -7,10 +7,10 @@
     "fr": "Efficacité COP changée"
   },
   "titleFormatted": {
-    "en": "COP efficiency [[condition]] [[threshold]]",
-    "nl": "COP efficiëntie [[condition]] [[threshold]]",
-    "de": "COP-Effizienz [[condition]] [[threshold]]",
-    "fr": "Efficacité COP [[condition]] [[threshold]]"
+    "en": "COP efficiency changed [[condition]] [[threshold]]",
+    "nl": "COP efficiëntie gewijzigd [[condition]] [[threshold]]",
+    "de": "COP-Effizienz geändert [[condition]] [[threshold]]",
+    "fr": "Efficacité COP changée [[condition]] [[threshold]]"
   },
   "hint": {
     "en": "Triggers when the Coefficient of Performance (COP) goes above or below a specified threshold",

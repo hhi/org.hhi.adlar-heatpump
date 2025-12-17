@@ -251,9 +251,19 @@ export class ServiceCoordinator {
       return;
     }
 
+    // Diagnostic logging (v1.3.13 - trigger debugging)
+    this.logger('ServiceCoordinator: handleTuyaData called with DPS keys:', Object.keys(data.dps));
+
     // Forward DPS data to device for capability updates
-    if (typeof (this.device as unknown as { updateCapabilitiesFromDps?: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps === 'function') {
-      (this.device as unknown as { updateCapabilitiesFromDps: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps(data.dps);
+    const updateFn = (this.device as unknown as { updateCapabilitiesFromDps?: (dps: Record<string, unknown>) => void }).updateCapabilitiesFromDps;
+    if (typeof updateFn === 'function') {
+      this.logger('ServiceCoordinator: Calling device.updateCapabilitiesFromDps()');
+      updateFn.call(this.device, data.dps);
+    } else {
+      this.logger('ServiceCoordinator: WARNING - device.updateCapabilitiesFromDps not found or not a function', {
+        deviceExists: !!this.device,
+        updateFnType: typeof updateFn,
+      });
     }
 
     // Update capability health for each DPS value

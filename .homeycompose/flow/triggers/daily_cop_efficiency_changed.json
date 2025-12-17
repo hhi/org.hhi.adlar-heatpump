@@ -7,10 +7,10 @@
     "fr": "Efficacité COP quotidienne changée"
   },
   "titleFormatted": {
-    "en": "Daily COP efficiency [[condition]] [[threshold]]",
-    "nl": "Dagelijkse COP efficiëntie [[condition]] [[threshold]]",
-    "de": "Tägliche COP-Effizienz [[condition]] [[threshold]]",
-    "fr": "Efficacité COP quotidienne [[condition]] [[threshold]]"
+    "en": "Daily COP efficiency changed [[condition]] [[threshold]]",
+    "nl": "Dagelijkse COP efficiëntie gewijzigd [[condition]] [[threshold]]",
+    "de": "Tägliche COP-Effizienz geändert [[condition]] [[threshold]]",
+    "fr": "Efficacité COP quotidienne changée [[condition]] [[threshold]]"
   },
   "hint": {
     "en": "Triggers when the 24-hour average COP goes above or below a specified threshold",

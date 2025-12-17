@@ -7,10 +7,10 @@
     "fr": "Efficacité COP mensuelle changée"
   },
   "titleFormatted": {
-    "en": "Monthly COP efficiency [[condition]] [[threshold]]",
-    "nl": "Maandelijkse COP efficiëntie [[condition]] [[threshold]]",
-    "de": "Monatliche COP-Effizienz [[condition]] [[threshold]]",
-    "fr": "Efficacité COP mensuelle [[condition]] [[threshold]]"
+    "en": "Monthly COP efficiency changed [[condition]] [[threshold]]",
+    "nl": "Maandelijkse COP efficiëntie gewijzigd [[condition]] [[threshold]]",
+    "de": "Monatliche COP-Effizienz geändert [[condition]] [[threshold]]",
+    "fr": "Efficacité COP mensuelle changée [[condition]] [[threshold]]"
   },
   "hint": {
     "en": "Triggers when the 30-day average COP goes above or below a specified threshold",

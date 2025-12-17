@@ -7,10 +7,10 @@
     "fr": "Température d'entrée changée"
   },
   "titleFormatted": {
-    "en": "Inlet temperature [[condition]] [[temperature]]°C ",
-    "nl": "Water intrede temperatuur [[condition]] [[temperature]]°C ",
-    "de": "Vorlauftemperatur [[condition]] [[temperature]]°C ",
-    "fr": "Température d'entrée [[condition]] [[temperature]]°C "
+    "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
+    "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+    "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
+    "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when water inlet temperature goes above or below a specified level",
