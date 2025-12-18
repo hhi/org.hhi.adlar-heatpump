@@ -21,7 +21,7 @@ Before installing the app, ensure you have the following:
 You'll need these credentials from your heat pump setup:
 
 - **Device ID** - Found in Tuya/Smart Life app device settings
-- **Local Key** - See `docs/Get Local Keys - instruction.pdf` for detailed instructions
+- **Local Key** - See `docs/setup/Get Local Keys - instruction.pdf` for detailed instructions
 - **IP Address** - Look for "Nest Labs - WP" or similar in your router app
 
 ## Installation Steps
@@ -92,7 +92,7 @@ You'll need these credentials from your heat pump setup:
 3. **Search for**: "Adlar Heat Pump"
 4. **Follow the pairing wizard** and enter:
    - Device ID (from Tuya/Smart Life app)
-   - Local Key (see `docs/Get Local Keys - instruction.pdf`)
+   - Local Key (see `docs/setup/Get Local Keys - instruction.pdf`)
    - IP Address (look for "Nest Labs -WP" in router)
 
 ### Using Homey Developer Tools (After Installation)
@@ -123,7 +123,7 @@ Once the app is installed and your device is paired, you can monitor live values
 
 #### Local Key
 
-- **Detailed Instructions**: See `docs/Get Local Keys - instruction.pdf` for complete step-by-step guide
+- **Detailed Instructions**: See `docs/setup/Get Local Keys - instruction.pdf` for complete step-by-step guide
 - Register at [Tuya Developer Portal](https://iot.tuya.com/)
 - Create a project and link your device
 - Extract the Local Key from device details

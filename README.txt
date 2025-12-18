@@ -48,7 +48,7 @@ WHAT DO YOU NEED?
 
 HOW TO OBTAIN DEVICE CREDENTIALS?
 You can obtain the required local key and other data by following the instructions in:
-/docs/Tuya_LocalKey_Homey_Guide_EN.pdf
+/docs/setup/Tuya_LocalKey_Homey_Guide_EN.pdf
 
 INSTALLATION STEPS
 1. Install the app via the Homey App Store
@@ -245,7 +245,7 @@ Power Measurement Settings:
 - Useful if you have external power monitoring
 
 CROSS-APP INTEGRATION
-Connect with other Homey apps for enhanced COP calculation (see /docs/COP flow-card-setup.md):
+Connect with other Homey apps for enhanced COP calculation (see /docs/setup/COP flow-card-setup.md):
 - External power measurements (from your smart meter)
 - External water flow data
 - External ambient temperature data

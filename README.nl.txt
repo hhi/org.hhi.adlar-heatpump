@@ -48,7 +48,7 @@ WAT HEEFT U NODIG?
 
 HOE VERKRIJGT U DE APPARAAT GEGEVENS?
 De benodigde lokale sleutel en andere gegevens kunt u verkrijgen door de instructies te volgen in:
-/docs/Tuya_LocalKey_Homey_Guide_NL.pdf
+/docs/setup/Tuya_LocalKey_Homey_Guide_NL.pdf
 
 INSTALLATIESTAPPEN
 1. Installeer de app via de Homey App Store
@@ -246,7 +246,7 @@ Vermogensmetingsinstellingen:
 - Nuttig als u externe vermogensmonitoring heeft
 
 CROSS-APP INTEGRATIE
-Verbind met andere Homey apps voor verbeterde COP berekening (zie /docs/COP flow-card-setup.md):
+Verbind met andere Homey apps voor verbeterde COP berekening (zie /docs/setup/COP flow-card-setup.md):
 - Externe vermogensmetingen (van uw slimme meter)
 - Externe water doorstroom gegevens
 - Externe buitentemperatuur gegevens

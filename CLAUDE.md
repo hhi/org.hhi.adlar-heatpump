@@ -1380,7 +1380,7 @@ await this.updateCumulativeEnergy(); // Existing, enhanced with milestone check
 
 #### Documentation
 
-**User-Facing Documentation**: `docs/FLOW_CARDS_GUIDE.md`
+**User-Facing Documentation**: `docs/setup/FLOW_CARDS_GUIDE.md`
 - Comprehensive usage examples
 - Configuration tips
 - Troubleshooting guide
@@ -1483,7 +1483,7 @@ All expressions are evaluated by Homey before reaching the flow card listener, t
 
 ##### Primary: Weather-Compensated Heating
 
-**Visual Example**: See `docs/Curve calculator.png` for production implementation with 14-point curve and timeline results.
+**Visual Example**: See `docs/setup/Curve calculator.png` for production implementation with 14-point curve and timeline results.
 
 ```text
 Outdoor Temp → Heating Setpoint
@@ -1653,7 +1653,7 @@ expect(validation.errors.length).toBeGreaterThan(0);
 **User Documentation**:
 
 - [README.md](README.md#advanced-calculate-value-from-curve) - Lines 147-230
-- [FLOW_CARDS_GUIDE.md](docs/FLOW_CARDS_GUIDE.md#8--calculate-value-from-curve) - Comprehensive guide
+- [FLOW_CARDS_GUIDE.md](docs/setup/FLOW_CARDS_GUIDE.md#8--calculate-value-from-curve) - Comprehensive guide
 
 **Technical Documentation**:
 

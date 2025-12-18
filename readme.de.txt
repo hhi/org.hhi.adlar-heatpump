@@ -47,7 +47,7 @@ WAS BENÖTIGEN SIE?
 
 WIE ERHALTEN SIE DIE GERÄTEANMELDEDATEN?
 Sie können den erforderlichen lokalen Schlüssel und andere Daten erhalten, indem Sie die Anweisungen befolgen in:
-/docs/Tuya_LocalKey_Homey_Guide_DE.pdf
+/docs/setup/Tuya_LocalKey_Homey_Guide_DE.pdf
 
 INSTALLATIONSSCHRITTE
 1. Installieren Sie die App über den Homey App Store
@@ -246,7 +246,7 @@ Leistungsmesseinstellungen:
 - Nützlich, wenn Sie eine externe Leistungsüberwachung haben
 
 APP-ÜBERGREIFENDE INTEGRATION
-Verbinden Sie sich mit anderen Homey-Apps für verbesserte COP-Berechnung (siehe /docs/COP flow-card-setup.md):
+Verbinden Sie sich mit anderen Homey-Apps für verbesserte COP-Berechnung (siehe /docs/setup/COP flow-card-setup.md):
 - Externe Leistungsmessungen (von Ihrem Smart Meter)
 - Externe Wasserdurchflussdaten
 - Externe Umgebungstemperaturdaten
