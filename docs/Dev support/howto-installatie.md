@@ -21,7 +21,7 @@ Zorg ervoor dat je het volgende hebt voordat je de app installeert:
 Je hebt deze gegevens nodig van je warmtepomp setup:
 
 - **Apparaat ID** - Te vinden in Tuya/Smart Life app apparaatinstellingen
-- **Local Key** - Zie `docs/Get Local Keys - instruction.pdf` voor gedetailleerde instructies
+- **Local Key** - Zie `docs/setup/Get Local Keys - instruction.pdf` voor gedetailleerde instructies
 - **IP Adres** - Zoek naar "Nest Labs -WP" of vergelijkbaar in je router app
 
 ## Installatiestappen
@@ -92,7 +92,7 @@ Je hebt deze gegevens nodig van je warmtepomp setup:
 3. **Zoek naar**: "Adlar Heat Pump"
 4. **Volg de koppelingsassistent** en voer in:
    - Apparaat ID (uit Tuya/Smart Life app)
-   - Local Key (zie `docs/Get Local Keys - instruction.pdf`)
+   - Local Key (zie `docs/setup/Get Local Keys - instruction.pdf`)
    - IP Adres (zoek naar "Nest Labs - WP" in router)
 
 ### Gebruik van Homey Developer Tools (Na Installatie)
@@ -123,7 +123,7 @@ Zodra de app geïnstalleerd is en je apparaat gekoppeld is, kun je live waarden 
 
 #### Local Key
 
-- **Gedetailleerde Instructies**: Zie `docs/Get Local Keys - instruction.pdf` voor complete stap-voor-stap handleiding
+- **Gedetailleerde Instructies**: Zie `docs/setup/Get Local Keys - instruction.pdf` voor complete stap-voor-stap handleiding
 - Registreer bij [Tuya Developer Portal](https://iot.tuya.com/)
 - Maak een project aan en koppel je apparaat
 - Haal de Local Key uit de apparaatdetails

@@ -53,7 +53,7 @@ The app provides access to **56 capabilities** across eight categories:
 ### Getting Device Credentials
 
 To obtain the required local key, refer to the documentation:
-`docs/Get Local Keys - instruction.pdf`
+`docs/setup/Get Local Keys - instruction.pdf`
 
 ### Installation Steps
 
@@ -66,7 +66,7 @@ To obtain the required local key, refer to the documentation:
    - **Protocol Version**: Tuya protocol version (3.3, 3.4, or 3.5) - Default: 3.3
 4. Complete the pairing process
 
-**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version in device settings (Settings → Connection Settings → Protocol Version). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.md](docs/USER_QUICK_FIX.md) for troubleshooting guidance.
+**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version in device settings (Settings → Connection Settings → Protocol Version). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.md](docs/setup/USER_QUICK_FIX.md) for troubleshooting guidance.
 
 ## Configuration
 
@@ -410,8 +410,8 @@ If your device repeatedly disconnects or shows ECONNRESET errors:
 
 **Detailed Guides:**
 
-- [USER_QUICK_FIX.md](docs/USER_QUICK_FIX.md) - Step-by-step instructions
-- [PROTOCOL_VERSION_GUIDE.md](docs/PROTOCOL_VERSION_GUIDE.md) - Comprehensive troubleshooting
+- [USER_QUICK_FIX.md](docs/setup/USER_QUICK_FIX.md) - Step-by-step instructions
+- [PROTOCOL_VERSION_GUIDE.md](docs/setup/PROTOCOL_VERSION_GUIDE.md) - Comprehensive troubleshooting
 
 ### Device Pairing Issues
 
@@ -421,7 +421,7 @@ If pairing fails:
 2. Ensure heat pump is on local network
 3. Try different protocol versions (3.3 → 3.4 → 3.5)
 4. Check firewall/network restrictions
-5. See `docs/Get Local Keys - instruction.pdf` for credential retrieval
+5. See `docs/setup/Get Local Keys - instruction.pdf` for credential retrieval
 
 ## Documentation & Support
 
@@ -446,7 +446,7 @@ Detailed documentation available in `/docs` directory:
 
 - **Issues**: Report bugs and feature requests on GitHub
 - **Community**: Homey Community Forum (Topic ID: 143690)
-- **Installation Guide**: `docs/Get Local Keys - instruction.pdf`
+- **Installation Guide**: `docs/setup/Get Local Keys - instruction.pdf`
 
 ## Release Notes
 
@@ -513,7 +513,7 @@ This release simplifies credential management by eliminating the intermediary re
 
 - ✅ Protocol version stored in both device store and settings for reliability
 - ✅ Automatic reconnection when protocol version changes
-- ✅ Comprehensive user documentation ([USER_QUICK_FIX.md](docs/USER_QUICK_FIX.md), [PROTOCOL_VERSION_GUIDE.md](docs/PROTOCOL_VERSION_GUIDE.md))
+- ✅ Comprehensive user documentation ([USER_QUICK_FIX.md](docs/setup/USER_QUICK_FIX.md), [PROTOCOL_VERSION_GUIDE.md](docs/setup/PROTOCOL_VERSION_GUIDE.md))
 
 This release resolved connection stability issues for users with devices requiring non-default protocol versions.
 

@@ -47,7 +47,7 @@ DE QUOI AVEZ-VOUS BESOIN ?
 
 COMMENT OBTENIR LES IDENTIFIANTS DE L'APPAREIL ?
 Vous pouvez obtenir la clé locale requise et d'autres données en suivant les instructions dans :
-/docs/Tuya_LocalKey_Homey_Guide_FR.pdf
+/docs/setup/Tuya_LocalKey_Homey_Guide_FR.pdf
 
 ÉTAPES D'INSTALLATION
 1. Installez l'application via le Homey App Store
@@ -246,7 +246,7 @@ Paramètres de mesure de puissance :
 - Utile si vous avez une surveillance de puissance externe
 
 INTÉGRATION INTER-APPLICATIONS
-Connectez-vous à d'autres applications Homey pour un calcul COP amélioré (voir /docs/COP flow-card-setup.md) :
+Connectez-vous à d'autres applications Homey pour un calcul COP amélioré (voir /docs/setup/COP flow-card-setup.md) :
 - Mesures de puissance externes (de votre compteur intelligent)
 - Données de débit d'eau externes
 - Données de température ambiante externes
