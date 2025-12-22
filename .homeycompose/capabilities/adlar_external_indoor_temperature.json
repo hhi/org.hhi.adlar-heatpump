@@ -1,0 +1,37 @@
+{
+  "id": "adlar_external_indoor_temperature",
+  "title": {
+    "en": "External Indoor Temperature",
+    "nl": "Externe Binnen Temperatuur",
+    "de": "Externe Raumtemperatur",
+    "fr": "Température intérieure externe"
+  },
+  "type": "number",
+  "units": {
+    "en": "°C",
+    "nl": "°C",
+    "de": "°C",
+    "fr": "°C"
+  },
+  "min": -10,
+  "max": 50,
+  "step": 0.1,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "External Indoor Temperature for Adaptive Control",
+    "nl": "Externe Binnentemperatuur voor Adaptieve Regeling",
+    "de": "Externe Raumtemperatur für adaptive Steuerung",
+    "fr": "Température intérieure externe pour contrôle adaptatif"
+  },
+  "icon": "/assets/external-temperature.svg",
+  "description": {
+    "en": "Indoor temperature received via flow cards from external Homey devices (thermostats, sensors), used for adaptive temperature control",
+    "nl": "Binnentemperatuur ontvangen via flow kaarten van externe Homey apparaten (thermostaten, sensoren), gebruikt voor adaptieve temperatuurregeling",
+    "de": "Raumtemperatur empfangen über Flow-Karten von externen Homey-Geräten (Thermostate, Sensoren), verwendet für adaptive Temperatursteuerung",
+    "fr": "Température intérieure reçue via des cartes de flux d'appareils Homey externes (thermostats, capteurs), utilisée pour le contrôle adaptatif de la température"
+  }
+}

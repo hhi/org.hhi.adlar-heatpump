@@ -1,0 +1,45 @@
+{
+  "id": "receive_external_indoor_temperature",
+  "title": {
+    "en": "Send indoor temperature to heat pump",
+    "nl": "Stuur binnentemperatuur naar warmtepomp",
+    "de": "Raumtemperatur an Wärmepumpe senden",
+    "fr": "Envoyer la température intérieure à la pompe à chaleur"
+  },
+  "titleFormatted": {
+    "en": "Send [[temperature_value]]°C indoor temperature for adaptive control",
+    "nl": "Stuur [[temperature_value]]°C binnentemperatuur voor adaptieve regeling",
+    "de": "Sende [[temperature_value]]°C Raumtemperatur für adaptive Steuerung",
+    "fr": "Envoyer [[temperature_value]]°C température intérieure pour contrôle adaptatif"
+  },
+  "hint": {
+    "en": "Sends current indoor/room temperature from an external sensor to enable adaptive temperature control",
+    "nl": "Stuurt huidige binnen-/kamertemperatuur van een externe sensor om adaptieve temperatuurregeling mogelijk te maken",
+    "de": "Sendet aktuelle Raum-/Innentemperatur von einem externen Sensor zur Aktivierung der adaptiven Temperatursteuerung",
+    "fr": "Envoie la température intérieure actuelle d'un capteur externe pour activer le contrôle adaptatif de la température"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "text",
+      "name": "temperature_value",
+      "title": {
+        "en": "Indoor temperature (°C)",
+        "nl": "Binnentemperatuur (°C)",
+        "de": "Raumtemperatur (°C)",
+        "fr": "Température intérieure (°C)"
+      },
+      "placeholder": {
+        "en": "e.g., 21.5 or {{ room_temperature }} or {{ (sensor1 + sensor2) / 2 }}",
+        "nl": "bijv. 21.5 of {{ kamer_temp }} of {{ (sensor1 + sensor2) / 2 }}",
+        "de": "z.B. 21.5 oder {{ Raumtemperatur }} oder {{ (sensor1 + sensor2) / 2 }}",
+        "fr": "par ex. 21.5 ou {{ température_pièce }} ou {{ (capteur1 + capteur2) / 2 }}"
+      }
+    }
+  ]
+}

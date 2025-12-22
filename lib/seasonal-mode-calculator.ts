@@ -135,7 +135,6 @@ export class SeasonalModeCalculator {
   static getDaysUntilSeasonChange(date: Date = new Date()): number {
     const currentYear = date.getFullYear();
     const currentMonth = date.getMonth() + 1;
-    const currentDay = date.getDate();
 
     let nextSeasonChangeDate: Date;
 
@@ -241,9 +240,13 @@ export class SeasonalModeCalculator {
     result: SeasonalModeResult,
     language: 'en' | 'nl' = 'en',
   ): string {
-    const seasonName = language === 'nl'
-      ? (result.isHeatingSeason ? 'Verwarmingsseizoen' : 'Koelseizoen')
-      : (result.isHeatingSeason ? 'Heating season' : 'Cooling season');
+    // Determine season name based on language and season type
+    let seasonName: string;
+    if (result.isHeatingSeason) {
+      seasonName = language === 'nl' ? 'Verwarmingsseizoen' : 'Heating season';
+    } else {
+      seasonName = language === 'nl' ? 'Koelseizoen' : 'Cooling season';
+    }
 
     const daysText = language === 'nl'
       ? `nog ${result.daysUntilSeasonChange} dagen`

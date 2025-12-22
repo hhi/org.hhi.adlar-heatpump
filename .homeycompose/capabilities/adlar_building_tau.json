@@ -1,0 +1,27 @@
+{
+  "id": "adlar_building_tau",
+  "type": "number",
+  "title": {
+    "en": "ML Time Constant",
+    "nl": "ML Tijdsconstante",
+    "de": "ML Zeitkonstante",
+    "fr": "Constante de Temps ML"
+  },
+  "units": {
+    "en": "hours",
+    "nl": "uren",
+    "de": "Stunden",
+    "fr": "heures"
+  },
+  "desc": {
+    "en": "Learned thermal time constant of the building (hours)",
+    "nl": "Geleerde thermische tijdsconstante van het gebouw (uren)",
+    "de": "Gelernte thermische Zeitkonstante des Gebäudes (Stunden)",
+    "fr": "Constante de temps thermique apprise du bâtiment (heures)"
+  },
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/building-time-constant.svg"
+}

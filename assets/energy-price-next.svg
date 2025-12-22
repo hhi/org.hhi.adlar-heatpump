@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Euro symbol (centered, main focus) -->
+  <path d="M 16 8 C 14 8 11 10 11 13 C 11 16 14 18 16 18"/>
+  <line x1="8" y1="11" x2="14" y2="11"/>
+  <line x1="8" y1="15" x2="14" y2="15"/>
+
+  <!-- Clock (bottom left - next hour) -->
+  <circle cx="5" cy="19" r="3" stroke-width="1.5"/>
+  <path d="M 5 17.5 L 5 19 L 6.2 20" stroke-width="1.5"/>
+
+  <!-- Forward arrow (top right - next/future) -->
+  <path d="M 18 4 L 21 4" stroke-width="1.5"/>
+  <path d="M 19 2 L 21 4 L 19 6" stroke-width="1.5"/>
+</svg>

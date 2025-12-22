@@ -1,0 +1,82 @@
+{
+  "id": "daily_cost_threshold",
+  "title": {
+    "en": "Daily energy cost exceeded threshold",
+    "nl": "Dagelijkse energiekosten drempel overschreden",
+    "de": "Tägliche Energiekosten Schwellenwert überschritten",
+    "fr": "Seuil de coût énergétique quotidien dépassé"
+  },
+  "titleFormatted": {
+    "en": "Daily cost exceeded €[[threshold]]",
+    "nl": "Dagelijkse kosten overschreden €[[threshold]]",
+    "de": "Tägliche Kosten überschritten €[[threshold]]",
+    "fr": "Coût quotidien dépassé €[[threshold]]"
+  },
+  "hint": {
+    "en": "Triggers when today's total energy cost exceeds specified amount (requires price optimizer)",
+    "nl": "Wordt geactiveerd wanneer de totale energiekosten van vandaag het opgegeven bedrag overschrijden (vereist prijsoptimalisatie)",
+    "de": "Wird ausgelöst, wenn die heutigen Gesamtenergiekosten den angegebenen Betrag überschreiten (erfordert Preisoptimierer)",
+    "fr": "Se déclenche lorsque le coût énergétique total d'aujourd'hui dépasse le montant spécifié (nécessite l'optimiseur de prix)"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "number",
+      "name": "threshold",
+      "title": {
+        "en": "Cost threshold (€)",
+        "nl": "Kosten drempel (€)",
+        "de": "Kosten-Schwellenwert (€)",
+        "fr": "Seuil de coût (€)"
+      },
+      "min": 1,
+      "max": 50,
+      "step": 0.5,
+      "placeholder": {
+        "en": "Daily cost limit in euros",
+        "nl": "Dagelijks kosten limiet in euros",
+        "de": "Tägliches Kostenlimit in Euro",
+        "fr": "Limite de coût quotidien en euros"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "daily_cost",
+      "type": "number",
+      "title": {
+        "en": "Today's Total Cost (€)",
+        "nl": "Totale Kosten Vandaag (€)",
+        "de": "Gesamtkosten Heute (€)",
+        "fr": "Coût Total Aujourd'hui (€)"
+      },
+      "example": 5.80
+    },
+    {
+      "name": "daily_consumption",
+      "type": "number",
+      "title": {
+        "en": "Today's Consumption (kWh)",
+        "nl": "Verbruik Vandaag (kWh)",
+        "de": "Verbrauch Heute (kWh)",
+        "fr": "Consommation Aujourd'hui (kWh)"
+      },
+      "example": 28.5
+    },
+    {
+      "name": "average_price",
+      "type": "number",
+      "title": {
+        "en": "Average Price Today (€/kWh)",
+        "nl": "Gemiddelde Prijs Vandaag (€/kWh)",
+        "de": "Durchschnittspreis Heute (€/kWh)",
+        "fr": "Prix Moyen Aujourd'hui (€/kWh)"
+      },
+      "example": 0.203
+    }
+  ]
+}

@@ -9,6 +9,7 @@
  * Categories for grouping device capabilities by functional type.
  * Used by CapabilityHealthService and FlowCardManagerService.
  * v1.2.3: Added 'calculated' and 'external' categories (excluded from DPS health tracking).
+ * v1.3.14: Added 'monitoring', 'building_model', 'energy_pricing' categories (excluded from DPS health tracking).
  */
 export interface CapabilityCategories {
   temperature: string[];
@@ -20,6 +21,9 @@ export interface CapabilityCategories {
   efficiency: string[]; // Flow card category (still used for user preferences)
   calculated: string[]; // COP/SCOP calculations (excluded from health metrics)
   external: string[]; // External integrations (excluded from health metrics)
+  monitoring: string[]; // Connection monitoring, disconnect counts (excluded from health metrics)
+  building_model: string[]; // Building thermal parameters learned by RLS (excluded from health metrics)
+  energy_pricing: string[]; // Energy price/cost data from API (excluded from health metrics)
 }
 
 /**

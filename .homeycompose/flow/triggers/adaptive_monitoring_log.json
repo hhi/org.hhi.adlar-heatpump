@@ -1,0 +1,85 @@
+{
+  "id": "adaptive_monitoring_log",
+  "title": {
+    "en": "Adaptive control logged action",
+    "nl": "Adaptieve regeling heeft actie gelogd",
+    "de": "Adaptive Steuerung hat Aktion protokolliert",
+    "fr": "Contrôle adaptatif a enregistré une action"
+  },
+  "titleFormatted": {
+    "en": "Adaptive control logged [[adjustment]]°C adjustment",
+    "nl": "Adaptieve regeling heeft [[adjustment]]°C aanpassing gelogd",
+    "de": "Adaptive Steuerung protokollierte [[adjustment]]°C Anpassung",
+    "fr": "Contrôle adaptatif a enregistré [[adjustment]]°C d'ajustement"
+  },
+  "hint": {
+    "en": "Triggers when adaptive control calculates a recommendation in monitoring mode (no execution)",
+    "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbeveling berekent in monitormodus (geen uitvoering)",
+    "de": "Wird ausgelöst, wenn adaptive Steuerung eine Empfehlung im Überwachungsmodus berechnet (keine Ausführung)",
+    "fr": "Se déclenche lorsque le contrôle adaptatif calcule une recommandation en mode surveillance (pas d'exécution)"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "adjustment",
+      "type": "number",
+      "title": {
+        "en": "Total Adjustment (°C)",
+        "nl": "Totale Aanpassing (°C)",
+        "de": "Gesamt Anpassung (°C)",
+        "fr": "Ajustement Total (°C)"
+      },
+      "example": 1.2
+    },
+    {
+      "name": "comfort_component",
+      "type": "number",
+      "title": {
+        "en": "Comfort Component (°C)",
+        "nl": "Comfort Component (°C)",
+        "de": "Komfort-Komponente (°C)",
+        "fr": "Composante Confort (°C)"
+      },
+      "example": 0.72
+    },
+    {
+      "name": "efficiency_component",
+      "type": "number",
+      "title": {
+        "en": "Efficiency Component (°C)",
+        "nl": "Efficiëntie Component (°C)",
+        "de": "Effizienz-Komponente (°C)",
+        "fr": "Composante Efficacité (°C)"
+      },
+      "example": 0.25
+    },
+    {
+      "name": "cost_component",
+      "type": "number",
+      "title": {
+        "en": "Cost Component (°C)",
+        "nl": "Kosten Component (°C)",
+        "de": "Kosten-Komponente (°C)",
+        "fr": "Composante Coût (°C)"
+      },
+      "example": 0.15
+    },
+    {
+      "name": "reasoning",
+      "type": "string",
+      "title": {
+        "en": "Reasoning",
+        "nl": "Redenering",
+        "de": "Begründung",
+        "fr": "Raisonnement"
+      },
+      "example": "Comfort: Error 0.8°C; Cost: Low price €0.12/kWh"
+    }
+  ]
+}

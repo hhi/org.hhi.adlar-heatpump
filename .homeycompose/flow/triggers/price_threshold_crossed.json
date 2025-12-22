@@ -1,0 +1,63 @@
+{
+  "id": "price_threshold_crossed",
+  "title": {
+    "en": "Energy price crossed threshold",
+    "nl": "Energieprijs drempel overschreden",
+    "de": "Energiepreis-Schwellenwert überschritten",
+    "fr": "Seuil de prix de l'énergie franchi"
+  },
+  "titleFormatted": {
+    "en": "Energy price became [[category]]",
+    "nl": "Energieprijs werd [[category]]",
+    "de": "Energiepreis wurde [[category]]",
+    "fr": "Prix de l'énergie devenu [[category]]"
+  },
+  "hint": {
+    "en": "Triggers when energy price category changes (very_low, low, normal, high, very_high)",
+    "nl": "Wordt geactiveerd wanneer energieprijs categorie verandert (very_low, low, normal, high, very_high)",
+    "de": "Wird ausgelöst, wenn sich die Energiepreis-Kategorie ändert (very_low, low, normal, high, very_high)",
+    "fr": "Se déclenche lorsque la catégorie de prix de l'énergie change (very_low, low, normal, high, very_high)"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "category",
+      "type": "string",
+      "title": {
+        "en": "Price Category",
+        "nl": "Prijs Categorie",
+        "de": "Preis-Kategorie",
+        "fr": "Catégorie de Prix"
+      },
+      "example": "very_low"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "title": {
+        "en": "Current Price (€/kWh)",
+        "nl": "Huidige Prijs (€/kWh)",
+        "de": "Aktueller Preis (€/kWh)",
+        "fr": "Prix Actuel (€/kWh)"
+      },
+      "example": 0.08
+    },
+    {
+      "name": "next_hour_price",
+      "type": "number",
+      "title": {
+        "en": "Next Hour Price (€/kWh)",
+        "nl": "Volgende Uur Prijs (€/kWh)",
+        "de": "Preis Nächste Stunde (€/kWh)",
+        "fr": "Prix Heure Suivante (€/kWh)"
+      },
+      "example": 0.12
+    }
+  ]
+}

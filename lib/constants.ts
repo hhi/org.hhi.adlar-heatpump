@@ -102,6 +102,43 @@ export class DeviceConstants {
   /** Maximum hot water temperature in Celsius */
   static readonly MAX_HOTWATER_TEMPERATURE = 75;
 
+  // Adaptive Temperature Control (v1.4.0 - Fase 1 MVP)
+  /** Adaptive control loop interval - frequency of PI calculations */
+  static readonly ADAPTIVE_CONTROL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+  /** Minimum wait time between temperature adjustments (prevent oscillation) */
+  static readonly ADAPTIVE_MIN_WAIT_BETWEEN_ADJUSTMENTS_MS = 20 * 60 * 1000; // 20 minutes
+
+  /** Maximum temperature adjustment per control cycle (safety limit) */
+  static readonly ADAPTIVE_MAX_TEMP_ADJUSTMENT = 3.0; // ±3°C
+
+  /** Absolute minimum target temperature (safety clamp) */
+  static readonly ADAPTIVE_MIN_TARGET_TEMP = 15.0; // °C
+
+  /** Absolute maximum target temperature (safety clamp) */
+  static readonly ADAPTIVE_MAX_TARGET_TEMP = 28.0; // °C
+
+  /** External temperature validation - minimum acceptable value */
+  static readonly EXTERNAL_TEMP_MIN = -10.0; // °C
+
+  /** External temperature validation - maximum acceptable value */
+  static readonly EXTERNAL_TEMP_MAX = 50.0; // °C
+
+  /** Maximum age of temperature data before considering it stale */
+  static readonly ADAPTIVE_MAX_TEMP_AGE_MINUTES = 10; // minutes
+
+  /** PI controller default - proportional gain */
+  static readonly ADAPTIVE_DEFAULT_KP = 3.0;
+
+  /** PI controller default - integral gain */
+  static readonly ADAPTIVE_DEFAULT_KI = 1.5;
+
+  /** PI controller default - deadband tolerance */
+  static readonly ADAPTIVE_DEFAULT_DEADBAND = 0.3; // °C
+
+  /** PI error history size - 2 hours at 5-minute intervals */
+  static readonly ADAPTIVE_PI_HISTORY_SIZE = 24; // data points
+
   // Retry delays
   /** Capability retry delay in milliseconds */
   static readonly CAPABILITY_RETRY_DELAY_MS = 1000;
