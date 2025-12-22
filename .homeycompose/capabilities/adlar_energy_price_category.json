@@ -1,0 +1,20 @@
+{
+  "id": "adlar_energy_price_category",
+  "type": "string",
+  "title": {
+    "en": "Energy Price Category",
+    "nl": "Energieprijs Categorie",
+    "de": "Energiepreis-Kategorie",
+    "fr": "Catégorie de Prix de l'Énergie"
+  },
+  "desc": {
+    "en": "Current energy price category (very_low, low, normal, high, very_high)",
+    "nl": "Huidige energieprijs categorie (very_low, low, normal, high, very_high)",
+    "de": "Aktuelle Energiepreis-Kategorie (very_low, low, normal, high, very_high)",
+    "fr": "Catégorie actuelle du prix de l'énergie (very_low, low, normal, high, very_high)"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/energy-price-category.svg"
+}

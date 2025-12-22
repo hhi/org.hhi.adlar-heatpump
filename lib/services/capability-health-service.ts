@@ -197,6 +197,15 @@ export class CapabilityHealthService {
     // External integration capabilities - excluded from health metrics (user configuration)
     if (capability.startsWith('adlar_external_')) return 'external';
 
+    // Connection monitoring capabilities - excluded from health metrics (application-level)
+    if (capability.startsWith('adlar_connection_') || capability === 'adlar_daily_disconnect_count') return 'monitoring';
+
+    // Building model capabilities - excluded from health metrics (learned parameters, not DPS)
+    if (capability.startsWith('adlar_building_')) return 'building_model';
+
+    // Energy pricing capabilities - excluded from health metrics (API data, not DPS)
+    if (capability.startsWith('adlar_energy_price_') || capability.startsWith('adlar_energy_cost_')) return 'energy_pricing';
+
     // DPS-based sensor capabilities - included in health metrics
     if (capability.startsWith('measure_temperature')) return 'temperature';
     if (capability.startsWith('measure_voltage')) return 'voltage';
@@ -390,8 +399,8 @@ export class CapabilityHealthService {
     this.capabilityHealthMap.forEach((healthData) => {
       const category = healthData.category as keyof CapabilityCategories;
 
-      // v1.2.3: Skip calculated and external capabilities (not DPS device data)
-      if (category === 'calculated' || category === 'external') {
+      // v1.2.3: Skip non-DPS capabilities (calculated values, external data, monitoring, learned parameters)
+      if (category === 'calculated' || category === 'external' || category === 'monitoring' || category === 'building_model' || category === 'energy_pricing') {
         return; // Skip - health check tracks DPS communication only
       }
 
@@ -474,6 +483,9 @@ export class CapabilityHealthService {
       efficiency: [], // Legacy - kept for flow card compatibility
       calculated: [], // v1.2.3: COP/SCOP calculations
       external: [], // v1.2.3: External integrations
+      monitoring: [], // v1.3.14: Connection monitoring (excluded from health)
+      building_model: [], // v1.3.14: Building model learned parameters (excluded from health)
+      energy_pricing: [], // v1.3.14: Energy price/cost data (excluded from health)
     };
 
     capabilities.forEach((capability) => {
@@ -499,8 +511,8 @@ export class CapabilityHealthService {
     this.capabilityHealthMap.forEach((healthData, capability) => {
       const category = healthData.category as keyof CapabilityCategories;
 
-      // v1.2.3: Skip calculated and external capabilities (not DPS device data)
-      if (category === 'calculated' || category === 'external') {
+      // v1.2.3: Skip non-DPS capabilities (calculated values, external data, monitoring, learned parameters)
+      if (category === 'calculated' || category === 'external' || category === 'monitoring' || category === 'building_model' || category === 'energy_pricing') {
         return; // Skip - only track DPS communication health
       }
 

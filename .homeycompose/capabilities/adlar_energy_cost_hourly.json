@@ -1,0 +1,28 @@
+{
+  "id": "adlar_energy_cost_hourly",
+  "type": "number",
+  "title": {
+    "en": "Hourly Energy Cost",
+    "nl": "Uurlijkse Energiekosten",
+    "de": "Stündliche Energiekosten",
+    "fr": "Coût Énergétique Horaire"
+  },
+  "units": {
+    "en": "€/h",
+    "nl": "€/u",
+    "de": "€/h",
+    "fr": "€/h"
+  },
+  "desc": {
+    "en": "Current energy cost per hour (power × price)",
+    "nl": "Huidige energiekosten per uur (vermogen × prijs)",
+    "de": "Aktuelle Energiekosten pro Stunde (Leistung × Preis)",
+    "fr": "Coût énergétique actuel par heure (puissance × prix)"
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/energy-cost-hourly.svg"
+}

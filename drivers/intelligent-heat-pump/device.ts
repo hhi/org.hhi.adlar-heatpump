@@ -10,6 +10,7 @@ import { COPCalculator, type COPDataSources, type COPCalculationResult } from '.
 import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
 import { ServiceCoordinator } from '../../lib/services/service-coordinator';
+import { enableFlowCardLogging } from '../../lib/flow-handler-wrapper';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -1399,6 +1400,12 @@ class MyDevice extends Homey.Device {
       if (this.hasCapability('adlar_external_ambient')) {
         await this.setCapabilityValue('adlar_external_ambient', null);
         this.categoryLog('cop', 'External ambient capability initialized with default value (null°C)');
+      }
+
+      // Initialize external indoor temperature capability (v1.4.0 - Adaptive Control Component 1)
+      if (this.hasCapability('adlar_external_indoor_temperature')) {
+        await this.setCapabilityValue('adlar_external_indoor_temperature', null);
+        this.log('External indoor temperature capability initialized with default value (null°C)');
       }
 
       // Initialize external energy total capability with storage-aware restoration
@@ -2883,6 +2890,9 @@ class MyDevice extends Homey.Device {
     try {
       await this.setUnavailable(); // Set the device as unavailable initially
 
+      // Enable automatic flow card logging (v2.0.0 - conditional on DEVMODE)
+      enableFlowCardLogging(this.homey, this.log.bind(this));
+
       // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
       // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
       if (this.hasCapability('adlar_connection_status')) {
@@ -2956,6 +2966,32 @@ class MyDevice extends Homey.Device {
           this.log('🗑️ Removed adlar_daily_disconnect_count capability (setting disabled)');
         } catch (error) {
           this.error('Failed to remove adlar_daily_disconnect_count capability:', error);
+        }
+      }
+
+      // Migration v1.4.0+: Add adlar_external_indoor_temperature capability to existing devices
+      if (!this.hasCapability('adlar_external_indoor_temperature')) {
+        await this.addCapability('adlar_external_indoor_temperature');
+        await this.setCapabilityValue('adlar_external_indoor_temperature', null);
+        this.log('Migration: Added adlar_external_indoor_temperature capability');
+      }
+
+      // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
+      const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');
+      if (!priceOptimizerEnabled) {
+        const energyPriceCapabilities = [
+          'adlar_energy_price_current',
+          'adlar_energy_price_next',
+          'adlar_energy_price_category',
+          'adlar_energy_cost_hourly',
+          'adlar_energy_cost_daily',
+        ];
+
+        for (const capability of energyPriceCapabilities) {
+          if (this.hasCapability(capability)) {
+            await this.removeCapability(capability);
+            this.log(`Migration: Removed ${capability} (price optimizer disabled)`);
+          }
         }
       }
 
@@ -3428,6 +3464,39 @@ class MyDevice extends Homey.Device {
       await this.handleOptionalCapabilities();
       this.log('Power measurement settings updated');
       return 'Power measurement settings updated. Capabilities and flow cards will be updated shortly.';
+    }
+
+    // Handle energy price optimizer toggle (v1.4.0+)
+    if (changedKeys.includes('price_optimizer_enabled')) {
+      const energyPriceCapabilities = [
+        'adlar_energy_price_current',
+        'adlar_energy_price_next',
+        'adlar_energy_price_category',
+        'adlar_energy_cost_hourly',
+        'adlar_energy_cost_daily',
+      ];
+
+      if (newSettings.price_optimizer_enabled) {
+        // Add capabilities when enabling
+        for (const capability of energyPriceCapabilities) {
+          if (!this.hasCapability(capability)) {
+            await this.addCapability(capability);
+            await this.setCapabilityValue(capability, null);
+            this.log(`Added energy pricing capability: ${capability}`);
+          }
+        }
+      } else {
+        // Remove capabilities when disabling
+        for (const capability of energyPriceCapabilities) {
+          if (this.hasCapability(capability)) {
+            await this.removeCapability(capability);
+            this.log(`Removed energy pricing capability: ${capability}`);
+          }
+        }
+      }
+
+      this.log('Energy price optimizer settings updated');
+      return 'Energy price optimizer settings updated. Capabilities will be updated shortly.';
     }
 
     // Handle slider controls settings

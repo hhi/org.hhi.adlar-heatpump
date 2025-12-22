@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "1.3.13",
+  "version": "2.0.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -55,7 +55,7 @@
     ]
   },
   "brandColor": "#f5a623",
-  "author": "H Hi <iphone.HHi@me.com>",
+  "author": "H Hi",
   "icon": "/assets/adlar-icon-white.svg",
   "homeyCommunityTopicId": 143690,
   "contributors": {
@@ -65,9 +65,138 @@
       }
     ]
   },
-  "support": "mailto:iphone.HHi@me.com",
   "flow": {
     "triggers": [
+      {
+        "id": "adaptive_monitoring_log",
+        "title": {
+          "en": "Adaptive control logged action",
+          "nl": "Adaptieve regeling heeft actie gelogd",
+          "de": "Adaptive Steuerung hat Aktion protokolliert",
+          "fr": "Contrôle adaptatif a enregistré une action"
+        },
+        "titleFormatted": {
+          "en": "Adaptive control logged [[adjustment]]°C adjustment",
+          "nl": "Adaptieve regeling heeft [[adjustment]]°C aanpassing gelogd",
+          "de": "Adaptive Steuerung protokollierte [[adjustment]]°C Anpassung",
+          "fr": "Contrôle adaptatif a enregistré [[adjustment]]°C d'ajustement"
+        },
+        "hint": {
+          "en": "Triggers when adaptive control calculates a recommendation in monitoring mode (no execution)",
+          "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbeveling berekent in monitormodus (geen uitvoering)",
+          "de": "Wird ausgelöst, wenn adaptive Steuerung eine Empfehlung im Überwachungsmodus berechnet (keine Ausführung)",
+          "fr": "Se déclenche lorsque le contrôle adaptatif calcule une recommandation en mode surveillance (pas d'exécution)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "adjustment",
+            "type": "number",
+            "title": {
+              "en": "Total Adjustment (°C)",
+              "nl": "Totale Aanpassing (°C)",
+              "de": "Gesamt Anpassung (°C)",
+              "fr": "Ajustement Total (°C)"
+            },
+            "example": 1.2
+          },
+          {
+            "name": "comfort_component",
+            "type": "number",
+            "title": {
+              "en": "Comfort Component (°C)",
+              "nl": "Comfort Component (°C)",
+              "de": "Komfort-Komponente (°C)",
+              "fr": "Composante Confort (°C)"
+            },
+            "example": 0.72
+          },
+          {
+            "name": "efficiency_component",
+            "type": "number",
+            "title": {
+              "en": "Efficiency Component (°C)",
+              "nl": "Efficiëntie Component (°C)",
+              "de": "Effizienz-Komponente (°C)",
+              "fr": "Composante Efficacité (°C)"
+            },
+            "example": 0.25
+          },
+          {
+            "name": "cost_component",
+            "type": "number",
+            "title": {
+              "en": "Cost Component (°C)",
+              "nl": "Kosten Component (°C)",
+              "de": "Kosten-Komponente (°C)",
+              "fr": "Composante Coût (°C)"
+            },
+            "example": 0.15
+          },
+          {
+            "name": "reasoning",
+            "type": "string",
+            "title": {
+              "en": "Reasoning",
+              "nl": "Redenering",
+              "de": "Begründung",
+              "fr": "Raisonnement"
+            },
+            "example": "Comfort: Error 0.8°C; Cost: Low price €0.12/kWh"
+          }
+        ]
+      },
+      {
+        "id": "adaptive_status_change",
+        "title": {
+          "en": "Adaptive control status changed",
+          "nl": "Adaptieve regeling status gewijzigd",
+          "de": "Adaptive Steuerung Status geändert",
+          "fr": "État du contrôle adaptatif modifié"
+        },
+        "titleFormatted": {
+          "en": "Adaptive control [[status]]",
+          "nl": "Adaptieve regeling [[status]]",
+          "de": "Adaptive Steuerung [[status]]",
+          "fr": "Contrôle adaptatif [[status]]"
+        },
+        "hint": {
+          "en": "Triggered when adaptive temperature control is enabled or disabled",
+          "nl": "Wordt geactiveerd wanneer adaptieve temperatuurregeling wordt in- of uitgeschakeld",
+          "de": "Wird ausgelöst, wenn die adaptive Temperatursteuerung aktiviert oder deaktiviert wird",
+          "fr": "Déclenché lorsque le contrôle adaptatif de température est activé ou désactivé"
+        },
+        "tokens": [
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "en": "Status",
+              "nl": "Status",
+              "de": "Status",
+              "fr": "État"
+            },
+            "example": "enabled"
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "title": {
+              "en": "Reason",
+              "nl": "Reden",
+              "de": "Grund",
+              "fr": "Raison"
+            },
+            "example": "Adaptive temperature control enabled"
+          }
+        ]
+      },
       {
         "id": "ambient_temperature_changed",
         "title": {
@@ -1054,6 +1183,88 @@
               "fr": "Changement du COP"
             },
             "example": 0.2
+          }
+        ]
+      },
+      {
+        "id": "daily_cost_threshold",
+        "title": {
+          "en": "Daily energy cost exceeded threshold",
+          "nl": "Dagelijkse energiekosten drempel overschreden",
+          "de": "Tägliche Energiekosten Schwellenwert überschritten",
+          "fr": "Seuil de coût énergétique quotidien dépassé"
+        },
+        "titleFormatted": {
+          "en": "Daily cost exceeded €[[threshold]]",
+          "nl": "Dagelijkse kosten overschreden €[[threshold]]",
+          "de": "Tägliche Kosten überschritten €[[threshold]]",
+          "fr": "Coût quotidien dépassé €[[threshold]]"
+        },
+        "hint": {
+          "en": "Triggers when today's total energy cost exceeds specified amount (requires price optimizer)",
+          "nl": "Wordt geactiveerd wanneer de totale energiekosten van vandaag het opgegeven bedrag overschrijden (vereist prijsoptimalisatie)",
+          "de": "Wird ausgelöst, wenn die heutigen Gesamtenergiekosten den angegebenen Betrag überschreiten (erfordert Preisoptimierer)",
+          "fr": "Se déclenche lorsque le coût énergétique total d'aujourd'hui dépasse le montant spécifié (nécessite l'optimiseur de prix)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "threshold",
+            "title": {
+              "en": "Cost threshold (€)",
+              "nl": "Kosten drempel (€)",
+              "de": "Kosten-Schwellenwert (€)",
+              "fr": "Seuil de coût (€)"
+            },
+            "min": 1,
+            "max": 50,
+            "step": 0.5,
+            "placeholder": {
+              "en": "Daily cost limit in euros",
+              "nl": "Dagelijks kosten limiet in euros",
+              "de": "Tägliches Kostenlimit in Euro",
+              "fr": "Limite de coût quotidien en euros"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "daily_cost",
+            "type": "number",
+            "title": {
+              "en": "Today's Total Cost (€)",
+              "nl": "Totale Kosten Vandaag (€)",
+              "de": "Gesamtkosten Heute (€)",
+              "fr": "Coût Total Aujourd'hui (€)"
+            },
+            "example": 5.8
+          },
+          {
+            "name": "daily_consumption",
+            "type": "number",
+            "title": {
+              "en": "Today's Consumption (kWh)",
+              "nl": "Verbruik Vandaag (kWh)",
+              "de": "Verbrauch Heute (kWh)",
+              "fr": "Consommation Aujourd'hui (kWh)"
+            },
+            "example": 28.5
+          },
+          {
+            "name": "average_price",
+            "type": "number",
+            "title": {
+              "en": "Average Price Today (€/kWh)",
+              "nl": "Gemiddelde Prijs Vandaag (€/kWh)",
+              "de": "Durchschnittspreis Heute (€/kWh)",
+              "fr": "Prix Moyen Aujourd'hui (€/kWh)"
+            },
+            "example": 0.203
           }
         ]
       },
@@ -2265,6 +2476,80 @@
         ]
       },
       {
+        "id": "learning_milestone_reached",
+        "title": {
+          "en": "Building model learning milestone",
+          "nl": "Gebouwmodel leer mijlpaal",
+          "de": "Gebäudemodell-Lernmeilenstein",
+          "fr": "Jalon d'apprentissage du modèle de bâtiment"
+        },
+        "titleFormatted": {
+          "en": "Building model reached [[milestone]] confidence",
+          "nl": "Gebouwmodel bereikte [[milestone]] vertrouwen",
+          "de": "Gebäudemodell erreichte [[milestone]] Vertrauen",
+          "fr": "Modèle de bâtiment a atteint [[milestone]] de confiance"
+        },
+        "hint": {
+          "en": "Triggers when the building thermal model reaches a learning milestone (e.g., 70% confidence)",
+          "nl": "Wordt geactiveerd wanneer het thermisch gebouwmodel een leermijlpaal bereikt (bijv. 70% vertrouwen)",
+          "de": "Wird ausgelöst, wenn das thermische Gebäudemodell einen Lernmeilenstein erreicht (z.B. 70% Vertrauen)",
+          "fr": "Se déclenche lorsque le modèle thermique du bâtiment atteint un jalon d'apprentissage (par exemple, 70% de confiance)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "milestone",
+            "type": "string",
+            "title": {
+              "en": "Milestone",
+              "nl": "Mijlpaal",
+              "de": "Meilenstein",
+              "fr": "Jalon"
+            },
+            "example": "70%"
+          },
+          {
+            "name": "confidence",
+            "type": "number",
+            "title": {
+              "en": "Confidence",
+              "nl": "Vertrouwen",
+              "de": "Vertrauen",
+              "fr": "Confiance"
+            },
+            "example": 72.5
+          },
+          {
+            "name": "thermal_mass",
+            "type": "number",
+            "title": {
+              "en": "Thermal Mass (kWh/°C)",
+              "nl": "Thermische Massa (kWh/°C)",
+              "de": "Thermische Masse (kWh/°C)",
+              "fr": "Masse Thermique (kWh/°C)"
+            },
+            "example": 14.3
+          },
+          {
+            "name": "time_constant",
+            "type": "number",
+            "title": {
+              "en": "Time Constant (hours)",
+              "nl": "Tijdsconstante (uren)",
+              "de": "Zeitkonstante (Stunden)",
+              "fr": "Constante de Temps (heures)"
+            },
+            "example": 6.8
+          }
+        ]
+      },
+      {
         "id": "low_pressure_temperature_alert",
         "title": {
           "en": "Low pressure temperature alert",
@@ -3154,6 +3439,69 @@
         ]
       },
       {
+        "id": "price_threshold_crossed",
+        "title": {
+          "en": "Energy price crossed threshold",
+          "nl": "Energieprijs drempel overschreden",
+          "de": "Energiepreis-Schwellenwert überschritten",
+          "fr": "Seuil de prix de l'énergie franchi"
+        },
+        "titleFormatted": {
+          "en": "Energy price became [[category]]",
+          "nl": "Energieprijs werd [[category]]",
+          "de": "Energiepreis wurde [[category]]",
+          "fr": "Prix de l'énergie devenu [[category]]"
+        },
+        "hint": {
+          "en": "Triggers when energy price category changes (very_low, low, normal, high, very_high)",
+          "nl": "Wordt geactiveerd wanneer energieprijs categorie verandert (very_low, low, normal, high, very_high)",
+          "de": "Wird ausgelöst, wenn sich die Energiepreis-Kategorie ändert (very_low, low, normal, high, very_high)",
+          "fr": "Se déclenche lorsque la catégorie de prix de l'énergie change (very_low, low, normal, high, very_high)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "category",
+            "type": "string",
+            "title": {
+              "en": "Price Category",
+              "nl": "Prijs Categorie",
+              "de": "Preis-Kategorie",
+              "fr": "Catégorie de Prix"
+            },
+            "example": "very_low"
+          },
+          {
+            "name": "price",
+            "type": "number",
+            "title": {
+              "en": "Current Price (€/kWh)",
+              "nl": "Huidige Prijs (€/kWh)",
+              "de": "Aktueller Preis (€/kWh)",
+              "fr": "Prix Actuel (€/kWh)"
+            },
+            "example": 0.08
+          },
+          {
+            "name": "next_hour_price",
+            "type": "number",
+            "title": {
+              "en": "Next Hour Price (€/kWh)",
+              "nl": "Volgende Uur Prijs (€/kWh)",
+              "de": "Preis Nächste Stunde (€/kWh)",
+              "fr": "Prix Heure Suivante (€/kWh)"
+            },
+            "example": 0.12
+          }
+        ]
+      },
+      {
         "id": "suction_temperature_alert",
         "title": {
           "en": "Suction temperature alert",
@@ -3354,6 +3702,84 @@
               "fr": "Température seuil"
             },
             "example": 60
+          }
+        ]
+      },
+      {
+        "id": "target_temperature_adjusted",
+        "title": {
+          "en": "Target temperature adjusted",
+          "nl": "Doeltemperatuur aangepast",
+          "de": "Zieltemperatur angepasst",
+          "fr": "Température cible ajustée"
+        },
+        "titleFormatted": {
+          "en": "Target temperature adjusted from [[old_temperature]]°C to [[new_temperature]]°C",
+          "nl": "Doeltemperatuur aangepast van [[old_temperature]]°C naar [[new_temperature]]°C",
+          "de": "Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C angepasst",
+          "fr": "Température cible ajustée de [[old_temperature]]°C à [[new_temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggered when adaptive control adjusts the target temperature setpoint based on indoor temperature and PI control algorithm",
+          "nl": "Wordt geactiveerd wanneer adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
+          "de": "Wird ausgelöst, wenn die adaptive Steuerung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
+          "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible basé sur la température intérieure et l'algorithme PI"
+        },
+        "tokens": [
+          {
+            "name": "old_temperature",
+            "type": "number",
+            "title": {
+              "en": "Previous target temperature",
+              "nl": "Vorige doeltemperatuur",
+              "de": "Vorherige Zieltemperatur",
+              "fr": "Température cible précédente"
+            },
+            "example": 21.5
+          },
+          {
+            "name": "new_temperature",
+            "type": "number",
+            "title": {
+              "en": "New target temperature",
+              "nl": "Nieuwe doeltemperatuur",
+              "de": "Neue Zieltemperatur",
+              "fr": "Nouvelle température cible"
+            },
+            "example": 22
+          },
+          {
+            "name": "adjustment",
+            "type": "number",
+            "title": {
+              "en": "Temperature adjustment",
+              "nl": "Temperatuur aanpassing",
+              "de": "Temperaturanpassung",
+              "fr": "Ajustement de température"
+            },
+            "example": 0.5
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "title": {
+              "en": "Adjustment reason",
+              "nl": "Reden voor aanpassing",
+              "de": "Anpassungsgrund",
+              "fr": "Raison de l'ajustement"
+            },
+            "example": "PI Control: Error=0.8°C, P=2.4°C, I=1.2°C"
+          },
+          {
+            "name": "controller",
+            "type": "string",
+            "title": {
+              "en": "Controller",
+              "nl": "Controller",
+              "de": "Regler",
+              "fr": "Contrôleur"
+            },
+            "example": "heating"
           }
         ]
       },
@@ -5490,6 +5916,51 @@
         ]
       },
       {
+        "id": "receive_external_indoor_temperature",
+        "title": {
+          "en": "Send indoor temperature to heat pump",
+          "nl": "Stuur binnentemperatuur naar warmtepomp",
+          "de": "Raumtemperatur an Wärmepumpe senden",
+          "fr": "Envoyer la température intérieure à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send [[temperature_value]]°C indoor temperature for adaptive control",
+          "nl": "Stuur [[temperature_value]]°C binnentemperatuur voor adaptieve regeling",
+          "de": "Sende [[temperature_value]]°C Raumtemperatur für adaptive Steuerung",
+          "fr": "Envoyer [[temperature_value]]°C température intérieure pour contrôle adaptatif"
+        },
+        "hint": {
+          "en": "Sends current indoor/room temperature from an external sensor to enable adaptive temperature control",
+          "nl": "Stuurt huidige binnen-/kamertemperatuur van een externe sensor om adaptieve temperatuurregeling mogelijk te maken",
+          "de": "Sendet aktuelle Raum-/Innentemperatur von einem externen Sensor zur Aktivierung der adaptiven Temperatursteuerung",
+          "fr": "Envoie la température intérieure actuelle d'un capteur externe pour activer le contrôle adaptatif de la température"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "text",
+            "name": "temperature_value",
+            "title": {
+              "en": "Indoor temperature (°C)",
+              "nl": "Binnentemperatuur (°C)",
+              "de": "Raumtemperatur (°C)",
+              "fr": "Température intérieure (°C)"
+            },
+            "placeholder": {
+              "en": "e.g., 21.5 or {{ room_temperature }} or {{ (sensor1 + sensor2) / 2 }}",
+              "nl": "bijv. 21.5 of {{ kamer_temp }} of {{ (sensor1 + sensor2) / 2 }}",
+              "de": "z.B. 21.5 oder {{ Raumtemperatur }} oder {{ (sensor1 + sensor2) / 2 }}",
+              "fr": "par ex. 21.5 ou {{ température_pièce }} ou {{ (capteur1 + capteur2) / 2 }}"
+            }
+          }
+        ]
+      },
+      {
         "id": "receive_external_power_data",
         "title": {
           "en": "Send power data to heat pump",
@@ -6299,6 +6770,15 @@
         "adlar_external_energy_daily",
         "adlar_external_flow",
         "adlar_external_ambient",
+        "adlar_external_indoor_temperature",
+        "adlar_building_c",
+        "adlar_building_ua",
+        "adlar_building_tau",
+        "adlar_energy_price_current",
+        "adlar_energy_price_next",
+        "adlar_energy_price_category",
+        "adlar_energy_cost_hourly",
+        "adlar_energy_cost_daily",
         "adlar_cop_daily",
         "adlar_cop_weekly",
         "adlar_cop_monthly",
@@ -7716,18 +8196,18 @@
               "id": "flow_expert_mode",
               "type": "checkbox",
               "label": {
-                "en": "Enable expert feature cards",
-                "nl": "Expert functie kaarten inschakelen",
-                "de": "Expertenfunktionskarten aktivieren",
-                "fr": "Activer les cartes de fonctionnalités d'expert"
+                "en": "Enable HVAC expert feature cards",
+                "nl": "Expert HVAC functie kaarten inschakelen",
+                "de": "HVAC Expertenfunktionskarten aktivieren",
+                "fr": "Activer les cartes de HVAC fonctionnalités d'expert"
               },
               "hint": {
-                "en": "Enable diagnostic and system analysis flow cards for HVAC experts",
-                "nl": "Schakel diagnose en systeem analyse flow kaarten in voor HVAC experts",
-                "de": "Aktivieren Sie Diagnose- und Systemanalyse-Flow-Karten für HVAC-Experten",
-                "fr": "Activer les cartes de flux de diagnostic et d'analyse système pour les experts HVAC"
+                "en": "Enable diagnostic and system analysis flow cards (compressor/fan motor/water flow) for HVAC experts",
+                "nl": "Schakel diagnose en systeem analyse flow kaarten (compressor/fan motor/water flow) in voor HVAC experts",
+                "de": "Aktivieren Sie Diagnose- und Systemanalyse-Flow-Karten (Kompressor/Lüftermotor/Wasserfluss) für HVAC-Experten",
+                "fr": "Activer les cartes de flux de diagnostic et d'analyse système (compressor/fan motor/water flow) pour les experts HVAC"
               },
-              "value": false
+              "value": true
             },
             {
               "id": "show_disconnect_diagnostic",
@@ -7796,6 +8276,546 @@
         {
           "type": "group",
           "label": {
+            "en": "Adaptive Temperature Control",
+            "nl": "Adaptieve Temperatuur Regeling",
+            "de": "Adaptive Temperatursteuerung",
+            "fr": "Contrôle Adaptatif de Température"
+          },
+          "children": [
+            {
+              "id": "adaptive_control_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable adaptive temperature control",
+                "nl": "Adaptieve temperatuurregeling inschakelen",
+                "de": "Adaptive Temperatursteuerung aktivieren",
+                "fr": "Activer le contrôle adaptatif de température"
+              },
+              "hint": {
+                "en": "Automatically adjusts target temperature based on external indoor temperature sensor. Requires external temperature via flow card 'Send indoor temperature'. Uses PI control algorithm for ±0.3°C stability.",
+                "nl": "Past doeltemperatuur automatisch aan op basis van externe binnentemperatuur sensor. Vereist externe temperatuur via flow kaart 'Stuur binnentemperatuur'. Gebruikt PI regeling voor ±0.3°C stabiliteit.",
+                "de": "Passt die Zieltemperatur automatisch basierend auf einem externen Raumtemperatursensor an. Erfordert externe Temperatur über Flow-Karte 'Raumtemperatur senden'. Verwendet PI-Regelung für ±0,3°C Stabilität.",
+                "fr": "Ajuste automatiquement la température cible basée sur un capteur de température intérieure externe. Nécessite une température externe via la carte de flux 'Envoyer température intérieure'. Utilise un algorithme de contrôle PI pour une stabilité de ±0.3°C."
+              },
+              "value": false
+            },
+            {
+              "id": "adaptive_pi_kp",
+              "type": "number",
+              "label": {
+                "en": "PI Controller: Proportional Gain (Kp)",
+                "nl": "PI Regelaar: Proportionele Versterking (Kp)",
+                "de": "PI-Regler: Proportionalverstärkung (Kp)",
+                "fr": "Contrôleur PI: Gain Proportionnel (Kp)"
+              },
+              "hint": {
+                "en": "Expert setting: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Default: 3.0",
+                "nl": "Expert instelling: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Standaard: 3.0",
+                "de": "Experteneinstellung: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Standard: 3.0",
+                "fr": "Paramètre expert: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. Défaut: 3.0"
+              },
+              "value": 3,
+              "min": 0.5,
+              "max": 10,
+              "step": 0.1
+            },
+            {
+              "id": "adaptive_pi_ki",
+              "type": "number",
+              "label": {
+                "en": "PI Controller: Integral Gain (Ki)",
+                "nl": "PI Regelaar: Integrale Versterking (Ki)",
+                "de": "PI-Regler: Integralverstärkung (Ki)",
+                "fr": "Contrôleur PI: Gain Intégral (Ki)"
+              },
+              "hint": {
+                "en": "Expert setting: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Default: 1.5",
+                "nl": "Expert instelling: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Standaard: 1.5",
+                "de": "Experteneinstellung: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Standard: 1.5",
+                "fr": "Paramètre expert: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. Défaut: 1.5"
+              },
+              "value": 1.5,
+              "min": 0.1,
+              "max": 5,
+              "step": 0.1
+            },
+            {
+              "id": "adaptive_pi_deadband",
+              "type": "number",
+              "label": {
+                "en": "PI Controller: Deadband (°C)",
+                "nl": "PI Regelaar: Deadband (°C)",
+                "de": "PI-Regler: Totzone (°C)",
+                "fr": "Contrôleur PI: Zone Morte (°C)"
+              },
+              "hint": {
+                "en": "Expert setting: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Default: 0.3°C",
+                "nl": "Expert instelling: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Standaard: 0.3°C",
+                "de": "Experteneinstellung: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Standard: 0.3°C",
+                "fr": "Paramètre expert: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. Défaut: 0.3°C"
+              },
+              "value": 0.3,
+              "min": 0.1,
+              "max": 1,
+              "step": 0.1
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Building Model Learning",
+            "nl": "Gebouwmodel Leren",
+            "de": "Gebäudemodell-Lernen",
+            "fr": "Apprentissage du Modèle de Bâtiment"
+          },
+          "children": [
+            {
+              "id": "building_model_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable building model learning",
+                "nl": "Gebouwmodel leren inschakelen",
+                "de": "Gebäudemodell-Lernen aktivieren",
+                "fr": "Activer l'apprentissage du modèle de bâtiment"
+              },
+              "hint": {
+                "en": "Learn thermal properties of your home (thermal mass, heat loss, solar gain). Enables temperature predictions and improves control accuracy over time.",
+                "nl": "Leer thermische eigenschappen van je woning (thermische massa, warmteverlies, zonnewinst). Maakt temperatuurvoorspellingen mogelijk en verbetert regelnauwkeurigheid in de loop van de tijd.",
+                "de": "Lernen Sie thermische Eigenschaften Ihres Hauses (thermische Masse, Wärmeverlust, Solargewinn). Ermöglicht Temperaturvorhersagen und verbessert die Regelgenauigkeit im Laufe der Zeit.",
+                "fr": "Apprenez les propriétés thermiques de votre maison (masse thermique, perte de chaleur, gain solaire). Permet les prédictions de température et améliore la précision du contrôle au fil du temps."
+              },
+              "value": true
+            },
+            {
+              "id": "building_model_forgetting_factor",
+              "type": "number",
+              "label": {
+                "en": "Learning: Forgetting Factor",
+                "nl": "Leren: Vergeetfactor",
+                "de": "Lernen: Vergissfaktor",
+                "fr": "Apprentissage: Facteur d'Oubli"
+              },
+              "hint": {
+                "en": "Expert setting: How quickly the model adapts to changes. Lower = faster adaptation to seasonal changes. Range 0.990-0.999. Default: 0.998",
+                "nl": "Expert instelling: Hoe snel het model zich aanpast aan veranderingen. Lager = snellere aanpassing aan seizoensveranderingen. Bereik 0.990-0.999. Standaard: 0.998",
+                "de": "Experteneinstellung: Wie schnell sich das Modell an Änderungen anpasst. Niedriger = schnellere Anpassung an saisonale Änderungen. Bereich 0.990-0.999. Standard: 0.998",
+                "fr": "Paramètre expert: Vitesse d'adaptation du modèle aux changements. Plus bas = adaptation plus rapide aux changements saisonniers. Plage 0.990-0.999. Défaut: 0.998"
+              },
+              "value": 0.998,
+              "min": 0.99,
+              "max": 0.999,
+              "step": 0.001
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Energy Price Optimization",
+            "nl": "Energieprijs Optimalisatie",
+            "de": "Energiepreis-Optimierung",
+            "fr": "Optimisation du Prix de l'Énergie"
+          },
+          "children": [
+            {
+              "id": "price_optimizer_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable price optimization",
+                "nl": "Prijsoptimalisatie inschakelen",
+                "de": "Preisoptimierung aktivieren",
+                "fr": "Activer l'optimisation des prix"
+              },
+              "hint": {
+                "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year.",
+                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar.",
+                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr.",
+                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an."
+              },
+              "value": false
+            },
+            {
+              "id": "price_threshold_very_low",
+              "type": "number",
+              "label": {
+                "en": "Very Low Price Threshold (€/kWh)",
+                "nl": "Zeer Lage Prijs Drempel (€/kWh)",
+                "de": "Sehr Niedriger Preisschwellenwert (€/kWh)",
+                "fr": "Seuil de Prix Très Bas (€/kWh)"
+              },
+              "hint": {
+                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Default: €0.10/kWh",
+                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Standaard: €0.10/kWh",
+                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Standard: €0.10/kWh",
+                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Défaut: €0.10/kWh"
+              },
+              "value": 0.1,
+              "min": 0,
+              "max": 0.5,
+              "step": 0.01,
+              "units": {
+                "en": "€/kWh",
+                "nl": "€/kWh",
+                "de": "€/kWh",
+                "fr": "€/kWh"
+              }
+            },
+            {
+              "id": "price_threshold_low",
+              "type": "number",
+              "label": {
+                "en": "Low Price Threshold (€/kWh)",
+                "nl": "Lage Prijs Drempel (€/kWh)",
+                "de": "Niedriger Preisschwellenwert (€/kWh)",
+                "fr": "Seuil de Prix Bas (€/kWh)"
+              },
+              "hint": {
+                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Default: €0.15/kWh",
+                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Standaard: €0.15/kWh",
+                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Standard: €0.15/kWh",
+                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Défaut: €0.15/kWh"
+              },
+              "value": 0.15,
+              "min": 0,
+              "max": 0.5,
+              "step": 0.01,
+              "units": {
+                "en": "€/kWh",
+                "nl": "€/kWh",
+                "de": "€/kWh",
+                "fr": "€/kWh"
+              }
+            },
+            {
+              "id": "price_threshold_normal",
+              "type": "number",
+              "label": {
+                "en": "Normal Price Threshold (€/kWh)",
+                "nl": "Normale Prijs Drempel (€/kWh)",
+                "de": "Normaler Preisschwellenwert (€/kWh)",
+                "fr": "Seuil de Prix Normal (€/kWh)"
+              },
+              "hint": {
+                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Default: €0.25/kWh",
+                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Standaard: €0.25/kWh",
+                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Standard: €0.25/kWh",
+                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Défaut: €0.25/kWh"
+              },
+              "value": 0.25,
+              "min": 0,
+              "max": 0.5,
+              "step": 0.01,
+              "units": {
+                "en": "€/kWh",
+                "nl": "€/kWh",
+                "de": "€/kWh",
+                "fr": "€/kWh"
+              }
+            },
+            {
+              "id": "price_threshold_high",
+              "type": "number",
+              "label": {
+                "en": "High Price Threshold (€/kWh)",
+                "nl": "Hoge Prijs Drempel (€/kWh)",
+                "de": "Hoher Preisschwellenwert (€/kWh)",
+                "fr": "Seuil de Prix Élevé (€/kWh)"
+              },
+              "hint": {
+                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Default: €0.35/kWh",
+                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Standaard: €0.35/kWh",
+                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Standard: €0.35/kWh",
+                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Défaut: €0.35/kWh"
+              },
+              "value": 0.35,
+              "min": 0,
+              "max": 1,
+              "step": 0.01,
+              "units": {
+                "en": "€/kWh",
+                "nl": "€/kWh",
+                "de": "€/kWh",
+                "fr": "€/kWh"
+              }
+            },
+            {
+              "id": "price_max_preheat_offset",
+              "type": "number",
+              "label": {
+                "en": "Max Pre-heat Offset (°C)",
+                "nl": "Max Voorverwarmen Offset (°C)",
+                "de": "Maximale Vorheiz-Offset (°C)",
+                "fr": "Offset de Préchauffage Max (°C)"
+              },
+              "hint": {
+                "en": "Maximum temperature increase during very low price periods. Default: 1.5°C",
+                "nl": "Maximale temperatuurverhoging tijdens zeer lage prijs periodes. Standaard: 1.5°C",
+                "de": "Maximale Temperaturerhöhung während sehr niedriger Preisperioden. Standard: 1.5°C",
+                "fr": "Augmentation maximale de température pendant les périodes de prix très bas. Défaut: 1.5°C"
+              },
+              "value": 1.5,
+              "min": 0,
+              "max": 3,
+              "step": 0.5,
+              "units": {
+                "en": "°C",
+                "nl": "°C",
+                "de": "°C",
+                "fr": "°C"
+              }
+            },
+            {
+              "id": "daily_cost_threshold",
+              "type": "number",
+              "label": {
+                "en": "Daily Cost Alert Threshold (€)",
+                "nl": "Dagelijkse Kosten Waarschuwings Drempel (€)",
+                "de": "Tägliche Kosten-Warnschwelle (€)",
+                "fr": "Seuil d'Alerte de Coût Quotidien (€)"
+              },
+              "hint": {
+                "en": "Trigger flow card when daily energy cost exceeds this amount. Used for budget monitoring. Default: €10",
+                "nl": "Activeer flow card wanneer dagelijkse energiekosten dit bedrag overschrijden. Gebruikt voor budgetbewaking. Standaard: €10",
+                "de": "Flow-Karte auslösen, wenn die täglichen Energiekosten diesen Betrag überschreiten. Für Budgetüberwachung. Standard: €10",
+                "fr": "Déclencher la carte flow lorsque le coût énergétique quotidien dépasse ce montant. Utilisé pour la surveillance du budget. Défaut: €10"
+              },
+              "value": 10,
+              "min": 1,
+              "max": 50,
+              "step": 0.5,
+              "units": {
+                "en": "€",
+                "nl": "€",
+                "de": "€",
+                "fr": "€"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "COP Optimization",
+            "nl": "COP Optimalisatie",
+            "de": "COP-Optimierung",
+            "fr": "Optimisation COP"
+          },
+          "children": [
+            {
+              "id": "cop_optimizer_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable COP optimization",
+                "nl": "COP optimalisatie inschakelen",
+                "de": "COP-Optimierung aktivieren",
+                "fr": "Activer l'optimisation COP"
+              },
+              "hint": {
+                "en": "Optimize supply temperature for maximum efficiency based on historical COP data. Learns optimal settings for each outdoor temperature. Estimated savings: €200-300/year.",
+                "nl": "Optimaliseer aanvoertemperatuur voor maximale efficiëntie op basis van historische COP data. Leert optimale instellingen voor elke buitentemperatuur. Geschatte besparing: €200-300/jaar.",
+                "de": "Optimieren Sie die Vorlauftemperatur für maximale Effizienz basierend auf historischen COP-Daten. Lernt optimale Einstellungen für jede Außentemperatur. Geschätzte Einsparungen: €200-300/Jahr.",
+                "fr": "Optimisez la température d'alimentation pour une efficacité maximale basée sur les données COP historiques. Apprend les paramètres optimaux pour chaque température extérieure. Économies estimées: €200-300/an."
+              },
+              "value": false
+            },
+            {
+              "id": "cop_min_acceptable",
+              "type": "number",
+              "label": {
+                "en": "Minimum Acceptable COP",
+                "nl": "Minimaal Acceptabele COP",
+                "de": "Minimal Akzeptabler COP",
+                "fr": "COP Minimum Acceptable"
+              },
+              "hint": {
+                "en": "Trigger optimization when COP drops below this value. Default: 2.5",
+                "nl": "Start optimalisatie wanneer COP onder deze waarde komt. Standaard: 2.5",
+                "de": "Optimierung starten, wenn COP unter diesen Wert fällt. Standard: 2.5",
+                "fr": "Déclencher l'optimisation lorsque le COP descend en dessous de cette valeur. Défaut: 2.5"
+              },
+              "value": 2.5,
+              "min": 1.5,
+              "max": 4,
+              "step": 0.1
+            },
+            {
+              "id": "cop_target",
+              "type": "number",
+              "label": {
+                "en": "Target COP",
+                "nl": "Doel COP",
+                "de": "Ziel-COP",
+                "fr": "COP Cible"
+              },
+              "hint": {
+                "en": "Target efficiency to aim for. System will try to improve COP toward this value. Default: 3.5",
+                "nl": "Doel efficiëntie om naar te streven. Systeem probeert COP naar deze waarde te verbeteren. Standaard: 3.5",
+                "de": "Zieleffizienz anzustreben. System versucht COP auf diesen Wert zu verbessern. Standard: 3.5",
+                "fr": "Efficacité cible à viser. Le système essaiera d'améliorer le COP vers cette valeur. Défaut: 3.5"
+              },
+              "value": 3.5,
+              "min": 2,
+              "max": 5,
+              "step": 0.1
+            },
+            {
+              "id": "cop_strategy",
+              "type": "dropdown",
+              "label": {
+                "en": "Optimization Strategy",
+                "nl": "Optimalisatie Strategie",
+                "de": "Optimierungsstrategie",
+                "fr": "Stratégie d'Optimisation"
+              },
+              "hint": {
+                "en": "How aggressively to optimize. Conservative = slow safe adjustments, Balanced = moderate (recommended), Aggressive = fast experimental adjustments.",
+                "nl": "Hoe agressief te optimaliseren. Conservatief = langzame veilige aanpassingen, Gebalanceerd = matig (aanbevolen), Agressief = snelle experimentele aanpassingen.",
+                "de": "Wie aggressiv zu optimieren. Konservativ = langsame sichere Anpassungen, Ausgewogen = moderat (empfohlen), Aggressiv = schnelle experimentelle Anpassungen.",
+                "fr": "Comment optimiser de manière agressive. Conservateur = ajustements lents et sûrs, Équilibré = modéré (recommandé), Agressif = ajustements rapides expérimentaux."
+              },
+              "value": "balanced",
+              "values": [
+                {
+                  "id": "conservative",
+                  "label": {
+                    "en": "Conservative (slow, safe)",
+                    "nl": "Conservatief (langzaam, veilig)",
+                    "de": "Konservativ (langsam, sicher)",
+                    "fr": "Conservateur (lent, sûr)"
+                  }
+                },
+                {
+                  "id": "balanced",
+                  "label": {
+                    "en": "Balanced (recommended)",
+                    "nl": "Gebalanceerd (aanbevolen)",
+                    "de": "Ausgewogen (empfohlen)",
+                    "fr": "Équilibré (recommandé)"
+                  }
+                },
+                {
+                  "id": "aggressive",
+                  "label": {
+                    "en": "Aggressive (fast, experimental)",
+                    "nl": "Agressief (snel, experimenteel)",
+                    "de": "Aggressiv (schnell, experimentell)",
+                    "fr": "Agressif (rapide, expérimental)"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "System Integration",
+            "nl": "Systeem Integratie",
+            "de": "Systemintegration",
+            "fr": "Intégration Système"
+          },
+          "children": [
+            {
+              "id": "monitoring_mode_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Monitoring Mode (log only, don't execute)",
+                "nl": "Monitor Modus (alleen loggen, niet uitvoeren)",
+                "de": "Überwachungsmodus (nur protokollieren, nicht ausführen)",
+                "fr": "Mode Surveillance (journaliser uniquement, ne pas exécuter)"
+              },
+              "hint": {
+                "en": "Enable to test adaptive control without making actual adjustments. All recommendations will be logged via 'Adaptive control logged action' flow card. Disable to activate real adjustments. Default: enabled for safety.",
+                "nl": "Activeer om adaptieve regeling te testen zonder daadwerkelijke aanpassingen. Alle aanbevelingen worden gelogd via 'Adaptieve regeling heeft actie gelogd' flow kaart. Deactiveer om echte aanpassingen te activeren. Standaard: ingeschakeld voor veiligheid.",
+                "de": "Aktivieren Sie, um adaptive Steuerung ohne tatsächliche Anpassungen zu testen. Alle Empfehlungen werden über 'Adaptive Steuerung hat Aktion protokolliert' Flow-Karte protokolliert. Deaktivieren Sie, um echte Anpassungen zu aktivieren. Standard: aktiviert für Sicherheit.",
+                "fr": "Activer pour tester le contrôle adaptatif sans faire d'ajustements réels. Toutes les recommandations seront journalisées via la carte de flux 'Contrôle adaptatif a enregistré une action'. Désactiver pour activer les ajustements réels. Défaut: activé pour la sécurité."
+              },
+              "value": true
+            },
+            {
+              "id": "priority_comfort",
+              "type": "number",
+              "label": {
+                "en": "Comfort Priority (%)",
+                "nl": "Comfort Prioriteit (%)",
+                "de": "Komfort-Priorität (%)",
+                "fr": "Priorité Confort (%)"
+              },
+              "hint": {
+                "en": "Weight given to comfort (PI temperature control). Higher = more focus on maintaining target temperature. Values are auto-normalized to sum 100%. Default: 60%",
+                "nl": "Gewicht gegeven aan comfort (PI temperatuurregeling). Hoger = meer focus op handhaven doeltemperatuur. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 60%",
+                "de": "Gewichtung für Komfort (PI-Temperaturregelung). Höher = mehr Fokus auf Zieltemperatur halten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 60%",
+                "fr": "Poids donné au confort (contrôle de température PI). Plus élevé = plus de concentration sur le maintien de la température cible. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 60%"
+              },
+              "value": 60,
+              "min": 0,
+              "max": 100,
+              "step": 5,
+              "units": {
+                "en": "%",
+                "nl": "%",
+                "de": "%",
+                "fr": "%"
+              }
+            },
+            {
+              "id": "priority_efficiency",
+              "type": "number",
+              "label": {
+                "en": "Efficiency Priority (%)",
+                "nl": "Efficiëntie Prioriteit (%)",
+                "de": "Effizienz-Priorität (%)",
+                "fr": "Priorité Efficacité (%)"
+              },
+              "hint": {
+                "en": "Weight given to efficiency (COP optimization). Higher = more focus on maximizing heat pump efficiency. Values are auto-normalized to sum 100%. Default: 25%",
+                "nl": "Gewicht gegeven aan efficiëntie (COP optimalisatie). Hoger = meer focus op maximaliseren warmtepomp efficiëntie. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 25%",
+                "de": "Gewichtung für Effizienz (COP-Optimierung). Höher = mehr Fokus auf Maximierung der Wärmepumpeneffizienz. Werte werden automatisch auf Summe 100% normalisiert. Standard: 25%",
+                "fr": "Poids donné à l'efficacité (optimisation COP). Plus élevé = plus de concentration sur la maximisation de l'efficacité de la pompe à chaleur. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 25%"
+              },
+              "value": 25,
+              "min": 0,
+              "max": 100,
+              "step": 5,
+              "units": {
+                "en": "%",
+                "nl": "%",
+                "de": "%",
+                "fr": "%"
+              }
+            },
+            {
+              "id": "priority_cost",
+              "type": "number",
+              "label": {
+                "en": "Cost Priority (%)",
+                "nl": "Kosten Prioriteit (%)",
+                "de": "Kosten-Priorität (%)",
+                "fr": "Priorité Coût (%)"
+              },
+              "hint": {
+                "en": "Weight given to cost (price optimization). Higher = more focus on minimizing energy costs. Values are auto-normalized to sum 100%. Default: 15%",
+                "nl": "Gewicht gegeven aan kosten (prijsoptimalisatie). Hoger = meer focus op minimaliseren energiekosten. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 15%",
+                "de": "Gewichtung für Kosten (Preisoptimierung). Höher = mehr Fokus auf Minimierung der Energiekosten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 15%",
+                "fr": "Poids donné au coût (optimisation des prix). Plus élevé = plus de concentration sur la minimisation des coûts énergétiques. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 15%"
+              },
+              "value": 15,
+              "min": 0,
+              "max": 100,
+              "step": 5,
+              "units": {
+                "en": "%",
+                "nl": "%",
+                "de": "%",
+                "fr": "%"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
             "en": "Diagnostics",
             "nl": "Diagnostiek",
             "de": "Diagnose",
@@ -7842,6 +8862,87 @@
     }
   ],
   "capabilities": {
+    "adlar_building_c": {
+      "id": "adlar_building_c",
+      "type": "number",
+      "title": {
+        "en": "Thermal Mass",
+        "nl": "Thermische Massa",
+        "de": "Thermische Masse",
+        "fr": "Masse Thermique"
+      },
+      "units": {
+        "en": "kWh/°C",
+        "nl": "kWh/°C",
+        "de": "kWh/°C",
+        "fr": "kWh/°C"
+      },
+      "desc": {
+        "en": "Learned thermal mass of the building (kWh/°C)",
+        "nl": "Geleerde thermische massa van het gebouw (kWh/°C)",
+        "de": "Gelernte thermische Masse des Gebäudes (kWh/°C)",
+        "fr": "Masse thermique apprise du bâtiment (kWh/°C)"
+      },
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/building-thermal-mass.svg"
+    },
+    "adlar_building_tau": {
+      "id": "adlar_building_tau",
+      "type": "number",
+      "title": {
+        "en": "ML Time Constant",
+        "nl": "ML Tijdsconstante",
+        "de": "ML Zeitkonstante",
+        "fr": "Constante de Temps ML"
+      },
+      "units": {
+        "en": "hours",
+        "nl": "uren",
+        "de": "Stunden",
+        "fr": "heures"
+      },
+      "desc": {
+        "en": "Learned thermal time constant of the building (hours)",
+        "nl": "Geleerde thermische tijdsconstante van het gebouw (uren)",
+        "de": "Gelernte thermische Zeitkonstante des Gebäudes (Stunden)",
+        "fr": "Constante de temps thermique apprise du bâtiment (heures)"
+      },
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/building-time-constant.svg"
+    },
+    "adlar_building_ua": {
+      "id": "adlar_building_ua",
+      "type": "number",
+      "title": {
+        "en": "Heat Loss Coefficient",
+        "nl": "Warmteverlies Coëfficiënt",
+        "de": "Wärmeverlust-Koeffizient",
+        "fr": "Coefficient de Perte de Chaleur"
+      },
+      "units": {
+        "en": "kW/°C",
+        "nl": "kW/°C",
+        "de": "kW/°C",
+        "fr": "kW/°C"
+      },
+      "desc": {
+        "en": "Learned heat loss coefficient of the building (kW/°C)",
+        "nl": "Geleerde warmteverlies coëfficiënt van het gebouw (kW/°C)",
+        "de": "Gelernter Wärmeverlust-Koeffizient des Gebäudes (kW/°C)",
+        "fr": "Coefficient de perte de chaleur appris du bâtiment (kW/°C)"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/building-heat-loss.svg"
+    },
     "adlar_connection_active": {
       "id": "adlar_connection_active",
       "type": "boolean",
@@ -8148,6 +9249,138 @@
         "de": "Zählt, wie oft das Gerät heute getrennt wurde (Homey-Zeitzone). Setzt sich täglich automatisch zurück.",
         "fr": "Compte le nombre de déconnexions aujourd'hui (fuseau horaire Homey). Réinitialisation automatique chaque jour."
       }
+    },
+    "adlar_energy_cost_daily": {
+      "id": "adlar_energy_cost_daily",
+      "type": "number",
+      "title": {
+        "en": "Daily Energy Cost",
+        "nl": "Dagelijkse Energiekosten",
+        "de": "Tägliche Energiekosten",
+        "fr": "Coût Énergétique Quotidien"
+      },
+      "units": {
+        "en": "€",
+        "nl": "€",
+        "de": "€",
+        "fr": "€"
+      },
+      "desc": {
+        "en": "Total energy cost today (consumption × average price)",
+        "nl": "Totale energiekosten vandaag (verbruik × gemiddelde prijs)",
+        "de": "Gesamte Energiekosten heute (Verbrauch × Durchschnittspreis)",
+        "fr": "Coût énergétique total aujourd'hui (consommation × prix moyen)"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/energy-cost-daily.svg"
+    },
+    "adlar_energy_cost_hourly": {
+      "id": "adlar_energy_cost_hourly",
+      "type": "number",
+      "title": {
+        "en": "Hourly Energy Cost",
+        "nl": "Uurlijkse Energiekosten",
+        "de": "Stündliche Energiekosten",
+        "fr": "Coût Énergétique Horaire"
+      },
+      "units": {
+        "en": "€/h",
+        "nl": "€/u",
+        "de": "€/h",
+        "fr": "€/h"
+      },
+      "desc": {
+        "en": "Current energy cost per hour (power × price)",
+        "nl": "Huidige energiekosten per uur (vermogen × prijs)",
+        "de": "Aktuelle Energiekosten pro Stunde (Leistung × Preis)",
+        "fr": "Coût énergétique actuel par heure (puissance × prix)"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/energy-cost-hourly.svg"
+    },
+    "adlar_energy_price_category": {
+      "id": "adlar_energy_price_category",
+      "type": "string",
+      "title": {
+        "en": "Energy Price Category",
+        "nl": "Energieprijs Categorie",
+        "de": "Energiepreis-Kategorie",
+        "fr": "Catégorie de Prix de l'Énergie"
+      },
+      "desc": {
+        "en": "Current energy price category (very_low, low, normal, high, very_high)",
+        "nl": "Huidige energieprijs categorie (very_low, low, normal, high, very_high)",
+        "de": "Aktuelle Energiepreis-Kategorie (very_low, low, normal, high, very_high)",
+        "fr": "Catégorie actuelle du prix de l'énergie (very_low, low, normal, high, very_high)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/energy-price-category.svg"
+    },
+    "adlar_energy_price_current": {
+      "id": "adlar_energy_price_current",
+      "type": "number",
+      "title": {
+        "en": "Current Energy Price",
+        "nl": "Huidige Energieprijs",
+        "de": "Aktueller Energiepreis",
+        "fr": "Prix Actuel de l'Énergie"
+      },
+      "units": {
+        "en": "€/kWh",
+        "nl": "€/kWh",
+        "de": "€/kWh",
+        "fr": "€/kWh"
+      },
+      "desc": {
+        "en": "Current electricity price per kWh (including VAT)",
+        "nl": "Huidige elektriciteitsprijs per kWh (inclusief BTW)",
+        "de": "Aktueller Strompreis pro kWh (inkl. MwSt.)",
+        "fr": "Prix actuel de l'électricité par kWh (TVA comprise)"
+      },
+      "decimals": 3,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/energy-price-current.svg"
+    },
+    "adlar_energy_price_next": {
+      "id": "adlar_energy_price_next",
+      "type": "number",
+      "title": {
+        "en": "Next Hour Energy Price",
+        "nl": "Energieprijs Volgend Uur",
+        "de": "Energiepreis Nächste Stunde",
+        "fr": "Prix de l'Énergie Heure Suivante"
+      },
+      "units": {
+        "en": "€/kWh",
+        "nl": "€/kWh",
+        "de": "€/kWh",
+        "fr": "€/kWh"
+      },
+      "desc": {
+        "en": "Energy price for the next hour (including VAT)",
+        "nl": "Energieprijs voor het volgende uur (inclusief BTW)",
+        "de": "Energiepreis für die nächste Stunde (inkl. MwSt.)",
+        "fr": "Prix de l'énergie pour l'heure suivante (TVA comprise)"
+      },
+      "decimals": 3,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/energy-price-next.svg"
     },
     "adlar_enum_capacity_set": {
       "id": "adlar_enum_capacity_set",
@@ -8664,6 +9897,43 @@
         "nl": "Externe water doorstroom meting ontvangen via flow kaarten van andere Homey apparaten, gebruikt voor verbeterde COP berekeningen met externe doorstroom meter gegevens",
         "de": "Externe Wasserdurchflussmessung empfangen über Flow-Karten von anderen Homey-Geräten, verwendet für erweiterte COP-Berechnungen mit externen Durchflussmessdaten",
         "fr": "Mesure de débit d'eau externe reçue via des cartes de flux d'autres appareils Homey, utilisée pour des calculs COP améliorés avec des données de débitmètre externe"
+      }
+    },
+    "adlar_external_indoor_temperature": {
+      "id": "adlar_external_indoor_temperature",
+      "title": {
+        "en": "External Indoor Temperature",
+        "nl": "Externe Binnen Temperatuur",
+        "de": "Externe Raumtemperatur",
+        "fr": "Température intérieure externe"
+      },
+      "type": "number",
+      "units": {
+        "en": "°C",
+        "nl": "°C",
+        "de": "°C",
+        "fr": "°C"
+      },
+      "min": -10,
+      "max": 50,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "External Indoor Temperature for Adaptive Control",
+        "nl": "Externe Binnentemperatuur voor Adaptieve Regeling",
+        "de": "Externe Raumtemperatur für adaptive Steuerung",
+        "fr": "Température intérieure externe pour contrôle adaptatif"
+      },
+      "icon": "/assets/external-temperature.svg",
+      "description": {
+        "en": "Indoor temperature received via flow cards from external Homey devices (thermostats, sensors), used for adaptive temperature control",
+        "nl": "Binnentemperatuur ontvangen via flow kaarten van externe Homey apparaten (thermostaten, sensoren), gebruikt voor adaptieve temperatuurregeling",
+        "de": "Raumtemperatur empfangen über Flow-Karten von externen Homey-Geräten (Thermostate, Sensoren), verwendet für adaptive Temperatursteuerung",
+        "fr": "Température intérieure reçue via des cartes de flux d'appareils Homey externes (thermostats, capteurs), utilisée pour le contrôle adaptatif de la température"
       }
     },
     "adlar_external_power": {
