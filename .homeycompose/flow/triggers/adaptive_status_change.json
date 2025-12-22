@@ -1,0 +1,45 @@
+{
+  "id": "adaptive_status_change",
+  "title": {
+    "en": "Adaptive control status changed",
+    "nl": "Adaptieve regeling status gewijzigd",
+    "de": "Adaptive Steuerung Status geändert",
+    "fr": "État du contrôle adaptatif modifié"
+  },
+  "titleFormatted": {
+    "en": "Adaptive control [[status]]",
+    "nl": "Adaptieve regeling [[status]]",
+    "de": "Adaptive Steuerung [[status]]",
+    "fr": "Contrôle adaptatif [[status]]"
+  },
+  "hint": {
+    "en": "Triggered when adaptive temperature control is enabled or disabled",
+    "nl": "Wordt geactiveerd wanneer adaptieve temperatuurregeling wordt in- of uitgeschakeld",
+    "de": "Wird ausgelöst, wenn die adaptive Temperatursteuerung aktiviert oder deaktiviert wird",
+    "fr": "Déclenché lorsque le contrôle adaptatif de température est activé ou désactivé"
+  },
+  "tokens": [
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "en": "Status",
+        "nl": "Status",
+        "de": "Status",
+        "fr": "État"
+      },
+      "example": "enabled"
+    },
+    {
+      "name": "reason",
+      "type": "string",
+      "title": {
+        "en": "Reason",
+        "nl": "Reden",
+        "de": "Grund",
+        "fr": "Raison"
+      },
+      "example": "Adaptive temperature control enabled"
+    }
+  ]
+}

@@ -1,4 +1,10 @@
 {
+  "2.0.0": {
+    "en": "Added: Alpha version of Adaptive temperature control with PI regulation, thermal predictions, energy price optimization, and COP optimization.",
+    "nl": "Toegevoegd: Alfa versie van Adaptieve temperatuurregeling met PI-regeling, thermische voorspellingen, energieprijsoptimalisatie en COP-optimalisatie.",
+    "de": "Hinzugefügt: Alpha-Version von Adaptiver Temperaturregelung mit PI-Regelung, thermischen Vorhersagen, Energiepreis-Optimierung und COP-Optimierung.",
+    "fr": "Ajouté: Version alpha de régulation Adaptative de température avec régulation PI, prédictions thermiques, optimisation du prix de l'énergie et optimisation du COP."
+  },
   "1.3.13": {
     "en": "Fixed: Trigger card titles now correctly indicate change events in all languages (11 triggers updated). State triggers show 'changed to', mode triggers show 'changed to', COP/temperature triggers show 'changed'. Prevents confusion between triggers (edge-triggered) and conditions (level-triggered).",
     "nl": "Opgelost: Trigger card titels tonen nu correct wijzigingsgebeurtenissen in alle talen (11 triggers bijgewerkt). Status triggers tonen 'gewijzigd naar', modus triggers tonen 'gewijzigd naar', COP/temperatuur triggers tonen 'gewijzigd'. Voorkomt verwarring tussen triggers (edge-triggered) en conditions (level-triggered).",

@@ -22,6 +22,7 @@ import { CurveCalculator } from './lib/curve-calculator';
 import { TimeScheduleCalculator } from './lib/time-schedule-calculator';
 import { SeasonalModeCalculator } from './lib/seasonal-mode-calculator';
 import { SelfHealingRegistry } from './lib/self-healing-registry';
+import { enableFlowCardLogging } from './lib/flow-handler-wrapper';
 
 // Type definitions for flow card arguments
 interface DeviceFlowArgs {
@@ -100,12 +101,16 @@ class MyApp extends App {
   powerThresholdExceededTrigger!: FlowCardTrigger;
 
   async onInit() {
+    this.log('DEBUG=', process.env.DEBUG);
     // Initialize self-healing registry (v1.3.5 - automatic error recovery)
     this.selfHealing = new SelfHealingRegistry(
       (message, ...args) => this.log(message, ...args),
       this.homey,
     );
     this.log('✅ Self-Healing Registry initialized');
+
+    // Enable automatic flow card logging (v2.0.0 - conditional on DEVMODE)
+    enableFlowCardLogging(this.homey, this.log.bind(this));
 
     if (process.env.DEBUG === '1') {
       this.log('Development mode detected, enabling debug features');

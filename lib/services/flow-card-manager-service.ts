@@ -125,6 +125,9 @@ export class FlowCardManagerService {
       efficiency: [],
       calculated: [], // v1.2.3: COP/SCOP calculations
       external: [], // v1.2.3: External integrations
+      monitoring: [], // v1.3.14: Connection monitoring (excluded from health)
+      building_model: [], // v1.3.14: Building model learned parameters (excluded from health)
+      energy_pricing: [], // v1.3.14: Energy price/cost data (excluded from health)
     };
 
     capabilities.forEach((capability) => {

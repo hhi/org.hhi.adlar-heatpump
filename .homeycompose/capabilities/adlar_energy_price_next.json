@@ -1,0 +1,28 @@
+{
+  "id": "adlar_energy_price_next",
+  "type": "number",
+  "title": {
+    "en": "Next Hour Energy Price",
+    "nl": "Energieprijs Volgend Uur",
+    "de": "Energiepreis Nächste Stunde",
+    "fr": "Prix de l'Énergie Heure Suivante"
+  },
+  "units": {
+    "en": "€/kWh",
+    "nl": "€/kWh",
+    "de": "€/kWh",
+    "fr": "€/kWh"
+  },
+  "desc": {
+    "en": "Energy price for the next hour (including VAT)",
+    "nl": "Energieprijs voor het volgende uur (inclusief BTW)",
+    "de": "Energiepreis für die nächste Stunde (inkl. MwSt.)",
+    "fr": "Prix de l'énergie pour l'heure suivante (TVA comprise)"
+  },
+  "decimals": 3,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/energy-price-next.svg"
+}

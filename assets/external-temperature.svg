@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- House outline (indicates INDOOR) -->
+  <path d="M75 33 L88 46 L88 83 L62 83 L62 46 Z" opacity="0.8"/>
+  <path d="M75 33 L75 21 L81 21 L81 27" opacity="0.6"/>
+
+  <!-- Thermometer body (inside house) -->
+  <rect x="72" y="50" width="6.5" height="25" rx="3"/>
+
+  <!-- Thermometer bulb -->
+  <circle cx="75" cy="78" r="6"/>
+
+  <!-- Mercury/temperature indicator (warm indoor temp) -->
+  <rect x="73" y="58" width="3.5" height="17" rx="1.5" fill="currentColor" opacity="0.7"/>
+  <circle cx="75" cy="78" r="4" fill="currentColor" opacity="0.7"/>
+
+  <!-- Temperature scale marks -->
+  <line x1="80" y1="54" x2="83" y2="54" stroke-width="1.5" opacity="0.5"/>
+  <line x1="80" y1="62" x2="83" y2="62" stroke-width="1.5" opacity="0.5"/>
+  <line x1="80" y1="71" x2="83" y2="71" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- External data flow arrow -->
+  <path d="M8 50 L50 50"/>
+  <path d="M38 37 L50 50 L38 62"/>
+
+  <!-- Data source indicator (external sensor device) -->
+  <rect x="8" y="40" width="21" height="21" rx="4" opacity="0.8"/>
+  <circle cx="19" cy="50" r="4" fill="currentColor" opacity="0.6"/>
+
+  <!-- Data flow dots (static - animations removed for iOS compatibility) -->
+  <circle cx="25" cy="46" r="1.5" fill="currentColor" opacity="0.5"/>
+  <circle cx="33" cy="52" r="1.5" fill="currentColor" opacity="0.5"/>
+  <circle cx="42" cy="48" r="1.5" fill="currentColor" opacity="0.5"/>
+</svg>

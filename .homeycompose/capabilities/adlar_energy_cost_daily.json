@@ -1,0 +1,28 @@
+{
+  "id": "adlar_energy_cost_daily",
+  "type": "number",
+  "title": {
+    "en": "Daily Energy Cost",
+    "nl": "Dagelijkse Energiekosten",
+    "de": "Tägliche Energiekosten",
+    "fr": "Coût Énergétique Quotidien"
+  },
+  "units": {
+    "en": "€",
+    "nl": "€",
+    "de": "€",
+    "fr": "€"
+  },
+  "desc": {
+    "en": "Total energy cost today (consumption × average price)",
+    "nl": "Totale energiekosten vandaag (verbruik × gemiddelde prijs)",
+    "de": "Gesamte Energiekosten heute (Verbrauch × Durchschnittspreis)",
+    "fr": "Coût énergétique total aujourd'hui (consommation × prix moyen)"
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/energy-cost-daily.svg"
+}
