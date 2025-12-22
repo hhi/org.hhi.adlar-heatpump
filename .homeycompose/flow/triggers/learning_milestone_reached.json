@@ -1,0 +1,74 @@
+{
+  "id": "learning_milestone_reached",
+  "title": {
+    "en": "Building model learning milestone",
+    "nl": "Gebouwmodel leer mijlpaal",
+    "de": "Gebäudemodell-Lernmeilenstein",
+    "fr": "Jalon d'apprentissage du modèle de bâtiment"
+  },
+  "titleFormatted": {
+    "en": "Building model reached [[milestone]] confidence",
+    "nl": "Gebouwmodel bereikte [[milestone]] vertrouwen",
+    "de": "Gebäudemodell erreichte [[milestone]] Vertrauen",
+    "fr": "Modèle de bâtiment a atteint [[milestone]] de confiance"
+  },
+  "hint": {
+    "en": "Triggers when the building thermal model reaches a learning milestone (e.g., 70% confidence)",
+    "nl": "Wordt geactiveerd wanneer het thermisch gebouwmodel een leermijlpaal bereikt (bijv. 70% vertrouwen)",
+    "de": "Wird ausgelöst, wenn das thermische Gebäudemodell einen Lernmeilenstein erreicht (z.B. 70% Vertrauen)",
+    "fr": "Se déclenche lorsque le modèle thermique du bâtiment atteint un jalon d'apprentissage (par exemple, 70% de confiance)"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "milestone",
+      "type": "string",
+      "title": {
+        "en": "Milestone",
+        "nl": "Mijlpaal",
+        "de": "Meilenstein",
+        "fr": "Jalon"
+      },
+      "example": "70%"
+    },
+    {
+      "name": "confidence",
+      "type": "number",
+      "title": {
+        "en": "Confidence",
+        "nl": "Vertrouwen",
+        "de": "Vertrauen",
+        "fr": "Confiance"
+      },
+      "example": 72.5
+    },
+    {
+      "name": "thermal_mass",
+      "type": "number",
+      "title": {
+        "en": "Thermal Mass (kWh/°C)",
+        "nl": "Thermische Massa (kWh/°C)",
+        "de": "Thermische Masse (kWh/°C)",
+        "fr": "Masse Thermique (kWh/°C)"
+      },
+      "example": 14.3
+    },
+    {
+      "name": "time_constant",
+      "type": "number",
+      "title": {
+        "en": "Time Constant (hours)",
+        "nl": "Tijdsconstante (uren)",
+        "de": "Zeitkonstante (Stunden)",
+        "fr": "Constante de Temps (heures)"
+      },
+      "example": 6.8
+    }
+  ]
+}

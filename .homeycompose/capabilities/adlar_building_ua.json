@@ -1,0 +1,27 @@
+{
+  "id": "adlar_building_ua",
+  "type": "number",
+  "title": {
+    "en": "Heat Loss Coefficient",
+    "nl": "Warmteverlies Coëfficiënt",
+    "de": "Wärmeverlust-Koeffizient",
+    "fr": "Coefficient de Perte de Chaleur"
+  },
+  "units": {
+    "en": "kW/°C",
+    "nl": "kW/°C",
+    "de": "kW/°C",
+    "fr": "kW/°C"
+  },
+  "desc": {
+    "en": "Learned heat loss coefficient of the building (kW/°C)",
+    "nl": "Geleerde warmteverlies coëfficiënt van het gebouw (kW/°C)",
+    "de": "Gelernter Wärmeverlust-Koeffizient des Gebäudes (kW/°C)",
+    "fr": "Coefficient de perte de chaleur appris du bâtiment (kW/°C)"
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/building-heat-loss.svg"
+}

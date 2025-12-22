@@ -8,6 +8,7 @@ import { CapabilityHealthService } from './capability-health-service';
 import { EnergyTrackingService } from './energy-tracking-service';
 import { TuyaConnectionService, TuyaDeviceConfig } from './tuya-connection-service';
 import { FlowCardManagerService } from './flow-card-manager-service';
+import { AdaptiveControlService } from './adaptive-control-service';
 import { CategorizedError } from '../error-types';
 import { AdlarMapping } from '../definitions/adlar-mapping';
 
@@ -33,6 +34,7 @@ export class ServiceCoordinator {
   private energyTracking!: EnergyTrackingService;
   private tuyaConnection!: TuyaConnectionService;
   private flowCardManager!: FlowCardManagerService;
+  private adaptiveControl!: AdaptiveControlService;
 
   // Service state tracking
   private serviceHealth = new Map<string, boolean>();
@@ -78,6 +80,7 @@ export class ServiceCoordinator {
     this.capabilityHealth = new CapabilityHealthService(serviceOptions);
     this.energyTracking = new EnergyTrackingService(serviceOptions);
     this.flowCardManager = new FlowCardManagerService(serviceOptions);
+    this.adaptiveControl = new AdaptiveControlService(serviceOptions);
 
     // TuyaConnectionService requires special initialization
     this.tuyaConnection = new TuyaConnectionService({
@@ -96,6 +99,7 @@ export class ServiceCoordinator {
     this.serviceHealth.set('energy', true);
     this.serviceHealth.set('tuya', false); // Not connected initially
     this.serviceHealth.set('flowcard', true);
+    this.serviceHealth.set('adaptive', true);
 
     this.logger('ServiceCoordinator: All services initialized');
   }
@@ -168,6 +172,10 @@ export class ServiceCoordinator {
       // Initialize flow card manager
       await this.flowCardManager.initialize();
       this.logger('ServiceCoordinator: Flow card manager initialized');
+
+      // Initialize adaptive control service
+      await this.adaptiveControl.initialize();
+      this.logger('ServiceCoordinator: Adaptive control service initialized');
 
       // Initialize Tuya connection last (most likely to fail)
       try {
@@ -333,11 +341,25 @@ export class ServiceCoordinator {
     return this.flowCardManager;
   }
 
+  getAdaptiveControl(): AdaptiveControlService {
+    return this.adaptiveControl;
+  }
+
   /**
-   * Called when device settings change; delegates to SettingsManagerService.
+   * Called when device settings change; delegates to SettingsManagerService and AdaptiveControlService.
    */
   async onSettings(oldSettings: Record<string, unknown>, newSettings: Record<string, unknown>, changedKeys: string[]): Promise<void> {
-    return this.settingsManager.onSettings(oldSettings, newSettings, changedKeys);
+    // SettingsManager first (critical - handles power settings, flow card auto-management, etc.)
+    await this.settingsManager.onSettings(oldSettings, newSettings, changedKeys);
+
+    // AdaptiveControl second (optional feature - graceful degradation if it fails)
+    try {
+      await this.adaptiveControl.onSettings(oldSettings, newSettings, changedKeys);
+    } catch (error) {
+      this.logger('ServiceCoordinator: AdaptiveControl settings update failed (non-critical)', error);
+      // Don't throw - allow settings save to succeed even if adaptive control fails
+      // User's other settings changes are preserved, adaptive control degrades gracefully
+    }
   }
 
   /**
@@ -419,6 +441,7 @@ export class ServiceCoordinator {
       this.energyTracking.destroy();
       this.tuyaConnection.destroy();
       this.flowCardManager.destroy();
+      this.adaptiveControl.destroy();
     } catch (error) {
       this.logger('ServiceCoordinator: Error during service cleanup', error);
     }

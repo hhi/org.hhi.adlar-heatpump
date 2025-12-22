@@ -1,0 +1,27 @@
+{
+  "id": "adlar_building_c",
+  "type": "number",
+  "title": {
+    "en": "Thermal Mass",
+    "nl": "Thermische Massa",
+    "de": "Thermische Masse",
+    "fr": "Masse Thermique"
+  },
+  "units": {
+    "en": "kWh/°C",
+    "nl": "kWh/°C",
+    "de": "kWh/°C",
+    "fr": "kWh/°C"
+  },
+  "desc": {
+    "en": "Learned thermal mass of the building (kWh/°C)",
+    "nl": "Geleerde thermische massa van het gebouw (kWh/°C)",
+    "de": "Gelernte thermische Masse des Gebäudes (kWh/°C)",
+    "fr": "Masse thermique apprise du bâtiment (kWh/°C)"
+  },
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/building-thermal-mass.svg"
+}

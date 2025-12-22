@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Building outline -->
+  <rect x="21" y="25" width="58" height="62" rx="4"/>
+
+  <!-- Windows -->
+  <rect x="33" y="37" width="13" height="13"/>
+  <rect x="54" y="37" width="13" height="13"/>
+  <rect x="33" y="62" width="13" height="13"/>
+  <rect x="54" y="62" width="13" height="13"/>
+
+  <!-- Heat escaping arrows (heat loss) -->
+  <path d="M 29 25 L 21 17"/>
+  <path d="M 50 25 L 50 12"/>
+  <path d="M 71 25 L 79 17"/>
+  <path d="M 79 50 L 88 50"/>
+  <path d="M 21 50 L 12 50"/>
+</svg>

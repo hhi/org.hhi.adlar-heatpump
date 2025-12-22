@@ -166,7 +166,7 @@ This is a Homey app for integrating Adlar heat pump devices via Tuya's local API
 
 ### Service-Oriented Architecture (v0.99.23+)
 
-The app uses **8 specialized services** managed by ServiceCoordinator, eliminating code duplication and providing clear separation of concerns:
+The app uses **9 specialized services** managed by ServiceCoordinator, eliminating code duplication and providing clear separation of concerns:
 
 #### Infrastructure Services (5)
 
@@ -238,6 +238,323 @@ The app uses **8 specialized services** managed by ServiceCoordinator, eliminati
    - Seasonal coverage tracking (Oct 1 - May 15)
    - Method contribution analysis
 
+#### Advanced Control Services (1)
+
+1. **AdaptiveControlService** (`lib/services/adaptive-control-service.ts`, v1.3.0+)
+   - **PI-based temperature control** using external room temperature sensor
+   - Maintains stable indoor temperature (±0.3°C deadband)
+   - 5-minute control loop with intelligent adjustment accumulation
+   - Persistent PI controller history (survives app restarts)
+   - Integration with **HeatingController** (`lib/adaptive/heating-controller.ts`)
+   - Integration with **ExternalTemperatureService** (`lib/services/external-temperature-service.ts`)
+   - Flow card triggers for transparency (`adaptive_status_change`, `target_temperature_adjusted`)
+   - Zero modifications to device class (external pattern)
+   - **Status**: Fase 1 MVP complete (Heating Controller only)
+
+   **Key Components:**
+   - **HeatingController**: PI algorithm with Kp=3.0, Ki=1.5
+     - 24-point error history (2 hours at 5-minute intervals)
+     - Safety clamp: ±3°C maximum adjustment per cycle
+     - Deadband tolerance prevents oscillation
+   - **ExternalTemperatureService**: Flow card integration for external sensors
+     - Receives room temperature from Homey thermostats/sensors
+     - Data validation and freshness tracking (5-minute timeout)
+     - Capability: `adlar_external_indoor_temperature`
+
+   **Control Flow** (Every 5 Minutes):
+   1. Read external indoor temperature via ExternalTemperatureService
+   2. Read current `target_temperature` from device
+   3. Calculate error: `targetTemp - indoorTemp`
+   4. Skip if within deadband (±0.3°C)
+   5. PI calculation: `adjustment = Kp×error + Ki×avgError`
+   6. Accumulate fractional adjustments (step:1 rounding)
+   7. Apply to `target_temperature` capability when ≥0.5°C
+   8. Trigger flow cards with adjustment details
+   9. Persist state to device store
+
+   **Persistence Strategy:**
+   - PI error history stored in device store (`adaptive_pi_history`)
+   - Last action tracking (`adaptive_last_action`)
+   - Accumulated adjustment counter (`adaptive_accumulated_adjustment`)
+   - Enable/disable state (`adaptive_control_enabled`)
+   - All state survives app updates and Homey restarts
+
+   **Flow Card Integration:**
+   - **Action**: `receive_external_indoor_temperature` - Updates external sensor data
+   - **Trigger**: `adaptive_status_change` - Status updates (enabled/disabled/error states)
+   - **Trigger**: `target_temperature_adjusted` - Transparency (shows adjustment reason and magnitude)
+
+   **Implementation Status** (v1.4.0+):
+   - ✅ **Fase 1 Complete** (v1.3.0+): HeatingController (PI temperature control)
+   - ✅ **Fase 2 Complete** (v1.4.0+): BuildingModelLearner (RLS machine learning)
+   - ✅ **Fase 3 Complete** (v1.4.0+): EnergyPriceOptimizer ⚠️ **OPTIONAL** - day-ahead pricing (requires dynamic contract)
+   - ✅ **Fase 4 Complete** (v1.4.0+): COPOptimizer (efficiency optimization)
+   - ✅ **Integration Complete** (v1.4.0+): WeightedDecisionMaker (60% comfort, 25% efficiency, 15% cost)
+   - 🔒 **Default Mode**: Monitoring (log-only) - users must explicitly enable active mode
+   - 🔒 **Component 3 Default**: Disabled (only enable with dynamic pricing contract)
+
+   **For detailed architecture**: See [Adaptive Control Architecture Guide](docs/Dev%20support/Architectural%20overview/adaptive-control-architecture.md)
+
+   **Component 2: Building Model Learner** (`lib/adaptive/building-model-learner.ts`, v1.4.0+)
+
+   Learns thermal properties of the building using **Recursive Least Squares (RLS)** machine learning algorithm.
+
+   **Learned Parameters**:
+   - **C** (Thermal Mass): Building's heat storage capacity in kWh/°C
+   - **UA** (Heat Loss): Heat transfer coefficient in kW/°C
+   - **g** (Solar Gain): Solar radiation utilization factor (dimensionless)
+   - **P_int** (Internal Gains): Internal heat sources in kW
+   - **τ** (Time Constant): C/UA in hours - how fast building responds to changes
+
+   **RLS Algorithm**:
+   ```typescript
+   // Physical model: dT/dt = (1/C) × [P_heating - UA×(T_in - T_out) + g×Solar + P_int]
+   // Rewritten as: y = X^T × θ
+   // where θ = [1/C, UA/C, g/C, P_int/C] are learned parameters
+
+   // RLS update equations (every 5 minutes):
+   K = P × X / (λ + X^T × P × X)              // Kalman gain
+   θ_new = θ_old + K × (y - X^T × θ_old)      // Parameter update
+   P_new = (1/λ) × (P - K × X^T × P)          // Covariance update
+   ```
+
+   **Configuration**:
+   - Forgetting factor λ = 0.998 (adapts to seasonal changes)
+   - Initial covariance = 100 (high uncertainty)
+   - Confidence threshold = 70% (288 samples = 24 hours @ 5min intervals)
+
+   **Data Collection**:
+   - Thermal power calculation: `P_thermal = (P_electric / 1000) × COP`
+   - Solar radiation: Time-based estimation or external sensor integration
+   - Update frequency: Every 5 minutes
+   - Capability updates: Every 50 minutes (10 samples)
+
+   **State Persistence**:
+   - `building_model_state` in device store
+   - Contains: theta parameters, covariance matrix P, sample count, last measurement
+   - Survives app restarts and updates
+
+   **Flow Card Integration**:
+   - **Trigger**: `learning_milestone_reached` at 70% confidence
+   - **Tokens**: confidence, thermal_mass, time_constant, milestone
+
+   **Service Wrapper**: `BuildingModelService` (`lib/services/building-model-service.ts`)
+   - Manages learner lifecycle and device integration
+   - Automatic capability updates (`adlar_building_c`, `adlar_building_ua`, `adlar_building_tau`)
+   - 5-minute data collection cycle
+
+   **Component 3: Energy Price Optimizer** (`lib/adaptive/energy-price-optimizer.ts`, v1.4.0+)
+
+   **⚠️ OPTIONAL** - Only useful for users with **dynamic energy pricing contracts** (e.g., day-ahead market pricing). Disabled by default.
+
+   Optimizes heating based on **dynamic day-ahead energy prices** from EnergyZero API.
+
+   **Prerequisites**:
+   - ✅ Dynamic energy contract with hourly pricing (e.g., ANWB Energie, Tibber, EasyEnergy)
+   - ❌ NOT useful for fixed-rate contracts (standard energy tariffs)
+   - 🔒 Default: **Disabled** - users must explicitly enable in settings
+
+   **Price Categories** (5 tiers):
+   - **VERY_LOW**: < €0.10/kWh → Pre-heat MAX (+1.5°C, high priority)
+   - **LOW**: €0.10-0.15/kWh → Pre-heat moderate (+0.75°C, medium priority)
+   - **NORMAL**: €0.15-0.25/kWh → Maintain (0°C, low priority)
+   - **HIGH**: €0.25-0.35/kWh → Reduce moderate (-0.5°C, medium priority)
+   - **VERY_HIGH**: > €0.35/kWh → Reduce MAX (-1.0°C, high priority)
+
+   **API Integration**:
+   - Endpoint: `https://api.energyzero.nl/v1/energyprices`
+   - Update frequency: 1x per hour (day-ahead data updates at 13:00)
+   - Data retention: 48 hours of price forecasts
+   - Rate limiting: 1 request/hour (respects API fair use)
+
+   **Optimization Strategy**:
+   - Look-ahead window: 4 hours (future price averaging)
+   - Pre-heat only if indoor temp below target + max offset
+   - Reduce only if indoor temp above target + max offset
+   - Respects comfort boundaries (never sacrifices user comfort)
+
+   **Cost Tracking**:
+   - **Hourly Cost**: `(measure_power / 1000) × current_price` in €/h
+   - **Daily Cost**: `daily_consumption × average_price` in €
+   - Integration with Homey system flow cards (power/energy triggers)
+   - Custom flow card: `daily_cost_threshold` with configurable limit
+
+   **State Persistence**:
+   - `energy_optimizer_state` in device store
+   - Contains: price data array, last fetch timestamp
+   - Survives app restarts with 7-day expiration
+
+   **Flow Card Integration**:
+   - **Trigger**: `price_threshold_crossed` when category changes
+   - **Trigger**: `daily_cost_threshold` when daily cost exceeds limit
+   - **Tokens**: category, price, next_hour_price, daily_cost, daily_consumption
+
+   **Capabilities**:
+   - `adlar_energy_price_current` (€/kWh, 3 decimals)
+   - `adlar_energy_price_next` (€/kWh, 3 decimals)
+   - `adlar_energy_price_category` (string: very_low/low/normal/high/very_high)
+   - `adlar_energy_cost_hourly` (€/h, 2 decimals)
+   - `adlar_energy_cost_daily` (€, 2 decimals)
+
+   **Component 4: COP Optimizer** (`lib/adaptive/cop-optimizer.ts`, v1.4.0+)
+
+   Optimizes **Coefficient of Performance (COP)** by learning historical relationships between outdoor temperature, supply temperature, and achieved COP.
+
+   **Learning Strategy**:
+   - Historical database: 1000 data points (FIFO circular buffer)
+   - Outdoor temperature bucketing: ±2°C groups (e.g., -2°C, 0°C, 2°C, ...)
+   - Supply temperature bucketing: ±2°C groups
+   - Finds optimal supply temp for each outdoor temp bucket
+   - Minimum 5 samples per bucket before optimization
+
+   **Optimization Thresholds**:
+   - Minimum acceptable COP: 2.5 (triggers high-priority action)
+   - Target COP: 3.5 (triggers medium-priority optimization)
+   - Supply temp range: 25-55°C (safety boundaries)
+
+   **Three Strategies**:
+   | Strategy | Max Adjustment | Speed | Use Case |
+   |----------|---------------|-------|----------|
+   | Conservative | ±1°C | Slow, safe | First-time users, stability |
+   | Balanced | ±2°C | Medium | Default, most users |
+   | Aggressive | ±3°C | Fast | Advanced users, testing |
+
+   **COP Data Collection**:
+   - Reuses existing capabilities: `adlar_cop`, `adlar_cop_daily`, `adlar_cop_weekly`
+   - No duplicate COP calculations (leverages existing COPCalculator service)
+   - Collection frequency: Every 5 minutes (during control cycle)
+   - Compressor validation: Only logs when compressor > 0 Hz
+
+   **Action Logic**:
+   ```typescript
+   if (currentCOP < minAcceptableCOP) {
+     // HIGH PRIORITY: COP too low
+     if (hasHistoricalOptimal) {
+       adjust toward historical optimum
+     } else {
+       heuristic: reduce supply temp (lower supply = higher COP)
+     }
+   } else if (currentCOP < targetCOP && dailyCOP < targetCOP) {
+     // MEDIUM PRIORITY: COP acceptable but improvable
+     if (hasHistoricalOptimal && difference > 3°C) {
+       adjust toward historical optimum
+     }
+   } else {
+     // LOW PRIORITY: COP is good, maintain
+   }
+   ```
+
+   **State Persistence**:
+   - `cop_optimizer_state` in device store
+   - Contains: history array, optimal settings map
+   - Survives app restarts and updates
+
+   **Integration**: Called during adaptive control cycle when COP optimizer enabled in settings
+
+   **Weighted Decision Maker** (`lib/adaptive/weighted-decision-maker.ts`, v1.4.0+)
+
+   Combines recommendations from all 4 controllers into a single **weighted decision** using configurable priorities.
+
+   **Default Priorities** (Normalized to sum = 1.0):
+   - **60% Comfort** (HeatingController) - Always highest priority
+   - **25% Efficiency** (COPOptimizer) - Within comfort boundaries
+   - **15% Cost** (EnergyPriceOptimizer) - Within comfort + efficiency boundaries
+
+   **Combination Algorithm**:
+   ```typescript
+   finalAdjustment =
+     (comfortAdjust × 0.60) +
+     (efficiencyAdjust × 0.25) +
+     (costAdjust × 0.15)
+
+   priority = max(heatingPriority, copPriority, pricePriority)
+   ```
+
+   **Example Calculation**:
+   ```
+   HeatingController: +2.0°C (error 0.8°C, high priority)
+   COPOptimizer: -1.0°C (COP 2.3 low, high priority)
+   EnergyPriceOptimizer: +1.5°C (very low price, high priority)
+
+   Weighted Result:
+   Comfort:    +2.0 × 0.60 = +1.20°C
+   Efficiency: -1.0 × 0.25 = -0.25°C
+   Cost:       +1.5 × 0.15 = +0.23°C
+   ────────────────────────────────
+   Final:                   +1.18°C (rounded to +1°C for step:1)
+   Priority: high (any controller high = overall high)
+   ```
+
+   **Transparency Features**:
+   - Breakdown tokens show contribution of each component
+   - Reasoning array explains each controller's recommendation
+   - Monitoring mode logs all decisions without execution
+   - `adaptive_monitoring_log` flow card for validation
+
+   **Updated Control Cycle** (v1.4.0+, Every 5 Minutes):
+
+   1. **Validation**: Check if adaptive control enabled, get indoor temperature
+   2. **Data Collection**: Read target temp, outdoor temp, COP values
+   3. **Component 1 (Comfort)**: HeatingController calculates PI adjustment
+   4. **Component 3 (Cost)**: EnergyPriceOptimizer calculates price-based adjustment (if enabled)
+   5. **Component 4 (Efficiency)**: COPOptimizer calculates COP-based adjustment (if enabled)
+   6. **Component 2 (Learning)**: BuildingModelService collects data point (if enabled)
+   7. **Integration**: WeightedDecisionMaker combines all actions
+   8. **Logging**: Log breakdown and reasoning
+   9. **Mode Check**:
+      - **Monitoring mode** (default): Trigger `adaptive_monitoring_log` flow card, return
+      - **Active mode**: Continue to execution
+   10. **Accumulation**: Add to fractional adjustment accumulator
+   11. **Throttling**: Check 20-minute minimum wait since last adjustment
+   12. **Execution**: If accumulated ≥ 1°C, apply rounded adjustment to `target_temperature`
+   13. **Flow Cards**: Trigger `target_temperature_adjusted` with tokens
+   14. **Persistence**: Save all optimizer states to device store
+
+   **Settings Configuration** (v1.4.0+):
+
+   Users can configure all components via device settings:
+
+   **Building Model Learning**:
+   - `building_model_enabled` (default: true) - Enable/disable learning
+   - `building_model_forgetting_factor` (default: 0.998, expert mode) - Adaptation speed
+
+   **Energy Price Optimization**:
+   - `energy_optimizer_enabled` (default: false) - Enable/disable price optimization
+   - `price_threshold_very_low` (default: €0.10/kWh)
+   - `price_threshold_low` (default: €0.15/kWh)
+   - `price_threshold_normal` (default: €0.25/kWh)
+   - `price_threshold_high` (default: €0.35/kWh)
+   - `price_max_preheat_offset` (default: 1.5°C)
+
+   **COP Optimization**:
+   - `cop_optimizer_enabled` (default: false) - Enable/disable COP optimization
+   - `cop_min_acceptable` (default: 2.5)
+   - `cop_target` (default: 3.5)
+   - `cop_strategy` (default: balanced) - conservative/balanced/aggressive
+
+   **System Integration**:
+   - `monitoring_mode_enabled` (default: true) - Safety: log-only mode
+   - `priority_comfort` (default: 60%) - Comfort weight
+   - `priority_efficiency` (default: 25%) - Efficiency weight
+   - `priority_cost` (default: 15%) - Cost weight
+
+   **Expected Savings** (Annual Estimates):
+   - **Component 3 (Energy Optimizer)**: €400-600/year ⚠️ **ONLY with dynamic pricing contract**
+   - **Component 4 (COP Optimizer)**: €200-300/year (all users)
+   - **Total**: €200-900/year depending on contract type
+   - Component 2 (Building Model): Enables predictive features (future versions)
+
+   **Savings by Contract Type**:
+   - **Fixed-rate contract**: €200-300/year (Components 1, 2, 4 only)
+   - **Dynamic pricing contract**: €600-900/year (all components)
+
+   **Safety Features**:
+   - Monitoring mode default (users must opt-in to active adjustments)
+   - Individual component enable/disable toggles
+   - Comfort always prioritized (60% weight minimum recommended)
+   - All adjustments respect existing throttling and accumulation logic
+   - Automatic state persistence and recovery
+
 #### Service Coordinator
 
 **ServiceCoordinator** (`lib/services/service-coordinator.ts`) manages initialization, lifecycle, and cross-service communication:
@@ -253,6 +570,7 @@ class ServiceCoordinator {
   getCOPCalculator(): COPCalculator;
   getSCOPCalculator(): SCOPCalculator;
   getRollingCOPCalculator(): RollingCOPCalculator;
+  getAdaptiveControl(): AdaptiveControlService;
 
   // Unified lifecycle
   async initialize(config: ServiceConfig): Promise<void>;
@@ -261,7 +579,7 @@ class ServiceCoordinator {
 }
 ```
 
-**Cross-Service Event Flow Example** (COP Calculation):
+**Cross-Service Event Flow Example 1** (COP Calculation):
 
 1. **TuyaConnectionService** receives sensor update (DPS change)
 2. **COPCalculator** triggered with new sensor values
@@ -271,6 +589,20 @@ class ServiceCoordinator {
 6. **SCOPCalculator** processes for temperature bin classification
 7. **SettingsManagerService** persists updated data
 8. **Device** publishes to capabilities (`adlar_cop`, `adlar_cop_daily`, etc.)
+
+**Cross-Service Event Flow Example 2** (Adaptive Temperature Control):
+
+1. **User Flow Card** triggers `receive_external_indoor_temperature` action (e.g., Homey thermostat reports 19.5°C)
+2. **ExternalTemperatureService** receives and validates temperature data
+3. **Device** updates `adlar_external_indoor_temperature` capability (visible in UI)
+4. **AdaptiveControlService** control loop triggers (5-minute interval)
+5. **AdaptiveControlService** reads external temperature + current `target_temperature` (e.g., 20.0°C)
+6. **HeatingController** calculates PI adjustment (error = 0.5°C → adjustment = +1.8°C)
+7. **AdaptiveControlService** accumulates adjustment and applies when ≥0.5°C threshold
+8. **Device** updates `target_temperature` capability (20.0°C → 22.0°C, rounded to step:1)
+9. **TuyaConnectionService** sends DPS 4 update to heat pump hardware
+10. **FlowCardManagerService** triggers `target_temperature_adjusted` flow card with tokens
+11. **SettingsManagerService** persists PI history and accumulated adjustment to device store
 
 **Service Architecture Benefits:**
 
@@ -1392,529 +1724,93 @@ await this.updateCumulativeEnergy(); // Existing, enhanced with milestone check
 - Performance characteristics
 - Maintenance guidelines
 
-### Curve Calculator Utility (v1.0.8+, Enhanced v1.3.10)
+### Calculator Utilities
 
-**Purpose**: Production-ready utility for dynamic value calculation based on configurable curves in flow cards.
+The app provides three production-ready calculator utilities for dynamic value calculations in flow cards. These are stateless, thread-safe utilities optimized for performance and user-friendly error handling.
 
-#### Architecture
+**Comprehensive Documentation**: See [docs/Dev support/CALCULATORS.md](docs/Dev%20support/CALCULATORS.md) for detailed implementation patterns, use cases, testing strategies, and integration examples.
 
-**Location**: `lib/curve-calculator.ts`
-**Registration**: `app.ts:475-514` - `registerCurveCalculatorCard()`
-**Flow Card**: `.homeycompose/flow/actions/calculate_curve_value.json`
+#### 1. Curve Calculator (v1.0.8+, Enhanced v1.3.10)
+
+**Location**: `lib/curve-calculator.ts` | **Registration**: `app.ts:475-514`
+
+**Purpose**: Dynamic value calculation based on configurable curves (weather compensation, COP adjustments, etc.)
 
 **Key Features**:
 
 - 6 comparison operators: `>`, `>=`, `<`, `<=`, `==`, `!=`
-- Default fallback support (`default` or `*` keyword)
-- Maximum 50 entries per curve (abuse prevention)
-- Comma or newline separated entries
-- **Input flexibility (v1.3.10)**: Accepts direct numbers, token expressions, and calculated expressions
-- Comprehensive error handling with user-friendly messages
-- Multilingual support (EN/NL/DE/FR)
+- Maximum 50 entries per curve
+- Input flexibility: Direct numbers, token expressions, calculated expressions (v1.3.10)
+- Example: `< -5: 60, < 0: 55, < 5: 50, < 10: 45, default: 40` (outdoor temp → heating setpoint)
 
-#### Implementation Pattern
-
-**Static Utility Class** (thread-safe, stateless):
+**Quick Reference**:
 
 ```typescript
-export class CurveCalculator {
-  // Parse curve string into structured entries
-  static parseCurve(curveString: string): CurveEntry[];
-
-  // Validate curve without throwing exceptions
-  static validateCurve(curveString: string): CurveValidationResult;
-
-  // Evaluate curve for input value (throws on error)
-  static evaluate(inputValue: number, curveString: string): number;
-
-  // Safe evaluation with fallback (never throws)
-  static evaluateWithFallback(
-    inputValue: number,
-    curveString: string,
-    fallbackValue: number
-  ): number;
-}
+CurveCalculator.evaluate(inputValue, curveString): number
+CurveCalculator.validateCurve(curveString): CurveValidationResult
+CurveCalculator.evaluateWithFallback(inputValue, curveString, fallback): number
 ```
 
-**Flow Card Registration** (`app.ts`) - Enhanced v1.3.10:
+#### 2. Time Schedule Calculator (v1.2.3+)
 
-```typescript
-registerCurveCalculatorCard() {
-  const curveCard = this.homey.flow.getActionCard('calculate_curve_value');
+**Location**: `lib/time-schedule-calculator.ts` | **Registration**: `app.ts:419-457`
 
-  curveCard.registerRunListener(async (args, state) => {
-    const { input_value: inputValueRaw, curve } = args;
-
-    // Parse input value (supports number, string, and expressions)
-    let inputValue: number;
-    if (typeof inputValueRaw === 'number') {
-      inputValue = inputValueRaw;
-    } else if (typeof inputValueRaw === 'string') {
-      inputValue = parseFloat(inputValueRaw);
-    } else {
-      throw new Error('Input value must be a number or numeric string');
-    }
-
-    // Validate parsed number
-    if (Number.isNaN(inputValue) || !Number.isFinite(inputValue)) {
-      throw new Error(`Input value must be a valid number (received: "${inputValueRaw}")`);
-    }
-
-    // Evaluate curve using CurveCalculator utility
-    const resultValue = CurveCalculator.evaluate(inputValue, curve);
-
-    // Return result token
-    return { result_value: resultValue };
-  });
-}
-```
-
-**Input Format Support (v1.3.10)**:
-
-The `input_value` field accepts:
-
-- **Direct numbers**: `5.2`, `-10`, `20.5`
-- **Token expressions**: `{{ outdoor_temperature }}`, `{{ logic|temperature }}`
-- **Calculated expressions**: `{{ outdoor_temperature + 2 }}`, `{{ ambient_temp - 5 }}`
-
-All expressions are evaluated by Homey before reaching the flow card listener, then parsed as numbers using `parseFloat()`.
-
-#### Use Cases
-
-##### Primary: Weather-Compensated Heating
-
-**Visual Example**: See `docs/setup/Curve calculator.png` for production implementation with 14-point curve and timeline results.
-
-```text
-Outdoor Temp → Heating Setpoint
-< -5 : 60, < 0 : 55, < 5 : 50, < 10 : 45, default : 35
-```
-
-##### Time-Based Optimization
-
-```text
-Hour of Day → Hot Water Temp
->= 22 : 45, >= 18 : 55, >= 6 : 60, default : 45
-```
-
-##### COP-Based Dynamic Adjustment
-
-```text
-Current COP → Temperature Adjustment
-< 2.0 : -5, < 2.5 : -3, >= 3.5 : +2, default : 0
-```
-
-#### Curve Syntax
-
-**Format**: `[operator] threshold : output_value`
-
-**Evaluation**:
-
-1. Top-to-bottom order (first match wins)
-2. Default fallback if no match
-3. Maximum 50 entries
-
-**Operators**:
-
-- `>` - Greater than
-- `>=` - Greater than or equal (default if omitted)
-- `<` - Less than
-- `<=` - Less than or equal
-- `==` - Equal to
-- `!=` - Not equal to
-- `default` or `*` - Always matches (use as last line)
-
-#### Error Handling
-
-**Production-Ready Error Messages**:
-
-- `"Input value must be a valid number"` - Invalid input
-- `"Curve definition cannot be empty"` - Empty curve string
-- `"Invalid curve syntax at line N"` - Malformed entry
-- `"Unsupported operator at line N"` - Unknown operator
-- `"Invalid output value at line N"` - Non-numeric output
-- `"Curve exceeds maximum allowed entries (50)"` - Too many entries
-- `"No matching curve condition found for input value: X"` - No match and no default
-
-**Error Context**: All errors include line numbers and specific guidance for resolution.
-
-#### Performance Characteristics
-
-**Parsing Performance**:
-
-- ~1ms for typical 10-entry curve
-- O(n) where n = number of entries
-- Regex-based parsing with validation
-
-**Memory Usage**:
-
-- ~100 bytes per curve entry
-- 5KB maximum (50 entries × 100 bytes)
-- Stateless class (no persistent memory)
-
-**Evaluation Performance**:
-
-- O(n) worst case (evaluates until match)
-- O(1) best case (first entry matches)
-- Typically <1ms for 10-entry curve
-
-#### Best Practices
-
-**✅ DO**:
-
-- Always include `default : <value>` as last line
-- Keep curves under 20 entries for readability
-- Test curve with representative inputs before deploying
-- Use consistent operator direction (`<` or `>`)
-- Document curve logic in flow description
-
-**❌ DON'T**:
-
-- Exceed 50 entries (hard limit enforced)
-- Mix heating/cooling logic in same curve
-- Use complex operators when simple ones suffice
-- Forget evaluation order matters (top to bottom)
-
-#### Validation Pattern
-
-**Pre-Validation** (recommended for user input):
-
-```typescript
-const result = CurveCalculator.validateCurve(userInput);
-if (!result.valid) {
-  this.error('Curve validation failed:', result.errors);
-  return;
-}
-// Safe to use validated curve
-const value = CurveCalculator.evaluate(inputValue, userInput);
-```
-
-**Safe Evaluation** (with fallback):
-
-```typescript
-// Never throws, returns fallback on any error
-const value = CurveCalculator.evaluateWithFallback(
-  outdoorTemp,
-  curve,
-  defaultSetpoint // Fallback if curve fails
-);
-```
-
-#### Testing Strategy
-
-**Unit Tests** (recommended):
-
-```typescript
-// Test basic evaluation
-const result = CurveCalculator.evaluate(5, "< 0 : 55, < 10 : 45, default : 35");
-expect(result).toBe(45); // 5 is < 10
-
-// Test default fallback
-const result2 = CurveCalculator.evaluate(15, "< 0 : 55, < 10 : 45, default : 35");
-expect(result2).toBe(35); // 15 doesn't match, uses default
-
-// Test validation
-const validation = CurveCalculator.validateCurve("invalid syntax");
-expect(validation.valid).toBe(false);
-expect(validation.errors.length).toBeGreaterThan(0);
-```
-
-**Integration Tests** (flow card):
-
-1. Create test flow with curve calculator
-2. Trigger with known input values
-3. Verify `result_value` token is correct
-4. Test error scenarios (invalid curve, missing default)
-5. Verify multilingual error messages
-
-#### Maintenance Notes
-
-**Adding New Operators**:
-
-1. Add to `SUPPORTED_OPERATORS` array
-2. Add case to switch statement in `evaluate()`
-3. Update regex pattern if needed
-4. Update documentation and error messages
-
-**Modifying Entry Limit**:
-
-- Current: `MAX_CURVE_ENTRIES = 50`
-- Change in one place, enforced throughout
-- Consider memory impact (100 bytes × limit)
-
-**Multilingual Support**:
-
-- Flow card definition: `.homeycompose/flow/actions/calculate_curve_value.json`
-- Error messages: Currently English only in `curve-calculator.ts`
-- Future: Consider extracting error messages to localization file
-
-#### Documentation References
-
-**User Documentation**:
-
-- [README.md](README.md#advanced-calculate-value-from-curve) - Lines 147-230
-- [FLOW_CARDS_GUIDE.md](docs/setup/FLOW_CARDS_GUIDE.md#8--calculate-value-from-curve) - Comprehensive guide
-
-**Technical Documentation**:
-
-- [lib/curve-calculator.ts](lib/curve-calculator.ts) - Implementation
-- [app.ts](app.ts:367-409) - Flow card registration
-- [.homeycompose/flow/actions/calculate_curve_value.json](.homeycompose/flow/actions/calculate_curve_value.json) - Flow card definition
-
-### Time Schedule Calculator (v1.2.3+)
-
-**Purpose**: Production-ready utility for time-based value calculation using daily schedules.
-
-#### Architecture
-
-**Location**: `lib/time-schedule-calculator.ts`
-**Registration**: `app.ts:419-457` - `registerTimeScheduleCard()`
-**Flow Card**: `.homeycompose/flow/actions/calculate_time_based_value.json`
+**Purpose**: Time-based value calculation using daily schedules (comfort modes, time-of-use optimization)
 
 **Key Features**:
 
 - Time range format: `HH:MM-HH:MM: value`
 - Supports overnight ranges (e.g., `23:00-06:00: 18`)
-- Default fallback support (`default: value`)
-- Maximum 30 entries per schedule (abuse prevention)
-- Comma or newline separated entries
-- Comprehensive validation with line-specific error messages
-- Multilingual support (EN/NL/DE/FR)
+- Maximum 30 entries per schedule
+- Example: `06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, default: 18`
 
-#### Use Cases
-
-**Daily Temperature Scheduling**:
-```text
-06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18
-```
-- 07:30 → 22°C (morning comfort)
-- 14:00 → 19°C (nobody home)
-- 20:00 → 21°C (evening comfort)
-- 02:00 → 18°C (night setback)
-
-**Time-of-Use Pricing Optimization**:
-```text
-00:00-06:00: 45, 06:00-23:00: 55, 23:00-00:00: 45
-```
-- Night tariff: Lower hot water temperature (45°C)
-- Day tariff: Normal temperature (55°C)
-
-**Combined with Seasonal Mode** (recommended):
-```
-WHEN time is 06:00
-AND Get seasonal mode → is_heating_season = true
-THEN Calculate time-based value: "06:00-09:00: 22, 09:00-17:00: 19, default: 18"
-     Set target_temperature to {{result_value}}
-```
-
-#### Implementation Pattern
-
-**Static Utility Class** (thread-safe, stateless):
+**Quick Reference**:
 
 ```typescript
-export class TimeScheduleCalculator {
-  // Parse schedule string into time range entries
-  static parseSchedule(scheduleString: string): TimeRangeEntry[];
-
-  // Validate schedule without throwing exceptions
-  static validateSchedule(scheduleString: string): ScheduleValidationResult;
-
-  // Evaluate schedule for current/specific time (throws on error)
-  static evaluate(scheduleString: string, now?: Date): number;
-
-  // Safe evaluation with fallback (never throws)
-  static evaluateWithFallback(
-    scheduleString: string,
-    fallbackValue: number,
-    now?: Date
-  ): number;
-}
+TimeScheduleCalculator.evaluate(scheduleString, now?: Date): number
+TimeScheduleCalculator.validateSchedule(scheduleString): ScheduleValidationResult
+TimeScheduleCalculator.evaluateWithFallback(scheduleString, fallback, now?: Date): number
 ```
 
-#### Schedule Syntax
+#### 3. Seasonal Mode Calculator (v1.2.3+)
 
-**Format**: `HH:MM-HH:MM: output_value`
+**Location**: `lib/seasonal-mode-calculator.ts` | **Registration**: `app.ts:465-503`
 
-**Examples**:
-- Normal range: `06:00-09:00: 22` (6 AM to 9 AM)
-- Overnight range: `23:00-06:00: 18` (11 PM to 6 AM, spans midnight)
-- Default fallback: `default: 20` (covers all unmatched times)
-
-**Validation**:
-- Hours: 0-23
-- Minutes: 0-59
-- Output values: Any valid number (including negatives, decimals)
-- Overnight detection: Automatic (end time < start time)
-
-#### Error Handling
-
-**Production-Ready Error Messages** (with line numbers):
-
-```text
-Invalid schedule syntax at line 2: '25:00-09:00: 22'
-Invalid start hour at line 2: 25
-Start hour must be between 0 and 23
-```
-
-**Common Errors**:
-- Empty schedule → `"Schedule definition cannot be empty"`
-- Invalid time → `"Invalid start hour at line N: 25"`
-- Same start/end → `"Invalid time range: start and end times are identical"`
-- No match found → `"No matching time range found for current time: 14:30"`
-
-### Seasonal Mode Calculator (v1.2.3+)
-
-**Purpose**: Automatic seasonal mode determination based on heating season dates (Oct 1 - May 15).
-
-#### Architecture
-
-**Location**: `lib/seasonal-mode-calculator.ts`
-**Registration**: `app.ts:465-503` - `registerSeasonalModeCard()`
-**Flow Card**: `.homeycompose/flow/actions/get_seasonal_mode.json`
+**Purpose**: Automatic seasonal mode determination aligned with EN 14825 SCOP standard
 
 **Key Features**:
 
-- Heating season: October 1 - May 15 (aligned with EN 14825 SCOP standard)
-- Cooling season: May 16 - September 30
+- Heating season: October 1 - May 15 (227 days)
+- Cooling season: May 16 - September 30 (138 days)
 - Returns 4 tokens: `mode`, `is_heating_season`, `is_cooling_season`, `days_until_season_change`
-- Integrates with existing SCOP calculation logic
-- No user configuration needed (fixed dates)
+- No user configuration required (fixed dates)
 
-#### Use Cases
-
-**Automatic Winter/Summer Schedule Switching**:
-```
-WHEN time is 06:00
-AND Get seasonal mode → is_heating_season = true
-THEN Time schedule: "06:00-09:00: 22, 09:00-17:00: 19, default: 18"
-
-WHEN time is 06:00
-AND Get seasonal mode → is_heating_season = false
-THEN Time schedule: "06:00-22:00: 18, default: 16"
-```
-
-**Season Change Notification**:
-```
-WHEN Get seasonal mode → days_until_season_change <= 7
-THEN Send notification: "Heating season ends in {{days_until_season_change}} days"
-```
-
-**Mode-Based Flow Logic**:
-```
-IF Get seasonal mode → mode = "heating"
-THEN Enable winter heating curves
-ELSE Enable summer cooling curves
-```
-
-#### Implementation Pattern
-
-**Static Utility Class** (thread-safe, stateless):
+**Quick Reference**:
 
 ```typescript
-export class SeasonalModeCalculator {
-  // Check if date is in heating season
-  static isHeatingSeason(date?: Date): boolean;
-
-  // Check if date is in cooling season
-  static isCoolingSeason(date?: Date): boolean;
-
-  // Get seasonal mode ('heating' or 'cooling')
-  static getSeasonalMode(date?: Date): SeasonalMode;
-
-  // Get comprehensive seasonal information
-  static getCurrentSeason(date?: Date): SeasonalModeResult;
-
-  // Check if near season boundary (within N days)
-  static isNearSeasonBoundary(date?: Date, daysThreshold?: number): boolean;
-}
+SeasonalModeCalculator.isHeatingSeason(date?: Date): boolean
+SeasonalModeCalculator.getSeasonalMode(date?: Date): SeasonalMode
+SeasonalModeCalculator.getCurrentSeason(date?: Date): SeasonalModeResult
 ```
 
-#### Flow Card Tokens
-
-**Returned Tokens**:
-
-1. `mode` (string): `"heating"` or `"cooling"`
-2. `is_heating_season` (boolean): `true` during Oct 1 - May 15
-3. `is_cooling_season` (boolean): `true` during May 16 - Sep 30
-4. `days_until_season_change` (number): Days remaining until next season
-
-**Usage in Flows**:
-```
-Get seasonal mode
-→ mode: "heating"
-→ is_heating_season: true
-→ is_cooling_season: false
-→ days_until_season_change: 45
-```
-
-#### Season Definitions
-
-**Heating Season**: October 1 - May 15 (inclusive)
-- Aligns with EN 14825 SCOP calculation period
-- Matches existing SCOP calculator logic
-- 227 days total (non-leap year)
-
-**Cooling Season**: May 16 - September 30 (inclusive)
-- Remainder of the year
-- 138 days total (non-leap year)
-
-**Design Rationale**:
-- Fixed dates simplify automation (no user configuration)
-- European climate optimized (Central Europe heating needs)
-- Consistent with energy efficiency standards
-
-#### Performance
-
-**Time Schedule Calculator**:
-- Parsing: ~1ms for 10-entry schedule
-- Evaluation: O(n) worst case, typically <1ms
-- Memory: ~100 bytes per entry, 3KB maximum (30 entries)
-
-**Seasonal Mode Calculator**:
-- Evaluation: O(1) - simple date comparison
-- Memory: Stateless, no persistent data
-- Performance: <0.1ms per call
-
-#### Best Practices
-
-**✅ DO**:
-- Always include `default: <value>` in time schedules
-- Combine both calculators for seasonal time schedules
-- Test overnight ranges (23:00-06:00) before deployment
-- Use seasonal mode for automatic heating/cooling switching
-- Keep schedules under 15 entries for readability
-
-**❌ DON'T**:
-- Exceed 30 entries in time schedules (hard limit)
-- Rely on seasonal mode for non-European climates without adjustment
-- Forget that overnight ranges span midnight
-- Mix heating/cooling logic in single time schedule
-
-#### Integration Example
+#### Integration Pattern
 
 **Complete Weather-Compensated + Time-Based System**:
 
-```
-// Flow 1: Get outdoor temperature and seasonal mode
-WHEN outdoor temperature changes
-AND Get seasonal mode → is_heating_season = true
-THEN Calculate curve value:
-     Input: {{outdoor_temperature}}
-     Curve: "< -5: 60, < 0: 55, < 5: 50, < 10: 45, default: 40"
-     → Store in variable: base_setpoint
+```typescript
+// 1. Base setpoint from outdoor temperature (weather compensation)
+baseSetpoint = CurveCalculator.evaluate(outdoorTemp, "< -5: 60, < 0: 55, ..., default: 40");
 
-// Flow 2: Apply time-based adjustment
-WHEN time is 06:00, 09:00, 17:00, 23:00
-THEN Calculate time-based value:
-     Schedule: "06:00-09:00: 2, 09:00-17:00: -3, 17:00-23:00: 1, default: -2"
-     → Store in variable: time_adjustment
+// 2. Time-based adjustment (comfort scheduling)
+timeAdjust = TimeScheduleCalculator.evaluate("06:00-09:00: 2, 09:00-17:00: -3, ...");
 
-// Flow 3: Apply combined setpoint
-WHEN variables change
-THEN Set target_temperature: {{base_setpoint}} + {{time_adjustment}}
+// 3. Seasonal check (heating vs cooling season)
+if (SeasonalModeCalculator.isHeatingSeason()) {
+  finalSetpoint = baseSetpoint + timeAdjust;
+}
 ```
 
-**Result**: Dynamic heating setpoint that adjusts for both outdoor temperature (weather compensation) and time of day (comfort scheduling), only during heating season.
+**Performance**: All calculators <1ms per evaluation, stateless (zero persistent memory).
 
 ## Official Homey Documentation
 
@@ -1964,4 +1860,5 @@ THEN Set target_temperature: {{base_setpoint}} + {{time_adjustment}}
 - **When app.json access needed**: Delegate to `homey-automation-tutor` agent rather than including in main context
 
 **Rationale**: `app.json` is auto-generated from `.homeycompose/` files, creating 200KB+ of redundant context. Agent delegation provides access when needed while keeping general context lean.
+
 - strings exposed to the user should be localized. Use localization as required.

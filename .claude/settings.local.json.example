@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git tag:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh release:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(homey app validate:*)",
+      "Bash(homey app build:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(tree:*)",
+      "Bash(xattr:*)",
+      "Bash(rm:*)",
+      "Bash(lsof:*)",
+      "Bash(ps:*)",
+      "Bash(docker ps:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "/Users/<YOUR_USERNAME>/.claude"
+    ]
+  },
+  "outputStyle": "Explanatory"
+}

@@ -1,0 +1,222 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
+/**
+ * Building Model Service - Service wrapper for BuildingModelLearner
+ *
+ * Manages lifecycle, data collection, and capability updates for the building
+ * thermal model learning component.
+ *
+ * @version 1.4.0
+ * @since 1.4.0
+ */
+
+import Homey from 'homey';
+import { BuildingModelLearner, type BuildingModelConfig, type MeasurementData } from '../adaptive/building-model-learner';
+
+export interface BuildingModelServiceConfig {
+  device: Homey.Device;
+  logger?: (msg: string, ...args: unknown[]) => void;
+}
+
+/**
+ * Building Model Service
+ *
+ * Responsibilities:
+ * - Initialize and manage BuildingModelLearner instance
+ * - Collect sensor data every 5 minutes
+ * - Update building model capabilities
+ * - Persist state to device store
+ * - Trigger milestone flow cards
+ */
+export class BuildingModelService {
+  private device: Homey.Device;
+  private learner: BuildingModelLearner;
+  private logger: (msg: string, ...args: unknown[]) => void;
+  private updateInterval: NodeJS.Timeout | null = null;
+  private readonly UPDATE_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+  constructor(config: BuildingModelServiceConfig) {
+    this.device = config.device;
+    this.logger = config.logger || (() => {});
+
+    // Configure learner with optimal parameters
+    const learnerConfig: BuildingModelConfig = {
+      forgettingFactor: 0.998, // Moderate adaptation rate
+      initialCovariance: 100, // High initial uncertainty
+      minSamplesForConfidence: 288, // 24 hours @ 5min intervals
+      logger: this.logger,
+    };
+
+    this.learner = new BuildingModelLearner(learnerConfig);
+  }
+
+  /**
+   * Initialize service
+   * - Restore persisted state
+   * - Start periodic data collection
+   * - Update capabilities with current model
+   */
+  public async initialize(): Promise<void> {
+    this.logger('BuildingModelService: Initializing...');
+
+    // Restore state from device store
+    const storedState = await this.device.getStoreValue('building_model_state');
+    if (storedState) {
+      this.learner.restoreState(storedState);
+      this.logger('BuildingModelService: Restored state from storage');
+    }
+
+    // Update capabilities with current model
+    await this.updateModelCapabilities();
+
+    // Start periodic updates (every 5 minutes)
+    this.updateInterval = this.device.homey.setInterval(
+      () => this.collectAndLearn().catch((err) => this.logger('Learning error:', err)),
+      this.UPDATE_INTERVAL_MS,
+    );
+
+    this.logger('BuildingModelService: Initialized successfully');
+  }
+
+  /**
+   * Collect current sensor data and update model
+   */
+  private async collectAndLearn(): Promise<void> {
+    try {
+      // Check if building model learning is enabled
+      const enabled = await this.device.getSetting('building_model_enabled');
+      if (!enabled) {
+        this.logger('BuildingModelService: Learning disabled, skipping');
+        return;
+      }
+
+      // Get indoor temperature from external sensor
+      // @ts-expect-error - Accessing MyDevice.serviceCoordinator (not in Homey.Device base type)
+      const indoorTemp = this.device.serviceCoordinator
+        .getAdaptiveControl()
+        .getExternalTemperatureService()
+        .getIndoorTemperature();
+
+      if (indoorTemp === null) {
+        this.logger('BuildingModelService: No indoor temp available, skipping');
+        return;
+      }
+
+      // Get outdoor temperature
+      const outdoorTemp = this.device.getCapabilityValue('measure_temperature.temp_ambient') as number;
+      if (outdoorTemp === null || outdoorTemp === undefined) {
+        this.logger('BuildingModelService: No outdoor temp available, skipping');
+        return;
+      }
+
+      // Get electrical power consumption
+      const powerElectric = (this.device.getCapabilityValue('measure_power') as number) || 0;
+
+      // Calculate thermal power using COP estimation
+      const cop = (this.device.getCapabilityValue('adlar_cop') as number) || 3.0;
+      const thermalPower = (powerElectric / 1000) * cop; // Convert W to kW
+
+      // Estimate solar radiation (placeholder - can be improved with actual sensor data)
+      const hour = new Date().getHours();
+      const solarRadiation = this.estimateSolarRadiation(hour);
+
+      // Create measurement data
+      const measurement: MeasurementData = {
+        timestamp: Date.now(),
+        tIndoor: indoorTemp,
+        tOutdoor: outdoorTemp,
+        pHeating: thermalPower,
+        solarRadiation,
+        deltaTPerHour: 0, // Calculated by learner
+      };
+
+      // Add measurement to learner
+      this.learner.addMeasurement(measurement);
+
+      // Update capabilities every 10 samples (every 50 minutes)
+      const state = this.learner.getState();
+      if (state.sampleCount % 10 === 0) {
+        await this.updateModelCapabilities();
+        await this.persistState();
+      }
+    } catch (error) {
+      this.logger('BuildingModelService: Error during learning:', error);
+    }
+  }
+
+  /**
+   * Update device capabilities with current building model
+   */
+  private async updateModelCapabilities(): Promise<void> {
+    const model = this.learner.getModel();
+
+    // Update capabilities
+    await this.device.setCapabilityValue('adlar_building_c', model.C);
+    await this.device.setCapabilityValue('adlar_building_ua', model.UA);
+    await this.device.setCapabilityValue('adlar_building_tau', model.tau);
+
+    this.logger(
+      'BuildingModelService: Model updated - '
+      + `C=${model.C.toFixed(1)} kWh/°C, `
+      + `UA=${model.UA.toFixed(2)} kW/°C, `
+      + `τ=${model.tau.toFixed(1)}h, `
+      + `confidence=${model.confidence.toFixed(0)}%`,
+    );
+
+    // Trigger milestone flow card at 70% confidence
+    if (model.confidence >= 70 && model.confidence < 75) {
+      await this.device.homey.flow
+        .getDeviceTriggerCard('learning_milestone_reached')
+        .trigger(this.device, {
+          confidence: model.confidence,
+          milestone: '70%',
+          thermal_mass: model.C,
+          time_constant: model.tau,
+        })
+        .catch((err: unknown) => this.logger('Failed to trigger milestone card:', err));
+    }
+  }
+
+  /**
+   * Persist learner state to device store
+   */
+  private async persistState(): Promise<void> {
+    const state = this.learner.getState();
+    await this.device.setStoreValue('building_model_state', state);
+  }
+
+  /**
+   * Get learner instance (for use by other components)
+   */
+  public getLearner(): BuildingModelLearner {
+    return this.learner;
+  }
+
+  /**
+   * Estimate solar radiation based on time of day
+   *
+   * Simplified model: 0 at night, peak at noon
+   * Can be enhanced with actual solar sensor data or API integration
+   */
+  private estimateSolarRadiation(hour: number): number {
+    // Night hours (18:00 - 06:00)
+    if (hour < 6 || hour > 20) return 0;
+
+    // Daytime hours (06:00 - 20:00)
+    // Peak at noon (12:00), sinusoidal curve
+    const solarHour = hour - 6; // 0-14 range
+    return Math.max(0, 500 * Math.sin((solarHour / 14) * Math.PI));
+  }
+
+  /**
+   * Destroy service - cleanup timers
+   */
+  public destroy(): void {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+    this.logger('BuildingModelService: Destroyed');
+  }
+}

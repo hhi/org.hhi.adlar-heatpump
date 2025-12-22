@@ -497,7 +497,7 @@ export class SCOPCalculator {
   public exportData(): {
     dailyData: Array<[string, DailyCOPSummary]>;
     currentSeasonStart: number;
-  } {
+    } {
     return {
       dailyData: Array.from(this.dailyData.entries()),
       currentSeasonStart: this.currentSeasonStart,

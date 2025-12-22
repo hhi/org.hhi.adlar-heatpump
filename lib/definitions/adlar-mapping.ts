@@ -152,7 +152,7 @@ export class AdlarMapping {
     104: 1, // measure_power (Watt)
 
     // Energy measurements (Scale 2: divide by 100)
-    18: 2,  // meter_power.power_consumption (kWh)
+    18: 2, // meter_power.power_consumption (kWh)
     105: 2, // meter_power.electric_total (kWh)
 
     // Current measurements (Scale 3: divide by 1000)
