@@ -171,4 +171,15 @@ export class WeightedDecisionMaker {
   public getPriorities(): WeightedPriorities {
     return { ...this.priorities };
   }
+
+  /**
+   * Destroy and release all state (v2.0.1+)
+   *
+   * Called during device deletion for consistency.
+   * Resets priorities to defaults.
+   */
+  public destroy(): void {
+    // Reset to neutral priorities
+    this.priorities = { comfort: 0.6, efficiency: 0.25, cost: 0.15 };
+  }
 }

@@ -12,6 +12,5 @@
   <circle cx="75" cy="42" r="19"/>
   <path d="M 75 29 L 75 42 L 83 48"/>
 
-  <!-- Thermal wave (showing time delay) -->
-  <path d="M 50 62 Q 58 54 67 62"/>
+
 </svg>

@@ -932,10 +932,10 @@
         "id": "price_threshold_very_low",
         "type": "number",
         "label": {
-          "en": "Very Low Price Threshold (€/kWh)",
-          "nl": "Zeer Lage Prijs Drempel (€/kWh)",
-          "de": "Sehr Niedriger Preisschwellenwert (€/kWh)",
-          "fr": "Seuil de Prix Très Bas (€/kWh)"
+          "en": "Very Low Price Threshold ",
+          "nl": "Zeer Lage Prijs Drempel ",
+          "de": "Sehr Niedriger Preisschwellenwert ",
+          "fr": "Seuil de Prix Très Bas "
         },
         "hint": {
           "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Default: €0.10/kWh",
@@ -958,10 +958,10 @@
         "id": "price_threshold_low",
         "type": "number",
         "label": {
-          "en": "Low Price Threshold (€/kWh)",
-          "nl": "Lage Prijs Drempel (€/kWh)",
-          "de": "Niedriger Preisschwellenwert (€/kWh)",
-          "fr": "Seuil de Prix Bas (€/kWh)"
+          "en": "Low Price Threshold ",
+          "nl": "Lage Prijs Drempel ",
+          "de": "Niedriger Preisschwellenwert ",
+          "fr": "Seuil de Prix Bas "
         },
         "hint": {
           "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Default: €0.15/kWh",
@@ -984,10 +984,10 @@
         "id": "price_threshold_normal",
         "type": "number",
         "label": {
-          "en": "Normal Price Threshold (€/kWh)",
-          "nl": "Normale Prijs Drempel (€/kWh)",
-          "de": "Normaler Preisschwellenwert (€/kWh)",
-          "fr": "Seuil de Prix Normal (€/kWh)"
+          "en": "Normal Price Threshold ",
+          "nl": "Normale Prijs Drempel ",
+          "de": "Normaler Preisschwellenwert ",
+          "fr": "Seuil de Prix Normal "
         },
         "hint": {
           "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Default: €0.25/kWh",
@@ -1010,10 +1010,10 @@
         "id": "price_threshold_high",
         "type": "number",
         "label": {
-          "en": "High Price Threshold (€/kWh)",
-          "nl": "Hoge Prijs Drempel (€/kWh)",
-          "de": "Hoher Preisschwellenwert (€/kWh)",
-          "fr": "Seuil de Prix Élevé (€/kWh)"
+          "en": "High Price Threshold ",
+          "nl": "Hoge Prijs Drempel ",
+          "de": "Hoher Preisschwellenwert ",
+          "fr": "Seuil de Prix Élevé "
         },
         "hint": {
           "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Default: €0.35/kWh",
@@ -1036,10 +1036,10 @@
         "id": "price_max_preheat_offset",
         "type": "number",
         "label": {
-          "en": "Max Pre-heat Offset (°C)",
-          "nl": "Max Voorverwarmen Offset (°C)",
-          "de": "Maximale Vorheiz-Offset (°C)",
-          "fr": "Offset de Préchauffage Max (°C)"
+          "en": "Max Pre-heat Offset ",
+          "nl": "Max Voorverwarmen Offset ",
+          "de": "Maximale Vorheiz-Offset ",
+          "fr": "Offset de Préchauffage Max "
         },
         "hint": {
           "en": "Maximum temperature increase during very low price periods. Default: 1.5°C",
@@ -1230,10 +1230,10 @@
         "id": "priority_comfort",
         "type": "number",
         "label": {
-          "en": "Comfort Priority (%)",
-          "nl": "Comfort Prioriteit (%)",
-          "de": "Komfort-Priorität (%)",
-          "fr": "Priorité Confort (%)"
+          "en": "Comfort Priority ",
+          "nl": "Comfort Prioriteit ",
+          "de": "Komfort-Priorität ",
+          "fr": "Priorité Confort "
         },
         "hint": {
           "en": "Weight given to comfort (PI temperature control). Higher = more focus on maintaining target temperature. Values are auto-normalized to sum 100%. Default: 60%",
@@ -1256,10 +1256,10 @@
         "id": "priority_efficiency",
         "type": "number",
         "label": {
-          "en": "Efficiency Priority (%)",
-          "nl": "Efficiëntie Prioriteit (%)",
-          "de": "Effizienz-Priorität (%)",
-          "fr": "Priorité Efficacité (%)"
+          "en": "Efficiency Priority ",
+          "nl": "Efficiëntie Prioriteit ",
+          "de": "Effizienz-Priorität ",
+          "fr": "Priorité Efficacité "
         },
         "hint": {
           "en": "Weight given to efficiency (COP optimization). Higher = more focus on maximizing heat pump efficiency. Values are auto-normalized to sum 100%. Default: 25%",
@@ -1282,10 +1282,10 @@
         "id": "priority_cost",
         "type": "number",
         "label": {
-          "en": "Cost Priority (%)",
-          "nl": "Kosten Prioriteit (%)",
-          "de": "Kosten-Priorität (%)",
-          "fr": "Priorité Coût (%)"
+          "en": "Cost Priority ",
+          "nl": "Kosten Prioriteit ",
+          "de": "Kosten-Priorität ",
+          "fr": "Priorité Coût "
         },
         "hint": {
           "en": "Weight given to cost (price optimization). Higher = more focus on minimizing energy costs. Values are auto-normalized to sum 100%. Default: 15%",

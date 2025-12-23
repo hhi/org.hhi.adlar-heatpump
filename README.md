@@ -27,6 +27,8 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 - **Settings Management**: Race condition prevention with deferred updates (SettingsManagerService)
 - **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration (CapabilityHealthService)
 - **Safety Monitoring**: Critical temperature, connection, and system fault alerts
+- **Adaptive Temperature Control (v2.0.0+)**: Alpha version with PI regulation, thermal predictions, energy price optimization, and COP optimization
+- **Building Model Diagnostics (v2.0.1+)**: Comprehensive troubleshooting tool for tau/C/UA learning issues with detailed status reporting
 
 ## Capabilities
 
@@ -119,7 +121,7 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 ## Flow Cards
 
-**77 Total Cards**: 39 triggers, 23 conditions, 15 actions
+**78 Total Cards**: 39 triggers, 23 conditions, 16 actions
 
 ### Triggers (39)
 
@@ -137,11 +139,13 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Action-based conditions** for all controllable settings
 - **Inverse operator support** for "is" and "is not" logic
 
-### Actions (15)
+### Actions (16)
 
 - **Temperature setpoint and mode control**
 - **System on/off and heating curve adjustments**
 - **External Data Integration**: Send power, flow, and ambient data to heat pump for enhanced COP calculations
+- **Adaptive Control Integration (v2.0.1+)**: Send indoor temperature from external sensors for adaptive temperature control
+- **Building Model Diagnostics (v2.0.1+)**: Troubleshoot building thermal model learning with comprehensive status report
 - **Dynamic Curve Calculator**: Calculate values based on configurable curves (e.g., weather-compensated heating)
 - **Time-Based Scheduler**: Calculate values based on time-of-day schedules (e.g., daily temperature programming)
 - **Seasonal Mode Detection**: Automatic heating/cooling season determination (Oct 1 - May 15)
@@ -362,6 +366,98 @@ THEN   Set target temperature: {{base_setpoint}} + {{time_adjustment}}
 3. Enhanced COP calculation uses both internal sensors and external measurements
 4. Similar patterns for `request_external_flow_data` and `request_external_ambient_data`
 
+## Building Model Diagnostics (v2.0.1+)
+
+### Troubleshooting Thermal Learning
+
+The **Building Model Learner** (adaptive control component 2) learns your home's thermal properties using machine learning. If the time constant (tau) remains at 50 hours or thermal mass (C) doesn't update, use the diagnostic tool to identify the issue.
+
+### Diagnostic Flow Card
+
+**Action**: `Diagnose building model learning`
+
+**Usage**:
+
+```text
+WHEN   Manual trigger (or scheduled)
+THEN   Adlar Heat Pump → Diagnose building model learning
+```
+
+**Output** (in app logs):
+
+```text
+═══ Building Model Diagnostic Status ═══
+Enabled: ✅ / ❌
+Indoor temp: ✅ 21.5°C / ❌ Not available
+Outdoor temp: ✅ 5.2°C / ❌ Not available
+Samples collected: 47
+Confidence: 16%
+Current tau: 48.3h (LEARNED) / 50.0h (DEFAULT)
+Next update in: 3 samples (15min)
+⚠️ BLOCKING REASON: [specific issue]
+✅ Learning active, collecting data
+═══════════════════════════════════════
+```
+
+### Status Fields Explained
+
+| Field | Meaning | Action if ❌ |
+| ----- | ------- | ------------ |
+| **Enabled** | Building model learning setting active | Enable in device settings → `building_model_enabled` |
+| **Indoor temp** | External sensor flow working | Setup `receive_external_indoor_temperature` flow |
+| **Outdoor temp** | Ambient sensor data available | Check DPS 25 (`measure_temperature.temp_ambient`) |
+| **Samples** | Data points collected | Wait (10 samples = 50 minutes for first update) |
+| **Confidence** | Learning accuracy (0-100%) | Normal progression: 0% → 16% → 70% over 24 hours |
+| **Tau** | Time constant status | 50.0h = DEFAULT (not learned), other values = LEARNED |
+
+### Common Blocking Reasons
+
+#### "No indoor temperature (external sensor flow not running)"
+
+- **Cause**: Flow card `receive_external_indoor_temperature` not configured
+- **Solution**: Create flow `WHEN thermostat changes THEN send temperature to heat pump`
+
+#### "No outdoor temperature (ambient sensor not available)"
+
+- **Cause**: DPS 25 sensor not providing data
+- **Solution**: Check heat pump sensor connections
+
+#### "Collecting initial samples (X/10)"
+
+- **Cause**: Normal - waiting for minimum data points
+- **Solution**: Wait 50 minutes (10 samples × 5-minute interval)
+
+#### "Learning disabled in settings"
+
+- **Cause**: Building model learning turned off
+- **Solution**: Device Settings → `building_model_enabled` = ON
+
+### Learning Timeline
+
+```text
+┌──────────────────────────────────────────────────────┐
+│        Building Model Learning Timeline              │
+├──────────────────────────────────────────────────────┤
+│  T+0        : tau = 50.0h (default)                  │
+│  T+50 min   : First ML update after 10 samples       │
+│  T+100 min  : Second update (tau evolving)           │
+│  T+24 hours : 70% confidence milestone               │
+│             : 288 samples collected                  │
+│             : Trigger: learning_milestone_reached    │
+└──────────────────────────────────────────────────────┘
+```
+
+### Integration with Adaptive Control
+
+The diagnostic tool helps ensure the Building Model Learner works correctly:
+
+- **Component 1** (HeatingController): Needs indoor temp → use same diagnostic approach
+- **Component 2** (BuildingModelLearner): Direct diagnostic via this flow card
+- **Component 3** (EnergyPriceOptimizer): Check energy price API connectivity
+- **Component 4** (COPOptimizer): Check COP capability data quality
+
+**All components** log to the same diagnostic framework for unified troubleshooting.
+
 ## Internationalization
 
 **Fully Localized Experience** in English and Dutch:
@@ -450,7 +546,53 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v1.0.31 - Comprehensive Connection Recovery System Overhaul (Current)
+### v2.0.1 - Critical Fixes & Building Model Diagnostics (Current)
+
+**Critical Flow Card Fix:**
+
+- ✅ **Indoor Temperature Flow Card Now Works**: Fixed missing registration handler for `receive_external_indoor_temperature` action card
+- ✅ **Full Logging Implementation**: Three-layer logging (device → service → confirmation) for complete traceability
+- ✅ **Adaptive Control Unblocked**: Building Model Learner can now receive indoor temperature data from external sensors
+
+**New Diagnostic Tool:**
+
+- ✅ **Building Model Diagnostic Flow Card**: Comprehensive troubleshooting for tau/C/UA learning issues
+- ✅ **Detailed Status Reporting**: 11 diagnostic fields including enabled state, sensor health, sample count, confidence level
+- ✅ **Specific Blocking Reasons**: Clear error messages with actionable solutions
+- ✅ **Timeline Guidance**: Expected progression (T+0 → T+50min → T+24h)
+
+**Technical Implementation:**
+
+```text
+┌──────────────────────────────────────────────────┐
+│  Indoor Temperature Flow Card Architecture      │
+├──────────────────────────────────────────────────┤
+│  User Flow → device.ts handler (3856-3870)      │
+│  ↓                                               │
+│  AdaptiveControlService.receiveExternalTemp()   │
+│  ↓                                               │
+│  ExternalTemperatureService validation          │
+│  ↓                                               │
+│  Capability update + logging                    │
+└──────────────────────────────────────────────────┘
+```
+
+**User Impact:**
+
+- Adaptive control Component 1 (HeatingController) can now function
+- Component 2 (BuildingModelLearner) diagnostic tool available
+- Clear troubleshooting path when tau remains at 50h default
+
+**Files Changed:**
+
+- `device.ts:3856-3870` - Indoor temperature flow card handler
+- `device.ts:3872-3884` - Diagnostic flow card handler
+- `lib/services/building-model-service.ts:212-302` - Diagnostic methods
+- `.homeycompose/flow/actions/diagnose_building_model.json` - Flow card definition
+
+---
+
+### v1.0.31 - Comprehensive Connection Recovery System Overhaul
 
 **Critical Stability Fix:**
 

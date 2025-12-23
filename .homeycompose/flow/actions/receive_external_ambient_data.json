@@ -7,16 +7,16 @@
     "fr": "Envoyer la température ambiante à la pompe à chaleur"
   },
   "titleFormatted": {
-    "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
-    "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening",
-    "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP-Berechnung",
-    "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP"
+    "en": "Send [[temperature_value]]°C to heat pump for COP/thermal mass calculation",
+    "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP/thermische massa berekening",
+    "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP/Thermische Masse Berechnung",
+    "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP/masse thermique"
   },
   "hint": {
-    "en": "Sends ambient temperature data to the heat pump for enhanced COP calculations",
-    "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP-berekeningen",
-    "de": "Sendet Umgebungstemperaturdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
-    "fr": "Envoie les données de température ambiante à la pompe à chaleur pour des calculs COP améliorés"
+    "en": "Sends ambient temperature data to the heat pump for enhanced COP/thermal mass calculations",
+    "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP/thermische massa berekeningen",
+    "de": "Sendet Umgebungstemperaturdaten an die Wärmepumpe für erweiterte COP/Thermische Masse Berechnungen",
+    "fr": "Envoie les données de température ambiante à la pompe à chaleur pour des calculs COP/masse thermique améliorés"
   },
   "highlight": true,
   "args": [

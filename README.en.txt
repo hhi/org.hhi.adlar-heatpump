@@ -26,11 +26,13 @@ COMPLETE OPERATION
 - Timer and automatic functions
 
 INTELLIGENT AUTOMATION
-- 77 flow cards for advanced automation
+- 78 flow cards for advanced automation
 - Smart error detection and recovery
 - Weather-dependent optimization
 - Energy efficiency trends and warnings
 - Time-based scheduling and seasonal mode detection
+- Adaptive temperature control with building thermal model learning (v2.0+)
+- Comprehensive diagnostic tools for troubleshooting (v2.0.1+)
 
 USER-FRIENDLY
 - Fully localized interface (English/Dutch)
@@ -250,6 +252,17 @@ Connect with other Homey apps for enhanced COP calculation (see /docs/setup/COP 
 - External power measurements (from your smart meter)
 - External water flow data
 - External ambient temperature data
+- External indoor temperature for adaptive control (v2.0.1+)
+
+BUILDING MODEL DIAGNOSTICS (v2.0.1+)
+Troubleshoot thermal learning issues when your building model doesn't update:
+- Comprehensive diagnostic flow card
+- Check indoor/outdoor temperature sensor status
+- Monitor learning progress (samples, confidence, time constant)
+- Identify specific blocking reasons with solutions
+- Track learning timeline (T+0 → T+50min → T+24h)
+
+Usage: Create flow "Diagnose building model learning" to view detailed status in app logs
 
 SAFETY AND RELIABILITY
 

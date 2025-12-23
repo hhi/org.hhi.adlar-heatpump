@@ -26,11 +26,13 @@ VOLLEDIGE BEDIENING
 - Timer en automatische functies
 
 INTELLIGENTE AUTOMATISERING
-- 77 flow kaarten voor geavanceerde automatisering
+- 78 flow kaarten voor geavanceerde automatisering
 - Slimme foutdetectie en herstel
 - Weersafhankelijke optimalisatie
 - Energie-efficiëntie trends en waarschuwingen
 - Tijdgebaseerde planning en seizoensmodus detectie
+- Adaptieve temperatuurregeling met thermisch gebouwmodel leren (v2.0+)
+- Uitgebreide diagnostische tools voor probleemoplossing (v2.0.1+)
 
 GEBRUIKSVRIENDELIJK
 - Volledig Nederlandse interface (Engels/Nederlands)
@@ -250,6 +252,17 @@ Verbind met andere Homey apps voor verbeterde COP berekening (zie /docs/setup/CO
 - Externe vermogensmetingen (van uw slimme meter)
 - Externe water doorstroom gegevens
 - Externe buitentemperatuur gegevens
+- Externe binnentemperatuur voor adaptieve regeling (v2.0.1+)
+
+GEBOUWMODEL DIAGNOSTIEK (v2.0.1+)
+Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet update:
+- Uitgebreide diagnostische flow kaart
+- Controleer binnen/buiten temperatuur sensor status
+- Monitor leerproces (samples, betrouwbaarheid, tijdsconstante)
+- Identificeer specifieke blokkerende redenen met oplossingen
+- Volg leer tijdlijn (T+0 → T+50min → T+24u)
+
+Gebruik: Maak flow "Diagnosticeer gebouwmodel leren" om gedetailleerde status te zien in app logs
 
 VEILIGHEID EN BETROUWBAARHEID
 

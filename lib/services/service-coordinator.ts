@@ -110,40 +110,68 @@ export class ServiceCoordinator {
   private setupServiceEventHandlers(): void {
     this.logger('ServiceCoordinator: Setting up inter-service event handlers');
 
+    // CRITICAL: Remove existing listeners BEFORE creating new ones (v2.0.2 re-init protection)
+    // This prevents accumulation when setupServiceEventHandlers() is called multiple times
+    if (this.onHealthDegradedHandler) {
+      this.device.removeListener('capability:health-degraded', this.onHealthDegradedHandler);
+    }
+    if (this.onHealthRecoveredHandler) {
+      this.device.removeListener('capability:health-recovered', this.onHealthRecoveredHandler);
+    }
+    if (this.onHealthReportHandler) {
+      this.device.removeListener('capability:health-report', this.onHealthReportHandler);
+    }
+    if (this.onEnergyTotalResetHandler) {
+      this.device.removeListener('energy:total-reset', this.onEnergyTotalResetHandler);
+    }
+    if (this.onEnergyDailyResetHandler) {
+      this.device.removeListener('energy:daily-reset', this.onEnergyDailyResetHandler);
+    }
+    if (this.onDiagnosticsReportHandler) {
+      this.device.removeListener('diagnostics:capability-report', this.onDiagnosticsReportHandler);
+    }
+
+    // Store handler references BEFORE registering to enable proper cleanup (v2.0.1 memory leak fix)
     // Capability health events -> Flow card updates
-    this.device.on('capability:health-degraded', ({ capability, healthData }) => {
+    this.onHealthDegradedHandler = ({ capability, healthData }) => {
       this.logger('ServiceCoordinator: Capability health degraded', capability);
       this.flowCardManager.updateFlowCards().catch((error) => {
         this.logger('ServiceCoordinator: Error updating flow cards after health degraded', error);
       });
-    });
+    };
+    this.device.on('capability:health-degraded', this.onHealthDegradedHandler);
 
-    this.device.on('capability:health-recovered', ({ capability, healthData }) => {
+    this.onHealthRecoveredHandler = ({ capability, healthData }) => {
       this.logger('ServiceCoordinator: Capability health recovered', capability);
       this.flowCardManager.updateFlowCards().catch((error) => {
         this.logger('ServiceCoordinator: Error updating flow cards after health recovered', error);
       });
-    });
+    };
+    this.device.on('capability:health-recovered', this.onHealthRecoveredHandler);
 
-    this.device.on('capability:health-report', (report) => {
-      this.logger('ServiceCoordinator: Health report generated', report.overall);
-    });
+    this.onHealthReportHandler = (report) => {
+      this.logger('ServiceCoordinator: Health report generated', (report as { overall?: unknown }).overall);
+    };
+    this.device.on('capability:health-report', this.onHealthReportHandler);
 
     // Energy tracking events
-    this.device.on('energy:total-reset', () => {
+    this.onEnergyTotalResetHandler = () => {
       this.logger('ServiceCoordinator: External energy total reset');
-    });
+    };
+    this.device.on('energy:total-reset', this.onEnergyTotalResetHandler);
 
-    this.device.on('energy:daily-reset', () => {
+    this.onEnergyDailyResetHandler = () => {
       this.logger('ServiceCoordinator: External energy daily reset');
-    });
+    };
+    this.device.on('energy:daily-reset', this.onEnergyDailyResetHandler);
 
     // Diagnostics events
-    this.device.on('diagnostics:capability-report', (diagnostics) => {
+    this.onDiagnosticsReportHandler = (diagnostics) => {
       this.logger('ServiceCoordinator: Capability diagnostics report generated', diagnostics);
-    });
+    };
+    this.device.on('diagnostics:capability-report', this.onDiagnosticsReportHandler);
 
-    this.logger('ServiceCoordinator: Inter-service event handlers configured');
+    this.logger('ServiceCoordinator: Inter-service event handlers configured (with cleanup refs)');
   }
 
   /**

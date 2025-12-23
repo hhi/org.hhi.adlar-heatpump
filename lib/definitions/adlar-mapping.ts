@@ -214,7 +214,7 @@ export class AdlarMapping {
   static dps: Record<string, DpsEntry> = {
     dps_1: { code: 'switch', name: 'Switch', adlar: 'Schakelaar' },
     dps_2: { code: 'mode', name: 'Mode', adlar: '(Verwarmings)modus' },
-    dps_4: { code: 'temp_set', name: 'Target temp', adlar: 'Stel temperatuur' },
+    dps_4: { code: 'temp_set', name: 'Target temp', adlar: 'Doeltemperatuur' },
     dps_5: { code: 'work_mode', name: 'Working mode', adlar: 'Bedrijfsmodus' },
     dps_10: { code: 'water_mode', name: 'Control Temperature', adlar: 'Temperatuurregeling Water' },
     dps_11: { code: 'capacity_set', name: 'Hot water curve setting', adlar: 'Instelling warmwater curve' }, // Functional: Hot water curves (OFF, H1-H4)

@@ -369,7 +369,9 @@ export class AdaptiveControlService {
         try {
           const currentCOP = (this.device.getCapabilityValue('adlar_cop') as number) || 0;
           const dailyCOP = (this.device.getCapabilityValue('adlar_cop_daily') as number) || 0;
-          const outdoorTemp = (this.device.getCapabilityValue('measure_temperature.temp_ambient') as number) || 0;
+          // Get outdoor temperature with priority fallback (v2.0.2): external sensor → heat pump sensor
+          // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
+          const outdoorTemp = this.device.getOutdoorTemperatureWithFallback() || 0;
 
           copAction = this.copOptimizer.calculateAction(currentCOP, dailyCOP, outdoorTemp, targetTemp);
 
@@ -704,12 +706,15 @@ export class AdaptiveControlService {
       this.controlLoopInterval = null;
     }
 
-    // Destroy all sub-services
+    // Destroy all sub-services (v2.0.1+: added missing components)
     this.heatingController.destroy();
     this.externalTemperature.destroy();
     this.buildingModel.destroy();
+    this.copOptimizer.destroy();
+    this.energyOptimizer.destroy();
+    this.decisionMaker.destroy();
 
-    this.logger('AdaptiveControlService: Destroyed');
+    this.logger('AdaptiveControlService: Destroyed (all 6 components cleaned up)');
   }
 
   /**
