@@ -1,0 +1,28 @@
+{
+  "id": "diagnose_building_model",
+  "title": {
+    "en": "Diagnose building model learning",
+    "nl": "Diagnosticeer gebouwmodel leren",
+    "de": "Gebäudemodell-Lernen diagnostizieren",
+    "fr": "Diagnostiquer l'apprentissage du modèle de bâtiment"
+  },
+  "titleFormatted": {
+    "en": "Show building model diagnostic status in logs",
+    "nl": "Toon diagnostische status gebouwmodel in logs",
+    "de": "Gebäudemodell-Diagnosestatus in Protokollen anzeigen",
+    "fr": "Afficher l'état de diagnostic du modèle de bâtiment dans les journaux"
+  },
+  "hint": {
+    "en": "Logs detailed diagnostic information about building model learning status. Check app logs after running this action to see why tau/C/UA values are not updating.",
+    "nl": "Logt gedetailleerde diagnostische informatie over gebouwmodel leer-status. Controleer app logs na het uitvoeren van deze actie om te zien waarom tau/C/UA waarden niet updaten.",
+    "de": "Protokolliert detaillierte Diagnoseinformationen zum Status des Gebäudemodell-Lernens. Überprüfen Sie die App-Protokolle nach Ausführung dieser Aktion, um zu sehen, warum tau/C/UA-Werte nicht aktualisiert werden.",
+    "fr": "Enregistre des informations de diagnostic détaillées sur l'état d'apprentissage du modèle de bâtiment. Vérifiez les journaux de l'application après avoir exécuté cette action pour voir pourquoi les valeurs tau/C/UA ne se mettent pas à jour."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ]
+}

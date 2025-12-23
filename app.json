@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -5725,6 +5725,34 @@
         ]
       },
       {
+        "id": "diagnose_building_model",
+        "title": {
+          "en": "Diagnose building model learning",
+          "nl": "Diagnosticeer gebouwmodel leren",
+          "de": "Gebäudemodell-Lernen diagnostizieren",
+          "fr": "Diagnostiquer l'apprentissage du modèle de bâtiment"
+        },
+        "titleFormatted": {
+          "en": "Show building model diagnostic status in logs",
+          "nl": "Toon diagnostische status gebouwmodel in logs",
+          "de": "Gebäudemodell-Diagnosestatus in Protokollen anzeigen",
+          "fr": "Afficher l'état de diagnostic du modèle de bâtiment dans les journaux"
+        },
+        "hint": {
+          "en": "Logs detailed diagnostic information about building model learning status. Check app logs after running this action to see why tau/C/UA values are not updating.",
+          "nl": "Logt gedetailleerde diagnostische informatie over gebouwmodel leer-status. Controleer app logs na het uitvoeren van deze actie om te zien waarom tau/C/UA waarden niet updaten.",
+          "de": "Protokolliert detaillierte Diagnoseinformationen zum Status des Gebäudemodell-Lernens. Überprüfen Sie die App-Protokolle nach Ausführung dieser Aktion, um zu sehen, warum tau/C/UA-Werte nicht aktualisiert werden.",
+          "fr": "Enregistre des informations de diagnostic détaillées sur l'état d'apprentissage du modèle de bâtiment. Vérifiez les journaux de l'application après avoir exécuté cette action pour voir pourquoi les valeurs tau/C/UA ne se mettent pas à jour."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
         "id": "get_seasonal_mode",
         "title": {
           "en": "Get current seasonal mode",
@@ -5828,16 +5856,16 @@
           "fr": "Envoyer la température ambiante à la pompe à chaleur"
         },
         "titleFormatted": {
-          "en": "Send [[temperature_value]]°C to heat pump for COP calculation",
-          "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP berekening",
-          "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP-Berechnung",
-          "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP"
+          "en": "Send [[temperature_value]]°C to heat pump for COP/thermal mass calculation",
+          "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP/thermische massa berekening",
+          "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP/Thermische Masse Berechnung",
+          "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP/masse thermique"
         },
         "hint": {
-          "en": "Sends ambient temperature data to the heat pump for enhanced COP calculations",
-          "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP-berekeningen",
-          "de": "Sendet Umgebungstemperaturdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
-          "fr": "Envoie les données de température ambiante à la pompe à chaleur pour des calculs COP améliorés"
+          "en": "Sends ambient temperature data to the heat pump for enhanced COP/thermal mass calculations",
+          "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP/thermische massa berekeningen",
+          "de": "Sendet Umgebungstemperaturdaten an die Wärmepumpe für erweiterte COP/Thermische Masse Berechnungen",
+          "fr": "Envoie les données de température ambiante à la pompe à chaleur pour des calculs COP/masse thermique améliorés"
         },
         "highlight": true,
         "args": [
@@ -6829,7 +6857,7 @@
           "unit": "°C",
           "setable": true,
           "description": {
-            "nl": "dps_4: temp_set - Stel temperatuur"
+            "nl": "dps_4: temp_set - Doeltemperatuur"
           }
         },
         "onoff": {
@@ -8439,10 +8467,10 @@
               "id": "price_threshold_very_low",
               "type": "number",
               "label": {
-                "en": "Very Low Price Threshold (€/kWh)",
-                "nl": "Zeer Lage Prijs Drempel (€/kWh)",
-                "de": "Sehr Niedriger Preisschwellenwert (€/kWh)",
-                "fr": "Seuil de Prix Très Bas (€/kWh)"
+                "en": "Very Low Price Threshold ",
+                "nl": "Zeer Lage Prijs Drempel ",
+                "de": "Sehr Niedriger Preisschwellenwert ",
+                "fr": "Seuil de Prix Très Bas "
               },
               "hint": {
                 "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Default: €0.10/kWh",
@@ -8465,10 +8493,10 @@
               "id": "price_threshold_low",
               "type": "number",
               "label": {
-                "en": "Low Price Threshold (€/kWh)",
-                "nl": "Lage Prijs Drempel (€/kWh)",
-                "de": "Niedriger Preisschwellenwert (€/kWh)",
-                "fr": "Seuil de Prix Bas (€/kWh)"
+                "en": "Low Price Threshold ",
+                "nl": "Lage Prijs Drempel ",
+                "de": "Niedriger Preisschwellenwert ",
+                "fr": "Seuil de Prix Bas "
               },
               "hint": {
                 "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Default: €0.15/kWh",
@@ -8491,10 +8519,10 @@
               "id": "price_threshold_normal",
               "type": "number",
               "label": {
-                "en": "Normal Price Threshold (€/kWh)",
-                "nl": "Normale Prijs Drempel (€/kWh)",
-                "de": "Normaler Preisschwellenwert (€/kWh)",
-                "fr": "Seuil de Prix Normal (€/kWh)"
+                "en": "Normal Price Threshold ",
+                "nl": "Normale Prijs Drempel ",
+                "de": "Normaler Preisschwellenwert ",
+                "fr": "Seuil de Prix Normal "
               },
               "hint": {
                 "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Default: €0.25/kWh",
@@ -8517,10 +8545,10 @@
               "id": "price_threshold_high",
               "type": "number",
               "label": {
-                "en": "High Price Threshold (€/kWh)",
-                "nl": "Hoge Prijs Drempel (€/kWh)",
-                "de": "Hoher Preisschwellenwert (€/kWh)",
-                "fr": "Seuil de Prix Élevé (€/kWh)"
+                "en": "High Price Threshold ",
+                "nl": "Hoge Prijs Drempel ",
+                "de": "Hoher Preisschwellenwert ",
+                "fr": "Seuil de Prix Élevé "
               },
               "hint": {
                 "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Default: €0.35/kWh",
@@ -8543,10 +8571,10 @@
               "id": "price_max_preheat_offset",
               "type": "number",
               "label": {
-                "en": "Max Pre-heat Offset (°C)",
-                "nl": "Max Voorverwarmen Offset (°C)",
-                "de": "Maximale Vorheiz-Offset (°C)",
-                "fr": "Offset de Préchauffage Max (°C)"
+                "en": "Max Pre-heat Offset ",
+                "nl": "Max Voorverwarmen Offset ",
+                "de": "Maximale Vorheiz-Offset ",
+                "fr": "Offset de Préchauffage Max "
               },
               "hint": {
                 "en": "Maximum temperature increase during very low price periods. Default: 1.5°C",
@@ -8737,10 +8765,10 @@
               "id": "priority_comfort",
               "type": "number",
               "label": {
-                "en": "Comfort Priority (%)",
-                "nl": "Comfort Prioriteit (%)",
-                "de": "Komfort-Priorität (%)",
-                "fr": "Priorité Confort (%)"
+                "en": "Comfort Priority ",
+                "nl": "Comfort Prioriteit ",
+                "de": "Komfort-Priorität ",
+                "fr": "Priorité Confort "
               },
               "hint": {
                 "en": "Weight given to comfort (PI temperature control). Higher = more focus on maintaining target temperature. Values are auto-normalized to sum 100%. Default: 60%",
@@ -8763,10 +8791,10 @@
               "id": "priority_efficiency",
               "type": "number",
               "label": {
-                "en": "Efficiency Priority (%)",
-                "nl": "Efficiëntie Prioriteit (%)",
-                "de": "Effizienz-Priorität (%)",
-                "fr": "Priorité Efficacité (%)"
+                "en": "Efficiency Priority ",
+                "nl": "Efficiëntie Prioriteit ",
+                "de": "Effizienz-Priorität ",
+                "fr": "Priorité Efficacité "
               },
               "hint": {
                 "en": "Weight given to efficiency (COP optimization). Higher = more focus on maximizing heat pump efficiency. Values are auto-normalized to sum 100%. Default: 25%",
@@ -8789,10 +8817,10 @@
               "id": "priority_cost",
               "type": "number",
               "label": {
-                "en": "Cost Priority (%)",
-                "nl": "Kosten Prioriteit (%)",
-                "de": "Kosten-Priorität (%)",
-                "fr": "Priorité Coût (%)"
+                "en": "Cost Priority ",
+                "nl": "Kosten Prioriteit ",
+                "de": "Kosten-Priorität ",
+                "fr": "Priorité Coût "
               },
               "hint": {
                 "en": "Weight given to cost (price optimization). Higher = more focus on minimizing energy costs. Values are auto-normalized to sum 100%. Default: 15%",

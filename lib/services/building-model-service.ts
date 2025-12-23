@@ -103,9 +103,12 @@ export class BuildingModelService {
         return;
       }
 
-      // Get outdoor temperature
-      const outdoorTemp = this.device.getCapabilityValue('measure_temperature.temp_ambient') as number;
-      if (outdoorTemp === null || outdoorTemp === undefined) {
+      // Get outdoor temperature with priority fallback (v2.0.2)
+      // Uses device helper method: external sensor → heat pump sensor
+      // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
+      const outdoorTemp = this.device.getOutdoorTemperatureWithFallback();
+
+      if (outdoorTemp === null) {
         this.logger('BuildingModelService: No outdoor temp available, skipping');
         return;
       }
@@ -207,6 +210,99 @@ export class BuildingModelService {
     // Peak at noon (12:00), sinusoidal curve
     const solarHour = hour - 6; // 0-14 range
     return Math.max(0, 500 * Math.sin((solarHour / 14) * Math.PI));
+  }
+
+  /**
+   * Get diagnostic status of building model learning
+   * Useful for troubleshooting why tau/C/UA values are not updating
+   */
+  public async getDiagnosticStatus(): Promise<{
+    enabled: boolean;
+    hasIndoorTemp: boolean;
+    hasOutdoorTemp: boolean;
+    indoorTempValue: number | null;
+    outdoorTempValue: number | null;
+    sampleCount: number;
+    confidence: number;
+    tau: number;
+    lastUpdateSamples: number;
+    isDefault: boolean;
+    blockingReason: string | null;
+  }> {
+    const enabled = await this.device.getSetting('building_model_enabled');
+
+    // Get indoor temperature from external sensor
+    let indoorTemp: number | null = null;
+    try {
+      // @ts-expect-error - Accessing MyDevice.serviceCoordinator
+      indoorTemp = this.device.serviceCoordinator
+        .getAdaptiveControl()
+        .getExternalTemperatureService()
+        .getIndoorTemperature();
+    } catch (err) {
+      // Service not available
+    }
+
+    // Get outdoor temperature with priority fallback (v2.0.2)
+    // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
+    const outdoorTemp = this.device.getOutdoorTemperatureWithFallback();
+
+    // Get model state
+    const model = this.learner.getModel();
+    const state = this.learner.getState();
+
+    // Determine blocking reason
+    let blockingReason: string | null = null;
+    if (!enabled) {
+      blockingReason = 'Learning disabled in settings';
+    } else if (indoorTemp === null) {
+      blockingReason = 'No indoor temperature (external sensor flow not running)';
+    } else if (outdoorTemp === null || outdoorTemp === undefined) {
+      blockingReason = 'No outdoor temperature (ambient sensor not available)';
+    } else if (state.sampleCount < 10) {
+      blockingReason = `Collecting initial samples (${state.sampleCount}/10)`;
+    }
+
+    // Check if still using default values
+    const isDefault = Math.abs(model.tau - 50) < 0.5 && state.sampleCount < 10;
+
+    return {
+      enabled,
+      hasIndoorTemp: indoorTemp !== null,
+      hasOutdoorTemp: outdoorTemp !== null && outdoorTemp !== undefined,
+      indoorTempValue: indoorTemp,
+      outdoorTempValue: outdoorTemp,
+      sampleCount: state.sampleCount,
+      confidence: model.confidence,
+      tau: model.tau,
+      lastUpdateSamples: state.sampleCount % 10,
+      isDefault,
+      blockingReason,
+    };
+  }
+
+  /**
+   * Log diagnostic status for troubleshooting
+   */
+  public async logDiagnosticStatus(): Promise<void> {
+    const status = await this.getDiagnosticStatus();
+
+    this.logger('═══ Building Model Diagnostic Status ═══');
+    this.logger(`Enabled: ${status.enabled ? '✅' : '❌'}`);
+    this.logger(`Indoor temp: ${status.hasIndoorTemp ? `✅ ${status.indoorTempValue}°C` : '❌ Not available'}`);
+    this.logger(`Outdoor temp: ${status.hasOutdoorTemp ? `✅ ${status.outdoorTempValue}°C` : '❌ Not available'}`);
+    this.logger(`Samples collected: ${status.sampleCount}`);
+    this.logger(`Confidence: ${status.confidence.toFixed(0)}%`);
+    this.logger(`Current tau: ${status.tau.toFixed(1)}h ${status.isDefault ? '(DEFAULT)' : '(LEARNED)'}`);
+    this.logger(`Next update in: ${10 - status.lastUpdateSamples} samples (${(10 - status.lastUpdateSamples) * 5}min)`);
+
+    if (status.blockingReason) {
+      this.logger(`⚠️ BLOCKING REASON: ${status.blockingReason}`);
+    } else {
+      this.logger('✅ Learning active, collecting data');
+    }
+
+    this.logger('═══════════════════════════════════════');
   }
 
   /**

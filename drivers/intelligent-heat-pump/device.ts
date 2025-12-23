@@ -189,6 +189,12 @@ class MyDevice extends Homey.Device {
   private lastCOPDataPointTime: number = 0;
   private compressorStateHistory: Array<{timestamp: number, running: boolean}> = [];
 
+  // Memory leak prevention: tracked timers for cleanup (v2.0.1+)
+  private connectionStatusInterval: NodeJS.Timeout | null = null;
+  private dailyEnergyResetTimeout: NodeJS.Timeout | null = null;
+  private dailyEnergyResetInterval: NodeJS.Timeout | null = null;
+  private flowCardInitRetryTimeout: NodeJS.Timeout | null = null;
+
   // State tracking for flow card triggers (v1.0.8)
   private lastCOPOutlierStatus = false; // For cop_outlier_detected trigger
   private lastCOPValue = 0; // For cop_efficiency_changed trigger
@@ -2784,6 +2790,14 @@ class MyDevice extends Homey.Device {
    * Initialize flow cards based on current settings (called once during device init)
    */
   private async initializeFlowCards(): Promise<void> {
+    // CRITICAL: Clear any pending retry timeout BEFORE attempting initialization (v2.0.2 re-init protection)
+    // Prevents duplicate retry attempts if initializeFlowCards() is called multiple times
+    if (this.flowCardInitRetryTimeout) {
+      clearTimeout(this.flowCardInitRetryTimeout);
+      this.flowCardInitRetryTimeout = null;
+      this.log('Cleared pending flow card retry timeout to prevent duplicate attempts');
+    }
+
     try {
       await this.updateFlowCards();
       this.isFlowCardsInitialized = true;
@@ -2794,25 +2808,40 @@ class MyDevice extends Homey.Device {
 
       if (categorizedError.retryable) {
         this.log('Will retry flow card initialization in 5 seconds');
-        this.homey.setTimeout(() => this.initializeFlowCards(), 5000);
+        // Track timeout for cleanup to prevent memory leak
+        this.flowCardInitRetryTimeout = this.homey.setTimeout(() => {
+          this.flowCardInitRetryTimeout = null; // Clear reference after execution
+          this.initializeFlowCards().catch((err) => {
+            this.error('Flow card retry initialization failed:', err);
+          });
+        }, 5000);
       }
     }
   }
 
   /**
-   * Initialize connection status tracking (v0.99.47)
-   * Updates adlar_connection_status capability every 5 seconds
+   * Initialize connection status tracking (v0.99.47, optimized v2.0.2)
+   * Updates adlar_connection_status capability every 30 seconds
    */
   private async initializeConnectionStatusTracking(): Promise<void> {
+    // CRITICAL: Clear existing interval BEFORE creating new one (v2.0.2 re-init protection)
+    // Prevents multiple intervals if this function is called multiple times
+    if (this.connectionStatusInterval) {
+      clearInterval(this.connectionStatusInterval);
+      this.connectionStatusInterval = null;
+      this.log('Cleared existing connection status interval to prevent accumulation');
+    }
+
     // Immediate initial update
     await this.updateConnectionStatus();
 
-    // Set up periodic updates (every 5 seconds)
-    this.homey.setInterval(async () => {
+    // Set up periodic updates (every 30 seconds) - optimized for memory efficiency (v2.0.2)
+    // Reduced from 5s to 30s: 83% less GC pressure, 6x slower leak amplification
+    this.connectionStatusInterval = this.homey.setInterval(async () => {
       await this.updateConnectionStatus();
-    }, 5000);
+    }, 30000); // 30 seconds
 
-    this.log('Connection status tracking initialized');
+    this.log('Connection status tracking initialized (30s interval)');
   }
 
   /**
@@ -2859,6 +2888,35 @@ class MyDevice extends Homey.Device {
   private unregisterAllFlowCards(): void {
     // Flow card unregistration is handled automatically by FlowCardManagerService
     this.log('Flow card unregistration delegated to FlowCardManagerService');
+  }
+
+  /**
+   * Get outdoor temperature with priority fallback (v2.0.2)
+   *
+   * Priority order (most accurate first):
+   * 1. External ambient sensor (adlar_external_ambient) - weather station, external thermometer
+   * 2. Heat pump's own sensor (measure_temperature.temp_ambient) - less accurate due to compressor heat
+   *
+   * @returns {number | null} Outdoor temperature in °C, or null if unavailable
+   */
+  public getOutdoorTemperatureWithFallback(): number | null {
+    // Priority 1: External ambient sensor (most accurate)
+    let outdoorTemp = this.getCapabilityValue('adlar_external_ambient') as number | null;
+    let source = 'external';
+
+    if (outdoorTemp === null || outdoorTemp === undefined) {
+      // Priority 2: Heat pump's own sensor (fallback)
+      outdoorTemp = this.getCapabilityValue('measure_temperature.temp_ambient') as number | null;
+      source = 'internal';
+    }
+
+    if (outdoorTemp !== null && outdoorTemp !== undefined) {
+      this.debugLog(`Using ${source} outdoor temperature: ${outdoorTemp}°C`);
+      return outdoorTemp;
+    }
+
+    this.debugLog('No outdoor temperature available (tried external + internal)');
+    return null;
   }
 
   /**
@@ -3853,6 +3911,51 @@ class MyDevice extends Homey.Device {
         this.categoryLog('energy', `✅ External ambient data updated: ${args.temperature_value}°C`);
       });
 
+      // Register external indoor temperature action card (for adaptive control)
+      const receiveExternalIndoorAction = this.homey.flow.getActionCard('receive_external_indoor_temperature');
+      // eslint-disable-next-line camelcase
+      receiveExternalIndoorAction.registerRunListener(async (args: { device: MyDevice; temperature_value: number | string }) => {
+        const { temperature_value: temperatureValueRaw } = args;
+
+        let temperatureValue: number;
+        if (typeof temperatureValueRaw === 'number') {
+          temperatureValue = temperatureValueRaw;
+        } else if (typeof temperatureValueRaw === 'string') {
+          temperatureValue = parseFloat(temperatureValueRaw);
+        } else {
+          throw new Error('Temperature value must be a number or numeric string');
+        }
+
+        if (Number.isNaN(temperatureValue) || !Number.isFinite(temperatureValue)) {
+          throw new Error(`Temperature value must be a valid number (received: "${temperatureValueRaw}")`);
+        }
+
+        this.log(`🏠 Received external indoor temperature: ${temperatureValue}°C`);
+
+        // Call AdaptiveControlService to store the temperature
+        try {
+          await this.serviceCoordinator?.getAdaptiveControl()?.receiveExternalTemperature(temperatureValue);
+          this.log(`✅ External indoor temperature updated: ${temperatureValue}°C`);
+        } catch (error) {
+          this.error('Failed to update external indoor temperature:', error);
+          throw error; // Re-throw to show error in flow card execution
+        }
+      });
+
+      // Register building model diagnostic action card
+      const diagnoseBuildingModelAction = this.homey.flow.getActionCard('diagnose_building_model');
+      diagnoseBuildingModelAction.registerRunListener(async () => {
+        this.log('🔍 Running building model diagnostics...');
+
+        try {
+          await this.serviceCoordinator?.getAdaptiveControl()?.getBuildingModelService()?.logDiagnosticStatus();
+          this.log('✅ Building model diagnostics completed - check logs above');
+        } catch (error) {
+          this.error('Failed to run building model diagnostics:', error);
+          throw error;
+        }
+      });
+
       // Currently no custom ACTION cards require device-level registration
     } catch (error) {
       this.error('Error registering flow card action listeners:', error);
@@ -3964,6 +4067,19 @@ class MyDevice extends Homey.Device {
    * Schedule daily energy reset at midnight
    */
   private scheduleDailyEnergyReset(): void {
+    // CRITICAL: Clear existing timers BEFORE creating new ones (v2.0.2 re-init protection)
+    // Prevents multiple midnight reset timers if this function is called multiple times
+    if (this.dailyEnergyResetTimeout) {
+      clearTimeout(this.dailyEnergyResetTimeout);
+      this.dailyEnergyResetTimeout = null;
+      this.log('Cleared existing daily energy reset timeout to prevent accumulation');
+    }
+    if (this.dailyEnergyResetInterval) {
+      clearInterval(this.dailyEnergyResetInterval);
+      this.dailyEnergyResetInterval = null;
+      this.log('Cleared existing daily energy reset interval to prevent accumulation');
+    }
+
     // Calculate milliseconds until next midnight
     const now = new Date();
     const tomorrow = new Date(now);
@@ -3971,12 +4087,13 @@ class MyDevice extends Homey.Device {
     tomorrow.setHours(0, 0, 0, 0);
     const msUntilMidnight = tomorrow.getTime() - now.getTime();
 
-    // Schedule reset
-    this.homey.setTimeout(() => {
+    // Schedule reset - tracked for cleanup to prevent memory leak
+    this.dailyEnergyResetTimeout = this.homey.setTimeout(() => {
+      this.dailyEnergyResetTimeout = null; // Clear reference after execution
       this.resetDailyEnergy()
         .catch((error) => this.error('Failed to reset daily energy at midnight:', error));
-      // Schedule recurring daily resets
-      this.homey.setInterval(() => {
+      // Schedule recurring daily resets - tracked for cleanup
+      this.dailyEnergyResetInterval = this.homey.setInterval(() => {
         this.resetDailyEnergy()
           .catch((error) => this.error('Failed to reset daily energy on schedule:', error));
       }, 24 * 60 * 60 * 1000); // 24 hours
@@ -4013,6 +4130,31 @@ class MyDevice extends Homey.Device {
    */
   async onDeleted() {
     this.log('MyDevice has been deleted');
+
+    // Memory leak prevention: Stop all tracked timers (v2.0.1+)
+    if (this.connectionStatusInterval) {
+      clearInterval(this.connectionStatusInterval);
+      this.connectionStatusInterval = null;
+      this.log('Connection status interval cleared');
+    }
+
+    if (this.dailyEnergyResetTimeout) {
+      clearTimeout(this.dailyEnergyResetTimeout);
+      this.dailyEnergyResetTimeout = null;
+      this.log('Daily energy reset timeout cleared');
+    }
+
+    if (this.dailyEnergyResetInterval) {
+      clearInterval(this.dailyEnergyResetInterval);
+      this.dailyEnergyResetInterval = null;
+      this.log('Daily energy reset interval cleared');
+    }
+
+    if (this.flowCardInitRetryTimeout) {
+      clearTimeout(this.flowCardInitRetryTimeout);
+      this.flowCardInitRetryTimeout = null;
+      this.log('Flow card init retry timeout cleared');
+    }
 
     // Cleanup ServiceCoordinator and all managed services
     if (this.serviceCoordinator) {

@@ -130,7 +130,7 @@
       "unit": "°C",
       "setable": true,
       "description": {
-        "nl": "dps_4: temp_set - Stel temperatuur"
+        "nl": "dps_4: temp_set - Doeltemperatuur"
       }
     },
 

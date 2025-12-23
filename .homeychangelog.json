@@ -1,4 +1,16 @@
 {
+  "2.0.2": {
+    "en": "Connection status updates reduced to 30-second intervals (was 5 seconds). Outdoor temperature now uses external sensor when available, falls back to heat pump sensor (improves thermal mass learning accuracy).",
+    "nl": "Verbindingsstatus updates verlaagd naar 30 seconden interval (was 5 seconden). Buitentemperatuur gebruikt nu externe sensor indien beschikbaar, valt terug op warmtepomp sensor (verbetert thermische massa leer-nauwkeurigheid).",
+    "de": "Verbindungsstatus-Updates auf 30-Sekunden-Intervalle reduziert (war 5 Sekunden). Außentemperatur verwendet jetzt externen Sensor wenn verfügbar, fällt zurück auf Wärmepumpen-Sensor (verbessert Genauigkeit des Thermische-Masse-Lernens).",
+    "fr": "Mises à jour statut connexion réduites à intervalles 30 secondes (était 5 secondes). Température extérieure utilise capteur externe si disponible, sinon capteur pompe à chaleur (améliore précision apprentissage masse thermique)."
+  },
+  "2.0.1": {
+    "en": "Fixed: Indoor temperature flow card now works (registration handler added). Added: Building model diagnostic tool to troubleshoot tau/C/UA learning issues.",
+    "nl": "Opgelost: Binnentemperatuur flow card werkt nu (registratie handler toegevoegd). Toegevoegd: Gebouwmodel diagnostische tool om tau/C/UA leer-problemen op te lossen.",
+    "de": "Behoben: Raumtemperatur-Flow-Karte funktioniert jetzt (Registrierungs-Handler hinzugefügt). Hinzugefügt: Gebäudemodell-Diagnosetool zur Fehlerbehebung bei tau/C/UA-Lernproblemen.",
+    "fr": "Corrigé: La carte de flux de température intérieure fonctionne maintenant (gestionnaire d'enregistrement ajouté). Ajouté: Outil de diagnostic du modèle de bâtiment pour résoudre les problèmes d'apprentissage tau/C/UA."
+  },
   "2.0.0": {
     "en": "Added: Alpha version of Adaptive temperature control with PI regulation, thermal predictions, energy price optimization, and COP optimization.",
     "nl": "Toegevoegd: Alfa versie van Adaptieve temperatuurregeling met PI-regeling, thermische voorspellingen, energieprijsoptimalisatie en COP-optimalisatie.",

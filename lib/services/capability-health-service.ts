@@ -204,7 +204,8 @@ export class CapabilityHealthService {
     if (capability.startsWith('adlar_building_')) return 'building_model';
 
     // Energy pricing capabilities - excluded from health metrics (API data, not DPS)
-    if (capability.startsWith('adlar_energy_price_') || capability.startsWith('adlar_energy_cost_')) return 'energy_pricing';
+    // v2.0.1: Simplified to catch all adlar_energy_ capabilities (prevents fragile _price_/_cost_ specific checks)
+    if (capability.startsWith('adlar_energy_')) return 'energy_pricing';
 
     // DPS-based sensor capabilities - included in health metrics
     if (capability.startsWith('measure_temperature')) return 'temperature';
@@ -235,12 +236,20 @@ export class CapabilityHealthService {
    * Perform a full pass over capability health entries and emit events if statuses changed.
    * - Marks capabilities as unhealthy when they exceed timeouts.
    * - Emits 'capability:health-degraded' / 'capability:health-recovered' on the device when needed.
+   * v2.0.1: Fixed to exclude calculated/external capabilities (completes v1.2.3 DPS-only health tracking spec).
    */
   private performHealthCheck(): void {
     const now = Date.now();
     let healthChanges = 0;
 
     this.capabilityHealthMap.forEach((healthData, capability) => {
+      const { category } = healthData;
+
+      // v2.0.1: Skip non-DPS capabilities (calculated values, external data, monitoring, learned parameters, energy pricing)
+      if (category === 'calculated' || category === 'external' || category === 'monitoring' || category === 'building_model' || category === 'energy_pricing') {
+        return; // Skip - health check tracks DPS communication only
+      }
+
       const timeSinceUpdate = now - healthData.lastUpdated;
       const wasHealthy = healthData.isHealthy;
 
@@ -272,7 +281,8 @@ export class CapabilityHealthService {
 
   /**
    * Determine the appropriate timeout for a capability based on its type (v1.2.1).
-   * Control capabilities never timeout, sensors have short timeouts, status/calculated have longer timeouts.
+   * Control capabilities never timeout, sensors have short timeouts, status capabilities have longer timeouts.
+   * v2.0.1: Calculated/external capabilities excluded from health checks entirely (see performHealthCheck()).
    * @param capability - The capability ID
    * @returns Timeout in milliseconds
    */
@@ -287,15 +297,6 @@ export class CapabilityHealthService {
       || capability === 'adlar_hotwater' // Hot water setpoint
     ) {
       return DeviceConstants.CAPABILITY_TIMEOUTS.CONTROL; // Infinity
-    }
-
-    // Calculated capabilities - Medium timeout (periodic calculations)
-    if (
-      capability.startsWith('adlar_cop') // COP calculations
-      || capability.startsWith('adlar_scop') // SCOP calculations
-      || capability.startsWith('adlar_external_') // External data integrations
-    ) {
-      return DeviceConstants.CAPABILITY_TIMEOUTS.CALCULATED; // 10 minutes
     }
 
     // Status capabilities - Longer timeout (event-driven)

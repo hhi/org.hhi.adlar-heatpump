@@ -316,4 +316,19 @@ export class EnergyPriceOptimizer {
     this.priceData = state.priceData || [];
     this.lastFetch = state.lastFetch || 0;
   }
+
+  /**
+   * Destroy and release all memory (v2.0.1+)
+   *
+   * Called during device deletion to prevent memory leaks.
+   * Clears the price data array.
+   */
+  public destroy(): void {
+    const dataSize = this.priceData.length;
+
+    this.priceData = [];
+    this.lastFetch = 0;
+
+    this.logger(`EnergyPriceOptimizer: Destroyed - released ${dataSize} price data points`);
+  }
 }

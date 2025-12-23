@@ -267,4 +267,20 @@ export class COPOptimizer {
     this.optimalSettings = new Map(state.optimalSettings || []);
     this.logger(`COPOptimizer: Restored state with ${this.history.length} data points`);
   }
+
+  /**
+   * Destroy and release all memory (v2.0.1+)
+   *
+   * Called during device deletion to prevent memory leaks.
+   * Clears the history array and optimal settings map.
+   */
+  public destroy(): void {
+    const historySize = this.history.length;
+    const settingsSize = this.optimalSettings.size;
+
+    this.history = [];
+    this.optimalSettings.clear();
+
+    this.logger(`COPOptimizer: Destroyed - released ${historySize} data points, ${settingsSize} optimal settings`);
+  }
 }
