@@ -1,4 +1,10 @@
 {
+  "2.0.7": {
+    "en": "Added: Configurable log level in device settings (ERROR/WARN/INFO/DEBUG). Reduces log noise in production - set to ERROR to see only critical failures.",
+    "nl": "Toegevoegd: Instelbaar log niveau in apparaat instellingen (ERROR/WARN/INFO/DEBUG). Vermindert log ruis in productie - zet op ERROR om alleen kritieke fouten te zien.",
+    "de": "Hinzugefügt: Konfigurierbares Log-Level in Geräteeinstellungen (ERROR/WARN/INFO/DEBUG). Reduziert Log-Rauschen in Produktion - auf ERROR setzen um nur kritische Fehler zu sehen.",
+    "fr": "Ajouté: Niveau de journal configurable dans les paramètres de l'appareil (ERROR/WARN/INFO/DEBUG). Réduit le bruit des journaux en production - définir sur ERROR pour voir uniquement les échecs critiques."
+  },
   "2.0.6": {
     "en": "Fixed: State change flow cards (defrost, compressor, backwater) now trigger correctly. Error messages in logs now show emoji indicators (🧊 defrost, ⚙️ compressor, 💧 backwater, ❌ errors).",
     "nl": "Opgelost: Status wijziging flow cards (defrost, compressor, backwater) triggeren nu correct. Foutmeldingen in logs tonen nu emoji indicatoren (🧊 defrost, ⚙️ compressor, 💧 backwater, ❌ fouten).",

@@ -78,10 +78,35 @@ For Markdown files adhere to markdownlint rules
   const socket = this.tuya.client;
   ```
 
-**Logging**:
+**Logging** (v2.1.0 - Structured Logger):
 - **NEVER** use `console.log()` - logs don't appear in Homey's app logs
-- **ALWAYS** use Homey's logging system via logger callbacks or `this.log()`
-- **Pattern for service classes without Homey.Device access**:
+- **ALWAYS** use the structured Logger with log levels (ERROR/WARN/INFO/DEBUG)
+- **Log levels** (hierarchical - each level includes all above):
+  - `ERROR`: Critical failures, exceptions, unrecoverable errors (always logged)
+  - `WARN`: Potential issues, degraded performance, recoverable errors
+  - `INFO`: Important state changes, connections, user actions
+  - `DEBUG`: Detailed diagnostics, internal state, trace information
+- **In device.ts**: Logger automatically initialized with user-configurable log level from device settings
+
+  ```typescript
+  // Use the logger instance (already initialized in onInit)
+  this.logger.error('Critical failure:', error);
+  this.logger.warn('Potential issue detected');
+  this.logger.info('Connection established');
+  this.logger.debug('Detailed state:', { state });
+  ```
+
+- **In app.ts**: Logger automatically initialized based on DEBUG environment variable
+
+  ```typescript
+  // DEBUG=1 → DEBUG level, otherwise ERROR level
+  this.logger.error('Critical app failure:', error);
+  this.logger.info('App initialized');
+  this.logger.debug('Internal state:', details);
+  ```
+
+- **In services**: Use logger callback pattern with level-aware logging
+
   ```typescript
   export interface ServiceConfig {
     // ... other config
@@ -97,15 +122,23 @@ For Markdown files adhere to markdownlint rules
     }
 
     someMethod(): void {
+      // Service logs at appropriate level via callback
       this.logger('MyService: Something happened', { detail: 'value' });
     }
   }
 
-  // In device.ts or other code with Homey access:
+  // In device.ts - pass logger with appropriate level method:
   new MyService({
-    logger: (msg, ...args) => this.log(msg, ...args),
+    logger: (msg, ...args) => this.logger.debug(msg, ...args), // For debug-level service logs
   });
   ```
+
+- **User configuration**: Users can change log level in device settings under "Diagnostics" → "Log Level"
+  - ERROR (recommended): Only critical failures - minimal log noise
+  - WARN: Errors + warnings
+  - INFO: Errors + warnings + important events
+  - DEBUG: All logs - for troubleshooting
+- **Migration note**: Legacy `debugLog()` and `categoryLog()` methods are deprecated but still functional for backward compatibility
 
 ### Debug Mode
 
