@@ -78,7 +78,7 @@ class MyApp extends App {
     // If logger is initialized, use it at INFO level
     // Otherwise fall back to Homey's default log (during early initialization)
     if (this.logger) {
-      this.logger.info(String(message ?? ''), ...args);
+      this.logger.info(this.safeStringify(message), ...args);
     } else {
       super.log(message, ...args);
     }
@@ -92,10 +92,53 @@ class MyApp extends App {
     // If logger is initialized, use it
     // Otherwise fall back to Homey's default error (during early initialization)
     if (this.logger) {
-      this.logger.error(String(message ?? ''), ...args);
+      this.logger.error(this.safeStringify(message), ...args);
     } else {
       super.error(message, ...args);
     }
+  }
+
+  /**
+   * Safely convert any value to string, handling circular references
+   * This prevents crashes when logging complex error objects
+   */
+  private safeStringify(value: unknown): string {
+    if (value === null) return 'null';
+    if (value === undefined) return '';
+
+    // Primitive types are safe
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+
+    // For objects, use JSON.stringify with circular reference handler
+    try {
+      return JSON.stringify(value, this.getCircularReplacer());
+    } catch (e) {
+      // If JSON.stringify fails, fall back to toString()
+      try {
+        return String(value);
+      } catch (e2) {
+        // Last resort: return type information
+        return `[${typeof value}]`;
+      }
+    }
+  }
+
+  /**
+   * Create a replacer function that handles circular references
+   * Used by JSON.stringify to prevent "Converting circular structure to JSON" errors
+   */
+  private getCircularReplacer() {
+    const seen = new WeakSet();
+    return (_key: string, value: unknown) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]';
+        }
+        seen.add(value);
+      }
+      return value;
+    };
   }
 
   // Trigger card references (auto-generated from patterns)

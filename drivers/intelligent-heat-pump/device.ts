@@ -297,7 +297,7 @@ class MyDevice extends Homey.Device {
     // If logger is initialized, use it at INFO level
     // Otherwise fall back to Homey's default log (during early initialization)
     if (this.logger) {
-      this.logger.info(String(message ?? ''), ...args);
+      this.logger.info(this.safeStringify(message), ...args);
     } else {
       super.log(message, ...args);
     }
@@ -311,10 +311,53 @@ class MyDevice extends Homey.Device {
     // If logger is initialized, use it
     // Otherwise fall back to Homey's default error (during early initialization)
     if (this.logger) {
-      this.logger.error(String(message ?? ''), ...args);
+      this.logger.error(this.safeStringify(message), ...args);
     } else {
       super.error(message, ...args);
     }
+  }
+
+  /**
+   * Safely convert any value to string, handling circular references
+   * This prevents crashes when logging complex error objects
+   */
+  private safeStringify(value: unknown): string {
+    if (value === null) return 'null';
+    if (value === undefined) return '';
+
+    // Primitive types are safe
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+
+    // For objects, use JSON.stringify with circular reference handler
+    try {
+      return JSON.stringify(value, this.getCircularReplacer());
+    } catch (e) {
+      // If JSON.stringify fails, fall back to toString()
+      try {
+        return String(value);
+      } catch (e2) {
+        // Last resort: return type information
+        return `[${typeof value}]`;
+      }
+    }
+  }
+
+  /**
+   * Create a replacer function that handles circular references
+   * Used by JSON.stringify to prevent "Converting circular structure to JSON" errors
+   */
+  private getCircularReplacer() {
+    const seen = new WeakSet();
+    return (_key: string, value: unknown) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]';
+        }
+        seen.add(value);
+      }
+      return value;
+    };
   }
 
   /**
@@ -2521,9 +2564,8 @@ class MyDevice extends Homey.Device {
                 const stateLabel = currentState ? 'running' : 'stopped';
                 this.log(`⚙️  Compressor state changed to: ${stateLabel}`);
 
-                // Create tokens object explicitly to avoid inline evaluation issues
+                // Token for flow card (current_state only, not state)
                 const tokens = {
-                  state: stateLabel,
                   current_state: stateLabel,
                 };
                 const stateParam = {
@@ -2546,16 +2588,15 @@ class MyDevice extends Homey.Device {
                 const stateLabel = currentState ? 'active' : 'inactive';
                 this.log(`🧊 Defrost state changed to: ${stateLabel} (currentState: ${currentState})`);
 
-                // Create tokens object explicitly to avoid inline evaluation issues
+                // Token for flow card (current_state only, not state)
                 const tokens = {
-                  state: stateLabel,
                   current_state: stateLabel,
                 };
                 const stateParam = {
                   state: stateLabel,
                 };
 
-                this.log(`🧊 Triggering defrost_state_changed with tokens:`, JSON.stringify(tokens));
+                this.log(`🧊 Triggering defrost_state_changed with tokens:`, tokens);
                 this.triggerFlowCard('defrost_state_changed', tokens, stateParam).catch((err) => {
                   this.error('❌ Failed to trigger defrost_state_changed:', err);
                 });
@@ -2572,9 +2613,8 @@ class MyDevice extends Homey.Device {
                 const stateLabel = currentState ? 'flowing' : 'blocked';
                 this.log(`💧 Backwater state changed to: ${stateLabel}`);
 
-                // Create tokens object explicitly to avoid inline evaluation issues
+                // Token for flow card (current_state only, not state)
                 const tokens = {
-                  state: stateLabel,
                   current_state: stateLabel,
                 };
                 const stateParam = {
@@ -2990,8 +3030,8 @@ class MyDevice extends Homey.Device {
     // Flow card triggering is handled automatically by FlowCardManagerService
     // For now, use the standard Homey trigger approach for compatibility
     try {
-      // Log tokens before triggering (diagnostic for defrost issue)
-      this.log(`🎯 triggerFlowCard: ${cardId}, tokens:`, JSON.stringify(tokens), 'state:', JSON.stringify(state));
+      // Log tokens before triggering (safeStringify handles circular refs)
+      this.log(`🎯 triggerFlowCard: ${cardId}, tokens:`, tokens, 'state:', state);
       const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
       this.log(`🎯 Retrieved trigger card for ${cardId}, about to call trigger()`);
       await triggerCard.trigger(this, tokens, state);
