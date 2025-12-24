@@ -18,6 +18,7 @@
     "de": "Wird ausgelöst, wenn adaptive Steuerung eine Empfehlung im Überwachungsmodus berechnet (keine Ausführung)",
     "fr": "Se déclenche lorsque le contrôle adaptatif calcule une recommandation en mode surveillance (pas d'exécution)"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",

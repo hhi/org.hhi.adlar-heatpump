@@ -103,6 +103,10 @@ export class DeviceConstants {
   static readonly MAX_HOTWATER_TEMPERATURE = 75;
 
   // Adaptive Temperature Control (v1.4.0 - Fase 1 MVP)
+  /** Adaptive control execution modes */
+  static readonly ADAPTIVE_MODE_AUTOMATIC = 'automatic';
+  static readonly ADAPTIVE_MODE_FLOW_ASSISTED = 'flow_assisted';
+
   /** Adaptive control loop interval - frequency of PI calculations */
   static readonly ADAPTIVE_CONTROL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 

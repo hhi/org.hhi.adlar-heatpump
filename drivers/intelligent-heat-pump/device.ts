@@ -2858,6 +2858,15 @@ class MyDevice extends Homey.Device {
         const tuyaService = this.serviceCoordinator.getTuyaConnection();
         const formattedStatus = tuyaService.getFormattedConnectionStatus();
         await this.setCapabilityValue('adlar_connection_status', formattedStatus);
+
+        if (this.hasCapability('adlar_connection_active')) {
+          const isConnected = tuyaService.isDeviceConnected();
+          const currentValue = this.getCapabilityValue('adlar_connection_active');
+          if (currentValue !== isConnected) {
+            await this.setCapabilityValue('adlar_connection_active', isConnected);
+            this.debugLog(`Synchronized adlar_connection_active: ${isConnected}`);
+          }
+        }
       }
     } catch (error) {
       this.error('Failed to update connection status capability:', error);
@@ -3032,6 +3041,26 @@ class MyDevice extends Homey.Device {
         await this.addCapability('adlar_external_indoor_temperature');
         await this.setCapabilityValue('adlar_external_indoor_temperature', null);
         this.log('Migration: Added adlar_external_indoor_temperature capability');
+      }
+
+      // Migration: Add building model capabilities to existing devices
+      const buildingModelCapabilities = [
+        'adlar_building_c',
+        'adlar_building_ua',
+        'adlar_building_tau',
+        'adlar_building_g',
+        'adlar_building_pint',
+      ];
+
+      for (const capability of buildingModelCapabilities) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`Migration: Added ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        }
       }
 
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled

@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
   <!-- Building outline (left side) -->
-  <rect x="8" y="37" width="42" height="54" rx="4"/>
+  <rect x="8" y="37" width="42" height="54" rx="4" fill="none" stroke="currentColor"/>
 
   <!-- Windows -->
-  <rect x="17" y="50" width="10" height="13"/>
-  <rect x="31" y="50" width="10" height="13"/>
-  <rect x="17" y="71" width="10" height="13"/>
-  <rect x="31" y="71" width="10" height="13"/>
+  <rect x="17" y="50" width="10" height="13" fill="none" stroke="currentColor"/>
+  <rect x="31" y="50" width="10" height="13" fill="none" stroke="currentColor"/>
+  <rect x="17" y="71" width="10" height="13" fill="none" stroke="currentColor"/>
+  <rect x="31" y="71" width="10" height="13" fill="none" stroke="currentColor"/>
 
   <!-- Clock (right side, no overlap) -->
-  <circle cx="75" cy="42" r="19"/>
-  <path d="M 75 29 L 75 42 L 83 48"/>
+  <circle cx="75" cy="42" r="19" fill="none" stroke="currentColor"/>
+  <path d="M 75 29 L 75 42 L 83 48" fill="none" stroke="currentColor"/>
 
 
 </svg>

@@ -1,4 +1,10 @@
 {
+  "2.0.5": {
+    "en": "Added: Building model capabilities (C/UA/tau/g/pInt) are now added to existing devices.",
+    "nl": "Toegevoegd: Building model capabilities (C/UA/tau/g/pInt) worden nu toegevoegd aan bestaande apparaten. ",
+    "de": "Hinzugefügt: Gebäudemodell-Capabilities (C/UA/tau/g/pInt) werden jetzt zu bestehenden Geräten hinzugefügt.",
+    "fr": "Ajouté: Les capacités du modèle de bâtiment (C/UA/tau/g/pInt) sont maintenant ajoutées aux appareils existants."
+  },
   "2.0.2": {
     "en": "Connection status updates reduced to 30-second intervals (was 5 seconds). Outdoor temperature now uses external sensor when available, falls back to heat pump sensor (improves thermal mass learning accuracy).",
     "nl": "Verbindingsstatus updates verlaagd naar 30 seconden interval (was 5 seconden). Buitentemperatuur gebruikt nu externe sensor indien beschikbaar, valt terug op warmtepomp sensor (verbetert thermische massa leer-nauwkeurigheid).",

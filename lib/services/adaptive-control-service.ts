@@ -427,14 +427,31 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 8: Active mode - continue with existing adjustment logic
+      // Step 8: Active mode - check execution mode setting
       if (heatingAction === null && Math.abs(combinedAction.finalAdjustment) < 0.1) {
         this.logger('AdaptiveControlService: No significant action needed');
         this.lastControlCycleTime = Date.now();
         return;
       }
 
-      // Step 9: Accumulate fractional adjustment (for step:1 rounding)
+      // Step 8a: Check adaptive control execution mode
+      const executionMode = await this.device.getSetting('adaptive_control_mode');
+
+      if (executionMode === DeviceConstants.ADAPTIVE_MODE_FLOW_ASSISTED) {
+        this.logger('⚙️ FLOW-ASSISTED MODE: Triggering recommendation for user flow execution');
+
+        // Calculate recommended temperature (integer adjusted, clamped)
+        const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
+        const recommendedTemp = Math.max(15, Math.min(28, targetTemp + integerAdjustment));
+
+        // Trigger recommendation flow card
+        await this.triggerTemperatureRecommendation(targetTemp, recommendedTemp, combinedAction);
+
+        this.lastControlCycleTime = Date.now();
+        return;
+      }
+
+      // Step 9: Automatic mode - accumulate fractional adjustment (for step:1 rounding)
       // target_temperature uses step:1, but weighted decision maker calculates fractional adjustments
       this.accumulatedAdjustment += combinedAction.finalAdjustment;
 
@@ -609,6 +626,32 @@ export class AdaptiveControlService {
       this.logger('AdaptiveControlService: Triggered adaptive_status_change flow card');
     } catch (error) {
       this.logger('AdaptiveControlService: Failed to trigger adaptive_status_change', {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  /**
+   * Trigger: temperature_adjustment_recommended
+   * Fired when adaptive control recommends a temperature adjustment in flow-assisted mode
+   */
+  private async triggerTemperatureRecommendation(
+    currentTemp: number,
+    recommendedTemp: number,
+    combinedAction: { finalAdjustment: number; reasoning: string[]; priority: string },
+  ): Promise<void> {
+    try {
+      const trigger = this.device.homey.flow.getTriggerCard('temperature_adjustment_recommended');
+      await trigger.trigger(this.device, {
+        current_temperature: currentTemp,
+        recommended_temperature: recommendedTemp,
+        adjustment: combinedAction.finalAdjustment,
+        reason: combinedAction.reasoning.join('; '),
+        controller: 'weighted', // All 4 components combined
+      });
+      this.logger('AdaptiveControlService: Triggered temperature_adjustment_recommended flow card');
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to trigger temperature_adjustment_recommended', {
         error: (error as Error).message,
       });
     }

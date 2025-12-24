@@ -100,6 +100,10 @@ export class TuyaConnectionService {
   private nativeHeartbeatMonitorInterval: NodeJS.Timeout | null = null;
   private readonly NATIVE_HEARTBEAT_TIMEOUT_MS = 35000; // 35 seconds (TuyaAPI heartbeat is ~10s, allow 3.5x margin)
 
+  // Data event context tracking (v2.0.3 - improved diagnostic logging)
+  private dataEventContext: string = 'spontaneous';
+  private contextResetTimer: NodeJS.Timeout | null = null;
+
   // Diagnostic tracking for 06:35 disconnect investigation (v1.0.4)
   private lastDisconnectSource: string | null = null;
   private lastDisconnectTime: number = 0;
@@ -1054,7 +1058,17 @@ export class TuyaConnectionService {
     // Data event - device data updates
     this.tuya.on('data', (data: { dps: Record<number, unknown> }): void => {
       const dpsFetched = data.dps || {};
-      this.logger('TuyaConnectionService: Data received from Tuya:', dpsFetched);
+
+      // Context-aware logging (v2.0.3) - show WHY data was received
+      const contextLabels: Record<string, string> = {
+        spontaneous: '📥 Data received (Spontaneous Update)',
+        dps_refresh: '📥 Data received (DPS Refresh Response)',
+        heartbeat_probe: '📥 Data received (Heartbeat Probe Response)',
+        initial_sync: '📥 Data received (Initial Sync after Connection)',
+        command_response: '📥 Data received (Command Response)',
+      };
+      const logLabel = contextLabels[this.dataEventContext] || `📥 Data received (${this.dataEventContext})`;
+      this.logger(`TuyaConnectionService: ${logLabel}:`, dpsFetched);
 
       // Update last data event timestamp (v0.99.98 - stale connection detection)
       this.lastDataEventTime = Date.now();
@@ -1112,6 +1126,9 @@ export class TuyaConnectionService {
       this.updateStatusTimestamp('connected').catch((err) => {
         this.logger('TuyaConnectionService: Failed to update status timestamp:', err);
       });
+
+      // v2.0.3: Set context for initial data sync after connection
+      this.setDataEventContext('initial_sync');
 
       // Reset error recovery state on successful connection
       this.resetErrorRecoveryState();
@@ -1331,6 +1348,9 @@ export class TuyaConnectionService {
       // v1.3.11: Set query lock before TuyaAPI call
       this.queryInProgress = true;
 
+      // v2.0.3: Set context for improved logging
+      this.setDataEventContext('dps_refresh');
+
       this.tuya.get({ schema: true })
         .then(async () => {
           // Query succeeded - but did it trigger a data event?
@@ -1505,6 +1525,9 @@ export class TuyaConnectionService {
       // LAYER 1: Try passive get() first (network-friendly)
       let timeoutHandle: NodeJS.Timeout | null = null;
       let layer1GetError: Error | null = null;
+
+      // v2.0.3: Set context for improved logging
+      this.setDataEventContext('heartbeat_probe');
 
       try {
         await Promise.race([
@@ -2062,6 +2085,26 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Set data event context for improved diagnostic logging (v2.0.3).
+   * Context automatically resets to 'spontaneous' after 2 seconds.
+   * @param context - Context description (e.g., 'dps_refresh', 'heartbeat_probe', 'initial_sync')
+   */
+  private setDataEventContext(context: string): void {
+    this.dataEventContext = context;
+
+    // Clear existing reset timer
+    if (this.contextResetTimer) {
+      clearTimeout(this.contextResetTimer);
+    }
+
+    // Auto-reset to 'spontaneous' after 2 seconds
+    this.contextResetTimer = this.device.homey.setTimeout(() => {
+      this.dataEventContext = 'spontaneous';
+      this.contextResetTimer = null;
+    }, 2000);
+  }
+
+  /**
    * Convert a raw Error to a CategorizedError with `recoverable` and `userMessage` fields.
    */
   private handleTuyaError(error: Error, context: string): CategorizedError {
@@ -2179,6 +2222,12 @@ export class TuyaConnectionService {
     this.stopHeartbeat();
     this.stopNativeHeartbeatMonitoring(); // v1.1.2
     this.stopPeriodicDpsRefresh();
+
+    // v2.0.3: Clean up context reset timer
+    if (this.contextResetTimer) {
+      clearTimeout(this.contextResetTimer);
+      this.contextResetTimer = null;
+    }
 
     if (this.tuya) {
       // Remove deep socket error handler BEFORE removeAllListeners (v1.0.2)

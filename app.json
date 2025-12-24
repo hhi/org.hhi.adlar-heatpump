@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.0.2",
+  "version": "2.0.5",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -87,6 +87,7 @@
           "de": "Wird ausgelöst, wenn adaptive Steuerung eine Empfehlung im Überwachungsmodus berechnet (keine Ausführung)",
           "fr": "Se déclenche lorsque le contrôle adaptatif calcule une recommandation en mode surveillance (pas d'exécution)"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -172,6 +173,14 @@
           "de": "Wird ausgelöst, wenn die adaptive Temperatursteuerung aktiviert oder deaktiviert wird",
           "fr": "Déclenché lorsque le contrôle adaptatif de température est activé ou désactivé"
         },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
         "tokens": [
           {
             "name": "status",
@@ -3708,23 +3717,31 @@
       {
         "id": "target_temperature_adjusted",
         "title": {
-          "en": "Target temperature adjusted",
-          "nl": "Doeltemperatuur aangepast",
-          "de": "Zieltemperatur angepasst",
-          "fr": "Température cible ajustée"
+          "en": "Adaptive control adjusted target temperature",
+          "nl": "Adaptieve regeling wijzigde doeltemperatuur",
+          "de": "Adaptive Regelung änderte die Zieltemperatur",
+          "fr": "Contrôle adaptatif a ajusté la température cible"
         },
         "titleFormatted": {
-          "en": "Target temperature adjusted from [[old_temperature]]°C to [[new_temperature]]°C",
-          "nl": "Doeltemperatuur aangepast van [[old_temperature]]°C naar [[new_temperature]]°C",
-          "de": "Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C angepasst",
-          "fr": "Température cible ajustée de [[old_temperature]]°C à [[new_temperature]]°C"
+          "en": "Adaptive control adjusted target temperature from [[old_temperature]]°C to [[new_temperature]]°C",
+          "nl": "Adaptieve regeling wijzigde doeltemperatuur van [[old_temperature]]°C naar [[new_temperature]]°C",
+          "de": "Adaptive Regelung änderte die Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C",
+          "fr": "Contrôle adaptatif a ajusté la température cible de [[old_temperature]]°C à [[new_temperature]]°C"
         },
         "hint": {
           "en": "Triggered when adaptive control adjusts the target temperature setpoint based on indoor temperature and PI control algorithm",
-          "nl": "Wordt geactiveerd wanneer adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
-          "de": "Wird ausgelöst, wenn die adaptive Steuerung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
-          "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible basé sur la température intérieure et l'algorithme PI"
+          "nl": "Wordt geactiveerd wanneer de adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
+          "de": "Wird ausgelöst, wenn die adaptive Regelung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
+          "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible en fonction de la température intérieure et de l'algorithme PI"
         },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
         "tokens": [
           {
             "name": "old_temperature",
@@ -3784,6 +3801,92 @@
         ]
       },
       {
+        "id": "temperature_adjustment_recommended",
+        "title": {
+          "en": "Adaptive control recommends temperature adjustment",
+          "nl": "Adaptieve regeling beveelt temperatuur aanpassing aan",
+          "de": "Adaptive Regelung empfiehlt Temperaturanpassung",
+          "fr": "Contrôle adaptatif recommande un ajustement de température"
+        },
+        "titleFormatted": {
+          "en": "Adaptive control recommends adjusting temperature from [[current_temperature]]°C to [[recommended_temperature]]°C",
+          "nl": "Adaptieve regeling beveelt aan temperatuur aan te passen van [[current_temperature]]°C naar [[recommended_temperature]]°C",
+          "de": "Adaptive Regelung empfiehlt Temperaturanpassung von [[current_temperature]]°C auf [[recommended_temperature]]°C",
+          "fr": "Contrôle adaptatif recommande d'ajuster la température de [[current_temperature]]°C à [[recommended_temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggered when adaptive control calculates a recommended temperature adjustment in flow-assisted mode. Use 'Set target temperature' action to apply the recommendation.",
+          "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbevolen temperatuur aanpassing berekent in flow-ondersteunde modus. Gebruik 'Doel temperatuur instellen' actie om de aanbeveling toe te passen.",
+          "de": "Wird ausgelöst, wenn adaptive Regelung eine empfohlene Temperaturanpassung im Flow-unterstützten Modus berechnet. Verwenden Sie 'Zieltemperatur einstellen' Aktion zur Anwendung.",
+          "fr": "Déclenché lorsque le contrôle adaptatif calcule un ajustement de température recommandé en mode assisté par flux. Utilisez l'action 'Régler la température cible' pour appliquer la recommandation."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "current_temperature",
+            "type": "number",
+            "title": {
+              "en": "Current target temperature",
+              "nl": "Huidige doeltemperatuur",
+              "de": "Aktuelle Zieltemperatur",
+              "fr": "Température cible actuelle"
+            },
+            "example": 21.5
+          },
+          {
+            "name": "recommended_temperature",
+            "type": "number",
+            "title": {
+              "en": "Recommended target temperature",
+              "nl": "Aanbevolen doeltemperatuur",
+              "de": "Empfohlene Zieltemperatur",
+              "fr": "Température cible recommandée"
+            },
+            "example": 22
+          },
+          {
+            "name": "adjustment",
+            "type": "number",
+            "title": {
+              "en": "Temperature adjustment",
+              "nl": "Temperatuur aanpassing",
+              "de": "Temperaturanpassung",
+              "fr": "Ajustement de température"
+            },
+            "example": 0.5
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "title": {
+              "en": "Adjustment reason",
+              "nl": "Reden voor aanpassing",
+              "de": "Anpassungsgrund",
+              "fr": "Raison de l'ajustement"
+            },
+            "example": "PI Control: Error=0.8°C, P=2.4°C, I=1.2°C"
+          },
+          {
+            "name": "controller",
+            "type": "string",
+            "title": {
+              "en": "Controller",
+              "nl": "Controller",
+              "de": "Regler",
+              "fr": "Contrôleur"
+            },
+            "example": "weighted"
+          }
+        ]
+      },
+      {
         "id": "total_consumption_milestone",
         "title": {
           "en": "Total consumption milestone reached",
@@ -3803,6 +3906,7 @@
           "de": "Wird ausgelöst, wenn der gesamte Stromverbrauch die angegebenen Meilensteine erreicht",
           "fr": "Se déclenche lorsque la consommation totale d'électricité atteint les jalons spécifiés"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -6802,6 +6906,8 @@
         "adlar_building_c",
         "adlar_building_ua",
         "adlar_building_tau",
+        "adlar_building_g",
+        "adlar_building_pint",
         "adlar_energy_price_current",
         "adlar_energy_price_next",
         "adlar_energy_price_category",
@@ -8328,6 +8434,43 @@
               "value": false
             },
             {
+              "id": "adaptive_control_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Adaptive control execution mode",
+                "nl": "Adaptieve regeling uitvoeringsmodus",
+                "de": "Adaptive Regelung Ausführungsmodus",
+                "fr": "Mode d'exécution du contrôle adaptatif"
+              },
+              "hint": {
+                "en": "Automatic: Directly adjusts target temperature (recommended for most users). Flow-assisted: Triggers flow card with recommendation, you control execution via flows (advanced users).",
+                "nl": "Automatisch: Past doeltemperatuur direct aan (aanbevolen voor meeste gebruikers). Flow-ondersteund: Activeert flow kaart met aanbeveling, jij regelt uitvoering via flows (gevorderde gebruikers).",
+                "de": "Automatisch: Passt Zieltemperatur direkt an (für die meisten Benutzer empfohlen). Flow-unterstützt: Löst Flow-Karte mit Empfehlung aus, Sie steuern Ausführung über Flows (fortgeschrittene Benutzer).",
+                "fr": "Automatique: Ajuste directement la température cible (recommandé pour la plupart des utilisateurs). Assisté par flux: Déclenche une carte de flux avec recommandation, vous contrôlez l'exécution via des flux (utilisateurs avancés)."
+              },
+              "value": "automatic",
+              "values": [
+                {
+                  "id": "automatic",
+                  "label": {
+                    "en": "Automatic (recommended)",
+                    "nl": "Automatisch (aanbevolen)",
+                    "de": "Automatisch (empfohlen)",
+                    "fr": "Automatique (recommandé)"
+                  }
+                },
+                {
+                  "id": "flow_assisted",
+                  "label": {
+                    "en": "Flow-assisted (advanced)",
+                    "nl": "Flow-ondersteund (gevorderd)",
+                    "de": "Flow-unterstützt (fortgeschritten)",
+                    "fr": "Assisté par flux (avancé)"
+                  }
+                }
+              ]
+            },
+            {
               "id": "adaptive_pi_kp",
               "type": "number",
               "label": {
@@ -8916,6 +9059,60 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/building-thermal-mass.svg"
+    },
+    "adlar_building_g": {
+      "id": "adlar_building_g",
+      "type": "number",
+      "title": {
+        "en": "Solar Gain Factor",
+        "nl": "Zonnewinst Factor",
+        "de": "Solarer Gewinnfaktor",
+        "fr": "Facteur de Gain Solaire"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "desc": {
+        "en": "Learned solar gain factor of the building (dimensionless)",
+        "nl": "Geleerde zonnewinst factor van het gebouw (dimensieloos)",
+        "de": "Gelernter solarer Gewinnfaktor des Gebäudes (dimensionslos)",
+        "fr": "Facteur de gain solaire appris du bâtiment (sans dimension)"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/building-solar-gain.svg"
+    },
+    "adlar_building_pint": {
+      "id": "adlar_building_pint",
+      "type": "number",
+      "title": {
+        "en": "Internal Heat Gains",
+        "nl": "Interne Warmtewinst",
+        "de": "Interne Wärmegewinne",
+        "fr": "Gains de Chaleur Internes"
+      },
+      "units": {
+        "en": "kW",
+        "nl": "kW",
+        "de": "kW",
+        "fr": "kW"
+      },
+      "desc": {
+        "en": "Learned internal heat gains from occupants, lighting, and appliances (kW)",
+        "nl": "Geleerde interne warmtewinst van bewoners, verlichting en apparaten (kW)",
+        "de": "Gelernte interne Wärmegewinne von Bewohnern, Beleuchtung und Geräten (kW)",
+        "fr": "Gains de chaleur internes appris des occupants, de l'éclairage et des appareils (kW)"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/building-internal-gains.svg"
     },
     "adlar_building_tau": {
       "id": "adlar_building_tau",
@@ -9956,7 +10153,7 @@
         "de": "Externe Raumtemperatur für adaptive Steuerung",
         "fr": "Température intérieure externe pour contrôle adaptatif"
       },
-      "icon": "/assets/external-temperature.svg",
+      "icon": "/assets/external_indoor-temperature.svg",
       "description": {
         "en": "Indoor temperature received via flow cards from external Homey devices (thermostats, sensors), used for adaptive temperature control",
         "nl": "Binnentemperatuur ontvangen via flow kaarten van externe Homey apparaten (thermostaten, sensoren), gebruikt voor adaptieve temperatuurregeling",

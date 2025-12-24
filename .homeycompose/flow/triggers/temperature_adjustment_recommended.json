@@ -1,0 +1,86 @@
+{
+  "id": "temperature_adjustment_recommended",
+  "title": {
+    "en": "Adaptive control recommends temperature adjustment",
+    "nl": "Adaptieve regeling beveelt temperatuur aanpassing aan",
+    "de": "Adaptive Regelung empfiehlt Temperaturanpassung",
+    "fr": "Contrôle adaptatif recommande un ajustement de température"
+  },
+  "titleFormatted": {
+    "en": "Adaptive control recommends adjusting temperature from [[current_temperature]]°C to [[recommended_temperature]]°C",
+    "nl": "Adaptieve regeling beveelt aan temperatuur aan te passen van [[current_temperature]]°C naar [[recommended_temperature]]°C",
+    "de": "Adaptive Regelung empfiehlt Temperaturanpassung von [[current_temperature]]°C auf [[recommended_temperature]]°C",
+    "fr": "Contrôle adaptatif recommande d'ajuster la température de [[current_temperature]]°C à [[recommended_temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggered when adaptive control calculates a recommended temperature adjustment in flow-assisted mode. Use 'Set target temperature' action to apply the recommendation.",
+    "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbevolen temperatuur aanpassing berekent in flow-ondersteunde modus. Gebruik 'Doel temperatuur instellen' actie om de aanbeveling toe te passen.",
+    "de": "Wird ausgelöst, wenn adaptive Regelung eine empfohlene Temperaturanpassung im Flow-unterstützten Modus berechnet. Verwenden Sie 'Zieltemperatur einstellen' Aktion zur Anwendung.",
+    "fr": "Déclenché lorsque le contrôle adaptatif calcule un ajustement de température recommandé en mode assisté par flux. Utilisez l'action 'Régler la température cible' pour appliquer la recommandation."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "current_temperature",
+      "type": "number",
+      "title": {
+        "en": "Current target temperature",
+        "nl": "Huidige doeltemperatuur",
+        "de": "Aktuelle Zieltemperatur",
+        "fr": "Température cible actuelle"
+      },
+      "example": 21.5
+    },
+    {
+      "name": "recommended_temperature",
+      "type": "number",
+      "title": {
+        "en": "Recommended target temperature",
+        "nl": "Aanbevolen doeltemperatuur",
+        "de": "Empfohlene Zieltemperatur",
+        "fr": "Température cible recommandée"
+      },
+      "example": 22.0
+    },
+    {
+      "name": "adjustment",
+      "type": "number",
+      "title": {
+        "en": "Temperature adjustment",
+        "nl": "Temperatuur aanpassing",
+        "de": "Temperaturanpassung",
+        "fr": "Ajustement de température"
+      },
+      "example": 0.5
+    },
+    {
+      "name": "reason",
+      "type": "string",
+      "title": {
+        "en": "Adjustment reason",
+        "nl": "Reden voor aanpassing",
+        "de": "Anpassungsgrund",
+        "fr": "Raison de l'ajustement"
+      },
+      "example": "PI Control: Error=0.8°C, P=2.4°C, I=1.2°C"
+    },
+    {
+      "name": "controller",
+      "type": "string",
+      "title": {
+        "en": "Controller",
+        "nl": "Controller",
+        "de": "Regler",
+        "fr": "Contrôleur"
+      },
+      "example": "weighted"
+    }
+  ]
+}

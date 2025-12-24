@@ -35,6 +35,7 @@ export class BuildingModelService {
   private logger: (msg: string, ...args: unknown[]) => void;
   private updateInterval: NodeJS.Timeout | null = null;
   private readonly UPDATE_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+  private missingCapabilitiesLogged = new Set<string>();
 
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
@@ -153,17 +154,45 @@ export class BuildingModelService {
    */
   private async updateModelCapabilities(): Promise<void> {
     const model = this.learner.getModel();
+    const state = this.learner.getState();
 
-    // Update capabilities
-    await this.device.setCapabilityValue('adlar_building_c', model.C);
-    await this.device.setCapabilityValue('adlar_building_ua', model.UA);
-    await this.device.setCapabilityValue('adlar_building_tau', model.tau);
+    // Determine if using default values (v2.0.3)
+    const isDefault = Math.abs(model.tau - 50) < 0.5 && state.sampleCount < 10;
+
+    // Determine learning status and confidence emoji (v2.0.3)
+    const statusKey = isDefault ? 'building_model.status_default' : 'building_model.status_learned';
+    const status = this.device.homey.__(statusKey);
+    const confidencePercent = Math.round(model.confidence);
+    const confidenceEmoji = confidencePercent >= 70 ? '🟢' : confidencePercent >= 40 ? '🟡' : '🔴';
+
+    // Update capabilities with dynamic titles showing status and confidence (v2.0.3)
+    await this.updateCapabilityIfPresent('adlar_building_c', model.C, {
+      title: this.device.homey.__('building_model.thermal_mass_title'),
+    });
+
+    await this.updateCapabilityIfPresent('adlar_building_ua', model.UA, {
+      title: `${this.device.homey.__('building_model.heat_loss_title')} ${confidenceEmoji} (${status}, ${confidencePercent}%)`,
+    });
+
+    await this.updateCapabilityIfPresent('adlar_building_tau', model.tau, {
+      title: this.device.homey.__('building_model.time_constant_title'),
+    });
+
+    await this.updateCapabilityIfPresent('adlar_building_g', model.g, {
+      title: this.device.homey.__('building_model.solar_gain_title'),
+    });
+
+    await this.updateCapabilityIfPresent('adlar_building_pint', model.pInt, {
+      title: this.device.homey.__('building_model.internal_gains_title'),
+    });
 
     this.logger(
       'BuildingModelService: Model updated - '
       + `C=${model.C.toFixed(1)} kWh/°C, `
       + `UA=${model.UA.toFixed(2)} kW/°C, `
       + `τ=${model.tau.toFixed(1)}h, `
+      + `g=${model.g.toFixed(2)}, `
+      + `P_int=${model.pInt.toFixed(2)} kW, `
       + `confidence=${model.confidence.toFixed(0)}%`,
     );
 
@@ -178,6 +207,35 @@ export class BuildingModelService {
           time_constant: model.tau,
         })
         .catch((err: unknown) => this.logger('Failed to trigger milestone card:', err));
+    }
+  }
+
+  private async updateCapabilityIfPresent(
+    capability: string,
+    value: number,
+    options?: Record<string, unknown>,
+  ): Promise<void> {
+    if (!this.device.hasCapability(capability)) {
+      if (!this.missingCapabilitiesLogged.has(capability)) {
+        this.logger(`BuildingModelService: Skipping missing capability ${capability}`);
+        this.missingCapabilitiesLogged.add(capability);
+      }
+      return;
+    }
+
+    try {
+      await this.device.setCapabilityValue(capability, value);
+    } catch (error) {
+      this.logger(`BuildingModelService: Failed to set ${capability} value:`, error);
+      return;
+    }
+
+    if (options) {
+      try {
+        await this.device.setCapabilityOptions(capability, options);
+      } catch (error) {
+        this.logger(`BuildingModelService: Failed to set ${capability} options:`, error);
+      }
     }
   }
 

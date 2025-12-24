@@ -64,5 +64,14 @@
     "disconnected": "Verbroken",
     "reconnecting": "Opnieuw verbinden",
     "error": "Fout"
+  },
+  "building_model": {
+    "thermal_mass_title": "ML Thermische Massa",
+    "heat_loss_title": "ML Warmteverlies",
+    "time_constant_title": "ML Tijdsconstante",
+    "solar_gain_title": "ML Zonnewinst",
+    "internal_gains_title": "ML Interne Winst",
+    "status_learned": "GELEERD",
+    "status_default": "STANDAARD"
   }
 }

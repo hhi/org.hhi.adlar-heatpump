@@ -1,0 +1,27 @@
+{
+  "id": "adlar_building_g",
+  "type": "number",
+  "title": {
+    "en": "Solar Gain Factor",
+    "nl": "Zonnewinst Factor",
+    "de": "Solarer Gewinnfaktor",
+    "fr": "Facteur de Gain Solaire"
+  },
+  "units": {
+    "en": "",
+    "nl": "",
+    "de": "",
+    "fr": ""
+  },
+  "desc": {
+    "en": "Learned solar gain factor of the building (dimensionless)",
+    "nl": "Geleerde zonnewinst factor van het gebouw (dimensieloos)",
+    "de": "Gelernter solarer Gewinnfaktor des Gebäudes (dimensionslos)",
+    "fr": "Facteur de gain solaire appris du bâtiment (sans dimension)"
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/building-solar-gain.svg"
+}

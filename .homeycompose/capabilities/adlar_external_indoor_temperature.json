@@ -27,7 +27,7 @@
     "de": "Externe Raumtemperatur für adaptive Steuerung",
     "fr": "Température intérieure externe pour contrôle adaptatif"
   },
-  "icon": "/assets/external-temperature.svg",
+  "icon": "/assets/external_indoor-temperature.svg",
   "description": {
     "en": "Indoor temperature received via flow cards from external Homey devices (thermostats, sensors), used for adaptive temperature control",
     "nl": "Binnentemperatuur ontvangen via flow kaarten van externe Homey apparaten (thermostaten, sensoren), gebruikt voor adaptieve temperatuurregeling",

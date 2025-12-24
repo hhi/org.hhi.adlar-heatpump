@@ -18,6 +18,7 @@
     "de": "Wird ausgelöst, wenn der gesamte Stromverbrauch die angegebenen Meilensteine erreicht",
     "fr": "Se déclenche lorsque la consommation totale d'électricité atteint les jalons spécifiés"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",
