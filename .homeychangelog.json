@@ -1,4 +1,10 @@
 {
+  "2.0.6": {
+    "en": "Fixed: State change flow cards (defrost, compressor, backwater) now trigger correctly. Error messages in logs now show emoji indicators (🧊 defrost, ⚙️ compressor, 💧 backwater, ❌ errors).",
+    "nl": "Opgelost: Status wijziging flow cards (defrost, compressor, backwater) triggeren nu correct. Foutmeldingen in logs tonen nu emoji indicatoren (🧊 defrost, ⚙️ compressor, 💧 backwater, ❌ fouten).",
+    "de": "Behoben: Zustandsänderungs-Flow-Karten (Abtauung, Kompressor, Rückwasser) werden jetzt korrekt ausgelöst. Fehlermeldungen in Protokollen zeigen jetzt Emoji-Indikatoren (🧊 Abtauung, ⚙️ Kompressor, 💧 Rückwasser, ❌ Fehler).",
+    "fr": "Corrigé: Les cartes de flux de changement d'état (dégivrage, compresseur, eau de retour) se déclenchent maintenant correctement. Les messages d'erreur dans les journaux affichent maintenant des indicateurs emoji (🧊 dégivrage, ⚙️ compresseur, 💧 eau de retour, ❌ erreurs)."
+  },
   "2.0.5": {
     "en": "Added: Building model capabilities (C/UA/tau/g/pInt) are now added to existing devices.",
     "nl": "Toegevoegd: Building model capabilities (C/UA/tau/g/pInt) worden nu toegevoegd aan bestaande apparaten. ",

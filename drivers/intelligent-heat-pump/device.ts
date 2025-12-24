@@ -2487,15 +2487,20 @@ class MyDevice extends Homey.Device {
               // Only trigger on state CHANGE (not on initialization)
               if (this.lastCompressorState !== null && currentState !== this.lastCompressorState) {
                 const stateLabel = currentState ? 'running' : 'stopped';
-                this.triggerFlowCard('compressor_state_changed', {
+                this.log(`⚙️  Compressor state changed to: ${stateLabel}`);
+
+                // Create tokens object explicitly to avoid inline evaluation issues
+                const tokens = {
                   state: stateLabel,
                   current_state: stateLabel,
-                }, {
-                  state: stateLabel, // Pass state for runListener filtering
-                }).catch((err) => {
-                  this.error('Failed to trigger compressor_state_changed:', err);
+                };
+                const stateParam = {
+                  state: stateLabel,
+                };
+
+                this.triggerFlowCard('compressor_state_changed', tokens, stateParam).catch((err) => {
+                  this.error('❌ Failed to trigger compressor_state_changed:', err);
                 });
-                this.log(`Compressor state changed to: ${stateLabel}`);
               }
               this.lastCompressorState = currentState;
             }
@@ -2507,15 +2512,21 @@ class MyDevice extends Homey.Device {
               // Only trigger on state CHANGE (not on initialization)
               if (this.lastDefrostState !== null && currentState !== this.lastDefrostState) {
                 const stateLabel = currentState ? 'active' : 'inactive';
-                this.triggerFlowCard('defrost_state_changed', {
+                this.log(`🧊 Defrost state changed to: ${stateLabel} (currentState: ${currentState})`);
+
+                // Create tokens object explicitly to avoid inline evaluation issues
+                const tokens = {
                   state: stateLabel,
                   current_state: stateLabel,
-                }, {
-                  state: stateLabel, // Pass state for runListener filtering
-                }).catch((err) => {
-                  this.error('Failed to trigger defrost_state_changed:', err);
+                };
+                const stateParam = {
+                  state: stateLabel,
+                };
+
+                this.log(`🧊 Triggering defrost_state_changed with tokens:`, JSON.stringify(tokens));
+                this.triggerFlowCard('defrost_state_changed', tokens, stateParam).catch((err) => {
+                  this.error('❌ Failed to trigger defrost_state_changed:', err);
                 });
-                this.log(`Defrost state changed to: ${stateLabel}`);
               }
               this.lastDefrostState = currentState;
             }
@@ -2527,15 +2538,20 @@ class MyDevice extends Homey.Device {
               // Only trigger on state CHANGE (not on initialization)
               if (this.lastBackwaterState !== null && currentState !== this.lastBackwaterState) {
                 const stateLabel = currentState ? 'flowing' : 'blocked';
-                this.triggerFlowCard('backwater_state_changed', {
+                this.log(`💧 Backwater state changed to: ${stateLabel}`);
+
+                // Create tokens object explicitly to avoid inline evaluation issues
+                const tokens = {
                   state: stateLabel,
                   current_state: stateLabel,
-                }, {
-                  state: stateLabel, // Pass state for runListener filtering
-                }).catch((err) => {
-                  this.error('Failed to trigger backwater_state_changed:', err);
+                };
+                const stateParam = {
+                  state: stateLabel,
+                };
+
+                this.triggerFlowCard('backwater_state_changed', tokens, stateParam).catch((err) => {
+                  this.error('❌ Failed to trigger backwater_state_changed:', err);
                 });
-                this.log(`Backwater state changed to: ${stateLabel}`);
               }
               this.lastBackwaterState = currentState;
             }
@@ -2942,11 +2958,14 @@ class MyDevice extends Homey.Device {
     // Flow card triggering is handled automatically by FlowCardManagerService
     // For now, use the standard Homey trigger approach for compatibility
     try {
+      // Log tokens before triggering (diagnostic for defrost issue)
+      this.log(`🎯 triggerFlowCard: ${cardId}, tokens:`, JSON.stringify(tokens), 'state:', JSON.stringify(state));
       const triggerCard = this.homey.flow.getDeviceTriggerCard(cardId);
+      this.log(`🎯 Retrieved trigger card for ${cardId}, about to call trigger()`);
       await triggerCard.trigger(this, tokens, state);
-      this.debugLog(`Triggered flow card: ${cardId}`, tokens, 'state:', state);
+      this.log(`✅ Successfully triggered flow card: ${cardId}`);
     } catch (error) {
-      this.debugLog(`Flow card ${cardId} not available or trigger failed:`, error);
+      this.log(`❌ Flow card ${cardId} not available or trigger failed:`, error);
     }
   }
 
