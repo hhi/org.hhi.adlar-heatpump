@@ -23,6 +23,7 @@ import { TimeScheduleCalculator } from './lib/time-schedule-calculator';
 import { SeasonalModeCalculator } from './lib/seasonal-mode-calculator';
 import { SelfHealingRegistry } from './lib/self-healing-registry';
 import { enableFlowCardLogging } from './lib/flow-handler-wrapper';
+import { Logger, LogLevel } from './lib/logger';
 
 // Type definitions for flow card arguments
 interface DeviceFlowArgs {
@@ -56,13 +57,44 @@ class MyApp extends App {
   // Self-healing registry for automatic error recovery (v1.3.5)
   private selfHealing!: SelfHealingRegistry;
 
+  // Structured logger with configurable log levels (v2.1.0)
+  private logger!: Logger;
+
   // Index signature to support dynamic trigger assignment
   [key: string]: FlowCardTrigger | ((...args: unknown[]) => unknown) | unknown;
 
-  // Debug-conditional logging method
+  // Debug-conditional logging method (DEPRECATED - use logger.debug() instead)
   private debugLog(...args: unknown[]) {
     if (process.env.DEBUG === '1') {
       this.log(...args);
+    }
+  }
+
+  /**
+   * Override Homey's log() method to route through Logger (v2.1.0)
+   * All existing this.log() calls now respect the DEBUG environment variable
+   */
+  log(message?: unknown, ...args: unknown[]): void {
+    // If logger is initialized, use it at INFO level
+    // Otherwise fall back to Homey's default log (during early initialization)
+    if (this.logger) {
+      this.logger.info(String(message ?? ''), ...args);
+    } else {
+      super.log(message, ...args);
+    }
+  }
+
+  /**
+   * Override Homey's error() method to route through Logger (v2.1.0)
+   * Errors are always logged regardless of log level
+   */
+  error(message?: unknown, ...args: unknown[]): void {
+    // If logger is initialized, use it
+    // Otherwise fall back to Homey's default error (during early initialization)
+    if (this.logger) {
+      this.logger.error(String(message ?? ''), ...args);
+    } else {
+      super.error(message, ...args);
     }
   }
 
@@ -101,13 +133,24 @@ class MyApp extends App {
   powerThresholdExceededTrigger!: FlowCardTrigger;
 
   async onInit() {
-    this.log('DEBUG=', process.env.DEBUG);
+    // Initialize structured logger (v2.1.0)
+    // Use DEBUG env var for backward compatibility: DEBUG=1 → DEBUG level, otherwise ERROR level
+    // CRITICAL: Use super.log/super.error to avoid infinite recursion
+    const logLevel = process.env.DEBUG === '1' ? LogLevel.DEBUG : LogLevel.ERROR;
+    this.logger = new Logger(
+      super.log.bind(this),
+      super.error.bind(this),
+      logLevel,
+      'App',
+    );
+    this.logger.info('App initializing with log level:', Logger.levelToString(logLevel), '(DEBUG=', process.env.DEBUG, ')');
+
     // Initialize self-healing registry (v1.3.5 - automatic error recovery)
     this.selfHealing = new SelfHealingRegistry(
-      (message, ...args) => this.log(message, ...args),
+      (message, ...args) => this.logger.debug(message, ...args),
       this.homey,
     );
-    this.log('✅ Self-Healing Registry initialized');
+    this.logger.info('✅ Self-Healing Registry initialized');
 
     // Enable automatic flow card logging (v2.0.0 - conditional on DEVMODE)
     enableFlowCardLogging(this.homey, this.log.bind(this));

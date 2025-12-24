@@ -11,6 +11,7 @@ import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-cal
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
 import { ServiceCoordinator } from '../../lib/services/service-coordinator';
 import { enableFlowCardLogging } from '../../lib/flow-handler-wrapper';
+import { Logger, LogLevel } from '../../lib/logger';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -229,7 +230,10 @@ class MyDevice extends Homey.Device {
   // Service Coordinator - manages all device services
   private serviceCoordinator: ServiceCoordinator | null = null;
 
-  // Debug-conditional logging method
+  // Structured logger with configurable log levels (v2.1.0)
+  private logger!: Logger;
+
+  // Debug-conditional logging method (DEPRECATED - use logger.debug() instead)
   private debugLog(...args: unknown[]) {
     if (process.env.DEBUG === '1') {
       this.log(...args);
@@ -282,6 +286,34 @@ class MyDevice extends Homey.Device {
   private categoryLog(category: 'core' | 'cop' | 'scop' | 'energy', message: string, ...args: unknown[]) {
     if (this.shouldLog(category)) {
       this.log(message, ...args);
+    }
+  }
+
+  /**
+   * Override Homey's log() method to route through Logger (v2.1.0)
+   * All existing this.log() calls now respect the user's log level setting
+   */
+  log(message?: unknown, ...args: unknown[]): void {
+    // If logger is initialized, use it at INFO level
+    // Otherwise fall back to Homey's default log (during early initialization)
+    if (this.logger) {
+      this.logger.info(String(message ?? ''), ...args);
+    } else {
+      super.log(message, ...args);
+    }
+  }
+
+  /**
+   * Override Homey's error() method to route through Logger (v2.1.0)
+   * Errors are always logged regardless of log level
+   */
+  error(message?: unknown, ...args: unknown[]): void {
+    // If logger is initialized, use it
+    // Otherwise fall back to Homey's default error (during early initialization)
+    if (this.logger) {
+      this.logger.error(String(message ?? ''), ...args);
+    } else {
+      super.error(message, ...args);
     }
   }
 
@@ -2976,6 +3008,18 @@ class MyDevice extends Homey.Device {
     try {
       await this.setUnavailable(); // Set the device as unavailable initially
 
+      // Initialize structured logger with user-configurable log level (v2.1.0)
+      // CRITICAL: Use super.log/super.error to avoid infinite recursion
+      const logLevelSetting = this.getSetting('log_level') || 'error';
+      const logLevel = Logger.parseLevel(logLevelSetting);
+      this.logger = new Logger(
+        super.log.bind(this),
+        super.error.bind(this),
+        logLevel,
+        'Device',
+      );
+      this.logger.info('Device initializing with log level:', Logger.levelToString(logLevel));
+
       // Enable automatic flow card logging (v2.0.0 - conditional on DEVMODE)
       enableFlowCardLogging(this.homey, this.log.bind(this));
 
@@ -3342,6 +3386,13 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+
+    // Handle log level changes (v2.1.0)
+    if (changedKeys.includes('log_level')) {
+      const newLogLevel = Logger.parseLevel(newSettings.log_level as string || 'error');
+      this.logger.setLevel(newLogLevel);
+      this.logger.info('Log level changed to:', Logger.levelToString(newLogLevel));
+    }
 
     // Delegate settings changes to ServiceCoordinator first
     if (this.serviceCoordinator) {

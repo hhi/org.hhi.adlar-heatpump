@@ -1385,6 +1385,61 @@
           "fr": "Cliquez pour générer un rapport détaillé montrant quelles capacités fonctionnent et lesquelles ont des valeurs nulles"
         },
         "value": false
+      },
+      {
+        "id": "log_level",
+        "type": "dropdown",
+        "label": {
+          "en": "Log Level",
+          "nl": "Log Niveau",
+          "de": "Log-Level",
+          "fr": "Niveau de Journal"
+        },
+        "hint": {
+          "en": "Control logging verbosity. ERROR: Only critical failures (recommended for production). WARN: Errors + warnings. INFO: Errors + warnings + important events. DEBUG: All logs (for troubleshooting).",
+          "nl": "Beheer logging verbositeit. ERROR: Alleen kritieke fouten (aanbevolen voor productie). WARN: Fouten + waarschuwingen. INFO: Fouten + waarschuwingen + belangrijke gebeurtenissen. DEBUG: Alle logs (voor probleemoplossing).",
+          "de": "Logging-Detailstufe steuern. ERROR: Nur kritische Fehler (für Produktion empfohlen). WARN: Fehler + Warnungen. INFO: Fehler + Warnungen + wichtige Ereignisse. DEBUG: Alle Logs (für Fehlerbehebung).",
+          "fr": "Contrôler la verbosité des journaux. ERROR: Seulement les échecs critiques (recommandé pour la production). WARN: Erreurs + avertissements. INFO: Erreurs + avertissements + événements importants. DEBUG: Tous les journaux (pour le dépannage)."
+        },
+        "value": "error",
+        "values": [
+          {
+            "id": "error",
+            "label": {
+              "en": "ERROR - Only critical failures (recommended)",
+              "nl": "ERROR - Alleen kritieke fouten (aanbevolen)",
+              "de": "ERROR - Nur kritische Fehler (empfohlen)",
+              "fr": "ERROR - Seulement échecs critiques (recommandé)"
+            }
+          },
+          {
+            "id": "warn",
+            "label": {
+              "en": "WARN - Errors + Warnings",
+              "nl": "WARN - Fouten + Waarschuwingen",
+              "de": "WARN - Fehler + Warnungen",
+              "fr": "WARN - Erreurs + Avertissements"
+            }
+          },
+          {
+            "id": "info",
+            "label": {
+              "en": "INFO - Errors + Warnings + Important events",
+              "nl": "INFO - Fouten + Waarschuwingen + Belangrijke gebeurtenissen",
+              "de": "INFO - Fehler + Warnungen + Wichtige Ereignisse",
+              "fr": "INFO - Erreurs + Avertissements + Événements importants"
+            }
+          },
+          {
+            "id": "debug",
+            "label": {
+              "en": "DEBUG - All logs (troubleshooting)",
+              "nl": "DEBUG - Alle logs (probleemoplossing)",
+              "de": "DEBUG - Alle Logs (Fehlerbehebung)",
+              "fr": "DEBUG - Tous les journaux (dépannage)"
+            }
+          }
+        ]
       }
     ]
   }
