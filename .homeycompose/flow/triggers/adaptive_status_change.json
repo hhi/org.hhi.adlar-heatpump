@@ -18,6 +18,14 @@
     "de": "Wird ausgelöst, wenn die adaptive Temperatursteuerung aktiviert oder deaktiviert wird",
     "fr": "Déclenché lorsque le contrôle adaptatif de température est activé ou désactivé"
   },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
   "tokens": [
     {
       "name": "status",

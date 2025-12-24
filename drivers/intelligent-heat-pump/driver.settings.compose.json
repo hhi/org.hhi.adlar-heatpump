@@ -781,6 +781,43 @@
         "value": false
       },
       {
+        "id": "adaptive_control_mode",
+        "type": "dropdown",
+        "label": {
+          "en": "Adaptive control execution mode",
+          "nl": "Adaptieve regeling uitvoeringsmodus",
+          "de": "Adaptive Regelung Ausführungsmodus",
+          "fr": "Mode d'exécution du contrôle adaptatif"
+        },
+        "hint": {
+          "en": "Automatic: Directly adjusts target temperature (recommended for most users). Flow-assisted: Triggers flow card with recommendation, you control execution via flows (advanced users).",
+          "nl": "Automatisch: Past doeltemperatuur direct aan (aanbevolen voor meeste gebruikers). Flow-ondersteund: Activeert flow kaart met aanbeveling, jij regelt uitvoering via flows (gevorderde gebruikers).",
+          "de": "Automatisch: Passt Zieltemperatur direkt an (für die meisten Benutzer empfohlen). Flow-unterstützt: Löst Flow-Karte mit Empfehlung aus, Sie steuern Ausführung über Flows (fortgeschrittene Benutzer).",
+          "fr": "Automatique: Ajuste directement la température cible (recommandé pour la plupart des utilisateurs). Assisté par flux: Déclenche une carte de flux avec recommandation, vous contrôlez l'exécution via des flux (utilisateurs avancés)."
+        },
+        "value": "automatic",
+        "values": [
+          {
+            "id": "automatic",
+            "label": {
+              "en": "Automatic (recommended)",
+              "nl": "Automatisch (aanbevolen)",
+              "de": "Automatisch (empfohlen)",
+              "fr": "Automatique (recommandé)"
+            }
+          },
+          {
+            "id": "flow_assisted",
+            "label": {
+              "en": "Flow-assisted (advanced)",
+              "nl": "Flow-ondersteund (gevorderd)",
+              "de": "Flow-unterstützt (fortgeschritten)",
+              "fr": "Assisté par flux (avancé)"
+            }
+          }
+        ]
+      },
+      {
         "id": "adaptive_pi_kp",
         "type": "number",
         "label": {

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Building outline -->
+  <rect x="12" y="40" width="45" height="48" rx="4" fill="none" stroke="currentColor"/>
+
+  <!-- Building windows -->
+  <rect x="22" y="50" width="10" height="10" fill="none" stroke="currentColor"/>
+  <rect x="38" y="50" width="10" height="10" fill="none" stroke="currentColor"/>
+  <rect x="22" y="68" width="10" height="10" fill="none" stroke="currentColor"/>
+  <rect x="38" y="68" width="10" height="10" fill="none" stroke="currentColor"/>
+
+  <!-- Sun circle -->
+  <circle cx="72" cy="28" r="10" fill="none" stroke="currentColor"/>
+
+  <!-- Sun rays -->
+  <line x1="72" y1="12" x2="72" y2="4" fill="none" stroke="currentColor"/>
+  <line x1="72" y1="52" x2="72" y2="60" fill="none" stroke="currentColor"/>
+  <line x1="88" y1="28" x2="96" y2="28" fill="none" stroke="currentColor"/>
+  <line x1="56" y1="28" x2="48" y2="28" fill="none" stroke="currentColor"/>
+  <line x1="84" y1="16" x2="90" y2="10" fill="none" stroke="currentColor"/>
+  <line x1="60" y1="40" x2="54" y2="46" fill="none" stroke="currentColor"/>
+  <line x1="84" y1="40" x2="90" y2="46" fill="none" stroke="currentColor"/>
+  <line x1="60" y1="16" x2="54" y2="10" fill="none" stroke="currentColor"/>
+
+  <!-- Solar energy arrows entering building -->
+  <path d="M 58 35 L 58 48" fill="none" stroke="currentColor"/>
+  <path d="M 58 48 L 53 43" fill="none" stroke="currentColor"/>
+  <path d="M 58 48 L 63 43" fill="none" stroke="currentColor"/>
+
+  <path d="M 64 42 L 64 55" fill="none" stroke="currentColor"/>
+  <path d="M 64 55 L 59 50" fill="none" stroke="currentColor"/>
+  <path d="M 64 55 L 69 50" fill="none" stroke="currentColor"/>
+</svg>

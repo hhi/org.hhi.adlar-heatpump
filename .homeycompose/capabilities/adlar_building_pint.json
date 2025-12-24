@@ -1,0 +1,27 @@
+{
+  "id": "adlar_building_pint",
+  "type": "number",
+  "title": {
+    "en": "Internal Heat Gains",
+    "nl": "Interne Warmtewinst",
+    "de": "Interne Wärmegewinne",
+    "fr": "Gains de Chaleur Internes"
+  },
+  "units": {
+    "en": "kW",
+    "nl": "kW",
+    "de": "kW",
+    "fr": "kW"
+  },
+  "desc": {
+    "en": "Learned internal heat gains from occupants, lighting, and appliances (kW)",
+    "nl": "Geleerde interne warmtewinst van bewoners, verlichting en apparaten (kW)",
+    "de": "Gelernte interne Wärmegewinne von Bewohnern, Beleuchtung und Geräten (kW)",
+    "fr": "Gains de chaleur internes appris des occupants, de l'éclairage et des appareils (kW)"
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/building-internal-gains.svg"
+}

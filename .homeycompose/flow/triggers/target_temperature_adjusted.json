@@ -1,23 +1,31 @@
 {
   "id": "target_temperature_adjusted",
   "title": {
-    "en": "Target temperature adjusted",
-    "nl": "Doeltemperatuur aangepast",
-    "de": "Zieltemperatur angepasst",
-    "fr": "Température cible ajustée"
+    "en": "Adaptive control adjusted target temperature",
+    "nl": "Adaptieve regeling wijzigde doeltemperatuur",
+    "de": "Adaptive Regelung änderte die Zieltemperatur",
+    "fr": "Contrôle adaptatif a ajusté la température cible"
   },
   "titleFormatted": {
-    "en": "Target temperature adjusted from [[old_temperature]]°C to [[new_temperature]]°C",
-    "nl": "Doeltemperatuur aangepast van [[old_temperature]]°C naar [[new_temperature]]°C",
-    "de": "Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C angepasst",
-    "fr": "Température cible ajustée de [[old_temperature]]°C à [[new_temperature]]°C"
+    "en": "Adaptive control adjusted target temperature from [[old_temperature]]°C to [[new_temperature]]°C",
+    "nl": "Adaptieve regeling wijzigde doeltemperatuur van [[old_temperature]]°C naar [[new_temperature]]°C",
+    "de": "Adaptive Regelung änderte die Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C",
+    "fr": "Contrôle adaptatif a ajusté la température cible de [[old_temperature]]°C à [[new_temperature]]°C"
   },
   "hint": {
     "en": "Triggered when adaptive control adjusts the target temperature setpoint based on indoor temperature and PI control algorithm",
-    "nl": "Wordt geactiveerd wanneer adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
-    "de": "Wird ausgelöst, wenn die adaptive Steuerung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
-    "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible basé sur la température intérieure et l'algorithme PI"
+    "nl": "Wordt geactiveerd wanneer de adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
+    "de": "Wird ausgelöst, wenn die adaptive Regelung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
+    "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible en fonction de la température intérieure et de l'algorithme PI"
   },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
   "tokens": [
     {
       "name": "old_temperature",

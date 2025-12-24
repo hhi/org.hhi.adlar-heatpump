@@ -64,5 +64,14 @@
     "disconnected": "Disconnected",
     "reconnecting": "Reconnecting",
     "error": "Error"
+  },
+  "building_model": {
+    "thermal_mass_title": "ML Thermal Mass",
+    "heat_loss_title": "ML Heat Loss",
+    "time_constant_title": "ML Time Constant",
+    "solar_gain_title": "ML Solar Gain",
+    "internal_gains_title": "ML Internal Gains",
+    "status_learned": "LEARNED",
+    "status_default": "DEFAULT"
   }
 }
