@@ -993,24 +993,46 @@ class MyApp extends App {
     compressorStateCard.registerRunListener(async (args, state) => {
       const featureName = 'compressor_state_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+        // Debug logging to diagnose trigger issues
+        this.log(`⚙️ ${featureName} runListener called:`, {
+          args: JSON.stringify(args),
+          state: JSON.stringify(state),
+        });
 
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.log(`⚙️ ${featureName}: Feature disabled, allowing trigger`);
+          return true;
+        }
+
+        // Validate state parameter from device trigger
         if (!state?.state || typeof state.state !== 'string') {
-          this.error(`${featureName}: Invalid state`, { state });
+          this.error(`${featureName}: Invalid state parameter`, {
+            state,
+            stateType: typeof state?.state,
+            fullState: JSON.stringify(state),
+          });
           this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
+
+        // Validate args from user flow card configuration
         if (!args?.state || typeof args.state !== 'string') {
-          this.error(`${featureName}: Invalid args`, { args });
+          this.error(`${featureName}: Invalid args parameter`, {
+            args,
+            argsType: typeof args?.state,
+            fullArgs: JSON.stringify(args),
+          });
           this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
         const userState = args.state;
         const currentState = state.state;
+        const matches = userState === currentState;
 
-        // Only execute flow if user's desired state matches current state
-        return userState === currentState;
+        this.log(`⚙️ ${featureName}: userState=${userState}, currentState=${currentState}, matches=${matches}`);
+
+        return matches;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
         this.selfHealing.trackError(featureName, { error });
@@ -1023,23 +1045,46 @@ class MyApp extends App {
     defrostStateCard.registerRunListener(async (args, state) => {
       const featureName = 'defrost_state_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+        // Debug logging to diagnose trigger issues
+        this.log(`🧊 ${featureName} runListener called:`, {
+          args: JSON.stringify(args),
+          state: JSON.stringify(state),
+        });
 
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.log(`🧊 ${featureName}: Feature disabled, allowing trigger`);
+          return true;
+        }
+
+        // Validate state parameter from device trigger
         if (!state?.state || typeof state.state !== 'string') {
-          this.error(`${featureName}: Invalid state`, { state });
+          this.error(`${featureName}: Invalid state parameter`, {
+            state,
+            stateType: typeof state?.state,
+            fullState: JSON.stringify(state),
+          });
           this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
+
+        // Validate args from user flow card configuration
         if (!args?.state || typeof args.state !== 'string') {
-          this.error(`${featureName}: Invalid args`, { args });
+          this.error(`${featureName}: Invalid args parameter`, {
+            args,
+            argsType: typeof args?.state,
+            fullArgs: JSON.stringify(args),
+          });
           this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
         const userState = args.state;
         const currentState = state.state;
+        const matches = userState === currentState;
 
-        return userState === currentState;
+        this.log(`🧊 ${featureName}: userState=${userState}, currentState=${currentState}, matches=${matches}`);
+
+        return matches;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
         this.selfHealing.trackError(featureName, { error });
@@ -1052,23 +1097,46 @@ class MyApp extends App {
     backwaterStateCard.registerRunListener(async (args, state) => {
       const featureName = 'backwater_state_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+        // Debug logging to diagnose trigger issues
+        this.log(`💧 ${featureName} runListener called:`, {
+          args: JSON.stringify(args),
+          state: JSON.stringify(state),
+        });
 
+        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          this.log(`💧 ${featureName}: Feature disabled, allowing trigger`);
+          return true;
+        }
+
+        // Validate state parameter from device trigger
         if (!state?.state || typeof state.state !== 'string') {
-          this.error(`${featureName}: Invalid state`, { state });
+          this.error(`${featureName}: Invalid state parameter`, {
+            state,
+            stateType: typeof state?.state,
+            fullState: JSON.stringify(state),
+          });
           this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
           return false;
         }
+
+        // Validate args from user flow card configuration
         if (!args?.state || typeof args.state !== 'string') {
-          this.error(`${featureName}: Invalid args`, { args });
+          this.error(`${featureName}: Invalid args parameter`, {
+            args,
+            argsType: typeof args?.state,
+            fullArgs: JSON.stringify(args),
+          });
           this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
           return false;
         }
 
         const userState = args.state;
         const currentState = state.state;
+        const matches = userState === currentState;
 
-        return userState === currentState;
+        this.log(`💧 ${featureName}: userState=${userState}, currentState=${currentState}, matches=${matches}`);
+
+        return matches;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
         this.selfHealing.trackError(featureName, { error });

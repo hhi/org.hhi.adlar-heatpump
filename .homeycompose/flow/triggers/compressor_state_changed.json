@@ -13,10 +13,10 @@
     "fr": "Compresseur est devenu [[state]]"
   },
   "hint": {
-    "en": "Triggers when compressor changes state",
-    "nl": "Wordt geactiveerd wanneer compressor van status wijzigt",
-    "de": "Wird ausgelöst, wenn der Kompressor den Zustand ändert",
-    "fr": "Se déclenche lorsque le compresseur change d'état"
+    "en": "Triggers when compressor changes state. Use 'Compressor state (text)' token for timeline notifications.",
+    "nl": "Wordt geactiveerd wanneer compressor van status wijzigt. Gebruik 'Compressor status (tekst)' token voor tijdlijn notificaties.",
+    "de": "Wird ausgelöst, wenn der Kompressor den Zustand ändert. Verwenden Sie 'Kompressor-Zustand (Text)' Token für Timeline-Benachrichtigungen.",
+    "fr": "Se déclenche lorsque le compresseur change d'état. Utilisez le token 'État compresseur (texte)' pour les notifications de timeline."
   },
   "highlight": true,
   "args": [
@@ -61,10 +61,10 @@
       "type": "string",
       "name": "current_state",
       "title": {
-        "en": "Current Compressor state",
-        "nl": "Huidige Compressor status",
-        "de": "Aktueller Kompressor-Zustand",
-        "fr": "État actuel du compresseur"
+        "en": "Compressor state (text)",
+        "nl": "Compressor status (tekst)",
+        "de": "Kompressor-Zustand (Text)",
+        "fr": "État compresseur (texte)"
       },
       "example": "running"
     }

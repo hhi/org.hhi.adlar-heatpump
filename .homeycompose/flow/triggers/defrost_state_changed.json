@@ -13,10 +13,10 @@
     "fr": "Dégivrage est devenu [[state]]"
   },
   "hint": {
-    "en": "Triggers when defrost system changes state",
-    "nl": "Wordt geactiveerd wanneer ontdooi systeem van status wijzigt",
-    "de": "Wird ausgelöst, wenn das Abtausystem den Zustand ändert",
-    "fr": "Se déclenche lorsque le système de dégivrage change d'état"
+    "en": "Triggers when defrost system changes state. Use 'Defrost state (text)' token for timeline notifications.",
+    "nl": "Wordt geactiveerd wanneer ontdooi systeem van status wijzigt. Gebruik 'Ontdooi status (tekst)' token voor tijdlijn notificaties.",
+    "de": "Wird ausgelöst, wenn das Abtausystem den Zustand ändert. Verwenden Sie 'Abtau-Zustand (Text)' Token für Timeline-Benachrichtigungen.",
+    "fr": "Se déclenche lorsque le système de dégivrage change d'état. Utilisez le token 'État dégivrage (texte)' pour les notifications de timeline."
   },
   "highlight": true,
   "args": [
@@ -61,10 +61,10 @@
       "type": "string",
       "name": "current_state",
       "title": {
-        "en": "Current Defrost state",
-        "nl": "Huidige Ontdooien status",
-        "de": "Aktueller Abtau-Zustand",
-        "fr": "État actuel du dégivrage"
+        "en": "Defrost state (text)",
+        "nl": "Ontdooi status (tekst)",
+        "de": "Abtau-Zustand (Text)",
+        "fr": "État dégivrage (texte)"
       },
       "example": "active"
     }
