@@ -13,10 +13,10 @@
     "fr": "Reflux est devenu [[state]]"
   },
   "hint": {
-    "en": "Triggers when backwater system changes state",
-    "nl": "Wordt geactiveerd wanneer water terugstroming systeem van status wijzigt",
-    "de": "Wird ausgelöst, wenn das Rückströmsystem den Zustand ändert",
-    "fr": "Se déclenche lorsque le système de reflux change d'état"
+    "en": "Triggers when backwater system changes state. Use 'Backwater state (text)' token for timeline notifications.",
+    "nl": "Wordt geactiveerd wanneer water terugstroming systeem van status wijzigt. Gebruik 'Terugstroming status (tekst)' token voor tijdlijn notificaties.",
+    "de": "Wird ausgelöst, wenn das Rückströmsystem den Zustand ändert. Verwenden Sie 'Rückström-Zustand (Text)' Token für Timeline-Benachrichtigungen.",
+    "fr": "Se déclenche lorsque le système de reflux change d'état. Utilisez le token 'État reflux (texte)' pour les notifications de timeline."
   },
   "args": [
     {
@@ -60,10 +60,10 @@
       "type": "string",
       "name": "current_state",
       "title": {
-        "en": "Current Backwater state",
-        "nl": "Huidige Water Terugstroming status",
-        "de": "Aktueller Rückström-Zustand",
-        "fr": "État actuel du reflux"
+        "en": "Backwater state (text)",
+        "nl": "Terugstroming status (tekst)",
+        "de": "Rückström-Zustand (Text)",
+        "fr": "État reflux (texte)"
       },
       "example": "flowing"
     }
