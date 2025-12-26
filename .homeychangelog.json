@@ -1,4 +1,10 @@
 {
+  "2.2.0": {
+    "en": "Added: Building type profiles (light/average/heavy/passive) set starting values for faster thermal model learning. Time-of-day internal gains (night 40%, day 100%, evening 180%). Seasonal solar gain adjustment accounts for sun angle (winter 60%, summer 130%).",
+    "nl": "Toegevoegd: Gebouwtype profielen (licht/gemiddeld/zwaar/passief) stellen startwaarden in voor sneller thermisch model leren. Tijdsafhankelijke interne warmtewinsten (nacht 40%, dag 100%, avond 180%). Seizoensgebonden zonnewinst aanpassing houdt rekening met zonnehoek (winter 60%, zomer 130%).",
+    "de": "Hinzugefügt: Gebäudetyp-Profile (leicht/durchschnitt/schwer/passiv) setzen Startwerte für schnelleres thermisches Modell-Lernen. Zeitabhängige interne Gewinne (Nacht 40%, Tag 100%, Abend 180%). Saisonale Solargewinn-Anpassung berücksichtigt Sonnenwinkel (Winter 60%, Sommer 130%).",
+    "fr": "Ajouté: Profils de type de bâtiment (léger/moyen/lourd/passif) définissent valeurs départ pour apprentissage modèle thermique rapide. Gains internes selon heure (nuit 40%, jour 100%, soir 180%). Ajustement saisonnier du gain solaire tient compte angle soleil (hiver 60%, été 130%)."
+  },
   "2.1.0": {
     "en": "Added: Calculate linear heating curve flow card for weather-compensated heating. Calculates supply temperature based on outdoor temperature, reference point, and slope coefficient (e.g., 55°C at -15°C with slope -0.5).",
     "nl": "Toegevoegd: Bereken lineaire verwarmingscurve flow card voor weerafhankelijke verwarming. Berekent aanvoertemperatuur op basis van buitentemperatuur, referentiepunt en hellingscoëfficiënt (bijv. 55°C bij -15°C met helling -0.5).",
