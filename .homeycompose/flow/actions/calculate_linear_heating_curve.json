@@ -1,0 +1,106 @@
+{
+  "id": "calculate_linear_heating_curve",
+  "title": {
+    "en": "Calculate linear heating curve",
+    "nl": "Bereken lineaire verwarmingscurve",
+    "de": "Lineare Heizkurve berechnen",
+    "fr": "Calculer la courbe de chauffage linéaire"
+  },
+  "titleFormatted": {
+    "en": "Calculate heating curve: [[reference_temp]]°C at [[reference_outdoor]]°C, slope [[slope]] with outdoor temp [[outdoor_temp]]",
+    "nl": "Bereken verwarmingscurve: [[reference_temp]]°C bij [[reference_outdoor]]°C, helling [[slope]] met buitentemp [[outdoor_temp]]",
+    "de": "Heizkurve berechnen: [[reference_temp]]°C bei [[reference_outdoor]]°C, Neigung [[slope]] mit Außentemp [[outdoor_temp]]",
+    "fr": "Calculer courbe de chauffage: [[reference_temp]]°C à [[reference_outdoor]]°C, pente [[slope]] avec temp extérieure [[outdoor_temp]]"
+  },
+  "hint": {
+    "en": "Calculates supply temperature using linear formula: y = slope × outdoor_temp + intercept, where intercept = reference_temp - (slope × reference_outdoor). Example: Reference point 55°C at -15°C with slope -0.5 gives formula y = -0.5x + 47.5. For outdoor temp 5°C → supply temp 45°C.",
+    "nl": "Berekent aanvoertemperatuur met lineaire formule: y = helling × buitentemp + constante, waarbij constante = referentie_temp - (helling × referentie_buiten). Voorbeeld: Referentiepunt 55°C bij -15°C met helling -0.5 geeft formule y = -0.5x + 47.5. Voor buitentemp 5°C → aanvoertemp 45°C.",
+    "de": "Berechnet Vorlauftemperatur mit linearer Formel: y = Neigung × Außentemp + Konstante, wobei Konstante = Referenz_temp - (Neigung × Referenz_außen). Beispiel: Referenzpunkt 55°C bei -15°C mit Neigung -0.5 ergibt Formel y = -0.5x + 47.5. Für Außentemp 5°C → Vorlauftemp 45°C.",
+    "fr": "Calcule la température de départ avec formule linéaire: y = pente × temp_extérieure + constante, où constante = temp_référence - (pente × référence_extérieure). Exemple: Point de référence 55°C à -15°C avec pente -0.5 donne formule y = -0.5x + 47.5. Pour temp extérieure 5°C → temp départ 45°C."
+  },
+  "highlight": true,
+  "tokens": [
+    {
+      "name": "supply_temperature",
+      "type": "number",
+      "title": {
+        "en": "Supply Temperature",
+        "nl": "Aanvoertemperatuur",
+        "de": "Vorlauftemperatur",
+        "fr": "Température de départ"
+      },
+      "example": 45
+    }
+  ],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "name": "outdoor_temp",
+      "type": "text",
+      "title": {
+        "en": "Outdoor Temperature",
+        "nl": "Buitentemperatuur",
+        "de": "Außentemperatur",
+        "fr": "Température extérieure"
+      },
+      "placeholder": {
+        "en": "e.g., 5 or {{outdoor_temperature}}",
+        "nl": "bijv. 5 of {{buitentemperatuur}}",
+        "de": "z.B. 5 oder {{Außentemperatur}}",
+        "fr": "par ex. 5 ou {{température_extérieure}}"
+      }
+    },
+    {
+      "name": "reference_temp",
+      "type": "number",
+      "title": {
+        "en": "Reference Supply Temp (°C)",
+        "nl": "Referentie Aanvoertemp (°C)",
+        "de": "Referenz Vorlauftemp (°C)",
+        "fr": "Température départ référence (°C)"
+      },
+      "placeholder": {
+        "en": "e.g., 55",
+        "nl": "bijv. 55",
+        "de": "z.B. 55",
+        "fr": "par ex. 55"
+      }
+    },
+    {
+      "name": "reference_outdoor",
+      "type": "number",
+      "title": {
+        "en": "Reference Outdoor Temp (°C)",
+        "nl": "Referentie Buitentemp (°C)",
+        "de": "Referenz Außentemp (°C)",
+        "fr": "Température extérieure référence (°C)"
+      },
+      "placeholder": {
+        "en": "e.g., -15",
+        "nl": "bijv. -15",
+        "de": "z.B. -15",
+        "fr": "par ex. -15"
+      }
+    },
+    {
+      "name": "slope",
+      "type": "number",
+      "title": {
+        "en": "Slope Coefficient",
+        "nl": "Hellingscoëfficiënt",
+        "de": "Neigungskoeffizient",
+        "fr": "Coefficient de pente"
+      },
+      "placeholder": {
+        "en": "e.g., -0.5",
+        "nl": "bijv. -0.5",
+        "de": "z.B. -0.5",
+        "fr": "par ex. -0.5"
+      }
+    }
+  ]
+}
