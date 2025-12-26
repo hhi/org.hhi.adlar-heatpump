@@ -12,10 +12,18 @@
  */
 
 import Homey from 'homey';
-import { BuildingModelLearner, type BuildingModelConfig, type MeasurementData } from '../adaptive/building-model-learner';
+import {
+  BuildingModelLearner,
+  type BuildingModelConfig,
+  type MeasurementData,
+  type BuildingProfileType,
+} from '../adaptive/building-model-learner';
 
 export interface BuildingModelServiceConfig {
   device: Homey.Device;
+  buildingProfile?: BuildingProfileType;
+  enableDynamicPInt?: boolean;
+  enableSeasonalG?: boolean;
   logger?: (msg: string, ...args: unknown[]) => void;
 }
 
@@ -46,6 +54,9 @@ export class BuildingModelService {
       forgettingFactor: 0.998, // Moderate adaptation rate
       initialCovariance: 100, // High initial uncertainty
       minSamplesForConfidence: 288, // 24 hours @ 5min intervals
+      buildingProfile: config.buildingProfile || 'average', // Default to average building
+      enableDynamicPInt: config.enableDynamicPInt ?? true, // Enable by default
+      enableSeasonalG: config.enableSeasonalG ?? true, // Enable by default
       logger: this.logger,
     };
 
@@ -163,7 +174,12 @@ export class BuildingModelService {
     const statusKey = isDefault ? 'building_model.status_default' : 'building_model.status_learned';
     const status = this.device.homey.__(statusKey);
     const confidencePercent = Math.round(model.confidence);
-    const confidenceEmoji = confidencePercent >= 70 ? '🟢' : confidencePercent >= 40 ? '🟡' : '🔴';
+    let confidenceEmoji = '🔴'; // Default: low confidence
+    if (confidencePercent >= 70) {
+      confidenceEmoji = '🟢'; // High confidence
+    } else if (confidencePercent >= 40) {
+      confidenceEmoji = '🟡'; // Medium confidence
+    }
 
     // Update capabilities with dynamic titles showing status and confidence (v2.0.3)
     await this.updateCapabilityIfPresent('adlar_building_c', model.C, {

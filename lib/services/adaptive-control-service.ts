@@ -119,6 +119,9 @@ export class AdaptiveControlService {
     // Initialize Component 2: Building Model Learner
     this.buildingModel = new BuildingModelService({
       device: this.device,
+      buildingProfile: this.device.getSetting('building_profile') || 'average',
+      enableDynamicPInt: this.device.getSetting('enable_dynamic_pint') ?? true,
+      enableSeasonalG: this.device.getSetting('enable_seasonal_g') ?? true,
       logger: this.logger,
     });
 

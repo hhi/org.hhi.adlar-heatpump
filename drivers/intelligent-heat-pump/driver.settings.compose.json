@@ -936,6 +936,95 @@
         "$visibleIf": {
           "flow_expert_mode": true
         }
+      },
+      {
+        "id": "building_profile",
+        "type": "dropdown",
+        "label": {
+          "en": "Building Type",
+          "nl": "Gebouwtype",
+          "de": "Gebäudetyp",
+          "fr": "Type de Bâtiment"
+        },
+        "hint": {
+          "en": "Select based on construction and insulation. Sets starting values for faster learning. Model adapts to your actual building over time.",
+          "nl": "Selecteer op basis van constructie en isolatie. Stelt startwaarden in voor sneller leren. Model past zich aan je werkelijke gebouw aan.",
+          "de": "Wählen basierend auf Konstruktion und Isolierung. Setzt Startwerte für schnelleres Lernen. Modell passt sich Ihrem tatsächlichen Gebäude an.",
+          "fr": "Sélectionnez selon construction et isolation. Définit valeurs départ pour apprentissage rapide. Modèle s'adapte à votre bâtiment réel."
+        },
+        "value": "average",
+        "values": [
+          {
+            "id": "light",
+            "label": {
+              "en": "Light: Wood/prefab, basic insulation, quick temp changes",
+              "nl": "Licht: Hout/prefab, basis isolatie, snelle temp wisselingen",
+              "de": "Leicht: Holz/Fertig, Basisisolierung, schnelle Temp-Änderungen",
+              "fr": "Léger: Bois/préfab, isolation basique, changements temp rapides"
+            }
+          },
+          {
+            "id": "average",
+            "label": {
+              "en": "Average: Brick, cavity walls, double glass (typical NL home)",
+              "nl": "Gemiddeld: Baksteen, spouwmuur, dubbel glas (typisch NL huis)",
+              "de": "Durchschnitt: Ziegel, Hohlwand, Doppelglas (typisches NL-Haus)",
+              "fr": "Moyen: Brique, murs creux, double vitrage (maison NL typique)"
+            }
+          },
+          {
+            "id": "heavy",
+            "label": {
+              "en": "Heavy: Concrete/stone, good insulation, HR++ glass, stable",
+              "nl": "Zwaar: Beton/steen, goede isolatie, HR++ glas, stabiel",
+              "de": "Schwer: Beton/Stein, gute Isolierung, HR++-Glas, stabil",
+              "fr": "Lourd: Béton/pierre, bonne isolation, verre HR++, stable"
+            }
+          },
+          {
+            "id": "passive",
+            "label": {
+              "en": "Passive: Passive house, HR+++ glass, airtight, heat recovery",
+              "nl": "Passief: Passiefhuis, HR+++ glas, luchtdicht, WTW",
+              "de": "Passiv: Passivhaus, HR+++-Glas, luftdicht, Wärmerückgewinnung",
+              "fr": "Passif: Maison passive, verre HR+++, étanche, récupération chaleur"
+            }
+          }
+        ]
+      },
+      {
+        "id": "enable_dynamic_pint",
+        "type": "checkbox",
+        "label": {
+          "en": "Dynamic internal gains",
+          "nl": "Dynamische interne warmtewinsten",
+          "de": "Dynamische interne Gewinne",
+          "fr": "Gains internes dynamiques"
+        },
+        "hint": {
+          "en": "Accounts for heat from people, cooking, appliances varying by time. Night (23-06h): 40% (sleeping), Day (06-18h): 100% (normal), Evening (18-23h): 180% (cooking, TV). Improves prediction accuracy ~10-15%.",
+          "nl": "Houdt rekening met warmte van mensen, koken, apparaten per tijdstip. Nacht (23-06u): 40% (slapen), Dag (06-18u): 100% (normaal), Avond (18-23u): 180% (koken, TV). Verbetert voorspelling ~10-15%.",
+          "de": "Berücksichtigt Wärme von Menschen, Kochen, Geräten je nach Zeit. Nacht (23-06h): 40% (schlafen), Tag (06-18h): 100% (normal), Abend (18-23h): 180% (kochen, TV). Verbessert Vorhersage ~10-15%.",
+          "fr": "Tient compte chaleur des personnes, cuisine, appareils selon heure. Nuit (23-06h): 40% (sommeil), Jour (06-18h): 100% (normal), Soir (18-23h): 180% (cuisine, TV). Améliore prévision ~10-15%."
+        },
+        "value": true
+      },
+      {
+        "id": "enable_seasonal_g",
+        "type": "checkbox",
+        "label": {
+          "en": "Seasonal solar gain adjustment",
+          "nl": "Seizoensgebonden zonnewinst aanpassing",
+          "de": "Saisonale Solargewinn-Anpassung",
+          "fr": "Ajustement saisonnier du gain solaire"
+        },
+        "hint": {
+          "en": "Accounts for sun angle changing with seasons. Low winter sun (Dec-Feb: 60%) heats less effectively than high summer sun (Jun-Jul: 130%). Contributes 5-20% of total heat depending on window size and orientation. Improves seasonal predictions.",
+          "nl": "Houdt rekening met zonnehoek per seizoen. Lage winterzon (dec-feb: 60%) verwarmt minder effectief dan hoge zomerzon (jun-jul: 130%). Draagt 5-20% bij aan totale warmte afhankelijk van raamgrootte en oriëntatie. Verbetert seizoensvoorspellingen.",
+          "de": "Berücksichtigt Sonnenwinkel je Jahreszeit. Niedrige Wintersonne (Dez-Feb: 60%) heizt weniger als hohe Sommersonne (Jun-Jul: 130%). Trägt 5-20% zur Gesamtwärme bei je nach Fenstergröße und Ausrichtung. Verbessert saisonale Vorhersagen.",
+          "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. Améliore prévisions saisonnières."
+        },
+        "value": true
       }
     ]
   },

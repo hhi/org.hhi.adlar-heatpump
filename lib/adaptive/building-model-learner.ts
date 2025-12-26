@@ -14,14 +14,97 @@
  *   X = [P_heating, (T_in - T_out), Solar, 1] (input vector)
  *   θ = [1/C, UA/C, g/C, P_int/C] (parameters to learn)
  *
- * @version 1.4.0
+ * @version 2.2.0 - Added building profiles, dynamic P_int, seasonal g-factor
  * @since 1.4.0
  */
+
+/**
+ * Building type profiles with typical parameter ranges
+ * Based on thermal characteristics and construction type
+ */
+export type BuildingProfileType = 'light' | 'average' | 'heavy' | 'passive';
+
+export interface BuildingProfile {
+  C: number; // Thermal mass (kWh/°C)
+  UA: number; // Heat loss coefficient (kW/°C)
+  g: number; // Solar gain factor (base value)
+  pInt: number; // Internal heat gains (kW, daytime average)
+}
+
+/**
+ * Predefined building profiles based on construction type and insulation
+ */
+export const BUILDING_PROFILES: Record<BuildingProfileType, BuildingProfile> = {
+  light: {
+    C: 7, // Low thermal mass - quick temperature response
+    UA: 0.35, // Moderate heat loss
+    g: 0.4, // Moderate solar gain
+    pInt: 0.3, // Standard internal gains
+  },
+  average: {
+    C: 15, // Medium thermal mass
+    UA: 0.3, // Average insulation
+    g: 0.5, // Good solar gain
+    pInt: 0.3, // Standard internal gains
+  },
+  heavy: {
+    C: 20, // High thermal mass - slow temperature response
+    UA: 0.25, // Better insulation
+    g: 0.4, // Lower solar gain (more mass to heat)
+    pInt: 0.35, // Slightly higher internal gains
+  },
+  passive: {
+    C: 30, // Very high thermal mass
+    UA: 0.05, // Excellent insulation
+    g: 0.6, // High solar gain utilization
+    pInt: 0.25, // Lower internal gains (less needed)
+  },
+};
+
+/**
+ * Get internal gains based on time of day
+ * Pattern: Low at night, moderate during day, higher in evening
+ */
+export function getDynamicPInt(hour: number, basePInt: number): number {
+  if (hour >= 23 || hour < 6) {
+    return basePInt * 0.4; // Night: 40% of base (0.12 kW for base 0.3)
+  }
+  if (hour >= 6 && hour < 18) {
+    return basePInt * 1.0; // Day: 100% of base (0.3 kW)
+  }
+  return basePInt * 1.8; // Evening: 180% of base (0.54 kW)
+}
+
+/**
+ * Get seasonal solar gain multiplier
+ * Accounts for sun angle and seasonal variation
+ */
+export function getSeasonalGMultiplier(month: number): number {
+  const seasonalFactors: Record<number, number> = {
+    0: 0.6, // Jan: Low sun angle
+    1: 0.7, // Feb
+    2: 0.9, // Mar
+    3: 1.0, // Apr
+    4: 1.1, // May
+    5: 1.3, // Jun: High sun angle
+    6: 1.3, // Jul
+    7: 1.2, // Aug
+    8: 1.0, // Sep
+    9: 0.9, // Oct
+    10: 0.7, // Nov
+    11: 0.6, // Dec
+  };
+
+  return seasonalFactors[month] || 1.0;
+}
 
 export interface BuildingModelConfig {
   forgettingFactor: number; // 0.995-0.999 = adapt to seasonal changes
   initialCovariance: number; // 100 = high initial uncertainty
   minSamplesForConfidence: number; // 288 = 24 hours @ 5min intervals
+  buildingProfile?: BuildingProfileType; // Building type for initial parameters
+  enableDynamicPInt?: boolean; // Enable time-of-day P_int adjustment
+  enableSeasonalG?: boolean; // Enable seasonal g-factor adjustment
   logger?: (msg: string, ...args: unknown[]) => void;
 }
 
@@ -54,20 +137,27 @@ export class BuildingModelLearner {
   private lastMeasurement: MeasurementData | null;
   private minSamplesForConfidence: number;
   private logger: (message: string, ...args: unknown[]) => void;
+  private enableDynamicPInt: boolean;
+  private enableSeasonalG: boolean;
+  private basePInt: number; // Base P_int value for dynamic calculation
 
   constructor(config: BuildingModelConfig) {
-    // Initialize with reasonable default parameters
-    // Assumptions:
-    // - C = 15 kWh/°C (typical residential thermal mass)
-    // - UA = 0.3 kW/°C (typical heat loss coefficient)
-    // - g = 0.5 (moderate solar gain)
-    // - P_int = 0.3 kW (typical internal gains from appliances, people)
+    // Get building profile (default to 'average' if not specified)
+    const profile = config.buildingProfile
+      ? BUILDING_PROFILES[config.buildingProfile]
+      : BUILDING_PROFILES.average;
+
+    // Initialize theta using building profile parameters
     this.theta = [
-      1 / 15, // 1/C
-      0.3 / 15, // UA/C
-      0.5 / 15, // g/C
-      0.3 / 15, // P_int/C
+      1 / profile.C, // 1/C
+      profile.UA / profile.C, // UA/C
+      profile.g / profile.C, // g/C
+      profile.pInt / profile.C, // P_int/C
     ];
+
+    this.basePInt = profile.pInt; // Store for dynamic P_int calculation
+    this.enableDynamicPInt = config.enableDynamicPInt ?? false;
+    this.enableSeasonalG = config.enableSeasonalG ?? false;
 
     // Initialize covariance matrix with high uncertainty
     const initCov = config.initialCovariance;
@@ -83,6 +173,11 @@ export class BuildingModelLearner {
     this.lastMeasurement = null;
     this.minSamplesForConfidence = config.minSamplesForConfidence;
     this.logger = config.logger || (() => {});
+
+    this.logger(
+      `BuildingModelLearner: Initialized with profile ${config.buildingProfile || 'average'} `
+      + `(C=${profile.C}, UA=${profile.UA}, g=${profile.g}, P_int=${profile.pInt})`,
+    );
   }
 
   /**
@@ -107,12 +202,25 @@ export class BuildingModelLearner {
     const dT = data.tIndoor - this.lastMeasurement!.tIndoor;
     const dtDt = dT / dt; // °C/hour
 
-    // Build input vector X = [pHeating, (tIn - tOut), Solar, 1]
+    // Apply time-of-day P_int multiplier if enabled
+    const hour = new Date(data.timestamp).getHours();
+    const pIntMultiplier = this.enableDynamicPInt
+      ? getDynamicPInt(hour, this.basePInt) / this.basePInt
+      : 1.0;
+
+    // Apply seasonal solar gain multiplier if enabled
+    const month = new Date(data.timestamp).getMonth();
+    const solarMultiplier = this.enableSeasonalG
+      ? getSeasonalGMultiplier(month)
+      : 1.0;
+
+    // Build input vector X = [pHeating, (tIn - tOut), Solar, constant_term]
+    // Apply dynamic adjustments to solar radiation and internal gains
     const X = [
       data.pHeating, // Heating power (kW)
       data.tIndoor - data.tOutdoor, // Temperature difference (°C)
-      data.solarRadiation || 0, // Solar radiation (W/m²)
-      1, // Constant term (for pInt)
+      (data.solarRadiation || 0) * solarMultiplier, // Solar with seasonal adjustment
+      pIntMultiplier, // Constant term scaled for time-varying P_int
     ];
 
     // Perform RLS update
@@ -235,6 +343,9 @@ export class BuildingModelLearner {
       P: this.P,
       sampleCount: this.sampleCount,
       lastMeasurement: this.lastMeasurement,
+      basePInt: this.basePInt,
+      enableDynamicPInt: this.enableDynamicPInt,
+      enableSeasonalG: this.enableSeasonalG,
     };
   }
 
@@ -246,11 +357,18 @@ export class BuildingModelLearner {
     P: number[][];
     sampleCount: number;
     lastMeasurement: MeasurementData | null;
+    basePInt?: number;
+    enableDynamicPInt?: boolean;
+    enableSeasonalG?: boolean;
   }): void {
     this.theta = state.theta;
     this.P = state.P;
     this.sampleCount = state.sampleCount;
     this.lastMeasurement = state.lastMeasurement;
+    // Restore configuration (with defaults for backward compatibility)
+    this.basePInt = state.basePInt ?? 0.3;
+    this.enableDynamicPInt = state.enableDynamicPInt ?? false;
+    this.enableSeasonalG = state.enableSeasonalG ?? false;
     this.logger(`BuildingModelLearner: Restored state with ${this.sampleCount} samples`);
   }
 
