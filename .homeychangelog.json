@@ -1,4 +1,10 @@
 {
+  "2.1.0": {
+    "en": "Added: Calculate linear heating curve flow card for weather-compensated heating. Calculates supply temperature based on outdoor temperature, reference point, and slope coefficient (e.g., 55°C at -15°C with slope -0.5).",
+    "nl": "Toegevoegd: Bereken lineaire verwarmingscurve flow card voor weerafhankelijke verwarming. Berekent aanvoertemperatuur op basis van buitentemperatuur, referentiepunt en hellingscoëfficiënt (bijv. 55°C bij -15°C met helling -0.5).",
+    "de": "Hinzugefügt: Lineare Heizkurve berechnen Flow-Karte für wettergeführte Heizung. Berechnet Vorlauftemperatur basierend auf Außentemperatur, Referenzpunkt und Neigungskoeffizient (z.B. 55°C bei -15°C mit Neigung -0.5).",
+    "fr": "Ajouté: Carte de flux calculer courbe de chauffage linéaire pour chauffage compensé par météo. Calcule température de départ basée sur température extérieure, point de référence et coefficient de pente (par ex. 55°C à -15°C avec pente -0.5)."
+  },
   "2.0.7": {
     "en": "Added: Configurable log level in device settings (ERROR/WARN/INFO/DEBUG). Reduces log noise in production - set to ERROR to see only critical failures.",
     "nl": "Toegevoegd: Instelbaar log niveau in apparaat instellingen (ERROR/WARN/INFO/DEBUG). Vermindert log ruis in productie - zet op ERROR om alleen kritieke fouten te zien.",

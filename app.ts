@@ -295,6 +295,7 @@ class MyApp extends App {
 
     // Calculator action cards
     this.registerCurveCalculatorCard();
+    this.registerLinearHeatingCurveCard();
     this.registerTimeScheduleCard();
     this.registerSeasonalModeCard();
 
@@ -615,6 +616,86 @@ class MyApp extends App {
     });
 
     this.debugLog('Curve calculator card registered successfully');
+  }
+
+  /**
+   * Register linear heating curve calculator action card
+   *
+   * Calculates supply temperature using linear formula: y = slope * x + intercept
+   * where intercept = reference_temp - (slope * reference_outdoor)
+   *
+   * Example: Reference point (55°C at -15°C), slope -0.5 → Formula: y = -0.5x + 47.5
+   *
+   * Primary use cases:
+   * - Weather compensation heating curves
+   * - Day/night temperature profiles
+   * - Seasonal heating adjustments
+   */
+  registerLinearHeatingCurveCard() {
+    const linearCurveCard = this.homey.flow.getActionCard('calculate_linear_heating_curve');
+
+    linearCurveCard.registerRunListener(async (args, state) => {
+      const {
+        outdoor_temp: outdoorTempRaw,
+        reference_temp,
+        reference_outdoor,
+        slope,
+      } = args;
+
+      try {
+        // Parse outdoor temperature (supports number, string, tokens)
+        let outdoorTemp: number;
+        if (typeof outdoorTempRaw === 'number') {
+          outdoorTemp = outdoorTempRaw;
+        } else if (typeof outdoorTempRaw === 'string') {
+          outdoorTemp = parseFloat(outdoorTempRaw);
+        } else {
+          throw new Error('Outdoor temperature must be a number or numeric string');
+        }
+
+        // Validate parsed number
+        if (Number.isNaN(outdoorTemp) || !Number.isFinite(outdoorTemp)) {
+          throw new Error(`Outdoor temperature must be valid (received: "${outdoorTempRaw}")`);
+        }
+
+        // Validate other parameters
+        if (Number.isNaN(reference_temp) || Number.isNaN(reference_outdoor) || Number.isNaN(slope)) {
+          throw new Error('All parameters must be valid numbers');
+        }
+
+        // Calculate supply temperature: y = slope * x + intercept
+        // Intercept: b = reference_temp - (slope * reference_outdoor)
+        const intercept = reference_temp - (slope * reference_outdoor);
+        const supplyTemperature = (slope * outdoorTemp) + intercept;
+
+        // Round to 1 decimal place for practical use
+        const roundedSupplyTemp = Math.round(supplyTemperature * 10) / 10;
+
+        // Log results (debug mode)
+        this.debugLog(`Linear heating curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C`, {
+          outdoorTemp,
+          referencePoint: `${reference_temp}°C @ ${reference_outdoor}°C`,
+          slope,
+          intercept,
+          supplyTemperature: roundedSupplyTemp,
+        });
+
+        // Standard logging for production
+        this.log(`Linear curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C (slope: ${slope})`);
+
+        return { supply_temperature: roundedSupplyTemp };
+
+      } catch (error) {
+        // Error logging
+        this.error('Linear heating curve calculation failed:', error);
+
+        // Re-throw with user-friendly message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Linear heating curve failed: ${errorMessage}`);
+      }
+    });
+
+    this.debugLog('Linear heating curve card registered successfully');
   }
 
   /**
