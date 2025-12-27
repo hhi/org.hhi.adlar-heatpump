@@ -1137,7 +1137,18 @@ class MyApp extends App {
           return true;
         }
 
-        // Validate args from user flow card configuration (the dropdown selection)
+        // Validate state parameter from device trigger
+        if (!state?.state || typeof state.state !== 'string') {
+          this.error(`${featureName}: Invalid state parameter`, {
+            state,
+            stateType: typeof state?.state,
+            fullState: JSON.stringify(state),
+          });
+          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          return false;
+        }
+
+        // Validate args from user flow card configuration
         if (!args?.state || typeof args.state !== 'string') {
           this.error(`${featureName}: Invalid args parameter`, {
             args,
@@ -1148,14 +1159,13 @@ class MyApp extends App {
           return false;
         }
 
-        // Since we no longer pass state parameter to fix token serialization, we can't check state.state
-        // Instead, just validate that args.state exists and return true
-        // The token value (current_state) is now properly available in the flow without serialization issues
-        // The actual state filtering should happen via the token value in the flow conditions
         const userState = args.state;
-        this.log(`🧊 ${featureName}: userState=${userState}, trigger allowed for token access`);
+        const currentState = state.state;
+        const matches = userState === currentState;
 
-        return true;
+        this.log(`🧊 ${featureName}: userState=${userState}, currentState=${currentState}, matches=${matches}`);
+
+        return matches;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
         this.selfHealing.trackError(featureName, { error });
