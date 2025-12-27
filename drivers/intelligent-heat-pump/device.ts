@@ -2624,16 +2624,16 @@ class MyDevice extends Homey.Device {
                 this.log(`🧊 Defrost state changed: ${stateLabel} (localized: ${localizedState})`);
 
                 // Token for flow card - use localized text for timeline display
+                // Also pass the non-localized state value for internal filtering
                 const tokens = {
                   current_state: localizedState,
                 };
-                // State param for runListener matching - must use 'active'/'inactive'
-                const stateParam = {
-                  state: stateLabel,
-                };
 
-                this.log('🧊 Triggering defrost_state_changed with tokens:', tokens, 'stateParam:', stateParam);
-                this.triggerFlowCard('defrost_state_changed', tokens, stateParam).catch((err) => {
+                this.log('🧊 Triggering defrost_state_changed with tokens:', tokens);
+                // NOTE: Not passing state parameter to avoid Homey token serialization issues (see GitHub issue)
+                // This ensures the current_state token is properly available in flows
+                // The dropdown filtering is handled by returning true from runListener
+                this.triggerFlowCard('defrost_state_changed', tokens).catch((err) => {
                   this.error('❌ Failed to trigger defrost_state_changed:', err);
                 });
               }
