@@ -301,12 +301,9 @@ export const FLOW_PATTERNS = {
     { cardId: 'evi_pulse_steps_alert', pattern: 'pulse_steps_alert' as const, sensorType: 'evi' },
   ],
 
-  // State change triggers
-  stateChanges: [
-    { cardId: 'defrost_state_changed', pattern: 'state_change' as const, sensorType: 'defrost' },
-    { cardId: 'compressor_state_changed', pattern: 'state_change' as const, sensorType: 'compressor' },
-    { cardId: 'backwater_state_changed', pattern: 'state_change' as const, sensorType: 'backwater' },
-  ],
+  // State change triggers (removed - now using Homey's automatic capability-based triggers)
+  // Compressor, defrost, and backwater states automatically generate "when turned on/off" flow cards
+  stateChanges: [],
   /**
    * Simple action cards that directly map flow actions to capability changes
    *

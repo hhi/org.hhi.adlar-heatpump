@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -299,77 +299,6 @@
         ]
       },
       {
-        "id": "backwater_state_changed",
-        "title": {
-          "en": "Backwater state changed",
-          "nl": "Water Terugstroming status gewijzigd",
-          "de": "Rückström-Zustand geändert",
-          "fr": "État du reflux changé"
-        },
-        "titleFormatted": {
-          "en": "Backwater turned [[state]]",
-          "nl": "Water Terugstroming is gewijzigd in [[state]]",
-          "de": "Rückströmung hat sich zu [[state]] geändert",
-          "fr": "Reflux est devenu [[state]]"
-        },
-        "hint": {
-          "en": "Triggers when backwater system changes state. Use 'Backwater state (text)' token for timeline notifications.",
-          "nl": "Wordt geactiveerd wanneer water terugstroming systeem van status wijzigt. Gebruik 'Terugstroming status (tekst)' token voor tijdlijn notificaties.",
-          "de": "Wird ausgelöst, wenn das Rückströmsystem den Zustand ändert. Verwenden Sie 'Rückström-Zustand (Text)' Token für Timeline-Benachrichtigungen.",
-          "fr": "Se déclenche lorsque le système de reflux change d'état. Utilisez le token 'État reflux (texte)' pour les notifications de timeline."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State",
-              "nl": "Status",
-              "de": "Zustand",
-              "fr": "État"
-            },
-            "values": [
-              {
-                "id": "flowing",
-                "title": {
-                  "en": "flowing",
-                  "nl": "stromend",
-                  "de": "fließend",
-                  "fr": "en écoulement"
-                }
-              },
-              {
-                "id": "blocked",
-                "title": {
-                  "en": "blocked",
-                  "nl": "geblokkeerd",
-                  "de": "blockiert",
-                  "fr": "bloqué"
-                }
-              }
-            ]
-          }
-        ],
-        "tokens": [
-          {
-            "type": "string",
-            "name": "current_state",
-            "title": {
-              "en": "Backwater state (text)",
-              "nl": "Terugstroming status (tekst)",
-              "de": "Rückström-Zustand (Text)",
-              "fr": "État reflux (texte)"
-            },
-            "example": "flowing"
-          }
-        ]
-      },
-      {
         "id": "coiler_temperature_alert",
         "title": {
           "en": "Coiler temperature alert",
@@ -570,78 +499,6 @@
               "fr": "Fréquence seuil"
             },
             "example": 90
-          }
-        ]
-      },
-      {
-        "id": "compressor_state_changed",
-        "title": {
-          "en": "Compressor state changed",
-          "nl": "Compressor status gewijzigd",
-          "de": "Kompressor-Zustand geändert",
-          "fr": "État du compresseur changé"
-        },
-        "titleFormatted": {
-          "en": "Compressor turned [[state]]",
-          "nl": "Compressor is gewijzigd naar [[state]]",
-          "de": "Kompressor hat sich zu [[state]] geändert",
-          "fr": "Compresseur est devenu [[state]]"
-        },
-        "hint": {
-          "en": "Triggers when compressor changes state. Use 'Compressor state (text)' token for timeline notifications.",
-          "nl": "Wordt geactiveerd wanneer compressor van status wijzigt. Gebruik 'Compressor status (tekst)' token voor tijdlijn notificaties.",
-          "de": "Wird ausgelöst, wenn der Kompressor den Zustand ändert. Verwenden Sie 'Kompressor-Zustand (Text)' Token für Timeline-Benachrichtigungen.",
-          "fr": "Se déclenche lorsque le compresseur change d'état. Utilisez le token 'État compresseur (texte)' pour les notifications de timeline."
-        },
-        "highlight": true,
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State",
-              "nl": "Status",
-              "de": "Zustand",
-              "fr": "État"
-            },
-            "values": [
-              {
-                "id": "running",
-                "title": {
-                  "en": "running",
-                  "nl": "draaiend",
-                  "de": "läuft",
-                  "fr": "en marche"
-                }
-              },
-              {
-                "id": "stopped",
-                "title": {
-                  "en": "stopped",
-                  "nl": "gestopt",
-                  "de": "aus",
-                  "fr": "arrêté"
-                }
-              }
-            ]
-          }
-        ],
-        "tokens": [
-          {
-            "type": "string",
-            "name": "current_state",
-            "title": {
-              "en": "Compressor state (text)",
-              "nl": "Compressor status (tekst)",
-              "de": "Kompressor-Zustand (Text)",
-              "fr": "État compresseur (texte)"
-            },
-            "example": "running"
           }
         ]
       },
@@ -1274,78 +1131,6 @@
               "fr": "Prix Moyen Aujourd'hui (€/kWh)"
             },
             "example": 0.203
-          }
-        ]
-      },
-      {
-        "id": "defrost_state_changed",
-        "title": {
-          "en": "Defrost state changed",
-          "nl": "Ontdooien status gewijzigd",
-          "de": "Abtau-Zustand geändert",
-          "fr": "État du dégivrage changé"
-        },
-        "titleFormatted": {
-          "en": "Defrost turned [[state]]",
-          "nl": "Ontdooien is gewijzigd naar [[state]]",
-          "de": "Abtauung hat sich zu [[state]] geändert",
-          "fr": "Dégivrage est devenu [[state]]"
-        },
-        "hint": {
-          "en": "Triggers when defrost system changes state. Use 'Defrost state (text)' token for timeline notifications.",
-          "nl": "Wordt geactiveerd wanneer ontdooi systeem van status wijzigt. Gebruik 'Ontdooi status (tekst)' token voor tijdlijn notificaties.",
-          "de": "Wird ausgelöst, wenn das Abtausystem den Zustand ändert. Verwenden Sie 'Abtau-Zustand (Text)' Token für Timeline-Benachrichtigungen.",
-          "fr": "Se déclenche lorsque le système de dégivrage change d'état. Utilisez le token 'État dégivrage (texte)' pour les notifications de timeline."
-        },
-        "highlight": true,
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State",
-              "nl": "Status",
-              "de": "Zustand",
-              "fr": "État"
-            },
-            "values": [
-              {
-                "id": "active",
-                "title": {
-                  "en": "active",
-                  "nl": "actief",
-                  "de": "aktiv",
-                  "fr": "actif"
-                }
-              },
-              {
-                "id": "inactive",
-                "title": {
-                  "en": "inactive",
-                  "nl": "inactief",
-                  "de": "inaktiv",
-                  "fr": "inactif"
-                }
-              }
-            ]
-          }
-        ],
-        "tokens": [
-          {
-            "type": "string",
-            "name": "current_state",
-            "title": {
-              "en": "Defrost state (text)",
-              "nl": "Ontdooi status (tekst)",
-              "de": "Abtau-Zustand (Text)",
-              "fr": "État dégivrage (texte)"
-            },
-            "example": "active"
           }
         ]
       },
