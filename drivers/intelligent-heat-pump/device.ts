@@ -2566,37 +2566,10 @@ class MyDevice extends Homey.Device {
             if (dpsId === 27 && capability === 'adlar_state_compressor_state') {
               const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
 
-              // Only trigger on state CHANGE (not on initialization)
+              // Only log state changes (Homey automatically triggers flow cards on capability changes)
               if (this.lastCompressorState !== null && currentState !== this.lastCompressorState) {
-                // State label for runListener matching (must match dropdown values: 'running'/'stopped')
                 const stateLabel = currentState ? 'running' : 'stopped';
-
-                // Localized state text for user-facing tokens
-                const lang = this.homey.i18n.getLanguage();
-                const localizedStateMap: Record<string, { running: string; stopped: string }> = {
-                  nl: { running: 'draaiend', stopped: 'gestopt' },
-                  de: { running: 'läuft', stopped: 'aus' },
-                  fr: { running: 'en marche', stopped: 'arrêté' },
-                  en: { running: 'running', stopped: 'stopped' },
-                };
-                const langMap = localizedStateMap[lang] || localizedStateMap.en;
-                const localizedState = currentState ? langMap.running : langMap.stopped;
-
-                this.log(`⚙️ Compressor state changed: ${stateLabel} (localized: ${localizedState})`);
-
-                // Token for flow card - use localized text for timeline display
-                const tokens = {
-                  current_state: localizedState,
-                };
-                // State param for runListener matching - must use 'running'/'stopped'
-                const stateParam = {
-                  state: stateLabel,
-                };
-
-                this.log('⚙️ Triggering compressor_state_changed with tokens:', tokens, 'stateParam:', stateParam);
-                this.triggerFlowCard('compressor_state_changed', tokens, stateParam).catch((err) => {
-                  this.error('❌ Failed to trigger compressor_state_changed:', err);
-                });
+                this.log(`⚙️ Compressor state changed to: ${stateLabel} (Homey auto-triggers flow cards)`);
               }
               this.lastCompressorState = currentState;
             }
@@ -2605,37 +2578,10 @@ class MyDevice extends Homey.Device {
             if (dpsId === 33 && capability === 'adlar_state_defrost_state') {
               const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
 
-              // Only trigger on state CHANGE (not on initialization)
+              // Only log state changes (Homey automatically triggers flow cards on capability changes)
               if (this.lastDefrostState !== null && currentState !== this.lastDefrostState) {
-                // State label for runListener matching (must match dropdown values: 'active'/'inactive')
                 const stateLabel = currentState ? 'active' : 'inactive';
-
-                // Localized state text for user-facing tokens
-                const lang = this.homey.i18n.getLanguage();
-                const localizedStateMap: Record<string, { active: string; inactive: string }> = {
-                  nl: { active: 'actief', inactive: 'inactief' },
-                  de: { active: 'aktiv', inactive: 'inaktiv' },
-                  fr: { active: 'actif', inactive: 'inactif' },
-                  en: { active: 'active', inactive: 'inactive' },
-                };
-                const langMap = localizedStateMap[lang] || localizedStateMap.en;
-                const localizedState = currentState ? langMap.active : langMap.inactive;
-
-                this.log(`🧊 Defrost state changed: ${stateLabel} (localized: ${localizedState})`);
-
-                // Token for flow card - use localized text for timeline display
-                const tokens = {
-                  current_state: localizedState,
-                };
-                // State param for runListener matching - must use 'active'/'inactive'
-                const stateParam = {
-                  state: stateLabel,
-                };
-
-                this.log('🧊 Triggering defrost_state_changed with tokens:', tokens, 'stateParam:', stateParam);
-                this.triggerFlowCard('defrost_state_changed', tokens, stateParam).catch((err) => {
-                  this.error('❌ Failed to trigger defrost_state_changed:', err);
-                });
+                this.log(`🧊 Defrost state changed to: ${stateLabel} (Homey auto-triggers flow cards)`);
               }
               this.lastDefrostState = currentState;
             }
@@ -2644,37 +2590,10 @@ class MyDevice extends Homey.Device {
             if (dpsId === 31 && capability === 'adlar_state_backwater') {
               const currentState = typeof transformedValue === 'boolean' ? transformedValue : false;
 
-              // Only trigger on state CHANGE (not on initialization)
+              // Only log state changes (Homey automatically triggers flow cards on capability changes)
               if (this.lastBackwaterState !== null && currentState !== this.lastBackwaterState) {
-                // State label for runListener matching (must match dropdown values: 'flowing'/'blocked')
                 const stateLabel = currentState ? 'flowing' : 'blocked';
-
-                // Localized state text for user-facing tokens
-                const lang = this.homey.i18n.getLanguage();
-                const localizedStateMap: Record<string, { flowing: string; blocked: string }> = {
-                  nl: { flowing: 'stromend', blocked: 'geblokkeerd' },
-                  de: { flowing: 'fließend', blocked: 'blockiert' },
-                  fr: { flowing: 'en écoulement', blocked: 'bloqué' },
-                  en: { flowing: 'flowing', blocked: 'blocked' },
-                };
-                const langMap = localizedStateMap[lang] || localizedStateMap.en;
-                const localizedState = currentState ? langMap.flowing : langMap.blocked;
-
-                this.log(`💧 Backwater state changed: ${stateLabel} (localized: ${localizedState})`);
-
-                // Token for flow card - use localized text for timeline display
-                const tokens = {
-                  current_state: localizedState,
-                };
-                // State param for runListener matching - must use 'flowing'/'blocked'
-                const stateParam = {
-                  state: stateLabel,
-                };
-
-                this.log('💧 Triggering backwater_state_changed with tokens:', tokens, 'stateParam:', stateParam);
-                this.triggerFlowCard('backwater_state_changed', tokens, stateParam).catch((err) => {
-                  this.error('❌ Failed to trigger backwater_state_changed:', err);
-                });
+                this.log(`💧 Backwater state changed to: ${stateLabel} (Homey auto-triggers flow cards)`);
               }
               this.lastBackwaterState = currentState;
             }

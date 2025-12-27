@@ -1,4 +1,10 @@
 {
+  "2.3.0": {
+    "en": "Changed: State flow cards now use Homey's built-in capability triggers. Defrost, compressor, and backwater states show as 'turned on/off' instead of custom cards.",
+    "nl": "Gewijzigd: Status flow cards gebruiken nu Homey's ingebouwde capability triggers. Defrost, compressor en terugwater statussen tonen als 'ingeschakeld/uitgeschakeld' in plaats van custom cards.",
+    "de": "Geändert: Zustands-Flow-Karten verwenden jetzt Homeys eingebaute Capability-Trigger. Abtau-, Kompressor- und Rückwasserzustände werden als 'eingeschaltet/ausgeschaltet' angezeigt statt custom Karten.",
+    "fr": "Modifié: Les cartes de flux d'état utilisent maintenant les déclencheurs de capacité intégrés de Homey. Les états dégivrage, compresseur et eau de retour s'affichent comme 'activé/désactivé' au lieu de cartes personnalisées."
+  },
   "2.2.0": {
     "en": "Added: Building type profiles (light/average/heavy/passive) set starting values for faster thermal model learning. Time-of-day internal gains (night 40%, day 100%, evening 180%). Seasonal solar gain adjustment accounts for sun angle (winter 60%, summer 130%).",
     "nl": "Toegevoegd: Gebouwtype profielen (licht/gemiddeld/zwaar/passief) stellen startwaarden in voor sneller thermisch model leren. Tijdsafhankelijke interne warmtewinsten (nacht 40%, dag 100%, avond 180%). Seizoensgebonden zonnewinst aanpassing houdt rekening met zonnehoek (winter 60%, zomer 130%).",
