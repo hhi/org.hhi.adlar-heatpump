@@ -13,7 +13,7 @@
 
   <!-- Sun rays -->
   <line x1="72" y1="12" x2="72" y2="4" fill="none" stroke="currentColor"/>
-  <line x1="72" y1="52" x2="72" y2="60" fill="none" stroke="currentColor"/>
+  <line x1="72" y1="44" x2="72" y2="52" fill="none" stroke="currentColor"/>
   <line x1="88" y1="28" x2="96" y2="28" fill="none" stroke="currentColor"/>
   <line x1="56" y1="28" x2="48" y2="28" fill="none" stroke="currentColor"/>
   <line x1="84" y1="16" x2="90" y2="10" fill="none" stroke="currentColor"/>
@@ -21,12 +21,12 @@
   <line x1="84" y1="40" x2="90" y2="46" fill="none" stroke="currentColor"/>
   <line x1="60" y1="16" x2="54" y2="10" fill="none" stroke="currentColor"/>
 
-  <!-- Solar energy arrows entering building -->
-  <path d="M 58 35 L 58 48" fill="none" stroke="currentColor"/>
-  <path d="M 58 48 L 53 43" fill="none" stroke="currentColor"/>
-  <path d="M 58 48 L 63 43" fill="none" stroke="currentColor"/>
+  <!-- Solar energy arrows pointing down from sun (centered, ending at building base) -->
+  <path d="M 66 75 L 66 88" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 66 88 L 62 83" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 66 88 L 70 83" fill="none" stroke="currentColor" stroke-width="2.5"/>
 
-  <path d="M 64 42 L 64 55" fill="none" stroke="currentColor"/>
-  <path d="M 64 55 L 59 50" fill="none" stroke="currentColor"/>
-  <path d="M 64 55 L 69 50" fill="none" stroke="currentColor"/>
+  <path d="M 78 75 L 78 88" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 78 88 L 74 83" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 78 88 L 82 83" fill="none" stroke="currentColor" stroke-width="2.5"/>
 </svg>

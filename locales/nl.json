@@ -71,7 +71,10 @@
     "time_constant_title": "ML Tijdsconstante",
     "solar_gain_title": "ML Zonnewinst",
     "internal_gains_title": "ML Interne Winst",
-    "status_learned": "GELEERD",
-    "status_default": "STANDAARD"
+    "status_learned": "LERENDE",
+    "status_default": "STANDAARD",
+    "period_night": "Nacht",
+    "period_day": "Dag",
+    "period_evening": "Avond"
   }
 }

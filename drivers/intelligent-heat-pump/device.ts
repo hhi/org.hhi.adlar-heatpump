@@ -1718,6 +1718,37 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Reset building model learning - clears all learned parameters and restarts from building profile defaults
+   */
+  private async resetBuildingModel(): Promise<void> {
+    try {
+      // Delete the stored building model state
+      await this.unsetStoreValue('building_model_state');
+
+      // Reset the BuildingModelService to reinitialize with building profile defaults
+      const buildingModelService = this.serviceCoordinator?.getAdaptiveControl()?.getBuildingModelService();
+      if (buildingModelService) {
+        await buildingModelService.reset();
+        this.log('✅ Building model learning reset - all learned parameters cleared');
+        this.log('🔄 Building model reinitialized with building profile defaults');
+      } else {
+        this.log('⚠️ Building model service not available - only storage cleared');
+      }
+
+      // Reset the setting back to false to prevent repeated triggers
+      this.homey.setTimeout(() => {
+        this.setSettings({ reset_building_model: false })
+          .then(() => this.log('🔄 Building model reset setting cleared'))
+          .catch((error) => this.error('Failed to clear building model reset setting:', error));
+      }, 1000);
+
+    } catch (error) {
+      this.error('Failed to reset building model:', error);
+      throw new Error(`Failed to reset building model: ${error}`);
+    }
+  }
+
+  /**
    * Start COP calculation interval
    */
   private startCOPCalculationInterval(): void {
@@ -3427,6 +3458,11 @@ class MyDevice extends Homey.Device {
       await this.resetExternalEnergyDaily();
     }
 
+    // Handle reset building model learning
+    if (changedKeys.includes('reset_building_model') && newSettings.reset_building_model === true) {
+      await this.resetBuildingModel();
+    }
+
     // Handle device credential changes (for repair scenarios)
     const credentialKeysChanged = changedKeys.filter(
       (key) => ['device_id', 'local_key', 'ip_address', 'protocol_version'].includes(key),
@@ -4268,7 +4304,7 @@ class MyDevice extends Homey.Device {
     // Cleanup ServiceCoordinator and all managed services
     if (this.serviceCoordinator) {
       try {
-        this.serviceCoordinator.destroy();
+        await this.serviceCoordinator.destroy();
         this.serviceCoordinator = null;
         this.log('ServiceCoordinator destroyed successfully');
       } catch (error) {

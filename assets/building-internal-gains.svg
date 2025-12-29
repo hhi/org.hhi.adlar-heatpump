@@ -1,33 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Building outline -->
-  <rect x="15" y="30" width="55" height="55" rx="4" fill="none" stroke="currentColor"/>
+  <!-- Building outline with roof -->
+  <path d="M 20 45 L 50 25 L 80 45 L 80 80 Q 80 82 78 82 L 22 82 Q 20 82 20 80 L 20 45" fill="none" stroke="currentColor"/>
 
-  <!-- Light bulb (top left) -->
-  <circle cx="32" cy="45" r="4" fill="none" stroke="currentColor"/>
-  <path d="M 29 49 Q 29 51 31 51 L 33 51 Q 35 51 35 49" fill="none" stroke="currentColor"/>
-  <line x1="30" y1="51" x2="34" y2="51" fill="none" stroke="currentColor"/>
+  <!-- Person (left side, larger) -->
+  <circle cx="32" cy="48" r="5" fill="none" stroke="currentColor"/>
+  <path d="M 32 53 L 32 63" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 26 57 L 38 57" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 30 63 L 26 72" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 34 63 L 38 72" fill="none" stroke="currentColor" stroke-width="2.5"/>
 
-  <!-- Person (middle) -->
-  <circle cx="50" cy="42" r="3.5" fill="none" stroke="currentColor"/>
-  <path d="M 50 45 L 50 54" fill="none" stroke="currentColor"/>
-  <path d="M 47 48 L 53 48" fill="none" stroke="currentColor"/>
-  <path d="M 49 54 L 46 60" fill="none" stroke="currentColor"/>
-  <path d="M 51 54 L 54 60" fill="none" stroke="currentColor"/>
+  <!-- Light bulb (right side, larger) -->
+  <circle cx="68" cy="50" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M 64 56 Q 64 58 66 58 L 70 58 Q 72 58 72 56" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <rect x="66" y="58" width="4" height="3" rx="0.5" fill="none" stroke="currentColor" stroke-width="2"/>
 
-  <!-- Appliance/Device (bottom right) -->
-  <rect x="62" y="55" width="10" height="8" rx="1" fill="none" stroke="currentColor"/>
-  <line x1="65" y1="57" x2="65" y2="61" fill="none" stroke="currentColor"/>
-  <line x1="69" y1="57" x2="69" y2="61" fill="none" stroke="currentColor"/>
+  <!-- Heat waves from person - left side -->
+  <path d="M 25 48 Q 18 46 15 50" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M 24 58 Q 15 60 12 65" fill="none" stroke="currentColor" stroke-width="2"/>
 
-  <!-- Heat waves from light bulb -->
-  <path d="M 28 45 Q 24 43 22 45" fill="none" stroke="currentColor"/>
-  <path d="M 27 40 Q 22 36 19 38" fill="none" stroke="currentColor"/>
-
-  <!-- Heat waves from person -->
-  <path d="M 50 35 Q 50 30 45 28" fill="none" stroke="currentColor"/>
-  <path d="M 55 35 Q 58 30 63 28" fill="none" stroke="currentColor"/>
-
-  <!-- Heat waves from appliance -->
-  <path d="M 70 55 Q 75 52 78 54" fill="none" stroke="currentColor"/>
-  <path d="M 68 63 Q 72 68 78 70" fill="none" stroke="currentColor"/>
+  <!-- Heat waves from light bulb - right side -->
+  <path d="M 75 48 Q 82 46 88 50" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M 76 56 Q 84 60 90 62" fill="none" stroke="currentColor" stroke-width="2"/>
 </svg>

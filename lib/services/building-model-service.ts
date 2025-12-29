@@ -17,11 +17,14 @@ import {
   type BuildingModelConfig,
   type MeasurementData,
   type BuildingProfileType,
+  getDynamicPInt,
+  getSeasonalGMultiplier,
 } from '../adaptive/building-model-learner';
 
 export interface BuildingModelServiceConfig {
   device: Homey.Device;
   buildingProfile?: BuildingProfileType;
+  forgettingFactor?: number;
   enableDynamicPInt?: boolean;
   enableSeasonalG?: boolean;
   logger?: (msg: string, ...args: unknown[]) => void;
@@ -49,9 +52,14 @@ export class BuildingModelService {
     this.device = config.device;
     this.logger = config.logger || (() => {});
 
+    // Get forgetting factor from config or device settings, fallback to default
+    const forgettingFactor = config.forgettingFactor
+      ?? this.device.getSetting('building_model_forgetting_factor')
+      ?? 0.998;
+
     // Configure learner with optimal parameters
     const learnerConfig: BuildingModelConfig = {
-      forgettingFactor: 0.998, // Moderate adaptation rate
+      forgettingFactor, // From settings or default
       initialCovariance: 100, // High initial uncertainty
       minSamplesForConfidence: 288, // 24 hours @ 5min intervals
       buildingProfile: config.buildingProfile || 'average', // Default to average building
@@ -181,25 +189,49 @@ export class BuildingModelService {
       confidenceEmoji = '🟡'; // Medium confidence
     }
 
-    // Update capabilities with dynamic titles showing status and confidence (v2.0.3)
+    // Update capabilities with smart info distribution (v2.3.1)
+    // C: confidence indicator (emoji + percentage)
     await this.updateCapabilityIfPresent('adlar_building_c', model.C, {
-      title: this.device.homey.__('building_model.thermal_mass_title'),
+      title: `${this.device.homey.__('building_model.thermal_mass_title')} ${confidenceEmoji} ${confidencePercent}%`,
     });
 
+    // UA: clean title
     await this.updateCapabilityIfPresent('adlar_building_ua', model.UA, {
-      title: `${this.device.homey.__('building_model.heat_loss_title')} ${confidenceEmoji} (${status}, ${confidencePercent}%)`,
+      title: this.device.homey.__('building_model.heat_loss_title'),
     });
 
+    // Tau: learning status and sample progress
+    const sampleProgress = `#${state.sampleCount}/288`;
     await this.updateCapabilityIfPresent('adlar_building_tau', model.tau, {
-      title: this.device.homey.__('building_model.time_constant_title'),
+      title: `${this.device.homey.__('building_model.time_constant_title')} (${status}, ${sampleProgress})`,
     });
 
+    // g: solar gain with seasonal variation (v2.3.1 - localized)
+    const now = new Date();
+    const month = now.getMonth();
+    const hour = now.getHours();
+
+    // Get localized short month name using browser's locale
+    const lang = this.device.homey.i18n.getLanguage();
+    const monthName = now.toLocaleDateString(lang, { month: 'short' });
+    const seasonalMultiplier = getSeasonalGMultiplier(month);
     await this.updateCapabilityIfPresent('adlar_building_g', model.g, {
-      title: this.device.homey.__('building_model.solar_gain_title'),
+      title: `${this.device.homey.__('building_model.solar_gain_title')} (${monthName} ×${seasonalMultiplier.toFixed(1)})`,
     });
 
+    // P_int: internal gains with time-of-day variation (v2.3.1 - localized)
+    let periodKey = 'building_model.period_day';
+    let pIntMultiplier = 1.0;
+    if (hour >= 23 || hour < 6) {
+      periodKey = 'building_model.period_night';
+      pIntMultiplier = 0.4;
+    } else if (hour >= 18) {
+      periodKey = 'building_model.period_evening';
+      pIntMultiplier = 1.8;
+    }
+    const periodName = this.device.homey.__(periodKey);
     await this.updateCapabilityIfPresent('adlar_building_pint', model.pInt, {
-      title: this.device.homey.__('building_model.internal_gains_title'),
+      title: `${this.device.homey.__('building_model.internal_gains_title')} (${periodName} ×${pIntMultiplier.toFixed(1)})`,
     });
 
     this.logger(
@@ -380,9 +412,85 @@ export class BuildingModelService {
   }
 
   /**
-   * Destroy service - cleanup timers
+   * Reset building model - reinitialize learner with building profile defaults
+   * Clears all learned parameters and restarts learning from scratch
    */
-  public destroy(): void {
+  public async reset(): Promise<void> {
+    this.logger('BuildingModelService: Resetting to building profile defaults...');
+
+    try {
+      // Log old learned values before reset
+      const oldModel = this.learner.getModel();
+      this.logger('═══════════════════════════════════════');
+      this.logger('📊 Old Learned Values (being cleared):');
+      this.logger(`   C (Thermal Mass):       ${oldModel.C.toFixed(1)} kWh/°C`);
+      this.logger(`   UA (Heat Loss):         ${oldModel.UA.toFixed(2)} kW/°C`);
+      this.logger(`   τ (Time Constant):      ${oldModel.tau.toFixed(1)} hours`);
+      this.logger(`   g (Solar Gain):         ${oldModel.g.toFixed(3)} kW/(W/m²)`);
+      this.logger(`   P_int (Internal Gains): ${oldModel.pInt.toFixed(2)} kW`);
+      this.logger(`   Confidence:             ${oldModel.confidence.toFixed(0)}%`);
+      this.logger('═══════════════════════════════════════');
+
+      // Get current settings for building profile and features
+      const buildingProfile = this.device.getSetting('building_profile') || 'average';
+      const enableDynamicPInt = this.device.getSetting('enable_dynamic_pint') ?? true;
+      const enableSeasonalG = this.device.getSetting('enable_seasonal_g') ?? true;
+      const forgettingFactor = this.device.getSetting('building_model_forgetting_factor') ?? 0.998;
+
+      // Create new learner instance with building profile defaults (no restored state)
+      const learnerConfig: BuildingModelConfig = {
+        forgettingFactor,
+        initialCovariance: 100, // High initial uncertainty
+        minSamplesForConfidence: 288, // 24 hours @ 5min intervals
+        buildingProfile, // Will use profile defaults
+        enableDynamicPInt,
+        enableSeasonalG,
+        logger: this.logger,
+      };
+
+      this.learner = new BuildingModelLearner(learnerConfig);
+
+      // Log new default values
+      const newModel = this.learner.getModel();
+      this.logger('📊 New Default Values (from building profile):');
+      this.logger(`   Building Profile:       ${buildingProfile}`);
+      this.logger(`   C (Thermal Mass):       ${newModel.C.toFixed(1)} kWh/°C`);
+      this.logger(`   UA (Heat Loss):         ${newModel.UA.toFixed(2)} kW/°C`);
+      this.logger(`   τ (Time Constant):      ${newModel.tau.toFixed(1)} hours`);
+      this.logger(`   g (Solar Gain):         ${newModel.g.toFixed(3)} kW/(W/m²)`);
+      this.logger(`   P_int (Internal Gains): ${newModel.pInt.toFixed(2)} kW`);
+      this.logger(`   Forgetting Factor:      ${forgettingFactor}`);
+      this.logger('═══════════════════════════════════════');
+
+      // Update capabilities to show default values from building profile
+      await this.updateModelCapabilities();
+
+      // Persist the reset state (empty state with profile defaults)
+      await this.persistState();
+
+      this.logger(`✅ BuildingModelService: Reset complete - using ${buildingProfile} building profile`);
+      this.logger('🔄 RLS learning will restart from scratch (sample count: 0)');
+      this.logger('⏱️  Expected timeline: T+50min first update → T+24h confidence builds');
+
+    } catch (error) {
+      this.logger('BuildingModelService: Failed to reset:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Destroy service - persist final state and cleanup timers
+   */
+  public async destroy(): Promise<void> {
+    // Persist final state before destruction to prevent data loss on app restart/update
+    try {
+      await this.persistState();
+      this.logger('BuildingModelService: Final state persisted before destruction');
+    } catch (error) {
+      this.logger('BuildingModelService: Failed to persist final state:', error);
+    }
+
+    // Cleanup timers
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
