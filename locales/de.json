@@ -71,7 +71,10 @@
     "time_constant_title": "ML Zeitkonstante",
     "solar_gain_title": "ML Solarer Gewinn",
     "internal_gains_title": "ML Interne Gewinne",
-    "status_learned": "GELERNT",
-    "status_default": "STANDARD"
+    "status_learned": "LERNEND",
+    "status_default": "STANDARD",
+    "period_night": "Nacht",
+    "period_day": "Tag",
+    "period_evening": "Abend"
   }
 }

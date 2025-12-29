@@ -71,7 +71,10 @@
     "time_constant_title": "ML Time Constant",
     "solar_gain_title": "ML Solar Gain",
     "internal_gains_title": "ML Internal Gains",
-    "status_learned": "LEARNED",
-    "status_default": "DEFAULT"
+    "status_learned": "LEARNING",
+    "status_default": "DEFAULT",
+    "period_night": "Night",
+    "period_day": "Day",
+    "period_evening": "Evening"
   }
 }

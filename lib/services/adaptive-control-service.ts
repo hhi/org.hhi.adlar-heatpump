@@ -120,6 +120,7 @@ export class AdaptiveControlService {
     this.buildingModel = new BuildingModelService({
       device: this.device,
       buildingProfile: this.device.getSetting('building_profile') || 'average',
+      forgettingFactor: this.device.getSetting('building_model_forgetting_factor') ?? 0.998,
       enableDynamicPInt: this.device.getSetting('enable_dynamic_pint') ?? true,
       enableSeasonalG: this.device.getSetting('enable_seasonal_g') ?? true,
       logger: this.logger,
@@ -743,7 +744,7 @@ export class AdaptiveControlService {
   /**
    * Destroy service and clean up resources
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     this.logger('AdaptiveControlService: Destroying service (all components)');
 
     // Stop control loop
@@ -755,7 +756,7 @@ export class AdaptiveControlService {
     // Destroy all sub-services (v2.0.1+: added missing components)
     this.heatingController.destroy();
     this.externalTemperature.destroy();
-    this.buildingModel.destroy();
+    await this.buildingModel.destroy(); // Await to persist final building model state
     this.copOptimizer.destroy();
     this.energyOptimizer.destroy();
     this.decisionMaker.destroy();

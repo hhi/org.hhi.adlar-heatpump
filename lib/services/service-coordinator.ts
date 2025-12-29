@@ -453,7 +453,7 @@ export class ServiceCoordinator {
   /**
    * Destroy coordinator and all owned services; clear intervals.
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     this.logger('ServiceCoordinator: Destroying service coordinator');
 
     // Stop health monitoring
@@ -469,7 +469,7 @@ export class ServiceCoordinator {
       this.energyTracking.destroy();
       this.tuyaConnection.destroy();
       this.flowCardManager.destroy();
-      this.adaptiveControl.destroy();
+      await this.adaptiveControl.destroy(); // Await to persist building model state
     } catch (error) {
       this.logger('ServiceCoordinator: Error during service cleanup', error);
     }
