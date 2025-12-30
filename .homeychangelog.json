@@ -1,4 +1,10 @@
 {
+  "2.4.0": {
+    "en": "Added: Defrost power monitoring capability tracks power consumption during defrost cycles. Heating curve visualization capabilities display formula, slope, intercept, and reference points. All 6 new capabilities automatically added to existing devices.",
+    "nl": "Toegevoegd: Defrost vermogen monitoring capability volgt stroomverbruik tijdens ontdooicycli. Verwarmingscurve visualisatie capabilities tonen formule, helling, snijpunt en referentiepunten. Alle 6 nieuwe capabilities automatisch toegevoegd aan bestaande apparaten.",
+    "de": "Hinzugefügt: Abtau-Leistungsüberwachungs-Capability verfolgt Stromverbrauch während Abtauzyklen. Heizkurven-Visualisierungs-Capabilities zeigen Formel, Steigung, Schnittpunkt und Referenzpunkte. Alle 6 neuen Capabilities automatisch zu bestehenden Geräten hinzugefügt.",
+    "fr": "Ajouté: Capacité de surveillance de puissance de dégivrage suit la consommation d'énergie pendant les cycles de dégivrage. Capacités de visualisation de courbe de chauffage affichent formule, pente, ordonnée à l'origine et points de référence. Toutes les 6 nouvelles capacités automatiquement ajoutées aux appareils existants."
+  },
   "2.3.6": {
     "en": "Fixed: All energy-related SVG icons now display correctly on iPhone. Icons optimized for iOS WebKit rendering (removed text elements, standardized stroke widths, added theme-aware colors).",
     "nl": "Opgelost: Alle energie-gerelateerde SVG iconen worden nu correct weergegeven op iPhone. Iconen geoptimaliseerd voor iOS WebKit rendering (tekstelementen verwijderd, stroke breedte gestandaardiseerd, theme-aware kleuren toegevoegd).",

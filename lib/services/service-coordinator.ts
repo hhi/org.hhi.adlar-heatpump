@@ -9,6 +9,7 @@ import { EnergyTrackingService } from './energy-tracking-service';
 import { TuyaConnectionService, TuyaDeviceConfig } from './tuya-connection-service';
 import { FlowCardManagerService } from './flow-card-manager-service';
 import { AdaptiveControlService } from './adaptive-control-service';
+import { HeatingCurveVisualizationService } from './heating-curve-visualization-service';
 import { CategorizedError } from '../error-types';
 import { AdlarMapping } from '../definitions/adlar-mapping';
 
@@ -35,6 +36,7 @@ export class ServiceCoordinator {
   private tuyaConnection!: TuyaConnectionService;
   private flowCardManager!: FlowCardManagerService;
   private adaptiveControl!: AdaptiveControlService;
+  private heatingCurveVisualization!: HeatingCurveVisualizationService;
 
   // Service state tracking
   private serviceHealth = new Map<string, boolean>();
@@ -81,6 +83,7 @@ export class ServiceCoordinator {
     this.energyTracking = new EnergyTrackingService(serviceOptions);
     this.flowCardManager = new FlowCardManagerService(serviceOptions);
     this.adaptiveControl = new AdaptiveControlService(serviceOptions);
+    this.heatingCurveVisualization = new HeatingCurveVisualizationService(serviceOptions);
 
     // TuyaConnectionService requires special initialization
     this.tuyaConnection = new TuyaConnectionService({
@@ -100,6 +103,7 @@ export class ServiceCoordinator {
     this.serviceHealth.set('tuya', false); // Not connected initially
     this.serviceHealth.set('flowcard', true);
     this.serviceHealth.set('adaptive', true);
+    this.serviceHealth.set('heatingcurve', true);
 
     this.logger('ServiceCoordinator: All services initialized');
   }
@@ -204,6 +208,10 @@ export class ServiceCoordinator {
       // Initialize adaptive control service
       await this.adaptiveControl.initialize();
       this.logger('ServiceCoordinator: Adaptive control service initialized');
+
+      // Initialize heating curve visualization service (v2.3.7)
+      await this.heatingCurveVisualization.initialize();
+      this.logger('ServiceCoordinator: Heating curve visualization service initialized');
 
       // Initialize Tuya connection last (most likely to fail)
       try {
@@ -470,6 +478,7 @@ export class ServiceCoordinator {
       this.tuyaConnection.destroy();
       this.flowCardManager.destroy();
       await this.adaptiveControl.destroy(); // Await to persist building model state
+      await this.heatingCurveVisualization.destroy(); // Cleanup image resources (v2.3.7)
     } catch (error) {
       this.logger('ServiceCoordinator: Error during service cleanup', error);
     }
@@ -505,5 +514,22 @@ export class ServiceCoordinator {
     this.isInitialized = false;
 
     this.logger('ServiceCoordinator: Service coordinator destroyed');
+  }
+
+  /**
+   * Update heating curve visualization (v2.3.7)
+   * Call this when heating curve parameters change
+   */
+  async updateHeatingCurveVisualization(): Promise<void> {
+    if (this.heatingCurveVisualization) {
+      await this.heatingCurveVisualization.updateVisualization();
+    }
+  }
+
+  /**
+   * Get heating curve image for capability assignment (v2.3.7)
+   */
+  getHeatingCurveImage(): Homey.Image | null {
+    return this.heatingCurveVisualization?.getImage() || null;
   }
 }

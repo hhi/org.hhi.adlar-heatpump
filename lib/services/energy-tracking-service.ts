@@ -406,6 +406,13 @@ export class EnergyTrackingService {
         await this.device.setCapabilityValue('adlar_external_power', powerValue);
         this.logger(`EnergyTrackingService: External power data received: ${powerValue}W`);
 
+        // Update defrost active power if applicable
+        if (this.device.hasCapability('defrost_active_power')) {
+          const isDefrosting = this.device.getCapabilityValue('adlar_state_defrost_state') || false;
+          const newValue = isDefrosting ? powerValue : 0;
+          await this.device.setCapabilityValue('defrost_active_power', newValue);
+        }
+
         // Trigger immediate power measurement update
         await this.updateIntelligentPowerMeasurement();
       }

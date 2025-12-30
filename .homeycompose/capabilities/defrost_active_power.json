@@ -1,0 +1,37 @@
+{
+  "id": "defrost_active_power",
+  "title": {
+    "en": "Defrost Power",
+    "nl": "Ontdooi Vermogen",
+    "de": "Abtau-Leistung",
+    "fr": "Puissance de dégivrage"
+  },
+  "type": "number",
+  "units": {
+    "en": "W",
+    "nl": "W",
+    "de": "W",
+    "fr": "W"
+  },
+  "min": 0,
+  "max": 50000,
+  "step": 0.1,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Power During Defrost",
+    "nl": "Vermogen Tijdens Ontdooien",
+    "de": "Leistung Während Abtauen",
+    "fr": "Puissance Pendant Dégivrage"
+  },
+  "icon": "/assets/defrost-active-power.svg",
+  "description": {
+    "en": "Power consumption during defrost cycles - shows external power measurement when defrosting is active, 0 when inactive",
+    "nl": "Vermogensverbruik tijdens ontdooicycli - toont externe vermogensmeting wanneer ontdooien actief is, 0 wanneer inactief",
+    "de": "Stromverbrauch während Abtauzyklen - zeigt externe Leistungsmessung wenn Abtauen aktiv ist, 0 wenn inaktiv",
+    "fr": "Consommation d'énergie pendant les cycles de dégivrage - affiche la mesure de puissance externe lorsque le dégivrage est actif, 0 lorsqu'il est inactif"
+  }
+}

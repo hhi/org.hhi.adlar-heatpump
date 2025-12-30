@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.3.6",
+  "version": "2.4.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -5765,6 +5765,17 @@
               "fr": "Température de départ"
             },
             "example": 45
+          },
+          {
+            "name": "formula",
+            "type": "string",
+            "title": {
+              "en": "Heating Curve Formula",
+              "nl": "Verwarmingscurve Formule",
+              "de": "Heizkurve Formel",
+              "fr": "Formule Courbe de Chauffage"
+            },
+            "example": "y = -0.5x + 47.5"
           }
         ],
         "args": [
@@ -7016,6 +7027,7 @@
         "adlar_fault",
         "adlar_state_compressor_state",
         "adlar_state_defrost_state",
+        "defrost_active_power",
         "adlar_state_backwater",
         "adlar_cop",
         "adlar_cop_method",
@@ -7041,6 +7053,11 @@
         "adlar_cop_trend",
         "adlar_scop",
         "adlar_scop_quality",
+        "heating_curve_formula",
+        "heating_curve_slope",
+        "heating_curve_intercept",
+        "heating_curve_ref_temp",
+        "heating_curve_ref_outdoor",
         "adlar_countdowntimer",
         "adlar_connection_status",
         "adlar_connection_active"
@@ -11139,6 +11156,183 @@
       "description": {
         "nl": "dp 33 : defrost_state - Defrosting"
       }
+    },
+    "defrost_active_power": {
+      "id": "defrost_active_power",
+      "title": {
+        "en": "Defrost Power",
+        "nl": "Ontdooi Vermogen",
+        "de": "Abtau-Leistung",
+        "fr": "Puissance de dégivrage"
+      },
+      "type": "number",
+      "units": {
+        "en": "W",
+        "nl": "W",
+        "de": "W",
+        "fr": "W"
+      },
+      "min": 0,
+      "max": 50000,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Power During Defrost",
+        "nl": "Vermogen Tijdens Ontdooien",
+        "de": "Leistung Während Abtauen",
+        "fr": "Puissance Pendant Dégivrage"
+      },
+      "icon": "/assets/defrost-active-power.svg",
+      "description": {
+        "en": "Power consumption during defrost cycles - shows external power measurement when defrosting is active, 0 when inactive",
+        "nl": "Vermogensverbruik tijdens ontdooicycli - toont externe vermogensmeting wanneer ontdooien actief is, 0 wanneer inactief",
+        "de": "Stromverbrauch während Abtauzyklen - zeigt externe Leistungsmessung wenn Abtauen aktiv ist, 0 wenn inaktiv",
+        "fr": "Consommation d'énergie pendant les cycles de dégivrage - affiche la mesure de puissance externe lorsque le dégivrage est actif, 0 lorsqu'il est inactif"
+      }
+    },
+    "heating_curve_formula": {
+      "id": "heating_curve_formula",
+      "type": "string",
+      "title": {
+        "en": "Heating Curve Formula",
+        "nl": "Verwarmingscurve Formule",
+        "de": "Heizkurve Formel",
+        "fr": "Formule Courbe de Chauffage"
+      },
+      "desc": {
+        "en": "Linear heating curve formula (y = mx + b)",
+        "nl": "Lineaire verwarmingscurve formule (y = mx + b)",
+        "de": "Lineare Heizkurve Formel (y = mx + b)",
+        "fr": "Formule de courbe de chauffage linéaire (y = mx + b)"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "chartType": "stepLine",
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/heating-curve.svg"
+    },
+    "heating_curve_intercept": {
+      "id": "heating_curve_intercept",
+      "type": "number",
+      "title": {
+        "en": "Heating Curve Intercept",
+        "nl": "Verwarmingscurve Snijpunt",
+        "de": "Heizkurve Schnittpunkt",
+        "fr": "Interception Courbe de Chauffage"
+      },
+      "desc": {
+        "en": "Intercept value (b) of the heating curve",
+        "nl": "Snijpuntwaarde (b) van de verwarmingscurve",
+        "de": "Schnittpunktwert (b) der Heizkurve",
+        "fr": "Valeur d'interception (b) de la courbe de chauffage"
+      },
+      "units": {
+        "en": "°C",
+        "nl": "°C",
+        "de": "°C",
+        "fr": "°C"
+      },
+      "chartType": "stepLine",
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/heating-curve.svg"
+    },
+    "heating_curve_ref_outdoor": {
+      "id": "heating_curve_ref_outdoor",
+      "type": "number",
+      "title": {
+        "en": "Heating Curve Reference Outdoor Temp",
+        "nl": "Verwarmingscurve Referentie Buitentemp",
+        "de": "Heizkurve Referenz Außentemp",
+        "fr": "Temp Extérieure Référence Courbe Chauffage"
+      },
+      "desc": {
+        "en": "Reference outdoor temperature for the heating curve",
+        "nl": "Referentie buitentemperatuur voor de verwarmingscurve",
+        "de": "Referenz Außentemperatur für die Heizkurve",
+        "fr": "Température extérieure de référence pour la courbe de chauffage"
+      },
+      "units": {
+        "en": "°C",
+        "nl": "°C",
+        "de": "°C",
+        "fr": "°C"
+      },
+      "chartType": "stepLine",
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/heating-curve.svg"
+    },
+    "heating_curve_ref_temp": {
+      "id": "heating_curve_ref_temp",
+      "type": "number",
+      "title": {
+        "en": "Heating Curve Reference Supply Temp",
+        "nl": "Verwarmingscurve Referentie Aanvoertemp",
+        "de": "Heizkurve Referenz Vorlauftemp",
+        "fr": "Temp Départ Référence Courbe Chauffage"
+      },
+      "desc": {
+        "en": "Reference supply temperature for the heating curve",
+        "nl": "Referentie aanvoertemperatuur voor de verwarmingscurve",
+        "de": "Referenz Vorlauftemperatur für die Heizkurve",
+        "fr": "Température de départ de référence pour la courbe de chauffage"
+      },
+      "units": {
+        "en": "°C",
+        "nl": "°C",
+        "de": "°C",
+        "fr": "°C"
+      },
+      "chartType": "stepLine",
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/heating-curve.svg"
+    },
+    "heating_curve_slope": {
+      "id": "heating_curve_slope",
+      "type": "number",
+      "title": {
+        "en": "Heating Curve Slope",
+        "nl": "Verwarmingscurve Helling",
+        "de": "Heizkurve Neigung",
+        "fr": "Pente Courbe de Chauffage"
+      },
+      "desc": {
+        "en": "Slope coefficient (m) of the heating curve",
+        "nl": "Hellingscoëfficiënt (m) van de verwarmingscurve",
+        "de": "Neigungskoeffizient (m) der Heizkurve",
+        "fr": "Coefficient de pente (m) de la courbe de chauffage"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "chartType": "stepLine",
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/heating-curve.svg"
     }
   }
 }

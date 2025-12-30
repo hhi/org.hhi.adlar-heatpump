@@ -30,6 +30,17 @@
         "fr": "Température de départ"
       },
       "example": 45
+    },
+    {
+      "name": "formula",
+      "type": "string",
+      "title": {
+        "en": "Heating Curve Formula",
+        "nl": "Verwarmingscurve Formule",
+        "de": "Heizkurve Formel",
+        "fr": "Formule Courbe de Chauffage"
+      },
+      "example": "y = -0.5x + 47.5"
     }
   ],
   "args": [
