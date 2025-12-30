@@ -592,6 +592,13 @@ export class FlowCardManagerService {
         await this.device.setCapabilityValue('adlar_external_power', args.power_value); // eslint-disable-line camelcase
         this.logger(`FlowCardManagerService: External power data updated: ${args.power_value}W`); // eslint-disable-line camelcase
 
+        // Update defrost active power if applicable
+        if (this.device.hasCapability('defrost_active_power')) {
+          const isDefrosting = this.device.getCapabilityValue('adlar_state_defrost_state') || false;
+          const newValue = isDefrosting ? args.power_value : 0; // eslint-disable-line camelcase
+          await this.device.setCapabilityValue('defrost_active_power', newValue);
+        }
+
         // Emit event for other services (especially EnergyTrackingService)
         this.device.emit('external-data:power', args.power_value);
       }

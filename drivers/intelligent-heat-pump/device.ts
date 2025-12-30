@@ -1058,6 +1058,32 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Update defrost_active_power capability based on defrost state and external power
+   * Shows external power value when defrosting is active, 0 when inactive
+   */
+  async updateDefrostActivePower(): Promise<void> {
+    if (!this.hasCapability('defrost_active_power')) {
+      return;
+    }
+
+    try {
+      const isDefrosting = this.getCapabilityValue('adlar_state_defrost_state') || false;
+      const externalPower = this.getCapabilityValue('adlar_external_power');
+
+      if (isDefrosting && externalPower !== null && externalPower !== undefined) {
+        // Defrost active: show current external power
+        await this.setCapabilityValue('defrost_active_power', externalPower);
+        this.logger.debug(`🧊⚡ Defrost active power updated: ${externalPower}W`);
+      } else {
+        // Defrost inactive or no external power data: show 0
+        await this.setCapabilityValue('defrost_active_power', 0);
+      }
+    } catch (error) {
+      this.error('Failed to update defrost_active_power:', error);
+    }
+  }
+
+  /**
    * Trigger daily COP efficiency flow cards
    */
   private async triggerDailyCOPFlowCards(dailyCOP: RollingCOPResult): Promise<void> {
@@ -1469,6 +1495,12 @@ class MyDevice extends Homey.Device {
       if (this.hasCapability('adlar_external_power')) {
         await this.setCapabilityValue('adlar_external_power', null);
         this.categoryLog('cop', 'External power capability initialized with default value (null W)');
+      }
+
+      // Initialize defrost active power capability with default value (0W when not defrosting)
+      if (this.hasCapability('defrost_active_power')) {
+        await this.setCapabilityValue('defrost_active_power', 0);
+        this.categoryLog('energy', 'Defrost active power capability initialized with default value (0 W)');
       }
 
       // Initialize external flow capability with default value
@@ -2657,6 +2689,11 @@ class MyDevice extends Homey.Device {
                 this.log(`🧊 Defrost state changed to: ${stateLabel} (Homey auto-triggers flow cards)`);
               }
               this.lastDefrostState = currentState;
+
+              // Update defrost active power when defrost state changes
+              this.updateDefrostActivePower().catch((err) => {
+                this.error('Failed to update defrost active power after state change:', err);
+              });
             }
 
             // Backwater state (adlar_state_backwater) - DPS 31
@@ -3240,6 +3277,37 @@ class MyDevice extends Homey.Device {
           this.log('Migration v2.3.5: Added target_temperature.indoor subcapability (default: 21.0°C)');
         } catch (error) {
           this.error('Failed to add target_temperature.indoor capability:', error);
+        }
+      }
+
+      // Migration v2.3.7: Add defrost_active_power capability for defrost monitoring
+      if (!this.hasCapability('defrost_active_power')) {
+        try {
+          await this.addCapability('defrost_active_power');
+          await this.setCapabilityValue('defrost_active_power', 0);
+          this.log('Migration v2.3.7: Added defrost_active_power capability (default: 0W)');
+        } catch (error) {
+          this.error('Failed to add defrost_active_power capability:', error);
+        }
+      }
+
+      // Migration v2.3.7: Add heating curve visualization capabilities
+      const heatingCurveCapabilities = [
+        'heating_curve_formula',
+        'heating_curve_slope',
+        'heating_curve_intercept',
+        'heating_curve_ref_temp',
+        'heating_curve_ref_outdoor',
+      ];
+
+      for (const capability of heatingCurveCapabilities) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`Migration v2.3.7: Added ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
         }
       }
 
@@ -4514,6 +4582,22 @@ class MyDevice extends Homey.Device {
     } else if (this.hasCapability('adlar_external_power')) {
       // Fallback to direct capability update
       await this.setCapabilityValue('adlar_external_power', powerValue);
+      // Update defrost active power if applicable (fire-and-forget)
+      this.updateDefrostActivePower().catch((err) => {
+        this.error('Failed to update defrost active power in fallback:', err);
+      });
+    }
+  }
+
+  /**
+   * Update heating curve visualization (v2.3.7)
+   * Called when heating curve parameters change
+   */
+  public async updateHeatingCurveVisualization(): Promise<void> {
+    if (this.serviceCoordinator) {
+      await this.serviceCoordinator.updateHeatingCurveVisualization();
+    } else {
+      this.logger.warn('Cannot update heating curve visualization - ServiceCoordinator not initialized');
     }
   }
 }

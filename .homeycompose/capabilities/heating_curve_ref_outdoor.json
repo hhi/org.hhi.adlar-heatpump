@@ -1,0 +1,28 @@
+{
+  "id": "heating_curve_ref_outdoor",
+  "type": "number",
+  "title": {
+    "en": "Heating Curve Reference Outdoor Temp",
+    "nl": "Verwarmingscurve Referentie Buitentemp",
+    "de": "Heizkurve Referenz Außentemp",
+    "fr": "Temp Extérieure Référence Courbe Chauffage"
+  },
+  "desc": {
+    "en": "Reference outdoor temperature for the heating curve",
+    "nl": "Referentie buitentemperatuur voor de verwarmingscurve",
+    "de": "Referenz Außentemperatur für die Heizkurve",
+    "fr": "Température extérieure de référence pour la courbe de chauffage"
+  },
+  "units": {
+    "en": "°C",
+    "nl": "°C",
+    "de": "°C",
+    "fr": "°C"
+  },
+  "chartType": "stepLine",
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/heating-curve.svg"
+}

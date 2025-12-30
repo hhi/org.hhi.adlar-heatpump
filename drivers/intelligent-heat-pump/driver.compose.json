@@ -60,6 +60,7 @@
     "adlar_fault",
     "adlar_state_compressor_state",
     "adlar_state_defrost_state",
+    "defrost_active_power",
 
     "adlar_state_backwater",
 
@@ -87,6 +88,12 @@
     "adlar_cop_trend",
     "adlar_scop",
     "adlar_scop_quality",
+
+    "heating_curve_formula",
+    "heating_curve_slope",
+    "heating_curve_intercept",
+    "heating_curve_ref_temp",
+    "heating_curve_ref_outdoor",
 
     "adlar_countdowntimer",
     "adlar_connection_status",

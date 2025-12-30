@@ -1,0 +1,28 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Snowflake pattern for defrost (smaller, left side) -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+    <line x1="35" y1="25" x2="35" y2="55"/>
+    <line x1="20" y1="40" x2="50" y2="40"/>
+    <line x1="25" y1="28" x2="45" y2="52"/>
+    <line x1="25" y1="52" x2="45" y2="28"/>
+    <!-- Arrow tips on snowflake -->
+    <line x1="20" y1="40" x2="25" y2="36"/>
+    <line x1="20" y1="40" x2="25" y2="44"/>
+    <line x1="50" y1="40" x2="45" y2="36"/>
+    <line x1="50" y1="40" x2="45" y2="44"/>
+  </g>
+
+  <!-- Lightning bolt for power (right side, prominent) -->
+  <path d="M65 20 L55 50 L70 50 L60 80 L75 45 L62 45 L72 20 Z"
+        fill="currentColor"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linejoin="round"/>
+
+  <!-- Small droplet to indicate melting/defrost (bottom) -->
+  <path d="M35 65 C37 69, 37 73, 35 76 C33 73, 33 69, 35 65 Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        opacity="0.6"/>
+</svg>

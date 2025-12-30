@@ -1,0 +1,28 @@
+{
+  "id": "heating_curve_formula",
+  "type": "string",
+  "title": {
+    "en": "Heating Curve Formula",
+    "nl": "Verwarmingscurve Formule",
+    "de": "Heizkurve Formel",
+    "fr": "Formule Courbe de Chauffage"
+  },
+  "desc": {
+    "en": "Linear heating curve formula (y = mx + b)",
+    "nl": "Lineaire verwarmingscurve formule (y = mx + b)",
+    "de": "Lineare Heizkurve Formel (y = mx + b)",
+    "fr": "Formule de courbe de chauffage linéaire (y = mx + b)"
+  },
+  "units": {
+    "en": "",
+    "nl": "",
+    "de": "",
+    "fr": ""
+  },
+  "chartType": "stepLine",
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/heating-curve.svg"
+}

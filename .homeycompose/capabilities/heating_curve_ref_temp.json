@@ -1,0 +1,28 @@
+{
+  "id": "heating_curve_ref_temp",
+  "type": "number",
+  "title": {
+    "en": "Heating Curve Reference Supply Temp",
+    "nl": "Verwarmingscurve Referentie Aanvoertemp",
+    "de": "Heizkurve Referenz Vorlauftemp",
+    "fr": "Temp Départ Référence Courbe Chauffage"
+  },
+  "desc": {
+    "en": "Reference supply temperature for the heating curve",
+    "nl": "Referentie aanvoertemperatuur voor de verwarmingscurve",
+    "de": "Referenz Vorlauftemperatur für die Heizkurve",
+    "fr": "Température de départ de référence pour la courbe de chauffage"
+  },
+  "units": {
+    "en": "°C",
+    "nl": "°C",
+    "de": "°C",
+    "fr": "°C"
+  },
+  "chartType": "stepLine",
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/heating-curve.svg"
+}
