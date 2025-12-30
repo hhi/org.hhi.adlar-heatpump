@@ -1,4 +1,16 @@
 {
+  "2.3.6": {
+    "en": "Fixed: All energy-related SVG icons now display correctly on iPhone. Icons optimized for iOS WebKit rendering (removed text elements, standardized stroke widths, added theme-aware colors).",
+    "nl": "Opgelost: Alle energie-gerelateerde SVG iconen worden nu correct weergegeven op iPhone. Iconen geoptimaliseerd voor iOS WebKit rendering (tekstelementen verwijderd, stroke breedte gestandaardiseerd, theme-aware kleuren toegevoegd).",
+    "de": "Behoben: Alle energiebezogenen SVG-Icons werden jetzt korrekt auf iPhone angezeigt. Icons für iOS WebKit-Rendering optimiert (Textelemente entfernt, Strichbreiten standardisiert, theme-aware Farben hinzugefügt).",
+    "fr": "Corrigé: Toutes les icônes SVG liées à l'énergie s'affichent maintenant correctement sur iPhone. Icônes optimisées pour le rendu iOS WebKit (éléments de texte supprimés, largeurs de trait standardisées, couleurs sensibles au thème ajoutées)."
+  },
+  "2.3.5": {
+    "en": "CRITICAL FIX: Adaptive control now uses correct desired room temperature instead of heat pump water setpoint. New subcapabilities target_temperature.indoor (user-settable comfort temperature) and measure_temperature.indoor (actual room temperature from external sensors) replace legacy adlar_external_indoor_temperature. Fixes nonsensical error calculations (was comparing 45°C water temp to 21°C room temp).",
+    "nl": "KRITIEKE FIX: Adaptieve regeling gebruikt nu correcte gewenste kamertemperatuur in plaats van warmtepomp water setpoint. Nieuwe subcapabilities target_temperature.indoor (instelbare comfort temperatuur) en measure_temperature.indoor (werkelijke kamertemperatuur van externe sensoren) vervangen verouderde adlar_external_indoor_temperature. Lost onzinnige foutberekeningen op (vergeleek 45°C water temp met 21°C kamer temp).",
+    "de": "KRITISCHER FIX: Adaptive Steuerung verwendet jetzt korrekte gewünschte Raumtemperatur statt Wärmepumpen-Wasser-Sollwert. Neue Subcapabilities target_temperature.indoor (einstellbare Komforttemperatur) und measure_temperature.indoor (tatsächliche Raumtemperatur von externen Sensoren) ersetzen veraltete adlar_external_indoor_temperature. Behebt unsinnige Fehlerberechnungen (verglich 45°C Wassertemp mit 21°C Raumtemp).",
+    "fr": "CORRECTIF CRITIQUE: Le contrôle adaptatif utilise maintenant la température ambiante souhaitée correcte au lieu de la consigne d'eau de la pompe à chaleur. Nouvelles subcapabilities target_temperature.indoor (température de confort réglable) et measure_temperature.indoor (température ambiante réelle des capteurs externes) remplacent l'ancienne adlar_external_indoor_temperature. Corrige calculs d'erreur absurdes (comparait 45°C temp eau avec 21°C temp pièce)."
+  },
   "2.3.0": {
     "en": "Changed: State flow cards now use Homey's built-in capability triggers. Defrost, compressor, and backwater states show as 'turned on/off' instead of custom cards.",
     "nl": "Gewijzigd: Status flow cards gebruiken nu Homey's ingebouwde capability triggers. Defrost, compressor en terugwater statussen tonen als 'ingeschakeld/uitgeschakeld' in plaats van custom cards.",

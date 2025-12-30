@@ -551,6 +551,9 @@ export class FlowCardManagerService {
         await this.device.setCapabilityValue('adlar_external_ambient', args.temperature_value); // eslint-disable-line camelcase
         this.logger(`FlowCardManagerService: External ambient temperature updated: ${args.temperature_value}°C`); // eslint-disable-line camelcase
 
+        // Store for persistence across app updates
+        await this.device.setStoreValue('external_outdoor_temp', args.temperature_value);
+
         // Emit event for other services
         this.device.emit('external-data:ambient', args.temperature_value);
       }
@@ -594,6 +597,58 @@ export class FlowCardManagerService {
       }
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external power data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external energy prices action flow (v2.4.0+).
+   * Accepts hourly energy prices from external sources to replace EnergyZero API.
+   *
+   * @param args.prices_json - JSON string with hour offsets as keys: {"0":0.11,"1":0.10,...}
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalEnergyPrices(args: { prices_json: string }): Promise<void> {
+    try {
+      const { prices_json: pricesJsonRaw } = args;
+
+      this.logger(`FlowCardManagerService: Received external energy prices (${pricesJsonRaw.length} chars)`);
+
+      // Parse JSON string to object
+      let pricesObject: Record<string, number>;
+      try {
+        const parsed = JSON.parse(pricesJsonRaw);
+        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+          throw new Error('Prices must be an object with hour offsets as keys (e.g., {"0":0.11,"1":0.10,...})');
+        }
+        pricesObject = parsed as Record<string, number>;
+      } catch (error) {
+        this.logger('FlowCardManagerService: Failed to parse prices JSON:', error);
+        throw new Error(`Invalid JSON format: ${(error as Error).message}`);
+      }
+
+      // Validate that we have at least one price entry
+      if (Object.keys(pricesObject).length === 0) {
+        throw new Error('Prices object must contain at least one hour:price entry');
+      }
+
+      // Get ServiceCoordinator to access EnergyPriceOptimizer
+      // @ts-expect-error - Accessing device.serviceCoordinator (not in Homey.Device base type)
+      const energyOptimizer = this.device.serviceCoordinator?.getAdaptiveControl()?.getEnergyPriceOptimizer();
+      if (!energyOptimizer) {
+        throw new Error('Price optimizer not available. Enable adaptive control and price optimization in settings.');
+      }
+
+      // Update price optimizer with external prices
+      energyOptimizer.setExternalPrices(pricesObject);
+
+      const priceCount = Object.keys(pricesObject).length;
+      this.logger(`FlowCardManagerService: External energy prices updated: ${priceCount} hours received`);
+
+      // Emit event for potential other services
+      this.device.emit('external-data:energy-prices', pricesObject);
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external energy prices:', error);
       throw error;
     }
   }

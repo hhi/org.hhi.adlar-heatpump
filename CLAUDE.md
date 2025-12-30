@@ -303,10 +303,12 @@ The app uses **9 specialized services** managed by ServiceCoordinator:
 **Capability Development Best Practices:**
 
 1. **Create individual capability files** in `.homeycompose/capabilities/[capability_name].json`
-2. **Reference capabilities** in `driver.compose.json` under `capabilities` array
-3. **Let Homey Compose generate** the final `app.json` automatically
-4. **Use modular approach** for maintainability and version control
-5. **Follow naming conventions** for capability IDs and file names
+2. **ALWAYS include `"id"` property** - Every capability file MUST have an explicit `"id"` property matching the filename (e.g., `adlar_simulated_target.json` must contain `"id": "adlar_simulated_target"`)
+3. **ALWAYS include `"icon"` property** - Every capability should have an icon path (e.g., `"icon": "/assets/capability-name.svg"`) for proper UI presentation
+4. **Reference capabilities** in `driver.compose.json` under `capabilities` array
+5. **Let Homey Compose generate** the final `app.json` automatically
+6. **Use modular approach** for maintainability and version control
+7. **Follow naming conventions** for capability IDs and file names
 
 ## Official Homey Documentation
 

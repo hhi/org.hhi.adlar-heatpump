@@ -299,6 +299,9 @@ class MyApp extends App {
     this.registerTimeScheduleCard();
     this.registerSeasonalModeCard();
 
+    // Adaptive control action cards
+    this.registerExternalEnergyPricesCard();
+
     this.debugLog('Custom cards registered successfully');
   }
 
@@ -788,6 +791,69 @@ class MyApp extends App {
     });
 
     this.debugLog('Seasonal mode calculator card registered successfully');
+  }
+
+  /**
+   * Register external energy prices action card
+   *
+   * Allows users to send energy prices from external sources (e.g., dynamic tariff providers)
+   * to the EnergyPriceOptimizer for price-based heating optimization.
+   *
+   * Replaces the deprecated EnergyZero API integration with a flexible flow card approach.
+   */
+  registerExternalEnergyPricesCard() {
+    const energyPricesCard = this.homey.flow.getActionCard('receive_external_energy_prices');
+
+    energyPricesCard.registerRunListener(async (args, state) => {
+      const { device, prices_json: pricesJson } = args;
+
+      try {
+        // Input validation
+        if (!pricesJson || typeof pricesJson !== 'string' || pricesJson.trim() === '') {
+          throw new Error('Energy prices JSON cannot be empty');
+        }
+
+        // Parse JSON
+        let pricesObject: Record<string, number>;
+        try {
+          pricesObject = JSON.parse(pricesJson);
+        } catch (parseError) {
+          throw new Error(`Invalid JSON format: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+        }
+
+        // Get AdaptiveControlService from device (accessing internal service property)
+        const adaptiveService = (device as unknown as { adaptiveControl?: { setExternalEnergyPrices: (prices: Record<string, number>) => void } }).adaptiveControl;
+
+        if (!adaptiveService) {
+          throw new Error('Adaptive Control Service not available on this device');
+        }
+
+        // Set external prices via service method
+        adaptiveService.setExternalEnergyPrices(pricesObject);
+
+        // Log success (only in debug mode)
+        this.debugLog('External energy prices received:', {
+          device: device.getName(),
+          priceCount: Object.keys(pricesObject).length,
+          pricesPreview: JSON.stringify(pricesObject).substring(0, 100),
+        });
+
+        // Standard logging for production
+        this.log(`Energy prices updated successfully for ${device.getName()} (${Object.keys(pricesObject).length} hours)`);
+
+        return true;
+
+      } catch (error) {
+        // Error logging
+        this.error('Failed to set external energy prices:', error);
+
+        // Re-throw with user-friendly message
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Energy prices update failed: ${errorMessage}`);
+      }
+    });
+
+    this.debugLog('External energy prices card registered successfully');
   }
 
   /**

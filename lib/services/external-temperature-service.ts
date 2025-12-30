@@ -53,19 +53,19 @@ export class ExternalTemperatureService {
   /**
    * Get current indoor temperature from external sensor
    *
-   * Reads the `adlar_external_indoor_temperature` capability which is
+   * Reads the `measure_temperature.indoor` subcapability which is
    * updated by the `receive_external_indoor_temperature` flow card.
    *
    * @returns Temperature in °C, or null if no data received yet
    */
   getIndoorTemperature(): number | null {
     try {
-      if (!this.device.hasCapability('adlar_external_indoor_temperature')) {
-        this.logger('ExternalTemperatureService: Capability adlar_external_indoor_temperature not available');
+      if (!this.device.hasCapability('measure_temperature.indoor')) {
+        this.logger('ExternalTemperatureService: Capability measure_temperature.indoor not available');
         return null;
       }
 
-      const temperature = this.device.getCapabilityValue('adlar_external_indoor_temperature') as number | null;
+      const temperature = this.device.getCapabilityValue('measure_temperature.indoor') as number | null;
 
       if (temperature === null || temperature === undefined) {
         this.logger('ExternalTemperatureService: No external indoor temperature received yet');
@@ -111,18 +111,25 @@ export class ExternalTemperatureService {
         throw new Error(`Temperature out of valid range: ${temperature}°C (must be -10°C to +50°C)`);
       }
 
-      // Update capability
+      // Update NEW capability (v2.3.5+)
+      if (this.device.hasCapability('measure_temperature.indoor')) {
+        await this.device.setCapabilityValue('measure_temperature.indoor', temperature);
+      }
+
+      // Update LEGACY capability (backwards compatibility - CRITICAL!)
       if (this.device.hasCapability('adlar_external_indoor_temperature')) {
         await this.device.setCapabilityValue('adlar_external_indoor_temperature', temperature);
-        this.lastReceivedTimestamp = Date.now();
-
-        this.logger('ExternalTemperatureService: Received external indoor temperature', {
-          temperature,
-          timestamp: new Date(this.lastReceivedTimestamp).toISOString(),
-        });
-      } else {
-        this.logger('ExternalTemperatureService: Capability not available, cannot store temperature');
       }
+
+      // Store for persistence across app updates
+      await this.device.setStoreValue('external_indoor_temp', temperature);
+
+      this.lastReceivedTimestamp = Date.now();
+
+      this.logger('ExternalTemperatureService: Received external indoor temperature', {
+        temperature,
+        timestamp: new Date(this.lastReceivedTimestamp).toISOString(),
+      });
 
     } catch (error) {
       this.logger('ExternalTemperatureService: Error receiving external temperature', {
@@ -195,7 +202,7 @@ export class ExternalTemperatureService {
    * @returns true if capability exists and has valid temperature
    */
   isConfigured(): boolean {
-    return this.device.hasCapability('adlar_external_indoor_temperature')
+    return this.device.hasCapability('measure_temperature.indoor')
       && this.getIndoorTemperature() !== null;
   }
 
