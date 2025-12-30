@@ -1,0 +1,32 @@
+{
+  "id": "adlar_simulated_target",
+  "type": "number",
+  "title": {
+    "en": "Simulated Target Temperature",
+    "nl": "Gesimuleerde Doeltemperatuur",
+    "de": "Simulierte Zieltemperatur",
+    "fr": "Température Cible Simulée"
+  },
+  "desc": {
+    "en": "Target temperature calculated by adaptive control in simulation mode (not sent to heat pump)",
+    "nl": "Doeltemperatuur berekend door adaptieve regeling in simulatiemodus (niet naar warmtepomp gestuurd)",
+    "de": "Zieltemperatur berechnet durch adaptive Steuerung im Simulationsmodus (nicht an Wärmepumpe gesendet)",
+    "fr": "Température cible calculée par contrôle adaptatif en mode simulation (non envoyée à la pompe)"
+  },
+  "units": {
+    "en": "°C",
+    "nl": "°C",
+    "de": "°C",
+    "fr": "°C"
+  },
+  "chartType": "stepLine",
+  "decimals": 1,
+  "min": 15,
+  "max": 28,
+  "step": 0.1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/simulated-target-temperature.svg",
+  "insight": true
+}

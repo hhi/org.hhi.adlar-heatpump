@@ -9,19 +9,21 @@
   <circle cx="50" cy="55" r="12" fill="none" stroke="currentColor" stroke-width="4" opacity="0.4"/>
 
   <!-- Connection waves/signals emanating from device -->
-  <path d="M50 20 Q50 15, 45 15 M50 20 Q50 15, 55 15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-  <path d="M50 23 Q50 19, 47 19 M50 23 Q50 19, 53 19" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <path d="M50 20 Q50 15 45 15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <path d="M50 20 Q50 15 55 15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <path d="M50 23 Q50 19 47 19" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <path d="M50 23 Q50 19 53 19" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
 
   <!-- Data flow indicators (bidirectional arrows) -->
-  <path d="M18 45 L25 45 L22 42 M25 45 L22 48" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-  <path d="M18 55 L25 55 L22 52 M25 55 L22 58" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <path d="M18 45 L25 45 L22 42 M25 45 L22 48" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8" fill="none"/>
+  <path d="M18 55 L25 55 L22 52 M25 55 L22 58" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.6" fill="none"/>
 
-  <path d="M82 45 L75 45 L78 42 M75 45 L78 48" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-  <path d="M82 55 L75 55 L78 52 M75 55 L78 58" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <path d="M82 45 L75 45 L78 42 M75 45 L78 48" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.8" fill="none"/>
+  <path d="M82 55 L75 55 L78 52 M75 55 L78 58" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.6" fill="none"/>
 
   <!-- Network/cloud connection symbol (top) -->
   <ellipse cx="50" cy="12" rx="8" ry="4" fill="currentColor" opacity="0.3"/>
-  <path d="M42 12 L42 8 Q42 5, 45 5 L55 5 Q58 5, 58 8 L58 12" fill="currentColor" opacity="0.3"/>
+  <path d="M42 12 L42 8 Q42 5 45 5 L55 5 Q58 5 58 8 L58 12" fill="currentColor" opacity="0.3"/>
 
   <!-- Status indicator dot (connection health) -->
   <circle cx="65" cy="40" r="5" fill="currentColor" opacity="0.9"/>

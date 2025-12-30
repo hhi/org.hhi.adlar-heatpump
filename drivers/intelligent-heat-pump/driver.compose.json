@@ -7,6 +7,9 @@
 
   "capabilities": [
     "target_temperature",
+    "target_temperature.indoor",
+    "measure_temperature.indoor",
+    "adlar_simulated_target",
 
     "onoff",
 
@@ -134,6 +137,53 @@
       "description": {
         "nl": "dps_4: temp_set - Doeltemperatuur"
       }
+    },
+
+    "target_temperature.indoor": {
+      "title": {
+        "en": "Desired Indoor Temperature",
+        "nl": "Gewenste Binnentemperatuur",
+        "de": "Gewünschte Innentemperatur",
+        "fr": "Température Intérieure Souhaitée"
+      },
+      "desc": {
+        "en": "Target room temperature for adaptive control to maintain. Set your desired comfort temperature here.",
+        "nl": "Doel kamertemperatuur die adaptieve regeling moet handhaven. Stel hier je gewenste comfort temperatuur in.",
+        "de": "Zielraumtemperatur für adaptive Steuerung. Stellen Sie hier Ihre gewünschte Komforttemperatur ein.",
+        "fr": "Température cible pour le contrôle adaptatif. Définissez ici votre température de confort souhaitée."
+      },
+      "units": "°C",
+      "decimals": 1,
+      "min": 15,
+      "max": 25,
+      "step": 0.5,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "thermostat",
+      "chartType": "stepLine",
+      "insight": true
+    },
+
+    "measure_temperature.indoor": {
+      "title": {
+        "en": "Indoor Temperature",
+        "nl": "Binnentemperatuur",
+        "de": "Innentemperatur",
+        "fr": "Température Intérieure"
+      },
+      "desc": {
+        "en": "Measured room temperature from external sensor (Homey thermostat, temperature sensor). Updated via flow card 'Send indoor temperature'.",
+        "nl": "Gemeten kamertemperatuur van externe sensor (Homey thermostaat, temperatuursensor). Geüpdatet via flow kaart 'Stuur binnentemperatuur'.",
+        "de": "Gemessene Raumtemperatur von externem Sensor (Homey Thermostat, Temperatursensor). Aktualisiert über Flow-Karte 'Raumtemperatur senden'.",
+        "fr": "Température mesurée par capteur externe (thermostat Homey, capteur de température). Mise à jour via carte de flux 'Envoyer température intérieure'."
+      },
+      "units": "°C",
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "chartType": "spline",
+      "insight": true
     },
 
     "onoff": {

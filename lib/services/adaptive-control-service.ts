@@ -80,7 +80,9 @@ export class AdaptiveControlService {
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
   private isEnabled = false;
-  private isMonitoringMode = true; // Start in monitoring mode for safety
+  private isMonitoringMode = true; // Start in monitoring mode for safety (deprecated - use isSimulateMode)
+  private isSimulateMode = false; // Simulation mode: track simulated temp without writing to device
+  private simulatedTargetTemp: number | null = null; // Simulated target temp (only used in simulate mode)
   private lastControlCycleTime: number = 0;
   private lastAdjustmentTime: number = 0; // Last time target_temperature was adjusted (throttling)
   private controlIntervalMs: number = 5 * 60 * 1000; // 5 minutes default
@@ -97,6 +99,7 @@ export class AdaptiveControlService {
   private readonly STORE_KEY_LAST_ADJUSTMENT = 'adaptive_last_adjustment_time';
   private readonly STORE_KEY_ENABLED = 'adaptive_control_enabled';
   private readonly STORE_KEY_ACCUMULATED_ADJUSTMENT = 'adaptive_accumulated_adjustment';
+  private readonly STORE_KEY_SIMULATED_TARGET = 'adaptive_simulated_target_temp';
 
   /**
    * @param config.device - Owning Homey device
@@ -128,8 +131,6 @@ export class AdaptiveControlService {
 
     // Initialize Component 3: Energy Price Optimizer
     this.energyOptimizer = new EnergyPriceOptimizer({
-      apiUrl: 'https://api.energyzero.nl/v1/energyprices',
-      updateIntervalHours: 1,
       thresholds: {
         veryLow: 0.10,
         low: 0.15,
@@ -216,12 +217,6 @@ export class AdaptiveControlService {
         this.energyOptimizer.restoreState(energyState);
       }
 
-      // Fetch initial energy prices (non-blocking) - only if price optimizer is enabled
-      const priceOptimizerEnabled = await this.device.getSetting('price_optimizer_enabled');
-      if (priceOptimizerEnabled) {
-        this.energyOptimizer.updatePrices().catch((err) => this.logger('Initial price fetch failed:', err));
-      }
-
       // Restore Component 4: COP Optimizer state
       const copState = await this.device.getStoreValue('cop_optimizer_state');
       if (copState) {
@@ -260,6 +255,37 @@ export class AdaptiveControlService {
     this.isEnabled = true;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, true);
 
+    // Check simulate mode setting
+    this.isSimulateMode = await this.device.getSetting('adaptive_simulate_mode') || false;
+
+    if (this.isSimulateMode) {
+      // Simulate mode: Initialize simulated target temp
+      const currentTargetTemp = this.device.getCapabilityValue('target_temperature') as number | null;
+
+      // Try to restore from previous simulation session
+      this.simulatedTargetTemp = await this.device.getStoreValue(this.STORE_KEY_SIMULATED_TARGET);
+
+      if (this.simulatedTargetTemp === null && currentTargetTemp !== null) {
+        // First time: initialize with actual temp_set (DPS 4)
+        this.simulatedTargetTemp = currentTargetTemp;
+        await this.device.setStoreValue(this.STORE_KEY_SIMULATED_TARGET, this.simulatedTargetTemp);
+
+        this.logger('AdaptiveControlService: Simulate mode initialized', {
+          initialTemp: this.simulatedTargetTemp.toFixed(1),
+          source: 'target_temperature (DPS 4)',
+        });
+      } else {
+        this.logger('AdaptiveControlService: Simulate mode restored', {
+          simulatedTemp: this.simulatedTargetTemp?.toFixed(1) || 'null',
+        });
+      }
+
+      // Update simulated target capability
+      if (this.simulatedTargetTemp !== null && this.device.hasCapability('adlar_simulated_target')) {
+        await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
+      }
+    }
+
     // Start control loop using Homey timer management
     this.controlLoopInterval = this.device.homey.setInterval(
       async () => {
@@ -272,9 +298,15 @@ export class AdaptiveControlService {
     await this.executeControlCycle();
 
     // Emit status change trigger
-    await this.triggerStatusChange('enabled', 'Adaptive temperature control enabled');
+    await this.triggerStatusChange(
+      this.isSimulateMode ? 'simulate' : 'enabled',
+      this.isSimulateMode
+        ? 'Adaptive control started in SIMULATION mode'
+        : 'Adaptive temperature control enabled',
+    );
 
     this.logger('AdaptiveControlService: Started', {
+      mode: this.isSimulateMode ? 'SIMULATE' : 'ACTIVE',
       intervalMinutes: this.controlIntervalMs / 60000,
     });
   }
@@ -288,7 +320,51 @@ export class AdaptiveControlService {
       this.controlLoopInterval = null;
     }
 
+    // Check if we need to commit simulated value
+    if (this.isSimulateMode && this.simulatedTargetTemp !== null) {
+      const shouldCommit = await this.device.getSetting('adaptive_commit_on_disable') || false;
+      const previousTemp = this.device.getCapabilityValue('target_temperature') as number;
+
+      if (shouldCommit) {
+        // Commit simulated temp to real device
+        this.logger('AdaptiveControlService: Committing simulated temp to device', {
+          simulatedTemp: this.simulatedTargetTemp.toFixed(1),
+          previousTemp: previousTemp?.toFixed(1) || 'unknown',
+          change: (this.simulatedTargetTemp - (previousTemp || 0)).toFixed(1),
+        });
+
+        await this.device.setCapabilityValue('target_temperature', this.simulatedTargetTemp);
+
+        // Trigger commit notification
+        await this.device.homey.flow
+          .getDeviceTriggerCard('adaptive_simulation_committed')
+          .trigger(this.device, {
+            committed_temperature: this.simulatedTargetTemp,
+            previous_temperature: previousTemp || 0,
+            change: this.simulatedTargetTemp - (previousTemp || 0),
+          })
+          .catch((err) => this.logger('Failed to trigger commit card:', err));
+      } else {
+        this.logger('AdaptiveControlService: Discarding simulated temp (not committed)', {
+          simulatedTemp: this.simulatedTargetTemp.toFixed(1),
+          actualTemp: previousTemp?.toFixed(1) || 'unknown',
+        });
+      }
+
+      // Clear simulated state
+      this.simulatedTargetTemp = null;
+      await this.device.unsetStoreValue(this.STORE_KEY_SIMULATED_TARGET);
+
+      // Clear simulated capability
+      if (this.device.hasCapability('adlar_simulated_target')) {
+        await this.device.setCapabilityValue('adlar_simulated_target', null).catch(() => {
+          // Ignore errors - capability might not be available
+        });
+      }
+    }
+
     this.isEnabled = false;
+    this.isSimulateMode = false;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, false);
 
     // Save PI history before stopping
@@ -298,6 +374,32 @@ export class AdaptiveControlService {
     await this.triggerStatusChange('disabled', 'Adaptive temperature control disabled');
 
     this.logger('AdaptiveControlService: Stopped');
+  }
+
+  /**
+   * Get effective target temperature for calculations
+   *
+   * @returns Simulated temp if in simulate mode, otherwise desired indoor temperature
+   */
+  private getEffectiveTargetTemp(): number | null {
+    if (this.isSimulateMode) {
+      return this.simulatedTargetTemp;
+    }
+
+    // Normal mode: read desired indoor temperature from user-settable subcapability
+    if (!this.device.hasCapability('target_temperature.indoor')) {
+      this.logger('AdaptiveControlService: target_temperature.indoor capability not available');
+      return null;
+    }
+
+    const desiredIndoorTemp = this.device.getCapabilityValue('target_temperature.indoor') as number | null;
+
+    if (desiredIndoorTemp === null || desiredIndoorTemp === undefined) {
+      this.logger('AdaptiveControlService: No desired indoor temperature set yet');
+      return null;
+    }
+
+    return desiredIndoorTemp;
   }
 
   /**
@@ -330,14 +432,16 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 3: Read current target temperature from device
-      const targetTemp = this.device.getCapabilityValue('target_temperature') as number | null;
+      // Step 3: Read current target temperature (simulated or actual)
+      const targetTemp = this.getEffectiveTargetTemp();
       if (targetTemp === null) {
         this.logger('AdaptiveControlService: No target temperature available, skipping cycle');
         return;
       }
 
-      this.logger(`Indoor: ${indoorTemp.toFixed(1)}°C, Target: ${targetTemp.toFixed(1)}°C`);
+      this.logger(
+        `Indoor: ${indoorTemp.toFixed(1)}°C, Target: ${targetTemp.toFixed(1)}°C${this.isSimulateMode ? ' [SIMULATED]' : ''}`,
+      );
 
       // Step 4A: Component 1 - Heating Controller (PI control)
       const sensorData: SensorData = {
@@ -411,11 +515,11 @@ export class AdaptiveControlService {
       this.logger(`Final Adjustment: ${combinedAction.finalAdjustment.toFixed(2)}°C (${combinedAction.priority} priority)`);
       combinedAction.reasoning.forEach((reason) => this.logger(`  - ${reason}`));
 
-      // Step 7: Check monitoring mode
-      if (this.isMonitoringMode) {
-        this.logger('⚠️ MONITORING MODE: Action logged but NOT executed');
+      // Step 7: Check for deprecated monitoring mode (legacy)
+      if (this.isMonitoringMode && !this.isSimulateMode) {
+        this.logger('⚠️ MONITORING MODE (DEPRECATED): Action logged but NOT executed');
 
-        // Trigger monitoring flow card
+        // Trigger legacy monitoring flow card
         await this.device.homey.flow
           .getDeviceTriggerCard('adaptive_monitoring_log')
           .trigger(this.device, {
@@ -455,103 +559,154 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 9: Automatic mode - accumulate fractional adjustment (for step:1 rounding)
-      // target_temperature uses step:1, but weighted decision maker calculates fractional adjustments
-      this.accumulatedAdjustment += combinedAction.finalAdjustment;
-
-      this.logger('AdaptiveControlService: Combined adjustment calculated', {
-        combinedAdjustment: combinedAction.finalAdjustment.toFixed(2),
-        accumulatedTotal: this.accumulatedAdjustment.toFixed(2),
-        reasoning: combinedAction.reasoning.join('; '),
-      });
-
-      // Round accumulated adjustment to nearest integer (step:1 requirement)
-      const integerAdjustment = Math.round(this.accumulatedAdjustment);
-
-      // Only apply if rounded adjustment is non-zero
-      if (integerAdjustment === 0) {
-        this.logger('AdaptiveControlService: Accumulating adjustment (waiting for ≥0.5°C)', {
-          accumulated: this.accumulatedAdjustment.toFixed(2),
-          needMore: (0.5 - Math.abs(this.accumulatedAdjustment)).toFixed(2),
-        });
-
-        // Persist accumulator even when not applying
-        await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
-        this.lastControlCycleTime = Date.now();
-        return;
-      }
-
-      // Step 5c: Throttling check - minimum 20 minutes between actual adjustments
-      const timeSinceLastAdjustment = Date.now() - this.lastAdjustmentTime;
-      const minWaitTime = DeviceConstants.ADAPTIVE_MIN_WAIT_BETWEEN_ADJUSTMENTS_MS;
-
-      if (this.lastAdjustmentTime > 0 && timeSinceLastAdjustment < minWaitTime) {
-        const minutesRemaining = Math.ceil((minWaitTime - timeSinceLastAdjustment) / 60000);
-        this.logger('AdaptiveControlService: Adjustment throttled (anti-oscillation)', {
-          minutesSinceLastAdjustment: Math.round(timeSinceLastAdjustment / 60000),
-          minutesUntilNextAllowed: minutesRemaining,
-          integerAdjustment,
-          accumulated: this.accumulatedAdjustment.toFixed(2),
-        });
-        this.lastControlCycleTime = Date.now();
-        return;
-      }
-
-      // Step 6: Calculate new target temperature with integer adjustment
-      const newTargetTemp = targetTemp + integerAdjustment;
-
-      // Safety: clamp target temperature to reasonable range (15-28°C)
-      const clampedTargetTemp = Math.max(15, Math.min(28, newTargetTemp));
-
-      // Calculate actual applied adjustment (may differ if clamped)
-      const actualAdjustment = clampedTargetTemp - targetTemp;
-
-      this.logger('AdaptiveControlService: Applying integer temperature adjustment', {
-        currentTarget: targetTemp,
-        integerAdjustment,
-        actualAdjustment,
-        newTarget: clampedTargetTemp,
-        accumulated: this.accumulatedAdjustment.toFixed(2),
-        reasoning: combinedAction.reasoning.join('; '),
-        priority: combinedAction.priority,
-      });
-
-      // Update target_temperature capability (step:1 compatible)
-      await this.device.setCapabilityValue('target_temperature', clampedTargetTemp);
-
-      // Subtract applied adjustment from accumulator
-      this.accumulatedAdjustment -= actualAdjustment;
-
-      this.logger('AdaptiveControlService: Accumulator updated after application', {
-        appliedAdjustment: actualAdjustment,
-        remainingAccumulated: this.accumulatedAdjustment.toFixed(2),
-      });
-
-      // Step 10: Emit flow card trigger (with actual applied adjustment)
-      await this.triggerTemperatureAdjusted(targetTemp, clampedTargetTemp, combinedAction);
-
-      // Step 11: Save state for all components
-      await this.savePIHistory();
-      await this.device.setStoreValue(this.STORE_KEY_LAST_ACTION, Date.now());
-      await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
-
-      // Persist optimizer states
-      await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
-      await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
-
-      // Update and persist last adjustment timestamp (throttling)
-      this.lastAdjustmentTime = Date.now();
-      await this.device.setStoreValue(this.STORE_KEY_LAST_ADJUSTMENT, this.lastAdjustmentTime);
-
-      this.lastControlCycleTime = Date.now();
-
-      this.logger('AdaptiveControlService: Control cycle completed successfully (all components)');
+      // Step 9: Apply temperature adjustment (simulate or active mode)
+      await this.applyTemperatureAdjustment(targetTemp, combinedAction);
 
     } catch (error) {
       this.logger('AdaptiveControlService: Control cycle error', {
         error: (error as Error).message,
       });
     }
+  }
+
+  /**
+   * Apply temperature adjustment to simulated or real target temp
+   *
+   * @param currentTarget - Current target temperature (simulated or actual)
+   * @param combinedAction - Combined action from weighted decision maker
+   */
+  private async applyTemperatureAdjustment(
+    currentTarget: number,
+    combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
+  ): Promise<void> {
+    // Accumulate fractional adjustment (for step:1 rounding)
+    this.accumulatedAdjustment += combinedAction.finalAdjustment;
+
+    this.logger('AdaptiveControlService: Combined adjustment calculated', {
+      combinedAdjustment: combinedAction.finalAdjustment.toFixed(2),
+      accumulatedTotal: this.accumulatedAdjustment.toFixed(2),
+      reasoning: combinedAction.reasoning.join('; '),
+    });
+
+    // Round accumulated adjustment to nearest integer (step:1 requirement)
+    const integerAdjustment = Math.round(this.accumulatedAdjustment);
+
+    // Only apply if rounded adjustment is non-zero
+    if (integerAdjustment === 0) {
+      this.logger('AdaptiveControlService: Accumulating adjustment (waiting for ≥0.5°C)', {
+        accumulated: this.accumulatedAdjustment.toFixed(2),
+        needMore: (0.5 - Math.abs(this.accumulatedAdjustment)).toFixed(2),
+      });
+
+      // Persist accumulator even when not applying
+      await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
+      this.lastControlCycleTime = Date.now();
+      return;
+    }
+
+    // Throttling check - minimum 20 minutes between actual adjustments
+    const timeSinceLastAdjustment = Date.now() - this.lastAdjustmentTime;
+    const minWaitTime = DeviceConstants.ADAPTIVE_MIN_WAIT_BETWEEN_ADJUSTMENTS_MS;
+
+    if (this.lastAdjustmentTime > 0 && timeSinceLastAdjustment < minWaitTime) {
+      const minutesRemaining = Math.ceil((minWaitTime - timeSinceLastAdjustment) / 60000);
+      this.logger('AdaptiveControlService: Adjustment throttled (anti-oscillation)', {
+        minutesSinceLastAdjustment: Math.round(timeSinceLastAdjustment / 60000),
+        minutesUntilNextAllowed: minutesRemaining,
+        integerAdjustment,
+        accumulated: this.accumulatedAdjustment.toFixed(2),
+      });
+      this.lastControlCycleTime = Date.now();
+      return;
+    }
+
+    // Calculate new target temperature with integer adjustment
+    const newTargetTemp = currentTarget + integerAdjustment;
+
+    // Safety: clamp target temperature to reasonable range (15-28°C)
+    const clampedTargetTemp = Math.max(15, Math.min(28, newTargetTemp));
+
+    // Calculate actual applied adjustment (may differ if clamped)
+    const actualAdjustment = clampedTargetTemp - currentTarget;
+
+    this.logger('AdaptiveControlService: Applying temperature adjustment', {
+      mode: this.isSimulateMode ? 'SIMULATE' : 'ACTIVE',
+      currentTarget,
+      integerAdjustment,
+      actualAdjustment,
+      newTarget: clampedTargetTemp,
+      accumulated: this.accumulatedAdjustment.toFixed(2),
+      reasoning: combinedAction.reasoning.join('; '),
+      priority: combinedAction.priority,
+    });
+
+    if (this.isSimulateMode) {
+      // SIMULATE MODE: Update internal simulated temp AND capability
+      this.simulatedTargetTemp = clampedTargetTemp;
+      await this.device.setStoreValue(this.STORE_KEY_SIMULATED_TARGET, this.simulatedTargetTemp);
+
+      // Update capability for Insights
+      if (this.device.hasCapability('adlar_simulated_target')) {
+        await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
+      }
+
+      // Get actual target temp for delta calculation
+      const actualTarget = this.device.getCapabilityValue('target_temperature') as number;
+      const delta = this.simulatedTargetTemp - actualTarget;
+
+      this.logger('Simulated target updated', {
+        simulated: this.simulatedTargetTemp.toFixed(1),
+        actual: actualTarget.toFixed(1),
+        delta: delta.toFixed(1),
+      });
+
+      // Trigger simulation flow card
+      await this.device.homey.flow
+        .getDeviceTriggerCard('adaptive_simulation_update')
+        .trigger(this.device, {
+          simulated_target: this.simulatedTargetTemp,
+          actual_target: actualTarget,
+          delta,
+          adjustment: actualAdjustment,
+          comfort_component: combinedAction.breakdown.comfort,
+          efficiency_component: combinedAction.breakdown.efficiency,
+          cost_component: combinedAction.breakdown.cost,
+          reasoning: combinedAction.reasoning.join('; '),
+        })
+        .catch((err) => this.logger('Failed to trigger simulation card:', err));
+
+    } else {
+      // ACTIVE MODE: Write to actual device capability (DPS 4)
+      await this.device.setCapabilityValue('target_temperature', clampedTargetTemp);
+
+      // Trigger normal adjustment card
+      await this.triggerTemperatureAdjusted(currentTarget, clampedTargetTemp, combinedAction);
+    }
+
+    // Subtract applied adjustment from accumulator
+    this.accumulatedAdjustment -= actualAdjustment;
+
+    this.logger('AdaptiveControlService: Accumulator updated after application', {
+      appliedAdjustment: actualAdjustment,
+      remainingAccumulated: this.accumulatedAdjustment.toFixed(2),
+    });
+
+    // Save state for all components
+    await this.savePIHistory();
+    await this.device.setStoreValue(this.STORE_KEY_LAST_ACTION, Date.now());
+    await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
+
+    // Persist optimizer states
+    await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
+    await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
+
+    // Update and persist last adjustment timestamp (throttling)
+    this.lastAdjustmentTime = Date.now();
+    await this.device.setStoreValue(this.STORE_KEY_LAST_ADJUSTMENT, this.lastAdjustmentTime);
+
+    this.lastControlCycleTime = Date.now();
+
+    this.logger('AdaptiveControlService: Temperature adjustment applied successfully');
   }
 
   /**
@@ -798,6 +953,28 @@ export class AdaptiveControlService {
   public updatePriorities(priorities: { comfort: number; efficiency: number; cost: number }): void {
     this.decisionMaker.setPriorities(priorities);
     this.logger('AdaptiveControlService: Updated priorities', priorities);
+  }
+
+  /**
+   * Set external energy prices from flow card
+   *
+   * Accepts hourly energy prices from external sources (e.g., dynamic tariff providers)
+   * and forwards them to the EnergyPriceOptimizer.
+   *
+   * @param pricesObject - Object with hour offsets as keys (0 = current hour) and prices (€/kWh) as values
+   * @throws Error if prices object is invalid
+   */
+  public setExternalEnergyPrices(pricesObject: Record<string, number>): void {
+    try {
+      this.energyOptimizer.setExternalPrices(pricesObject);
+      this.logger(
+        'AdaptiveControlService: External energy prices received',
+        `(${Object.keys(pricesObject).length} hours)`,
+      );
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to set external energy prices:', error);
+      throw error;
+    }
   }
 
   /**

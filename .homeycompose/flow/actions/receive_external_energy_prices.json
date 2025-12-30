@@ -1,0 +1,45 @@
+{
+  "id": "receive_external_energy_prices",
+  "title": {
+    "en": "Send energy prices to heat pump",
+    "nl": "Stuur energieprijzen naar warmtepomp",
+    "de": "Energiepreise an Wärmepumpe senden",
+    "fr": "Envoyer les prix de l'énergie à la pompe à chaleur"
+  },
+  "titleFormatted": {
+    "en": "Send external energy prices [[prices_json]] for price optimization",
+    "nl": "Stuur externe energieprijzen [[prices_json]] voor prijsoptimalisatie",
+    "de": "Externe Energiepreise [[prices_json]] für Preisoptimierung senden",
+    "fr": "Envoyer les prix de l'énergie externes [[prices_json]] pour l'optimisation des prix"
+  },
+  "hint": {
+    "en": "Sends hourly energy prices (€/kWh) from external source to enable price-based optimization. Format: {\"0\":0.11,\"1\":0.10,...} where keys are hours from now (0=current hour). Replaces EnergyZero API.",
+    "nl": "Stuurt uurlijkse energieprijzen (€/kWh) van externe bron om prijsgebaseerde optimalisatie mogelijk te maken. Formaat: {\"0\":0.11,\"1\":0.10,...} waarbij keys uren vanaf nu zijn (0=huidig uur). Vervangt EnergyZero API.",
+    "de": "Sendet stündliche Energiepreise (€/kWh) von externer Quelle zur preisbasierten Optimierung. Format: {\"0\":0.11,\"1\":0.10,...} wobei Schlüssel Stunden ab jetzt sind (0=aktuelle Stunde). Ersetzt EnergyZero API.",
+    "fr": "Envoie les prix horaires de l'énergie (€/kWh) depuis une source externe pour l'optimisation basée sur les prix. Format: {\"0\":0.11,\"1\":0.10,...} où les clés sont les heures à partir de maintenant (0=heure actuelle). Remplace l'API EnergyZero."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "text",
+      "name": "prices_json",
+      "title": {
+        "en": "Energy prices (JSON)",
+        "nl": "Energieprijzen (JSON)",
+        "de": "Energiepreise (JSON)",
+        "fr": "Prix de l'énergie (JSON)"
+      },
+      "placeholder": {
+        "en": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
+        "nl": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
+        "de": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
+        "fr": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}"
+      }
+    }
+  ]
+}

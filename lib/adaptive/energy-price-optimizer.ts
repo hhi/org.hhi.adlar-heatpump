@@ -1,8 +1,8 @@
 /**
  * Energy Price Optimizer - Component 3 of Adaptive Control System
  *
- * Integrates with EnergyZero day-ahead energy pricing API to optimize
- * heating schedule based on electricity prices.
+ * Receives energy prices via flow card to optimize heating schedule
+ * based on electricity prices.
  *
  * Strategy:
  * - VERY_LOW prices (<€0.10/kWh): Pre-heat maximally (+1.5°C)
@@ -37,8 +37,6 @@ export interface PriceData {
 }
 
 export interface EnergyOptimizerConfig {
-  apiUrl: string;
-  updateIntervalHours: number;
   thresholds: PriceThresholds;
   maxPreHeatOffset: number; // 1.5°C
   maxReduceOffset: number; // -1.0°C
@@ -72,50 +70,6 @@ export class EnergyPriceOptimizer {
     this.logger = config.logger || (() => {});
   }
 
-  /**
-   * Fetch latest prices from EnergyZero API
-   *
-   * API endpoint: https://api.energyzero.nl/v1/energyprices
-   * Returns 48 hours of day-ahead prices (updated daily at 13:00)
-   */
-  public async updatePrices(): Promise<void> {
-    const now = Date.now();
-    const hoursSinceLastFetch = (now - this.lastFetch) / 3600000;
-
-    if (hoursSinceLastFetch < this.config.updateIntervalHours && this.priceData.length > 0) {
-      this.logger('EnergyPriceOptimizer: Using cached prices');
-      return;
-    }
-
-    try {
-      const response = await fetch(this.config.apiUrl, {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-      });
-
-      if (!response.ok) {
-        throw new Error(`API returned ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json() as { Prices: Array<{ price: number; readingDate: string }> };
-
-      // Parse and categorize prices
-      this.priceData = data.Prices.map((item) => {
-        const { price } = item; // €/kWh (including VAT)
-        return {
-          timestamp: new Date(item.readingDate).getTime(),
-          price,
-          category: this.categorizePrice(price),
-        };
-      });
-
-      this.lastFetch = now;
-      this.logger(`EnergyPriceOptimizer: Fetched ${this.priceData.length} price points`);
-    } catch (error) {
-      this.logger('EnergyPriceOptimizer: Failed to fetch prices:', error);
-      throw error;
-    }
-  }
 
   /**
    * Categorize price into bands
@@ -297,6 +251,77 @@ export class EnergyPriceOptimizer {
    */
   public getPriceData(): PriceData[] {
     return this.priceData;
+  }
+
+  /**
+   * Set energy prices from external source (flow card)
+   *
+   * Accepts hourly prices from external flow card in format:
+   * {"0": 0.11, "1": 0.10, "2": 0.09, ...}
+   * where keys are hour offsets from now (0 = current hour, 1 = next hour, etc.)
+   *
+   * @param pricesObject - Object with hour offsets as keys and prices (€/kWh) as values
+   * @throws Error if prices object is invalid or empty
+   */
+  public setExternalPrices(pricesObject: Record<string, number>): void {
+    const now = Date.now();
+
+    // Validate input
+    if (!pricesObject || typeof pricesObject !== 'object') {
+      throw new Error('Invalid prices object: must be an object with hour offsets as keys');
+    }
+
+    const entries = Object.entries(pricesObject);
+    if (entries.length === 0) {
+      throw new Error('Invalid prices object: must contain at least one price entry');
+    }
+
+    // Convert external prices to internal format
+    const newPriceData: PriceData[] = [];
+
+    for (const [hourOffsetStr, price] of entries) {
+      // Validate hour offset
+      const hourOffset = parseInt(hourOffsetStr, 10);
+      if (isNaN(hourOffset) || hourOffset < 0) {
+        this.logger(`EnergyPriceOptimizer: Skipping invalid hour offset: ${hourOffsetStr}`);
+        continue;
+      }
+
+      // Validate price value
+      if (typeof price !== 'number' || isNaN(price) || price < 0) {
+        this.logger(`EnergyPriceOptimizer: Skipping invalid price for hour ${hourOffset}: ${price}`);
+        continue;
+      }
+
+      // Calculate timestamp for this hour
+      // Round current time to start of hour, then add offset
+      const hourStart = new Date(now);
+      hourStart.setMinutes(0, 0, 0);
+      const timestamp = hourStart.getTime() + (hourOffset * 3600000);
+
+      // Create price data entry (use price as-is, no VAT or adjustments)
+      newPriceData.push({
+        timestamp,
+        price, // €/kWh as provided
+        category: this.categorizePrice(price),
+      });
+    }
+
+    if (newPriceData.length === 0) {
+      throw new Error('No valid price entries found in input');
+    }
+
+    // Sort by timestamp (ascending)
+    newPriceData.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Replace existing price data
+    this.priceData = newPriceData;
+    this.lastFetch = now;
+
+    this.logger(
+      `EnergyPriceOptimizer: Set ${newPriceData.length} external prices `
+      + `(hours ${Object.keys(pricesObject).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).join(', ')})`,
+    );
   }
 
   /**

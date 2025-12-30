@@ -818,6 +818,40 @@
         ]
       },
       {
+        "id": "adaptive_simulate_mode",
+        "type": "checkbox",
+        "label": {
+          "en": "Simulation Mode (Safe Testing)",
+          "nl": "Simulatiemodus (Veilig Testen)",
+          "de": "Simulationsmodus (Sicheres Testen)",
+          "fr": "Mode Simulation (Test Sécurisé)"
+        },
+        "hint": {
+          "en": "When enabled, adaptive control calculates and tracks a simulated target temperature without sending commands to the heat pump. This allows you to safely observe how adaptive control would behave before activating it. The simulated temperature is visible in Insights for comparison with your actual target temperature.",
+          "nl": "Wanneer ingeschakeld, berekent en volgt adaptieve regeling een gesimuleerde doeltemperatuur zonder commando's naar de warmtepomp te sturen. Hiermee kun je veilig observeren hoe adaptieve regeling zich zou gedragen voor je het activeert. De gesimuleerde temperatuur is zichtbaar in Insights voor vergelijking met je werkelijke doeltemperatuur.",
+          "de": "Wenn aktiviert, berechnet und verfolgt die adaptive Steuerung eine simulierte Zieltemperatur, ohne Befehle an die Wärmepumpe zu senden. Auf diese Weise können Sie sicher beobachten, wie sich die adaptive Steuerung verhalten würde, bevor Sie sie aktivieren. Die simulierte Temperatur ist in Insights sichtbar zum Vergleich mit Ihrer tatsächlichen Zieltemperatur.",
+          "fr": "Lorsqu'activé, le contrôle adaptatif calcule et suit une température cible simulée sans envoyer de commandes à la pompe à chaleur. Cela vous permet d'observer en toute sécurité comment le contrôle adaptatif se comporterait avant de l'activer. La température simulée est visible dans Insights pour comparaison avec votre température cible réelle."
+        },
+        "value": false
+      },
+      {
+        "id": "adaptive_commit_on_disable",
+        "type": "checkbox",
+        "label": {
+          "en": "Commit Simulated Temp When Disabling",
+          "nl": "Gesimuleerde Temp Doorvoeren Bij Uitschakelen",
+          "de": "Simulierte Temp Übernehmen Beim Deaktivieren",
+          "fr": "Valider Temp Simulée Lors Désactivation"
+        },
+        "hint": {
+          "en": "If enabled, the simulated temperature will be written to the heat pump when you disable adaptive control. If disabled, the simulated value is discarded and your heat pump keeps its current target temperature. Only applies when simulation mode is active.",
+          "nl": "Indien ingeschakeld, wordt de gesimuleerde temperatuur naar de warmtepomp geschreven wanneer je adaptieve regeling uitschakelt. Indien uitgeschakeld wordt de gesimuleerde waarde verworpen en behoudt je warmtepomp de huidige doeltemperatuur. Geldt alleen wanneer simulatiemodus actief is.",
+          "de": "Wenn aktiviert, wird die simulierte Temperatur an die Wärmepumpe gesendet, wenn Sie die adaptive Steuerung deaktivieren. Wenn deaktiviert, wird der simulierte Wert verworfen und Ihre Wärmepumpe behält ihre aktuelle Zieltemperatur. Gilt nur, wenn der Simulationsmodus aktiv ist.",
+          "fr": "Si activé, la température simulée sera écrite sur la pompe à chaleur lorsque vous désactivez le contrôle adaptatif. Si désactivé, la valeur simulée est rejetée et votre pompe à chaleur conserve sa température cible actuelle. S'applique uniquement lorsque le mode simulation est actif."
+        },
+        "value": false
+      },
+      {
         "id": "adaptive_pi_kp",
         "type": "number",
         "label": {

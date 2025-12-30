@@ -1478,15 +1478,57 @@ class MyDevice extends Homey.Device {
       }
 
       // Initialize external ambient temperature capability with default value
+      // Restore from store to survive app updates
       if (this.hasCapability('adlar_external_ambient')) {
-        await this.setCapabilityValue('adlar_external_ambient', null);
-        this.categoryLog('cop', 'External ambient capability initialized with default value (null°C)');
+        const storedOutdoorTemp = await this.getStoreValue('external_outdoor_temp');
+        if (storedOutdoorTemp !== null && storedOutdoorTemp !== undefined) {
+          await this.setCapabilityValue('adlar_external_ambient', storedOutdoorTemp);
+          this.categoryLog('cop', `External ambient capability restored from store: ${storedOutdoorTemp}°C`);
+        } else {
+          await this.setCapabilityValue('adlar_external_ambient', null);
+          this.categoryLog('cop', 'External ambient capability initialized with default value (null°C)');
+        }
       }
 
       // Initialize external indoor temperature capability (v1.4.0 - Adaptive Control Component 1)
+      // Initialize legacy external indoor temperature capability (backwards compatibility)
+      // Restore from store to survive app updates
       if (this.hasCapability('adlar_external_indoor_temperature')) {
-        await this.setCapabilityValue('adlar_external_indoor_temperature', null);
-        this.log('External indoor temperature capability initialized with default value (null°C)');
+        const storedIndoorTemp = await this.getStoreValue('external_indoor_temp');
+        if (storedIndoorTemp !== null && storedIndoorTemp !== undefined) {
+          await this.setCapabilityValue('adlar_external_indoor_temperature', storedIndoorTemp);
+          this.log(`External indoor temperature capability (legacy) restored from store: ${storedIndoorTemp}°C`);
+        } else {
+          await this.setCapabilityValue('adlar_external_indoor_temperature', null);
+          this.log('External indoor temperature capability initialized with default value (null°C)');
+        }
+      }
+
+      // Initialize indoor temperature measurement subcapability (v2.3.5 - Subcapability Architecture)
+      // This read-only capability displays actual room temperature from external sensors
+      // Restore from store to survive app updates
+      if (this.hasCapability('measure_temperature.indoor')) {
+        const storedIndoorTemp = await this.getStoreValue('external_indoor_temp');
+        if (storedIndoorTemp !== null && storedIndoorTemp !== undefined) {
+          await this.setCapabilityValue('measure_temperature.indoor', storedIndoorTemp);
+          this.log(`Indoor temperature measurement subcapability restored from store: ${storedIndoorTemp}°C`);
+        } else {
+          await this.setCapabilityValue('measure_temperature.indoor', null);
+          this.log('Indoor temperature measurement subcapability initialized with default value (null°C)');
+        }
+      }
+
+      // Initialize desired indoor temperature subcapability (v2.3.5 - Subcapability Architecture)
+      // This user-settable capability defines the target room temperature for adaptive control
+      if (this.hasCapability('target_temperature.indoor')) {
+        const currentValue = this.getCapabilityValue('target_temperature.indoor');
+        if (currentValue === null || currentValue === undefined) {
+          // Default to 21.0°C if not set (typical comfortable room temperature)
+          await this.setCapabilityValue('target_temperature.indoor', 21.0);
+          this.log('Desired indoor temperature subcapability initialized with default: 21.0°C');
+        } else {
+          this.log(`Desired indoor temperature subcapability already set: ${currentValue}°C`);
+        }
       }
 
       // Initialize external energy total capability with storage-aware restoration
@@ -3167,6 +3209,40 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.3.5: Add indoor temperature subcapabilities for adaptive control
+      // These replace the legacy adlar_external_indoor_temperature with Homey's subcapability architecture
+      if (!this.hasCapability('measure_temperature.indoor')) {
+        try {
+          await this.addCapability('measure_temperature.indoor');
+          this.log('Migration v2.3.5: Added measure_temperature.indoor subcapability');
+
+          // Migrate data from legacy adlar_external_indoor_temperature if it exists
+          if (this.hasCapability('adlar_external_indoor_temperature')) {
+            const legacyValue = this.getCapabilityValue('adlar_external_indoor_temperature') as number | null;
+            if (legacyValue !== null && legacyValue !== undefined) {
+              await this.setCapabilityValue('measure_temperature.indoor', legacyValue);
+              this.log(`Migration v2.3.5: Migrated indoor temperature data: ${legacyValue}°C (from adlar_external_indoor_temperature)`);
+            } else {
+              await this.setCapabilityValue('measure_temperature.indoor', null);
+            }
+          } else {
+            await this.setCapabilityValue('measure_temperature.indoor', null);
+          }
+        } catch (error) {
+          this.error('Failed to add measure_temperature.indoor capability:', error);
+        }
+      }
+
+      if (!this.hasCapability('target_temperature.indoor')) {
+        try {
+          await this.addCapability('target_temperature.indoor');
+          await this.setCapabilityValue('target_temperature.indoor', 21.0);
+          this.log('Migration v2.3.5: Added target_temperature.indoor subcapability (default: 21.0°C)');
+        } catch (error) {
+          this.error('Failed to add target_temperature.indoor capability:', error);
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');
       if (!priceOptimizerEnabled) {
@@ -3254,8 +3330,43 @@ class MyDevice extends Homey.Device {
       ];
       this.debugLog('Setable capabilities:', this.settableCapabilities); // Output: []
 
+      // Register special listener for target_temperature.indoor (v2.3.5 - Subcapability Architecture)
+      // This is a local-only capability (no Tuya DP mapping) for desired room temperature
+      if (this.hasCapability('target_temperature.indoor')) {
+        this.registerCapabilityListener('target_temperature.indoor', async (value) => {
+          this.log(`Desired indoor temperature set to: ${value}°C`);
+
+          try {
+            // Validate temperature is within reasonable range
+            if (typeof value !== 'number' || Number.isNaN(value)) {
+              throw new Error(`Invalid temperature value: ${value}`);
+            }
+
+            if (value < 15 || value > 25) {
+              throw new Error(`Temperature ${value}°C out of valid range (15-25°C)`);
+            }
+
+            // Just store the value locally - no Tuya DP mapping needed
+            await this.setCapabilityValue('target_temperature.indoor', value);
+            this.log(`Desired indoor temperature updated successfully: ${value}°C`);
+
+          } catch (error) {
+            this.error('Error updating desired indoor temperature:', error);
+            throw error;
+          }
+        });
+
+        this.log('Registered listener for target_temperature.indoor (local-only capability)');
+      }
+
       // Register enhanced capability listeners with validation and error handling
       this.settableCapabilities.forEach((capability: string) => {
+        // Skip target_temperature.indoor - it has a custom listener registered above
+        if (capability === 'target_temperature.indoor') {
+          this.debugLog(`Skipping ${capability} - custom listener already registered`);
+          return;
+        }
+
         this.debugLog(`Registering capability listener for ${capability}`);
         this.registerCapabilityListener(capability, async (value, _opts) => {
           this.log(`${capability} set to`, value);
@@ -3410,6 +3521,36 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Update simulated target capability visibility based on simulate mode setting
+   *
+   * @param simulateMode - Whether simulate mode is enabled
+   */
+  private async updateSimulatedCapabilityVisibility(simulateMode: boolean): Promise<void> {
+    const hasCapability = this.hasCapability('adlar_simulated_target');
+
+    if (simulateMode) {
+      // Simulate mode enabled - ensure capability is visible
+      if (!hasCapability) {
+        await this.addCapability('adlar_simulated_target');
+        this.logger.info('Added adlar_simulated_target capability (simulate mode enabled)');
+      }
+
+      // Initialize with current target_temperature
+      const currentTarget = this.getCapabilityValue('target_temperature') as number;
+      if (currentTarget !== null) {
+        await this.setCapabilityValue('adlar_simulated_target', currentTarget);
+        this.logger.info('Initialized simulated target with current target:', currentTarget);
+      }
+    } else {
+      // Simulate mode disabled - remove capability
+      if (hasCapability) {
+        await this.removeCapability('adlar_simulated_target');
+        this.logger.info('Removed adlar_simulated_target capability (simulate mode disabled)');
+      }
+    }
+  }
+
+  /**
    * onSettings is called when the user updates the device's settings.
    * @param {object} event the onSettings event data
    * @param {object} event.oldSettings The old settings object
@@ -3433,6 +3574,11 @@ class MyDevice extends Homey.Device {
       const newLogLevel = Logger.parseLevel(newSettings.log_level as string || 'error');
       this.logger.setLevel(newLogLevel);
       this.logger.info('Log level changed to:', Logger.levelToString(newLogLevel));
+    }
+
+    // Handle adaptive simulate mode capability visibility (v2.3.1)
+    if (changedKeys.includes('adaptive_simulate_mode')) {
+      await this.updateSimulatedCapabilityVisibility(newSettings.adaptive_simulate_mode as boolean);
     }
 
     // Delegate settings changes to ServiceCoordinator first
@@ -3958,71 +4104,15 @@ class MyDevice extends Homey.Device {
       receiveExternalPowerAction.registerRunListener(async (args: { device: MyDevice; power_value: number }) => {
         this.categoryLog('energy', `📊 Received external power data: ${args.power_value}W`);
 
-        // Store the external power value in the capability
-        if (this.hasCapability('adlar_external_power')) {
-          await this.setCapabilityValue('adlar_external_power', args.power_value);
-          this.categoryLog('energy', `📊 External power capability updated to: ${args.power_value}W`);
-
-          // IMMEDIATELY update external energy total when external power is received
-          if (this.hasCapability('adlar_external_energy_total')) {
-            const now = Date.now();
-            const currentExternalTotal = this.getCapabilityValue('adlar_external_energy_total') || 0;
-
-            // Calculate time difference from last external power update
-            let energyIncrement = 0;
-            if (this.lastExternalPowerTimestamp) {
-              const timeDifferenceMs = now - this.lastExternalPowerTimestamp;
-              const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60); // Convert to hours
-              energyIncrement = (args.power_value / 1000) * timeDifferenceHours; // kWh
-
-              this.categoryLog('energy', `⏱️ Time since last power update: ${(timeDifferenceMs / 1000).toFixed(1)}s`);
-            } else {
-              // First measurement - use a default 10-second interval
-              energyIncrement = (args.power_value / 1000) * 0.002778; // kWh (10 seconds)
-              this.categoryLog('energy', '🆕 First external power measurement - using default 10s interval');
-            }
-
-            this.lastExternalPowerTimestamp = now;
-            const newExternalTotal = currentExternalTotal + energyIncrement;
-
-            // Use higher precision for small energy increments
-            const roundedTotal = Math.round(newExternalTotal * 1000000) / 1000000; // 6 decimal places
-            await this.setCapabilityValue('adlar_external_energy_total', roundedTotal);
-            await this.setStoreValue('external_cumulative_energy_kwh', roundedTotal);
-
-            // Also update external daily energy consumption
-            if (this.hasCapability('adlar_external_energy_daily')) {
-              const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
-              const newExternalDaily = currentExternalDaily + energyIncrement;
-              const roundedDaily = Math.round(newExternalDaily * 1000000) / 1000000; // 6 decimal places for daily (matches total)
-              await this.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
-
-              // Store external daily energy for persistence and reset functionality
-              await this.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
-            }
-
-            // Better display formatting for small values
-            const incrementWh = energyIncrement * 1000;
-            const incrementDisplay = incrementWh < 0.1
-              ? `+${(incrementWh * 1000).toFixed(1)}mWh`
-              : `+${incrementWh.toFixed(1)}Wh`;
-
-            this.categoryLog('energy', `🔌 External energy updated: ${incrementDisplay} `
-              + `(power: ${args.power_value}W, total: ${roundedTotal.toFixed(6)}kWh)`);
-          }
-        } else {
-          this.error('📊 External power capability not available!');
-        }
+        // Delegate to FlowCardManagerService for business logic (energy calculations, store persistence)
+        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalPowerData(args);
 
         // Trigger intelligent power update to potentially use this new external data
         const energyTrackingEnabled = this.getSetting('enable_intelligent_energy_tracking');
-        this.categoryLog('energy', `📊 Energy tracking enabled: ${energyTrackingEnabled}`);
 
         if (energyTrackingEnabled) {
           this.categoryLog('energy', '📊 Triggering intelligent power measurement update...');
           await this.updateIntelligentPowerMeasurement();
-        } else {
-          this.categoryLog('energy', '📊 Skipping intelligent power update - energy tracking disabled');
         }
 
         this.categoryLog('energy', `✅ External power data updated: ${args.power_value}W (energy tracking: ${energyTrackingEnabled})`);
@@ -4034,10 +4124,8 @@ class MyDevice extends Homey.Device {
       receiveExternalFlowAction.registerRunListener(async (args: { device: MyDevice; flow_value: number }) => {
         this.categoryLog('energy', `🌊 Received external flow data: ${args.flow_value}L/min`);
 
-        // Store the external flow value in the capability
-        if (this.hasCapability('adlar_external_flow')) {
-          await this.setCapabilityValue('adlar_external_flow', args.flow_value);
-        }
+        // Delegate to FlowCardManagerService for business logic
+        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalFlowData(args);
 
         this.categoryLog('energy', `✅ External flow data updated: ${args.flow_value}L/min`);
       });
@@ -4048,10 +4136,8 @@ class MyDevice extends Homey.Device {
       receiveExternalAmbientAction.registerRunListener(async (args: { device: MyDevice; temperature_value: number }) => {
         this.categoryLog('energy', `🌡️ Received external ambient data: ${args.temperature_value}°C`);
 
-        // Store the external ambient temperature value in the capability
-        if (this.hasCapability('adlar_external_ambient')) {
-          await this.setCapabilityValue('adlar_external_ambient', args.temperature_value);
-        }
+        // Delegate to FlowCardManagerService for business logic
+        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalAmbientData(args);
 
         this.categoryLog('energy', `✅ External ambient data updated: ${args.temperature_value}°C`);
       });
@@ -4085,6 +4171,18 @@ class MyDevice extends Homey.Device {
           this.error('Failed to update external indoor temperature:', error);
           throw error; // Re-throw to show error in flow card execution
         }
+      });
+
+      // Register external energy prices action card (for price optimization)
+      const receiveExternalEnergyPricesAction = this.homey.flow.getActionCard('receive_external_energy_prices');
+      // eslint-disable-next-line camelcase
+      receiveExternalEnergyPricesAction.registerRunListener(async (args: { device: MyDevice; prices_json: string }) => {
+        this.log(`💰 Received external energy prices (${args.prices_json.length} chars)`);
+
+        // Delegate to FlowCardManagerService for business logic
+        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalEnergyPrices(args);
+
+        this.log('✅ External energy prices updated successfully');
       });
 
       // Register building model diagnostic action card

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.3.4",
+  "version": "2.3.6",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -150,6 +150,189 @@
               "fr": "Raisonnement"
             },
             "example": "Comfort: Error 0.8°C; Cost: Low price €0.12/kWh"
+          }
+        ]
+      },
+      {
+        "id": "adaptive_simulation_committed",
+        "title": {
+          "en": "Simulated temperature committed to heat pump",
+          "nl": "Gesimuleerde temperatuur doorgevoerd naar warmtepomp",
+          "de": "Simulierte Temperatur an Wärmepumpe übertragen",
+          "fr": "Température simulée validée vers pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Committed [[committed_temperature]]°C to heat pump (was [[previous_temperature]]°C)",
+          "nl": "[[committed_temperature]]°C doorgevoerd naar warmtepomp (was [[previous_temperature]]°C)",
+          "de": "[[committed_temperature]]°C an Wärmepumpe übertragen (war [[previous_temperature]]°C)",
+          "fr": "[[committed_temperature]]°C validé vers pompe à chaleur (était [[previous_temperature]]°C)"
+        },
+        "hint": {
+          "en": "Triggers when you disable adaptive control with 'Commit on disable' enabled. The simulated temperature is written to the heat pump as the new target temperature.",
+          "nl": "Wordt geactiveerd wanneer je adaptieve regeling uitschakelt met 'Doorvoeren bij uitschakelen' ingeschakeld. De gesimuleerde temperatuur wordt naar de warmtepomp geschreven als nieuwe doeltemperatuur.",
+          "de": "Wird ausgelöst, wenn Sie die adaptive Steuerung mit 'Beim Deaktivieren übernehmen' aktiviert deaktivieren. Die simulierte Temperatur wird als neue Zieltemperatur an die Wärmepumpe geschrieben.",
+          "fr": "Se déclenche lorsque vous désactivez le contrôle adaptatif avec 'Valider lors de la désactivation' activé. La température simulée est écrite sur la pompe à chaleur comme nouvelle température cible."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "committed_temperature",
+            "type": "number",
+            "title": {
+              "en": "Committed Temperature (°C)",
+              "nl": "Doorgevoerde Temperatuur (°C)",
+              "de": "Übertragene Temperatur (°C)",
+              "fr": "Température Validée (°C)"
+            },
+            "example": 23.5
+          },
+          {
+            "name": "previous_temperature",
+            "type": "number",
+            "title": {
+              "en": "Previous Temperature (°C)",
+              "nl": "Vorige Temperatuur (°C)",
+              "de": "Vorherige Temperatur (°C)",
+              "fr": "Température Précédente (°C)"
+            },
+            "example": 21
+          },
+          {
+            "name": "change",
+            "type": "number",
+            "title": {
+              "en": "Change (°C)",
+              "nl": "Verandering (°C)",
+              "de": "Änderung (°C)",
+              "fr": "Changement (°C)"
+            },
+            "example": 2.5
+          }
+        ]
+      },
+      {
+        "id": "adaptive_simulation_update",
+        "title": {
+          "en": "Simulated temperature adjusted",
+          "nl": "Gesimuleerde temperatuur aangepast",
+          "de": "Simulierte Temperatur angepasst",
+          "fr": "Température simulée ajustée"
+        },
+        "titleFormatted": {
+          "en": "Simulated target adjusted to [[simulated_target]]°C ([[delta]]°C from actual)",
+          "nl": "Gesimuleerd doel aangepast naar [[simulated_target]]°C ([[delta]]°C van werkelijk)",
+          "de": "Simuliertes Ziel angepasst auf [[simulated_target]]°C ([[delta]]°C vom tatsächlichen)",
+          "fr": "Cible simulée ajustée à [[simulated_target]]°C ([[delta]]°C de l'actuel)"
+        },
+        "hint": {
+          "en": "Triggers when adaptive control adjusts the simulated target temperature in simulation mode. The simulated value is NOT sent to the heat pump - use this to safely observe adaptive control behavior before activating it.",
+          "nl": "Wordt geactiveerd wanneer adaptieve regeling de gesimuleerde doeltemperatuur aanpast in simulatiemodus. De gesimuleerde waarde wordt NIET naar de warmtepomp gestuurd - gebruik dit om veilig het gedrag van adaptieve regeling te observeren voordat je het activeert.",
+          "de": "Wird ausgelöst, wenn die adaptive Steuerung die simulierte Zieltemperatur im Simulationsmodus anpasst. Der simulierte Wert wird NICHT an die Wärmepumpe gesendet - verwenden Sie dies, um das Verhalten der adaptiven Steuerung sicher zu beobachten, bevor Sie sie aktivieren.",
+          "fr": "Se déclenche lorsque le contrôle adaptatif ajuste la température cible simulée en mode simulation. La valeur simulée n'est PAS envoyée à la pompe à chaleur - utilisez ceci pour observer en toute sécurité le comportement du contrôle adaptatif avant de l'activer."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "simulated_target",
+            "type": "number",
+            "title": {
+              "en": "Simulated Target (°C)",
+              "nl": "Gesimuleerd Doel (°C)",
+              "de": "Simuliertes Ziel (°C)",
+              "fr": "Cible Simulée (°C)"
+            },
+            "example": 23.5
+          },
+          {
+            "name": "actual_target",
+            "type": "number",
+            "title": {
+              "en": "Actual Target (°C)",
+              "nl": "Werkelijk Doel (°C)",
+              "de": "Tatsächliches Ziel (°C)",
+              "fr": "Cible Réelle (°C)"
+            },
+            "example": 21
+          },
+          {
+            "name": "delta",
+            "type": "number",
+            "title": {
+              "en": "Difference (°C)",
+              "nl": "Verschil (°C)",
+              "de": "Unterschied (°C)",
+              "fr": "Différence (°C)"
+            },
+            "example": 2.5
+          },
+          {
+            "name": "adjustment",
+            "type": "number",
+            "title": {
+              "en": "Adjustment (°C)",
+              "nl": "Aanpassing (°C)",
+              "de": "Anpassung (°C)",
+              "fr": "Ajustement (°C)"
+            },
+            "example": 1
+          },
+          {
+            "name": "comfort_component",
+            "type": "number",
+            "title": {
+              "en": "Comfort Component (°C)",
+              "nl": "Comfort Component (°C)",
+              "de": "Komfort-Komponente (°C)",
+              "fr": "Composante Confort (°C)"
+            },
+            "example": 0.72
+          },
+          {
+            "name": "efficiency_component",
+            "type": "number",
+            "title": {
+              "en": "Efficiency Component (°C)",
+              "nl": "Efficiëntie Component (°C)",
+              "de": "Effizienz-Komponente (°C)",
+              "fr": "Composante Efficacité (°C)"
+            },
+            "example": 0.25
+          },
+          {
+            "name": "cost_component",
+            "type": "number",
+            "title": {
+              "en": "Cost Component (°C)",
+              "nl": "Kosten Component (°C)",
+              "de": "Kosten-Komponente (°C)",
+              "fr": "Composante Coût (°C)"
+            },
+            "example": 0.15
+          },
+          {
+            "name": "reasoning",
+            "type": "string",
+            "title": {
+              "en": "Reasoning",
+              "nl": "Redenering",
+              "de": "Begründung",
+              "fr": "Raisonnement"
+            },
+            "example": "Comfort: Error 0.8°C; Efficiency: Low COP 2.5; Cost: Normal price €0.25/kWh"
           }
         ]
       },
@@ -5891,6 +6074,51 @@
         ]
       },
       {
+        "id": "receive_external_energy_prices",
+        "title": {
+          "en": "Send energy prices to heat pump",
+          "nl": "Stuur energieprijzen naar warmtepomp",
+          "de": "Energiepreise an Wärmepumpe senden",
+          "fr": "Envoyer les prix de l'énergie à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send external energy prices [[prices_json]] for price optimization",
+          "nl": "Stuur externe energieprijzen [[prices_json]] voor prijsoptimalisatie",
+          "de": "Externe Energiepreise [[prices_json]] für Preisoptimierung senden",
+          "fr": "Envoyer les prix de l'énergie externes [[prices_json]] pour l'optimisation des prix"
+        },
+        "hint": {
+          "en": "Sends hourly energy prices (€/kWh) from external source to enable price-based optimization. Format: {\"0\":0.11,\"1\":0.10,...} where keys are hours from now (0=current hour). Replaces EnergyZero API.",
+          "nl": "Stuurt uurlijkse energieprijzen (€/kWh) van externe bron om prijsgebaseerde optimalisatie mogelijk te maken. Formaat: {\"0\":0.11,\"1\":0.10,...} waarbij keys uren vanaf nu zijn (0=huidig uur). Vervangt EnergyZero API.",
+          "de": "Sendet stündliche Energiepreise (€/kWh) von externer Quelle zur preisbasierten Optimierung. Format: {\"0\":0.11,\"1\":0.10,...} wobei Schlüssel Stunden ab jetzt sind (0=aktuelle Stunde). Ersetzt EnergyZero API.",
+          "fr": "Envoie les prix horaires de l'énergie (€/kWh) depuis une source externe pour l'optimisation basée sur les prix. Format: {\"0\":0.11,\"1\":0.10,...} où les clés sont les heures à partir de maintenant (0=heure actuelle). Remplace l'API EnergyZero."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "text",
+            "name": "prices_json",
+            "title": {
+              "en": "Energy prices (JSON)",
+              "nl": "Energieprijzen (JSON)",
+              "de": "Energiepreise (JSON)",
+              "fr": "Prix de l'énergie (JSON)"
+            },
+            "placeholder": {
+              "en": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
+              "nl": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
+              "de": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
+              "fr": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}"
+            }
+          }
+        ]
+      },
+      {
         "id": "receive_external_flow_data",
         "title": {
           "en": "Send flow data to heat pump",
@@ -6746,6 +6974,9 @@
       "class": "heatpump",
       "capabilities": [
         "target_temperature",
+        "target_temperature.indoor",
+        "measure_temperature.indoor",
+        "adlar_simulated_target",
         "onoff",
         "adlar_hotwater",
         "adlar_enum_water_mode",
@@ -6856,6 +7087,51 @@
           "description": {
             "nl": "dps_4: temp_set - Doeltemperatuur"
           }
+        },
+        "target_temperature.indoor": {
+          "title": {
+            "en": "Desired Indoor Temperature",
+            "nl": "Gewenste Binnentemperatuur",
+            "de": "Gewünschte Innentemperatur",
+            "fr": "Température Intérieure Souhaitée"
+          },
+          "desc": {
+            "en": "Target room temperature for adaptive control to maintain. Set your desired comfort temperature here.",
+            "nl": "Doel kamertemperatuur die adaptieve regeling moet handhaven. Stel hier je gewenste comfort temperatuur in.",
+            "de": "Zielraumtemperatur für adaptive Steuerung. Stellen Sie hier Ihre gewünschte Komforttemperatur ein.",
+            "fr": "Température cible pour le contrôle adaptatif. Définissez ici votre température de confort souhaitée."
+          },
+          "units": "°C",
+          "decimals": 1,
+          "min": 15,
+          "max": 25,
+          "step": 0.5,
+          "getable": true,
+          "setable": true,
+          "uiComponent": "thermostat",
+          "chartType": "stepLine",
+          "insight": true
+        },
+        "measure_temperature.indoor": {
+          "title": {
+            "en": "Indoor Temperature",
+            "nl": "Binnentemperatuur",
+            "de": "Innentemperatur",
+            "fr": "Température Intérieure"
+          },
+          "desc": {
+            "en": "Measured room temperature from external sensor (Homey thermostat, temperature sensor). Updated via flow card 'Send indoor temperature'.",
+            "nl": "Gemeten kamertemperatuur van externe sensor (Homey thermostaat, temperatuursensor). Geüpdatet via flow kaart 'Stuur binnentemperatuur'.",
+            "de": "Gemessene Raumtemperatur von externem Sensor (Homey Thermostat, Temperatursensor). Aktualisiert über Flow-Karte 'Raumtemperatur senden'.",
+            "fr": "Température mesurée par capteur externe (thermostat Homey, capteur de température). Mise à jour via carte de flux 'Envoyer température intérieure'."
+          },
+          "units": "°C",
+          "decimals": 1,
+          "getable": true,
+          "setable": false,
+          "uiComponent": "sensor",
+          "chartType": "spline",
+          "insight": true
         },
         "onoff": {
           "title": {
@@ -8360,6 +8636,40 @@
                   }
                 }
               ]
+            },
+            {
+              "id": "adaptive_simulate_mode",
+              "type": "checkbox",
+              "label": {
+                "en": "Simulation Mode (Safe Testing)",
+                "nl": "Simulatiemodus (Veilig Testen)",
+                "de": "Simulationsmodus (Sicheres Testen)",
+                "fr": "Mode Simulation (Test Sécurisé)"
+              },
+              "hint": {
+                "en": "When enabled, adaptive control calculates and tracks a simulated target temperature without sending commands to the heat pump. This allows you to safely observe how adaptive control would behave before activating it. The simulated temperature is visible in Insights for comparison with your actual target temperature.",
+                "nl": "Wanneer ingeschakeld, berekent en volgt adaptieve regeling een gesimuleerde doeltemperatuur zonder commando's naar de warmtepomp te sturen. Hiermee kun je veilig observeren hoe adaptieve regeling zich zou gedragen voor je het activeert. De gesimuleerde temperatuur is zichtbaar in Insights voor vergelijking met je werkelijke doeltemperatuur.",
+                "de": "Wenn aktiviert, berechnet und verfolgt die adaptive Steuerung eine simulierte Zieltemperatur, ohne Befehle an die Wärmepumpe zu senden. Auf diese Weise können Sie sicher beobachten, wie sich die adaptive Steuerung verhalten würde, bevor Sie sie aktivieren. Die simulierte Temperatur ist in Insights sichtbar zum Vergleich mit Ihrer tatsächlichen Zieltemperatur.",
+                "fr": "Lorsqu'activé, le contrôle adaptatif calcule et suit une température cible simulée sans envoyer de commandes à la pompe à chaleur. Cela vous permet d'observer en toute sécurité comment le contrôle adaptatif se comporterait avant de l'activer. La température simulée est visible dans Insights pour comparaison avec votre température cible réelle."
+              },
+              "value": false
+            },
+            {
+              "id": "adaptive_commit_on_disable",
+              "type": "checkbox",
+              "label": {
+                "en": "Commit Simulated Temp When Disabling",
+                "nl": "Gesimuleerde Temp Doorvoeren Bij Uitschakelen",
+                "de": "Simulierte Temp Übernehmen Beim Deaktivieren",
+                "fr": "Valider Temp Simulée Lors Désactivation"
+              },
+              "hint": {
+                "en": "If enabled, the simulated temperature will be written to the heat pump when you disable adaptive control. If disabled, the simulated value is discarded and your heat pump keeps its current target temperature. Only applies when simulation mode is active.",
+                "nl": "Indien ingeschakeld, wordt de gesimuleerde temperatuur naar de warmtepomp geschreven wanneer je adaptieve regeling uitschakelt. Indien uitgeschakeld wordt de gesimuleerde waarde verworpen en behoudt je warmtepomp de huidige doeltemperatuur. Geldt alleen wanneer simulatiemodus actief is.",
+                "de": "Wenn aktiviert, wird die simulierte Temperatur an die Wärmepumpe gesendet, wenn Sie die adaptive Steuerung deaktivieren. Wenn deaktiviert, wird der simulierte Wert verworfen und Ihre Wärmepumpe behält ihre aktuelle Zieltemperatur. Gilt nur, wenn der Simulationsmodus aktiv ist.",
+                "fr": "Si activé, la température simulée sera écrite sur la pompe à chaleur lorsque vous désactivez le contrôle adaptatif. Si désactivé, la valeur simulée est rejetée et votre pompe à chaleur conserve sa température cible actuelle. S'applique uniquement lorsque le mode simulation est actif."
+              },
+              "value": false
             },
             {
               "id": "adaptive_pi_kp",
@@ -10707,6 +11017,38 @@
         "de": "dp 11: capacity_set - Zeigt aktuelle Warmwasserkurveneinstellung vom Gerät (schreibgeschützter Sensor)",
         "fr": "dp 11: capacity_set - Affiche le paramètre actuel de courbe d'eau chaude de l'appareil (capteur en lecture seule)"
       }
+    },
+    "adlar_simulated_target": {
+      "id": "adlar_simulated_target",
+      "type": "number",
+      "title": {
+        "en": "Simulated Target Temperature",
+        "nl": "Gesimuleerde Doeltemperatuur",
+        "de": "Simulierte Zieltemperatur",
+        "fr": "Température Cible Simulée"
+      },
+      "desc": {
+        "en": "Target temperature calculated by adaptive control in simulation mode (not sent to heat pump)",
+        "nl": "Doeltemperatuur berekend door adaptieve regeling in simulatiemodus (niet naar warmtepomp gestuurd)",
+        "de": "Zieltemperatur berechnet durch adaptive Steuerung im Simulationsmodus (nicht an Wärmepumpe gesendet)",
+        "fr": "Température cible calculée par contrôle adaptatif en mode simulation (non envoyée à la pompe)"
+      },
+      "units": {
+        "en": "°C",
+        "nl": "°C",
+        "de": "°C",
+        "fr": "°C"
+      },
+      "chartType": "stepLine",
+      "decimals": 1,
+      "min": 15,
+      "max": 28,
+      "step": 0.1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/simulated-target-temperature.svg",
+      "insight": true
     },
     "adlar_state_backwater": {
       "id": "adlar_state_backwater",
