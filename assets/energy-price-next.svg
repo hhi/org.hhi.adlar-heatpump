@@ -1,14 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Euro symbol (centered, main focus) -->
-  <path d="M 16 8 C 14 8 11 10 11 13 C 11 16 14 18 16 18"/>
-  <line x1="8" y1="11" x2="14" y2="11"/>
-  <line x1="8" y1="15" x2="14" y2="15"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Euro symbol (main element, center-left) -->
+  <path d="M6 8 C6 7 7 6 8.5 6 C10 6 11 7 11 8.5" opacity="0.9"/>
+  <line x1="3.5" y1="8" x2="11" y2="8" opacity="0.9"/>
+  <path d="M6 12 C6 13 7 14 8.5 14 C10 14 11 13 11 11.5" opacity="0.9"/>
+  <line x1="3.5" y1="12" x2="11" y2="12" opacity="0.9"/>
 
-  <!-- Clock (bottom left - next hour) -->
-  <circle cx="5" cy="19" r="3"/>
-  <path d="M 5 17.5 L 5 19 L 6.2 20"/>
+  <!-- Forward arrow (right side, main indicator) -->
+  <path d="M16 9 L21 9" stroke-width="1.8" opacity="0.85"/>
+  <path d="M19 7 L21 9 L19 11" opacity="0.85"/>
 
-  <!-- Forward arrow (top right - next/future) -->
-  <path d="M 18 4 L 21 4"/>
-  <path d="M 19 2 L 21 4 L 19 6"/>
+  <!-- Progression time indicator -->
+  <circle cx="14.5" cy="16.5" r="0.4" fill="currentColor" opacity="0.6"/>
+  <circle cx="17.5" cy="16.5" r="0.4" fill="currentColor" opacity="0.7"/>
+  <circle cx="20.5" cy="16.5" r="0.4" fill="currentColor" opacity="0.85"/>
 </svg>

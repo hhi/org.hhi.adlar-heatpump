@@ -1,32 +1,32 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <!-- Background circle for visual balance -->
-  <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="4" opacity="0.1"/>
-
+  <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="4" opacity="0.1"/>
+  
   <!-- Main thermometer body -->
-  <rect x="37" y="16" width="26" height="50" rx="13" ry="13" stroke="currentColor" stroke-width="5"/>
-
+  <rect x="37" y="16" width="26" height="50" rx="13" ry="13" fill="none" stroke="currentColor" stroke-width="5"/>
+  
   <!-- Thermometer bulb -->
   <circle cx="50" cy="77" r="10.5" fill="currentColor" opacity="0.8"/>
-
+  
   <!-- Temperature scale marks -->
   <line x1="64" y1="25" x2="71" y2="25" stroke="currentColor" stroke-width="4" opacity="0.8"/>
   <line x1="64" y1="33" x2="69" y2="33" stroke="currentColor" stroke-width="4" opacity="0.8"/>
   <line x1="64" y1="42" x2="71" y2="42" stroke="currentColor" stroke-width="4" opacity="0.8"/>
   <line x1="64" y1="50" x2="69" y2="50" stroke="currentColor" stroke-width="4" opacity="0.8"/>
   <line x1="64" y1="58" x2="71" y2="58" stroke="currentColor" stroke-width="4" opacity="0.8"/>
-
+  
   <!-- Efficiency indicator - rising mercury/fluid -->
   <rect x="42" y="29" width="16" height="40" rx="8" ry="8" fill="currentColor" opacity="0.4"/>
-
+  
   <!-- Efficiency arrows showing heat flow -->
-  <path d="M20 33 L29 25 L29 29 L34 29 L34 37 L29 37 L29 42" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor" opacity="0.8"/>
-  <path d="M20 50 L29 42 L29 46 L34 46 L34 54 L29 54 L29 58" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor" opacity="0.8"/>
-
+  <path d="M20 33 L29 25 L29 29 L34 29 L34 37 L29 37 L29 42 Z" fill="currentColor" opacity="0.8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M20 50 L29 42 L29 46 L34 46 L34 54 L29 54 L29 58 Z" fill="currentColor" opacity="0.8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  
   <!-- Performance indicator bar -->
-  <rect x="77" y="33" width="8" height="34" rx="4" ry="4" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+  <rect x="77" y="33" width="8" height="34" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="4" opacity="0.6"/>
   <rect x="78" y="50" width="6" height="16" rx="3" ry="3" fill="currentColor" opacity="0.7"/>
-
-  <!-- COP indicator - efficiency symbol (magnifying glass) -->
-  <circle cx="25" cy="67" r="6" stroke="currentColor" stroke-width="5" opacity="0.9"/>
+  
+  <!-- COP indicator - efficiency symbol -->
+  <circle cx="25" cy="67" r="6" fill="none" stroke="currentColor" stroke-width="5" opacity="0.9"/>
   <path d="M22 71 L28 63" stroke="currentColor" stroke-width="5" opacity="0.9" stroke-linecap="round"/>
 </svg>

@@ -1,12 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Bar chart showing price levels -->
-  <rect x="4" y="14" width="3" height="7" fill="currentColor" opacity="0.3"/>
-  <rect x="9" y="10" width="3" height="11" fill="currentColor" opacity="0.5"/>
-  <rect x="14" y="6" width="3" height="15" fill="currentColor" opacity="0.7"/>
-  <rect x="19" y="2" width="3" height="19" fill="currentColor" opacity="0.9"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Euro symbol (center-left, main element) -->
+  <path d="M6 8 C6 7 7 6 8.5 6 C10 6 11 7 11 8.5" opacity="0.9"/>
+  <line x1="3.5" y1="8" x2="11" y2="8" opacity="0.9"/>
+  <path d="M6 12 C6 13 7 14 8.5 14 C10 14 11 13 11 11.5" opacity="0.9"/>
+  <line x1="3.5" y1="12" x2="11" y2="12" opacity="0.9"/>
 
-  <!-- Euro symbol small -->
-  <path d="M 5.5 4 C 4.5 4 3 5 3 6.5 C 3 8 4.5 9 5.5 9"/>
-  <line x1="2.5" y1="5.5" x2="5" y2="5.5"/>
-  <line x1="2.5" y1="7.5" x2="5" y2="7.5"/>
+  <!-- Price category tier bars (right side) - signal strength style -->
+  <!-- Low tier bar -->
+  <rect x="15" y="17" width="2" height="2.5" rx="0.3" fill="currentColor" opacity="0.4"/>
+
+  <!-- Normal tier bar -->
+  <rect x="18.5" y="13.5" width="2" height="6" rx="0.3" fill="currentColor" opacity="0.65"/>
+
+  <!-- High tier bar -->
+  <rect x="22" y="8" width="2" height="11.5" rx="0.3" fill="currentColor" opacity="0.9"/>
+
+  <!-- Indicator highlight on current tier -->
+  <circle cx="23" cy="11.5" r="1.2" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.75"/>
 </svg>

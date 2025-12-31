@@ -3291,23 +3291,14 @@ class MyDevice extends Homey.Device {
         }
       }
 
-      // Migration v2.3.7: Add heating curve visualization capabilities
-      const heatingCurveCapabilities = [
-        'heating_curve_formula',
-        'heating_curve_slope',
-        'heating_curve_intercept',
-        'heating_curve_ref_temp',
-        'heating_curve_ref_outdoor',
-      ];
-
-      for (const capability of heatingCurveCapabilities) {
-        if (!this.hasCapability(capability)) {
-          try {
-            await this.addCapability(capability);
-            this.log(`Migration v2.3.7: Added ${capability} capability`);
-          } catch (error) {
-            this.error(`Failed to add ${capability} capability:`, error);
-          }
+      // Migration v2.4.3: Add energy_prices_data capability for 24h energy price tracking
+      if (!this.hasCapability('energy_prices_data')) {
+        try {
+          await this.addCapability('energy_prices_data');
+          await this.setCapabilityValue('energy_prices_data', '{}');
+          this.log('Migration v2.4.3: Added energy_prices_data capability (default: empty JSON)');
+        } catch (error) {
+          this.error('Failed to add energy_prices_data capability:', error);
         }
       }
 
@@ -3326,6 +3317,26 @@ class MyDevice extends Homey.Device {
           if (this.hasCapability(capability)) {
             await this.removeCapability(capability);
             this.log(`Migration: Removed ${capability} (price optimizer disabled)`);
+          }
+        }
+      }
+
+      // Migration v2.4.3: Cleanup deprecated heating curve capabilities
+      const deprecatedHeatingCurveCapabilities = [
+        'heating_curve_formula',
+        'heating_curve_slope',
+        'heating_curve_intercept',
+        'heating_curve_ref_temp',
+        'heating_curve_ref_outdoor',
+      ];
+
+      for (const capability of deprecatedHeatingCurveCapabilities) {
+        if (this.hasCapability(capability)) {
+          try {
+            await this.removeCapability(capability);
+            this.log(`Migration v2.4.3: Removed deprecated ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to remove deprecated ${capability} capability:`, error);
           }
         }
       }
