@@ -1098,32 +1098,38 @@ export class AdaptiveControlService {
       const currentPrice = this.energyOptimizer.getCurrentPrice(now);
       const nextHourPrice = this.energyOptimizer.getCurrentPrice(now + 3600000); // Next hour (fixed: was using getAveragePrice which returned hour+2)
 
-      if (currentPrice) {
-        // Update price capabilities
-        await this.device.setCapabilityValue('adlar_energy_price_current', currentPrice.price);
-        await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
+      if (!currentPrice) {
+        // No price data available yet - cannot update capabilities
+        return;
+      }
 
-        if (nextHourPrice) {
-          await this.device.setCapabilityValue('adlar_energy_price_next', nextHourPrice.price);
-        }
+      // Update price capabilities
+      await this.device.setCapabilityValue('adlar_energy_price_current', currentPrice.price);
+      await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
 
-        // Update cost capabilities
-        const currentPowerWatts = (this.device.getCapabilityValue('measure_power') as number) || 0;
-        const hourlyCost = this.energyOptimizer.calculateCurrentCost(currentPowerWatts);
-        await this.device.setCapabilityValue('adlar_energy_cost_hourly', hourlyCost);
+      if (nextHourPrice) {
+        await this.device.setCapabilityValue('adlar_energy_price_next', nextHourPrice.price);
+      }
 
-        // Calculate daily cost (requires daily consumption capability)
-        const dailyConsumption = (this.device.getCapabilityValue('adlar_external_energy_daily') as number) || 0;
-        if (dailyConsumption > 0) {
-          const dailyCost = this.energyOptimizer.calculateDailyCost(dailyConsumption);
+      // Update hourly cost capability
+      const currentPowerWatts = (this.device.getCapabilityValue('measure_power') as number) ?? 0;
+      const hourlyCost = this.energyOptimizer.calculateCurrentCost(currentPowerWatts);
+      await this.device.setCapabilityValue('adlar_energy_cost_hourly', hourlyCost);
+
+      // Calculate daily cost (only if daily consumption > 0)
+      const dailyConsumption = (this.device.getCapabilityValue('adlar_external_energy_daily') as number) ?? 0;
+      if (dailyConsumption > 0) {
+        const dailyCost = this.energyOptimizer.calculateDailyCost(dailyConsumption);
+        // Only update if calculation succeeded (returns non-zero)
+        if (dailyCost !== null && dailyCost !== undefined) {
           await this.device.setCapabilityValue('adlar_energy_cost_daily', dailyCost);
         }
-
-        this.logger(
-          `Energy prices updated: Current €${currentPrice.price.toFixed(4)}/kWh (${currentPrice.category}), `
-          + `Hourly cost €${hourlyCost.toFixed(2)}/h`,
-        );
       }
+
+      this.logger(
+        `Energy prices updated: Current €${currentPrice.price.toFixed(4)}/kWh (${currentPrice.category}), `
+        + `Hourly cost €${hourlyCost.toFixed(2)}/h`,
+      );
     } catch (err) {
       this.logger('Failed to update energy price capabilities:', err);
     }

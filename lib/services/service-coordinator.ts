@@ -392,6 +392,11 @@ export class ServiceCoordinator {
     // SettingsManager first (critical - handles power settings, flow card auto-management, etc.)
     await this.settingsManager.onSettings(oldSettings, newSettings, changedKeys);
 
+    // EnergyTracking settings handler (v1.0.9 - handles energy tracking enable/disable)
+    if (this.energyTracking) {
+      await this.energyTracking.onSettings(oldSettings, newSettings, changedKeys);
+    }
+
     // AdaptiveControl second (optional feature - graceful degradation if it fails)
     try {
       await this.adaptiveControl.onSettings(oldSettings, newSettings, changedKeys);
