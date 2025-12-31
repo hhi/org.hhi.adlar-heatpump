@@ -3,26 +3,9 @@
   "type": "number",
   "title": {
     "en": "Heating Curve Slope",
-    "nl": "Verwarmingscurve Helling",
-    "de": "Heizkurve Neigung",
-    "fr": "Pente Courbe de Chauffage"
+    "nl": "Verwarmingscurve Helling"
   },
-  "desc": {
-    "en": "Slope coefficient (m) of the heating curve",
-    "nl": "Hellingscoëfficiënt (m) van de verwarmingscurve",
-    "de": "Neigungskoeffizient (m) der Heizkurve",
-    "fr": "Coefficient de pente (m) de la courbe de chauffage"
-  },
-  "units": {
-    "en": "",
-    "nl": "",
-    "de": "",
-    "fr": ""
-  },
-  "chartType": "stepLine",
-  "decimals": 2,
   "getable": true,
   "setable": false,
-  "uiComponent": "sensor",
-  "icon": "/assets/heating-curve.svg"
+  "uiComponent": null
 }

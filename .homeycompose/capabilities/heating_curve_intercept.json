@@ -3,26 +3,9 @@
   "type": "number",
   "title": {
     "en": "Heating Curve Intercept",
-    "nl": "Verwarmingscurve Snijpunt",
-    "de": "Heizkurve Schnittpunkt",
-    "fr": "Interception Courbe de Chauffage"
+    "nl": "Verwarmingscurve Intercept"
   },
-  "desc": {
-    "en": "Intercept value (b) of the heating curve",
-    "nl": "Snijpuntwaarde (b) van de verwarmingscurve",
-    "de": "Schnittpunktwert (b) der Heizkurve",
-    "fr": "Valeur d'interception (b) de la courbe de chauffage"
-  },
-  "units": {
-    "en": "°C",
-    "nl": "°C",
-    "de": "°C",
-    "fr": "°C"
-  },
-  "chartType": "stepLine",
-  "decimals": 2,
   "getable": true,
   "setable": false,
-  "uiComponent": "sensor",
-  "icon": "/assets/heating-curve.svg"
+  "uiComponent": null
 }

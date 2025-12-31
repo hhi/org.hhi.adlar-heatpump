@@ -693,30 +693,6 @@ class MyApp extends App {
         // Standard logging for production
         this.log(`Linear curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C (formula: ${formula})`);
 
-        // Save curve parameters to device capabilities (v2.3.7)
-        const { device } = args;
-        if (device && typeof device.setCapabilityValue === 'function') {
-          try {
-            await device.setCapabilityValue('heating_curve_formula', formula);
-            await device.setCapabilityValue('heating_curve_slope', roundedSlope);
-            await device.setCapabilityValue('heating_curve_intercept', roundedIntercept);
-            await device.setCapabilityValue('heating_curve_ref_temp', reference_temp);
-            await device.setCapabilityValue('heating_curve_ref_outdoor', reference_outdoor);
-
-            this.debugLog('Heating curve parameters saved to device capabilities');
-
-            // Trigger visualization update via ServiceCoordinator (v2.3.7)
-            const updateVisualizationFn = (device as unknown as { updateHeatingCurveVisualization?: () => Promise<void> }).updateHeatingCurveVisualization;
-            if (typeof updateVisualizationFn === 'function') {
-              await updateVisualizationFn.call(device);
-              this.debugLog('Heating curve visualization updated');
-            }
-          } catch (capabilityError) {
-            this.error('Failed to save heating curve parameters:', capabilityError);
-            // Continue execution - don't fail the flow card if capability save fails
-          }
-        }
-
         return {
           supply_temperature: roundedSupplyTemp,
           formula,

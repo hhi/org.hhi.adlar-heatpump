@@ -90,12 +90,6 @@
     "adlar_scop",
     "adlar_scop_quality",
 
-    "heating_curve_formula",
-    "heating_curve_slope",
-    "heating_curve_intercept",
-    "heating_curve_ref_temp",
-    "heating_curve_ref_outdoor",
-
     "adlar_countdowntimer",
     "adlar_connection_status",
     "adlar_connection_active"
