@@ -9,11 +9,15 @@ import { CapabilityCategories, UserFlowPreferences } from '../types/shared-inter
 export interface FlowCardManagerOptions {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
+  onExternalPowerData?: (powerValue: number) => Promise<void>;
+  onExternalPricesData?: (pricesObject: Record<string, number>) => Promise<void>;
 }
 
 export class FlowCardManagerService {
   private device: Homey.Device;
   private logger: (message: string, ...args: unknown[]) => void;
+  private onExternalPowerData: (powerValue: number) => Promise<void>;
+  private onExternalPricesData: (pricesObject: Record<string, number>) => Promise<void>;
   private flowCardListeners = new Map<string, unknown>();
   private isInitialized = false;
   private initializationRetryTimer: NodeJS.Timeout | null = null;
@@ -23,10 +27,14 @@ export class FlowCardManagerService {
    * based on device capabilities and user preferences.
    * @param options.device - device instance
    * @param options.logger - optional logger
+   * @param options.onExternalPowerData - callback to delegate external power data to EnergyTrackingService
+   * @param options.onExternalPricesData - callback to delegate external prices data to AdaptiveControlService
    */
   constructor(options: FlowCardManagerOptions) {
     this.device = options.device;
     this.logger = options.logger || (() => {});
+    this.onExternalPowerData = options.onExternalPowerData || (async () => {});
+    this.onExternalPricesData = options.onExternalPricesData || (async () => {});
   }
 
   /**
@@ -599,8 +607,8 @@ export class FlowCardManagerService {
           await this.device.setCapabilityValue('defrost_active_power', newValue);
         }
 
-        // Emit event for other services (especially EnergyTrackingService)
-        this.device.emit('external-data:power', args.power_value);
+        // Delegate to EnergyTrackingService for energy calculations via callback
+        await this.onExternalPowerData(args.power_value); // eslint-disable-line camelcase
       }
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external power data:', error);
@@ -652,8 +660,13 @@ export class FlowCardManagerService {
       const priceCount = Object.keys(pricesObject).length;
       this.logger(`FlowCardManagerService: External energy prices updated: ${priceCount} hours received`);
 
-      // Emit event for potential other services
-      this.device.emit('external-data:energy-prices', pricesObject);
+      // Update verborgen capability with prices data for visibility
+      if (this.device.hasCapability('energy_prices_data')) {
+        await this.device.setCapabilityValue('energy_prices_data', pricesJsonRaw);
+      }
+
+      // Delegate to AdaptiveControlService for immediate capability updates via callback
+      await this.onExternalPricesData(pricesObject);
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external energy prices:', error);
       throw error;

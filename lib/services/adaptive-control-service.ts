@@ -223,6 +223,9 @@ export class AdaptiveControlService {
         this.copOptimizer.restoreState(copState);
       }
 
+      // Load priority settings from device settings (v2.4.1: bug fix - settings were defined but not used)
+      await this.loadPrioritySettings();
+
       // Start control loop if enabled
       if (this.isEnabled) {
         await this.start();
@@ -379,27 +382,30 @@ export class AdaptiveControlService {
   /**
    * Get effective target temperature for calculations
    *
-   * @returns Simulated temp if in simulate mode, otherwise desired indoor temperature
+   * CASCADE CONTROL: Returns the current warmtepomp setpoint (DPS 4) that will be adjusted
+   * with the delta calculated by the PI controller based on indoor temperature error.
+   *
+   * @returns Simulated temp if in simulate mode, otherwise current warmtepomp setpoint (DPS 4)
    */
   private getEffectiveTargetTemp(): number | null {
     if (this.isSimulateMode) {
       return this.simulatedTargetTemp;
     }
 
-    // Normal mode: read desired indoor temperature from user-settable subcapability
-    if (!this.device.hasCapability('target_temperature.indoor')) {
-      this.logger('AdaptiveControlService: target_temperature.indoor capability not available');
+    // Normal mode: read current warmtepomp setpoint (DPS 4) - this is what we adjust
+    if (!this.device.hasCapability('target_temperature')) {
+      this.logger('AdaptiveControlService: target_temperature capability not available');
       return null;
     }
 
-    const desiredIndoorTemp = this.device.getCapabilityValue('target_temperature.indoor') as number | null;
+    const currentSetpoint = this.device.getCapabilityValue('target_temperature') as number | null;
 
-    if (desiredIndoorTemp === null || desiredIndoorTemp === undefined) {
-      this.logger('AdaptiveControlService: No desired indoor temperature set yet');
+    if (currentSetpoint === null || currentSetpoint === undefined) {
+      this.logger('AdaptiveControlService: No current warmtepomp setpoint available');
       return null;
     }
 
-    return desiredIndoorTemp;
+    return currentSetpoint;
   }
 
   /**
@@ -432,21 +438,30 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 3: Read current target temperature (simulated or actual)
-      const targetTemp = this.getEffectiveTargetTemp();
-      if (targetTemp === null) {
-        this.logger('AdaptiveControlService: No target temperature available, skipping cycle');
+      // Step 3: Read current warmtepomp setpoint (simulated or actual DPS 4)
+      const currentSetpoint = this.getEffectiveTargetTemp();
+      if (currentSetpoint === null) {
+        this.logger('AdaptiveControlService: No warmtepomp setpoint available, skipping cycle');
+        return;
+      }
+
+      // Step 3b: Read desired indoor temperature for PI calculation
+      const desiredIndoorTemp = this.device.getCapabilityValue('target_temperature.indoor') as number | null;
+      if (desiredIndoorTemp === null) {
+        this.logger('AdaptiveControlService: No desired indoor temperature set, skipping cycle');
         return;
       }
 
       this.logger(
-        `Indoor: ${indoorTemp.toFixed(1)}°C, Target: ${targetTemp.toFixed(1)}°C${this.isSimulateMode ? ' [SIMULATED]' : ''}`,
+        `Indoor: ${indoorTemp.toFixed(1)}°C, Desired: ${desiredIndoorTemp.toFixed(1)}°C, `
+        + `Setpoint: ${currentSetpoint.toFixed(1)}°C${this.isSimulateMode ? ' [SIMULATED]' : ' [DPS 4]'}`,
       );
 
       // Step 4A: Component 1 - Heating Controller (PI control)
+      // PI controller calculates delta based on indoor temp error
       const sensorData: SensorData = {
         indoorTemp,
-        targetTemp,
+        targetTemp: desiredIndoorTemp, // Use desired indoor temp for error calculation
         timestamp: Date.now(),
       };
 
@@ -457,7 +472,7 @@ export class AdaptiveControlService {
       const priceOptimizerEnabled = await this.device.getSetting('price_optimizer_enabled');
       if (priceOptimizerEnabled) {
         try {
-          priceAction = this.energyOptimizer.calculateAction(indoorTemp, targetTemp);
+          priceAction = this.energyOptimizer.calculateAction(indoorTemp, desiredIndoorTemp);
 
           // Update energy price/cost capabilities
           await this.updateEnergyPriceCapabilities();
@@ -481,7 +496,8 @@ export class AdaptiveControlService {
           // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
           const outdoorTemp = this.device.getOutdoorTemperatureWithFallback() || 0;
 
-          copAction = this.copOptimizer.calculateAction(currentCOP, dailyCOP, outdoorTemp, targetTemp);
+          // COP optimizer uses current warmtepomp setpoint for efficiency calculation
+          copAction = this.copOptimizer.calculateAction(currentCOP, dailyCOP, outdoorTemp, currentSetpoint);
 
           // Collect COP measurement for learning
           const compressorFreq = (this.device.getCapabilityValue('measure_frequency.compressor_strength') as number) || 0;
@@ -489,7 +505,7 @@ export class AdaptiveControlService {
             this.copOptimizer.addMeasurement({
               timestamp: Date.now(),
               outdoorTemp,
-              supplyTemp: targetTemp,
+              supplyTemp: currentSetpoint, // Use current warmtepomp setpoint
               cop: currentCOP,
               compressorFreq,
             });
@@ -548,19 +564,22 @@ export class AdaptiveControlService {
       if (executionMode === DeviceConstants.ADAPTIVE_MODE_FLOW_ASSISTED) {
         this.logger('⚙️ FLOW-ASSISTED MODE: Triggering recommendation for user flow execution');
 
-        // Calculate recommended temperature (integer adjusted, clamped)
+        // Calculate recommended warmtepomp setpoint (integer adjusted, clamped to realistic range)
         const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
-        const recommendedTemp = Math.max(15, Math.min(28, targetTemp + integerAdjustment));
+        const recommendedTemp = Math.max(
+          DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+          Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
+        );
 
         // Trigger recommendation flow card
-        await this.triggerTemperatureRecommendation(targetTemp, recommendedTemp, combinedAction);
+        await this.triggerTemperatureRecommendation(currentSetpoint, recommendedTemp, combinedAction);
 
         this.lastControlCycleTime = Date.now();
         return;
       }
 
-      // Step 9: Apply temperature adjustment (simulate or active mode)
-      await this.applyTemperatureAdjustment(targetTemp, combinedAction);
+      // Step 9: Apply temperature adjustment to warmtepomp setpoint (simulate or active mode)
+      await this.applyTemperatureAdjustment(currentSetpoint, combinedAction);
 
     } catch (error) {
       this.logger('AdaptiveControlService: Control cycle error', {
@@ -570,13 +589,16 @@ export class AdaptiveControlService {
   }
 
   /**
-   * Apply temperature adjustment to simulated or real target temp
+   * Apply temperature adjustment to warmtepomp setpoint (CASCADE CONTROL)
    *
-   * @param currentTarget - Current target temperature (simulated or actual)
+   * The PI controller calculates a delta based on indoor temperature error,
+   * and this delta is applied to the current warmtepomp setpoint (DPS 4).
+   *
+   * @param currentSetpoint - Current warmtepomp setpoint (simulated or actual DPS 4)
    * @param combinedAction - Combined action from weighted decision maker
    */
   private async applyTemperatureAdjustment(
-    currentTarget: number,
+    currentSetpoint: number,
     combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
   ): Promise<void> {
     // Accumulate fractional adjustment (for step:1 rounding)
@@ -620,29 +642,32 @@ export class AdaptiveControlService {
       return;
     }
 
-    // Calculate new target temperature with integer adjustment
-    const newTargetTemp = currentTarget + integerAdjustment;
+    // Calculate new warmtepomp setpoint with integer adjustment (cascade control)
+    const newSetpoint = currentSetpoint + integerAdjustment;
 
-    // Safety: clamp target temperature to reasonable range (15-28°C)
-    const clampedTargetTemp = Math.max(15, Math.min(28, newTargetTemp));
+    // Safety: clamp warmtepomp setpoint to realistic range (25-65°C for floor heating/radiators)
+    const clampedSetpoint = Math.max(
+      DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+      Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, newSetpoint),
+    );
 
     // Calculate actual applied adjustment (may differ if clamped)
-    const actualAdjustment = clampedTargetTemp - currentTarget;
+    const actualAdjustment = clampedSetpoint - currentSetpoint;
 
-    this.logger('AdaptiveControlService: Applying temperature adjustment', {
+    this.logger('AdaptiveControlService: Applying warmtepomp setpoint adjustment (CASCADE CONTROL)', {
       mode: this.isSimulateMode ? 'SIMULATE' : 'ACTIVE',
-      currentTarget,
-      integerAdjustment,
-      actualAdjustment,
-      newTarget: clampedTargetTemp,
+      currentSetpoint,
+      delta: integerAdjustment,
+      actualDelta: actualAdjustment,
+      newSetpoint: clampedSetpoint,
       accumulated: this.accumulatedAdjustment.toFixed(2),
       reasoning: combinedAction.reasoning.join('; '),
       priority: combinedAction.priority,
     });
 
     if (this.isSimulateMode) {
-      // SIMULATE MODE: Update internal simulated temp AND capability
-      this.simulatedTargetTemp = clampedTargetTemp;
+      // SIMULATE MODE: Update internal simulated warmtepomp setpoint AND capability
+      this.simulatedTargetTemp = clampedSetpoint;
       await this.device.setStoreValue(this.STORE_KEY_SIMULATED_TARGET, this.simulatedTargetTemp);
 
       // Update capability for Insights
@@ -650,13 +675,13 @@ export class AdaptiveControlService {
         await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
       }
 
-      // Get actual target temp for delta calculation
-      const actualTarget = this.device.getCapabilityValue('target_temperature') as number;
-      const delta = this.simulatedTargetTemp - actualTarget;
+      // Get actual warmtepomp setpoint (DPS 4) for delta calculation
+      const actualSetpoint = this.device.getCapabilityValue('target_temperature') as number;
+      const delta = this.simulatedTargetTemp - actualSetpoint;
 
-      this.logger('Simulated target updated', {
+      this.logger('Simulated warmtepomp setpoint updated', {
         simulated: this.simulatedTargetTemp.toFixed(1),
-        actual: actualTarget.toFixed(1),
+        actual: actualSetpoint.toFixed(1),
         delta: delta.toFixed(1),
       });
 
@@ -665,7 +690,7 @@ export class AdaptiveControlService {
         .getDeviceTriggerCard('adaptive_simulation_update')
         .trigger(this.device, {
           simulated_target: this.simulatedTargetTemp,
-          actual_target: actualTarget,
+          actual_target: actualSetpoint,
           delta,
           adjustment: actualAdjustment,
           comfort_component: combinedAction.breakdown.comfort,
@@ -676,11 +701,11 @@ export class AdaptiveControlService {
         .catch((err) => this.logger('Failed to trigger simulation card:', err));
 
     } else {
-      // ACTIVE MODE: Write to actual device capability (DPS 4)
-      await this.device.setCapabilityValue('target_temperature', clampedTargetTemp);
+      // ACTIVE MODE: Write to actual warmtepomp setpoint (DPS 4)
+      await this.device.setCapabilityValue('target_temperature', clampedSetpoint);
 
       // Trigger normal adjustment card
-      await this.triggerTemperatureAdjusted(currentTarget, clampedTargetTemp, combinedAction);
+      await this.triggerTemperatureAdjusted(currentSetpoint, clampedSetpoint, combinedAction);
     }
 
     // Subtract applied adjustment from accumulator
@@ -824,6 +849,56 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Load priority settings from device settings
+   * Called during initialization and when settings change
+   * @version 2.4.1 - Bug fix: priority settings existed in UI but were not used
+   */
+  private async loadPrioritySettings(): Promise<void> {
+    try {
+      // Read priority settings (percentages 0-100)
+      const comfortPct = (await this.device.getSetting('priority_comfort')) ?? 60;
+      const efficiencyPct = (await this.device.getSetting('priority_efficiency')) ?? 25;
+      const costPct = (await this.device.getSetting('priority_cost')) ?? 15;
+
+      // Validate: at least one priority must be > 0
+      if (comfortPct === 0 && efficiencyPct === 0 && costPct === 0) {
+        this.logger('AdaptiveControlService: All priorities are 0%, using defaults (60/25/15)');
+        this.decisionMaker.setPriorities({
+          comfort: 0.60,
+          efficiency: 0.25,
+          cost: 0.15,
+        });
+        return;
+      }
+
+      // Convert percentages to 0.0-1.0 range and update decision maker
+      // WeightedDecisionMaker automatically normalizes to sum = 1.0
+      this.decisionMaker.setPriorities({
+        comfort: comfortPct / 100,
+        efficiency: efficiencyPct / 100,
+        cost: costPct / 100,
+      });
+
+      this.logger('AdaptiveControlService: Priorities loaded from settings', {
+        comfort: `${comfortPct}%`,
+        efficiency: `${efficiencyPct}%`,
+        cost: `${costPct}%`,
+        normalized: this.decisionMaker.getPriorities(),
+      });
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to load priority settings, using defaults', {
+        error: (error as Error).message,
+      });
+      // Fallback to defaults
+      this.decisionMaker.setPriorities({
+        comfort: 0.60,
+        efficiency: 0.25,
+        cost: 0.15,
+      });
+    }
+  }
+
+  /**
    * Update PI controller parameters (Expert Mode)
    */
   updatePIParameters(Kp: number, Ki: number, deadband: number): void {
@@ -885,6 +960,21 @@ export class AdaptiveControlService {
       } else if (!enabled && this.isEnabled) {
         await this.stop();
       }
+    }
+
+    // Handle priority settings changes (v2.4.1: bug fix - settings were defined but not used)
+    if (changedKeys.includes('priority_comfort')
+        || changedKeys.includes('priority_efficiency')
+        || changedKeys.includes('priority_cost')) {
+      await this.loadPrioritySettings();
+
+      // Log the change for transparency
+      const priorities = this.decisionMaker.getPriorities();
+      this.logger('AdaptiveControlService: Priority weights updated', {
+        comfort: `${Math.round(priorities.comfort * 100)}%`,
+        efficiency: `${Math.round(priorities.efficiency * 100)}%`,
+        cost: `${Math.round(priorities.cost * 100)}%`,
+      });
     }
 
     // Handle PI parameter changes (Expert Mode)
@@ -978,8 +1068,29 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Receive and persist external energy prices, then update capabilities immediately
+   * Called when flow card provides new price data
+   * @param pricesObject - Price data by hour offset
+   */
+  async receiveExternalPricesData(pricesObject: Record<string, number>): Promise<void> {
+    try {
+      // Store prices for persistence (survives app restarts)
+      await this.device.setStoreValue('external_energy_prices', pricesObject);
+      await this.device.setStoreValue('external_energy_prices_timestamp', Date.now());
+
+      this.logger(`AdaptiveControlService: Stored ${Object.keys(pricesObject).length} hourly prices for persistence`);
+
+      // Update capabilities immediately
+      await this.updateEnergyPriceCapabilities();
+    } catch (error) {
+      this.logger('AdaptiveControlService: Error receiving external prices data:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Update energy price/cost capabilities (Component 3)
-   * Called during control cycle when price optimizer is enabled
+   * Called during control cycle when price optimizer is enabled, or immediately after receiving new prices
    */
   private async updateEnergyPriceCapabilities(): Promise<void> {
     try {

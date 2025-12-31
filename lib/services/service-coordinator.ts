@@ -81,8 +81,12 @@ export class ServiceCoordinator {
     this.settingsManager = new SettingsManagerService(serviceOptions);
     this.capabilityHealth = new CapabilityHealthService(serviceOptions);
     this.energyTracking = new EnergyTrackingService(serviceOptions);
-    this.flowCardManager = new FlowCardManagerService(serviceOptions);
     this.adaptiveControl = new AdaptiveControlService(serviceOptions);
+    this.flowCardManager = new FlowCardManagerService({
+      ...serviceOptions,
+      onExternalPowerData: this.energyTracking.receiveExternalPowerData.bind(this.energyTracking),
+      onExternalPricesData: this.adaptiveControl.receiveExternalPricesData.bind(this.adaptiveControl),
+    });
     this.heatingCurveVisualization = new HeatingCurveVisualizationService(serviceOptions);
 
     // TuyaConnectionService requires special initialization
