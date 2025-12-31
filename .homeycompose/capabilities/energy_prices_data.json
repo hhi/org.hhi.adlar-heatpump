@@ -1,0 +1,28 @@
+{
+  "id": "energy_prices_data",
+  "type": "string",
+  "title": {
+    "en": "Energy Prices (24h)",
+    "nl": "Energieprijzen (24u)",
+    "de": "Energiepreise (24h)",
+    "fr": "Prix de l'énergie (24h)"
+  },
+  "desc": {
+    "en": "Hourly energy prices for next 24 hours as JSON (hour offset: price)",
+    "nl": "Uurlijkse energieprijzen voor komende 24 uur als JSON (uur offset: prijs)",
+    "de": "Stündliche Energiepreise für nächste 24 Stunden als JSON (Stunden-Offset: Preis)",
+    "fr": "Prix de l'énergie horaires pour les prochaines 24 heures en JSON (décalage horaire: prix)"
+  },
+  "units": {
+    "en": "",
+    "nl": "",
+    "de": "",
+    "fr": ""
+  },
+  "chartType": "stepLine",
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/energy-price-current.svg"
+}

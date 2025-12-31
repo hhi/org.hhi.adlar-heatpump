@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.4.0",
+  "version": "2.4.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -92,7 +92,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_simulated_target"
           }
         ],
         "tokens": [
@@ -178,7 +178,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_simulated_target"
           }
         ],
         "tokens": [
@@ -242,7 +242,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_simulated_target"
           }
         ],
         "tokens": [
@@ -361,7 +361,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_simulated_target"
           }
         ],
         "tokens": [
@@ -607,7 +607,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
           },
           {
             "type": "dropdown",
@@ -710,7 +710,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
           },
           {
             "type": "dropdown",
@@ -845,7 +845,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
           }
         ],
         "tokens": [
@@ -908,7 +908,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_trend"
           },
           {
             "type": "dropdown",
@@ -1146,7 +1146,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_daily"
           },
           {
             "type": "dropdown",
@@ -1259,7 +1259,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_energy_cost_daily"
           },
           {
             "type": "number",
@@ -1953,7 +1953,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
           },
           {
             "type": "dropdown",
@@ -2476,7 +2476,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_building_c"
           }
         ],
         "tokens": [
@@ -2653,7 +2653,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_monthly"
           },
           {
             "type": "dropdown",
@@ -2857,7 +2857,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=measure_voltage.voltage_current"
           },
           {
             "type": "dropdown",
@@ -2959,7 +2959,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=measure_current.b_cur"
           },
           {
             "type": "dropdown",
@@ -3061,7 +3061,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=measure_voltage.bv"
           },
           {
             "type": "dropdown",
@@ -3163,7 +3163,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=measure_current.c_cur"
           },
           {
             "type": "dropdown",
@@ -3265,7 +3265,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=measure_voltage.cv"
           },
           {
             "type": "dropdown",
@@ -3439,7 +3439,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_energy_price_category"
           }
         ],
         "tokens": [
@@ -4275,7 +4275,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_method"
           },
           {
             "type": "dropdown",
@@ -4352,7 +4352,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
           },
           {
             "type": "range",
@@ -4400,7 +4400,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_trend"
           },
           {
             "type": "range",
@@ -4449,7 +4449,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_daily"
           },
           {
             "type": "range",
@@ -5016,7 +5016,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_monthly"
           },
           {
             "type": "range",
@@ -5937,7 +5937,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_building_c"
           }
         ]
       },
@@ -6061,7 +6061,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_external_ambient"
           },
           {
             "type": "number",
@@ -6109,7 +6109,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
           },
           {
             "type": "text",
@@ -6154,7 +6154,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_external_flow"
           },
           {
             "type": "number",
@@ -6202,7 +6202,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_external_indoor_temperature"
           },
           {
             "type": "text",
@@ -6247,7 +6247,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_external_power"
           },
           {
             "type": "number",
@@ -7045,6 +7045,7 @@
         "adlar_energy_price_current",
         "adlar_energy_price_next",
         "adlar_energy_price_category",
+        "energy_prices_data",
         "adlar_energy_cost_hourly",
         "adlar_energy_cost_daily",
         "adlar_cop_daily",
@@ -11045,10 +11046,10 @@
         "fr": "Température Cible Simulée"
       },
       "desc": {
-        "en": "Target temperature calculated by adaptive control in simulation mode (not sent to heat pump)",
-        "nl": "Doeltemperatuur berekend door adaptieve regeling in simulatiemodus (niet naar warmtepomp gestuurd)",
-        "de": "Zieltemperatur berechnet durch adaptive Steuerung im Simulationsmodus (nicht an Wärmepumpe gesendet)",
-        "fr": "Température cible calculée par contrôle adaptatif en mode simulation (non envoyée à la pompe)"
+        "en": "Warmtepomp setpoint calculated by adaptive control in simulation mode (CASCADE CONTROL - not sent to heat pump)",
+        "nl": "Warmtepomp setpoint berekend door adaptieve regeling in simulatiemodus (CASCADE CONTROL - niet naar warmtepomp gestuurd)",
+        "de": "Wärmepumpen-Sollwert berechnet durch adaptive Steuerung im Simulationsmodus (CASCADE CONTROL - nicht an Wärmepumpe gesendet)",
+        "fr": "Consigne de pompe à chaleur calculée par contrôle adaptatif en mode simulation (CASCADE CONTROL - non envoyée à la pompe)"
       },
       "units": {
         "en": "°C",
@@ -11058,8 +11059,8 @@
       },
       "chartType": "stepLine",
       "decimals": 1,
-      "min": 15,
-      "max": 28,
+      "min": 25,
+      "max": 65,
       "step": 0.1,
       "getable": true,
       "setable": false,
@@ -11193,6 +11194,34 @@
         "de": "Stromverbrauch während Abtauzyklen - zeigt externe Leistungsmessung wenn Abtauen aktiv ist, 0 wenn inaktiv",
         "fr": "Consommation d'énergie pendant les cycles de dégivrage - affiche la mesure de puissance externe lorsque le dégivrage est actif, 0 lorsqu'il est inactif"
       }
+    },
+    "energy_prices_data": {
+      "id": "energy_prices_data",
+      "type": "string",
+      "title": {
+        "en": "Energy Prices (24h)",
+        "nl": "Energieprijzen (24u)",
+        "de": "Energiepreise (24h)",
+        "fr": "Prix de l'énergie (24h)"
+      },
+      "desc": {
+        "en": "Hourly energy prices for next 24 hours as JSON (hour offset: price)",
+        "nl": "Uurlijkse energieprijzen voor komende 24 uur als JSON (uur offset: prijs)",
+        "de": "Stündliche Energiepreise für nächste 24 Stunden als JSON (Stunden-Offset: Preis)",
+        "fr": "Prix de l'énergie horaires pour les prochaines 24 heures en JSON (décalage horaire: prix)"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "chartType": "stepLine",
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/energy-price-current.svg"
     },
     "heating_curve_formula": {
       "id": "heating_curve_formula",

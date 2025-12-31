@@ -1,4 +1,10 @@
 {
+  "2.4.2": {
+    "en": "Fixed: Priority settings (Comfort/Efficiency/Cost) in adaptive control now work as intended. Settings were visible in UI but ignored (always used 60%/25%/15%). Users can now configure any combination (e.g., 0% comfort, 100% efficiency for COP-only optimization).",
+    "nl": "Opgelost: Prioriteitsinstellingen (Comfort/Efficiëntie/Kosten) in adaptieve regeling werken nu zoals bedoeld. Instellingen waren zichtbaar in UI maar werden genegeerd (gebruikte altijd 60%/25%/15%). Gebruikers kunnen nu elke combinatie instellen (bijv. 0% comfort, 100% efficiëntie voor alleen-COP optimalisatie).",
+    "de": "Behoben: Prioritätseinstellungen (Komfort/Effizienz/Kosten) in adaptiver Steuerung funktionieren jetzt wie vorgesehen. Einstellungen waren in UI sichtbar, wurden aber ignoriert (verwendete immer 60%/25%/15%). Benutzer können jetzt jede Kombination konfigurieren (z.B. 0% Komfort, 100% Effizienz für reine COP-Optimierung).",
+    "fr": "Corrigé: Les paramètres de priorité (Confort/Efficacité/Coût) dans le contrôle adaptatif fonctionnent maintenant comme prévu. Les paramètres étaient visibles dans l'UI mais ignorés (utilisait toujours 60%/25%/15%). Les utilisateurs peuvent maintenant configurer n'importe quelle combinaison (par ex. 0% confort, 100% efficacité pour optimisation COP uniquement)."
+  },
   "2.4.0": {
     "en": "Added: Defrost power monitoring capability tracks power consumption during defrost cycles. Heating curve visualization capabilities display formula, slope, intercept, and reference points. All 6 new capabilities automatically added to existing devices.",
     "nl": "Toegevoegd: Defrost vermogen monitoring capability volgt stroomverbruik tijdens ontdooicycli. Verwarmingscurve visualisatie capabilities tonen formule, helling, snijpunt en referentiepunten. Alle 6 nieuwe capabilities automatisch toegevoegd aan bestaande apparaten.",

@@ -22,7 +22,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump"
+      "filter": "driver_id=intelligent-heat-pump&capabilities=measure_current.c_cur"
     },
     {
       "type": "dropdown",

@@ -8,10 +8,10 @@
     "fr": "Température Cible Simulée"
   },
   "desc": {
-    "en": "Target temperature calculated by adaptive control in simulation mode (not sent to heat pump)",
-    "nl": "Doeltemperatuur berekend door adaptieve regeling in simulatiemodus (niet naar warmtepomp gestuurd)",
-    "de": "Zieltemperatur berechnet durch adaptive Steuerung im Simulationsmodus (nicht an Wärmepumpe gesendet)",
-    "fr": "Température cible calculée par contrôle adaptatif en mode simulation (non envoyée à la pompe)"
+    "en": "Warmtepomp setpoint calculated by adaptive control in simulation mode (CASCADE CONTROL - not sent to heat pump)",
+    "nl": "Warmtepomp setpoint berekend door adaptieve regeling in simulatiemodus (CASCADE CONTROL - niet naar warmtepomp gestuurd)",
+    "de": "Wärmepumpen-Sollwert berechnet durch adaptive Steuerung im Simulationsmodus (CASCADE CONTROL - nicht an Wärmepumpe gesendet)",
+    "fr": "Consigne de pompe à chaleur calculée par contrôle adaptatif en mode simulation (CASCADE CONTROL - non envoyée à la pompe)"
   },
   "units": {
     "en": "°C",
@@ -21,8 +21,8 @@
   },
   "chartType": "stepLine",
   "decimals": 1,
-  "min": 15,
-  "max": 28,
+  "min": 25,
+  "max": 65,
   "step": 0.1,
   "getable": true,
   "setable": false,
