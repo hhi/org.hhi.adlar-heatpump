@@ -1570,11 +1570,15 @@ class MyDevice extends Homey.Device {
         this.categoryLog('cop', `External energy total capability initialized: ${storedExternalTotal} kWh ${storedExternalTotal > 0 ? '(restored from storage)' : '(starting fresh)'}`);
       }
 
-      // Initialize external energy daily capability with storage-aware restoration
+      // Initialize external energy daily capability
+      // NOTE: Full sanity check and restore logic is in initializeEnergyTracking()
+      // This initialization only sets to 0 if not present (initializeEnergyTracking handles corruption detection)
       if (this.hasCapability('adlar_external_energy_daily')) {
-        const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
-        await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
-        this.categoryLog('cop', `External energy daily capability initialized: ${storedExternalDaily} kWh ${storedExternalDaily > 0 ? '(restored from storage)' : '(starting fresh)'}`);
+        const currentValue = this.getCapabilityValue('adlar_external_energy_daily');
+        if (currentValue === null || currentValue === undefined) {
+          await this.setCapabilityValue('adlar_external_energy_daily', 0);
+          this.categoryLog('cop', 'External energy daily capability initialized to 0 (will be restored by initializeEnergyTracking if valid store data exists)');
+        }
       }
     } catch (error) {
       this.error('Error initializing COP system:', error);
@@ -4364,14 +4368,24 @@ class MyDevice extends Homey.Device {
 
       // Initialize external daily energy tracking capability
       if (this.hasCapability('adlar_external_energy_daily')) {
-        const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily');
-        if (!currentExternalDaily || currentExternalDaily === 0) {
-          // Check if we have stored external daily energy from previous sessions
-          const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
-          if (storedExternalDaily > 0) {
-            await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
-            this.log(`🔌 Restored external daily energy: ${storedExternalDaily} kWh`);
-          }
+        // ALWAYS check store value for corruption, even if capability has a value
+        const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
+        const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
+
+        // Sanity check: daily consumption > 150 kWh is unrealistic (likely corrupt data)
+        // Realistic max for heat pump: ~80 kWh/day, theoretical max 24/7: ~240 kWh
+        const MAX_REALISTIC_DAILY_KWH = 150;
+
+        // Check both store AND capability for corruption
+        if (storedExternalDaily > MAX_REALISTIC_DAILY_KWH || currentExternalDaily > MAX_REALISTIC_DAILY_KWH) {
+          // Corrupt data detected - reset to 0 and clear store
+          await this.setCapabilityValue('adlar_external_energy_daily', 0);
+          await this.setStoreValue('external_daily_consumption_kwh', 0);
+          this.log(`⚠️ Corrupt daily energy data detected (store: ${storedExternalDaily} kWh, capability: ${currentExternalDaily} kWh) - reset to 0`);
+        } else if (currentExternalDaily === 0 && storedExternalDaily > 0) {
+          // Valid stored data and capability is 0 - restore from store
+          await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
+          this.log(`🔌 Restored external daily energy: ${storedExternalDaily} kWh`);
         }
       }
 

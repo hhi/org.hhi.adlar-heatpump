@@ -1,4 +1,10 @@
 {
+  "2.4.4": {
+    "en": "Fixed: Energy price capability updates no longer crash when price data unavailable. Improved null-safety and error handling in adaptive control. Renamed defrost capability to 'Defrost Power Consumption' for clarity.",
+    "nl": "Opgelost: Energieprijs capability updates crashen niet meer wanneer prijsdata niet beschikbaar is. Verbeterde null-veiligheid en foutafhandeling in adaptieve regeling. Defrost capability hernoemd naar 'Ontdooistand Vermogensverbruik' voor duidelijkheid.",
+    "de": "Behoben: Energiepreis-Capability-Updates stürzen nicht mehr ab wenn Preisdaten nicht verfügbar. Verbesserte Null-Sicherheit und Fehlerbehandlung in adaptiver Steuerung. Abtau-Capability umbenannt in 'Abtau-Leistungsaufnahme' für Klarheit.",
+    "fr": "Corrigé: Les mises à jour de capacité de prix d'énergie ne plantent plus quand données de prix indisponibles. Sécurité nulle et gestion d'erreurs améliorées dans contrôle adaptatif. Capacité dégivrage renommée en 'Consommation pendant dégivrage' pour clarté."
+  },
   "2.4.2": {
     "en": "Fixed: Priority settings (Comfort/Efficiency/Cost) in adaptive control now work as intended. Settings were visible in UI but ignored (always used 60%/25%/15%). Users can now configure any combination (e.g., 0% comfort, 100% efficiency for COP-only optimization).",
     "nl": "Opgelost: Prioriteitsinstellingen (Comfort/Efficiëntie/Kosten) in adaptieve regeling werken nu zoals bedoeld. Instellingen waren zichtbaar in UI maar werden genegeerd (gebruikte altijd 60%/25%/15%). Gebruikers kunnen nu elke combinatie instellen (bijv. 0% comfort, 100% efficiëntie voor alleen-COP optimalisatie).",

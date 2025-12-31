@@ -426,9 +426,55 @@ export class EnergyTrackingService {
    */
   async initialize(): Promise<void> {
     this.logger('EnergyTrackingService: Initializing energy tracking service');
-    // Start energy tracking updates
+
+    // Check if energy tracking is enabled in device settings
+    const energyTrackingEnabled = this.device.getSetting('enable_intelligent_energy_tracking');
+
+    if (energyTrackingEnabled) {
+      // Enable the service
+      this.isEnabled = true;
+
+      // Initialize persistent tracking values
+      await this.initializeEnergyTracking();
+
+      // Start the 30-second accumulation interval
+      this.startEnergyTrackingInterval();
+
+      this.logger('EnergyTrackingService: Energy tracking enabled and interval started');
+    } else {
+      this.logger('EnergyTrackingService: Energy tracking disabled by user settings');
+    }
+
+    // Start initial power measurement update
     await this.updateIntelligentPowerMeasurement();
     this.logger('EnergyTrackingService: Energy tracking service initialized');
+  }
+
+  /**
+   * Handle settings changes (v1.0.9)
+   * Enables or disables energy tracking based on user settings
+   */
+  async onSettings(
+    oldSettings: Record<string, unknown>,
+    newSettings: Record<string, unknown>,
+    changedKeys: string[],
+  ): Promise<void> {
+    if (changedKeys.includes('enable_intelligent_energy_tracking')) {
+      const enabled = newSettings.enable_intelligent_energy_tracking as boolean;
+
+      if (enabled && !this.isEnabled) {
+        // Enable tracking
+        this.isEnabled = true;
+        await this.initializeEnergyTracking();
+        this.startEnergyTrackingInterval();
+        this.logger('EnergyTrackingService: Enabled energy tracking via settings');
+      } else if (!enabled && this.isEnabled) {
+        // Disable tracking
+        this.isEnabled = false;
+        this.stopEnergyTrackingInterval();
+        this.logger('EnergyTrackingService: Disabled energy tracking via settings');
+      }
+    }
   }
 
   /**

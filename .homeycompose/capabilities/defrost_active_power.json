@@ -1,10 +1,10 @@
 {
   "id": "defrost_active_power",
   "title": {
-    "en": "Defrost Power",
-    "nl": "Ontdooi Vermogen",
-    "de": "Abtau-Leistung",
-    "fr": "Puissance de dégivrage"
+    "en": "Defrost Power Consumption",
+    "nl": "Ontdooistand Vermogensverbruik",
+    "de": "Abtau-Leistungsaufnahme",
+    "fr": "Consommation pendant dégivrage"
   },
   "type": "number",
   "units": {
@@ -22,10 +22,10 @@
   "uiComponent": "sensor",
   "insights": true,
   "insightsTitle": {
-    "en": "Power During Defrost",
-    "nl": "Vermogen Tijdens Ontdooien",
-    "de": "Leistung Während Abtauen",
-    "fr": "Puissance Pendant Dégivrage"
+    "en": "Power Consumption During Defrost",
+    "nl": "Ontdooistand Vermogensverbruik",
+    "de": "Leistungsaufnahme Während Abtauen",
+    "fr": "Consommation Pendant Dégivrage"
   },
   "icon": "/assets/defrost-active-power.svg",
   "description": {

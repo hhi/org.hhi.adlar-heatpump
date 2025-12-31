@@ -4,6 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **📖 Detailed Documentation**: For in-depth architectural information, see [`docs/architecture/`](docs/architecture/) directory.
 
+## 🚨 CRITICAL: Code Change Authorization Policy
+
+**MANDATORY WORKFLOW FOR ALL CODE CHANGES:**
+
+1. **ANALYZE FIRST** - When encountering bugs or feature requests:
+   - Investigate and analyze the issue thoroughly
+   - Document findings, root causes, and proposed solutions
+   - Present analysis to user for review
+
+2. **WAIT FOR APPROVAL** - Before making ANY code changes:
+   - Present proposed solution with clear explanation
+   - Wait for explicit user approval to proceed
+   - Do NOT use agents that automatically modify code without prior user consent
+
+3. **IMPLEMENT ONLY AFTER APPROVAL** - Once approved:
+   - Make the agreed-upon changes
+   - Test and validate
+   - Report results
+
+4. **GIT OPERATIONS - STRICTLY RESTRICTED:**
+   - ❌ **FORBIDDEN for ALL agents except github-release-manager**: `git add`, `git commit`, `git push`, `git tag`, `git merge`, `git rebase`, `git cherry-pick`, `git reset --hard`, or ANY git operation that modifies the repository
+   - ✅ **ALLOWED**: Read-only git operations (`git status`, `git diff`, `git log`, `git show`)
+   - ✅ **EXCEPTION**: Only the `github-release-manager` agent is authorized to perform git commits/tags/pushes for release management
+   - ✅ **MAIN ASSISTANT**: ONLY commit when user explicitly requests "commit this" or similar explicit instruction
+   - ❌ **NEVER** automatically commit code changes without explicit user command
+   - ✅ **ALWAYS** show what will be committed before executing any git commit
+
+**Agent-Specific Restrictions:**
+
+- `homey-bug-fixer`: ❌ NO git operations - analysis and code fixes only
+- `homey-implementation-guide`: ❌ NO git operations - guidance only
+- `documentation-revision-analyst`: ❌ NO git operations - analysis only
+- `svg-icon-designer`: ❌ NO git operations - design only
+- `Explore`: ❌ NO git operations - read-only exploration
+- `Plan`: ❌ NO git operations - planning only
+- `code-reviewer`: ❌ NO git operations - review only
+- `github-release-manager`: ✅ AUTHORIZED for git tag, git commit, git push, gh release (release management only)
+
+**Rationale**: Unauthorized code changes and commits have repeatedly caused unnecessary rollbacks and recovery actions. The user must maintain full control over all code modifications.
+
+**Violation Consequences**: Failure to follow this policy damages trust and creates additional work for the user.
+
 ## Development Commands
 
 ### Build
