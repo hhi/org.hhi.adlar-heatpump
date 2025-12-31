@@ -1,20 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Euro symbol (main element, center) -->
-  <path d="M8 8 C8 7 9 6 10.5 6 C12 6 13 7 13 8.5" opacity="0.9"/>
-  <line x1="5.5" y1="8" x2="13" y2="8" opacity="0.9"/>
-  <path d="M8 12 C8 13 9 14 10.5 14 C12 14 13 13 13 11.5" opacity="0.9"/>
-  <line x1="5.5" y1="12" x2="13" y2="12" opacity="0.9"/>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Euro symbol (right side) -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 75 25 C 65 25 58 35 58 50 C 58 65 65 75 75 75"/>
+    <line x1="52" y1="42" x2="72" y2="42"/>
+    <line x1="52" y1="58" x2="72" y2="58"/>
+  </g>
 
-  <!-- Calendar days indicator (left side) -->
-  <circle cx="4" cy="15" r="0.5" fill="currentColor" opacity="0.6"/>
-  <circle cx="4" cy="17" r="0.5" fill="currentColor" opacity="0.6"/>
-  <circle cx="4" cy="19" r="0.5" fill="currentColor" opacity="0.6"/>
-
-  <!-- Daily cost bar chart (right side) -->
-  <line x1="18" y1="16" x2="18" y2="19" stroke-width="1.8" opacity="0.7"/>
-  <line x1="20.5" y1="13" x2="20.5" y2="19" stroke-width="1.8" opacity="0.85"/>
-  <line x1="23" y1="9" x2="23" y2="19" stroke-width="1.8" opacity="0.65"/>
-
-  <!-- Baseline for chart -->
-  <line x1="17" y1="19" x2="23" y2="19" opacity="0.5"/>
+  <!-- Calendar (left side) -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="8" y="33" width="33" height="42" rx="3"/>
+    <line x1="8" y1="46" x2="41" y2="46"/>
+    <line x1="17" y1="25" x2="17" y2="38"/>
+    <line x1="32" y1="25" x2="32" y2="38"/>
+  </g>
 </svg>
