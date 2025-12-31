@@ -9947,7 +9947,7 @@
         "de": "Aktueller Strompreis pro kWh (inkl. MwSt.)",
         "fr": "Prix actuel de l'électricité par kWh (TVA comprise)"
       },
-      "decimals": 3,
+      "decimals": 4,
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
@@ -9975,7 +9975,7 @@
         "de": "Energiepreis für die nächste Stunde (inkl. MwSt.)",
         "fr": "Prix de l'énergie pour l'heure suivante (TVA comprise)"
       },
-      "decimals": 3,
+      "decimals": 4,
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
@@ -11215,7 +11215,7 @@
       "decimals": 0,
       "getable": true,
       "setable": false,
-      "uiComponent": "sensor",
+      "uiComponent": null,
       "icon": "/assets/energy-price-current.svg"
     },
     "heating_curve_formula": {

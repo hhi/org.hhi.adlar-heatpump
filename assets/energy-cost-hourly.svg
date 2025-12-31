@@ -1,21 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Euro symbol (main element, center) -->
-  <path d="M8 8 C8 7 9 6 10.5 6 C12 6 13 7 13 8.5" opacity="0.9"/>
-  <line x1="5.5" y1="8" x2="13" y2="8" opacity="0.9"/>
-  <path d="M8 12 C8 13 9 14 10.5 14 C12 14 13 13 13 11.5" opacity="0.9"/>
-  <line x1="5.5" y1="12" x2="13" y2="12" opacity="0.9"/>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Euro symbol (right side) -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 75 25 C 65 25 58 35 58 50 C 58 65 65 75 75 75"/>
+    <line x1="52" y1="42" x2="72" y2="42"/>
+    <line x1="52" y1="58" x2="72" y2="58"/>
+  </g>
 
-  <!-- Clock circle (left side) -->
-  <circle cx="4" cy="17" r="2.5" opacity="0.8"/>
-  <line x1="4" y1="15" x2="4" y2="17" opacity="0.8"/>
-  <line x1="4" y1="17" x2="5.5" y2="17" opacity="0.8"/>
-  <circle cx="4" cy="17" r="0.3" fill="currentColor" opacity="0.8"/>
-
-  <!-- Hourly cost bars (right side) - variable heights for hourly data -->
-  <line x1="18" y1="14" x2="18" y2="19" stroke-width="1.5" opacity="0.6"/>
-  <line x1="20.5" y1="11" x2="20.5" y2="19" stroke-width="1.5" opacity="0.75"/>
-  <line x1="23" y1="15" x2="23" y2="19" stroke-width="1.5" opacity="0.65"/>
-
-  <!-- Baseline for hourly chart -->
-  <line x1="17.5" y1="19" x2="23.5" y2="19" opacity="0.5"/>
+  <!-- Clock (left side) -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="25" cy="50" r="17"/>
+    <polyline points="25,40 25,50 32,57"/>
+  </g>
 </svg>

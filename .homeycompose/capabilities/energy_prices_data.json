@@ -23,6 +23,6 @@
   "decimals": 0,
   "getable": true,
   "setable": false,
-  "uiComponent": "sensor",
+  "uiComponent": null,
   "icon": "/assets/energy-price-current.svg"
 }

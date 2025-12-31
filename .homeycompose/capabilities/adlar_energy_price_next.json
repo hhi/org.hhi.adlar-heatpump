@@ -19,7 +19,7 @@
     "de": "Energiepreis für die nächste Stunde (inkl. MwSt.)",
     "fr": "Prix de l'énergie pour l'heure suivante (TVA comprise)"
   },
-  "decimals": 3,
+  "decimals": 4,
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",

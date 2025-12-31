@@ -111,7 +111,7 @@ export class EnergyPriceOptimizer {
             action: 'preheat',
             magnitude: this.config.maxPreHeatOffset,
             priority: 'high',
-            reason: `Very low price (€${currentPrice.price.toFixed(3)}/kWh) - pre-heating maximally`,
+            reason: `Very low price (€${currentPrice.price.toFixed(4)}/kWh) - pre-heating maximally`,
             currentPrice: currentPrice.price,
             futurePrice: futurePrice?.price,
           };
@@ -125,7 +125,7 @@ export class EnergyPriceOptimizer {
             action: 'preheat',
             magnitude: this.config.maxPreHeatOffset / 2,
             priority: 'medium',
-            reason: `Low price (€${currentPrice.price.toFixed(3)}/kWh) - pre-heating moderately`,
+            reason: `Low price (€${currentPrice.price.toFixed(4)}/kWh) - pre-heating moderately`,
             currentPrice: currentPrice.price,
             futurePrice: futurePrice?.price,
           };
@@ -139,7 +139,7 @@ export class EnergyPriceOptimizer {
             action: 'reduce',
             magnitude: this.config.maxReduceOffset / 2,
             priority: 'medium',
-            reason: `High price (€${currentPrice.price.toFixed(3)}/kWh) - reducing moderately`,
+            reason: `High price (€${currentPrice.price.toFixed(4)}/kWh) - reducing moderately`,
             currentPrice: currentPrice.price,
             futurePrice: futurePrice?.price,
           };
@@ -153,7 +153,7 @@ export class EnergyPriceOptimizer {
             action: 'reduce',
             magnitude: this.config.maxReduceOffset,
             priority: 'high',
-            reason: `Very high price (€${currentPrice.price.toFixed(3)}/kWh) - reducing maximally`,
+            reason: `Very high price (€${currentPrice.price.toFixed(4)}/kWh) - reducing maximally`,
             currentPrice: currentPrice.price,
             futurePrice: futurePrice?.price,
           };
@@ -167,7 +167,7 @@ export class EnergyPriceOptimizer {
           action: 'maintain',
           magnitude: 0,
           priority: 'low',
-          reason: `Normal price (€${currentPrice.price.toFixed(3)}/kWh) - maintaining`,
+          reason: `Normal price (€${currentPrice.price.toFixed(4)}/kWh) - maintaining`,
           currentPrice: currentPrice.price,
           futurePrice: futurePrice?.price,
         };

@@ -1096,7 +1096,7 @@ export class AdaptiveControlService {
     try {
       const now = Date.now();
       const currentPrice = this.energyOptimizer.getCurrentPrice(now);
-      const nextHourPrice = this.energyOptimizer.getAveragePrice(now + 3600000, 1); // Next hour
+      const nextHourPrice = this.energyOptimizer.getCurrentPrice(now + 3600000); // Next hour (fixed: was using getAveragePrice which returned hour+2)
 
       if (currentPrice) {
         // Update price capabilities
@@ -1120,7 +1120,7 @@ export class AdaptiveControlService {
         }
 
         this.logger(
-          `Energy prices updated: Current €${currentPrice.price.toFixed(3)}/kWh (${currentPrice.category}), `
+          `Energy prices updated: Current €${currentPrice.price.toFixed(4)}/kWh (${currentPrice.category}), `
           + `Hourly cost €${hourlyCost.toFixed(2)}/h`,
         );
       }
@@ -1144,11 +1144,11 @@ export class AdaptiveControlService {
 
       // Change detection: only trigger when category changes
       if (this.lastPriceCategory !== null && this.lastPriceCategory !== currentPrice.category) {
-        const nextHourPrice = this.energyOptimizer.getAveragePrice(now + 3600000, 1);
+        const nextHourPrice = this.energyOptimizer.getCurrentPrice(now + 3600000);
 
         this.logger(
           `Price threshold crossed: ${this.lastPriceCategory} → ${currentPrice.category} `
-          + `(€${currentPrice.price.toFixed(3)}/kWh)`,
+          + `(€${currentPrice.price.toFixed(4)}/kWh)`,
         );
 
         await this.device.homey.flow

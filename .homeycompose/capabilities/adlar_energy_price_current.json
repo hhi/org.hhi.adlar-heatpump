@@ -19,7 +19,7 @@
     "de": "Aktueller Strompreis pro kWh (inkl. MwSt.)",
     "fr": "Prix actuel de l'électricité par kWh (TVA comprise)"
   },
-  "decimals": 3,
+  "decimals": 4,
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",

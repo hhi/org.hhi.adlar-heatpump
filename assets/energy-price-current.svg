@@ -1,19 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Euro symbol (main element, center-left) -->
-  <path d="M7 8 C7 7 8 6 9.5 6 C11 6 12 7 12 8.5" opacity="0.9"/>
-  <line x1="4.5" y1="8" x2="12" y2="8" opacity="0.9"/>
-  <path d="M7 12 C7 13 8 14 9.5 14 C11 14 12 13 12 11.5" opacity="0.9"/>
-  <line x1="4.5" y1="12" x2="12" y2="12" opacity="0.9"/>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Euro symbol (right side) -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 75 25 C 65 25 58 35 58 50 C 58 65 65 75 75 75"/>
+    <line x1="52" y1="42" x2="72" y2="42"/>
+    <line x1="52" y1="58" x2="72" y2="58"/>
+  </g>
 
-  <!-- "Now" / "Current" indicator - center dot -->
-  <circle cx="14" cy="10" r="1.5" fill="currentColor" opacity="0.85"/>
-
-  <!-- Time/moment line indicator -->
-  <line x1="17" y1="6" x2="20" y2="6" opacity="0.6"/>
-  <line x1="17" y1="14" x2="20" y2="14" opacity="0.6"/>
-
-  <!-- Price level bracket -->
-  <path d="M18 7 L18 13" opacity="0.7"/>
-  <line x1="17.5" y1="7" x2="18.5" y2="7" opacity="0.7"/>
-  <line x1="17.5" y1="13" x2="18.5" y2="13" opacity="0.7"/>
+  <!-- Current indicator (left side - filled circles) -->
+  <circle cx="25" cy="50" r="15" fill="currentColor" opacity="0.2"/>
+  <circle cx="25" cy="50" r="8" fill="currentColor"/>
 </svg>
