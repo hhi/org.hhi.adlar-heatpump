@@ -660,9 +660,9 @@ export class FlowCardManagerService {
       const priceCount = Object.keys(pricesObject).length;
       this.logger(`FlowCardManagerService: External energy prices updated: ${priceCount} hours received`);
 
-      // Update verborgen capability with prices data for visibility
       if (this.device.hasCapability('energy_prices_data')) {
-        await this.device.setCapabilityValue('energy_prices_data', pricesJsonRaw);
+        const timestamp = new Date().toISOString();
+        await this.device.setCapabilityValue('energy_prices_data', timestamp);
       }
 
       // Delegate to AdaptiveControlService for immediate capability updates via callback

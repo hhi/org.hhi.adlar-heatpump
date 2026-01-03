@@ -1,8 +1,7 @@
 # Adlar Warmtepomp - Adaptieve Regeling Systeem
 
-**Versie:** 1.0  
-**Datum:** December 2025  
-**Auteur:** Herman (met ondersteuning van Claude)  
+**Versie:** 1.0
+**Datum:** December 2025
 **Voor:** Homey Pro App Development
 
 ---

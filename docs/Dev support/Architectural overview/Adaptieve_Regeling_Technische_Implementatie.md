@@ -2,7 +2,6 @@
 
 **Versie:** 2.2.0
 **Datum:** December 2025
-**Auteur:** Herman (met ondersteuning van Claude)
 **Voor:** Developers & System Architects
 
 ---

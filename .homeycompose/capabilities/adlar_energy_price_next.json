@@ -14,10 +14,10 @@
     "fr": "€/kWh"
   },
   "desc": {
-    "en": "Energy price for the next hour (including VAT)",
-    "nl": "Energieprijs voor het volgende uur (inclusief BTW)",
-    "de": "Energiepreis für die nächste Stunde (inkl. MwSt.)",
-    "fr": "Prix de l'énergie pour l'heure suivante (TVA comprise)"
+    "en": "Energy price for the next hour.",
+    "nl": "Energieprijs voor het volgende uur.",
+    "de": "Energiepreis für die nächste Stunde.",
+    "fr": "Prix de l'énergie pour l'heure suivante."
   },
   "decimals": 4,
   "getable": true,

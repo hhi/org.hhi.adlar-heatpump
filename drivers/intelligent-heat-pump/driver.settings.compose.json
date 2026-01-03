@@ -712,45 +712,117 @@
   {
     "type": "group",
     "label": {
-      "en": "Energy Management",
-      "nl": "Energie Beheer",
-      "de": "Energieverwaltung",
-      "fr": "Gestion de l'énergie"
+      "en": "Energy Price Settings",
+      "nl": "Energieprijs Instellingen",
+      "de": "Energiepreis-Einstellungen",
+      "fr": "Paramètres de Prix de l'Énergie"
     },
     "children": [
       {
-        "id": "reset_external_energy_total",
-        "type": "checkbox",
+        "id": "price_calculation_mode",
+        "type": "dropdown",
         "label": {
-          "en": "Reset external energy total counter",
-          "nl": "Reset externe energie totaal teller",
-          "de": "Externe Gesamtenergiezähler zurücksetzen",
-          "fr": "Réinitialiser le compteur d'énergie totale externe"
+          "en": "Price calculation mode",
+          "nl": "Prijsberekening modus",
+          "de": "Preisberechnungsmodus",
+          "fr": "Mode de calcul du prix"
         },
         "hint": {
-          "en": "Click to reset the external energy total counter to zero. This will clear all accumulated energy measurements from flow cards.",
-          "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten.",
-          "de": "Klicken Sie, um den externen Gesamtenergiezähler auf Null zurückzusetzen. Dies löscht alle akkumulierten Energiemessungen von Flow-Karten.",
-          "fr": "Cliquez pour réinitialiser le compteur d'énergie totale externe à zéro. Cela effacera toutes les mesures d'énergie accumulées des cartes de flux."
+          "en": "Market: spot price + VAT only. Market+: adds supplier fee. All-in: adds energy tax (complete cost).",
+          "nl": "Marktprijs: spotprijs + BTW. Marktprijs+: incl. leveranciersopslag. All-in: incl. energiebelasting (complete kosten).",
+          "de": "Markt: Spotpreis + MwSt. Markt+: plus Lieferantengebühr. All-in: plus Energiesteuer (Gesamtkosten).",
+          "fr": "Marché: prix spot + TVA. Marché+: ajoute frais fournisseur. All-in: ajoute taxe énergie (coût complet)."
         },
-        "value": false
+        "value": "all_in",
+        "values": [
+          {
+            "id": "market",
+            "label": {
+              "en": "Market price (spot + VAT)",
+              "nl": "Marktprijs (spot + BTW)",
+              "de": "Marktpreis (Spot + MwSt)",
+              "fr": "Prix du marché (spot + TVA)"
+            }
+          },
+          {
+            "id": "market_plus",
+            "label": {
+              "en": "Market+ (spot + fee + VAT)",
+              "nl": "Marktprijs+ (spot + opslag + BTW)",
+              "de": "Markt+ (Spot + Gebühr + MwSt)",
+              "fr": "Marché+ (spot + frais + TVA)"
+            }
+          },
+          {
+            "id": "all_in",
+            "label": {
+              "en": "All-in price (complete cost)",
+              "nl": "All-in prijs (complete kosten)",
+              "de": "All-in Preis (Gesamtkosten)",
+              "fr": "Prix all-in (coût complet)"
+            }
+          }
+        ]
       },
       {
-        "id": "reset_external_energy_daily",
-        "type": "checkbox",
+        "id": "supplier_fee_inc_vat",
+        "type": "number",
         "label": {
-          "en": "Reset external energy daily counter",
-          "nl": "Reset externe energie dagelijkse teller",
-          "de": "Externe Tagesenergiezähler zurücksetzen",
-          "fr": "Réinitialiser le compteur d'énergie quotidienne externe"
+          "en": "Supplier fee (€/kWh incl. VAT)",
+          "nl": "Inkoopvergoeding (€/kWh incl. BTW)",
+          "de": "Lieferantengebühr (€/kWh inkl. MwSt)",
+          "fr": "Frais fournisseur (€/kWh TTC)"
         },
         "hint": {
-          "en": "Click to reset the external daily energy counter to zero. This will clear today's accumulated energy measurements from flow cards.",
-          "nl": "Klik om de externe dagelijkse energie teller naar nul te resetten. Dit wist de geaccumuleerde energie metingen van vandaag van flow kaarten.",
-          "de": "Klicken Sie, um den externen Tagesenergiezähler auf Null zurückzusetzen. Dies löscht die heutigen akkumulierten Energiemessungen von Flow-Karten.",
-          "fr": "Cliquez pour réinitialiser le compteur d'énergie quotidienne externe à zéro. Cela effacera les mesures d'énergie accumulées d'aujourd'hui des cartes de flux."
+          "en": "Supplier/trading fee per kWh, including VAT. Check your energy contract for this value.",
+          "nl": "Leveranciersopslag per kWh, inclusief BTW. Controleer uw energiecontract voor deze waarde.",
+          "de": "Lieferantengebühr pro kWh, inklusive MwSt. Überprüfen Sie Ihren Energievertrag auf diesen Wert.",
+          "fr": "Frais de fournisseur/négoce par kWh, TTC. Vérifiez votre contrat d'énergie pour cette valeur."
         },
-        "value": false
+        "value": 0.0182,
+        "min": 0,
+        "max": 0.5,
+        "step": 0.0001
+      },
+      {
+        "id": "electricity_tax_inc_vat",
+        "type": "number",
+        "label": {
+          "en": "Energy tax (€/kWh incl. VAT)",
+          "nl": "Energiebelasting (€/kWh incl. BTW)",
+          "de": "Energiesteuer (€/kWh inkl. MwSt)",
+          "fr": "Taxe énergie (€/kWh TTC)"
+        },
+        "hint": {
+          "en": "Energy tax per kWh, including VAT. Netherlands 2024: ~€0.11085. Check your invoice for current rate.",
+          "nl": "Energiebelasting per kWh, inclusief BTW. Nederland 2024: ~€0.11085. Controleer uw factuur voor actueel tarief.",
+          "de": "Energiesteuer pro kWh, inklusive MwSt. Niederlande 2024: ~€0.11085. Überprüfen Sie Ihre Rechnung für aktuelle Rate.",
+          "fr": "Taxe sur l'énergie par kWh, TTC. Pays-Bas 2024: ~€0.11085. Vérifiez votre facture pour le taux actuel."
+        },
+        "value": 0.11085,
+        "min": 0,
+        "max": 0.5,
+        "step": 0.0001
+      },
+      {
+        "id": "vat_percentage",
+        "type": "number",
+        "label": {
+          "en": "VAT percentage (%)",
+          "nl": "BTW-percentage (%)",
+          "de": "MwSt-Prozentsatz (%)",
+          "fr": "Pourcentage TVA (%)"
+        },
+        "hint": {
+          "en": "VAT percentage applied to market price. Netherlands: 21% (standard), 9% (reduced rate for some situations).",
+          "nl": "BTW-percentage toegepast op marktprijs. Nederland: 21% (standaard), 9% (verlaagd tarief voor sommige situaties).",
+          "de": "MwSt-Prozentsatz auf Marktpreis. Niederlande: 21% (Standard), 9% (ermäßigter Satz für einige Situationen).",
+          "fr": "Pourcentage de TVA appliqué au prix du marché. Pays-Bas: 21% (standard), 9% (taux réduit pour certaines situations)."
+        },
+        "value": 21,
+        "min": 0,
+        "max": 30,
+        "step": 1
       }
     ]
   },
@@ -1025,6 +1097,23 @@
             }
           }
         ]
+      },
+      {
+        "id": "reset_building_model",
+        "type": "checkbox",
+        "label": {
+          "en": "Reset building model learning",
+          "nl": "Reset gebouwmodel leren",
+          "de": "Gebäudemodell-Lernen zurücksetzen",
+          "fr": "Réinitialiser l'apprentissage du modèle de bâtiment"
+        },
+        "hint": {
+          "en": "Enable to reset all learned building parameters (tau, C, UA) and restart learning from scratch using the selected building profile. Automatically disables after reset. Use when diagnostics show corrupt state (negative values, 0% confidence with many samples).",
+          "nl": "Schakel in om alle geleerde gebouwparameters (tau, C, UA) te resetten en opnieuw te beginnen met het geselecteerde gebouwprofiel. Schakelt automatisch uit na reset. Gebruik wanneer diagnostics corrupte state tonen (negatieve waarden, 0% confidence met veel samples).",
+          "de": "Aktivieren zum Zurücksetzen aller gelernten Gebäudeparameter (tau, C, UA) und Neustart des Lernens mit ausgewähltem Gebäudeprofil. Deaktiviert sich automatisch nach Reset. Verwenden wenn Diagnose korrupten Zustand zeigt (negative Werte, 0% Konfidenz mit vielen Samples).",
+          "fr": "Activer pour réinitialiser tous paramètres bâtiment appris (tau, C, UA) et redémarrer apprentissage avec profil sélectionné. Se désactive automatiquement après reset. Utiliser quand diagnostic montre état corrompu (valeurs négatives, 0% confiance avec nombreux échantillons)."
+        },
+        "value": false
       },
       {
         "id": "enable_dynamic_pint",
@@ -1580,6 +1669,51 @@
             }
           }
         ]
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Energy Management",
+      "nl": "Energie Beheer",
+      "de": "Energieverwaltung",
+      "fr": "Gestion de l'énergie"
+    },
+    "children": [
+      {
+        "id": "reset_external_energy_total",
+        "type": "checkbox",
+        "label": {
+          "en": "Reset external energy total counter",
+          "nl": "Reset externe energie totaal teller",
+          "de": "Externe Gesamtenergiezähler zurücksetzen",
+          "fr": "Réinitialiser le compteur d'énergie totale externe"
+        },
+        "hint": {
+          "en": "Click to reset the external energy total counter to zero. This will clear all accumulated energy measurements from flow cards.",
+          "nl": "Klik om de externe energie totaal teller naar nul te resetten. Dit wist alle geaccumuleerde energie metingen van flow kaarten.",
+          "de": "Klicken Sie, um den externen Gesamtenergiezähler auf Null zurückzusetzen. Dies löscht alle akkumulierten Energiemessungen von Flow-Karten.",
+          "fr": "Cliquez pour réinitialiser le compteur d'énergie totale externe à zéro. Cela effacera toutes les mesures d'énergie accumulées des cartes de flux."
+        },
+        "value": false
+      },
+      {
+        "id": "reset_external_energy_daily",
+        "type": "checkbox",
+        "label": {
+          "en": "Reset external energy daily counter",
+          "nl": "Reset externe energie dagelijkse teller",
+          "de": "Externe Tagesenergiezähler zurücksetzen",
+          "fr": "Réinitialiser le compteur d'énergie quotidienne externe"
+        },
+        "hint": {
+          "en": "Click to reset the external daily energy counter to zero. This will clear today's accumulated energy measurements from flow cards.",
+          "nl": "Klik om de externe dagelijkse energie teller naar nul te resetten. Dit wist de geaccumuleerde energie metingen van vandaag van flow kaarten.",
+          "de": "Klicken Sie, um den externen Tagesenergiezähler auf Null zurückzusetzen. Dies löscht die heutigen akkumulierten Energiemessungen von Flow-Karten.",
+          "fr": "Cliquez pour réinitialiser le compteur d'énergie quotidienne externe à zéro. Cela effacera les mesures d'énergie accumulées d'aujourd'hui des cartes de flux."
+        },
+        "value": false
       }
     ]
   }

@@ -107,7 +107,7 @@ export class AdaptiveControlService {
    */
   constructor(config: AdaptiveControlServiceConfig) {
     this.device = config.device;
-    this.logger = config.logger || (() => {});
+    this.logger = config.logger || (() => { });
 
     // Initialize Component 1: Heating Controller (PI control)
     this.heatingController = new HeatingController({
@@ -162,6 +162,14 @@ export class AdaptiveControlService {
     });
 
     this.logger('AdaptiveControlService: Initialized with all 4 components');
+  }
+
+  /**
+   * Get the EnergyPriceOptimizer instance for dependency injection
+   * Used by EnergyTrackingService for cost accumulation
+   */
+  public getEnergyOptimizer(): EnergyPriceOptimizer {
+    return this.energyOptimizer;
   }
 
   /**
@@ -964,8 +972,8 @@ export class AdaptiveControlService {
 
     // Handle priority settings changes (v2.4.1: bug fix - settings were defined but not used)
     if (changedKeys.includes('priority_comfort')
-        || changedKeys.includes('priority_efficiency')
-        || changedKeys.includes('priority_cost')) {
+      || changedKeys.includes('priority_efficiency')
+      || changedKeys.includes('priority_cost')) {
       await this.loadPrioritySettings();
 
       // Log the change for transparency
@@ -983,6 +991,43 @@ export class AdaptiveControlService {
       const Ki = newSettings.adaptive_pi_ki as number || 1.5;
       const deadband = newSettings.adaptive_pi_deadband as number || 0.3;
       this.updatePIParameters(Kp, Ki, deadband);
+    }
+
+    // Handle energy price settings changes
+    if (changedKeys.includes('price_calculation_mode')) {
+      const mode = newSettings.price_calculation_mode as 'market' | 'market_plus' | 'all_in';
+      this.energyOptimizer.setPriceMode(mode);
+    }
+
+    // Handle financial component changes
+    if (changedKeys.includes('supplier_fee_inc_vat')
+      || changedKeys.includes('electricity_tax_inc_vat')
+      || changedKeys.includes('vat_percentage')) {
+      this.energyOptimizer.setFinancialComponents({
+        storageFee: newSettings.supplier_fee_inc_vat as number,
+        energyTax: newSettings.electricity_tax_inc_vat as number,
+        vatPercentage: newSettings.vat_percentage as number,
+      });
+    }
+
+    // Handle building model reset toggle
+    if (changedKeys.includes('reset_building_model')) {
+      const shouldReset = newSettings.reset_building_model as boolean;
+      if (shouldReset) {
+        this.logger('AdaptiveControlService: Building model reset requested via settings');
+        try {
+          // Execute reset
+          await this.buildingModel.reset();
+
+          // Automatically turn off the toggle
+          await this.device.setSettings({ reset_building_model: false });
+          this.logger('✅ Building model reset complete - toggle automatically disabled');
+        } catch (error) {
+          this.logger('❌ Building model reset failed:', error);
+          // Still turn off toggle to prevent repeated failures
+          await this.device.setSettings({ reset_building_model: false });
+        }
+      }
     }
   }
 
@@ -1103,32 +1148,20 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Update price capabilities
+      // Update price capabilities only
+      // NOTE: Cost capabilities (adlar_energy_cost_daily, adlar_energy_cost_hourly)
+      // are now updated by EnergyTrackingService every 10 seconds for accurate accumulation
       await this.device.setCapabilityValue('adlar_energy_price_current', currentPrice.price);
       await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
 
       if (nextHourPrice) {
         await this.device.setCapabilityValue('adlar_energy_price_next', nextHourPrice.price);
-      }
-
-      // Update hourly cost capability
-      const currentPowerWatts = (this.device.getCapabilityValue('measure_power') as number) ?? 0;
-      const hourlyCost = this.energyOptimizer.calculateCurrentCost(currentPowerWatts);
-      await this.device.setCapabilityValue('adlar_energy_cost_hourly', hourlyCost);
-
-      // Calculate daily cost (only if daily consumption > 0)
-      const dailyConsumption = (this.device.getCapabilityValue('adlar_external_energy_daily') as number) ?? 0;
-      if (dailyConsumption > 0) {
-        const dailyCost = this.energyOptimizer.calculateDailyCost(dailyConsumption);
-        // Only update if calculation succeeded (returns non-zero)
-        if (dailyCost !== null && dailyCost !== undefined) {
-          await this.device.setCapabilityValue('adlar_energy_cost_daily', dailyCost);
-        }
+      } else {
+        await this.device.setCapabilityValue('adlar_energy_price_next', null);
       }
 
       this.logger(
-        `Energy prices updated: Current €${currentPrice.price.toFixed(4)}/kWh (${currentPrice.category}), `
-        + `Hourly cost €${hourlyCost.toFixed(2)}/h`,
+        `Energy prices updated: Current €${currentPrice.price.toFixed(4)}/kWh (${currentPrice.category})`,
       );
     } catch (err) {
       this.logger('Failed to update energy price capabilities:', err);

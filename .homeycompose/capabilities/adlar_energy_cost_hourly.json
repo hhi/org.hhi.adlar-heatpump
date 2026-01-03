@@ -19,7 +19,7 @@
     "de": "Aktuelle Energiekosten pro Stunde (Leistung × Preis)",
     "fr": "Coût énergétique actuel par heure (puissance × prix)"
   },
-  "decimals": 2,
+  "decimals": 4,
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",

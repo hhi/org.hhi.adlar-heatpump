@@ -14,10 +14,10 @@
     "fr": "€/kWh"
   },
   "desc": {
-    "en": "Current electricity price per kWh (including VAT)",
-    "nl": "Huidige elektriciteitsprijs per kWh (inclusief BTW)",
-    "de": "Aktueller Strompreis pro kWh (inkl. MwSt.)",
-    "fr": "Prix actuel de l'électricité par kWh (TVA comprise)"
+    "en": "Current electricity price per kWh.",
+    "nl": "Huidige elektriciteitsprijs per kWh.",
+    "de": "Aktueller Strompreis pro kWh.",
+    "fr": "Prix actuel de l'électricité par kWh."
   },
   "decimals": 4,
   "getable": true,
