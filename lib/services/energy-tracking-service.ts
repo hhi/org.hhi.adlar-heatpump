@@ -4,10 +4,12 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { DeviceConstants } from '../constants';
+import { EnergyPriceOptimizer } from '../adaptive/energy-price-optimizer';
 
 export interface EnergyTrackingOptions {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
+  energyPriceOptimizer?: EnergyPriceOptimizer;
 }
 
 export interface PowerMeasurement {
@@ -30,8 +32,6 @@ export class EnergyTrackingService {
   // State tracking for flow card triggers (v1.0.8)
   private dailyThresholdTriggered = false; // Reset daily at midnight
   private lastDailyConsumptionCheck = 0; // For rate limiting
-  // TODO (v1.0.9): Implement automatic midnight reset via dailyResetInterval
-  // Currently resets when service is reinitialized (app restart)
 
   // Overlap protection guard (v1.0.2)
   private energyCalculationInProgress = false;
@@ -47,10 +47,15 @@ export class EnergyTrackingService {
    * and maintains daily/cumulative energy totals.
    * @param options.device - The Homey device that owns this service.
    * @param options.logger - Optional logger function.
+   * @param options.energyPriceOptimizer - Optional energy price optimizer for cost accumulation.
    */
+  // Energy price optimizer for cost accumulation (injected dependency)
+  private energyPriceOptimizer: EnergyPriceOptimizer | null = null;
+
   constructor(options: EnergyTrackingOptions) {
     this.device = options.device;
-    this.logger = options.logger || (() => {});
+    this.logger = options.logger || (() => { });
+    this.energyPriceOptimizer = options.energyPriceOptimizer || null;
   }
 
   /**
@@ -305,6 +310,15 @@ export class EnergyTrackingService {
       // Track external energy separately when external power is being used
       await this.updateExternalEnergy(externalPower, currentTime);
 
+      // === Update hourly cost accumulator ===
+      // Tracks actual accumulated costs for the current hour (resets at hour boundary)
+      if (this.energyPriceOptimizer && this.device.hasCapability('adlar_energy_cost_hourly')) {
+        const currentDailyEnergy = this.device.getCapabilityValue('adlar_external_energy_daily') || 0;
+        const hourlyCost = this.energyPriceOptimizer.accumulateHourlyCost(currentDailyEnergy);
+        await this.device.setCapabilityValue('adlar_energy_cost_hourly',
+          Math.round(hourlyCost * 100) / 100);
+      }
+
       // Update timestamp for next calculation
       if (currentPower > 0 || externalPower > 0) {
         await this.device.setStoreValue('last_energy_update', currentTime);
@@ -357,6 +371,26 @@ export class EnergyTrackingService {
           await this.device.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
         }
 
+        // === NEW: Cost accumulation via EnergyPriceOptimizer ===
+        if (this.energyPriceOptimizer) {
+          // Accumulate cost based on energy increment
+          this.energyPriceOptimizer.accumulateCost(externalEnergyIncrement);
+
+          // Update daily cost capability
+          if (this.device.hasCapability('adlar_energy_cost_daily')) {
+            const dailyCost = this.energyPriceOptimizer.getAccumulatedDailyCost();
+            await this.device.setCapabilityValue('adlar_energy_cost_daily',
+              Math.round(dailyCost * 100) / 100);
+          }
+
+          // Update hourly cost capability (momentary projection)
+          if (this.device.hasCapability('adlar_energy_cost_hourly')) {
+            const hourlyCost = this.energyPriceOptimizer.calculateCurrentCost(externalPower);
+            await this.device.setCapabilityValue('adlar_energy_cost_hourly',
+              Math.round(hourlyCost * 100) / 100);
+          }
+        }
+
         // Store external energy in device storage for persistence
         await this.device.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
         // Update external energy timestamp
@@ -392,6 +426,68 @@ export class EnergyTrackingService {
       clearInterval(this.energyTrackingInterval);
       this.energyTrackingInterval = null;
       this.logger('EnergyTrackingService: Stopped energy tracking interval');
+    }
+  }
+
+  /**
+   * Schedule midnight reset for daily counters
+   * Uses a timeout to midnight, then a 24-hour interval
+   */
+  private scheduleMidnightReset(): void {
+    // Calculate milliseconds until next midnight
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0); // Next midnight
+    const msUntilMidnight = midnight.getTime() - now.getTime();
+
+    this.logger(`EnergyTrackingService: Scheduling midnight reset in ${Math.round(msUntilMidnight / 60000)} minutes`);
+
+    // First: wait until midnight
+    this.dailyResetTimeout = this.device.homey.setTimeout(() => {
+      this.performDailyReset();
+
+      // Then: repeat every 24 hours
+      this.dailyResetInterval = this.device.homey.setInterval(() => {
+        this.performDailyReset();
+      }, 24 * 60 * 60 * 1000); // 24 hours
+
+    }, msUntilMidnight);
+  }
+
+  /**
+   * Perform daily reset of energy and cost counters
+   * Called at midnight
+   */
+  private async performDailyReset(): Promise<void> {
+    this.logger('EnergyTrackingService: Performing daily reset at midnight');
+
+    try {
+      // Reset external daily energy
+      if (this.device.hasCapability('adlar_external_energy_daily')) {
+        await this.device.setCapabilityValue('adlar_external_energy_daily', 0);
+        await this.device.setStoreValue('external_daily_consumption_kwh', 0);
+      }
+
+      // Reset internal daily consumption
+      if (this.device.hasCapability('meter_power.power_consumption')) {
+        await this.device.setCapabilityValue('meter_power.power_consumption', 0);
+        await this.device.setStoreValue('daily_consumption_kwh', 0);
+      }
+
+      // Reset daily cost via EnergyPriceOptimizer
+      this.resetDailyCost();
+
+      // Reset daily cost capability
+      if (this.device.hasCapability('adlar_energy_cost_daily')) {
+        await this.device.setCapabilityValue('adlar_energy_cost_daily', 0);
+      }
+
+      // Reset daily threshold trigger flag
+      this.dailyThresholdTriggered = false;
+
+      this.logger('EnergyTrackingService: Daily reset completed');
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error during daily reset:', error);
     }
   }
 
@@ -439,6 +535,9 @@ export class EnergyTrackingService {
 
       // Start the 30-second accumulation interval
       this.startEnergyTrackingInterval();
+
+      // Schedule midnight reset for daily counters
+      this.scheduleMidnightReset();
 
       this.logger('EnergyTrackingService: Energy tracking enabled and interval started');
     } else {
@@ -626,5 +725,25 @@ export class EnergyTrackingService {
     }
 
     this.logger('EnergyTrackingService: Service destroyed - all timers cleared');
+  }
+
+  /**
+   * Set the energy price optimizer for cost accumulation
+   * Used for late dependency injection after constructor
+   */
+  public setEnergyPriceOptimizer(optimizer: EnergyPriceOptimizer): void {
+    this.energyPriceOptimizer = optimizer;
+    this.logger('EnergyTrackingService: EnergyPriceOptimizer injected');
+  }
+
+  /**
+   * Reset daily cost accumulator (called at midnight)
+   * Delegates to EnergyPriceOptimizer if available
+   */
+  public resetDailyCost(): void {
+    if (this.energyPriceOptimizer) {
+      this.energyPriceOptimizer.resetDailyCost();
+      this.logger('EnergyTrackingService: Daily cost reset delegated to EnergyPriceOptimizer');
+    }
   }
 }

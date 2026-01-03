@@ -361,6 +361,60 @@ export class BuildingModelLearner {
     enableDynamicPInt?: boolean;
     enableSeasonalG?: boolean;
   }): void {
+    // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
+    let stateIsValid = true;
+    const validationErrors: string[] = [];
+
+    // Validate theta parameters (must be physically possible)
+    if (state.theta && state.theta.length === 4) {
+      // θ[0] = 1/C must be positive (C > 0)
+      if (state.theta[0] <= 0) {
+        validationErrors.push(`θ[0]=${state.theta[0]} (must be positive, represents 1/C)`);
+        stateIsValid = false;
+      }
+      // θ[1] = UA/C must be positive (UA > 0)
+      if (state.theta[1] <= 0) {
+        validationErrors.push(`θ[1]=${state.theta[1]} (must be positive, represents UA/C)`);
+        stateIsValid = false;
+      }
+      // θ[1] must be smaller than θ[0] (otherwise tau < 1 hour, unrealistic)
+      if (state.theta[1] >= state.theta[0]) {
+        validationErrors.push(`θ[1]=${state.theta[1]} >= θ[0]=${state.theta[0]} (would give tau < 1h)`);
+        stateIsValid = false;
+      }
+    } else {
+      validationErrors.push('theta array missing or wrong size');
+      stateIsValid = false;
+    }
+
+    // Validate P matrix (covariance matrix trace should be reasonable)
+    if (state.P && state.P.length === 4 && state.P[0].length === 4) {
+      const pTrace = state.P.reduce((sum, row, i) => sum + row[i], 0);
+      // Abnormally high trace indicates corruption (healthy range: 10-400)
+      if (pTrace > 400 || pTrace < 0) {
+        validationErrors.push(`P matrix trace=${pTrace.toFixed(1)} (healthy: 10-400)`);
+        stateIsValid = false;
+      }
+    } else {
+      validationErrors.push('P matrix missing or wrong dimensions');
+      stateIsValid = false;
+    }
+
+    // If validation failed, REJECT corrupt state and use defaults
+    if (!stateIsValid) {
+      this.logger('⚠️ BuildingModelLearner: CORRUPT STATE DETECTED - rejecting restore');
+      this.logger('   Validation errors:');
+      validationErrors.forEach((err) => this.logger(`   - ${err}`));
+      this.logger('   Using DEFAULT state instead (sample count preserved for diagnostics)');
+
+      // Keep sample count for diagnostics, but reset parameters to defaults
+      this.sampleCount = state.sampleCount || 0;
+      // theta and P already initialized with defaults in constructor
+      this.logger(`   ✅ State restore prevented corruption (kept ${this.sampleCount} sample count)`);
+      return;
+    }
+
+    // State is valid - restore normally
     this.theta = state.theta;
     this.P = state.P;
     this.sampleCount = state.sampleCount;
@@ -369,7 +423,7 @@ export class BuildingModelLearner {
     this.basePInt = state.basePInt ?? 0.3;
     this.enableDynamicPInt = state.enableDynamicPInt ?? false;
     this.enableSeasonalG = state.enableSeasonalG ?? false;
-    this.logger(`BuildingModelLearner: Restored state with ${this.sampleCount} samples`);
+    this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
   }
 
   // ========================================================================

@@ -1,6 +1,6 @@
 {
   "id": "adlar_energy_price_category",
-  "type": "string",
+  "type": "enum",
   "title": {
     "en": "Energy Price Category",
     "nl": "Energieprijs Categorie",
@@ -8,11 +8,58 @@
     "fr": "Catégorie de Prix de l'Énergie"
   },
   "desc": {
-    "en": "Current energy price category (very_low, low, normal, high, very_high)",
-    "nl": "Huidige energieprijs categorie (very_low, low, normal, high, very_high)",
-    "de": "Aktuelle Energiepreis-Kategorie (very_low, low, normal, high, very_high)",
-    "fr": "Catégorie actuelle du prix de l'énergie (very_low, low, normal, high, very_high)"
+    "en": "Current energy price category (very low, low, normal, high, very high).",
+    "nl": "Huidige energieprijscategorie (zeer laag, laag, normaal, hoog, zeer hoog).",
+    "de": "Aktuelle Energiepreis-Kategorie (sehr niedrig, niedrig, normal, hoch, sehr hoch).",
+    "fr": "Catégorie actuelle du prix de l'énergie (très bas, bas, normal, élevé, très élevé)."
   },
+  "values": [
+    {
+      "id": "very_low",
+      "title": {
+        "en": "Very Low",
+        "nl": "Zeer Laag",
+        "de": "Sehr Niedrig",
+        "fr": "Très Bas"
+      }
+    },
+    {
+      "id": "low",
+      "title": {
+        "en": "Low",
+        "nl": "Laag",
+        "de": "Niedrig",
+        "fr": "Bas"
+      }
+    },
+    {
+      "id": "normal",
+      "title": {
+        "en": "Normal",
+        "nl": "Normaal",
+        "de": "Normal",
+        "fr": "Normal"
+      }
+    },
+    {
+      "id": "high",
+      "title": {
+        "en": "High",
+        "nl": "Hoog",
+        "de": "Hoch",
+        "fr": "Élevé"
+      }
+    },
+    {
+      "id": "very_high",
+      "title": {
+        "en": "Very High",
+        "nl": "Zeer Hoog",
+        "de": "Sehr Hoch",
+        "fr": "Très Élevé"
+      }
+    }
+  ],
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",

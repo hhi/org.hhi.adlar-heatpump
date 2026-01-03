@@ -389,9 +389,12 @@ export class BuildingModelService {
 
   /**
    * Log diagnostic status for troubleshooting
+   * Enhanced with RLS state verification (v2.4.4 - detect corrupt state after app restart)
    */
   public async logDiagnosticStatus(): Promise<void> {
     const status = await this.getDiagnosticStatus();
+    const state = this.learner.getState();
+    const model = this.learner.getModel();
 
     this.logger('═══ Building Model Diagnostic Status ═══');
     this.logger(`Enabled: ${status.enabled ? '✅' : '❌'}`);
@@ -406,6 +409,62 @@ export class BuildingModelService {
       this.logger(`⚠️ BLOCKING REASON: ${status.blockingReason}`);
     } else {
       this.logger('✅ Learning active, collecting data');
+    }
+
+    // Enhanced diagnostics: RLS algorithm state verification
+    this.logger('');
+    this.logger('📊 RLS Algorithm Internal State:');
+
+    // Calculate P matrix trace (sum of diagonal elements)
+    const pTrace = state.P.reduce((sum, row, i) => sum + row[i], 0);
+    const pTraceStatus = pTrace > 400 ? '⚠️ ABNORMALLY HIGH (corrupt?)' : pTrace < 10 ? '⚠️ TOO LOW (over-confident?)' : '✅ OK';
+    this.logger(`   P matrix trace: ${pTrace.toFixed(1)} ${pTraceStatus}`);
+    this.logger(`   P[0][0]: ${state.P[0][0].toFixed(3)} (1/C variance)`);
+    this.logger(`   P[1][1]: ${state.P[1][1].toFixed(3)} (UA/C variance)`);
+
+    // Theta parameters (RLS internal parameters)
+    this.logger('');
+    this.logger('🔢 Theta Parameters (RLS):');
+    this.logger(`   θ[0] (1/C):    ${state.theta[0].toFixed(6)} ${state.theta[0] <= 0 ? '❌ NEGATIVE!' : '✅'}`);
+    this.logger(`   θ[1] (UA/C):   ${state.theta[1].toFixed(6)} ${state.theta[1] <= 0 ? '❌ NEGATIVE!' : '✅'}`);
+    this.logger(`   θ[2] (g/C):    ${state.theta[2].toFixed(6)}`);
+    this.logger(`   θ[3] (P_int/C): ${state.theta[3].toFixed(6)}`);
+
+    // Physical building parameters
+    this.logger('');
+    this.logger('🏠 Learned Building Parameters:');
+    const cStatus = model.C > 0 && model.C < 100 ? '✅' : '⚠️ UNREALISTIC';
+    const uaStatus = model.UA > 0 && model.UA < 2 ? '✅' : '⚠️ UNREALISTIC';
+    const tauStatus = model.tau > 0 && model.tau < 500 ? '✅' : model.tau < 0 ? '❌ NEGATIVE (IMPOSSIBLE!)' : '⚠️ UNREALISTIC';
+    this.logger(`   C (Thermal Mass):  ${model.C.toFixed(1)} kWh/°C ${cStatus}`);
+    this.logger(`   UA (Heat Loss):    ${model.UA.toFixed(3)} kW/°C ${uaStatus}`);
+    this.logger(`   τ (Time Constant): ${model.tau.toFixed(1)}h ${tauStatus}`);
+    this.logger(`   g (Solar Gain):    ${model.g.toFixed(3)}`);
+    this.logger(`   P_int (Internal):  ${model.pInt.toFixed(2)} kW`);
+
+    // State persistence verification
+    const stateJson = JSON.stringify(state);
+    const stateSize = stateJson.length;
+    const pMatrixValid = Array.isArray(state.P) && state.P.length === 4
+      && state.P.every((row) => Array.isArray(row) && row.length === 4);
+
+    this.logger('');
+    this.logger('💾 State Persistence Check:');
+    this.logger(`   State JSON size: ${(stateSize / 1024).toFixed(2)} KB`);
+    this.logger(`   P matrix structure: ${pMatrixValid ? '✅ Valid 4×4' : '❌ CORRUPT'}`);
+    this.logger(`   Sample count: ${state.sampleCount} ${state.sampleCount > 0 ? '✅' : '❌ Zero'}`);
+
+    // Diagnosis summary
+    if (model.tau < 0 || model.C < 0 || model.UA < 0) {
+      this.logger('');
+      this.logger('🚨 CRITICAL: Negative parameters detected!');
+      this.logger('   This indicates RLS state corruption.');
+      this.logger('   Recommendation: Reset building model via flow card action.');
+    } else if (pTrace > 400) {
+      this.logger('');
+      this.logger('⚠️ WARNING: High covariance matrix trace detected.');
+      this.logger('   This may indicate state restore failure after app restart.');
+      this.logger('   Recommendation: Reset building model if confidence remains 0%.');
     }
 
     this.logger('═══════════════════════════════════════');

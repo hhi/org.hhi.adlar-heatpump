@@ -59,7 +59,7 @@ export class ServiceCoordinator {
    */
   constructor(options: ServiceCoordinatorOptions) {
     this.device = options.device;
-    this.logger = options.logger || (() => {});
+    this.logger = options.logger || (() => { });
 
     this.initializeServices();
     this.setupServiceEventHandlers();
@@ -212,6 +212,11 @@ export class ServiceCoordinator {
       // Initialize adaptive control service
       await this.adaptiveControl.initialize();
       this.logger('ServiceCoordinator: Adaptive control service initialized');
+
+      // Wire EnergyPriceOptimizer to EnergyTrackingService for cost accumulation
+      const energyOptimizer = this.adaptiveControl.getEnergyOptimizer();
+      this.energyTracking.setEnergyPriceOptimizer(energyOptimizer);
+      this.logger('ServiceCoordinator: EnergyPriceOptimizer injected into EnergyTrackingService');
 
       // Initialize heating curve visualization service (v2.3.7)
       await this.heatingCurveVisualization.initialize();
