@@ -245,6 +245,24 @@ export class EnergyTrackingService {
         }
       }
 
+      // Restore hourly cost capability from store (survives app restarts)
+      if (this.device.hasCapability('adlar_energy_cost_hourly')) {
+        const storedHourlyCost = await this.device.getStoreValue('hourly_cost_cache') || 0;
+        if (storedHourlyCost > 0) {
+          await this.device.setCapabilityValue('adlar_energy_cost_hourly', storedHourlyCost);
+          this.logger(`EnergyTrackingService: Restored hourly cost: €${storedHourlyCost.toFixed(2)}`);
+        }
+      }
+
+      // Restore daily cost capability from store (survives app restarts)
+      if (this.device.hasCapability('adlar_energy_cost_daily')) {
+        const storedDailyCost = await this.device.getStoreValue('daily_cost_cache') || 0;
+        if (storedDailyCost > 0) {
+          await this.device.setCapabilityValue('adlar_energy_cost_daily', storedDailyCost);
+          this.logger(`EnergyTrackingService: Restored daily cost: €${storedDailyCost.toFixed(2)}`);
+        }
+      }
+
     } catch (error) {
       this.logger('EnergyTrackingService: Error initializing energy tracking:', error);
     }
@@ -379,15 +397,19 @@ export class EnergyTrackingService {
           // Update daily cost capability
           if (this.device.hasCapability('adlar_energy_cost_daily')) {
             const dailyCost = this.energyPriceOptimizer.getAccumulatedDailyCost();
-            await this.device.setCapabilityValue('adlar_energy_cost_daily',
-              Math.round(dailyCost * 100) / 100);
+            const roundedDailyCost = Math.round(dailyCost * 100) / 100;
+            await this.device.setCapabilityValue('adlar_energy_cost_daily', roundedDailyCost);
+            // Persist for app restart recovery
+            await this.device.setStoreValue('daily_cost_cache', roundedDailyCost);
           }
 
           // Update hourly cost capability (momentary projection)
           if (this.device.hasCapability('adlar_energy_cost_hourly')) {
             const hourlyCost = this.energyPriceOptimizer.calculateCurrentCost(externalPower);
-            await this.device.setCapabilityValue('adlar_energy_cost_hourly',
-              Math.round(hourlyCost * 100) / 100);
+            const roundedHourlyCost = Math.round(hourlyCost * 100) / 100;
+            await this.device.setCapabilityValue('adlar_energy_cost_hourly', roundedHourlyCost);
+            // Persist for app restart recovery
+            await this.device.setStoreValue('hourly_cost_cache', roundedHourlyCost);
           }
         }
 
@@ -444,11 +466,15 @@ export class EnergyTrackingService {
 
     // First: wait until midnight
     this.dailyResetTimeout = this.device.homey.setTimeout(() => {
-      this.performDailyReset();
+      this.performDailyReset().catch((error) => {
+        this.logger('EnergyTrackingService: Error in daily reset timeout:', error);
+      });
 
       // Then: repeat every 24 hours
       this.dailyResetInterval = this.device.homey.setInterval(() => {
-        this.performDailyReset();
+        this.performDailyReset().catch((error) => {
+          this.logger('EnergyTrackingService: Error in daily reset interval:', error);
+        });
       }, 24 * 60 * 60 * 1000); // 24 hours
 
     }, msUntilMidnight);
@@ -477,10 +503,14 @@ export class EnergyTrackingService {
       // Reset daily cost via EnergyPriceOptimizer
       this.resetDailyCost();
 
-      // Reset daily cost capability
+      // Reset daily cost capability and cache
       if (this.device.hasCapability('adlar_energy_cost_daily')) {
         await this.device.setCapabilityValue('adlar_energy_cost_daily', 0);
+        await this.device.setStoreValue('daily_cost_cache', 0);
       }
+
+      // Reset hourly cost cache as well (new day starts fresh)
+      await this.device.setStoreValue('hourly_cost_cache', 0);
 
       // Reset daily threshold trigger flag
       this.dailyThresholdTriggered = false;

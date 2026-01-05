@@ -80,9 +80,9 @@ export class AdaptiveControlService {
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
   private isEnabled = false;
-  private isMonitoringMode = true; // Start in monitoring mode for safety (deprecated - use isSimulateMode)
-  private isSimulateMode = false; // Simulation mode: track simulated temp without writing to device
-  private simulatedTargetTemp: number | null = null; // Simulated target temp (only used in simulate mode)
+  private isMonitoringMode = true; // Always true - legacy monitoring mode (v2.5.0: implicit, no setting)
+  private isSimulateMode = true; // Always true - simulates adjustments, user executes via flows (v2.5.0: implicit, no setting)
+  private simulatedTargetTemp: number | null = null; // Simulated target temp (tracked for Insights)
   private lastControlCycleTime: number = 0;
   private lastAdjustmentTime: number = 0; // Last time target_temperature was adjusted (throttling)
   private controlIntervalMs: number = 5 * 60 * 1000; // 5 minutes default
@@ -99,7 +99,7 @@ export class AdaptiveControlService {
   private readonly STORE_KEY_LAST_ADJUSTMENT = 'adaptive_last_adjustment_time';
   private readonly STORE_KEY_ENABLED = 'adaptive_control_enabled';
   private readonly STORE_KEY_ACCUMULATED_ADJUSTMENT = 'adaptive_accumulated_adjustment';
-  private readonly STORE_KEY_SIMULATED_TARGET = 'adaptive_simulated_target_temp';
+  private readonly STORE_KEY_LAST_DPS4 = 'adaptive_last_dps4'; // v2.5.1: Store last known DPS 4 for capability sync
 
   /**
    * @param config.device - Owning Homey device
@@ -130,12 +130,13 @@ export class AdaptiveControlService {
     });
 
     // Initialize Component 3: Energy Price Optimizer
+    // Note: thresholds here are defaults, will be overwritten by loadPriceSettings()
     this.energyOptimizer = new EnergyPriceOptimizer({
       thresholds: {
-        veryLow: 0.10,
-        low: 0.15,
-        normal: 0.25,
-        high: 0.35,
+        veryLow: 0.04,  // P10 percentile (2024 NL EPEX)
+        low: 0.06,      // P30 percentile
+        normal: 0.10,   // P70 percentile
+        high: 0.12,     // P90 percentile
       },
       maxPreHeatOffset: 1.5,
       maxReduceOffset: -1.0,
@@ -180,6 +181,32 @@ export class AdaptiveControlService {
     this.logger('AdaptiveControlService: Starting initialization');
 
     try {
+      // v2.5.1 CRITICAL FIX: Restore adlar_simulated_target EARLY, before ANY potentially-failing operations
+      // This ensures the capability is synchronized even if later initialization steps fail
+      // (e.g., building model init, price settings, updateEnergyPriceCapabilities)
+      if (this.device.hasCapability('adlar_simulated_target')) {
+        const storedDPS4 = await this.device.getStoreValue(this.STORE_KEY_LAST_DPS4);
+        if (typeof storedDPS4 === 'number') {
+          await this.device.setCapabilityValue('adlar_simulated_target', storedDPS4);
+          this.logger('AdaptiveControlService: Early restore - synced adlar_simulated_target with stored DPS 4', {
+            value: `${storedDPS4}°C`,
+          });
+        } else {
+          // No stored value yet - try current DPS 4 as fallback
+          const currentDPS4 = this.device.getCapabilityValue('target_temperature') as number | null;
+          if (currentDPS4 !== null) {
+            await this.device.setCapabilityValue('adlar_simulated_target', currentDPS4);
+            this.logger('AdaptiveControlService: Early restore - synced adlar_simulated_target with current DPS 4 (no stored value)', {
+              value: `${currentDPS4}°C`,
+            });
+          } else {
+            // Device not connected yet - set to null
+            await this.device.setCapabilityValue('adlar_simulated_target', null);
+            this.logger('AdaptiveControlService: Early restore - DPS 4 unavailable, set adlar_simulated_target to null');
+          }
+        }
+      }
+
       // Restore enabled state from device store
       const savedEnabled = await this.device.getStoreValue(this.STORE_KEY_ENABLED);
       if (typeof savedEnabled === 'boolean') {
@@ -219,10 +246,43 @@ export class AdaptiveControlService {
       // Initialize Component 2: Building Model Service
       await this.buildingModel.initialize();
 
+      // Load price settings from device settings BEFORE restoring optimizer state
+      // This ensures priceMode is set correctly when the optimizer processes prices
+      await this.loadPriceSettings();
+
       // Restore Component 3: Energy Price Optimizer state
       const energyState = await this.device.getStoreValue('energy_optimizer_state');
       if (energyState) {
         this.energyOptimizer.restoreState(energyState);
+
+        // v2.5.1 Fix: Wrap price capability update in try-catch to prevent initialization failure
+        // If no price data available yet, this would previously stop the entire initialization
+        // Now it fails gracefully and will update when prices become available
+        try {
+          await this.updateEnergyPriceCapabilities();
+        } catch (error) {
+          this.logger('AdaptiveControlService: Price capabilities update failed (will retry when prices available)', {
+            error: (error as Error).message,
+          });
+        }
+
+        // v2.4.8 Fix: Also sync cost capabilities with restored optimizer values
+        if (this.device.hasCapability('adlar_energy_cost_daily')) {
+          const dailyCost = this.energyOptimizer.getAccumulatedDailyCost();
+          await this.device.setCapabilityValue('adlar_energy_cost_daily',
+            Math.round(dailyCost * 100) / 100);
+          this.logger('AdaptiveControlService: Restored daily cost capability', {
+            dailyCost: `€${dailyCost.toFixed(2)}`,
+          });
+        }
+        if (this.device.hasCapability('adlar_energy_cost_hourly')) {
+          const hourlyCost = this.energyOptimizer.getAccumulatedHourlyCost();
+          await this.device.setCapabilityValue('adlar_energy_cost_hourly',
+            Math.round(hourlyCost * 100) / 100);
+          this.logger('AdaptiveControlService: Restored hourly cost capability', {
+            hourlyCost: `€${hourlyCost.toFixed(2)}`,
+          });
+        }
       }
 
       // Restore Component 4: COP Optimizer state
@@ -233,6 +293,8 @@ export class AdaptiveControlService {
 
       // Load priority settings from device settings (v2.4.1: bug fix - settings were defined but not used)
       await this.loadPrioritySettings();
+
+      // v2.5.1: Removed late sync code - now done EARLY at start of initialize() (before any failing operations)
 
       // Start control loop if enabled
       if (this.isEnabled) {
@@ -266,35 +328,23 @@ export class AdaptiveControlService {
     this.isEnabled = true;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, true);
 
-    // Check simulate mode setting
-    this.isSimulateMode = await this.device.getSetting('adaptive_simulate_mode') || false;
+    // Simulate mode is now implicit (always true, no setting) - v2.5.0
+    // v2.4.8 Fix: ALWAYS initialize simulated target to current DPS 4
+    const currentTargetTemp = this.device.getCapabilityValue('target_temperature') as number | null;
 
-    if (this.isSimulateMode) {
-      // Simulate mode: Initialize simulated target temp
-      const currentTargetTemp = this.device.getCapabilityValue('target_temperature') as number | null;
+    if (currentTargetTemp === null) {
+      throw new Error('Cannot start adaptive control: target_temperature (DPS 4) is not available. Device may not be connected.');
+    }
 
-      // Try to restore from previous simulation session
-      this.simulatedTargetTemp = await this.device.getStoreValue(this.STORE_KEY_SIMULATED_TARGET);
+    // Always start with current DPS 4 as baseline
+    this.simulatedTargetTemp = currentTargetTemp;
+    this.logger('AdaptiveControlService: Simulated target initialized to current DPS 4', {
+      value: `${currentTargetTemp}°C`,
+    });
 
-      if (this.simulatedTargetTemp === null && currentTargetTemp !== null) {
-        // First time: initialize with actual temp_set (DPS 4)
-        this.simulatedTargetTemp = currentTargetTemp;
-        await this.device.setStoreValue(this.STORE_KEY_SIMULATED_TARGET, this.simulatedTargetTemp);
-
-        this.logger('AdaptiveControlService: Simulate mode initialized', {
-          initialTemp: this.simulatedTargetTemp.toFixed(1),
-          source: 'target_temperature (DPS 4)',
-        });
-      } else {
-        this.logger('AdaptiveControlService: Simulate mode restored', {
-          simulatedTemp: this.simulatedTargetTemp?.toFixed(1) || 'null',
-        });
-      }
-
-      // Update simulated target capability
-      if (this.simulatedTargetTemp !== null && this.device.hasCapability('adlar_simulated_target')) {
-        await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
-      }
+    // Update simulated target capability
+    if (this.device.hasCapability('adlar_simulated_target')) {
+      await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
     }
 
     // Start control loop using Homey timer management
@@ -310,14 +360,12 @@ export class AdaptiveControlService {
 
     // Emit status change trigger
     await this.triggerStatusChange(
-      this.isSimulateMode ? 'simulate' : 'enabled',
-      this.isSimulateMode
-        ? 'Adaptive control started in SIMULATION mode'
-        : 'Adaptive temperature control enabled',
+      'simulate',
+      'Adaptive control started in SIMULATION mode (implicit)',
     );
 
     this.logger('AdaptiveControlService: Started', {
-      mode: this.isSimulateMode ? 'SIMULATE' : 'ACTIVE',
+      mode: 'SIMULATE (implicit)',
       intervalMinutes: this.controlIntervalMs / 60000,
     });
   }
@@ -331,51 +379,20 @@ export class AdaptiveControlService {
       this.controlLoopInterval = null;
     }
 
-    // Check if we need to commit simulated value
-    if (this.isSimulateMode && this.simulatedTargetTemp !== null) {
-      const shouldCommit = await this.device.getSetting('adaptive_commit_on_disable') || false;
-      const previousTemp = this.device.getCapabilityValue('target_temperature') as number;
-
-      if (shouldCommit) {
-        // Commit simulated temp to real device
-        this.logger('AdaptiveControlService: Committing simulated temp to device', {
-          simulatedTemp: this.simulatedTargetTemp.toFixed(1),
-          previousTemp: previousTemp?.toFixed(1) || 'unknown',
-          change: (this.simulatedTargetTemp - (previousTemp || 0)).toFixed(1),
-        });
-
-        await this.device.setCapabilityValue('target_temperature', this.simulatedTargetTemp);
-
-        // Trigger commit notification
-        await this.device.homey.flow
-          .getDeviceTriggerCard('adaptive_simulation_committed')
-          .trigger(this.device, {
-            committed_temperature: this.simulatedTargetTemp,
-            previous_temperature: previousTemp || 0,
-            change: this.simulatedTargetTemp - (previousTemp || 0),
-          })
-          .catch((err) => this.logger('Failed to trigger commit card:', err));
-      } else {
-        this.logger('AdaptiveControlService: Discarding simulated temp (not committed)', {
-          simulatedTemp: this.simulatedTargetTemp.toFixed(1),
-          actualTemp: previousTemp?.toFixed(1) || 'unknown',
-        });
-      }
-
-      // Clear simulated state
-      this.simulatedTargetTemp = null;
-      await this.device.unsetStoreValue(this.STORE_KEY_SIMULATED_TARGET);
-
-      // Clear simulated capability
-      if (this.device.hasCapability('adlar_simulated_target')) {
-        await this.device.setCapabilityValue('adlar_simulated_target', null).catch(() => {
-          // Ignore errors - capability might not be available
-        });
-      }
+    // Log final simulated state (v2.5.0: no commit option, always simulate mode)
+    if (this.simulatedTargetTemp !== null) {
+      const actualTemp = this.device.getCapabilityValue('target_temperature') as number;
+      this.logger('AdaptiveControlService: Final simulated state', {
+        simulatedTemp: this.simulatedTargetTemp.toFixed(1),
+        actualTemp: actualTemp?.toFixed(1) || 'unknown',
+        delta: (this.simulatedTargetTemp - (actualTemp || 0)).toFixed(1),
+      });
     }
 
+    // Clear simulated target (will be reinitialized on next start)
+    this.simulatedTargetTemp = null;
+
     this.isEnabled = false;
-    this.isSimulateMode = false;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, false);
 
     // Save PI history before stopping
@@ -393,14 +410,17 @@ export class AdaptiveControlService {
    * CASCADE CONTROL: Returns the current warmtepomp setpoint (DPS 4) that will be adjusted
    * with the delta calculated by the PI controller based on indoor temperature error.
    *
-   * @returns Simulated temp if in simulate mode, otherwise current warmtepomp setpoint (DPS 4)
+   * IMPORTANT: Always returns the REAL DPS 4 value, even in simulate mode.
+   * This prevents the simulation from diverging from reality.
+   * The difference between simulate and active mode is only WHERE the result is applied:
+   * - Active mode: writes to actual DPS 4
+   * - Simulate mode: writes to simulatedTargetTemp (shows what WOULD happen)
+   *
+   * @returns Current warmtepomp setpoint (DPS 4)
    */
   private getEffectiveTargetTemp(): number | null {
-    if (this.isSimulateMode) {
-      return this.simulatedTargetTemp;
-    }
-
-    // Normal mode: read current warmtepomp setpoint (DPS 4) - this is what we adjust
+    // Always read current warmtepomp setpoint (DPS 4) - this is the base for all adjustments
+    // In simulate mode, we still need the real value to calculate "what would happen"
     if (!this.device.hasCapability('target_temperature')) {
       this.logger('AdaptiveControlService: target_temperature capability not available');
       return null;
@@ -462,7 +482,7 @@ export class AdaptiveControlService {
 
       this.logger(
         `Indoor: ${indoorTemp.toFixed(1)}°C, Desired: ${desiredIndoorTemp.toFixed(1)}°C, `
-        + `Setpoint: ${currentSetpoint.toFixed(1)}°C${this.isSimulateMode ? ' [SIMULATED]' : ' [DPS 4]'}`,
+        + `Setpoint: ${currentSetpoint.toFixed(1)}°C [DPS 4]`,
       );
 
       // Step 4A: Component 1 - Heating Controller (PI control)
@@ -493,10 +513,11 @@ export class AdaptiveControlService {
         }
       }
 
-      // Step 4C: Component 4 - COP Optimizer (if enabled)
+      // Step 4C: Component 4 - COP Optimizer (if enabled AND cop_calculation is enabled)
       let copAction = null;
       const copOptimizerEnabled = await this.device.getSetting('cop_optimizer_enabled');
-      if (copOptimizerEnabled) {
+      const copCalculationEnabled = this.device.getSetting('cop_calculation_enabled') !== false; // default true
+      if (copOptimizerEnabled && copCalculationEnabled) {
         try {
           const currentCOP = (this.device.getCapabilityValue('adlar_cop') as number) || 0;
           const dailyCOP = (this.device.getCapabilityValue('adlar_cop_daily') as number) || 0;
@@ -521,6 +542,9 @@ export class AdaptiveControlService {
         } catch (err) {
           this.logger('COP optimizer failed:', err);
         }
+      } else if (copOptimizerEnabled && !copCalculationEnabled) {
+        // Log warning: optimizer enabled but calculation disabled - misconfiguration
+        this.logger('⚠️ COP optimizer skipped: cop_calculation_enabled is off (required dependency)');
       }
 
       // Step 5: Combine actions using Weighted Decision Maker
@@ -559,35 +583,42 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 8: Active mode - check execution mode setting
+      // Step 8: Check if significant action is needed
       if (heatingAction === null && Math.abs(combinedAction.finalAdjustment) < 0.1) {
         this.logger('AdaptiveControlService: No significant action needed');
-        this.lastControlCycleTime = Date.now();
-        return;
-      }
 
-      // Step 8a: Check adaptive control execution mode
-      const executionMode = await this.device.getSetting('adaptive_control_mode');
-
-      if (executionMode === DeviceConstants.ADAPTIVE_MODE_FLOW_ASSISTED) {
-        this.logger('⚙️ FLOW-ASSISTED MODE: Triggering recommendation for user flow execution');
-
-        // Calculate recommended warmtepomp setpoint (integer adjusted, clamped to realistic range)
-        const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
-        const recommendedTemp = Math.max(
-          DeviceConstants.ADAPTIVE_MIN_SETPOINT,
-          Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
-        );
-
-        // Trigger recommendation flow card
-        await this.triggerTemperatureRecommendation(currentSetpoint, recommendedTemp, combinedAction);
+        // v2.5.1 Fix: Always update adlar_simulated_target to current setpoint to prevent stale values
+        // Without this, the capability could retain an old value from a previous session
+        this.simulatedTargetTemp = currentSetpoint;
+        if (this.device.hasCapability('adlar_simulated_target')) {
+          await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
+        }
 
         this.lastControlCycleTime = Date.now();
         return;
       }
 
-      // Step 9: Apply temperature adjustment to warmtepomp setpoint (simulate or active mode)
-      await this.applyTemperatureAdjustment(currentSetpoint, combinedAction);
+      // Step 9: Flow-assisted mode (v2.5.0: automatic mode removed)
+      // Always trigger recommendation flow card - user controls execution via flows
+      this.logger('⚙️ FLOW-ASSISTED MODE: Triggering recommendation for user flow execution');
+
+      // Calculate recommended warmtepomp setpoint (integer adjusted, clamped to realistic range)
+      const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
+      const recommendedTemp = Math.max(
+        DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
+      );
+
+      // Trigger recommendation flow card
+      await this.triggerTemperatureRecommendation(currentSetpoint, recommendedTemp, combinedAction);
+
+      // Always update recommended temp for Insights tracking (v2.5.0: simulate mode implicit)
+      this.simulatedTargetTemp = recommendedTemp;
+      if (this.device.hasCapability('adlar_simulated_target')) {
+        await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
+      }
+
+      this.lastControlCycleTime = Date.now();
 
     } catch (error) {
       this.logger('AdaptiveControlService: Control cycle error', {
@@ -676,7 +707,6 @@ export class AdaptiveControlService {
     if (this.isSimulateMode) {
       // SIMULATE MODE: Update internal simulated warmtepomp setpoint AND capability
       this.simulatedTargetTemp = clampedSetpoint;
-      await this.device.setStoreValue(this.STORE_KEY_SIMULATED_TARGET, this.simulatedTargetTemp);
 
       // Update capability for Insights
       if (this.device.hasCapability('adlar_simulated_target')) {
@@ -907,6 +937,78 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Load price settings from device settings
+   * Called during initialization and when settings change
+   * @version 2.4.6 - Bug fix: price settings existed in UI but were not loaded on init
+   * @version 2.4.7 - Bug fix: price thresholds were not loaded, always used hardcoded defaults
+   */
+  private async loadPriceSettings(): Promise<void> {
+    try {
+      // Read price calculation mode (default: all_in)
+      const priceMode = (await this.device.getSetting('price_calculation_mode')) ?? 'all_in';
+
+      // Read financial components (with defaults matching energy-price-optimizer.ts)
+      const supplierFee = (await this.device.getSetting('supplier_fee_inc_vat')) ?? 0.0182;
+      const energyTax = (await this.device.getSetting('electricity_tax_inc_vat')) ?? 0.11085;
+      const vatPercentage = (await this.device.getSetting('vat_percentage')) ?? 21;
+
+      // Read price thresholds (2024 NL spot market defaults based on EPEX data)
+      const thresholdVeryLow = (await this.device.getSetting('price_threshold_very_low')) ?? 0.04;
+      const thresholdLow = (await this.device.getSetting('price_threshold_low')) ?? 0.06;
+      const thresholdNormal = (await this.device.getSetting('price_threshold_normal')) ?? 0.10;
+      const thresholdHigh = (await this.device.getSetting('price_threshold_high')) ?? 0.12;
+
+      // Apply price mode to optimizer
+      this.energyOptimizer.setPriceMode(priceMode as 'market' | 'market_plus' | 'all_in');
+
+      // Apply financial components to optimizer
+      this.energyOptimizer.setFinancialComponents({
+        storageFee: supplierFee,
+        energyTax,
+        vatPercentage,
+      });
+
+      // Apply price thresholds to optimizer (v2.5.0 bug fix)
+      this.energyOptimizer.setThresholds({
+        veryLow: thresholdVeryLow,
+        low: thresholdLow,
+        normal: thresholdNormal,
+        high: thresholdHigh,
+      });
+
+      this.logger('AdaptiveControlService: Price settings loaded from device settings', {
+        priceMode,
+        supplierFee: `€${supplierFee.toFixed(4)}/kWh`,
+        energyTax: `€${energyTax.toFixed(5)}/kWh`,
+        vatPercentage: `${vatPercentage}%`,
+        thresholds: {
+          veryLow: `€${thresholdVeryLow.toFixed(4)}/kWh`,
+          low: `€${thresholdLow.toFixed(4)}/kWh`,
+          normal: `€${thresholdNormal.toFixed(4)}/kWh`,
+          high: `€${thresholdHigh.toFixed(4)}/kWh`,
+        },
+      });
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to load price settings, using defaults', {
+        error: (error as Error).message,
+      });
+      // Fallback to defaults from settings schema (driver.settings.compose.json)
+      this.energyOptimizer.setPriceMode('all_in');
+      this.energyOptimizer.setFinancialComponents({
+        storageFee: 0.0182,
+        energyTax: 0.11085,
+        vatPercentage: 21,
+      });
+      this.energyOptimizer.setThresholds({
+        veryLow: 0.04,
+        low: 0.06,
+        normal: 0.10,
+        high: 0.12,
+      });
+    }
+  }
+
+  /**
    * Update PI controller parameters (Expert Mode)
    */
   updatePIParameters(Kp: number, Ki: number, deadband: number): void {
@@ -1010,6 +1112,26 @@ export class AdaptiveControlService {
       });
     }
 
+    // v2.5.1 Fix: Handle price threshold settings changes
+    // Previously thresholds were only loaded at initialization, changes were ignored
+    if (changedKeys.includes('price_threshold_very_low')
+      || changedKeys.includes('price_threshold_low')
+      || changedKeys.includes('price_threshold_normal')
+      || changedKeys.includes('price_threshold_high')) {
+      this.energyOptimizer.setThresholds({
+        veryLow: newSettings.price_threshold_very_low as number ?? 0.04,
+        low: newSettings.price_threshold_low as number ?? 0.06,
+        normal: newSettings.price_threshold_normal as number ?? 0.10,
+        high: newSettings.price_threshold_high as number ?? 0.12,
+      });
+      this.logger('AdaptiveControlService: Price thresholds updated from settings', {
+        veryLow: `€${(newSettings.price_threshold_very_low as number)?.toFixed(2) || '0.04'}/kWh`,
+        low: `€${(newSettings.price_threshold_low as number)?.toFixed(2) || '0.06'}/kWh`,
+        normal: `€${(newSettings.price_threshold_normal as number)?.toFixed(2) || '0.10'}/kWh`,
+        high: `€${(newSettings.price_threshold_high as number)?.toFixed(2) || '0.12'}/kWh`,
+      });
+    }
+
     // Handle building model reset toggle
     if (changedKeys.includes('reset_building_model')) {
       const shouldReset = newSettings.reset_building_model as boolean;
@@ -1043,6 +1165,15 @@ export class AdaptiveControlService {
       this.controlLoopInterval = null;
     }
 
+    // CRITICAL: Save optimizer states BEFORE destroying (ensures cost persistence across app restarts)
+    try {
+      await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
+      await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
+      this.logger('AdaptiveControlService: Saved optimizer states before destroy');
+    } catch (error) {
+      this.logger('AdaptiveControlService: Error saving optimizer states during destroy:', error);
+    }
+
     // Destroy all sub-services (v2.0.1+: added missing components)
     this.heatingController.destroy();
     this.externalTemperature.destroy();
@@ -1052,6 +1183,30 @@ export class AdaptiveControlService {
     this.decisionMaker.destroy();
 
     this.logger('AdaptiveControlService: Destroyed (all 6 components cleaned up)');
+  }
+
+  /**
+   * Save energy optimizer state externally (for periodic saves from EnergyTrackingService)
+   */
+  public async saveEnergyOptimizerState(): Promise<void> {
+    await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
+  }
+
+  /**
+   * Store DPS 4 (target_temperature) value for capability synchronization
+   * Called from device.ts when target_temperature capability changes
+   * @param value - Current DPS 4 value
+   * @version 2.4.9 - Fix: Store DPS 4 to ensure adlar_simulated_target sync on restart
+   */
+  public async storeDPS4Value(value: number): Promise<void> {
+    try {
+      await this.device.setStoreValue(this.STORE_KEY_LAST_DPS4, value);
+      this.logger('AdaptiveControlService: Stored DPS 4 value', { value: `${value}°C` });
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to store DPS 4 value', {
+        error: (error as Error).message,
+      });
+    }
   }
 
   /**
@@ -1140,28 +1295,36 @@ export class AdaptiveControlService {
   private async updateEnergyPriceCapabilities(): Promise<void> {
     try {
       const now = Date.now();
+      const nextHourTimestamp = now + 3600000;
       const currentPrice = this.energyOptimizer.getCurrentPrice(now);
-      const nextHourPrice = this.energyOptimizer.getCurrentPrice(now + 3600000); // Next hour (fixed: was using getAveragePrice which returned hour+2)
 
       if (!currentPrice) {
         // No price data available yet - cannot update capabilities
         return;
       }
 
-      // Update price capabilities only
-      // NOTE: Cost capabilities (adlar_energy_cost_daily, adlar_energy_cost_hourly)
-      // are now updated by EnergyTrackingService every 10 seconds for accurate accumulation
-      await this.device.setCapabilityValue('adlar_energy_price_current', currentPrice.price);
+      // Get effective prices (respects priceMode setting: market/market_plus/all_in)
+      const effectiveCurrentPrice = this.energyOptimizer.getEffectivePrice(now);
+      const effectiveNextPrice = this.energyOptimizer.getEffectivePrice(nextHourTimestamp);
+
+      // Update price capabilities with EFFECTIVE price (includes VAT, fees, tax based on mode)
+      await this.device.setCapabilityValue('adlar_energy_price_current',
+        Math.round(effectiveCurrentPrice * 10000) / 10000);
+
+      // Category always based on RAW market price (for correct threshold detection)
       await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
 
-      if (nextHourPrice) {
-        await this.device.setCapabilityValue('adlar_energy_price_next', nextHourPrice.price);
+      // Next hour price (effective)
+      if (effectiveNextPrice > 0) {
+        await this.device.setCapabilityValue('adlar_energy_price_next',
+          Math.round(effectiveNextPrice * 10000) / 10000);
       } else {
         await this.device.setCapabilityValue('adlar_energy_price_next', null);
       }
 
       this.logger(
-        `Energy prices updated: Current €${currentPrice.price.toFixed(4)}/kWh (${currentPrice.category})`,
+        `Energy prices updated: Current €${effectiveCurrentPrice.toFixed(4)}/kWh (${currentPrice.category}), `
+        + `Next €${effectiveNextPrice > 0 ? effectiveNextPrice.toFixed(4) : 'N/A'}/kWh, Mode: ${this.energyOptimizer.getPriceMode()}`,
       );
     } catch (err) {
       this.logger('Failed to update energy price capabilities:', err);

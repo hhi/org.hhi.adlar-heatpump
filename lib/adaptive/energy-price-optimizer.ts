@@ -4,12 +4,15 @@
  * Receives energy prices via flow card to optimize heating schedule
  * based on electricity prices.
  *
- * Strategy:
- * - VERY_LOW prices (<€0.10/kWh): Pre-heat maximally (+1.5°C)
- * - LOW prices (€0.10-0.15): Pre-heat moderately (+0.75°C)
- * - NORMAL prices (€0.15-0.25): Maintain (0°C)
- * - HIGH prices (€0.25-0.35): Reduce moderately (-0.5°C)
- * - VERY_HIGH prices (>€0.35): Reduce maximally (-1.0°C)
+ * Strategy (thresholds based on 2024 EPEX NL spot price percentiles):
+ * - VERY_LOW prices (<€0.04/kWh, P10): Pre-heat maximally (+1.5°C)
+ * - LOW prices (€0.04-0.06, P10-P30): Pre-heat moderately (+0.75°C)
+ * - NORMAL prices (€0.06-0.10, P30-P70): Maintain (0°C)
+ * - HIGH prices (€0.10-0.12, P70-P90): Reduce moderately (-0.5°C)
+ * - VERY_HIGH prices (>€0.12/kWh, P90): Reduce maximally (-1.0°C)
+ *
+ * Note: Thresholds apply to RAW market price (excl. VAT/fees).
+ * The 2024 NL average was ~€0.077/kWh with σ≈€0.028/kWh.
  *
  * @version 1.4.0
  * @since 1.4.0
@@ -24,10 +27,10 @@ export enum PriceCategory {
 }
 
 export interface PriceThresholds {
-  veryLow: number; // €0.10/kWh
-  low: number; // €0.15/kWh
-  normal: number; // €0.25/kWh
-  high: number; // €0.35/kWh
+  veryLow: number; // €0.04/kWh (P10 percentile)
+  low: number; // €0.06/kWh (P30 percentile)
+  normal: number; // €0.10/kWh (P70 percentile)
+  high: number; // €0.12/kWh (P90 percentile)
 }
 
 export interface PriceData {
@@ -50,8 +53,8 @@ export interface EnergyOptimizerConfig {
  * VAT percentage is applied only to the base market price
  */
 export interface FinancialComponents {
-  storageFee: number;   // Inkoopvergoeding / leveranciersopslag (€/kWh, INCL. BTW)
-  energyTax: number;    // Energiebelasting (€/kWh, INCL. BTW)
+  storageFee: number; // Inkoopvergoeding / leveranciersopslag (€/kWh, INCL. BTW)
+  energyTax: number; // Energiebelasting (€/kWh, INCL. BTW)
   vatPercentage: number; // BTW-percentage (e.g., 21 for 21%)
 }
 
@@ -85,11 +88,12 @@ export class EnergyPriceOptimizer {
   private hourStartEnergy: number = 0;
   private currentHour: number = new Date().getHours();
 
-  // Financial components (set via device settings)
+  // Financial components (MUST be set via device settings - setFinancialComponents())
+  // Initial values are placeholders; actual values come from loadPriceSettings()
   private financialComponents: FinancialComponents = {
-    storageFee: 0.0182,    // Default supplier fee (incl. VAT)
-    energyTax: 0.11085,    // Default energy tax (incl. VAT)
-    vatPercentage: 21,     // Default 21% VAT in Netherlands
+    storageFee: 0, // Will be set by loadPriceSettings()
+    energyTax: 0, // Will be set by loadPriceSettings()
+    vatPercentage: 0, // Will be set by loadPriceSettings()
   };
 
   // Price calculation mode: 'market', 'market_plus', 'all_in'
@@ -100,6 +104,24 @@ export class EnergyPriceOptimizer {
     this.logger = config.logger || (() => { });
   }
 
+  /**
+   * Update price thresholds from device settings
+   * @version 2.4.7 - Bug fix: thresholds were hardcoded, now loaded from settings
+   */
+  public setThresholds(thresholds: {
+    veryLow: number;
+    low: number;
+    normal: number;
+    high: number;
+  }): void {
+    this.config.thresholds = thresholds;
+    this.logger('EnergyPriceOptimizer: Thresholds updated', {
+      veryLow: `€${thresholds.veryLow.toFixed(4)}/kWh`,
+      low: `€${thresholds.low.toFixed(4)}/kWh`,
+      normal: `€${thresholds.normal.toFixed(4)}/kWh`,
+      high: `€${thresholds.high.toFixed(4)}/kWh`,
+    });
+  }
 
   /**
    * Categorize price into bands
@@ -216,19 +238,27 @@ export class EnergyPriceOptimizer {
 
   /**
    * Get current price data point
+   * @version 2.4.8 - Category is now calculated on-demand with current thresholds
    */
   public getCurrentPrice(timestamp: number): PriceData | null {
     // Find price for current hour
     const hourStart = new Date(timestamp);
     hourStart.setMinutes(0, 0, 0);
 
-    return (
-      this.priceData.find((p) => {
-        const priceHour = new Date(p.timestamp);
-        priceHour.setMinutes(0, 0, 0);
-        return priceHour.getTime() === hourStart.getTime();
-      }) || null
-    );
+    const found = this.priceData.find((p) => {
+      const priceHour = new Date(p.timestamp);
+      priceHour.setMinutes(0, 0, 0);
+      return priceHour.getTime() === hourStart.getTime();
+    });
+
+    if (!found) return null;
+
+    // v2.4.8: Always calculate category on-demand with current thresholds
+    // This ensures threshold changes and restarts use correct categories
+    return {
+      ...found,
+      category: this.categorizePrice(found.price),
+    };
   }
 
   /**
@@ -276,15 +306,18 @@ export class EnergyPriceOptimizer {
    * - P_fee_inc = storage/supplier fee INCL. VAT
    * - P_tax_inc = energy tax INCL. VAT
    * - vat = VAT percentage (e.g., 0.21 for 21%)
+   *
+   * @param timestamp - Optional timestamp (ms), defaults to current time
    */
-  public getEffectivePrice(): number {
-    const currentPrice = this.getCurrentPrice(Date.now());
-    if (!currentPrice) return 0;
+  public getEffectivePrice(timestamp?: number): number {
+    const ts = timestamp ?? Date.now();
+    const priceData = this.getCurrentPrice(ts);
+    if (!priceData) return 0;
 
     const { storageFee, energyTax, vatPercentage } = this.financialComponents;
 
     // Market price with VAT (always included)
-    const marketPriceIncVat = currentPrice.price * (1 + vatPercentage / 100);
+    const marketPriceIncVat = priceData.price * (1 + vatPercentage / 100);
 
     // Calculate based on price mode
     switch (this.priceMode) {
@@ -421,7 +454,7 @@ export class EnergyPriceOptimizer {
     };
 
     this.logger(
-      `EnergyPriceOptimizer: Financial components updated: `
+      'EnergyPriceOptimizer: Financial components updated: '
       + `storage=€${this.financialComponents.storageFee.toFixed(4)}/kWh, `
       + `tax=€${this.financialComponents.energyTax.toFixed(4)}/kWh, `
       + `VAT=${this.financialComponents.vatPercentage}%`,
@@ -492,13 +525,13 @@ export class EnergyPriceOptimizer {
     for (const [hourOffsetStr, price] of entries) {
       // Validate hour offset
       const hourOffset = parseInt(hourOffsetStr, 10);
-      if (isNaN(hourOffset) || hourOffset < 0) {
+      if (Number.isNaN(hourOffset) || hourOffset < 0) {
         this.logger(`EnergyPriceOptimizer: Skipping invalid hour offset: ${hourOffsetStr}`);
         continue;
       }
 
       // Validate price value
-      if (typeof price !== 'number' || isNaN(price) || price < 0) {
+      if (typeof price !== 'number' || Number.isNaN(price) || price < 0) {
         this.logger(`EnergyPriceOptimizer: Skipping invalid price for hour ${hourOffset}: ${price}`);
         continue;
       }
@@ -510,9 +543,11 @@ export class EnergyPriceOptimizer {
       const timestamp = hourStart.getTime() + (hourOffset * 3600000);
 
       // Create price data entry (use price as-is, no VAT or adjustments)
+      // Note: category is stored for backwards compatibility but getCurrentPrice()
+      // recalculates it on-demand with current thresholds (v2.4.8)
       newPriceData.push({
         timestamp,
-        price, // €/kWh as provided
+        price, // €/kWh as provided (raw market price)
         category: this.categorizePrice(price),
       });
     }
