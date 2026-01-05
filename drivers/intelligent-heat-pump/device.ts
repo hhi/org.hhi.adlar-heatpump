@@ -188,7 +188,7 @@ class MyDevice extends Homey.Device {
   // Idle period monitoring
   private idleCheckInterval: NodeJS.Timeout | null = null;
   private lastCOPDataPointTime: number = 0;
-  private compressorStateHistory: Array<{timestamp: number, running: boolean}> = [];
+  private compressorStateHistory: Array<{ timestamp: number, running: boolean }> = [];
 
   // Memory leak prevention: tracked timers for cleanup (v2.0.1+)
   private connectionStatusInterval: NodeJS.Timeout | null = null;
@@ -452,7 +452,7 @@ class MyDevice extends Homey.Device {
     // Prevent spam - only send notifications every 30 minutes for the same device
     // Also prevent duplicate notifications within 5 seconds (for duplicate events)
     if (now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_THROTTLE_MS
-        || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_KEY_CHANGE_THRESHOLD_MS)) {
+      || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_KEY_CHANGE_THRESHOLD_MS)) {
       try {
         await this.homey.notifications.createNotification({
           excerpt: `${this.getName()}: ${title}`,
@@ -969,7 +969,7 @@ class MyDevice extends Homey.Device {
     try {
       // Use idle-aware calculation for daily COP
       const dailyCOP = this.rollingCOPCalculator.getDailyCOPWithIdleAwareness?.()
-                       || this.rollingCOPCalculator.getDailyCOP();
+        || this.rollingCOPCalculator.getDailyCOP();
 
       // Get diagnostic info for better logging
       const diagnostics = this.rollingCOPCalculator.getDiagnosticInfo?.();
@@ -1131,7 +1131,7 @@ class MyDevice extends Homey.Device {
 
     // Track state changes for better runtime calculation
     if (this.compressorStateHistory.length === 0
-        || this.compressorStateHistory[this.compressorStateHistory.length - 1].running !== currentState) {
+      || this.compressorStateHistory[this.compressorStateHistory.length - 1].running !== currentState) {
       this.compressorStateHistory.push({ timestamp: now, running: currentState });
 
       // Keep only last 48 hours of state history
@@ -2557,7 +2557,7 @@ class MyDevice extends Homey.Device {
       default:
         // Auto mode: require both capability AND data
         return availableCaps.length > 0
-               && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
+          && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
     }
   }
 
@@ -2614,17 +2614,17 @@ class MyDevice extends Homey.Device {
         // Update ALL capabilities mapped to this DPS
         // Example: DPS 11 updates both adlar_enum_capacity_set (picker) and adlar_sensor_capacity_set (sensor)
         capabilities.forEach((capability) => {
-        // Check if device has this capability
+          // Check if device has this capability
           if (!this.hasCapability(capability)) {
             this.debugLog(`Device does not have capability ${capability} for DPS ${dpsId}`);
             return;
           }
 
           try {
-          // Apply DPS scale transformation (v1.0.10+)
-          // Transforms raw Tuya integer values to actual decimal values
-          // Example: DPS 104 (power) raw 25000 → 2500 W (scale 1: ÷ 10)
-          // Example: DPS 103 (voltage) raw 2305 → 230.5 V (scale 3: ÷ 1000)
+            // Apply DPS scale transformation (v1.0.10+)
+            // Transforms raw Tuya integer values to actual decimal values
+            // Example: DPS 104 (power) raw 25000 → 2500 W (scale 1: ÷ 10)
+            // Example: DPS 103 (voltage) raw 2305 → 230.5 V (scale 3: ÷ 1000)
             const transformedValue = AdlarMapping.transformDpsValue(dpsId, value);
 
             // Collect capability update promise for batching
@@ -2645,13 +2645,13 @@ class MyDevice extends Homey.Device {
             // Fault detection for DPS 15 (adlar_fault) - v1.0.7 feature
             // Trigger fault_detected flow card when new fault code appears
             if (dpsId === 15 && capability === 'adlar_fault') {
-            // Use transformedValue for consistency (DPS 15 has no scale, so same as raw value)
+              // Use transformedValue for consistency (DPS 15 has no scale, so same as raw value)
               const faultCode = typeof transformedValue === 'number' ? transformedValue : 0;
 
               // Only trigger on NEW faults (not on every DPS update)
               // faultCode > 0 = active fault, faultCode changed = new/different fault
               if (faultCode > 0 && faultCode !== this.lastFaultCode) {
-              // Fire-and-forget pattern to prevent blocking DPS processing
+                // Fire-and-forget pattern to prevent blocking DPS processing
                 this.triggerFlowCard('fault_detected', {
                   fault_code: faultCode,
                   fault_description: getFaultDescription(faultCode, this.homey.i18n.getLanguage() as 'en' | 'nl'),
@@ -2662,7 +2662,7 @@ class MyDevice extends Homey.Device {
                 this.log(`🚨 Fault detected: Code ${faultCode} - ${getFaultDescription(faultCode, 'en')}`);
                 this.lastFaultCode = faultCode;
               } else if (faultCode === 0 && this.lastFaultCode !== 0) {
-              // Fault cleared - log but don't trigger (users may want separate "fault_cleared" trigger in future)
+                // Fault cleared - log but don't trigger (users may want separate "fault_cleared" trigger in future)
                 this.log(`✅ Fault cleared: Previous code ${this.lastFaultCode} resolved`);
                 this.lastFaultCode = 0;
               }
@@ -2710,6 +2710,19 @@ class MyDevice extends Homey.Device {
                 this.log(`💧 Backwater state changed to: ${stateLabel} (Homey auto-triggers flow cards)`);
               }
               this.lastBackwaterState = currentState;
+            }
+
+            // Target temperature (target_temperature) - DPS 4
+            // v2.5.1 Fix: Store DPS 4 value for adlar_simulated_target synchronization on app restart
+            if (dpsId === 4 && capability === 'target_temperature') {
+              const temperatureValue = typeof transformedValue === 'number' ? transformedValue : null;
+              if (temperatureValue !== null) {
+                // Fire-and-forget: store value for capability sync during next initialization
+                this.serviceCoordinator?.getAdaptiveControl()?.storeDPS4Value(temperatureValue)
+                  .catch((err) => {
+                    this.error('Failed to store DPS 4 value:', err);
+                  });
+              }
             }
 
             // Enum mode change detection (v1.1.0) - heating mode, work mode, water mode
@@ -2917,7 +2930,7 @@ class MyDevice extends Homey.Device {
             }
           })
           .catch((error) => {
-          // This should never happen with allSettled, but defensive catch for safety
+            // This should never happen with allSettled, but defensive catch for safety
             this.error('Unexpected error in batched capability updates:', error);
           });
       }
@@ -2929,13 +2942,13 @@ class MyDevice extends Homey.Device {
 
   private getCapabilityFriendlyTitle(capability: string): string {
     try {
-    // Prefer the title from driver.compose.json capabilitiesOptions if present
+      // Prefer the title from driver.compose.json capabilitiesOptions if present
       const deviceWithDriver = this as unknown as { driver?: { manifest?: { capabilitiesOptions?: Record<string, { title?: { en?: string; nl?: string } }> } } };
       const opt = deviceWithDriver?.driver?.manifest?.capabilitiesOptions?.[capability];
       const title = opt?.title?.en || opt?.title?.nl;
       if (title) return title;
     } catch {
-    // ignore typing/runtime issues and fall back below
+      // ignore typing/runtime issues and fall back below
     }
 
     // Fallback mapping by capability suffix
@@ -3151,7 +3164,7 @@ class MyDevice extends Homey.Device {
       // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
       if (this.hasCapability('adlar_connection_status')) {
         try {
-        // Check if migration flag exists to avoid repeated migrations
+          // Check if migration flag exists to avoid repeated migrations
           const migrationFlag = this.getStoreValue('connection_status_migrated_v0_99_61');
           if (!migrationFlag) {
             this.log('🔄 Migrating adlar_connection_status capability from enum to string type...');
@@ -3164,7 +3177,7 @@ class MyDevice extends Homey.Device {
           this.error('Failed to migrate adlar_connection_status capability:', error);
         }
       } else {
-      // Add capability for brand new devices
+        // Add capability for brand new devices
         try {
           await this.addCapability('adlar_connection_status');
           await this.setStoreValue('connection_status_migrated_v0_99_61', true);
@@ -3351,7 +3364,7 @@ class MyDevice extends Homey.Device {
         try {
           const currentStatus = this.getCapabilityValue('adlar_connection_status') as string || '';
           const isCurrentlyConnected = currentStatus.toLowerCase().includes('connected')
-                                   || currentStatus.toLowerCase().includes('verbonden');
+            || currentStatus.toLowerCase().includes('verbonden');
           const currentBooleanValue = this.getCapabilityValue('adlar_connection_active');
 
           // Only update if out of sync
@@ -3455,7 +3468,7 @@ class MyDevice extends Homey.Device {
           this.log(`${capability} set to`, value);
 
           try {
-          // Map capability to Tuya DP (data point)
+            // Map capability to Tuya DP (data point)
             const dpArray = this.allCapabilities[capability];
             const dp = Array.isArray(dpArray) ? dpArray[0] : undefined;
 
@@ -3552,7 +3565,7 @@ class MyDevice extends Homey.Device {
             return String(e);
           }),
         });
-      // Continue with fallback to direct methods for failed services
+        // Continue with fallback to direct methods for failed services
       }
 
       // Note: Reconnection interval is managed by ServiceCoordinator's TuyaConnectionService (v0.99.23+)
@@ -3970,6 +3983,22 @@ class MyDevice extends Homey.Device {
 
     if (copSettingsChanged) {
       this.log('COP settings changed, reloading COP configuration');
+
+      // Auto-disable cop_optimizer_enabled when cop_calculation_enabled is turned off (v2.5.0)
+      // The optimizer requires COP calculation data to function
+      if (changedKeys.includes('cop_calculation_enabled') && newSettings.cop_calculation_enabled === false) {
+        if (newSettings.cop_optimizer_enabled === true || oldSettings.cop_optimizer_enabled === true) {
+          this.log('⚠️ COP optimizer auto-disabled: requires cop_calculation_enabled');
+          this.homey.setTimeout(async () => {
+            try {
+              await this.setSettings({ cop_optimizer_enabled: false });
+              this.log('✅ cop_optimizer_enabled set to false (dependency on cop_calculation_enabled)');
+            } catch (error) {
+              this.error('Failed to auto-disable cop_optimizer_enabled:', error);
+            }
+          }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+        }
+      }
 
       // Reload COP settings
       await this.loadCOPSettings();

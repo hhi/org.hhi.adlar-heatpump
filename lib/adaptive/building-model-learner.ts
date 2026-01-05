@@ -321,14 +321,18 @@ export class BuildingModelLearner {
    * Confidence combines:
    * - Sample count coverage (0-100% based on minSamplesForConfidence)
    * - Parameter certainty (inverse of covariance trace)
+   *
+   * @version 2.4.6 - Threshold increased from 400 to 500 to show learning progress from initialization
    */
   private calculateConfidence(): number {
     // Component 1: Sample count coverage
     const sampleCoverage = Math.min(this.sampleCount / this.minSamplesForConfidence, 1.0);
 
     // Component 2: Parameter certainty (lower covariance = higher certainty)
+    // Trace range: 400 (init) → 100 (converged) → 10-50 (fully learned)
+    // Threshold 500 allows showing confidence from initialization onwards
     const trace = this.P.reduce((sum, row, i) => sum + row[i], 0);
-    const covarianceConfidence = Math.max(0, 1 - trace / 400);
+    const covarianceConfidence = Math.max(0, 1 - trace / 500);
 
     // Combined confidence
     return sampleCoverage * covarianceConfidence * 100;

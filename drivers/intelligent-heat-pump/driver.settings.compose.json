@@ -293,16 +293,16 @@
         "id": "enable_power_measurements",
         "type": "checkbox",
         "label": {
-          "en": "Enable power measurement capabilities",
-          "nl": "Vermogingsmeting capabilities inschakelen",
-          "de": "Leistungsmessungen aktivieren",
-          "fr": "Activer les mesures de puissance"
+          "en": "Enable internal power measurement capabilities",
+          "nl": "Interne vermogingsmeting capabilities inschakelen",
+          "de": "Interne Leistungsmessfunktionen aktivieren",
+          "fr": "Activer les fonctionnalités de mesure de puissance interne"
         },
         "hint": {
-          "en": "Show/hide 9 power measurement capabilities (power consumption, voltage, current). Disable for cleaner interface if your device lacks power monitoring. Requires app restart to take effect.",
-          "nl": "Toon/verberg 9 vermogingsmeting capabilities (stroomverbruik, spanning, stroomsterkte). Uitschakelen voor schonere interface als uw apparaat geen vermogingsmonitoring heeft. Vereist app herstart om effect te hebben.",
-          "de": "Zeigen/Verbergen Sie 9 Leistungsmessfunktionen (Stromverbrauch, Spannung, Strom). Deaktivieren Sie für eine übersichtlichere Oberfläche, wenn Ihr Gerät keine Leistungsüberwachung hat. Erfordert App-Neustart zur Aktivierung.",
-          "fr": "Afficher/Masquer 9 capacités de mesure de puissance (consommation, tension, courant). Désactiver pour une interface plus claire si votre appareil n'a pas de surveillance de puissance. Nécessite un redémarrage de l'app pour prendre effet."
+          "en": "Show/hide 9 DPS power measurement capabilities (power consumption, voltage, current). Disable for cleaner interface if your device lacks power monitoring. Requires app restart to take effect.",
+          "nl": "Toon/verberg 9 DPS vermogingsmeting capabilities (stroomverbruik, spanning, stroomsterkte). Uitschakelen voor schonere interface als uw apparaat geen vermogingsmonitoring heeft. Vereist app herstart om effect te hebben.",
+          "de": "Zeigen/Verbergen Sie 9 DPS Leistungsmessfunktionen (Stromverbrauch, Spannung, Strom). Deaktivieren Sie für eine übersichtlichere Oberfläche, wenn Ihr Gerät keine Leistungsüberwachung hat. Erfordert App-Neustart zur Aktivierung.",
+          "fr": "Afficher/Masquer 9 DPS capacités de mesure de puissance (consommation, tension, courant). Désactiver pour une interface plus claire si votre appareil n'a pas de surveillance de puissance. Nécessite un redémarrage de l'app pour prendre effet."
         },
         "value": false
       },
@@ -712,123 +712,6 @@
   {
     "type": "group",
     "label": {
-      "en": "Energy Price Settings",
-      "nl": "Energieprijs Instellingen",
-      "de": "Energiepreis-Einstellungen",
-      "fr": "Paramètres de Prix de l'Énergie"
-    },
-    "children": [
-      {
-        "id": "price_calculation_mode",
-        "type": "dropdown",
-        "label": {
-          "en": "Price calculation mode",
-          "nl": "Prijsberekening modus",
-          "de": "Preisberechnungsmodus",
-          "fr": "Mode de calcul du prix"
-        },
-        "hint": {
-          "en": "Market: spot price + VAT only. Market+: adds supplier fee. All-in: adds energy tax (complete cost).",
-          "nl": "Marktprijs: spotprijs + BTW. Marktprijs+: incl. leveranciersopslag. All-in: incl. energiebelasting (complete kosten).",
-          "de": "Markt: Spotpreis + MwSt. Markt+: plus Lieferantengebühr. All-in: plus Energiesteuer (Gesamtkosten).",
-          "fr": "Marché: prix spot + TVA. Marché+: ajoute frais fournisseur. All-in: ajoute taxe énergie (coût complet)."
-        },
-        "value": "all_in",
-        "values": [
-          {
-            "id": "market",
-            "label": {
-              "en": "Market price (spot + VAT)",
-              "nl": "Marktprijs (spot + BTW)",
-              "de": "Marktpreis (Spot + MwSt)",
-              "fr": "Prix du marché (spot + TVA)"
-            }
-          },
-          {
-            "id": "market_plus",
-            "label": {
-              "en": "Market+ (spot + fee + VAT)",
-              "nl": "Marktprijs+ (spot + opslag + BTW)",
-              "de": "Markt+ (Spot + Gebühr + MwSt)",
-              "fr": "Marché+ (spot + frais + TVA)"
-            }
-          },
-          {
-            "id": "all_in",
-            "label": {
-              "en": "All-in price (complete cost)",
-              "nl": "All-in prijs (complete kosten)",
-              "de": "All-in Preis (Gesamtkosten)",
-              "fr": "Prix all-in (coût complet)"
-            }
-          }
-        ]
-      },
-      {
-        "id": "supplier_fee_inc_vat",
-        "type": "number",
-        "label": {
-          "en": "Supplier fee (€/kWh incl. VAT)",
-          "nl": "Inkoopvergoeding (€/kWh incl. BTW)",
-          "de": "Lieferantengebühr (€/kWh inkl. MwSt)",
-          "fr": "Frais fournisseur (€/kWh TTC)"
-        },
-        "hint": {
-          "en": "Supplier/trading fee per kWh, including VAT. Check your energy contract for this value.",
-          "nl": "Leveranciersopslag per kWh, inclusief BTW. Controleer uw energiecontract voor deze waarde.",
-          "de": "Lieferantengebühr pro kWh, inklusive MwSt. Überprüfen Sie Ihren Energievertrag auf diesen Wert.",
-          "fr": "Frais de fournisseur/négoce par kWh, TTC. Vérifiez votre contrat d'énergie pour cette valeur."
-        },
-        "value": 0.0182,
-        "min": 0,
-        "max": 0.5,
-        "step": 0.0001
-      },
-      {
-        "id": "electricity_tax_inc_vat",
-        "type": "number",
-        "label": {
-          "en": "Energy tax (€/kWh incl. VAT)",
-          "nl": "Energiebelasting (€/kWh incl. BTW)",
-          "de": "Energiesteuer (€/kWh inkl. MwSt)",
-          "fr": "Taxe énergie (€/kWh TTC)"
-        },
-        "hint": {
-          "en": "Energy tax per kWh, including VAT. Netherlands 2024: ~€0.11085. Check your invoice for current rate.",
-          "nl": "Energiebelasting per kWh, inclusief BTW. Nederland 2024: ~€0.11085. Controleer uw factuur voor actueel tarief.",
-          "de": "Energiesteuer pro kWh, inklusive MwSt. Niederlande 2024: ~€0.11085. Überprüfen Sie Ihre Rechnung für aktuelle Rate.",
-          "fr": "Taxe sur l'énergie par kWh, TTC. Pays-Bas 2024: ~€0.11085. Vérifiez votre facture pour le taux actuel."
-        },
-        "value": 0.11085,
-        "min": 0,
-        "max": 0.5,
-        "step": 0.0001
-      },
-      {
-        "id": "vat_percentage",
-        "type": "number",
-        "label": {
-          "en": "VAT percentage (%)",
-          "nl": "BTW-percentage (%)",
-          "de": "MwSt-Prozentsatz (%)",
-          "fr": "Pourcentage TVA (%)"
-        },
-        "hint": {
-          "en": "VAT percentage applied to market price. Netherlands: 21% (standard), 9% (reduced rate for some situations).",
-          "nl": "BTW-percentage toegepast op marktprijs. Nederland: 21% (standaard), 9% (verlaagd tarief voor sommige situaties).",
-          "de": "MwSt-Prozentsatz auf Marktpreis. Niederlande: 21% (Standard), 9% (ermäßigter Satz für einige Situationen).",
-          "fr": "Pourcentage de TVA appliqué au prix du marché. Pays-Bas: 21% (standard), 9% (taux réduit pour certaines situations)."
-        },
-        "value": 21,
-        "min": 0,
-        "max": 30,
-        "step": 1
-      }
-    ]
-  },
-  {
-    "type": "group",
-    "label": {
       "en": "Adaptive Temperature Control",
       "nl": "Adaptieve Temperatuur Regeling",
       "de": "Adaptive Temperatursteuerung",
@@ -849,77 +732,6 @@
           "nl": "Past doeltemperatuur automatisch aan op basis van externe binnentemperatuur sensor. Vereist externe temperatuur via flow kaart 'Stuur binnentemperatuur'. Gebruikt PI regeling voor ±0.3°C stabiliteit.",
           "de": "Passt die Zieltemperatur automatisch basierend auf einem externen Raumtemperatursensor an. Erfordert externe Temperatur über Flow-Karte 'Raumtemperatur senden'. Verwendet PI-Regelung für ±0,3°C Stabilität.",
           "fr": "Ajuste automatiquement la température cible basée sur un capteur de température intérieure externe. Nécessite une température externe via la carte de flux 'Envoyer température intérieure'. Utilise un algorithme de contrôle PI pour une stabilité de ±0.3°C."
-        },
-        "value": false
-      },
-      {
-        "id": "adaptive_control_mode",
-        "type": "dropdown",
-        "label": {
-          "en": "Adaptive control execution mode",
-          "nl": "Adaptieve regeling uitvoeringsmodus",
-          "de": "Adaptive Regelung Ausführungsmodus",
-          "fr": "Mode d'exécution du contrôle adaptatif"
-        },
-        "hint": {
-          "en": "Automatic: Directly adjusts target temperature (recommended for most users). Flow-assisted: Triggers flow card with recommendation, you control execution via flows (advanced users).",
-          "nl": "Automatisch: Past doeltemperatuur direct aan (aanbevolen voor meeste gebruikers). Flow-ondersteund: Activeert flow kaart met aanbeveling, jij regelt uitvoering via flows (gevorderde gebruikers).",
-          "de": "Automatisch: Passt Zieltemperatur direkt an (für die meisten Benutzer empfohlen). Flow-unterstützt: Löst Flow-Karte mit Empfehlung aus, Sie steuern Ausführung über Flows (fortgeschrittene Benutzer).",
-          "fr": "Automatique: Ajuste directement la température cible (recommandé pour la plupart des utilisateurs). Assisté par flux: Déclenche une carte de flux avec recommandation, vous contrôlez l'exécution via des flux (utilisateurs avancés)."
-        },
-        "value": "automatic",
-        "values": [
-          {
-            "id": "automatic",
-            "label": {
-              "en": "Automatic (recommended)",
-              "nl": "Automatisch (aanbevolen)",
-              "de": "Automatisch (empfohlen)",
-              "fr": "Automatique (recommandé)"
-            }
-          },
-          {
-            "id": "flow_assisted",
-            "label": {
-              "en": "Flow-assisted (advanced)",
-              "nl": "Flow-ondersteund (gevorderd)",
-              "de": "Flow-unterstützt (fortgeschritten)",
-              "fr": "Assisté par flux (avancé)"
-            }
-          }
-        ]
-      },
-      {
-        "id": "adaptive_simulate_mode",
-        "type": "checkbox",
-        "label": {
-          "en": "Simulation Mode (Safe Testing)",
-          "nl": "Simulatiemodus (Veilig Testen)",
-          "de": "Simulationsmodus (Sicheres Testen)",
-          "fr": "Mode Simulation (Test Sécurisé)"
-        },
-        "hint": {
-          "en": "When enabled, adaptive control calculates and tracks a simulated target temperature without sending commands to the heat pump. This allows you to safely observe how adaptive control would behave before activating it. The simulated temperature is visible in Insights for comparison with your actual target temperature.",
-          "nl": "Wanneer ingeschakeld, berekent en volgt adaptieve regeling een gesimuleerde doeltemperatuur zonder commando's naar de warmtepomp te sturen. Hiermee kun je veilig observeren hoe adaptieve regeling zich zou gedragen voor je het activeert. De gesimuleerde temperatuur is zichtbaar in Insights voor vergelijking met je werkelijke doeltemperatuur.",
-          "de": "Wenn aktiviert, berechnet und verfolgt die adaptive Steuerung eine simulierte Zieltemperatur, ohne Befehle an die Wärmepumpe zu senden. Auf diese Weise können Sie sicher beobachten, wie sich die adaptive Steuerung verhalten würde, bevor Sie sie aktivieren. Die simulierte Temperatur ist in Insights sichtbar zum Vergleich mit Ihrer tatsächlichen Zieltemperatur.",
-          "fr": "Lorsqu'activé, le contrôle adaptatif calcule et suit une température cible simulée sans envoyer de commandes à la pompe à chaleur. Cela vous permet d'observer en toute sécurité comment le contrôle adaptatif se comporterait avant de l'activer. La température simulée est visible dans Insights pour comparaison avec votre température cible réelle."
-        },
-        "value": false
-      },
-      {
-        "id": "adaptive_commit_on_disable",
-        "type": "checkbox",
-        "label": {
-          "en": "Commit Simulated Temp When Disabling",
-          "nl": "Gesimuleerde Temp Doorvoeren Bij Uitschakelen",
-          "de": "Simulierte Temp Übernehmen Beim Deaktivieren",
-          "fr": "Valider Temp Simulée Lors Désactivation"
-        },
-        "hint": {
-          "en": "If enabled, the simulated temperature will be written to the heat pump when you disable adaptive control. If disabled, the simulated value is discarded and your heat pump keeps its current target temperature. Only applies when simulation mode is active.",
-          "nl": "Indien ingeschakeld, wordt de gesimuleerde temperatuur naar de warmtepomp geschreven wanneer je adaptieve regeling uitschakelt. Indien uitgeschakeld wordt de gesimuleerde waarde verworpen en behoudt je warmtepomp de huidige doeltemperatuur. Geldt alleen wanneer simulatiemodus actief is.",
-          "de": "Wenn aktiviert, wird die simulierte Temperatur an die Wärmepumpe gesendet, wenn Sie die adaptive Steuerung deaktivieren. Wenn deaktiviert, wird der simulierte Wert verworfen und Ihre Wärmepumpe behält ihre aktuelle Zieltemperatur. Gilt nur, wenn der Simulationsmodus aktiv ist.",
-          "fr": "Si activé, la température simulée sera écrite sur la pompe à chaleur lorsque vous désactivez le contrôle adaptatif. Si désactivé, la valeur simulée est rejetée et votre pompe à chaleur conserve sa température cible actuelle. S'applique uniquement lorsque le mode simulation est actif."
         },
         "value": false
       },
@@ -1178,6 +990,112 @@
     },
     "children": [
       {
+        "id": "price_calculation_mode",
+        "type": "dropdown",
+        "label": {
+          "en": "Price calculation mode",
+          "nl": "Prijsberekening modus",
+          "de": "Preisberechnungsmodus",
+          "fr": "Mode de calcul du prix"
+        },
+        "hint": {
+          "en": "Market: spot price + VAT only. Market+: adds supplier fee. All-in: adds energy tax (complete cost).",
+          "nl": "Marktprijs: spotprijs + BTW. Marktprijs+: incl. leveranciersopslag. All-in: incl. energiebelasting (complete kosten).",
+          "de": "Markt: Spotpreis + MwSt. Markt+: plus Lieferantengebühr. All-in: plus Energiesteuer (Gesamtkosten).",
+          "fr": "Marché: prix spot + TVA. Marché+: ajoute frais fournisseur. All-in: ajoute taxe énergie (coût complet)."
+        },
+        "value": "all_in",
+        "values": [
+          {
+            "id": "market",
+            "label": {
+              "en": "Market price (spot + VAT)",
+              "nl": "Marktprijs (spot + BTW)",
+              "de": "Marktpreis (Spot + MwSt)",
+              "fr": "Prix du marché (spot + TVA)"
+            }
+          },
+          {
+            "id": "market_plus",
+            "label": {
+              "en": "Market+ (spot + fee + VAT)",
+              "nl": "Marktprijs+ (spot + opslag + BTW)",
+              "de": "Markt+ (Spot + Gebühr + MwSt)",
+              "fr": "Marché+ (spot + frais + TVA)"
+            }
+          },
+          {
+            "id": "all_in",
+            "label": {
+              "en": "All-in price (complete cost)",
+              "nl": "All-in prijs (complete kosten)",
+              "de": "All-in Preis (Gesamtkosten)",
+              "fr": "Prix all-in (coût complet)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "supplier_fee_inc_vat",
+        "type": "number",
+        "label": {
+          "en": "Supplier fee (€/kWh incl. VAT)",
+          "nl": "Inkoopvergoeding (€/kWh incl. BTW)",
+          "de": "Lieferantengebühr (€/kWh inkl. MwSt)",
+          "fr": "Frais fournisseur (€/kWh TTC)"
+        },
+        "hint": {
+          "en": "Supplier/trading fee per kWh, including VAT. Check your energy contract for this value.",
+          "nl": "Leveranciersopslag per kWh, inclusief BTW. Controleer uw energiecontract voor deze waarde.",
+          "de": "Lieferantengebühr pro kWh, inklusive MwSt. Überprüfen Sie Ihren Energievertrag auf diesen Wert.",
+          "fr": "Frais de fournisseur/négoce par kWh, TTC. Vérifiez votre contrat d'énergie pour cette valeur."
+        },
+        "value": 0.0182,
+        "min": 0,
+        "max": 0.5,
+        "step": 0.0001
+      },
+      {
+        "id": "electricity_tax_inc_vat",
+        "type": "number",
+        "label": {
+          "en": "Energy tax (€/kWh incl. VAT)",
+          "nl": "Energiebelasting (€/kWh incl. BTW)",
+          "de": "Energiesteuer (€/kWh inkl. MwSt)",
+          "fr": "Taxe énergie (€/kWh TTC)"
+        },
+        "hint": {
+          "en": "Energy tax per kWh, including VAT. Netherlands 2024: ~€0.11085. Check your invoice for current rate.",
+          "nl": "Energiebelasting per kWh, inclusief BTW. Nederland 2024: ~€0.11085. Controleer uw factuur voor actueel tarief.",
+          "de": "Energiesteuer pro kWh, inklusive MwSt. Niederlande 2024: ~€0.11085. Überprüfen Sie Ihre Rechnung für aktuelle Rate.",
+          "fr": "Taxe sur l'énergie par kWh, TTC. Pays-Bas 2024: ~€0.11085. Vérifiez votre facture pour le taux actuel."
+        },
+        "value": 0.11085,
+        "min": 0,
+        "max": 0.5,
+        "step": 0.0001
+      },
+      {
+        "id": "vat_percentage",
+        "type": "number",
+        "label": {
+          "en": "VAT percentage (%)",
+          "nl": "BTW-percentage (%)",
+          "de": "MwSt-Prozentsatz (%)",
+          "fr": "Pourcentage TVA (%)"
+        },
+        "hint": {
+          "en": "VAT percentage applied to market price. Netherlands: 21% (standard), 9% (reduced rate for some situations).",
+          "nl": "BTW-percentage toegepast op marktprijs. Nederland: 21% (standaard), 9% (verlaagd tarief voor sommige situaties).",
+          "de": "MwSt-Prozentsatz auf Marktpreis. Niederlande: 21% (Standard), 9% (ermäßigter Satz für einige Situationen).",
+          "fr": "Pourcentage de TVA appliqué au prix du marché. Pays-Bas: 21% (standard), 9% (taux réduit pour certaines situations)."
+        },
+        "value": 21,
+        "min": 0,
+        "max": 30,
+        "step": 1
+      },
+      {
         "id": "price_optimizer_enabled",
         "type": "checkbox",
         "label": {
@@ -1204,14 +1122,14 @@
           "fr": "Seuil de Prix Très Bas "
         },
         "hint": {
-          "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Default: €0.10/kWh",
-          "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Standaard: €0.10/kWh",
-          "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Standard: €0.10/kWh",
-          "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Défaut: €0.10/kWh"
+          "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Based on P10 percentile of 2024 spot prices. Default: €0.04/kWh",
+          "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Gebaseerd op P10 percentiel van 2024 spotprijzen. Standaard: €0.04/kWh",
+          "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Basierend auf P10-Perzentil der Spotpreise 2024. Standard: €0.04/kWh",
+          "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Basé sur le percentile P10 des prix spot 2024. Défaut: €0.04/kWh"
         },
-        "value": 0.10,
-        "min": 0.0,
-        "max": 0.50,
+        "value": 0.04,
+        "min": -0.10,
+        "max": 0.30,
         "step": 0.01,
         "units": {
           "en": "€/kWh",
@@ -1230,14 +1148,14 @@
           "fr": "Seuil de Prix Bas "
         },
         "hint": {
-          "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Default: €0.15/kWh",
-          "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Standaard: €0.15/kWh",
-          "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Standard: €0.15/kWh",
-          "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Défaut: €0.15/kWh"
+          "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Based on P30 percentile. Default: €0.06/kWh",
+          "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Gebaseerd op P30 percentiel. Standaard: €0.06/kWh",
+          "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Basierend auf P30-Perzentil. Standard: €0.06/kWh",
+          "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Basé sur le percentile P30. Défaut: €0.06/kWh"
         },
-        "value": 0.15,
-        "min": 0.0,
-        "max": 0.50,
+        "value": 0.06,
+        "min": -0.05,
+        "max": 0.30,
         "step": 0.01,
         "units": {
           "en": "€/kWh",
@@ -1256,14 +1174,14 @@
           "fr": "Seuil de Prix Normal "
         },
         "hint": {
-          "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Default: €0.25/kWh",
-          "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Standaard: €0.25/kWh",
-          "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Standard: €0.25/kWh",
-          "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Défaut: €0.25/kWh"
+          "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Based on P70 percentile. Default: €0.10/kWh",
+          "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Gebaseerd op P70 percentiel. Standaard: €0.10/kWh",
+          "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Basierend auf P70-Perzentil. Standard: €0.10/kWh",
+          "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Basé sur le percentile P70. Défaut: €0.10/kWh"
         },
-        "value": 0.25,
+        "value": 0.10,
         "min": 0.0,
-        "max": 0.50,
+        "max": 0.30,
         "step": 0.01,
         "units": {
           "en": "€/kWh",
@@ -1282,14 +1200,14 @@
           "fr": "Seuil de Prix Élevé "
         },
         "hint": {
-          "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Default: €0.35/kWh",
-          "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Standaard: €0.35/kWh",
-          "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Standard: €0.35/kWh",
-          "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Défaut: €0.35/kWh"
+          "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Based on P90 percentile. Default: €0.12/kWh",
+          "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Gebaseerd op P90 percentiel. Standaard: €0.12/kWh",
+          "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Basierend auf P90-Perzentil. Standard: €0.12/kWh",
+          "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Basé sur le percentile P90. Défaut: €0.12/kWh"
         },
-        "value": 0.35,
+        "value": 0.12,
         "min": 0.0,
-        "max": 1.00,
+        "max": 0.50,
         "step": 0.01,
         "units": {
           "en": "€/kWh",
@@ -1469,29 +1387,12 @@
   {
     "type": "group",
     "label": {
-      "en": "System Integration",
-      "nl": "Systeem Integratie",
-      "de": "Systemintegration",
-      "fr": "Intégration Système"
+      "en": "Adaptive Control Weighting Factors",
+      "nl": "Adaptieve Regeling Wegingsfactoren",
+      "de": "Adaptive Regelung Gewichtungsfaktoren",
+      "fr": "Facteurs de Pondération du Contrôle Adaptatif"
     },
     "children": [
-      {
-        "id": "monitoring_mode_enabled",
-        "type": "checkbox",
-        "label": {
-          "en": "Monitoring Mode (log only, don't execute)",
-          "nl": "Monitor Modus (alleen loggen, niet uitvoeren)",
-          "de": "Überwachungsmodus (nur protokollieren, nicht ausführen)",
-          "fr": "Mode Surveillance (journaliser uniquement, ne pas exécuter)"
-        },
-        "hint": {
-          "en": "Enable to test adaptive control without making actual adjustments. All recommendations will be logged via 'Adaptive control logged action' flow card. Disable to activate real adjustments. Default: enabled for safety.",
-          "nl": "Activeer om adaptieve regeling te testen zonder daadwerkelijke aanpassingen. Alle aanbevelingen worden gelogd via 'Adaptieve regeling heeft actie gelogd' flow kaart. Deactiveer om echte aanpassingen te activeren. Standaard: ingeschakeld voor veiligheid.",
-          "de": "Aktivieren Sie, um adaptive Steuerung ohne tatsächliche Anpassungen zu testen. Alle Empfehlungen werden über 'Adaptive Steuerung hat Aktion protokolliert' Flow-Karte protokolliert. Deaktivieren Sie, um echte Anpassungen zu aktivieren. Standard: aktiviert für Sicherheit.",
-          "fr": "Activer pour tester le contrôle adaptatif sans faire d'ajustements réels. Toutes les recommandations seront journalisées via la carte de flux 'Contrôle adaptatif a enregistré une action'. Désactiver pour activer les ajustements réels. Défaut: activé pour la sécurité."
-        },
-        "value": true
-      },
       {
         "id": "priority_comfort",
         "type": "number",
