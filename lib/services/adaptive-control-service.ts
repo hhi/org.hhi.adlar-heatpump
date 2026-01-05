@@ -212,6 +212,14 @@ export class AdaptiveControlService {
       if (typeof savedEnabled === 'boolean') {
         this.isEnabled = savedEnabled;
         this.logger('AdaptiveControlService: Restored enabled state', { enabled: this.isEnabled });
+      } else {
+        // Fallback: Sync from device setting if store value is missing (v2.4.11: settings/store sync fix)
+        // This handles cases where the setting was enabled but store was never written (e.g., old version, failed start)
+        const settingEnabled = this.device.getSetting('adaptive_control_enabled');
+        if (settingEnabled === true) {
+          this.isEnabled = true;
+          this.logger('AdaptiveControlService: Enabled state synced from device setting (store was missing)', { enabled: true });
+        }
       }
 
       // Restore monitoring mode state
