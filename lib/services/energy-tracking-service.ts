@@ -42,6 +42,12 @@ export class EnergyTrackingService {
   private readonly POWER_THRESHOLD_HYSTERESIS = 0.05; // 5% hysteresis
   private readonly POWER_THRESHOLD_RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
 
+  // Power measurement state (v1.1.0)
+  private lastPowerMeasurement: PowerMeasurement | null = null;
+
+  // Cumulative energy state (v1.1.2 - internal tracking for robust cost calculation)
+  private currentCumulativeEnergy: number = 0;
+
   /**
    * EnergyTrackingService tracks energy/power measurements, updates power-related capabilities,
    * and maintains daily/cumulative energy totals.
@@ -56,6 +62,14 @@ export class EnergyTrackingService {
     this.device = options.device;
     this.logger = options.logger || (() => { });
     this.energyPriceOptimizer = options.energyPriceOptimizer || null;
+  }
+
+  /**
+   * Get the current power measurement (value, source, confidence)
+   * accessible regardless of capability availability
+   */
+  public getCurrentPowerMeasurement(): PowerMeasurement | null {
+    return this.lastPowerMeasurement;
   }
 
   /**
@@ -107,6 +121,9 @@ export class EnergyTrackingService {
         timestamp: Date.now(),
       };
 
+      // Store measurement internally (robustness against capability changes)
+      this.lastPowerMeasurement = measurement;
+
       // Update measure_power capability with the selected power source
       if (powerValue !== null && this.device.hasCapability('measure_power')) {
         await this.device.setCapabilityValue('measure_power', Math.round(powerValue));
@@ -114,8 +131,11 @@ export class EnergyTrackingService {
 
         // Check power threshold for trigger (v1.0.7 - power_threshold_exceeded)
         await this.checkPowerThreshold(powerValue);
+      }
 
-        // Update cumulative energy based on the new power measurement
+      // Update cumulative energy based on the new power measurement
+      // Moved outside capability check to ensure tracking works even if measure_power is disabled (v1.1.0)
+      if (powerValue !== null) {
         await this.updateCumulativeEnergy();
       }
 
@@ -206,15 +226,25 @@ export class EnergyTrackingService {
         this.logger('EnergyTrackingService: External energy tracking initialized');
       }
 
-      // Initialize cumulative energy if meter capabilities are zero/null
+      // Initialize cumulative energy from store (or capability as fallback)
+      const storedEnergy = await this.device.getStoreValue('cumulative_energy_kwh');
+      if (typeof storedEnergy === 'number') {
+        this.currentCumulativeEnergy = storedEnergy;
+      } else {
+        // Fallback to capability value if store is empty (legacy migration)
+        const capabilityEnergy = this.device.getCapabilityValue('meter_power.electric_total');
+        if (typeof capabilityEnergy === 'number') {
+          this.currentCumulativeEnergy = capabilityEnergy;
+        }
+      }
+
+      // Initialize cumulative energy capability if zero/null
       if (this.device.hasCapability('meter_power.electric_total')) {
         const currentTotal = this.device.getCapabilityValue('meter_power.electric_total');
         if (!currentTotal || currentTotal === 0) {
-          // Check if we have stored cumulative energy from previous sessions
-          const storedTotal = await this.device.getStoreValue('cumulative_energy_kwh') || 0;
-          if (storedTotal > 0) {
-            await this.device.setCapabilityValue('meter_power.electric_total', storedTotal);
-            this.logger(`EnergyTrackingService: Restored cumulative energy: ${storedTotal} kWh`);
+          if (this.currentCumulativeEnergy > 0) {
+            await this.device.setCapabilityValue('meter_power.electric_total', this.currentCumulativeEnergy);
+            this.logger(`EnergyTrackingService: Restored cumulative energy: ${this.currentCumulativeEnergy} kWh`);
           }
         }
       }
@@ -286,26 +316,30 @@ export class EnergyTrackingService {
     this.energyCalculationInProgress = true;
 
     try {
-      const currentPower = this.device.getCapabilityValue('measure_power') || 0;
+      // Use internal power measurement state independent of Homey capability
+      const powerMeasurement = this.getCurrentPowerMeasurement();
+      const currentPower = powerMeasurement ? powerMeasurement.value : 0;
       const externalPower = this.device.getCapabilityValue('adlar_external_power') || 0;
 
       const lastUpdate = await this.device.getStoreValue('last_energy_update') || Date.now();
       const currentTime = Date.now();
       const hoursElapsed = (currentTime - lastUpdate) / (1000 * 60 * 60);
 
-      // Only accumulate internal energy when we have reliable internal power data
+      // Only accumulate internal energy when we have reliable positive power data
       if (currentPower > 0) {
         // Calculate energy increment in kWh
         const energyIncrement = (currentPower / 1000) * hoursElapsed;
 
-        // Update total cumulative energy
-        if (this.device.hasCapability('meter_power.electric_total')) {
-          const currentTotal = this.device.getCapabilityValue('meter_power.electric_total') || 0;
-          const newTotal = currentTotal + energyIncrement;
-          await this.device.setCapabilityValue('meter_power.electric_total', Math.round(newTotal * 100) / 100);
+        // Update total cumulative energy (Internal State v1.1.2)
+        this.currentCumulativeEnergy += energyIncrement;
+        const newTotal = this.currentCumulativeEnergy;
 
-          // Store in device storage for persistence
-          await this.device.setStoreValue('cumulative_energy_kwh', newTotal);
+        // Store in device storage for persistence
+        await this.device.setStoreValue('cumulative_energy_kwh', newTotal);
+
+        // Update capability if it exists (for visualization only - decoupling v1.1.2)
+        if (this.device.hasCapability('meter_power.electric_total')) {
+          await this.device.setCapabilityValue('meter_power.electric_total', Math.round(newTotal * 100) / 100);
 
           // Check for energy milestones (v1.0.7 - total_consumption_milestone trigger)
           await this.checkEnergyMilestones(newTotal);
@@ -322,20 +356,48 @@ export class EnergyTrackingService {
           await this.checkDailyConsumptionThreshold(newDailyTotal);
         }
 
+        // === UNIFIED COST CALCULATION (v1.1.0) ===
+        // Calculate costs regardless of power source (internal/external/calculated)
+        if (this.energyPriceOptimizer) {
+          const effectivePrice = this.energyPriceOptimizer.getEffectivePrice();
+          this.logger(`EnergyTrackingService DEBUG: Power=${currentPower}W, Increment=${(energyIncrement * 1000).toFixed(4)}Wh, Price=€${effectivePrice.toFixed(4)}/kWh`);
+
+          // 1. Accumulate Daily Cost
+          // Adds incremental cost to the daily total based on current energy increment and effective price
+          this.energyPriceOptimizer.accumulateCost(energyIncrement);
+
+          if (this.device.hasCapability('adlar_energy_cost_daily')) {
+            const dailyCost = this.energyPriceOptimizer.getAccumulatedDailyCost();
+            const roundedDailyCost = Math.round(dailyCost * 100) / 100;
+            await this.device.setCapabilityValue('adlar_energy_cost_daily', roundedDailyCost);
+            // Persist for app restart recovery
+            await this.device.setStoreValue('daily_cost_cache', roundedDailyCost);
+          }
+
+          // 2. Accumulate Hourly Cost
+          // Use INTERNAL total energy counter to track hourly deltas (Decoupled from capability v1.1.2)
+          if (this.device.hasCapability('adlar_energy_cost_hourly')) {
+            // We use the monotonic internal counter for correct delta tracking
+            // This works even if meter_power.electric_total capability is disabled/missing
+            const hourlyCost = this.energyPriceOptimizer.accumulateHourlyCost(this.currentCumulativeEnergy);
+
+            const roundedHourlyCost = Math.round(hourlyCost * 100) / 100;
+            await this.device.setCapabilityValue('adlar_energy_cost_hourly', roundedHourlyCost);
+            // Persist for app restart recovery
+            await this.device.setStoreValue('hourly_cost_cache', roundedHourlyCost);
+          }
+
+          // Persist optimizer state to ensure hourStartEnergy and accumulated costs are saved immediately
+          // This makes the calculation resilient to app restarts (v1.1.1)
+          await this.device.setStoreValue('energy_optimizer_state', this.energyPriceOptimizer.getState());
+        }
+
         this.logger(`EnergyTrackingService: Energy updated: +${(energyIncrement * 1000).toFixed(1)}Wh (power: ${currentPower}W, time: ${(hoursElapsed * 60).toFixed(1)}min)`);
       }
 
       // Track external energy separately when external power is being used
+      // Note: Cost calculation removed from here as it is now handled above for all sources
       await this.updateExternalEnergy(externalPower, currentTime);
-
-      // === Update hourly cost accumulator ===
-      // Tracks actual accumulated costs for the current hour (resets at hour boundary)
-      if (this.energyPriceOptimizer && this.device.hasCapability('adlar_energy_cost_hourly')) {
-        const currentDailyEnergy = this.device.getCapabilityValue('adlar_external_energy_daily') || 0;
-        const hourlyCost = this.energyPriceOptimizer.accumulateHourlyCost(currentDailyEnergy);
-        await this.device.setCapabilityValue('adlar_energy_cost_hourly',
-          Math.round(hourlyCost * 100) / 100);
-      }
 
       // Update timestamp for next calculation
       if (currentPower > 0 || externalPower > 0) {
@@ -389,29 +451,8 @@ export class EnergyTrackingService {
           await this.device.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
         }
 
-        // === NEW: Cost accumulation via EnergyPriceOptimizer ===
-        if (this.energyPriceOptimizer) {
-          // Accumulate cost based on energy increment
-          this.energyPriceOptimizer.accumulateCost(externalEnergyIncrement);
-
-          // Update daily cost capability
-          if (this.device.hasCapability('adlar_energy_cost_daily')) {
-            const dailyCost = this.energyPriceOptimizer.getAccumulatedDailyCost();
-            const roundedDailyCost = Math.round(dailyCost * 100) / 100;
-            await this.device.setCapabilityValue('adlar_energy_cost_daily', roundedDailyCost);
-            // Persist for app restart recovery
-            await this.device.setStoreValue('daily_cost_cache', roundedDailyCost);
-          }
-
-          // Update hourly cost capability (momentary projection)
-          if (this.device.hasCapability('adlar_energy_cost_hourly')) {
-            const hourlyCost = this.energyPriceOptimizer.calculateCurrentCost(externalPower);
-            const roundedHourlyCost = Math.round(hourlyCost * 100) / 100;
-            await this.device.setCapabilityValue('adlar_energy_cost_hourly', roundedHourlyCost);
-            // Persist for app restart recovery
-            await this.device.setStoreValue('hourly_cost_cache', roundedHourlyCost);
-          }
-        }
+        // Note: Cost accumulation logic moved to updateCumulativeEnergy (v1.1.0)
+        // This ensures unified tracking for all power sources (internal/external/calculated)
 
         // Store external energy in device storage for persistence
         await this.device.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
@@ -432,7 +473,9 @@ export class EnergyTrackingService {
   private startEnergyTrackingInterval(): void {
     // Start frequent energy tracking interval (every 30 seconds)
     this.energyTrackingInterval = this.device.homey.setInterval(() => {
-      this.updateCumulativeEnergy().catch((error) => {
+      // Refresh intelligent power measurement continuously
+      // This ensures we have the latest power data AND triggers accumulation via the update chain
+      this.updateIntelligentPowerMeasurement().catch((error) => {
         this.logger('EnergyTrackingService: Error in energy tracking interval:', error);
       });
     }, DeviceConstants.ENERGY_TRACKING_INTERVAL_MS);

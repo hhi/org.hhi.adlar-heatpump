@@ -3319,6 +3319,29 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.4.11: Add adaptive_control_diagnostics capability for real-time decision breakdown
+      this.log('🔍 Checking adaptive_control_diagnostics migration...', {
+        hasCapability: this.hasCapability('adaptive_control_diagnostics'),
+      });
+
+      if (!this.hasCapability('adaptive_control_diagnostics')) {
+        try {
+          this.log('➕ Adding adaptive_control_diagnostics capability...');
+          await this.addCapability('adaptive_control_diagnostics');
+          this.log('✅ Capability added, setting initial value...');
+          await this.setCapabilityValue('adaptive_control_diagnostics', '{}');
+          this.log('✅ Migration v2.4.11: Added adaptive_control_diagnostics capability (default: empty JSON)');
+        } catch (error) {
+          this.error('❌ Failed to add adaptive_control_diagnostics capability:', error);
+          this.error('Error details:', {
+            name: (error as Error).name,
+            message: (error as Error).message,
+          });
+        }
+      } else {
+        this.log('ℹ️ adaptive_control_diagnostics capability already exists, skipping migration');
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');
       if (!priceOptimizerEnabled) {
