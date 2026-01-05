@@ -1,4 +1,10 @@
 {
+  "2.4.12": {
+    "en": "Adaptive control now starts automatically on app restart when enabled in settings. Diagnostic capability shows weighted decision breakdown (comfort/efficiency/cost components) with PI controller status.",
+    "nl": "Adaptieve controle start nu automatisch bij app herstart wanneer ingeschakeld in instellingen. Diagnostische capability toont gewogen beslissing uitsplitsing (comfort/efficiëntie/kosten componenten) met PI controller status.",
+    "de": "Adaptive Steuerung startet jetzt automatisch bei App-Neustart wenn in Einstellungen aktiviert. Diagnose-Capability zeigt gewichtete Entscheidungsaufschlüsselung (Komfort/Effizienz/Kosten-Komponenten) mit PI-Controller-Status.",
+    "fr": "Contrôle adaptatif démarre automatiquement au redémarrage de l'application quand activé dans paramètres. Capacité diagnostic affiche répartition décision pondérée (composants confort/efficacité/coût) avec statut contrôleur PI."
+  },
   "2.4.6": {
     "en": "Energy optimizer now works with Market price, Market price+, and All-in prices.",
     "nl": "De energy optimizer werkt nu met zowel Marktprijs, Marktprijs+ en All-in prijzen.",
