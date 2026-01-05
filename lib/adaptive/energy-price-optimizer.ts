@@ -421,6 +421,8 @@ export class EnergyPriceOptimizer {
       this.accumulatedHourlyCost = deltaKWh * effectivePrice;
     }
 
+    this.logger(`EnergyPriceOptimizer DEBUG: Hourly Cost Check - Total=${currentEnergyTotal.toFixed(3)}, Start=${this.hourStartEnergy.toFixed(3)}, Delta=${deltaKWh.toFixed(5)}, Price=${effectivePrice.toFixed(3)}, Cost=${this.accumulatedHourlyCost.toFixed(4)}`);
+
     return this.accumulatedHourlyCost;
   }
 

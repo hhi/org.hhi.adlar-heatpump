@@ -10,6 +10,7 @@
     "target_temperature.indoor",
     "measure_temperature.indoor",
     "adlar_simulated_target",
+    "adaptive_control_diagnostics",
 
     "onoff",
 

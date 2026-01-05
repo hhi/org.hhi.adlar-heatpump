@@ -285,6 +285,22 @@ export class AdaptiveControlService {
         }
       }
 
+      // Restore raw External Energy Prices (v1.1.2 - Persistence Fix)
+      // If optimizer state was lost/stale, we rebuild it from the raw prices
+      const storedPrices = await this.device.getStoreValue('external_energy_prices');
+      if (storedPrices && typeof storedPrices === 'object') {
+        try {
+          this.energyOptimizer.setExternalPrices(storedPrices);
+
+          // Also update capabilities immediately based on these restored prices
+          await this.updateEnergyPriceCapabilities();
+
+          this.logger(`AdaptiveControlService: Restored ${Object.keys(storedPrices).length} external energy prices from store`);
+        } catch (error) {
+          this.logger('AdaptiveControlService: Failed to restore external energy prices', { error: (error as Error).message });
+        }
+      }
+
       // Restore Component 4: COP Optimizer state
       const copState = await this.device.getStoreValue('cop_optimizer_state');
       if (copState) {
@@ -562,6 +578,9 @@ export class AdaptiveControlService {
       );
       this.logger(`Final Adjustment: ${combinedAction.finalAdjustment.toFixed(2)}°C (${combinedAction.priority} priority)`);
       combinedAction.reasoning.forEach((reason) => this.logger(`  - ${reason}`));
+
+      // Step 6.5: Update diagnostic capability with weighted decision breakdown
+      await this.updateDiagnosticsCapability(combinedAction);
 
       // Step 7: Check for deprecated monitoring mode (legacy)
       if (this.isMonitoringMode && !this.isSimulateMode) {
@@ -1150,6 +1169,76 @@ export class AdaptiveControlService {
           await this.device.setSettings({ reset_building_model: false });
         }
       }
+    }
+  }
+
+  /**
+   * Update diagnostic capability with weighted decision breakdown
+   *
+   * Provides real-time transparency into adaptive control decision-making process
+   * by publishing JSON data showing:
+   * - Final temperature adjustment
+   * - Breakdown per component (comfort/efficiency/cost)
+   * - Current priority weights
+   * - Reasoning from each controller
+   * - PI controller state (error, P-term, I-term)
+   *
+   * @param combinedAction - Combined action from weighted decision maker
+   */
+  private async updateDiagnosticsCapability(
+    combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
+  ): Promise<void> {
+    try {
+      // Check if capability exists (should always be true, but defensive)
+      if (!this.device.hasCapability('adaptive_control_diagnostics')) {
+        return;
+      }
+
+      // Get current priorities from decision maker
+      const priorities = this.decisionMaker.getPriorities();
+
+      // Get PI controller state
+      const piStatus = this.heatingController.getStatus();
+
+      // Compile diagnostic data as JSON
+      const diagnostics = {
+        timestamp: Date.now(),
+        finalAdjustment: Number(combinedAction.finalAdjustment.toFixed(2)),
+        breakdown: {
+          comfort: Number(combinedAction.breakdown.comfort.toFixed(2)),
+          efficiency: Number(combinedAction.breakdown.efficiency.toFixed(2)),
+          cost: Number(combinedAction.breakdown.cost.toFixed(2)),
+        },
+        priorities: {
+          comfort: Number(priorities.comfort.toFixed(2)),
+          efficiency: Number(priorities.efficiency.toFixed(2)),
+          cost: Number(priorities.cost.toFixed(2)),
+        },
+        reasoning: combinedAction.reasoning,
+        priority: combinedAction.priority,
+        piController: {
+          currentError: Number(piStatus.currentError.toFixed(2)),
+          averageError: Number(piStatus.averageError.toFixed(2)),
+          historySize: piStatus.historySize,
+          maxHistorySize: piStatus.maxHistorySize,
+          parameters: {
+            Kp: piStatus.Kp,
+            Ki: piStatus.Ki,
+            deadband: piStatus.deadband,
+          },
+        },
+      };
+
+      // Update capability with JSON string
+      await this.device.setCapabilityValue('adaptive_control_diagnostics', JSON.stringify(diagnostics));
+
+      this.logger('📊 Diagnostic capability updated', {
+        adjustment: diagnostics.finalAdjustment,
+        priority: diagnostics.priority,
+      });
+    } catch (error) {
+      this.logger('⚠️ Failed to update diagnostic capability:', error);
+      // Non-critical: don't throw, just log warning
     }
   }
 

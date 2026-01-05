@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.4.9",
+  "version": "2.4.11",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -6988,6 +6988,7 @@
         "target_temperature.indoor",
         "measure_temperature.indoor",
         "adlar_simulated_target",
+        "adaptive_control_diagnostics",
         "onoff",
         "adlar_hotwater",
         "adlar_enum_water_mode",
@@ -9443,6 +9444,34 @@
     }
   ],
   "capabilities": {
+    "adaptive_control_diagnostics": {
+      "id": "adaptive_control_diagnostics",
+      "type": "string",
+      "title": {
+        "en": "Adaptive Control Diagnostics",
+        "nl": "Adaptieve Controle Diagnostiek",
+        "de": "Adaptive Steuerungsdiagnostik",
+        "fr": "Diagnostics de contrôle adaptatif"
+      },
+      "desc": {
+        "en": "Real-time breakdown of weighted decision making as JSON (comfort/efficiency/cost contributions)",
+        "nl": "Real-time breakdown van gewogen besluitvorming als JSON (comfort/efficiëntie/kosten bijdragen)",
+        "de": "Echtzeit-Aufschlüsselung der gewichteten Entscheidungsfindung als JSON (Komfort/Effizienz/Kosten Beiträge)",
+        "fr": "Répartition en temps réel de la prise de décision pondérée en JSON (contributions confort/efficacité/coût)"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "chartType": "stepLine",
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
     "adlar_building_c": {
       "id": "adlar_building_c",
       "type": "number",
