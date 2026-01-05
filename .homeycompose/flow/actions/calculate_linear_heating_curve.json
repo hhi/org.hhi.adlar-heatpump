@@ -1,22 +1,22 @@
 {
   "id": "calculate_linear_heating_curve",
   "title": {
-    "en": "Calculate linear heating curve",
-    "nl": "Bereken lineaire verwarmingscurve",
-    "de": "Lineare Heizkurve berechnen",
-    "fr": "Calculer la courbe de chauffage linéaire"
+    "en": "Calculate Custom heating curve (L28/L29)",
+    "nl": "Bereken Custom stooklijn (L28/L29)",
+    "de": "Berechne Custom Heizkurve (L28/L29)",
+    "fr": "Calculer courbe de chauffage Custom (L28/L29)"
   },
   "titleFormatted": {
-    "en": "Calculate heating curve: [[reference_temp]]°C at [[reference_outdoor]]°C, slope [[slope]] with outdoor temp [[outdoor_temp]]",
-    "nl": "Bereken verwarmingscurve: [[reference_temp]]°C bij [[reference_outdoor]]°C, helling [[slope]] met buitentemp [[outdoor_temp]]",
-    "de": "Heizkurve berechnen: [[reference_temp]]°C bei [[reference_outdoor]]°C, Neigung [[slope]] mit Außentemp [[outdoor_temp]]",
-    "fr": "Calculer courbe de chauffage: [[reference_temp]]°C à [[reference_outdoor]]°C, pente [[slope]] avec temp extérieure [[outdoor_temp]]"
+    "en": "Calculate heating curve: L29=[[reference_temp]]°C at [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C with outdoor temp [[outdoor_temp]]",
+    "nl": "Bereken stooklijn: L29=[[reference_temp]]°C bij [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C met buitentemp [[outdoor_temp]]",
+    "de": "Heizkurve berechnen: L29=[[reference_temp]]°C bei [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C mit Außentemp [[outdoor_temp]]",
+    "fr": "Calculer courbe de chauffage: L29=[[reference_temp]]°C à [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C avec temp extérieure [[outdoor_temp]]"
   },
   "hint": {
-    "en": "Calculates supply temperature using linear formula: y = slope × outdoor_temp + intercept, where intercept = reference_temp - (slope × reference_outdoor). Example: Reference point 55°C at -15°C with slope -0.5 gives formula y = -0.5x + 47.5. For outdoor temp 5°C → supply temp 45°C.",
-    "nl": "Berekent aanvoertemperatuur met lineaire formule: y = helling × buitentemp + constante, waarbij constante = referentie_temp - (helling × referentie_buiten). Voorbeeld: Referentiepunt 55°C bij -15°C met helling -0.5 geeft formule y = -0.5x + 47.5. Voor buitentemp 5°C → aanvoertemp 45°C.",
-    "de": "Berechnet Vorlauftemperatur mit linearer Formel: y = Neigung × Außentemp + Konstante, wobei Konstante = Referenz_temp - (Neigung × Referenz_außen). Beispiel: Referenzpunkt 55°C bei -15°C mit Neigung -0.5 ergibt Formel y = -0.5x + 47.5. Für Außentemp 5°C → Vorlauftemp 45°C.",
-    "fr": "Calcule la température de départ avec formule linéaire: y = pente × temp_extérieure + constante, où constante = temp_référence - (pente × référence_extérieure). Exemple: Point de référence 55°C à -15°C avec pente -0.5 donne formule y = -0.5x + 47.5. Pour temp extérieure 5°C → temp départ 45°C."
+    "en": "Calculates supply temperature using Adlar Custom heating curve. Uses L29 (set temp at -15°C) and L28 (slope grade per 10°C). Example: L29=55°C at -15°C with L28=-5 gives slope -0.5/°C, formula y = -0.5x + 47.5. For outdoor temp 5°C → supply temp 45°C.",
+    "nl": "Berekent aanvoertemperatuur met Adlar Custom stooklijn. Gebruikt L29 (set temp bij -15°C) en L28 (hellingsgraad per 10°C). Voorbeeld: L29=55°C bij -15°C met L28=-5 geeft helling -0.5/°C, formule y = -0.5x + 47.5. Voor buitentemp 5°C → aanvoertemp 45°C.",
+    "de": "Berechnet Vorlauftemperatur mit Adlar Custom Heizkurve. Verwendet L29 (Solltemperatur bei -15°C) und L28 (Neigungsgrad pro 10°C). Beispiel: L29=55°C bei -15°C mit L28=-5 ergibt Neigung -0.5/°C, Formel y = -0.5x + 47.5. Für Außentemp 5°C → Vorlauftemp 45°C.",
+    "fr": "Calcule la température de départ avec courbe de chauffage Adlar Custom. Utilise L29 (température réglée à -15°C) et L28 (pente par 10°C). Exemple: L29=55°C à -15°C avec L28=-5 donne pente -0.5/°C, formule y = -0.5x + 47.5. Pour temp extérieure 5°C → temp départ 45°C."
   },
   "highlight": true,
   "tokens": [
@@ -69,16 +69,16 @@
       "name": "reference_temp",
       "type": "number",
       "title": {
-        "en": "Reference Supply Temp (°C)",
-        "nl": "Referentie Aanvoertemp (°C)",
-        "de": "Referenz Vorlauftemp (°C)",
-        "fr": "Température départ référence (°C)"
+        "en": "L29: Set temp at -15°C outdoor (°C)",
+        "nl": "L29: Set temp bij -15°C buiten (°C)",
+        "de": "L29: Solltemperatur bei -15°C außen (°C)",
+        "fr": "L29: Temp réglée à -15°C extérieur (°C)"
       },
       "placeholder": {
-        "en": "e.g., 55",
-        "nl": "bijv. 55",
-        "de": "z.B. 55",
-        "fr": "par ex. 55"
+        "en": "e.g., 55 (L29)",
+        "nl": "bijv. 55 (L29)",
+        "de": "z.B. 55 (L29)",
+        "fr": "par ex. 55 (L29)"
       }
     },
     {
@@ -98,19 +98,19 @@
       }
     },
     {
-      "name": "slope",
+      "name": "slope_grade",
       "type": "number",
       "title": {
-        "en": "Slope Coefficient",
-        "nl": "Hellingscoëfficiënt",
-        "de": "Neigungskoeffizient",
-        "fr": "Coefficient de pente"
+        "en": "L28: Slope grade (per 10°C)",
+        "nl": "L28: Hellingsgraad (per 10°C)",
+        "de": "L28: Neigungsgrad (pro 10°C)",
+        "fr": "L28: Pente (par 10°C)"
       },
       "placeholder": {
-        "en": "e.g., -0.5",
-        "nl": "bijv. -0.5",
-        "de": "z.B. -0.5",
-        "fr": "par ex. -0.5"
+        "en": "e.g., -5 (L28)",
+        "nl": "bijv. -5 (L28)",
+        "de": "z.B. -5 (L28)",
+        "fr": "par ex. -5 (L28)"
       }
     }
   ]

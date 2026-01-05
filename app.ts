@@ -642,7 +642,7 @@ class MyApp extends App {
         outdoor_temp: outdoorTempRaw,
         reference_temp,
         reference_outdoor,
-        slope,
+        slope_grade,
       } = args;
 
       try {
@@ -662,12 +662,18 @@ class MyApp extends App {
         }
 
         // Validate other parameters
-        if (Number.isNaN(reference_temp) || Number.isNaN(reference_outdoor) || Number.isNaN(slope)) {
+        if (Number.isNaN(reference_temp) || Number.isNaN(reference_outdoor) || Number.isNaN(slope_grade)) {
           throw new Error('All parameters must be valid numbers');
         }
 
-        // Calculate supply temperature: y = slope * x + intercept
-        // Intercept: b = reference_temp - (slope * reference_outdoor)
+        // Convert Adlar L28 (slope grade per 10°C) to slope per degree
+        // Example: L28 = -5 → slope = -5/10 = -0.5 per degree
+        const slope = slope_grade / 10;
+
+        // Calculate supply temperature using Adlar Custom heating curve (L28/L29)
+        // Formula: y = slope * x + intercept
+        // Intercept: b = L29 - (slope * reference_outdoor)
+        // Reference point: (reference_outdoor, L29) typically (-15°C, L29)
         const intercept = reference_temp - (slope * reference_outdoor);
         const supplyTemperature = (slope * outdoorTemp) + intercept;
 
@@ -681,17 +687,18 @@ class MyApp extends App {
         const formula = `y = ${roundedSlope}x + ${roundedIntercept}`;
 
         // Log results (debug mode)
-        this.debugLog(`Linear heating curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C`, {
+        this.debugLog(`Adlar Custom heating curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C`, {
           outdoorTemp,
-          referencePoint: `${reference_temp}°C @ ${reference_outdoor}°C`,
-          slope,
+          L29: `${reference_temp}°C @ ${reference_outdoor}°C`,
+          L28: slope_grade,
+          slopePerDegree: slope,
           intercept,
           formula,
           supplyTemperature: roundedSupplyTemp,
         });
 
         // Standard logging for production
-        this.log(`Linear curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C (formula: ${formula})`);
+        this.log(`Custom stooklijn (L29=${reference_temp}, L28=${slope_grade}): ${outdoorTemp}°C → ${roundedSupplyTemp}°C (${formula})`);
 
         return {
           supply_temperature: roundedSupplyTemp,
@@ -700,15 +707,15 @@ class MyApp extends App {
 
       } catch (error) {
         // Error logging
-        this.error('Linear heating curve calculation failed:', error);
+        this.error('Adlar Custom heating curve calculation failed:', error);
 
         // Re-throw with user-friendly message
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        throw new Error(`Linear heating curve failed: ${errorMessage}`);
+        throw new Error(`Custom heating curve failed: ${errorMessage}`);
       }
     });
 
-    this.debugLog('Linear heating curve card registered successfully');
+    this.debugLog('Adlar Custom heating curve card registered successfully');
   }
 
   /**

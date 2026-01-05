@@ -1,4 +1,10 @@
 {
+  "2.4.13": {
+    "en": "Custom heating curve flow card now uses Adlar L28/L29 parameters. Enter slope grade per 10°C (L28) directly without manual conversion. IP address setting clarified as 'Local IP Address' with warning against public IPs.",
+    "nl": "Custom stooklijn flow card gebruikt nu Adlar L28/L29 parameters. Voer hellingsgraad per 10°C (L28) direct in zonder handmatige conversie. IP-adres instelling verduidelijkt als 'Lokaal IP-adres' met waarschuwing tegen publieke IPs.",
+    "de": "Custom Heizkurve Flow-Karte verwendet jetzt Adlar L28/L29 Parameter. Neigungsgrad pro 10°C (L28) direkt eingeben ohne manuelle Umrechnung. IP-Adresse Einstellung als 'Lokale IP-Adresse' klargestellt mit Warnung vor öffentlichen IPs.",
+    "fr": "Carte de flux courbe de chauffage Custom utilise maintenant paramètres Adlar L28/L29. Entrez pente par 10°C (L28) directement sans conversion manuelle. Paramètre adresse IP clarifié comme 'Adresse IP locale' avec avertissement contre IPs publiques."
+  },
   "2.4.12": {
     "en": "Adaptive control now starts automatically on app restart when enabled in settings. Diagnostic capability shows weighted decision breakdown (comfort/efficiency/cost components) with PI controller status.",
     "nl": "Adaptieve controle start nu automatisch bij app herstart wanneer ingeschakeld in instellingen. Diagnostische capability toont gewogen beslissing uitsplitsing (comfort/efficiëntie/kosten componenten) met PI controller status.",
