@@ -37,16 +37,16 @@
     "id": "ip_address",
     "type": "text",
     "label": {
-      "en": "IP Address",
-      "nl": "IP-adres",
-      "de": "IP-Adresse",
-      "fr": "Adresse IP"
+      "en": "Local IP Address",
+      "nl": "Lokaal IP-adres",
+      "de": "Lokale IP-Adresse",
+      "fr": "Adresse IP locale"
     },
     "hint": {
-      "en": "Enter the IP address of the device.",
-      "nl": "Voer het IP-adres van het apparaat in.",
-      "de": "Geben Sie die IP-Adresse des Geräts ein.",
-      "fr": "Saisissez l'adresse IP de l'appareil."
+      "en": "Enter only the local IP address of the device. Do not use Public-IP-assigned addresses.",
+      "nl": "Voer alleen het lokale IP-adres van het apparaat in. Gebruik geen publieke IP-adressen.",
+      "de": "Geben Sie nur die lokale IP-Adresse des Geräts ein. Verwenden Sie keine öffentlich zugewiesenen IP-Adressen.",
+      "fr": "Saisissez uniquement l'adresse IP locale de l'appareil. N'utilisez pas d'adresses IP publiques."
     },
     "value": ""
   },
