@@ -7,10 +7,10 @@
     "fr": "Calculer courbe de chauffage Custom (L28/L29)"
   },
   "titleFormatted": {
-    "en": "Calculate heating curve: L29=[[reference_temp]]°C at [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C with outdoor temp [[outdoor_temp]]",
-    "nl": "Bereken stooklijn: L29=[[reference_temp]]°C bij [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C met buitentemp [[outdoor_temp]]",
-    "de": "Heizkurve berechnen: L29=[[reference_temp]]°C bei [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C mit Außentemp [[outdoor_temp]]",
-    "fr": "Calculer courbe de chauffage: L29=[[reference_temp]]°C à [[reference_outdoor]]°C, L28=[[slope_grade]]/10°C avec temp extérieure [[outdoor_temp]]"
+    "en": "Calculate heating curve: L29=[[reference_temp]]°C at -15°C, L28=[[slope_grade]]/10°C with outdoor temp [[outdoor_temp]]",
+    "nl": "Bereken stooklijn: L29=[[reference_temp]]°C bij -15°C, L28=[[slope_grade]]/10°C met buitentemp [[outdoor_temp]]",
+    "de": "Heizkurve berechnen: L29=[[reference_temp]]°C bei -15°C, L28=[[slope_grade]]/10°C mit Außentemp [[outdoor_temp]]",
+    "fr": "Calculer courbe de chauffage: L29=[[reference_temp]]°C à -15°C, L28=[[slope_grade]]/10°C avec temp extérieure [[outdoor_temp]]"
   },
   "hint": {
     "en": "Calculates supply temperature using Adlar Custom heating curve. Uses L29 (set temp at -15°C) and L28 (slope grade per 10°C). Example: L29=55°C at -15°C with L28=-5 gives slope -0.5/°C, formula y = -0.5x + 47.5. For outdoor temp 5°C → supply temp 45°C.",
@@ -79,22 +79,6 @@
         "nl": "bijv. 55 (L29)",
         "de": "z.B. 55 (L29)",
         "fr": "par ex. 55 (L29)"
-      }
-    },
-    {
-      "name": "reference_outdoor",
-      "type": "number",
-      "title": {
-        "en": "Reference Outdoor Temp (°C)",
-        "nl": "Referentie Buitentemp (°C)",
-        "de": "Referenz Außentemp (°C)",
-        "fr": "Température extérieure référence (°C)"
-      },
-      "placeholder": {
-        "en": "e.g., -15",
-        "nl": "bijv. -15",
-        "de": "z.B. -15",
-        "fr": "par ex. -15"
       }
     },
     {

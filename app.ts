@@ -624,10 +624,12 @@ class MyApp extends App {
   /**
    * Register linear heating curve calculator action card
    *
-   * Calculates supply temperature using linear formula: y = slope * x + intercept
-   * where intercept = reference_temp - (slope * reference_outdoor)
+   * Calculates supply temperature using Adlar Custom heating curve (L28/L29)
+   * Formula: y = slope * x + intercept
+   * where intercept = reference_temp - (slope * -15)
+   * Reference outdoor temperature is fixed at -15°C per Adlar specification
    *
-   * Example: Reference point (55°C at -15°C), slope -0.5 → Formula: y = -0.5x + 47.5
+   * Example: L29=55°C at -15°C with L28=-5 (slope -0.5/°C) → Formula: y = -0.5x + 47.5
    *
    * Primary use cases:
    * - Weather compensation heating curves
@@ -641,9 +643,11 @@ class MyApp extends App {
       const {
         outdoor_temp: outdoorTempRaw,
         reference_temp,
-        reference_outdoor,
         slope_grade,
       } = args;
+
+      // Adlar Custom heating curve always uses -15°C as reference outdoor temperature
+      const reference_outdoor = -15;
 
       try {
         // Parse outdoor temperature (supports number, string, tokens)
@@ -662,7 +666,7 @@ class MyApp extends App {
         }
 
         // Validate other parameters
-        if (Number.isNaN(reference_temp) || Number.isNaN(reference_outdoor) || Number.isNaN(slope_grade)) {
+        if (Number.isNaN(reference_temp) || Number.isNaN(slope_grade)) {
           throw new Error('All parameters must be valid numbers');
         }
 
@@ -672,8 +676,8 @@ class MyApp extends App {
 
         // Calculate supply temperature using Adlar Custom heating curve (L28/L29)
         // Formula: y = slope * x + intercept
-        // Intercept: b = L29 - (slope * reference_outdoor)
-        // Reference point: (reference_outdoor, L29) typically (-15°C, L29)
+        // Intercept: b = L29 - (slope * -15°C)
+        // Reference point: (-15°C, L29) as per Adlar specification
         const intercept = reference_temp - (slope * reference_outdoor);
         const supplyTemperature = (slope * outdoorTemp) + intercept;
 
@@ -689,7 +693,7 @@ class MyApp extends App {
         // Log results (debug mode)
         this.debugLog(`Adlar Custom heating curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C`, {
           outdoorTemp,
-          L29: `${reference_temp}°C @ ${reference_outdoor}°C`,
+          L29: `${reference_temp}°C @ -15°C`,
           L28: slope_grade,
           slopePerDegree: slope,
           intercept,

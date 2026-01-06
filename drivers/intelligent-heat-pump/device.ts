@@ -4334,6 +4334,20 @@ class MyDevice extends Homey.Device {
         }
       });
 
+      // Register COP optimizer diagnostic action card
+      const diagnoseCOPOptimizerAction = this.homey.flow.getActionCard('diagnose_cop_optimizer');
+      diagnoseCOPOptimizerAction.registerRunListener(async () => {
+        this.log('🔍 Running COP optimizer diagnostics...');
+
+        try {
+          await this.serviceCoordinator?.getAdaptiveControl()?.getCOPOptimizer()?.logDiagnosticStatus();
+          this.log('✅ COP optimizer diagnostics completed - check logs above');
+        } catch (error) {
+          this.error('Failed to run COP optimizer diagnostics:', error);
+          throw error;
+        }
+      });
+
       // Currently no custom ACTION cards require device-level registration
     } catch (error) {
       this.error('Error registering flow card action listeners:', error);
