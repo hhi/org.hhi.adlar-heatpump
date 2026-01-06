@@ -1208,6 +1208,9 @@ export class AdaptiveControlService {
       // Get PI controller state
       const piStatus = this.heatingController.getStatus();
 
+      // Get COP optimizer diagnostics
+      const copDiag = this.copOptimizer.getDiagnostics();
+
       // Compile diagnostic data as JSON
       const diagnostics = {
         timestamp: Date.now(),
@@ -1234,6 +1237,18 @@ export class AdaptiveControlService {
             Ki: piStatus.Ki,
             deadband: piStatus.deadband,
           },
+        },
+        copOptimizer: {
+          samplesCollected: copDiag.samplesCollected,
+          historyCapacity: copDiag.historyCapacity,
+          fillPercentage: copDiag.fillPercentage,
+          bucketsLearned: copDiag.bucketsLearned,
+          confidenceLevels: {
+            low: copDiag.bucketDetails.filter((b) => b.confidence === 'low').length,
+            medium: copDiag.bucketDetails.filter((b) => b.confidence === 'medium').length,
+            high: copDiag.bucketDetails.filter((b) => b.confidence === 'high').length,
+          },
+          configuration: copDiag.configuration,
         },
       };
 

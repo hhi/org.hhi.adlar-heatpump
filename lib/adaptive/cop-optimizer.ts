@@ -269,6 +269,144 @@ export class COPOptimizer {
   }
 
   /**
+   * Get diagnostic statistics for monitoring and debugging
+   *
+   * Returns detailed statistics about the optimizer's learning status,
+   * including sample counts, bucket distribution, and confidence levels.
+   *
+   * @returns Diagnostic statistics object
+   */
+  public getDiagnostics(): {
+    samplesCollected: number;
+    historyCapacity: number;
+    fillPercentage: number;
+    bucketsLearned: number;
+    bucketDetails: Array<{
+      outdoorTemp: number;
+      optimalSupplyTemp: number;
+      sampleCount: number;
+      confidence: 'low' | 'medium' | 'high';
+    }>;
+    configuration: {
+      minAcceptableCOP: number;
+      targetCOP: number;
+      strategy: string;
+      tempRange: string;
+    };
+    } {
+    // Calculate samples per bucket for confidence assessment
+    const bucketSamples = new Map<number, number>();
+    this.history.forEach((point) => {
+      const bucket = Math.round(point.outdoorTemp / 2) * 2;
+      bucketSamples.set(bucket, (bucketSamples.get(bucket) || 0) + 1);
+    });
+
+    // Build detailed bucket information
+    const bucketDetails = Array.from(this.optimalSettings.entries())
+      .map(([outdoorTemp, optimalSupply]) => {
+        const sampleCount = bucketSamples.get(outdoorTemp) || 0;
+        let confidence: 'low' | 'medium' | 'high';
+
+        if (sampleCount < 10) {
+          confidence = 'low';
+        } else if (sampleCount < 30) {
+          confidence = 'medium';
+        } else {
+          confidence = 'high';
+        }
+
+        return {
+          outdoorTemp,
+          optimalSupplyTemp: optimalSupply,
+          sampleCount,
+          confidence,
+        };
+      })
+      .sort((a, b) => a.outdoorTemp - b.outdoorTemp); // Sort by outdoor temp
+
+    return {
+      samplesCollected: this.history.length,
+      historyCapacity: this.config.historySize,
+      fillPercentage: Math.round((this.history.length / this.config.historySize) * 100),
+      bucketsLearned: this.optimalSettings.size,
+      bucketDetails,
+      configuration: {
+        minAcceptableCOP: this.config.minAcceptableCOP,
+        targetCOP: this.config.targetCOP,
+        strategy: this.config.strategy,
+        tempRange: `${this.config.minSupplyTemp}-${this.config.maxSupplyTemp}°C`,
+      },
+    };
+  }
+
+  /**
+   * Log detailed diagnostic status (for flow action)
+   *
+   * Outputs comprehensive diagnostic information to logs for troubleshooting
+   * and monitoring the COP optimizer's learning progress.
+   */
+  public logDiagnosticStatus(): void {
+    const diag = this.getDiagnostics();
+
+    this.logger('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    this.logger('🔍 COP Optimizer Diagnostic Report');
+    this.logger('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    this.logger('');
+    this.logger('📊 Data Collection Status:');
+    this.logger(`  • Total samples: ${diag.samplesCollected}`);
+    this.logger(`  • History capacity: ${diag.historyCapacity} samples`);
+    this.logger(`  • Fill level: ${diag.fillPercentage}%`);
+    this.logger('');
+    this.logger('📈 Learning Status:');
+    this.logger(`  • Outdoor temp buckets learned: ${diag.bucketsLearned}`);
+
+    if (diag.bucketDetails.length === 0) {
+      this.logger('  • ⚠️ No optimal settings learned yet (need minimum 5 samples per bucket)');
+    } else {
+      const lowConf = diag.bucketDetails.filter((b) => b.confidence === 'low').length;
+      const medConf = diag.bucketDetails.filter((b) => b.confidence === 'medium').length;
+      const highConf = diag.bucketDetails.filter((b) => b.confidence === 'high').length;
+
+      this.logger(`  • Low confidence buckets: ${lowConf} (5-9 samples)`);
+      this.logger(`  • Medium confidence buckets: ${medConf} (10-29 samples)`);
+      this.logger(`  • High confidence buckets: ${highConf} (30+ samples)`);
+    }
+
+    this.logger('');
+    this.logger('🎯 Optimal Settings Learned:');
+
+    if (diag.bucketDetails.length === 0) {
+      this.logger('  • None yet - keep collecting data');
+    } else {
+      diag.bucketDetails.forEach((bucket) => {
+        let confidenceSymbol: string;
+        if (bucket.confidence === 'high') {
+          confidenceSymbol = '✅';
+        } else if (bucket.confidence === 'medium') {
+          confidenceSymbol = '⚠️';
+        } else {
+          confidenceSymbol = '❌';
+        }
+
+        this.logger(
+          `  • ${bucket.outdoorTemp}°C outdoor → ${bucket.optimalSupplyTemp}°C supply `
+          + `(${bucket.sampleCount} samples) ${confidenceSymbol} ${bucket.confidence}`,
+        );
+      });
+    }
+
+    this.logger('');
+    this.logger('⚙️ Configuration:');
+    this.logger(`  • Min acceptable COP: ${diag.configuration.minAcceptableCOP}`);
+    this.logger(`  • Target COP: ${diag.configuration.targetCOP}`);
+    this.logger(`  • Strategy: ${diag.configuration.strategy}`);
+    this.logger(`  • Temperature range: ${diag.configuration.tempRange}`);
+    this.logger('');
+    this.logger('💾 Persistence: State is saved after each temperature adjustment');
+    this.logger('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
+
+  /**
    * Destroy and release all memory (v2.0.1+)
    *
    * Called during device deletion to prevent memory leaks.

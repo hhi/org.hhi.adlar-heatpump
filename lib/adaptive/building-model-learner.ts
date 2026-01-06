@@ -141,6 +141,38 @@ export class BuildingModelLearner {
   private enableSeasonalG: boolean;
   private basePInt: number; // Base P_int value for dynamic calculation
 
+  // =========================================================================
+  // DEFENSIVE LAYER 1: Measurement Validation Bounds
+  // Reject physically impossible or extreme measurement values BEFORE RLS update
+  // =========================================================================
+  private static readonly MEASUREMENT_BOUNDS = {
+    dT_dt_max: 10.0, // ±10°C/hour max realistic temperature change rate
+    pHeating_min: 0.0, // Minimum thermal power (kW)
+    pHeating_max: 20.0, // Maximum thermal power (kW) - based on 5kW electric × 4 COP
+    tIndoor_min: 5.0, // Minimum indoor temp (°C)
+    tIndoor_max: 30.0, // Maximum indoor temp (°C)
+    tOutdoor_min: -10.0, // Minimum outdoor temp (°C)
+    tOutdoor_max: 50.0, // Maximum outdoor temp (°C)
+    solarRadiation_max: 1200.0, // Maximum solar radiation (W/m²)
+  };
+
+  // =========================================================================
+  // DEFENSIVE LAYER 2: Theta Parameter Bounds
+  // Detect RLS algorithm divergence by checking physical parameter ranges
+  // Derived from BUILDING_PROFILES (lines 37-62)
+  // =========================================================================
+  private static readonly THETA_BOUNDS = {
+    theta0_min: 1 / 40, // Min 1/C (max C = 40 kWh/°C, passive house)
+    theta0_max: 1 / 5, // Max 1/C (min C = 5 kWh/°C, light building)
+    theta1_min: 0.02 / 40, // Min UA/C (UA=0.02 kW/°C passive, C=40)
+    theta1_max: 1.0 / 5, // Max UA/C (UA=1.0 kW/°C poor insulation, C=5)
+    theta1_theta0_ratio_max: 0.8, // θ[1]/θ[0] < 0.8 ensures tau > 1.25h
+    g_c_min: 0.2 / 40, // Min g/C (g=0.2 base × 0.6 seasonal winter)
+    g_c_max: 0.8 / 5, // Max g/C (g=0.8 base × 1.3 seasonal summer)
+    pint_c_min: 0.1 / 40, // Min P_int/C (0.1kW base × 0.4 night)
+    pint_c_max: 0.6 / 5, // Max P_int/C (0.6kW base × 1.8 evening)
+  };
+
   constructor(config: BuildingModelConfig) {
     // Get building profile (default to 'average' if not specified)
     const profile = config.buildingProfile
@@ -185,15 +217,16 @@ export class BuildingModelLearner {
    */
   public addMeasurement(data: MeasurementData): void {
     // First measurement - just store it
-    if (this.sampleCount === 0) {
+    // DEFENSIVE: Also treat as first if lastMeasurement is null (corrupted state recovery)
+    if (this.sampleCount === 0 || this.lastMeasurement === null) {
       this.lastMeasurement = data;
       this.sampleCount++;
-      this.logger('BuildingModelLearner: First measurement stored');
+      this.logger(`BuildingModelLearner: First measurement stored (count was ${this.sampleCount - 1})`);
       return;
     }
 
     // Calculate temperature change rate (dT/dt)
-    const dt = (data.timestamp - this.lastMeasurement!.timestamp) / 3600000; // Convert ms to hours
+    const dt = (data.timestamp - this.lastMeasurement.timestamp) / 3600000; // Convert ms to hours
     if (dt <= 0) {
       this.logger('BuildingModelLearner: Invalid time delta, skipping measurement');
       return;
@@ -201,6 +234,44 @@ export class BuildingModelLearner {
 
     const dT = data.tIndoor - this.lastMeasurement!.tIndoor;
     const dtDt = dT / dt; // °C/hour
+
+    // =========================================================================
+    // DEFENSIVE LAYER 1: Measurement Validation
+    // Reject physically impossible or extreme values BEFORE RLS update
+    // =========================================================================
+    const bounds = BuildingModelLearner.MEASUREMENT_BOUNDS;
+    let validationFailure: string | null = null;
+
+    // Check temperature change rate (most critical - indicates sensor errors)
+    if (Math.abs(dtDt) > bounds.dT_dt_max) {
+      validationFailure = `Temperature change rate too high: ${dtDt.toFixed(2)}°C/h (max: ±${bounds.dT_dt_max})`;
+    } else if (data.pHeating < bounds.pHeating_min || data.pHeating > bounds.pHeating_max) {
+      // Check heating power bounds
+      validationFailure = `Heating power out of bounds: ${data.pHeating.toFixed(2)}kW (valid: ${bounds.pHeating_min}-${bounds.pHeating_max})`;
+    } else if (data.tIndoor < bounds.tIndoor_min || data.tIndoor > bounds.tIndoor_max) {
+      // Check indoor temperature bounds
+      validationFailure = `Indoor temperature out of bounds: ${data.tIndoor.toFixed(1)}°C (valid: ${bounds.tIndoor_min}-${bounds.tIndoor_max})`;
+    } else if (data.tOutdoor < bounds.tOutdoor_min || data.tOutdoor > bounds.tOutdoor_max) {
+      // Check outdoor temperature bounds
+      validationFailure = `Outdoor temperature out of bounds: ${data.tOutdoor.toFixed(1)}°C (valid: ${bounds.tOutdoor_min}-${bounds.tOutdoor_max})`;
+    } else if (data.solarRadiation !== undefined
+             && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
+      // Check solar radiation bounds (if provided)
+      validationFailure = `Solar radiation out of bounds: ${data.solarRadiation.toFixed(0)}W/m² (valid: 0-${bounds.solarRadiation_max})`;
+    }
+
+    // If validation failed, log and skip RLS update
+    if (validationFailure) {
+      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping RLS update');
+      this.logger(`  Reason: ${validationFailure}`);
+      this.logger(
+        `  Values: dT/dt=${dtDt.toFixed(2)}°C/h, pHeating=${data.pHeating.toFixed(2)}kW, `
+        + `tIn=${data.tIndoor.toFixed(1)}°C, tOut=${data.tOutdoor.toFixed(1)}°C`,
+      );
+      // Early return - do NOT update lastMeasurement, do NOT increment sampleCount
+      // This preserves learning continuity while rejecting bad data
+      return;
+    }
 
     // Apply time-of-day P_int multiplier if enabled
     const hour = new Date(data.timestamp).getHours();
@@ -250,20 +321,74 @@ export class BuildingModelLearner {
    * P = (1/λ) × (P - K × X^T × P)         (Covariance update)
    */
   private updateRLS(X: number[], y: number): void {
+    // =========================================================================
+    // DEFENSIVE LAYER 3: Adaptive Forgetting Factor
+    // Start conservative (λ=0.999) during initial learning, gradually decrease
+    // to configured value (default 0.998) to prevent early divergence
+    // =========================================================================
+    const adaptiveLambda = Math.max(
+      this.lambda, // Configured value (default 0.998)
+      0.999 - this.sampleCount / 100000, // Gradual decrease
+    );
+
+    // Optional: Log adaptive lambda at milestones (every 100 samples)
+    if (this.sampleCount % 100 === 0 && adaptiveLambda > this.lambda) {
+      this.logger(
+        `BuildingModelLearner: Using adaptive λ=${adaptiveLambda.toFixed(4)} `
+        + `(configured: ${this.lambda.toFixed(4)}) for sample ${this.sampleCount}`,
+      );
+    }
+
     // Step 1: Compute Kalman gain K = P × X / (λ + X^T × P × X)
     const PX = this.matrixVectorMultiply(this.P, X);
-    const denominator = this.lambda + this.dotProduct(X, PX);
+    const denominator = adaptiveLambda + this.dotProduct(X, PX);
     const K = PX.map((val) => val / denominator);
 
     // Step 2: Update parameters θ = θ + K × (y - X^T × θ)
     const prediction = this.dotProduct(X, this.theta);
     const error = y - prediction;
+
+    // =========================================================================
+    // DEFENSIVE LAYER 2: Save theta before update for potential reversion
+    // =========================================================================
+    const thetaPrevious = [...this.theta]; // Shallow copy (4 numbers)
+
     this.theta = this.theta.map((val, i) => val + K[i] * error);
+
+    // =========================================================================
+    // DEFENSIVE LAYER 2: Theta Parameter Bounds Checking
+    // Detect RLS divergence by validating physical parameter ranges
+    // =========================================================================
+    const bounds = BuildingModelLearner.THETA_BOUNDS;
+    const theta0Valid = this.theta[0] >= bounds.theta0_min && this.theta[0] <= bounds.theta0_max;
+    const theta1Valid = this.theta[1] >= bounds.theta1_min && this.theta[1] <= bounds.theta1_max;
+    const theta2Valid = this.theta[2] >= bounds.g_c_min && this.theta[2] <= bounds.g_c_max;
+    const theta3Valid = this.theta[3] >= bounds.pint_c_min && this.theta[3] <= bounds.pint_c_max;
+    const ratioValid = this.theta[1] < this.theta[0] * bounds.theta1_theta0_ratio_max;
+
+    const allValid = theta0Valid && theta1Valid && theta2Valid && theta3Valid && ratioValid;
+
+    if (!allValid) {
+      // RLS algorithm has diverged - log detailed diagnostics and revert
+      this.logger('BuildingModelLearner: ⚠️ RLS DIVERGENCE DETECTED - reverting theta');
+      this.logger(`  θ[0] (1/C):     ${this.theta[0].toFixed(6)} [valid: ${bounds.theta0_min.toFixed(6)} - ${bounds.theta0_max.toFixed(6)}] ${theta0Valid ? '✅' : '❌'}`);
+      this.logger(`  θ[1] (UA/C):    ${this.theta[1].toFixed(6)} [valid: ${bounds.theta1_min.toFixed(6)} - ${bounds.theta1_max.toFixed(6)}] ${theta1Valid ? '✅' : '❌'}`);
+      this.logger(`  θ[2] (g/C):     ${this.theta[2].toFixed(6)} [valid: ${bounds.g_c_min.toFixed(6)} - ${bounds.g_c_max.toFixed(6)}] ${theta2Valid ? '✅' : '❌'}`);
+      this.logger(`  θ[3] (P_int/C): ${this.theta[3].toFixed(6)} [valid: ${bounds.pint_c_min.toFixed(6)} - ${bounds.pint_c_max.toFixed(6)}] ${theta3Valid ? '✅' : '❌'}`);
+      this.logger(`  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(3)} [max: ${bounds.theta1_theta0_ratio_max}] ${ratioValid ? '✅' : '❌'}`);
+      this.logger('  Action: Reverted to previous theta, kept P matrix for uncertainty tracking');
+
+      // REVERT: Restore previous theta (keep P matrix to maintain uncertainty)
+      this.theta = thetaPrevious;
+
+      // Skip P matrix update by returning early
+      return;
+    }
 
     // Step 3: Update covariance P = (1/λ) × (P - K × X^T × P)
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
-    this.P = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / this.lambda));
+    this.P = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / adaptiveLambda));
   }
 
   /**
@@ -409,12 +534,14 @@ export class BuildingModelLearner {
       this.logger('⚠️ BuildingModelLearner: CORRUPT STATE DETECTED - rejecting restore');
       this.logger('   Validation errors:');
       validationErrors.forEach((err) => this.logger(`   - ${err}`));
-      this.logger('   Using DEFAULT state instead (sample count preserved for diagnostics)');
+      this.logger('   Using DEFAULT state instead (resetting to fresh start)');
 
-      // Keep sample count for diagnostics, but reset parameters to defaults
-      this.sampleCount = state.sampleCount || 0;
+      // CRITICAL FIX: Reset sample count to 0, not preserve it!
+      // Preserving sample count but not lastMeasurement causes null pointer crash in addMeasurement()
+      this.sampleCount = 0;
+      this.lastMeasurement = null;
       // theta and P already initialized with defaults in constructor
-      this.logger(`   ✅ State restore prevented corruption (kept ${this.sampleCount} sample count)`);
+      this.logger('   ✅ State restore prevented corruption - learning will restart from sample 0');
       return;
     }
 

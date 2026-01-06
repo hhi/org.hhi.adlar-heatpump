@@ -96,13 +96,16 @@ export class BuildingModelService {
       this.UPDATE_INTERVAL_MS,
     );
 
-    this.logger('BuildingModelService: Initialized successfully');
+    this.logger(`BuildingModelService: Initialized successfully - timer started (interval: ${this.UPDATE_INTERVAL_MS / 1000}s)`);
   }
 
   /**
    * Collect current sensor data and update model
    */
   private async collectAndLearn(): Promise<void> {
+    // Heartbeat log - fires every 5 minutes to verify timer is running
+    this.logger('BuildingModelService: Timer tick - collecting data...');
+
     try {
       // Check if building model learning is enabled
       const enabled = await this.device.getSetting('building_model_enabled');
@@ -119,9 +122,10 @@ export class BuildingModelService {
         .getIndoorTemperature();
 
       if (indoorTemp === null) {
-        this.logger('BuildingModelService: No indoor temp available, skipping');
+        this.logger('BuildingModelService: ❌ EXIT - No indoor temp available, skipping');
         return;
       }
+      this.logger(`BuildingModelService: ✅ Indoor temp OK: ${indoorTemp.toFixed(1)}°C`);
 
       // Get outdoor temperature with priority fallback (v2.0.2)
       // Uses device helper method: external sensor → heat pump sensor
@@ -129,9 +133,10 @@ export class BuildingModelService {
       const outdoorTemp = this.device.getOutdoorTemperatureWithFallback();
 
       if (outdoorTemp === null) {
-        this.logger('BuildingModelService: No outdoor temp available, skipping');
+        this.logger('BuildingModelService: ❌ EXIT - No outdoor temp available, skipping');
         return;
       }
+      this.logger(`BuildingModelService: ✅ Outdoor temp OK: ${outdoorTemp.toFixed(1)}°C`);
 
       // Get electrical power consumption
       const powerElectric = (this.device.getCapabilityValue('measure_power') as number) || 0;
@@ -156,12 +161,14 @@ export class BuildingModelService {
 
       // Add measurement to learner
       this.learner.addMeasurement(measurement);
+      const state = this.learner.getState();
+      this.logger(`BuildingModelService: ✅ Sample #${state.sampleCount} added (power: ${thermalPower.toFixed(2)}kW, COP: ${cop.toFixed(1)})`);
 
       // Update capabilities every 10 samples (every 50 minutes)
-      const state = this.learner.getState();
       if (state.sampleCount % 10 === 0) {
         await this.updateModelCapabilities();
         await this.persistState();
+        this.logger(`BuildingModelService: 💾 Capabilities + state persisted (sample ${state.sampleCount})`);
       }
     } catch (error) {
       this.logger('BuildingModelService: Error during learning:', error);
@@ -553,6 +560,7 @@ export class BuildingModelService {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
+      this.logger('BuildingModelService: ⚠️ Timer STOPPED (clearInterval called)');
     }
     this.logger('BuildingModelService: Destroyed');
   }
