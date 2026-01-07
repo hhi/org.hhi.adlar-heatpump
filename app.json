@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.4.14",
+  "version": "2.4.15",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -150,70 +150,6 @@
               "fr": "Raisonnement"
             },
             "example": "Comfort: Error 0.8°C; Cost: Low price €0.12/kWh"
-          }
-        ]
-      },
-      {
-        "id": "adaptive_simulation_committed",
-        "title": {
-          "en": "Simulated temperature committed to heat pump",
-          "nl": "Gesimuleerde temperatuur doorgevoerd naar warmtepomp",
-          "de": "Simulierte Temperatur an Wärmepumpe übertragen",
-          "fr": "Température simulée validée vers pompe à chaleur"
-        },
-        "titleFormatted": {
-          "en": "Committed [[committed_temperature]]°C to heat pump (was [[previous_temperature]]°C)",
-          "nl": "[[committed_temperature]]°C doorgevoerd naar warmtepomp (was [[previous_temperature]]°C)",
-          "de": "[[committed_temperature]]°C an Wärmepumpe übertragen (war [[previous_temperature]]°C)",
-          "fr": "[[committed_temperature]]°C validé vers pompe à chaleur (était [[previous_temperature]]°C)"
-        },
-        "hint": {
-          "en": "Triggers when you disable adaptive control with 'Commit on disable' enabled. The simulated temperature is written to the heat pump as the new target temperature.",
-          "nl": "Wordt geactiveerd wanneer je adaptieve regeling uitschakelt met 'Doorvoeren bij uitschakelen' ingeschakeld. De gesimuleerde temperatuur wordt naar de warmtepomp geschreven als nieuwe doeltemperatuur.",
-          "de": "Wird ausgelöst, wenn Sie die adaptive Steuerung mit 'Beim Deaktivieren übernehmen' aktiviert deaktivieren. Die simulierte Temperatur wird als neue Zieltemperatur an die Wärmepumpe geschrieben.",
-          "fr": "Se déclenche lorsque vous désactivez le contrôle adaptatif avec 'Valider lors de la désactivation' activé. La température simulée est écrite sur la pompe à chaleur comme nouvelle température cible."
-        },
-        "highlight": true,
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_simulated_target"
-          }
-        ],
-        "tokens": [
-          {
-            "name": "committed_temperature",
-            "type": "number",
-            "title": {
-              "en": "Committed Temperature (°C)",
-              "nl": "Doorgevoerde Temperatuur (°C)",
-              "de": "Übertragene Temperatur (°C)",
-              "fr": "Température Validée (°C)"
-            },
-            "example": 23.5
-          },
-          {
-            "name": "previous_temperature",
-            "type": "number",
-            "title": {
-              "en": "Previous Temperature (°C)",
-              "nl": "Vorige Temperatuur (°C)",
-              "de": "Vorherige Temperatur (°C)",
-              "fr": "Température Précédente (°C)"
-            },
-            "example": 21
-          },
-          {
-            "name": "change",
-            "type": "number",
-            "title": {
-              "en": "Change (°C)",
-              "nl": "Verandering (°C)",
-              "de": "Änderung (°C)",
-              "fr": "Changement (°C)"
-            },
-            "example": 2.5
           }
         ]
       },
@@ -3683,92 +3619,6 @@
         ]
       },
       {
-        "id": "target_temperature_adjusted",
-        "title": {
-          "en": "Adaptive control adjusted target temperature",
-          "nl": "Adaptieve regeling wijzigde doeltemperatuur",
-          "de": "Adaptive Regelung änderte die Zieltemperatur",
-          "fr": "Contrôle adaptatif a ajusté la température cible"
-        },
-        "titleFormatted": {
-          "en": "Adaptive control adjusted target temperature from [[old_temperature]]°C to [[new_temperature]]°C",
-          "nl": "Adaptieve regeling wijzigde doeltemperatuur van [[old_temperature]]°C naar [[new_temperature]]°C",
-          "de": "Adaptive Regelung änderte die Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C",
-          "fr": "Contrôle adaptatif a ajusté la température cible de [[old_temperature]]°C à [[new_temperature]]°C"
-        },
-        "hint": {
-          "en": "Triggered when adaptive control adjusts the target temperature setpoint based on indoor temperature and PI control algorithm",
-          "nl": "Wordt geactiveerd wanneer de adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
-          "de": "Wird ausgelöst, wenn die adaptive Regelung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
-          "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible en fonction de la température intérieure et de l'algorithme PI"
-        },
-        "highlight": true,
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          }
-        ],
-        "tokens": [
-          {
-            "name": "old_temperature",
-            "type": "number",
-            "title": {
-              "en": "Previous target temperature",
-              "nl": "Vorige doeltemperatuur",
-              "de": "Vorherige Zieltemperatur",
-              "fr": "Température cible précédente"
-            },
-            "example": 21.5
-          },
-          {
-            "name": "new_temperature",
-            "type": "number",
-            "title": {
-              "en": "New target temperature",
-              "nl": "Nieuwe doeltemperatuur",
-              "de": "Neue Zieltemperatur",
-              "fr": "Nouvelle température cible"
-            },
-            "example": 22
-          },
-          {
-            "name": "adjustment",
-            "type": "number",
-            "title": {
-              "en": "Temperature adjustment",
-              "nl": "Temperatuur aanpassing",
-              "de": "Temperaturanpassung",
-              "fr": "Ajustement de température"
-            },
-            "example": 0.5
-          },
-          {
-            "name": "reason",
-            "type": "string",
-            "title": {
-              "en": "Adjustment reason",
-              "nl": "Reden voor aanpassing",
-              "de": "Anpassungsgrund",
-              "fr": "Raison de l'ajustement"
-            },
-            "example": "PI Control: Error=0.8°C, P=2.4°C, I=1.2°C"
-          },
-          {
-            "name": "controller",
-            "type": "string",
-            "title": {
-              "en": "Controller",
-              "nl": "Controller",
-              "de": "Regler",
-              "fr": "Contrôleur"
-            },
-            "example": "heating"
-          }
-        ]
-      },
-      {
         "id": "temperature_adjustment_recommended",
         "title": {
           "en": "Adaptive control recommends temperature adjustment",
@@ -7001,6 +6851,7 @@
         "measure_temperature.indoor",
         "adlar_simulated_target",
         "adaptive_control_diagnostics",
+        "building_model_diagnostics",
         "onoff",
         "adlar_hotwater",
         "adlar_enum_water_mode",
@@ -11275,6 +11126,34 @@
       "description": {
         "nl": "dp 33 : defrost_state - Defrosting"
       }
+    },
+    "building_model_diagnostics": {
+      "id": "building_model_diagnostics",
+      "type": "string",
+      "title": {
+        "en": "Building Model Diagnostics",
+        "nl": "Gebouwmodel Diagnostiek",
+        "de": "Gebäudemodell-Diagnostik",
+        "fr": "Diagnostics du modèle de bâtiment"
+      },
+      "desc": {
+        "en": "Building thermal model learning status as JSON (tau/C/UA parameters, confidence, samples)",
+        "nl": "Thermisch gebouwmodel leer-status als JSON (tau/C/UA parameters, betrouwbaarheid, samples)",
+        "de": "Status des thermischen Gebäudemodell-Lernens als JSON (tau/C/UA-Parameter, Vertrauen, Proben)",
+        "fr": "État d'apprentissage du modèle thermique du bâtiment en JSON (paramètres tau/C/UA, confiance, échantillons)"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "chartType": "stepLine",
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
     },
     "defrost_active_power": {
       "id": "defrost_active_power",

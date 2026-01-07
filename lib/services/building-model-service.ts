@@ -395,6 +395,136 @@ export class BuildingModelService {
   }
 
   /**
+   * Get diagnostic data as structured JSON for building_model_diagnostics capability
+   * @returns Diagnostic data object with all building model learning information
+   */
+  public async getDiagnostics(): Promise<object> {
+    const status = await this.getDiagnosticStatus();
+    const state = this.learner.getState();
+    const model = this.learner.getModel();
+
+    // Determine learning status
+    let learningStatus: string;
+    if (!status.enabled) {
+      learningStatus = 'disabled';
+    } else if (status.blockingReason) {
+      learningStatus = 'insufficient_data';
+    } else if (status.isDefault) {
+      learningStatus = 'learning';
+    } else {
+      learningStatus = 'converged';
+    }
+
+    // Calculate P matrix trace for validation
+    const pTrace = state.P.reduce((sum, row, i) => sum + row[i], 0);
+
+    // Determine parameter sources
+    const parameterSource = status.isDefault ? 'default' : 'learned';
+
+    // Build recommendations
+    const recommendations: string[] = [];
+    if (status.blockingReason) {
+      if (status.blockingReason.includes('indoor temperature')) {
+        recommendations.push('Configure indoor temperature sensor in device settings');
+      }
+      if (status.blockingReason.includes('outdoor temperature')) {
+        recommendations.push('Check ambient temperature sensor availability');
+      }
+      if (status.blockingReason.includes('disabled')) {
+        recommendations.push('Enable building model learning in advanced settings');
+      }
+      if (status.blockingReason.includes('initial samples')) {
+        recommendations.push(`Wait for ${10 - status.sampleCount} more samples (${(10 - status.sampleCount) * 5} minutes)`);
+      }
+    }
+
+    // Validation warnings
+    const warnings: string[] = [];
+    if (model.C <= 0 || model.C > 100) {
+      warnings.push(`⚠️ Unrealistic thermal mass C=${model.C.toFixed(1)} kWh/°C (expected 0-100)`);
+    }
+    if (model.UA <= 0 || model.UA > 2) {
+      warnings.push(`⚠️ Unrealistic heat loss UA=${model.UA.toFixed(3)} kW/°C (expected 0-2)`);
+    }
+    if (model.tau < 0) {
+      warnings.push(`🚨 CRITICAL: Negative time constant τ=${model.tau.toFixed(1)}h indicates RLS corruption`);
+    } else if (model.tau > 500) {
+      warnings.push(`⚠️ Unrealistic time constant τ=${model.tau.toFixed(1)}h (expected 0-500)`);
+    }
+    if (pTrace > 400) {
+      warnings.push('⚠️ P matrix trace abnormally high - possible RLS state corruption');
+    } else if (pTrace < 10) {
+      warnings.push('⚠️ P matrix trace very low - algorithm may be over-confident');
+    }
+
+    return {
+      timestamp: Date.now(),
+      timestampReadable: new Date().toLocaleString('nl-NL'),
+      enabled: status.enabled,
+      status: learningStatus,
+      dataAvailability: {
+        hasIndoorTemp: status.hasIndoorTemp,
+        hasOutdoorTemp: status.hasOutdoorTemp,
+        indoorTempValue: status.indoorTempValue,
+        outdoorTempValue: status.outdoorTempValue,
+      },
+      learning: {
+        samplesCollected: status.sampleCount,
+        confidence: status.confidence,
+        isDefault: status.isDefault,
+        blockingReason: status.blockingReason,
+        nextUpdateIn: {
+          samples: 10 - status.lastUpdateSamples,
+          minutes: (10 - status.lastUpdateSamples) * 5,
+        },
+      },
+      parameters: {
+        tau: {
+          value: Number(model.tau.toFixed(1)),
+          unit: 'hours',
+          source: parameterSource,
+          description: 'Time constant (thermal inertia)',
+        },
+        C: {
+          value: Number(model.C.toFixed(1)),
+          unit: 'kWh/°C',
+          source: parameterSource,
+          description: 'Thermal mass (heat capacity)',
+        },
+        UA: {
+          value: Number(model.UA.toFixed(3)),
+          unit: 'kW/°C',
+          source: parameterSource,
+          description: 'Heat loss coefficient',
+        },
+        g: {
+          value: Number(model.g.toFixed(3)),
+          unit: 'dimensionless',
+          source: parameterSource,
+          description: 'Solar gain factor',
+        },
+        pInt: {
+          value: Number(model.pInt.toFixed(2)),
+          unit: 'kW',
+          source: parameterSource,
+          description: 'Internal heat gains',
+        },
+      },
+      rlsState: {
+        theta: state.theta.map((v) => Number(v.toFixed(6))),
+        P_diag: state.P.map((row, i) => Number(row[i].toFixed(3))),
+        P_trace: Number(pTrace.toFixed(1)),
+        sampleCount: state.sampleCount,
+      },
+      validation: {
+        parametersRealistic: warnings.length === 0,
+        warnings,
+      },
+      recommendations,
+    };
+  }
+
+  /**
    * Log diagnostic status for troubleshooting
    * Enhanced with RLS state verification (v2.4.4 - detect corrupt state after app restart)
    */

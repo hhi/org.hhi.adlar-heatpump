@@ -8,7 +8,7 @@ import { ExternalTemperatureService } from './external-temperature-service';
 import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
-import { WeightedDecisionMaker } from '../adaptive/weighted-decision-maker';
+import { WeightedDecisionMaker, type ConfidenceMetrics } from '../adaptive/weighted-decision-maker';
 import { DeviceConstants } from '../constants';
 
 /**
@@ -571,12 +571,42 @@ export class AdaptiveControlService {
         this.logger('⚠️ COP optimizer skipped: cop_calculation_enabled is off (required dependency)');
       }
 
-      // Step 5: Combine actions using Weighted Decision Maker
-      const combinedAction = this.decisionMaker.combineActions(
+      // Step 5: Collect confidence metrics for adaptive weighting (v2.4.14+)
+      const buildingDiagnostics = await this.buildingModel.getDiagnosticStatus();
+
+      const confidenceMetrics: ConfidenceMetrics = {
+        // COP optimizer confidence: based on bucket quality distribution
+        copConfidence: this.calculateCOPConfidence(),
+
+        // Building model confidence: from RLS algorithm (0-100%, convert to 0.0-1.0)
+        buildingModelConfidence: buildingDiagnostics.confidence / 100,
+
+        // Energy price data availability: binary check
+        priceDataAvailable: this.energyOptimizer.getPriceData().length > 0,
+      };
+
+      this.logger(
+        `📊 Confidence: COP=${(confidenceMetrics.copConfidence * 100).toFixed(0)}%, `
+        + `Building=${(confidenceMetrics.buildingModelConfidence * 100).toFixed(0)}%, `
+        + `Price=${confidenceMetrics.priceDataAvailable ? 'Yes' : 'No'}`,
+      );
+
+      // Step 5: Combine actions using Weighted Decision Maker with confidence-aware weighting
+      const combinedAction = this.decisionMaker.combineActionsWithConfidence(
         heatingAction,
         copAction,
         priceAction,
+        confidenceMetrics,
       );
+
+      // Log effective weights (confidence-adjusted)
+      if (combinedAction.effectiveWeights) {
+        this.logger(
+          `⚖️ Effective Weights: Comfort=${(combinedAction.effectiveWeights.comfort * 100).toFixed(1)}%, `
+          + `Efficiency=${(combinedAction.effectiveWeights.efficiency * 100).toFixed(1)}%, `
+          + `Cost=${(combinedAction.effectiveWeights.cost * 100).toFixed(1)}%`,
+        );
+      }
 
       // Step 6: Log combined decision
       this.logger(
@@ -768,9 +798,6 @@ export class AdaptiveControlService {
     } else {
       // ACTIVE MODE: Write to actual warmtepomp setpoint (DPS 4)
       await this.device.setCapabilityValue('target_temperature', clampedSetpoint);
-
-      // Trigger normal adjustment card
-      await this.triggerTemperatureAdjusted(currentSetpoint, clampedSetpoint, combinedAction);
     }
 
     // Subtract applied adjustment from accumulator
@@ -836,38 +863,12 @@ export class AdaptiveControlService {
   }
 
   /**
-   * Trigger: target_temperature_adjusted
-   * Fired when adaptive control adjusts the target temperature
-   */
-  private async triggerTemperatureAdjusted(
-    oldTemp: number,
-    newTemp: number,
-    combinedAction: { finalAdjustment: number; reasoning: string[]; priority: string },
-  ): Promise<void> {
-    try {
-      const trigger = this.device.homey.flow.getTriggerCard('target_temperature_adjusted');
-      await trigger.trigger(this.device, {
-        old_temperature: oldTemp,
-        new_temperature: newTemp,
-        adjustment: combinedAction.finalAdjustment,
-        reason: combinedAction.reasoning.join('; '),
-        controller: 'weighted', // All 4 components combined
-      });
-      this.logger('AdaptiveControlService: Triggered target_temperature_adjusted flow card');
-    } catch (error) {
-      this.logger('AdaptiveControlService: Failed to trigger target_temperature_adjusted', {
-        error: (error as Error).message,
-      });
-    }
-  }
-
-  /**
    * Trigger: adaptive_status_change
    * Fired when adaptive control is enabled/disabled
    */
   private async triggerStatusChange(status: string, reason: string): Promise<void> {
     try {
-      const trigger = this.device.homey.flow.getTriggerCard('adaptive_status_change');
+      const trigger = this.device.homey.flow.getDeviceTriggerCard('adaptive_status_change');
       await trigger.trigger(this.device, {
         status,
         reason,
@@ -890,7 +891,7 @@ export class AdaptiveControlService {
     combinedAction: { finalAdjustment: number; reasoning: string[]; priority: string },
   ): Promise<void> {
     try {
-      const trigger = this.device.homey.flow.getTriggerCard('temperature_adjustment_recommended');
+      const trigger = this.device.homey.flow.getDeviceTriggerCard('temperature_adjustment_recommended');
       await trigger.trigger(this.device, {
         current_temperature: currentTemp,
         recommended_temperature: recommendedTemp,
@@ -1194,7 +1195,13 @@ export class AdaptiveControlService {
    * @param combinedAction - Combined action from weighted decision maker
    */
   private async updateDiagnosticsCapability(
-    combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
+    combinedAction: {
+      finalAdjustment: number;
+      breakdown: { comfort: number; efficiency: number; cost: number };
+      reasoning: string[];
+      priority: string;
+      effectiveWeights?: { comfort: number; efficiency: number; cost: number };
+    },
   ): Promise<void> {
     try {
       // Check if capability exists (should always be true, but defensive)
@@ -1225,6 +1232,11 @@ export class AdaptiveControlService {
           efficiency: Number(priorities.efficiency.toFixed(2)),
           cost: Number(priorities.cost.toFixed(2)),
         },
+        effectiveWeights: combinedAction.effectiveWeights ? {
+          comfort: Number(combinedAction.effectiveWeights.comfort.toFixed(2)),
+          efficiency: Number(combinedAction.effectiveWeights.efficiency.toFixed(2)),
+          cost: Number(combinedAction.effectiveWeights.cost.toFixed(2)),
+        } : undefined,
         reasoning: combinedAction.reasoning,
         priority: combinedAction.priority,
         piController: {
@@ -1263,6 +1275,51 @@ export class AdaptiveControlService {
       this.logger('⚠️ Failed to update diagnostic capability:', error);
       // Non-critical: don't throw, just log warning
     }
+  }
+
+  /**
+   * Calculate COP optimizer confidence score (0.0-1.0)
+   *
+   * Confidence based on bucket quality distribution:
+   * - High confidence buckets (30+ samples): 1.0 weight
+   * - Medium confidence buckets (10-29 samples): 0.5 weight
+   * - Low confidence buckets (<10 samples): 0.0 weight
+   *
+   * Overall confidence = weighted average across all buckets
+   *
+   * @returns Confidence score 0.0-1.0
+   * @version 2.4.14
+   * @since 2.4.14
+   */
+  private calculateCOPConfidence(): number {
+    const copDiagnostics = this.copOptimizer.getDiagnostics();
+
+    // No buckets learned yet = zero confidence
+    if (copDiagnostics.bucketsLearned === 0) {
+      return 0.0;
+    }
+
+    // Calculate weighted confidence based on bucket quality
+    const { bucketDetails } = copDiagnostics;
+    let totalWeight = 0;
+    let weightedSum = 0;
+
+    bucketDetails.forEach((bucket) => {
+      let weight: number;
+      if (bucket.confidence === 'high') {
+        weight = 1.0; // 30+ samples = full confidence
+      } else if (bucket.confidence === 'medium') {
+        weight = 0.5; // 10-29 samples = partial confidence
+      } else {
+        weight = 0.0; // <10 samples = no confidence
+      }
+
+      totalWeight += 1.0;
+      weightedSum += weight;
+    });
+
+    // Return weighted average
+    return totalWeight > 0 ? weightedSum / totalWeight : 0.0;
   }
 
   /**

@@ -29,6 +29,19 @@ export interface WeightedPriorities {
   cost: number; // 0.0 - 1.0
 }
 
+/**
+ * Confidence metrics for adaptive weighting
+ * Allows reducing influence of optimizers with insufficient data
+ *
+ * @version 2.4.14
+ * @since 2.4.14
+ */
+export interface ConfidenceMetrics {
+  copConfidence: number; // 0.0 - 1.0 (COP optimizer confidence based on sample quality)
+  buildingModelConfidence: number; // 0.0 - 1.0 (Building model confidence from RLS)
+  priceDataAvailable: boolean; // Whether energy price data is available
+}
+
 export interface CombinedAction {
   finalAdjustment: number; // °C to adjust target_temperature
   breakdown: {
@@ -38,6 +51,11 @@ export interface CombinedAction {
   };
   reasoning: string[];
   priority: 'low' | 'medium' | 'high';
+  effectiveWeights?: { // Added v2.4.14 - shows confidence-adjusted weights
+    comfort: number;
+    efficiency: number;
+    cost: number;
+  };
 }
 
 /**
@@ -61,6 +79,98 @@ export class WeightedDecisionMaker {
 
   /**
    * Combine all controller actions into single weighted decision
+   * WITH confidence-aware weighting (v2.4.14+)
+   *
+   * Reduces influence of optimizers with low confidence:
+   * - COP optimizer with few samples gets reduced weight
+   * - Building model with low confidence gets reduced weight
+   * - Energy price without data gets zero weight
+   * Unused weights are redistributed to comfort (safe fallback)
+   *
+   * @param heatingAction - PI controller action (always trusted)
+   * @param copAction - COP optimizer action
+   * @param priceAction - Energy price optimizer action
+   * @param confidenceMetrics - Confidence levels for adaptive weighting
+   * @returns Combined action with effective weights
+   *
+   * @version 2.4.14
+   * @since 2.4.14
+   */
+  public combineActionsWithConfidence(
+    heatingAction: ControllerAction | null,
+    copAction: COPAction | null,
+    priceAction: PriceAction | null,
+    confidenceMetrics: ConfidenceMetrics,
+  ): CombinedAction {
+    const reasoning: string[] = [];
+
+    // Extract adjustments from each controller
+    const comfortAdjust = heatingAction?.temperatureAdjustment || 0;
+    const efficiencyAdjust = this.extractCOPAdjustment(copAction);
+    const costAdjust = this.extractPriceAdjustment(priceAction);
+
+    // =========================================================================
+    // CONFIDENCE-AWARE WEIGHT ADJUSTMENT
+    // Reduce weights for low-confidence optimizers, redistribute to comfort
+    // =========================================================================
+
+    // Apply confidence multipliers to configured weights
+    const effectiveEfficiencyWeight = this.priorities.efficiency * confidenceMetrics.copConfidence;
+    const effectiveCostWeight = this.priorities.cost * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
+
+    // Calculate total effective weight (comfort always at full weight)
+    const totalEffectiveWeight = this.priorities.comfort + effectiveEfficiencyWeight + effectiveCostWeight;
+
+    // Normalize weights to sum to 1.0 (redistributes unused weight to comfort)
+    const normalizedWeights = {
+      comfort: this.priorities.comfort / totalEffectiveWeight,
+      efficiency: effectiveEfficiencyWeight / totalEffectiveWeight,
+      cost: effectiveCostWeight / totalEffectiveWeight,
+    };
+
+    // Add reasoning for each component
+    if (heatingAction) {
+      reasoning.push(`Comfort: ${heatingAction.reason}`);
+    }
+    if (copAction && copAction.action !== 'maintain') {
+      reasoning.push(`Efficiency: ${copAction.reason}`);
+      // Add confidence warning if COP confidence is low
+      if (confidenceMetrics.copConfidence < 0.3) {
+        reasoning.push(`⚠️ COP optimizer has low confidence (${(confidenceMetrics.copConfidence * 100).toFixed(0)}%), reduced weight`);
+      }
+    }
+    if (priceAction && priceAction.action !== 'maintain') {
+      reasoning.push(`Cost: ${priceAction.reason}`);
+    } else if (!confidenceMetrics.priceDataAvailable) {
+      reasoning.push('Cost: No price data available, weight redistributed to comfort');
+    }
+
+    // Apply normalized weights (confidence-adjusted)
+    const finalAdjustment = comfortAdjust * normalizedWeights.comfort
+      + efficiencyAdjust * normalizedWeights.efficiency
+      + costAdjust * normalizedWeights.cost;
+
+    // Determine overall priority (highest wins)
+    const priority = this.determinePriority(heatingAction, copAction, priceAction);
+
+    return {
+      finalAdjustment,
+      breakdown: {
+        comfort: comfortAdjust * normalizedWeights.comfort,
+        efficiency: efficiencyAdjust * normalizedWeights.efficiency,
+        cost: costAdjust * normalizedWeights.cost,
+      },
+      reasoning,
+      priority,
+      effectiveWeights: normalizedWeights, // Show confidence-adjusted weights
+    };
+  }
+
+  /**
+   * Combine all controller actions into single weighted decision
+   * LEGACY METHOD without confidence-aware weighting
+   *
+   * @deprecated Use combineActionsWithConfidence() for confidence-aware weighting
    */
   public combineActions(
     heatingAction: ControllerAction | null,

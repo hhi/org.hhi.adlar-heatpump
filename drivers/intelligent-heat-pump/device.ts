@@ -3114,7 +3114,7 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Helper method to trigger flow cards safely - delegated to FlowCardManagerService
+   * @todo Helper method to trigger flow cards safely - delegated to FlowCardManagerService
    * @param cardId - Flow card ID
    * @param tokens - Token values to pass to flow
    * @param state - Optional state parameter for runListener filtering (v1.3.2+)
@@ -4326,7 +4326,19 @@ class MyDevice extends Homey.Device {
         this.log('🔍 Running building model diagnostics...');
 
         try {
-          await this.serviceCoordinator?.getAdaptiveControl()?.getBuildingModelService()?.logDiagnosticStatus();
+          const buildingModelService = this.serviceCoordinator?.getAdaptiveControl()?.getBuildingModelService();
+
+          // Get structured diagnostics data
+          const diagnostics = await buildingModelService?.getDiagnostics();
+
+          // Update building_model_diagnostics capability
+          if (diagnostics && this.hasCapability('building_model_diagnostics')) {
+            await this.setCapabilityValue('building_model_diagnostics', JSON.stringify(diagnostics));
+            this.log('📊 building_model_diagnostics capability updated');
+          }
+
+          // Log detailed diagnostics to app logs
+          await buildingModelService?.logDiagnosticStatus();
           this.log('✅ Building model diagnostics completed - check logs above');
         } catch (error) {
           this.error('Failed to run building model diagnostics:', error);

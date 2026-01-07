@@ -1,4 +1,10 @@
 {
+  "2.4.15": {
+    "en": "Fixed: Adaptive control flow card triggers now fire correctly (temperature_adjustment_recommended, adaptive_status_change). Added building_model_diagnostics capability tracking building thermal model learning with tau/C/UA parameters, confidence, and recommendations. Diagnose building model action now updates capability and logs detailed status.",
+    "nl": "Opgelost: Adaptieve controle flow card triggers worden nu correct geactiveerd (temperature_adjustment_recommended, adaptive_status_change). Building_model_diagnostics capability toegevoegd die gebouwmodel leren volgt met tau/C/UA parameters, betrouwbaarheid en aanbevelingen. Diagnosticeer gebouwmodel actie update nu capability en logt gedetailleerde status.",
+    "de": "Behoben: Adaptive Steuerungs-Flow-Card-Trigger werden jetzt korrekt ausgelöst (temperature_adjustment_recommended, adaptive_status_change). Building_model_diagnostics Capability hinzugefügt, die Gebäudemodell-Lernen mit tau/C/UA-Parametern, Vertrauen und Empfehlungen verfolgt. Gebäudemodell diagnostizieren Aktion aktualisiert jetzt Capability und protokolliert detaillierten Status.",
+    "fr": "Corrigé: Les déclencheurs de carte de flux de contrôle adaptatif se déclenchent maintenant correctement (temperature_adjustment_recommended, adaptive_status_change). Ajout de la capacité building_model_diagnostics qui suit l'apprentissage du modèle thermique avec paramètres tau/C/UA, confiance et recommandations. L'action diagnostiquer modèle de bâtiment met maintenant à jour la capacité et enregistre l'état détaillé."
+  },
   "2.4.13": {
     "en": "Custom heating curve flow card now uses Adlar L28/L29 parameters. Enter slope grade per 10°C (L28) directly without manual conversion. IP address setting clarified as 'Local IP Address' with warning against public IPs.",
     "nl": "Custom stooklijn flow card gebruikt nu Adlar L28/L29 parameters. Voer hellingsgraad per 10°C (L28) direct in zonder handmatige conversie. IP-adres instelling verduidelijkt als 'Lokaal IP-adres' met waarschuwing tegen publieke IPs.",
