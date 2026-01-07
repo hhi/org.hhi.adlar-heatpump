@@ -1,0 +1,28 @@
+{
+  "id": "building_model_diagnostics",
+  "type": "string",
+  "title": {
+    "en": "Building Model Diagnostics",
+    "nl": "Gebouwmodel Diagnostiek",
+    "de": "Gebäudemodell-Diagnostik",
+    "fr": "Diagnostics du modèle de bâtiment"
+  },
+  "desc": {
+    "en": "Building thermal model learning status as JSON (tau/C/UA parameters, confidence, samples)",
+    "nl": "Thermisch gebouwmodel leer-status als JSON (tau/C/UA parameters, betrouwbaarheid, samples)",
+    "de": "Status des thermischen Gebäudemodell-Lernens als JSON (tau/C/UA-Parameter, Vertrauen, Proben)",
+    "fr": "État d'apprentissage du modèle thermique du bâtiment en JSON (paramètres tau/C/UA, confiance, échantillons)"
+  },
+  "units": {
+    "en": "",
+    "nl": "",
+    "de": "",
+    "fr": ""
+  },
+  "chartType": "stepLine",
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": null,
+  "icon": "/assets/adaptive-control-diagnostics.svg"
+}

@@ -189,7 +189,7 @@ Check de volgende punten:
 
 ✅ **Capability zichtbaar**: Ga naar de heat pump → Bekijk "External Indoor Temperature"
 ✅ **Waarde actueel**: De temperatuur moet de laatste sensor-update tonen
-✅ **Flow trigger actief**: Maak een test-flow met trigger "Target temperature adjusted"
+✅ **Flow trigger actief**: Maak een test-flow met trigger "Adaptieve regeling beveelt temperatuur aanpassing aan"
 ✅ **Insights**: Bekijk de grafiek van "External Indoor Temperature" voor continuïteit
 
 ---
@@ -253,7 +253,7 @@ Alleen zichtbaar als **"Flow Expert Mode"** is ingeschakeld in de device setting
 
 ## Flow Cards
 
-Adaptive Control biedt 3 flow cards voor automatisering en monitoring.
+Adaptive Control biedt 4 flow cards voor automatisering en monitoring (1 action + 3 triggers).
 
 ### 1️⃣ Action: Stuur binnentemperatuur voor adaptieve regeling
 
@@ -288,56 +288,79 @@ ELSE: Stuur binnentemperatuur voor adaptieve regeling
 
 ---
 
-### 2️⃣ Trigger: Target temperature adjusted
+### 2️⃣ Trigger: Temperatuur aanpassing aanbevolen
 
-**ID**: `target_temperature_adjusted`
+**ID**: `temperature_adjustment_recommended`
 **Type**: Trigger Card
-**Wanneer triggert**: Elke keer dat adaptive control de warmtepomp setpoint aanpast
+**Wanneer triggert**: Wanneer adaptive control een aanbevolen setpoint berekent in flow-ondersteunde modus
 
 #### Tokens
 
 | Token | Type | Beschrijving | Voorbeeld |
 |-------|------|--------------|-----------|
-| `old_temperature` | Number | Vorige setpoint (°C) | `45` |
-| `new_temperature` | Number | Nieuwe setpoint (°C) | `43` |
-| `adjustment` | Number | **PI-berekende** adjustment (kan fractional zijn) | `-1.5` |
-| `reason` | String | Uitleg van PI berekening | `PI Control: Error=-0.5°C, P=-1.5°C, I=0.0°C` |
-| `controller` | String | Welke controller | `heating` |
+| `current_temperature` | Number | Huidige setpoint (°C) | `45` |
+| `recommended_temperature` | Number | Aanbevolen setpoint (°C) | `43` |
+| `adjustment` | Number | Berekende aanpassing (kan fractional zijn) | `-1.5` |
+| `reason` | String | Uitleg van berekening | `Comfort: Error=-0.5°C; Cost: Low price` |
+| `controller` | String | Welke controller | `weighted` |
 
-**⚠️ Let op**: `adjustment` is de **PI-berekende waarde** (fractional), niet altijd gelijk aan `new_temperature - old_temperature` (integer). Voor de werkelijk toegepaste adjustment: bereken `{{new_temperature}} - {{old_temperature}}`.
+**⚠️ Let op**: `adjustment` is de berekende aanbeveling (kan fractional zijn) en is niet altijd gelijk aan `recommended_temperature - current_temperature`. Voor de werkelijk toegepaste aanpassing: bereken `{{recommended_temperature}} - {{current_temperature}}`.
 
 #### Voorbeelden
 
-**Notificatie bij grote aanpassing**:
+**Notificatie bij grote aanbeveling**:
 ```
-WHEN: Target temperature adjusted
-AND: old_temperature - new_temperature is groter dan 2
-THEN: Calculate: applied = {{new_temperature}} - {{old_temperature}}
-     Send notification "Grote warmtepomp correctie: {{applied}}°C (PI berekende: {{adjustment}}°C)"
+WHEN: Adaptieve regeling beveelt temperatuur aanpassing aan
+AND: recommended_temperature - current_temperature is groter dan 2
+THEN: Calculate: applied = {{recommended_temperature}} - {{current_temperature}}
+     Send notification "Aanbevolen setpoint: {{recommended_temperature}}°C (delta {{applied}}°C) - {{reason}}"
 ```
 
 **Logging naar spreadsheet**:
 ```
-WHEN: Target temperature adjusted
-THEN: Calculate: applied_adjustment = {{new_temperature}} - {{old_temperature}}
+WHEN: Adaptieve regeling beveelt temperatuur aanpassing aan
+THEN: Calculate: applied_adjustment = {{recommended_temperature}} - {{current_temperature}}
       Google Sheets - Add row
       └─ Timestamp: {{time}}
-      └─ Old temp: {{old_temperature}}
-      └─ New temp: {{new_temperature}}
+      └─ Huidig: {{current_temperature}}
+      └─ Aanbevolen: {{recommended_temperature}}
       └─ Applied: {{applied_adjustment}}
-      └─ PI calculated: {{adjustment}}
+      └─ Berekend: {{adjustment}}
       └─ Reason: {{reason}}
-```
-
-**Alarm bij veel aanpassingen**:
-```
-WHEN: Target temperature adjusted (5x binnen 2 uur)
-THEN: Send notification "Adaptive control maakt veel aanpassingen - check systeem"
 ```
 
 ---
 
-### 3️⃣ Trigger: Adaptive status change
+### 3️⃣ Trigger: Gesimuleerde temperatuur aangepast
+
+**ID**: `adaptive_simulation_update`
+**Type**: Trigger Card
+**Wanneer triggert**: Wanneer adaptive control de gesimuleerde doeltemperatuur bijwerkt (niet naar warmtepomp geschreven)
+
+#### Tokens
+
+| Token | Type | Beschrijving | Voorbeeld |
+|-------|------|--------------|-----------|
+| `simulated_target` | Number | Gesimuleerde doeltemperatuur (°C) | `23.5` |
+| `actual_target` | Number | Werkelijke setpoint (°C) | `21.0` |
+| `delta` | Number | Verschil (°C) | `2.5` |
+| `adjustment` | Number | Berekende aanpassing | `1.0` |
+| `comfort_component` | Number | Comfort bijdrage (°C) | `0.72` |
+| `efficiency_component` | Number | Efficiëntie bijdrage (°C) | `0.25` |
+| `cost_component` | Number | Kosten bijdrage (°C) | `0.15` |
+| `reasoning` | String | Redenering | `Comfort: Error 0.8°C; Efficiency: Low COP 2.5; Cost: Normal price` |
+
+#### Voorbeeld
+
+```
+WHEN: Gesimuleerde temperatuur aangepast
+THEN: Homey Log - Log entry
+      └─ Bericht: "Simulatie: {{simulated_target}}°C (delta {{delta}}°C) | {{reasoning}}"
+```
+
+---
+
+### 4️⃣ Trigger: Adaptive status change
 
 **ID**: `adaptive_status_change`
 **Type**: Trigger Card
@@ -391,9 +414,9 @@ THEN: Adlar Heat Pump - Stuur binnentemperatuur
 
 **Flow 2: Monitoring**
 ```
-WHEN: Adlar Heat Pump - Target temperature adjusted
+WHEN: Adlar Heat Pump - Adaptieve regeling beveelt temperatuur aanpassing aan
 THEN: Homey Log - Log entry
-      └─ Bericht: "Warmtepomp aangepast: {{adjustment}}°C ({{reason}})"
+      └─ Bericht: "Aanbevolen setpoint: {{recommended_temperature}}°C ({{adjustment}}°C) - {{reason}}"
 ```
 
 **Settings**:
@@ -595,7 +618,7 @@ THEN:
 
 ---
 
-### ❌ Probleem: Flow card "Target temperature adjusted" triggert niet
+### ❌ Probleem: Flow card "Adaptieve regeling beveelt temperatuur aanpassing aan" triggert niet
 
 **Mogelijke oorzaken**:
 
@@ -603,13 +626,13 @@ THEN:
 - Check: Device settings
 - Oplossing: Schakel in
 
-**2. Temperatuur binnen deadband**
-- Check: Afwijking is <0.3°C?
-- Oplossing: Normaal gedrag - binnen deadband triggert niet
+**2. Geen (geldige) binnentemperatuurdata**
+- Check: "External Indoor Temperature" heeft een recente waarde (<10 minuten)
+- Oplossing: Zorg dat de temperatuur-flow draait en minimaal elke 5-10 minuten update
 
-**3. Throttling actief**
-- Check: Logs voor "Adjustment throttled"
-- Oplossing: Wacht 20 minuten na laatste aanpassing
+**3. Geen significante aanpassing nodig**
+- Check: Afwijking is <0.3°C of logs tonen "No action needed"
+- Oplossing: Normaal gedrag - er is geen aanbeveling nodig
 
 **4. Flow card niet correct geregistreerd**
 - Check: Herstart Homey app
@@ -899,7 +922,7 @@ A: Nee, de 20-minuten throttling voorkomt overmatige start/stop cycli. Het syste
 ### v1.4.0 (2024-12-18)
 - ✨ Eerste release van Adaptive Temperature Control (Fase 1 MVP)
 - ✅ PI-controller met persistence
-- ✅ Flow cards: receive_external_indoor_temperature, target_temperature_adjusted, adaptive_status_change
+- ✅ Flow cards: receive_external_indoor_temperature, temperature_adjustment_recommended, adaptive_simulation_update, adaptive_status_change
 - ✅ Simple mode (enable/disable) en Expert mode (PI parameters)
 - ✅ Anti-oscillatie throttling (20 minuten minimum tussen aanpassingen)
 - ✅ Data health monitoring (10 minuten max age)

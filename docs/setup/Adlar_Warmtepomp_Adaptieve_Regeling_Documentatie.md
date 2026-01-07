@@ -78,27 +78,27 @@ Besparing: €700/jaar (39%)
 ### 🏗️ Systeem Diagram
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                      HOMEY PRO                                 │
-│                                                                │
-│  ┌──────────────────────────────────────────────────────┐    │
-│  │           ADLAR HEAT PUMP DEVICE                      │    │
-│  │           (Main Controller)                           │    │
-│  │                                                        │    │
-│  │  • Data verzameling (elke 5 min)                     │    │
-│  │  • Coördinatie tussen controllers                     │    │
-│  │  • Gewogen beslissingen                               │    │
-│  │  • Uitvoering via DPS 4 (steltemperatuur)           │    │
-│  └──────────────┬───────────────────────────────────────┘    │
-│                 │                                             │
+┌─────────────────────────────────────────────────────────────┐
+│                      HOMEY PRO                              │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │           ADLAR HEAT PUMP DEVICE                     │   │
+│  │           (Main Controller)                          │   │
+│  │                                                      │   │
+│  │  • Data verzameling (elke 5 min)                     │   │
+│  │  • Coördinatie tussen controllers                    │   │
+│  │  • Gewogen beslissingen                              │   │
+│  │  • Uitvoering via DPS 4 (steltemperatuur)            │   │
+│  └──────────────┬───────────────────────────────────────┘   │
+│                 │                                           │
 │    ┌────────────┼────────────┬──────────────┐               │
-│    │            │             │              │               │
-│  ┌─▼──────┐  ┌─▼──────┐  ┌─▼──────┐  ┌───▼─────┐          │
-│  │Heating │  │Building│  │ Energy │  │   COP   │          │
-│  │Control │  │Learner │  │Optimiz │  │Controller│          │
-│  └────────┘  └────────┘  └────────┘  └─────────┘          │
+│    │            │            │              │               │
+│  ┌─▼──────┐  ┌─▼──────┐  ┌─▼──────┐  ┌───▼────-─┐           │
+│  │Heating │  │Building│  │ Energy │  │   COP    │           │
+│  │Control │  │Learner │  │Optimiz │  │Controller│           │
+│  └────────┘  └────────┘  └────────┘  └────────-─┘           │
 │     60%         Info       15%          25%                 │
-│   Priority    Provider    Priority     Priority            │
+│   Priority    Provider    Priority     Priority             │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
                             │
@@ -106,20 +106,20 @@ Besparing: €700/jaar (39%)
 ┌─────────────────────────────────────────────────────────────┐
 │                   ADLAR WARMTEPOMP                          │
 │                                                             │
-│  DPS 4:  Steltemperatuur (Direct Control)                 │
-│  DPS 13: Stooklijn = OFF                                   │
-│  DPS 26: Buitentemperatuur                                 │
-│  DPS 21/22: Aanvoer/Retour temperaturen                   │
-│  adlar_external_power: Vermogen meting                    │
+│  DPS 4:  Steltemperatuur (Direct Control)                   │
+│  DPS 13: Stooklijn = OFF                                    │
+│  DPS 26: Buitentemperatuur                                  │
+│  DPS 21/22: Aanvoer/Retour temperaturen                     │
+│  adlar_external_power: Vermogen meting                      │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              EXTERNE SENSOREN                               │
 │                                                             │
-│  • Binnentemperatuur (Thermostaat)                        │
-│  • Weer API (Zonnestraling)                               │
-│  • Energie API (Prijzen)                                  │
+│  • Binnentemperatuur (Thermostaat)                          │
+│  • Weer API (Zonnestraling)                                 │
+│  • Energie API (Prijzen)                                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -167,11 +167,13 @@ Besparing: €700/jaar (39%)
 | **n/a** | `adlar_external_power` | **Werkelijk vermogen** (W) | COP berekening |
 
 **EXTERNE DATA:**
+
 - **Binnentemperatuur**: VAN EXTERNE SENSOR (thermostaat, niet van WP!)
 - **Zonnestraling**: Via Homey Weather API of schatting
 - **Energieprijzen**: Via EnergyZero of ENTSO-E API
 
 **ADLAR COP CAPABILITIES (ingebouwd):**
+
 | Capability | Beschrijving | Gebruik voor |
 |------------|-------------|--------------|
 | `adlar_cop` | Huidige COP (realtime) | Directe feedback & aanpassingen |
@@ -206,12 +208,14 @@ Besparing: €700/jaar (39%)
 ### 🔌 Hardware Vereisten
 
 **Minimaal:**
+
 - Adlar Castra Aurora II warmtepomp
 - Homey Pro (Early 2023 of nieuw)
 - Externe temperatuur sensor (thermostaat)
 - Vermogen meting (via `adlar_external_power`)
 
 **Aanbevolen:**
+
 - Meerdere temperatuur sensoren (meerdere kamers)
 - Weer station met zonnestraling sensor
 - Slimme meter met P1 uitlezing
@@ -229,26 +233,26 @@ Een **PI (Proportional-Integral) controller** is een klassieke regeltechniek die
 ```
 ┌─────────────────────────────────────────────────────┐
 │  P - PROPORTIONAL (Proportioneel)                   │
-│  "Hoe ver zit ik van mijn doel?"                   │
-│                                                      │
+│  "Hoe ver zit ik van mijn doel?"                    │
+│                                                     │
 │  Kleine afwijking → Kleine correctie                │
 │  Grote afwijking → Grote correctie                  │
-│                                                      │
-│  Voorbeeld:                                          │
-│  19.5°C vs doel 20°C = 0.5°C verschil              │
-│  → Correctie: 0.5 × 3.0 (Kp) = 1.5°C aanpassing   │
+│                                                     │
+│  Voorbeeld:                                         │
+│  19.5°C vs doel 20°C = 0.5°C verschil               │
+│  → Correctie: 0.5 × 3.0 (Kp) = 1.5°C aanpassing     │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
 │  I - INTEGRAL (Integraal)                           │
-│  "Ben ik STRUCTUREEL te hoog of laag?"             │
-│                                                      │
+│  "Ben ik STRUCTUREEL te hoog of laag?"              │
+│                                                     │
 │  Kijkt naar gemiddelde fout over tijd               │
 │  Compenseert voor blijvende afwijkingen             │
-│                                                      │
-│  Voorbeeld:                                          │
-│  Laatste 2 uur gemiddeld 0.3°C te laag             │
-│  → Extra correctie: 0.3 × 1.5 (Ki) = 0.45°C       │
+│                                                     │
+│  Voorbeeld:                                         │
+│  Laatste 2 uur gemiddeld 0.3°C te laag              │
+│  → Extra correctie: 0.3 × 1.5 (Ki) = 0.45°C         │
 └─────────────────────────────────────────────────────┘
 
 TOTAAL: 1.5°C + 0.45°C = 1.95°C aanpassing nodig
@@ -257,6 +261,7 @@ TOTAAL: 1.5°C + 0.45°C = 1.95°C aanpassing nodig
 #### Waarom P én I?
 
 **ALLEEN P (zonder I):**
+
 ```
 Temperatuur: ━━━━━━━19.8°C━━━━━━━━━━
 Doel:       ━━━━━━━20.0°C━━━━━━━━━━
@@ -266,6 +271,7 @@ Reden: Bij kleine fout → kleine correctie → nooit helemaal goed
 ```
 
 **P + I (compleet):**
+
 ```
 Temperatuur: ━━━━━━━20.0°C━━━━━━━━━━
 Doel:       ━━━━━━━20.0°C━━━━━━━━━━
@@ -368,18 +374,21 @@ Het PI regelaar algoritme doorloopt elk interval de volgende stappen:
 ### 🎯 Tuning Guidelines
 
 **Agressieve Regeling (snel reageren):**
+
 - Kp: 4.0-5.0
 - Ki: 2.0-3.0
 - Deadband: 0.2°C
 - Use case: Slecht geïsoleerde woning
 
 **Gebalanceerde Regeling (aanbevolen):**
+
 - Kp: 3.0
 - Ki: 1.5
 - Deadband: 0.3°C
 - Use case: Gemiddelde woning
 
 **Conservatieve Regeling (stabiel, langzaam):**
+
 - Kp: 2.0
 - Ki: 1.0
 - Deadband: 0.5°C
@@ -396,22 +405,22 @@ Het PI regelaar algoritme doorloopt elk interval de volgende stappen:
 ```
 ┌─────────────────────────────────────────────────┐
 │  JE WONING = BADKUIP MET LEK                    │
-│                                                  │
+│                                                 │
 │     Kraan (verwarming)                          │
-│         │                                        │
-│         ▼                                        │
+│         │                                       │
+│         ▼                                       │
 │    ┌─────────────────┐                          │
 │    │   🌡️ WATER      │ ← Hoeveelheid =          │
-│    │   (warmte)      │    Thermische massa (C) │
-│    │                 │                           │
-│    │   Niveau =      │                           │
-│    │   Temperatuur   │                           │
+│    │   (warmte)      │    Thermische massa (C)  │
+│    │                 │                          │
+│    │   Niveau =      │                          │
+│    │   Temperatuur   │                          │
 │    └─────────────────┘                          │
-│         │                                        │
+│         │                                       │
 │         ▼  Lek (warmteverlies)                  │
-│        💧💧 ← Grootte lek = UA                  │
-│                 (isolatie kwaliteit)             │
-│                                                  │
+│        💧💧 ← Grootte lek = UA                   │
+│                 (isolatie kwaliteit)            │
+│                                                 │
 │  Extra water erbij:                             │
 │  • Zon door raam                                │
 │  • Mensen & apparaten                           │
@@ -421,6 +430,7 @@ Het PI regelaar algoritme doorloopt elk interval de volgende stappen:
 #### Fysische Vergelijking
 
 **Fundamentele Warmte Balans:**
+
 ```
 dT/dt = (1/C) × [P_verwarming - UA×(T_in - T_uit) + P_zon + P_intern]
 
@@ -440,10 +450,12 @@ Waarbij:
 #### 1. Thermische Massa (C)
 
 **Wat is het?**
+
 - Hoeveel energie nodig om woning 1°C op te warmen
 - Eenheid: kWh/°C
 
 **Typische Waardes:**
+
 ```
 Licht gebouw (hout, weinig beton):      5-8 kWh/°C
 Gemiddelde woning:                      10-15 kWh/°C
@@ -452,6 +464,7 @@ Passief huis:                           25-40 kWh/°C
 ```
 
 **Praktisch Voorbeeld:**
+
 ```
 C = 15 kWh/°C betekent:
 ├─ Om 1°C op te warmen: 15 kWh energie nodig
@@ -462,10 +475,12 @@ C = 15 kWh/°C betekent:
 #### 2. Warmteverlies Coëfficiënt (UA)
 
 **Wat is het?**
+
 - Warmteverlies per graad temperatuurverschil
 - Eenheid: kW/°C (of W/°C)
 
 **Typische Waardes:**
+
 ```
 Slecht geïsoleerd (oud huis):    400-600 W/°C
 Gemiddeld geïsoleerd:            200-400 W/°C
@@ -474,6 +489,7 @@ Passief huis:                     <50 W/°C
 ```
 
 **Praktisch Voorbeeld:**
+
 ```
 UA = 300 W/°C betekent:
 Bij 20°C binnen en 0°C buiten (verschil: 20°C):
@@ -485,10 +501,12 @@ Dit moet WP compenseren om temperatuur te handhaven.
 #### 3. Zonnewinst Factor (g)
 
 **Wat is het?**
+
 - Hoeveel opwarming door zonnestraling via ramen
 - Eenheid: dimensieloos (0-2)
 
 **Typische Waardes:**
+
 ```
 Weinig ramen, noord-oriëntatie:   0.1-0.2
 Gemiddeld (mix van oriëntaties):  0.3-0.5
@@ -496,6 +514,7 @@ Veel ramen op zuid:               0.6-1.0
 ```
 
 **Praktisch Voorbeeld:**
+
 ```
 g = 0.5 en 10m² raam op zuid:
 Zonnige dag (500 W/m² straling):
@@ -506,10 +525,12 @@ Gratis warmte = 0.5 × 0.5 kW/m² × 10m² = 2.5 kW!
 #### 4. Interne Warmtewinst (P_internal)
 
 **Wat is het?**
+
 - Gemiddelde warmte van mensen, apparaten, koken
 - Eenheid: kW (constant gemiddelde)
 
 **Typische Waardes:**
+
 ```
 1 persoon:           ~100 W
 Computer/TV:         50-200 W
@@ -525,11 +546,13 @@ Gemiddeld huishouden:
 #### 5. Tijdsconstante (τ)
 
 **Wat is het?**
+
 - Hoe snel reageert woning op veranderingen
 - Berekend: τ = C / UA
 - Eenheid: uren
 
 **Typische Waardes:**
+
 ```
 Snelle woning:        2-4 uur
 Gemiddelde woning:    4-8 uur
@@ -538,6 +561,7 @@ Passief huis:         16-48 uur
 ```
 
 **Praktisch Voorbeeld:**
+
 ```
 τ = 8 uur betekent:
 Als verwarming uitvalt bij 20°C (buiten 0°C):
@@ -551,6 +575,7 @@ Als verwarming uitvalt bij 20°C (buiten 0°C):
 #### Waarom RLS?
 
 **Alternatieve Methoden:**
+
 | Methode | Pro | Con | Geschikt? |
 |---------|-----|-----|-----------|
 | Linear Regression | Simpel | Statisch | ⚠️ Matig |
@@ -559,6 +584,7 @@ Als verwarming uitvalt bij 20°C (buiten 0°C):
 | Neural Network | Zeer flexibel | Te complex, veel data | ❌ Overkill |
 
 **RLS = Recursive Least Squares:**
+
 - Leert TIJDENS gebruik (online learning)
 - Past zich aan bij seizoenen/wijzigingen
 - Computationeel licht (past op Homey)
@@ -618,6 +644,7 @@ RESULTAAT NA TIJD:
 #### Wiskundige Details (voor geïnteresseerden)
 
 **Model in Lineaire Vorm:**
+
 ```
 dT/dt = φ^T × θ
 
@@ -637,6 +664,7 @@ dT/dt = 5×0.067 + (-15)×0.020 + 0.3×0.027 + 1×0.020
 ```
 
 **RLS Update Formules:**
+
 ```
 1. Prediction error:
    e(k) = y(k) - φ(k)^T × θ(k-1)
@@ -699,6 +727,7 @@ WEEK 4:
 Het building model kan temperatuur voorspellen op basis van huidige condities en verwachte verwarming, buitentemperatuur en zonnestraling.
 
 **Use Case: Avond planning**
+
 ```
 Nu 18:00: 19.5°C
 Voorspelling 22:00: 18.8°C (te koud voor slapen!)
@@ -711,6 +740,7 @@ Actie: Verhoog verwarming NU preventief
 Het model kan berekenen hoeveel tijd nodig is om van huidige temperatuur naar een doeltemperatuur te komen, gegeven de verwachte buitentemperatuur en maximaal beschikbaar vermogen.
 
 **Use Case: GPS-based preheating**
+
 ```
 Homey detecteert: "30 min van huis"
 Model weet: "2.5 uur nodig voor opwarmen"
@@ -726,6 +756,7 @@ Het model kan het benodigde verwarmingsvermogen berekenen om een temperatuur te 
 - Interne warmtewinst (mensen, apparaten, koken)
 
 **Use Case: COP optimalisatie**
+
 ```
 Weet dat 4 kW nodig is
 WP kan dit leveren bij COP 3.5 met 1.14 kW elektrisch
@@ -758,6 +789,7 @@ Het Building Model Learner systeem gebruikt Recursive Least Squares (RLS) algori
 #### Nederlandse Energiemarkt
 
 **Day-Ahead Pricing:**
+
 ```
 Nederlandse consumenten met dynamisch contract betalen 
 uurprijzen die 1 dag van tevoren bekend zijn.
@@ -770,6 +802,7 @@ Prijzen worden bepaald door:
 ```
 
 **Typische Prijsvariatie:**
+
 ```
 ┌────────────────────────────────────────────────┐
 │  WINTERDAG - PRIJZEN (€/kWh incl. BTW)        │
@@ -794,6 +827,7 @@ POTENTIEEL: €400-600 besparing/jaar door slim laden
 #### Drempel Definitie
 
 **Prijs Categorieën:**
+
 ```
 ┌──────────────────────────────────────────────┐
 │  ZEER LAAG    │ < €0.10/kWh  │ Pre-heat MAX │
@@ -815,6 +849,7 @@ POTENTIEEL: €400-600 besparing/jaar door slim laden
 | Zeer Hoog | Reduce Max | -1.0°C | Maximaal besparen |
 
 **Voorwaarden voor Pre-heat:**
+
 ```
 ✓ Prijs is laag (< €0.15/kWh)
 ✓ Dure periode komt binnen 2-4 uur
@@ -823,6 +858,7 @@ POTENTIEEL: €400-600 besparing/jaar door slim laden
 ```
 
 **Voorwaarden voor Reduce:**
+
 ```
 ✓ Prijs is hoog (> €0.25/kWh)
 ✓ Binnentemp > target - max_offset (bijv. > 19°C)
@@ -876,6 +912,7 @@ TOTAAL MET OPTIMALISATIE:
 ```
 
 **Realistische Jaarbesparingen:**
+
 ```
 Conservatief (kleinere woning):    €300-400/jaar
 Gemiddeld:                         €400-600/jaar
@@ -887,11 +924,13 @@ Optimaal (grote woning, goed τ):   €600-800/jaar
 #### EnergyZero API (Gratis, Nederlands)
 
 **Endpoint:**
+
 ```
 https://api.energyzero.nl/v1/energyprices
 ```
 
 **Response Format:**
+
 ```json
 {
   "Prices": [
@@ -999,6 +1038,7 @@ const copData = {
 #### Wat is COP?
 
 **Definitie:**
+
 ```
 COP = Warmte Output / Elektrisch Input
 
@@ -1009,6 +1049,7 @@ Een warmtepomp is GEEN kachel maar een warmte POMP:
 ```
 
 **Voorbeeld:**
+
 ```
 Elektrisch input:  2.0 kW
 Warmte output:     7.0 kW
@@ -1063,6 +1104,7 @@ Scenario C: Groot verschil (zwaar pompen)
 ```
 
 **Fysische Verklaring:**
+
 ```
 Carnot efficiëntie (theoretisch max):
 COP_max = T_hot / (T_hot - T_cold)
@@ -1142,6 +1184,7 @@ RESULTAAT: Maximale COP binnen comfort grenzen
 #### Efficiency Zones
 
 **Classificatie (alle horizons):**
+
 | Zone | COP Bereik | Kleuren | Actie |
 |------|-----------|---------|-------|
 | **Excellent** | ≥ 4.0 | 🟢 Groen | Maintain, perfect! |
@@ -1264,11 +1307,12 @@ Historische analyse:
 
 Actie:
 └─ Verlaag steltemperatuur om 35°C aan te houden
+
 ```
 
 ### 💡 Praktisch Voorbeeld
 
-```
+
 ╔═══════════════════════════════════════════════════╗
 ║  DONDERDAG OCHTEND - COP OPTIMALISATIE            ║
 ╚═══════════════════════════════════════════════════╝
@@ -1329,7 +1373,7 @@ RESULTAAT:
 ├─ COP stabiel op 3.4-3.5
 ├─ Comfort gewaarborgd
 └─ Jaarlijkse besparing door COP optim: €600-700
-```
+
 
 ### 🎛️ Configuratie Parameters
 
@@ -1356,6 +1400,7 @@ RESULTAAT:
 **Elke 5 Minuten:**
 
 ```
+
 ┌──────────────────────────────────────────────────┐
 │  STAP 1: DATA VERZAMELEN                         │
 └──────────────────────────────────────────────────┘
@@ -1422,7 +1467,7 @@ const priceAdvice = energyOptimizer.calculateAction();
 // 25% COP (binnen comfort grenzen)
 // 15% Prijs (binnen comfort + COP grenzen)
 
-totalAdjust = 
+totalAdjust =
   tempAdvice.magnitude × 0.60 +      // 1.2 × 0.6 = 0.72
   copAdvice.adjustment × 0.25 +      // 0 × 0.25 = 0
   priceAdvice.adjustment × 0.15;     // 0 × 0.15 = 0
@@ -1459,6 +1504,7 @@ if (Math.abs(newSetpoint - currentSetpoint) >= 0.1) {
 ┌──────────────────────────────────────────────────┐
 │  WACHT 5 MINUTEN... HERHAAL                      │
 └──────────────────────────────────────────────────┘
+
 ```
 
 ### ⚖️ Prioriteiten & Conflicten
@@ -1466,8 +1512,9 @@ if (Math.abs(newSetpoint - currentSetpoint) >= 0.1) {
 **Hoe worden Conflicten Opgelost?**
 
 ```
+
 ╔═══════════════════════════════════════════════════╗
-║  SCENARIO: CONFLICTERENDE ADVIEZEN               ║
+║  SCENARIO: CONFLICTERENDE ADVIEZEN                ║
 ╚═══════════════════════════════════════════════════╝
 
 Temp Controller:  "Verhoog +2°C" (te koud!)
@@ -1483,40 +1530,49 @@ GEWOGEN BEREKENING:
 BESLUIT: Verhoog met +0.8°C
 REDEN: Comfort is prioriteit, maar meer gematigd
        door COP en prijs overwegingen
+
 ```
 
 **Priority Override Regels:**
 
 1. **Safety First:**
    ```
+
    if (indoor < 15°C || indoor > 28°C) {
      // Negeer alles, herstel naar veilig bereik
      override = true;
    }
+
    ```
 
 2. **Comfort Minimum:**
    ```
+
    if (indoor < target - maxComfortDeviation) {
      // COP en prijs worden genegeerd
      weights = [1.0, 0.0, 0.0];  // 100% comfort
    }
+
    ```
 
 3. **Efficiency Opportunity:**
    ```
+
    if (cop < minAcceptableCOP && indoor > target) {
      // Extra gewicht op COP optimalisatie
      weights = [0.40, 0.50, 0.10];
    }
+
    ```
 
 4. **Price Emergency:**
    ```
+
    if (price > extremeThreshold && indoor > target - 0.5) {
      // Extra gewicht op kosten
      weights = [0.50, 0.20, 0.30];
    }
+
    ```
 
 ---
@@ -1553,6 +1609,7 @@ homey app install
 1. **Open Homey App** → Devices → Adlar Heat Pump
 
 2. **Configureer Externe Sensor:**
+
    ```
    Settings → External Temperature Sensor
    ├─ Device: [Selecteer je thermostaat]
@@ -1560,6 +1617,7 @@ homey app install
    ```
 
 3. **Verificeer Stooklijn:**
+
    ```
    App zet automatisch stooklijn op OFF
    Controleer: Settings → Control Mode
@@ -1567,6 +1625,7 @@ homey app install
    ```
 
 4. **Stel Gewenste Temperatuur In:**
+
    ```
    Settings → Adaptive Temperature Control
    ├─ Target Temperature: 20°C (gewenste binnentemp)
@@ -1700,6 +1759,7 @@ API Configuratie:
 ### 🎯 Tuning Guide
 
 **Situatie: Temperatuur Schommelt Te Veel (±1°C)**
+
 ```
 Probleem: Te agressieve regeling
 Oplossing:
@@ -1709,6 +1769,7 @@ Oplossing:
 ```
 
 **Situatie: Temperatuur Reageert Te Traag**
+
 ```
 Probleem: Te conservatieve regeling
 Oplossing:
@@ -1718,6 +1779,7 @@ Oplossing:
 ```
 
 **Situatie: Structureel Te Laag/Hoog**
+
 ```
 Probleem: I-term niet effectief
 Oplossing:
@@ -1726,6 +1788,7 @@ Oplossing:
 ```
 
 **Situatie: Model Confidence Blijft Laag**
+
 ```
 Probleem: Inconsistente data of grote variaties
 Oplossing:
@@ -1957,37 +2020,43 @@ THEN:
    🎯 Aanbevelingen:
    {{optimization_suggestions}}"
 ```
+
   "📊 Week Rapport
    Gemiddelde COP: {{avg_cop}}
    Elektrisch verbruik: {{kwh_used}} kWh
    Warmte geleverd: {{heat_delivered}} kWh
    Effectieve kosten: €{{cost}}"
+
 ```
 
 #### Flow 8: Afwezigheid Scenario's
 
 ```
+
 NAAM: "Weekend Weg - Eco Mode"
 
 WHEN: User manually activates "Weekend Away" scene
 THEN:
-  - Set adaptive target to 15°C (Vorst bescherming)
-  - Disable night mode
-  - Send notification:
+
+- Set adaptive target to 15°C (Vorst bescherming)
+- Disable night mode
+- Send notification:
     "🏖️ Weekend mode actief
      Min temp: 15°C (vorst bescherming)"
-  - Store original settings
+- Store original settings
 
 NAAM: "Weekend Terug - Restore"
 
 WHEN: User manually activates "Back Home" scene
 THEN:
-  - Restore original target temperature
-  - Re-enable night mode if was active
-  - Calculate time to reach comfort temp
-  - Send notification:
+
+- Restore original target temperature
+- Re-enable night mode if was active
+- Calculate time to reach comfort temp
+- Send notification:
     "🏠 Welkom terug!
      Opwarmen naar {{target}}°C duurt {{time}}u"
+
 ```
 
 ### 📊 Monitoring & Logging Flows
@@ -1995,6 +2064,7 @@ THEN:
 #### Flow 9: Data Export voor Analyse
 
 ```
+
 NAAM: "Maandelijkse Data Export"
 
 WHEN: First day of month at 01:00
@@ -2004,43 +2074,49 @@ THEN:
   Get energy price statistics
   
   Create CSV with:
-  - Date, Hour
-  - Indoor Temp, Outdoor Temp
-  - Setpoint, COP
-  - Electricity Price
-  - Cost, Savings
+
+- Date, Hour
+- Indoor Temp, Outdoor Temp
+- Setpoint, COP
+- Electricity Price
+- Cost, Savings
   
   Save to: /userdata/exports/{{month}}-data.csv
   
   Send notification:
   "📈 Maand {{month}} Data Geëxporteerd
    Download via Homey Files"
+
 ```
 
 #### Flow 10: Probleem Detectie
 
 ```
+
 NAAM: "Detecteer Afwijkend Gedrag"
 
 WHEN: Every hour
 IF:
-  - Temperature error > 2°C for 3+ hours
+
+- Temperature error > 2°C for 3+ hours
   OR
-  - COP < 2.0 for 2+ hours
+- COP < 2.0 for 2+ hours
   OR
-  - Setpoint changed >5× in last hour
+- Setpoint changed >5× in last hour
 THEN:
   Send notification:
   "⚠️ Mogelijk probleem gedetecteerd
    {{issue_description}}
-   
+
    Check:
-   - Externe sensor verbinding
-   - Warmtepomp status
-   - Building model confidence"
+
+- Externe sensor verbinding
+- Warmtepomp status
+- Building model confidence"
   
   Disable adaptive control (veiligheid)
   Log to timeline: "System issue detected"
+
 ```
 
 ---
@@ -2062,6 +2138,7 @@ THEN:
 
 **Oplossing:**
 ```
+
 Stap 1: Check huidige status
 ├─ Homey App → Device → Settings
 └─ Control Mode moet "Direct Setpoint ✓" tonen
@@ -2076,6 +2153,7 @@ Stap 3: Verificatie
 └─ Test: Pas target temp aan, moet werken
 
 BELANGRIJK: Verander NOOIT handmatig stooklijn via WP!
+
 ```
 
 #### Probleem 2: Temperatuur Reageert Niet
@@ -2086,6 +2164,7 @@ BELANGRIJK: Verander NOOIT handmatig stooklijn via WP!
 
 **Diagnose Checklist:**
 ```
+
 ☑️ 1. Externe Sensor Werkt?
    └─ Check: Settings → External Temp Sensor
        Device selected? ✓
@@ -2105,10 +2184,12 @@ BELANGRIJK: Verander NOOIT handmatig stooklijn via WP!
 ☑️ 5. Deadband Te Groot?
    └─ Settings: control_deadband
        Probeer: 0.2°C (smaller = more responsive)
+
 ```
 
 **Specifieke Oplossingen:**
 ```
+
 A) Externe Sensor Issues:
    ├─ Re-configureer sensor in settings
    ├─ Check sensor batterij/verbinding
@@ -2123,6 +2204,7 @@ C) Regelaar Te Conservatief:
    ├─ Verlaag min_wait_between_changes: 20 → 15 min
    ├─ Verhoog Kp: 3.0 → 3.5
    └─ Verlaag deadband: 0.3 → 0.2°C
+
 ```
 
 #### Probleem 3: Model Confidence Blijft Laag
@@ -2134,6 +2216,7 @@ C) Regelaar Te Conservatief:
 
 **Diagnose:**
 ```
+
 1. Check Data Kwaliteit
    ├─ Logs → Search "Invalid measurement"
    ├─ Zijn er veel fouten?
@@ -2149,10 +2232,12 @@ C) Regelaar Te Conservatief:
    ├─ Is externe temp sensor stabiel?
    ├─ Veel ruis/spikes?
    └─ Relocate sensor if nodig
+
 ```
 
 **Oplossingen:**
 ```
+
 A) Data Collectie Verbeteren:
    ├─ Ensure WP always on (not eco-off)
    ├─ Check adlar_external_power availability
@@ -2167,6 +2252,7 @@ C) Parameter Aanpassing:
    ├─ Increase forgetting_factor (slower adaptation)
    ├─ Decrease min_confidence_threshold
    └─ Manual parameter initialization if needed
+
 ```
 
 #### Probleem 4: Energy Prices Niet Beschikbaar
@@ -2177,22 +2263,25 @@ C) Parameter Aanpassing:
 
 **Diagnose:**
 ```
+
 1. Check API Source
    └─ Settings → Energy Optimization
        ├─ Source: energyzero / entsoe
        └─ API key (if entsoe): configured?
 
 2. Test API Manually
-   └─ Browser: https://api.energyzero.nl/v1/energyprices
+   └─ Browser: <https://api.energyzero.nl/v1/energyprices>
        Response should show prices array
 
 3. Check Homey Network
    └─ Can Homey reach internet?
        Test: Weather updates working?
+
 ```
 
 **Oplossingen:**
 ```
+
 A) EnergyZero Issues:
    ├─ API down? Check status
    ├─ Rate limited? Wait 1 hour
@@ -2207,6 +2296,7 @@ C) Fallback to Manual:
    ├─ Settings → energy_api_source = "manual"
    ├─ Set price thresholds manually
    └─ Create flows for manual price input
+
 ```
 
 #### Probleem 5: COP Capabilities Niet Beschikbaar of Onrealistisch
@@ -2219,6 +2309,7 @@ C) Fallback to Manual:
 
 **Diagnose:**
 ```
+
 1. Check Capability Availability
    ├─ adlar_cop: Beschikbaar? ✓
    ├─ adlar_cop_daily: Beschikbaar? ✓
@@ -2237,10 +2328,12 @@ C) Fallback to Manual:
    ├─ Compressor state: ON wanneer verwacht?
    ├─ Work mode: "heating" (niet cooling/off)?
    └─ Actual heating happening? (supply > return temp)
+
 ```
 
 **Oplossingen:**
 ```
+
 A) Capability Niet Beschikbaar:
    ├─ Check Homey app versie (recentste?)
    ├─ Tuya verbinding OK? (local/cloud)
@@ -2264,8 +2357,10 @@ D) Fallback Mode:
    ├─ Disable COP-based optimizations
    ├─ Rely only on temperature + price control
    └─ Manual COP monitoring via capabilities
+
 ```
 ```
+
 A) Vermogen Meting Incorrect:
    ├─ Calibrate adlar_external_power
    ├─ Check if includes auxiliary (pomp, fans)
@@ -2285,6 +2380,7 @@ D) Disable COP Control:
    ├─ If unfixable data issues
    ├─ Settings → cop_control_enabled = false
    └─ Rely on temp + price only
+
 ```
 
 ### 🔧 Debug Modus
@@ -2299,6 +2395,7 @@ Settings → Advanced → Debug Logging → Enable
 ```
 
 **Wat gebeurt er:**
+
 ```
 Met DEBUG=1 krijg je extra logs:
 
@@ -2317,11 +2414,13 @@ Bij aanpassingen:
 ### 📞 Support & Community
 
 **Resources:**
+
 - GitHub Issues: [repo-url]/issues
 - Tweakers Forum: "Adlår Castra Aurora 2 Warmtepompen"
 - Homey Community: community.homey.app
 
 **Bug Report Template:**
+
 ```markdown
 **Probleem:** Korte beschrijving
 
@@ -2331,7 +2430,9 @@ Bij aanpassingen:
 
 **Logs:**
 ```
+
 [Plak relevante logs hier]
+
 ```
 
 **Configuratie:**
@@ -2365,12 +2466,14 @@ Bij aanpassingen:
 | 27 | compressor_state | Enum | on/off/... | - | Compressor status |
 
 **EXTERN:**
+
 - `adlar_external_power`: Integer, Watt, Werkelijk vermogen
 - External indoor sensor: Via capability, °C, Binnentemperatuur
 
 ### B. Formules & Constanten
 
 **Thermische Berekeningen:**
+
 ```
 1. Warmte Balans:
    dT/dt = (1/C) × [P_in - P_out + P_solar + P_internal]
@@ -2405,6 +2508,7 @@ Bij aanpassingen:
 ```
 
 **PI Controller:**
+
 ```
 1. Fout Berekening:
    e(t) = T_target - T_actual
@@ -2425,6 +2529,7 @@ Bij aanpassingen:
 ```
 
 **RLS Algoritme:**
+
 ```
 1. Feature Vector:
    φ(k) = [P_heat, -(T_in - T_out), Solar/1000, 1]^T
@@ -2453,6 +2558,7 @@ Bij aanpassingen:
 ### C. API Referenties
 
 **EnergyZero API:**
+
 ```
 GET https://api.energyzero.nl/v1/energyprices
 
@@ -2473,6 +2579,7 @@ Update Frequency: 1× per uur voldoende
 ```
 
 **ENTSO-E Transparency Platform:**
+
 ```
 GET https://web-api.tp.entsoe.eu/api
 
@@ -2490,6 +2597,7 @@ Free API key: transparency.entsoe.eu
 ```
 
 **Homey Weather API:**
+
 ```javascript
 const weather = await this.homey.weather.getWeather();
 
@@ -2528,6 +2636,7 @@ Properties:
 ### E. Versie Historie
 
 **v1.0 (December 2025)**
+
 - Initial release
 - PI temperature controller
 - Building model learner (RLS)
@@ -2537,6 +2646,7 @@ Properties:
 - Dutch & English support
 
 **Planned Features:**
+
 - v1.1: Model Predictive Control (MPC)
 - v1.2: Weather forecast integration
 - v1.3: Multi-zone support
@@ -2555,6 +2665,7 @@ Dit systeem combineert vier intelligente controllers om je warmtepomp optimaal t
 4. **COP Controller** - Maximaliseert efficiëntie binnen comfort grenzen
 
 **Verwachte Resultaten:**
+
 - ✅ Constante binnentemperatuur (±0.3°C)
 - ✅ 30-45% lagere energiekosten
 - ✅ 25-35% betere COP
