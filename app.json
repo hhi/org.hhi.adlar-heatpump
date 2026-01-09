@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -8998,10 +8998,10 @@
                 "fr": "Réinitialiser l'apprentissage du modèle de bâtiment"
               },
               "hint": {
-                "en": "Enable to reset all learned building parameters (tau, C, UA) and restart learning from scratch using the selected building profile. Automatically disables after reset. Use when diagnostics show corrupt state (negative values, 0% confidence with many samples).",
-                "nl": "Schakel in om alle geleerde gebouwparameters (tau, C, UA) te resetten en opnieuw te beginnen met het geselecteerde gebouwprofiel. Schakelt automatisch uit na reset. Gebruik wanneer diagnostics corrupte state tonen (negatieve waarden, 0% confidence met veel samples).",
-                "de": "Aktivieren zum Zurücksetzen aller gelernten Gebäudeparameter (tau, C, UA) und Neustart des Lernens mit ausgewähltem Gebäudeprofil. Deaktiviert sich automatisch nach Reset. Verwenden wenn Diagnose korrupten Zustand zeigt (negative Werte, 0% Konfidenz mit vielen Samples).",
-                "fr": "Activer pour réinitialiser tous paramètres bâtiment appris (tau, C, UA) et redémarrer apprentissage avec profil sélectionné. Se désactive automatiquement après reset. Utiliser quand diagnostic montre état corrompu (valeurs négatives, 0% confiance avec nombreux échantillons)."
+                "en": "Enable to reset all learned building parameters (C, UA, τ, g, P_int and restart learning from scratch using the selected building profile. Automatically disables after reset. Use when diagnostics show corrupt state (negative values, 0% confidence with many samples).",
+                "nl": "Schakel in om alle geleerde gebouwparameters (C, UA, τ, g, P_int) te resetten en opnieuw te beginnen met het geselecteerde gebouwprofiel. Schakelt automatisch uit na reset. Gebruik wanneer diagnostics corrupte state tonen (negatieve waarden, 0% confidence met veel samples).",
+                "de": "Aktivieren zum Zurücksetzen aller gelernten Gebäudeparameter (C, UA, τ, g, P_int) und Neustart des Lernens mit ausgewähltem Gebäudeprofil. Deaktiviert sich automatisch nach Reset. Verwenden wenn Diagnose korrupten Zustand zeigt (negative Werte, 0% Konfidenz mit vielen Samples).",
+                "fr": "Activer pour réinitialiser tous paramètres bâtiment appris (C, UA, τ, g, P_int) et redémarrer apprentissage avec profil sélectionné. Se désactive automatiquement après reset. Utiliser quand diagnostic montre état corrompu (valeurs négatives, 0% confiance avec nombreux échantillons)."
               },
               "value": false
             },
@@ -9038,23 +9038,6 @@
                 "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. Améliore prévisions saisonnières."
               },
               "value": true
-            },
-            {
-              "id": "reset_building_model",
-              "type": "checkbox",
-              "label": {
-                "en": "Reset building model learning",
-                "nl": "Reset gebouwmodel leren",
-                "de": "Gebäudemodell-Lernen zurücksetzen",
-                "fr": "Réinitialiser l'apprentissage du modèle"
-              },
-              "hint": {
-                "en": "Click to reset all learned building parameters (C, UA, τ, g, P_int) back to defaults based on building type. Use this if learned values seem incorrect or after major home renovations. Learning will restart from scratch.",
-                "nl": "Klik om alle geleerde gebouwparameters (C, UA, τ, g, P_int) terug te zetten naar standaardwaarden op basis van gebouwtype. Gebruik dit als geleerde waarden incorrect lijken of na grote woning renovaties. Learning start opnieuw vanaf nul.",
-                "de": "Klicken Sie, um alle gelernten Gebäudeparameter (C, UA, τ, g, P_int) auf Standardwerte basierend auf Gebäudetyp zurückzusetzen. Verwenden Sie dies, wenn gelernte Werte falsch erscheinen oder nach größeren Hausrenovierungen. Lernen startet von vorne.",
-                "fr": "Cliquez pour réinitialiser tous les paramètres appris (C, UA, τ, g, P_int) aux valeurs par défaut selon le type de bâtiment. Utilisez ceci si les valeurs apprises semblent incorrectes ou après des rénovations importantes. L'apprentissage redémarre de zéro."
-              },
-              "value": false
             }
           ]
         },
@@ -9067,6 +9050,23 @@
             "fr": "Optimisation du Prix de l'Énergie"
           },
           "children": [
+            {
+              "id": "price_optimizer_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable price optimization",
+                "nl": "Prijsoptimalisatie inschakelen",
+                "de": "Preisoptimierung aktivieren",
+                "fr": "Activer l'optimisation des prix"
+              },
+              "hint": {
+                "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year.",
+                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar.",
+                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr.",
+                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an."
+              },
+              "value": false
+            },
             {
               "id": "price_calculation_mode",
               "type": "dropdown",
@@ -9172,23 +9172,6 @@
               "min": 0,
               "max": 30,
               "step": 1
-            },
-            {
-              "id": "price_optimizer_enabled",
-              "type": "checkbox",
-              "label": {
-                "en": "Enable price optimization",
-                "nl": "Prijsoptimalisatie inschakelen",
-                "de": "Preisoptimierung aktivieren",
-                "fr": "Activer l'optimisation des prix"
-              },
-              "hint": {
-                "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year.",
-                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar.",
-                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr.",
-                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an."
-              },
-              "value": false
             },
             {
               "id": "price_threshold_very_low",
@@ -10289,7 +10272,7 @@
         "de": "Gesamte Energiekosten heute (Verbrauch × Durchschnittspreis)",
         "fr": "Coût énergétique total aujourd'hui (consommation × prix moyen)"
       },
-      "decimals": 2,
+      "decimals": 4,
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
