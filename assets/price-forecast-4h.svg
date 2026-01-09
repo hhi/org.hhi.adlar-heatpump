@@ -1,0 +1,16 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Euro symbol -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 30 C 50 30 43 40 43 55 C 43 70 50 80 60 80"/>
+    <line x1="37" y1="47" x2="57" y2="47"/>
+    <line x1="37" y1="63" x2="57" y2="63"/>
+  </g>
+
+  <!-- Clock icon (4h indicator) - left side -->
+  <circle cx="22" cy="30" r="12" fill="none" stroke="currentColor" stroke-width="3"/>
+  <line x1="22" y1="30" x2="22" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="22" y1="30" x2="27" y2="30" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 4h text -->
+  <text x="20" y="73" font-size="18" font-weight="bold" fill="currentColor" text-anchor="middle">4h</text>
+</svg>

@@ -68,6 +68,46 @@ export interface PriceAction {
 }
 
 /**
+ * Block analysis result for cheapest/expensive time windows
+ * @since v2.5.0
+ */
+export interface BlockAnalysis {
+  startTime: Date;
+  endTime: Date;
+  avgPrice: number; // €/kWh (average price for block)
+  totalHours: number;
+}
+
+/**
+ * Statistical analysis of price data
+ * @since v2.5.0
+ */
+export interface PriceStats {
+  min: number; // €/kWh
+  max: number; // €/kWh
+  avg: number; // €/kWh
+  median: number; // €/kWh
+  stdDev: number; // €/kWh (standard deviation)
+  sampleSize: number;
+}
+
+/**
+ * Price trend classification
+ * @since v2.5.0
+ */
+export type PriceTrend = 'rising' | 'falling' | 'stable';
+
+/**
+ * Price trend analysis result with confidence
+ * @since v2.5.0
+ */
+export interface PriceTrendAnalysis {
+  trend: PriceTrend;
+  slope: number; // €/kWh per hour (positive = rising, negative = falling)
+  confidence: number; // 0.0-1.0 (R² from linear regression)
+}
+
+/**
  * Energy Price Optimizer
  *
  * Fetches day-ahead electricity prices and provides temperature adjustment
@@ -263,6 +303,7 @@ export class EnergyPriceOptimizer {
 
   /**
    * Get average price for next N hours
+   * @version 2.5.0 - Bug fix: now returns effective price based on priceMode
    */
   public getAveragePrice(timestamp: number, hoursAhead: number): PriceData | null {
     const endTime = timestamp + hoursAhead * 3600000;
@@ -271,7 +312,9 @@ export class EnergyPriceOptimizer {
 
     if (futurePrices.length === 0) return null;
 
-    const avgPrice = futurePrices.reduce((sum, p) => sum + p.price, 0) / futurePrices.length;
+    // Calculate effective prices and average them
+    const effectivePrices = futurePrices.map((p) => this.calculateEffectivePrice(p.price));
+    const avgPrice = effectivePrices.reduce((sum, p) => sum + p, 0) / effectivePrices.length;
     const avgCategory = this.categorizePrice(avgPrice);
 
     return {
@@ -279,6 +322,283 @@ export class EnergyPriceOptimizer {
       price: avgPrice,
       category: avgCategory,
     };
+  }
+
+  /**
+   * Find cheapest consecutive N-hour block in available price data
+   * Uses sliding window algorithm for O(n) efficiency
+   *
+   * @param hours - Block size in hours (1-12)
+   * @returns Block analysis with start/end times and average price, or null if insufficient data
+   * @since v2.5.0
+   * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
+   */
+  public findCheapestBlock(hours: number): BlockAnalysis | null {
+    // Input validation
+    if (hours <= 0 || hours > 12) {
+      this.logger('EnergyPriceOptimizer: Invalid block hours', { hours });
+      return null;
+    }
+
+    if (this.priceData.length < hours) {
+      this.logger('EnergyPriceOptimizer: Insufficient price data for block analysis', {
+        required: hours,
+        available: this.priceData.length,
+      });
+      return null;
+    }
+
+    let minAvgPrice = Infinity;
+    let bestStartIndex = 0;
+
+    // Sliding window: calculate average effective price for each possible window position
+    for (let i = 0; i <= this.priceData.length - hours; i++) {
+      const windowPrices = this.priceData.slice(i, i + hours);
+      const avgPrice = windowPrices.reduce((sum, p) => sum + this.calculateEffectivePrice(p.price), 0) / hours;
+
+      if (avgPrice < minAvgPrice) {
+        minAvgPrice = avgPrice;
+        bestStartIndex = i;
+      }
+    }
+
+    // Build result
+    const startTime = new Date(this.priceData[bestStartIndex].timestamp);
+    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp);
+    endTime.setHours(endTime.getHours() + 1); // End of last hour
+
+    return {
+      startTime,
+      endTime,
+      avgPrice: minAvgPrice,
+      totalHours: hours,
+    };
+  }
+
+  /**
+   * Find most expensive consecutive N-hour block in available price data
+   * Inverse of findCheapestBlock()
+   *
+   * @param hours - Block size in hours (1-12)
+   * @returns Block analysis with start/end times and average price, or null if insufficient data
+   * @since v2.5.0
+   * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
+   */
+  public findMostExpensiveBlock(hours: number): BlockAnalysis | null {
+    // Input validation
+    if (hours <= 0 || hours > 12) {
+      this.logger('EnergyPriceOptimizer: Invalid block hours', { hours });
+      return null;
+    }
+
+    if (this.priceData.length < hours) {
+      this.logger('EnergyPriceOptimizer: Insufficient price data for block analysis', {
+        required: hours,
+        available: this.priceData.length,
+      });
+      return null;
+    }
+
+    let maxAvgPrice = -Infinity;
+    let bestStartIndex = 0;
+
+    // Sliding window: calculate average effective price for each possible window position
+    for (let i = 0; i <= this.priceData.length - hours; i++) {
+      const windowPrices = this.priceData.slice(i, i + hours);
+      const avgPrice = windowPrices.reduce((sum, p) => sum + this.calculateEffectivePrice(p.price), 0) / hours;
+
+      if (avgPrice > maxAvgPrice) {
+        maxAvgPrice = avgPrice;
+        bestStartIndex = i;
+      }
+    }
+
+    // Build result
+    const startTime = new Date(this.priceData[bestStartIndex].timestamp);
+    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp);
+    endTime.setHours(endTime.getHours() + 1); // End of last hour
+
+    return {
+      startTime,
+      endTime,
+      avgPrice: maxAvgPrice,
+      totalHours: hours,
+    };
+  }
+
+  /**
+   * Calculate statistical measures for price data
+   *
+   * @param hoursAhead - Optional: only analyze next N hours (default: all data)
+   * @returns Price statistics including min, max, avg, median, std deviation
+   * @since v2.5.0
+   * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
+   */
+  public getPriceStatistics(hoursAhead?: number): PriceStats | null {
+    let dataToAnalyze = this.priceData;
+
+    // Filter by time window if specified
+    if (hoursAhead !== undefined) {
+      const now = Date.now();
+      const endTime = now + hoursAhead * 3600000;
+      dataToAnalyze = this.priceData.filter((p) => p.timestamp >= now && p.timestamp <= endTime);
+    }
+
+    if (dataToAnalyze.length === 0) {
+      this.logger('EnergyPriceOptimizer: No price data available for statistics');
+      return null;
+    }
+
+    // Extract and transform to effective prices
+    const prices = dataToAnalyze.map((p) => this.calculateEffectivePrice(p.price));
+
+    // Calculate basic statistics
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const sum = prices.reduce((acc, p) => acc + p, 0);
+    const avg = sum / prices.length;
+
+    // Calculate median
+    const sortedPrices = [...prices].sort((a, b) => a - b);
+    const mid = Math.floor(sortedPrices.length / 2);
+    const median = sortedPrices.length % 2 === 0
+      ? (sortedPrices[mid - 1] + sortedPrices[mid]) / 2
+      : sortedPrices[mid];
+
+    // Calculate standard deviation
+    const variance = prices.reduce((acc, p) => acc + Math.pow(p - avg, 2), 0) / prices.length;
+    const stdDev = Math.sqrt(variance);
+
+    return {
+      min,
+      max,
+      avg,
+      median,
+      stdDev,
+      sampleSize: prices.length,
+    };
+  }
+
+  /**
+   * Calculate price trend using simple linear regression
+   *
+   * @param hoursAhead - Number of hours to analyze (minimum 3)
+   * @returns Trend analysis with direction, slope, and confidence (R²)
+   * @since v2.5.0
+   * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
+   */
+  public calculatePriceTrend(hoursAhead: number): PriceTrendAnalysis | null {
+    const now = Date.now();
+    const endTime = now + hoursAhead * 3600000;
+
+    const futurePrices = this.priceData.filter((p) => p.timestamp >= now && p.timestamp <= endTime);
+
+    if (futurePrices.length < 3) {
+      this.logger('EnergyPriceOptimizer: Insufficient data for trend analysis', {
+        required: 3,
+        available: futurePrices.length,
+      });
+      return null;
+    }
+
+    // Linear regression: y = mx + b
+    const n = futurePrices.length;
+    const x = futurePrices.map((_, i) => i); // Time index (0, 1, 2, ...)
+    const y = futurePrices.map((p) => this.calculateEffectivePrice(p.price)); // Effective prices
+
+    const sumX = x.reduce((acc, val) => acc + val, 0);
+    const sumY = y.reduce((acc, val) => acc + val, 0);
+    const sumXY = x.reduce((acc, val, i) => acc + val * y[i], 0);
+    const sumX2 = x.reduce((acc, val) => acc + val * val, 0);
+
+    // Calculate slope (m)
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+    // Calculate R² (coefficient of determination) for confidence
+    const meanY = sumY / n;
+    const ssTotal = y.reduce((acc, val) => acc + Math.pow(val - meanY, 2), 0);
+    const intercept = (sumY - slope * sumX) / n;
+    const ssResidual = y.reduce((acc, val, i) => acc + Math.pow(val - (slope * x[i] + intercept), 2), 0);
+    const rSquared = 1 - (ssResidual / ssTotal);
+
+    // Classify trend (threshold: ±0.0001 €/kWh per hour)
+    const threshold = 0.0001;
+    let trend: PriceTrend;
+    if (slope > threshold) {
+      trend = 'rising';
+    } else if (slope < -threshold) {
+      trend = 'falling';
+    } else {
+      trend = 'stable';
+    }
+
+    return {
+      trend,
+      slope,
+      confidence: Math.max(0, Math.min(1, rSquared)), // Clamp to 0-1
+    };
+  }
+
+  /**
+   * Check if current hour has lowest price in ±windowHours range
+   *
+   * @param windowHours - Time window to check (hours before and after current)
+   * @returns True if current hour is a local minimum
+   * @since v2.5.0
+   */
+  public isLocalMinimum(windowHours: number): boolean {
+    const now = Date.now();
+    const currentPrice = this.getCurrentPrice(now);
+
+    if (!currentPrice) {
+      return false;
+    }
+
+    const windowStart = now - windowHours * 3600000;
+    const windowEnd = now + windowHours * 3600000;
+
+    const windowPrices = this.priceData.filter(
+      (p) => p.timestamp >= windowStart && p.timestamp <= windowEnd,
+    );
+
+    if (windowPrices.length === 0) {
+      return false;
+    }
+
+    // Check if current price is minimum in window
+    const minPrice = Math.min(...windowPrices.map((p) => p.price));
+    return currentPrice.price <= minPrice;
+  }
+
+  /**
+   * Check if current hour has highest price in ±windowHours range
+   *
+   * @param windowHours - Time window to check (hours before and after current)
+   * @returns True if current hour is a local maximum
+   * @since v2.5.0
+   */
+  public isLocalMaximum(windowHours: number): boolean {
+    const now = Date.now();
+    const currentPrice = this.getCurrentPrice(now);
+
+    if (!currentPrice) {
+      return false;
+    }
+
+    const windowStart = now - windowHours * 3600000;
+    const windowEnd = now + windowHours * 3600000;
+
+    const windowPrices = this.priceData.filter(
+      (p) => p.timestamp >= windowStart && p.timestamp <= windowEnd,
+    );
+
+    if (windowPrices.length === 0) {
+      return false;
+    }
+
+    // Check if current price is maximum in window
+    const maxPrice = Math.max(...windowPrices.map((p) => p.price));
+    return currentPrice.price >= maxPrice;
   }
 
   /**
@@ -291,6 +611,38 @@ export class EnergyPriceOptimizer {
 
     // Convert W to kW, multiply by effective price
     return (currentPowerWatts / 1000) * effectivePrice;
+  }
+
+  /**
+   * Calculate effective price from raw market price (respects priceMode)
+   * Internal helper for transforming raw market prices to effective prices.
+   *
+   * @param rawPrice - Raw market price (€/kWh, excl. VAT) from priceData
+   * @returns Effective price (€/kWh) based on priceMode setting
+   * @version 2.5.0 - Bug fix: price capabilities now use effective prices
+   * @private
+   */
+  private calculateEffectivePrice(rawPrice: number): number {
+    const { storageFee, energyTax, vatPercentage } = this.financialComponents;
+
+    // Market price with VAT (always included)
+    const marketPriceIncVat = rawPrice * (1 + vatPercentage / 100);
+
+    // Calculate based on price mode
+    switch (this.priceMode) {
+      case 'market':
+        // Only market price + VAT
+        return marketPriceIncVat;
+
+      case 'market_plus':
+        // Market + VAT + supplier fee
+        return marketPriceIncVat + storageFee;
+
+      case 'all_in':
+      default:
+        // Market + VAT + supplier fee + energy tax
+        return marketPriceIncVat + storageFee + energyTax;
+    }
   }
 
   /**
@@ -314,26 +666,7 @@ export class EnergyPriceOptimizer {
     const priceData = this.getCurrentPrice(ts);
     if (!priceData) return 0;
 
-    const { storageFee, energyTax, vatPercentage } = this.financialComponents;
-
-    // Market price with VAT (always included)
-    const marketPriceIncVat = priceData.price * (1 + vatPercentage / 100);
-
-    // Calculate based on price mode
-    switch (this.priceMode) {
-      case 'market':
-        // Only market price + VAT
-        return marketPriceIncVat;
-
-      case 'market_plus':
-        // Market + VAT + supplier fee
-        return marketPriceIncVat + storageFee;
-
-      case 'all_in':
-      default:
-        // Market + VAT + supplier fee + energy tax
-        return marketPriceIncVat + storageFee + energyTax;
-    }
+    return this.calculateEffectivePrice(priceData.price);
   }
 
   /**

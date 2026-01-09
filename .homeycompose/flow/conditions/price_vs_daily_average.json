@@ -1,0 +1,49 @@
+{
+  "id": "price_vs_daily_average",
+  "title": {
+    "en": "Price vs daily average",
+    "nl": "Prijs vs daggemiddelde",
+    "de": "Preis vs Tagesdurchschnitt",
+    "fr": "Prix vs moyenne quotidienne"
+  },
+  "titleFormatted": {
+    "en": "Current price is !{{below|above}} daily average by [[margin]]%",
+    "nl": "Huidige prijs is !{{onder|boven}} daggemiddelde met [[margin]]%",
+    "de": "Aktueller Preis ist !{{unter|über}} Tagesdurchschnitt um [[margin]]%",
+    "fr": "Le prix actuel est !{{inférieur|supérieur}} à la moyenne quotidienne de [[margin]]%"
+  },
+  "hint": {
+    "en": "Check if current electricity price deviates from the daily average by at least the specified margin percentage. Useful for detecting significantly low or high prices.",
+    "nl": "Controleer of de huidige elektriciteitsprijs afwijkt van het daggemiddelde met minimaal het opgegeven margepercentage. Nuttig voor het detecteren van aanzienlijk lage of hoge prijzen.",
+    "de": "Prüfen Sie, ob der aktuelle Strompreis vom Tagesdurchschnitt um mindestens die angegebene Marge abweicht. Nützlich zum Erkennen deutlich niedriger oder hoher Preise.",
+    "fr": "Vérifier si le prix actuel de l'électricité s'écarte de la moyenne quotidienne d'au moins le pourcentage de marge spécifié. Utile pour détecter des prix significativement bas ou élevés."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+    },
+    {
+      "type": "range",
+      "name": "margin",
+      "title": {
+        "en": "Margin (%)",
+        "nl": "Marge (%)",
+        "de": "Marge (%)",
+        "fr": "Marge (%)"
+      },
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "units": "%",
+      "placeholder": {
+        "en": "Margin (%)",
+        "nl": "Marge (%)",
+        "de": "Marge (%)",
+        "fr": "Marge (%)"
+      }
+    }
+  ]
+}

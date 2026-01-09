@@ -1,0 +1,75 @@
+{
+  "id": "cheapest_block_started",
+  "title": {
+    "en": "Cheapest block started",
+    "nl": "Goedkoopste blok gestart",
+    "de": "Günstigster Block gestartet",
+    "fr": "Bloc le moins cher commencé"
+  },
+  "titleFormatted": {
+    "en": "Cheapest [[hours]]-hour block started",
+    "nl": "Goedkoopste [[hours]]-uurs blok gestart",
+    "de": "Günstigster [[hours]]-Stunden-Block gestartet",
+    "fr": "Bloc de [[hours]] heures le moins cher commencé"
+  },
+  "hint": {
+    "en": "Triggers when the cheapest electricity price block of the day starts. Use to maximize energy consumption during low-price periods.",
+    "nl": "Wordt geactiveerd wanneer het goedkoopste elektriciteitsprijs blok van de dag begint. Gebruik dit om energieverbruik te maximaliseren tijdens goedkope periodes.",
+    "de": "Wird ausgelöst, wenn der günstigste Strompreis-Block des Tages beginnt. Nutzen Sie dies, um den Energieverbrauch während günstiger Perioden zu maximieren.",
+    "fr": "Se déclenche lorsque le bloc de prix d'électricité le moins cher de la journée commence. Utilisez-le pour maximiser la consommation d'énergie pendant les périodes à bas prix."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "block_start",
+      "type": "string",
+      "title": {
+        "en": "Block Start Time",
+        "nl": "Blok Starttijd",
+        "de": "Block-Startzeit",
+        "fr": "Heure de Début du Bloc"
+      },
+      "example": "14:00"
+    },
+    {
+      "name": "block_end",
+      "type": "string",
+      "title": {
+        "en": "Block End Time",
+        "nl": "Blok Eindtijd",
+        "de": "Block-Endzeit",
+        "fr": "Heure de Fin du Bloc"
+      },
+      "example": "18:00"
+    },
+    {
+      "name": "avg_price",
+      "type": "number",
+      "title": {
+        "en": "Average Price (€/kWh)",
+        "nl": "Gemiddelde Prijs (€/kWh)",
+        "de": "Durchschnittspreis (€/kWh)",
+        "fr": "Prix Moyen (€/kWh)"
+      },
+      "example": 0.05
+    },
+    {
+      "name": "hours",
+      "type": "number",
+      "title": {
+        "en": "Block Duration (hours)",
+        "nl": "Blok Duur (uren)",
+        "de": "Block-Dauer (Stunden)",
+        "fr": "Durée du Bloc (heures)"
+      },
+      "example": 4
+    }
+  ]
+}

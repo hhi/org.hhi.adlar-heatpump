@@ -1,0 +1,21 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Euro symbol with piggybank/savings concept -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 65 35 C 55 35 48 45 48 60 C 48 75 55 85 65 85"/>
+    <line x1="42" y1="52" x2="62" y2="52"/>
+    <line x1="42" y1="68" x2="62" y2="68"/>
+  </g>
+
+  <!-- Piggybank body (simplified) - left side -->
+  <ellipse cx="22" cy="38" rx="15" ry="12" fill="none" stroke="currentColor" stroke-width="4"/>
+  <line x1="32" y1="32" x2="38" y2="28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Coin slot -->
+  <line x1="18" y1="30" x2="26" y2="30" stroke="currentColor" stroke-width="2"/>
+
+  <!-- Plus symbol (savings = positive) -->
+  <g stroke="currentColor" stroke-width="4" stroke-linecap="round">
+    <line x1="75" y1="20" x2="85" y2="20"/>
+    <line x1="80" y1="15" x2="80" y2="25"/>
+  </g>
+</svg>

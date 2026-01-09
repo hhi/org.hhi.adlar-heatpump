@@ -1,0 +1,64 @@
+{
+  "id": "price_trend_changed",
+  "title": {
+    "en": "Price trend changed",
+    "nl": "Prijstrend veranderd",
+    "de": "Preistrend geändert",
+    "fr": "Tendance des prix changée"
+  },
+  "titleFormatted": {
+    "en": "Price trend changed from [[old_trend]] to [[new_trend]]",
+    "nl": "Prijstrend veranderd van [[old_trend]] naar [[new_trend]]",
+    "de": "Preistrend geändert von [[old_trend]] zu [[new_trend]]",
+    "fr": "Tendance des prix changée de [[old_trend]] à [[new_trend]]"
+  },
+  "hint": {
+    "en": "Triggers when electricity price trend direction changes (rising, falling, stable). Based on linear regression analysis with confidence threshold.",
+    "nl": "Wordt geactiveerd wanneer de prijstrendrichting van elektriciteit verandert (stijgend, dalend, stabiel). Gebaseerd op lineaire regressie analyse met betrouwbaarheidsdrempel.",
+    "de": "Wird ausgelöst, wenn sich die Richtung des Strompreistrends ändert (steigend, fallend, stabil). Basierend auf linearer Regressionsanalyse mit Konfidenzschwelle.",
+    "fr": "Se déclenche lorsque la direction de la tendance des prix de l'électricité change (en hausse, en baisse, stable). Basé sur une analyse de régression linéaire avec seuil de confiance."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "old_trend",
+      "type": "string",
+      "title": {
+        "en": "Previous Trend",
+        "nl": "Vorige Trend",
+        "de": "Vorheriger Trend",
+        "fr": "Tendance Précédente"
+      },
+      "example": "falling"
+    },
+    {
+      "name": "new_trend",
+      "type": "string",
+      "title": {
+        "en": "New Trend",
+        "nl": "Nieuwe Trend",
+        "de": "Neuer Trend",
+        "fr": "Nouvelle Tendance"
+      },
+      "example": "rising"
+    },
+    {
+      "name": "hours_analyzed",
+      "type": "number",
+      "title": {
+        "en": "Hours Analyzed",
+        "nl": "Uren Geanalyseerd",
+        "de": "Analysierte Stunden",
+        "fr": "Heures Analysées"
+      },
+      "example": 6
+    }
+  ]
+}

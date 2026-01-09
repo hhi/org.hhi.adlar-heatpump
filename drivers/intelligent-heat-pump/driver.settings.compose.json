@@ -1267,6 +1267,84 @@
           "de": "€",
           "fr": "€"
         }
+      },
+      {
+        "id": "adaptive_price_block_hours",
+        "type": "number",
+        "label": {
+          "en": "Price Block Size (hours)",
+          "nl": "Prijsblok Grootte (uren)",
+          "de": "Preisblock-Größe (Stunden)",
+          "fr": "Taille du Bloc de Prix (heures)"
+        },
+        "hint": {
+          "en": "Size of cheapest/expensive blocks for day-ahead planning. Used by 'cheapest block started' trigger and block detection. Default: 4 hours",
+          "nl": "Grootte van goedkoopste/duurste blokken voor dag-vooruit planning. Gebruikt door 'goedkoopste blok gestart' trigger en blok detectie. Standaard: 4 uren",
+          "de": "Größe der günstigsten/teuersten Blöcke für Day-Ahead-Planung. Verwendet von 'günstigster Block gestartet' Trigger und Block-Erkennung. Standard: 4 Stunden",
+          "fr": "Taille des blocs les moins chers/coûteux pour la planification day-ahead. Utilisé par le déclencheur 'bloc le moins cher commencé' et la détection de blocs. Défaut: 4 heures"
+        },
+        "value": 4,
+        "min": 1,
+        "max": 12,
+        "step": 1,
+        "units": {
+          "en": "h",
+          "nl": "u",
+          "de": "Std",
+          "fr": "h"
+        }
+      },
+      {
+        "id": "adaptive_price_warning_hours",
+        "type": "number",
+        "label": {
+          "en": "Expensive Block Warning Time (hours)",
+          "nl": "Duur Blok Waarschuwingstijd (uren)",
+          "de": "Teurer Block Warnzeit (Stunden)",
+          "fr": "Temps d'Avertissement Bloc Coûteux (heures)"
+        },
+        "hint": {
+          "en": "Trigger 'expensive period approaching' flow N hours before expensive block starts. Use to pre-heat building. Default: 2 hours",
+          "nl": "Activeer 'dure periode nadert' flow N uur voor duur blok begint. Gebruik om gebouw voor te verwarmen. Standaard: 2 uren",
+          "de": "Löst 'teure Periode naht' Flow N Stunden vor Start des teuren Blocks aus. Zum Vorheizen des Gebäudes verwenden. Standard: 2 Stunden",
+          "fr": "Déclenche le flow 'période coûteuse approche' N heures avant le début du bloc coûteux. Utilisez pour préchauffer le bâtiment. Défaut: 2 heures"
+        },
+        "value": 2,
+        "min": 1,
+        "max": 4,
+        "step": 1,
+        "units": {
+          "en": "h",
+          "nl": "u",
+          "de": "Std",
+          "fr": "h"
+        }
+      },
+      {
+        "id": "adaptive_price_trend_hours",
+        "type": "number",
+        "label": {
+          "en": "Price Trend Analysis Window (hours)",
+          "nl": "Prijstrend Analyse Venster (uren)",
+          "de": "Preistrend-Analysefenster (Stunden)",
+          "fr": "Fenêtre d'Analyse Tendance Prix (heures)"
+        },
+        "hint": {
+          "en": "Number of future hours to analyze for price trend detection (rising/falling/stable). Used by 'price trend changed' trigger. Default: 6 hours",
+          "nl": "Aantal toekomstige uren om te analyseren voor prijstrend detectie (stijgend/dalend/stabiel). Gebruikt door 'prijstrend veranderd' trigger. Standaard: 6 uren",
+          "de": "Anzahl zukünftiger Stunden für Preistrend-Erkennung (steigend/fallend/stabil). Verwendet von 'Preistrend geändert' Trigger. Standard: 6 Stunden",
+          "fr": "Nombre d'heures futures à analyser pour la détection de tendance de prix (en hausse/baisse/stable). Utilisé par le déclencheur 'tendance prix changée'. Défaut: 6 heures"
+        },
+        "value": 6,
+        "min": 3,
+        "max": 24,
+        "step": 1,
+        "units": {
+          "en": "h",
+          "nl": "u",
+          "de": "Std",
+          "fr": "h"
+        }
       }
     ]
   },

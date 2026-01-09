@@ -3309,13 +3309,47 @@ class MyDevice extends Homey.Device {
       }
 
       // Migration v2.4.3: Add energy_prices_data capability for 24h energy price tracking
-      if (!this.hasCapability('energy_prices_data')) {
+      // Only add if price optimizer is enabled (v2.5.0+: capability as feature flag)
+      const priceOptimizerEnabledForMigration = await this.getSetting('price_optimizer_enabled');
+      if (priceOptimizerEnabledForMigration && !this.hasCapability('energy_prices_data')) {
         try {
           await this.addCapability('energy_prices_data');
           await this.setCapabilityValue('energy_prices_data', '{}');
           this.log('Migration v2.4.3: Added energy_prices_data capability (default: empty JSON)');
         } catch (error) {
           this.error('Failed to add energy_prices_data capability:', error);
+        }
+      }
+
+      // Migration v2.5.0: Add energy price optimization display capabilities
+      // Only add if price optimizer is enabled (capability as feature flag)
+      if (priceOptimizerEnabledForMigration) {
+        const priceOptimizationCapabilities = [
+          'adlar_cheapest_block_start',
+          'adlar_price_forecast_24h',
+          'adlar_price_forecast_4h',
+          'adlar_price_savings_potential',
+        ];
+
+        for (const capability of priceOptimizationCapabilities) {
+          if (!this.hasCapability(capability)) {
+            try {
+              await this.addCapability(capability);
+
+              // Set appropriate default values
+              let defaultValue: string | number = 'N/A';
+              if (capability === 'adlar_price_forecast_24h' || capability === 'adlar_price_forecast_4h') {
+                defaultValue = 0;
+              } else if (capability === 'adlar_price_savings_potential') {
+                defaultValue = 0;
+              }
+
+              await this.setCapabilityValue(capability, defaultValue);
+              this.log(`Migration v2.5.0: Added ${capability} capability (default: ${defaultValue})`);
+            } catch (error) {
+              this.error(`Failed to add ${capability} capability:`, error);
+            }
+          }
         }
       }
 
@@ -3343,14 +3377,20 @@ class MyDevice extends Homey.Device {
       }
 
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
+      // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');
       if (!priceOptimizerEnabled) {
         const energyPriceCapabilities = [
+          'energy_prices_data',
           'adlar_energy_price_current',
           'adlar_energy_price_next',
           'adlar_energy_price_category',
           'adlar_energy_cost_hourly',
           'adlar_energy_cost_daily',
+          'adlar_price_forecast_4h',
+          'adlar_price_forecast_24h',
+          'adlar_cheapest_block_start',
+          'adlar_price_savings_potential',
         ];
 
         for (const capability of energyPriceCapabilities) {
@@ -3359,6 +3399,14 @@ class MyDevice extends Homey.Device {
             this.log(`Migration: Removed ${capability} (price optimizer disabled)`);
           }
         }
+      }
+
+      // Sync simulated target capability with adaptive control setting (v2.3.1)
+      try {
+        const adaptiveControlEnabled = this.getSetting('adaptive_control_enabled') === true;
+        await this.updateSimulatedCapabilityVisibility(adaptiveControlEnabled);
+      } catch (error) {
+        this.error('Failed to sync adlar_simulated_target capability with adaptive control setting:', error);
       }
 
       // Migration v2.4.3: Cleanup deprecated heating curve capabilities
@@ -3640,18 +3688,18 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Update simulated target capability visibility based on simulate mode setting
+   * Update simulated target capability visibility based on adaptive control setting
    *
-   * @param simulateMode - Whether simulate mode is enabled
+   * @param adaptiveControlEnabled - Whether adaptive control is enabled
    */
-  private async updateSimulatedCapabilityVisibility(simulateMode: boolean): Promise<void> {
+  private async updateSimulatedCapabilityVisibility(adaptiveControlEnabled: boolean): Promise<void> {
     const hasCapability = this.hasCapability('adlar_simulated_target');
 
-    if (simulateMode) {
-      // Simulate mode enabled - ensure capability is visible
+    if (adaptiveControlEnabled) {
+      // Adaptive control enabled - ensure capability is visible
       if (!hasCapability) {
         await this.addCapability('adlar_simulated_target');
-        this.logger.info('Added adlar_simulated_target capability (simulate mode enabled)');
+        this.logger.info('Added adlar_simulated_target capability (adaptive control enabled)');
       }
 
       // Initialize with current target_temperature
@@ -3661,10 +3709,10 @@ class MyDevice extends Homey.Device {
         this.logger.info('Initialized simulated target with current target:', currentTarget);
       }
     } else {
-      // Simulate mode disabled - remove capability
+      // Adaptive control disabled - remove capability
       if (hasCapability) {
         await this.removeCapability('adlar_simulated_target');
-        this.logger.info('Removed adlar_simulated_target capability (simulate mode disabled)');
+        this.logger.info('Removed adlar_simulated_target capability (adaptive control disabled)');
       }
     }
   }
@@ -3695,9 +3743,9 @@ class MyDevice extends Homey.Device {
       this.logger.info('Log level changed to:', Logger.levelToString(newLogLevel));
     }
 
-    // Handle adaptive simulate mode capability visibility (v2.3.1)
-    if (changedKeys.includes('adaptive_simulate_mode')) {
-      await this.updateSimulatedCapabilityVisibility(newSettings.adaptive_simulate_mode as boolean);
+    // Handle adaptive control capability visibility (v2.3.1)
+    if (changedKeys.includes('adaptive_control_enabled')) {
+      await this.updateSimulatedCapabilityVisibility(newSettings.adaptive_control_enabled as boolean);
     }
 
     // Delegate settings changes to ServiceCoordinator first
@@ -3935,13 +3983,19 @@ class MyDevice extends Homey.Device {
     }
 
     // Handle energy price optimizer toggle (v1.4.0+)
+    // Updated v2.5.0: Added energy_prices_data and 4 display capabilities as feature flags
     if (changedKeys.includes('price_optimizer_enabled')) {
       const energyPriceCapabilities = [
+        'energy_prices_data',
         'adlar_energy_price_current',
         'adlar_energy_price_next',
         'adlar_energy_price_category',
         'adlar_energy_cost_hourly',
         'adlar_energy_cost_daily',
+        'adlar_price_forecast_4h',
+        'adlar_price_forecast_24h',
+        'adlar_cheapest_block_start',
+        'adlar_price_savings_potential',
       ];
 
       if (newSettings.price_optimizer_enabled) {
@@ -3949,7 +4003,20 @@ class MyDevice extends Homey.Device {
         for (const capability of energyPriceCapabilities) {
           if (!this.hasCapability(capability)) {
             await this.addCapability(capability);
-            await this.setCapabilityValue(capability, null);
+
+            // Set appropriate default values
+            let defaultValue: string | number | null = null;
+            if (capability === 'energy_prices_data') {
+              defaultValue = '{}';
+            } else if (capability === 'adlar_price_forecast_24h' || capability === 'adlar_price_forecast_4h') {
+              defaultValue = 0;
+            } else if (capability === 'adlar_price_savings_potential') {
+              defaultValue = 0;
+            } else if (capability === 'adlar_cheapest_block_start') {
+              defaultValue = 'N/A';
+            }
+
+            await this.setCapabilityValue(capability, defaultValue);
             this.log(`Added energy pricing capability: ${capability}`);
           }
         }
