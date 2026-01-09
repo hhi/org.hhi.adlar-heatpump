@@ -1,0 +1,64 @@
+{
+  "id": "expensive_block_approaching",
+  "title": {
+    "en": "Expensive period approaching",
+    "nl": "Dure periode nadert",
+    "de": "Teure Periode naht",
+    "fr": "Période coûteuse approche"
+  },
+  "titleFormatted": {
+    "en": "Expensive period starts in [[warning_hours]] hour(s)",
+    "nl": "Dure periode begint over [[warning_hours]] uur/uren",
+    "de": "Teure Periode beginnt in [[warning_hours]] Stunde(n)",
+    "fr": "Période coûteuse commence dans [[warning_hours]] heure(s)"
+  },
+  "hint": {
+    "en": "Triggers N hours before the most expensive electricity price block starts. Use to pre-heat or prepare before high-price periods.",
+    "nl": "Wordt N uur vóór het duurste elektriciteitsprijs blok geactiveerd. Gebruik dit om voor te verwarmen of voor te bereiden voor dure periodes.",
+    "de": "Wird N Stunden vor Beginn des teuersten Strompreis-Blocks ausgelöst. Nutzen Sie dies zum Vorheizen oder Vorbereiten vor teuren Perioden.",
+    "fr": "Se déclenche N heures avant le début du bloc de prix d'électricité le plus cher. Utilisez-le pour préchauffer ou préparer avant les périodes à prix élevés."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "starts_at",
+      "type": "string",
+      "title": {
+        "en": "Block Start Time",
+        "nl": "Blok Starttijd",
+        "de": "Block-Startzeit",
+        "fr": "Heure de Début du Bloc"
+      },
+      "example": "18:00"
+    },
+    {
+      "name": "avg_price",
+      "type": "number",
+      "title": {
+        "en": "Average Price (€/kWh)",
+        "nl": "Gemiddelde Prijs (€/kWh)",
+        "de": "Durchschnittspreis (€/kWh)",
+        "fr": "Prix Moyen (€/kWh)"
+      },
+      "example": 0.15
+    },
+    {
+      "name": "duration",
+      "type": "number",
+      "title": {
+        "en": "Block Duration (hours)",
+        "nl": "Blok Duur (uren)",
+        "de": "Block-Dauer (Stunden)",
+        "fr": "Durée du Bloc (heures)"
+      },
+      "example": 4
+    }
+  ]
+}

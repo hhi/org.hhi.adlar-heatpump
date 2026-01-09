@@ -27,6 +27,12 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
-  "icon": "/assets/simulated-target-temperature.svg",
-  "insight": true
+  "insights": true,
+  "insightsTitle": {
+    "en": "Simulated Heat Pump Setpoint",
+    "nl": "Gesimuleerde Warmtepomp Setpoint",
+    "de": "Simulierter Wärmepumpen-Sollwert",
+    "fr": "Consigne simulée de la pompe à chaleur"
+  },
+  "icon": "/assets/simulated-target-temperature.svg"
 }

@@ -32,9 +32,9 @@ export class FlowCardManagerService {
    */
   constructor(options: FlowCardManagerOptions) {
     this.device = options.device;
-    this.logger = options.logger || (() => {});
-    this.onExternalPowerData = options.onExternalPowerData || (async () => {});
-    this.onExternalPricesData = options.onExternalPricesData || (async () => {});
+    this.logger = options.logger || (() => { });
+    this.onExternalPowerData = options.onExternalPowerData || (async () => { });
+    this.onExternalPricesData = options.onExternalPricesData || (async () => { });
   }
 
   /**
@@ -228,7 +228,7 @@ export class FlowCardManagerService {
       default:
         // Auto mode: require both capability AND data
         return availableCaps.length > 0
-               && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
+          && availableCaps.some((cap) => capabilitiesWithData.includes(cap));
     }
   }
 
@@ -486,6 +486,211 @@ export class FlowCardManagerService {
       });
       this.flowCardListeners.set('cop_trend_analysis', copTrendListener);
 
+      // Price in cheapest hours condition (v2.5.0)
+      const priceInCheapestHoursCard = this.device.homey.flow.getConditionCard('price_in_cheapest_hours');
+      const priceInCheapestHoursListener = priceInCheapestHoursCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Price in cheapest hours condition triggered', { args });
+
+        // Get service coordinator to access EnergyPriceOptimizer
+        const { serviceCoordinator } = this.device as unknown as {
+          serviceCoordinator?: {
+            getAdaptiveControl: () => {
+              getEnergyPriceOptimizer: () => {
+                findCheapestBlock: (hours: number) => { startTime: Date; endTime: Date; avgPrice: number; totalHours: number } | null;
+              } | null;
+            } | null;
+          };
+        };
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control not available');
+          return false;
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control service not available');
+          return false;
+        }
+
+        const energyOptimizer = adaptiveControl.getEnergyPriceOptimizer();
+        if (!energyOptimizer) {
+          this.logger('FlowCardManagerService: Energy price optimizer not available');
+          return false;
+        }
+
+        const hours = args.hours || 4;
+        const cheapestBlock = energyOptimizer.findCheapestBlock(hours);
+
+        if (!cheapestBlock) {
+          this.logger('FlowCardManagerService: No cheapest block found - insufficient price data');
+          return false;
+        }
+
+        // Check if current time is within the cheapest block
+        const now = Date.now();
+        const isInBlock = now >= cheapestBlock.startTime.getTime() && now < cheapestBlock.endTime.getTime();
+
+        this.logger('FlowCardManagerService: Price in cheapest hours result', {
+          hours,
+          blockStart: cheapestBlock.startTime.toISOString(),
+          blockEnd: cheapestBlock.endTime.toISOString(),
+          avgPrice: cheapestBlock.avgPrice,
+          isInBlock,
+        });
+
+        return isInBlock;
+      });
+      this.flowCardListeners.set('price_in_cheapest_hours', priceInCheapestHoursListener);
+
+      // Price trend is condition (v2.5.0)
+      const priceTrendIsCard = this.device.homey.flow.getConditionCard('price_trend_is');
+      const priceTrendIsListener = priceTrendIsCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Price trend is condition triggered', { args });
+
+        // Get service coordinator to access EnergyPriceOptimizer
+        const { serviceCoordinator } = this.device as unknown as {
+          serviceCoordinator?: {
+            getAdaptiveControl: () => {
+              getEnergyPriceOptimizer: () => {
+                calculatePriceTrend: (hours: number) => { trend: 'rising' | 'falling' | 'stable'; slope: number; confidence: number } | null;
+              } | null;
+            } | null;
+          };
+        };
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control not available');
+          return false;
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control service not available');
+          return false;
+        }
+
+        const energyOptimizer = adaptiveControl.getEnergyPriceOptimizer();
+        if (!energyOptimizer) {
+          this.logger('FlowCardManagerService: Energy price optimizer not available');
+          return false;
+        }
+
+        const hours = args.hours || 6;
+        const expectedTrend = args.trend || 'stable';
+        const trendAnalysis = energyOptimizer.calculatePriceTrend(hours);
+
+        if (!trendAnalysis) {
+          this.logger('FlowCardManagerService: No trend analysis available - insufficient price data');
+          return false;
+        }
+
+        // Only trust trends with confidence > 0.5 (R² from linear regression)
+        if (trendAnalysis.confidence <= 0.5) {
+          this.logger('FlowCardManagerService: Trend confidence too low', {
+            confidence: trendAnalysis.confidence,
+            threshold: 0.5,
+          });
+          return false;
+        }
+
+        const trendsMatch = trendAnalysis.trend === expectedTrend;
+
+        this.logger('FlowCardManagerService: Price trend is result', {
+          hours,
+          expectedTrend,
+          actualTrend: trendAnalysis.trend,
+          slope: trendAnalysis.slope,
+          confidence: trendAnalysis.confidence,
+          trendsMatch,
+        });
+
+        return trendsMatch;
+      });
+      this.flowCardListeners.set('price_trend_is', priceTrendIsListener);
+
+      // Price vs daily average condition (v2.5.0)
+      const priceVsDailyAverageCard = this.device.homey.flow.getConditionCard('price_vs_daily_average');
+      const priceVsDailyAverageListener = priceVsDailyAverageCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Price vs daily average condition triggered', { args });
+
+        // Get service coordinator to access EnergyPriceOptimizer
+        const { serviceCoordinator } = this.device as unknown as {
+          serviceCoordinator?: {
+            getAdaptiveControl: () => {
+              getEnergyPriceOptimizer: () => {
+                getCurrentPrice: (timestamp: number) => { price: number; category: string } | null;
+                getPriceStatistics: () => { avg: number; sampleSize: number } | null;
+              } | null;
+            } | null;
+          };
+        };
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control not available');
+          return false;
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control service not available');
+          return false;
+        }
+
+        const energyOptimizer = adaptiveControl.getEnergyPriceOptimizer();
+        if (!energyOptimizer) {
+          this.logger('FlowCardManagerService: Energy price optimizer not available');
+          return false;
+        }
+
+        const margin = args.margin || 10;
+        const now = Date.now();
+
+        const currentPriceData = energyOptimizer.getCurrentPrice(now);
+        if (!currentPriceData) {
+          this.logger('FlowCardManagerService: No current price available');
+          return false;
+        }
+
+        const priceStats = energyOptimizer.getPriceStatistics();
+        if (!priceStats || priceStats.sampleSize < 6) {
+          this.logger('FlowCardManagerService: Insufficient price data for daily average', {
+            sampleSize: priceStats?.sampleSize || 0,
+            required: 6,
+          });
+          return false;
+        }
+
+        const currentPrice = currentPriceData.price;
+        const dailyAverage = priceStats.avg;
+
+        // Calculate percentage deviation from average
+        const deviationPercent = ((currentPrice - dailyAverage) / dailyAverage) * 100;
+        const absDeviationPercent = Math.abs(deviationPercent);
+
+        // Check if deviation meets the margin requirement
+        const meetsMargin = absDeviationPercent >= margin;
+
+        // The !{{below|above}} syntax means:
+        // - Return true if price is below average AND deviation meets margin
+        // - Return false if price is above average OR deviation doesn't meet margin
+        const isBelow = deviationPercent < 0;
+        const result = isBelow && meetsMargin;
+
+        this.logger('FlowCardManagerService: Price vs daily average result', {
+          currentPrice,
+          dailyAverage,
+          deviationPercent: deviationPercent.toFixed(2),
+          margin,
+          meetsMargin,
+          isBelow,
+          result,
+        });
+
+        return result;
+      });
+      this.flowCardListeners.set('price_vs_daily_average', priceVsDailyAverageListener);
+
       this.logger('FlowCardManagerService: Action-based condition cards registered');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering action-based condition cards:', error);
@@ -661,8 +866,60 @@ export class FlowCardManagerService {
       this.logger(`FlowCardManagerService: External energy prices updated: ${priceCount} hours received`);
 
       if (this.device.hasCapability('energy_prices_data')) {
-        const timestamp = new Date().toISOString();
-        await this.device.setCapabilityValue('energy_prices_data', timestamp);
+        // Build rich JSON schedule from EnergyPriceOptimizer data
+        const priceDataArray = energyOptimizer.getPriceData();
+        const cheapestBlock = energyOptimizer.findCheapestBlock(4); // 4-hour block
+        const expensiveBlock = energyOptimizer.findMostExpensiveBlock(2); // 2-hour block
+
+        // Build per-hour schedule with category and advice
+        const schedule = priceDataArray.map((pd: { timestamp: number; price: number; category: string }) => {
+          const hourDate = new Date(pd.timestamp);
+          const hourStr = `${hourDate.getHours().toString().padStart(2, '0')}:00`;
+
+          // Determine advice based on category
+          let advice = 'maintain';
+          if (pd.category === 'very_low' || pd.category === 'low') {
+            advice = 'preheat';
+          } else if (pd.category === 'high' || pd.category === 'very_high') {
+            advice = 'reduce';
+          }
+
+          return {
+            hour: hourStr,
+            price: Math.round(pd.price * 10000) / 10000, // 4 decimals
+            category: pd.category,
+            advice: advice,
+          };
+        });
+
+        // Build summary
+        const summary: Record<string, unknown> = {};
+        if (cheapestBlock) {
+          summary.cheapestBlock = {
+            start: `${cheapestBlock.startTime.getHours().toString().padStart(2, '0')}:00`,
+            end: `${cheapestBlock.endTime.getHours().toString().padStart(2, '0')}:00`,
+            avgPrice: Math.round(cheapestBlock.avgPrice * 10000) / 10000,
+            hours: cheapestBlock.totalHours,
+          };
+        }
+        if (expensiveBlock) {
+          summary.expensiveBlock = {
+            start: `${expensiveBlock.startTime.getHours().toString().padStart(2, '0')}:00`,
+            end: `${expensiveBlock.endTime.getHours().toString().padStart(2, '0')}:00`,
+            avgPrice: Math.round(expensiveBlock.avgPrice * 10000) / 10000,
+            hours: expensiveBlock.totalHours,
+          };
+        }
+
+        const richData = {
+          timestamp: new Date().toISOString(),
+          hoursAvailable: priceDataArray.length,
+          summary: summary,
+          schedule: schedule,
+        };
+
+        await this.device.setCapabilityValue('energy_prices_data', JSON.stringify(richData));
+        this.logger(`FlowCardManagerService: energy_prices_data updated with ${priceDataArray.length} hours of data`);
       }
 
       // Delegate to AdaptiveControlService for immediate capability updates via callback

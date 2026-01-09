@@ -50,7 +50,7 @@ export class BuildingModelService {
 
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
-    this.logger = config.logger || (() => {});
+    this.logger = config.logger || (() => { });
 
     // Get forgetting factor from config or device settings, fallback to default
     const forgettingFactor = config.forgettingFactor
@@ -139,7 +139,19 @@ export class BuildingModelService {
       this.logger(`BuildingModelService: ✅ Outdoor temp OK: ${outdoorTemp.toFixed(1)}°C`);
 
       // Get electrical power consumption
-      const powerElectric = (this.device.getCapabilityValue('measure_power') as number) || 0;
+      // FIX: Use EnergyTrackingService to get the best available power measurement (internal or external)
+      // This solves the issue where measure_power is 0 or unavailable (causing phantom high Tau values)
+      let powerElectric = 0;
+      // usage of EnergyTrackingService is MANDATORY for correct power readings
+      // If this fails, we skip the cycle rather than using unreliable fallback data
+      const energyTracking = (this.device as any).serviceCoordinator?.getEnergyTracking();
+      const powerMeasurement = energyTracking?.getCurrentPowerMeasurement();
+
+      if (!powerMeasurement || typeof powerMeasurement.value !== 'number') {
+        this.logger('BuildingModelService: ⚠️ No valid power measurement available - skipping cycle');
+        return;
+      }
+      powerElectric = powerMeasurement.value;
 
       // Calculate thermal power using COP estimation
       const cop = (this.device.getCapabilityValue('adlar_cop') as number) || 3.0;

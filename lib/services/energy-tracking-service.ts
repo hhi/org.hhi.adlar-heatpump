@@ -91,7 +91,8 @@ export class EnergyTrackingService {
 
       // Priority 1: External power measurement (from flow cards)
       const externalPower = this.device.getCapabilityValue('adlar_external_power');
-      if (externalPower !== null && externalPower > 0) {
+      // FIX: Accept 0 as a valid measurement (idling/standby) - checks for null/undefined only
+      if (externalPower !== null && externalPower !== undefined) {
         powerValue = externalPower;
         powerSource = 'external';
         confidence = 'high';

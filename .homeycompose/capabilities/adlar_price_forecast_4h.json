@@ -1,0 +1,28 @@
+{
+  "id": "adlar_price_forecast_4h",
+  "type": "number",
+  "title": {
+    "en": "Price Forecast (4h)",
+    "nl": "Prijsvoorspelling (4u)",
+    "de": "Preisprognose (4 Std)",
+    "fr": "Prévision Prix (4h)"
+  },
+  "units": {
+    "en": "€/kWh",
+    "nl": "€/kWh",
+    "de": "€/kWh",
+    "fr": "€/kWh"
+  },
+  "desc": {
+    "en": "Average electricity price for the next 4 hours.",
+    "nl": "Gemiddelde elektriciteitsprijs voor de komende 4 uur.",
+    "de": "Durchschnittlicher Strompreis für die nächsten 4 Stunden.",
+    "fr": "Prix moyen de l'électricité pour les 4 prochaines heures."
+  },
+  "decimals": 4,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/price-forecast-4h.svg"
+}

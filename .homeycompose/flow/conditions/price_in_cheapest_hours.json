@@ -1,0 +1,49 @@
+{
+  "id": "price_in_cheapest_hours",
+  "title": {
+    "en": "Price in cheapest hours",
+    "nl": "Prijs in goedkoopste uren",
+    "de": "Preis in günstigsten Stunden",
+    "fr": "Prix dans les heures les moins chères"
+  },
+  "titleFormatted": {
+    "en": "Current hour is !{{in|not in}} cheapest [[hours]] hours of today",
+    "nl": "Huidig uur is !{{in|niet in}} goedkoopste [[hours]] uren van vandaag",
+    "de": "Aktuelle Stunde ist !{{in|nicht in}} den günstigsten [[hours]] Stunden heute",
+    "fr": "L'heure actuelle est !{{dans|pas dans}} les [[hours]] heures les moins chères aujourd'hui"
+  },
+  "hint": {
+    "en": "Check if current hour is within the cheapest N-hour block today. Useful for running high-power tasks during low-price periods.",
+    "nl": "Controleer of het huidige uur binnen het goedkoopste N-uurs blok van vandaag valt. Nuttig voor het uitvoeren van energievretende taken tijdens goedkope periodes.",
+    "de": "Prüfen Sie, ob die aktuelle Stunde im günstigsten N-Stunden-Block heute liegt. Nützlich für energieintensive Aufgaben während günstiger Perioden.",
+    "fr": "Vérifier si l'heure actuelle se trouve dans le bloc de N heures les moins chères aujourd'hui. Utile pour exécuter des tâches gourmandes en énergie pendant les périodes à bas prix."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+    },
+    {
+      "type": "range",
+      "name": "hours",
+      "title": {
+        "en": "Block size (hours)",
+        "nl": "Blokgrootte (uren)",
+        "de": "Blockgröße (Stunden)",
+        "fr": "Taille du bloc (heures)"
+      },
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "units": "h",
+      "placeholder": {
+        "en": "Hours",
+        "nl": "Uren",
+        "de": "Stunden",
+        "fr": "Heures"
+      }
+    }
+  ]
+}

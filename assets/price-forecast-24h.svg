@@ -1,0 +1,17 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Euro symbol -->
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 30 C 50 30 43 40 43 55 C 43 70 50 80 60 80"/>
+    <line x1="37" y1="47" x2="57" y2="47"/>
+    <line x1="37" y1="63" x2="57" y2="63"/>
+  </g>
+
+  <!-- Calendar icon (24h indicator) - left side -->
+  <rect x="10" y="22" width="24" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="3"/>
+  <line x1="10" y1="28" x2="34" y2="28" stroke="currentColor" stroke-width="3"/>
+  <line x1="16" y1="19" x2="16" y2="25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="28" y1="19" x2="28" y2="25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 24h text -->
+  <text x="22" y="72" font-size="16" font-weight="bold" fill="currentColor" text-anchor="middle">24h</text>
+</svg>

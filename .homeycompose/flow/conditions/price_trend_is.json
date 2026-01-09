@@ -1,0 +1,88 @@
+{
+  "id": "price_trend_is",
+  "title": {
+    "en": "Price trend is",
+    "nl": "Prijstrend is",
+    "de": "Preistrend ist",
+    "fr": "Tendance des prix est"
+  },
+  "titleFormatted": {
+    "en": "Price trend for next [[hours]] hours !{{is|is not}} [[trend]]",
+    "nl": "Prijstrend voor komende [[hours]] uur !{{is|is niet}} [[trend]]",
+    "de": "Preistrend für nächste [[hours]] Stunden !{{ist|ist nicht}} [[trend]]",
+    "fr": "Tendance des prix pour les [[hours]] prochaines heures !{{est|n'est pas}} [[trend]]"
+  },
+  "hint": {
+    "en": "Check if electricity prices are rising, falling, or stable in the next N hours. Based on linear regression with confidence metric.",
+    "nl": "Controleer of elektriciteitsprijzen stijgen, dalen of stabiel zijn in de komende N uur. Gebaseerd op lineaire regressie met betrouwbaarheidsmeting.",
+    "de": "Prüfen Sie, ob die Strompreise in den nächsten N Stunden steigen, fallen oder stabil sind. Basierend auf linearer Regression mit Konfidenzmetrik.",
+    "fr": "Vérifier si les prix de l'électricité augmentent, diminuent ou sont stables dans les N prochaines heures. Basé sur une régression linéaire avec mesure de confiance."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+    },
+    {
+      "type": "range",
+      "name": "hours",
+      "title": {
+        "en": "Analysis window (hours)",
+        "nl": "Analysevenster (uren)",
+        "de": "Analysefenster (Stunden)",
+        "fr": "Fenêtre d'analyse (heures)"
+      },
+      "min": 1,
+      "max": 24,
+      "step": 1,
+      "units": "h",
+      "placeholder": {
+        "en": "Hours",
+        "nl": "Uren",
+        "de": "Stunden",
+        "fr": "Heures"
+      }
+    },
+    {
+      "type": "dropdown",
+      "name": "trend",
+      "title": {
+        "en": "Trend",
+        "nl": "Trend",
+        "de": "Trend",
+        "fr": "Tendance"
+      },
+      "values": [
+        {
+          "id": "rising",
+          "title": {
+            "en": "Rising",
+            "nl": "Stijgend",
+            "de": "Steigend",
+            "fr": "En hausse"
+          }
+        },
+        {
+          "id": "falling",
+          "title": {
+            "en": "Falling",
+            "nl": "Dalend",
+            "de": "Fallend",
+            "fr": "En baisse"
+          }
+        },
+        {
+          "id": "stable",
+          "title": {
+            "en": "Stable",
+            "nl": "Stabiel",
+            "de": "Stabil",
+            "fr": "Stable"
+          }
+        }
+      ]
+    }
+  ]
+}

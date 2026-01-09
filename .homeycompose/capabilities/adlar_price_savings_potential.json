@@ -1,0 +1,28 @@
+{
+  "id": "adlar_price_savings_potential",
+  "type": "number",
+  "title": {
+    "en": "Daily Savings Potential",
+    "nl": "Dagelijks Besparingspotentieel",
+    "de": "Tägliches Einsparpotenzial",
+    "fr": "Potentiel d'Économies Quotidiennes"
+  },
+  "units": {
+    "en": "€",
+    "nl": "€",
+    "de": "€",
+    "fr": "€"
+  },
+  "desc": {
+    "en": "Estimated daily savings using price optimization vs always-on heating.",
+    "nl": "Geschatte dagelijkse besparing met prijsoptimalisatie vs altijd aan verwarming.",
+    "de": "Geschätzte tägliche Einsparungen durch Preisoptimierung vs. Dauerheizung.",
+    "fr": "Économies quotidiennes estimées avec optimisation des prix vs chauffage continu."
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/price-savings-potential.svg"
+}

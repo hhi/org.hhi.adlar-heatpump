@@ -1,0 +1,20 @@
+{
+  "id": "adlar_cheapest_block_start",
+  "type": "string",
+  "title": {
+    "en": "Cheapest Block Starts",
+    "nl": "Goedkoopste Blok Begint",
+    "de": "Günstigster Block Beginnt",
+    "fr": "Bloc le Moins Cher Commence"
+  },
+  "desc": {
+    "en": "Start time (HH:MM) of the cheapest 4-hour block today.",
+    "nl": "Starttijd (UU:MM) van het goedkoopste 4-uurs blok vandaag.",
+    "de": "Startzeit (HH:MM) des günstigsten 4-Stunden-Blocks heute.",
+    "fr": "Heure de début (HH:MM) du bloc de 4 heures le moins cher aujourd'hui."
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/cheapest-block-start.svg"
+}

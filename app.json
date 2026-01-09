@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.4.15",
+  "version": "2.5.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -414,6 +414,81 @@
               "fr": "Température ambiante actuelle"
             },
             "example": 15.5
+          }
+        ]
+      },
+      {
+        "id": "cheapest_block_started",
+        "title": {
+          "en": "Cheapest block started",
+          "nl": "Goedkoopste blok gestart",
+          "de": "Günstigster Block gestartet",
+          "fr": "Bloc le moins cher commencé"
+        },
+        "titleFormatted": {
+          "en": "Cheapest [[hours]]-hour block started",
+          "nl": "Goedkoopste [[hours]]-uurs blok gestart",
+          "de": "Günstigster [[hours]]-Stunden-Block gestartet",
+          "fr": "Bloc de [[hours]] heures le moins cher commencé"
+        },
+        "hint": {
+          "en": "Triggers when the cheapest electricity price block of the day starts. Use to maximize energy consumption during low-price periods.",
+          "nl": "Wordt geactiveerd wanneer het goedkoopste elektriciteitsprijs blok van de dag begint. Gebruik dit om energieverbruik te maximaliseren tijdens goedkope periodes.",
+          "de": "Wird ausgelöst, wenn der günstigste Strompreis-Block des Tages beginnt. Nutzen Sie dies, um den Energieverbrauch während günstiger Perioden zu maximieren.",
+          "fr": "Se déclenche lorsque le bloc de prix d'électricité le moins cher de la journée commence. Utilisez-le pour maximiser la consommation d'énergie pendant les périodes à bas prix."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "block_start",
+            "type": "string",
+            "title": {
+              "en": "Block Start Time",
+              "nl": "Blok Starttijd",
+              "de": "Block-Startzeit",
+              "fr": "Heure de Début du Bloc"
+            },
+            "example": "14:00"
+          },
+          {
+            "name": "block_end",
+            "type": "string",
+            "title": {
+              "en": "Block End Time",
+              "nl": "Blok Eindtijd",
+              "de": "Block-Endzeit",
+              "fr": "Heure de Fin du Bloc"
+            },
+            "example": "18:00"
+          },
+          {
+            "name": "avg_price",
+            "type": "number",
+            "title": {
+              "en": "Average Price (€/kWh)",
+              "nl": "Gemiddelde Prijs (€/kWh)",
+              "de": "Durchschnittspreis (€/kWh)",
+              "fr": "Prix Moyen (€/kWh)"
+            },
+            "example": 0.05
+          },
+          {
+            "name": "hours",
+            "type": "number",
+            "title": {
+              "en": "Block Duration (hours)",
+              "nl": "Blok Duur (uren)",
+              "de": "Block-Dauer (Stunden)",
+              "fr": "Durée du Bloc (heures)"
+            },
+            "example": 4
           }
         ]
       },
@@ -1862,6 +1937,70 @@
               "fr": "Pas d'impulsion seuil"
             },
             "example": 200
+          }
+        ]
+      },
+      {
+        "id": "expensive_block_approaching",
+        "title": {
+          "en": "Expensive period approaching",
+          "nl": "Dure periode nadert",
+          "de": "Teure Periode naht",
+          "fr": "Période coûteuse approche"
+        },
+        "titleFormatted": {
+          "en": "Expensive period starts in [[warning_hours]] hour(s)",
+          "nl": "Dure periode begint over [[warning_hours]] uur/uren",
+          "de": "Teure Periode beginnt in [[warning_hours]] Stunde(n)",
+          "fr": "Période coûteuse commence dans [[warning_hours]] heure(s)"
+        },
+        "hint": {
+          "en": "Triggers N hours before the most expensive electricity price block starts. Use to pre-heat or prepare before high-price periods.",
+          "nl": "Wordt N uur vóór het duurste elektriciteitsprijs blok geactiveerd. Gebruik dit om voor te verwarmen of voor te bereiden voor dure periodes.",
+          "de": "Wird N Stunden vor Beginn des teuersten Strompreis-Blocks ausgelöst. Nutzen Sie dies zum Vorheizen oder Vorbereiten vor teuren Perioden.",
+          "fr": "Se déclenche N heures avant le début du bloc de prix d'électricité le plus cher. Utilisez-le pour préchauffer ou préparer avant les périodes à prix élevés."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "starts_at",
+            "type": "string",
+            "title": {
+              "en": "Block Start Time",
+              "nl": "Blok Starttijd",
+              "de": "Block-Startzeit",
+              "fr": "Heure de Début du Bloc"
+            },
+            "example": "18:00"
+          },
+          {
+            "name": "avg_price",
+            "type": "number",
+            "title": {
+              "en": "Average Price (€/kWh)",
+              "nl": "Gemiddelde Prijs (€/kWh)",
+              "de": "Durchschnittspreis (€/kWh)",
+              "fr": "Prix Moyen (€/kWh)"
+            },
+            "example": 0.15
+          },
+          {
+            "name": "duration",
+            "type": "number",
+            "title": {
+              "en": "Block Duration (hours)",
+              "nl": "Blok Duur (uren)",
+              "de": "Block-Dauer (Stunden)",
+              "fr": "Durée du Bloc (heures)"
+            },
+            "example": 4
           }
         ]
       },
@@ -3415,6 +3554,70 @@
         ]
       },
       {
+        "id": "price_trend_changed",
+        "title": {
+          "en": "Price trend changed",
+          "nl": "Prijstrend veranderd",
+          "de": "Preistrend geändert",
+          "fr": "Tendance des prix changée"
+        },
+        "titleFormatted": {
+          "en": "Price trend changed from [[old_trend]] to [[new_trend]]",
+          "nl": "Prijstrend veranderd van [[old_trend]] naar [[new_trend]]",
+          "de": "Preistrend geändert von [[old_trend]] zu [[new_trend]]",
+          "fr": "Tendance des prix changée de [[old_trend]] à [[new_trend]]"
+        },
+        "hint": {
+          "en": "Triggers when electricity price trend direction changes (rising, falling, stable). Based on linear regression analysis with confidence threshold.",
+          "nl": "Wordt geactiveerd wanneer de prijstrendrichting van elektriciteit verandert (stijgend, dalend, stabiel). Gebaseerd op lineaire regressie analyse met betrouwbaarheidsdrempel.",
+          "de": "Wird ausgelöst, wenn sich die Richtung des Strompreistrends ändert (steigend, fallend, stabil). Basierend auf linearer Regressionsanalyse mit Konfidenzschwelle.",
+          "fr": "Se déclenche lorsque la direction de la tendance des prix de l'électricité change (en hausse, en baisse, stable). Basé sur une analyse de régression linéaire avec seuil de confiance."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "old_trend",
+            "type": "string",
+            "title": {
+              "en": "Previous Trend",
+              "nl": "Vorige Trend",
+              "de": "Vorheriger Trend",
+              "fr": "Tendance Précédente"
+            },
+            "example": "falling"
+          },
+          {
+            "name": "new_trend",
+            "type": "string",
+            "title": {
+              "en": "New Trend",
+              "nl": "Nieuwe Trend",
+              "de": "Neuer Trend",
+              "fr": "Nouvelle Tendance"
+            },
+            "example": "rising"
+          },
+          {
+            "name": "hours_analyzed",
+            "type": "number",
+            "title": {
+              "en": "Hours Analyzed",
+              "nl": "Uren Geanalyseerd",
+              "de": "Analysierte Stunden",
+              "fr": "Heures Analysées"
+            },
+            "example": 6
+          }
+        ]
+      },
+      {
         "id": "suction_temperature_alert",
         "title": {
           "en": "Suction temperature alert",
@@ -4934,6 +5137,192 @@
               "nl": "Vermogen drempel in watt",
               "de": "Leistungsschwellenwert in Watt",
               "fr": "Seuil de puissance en watts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "price_in_cheapest_hours",
+        "title": {
+          "en": "Price in cheapest hours",
+          "nl": "Prijs in goedkoopste uren",
+          "de": "Preis in günstigsten Stunden",
+          "fr": "Prix dans les heures les moins chères"
+        },
+        "titleFormatted": {
+          "en": "Current hour is !{{in|not in}} cheapest [[hours]] hours of today",
+          "nl": "Huidig uur is !{{in|niet in}} goedkoopste [[hours]] uren van vandaag",
+          "de": "Aktuelle Stunde ist !{{in|nicht in}} den günstigsten [[hours]] Stunden heute",
+          "fr": "L'heure actuelle est !{{dans|pas dans}} les [[hours]] heures les moins chères aujourd'hui"
+        },
+        "hint": {
+          "en": "Check if current hour is within the cheapest N-hour block today. Useful for running high-power tasks during low-price periods.",
+          "nl": "Controleer of het huidige uur binnen het goedkoopste N-uurs blok van vandaag valt. Nuttig voor het uitvoeren van energievretende taken tijdens goedkope periodes.",
+          "de": "Prüfen Sie, ob die aktuelle Stunde im günstigsten N-Stunden-Block heute liegt. Nützlich für energieintensive Aufgaben während günstiger Perioden.",
+          "fr": "Vérifier si l'heure actuelle se trouve dans le bloc de N heures les moins chères aujourd'hui. Utile pour exécuter des tâches gourmandes en énergie pendant les périodes à bas prix."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          },
+          {
+            "type": "range",
+            "name": "hours",
+            "title": {
+              "en": "Block size (hours)",
+              "nl": "Blokgrootte (uren)",
+              "de": "Blockgröße (Stunden)",
+              "fr": "Taille du bloc (heures)"
+            },
+            "min": 1,
+            "max": 12,
+            "step": 1,
+            "units": "h",
+            "placeholder": {
+              "en": "Hours",
+              "nl": "Uren",
+              "de": "Stunden",
+              "fr": "Heures"
+            }
+          }
+        ]
+      },
+      {
+        "id": "price_trend_is",
+        "title": {
+          "en": "Price trend is",
+          "nl": "Prijstrend is",
+          "de": "Preistrend ist",
+          "fr": "Tendance des prix est"
+        },
+        "titleFormatted": {
+          "en": "Price trend for next [[hours]] hours !{{is|is not}} [[trend]]",
+          "nl": "Prijstrend voor komende [[hours]] uur !{{is|is niet}} [[trend]]",
+          "de": "Preistrend für nächste [[hours]] Stunden !{{ist|ist nicht}} [[trend]]",
+          "fr": "Tendance des prix pour les [[hours]] prochaines heures !{{est|n'est pas}} [[trend]]"
+        },
+        "hint": {
+          "en": "Check if electricity prices are rising, falling, or stable in the next N hours. Based on linear regression with confidence metric.",
+          "nl": "Controleer of elektriciteitsprijzen stijgen, dalen of stabiel zijn in de komende N uur. Gebaseerd op lineaire regressie met betrouwbaarheidsmeting.",
+          "de": "Prüfen Sie, ob die Strompreise in den nächsten N Stunden steigen, fallen oder stabil sind. Basierend auf linearer Regression mit Konfidenzmetrik.",
+          "fr": "Vérifier si les prix de l'électricité augmentent, diminuent ou sont stables dans les N prochaines heures. Basé sur une régression linéaire avec mesure de confiance."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          },
+          {
+            "type": "range",
+            "name": "hours",
+            "title": {
+              "en": "Analysis window (hours)",
+              "nl": "Analysevenster (uren)",
+              "de": "Analysefenster (Stunden)",
+              "fr": "Fenêtre d'analyse (heures)"
+            },
+            "min": 1,
+            "max": 24,
+            "step": 1,
+            "units": "h",
+            "placeholder": {
+              "en": "Hours",
+              "nl": "Uren",
+              "de": "Stunden",
+              "fr": "Heures"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "trend",
+            "title": {
+              "en": "Trend",
+              "nl": "Trend",
+              "de": "Trend",
+              "fr": "Tendance"
+            },
+            "values": [
+              {
+                "id": "rising",
+                "title": {
+                  "en": "Rising",
+                  "nl": "Stijgend",
+                  "de": "Steigend",
+                  "fr": "En hausse"
+                }
+              },
+              {
+                "id": "falling",
+                "title": {
+                  "en": "Falling",
+                  "nl": "Dalend",
+                  "de": "Fallend",
+                  "fr": "En baisse"
+                }
+              },
+              {
+                "id": "stable",
+                "title": {
+                  "en": "Stable",
+                  "nl": "Stabiel",
+                  "de": "Stabil",
+                  "fr": "Stable"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "price_vs_daily_average",
+        "title": {
+          "en": "Price vs daily average",
+          "nl": "Prijs vs daggemiddelde",
+          "de": "Preis vs Tagesdurchschnitt",
+          "fr": "Prix vs moyenne quotidienne"
+        },
+        "titleFormatted": {
+          "en": "Current price is !{{below|above}} daily average by [[margin]]%",
+          "nl": "Huidige prijs is !{{onder|boven}} daggemiddelde met [[margin]]%",
+          "de": "Aktueller Preis ist !{{unter|über}} Tagesdurchschnitt um [[margin]]%",
+          "fr": "Le prix actuel est !{{inférieur|supérieur}} à la moyenne quotidienne de [[margin]]%"
+        },
+        "hint": {
+          "en": "Check if current electricity price deviates from the daily average by at least the specified margin percentage. Useful for detecting significantly low or high prices.",
+          "nl": "Controleer of de huidige elektriciteitsprijs afwijkt van het daggemiddelde met minimaal het opgegeven margepercentage. Nuttig voor het detecteren van aanzienlijk lage of hoge prijzen.",
+          "de": "Prüfen Sie, ob der aktuelle Strompreis vom Tagesdurchschnitt um mindestens die angegebene Marge abweicht. Nützlich zum Erkennen deutlich niedriger oder hoher Preise.",
+          "fr": "Vérifier si le prix actuel de l'électricité s'écarte de la moyenne quotidienne d'au moins le pourcentage de marge spécifié. Utile pour détecter des prix significativement bas ou élevés."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          },
+          {
+            "type": "range",
+            "name": "margin",
+            "title": {
+              "en": "Margin (%)",
+              "nl": "Marge (%)",
+              "de": "Marge (%)",
+              "fr": "Marge (%)"
+            },
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "units": "%",
+            "placeholder": {
+              "en": "Margin (%)",
+              "nl": "Marge (%)",
+              "de": "Marge (%)",
+              "fr": "Marge (%)"
             }
           }
         ]
@@ -6912,6 +7301,10 @@
         "energy_prices_data",
         "adlar_energy_cost_hourly",
         "adlar_energy_cost_daily",
+        "adlar_price_forecast_4h",
+        "adlar_price_forecast_24h",
+        "adlar_cheapest_block_start",
+        "adlar_price_savings_potential",
         "adlar_cop_daily",
         "adlar_cop_weekly",
         "adlar_cop_monthly",
@@ -8952,6 +9345,84 @@
                 "de": "€",
                 "fr": "€"
               }
+            },
+            {
+              "id": "adaptive_price_block_hours",
+              "type": "number",
+              "label": {
+                "en": "Price Block Size (hours)",
+                "nl": "Prijsblok Grootte (uren)",
+                "de": "Preisblock-Größe (Stunden)",
+                "fr": "Taille du Bloc de Prix (heures)"
+              },
+              "hint": {
+                "en": "Size of cheapest/expensive blocks for day-ahead planning. Used by 'cheapest block started' trigger and block detection. Default: 4 hours",
+                "nl": "Grootte van goedkoopste/duurste blokken voor dag-vooruit planning. Gebruikt door 'goedkoopste blok gestart' trigger en blok detectie. Standaard: 4 uren",
+                "de": "Größe der günstigsten/teuersten Blöcke für Day-Ahead-Planung. Verwendet von 'günstigster Block gestartet' Trigger und Block-Erkennung. Standard: 4 Stunden",
+                "fr": "Taille des blocs les moins chers/coûteux pour la planification day-ahead. Utilisé par le déclencheur 'bloc le moins cher commencé' et la détection de blocs. Défaut: 4 heures"
+              },
+              "value": 4,
+              "min": 1,
+              "max": 12,
+              "step": 1,
+              "units": {
+                "en": "h",
+                "nl": "u",
+                "de": "Std",
+                "fr": "h"
+              }
+            },
+            {
+              "id": "adaptive_price_warning_hours",
+              "type": "number",
+              "label": {
+                "en": "Expensive Block Warning Time (hours)",
+                "nl": "Duur Blok Waarschuwingstijd (uren)",
+                "de": "Teurer Block Warnzeit (Stunden)",
+                "fr": "Temps d'Avertissement Bloc Coûteux (heures)"
+              },
+              "hint": {
+                "en": "Trigger 'expensive period approaching' flow N hours before expensive block starts. Use to pre-heat building. Default: 2 hours",
+                "nl": "Activeer 'dure periode nadert' flow N uur voor duur blok begint. Gebruik om gebouw voor te verwarmen. Standaard: 2 uren",
+                "de": "Löst 'teure Periode naht' Flow N Stunden vor Start des teuren Blocks aus. Zum Vorheizen des Gebäudes verwenden. Standard: 2 Stunden",
+                "fr": "Déclenche le flow 'période coûteuse approche' N heures avant le début du bloc coûteux. Utilisez pour préchauffer le bâtiment. Défaut: 2 heures"
+              },
+              "value": 2,
+              "min": 1,
+              "max": 4,
+              "step": 1,
+              "units": {
+                "en": "h",
+                "nl": "u",
+                "de": "Std",
+                "fr": "h"
+              }
+            },
+            {
+              "id": "adaptive_price_trend_hours",
+              "type": "number",
+              "label": {
+                "en": "Price Trend Analysis Window (hours)",
+                "nl": "Prijstrend Analyse Venster (uren)",
+                "de": "Preistrend-Analysefenster (Stunden)",
+                "fr": "Fenêtre d'Analyse Tendance Prix (heures)"
+              },
+              "hint": {
+                "en": "Number of future hours to analyze for price trend detection (rising/falling/stable). Used by 'price trend changed' trigger. Default: 6 hours",
+                "nl": "Aantal toekomstige uren om te analyseren voor prijstrend detectie (stijgend/dalend/stabiel). Gebruikt door 'prijstrend veranderd' trigger. Standaard: 6 uren",
+                "de": "Anzahl zukünftiger Stunden für Preistrend-Erkennung (steigend/fallend/stabil). Verwendet von 'Preistrend geändert' Trigger. Standard: 6 Stunden",
+                "fr": "Nombre d'heures futures à analyser pour la détection de tendance de prix (en hausse/baisse/stable). Utilisé par le déclencheur 'tendance prix changée'. Défaut: 6 heures"
+              },
+              "value": 6,
+              "min": 3,
+              "max": 24,
+              "step": 1,
+              "units": {
+                "en": "h",
+                "nl": "u",
+                "de": "Std",
+                "fr": "h"
+              }
             }
           ]
         },
@@ -9469,6 +9940,26 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/building-heat-loss.svg"
+    },
+    "adlar_cheapest_block_start": {
+      "id": "adlar_cheapest_block_start",
+      "type": "string",
+      "title": {
+        "en": "Cheapest Block Starts",
+        "nl": "Goedkoopste Blok Begint",
+        "de": "Günstigster Block Beginnt",
+        "fr": "Bloc le Moins Cher Commence"
+      },
+      "desc": {
+        "en": "Start time (HH:MM) of the cheapest 4-hour block today.",
+        "nl": "Starttijd (UU:MM) van het goedkoopste 4-uurs blok vandaag.",
+        "de": "Startzeit (HH:MM) des günstigsten 4-Stunden-Blocks heute.",
+        "fr": "Heure de début (HH:MM) du bloc de 4 heures le moins cher aujourd'hui."
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/cheapest-block-start.svg"
     },
     "adlar_connection_active": {
       "id": "adlar_connection_active",
@@ -10887,6 +11378,90 @@
         "fr": "dp 13: countdown_set - Définir la courbe de chauffage pour la compensation de température (sélecteur contrôlable par l'utilisateur)"
       }
     },
+    "adlar_price_forecast_24h": {
+      "id": "adlar_price_forecast_24h",
+      "type": "number",
+      "title": {
+        "en": "Price Forecast (24h)",
+        "nl": "Prijsvoorspelling (24u)",
+        "de": "Preisprognose (24 Std)",
+        "fr": "Prévision Prix (24h)"
+      },
+      "units": {
+        "en": "€/kWh",
+        "nl": "€/kWh",
+        "de": "€/kWh",
+        "fr": "€/kWh"
+      },
+      "desc": {
+        "en": "Average electricity price for the next 24 hours.",
+        "nl": "Gemiddelde elektriciteitsprijs voor de komende 24 uur.",
+        "de": "Durchschnittlicher Strompreis für die nächsten 24 Stunden.",
+        "fr": "Prix moyen de l'électricité pour les 24 prochaines heures."
+      },
+      "decimals": 4,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/price-forecast-24h.svg"
+    },
+    "adlar_price_forecast_4h": {
+      "id": "adlar_price_forecast_4h",
+      "type": "number",
+      "title": {
+        "en": "Price Forecast (4h)",
+        "nl": "Prijsvoorspelling (4u)",
+        "de": "Preisprognose (4 Std)",
+        "fr": "Prévision Prix (4h)"
+      },
+      "units": {
+        "en": "€/kWh",
+        "nl": "€/kWh",
+        "de": "€/kWh",
+        "fr": "€/kWh"
+      },
+      "desc": {
+        "en": "Average electricity price for the next 4 hours.",
+        "nl": "Gemiddelde elektriciteitsprijs voor de komende 4 uur.",
+        "de": "Durchschnittlicher Strompreis für die nächsten 4 Stunden.",
+        "fr": "Prix moyen de l'électricité pour les 4 prochaines heures."
+      },
+      "decimals": 4,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/price-forecast-4h.svg"
+    },
+    "adlar_price_savings_potential": {
+      "id": "adlar_price_savings_potential",
+      "type": "number",
+      "title": {
+        "en": "Daily Savings Potential",
+        "nl": "Dagelijks Besparingspotentieel",
+        "de": "Tägliches Einsparpotenzial",
+        "fr": "Potentiel d'Économies Quotidiennes"
+      },
+      "units": {
+        "en": "€",
+        "nl": "€",
+        "de": "€",
+        "fr": "€"
+      },
+      "desc": {
+        "en": "Estimated daily savings using price optimization vs always-on heating.",
+        "nl": "Geschatte dagelijkse besparing met prijsoptimalisatie vs altijd aan verwarming.",
+        "de": "Geschätzte tägliche Einsparungen durch Preisoptimierung vs. Dauerheizung.",
+        "fr": "Économies quotidiennes estimées avec optimisation des prix vs chauffage continu."
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/price-savings-potential.svg"
+    },
     "adlar_scop": {
       "id": "adlar_scop",
       "title": {
@@ -11034,8 +11609,14 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
-      "icon": "/assets/simulated-target-temperature.svg",
-      "insight": true
+      "insights": true,
+      "insightsTitle": {
+        "en": "Simulated Heat Pump Setpoint",
+        "nl": "Gesimuleerde Warmtepomp Setpoint",
+        "de": "Simulierter Wärmepumpen-Sollwert",
+        "fr": "Consigne simulée de la pompe à chaleur"
+      },
+      "icon": "/assets/simulated-target-temperature.svg"
     },
     "adlar_state_backwater": {
       "id": "adlar_state_backwater",

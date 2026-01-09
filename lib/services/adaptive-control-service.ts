@@ -6,7 +6,7 @@ import Homey from 'homey';
 import { HeatingController, SensorData } from '../adaptive/heating-controller';
 import { ExternalTemperatureService } from './external-temperature-service';
 import { BuildingModelService } from './building-model-service';
-import { EnergyPriceOptimizer } from '../adaptive/energy-price-optimizer';
+import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { WeightedDecisionMaker, type ConfidenceMetrics } from '../adaptive/weighted-decision-maker';
 import { DeviceConstants } from '../constants';
@@ -92,6 +92,11 @@ export class AdaptiveControlService {
   private lastPriceCategory: string | null = null; // Track category changes
   private lastDailyCostCheck: number = 0; // Rate limit daily cost checks
   private dailyCostThresholdTriggered = false; // Reset daily at midnight
+
+  // Block detection state (v2.5.0+)
+  private lastCheapestBlockStart: number = 0; // Timestamp of last cheapest block start
+  private lastExpensiveBlockWarning: number = 0; // Timestamp of last expensive block warning
+  private lastPriceTrend: PriceTrend | null = null; // Last known price trend
 
   // Persistence keys
   private readonly STORE_KEY_PI_HISTORY = 'adaptive_pi_history';
@@ -532,6 +537,9 @@ export class AdaptiveControlService {
           // Check and trigger flow cards
           await this.checkPriceThresholdCrossed();
           await this.checkDailyCostThreshold();
+
+          // Step 4D: Price Block Detection (v2.5.0+)
+          await this.detectPriceBlocks();
         } catch (err) {
           this.logger('Energy optimizer failed:', err);
         }
@@ -1220,7 +1228,7 @@ export class AdaptiveControlService {
 
       // Compile diagnostic data as JSON
       const diagnostics = {
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
         finalAdjustment: Number(combinedAction.finalAdjustment.toFixed(2)),
         breakdown: {
           comfort: Number(combinedAction.breakdown.comfort.toFixed(2)),
@@ -1262,6 +1270,7 @@ export class AdaptiveControlService {
           },
           configuration: copDiag.configuration,
         },
+        buildingModel: await this.getBuildingModelDiagnostics(),
       };
 
       // Update capability with JSON string
@@ -1274,6 +1283,40 @@ export class AdaptiveControlService {
     } catch (error) {
       this.logger('⚠️ Failed to update diagnostic capability:', error);
       // Non-critical: don't throw, just log warning
+    }
+  }
+
+  /**
+   * Get Building Model diagnostics for inclusion in adaptive_control_diagnostics
+   * @returns Object with tau, confidence, sampleCount, enabled status
+   * @since v2.6.0
+   */
+  private async getBuildingModelDiagnostics(): Promise<{
+    enabled: boolean;
+    tau: number;
+    confidence: number;
+    sampleCount: number;
+    thermalMass: number;
+    heatLoss: number;
+  } | null> {
+    try {
+      if (!this.buildingModel) {
+        return null;
+      }
+      const status = await this.buildingModel.getDiagnosticStatus();
+      const model = this.buildingModel.getLearner().getModel();
+
+      return {
+        enabled: status.enabled,
+        tau: Number(status.tau.toFixed(1)),
+        confidence: Number(status.confidence.toFixed(1)),
+        sampleCount: status.sampleCount,
+        thermalMass: model ? Number(model.C.toFixed(2)) : 0,
+        heatLoss: model ? Number(model.UA.toFixed(3)) : 0,
+      };
+    } catch (error) {
+      this.logger('⚠️ Failed to get building model diagnostics:', error);
+      return null;
     }
   }
 
@@ -1491,6 +1534,45 @@ export class AdaptiveControlService {
         await this.device.setCapabilityValue('adlar_energy_price_next', null);
       }
 
+      // Update forecast capabilities (v2.5.0+)
+      if (this.device.hasCapability('adlar_price_forecast_4h')) {
+        const forecast4h = this.energyOptimizer.getAveragePrice(now, 4);
+        if (forecast4h) {
+          await this.device.setCapabilityValue('adlar_price_forecast_4h',
+            Math.round(forecast4h.price * 10000) / 10000);
+        }
+      }
+
+      if (this.device.hasCapability('adlar_price_forecast_24h')) {
+        const forecast24h = this.energyOptimizer.getAveragePrice(now, 24);
+        if (forecast24h) {
+          await this.device.setCapabilityValue('adlar_price_forecast_24h',
+            Math.round(forecast24h.price * 10000) / 10000);
+        }
+      }
+
+      // Update cheapest block start time
+      if (this.device.hasCapability('adlar_cheapest_block_start')) {
+        const blockHours = (await this.device.getSetting('adaptive_price_block_hours')) || 4;
+        const cheapestBlock = this.energyOptimizer.findCheapestBlock(blockHours);
+        if (cheapestBlock) {
+          const formatTime = (date: Date) => {
+            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+          };
+          await this.device.setCapabilityValue('adlar_cheapest_block_start',
+            formatTime(cheapestBlock.startTime));
+        } else {
+          await this.device.setCapabilityValue('adlar_cheapest_block_start', 'N/A');
+        }
+      }
+
+      // Calculate and update daily savings potential
+      if (this.device.hasCapability('adlar_price_savings_potential')) {
+        const savingsPotential = this.calculateDailySavingsPotential();
+        await this.device.setCapabilityValue('adlar_price_savings_potential',
+          Math.round(savingsPotential * 100) / 100);
+      }
+
       this.logger(
         `Energy prices updated: Current €${effectiveCurrentPrice.toFixed(4)}/kWh (${currentPrice.category}), `
         + `Next €${effectiveNextPrice > 0 ? effectiveNextPrice.toFixed(4) : 'N/A'}/kWh, Mode: ${this.energyOptimizer.getPriceMode()}`,
@@ -1601,6 +1683,186 @@ export class AdaptiveControlService {
       }
     } catch (err) {
       this.logger('Failed to check daily cost threshold:', err);
+    }
+  }
+
+  /**
+   * Calculate daily savings potential using price optimization
+   * Conservative estimate based on load shifting opportunities
+   *
+   * @returns Estimated savings in € per day
+   * @since v2.5.0
+   */
+  private calculateDailySavingsPotential(): number {
+    try {
+      // Get price statistics (require 6+ hours of data)
+      const priceStats = this.energyOptimizer.getPriceStatistics();
+      if (!priceStats || priceStats.sampleSize < 6) {
+        this.logger('EnergyPriceOptimizer: Insufficient price data for savings calculation');
+        return 0;
+      }
+
+      // Get daily consumption
+      const dailyKWh = (this.device.getCapabilityValue('adlar_external_energy_daily') as number) || 0;
+      if (dailyKWh === 0) {
+        return 0; // No consumption data
+      }
+
+      // Calculate always-on cost (baseline)
+      const alwaysOnCost = dailyKWh * priceStats.avg;
+
+      // Conservative assumptions:
+      // - Only 20% of load is shiftable (thermal storage, pre-heating)
+      // - Shifted load pays 30% less (avg price → cheapest period)
+      const shiftableLoad = dailyKWh * 0.20;
+      const priceReduction = 0.30; // 30% savings on shifted load
+
+      const optimizedCost = ((dailyKWh - shiftableLoad) * priceStats.avg)
+        + (shiftableLoad * priceStats.avg * (1 - priceReduction));
+
+      const savings = alwaysOnCost - optimizedCost;
+
+      // Sanity check: savings must be positive and < 50% of always-on cost
+      if (savings < 0 || savings > alwaysOnCost * 0.50) {
+        this.logger('EnergyPriceOptimizer: Sanity check failed', {
+          savings: `€${savings.toFixed(2)}`,
+          alwaysOnCost: `€${alwaysOnCost.toFixed(2)}`,
+        });
+        return 0;
+      }
+
+      this.logger(`EnergyPriceOptimizer: Daily savings potential: €${savings.toFixed(2)} (${dailyKWh.toFixed(1)} kWh × 20% shifted × 30% cheaper)`);
+      return savings;
+    } catch (error) {
+      this.logger('EnergyPriceOptimizer: Error calculating savings potential:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Detect price blocks and trigger flow cards
+   * Checks for cheapest block entry, approaching expensive blocks, and trend changes
+   *
+   * @since v2.5.0
+   */
+  private async detectPriceBlocks(): Promise<void> {
+    try {
+      const now = Date.now();
+
+      // Get block settings
+      const blockHours = (await this.device.getSetting('adaptive_price_block_hours')) || 4;
+      const warningHours = (await this.device.getSetting('adaptive_price_warning_hours')) || 2;
+      const trendHours = (await this.device.getSetting('adaptive_price_trend_hours')) || 6;
+
+      // === 1. Cheapest Block Detection ===
+      const cheapestBlock = this.energyOptimizer.findCheapestBlock(blockHours);
+      if (cheapestBlock) {
+        const blockStart = cheapestBlock.startTime.getTime();
+        const blockEnd = cheapestBlock.endTime.getTime();
+
+        // Check if we just entered the cheapest block
+        const isInBlock = now >= blockStart && now < blockEnd;
+        const isNewBlock = this.lastCheapestBlockStart !== blockStart;
+
+        if (isInBlock && isNewBlock) {
+          // Format times as HH:MM
+          const formatTime = (date: Date) => {
+            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+          };
+
+          this.logger(
+            `💰 Cheapest ${blockHours}-hour block started: ${formatTime(cheapestBlock.startTime)} - ${formatTime(cheapestBlock.endTime)} `
+            + `(avg €${cheapestBlock.avgPrice.toFixed(4)}/kWh)`,
+          );
+
+          // Trigger flow card
+          await this.device.homey.flow
+            .getDeviceTriggerCard('cheapest_block_started')
+            .trigger(
+              this.device,
+              {
+                block_start: formatTime(cheapestBlock.startTime),
+                block_end: formatTime(cheapestBlock.endTime),
+                avg_price: cheapestBlock.avgPrice,
+                hours: blockHours,
+              },
+            )
+            .catch((err) => this.logger('Failed to trigger cheapest_block_started:', err));
+
+          // Update state to prevent duplicate triggers
+          this.lastCheapestBlockStart = blockStart;
+        }
+      }
+
+      // === 2. Expensive Block Warning ===
+      const expensiveBlock = this.energyOptimizer.findMostExpensiveBlock(blockHours);
+      if (expensiveBlock) {
+        const blockStart = expensiveBlock.startTime.getTime();
+        const warningTime = blockStart - (warningHours * 3600000);
+
+        // Check if we're in the warning window
+        const isWarningTime = now >= warningTime && now < blockStart;
+        const isNewWarning = this.lastExpensiveBlockWarning !== blockStart;
+
+        if (isWarningTime && isNewWarning) {
+          const formatTime = (date: Date) => {
+            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+          };
+
+          this.logger(
+            `⚠️ Expensive period approaching: starts at ${formatTime(expensiveBlock.startTime)} `
+            + `(avg €${expensiveBlock.avgPrice.toFixed(4)}/kWh)`,
+          );
+
+          // Trigger flow card
+          await this.device.homey.flow
+            .getDeviceTriggerCard('expensive_block_approaching')
+            .trigger(
+              this.device,
+              {
+                starts_at: formatTime(expensiveBlock.startTime),
+                avg_price: expensiveBlock.avgPrice,
+                duration: blockHours,
+              },
+            )
+            .catch((err) => this.logger('Failed to trigger expensive_block_approaching:', err));
+
+          // Update state to prevent duplicate triggers
+          this.lastExpensiveBlockWarning = blockStart;
+        }
+      }
+
+      // === 3. Price Trend Detection ===
+      const trendAnalysis = this.energyOptimizer.calculatePriceTrend(trendHours);
+      if (trendAnalysis && trendAnalysis.confidence > 0.5) {
+        const currentTrend = trendAnalysis.trend;
+
+        // Check if trend changed
+        if (this.lastPriceTrend !== null && this.lastPriceTrend !== currentTrend) {
+          this.logger(
+            `📈 Price trend changed: ${this.lastPriceTrend} → ${currentTrend} `
+            + `(confidence: ${(trendAnalysis.confidence * 100).toFixed(0)}%, slope: ${trendAnalysis.slope.toFixed(6)})`,
+          );
+
+          // Trigger flow card
+          await this.device.homey.flow
+            .getDeviceTriggerCard('price_trend_changed')
+            .trigger(
+              this.device,
+              {
+                old_trend: this.lastPriceTrend,
+                new_trend: currentTrend,
+                hours_analyzed: trendHours,
+              },
+            )
+            .catch((err) => this.logger('Failed to trigger price_trend_changed:', err));
+        }
+
+        // Update state
+        this.lastPriceTrend = currentTrend;
+      }
+    } catch (error) {
+      this.logger('AdaptiveControlService: Error detecting price blocks:', error);
     }
   }
 }
