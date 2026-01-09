@@ -1012,7 +1012,17 @@ ACTION: Calculate value from curve
 
 **Weather-Compensated Heating** (Primary Use Case):
 
-![Curve Calculator Example](Curve%20calculator.png)
+
+**Visual Example**: The curve calculator with a 14-point weather compensation curve applied in real-time:
+
+![Curve Calculator Example](../images/Curve%20calculator.png)
+
+This screenshot demonstrates:
+- **Input value**: Current outdoor temperature (-10°C)
+- **Curve definition**: 14 progressive thresholds from -18°C to +18°C
+- **Output value**: Calculated heating setpoint (28°C)
+- **Live timeline**: Real-world results at different temperatures
+
 *Real-world example: Weather-compensated heating with 14-point curve and live timeline results*
 
 ```

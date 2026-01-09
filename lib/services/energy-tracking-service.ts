@@ -369,7 +369,7 @@ export class EnergyTrackingService {
 
           if (this.device.hasCapability('adlar_energy_cost_daily')) {
             const dailyCost = this.energyPriceOptimizer.getAccumulatedDailyCost();
-            const roundedDailyCost = Math.round(dailyCost * 100) / 100;
+            const roundedDailyCost = Math.round(dailyCost * 10000) / 10000;
             await this.device.setCapabilityValue('adlar_energy_cost_daily', roundedDailyCost);
             // Persist for app restart recovery
             await this.device.setStoreValue('daily_cost_cache', roundedDailyCost);
@@ -382,7 +382,7 @@ export class EnergyTrackingService {
             // This works even if meter_power.electric_total capability is disabled/missing
             const hourlyCost = this.energyPriceOptimizer.accumulateHourlyCost(this.currentCumulativeEnergy);
 
-            const roundedHourlyCost = Math.round(hourlyCost * 100) / 100;
+            const roundedHourlyCost = Math.round(hourlyCost * 10000) / 10000;
             await this.device.setCapabilityValue('adlar_energy_cost_hourly', roundedHourlyCost);
             // Persist for app restart recovery
             await this.device.setStoreValue('hourly_cost_cache', roundedHourlyCost);

@@ -19,7 +19,7 @@
     "de": "Gesamte Energiekosten heute (Verbrauch × Durchschnittspreis)",
     "fr": "Coût énergétique total aujourd'hui (consommation × prix moyen)"
   },
-  "decimals": 2,
+  "decimals": 4,
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
