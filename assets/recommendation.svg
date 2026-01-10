@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Circular frame for recommendation badge -->
+  <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor"/>
+
+  <!-- Checkmark (action completed) -->
+  <path d="M 35 50 L 45 60 L 68 38" fill="none" stroke="currentColor" stroke-width="3.5"/>
+
+  <!-- Action arrow pointing forward (movement) -->
+  <path d="M 62 70 L 75 70 L 75 57" fill="none" stroke="currentColor"/>
+  <path d="M 75 70 L 68 63" fill="none" stroke="currentColor"/>
+</svg>

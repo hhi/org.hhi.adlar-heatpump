@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Smaller lightbulb (secondary emphasis) -->
+  <circle cx="50" cy="42" r="15" fill="none" stroke="currentColor"/>
+
+  <!-- Filament -->
+  <path d="M 44 42 L 50 38 L 56 42" fill="none" stroke="currentColor"/>
+
+  <!-- Bulb socket -->
+  <rect x="45" y="57" width="10" height="7" rx="1" fill="none" stroke="currentColor"/>
+  <line x1="45" y1="61" x2="55" y2="61" stroke="currentColor"/>
+
+  <!-- Minimal rays (only 4 cardinal directions) -->
+  <line x1="50" y1="20" x2="50" y2="25" stroke="currentColor"/>
+  <line x1="50" y1="59" x2="50" y2="64" stroke="currentColor"/>
+  <line x1="28" y1="42" x2="33" y2="42" stroke="currentColor"/>
+  <line x1="67" y1="42" x2="72" y2="42" stroke="currentColor"/>
+</svg>

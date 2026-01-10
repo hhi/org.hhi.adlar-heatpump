@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- JSON bracket left -->
+  <path d="M 30 25 L 20 25 Q 15 25 15 30 L 15 45 Q 15 50 10 50 Q 15 50 15 55 L 15 70 Q 15 75 20 75 L 30 75" fill="none" stroke="currentColor"/>
+
+  <!-- JSON bracket right -->
+  <path d="M 70 25 L 80 25 Q 85 25 85 30 L 85 45 Q 85 50 90 50 Q 85 50 85 55 L 85 70 Q 85 75 80 75 L 70 75" fill="none" stroke="currentColor"/>
+
+  <!-- Data visualization bars (showing diagnostic data) -->
+  <line x1="35" y1="60" x2="35" y2="45" stroke="currentColor" stroke-width="3"/>
+  <line x1="45" y1="60" x2="45" y2="35" stroke="currentColor" stroke-width="3"/>
+  <line x1="55" y1="60" x2="55" y2="50" stroke="currentColor" stroke-width="3"/>
+  <line x1="65" y1="60" x2="65" y2="40" stroke="currentColor" stroke-width="3"/>
+
+  <!-- Baseline -->
+  <line x1="30" y1="63" x2="70" y2="63" stroke="currentColor" stroke-width="1.5"/>
+</svg>

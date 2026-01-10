@@ -16,5 +16,5 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
-  "icon": "/assets/capability-icons/recommendation.svg"
+  "icon": "/assets/recommendation.svg"
 }

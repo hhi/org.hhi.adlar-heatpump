@@ -16,5 +16,5 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
-  "icon": "/assets/capability-icons/insight-primary.svg"
+  "icon": "/assets/insight-primary.svg"
 }
