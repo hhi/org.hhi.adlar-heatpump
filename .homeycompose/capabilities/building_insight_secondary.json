@@ -1,0 +1,20 @@
+{
+  "id": "building_insight_secondary",
+  "type": "string",
+  "title": {
+    "en": "Secondary Building Insight",
+    "nl": "Secundair Gebouw Inzicht",
+    "de": "Sekundäre Gebäudeerkenntnis",
+    "fr": "Aperçu Secondaire du Bâtiment"
+  },
+  "desc": {
+    "en": "Second-priority building performance insight",
+    "nl": "Tweede prioriteit gebouwprestatie inzicht",
+    "de": "Gebäudeleistungserkenntnis mit zweiter Priorität",
+    "fr": "Aperçu des performances du bâtiment de seconde priorité"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/capability-icons/insight-secondary.svg"
+}

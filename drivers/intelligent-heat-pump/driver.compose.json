@@ -12,6 +12,10 @@
     "adlar_simulated_target",
     "adaptive_control_diagnostics",
     "building_model_diagnostics",
+    "building_insight_primary",
+    "building_insight_secondary",
+    "building_insight_recommendation",
+    "building_insights_diagnostics",
 
     "onoff",
 
