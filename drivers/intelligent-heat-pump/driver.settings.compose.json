@@ -1678,5 +1678,113 @@
         "value": false
       }
     ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Building Insights & Recommendations",
+      "nl": "Gebouw Inzichten & Aanbevelingen",
+      "de": "Gebäudeerkenntnisse & Empfehlungen",
+      "fr": "Aperçus & Recommandations du Bâtiment"
+    },
+    "children": [
+      {
+        "id": "insights_enabled",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable Building Insights",
+          "nl": "Gebouw Inzichten Inschakelen",
+          "de": "Gebäudeerkenntnisse Aktivieren",
+          "fr": "Activer les Aperçus du Bâtiment"
+        },
+        "hint": {
+          "en": "Analyze building thermal model and provide energy-saving recommendations with ROI estimates. Insights appear after 24-48 hours of learning.",
+          "nl": "Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen met ROI schattingen. Inzichten verschijnen na 24-48 uur leren.",
+          "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen.",
+          "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage."
+        },
+        "value": true
+      },
+      {
+        "id": "insights_min_confidence",
+        "type": "number",
+        "label": {
+          "en": "Minimum Confidence (%)",
+          "nl": "Minimale Betrouwbaarheid (%)",
+          "de": "Mindestvertrauen (%)",
+          "fr": "Confiance Minimale (%)"
+        },
+        "hint": {
+          "en": "Only show insights when building model confidence exceeds this threshold. 70% = ~24-48 hours learning. Lower values show earlier insights with less accuracy.",
+          "nl": "Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt. 70% = ~24-48 uur leren. Lagere waarden tonen eerdere inzichten met minder nauwkeurigheid.",
+          "de": "Zeigen Sie nur Erkenntnisse an, wenn das Gebäudemodellvertrauen diesen Schwellenwert überschreitet. 70% = ~24-48 Stunden Lernen. Niedrigere Werte zeigen frühere Erkenntnisse mit geringerer Genauigkeit.",
+          "fr": "Afficher uniquement les aperçus lorsque la confiance du modèle du bâtiment dépasse ce seuil. 70% = ~24-48 heures d'apprentissage. Des valeurs plus faibles montrent des aperçus plus tôt avec moins de précision."
+        },
+        "value": 70,
+        "min": 50,
+        "max": 90,
+        "step": 5,
+        "units": "%"
+      },
+      {
+        "id": "insights_max_active",
+        "type": "number",
+        "label": {
+          "en": "Max Active Insights",
+          "nl": "Max Actieve Inzichten",
+          "de": "Max. Aktive Erkenntnisse",
+          "fr": "Max. d'Aperçus Actifs"
+        },
+        "hint": {
+          "en": "Maximum number of insights to display simultaneously. Prevents information overload. Most important insights shown first.",
+          "nl": "Maximum aantal inzichten om tegelijkertijd weer te geven. Voorkomt informatie-overload. Belangrijkste inzichten eerst getoond.",
+          "de": "Maximale Anzahl gleichzeitig anzuzeigender Erkenntnisse. Verhindert Informationsüberflutung. Wichtigste Erkenntnisse zuerst angezeigt.",
+          "fr": "Nombre maximum d'aperçus à afficher simultanément. Empêche la surcharge d'informations. Les aperçus les plus importants sont affichés en premier."
+        },
+        "value": 3,
+        "min": 1,
+        "max": 5,
+        "step": 1
+      },
+      {
+        "id": "wake_time",
+        "type": "text",
+        "label": {
+          "en": "Wake Time (HH:MM)",
+          "nl": "Waktijd (UU:MM)",
+          "de": "Aufwachzeit (HH:MM)",
+          "fr": "Heure de Réveil (HH:MM)"
+        },
+        "hint": {
+          "en": "Time when building should reach target temperature. Used to calculate optimal pre-heat start time based on thermal response (τ).",
+          "nl": "Tijd wanneer gebouw doeltemperatuur moet bereiken. Gebruikt om optimale voorverwarm starttijd te berekenen gebaseerd op thermische respons (τ).",
+          "de": "Zeit, zu der das Gebäude die Zieltemperatur erreichen soll. Wird verwendet, um die optimale Vorheizstartzeit basierend auf der thermischen Reaktion (τ) zu berechnen.",
+          "fr": "Heure à laquelle le bâtiment devrait atteindre la température cible. Utilisé pour calculer l'heure de début de préchauffage optimale basée sur la réponse thermique (τ)."
+        },
+        "value": "07:00",
+        "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+      },
+      {
+        "id": "night_setback_delta",
+        "type": "number",
+        "label": {
+          "en": "Night Setback (°C)",
+          "nl": "Nacht Verlaging (°C)",
+          "de": "Nachtabsenkung (°C)",
+          "fr": "Réduction Nocturne (°C)"
+        },
+        "hint": {
+          "en": "Temperature reduction during night (e.g., from 21°C to 17°C = 4°C setback). Used to calculate pre-heat duration and energy savings potential.",
+          "nl": "Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging). Gebruikt om voorverwarm duur en energie besparingspotentieel te berekenen.",
+          "de": "Temperaturreduktion während der Nacht (z.B. von 21°C auf 17°C = 4°C Absenkung). Wird verwendet, um Vorheizdauer und Energiesparpotenzial zu berechnen.",
+          "fr": "Réduction de température pendant la nuit (p. ex., de 21°C à 17°C = réduction de 4°C). Utilisé pour calculer la durée de préchauffage et le potentiel d'économie d'énergie."
+        },
+        "value": 4.0,
+        "min": 2.0,
+        "max": 6.0,
+        "step": 0.5,
+        "units": "°C"
+      }
+    ]
   }
 ]

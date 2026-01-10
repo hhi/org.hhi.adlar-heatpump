@@ -1,0 +1,73 @@
+{
+  "id": "pre_heat_recommendation",
+  "title": {
+    "en": "Pre-heating time recommendation",
+    "nl": "Voorverwarm tijd aanbeveling",
+    "de": "Vorheizzeit-Empfehlung",
+    "fr": "Recommandation de temps de préchauffage"
+  },
+  "hint": {
+    "en": "Daily trigger (23:00) suggesting optimal pre-heat start time based on building thermal response (τ). Requires ≥70% model confidence.",
+    "nl": "Dagelijkse trigger (23:00) die optimale voorverwarm starttijd voorstelt gebaseerd op thermische respons van gebouw (τ). Vereist ≥70% model betrouwbaarheid.",
+    "de": "Täglicher Trigger (23:00), der optimale Vorheizstartzeit basierend auf thermischer Gebäudereaktion (τ) vorschlägt. Erfordert ≥70% Modellvertrauen.",
+    "fr": "Déclencheur quotidien (23:00) suggérant l'heure de début de préchauffage optimale basée sur la réponse thermique du bâtiment (τ). Nécessite une confiance du modèle ≥70%."
+  },
+  "highlight": true,
+  "tokens": [
+    {
+      "name": "start_time",
+      "type": "string",
+      "title": {
+        "en": "Start Time",
+        "nl": "Starttijd",
+        "de": "Startzeit",
+        "fr": "Heure de Début"
+      },
+      "example": "05:30"
+    },
+    {
+      "name": "target_time",
+      "type": "string",
+      "title": {
+        "en": "Target Time",
+        "nl": "Doeltijd",
+        "de": "Zielzeit",
+        "fr": "Heure Cible"
+      },
+      "example": "07:00"
+    },
+    {
+      "name": "duration_hours",
+      "type": "number",
+      "title": {
+        "en": "Duration (hours)",
+        "nl": "Duur (uren)",
+        "de": "Dauer (Stunden)",
+        "fr": "Durée (heures)"
+      },
+      "example": 1.5
+    },
+    {
+      "name": "temp_rise",
+      "type": "number",
+      "title": {
+        "en": "Temperature Rise (°C)",
+        "nl": "Temperatuurstijging (°C)",
+        "de": "Temperaturanstieg (°C)",
+        "fr": "Augmentation de Température (°C)"
+      },
+      "example": 4.0
+    },
+    {
+      "name": "confidence",
+      "type": "number",
+      "title": {
+        "en": "Confidence (%)",
+        "nl": "Betrouwbaarheid (%)",
+        "de": "Vertrauen (%)",
+        "fr": "Confiance (%)"
+      },
+      "example": 74
+    }
+  ]
+}

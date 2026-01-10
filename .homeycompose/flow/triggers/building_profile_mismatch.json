@@ -1,0 +1,84 @@
+{
+  "id": "building_profile_mismatch",
+  "title": {
+    "en": "Building profile mismatch detected",
+    "nl": "Gebouwprofiel mismatch gedetecteerd",
+    "de": "Gebäudeprofil-Fehlanpassung erkannt",
+    "fr": "Désaccord de profil de bâtiment détecté"
+  },
+  "hint": {
+    "en": "Triggers when learned building behavior significantly differs from selected profile (>30% deviation). Suggests optimal profile for faster learning.",
+    "nl": "Triggert wanneer geleerd gebouwgedrag significant afwijkt van geselecteerd profiel (>30% afwijking). Stelt optimaal profiel voor sneller leren voor.",
+    "de": "Wird ausgelöst, wenn erlerntes Gebäudeverhalten erheblich vom ausgewählten Profil abweicht (>30% Abweichung). Schlägt optimales Profil für schnelleres Lernen vor.",
+    "fr": "Se déclenche lorsque le comportement du bâtiment appris diffère significativement du profil sélectionné (>30% de déviation). Suggère un profil optimal pour un apprentissage plus rapide."
+  },
+  "highlight": true,
+  "tokens": [
+    {
+      "name": "current_profile",
+      "type": "string",
+      "title": {
+        "en": "Current Profile",
+        "nl": "Huidig Profiel",
+        "de": "Aktuelles Profil",
+        "fr": "Profil Actuel"
+      },
+      "example": "average"
+    },
+    {
+      "name": "suggested_profile",
+      "type": "string",
+      "title": {
+        "en": "Suggested Profile",
+        "nl": "Voorgesteld Profiel",
+        "de": "Vorgeschlagenes Profil",
+        "fr": "Profil Suggéré"
+      },
+      "example": "heavy"
+    },
+    {
+      "name": "tau_learned",
+      "type": "number",
+      "title": {
+        "en": "Learned τ (hours)",
+        "nl": "Geleerde τ (uren)",
+        "de": "Gelernte τ (Stunden)",
+        "fr": "τ Appris (heures)"
+      },
+      "example": 18.2
+    },
+    {
+      "name": "tau_profile",
+      "type": "number",
+      "title": {
+        "en": "Profile τ (hours)",
+        "nl": "Profiel τ (uren)",
+        "de": "Profil τ (Stunden)",
+        "fr": "τ du Profil (heures)"
+      },
+      "example": 10.0
+    },
+    {
+      "name": "deviation_percent",
+      "type": "number",
+      "title": {
+        "en": "Deviation (%)",
+        "nl": "Afwijking (%)",
+        "de": "Abweichung (%)",
+        "fr": "Déviation (%)"
+      },
+      "example": 82
+    },
+    {
+      "name": "confidence",
+      "type": "number",
+      "title": {
+        "en": "Confidence (%)",
+        "nl": "Betrouwbaarheid (%)",
+        "de": "Vertrauen (%)",
+        "fr": "Confiance (%)"
+      },
+      "example": 65
+    }
+  ]
+}

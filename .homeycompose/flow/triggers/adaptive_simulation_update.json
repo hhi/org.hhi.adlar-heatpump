@@ -1,22 +1,22 @@
 {
   "id": "adaptive_simulation_update",
   "title": {
-    "en": "Simulated temperature adjusted",
-    "nl": "Gesimuleerde temperatuur aangepast",
-    "de": "Simulierte Temperatur angepasst",
-    "fr": "Température simulée ajustée"
+    "en": "Simulated temperature updated",
+    "nl": "Gesimuleerde temperatuur bijgewerkt",
+    "de": "Simulierte Temperatur aktualisiert",
+    "fr": "Température simulée mise à jour"
   },
   "titleFormatted": {
-    "en": "Simulated target adjusted to [[simulated_target]]°C ([[delta]]°C from actual)",
-    "nl": "Gesimuleerd doel aangepast naar [[simulated_target]]°C ([[delta]]°C van werkelijk)",
-    "de": "Simuliertes Ziel angepasst auf [[simulated_target]]°C ([[delta]]°C vom tatsächlichen)",
-    "fr": "Cible simulée ajustée à [[simulated_target]]°C ([[delta]]°C de l'actuel)"
+    "en": "Simulated target: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
+    "nl": "Gesimuleerd doel: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
+    "de": "Simuliertes Ziel: [[simulated_target]]°C (Δ[[delta]]°C, Konf: [[building_model_confidence]]%)",
+    "fr": "Cible simulée: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)"
   },
   "hint": {
-    "en": "Triggers when adaptive control adjusts the simulated target temperature in simulation mode. The simulated value is NOT sent to the heat pump - use this to safely observe adaptive control behavior before activating it.",
-    "nl": "Wordt geactiveerd wanneer adaptieve regeling de gesimuleerde doeltemperatuur aanpast in simulatiemodus. De gesimuleerde waarde wordt NIET naar de warmtepomp gestuurd - gebruik dit om veilig het gedrag van adaptieve regeling te observeren voordat je het activeert.",
-    "de": "Wird ausgelöst, wenn die adaptive Steuerung die simulierte Zieltemperatur im Simulationsmodus anpasst. Der simulierte Wert wird NICHT an die Wärmepumpe gesendet - verwenden Sie dies, um das Verhalten der adaptiven Steuerung sicher zu beobachten, bevor Sie sie aktivieren.",
-    "fr": "Se déclenche lorsque le contrôle adaptatif ajuste la température cible simulée en mode simulation. La valeur simulée n'est PAS envoyée à la pompe à chaleur - utilisez ceci pour observer en toute sécurité le comportement du contrôle adaptatif avant de l'activer."
+    "en": "Triggers every control cycle (5 min) with full breakdown of what adaptive control calculates. Use for monitoring, logging, and confidence-based filtering. Filter on building_model_confidence to only act on high-confidence recommendations.",
+    "nl": "Triggert elke regelcyclus (5 min) met volledige breakdown van wat adaptieve regeling berekent. Gebruik voor monitoring, logging en filteren op betrouwbaarheid. Filter op building_model_confidence om alleen te acteren op aanbevelingen met hoge betrouwbaarheid.",
+    "de": "Wird bei jedem Regelzyklus (5 min) mit vollständiger Aufschlüsselung der adaptiven Regelungsberechnung ausgelöst. Verwenden Sie für Überwachung, Protokollierung und Vertrauensfilterung. Filtern Sie nach building_model_confidence, um nur auf vertrauenswürdige Empfehlungen zu reagieren.",
+    "fr": "Se déclenche à chaque cycle de contrôle (5 min) avec une répartition complète du calcul du contrôle adaptatif. Utilisez pour la surveillance, la journalisation et le filtrage basé sur la confiance. Filtrez sur building_model_confidence pour n'agir que sur des recommandations à haute confiance."
   },
   "highlight": true,
   "args": [
@@ -69,7 +69,7 @@
         "de": "Anpassung (°C)",
         "fr": "Ajustement (°C)"
       },
-      "example": 1
+      "example": 1.2
     },
     {
       "name": "comfort_component",
@@ -103,6 +103,28 @@
         "fr": "Composante Coût (°C)"
       },
       "example": 0.15
+    },
+    {
+      "name": "building_model_confidence",
+      "type": "number",
+      "title": {
+        "en": "Building Model Confidence (%)",
+        "nl": "Gebouwmodel Betrouwbaarheid (%)",
+        "de": "Gebäudemodell Vertrauen (%)",
+        "fr": "Confiance du Modèle de Bâtiment (%)"
+      },
+      "example": 72
+    },
+    {
+      "name": "cop_confidence",
+      "type": "number",
+      "title": {
+        "en": "COP Confidence (%)",
+        "nl": "COP Betrouwbaarheid (%)",
+        "de": "COP Vertrauen (%)",
+        "fr": "Confiance COP (%)"
+      },
+      "example": 65
     },
     {
       "name": "reasoning",

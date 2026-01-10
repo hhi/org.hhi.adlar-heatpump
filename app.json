@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -154,24 +154,88 @@
         ]
       },
       {
-        "id": "adaptive_simulation_update",
+        "id": "adaptive_simulation_committed",
         "title": {
-          "en": "Simulated temperature adjusted",
-          "nl": "Gesimuleerde temperatuur aangepast",
-          "de": "Simulierte Temperatur angepasst",
-          "fr": "Température simulée ajustée"
+          "en": "Simulated temperature committed to heat pump",
+          "nl": "Gesimuleerde temperatuur doorgevoerd naar warmtepomp",
+          "de": "Simulierte Temperatur an Wärmepumpe übertragen",
+          "fr": "Température simulée validée vers pompe à chaleur"
         },
         "titleFormatted": {
-          "en": "Simulated target adjusted to [[simulated_target]]°C ([[delta]]°C from actual)",
-          "nl": "Gesimuleerd doel aangepast naar [[simulated_target]]°C ([[delta]]°C van werkelijk)",
-          "de": "Simuliertes Ziel angepasst auf [[simulated_target]]°C ([[delta]]°C vom tatsächlichen)",
-          "fr": "Cible simulée ajustée à [[simulated_target]]°C ([[delta]]°C de l'actuel)"
+          "en": "Committed [[committed_temperature]]°C to heat pump (was [[previous_temperature]]°C)",
+          "nl": "[[committed_temperature]]°C doorgevoerd naar warmtepomp (was [[previous_temperature]]°C)",
+          "de": "[[committed_temperature]]°C an Wärmepumpe übertragen (war [[previous_temperature]]°C)",
+          "fr": "[[committed_temperature]]°C validé vers pompe à chaleur (était [[previous_temperature]]°C)"
         },
         "hint": {
-          "en": "Triggers when adaptive control adjusts the simulated target temperature in simulation mode. The simulated value is NOT sent to the heat pump - use this to safely observe adaptive control behavior before activating it.",
-          "nl": "Wordt geactiveerd wanneer adaptieve regeling de gesimuleerde doeltemperatuur aanpast in simulatiemodus. De gesimuleerde waarde wordt NIET naar de warmtepomp gestuurd - gebruik dit om veilig het gedrag van adaptieve regeling te observeren voordat je het activeert.",
-          "de": "Wird ausgelöst, wenn die adaptive Steuerung die simulierte Zieltemperatur im Simulationsmodus anpasst. Der simulierte Wert wird NICHT an die Wärmepumpe gesendet - verwenden Sie dies, um das Verhalten der adaptiven Steuerung sicher zu beobachten, bevor Sie sie aktivieren.",
-          "fr": "Se déclenche lorsque le contrôle adaptatif ajuste la température cible simulée en mode simulation. La valeur simulée n'est PAS envoyée à la pompe à chaleur - utilisez ceci pour observer en toute sécurité le comportement du contrôle adaptatif avant de l'activer."
+          "en": "Triggers when you disable adaptive control with 'Commit on disable' enabled. The simulated temperature is written to the heat pump as the new target temperature.",
+          "nl": "Wordt geactiveerd wanneer je adaptieve regeling uitschakelt met 'Doorvoeren bij uitschakelen' ingeschakeld. De gesimuleerde temperatuur wordt naar de warmtepomp geschreven als nieuwe doeltemperatuur.",
+          "de": "Wird ausgelöst, wenn Sie die adaptive Steuerung mit 'Beim Deaktivieren übernehmen' aktiviert deaktivieren. Die simulierte Temperatur wird als neue Zieltemperatur an die Wärmepumpe geschrieben.",
+          "fr": "Se déclenche lorsque vous désactivez le contrôle adaptatif avec 'Valider lors de la désactivation' activé. La température simulée est écrite sur la pompe à chaleur comme nouvelle température cible."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_simulated_target"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "committed_temperature",
+            "type": "number",
+            "title": {
+              "en": "Committed Temperature (°C)",
+              "nl": "Doorgevoerde Temperatuur (°C)",
+              "de": "Übertragene Temperatur (°C)",
+              "fr": "Température Validée (°C)"
+            },
+            "example": 23.5
+          },
+          {
+            "name": "previous_temperature",
+            "type": "number",
+            "title": {
+              "en": "Previous Temperature (°C)",
+              "nl": "Vorige Temperatuur (°C)",
+              "de": "Vorherige Temperatur (°C)",
+              "fr": "Température Précédente (°C)"
+            },
+            "example": 21
+          },
+          {
+            "name": "change",
+            "type": "number",
+            "title": {
+              "en": "Change (°C)",
+              "nl": "Verandering (°C)",
+              "de": "Änderung (°C)",
+              "fr": "Changement (°C)"
+            },
+            "example": 2.5
+          }
+        ]
+      },
+      {
+        "id": "adaptive_simulation_update",
+        "title": {
+          "en": "Simulated temperature updated",
+          "nl": "Gesimuleerde temperatuur bijgewerkt",
+          "de": "Simulierte Temperatur aktualisiert",
+          "fr": "Température simulée mise à jour"
+        },
+        "titleFormatted": {
+          "en": "Simulated target: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
+          "nl": "Gesimuleerd doel: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
+          "de": "Simuliertes Ziel: [[simulated_target]]°C (Δ[[delta]]°C, Konf: [[building_model_confidence]]%)",
+          "fr": "Cible simulée: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)"
+        },
+        "hint": {
+          "en": "Triggers every control cycle (5 min) with full breakdown of what adaptive control calculates. Use for monitoring, logging, and confidence-based filtering. Filter on building_model_confidence to only act on high-confidence recommendations.",
+          "nl": "Triggert elke regelcyclus (5 min) met volledige breakdown van wat adaptieve regeling berekent. Gebruik voor monitoring, logging en filteren op betrouwbaarheid. Filter op building_model_confidence om alleen te acteren op aanbevelingen met hoge betrouwbaarheid.",
+          "de": "Wird bei jedem Regelzyklus (5 min) mit vollständiger Aufschlüsselung der adaptiven Regelungsberechnung ausgelöst. Verwenden Sie für Überwachung, Protokollierung und Vertrauensfilterung. Filtern Sie nach building_model_confidence, um nur auf vertrauenswürdige Empfehlungen zu reagieren.",
+          "fr": "Se déclenche à chaque cycle de contrôle (5 min) avec une répartition complète du calcul du contrôle adaptatif. Utilisez pour la surveillance, la journalisation et le filtrage basé sur la confiance. Filtrez sur building_model_confidence pour n'agir que sur des recommandations à haute confiance."
         },
         "highlight": true,
         "args": [
@@ -224,7 +288,7 @@
               "de": "Anpassung (°C)",
               "fr": "Ajustement (°C)"
             },
-            "example": 1
+            "example": 1.2
           },
           {
             "name": "comfort_component",
@@ -258,6 +322,28 @@
               "fr": "Composante Coût (°C)"
             },
             "example": 0.15
+          },
+          {
+            "name": "building_model_confidence",
+            "type": "number",
+            "title": {
+              "en": "Building Model Confidence (%)",
+              "nl": "Gebouwmodel Betrouwbaarheid (%)",
+              "de": "Gebäudemodell Vertrauen (%)",
+              "fr": "Confiance du Modèle de Bâtiment (%)"
+            },
+            "example": 72
+          },
+          {
+            "name": "cop_confidence",
+            "type": "number",
+            "title": {
+              "en": "COP Confidence (%)",
+              "nl": "COP Betrouwbaarheid (%)",
+              "de": "COP Vertrauen (%)",
+              "fr": "Confiance COP (%)"
+            },
+            "example": 65
           },
           {
             "name": "reasoning",
@@ -414,6 +500,174 @@
               "fr": "Température ambiante actuelle"
             },
             "example": 15.5
+          }
+        ]
+      },
+      {
+        "id": "building_insight_detected",
+        "title": {
+          "en": "New building insight detected",
+          "nl": "Nieuw gebouw inzicht gedetecteerd",
+          "de": "Neue Gebäudeerkenntnis erkannt",
+          "fr": "Nouvel aperçu du bâtiment détecté"
+        },
+        "hint": {
+          "en": "Triggers when building model detects actionable performance insight (≥70% confidence). Use tokens to filter by category and savings potential.",
+          "nl": "Triggert wanneer gebouwmodel uitvoerbaar prestatie-inzicht detecteert (≥70% betrouwbaarheid). Gebruik tokens om te filteren op categorie en besparingspotentieel.",
+          "de": "Wird ausgelöst, wenn das Gebäudemodell umsetzbare Leistungserkenntnisse erkennt (≥70% Vertrauen). Verwenden Sie Token zum Filtern nach Kategorie und Einsparpotenzial.",
+          "fr": "Se déclenche lorsque le modèle du bâtiment détecte un aperçu de performance actionnable (≥70% de confiance). Utilisez des jetons pour filtrer par catégorie et potentiel d'économies."
+        },
+        "highlight": true,
+        "tokens": [
+          {
+            "name": "category",
+            "type": "string",
+            "title": {
+              "en": "Category",
+              "nl": "Categorie",
+              "de": "Kategorie",
+              "fr": "Catégorie"
+            },
+            "example": "thermal_storage"
+          },
+          {
+            "name": "insight",
+            "type": "string",
+            "title": {
+              "en": "Insight",
+              "nl": "Inzicht",
+              "de": "Erkenntnis",
+              "fr": "Aperçu"
+            },
+            "example": "Thermal storage potential - C=24 kWh/°C"
+          },
+          {
+            "name": "recommendation",
+            "type": "string",
+            "title": {
+              "en": "Recommendation",
+              "nl": "Aanbeveling",
+              "de": "Empfehlung",
+              "fr": "Recommandation"
+            },
+            "example": "Pre-heat +2°C during cheap hours"
+          },
+          {
+            "name": "priority",
+            "type": "number",
+            "title": {
+              "en": "Priority (0-100)",
+              "nl": "Prioriteit (0-100)",
+              "de": "Priorität (0-100)",
+              "fr": "Priorité (0-100)"
+            },
+            "example": 85
+          },
+          {
+            "name": "confidence",
+            "type": "number",
+            "title": {
+              "en": "Confidence (%)",
+              "nl": "Betrouwbaarheid (%)",
+              "de": "Vertrauen (%)",
+              "fr": "Confiance (%)"
+            },
+            "example": 74
+          },
+          {
+            "name": "estimated_savings_eur_month",
+            "type": "number",
+            "title": {
+              "en": "Est. Savings (€/month)",
+              "nl": "Geschatte Besparing (€/maand)",
+              "de": "Geschätzte Einsparungen (€/Monat)",
+              "fr": "Économies Estimées (€/mois)"
+            },
+            "example": 95
+          }
+        ]
+      },
+      {
+        "id": "building_profile_mismatch",
+        "title": {
+          "en": "Building profile mismatch detected",
+          "nl": "Gebouwprofiel mismatch gedetecteerd",
+          "de": "Gebäudeprofil-Fehlanpassung erkannt",
+          "fr": "Désaccord de profil de bâtiment détecté"
+        },
+        "hint": {
+          "en": "Triggers when learned building behavior significantly differs from selected profile (>30% deviation). Suggests optimal profile for faster learning.",
+          "nl": "Triggert wanneer geleerd gebouwgedrag significant afwijkt van geselecteerd profiel (>30% afwijking). Stelt optimaal profiel voor sneller leren voor.",
+          "de": "Wird ausgelöst, wenn erlerntes Gebäudeverhalten erheblich vom ausgewählten Profil abweicht (>30% Abweichung). Schlägt optimales Profil für schnelleres Lernen vor.",
+          "fr": "Se déclenche lorsque le comportement du bâtiment appris diffère significativement du profil sélectionné (>30% de déviation). Suggère un profil optimal pour un apprentissage plus rapide."
+        },
+        "highlight": true,
+        "tokens": [
+          {
+            "name": "current_profile",
+            "type": "string",
+            "title": {
+              "en": "Current Profile",
+              "nl": "Huidig Profiel",
+              "de": "Aktuelles Profil",
+              "fr": "Profil Actuel"
+            },
+            "example": "average"
+          },
+          {
+            "name": "suggested_profile",
+            "type": "string",
+            "title": {
+              "en": "Suggested Profile",
+              "nl": "Voorgesteld Profiel",
+              "de": "Vorgeschlagenes Profil",
+              "fr": "Profil Suggéré"
+            },
+            "example": "heavy"
+          },
+          {
+            "name": "tau_learned",
+            "type": "number",
+            "title": {
+              "en": "Learned τ (hours)",
+              "nl": "Geleerde τ (uren)",
+              "de": "Gelernte τ (Stunden)",
+              "fr": "τ Appris (heures)"
+            },
+            "example": 18.2
+          },
+          {
+            "name": "tau_profile",
+            "type": "number",
+            "title": {
+              "en": "Profile τ (hours)",
+              "nl": "Profiel τ (uren)",
+              "de": "Profil τ (Stunden)",
+              "fr": "τ du Profil (heures)"
+            },
+            "example": 10
+          },
+          {
+            "name": "deviation_percent",
+            "type": "number",
+            "title": {
+              "en": "Deviation (%)",
+              "nl": "Afwijking (%)",
+              "de": "Abweichung (%)",
+              "fr": "Déviation (%)"
+            },
+            "example": 82
+          },
+          {
+            "name": "confidence",
+            "type": "number",
+            "title": {
+              "en": "Confidence (%)",
+              "nl": "Betrouwbaarheid (%)",
+              "de": "Vertrauen (%)",
+              "fr": "Confiance (%)"
+            },
+            "example": 65
           }
         ]
       },
@@ -2547,6 +2801,7 @@
           "de": "Wird ausgelöst, wenn das thermische Gebäudemodell einen Lernmeilenstein erreicht (z.B. 70% Vertrauen)",
           "fr": "Se déclenche lorsque le modèle thermique du bâtiment atteint un jalon d'apprentissage (par exemple, 70% de confiance)"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -3491,6 +3746,79 @@
         ]
       },
       {
+        "id": "pre_heat_recommendation",
+        "title": {
+          "en": "Pre-heating time recommendation",
+          "nl": "Voorverwarm tijd aanbeveling",
+          "de": "Vorheizzeit-Empfehlung",
+          "fr": "Recommandation de temps de préchauffage"
+        },
+        "hint": {
+          "en": "Daily trigger (23:00) suggesting optimal pre-heat start time based on building thermal response (τ). Requires ≥70% model confidence.",
+          "nl": "Dagelijkse trigger (23:00) die optimale voorverwarm starttijd voorstelt gebaseerd op thermische respons van gebouw (τ). Vereist ≥70% model betrouwbaarheid.",
+          "de": "Täglicher Trigger (23:00), der optimale Vorheizstartzeit basierend auf thermischer Gebäudereaktion (τ) vorschlägt. Erfordert ≥70% Modellvertrauen.",
+          "fr": "Déclencheur quotidien (23:00) suggérant l'heure de début de préchauffage optimale basée sur la réponse thermique du bâtiment (τ). Nécessite une confiance du modèle ≥70%."
+        },
+        "highlight": true,
+        "tokens": [
+          {
+            "name": "start_time",
+            "type": "string",
+            "title": {
+              "en": "Start Time",
+              "nl": "Starttijd",
+              "de": "Startzeit",
+              "fr": "Heure de Début"
+            },
+            "example": "05:30"
+          },
+          {
+            "name": "target_time",
+            "type": "string",
+            "title": {
+              "en": "Target Time",
+              "nl": "Doeltijd",
+              "de": "Zielzeit",
+              "fr": "Heure Cible"
+            },
+            "example": "07:00"
+          },
+          {
+            "name": "duration_hours",
+            "type": "number",
+            "title": {
+              "en": "Duration (hours)",
+              "nl": "Duur (uren)",
+              "de": "Dauer (Stunden)",
+              "fr": "Durée (heures)"
+            },
+            "example": 1.5
+          },
+          {
+            "name": "temp_rise",
+            "type": "number",
+            "title": {
+              "en": "Temperature Rise (°C)",
+              "nl": "Temperatuurstijging (°C)",
+              "de": "Temperaturanstieg (°C)",
+              "fr": "Augmentation de Température (°C)"
+            },
+            "example": 4
+          },
+          {
+            "name": "confidence",
+            "type": "number",
+            "title": {
+              "en": "Confidence (%)",
+              "nl": "Betrouwbaarheid (%)",
+              "de": "Vertrauen (%)",
+              "fr": "Confiance (%)"
+            },
+            "example": 74
+          }
+        ]
+      },
+      {
         "id": "price_threshold_crossed",
         "title": {
           "en": "Energy price crossed threshold",
@@ -3822,6 +4150,92 @@
         ]
       },
       {
+        "id": "target_temperature_adjusted",
+        "title": {
+          "en": "Adaptive control adjusted target temperature",
+          "nl": "Adaptieve regeling wijzigde doeltemperatuur",
+          "de": "Adaptive Regelung änderte die Zieltemperatur",
+          "fr": "Contrôle adaptatif a ajusté la température cible"
+        },
+        "titleFormatted": {
+          "en": "Adaptive control adjusted target temperature from [[old_temperature]]°C to [[new_temperature]]°C",
+          "nl": "Adaptieve regeling wijzigde doeltemperatuur van [[old_temperature]]°C naar [[new_temperature]]°C",
+          "de": "Adaptive Regelung änderte die Zieltemperatur von [[old_temperature]]°C auf [[new_temperature]]°C",
+          "fr": "Contrôle adaptatif a ajusté la température cible de [[old_temperature]]°C à [[new_temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggered when adaptive control adjusts the target temperature setpoint based on indoor temperature and PI control algorithm",
+          "nl": "Wordt geactiveerd wanneer de adaptieve regeling de doeltemperatuur aanpast op basis van binnentemperatuur en PI-algoritme",
+          "de": "Wird ausgelöst, wenn die adaptive Regelung die Zieltemperatur basierend auf Raumtemperatur und PI-Algorithmus anpasst",
+          "fr": "Déclenché lorsque le contrôle adaptatif ajuste la température cible en fonction de la température intérieure et de l'algorithme PI"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "old_temperature",
+            "type": "number",
+            "title": {
+              "en": "Previous target temperature",
+              "nl": "Vorige doeltemperatuur",
+              "de": "Vorherige Zieltemperatur",
+              "fr": "Température cible précédente"
+            },
+            "example": 21.5
+          },
+          {
+            "name": "new_temperature",
+            "type": "number",
+            "title": {
+              "en": "New target temperature",
+              "nl": "Nieuwe doeltemperatuur",
+              "de": "Neue Zieltemperatur",
+              "fr": "Nouvelle température cible"
+            },
+            "example": 22
+          },
+          {
+            "name": "adjustment",
+            "type": "number",
+            "title": {
+              "en": "Temperature adjustment",
+              "nl": "Temperatuur aanpassing",
+              "de": "Temperaturanpassung",
+              "fr": "Ajustement de température"
+            },
+            "example": 0.5
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "title": {
+              "en": "Adjustment reason",
+              "nl": "Reden voor aanpassing",
+              "de": "Anpassungsgrund",
+              "fr": "Raison de l'ajustement"
+            },
+            "example": "PI Control: Error=0.8°C, P=2.4°C, I=1.2°C"
+          },
+          {
+            "name": "controller",
+            "type": "string",
+            "title": {
+              "en": "Controller",
+              "nl": "Controller",
+              "de": "Regler",
+              "fr": "Contrôleur"
+            },
+            "example": "heating"
+          }
+        ]
+      },
+      {
         "id": "temperature_adjustment_recommended",
         "title": {
           "en": "Adaptive control recommends temperature adjustment",
@@ -3830,16 +4244,16 @@
           "fr": "Contrôle adaptatif recommande un ajustement de température"
         },
         "titleFormatted": {
-          "en": "Adaptive control recommends adjusting temperature from [[current_temperature]]°C to [[recommended_temperature]]°C",
-          "nl": "Adaptieve regeling beveelt aan temperatuur aan te passen van [[current_temperature]]°C naar [[recommended_temperature]]°C",
-          "de": "Adaptive Regelung empfiehlt Temperaturanpassung von [[current_temperature]]°C auf [[recommended_temperature]]°C",
-          "fr": "Contrôle adaptatif recommande d'ajuster la température de [[current_temperature]]°C à [[recommended_temperature]]°C"
+          "en": "Adaptive control recommends [[recommended_temperature]]°C (conf: [[building_model_confidence]]%)",
+          "nl": "Adaptieve regeling beveelt [[recommended_temperature]]°C aan (conf: [[building_model_confidence]]%)",
+          "de": "Adaptive Regelung empfiehlt [[recommended_temperature]]°C (Konf: [[building_model_confidence]]%)",
+          "fr": "Contrôle adaptatif recommande [[recommended_temperature]]°C (conf: [[building_model_confidence]]%)"
         },
         "hint": {
-          "en": "Triggered when adaptive control calculates a recommended temperature adjustment in flow-assisted mode. Use 'Set target temperature' action to apply the recommendation.",
-          "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbevolen temperatuur aanpassing berekent in flow-ondersteunde modus. Gebruik 'Doel temperatuur instellen' actie om de aanbeveling toe te passen.",
-          "de": "Wird ausgelöst, wenn adaptive Regelung eine empfohlene Temperaturanpassung im Flow-unterstützten Modus berechnet. Verwenden Sie 'Zieltemperatur einstellen' Aktion zur Anwendung.",
-          "fr": "Déclenché lorsque le contrôle adaptatif calcule un ajustement de température recommandé en mode assisté par flux. Utilisez l'action 'Régler la température cible' pour appliquer la recommandation."
+          "en": "Triggered when adaptive control calculates a recommended temperature adjustment (only when significant action needed). Use building_model_confidence to filter on model confidence. Use 'Set target temperature' action to apply.",
+          "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbevolen temperatuur berekent (alleen bij significante actie nodig). Gebruik building_model_confidence om te filteren op modelbetrouwbaarheid. Gebruik 'Doel temperatuur instellen' actie om toe te passen.",
+          "de": "Wird ausgelöst, wenn adaptive Regelung eine empfohlene Temperaturanpassung berechnet (nur bei signifikanter Aktion). Verwenden Sie building_model_confidence zum Filtern. Verwenden Sie 'Zieltemperatur einstellen' zum Anwenden.",
+          "fr": "Déclenché lorsque le contrôle adaptatif calcule un ajustement recommandé (uniquement si action significative). Utilisez building_model_confidence pour filtrer. Utilisez 'Régler température' pour appliquer."
         },
         "highlight": true,
         "args": [
@@ -3892,7 +4306,7 @@
               "de": "Anpassungsgrund",
               "fr": "Raison de l'ajustement"
             },
-            "example": "PI Control: Error=0.8°C, P=2.4°C, I=1.2°C"
+            "example": "Comfort: Error 0.8°C; Efficiency: COP 3.2; Cost: Low price"
           },
           {
             "name": "controller",
@@ -3904,6 +4318,17 @@
               "fr": "Contrôleur"
             },
             "example": "weighted"
+          },
+          {
+            "name": "building_model_confidence",
+            "type": "number",
+            "title": {
+              "en": "Building Model Confidence (%)",
+              "nl": "Gebouwmodel Betrouwbaarheid (%)",
+              "de": "Gebäudemodell Vertrauen (%)",
+              "fr": "Confiance du Modèle (%)"
+            },
+            "example": 72
           }
         ]
       },
@@ -7241,6 +7666,10 @@
         "adlar_simulated_target",
         "adaptive_control_diagnostics",
         "building_model_diagnostics",
+        "building_insight_primary",
+        "building_insight_secondary",
+        "building_insight_recommendation",
+        "building_insights_diagnostics",
         "onoff",
         "adlar_hotwater",
         "adlar_enum_water_mode",
@@ -9756,6 +10185,114 @@
               "value": false
             }
           ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Building Insights & Recommendations",
+            "nl": "Gebouw Inzichten & Aanbevelingen",
+            "de": "Gebäudeerkenntnisse & Empfehlungen",
+            "fr": "Aperçus & Recommandations du Bâtiment"
+          },
+          "children": [
+            {
+              "id": "insights_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable Building Insights",
+                "nl": "Gebouw Inzichten Inschakelen",
+                "de": "Gebäudeerkenntnisse Aktivieren",
+                "fr": "Activer les Aperçus du Bâtiment"
+              },
+              "hint": {
+                "en": "Analyze building thermal model and provide energy-saving recommendations with ROI estimates. Insights appear after 24-48 hours of learning.",
+                "nl": "Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen met ROI schattingen. Inzichten verschijnen na 24-48 uur leren.",
+                "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen.",
+                "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage."
+              },
+              "value": true
+            },
+            {
+              "id": "insights_min_confidence",
+              "type": "number",
+              "label": {
+                "en": "Minimum Confidence (%)",
+                "nl": "Minimale Betrouwbaarheid (%)",
+                "de": "Mindestvertrauen (%)",
+                "fr": "Confiance Minimale (%)"
+              },
+              "hint": {
+                "en": "Only show insights when building model confidence exceeds this threshold. 70% = ~24-48 hours learning. Lower values show earlier insights with less accuracy.",
+                "nl": "Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt. 70% = ~24-48 uur leren. Lagere waarden tonen eerdere inzichten met minder nauwkeurigheid.",
+                "de": "Zeigen Sie nur Erkenntnisse an, wenn das Gebäudemodellvertrauen diesen Schwellenwert überschreitet. 70% = ~24-48 Stunden Lernen. Niedrigere Werte zeigen frühere Erkenntnisse mit geringerer Genauigkeit.",
+                "fr": "Afficher uniquement les aperçus lorsque la confiance du modèle du bâtiment dépasse ce seuil. 70% = ~24-48 heures d'apprentissage. Des valeurs plus faibles montrent des aperçus plus tôt avec moins de précision."
+              },
+              "value": 70,
+              "min": 50,
+              "max": 90,
+              "step": 5,
+              "units": "%"
+            },
+            {
+              "id": "insights_max_active",
+              "type": "number",
+              "label": {
+                "en": "Max Active Insights",
+                "nl": "Max Actieve Inzichten",
+                "de": "Max. Aktive Erkenntnisse",
+                "fr": "Max. d'Aperçus Actifs"
+              },
+              "hint": {
+                "en": "Maximum number of insights to display simultaneously. Prevents information overload. Most important insights shown first.",
+                "nl": "Maximum aantal inzichten om tegelijkertijd weer te geven. Voorkomt informatie-overload. Belangrijkste inzichten eerst getoond.",
+                "de": "Maximale Anzahl gleichzeitig anzuzeigender Erkenntnisse. Verhindert Informationsüberflutung. Wichtigste Erkenntnisse zuerst angezeigt.",
+                "fr": "Nombre maximum d'aperçus à afficher simultanément. Empêche la surcharge d'informations. Les aperçus les plus importants sont affichés en premier."
+              },
+              "value": 3,
+              "min": 1,
+              "max": 5,
+              "step": 1
+            },
+            {
+              "id": "wake_time",
+              "type": "text",
+              "label": {
+                "en": "Wake Time (HH:MM)",
+                "nl": "Waktijd (UU:MM)",
+                "de": "Aufwachzeit (HH:MM)",
+                "fr": "Heure de Réveil (HH:MM)"
+              },
+              "hint": {
+                "en": "Time when building should reach target temperature. Used to calculate optimal pre-heat start time based on thermal response (τ).",
+                "nl": "Tijd wanneer gebouw doeltemperatuur moet bereiken. Gebruikt om optimale voorverwarm starttijd te berekenen gebaseerd op thermische respons (τ).",
+                "de": "Zeit, zu der das Gebäude die Zieltemperatur erreichen soll. Wird verwendet, um die optimale Vorheizstartzeit basierend auf der thermischen Reaktion (τ) zu berechnen.",
+                "fr": "Heure à laquelle le bâtiment devrait atteindre la température cible. Utilisé pour calculer l'heure de début de préchauffage optimale basée sur la réponse thermique (τ)."
+              },
+              "value": "07:00",
+              "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+            },
+            {
+              "id": "night_setback_delta",
+              "type": "number",
+              "label": {
+                "en": "Night Setback (°C)",
+                "nl": "Nacht Verlaging (°C)",
+                "de": "Nachtabsenkung (°C)",
+                "fr": "Réduction Nocturne (°C)"
+              },
+              "hint": {
+                "en": "Temperature reduction during night (e.g., from 21°C to 17°C = 4°C setback). Used to calculate pre-heat duration and energy savings potential.",
+                "nl": "Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging). Gebruikt om voorverwarm duur en energie besparingspotentieel te berekenen.",
+                "de": "Temperaturreduktion während der Nacht (z.B. von 21°C auf 17°C = 4°C Absenkung). Wird verwendet, um Vorheizdauer und Energiesparpotenzial zu berechnen.",
+                "fr": "Réduction de température pendant la nuit (p. ex., de 21°C à 17°C = réduction de 4°C). Utilisé pour calculer la durée de préchauffage et le potentiel d'économie d'énergie."
+              },
+              "value": 4,
+              "min": 2,
+              "max": 6,
+              "step": 0.5,
+              "units": "°C"
+            }
+          ]
         }
       ]
     }
@@ -11690,6 +12227,86 @@
       "description": {
         "nl": "dp 33 : defrost_state - Defrosting"
       }
+    },
+    "building_insight_primary": {
+      "id": "building_insight_primary",
+      "type": "string",
+      "title": {
+        "en": "Primary Building Insight",
+        "nl": "Primair Gebouw Inzicht",
+        "de": "Primäre Gebäudeerkenntnis",
+        "fr": "Aperçu Principal du Bâtiment"
+      },
+      "desc": {
+        "en": "Most important building performance insight with energy-saving recommendations",
+        "nl": "Belangrijkste gebouwprestatie inzicht met energie-besparende aanbevelingen",
+        "de": "Wichtigste Gebäudeleistungserkenntnis mit Energiespartipps",
+        "fr": "Aperçu le plus important des performances du bâtiment avec recommandations d'économie d'énergie"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/insight-primary.svg"
+    },
+    "building_insight_recommendation": {
+      "id": "building_insight_recommendation",
+      "type": "string",
+      "title": {
+        "en": "Recommended Action",
+        "nl": "Aanbevolen Actie",
+        "de": "Empfohlene Aktion",
+        "fr": "Action Recommandée"
+      },
+      "desc": {
+        "en": "Specific actionable recommendation based on learned building thermal model",
+        "nl": "Specifieke uitvoerbare aanbeveling gebaseerd op geleerd thermisch gebouwmodel",
+        "de": "Spezifische umsetzbare Empfehlung basierend auf erlerntem thermischem Gebäudemodell",
+        "fr": "Recommandation spécifique et actionnable basée sur le modèle thermique du bâtiment appris"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/recommendation.svg"
+    },
+    "building_insight_secondary": {
+      "id": "building_insight_secondary",
+      "type": "string",
+      "title": {
+        "en": "Secondary Building Insight",
+        "nl": "Secundair Gebouw Inzicht",
+        "de": "Sekundäre Gebäudeerkenntnis",
+        "fr": "Aperçu Secondaire du Bâtiment"
+      },
+      "desc": {
+        "en": "Second-priority building performance insight",
+        "nl": "Tweede prioriteit gebouwprestatie inzicht",
+        "de": "Gebäudeleistungserkenntnis mit zweiter Priorität",
+        "fr": "Aperçu des performances du bâtiment de seconde priorité"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/insight-secondary.svg"
+    },
+    "building_insights_diagnostics": {
+      "id": "building_insights_diagnostics",
+      "type": "string",
+      "title": {
+        "en": "Building Insights Diagnostics (JSON)",
+        "nl": "Gebouw Inzichten Diagnostiek (JSON)",
+        "de": "Gebäudeerkenntnisse Diagnose (JSON)",
+        "fr": "Diagnostics des Aperçus du Bâtiment (JSON)"
+      },
+      "desc": {
+        "en": "Detailed diagnostics about active insights, history, and insight detection status (JSON format for advanced users)",
+        "nl": "Gedetailleerde diagnostiek over actieve inzichten, geschiedenis en inzicht detectiestatus (JSON formaat voor gevorderde gebruikers)",
+        "de": "Detaillierte Diagnose über aktive Erkenntnisse, Verlauf und Erkennungserkennungsstatus (JSON-Format für fortgeschrittene Benutzer)",
+        "fr": "Diagnostics détaillés sur les aperçus actifs, l'historique et le statut de détection des aperçus (format JSON pour utilisateurs avancés)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/diagnostics.svg"
     },
     "building_model_diagnostics": {
       "id": "building_model_diagnostics",

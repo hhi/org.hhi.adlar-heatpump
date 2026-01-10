@@ -1,0 +1,20 @@
+{
+  "id": "building_insight_recommendation",
+  "type": "string",
+  "title": {
+    "en": "Recommended Action",
+    "nl": "Aanbevolen Actie",
+    "de": "Empfohlene Aktion",
+    "fr": "Action Recommandée"
+  },
+  "desc": {
+    "en": "Specific actionable recommendation based on learned building thermal model",
+    "nl": "Specifieke uitvoerbare aanbeveling gebaseerd op geleerd thermisch gebouwmodel",
+    "de": "Spezifische umsetzbare Empfehlung basierend auf erlerntem thermischem Gebäudemodell",
+    "fr": "Recommandation spécifique et actionnable basée sur le modèle thermique du bâtiment appris"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/capability-icons/recommendation.svg"
+}

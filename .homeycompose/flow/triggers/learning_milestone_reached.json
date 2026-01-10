@@ -18,6 +18,7 @@
     "de": "Wird ausgelöst, wenn das thermische Gebäudemodell einen Lernmeilenstein erreicht (z.B. 70% Vertrauen)",
     "fr": "Se déclenche lorsque le modèle thermique du bâtiment atteint un jalon d'apprentissage (par exemple, 70% de confiance)"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",

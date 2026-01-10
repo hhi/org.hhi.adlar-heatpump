@@ -10,6 +10,7 @@ import { TuyaConnectionService, TuyaDeviceConfig } from './tuya-connection-servi
 import { FlowCardManagerService } from './flow-card-manager-service';
 import { AdaptiveControlService } from './adaptive-control-service';
 import { HeatingCurveVisualizationService } from './heating-curve-visualization-service';
+import { BuildingInsightsService } from './building-insights-service';
 import { CategorizedError } from '../error-types';
 import { AdlarMapping } from '../definitions/adlar-mapping';
 
@@ -37,6 +38,7 @@ export class ServiceCoordinator {
   private flowCardManager!: FlowCardManagerService;
   private adaptiveControl!: AdaptiveControlService;
   private heatingCurveVisualization!: HeatingCurveVisualizationService;
+  private buildingInsights!: BuildingInsightsService;
 
   // Service state tracking
   private serviceHealth = new Map<string, boolean>();
@@ -89,6 +91,15 @@ export class ServiceCoordinator {
     });
     this.heatingCurveVisualization = new HeatingCurveVisualizationService(serviceOptions);
 
+    // BuildingInsightsService requires BuildingModelService and AdaptiveControlService
+    // Note: Will be fully initialized after adaptiveControl.initialize() is called
+    this.buildingInsights = new BuildingInsightsService({
+      device: this.device,
+      logger: this.logger,
+      buildingModelService: this.adaptiveControl.getBuildingModelService(),
+      adaptiveControlService: this.adaptiveControl,
+    });
+
     // TuyaConnectionService requires special initialization
     this.tuyaConnection = new TuyaConnectionService({
       device: this.device,
@@ -108,6 +119,7 @@ export class ServiceCoordinator {
     this.serviceHealth.set('flowcard', true);
     this.serviceHealth.set('adaptive', true);
     this.serviceHealth.set('heatingcurve', true);
+    this.serviceHealth.set('insights', true);
 
     this.logger('ServiceCoordinator: All services initialized');
   }
@@ -221,6 +233,10 @@ export class ServiceCoordinator {
       // Initialize heating curve visualization service (v2.3.7)
       await this.heatingCurveVisualization.initialize();
       this.logger('ServiceCoordinator: Heating curve visualization service initialized');
+
+      // Initialize building insights service (v2.5.0 - requires building model to be ready)
+      await this.buildingInsights.initialize();
+      this.logger('ServiceCoordinator: Building insights service initialized');
 
       // Initialize Tuya connection last (most likely to fail)
       try {
@@ -390,6 +406,10 @@ export class ServiceCoordinator {
     return this.adaptiveControl;
   }
 
+  getBuildingInsights(): BuildingInsightsService {
+    return this.buildingInsights;
+  }
+
   /**
    * Called when device settings change; delegates to SettingsManagerService and AdaptiveControlService.
    */
@@ -409,6 +429,14 @@ export class ServiceCoordinator {
       this.logger('ServiceCoordinator: AdaptiveControl settings update failed (non-critical)', error);
       // Don't throw - allow settings save to succeed even if adaptive control fails
       // User's other settings changes are preserved, adaptive control degrades gracefully
+    }
+
+    // BuildingInsights third (optional feature - graceful degradation if it fails)
+    try {
+      await this.buildingInsights.onSettingsChanged(newSettings);
+    } catch (error) {
+      this.logger('ServiceCoordinator: BuildingInsights settings update failed (non-critical)', error);
+      // Don't throw - allow settings save to succeed even if insights fail
     }
   }
 
@@ -493,6 +521,7 @@ export class ServiceCoordinator {
       this.flowCardManager.destroy();
       await this.adaptiveControl.destroy(); // Await to persist building model state
       await this.heatingCurveVisualization.destroy(); // Cleanup image resources (v2.3.7)
+      await this.buildingInsights.destroy(); // Await to persist insights state (v2.5.0)
     } catch (error) {
       this.logger('ServiceCoordinator: Error during service cleanup', error);
     }

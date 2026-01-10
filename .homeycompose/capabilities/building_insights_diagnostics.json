@@ -1,0 +1,20 @@
+{
+  "id": "building_insights_diagnostics",
+  "type": "string",
+  "title": {
+    "en": "Building Insights Diagnostics (JSON)",
+    "nl": "Gebouw Inzichten Diagnostiek (JSON)",
+    "de": "Gebäudeerkenntnisse Diagnose (JSON)",
+    "fr": "Diagnostics des Aperçus du Bâtiment (JSON)"
+  },
+  "desc": {
+    "en": "Detailed diagnostics about active insights, history, and insight detection status (JSON format for advanced users)",
+    "nl": "Gedetailleerde diagnostiek over actieve inzichten, geschiedenis en inzicht detectiestatus (JSON formaat voor gevorderde gebruikers)",
+    "de": "Detaillierte Diagnose über aktive Erkenntnisse, Verlauf und Erkennungserkennungsstatus (JSON-Format für fortgeschrittene Benutzer)",
+    "fr": "Diagnostics détaillés sur les aperçus actifs, l'historique et le statut de détection des aperçus (format JSON pour utilisateurs avancés)"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/capability-icons/diagnostics.svg"
+}

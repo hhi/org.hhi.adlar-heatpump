@@ -1,0 +1,84 @@
+{
+  "id": "building_insight_detected",
+  "title": {
+    "en": "New building insight detected",
+    "nl": "Nieuw gebouw inzicht gedetecteerd",
+    "de": "Neue Gebäudeerkenntnis erkannt",
+    "fr": "Nouvel aperçu du bâtiment détecté"
+  },
+  "hint": {
+    "en": "Triggers when building model detects actionable performance insight (≥70% confidence). Use tokens to filter by category and savings potential.",
+    "nl": "Triggert wanneer gebouwmodel uitvoerbaar prestatie-inzicht detecteert (≥70% betrouwbaarheid). Gebruik tokens om te filteren op categorie en besparingspotentieel.",
+    "de": "Wird ausgelöst, wenn das Gebäudemodell umsetzbare Leistungserkenntnisse erkennt (≥70% Vertrauen). Verwenden Sie Token zum Filtern nach Kategorie und Einsparpotenzial.",
+    "fr": "Se déclenche lorsque le modèle du bâtiment détecte un aperçu de performance actionnable (≥70% de confiance). Utilisez des jetons pour filtrer par catégorie et potentiel d'économies."
+  },
+  "highlight": true,
+  "tokens": [
+    {
+      "name": "category",
+      "type": "string",
+      "title": {
+        "en": "Category",
+        "nl": "Categorie",
+        "de": "Kategorie",
+        "fr": "Catégorie"
+      },
+      "example": "thermal_storage"
+    },
+    {
+      "name": "insight",
+      "type": "string",
+      "title": {
+        "en": "Insight",
+        "nl": "Inzicht",
+        "de": "Erkenntnis",
+        "fr": "Aperçu"
+      },
+      "example": "Thermal storage potential - C=24 kWh/°C"
+    },
+    {
+      "name": "recommendation",
+      "type": "string",
+      "title": {
+        "en": "Recommendation",
+        "nl": "Aanbeveling",
+        "de": "Empfehlung",
+        "fr": "Recommandation"
+      },
+      "example": "Pre-heat +2°C during cheap hours"
+    },
+    {
+      "name": "priority",
+      "type": "number",
+      "title": {
+        "en": "Priority (0-100)",
+        "nl": "Prioriteit (0-100)",
+        "de": "Priorität (0-100)",
+        "fr": "Priorité (0-100)"
+      },
+      "example": 85
+    },
+    {
+      "name": "confidence",
+      "type": "number",
+      "title": {
+        "en": "Confidence (%)",
+        "nl": "Betrouwbaarheid (%)",
+        "de": "Vertrauen (%)",
+        "fr": "Confiance (%)"
+      },
+      "example": 74
+    },
+    {
+      "name": "estimated_savings_eur_month",
+      "type": "number",
+      "title": {
+        "en": "Est. Savings (€/month)",
+        "nl": "Geschatte Besparing (€/maand)",
+        "de": "Geschätzte Einsparungen (€/Monat)",
+        "fr": "Économies Estimées (€/mois)"
+      },
+      "example": 95
+    }
+  ]
+}

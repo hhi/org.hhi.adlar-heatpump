@@ -179,6 +179,18 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Check if dynamic pricing data is available (for insights and recommendations)
+   */
+  public hasDynamicPricing(): boolean {
+    const priceOptimizerEnabled = this.device.getSetting('price_optimizer_enabled');
+    if (priceOptimizerEnabled === false) {
+      return false;
+    }
+
+    return this.energyOptimizer.getPriceData().length > 0;
+  }
+
+  /**
    * Initialize adaptive control service
    * Called after ServiceCoordinator initialization
    */
@@ -628,6 +640,14 @@ export class AdaptiveControlService {
       // Step 6.5: Update diagnostic capability with weighted decision breakdown
       await this.updateDiagnosticsCapability(combinedAction);
 
+      // Step 6.6: Trigger simulation update flow card (v2.6.0: revived for monitoring)
+      // This fires EVERY cycle with full breakdown for monitoring/logging purposes
+      await this.triggerSimulationUpdate(
+        currentSetpoint,
+        combinedAction,
+        confidenceMetrics,
+      );
+
       // Step 7: Check for deprecated monitoring mode (legacy)
       if (this.isMonitoringMode && !this.isSimulateMode) {
         this.logger('⚠️ MONITORING MODE (DEPRECATED): Action logged but NOT executed');
@@ -674,8 +694,13 @@ export class AdaptiveControlService {
         Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
       );
 
-      // Trigger recommendation flow card
-      await this.triggerTemperatureRecommendation(currentSetpoint, recommendedTemp, combinedAction);
+      // Trigger recommendation flow card (with confidence for user filtering)
+      await this.triggerTemperatureRecommendation(
+        currentSetpoint,
+        recommendedTemp,
+        combinedAction,
+        confidenceMetrics.buildingModelConfidence,
+      );
 
       // Always update recommended temp for Insights tracking (v2.5.0: simulate mode implicit)
       this.simulatedTargetTemp = recommendedTemp;
@@ -892,11 +917,13 @@ export class AdaptiveControlService {
   /**
    * Trigger: temperature_adjustment_recommended
    * Fired when adaptive control recommends a temperature adjustment in flow-assisted mode
+   * @version 2.6.0 - Added building_model_confidence token for user filtering
    */
   private async triggerTemperatureRecommendation(
     currentTemp: number,
     recommendedTemp: number,
     combinedAction: { finalAdjustment: number; reasoning: string[]; priority: string },
+    buildingModelConfidence: number = 0,
   ): Promise<void> {
     try {
       const trigger = this.device.homey.flow.getDeviceTriggerCard('temperature_adjustment_recommended');
@@ -906,10 +933,57 @@ export class AdaptiveControlService {
         adjustment: combinedAction.finalAdjustment,
         reason: combinedAction.reasoning.join('; '),
         controller: 'weighted', // All 4 components combined
+        building_model_confidence: Math.round(buildingModelConfidence * 100), // 0-100%
       });
-      this.logger('AdaptiveControlService: Triggered temperature_adjustment_recommended flow card');
+      this.logger('AdaptiveControlService: Triggered temperature_adjustment_recommended flow card', {
+        confidence: `${Math.round(buildingModelConfidence * 100)}%`,
+      });
     } catch (error) {
       this.logger('AdaptiveControlService: Failed to trigger temperature_adjustment_recommended', {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  /**
+   * Trigger: adaptive_simulation_update
+   * Fired EVERY control cycle with full breakdown for monitoring/logging
+   * @version 2.6.0 - Revived from dead code, now fires every cycle with confidence metrics
+   */
+  private async triggerSimulationUpdate(
+    currentSetpoint: number,
+    combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
+    confidenceMetrics: ConfidenceMetrics,
+  ): Promise<void> {
+    try {
+      // Calculate simulated target (what the system recommends)
+      const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
+      const simulatedTarget = Math.max(
+        DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
+      );
+      const delta = simulatedTarget - currentSetpoint;
+
+      const trigger = this.device.homey.flow.getDeviceTriggerCard('adaptive_simulation_update');
+      await trigger.trigger(this.device, {
+        simulated_target: simulatedTarget,
+        actual_target: currentSetpoint,
+        delta,
+        adjustment: combinedAction.finalAdjustment,
+        comfort_component: combinedAction.breakdown.comfort,
+        efficiency_component: combinedAction.breakdown.efficiency,
+        cost_component: combinedAction.breakdown.cost,
+        building_model_confidence: Math.round(confidenceMetrics.buildingModelConfidence * 100), // 0-100%
+        cop_confidence: Math.round(confidenceMetrics.copConfidence * 100), // 0-100%
+        reasoning: combinedAction.reasoning.join('; '),
+      });
+      this.logger('AdaptiveControlService: Triggered adaptive_simulation_update flow card', {
+        simulated: `${simulatedTarget}°C`,
+        delta: `${delta}°C`,
+        confidence: `${Math.round(confidenceMetrics.buildingModelConfidence * 100)}%`,
+      });
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to trigger adaptive_simulation_update', {
         error: (error as Error).message,
       });
     }
