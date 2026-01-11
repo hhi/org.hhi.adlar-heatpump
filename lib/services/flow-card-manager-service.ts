@@ -5,12 +5,14 @@
 import Homey from 'homey';
 import { TuyaErrorCategorizer } from '../error-types';
 import { CapabilityCategories, UserFlowPreferences } from '../types/shared-interfaces';
+import type { BuildingInsightsService } from './building-insights-service';
 
 export interface FlowCardManagerOptions {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
   onExternalPowerData?: (powerValue: number) => Promise<void>;
   onExternalPricesData?: (pricesObject: Record<string, number>) => Promise<void>;
+  buildingInsightsService?: BuildingInsightsService; // v2.5.0: Building insights flow cards
 }
 
 export class FlowCardManagerService {
@@ -18,6 +20,7 @@ export class FlowCardManagerService {
   private logger: (message: string, ...args: unknown[]) => void;
   private onExternalPowerData: (powerValue: number) => Promise<void>;
   private onExternalPricesData: (pricesObject: Record<string, number>) => Promise<void>;
+  private buildingInsightsService?: BuildingInsightsService; // v2.5.0
   private flowCardListeners = new Map<string, unknown>();
   private isInitialized = false;
   private initializationRetryTimer: NodeJS.Timeout | null = null;
@@ -29,12 +32,14 @@ export class FlowCardManagerService {
    * @param options.logger - optional logger
    * @param options.onExternalPowerData - callback to delegate external power data to EnergyTrackingService
    * @param options.onExternalPricesData - callback to delegate external prices data to AdaptiveControlService
+   * @param options.buildingInsightsService - v2.5.0: optional building insights service for flow cards
    */
   constructor(options: FlowCardManagerOptions) {
     this.device = options.device;
     this.logger = options.logger || (() => { });
     this.onExternalPowerData = options.onExternalPowerData || (async () => { });
     this.onExternalPricesData = options.onExternalPricesData || (async () => { });
+    this.buildingInsightsService = options.buildingInsightsService; // v2.5.0
   }
 
   /**
@@ -95,6 +100,11 @@ export class FlowCardManagerService {
 
       // Register action-based condition cards (always available)
       await this.registerActionBasedConditionCards();
+
+      // Register Building Insights cards (v2.5.0 - always available if service exists)
+      if (this.buildingInsightsService) {
+        await this.registerBuildingInsightsCards();
+      }
 
       this.logger('FlowCardManagerService: Flow cards updated successfully');
     } catch (error) {
@@ -694,6 +704,141 @@ export class FlowCardManagerService {
       this.logger('FlowCardManagerService: Action-based condition cards registered');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering action-based condition cards:', error);
+    }
+  }
+
+  /**
+   * Register Building Insights flow cards (v2.5.0)
+   * - 4 action cards: dismiss, force analysis, reset history, set threshold
+   * - 3 condition cards: insight active, confidence above, savings above
+   */
+  private async registerBuildingInsightsCards(): Promise<void> {
+    if (!this.buildingInsightsService) {
+      this.logger('FlowCardManagerService: Building Insights service not available, skipping cards');
+      return;
+    }
+
+    try {
+      // ==================== ACTION CARDS ====================
+
+      // Action 1: Dismiss insight
+      const dismissInsightCard = this.device.homey.flow.getActionCard('dismiss_insight');
+      const dismissInsightListener = dismissInsightCard.registerRunListener(async (args: { category: string; duration: number }) => {
+        this.logger('FlowCardManagerService: Dismiss insight action triggered', { category: args.category, duration: args.duration });
+
+        if (!this.buildingInsightsService) {
+          throw new Error('Building Insights service not available');
+        }
+
+        await this.buildingInsightsService.dismissInsight(args.category as any, args.duration);
+        return true;
+      });
+      this.flowCardListeners.set('dismiss_insight', dismissInsightListener);
+
+      // Action 2: Force insight analysis
+      const forceAnalysisCard = this.device.homey.flow.getActionCard('force_insight_analysis');
+      const forceAnalysisListener = forceAnalysisCard.registerRunListener(async () => {
+        this.logger('FlowCardManagerService: Force insight analysis action triggered');
+
+        if (!this.buildingInsightsService) {
+          throw new Error('Building Insights service not available');
+        }
+
+        const result = await this.buildingInsightsService.forceInsightAnalysis();
+        this.logger(`FlowCardManagerService: Force analysis complete - ${result.insights_detected} insights at ${result.confidence}% confidence`);
+
+        // Return tokens for use in flows
+        return result;
+      });
+      this.flowCardListeners.set('force_insight_analysis', forceAnalysisListener);
+
+      // Action 3: Reset insight history
+      const resetHistoryCard = this.device.homey.flow.getActionCard('reset_insight_history');
+      const resetHistoryListener = resetHistoryCard.registerRunListener(async (args: { confirm: boolean }) => {
+        this.logger('FlowCardManagerService: Reset insight history action triggered', { confirm: args.confirm });
+
+        if (!this.buildingInsightsService) {
+          throw new Error('Building Insights service not available');
+        }
+
+        // Only proceed if user confirmed
+        if (args.confirm !== true) {
+          this.logger('FlowCardManagerService: Reset history cancelled - confirmation not checked');
+          throw new Error('Reset confirmation required - please check the confirmation box');
+        }
+
+        await this.buildingInsightsService.resetInsightHistory();
+        return true;
+      });
+      this.flowCardListeners.set('reset_insight_history', resetHistoryListener);
+
+      // Action 4: Set confidence threshold
+      const setThresholdCard = this.device.homey.flow.getActionCard('set_confidence_threshold');
+      const setThresholdListener = setThresholdCard.registerRunListener(async (args: { threshold: number }) => {
+        this.logger('FlowCardManagerService: Set confidence threshold action triggered', { threshold: args.threshold });
+
+        if (!this.buildingInsightsService) {
+          throw new Error('Building Insights service not available');
+        }
+
+        await this.buildingInsightsService.setConfidenceThreshold(args.threshold);
+        return true;
+      });
+      this.flowCardListeners.set('set_confidence_threshold', setThresholdListener);
+
+      // ==================== CONDITION CARDS ====================
+
+      // Condition 1: Insight is active
+      const insightActiveCard = this.device.homey.flow.getConditionCard('insight_is_active');
+      const insightActiveListener = insightActiveCard.registerRunListener(async (args: { category: string }) => {
+        this.logger('FlowCardManagerService: Insight is active condition triggered', { category: args.category });
+
+        if (!this.buildingInsightsService) {
+          this.logger('FlowCardManagerService: Building Insights service not available, returning false');
+          return false;
+        }
+
+        const isActive = this.buildingInsightsService.isInsightActive(args.category as any);
+        this.logger(`FlowCardManagerService: Insight ${args.category} is ${isActive ? 'active' : 'not active'}`);
+        return isActive;
+      });
+      this.flowCardListeners.set('insight_is_active', insightActiveListener);
+
+      // Condition 2: Confidence above threshold
+      const confidenceAboveCard = this.device.homey.flow.getConditionCard('confidence_above');
+      const confidenceAboveListener = confidenceAboveCard.registerRunListener(async (args: { threshold: number }) => {
+        this.logger('FlowCardManagerService: Confidence above condition triggered', { threshold: args.threshold });
+
+        if (!this.buildingInsightsService) {
+          this.logger('FlowCardManagerService: Building Insights service not available, returning false');
+          return false;
+        }
+
+        const isAbove = await this.buildingInsightsService.isConfidenceAbove(args.threshold);
+        this.logger(`FlowCardManagerService: Confidence is ${isAbove ? 'above' : 'below'} ${args.threshold}%`);
+        return isAbove;
+      });
+      this.flowCardListeners.set('confidence_above', confidenceAboveListener);
+
+      // Condition 3: Savings above threshold
+      const savingsAboveCard = this.device.homey.flow.getConditionCard('savings_above');
+      const savingsAboveListener = savingsAboveCard.registerRunListener(async (args: { category: string; threshold: number }) => {
+        this.logger('FlowCardManagerService: Savings above condition triggered', { category: args.category, threshold: args.threshold });
+
+        if (!this.buildingInsightsService) {
+          this.logger('FlowCardManagerService: Building Insights service not available, returning false');
+          return false;
+        }
+
+        const isAbove = this.buildingInsightsService.areSavingsAbove(args.category as any, args.threshold);
+        this.logger(`FlowCardManagerService: Savings for ${args.category} are ${isAbove ? 'above' : 'below'} €${args.threshold}/month`);
+        return isAbove;
+      });
+      this.flowCardListeners.set('savings_above', savingsAboveListener);
+
+      this.logger('FlowCardManagerService: Building Insights flow cards registered (4 actions + 3 conditions)');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering Building Insights flow cards:', error);
     }
   }
 

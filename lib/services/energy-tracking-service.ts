@@ -129,8 +129,10 @@ export class EnergyTrackingService {
       if (powerValue !== null && this.device.hasCapability('measure_power')) {
         await this.device.setCapabilityValue('measure_power', Math.round(powerValue));
         this.logger(`EnergyTrackingService: Power updated: ${Math.round(powerValue)}W (source: ${powerSource}, confidence: ${confidence})`);
+      }
 
-        // Check power threshold for trigger (v1.0.7 - power_threshold_exceeded)
+      // Check power threshold for trigger (v1.0.7 - power_threshold_exceeded)
+      if (powerValue !== null) {
         await this.checkPowerThreshold(powerValue);
       }
 

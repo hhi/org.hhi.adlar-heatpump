@@ -1,6 +1,6 @@
 # Adlar Warmtepomp — Adaptieve Regeling Systeem
 
-**Versie:** 2.3.0 | **Datum:** Januari 2026
+**Versie:** 2.4.0 | **Datum:** Januari 2026
 
 ---
 
@@ -25,32 +25,44 @@ Dit systeem regelt je Adlar Castra warmtepomp intelligent voor:
 
 ## Architectuur
 
-```mermaid
-flowchart TB
-    subgraph HOMEY["Homey Pro"]
-        DEVICE["Adlar Heat Pump Device<br/>Main Controller"]
-        HEAT["Heating<br/>Control<br/>60%"]
-        BUILD["Building<br/>Learner<br/>Info"]
-        ENERGY["Energy<br/>Optimizer<br/>15%"]
-        COP["COP<br/>Controller<br/>25%"]
-        DEVICE --> HEAT & BUILD & ENERGY & COP
-    end
-    
-    subgraph WP["Warmtepomp"]
-        DPS4["DPS 4: Steltemperatuur"]
-        DPS13["DPS 13: Stooklijn = OFF"]
-        SENSORS["DPS 21/22: Aanvoer/Retour<br/>DPS 26: Buitentemp"]
-    end
-    
-    subgraph EXT["Externe Data"]
-        TEMP["Binnentemperatuur"]
-        PRICES["Energieprijzen"]
-        WEATHER["Weer API"]
-    end
-    
-    HEAT & ENERGY & COP --> DPS4
-    SENSORS --> BUILD
-    EXT --> DEVICE
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           HOMEY PRO                                 │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │          Adlar Heat Pump Device - Main Controller             │  │
+│  └─────────────────────────────┬─────────────────────────────────┘  │
+│                                │                                    │
+│        ┌───────────┬───────────┼───────────┬───────────┐            │
+│        │           │           │           │           │            │
+│        ▼           ▼           ▼           ▼           │            │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐            │
+│  │  Heating  │ │ Building  │ │  Energy   │ │    COP    │            │
+│  │  Control  │ │  Learner  │ │ Optimizer │ │Controller │            │
+│  │    60%    │ │   Info    │ │    15%    │ │    25%    │            │
+│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘            │
+│        │             │             │             │                  │
+└────────┼─────────────┼─────────────┼─────────────┼──────────────────┘
+         │             │             │             │
+         ▼             ▼             ▼             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                          WARMTEPOMP                                 │
+│  ┌───────────────────┐  ┌───────────────────────────────────────┐   │
+│  │ DPS 4:            │  │ DPS 21/22: Aanvoer/Retour             │   │
+│  │ Steltemperatuur   │  │ DPS 26: Buitentemp                    │   │
+│  └───────────────────┘  └───────────────────────────────────────┘   │
+│  ┌───────────────────┐                                              │
+│  │ DPS 13:           │                                              │
+│  │ Stooklijn = OFF   │                                              │
+│  └───────────────────┘                                              │
+└─────────────────────────────────────────────────────────────────────┘
+         ▲
+         │
+┌─────────────────────────────────────────────────────────────────────┐
+│                         EXTERNE DATA                                │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐            │
+│  │Binnentemperatuur│  │ Energieprijzen│  │   Weer API   │            │
+│  └───────────────┘  └───────────────┘  └───────────────┘            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Control Loop (elke 5 min)
@@ -221,11 +233,16 @@ De app gebruikt ingebouwde COP capabilities:
 
 ### Prioriteiten & Gewichten
 
-```
-Comfort:     60%  ← Altijd belangrijkst
-COP:         25%  ← Binnen comfort grenzen
-Prijs:       15%  ← Binnen comfort + COP grenzen
-```
+De wegingsfactoren zijn **configureerbaar** via Apparaatinstellingen → Adaptieve Regeling Wegingsfactoren:
+
+| Prioriteit | Standaard | Bereik | Functie |
+|------------|-----------|--------|---------|
+| **Comfort** | 60% | 0-100% | Gewicht voor PI temperatuurregeling |
+| **Efficiëntie** | 25% | 0-100% | Gewicht voor COP optimalisatie |
+| **Kosten** | 15% | 0-100% | Gewicht voor prijsoptimalisatie |
+
+> [!NOTE]
+> Waarden worden automatisch genormaliseerd naar totaal 100%.
 
 ### Conflict Resolutie
 
@@ -435,14 +452,3 @@ Correctie = (Kp × huidige_fout) + (Ki × gemiddelde_fout)
 | Jaarlijkse besparing | €500 | €600-800 |
 
 ---
-
-## Gerelateerde Documentatie
-
-- [ADAPTIVE_CONTROL_GUIDE.md](./ADAPTIVE_CONTROL_GUIDE.md) — Gebruikershandleiding
-- [Technische Implementatie](../Dev%20support/Architectural%20overview/Adaptieve_Regeling_Technische_Implementatie.md) — Code details
-- [CONFIGURATIEGIDS.md](../advanced-settings/CONFIGURATIEGIDS.md) — Alle instellingen
-
----
-
-*© 2026 Adlar Heat Pump App*  
-*Versie: 2.3.0 | Laatst bijgewerkt: 9 januari 2026*

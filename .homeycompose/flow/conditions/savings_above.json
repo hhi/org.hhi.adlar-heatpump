@@ -1,0 +1,86 @@
+{
+  "id": "savings_above",
+  "title": {
+    "en": "Insight savings !{{are|aren't}} above threshold",
+    "nl": "Inzicht besparing !{{is|is niet}} boven drempel",
+    "de": "Erkenntniseinsparungen !{{sind|sind nicht}} über Schwellenwert",
+    "fr": "Les économies d'aperçu !{{sont|ne sont pas}} au-dessus du seuil"
+  },
+  "titleFormatted": {
+    "en": "[[category]] savings !{{are|aren't}} above €[[threshold]]/month",
+    "nl": "[[category]] besparing !{{is|is niet}} boven €[[threshold]]/maand",
+    "de": "[[category]] Einsparungen !{{sind|sind nicht}} über €[[threshold]]/Monat",
+    "fr": "Les économies [[category]] !{{sont|ne sont pas}} au-dessus de €[[threshold]]/mois"
+  },
+  "hint": {
+    "en": "Check if estimated monthly savings for an insight category exceed a threshold (in EUR/month). Use for ROI-based filtering (e.g., only act on savings >€100/month).",
+    "nl": "Controleer of geschatte maandelijkse besparing voor een inzicht categorie een drempel overschrijdt (in EUR/maand). Gebruik voor ROI-gebaseerde filtering (bijv. alleen actie bij besparing >€100/maand).",
+    "de": "Überprüfen Sie, ob die geschätzten monatlichen Einsparungen für eine Erkenntniskategorie einen Schwellenwert überschreiten (in EUR/Monat). Verwenden Sie für ROI-basierte Filterung (z. B. nur handeln bei Einsparungen >€100/Monat).",
+    "fr": "Vérifier si les économies mensuelles estimées pour une catégorie d'aperçu dépassent un seuil (en EUR/mois). Utiliser pour le filtrage basé sur le ROI (par exemple, agir uniquement sur les économies >€100/mois)."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "name": "category",
+      "type": "dropdown",
+      "title": {
+        "en": "Category",
+        "nl": "Categorie",
+        "de": "Kategorie",
+        "fr": "Catégorie"
+      },
+      "values": [
+        {
+          "id": "insulation_performance",
+          "label": {
+            "en": "Insulation performance",
+            "nl": "Isolatieprestaties",
+            "de": "Isolationsleistung",
+            "fr": "Performance d'isolation"
+          }
+        },
+        {
+          "id": "pre_heating",
+          "label": {
+            "en": "Pre-heating strategy",
+            "nl": "Voorverwarm strategie",
+            "de": "Vorheizstrategie",
+            "fr": "Stratégie de préchauffage"
+          }
+        },
+        {
+          "id": "thermal_storage",
+          "label": {
+            "en": "Thermal storage",
+            "nl": "Thermische opslag",
+            "de": "Wärmespeicher",
+            "fr": "Stockage thermique"
+          }
+        }
+      ]
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": {
+        "en": "Threshold (EUR/month)",
+        "nl": "Drempel (EUR/maand)",
+        "de": "Schwellenwert (EUR/Monat)",
+        "fr": "Seuil (EUR/mois)"
+      },
+      "min": 0,
+      "max": 500,
+      "step": 10,
+      "placeholder": {
+        "en": "100",
+        "nl": "100",
+        "de": "100",
+        "fr": "100"
+      }
+    }
+  ]
+}

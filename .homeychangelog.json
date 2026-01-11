@@ -1,4 +1,10 @@
 {
+  "2.5.7": {
+    "en": "Fixed capability icon paths for building insights features. Added automatic migration to add building insights capabilities to existing devices (4 capabilities). Added device filters to building insight flow triggers. Reorganized settings: 'Building Insights' group now appears after 'Building Model Learning'.",
+    "nl": "Capability icon paden voor gebouw inzichten functies gecorrigeerd. Automatische migratie toegevoegd om gebouw inzichten capabilities toe te voegen aan bestaande apparaten (4 capabilities). Device filters toegevoegd aan gebouw inzicht flow triggers. Instellingen gereorganiseerd: 'Gebouw Inzichten' groep verschijnt nu na 'Gebouwmodel Leren'.",
+    "de": "Capability-Icon-Pfade für Gebäude-Einblicke-Funktionen korrigiert. Automatische Migration hinzugefügt, um Gebäude-Einblicke-Capabilities zu bestehenden Geräten hinzuzufügen (4 Capabilities). Gerätefilter zu Gebäude-Einblicke-Flow-Triggern hinzugefügt. Einstellungen reorganisiert: 'Gebäudeerkenntnisse' Gruppe erscheint jetzt nach 'Gebäudemodell-Lernen'.",
+    "fr": "Chemins d'icônes de capacité pour insights du bâtiment corrigés. Migration automatique ajoutée pour ajouter les capacités d'insights du bâtiment aux appareils existants (4 capacités). Filtres d'appareil ajoutés aux déclencheurs de flux d'insights du bâtiment. Paramètres réorganisés: groupe 'Insights du Bâtiment' apparaît maintenant après 'Apprentissage du Modèle de Bâtiment'."
+  },
   "2.5.3": {
     "en": "Added capability icons for building insights features (diagnostics, primary insight, secondary insight, recommendation).",
     "nl": "Capability iconen toegevoegd voor gebouw inzichten functies (diagnostiek, primair inzicht, secundair inzicht, aanbeveling).",

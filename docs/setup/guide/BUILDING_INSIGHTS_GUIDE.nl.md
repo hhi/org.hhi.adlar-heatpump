@@ -59,13 +59,29 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 
 ### Leerfase (24-48 uur)
 
-```mermaid
-flowchart LR
-    A[Data Verzameling<br/>elke 5 min] --> B[Parameter Leren<br/>RLS algoritme]
-    B --> C[Confidence groeit<br/>0% → 100%]
-    C --> D{≥70%?}
-    D -->|Ja| E[Inzichten<br/>beschikbaar]
-    D -->|Nee| A
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ Data Verzameling│───▶│ Parameter Leren │───▶│ Confidence groeit│
+│   elke 5 min    │    │  RLS algoritme  │    │    0% → 100%    │
+└─────────────────┘    └─────────────────┘    └────────┬────────┘
+                                                       │
+         ┌─────────────────────────────────────────────┘
+         ▼
+   ┌───────────┐
+   │  ≥70%?    │
+   └─────┬─────┘
+         │
+    ┌────┴────┐
+    │         │
+   Ja        Nee ──────────────────────────────┐
+    │                                          │
+    ▼                                          │
+┌─────────────────┐                            │
+│    Inzichten    │                            │
+│   beschikbaar   │          ┌─────────────────┘
+└─────────────────┘          │
+                             ▼
+                   (Terug naar Data Verzameling)
 ```
 
 **Data die verzameld wordt:**
@@ -332,6 +348,297 @@ THEN
 
 ---
 
+### Flow 5: Inzicht Tijdelijk Verbergen (Dismiss)
+
+```
+WHEN Gebouwinzicht gedetecteerd, categorie = "insulation_performance"
+
+AND Gebruiker heeft besloten isolatie te negeren (bekend probleem)
+
+THEN
+  Verberg "insulation_performance" inzicht voor 90 dagen
+    (actie: Dismiss insight)
+
+  Notificatie: "Isolatie inzicht verborgen voor 3 maanden"
+```
+
+**Use case:** Na renovatie werk in progress, of als je weet dat isolatie op planning staat maar nog niet uitgevoerd.
+
+---
+
+### Flow 6: Forceer Inzicht Analyse (On-Demand)
+
+```
+WHEN Gebruiker drukt op virtuele knop "Analyseer Gebouw Nu"
+  (of dagelijks om 08:00 voor ochtend rapport)
+
+THEN
+  1. Forceer inzicht analyse
+     (actie: Force insight analysis)
+     Retourneert: {{insights_detected}}, {{confidence}}
+
+  2. WANNEER {{insights_detected}} is groter dan 0
+     THEN Notificatie:
+       "Gebouwanalyse: {{insights_detected}} inzicht(en) gevonden"
+       "Model betrouwbaarheid: {{confidence}}%"
+```
+
+**Use case:** Direct controleren na grote veranderingen (weer, instellingen) zonder 50 minuten te wachten.
+
+---
+
+### Flow 7: Reset na Renovatie
+
+```
+WHEN Virtuele knop "Renovatie Voltooid" ingedrukt
+
+THEN
+  1. Reset inzicht geschiedenis [✓ Bevestig reset]
+     (actie: Reset insight history - checkbox MOET aangevinkt)
+
+  2. Notificatie:
+     "Inzichten gereset. Nieuw leren start - verwacht nieuwe inzichten na 24-48u"
+```
+
+**Use case:** Na grote gebouw wijzigingen (isolatie, nieuwe ramen, verbouwing) - reset insights maar behoud building model.
+
+---
+
+### Flow 8: Dynamische Confidence Drempel (Adaptief)
+
+```
+WHEN Gebouwmodel leermijlpaal bereikt
+  milestone = "convergence_reached" (na 7 dagen stabiel leren)
+
+THEN
+  Stel betrouwbaarheidsdrempel in op 60%
+    (actie: Set confidence threshold)
+
+  Notificatie: "Model stabiel - confidence drempel verlaagd voor meer inzichten"
+```
+
+**Use case:** Start conservatief (70%), verlaag drempel als model stabiel is voor meer inzicht granulariteit.
+
+---
+
+### Flow 9: Alleen Hoge ROI Inzichten Notificeren (Condition)
+
+```
+WHEN Gebouwinzicht gedetecteerd
+
+AND Geschatte besparing is boven €100/maand
+  (conditie: Savings above threshold - category, €100)
+
+AND Model confidence is boven 75%
+  (conditie: Confidence above threshold - 75%)
+
+THEN
+  Stuur pushbericht:
+    "💰 Grote Besparingskans!"
+    "{{insight}}"
+    "Actie: {{recommendation}}"
+    "Potentieel: €{{estimated_savings_eur_month}}/maand"
+```
+
+**Use case:** Filter "advies-ruis" - alleen notificaties voor significante besparingen met hoge zekerheid.
+
+---
+
+### Flow 10: Thermische Opslag Alleen Wanneer Actief (Condition)
+
+```
+WHEN Goedkoopste energieblok gestart
+  (van Energy Prices app)
+
+AND Thermische opslag inzicht is actief
+  (conditie: Insight is active - category "thermal_storage")
+
+THEN
+  Verhoog doeltemperatuur met 2°C
+  Notificatie: "Thermische opslag: voorverwarmen actief"
+
+ELSE
+  (Geen actie - thermische opslag niet mogelijk voor dit gebouw)
+```
+
+**Use case:** Conditionele automatisering - alleen thermische opslag strategie toepassen als gebouw geschikt is.
+
+---
+
+### Flow 11: Isolatie Inzicht Negeren tot Lente (Seasonal)
+
+```
+WHEN Gebouwinzicht gedetecteerd, categorie = "insulation_performance"
+
+AND Huidige maand is tussen Oktober en Maart (winter)
+
+THEN
+  Verberg "insulation_performance" inzicht voor 180 dagen
+    (actie: Dismiss insight)
+
+  Notificatie:
+    "Isolatie inzicht uitgesteld tot lente (april) voor warmere renovatieweersomstandigheden"
+```
+
+**Use case:** Strategisch plannen van isolatie werk in gunstige seizoenen.
+
+---
+
+## Flow Kaarten Referentie
+
+### Trigger Kaarten (3)
+
+#### 1. Nieuw gebouwinzicht gedetecteerd
+
+**Triggert:** Wanneer een nieuw inzicht wordt gedetecteerd (≥70% confidence, max 1× per categorie per dag)
+
+**Tokens:**
+
+- `category` (string) - Categorie: insulation_performance / pre_heating / thermal_storage
+- `insight` (string) - Mensleesbaar inzicht bericht
+- `recommendation` (string) - Aanbevolen actie
+- `priority` (number 0-100) - Prioriteitsscore
+- `confidence` (number 0-100) - Model betrouwbaarheid
+- `estimated_savings_eur_month` (number) - Maandelijkse besparing in EUR (indien van toepassing)
+
+**Frequentie:** Max 1× per categorie per 24 uur (advice fatigue prevention)
+
+---
+
+#### 2. Voorverwarmen tijd aanbeveling
+
+**Triggert:** Dagelijks om 23:00 met optimale voorverwarmen starttijd
+
+**Tokens:**
+
+- `start_time` (string) - HH:MM formaat (bijv. "05:30")
+- `target_time` (string) - Doeltijd (ingesteld via wake_time setting)
+- `duration_hours` (number) - Voorverwarmen duur in uren
+- `temp_rise` (number) - Temperatuurstijging in °C
+- `confidence` (number 0-100) - Model betrouwbaarheid
+
+**Voorwaarden:** Alleen als confidence ≥70%, herberekent bij τ wijziging >10%
+
+---
+
+#### 3. Gebouwprofiel mismatch gedetecteerd
+
+**Triggert:** Eenmalig wanneer geleerd gedrag significant afwijkt van geselecteerd profiel
+
+**Tokens:**
+
+- `current_profile` (string) - Huidig profiel (bijv. "average")
+- `suggested_profile` (string) - Voorgesteld profiel (bijv. "heavy")
+- `tau_learned` (number) - Geleerde tijdsconstante in uren
+- `tau_profile` (number) - Profiel tijdsconstante in uren
+- `deviation_percent` (number) - Afwijkingspercentage
+- `confidence` (number 0-100) - Model betrouwbaarheid (minimum 50%)
+
+**Voorwaarden:** Afwijking >30%, confidence ≥50%
+
+---
+
+### Actie Kaarten (4)
+
+#### 1. Verberg inzicht (Dismiss insight)
+
+**Functie:** Verberg specifieke inzicht categorie tijdelijk
+
+**Parameters:**
+
+- `category` (dropdown) - Categorie om te verbergen
+- `duration` (number 1-365) - Aantal dagen
+
+**Gebruik:** Na renovatie planning, bekend probleem negeren
+
+---
+
+#### 2. Forceer inzicht analyse
+
+**Functie:** Trigger onmiddellijke evaluatie (niet wachten op 50-min interval)
+
+**Returns:**
+
+- `insights_detected` (number) - Aantal gedetecteerde inzichten
+- `confidence` (number) - Huidige model betrouwbaarheid
+
+**Gebruik:** On-demand analyse, debugging, dagelijks rapport
+
+---
+
+#### 3. Reset inzicht geschiedenis
+
+**Functie:** Wis alle actieve inzichten en geschiedenis (gebouwmodel blijft intact)
+
+**Parameters:**
+
+- `confirm` (checkbox) - MOET aangevinkt om reset uit te voeren
+
+**Gebruik:** Na grote gebouw wijzigingen (isolatie, renovatie, nieuwe ramen)
+
+**BELANGRIJK:** Gebouwmodel (C, UA, τ, g, P_int) blijft behouden - alleen insights worden gereset
+
+---
+
+#### 4. Stel betrouwbaarheidsdrempel in
+
+**Functie:** Pas dynamisch minimum confidence threshold aan
+
+**Parameters:**
+
+- `threshold` (number 50-90) - Nieuwe drempel in %
+
+**Effec:** Hogere drempel = minder inzichten (zeer betrouwbaar), lagere = meer inzichten (vroeger, minder accuraat)
+
+**Gebruik:** Adaptieve drempel - start 70%, verlaag naar 60% na convergentie
+
+---
+
+### Conditie Kaarten (3)
+
+#### 1. Inzicht is actief
+
+**Functie:** Check of specifieke categorie momenteel actief is
+
+**Parameters:**
+
+- `category` (dropdown) - Te checken categorie
+
+**Returns:** `true` als actief EN niet dismissed, anders `false`
+
+**Gebruik:** Conditionele automatisering (alleen thermische opslag als inzicht actief)
+
+---
+
+#### 2. Model confidence is boven drempel
+
+**Functie:** Kwaliteitspoort voor flows
+
+**Parameters:**
+
+- `threshold` (number 0-100) - Confidence drempel in %
+
+**Returns:** `true` als model confidence > threshold
+
+**Gebruik:** Alleen notificaties/acties bij hoge zekerheid (bijv. >80%)
+
+---
+
+#### 3. Geschatte besparing is boven drempel
+
+**Functie:** ROI-gebaseerde filtering
+
+**Parameters:**
+
+- `category` (dropdown) - Categorie om te checken (insulation_performance / pre_heating / thermal_storage)
+- `threshold` (number 0-500) - EUR/maand drempel
+
+**Returns:** `true` als geschatte maandelijkse besparing > threshold
+
+**Gebruik:** Filter voor significante besparingen (bijv. alleen notificeren als >€100/maand)
+
+---
+
 ## Instellingen
 
 ### Inzichten Instellingen
@@ -417,15 +724,3 @@ THEN
 - Frequente modus wisselingen (verwarring voor model)
 
 ---
-
-## Support & Feedback
-
-**Bug gevonden?** [Meld op GitHub Issues](https://github.com/hermanhilberink/org.hhi.adlar-heatpump/issues)
-
-**Feature verzoek?** Voeg toe aan [GitHub Discussions](https://github.com/hermanhilberink/org.hhi.adlar-heatpump/discussions)
-
-**Hulp nodig?** Vraag in [Homey Community Forum](https://community.homey.app)
-
----
-
-*Veel succes met optimaliseren! 🎉*

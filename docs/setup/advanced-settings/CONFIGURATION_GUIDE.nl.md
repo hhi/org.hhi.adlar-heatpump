@@ -10,11 +10,12 @@ Deze gids beschrijft alle configureerbare instellingen van de Adlar Warmtepomp H
 4. [Flow Kaart Afhandeling](#4-flow-kaart-afhandeling)
 5. [Adaptieve Temperatuur Regeling](#5-adaptieve-temperatuur-regeling)
 6. [Gebouwmodel Leren](#6-gebouwmodel-leren)
-7. [Energieprijs Optimalisatie](#7-energieprijs-optimalisatie)
-8. [COP Optimalisatie](#8-cop-optimalisatie)
-9. [Adaptieve Regeling Wegingsfactoren](#9-adaptieve-regeling-wegingsfactoren)
-10. [Diagnostiek](#10-diagnostiek)
-11. [Energie Beheer](#11-energie-beheer)
+7. [Gebouw Inzichten & Aanbevelingen](#7-gebouw-inzichten--aanbevelingen)
+8. [Energieprijs Optimalisatie](#8-energieprijs-optimalisatie)
+9. [COP Optimalisatie](#9-cop-optimalisatie)
+10. [Adaptieve Regeling Wegingsfactoren](#10-adaptieve-regeling-wegingsfactoren)
+11. [Diagnostiek](#11-diagnostiek)
+12. [Energie Beheer](#12-energie-beheer)
 
 ---
 
@@ -244,7 +245,44 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 
 ---
 
-## 7. Energieprijs Optimalisatie
+## 7. Gebouw Inzichten & Aanbevelingen
+
+Geautomatiseerde analyse van het thermische gebouwmodel met energie-besparende aanbevelingen en ROI-schattingen.
+
+### Gebouw Inzichten Inschakelen
+- **Standaard**: Ingeschakeld
+- **Functie**: Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen
+- **Leertijd**: Inzichten verschijnen na 24-48 uur leren
+- **Vereisten**: Gebouwmodel leren moet ingeschakeld zijn
+
+### Minimale Betrouwbaarheid
+- **Standaard**: 70%
+- **Bereik**: 50% - 90%
+- **Functie**: Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt
+- **70%**: ~24-48 uur leren
+- **Lagere waarden**: Eerdere inzichten, minder nauwkeurigheid
+
+### Max Actieve Inzichten
+- **Standaard**: 3
+- **Bereik**: 1 - 5
+- **Functie**: Maximum aantal inzichten om tegelijkertijd weer te geven
+- **Prioriteit**: Belangrijkste inzichten worden eerst getoond
+
+### Gewenste Sta-op Tijd (HH:MM)
+- **Standaard**: 07:00
+- **Formaat**: UU:MM (bijv. 07:00, 06:30)
+- **Functie**: Tijd wanneer gebouw doeltemperatuur moet bereiken
+- **Gebruikt voor**: Berekenen optimale voorverwarm starttijd gebaseerd op thermische respons (τ)
+
+### Nacht Verlaging (°C)
+- **Standaard**: 4.0°C
+- **Bereik**: 2.0 - 6.0°C
+- **Functie**: Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging)
+- **Gebruikt voor**: Berekenen voorverwarm duur en energie besparingspotentieel
+
+---
+
+## 8. Energieprijs Optimalisatie
 
 Automatische optimalisatie op basis van day-ahead energieprijzen (dynamisch contract vereist).
 
@@ -323,7 +361,7 @@ De drempels zijn gebaseerd op percentielen van 2024 spotprijzen:
 
 ---
 
-## 8. COP Optimalisatie
+## 9. COP Optimalisatie
 
 Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
 
@@ -356,7 +394,7 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
 
 ---
 
-## 9. Adaptieve Regeling Wegingsfactoren
+## 10. Adaptieve Regeling Wegingsfactoren
 
 Deze drie prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.**
 
@@ -389,7 +427,7 @@ Deze drie prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waard
 
 ---
 
-## 10. Diagnostiek
+## 11. Diagnostiek
 
 Tools voor probleemoplossing en systeem analyse.
 
@@ -416,7 +454,7 @@ Tools voor probleemoplossing en systeem analyse.
 
 ---
 
-## 11. Energie Beheer
+## 12. Energie Beheer
 
 Beheer van energie tellers voor tracking en rapportage.
 
@@ -506,14 +544,3 @@ Gebruik flows voor:
 ```
 
 ---
-
-## 📚 Gerelateerde Documentatie
-
-- **[Flow Cards Guide](FLOW_CARDS_GUIDE.md)** - Gebruik van flow kaarten voor automations
-- **[Adaptive Control Architecture](../Dev%20support/Architectural%20overview/adaptive-control-architecture.md)** - Technische werking van adaptive control
-- **[Calculator Utilities](../Dev%20support/CALCULATORS.md)** - Curve calculator, time schedules, seasonal modes
-
----
-
-*Laatste update: 2026-01-09*
-*Versie: 2.3.0*

@@ -103,13 +103,3 @@ La version du protocole Tuya détermine comment l'application communique avec vo
 - Une corruption de données
 
 Différents modèles de pompes à chaleur/versions de micrologiciel nécessitent différentes versions de protocole. Il n'y a aucun risque à essayer différentes versions - mettez simplement à jour la version du protocole dans les paramètres de l'appareil pour changer.
-
-## Historique des Versions
-
-- **v0.99.62** - Flux de réparation supprimé, identifiants désormais modifiables directement dans les paramètres de l'appareil
-- **v0.99.59** - Ajout de la sélection de version de protocole pendant l'appairage
-- **v0.99.58 et antérieures** - Codé en dur à la version 3.3 (a causé des problèmes pour certains utilisateurs)
-
----
-
-**Besoin d'Aide ?** Signalez les problèmes sur : https://github.com/your-repo/issues

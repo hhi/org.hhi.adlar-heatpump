@@ -99,6 +99,13 @@ export class BuildingInsightsService {
   }
 
   /**
+   * Get current Homey language (nl/en)
+   */
+  private getLanguage(): string {
+    return this.device.homey.i18n.getLanguage();
+  }
+
+  /**
    * Initialize service
    * - Restore persisted state
    * - Start periodic insight evaluation
@@ -311,6 +318,12 @@ export class BuildingInsightsService {
     // High heat loss detected (UA > 1.5× expected OR absolute high)
     if (model.UA > expectedUA * 1.5 || model.UA > 0.5) {
       const savingsEstimate = this.estimateInsulationSavings(model.UA, expectedUA);
+      const lang = this.getLanguage();
+
+      const recommendation = lang === 'nl'
+        ? `🏠 Dak/muren/ramen • €${savingsEstimate}/mnd besparing`
+        : `🏠 Roof/walls/windows • €${savingsEstimate}/mo savings`;
+
       return {
         id: `insulation_poor_${Date.now()}`,
         category: 'insulation_performance',
@@ -318,7 +331,7 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: `🏠 High heat loss - UA ${model.UA.toFixed(2)} kW/°C (expected: ${expectedUA.toFixed(2)})`,
-        recommendation: `Consider insulation upgrades: roof (25% savings), walls (15%), windows (10%). Est. savings: €${savingsEstimate}/month`,
+        recommendation,
         estimatedSavings: savingsEstimate,
         status: 'new',
       };
@@ -326,6 +339,12 @@ export class BuildingInsightsService {
 
     // Good insulation (informational only - low priority)
     if (model.UA < expectedUA * 0.7) {
+      const lang = this.getLanguage();
+
+      const recommendation = lang === 'nl'
+        ? '✅ Goed geïsoleerd, huidige strategie voortzetten'
+        : '✅ Well-insulated, continue current strategy';
+
       return {
         id: `insulation_good_${Date.now()}`,
         category: 'insulation_performance',
@@ -333,7 +352,7 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: `✅ Excellent insulation - UA ${model.UA.toFixed(2)} kW/°C`,
-        recommendation: 'Building is well-optimized, continue current strategy',
+        recommendation,
         status: 'new',
       };
     }
@@ -377,19 +396,26 @@ export class BuildingInsightsService {
     let category: string;
     let recommendation: string;
     let priority: number;
+    const lang = this.getLanguage();
 
     if (tau < 5) {
       category = 'fast_response';
       priority = 75;
-      recommendation = `Fast thermal response (${tau.toFixed(1)}h) - enable aggressive night setback to 16°C, pre-heat 2 hours before wake time. Est. 12% energy savings.`;
+      recommendation = lang === 'nl'
+        ? `⏱️ Nacht 16°C, voorverw. 2u • 12% besparing`
+        : `⏱️ Night 16°C, pre-heat 2hrs • 12% saved`;
     } else if (tau < 15) {
       category = 'medium_response';
       priority = 60;
-      recommendation = `Medium thermal response (${tau.toFixed(1)}h) - moderate night setback to 17°C, pre-heat 4 hours before wake time. Est. 8% energy savings.`;
+      recommendation = lang === 'nl'
+        ? `⏱️ Nacht 17°C, voorverw. 4u • 8% besparing`
+        : `⏱️ Night 17°C, pre-heat 4hrs • 8% saved`;
     } else {
       category = 'slow_response';
       priority = 50;
-      recommendation = `Slow thermal response (${tau.toFixed(1)}h) - minimal setback to 18°C, pre-heat 6+ hours before wake time. Consider continuous heating.`;
+      recommendation = lang === 'nl'
+        ? `⏱️ Nacht 18°C, voorverw. 6u+ • Overweeg continu`
+        : `⏱️ Night 18°C, pre-heat 6hrs+ • Consider continuous`;
     }
 
     return {
@@ -440,8 +466,15 @@ export class BuildingInsightsService {
 
     // High thermal mass + slow response = thermal storage potential
     if (model.C > 18 && tau > 12) {
+      const lang = this.getLanguage();
+
       if (hasDynamicPricing) {
         const savingsEstimate = this.estimateThermalStorageSavings(model.C, tau);
+
+        const recommendation = lang === 'nl'
+          ? `💰 +2°C goedkoop, -1°C piek • €${savingsEstimate}/mnd`
+          : `💰 +2°C cheap hrs, -1°C peak • €${savingsEstimate}/mo`;
+
         return {
           id: `thermal_storage_active_${Date.now()}`,
           category: 'thermal_storage',
@@ -449,12 +482,16 @@ export class BuildingInsightsService {
           confidence: diagnostics.confidence,
           detectedAt: Date.now(),
           insight: `💰 Thermal storage potential - C=${model.C.toFixed(0)} kWh/°C, τ=${tau.toFixed(1)}h`,
-          recommendation: `Pre-heat +2°C during cheap hours (02:00-06:00), coast at -1°C during peak (17:00-21:00). Est. savings: €${savingsEstimate}/month`,
+          recommendation,
           estimatedSavings: savingsEstimate,
           status: 'new',
         };
       }
       // Potential exists but dynamic pricing not configured
+      const recommendation = lang === 'nl'
+        ? '💡 Voeg dynamische energieprijzen toe • 15-25% potentieel'
+        : '💡 Add dynamic energy pricing • 15-25% potential';
+
       return {
         id: `thermal_storage_potential_${Date.now()}`,
         category: 'thermal_storage',
@@ -462,7 +499,7 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: `💡 Building suitable for thermal storage - C=${model.C.toFixed(0)} kWh/°C, τ=${tau.toFixed(1)}h`,
-        recommendation: 'Add dynamic energy pricing data via flow card "Receive external energy prices" to enable cost optimization. Potential savings: 15-25%',
+        recommendation,
         status: 'new',
       };
     }
@@ -513,6 +550,11 @@ export class BuildingInsightsService {
     // Significant mismatch (>30% deviation)
     if (deviation > 0.3) {
       const suggestedProfile = this.findClosestProfile(model);
+      const lang = this.getLanguage();
+
+      const recommendation = lang === 'nl'
+        ? `🔄 Wijzig profiel naar '${suggestedProfile}' in instellingen`
+        : `🔄 Change profile to '${suggestedProfile}' in settings`;
 
       return {
         id: `profile_mismatch_${Date.now()}`,
@@ -521,7 +563,7 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: `🔄 Building behaves like '${suggestedProfile}' (τ=${learnedTau.toFixed(1)}h vs '${currentProfile}' τ=${profileTau.toFixed(1)}h)`,
-        recommendation: `Change building profile to '${suggestedProfile}' in device settings for faster learning and better initial parameters`,
+        recommendation,
         status: 'new',
       };
     }
@@ -961,10 +1003,19 @@ export class BuildingInsightsService {
     }
   }
 
+  // ==================== PUBLIC API FOR FLOW CARDS ====================
+
   /**
-   * Public API: Dismiss insight for specified duration
+   * Flow Action: Dismiss insight for specified duration
+   * Used by: dismiss_insight flow action card
    */
   public async dismissInsight(category: InsightCategory, durationDays: number): Promise<void> {
+    // Defensive: Validate duration is reasonable (1-365 days)
+    if (typeof durationDays !== 'number' || durationDays < 1 || durationDays > 365) {
+      this.logger('BuildingInsightsService: Invalid duration for dismiss insight:', durationDays);
+      throw new Error('Duration must be between 1 and 365 days');
+    }
+
     const insight = this.activeInsights.get(category);
     if (insight) {
       insight.status = 'dismissed';
@@ -972,15 +1023,142 @@ export class BuildingInsightsService {
       await this.updateInsightCapabilities();
       await this.persistState();
       this.logger(`BuildingInsightsService: Dismissed ${category} for ${durationDays} days`);
+    } else {
+      this.logger(`BuildingInsightsService: No active insight for category ${category} to dismiss`);
     }
   }
 
   /**
-   * Public API: Analyze performance now (on-demand evaluation)
+   * Flow Action: Force immediate insight analysis
+   * Used by: force_insight_analysis flow action card
+   * @returns Object with insights_detected and confidence for flow tokens
    */
-  public async analyzePerformanceNow(): Promise<Insight[]> {
+  public async forceInsightAnalysis(): Promise<{ insights_detected: number; confidence: number }> {
+    this.logger('BuildingInsightsService: Force insight analysis triggered');
+
     await this.evaluateInsights();
-    return Array.from(this.activeInsights.values());
+
+    const diagnostics = await this.buildingModel.getDiagnosticStatus();
+    const insightsCount = Array.from(this.activeInsights.values()).filter((i) => i.status === 'active').length;
+
+    return {
+      insights_detected: insightsCount,
+      confidence: diagnostics.confidence,
+    };
+  }
+
+  /**
+   * Flow Action: Reset all insight history
+   * Used by: reset_insight_history flow action card
+   */
+  public async resetInsightHistory(): Promise<void> {
+    this.logger('BuildingInsightsService: Resetting all insight history');
+
+    // Clear all active insights
+    this.activeInsights.clear();
+
+    // Clear history
+    this.insightHistory = [];
+
+    // Reset last evaluation time
+    this.lastEvaluationTime = 0;
+
+    // Update capabilities (will clear all insight strings)
+    await this.updateInsightCapabilities();
+
+    // Persist cleared state
+    await this.persistState();
+
+    this.logger('BuildingInsightsService: Insight history reset complete');
+  }
+
+  /**
+   * Flow Action: Set confidence threshold dynamically
+   * Used by: set_confidence_threshold flow action card
+   */
+  public async setConfidenceThreshold(threshold: number): Promise<void> {
+    // Defensive: Validate threshold is in valid range (50-90%)
+    if (typeof threshold !== 'number' || threshold < 50 || threshold > 90) {
+      this.logger('BuildingInsightsService: Invalid confidence threshold:', threshold);
+      throw new Error('Confidence threshold must be between 50 and 90');
+    }
+
+    this.minConfidence = threshold;
+    this.logger(`BuildingInsightsService: Confidence threshold set to ${threshold}%`);
+
+    // Trigger immediate re-evaluation with new threshold
+    await this.evaluateInsights();
+  }
+
+  /**
+   * Flow Condition: Check if specific insight category is active
+   * Used by: insight_is_active flow condition card
+   */
+  public isInsightActive(category: InsightCategory): boolean {
+    const insight = this.activeInsights.get(category);
+
+    // Active if exists, status is 'active', and not dismissed
+    if (!insight) {
+      return false;
+    }
+
+    if (insight.status !== 'active') {
+      return false;
+    }
+
+    // Check if still dismissed
+    if (insight.dismissedUntil && Date.now() < insight.dismissedUntil) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Flow Condition: Check if model confidence is above threshold
+   * Used by: confidence_above flow condition card
+   */
+  public async isConfidenceAbove(threshold: number): Promise<boolean> {
+    // Defensive: Validate threshold
+    if (typeof threshold !== 'number' || threshold < 0 || threshold > 100) {
+      this.logger('BuildingInsightsService: Invalid confidence threshold for condition:', threshold);
+      return false;
+    }
+
+    try {
+      const diagnostics = await this.buildingModel.getDiagnosticStatus();
+      return diagnostics.confidence > threshold;
+    } catch (error) {
+      this.logger('BuildingInsightsService: Error checking confidence:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Flow Condition: Check if savings for a category are above threshold
+   * Used by: savings_above flow condition card
+   */
+  public areSavingsAbove(category: InsightCategory, threshold: number): boolean {
+    // Defensive: Validate threshold
+    if (typeof threshold !== 'number' || threshold < 0 || threshold > 500) {
+      this.logger('BuildingInsightsService: Invalid savings threshold for condition:', threshold);
+      return false;
+    }
+
+    const insight = this.activeInsights.get(category);
+
+    if (!insight) {
+      return false; // No insight = no savings
+    }
+
+    if (insight.status !== 'active') {
+      return false; // Dismissed insight = don't consider savings
+    }
+
+    // estimatedSavings is optional (profile_mismatch doesn't have savings)
+    const savings = insight.estimatedSavings || 0;
+
+    return savings > threshold;
   }
 
   /**

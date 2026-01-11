@@ -84,21 +84,25 @@ export class ServiceCoordinator {
     this.capabilityHealth = new CapabilityHealthService(serviceOptions);
     this.energyTracking = new EnergyTrackingService(serviceOptions);
     this.adaptiveControl = new AdaptiveControlService(serviceOptions);
-    this.flowCardManager = new FlowCardManagerService({
-      ...serviceOptions,
-      onExternalPowerData: this.energyTracking.receiveExternalPowerData.bind(this.energyTracking),
-      onExternalPricesData: this.adaptiveControl.receiveExternalPricesData.bind(this.adaptiveControl),
-    });
-    this.heatingCurveVisualization = new HeatingCurveVisualizationService(serviceOptions);
 
     // BuildingInsightsService requires BuildingModelService and AdaptiveControlService
     // Note: Will be fully initialized after adaptiveControl.initialize() is called
+    // Must be created BEFORE FlowCardManagerService to enable flow card registration
     this.buildingInsights = new BuildingInsightsService({
       device: this.device,
       logger: this.logger,
       buildingModelService: this.adaptiveControl.getBuildingModelService(),
       adaptiveControlService: this.adaptiveControl,
     });
+
+    // FlowCardManagerService with BuildingInsightsService support (v2.5.0)
+    this.flowCardManager = new FlowCardManagerService({
+      ...serviceOptions,
+      onExternalPowerData: this.energyTracking.receiveExternalPowerData.bind(this.energyTracking),
+      onExternalPricesData: this.adaptiveControl.receiveExternalPricesData.bind(this.adaptiveControl),
+      buildingInsightsService: this.buildingInsights, // v2.5.0: Enable Building Insights flow cards
+    });
+    this.heatingCurveVisualization = new HeatingCurveVisualizationService(serviceOptions);
 
     // TuyaConnectionService requires special initialization
     this.tuyaConnection = new TuyaConnectionService({

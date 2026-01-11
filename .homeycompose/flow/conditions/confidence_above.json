@@ -1,0 +1,47 @@
+{
+  "id": "confidence_above",
+  "title": {
+    "en": "Model confidence !{{is|isn't}} above threshold",
+    "nl": "Model betrouwbaarheid !{{is|is niet}} boven drempel",
+    "de": "Modellvertrauen !{{ist|ist nicht}} über Schwellenwert",
+    "fr": "La confiance du modèle !{{est|n'est pas}} au-dessus du seuil"
+  },
+  "titleFormatted": {
+    "en": "Model confidence !{{is|isn't}} above [[threshold]]%",
+    "nl": "Model betrouwbaarheid !{{is|is niet}} boven [[threshold]]%",
+    "de": "Modellvertrauen !{{ist|ist nicht}} über [[threshold]]%",
+    "fr": "La confiance du modèle !{{est|n'est pas}} au-dessus de [[threshold]]%"
+  },
+  "hint": {
+    "en": "Check if building model confidence exceeds a threshold (0-100%). Use as quality gate for flows (e.g., only send notifications when confidence >80%).",
+    "nl": "Controleer of gebouwmodel betrouwbaarheid een drempel overschrijdt (0-100%). Gebruik als kwaliteitspoort voor flows (bijv. alleen notificaties versturen wanneer betrouwbaarheid >80%).",
+    "de": "Überprüfen Sie, ob das Gebäudemodellvertrauen einen Schwellenwert überschreitet (0-100%). Verwenden Sie als Qualitätsgate für Flows (z. B. nur Benachrichtigungen senden, wenn Vertrauen >80%).",
+    "fr": "Vérifier si la confiance du modèle de bâtiment dépasse un seuil (0-100%). Utiliser comme porte de qualité pour les flux (par exemple, envoyer des notifications uniquement lorsque la confiance >80%)."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": {
+        "en": "Threshold (%)",
+        "nl": "Drempel (%)",
+        "de": "Schwellenwert (%)",
+        "fr": "Seuil (%)"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "placeholder": {
+        "en": "70",
+        "nl": "70",
+        "de": "70",
+        "fr": "70"
+      }
+    }
+  ]
+}

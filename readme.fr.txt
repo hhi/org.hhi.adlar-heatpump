@@ -18,6 +18,7 @@ SURVEILLANCE AVANCÉE
 - Surveillance de la consommation électrique et de l'efficacité
 - Calcul automatique du COP (coefficient de performance) avec 8 méthodes différentes
 - Analyse SCOP saisonnière selon les normes européennes
+- Plus de 60 fonctionnalités dans 9 catégories
 
 EXPLOITATION COMPLÈTE
 - Réglage de la température et modes de chauffage
@@ -26,13 +27,20 @@ EXPLOITATION COMPLÈTE
 - Fonctions de minuterie et automatiques
 
 AUTOMATISATION INTELLIGENTE
-- 67 cartes de flux pour une automatisation avancée
+- 78 cartes de flux pour une automatisation avancée
 - Détection et récupération intelligentes des erreurs
 - Optimisation en fonction de la météo
 - Tendances et avertissements d'efficacité énergétique
+- Planification temporelle et détection du mode saisonnier
+- Régulation adaptative de la température avec contrôleur PI (v2.0+)
+- Apprentissage du modèle de bâtiment avec machine learning (v2.0+)
+- Insights & Recommandations Bâtiment avec estimations ROI (v2.4+)
+- Optimisation des prix de l'énergie avec tarifs day-ahead (v2.0+)
+- Optimisation COP pour une efficacité maximale (v2.0+)
+- Outils de diagnostic complets pour le dépannage (v2.0.1+)
 
 CONVIVIAL
-- Interface entièrement localisée (Français/Anglais/Néerlandais/Allemand)
+- Interface entièrement localisée
 - Affichage adapté aux mobiles
 - Indicateurs d'état clairs
 - Messages d'erreur compréhensibles
@@ -66,11 +74,11 @@ La version du protocole détermine comment l'application communique avec votre p
 - 3.5 : Requis pour les dernières versions de micrologiciel
 
 Si vous rencontrez des problèmes de connexion (déconnexions fréquentes, erreurs ECONNRESET),
-essayez une version de protocole différente via la réparation de l'appareil (voir section Dépannage).
-- ECONNRESET à 00:00 heure se produit généralement en raison de la réinitialisation quotidienne de votre routeur ;
-- HMAC mismatch, la valeur par défaut est la version de protocole 3.3, passez à 3.4 (ou 3.5)
-- ECONNREFUSED <adresse-ip> probablement dû à une adresse IP incorrecte,
-   attribuez une adresse statique (DHCP) à votre pompe à chaleur  
+essayez une version de protocole différente via les paramètres de l'appareil.
+- ECONNRESET à 00:00 se produit généralement en raison de la réinitialisation quotidienne de votre routeur
+- HMAC mismatch : la valeur par défaut est la version de protocole 3.3, passez à 3.4 (ou 3.5)
+- ECONNREFUSED <adresse-ip> : probablement une adresse IP incorrecte,
+  attribuez une adresse statique (DHCP) à votre pompe à chaleur
 
 CAPACITÉS IMPORTANTES
 
@@ -87,6 +95,7 @@ SURVEILLANCE DE LA TEMPÉRATURE
 - Calcul du COP (efficacité de fonctionnement de votre pompe à chaleur)
 - Analyse des tendances pour l'optimisation
 - Surveillance des performances saisonnières
+- Calcul des coûts horaires et quotidiens
 
 CONTRÔLE DU SYSTÈME
 - Commutation marche/arrêt
@@ -115,11 +124,38 @@ Calculez des valeurs de sortie basées sur des courbes configurables pour une au
 Exemple : Chauffage compensé par la météo
 "Lorsque la température extérieure change, calculez le point de consigne de chauffage avec la courbe :
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
-Résultat : Ajuste automatiquement le chauffage en fonction des conditions météorologiques
+Résultat : Ajuste automatiquement le chauffage en fonction des conditions météorologiques.
 Le champ d'entrée accepte des nombres, des variables ou la syntaxe {{ expression }} prise en charge par Homey.
 
+CALCULATEUR DE COURBE DE CHAUFFE ADLAR CUSTOM (L28/L29)
+Calcule la température de départ directement à partir des paramètres de courbe de chauffe Adlar Custom :
+
+Que sont L28 et L29 ?
+- L29 : Température de départ souhaitée à -15°C température extérieure (point de référence, ex. 55°C)
+- L28 : Degré de pente par 10°C de changement de température (ex. -5 = -0,5°C par degré)
+
+Comment ça fonctionne ?
+La formule y = ax + b est calculée automatiquement :
+- Pente (a) = L28 ÷ 10
+- Ordonnée à l'origine (b) = L29 - (pente × -15°C)
+Exemple : L29=55°C, L28=-5 → formule : y = -0,5x + 47,5
+
+Exemple de flux :
+"Lorsque la température extérieure change, calculez la courbe de chauffe Custom
+avec L29=55°C à -15°C, L28=-5 par 10°C, temp extérieure {{outdoor_temperature}}"
+Résultat à 5°C extérieur → temp de départ 45°C
+
+Valeurs retournées :
+- supply_temperature : Température de départ calculée (°C)
+- formula : Formule mathématique (ex. "y = -0,5x + 47,5")
+
+Avantages par rapport au Calculateur de Courbe général :
+- Utilise les mêmes valeurs L28/L29 que l'affichage de votre pompe à chaleur
+- Aucune définition manuelle de courbe nécessaire
+- Mathématiquement exact selon les spécifications Adlar
+
 PLANIFICATEUR TEMPOREL & MODE SAISONNIER (Fonctionnalités avancées)
-Deux nouveaux calculateurs pour une automatisation intelligente basée sur le temps et la saison :
+Deux calculateurs pour une automatisation intelligente basée sur le temps et la saison :
 
 Planificateur temporel :
 Calculez des valeurs basées sur des horaires journaliers pour la programmation quotidienne de température.
@@ -134,24 +170,66 @@ Détection automatique de la saison de chauffage/refroidissement basée sur la d
 - Renvoie le mode, les indicateurs de saison et les jours jusqu'au changement de saison
 - Parfait pour le basculement automatique des plannings hiver/été
 
-Exemple combiné :
-Utilisez les trois calculateurs ensemble pour une automatisation ultime :
-Compensation météo (temp. extérieure) + Planification temporelle (confort) + Mode saisonnier (hiver/été)
-Résultat : Chauffage dynamique qui s'adapte à la météo, à l'heure de la journée et à la saison
-
 SURVEILLANCE DU COP (COEFFICIENT DE PERFORMANCE)
 
-L'application calcule automatiquement l'efficacité de fonctionnement de votre pompe à chaleur (voir répertoire /docs/COP calculation dans le code source) :
+L'application calcule automatiquement l'efficacité de fonctionnement de votre pompe à chaleur :
 - Valeur COP : Rapport entre la chaleur générée et l'électricité consommée
 - Moyennes quotidiennes : Tendances sur 24 heures
 - Analyse hebdomadaire : Performance à long terme
 - Surveillance saisonnière : SCOP selon les normes européennes
 - Retour diagnostique : Ce qui affecte l'efficacité
+- Détection des valeurs aberrantes : Signalement des valeurs irréalistes (< 0,5 ou > 8,0)
 
 QUE SIGNIFIENT LES VALEURS COP ?
 - COP 2.0-3.0 : Performance moyenne
 - COP 3.0-4.0 : Bonne performance
 - COP 4.0+ : Excellente performance
+
+PARAMÈTRES AVANCÉS
+
+RÉGULATION ADAPTATIVE DE LA TEMPÉRATURE
+Régulation automatique de la température cible basée sur un capteur de température intérieure externe :
+- Contrôleur PI (Proportionnel-Intégral) pour une température intérieure stable
+- Performance : ±0,3°C de stabilité
+- Requis : Capteur de température externe via carte de flux
+
+APPRENTISSAGE DU MODÈLE DE BÂTIMENT
+Algorithme d'apprentissage automatique qui apprend les propriétés thermiques de votre maison :
+- Apprend 4 paramètres thermiques (C, UA, g, P_int)
+- Temps d'apprentissage : 24-72 heures pour le modèle de base, 2-4 semaines pour un modèle précis
+- Sélection du type de bâtiment : Léger/Moyen/Lourd/Passif
+- Gains de chaleur internes dynamiques par heure de la journée
+- Ajustement saisonnier du gain solaire
+
+INSIGHTS & RECOMMANDATIONS BÂTIMENT (NOUVEAU v2.4)
+Analyse automatisée du modèle thermique du bâtiment :
+- Recommandations d'économie d'énergie avec estimations ROI
+- Les insights apparaissent après 24-48 heures d'apprentissage (70% de confiance)
+- "Heure de réveil" configurable pour les calculs de préchauffage
+- Paramètre de réduction nocturne pour les estimations d'économies
+- Nombre maximum d'insights actifs configurable (1-5)
+
+OPTIMISATION DES PRIX DE L'ÉNERGIE
+Optimisation automatique basée sur les prix de l'énergie day-ahead :
+- Source de données : API EnergyZero (gratuit, aucun compte nécessaire)
+- Économies estimées : 400-600 € par an
+- Seuils de prix : Très Bas/Bas/Normal/Élevé basés sur les percentiles 2024
+- Mode de calcul des prix : Marché/Marché+/Prix tout compris
+- Frais de fournisseur et taxe énergétique configurables
+- Détection des blocs de prix pour les périodes les moins/plus chères
+
+OPTIMISATION COP
+Optimisation automatique de la température de départ pour une efficacité maximale :
+- Apprend la température de départ optimale par température extérieure
+- Économies estimées : 200-300 €/an
+- Stratégies : Conservateur/Équilibré/Agressif
+
+FACTEURS DE PONDÉRATION DE LA RÉGULATION ADAPTATIVE
+Trois priorités qui déterminent ensemble comment le système prend ses décisions :
+- Priorité Confort (défaut 60%) : Poids pour la régulation de température PI
+- Priorité Efficacité (défaut 25%) : Poids pour l'optimisation COP
+- Priorité Coût (défaut 15%) : Poids pour l'optimisation des prix
+- Les valeurs sont automatiquement normalisées à 100%
 
 DÉPANNAGE ET SUPPORT
 
@@ -179,22 +257,6 @@ Autres problèmes courants :
 - Codes d'erreur : Voir l'application pour une explication spécifique par code d'erreur
 - L'appairage échoue : Essayez différentes versions de protocole (3.3, 3.4, 3.5)
 
-RÉINITIALISATION MANUELLE DE LA CONNEXION (Solution temporaire)
-Si votre appareil affiche l'état « Déconnecté » et ne se reconnecte pas automatiquement :
-
-SOLUTION RAPIDE ALTERNATIVE :
-1. Ouvrez les commandes de l'appareil dans l'application Homey
-2. Changez le Mode de fonctionnement vers une valeur différente (par ex. de « Chauffage » à « Refroidissement »)
-3. Attendez 5-10 secondes
-4. Remettez le Mode de fonctionnement à la valeur d'origine
-5. La connexion se rétablit généralement en quelques secondes
-
-Cette méthode fonctionne car changer le mode de fonctionnement envoie une commande active
-à l'appareil, ce qui réactive les connexions en veille.
-
-NOTE : À partir de la v1.0.12, l'application résout cela automatiquement en 10 minutes.
-Cette méthode manuelle n'est nécessaire que pour les anciennes versions de l'application ou comme solution de secours d'urgence.
-
 METTRE À JOUR LES IDENTIFIANTS DE L'APPAREIL
 Vous pouvez mettre à jour les identifiants de l'appareil sans réappairage :
 1. Accédez aux Paramètres de l'appareil dans l'application Homey
@@ -203,53 +265,27 @@ Vous pouvez mettre à jour les identifiants de l'appareil sans réappairage :
 4. Cliquez sur "Enregistrer" - l'appareil se reconnecte automatiquement
 
 BESOIN D'AIDE ?
-- Documentation : Consultez le dossier /docs dans le code source sur Github pour des informations détaillées
+- Documentation : Consultez le dossier /docs sur GitHub pour des informations détaillées
+- Guide de configuration : /docs/setup/advanced-settings/CONFIGURATIEGIDS.md (référence complète des paramètres)
 - Communauté : Forum de la communauté Homey (ID de sujet : 143690)
 - Problèmes : Signalez les problèmes sur GitHub
 
-FONCTIONNALITÉS AVANCÉES
-
-PARAMÈTRES DE L'APPAREIL (Configurer par appareil)
-Accès via les Paramètres de l'appareil dans l'application Homey :
-
-Paramètres de connexion :
-- Version du protocole : Version du protocole Tuya (3.3, 3.4, 3.5)
-- ID de l'appareil, Clé locale, Adresse IP : Identifiants de connexion
-
-Paramètres de calcul du COP :
-- Activer/désactiver le calcul du COP
-- Intégration de mesures de puissance externes
-- Intégration de données de débit externes
-- Intégration de température ambiante externe
-
-Contrôle des cartes de flux :
-Vous pouvez contrôler quelles cartes de flux sont visibles (désactivé/auto/activé) :
-- Avertissements de température : Alertes de seuil de température
-- Surveillance tension/courant : Surveillance du système électrique
-- Avertissements de puissance : Alertes de consommation électrique
-- Changements d'état du système : Compresseur, dégivrage, états du système
-- Surveillance de l'efficacité : Tendances COP et valeurs aberrantes
-- Fonctions d'expert : Cartes de flux de diagnostic avancées
-
-Mode Auto (recommandé) :
-Affiche uniquement les cartes de flux pour les capteurs avec des données adéquates (mises à jour récemment, pas d'erreurs).
-
-
-Contrôles de courbe (optionnel) :
-- Activez les contrôles de sélection pour les courbes de chauffage et d'eau chaude
-- Par défaut : Désactivé (capteurs toujours visibles, sélecteurs masqués)
-- Activez pour les utilisateurs avancés qui souhaitent un ajustement direct de la courbe
-
-Paramètres de mesure de puissance :
-- Activer/désactiver les mesures de puissance de la pompe à chaleur
-- Gère automatiquement la visibilité des cartes de flux associées
-- Utile si vous avez une surveillance de puissance externe
-
 INTÉGRATION INTER-APPLICATIONS
-Connectez-vous à d'autres applications Homey pour un calcul COP amélioré (voir /docs/setup/COP flow-card-setup.md) :
+Connectez-vous à d'autres applications Homey pour un calcul COP amélioré :
 - Mesures de puissance externes (de votre compteur intelligent)
 - Données de débit d'eau externes
 - Données de température ambiante externes
+- Température intérieure externe pour régulation adaptative
+
+DIAGNOSTIC DU MODÈLE DE BÂTIMENT (v2.0.1+)
+Dépannage pour les problèmes d'apprentissage thermique lorsque votre modèle de bâtiment ne se met pas à jour :
+- Carte de flux de diagnostic complète
+- Vérifier l'état des capteurs de température intérieure/extérieure
+- Surveiller le processus d'apprentissage (échantillons, confiance, constante de temps)
+- Identifier les raisons de blocage spécifiques avec des solutions
+- Suivre la chronologie d'apprentissage (T+0 → T+50min → T+24h)
+
+Utilisation : Créez le flux "Diagnostiquer l'apprentissage du modèle de bâtiment" pour voir l'état détaillé dans les logs de l'application
 
 SÉCURITÉ ET FIABILITÉ
 
@@ -258,10 +294,10 @@ SURVEILLANCE AUTOMATIQUE
 - Contrôle de l'état de connexion
 - Détection d'erreur système
 - Notifications de minuterie système
+- Détection des valeurs COP aberrantes
 
 RÉCUPÉRATION INTELLIGENTE
 - Reconnexion automatique
 - Correction d'erreur
 - Récupération d'état
 - Messages d'erreur conviviaux
-
