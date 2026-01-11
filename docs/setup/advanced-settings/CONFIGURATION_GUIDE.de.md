@@ -2,6 +2,57 @@
 
 Dieses Handbuch beschreibt alle konfigurierbaren Einstellungen der Adlar Wärmepumpen Homey App. Jede Einstellung wird mit praktischen Beispielen und Empfehlungen erklärt.
 
+---
+
+## 🔗 Einstellungsgruppen & Abhängigkeiten
+
+| # | Gruppe | Erforderlich | Optional |
+|---|--------|--------------|----------|
+| 1 | **Verbindungseinstellungen** | - | - |
+| 2 | **COP Einstellungen** | - | Leistungsmessung (für Genauigkeit) |
+| 3 | **Funktionseinstellungen** | App-Neustart | - |
+| 4 | **Flow-Karten-Verwaltung** | App-Neustart | - |
+| 5 | **Adaptive Temperaturregelung** | Externer Temp-Sensor | - |
+| 6 | **Gebäudemodell-Lernen** | - | - |
+| 7 | **Gebäude-Einblicke** | Gebäudemodell ON | Min. Vertrauen |
+| 8 | **Energiepreis-Optimierung** | Adaptive Regelung ON, Internet | Dynamischer Tarif |
+| 9 | **COP-Optimierung** | COP-Berechnung ON, Adaptive Regelung | 1+ Woche Daten |
+| 10 | **Gewichtungsfaktoren** | Adaptive Regelung ON | - |
+| 11 | **Diagnose** | - | - |
+| 12 | **Energiemanagement** | - | Leistungsmessung |
+
+```
+┌──────────────────┐
+│ 1. Verbindung    │  Basis - immer erforderlich
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐     ┌──────────────────┐
+│ 2. COP Settings  │────▶│ 9. COP Optimizer │
+└──────────────────┘     └──────────────────┘
+         │                        ▲
+         │                        │
+         ▼                        │
+┌──────────────────┐              │
+│ 5. Adaptive Temp │──────────────┤
+│    Control       │              │
+└────────┬─────────┘              │
+         │                        │
+    ┌────┴────┬───────────────────┤
+    ▼         ▼                   │
+┌────────┐ ┌────────────────┐     │
+│ 10.    │ │ 8. Price       │─────┘
+│Weights │ │    Optimizer   │
+└────────┘ └────────────────┘
+
+┌──────────────────┐     ┌──────────────────┐
+│ 6. Building      │────▶│ 7. Building      │
+│    Model         │     │    Insights      │
+└──────────────────┘     └──────────────────┘
+```
+
+---
+
 ## 📖 Inhaltsverzeichnis
 
 1. [Verbindungseinstellungen](#1-verbindungseinstellungen)

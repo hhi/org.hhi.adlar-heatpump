@@ -2,6 +2,57 @@
 
 Deze gids beschrijft alle configureerbare instellingen van de Adlar Warmtepomp Homey app. Elke instelling wordt uitgelegd met praktische voorbeelden en aanbevelingen.
 
+---
+
+## 🔗 Instellingen Groepen & Afhankelijkheden
+
+| # | Groep | Vereist | Optioneel |
+|---|-------|---------|-----------|
+| 1 | **Verbindingsinstellingen** | - | - |
+| 2 | **COP Instellingen** | - | Vermogensmeting (voor nauwkeurigheid) |
+| 3 | **Functie Instellingen** | App herstart | - |
+| 4 | **Flow Kaart Afhandeling** | App herstart | - |
+| 5 | **Adaptieve Temperatuur Regeling** | Externe temp sensor | - |
+| 6 | **Gebouwmodel Leren** | - | - |
+| 7 | **Gebouw Inzichten** | Gebouwmodel Leren AAN | Min. betrouwbaarheid |
+| 8 | **Energieprijs Optimalisatie** | Adaptive Control AAN, Internet | Dynamisch tarief |
+| 9 | **COP Optimalisatie** | COP Berekening AAN, Adaptive Control | 1+ week data |
+| 10 | **Wegingsfactoren** | Adaptive Control AAN | - |
+| 11 | **Diagnostiek** | - | - |
+| 12 | **Energie Beheer** | - | Vermogensmeting |
+
+```
+┌──────────────────┐
+│ 1. Verbinding    │  Basis - altijd nodig
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐     ┌──────────────────┐
+│ 2. COP Settings  │────▶│ 9. COP Optimizer │
+└──────────────────┘     └──────────────────┘
+         │                        ▲
+         │                        │
+         ▼                        │
+┌──────────────────┐              │
+│ 5. Adaptive Temp │──────────────┤
+│    Control       │              │
+└────────┬─────────┘              │
+         │                        │
+    ┌────┴────┬───────────────────┤
+    ▼         ▼                   │
+┌────────┐ ┌────────────────┐     │
+│ 10.    │ │ 8. Price       │─────┘
+│Weights │ │    Optimizer   │
+└────────┘ └────────────────┘
+
+┌──────────────────┐     ┌──────────────────┐
+│ 6. Building      │────▶│ 7. Building      │
+│    Model         │     │    Insights      │
+└──────────────────┘     └──────────────────┘
+```
+
+---
+
 ## 📖 Inhoudsopgave
 
 1. [Verbindingsinstellingen](#1-verbindingsinstellingen)

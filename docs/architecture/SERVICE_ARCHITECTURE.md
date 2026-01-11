@@ -500,10 +500,11 @@ Priority: high (any controller high = overall high)
 **Transparency Features**:
 - Breakdown tokens show contribution of each component
 - Reasoning array explains each controller's recommendation
-- Monitoring mode logs all decisions without execution
-- `adaptive_monitoring_log` flow card for validation
+- `adaptive_simulation_update` flow card fires every cycle with full monitoring data
+- `temperature_adjustment_recommended` flow card fires only when significant action needed
+- `adaptive_control_diagnostics` capability provides real-time JSON diagnostics
 
-**Updated Control Cycle** (v1.4.0+, Every 5 Minutes):
+**Control Cycle** (v2.5.0+, Every 5 Minutes):
 
 1. **Validation**: Check if adaptive control enabled, get indoor temperature
 2. **Data Collection**: Read target temp, outdoor temp, COP values
@@ -511,16 +512,19 @@ Priority: high (any controller high = overall high)
 4. **Component 3 (Cost)**: EnergyPriceOptimizer calculates price-based adjustment (if enabled)
 5. **Component 4 (Efficiency)**: COPOptimizer calculates COP-based adjustment (if enabled)
 6. **Component 2 (Learning)**: BuildingModelService collects data point (if enabled)
-7. **Integration**: WeightedDecisionMaker combines all actions
-8. **Logging**: Log breakdown and reasoning
-9. **Mode Check**:
-   - **Monitoring mode** (default): Trigger `adaptive_monitoring_log` flow card, return
-   - **Active mode**: Continue to execution
-10. **Accumulation**: Add to fractional adjustment accumulator
-11. **Throttling**: Check 20-minute minimum wait since last adjustment
-12. **Execution**: If accumulated ≥ 1°C, apply rounded adjustment to `target_temperature`
-13. **Flow Cards**: Trigger `target_temperature_adjusted` with tokens
-14. **Persistence**: Save all optimizer states to device store
+7. **Integration**: WeightedDecisionMaker combines all actions with confidence-aware weighting
+8. **Diagnostics Update**: Update `adaptive_control_diagnostics` capability with full breakdown
+9. **Monitoring Trigger**: Fire `adaptive_simulation_update` flow card (every cycle)
+10. **Recommendation Check**: If significant action needed, fire `temperature_adjustment_recommended`
+11. **Simulated Target Update**: Update `adlar_simulated_target` capability (for Insights tracking)
+12. **Flow-Assisted Execution**: User flows decide whether to apply recommendation
+13. **Persistence**: Save all optimizer states to device store
+
+**Operating Mode** (v2.5.0+):
+
+- **Flow-Assisted Simulate Mode** (implicit, always active): System calculates and recommends, user flows execute
+- Removed automatic execution mode for safety and user control
+- All adjustments require explicit user flow action
 
 **Settings Configuration** (v1.4.0+):
 
@@ -545,7 +549,7 @@ Users can configure all components via device settings:
 - `cop_strategy` (default: balanced) - conservative/balanced/aggressive
 
 **System Integration**:
-- `monitoring_mode_enabled` (default: true) - Safety: log-only mode
+
 - `priority_comfort` (default: 60%) - Comfort weight
 - `priority_efficiency` (default: 25%) - Efficiency weight
 - `priority_cost` (default: 15%) - Cost weight
@@ -561,11 +565,13 @@ Users can configure all components via device settings:
 - **Dynamic pricing contract**: €600-900/year (all components)
 
 **Safety Features**:
-- Monitoring mode default (users must opt-in to active adjustments)
+
+- Flow-assisted execution (system recommends, user flows execute via `temperature_adjustment_recommended` trigger)
 - Individual component enable/disable toggles
+- Confidence-aware weighting (low-confidence components get reduced weight)
 - Comfort always prioritized (60% weight minimum recommended)
-- All adjustments respect existing throttling and accumulation logic
-- Automatic state persistence and recovery
+- All adjustments respect 20-minute throttling and fractional accumulation logic
+- Automatic state persistence and recovery across app restarts
 
 ## Service Coordinator
 

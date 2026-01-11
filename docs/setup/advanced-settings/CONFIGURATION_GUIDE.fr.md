@@ -2,6 +2,57 @@
 
 Ce guide décrit tous les paramètres configurables de l'application Homey Adlar Heat Pump. Chaque paramètre est expliqué avec des exemples pratiques et des recommandations.
 
+---
+
+## 🔗 Groupes de Paramètres & Dépendances
+
+| # | Groupe | Requis | Optionnel |
+|---|--------|--------|-----------|
+| 1 | **Paramètres de Connexion** | - | - |
+| 2 | **Paramètres COP** | - | Mesure de puissance (pour précision) |
+| 3 | **Paramètres de Fonctionnalités** | Redémarrage app | - |
+| 4 | **Gestion des Cartes de Flux** | Redémarrage app | - |
+| 5 | **Contrôle Adaptatif de Température** | Capteur temp externe | - |
+| 6 | **Apprentissage du Modèle de Bâtiment** | - | - |
+| 7 | **Aperçus du Bâtiment** | Modèle Bâtiment ON | Confiance min. |
+| 8 | **Optimisation du Prix de l'Énergie** | Contrôle Adaptatif ON, Internet | Tarif dynamique |
+| 9 | **Optimisation COP** | Calcul COP ON, Contrôle Adaptatif | 1+ semaine données |
+| 10 | **Facteurs de Pondération** | Contrôle Adaptatif ON | - |
+| 11 | **Diagnostics** | - | - |
+| 12 | **Gestion de l'Énergie** | - | Mesure de puissance |
+
+```
+┌──────────────────┐
+│ 1. Connexion     │  Base - toujours nécessaire
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐     ┌──────────────────┐
+│ 2. COP Settings  │────▶│ 9. COP Optimizer │
+└──────────────────┘     └──────────────────┘
+         │                        ▲
+         │                        │
+         ▼                        │
+┌──────────────────┐              │
+│ 5. Adaptive Temp │──────────────┤
+│    Control       │              │
+└────────┬─────────┘              │
+         │                        │
+    ┌────┴────┬───────────────────┤
+    ▼         ▼                   │
+┌────────┐ ┌────────────────┐     │
+│ 10.    │ │ 8. Price       │─────┘
+│Weights │ │    Optimizer   │
+└────────┘ └────────────────┘
+
+┌──────────────────┐     ┌──────────────────┐
+│ 6. Building      │────▶│ 7. Building      │
+│    Model         │     │    Insights      │
+└──────────────────┘     └──────────────────┘
+```
+
+---
+
 ## 📖 Table des Matières
 
 1. [Paramètres de Connexion](#1-paramètres-de-connexion)

@@ -90,7 +90,7 @@ export class BuildingInsightsService {
     this.device = config.device;
     this.buildingModel = config.buildingModelService;
     this.adaptiveControl = config.adaptiveControlService;
-    this.logger = config.logger || (() => {});
+    this.logger = config.logger || (() => { });
 
     // Load settings
     this.enabled = this.device.getSetting('insights_enabled') ?? true;
@@ -584,34 +584,39 @@ export class BuildingInsightsService {
 
   /**
    * Check if insight should trigger (advice fatigue prevention)
-   * - Check if dismissed
-   * - Check if already triggered recently (24h)
-   * - Check if parameters changed significantly (>10% drift)
+   * 
+   * Logic order (v2.5.1 fix):
+   * 1. Check if dismissed by user
+   * 2. Check for significant drift (>10%) - bypasses time limit if true
+   * 3. Check time-based fatigue (12 hours)
    */
   private shouldTriggerInsight(insight: Insight): boolean {
-    // Check if dismissed
     const existingInsight = this.activeInsights.get(insight.category);
+
+    // STEP 1: Check if dismissed by user
     if (existingInsight?.dismissedUntil && Date.now() < existingInsight.dismissedUntil) {
       this.logger(`BuildingInsightsService: Insight ${insight.category} dismissed until ${new Date(existingInsight.dismissedUntil).toISOString()}`);
       return false;
     }
 
-    // Check if already triggered recently (same category within 24 hours)
-    const recentInsight = this.insightHistory.find(
-      (h) => h.category === insight.category && Date.now() - h.detectedAt < 24 * 60 * 60 * 1000,
-    );
-    if (recentInsight) {
-      this.logger(`BuildingInsightsService: Insight ${insight.category} already triggered within 24 hours`);
-      return false;
-    }
-
-    // Check if parameters changed significantly (>10% drift)
+    // STEP 2: Significant drift (>10%) bypasses time-based blocking
+    // This ensures important parameter changes are always reported
     if (existingInsight) {
       const confidenceDrift = Math.abs(insight.confidence - existingInsight.confidence) / 100;
-      if (confidenceDrift < 0.10) {
-        this.logger(`BuildingInsightsService: Insight ${insight.category} no significant change (drift=${(confidenceDrift * 100).toFixed(1)}%)`);
-        return false;
+      if (confidenceDrift >= 0.10) {
+        this.logger(`BuildingInsightsService: Significant drift detected (${(confidenceDrift * 100).toFixed(1)}%) - bypassing time limit for ${insight.category}`);
+        return true; // Allow re-trigger regardless of time
       }
+    }
+
+    // STEP 3: Time-based fatigue (12 hours for unchanged insights)
+    const FATIGUE_PERIOD_MS = 12 * 60 * 60 * 1000; // 12 hours (v2.5.1: reduced from 24h)
+    const recentInsight = this.insightHistory.find(
+      (h) => h.category === insight.category && Date.now() - h.detectedAt < FATIGUE_PERIOD_MS,
+    );
+    if (recentInsight) {
+      this.logger(`BuildingInsightsService: Insight ${insight.category} already triggered within 12 hours (no significant change)`);
+      return false;
     }
 
     return true;

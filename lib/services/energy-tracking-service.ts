@@ -126,7 +126,10 @@ export class EnergyTrackingService {
       this.lastPowerMeasurement = measurement;
 
       // Update measure_power capability with the selected power source
-      if (powerValue !== null && this.device.hasCapability('measure_power')) {
+      // Only update if power measurements are enabled in settings
+      const enablePowerMeasurements = this.device.getSetting('enable_power_measurements') ?? true;
+
+      if (powerValue !== null && enablePowerMeasurements && this.device.hasCapability('measure_power')) {
         await this.device.setCapabilityValue('measure_power', Math.round(powerValue));
         this.logger(`EnergyTrackingService: Power updated: ${Math.round(powerValue)}W (source: ${powerSource}, confidence: ${confidence})`);
       }
