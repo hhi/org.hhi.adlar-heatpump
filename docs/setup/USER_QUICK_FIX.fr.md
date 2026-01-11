@@ -32,7 +32,3 @@ Essayez la version du protocole **3.5** en suivant les mêmes étapes (changez l
 Différents modèles de pompes à chaleur utilisent différentes versions du protocole Tuya. L'application utilisait auparavant 3.3 par défaut, mais de nombreux modèles plus récents nécessitent 3.4 ou 3.5.
 
 ---
-
-**Version 0.99.59** a ajouté la sélection de la version du protocole pour résoudre ce problème définitivement.
-
-**Besoin d'aide détaillée ?** Voir [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md)

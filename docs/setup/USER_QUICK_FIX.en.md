@@ -32,7 +32,3 @@ Try protocol version **3.5** using the same steps (change Protocol Version in Se
 Different heat pump models use different Tuya protocol versions. The app previously defaulted to 3.3, but many newer models need 3.4 or 3.5.
 
 ---
-
-**Version 0.99.59** added protocol version selection to fix this issue permanently.
-
-**Need detailed help?** See [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md)

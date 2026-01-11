@@ -13,6 +13,13 @@
     "fr": "Se déclenche lorsque le comportement du bâtiment appris diffère significativement du profil sélectionné (>30% de déviation). Suggère un profil optimal pour un apprentissage plus rapide."
   },
   "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=building_insight_primary"
+    }
+  ],
   "tokens": [
     {
       "name": "current_profile",

@@ -7,10 +7,10 @@
     "fr": "Régler la température cible (consigne)"
   },
   "titleFormatted": {
-    "en": "Set target (setpoint) temperature to [[temperature]]",
-    "nl": "Doel (setpoint) temperatuur instellen op [[temperature]]",
-    "de": "Zieltemperatur (Sollwert) einstellen auf [[temperature]]",
-    "fr": "Régler la température cible (consigne) sur [[temperature]]"
+    "en": "Set target (setpoint) temperature to [[temperature]] [[decimal_handling]]",
+    "nl": "Doel (setpoint) temperatuur instellen op [[temperature]] [[decimal_handling]]",
+    "de": "Zieltemperatur (Sollwert) einstellen auf [[temperature]] [[decimal_handling]]",
+    "fr": "Régler la température cible (consigne) sur [[temperature]] [[decimal_handling]]"
   },
   "hint": {
     "en": "Set the target (setpoint) temperature for the heat pump",
@@ -35,8 +35,8 @@
         "fr": " Température (°C)"
       },
       "min": 5,
-      "max": 60,
-      "step": 0.5,
+      "max": 75,
+      "step": 1,
       "units": "°C",
       "placeholder": {
         "en": "Target temperature in °C",
@@ -44,6 +44,37 @@
         "de": "Zieltemperatur in °C",
         "fr": "Température cible en °C"
       }
+    },
+    {
+      "type": "dropdown",
+      "name": "decimal_handling",
+      "title": {
+        "en": "If decimal value",
+        "nl": "Bij decimale waarde",
+        "de": "Bei Dezimalwert",
+        "fr": "Si valeur décimale"
+      },
+      "values": [
+        {
+          "id": "round",
+          "label": {
+            "en": "Auto-round (recommended)",
+            "nl": "Automatisch afronden (aanbevolen)",
+            "de": "Automatisch runden (empfohlen)",
+            "fr": "Arrondir automatiquement (recommandé)"
+          }
+        },
+        {
+          "id": "error",
+          "label": {
+            "en": "Show error",
+            "nl": "Foutmelding tonen",
+            "de": "Fehler anzeigen",
+            "fr": "Afficher erreur"
+          }
+        }
+      ],
+      "value": "round"
     }
   ]
 }

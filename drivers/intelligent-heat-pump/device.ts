@@ -3376,6 +3376,31 @@ class MyDevice extends Homey.Device {
         this.log('ℹ️ adaptive_control_diagnostics capability already exists, skipping migration');
       }
 
+      // Migration v2.5.2+: Add building insights capabilities
+      const buildingInsightsCapabilities = [
+        'building_insight_primary',
+        'building_insight_secondary',
+        'building_insight_recommendation',
+        'building_insights_diagnostics',
+      ];
+
+      for (const capability of buildingInsightsCapabilities) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            // Set default value based on capability type
+            if (capability === 'building_insights_diagnostics') {
+              await this.setCapabilityValue(capability, '{}');
+            } else {
+              await this.setCapabilityValue(capability, null);
+            }
+            this.log(`Migration v2.5.2: Added ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');
@@ -3535,7 +3560,7 @@ class MyDevice extends Homey.Device {
         }
 
         this.debugLog(`Registering capability listener for ${capability}`);
-        this.registerCapabilityListener(capability, async (value, _opts) => {
+        this.registerCapabilityListener(capability, async (value, opts) => {
           this.log(`${capability} set to`, value);
 
           try {
@@ -3549,8 +3574,8 @@ class MyDevice extends Homey.Device {
               throw new Error(errorMsg);
             }
 
-            // Validate value based on capability type
-            const validatedValue = this.validateCapabilityValue(capability, value);
+            // Validate value based on capability type (pass opts for flow card arguments)
+            const validatedValue = this.validateCapabilityValue(capability, value, opts);
 
             // OPTIMISTIC UPDATE (v0.99.52): Set capability value immediately for responsive UI
             // This ensures getCapabilityValue() returns the new value right away, even before
@@ -4244,10 +4269,11 @@ class MyDevice extends Homey.Device {
    * Validate capability values based on capability type
    * @param capability - The capability name to validate
    * @param value - The value to validate
+   * @param opts - Optional flow card arguments (e.g., decimal_handling for target_temperature)
    * @returns The validated and possibly converted value
    * @throws Error if value is invalid for the capability
    */
-  private validateCapabilityValue(capability: string, value: unknown): unknown {
+  private validateCapabilityValue(capability: string, value: unknown, opts?: { decimal_handling?: 'round' | 'error' }): unknown {
     // Check for null/undefined values first
     if (value === null || value === undefined) {
       throw new Error(`Value for capability ${capability} cannot be null or undefined`);
@@ -4255,9 +4281,30 @@ class MyDevice extends Homey.Device {
     switch (capability) {
       case 'target_temperature': {
         const temp = Number(value);
+
+        // Validate range
         if (Number.isNaN(temp) || temp < DeviceConstants.MIN_TARGET_TEMPERATURE || temp > DeviceConstants.MAX_TARGET_TEMPERATURE) {
           throw new Error(`Temperature ${temp}°C is outside valid range (${DeviceConstants.MIN_TARGET_TEMPERATURE}-${DeviceConstants.MAX_TARGET_TEMPERATURE}°C)`);
         }
+
+        // Check for decimals
+        const hasDecimals = temp !== Math.round(temp);
+
+        if (hasDecimals) {
+          // Get decimal handling preference (default: 'round')
+          const decimalHandling = opts?.decimal_handling || 'round';
+
+          if (decimalHandling === 'round') {
+            // Auto-round to nearest integer
+            const roundedTemp = Math.round(temp);
+            this.logger.warn(`Target temperature ${temp}°C rounded to ${roundedTemp}°C`);
+            return roundedTemp;
+          } else {
+            // Show error - decimal not allowed
+            throw new Error(`Temperature must be a whole number (received: ${temp}°C). Enable auto-rounding or use a whole number.`);
+          }
+        }
+
         return temp;
       }
 

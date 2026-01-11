@@ -103,13 +103,3 @@ Die Tuya-Protokollversion bestimmt, wie die App auf Netzwerkebene mit Ihrem Ger�
 - Datenbeschädigung
 
 Verschiedene Wärmepumpenmodelle/Firmware-Versionen benötigen unterschiedliche Protokollversionen. Es schadet nicht, verschiedene Versionen auszuprobieren - aktualisieren Sie einfach die Protokollversion in den Geräteeinstellungen, um zu wechseln.
-
-## Versionsverlauf
-
-- **v0.99.62** - Reparaturablauf entfernt, Anmeldedaten jetzt direkt in Geräteeinstellungen bearbeitbar
-- **v0.99.59** - Protokollversionsauswahl während der Kopplung hinzugefügt
-- **v0.99.58 und früher** - Fest auf Version 3.3 eingestellt (verursachte Probleme für einige Benutzer)
-
----
-
-**Benötigen Sie Hilfe?** Melden Sie Probleme unter: https://github.com/your-repo/issues

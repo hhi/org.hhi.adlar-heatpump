@@ -1,0 +1,76 @@
+{
+  "id": "insight_is_active",
+  "title": {
+    "en": "Insight !{{is|isn't}} active",
+    "nl": "Inzicht !{{is|is niet}} actief",
+    "de": "Erkenntnis !{{ist|ist nicht}} aktiv",
+    "fr": "L'aperçu !{{est|n'est pas}} actif"
+  },
+  "titleFormatted": {
+    "en": "[[category]] insight !{{is|isn't}} active",
+    "nl": "[[category]] inzicht !{{is|is niet}} actief",
+    "de": "[[category]] Erkenntnis !{{ist|ist nicht}} aktiv",
+    "fr": "L'aperçu [[category]] !{{est|n'est pas}} actif"
+  },
+  "hint": {
+    "en": "Check if a specific insight category is currently active (visible in capabilities). Returns false if dismissed or not detected.",
+    "nl": "Controleer of een specifieke inzicht categorie momenteel actief is (zichtbaar in capabilities). Retourneert onwaar als genegeerd of niet gedetecteerd.",
+    "de": "Überprüfen Sie, ob eine bestimmte Erkenntniskategorie derzeit aktiv ist (in Fähigkeiten sichtbar). Gibt falsch zurück, wenn verworfen oder nicht erkannt.",
+    "fr": "Vérifier si une catégorie d'aperçu spécifique est actuellement active (visible dans les capacités). Retourne faux si ignoré ou non détecté."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "name": "category",
+      "type": "dropdown",
+      "title": {
+        "en": "Category",
+        "nl": "Categorie",
+        "de": "Kategorie",
+        "fr": "Catégorie"
+      },
+      "values": [
+        {
+          "id": "insulation_performance",
+          "label": {
+            "en": "Insulation performance",
+            "nl": "Isolatieprestaties",
+            "de": "Isolationsleistung",
+            "fr": "Performance d'isolation"
+          }
+        },
+        {
+          "id": "pre_heating",
+          "label": {
+            "en": "Pre-heating strategy",
+            "nl": "Voorverwarm strategie",
+            "de": "Vorheizstrategie",
+            "fr": "Stratégie de préchauffage"
+          }
+        },
+        {
+          "id": "thermal_storage",
+          "label": {
+            "en": "Thermal storage",
+            "nl": "Thermische opslag",
+            "de": "Wärmespeicher",
+            "fr": "Stockage thermique"
+          }
+        },
+        {
+          "id": "profile_mismatch",
+          "label": {
+            "en": "Building profile mismatch",
+            "nl": "Gebouwprofiel mismatch",
+            "de": "Gebäudeprofil-Fehlanpassung",
+            "fr": "Incompatibilité de profil de bâtiment"
+          }
+        }
+      ]
+    }
+  ]
+}

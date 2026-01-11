@@ -13,6 +13,13 @@
     "fr": "Se déclenche lorsque le modèle du bâtiment détecte un aperçu de performance actionnable (≥70% de confiance). Utilisez des jetons pour filtrer par catégorie et potentiel d'économies."
   },
   "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump&capabilities=building_insight_primary"
+    }
+  ],
   "tokens": [
     {
       "name": "category",

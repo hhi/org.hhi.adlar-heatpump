@@ -18,6 +18,7 @@ ADVANCED MONITORING
 - Power consumption and efficiency monitoring
 - Automatic COP (coefficient of performance) calculation with 8 different methods
 - Seasonal SCOP analysis according to European standards
+- 60+ capabilities in 9 categories
 
 COMPLETE OPERATION
 - Temperature setting and heating modes
@@ -26,14 +27,20 @@ COMPLETE OPERATION
 - Timer and automatic functions
 
 INTELLIGENT AUTOMATION
-- 77 flow cards for advanced automation
+- 78 flow cards for advanced automation
 - Smart error detection and recovery
 - Weather-dependent optimization
 - Energy efficiency trends and warnings
 - Time-based scheduling and seasonal mode detection
+- Adaptive temperature control with PI controller (v2.0+)
+- Building model learning with machine learning (v2.0+)
+- Building Insights & Recommendations with ROI estimates (v2.4+)
+- Energy price optimization with day-ahead pricing (v2.0+)
+- COP optimization for maximum efficiency (v2.0+)
+- Comprehensive diagnostic tools for troubleshooting (v2.0.1+)
 
 USER-FRIENDLY
-- Fully localized interface (English/Dutch)
+- Fully localized interface
 - Mobile-friendly display
 - Clear status indicators
 - Understandable error messages
@@ -67,11 +74,11 @@ The protocol version determines how the app communicates with your heat pump:
 - 3.5: Required for latest firmware versions
 
 If you experience connection problems (frequent disconnects, ECONNRESET errors),
-try a different protocol version via device repair (see Troubleshooting section).
-- ECONNRESET at 00:00 usually occurs due to daily reset of your router;
-- HMAC mismatch, default is protocol version 3.3, switch to 3.4 (or 3.5)
-- ECONNREFUSED <ip-address> most likely indicates an incorrect IP address,
-   assign a static (DHCP) address to your heat pump
+try a different protocol version via device settings.
+- ECONNRESET at 00:00 usually occurs due to daily reset of your router
+- HMAC mismatch: default is protocol version 3.3, switch to 3.4 (or 3.5)
+- ECONNREFUSED <ip-address>: most likely indicates an incorrect IP address,
+  assign a static (DHCP) address to your heat pump
 
 IMPORTANT CAPABILITIES
 
@@ -88,6 +95,7 @@ ENERGY AND EFFICIENCY
 - COP calculation (how efficiently your heat pump works)
 - Trend analysis for optimization
 - Seasonal performance monitoring
+- Hourly and daily cost calculation
 
 SYSTEM CONTROL
 - On/off switching
@@ -116,10 +124,38 @@ Calculate output values based on configurable curves for intelligent automation:
 Example: Weather-Compensated Heating
 "When outdoor temperature changes, calculate heating setpoint using curve:
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
-Result: Automatically adjusts heating based on weather conditions
+Result: Automatically adjusts heating based on weather conditions.
+The input field accepts numbers, variables, or Homey-supported {{ expression }} syntax.
+
+ADLAR CUSTOM HEATING CURVE CALCULATOR (L28/L29)
+Calculates supply temperature directly from Adlar Custom heating curve parameters:
+
+What are L28 and L29?
+- L29: Desired supply temperature at -15°C outdoor temp (reference point, e.g., 55°C)
+- L28: Slope grade per 10°C temperature change (e.g., -5 = -0.5°C per degree)
+
+How does it work?
+The formula y = ax + b is automatically calculated:
+- Slope (a) = L28 ÷ 10
+- Intercept (b) = L29 - (slope × -15°C)
+Example: L29=55°C, L28=-5 → formula: y = -0.5x + 47.5
+
+Example Flow:
+"When outdoor temperature changes, calculate Custom heating curve
+with L29=55°C at -15°C, L28=-5 per 10°C, outdoor temp {{outdoor_temperature}}"
+Result at 5°C outdoor → supply temp 45°C
+
+Returns:
+- supply_temperature: Calculated supply temperature (°C)
+- formula: Mathematical formula (e.g., "y = -0.5x + 47.5")
+
+Advantages over general Curve Calculator:
+- Uses the same L28/L29 values as your heat pump display
+- No manual curve definition needed
+- Mathematically exact according to Adlar specification
 
 TIME-BASED SCHEDULER & SEASONAL MODE (Advanced Features)
-Two new calculators for intelligent time and season-based automation:
+Two calculators for intelligent time and season-based automation:
 
 Time-Based Scheduler:
 Calculate values based on time-of-day schedules for daily temperature programming.
@@ -134,24 +170,66 @@ Automatically detect heating/cooling season based on date.
 - Returns mode, season flags, and days until season change
 - Perfect for automatic winter/summer schedule switching
 
-Combined Example:
-Use all three calculators together for ultimate automation:
-Weather compensation (outdoor temp) + Time scheduling (comfort) + Seasonal mode (winter/summer)
-Result: Dynamic heating that adapts to weather, time of day, and season
-
 COP (COEFFICIENT OF PERFORMANCE) MONITORING
 
-The app automatically calculates how efficiently your heat pump works (see directory /docs/COP calculation at sourcecode):
+The app automatically calculates how efficiently your heat pump works:
 - COP value: Ratio between generated heat and consumed electricity
 - Daily averages: 24-hour trends
 - Weekly analysis: Long-term performance
 - Seasonal monitoring: SCOP according to European standards
 - Diagnostic feedback: What affects efficiency
+- Outlier detection: Flagging unrealistic values (< 0.5 or > 8.0)
 
 WHAT DO COP VALUES MEAN?
 - COP 2.0-3.0: Average performance
 - COP 3.0-4.0: Good performance
 - COP 4.0+: Excellent performance
+
+ADVANCED SETTINGS
+
+ADAPTIVE TEMPERATURE CONTROL
+Automatic target temperature regulation based on external indoor temperature sensor:
+- PI (Proportional-Integral) controller for stable indoor temperature
+- Performance: ±0.3°C stability
+- Requires: External temperature sensor via flow card
+
+BUILDING MODEL LEARNING
+Machine learning algorithm that learns the thermal properties of your home:
+- Learns 4 thermal parameters (C, UA, g, P_int)
+- Learning time: 24-72 hours for basic model, 2-4 weeks for accurate model
+- Building type selection: Light/Average/Heavy/Passive
+- Dynamic internal heat gains by time of day
+- Seasonal solar gain adjustment
+
+BUILDING INSIGHTS & RECOMMENDATIONS (NEW v2.4)
+Automated analysis of the thermal building model:
+- Energy-saving recommendations with ROI estimates
+- Insights appear after 24-48 hours of learning (70% confidence)
+- Configurable "wake time" for pre-heat calculations
+- Night setback setting for savings estimates
+- Maximum number of active insights configurable (1-5)
+
+ENERGY PRICE OPTIMIZATION
+Automatic optimization based on day-ahead energy prices:
+- Data source: EnergyZero API (free, no account needed)
+- Estimated savings: €400-600 per year
+- Price thresholds: Very Low/Low/Normal/High based on 2024 percentiles
+- Price calculation mode: Market/Market+/All-in pricing
+- Configurable supplier fee and energy tax
+- Price block detection for cheapest/most expensive periods
+
+COP OPTIMIZATION
+Automatic supply temperature optimization for maximum efficiency:
+- Learns optimal supply temperature per outdoor temperature
+- Estimated savings: €200-300/year
+- Strategies: Conservative/Balanced/Aggressive
+
+ADAPTIVE CONTROL WEIGHTING FACTORS
+Three priorities that together determine how the system makes decisions:
+- Comfort Priority (default 60%): Weight for PI temperature control
+- Efficiency Priority (default 25%): Weight for COP optimization
+- Cost Priority (default 15%): Weight for price optimization
+- Values are automatically normalized to total 100%
 
 TROUBLESHOOTING AND SUPPORT
 
@@ -179,22 +257,6 @@ Other Common Problems:
 - Error codes: See the app for specific explanation per error code
 - Pairing fails: Try different protocol versions (3.3, 3.4, 3.5)
 
-MANUAL CONNECTION RESET (Temporary Workaround)
-If your device shows 'Disconnected' status and doesn't automatically reconnect:
-
-ALTERNATIVE QUICK FIX:
-1. Open device controls in Homey app
-2. Change the Work Mode to a different value (e.g., from "Heating" to "Cooling")
-3. Wait 5-10 seconds
-4. Change the Work Mode back to the original value
-5. Connection usually restores within seconds
-
-This method works because changing the work mode sends an active command to the
-device, which reactivates sleeping connections.
-
-NOTE: From v1.0.12 onwards, the app resolves this automatically within 10 minutes.
-This manual method is only needed for older app versions or as emergency fallback.
-
 UPDATE DEVICE CREDENTIALS
 You can update device credentials without re-pairing:
 1. Go to device Settings in Homey app
@@ -203,52 +265,27 @@ You can update device credentials without re-pairing:
 4. Click "Save" - device reconnects automatically
 
 NEED HELP?
-- Documentation: Check the /docs folder within the sourcecode at Github for detailed information
+- Documentation: Check the /docs folder at GitHub for detailed information
+- Configuration Guide: /docs/setup/advanced-settings/CONFIGURATIEGIDS.md (complete settings reference)
 - Community: Homey Community Forum (Topic ID: 143690)
 - Issues: Report problems on GitHub
 
-ADVANCED FEATURES
-
-DEVICE SETTINGS (Configure per device)
-Access via device Settings in Homey app:
-
-Connection Settings:
-- Protocol Version: Tuya protocol version (3.3, 3.4, 3.5)
-- Device ID, Local Key, Local IP Address: Connection credentials
-
-COP Calculation Settings:
-- Enable/disable COP calculation
-- External power measurement integration
-- External flow data integration
-- External ambient temperature integration
-
-Flow Card Control:
-You can control which flow cards are visible (disabled/auto/enabled):
-- Temperature warnings: Temperature threshold alerts
-- Voltage/current monitoring: Electrical system monitoring
-- Power warnings: Power consumption alerts
-- System status changes: Compressor, defrost, system states
-- Efficiency monitoring: COP trends and outliers
-- Expert functions: Advanced diagnostic flow cards
-
-Auto Mode (recommended):
-Shows only flow cards for sensors with adequate data (updated recently, no errors).
-
-Curve Controls (optional):
-- Enable picker controls for heating and hot water curves
-- Default: Disabled (sensors always visible, pickers hidden)
-- Enable for advanced users who want direct curve adjustment
-
-Power Measurement Settings:
-- Enable/disable power measurements from heat pump
-- Auto-manages related flow card visibility
-- Useful if you have external power monitoring
-
 CROSS-APP INTEGRATION
-Connect with other Homey apps for enhanced COP calculation (see /docs/setup/COP flow-card-setup.md):
+Connect with other Homey apps for enhanced COP calculation:
 - External power measurements (from your smart meter)
 - External water flow data
 - External ambient temperature data
+- External indoor temperature for adaptive control
+
+BUILDING MODEL DIAGNOSTICS (v2.0.1+)
+Troubleshooting for thermal learning issues when your building model doesn't update:
+- Comprehensive diagnostic flow card
+- Check indoor/outdoor temperature sensor status
+- Monitor learning process (samples, confidence, time constant)
+- Identify specific blocking reasons with solutions
+- Follow learning timeline (T+0 → T+50min → T+24h)
+
+Usage: Create flow "Diagnose building model learning" to see detailed status in app logs
 
 SAFETY AND RELIABILITY
 
@@ -257,10 +294,10 @@ AUTOMATIC MONITORING
 - Connection status control
 - System error detection
 - System timer notifications
+- COP outlier detection
 
 INTELLIGENT RECOVERY
 - Automatic reconnection
 - Error correction
 - Status recovery
 - User-friendly error messages
-

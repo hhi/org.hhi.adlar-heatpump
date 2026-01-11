@@ -284,8 +284,8 @@ class MyApp extends App {
 
   registerCustomCards() {
     // Custom triggers that don't fit the pattern
-    this.faultDetectedTrigger = this.homey.flow.getTriggerCard('fault_detected');
-    this.powerThresholdExceededTrigger = this.homey.flow.getTriggerCard('power_threshold_exceeded');
+    // this.faultDetectedTrigger = this.homey.flow.getTriggerCard('fault_detected');
+    // this.powerThresholdExceededTrigger = this.homey.flow.getTriggerCard('power_threshold_exceeded');
 
     // Custom conditions with complex logic
     this.registerComplexConditions();

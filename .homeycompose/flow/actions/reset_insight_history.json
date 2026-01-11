@@ -1,0 +1,45 @@
+{
+  "id": "reset_insight_history",
+  "title": {
+    "en": "Reset insight history",
+    "nl": "Reset inzicht geschiedenis",
+    "de": "Erkenntnishistorie zurücksetzen",
+    "fr": "Réinitialiser l'historique des aperçus"
+  },
+  "titleFormatted": {
+    "en": "Reset insight history [[confirm]]",
+    "nl": "Reset inzicht geschiedenis [[confirm]]",
+    "de": "Erkenntnishistorie zurücksetzen [[confirm]]",
+    "fr": "Réinitialiser l'historique des aperçus [[confirm]]"
+  },
+  "hint": {
+    "en": "Clear all active insights and history (use after major building changes like renovation). Building model itself remains intact.",
+    "nl": "Wis alle actieve inzichten en geschiedenis (gebruik na grote gebouw veranderingen zoals renovatie). Gebouwmodel zelf blijft intact.",
+    "de": "Löschen Sie alle aktiven Erkenntnisse und die Historie (nach größeren Gebäudeänderungen wie Renovierungen). Das Gebäudemodell selbst bleibt intakt.",
+    "fr": "Effacer tous les aperçus actifs et l'historique (à utiliser après des changements majeurs du bâtiment comme une rénovation). Le modèle de bâtiment lui-même reste intact."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "name": "confirm",
+      "type": "checkbox",
+      "title": {
+        "en": "Confirm reset",
+        "nl": "Bevestig reset",
+        "de": "Reset bestätigen",
+        "fr": "Confirmer la réinitialisation"
+      },
+      "hint": {
+        "en": "Check this box to confirm you want to reset all insight history",
+        "nl": "Vink dit vakje aan om te bevestigen dat je alle inzicht geschiedenis wilt resetten",
+        "de": "Aktivieren Sie dieses Kontrollkästchen, um zu bestätigen, dass Sie die gesamte Erkenntnishistorie zurücksetzen möchten",
+        "fr": "Cochez cette case pour confirmer que vous souhaitez réinitialiser tout l'historique des aperçus"
+      },
+      "value": false
+    }
+  ]
+}

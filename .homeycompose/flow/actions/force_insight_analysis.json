@@ -1,0 +1,46 @@
+{
+  "id": "force_insight_analysis",
+  "title": {
+    "en": "Force insight analysis",
+    "nl": "Forceer inzicht analyse",
+    "de": "Erkenntnisanalyse erzwingen",
+    "fr": "Forcer l'analyse des aperçus"
+  },
+  "hint": {
+    "en": "Immediately evaluate building insights (without waiting for 50-minute interval). Returns number of insights detected and current model confidence.",
+    "nl": "Evalueer direct gebouw inzichten (zonder te wachten op 50-minuten interval). Retourneert aantal gedetecteerde inzichten en huidige model betrouwbaarheid.",
+    "de": "Sofort Gebäudeerkenntnisse auswerten (ohne auf 50-Minuten-Intervall zu warten). Gibt die Anzahl der erkannten Erkenntnisse und das aktuelle Modellvertrauen zurück.",
+    "fr": "Évaluer immédiatement les aperçus du bâtiment (sans attendre l'intervalle de 50 minutes). Retourne le nombre d'aperçus détectés et la confiance actuelle du modèle."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "insights_detected",
+      "type": "number",
+      "title": {
+        "en": "Insights detected",
+        "nl": "Inzichten gedetecteerd",
+        "de": "Erkenntnisse erkannt",
+        "fr": "Aperçus détectés"
+      },
+      "example": 2
+    },
+    {
+      "name": "confidence",
+      "type": "number",
+      "title": {
+        "en": "Model confidence (%)",
+        "nl": "Model betrouwbaarheid (%)",
+        "de": "Modellvertrauen (%)",
+        "fr": "Confiance du modèle (%)"
+      },
+      "example": 74
+    }
+  ]
+}

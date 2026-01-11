@@ -103,13 +103,3 @@ The Tuya protocol version determines how the app communicates with your device a
 - Data corruption
 
 Different heat pump models/firmware versions require different protocol versions. There's no harm in trying different versions - just update the protocol version in device settings to switch.
-
-## Version History
-
-- **v0.99.62** - Removed repair flow, credentials now editable directly in device settings
-- **v0.99.59** - Added protocol version selection during pairing
-- **v0.99.58 and earlier** - Hardcoded to version 3.3 (caused issues for some users)
-
----
-
-**Need Help?** Report issues at: https://github.com/your-repo/issues

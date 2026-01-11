@@ -18,6 +18,7 @@ GEAVANCEERDE MONITORING
 - Stroomverbruik en efficiëntie monitoring
 - Automatische COP (prestatiecoëfficiënt) berekening met 8 verschillende methoden
 - Seizoensgebonden SCOP analyse volgens Europese normen
+- 60+ capabilities in 9 categorieën
 
 VOLLEDIGE BEDIENING
 - Temperatuur instelling en verwarmingsmodi
@@ -31,11 +32,15 @@ INTELLIGENTE AUTOMATISERING
 - Weersafhankelijke optimalisatie
 - Energie-efficiëntie trends en waarschuwingen
 - Tijdgebaseerde planning en seizoensmodus detectie
-- Adaptieve temperatuurregeling met thermisch gebouwmodel leren (v2.0+)
+- Adaptieve temperatuurregeling met PI-regelaar (v2.0+)
+- Gebouwmodel leren met machine learning (v2.0+)
+- Gebouw Inzichten & Aanbevelingen met ROI-schattingen (v2.4+)
+- Energieprijs optimalisatie met day-ahead prijzen (v2.0+)
+- COP optimalisatie voor maximale efficiëntie (v2.0+)
 - Uitgebreide diagnostische tools voor probleemoplossing (v2.0.1+)
 
 GEBRUIKSVRIENDELIJK
-- Volledig Nederlandse interface (Engels/Nederlands)
+- Volledig Nederlandse interface
 - Mobielvriendelijke weergave
 - Duidelijke status indicatoren
 - Begrijpelijke foutmeldingen
@@ -69,11 +74,11 @@ De protocolversie bepaalt hoe de app communiceert met uw warmtepomp:
 - 3.5: Vereist voor nieuwste firmware versies
 
 Bij verbindingsproblemen (frequente onderbrekingen, ECONNRESET fouten),
-probeer een andere protocolversie via apparaatreparatie (zie Troubleshooting).
-- ECONNRESET om 00:00 uur treedt doorgaans op vanwege dagelijkse reset van je router;
-- HMAC mismatch, default is protocol versie 3.3, ga over naar 3.4 (of 3.5)
-- ECONNREFUSED <ip-adres> na alle weaarschijnlijkheid een verkeerd ip adres bepaalt,
-  ken een statisch (DHCP) adres toe aan je warmtepomp  
+probeer een andere protocolversie via apparaatinstellingen.
+- ECONNRESET om 00:00 uur treedt doorgaans op vanwege dagelijkse reset van je router
+- HMAC mismatch: standaard is protocol versie 3.3, ga over naar 3.4 (of 3.5)
+- ECONNREFUSED <ip-adres>: na alle waarschijnlijkheid een verkeerd IP-adres,
+  ken een statisch (DHCP) adres toe aan je warmtepomp
 
 BELANGRIJKE MOGELIJKHEDEN
 
@@ -90,6 +95,7 @@ ENERGIE EN EFFICIËNTIE
 - COP berekening (hoe efficiënt uw warmtepomp werkt)
 - Trend analyse voor optimalisatie
 - Seizoensgebonden prestatie monitoring
+- Uurlijkse en dagelijkse kostenberekening
 
 SYSTEEM CONTROLE
 - Aan/uit schakeling
@@ -118,11 +124,38 @@ Bereken outputwaarden op basis van configureerbare curves voor intelligente auto
 Voorbeeld: Weerafhankelijke Verwarming
 "Wanneer buitentemperatuur verandert, bereken verwarmingssetpoint met curve:
 < -5°C : 60°C, < 0°C : 55°C, < 5°C : 50°C, < 10°C : 45°C, default : 35°C"
-Resultaat: Past verwarming automatisch aan op basis van weersomstandigheden
+Resultaat: Past verwarming automatisch aan op basis van weersomstandigheden.
 Het invoerveld accepteert getallen, variabelen of Homey-ondersteunde {{ expression }} syntax.
 
+ADLAR CUSTOM STOOKLIJN CALCULATOR (L28/L29)
+Berekent de aanvoertemperatuur direct uit de Adlar Custom stooklijn parameters:
+
+Wat zijn L28 en L29?
+- L29: Gewenste aanvoertemperatuur bij -15°C buitentemp (referentiepunt, bijv. 55°C)
+- L28: Hellingsgraad per 10°C temperatuurverandering (bijv. -5 = -0.5°C per graad)
+
+Hoe werkt het?
+De formule y = ax + b wordt automatisch berekend:
+- Helling (a) = L28 ÷ 10
+- Intercept (b) = L29 - (helling × -15°C)
+Voorbeeld: L29=55°C, L28=-5 → formule: y = -0.5x + 47.5
+
+Voorbeeld Flow:
+"Wanneer buitentemperatuur verandert, bereken Custom stooklijn
+met L29=55°C bij -15°C, L28=-5 per 10°C, buitentemp {{outdoor_temperature}}"
+Resultaat bij 5°C buiten → aanvoertemp 45°C
+
+Retourneert:
+- supply_temperature: Berekende aanvoertemperatuur (°C)
+- formula: Mathematische formule (bijv. "y = -0.5x + 47.5")
+
+Voordelen t.o.v. algemene Curve Calculator:
+- Gebruikt dezelfde L28/L29 waarden als je warmtepomp display
+- Geen handmatige curve definitie nodig
+- Mathematisch exact volgens Adlar specificatie
+
 TIJDGEBASEERDE PLANNING & SEIZOENSMODUS (Geavanceerde Functies)
-Twee nieuwe calculators voor intelligente tijd- en seizoensgebonden automatisering:
+Twee calculators voor intelligente tijd- en seizoensgebonden automatisering:
 
 Tijdgebaseerde Planning:
 Bereken waarden op basis van dagschema's voor dagelijkse temperatuurprogrammering.
@@ -137,24 +170,66 @@ Automatische detectie van verwarmings-/koelseizoen op basis van datum.
 - Retourneert modus, seizoensvlaggen en dagen tot seizoenswissel
 - Perfect voor automatisch schakelen tussen winter-/zomerschema's
 
-Gecombineerd Voorbeeld:
-Gebruik alle drie calculators samen voor ultieme automatisering:
-Weerscompensatie (buitentemp) + Tijdplanning (comfort) + Seizoensmodus (winter/zomer)
-Resultaat: Dynamische verwarming die zich aanpast aan weer, tijdstip en seizoen
-
 COP (PRESTATIECOËFFICIËNT) MONITORING
 
-De app berekent automatisch hoe efficiënt uw warmtepomp werkt (zie de directory /docs/COP calculation/ in de broncode):
+De app berekent automatisch hoe efficiënt uw warmtepomp werkt:
 - COP waarde: Verhouding tussen opgewekte warmte en verbruikte stroom
 - Dagelijkse gemiddelden: 24-uurs trends
 - Wekelijkse analyse: Langetermijn prestaties
 - Seizoensgebonden monitoring: SCOP volgens Europese normen
 - Diagnostische feedback: Wat beïnvloedt de efficiëntie
+- Outlier detectie: Signaleren van onrealistische waarden (< 0.5 of > 8.0)
 
 WAT BETEKENEN COP WAARDEN?
 - COP 2.0-3.0: Gemiddelde prestatie
 - COP 3.0-4.0: Goede prestatie
 - COP 4.0+: Uitstekende prestatie
+
+GEAVANCEERDE INSTELLINGEN
+
+ADAPTIEVE TEMPERATUURREGELING
+Automatische regeling van de doeltemperatuur op basis van externe binnentemperatuur sensor:
+- PI (Proportioneel-Integraal) regelaar voor stabiele binnentemperatuur
+- Prestaties: ±0.3°C stabiliteit
+- Vereist: Externe temperatuursensor via flow kaart
+
+GEBOUWMODEL LEREN
+Machine learning algoritme dat de thermische eigenschappen van je woning leert:
+- Leert 4 thermische parameters (C, UA, g, P_int)
+- Leertijd: 24-72 uur voor basismodel, 2-4 weken voor nauwkeurig model
+- Gebouwtype selectie: Licht/Gemiddeld/Zwaar/Passief
+- Dynamische interne warmtewinsten per tijdstip
+- Seizoensgebonden zonnewinst aanpassing
+
+GEBOUW INZICHTEN & AANBEVELINGEN (NIEUW v2.4)
+Geautomatiseerde analyse van het thermische gebouwmodel:
+- Energie-besparende aanbevelingen met ROI-schattingen
+- Inzichten verschijnen na 24-48 uur leren (70% betrouwbaarheid)
+- Configureerbare "sta-op tijd" voor voorverwarm berekeningen
+- Nacht verlaging instelling voor besparingsschattingen
+- Maximum aantal actieve inzichten instelbaar (1-5)
+
+ENERGIEPRIJS OPTIMALISATIE
+Automatische optimalisatie op basis van day-ahead energieprijzen:
+- Data bron: EnergyZero API (gratis, geen account nodig)
+- Geschatte besparing: €400-600 per jaar
+- Prijsdrempels: Zeer Laag/Laag/Normaal/Hoog gebaseerd op 2024 percentielen
+- Prijsberekening modus: Marktprijs/Markt+/All-in prijs
+- Configureerbare leveranciersopslag en energiebelasting
+- Prijsblok detectie voor goedkoopste/duurste periodes
+
+COP OPTIMALISATIE
+Automatische optimalisatie van aanvoertemperatuur voor maximale efficiëntie:
+- Leert optimale aanvoertemperatuur per buitentemperatuur
+- Geschatte besparing: €200-300/jaar
+- Strategieën: Conservatief/Gebalanceerd/Agressief
+
+ADAPTIEVE REGELING WEGINGSFACTOREN
+Drie prioriteiten die samen bepalen hoe het systeem beslissingen maakt:
+- Comfort Prioriteit (standaard 60%): Gewicht voor PI temperatuurregeling
+- Efficiëntie Prioriteit (standaard 25%): Gewicht voor COP optimalisatie
+- Kosten Prioriteit (standaard 15%): Gewicht voor prijsoptimalisatie
+- Waarden worden automatisch genormaliseerd naar totaal 100%
 
 TROUBLESHOOTING EN ONDERSTEUNING
 
@@ -182,22 +257,6 @@ Andere Veelvoorkomende Problemen:
 - Foutcodes: Zie de app voor specifieke uitleg per foutcode
 - Koppelen mislukt: Probeer verschillende protocolversies (3.3, 3.4, 3.5)
 
-HANDMATIGE VERBINDING RESET (Tijdelijke Oplossing)
-Als uw apparaat 'Verbroken' status toont en niet automatisch herverbindt:
-
-ALTERNATIEVE SNELLE OPLOSSING:
-1. Open apparaat besturing in Homey app
-2. Wijzig de Bedrijfsmodus naar een andere waarde (bijv. van "Verwarmen" naar "Koelen")
-3. Wacht 5-10 seconden
-4. Wijzig de Bedrijfsmodus terug naar de oorspronkelijke waarde
-5. De verbinding wordt meestal binnen enkele seconden hersteld
-
-Deze methode werkt omdat het wijzigen van de bedrijfsmodus een actief commando naar
-het apparaat stuurt, waardoor slapende verbindingen opnieuw worden geactiveerd.
-
-LET OP: Vanaf v1.0.12 lost de app dit automatisch op binnen 10 minuten. Deze
-handmatige methode is alleen nodig voor oudere app-versies of als noodoplossing.
-
 APPARAAT GEGEVENS BIJWERKEN
 U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
 1. Ga naar apparaat Instellingen in Homey app
@@ -206,53 +265,17 @@ U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
 4. Klik op "Opslaan" - apparaat verbindt automatisch opnieuw
 
 HULP NODIG?
-- Documentatie: Bekijk de /docs map in de broncode op Github voor gedetailleerde informatie
+- Documentatie: Bekijk de /docs map in de broncode op GitHub voor gedetailleerde informatie
+- Configuratiegids: /docs/setup/advanced-settings/CONFIGURATIEGIDS.md (complete instellingen referentie)
 - Community: Homey Community Forum (Topic ID: 143690)
 - Issues: Meld problemen op GitHub
 
-GEAVANCEERDE FUNCTIES
-
-APPARAAT INSTELLINGEN (Configureer per apparaat)
-Toegang via apparaat Instellingen in Homey app:
-
-Verbindingsinstellingen:
-- Protocolversie: Tuya protocolversie (3.3, 3.4, 3.5)
-- Apparaat ID, Lokale Sleutel, lokaal IP-adres: Verbindingsgegevens
-
-COP Berekeningsinstellingen:
-- COP berekening in-/uitschakelen
-- Externe vermogensmetingintegratie
-- Externe doorstroomgegevens integratie
-- Externe buitentemperatuur integratie
-
-Flow Kaart Controle:
-U kunt regelen welke flow kaarten zichtbaar zijn (uitgeschakeld/auto/ingeschakeld):
-- Temperatuurwaarschuwingen: Temperatuurdrempel meldingen
-- Spanning/stroommonitoring: Elektrisch systeem monitoring
-- Vermogenwaarschuwingen: Stroomverbruik meldingen
-- Systeemstatuswijzigingen: Compressor, ontdooien, systeem toestanden
-- Efficiëntiemonitoring: COP trends en afwijkingen
-- Expertfuncties: Geavanceerde diagnostische flow kaarten
-
-Auto Modus (aanbevolen):
-Toont alleen flow kaarten voor sensoren met adequate gegevens (recent bijgewerkt, geen fouten).
-
-Curve Controles (optioneel):
-- Schakel picker controles in voor verwarmings- en warmwatercurves
-- Standaard: Uitgeschakeld (sensoren altijd zichtbaar, pickers verborgen)
-- Inschakelen voor gevorderde gebruikers die directe curve aanpassing willen
-
-Vermogensmetingsinstellingen:
-- Vermogensmetingen van warmtepomp in-/uitschakelen
-- Beheert automatisch gerelateerde flow kaart zichtbaarheid
-- Nuttig als u externe vermogensmonitoring heeft
-
 CROSS-APP INTEGRATIE
-Verbind met andere Homey apps voor verbeterde COP berekening (zie /docs/setup/COP flow-card-setup.md):
+Verbind met andere Homey apps voor verbeterde COP berekening:
 - Externe vermogensmetingen (van uw slimme meter)
 - Externe water doorstroom gegevens
 - Externe buitentemperatuur gegevens
-- Externe binnentemperatuur voor adaptieve regeling (v2.0.1+)
+- Externe binnentemperatuur voor adaptieve regeling
 
 GEBOUWMODEL DIAGNOSTIEK (v2.0.1+)
 Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet update:
@@ -271,6 +294,7 @@ AUTOMATISCHE MONITORING
 - Verbindingsstatus controle
 - Systeemfout detectie
 - Systeem timer meldingen
+- COP outlier detectie
 
 INTELLIGENTE HERSTEL
 - Automatische herverbinding

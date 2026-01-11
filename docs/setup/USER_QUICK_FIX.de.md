@@ -32,7 +32,3 @@ Versuchen Sie Protokollversion **3.5** mit den gleichen Schritten (ändern Sie d
 Verschiedene Wärmepumpenmodelle verwenden unterschiedliche Tuya-Protokollversionen. Die App hatte zuvor standardmäßig 3.3 eingestellt, aber viele neuere Modelle benötigen 3.4 oder 3.5.
 
 ---
-
-**Version 0.99.59** hat die Protokollversionsauswahl hinzugefügt, um dieses Problem dauerhaft zu beheben.
-
-**Benötigen Sie detaillierte Hilfe?** Siehe [PROTOCOL_VERSION_GUIDE.md](PROTOCOL_VERSION_GUIDE.md)

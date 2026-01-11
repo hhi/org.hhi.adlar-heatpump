@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.5.3",
+  "version": "2.5.7",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -518,6 +518,13 @@
           "fr": "Se déclenche lorsque le modèle du bâtiment détecte un aperçu de performance actionnable (≥70% de confiance). Utilisez des jetons pour filtrer par catégorie et potentiel d'économies."
         },
         "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=building_insight_primary"
+          }
+        ],
         "tokens": [
           {
             "name": "category",
@@ -602,6 +609,13 @@
           "fr": "Se déclenche lorsque le comportement du bâtiment appris diffère significativement du profil sélectionné (>30% de déviation). Suggère un profil optimal pour un apprentissage plus rapide."
         },
         "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump&capabilities=building_insight_primary"
+          }
+        ],
         "tokens": [
           {
             "name": "current_profile",
@@ -4730,6 +4744,53 @@
         ]
       },
       {
+        "id": "confidence_above",
+        "title": {
+          "en": "Model confidence !{{is|isn't}} above threshold",
+          "nl": "Model betrouwbaarheid !{{is|is niet}} boven drempel",
+          "de": "Modellvertrauen !{{ist|ist nicht}} über Schwellenwert",
+          "fr": "La confiance du modèle !{{est|n'est pas}} au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "Model confidence !{{is|isn't}} above [[threshold]]%",
+          "nl": "Model betrouwbaarheid !{{is|is niet}} boven [[threshold]]%",
+          "de": "Modellvertrauen !{{ist|ist nicht}} über [[threshold]]%",
+          "fr": "La confiance du modèle !{{est|n'est pas}} au-dessus de [[threshold]]%"
+        },
+        "hint": {
+          "en": "Check if building model confidence exceeds a threshold (0-100%). Use as quality gate for flows (e.g., only send notifications when confidence >80%).",
+          "nl": "Controleer of gebouwmodel betrouwbaarheid een drempel overschrijdt (0-100%). Gebruik als kwaliteitspoort voor flows (bijv. alleen notificaties versturen wanneer betrouwbaarheid >80%).",
+          "de": "Überprüfen Sie, ob das Gebäudemodellvertrauen einen Schwellenwert überschreitet (0-100%). Verwenden Sie als Qualitätsgate für Flows (z. B. nur Benachrichtigungen senden, wenn Vertrauen >80%).",
+          "fr": "Vérifier si la confiance du modèle de bâtiment dépasse un seuil (0-100%). Utiliser comme porte de qualité pour les flux (par exemple, envoyer des notifications uniquement lorsque la confiance >80%)."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "title": {
+              "en": "Threshold (%)",
+              "nl": "Drempel (%)",
+              "de": "Schwellenwert (%)",
+              "fr": "Seuil (%)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "placeholder": {
+              "en": "70",
+              "nl": "70",
+              "de": "70",
+              "fr": "70"
+            }
+          }
+        ]
+      },
+      {
         "id": "cop_calculation_method_is",
         "title": {
           "en": "COP calculation method is",
@@ -5470,6 +5531,82 @@
         ]
       },
       {
+        "id": "insight_is_active",
+        "title": {
+          "en": "Insight !{{is|isn't}} active",
+          "nl": "Inzicht !{{is|is niet}} actief",
+          "de": "Erkenntnis !{{ist|ist nicht}} aktiv",
+          "fr": "L'aperçu !{{est|n'est pas}} actif"
+        },
+        "titleFormatted": {
+          "en": "[[category]] insight !{{is|isn't}} active",
+          "nl": "[[category]] inzicht !{{is|is niet}} actief",
+          "de": "[[category]] Erkenntnis !{{ist|ist nicht}} aktiv",
+          "fr": "L'aperçu [[category]] !{{est|n'est pas}} actif"
+        },
+        "hint": {
+          "en": "Check if a specific insight category is currently active (visible in capabilities). Returns false if dismissed or not detected.",
+          "nl": "Controleer of een specifieke inzicht categorie momenteel actief is (zichtbaar in capabilities). Retourneert onwaar als genegeerd of niet gedetecteerd.",
+          "de": "Überprüfen Sie, ob eine bestimmte Erkenntniskategorie derzeit aktiv ist (in Fähigkeiten sichtbar). Gibt falsch zurück, wenn verworfen oder nicht erkannt.",
+          "fr": "Vérifier si une catégorie d'aperçu spécifique est actuellement active (visible dans les capacités). Retourne faux si ignoré ou non détecté."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "category",
+            "type": "dropdown",
+            "title": {
+              "en": "Category",
+              "nl": "Categorie",
+              "de": "Kategorie",
+              "fr": "Catégorie"
+            },
+            "values": [
+              {
+                "id": "insulation_performance",
+                "label": {
+                  "en": "Insulation performance",
+                  "nl": "Isolatieprestaties",
+                  "de": "Isolationsleistung",
+                  "fr": "Performance d'isolation"
+                }
+              },
+              {
+                "id": "pre_heating",
+                "label": {
+                  "en": "Pre-heating strategy",
+                  "nl": "Voorverwarm strategie",
+                  "de": "Vorheizstrategie",
+                  "fr": "Stratégie de préchauffage"
+                }
+              },
+              {
+                "id": "thermal_storage",
+                "label": {
+                  "en": "Thermal storage",
+                  "nl": "Thermische opslag",
+                  "de": "Wärmespeicher",
+                  "fr": "Stockage thermique"
+                }
+              },
+              {
+                "id": "profile_mismatch",
+                "label": {
+                  "en": "Building profile mismatch",
+                  "nl": "Gebouwprofiel mismatch",
+                  "de": "Gebäudeprofil-Fehlanpassung",
+                  "fr": "Incompatibilité de profil de bâtiment"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "monthly_cop_above_threshold",
         "title": {
           "en": "Monthly COP above threshold",
@@ -5748,6 +5885,92 @@
               "nl": "Marge (%)",
               "de": "Marge (%)",
               "fr": "Marge (%)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "savings_above",
+        "title": {
+          "en": "Insight savings !{{are|aren't}} above threshold",
+          "nl": "Inzicht besparing !{{is|is niet}} boven drempel",
+          "de": "Erkenntniseinsparungen !{{sind|sind nicht}} über Schwellenwert",
+          "fr": "Les économies d'aperçu !{{sont|ne sont pas}} au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "[[category]] savings !{{are|aren't}} above €[[threshold]]/month",
+          "nl": "[[category]] besparing !{{is|is niet}} boven €[[threshold]]/maand",
+          "de": "[[category]] Einsparungen !{{sind|sind nicht}} über €[[threshold]]/Monat",
+          "fr": "Les économies [[category]] !{{sont|ne sont pas}} au-dessus de €[[threshold]]/mois"
+        },
+        "hint": {
+          "en": "Check if estimated monthly savings for an insight category exceed a threshold (in EUR/month). Use for ROI-based filtering (e.g., only act on savings >€100/month).",
+          "nl": "Controleer of geschatte maandelijkse besparing voor een inzicht categorie een drempel overschrijdt (in EUR/maand). Gebruik voor ROI-gebaseerde filtering (bijv. alleen actie bij besparing >€100/maand).",
+          "de": "Überprüfen Sie, ob die geschätzten monatlichen Einsparungen für eine Erkenntniskategorie einen Schwellenwert überschreiten (in EUR/Monat). Verwenden Sie für ROI-basierte Filterung (z. B. nur handeln bei Einsparungen >€100/Monat).",
+          "fr": "Vérifier si les économies mensuelles estimées pour une catégorie d'aperçu dépassent un seuil (en EUR/mois). Utiliser pour le filtrage basé sur le ROI (par exemple, agir uniquement sur les économies >€100/mois)."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "category",
+            "type": "dropdown",
+            "title": {
+              "en": "Category",
+              "nl": "Categorie",
+              "de": "Kategorie",
+              "fr": "Catégorie"
+            },
+            "values": [
+              {
+                "id": "insulation_performance",
+                "label": {
+                  "en": "Insulation performance",
+                  "nl": "Isolatieprestaties",
+                  "de": "Isolationsleistung",
+                  "fr": "Performance d'isolation"
+                }
+              },
+              {
+                "id": "pre_heating",
+                "label": {
+                  "en": "Pre-heating strategy",
+                  "nl": "Voorverwarm strategie",
+                  "de": "Vorheizstrategie",
+                  "fr": "Stratégie de préchauffage"
+                }
+              },
+              {
+                "id": "thermal_storage",
+                "label": {
+                  "en": "Thermal storage",
+                  "nl": "Thermische opslag",
+                  "de": "Wärmespeicher",
+                  "fr": "Stockage thermique"
+                }
+              }
+            ]
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "title": {
+              "en": "Threshold (EUR/month)",
+              "nl": "Drempel (EUR/maand)",
+              "de": "Schwellenwert (EUR/Monat)",
+              "fr": "Seuil (EUR/mois)"
+            },
+            "min": 0,
+            "max": 500,
+            "step": 10,
+            "placeholder": {
+              "en": "100",
+              "nl": "100",
+              "de": "100",
+              "fr": "100"
             }
           }
         ]
@@ -6618,6 +6841,147 @@
         ]
       },
       {
+        "id": "dismiss_insight",
+        "title": {
+          "en": "Dismiss insight",
+          "nl": "Negeer inzicht",
+          "de": "Erkenntnis verwerfen",
+          "fr": "Ignorer l'aperçu"
+        },
+        "titleFormatted": {
+          "en": "Dismiss [[category]] insight for [[duration]] days",
+          "nl": "Negeer [[category]] inzicht voor [[duration]] dagen",
+          "de": "[[category]] Erkenntnis für [[duration]] Tage verwerfen",
+          "fr": "Ignorer l'aperçu [[category]] pendant [[duration]] jours"
+        },
+        "hint": {
+          "en": "Temporarily hide a specific insight category (e.g., after renovation or known issue). Insight will be re-evaluated after the specified duration.",
+          "nl": "Verberg tijdelijk een specifieke inzicht categorie (bijv. na renovatie of bekend probleem). Inzicht wordt opnieuw geëvalueerd na de opgegeven duur.",
+          "de": "Verstecken Sie vorübergehend eine bestimmte Erkenntniskategorie (z. B. nach Renovierung oder bekanntem Problem). Die Erkenntnis wird nach der angegebenen Dauer neu bewertet.",
+          "fr": "Masquer temporairement une catégorie d'aperçu spécifique (par exemple, après rénovation ou problème connu). L'aperçu sera réévalué après la durée spécifiée."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "category",
+            "type": "dropdown",
+            "title": {
+              "en": "Category",
+              "nl": "Categorie",
+              "de": "Kategorie",
+              "fr": "Catégorie"
+            },
+            "values": [
+              {
+                "id": "insulation_performance",
+                "label": {
+                  "en": "Insulation performance",
+                  "nl": "Isolatieprestaties",
+                  "de": "Isolationsleistung",
+                  "fr": "Performance d'isolation"
+                }
+              },
+              {
+                "id": "pre_heating",
+                "label": {
+                  "en": "Pre-heating strategy",
+                  "nl": "Voorverwarm strategie",
+                  "de": "Vorheizstrategie",
+                  "fr": "Stratégie de préchauffage"
+                }
+              },
+              {
+                "id": "thermal_storage",
+                "label": {
+                  "en": "Thermal storage",
+                  "nl": "Thermische opslag",
+                  "de": "Wärmespeicher",
+                  "fr": "Stockage thermique"
+                }
+              },
+              {
+                "id": "profile_mismatch",
+                "label": {
+                  "en": "Building profile mismatch",
+                  "nl": "Gebouwprofiel mismatch",
+                  "de": "Gebäudeprofil-Fehlanpassung",
+                  "fr": "Incompatibilité de profil de bâtiment"
+                }
+              }
+            ]
+          },
+          {
+            "name": "duration",
+            "type": "number",
+            "title": {
+              "en": "Duration (days)",
+              "nl": "Duur (dagen)",
+              "de": "Dauer (Tage)",
+              "fr": "Durée (jours)"
+            },
+            "min": 1,
+            "max": 365,
+            "step": 1,
+            "placeholder": {
+              "en": "30",
+              "nl": "30",
+              "de": "30",
+              "fr": "30"
+            }
+          }
+        ]
+      },
+      {
+        "id": "force_insight_analysis",
+        "title": {
+          "en": "Force insight analysis",
+          "nl": "Forceer inzicht analyse",
+          "de": "Erkenntnisanalyse erzwingen",
+          "fr": "Forcer l'analyse des aperçus"
+        },
+        "hint": {
+          "en": "Immediately evaluate building insights (without waiting for 50-minute interval). Returns number of insights detected and current model confidence.",
+          "nl": "Evalueer direct gebouw inzichten (zonder te wachten op 50-minuten interval). Retourneert aantal gedetecteerde inzichten en huidige model betrouwbaarheid.",
+          "de": "Sofort Gebäudeerkenntnisse auswerten (ohne auf 50-Minuten-Intervall zu warten). Gibt die Anzahl der erkannten Erkenntnisse und das aktuelle Modellvertrauen zurück.",
+          "fr": "Évaluer immédiatement les aperçus du bâtiment (sans attendre l'intervalle de 50 minutes). Retourne le nombre d'aperçus détectés et la confiance actuelle du modèle."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "insights_detected",
+            "type": "number",
+            "title": {
+              "en": "Insights detected",
+              "nl": "Inzichten gedetecteerd",
+              "de": "Erkenntnisse erkannt",
+              "fr": "Aperçus détectés"
+            },
+            "example": 2
+          },
+          {
+            "name": "confidence",
+            "type": "number",
+            "title": {
+              "en": "Model confidence (%)",
+              "nl": "Model betrouwbaarheid (%)",
+              "de": "Modellvertrauen (%)",
+              "fr": "Confiance du modèle (%)"
+            },
+            "example": 74
+          }
+        ]
+      },
+      {
         "id": "get_seasonal_mode",
         "title": {
           "en": "Get current seasonal mode",
@@ -6947,6 +7311,51 @@
         ]
       },
       {
+        "id": "reset_insight_history",
+        "title": {
+          "en": "Reset insight history",
+          "nl": "Reset inzicht geschiedenis",
+          "de": "Erkenntnishistorie zurücksetzen",
+          "fr": "Réinitialiser l'historique des aperçus"
+        },
+        "titleFormatted": {
+          "en": "Reset insight history [[confirm]]",
+          "nl": "Reset inzicht geschiedenis [[confirm]]",
+          "de": "Erkenntnishistorie zurücksetzen [[confirm]]",
+          "fr": "Réinitialiser l'historique des aperçus [[confirm]]"
+        },
+        "hint": {
+          "en": "Clear all active insights and history (use after major building changes like renovation). Building model itself remains intact.",
+          "nl": "Wis alle actieve inzichten en geschiedenis (gebruik na grote gebouw veranderingen zoals renovatie). Gebouwmodel zelf blijft intact.",
+          "de": "Löschen Sie alle aktiven Erkenntnisse und die Historie (nach größeren Gebäudeänderungen wie Renovierungen). Das Gebäudemodell selbst bleibt intakt.",
+          "fr": "Effacer tous les aperçus actifs et l'historique (à utiliser après des changements majeurs du bâtiment comme une rénovation). Le modèle de bâtiment lui-même reste intact."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "confirm",
+            "type": "checkbox",
+            "title": {
+              "en": "Confirm reset",
+              "nl": "Bevestig reset",
+              "de": "Reset bestätigen",
+              "fr": "Confirmer la réinitialisation"
+            },
+            "hint": {
+              "en": "Check this box to confirm you want to reset all insight history",
+              "nl": "Vink dit vakje aan om te bevestigen dat je alle inzicht geschiedenis wilt resetten",
+              "de": "Aktivieren Sie dieses Kontrollkästchen, um zu bestätigen, dass Sie die gesamte Erkenntnishistorie zurücksetzen möchten",
+              "fr": "Cochez cette case pour confirmer que vous souhaitez réinitialiser tout l'historique des aperçus"
+            },
+            "value": false
+          }
+        ]
+      },
+      {
         "id": "set_capacity",
         "title": {
           "en": "Set hot water curve setting",
@@ -7028,6 +7437,53 @@
                 }
               }
             ]
+          }
+        ]
+      },
+      {
+        "id": "set_confidence_threshold",
+        "title": {
+          "en": "Set confidence threshold",
+          "nl": "Stel betrouwbaarheidsdrempel in",
+          "de": "Vertrauensschwelle festlegen",
+          "fr": "Définir le seuil de confiance"
+        },
+        "titleFormatted": {
+          "en": "Set confidence threshold to [[threshold]]%",
+          "nl": "Stel betrouwbaarheidsdrempel in op [[threshold]]%",
+          "de": "Vertrauensschwelle auf [[threshold]]% festlegen",
+          "fr": "Définir le seuil de confiance à [[threshold]]%"
+        },
+        "hint": {
+          "en": "Dynamically adjust minimum confidence threshold via flows (50-90%). Lower = more insights (less reliable), higher = fewer insights (very reliable).",
+          "nl": "Pas dynamisch de minimale betrouwbaarheidsdrempel aan via flows (50-90%). Lager = meer inzichten (minder betrouwbaar), hoger = minder inzichten (zeer betrouwbaar).",
+          "de": "Passen Sie die Mindestvertrauensschwelle dynamisch über Flows an (50-90%). Niedriger = mehr Erkenntnisse (weniger zuverlässig), höher = weniger Erkenntnisse (sehr zuverlässig).",
+          "fr": "Ajuster dynamiquement le seuil de confiance minimum via les flux (50-90%). Plus bas = plus d'aperçus (moins fiables), plus haut = moins d'aperçus (très fiables)."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "title": {
+              "en": "Confidence threshold (%)",
+              "nl": "Betrouwbaarheidsdrempel (%)",
+              "de": "Vertrauensschwelle (%)",
+              "fr": "Seuil de confiance (%)"
+            },
+            "min": 50,
+            "max": 90,
+            "step": 5,
+            "placeholder": {
+              "en": "70",
+              "nl": "70",
+              "de": "70",
+              "fr": "70"
+            }
           }
         ]
       },
@@ -7446,10 +7902,10 @@
           "fr": "Régler la température cible (consigne)"
         },
         "titleFormatted": {
-          "en": "Set target (setpoint) temperature to [[temperature]]",
-          "nl": "Doel (setpoint) temperatuur instellen op [[temperature]]",
-          "de": "Zieltemperatur (Sollwert) einstellen auf [[temperature]]",
-          "fr": "Régler la température cible (consigne) sur [[temperature]]"
+          "en": "Set target (setpoint) temperature to [[temperature]] [[decimal_handling]]",
+          "nl": "Doel (setpoint) temperatuur instellen op [[temperature]] [[decimal_handling]]",
+          "de": "Zieltemperatur (Sollwert) einstellen auf [[temperature]] [[decimal_handling]]",
+          "fr": "Régler la température cible (consigne) sur [[temperature]] [[decimal_handling]]"
         },
         "hint": {
           "en": "Set the target (setpoint) temperature for the heat pump",
@@ -7474,8 +7930,8 @@
               "fr": " Température (°C)"
             },
             "min": 5,
-            "max": 60,
-            "step": 0.5,
+            "max": 75,
+            "step": 1,
             "units": "°C",
             "placeholder": {
               "en": "Target temperature in °C",
@@ -7483,6 +7939,37 @@
               "de": "Zieltemperatur in °C",
               "fr": "Température cible en °C"
             }
+          },
+          {
+            "type": "dropdown",
+            "name": "decimal_handling",
+            "title": {
+              "en": "If decimal value",
+              "nl": "Bij decimale waarde",
+              "de": "Bei Dezimalwert",
+              "fr": "Si valeur décimale"
+            },
+            "values": [
+              {
+                "id": "round",
+                "label": {
+                  "en": "Auto-round (recommended)",
+                  "nl": "Automatisch afronden (aanbevolen)",
+                  "de": "Automatisch runden (empfohlen)",
+                  "fr": "Arrondir automatiquement (recommandé)"
+                }
+              },
+              {
+                "id": "error",
+                "label": {
+                  "en": "Show error",
+                  "nl": "Foutmelding tonen",
+                  "de": "Fehler anzeigen",
+                  "fr": "Afficher erreur"
+                }
+              }
+            ],
+            "value": "round"
           }
         ]
       },
@@ -9473,6 +9960,114 @@
         {
           "type": "group",
           "label": {
+            "en": "Building Insights & Recommendations",
+            "nl": "Gebouw Inzichten & Aanbevelingen",
+            "de": "Gebäudeerkenntnisse & Empfehlungen",
+            "fr": "Aperçus & Recommandations du Bâtiment"
+          },
+          "children": [
+            {
+              "id": "insights_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable Building Insights",
+                "nl": "Gebouw Inzichten Inschakelen",
+                "de": "Gebäudeerkenntnisse Aktivieren",
+                "fr": "Activer les Aperçus du Bâtiment"
+              },
+              "hint": {
+                "en": "Analyze building thermal model and provide energy-saving recommendations with ROI estimates. Insights appear after 24-48 hours of learning.",
+                "nl": "Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen met ROI schattingen. Inzichten verschijnen na 24-48 uur leren.",
+                "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen.",
+                "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage."
+              },
+              "value": true
+            },
+            {
+              "id": "insights_min_confidence",
+              "type": "number",
+              "label": {
+                "en": "Minimum Confidence (%)",
+                "nl": "Minimale Betrouwbaarheid (%)",
+                "de": "Mindestvertrauen (%)",
+                "fr": "Confiance Minimale (%)"
+              },
+              "hint": {
+                "en": "Only show insights when building model confidence exceeds this threshold. 70% = ~24-48 hours learning. Lower values show earlier insights with less accuracy.",
+                "nl": "Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt. 70% = ~24-48 uur leren. Lagere waarden tonen eerdere inzichten met minder nauwkeurigheid.",
+                "de": "Zeigen Sie nur Erkenntnisse an, wenn das Gebäudemodellvertrauen diesen Schwellenwert überschreitet. 70% = ~24-48 Stunden Lernen. Niedrigere Werte zeigen frühere Erkenntnisse mit geringerer Genauigkeit.",
+                "fr": "Afficher uniquement les aperçus lorsque la confiance du modèle du bâtiment dépasse ce seuil. 70% = ~24-48 heures d'apprentissage. Des valeurs plus faibles montrent des aperçus plus tôt avec moins de précision."
+              },
+              "value": 70,
+              "min": 50,
+              "max": 90,
+              "step": 5,
+              "units": "%"
+            },
+            {
+              "id": "insights_max_active",
+              "type": "number",
+              "label": {
+                "en": "Max Active Insights",
+                "nl": "Max Actieve Inzichten",
+                "de": "Max. Aktive Erkenntnisse",
+                "fr": "Max. d'Aperçus Actifs"
+              },
+              "hint": {
+                "en": "Maximum number of insights to display simultaneously. Prevents information overload. Most important insights shown first.",
+                "nl": "Maximum aantal inzichten om tegelijkertijd weer te geven. Voorkomt informatie-overload. Belangrijkste inzichten eerst getoond.",
+                "de": "Maximale Anzahl gleichzeitig anzuzeigender Erkenntnisse. Verhindert Informationsüberflutung. Wichtigste Erkenntnisse zuerst angezeigt.",
+                "fr": "Nombre maximum d'aperçus à afficher simultanément. Empêche la surcharge d'informations. Les aperçus les plus importants sont affichés en premier."
+              },
+              "value": 3,
+              "min": 1,
+              "max": 5,
+              "step": 1
+            },
+            {
+              "id": "wake_time",
+              "type": "text",
+              "label": {
+                "en": "Wake Time (HH:MM)",
+                "nl": "Gewenste sta-op tijd (UU:MM)",
+                "de": "Aufwachzeit (HH:MM)",
+                "fr": "Heure de Réveil (HH:MM)"
+              },
+              "hint": {
+                "en": "Time when building should reach target temperature. Used to calculate optimal pre-heat start time based on thermal response (τ).",
+                "nl": "Tijd wanneer gebouw doeltemperatuur moet bereiken. Gebruikt om optimale voorverwarm starttijd te berekenen gebaseerd op thermische respons (τ).",
+                "de": "Zeit, zu der das Gebäude die Zieltemperatur erreichen soll. Wird verwendet, um die optimale Vorheizstartzeit basierend auf der thermischen Reaktion (τ) zu berechnen.",
+                "fr": "Heure à laquelle le bâtiment devrait atteindre la température cible. Utilisé pour calculer l'heure de début de préchauffage optimale basée sur la réponse thermique (τ)."
+              },
+              "value": "07:00",
+              "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+            },
+            {
+              "id": "night_setback_delta",
+              "type": "number",
+              "label": {
+                "en": "Night Setback (°C)",
+                "nl": "Nacht Verlaging (°C)",
+                "de": "Nachtabsenkung (°C)",
+                "fr": "Réduction Nocturne (°C)"
+              },
+              "hint": {
+                "en": "Temperature reduction during night (e.g., from 21°C to 17°C = 4°C setback). Used to calculate pre-heat duration and energy savings potential.",
+                "nl": "Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging). Gebruikt om voorverwarm duur en energie besparingspotentieel te berekenen.",
+                "de": "Temperaturreduktion während der Nacht (z.B. von 21°C auf 17°C = 4°C Absenkung). Wird verwendet, um Vorheizdauer und Energiesparpotenzial zu berechnen.",
+                "fr": "Réduction de température pendant la nuit (p. ex., de 21°C à 17°C = réduction de 4°C). Utilisé pour calculer la durée de préchauffage et le potentiel d'économie d'énergie."
+              },
+              "value": 4,
+              "min": 2,
+              "max": 6,
+              "step": 0.5,
+              "units": "°C"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
             "en": "Energy Price Optimization",
             "nl": "Energieprijs Optimalisatie",
             "de": "Energiepreis-Optimierung",
@@ -10183,114 +10778,6 @@
                 "fr": "Cliquez pour réinitialiser le compteur d'énergie quotidienne externe à zéro. Cela effacera les mesures d'énergie accumulées d'aujourd'hui des cartes de flux."
               },
               "value": false
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Building Insights & Recommendations",
-            "nl": "Gebouw Inzichten & Aanbevelingen",
-            "de": "Gebäudeerkenntnisse & Empfehlungen",
-            "fr": "Aperçus & Recommandations du Bâtiment"
-          },
-          "children": [
-            {
-              "id": "insights_enabled",
-              "type": "checkbox",
-              "label": {
-                "en": "Enable Building Insights",
-                "nl": "Gebouw Inzichten Inschakelen",
-                "de": "Gebäudeerkenntnisse Aktivieren",
-                "fr": "Activer les Aperçus du Bâtiment"
-              },
-              "hint": {
-                "en": "Analyze building thermal model and provide energy-saving recommendations with ROI estimates. Insights appear after 24-48 hours of learning.",
-                "nl": "Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen met ROI schattingen. Inzichten verschijnen na 24-48 uur leren.",
-                "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen.",
-                "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage."
-              },
-              "value": true
-            },
-            {
-              "id": "insights_min_confidence",
-              "type": "number",
-              "label": {
-                "en": "Minimum Confidence (%)",
-                "nl": "Minimale Betrouwbaarheid (%)",
-                "de": "Mindestvertrauen (%)",
-                "fr": "Confiance Minimale (%)"
-              },
-              "hint": {
-                "en": "Only show insights when building model confidence exceeds this threshold. 70% = ~24-48 hours learning. Lower values show earlier insights with less accuracy.",
-                "nl": "Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt. 70% = ~24-48 uur leren. Lagere waarden tonen eerdere inzichten met minder nauwkeurigheid.",
-                "de": "Zeigen Sie nur Erkenntnisse an, wenn das Gebäudemodellvertrauen diesen Schwellenwert überschreitet. 70% = ~24-48 Stunden Lernen. Niedrigere Werte zeigen frühere Erkenntnisse mit geringerer Genauigkeit.",
-                "fr": "Afficher uniquement les aperçus lorsque la confiance du modèle du bâtiment dépasse ce seuil. 70% = ~24-48 heures d'apprentissage. Des valeurs plus faibles montrent des aperçus plus tôt avec moins de précision."
-              },
-              "value": 70,
-              "min": 50,
-              "max": 90,
-              "step": 5,
-              "units": "%"
-            },
-            {
-              "id": "insights_max_active",
-              "type": "number",
-              "label": {
-                "en": "Max Active Insights",
-                "nl": "Max Actieve Inzichten",
-                "de": "Max. Aktive Erkenntnisse",
-                "fr": "Max. d'Aperçus Actifs"
-              },
-              "hint": {
-                "en": "Maximum number of insights to display simultaneously. Prevents information overload. Most important insights shown first.",
-                "nl": "Maximum aantal inzichten om tegelijkertijd weer te geven. Voorkomt informatie-overload. Belangrijkste inzichten eerst getoond.",
-                "de": "Maximale Anzahl gleichzeitig anzuzeigender Erkenntnisse. Verhindert Informationsüberflutung. Wichtigste Erkenntnisse zuerst angezeigt.",
-                "fr": "Nombre maximum d'aperçus à afficher simultanément. Empêche la surcharge d'informations. Les aperçus les plus importants sont affichés en premier."
-              },
-              "value": 3,
-              "min": 1,
-              "max": 5,
-              "step": 1
-            },
-            {
-              "id": "wake_time",
-              "type": "text",
-              "label": {
-                "en": "Wake Time (HH:MM)",
-                "nl": "Waktijd (UU:MM)",
-                "de": "Aufwachzeit (HH:MM)",
-                "fr": "Heure de Réveil (HH:MM)"
-              },
-              "hint": {
-                "en": "Time when building should reach target temperature. Used to calculate optimal pre-heat start time based on thermal response (τ).",
-                "nl": "Tijd wanneer gebouw doeltemperatuur moet bereiken. Gebruikt om optimale voorverwarm starttijd te berekenen gebaseerd op thermische respons (τ).",
-                "de": "Zeit, zu der das Gebäude die Zieltemperatur erreichen soll. Wird verwendet, um die optimale Vorheizstartzeit basierend auf der thermischen Reaktion (τ) zu berechnen.",
-                "fr": "Heure à laquelle le bâtiment devrait atteindre la température cible. Utilisé pour calculer l'heure de début de préchauffage optimale basée sur la réponse thermique (τ)."
-              },
-              "value": "07:00",
-              "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-            },
-            {
-              "id": "night_setback_delta",
-              "type": "number",
-              "label": {
-                "en": "Night Setback (°C)",
-                "nl": "Nacht Verlaging (°C)",
-                "de": "Nachtabsenkung (°C)",
-                "fr": "Réduction Nocturne (°C)"
-              },
-              "hint": {
-                "en": "Temperature reduction during night (e.g., from 21°C to 17°C = 4°C setback). Used to calculate pre-heat duration and energy savings potential.",
-                "nl": "Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging). Gebruikt om voorverwarm duur en energie besparingspotentieel te berekenen.",
-                "de": "Temperaturreduktion während der Nacht (z.B. von 21°C auf 17°C = 4°C Absenkung). Wird verwendet, um Vorheizdauer und Energiesparpotenzial zu berechnen.",
-                "fr": "Réduction de température pendant la nuit (p. ex., de 21°C à 17°C = réduction de 4°C). Utilisé pour calculer la durée de préchauffage et le potentiel d'économie d'énergie."
-              },
-              "value": 4,
-              "min": 2,
-              "max": 6,
-              "step": 0.5,
-              "units": "°C"
             }
           ]
         }
@@ -12123,8 +12610,8 @@
       },
       "chartType": "stepLine",
       "decimals": 1,
-      "min": 25,
-      "max": 65,
+      "min": 5,
+      "max": 75,
       "step": 0.1,
       "getable": true,
       "setable": false,
@@ -12305,7 +12792,7 @@
       },
       "getable": true,
       "setable": false,
-      "uiComponent": "sensor",
+      "uiComponent": null,
       "icon": "/assets/diagnostics.svg"
     },
     "building_model_diagnostics": {

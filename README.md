@@ -27,12 +27,14 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 - **Settings Management**: Race condition prevention with deferred updates (SettingsManagerService)
 - **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration (CapabilityHealthService)
 - **Safety Monitoring**: Critical temperature, connection, and system fault alerts
-- **Adaptive Temperature Control (v2.0.0+)**: Alpha version with PI regulation, thermal predictions, energy price optimization, and COP optimization
+- **Adaptive Temperature Control (v2.0.0+)**: PI regulation, thermal predictions, energy price optimization, and COP optimization
+- **Building Model Learning (v2.0.0+)**: Machine learning for thermal properties (C, UA, τ, g, P_int) with seasonal adjustments
+- **Building Insights & Recommendations (v2.4.0+)**: Automated energy-saving recommendations with ROI estimates based on learned building model
 - **Building Model Diagnostics (v2.0.1+)**: Comprehensive troubleshooting tool for tau/C/UA learning issues with detailed status reporting
 
 ## Capabilities
 
-The app provides access to **56 capabilities** across eight categories:
+The app provides access to **60+ capabilities** across nine categories:
 
 - **Connection Status (1)**: Real-time Tuya connection state (connected/disconnected/reconnecting/error)
 - **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
@@ -41,6 +43,7 @@ The app provides access to **56 capabilities** across eight categories:
 - **System States (6)**: Compressor status, defrost state, backwater state, fault detection
 - **Valve Control (2)**: EEV and EVI pulse steps monitoring
 - **Efficiency Monitoring (6)**: Real-time COP with diagnostics, calculation method, seasonal SCOP with data quality, rolling averages (daily/weekly/monthly), trend analysis
+- **Adaptive Control (8)**: Simulated target, price category, current/next price, hourly/daily costs, energy price data, adaptive diagnostics
 - **Additional Monitoring (7)**: Water flow, diagnostic parameters, system optimization, external power integration
 
 ## Installation & Setup
@@ -113,11 +116,47 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Temperature Bin Method**: 6 temperature bins with load ratio weighting
 - **Quality Assessment**: High/medium/low confidence based on data coverage
 
-#### Feature Settings
+#### Feature Settings (App Restart Required)
 
-- **Enable Power Measurements**: Toggle 9 power-related capabilities
+- **Show Curve Picker Controls**: Toggle heating/hot water curve controls in device UI (default: off)
+- **Enable Power Measurements**: Toggle 9 DPS power-related capabilities (voltage, current, consumption)
 - **Enable Slider Controls**: Toggle 3 manual control sliders (water/power management)
-- **Capability Diagnostics**: Generate sensor health reports
+- **Enable Intelligent Energy Tracking**: Prioritize external power measurements, appear in Homey Energy dashboard
+
+#### Building Model Learning
+
+- **Building Model Learning**: Enable/disable thermal property learning (C, UA, τ, g, P_int)
+- **Building Type**: Light/Average/Heavy/Passive - sets initial learning parameters
+- **Dynamic Internal Gains**: Time-of-day heat contribution patterns (night 40%, day 100%, evening 180%)
+- **Seasonal Solar Adjustment**: Seasonal sun angle compensation (winter 60%, summer 130%)
+- **Reset Building Model**: Clear learned parameters and restart from selected profile
+
+#### Building Insights & Recommendations (v2.4.0+)
+
+- **Enable Building Insights**: Analyze thermal model and provide energy-saving recommendations with ROI
+- **Minimum Confidence**: Threshold for showing insights (70% = ~24-48 hours learning)
+- **Max Active Insights**: Limit simultaneous recommendations (1-5, default: 3)
+- **Wake Time**: Target time for building to reach temperature (for pre-heat calculations)
+- **Night Setback**: Temperature reduction at night (for energy savings estimates)
+
+#### Energy Price Optimization
+
+- **Price Optimization**: Day-ahead price-based heating (EnergyZero API, €400-600/year savings)
+- **Price Calculation Mode**: Market/Market+/All-in pricing with configurable supplier fees and taxes
+- **Price Thresholds**: Very Low/Low/Normal/High categories with P10-P90 percentile defaults
+- **Price Block Detection**: Cheapest/expensive block identification for day-ahead planning
+
+#### COP Optimization
+
+- **COP Optimizer**: Learn optimal supply temperature per outdoor temperature (€200-300/year)
+- **Strategy**: Conservative/Balanced/Aggressive optimization approaches
+
+#### Adaptive Control Weighting
+
+- **Comfort Priority**: Weight for PI temperature control (default: 60%)
+- **Efficiency Priority**: Weight for COP optimization (default: 25%)
+- **Cost Priority**: Weight for price optimization (default: 15%)
+- Values auto-normalize to 100%
 
 ## Flow Cards
 
@@ -546,7 +585,23 @@ Detailed documentation available in `/docs` directory:
 
 ## Release Notes
 
-### v2.0.1 - Critical Fixes & Building Model Diagnostics (Current)
+### v2.4.0 - Building Insights & Recommendations (Current)
+
+**New Feature:**
+
+- ✅ **Building Insights & Recommendations**: Automated energy-saving recommendations with ROI estimates
+- ✅ **Configurable Confidence Threshold**: Show insights after 24-48 hours learning (default: 70%)
+- ✅ **Wake Time & Night Setback**: Pre-heat timing and savings calculations
+- ✅ **Max Active Insights**: Limit info overload (1-5 insights, default: 3)
+
+**Documentation:**
+
+- ✅ Updated CONFIGURATIEGIDS.md with new section 7
+- ✅ Full Dutch localization for all new settings
+
+---
+
+### v2.0.1 - Critical Fixes & Building Model Diagnostics
 
 **Critical Flow Card Fix:**
 
