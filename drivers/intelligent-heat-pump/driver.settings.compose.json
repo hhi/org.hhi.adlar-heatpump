@@ -982,10 +982,10 @@
           "fr": "Activer les Aperçus du Bâtiment"
         },
         "hint": {
-          "en": "Analyze building thermal model and provide energy-saving recommendations with ROI estimates. Insights appear after 24-48 hours of learning.",
-          "nl": "Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen met ROI schattingen. Inzichten verschijnen na 24-48 uur leren.",
-          "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen.",
-          "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage."
+          "en": "Analyze building thermal model and provide energy-saving recommendations with ROI estimates. Insights appear after 24-48 hours of learning. ⚠️ Requires: Building Model Learning must be enabled.",
+          "nl": "Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen met ROI schattingen. Inzichten verschijnen na 24-48 uur leren. ⚠️ Vereist: Gebouwmodel Leren moet ingeschakeld zijn.",
+          "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen. ⚠️ Voraussetzung: Gebäudemodell-Lernen muss aktiviert sein.",
+          "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage. ⚠️ Prérequis: L'apprentissage du modèle de bâtiment doit être activé."
         },
         "value": true
       },
@@ -1090,10 +1090,10 @@
           "fr": "Activer l'optimisation des prix"
         },
         "hint": {
-          "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year.",
-          "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar.",
-          "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr.",
-          "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an."
+          "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year. ⚠️ Requires: Adaptive Temperature Control must be enabled.",
+          "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar. ⚠️ Vereist: Adaptieve Temperatuur Regeling moet ingeschakeld zijn.",
+          "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr. ⚠️ Voraussetzung: Adaptive Temperaturregelung muss aktiviert sein.",
+          "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an. ⚠️ Prérequis: Le contrôle adaptatif de température doit être activé."
         },
         "value": false
       },
@@ -1458,10 +1458,10 @@
           "fr": "Activer l'optimisation COP"
         },
         "hint": {
-          "en": "Optimize supply temperature for maximum efficiency based on historical COP data. Learns optimal settings for each outdoor temperature. Estimated savings: €200-300/year.",
-          "nl": "Optimaliseer aanvoertemperatuur voor maximale efficiëntie op basis van historische COP data. Leert optimale instellingen voor elke buitentemperatuur. Geschatte besparing: €200-300/jaar.",
-          "de": "Optimieren Sie die Vorlauftemperatur für maximale Effizienz basierend auf historischen COP-Daten. Lernt optimale Einstellungen für jede Außentemperatur. Geschätzte Einsparungen: €200-300/Jahr.",
-          "fr": "Optimisez la température d'alimentation pour une efficacité maximale basée sur les données COP historiques. Apprend les paramètres optimaux pour chaque température extérieure. Économies estimées: €200-300/an."
+          "en": "Optimize supply temperature for maximum efficiency based on historical COP data. Learns optimal settings for each outdoor temperature. Estimated savings: €200-300/year. ⚠️ Requires: COP Calculation must be enabled.",
+          "nl": "Optimaliseer aanvoertemperatuur voor maximale efficiëntie op basis van historische COP data. Leert optimale instellingen voor elke buitentemperatuur. Geschatte besparing: €200-300/jaar. ⚠️ Vereist: COP Berekening moet ingeschakeld zijn.",
+          "de": "Optimieren Sie die Vorlauftemperatur für maximale Effizienz basierend auf historischen COP-Daten. Lernt optimale Einstellungen für jede Außentemperatur. Geschätzte Einsparungen: €200-300/Jahr. ⚠️ Voraussetzung: COP-Berechnung muss aktiviert sein.",
+          "fr": "Optimisez la température d'alimentation pour une efficacité maximale basée sur les données COP historiques. Apprend les paramètres optimaux pour chaque température extérieure. Économies estimées: €200-300/an. ⚠️ Prérequis: Le calcul COP doit être activé."
         },
         "value": false
       },

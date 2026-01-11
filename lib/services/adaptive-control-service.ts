@@ -80,7 +80,6 @@ export class AdaptiveControlService {
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
   private isEnabled = false;
-  private isMonitoringMode = true; // Always true - legacy monitoring mode (v2.5.0: implicit, no setting)
   private isSimulateMode = true; // Always true - simulates adjustments, user executes via flows (v2.5.0: implicit, no setting)
   private simulatedTargetTemp: number | null = null; // Simulated target temp (tracked for Insights)
   private lastControlCycleTime: number = 0;
@@ -237,13 +236,6 @@ export class AdaptiveControlService {
           this.isEnabled = true;
           this.logger('AdaptiveControlService: Enabled state synced from device setting (store was missing)', { enabled: true });
         }
-      }
-
-      // Restore monitoring mode state
-      const savedMonitoringMode = await this.device.getStoreValue('monitoring_mode_enabled');
-      if (typeof savedMonitoringMode === 'boolean') {
-        this.isMonitoringMode = savedMonitoringMode;
-        this.logger('AdaptiveControlService: Restored monitoring mode', { monitoring: this.isMonitoringMode });
       }
 
       // Restore last adjustment timestamp (for throttling)
@@ -648,27 +640,7 @@ export class AdaptiveControlService {
         confidenceMetrics,
       );
 
-      // Step 7: Check for deprecated monitoring mode (legacy)
-      if (this.isMonitoringMode && !this.isSimulateMode) {
-        this.logger('⚠️ MONITORING MODE (DEPRECATED): Action logged but NOT executed');
-
-        // Trigger legacy monitoring flow card
-        await this.device.homey.flow
-          .getDeviceTriggerCard('adaptive_monitoring_log')
-          .trigger(this.device, {
-            adjustment: combinedAction.finalAdjustment,
-            comfort_component: combinedAction.breakdown.comfort,
-            efficiency_component: combinedAction.breakdown.efficiency,
-            cost_component: combinedAction.breakdown.cost,
-            reasoning: combinedAction.reasoning.join('; '),
-          })
-          .catch((err) => this.logger('Failed to trigger monitoring card:', err));
-
-        this.lastControlCycleTime = Date.now();
-        return;
-      }
-
-      // Step 8: Check if significant action is needed
+      // Step 7: Check if significant action is needed
       if (heatingAction === null && Math.abs(combinedAction.finalAdjustment) < 0.1) {
         this.logger('AdaptiveControlService: No significant action needed');
 

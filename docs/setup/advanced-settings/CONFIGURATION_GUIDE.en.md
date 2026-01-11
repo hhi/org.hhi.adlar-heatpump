@@ -2,6 +2,57 @@
 
 This guide describes all configurable settings of the Adlar Heat Pump Homey app. Each setting is explained with practical examples and recommendations.
 
+---
+
+## 🔗 Settings Groups & Dependencies
+
+| # | Group | Requires | Optional |
+|---|-------|----------|----------|
+| 1 | **Connection Settings** | - | - |
+| 2 | **COP Settings** | - | Power measurement (for accuracy) |
+| 3 | **Feature Settings** | App restart | - |
+| 4 | **Flow Card Controls** | App restart | - |
+| 5 | **Adaptive Temperature Control** | External temp sensor | - |
+| 6 | **Building Model Learning** | - | - |
+| 7 | **Building Insights** | Building Model Learning ON | Min. confidence |
+| 8 | **Energy Price Optimization** | Adaptive Control ON, Internet | Dynamic tariff |
+| 9 | **COP Optimization** | COP Calculation ON, Adaptive Control | 1+ week data |
+| 10 | **Weighting Factors** | Adaptive Control ON | - |
+| 11 | **Diagnostics** | - | - |
+| 12 | **Energy Management** | - | Power measurement |
+
+```
+┌──────────────────┐
+│ 1. Connection    │  Base - always needed
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐     ┌──────────────────┐
+│ 2. COP Settings  │────▶│ 9. COP Optimizer │
+└──────────────────┘     └──────────────────┘
+         │                        ▲
+         │                        │
+         ▼                        │
+┌──────────────────┐              │
+│ 5. Adaptive Temp │──────────────┤
+│    Control       │              │
+└────────┬─────────┘              │
+         │                        │
+    ┌────┴────┬───────────────────┤
+    ▼         ▼                   │
+┌────────┐ ┌────────────────┐     │
+│ 10.    │ │ 8. Price       │─────┘
+│Weights │ │    Optimizer   │
+└────────┘ └────────────────┘
+
+┌──────────────────┐     ┌──────────────────┐
+│ 6. Building      │────▶│ 7. Building      │
+│    Model         │     │    Insights      │
+└──────────────────┘     └──────────────────┘
+```
+
+---
+
 ## 📖 Table of Contents
 
 1. [Connection Settings](#1-connection-settings)

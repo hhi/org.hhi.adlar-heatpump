@@ -1,4 +1,16 @@
 {
+  "2.5.9": {
+    "en": "Fixed: Building insights now update more frequently. Fatigue prevention reduced from 24h to 12h. Significant parameter changes (>10% drift) now bypass time limit and trigger immediately.",
+    "nl": "Opgelost: Gebouw inzichten updaten nu vaker. Herhalings-preventie verminderd van 24u naar 12u. Significante parameterwijzigingen (>10% drift) overslaan nu tijdslimiet en triggeren direct.",
+    "de": "Behoben: Gebäudeeinblicke aktualisieren jetzt häufiger. Wiederholungsschutz von 24h auf 12h reduziert. Signifikante Parameteränderungen (>10% Drift) umgehen jetzt Zeitlimit und lösen sofort aus.",
+    "fr": "Corrigé: Les insights du bâtiment se mettent à jour plus fréquemment. Prévention de fatigue réduite de 24h à 12h. Les changements de paramètres significatifs (>10% dérive) contournent maintenant la limite de temps et se déclenchent immédiatement."
+  },
+  "2.5.8": {
+    "en": "Fixed: Energy tracking service respects 'Enable internal power measurement capabilities' setting. Removed: 'Adaptive control logged action' trigger (inactive since v2.5.0, replaced by 'Simulated temperature updated').",
+    "nl": "Opgelost: Energy tracking service respecteert 'Interne vermogingsmeting capabilities inschakelen' instelling. Verwijderd: 'Adaptieve regeling heeft actie gelogd' trigger (inactief sinds v2.5.0, vervangen door 'Gesimuleerde temperatuur bijgewerkt').",
+    "de": "Behoben: Energy Tracking Service respektiert 'Interne Leistungsmessfunktionen aktivieren' Einstellung. Entfernt: 'Adaptive Steuerung hat Aktion protokolliert' Trigger (inaktiv seit v2.5.0, ersetzt durch 'Simulierte Temperatur aktualisiert').",
+    "fr": "Corrigé: Service de suivi énergétique respecte 'Activer les fonctionnalités de mesure de puissance interne' paramètre. Supprimé: Déclencheur 'Contrôle adaptatif a enregistré une action' (inactif depuis v2.5.0, remplacé par 'Température simulée mise à jour')."
+  },
   "2.5.7": {
     "en": "Fixed capability icon paths for building insights features. Added automatic migration to add building insights capabilities to existing devices (4 capabilities). Added device filters to building insight flow triggers. Reorganized settings: 'Building Insights' group now appears after 'Building Model Learning'.",
     "nl": "Capability icon paden voor gebouw inzichten functies gecorrigeerd. Automatische migratie toegevoegd om gebouw inzichten capabilities toe te voegen aan bestaande apparaten (4 capabilities). Device filters toegevoegd aan gebouw inzicht flow triggers. Instellingen gereorganiseerd: 'Gebouw Inzichten' groep verschijnt nu na 'Gebouwmodel Leren'.",
