@@ -1,4 +1,10 @@
 {
+  "2.5.10": {
+    "en": "Building Insights: Replaced 3 generic capabilities with 4 category-specific sensors (Insulation, Pre-heating, Thermal Storage, Profile). Each sensor now shows its category's insight with recommendation.",
+    "nl": "Gebouw Inzichten: 3 generieke capabilities vervangen door 4 categorie-specifieke sensors (Isolatie, Voorverwarming, Thermische Opslag, Profiel). Elke sensor toont nu het inzicht van zijn categorie met aanbeveling.",
+    "de": "Gebäudeeinblicke: 3 generische Capabilities durch 4 kategoriespezifische Sensoren ersetzt (Dämmung, Vorheizen, Thermische Speicherung, Profil). Jeder Sensor zeigt jetzt seine kategoriebezogene Erkenntnis mit Empfehlung.",
+    "fr": "Insights du Bâtiment: 3 capabilities génériques remplacées par 4 capteurs spécifiques par catégorie (Isolation, Préchauffage, Stockage Thermique, Profil). Chaque capteur affiche maintenant l'insight de sa catégorie avec recommandation."
+  },
   "2.5.9": {
     "en": "Fixed: Building insights now update more frequently. Fatigue prevention reduced from 24h to 12h. Significant parameter changes (>10% drift) now bypass time limit and trigger immediately.",
     "nl": "Opgelost: Gebouw inzichten updaten nu vaker. Herhalings-preventie verminderd van 24u naar 12u. Significante parameterwijzigingen (>10% drift) overslaan nu tijdslimiet en triggeren direct.",

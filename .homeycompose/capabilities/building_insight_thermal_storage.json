@@ -1,0 +1,20 @@
+{
+    "id": "building_insight_thermal_storage",
+    "type": "string",
+    "title": {
+        "en": "Thermal Storage",
+        "nl": "Thermische Opslag",
+        "de": "Thermische Speicherung",
+        "fr": "Stockage Thermique"
+    },
+    "desc": {
+        "en": "Thermal mass optimization for energy price shifting",
+        "nl": "Thermische massa optimalisatie voor energieprijs verschuiving",
+        "de": "Thermische Massenoptimierung für Energiepreisverlagerung",
+        "fr": "Optimisation de la masse thermique pour le décalage des prix de l'énergie"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "icon": "/assets/insight-thermal.svg"
+}

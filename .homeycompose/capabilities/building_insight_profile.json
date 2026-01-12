@@ -1,0 +1,20 @@
+{
+    "id": "building_insight_profile",
+    "type": "string",
+    "title": {
+        "en": "Building Profile",
+        "nl": "Gebouwprofiel",
+        "de": "Gebäudeprofil",
+        "fr": "Profil du Bâtiment"
+    },
+    "desc": {
+        "en": "Building profile match analysis and optimization suggestions",
+        "nl": "Gebouwprofiel match analyse en optimalisatie suggesties",
+        "de": "Gebäudeprofilabgleich-Analyse und Optimierungsvorschläge",
+        "fr": "Analyse de correspondance du profil du bâtiment et suggestions d'optimisation"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "icon": "/assets/insight-profile.svg"
+}

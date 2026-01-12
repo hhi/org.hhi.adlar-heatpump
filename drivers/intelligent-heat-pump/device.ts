@@ -3376,15 +3376,20 @@ class MyDevice extends Homey.Device {
         this.log('ℹ️ adaptive_control_diagnostics capability already exists, skipping migration');
       }
 
-      // Migration v2.5.2+: Add building insights capabilities
-      const buildingInsightsCapabilities = [
-        'building_insight_primary',
-        'building_insight_secondary',
-        'building_insight_recommendation',
+      // Migration v2.5.10: Add category-specific building insight capabilities
+      // Note: Old capabilities (building_insight_primary/secondary/recommendation) are no longer
+      // removable since their definition files were deleted. Users with old devices should
+      // delete and re-add the device to get clean capabilities.
+      const newBuildingInsightsCapabilities = [
+        'building_insight_insulation',
+        'building_insight_preheating',
+        'building_insight_thermal_storage',
+        'building_insight_profile',
         'building_insights_diagnostics',
       ];
 
-      for (const capability of buildingInsightsCapabilities) {
+      // Add new category-specific capabilities if missing
+      for (const capability of newBuildingInsightsCapabilities) {
         if (!this.hasCapability(capability)) {
           try {
             await this.addCapability(capability);
@@ -3392,9 +3397,9 @@ class MyDevice extends Homey.Device {
             if (capability === 'building_insights_diagnostics') {
               await this.setCapabilityValue(capability, '{}');
             } else {
-              await this.setCapabilityValue(capability, null);
+              await this.setCapabilityValue(capability, '');
             }
-            this.log(`Migration v2.5.2: Added ${capability} capability`);
+            this.log(`Migration v2.5.10: Added ${capability} capability`);
           } catch (error) {
             this.error(`Failed to add ${capability} capability:`, error);
           }
