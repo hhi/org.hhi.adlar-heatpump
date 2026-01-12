@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Building outline -->
+  <rect x="21" y="33" width="58" height="54" rx="4" fill="none" stroke="currentColor"/>
+
+  <!-- Windows -->
+  <rect x="33" y="45" width="13" height="13" fill="none" stroke="currentColor"/>
+  <rect x="54" y="45" width="13" height="13" fill="none" stroke="currentColor"/>
+  <rect x="33" y="66" width="13" height="13" fill="none" stroke="currentColor"/>
+  <rect x="54" y="66" width="13" height="13" fill="none" stroke="currentColor"/>
+
+  <!-- Profile/document icon (top right) -->
+  <rect x="62" y="8" width="25" height="22" rx="2" fill="none" stroke="currentColor"/>
+  <line x1="67" y1="14" x2="82" y2="14" fill="none" stroke="currentColor"/>
+  <line x1="67" y1="19" x2="79" y2="19" fill="none" stroke="currentColor"/>
+  <line x1="67" y1="24" x2="75" y2="24" fill="none" stroke="currentColor"/>
+
+  <!-- Sync/refresh arrows (profile match) -->
+  <path d="M 25 12 A 12 12 0 0 1 45 12" fill="none" stroke="currentColor"/>
+  <path d="M 45 12 L 42 8" fill="none" stroke="currentColor"/>
+  <path d="M 45 12 L 41 16" fill="none" stroke="currentColor"/>
+</svg>

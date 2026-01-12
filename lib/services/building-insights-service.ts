@@ -680,42 +680,43 @@ export class BuildingInsightsService {
   }
 
   /**
-   * Update insight capabilities (top 3 active insights)
+   * Update insight capabilities - one capability per category (v2.5.10)
+   * 
+   * Maps each insight category to its dedicated capability:
+   * - insulation_performance → building_insight_insulation
+   * - pre_heating → building_insight_preheating
+   * - thermal_storage → building_insight_thermal_storage
+   * - profile_mismatch → building_insight_profile
    */
   private async updateInsightCapabilities(): Promise<void> {
     try {
-      // Get top 3 insights sorted by priority
-      const topInsights = Array.from(this.activeInsights.values())
-        .filter((i) => i.status === 'active')
-        .sort((a, b) => b.priority - a.priority)
-        .slice(0, 3);
+      // Category to capability mapping
+      const categoryCapabilityMap: Record<InsightCategory, string> = {
+        insulation_performance: 'building_insight_insulation',
+        pre_heating: 'building_insight_preheating',
+        thermal_storage: 'building_insight_thermal_storage',
+        profile_mismatch: 'building_insight_profile',
+      };
 
-      // Defensive: Check capability exists before setting
-      if (this.device.hasCapability('building_insight_primary')) {
-        const value = topInsights.length > 0 ? topInsights[0].insight : '';
-        await this.device.setCapabilityValue('building_insight_primary', value);
-      } else {
-        this.logger('BuildingInsightsService: WARNING - building_insight_primary capability missing');
-      }
-
-      if (this.device.hasCapability('building_insight_secondary')) {
-        const value = topInsights.length > 1 ? topInsights[1].insight : '';
-        await this.device.setCapabilityValue('building_insight_secondary', value);
-      } else {
-        this.logger('BuildingInsightsService: WARNING - building_insight_secondary capability missing');
-      }
-
-      if (this.device.hasCapability('building_insight_recommendation')) {
-        const value = topInsights.length > 0 ? topInsights[0].recommendation : '';
-        await this.device.setCapabilityValue('building_insight_recommendation', value);
-      } else {
-        this.logger('BuildingInsightsService: WARNING - building_insight_recommendation capability missing');
+      // Update each capability with its category's insight
+      for (const [category, capabilityId] of Object.entries(categoryCapabilityMap)) {
+        if (this.device.hasCapability(capabilityId)) {
+          const insight = this.activeInsights.get(category as InsightCategory);
+          // Show insight + recommendation combined, or empty if no active insight
+          const value = insight?.status === 'active'
+            ? `${insight.insight}\n→ ${insight.recommendation}`
+            : '';
+          await this.device.setCapabilityValue(capabilityId, value);
+        } else {
+          this.logger(`BuildingInsightsService: Capability ${capabilityId} not found (migration pending)`);
+        }
       }
 
       // Update diagnostics JSON
       await this.updateDiagnosticsCapability();
 
-      this.logger(`BuildingInsightsService: Updated capabilities (${topInsights.length} active insights)`);
+      const activeCount = Array.from(this.activeInsights.values()).filter((i) => i.status === 'active').length;
+      this.logger(`BuildingInsightsService: Updated ${Object.keys(categoryCapabilityMap).length} category capabilities (${activeCount} active insights)`);
     } catch (error) {
       this.logger('BuildingInsightsService: Error updating capabilities:', error);
     }

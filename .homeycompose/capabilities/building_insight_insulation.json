@@ -1,0 +1,20 @@
+{
+    "id": "building_insight_insulation",
+    "type": "string",
+    "title": {
+        "en": "Insulation Performance",
+        "nl": "Isolatie Prestatie",
+        "de": "Dämmleistung",
+        "fr": "Performance d'Isolation"
+    },
+    "desc": {
+        "en": "Insulation analysis: heat loss assessment and improvement recommendations",
+        "nl": "Isolatie analyse: warmteverlies beoordeling en verbeteringsaanbevelingen",
+        "de": "Dämmungsanalyse: Wärmeverlustbewertung und Verbesserungsempfehlungen",
+        "fr": "Analyse d'isolation: évaluation des pertes de chaleur et recommandations d'amélioration"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "icon": "/assets/insight-insulation.svg"
+}

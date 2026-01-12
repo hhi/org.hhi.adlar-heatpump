@@ -4,44 +4,29 @@
     "nl": "intelligent-heat-pump"
   },
   "class": "heatpump",
-
   "capabilities": [
     "target_temperature",
     "target_temperature.indoor",
     "measure_temperature.indoor",
-    "adlar_simulated_target",
-    "adaptive_control_diagnostics",
-    "building_model_diagnostics",
-    "building_insight_primary",
-    "building_insight_secondary",
-    "building_insight_recommendation",
-    "building_insights_diagnostics",
 
     "onoff",
-
     "adlar_hotwater",
     "adlar_enum_water_mode",
-
     "adlar_enum_mode",
     "adlar_enum_work_mode",
     "adlar_enum_countdown_set",
-    
     "adlar_enum_capacity_set",
     "adlar_sensor_capacity_set",
     "adlar_enum_volume_set",
-
     "adlar_picker_countdown_set",
-
     "measure_frequency.compressor_strength",
     "measure_frequency.fan_motor_frequency",
-
     "measure_water",
     "measure_temperature.around_temp",
     "measure_temperature.temp_top",
     "measure_temperature.temp_bottom",
     "measure_temperature.coiler_temp",
     "measure_temperature.venting_temp",
-
     "measure_temperature.temp_current_f",
     "measure_temperature.top_temp_f",
     "measure_temperature.bottom_temp_f",
@@ -49,7 +34,6 @@
     "measure_temperature.coiler_temp_f",
     "measure_temperature.evlin",
     "measure_temperature.eviout",
-
     "adlar_measure_pulse_steps_temp_current",
     "adlar_measure_pulse_steps_effluent_temp",
 
@@ -63,26 +47,34 @@
     "measure_voltage.bv",
     "measure_voltage.cv",
 
-    "adlar_fault",
     "adlar_state_compressor_state",
     "adlar_state_defrost_state",
     "defrost_active_power",
-
     "adlar_state_backwater",
 
-    "adlar_cop",
-    "adlar_cop_method",
     "adlar_external_power",
     "adlar_external_energy_total",
     "adlar_external_energy_daily",
     "adlar_external_flow",
     "adlar_external_ambient",
     "adlar_external_indoor_temperature",
+
+    "adlar_cop",
+    "adlar_cop_method",
+    "adlar_cop_daily",
+    "adlar_cop_weekly",
+    "adlar_cop_monthly",
+    "adlar_cop_trend",
+    "adlar_scop",
+    "adlar_scop_quality",
+
+    "adlar_simulated_target",
     "adlar_building_c",
     "adlar_building_ua",
     "adlar_building_tau",
     "adlar_building_g",
     "adlar_building_pint",
+
     "adlar_energy_price_current",
     "adlar_energy_price_next",
     "adlar_energy_price_category",
@@ -93,18 +85,20 @@
     "adlar_price_forecast_24h",
     "adlar_cheapest_block_start",
     "adlar_price_savings_potential",
-    "adlar_cop_daily",
-    "adlar_cop_weekly",
-    "adlar_cop_monthly",
-    "adlar_cop_trend",
-    "adlar_scop",
-    "adlar_scop_quality",
 
+    "building_insight_insulation",
+    "building_insight_preheating",
+    "building_insight_thermal_storage",
+    "building_insight_profile",
+    "building_insights_diagnostics",
+
+    "adlar_fault",
     "adlar_countdowntimer",
     "adlar_connection_status",
-    "adlar_connection_active"
+    "adlar_connection_active",
+    "adaptive_control_diagnostics",
+    "building_model_diagnostics"
   ],
-
   "capabilitiesOptions": {
     "measure_power": {
       "title": {
@@ -119,7 +113,6 @@
         "nl": " dps_104: cur_power - Power"
       }
     },
-
     "measure_water": {
       "title": {
         "en": "Water flow",
@@ -133,7 +126,6 @@
         "nl": "dps_39: venting_temp_f - Water flow"
       }
     },
-
     "target_temperature": {
       "title": {
         "en": "Setpoint temperature",
@@ -150,7 +142,6 @@
         "nl": "dps_4: temp_set - Doeltemperatuur"
       }
     },
-
     "target_temperature.indoor": {
       "title": {
         "en": "Desired Indoor Temperature",
@@ -175,7 +166,6 @@
       "chartType": "stepLine",
       "insight": true
     },
-
     "measure_temperature.indoor": {
       "title": {
         "en": "Indoor Temperature",
@@ -197,7 +187,6 @@
       "chartType": "spline",
       "insight": true
     },
-
     "onoff": {
       "title": {
         "en": "Switch",
@@ -211,7 +200,6 @@
         "nl": "dps_1: switch - Schakelaar"
       }
     },
-
     "measure_voltage.bv": {
       "title": {
         "en": "Voltage B",
@@ -232,7 +220,6 @@
         "nl": "dp 111 : bv - Voltage B"
       }
     },
-
     "measure_current.b_cur": {
       "title": {
         "en": "Current B",
@@ -253,7 +240,6 @@
         "nl": "dp 109 : b_cur - Current B"
       }
     },
-
     "measure_current.c_cur": {
       "title": {
         "en": "Current C",
@@ -274,7 +260,6 @@
         "nl": "dp 110 : c_cur - Current C"
       }
     },
-
     "measure_current.cur_current": {
       "title": {
         "en": "Current A",
@@ -295,7 +280,6 @@
         "nl": "dp 102 : cur_current - Current A"
       }
     },
-
     "measure_frequency.compressor_strength": {
       "title": {
         "en": "Compressor Frequency",
@@ -317,7 +301,6 @@
         "nl": "dp 20 : compressor_strength - Compressor Frequency"
       }
     },
-
     "measure_frequency.fan_motor_frequency": {
       "title": {
         "en": "Fan motor frequency",
@@ -338,7 +321,6 @@
         "nl": "dp 40 : effluent_temp_f - Fan motor frequency"
       }
     },
-
     "measure_temperature.around_temp_f": {
       "title": {
         "en": "Tank temp",
@@ -579,7 +561,6 @@
         "nl": "dp 108 : eviout - Economy outlet temp"
       }
     },
-
     "meter_power.power_consumption": {
       "title": {
         "en": "Electricity Consumption of Today",
@@ -660,7 +641,6 @@
         "nl": "dp 112 : cv - Voltage C"
       }
     },
-
     "adlar_cop": {
       "title": {
         "en": "Coefficient of Performance (COP)",
@@ -687,7 +667,6 @@
         "fr": "Rapport d'efficacité calculé entre la production de chaleur utile et la consommation d'énergie électrique"
       }
     },
-
     "adlar_cop_method": {
       "title": {
         "en": "COP Calculation Method",
@@ -710,7 +689,6 @@
         "fr": "Indique quelle méthode de calcul a été utilisée pour déterminer la valeur COP, indiquant la qualité des données et le niveau de précision"
       }
     },
-
     "adlar_external_power": {
       "title": {
         "en": "External Power Measurement",
@@ -737,7 +715,6 @@
         "fr": "Mesure de puissance externe reçue via des cartes de flux d'autres appareils Homey, utilisée pour des calculs COP améliorés"
       }
     },
-
     "adlar_cop_daily": {
       "title": {
         "en": "Daily Average COP",
@@ -764,7 +741,6 @@
         "fr": "Moyenne mobile COP sur 24 heures pour l'analyse des tendances et l'optimisation quotidienne"
       }
     },
-
     "adlar_cop_weekly": {
       "title": {
         "en": "Weekly Average COP",
@@ -791,7 +767,6 @@
         "fr": "Moyenne mobile COP sur 7 jours pour l'identification des tendances saisonnières"
       }
     },
-
     "adlar_cop_monthly": {
       "title": {
         "en": "Monthly Average COP",
@@ -818,7 +793,6 @@
         "fr": "Moyenne mobile COP sur 30 jours pour l'identification des tendances saisonnières et la surveillance de l'efficacité à long terme"
       }
     },
-
     "adlar_cop_trend": {
       "title": {
         "en": "COP Efficiency Trend",
@@ -835,7 +809,6 @@
         "fr": "Analyse actuelle de la tendance de l'efficacité de la pompe à chaleur montrant la direction et la force des performances"
       }
     },
-
     "adlar_connection_status": {
       "title": {
         "en": "Connection Status",
@@ -859,21 +832,22 @@
       }
     }
   },
-
-  "platforms": ["local"],
-  "connectivity": ["lan"],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
   "images": {
     "small": "{{driverAssetsPath}}/images/Aurora2-drv-small.png",
     "large": "{{driverAssetsPath}}/images/Aurora2-drv-large.png",
     "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
   },
-
   "energy": {
     "approximation": {
       "usageConstant": 2500
     }
   },
-
   "pair": [
     {
       "id": "enter_device_info"
