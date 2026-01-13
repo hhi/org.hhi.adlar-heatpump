@@ -830,7 +830,7 @@
           "de": "Lernen Sie thermische Eigenschaften Ihres Hauses (thermische Masse, Wärmeverlust, Solargewinn). Ermöglicht Temperaturvorhersagen und verbessert die Regelgenauigkeit im Laufe der Zeit.",
           "fr": "Apprenez les propriétés thermiques de votre maison (masse thermique, perte de chaleur, gain solaire). Permet les prédictions de température et améliore la précision du contrôle au fil du temps."
         },
-        "value": true
+        "value": false
       },
       {
         "id": "building_model_forgetting_factor",
@@ -973,7 +973,7 @@
     },
     "children": [
       {
-        "id": "insights_enabled",
+        "id": "building_insights_enabled",
         "type": "checkbox",
         "label": {
           "en": "Enable Building Insights",
@@ -987,7 +987,7 @@
           "de": "Analysieren Sie das thermische Gebäudemodell und geben Sie Energiespartipps mit ROI-Schätzungen. Erkenntnisse erscheinen nach 24-48 Stunden Lernen. ⚠️ Voraussetzung: Gebäudemodell-Lernen muss aktiviert sein.",
           "fr": "Analysez le modèle thermique du bâtiment et fournissez des recommandations d'économie d'énergie avec des estimations de ROI. Les aperçus apparaissent après 24-48 heures d'apprentissage. ⚠️ Prérequis: L'apprentissage du modèle de bâtiment doit être activé."
         },
-        "value": true
+        "value": false
       },
       {
         "id": "insights_min_confidence",
@@ -1009,26 +1009,6 @@
         "max": 90,
         "step": 5,
         "units": "%"
-      },
-      {
-        "id": "insights_max_active",
-        "type": "number",
-        "label": {
-          "en": "Max Active Insights",
-          "nl": "Max Actieve Inzichten",
-          "de": "Max. Aktive Erkenntnisse",
-          "fr": "Max. d'Aperçus Actifs"
-        },
-        "hint": {
-          "en": "Maximum number of insights to display simultaneously. Prevents information overload. Most important insights shown first.",
-          "nl": "Maximum aantal inzichten om tegelijkertijd weer te geven. Voorkomt informatie-overload. Belangrijkste inzichten eerst getoond.",
-          "de": "Maximale Anzahl gleichzeitig anzuzeigender Erkenntnisse. Verhindert Informationsüberflutung. Wichtigste Erkenntnisse zuerst angezeigt.",
-          "fr": "Nombre maximum d'aperçus à afficher simultanément. Empêche la surcharge d'informations. Les aperçus les plus importants sont affichés en premier."
-        },
-        "value": 3,
-        "min": 1,
-        "max": 5,
-        "step": 1
       },
       {
         "id": "wake_time",

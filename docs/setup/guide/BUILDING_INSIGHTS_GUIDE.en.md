@@ -106,7 +106,7 @@ When optimization opportunities are detected, it generates **insights** with spe
 
 ## Insight Categories
 
-The system provides **3 priority categories** + 1 diagnostic:
+The system provides **4 category-specific sensors** (v2.5.10+):
 
 ### 1. 🏠 Insulation Performance Insights
 
@@ -210,11 +210,12 @@ Monthly savings = €5.04 × 30 = €151/month
 
 ### Where to Find Them
 
-**Device Capabilities** (visible in Homey app):
-1. **Primary Building Insight** — Most important insight (highest priority)
-2. **Secondary Building Insight** — Second-highest priority
-3. **Recommended Action** — Specific action to take
-4. **Building Insights Diagnostics (JSON)** — Detailed technical data
+**Device Capabilities (v2.5.10+)** - Each category has its own sensor:
+1. **Insulation Insight** (`building_insight_insulation`) — Heat loss analysis
+2. **Pre-heating Insight** (`building_insight_preheating`) — Thermal response advice
+3. **Thermal Storage Insight** (`building_insight_thermal_storage`) — Load-shifting potential
+4. **Building Profile Insight** (`building_insight_profile`) — Profile mismatch detection
+5. **Building Insights Diagnostics (JSON)** — Detailed technical data
 
 **Flow Trigger Cards:**
 1. **"New building insight detected"** — Triggers on new insights
@@ -239,7 +240,7 @@ Insights are ranked 0-100 based on:
 - **Action simplicity** (20%) — How easy to implement
 - **Immediate impact** (10%) — Quick vs. long-term benefit
 
-**Display rule:** Max 3 active insights simultaneously (highest priority first)
+**Display rule:** Each category has its own sensor - all insights are shown in parallel (v2.5.10)
 
 ---
 
@@ -650,17 +651,48 @@ THEN
 |---------|---------|-------|-------------|
 | **Enable Building Insights** | ON | ON/OFF | Master switch |
 | **Minimum Confidence (%)** | 70% | 50-90% | Threshold for showing insights |
-| **Max Active Insights** | 3 | 1-5 | Maximum simultaneous insights |
 | **Wake Time** | 07:00 | HH:MM | Target time for pre-heat completion |
 | **Night Setback (°C)** | 4.0 | 2.0-6.0 | Temperature reduction at night |
 
+> **Note (v2.5.10):** The "Max Active Insights" setting has been removed - each category now has its own sensor.
+
+### Wake Time - How It Works
+
+The `wake_time` setting determines when pre-heating should be completed. The system automatically calculates the optimal start time:
+
+**Formula:**
+```
+Pre_heat_duration = τ × ln(ΔT_target / ΔT_residual)
+Start_time = Wake_time - Pre_heat_duration
+```
+
+**Example calculation:**
+- Wake time: **07:00**
+- τ (time constant): **10 hours**
+- Night setback: **4°C** (from 21°C to 17°C)
+- Residual temperature drop: **0.5°C** (assumption)
+
+```
+Pre_heat_duration = 10 × ln(4 / 0.5) = 10 × 2.08 = 20.8 hours
+→ This is unrealistic, so system adjusts for thermal mass
+```
+
+**Practical outcomes by building type:**
+
+| τ (hours) | Pre-heating | Start for wake time 07:00 |
+|-----------|-------------|---------------------------|
+| 4 | 2 hours | 05:00 |
+| 8 | 3.5 hours | 03:30 |
+| 15 | 5 hours | 02:00 |
+| 25+ | Not practical | Consider continuous heating |
+
 ### Recommended Settings by User Type
 
-| Type | Confidence | Max Insights | Night Setback |
-|------|------------|--------------|---------------|
-| **Beginner** (first 2 weeks) | 70% | 2 | 2°C |
-| **Intermediate** (after 1 month) | 65% | 3 | 4°C |
-| **Advanced** (after 3 months) | 60% | 5 | Based on τ |
+| Type | Confidence | Night Setback |
+|------|------------|---------------|
+| **Beginner** (first 2 weeks) | 70% | 2°C |
+| **Intermediate** (after 1 month) | 65% | 4°C |
+| **Advanced** (after 3 months) | 60% | Based on τ |
 
 ---
 

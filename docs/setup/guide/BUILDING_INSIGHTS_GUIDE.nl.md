@@ -105,7 +105,7 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 
 ## Inzicht Categorieën
 
-Het systeem biedt **3 prioriteit categorieën** + 1 diagnostische:
+Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 
 ### 1. 🏠 Isolatie Prestatie Inzichten
 
@@ -209,11 +209,12 @@ Maandelijkse besparing = €5.04 × 30 = €151/maand
 
 ### Waar te vinden
 
-**Apparaat Capabilities** (zichtbaar in Homey app):
-1. **Primair Gebouwinzicht** — Belangrijkste inzicht (hoogste prioriteit)
-2. **Secundair Gebouwinzicht** — Tweede-hoogste prioriteit
-3. **Aanbevolen Actie** — Specifieke actie om te ondernemen
-4. **Gebouwinzichten Diagnostiek (JSON)** — Gedetailleerde technische data
+**Apparaat Capabilities (v2.5.10+)** - Elke categorie heeft een eigen sensor:
+1. **Isolatie Inzicht** (`building_insight_insulation`) — Warmteverlies analyse
+2. **Voorverwarming Inzicht** (`building_insight_preheating`) — Thermische respons advies
+3. **Thermische Opslag Inzicht** (`building_insight_thermal_storage`) — Load-shifting potentieel
+4. **Gebouwprofiel Inzicht** (`building_insight_profile`) — Profiel mismatch detectie
+5. **Gebouwinzichten Diagnostiek (JSON)** — Gedetailleerde technische data
 
 **Flow Trigger Kaarten:**
 1. **"Nieuw gebouwinzicht gedetecteerd"** — Triggert bij nieuwe inzichten
@@ -238,7 +239,7 @@ Inzichten worden gerangschikt 0-100 op basis van:
 - **Actie eenvoud** (20%) — Hoe makkelijk te implementeren
 - **Directe impact** (10%) — Snel vs. lange termijn voordeel
 
-**Weergave regel:** Max 3 actieve inzichten tegelijk (hoogste prioriteit eerst)
+**Weergave regel:** Elke categorie heeft zijn eigen sensor - alle inzichten worden parallel getoond (v2.5.10)
 
 ---
 
@@ -649,17 +650,48 @@ THEN
 |------------|-----------|--------|--------------|
 | **Gebouwinzichten inschakelen** | AAN | AAN/UIT | Hoofdschakelaar |
 | **Minimum Confidence (%)** | 70% | 50-90% | Drempel voor tonen inzichten |
-| **Max Actieve Inzichten** | 3 | 1-5 | Maximum simultane inzichten |
 | **Wektijd** | 07:00 | UU:MM | Doeltijd voor voorverwarmen voltooiing |
 | **Nachtverlaging (°C)** | 4.0 | 2.0-6.0 | Temperatuurreductie 's nachts |
 
+> **Opmerking (v2.5.10):** De instelling "Max Actieve Inzichten" is verwijderd - elke categorie heeft nu een eigen sensor.
+
+### Wektijd (wake_time) - Hoe het werkt
+
+De `wake_time` instelling bepaalt wanneer het voorverwarmen voltooid moet zijn. Het systeem berekent automatisch de optimale starttijd:
+
+**Formule:**
+```
+Voorverwarmen_duur = τ × ln(ΔT_doel / ΔT_rest)
+Start_tijd = Wektijd - Voorverwarmen_duur
+```
+
+**Voorbeeld berekening:**
+- Wektijd: **07:00**
+- τ (tijdsconstante): **10 uur**
+- Nachtverlaging: **4°C** (van 21°C naar 17°C)
+- Residuele temperatuurdaling: **0.5°C** (aanname)
+
+```
+Voorverwarmen_duur = 10 × ln(4 / 0.5) = 10 × 2.08 = 20.8 uur
+→ Dit is onrealistisch, dus systeem past aan voor thermische massa
+```
+
+**Praktische uitkomst per gebouwtype:**
+
+| τ (uur) | Voorverwarmen | Start bij wektijd 07:00 |
+|---------|---------------|-------------------------|
+| 4 | 2 uur | 05:00 |
+| 8 | 3.5 uur | 03:30 |
+| 15 | 5 uur | 02:00 |
+| 25+ | Niet praktisch | Overweeg continue verwarming |
+
 ### Aanbevolen Instellingen per Gebruikerstype
 
-| Type | Confidence | Max Inzichten | Nachtverlaging |
-|------|------------|---------------|----------------|
-| **Beginner** (eerste 2 weken) | 70% | 2 | 2°C |
-| **Gemiddeld** (na 1 maand) | 65% | 3 | 4°C |
-| **Gevorderd** (na 3 maanden) | 60% | 5 | Op basis van τ |
+| Type | Confidence | Nachtverlaging |
+|------|------------|----------------|
+| **Beginner** (eerste 2 weken) | 70% | 2°C |
+| **Gemiddeld** (na 1 maand) | 65% | 4°C |
+| **Gevorderd** (na 3 maanden) | 60% | Op basis van τ |
 
 ---
 
