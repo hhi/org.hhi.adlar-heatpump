@@ -1,0 +1,606 @@
+# Guide des Aperçus & Recommandations du Bâtiment
+
+**Version** : 2.6.0+ | **Dernière mise à jour** : Janvier 2026
+
+---
+
+## Table des matières
+
+1. [Introduction](#introduction)
+2. [Que sont les Aperçus du Bâtiment ?](#que-sont-les-aperçus-du-bâtiment)
+3. [Comment ça fonctionne](#comment-ça-fonctionne)
+4. [Catégories d'aperçus](#catégories-daperçus)
+5. [Comprendre vos aperçus](#comprendre-vos-aperçus)
+6. [Passer à l'action](#passer-à-laction)
+7. [Exemples de Flows](#exemples-de-flows)
+8. [Référence des cartes Flow](#référence-des-cartes-flow)
+9. [Paramètres](#paramètres)
+10. [Dépannage](#dépannage)
+11. [FAQ](#faq)
+
+---
+
+## Introduction
+
+La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après 24-48 heures d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables** avec des économies estimées en euros par mois.
+
+### Avantages clés
+
+| Avantage | Économies |
+|----------|-----------|
+| 💰 Aperçus d'isolation | 10-30% |
+| ⏱️ Optimisation du préchauffage | 5-10% |
+| 🏠 Stratégies de stockage thermique | 10-25% (avec tarification dynamique) |
+| 📊 Transparence du ROI | Chaque recommandation inclut les économies mensuelles |
+
+---
+
+## Que sont les Aperçus du Bâtiment ?
+
+Les Aperçus du Bâtiment analysent les **5 paramètres thermiques** appris par le Modèle du Bâtiment :
+
+| Paramètre | Symbole | Signification | Plage typique |
+|-----------|---------|---------------|---------------|
+| **Masse thermique** | C | Capacité thermique - énergie nécessaire pour 1°C | 7-30 kWh/°C |
+| **Coefficient de perte thermique** | UA | Taux de perte de chaleur par degré de différence | 0,05-0,5 kW/°C |
+| **Constante de temps** | τ (tau) | Vitesse de chauffage/refroidissement (τ = C/UA) | 5-25 heures |
+| **Facteur de gain solaire** | g | Efficacité du rayonnement solaire | 0,3-0,6 |
+| **Gains thermiques internes** | P_int | Chaleur des personnes, appareils, cuisine | 0,2-0,5 kW |
+
+Le système compare les valeurs apprises avec :
+- **Votre profil de bâtiment sélectionné** (Léger/Moyen/Lourd/Passif)
+- **Les valeurs typiques pour des bâtiments bien isolés**
+- **Vos données de prix de l'énergie** (si disponibles)
+
+Lorsque des opportunités d'optimisation sont détectées, il génère des **aperçus** avec des recommandations spécifiques.
+
+---
+
+## Comment ça fonctionne
+
+### Phase d'apprentissage (24-48 heures)
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│Collecte données │───▶│Apprentissage    │───▶│ Confiance croît │
+│  toutes 5 min   │    │  algorithme RLS │    │    0% → 100%    │
+└─────────────────┘    └─────────────────┘    └────────┬────────┘
+                                                       │
+         ┌─────────────────────────────────────────────┘
+         ▼
+   ┌───────────┐
+   │   ≥70% ?  │
+   └─────┬─────┘
+         │
+    ┌────┴────┐
+    │         │
+   Oui       Non ───────────────────────────────┐
+    │                                           │
+    ▼                                           │
+┌─────────────────┐                             │
+│    Aperçus      │                             │
+│   disponibles   │          ┌──────────────────┘
+└─────────────────┘          │
+                             ▼
+                  (Retour à la collecte de données)
+```
+
+**Données collectées :**
+- Température intérieure (capteur externe)
+- Température extérieure (pompe à chaleur ou capteur externe)
+- Puissance électrique
+- Rayonnement solaire estimé
+
+**Génération des aperçus :**
+- Le système évalue toutes les 50 minutes (10 échantillons)
+- Détecte les patterns : mauvaise isolation, potentiel de stockage thermique, opportunités de préchauffage
+- Génère des recommandations avec estimations de ROI
+
+### Surveillance continue
+
+- **S'adapte aux saisons** (multiplicateurs de gain solaire, patterns de chaleur interne)
+- **Met à jour les aperçus** lors de dérive des paramètres >10%
+- **Limitation du débit** pour éviter la "fatigue des conseils" (max 1 aperçu par catégorie par jour)
+
+---
+
+## Catégories d'aperçus
+
+Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
+
+### 1. 🏠 Aperçus de Performance d'Isolation
+
+**Ce qui est détecté :**
+- Perte de chaleur élevée (UA > attendu)
+- Excellente isolation (UA < attendu)
+
+**Exemple d'aperçu :**
+> « 🏠 Perte de chaleur élevée - UA 0,52 kW/°C (attendu : 0,30) »
+
+**Exemple de recommandation :**
+> « Envisagez des améliorations d'isolation : toit (25% d'économies), murs (15%), fenêtres (10%). Économies est. : €120/mois »
+
+**Quand ça se déclenche :**
+- Confiance ≥ 70%
+- UA > 1,5× UA du profil **OU** UA > 0,5 kW/°C (seuil absolu)
+
+**Que faire :**
+1. **Vérifier la mesure** - Vérifier si portes/fenêtres étaient ouvertes pendant l'apprentissage
+2. **Prioriser les améliorations** - L'isolation du toit offre le meilleur ROI (25% des économies totales)
+3. **Obtenir des devis** - Utiliser l'estimation €120/mois pour calculer le délai d'amortissement
+4. **Implémenter la réduction nocturne** - Réduire les pertes pendant les heures inoccupées
+
+---
+
+### 2. ⏱️ Aperçus de Stratégie de Préchauffage
+
+**Ce qui est détecté :**
+- Réponse thermique rapide (τ < 5 heures)
+- Réponse thermique moyenne (τ 5-15 heures)
+- Réponse thermique lente (τ > 15 heures)
+
+**Exemple d'aperçu :**
+> « ⏱️ Réponse thermique rapide - le bâtiment chauffe en 4,2 heures »
+
+**Exemple de recommandation :**
+> « Activez une réduction nocturne agressive à 16°C, préchauffez 2 heures avant le réveil (05:00 → 07:00 prêt). Est. 12% d'économies d'énergie. »
+
+**Actions recommandées par type :**
+
+| Type de réponse | τ | Réduction nocturne | Préchauffage | Économies |
+|-----------------|---|--------------------|--------------|-----------|
+| Rapide | <5h | Agressive (16-17°C) | 2-3 heures | 10-15% |
+| Moyenne | 5-15h | Modérée (17-18°C) | 4-5 heures | 6-10% |
+| Lente | >15h | Minimale ou aucune | Non pratique | 3-5% |
+
+---
+
+### 3. 💰 Aperçus d'Optimisation du Stockage Thermique
+
+**Ce qui est détecté :**
+- Bâtiments à haute masse thermique (C > 18 kWh/°C) avec réponse lente (τ > 12h)
+- Capacité à stocker l'énergie pendant les heures creuses, coaster pendant les heures de pointe
+
+**Exemple d'aperçu (avec tarification dynamique) :**
+> « 💰 Potentiel de stockage thermique - C=24 kWh/°C, τ=18h »
+
+**Exemple de recommandation :**
+> « Préchauffez +2°C pendant les heures creuses (02:00-06:00), coastez -1°C pendant les pointes (17:00-21:00). Économies est. : €95/mois »
+
+**Exemple d'aperçu (sans tarification dynamique) :**
+> « 💡 Bâtiment adapté au stockage thermique - C=24 kWh/°C, τ=18h »
+
+**Exemple de recommandation :**
+> « Ajoutez les prix de l'énergie dynamiques via la carte Flow 'Recevoir les prix de l'énergie externes' pour activer l'optimisation des coûts. Économies potentielles : 15-25% »
+
+**Calcul du stockage thermique :**
+```
+Énergie stockée = C × Décalage temp = 24 kWh/°C × 2°C = 48 kWh
+Économies quotidiennes = Énergie stockée × Différentiel de prix × Facteur d'utilisation
+                       = 48 kWh × €0,15/kWh × 0,70 = €5,04/jour
+Économies mensuelles = €5,04 × 30 = €151/mois
+```
+
+---
+
+### 4. 🔄 Discordance du Profil de Bâtiment (Diagnostic)
+
+**Ce qui est détecté :**
+- Le profil de bâtiment sélectionné ne correspond pas au comportement appris
+- >30% de déviation dans la constante de temps (τ)
+
+**Exemple d'aperçu :**
+> « 🔄 Le bâtiment se comporte comme 'lourd' (τ=18h vs 'moyen' τ=10h) »
+
+**Exemple de recommandation :**
+> « Changez le profil de bâtiment vers 'lourd' dans les paramètres de l'appareil pour un apprentissage plus rapide et de meilleurs paramètres initiaux »
+
+**Caractéristiques des profils :**
+
+| Profil | C (kWh/°C) | UA (kW/°C) | τ (heures) | Type de bâtiment |
+|--------|-----------|-----------|------------|------------------|
+| **Léger** | 7 | 0,35 | 20 | Ossature bois, isolation basique, changements rapides |
+| **Moyen** | 15 | 0,30 | 50 | Brique, murs creux, double vitrage (typique FR) |
+| **Lourd** | 20 | 0,25 | 80 | Béton/pierre, bonne isolation, verre HR++ |
+| **Passif** | 30 | 0,05 | 600 | Maison passive, HR+++, étanche à l'air, VMC |
+
+---
+
+## Comprendre vos aperçus
+
+### Où les trouver
+
+**Capacités de l'appareil (v2.5.10+)** - Chaque catégorie a son propre capteur :
+1. **Aperçu Isolation** (`building_insight_insulation`) — Analyse des pertes thermiques
+2. **Aperçu Préchauffage** (`building_insight_preheating`) — Conseil de réponse thermique
+3. **Aperçu Stockage Thermique** (`building_insight_thermal_storage`) — Potentiel de délestage
+4. **Aperçu Profil Bâtiment** (`building_insight_profile`) — Détection de discordance de profil
+5. **Diagnostics des Aperçus du Bâtiment (JSON)** — Données techniques détaillées
+
+**Cartes de déclenchement Flow :**
+1. **« Nouvel aperçu du bâtiment détecté »** — Se déclenche sur les nouveaux aperçus
+2. **« Recommandation d'heure de préchauffage »** — Déclenchement quotidien à 23:00
+3. **« Discordance du profil de bâtiment détectée »** — Déclenchement unique
+
+### Cycle de vie des aperçus
+
+| Statut | Icône | Description |
+|--------|-------|-------------|
+| Nouveau | 🆕 | Vient d'être détecté, notification envoyée |
+| Actif | ✅ | Affiché dans les capacités |
+| Acquitté | 👀 | L'utilisateur l'a vu |
+| Rejeté | 🚫 | Masqué pour 30 jours |
+| Résolu | ✔️ | Action implémentée |
+
+### Système de priorité
+
+Les aperçus sont classés 0-100 basé sur :
+- **Confiance** (30%) — Certitude du modèle
+- **Potentiel d'économies d'énergie** (40%) — Estimation €/mois
+- **Simplicité d'action** (20%) — Facilité d'implémentation
+- **Impact immédiat** (10%) — Bénéfice rapide vs long terme
+
+**Règle d'affichage :** Chaque catégorie a son propre capteur - tous les aperçus sont affichés en parallèle (v2.5.10)
+
+---
+
+## Passer à l'action
+
+### Guide d'action étape par étape
+
+#### Pour les aperçus d'isolation :
+
+| Délai | Actions |
+|-------|---------|
+| **Immédiat** (0-1 semaine) | ✅ Activer la réduction nocturne<br/>✅ Vérifier les fuites d'air et les colmater |
+| **Court terme** (1-3 mois) | ✅ Obtenir des devis pour l'isolation du toit (€3000-6000, amortissement 2-4 ans)<br/>✅ Envisager l'isolation des murs creux (€1500-3000)<br/>✅ Évaluer les fenêtres pour verre HR++ |
+| **Long terme** (6-12 mois) | ✅ Planifier un package d'isolation complet<br/>✅ Vérifier les subventions (MaPrimeRénov', aides locales)<br/>✅ Calculer le ROI total avec les économies mensuelles |
+
+#### Pour les aperçus de préchauffage :
+
+| Délai | Actions |
+|-------|---------|
+| **Immédiat** | ✅ Créer un flow d'automatisation avec déclencheur `pre_heat_recommendation`<br/>✅ Tester la réduction nocturne (commencer conservateur : réduction de 2°C) |
+| **Optimisation** | ✅ Affiner la réduction selon le confort<br/>✅ Ajuster le paramètre d'heure de réveil si nécessaire |
+
+#### Pour les aperçus de stockage thermique :
+
+| Délai | Actions |
+|-------|---------|
+| **Prérequis** (1-2 semaines) | ✅ S'inscrire à un contrat d'énergie dynamique<br/>✅ Installer l'application Energy Prices<br/>✅ Configurer un flow pour transmettre les prix |
+| **Implémentation** | ✅ Créer l'automatisation de stockage thermique<br/>✅ Commencer conservateur (ajustements de ±1°C) |
+| **Optimisation** | ✅ Augmenter le décalage de température si confortable<br/>✅ Ajuster le timing selon votre courbe de prix |
+
+---
+
+## Exemples de Flows
+
+### Flow 1 : Programme de Préchauffage Automatique
+
+```
+QUAND Recommandation d'heure de préchauffage
+  (se déclenche quotidiennement à 23:00 avec l'heure de démarrage optimale)
+
+ALORS
+  1. Régler la température cible à 17°C à 22:00
+     (réduction nocturne - le bâtiment refroidit lentement)
+
+  2. Régler la température cible à 21°C à {{start_time}} token
+     (le préchauffage commence - calculé selon τ)
+
+  3. Notification : « Préchauffage programmé pour {{start_time}} ({{duration_hours}}h) »
+```
+
+---
+
+### Flow 2 : Stockage Thermique avec Tarification Dynamique
+
+```
+QUAND Bloc d'énergie le moins cher démarré
+  (depuis l'application Energy Prices - typiquement 02:00-06:00)
+
+ET Aperçu du bâtiment détecté, catégorie = « thermal_storage »
+
+ALORS
+  1. Augmenter la température cible de 2°C (stocker l'énergie thermique)
+  2. Notification : « Stockage thermique : préchauffage à {{target}}°C »
+```
+
+```
+QUAND Bloc d'énergie le plus cher démarré
+  (typiquement 17:00-21:00)
+
+ALORS
+  1. Diminuer la température cible de 1°C (coaster sur l'énergie stockée)
+  2. Notification : « Stockage thermique : coasting à {{target}}°C »
+```
+
+---
+
+### Flow 3 : Notifications d'Aperçus Haute Priorité
+
+```
+QUAND Nouvel aperçu du bâtiment détecté
+
+ET {{estimated_savings_eur_month}} est supérieur à 70
+ET {{priority}} est supérieur à 70
+
+ALORS
+  Envoyer notification :
+    « 💰 Opportunité d'économies d'énergie ! »
+    « {{insight}} »
+    « Action : {{recommendation}} »
+    « Potentiel : €{{estimated_savings_eur_month}}/mois »
+```
+
+---
+
+## Référence des cartes Flow
+
+### Cartes de déclenchement (3)
+
+#### 1. Nouvel aperçu du bâtiment détecté
+
+**Déclenche :** Quand un nouvel aperçu est détecté (≥70% confiance, max 1× par catégorie par jour)
+
+**Tokens :**
+
+- `category` (string) - Catégorie : insulation_performance / pre_heating / thermal_storage
+- `insight` (string) - Message d'aperçu lisible
+- `recommendation` (string) - Action recommandée
+- `priority` (number 0-100) - Score de priorité
+- `confidence` (number 0-100) - Fiabilité du modèle
+- `estimated_savings_eur_month` (number) - Économies mensuelles en EUR (si applicable)
+
+**Fréquence :** Max 1× par catégorie par 24 heures (prévention de la fatigue des conseils)
+
+---
+
+#### 2. Recommandation d'heure de préchauffage
+
+**Déclenche :** Quotidiennement à 23:00 avec l'heure de démarrage de préchauffage optimale
+
+**Tokens :**
+
+- `start_time` (string) - Format HH:MM (ex : « 05:30 »)
+- `target_time` (string) - Heure cible (définie via paramètre wake_time)
+- `duration_hours` (number) - Durée de préchauffage en heures
+- `temp_rise` (number) - Hausse de température en °C
+- `confidence` (number 0-100) - Fiabilité du modèle
+
+**Conditions :** Uniquement si confiance ≥70%, recalcule lors de changement de τ >10%
+
+---
+
+#### 3. Discordance du profil de bâtiment détectée
+
+**Déclenche :** Une seule fois quand le comportement appris dévie significativement du profil sélectionné
+
+**Tokens :**
+
+- `current_profile` (string) - Profil actuel (ex : « average »)
+- `suggested_profile` (string) - Profil suggéré (ex : « heavy »)
+- `tau_learned` (number) - Constante de temps apprise en heures
+- `tau_profile` (number) - Constante de temps du profil en heures
+- `deviation_percent` (number) - Pourcentage de déviation
+- `confidence` (number 0-100) - Fiabilité du modèle (min 50%)
+
+**Conditions :** Déviation >30%, confiance ≥50%
+
+---
+
+### Cartes d'action (4)
+
+#### 1. Masquer l'aperçu
+
+**Fonction :** Masquer temporairement une catégorie d'aperçu spécifique
+
+**Paramètres :**
+
+- `category` (liste déroulante) - Catégorie à masquer
+- `duration` (number 1-365) - Nombre de jours
+
+**Usage :** Après planification de rénovation, ignorer un problème connu
+
+---
+
+#### 2. Forcer l'analyse des aperçus
+
+**Fonction :** Déclencher une évaluation immédiate (ne pas attendre l'intervalle de 50 min)
+
+**Retourne :**
+
+- `insights_detected` (number) - Nombre d'aperçus détectés
+- `confidence` (number) - Fiabilité actuelle du modèle
+
+**Usage :** Analyse à la demande, débogage, rapport quotidien
+
+---
+
+#### 3. Réinitialiser l'historique des aperçus
+
+**Fonction :** Effacer tous les aperçus actifs et l'historique (le modèle du bâtiment reste intact)
+
+**Paramètres :**
+
+- `confirm` (case à cocher) - DOIT être cochée pour exécuter la réinitialisation
+
+**Usage :** Après des changements majeurs du bâtiment (isolation, rénovation, nouvelles fenêtres)
+
+**IMPORTANT :** Le modèle du bâtiment (C, UA, τ, g, P_int) est préservé - seuls les aperçus sont réinitialisés
+
+---
+
+#### 4. Définir le seuil de confiance
+
+**Fonction :** Ajuster dynamiquement le seuil de confiance minimum
+
+**Paramètres :**
+
+- `threshold` (number 50-90) - Nouveau seuil en %
+
+**Effet :** Seuil plus élevé = moins d'aperçus (très fiables), plus bas = plus d'aperçus (plus tôt, moins précis)
+
+**Usage :** Seuil adaptatif - commencer à 70%, baisser à 60% après convergence
+
+---
+
+### Cartes de condition (3)
+
+#### 1. L'aperçu est actif
+
+**Fonction :** Vérifier si une catégorie spécifique est actuellement active
+
+**Paramètres :**
+
+- `category` (liste déroulante) - Catégorie à vérifier
+
+**Retourne :** `true` si actif ET non rejeté, sinon `false`
+
+**Usage :** Automatisation conditionnelle (stockage thermique uniquement si aperçu actif)
+
+---
+
+#### 2. La confiance du modèle est au-dessus du seuil
+
+**Fonction :** Porte de qualité pour les flows
+
+**Paramètres :**
+
+- `threshold` (number 0-100) - Seuil de confiance en %
+
+**Retourne :** `true` si confiance du modèle > seuil
+
+**Usage :** Notifications/actions uniquement à haute certitude (ex : >80%)
+
+---
+
+#### 3. Les économies estimées sont au-dessus du seuil
+
+**Fonction :** Filtrage basé sur le ROI
+
+**Paramètres :**
+
+- `category` (liste déroulante) - Catégorie à vérifier (insulation_performance / pre_heating / thermal_storage)
+- `threshold` (number 0-500) - Seuil €/mois
+
+**Retourne :** `true` si économies mensuelles estimées > seuil
+
+**Usage :** Filtre pour économies significatives (ex : notifier uniquement si >€100/mois)
+
+---
+
+## Paramètres
+
+### Paramètres des aperçus
+
+**Emplacement :** Paramètres de l'appareil → Aperçus & Recommandations du Bâtiment
+
+| Paramètre | Défaut | Plage | Description |
+|-----------|--------|-------|-------------|
+| **Activer les Aperçus du Bâtiment** | OUI | OUI/NON | Interrupteur principal |
+| **Confiance Minimale (%)** | 70% | 50-90% | Seuil pour afficher les aperçus |
+| **Heure de Réveil** | 07:00 | HH:MM | Heure cible pour fin du préchauffage |
+| **Réduction Nocturne (°C)** | 4,0 | 2,0-6,0 | Réduction de température la nuit |
+
+> **Note (v2.5.10) :** Le paramètre « Max Aperçus Actifs » a été supprimé - chaque catégorie a maintenant son propre capteur.
+
+### Heure de Réveil - Comment ça fonctionne
+
+Le paramètre `wake_time` détermine quand le préchauffage doit être terminé. Le système calcule automatiquement l'heure de démarrage optimale :
+
+**Formule :**
+```
+Durée_préchauffage = τ × ln(ΔT_cible / ΔT_résiduel)
+Heure_démarrage = Heure_réveil - Durée_préchauffage
+```
+
+**Exemple de calcul :**
+- Heure de réveil : **07:00**
+- τ (constante de temps) : **10 heures**
+- Réduction nocturne : **4°C** (de 21°C à 17°C)
+- Baisse de température résiduelle : **0,5°C** (hypothèse)
+
+```
+Durée_préchauffage = 10 × ln(4 / 0,5) = 10 × 2,08 = 20,8 heures
+→ C'est irréaliste, donc le système s'ajuste pour la masse thermique
+```
+
+**Résultats pratiques par type de bâtiment :**
+
+| τ (heures) | Préchauffage | Démarrage pour réveil 07:00 |
+|------------|--------------|------------------------------|
+| 4 | 2 heures | 05:00 |
+| 8 | 3,5 heures | 03:30 |
+| 15 | 5 heures | 02:00 |
+| 25+ | Non pratique | Envisager chauffage continu |
+
+### Paramètres recommandés par type d'utilisateur
+
+| Type | Confiance | Réduction Nocturne |
+|------|-----------|-------------------|
+| **Débutant** (premières 2 semaines) | 70% | 2°C |
+| **Intermédiaire** (après 1 mois) | 65% | 4°C |
+| **Avancé** (après 3 mois) | 60% | Basé sur τ |
+
+---
+
+## Dépannage
+
+### Pas d'aperçus après 48 heures
+
+| Cause | Solution |
+|-------|----------|
+| Confiance du modèle <70% | Attendre plus longtemps (jusqu'à 72 heures) ou baisser le seuil à 65% |
+| Aperçus désactivés | Vérifier Paramètres de l'appareil → Activer les Aperçus du Bâtiment |
+| Le bâtiment se comporte exactement comme prévu | Bonne nouvelle ! Pas d'optimisation nécessaire |
+| Sources de données manquantes | S'assurer que le capteur de température intérieure externe est connecté |
+
+### Les aperçus montrent de mauvaises estimations d'économies
+
+| Cause | Impact | Solution |
+|-------|--------|----------|
+| Prix de l'énergie ≠ €0,30/kWh | Estimations proportionnelles | Multiplier par (votre prix / 0,30) |
+| COP ≠ 3,5 | COP plus élevé = économies plus élevées | Les estimations sont conservatives |
+| Heures de chauffage ≠ 4000h/an | Plus d'heures = économies plus élevées | Surveiller les économies réelles après 1 mois |
+
+### La recommandation de préchauffage ne se déclenche pas
+
+| Cause | Solution |
+|-------|----------|
+| Confiance du modèle <70% | Attendre l'apprentissage |
+| Heure de réveil non configurée | Définir via Paramètres de l'appareil |
+| Carte Flow non créée | Créer un flow avec déclencheur « Recommandation d'heure de préchauffage » |
+
+---
+
+## FAQ
+
+### Q : Combien de temps dure l'apprentissage ?
+
+**R :** 24-48 heures pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
+
+### Q : Les aperçus se mettent-ils à jour si j'améliore l'isolation ?
+
+**R :** Oui ! Le modèle apprend continuellement. Après des améliorations d'isolation, le UA devrait diminuer sur 3-7 jours. L'aperçu « mauvaise isolation » disparaît et peut être remplacé par « excellente isolation » ou « opportunité de stockage thermique ».
+
+### Q : Et si mon bâtiment ne correspond à aucun profil ?
+
+**R :** Les profils ne sont que des points de départ pour accélérer l'apprentissage. Après 48 heures, les paramètres appris remplacent complètement le profil.
+
+### Q : Pourquoi mon τ (constante de temps) semble-t-il élevé/bas ?
+
+**R :** τ dépend à la fois de la masse thermique (C) et des pertes thermiques (UA) :
+- **τ élevé** (>15h) : Bâtiment lourd (C élevé) OU excellente isolation (UA faible)
+- **τ faible** (<5h) : Bâtiment léger (C faible) OU mauvaise isolation (UA élevé)
+
+### Q : Quelle est la précision des estimations d'économies ?
+
+**R :** La précision cible est de ±20%. Elles sont basées sur des hypothèses conservatives (COP 3,5, 4000 heures de chauffage, €0,30/kWh). Surveillez les économies réelles via Homey Energy après implémentation.
+
+### Q : Que se passe-t-il si je modifie les paramètres de l'appareil pendant l'apprentissage ?
+
+**R :** Impact minimal. Le modèle apprend les caractéristiques du bâtiment, pas les paramètres de la pompe à chaleur. Mais évitez :
+- Changer le profil de bâtiment en cours d'apprentissage (réinitialise les paramètres)
+- Réinitialiser le modèle du bâtiment (perd toutes les données apprises)
+- Changements de mode fréquents (confond le modèle)

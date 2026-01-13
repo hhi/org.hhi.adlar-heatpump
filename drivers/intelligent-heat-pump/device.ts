@@ -3431,12 +3431,21 @@ class MyDevice extends Homey.Device {
         }
       }
 
-      // Sync simulated target capability with adaptive control setting (v2.3.1)
+      // Sync optional capabilities with feature settings (v2.3.1, v2.5.10+)
       try {
+        await this.handleOptionalCapabilities();
+
+        // Special initialization for adlar_simulated_target when adaptive control is enabled
         const adaptiveControlEnabled = this.getSetting('adaptive_control_enabled') === true;
-        await this.updateSimulatedCapabilityVisibility(adaptiveControlEnabled);
+        if (adaptiveControlEnabled && this.hasCapability('adlar_simulated_target')) {
+          const currentTarget = this.getCapabilityValue('target_temperature') as number;
+          if (currentTarget !== null) {
+            await this.setCapabilityValue('adlar_simulated_target', currentTarget);
+            this.logger.info('Initialized simulated target with current target:', currentTarget);
+          }
+        }
       } catch (error) {
-        this.error('Failed to sync adlar_simulated_target capability with adaptive control setting:', error);
+        this.error('Failed to sync optional capabilities with feature settings:', error);
       }
 
       // Migration v2.4.3: Cleanup deprecated heating curve capabilities
@@ -3717,35 +3726,6 @@ class MyDevice extends Homey.Device {
     this.log('MyDevice has been added');
   }
 
-  /**
-   * Update simulated target capability visibility based on adaptive control setting
-   *
-   * @param adaptiveControlEnabled - Whether adaptive control is enabled
-   */
-  private async updateSimulatedCapabilityVisibility(adaptiveControlEnabled: boolean): Promise<void> {
-    const hasCapability = this.hasCapability('adlar_simulated_target');
-
-    if (adaptiveControlEnabled) {
-      // Adaptive control enabled - ensure capability is visible
-      if (!hasCapability) {
-        await this.addCapability('adlar_simulated_target');
-        this.logger.info('Added adlar_simulated_target capability (adaptive control enabled)');
-      }
-
-      // Initialize with current target_temperature
-      const currentTarget = this.getCapabilityValue('target_temperature') as number;
-      if (currentTarget !== null) {
-        await this.setCapabilityValue('adlar_simulated_target', currentTarget);
-        this.logger.info('Initialized simulated target with current target:', currentTarget);
-      }
-    } else {
-      // Adaptive control disabled - remove capability
-      if (hasCapability) {
-        await this.removeCapability('adlar_simulated_target');
-        this.logger.info('Removed adlar_simulated_target capability (adaptive control disabled)');
-      }
-    }
-  }
 
   /**
    * onSettings is called when the user updates the device's settings.
@@ -3773,9 +3753,16 @@ class MyDevice extends Homey.Device {
       this.logger.info('Log level changed to:', Logger.levelToString(newLogLevel));
     }
 
-    // Handle adaptive control capability visibility (v2.3.1)
-    if (changedKeys.includes('adaptive_control_enabled')) {
-      await this.updateSimulatedCapabilityVisibility(newSettings.adaptive_control_enabled as boolean);
+    // Handle capability visibility when feature settings change (v2.3.1+)
+    const capabilityRelatedKeys = [
+      'adaptive_control_enabled',
+      'building_model_enabled',
+      'building_insights_enabled',
+    ];
+
+    if (changedKeys.some((key) => capabilityRelatedKeys.includes(key))) {
+      await this.handleOptionalCapabilities();
+      this.logger.info('Capability visibility updated based on settings changes');
     }
 
     // Delegate settings changes to ServiceCoordinator first
@@ -4167,6 +4154,9 @@ class MyDevice extends Homey.Device {
     const enableSliderControls = this.getSetting('enable_slider_controls') ?? true;
     const enableCOPCalculation = this.getSetting('cop_calculation_enabled') !== false; // default true
     const enableCurveControls = this.getSetting('enable_curve_controls') ?? false; // default false (v0.99.54+)
+    const enableBuildingModel = this.getSetting('building_model_enabled') ?? false; // default false
+    const enableBuildingInsights = this.getSetting('building_insights_enabled') ?? false; // default false
+    const enableAdaptiveControl = this.getSetting('adaptive_control_enabled') ?? false; // default false
 
     const powerCapabilities = [
       'measure_power',
@@ -4209,6 +4199,34 @@ class MyDevice extends Homey.Device {
       'adlar_picker_countdown_set', // Heating curve picker
     ];
 
+    // Building Model capabilities (v2.5.10+)
+    const buildingModelCapabilities = [
+      'adlar_building_c',
+      'adlar_building_ua',
+      'adlar_building_tau',
+      'adlar_building_g',
+      'adlar_building_pint',
+      'building_model_diagnostics',
+    ];
+
+    // Building Insights capabilities (v2.5.10+)
+    const buildingInsightsCapabilities = [
+      'building_insight_insulation',
+      'building_insight_preheating',
+      'building_insight_thermal_storage',
+      'building_insight_profile',
+      'building_insights_diagnostics',
+    ];
+
+    // Adaptive Control capabilities (v2.3.1+)
+    const adaptiveControlCapabilities = [
+      'adlar_simulated_target',
+      'target_temperature.indoor',
+      'measure_temperature.indoor',
+      'adlar_external_indoor_temperature',
+      'adaptive_control_diagnostics',
+    ];
+
     // Process power capabilities
     await this.processCapabilityGroup(powerCapabilities, enablePowerMeasurements, 'power measurement');
 
@@ -4220,6 +4238,15 @@ class MyDevice extends Homey.Device {
 
     // Process curve control picker capabilities (v0.99.54+)
     await this.processCapabilityGroup(curvePickerCapabilities, enableCurveControls, 'curve control picker');
+
+    // Process building model capabilities (v2.5.10+)
+    await this.processCapabilityGroup(buildingModelCapabilities, enableBuildingModel, 'building model');
+
+    // Process building insights capabilities (v2.5.10+)
+    await this.processCapabilityGroup(buildingInsightsCapabilities, enableBuildingInsights, 'building insights');
+
+    // Process adaptive control capabilities (v2.3.1+)
+    await this.processCapabilityGroup(adaptiveControlCapabilities, enableAdaptiveControl, 'adaptive control');
   }
 
   /**
