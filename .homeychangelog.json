@@ -1,4 +1,10 @@
 {
+  "2.5.13": {
+    "en": "Building model parameters (C, tau, UA, g, pInt) now show historical charts in Homey Insights. Building model diagnostics capability updates automatically every 50 minutes.",
+    "nl": "Gebouwmodel parameters (C, tau, UA, g, pInt) tonen nu historische grafieken in Homey Inzichten. Gebouwmodel diagnostiek capability update nu automatisch elke 50 minuten.",
+    "de": "Gebäudemodell-Parameter (C, tau, UA, g, pInt) zeigen jetzt historische Diagramme in Homey Insights. Gebäudemodell-Diagnose-Capability aktualisiert sich automatisch alle 50 Minuten.",
+    "fr": "Paramètres du modèle de bâtiment (C, tau, UA, g, pInt) affichent maintenant des graphiques historiques dans Homey Insights. Capacité de diagnostic du modèle de bâtiment se met à jour automatiquement toutes les 50 minutes."
+  },
   "2.5.10": {
     "en": "Building Insights: Replaced 3 generic capabilities with 4 category-specific sensors (Insulation, Pre-heating, Thermal Storage, Profile). Each sensor now shows its category's insight with recommendation.",
     "nl": "Gebouw Inzichten: 3 generieke capabilities vervangen door 4 categorie-specifieke sensors (Isolatie, Voorverwarming, Thermische Opslag, Profiel). Elke sensor toont nu het inzicht van zijn categorie met aanbeveling.",

@@ -90,6 +90,9 @@ export class BuildingModelService {
     // Update capabilities with current model
     await this.updateModelCapabilities();
 
+    // Update diagnostics capability with initial state
+    await this.updateDiagnosticsCapability();
+
     // Start periodic updates (every 5 minutes)
     this.updateInterval = this.device.homey.setInterval(
       () => this.collectAndLearn().catch((err) => this.logger('Learning error:', err)),
@@ -179,8 +182,9 @@ export class BuildingModelService {
       // Update capabilities every 10 samples (every 50 minutes)
       if (state.sampleCount % 10 === 0) {
         await this.updateModelCapabilities();
+        await this.updateDiagnosticsCapability();
         await this.persistState();
-        this.logger(`BuildingModelService: 💾 Capabilities + state persisted (sample ${state.sampleCount})`);
+        this.logger(`BuildingModelService: 💾 Capabilities + diagnostics + state persisted (sample ${state.sampleCount})`);
       }
     } catch (error) {
       this.logger('BuildingModelService: Error during learning:', error);
@@ -274,6 +278,25 @@ export class BuildingModelService {
           time_constant: model.tau,
         })
         .catch((err: unknown) => this.logger('Failed to trigger milestone card:', err));
+    }
+  }
+
+  /**
+   * Update building_model_diagnostics capability with current diagnostic data
+   * Called automatically every 10 samples (50 minutes) alongside updateModelCapabilities()
+   * Also available on-demand via "Diagnose building model" flow card action
+   */
+  private async updateDiagnosticsCapability(): Promise<void> {
+    if (!this.device.hasCapability('building_model_diagnostics')) {
+      return; // Capability not present, skip silently (may be old device)
+    }
+
+    try {
+      const diagnostics = await this.getDiagnostics();
+      await this.device.setCapabilityValue('building_model_diagnostics', JSON.stringify(diagnostics));
+      this.logger('BuildingModelService: 📊 building_model_diagnostics capability updated');
+    } catch (error) {
+      this.logger('BuildingModelService: Failed to update building_model_diagnostics capability:', error);
     }
   }
 
