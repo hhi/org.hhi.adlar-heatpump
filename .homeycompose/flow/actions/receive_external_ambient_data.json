@@ -23,7 +23,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_external_ambient"
+      "filter": "driver_id=intelligent-heat-pump"
     },
     {
       "type": "number",

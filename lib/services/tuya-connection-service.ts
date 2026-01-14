@@ -45,8 +45,8 @@ export class TuyaConnectionService {
   private readonly DAILY_DISCONNECT_COUNT_KEY = 'daily_disconnect_count';
   private readonly DAILY_DISCONNECT_DATE_KEY = 'daily_disconnect_date';
 
-  // Connection status tracking (v0.99.47, enhanced v0.99.61 with timestamps)
-  private currentStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error' = 'disconnected';
+  // Connection status tracking (v0.99.47, enhanced v0.99.61 with timestamps, v2.6.1 added 'initializing')
+  private currentStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error' | 'initializing' = 'initializing';
   private lastStatusChangeTime: number = Date.now(); // Timestamp of last status change
 
   // Error recovery state
@@ -131,7 +131,7 @@ export class TuyaConnectionService {
    */
   constructor(options: TuyaConnectionOptions) {
     this.device = options.device;
-    this.logger = options.logger || (() => {});
+    this.logger = options.logger || (() => { });
     this.onDataHandler = options.onData;
     this.onDpRefreshHandler = options.onDpRefresh;
     this.onConnectedHandler = options.onConnected;
@@ -165,7 +165,7 @@ export class TuyaConnectionService {
 
           // Restore status if valid (v1.0.6 - prevents showing stale "disconnected" at startup)
           if (storedStatus && typeof storedStatus === 'string'
-              && ['connected', 'disconnected', 'reconnecting', 'error'].includes(storedStatus)) {
+            && ['connected', 'disconnected', 'reconnecting', 'error'].includes(storedStatus)) {
             this.currentStatus = storedStatus as 'connected' | 'disconnected' | 'reconnecting' | 'error';
             this.logger(`TuyaConnectionService: Restored connection status '${storedStatus}' from ${new Date(storedTimestamp).toISOString()}`);
           } else {
@@ -626,9 +626,9 @@ export class TuyaConnectionService {
 
   /**
    * Get the current connection status enum value for adlar_connection_status capability.
-   * @returns One of: 'connected', 'disconnected', 'reconnecting', 'error'
+   * @returns One of: 'connected', 'disconnected', 'reconnecting', 'error', 'initializing'
    */
-  getCurrentConnectionStatus(): 'connected' | 'disconnected' | 'reconnecting' | 'error' {
+  getCurrentConnectionStatus(): 'connected' | 'disconnected' | 'reconnecting' | 'error' | 'initializing' {
     return this.currentStatus;
   }
 
@@ -2121,7 +2121,7 @@ export class TuyaConnectionService {
     // Prevent spam - only send notifications every 30 minutes for the same device
     // Also prevent duplicate notifications within 5 seconds (for duplicate events)
     if (now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_THROTTLE_MS
-        || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_KEY_CHANGE_THRESHOLD_MS)) {
+      || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_KEY_CHANGE_THRESHOLD_MS)) {
       try {
         await this.device.homey.notifications.createNotification({
           excerpt: `${this.device.getName()}: ${title}`,

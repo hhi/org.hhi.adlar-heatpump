@@ -1134,7 +1134,7 @@
         },
         "hint": {
           "en": "Supplier/trading fee per kWh, including VAT. Check your energy contract for this value.",
-          "nl": "Leveranciersopslag per kWh, inclusief BTW. Controleer uw energiecontract voor deze waarde.",
+          "nl": "Leveranciersopslag per kWh, inclusief BTW. Controleer uw energiecontract voor deze waarde.De huidige waarde hier is die van Frank Energie",
           "de": "Lieferantengebühr pro kWh, inklusive MwSt. Überprüfen Sie Ihren Energievertrag auf diesen Wert.",
           "fr": "Frais de fournisseur/négoce par kWh, TTC. Vérifiez votre contrat d'énergie pour cette valeur."
         },

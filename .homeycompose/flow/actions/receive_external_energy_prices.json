@@ -23,7 +23,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+      "filter": "driver_id=intelligent-heat-pump"
     },
     {
       "type": "text",

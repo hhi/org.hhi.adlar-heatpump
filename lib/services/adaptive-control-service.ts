@@ -1148,7 +1148,25 @@ export class AdaptiveControlService {
     if (changedKeys.includes('adaptive_control_enabled')) {
       const enabled = newSettings.adaptive_control_enabled as boolean;
       if (enabled && !this.isEnabled) {
-        await this.start();
+        try {
+          await this.start();
+        } catch (error) {
+          // v2.6.1: Prevent unhandled exception when starting without required data
+          // This can happen if user enables adaptive control before sending indoor temperature via flow card
+          this.logger('AdaptiveControlService: Failed to start - resetting setting', {
+            error: (error as Error).message,
+          });
+          // Reset the setting to false since start failed
+          // Use setTimeout to avoid race condition with onSettings still pending
+          this.device.homey.setTimeout(async () => {
+            try {
+              await this.device.setSettings({ adaptive_control_enabled: false });
+              this.logger('AdaptiveControlService: adaptive_control_enabled reset to false');
+            } catch (settingsError) {
+              this.logger('AdaptiveControlService: Failed to reset adaptive_control_enabled setting:', settingsError);
+            }
+          }, 100);
+        }
       } else if (!enabled && this.isEnabled) {
         await this.stop();
       }
