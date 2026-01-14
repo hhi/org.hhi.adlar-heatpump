@@ -1,4 +1,10 @@
 {
+  "2.5.15": {
+    "en": "Fixed: External data flow cards (ambient, power, flow, energy prices, indoor temperature) now show all heat pump devices in device picker. Adaptive control gracefully handles missing indoor temperature when enabled.",
+    "nl": "Opgelost: Externe data flow cards (omgevingstemperatuur, vermogen, flow, energieprijzen, binnentemperatuur) tonen nu alle warmtepomp apparaten in device picker. Adaptieve regeling handelt ontbrekende binnentemperatuur nu graceful af bij inschakelen.",
+    "de": "Behoben: Externe Daten-Flow-Karten (Umgebung, Leistung, Durchfluss, Energiepreise, Innentemperatur) zeigen jetzt alle Wärmepumpen-Geräte in der Geräteauswahl. Adaptive Steuerung behandelt fehlende Innentemperatur beim Aktivieren nun fehlertolerant.",
+    "fr": "Corrigé: Les cartes de flux de données externes (ambiant, puissance, débit, prix de l'énergie, température intérieure) affichent maintenant tous les appareils de pompe à chaleur dans le sélecteur. Le contrôle adaptatif gère gracieusement la température intérieure manquante lors de l'activation."
+  },
   "2.5.13": {
     "en": "Building model parameters (C, tau, UA, g, pInt) now show historical charts in Homey Insights. Building model diagnostics capability updates automatically every 50 minutes.",
     "nl": "Gebouwmodel parameters (C, tau, UA, g, pInt) tonen nu historische grafieken in Homey Inzichten. Gebouwmodel diagnostiek capability update nu automatisch elke 50 minuten.",
