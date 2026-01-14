@@ -23,5 +23,13 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
+  "chartType": "spline",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Building Heat Loss Coefficient",
+    "nl": "Gebouw Warmteverlies Coëfficiënt",
+    "de": "Gebäude Wärmeverlust-Koeffizient",
+    "fr": "Coefficient de Perte de Chaleur du Bâtiment"
+  },
   "icon": "/assets/building-heat-loss.svg"
 }

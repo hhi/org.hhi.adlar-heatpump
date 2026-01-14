@@ -23,5 +23,13 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
+  "chartType": "spline",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Building Time Constant",
+    "nl": "Gebouw Tijdsconstante",
+    "de": "Gebäude Zeitkonstante",
+    "fr": "Constante de Temps du Bâtiment"
+  },
   "icon": "/assets/building-time-constant.svg"
 }

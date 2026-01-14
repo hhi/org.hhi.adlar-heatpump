@@ -1555,9 +1555,9 @@ class MyDevice extends Homey.Device {
       if (this.hasCapability('target_temperature.indoor')) {
         const currentValue = this.getCapabilityValue('target_temperature.indoor');
         if (currentValue === null || currentValue === undefined) {
-          // Default to 21.0°C if not set (typical comfortable room temperature)
-          await this.setCapabilityValue('target_temperature.indoor', 21.0);
-          this.log('Desired indoor temperature subcapability initialized with default: 21.0°C');
+          // Default to 20.0°C if not set (typical comfortable room temperature)
+          await this.setCapabilityValue('target_temperature.indoor', 20.0);
+          this.log('Desired indoor temperature subcapability initialized with default: 20.0°C');
         } else {
           this.log(`Desired indoor temperature subcapability already set: ${currentValue}°C`);
         }

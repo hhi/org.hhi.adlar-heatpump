@@ -23,5 +23,13 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
+  "chartType": "spline",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Building Thermal Mass",
+    "nl": "Gebouw Thermische Massa",
+    "de": "Gebäude Thermische Masse",
+    "fr": "Masse Thermique du Bâtiment"
+  },
   "icon": "/assets/building-thermal-mass.svg"
 }

@@ -23,5 +23,13 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
+  "chartType": "spline",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Building Internal Heat Gains",
+    "nl": "Gebouw Interne Warmtewinst",
+    "de": "Gebäude Interne Wärmegewinne",
+    "fr": "Gains de Chaleur Internes du Bâtiment"
+  },
   "icon": "/assets/building-internal-gains.svg"
 }

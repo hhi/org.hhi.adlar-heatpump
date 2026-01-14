@@ -23,5 +23,13 @@
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",
+  "chartType": "spline",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Building Solar Gain Factor",
+    "nl": "Gebouw Zonnewinst Factor",
+    "de": "Gebäude Solarer Gewinnfaktor",
+    "fr": "Facteur de Gain Solaire du Bâtiment"
+  },
   "icon": "/assets/building-solar-gain.svg"
 }

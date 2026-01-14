@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.5.11",
+  "version": "2.5.13",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -10819,6 +10819,14 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
+      "chartType": "spline",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Building Thermal Mass",
+        "nl": "Gebouw Thermische Massa",
+        "de": "Gebäude Thermische Masse",
+        "fr": "Masse Thermique du Bâtiment"
+      },
       "icon": "/assets/building-thermal-mass.svg"
     },
     "adlar_building_g": {
@@ -10846,6 +10854,14 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
+      "chartType": "spline",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Building Solar Gain Factor",
+        "nl": "Gebouw Zonnewinst Factor",
+        "de": "Gebäude Solarer Gewinnfaktor",
+        "fr": "Facteur de Gain Solaire du Bâtiment"
+      },
       "icon": "/assets/building-solar-gain.svg"
     },
     "adlar_building_pint": {
@@ -10873,6 +10889,14 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
+      "chartType": "spline",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Building Internal Heat Gains",
+        "nl": "Gebouw Interne Warmtewinst",
+        "de": "Gebäude Interne Wärmegewinne",
+        "fr": "Gains de Chaleur Internes du Bâtiment"
+      },
       "icon": "/assets/building-internal-gains.svg"
     },
     "adlar_building_tau": {
@@ -10900,6 +10924,14 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
+      "chartType": "spline",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Building Time Constant",
+        "nl": "Gebouw Tijdsconstante",
+        "de": "Gebäude Zeitkonstante",
+        "fr": "Constante de Temps du Bâtiment"
+      },
       "icon": "/assets/building-time-constant.svg"
     },
     "adlar_building_ua": {
@@ -10927,6 +10959,14 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
+      "chartType": "spline",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Building Heat Loss Coefficient",
+        "nl": "Gebouw Warmteverlies Coëfficiënt",
+        "de": "Gebäude Wärmeverlust-Koeffizient",
+        "fr": "Coefficient de Perte de Chaleur du Bâtiment"
+      },
       "icon": "/assets/building-heat-loss.svg"
     },
     "adlar_cheapest_block_start": {
