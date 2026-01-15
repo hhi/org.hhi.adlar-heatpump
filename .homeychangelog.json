@@ -1,4 +1,10 @@
 {
+  "2.5.18": {
+    "en": "Added: COP optimizer diagnostics capability shows learning progress (samples collected, temperature buckets learned). Diagnostics update automatically every 50 minutes.",
+    "nl": "Toegevoegd: COP optimizer diagnostiek capability toont leervoortgang (verzamelde samples, geleerde temperatuur-buckets). Diagnostiek update automatisch elke 50 minuten.",
+    "de": "Hinzugefügt: COP-Optimierer-Diagnose-Capability zeigt Lernfortschritt (gesammelte Samples, gelernte Temperatur-Buckets). Diagnose aktualisiert sich automatisch alle 50 Minuten.",
+    "fr": "Ajouté: Capacité de diagnostic de l'optimiseur COP affiche la progression de l'apprentissage (échantillons collectés, buckets de température appris). Les diagnostics se mettent à jour automatiquement toutes les 50 minutes."
+  },
   "2.5.15": {
     "en": "Fixed: External data flow cards (ambient, power, flow, energy prices, indoor temperature) now show all heat pump devices in device picker. Adaptive control gracefully handles missing indoor temperature when enabled.",
     "nl": "Opgelost: Externe data flow cards (omgevingstemperatuur, vermogen, flow, energieprijzen, binnentemperatuur) tonen nu alle warmtepomp apparaten in device picker. Adaptieve regeling handelt ontbrekende binnentemperatuur nu graceful af bij inschakelen.",

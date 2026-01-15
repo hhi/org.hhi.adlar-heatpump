@@ -106,6 +106,12 @@ export class FlowCardManagerService {
         await this.registerBuildingInsightsCards();
       }
 
+      // Register COP optimizer diagnostics card (v2.6.1 - always available)
+      await this.registerCOPOptimizerDiagnosticsCard();
+
+      // Register external data action cards (v2.6.1 - consolidates from device.ts)
+      await this.registerExternalDataActionCards();
+
       this.logger('FlowCardManagerService: Flow cards updated successfully');
     } catch (error) {
       this.logger('FlowCardManagerService: Error updating flow cards:', error);
@@ -839,6 +845,220 @@ export class FlowCardManagerService {
       this.logger('FlowCardManagerService: Building Insights flow cards registered (4 actions + 3 conditions)');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering Building Insights flow cards:', error);
+    }
+  }
+
+  /**
+   * Register COP Optimizer diagnostics flow card (v2.6.1)
+   * Writes diagnostic data to cop_optimizer_diagnostics capability for end-user visibility
+   */
+  private async registerCOPOptimizerDiagnosticsCard(): Promise<void> {
+    try {
+      const diagnoseCOPCard = this.device.homey.flow.getActionCard('diagnose_cop_optimizer');
+      const diagnoseCOPListener = diagnoseCOPCard.registerRunListener(async () => {
+        this.logger('FlowCardManagerService: COP optimizer diagnostics triggered');
+
+        // Get service coordinator to access COP optimizer
+        const { serviceCoordinator } = this.device as unknown as {
+          serviceCoordinator?: {
+            getAdaptiveControl: () => {
+              getCOPOptimizer: () => {
+                logDiagnosticStatus: () => void;
+                getDiagnostics: () => {
+                  samplesCollected: number;
+                  historyCapacity: number;
+                  fillPercentage: number;
+                  bucketsLearned: number;
+                  bucketDetails: Array<{
+                    outdoorTemp: number;
+                    optimalSupplyTemp: number;
+                    sampleCount: number;
+                    confidence: 'low' | 'medium' | 'high';
+                  }>;
+                  configuration: {
+                    minAcceptableCOP: number;
+                    targetCOP: number;
+                    strategy: string;
+                    tempRange: string;
+                  };
+                };
+              } | null;
+            } | null;
+          };
+        };
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          throw new Error('Adaptive control not available');
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          throw new Error('Adaptive control service not available');
+        }
+
+        const copOptimizer = adaptiveControl.getCOPOptimizer();
+        if (!copOptimizer) {
+          throw new Error('COP optimizer not available');
+        }
+
+        // Log to console (for developers running via homey app run)
+        copOptimizer.logDiagnosticStatus();
+
+        // Write to capability for end-users
+        const diagnostics = copOptimizer.getDiagnostics();
+        if (this.device.hasCapability('cop_optimizer_diagnostics')) {
+          await this.device.setCapabilityValue('cop_optimizer_diagnostics', JSON.stringify({
+            samples: diagnostics.samplesCollected,
+            capacity: diagnostics.historyCapacity,
+            fillPercent: diagnostics.fillPercentage,
+            bucketsLearned: diagnostics.bucketsLearned,
+            buckets: diagnostics.bucketDetails.map((b) => ({
+              temp: b.outdoorTemp,
+              optimal: b.optimalSupplyTemp,
+              count: b.sampleCount,
+              conf: b.confidence,
+            })),
+            config: diagnostics.configuration,
+            timestamp: new Date().toISOString(),
+          }));
+        }
+
+        this.logger('FlowCardManagerService: COP optimizer diagnostics written to capability');
+        return true;
+      });
+      this.flowCardListeners.set('diagnose_cop_optimizer', diagnoseCOPListener);
+
+      this.logger('FlowCardManagerService: COP optimizer diagnostics card registered');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering COP optimizer diagnostics card:', error);
+    }
+  }
+
+  /**
+   * Register external data action cards (v2.6.1)
+   * Consolidates all receive_external_* action cards and diagnose_building_model
+   * Previously in device.ts registerFlowCardActionListeners()
+   */
+  private async registerExternalDataActionCards(): Promise<void> {
+    try {
+      // 1. Receive external power data
+      const receiveExternalPowerCard = this.device.homey.flow.getActionCard('receive_external_power_data');
+      const receiveExternalPowerListener = receiveExternalPowerCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { power_value: number }) => {
+          this.logger(`FlowCardManagerService: 📊 Received external power data: ${args.power_value}W`);
+          await this.handleReceiveExternalPowerData(args);
+
+          // Trigger intelligent power update if enabled
+          const energyTrackingEnabled = this.device.getSetting('enable_intelligent_energy_tracking');
+          if (energyTrackingEnabled) {
+            // @ts-expect-error - updateIntelligentPowerMeasurement exists in MyDevice
+            await this.device.updateIntelligentPowerMeasurement?.();
+          }
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_power_data', receiveExternalPowerListener);
+
+      // 2. Receive external flow data
+      const receiveExternalFlowCard = this.device.homey.flow.getActionCard('receive_external_flow_data');
+      const receiveExternalFlowListener = receiveExternalFlowCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { flow_value: number }) => {
+          this.logger(`FlowCardManagerService: 🌊 Received external flow data: ${args.flow_value}L/min`);
+          await this.handleReceiveExternalFlowData(args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_flow_data', receiveExternalFlowListener);
+
+      // 3. Receive external ambient data
+      const receiveExternalAmbientCard = this.device.homey.flow.getActionCard('receive_external_ambient_data');
+      const receiveExternalAmbientListener = receiveExternalAmbientCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { temperature_value: number }) => {
+          this.logger(`FlowCardManagerService: 🌡️ Received external ambient data: ${args.temperature_value}°C`);
+          await this.handleReceiveExternalAmbientData(args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_ambient_data', receiveExternalAmbientListener);
+
+      // 4. Receive external indoor temperature
+      const receiveExternalIndoorCard = this.device.homey.flow.getActionCard('receive_external_indoor_temperature');
+      const receiveExternalIndoorListener = receiveExternalIndoorCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { temperature_value: number | string }) => {
+          const { temperature_value: temperatureValueRaw } = args;
+
+          let temperatureValue: number;
+          if (typeof temperatureValueRaw === 'number') {
+            temperatureValue = temperatureValueRaw;
+          } else if (typeof temperatureValueRaw === 'string') {
+            temperatureValue = parseFloat(temperatureValueRaw);
+          } else {
+            throw new Error('Temperature value must be a number or numeric string');
+          }
+
+          if (Number.isNaN(temperatureValue) || !Number.isFinite(temperatureValue)) {
+            throw new Error(`Temperature value must be a valid number (received: "${temperatureValueRaw}")`);
+          }
+
+          this.logger(`FlowCardManagerService: 🏠 Received external indoor temperature: ${temperatureValue}°C`);
+
+          // Call AdaptiveControlService to store the temperature
+          // @ts-expect-error - serviceCoordinator exists in MyDevice
+          const adaptiveControl = this.device.serviceCoordinator?.getAdaptiveControl();
+          if (adaptiveControl) {
+            await adaptiveControl.receiveExternalTemperature(temperatureValue);
+          }
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_indoor_temperature', receiveExternalIndoorListener);
+
+      // 5. Receive external energy prices
+      const receiveExternalPricesCard = this.device.homey.flow.getActionCard('receive_external_energy_prices');
+      const receiveExternalPricesListener = receiveExternalPricesCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { prices_json: string }) => {
+          this.logger(`FlowCardManagerService: 💰 Received external energy prices (${args.prices_json.length} chars)`);
+          await this.handleReceiveExternalEnergyPrices(args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_energy_prices', receiveExternalPricesListener);
+
+      // 6. Diagnose building model
+      const diagnoseBuildingModelCard = this.device.homey.flow.getActionCard('diagnose_building_model');
+      const diagnoseBuildingModelListener = diagnoseBuildingModelCard.registerRunListener(async () => {
+        this.logger('FlowCardManagerService: 🔍 Running building model diagnostics...');
+
+        // @ts-expect-error - serviceCoordinator exists in MyDevice
+        const buildingModelService = this.device.serviceCoordinator?.getAdaptiveControl()?.getBuildingModelService();
+        if (!buildingModelService) {
+          throw new Error('Building model service not available');
+        }
+
+        // Get structured diagnostics data
+        const diagnostics = await buildingModelService.getDiagnostics();
+
+        // Update building_model_diagnostics capability
+        if (diagnostics && this.device.hasCapability('building_model_diagnostics')) {
+          await this.device.setCapabilityValue('building_model_diagnostics', JSON.stringify(diagnostics));
+        }
+
+        // Log detailed diagnostics
+        await buildingModelService.logDiagnosticStatus();
+
+        this.logger('FlowCardManagerService: ✅ Building model diagnostics completed');
+        return true;
+      });
+      this.flowCardListeners.set('diagnose_building_model', diagnoseBuildingModelListener);
+
+      this.logger('FlowCardManagerService: External data action cards registered (6 cards)');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering external data action cards:', error);
     }
   }
 

@@ -1,0 +1,19 @@
+{
+    "type": "string",
+    "title": {
+        "en": "COP Optimizer Diagnostics",
+        "nl": "COP Optimizer Diagnostiek",
+        "de": "COP-Optimierer-Diagnose",
+        "fr": "Diagnostics de l'optimiseur COP"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": null,
+    "insights": false,
+    "desc": {
+        "en": "JSON diagnostic data for COP optimizer learning status",
+        "nl": "JSON diagnostische gegevens voor COP optimizer leerstatus",
+        "de": "JSON-Diagnosedaten für COP-Optimierer-Lernstatus",
+        "fr": "Données de diagnostic JSON pour l'état d'apprentissage de l'optimiseur COP"
+    }
+}

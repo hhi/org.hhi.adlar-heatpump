@@ -124,7 +124,7 @@ DAN: [Intelligent Heat Pump] Stuur externe energieprijzen {{Prijzen}} voor prijs
 
 ---
 
-## Deel 2: Geavanceerde Flow Card Functies (Demo's)
+## Deel 2: Geavanceerde Flow Card Functies (fictive Demo's)
 
 Na het koppelen van externe data kun je gebruikmaken van krachtige calculator flow cards.
 
