@@ -3376,6 +3376,18 @@ class MyDevice extends Homey.Device {
         this.log('ℹ️ adaptive_control_diagnostics capability already exists, skipping migration');
       }
 
+      // Migration v2.6.1: Add cop_optimizer_diagnostics capability for COP learner status
+      if (!this.hasCapability('cop_optimizer_diagnostics')) {
+        try {
+          this.log('➕ Adding cop_optimizer_diagnostics capability...');
+          await this.addCapability('cop_optimizer_diagnostics');
+          await this.setCapabilityValue('cop_optimizer_diagnostics', '{}');
+          this.log('✅ Migration v2.6.1: Added cop_optimizer_diagnostics capability');
+        } catch (error) {
+          this.error('❌ Failed to add cop_optimizer_diagnostics capability:', error);
+        }
+      }
+
       // Migration v2.5.10: Add category-specific building insight capabilities
       // Note: Old capabilities (building_insight_primary/secondary/recommendation) are no longer
       // removable since their definition files were deleted. Users with old devices should
@@ -4365,151 +4377,25 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Register flow card action listeners
-   * Note: Most ACTION cards are now handled by the app-level pattern-based system in app.ts/flow-helpers.ts
-   * Only custom/complex ACTION cards should be registered here
+   * Register custom/complex device-level ACTION cards (v2.6.1 refactored)
+   *
+   * All action cards are now handled by FlowCardManagerService.registerExternalDataActionCards()
+   * This method is kept for backwards compatibility and future device-specific cards.
    */
   private async registerFlowCardActionListeners(): Promise<void> {
-    this.debugLog('Registering device-level flow card action listeners');
+    this.debugLog('registerFlowCardActionListeners: All action cards now handled by FlowCardManagerService (v2.6.1)');
 
-    try {
-      // All simple ACTION cards (set_target_temperature, set_device_onoff, set_heating_mode,
-      // set_heating_curve, set_work_mode) are now handled by the app-level pattern-based system
-      this.debugLog('Simple ACTION cards are managed by app-level pattern-based system');
+    // v2.6.1: Refactored the following action cards to FlowCardManagerService:
+    // - receive_external_power_data
+    // - receive_external_flow_data
+    // - receive_external_ambient_data
+    // - receive_external_indoor_temperature
+    // - receive_external_energy_prices
+    // - diagnose_building_model
+    // - diagnose_cop_optimizer
 
-      // Reserve this method for custom/complex ACTION cards that need device-specific logic
-
-      // Register external power data action card
-      const receiveExternalPowerAction = this.homey.flow.getActionCard('receive_external_power_data');
-      // eslint-disable-next-line camelcase
-      receiveExternalPowerAction.registerRunListener(async (args: { device: MyDevice; power_value: number }) => {
-        this.categoryLog('energy', `📊 Received external power data: ${args.power_value}W`);
-
-        // Delegate to FlowCardManagerService for business logic (energy calculations, store persistence)
-        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalPowerData(args);
-
-        // Trigger intelligent power update to potentially use this new external data
-        const energyTrackingEnabled = this.getSetting('enable_intelligent_energy_tracking');
-
-        if (energyTrackingEnabled) {
-          this.categoryLog('energy', '📊 Triggering intelligent power measurement update...');
-          await this.updateIntelligentPowerMeasurement();
-        }
-
-        this.categoryLog('energy', `✅ External power data updated: ${args.power_value}W (energy tracking: ${energyTrackingEnabled})`);
-      });
-
-      // Register external flow data action card
-      const receiveExternalFlowAction = this.homey.flow.getActionCard('receive_external_flow_data');
-      // eslint-disable-next-line camelcase
-      receiveExternalFlowAction.registerRunListener(async (args: { device: MyDevice; flow_value: number }) => {
-        this.categoryLog('energy', `🌊 Received external flow data: ${args.flow_value}L/min`);
-
-        // Delegate to FlowCardManagerService for business logic
-        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalFlowData(args);
-
-        this.categoryLog('energy', `✅ External flow data updated: ${args.flow_value}L/min`);
-      });
-
-      // Register external ambient temperature data action card
-      const receiveExternalAmbientAction = this.homey.flow.getActionCard('receive_external_ambient_data');
-      // eslint-disable-next-line camelcase
-      receiveExternalAmbientAction.registerRunListener(async (args: { device: MyDevice; temperature_value: number }) => {
-        this.categoryLog('energy', `🌡️ Received external ambient data: ${args.temperature_value}°C`);
-
-        // Delegate to FlowCardManagerService for business logic
-        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalAmbientData(args);
-
-        this.categoryLog('energy', `✅ External ambient data updated: ${args.temperature_value}°C`);
-      });
-
-      // Register external indoor temperature action card (for adaptive control)
-      const receiveExternalIndoorAction = this.homey.flow.getActionCard('receive_external_indoor_temperature');
-      // eslint-disable-next-line camelcase
-      receiveExternalIndoorAction.registerRunListener(async (args: { device: MyDevice; temperature_value: number | string }) => {
-        const { temperature_value: temperatureValueRaw } = args;
-
-        let temperatureValue: number;
-        if (typeof temperatureValueRaw === 'number') {
-          temperatureValue = temperatureValueRaw;
-        } else if (typeof temperatureValueRaw === 'string') {
-          temperatureValue = parseFloat(temperatureValueRaw);
-        } else {
-          throw new Error('Temperature value must be a number or numeric string');
-        }
-
-        if (Number.isNaN(temperatureValue) || !Number.isFinite(temperatureValue)) {
-          throw new Error(`Temperature value must be a valid number (received: "${temperatureValueRaw}")`);
-        }
-
-        this.log(`🏠 Received external indoor temperature: ${temperatureValue}°C`);
-
-        // Call AdaptiveControlService to store the temperature
-        try {
-          await this.serviceCoordinator?.getAdaptiveControl()?.receiveExternalTemperature(temperatureValue);
-          this.log(`✅ External indoor temperature updated: ${temperatureValue}°C`);
-        } catch (error) {
-          this.error('Failed to update external indoor temperature:', error);
-          throw error; // Re-throw to show error in flow card execution
-        }
-      });
-
-      // Register external energy prices action card (for price optimization)
-      const receiveExternalEnergyPricesAction = this.homey.flow.getActionCard('receive_external_energy_prices');
-      // eslint-disable-next-line camelcase
-      receiveExternalEnergyPricesAction.registerRunListener(async (args: { device: MyDevice; prices_json: string }) => {
-        this.log(`💰 Received external energy prices (${args.prices_json.length} chars)`);
-
-        // Delegate to FlowCardManagerService for business logic
-        await this.serviceCoordinator?.getFlowCardManager()?.handleReceiveExternalEnergyPrices(args);
-
-        this.log('✅ External energy prices updated successfully');
-      });
-
-      // Register building model diagnostic action card
-      const diagnoseBuildingModelAction = this.homey.flow.getActionCard('diagnose_building_model');
-      diagnoseBuildingModelAction.registerRunListener(async () => {
-        this.log('🔍 Running building model diagnostics...');
-
-        try {
-          const buildingModelService = this.serviceCoordinator?.getAdaptiveControl()?.getBuildingModelService();
-
-          // Get structured diagnostics data
-          const diagnostics = await buildingModelService?.getDiagnostics();
-
-          // Update building_model_diagnostics capability
-          if (diagnostics && this.hasCapability('building_model_diagnostics')) {
-            await this.setCapabilityValue('building_model_diagnostics', JSON.stringify(diagnostics));
-            this.log('📊 building_model_diagnostics capability updated');
-          }
-
-          // Log detailed diagnostics to app logs
-          await buildingModelService?.logDiagnosticStatus();
-          this.log('✅ Building model diagnostics completed - check logs above');
-        } catch (error) {
-          this.error('Failed to run building model diagnostics:', error);
-          throw error;
-        }
-      });
-
-      // Register COP optimizer diagnostic action card
-      const diagnoseCOPOptimizerAction = this.homey.flow.getActionCard('diagnose_cop_optimizer');
-      diagnoseCOPOptimizerAction.registerRunListener(async () => {
-        this.log('🔍 Running COP optimizer diagnostics...');
-
-        try {
-          await this.serviceCoordinator?.getAdaptiveControl()?.getCOPOptimizer()?.logDiagnosticStatus();
-          this.log('✅ COP optimizer diagnostics completed - check logs above');
-        } catch (error) {
-          this.error('Failed to run COP optimizer diagnostics:', error);
-          throw error;
-        }
-      });
-
-      // Currently no custom ACTION cards require device-level registration
-    } catch (error) {
-      this.error('Error registering flow card action listeners:', error);
-    }
+    // This method can be used for future device-specific action cards
+    // that require direct access to device internals not available in FlowCardManagerService
   }
 
   /**

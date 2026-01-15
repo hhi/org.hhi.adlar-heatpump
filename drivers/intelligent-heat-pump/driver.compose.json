@@ -8,7 +8,6 @@
     "target_temperature",
     "target_temperature.indoor",
     "measure_temperature.indoor",
-
     "onoff",
     "adlar_hotwater",
     "adlar_enum_water_mode",
@@ -36,7 +35,6 @@
     "measure_temperature.eviout",
     "adlar_measure_pulse_steps_temp_current",
     "adlar_measure_pulse_steps_effluent_temp",
-
     "measure_power",
     "meter_power.power_consumption",
     "meter_power.electric_total",
@@ -46,19 +44,16 @@
     "measure_voltage.voltage_current",
     "measure_voltage.bv",
     "measure_voltage.cv",
-
     "adlar_state_compressor_state",
     "adlar_state_defrost_state",
     "defrost_active_power",
     "adlar_state_backwater",
-
     "adlar_external_power",
     "adlar_external_energy_total",
     "adlar_external_energy_daily",
     "adlar_external_flow",
     "adlar_external_ambient",
     "adlar_external_indoor_temperature",
-
     "adlar_cop",
     "adlar_cop_method",
     "adlar_cop_daily",
@@ -67,14 +62,12 @@
     "adlar_cop_trend",
     "adlar_scop",
     "adlar_scop_quality",
-
     "adlar_simulated_target",
     "adlar_building_c",
     "adlar_building_ua",
     "adlar_building_tau",
     "adlar_building_g",
     "adlar_building_pint",
-
     "adlar_energy_price_current",
     "adlar_energy_price_next",
     "adlar_energy_price_category",
@@ -85,19 +78,18 @@
     "adlar_price_forecast_24h",
     "adlar_cheapest_block_start",
     "adlar_price_savings_potential",
-
     "building_insight_insulation",
     "building_insight_preheating",
     "building_insight_thermal_storage",
     "building_insight_profile",
     "building_insights_diagnostics",
-
     "adlar_fault",
     "adlar_countdowntimer",
     "adlar_connection_status",
     "adlar_connection_active",
     "adaptive_control_diagnostics",
-    "building_model_diagnostics"
+    "building_model_diagnostics",
+    "cop_optimizer_diagnostics"
   ],
   "capabilitiesOptions": {
     "measure_power": {

@@ -157,6 +157,12 @@ export class AdaptiveControlService {
       maxSupplyTemp: 55,
       historySize: 1000,
       logger: this.logger,
+      // v2.6.1: Callback to update cop_optimizer_diagnostics capability
+      onDiagnosticsUpdate: async (diagnosticsJson: string) => {
+        if (this.device.hasCapability('cop_optimizer_diagnostics')) {
+          await this.device.setCapabilityValue('cop_optimizer_diagnostics', diagnosticsJson);
+        }
+      },
     });
 
     // Initialize Integration: Weighted Decision Maker

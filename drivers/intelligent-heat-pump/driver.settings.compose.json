@@ -1317,10 +1317,10 @@
         "id": "daily_cost_threshold",
         "type": "number",
         "label": {
-          "en": "Daily Cost Alert Threshold (€)",
-          "nl": "Dagelijkse Kosten Waarschuwings Drempel (€)",
-          "de": "Tägliche Kosten-Warnschwelle (€)",
-          "fr": "Seuil d'Alerte de Coût Quotidien (€)"
+          "en": "Daily Cost Alert Threshold ",
+          "nl": "Dagelijkse Kosten Waarschuwings Drempel ",
+          "de": "Tägliche Kosten-Warnschwelle ",
+          "fr": "Seuil d'Alerte de Coût Quotidien "
         },
         "hint": {
           "en": "Trigger flow card when daily energy cost exceeds this amount. Used for budget monitoring. Default: €10",
@@ -1343,10 +1343,10 @@
         "id": "adaptive_price_block_hours",
         "type": "number",
         "label": {
-          "en": "Price Block Size (hours)",
-          "nl": "Prijsblok Grootte (uren)",
-          "de": "Preisblock-Größe (Stunden)",
-          "fr": "Taille du Bloc de Prix (heures)"
+          "en": "Price Block Size ",
+          "nl": "Prijsblok Grootte ",
+          "de": "Preisblock-Größe ",
+          "fr": "Taille du Bloc de Prix "
         },
         "hint": {
           "en": "Size of cheapest/expensive blocks for day-ahead planning. Used by 'cheapest block started' trigger and block detection. Default: 4 hours",
@@ -1369,10 +1369,10 @@
         "id": "adaptive_price_warning_hours",
         "type": "number",
         "label": {
-          "en": "Expensive Block Warning Time (hours)",
-          "nl": "Duur Blok Waarschuwingstijd (uren)",
-          "de": "Teurer Block Warnzeit (Stunden)",
-          "fr": "Temps d'Avertissement Bloc Coûteux (heures)"
+          "en": "Expensive Block Warning Time ",
+          "nl": "Duur Blok Waarschuwingstijd ",
+          "de": "Teurer Block Warnzeit ",
+          "fr": "Temps d'Avertissement Bloc Coûteux "
         },
         "hint": {
           "en": "Trigger 'expensive period approaching' flow N hours before expensive block starts. Use to pre-heat building. Default: 2 hours",
@@ -1395,10 +1395,10 @@
         "id": "adaptive_price_trend_hours",
         "type": "number",
         "label": {
-          "en": "Price Trend Analysis Window (hours)",
-          "nl": "Prijstrend Analyse Venster (uren)",
-          "de": "Preistrend-Analysefenster (Stunden)",
-          "fr": "Fenêtre d'Analyse Tendance Prix (heures)"
+          "en": "Price Trend Analysis Window ",
+          "nl": "Prijstrend Analyse Venster ",
+          "de": "Preistrend-Analysefenster ",
+          "fr": "Fenêtre d'Analyse Tendance Prix "
         },
         "hint": {
           "en": "Number of future hours to analyze for price trend detection (rising/falling/stable). Used by 'price trend changed' trigger. Default: 6 hours",

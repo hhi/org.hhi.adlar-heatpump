@@ -37,6 +37,7 @@ export interface COPOptimizerConfig {
   maxSupplyTemp: number; // 55°C
   historySize: number; // 1000 data points
   logger?: (msg: string, ...args: unknown[]) => void;
+  onDiagnosticsUpdate?: (diagnosticsJson: string) => Promise<void>; // v2.6.1: callback for diagnostics capability
 }
 
 export interface COPAction {
@@ -64,7 +65,7 @@ export class COPOptimizer {
 
   constructor(config: COPOptimizerConfig) {
     this.config = config;
-    this.logger = config.logger || (() => {});
+    this.logger = config.logger || (() => { });
   }
 
   /**
@@ -85,6 +86,41 @@ export class COPOptimizer {
     if (this.history.length % 100 === 0) {
       this.logger(`COPOptimizer: Collected ${this.history.length} data points`);
     }
+
+    // v2.6.1: Update diagnostics capability periodically (every 10 samples)
+    if (this.history.length % 10 === 0 && this.config.onDiagnosticsUpdate) {
+      this.updateDiagnosticsCapability().catch((error) => {
+        this.logger(`COPOptimizer: Failed to update diagnostics capability: ${error}`);
+      });
+    }
+  }
+
+  /**
+   * Update cop_optimizer_diagnostics capability with current diagnostic data (v2.6.1)
+   */
+  private async updateDiagnosticsCapability(): Promise<void> {
+    if (!this.config.onDiagnosticsUpdate) {
+      return;
+    }
+
+    const diagnostics = this.getDiagnostics();
+    const diagnosticsJson = JSON.stringify({
+      samples: diagnostics.samplesCollected,
+      capacity: diagnostics.historyCapacity,
+      fillPercent: diagnostics.fillPercentage,
+      bucketsLearned: diagnostics.bucketsLearned,
+      buckets: diagnostics.bucketDetails.map((b) => ({
+        temp: b.outdoorTemp,
+        optimal: b.optimalSupplyTemp,
+        count: b.sampleCount,
+        conf: b.confidence,
+      })),
+      config: diagnostics.configuration,
+      timestamp: new Date().toISOString(),
+    });
+
+    await this.config.onDiagnosticsUpdate(diagnosticsJson);
+    this.logger('COPOptimizer: 📊 Diagnostics capability updated');
   }
 
   /**
@@ -293,7 +329,7 @@ export class COPOptimizer {
       strategy: string;
       tempRange: string;
     };
-    } {
+  } {
     // Calculate samples per bucket for confidence assessment
     const bucketSamples = new Map<number, number>();
     this.history.forEach((point) => {
