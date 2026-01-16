@@ -205,6 +205,8 @@ Détermine quelles cartes de flux sont visibles dans l'éditeur de flux Homey. *
 ### Compteur de Déconnexions Quotidien
 - **Par défaut** : Désactivé
 - **Fonction** : Compte combien de fois la connexion a été perdue
+- **Capacité** : Lorsqu'il est activé, ajoute le capteur `adlar_daily_disconnect_count` à votre appareil
+- **Persistance** : Le paramètre persiste après les mises à jour de l'app et les redémarrages de Homey
 - **Valeur normale** : 0-2 par jour
 - **Problématique** : > 5 par jour → améliorer le signal WiFi ou définir une IP statique
 

@@ -108,6 +108,7 @@
       {
         "id": "cop_calculation_enabled",
         "type": "checkbox",
+        "highlight": true,
         "label": {
           "en": "Enable COP calculation",
           "nl": "COP berekening inschakelen",
@@ -721,6 +722,7 @@
       {
         "id": "adaptive_control_enabled",
         "type": "checkbox",
+        "highlight": true,
         "label": {
           "en": "Enable adaptive temperature control",
           "nl": "Adaptieve temperatuurregeling inschakelen",
@@ -818,6 +820,7 @@
       {
         "id": "building_model_enabled",
         "type": "checkbox",
+        "highlight": true,
         "label": {
           "en": "Enable building model learning",
           "nl": "Gebouwmodel leren inschakelen",
@@ -1063,6 +1066,7 @@
       {
         "id": "price_optimizer_enabled",
         "type": "checkbox",
+        "highlight": true,
         "label": {
           "en": "Enable price optimization",
           "nl": "Prijsoptimalisatie inschakelen",
@@ -1431,6 +1435,7 @@
       {
         "id": "cop_optimizer_enabled",
         "type": "checkbox",
+        "highlight": true,
         "label": {
           "en": "Enable COP optimization",
           "nl": "COP optimalisatie inschakelen",

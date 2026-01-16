@@ -205,6 +205,8 @@ Bepaalt welke flow kaarten zichtbaar zijn in de Homey Flow editor. **Herstart aa
 ### Dagelijkse Disconnect Telling
 - **Standaard**: Uitgeschakeld
 - **Functie**: Telt aantal keer dat verbinding verbroken werd
+- **Capability**: Bij inschakelen wordt de `adlar_daily_disconnect_count` sensor toegevoegd aan je apparaat
+- **Persistentie**: Instelling blijft behouden na app updates en Homey herstarts
 - **Normale waarde**: 0-2 per dag
 - **Problematisch**: > 5 per dag → WiFi signaal verbeteren of vaste IP instellen
 

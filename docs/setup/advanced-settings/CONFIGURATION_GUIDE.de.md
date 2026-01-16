@@ -205,6 +205,8 @@ Bestimmt, welche Flow-Karten im Homey Flow-Editor sichtbar sind. **Neustart nach
 ### Täglicher Trennungszähler
 - **Standard**: Deaktiviert
 - **Funktion**: Zählt, wie oft die Verbindung verloren wurde
+- **Capability**: Bei Aktivierung wird der `adlar_daily_disconnect_count`-Sensor zu Ihrem Gerät hinzugefügt
+- **Persistenz**: Einstellung bleibt nach App-Updates und Homey-Neustarts erhalten
 - **Normaler Wert**: 0-2 pro Tag
 - **Problematisch**: > 5 pro Tag → WLAN-Signal verbessern oder statische IP setzen
 
