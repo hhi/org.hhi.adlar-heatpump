@@ -560,28 +560,44 @@ If pairing fails:
 
 ## Documentation & Support
 
-### Technical Documentation
+### 📚 Documentation Portal
 
-Detailed documentation available in `/docs` directory:
+Complete documentation is available in **4 languages** (🇳🇱 NL, 🇬🇧 EN, 🇩🇪 DE, 🇫🇷 FR):
 
-- **capabilities-overview.md**: Complete capability reference
-- **flow-cards-overview.md**: Flow card system analysis
-- **capability-flowcard-mapping.md**: Registration logic and examples
-- **flow-patterns.md**: Pattern-based management system
-- **REPAIR_MECHANISM_VALIDATION.md**: Credential management evolution and technical details
-- **PROTOCOL_AUTO_DETECTION_DESIGN.md**: Future auto-detection enhancement
+| Language | Documentation Index |
+|----------|---------------------|
+| 🇳🇱 Nederlands | [docs/README.nl.md](docs/README.nl.md) |
+| 🇬🇧 English | [docs/README.en.md](docs/README.en.md) |
+| 🇩🇪 Deutsch | [docs/README.de.md](docs/README.de.md) |
+| 🇫🇷 Français | [docs/README.fr.md](docs/README.fr.md) |
 
-### User Guides
+### 👤 User Guides
 
-- **USER_QUICK_FIX.md**: Quick fix for ECONNRESET errors
-- **PROTOCOL_VERSION_GUIDE.md**: Protocol version troubleshooting
-- **Get Local Keys - instruction.pdf**: Credential retrieval guide
+| Guide | Description |
+|-------|-------------|
+| [Advanced Features Introduction](docs/setup/Advanced_Features_Intro.en.md) | Unlock full functionality with external data |
+| [Configuration Guide](docs/setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | All settings explained |
+| [COP Flow Card Setup](docs/setup/COP%20flow-card-setup.en.md) | Step-by-step COP measurement configuration |
+| [Protocol Version Guide](docs/setup/PROTOCOL_VERSION_GUIDE.en.md) | Tuya protocol troubleshooting (3.3/3.4/3.5) |
+| [Tuya LocalKey Guide](docs/setup/Tuya_LocalKey_Homey_Guide_EN.pdf) | Credential retrieval (PDF) |
+| [Quick Fix Guide](docs/setup/USER_QUICK_FIX.en.md) | Common problems and solutions |
+
+### 🔧 Developer Documentation
+
+Located in `/docs` directory:
+
+| Directory | Contents | Audience |
+|-----------|----------|----------|
+| `setup/` | Installation, configuration, user tutorials | Users, Installers |
+| `COP calculation/` | COP/SCOP algorithms and methodology | Advanced Users, HVAC Pros |
+| `Heatpump specs/` | DPS mappings, capabilities, device specs | Developers |
+| `architecture/` | Service architecture, code patterns | Developers |
+| `Dev support/` | Testing guides, internal documentation | Developers only |
 
 ### Support
 
 - **Issues**: Report bugs and feature requests on GitHub
 - **Community**: Homey Community Forum (Topic ID: 143690)
-- **Installation Guide**: `docs/setup/Get Local Keys - instruction.pdf`
 
 ## Release Notes
 

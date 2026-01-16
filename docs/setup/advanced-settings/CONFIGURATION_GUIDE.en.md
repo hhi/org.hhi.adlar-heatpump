@@ -205,6 +205,8 @@ Determines which flow cards are visible in the Homey Flow editor. **Restart reco
 ### Daily Disconnect Count
 - **Default**: Disabled
 - **Function**: Counts how many times connection was lost
+- **Capability**: When enabled, adds the `adlar_daily_disconnect_count` sensor to your device
+- **Persistence**: Setting persists through app updates and Homey restarts
 - **Normal value**: 0-2 per day
 - **Problematic**: > 5 per day → improve WiFi signal or set static IP
 

@@ -1,4 +1,10 @@
 {
+  "2.5.19": {
+    "en": "Updated documentation: New multilingual Advanced Features Introduction guides and improved configuration documentation.",
+    "nl": "Documentatie bijgewerkt: Nieuwe meertalige Geavanceerde Functies Introductie gidsen en verbeterde configuratie documentatie.",
+    "de": "Dokumentation aktualisiert: Neue mehrsprachige Einführung in erweiterte Funktionen und verbesserte Konfigurationsdokumentation.",
+    "fr": "Documentation mise à jour: Nouveaux guides d'introduction aux fonctionnalités avancées multilingues et documentation de configuration améliorée."
+  },
   "2.5.18": {
     "en": "Added: COP optimizer diagnostics capability shows learning progress (samples collected, temperature buckets learned). Diagnostics update automatically every 50 minutes.",
     "nl": "Toegevoegd: COP optimizer diagnostiek capability toont leervoortgang (verzamelde samples, geleerde temperatuur-buckets). Diagnostiek update automatisch elke 50 minuten.",
