@@ -1,0 +1,58 @@
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#3b82f6', 'primaryTextColor': '#fff', 'primaryBorderColor': '#60a5fa', 'lineColor': '#94a3b8', 'secondaryColor': '#10b981', 'tertiaryColor': '#6b7280', 'background': '#1e1e2e', 'mainBkg': '#1e1e2e'}}}%%
+flowchart TB
+    subgraph features["🎛️ FEATURES (Settings)"]
+        direction TB
+        AC["<b>Adaptive Temperature Control</b><br/><code>adaptive_control_enabled</code>"]
+        BML["<b>Building Model Learning</b><br/><code>building_model_enabled</code>"]
+        BI["<b>Building Insights</b><br/><code>building_insights_enabled</code>"]
+        EPO["<b>Energy Price Optimizer</b><br/><code>price_optimizer_enabled</code>"]
+        COPO["<b>COP Optimizer</b><br/><code>cop_optimizer_enabled</code>"]
+        WC["<b>Weight Calculator</b><br/><code>comfort/efficiency/cost</code>"]
+    end
+
+    subgraph external["📥 EXTERNAL DATA (Flow Cards)"]
+        direction TB
+        TIN["🌡️ Indoor Temperature<br/><i>receive_external_indoor_temperature</i>"]
+        TOUT["🌤️ Outdoor Temperature<br/><i>receive_external_ambient_data</i>"]
+        PWR["⚡ Power Measurement<br/><i>receive_external_power_data</i>"]
+        PRICES["💰 Energy Prices<br/><i>receive_external_energy_prices</i>"]
+    end
+
+    subgraph internal["⚙️ INTERNAL CAPABILITIES"]
+        direction TB
+        TARGET["🎯 Target Temperature<br/><i>target_temperature</i>"]
+        COP["📈 COP Calculation<br/><i>cop_enabled</i>"]
+    end
+
+    %% Feature dependencies - Required (solid lines)
+    AC -->|"required"| TIN
+    AC -->|"required"| TARGET
+    AC -.->|"optional"| TOUT
+    
+    BML -->|"required"| TIN
+    BML -->|"required"| TOUT
+    BML -.->|"enhances"| PWR
+    
+    BI -->|"required"| BML
+    
+    EPO -->|"required"| PRICES
+    EPO -->|"required"| AC
+    
+    COPO -->|"required"| COP
+    COPO -->|"required"| AC
+    
+    COP -->|"required"| PWR
+    
+    WC -->|"configures"| AC
+    WC -.->|"uses"| EPO
+    WC -.->|"uses"| COPO
+
+    %% Styling
+    classDef featureBox fill:#1e40af,stroke:#3b82f6,stroke-width:2px,color:#fff,font-size:12px
+    classDef externalBox fill:#065f46,stroke:#10b981,stroke-width:2px,color:#fff
+    classDef internalBox fill:#374151,stroke:#9ca3af,stroke-width:2px,color:#fff
+    classDef subgraphStyle fill:#1e1e2e,stroke:#444,color:#fff
+
+    class AC,BML,BI,EPO,COPO,WC featureBox
+    class TIN,TOUT,PWR,PRICES externalBox
+    class TARGET,COP internalBox
