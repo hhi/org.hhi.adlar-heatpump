@@ -1,0 +1,92 @@
+# 📚 Adlar Wärmepumpe Dokumentation
+
+Willkommen zur Dokumentation der Adlar Wärmepumpe Homey App.
+
+---
+
+## 🗂️ Verzeichnisübersicht
+
+| Verzeichnis | Beschreibung | Zielgruppe |
+|-------------|--------------|------------|
+| [**setup/**](setup/) | Installationsanleitungen, Konfiguration und Benutzer-Tutorials | 👤 Endbenutzer, Installateure |
+| [**COP calculation/**](COP%20calculation/) | COP- und SCOP-Berechnungsmethodik und Algorithmen | 👤 Fortgeschrittene Benutzer, HVAC-Profis |
+| [**Heatpump specs/**](Heatpump%20specs/) | DPS-Mappings, Capabilities und Gerätespezifikationen | 🔧 Entwickler, technische Integratoren |
+| [**architecture/**](architecture/) | App-Architektur, Service-Patterns und Code-Design | 🔧 Entwickler, Mitwirkende |
+| [**Dev support/**](Dev%20support/) | Entwicklungstools, Testanleitungen und interne Docs | 🔧 Nur Entwickler |
+
+---
+
+## 🌍 Verfügbare Sprachen
+
+Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
+
+| Dokument | 🇳🇱 NL | 🇬🇧 EN | 🇩🇪 DE | 🇫🇷 FR |
+|----------|--------|--------|--------|--------|
+| Einführung Erweiterte Funktionen | [NL](setup/Advanced_Features_Intro.nl.md) | [EN](setup/Advanced_Features_Intro.en.md) | [DE](setup/Advanced_Features_Intro.de.md) | [FR](setup/Advanced_Features_Intro.fr.md) |
+| COP Flow-Karten-Einrichtung | [NL](setup/COP%20flow-card-setup.nl.md) | [EN](setup/COP%20flow-card-setup.en.md) | [DE](setup/COP%20flow-card-setup.de.md) | [FR](setup/COP%20flow-card-setup.fr.md) |
+| Protokollversions-Leitfaden | [NL](setup/PROTOCOL_VERSION_GUIDE.nl.md) | [EN](setup/PROTOCOL_VERSION_GUIDE.en.md) | [DE](setup/PROTOCOL_VERSION_GUIDE.de.md) | [FR](setup/PROTOCOL_VERSION_GUIDE.fr.md) |
+| Konfigurationshandbuch | [NL](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) |
+| Tuya LocalKey-Anleitung | [NL](setup/Tuya_LocalKey_Homey_Guide_NL.pdf) | [EN](setup/Tuya_LocalKey_Homey_Guide_EN.pdf) | [DE](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) | [FR](setup/Tuya_LocalKey_Homey_Guide_FR.pdf) |
+| Schnelle Problemlösung | [NL](setup/USER_QUICK_FIX.nl.md) | [EN](setup/USER_QUICK_FIX.en.md) | [DE](setup/USER_QUICK_FIX.de.md) | [FR](setup/USER_QUICK_FIX.fr.md) |
+
+---
+
+## 📁 Detaillierter Inhalt
+
+### 👤 setup/ — Benutzerdokumentation
+*Für: Endbenutzer, Installateure, HVAC-Profis*
+
+- **Einführung Erweiterte Funktionen** — Wie man erweiterte Funktionen mit externen Daten freischaltet
+- **COP Flow-Karten-Einrichtung** — Schritt-für-Schritt COP-Messkonfiguration
+- **Protokollversions-Leitfaden** — Tuya-Protokollversion-Auswahl (3.3/3.4/3.5)
+- **Konfigurationshandbuch** — Vollständige Einstellungsreferenz
+- **Tuya LocalKey-Anleitung** — Wie man Tuya-Anmeldedaten erhält (PDF)
+- **Schnelle Problemlösung** — Häufige Probleme und Lösungen
+- **guide/** — Zusätzliche detaillierte Anleitungen (Flow-Karten, adaptive Regelung)
+
+### 📊 COP calculation/ — Effizienz-Algorithmen
+*Für: Fortgeschrittene Benutzer, HVAC-Profis, Entwickler*
+
+- **COP-calculation.md** — Echtzeit-COP-Berechnungsmethodik
+- **SCOP-calculation.md** — Saison-COP (SCOP) Algorithmen
+
+### 🔌 Heatpump specs/ — Gerätespezifikationen
+*Für: Entwickler, technische Integratoren*
+
+- **capabilities-overview.md** — Alle Homey Capabilities erklärt
+- **DPsettings2.pdf/xlsx** — Vollständige DPS (Data Point) Zuordnung
+- **R290/** — R290-Kältemittel-spezifische Parameter
+- **R32/** — R32-Kältemittel-spezifische Parameter
+
+### 🏗️ architecture/ — Code-Architektur
+*Für: Entwickler, Mitwirkende*
+
+- **SERVICE_ARCHITECTURE.md** — Microservice Design-Patterns
+- **DPS_MAPPING.md** — Tuya DPS zu Capability-Zuordnung
+- **ERROR_HANDLING.md** — Fehlerbehandlungsstrategien
+- **HEARTBEAT_MECHANISM.md** — Verbindungs-Keepalive-Design
+- **KEY_PATTERNS.md** — Kern-Code-Patterns und Konventionen
+
+### 🔧 Dev support/ — Entwickler-Ressourcen
+*Für: Nur Entwickler*
+
+- **Architectural overview/** — Systemdiagramme und Design-Docs
+- **Flow Card handling/** — Flow-Karten-Implementierungsdetails
+- **Image design/** — Icon- und UI-Asset-Quellen
+- **CALCULATORS.md** — Calculator Flow-Karten-Implementierung
+- **PHASE2_TESTING_GUIDE.md** — Testverfahren
+
+---
+
+## 🚀 Schnellstart
+
+**Neuer Benutzer?** Beginnen Sie hier:
+1. [Tuya LocalKey-Anleitung](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) — Holen Sie sich Ihre Anmeldedaten
+2. [Protokollversions-Leitfaden](setup/PROTOCOL_VERSION_GUIDE.de.md) — Wählen Sie das richtige Protokoll
+3. [Einführung Erweiterte Funktionen](setup/Advanced_Features_Intro.de.md) — Schalten Sie die volle Funktionalität frei
+
+**Probleme?** Prüfen Sie die [Schnelle Problemlösung](setup/USER_QUICK_FIX.de.md)
+
+---
+
+*Letzte Aktualisierung: 2026-01-16*
