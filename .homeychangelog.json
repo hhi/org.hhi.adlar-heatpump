@@ -1,4 +1,10 @@
 {
+  "2.5.20": {
+    "en": "Changed: Building model learning forgetting factor default from 0.998 to 0.999. Confidence now converges to ~75% instead of ~60%. Setting range extended to 0.9995.",
+    "nl": "Gewijzigd: Gebouwmodel leren vergeetfactor standaard van 0.998 naar 0.999. Betrouwbaarheid convergeert nu naar ~75% in plaats van ~60%. Instelling bereik uitgebreid naar 0.9995.",
+    "de": "Geändert: Gebäudemodell-Lernen Vergissfaktor Standard von 0.998 auf 0.999. Vertrauen konvergiert jetzt auf ~75% statt ~60%. Einstellungsbereich auf 0.9995 erweitert.",
+    "fr": "Modifié: Facteur d'oubli d'apprentissage du modèle de bâtiment par défaut de 0.998 à 0.999. La confiance converge maintenant vers ~75% au lieu de ~60%. Plage de paramètres étendue à 0.9995."
+  },
   "2.5.19": {
     "en": "Updated documentation: New multilingual Advanced Features Introduction guides and improved configuration documentation.",
     "nl": "Documentatie bijgewerkt: Nieuwe meertalige Geavanceerde Functies Introductie gidsen en verbeterde configuratie documentatie.",

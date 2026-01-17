@@ -259,9 +259,9 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - **Algorithme** : Moindres carrés récursifs (RLS) avec facteur d'oubli
 
 ### Facteur d'Oubli (Expert)
-- **Par défaut** : 0.998
-- **Plage** : 0.990 - 0.999
-- **Fonction** : Rapidité d'adaptation du modèle aux changements
+- **Par défaut** : 0.999
+- **Plage** : 0.990 - 0.9995
+- **Fonction** : Rapidité d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance (~75%). Plus bas = adaptation plus rapide aux changements saisonniers.
 - **Visible uniquement** : Avec "Cartes de fonction expert HVAC" activé
 
 ### Type de Bâtiment

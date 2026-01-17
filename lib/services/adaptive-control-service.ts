@@ -127,7 +127,7 @@ export class AdaptiveControlService {
     this.buildingModel = new BuildingModelService({
       device: this.device,
       buildingProfile: this.device.getSetting('building_profile') || 'average',
-      forgettingFactor: this.device.getSetting('building_model_forgetting_factor') ?? 0.998,
+      forgettingFactor: this.device.getSetting('building_model_forgetting_factor') ?? 0.999,
       enableDynamicPInt: this.device.getSetting('enable_dynamic_pint') ?? true,
       enableSeasonalG: this.device.getSetting('enable_seasonal_g') ?? true,
       logger: this.logger,
