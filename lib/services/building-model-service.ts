@@ -52,10 +52,12 @@ export class BuildingModelService {
     this.device = config.device;
     this.logger = config.logger || (() => { });
 
-    // Get forgetting factor from config or device settings, fallback to default
+    // Get forgetting factor from config or device settings
+    // Fallback 0.999 needed for backward compatibility (devices updated before setting existed)
+    // Must match default in driver.settings.compose.json
     const forgettingFactor = config.forgettingFactor
       ?? this.device.getSetting('building_model_forgetting_factor')
-      ?? 0.998;
+      ?? 0.999;
 
     // Configure learner with optimal parameters
     const learnerConfig: BuildingModelConfig = {
@@ -666,7 +668,7 @@ export class BuildingModelService {
       const buildingProfile = this.device.getSetting('building_profile') || 'average';
       const enableDynamicPInt = this.device.getSetting('enable_dynamic_pint') ?? true;
       const enableSeasonalG = this.device.getSetting('enable_seasonal_g') ?? true;
-      const forgettingFactor = this.device.getSetting('building_model_forgetting_factor') ?? 0.998;
+      const forgettingFactor = this.device.getSetting('building_model_forgetting_factor') ?? 0.999;
 
       // Create new learner instance with building profile defaults (no restored state)
       const learnerConfig: BuildingModelConfig = {

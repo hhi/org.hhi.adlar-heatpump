@@ -259,9 +259,9 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 - **Algorithmus**: Recursive Least Squares (RLS) mit Vergessensfaktor
 
 ### Vergessensfaktor (Experteneinstellung)
-- **Standard**: 0.998
-- **Bereich**: 0.990 - 0.999
-- **Funktion**: Wie schnell sich das Modell an Änderungen anpasst
+- **Standard**: 0.999
+- **Bereich**: 0.990 - 0.9995
+- **Funktion**: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen (~75%). Niedriger = schnellere Anpassung an saisonale Änderungen.
 - **Nur sichtbar**: Mit aktivierten "Expert HVAC-Funktionskarten"
 
 ### Gebäudetyp

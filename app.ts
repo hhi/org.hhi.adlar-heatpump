@@ -195,8 +195,8 @@ class MyApp extends App {
     );
     this.logger.info('✅ Self-Healing Registry initialized');
 
-    // Enable automatic flow card logging (v2.0.0 - conditional on DEVMODE)
-    enableFlowCardLogging(this.homey, this.log.bind(this));
+    // Enable automatic flow card logging (v2.1.0 - respects logger level)
+    enableFlowCardLogging(this.homey, this.logger.debug.bind(this.logger));
 
     if (process.env.DEBUG === '1') {
       this.log('Development mode detected, enabling debug features');

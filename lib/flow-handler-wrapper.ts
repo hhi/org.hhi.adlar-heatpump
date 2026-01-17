@@ -11,9 +11,9 @@
  * - Zero code changes to existing handlers
  * - Automatic logging of ALL flow cards (actions, conditions, triggers)
  * - Easy debugging: grep for "🎬 Flow" to see all flow activity
- * - Conditional on DEVMODE for production safety
+ * - Respects logger level settings (pass logger.debug for DEBUG-only output)
  *
- * @version 2.0.0
+ * @version 2.1.0
  */
 
 /**
@@ -93,16 +93,17 @@ const summarizeFlowPayload = (payload: unknown): unknown => {
  * Enable automatic flow card logging by intercepting Homey's flow card methods
  *
  * Call this ONCE in app.ts onInit() or device.ts onInit() BEFORE any flow cards are registered.
- * Only enables logging if DEVMODE environment variable is set.
+ * Logging output is controlled by the logger function passed - use logger.debug for DEBUG-only output.
  *
  * @param homey - Homey instance (this.homey from App or Device)
- * @param logger - Logger function (this.log.bind(this))
+ * @param logger - Logger function (use this.logger.debug.bind(this.logger) for level-controlled output)
  *
  * @example
  * ```typescript
  * // In app.ts or device.ts onInit():
  * async onInit() {
- *   enableFlowCardLogging(this.homey, this.log.bind(this));
+ *   // Flow card logs only shown at DEBUG level
+ *   enableFlowCardLogging(this.homey, this.logger.debug.bind(this.logger));
  *   // ... rest of initialization
  * }
  * ```
@@ -111,20 +112,11 @@ export function enableFlowCardLogging(
   homey: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   logger: (message: string, ...args: unknown[]) => void,
 ): void {
-  // Only enable in DEVMODE
-  const devMode = process.env.DEVMODE === '1' || process.env.DEBUG === '1';
-  if (!devMode) {
-    logger('Flow card logging disabled (DEVMODE not set)');
-    return;
-  }
-
   if (flowLoggingEnabled) {
-    logger('⚠️ Flow card logging already enabled - skipping duplicate initialization');
-    return;
+    return; // Already enabled, skip silently
   }
 
   flowLoggingEnabled = true;
-  logger('✅ Flow card logging enabled (DEVMODE active) - intercepting all flow cards');
 
   // Intercept getActionCard, getConditionCard, getTriggerCard
   const flowMethods = ['getActionCard', 'getConditionCard', 'getTriggerCard'] as const;

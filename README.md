@@ -197,7 +197,7 @@ Dynamically calculate output values based on input conditions using configurable
 
 Automatically adjust heating setpoint based on outdoor temperature for optimal efficiency:
 
-![Curve Calculator in Action](docs/Curve%20calculator.png)
+![Curve Calculator in Action](docs/setup/images/Curve%20calculator.png)
 *Screenshot: Weather-compensated heating flow with real-time results*
 
 ```text

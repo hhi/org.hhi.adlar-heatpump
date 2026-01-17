@@ -99,7 +99,7 @@ export function getSeasonalGMultiplier(month: number): number {
 }
 
 export interface BuildingModelConfig {
-  forgettingFactor: number; // 0.995-0.999 = adapt to seasonal changes
+  forgettingFactor: number; // 0.995-0.9995, default 0.999 = balance stability/adaptivity
   initialCovariance: number; // 100 = high initial uncertainty
   minSamplesForConfidence: number; // 288 = 24 hours @ 5min intervals
   buildingProfile?: BuildingProfileType; // Building type for initial parameters
