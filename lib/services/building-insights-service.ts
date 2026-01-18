@@ -123,8 +123,9 @@ export class BuildingInsightsService {
     // Restore state from device store
     await this.restoreState();
 
-    // Update capabilities with current insights
-    await this.updateInsightCapabilities();
+    // Evaluate insights immediately on initialization (v2.5.21)
+    // This ensures capabilities show current status right after app install/update
+    await this.evaluateInsights();
 
     // Start periodic evaluation (every 50 minutes)
     this.evaluationTimer = this.device.homey.setInterval(
@@ -302,8 +303,8 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: lang === 'nl'
-          ? `⏳ Aan het leren (${Math.round(diagnostics.confidence)}%)`
-          : `⏳ Learning (${Math.round(diagnostics.confidence)}%)`,
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
         recommendation: '',
         status: 'new',
       };
@@ -400,8 +401,8 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: lang === 'nl'
-          ? `⏳ Aan het leren (${Math.round(diagnostics.confidence)}%)`
-          : `⏳ Learning (${Math.round(diagnostics.confidence)}%)`,
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
         recommendation: '',
         status: 'new',
       };
@@ -483,8 +484,8 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: lang === 'nl'
-          ? `⏳ Aan het leren (${Math.round(diagnostics.confidence)}%)`
-          : `⏳ Learning (${Math.round(diagnostics.confidence)}%)`,
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
         recommendation: '',
         status: 'new',
       };
@@ -585,8 +586,8 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: lang === 'nl'
-          ? `⏳ Aan het leren (${Math.round(diagnostics.confidence)}%)`
-          : `⏳ Learning (${Math.round(diagnostics.confidence)}%)`,
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
         recommendation: '',
         status: 'new',
       };

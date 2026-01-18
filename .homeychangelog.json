@@ -1,4 +1,16 @@
 {
+  "2.5.22": {
+    "en": "Added: 11 new expert mode alert triggers (9 temperature + 2 pulse steps). Coiler, discharge, suction, high/low pressure, incoiler, tank, economizer inlet/outlet temperature alerts. EEV and EVI pulse steps alerts. All triggers include threshold filtering via RunListeners with self-healing protection.",
+    "nl": "Toegevoegd: 11 nieuwe expert modus alert triggers (9 temperatuur + 2 pulse steps). Coiler, afvoer, zuig-, hoge/lage druk, incoiler, tank, economizer inlaat/uitlaat temperatuur alerts. EEV en EVI pulse steps alerts. Alle triggers met drempelfiltering via RunListeners met self-healing bescherming.",
+    "de": "Hinzugefügt: 11 neue Expertenmodus-Alert-Trigger (9 Temperatur + 2 Pulsschritte). Coiler, Austritt, Ansaug-, Hoch-/Niederdruck, Incoiler, Tank, Economizer-Einlass/-Auslass-Temperaturalarme. EEV- und EVI-Pulsschritt-Alarme. Alle Trigger mit Schwellenwertfilterung über RunListeners mit Self-Healing-Schutz.",
+    "fr": "Ajouté: 11 nouveaux déclencheurs d'alerte mode expert (9 température + 2 pas d'impulsion). Alertes température coiler, évacuation, aspiration, haute/basse pression, incoiler, réservoir, entrée/sortie économiseur. Alertes pas d'impulsion EEV et EVI. Tous les déclencheurs avec filtrage de seuil via RunListeners avec protection auto-réparation."
+  },
+  "2.5.21": {
+    "en": "Building model confidence now shows visible progress for samples beyond minimum (~63% at 850 samples). Learning percentage displays with 1 decimal (e.g., 63.1%).",
+    "nl": "Gebouwmodel betrouwbaarheid toont nu zichtbare voortgang voor samples boven minimum (~63% bij 850 samples). Leerpercentage toont nu 1 decimaal (bijv. 63.1%).",
+    "de": "Gebäudemodell-Vertrauen zeigt jetzt sichtbaren Fortschritt für Samples über dem Minimum (~63% bei 850 Samples). Lernprozentsatz zeigt jetzt 1 Dezimalstelle (z.B. 63.1%).",
+    "fr": "Confiance du modèle de bâtiment affiche maintenant une progression visible au-delà du minimum (~63% à 850 échantillons). Le pourcentage d'apprentissage affiche 1 décimale (ex: 63.1%)."
+  },
   "2.5.20": {
     "en": "Changed: Building model learning forgetting factor default from 0.998 to 0.999. Confidence now converges to ~75% instead of ~60%. Setting range extended to 0.9995.",
     "nl": "Gewijzigd: Gebouwmodel leren vergeetfactor standaard van 0.998 naar 0.999. Betrouwbaarheid convergeert nu naar ~75% in plaats van ~60%. Instelling bereik uitgebreid naar 0.9995.",

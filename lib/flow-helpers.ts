@@ -27,7 +27,7 @@ export interface FlowCardPattern {
   /** Homey capability name this card operates on */
   capabilityName?: string;
   /** Pattern type that determines registration behavior */
-  pattern: 'temperature_alert' | 'voltage_alert' | 'current_alert' | 'pulse_steps_alert' | 'state_change' | 'simple_action' | 'simple_condition';
+  pattern: 'temperature_alert' | 'pulse_steps_alert' | 'state_change' | 'simple_action' | 'simple_condition';
   /** Sensor type for categorization (used with state_change pattern) */
   sensorType?: string;
   /** Optional capability that must exist for this card to be available */
@@ -57,35 +57,7 @@ export function registerTemperatureAlerts(app: ExtendedApp, patterns: FlowCardPa
   }
 }
 
-/**
- * Register voltage alert triggers with pattern-based logic
- */
-interface AppWithTriggers extends App {
-  [key: string]: FlowCardTrigger | unknown;
-}
 
-export function registerVoltageAlerts(app: AppWithTriggers, patterns: FlowCardPattern[]) {
-  for (const pattern of patterns) {
-    const triggerCard: FlowCardTrigger = app.homey.flow.getTriggerCard(pattern.cardId);
-    // Store reference for device instances to use
-    app[`${pattern.cardId.replace(/_/g, '')}Trigger`] = triggerCard;
-  }
-}
-
-/**
- * Register current alert triggers with pattern-based logic
- */
-interface AppWithDynamicTriggers extends App {
-  [key: string]: FlowCardTrigger | unknown;
-}
-
-export function registerCurrentAlerts(app: AppWithDynamicTriggers, patterns: FlowCardPattern[]) {
-  for (const pattern of patterns) {
-    const triggerCard: FlowCardTrigger = app.homey.flow.getTriggerCard(pattern.cardId);
-    // Store reference for device instances to use
-    app[`${pattern.cardId.replace(/_/g, '')}Trigger`] = triggerCard;
-  }
-}
 
 /**
  * Register pulse-steps alert triggers with pattern-based logic
@@ -233,7 +205,7 @@ export function registerSimpleConditions(app: App, patterns: FlowCardPattern[]) 
           // Pattern-based condition logic
           switch (pattern.pattern) {
             case 'simple_condition': {
-            // Extract threshold from args
+              // Extract threshold from args
               const argKeys = Object.keys(args).filter((key) => key !== 'device');
               const thresholdKey = argKeys[0];
               const threshold = args[thresholdKey];
@@ -280,19 +252,6 @@ export const FLOW_PATTERNS = {
     { cardId: 'discharge_temperature_alert', pattern: 'temperature_alert' as const, sensorType: 'discharge' },
     { cardId: 'economizer_inlet_temperature_alert', pattern: 'temperature_alert' as const, sensorType: 'economizer_inlet' },
     { cardId: 'economizer_outlet_temperature_alert', pattern: 'temperature_alert' as const, sensorType: 'economizer_outlet' },
-  ],
-
-  // Voltage alert triggers
-  voltageAlerts: [
-    { cardId: 'phase_a_voltage_alert', pattern: 'voltage_alert' as const, sensorType: 'phase_a' },
-    { cardId: 'phase_b_voltage_alert', pattern: 'voltage_alert' as const, sensorType: 'phase_b' },
-    { cardId: 'phase_c_voltage_alert', pattern: 'voltage_alert' as const, sensorType: 'phase_c' },
-  ],
-
-  // Current alert triggers
-  currentAlerts: [
-    { cardId: 'phase_b_current_alert', pattern: 'current_alert' as const, sensorType: 'phase_b' },
-    { cardId: 'phase_c_current_alert', pattern: 'current_alert' as const, sensorType: 'phase_c' },
   ],
 
   // Pulse-steps alert triggers

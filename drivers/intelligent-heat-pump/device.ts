@@ -208,6 +208,21 @@ class MyDevice extends Homey.Device {
   private lastFanMotorFreq: number | null = null; // For fan_motor_efficiency_alert
   private lastWaterFlow: number | null = null; // For water_flow_alert
 
+  // Temperature alert state tracking (v2.5.x)
+  private lastCoilerTemp: number | null = null; // For coiler_temperature_alert
+  private lastDischargeTemp: number | null = null; // For discharge_temperature_alert
+  private lastSuctionTemp: number | null = null; // For suction_temperature_alert
+  private lastHighPressureTemp: number | null = null; // For high_pressure_temperature_alert
+  private lastLowPressureTemp: number | null = null; // For low_pressure_temperature_alert
+  private lastIncoilerTemp: number | null = null; // For incoiler_temperature_alert
+  private lastTankTemp: number | null = null; // For tank_temperature_alert
+  private lastEconomizerInletTemp: number | null = null; // For economizer_inlet_temperature_alert
+  private lastEconomizerOutletTemp: number | null = null; // For economizer_outlet_temperature_alert
+
+  // Pulse steps alert state tracking (v2.5.x)
+  private lastEevPulseSteps: number | null = null; // For eev_pulse_steps_alert
+  private lastEviPulseSteps: number | null = null; // For evi_pulse_steps_alert
+
   // External power energy tracking
   private lastExternalPowerTimestamp: number | null = null;
 
@@ -2908,6 +2923,188 @@ class MyDevice extends Homey.Device {
                   });
                 }
                 this.lastWaterFlow = transformedValue;
+              }
+
+              // === TEMPERATURE ALERTS (v2.5.x) ===
+              const TEMP_CHANGE_THRESHOLD = 2; // Minimum °C change to trigger
+
+              // Coiler temperature (measure_temperature.coiler_temp)
+              if (capability === 'measure_temperature.coiler_temp' && typeof transformedValue === 'number') {
+                if (this.lastCoilerTemp !== null && Math.abs(transformedValue - this.lastCoilerTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastCoilerTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ coiler_temperature_alert TRIGGER: ${this.lastCoilerTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('coiler_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger coiler_temperature_alert:', err);
+                  });
+                }
+                this.lastCoilerTemp = transformedValue;
+              }
+
+              // Discharge temperature (measure_temperature.venting_temp)
+              if (capability === 'measure_temperature.venting_temp' && typeof transformedValue === 'number') {
+                if (this.lastDischargeTemp !== null && Math.abs(transformedValue - this.lastDischargeTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastDischargeTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ discharge_temperature_alert TRIGGER: ${this.lastDischargeTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('discharge_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger discharge_temperature_alert:', err);
+                  });
+                }
+                this.lastDischargeTemp = transformedValue;
+              }
+
+              // Suction temperature (measure_temperature.coiler_temp_f)
+              if (capability === 'measure_temperature.coiler_temp_f' && typeof transformedValue === 'number') {
+                if (this.lastSuctionTemp !== null && Math.abs(transformedValue - this.lastSuctionTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastSuctionTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ suction_temperature_alert TRIGGER: ${this.lastSuctionTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('suction_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger suction_temperature_alert:', err);
+                  });
+                }
+                this.lastSuctionTemp = transformedValue;
+              }
+
+              // High pressure temperature (measure_temperature.temp_current_f)
+              if (capability === 'measure_temperature.temp_current_f' && typeof transformedValue === 'number') {
+                if (this.lastHighPressureTemp !== null && Math.abs(transformedValue - this.lastHighPressureTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastHighPressureTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ high_pressure_temperature_alert TRIGGER: ${this.lastHighPressureTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('high_pressure_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger high_pressure_temperature_alert:', err);
+                  });
+                }
+                this.lastHighPressureTemp = transformedValue;
+              }
+
+              // Low pressure temperature (measure_temperature.top_temp_f)
+              if (capability === 'measure_temperature.top_temp_f' && typeof transformedValue === 'number') {
+                if (this.lastLowPressureTemp !== null && Math.abs(transformedValue - this.lastLowPressureTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastLowPressureTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ low_pressure_temperature_alert TRIGGER: ${this.lastLowPressureTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('low_pressure_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger low_pressure_temperature_alert:', err);
+                  });
+                }
+                this.lastLowPressureTemp = transformedValue;
+              }
+
+              // Incoiler temperature (measure_temperature.bottom_temp_f)
+              if (capability === 'measure_temperature.bottom_temp_f' && typeof transformedValue === 'number') {
+                if (this.lastIncoilerTemp !== null && Math.abs(transformedValue - this.lastIncoilerTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastIncoilerTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ incoiler_temperature_alert TRIGGER: ${this.lastIncoilerTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('incoiler_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger incoiler_temperature_alert:', err);
+                  });
+                }
+                this.lastIncoilerTemp = transformedValue;
+              }
+
+              // Tank temperature (measure_temperature.around_temp_f)
+              if (capability === 'measure_temperature.around_temp_f' && typeof transformedValue === 'number') {
+                if (this.lastTankTemp !== null && Math.abs(transformedValue - this.lastTankTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastTankTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ tank_temperature_alert TRIGGER: ${this.lastTankTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('tank_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger tank_temperature_alert:', err);
+                  });
+                }
+                this.lastTankTemp = transformedValue;
+              }
+
+              // Economizer inlet temperature (measure_temperature.evlin)
+              if (capability === 'measure_temperature.evlin' && typeof transformedValue === 'number') {
+                if (this.lastEconomizerInletTemp !== null && Math.abs(transformedValue - this.lastEconomizerInletTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastEconomizerInletTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ economizer_inlet_temperature_alert TRIGGER: ${this.lastEconomizerInletTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('economizer_inlet_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger economizer_inlet_temperature_alert:', err);
+                  });
+                }
+                this.lastEconomizerInletTemp = transformedValue;
+              }
+
+              // Economizer outlet temperature (measure_temperature.eviout)
+              if (capability === 'measure_temperature.eviout' && typeof transformedValue === 'number') {
+                if (this.lastEconomizerOutletTemp !== null && Math.abs(transformedValue - this.lastEconomizerOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
+                  const delta = transformedValue - this.lastEconomizerOutletTemp;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🌡️ economizer_outlet_temperature_alert TRIGGER: ${this.lastEconomizerOutletTemp}°C → ${transformedValue}°C`);
+                  this.triggerFlowCard('economizer_outlet_temperature_alert', {
+                    current_temperature: Math.round(transformedValue * 10) / 10,
+                    threshold_temperature: transformedValue,
+                  }, { condition, temperature: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger economizer_outlet_temperature_alert:', err);
+                  });
+                }
+                this.lastEconomizerOutletTemp = transformedValue;
+              }
+
+              // === PULSE STEPS ALERTS (v2.5.x) ===
+              const PULSE_STEPS_THRESHOLD = 20; // Minimum steps change to trigger
+
+              // EEV pulse steps (adlar_measure_pulse_steps_temp_current)
+              if (capability === 'adlar_measure_pulse_steps_temp_current' && typeof transformedValue === 'number') {
+                if (this.lastEevPulseSteps !== null && Math.abs(transformedValue - this.lastEevPulseSteps) >= PULSE_STEPS_THRESHOLD) {
+                  const delta = transformedValue - this.lastEevPulseSteps;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🔧 eev_pulse_steps_alert TRIGGER: ${this.lastEevPulseSteps} → ${transformedValue} steps`);
+                  this.triggerFlowCard('eev_pulse_steps_alert', {
+                    current_pulse_steps: transformedValue,
+                    threshold_pulse_steps: transformedValue,
+                  }, { condition, pulse_steps: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger eev_pulse_steps_alert:', err);
+                  });
+                }
+                this.lastEevPulseSteps = transformedValue;
+              }
+
+              // EVI pulse steps (adlar_measure_pulse_steps_effluent_temp)
+              if (capability === 'adlar_measure_pulse_steps_effluent_temp' && typeof transformedValue === 'number') {
+                if (this.lastEviPulseSteps !== null && Math.abs(transformedValue - this.lastEviPulseSteps) >= PULSE_STEPS_THRESHOLD) {
+                  const delta = transformedValue - this.lastEviPulseSteps;
+                  const condition = delta > 0 ? 'above' : 'below';
+                  this.log(`🔧 evi_pulse_steps_alert TRIGGER: ${this.lastEviPulseSteps} → ${transformedValue} steps`);
+                  this.triggerFlowCard('evi_pulse_steps_alert', {
+                    current_pulse_steps: transformedValue,
+                    threshold_pulse_steps: transformedValue,
+                  }, { condition, pulse_steps: transformedValue }).catch((err) => {
+                    this.error('Failed to trigger evi_pulse_steps_alert:', err);
+                  });
+                }
+                this.lastEviPulseSteps = transformedValue;
               }
             }
 

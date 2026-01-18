@@ -445,13 +445,27 @@ export class BuildingModelLearner {
    *
    * Confidence combines:
    * - Sample count coverage (0-100% based on minSamplesForConfidence)
+   * - Bonus for samples beyond minimum (logarithmic scale, max 15%)
    * - Parameter certainty (inverse of covariance trace)
    *
    * @version 2.4.6 - Threshold increased from 400 to 500 to show learning progress from initialization
+   * @version 2.5.21 - Added logarithmic bonus for samples beyond minimum for visible progress
    */
   private calculateConfidence(): number {
-    // Component 1: Sample count coverage
-    const sampleCoverage = Math.min(this.sampleCount / this.minSamplesForConfidence, 1.0);
+    // Component 1: Sample count coverage (base + bonus for extra samples)
+    const baseCoverage = Math.min(this.sampleCount / this.minSamplesForConfidence, 1.0);
+
+    // Bonus for samples beyond minimum: logarithmic scale for diminishing returns
+    // Gives visible progress credit for continued data collection
+    // At 850 samples (2.95x min): bonus ≈ 5.4% → ~63% instead of 60%
+    // At 1440 samples (5x min): bonus ≈ 8% → ~65% instead of 60%
+    // At 2880 samples (10x min): bonus ≈ 11.5% → ~68% instead of 60%
+    const extraSamplesBonus = this.sampleCount > this.minSamplesForConfidence
+      ? 0.05 * Math.log(this.sampleCount / this.minSamplesForConfidence)
+      : 0;
+
+    // Cap total sample coverage at 1.15 (max 15% bonus from extra samples)
+    const sampleCoverage = Math.min(baseCoverage + extraSamplesBonus, 1.15);
 
     // Component 2: Parameter certainty (lower covariance = higher certainty)
     // Trace range: 400 (init) → 100 (converged) → 10-50 (fully learned)

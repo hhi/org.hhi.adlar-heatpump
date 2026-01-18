@@ -10,8 +10,6 @@ import {
 import enableDebugInspector from './app-debug'; // Uncomment and fix path if file exists
 import {
   registerTemperatureAlerts,
-  registerVoltageAlerts,
-  registerCurrentAlerts,
   registerPulseStepsAlerts,
   registerStateChanges,
   registerSimpleActions,
@@ -268,8 +266,6 @@ class MyApp extends App {
   registerPatternBasedCards() {
     // Register all pattern-based triggers
     registerTemperatureAlerts(this, FLOW_PATTERNS.temperatureAlerts);
-    registerVoltageAlerts(this, FLOW_PATTERNS.voltageAlerts);
-    registerCurrentAlerts(this, FLOW_PATTERNS.currentAlerts);
     registerPulseStepsAlerts(this, FLOW_PATTERNS.pulseStepsAlerts);
     registerStateChanges(this, FLOW_PATTERNS.stateChanges);
 
@@ -298,9 +294,6 @@ class MyApp extends App {
     this.registerLinearHeatingCurveCard();
     this.registerTimeScheduleCard();
     this.registerSeasonalModeCard();
-
-    // Adaptive control action cards
-    this.registerExternalEnergyPricesCard();
 
     this.debugLog('Custom cards registered successfully');
   }
@@ -815,101 +808,38 @@ class MyApp extends App {
   }
 
   /**
-   * Register external energy prices action card
-   *
-   * Allows users to send energy prices from external sources (e.g., dynamic tariff providers)
-   * to the EnergyPriceOptimizer for price-based heating optimization.
-   *
-   * Replaces the deprecated EnergyZero API integration with a flexible flow card approach.
-   */
-  registerExternalEnergyPricesCard() {
-    const energyPricesCard = this.homey.flow.getActionCard('receive_external_energy_prices');
-
-    energyPricesCard.registerRunListener(async (args, state) => {
-      const { device, prices_json: pricesJson } = args;
-
-      try {
-        // Input validation
-        if (!pricesJson || typeof pricesJson !== 'string' || pricesJson.trim() === '') {
-          throw new Error('Energy prices JSON cannot be empty');
-        }
-
-        // Parse JSON
-        let pricesObject: Record<string, number>;
-        try {
-          pricesObject = JSON.parse(pricesJson);
-        } catch (parseError) {
-          throw new Error(`Invalid JSON format: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
-        }
-
-        // Get AdaptiveControlService from device (accessing internal service property)
-        const adaptiveService = (device as unknown as { adaptiveControl?: { setExternalEnergyPrices: (prices: Record<string, number>) => void } }).adaptiveControl;
-
-        if (!adaptiveService) {
-          throw new Error('Adaptive Control Service not available on this device');
-        }
-
-        // Set external prices via service method
-        adaptiveService.setExternalEnergyPrices(pricesObject);
-
-        // Log success (only in debug mode)
-        this.debugLog('External energy prices received:', {
-          device: device.getName(),
-          priceCount: Object.keys(pricesObject).length,
-          pricesPreview: JSON.stringify(pricesObject).substring(0, 100),
-        });
-
-        // Standard logging for production
-        this.log(`Energy prices updated successfully for ${device.getName()} (${Object.keys(pricesObject).length} hours)`);
-
-        return true;
-
-      } catch (error) {
-        // Error logging
-        this.error('Failed to set external energy prices:', error);
-
-        // Re-throw with user-friendly message
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        throw new Error(`Energy prices update failed: ${errorMessage}`);
-      }
-    });
-
-    this.debugLog('External energy prices card registered successfully');
-  }
-
-  /**
-   * Register runListeners for "changed" trigger cards (v1.3.2+, fixed v1.3.4, enhanced v1.3.5)
-   *
-   * CRITICAL FIX: These triggers have user args (condition + threshold/state)
-   * but were missing runListeners to filter flows based on user-specified values.
-   *
-   * Without runListeners:
-   * - Trigger fires on ANY change
-   * - User args (above/below, threshold) are IGNORED
-   * - Flows execute regardless of condition
-   *
-   * With runListeners:
-   * - Homey evaluates args.condition vs state.condition
-   * - Flow only executes if user-specified threshold is crossed
-   * - Proper filtering based on user intent
-   *
-   * v1.3.4 Bug Fixes:
-   * - Added try-catch blocks to prevent unhandled Promise rejections
-   * - Added state validation to handle undefined/null values safely
-   * - Removed unsafe .toUpperCase() calls that could throw on undefined
-   * - All runListeners now fail-safe (return false on error)
-   *
-   * v1.3.5 Self-Healing:
-   * - Auto-disables runListeners after 50 errors/hour (prevents crash loops)
-   * - Graceful degradation: disabled features fall back to "execute all flows" mode
-   * - Auto-re-enables after 1 hour cooldown (automatic recovery)
-   * - Prevents permanent device failure from recurring bugs
-   *
-   * Affected triggers (9 total):
-   * - Temperature-based (3): ambient, inlet, outlet
-   * - COP-based (3): real-time, daily, monthly
-   * - State-based (3): compressor, defrost, backwater
-   */
+ * Register runListeners for "changed" trigger cards (v1.3.2+, fixed v1.3.4, enhanced v1.3.5)
+ *
+ * CRITICAL FIX: These triggers have user args (condition + threshold/state)
+ * but were missing runListeners to filter flows based on user-specified values.
+ *
+ * Without runListeners:
+ * - Trigger fires on ANY change
+ * - User args (above/below, threshold) are IGNORED
+ * - Flows execute regardless of condition
+ *
+ * With runListeners:
+ * - Homey evaluates args.condition vs state.condition
+ * - Flow only executes if user-specified threshold is crossed
+ * - Proper filtering based on user intent
+ *
+ * v1.3.4 Bug Fixes:
+ * - Added try-catch blocks to prevent unhandled Promise rejections
+ * - Added state validation to handle undefined/null values safely
+ * - Removed unsafe .toUpperCase() calls that could throw on undefined
+ * - All runListeners now fail-safe (return false on error)
+ *
+ * v1.3.5 Self-Healing:
+ * - Auto-disables runListeners after 50 errors/hour (prevents crash loops)
+ * - Graceful degradation: disabled features fall back to "execute all flows" mode
+ * - Auto-re-enables after 1 hour cooldown (automatic recovery)
+ * - Prevents permanent device failure from recurring bugs
+ *
+ * Affected triggers (9 total):
+ * - Temperature-based (3): ambient, inlet, outlet
+ * - COP-based (3): real-time, daily, monthly
+ * - State-based (3): compressor, defrost, backwater
+ */
   registerChangedTriggerRunListeners() {
     // ========================================
     // CATEGORY 1: Temperature-Based Triggers (3)
@@ -1309,7 +1239,107 @@ class MyApp extends App {
       }
     });
 
-    this.log(`Changed trigger runListeners registered successfully (12 triggers with self-healing: 9 standard + 3 expert mode, threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`);
+    // === TEMPERATURE ALERT RUN LISTENERS (v2.5.x) ===
+    const temperatureAlerts = [
+      'coiler_temperature_alert',
+      'discharge_temperature_alert',
+      'suction_temperature_alert',
+      'high_pressure_temperature_alert',
+      'low_pressure_temperature_alert',
+      'incoiler_temperature_alert',
+      'tank_temperature_alert',
+      'economizer_inlet_temperature_alert',
+      'economizer_outlet_temperature_alert',
+    ];
+
+    for (const alertId of temperatureAlerts) {
+      const card = this.homey.flow.getDeviceTriggerCard(alertId);
+      card.registerRunListener(async (args, state) => {
+        try {
+          // Self-healing check
+          if (!this.selfHealing.isFeatureEnabled(alertId)) {
+            this.debugLog(`${alertId}: Disabled by self-healing - executing flow (degraded mode)`);
+            return true;
+          }
+
+          // Validate inputs
+          if (!state?.condition || typeof state?.temperature !== 'number') {
+            this.error(`${alertId}: Invalid state object`, { state });
+            this.selfHealing.trackError(alertId, { error: 'Invalid state', state });
+            return false;
+          }
+          if (!args?.condition || typeof args?.temperature !== 'number') {
+            this.error(`${alertId}: Invalid args object`, { args });
+            this.selfHealing.trackError(alertId, { error: 'Invalid args', args });
+            return false;
+          }
+
+          const userCondition = args.condition;
+          const userThreshold = args.temperature;
+          const currentTemp = state.temperature;
+
+          this.debugLog(`🌡️ ${alertId} runListener:`, { userCondition, userThreshold, currentTemp });
+
+          const shouldExecute = (userCondition === 'above')
+            ? currentTemp >= userThreshold
+            : currentTemp <= userThreshold;
+
+          this.debugLog(`  → User wants ${userCondition.toUpperCase()} ${userThreshold}°C, current: ${currentTemp}°C → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+          return shouldExecute;
+        } catch (error) {
+          this.error(`${alertId} runListener error:`, error);
+          this.selfHealing.trackError(alertId, { error });
+          return false;
+        }
+      });
+    }
+
+    // === PULSE STEPS ALERT RUN LISTENERS (v2.5.x) ===
+    const pulseStepsAlerts = ['eev_pulse_steps_alert', 'evi_pulse_steps_alert'];
+
+    for (const alertId of pulseStepsAlerts) {
+      const card = this.homey.flow.getDeviceTriggerCard(alertId);
+      card.registerRunListener(async (args, state) => {
+        try {
+          // Self-healing check
+          if (!this.selfHealing.isFeatureEnabled(alertId)) {
+            this.debugLog(`${alertId}: Disabled by self-healing - executing flow (degraded mode)`);
+            return true;
+          }
+
+          // Validate inputs
+          if (!state?.condition || typeof state?.pulse_steps !== 'number') {
+            this.error(`${alertId}: Invalid state object`, { state });
+            this.selfHealing.trackError(alertId, { error: 'Invalid state', state });
+            return false;
+          }
+          if (!args?.condition || typeof args?.pulse_steps !== 'number') {
+            this.error(`${alertId}: Invalid args object`, { args });
+            this.selfHealing.trackError(alertId, { error: 'Invalid args', args });
+            return false;
+          }
+
+          const userCondition = args.condition;
+          const userThreshold = args.pulse_steps;
+          const currentSteps = state.pulse_steps;
+
+          this.debugLog(`🔧 ${alertId} runListener:`, { userCondition, userThreshold, currentSteps });
+
+          const shouldExecute = (userCondition === 'above')
+            ? currentSteps >= userThreshold
+            : currentSteps <= userThreshold;
+
+          this.debugLog(`  → User wants ${userCondition.toUpperCase()} ${userThreshold} steps, current: ${currentSteps} → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+          return shouldExecute;
+        } catch (error) {
+          this.error(`${alertId} runListener error:`, error);
+          this.selfHealing.trackError(alertId, { error });
+          return false;
+        }
+      });
+    }
+
+    this.log(`Changed trigger runListeners registered successfully (23 triggers with self-healing: 9 standard + 3 expert mode + 11 new alerts, threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`);
   }
 }
 
