@@ -206,11 +206,11 @@ export class BuildingModelService {
     // Determine learning status and confidence emoji (v2.0.3)
     const statusKey = isDefault ? 'building_model.status_default' : 'building_model.status_learned';
     const status = this.device.homey.__(statusKey);
-    const confidencePercent = Math.round(model.confidence);
+    const confidencePercent = model.confidence.toFixed(1); // v2.5.21: Show 1 decimal for visible progress
     let confidenceEmoji = '🔴'; // Default: low confidence
-    if (confidencePercent >= 70) {
+    if (model.confidence >= 70) {
       confidenceEmoji = '🟢'; // High confidence
-    } else if (confidencePercent >= 40) {
+    } else if (model.confidence >= 40) {
       confidenceEmoji = '🟡'; // Medium confidence
     }
 
