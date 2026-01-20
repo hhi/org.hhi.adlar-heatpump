@@ -421,8 +421,8 @@ export class BuildingInsightsService {
     // Calculate time constant
     const tau = model.C / model.UA; // hours
 
-    // Defensive: Validate tau is finite and in reasonable range (0.5h - 100h)
-    if (!Number.isFinite(tau) || tau < 0.5 || tau > 100) {
+    // Defensive: Validate tau is finite and in reasonable range (0.5h - 250h)
+    if (!Number.isFinite(tau) || tau < 0.5 || tau > 250) {
       this.logger('BuildingInsightsService: Invalid tau calculated for pre-heating:', tau);
       return null;
     }
@@ -1096,29 +1096,6 @@ export class BuildingInsightsService {
   // ==================== PUBLIC API FOR FLOW CARDS ====================
 
   /**
-   * Flow Action: Dismiss insight for specified duration
-   * Used by: dismiss_insight flow action card
-   */
-  public async dismissInsight(category: InsightCategory, durationDays: number): Promise<void> {
-    // Defensive: Validate duration is reasonable (1-365 days)
-    if (typeof durationDays !== 'number' || durationDays < 1 || durationDays > 365) {
-      this.logger('BuildingInsightsService: Invalid duration for dismiss insight:', durationDays);
-      throw new Error('Duration must be between 1 and 365 days');
-    }
-
-    const insight = this.activeInsights.get(category);
-    if (insight) {
-      insight.status = 'dismissed';
-      insight.dismissedUntil = Date.now() + durationDays * 24 * 60 * 60 * 1000;
-      await this.updateInsightCapabilities();
-      await this.persistState();
-      this.logger(`BuildingInsightsService: Dismissed ${category} for ${durationDays} days`);
-    } else {
-      this.logger(`BuildingInsightsService: No active insight for category ${category} to dismiss`);
-    }
-  }
-
-  /**
    * Flow Action: Force immediate insight analysis
    * Used by: force_insight_analysis flow action card
    * @returns Object with insights_detected and confidence for flow tokens
@@ -1135,49 +1112,6 @@ export class BuildingInsightsService {
       insights_detected: insightsCount,
       confidence: diagnostics.confidence,
     };
-  }
-
-  /**
-   * Flow Action: Reset all insight history
-   * Used by: reset_insight_history flow action card
-   */
-  public async resetInsightHistory(): Promise<void> {
-    this.logger('BuildingInsightsService: Resetting all insight history');
-
-    // Clear all active insights
-    this.activeInsights.clear();
-
-    // Clear history
-    this.insightHistory = [];
-
-    // Reset last evaluation time
-    this.lastEvaluationTime = 0;
-
-    // Update capabilities (will clear all insight strings)
-    await this.updateInsightCapabilities();
-
-    // Persist cleared state
-    await this.persistState();
-
-    this.logger('BuildingInsightsService: Insight history reset complete');
-  }
-
-  /**
-   * Flow Action: Set confidence threshold dynamically
-   * Used by: set_confidence_threshold flow action card
-   */
-  public async setConfidenceThreshold(threshold: number): Promise<void> {
-    // Defensive: Validate threshold is in valid range (50-90%)
-    if (typeof threshold !== 'number' || threshold < 50 || threshold > 90) {
-      this.logger('BuildingInsightsService: Invalid confidence threshold:', threshold);
-      throw new Error('Confidence threshold must be between 50 and 90');
-    }
-
-    this.minConfidence = threshold;
-    this.logger(`BuildingInsightsService: Confidence threshold set to ${threshold}%`);
-
-    // Trigger immediate re-evaluation with new threshold
-    await this.evaluateInsights();
   }
 
   /**

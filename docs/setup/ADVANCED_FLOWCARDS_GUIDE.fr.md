@@ -10,10 +10,10 @@
 | Module | Triggers | Conditions | Actions | Total |
 |--------|----------|------------|---------|-------|
 | Contrôle Adaptatif | 3 | 2 | 2 | **7** |
-| Modèle de Bâtiment | 1 | 1 | 2 | **4** |
+| Modèle de Bâtiment | 1 | 1 | 0 | **2** |
 | Optimiseur Énergie/Prix | 2 | 3 | 1 | **6** |
-| Optimiseur COP | 5 | 5 | 1 | **11** |
-| Aperçus du Bâtiment | 1 | 1 | 4 | **6** |
+| Optimiseur COP | 5 | 5 | 0 | **10** |
+| Aperçus du Bâtiment | 1 | 1 | 1 | **3** |
 
 ---
 
@@ -77,11 +77,7 @@
 
 ## 2️⃣ Apprentissage du Modèle de Bâtiment
 
-### 🟢 ACTIONS
-
-| Flow ID | Titre | Description |
-|---------|-------|-------------|
-| `diagnose_building_model` | Diagnostiquer l'apprentissage du modèle | Journalise l'état τ/C/UA |
+> **Note**: Les diagnostics du modèle de bâtiment sont automatiquement mis à jour vers la capacité `building_model_diagnostics`.
 
 ---
 
@@ -143,11 +139,7 @@
 
 ---
 
-### 🟢 ACTIONS
-
-| Flow ID | Titre | Description |
-|---------|-------|-------------|
-| `diagnose_cop_optimizer` | Diagnostiquer l'apprentissage optimiseur COP | Journalise les échantillons par bucket de temp |
+> **Note**: Les diagnostics de l'optimiseur COP sont automatiquement mis à jour vers la capacité `cop_optimizer_diagnostics`.
 
 ---
 
@@ -188,9 +180,6 @@
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Forcer l'analyse des aperçus | Évaluer immédiatement (tokens: insights_detected, confidence) |
-| `dismiss_insight` | Ignorer l'aperçu | Masquer la catégorie pendant X jours |
-| `reset_insight_history` | Réinitialiser l'historique des aperçus | Effacer tous les aperçus ignorés |
-| `set_confidence_threshold` | Définir le seuil de confiance | Ajuster dynamiquement (50-90%) |
 
 ---
 
@@ -241,12 +230,7 @@
 | `receive_external_power_data` | `flow-card-manager-service.ts:945` |
 | `receive_external_flow_data` | `flow-card-manager-service.ts:964` |
 | `receive_external_ambient_data` | `flow-card-manager-service.ts:976` |
-| `diagnose_building_model` | `flow-card-manager-service.ts:1033` |
-| `diagnose_cop_optimizer` | `flow-card-manager-service.ts:857` |
 | `force_insight_analysis` | `flow-card-manager-service.ts:745` |
-| `dismiss_insight` | `flow-card-manager-service.ts:731` |
-| `reset_insight_history` | `flow-card-manager-service.ts:762` |
-| `set_confidence_threshold` | `flow-card-manager-service.ts:782` |
 
 #### CONDITIONS
 

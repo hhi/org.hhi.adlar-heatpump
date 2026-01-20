@@ -2,10 +2,10 @@
     "id": "building_insight_preheating",
     "type": "string",
     "title": {
-        "en": "Pre-heating Strategy",
-        "nl": "Voorverwarming Advies",
-        "de": "Vorheizstrategie",
-        "fr": "Stratégie de Préchauffage"
+        "en": "Pre-heating Strategy (comfort)",
+        "nl": "Voorverwarming Advies (comfort)",
+        "de": "Vorheizstrategie (Komfort)",
+        "fr": "Stratégie de Préchauffage (confort)"
     },
     "desc": {
         "en": "Pre-heating recommendations based on thermal response speed",

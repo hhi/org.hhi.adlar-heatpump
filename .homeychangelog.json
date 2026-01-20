@@ -1,4 +1,10 @@
 {
+  "2.5.23": {
+    "en": "Fixed: Pre-heating insight now works for heavy buildings with high thermal mass (τ > 100h). Removed: 5 rarely-used flow action cards (diagnose building model, diagnose COP optimizer, dismiss insight, reset insight history, set confidence threshold).",
+    "nl": "Opgelost: Voorverwarming inzicht werkt nu voor zware gebouwen met hoge thermische massa (τ > 100u). Verwijderd: 5 weinig gebruikte flow actiekaarten (diagnosticeer gebouwmodel, diagnosticeer COP optimizer, negeer inzicht, reset inzicht geschiedenis, stel betrouwbaarheidsdrempel in).",
+    "de": "Behoben: Vorheiz-Erkenntnis funktioniert jetzt für schwere Gebäude mit hoher thermischer Masse (τ > 100h). Entfernt: 5 selten genutzte Flow-Aktionskarten (Gebäudemodell diagnostizieren, COP-Optimierer diagnostizieren, Erkenntnis verwerfen, Erkenntnishistorie zurücksetzen, Vertrauensschwelle festlegen).",
+    "fr": "Corrigé: L'aperçu de préchauffage fonctionne maintenant pour les bâtiments lourds avec une masse thermique élevée (τ > 100h). Supprimé: 5 cartes d'action de flux rarement utilisées (diagnostiquer modèle de bâtiment, diagnostiquer optimiseur COP, ignorer aperçu, réinitialiser historique des aperçus, définir seuil de confiance)."
+  },
   "2.5.22": {
     "en": "Added: 11 new expert mode alert triggers (9 temperature + 2 pulse steps). Coiler, discharge, suction, high/low pressure, incoiler, tank, economizer inlet/outlet temperature alerts. EEV and EVI pulse steps alerts. All triggers include threshold filtering via RunListeners with self-healing protection.",
     "nl": "Toegevoegd: 11 nieuwe expert modus alert triggers (9 temperatuur + 2 pulse steps). Coiler, afvoer, zuig-, hoge/lage druk, incoiler, tank, economizer inlaat/uitlaat temperatuur alerts. EEV en EVI pulse steps alerts. Alle triggers met drempelfiltering via RunListeners met self-healing bescherming.",
