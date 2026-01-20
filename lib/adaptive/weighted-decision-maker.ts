@@ -27,6 +27,7 @@ export interface WeightedPriorities {
   comfort: number; // 0.0 - 1.0
   efficiency: number; // 0.0 - 1.0
   cost: number; // 0.0 - 1.0
+  thermal?: number; // 0.0 - 1.0 (v2.6.0: building model component)
 }
 
 /**
@@ -48,6 +49,7 @@ export interface CombinedAction {
     comfort: number;
     efficiency: number;
     cost: number;
+    thermal?: number; // v2.6.0: building model component
   };
   reasoning: string[];
   priority: 'low' | 'medium' | 'high';
@@ -55,6 +57,7 @@ export interface CombinedAction {
     comfort: number;
     efficiency: number;
     cost: number;
+    thermal?: number; // v2.6.0
   };
 }
 
@@ -163,6 +166,115 @@ export class WeightedDecisionMaker {
       reasoning,
       priority,
       effectiveWeights: normalizedWeights, // Show confidence-adjusted weights
+    };
+  }
+
+  /**
+   * Combine all controller actions with thermal component (4-way weighting)
+   * v2.6.0: Building model integration
+   *
+   * Weights: comfort=50%, efficiency=20%, cost=10%, thermal=20%
+   * (when all components have sufficient confidence)
+   *
+   * @param heatingAction - PI controller action (always trusted)
+   * @param copAction - COP optimizer action
+   * @param priceAction - Energy price optimizer action
+   * @param thermalAction - Building model thermal action
+   * @param confidenceMetrics - Confidence levels for adaptive weighting
+   * @returns Combined action with 4-component breakdown
+   *
+   * @version 2.7.0
+   * @since 2.7.0
+   */
+  public combineActionsWithThermal(
+    heatingAction: ControllerAction | null,
+    copAction: COPAction | null,
+    priceAction: PriceAction | null,
+    thermalAction: { adjustment: number; reason: string; priority: 'low' | 'medium' | 'high' } | null,
+    confidenceMetrics: ConfidenceMetrics,
+  ): CombinedAction {
+    const reasoning: string[] = [];
+
+    // Extract adjustments from each controller
+    const comfortAdjust = heatingAction?.temperatureAdjustment || 0;
+    const efficiencyAdjust = this.extractCOPAdjustment(copAction);
+    const costAdjust = this.extractPriceAdjustment(priceAction);
+    const thermalAdjust = thermalAction?.adjustment || 0;
+
+    // =========================================================================
+    // 4-WAY CONFIDENCE-AWARE WEIGHT ADJUSTMENT
+    // Reduce weights for low-confidence optimizers, redistribute to comfort
+    // =========================================================================
+
+    // Default priorities for 4-way: comfort=50%, efficiency=20%, cost=10%, thermal=20%
+    const basePriorities = {
+      comfort: this.priorities.thermal !== undefined ? 0.50 : this.priorities.comfort,
+      efficiency: this.priorities.thermal !== undefined ? 0.20 : this.priorities.efficiency,
+      cost: this.priorities.thermal !== undefined ? 0.10 : this.priorities.cost,
+      thermal: this.priorities.thermal ?? 0.20,
+    };
+
+    // Apply confidence multipliers
+    const effectiveEfficiencyWeight = basePriorities.efficiency * confidenceMetrics.copConfidence;
+    const effectiveCostWeight = basePriorities.cost * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
+    const effectiveThermalWeight = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0);
+
+    // Calculate total effective weight
+    const totalEffectiveWeight = basePriorities.comfort + effectiveEfficiencyWeight + effectiveCostWeight + effectiveThermalWeight;
+
+    // Normalize weights to sum to 1.0
+    const normalizedWeights = {
+      comfort: basePriorities.comfort / totalEffectiveWeight,
+      efficiency: effectiveEfficiencyWeight / totalEffectiveWeight,
+      cost: effectiveCostWeight / totalEffectiveWeight,
+      thermal: effectiveThermalWeight / totalEffectiveWeight,
+    };
+
+    // Add reasoning for each component
+    if (heatingAction) {
+      reasoning.push(`Comfort: ${heatingAction.reason}`);
+    }
+    if (copAction && copAction.action !== 'maintain') {
+      reasoning.push(`Efficiency: ${copAction.reason}`);
+    }
+    if (priceAction && priceAction.action !== 'maintain') {
+      reasoning.push(`Cost: ${priceAction.reason}`);
+    }
+    if (thermalAction && thermalAction.adjustment !== 0) {
+      reasoning.push(`${thermalAction.reason}`);
+    } else if (confidenceMetrics.buildingModelConfidence < 0.5) {
+      reasoning.push('⚠️ Thermal: confidence <50%, disabled');
+    }
+
+    // Apply normalized weights (4-way)
+    const finalAdjustment = comfortAdjust * normalizedWeights.comfort
+      + efficiencyAdjust * normalizedWeights.efficiency
+      + costAdjust * normalizedWeights.cost
+      + thermalAdjust * normalizedWeights.thermal;
+
+    // Determine overall priority (highest wins)
+    const allPriorities = [
+      heatingAction?.priority,
+      copAction?.priority,
+      priceAction?.priority,
+      thermalAction?.priority,
+    ].filter(Boolean) as ('low' | 'medium' | 'high')[];
+
+    let priority: 'low' | 'medium' | 'high' = 'low';
+    if (allPriorities.includes('high')) priority = 'high';
+    else if (allPriorities.includes('medium')) priority = 'medium';
+
+    return {
+      finalAdjustment,
+      breakdown: {
+        comfort: comfortAdjust * normalizedWeights.comfort,
+        efficiency: efficiencyAdjust * normalizedWeights.efficiency,
+        cost: costAdjust * normalizedWeights.cost,
+        thermal: thermalAdjust * normalizedWeights.thermal,
+      },
+      reasoning,
+      priority,
+      effectiveWeights: normalizedWeights,
     };
   }
 

@@ -69,7 +69,7 @@
     "thermal_mass_title": "ML Thermische Massa",
     "heat_loss_title": "ML Warmteverlies",
     "time_constant_title": "ML Tijdsconstante",
-    "solar_gain_title": "ML Zonnewinst",
+    "solar_gain_title": "ML Zonnewinst Factor",
     "internal_gains_title": "ML Interne Winst",
     "status_learned": "LERENDE",
     "status_default": "STANDAARD",

@@ -741,6 +741,94 @@ export class FlowCardManagerService {
       });
       this.flowCardListeners.set('force_insight_analysis', forceAnalysisListener);
 
+      // Action: Calculate pre-heat start time (v2.6.0)
+      const calculatePreHeatCard = this.device.homey.flow.getActionCard('calculate_preheat_time');
+      const calculatePreHeatListener = calculatePreHeatCard.registerRunListener(async (args: {
+        target_indoor_temp: number;
+        target_clock_time: string;
+      }) => {
+        this.logger('FlowCardManagerService: Calculate pre-heat time action triggered', {
+          target_indoor_temp: args.target_indoor_temp,
+          target_clock_time: args.target_clock_time,
+        });
+
+        if (!this.buildingInsightsService) {
+          throw new Error('Building Insights service not available');
+        }
+
+        // Get building model parameters via BuildingModelService
+        // @ts-expect-error - Accessing MyDevice.serviceCoordinator
+        const buildingModelService = this.device.serviceCoordinator
+          ?.getAdaptiveControl()
+          ?.getBuildingModelService();
+
+        if (!buildingModelService) {
+          throw new Error('Building model service not available');
+        }
+
+        const model = buildingModelService.getLearner().getModel();
+        const tau = model.C / model.UA; // Time constant in hours
+        const confidence = model.confidence;
+
+        // Get current indoor temperature
+        // @ts-expect-error - Accessing MyDevice.serviceCoordinator
+        const indoorTemp: number | null = this.device.serviceCoordinator
+          ?.getAdaptiveControl()
+          ?.getExternalTemperatureService()
+          ?.getIndoorTemperature() || null;
+
+        if (indoorTemp === null) {
+          throw new Error('No indoor temperature available');
+        }
+
+        // Parse target time
+        const [targetHour, targetMinute] = args.target_clock_time.split(':').map(Number);
+        if (Number.isNaN(targetHour) || Number.isNaN(targetMinute)) {
+          throw new Error('Invalid time format. Use HH:MM');
+        }
+
+        // Calculate temperature delta
+        const tempDelta = args.target_indoor_temp - indoorTemp;
+        if (tempDelta <= 0) {
+          // Already at or above target
+          return {
+            start_time: 'Now',
+            duration_hours: 0,
+            suggested_setpoint_boost: 0,
+            confidence,
+          };
+        }
+
+        // Calculate pre-heat duration using thermal model
+        // t = τ × ln(ΔT_target / ΔT_residual)
+        const residualDelta = 0.3; // °C acceptable residual
+        const durationHours = tau * Math.log(tempDelta / residualDelta);
+
+        // Calculate start time
+        const targetTime = new Date();
+        targetTime.setHours(targetHour, targetMinute, 0, 0);
+        if (targetTime <= new Date()) {
+          // Target is in the past, assume next day
+          targetTime.setDate(targetTime.getDate() + 1);
+        }
+
+        const startTime = new Date(targetTime.getTime() - durationHours * 3600 * 1000);
+        const startTimeStr = `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')}`;
+
+        // Calculate suggested setpoint boost based on duration
+        const suggestedBoost = Math.min(3.0, Math.max(1.0, tempDelta * 0.5));
+
+        this.logger(`FlowCardManagerService: Pre-heat calculation - start: ${startTimeStr}, duration: ${durationHours.toFixed(1)}h, boost: ${suggestedBoost.toFixed(1)}°C`);
+
+        return {
+          start_time: startTimeStr,
+          duration_hours: Number(durationHours.toFixed(1)),
+          suggested_setpoint_boost: Number(suggestedBoost.toFixed(1)),
+          confidence,
+        };
+      });
+      this.flowCardListeners.set('calculate_preheat_time', calculatePreHeatListener);
+
       // ==================== CONDITION CARDS ====================
 
       // Condition 1: Insight is active

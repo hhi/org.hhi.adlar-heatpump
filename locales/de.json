@@ -69,7 +69,7 @@
     "thermal_mass_title": "ML Thermische Masse",
     "heat_loss_title": "ML Wärmeverlust",
     "time_constant_title": "ML Zeitkonstante",
-    "solar_gain_title": "ML Solarer Gewinn",
+    "solar_gain_title": "ML Solarer Gewinnfaktor",
     "internal_gains_title": "ML Interne Gewinne",
     "status_learned": "LERNEND",
     "status_default": "STANDARD",

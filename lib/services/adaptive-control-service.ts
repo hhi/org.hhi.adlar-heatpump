@@ -609,11 +609,35 @@ export class AdaptiveControlService {
         + `Price=${confidenceMetrics.priceDataAvailable ? 'Yes' : 'No'}`,
       );
 
-      // Step 5: Combine actions using Weighted Decision Maker with confidence-aware weighting
-      const combinedAction = this.decisionMaker.combineActionsWithConfidence(
+      // v2.6.0: Step 5B - Building Model Integration
+      // Pass building parameters to controllers for predictive features
+      const buildingModel = this.buildingModel.getLearner().getModel();
+      const tau = buildingModel.C / buildingModel.UA;
+
+      // Update HeatingController with thermal inertia (for overshoot prevention)
+      this.heatingController.setThermalInertia(tau);
+      this.heatingController.setDynamicDeadbandUA(buildingModel.UA);
+
+      // Update EnergyPriceOptimizer with thermal capacity (for load shifting)
+      this.energyOptimizer.setThermalCapacity(buildingModel.C);
+
+      // Get outdoor temperature for thermal calculation
+      // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback()
+      const outdoorTempForThermal = this.device.getOutdoorTemperatureWithFallback() || 0;
+
+      // Step 5C: Calculate thermal action (4th component)
+      const thermalAction = this.buildingModel.calculateThermalAdjustment({
+        indoorTemp,
+        targetIndoorTemp: desiredIndoorTemp,
+        outdoorTemp: outdoorTempForThermal,
+      });
+
+      // Step 6: Combine actions using Weighted Decision Maker with 4-way thermal weighting
+      const combinedAction = this.decisionMaker.combineActionsWithThermal(
         heatingAction,
         copAction,
         priceAction,
+        thermalAction,
         confidenceMetrics,
       );
 
@@ -622,15 +646,17 @@ export class AdaptiveControlService {
         this.logger(
           `⚖️ Effective Weights: Comfort=${(combinedAction.effectiveWeights.comfort * 100).toFixed(1)}%, `
           + `Efficiency=${(combinedAction.effectiveWeights.efficiency * 100).toFixed(1)}%, `
-          + `Cost=${(combinedAction.effectiveWeights.cost * 100).toFixed(1)}%`,
+          + `Cost=${(combinedAction.effectiveWeights.cost * 100).toFixed(1)}%, `
+          + `Thermal=${((combinedAction.effectiveWeights.thermal || 0) * 100).toFixed(1)}%`,
         );
       }
 
-      // Step 6: Log combined decision
+      // Step 7: Log combined decision
       this.logger(
         `Breakdown: Comfort=${combinedAction.breakdown.comfort.toFixed(2)}°C, `
         + `Efficiency=${combinedAction.breakdown.efficiency.toFixed(2)}°C, `
-        + `Cost=${combinedAction.breakdown.cost.toFixed(2)}°C`,
+        + `Cost=${combinedAction.breakdown.cost.toFixed(2)}°C, `
+        + `Thermal=${(combinedAction.breakdown.thermal || 0).toFixed(2)}°C`,
       );
       this.logger(`Final Adjustment: ${combinedAction.finalAdjustment.toFixed(2)}°C (${combinedAction.priority} priority)`);
       combinedAction.reasoning.forEach((reason) => this.logger(`  - ${reason}`));

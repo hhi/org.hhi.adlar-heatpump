@@ -19,7 +19,7 @@
     "de": "Gelernter solarer Gewinnfaktor des Gebäudes (dimensionslos)",
     "fr": "Facteur de gain solaire appris du bâtiment (sans dimension)"
   },
-  "decimals": 2,
+  "decimals": 4,
   "getable": true,
   "setable": false,
   "uiComponent": "sensor",

@@ -1,0 +1,109 @@
+{
+    "id": "calculate_preheat_time",
+    "title": {
+        "en": "Calculate pre-heat start time",
+        "nl": "Bereken voorverwarm starttijd",
+        "de": "Vorheiz-Startzeit berechnen",
+        "fr": "Calculer l'heure de démarrage du préchauffage"
+    },
+    "titleFormatted": {
+        "en": "Calculate when to start heating to reach [[target_indoor_temp]]°C at [[target_clock_time]]",
+        "nl": "Bereken wanneer te beginnen met verwarmen om [[target_indoor_temp]]°C te bereiken om [[target_clock_time]]",
+        "de": "Berechne wann mit dem Heizen zu beginnen um [[target_indoor_temp]]°C um [[target_clock_time]] zu erreichen",
+        "fr": "Calculer quand commencer à chauffer pour atteindre [[target_indoor_temp]]°C à [[target_clock_time]]"
+    },
+    "hint": {
+        "en": "Calculate when to start heating to reach the desired indoor temperature at a specific time. Uses the building model's thermal time constant (τ) for accurate prediction.",
+        "nl": "Bereken wanneer te beginnen met verwarmen om de gewenste binnentemperatuur op een specifiek tijdstip te bereiken. Gebruikt de thermische tijdsconstante (τ) van het gebouwmodel voor nauwkeurige voorspelling.",
+        "de": "Berechnet, wann mit dem Heizen begonnen werden soll, um die gewünschte Innentemperatur zu einer bestimmten Zeit zu erreichen. Verwendet die thermische Zeitkonstante (τ) des Gebäudemodells für genaue Vorhersage.",
+        "fr": "Calcule quand commencer à chauffer pour atteindre la température intérieure souhaitée à une heure précise. Utilise la constante de temps thermique (τ) du modèle de bâtiment pour une prédiction précise."
+    },
+    "highight": true,
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+        },
+        {
+            "type": "number",
+            "name": "target_indoor_temp",
+            "title": {
+                "en": "Target indoor temperature (°C)",
+                "nl": "Gewenste binnentemperatuur (°C)",
+                "de": "Ziel-Innentemperatur (°C)",
+                "fr": "Température intérieure cible (°C)"
+            },
+            "min": 16,
+            "max": 28,
+            "step": 0.5
+        },
+        {
+            "type": "text",
+            "name": "target_clock_time",
+            "title": {
+                "en": "Ready at (HH:MM)",
+                "nl": "Klaar om (UU:MM)",
+                "de": "Fertig um (HH:MM)",
+                "fr": "Prêt à (HH:MM)"
+            },
+            "placeholder": {
+                "en": "07:00",
+                "nl": "07:00",
+                "de": "07:00",
+                "fr": "07:00"
+            }
+        }
+    ],
+    "tokens": [
+        {
+            "type": "string",
+            "name": "start_time",
+            "title": {
+                "en": "Start time",
+                "nl": "Starttijd",
+                "de": "Startzeit",
+                "fr": "Heure de démarrage"
+            },
+            "example": {
+                "en": "05:30",
+                "nl": "05:30",
+                "de": "05:30",
+                "fr": "05:30"
+            }
+        },
+        {
+            "type": "number",
+            "name": "duration_hours",
+            "title": {
+                "en": "Duration (hours)",
+                "nl": "Duur (uren)",
+                "de": "Dauer (Stunden)",
+                "fr": "Durée (heures)"
+            },
+            "example": 1.5
+        },
+        {
+            "type": "number",
+            "name": "suggested_setpoint_boost",
+            "title": {
+                "en": "Suggested setpoint boost (°C)",
+                "nl": "Voorgestelde setpoint verhoging (°C)",
+                "de": "Vorgeschlagene Sollwerterhöhung (°C)",
+                "fr": "Augmentation de consigne suggérée (°C)"
+            },
+            "example": 2.0
+        },
+        {
+            "type": "number",
+            "name": "confidence",
+            "title": {
+                "en": "Model confidence (%)",
+                "nl": "Model betrouwbaarheid (%)",
+                "de": "Modellvertrauen (%)",
+                "fr": "Confiance du modèle (%)"
+            },
+            "example": 75
+        }
+    ]
+}

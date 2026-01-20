@@ -56,6 +56,10 @@ export class HeatingController {
   private errorHistory: number[] = [];
   private readonly maxHistorySize = 24; // 2 hours at 5-minute intervals
 
+  // v2.6.0: Building model integration for predictive control
+  private thermalInertia: number = 0; // τ (tau) in hours - for overshoot prevention
+  private dynamicDeadbandUA: number = 0; // UA value for dynamic deadband calculation
+
   /**
    * @param config.logger - Logger callback (uses Homey logging system)
    * @param config.Kp - Proportional gain (default: 3.0)
@@ -63,7 +67,7 @@ export class HeatingController {
    * @param config.deadband - Deadband in °C (default: 0.3)
    */
   constructor(config: PIControllerConfig = {}) {
-    this.logger = config.logger || (() => {});
+    this.logger = config.logger || (() => { });
     this.Kp = config.Kp ?? 3.0;
     this.Ki = config.Ki ?? 1.5;
     this.deadband = config.deadband ?? 0.3;
@@ -84,14 +88,36 @@ export class HeatingController {
   async calculateAction(data: SensorData): Promise<ControllerAction | null> {
     const error = data.targetTemp - data.indoorTemp;
 
+    // v2.6.0: Calculate effective deadband based on building UA (if available)
+    // Higher UA (poor insulation) → larger deadband to reduce oscillation
+    const effectiveDeadband = this.dynamicDeadbandUA > 0
+      ? Math.max(0.3, Math.min(0.8, this.dynamicDeadbandUA * 0.5 + 0.25))
+      : this.deadband;
+
     this.logger('HeatingController: Calculating action', {
       targetTemp: data.targetTemp,
       indoorTemp: data.indoorTemp,
       error: error.toFixed(2),
+      effectiveDeadband: effectiveDeadband.toFixed(2),
     });
 
-    // No action if within deadband
-    if (Math.abs(error) < this.deadband) {
+    // v2.6.0: Overshoot prevention based on thermal inertia (τ)
+    // When approaching target and building has high τ, stop earlier to prevent overshoot
+    if (this.thermalInertia > 0 && error > 0 && error < 2.0) {
+      const heatingRate = 0.3; // Estimated °C/hour during heating
+      const overshootMargin = this.thermalInertia * heatingRate * 0.2;
+      if (error < overshootMargin) {
+        this.logger('HeatingController: Overshoot prevention - stopping early', {
+          error: error.toFixed(2),
+          overshootMargin: overshootMargin.toFixed(2),
+          thermalInertia: this.thermalInertia.toFixed(1),
+        });
+        return null; // Stop adjusting to prevent overshoot
+      }
+    }
+
+    // No action if within effective deadband
+    if (Math.abs(error) < effectiveDeadband) {
       this.logger('HeatingController: Within deadband, no action needed');
       return null;
     }
@@ -167,6 +193,42 @@ export class HeatingController {
     this.deadband = deadband;
 
     this.logger('HeatingController: Parameters updated', { Kp, Ki, deadband });
+  }
+
+  /**
+   * Set thermal inertia (τ) for overshoot prevention
+   * v2.6.0: Building model integration
+   *
+   * When τ > 0, the controller will stop adjusting earlier when approaching
+   * the target temperature to prevent thermal overshoot.
+   *
+   * @param tau - Time constant in hours (0 = disabled)
+   */
+  setThermalInertia(tau: number): void {
+    this.thermalInertia = Math.max(0, tau);
+    if (tau > 0) {
+      this.logger('HeatingController: Thermal inertia set', { tau: tau.toFixed(1) });
+    }
+  }
+
+  /**
+   * Set dynamic deadband based on building UA (heat loss coefficient)
+   * v2.6.0: Building model integration
+   *
+   * Higher UA (poor insulation) → larger deadband to reduce oscillation
+   * Formula: deadband = max(0.3, min(0.8, UA × 0.5 + 0.25))
+   *
+   * @param UA - Heat loss coefficient in kW/°C (0 = use static deadband)
+   */
+  setDynamicDeadbandUA(UA: number): void {
+    this.dynamicDeadbandUA = Math.max(0, UA);
+    if (UA > 0) {
+      const effectiveDeadband = Math.max(0.3, Math.min(0.8, UA * 0.5 + 0.25));
+      this.logger('HeatingController: Dynamic deadband set', {
+        UA: UA.toFixed(3),
+        effectiveDeadband: effectiveDeadband.toFixed(2),
+      });
+    }
   }
 
   /**

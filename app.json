@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.5.23",
+  "version": "2.6.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -5825,6 +5825,115 @@
         ]
       },
       {
+        "id": "calculate_preheat_time",
+        "title": {
+          "en": "Calculate pre-heat start time",
+          "nl": "Bereken voorverwarm starttijd",
+          "de": "Vorheiz-Startzeit berechnen",
+          "fr": "Calculer l'heure de démarrage du préchauffage"
+        },
+        "titleFormatted": {
+          "en": "Calculate when to start heating to reach [[target_indoor_temp]]°C at [[target_clock_time]]",
+          "nl": "Bereken wanneer te beginnen met verwarmen om [[target_indoor_temp]]°C te bereiken om [[target_clock_time]]",
+          "de": "Berechne wann mit dem Heizen zu beginnen um [[target_indoor_temp]]°C um [[target_clock_time]] zu erreichen",
+          "fr": "Calculer quand commencer à chauffer pour atteindre [[target_indoor_temp]]°C à [[target_clock_time]]"
+        },
+        "hint": {
+          "en": "Calculate when to start heating to reach the desired indoor temperature at a specific time. Uses the building model's thermal time constant (τ) for accurate prediction.",
+          "nl": "Bereken wanneer te beginnen met verwarmen om de gewenste binnentemperatuur op een specifiek tijdstip te bereiken. Gebruikt de thermische tijdsconstante (τ) van het gebouwmodel voor nauwkeurige voorspelling.",
+          "de": "Berechnet, wann mit dem Heizen begonnen werden soll, um die gewünschte Innentemperatur zu einer bestimmten Zeit zu erreichen. Verwendet die thermische Zeitkonstante (τ) des Gebäudemodells für genaue Vorhersage.",
+          "fr": "Calcule quand commencer à chauffer pour atteindre la température intérieure souhaitée à une heure précise. Utilise la constante de temps thermique (τ) du modèle de bâtiment pour une prédiction précise."
+        },
+        "highight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "target_indoor_temp",
+            "title": {
+              "en": "Target indoor temperature (°C)",
+              "nl": "Gewenste binnentemperatuur (°C)",
+              "de": "Ziel-Innentemperatur (°C)",
+              "fr": "Température intérieure cible (°C)"
+            },
+            "min": 16,
+            "max": 28,
+            "step": 0.5
+          },
+          {
+            "type": "text",
+            "name": "target_clock_time",
+            "title": {
+              "en": "Ready at (HH:MM)",
+              "nl": "Klaar om (UU:MM)",
+              "de": "Fertig um (HH:MM)",
+              "fr": "Prêt à (HH:MM)"
+            },
+            "placeholder": {
+              "en": "07:00",
+              "nl": "07:00",
+              "de": "07:00",
+              "fr": "07:00"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "start_time",
+            "title": {
+              "en": "Start time",
+              "nl": "Starttijd",
+              "de": "Startzeit",
+              "fr": "Heure de démarrage"
+            },
+            "example": {
+              "en": "05:30",
+              "nl": "05:30",
+              "de": "05:30",
+              "fr": "05:30"
+            }
+          },
+          {
+            "type": "number",
+            "name": "duration_hours",
+            "title": {
+              "en": "Duration (hours)",
+              "nl": "Duur (uren)",
+              "de": "Dauer (Stunden)",
+              "fr": "Durée (heures)"
+            },
+            "example": 1.5
+          },
+          {
+            "type": "number",
+            "name": "suggested_setpoint_boost",
+            "title": {
+              "en": "Suggested setpoint boost (°C)",
+              "nl": "Voorgestelde setpoint verhoging (°C)",
+              "de": "Vorgeschlagene Sollwerterhöhung (°C)",
+              "fr": "Augmentation de consigne suggérée (°C)"
+            },
+            "example": 2
+          },
+          {
+            "type": "number",
+            "name": "confidence",
+            "title": {
+              "en": "Model confidence (%)",
+              "nl": "Model betrouwbaarheid (%)",
+              "de": "Modellvertrauen (%)",
+              "fr": "Confiance du modèle (%)"
+            },
+            "example": 75
+          }
+        ]
+      },
+      {
         "id": "calculate_time_based_value",
         "title": {
           "en": "Calculate value from time schedule",
@@ -9480,6 +9589,32 @@
                 "de": "%",
                 "fr": "%"
               }
+            },
+            {
+              "id": "priority_thermal",
+              "type": "number",
+              "label": {
+                "en": "Thermal Prediction Priority ",
+                "nl": "Thermische Voorspelling Prioriteit ",
+                "de": "Thermische Vorhersage-Priorität ",
+                "fr": "Priorité Prédiction Thermique "
+              },
+              "hint": {
+                "en": "Weight given to building model thermal predictions (τ/C/UA). Higher = more influence from learned building behavior on temperature adjustments. Requires ≥50% building model confidence. Set to 0 to disable. Default: 20%",
+                "nl": "Gewicht gegeven aan thermische voorspellingen gebouwmodel (τ/C/UA). Hoger = meer invloed van geleerd gebouwgedrag op temperatuur aanpassingen. Vereist ≥50% gebouwmodel betrouwbaarheid. Stel in op 0 om uit te schakelen. Standaard: 20%",
+                "de": "Gewichtung für Gebäudemodell-Wärmevorhersagen (τ/C/UA). Höher = mehr Einfluss des gelernten Gebäudeverhaltens auf Temperaturanpassungen. Erfordert ≥50% Gebäudemodell-Vertrauen. Auf 0 setzen zum Deaktivieren. Standard: 20%",
+                "fr": "Poids donné aux prédictions thermiques du modèle de bâtiment (τ/C/UA). Plus élevé = plus d'influence du comportement appris du bâtiment sur les ajustements de température. Nécessite ≥50% de confiance du modèle. Mettre à 0 pour désactiver. Défaut: 20%"
+              },
+              "value": 20,
+              "min": 0,
+              "max": 50,
+              "step": 5,
+              "units": {
+                "en": "%",
+                "nl": "%",
+                "de": "%",
+                "fr": "%"
+              }
             }
           ]
         },
@@ -9716,7 +9851,7 @@
         "de": "Gelernter solarer Gewinnfaktor des Gebäudes (dimensionslos)",
         "fr": "Facteur de gain solaire appris du bâtiment (sans dimension)"
       },
-      "decimals": 2,
+      "decimals": 4,
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
