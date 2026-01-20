@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.5.22",
+  "version": "2.5.23",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -3863,6 +3863,7 @@
           "de": "Überprüfen Sie, ob das Gebäudemodellvertrauen einen Schwellenwert überschreitet (0-100%). Verwenden Sie als Qualitätsgate für Flows (z. B. nur Benachrichtigungen senden, wenn Vertrauen >80%).",
           "fr": "Vérifier si la confiance du modèle de bâtiment dépasse un seuil (0-100%). Utiliser comme porte de qualité pour les flux (par exemple, envoyer des notifications uniquement lorsque la confiance >80%)."
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -4190,6 +4191,7 @@
           "de": "Prüfen Sie, ob die 3-Phasen-Elektrischen Ströme innerhalb der angegebenen Toleranz ausgeglichen sind",
           "fr": "Vérifier si les courants électriques triphasés sont équilibrés dans la tolérance spécifiée"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -5095,6 +5097,7 @@
           "de": "Prüfen Sie, ob die Pulsschritte-Differenz zwischen EEV und EVI über oder unter einem Schwellenwert liegt",
           "fr": "Vérifier si la différence des pas d'impulsion entre EEV et EVI est au-dessus ou en dessous d'un seuil"
         },
+        "highlight": true,
         "args": [
           {
             "type": "device",
@@ -5885,157 +5888,6 @@
         ]
       },
       {
-        "id": "diagnose_building_model",
-        "title": {
-          "en": "Diagnose building model learning",
-          "nl": "Diagnosticeer gebouwmodel leren",
-          "de": "Gebäudemodell-Lernen diagnostizieren",
-          "fr": "Diagnostiquer l'apprentissage du modèle de bâtiment"
-        },
-        "titleFormatted": {
-          "en": "Show building model diagnostic status in logs",
-          "nl": "Toon diagnostische status gebouwmodel in logs",
-          "de": "Gebäudemodell-Diagnosestatus in Protokollen anzeigen",
-          "fr": "Afficher l'état de diagnostic du modèle de bâtiment dans les journaux"
-        },
-        "hint": {
-          "en": "Logs detailed diagnostic information about building model learning status. Check app logs after running this action to see why tau/C/UA values are not updating.",
-          "nl": "Logt gedetailleerde diagnostische informatie over gebouwmodel leer-status. Controleer app logs na het uitvoeren van deze actie om te zien waarom tau/C/UA waarden niet updaten.",
-          "de": "Protokolliert detaillierte Diagnoseinformationen zum Status des Gebäudemodell-Lernens. Überprüfen Sie die App-Protokolle nach Ausführung dieser Aktion, um zu sehen, warum tau/C/UA-Werte nicht aktualisiert werden.",
-          "fr": "Enregistre des informations de diagnostic détaillées sur l'état d'apprentissage du modèle de bâtiment. Vérifiez les journaux de l'application après avoir exécuté cette action pour voir pourquoi les valeurs tau/C/UA ne se mettent pas à jour."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_daily_disconnect_count"
-          }
-        ]
-      },
-      {
-        "id": "diagnose_cop_optimizer",
-        "title": {
-          "en": "Diagnose COP optimizer learning",
-          "nl": "Diagnosticeer COP optimizer leren",
-          "de": "COP-Optimierer-Lernen diagnostizieren",
-          "fr": "Diagnostiquer l'apprentissage de l'optimiseur COP"
-        },
-        "titleFormatted": {
-          "en": "Show COP optimizer diagnostic status in logs",
-          "nl": "Toon diagnostische status COP optimizer in logs",
-          "de": "COP-Optimierer-Diagnosestatus in Protokollen anzeigen",
-          "fr": "Afficher l'état de diagnostic de l'optimiseur COP dans les journaux"
-        },
-        "hint": {
-          "en": "Logs detailed diagnostic information about COP optimizer learning status. Check app logs after running this action to see samples collected, optimal settings learned, and confidence levels per outdoor temperature bucket.",
-          "nl": "Logt gedetailleerde diagnostische informatie over COP optimizer leer-status. Controleer app logs na het uitvoeren van deze actie om verzamelde samples, geleerde optimale settings en betrouwbaarheidsniveaus per buitentemperatuur bucket te zien.",
-          "de": "Protokolliert detaillierte Diagnoseinformationen zum COP-Optimierer-Lernstatus. Überprüfen Sie die App-Protokolle nach Ausführung dieser Aktion, um gesammelte Proben, gelernte optimale Einstellungen und Vertrauensniveaus pro Außentemperatur-Bucket zu sehen.",
-          "fr": "Enregistre des informations de diagnostic détaillées sur l'état d'apprentissage de l'optimiseur COP. Vérifiez les journaux de l'application après avoir exécuté cette action pour voir les échantillons collectés, les paramètres optimaux appris et les niveaux de confiance par plage de température extérieure."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_daily_disconnect_count"
-          }
-        ]
-      },
-      {
-        "id": "dismiss_insight",
-        "title": {
-          "en": "Dismiss insight",
-          "nl": "Negeer inzicht",
-          "de": "Erkenntnis verwerfen",
-          "fr": "Ignorer l'aperçu"
-        },
-        "titleFormatted": {
-          "en": "Dismiss [[category]] insight for [[duration]] days",
-          "nl": "Negeer [[category]] inzicht voor [[duration]] dagen",
-          "de": "[[category]] Erkenntnis für [[duration]] Tage verwerfen",
-          "fr": "Ignorer l'aperçu [[category]] pendant [[duration]] jours"
-        },
-        "hint": {
-          "en": "Temporarily hide a specific insight category (e.g., after renovation or known issue). Insight will be re-evaluated after the specified duration.",
-          "nl": "Verberg tijdelijk een specifieke inzicht categorie (bijv. na renovatie of bekend probleem). Inzicht wordt opnieuw geëvalueerd na de opgegeven duur.",
-          "de": "Verstecken Sie vorübergehend eine bestimmte Erkenntniskategorie (z. B. nach Renovierung oder bekanntem Problem). Die Erkenntnis wird nach der angegebenen Dauer neu bewertet.",
-          "fr": "Masquer temporairement une catégorie d'aperçu spécifique (par exemple, après rénovation ou problème connu). L'aperçu sera réévalué après la durée spécifiée."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          },
-          {
-            "name": "category",
-            "type": "dropdown",
-            "title": {
-              "en": "Category",
-              "nl": "Categorie",
-              "de": "Kategorie",
-              "fr": "Catégorie"
-            },
-            "values": [
-              {
-                "id": "insulation_performance",
-                "label": {
-                  "en": "Insulation performance",
-                  "nl": "Isolatieprestaties",
-                  "de": "Isolationsleistung",
-                  "fr": "Performance d'isolation"
-                }
-              },
-              {
-                "id": "pre_heating",
-                "label": {
-                  "en": "Pre-heating strategy",
-                  "nl": "Voorverwarm strategie",
-                  "de": "Vorheizstrategie",
-                  "fr": "Stratégie de préchauffage"
-                }
-              },
-              {
-                "id": "thermal_storage",
-                "label": {
-                  "en": "Thermal storage",
-                  "nl": "Thermische opslag",
-                  "de": "Wärmespeicher",
-                  "fr": "Stockage thermique"
-                }
-              },
-              {
-                "id": "profile_mismatch",
-                "label": {
-                  "en": "Building profile mismatch",
-                  "nl": "Gebouwprofiel mismatch",
-                  "de": "Gebäudeprofil-Fehlanpassung",
-                  "fr": "Incompatibilité de profil de bâtiment"
-                }
-              }
-            ]
-          },
-          {
-            "name": "duration",
-            "type": "number",
-            "title": {
-              "en": "Duration (days)",
-              "nl": "Duur (dagen)",
-              "de": "Dauer (Tage)",
-              "fr": "Durée (jours)"
-            },
-            "min": 1,
-            "max": 365,
-            "step": 1,
-            "placeholder": {
-              "en": "30",
-              "nl": "30",
-              "de": "30",
-              "fr": "30"
-            }
-          }
-        ]
-      },
-      {
         "id": "force_insight_analysis",
         "title": {
           "en": "Force insight analysis",
@@ -6411,51 +6263,6 @@
         ]
       },
       {
-        "id": "reset_insight_history",
-        "title": {
-          "en": "Reset insight history",
-          "nl": "Reset inzicht geschiedenis",
-          "de": "Erkenntnishistorie zurücksetzen",
-          "fr": "Réinitialiser l'historique des aperçus"
-        },
-        "titleFormatted": {
-          "en": "Reset insight history [[confirm]]",
-          "nl": "Reset inzicht geschiedenis [[confirm]]",
-          "de": "Erkenntnishistorie zurücksetzen [[confirm]]",
-          "fr": "Réinitialiser l'historique des aperçus [[confirm]]"
-        },
-        "hint": {
-          "en": "Clear all active insights and history (use after major building changes like renovation). Building model itself remains intact.",
-          "nl": "Wis alle actieve inzichten en geschiedenis (gebruik na grote gebouw veranderingen zoals renovatie). Gebouwmodel zelf blijft intact.",
-          "de": "Löschen Sie alle aktiven Erkenntnisse und die Historie (nach größeren Gebäudeänderungen wie Renovierungen). Das Gebäudemodell selbst bleibt intakt.",
-          "fr": "Effacer tous les aperçus actifs et l'historique (à utiliser après des changements majeurs du bâtiment comme une rénovation). Le modèle de bâtiment lui-même reste intact."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          },
-          {
-            "name": "confirm",
-            "type": "checkbox",
-            "title": {
-              "en": "Confirm reset",
-              "nl": "Bevestig reset",
-              "de": "Reset bestätigen",
-              "fr": "Confirmer la réinitialisation"
-            },
-            "hint": {
-              "en": "Check this box to confirm you want to reset all insight history",
-              "nl": "Vink dit vakje aan om te bevestigen dat je alle inzicht geschiedenis wilt resetten",
-              "de": "Aktivieren Sie dieses Kontrollkästchen, um zu bestätigen, dass Sie die gesamte Erkenntnishistorie zurücksetzen möchten",
-              "fr": "Cochez cette case pour confirmer que vous souhaitez réinitialiser tout l'historique des aperçus"
-            },
-            "value": false
-          }
-        ]
-      },
-      {
         "id": "set_capacity",
         "title": {
           "en": "Set hot water curve setting",
@@ -6537,53 +6344,6 @@
                 }
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "set_confidence_threshold",
-        "title": {
-          "en": "Set confidence threshold",
-          "nl": "Stel betrouwbaarheidsdrempel in",
-          "de": "Vertrauensschwelle festlegen",
-          "fr": "Définir le seuil de confiance"
-        },
-        "titleFormatted": {
-          "en": "Set confidence threshold to [[threshold]]%",
-          "nl": "Stel betrouwbaarheidsdrempel in op [[threshold]]%",
-          "de": "Vertrauensschwelle auf [[threshold]]% festlegen",
-          "fr": "Définir le seuil de confiance à [[threshold]]%"
-        },
-        "hint": {
-          "en": "Dynamically adjust minimum confidence threshold via flows (50-90%). Lower = more insights (less reliable), higher = fewer insights (very reliable).",
-          "nl": "Pas dynamisch de minimale betrouwbaarheidsdrempel aan via flows (50-90%). Lager = meer inzichten (minder betrouwbaar), hoger = minder inzichten (zeer betrouwbaar).",
-          "de": "Passen Sie die Mindestvertrauensschwelle dynamisch über Flows an (50-90%). Niedriger = mehr Erkenntnisse (weniger zuverlässig), höher = weniger Erkenntnisse (sehr zuverlässig).",
-          "fr": "Ajuster dynamiquement le seuil de confiance minimum via les flux (50-90%). Plus bas = plus d'aperçus (moins fiables), plus haut = moins d'aperçus (très fiables)."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=intelligent-heat-pump"
-          },
-          {
-            "name": "threshold",
-            "type": "number",
-            "title": {
-              "en": "Confidence threshold (%)",
-              "nl": "Betrouwbaarheidsdrempel (%)",
-              "de": "Vertrauensschwelle (%)",
-              "fr": "Seuil de confiance (%)"
-            },
-            "min": 50,
-            "max": 90,
-            "step": 5,
-            "placeholder": {
-              "en": "70",
-              "nl": "70",
-              "de": "70",
-              "fr": "70"
-            }
           }
         ]
       },
@@ -11866,10 +11626,10 @@
       "id": "building_insight_preheating",
       "type": "string",
       "title": {
-        "en": "Pre-heating Strategy",
-        "nl": "Voorverwarming Advies",
-        "de": "Vorheizstrategie",
-        "fr": "Stratégie de Préchauffage"
+        "en": "Pre-heating Strategy (comfort)",
+        "nl": "Voorverwarming Advies (comfort)",
+        "de": "Vorheizstrategie (Komfort)",
+        "fr": "Stratégie de Préchauffage (confort)"
       },
       "desc": {
         "en": "Pre-heating recommendations based on thermal response speed",
@@ -11906,10 +11666,10 @@
       "id": "building_insight_thermal_storage",
       "type": "string",
       "title": {
-        "en": "Thermal Storage",
-        "nl": "Thermische Opslag",
-        "de": "Thermische Speicherung",
-        "fr": "Stockage Thermique"
+        "en": "Thermal Storage (cost savings)",
+        "nl": "Thermische Opslag (kostenbesparing)",
+        "de": "Thermische Speicherung (Kosteneinsparungen)",
+        "fr": "Stockage Thermique (économies de coûts)"
       },
       "desc": {
         "en": "Thermal mass optimization for energy price shifting",

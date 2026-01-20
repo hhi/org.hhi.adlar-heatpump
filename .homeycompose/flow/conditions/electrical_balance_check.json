@@ -18,6 +18,7 @@
     "de": "Prüfen Sie, ob die 3-Phasen-Elektrischen Ströme innerhalb der angegebenen Toleranz ausgeglichen sind",
     "fr": "Vérifier si les courants électriques triphasés sont équilibrés dans la tolérance spécifiée"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",

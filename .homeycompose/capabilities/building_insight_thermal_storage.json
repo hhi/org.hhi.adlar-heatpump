@@ -2,10 +2,10 @@
     "id": "building_insight_thermal_storage",
     "type": "string",
     "title": {
-        "en": "Thermal Storage",
-        "nl": "Thermische Opslag",
-        "de": "Thermische Speicherung",
-        "fr": "Stockage Thermique"
+        "en": "Thermal Storage (cost savings)",
+        "nl": "Thermische Opslag (kostenbesparing)",
+        "de": "Thermische Speicherung (Kosteneinsparungen)",
+        "fr": "Stockage Thermique (économies de coûts)"
     },
     "desc": {
         "en": "Thermal mass optimization for energy price shifting",

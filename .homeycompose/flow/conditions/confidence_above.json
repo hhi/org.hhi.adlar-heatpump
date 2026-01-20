@@ -18,6 +18,7 @@
     "de": "Überprüfen Sie, ob das Gebäudemodellvertrauen einen Schwellenwert überschreitet (0-100%). Verwenden Sie als Qualitätsgate für Flows (z. B. nur Benachrichtigungen senden, wenn Vertrauen >80%).",
     "fr": "Vérifier si la confiance du modèle de bâtiment dépasse un seuil (0-100%). Utiliser comme porte de qualité pour les flux (par exemple, envoyer des notifications uniquement lorsque la confiance >80%)."
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",

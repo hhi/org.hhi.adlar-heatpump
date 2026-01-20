@@ -18,6 +18,7 @@
     "de": "Prüfen Sie, ob die Pulsschritte-Differenz zwischen EEV und EVI über oder unter einem Schwellenwert liegt",
     "fr": "Vérifier si la différence des pas d'impulsion entre EEV et EVI est au-dessus ou en dessous d'un seuil"
   },
+  "highlight": true,
   "args": [
     {
       "type": "device",

@@ -10,10 +10,10 @@
 | Module | Triggers | Conditions | Actions | Totaal |
 |--------|----------|------------|---------|--------|
 | Adaptieve Regeling | 3 | 2 | 2 | **7** |
-| Building Model | 1 | 1 | 2 | **4** |
+| Building Model | 1 | 1 | 0 | **2** |
 | Energy/Price Optimizer | 2 | 3 | 1 | **6** |
-| COP Optimizer | 5 | 5 | 1 | **11** |
-| Building Insights | 1 | 1 | 4 | **6** |
+| COP Optimizer | 5 | 5 | 0 | **10** |
+| Building Insights | 1 | 1 | 1 | **3** |
 
 ---
 
@@ -77,11 +77,7 @@
 
 ## 2️⃣ Building Model Learning
 
-### 🟢 ACTIONS
-
-| Flow ID | Titel | Beschrijving |
-|---------|-------|--------------|
-| `diagnose_building_model` | Diagnosticeer gebouwmodel leren | Logt τ/C/UA status naar app logs |
+> **Opmerking**: Building model diagnostics worden automatisch bijgewerkt naar de `building_model_diagnostics` capability.
 
 ---
 
@@ -143,11 +139,7 @@
 
 ---
 
-### 🟢 ACTIONS
-
-| Flow ID | Titel | Beschrijving |
-|---------|-------|--------------|
-| `diagnose_cop_optimizer` | Diagnosticeer COP optimizer leren | Logt samples per temp bucket |
+> **Opmerking**: COP optimizer diagnostics worden automatisch bijgewerkt naar de `cop_optimizer_diagnostics` capability.
 
 ---
 
@@ -188,9 +180,6 @@
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
 | `force_insight_analysis` | Forceer inzicht analyse | Direct evalueren (tokens: insights_detected, confidence) |
-| `dismiss_insight` | Negeer inzicht | Verberg categorie voor X dagen |
-| `reset_insight_history` | Reset inzicht geschiedenis | Wis alle genegeerde insights |
-| `set_confidence_threshold` | Stel betrouwbaarheidsdrempel in | Dynamisch aanpassen (50-90%) |
 
 ---
 
@@ -241,12 +230,7 @@
 | `receive_external_power_data` | `flow-card-manager-service.ts:945` |
 | `receive_external_flow_data` | `flow-card-manager-service.ts:964` |
 | `receive_external_ambient_data` | `flow-card-manager-service.ts:976` |
-| `diagnose_building_model` | `flow-card-manager-service.ts:1033` |
-| `diagnose_cop_optimizer` | `flow-card-manager-service.ts:857` |
 | `force_insight_analysis` | `flow-card-manager-service.ts:745` |
-| `dismiss_insight` | `flow-card-manager-service.ts:731` |
-| `reset_insight_history` | `flow-card-manager-service.ts:762` |
-| `set_confidence_threshold` | `flow-card-manager-service.ts:782` |
 
 #### CONDITIONS
 
