@@ -1,4 +1,10 @@
 {
+  "2.6.1": {
+    "en": "Added: Building model integration with PI controller for overshoot prevention and dynamic deadband. New flow card 'Calculate pre-heat start time' uses thermal time constant (τ) to predict optimal heating start time.",
+    "nl": "Toegevoegd: Gebouwmodel integratie met PI controller voor overshoot-preventie en dynamische deadband. Nieuwe flow card 'Bereken voorverwarm starttijd' gebruikt thermische tijdsconstante (τ) om optimale verwarmingsstarttijd te voorspellen.",
+    "de": "Hinzugefügt: Gebäudemodell-Integration mit PI-Regler zur Überschwingvermeidung und dynamischer Deadband. Neue Flow-Karte 'Vorheiz-Startzeit berechnen' verwendet thermische Zeitkonstante (τ) zur Vorhersage der optimalen Heizstartzeit.",
+    "fr": "Ajouté: Intégration du modèle de bâtiment avec contrôleur PI pour la prévention du dépassement et deadband dynamique. Nouvelle carte de flux 'Calculer l'heure de démarrage du préchauffage' utilise la constante de temps thermique (τ) pour prédire l'heure de démarrage optimale."
+  },
   "2.5.23": {
     "en": "Fixed: Pre-heating insight now works for heavy buildings with high thermal mass (τ > 100h). Removed: 5 rarely-used flow action cards (diagnose building model, diagnose COP optimizer, dismiss insight, reset insight history, set confidence threshold).",
     "nl": "Opgelost: Voorverwarming inzicht werkt nu voor zware gebouwen met hoge thermische massa (τ > 100u). Verwijderd: 5 weinig gebruikte flow actiekaarten (diagnosticeer gebouwmodel, diagnosticeer COP optimizer, negeer inzicht, reset inzicht geschiedenis, stel betrouwbaarheidsdrempel in).",

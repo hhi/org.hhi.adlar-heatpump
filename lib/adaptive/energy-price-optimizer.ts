@@ -139,6 +139,10 @@ export class EnergyPriceOptimizer {
   // Price calculation mode: 'market', 'market_plus', 'all_in'
   private priceMode: 'market' | 'market_plus' | 'all_in' = 'all_in';
 
+  // v2.6.0: Building model integration for thermal storage optimization
+  // Higher C (thermal mass) = more potential for pre-heat load shifting
+  private thermalCapacity: number = 0; // kWh/°C (0 = not set, use default boost)
+
   constructor(config: EnergyOptimizerConfig) {
     this.config = config;
     this.logger = config.logger || (() => { });
@@ -195,15 +199,23 @@ export class EnergyPriceOptimizer {
     // Decision logic based on price category
     const { category } = currentPrice;
 
+    // v2.6.0: Calculate thermal-based pre-heat boost if building model is available
+    // Formula: min(2.0, C / 20) - scales boost with thermal capacity
+    const thermalBoost = this.thermalCapacity > 15
+      ? Math.min(2.0, this.thermalCapacity / 20)
+      : this.config.maxPreHeatOffset; // Fallback to config default
+
     switch (category) {
       case PriceCategory.VERY_LOW:
-        // Pre-heat maximum if cheap period
-        if (currentIndoorTemp < targetTemp + this.config.maxPreHeatOffset) {
+        // Pre-heat maximum - use thermal boost if available
+        if (currentIndoorTemp < targetTemp + thermalBoost) {
           return {
             action: 'preheat',
-            magnitude: this.config.maxPreHeatOffset,
+            magnitude: thermalBoost,
             priority: 'high',
-            reason: `Very low price (€${currentPrice.price.toFixed(4)}/kWh) - pre-heating maximally`,
+            reason: this.thermalCapacity > 15
+              ? `Very low price (€${currentPrice.price.toFixed(4)}/kWh) - thermal storage boost (C=${this.thermalCapacity.toFixed(0)} kWh/°C)`
+              : `Very low price (€${currentPrice.price.toFixed(4)}/kWh) - pre-heating maximally`,
             currentPrice: currentPrice.price,
             futurePrice: futurePrice?.price,
           };
@@ -211,11 +223,12 @@ export class EnergyPriceOptimizer {
         break;
 
       case PriceCategory.LOW:
-        // Pre-heat moderately
-        if (currentIndoorTemp < targetTemp + this.config.maxPreHeatOffset / 2) {
+        // Pre-heat moderately - half of thermal boost
+        const lowBoost = thermalBoost / 2;
+        if (currentIndoorTemp < targetTemp + lowBoost) {
           return {
             action: 'preheat',
-            magnitude: this.config.maxPreHeatOffset / 2,
+            magnitude: lowBoost,
             priority: 'medium',
             reason: `Low price (€${currentPrice.price.toFixed(4)}/kWh) - pre-heating moderately`,
             currentPrice: currentPrice.price,
@@ -683,6 +696,38 @@ export class EnergyPriceOptimizer {
    */
   public getPriceMode(): string {
     return this.priceMode;
+  }
+
+  /**
+   * Set thermal capacity from building model
+   * v2.6.0: Building model integration for thermal storage optimization
+   *
+   * Higher thermal capacity (C) allows for more pre-heat boost during low price periods,
+   * as the building can store more thermal energy.
+   *
+   * Formula for max pre-heat boost: min(2.0, C / 20)
+   * - C = 10 kWh/°C → boost = 0.5°C
+   * - C = 25 kWh/°C → boost = 1.25°C
+   * - C = 50 kWh/°C → boost = 2.0°C (capped)
+   *
+   * @param C - Thermal capacity in kWh/°C (0 = use default config boost)
+   */
+  public setThermalCapacity(C: number): void {
+    this.thermalCapacity = Math.max(0, C);
+    if (C > 0) {
+      const maxBoost = Math.min(2.0, C / 20);
+      this.logger('EnergyPriceOptimizer: Thermal capacity set', {
+        C: C.toFixed(1),
+        maxPreHeatBoost: maxBoost.toFixed(2),
+      });
+    }
+  }
+
+  /**
+   * Get thermal capacity
+   */
+  public getThermalCapacity(): number {
+    return this.thermalCapacity;
   }
 
   /**

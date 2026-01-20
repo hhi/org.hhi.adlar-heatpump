@@ -69,7 +69,7 @@
     "thermal_mass_title": "ML Masse Thermique",
     "heat_loss_title": "ML Perte de Chaleur",
     "time_constant_title": "ML Constante de Temps",
-    "solar_gain_title": "ML Gain Solaire",
+    "solar_gain_title": "ML Facteur de Gain Solaire",
     "internal_gains_title": "ML Gains Internes",
     "status_learned": "EN APPRENTISSAGE",
     "status_default": "PAR DÉFAUT",

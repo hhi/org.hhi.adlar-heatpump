@@ -1624,6 +1624,32 @@
           "de": "%",
           "fr": "%"
         }
+      },
+      {
+        "id": "priority_thermal",
+        "type": "number",
+        "label": {
+          "en": "Thermal Prediction Priority ",
+          "nl": "Thermische Voorspelling Prioriteit ",
+          "de": "Thermische Vorhersage-Priorität ",
+          "fr": "Priorité Prédiction Thermique "
+        },
+        "hint": {
+          "en": "Weight given to building model thermal predictions (τ/C/UA). Higher = more influence from learned building behavior on temperature adjustments. Requires ≥50% building model confidence. Set to 0 to disable. Default: 20%",
+          "nl": "Gewicht gegeven aan thermische voorspellingen gebouwmodel (τ/C/UA). Hoger = meer invloed van geleerd gebouwgedrag op temperatuur aanpassingen. Vereist ≥50% gebouwmodel betrouwbaarheid. Stel in op 0 om uit te schakelen. Standaard: 20%",
+          "de": "Gewichtung für Gebäudemodell-Wärmevorhersagen (τ/C/UA). Höher = mehr Einfluss des gelernten Gebäudeverhaltens auf Temperaturanpassungen. Erfordert ≥50% Gebäudemodell-Vertrauen. Auf 0 setzen zum Deaktivieren. Standard: 20%",
+          "fr": "Poids donné aux prédictions thermiques du modèle de bâtiment (τ/C/UA). Plus élevé = plus d'influence du comportement appris du bâtiment sur les ajustements de température. Nécessite ≥50% de confiance du modèle. Mettre à 0 pour désactiver. Défaut: 20%"
+        },
+        "value": 20,
+        "min": 0,
+        "max": 50,
+        "step": 5,
+        "units": {
+          "en": "%",
+          "nl": "%",
+          "de": "%",
+          "fr": "%"
+        }
       }
     ]
   },

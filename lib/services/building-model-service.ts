@@ -347,6 +347,124 @@ export class BuildingModelService {
   }
 
   /**
+   * Calculate thermal adjustment for weighted decision maker
+   * v2.6.0: Building model integration - 4th component
+   *
+   * This method provides a temperature adjustment recommendation based on
+   * the building's thermal properties (τ, C, UA, g, pInt) and current conditions.
+   *
+   * Corrections applied:
+   * - g (solar gain): reduces effective τ during sunny periods
+   * - pInt (internal gains): reduces effective τ based on time of day (evening ×1.8)
+   *
+   * Logic:
+   * - Far from target (>1°C, >2h predicted): boost +0.5°C
+   * - Near target (<0.5°C, <0.5h predicted): slowdown -0.3°C (overshoot prevention)
+   * - Otherwise: maintain (0°C)
+   *
+   * @param params - Current indoor/target/outdoor temps
+   * @returns ThermalAction with adjustment and reason
+   */
+  public calculateThermalAdjustment(params: {
+    indoorTemp: number;
+    targetIndoorTemp: number;
+    outdoorTemp: number;
+  }): { adjustment: number; reason: string; priority: 'low' | 'medium' | 'high' } {
+    const model = this.learner.getModel();
+
+    // Check confidence - if too low, return no adjustment
+    if (model.confidence < 50) {
+      return {
+        adjustment: 0,
+        reason: `Thermal: confidence ${model.confidence.toFixed(0)}% < 50% - disabled`,
+        priority: 'low',
+      };
+    }
+
+    const tempDelta = params.targetIndoorTemp - params.indoorTemp;
+
+    // Can't calculate if we're already at or above target
+    if (tempDelta <= 0) {
+      return {
+        adjustment: 0,
+        reason: 'Thermal: at or above target',
+        priority: 'low',
+      };
+    }
+
+    // v2.6.0: Apply g and pInt corrections to thermal prediction
+    // g = solar gain coefficient (kW per kW/m² radiation)
+    // pInt = internal gains (kW from occupants/appliances)
+    const hour = new Date().getHours();
+
+    // Time-based pInt multiplier (evening when people are home)
+    const pIntMultiplier = (hour >= 17 && hour <= 22) ? 1.8 : 1.0;
+    const effectivePInt = model.pInt * pIntMultiplier;
+
+    // Calculate solar gain using estimated radiation
+    // estimateSolarRadiation returns W/m², g is kW per kW/m²
+    const solarRadiation = this.estimateSolarRadiation(hour); // W/m²
+    const solarGain = model.g * solarRadiation / 1000; // kW
+
+    // Total extra gains (kW)
+    const totalGains = solarGain + effectivePInt;
+
+    // Calculate base tau
+    const baseTau = model.C / model.UA;
+
+    // Correct tau for extra gains
+    // Extra gains reduce effective tau (building warms faster)
+    // Formula: effectiveTau = baseTau / (1 + totalGains / (UA × ΔT))
+    const gainCorrection = tempDelta > 0.1 ? totalGains / (model.UA * tempDelta) : 0;
+    const effectiveTau = baseTau / Math.max(1.0, 1 + gainCorrection);
+
+    // Predict time to reach target using corrected thermal model
+    // T(t) = T_final × (1 - e^(-t/τ)) → t = τ × ln(ΔT_target / ΔT_residual)
+    const residualDelta = 0.3; // Acceptable residual error
+    const predictedHours = tempDelta > residualDelta
+      ? effectiveTau * Math.log(tempDelta / residualDelta)
+      : 0;
+
+    this.logger('BuildingModelService: Thermal adjustment calculation', {
+      baseTau: baseTau.toFixed(1),
+      effectiveTau: effectiveTau.toFixed(1),
+      tempDelta: tempDelta.toFixed(2),
+      predictedHours: predictedHours.toFixed(1),
+      g: model.g.toFixed(3),
+      solarRadiation: solarRadiation.toFixed(0),
+      solarGain: solarGain.toFixed(3),
+      pInt: model.pInt.toFixed(3),
+      effectivePInt: effectivePInt.toFixed(3),
+      totalGains: totalGains.toFixed(3),
+      confidence: model.confidence.toFixed(0),
+    });
+
+    // Decision logic
+    if (predictedHours > 2.0 && tempDelta > 1.0) {
+      // Far from target: boost setpoint to accelerate heating
+      return {
+        adjustment: +0.5,
+        reason: `Thermal: τ=${effectiveTau.toFixed(0)}h (corr.), ${predictedHours.toFixed(1)}h to target → +0.5°C boost`,
+        priority: 'medium',
+      };
+    } else if (predictedHours < 0.5 && tempDelta < 0.5) {
+      // Near target: reduce setpoint to prevent overshoot
+      return {
+        adjustment: -0.3,
+        reason: `Thermal: τ=${effectiveTau.toFixed(0)}h (corr.), approaching target → -0.3°C slowdown`,
+        priority: 'medium',
+      };
+    }
+
+    // Default: maintain
+    return {
+      adjustment: 0,
+      reason: `Thermal: τ=${effectiveTau.toFixed(0)}h (corr.), maintain`,
+      priority: 'low',
+    };
+  }
+
+  /**
    * Estimate solar radiation based on time of day
    *
    * Simplified model: 0 at night, peak at noon
