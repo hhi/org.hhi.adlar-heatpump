@@ -128,13 +128,11 @@ export class BuildingInsightsService {
     await this.evaluateInsights();
 
     // Start periodic evaluation (every 50 minutes)
+    // Pre-heat recommendations are now triggered based on ΔT threshold during evaluation
     this.evaluationTimer = this.device.homey.setInterval(
       () => this.evaluateInsights().catch((err) => this.logger('BuildingInsightsService: Evaluation error:', err)),
       this.EVALUATION_INTERVAL_MS,
     );
-
-    // Schedule daily pre-heat recommendation trigger (23:00)
-    this.schedulePreHeatRecommendation();
 
     this.logger(`BuildingInsightsService: Initialized successfully (interval: ${this.EVALUATION_INTERVAL_MS / 1000}s)`);
   }
@@ -279,6 +277,9 @@ export class BuildingInsightsService {
 
     // Persist state
     await this.persistState();
+
+    // v2.6.0: Check ΔT threshold for pre-heat recommendation trigger
+    await this.checkPreHeatThreshold(diagnostics);
 
     this.lastEvaluationTime = Date.now();
     this.logger('BuildingInsightsService: Evaluation complete');
@@ -436,20 +437,20 @@ export class BuildingInsightsService {
       category = 'fast_response';
       priority = 75;
       recommendation = lang === 'nl'
-        ? '⏱️ Nacht 16°C, voorverw. 2u • 12% besparing'
-        : '⏱️ Night 16°C, pre-heat 2h • 12% saved';
+        ? 'Snel (~2 uur voor 2°C)'
+        : 'Fast (~2 hours for 2°C)';
     } else if (tau < 15) {
       category = 'medium_response';
       priority = 60;
       recommendation = lang === 'nl'
-        ? '⏱️ Nacht 17°C, voorverw. 4u • 8% besparing'
-        : '⏱️ Night 17°C, pre-heat 4h • 8% saved';
+        ? 'Normaal (~4 uur voor 2°C)'
+        : 'Normal (~4 hours for 2°C)';
     } else {
       category = 'slow_response';
       priority = 50;
       recommendation = lang === 'nl'
-        ? '⏱️ Nacht 18°C, voorverw. 6u+ • Overweeg continu'
-        : '⏱️ Night 18°C, pre-heat 6h+ • Consider continuous';
+        ? 'Langzaam (~8 uur voor 2°C)'
+        : 'Slow (~8 hours for 2°C)';
     }
 
     return {
@@ -514,11 +515,17 @@ export class BuildingInsightsService {
     // High thermal mass + slow response = thermal storage potential
     if (model.C > 18 && tau > 12) {
       if (hasDynamicPricing) {
-        const savingsEstimate = this.estimateThermalStorageSavings(model.C, tau);
+        // v2.6.0: Calculate optimal boost/reduce based on building model
+        const optimalBoost = Math.min(2.5, model.C / 15 + tau / 20);
+        const optimalReduce = optimalBoost * 0.5;
+        const savingsEstimate = this.estimateThermalStorageSavingsWithBoost(model.C, optimalBoost);
+
+        const boostStr = optimalBoost.toFixed(1);
+        const reduceStr = optimalReduce.toFixed(1);
 
         const recommendation = lang === 'nl'
-          ? `💰 +2°C goedkoop uur, -1°C piek • €${savingsEstimate}/mnd`
-          : `💰 +2°C cheap hr, -1°C peak • €${savingsEstimate}/mo`;
+          ? `💰 +${boostStr}°C dal, -${reduceStr}°C piek • €${savingsEstimate}/mnd`
+          : `💰 +${boostStr}°C off-peak, -${reduceStr}°C peak • €${savingsEstimate}/mo`;
 
         return {
           id: `thermal_storage_active_${Date.now()}`,
@@ -551,8 +558,8 @@ export class BuildingInsightsService {
 
     // Low thermal mass - not suitable for load shifting
     const recommendation = lang === 'nl'
-      ? '✅ Beperkte massa • Niet rendabel'
-      : '✅ Limited mass • Not economical';
+      ? 'ℹ️ Beperkte massa • Niet rendabel'
+      : 'ℹ️ Limited mass • Not economical';
 
     return {
       id: `thermal_storage_unsuitable_${Date.now()}`,
@@ -624,8 +631,8 @@ export class BuildingInsightsService {
       const suggestedProfile = this.findClosestProfile(model);
 
       const recommendation = lang === 'nl'
-        ? `🔄 Wijzig naar '${suggestedProfile}' profiel in instellingen`
-        : `🔄 Change to '${suggestedProfile}' profile in settings`;
+        ? `🔄 Wijzig naar '${suggestedProfile}' profiel`
+        : `🔄 Change to '${suggestedProfile}' profile`;
 
       return {
         id: `profile_mismatch_${Date.now()}`,
@@ -829,39 +836,58 @@ export class BuildingInsightsService {
   }
 
   /**
-   * Schedule daily pre-heat recommendation trigger (23:00)
+   * Check if pre-heat recommendation should be triggered based on ΔT threshold
+   * v2.6.0: Replaces fixed 23:00 schedule with dynamic condition-based trigger
+   * 
+   * Triggers when:
+   * - ΔT (target - indoor) > 1.5°C
+   * - Confidence >= minConfidence
+   * - Not triggered in last 4 hours (fatigue prevention)
    */
-  private schedulePreHeatRecommendation(): void {
-    // Calculate milliseconds until next 23:00
-    const now = new Date();
-    const next23 = new Date();
-    next23.setHours(23, 0, 0, 0);
-
-    if (now.getHours() >= 23) {
-      // Already past 23:00 today, schedule for tomorrow
-      next23.setDate(next23.getDate() + 1);
+  private async checkPreHeatThreshold(
+    diagnostics: Awaited<ReturnType<typeof this.buildingModel.getDiagnosticStatus>>,
+  ): Promise<void> {
+    if (!this.enabled || diagnostics.confidence < this.minConfidence) {
+      return;
     }
 
-    const msUntil23 = next23.getTime() - now.getTime();
+    // Get current temperatures
+    // @ts-expect-error - Accessing private externalTemperature from adaptiveControl
+    const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
+    const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
 
-    // Schedule first trigger
-    this.device.homey.setTimeout(() => {
-      this.triggerPreHeatRecommendation().catch((err) => this.logger('BuildingInsightsService: Pre-heat trigger error:', err));
+    if (indoorTemp === null || indoorTemp === undefined ||
+      targetTemp === null || targetTemp === undefined) {
+      return;
+    }
 
-      // Schedule daily repeating trigger
-      this.preHeatRecommendationTimer = this.device.homey.setInterval(
-        () => this.triggerPreHeatRecommendation().catch((err) => this.logger('BuildingInsightsService: Pre-heat trigger error:', err)),
-        24 * 60 * 60 * 1000, // 24 hours
-      );
-    }, msUntil23);
+    const tempDelta = targetTemp - indoorTemp;
+    const DELTA_THRESHOLD = 1.5; // °C
 
-    this.logger(`BuildingInsightsService: Pre-heat recommendation scheduled for ${next23.toISOString()}`);
+    // Only trigger if ΔT exceeds threshold
+    if (tempDelta <= DELTA_THRESHOLD) {
+      return;
+    }
+
+    // Check fatigue prevention (4 hours between triggers)
+    const FATIGUE_HOURS = 4;
+    const lastTrigger = this.insightHistory.find(
+      (h) => h.category === 'pre_heating' &&
+        Date.now() - h.detectedAt < FATIGUE_HOURS * 60 * 60 * 1000,
+    );
+    if (lastTrigger) {
+      return;
+    }
+
+    // Trigger the recommendation
+    this.logger(`BuildingInsightsService: ΔT=${tempDelta.toFixed(1)}°C > ${DELTA_THRESHOLD}°C threshold, triggering pre-heat recommendation`);
+    await this.triggerPreHeatRecommendation();
   }
 
   /**
    * Trigger pre-heat recommendation flow card
-   * - Calculate optimal pre-heat duration based on τ
-   * - Suggest start time based on wake time setting
+   * v2.6.0: Uses dynamic ΔT from actual indoor/target temps (not fixed settings)
+   * - Calculate optimal pre-heat duration based on τ and current temperature delta
    */
   private async triggerPreHeatRecommendation(): Promise<void> {
     if (!this.enabled) {
@@ -890,57 +916,46 @@ export class BuildingInsightsService {
       return;
     }
 
-    const wakeTime = this.device.getSetting('wake_time') || '07:00';
-    const desiredTempRise = this.device.getSetting('night_setback_delta') || 4.0;
+    // v2.6.0: Get dynamic temperatures instead of fixed settings
+    // @ts-expect-error - Accessing private externalTemperature from adaptiveControl
+    const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
+    const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
 
-    // Defensive: Validate wake_time format (HH:MM)
-    const wakeTimeMatch = /^(\d{1,2}):(\d{2})$/.exec(wakeTime);
-    if (!wakeTimeMatch) {
-      this.logger('BuildingInsightsService: Invalid wake_time format:', wakeTime);
+    if (indoorTemp === null || indoorTemp === undefined || targetTemp === null || targetTemp === undefined) {
+      this.logger('BuildingInsightsService: Missing indoor or target temperature');
       return;
     }
 
-    // Defensive: Validate desiredTempRise is reasonable (2-6°C)
-    if (typeof desiredTempRise !== 'number' || desiredTempRise < 2 || desiredTempRise > 6) {
-      this.logger('BuildingInsightsService: Invalid night_setback_delta:', desiredTempRise);
+    // Calculate dynamic temperature delta
+    const tempDelta = targetTemp - indoorTemp;
+
+    // Skip if already at or above target
+    if (tempDelta <= 0.5) {
+      this.logger('BuildingInsightsService: Already near target, no pre-heat needed');
       return;
     }
 
     // Calculate optimal pre-heat duration: τ × ln(ΔT_target / ΔT_residual)
-    const preHeatHours = tau * Math.log(desiredTempRise / 0.5); // 0.5°C residual
+    const preHeatHours = tau * Math.log(tempDelta / 0.3); // 0.3°C residual
 
-    // Defensive: Validate preHeatHours is reasonable (0.5h - 24h)
-    if (!Number.isFinite(preHeatHours) || preHeatHours < 0.5 || preHeatHours > 24) {
-      this.logger('BuildingInsightsService: Invalid preHeatHours calculated:', preHeatHours);
+    // Defensive: Validate preHeatHours is reasonable (0.25h - 12h)
+    if (!Number.isFinite(preHeatHours) || preHeatHours < 0.25 || preHeatHours > 12) {
+      this.logger('BuildingInsightsService: Pre-heat duration out of range:', preHeatHours);
       return;
     }
-
-    const wakeHour = parseInt(wakeTimeMatch[1], 10);
-    const wakeMinute = parseInt(wakeTimeMatch[2], 10);
-
-    let startHour = wakeHour - Math.floor(preHeatHours);
-    let startMinute = wakeMinute - Math.round((preHeatHours % 1) * 60);
-
-    if (startMinute < 0) {
-      startMinute += 60;
-      startHour -= 1;
-    }
-    if (startHour < 0) startHour += 24;
-
-    const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
 
     try {
       await this.device.homey.flow
         .getDeviceTriggerCard('pre_heat_recommendation')
         .trigger(this.device, {
-          start_time: startTime,
-          target_time: wakeTime,
           duration_hours: Math.round(preHeatHours * 10) / 10,
-          temp_rise: desiredTempRise,
+          temp_rise: Math.round(tempDelta * 10) / 10,
+          current_temp: Math.round(indoorTemp * 10) / 10,
+          target_temp: Math.round(targetTemp * 10) / 10,
           confidence: diagnostics.confidence,
         });
 
-      this.logger(`BuildingInsightsService: Triggered pre_heat_recommendation: start=${startTime}, duration=${preHeatHours.toFixed(1)}h`);
+      this.logger(`BuildingInsightsService: Triggered pre_heat_recommendation: ΔT=${tempDelta.toFixed(1)}°C, duration=${preHeatHours.toFixed(1)}h`);
     } catch (error) {
       this.logger('BuildingInsightsService: Error triggering pre-heat recommendation:', error);
     }
@@ -1060,6 +1075,41 @@ export class BuildingInsightsService {
     // Defensive: Validate result is reasonable (0-300 EUR/month)
     if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 300) {
       this.logger('BuildingInsightsService: Unrealistic thermal storage savings calculated:', monthlySavings);
+      return 0;
+    }
+
+    return Math.round(monthlySavings);
+  }
+
+  /**
+   * Estimate thermal storage savings with dynamic boost value (EUR/month)
+   * v2.6.0: Uses calculated optimal boost instead of fixed 2°C
+   */
+  private estimateThermalStorageSavingsWithBoost(C: number, boost: number): number {
+    // Defensive: Validate inputs
+    if (!Number.isFinite(C) || C <= 0 || !Number.isFinite(boost) || boost <= 0) {
+      this.logger('BuildingInsightsService: Invalid C or boost for savings calculation');
+      return 0;
+    }
+
+    const storedEnergy = C * boost; // kWh stored
+
+    // Defensive: Validate stored energy
+    if (!Number.isFinite(storedEnergy) || storedEnergy <= 0 || storedEnergy > 250) {
+      this.logger('BuildingInsightsService: Unrealistic stored energy:', storedEnergy);
+      return 0;
+    }
+
+    const dailyStorageCycles = 1;
+    const priceDifferential = 0.15; // €/kWh (peak - off-peak)
+    const utilizationFactor = 0.7;
+
+    const dailySavings = storedEnergy * dailyStorageCycles * priceDifferential * utilizationFactor;
+    const monthlySavings = dailySavings * 30;
+
+    // Defensive: Validate result (0-400 EUR/month)
+    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 400) {
+      this.logger('BuildingInsightsService: Unrealistic savings:', monthlySavings);
       return 0;
     }
 

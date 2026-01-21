@@ -358,17 +358,17 @@ DANN
 
 #### 2. Vorheizzeit-Empfehlung
 
-**Löst aus:** Täglich um 23:00 mit optimaler Vorheizstartzeit
+**Löst aus:** Wenn ΔT (Ziel - innen) > 1.5°C (max 1x pro 4 Stunden)
 
-**Tokens:**
+**Tokens (v2.6.0):**
 
-- `start_time` (string) - HH:MM Format (z.B. „05:30")
-- `target_time` (string) - Zielzeit (über wake_time Einstellung gesetzt)
 - `duration_hours` (number) - Vorheizdauer in Stunden
-- `temp_rise` (number) - Temperaturanstieg in °C
+- `temp_rise` (number) - Benötigter Temperaturanstieg in °C
+- `current_temp` (number) - Aktuelle Innentemperatur in °C
+- `target_temp` (number) - Zieltemperatur in °C
 - `confidence` (number 0-100) - Modellzuverlässigkeit
 
-**Bedingungen:** Nur wenn Vertrauen ≥70%, neuberechnet bei τ Änderung >10%
+**Bedingungen:** Nur wenn Vertrauen ≥70%, max 1x pro 4 Stunden
 
 ---
 
@@ -389,7 +389,7 @@ DANN
 
 ---
 
-### Aktions-Karten (4)
+### Aktions-Karten (5)
 
 #### 1. Erkenntnis ausblenden
 
@@ -442,6 +442,24 @@ DANN
 **Effekt:** Höhere Schwelle = weniger Erkenntnisse (sehr zuverlässig), niedriger = mehr Erkenntnisse (früher, weniger genau)
 
 **Verwendung:** Adaptive Schwelle - mit 70% starten, nach Konvergenz auf 60% senken
+
+---
+
+#### 5. Vorheizdauer berechnen (v2.6.0)
+
+**Funktion:** Berechnet Zeit für X°C Temperaturanstieg
+
+**Parameter:**
+
+- `temperature_rise` (number) - Gewünschter Temperaturanstieg in °C (z.B. 2.0)
+
+**Rückgabe:**
+
+- `preheat_hours` (number) - Vorheizdauer in Stunden
+- `confidence` (number) - Modellzuverlässigkeit (%)
+- `building_tau` (number) - Thermische Zeitkonstante τ (Stunden)
+
+**Verwendung:** Vorheizen für bestimmte Zeiten planen, thermische Speicher-Automatisierung
 
 ---
 
@@ -500,48 +518,43 @@ DANN
 |-------------|----------|---------|--------------|
 | **Gebäudeerkenntnisse aktivieren** | AN | AN/AUS | Hauptschalter |
 | **Mindestvertrauen (%)** | 70% | 50-90% | Schwelle für Anzeige von Erkenntnissen |
-| **Aufwachzeit** | 07:00 | HH:MM | Zielzeit für Vorheiz-Abschluss |
-| **Nachtabsenkung (°C)** | 4,0 | 2,0-6,0 | Temperaturabsenkung nachts |
 
-> **Hinweis (v2.5.10):** Die Einstellung „Max. Aktive Erkenntnisse" wurde entfernt - jede Kategorie hat jetzt ihren eigenen Sensor.
+> **Hinweis (v2.6.0):** Die Einstellungen `wake_time` und `night_setback_delta` wurden entfernt. Vorheizen wird jetzt dynamisch basierend auf aktuellen Innen/Ziel-Temperaturen berechnet.
 
-### Aufwachzeit - Wie es funktioniert
+### Dynamisches Vorheizen (v2.6.0)
 
-Die `wake_time` Einstellung bestimmt, wann das Vorheizen abgeschlossen sein soll. Das System berechnet automatisch die optimale Startzeit:
+Das System löst automatisch aus, wenn ΔT (Ziel - innen) > 1.5°C:
 
 **Formel:**
 ```
-Vorheiz_Dauer = τ × ln(ΔT_Ziel / ΔT_Rest)
-Start_Zeit = Aufwachzeit - Vorheiz_Dauer
+Vorheiz_Dauer = τ × ln(ΔT / 0.3)
 ```
 
-**Beispielberechnung:**
-- Aufwachzeit: **07:00**
+**Beispiel:**
+- Zieltemperatur: **21°C**
+- Innentemperatur: **18°C**
 - τ (Zeitkonstante): **10 Stunden**
-- Nachtabsenkung: **4°C** (von 21°C auf 17°C)
-- Rest-Temperaturabfall: **0,5°C** (Annahme)
+- ΔT = 21 - 18 = **3°C**
 
 ```
-Vorheiz_Dauer = 10 × ln(4 / 0,5) = 10 × 2,08 = 20,8 Stunden
-→ Dies ist unrealistisch, daher passt das System für thermische Masse an
+Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 ```
 
-**Praktische Ergebnisse nach Gebäudetyp:**
+**Praktische Ergebnisse:**
 
-| τ (Stunden) | Vorheizen | Start für Aufwachzeit 07:00 |
-|-------------|-----------|------------------------------|
-| 4 | 2 Stunden | 05:00 |
-| 8 | 3,5 Stunden | 03:30 |
-| 15 | 5 Stunden | 02:00 |
-| 25+ | Nicht praktikabel | Kontinuierliches Heizen erwägen |
+| τ (Stunden) | ΔT 2°C | ΔT 3°C | ΔT 4°C |
+|-------------|--------|--------|--------|
+| 4 | 0.8h | 0.9h | 1.0h |
+| 10 | 1.9h | 2.3h | 2.6h |
+| 15 | 2.9h | 3.5h | 3.9h |
 
 ### Empfohlene Einstellungen nach Benutzertyp
 
-| Typ | Vertrauen | Nachtabsenkung |
-|-----|-----------|----------------|
-| **Anfänger** (erste 2 Wochen) | 70% | 2°C |
-| **Fortgeschritten** (nach 1 Monat) | 65% | 4°C |
-| **Experte** (nach 3 Monaten) | 60% | Basierend auf τ |
+| Typ | Vertrauen |
+|-----|-----------|
+| **Anfänger** (erste 2 Wochen) | 70% |
+| **Fortgeschritten** (nach 1 Monat) | 65% |
+| **Experte** (nach 3 Monaten) | 60% |
 
 ---
 

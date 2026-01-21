@@ -321,18 +321,6 @@ Automated analysis of the thermal building model with energy-saving recommendati
 - **Function**: Maximum number of insights to display simultaneously
 - **Priority**: Most important insights are shown first
 
-### Desired Wake Time (HH:MM)
-- **Default**: 07:00
-- **Format**: HH:MM (e.g., 07:00, 06:30)
-- **Function**: Time when building should reach target temperature
-- **Used for**: Calculating optimal pre-heat start time based on thermal response (τ)
-
-### Night Setback (°C)
-- **Default**: 4.0°C
-- **Range**: 2.0 - 6.0°C
-- **Function**: Temperature reduction during the night (e.g., from 21°C to 17°C = 4°C setback)
-- **Used for**: Calculating pre-heat duration and energy savings potential
-
 ---
 
 ## 8. Energy Price Optimization
@@ -449,34 +437,44 @@ Automatic supply temperature optimization for maximum efficiency.
 
 ## 10. Adaptive Control Weighting Factors
 
-These three priorities together determine how the system makes decisions. **Values are automatically normalized to total 100%.**
+These four priorities together determine how the system makes decisions. **Values are automatically normalized to total 100%.**
 
 ### Comfort Priority
-- **Default**: 60%
+- **Default**: 50%
 - **Range**: 0 - 100%
 - **Function**: Weight for PI temperature control
-- **High comfort** (80-90%): Temperature always stable within ±0.3°C
+- **High comfort** (70-80%): Temperature always stable within ±0.3°C
 
 ### Efficiency Priority
-- **Default**: 25%
+- **Default**: 15%
 - **Range**: 0 - 100%
 - **Function**: Weight for COP optimization
-- **High efficiency** (40-50%): Focus on maximum COP
+- **High efficiency** (30-40%): Focus on maximum COP
 
 ### Cost Priority
 - **Default**: 15%
 - **Range**: 0 - 100%
 - **Function**: Weight for price optimization
-- **High cost** (30-40%): Maximum savings on energy costs
+- **Dynamic multiplier** (v2.6.0):
+  - HIGH prices (reduce): weight ×2.0 to ×3.0
+  - LOW prices (preheat): weight ×1.2 to ×1.5
+- **High cost** (25-35%): Maximum savings on energy costs
+
+### Thermal Prediction Priority
+- **Default**: 20%
+- **Range**: 0 - 50%
+- **Function**: Weight for thermal predictions (τ/C/UA)
+- **Requirements**: Building model confidence ≥50%
+- **0%**: Disabled (no influence from building model)
 
 **Practical Profiles**:
 
-| Profile | Comfort | Efficiency | Cost | Use Case |
-|---------|---------|------------|------|----------|
-| Family with Baby | 90% | 10% | 0% | Max comfort |
-| Home Worker | 50% | 40% | 10% | Balanced |
-| Budget Focus | 30% | 30% | 40% | Dynamic contract |
-| Often Away | 20% | 60% | 20% | Max efficiency |
+| Profile | Comfort | Efficiency | Cost | Thermal | Use Case |
+|---------|---------|------------|------|---------|----------|
+| Family with Baby | 80% | 5% | 5% | 10% | Max comfort |
+| Home Worker | 50% | 15% | 15% | 20% | Balanced (default) |
+| Budget Focus | 35% | 10% | 35% | 20% | Dynamic contract |
+| Often Away | 30% | 40% | 10% | 20% | Max efficiency |
 
 ---
 
@@ -539,8 +537,9 @@ Management of energy counters for tracking and reporting.
 
 Priorities:
 - Comfort: 80%
-- Efficiency: 15%
+- Efficiency: 5%
 - Cost: 5%
+- Thermal: 10%
 ```
 
 ### Scenario 2: "Maximum savings, have dynamic contract"
@@ -557,9 +556,10 @@ Priorities:
    - Strategy: Balanced
 
 Priorities:
-- Comfort: 40%
-- Efficiency: 30%
-- Cost: 30%
+- Comfort: 35%
+- Efficiency: 10%
+- Cost: 35%
+- Thermal: 20%
 ```
 
 ### Scenario 3: "Passive house, efficiency is key"
@@ -575,9 +575,10 @@ Priorities:
    - Strategy: Aggressive (passive house tolerates experiments)
 
 Priorities:
-- Comfort: 30%
-- Efficiency: 60%
+- Comfort: 25%
+- Efficiency: 40%
 - Cost: 10%
+- Thermal: 25%
 ```
 
 ### Scenario 4: "Often away, minimal supervision"

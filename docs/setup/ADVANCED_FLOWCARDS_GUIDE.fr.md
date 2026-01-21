@@ -1,6 +1,6 @@
 # 🔧 Documentation des Flow Cards : Fonctions Avancées
 
-> **Version** : 2.5.x  
+> **Version** : 2.6.x  
 > **Objectif** : Flow cards pour le contrôle adaptatif, modèle de bâtiment, optimiseur d'énergie, optimiseur COP et aperçus du bâtiment
 
 ---
@@ -13,7 +13,7 @@
 | Modèle de Bâtiment | 1 | 1 | 0 | **2** |
 | Optimiseur Énergie/Prix | 2 | 3 | 1 | **6** |
 | Optimiseur COP | 5 | 5 | 0 | **10** |
-| Aperçus du Bâtiment | 1 | 1 | 1 | **3** |
+| Aperçus du Bâtiment | 2 | 1 | 2 | **5** |
 
 ---
 
@@ -162,6 +162,7 @@
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
 | `building_insight_detected` ⭐ | Nouvel aperçu du bâtiment | Déclenche à ≥70% de confiance |
+| `pre_heat_recommendation` ⭐ | Recommandation de préchauffage | Déclenche quand ΔT > 1.5°C (v2.6.0) |
 
 #### `building_insight_detected` - Tokens
 | Token | Type | Description |
@@ -173,6 +174,20 @@
 | `confidence` | number | Confiance (%) |
 | `estimated_savings_eur_month` | number | Économies estimées €/mois |
 
+#### `pre_heat_recommendation` - Tokens (v2.6.0)
+| Token | Type | Description |
+|-------|------|-------------|
+| `duration_hours` | number | Durée de préchauffage en heures |
+| `temp_rise` | number | Élévation de température requise (°C) |
+| `current_temp` | number | Température intérieure actuelle (°C) |
+| `target_temp` | number | Température cible (°C) |
+| `confidence` | number | Confiance du modèle (%) |
+
+**Conditions de déclenchement :**
+- ΔT (cible - intérieur) > 1.5°C
+- Confiance du modèle ≥ 70%
+- Max 1x par 4 heures (prévention de fatigue)
+
 ---
 
 ### 🟢 ACTIONS
@@ -180,6 +195,18 @@
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Forcer l'analyse des aperçus | Évaluer immédiatement (tokens: insights_detected, confidence) |
+| `calculate_preheat_time` ⭐ | Calculer durée préchauffage | Calcule le temps nécessaire pour ±X°C (v2.6.0) |
+
+#### `calculate_preheat_time` - Paramètres & Retours
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `temperature_rise` | number | Élévation de température souhaitée en °C (ex: 2.0) |
+
+| Token de Retour | Type | Description |
+|-----------------|------|-------------|
+| `preheat_hours` | number | Durée de préchauffage en heures |
+| `confidence` | number | Confiance du modèle (%) |
+| `building_tau` | number | Constante de temps thermique τ (heures) |
 
 ---
 

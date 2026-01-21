@@ -173,7 +173,8 @@ export class WeightedDecisionMaker {
    * Combine all controller actions with thermal component (4-way weighting)
    * v2.6.0: Building model integration
    *
-   * Weights: comfort=50%, efficiency=20%, cost=10%, thermal=20%
+   * Weights: comfort=50%, efficiency=15%, cost=15%, thermal=20%
+   * Dynamic cost multiplier: ×2-3 for reduce, ×1.2-1.5 for preheat
    * (when all components have sufficient confidence)
    *
    * @param heatingAction - PI controller action (always trusted)
@@ -206,17 +207,32 @@ export class WeightedDecisionMaker {
     // Reduce weights for low-confidence optimizers, redistribute to comfort
     // =========================================================================
 
-    // Default priorities for 4-way: comfort=50%, efficiency=20%, cost=10%, thermal=20%
+    // Default priorities for 4-way: comfort=50%, efficiency=15%, cost=15%, thermal=20%
     const basePriorities = {
       comfort: this.priorities.thermal !== undefined ? 0.50 : this.priorities.comfort,
-      efficiency: this.priorities.thermal !== undefined ? 0.20 : this.priorities.efficiency,
-      cost: this.priorities.thermal !== undefined ? 0.10 : this.priorities.cost,
+      efficiency: this.priorities.thermal !== undefined ? 0.15 : this.priorities.efficiency,
+      cost: this.priorities.thermal !== undefined ? 0.15 : this.priorities.cost,
       thermal: this.priorities.thermal ?? 0.20,
     };
 
+    // v2.6.0: Dynamic cost multiplier based on price action urgency
+    // - reduce action = high prices → boost cost weight ×2.0-3.0
+    // - preheat action = low prices → boost cost weight ×1.5
+    // - maintain = normal → no boost
+    let costMultiplier = 1.0;
+    if (priceAction) {
+      if (priceAction.action === 'reduce') {
+        // High prices - stronger reduce response
+        costMultiplier = priceAction.priority === 'high' ? 3.0 : 2.0;
+      } else if (priceAction.action === 'preheat') {
+        // Low prices - moderate preheat boost
+        costMultiplier = priceAction.priority === 'high' ? 1.5 : 1.2;
+      }
+    }
+
     // Apply confidence multipliers
     const effectiveEfficiencyWeight = basePriorities.efficiency * confidenceMetrics.copConfidence;
-    const effectiveCostWeight = basePriorities.cost * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
+    const effectiveCostWeight = basePriorities.cost * costMultiplier * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
     const effectiveThermalWeight = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0);
 
     // Calculate total effective weight

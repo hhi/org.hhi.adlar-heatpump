@@ -1,4 +1,10 @@
 {
+  "2.6.2": {
+    "en": "Changed: Pre-heat trigger now fires when ΔT threshold detected (was: daily at 23:00). Thermal storage boost/reduce values now dynamically calculated from building model. Simplified insight texts. Removed wake_time and night_setback_delta settings (use flow card instead).",
+    "nl": "Gewijzigd: Voorverwarming trigger vuurt nu bij ΔT drempel detectie (was: dagelijks om 23:00). Thermische opslag boost/reduce waarden nu dynamisch berekend uit gebouwmodel. Vereenvoudigde inzicht teksten. Wake_time en night_setback_delta instellingen verwijderd (gebruik flow card).",
+    "de": "Geändert: Vorheiz-Trigger löst jetzt bei ΔT-Schwellenerkennung aus (war: täglich um 23:00). Thermische Speicher Boost/Reduce-Werte werden jetzt dynamisch aus dem Gebäudemodell berechnet. Vereinfachte Insight-Texte. Wake_time und night_setback_delta Einstellungen entfernt (Flow-Karte verwenden).",
+    "fr": "Modifié: Le déclencheur de préchauffage se déclenche maintenant lors de la détection du seuil ΔT (était: quotidien à 23h00). Les valeurs boost/reduce du stockage thermique sont maintenant calculées dynamiquement à partir du modèle de bâtiment. Textes d'aperçu simplifiés. Paramètres wake_time et night_setback_delta supprimés (utiliser carte de flux)."
+  },
   "2.6.1": {
     "en": "Added: Building model integration with PI controller for overshoot prevention and dynamic deadband. New flow card 'Calculate pre-heat start time' uses thermal time constant (τ) to predict optimal heating start time.",
     "nl": "Toegevoegd: Gebouwmodel integratie met PI controller voor overshoot-preventie en dynamische deadband. Nieuwe flow card 'Bereken voorverwarm starttijd' gebruikt thermische tijdsconstante (τ) om optimale verwarmingsstarttijd te voorspellen.",

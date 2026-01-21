@@ -219,7 +219,7 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 
 **Cartes de déclenchement Flow :**
 1. **« Nouvel aperçu du bâtiment détecté »** — Se déclenche sur les nouveaux aperçus
-2. **« Recommandation d'heure de préchauffage »** — Déclenchement quotidien à 23:00
+2. **« Recommandation d'heure de préchauffage »** — Déclenche quand ΔT > 1.5°C (max 1x par 4 heures)
 3. **« Discordance du profil de bâtiment détectée »** — Déclenchement unique
 
 ### Cycle de vie des aperçus
@@ -358,17 +358,17 @@ ALORS
 
 #### 2. Recommandation d'heure de préchauffage
 
-**Déclenche :** Quotidiennement à 23:00 avec l'heure de démarrage de préchauffage optimale
+**Déclenche :** Quand ΔT (cible - intérieur) > 1.5°C (max 1x par 4 heures)
 
-**Tokens :**
+**Tokens (v2.6.0) :**
 
-- `start_time` (string) - Format HH:MM (ex : « 05:30 »)
-- `target_time` (string) - Heure cible (définie via paramètre wake_time)
 - `duration_hours` (number) - Durée de préchauffage en heures
-- `temp_rise` (number) - Hausse de température en °C
+- `temp_rise` (number) - Hausse de température requise en °C
+- `current_temp` (number) - Température intérieure actuelle en °C
+- `target_temp` (number) - Température cible en °C
 - `confidence` (number 0-100) - Fiabilité du modèle
 
-**Conditions :** Uniquement si confiance ≥70%, recalcule lors de changement de τ >10%
+**Conditions :** Uniquement si confiance ≥70%, max 1x par 4 heures
 
 ---
 
@@ -389,7 +389,7 @@ ALORS
 
 ---
 
-### Cartes d'action (4)
+### Cartes d'action (5)
 
 #### 1. Masquer l'aperçu
 
@@ -442,6 +442,24 @@ ALORS
 **Effet :** Seuil plus élevé = moins d'aperçus (très fiables), plus bas = plus d'aperçus (plus tôt, moins précis)
 
 **Usage :** Seuil adaptatif - commencer à 70%, baisser à 60% après convergence
+
+---
+
+#### 5. Calculer la durée de préchauffage (v2.6.0)
+
+**Fonction :** Calcule le temps nécessaire pour X°C de hausse de température
+
+**Paramètres :**
+
+- `temperature_rise` (number) - Hausse de température souhaitée en °C (ex : 2.0)
+
+**Retourne :**
+
+- `preheat_hours` (number) - Durée de préchauffage en heures
+- `confidence` (number) - Fiabilité du modèle (%)
+- `building_tau` (number) - Constante de temps thermique τ (heures)
+
+**Usage :** Planifier le préchauffage pour des moments spécifiques, automatisation du stockage thermique
 
 ---
 
@@ -500,48 +518,43 @@ ALORS
 |-----------|--------|-------|-------------|
 | **Activer les Aperçus du Bâtiment** | OUI | OUI/NON | Interrupteur principal |
 | **Confiance Minimale (%)** | 70% | 50-90% | Seuil pour afficher les aperçus |
-| **Heure de Réveil** | 07:00 | HH:MM | Heure cible pour fin du préchauffage |
-| **Réduction Nocturne (°C)** | 4,0 | 2,0-6,0 | Réduction de température la nuit |
 
-> **Note (v2.5.10) :** Le paramètre « Max Aperçus Actifs » a été supprimé - chaque catégorie a maintenant son propre capteur.
+> **Note (v2.6.0) :** Les paramètres `wake_time` et `night_setback_delta` ont été supprimés. Le préchauffage est maintenant calculé dynamiquement basé sur les températures intérieure/cible actuelles.
 
-### Heure de Réveil - Comment ça fonctionne
+### Préchauffage Dynamique (v2.6.0)
 
-Le paramètre `wake_time` détermine quand le préchauffage doit être terminé. Le système calcule automatiquement l'heure de démarrage optimale :
+Le système se déclenche automatiquement quand ΔT (cible - intérieur) > 1.5°C :
 
 **Formule :**
 ```
-Durée_préchauffage = τ × ln(ΔT_cible / ΔT_résiduel)
-Heure_démarrage = Heure_réveil - Durée_préchauffage
+Durée_préchauffage = τ × ln(ΔT / 0.3)
 ```
 
-**Exemple de calcul :**
-- Heure de réveil : **07:00**
+**Exemple :**
+- Température cible : **21°C**
+- Température intérieure : **18°C**
 - τ (constante de temps) : **10 heures**
-- Réduction nocturne : **4°C** (de 21°C à 17°C)
-- Baisse de température résiduelle : **0,5°C** (hypothèse)
+- ΔT = 21 - 18 = **3°C**
 
 ```
-Durée_préchauffage = 10 × ln(4 / 0,5) = 10 × 2,08 = 20,8 heures
-→ C'est irréaliste, donc le système s'ajuste pour la masse thermique
+Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 ```
 
-**Résultats pratiques par type de bâtiment :**
+**Résultats pratiques :**
 
-| τ (heures) | Préchauffage | Démarrage pour réveil 07:00 |
-|------------|--------------|------------------------------|
-| 4 | 2 heures | 05:00 |
-| 8 | 3,5 heures | 03:30 |
-| 15 | 5 heures | 02:00 |
-| 25+ | Non pratique | Envisager chauffage continu |
+| τ (heures) | ΔT 2°C | ΔT 3°C | ΔT 4°C |
+|------------|--------|--------|--------|
+| 4 | 0.8h | 0.9h | 1.0h |
+| 10 | 1.9h | 2.3h | 2.6h |
+| 15 | 2.9h | 3.5h | 3.9h |
 
 ### Paramètres recommandés par type d'utilisateur
 
-| Type | Confiance | Réduction Nocturne |
-|------|-----------|-------------------|
-| **Débutant** (premières 2 semaines) | 70% | 2°C |
-| **Intermédiaire** (après 1 mois) | 65% | 4°C |
-| **Avancé** (après 3 mois) | 60% | Basé sur τ |
+| Type | Confiance |
+|------|-----------|
+| **Débutant** (premières 2 semaines) | 70% |
+| **Intermédiaire** (après 1 mois) | 65% |
+| **Avancé** (après 3 mois) | 60% |
 
 ---
 
