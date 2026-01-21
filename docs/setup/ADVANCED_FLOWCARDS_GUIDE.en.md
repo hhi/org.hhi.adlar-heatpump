@@ -1,6 +1,6 @@
 # 🔧 Flow Cards Documentation: Advanced Features
 
-> **Version**: 2.5.x  
+> **Version**: 2.6.x  
 > **Purpose**: Flow cards for adaptive control, building model, energy optimizer, COP optimizer, and building insights
 
 ---
@@ -13,7 +13,7 @@
 | Building Model | 1 | 1 | 0 | **2** |
 | Energy/Price Optimizer | 2 | 3 | 1 | **6** |
 | COP Optimizer | 5 | 5 | 0 | **10** |
-| Building Insights | 1 | 1 | 1 | **3** |
+| Building Insights | 2 | 1 | 2 | **5** |
 
 ---
 
@@ -162,6 +162,7 @@
 | Flow ID | Title | Description |
 |---------|-------|-------------|
 | `building_insight_detected` ⭐ | New building insight | Triggers at ≥70% confidence |
+| `pre_heat_recommendation` ⭐ | Pre-heat recommendation | Triggers when ΔT > 1.5°C (v2.6.0) |
 
 #### `building_insight_detected` - Tokens
 | Token | Type | Description |
@@ -173,6 +174,20 @@
 | `confidence` | number | Confidence (%) |
 | `estimated_savings_eur_month` | number | Estimated savings €/month |
 
+#### `pre_heat_recommendation` - Tokens (v2.6.0)
+| Token | Type | Description |
+|-------|------|-------------|
+| `duration_hours` | number | Pre-heat duration in hours |
+| `temp_rise` | number | Required temperature rise (°C) |
+| `current_temp` | number | Current indoor temperature (°C) |
+| `target_temp` | number | Target temperature (°C) |
+| `confidence` | number | Model confidence (%) |
+
+**Trigger conditions:**
+- ΔT (target - indoor) > 1.5°C
+- Model confidence ≥ 70%
+- Max 1x per 4 hours (fatigue prevention)
+
 ---
 
 ### 🟢 ACTIONS
@@ -180,6 +195,18 @@
 | Flow ID | Title | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Force insight analysis | Evaluate immediately (tokens: insights_detected, confidence) |
+| `calculate_preheat_time` ⭐ | Calculate pre-heat duration | Calculates time needed to warm up ±X°C (v2.6.0) |
+
+#### `calculate_preheat_time` - Parameters & Returns
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `temperature_rise` | number | Desired temperature rise in °C (e.g., 2.0) |
+
+| Return Token | Type | Description |
+|--------------|------|-------------|
+| `preheat_hours` | number | Pre-heat duration in hours |
+| `confidence` | number | Model confidence (%) |
+| `building_tau` | number | Thermal time constant τ (hours) |
 
 ---
 

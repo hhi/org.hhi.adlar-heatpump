@@ -321,18 +321,6 @@ Analyse automatisée du modèle thermique du bâtiment avec recommandations d'é
 - **Fonction** : Nombre maximum d'aperçus à afficher simultanément
 - **Priorité** : Les aperçus les plus importants sont affichés en premier
 
-### Heure de Réveil Souhaitée (HH:MM)
-- **Par défaut** : 07:00
-- **Format** : HH:MM (ex. : 07:00, 06:30)
-- **Fonction** : Heure à laquelle le bâtiment doit atteindre la température cible
-- **Utilisé pour** : Calcul de l'heure de démarrage optimale du préchauffage basée sur la réponse thermique (τ)
-
-### Réduction Nocturne (°C)
-- **Par défaut** : 4.0°C
-- **Plage** : 2.0 - 6.0°C
-- **Fonction** : Réduction de température pendant la nuit (ex. : de 21°C à 17°C = 4°C de réduction)
-- **Utilisé pour** : Calcul de la durée de préchauffage et du potentiel d'économie d'énergie
-
 ---
 
 ## 8. Optimisation du Prix de l'Énergie
@@ -449,34 +437,44 @@ Optimisation automatique de la température de départ pour une efficacité maxi
 
 ## 10. Facteurs de Pondération du Contrôle Adaptatif
 
-Ces trois priorités déterminent ensemble comment le système prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.**
+Ces quatre priorités déterminent ensemble comment le système prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.**
 
 ### Priorité Confort
-- **Par défaut** : 60%
+- **Par défaut** : 50%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour le contrôle de température PI
-- **Confort élevé** (80-90%) : Température toujours stable dans ±0.3°C
+- **Confort élevé** (70-80%) : Température toujours stable dans ±0.3°C
 
 ### Priorité Efficacité
-- **Par défaut** : 25%
+- **Par défaut** : 15%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour l'optimisation COP
-- **Haute efficacité** (40-50%) : Focus sur le COP maximum
+- **Haute efficacité** (30-40%) : Focus sur le COP maximum
 
 ### Priorité Coût
 - **Par défaut** : 15%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour l'optimisation des prix
-- **Coût élevé** (30-40%) : Économies maximales sur les coûts énergétiques
+- **Multiplicateur dynamique** (v2.6.0) :
+  - Prix ÉLEVÉS (réduire) : poids ×2.0 à ×3.0
+  - Prix BAS (préchauffer) : poids ×1.2 à ×1.5
+- **Coût élevé** (25-35%) : Économies maximales sur les coûts énergétiques
+
+### Priorité Prédiction Thermique
+- **Par défaut** : 20%
+- **Plage** : 0 - 50%
+- **Fonction** : Poids pour les prédictions thermiques (τ/C/UA)
+- **Prérequis** : Confiance du modèle de bâtiment ≥50%
+- **0%** : Désactivé (pas d'influence du modèle de bâtiment)
 
 **Profils Pratiques** :
 
-| Profil | Confort | Efficacité | Coût | Cas d'Utilisation |
-|--------|---------|------------|------|-------------------|
-| Famille avec Bébé | 90% | 10% | 0% | Max confort |
-| Télétravailleur | 50% | 40% | 10% | Équilibré |
-| Focus Budget | 30% | 30% | 40% | Contrat dynamique |
-| Souvent Absent | 20% | 60% | 20% | Max efficacité |
+| Profil | Confort | Efficacité | Coût | Thermique | Cas d'Utilisation |
+|--------|---------|------------|------|-----------|-------------------|
+| Famille avec Bébé | 80% | 5% | 5% | 10% | Max confort |
+| Télétravailleur | 50% | 15% | 15% | 20% | Équilibré (défaut) |
+| Focus Budget | 35% | 10% | 35% | 20% | Contrat dynamique |
+| Souvent Absent | 30% | 40% | 10% | 20% | Max efficacité |
 
 ---
 
@@ -539,8 +537,9 @@ Gestion des compteurs d'énergie pour le suivi et les rapports.
 
 Priorités :
 - Confort : 80%
-- Efficacité : 15%
+- Efficacité : 5%
 - Coût : 5%
+- Thermique : 10%
 ```
 
 ### Scénario 2 : "Économies maximales, j'ai un contrat dynamique"
@@ -557,9 +556,10 @@ Priorités :
    - Stratégie : Équilibré
 
 Priorités :
-- Confort : 40%
-- Efficacité : 30%
-- Coût : 30%
+- Confort : 35%
+- Efficacité : 10%
+- Coût : 35%
+- Thermique : 20%
 ```
 
 ### Scénario 3 : "Maison passive, l'efficacité est clé"
@@ -575,9 +575,10 @@ Priorités :
    - Stratégie : Agressif (maison passive tolère les expériences)
 
 Priorités :
-- Confort : 30%
-- Efficacité : 60%
+- Confort : 25%
+- Efficacité : 40%
 - Coût : 10%
+- Thermique : 25%
 ```
 
 ### Scénario 4 : "Souvent absent, supervision minimale"

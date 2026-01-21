@@ -1,6 +1,6 @@
 # 🔧 Flow Cards Documentatie: Geavanceerde Functies
 
-> **Versie**: 2.5.x  
+> **Versie**: 2.6.x  
 > **Doel**: Flow cards voor adaptieve regeling, building model, energy optimizer, COP optimizer en building insights
 
 ---
@@ -13,7 +13,7 @@
 | Building Model | 1 | 1 | 0 | **2** |
 | Energy/Price Optimizer | 2 | 3 | 1 | **6** |
 | COP Optimizer | 5 | 5 | 0 | **10** |
-| Building Insights | 1 | 1 | 1 | **3** |
+| Building Insights | 2 | 1 | 2 | **5** |
 
 ---
 
@@ -162,6 +162,7 @@
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
 | `building_insight_detected` ⭐ | Nieuw gebouw inzicht | Triggert bij ≥70% confidence |
+| `pre_heat_recommendation` ⭐ | Voorverwarmen aanbeveling | Triggert wanneer ΔT > 1.5°C (v2.6.0) |
 
 #### `building_insight_detected` - Tokens
 | Token | Type | Beschrijving |
@@ -173,6 +174,20 @@
 | `confidence` | number | Betrouwbaarheid (%) |
 | `estimated_savings_eur_month` | number | Geschatte besparing €/maand |
 
+#### `pre_heat_recommendation` - Tokens (v2.6.0)
+| Token | Type | Beschrijving |
+|-------|------|--------------|
+| `duration_hours` | number | Voorverwarmen duur in uren |
+| `temp_rise` | number | Benodigde temperatuurstijging (°C) |
+| `current_temp` | number | Huidige binnentemperatuur (°C) |
+| `target_temp` | number | Doeltemperatuur (°C) |
+| `confidence` | number | Model betrouwbaarheid (%) |
+
+**Trigger condities:**
+- ΔT (doel - binnen) > 1.5°C
+- Model confidence ≥ 70%
+- Max 1x per 4 uur (fatigue prevention)
+
 ---
 
 ### 🟢 ACTIONS
@@ -180,6 +195,28 @@
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
 | `force_insight_analysis` | Forceer inzicht analyse | Direct evalueren (tokens: insights_detected, confidence) |
+| `calculate_preheat_time` ⭐ | Bereken voorverwarmen duur | Berekent tijd nodig om ±X°C op te warmen (v2.6.0) |
+
+#### `calculate_preheat_time` - Parameters & Returns
+| Parameter | Type | Beschrijving |
+|-----------|------|--------------|
+| `temperature_rise` | number | Gewenste temperatuurstijging in °C (bijv. 2.0) |
+
+| Return Token | Type | Beschrijving |
+|--------------|------|--------------|
+| `preheat_hours` | number | Voorverwarmen duur in uren |
+| `confidence` | number | Model betrouwbaarheid (%) |
+| `building_tau` | number | Thermische tijdsconstante τ (uren) |
+
+**Voorbeeld flow:**
+```
+WHEN Goedkoopste prijsblok nadert (2 uur van tevoren)
+THEN
+  1. Bereken voorverwarmen duur (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Start voorverwarmen nu
+  3. Notificatie: "Voorverwarmen duurt {{preheat_hours}}u"
+```
 
 ---
 

@@ -7,35 +7,13 @@
     "fr": "Recommandation de temps de préchauffage"
   },
   "hint": {
-    "en": "Daily trigger (23:00) suggesting optimal pre-heat start time based on building thermal response (τ). Requires ≥70% model confidence.",
-    "nl": "Dagelijkse trigger (23:00) die optimale voorverwarm starttijd voorstelt gebaseerd op thermische respons van gebouw (τ). Vereist ≥70% model betrouwbaarheid.",
-    "de": "Täglicher Trigger (23:00), der optimale Vorheizstartzeit basierend auf thermischer Gebäudereaktion (τ) vorschlägt. Erfordert ≥70% Modellvertrauen.",
-    "fr": "Déclencheur quotidien (23:00) suggérant l'heure de début de préchauffage optimale basée sur la réponse thermique du bâtiment (τ). Nécessite une confiance du modèle ≥70%."
+    "en": "Triggers when ΔT (target - indoor) exceeds 1.5°C. Provides pre-heat duration based on building thermal response (τ). Requires ≥70% model confidence. Max once per 4 hours.",
+    "nl": "Triggert wanneer ΔT (doel - binnen) 1.5°C overschrijdt. Geeft voorverwarm duur gebaseerd op thermische respons van gebouw (τ). Vereist ≥70% model betrouwbaarheid. Max 1x per 4 uur.",
+    "de": "Triggert wenn ΔT (Ziel - Innen) 1.5°C überschreitet. Liefert Vorheizdauer basierend auf thermischer Gebäudereaktion (τ). Erfordert ≥70% Modellvertrauen. Max 1x pro 4 Stunden.",
+    "fr": "Se déclenche lorsque ΔT (cible - intérieur) dépasse 1.5°C. Fournit la durée de préchauffage basée sur la réponse thermique du bâtiment (τ). Nécessite ≥70% de confiance du modèle. Max 1x par 4 heures."
   },
   "highlight": true,
   "tokens": [
-    {
-      "name": "start_time",
-      "type": "string",
-      "title": {
-        "en": "Start Time",
-        "nl": "Starttijd",
-        "de": "Startzeit",
-        "fr": "Heure de Début"
-      },
-      "example": "05:30"
-    },
-    {
-      "name": "target_time",
-      "type": "string",
-      "title": {
-        "en": "Target Time",
-        "nl": "Doeltijd",
-        "de": "Zielzeit",
-        "fr": "Heure Cible"
-      },
-      "example": "07:00"
-    },
     {
       "name": "duration_hours",
       "type": "number",
@@ -56,7 +34,29 @@
         "de": "Temperaturanstieg (°C)",
         "fr": "Augmentation de Température (°C)"
       },
-      "example": 4.0
+      "example": 2.5
+    },
+    {
+      "name": "current_temp",
+      "type": "number",
+      "title": {
+        "en": "Current Temperature (°C)",
+        "nl": "Huidige Temperatuur (°C)",
+        "de": "Aktuelle Temperatur (°C)",
+        "fr": "Température Actuelle (°C)"
+      },
+      "example": 18.5
+    },
+    {
+      "name": "target_temp",
+      "type": "number",
+      "title": {
+        "en": "Target Temperature (°C)",
+        "nl": "Doeltemperatuur (°C)",
+        "de": "Zieltemperatur (°C)",
+        "fr": "Température Cible (°C)"
+      },
+      "example": 21.0
     },
     {
       "name": "confidence",

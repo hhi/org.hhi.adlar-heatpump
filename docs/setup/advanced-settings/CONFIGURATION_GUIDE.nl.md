@@ -321,18 +321,6 @@ Geautomatiseerde analyse van het thermische gebouwmodel met energie-besparende a
 - **Functie**: Maximum aantal inzichten om tegelijkertijd weer te geven
 - **Prioriteit**: Belangrijkste inzichten worden eerst getoond
 
-### Gewenste Sta-op Tijd (HH:MM)
-- **Standaard**: 07:00
-- **Formaat**: UU:MM (bijv. 07:00, 06:30)
-- **Functie**: Tijd wanneer gebouw doeltemperatuur moet bereiken
-- **Gebruikt voor**: Berekenen optimale voorverwarm starttijd gebaseerd op thermische respons (τ)
-
-### Nacht Verlaging (°C)
-- **Standaard**: 4.0°C
-- **Bereik**: 2.0 - 6.0°C
-- **Functie**: Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging)
-- **Gebruikt voor**: Berekenen voorverwarm duur en energie besparingspotentieel
-
 ---
 
 ## 8. Energieprijs Optimalisatie
@@ -449,34 +437,44 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
 
 ## 10. Adaptieve Regeling Wegingsfactoren
 
-Deze drie prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.**
+Deze vier prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.**
 
 ### Comfort Prioriteit
-- **Standaard**: 60%
+- **Standaard**: 50%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor PI temperatuurregeling
-- **Hoog comfort** (80-90%): Temperatuur altijd stabiel binnen ±0.3°C
+- **Hoog comfort** (70-80%): Temperatuur altijd stabiel binnen ±0.3°C
 
 ### Efficiëntie Prioriteit
-- **Standaard**: 25%
+- **Standaard**: 15%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor COP optimalisatie
-- **Hoge efficiency** (40-50%): Focus op maximale COP
+- **Hoge efficiency** (30-40%): Focus op maximale COP
 
 ### Kosten Prioriteit
 - **Standaard**: 15%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor prijsoptimalisatie
-- **Hoge cost** (30-40%): Maximale besparing op energiekosten
+- **Dynamische multiplier** (v2.6.0):
+  - Bij HOGE prijzen (reduce): gewicht ×2.0 tot ×3.0
+  - Bij LAGE prijzen (preheat): gewicht ×1.2 tot ×1.5
+- **Hoge cost** (25-35%): Maximale besparing op energiekosten
+
+### Thermische Voorspelling Prioriteit
+- **Standaard**: 20%
+- **Bereik**: 0 - 50%
+- **Functie**: Gewicht voor thermische voorspellingen (τ/C/UA)
+- **Vereisten**: Gebouwmodel confidence ≥50%
+- **0%**: Uitgeschakeld (geen influence van building model)
 
 **Praktijk Profielen**:
 
-| Profiel | Comfort | Efficiency | Cost | Use Case |
-|---------|---------|------------|------|----------|
-| Gezin met Baby | 90% | 10% | 0% | Max comfort |
-| Thuiswerker | 50% | 40% | 10% | Balanced |
-| Budget Focus | 30% | 30% | 40% | Dynamisch contract |
-| Vaak Afwezig | 20% | 60% | 20% | Max rendement |
+| Profiel | Comfort | Efficiency | Cost | Thermal | Use Case |
+|---------|---------|------------|------|---------|----------|
+| Gezin met Baby | 80% | 5% | 5% | 10% | Max comfort |
+| Thuiswerker | 50% | 15% | 15% | 20% | Balanced (default) |
+| Budget Focus | 35% | 10% | 35% | 20% | Dynamisch contract |
+| Vaak Afwezig | 30% | 40% | 10% | 20% | Max rendement |
 
 ---
 
@@ -539,8 +537,9 @@ Beheer van energie tellers voor tracking en rapportage.
 
 Prioriteiten:
 - Comfort: 80%
-- Efficiency: 15%
+- Efficiency: 5%
 - Cost: 5%
+- Thermal: 10%
 ```
 
 ### Scenario 2: "Maximale besparing, heb dynamisch contract"
@@ -557,9 +556,10 @@ Prioriteiten:
    - Strategy: Balanced
 
 Prioriteiten:
-- Comfort: 40%
-- Efficiency: 30%
-- Cost: 30%
+- Comfort: 35%
+- Efficiency: 10%
+- Cost: 35%
+- Thermal: 20%
 ```
 
 ### Scenario 3: "Passiefhuis, vooral efficiency belangrijk"
@@ -575,9 +575,10 @@ Prioriteiten:
    - Strategy: Aggressive (passiefhuis tolereert experimenten)
 
 Prioriteiten:
-- Comfort: 30%
-- Efficiency: 60%
+- Comfort: 25%
+- Efficiency: 40%
 - Cost: 10%
+- Thermal: 25%
 ```
 
 ### Scenario 4: "Vaak weg, minimaal toezicht"

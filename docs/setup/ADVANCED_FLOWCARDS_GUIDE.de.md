@@ -1,6 +1,6 @@
 # 🔧 Flow Cards Dokumentation: Erweiterte Funktionen
 
-> **Version**: 2.5.x  
+> **Version**: 2.6.x  
 > **Zweck**: Flow Cards für adaptive Regelung, Gebäudemodell, Energieoptimierer, COP-Optimierer und Gebäudeeinblicke
 
 ---
@@ -13,7 +13,7 @@
 | Gebäudemodell | 1 | 1 | 0 | **2** |
 | Energie/Preis-Optimierer | 2 | 3 | 1 | **6** |
 | COP-Optimierer | 5 | 5 | 0 | **10** |
-| Gebäudeeinblicke | 1 | 1 | 1 | **3** |
+| Gebäudeeinblicke | 2 | 1 | 2 | **5** |
 
 ---
 
@@ -162,6 +162,7 @@
 | Flow ID | Titel | Beschreibung |
 |---------|-------|--------------|
 | `building_insight_detected` ⭐ | Neue Gebäudeerkenntnis | Triggert bei ≥70% Vertrauen |
+| `pre_heat_recommendation` ⭐ | Vorheiz-Empfehlung | Triggert wenn ΔT > 1.5°C (v2.6.0) |
 
 #### `building_insight_detected` - Tokens
 | Token | Typ | Beschreibung |
@@ -173,6 +174,20 @@
 | `confidence` | number | Vertrauen (%) |
 | `estimated_savings_eur_month` | number | Geschätzte Einsparungen €/Monat |
 
+#### `pre_heat_recommendation` - Tokens (v2.6.0)
+| Token | Typ | Beschreibung |
+|-------|-----|--------------|
+| `duration_hours` | number | Vorheiz-Dauer in Stunden |
+| `temp_rise` | number | Benötigte Temperaturerhöhung (°C) |
+| `current_temp` | number | Aktuelle Innentemperatur (°C) |
+| `target_temp` | number | Zieltemperatur (°C) |
+| `confidence` | number | Modellvertrauen (%) |
+
+**Trigger-Bedingungen:**
+- ΔT (Ziel - innen) > 1.5°C
+- Modellvertrauen ≥ 70%
+- Max 1x pro 4 Stunden (Ermüdungsverhinderung)
+
 ---
 
 ### 🟢 ACTIONS
@@ -180,6 +195,18 @@
 | Flow ID | Titel | Beschreibung |
 |---------|-------|--------------|
 | `force_insight_analysis` | Erkenntnisanalyse erzwingen | Sofort auswerten (Tokens: insights_detected, confidence) |
+| `calculate_preheat_time` ⭐ | Vorheiz-Dauer berechnen | Berechnet Zeit für ±X°C Erwärmung (v2.6.0) |
+
+#### `calculate_preheat_time` - Parameter & Rückgabe
+| Parameter | Typ | Beschreibung |
+|-----------|-----|--------------|
+| `temperature_rise` | number | Gewünschte Temperaturerhöhung in °C (z.B. 2.0) |
+
+| Rückgabe-Token | Typ | Beschreibung |
+|----------------|-----|--------------|
+| `preheat_hours` | number | Vorheiz-Dauer in Stunden |
+| `confidence` | number | Modellvertrauen (%) |
+| `building_tau` | number | Thermische Zeitkonstante τ (Stunden) |
 
 ---
 

@@ -1335,11 +1335,13 @@ export class AdaptiveControlService {
           comfort: Number(priorities.comfort.toFixed(2)),
           efficiency: Number(priorities.efficiency.toFixed(2)),
           cost: Number(priorities.cost.toFixed(2)),
+          thermal: Number((priorities.thermal ?? 0).toFixed(2)),
         },
         effectiveWeights: combinedAction.effectiveWeights ? {
           comfort: Number(combinedAction.effectiveWeights.comfort.toFixed(2)),
           efficiency: Number(combinedAction.effectiveWeights.efficiency.toFixed(2)),
           cost: Number(combinedAction.effectiveWeights.cost.toFixed(2)),
+          thermal: Number(((combinedAction.effectiveWeights as { thermal?: number }).thermal ?? 0).toFixed(2)),
         } : undefined,
         reasoning: combinedAction.reasoning,
         priority: combinedAction.priority,

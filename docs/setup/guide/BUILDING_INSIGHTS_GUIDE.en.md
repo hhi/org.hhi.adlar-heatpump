@@ -509,17 +509,17 @@ THEN
 
 #### 2. Pre-heating time recommendation
 
-**Triggers:** Daily at 23:00 with optimal pre-heating start time
+**Triggers:** When ΔT (target - indoor) > 1.5°C (max 1x per 4 hours)
 
-**Tokens:**
+**Tokens (v2.6.0):**
 
-- `start_time` (string) - HH:MM format (e.g., "05:30")
-- `target_time` (string) - Target time (set via wake_time setting)
 - `duration_hours` (number) - Pre-heating duration in hours
-- `temp_rise` (number) - Temperature rise in °C
+- `temp_rise` (number) - Required temperature rise in °C
+- `current_temp` (number) - Current indoor temperature in °C
+- `target_temp` (number) - Target temperature in °C
 - `confidence` (number 0-100) - Model reliability
 
-**Conditions:** Only if confidence ≥70%, recalculates on τ change >10%
+**Conditions:** Only if confidence ≥70%, max 1x per 4 hours
 
 ---
 
@@ -540,7 +540,7 @@ THEN
 
 ---
 
-### Action Cards (4)
+### Action Cards (5)
 
 #### 1. Dismiss insight
 
@@ -593,6 +593,24 @@ THEN
 **Effect:** Higher threshold = fewer insights (very reliable), lower = more insights (earlier, less accurate)
 
 **Use:** Adaptive threshold - start 70%, lower to 60% after convergence
+
+---
+
+#### 5. Calculate pre-heat duration (v2.6.0)
+
+**Function:** Calculates time needed for X°C temperature rise
+
+**Parameters:**
+
+- `temperature_rise` (number) - Desired temperature rise in °C (e.g., 2.0)
+
+**Returns:**
+
+- `preheat_hours` (number) - Pre-heat duration in hours
+- `confidence` (number) - Model reliability (%)
+- `building_tau` (number) - Thermal time constant τ (hours)
+
+**Use:** Plan pre-heating for specific times, thermal storage automation
 
 ---
 
@@ -651,48 +669,43 @@ THEN
 |---------|---------|-------|-------------|
 | **Enable Building Insights** | ON | ON/OFF | Master switch |
 | **Minimum Confidence (%)** | 70% | 50-90% | Threshold for showing insights |
-| **Wake Time** | 07:00 | HH:MM | Target time for pre-heat completion |
-| **Night Setback (°C)** | 4.0 | 2.0-6.0 | Temperature reduction at night |
 
-> **Note (v2.5.10):** The "Max Active Insights" setting has been removed - each category now has its own sensor.
+> **Note (v2.6.0):** The `wake_time` and `night_setback_delta` settings have been removed. Pre-heating is now calculated dynamically based on actual indoor/target temperatures.
 
-### Wake Time - How It Works
+### Dynamic Pre-Heating (v2.6.0)
 
-The `wake_time` setting determines when pre-heating should be completed. The system automatically calculates the optimal start time:
+The system triggers automatically when ΔT (target - indoor) > 1.5°C:
 
 **Formula:**
 ```
-Pre_heat_duration = τ × ln(ΔT_target / ΔT_residual)
-Start_time = Wake_time - Pre_heat_duration
+Pre_heat_duration = τ × ln(ΔT / 0.3)
 ```
 
-**Example calculation:**
-- Wake time: **07:00**
+**Example:**
+- Target temperature: **21°C**
+- Indoor temperature: **18°C**
 - τ (time constant): **10 hours**
-- Night setback: **4°C** (from 21°C to 17°C)
-- Residual temperature drop: **0.5°C** (assumption)
+- ΔT = 21 - 18 = **3°C**
 
 ```
-Pre_heat_duration = 10 × ln(4 / 0.5) = 10 × 2.08 = 20.8 hours
-→ This is unrealistic, so system adjusts for thermal mass
+Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 ```
 
-**Practical outcomes by building type:**
+**Practical outcomes:**
 
-| τ (hours) | Pre-heating | Start for wake time 07:00 |
-|-----------|-------------|---------------------------|
-| 4 | 2 hours | 05:00 |
-| 8 | 3.5 hours | 03:30 |
-| 15 | 5 hours | 02:00 |
-| 25+ | Not practical | Consider continuous heating |
+| τ (hours) | ΔT 2°C | ΔT 3°C | ΔT 4°C |
+|-----------|--------|--------|--------|
+| 4 | 0.8h | 0.9h | 1.0h |
+| 10 | 1.9h | 2.3h | 2.6h |
+| 15 | 2.9h | 3.5h | 3.9h |
 
 ### Recommended Settings by User Type
 
-| Type | Confidence | Night Setback |
-|------|------------|---------------|
-| **Beginner** (first 2 weeks) | 70% | 2°C |
-| **Intermediate** (after 1 month) | 65% | 4°C |
-| **Advanced** (after 3 months) | 60% | Based on τ |
+| Type | Confidence |
+|------|------------|
+| **Beginner** (first 2 weeks) | 70% |
+| **Intermediate** (after 1 month) | 65% |
+| **Advanced** (after 3 months) | 60% |
 
 ---
 

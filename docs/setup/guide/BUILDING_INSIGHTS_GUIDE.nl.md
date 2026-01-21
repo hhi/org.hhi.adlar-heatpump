@@ -138,19 +138,16 @@ Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 - Medium thermische respons (τ 5-15 uur)
 - Trage thermische respons (τ > 15 uur)
 
-**Voorbeeld Inzicht:**
-> "⏱️ Snelle thermische respons - gebouw warmt op in 4.2 uur"
+**Voorbeeld Inzicht (v2.6.0):**
+> "Snel (~2 uur voor 2°C)" / "Normaal (~4 uur voor 2°C)" / "Langzaam (~8 uur voor 2°C)"
 
-**Voorbeeld Aanbeveling:**
-> "Schakel agressieve nachtverlaging naar 16°C in, voorverwarmen 2 uur voor wakker worden (05:00 → 07:00 klaar). Geschat 12% energiebesparing."
+**Aanbevelingen per type:**
 
-**Aanbevolen acties per type:**
-
-| Respons Type | τ | Nachtverlaging | Voorverwarmen | Besparing |
-|--------------|---|----------------|---------------|-----------|
-| Snel | <5u | Agressief (16-17°C) | 2-3 uur | 10-15% |
-| Medium | 5-15u | Matig (17-18°C) | 4-5 uur | 6-10% |
-| Traag | >15u | Minimaal of geen | Niet praktisch | 3-5% |
+| Respons Type | τ | Advies |
+|--------------|---|--------|
+| Snel | <5u | Stabiel stoken, flexibele planning mogelijk |
+| Normaal | 5-15u | Plan 4+ uur vooruit voor temperatuurstijging |
+| Langzaam | >15u | Continu stoken optimaal voor warmtepomp |
 
 ---
 
@@ -218,7 +215,7 @@ Maandelijkse besparing = €5.04 × 30 = €151/maand
 
 **Flow Trigger Kaarten:**
 1. **"Nieuw gebouwinzicht gedetecteerd"** — Triggert bij nieuwe inzichten
-2. **"Voorverwarmen tijd aanbeveling"** — Dagelijkse trigger om 23:00
+2. **"Voorverwarmen tijd aanbeveling"** — Triggert wanneer ΔT > 1.5°C (max 1x per 4 uur)
 3. **"Gebouwprofiel mismatch gedetecteerd"** — Eenmalige trigger
 
 ### Inzicht Levenscyclus
@@ -508,17 +505,17 @@ THEN
 
 #### 2. Voorverwarmen tijd aanbeveling
 
-**Triggert:** Dagelijks om 23:00 met optimale voorverwarmen starttijd
+**Triggert:** Wanneer ΔT (doel - binnen) > 1.5°C (max 1x per 4 uur)
 
-**Tokens:**
+**Tokens (v2.6.0):**
 
-- `start_time` (string) - HH:MM formaat (bijv. "05:30")
-- `target_time` (string) - Doeltijd (ingesteld via wake_time setting)
 - `duration_hours` (number) - Voorverwarmen duur in uren
-- `temp_rise` (number) - Temperatuurstijging in °C
+- `temp_rise` (number) - Benodigde temperatuurstijging in °C
+- `current_temp` (number) - Huidige binnentemperatuur in °C
+- `target_temp` (number) - Doeltemperatuur in °C
 - `confidence` (number 0-100) - Model betrouwbaarheid
 
-**Voorwaarden:** Alleen als confidence ≥70%, herberekent bij τ wijziging >10%
+**Voorwaarden:** Alleen als confidence ≥70%, max 1x per 4 uur
 
 ---
 
@@ -539,7 +536,7 @@ THEN
 
 ---
 
-### Actie Kaarten (4)
+### Actie Kaarten (5)
 
 #### 1. Verberg inzicht (Dismiss insight)
 
@@ -592,6 +589,33 @@ THEN
 **Effec:** Hogere drempel = minder inzichten (zeer betrouwbaar), lagere = meer inzichten (vroeger, minder accuraat)
 
 **Gebruik:** Adaptieve drempel - start 70%, verlaag naar 60% na convergentie
+
+---
+
+#### 5. Bereken voorverwarmen duur (v2.6.0)
+
+**Functie:** Berekent de tijd nodig om X°C temperatuurstijging te bereiken
+
+**Parameters:**
+
+- `temperature_rise` (number) - Gewenste temperatuurstijging in °C (bijv. 2.0)
+
+**Returns:**
+
+- `preheat_hours` (number) - Voorverwarmen duur in uren
+- `confidence` (number) - Model betrouwbaarheid (%)
+- `building_tau` (number) - Thermische tijdsconstante τ (uren)
+
+**Gebruik:** Voorverwarmen plannen voor specifieke tijdstippen, thermische opslag automatisering
+
+**Voorbeeld flow:**
+```
+WHEN Goedkoopste prijsblok nadert (2 uur van tevoren)
+THEN
+  1. Bereken voorverwarmen duur (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Start voorverwarmen nu
+```
 
 ---
 
@@ -650,48 +674,43 @@ THEN
 |------------|-----------|--------|--------------|
 | **Gebouwinzichten inschakelen** | AAN | AAN/UIT | Hoofdschakelaar |
 | **Minimum Confidence (%)** | 70% | 50-90% | Drempel voor tonen inzichten |
-| **Wektijd** | 07:00 | UU:MM | Doeltijd voor voorverwarmen voltooiing |
-| **Nachtverlaging (°C)** | 4.0 | 2.0-6.0 | Temperatuurreductie 's nachts |
 
-> **Opmerking (v2.5.10):** De instelling "Max Actieve Inzichten" is verwijderd - elke categorie heeft nu een eigen sensor.
+> **Opmerking (v2.6.0):** De instellingen `wake_time` en `night_setback_delta` zijn verwijderd. Voorverwarmen wordt nu dynamisch berekend op basis van actuele binnen/doel temperaturen.
 
-### Wektijd (wake_time) - Hoe het werkt
+### Dynamische Voorverwarmen (v2.6.0)
 
-De `wake_time` instelling bepaalt wanneer het voorverwarmen voltooid moet zijn. Het systeem berekent automatisch de optimale starttijd:
+Het systeem triggert automatisch wanneer ΔT (doel - binnen) > 1.5°C:
 
 **Formule:**
 ```
-Voorverwarmen_duur = τ × ln(ΔT_doel / ΔT_rest)
-Start_tijd = Wektijd - Voorverwarmen_duur
+Voorverwarmen_duur = τ × ln(ΔT / 0.3)
 ```
 
-**Voorbeeld berekening:**
-- Wektijd: **07:00**
+**Voorbeeld:**
+- Doeltemperatuur: **21°C**
+- Binnentemperatuur: **18°C**
 - τ (tijdsconstante): **10 uur**
-- Nachtverlaging: **4°C** (van 21°C naar 17°C)
-- Residuele temperatuurdaling: **0.5°C** (aanname)
+- ΔT = 21 - 18 = **3°C**
 
 ```
-Voorverwarmen_duur = 10 × ln(4 / 0.5) = 10 × 2.08 = 20.8 uur
-→ Dit is onrealistisch, dus systeem past aan voor thermische massa
+Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 ```
 
-**Praktische uitkomst per gebouwtype:**
+**Praktische uitkomsten:**
 
-| τ (uur) | Voorverwarmen | Start bij wektijd 07:00 |
-|---------|---------------|-------------------------|
-| 4 | 2 uur | 05:00 |
-| 8 | 3.5 uur | 03:30 |
-| 15 | 5 uur | 02:00 |
-| 25+ | Niet praktisch | Overweeg continue verwarming |
+| τ (uur) | ΔT 2°C | ΔT 3°C | ΔT 4°C |
+|---------|--------|--------|--------|
+| 4 | 0.8u | 0.9u | 1.0u |
+| 10 | 1.9u | 2.3u | 2.6u |
+| 15 | 2.9u | 3.5u | 3.9u |
 
 ### Aanbevolen Instellingen per Gebruikerstype
 
-| Type | Confidence | Nachtverlaging |
-|------|------------|----------------|
-| **Beginner** (eerste 2 weken) | 70% | 2°C |
-| **Gemiddeld** (na 1 maand) | 65% | 4°C |
-| **Gevorderd** (na 3 maanden) | 60% | Op basis van τ |
+| Type | Confidence |
+|------|------------|
+| **Beginner** (eerste 2 weken) | 70% |
+| **Gemiddeld** (na 1 maand) | 65% |
+| **Gevorderd** (na 3 maanden) | 60% |
 
 ---
 

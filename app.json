@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -2954,35 +2954,13 @@
           "fr": "Recommandation de temps de préchauffage"
         },
         "hint": {
-          "en": "Daily trigger (23:00) suggesting optimal pre-heat start time based on building thermal response (τ). Requires ≥70% model confidence.",
-          "nl": "Dagelijkse trigger (23:00) die optimale voorverwarm starttijd voorstelt gebaseerd op thermische respons van gebouw (τ). Vereist ≥70% model betrouwbaarheid.",
-          "de": "Täglicher Trigger (23:00), der optimale Vorheizstartzeit basierend auf thermischer Gebäudereaktion (τ) vorschlägt. Erfordert ≥70% Modellvertrauen.",
-          "fr": "Déclencheur quotidien (23:00) suggérant l'heure de début de préchauffage optimale basée sur la réponse thermique du bâtiment (τ). Nécessite une confiance du modèle ≥70%."
+          "en": "Triggers when ΔT (target - indoor) exceeds 1.5°C. Provides pre-heat duration based on building thermal response (τ). Requires ≥70% model confidence. Max once per 4 hours.",
+          "nl": "Triggert wanneer ΔT (doel - binnen) 1.5°C overschrijdt. Geeft voorverwarm duur gebaseerd op thermische respons van gebouw (τ). Vereist ≥70% model betrouwbaarheid. Max 1x per 4 uur.",
+          "de": "Triggert wenn ΔT (Ziel - Innen) 1.5°C überschreitet. Liefert Vorheizdauer basierend auf thermischer Gebäudereaktion (τ). Erfordert ≥70% Modellvertrauen. Max 1x pro 4 Stunden.",
+          "fr": "Se déclenche lorsque ΔT (cible - intérieur) dépasse 1.5°C. Fournit la durée de préchauffage basée sur la réponse thermique du bâtiment (τ). Nécessite ≥70% de confiance du modèle. Max 1x par 4 heures."
         },
         "highlight": true,
         "tokens": [
-          {
-            "name": "start_time",
-            "type": "string",
-            "title": {
-              "en": "Start Time",
-              "nl": "Starttijd",
-              "de": "Startzeit",
-              "fr": "Heure de Début"
-            },
-            "example": "05:30"
-          },
-          {
-            "name": "target_time",
-            "type": "string",
-            "title": {
-              "en": "Target Time",
-              "nl": "Doeltijd",
-              "de": "Zielzeit",
-              "fr": "Heure Cible"
-            },
-            "example": "07:00"
-          },
           {
             "name": "duration_hours",
             "type": "number",
@@ -3003,7 +2981,29 @@
               "de": "Temperaturanstieg (°C)",
               "fr": "Augmentation de Température (°C)"
             },
-            "example": 4
+            "example": 2.5
+          },
+          {
+            "name": "current_temp",
+            "type": "number",
+            "title": {
+              "en": "Current Temperature (°C)",
+              "nl": "Huidige Temperatuur (°C)",
+              "de": "Aktuelle Temperatur (°C)",
+              "fr": "Température Actuelle (°C)"
+            },
+            "example": 18.5
+          },
+          {
+            "name": "target_temp",
+            "type": "number",
+            "title": {
+              "en": "Target Temperature (°C)",
+              "nl": "Doeltemperatuur (°C)",
+              "de": "Zieltemperatur (°C)",
+              "fr": "Température Cible (°C)"
+            },
+            "example": 21
           },
           {
             "name": "confidence",
@@ -8977,45 +8977,6 @@
               "max": 90,
               "step": 5,
               "units": "%"
-            },
-            {
-              "id": "wake_time",
-              "type": "text",
-              "label": {
-                "en": "Wake Time (HH:MM)",
-                "nl": "Gewenste sta-op tijd (UU:MM)",
-                "de": "Aufwachzeit (HH:MM)",
-                "fr": "Heure de Réveil (HH:MM)"
-              },
-              "hint": {
-                "en": "Time when building should reach target temperature. Used to calculate optimal pre-heat start time based on thermal response (τ).",
-                "nl": "Tijd wanneer gebouw doeltemperatuur moet bereiken. Gebruikt om optimale voorverwarm starttijd te berekenen gebaseerd op thermische respons (τ).",
-                "de": "Zeit, zu der das Gebäude die Zieltemperatur erreichen soll. Wird verwendet, um die optimale Vorheizstartzeit basierend auf der thermischen Reaktion (τ) zu berechnen.",
-                "fr": "Heure à laquelle le bâtiment devrait atteindre la température cible. Utilisé pour calculer l'heure de début de préchauffage optimale basée sur la réponse thermique (τ)."
-              },
-              "value": "07:00",
-              "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-            },
-            {
-              "id": "night_setback_delta",
-              "type": "number",
-              "label": {
-                "en": "Night Setback (°C)",
-                "nl": "Nacht Verlaging (°C)",
-                "de": "Nachtabsenkung (°C)",
-                "fr": "Réduction Nocturne (°C)"
-              },
-              "hint": {
-                "en": "Temperature reduction during night (e.g., from 21°C to 17°C = 4°C setback). Used to calculate pre-heat duration and energy savings potential.",
-                "nl": "Temperatuur verlaging tijdens de nacht (bijv. van 21°C naar 17°C = 4°C verlaging). Gebruikt om voorverwarm duur en energie besparingspotentieel te berekenen.",
-                "de": "Temperaturreduktion während der Nacht (z.B. von 21°C auf 17°C = 4°C Absenkung). Wird verwendet, um Vorheizdauer und Energiesparpotenzial zu berechnen.",
-                "fr": "Réduction de température pendant la nuit (p. ex., de 21°C à 17°C = réduction de 4°C). Utilisé pour calculer la durée de préchauffage et le potentiel d'économie d'énergie."
-              },
-              "value": 4,
-              "min": 2,
-              "max": 6,
-              "step": 0.5,
-              "units": "°C"
             }
           ]
         },
@@ -9522,12 +9483,12 @@
                 "fr": "Priorité Confort "
               },
               "hint": {
-                "en": "Weight given to comfort (PI temperature control). Higher = more focus on maintaining target temperature. Values are auto-normalized to sum 100%. Default: 60%",
-                "nl": "Gewicht gegeven aan comfort (PI temperatuurregeling). Hoger = meer focus op handhaven doeltemperatuur. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 60%",
-                "de": "Gewichtung für Komfort (PI-Temperaturregelung). Höher = mehr Fokus auf Zieltemperatur halten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 60%",
-                "fr": "Poids donné au confort (contrôle de température PI). Plus élevé = plus de concentration sur le maintien de la température cible. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 60%"
+                "en": "Weight given to comfort (PI temperature control). Higher = more focus on maintaining target temperature. Values are auto-normalized to sum 100%. Default: 50%",
+                "nl": "Gewicht gegeven aan comfort (PI temperatuurregeling). Hoger = meer focus op handhaven doeltemperatuur. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 50%",
+                "de": "Gewichtung für Komfort (PI-Temperaturregelung). Höher = mehr Fokus auf Zieltemperatur halten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 50%",
+                "fr": "Poids donné au confort (contrôle de température PI). Plus élevé = plus de concentration sur le maintien de la température cible. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 50%"
               },
-              "value": 60,
+              "value": 50,
               "min": 0,
               "max": 100,
               "step": 5,
@@ -9548,12 +9509,12 @@
                 "fr": "Priorité Efficacité "
               },
               "hint": {
-                "en": "Weight given to efficiency (COP optimization). Higher = more focus on maximizing heat pump efficiency. Values are auto-normalized to sum 100%. Default: 25%",
-                "nl": "Gewicht gegeven aan efficiëntie (COP optimalisatie). Hoger = meer focus op maximaliseren warmtepomp efficiëntie. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 25%",
-                "de": "Gewichtung für Effizienz (COP-Optimierung). Höher = mehr Fokus auf Maximierung der Wärmepumpeneffizienz. Werte werden automatisch auf Summe 100% normalisiert. Standard: 25%",
-                "fr": "Poids donné à l'efficacité (optimisation COP). Plus élevé = plus de concentration sur la maximisation de l'efficacité de la pompe à chaleur. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 25%"
+                "en": "Weight given to efficiency (COP optimization). Higher = more focus on maximizing heat pump efficiency. Values are auto-normalized to sum 100%. Default: 15%",
+                "nl": "Gewicht gegeven aan efficiëntie (COP optimalisatie). Hoger = meer focus op maximaliseren warmtepomp efficiëntie. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 15%",
+                "de": "Gewichtung für Effizienz (COP-Optimierung). Höher = mehr Fokus auf Maximierung der Wärmepumpeneffizienz. Werte werden automatisch auf Summe 100% normalisiert. Standard: 15%",
+                "fr": "Poids donné à l'efficacité (optimisation COP). Plus élevé = plus de concentration sur la maximisation de l'efficacité de la pompe à chaleur. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 15%"
               },
-              "value": 25,
+              "value": 15,
               "min": 0,
               "max": 100,
               "step": 5,
@@ -9574,10 +9535,10 @@
                 "fr": "Priorité Coût "
               },
               "hint": {
-                "en": "Weight given to cost (price optimization). Higher = more focus on minimizing energy costs. Values are auto-normalized to sum 100%. Default: 15%",
-                "nl": "Gewicht gegeven aan kosten (prijsoptimalisatie). Hoger = meer focus op minimaliseren energiekosten. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 15%",
-                "de": "Gewichtung für Kosten (Preisoptimierung). Höher = mehr Fokus auf Minimierung der Energiekosten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 15%",
-                "fr": "Poids donné au coût (optimisation des prix). Plus élevé = plus de concentration sur la minimisation des coûts énergétiques. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 15%"
+                "en": "Weight given to cost (price optimization). Higher = more focus on minimizing energy costs. Values are auto-normalized to sum 100%. Default: 15%, but increases factor-wise at (very) high prices (15% -> 45%)",
+                "nl": "Gewicht gegeven aan kosten (prijsoptimalisatie). Hoger = meer focus op minimaliseren energiekosten. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 15%, maar bij (zeer) hoge prijzen factorgewijs verhoogt (15% -> 45%",
+                "de": "Gewichtung für Kosten (Preisoptimierung). Höher = mehr Fokus auf Minimierung der Energiekosten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 15%, aber steigt faktorweise bei (sehr) hohen Preisen (15% -> 45%)",
+                "fr": "Poids donné au coût (optimisation des prix). Plus élevé = plus de concentration sur la minimisation des coûts énergétiques. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 15%, mais augmente par facteur à des prix (très) élevés (15% -> 45%)"
               },
               "value": 15,
               "min": 0,
@@ -11761,10 +11722,10 @@
       "id": "building_insight_preheating",
       "type": "string",
       "title": {
-        "en": "Pre-heating Strategy (comfort)",
-        "nl": "Voorverwarming Advies (comfort)",
-        "de": "Vorheizstrategie (Komfort)",
-        "fr": "Stratégie de Préchauffage (confort)"
+        "en": "Pre-heating duration (comfort)",
+        "nl": "Voorverwarming duur (comfort)",
+        "de": "Vorheizdauer (Komfort)",
+        "fr": "Durée de préchauffage (confort)"
       },
       "desc": {
         "en": "Pre-heating recommendations based on thermal response speed",

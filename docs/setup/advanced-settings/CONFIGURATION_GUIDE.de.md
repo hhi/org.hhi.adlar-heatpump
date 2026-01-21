@@ -321,18 +321,6 @@ Automatisierte Analyse des thermischen Gebäudemodells mit Energiespar-Empfehlun
 - **Funktion**: Maximale Anzahl gleichzeitig anzuzeigender Einblicke
 - **Priorität**: Wichtigste Einblicke werden zuerst angezeigt
 
-### Gewünschte Aufwachzeit (HH:MM)
-- **Standard**: 07:00
-- **Format**: HH:MM (z.B. 07:00, 06:30)
-- **Funktion**: Zeit, wann das Gebäude die Zieltemperatur erreichen soll
-- **Verwendet für**: Berechnung der optimalen Vorheiz-Startzeit basierend auf thermischer Antwort (τ)
-
-### Nachtabsenkung (°C)
-- **Standard**: 4.0°C
-- **Bereich**: 2.0 - 6.0°C
-- **Funktion**: Temperaturabsenkung während der Nacht (z.B. von 21°C auf 17°C = 4°C Absenkung)
-- **Verwendet für**: Berechnung der Vorheizdauer und des Energiesparpotenzials
-
 ---
 
 ## 8. Energiepreis-Optimierung
@@ -449,34 +437,44 @@ Automatische Vorlauftemperatur-Optimierung für maximale Effizienz.
 
 ## 10. Gewichtungsfaktoren der Adaptiven Regelung
 
-Diese drei Prioritäten bestimmen gemeinsam, wie das System Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.**
+Diese vier Prioritäten bestimmen gemeinsam, wie das System Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.**
 
 ### Komfort-Priorität
-- **Standard**: 60%
+- **Standard**: 50%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für PI-Temperaturregelung
-- **Hoher Komfort** (80-90%): Temperatur immer stabil innerhalb ±0,3°C
+- **Hoher Komfort** (70-80%): Temperatur immer stabil innerhalb ±0,3°C
 
 ### Effizienz-Priorität
-- **Standard**: 25%
+- **Standard**: 15%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für COP-Optimierung
-- **Hohe Effizienz** (40-50%): Fokus auf maximalen COP
+- **Hohe Effizienz** (30-40%): Fokus auf maximalen COP
 
 ### Kosten-Priorität
 - **Standard**: 15%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für Preisoptimierung
-- **Hohe Kosten** (30-40%): Maximale Einsparungen bei Energiekosten
+- **Dynamischer Multiplikator** (v2.6.0):
+  - HOHE Preise (reduzieren): Gewicht ×2,0 bis ×3,0
+  - NIEDRIGE Preise (vorheizen): Gewicht ×1,2 bis ×1,5
+- **Hohe Kosten** (25-35%): Maximale Einsparungen bei Energiekosten
+
+### Thermische Vorhersage-Priorität
+- **Standard**: 20%
+- **Bereich**: 0 - 50%
+- **Funktion**: Gewicht für thermische Vorhersagen (τ/C/UA)
+- **Voraussetzungen**: Gebäudemodell-Vertrauen ≥50%
+- **0%**: Deaktiviert (kein Einfluss vom Gebäudemodell)
 
 **Praktische Profile**:
 
-| Profil | Komfort | Effizienz | Kosten | Anwendungsfall |
-|--------|---------|-----------|--------|----------------|
-| Familie mit Baby | 90% | 10% | 0% | Max Komfort |
-| Homeoffice | 50% | 40% | 10% | Ausgewogen |
-| Budget-Fokus | 30% | 30% | 40% | Dynamischer Vertrag |
-| Oft Abwesend | 20% | 60% | 20% | Max Effizienz |
+| Profil | Komfort | Effizienz | Kosten | Thermisch | Anwendungsfall |
+|--------|---------|-----------|--------|-----------|----------------|
+| Familie mit Baby | 80% | 5% | 5% | 10% | Max Komfort |
+| Homeoffice | 50% | 15% | 15% | 20% | Ausgewogen (Standard) |
+| Budget-Fokus | 35% | 10% | 35% | 20% | Dynamischer Vertrag |
+| Oft Abwesend | 30% | 40% | 10% | 20% | Max Effizienz |
 
 ---
 
@@ -539,8 +537,9 @@ Verwaltung von Energiezählern für Tracking und Berichterstattung.
 
 Prioritäten:
 - Komfort: 80%
-- Effizienz: 15%
+- Effizienz: 5%
 - Kosten: 5%
+- Thermisch: 10%
 ```
 
 ### Szenario 2: "Maximale Einsparungen, habe dynamischen Vertrag"
@@ -557,9 +556,10 @@ Prioritäten:
    - Strategie: Ausgewogen
 
 Prioritäten:
-- Komfort: 40%
-- Effizienz: 30%
-- Kosten: 30%
+- Komfort: 35%
+- Effizienz: 10%
+- Kosten: 35%
+- Thermisch: 20%
 ```
 
 ### Szenario 3: "Passivhaus, Effizienz ist entscheidend"
@@ -575,9 +575,10 @@ Prioritäten:
    - Strategie: Aggressiv (Passivhaus toleriert Experimente)
 
 Prioritäten:
-- Komfort: 30%
-- Effizienz: 60%
+- Komfort: 25%
+- Effizienz: 40%
 - Kosten: 10%
+- Thermisch: 25%
 ```
 
 ### Szenario 4: "Oft abwesend, minimale Überwachung"
