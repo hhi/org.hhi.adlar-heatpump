@@ -173,13 +173,12 @@ This document provides a comprehensive mapping between device capabilities and t
   - **Type**: Essential monitoring
   - **Usage**: System circulation monitoring
 
-### adlar_countdowntimer → Flow Cards
-**Capability**: `adlar_countdowntimer` (DPS 14)
-- **Trigger**: `countdown_timer_finished`
-  - **Purpose**: System timer completion
-  - **Tokens**: timer_duration, completion_time
-  - **Type**: Advanced monitoring
-  - **Usage**: Scheduled operations, maintenance reminders
+### adlar_firmware_mcu → Flow Cards
+**Capability**: `adlar_firmware_mcu` (DPS 14)
+- **Note**: No flow cards - static firmware version display
+  - **Purpose**: Displays MCU mainboard firmware version (e.g., 433 = v4.3.3)
+  - **Type**: Diagnostic information
+  - **Usage**: Version identification for support and troubleshooting
 
 ---
 

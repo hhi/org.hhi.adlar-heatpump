@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -7195,7 +7195,7 @@
         "building_insight_profile",
         "building_insights_diagnostics",
         "adlar_fault",
-        "adlar_countdowntimer",
+        "adlar_firmware_mcu",
         "adlar_connection_status",
         "adlar_connection_active",
         "adaptive_control_diagnostics",
@@ -10194,39 +10194,6 @@
         "fr": "Moyenne mobile COP sur 7 jours pour l'identification des tendances saisonnières et la surveillance de l'efficacité à long terme. Aide à identifier les conditions de fonctionnement optimales."
       }
     },
-    "adlar_countdowntimer": {
-      "id": "adlar_countdowntimer",
-      "title": {
-        "en": "Automatic shutoff timer",
-        "nl": "Automatische sluitingstimer",
-        "de": "Automatischer Abschalttimer",
-        "fr": "Minuterie d'arrêt automatique"
-      },
-      "type": "number",
-      "min": 0,
-      "max": 2000,
-      "step": 1,
-      "units": {
-        "en": "min",
-        "nl": "min",
-        "de": "min",
-        "fr": "min"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/countdowntimer.svg",
-      "insights": true,
-      "insightsTitle": {
-        "en": "Automatic shutoff timer",
-        "nl": "Automatische sluitingstimer",
-        "de": "Automatischer Abschalttimer",
-        "fr": "Minuterie d'arrêt automatique"
-      },
-      "description": {
-        "nl": "dp 14 : countdown_left - Countdown Left"
-      }
-    },
     "adlar_daily_disconnect_count": {
       "id": "adlar_daily_disconnect_count",
       "title": {
@@ -11052,6 +11019,25 @@
       },
       "description": {
         "nl": "dp 15 : fault - Fault"
+      }
+    },
+    "adlar_firmware_mcu": {
+      "id": "adlar_firmware_mcu",
+      "title": {
+        "en": "MCU Firmware Version",
+        "nl": "MCU Firmware versie",
+        "de": "MCU-Firmware-Version",
+        "fr": "Version du firmware MCU"
+      },
+      "type": "string",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/firmware-mcu.svg",
+      "insights": false,
+      "description": {
+        "en": "DPS 14: MCU mainboard firmware version (e.g., v4.3.3)",
+        "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)"
       }
     },
     "adlar_hotwater": {

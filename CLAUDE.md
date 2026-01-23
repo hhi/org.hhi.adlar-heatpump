@@ -40,7 +40,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `Explore`: ❌ NO git operations - read-only exploration
 - `Plan`: ❌ NO git operations - planning only
 - `code-reviewer`: ❌ NO git operations - review only
-- `github-release-manager`: ✅ AUTHORIZED for git tag, git commit, git push, gh release (release management only)
+- `github-release-manager`: ✅ AUTHORIZED for git tag, git commit, git push, gh release (release management only); ⚠️ MUST follow Release Workflow below
+
+**Release Workflow (MANDATORY for github-release-manager):**
+
+1. **ALWAYS run `git status`** first to see ALL modified/deleted/untracked files
+2. **ASK user confirmation** before staging: "I found X modified files, Y deleted files, Z untracked files. Should I include all of these?"
+3. **Stage ALL relevant files** - do not cherry-pick only files mentioned in the prompt
+4. **Include `app.json`** - this auto-generated file MUST be committed with every release
+5. **Include documentation changes** - if docs were modified, they belong in the release commit
+6. **Verify with `git status`** after staging to confirm nothing is left behind
+7. **Only proceed with commit/tag/push** after user confirms all files are staged
 
 **Rationale**: Unauthorized code changes and commits have repeatedly caused unnecessary rollbacks and recovery actions. The user must maintain full control over all code modifications.
 

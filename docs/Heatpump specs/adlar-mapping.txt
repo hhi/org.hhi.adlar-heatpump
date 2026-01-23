@@ -77,8 +77,8 @@ export class AdlarMapping {
     adlar_state_compressor_state: [27],
     adlar_state_backwater: [31],
     adlar_state_defrost_state: [33],
-    adlar_countdowntimer: [14],
-    // DPS 14: Mainboard Program
+    adlar_firmware_mcu: [14],
+    // DPS 14: MCU mainboard firmware version (e.g., 433 = v4.3.3)
     adlar_fault: [15],
   };
 

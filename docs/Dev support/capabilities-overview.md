@@ -114,12 +114,12 @@ This document provides a comprehensive overview of all device capabilities suppo
 
 ### Status & Monitoring Capabilities
 
-#### adlar_countdowntimer
+#### adlar_firmware_mcu
 - **DPS**: 14 (countdown_left)
 - **Type**: number
-- **Purpose**: Displays remaining countdown time for automatic shutoff
-- **Range**: 0-2000 (step 1)
-- **Properties**: Read-only, sensor UI, insights enabled
+- **Purpose**: Displays MCU mainboard firmware version (e.g., 433 = v4.3.3)
+- **Range**: 0-9999 (step 1)
+- **Properties**: Read-only, sensor UI, insights disabled
 
 #### adlar_fault
 - **DPS**: 15 (fault)
