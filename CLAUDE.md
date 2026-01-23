@@ -49,8 +49,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **Stage ALL relevant files** - do not cherry-pick only files mentioned in the prompt
 4. **Include `app.json`** - this auto-generated file MUST be committed with every release
 5. **Include documentation changes** - if docs were modified, they belong in the release commit
-6. **Verify with `git status`** after staging to confirm nothing is left behind
-7. **Only proceed with commit/tag/push** after user confirms all files are staged
+6. **Include untracked files (`??`)** - new files in the working directory belong in the commit UNLESS user explicitly says "do NOT commit this file"
+7. **Default assumption**: If a file exists in the working directory and is relevant to the project, it should be committed
+8. **Verify with `git status`** after staging to confirm NOTHING is left behind (status should be empty)
+9. **Only proceed with commit/tag/push** after user confirms all files are staged
 
 **Rationale**: Unauthorized code changes and commits have repeatedly caused unnecessary rollbacks and recovery actions. The user must maintain full control over all code modifications.
 
