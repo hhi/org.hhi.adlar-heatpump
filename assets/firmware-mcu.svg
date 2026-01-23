@@ -1,0 +1,35 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main chip body -->
+  <rect x="28" y="28" width="44" height="44" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="4"/>
+
+  <!-- Internal circuit grid pattern - horizontal lines -->
+  <line x1="35" y1="40" x2="65" y2="40" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="35" y1="50" x2="65" y2="50" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="35" y1="60" x2="65" y2="60" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+
+  <!-- Internal circuit grid pattern - vertical lines -->
+  <line x1="42" y1="35" x2="42" y2="65" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="50" y1="35" x2="50" y2="65" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="58" y1="35" x2="58" y2="65" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+
+  <!-- Central processing core -->
+  <circle cx="50" cy="50" r="6" fill="none" stroke="currentColor" stroke-width="3" opacity="0.8"/>
+
+  <!-- Left side connection pins -->
+  <line x1="28" y1="38" x2="18" y2="38" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="28" y1="50" x2="18" y2="50" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="28" y1="62" x2="18" y2="62" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Right side connection pins -->
+  <line x1="72" y1="38" x2="82" y2="38" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="72" y1="50" x2="82" y2="50" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="72" y1="62" x2="82" y2="62" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Pin connection dots -->
+  <circle cx="18" cy="38" r="2.5" fill="currentColor" stroke="none" opacity="0.8"/>
+  <circle cx="18" cy="50" r="2.5" fill="currentColor" stroke="none" opacity="0.8"/>
+  <circle cx="18" cy="62" r="2.5" fill="currentColor" stroke="none" opacity="0.8"/>
+  <circle cx="82" cy="38" r="2.5" fill="currentColor" stroke="none" opacity="0.8"/>
+  <circle cx="82" cy="50" r="2.5" fill="currentColor" stroke="none" opacity="0.8"/>
+  <circle cx="82" cy="62" r="2.5" fill="currentColor" stroke="none" opacity="0.8"/>
+</svg>

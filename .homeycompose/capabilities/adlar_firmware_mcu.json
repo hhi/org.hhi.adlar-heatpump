@@ -1,0 +1,19 @@
+{
+  "id": "adlar_firmware_mcu",
+  "title": {
+    "en": "MCU Firmware Version",
+    "nl": "MCU Firmware versie",
+    "de": "MCU-Firmware-Version",
+    "fr": "Version du firmware MCU"
+  },
+  "type": "string",
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/firmware-mcu.svg",
+  "insights": false,
+  "description": {
+    "en": "DPS 14: MCU mainboard firmware version (e.g., v4.3.3)",
+    "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)"
+  }
+}

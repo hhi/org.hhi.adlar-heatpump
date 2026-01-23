@@ -1,4 +1,10 @@
 {
+  "2.6.3": {
+    "en": "Fixed: DPS 14 now correctly shows MCU firmware version (e.g., v4.3.3) instead of countdown timer.",
+    "nl": "Opgelost: DPS 14 toont nu correct MCU firmware versie (bijv. v4.3.3) in plaats van afteller.",
+    "de": "Behoben: DPS 14 zeigt jetzt korrekt MCU-Firmware-Version (z.B. v4.3.3) statt Countdown-Timer.",
+    "fr": "Corrigé: DPS 14 affiche maintenant correctement la version du firmware MCU (par ex. v4.3.3) au lieu du compte à rebours."
+  },
   "2.6.2": {
     "en": "Changed: Pre-heat trigger now fires when ΔT threshold detected (was: daily at 23:00). Thermal storage boost/reduce values now dynamically calculated from building model. Simplified insight texts. Removed wake_time and night_setback_delta settings (use flow card instead).",
     "nl": "Gewijzigd: Voorverwarming trigger vuurt nu bij ΔT drempel detectie (was: dagelijks om 23:00). Thermische opslag boost/reduce waarden nu dynamisch berekend uit gebouwmodel. Vereenvoudigde inzicht teksten. Wake_time en night_setback_delta instellingen verwijderd (gebruik flow card).",
