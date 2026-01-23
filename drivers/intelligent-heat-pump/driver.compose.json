@@ -84,7 +84,7 @@
     "building_insight_profile",
     "building_insights_diagnostics",
     "adlar_fault",
-    "adlar_countdowntimer",
+    "adlar_firmware_mcu",
     "adlar_connection_status",
     "adlar_connection_active",
     "adaptive_control_diagnostics",

@@ -2640,7 +2640,25 @@ class MyDevice extends Homey.Device {
             // Transforms raw Tuya integer values to actual decimal values
             // Example: DPS 104 (power) raw 25000 → 2500 W (scale 1: ÷ 10)
             // Example: DPS 103 (voltage) raw 2305 → 230.5 V (scale 3: ÷ 1000)
-            const transformedValue = AdlarMapping.transformDpsValue(dpsId, value);
+            let transformedValue: unknown = AdlarMapping.transformDpsValue(dpsId, value);
+
+            // DPS 14 (adlar_firmware_mcu): Format numeric firmware version to string (v2.7.0)
+            // Example: 433 → "v4.3.3", 1234 → "v12.3.4"
+            if (dpsId === 14 && capability === 'adlar_firmware_mcu' && typeof transformedValue === 'number') {
+              const numValue = Math.floor(transformedValue);
+              if (numValue > 0 && numValue < 10000) {
+                // Format: split digits into major.minor.patch
+                // 433 → v4.3.3, 1234 → v12.3.4
+                const str = numValue.toString();
+                if (str.length === 3) {
+                  transformedValue = `v${str[0]}.${str[1]}.${str[2]}`;
+                } else if (str.length === 4) {
+                  transformedValue = `v${str.slice(0, 2)}.${str[2]}.${str[3]}`;
+                } else {
+                  transformedValue = `v${numValue}`;
+                }
+              }
+            }
 
             // Collect capability update promise for batching
             const updatePromise = this.setCapabilityValue(capability, transformedValue)
@@ -3381,6 +3399,32 @@ class MyDevice extends Homey.Device {
           this.log('✅ Added adlar_connection_status capability to new device');
         } catch (error) {
           this.error('Failed to add adlar_connection_status capability:', error);
+        }
+      }
+
+      // Migration: adlar_countdowntimer → adlar_firmware_mcu (v2.7.0 migration)
+      // DPS 14 was incorrectly named as countdown timer, but actually contains MCU firmware version
+      if (this.hasCapability('adlar_countdowntimer')) {
+        try {
+          const migrationFlag = this.getStoreValue('firmware_mcu_migrated_v2_7_0');
+          if (!migrationFlag) {
+            this.log('🔄 Migrating adlar_countdowntimer to adlar_firmware_mcu...');
+            await this.removeCapability('adlar_countdowntimer');
+            await this.addCapability('adlar_firmware_mcu');
+            await this.setStoreValue('firmware_mcu_migrated_v2_7_0', true);
+            this.log('✅ Successfully migrated to adlar_firmware_mcu');
+          }
+        } catch (error) {
+          this.error('Failed to migrate adlar_countdowntimer:', error);
+        }
+      } else if (!this.hasCapability('adlar_firmware_mcu')) {
+        // Brand new devices get the new capability directly
+        try {
+          await this.addCapability('adlar_firmware_mcu');
+          await this.setStoreValue('firmware_mcu_migrated_v2_7_0', true);
+          this.log('✅ Added adlar_firmware_mcu capability to new device');
+        } catch (error) {
+          this.error('Failed to add adlar_firmware_mcu capability:', error);
         }
       }
 

@@ -36,7 +36,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `homey-bug-fixer`: ❌ NO git operations - analysis and code fixes only
 - `homey-implementation-guide`: ❌ NO git operations - guidance only
 - `documentation-revision-analyst`: ❌ NO git operations - analysis only
-- `svg-icon-designer`: ❌ NO git operations - design only
+- `svg-icon-designer`: ❌ NO git operations - design only; ⚠️ MUST follow SVG Icon Guidelines below
 - `Explore`: ❌ NO git operations - read-only exploration
 - `Plan`: ❌ NO git operations - planning only
 - `code-reviewer`: ❌ NO git operations - review only
@@ -45,6 +45,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Rationale**: Unauthorized code changes and commits have repeatedly caused unnecessary rollbacks and recovery actions. The user must maintain full control over all code modifications.
 
 **Violation Consequences**: Failure to follow this policy damages trust and creates additional work for the user.
+
+## 🎨 SVG Icon Guidelines (MANDATORY for svg-icon-designer agent)
+
+**CRITICAL: iOS/Safari Compatibility Requirements**
+
+SVG icons in this Homey app MUST be compatible with iOS/Safari (WebKit). WebKit has a known bug where it does NOT correctly inherit `stroke`, `fill`, and other styling attributes from the root `<svg>` element.
+
+### ❌ FORBIDDEN - Do NOT use attributes on root SVG
+
+```xml
+<!-- WRONG - iOS will NOT render this correctly -->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     fill="none" stroke="currentColor" stroke-width="3"
+     stroke-linecap="round" stroke-linejoin="round">
+  <rect x="10" y="10" width="80" height="80"/>
+</svg>
+```
+
+### ✅ REQUIRED - Apply attributes to EACH element
+
+```xml
+<!-- CORRECT - iOS renders this properly -->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="80"
+        fill="none" stroke="currentColor" stroke-width="3"/>
+</svg>
+```
+
+### SVG Icon Checklist
+
+1. ✅ Root `<svg>` element ONLY contains: `viewBox="0 0 100 100"` and `xmlns="http://www.w3.org/2000/svg"`
+2. ✅ EVERY shape element (`<rect>`, `<circle>`, `<line>`, `<path>`, etc.) has explicit `fill` and `stroke` attributes
+3. ✅ Use `stroke="currentColor"` and `fill="currentColor"` for theme compatibility
+4. ✅ Use `fill="none"` explicitly when no fill is needed (do NOT rely on inheritance)
+5. ✅ Apply `stroke-linecap`, `stroke-linejoin` on individual elements, NOT on root
+6. ✅ Test icons on iOS/iPhone before finalizing
+
+### Reference: Working Icon Example
+
+See `assets/compressor-state.svg` for a correctly structured icon that works on all platforms including iOS.
 
 ## Development Commands
 

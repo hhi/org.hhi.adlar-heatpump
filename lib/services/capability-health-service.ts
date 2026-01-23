@@ -311,7 +311,7 @@ export class CapabilityHealthService {
     }
 
     // Sensor capabilities - Short timeout (frequent updates expected)
-    // measure_*, meter_*, adlar_measure_*, adlar_countdowntimer, etc.
+    // measure_*, meter_*, adlar_measure_*, adlar_firmware_mcu, etc.
     return DeviceConstants.CAPABILITY_TIMEOUTS.SENSOR; // 5 minutes
   }
 
