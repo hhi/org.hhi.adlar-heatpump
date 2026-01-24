@@ -43,7 +43,7 @@ export interface COPOptimizerConfig {
 export interface COPAction {
   action: 'increase' | 'decrease' | 'maintain';
   magnitude: number; // °C adjustment to supply temp
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium-low' | 'medium' | 'medium-high' | 'high';
   reason: string;
   currentCOP: number;
   targetCOP: number;
@@ -216,17 +216,39 @@ export class COPOptimizer {
 
     // COP acceptable but check if we can do better
     if (currentCOP < this.config.targetCOP && dailyCOP < this.config.targetCOP) {
+      // Calculate normalized position within medium zone (0 = at minimum, 1 = at target)
+      const range = this.config.targetCOP - this.config.minAcceptableCOP;
+      const position = (currentCOP - this.config.minAcceptableCOP) / range;
+
+      // Determine sub-priority: closer to minimum = higher priority
+      let subPriority: 'medium-high' | 'medium' | 'medium-low';
+      if (position < 0.33) {
+        subPriority = 'medium-high';
+      } else if (position < 0.67) {
+        subPriority = 'medium';
+      } else {
+        subPriority = 'medium-low';
+      }
+
       const optimalSupply = this.getOptimalSupplyTemp(outdoorTemp);
 
-      if (optimalSupply && Math.abs(currentSupplyTemp - optimalSupply) > 3) {
+      // Lower threshold for higher sub-priority (medium-high: 2°C, medium: 2.5°C, medium-low: 3°C)
+      const thresholdMap: Record<'medium-high' | 'medium' | 'medium-low', number> = {
+        'medium-high': 2,
+        'medium': 2.5,
+        'medium-low': 3,
+      };
+      const threshold = thresholdMap[subPriority];
+
+      if (optimalSupply && Math.abs(currentSupplyTemp - optimalSupply) > threshold) {
         const adjustment = this.calculateAdjustment(currentSupplyTemp, optimalSupply, this.config.strategy);
 
         return {
           action: adjustment > 0 ? 'increase' : 'decrease',
           magnitude: Math.abs(adjustment),
-          priority: 'medium',
+          priority: subPriority,
           reason:
-            `COP ${currentCOP.toFixed(1)} below target ${this.config.targetCOP}. `
+            `COP ${currentCOP.toFixed(1)} below target ${this.config.targetCOP} (priority: ${subPriority}). `
             + 'Optimizing toward historical best',
           currentCOP,
           targetCOP: this.config.targetCOP,

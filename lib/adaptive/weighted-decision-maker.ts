@@ -131,21 +131,25 @@ export class WeightedDecisionMaker {
       cost: effectiveCostWeight / totalEffectiveWeight,
     };
 
-    // Add reasoning for each component
+    // Add reasoning for each component WITH weight percentages
+    const comfortPct = Math.round(normalizedWeights.comfort * 100);
+    const efficiencyPct = Math.round(normalizedWeights.efficiency * 100);
+    const costPct = Math.round(normalizedWeights.cost * 100);
+
     if (heatingAction) {
-      reasoning.push(`Comfort: ${heatingAction.reason}`);
+      reasoning.push(`Comfort (${comfortPct}%): ${heatingAction.reason}`);
     }
     if (copAction && copAction.action !== 'maintain') {
-      reasoning.push(`Efficiency: ${copAction.reason}`);
+      reasoning.push(`Efficiency (${efficiencyPct}%): ${copAction.reason}`);
       // Add confidence warning if COP confidence is low
       if (confidenceMetrics.copConfidence < 0.3) {
-        reasoning.push(`⚠️ COP optimizer has low confidence (${(confidenceMetrics.copConfidence * 100).toFixed(0)}%), reduced weight`);
+        reasoning.push(`⚠️ COP: low conf (${(confidenceMetrics.copConfidence * 100).toFixed(0)}%)`);
       }
     }
     if (priceAction && priceAction.action !== 'maintain') {
-      reasoning.push(`Cost: ${priceAction.reason}`);
+      reasoning.push(`Cost (${costPct}%): ${priceAction.reason}`);
     } else if (!confidenceMetrics.priceDataAvailable) {
-      reasoning.push('Cost: No price data available, weight redistributed to comfort');
+      reasoning.push('Cost (0%): no price data, redistributed to comfort');
     }
 
     // Apply normalized weights (confidence-adjusted)
@@ -246,20 +250,28 @@ export class WeightedDecisionMaker {
       thermal: effectiveThermalWeight / totalEffectiveWeight,
     };
 
-    // Add reasoning for each component
+    // Add reasoning for each component WITH weight percentages
+    const comfortPct = Math.round(normalizedWeights.comfort * 100);
+    const efficiencyPct = Math.round(normalizedWeights.efficiency * 100);
+    const costPct = Math.round(normalizedWeights.cost * 100);
+    const thermalPct = Math.round(normalizedWeights.thermal * 100);
+
+    // Cost multiplier indicator for transparency
+    const costMultiplierStr = costMultiplier > 1 ? `×${costMultiplier.toFixed(0)}` : '';
+
     if (heatingAction) {
-      reasoning.push(`Comfort: ${heatingAction.reason}`);
+      reasoning.push(`Comfort (${comfortPct}%): ${heatingAction.reason}`);
     }
     if (copAction && copAction.action !== 'maintain') {
-      reasoning.push(`Efficiency: ${copAction.reason}`);
+      reasoning.push(`Efficiency (${efficiencyPct}%): ${copAction.reason}`);
     }
     if (priceAction && priceAction.action !== 'maintain') {
-      reasoning.push(`Cost: ${priceAction.reason}`);
+      reasoning.push(`Cost (${costPct}%${costMultiplierStr}): ${priceAction.reason}`);
     }
     if (thermalAction && thermalAction.adjustment !== 0) {
-      reasoning.push(`${thermalAction.reason}`);
+      reasoning.push(`Thermal (${thermalPct}%): ${thermalAction.reason}`);
     } else if (confidenceMetrics.buildingModelConfidence < 0.5) {
-      reasoning.push('⚠️ Thermal: confidence <50%, disabled');
+      reasoning.push('⚠️ Thermal (0%): conf <50%, disabled');
     }
 
     // Apply normalized weights (4-way)
@@ -312,15 +324,19 @@ export class WeightedDecisionMaker {
     const efficiencyAdjust = this.extractCOPAdjustment(copAction);
     const costAdjust = this.extractPriceAdjustment(priceAction);
 
-    // Add reasoning for each component
+    // Add reasoning for each component WITH weight percentages
+    const comfortPct = Math.round(this.priorities.comfort * 100);
+    const efficiencyPct = Math.round(this.priorities.efficiency * 100);
+    const costPct = Math.round(this.priorities.cost * 100);
+
     if (heatingAction) {
-      reasoning.push(`Comfort: ${heatingAction.reason}`);
+      reasoning.push(`Comfort (${comfortPct}%): ${heatingAction.reason}`);
     }
     if (copAction && copAction.action !== 'maintain') {
-      reasoning.push(`Efficiency: ${copAction.reason}`);
+      reasoning.push(`Efficiency (${efficiencyPct}%): ${copAction.reason}`);
     }
     if (priceAction && priceAction.action !== 'maintain') {
-      reasoning.push(`Cost: ${priceAction.reason}`);
+      reasoning.push(`Cost (${costPct}%): ${priceAction.reason}`);
     }
 
     // Apply weighted combination

@@ -226,9 +226,14 @@ export class BuildingModelService {
     });
 
     // Tau: learning status and sample progress
-    const sampleProgress = `#${state.sampleCount}/288`;
+    // When minimum samples (288) reached, show only current count without "LERENDE" status
+    // Otherwise show "LERENDE" with ratio (huidig/minimum)
+    const minSamples = 288;
+    const tauTitle = state.sampleCount >= minSamples
+      ? `${this.device.homey.__('building_model.time_constant_title')} (#${state.sampleCount})`
+      : `${this.device.homey.__('building_model.time_constant_title')} (${status}, #${state.sampleCount}/${minSamples})`;
     await this.updateCapabilityIfPresent('adlar_building_tau', model.tau, {
-      title: `${this.device.homey.__('building_model.time_constant_title')} (${status}, ${sampleProgress})`,
+      title: tauTitle,
     });
 
     // g: solar gain with seasonal variation (v2.3.1 - localized)
