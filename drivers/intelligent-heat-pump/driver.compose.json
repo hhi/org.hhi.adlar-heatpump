@@ -137,7 +137,7 @@
     "target_temperature.indoor": {
       "title": {
         "en": "Desired Indoor Temperature",
-        "nl": "Gewenste Binnentemperatuur",
+        "nl": "Binnentemperatuur gewenst",
         "de": "Gewünschte Innentemperatur",
         "fr": "Température Intérieure Souhaitée"
       },
@@ -146,6 +146,12 @@
         "nl": "Doel kamertemperatuur die adaptieve regeling moet handhaven. Stel hier je gewenste comfort temperatuur in.",
         "de": "Zielraumtemperatur für adaptive Steuerung. Stellen Sie hier Ihre gewünschte Komforttemperatur ein.",
         "fr": "Température cible pour le contrôle adaptatif. Définissez ici votre température de confort souhaitée."
+      },
+      "insightsTitle": {
+        "en": "Target Indoor Temperature",
+        "nl": "Binnentemperatuur gewenst",
+        "de": "Ziel-Innentemperatur",
+        "fr": "Température Intérieure Cible"
       },
       "units": "°C",
       "decimals": 1,
@@ -156,14 +162,14 @@
       "setable": true,
       "uiComponent": "thermostat",
       "chartType": "stepLine",
-      "insight": true
+      "insights": true
     },
     "measure_temperature.indoor": {
       "title": {
-        "en": "Indoor Temperature",
-        "nl": "Binnentemperatuur",
-        "de": "Innentemperatur",
-        "fr": "Température Intérieure"
+        "en": "Indoor Temperature Measured",
+        "nl": "Binnentemperatuur gemeten",
+        "de": "Gemessene Innentemperatur",
+        "fr": "Température Intérieure Mesurée"
       },
       "desc": {
         "en": "Measured room temperature from external sensor (Homey thermostat, temperature sensor). Updated via flow card 'Send indoor temperature'.",
@@ -171,13 +177,19 @@
         "de": "Gemessene Raumtemperatur von externem Sensor (Homey Thermostat, Temperatursensor). Aktualisiert über Flow-Karte 'Raumtemperatur senden'.",
         "fr": "Température mesurée par capteur externe (thermostat Homey, capteur de température). Mise à jour via carte de flux 'Envoyer température intérieure'."
       },
+      "insightsTitle": {
+        "en": "Indoor Temperature Measured",
+        "nl": "Binnentemperatuur gemeten",
+        "de": "Gemessene Innentemperatur",
+        "fr": "Température Intérieure Mesurée"
+      },
       "units": "°C",
       "decimals": 1,
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
       "chartType": "spline",
-      "insight": true
+      "insights": true
     },
     "onoff": {
       "title": {

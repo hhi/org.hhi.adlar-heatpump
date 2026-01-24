@@ -204,7 +204,7 @@ export class BuildingModelLearner {
     this.sampleCount = 0;
     this.lastMeasurement = null;
     this.minSamplesForConfidence = config.minSamplesForConfidence;
-    this.logger = config.logger || (() => {});
+    this.logger = config.logger || (() => { });
 
     this.logger(
       `BuildingModelLearner: Initialized with profile ${config.buildingProfile || 'average'} `
@@ -255,7 +255,7 @@ export class BuildingModelLearner {
       // Check outdoor temperature bounds
       validationFailure = `Outdoor temperature out of bounds: ${data.tOutdoor.toFixed(1)}°C (valid: ${bounds.tOutdoor_min}-${bounds.tOutdoor_max})`;
     } else if (data.solarRadiation !== undefined
-             && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
+      && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
       // Check solar radiation bounds (if provided)
       validationFailure = `Solar radiation out of bounds: ${data.solarRadiation.toFixed(0)}W/m² (valid: 0-${bounds.solarRadiation_max})`;
     }
@@ -450,6 +450,7 @@ export class BuildingModelLearner {
    *
    * @version 2.4.6 - Threshold increased from 400 to 500 to show learning progress from initialization
    * @version 2.5.21 - Added logarithmic bonus for samples beyond minimum for visible progress
+   * @version 2.5.22 - Added final clamp to ensure confidence never exceeds 100%
    */
   private calculateConfidence(): number {
     // Component 1: Sample count coverage (base + bonus for extra samples)
@@ -473,8 +474,9 @@ export class BuildingModelLearner {
     const trace = this.P.reduce((sum, row, i) => sum + row[i], 0);
     const covarianceConfidence = Math.max(0, 1 - trace / 500);
 
-    // Combined confidence
-    return sampleCoverage * covarianceConfidence * 100;
+    // Combined confidence, clamped to 0-100%
+    const rawConfidence = sampleCoverage * covarianceConfidence * 100;
+    return Math.min(Math.max(rawConfidence, 0), 100);
   }
 
   /**

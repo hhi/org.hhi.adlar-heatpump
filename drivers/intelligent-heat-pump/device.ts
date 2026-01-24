@@ -3538,6 +3538,7 @@ class MyDevice extends Homey.Device {
         }
       }
 
+
       // Migration v2.3.7: Add defrost_active_power capability for defrost monitoring
       if (!this.hasCapability('defrost_active_power')) {
         try {

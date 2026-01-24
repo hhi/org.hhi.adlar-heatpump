@@ -1571,7 +1571,7 @@
         },
         "hint": {
           "en": "Weight given to cost (price optimization). Higher = more focus on minimizing energy costs. Values are auto-normalized to sum 100%. Default: 15%, but increases factor-wise at (very) high prices (15% -> 45%)",
-          "nl": "Gewicht gegeven aan kosten (prijsoptimalisatie). Hoger = meer focus op minimaliseren energiekosten. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 15%, maar bij (zeer) hoge prijzen factorgewijs verhoogt (15% -> 45%",
+          "nl": "Gewicht gegeven aan kosten (prijsoptimalisatie). Hoger = meer focus op minimaliseren energiekosten. Waarden worden automatisch genormaliseerd naar totaal 100%. Standaard: 15%, maar bij (zeer) hoge prijzen factorgewijs verhoogt (15% -> 45%)",
           "de": "Gewichtung für Kosten (Preisoptimierung). Höher = mehr Fokus auf Minimierung der Energiekosten. Werte werden automatisch auf Summe 100% normalisiert. Standard: 15%, aber steigt faktorweise bei (sehr) hohen Preisen (15% -> 45%)",
           "fr": "Poids donné au coût (optimisation des prix). Plus élevé = plus de concentration sur la minimisation des coûts énergétiques. Les valeurs sont automatiquement normalisées pour totaliser 100%. Défaut: 15%, mais augmente par facteur à des prix (très) élevés (15% -> 45%)"
         },
