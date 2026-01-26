@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.6.4",
+  "version": "2.7.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -6372,6 +6372,150 @@
         ]
       },
       {
+        "id": "receive_external_solar_power",
+        "title": {
+          "en": "Send solar panel power to heat pump",
+          "nl": "Stuur zonnepaneel vermogen naar warmtepomp",
+          "de": "Solarleistung an Wärmepumpe senden",
+          "fr": "Envoyer la puissance solaire à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send solar power [[power_value]]W to heat pump",
+          "nl": "Stuur zonnepaneel vermogen [[power_value]]W naar warmtepomp",
+          "de": "Sende Solarleistung [[power_value]]W an Wärmepumpe",
+          "fr": "Envoyer puissance solaire [[power_value]]W à la pompe à chaleur"
+        },
+        "hint": {
+          "en": "Sends solar panel output for accurate solar radiation calculation. Use with SolarEdge, Enphase, etc.",
+          "nl": "Stuurt zonnepaneel opbrengst voor nauwkeurige zonnestraling berekening. Gebruik met SolarEdge, Enphase, etc.",
+          "de": "Sendet Solarertrag für genaue Sonnenstrahlungsberechnung. Verwenden mit SolarEdge, Enphase, usw.",
+          "fr": "Envoie la production solaire pour un calcul précis du rayonnement. À utiliser avec SolarEdge, Enphase, etc."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "power_value",
+            "title": {
+              "en": "Solar panel power (W)",
+              "nl": "Zonnepaneel vermogen (W)",
+              "de": "Solarleistung (W)",
+              "fr": "Puissance solaire (W)"
+            },
+            "placeholder": {
+              "en": "Current solar output in watts",
+              "nl": "Huidige zonne-opbrengst in watt",
+              "de": "Aktuelle Solarleistung in Watt",
+              "fr": "Production solaire actuelle en watts"
+            },
+            "min": 0,
+            "max": 50000,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_solar_radiation",
+        "title": {
+          "en": "Send solar radiation to heat pump",
+          "nl": "Stuur zonnestraling naar warmtepomp",
+          "de": "Sonnenstrahlung an Wärmepumpe senden",
+          "fr": "Envoyer le rayonnement solaire à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send solar radiation [[radiation_value]] W/m² to heat pump",
+          "nl": "Stuur zonnestraling [[radiation_value]] W/m² naar warmtepomp",
+          "de": "Sende Sonnenstrahlung [[radiation_value]] W/m² an Wärmepumpe",
+          "fr": "Envoyer rayonnement solaire [[radiation_value]] W/m² à la pompe à chaleur"
+        },
+        "hint": {
+          "en": "Sends solar radiation data for building model. Use with KNMI weather app.",
+          "nl": "Stuurt zonnestraling voor gebouwmodel. Gebruik met KNMI weer app.",
+          "de": "Sendet Sonnenstrahlung für Gebäudemodell. Verwenden mit KNMI Wetter-App.",
+          "fr": "Envoie le rayonnement solaire pour le modèle de bâtiment. À utiliser avec l'app météo KNMI."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "radiation_value",
+            "title": {
+              "en": "Solar radiation (W/m²)",
+              "nl": "Zonnestraling (W/m²)",
+              "de": "Sonnenstrahlung (W/m²)",
+              "fr": "Rayonnement solaire (W/m²)"
+            },
+            "placeholder": {
+              "en": "Current solar radiation",
+              "nl": "Huidige zonnestraling",
+              "de": "Aktuelle Sonnenstrahlung",
+              "fr": "Rayonnement solaire actuel"
+            },
+            "min": 0,
+            "max": 1500,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_wind_data",
+        "title": {
+          "en": "Send wind speed data to heat pump",
+          "nl": "Stuur windsnelheid naar warmtepomp",
+          "de": "Windgeschwindigkeit an Wärmepumpe senden",
+          "fr": "Envoyer la vitesse du vent à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send wind speed [[wind_speed]] km/h to heat pump",
+          "nl": "Stuur windsnelheid [[wind_speed]] km/u naar warmtepomp",
+          "de": "Sende Windgeschwindigkeit [[wind_speed]] km/h an Wärmepumpe",
+          "fr": "Envoyer vitesse du vent [[wind_speed]] km/h à la pompe à chaleur"
+        },
+        "hint": {
+          "en": "Sends wind speed data for heat loss correction. Use with KNMI weather app.",
+          "nl": "Stuurt windsnelheid voor warmteverlies correctie. Gebruik met KNMI weer app.",
+          "de": "Sendet Windgeschwindigkeit für Wärmeverlustkorrektur. Verwenden mit KNMI Wetter-App.",
+          "fr": "Envoie la vitesse du vent pour correction des pertes de chaleur. À utiliser avec l'app météo KNMI."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "wind_speed",
+            "title": {
+              "en": "Wind speed (km/h)",
+              "nl": "Windsnelheid (km/u)",
+              "de": "Windgeschwindigkeit (km/h)",
+              "fr": "Vitesse du vent (km/h)"
+            },
+            "placeholder": {
+              "en": "Current wind speed",
+              "nl": "Huidige windsnelheid",
+              "de": "Aktuelle Windgeschwindigkeit",
+              "fr": "Vitesse du vent actuelle"
+            },
+            "min": 0,
+            "max": 200,
+            "step": 0.1
+          }
+        ]
+      },
+      {
         "id": "set_capacity",
         "title": {
           "en": "Set hot water curve setting",
@@ -7200,7 +7344,10 @@
         "adlar_connection_active",
         "adaptive_control_diagnostics",
         "building_model_diagnostics",
-        "cop_optimizer_diagnostics"
+        "cop_optimizer_diagnostics",
+        "adlar_external_wind_speed",
+        "adlar_external_solar_power",
+        "adlar_external_solar_radiation"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -8934,10 +9081,10 @@
                 "fr": "Ajustement saisonnier du gain solaire"
               },
               "hint": {
-                "en": "Accounts for sun angle changing with seasons. Low winter sun (Dec-Feb: 60%) heats less effectively than high summer sun (Jun-Jul: 130%). Contributes 5-20% of total heat depending on window size and orientation. Improves seasonal predictions.",
-                "nl": "Houdt rekening met zonnehoek per seizoen. Lage winterzon (dec-feb: 60%) verwarmt minder effectief dan hoge zomerzon (jun-jul: 130%). Draagt 5-20% bij aan totale warmte afhankelijk van raamgrootte en oriëntatie. Verbetert seizoensvoorspellingen.",
-                "de": "Berücksichtigt Sonnenwinkel je Jahreszeit. Niedrige Wintersonne (Dez-Feb: 60%) heizt weniger als hohe Sommersonne (Jun-Jul: 130%). Trägt 5-20% zur Gesamtwärme bei je nach Fenstergröße und Ausrichtung. Verbessert saisonale Vorhersagen.",
-                "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. Améliore prévisions saisonnières."
+                "en": "Accounts for sun angle changing with seasons. Low winter sun (Dec-Feb: 60%) heats less effectively than high summer sun (Jun-Jul: 130%). Contributes 5-20% of total heat depending on window size and orientation. ⚠️ Only applies to estimated radiation - disabled when using external sources (solar panels/KNMI).",
+                "nl": "Houdt rekening met zonnehoek per seizoen. Lage winterzon (dec-feb: 60%) verwarmt minder effectief dan hoge zomerzon (jun-jul: 130%). Draagt 5-20% bij aan totale warmte afhankelijk van raamgrootte en oriëntatie. ⚠️ Seizoenscorrectie alleen bij geschatte straling van toepassing - uitgeschakeld bij externe bronnen (zonnepanelen/KNMI).",
+                "de": "Berücksichtigt Sonnenwinkel je Jahreszeit. Niedrige Wintersonne (Dez-Feb: 60%) heizt weniger als hohe Sommersonne (Jun-Jul: 130%). Trägt 5-20% zur Gesamtwärme bei je nach Fenstergröße und Ausrichtung. ⚠️ Gilt nur für geschätzte Strahlung - deaktiviert bei externen Quellen (Solarpanels/KNMI).",
+                "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. ⚠️ S'applique uniquement au rayonnement estimé - désactivé pour sources externes (panneaux solaires/KNMI)."
               },
               "value": true
             }
@@ -8973,10 +9120,10 @@
               "id": "insights_min_confidence",
               "type": "number",
               "label": {
-                "en": "Minimum Confidence (%)",
-                "nl": "Minimale Betrouwbaarheid (%)",
-                "de": "Mindestvertrauen (%)",
-                "fr": "Confiance Minimale (%)"
+                "en": "Minimum Confidence ",
+                "nl": "Minimale Betrouwbaarheid ",
+                "de": "Mindestvertrauen ",
+                "fr": "Confiance Minimale "
               },
               "hint": {
                 "en": "Only show insights when building model confidence exceeds this threshold. 70% = ~24-48 hours learning. Lower values show earlier insights with less accuracy.",
@@ -9473,6 +9620,180 @@
                   }
                 }
               ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Wind Correction",
+            "nl": "Wind Correctie",
+            "de": "Windkorrektur",
+            "fr": "Correction du vent"
+          },
+          "children": [
+            {
+              "id": "wind_correction_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable wind correction",
+                "nl": "Wind correctie inschakelen",
+                "de": "Windkorrektur aktivieren",
+                "fr": "Activer la correction du vent"
+              },
+              "hint": {
+                "en": "Adjusts target temperature based on wind speed to compensate for increased heat loss.",
+                "nl": "Past streeftemperatuur aan op basis van windsnelheid om verhoogd warmteverlies te compenseren.",
+                "de": "Passt die Zieltemperatur basierend auf der Windgeschwindigkeit an, um erhöhten Wärmeverlust zu kompensieren.",
+                "fr": "Ajuste la température cible en fonction de la vitesse du vent pour compenser l'augmentation des pertes de chaleur."
+              },
+              "value": false
+            },
+            {
+              "id": "wind_alpha_manual",
+              "type": "number",
+              "label": {
+                "en": "Manual wind coefficient (α)",
+                "nl": "Handmatige wind coëfficiënt (α)",
+                "de": "Manueller Windkoeffizient (α)",
+                "fr": "Coefficient de vent manuel (α)"
+              },
+              "hint": {
+                "en": "Manual override for wind sensitivity coefficient. Set to 0 to use learned value. Typical range: 0.003-0.01.",
+                "nl": "Handmatige overschrijving voor windgevoeligheidscoëfficiënt. Stel in op 0 om geleerde waarde te gebruiken. Typisch bereik: 0.003-0.01.",
+                "de": "Manuelle Überschreibung für Windempfindlichkeitskoeffizient. Auf 0 setzen, um gelernten Wert zu verwenden. Typischer Bereich: 0,003-0,01.",
+                "fr": "Remplacement manuel du coefficient de sensibilité au vent. Réglez sur 0 pour utiliser la valeur apprise. Plage typique: 0,003-0,01."
+              },
+              "value": 0,
+              "min": 0,
+              "max": 0.05,
+              "step": 0.001
+            },
+            {
+              "id": "wind_max_correction",
+              "type": "number",
+              "label": {
+                "en": "Maximum temperature correction (°C)",
+                "nl": "Maximale temperatuur correctie (°C)",
+                "de": "Maximale Temperaturkorrektur (°C)",
+                "fr": "Correction de température maximale (°C)"
+              },
+              "hint": {
+                "en": "Maximum target temperature increase due to wind. Prevents excessive corrections during storms.",
+                "nl": "Maximale streeftemperatuur verhoging door wind. Voorkomt overmatige correcties tijdens storm.",
+                "de": "Maximale Zieltemperaturerhöhung durch Wind. Verhindert übermäßige Korrekturen bei Sturm.",
+                "fr": "Augmentation maximale de la température cible due au vent. Empêche les corrections excessives pendant les tempêtes."
+              },
+              "value": 3,
+              "min": 0.5,
+              "max": 5,
+              "step": 0.5
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Solar Radiation Source",
+            "nl": "Zonnestraling Bron",
+            "de": "Sonnenstrahlungsquelle",
+            "fr": "Source de rayonnement solaire"
+          },
+          "children": [
+            {
+              "id": "solar_source",
+              "type": "dropdown",
+              "label": {
+                "en": "Solar radiation source",
+                "nl": "Zonnestraling bron",
+                "de": "Sonnenstrahlungsquelle",
+                "fr": "Source de rayonnement solaire"
+              },
+              "hint": {
+                "en": "Select the source for solar radiation data. Auto uses the best available source.",
+                "nl": "Selecteer de bron voor zonnestralinggegevens. Auto gebruikt de best beschikbare bron.",
+                "de": "Wählen Sie die Quelle für Sonnenstrahlungsdaten. Auto verwendet die beste verfügbare Quelle.",
+                "fr": "Sélectionnez la source des données de rayonnement solaire. Auto utilise la meilleure source disponible."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Auto (best available)",
+                    "nl": "Auto (beste beschikbaar)",
+                    "de": "Auto (beste verfügbar)",
+                    "fr": "Auto (meilleur disponible)"
+                  }
+                },
+                {
+                  "id": "solar_panels",
+                  "label": {
+                    "en": "Solar panels only",
+                    "nl": "Alleen zonnepanelen",
+                    "de": "Nur Solarmodule",
+                    "fr": "Panneaux solaires uniquement"
+                  }
+                },
+                {
+                  "id": "knmi_radiation",
+                  "label": {
+                    "en": "KNMI radiation only",
+                    "nl": "Alleen KNMI straling",
+                    "de": "Nur KNMI-Strahlung",
+                    "fr": "Rayonnement KNMI uniquement"
+                  }
+                },
+                {
+                  "id": "estimation",
+                  "label": {
+                    "en": "Estimation only",
+                    "nl": "Alleen schatting",
+                    "de": "Nur Schätzung",
+                    "fr": "Estimation uniquement"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "solar_panel_wp",
+              "type": "number",
+              "label": {
+                "en": "Solar panel system size (Wp)",
+                "nl": "Zonnepaneel systeem grootte (Wp)",
+                "de": "Solarmodulsystemgröße (Wp)",
+                "fr": "Taille du système solaire (Wp)"
+              },
+              "hint": {
+                "en": "Total peak power of your solar panel system in Wp. E.g., 6000 for a 6 kWp system.",
+                "nl": "Totaal piekvermogen van uw zonnepaneelsysteem in Wp. Bijv. 6000 voor een 6 kWp systeem.",
+                "de": "Gesamte Spitzenleistung Ihres Solarmodulsystems in Wp. Z.B. 6000 für ein 6 kWp System.",
+                "fr": "Puissance crête totale de votre système solaire en Wp. Ex: 6000 pour un système de 6 kWp."
+              },
+              "value": 0,
+              "min": 0,
+              "max": 50000,
+              "step": 10
+            },
+            {
+              "id": "solar_panel_efficiency",
+              "type": "number",
+              "label": {
+                "en": "Solar panel efficiency factor",
+                "nl": "Zonnepaneel efficiëntie factor",
+                "de": "Solarmodule Effizienzfaktor",
+                "fr": "Facteur d'efficacité des panneaux solaires"
+              },
+              "hint": {
+                "en": "Real-world efficiency compared to STC conditions. Default 0.85 accounts for temperature, shading, and inverter losses.",
+                "nl": "Werkelijke efficiëntie vergeleken met STC-condities. Standaard 0.85 houdt rekening met temperatuur, schaduw en omvormerverliezen.",
+                "de": "Reale Effizienz im Vergleich zu STC-Bedingungen. Standard 0,85 berücksichtigt Temperatur, Beschattung und Wechselrichterverluste.",
+                "fr": "Efficacité réelle par rapport aux conditions STC. La valeur par défaut de 0,85 tient compte de la température, de l'ombrage et des pertes de l'onduleur."
+              },
+              "value": 0.85,
+              "min": 0.5,
+              "max": 1,
+              "step": 0.01
             }
           ]
         },
@@ -11006,6 +11327,81 @@
         "de": "Externe Leistungsmessung empfangen über Flow-Karten von anderen Homey-Geräten, verwendet für erweiterte COP-Berechnungen mit externen Leistungsmessdaten",
         "fr": "Mesure de puissance externe reçue via des cartes de flux d'autres appareils Homey, utilisée pour des calculs COP améliorés avec des données de compteur de puissance externe"
       }
+    },
+    "adlar_external_solar_power": {
+      "id": "adlar_external_solar_power",
+      "title": {
+        "en": "External Solar Power",
+        "nl": "Externe Zonnepaneel Vermogen",
+        "de": "Externe Solarleistung",
+        "fr": "Puissance solaire externe"
+      },
+      "type": "number",
+      "units": {
+        "en": "W",
+        "nl": "W",
+        "de": "W",
+        "fr": "W"
+      },
+      "min": 0,
+      "max": 50000,
+      "step": 1,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/external-solar-power.svg"
+    },
+    "adlar_external_solar_radiation": {
+      "id": "adlar_external_solar_radiation",
+      "title": {
+        "en": "External Solar Radiation",
+        "nl": "Externe Zonnestraling",
+        "de": "Externe Sonnenstrahlung",
+        "fr": "Rayonnement solaire externe"
+      },
+      "type": "number",
+      "units": {
+        "en": "W/m²",
+        "nl": "W/m²",
+        "de": "W/m²",
+        "fr": "W/m²"
+      },
+      "min": 0,
+      "max": 1500,
+      "step": 1,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/external-solar-radiation.svg"
+    },
+    "adlar_external_wind_speed": {
+      "id": "adlar_external_wind_speed",
+      "title": {
+        "en": "External Wind Speed",
+        "nl": "Externe Windsnelheid",
+        "de": "Externe Windgeschwindigkeit",
+        "fr": "Vitesse du vent externe"
+      },
+      "type": "number",
+      "units": {
+        "en": "km/h",
+        "nl": "km/u",
+        "de": "km/h",
+        "fr": "km/h"
+      },
+      "min": 0,
+      "max": 200,
+      "step": 0.1,
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "icon": "/assets/external-wind-speed.svg"
     },
     "adlar_fault": {
       "id": "adlar_fault",

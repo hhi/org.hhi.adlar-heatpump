@@ -3660,6 +3660,24 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.7.0: Add wind/solar capabilities for building model extension
+      const windSolarCapabilities = [
+        'adlar_external_wind_speed',
+        'adlar_external_solar_power',
+        'adlar_external_solar_radiation',
+      ];
+
+      for (const capability of windSolarCapabilities) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`Migration v2.7.0: Added ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');

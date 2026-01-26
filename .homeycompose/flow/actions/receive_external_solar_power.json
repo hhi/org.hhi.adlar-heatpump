@@ -1,0 +1,48 @@
+{
+  "id": "receive_external_solar_power",
+  "title": {
+    "en": "Send solar panel power to heat pump",
+    "nl": "Stuur zonnepaneel vermogen naar warmtepomp",
+    "de": "Solarleistung an Wärmepumpe senden",
+    "fr": "Envoyer la puissance solaire à la pompe à chaleur"
+  },
+  "titleFormatted": {
+    "en": "Send solar power [[power_value]]W to heat pump",
+    "nl": "Stuur zonnepaneel vermogen [[power_value]]W naar warmtepomp",
+    "de": "Sende Solarleistung [[power_value]]W an Wärmepumpe",
+    "fr": "Envoyer puissance solaire [[power_value]]W à la pompe à chaleur"
+  },
+  "hint": {
+    "en": "Sends solar panel output for accurate solar radiation calculation. Use with SolarEdge, Enphase, etc.",
+    "nl": "Stuurt zonnepaneel opbrengst voor nauwkeurige zonnestraling berekening. Gebruik met SolarEdge, Enphase, etc.",
+    "de": "Sendet Solarertrag für genaue Sonnenstrahlungsberechnung. Verwenden mit SolarEdge, Enphase, usw.",
+    "fr": "Envoie la production solaire pour un calcul précis du rayonnement. À utiliser avec SolarEdge, Enphase, etc."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "number",
+      "name": "power_value",
+      "title": {
+        "en": "Solar panel power (W)",
+        "nl": "Zonnepaneel vermogen (W)",
+        "de": "Solarleistung (W)",
+        "fr": "Puissance solaire (W)"
+      },
+      "placeholder": {
+        "en": "Current solar output in watts",
+        "nl": "Huidige zonne-opbrengst in watt",
+        "de": "Aktuelle Solarleistung in Watt",
+        "fr": "Production solaire actuelle en watts"
+      },
+      "min": 0,
+      "max": 50000,
+      "step": 1
+    }
+  ]
+}

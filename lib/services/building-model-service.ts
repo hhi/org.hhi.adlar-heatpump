@@ -162,17 +162,18 @@ export class BuildingModelService {
       const cop = (this.device.getCapabilityValue('adlar_cop') as number) || 3.0;
       const thermalPower = (powerElectric / 1000) * cop; // Convert W to kW
 
-      // Estimate solar radiation (placeholder - can be improved with actual sensor data)
-      const hour = new Date().getHours();
-      const solarRadiation = this.estimateSolarRadiation(hour);
+      // Get solar radiation with priority cascade (panel > KNMI > estimation)
+      const { radiation: solarRadiation, source: solarSource } = this.getSolarRadiationWithPriority();
+      this.logger(`BuildingModelService: Solar radiation ${solarRadiation.toFixed(0)} W/m² (source: ${solarSource})`);
 
-      // Create measurement data
+      // Create measurement data (v2.7.0: include solarSource for conditional seasonal g)
       const measurement: MeasurementData = {
         timestamp: Date.now(),
         tIndoor: indoorTemp,
         tOutdoor: outdoorTemp,
         pHeating: thermalPower,
         solarRadiation,
+        solarSource: solarSource as 'solar_panels' | 'knmi_radiation' | 'estimation',
         deltaTPerHour: 0, // Calculated by learner
       };
 
@@ -406,9 +407,9 @@ export class BuildingModelService {
     const pIntMultiplier = (hour >= 17 && hour <= 22) ? 1.8 : 1.0;
     const effectivePInt = model.pInt * pIntMultiplier;
 
-    // Calculate solar gain using estimated radiation
-    // estimateSolarRadiation returns W/m², g is kW per kW/m²
-    const solarRadiation = this.estimateSolarRadiation(hour); // W/m²
+    // Calculate solar gain using priority cascade (panel > KNMI > estimation)
+    // getSolarRadiationWithPriority returns W/m², g is kW per kW/m²
+    const { radiation: solarRadiation } = this.getSolarRadiationWithPriority();
     const solarGain = model.g * solarRadiation / 1000; // kW
 
     // Total extra gains (kW)
@@ -483,6 +484,54 @@ export class BuildingModelService {
     // Peak at noon (12:00), sinusoidal curve
     const solarHour = hour - 6; // 0-14 range
     return Math.max(0, 500 * Math.sin((solarHour / 14) * Math.PI));
+  }
+
+  /**
+   * Get solar radiation with priority cascade
+   *
+   * Priority order:
+   * 1. Solar panel power (most accurate - hyperlocal measurement)
+   * 2. KNMI radiation (good accuracy - regional measurement)
+   * 3. Sinusoidal estimation (fallback)
+   *
+   * @returns Solar radiation in W/m² and the source used
+   */
+  public getSolarRadiationWithPriority(): { radiation: number; source: string } {
+    const source = this.device.getSetting('solar_source') as string || 'auto';
+
+    // Priority 1: Solar panels (convert W to W/m²)
+    if (source === 'auto' || source === 'solar_panels') {
+      const power = this.device.getCapabilityValue('adlar_external_solar_power') as number | null;
+      const wp = this.device.getSetting('solar_panel_wp') as number || 0;
+      const eff = this.device.getSetting('solar_panel_efficiency') as number || 0.85;
+
+      if (power !== null && power > 0 && wp > 0) {
+        // At STC: 1000 W/m² → Wp output
+        // radiation = power / (Wp / 1000) / efficiency
+        const radiation = Math.min((power / (wp / 1000)) / eff, 1200);
+        this.logger('Solar radiation from panels', {
+          power,
+          wp,
+          efficiency: eff,
+          radiation: radiation.toFixed(0),
+        });
+        return { radiation, source: 'solar_panels' };
+      }
+    }
+
+    // Priority 2: KNMI radiation (direct W/m²)
+    if (source === 'auto' || source === 'knmi_radiation') {
+      const radiation = this.device.getCapabilityValue('adlar_external_solar_radiation') as number | null;
+      if (radiation !== null && radiation >= 0) {
+        this.logger('Solar radiation from KNMI', { radiation });
+        return { radiation, source: 'knmi_radiation' };
+      }
+    }
+
+    // Priority 3: Sinusoidal estimation (fallback)
+    const hour = new Date().getHours();
+    const radiation = this.estimateSolarRadiation(hour);
+    return { radiation, source: 'estimation' };
   }
 
   /**

@@ -1,4 +1,10 @@
 {
+  "2.7.1": {
+    "en": "Added: External wind speed, solar radiation, and solar power flow cards for building model integration. Wind correction service adjusts heat loss calculations based on wind chill effect.",
+    "nl": "Toegevoegd: Externe windsnelheid, zonnestraling en zonne-energie flow cards voor gebouwmodel integratie. Windcorrectie service past warmteverlies berekeningen aan op basis van windchill effect.",
+    "de": "Hinzugefügt: Externe Windgeschwindigkeit, Sonneneinstrahlung und Solarleistung Flow-Karten für Gebäudemodell-Integration. Windkorrektur-Service passt Wärmeverlustberechnungen basierend auf Windchill-Effekt an.",
+    "fr": "Ajouté: Cartes de flux vitesse du vent externe, rayonnement solaire et puissance solaire pour l'intégration du modèle de bâtiment. Service de correction du vent ajuste les calculs de perte de chaleur basé sur l'effet de refroidissement éolien."
+  },
   "2.6.3": {
     "en": "Fixed: DPS 14 now correctly shows MCU firmware version (e.g., v4.3.3) instead of countdown timer.",
     "nl": "Opgelost: DPS 14 toont nu correct MCU firmware versie (bijv. v4.3.3) in plaats van afteller.",

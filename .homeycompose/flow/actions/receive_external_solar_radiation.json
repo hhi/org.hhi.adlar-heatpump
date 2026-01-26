@@ -1,0 +1,48 @@
+{
+  "id": "receive_external_solar_radiation",
+  "title": {
+    "en": "Send solar radiation to heat pump",
+    "nl": "Stuur zonnestraling naar warmtepomp",
+    "de": "Sonnenstrahlung an Wärmepumpe senden",
+    "fr": "Envoyer le rayonnement solaire à la pompe à chaleur"
+  },
+  "titleFormatted": {
+    "en": "Send solar radiation [[radiation_value]] W/m² to heat pump",
+    "nl": "Stuur zonnestraling [[radiation_value]] W/m² naar warmtepomp",
+    "de": "Sende Sonnenstrahlung [[radiation_value]] W/m² an Wärmepumpe",
+    "fr": "Envoyer rayonnement solaire [[radiation_value]] W/m² à la pompe à chaleur"
+  },
+  "hint": {
+    "en": "Sends solar radiation data for building model. Use with KNMI weather app.",
+    "nl": "Stuurt zonnestraling voor gebouwmodel. Gebruik met KNMI weer app.",
+    "de": "Sendet Sonnenstrahlung für Gebäudemodell. Verwenden mit KNMI Wetter-App.",
+    "fr": "Envoie le rayonnement solaire pour le modèle de bâtiment. À utiliser avec l'app météo KNMI."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "number",
+      "name": "radiation_value",
+      "title": {
+        "en": "Solar radiation (W/m²)",
+        "nl": "Zonnestraling (W/m²)",
+        "de": "Sonnenstrahlung (W/m²)",
+        "fr": "Rayonnement solaire (W/m²)"
+      },
+      "placeholder": {
+        "en": "Current solar radiation",
+        "nl": "Huidige zonnestraling",
+        "de": "Aktuelle Sonnenstrahlung",
+        "fr": "Rayonnement solaire actuel"
+      },
+      "min": 0,
+      "max": 1500,
+      "step": 1
+    }
+  ]
+}

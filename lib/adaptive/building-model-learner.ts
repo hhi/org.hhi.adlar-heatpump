@@ -114,6 +114,7 @@ export interface MeasurementData {
   tOutdoor: number; // Outdoor temperature (°C)
   pHeating: number; // Thermal heating power (kW)
   solarRadiation?: number; // Solar radiation (W/m²) - optional
+  solarSource?: 'solar_panels' | 'knmi_radiation' | 'estimation'; // Source of solar data (v2.7.0)
   deltaTPerHour: number; // Temperature change rate (°C/h) - calculated internally
 }
 
@@ -280,10 +281,19 @@ export class BuildingModelLearner {
       : 1.0;
 
     // Apply seasonal solar gain multiplier if enabled
+    // v2.7.0: Only apply seasonal correction for estimated solar data
+    // External sources (solar_panels, knmi_radiation) already include seasonal/weather effects
     const month = new Date(data.timestamp).getMonth();
-    const solarMultiplier = this.enableSeasonalG
+    const useEstimation = data.solarSource === 'estimation' || data.solarSource === undefined;
+    const applySeasonalG = this.enableSeasonalG && useEstimation;
+    const solarMultiplier = applySeasonalG
       ? getSeasonalGMultiplier(month)
       : 1.0;
+
+    // Log when seasonal g is skipped due to external solar data (first occurrence per session)
+    if (this.enableSeasonalG && !useEstimation && this.sampleCount % 100 === 1) {
+      this.logger(`ℹ️ Seasonal g-factor disabled: using ${data.solarSource} radiation data`);
+    }
 
     // Build input vector X = [pHeating, (tIn - tOut), Solar, constant_term]
     // Apply dynamic adjustments to solar radiation and internal gains

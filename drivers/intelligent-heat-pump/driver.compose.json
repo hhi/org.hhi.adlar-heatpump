@@ -89,7 +89,10 @@
     "adlar_connection_active",
     "adaptive_control_diagnostics",
     "building_model_diagnostics",
-    "cop_optimizer_diagnostics"
+    "cop_optimizer_diagnostics",
+    "adlar_external_wind_speed",
+    "adlar_external_solar_power",
+    "adlar_external_solar_radiation"
   ],
   "capabilitiesOptions": {
     "measure_power": {
