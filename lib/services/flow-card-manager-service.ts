@@ -980,7 +980,43 @@ export class FlowCardManagerService {
       );
       this.flowCardListeners.set('receive_external_energy_prices', receiveExternalPricesListener);
 
-      this.logger('FlowCardManagerService: External data action cards registered (5 cards)');
+      // 6. Receive external wind data
+      const receiveExternalWindCard = this.device.homey.flow.getActionCard('receive_external_wind_data');
+      const receiveExternalWindListener = receiveExternalWindCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { wind_speed: number }) => {
+          this.logger(`FlowCardManagerService: 💨 Received external wind speed: ${args.wind_speed} km/h`);
+          await this.handleReceiveExternalWindData(args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_wind_data', receiveExternalWindListener);
+
+      // 7. Receive external solar power
+      const receiveExternalSolarPowerCard = this.device.homey.flow.getActionCard('receive_external_solar_power');
+      const receiveExternalSolarPowerListener = receiveExternalSolarPowerCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { power_value: number }) => {
+          this.logger(`FlowCardManagerService: ☀️ Received external solar power: ${args.power_value} W`);
+          await this.handleReceiveExternalSolarPower(args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_solar_power', receiveExternalSolarPowerListener);
+
+      // 8. Receive external solar radiation
+      const receiveExternalSolarRadiationCard = this.device.homey.flow.getActionCard('receive_external_solar_radiation');
+      const receiveExternalSolarRadiationListener = receiveExternalSolarRadiationCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { radiation_value: number }) => {
+          this.logger(`FlowCardManagerService: 🌞 Received external solar radiation: ${args.radiation_value} W/m²`);
+          await this.handleReceiveExternalSolarRadiation(args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_solar_radiation', receiveExternalSolarRadiationListener);
+
+      this.logger('FlowCardManagerService: External data action cards registered (8 cards)');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering external data action cards:', error);
     }
@@ -1215,6 +1251,114 @@ export class FlowCardManagerService {
       await this.onExternalPricesData(pricesObject);
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external energy prices:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external wind data action flow (v2.7.0+).
+   * Updates the wind speed capability for wind correction calculations.
+   *
+   * @param args.wind_speed - Wind speed in km/h
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalWindData(args: { wind_speed: number }): Promise<void> {
+    try {
+      const { wind_speed: windSpeed } = args;
+
+      // Validate wind speed
+      if (typeof windSpeed !== 'number' || Number.isNaN(windSpeed)) {
+        throw new Error(`Invalid wind speed value: ${windSpeed}`);
+      }
+
+      if (windSpeed < 0 || windSpeed > 200) {
+        throw new Error(`Wind speed out of valid range: ${windSpeed} km/h (must be 0-200 km/h)`);
+      }
+
+      // Update capability
+      if (this.device.hasCapability('adlar_external_wind_speed')) {
+        await this.device.setCapabilityValue('adlar_external_wind_speed', windSpeed);
+        this.logger(`FlowCardManagerService: External wind speed updated: ${windSpeed} km/h`);
+      }
+
+      // Store for persistence
+      await this.device.setStoreValue('external_wind_speed', windSpeed);
+      await this.device.setStoreValue('external_wind_speed_timestamp', Date.now());
+
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external wind data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external solar power action flow (v2.7.0+).
+   * Updates the solar power capability for solar radiation calculations.
+   *
+   * @param args.power_value - Solar panel power in Watts
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalSolarPower(args: { power_value: number }): Promise<void> {
+    try {
+      const { power_value: powerValue } = args;
+
+      // Validate power value
+      if (typeof powerValue !== 'number' || Number.isNaN(powerValue)) {
+        throw new Error(`Invalid solar power value: ${powerValue}`);
+      }
+
+      if (powerValue < 0 || powerValue > 50000) {
+        throw new Error(`Solar power out of valid range: ${powerValue} W (must be 0-50000 W)`);
+      }
+
+      // Update capability
+      if (this.device.hasCapability('adlar_external_solar_power')) {
+        await this.device.setCapabilityValue('adlar_external_solar_power', powerValue);
+        this.logger(`FlowCardManagerService: External solar power updated: ${powerValue} W`);
+      }
+
+      // Store for persistence
+      await this.device.setStoreValue('external_solar_power', powerValue);
+      await this.device.setStoreValue('external_solar_power_timestamp', Date.now());
+
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external solar power:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external solar radiation action flow (v2.7.0+).
+   * Updates the solar radiation capability for building model calculations.
+   *
+   * @param args.radiation_value - Solar radiation in W/m²
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalSolarRadiation(args: { radiation_value: number }): Promise<void> {
+    try {
+      const { radiation_value: radiationValue } = args;
+
+      // Validate radiation value
+      if (typeof radiationValue !== 'number' || Number.isNaN(radiationValue)) {
+        throw new Error(`Invalid solar radiation value: ${radiationValue}`);
+      }
+
+      if (radiationValue < 0 || radiationValue > 1500) {
+        throw new Error(`Solar radiation out of valid range: ${radiationValue} W/m² (must be 0-1500 W/m²)`);
+      }
+
+      // Update capability
+      if (this.device.hasCapability('adlar_external_solar_radiation')) {
+        await this.device.setCapabilityValue('adlar_external_solar_radiation', radiationValue);
+        this.logger(`FlowCardManagerService: External solar radiation updated: ${radiationValue} W/m²`);
+      }
+
+      // Store for persistence
+      await this.device.setStoreValue('external_solar_radiation', radiationValue);
+      await this.device.setStoreValue('external_solar_radiation_timestamp', Date.now());
+
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external solar radiation:', error);
       throw error;
     }
   }

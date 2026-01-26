@@ -1,0 +1,25 @@
+{
+  "id": "adlar_external_solar_radiation",
+  "title": {
+    "en": "External Solar Radiation",
+    "nl": "Externe Zonnestraling",
+    "de": "Externe Sonnenstrahlung",
+    "fr": "Rayonnement solaire externe"
+  },
+  "type": "number",
+  "units": {
+    "en": "W/m²",
+    "nl": "W/m²",
+    "de": "W/m²",
+    "fr": "W/m²"
+  },
+  "min": 0,
+  "max": 1500,
+  "step": 1,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/external-solar-radiation.svg"
+}

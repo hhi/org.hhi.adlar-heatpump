@@ -9,6 +9,7 @@ import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { WeightedDecisionMaker, type ConfidenceMetrics } from '../adaptive/weighted-decision-maker';
+import { WindCorrectionService } from './wind-correction-service';
 import { DeviceConstants } from '../constants';
 
 /**
@@ -76,6 +77,9 @@ export class AdaptiveControlService {
 
   // Integration: Weighted Decision Maker
   private decisionMaker: WeightedDecisionMaker;
+
+  // Component 5: Wind Correction Service (v2.7.0+)
+  private windCorrection: WindCorrectionService;
 
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
@@ -172,7 +176,13 @@ export class AdaptiveControlService {
       cost: 0.15,
     });
 
-    this.logger('AdaptiveControlService: Initialized with all 4 components');
+    // Initialize Component 5: Wind Correction Service (v2.7.0+)
+    this.windCorrection = new WindCorrectionService({
+      device: this.device,
+      logger: this.logger,
+    });
+
+    this.logger('AdaptiveControlService: Initialized with all 5 components');
   }
 
   /**
@@ -631,6 +641,24 @@ export class AdaptiveControlService {
         targetIndoorTemp: desiredIndoorTemp,
         outdoorTemp: outdoorTempForThermal,
       });
+
+      // Step 5D: Calculate wind correction (5th component, v2.7.0+)
+      // Wind correction adds to thermal adjustment to compensate for wind-induced heat loss
+      let windCorrectionValue = 0;
+      if (this.device.getSetting('wind_correction_enabled')) {
+        const windResult = this.windCorrection.calculateCorrection(indoorTemp, outdoorTempForThermal);
+        windCorrectionValue = windResult.correction;
+
+        if (windCorrectionValue > 0) {
+          this.logger(
+            `💨 Wind correction: +${windCorrectionValue.toFixed(2)}°C `
+            + `(wind: ${windResult.windSpeed} km/h, ΔT: ${windResult.deltaT.toFixed(1)}°C, `
+            + `α: ${windResult.alpha.toFixed(4)} [${windResult.alphaSource}]${windResult.capped ? ' CAPPED' : ''})`,
+          );
+          // Add wind correction to thermal adjustment
+          thermalAction.adjustment += windCorrectionValue;
+        }
+      }
 
       // Step 6: Combine actions using Weighted Decision Maker with 4-way thermal weighting
       const combinedAction = this.decisionMaker.combineActionsWithThermal(
@@ -1491,8 +1519,9 @@ export class AdaptiveControlService {
     this.copOptimizer.destroy();
     this.energyOptimizer.destroy();
     this.decisionMaker.destroy();
+    await this.windCorrection.destroy(); // v2.7.0+: Persist learned alpha
 
-    this.logger('AdaptiveControlService: Destroyed (all 6 components cleaned up)');
+    this.logger('AdaptiveControlService: Destroyed (all 7 components cleaned up)');
   }
 
   /**

@@ -403,6 +403,24 @@ The app uses **9 specialized services** managed by ServiceCoordinator:
 5. **Let Homey Compose generate** the final `app.json` automatically
 6. **Use modular approach** for maintainability and version control
 7. **Follow naming conventions** for capability IDs and file names
+8. **ALWAYS add migration code** - New capabilities are NOT automatically added to existing devices after app updates. Add migration code in `device.ts` `onInit()`:
+
+   ```typescript
+   // Migration vX.Y.Z: Add [description] capabilities
+   const newCapabilities = ['capability_name_1', 'capability_name_2'];
+   for (const capability of newCapabilities) {
+     if (!this.hasCapability(capability)) {
+       try {
+         await this.addCapability(capability);
+         this.log(`Migration vX.Y.Z: Added ${capability} capability`);
+       } catch (error) {
+         this.error(`Failed to add ${capability} capability:`, error);
+       }
+     }
+   }
+   ```
+
+9. **Ask for version number BEFORE implementation** - When implementing a plan that adds new features/capabilities, first ask the user what version number to use for the release
 
 ## Official Homey Documentation
 

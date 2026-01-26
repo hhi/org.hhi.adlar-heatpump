@@ -1,0 +1,25 @@
+{
+  "id": "adlar_external_wind_speed",
+  "title": {
+    "en": "External Wind Speed",
+    "nl": "Externe Windsnelheid",
+    "de": "Externe Windgeschwindigkeit",
+    "fr": "Vitesse du vent externe"
+  },
+  "type": "number",
+  "units": {
+    "en": "km/h",
+    "nl": "km/u",
+    "de": "km/h",
+    "fr": "km/h"
+  },
+  "min": 0,
+  "max": 200,
+  "step": 0.1,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/external-wind-speed.svg"
+}

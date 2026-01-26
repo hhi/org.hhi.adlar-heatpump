@@ -1,0 +1,48 @@
+{
+  "id": "receive_external_wind_data",
+  "title": {
+    "en": "Send wind speed data to heat pump",
+    "nl": "Stuur windsnelheid naar warmtepomp",
+    "de": "Windgeschwindigkeit an Wärmepumpe senden",
+    "fr": "Envoyer la vitesse du vent à la pompe à chaleur"
+  },
+  "titleFormatted": {
+    "en": "Send wind speed [[wind_speed]] km/h to heat pump",
+    "nl": "Stuur windsnelheid [[wind_speed]] km/u naar warmtepomp",
+    "de": "Sende Windgeschwindigkeit [[wind_speed]] km/h an Wärmepumpe",
+    "fr": "Envoyer vitesse du vent [[wind_speed]] km/h à la pompe à chaleur"
+  },
+  "hint": {
+    "en": "Sends wind speed data for heat loss correction. Use with KNMI weather app.",
+    "nl": "Stuurt windsnelheid voor warmteverlies correctie. Gebruik met KNMI weer app.",
+    "de": "Sendet Windgeschwindigkeit für Wärmeverlustkorrektur. Verwenden mit KNMI Wetter-App.",
+    "fr": "Envoie la vitesse du vent pour correction des pertes de chaleur. À utiliser avec l'app météo KNMI."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "number",
+      "name": "wind_speed",
+      "title": {
+        "en": "Wind speed (km/h)",
+        "nl": "Windsnelheid (km/u)",
+        "de": "Windgeschwindigkeit (km/h)",
+        "fr": "Vitesse du vent (km/h)"
+      },
+      "placeholder": {
+        "en": "Current wind speed",
+        "nl": "Huidige windsnelheid",
+        "de": "Aktuelle Windgeschwindigkeit",
+        "fr": "Vitesse du vent actuelle"
+      },
+      "min": 0,
+      "max": 200,
+      "step": 0.1
+    }
+  ]
+}

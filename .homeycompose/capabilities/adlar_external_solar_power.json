@@ -1,0 +1,25 @@
+{
+  "id": "adlar_external_solar_power",
+  "title": {
+    "en": "External Solar Power",
+    "nl": "Externe Zonnepaneel Vermogen",
+    "de": "Externe Solarleistung",
+    "fr": "Puissance solaire externe"
+  },
+  "type": "number",
+  "units": {
+    "en": "W",
+    "nl": "W",
+    "de": "W",
+    "fr": "W"
+  },
+  "min": 0,
+  "max": 50000,
+  "step": 1,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "icon": "/assets/external-solar-power.svg"
+}

@@ -957,10 +957,10 @@
           "fr": "Ajustement saisonnier du gain solaire"
         },
         "hint": {
-          "en": "Accounts for sun angle changing with seasons. Low winter sun (Dec-Feb: 60%) heats less effectively than high summer sun (Jun-Jul: 130%). Contributes 5-20% of total heat depending on window size and orientation. Improves seasonal predictions.",
-          "nl": "Houdt rekening met zonnehoek per seizoen. Lage winterzon (dec-feb: 60%) verwarmt minder effectief dan hoge zomerzon (jun-jul: 130%). Draagt 5-20% bij aan totale warmte afhankelijk van raamgrootte en oriëntatie. Verbetert seizoensvoorspellingen.",
-          "de": "Berücksichtigt Sonnenwinkel je Jahreszeit. Niedrige Wintersonne (Dez-Feb: 60%) heizt weniger als hohe Sommersonne (Jun-Jul: 130%). Trägt 5-20% zur Gesamtwärme bei je nach Fenstergröße und Ausrichtung. Verbessert saisonale Vorhersagen.",
-          "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. Améliore prévisions saisonnières."
+          "en": "Accounts for sun angle changing with seasons. Low winter sun (Dec-Feb: 60%) heats less effectively than high summer sun (Jun-Jul: 130%). Contributes 5-20% of total heat depending on window size and orientation. ⚠️ Only applies to estimated radiation - disabled when using external sources (solar panels/KNMI).",
+          "nl": "Houdt rekening met zonnehoek per seizoen. Lage winterzon (dec-feb: 60%) verwarmt minder effectief dan hoge zomerzon (jun-jul: 130%). Draagt 5-20% bij aan totale warmte afhankelijk van raamgrootte en oriëntatie. ⚠️ Seizoenscorrectie alleen bij geschatte straling van toepassing - uitgeschakeld bij externe bronnen (zonnepanelen/KNMI).",
+          "de": "Berücksichtigt Sonnenwinkel je Jahreszeit. Niedrige Wintersonne (Dez-Feb: 60%) heizt weniger als hohe Sommersonne (Jun-Jul: 130%). Trägt 5-20% zur Gesamtwärme bei je nach Fenstergröße und Ausrichtung. ⚠️ Gilt nur für geschätzte Strahlung - deaktiviert bei externen Quellen (Solarpanels/KNMI).",
+          "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. ⚠️ S'applique uniquement au rayonnement estimé - désactivé pour sources externes (panneaux solaires/KNMI)."
         },
         "value": true
       }
@@ -996,10 +996,10 @@
         "id": "insights_min_confidence",
         "type": "number",
         "label": {
-          "en": "Minimum Confidence (%)",
-          "nl": "Minimale Betrouwbaarheid (%)",
-          "de": "Mindestvertrauen (%)",
-          "fr": "Confiance Minimale (%)"
+          "en": "Minimum Confidence ",
+          "nl": "Minimale Betrouwbaarheid ",
+          "de": "Mindestvertrauen ",
+          "fr": "Confiance Minimale "
         },
         "hint": {
           "en": "Only show insights when building model confidence exceeds this threshold. 70% = ~24-48 hours learning. Lower values show earlier insights with less accuracy.",
@@ -1496,6 +1496,180 @@
             }
           }
         ]
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Wind Correction",
+      "nl": "Wind Correctie",
+      "de": "Windkorrektur",
+      "fr": "Correction du vent"
+    },
+    "children": [
+      {
+        "id": "wind_correction_enabled",
+        "type": "checkbox",
+        "label": {
+          "en": "Enable wind correction",
+          "nl": "Wind correctie inschakelen",
+          "de": "Windkorrektur aktivieren",
+          "fr": "Activer la correction du vent"
+        },
+        "hint": {
+          "en": "Adjusts target temperature based on wind speed to compensate for increased heat loss.",
+          "nl": "Past streeftemperatuur aan op basis van windsnelheid om verhoogd warmteverlies te compenseren.",
+          "de": "Passt die Zieltemperatur basierend auf der Windgeschwindigkeit an, um erhöhten Wärmeverlust zu kompensieren.",
+          "fr": "Ajuste la température cible en fonction de la vitesse du vent pour compenser l'augmentation des pertes de chaleur."
+        },
+        "value": false
+      },
+      {
+        "id": "wind_alpha_manual",
+        "type": "number",
+        "label": {
+          "en": "Manual wind coefficient (α)",
+          "nl": "Handmatige wind coëfficiënt (α)",
+          "de": "Manueller Windkoeffizient (α)",
+          "fr": "Coefficient de vent manuel (α)"
+        },
+        "hint": {
+          "en": "Manual override for wind sensitivity coefficient. Set to 0 to use learned value. Typical range: 0.003-0.01.",
+          "nl": "Handmatige overschrijving voor windgevoeligheidscoëfficiënt. Stel in op 0 om geleerde waarde te gebruiken. Typisch bereik: 0.003-0.01.",
+          "de": "Manuelle Überschreibung für Windempfindlichkeitskoeffizient. Auf 0 setzen, um gelernten Wert zu verwenden. Typischer Bereich: 0,003-0,01.",
+          "fr": "Remplacement manuel du coefficient de sensibilité au vent. Réglez sur 0 pour utiliser la valeur apprise. Plage typique: 0,003-0,01."
+        },
+        "value": 0,
+        "min": 0,
+        "max": 0.05,
+        "step": 0.001
+      },
+      {
+        "id": "wind_max_correction",
+        "type": "number",
+        "label": {
+          "en": "Maximum temperature correction (°C)",
+          "nl": "Maximale temperatuur correctie (°C)",
+          "de": "Maximale Temperaturkorrektur (°C)",
+          "fr": "Correction de température maximale (°C)"
+        },
+        "hint": {
+          "en": "Maximum target temperature increase due to wind. Prevents excessive corrections during storms.",
+          "nl": "Maximale streeftemperatuur verhoging door wind. Voorkomt overmatige correcties tijdens storm.",
+          "de": "Maximale Zieltemperaturerhöhung durch Wind. Verhindert übermäßige Korrekturen bei Sturm.",
+          "fr": "Augmentation maximale de la température cible due au vent. Empêche les corrections excessives pendant les tempêtes."
+        },
+        "value": 3.0,
+        "min": 0.5,
+        "max": 5.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Solar Radiation Source",
+      "nl": "Zonnestraling Bron",
+      "de": "Sonnenstrahlungsquelle",
+      "fr": "Source de rayonnement solaire"
+    },
+    "children": [
+      {
+        "id": "solar_source",
+        "type": "dropdown",
+        "label": {
+          "en": "Solar radiation source",
+          "nl": "Zonnestraling bron",
+          "de": "Sonnenstrahlungsquelle",
+          "fr": "Source de rayonnement solaire"
+        },
+        "hint": {
+          "en": "Select the source for solar radiation data. Auto uses the best available source.",
+          "nl": "Selecteer de bron voor zonnestralinggegevens. Auto gebruikt de best beschikbare bron.",
+          "de": "Wählen Sie die Quelle für Sonnenstrahlungsdaten. Auto verwendet die beste verfügbare Quelle.",
+          "fr": "Sélectionnez la source des données de rayonnement solaire. Auto utilise la meilleure source disponible."
+        },
+        "value": "auto",
+        "values": [
+          {
+            "id": "auto",
+            "label": {
+              "en": "Auto (best available)",
+              "nl": "Auto (beste beschikbaar)",
+              "de": "Auto (beste verfügbar)",
+              "fr": "Auto (meilleur disponible)"
+            }
+          },
+          {
+            "id": "solar_panels",
+            "label": {
+              "en": "Solar panels only",
+              "nl": "Alleen zonnepanelen",
+              "de": "Nur Solarmodule",
+              "fr": "Panneaux solaires uniquement"
+            }
+          },
+          {
+            "id": "knmi_radiation",
+            "label": {
+              "en": "KNMI radiation only",
+              "nl": "Alleen KNMI straling",
+              "de": "Nur KNMI-Strahlung",
+              "fr": "Rayonnement KNMI uniquement"
+            }
+          },
+          {
+            "id": "estimation",
+            "label": {
+              "en": "Estimation only",
+              "nl": "Alleen schatting",
+              "de": "Nur Schätzung",
+              "fr": "Estimation uniquement"
+            }
+          }
+        ]
+      },
+      {
+        "id": "solar_panel_wp",
+        "type": "number",
+        "label": {
+          "en": "Solar panel system size (Wp)",
+          "nl": "Zonnepaneel systeem grootte (Wp)",
+          "de": "Solarmodulsystemgröße (Wp)",
+          "fr": "Taille du système solaire (Wp)"
+        },
+        "hint": {
+          "en": "Total peak power of your solar panel system in Wp. E.g., 6000 for a 6 kWp system.",
+          "nl": "Totaal piekvermogen van uw zonnepaneelsysteem in Wp. Bijv. 6000 voor een 6 kWp systeem.",
+          "de": "Gesamte Spitzenleistung Ihres Solarmodulsystems in Wp. Z.B. 6000 für ein 6 kWp System.",
+          "fr": "Puissance crête totale de votre système solaire en Wp. Ex: 6000 pour un système de 6 kWp."
+        },
+        "value": 0,
+        "min": 0,
+        "max": 50000,
+        "step": 10
+      },
+      {
+        "id": "solar_panel_efficiency",
+        "type": "number",
+        "label": {
+          "en": "Solar panel efficiency factor",
+          "nl": "Zonnepaneel efficiëntie factor",
+          "de": "Solarmodule Effizienzfaktor",
+          "fr": "Facteur d'efficacité des panneaux solaires"
+        },
+        "hint": {
+          "en": "Real-world efficiency compared to STC conditions. Default 0.85 accounts for temperature, shading, and inverter losses.",
+          "nl": "Werkelijke efficiëntie vergeleken met STC-condities. Standaard 0.85 houdt rekening met temperatuur, schaduw en omvormerverliezen.",
+          "de": "Reale Effizienz im Vergleich zu STC-Bedingungen. Standard 0,85 berücksichtigt Temperatur, Beschattung und Wechselrichterverluste.",
+          "fr": "Efficacité réelle par rapport aux conditions STC. La valeur par défaut de 0,85 tient compte de la température, de l'ombrage et des pertes de l'onduleur."
+        },
+        "value": 0.85,
+        "min": 0.5,
+        "max": 1.0,
+        "step": 0.01
       }
     ]
   },
