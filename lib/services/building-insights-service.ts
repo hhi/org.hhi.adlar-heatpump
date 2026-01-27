@@ -630,6 +630,26 @@ export class BuildingInsightsService {
     if (deviation > 0.3) {
       const suggestedProfile = this.findClosestProfile(model);
 
+      // v2.7.1: Check if suggested profile is already the current profile
+      // This can happen when model has diverged or profile is at boundary
+      if (suggestedProfile === currentProfile) {
+        // Current profile is already the closest match - show as "matches well"
+        const recommendation = lang === 'nl'
+          ? `✅ Profiel '${currentProfile}' is passend (τ wijkt ${Math.round(deviation * 100)}% af)`
+          : `✅ Profile '${currentProfile}' is appropriate (τ deviates ${Math.round(deviation * 100)}%)`;
+
+        return {
+          id: `profile_matches_${Date.now()}`,
+          category: 'profile_mismatch',
+          priority: 30,
+          confidence: diagnostics.confidence,
+          detectedAt: Date.now(),
+          insight: recommendation,
+          recommendation,
+          status: 'new',
+        };
+      }
+
       const recommendation = lang === 'nl'
         ? `🔄 Wijzig naar '${suggestedProfile}' profiel`
         : `🔄 Change to '${suggestedProfile}' profile`;

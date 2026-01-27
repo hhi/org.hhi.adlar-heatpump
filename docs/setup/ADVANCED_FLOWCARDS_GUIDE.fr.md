@@ -1,7 +1,7 @@
 # 🔧 Documentation des Flow Cards : Fonctions Avancées
 
-> **Version** : 2.6.x  
-> **Objectif** : Flow cards pour le contrôle adaptatif, modèle de bâtiment, optimiseur d'énergie, optimiseur COP et aperçus du bâtiment
+> **Version** : 2.7.x  
+> **Objectif** : Flow cards pour le contrôle adaptatif, modèle de bâtiment, optimiseur d'énergie, optimiseur COP, aperçus du bâtiment et données vent/solaire
 
 ---
 
@@ -14,6 +14,7 @@
 | Optimiseur Énergie/Prix | 2 | 3 | 1 | **6** |
 | Optimiseur COP | 5 | 5 | 0 | **10** |
 | Aperçus du Bâtiment | 2 | 1 | 2 | **5** |
+| Vent & Solaire (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -215,6 +216,82 @@
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
 | `insight_is_active` | Aperçu est actif | Vérifie si la catégorie est active |
+
+---
+
+## 6️⃣ Données Vent & Solaire (v2.7.0)
+
+> **Nouveau en v2.7.0** : Données externes de vent et de radiation solaire pour un modèle de bâtiment plus précis et une correction du vent.
+
+### 🟢 ACTIONS
+
+| Flow ID | Titre | Description |
+|---------|-------|-------------|
+| `receive_external_wind_speed` ⭐ | Envoyer vitesse du vent à la pompe à chaleur | Données de vent pour correction des pertes de chaleur |
+| `receive_external_solar_power` ⭐ | Envoyer puissance solaire à la pompe à chaleur | Puissance des panneaux solaires (W) |
+| `receive_external_solar_radiation` | Envoyer radiation solaire à la pompe à chaleur | Radiation directe (W/m²) |
+
+#### `receive_external_wind_speed` - Paramètres
+| Paramètre | Type | Plage | Description |
+|-----------|------|-------|-------------|
+| `speed_value` | number | 0-30 m/s | Vitesse du vent en mètres par seconde |
+
+**Formule de correction du vent :**
+```
+correction = α × windSpeed × ΔT / 100
+```
+* `α` = coefficient de sensibilité au vent (appris ou manuel)
+* `ΔT` = (T_indoor - T_outdoor)
+
+**Table de référence α du vent (v2.7.0) :**
+| α value | Signification | Bâtiment typique |
+|---------|---------------|------------------|
+| 0.03-0.05 | Faible sensibilité au vent | Emplacement abrité |
+| 0.05-0.08 | Moyenne | Maison standard |
+| 0.08-0.12 | Sensible au vent | Détachée, exposée |
+
+**Exemple de flow :**
+```
+WHEN Vitesse du vent changée (weather app)
+THEN Envoyer vitesse du vent à la pompe à chaleur ({{wind_speed}})
+```
+
+---
+
+#### `receive_external_solar_power` - Paramètres
+| Paramètre | Type | Plage | Description |
+|-----------|------|-------|-------------|
+| `power_value` | number | 0-50000 W | Puissance actuelle des panneaux solaires en watts |
+
+**Conversion en radiation :**
+```
+radiation = P_panel / Wp × 1000 W/m²
+```
+* `Wp` = Puissance crête des panneaux solaires (paramètre : solar_panel_wp)
+
+**Exemple de flow :**
+```
+WHEN Puissance panneau solaire changée (SolarEdge/Enphase app)
+THEN Envoyer puissance solaire à la pompe à chaleur ({{current_power}})
+```
+
+> [!TIP]
+> Configurez `solar_panel_wp` dans les paramètres de l’appareil pour une conversion précise.
+
+---
+
+#### `receive_external_solar_radiation` - Paramètres
+| Paramètre | Type | Plage | Description |
+|-----------|------|-------|-------------|
+| `radiation_value` | number | 0-1200 W/m² | Radiation solaire directe en W/m² |
+
+**Exemple de flow :**
+```
+WHEN Radiation solaire changée (station météo/KNMI app)
+THEN Envoyer radiation solaire à la pompe à chaleur ({{radiation}})
+```
+
+**Cascade de priorité :** Lorsque la puissance solaire et la radiation sont reçues, la puissance solaire a la priorité (plus précise).
 
 ---
 

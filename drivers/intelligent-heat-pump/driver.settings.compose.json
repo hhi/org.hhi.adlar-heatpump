@@ -868,47 +868,47 @@
           "fr": "Type de Bâtiment"
         },
         "hint": {
-          "en": "Select based on construction and insulation. Sets starting values for faster learning. Model adapts to your actual building over time.",
-          "nl": "Selecteer op basis van constructie en isolatie. Stelt startwaarden in voor sneller leren. Model past zich aan je werkelijke gebouw aan.",
-          "de": "Wählen basierend auf Konstruktion und Isolierung. Setzt Startwerte für schnelleres Lernen. Modell passt sich Ihrem tatsächlichen Gebäude an.",
-          "fr": "Sélectionnez selon construction et isolation. Définit valeurs départ pour apprentissage rapide. Modèle s'adapte à votre bâtiment réel."
+          "en": "C = Thermal mass (kWh/°C), UA = Heat loss (kW/°C), τ = Time constant (hours). Select based on construction. Model adapts over time.",
+          "nl": "C = Thermische massa (kWh/°C), UA = Warmteverlies (kW/°C), τ = Tijdconstante (uren). Selecteer op basis van constructie. Model past zich aan.",
+          "de": "C = Wärmespeicher (kWh/°C), UA = Wärmeverlust (kW/°C), τ = Zeitkonstante (Stunden). Wählen nach Konstruktion. Modell passt sich an.",
+          "fr": "C = Masse thermique (kWh/°C), UA = Perte chaleur (kW/°C), τ = Constante temps (heures). Sélectionner selon construction. Modèle s'adapte."
         },
         "value": "average",
         "values": [
           {
             "id": "light",
             "label": {
-              "en": "Light: Wood/prefab, basic insulation, quick temp changes",
-              "nl": "Licht: Hout/prefab, basis isolatie, snelle temp wisselingen",
-              "de": "Leicht: Holz/Fertig, Basisisolierung, schnelle Temp-Änderungen",
-              "fr": "Léger: Bois/préfab, isolation basique, changements temp rapides"
+              "en": "Light: Wood/prefab, basic insulation, quick temp changes | C=7, UA=0.35, τ=20h",
+              "nl": "Licht: Hout/prefab, basis isolatie, snelle temp wisselingen | C=7, UA=0.35, τ=20h",
+              "de": "Leicht: Holz/Fertig, Basisisolierung, schnelle Temp-Änderungen | C=7, UA=0.35, τ=20h",
+              "fr": "Léger: Bois/préfab, isolation basique, changements temp rapides | C=7, UA=0.35, τ=20h"
             }
           },
           {
             "id": "average",
             "label": {
-              "en": "Average: Brick, cavity walls, double glass (typical NL home)",
-              "nl": "Gemiddeld: Baksteen, spouwmuur, dubbel glas (typisch NL huis)",
-              "de": "Durchschnitt: Ziegel, Hohlwand, Doppelglas (typisches NL-Haus)",
-              "fr": "Moyen: Brique, murs creux, double vitrage (maison NL typique)"
+              "en": "Average: Brick, cavity walls, double glass (typical NL home) | C=15, UA=0.30, τ=50h",
+              "nl": "Gemiddeld: Baksteen, spouwmuur, dubbel glas (typisch NL huis) | C=15, UA=0.30, τ=50h",
+              "de": "Durchschnitt: Ziegel, Hohlwand, Doppelglas (typisches NL-Haus) | C=15, UA=0.30, τ=50h",
+              "fr": "Moyen: Brique, murs creux, double vitrage (maison NL typique) | C=15, UA=0.30, τ=50h"
             }
           },
           {
             "id": "heavy",
             "label": {
-              "en": "Heavy: Concrete/stone, good insulation, HR++ glass, stable",
-              "nl": "Zwaar: Beton/steen, goede isolatie, HR++ glas, stabiel",
-              "de": "Schwer: Beton/Stein, gute Isolierung, HR++-Glas, stabil",
-              "fr": "Lourd: Béton/pierre, bonne isolation, verre HR++, stable"
+              "en": "Heavy: Concrete/stone, good insulation, HR++ glass, stable | C=20, UA=0.25, τ=80h",
+              "nl": "Zwaar: Beton/steen, goede isolatie, HR++ glas, stabiel | C=20, UA=0.25, τ=80h",
+              "de": "Schwer: Beton/Stein, gute Isolierung, HR++-Glas, stabil | C=20, UA=0.25, τ=80h",
+              "fr": "Lourd: Béton/pierre, bonne isolation, verre HR++, stable | C=20, UA=0.25, τ=80h"
             }
           },
           {
             "id": "passive",
             "label": {
-              "en": "Passive: Passive house, HR+++ glass, airtight, heat recovery",
-              "nl": "Passief: Passiefhuis, HR+++ glas, luchtdicht, WTW",
-              "de": "Passiv: Passivhaus, HR+++-Glas, luftdicht, Wärmerückgewinnung",
-              "fr": "Passif: Maison passive, verre HR+++, étanche, récupération chaleur"
+              "en": "Passive: Passive house, HR+++ glass, airtight, heat recovery | C=30, UA=0.05, τ=600h",
+              "nl": "Passief: Passief huis, HR+++ glas, luchtdicht, warmte terugwin ventilatie | C=30, UA=0.05, τ=600h",
+              "de": "Passiv: Passiv Haus, HR+++-Glas, luftdicht, Wärmerückgewinnung | C=30, UA=0.05, τ=600h",
+              "fr": "Passif: Maison passive, verre HR+++, étanche, récupération chaleur | C=30, UA=0.05, τ=600h"
             }
           }
         ]
@@ -1524,26 +1524,6 @@
           "fr": "Ajuste la température cible en fonction de la vitesse du vent pour compenser l'augmentation des pertes de chaleur."
         },
         "value": false
-      },
-      {
-        "id": "wind_alpha_manual",
-        "type": "number",
-        "label": {
-          "en": "Manual wind coefficient (α)",
-          "nl": "Handmatige wind coëfficiënt (α)",
-          "de": "Manueller Windkoeffizient (α)",
-          "fr": "Coefficient de vent manuel (α)"
-        },
-        "hint": {
-          "en": "Manual override for wind sensitivity coefficient. Set to 0 to use learned value. Typical range: 0.003-0.01.",
-          "nl": "Handmatige overschrijving voor windgevoeligheidscoëfficiënt. Stel in op 0 om geleerde waarde te gebruiken. Typisch bereik: 0.003-0.01.",
-          "de": "Manuelle Überschreibung für Windempfindlichkeitskoeffizient. Auf 0 setzen, um gelernten Wert zu verwenden. Typischer Bereich: 0,003-0,01.",
-          "fr": "Remplacement manuel du coefficient de sensibilité au vent. Réglez sur 0 pour utiliser la valeur apprise. Plage typique: 0,003-0,01."
-        },
-        "value": 0,
-        "min": 0,
-        "max": 0.05,
-        "step": 0.001
       },
       {
         "id": "wind_max_correction",

@@ -1,6 +1,6 @@
 # Gebouwinzichten & Aanbevelingen Gids
 
-**Versie**: 2.6.0+ | **Laatst bijgewerkt**: Januari 2026
+**Versie**: 2.7.0+ | **Laatst bijgewerkt**: Januari 2026
 
 ---
 
@@ -9,13 +9,14 @@
 1. [Introductie](#introductie)
 2. [Wat zijn Gebouwinzichten?](#wat-zijn-gebouwinzichten)
 3. [Hoe het werkt](#hoe-het-werkt)
-4. [Inzicht Categorieën](#inzicht-categorieën)
-5. [Inzichten begrijpen](#inzichten-begrijpen)
-6. [Actie ondernemen](#actie-ondernemen)
-7. [Voorbeeldflows](#voorbeeldflows)
-8. [Instellingen](#instellingen)
-9. [Probleemoplossing](#probleemoplossing)
-10. [FAQ](#faq)
+4. [Zonnestraling Bronnen](#zonnestraling-bronnen)
+5. [Inzicht Categorieën](#inzicht-categorieën)
+6. [Inzichten begrijpen](#inzichten-begrijpen)
+7. [Actie ondernemen](#actie-ondernemen)
+8. [Voorbeeldflows](#voorbeeldflows)
+9. [Instellingen](#instellingen)
+10. [Probleemoplossing](#probleemoplossing)
+11. [FAQ](#faq)
 
 ---
 
@@ -100,6 +101,76 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 - **Past aan bij seizoenen** (zonnewinst multipliers, interne warmte patronen)
 - **Update inzichten** bij parameter drift >10%
 - **Rate limited** om "advies-moeheid" te voorkomen (max 1 inzicht per categorie per dag)
+
+---
+
+## Zonnestraling Bronnen
+
+Het gebouwmodel gebruikt zonnestraling om warmtewinst door ramen te berekenen. Vanaf versie 2.7.0 ondersteunt het systeem **drie databronnen** met automatische prioriteit.
+
+### De Zonnewinst Factor (g)
+
+De **g-factor** (0.3-0.6) bepaalt hoeveel van de invallende zonnestraling je gebouw effectief opwarmt:
+
+| g-waarde | Betekenis | Typisch gebouw |
+|----------|-----------|----------------|
+| **0.3** | Weinig zonnewinst | Kleine ramen, noord-oriëntatie |
+| **0.45** | Gemiddelde zonnewinst | Standaard woning |
+| **0.6** | Hoge zonnewinst | Grote ramen op zuid |
+
+**Formule:** `Zonnewinst (kW) = g × Zonnestraling (W/m²) / 1000 × Effectief raamoppervlak`
+
+### Zonnestraling Prioriteit Cascade (v2.7.0)
+
+Het systeem kiest automatisch de beste beschikbare bron:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITEIT 1: Zonnepanelen                                 │
+│  - Meest accurate real-time data                           │
+│  - Omgerekend naar straling via: P_panel / Wp × 1000 W/m²  │
+│  - Vereist: flow card "Ontvang externe zonnestroom"        │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (niet beschikbaar)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITEIT 2: KNMI Stralingsdata                          │
+│  - Werkelijke gemeten straling van weerstation             │
+│  - Vereist: flow card "Ontvang externe zonnestraling"      │
+│  - Bron: bijv. KNMI app of weerstation integratie          │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (niet beschikbaar)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITEIT 3: Sinusoïdale Schatting (fallback)            │
+│  - Berekend op basis van tijd en datum                     │
+│  - Gebruikt formule: max(0, sin(π × (uur-6)/12)) × piek    │
+│  - Seizoensafhankelijke piekwaarden (winter 200, zomer 800)│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Seizoenscorrectie (g-multiplier)
+
+De instelling **"Seizoensgebonden zonnewinst (g)"** past de effectiviteit van zonnestraling aan per seizoen:
+
+| Maand | Multiplier | Reden |
+|-------|------------|-------|
+| Dec-Feb | 60% | Lage winterzon, veel bewolking |
+| Mrt, Nov | 80% | Overgangsperioden |
+| Apr, Okt | 100% | Referentie baseline |
+| Mei, Sep | 120% | Hogere zon, betere invalshoek |
+| Jun-Aug | 130% | Maximale zomer instraling |
+
+> [!IMPORTANT]
+> **Automatische detectie (v2.7.0):** De seizoenscorrectie wordt **alleen** toegepast bij geschatte straling (sinusoïdale fallback). Bij gebruik van zonnepanelen of KNMI data wordt de correctie automatisch uitgeschakeld, omdat deze bronnen al het werkelijke seizoens- en weereffect bevatten.
+
+### Welke bron gebruik ik?
+
+| Bron | Voordelen | Nadelen | Setup |
+|------|-----------|---------|-------|
+| **Zonnepanelen** | Meest accuraat, real-time | Vereist zonnepaneel-integratie | Flow: solar panel → ADLAR |
+| **KNMI** | Gemeten data, geen panelen nodig | Kan 10-60 min vertraagd zijn | Flow: weer-app → ADLAR |
+| **Schatting** | Geen setup nodig, altijd beschikbaar | Minder nauwkeurig bij bewolking | Automatisch actief |
+
+**Aanbeveling:** Als je zonnepanelen hebt, stuur hun vermogen door. Anders is de sinusoïdale schatting met seizoenscorrectie voldoende nauwkeurig voor de meeste situaties.
 
 ---
 
@@ -198,7 +269,7 @@ Maandelijkse besparing = €5.04 × 30 = €151/maand
 | **Licht** | 7 | 0.35 | 20 | Houtskelet, basis isolatie, snelle temp wisselingen |
 | **Gemiddeld** | 15 | 0.30 | 50 | Baksteen, spouwmuur, dubbel glas (typisch NL) |
 | **Zwaar** | 20 | 0.25 | 80 | Beton/steen, goede isolatie, HR++ glas |
-| **Passief** | 30 | 0.05 | 600 | Passiefhuis, HR+++, luchtdicht, WTW |
+| **Passief** | 30 | 0.05 | 600 | Passiefhuis, HR+++, luchtdicht, warmte terugwin ventilatie |
 
 ---
 

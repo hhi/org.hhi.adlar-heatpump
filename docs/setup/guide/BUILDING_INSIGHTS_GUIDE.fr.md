@@ -1,6 +1,6 @@
 # Guide des Aperçus & Recommandations du Bâtiment
 
-**Version** : 2.6.0+ | **Dernière mise à jour** : Janvier 2026
+**Version** : 2.7.0+ | **Dernière mise à jour** : Janvier 2026
 
 ---
 
@@ -9,14 +9,15 @@
 1. [Introduction](#introduction)
 2. [Que sont les Aperçus du Bâtiment ?](#que-sont-les-aperçus-du-bâtiment)
 3. [Comment ça fonctionne](#comment-ça-fonctionne)
-4. [Catégories d'aperçus](#catégories-daperçus)
-5. [Comprendre vos aperçus](#comprendre-vos-aperçus)
-6. [Passer à l'action](#passer-à-laction)
-7. [Exemples de Flows](#exemples-de-flows)
-8. [Référence des cartes Flow](#référence-des-cartes-flow)
-9. [Paramètres](#paramètres)
-10. [Dépannage](#dépannage)
-11. [FAQ](#faq)
+4. [Sources de Rayonnement Solaire](#sources-de-rayonnement-solaire)
+5. [Catégories d'aperçus](#catégories-daperçus)
+6. [Comprendre vos aperçus](#comprendre-vos-aperçus)
+7. [Passer à l'action](#passer-à-laction)
+8. [Exemples de Flows](#exemples-de-flows)
+9. [Référence des cartes Flow](#référence-des-cartes-flow)
+10. [Paramètres](#paramètres)
+11. [Dépannage](#dépannage)
+12. [FAQ](#faq)
 
 ---
 
@@ -101,6 +102,76 @@ Lorsque des opportunités d'optimisation sont détectées, il génère des **ape
 - **S'adapte aux saisons** (multiplicateurs de gain solaire, patterns de chaleur interne)
 - **Met à jour les aperçus** lors de dérive des paramètres >10%
 - **Limitation du débit** pour éviter la "fatigue des conseils" (max 1 aperçu par catégorie par jour)
+
+---
+
+## Sources de Rayonnement Solaire
+
+Le modèle du bâtiment utilise le rayonnement solaire pour calculer le gain de chaleur par les fenêtres. À partir de la version 2.7.0, le système prend en charge **trois sources de données** avec priorisation automatique.
+
+### Le Facteur de Gain Solaire (g)
+
+Le **facteur g** (0,3-0,6) détermine quelle proportion du rayonnement solaire incident réchauffe effectivement votre bâtiment :
+
+| Valeur g | Signification | Bâtiment typique |
+|----------|---------------|------------------|
+| **0,3** | Faible gain solaire | Petites fenêtres, orientation nord |
+| **0,45** | Gain solaire moyen | Logement standard |
+| **0,6** | Gain solaire élevé | Grandes fenêtres orientées sud |
+
+**Formule :** `Gain solaire (kW) = g × Rayonnement (W/m²) / 1000 × Surface vitrée effective`
+
+### Cascade de Priorité du Rayonnement (v2.7.0)
+
+Le système choisit automatiquement la meilleure source disponible :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITÉ 1 : Panneaux solaires                             │
+│  - Données temps réel les plus précises                     │
+│  - Converti en rayonnement : P_panneau / Wc × 1000 W/m²     │
+│  - Requiert : carte Flow "Recevoir puissance solaire"       │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (non disponible)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITÉ 2 : Données de station météo                      │
+│  - Rayonnement réellement mesuré                            │
+│  - Requiert : carte Flow "Recevoir rayonnement externe"     │
+│  - Source : ex. app météo ou intégration station météo      │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (non disponible)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITÉ 3 : Estimation sinusoïdale (fallback)             │
+│  - Calculé selon l'heure et la date                         │
+│  - Formule : max(0, sin(π × (heure-6)/12)) × pic            │
+│  - Valeurs de pic saisonnières (hiver 200, été 800)         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Correction Saisonnière (multiplicateur g)
+
+Le paramètre **"Gain solaire saisonnier (g)"** ajuste l'efficacité du rayonnement solaire par saison :
+
+| Mois | Multiplicateur | Raison |
+|------|----------------|--------|
+| Déc-Fév | 60% | Soleil bas d'hiver, beaucoup de nuages |
+| Mars, Nov | 80% | Périodes de transition |
+| Avr, Oct | 100% | Référence de base |
+| Mai, Sep | 120% | Soleil plus haut, meilleur angle |
+| Juin-Août | 130% | Rayonnement maximal d'été |
+
+> [!IMPORTANT]
+> **Détection automatique (v2.7.0) :** La correction saisonnière est **uniquement** appliquée au rayonnement estimé. Lors de l'utilisation de panneaux solaires ou de données météo, la correction est automatiquement désactivée, car ces sources contiennent déjà l'effet réel de saison et de météo.
+
+### Quelle source utiliser ?
+
+| Source | Avantages | Inconvénients | Configuration |
+|--------|-----------|---------------|---------------|
+| **Panneaux** | Plus précis, temps réel | Nécessite intégration panneau | Flow : panneau → ADLAR |
+| **Météo** | Données mesurées, pas de panneaux | Peut être retardé 10-60 min | Flow : app météo → ADLAR |
+| **Estimation** | Pas de config nécessaire | Moins précis par temps nuageux | Automatiquement actif |
+
+**Recommandation :** Si vous avez des panneaux solaires, transmettez leur puissance. Sinon, l'estimation sinusoïdale avec correction saisonnière est suffisamment précise pour la plupart des situations.
 
 ---
 

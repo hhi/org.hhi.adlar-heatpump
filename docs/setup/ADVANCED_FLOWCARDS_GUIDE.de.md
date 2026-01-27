@@ -1,7 +1,7 @@
 # 🔧 Flow Cards Dokumentation: Erweiterte Funktionen
 
-> **Version**: 2.6.x  
-> **Zweck**: Flow Cards für adaptive Regelung, Gebäudemodell, Energieoptimierer, COP-Optimierer und Gebäudeeinblicke
+> **Version**: 2.7.x  
+> **Zweck**: Flow Cards für adaptive Regelung, Gebäudemodell, Energieoptimierer, COP-Optimierer, Gebäudeeinblicke und Wind-/Solardaten
 
 ---
 
@@ -14,6 +14,7 @@
 | Energie/Preis-Optimierer | 2 | 3 | 1 | **6** |
 | COP-Optimierer | 5 | 5 | 0 | **10** |
 | Gebäudeeinblicke | 2 | 1 | 2 | **5** |
+| Wind & Solar (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -215,6 +216,82 @@
 | Flow ID | Titel | Beschreibung |
 |---------|-------|--------------|
 | `insight_is_active` | Erkenntnis ist aktiv | Prüft ob Kategorie aktiv ist |
+
+---
+
+## 6️⃣ Wind- & Solardaten (v2.7.0)
+
+> **Neu in v2.7.0**: Externe Wind- und Solarstrahlungsdaten für ein genaueres Gebäudemodell und Windkorrektur.
+
+### 🟢 ACTIONS
+
+| Flow ID | Titel | Beschreibung |
+|---------|-------|--------------|
+| `receive_external_wind_speed` ⭐ | Windgeschwindigkeit an Wärmepumpe senden | Winddaten für Wärmeverlustkorrektur |
+| `receive_external_solar_power` ⭐ | Solarleistung an Wärmepumpe senden | Solar-Panel-Ausgang (W) |
+| `receive_external_solar_radiation` | Solarstrahlung an Wärmepumpe senden | Direkte Strahlung (W/m²) |
+
+#### `receive_external_wind_speed` - Parameter
+| Parameter | Typ | Bereich | Beschreibung |
+|-----------|-----|--------|--------------|
+| `speed_value` | number | 0-30 m/s | Windgeschwindigkeit in Metern pro Sekunde |
+
+**Windkorrektur-Formel:**
+```
+correction = α × windSpeed × ΔT / 100
+```
+* `α` = Windempfindlichkeitskoeffizient (gelernt oder manuell)
+* `ΔT` = (T_indoor - T_outdoor)
+
+**Wind-α-Referenztabelle (v2.7.0):**
+| α value | Bedeutung | Typisches Gebäude |
+|---------|-----------|------------------|
+| 0.03-0.05 | Geringe Windempfindlichkeit | Geschützte Lage |
+| 0.05-0.08 | Durchschnittlich | Standardhaus |
+| 0.08-0.12 | Windempfindlich | Freistehend, exponiert |
+
+**Beispiel-Flow:**
+```
+WHEN Windgeschwindigkeit geändert (weather app)
+THEN Windgeschwindigkeit an Wärmepumpe senden ({{wind_speed}})
+```
+
+---
+
+#### `receive_external_solar_power` - Parameter
+| Parameter | Typ | Bereich | Beschreibung |
+|-----------|-----|--------|--------------|
+| `power_value` | number | 0-50000 W | Aktuelle Solar-Panel-Leistung in Watt |
+
+**Umrechnung in Strahlung:**
+```
+radiation = P_panel / Wp × 1000 W/m²
+```
+* `Wp` = Peak-Solarleistung (Einstellung: solar_panel_wp)
+
+**Beispiel-Flow:**
+```
+WHEN Solar-Panel-Leistung geändert (SolarEdge/Enphase app)
+THEN Solarleistung an Wärmepumpe senden ({{current_power}})
+```
+
+> [!TIP]
+> Konfiguriere `solar_panel_wp` in den Geräteeinstellungen für eine genaue Umrechnung.
+
+---
+
+#### `receive_external_solar_radiation` - Parameter
+| Parameter | Typ | Bereich | Beschreibung |
+|-----------|-----|--------|--------------|
+| `radiation_value` | number | 0-1200 W/m² | Direkte Solarstrahlung in W/m² |
+
+**Beispiel-Flow:**
+```
+WHEN Solarstrahlung geändert (weather station/KNMI app)
+THEN Solarstrahlung an Wärmepumpe senden ({{radiation}})
+```
+
+**Prioritätskaskade:** Wenn sowohl Solarleistung als auch Strahlung empfangen werden, hat Solarleistung Priorität (genauer).
 
 ---
 
