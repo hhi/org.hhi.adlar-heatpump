@@ -1,6 +1,6 @@
 # Building Insights & Recommendations Guide
 
-**Version**: 2.6.0+ | **Last Updated**: January 2026
+**Version**: 2.7.0+ | **Last Updated**: January 2026
 
 ---
 
@@ -9,14 +9,15 @@
 1. [Introduction](#introduction)
 2. [What Are Building Insights?](#what-are-building-insights)
 3. [How It Works](#how-it-works)
-4. [Insight Categories](#insight-categories)
-5. [Understanding Your Insights](#understanding-your-insights)
-6. [Taking Action](#taking-action)
-7. [Example Flows](#example-flows)
-8. [Flow Cards Reference](#flow-cards-reference)
-9. [Settings](#settings)
-10. [Troubleshooting](#troubleshooting)
-11. [FAQ](#faq)
+4. [Solar Radiation Sources](#solar-radiation-sources)
+5. [Insight Categories](#insight-categories)
+6. [Understanding Your Insights](#understanding-your-insights)
+7. [Taking Action](#taking-action)
+8. [Example Flows](#example-flows)
+9. [Flow Cards Reference](#flow-cards-reference)
+10. [Settings](#settings)
+11. [Troubleshooting](#troubleshooting)
+12. [FAQ](#faq)
 
 ---
 
@@ -101,6 +102,76 @@ When optimization opportunities are detected, it generates **insights** with spe
 - **Adapts to seasons** (solar gain multipliers, internal heat patterns)
 - **Updates insights** when parameter drift >10%
 - **Rate limited** to prevent "advice fatigue" (max 1 insight per category per day)
+
+---
+
+## Solar Radiation Sources
+
+The building model uses solar radiation to calculate heat gain through windows. From version 2.7.0, the system supports **three data sources** with automatic priority.
+
+### The Solar Gain Factor (g)
+
+The **g-factor** (0.3-0.6) determines how much incoming solar radiation effectively heats your building:
+
+| g-value | Meaning | Typical Building |
+|---------|---------|------------------|
+| **0.3** | Low solar gain | Small windows, north-facing |
+| **0.45** | Average solar gain | Standard home |
+| **0.6** | High solar gain | Large south-facing windows |
+
+**Formula:** `Solar gain (kW) = g × Solar radiation (W/m²) / 1000 × Effective window area`
+
+### Solar Radiation Priority Cascade (v2.7.0)
+
+The system automatically selects the best available source:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITY 1: Solar Panels                                  │
+│  - Most accurate real-time data                            │
+│  - Converted to radiation via: P_panel / Wp × 1000 W/m²   │
+│  - Requires: flow card "Receive external solar power"      │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (not available)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITY 2: Weather Station Radiation Data                 │
+│  - Actual measured radiation from weather station           │
+│  - Requires: flow card "Receive external solar radiation"   │
+│  - Source: e.g., KNMI app or weather station integration    │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (not available)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITY 3: Sinusoidal Estimation (fallback)               │
+│  - Calculated based on time and date                       │
+│  - Uses formula: max(0, sin(π × (hour-6)/12)) × peak       │
+│  - Season-dependent peak values (winter 200, summer 800)    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Seasonal Correction (g-multiplier)
+
+The **"Seasonal solar gain (g)"** setting adjusts solar radiation effectiveness per season:
+
+| Month | Multiplier | Reason |
+|-------|------------|--------|
+| Dec-Feb | 60% | Low winter sun, more clouds |
+| Mar, Nov | 80% | Transition periods |
+| Apr, Oct | 100% | Reference baseline |
+| May, Sep | 120% | Higher sun, better angle |
+| Jun-Aug | 130% | Maximum summer radiation |
+
+> [!IMPORTANT]
+> **Automatic detection (v2.7.0):** Seasonal correction is **only** applied for estimated radiation (sinusoidal fallback). When using solar panels or weather station data, the correction is automatically disabled because these sources already include actual seasonal/weather effects.
+
+### Which Source Should I Use?
+
+| Source | Advantages | Disadvantages | Setup |
+|--------|------------|---------------|-------|
+| **Solar Panels** | Most accurate, real-time | Requires solar panel integration | Flow: solar panel → ADLAR |
+| **Weather Station** | Measured data, no panels needed | May be 10-60 min delayed | Flow: weather app → ADLAR |
+| **Estimation** | No setup needed, always available | Less accurate during clouds | Automatically active |
+
+**Recommendation:** If you have solar panels, forward their power output. Otherwise, the sinusoidal estimation with seasonal correction is sufficiently accurate for most situations.
 
 ---
 

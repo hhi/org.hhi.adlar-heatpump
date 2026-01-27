@@ -1,7 +1,7 @@
 # 🔧 Flow Cards Documentatie: Geavanceerde Functies
 
-> **Versie**: 2.6.x  
-> **Doel**: Flow cards voor adaptieve regeling, building model, energy optimizer, COP optimizer en building insights
+> **Versie**: 2.7.x  
+> **Doel**: Flow cards voor adaptieve regeling, building model, energy optimizer, COP optimizer, building insights en wind/zonnestraling data
 
 ---
 
@@ -14,6 +14,7 @@
 | Energy/Price Optimizer | 2 | 3 | 1 | **6** |
 | COP Optimizer | 5 | 5 | 0 | **10** |
 | Building Insights | 2 | 1 | 2 | **5** |
+| Wind & Zonnestraling (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -225,6 +226,82 @@ THEN
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
 | `insight_is_active` | Inzicht is actief | Check of categorie actief is |
+
+---
+
+## 6️⃣ Wind & Zonnestraling Data (v2.7.0)
+
+> **Nieuw in v2.7.0**: Externe wind- en zonnestralingsdata voor nauwkeuriger gebouwmodel en windcorrectie.
+
+### 🟢 ACTIONS
+
+| Flow ID | Titel | Beschrijving |
+|---------|-------|--------------|
+| `receive_external_wind_speed` ⭐ | Stuur windsnelheid naar warmtepomp | Wind data voor warmteverlies correctie |
+| `receive_external_solar_power` ⭐ | Stuur zonnestroom naar warmtepomp | Zonnepaneel vermogen (W) |
+| `receive_external_solar_radiation` | Stuur zonnestraling naar warmtepomp | Directe straling (W/m²) |
+
+#### `receive_external_wind_speed` - Parameters
+| Parameter | Type | Bereik | Beschrijving |
+|-----------|------|--------|--------------|
+| `speed_value` | number | 0-30 m/s | Windsnelheid in meters per seconde |
+
+**Windcorrectie formule:**
+```
+correctie = α × windSpeed × ΔT / 100
+```
+* `α` = wind gevoeligheidscoëfficiënt (geleerd of handmatig)
+* `ΔT` = (T_indoor - T_outdoor)
+
+**Wind α referentietabel (v2.7.0):**
+| α waarde | Betekenis | Typisch gebouw |
+|----------|-----------|----------------|
+| 0.03-0.05 | Weinig windgevoelig | Beschutte locatie |
+| 0.05-0.08 | Gemiddeld | Standaard woning |
+| 0.08-0.12 | Windgevoelig | Vrijstaand, onbeschut |
+
+**Voorbeeld flow:**
+```
+WHEN Windsnelheid veranderd (weather app)
+THEN Stuur windsnelheid naar warmtepomp ({{wind_speed}})
+```
+
+---
+
+#### `receive_external_solar_power` - Parameters
+| Parameter | Type | Bereik | Beschrijving |
+|-----------|------|--------|--------------|
+| `power_value` | number | 0-50000 W | Huidig zonnepaneel vermogen in Watt |
+
+**Omrekening naar straling:**
+```
+straling = P_panel / Wp × 1000 W/m²
+```
+* `Wp` = Piekvermogen zonnepanelen (instelling: solar_panel_wp)
+
+**Voorbeeld flow:**
+```
+WHEN Zonnepaneel vermogen veranderd (SolarEdge/Enphase app)
+THEN Stuur zonnestroom naar warmtepomp ({{current_power}})
+```
+
+> [!TIP]
+> Configureer `solar_panel_wp` in apparaatinstellingen voor nauwkeurige omrekening.
+
+---
+
+#### `receive_external_solar_radiation` - Parameters
+| Parameter | Type | Bereik | Beschrijving |
+|-----------|------|--------|--------------|
+| `radiation_value` | number | 0-1200 W/m² | Directe zonnestraling in W/m² |
+
+**Voorbeeld flow:**
+```
+WHEN Zonnestraling veranderd (KNMI app / weerstation)
+THEN Stuur zonnestraling naar warmtepomp ({{radiation}})
+```
+
+**Prioriteit cascade:** Wanneer zowel zonnestroom als straling ontvangen worden, heeft zonnestroom prioriteit (meer nauwkeurig).
 
 ---
 

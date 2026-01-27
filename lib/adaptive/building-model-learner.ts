@@ -165,9 +165,10 @@ export class BuildingModelLearner {
   private static readonly THETA_BOUNDS = {
     theta0_min: 1 / 40, // Min 1/C (max C = 40 kWh/°C, passive house)
     theta0_max: 1 / 5, // Max 1/C (min C = 5 kWh/°C, light building)
-    theta1_min: 0.02 / 40, // Min UA/C (UA=0.02 kW/°C passive, C=40)
+    theta1_min: 0.05 / 40, // Min UA/C (UA=0.05 kW/°C, C=40) - v2.7.1: tightened from 0.02
     theta1_max: 1.0 / 5, // Max UA/C (UA=1.0 kW/°C poor insulation, C=5)
-    theta1_theta0_ratio_max: 0.8, // θ[1]/θ[0] < 0.8 ensures tau > 1.25h
+    theta1_theta0_ratio_min: 0.002, // θ[1]/θ[0] > 0.002 ensures τ < 500h (v2.7.1: NEW)
+    theta1_theta0_ratio_max: 0.8, // θ[1]/θ[0] < 0.8 ensures τ > 1.25h
     g_c_min: 0.2 / 40, // Min g/C (g=0.2 base × 0.6 seasonal winter)
     g_c_max: 0.8 / 5, // Max g/C (g=0.8 base × 1.3 seasonal summer)
     pint_c_min: 0.1 / 40, // Min P_int/C (0.1kW base × 0.4 night)
@@ -374,18 +375,22 @@ export class BuildingModelLearner {
     const theta1Valid = this.theta[1] >= bounds.theta1_min && this.theta[1] <= bounds.theta1_max;
     const theta2Valid = this.theta[2] >= bounds.g_c_min && this.theta[2] <= bounds.g_c_max;
     const theta3Valid = this.theta[3] >= bounds.pint_c_min && this.theta[3] <= bounds.pint_c_max;
-    const ratioValid = this.theta[1] < this.theta[0] * bounds.theta1_theta0_ratio_max;
+    // v2.7.1: Added ratio minimum check to prevent τ > 500h (θ[1]/θ[0] > 0.002)
+    const ratioMinValid = this.theta[1] > this.theta[0] * bounds.theta1_theta0_ratio_min;
+    const ratioMaxValid = this.theta[1] < this.theta[0] * bounds.theta1_theta0_ratio_max;
 
-    const allValid = theta0Valid && theta1Valid && theta2Valid && theta3Valid && ratioValid;
+    const allValid = theta0Valid && theta1Valid && theta2Valid && theta3Valid && ratioMinValid && ratioMaxValid;
 
     if (!allValid) {
       // RLS algorithm has diverged - log detailed diagnostics and revert
+      const tauEstimate = this.theta[0] / this.theta[1]; // 1/C ÷ UA/C = 1/UA × C/1 = C/UA = τ
       this.logger('BuildingModelLearner: ⚠️ RLS DIVERGENCE DETECTED - reverting theta');
       this.logger(`  θ[0] (1/C):     ${this.theta[0].toFixed(6)} [valid: ${bounds.theta0_min.toFixed(6)} - ${bounds.theta0_max.toFixed(6)}] ${theta0Valid ? '✅' : '❌'}`);
       this.logger(`  θ[1] (UA/C):    ${this.theta[1].toFixed(6)} [valid: ${bounds.theta1_min.toFixed(6)} - ${bounds.theta1_max.toFixed(6)}] ${theta1Valid ? '✅' : '❌'}`);
       this.logger(`  θ[2] (g/C):     ${this.theta[2].toFixed(6)} [valid: ${bounds.g_c_min.toFixed(6)} - ${bounds.g_c_max.toFixed(6)}] ${theta2Valid ? '✅' : '❌'}`);
       this.logger(`  θ[3] (P_int/C): ${this.theta[3].toFixed(6)} [valid: ${bounds.pint_c_min.toFixed(6)} - ${bounds.pint_c_max.toFixed(6)}] ${theta3Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(3)} [max: ${bounds.theta1_theta0_ratio_max}] ${ratioValid ? '✅' : '❌'}`);
+      this.logger(`  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)} [valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}] ${ratioMinValid && ratioMaxValid ? '✅' : '❌'}`);
+      this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: 1.25 - 500]`);
       this.logger('  Action: Reverted to previous theta, kept P matrix for uncertainty tracking');
 
       // REVERT: Restore previous theta (keep P matrix to maintain uncertainty)
@@ -396,9 +401,15 @@ export class BuildingModelLearner {
     }
 
     // Step 3: Update covariance P = (1/λ) × (P - K × X^T × P)
+    // v2.7.1: Added P matrix diagonal floor to prevent covariance collapse
+    const P_FLOOR = 0.0001; // Minimum uncertainty - prevents P[i,i]=0 (algorithm stops learning)
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
-    this.P = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / adaptiveLambda));
+    this.P = this.P.map((row, i) => row.map((val, j) => {
+      const updated = (val - KXP[i][j]) / adaptiveLambda;
+      // Apply floor to diagonal elements only to maintain minimum uncertainty
+      return i === j ? Math.max(updated, P_FLOOR) : updated;
+    }));
   }
 
   /**

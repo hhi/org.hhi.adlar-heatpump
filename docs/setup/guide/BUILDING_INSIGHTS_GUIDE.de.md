@@ -1,6 +1,6 @@
 # Gebäudeerkenntnisse & Empfehlungen Leitfaden
 
-**Version**: 2.6.0+ | **Zuletzt aktualisiert**: Januar 2026
+**Version**: 2.7.0+ | **Zuletzt aktualisiert**: Januar 2026
 
 ---
 
@@ -9,14 +9,15 @@
 1. [Einführung](#einführung)
 2. [Was sind Gebäudeerkenntnisse?](#was-sind-gebäudeerkenntnisse)
 3. [Wie es funktioniert](#wie-es-funktioniert)
-4. [Erkenntniskategorien](#erkenntniskategorien)
-5. [Ihre Erkenntnisse verstehen](#ihre-erkenntnisse-verstehen)
-6. [Maßnahmen ergreifen](#maßnahmen-ergreifen)
-7. [Beispiel-Flows](#beispiel-flows)
-8. [Flow-Karten Referenz](#flow-karten-referenz)
-9. [Einstellungen](#einstellungen)
-10. [Fehlerbehebung](#fehlerbehebung)
-11. [FAQ](#faq)
+4. [Sonnenstrahlungsquellen](#sonnenstrahlungsquellen)
+5. [Erkenntniskategorien](#erkenntniskategorien)
+6. [Ihre Erkenntnisse verstehen](#ihre-erkenntnisse-verstehen)
+7. [Maßnahmen ergreifen](#maßnahmen-ergreifen)
+8. [Beispiel-Flows](#beispiel-flows)
+9. [Flow-Karten Referenz](#flow-karten-referenz)
+10. [Einstellungen](#einstellungen)
+11. [Fehlerbehebung](#fehlerbehebung)
+12. [FAQ](#faq)
 
 ---
 
@@ -101,6 +102,76 @@ Bei Optimierungsmöglichkeiten generiert es **Erkenntnisse** mit spezifischen Em
 - **Passt sich an Jahreszeiten an** (Solargewinn-Multiplikatoren, interne Wärmemuster)
 - **Aktualisiert Erkenntnisse** bei Parameterdrift >10%
 - **Ratenbegrenzt** zur Vermeidung von "Beratungsmüdigkeit" (max. 1 Erkenntnis pro Kategorie pro Tag)
+
+---
+
+## Sonnenstrahlungsquellen
+
+Das Gebäudemodell verwendet Sonneneinstrahlung, um den Wärmegewinn durch Fenster zu berechnen. Ab Version 2.7.0 unterstützt das System **drei Datenquellen** mit automatischer Priorisierung.
+
+### Der Solargewinnfaktor (g)
+
+Der **g-Faktor** (0,3-0,6) bestimmt, wie viel der einfallenden Sonnenstrahlung Ihr Gebäude effektiv erwärmt:
+
+| g-Wert | Bedeutung | Typisches Gebäude |
+|--------|-----------|-------------------|
+| **0,3** | Wenig Solargewinn | Kleine Fenster, Nord-Ausrichtung |
+| **0,45** | Durchschnittlicher Solargewinn | Standardwohnung |
+| **0,6** | Hoher Solargewinn | Große Fenster nach Süden |
+
+**Formel:** `Solargewinn (kW) = g × Sonneneinstrahlung (W/m²) / 1000 × Effektive Fensterfläche`
+
+### Sonneneinstrahlung Prioritätskaskade (v2.7.0)
+
+Das System wählt automatisch die beste verfügbare Quelle:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITÄT 1: Solarpanels                                   │
+│  - Genaueste Echtzeitdaten                                  │
+│  - Umgerechnet in Strahlung: P_panel / Wp × 1000 W/m²       │
+│  - Erfordert: Flow-Karte "Externe Solarleistung empfangen"  │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (nicht verfügbar)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITÄT 2: Wetterstation Strahlungsdaten                 │
+│  - Tatsächlich gemessene Strahlung                          │
+│  - Erfordert: Flow-Karte "Externe Sonneneinstrahlung"       │
+│  - Quelle: z.B. Wetter-App oder Wetterstation-Integration   │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ (nicht verfügbar)
+┌─────────────────────────────────────────────────────────────┐
+│  PRIORITÄT 3: Sinusförmige Schätzung (Fallback)             │
+│  - Berechnet basierend auf Zeit und Datum                   │
+│  - Formel: max(0, sin(π × (Stunde-6)/12)) × Spitzenwert     │
+│  - Jahreszeitabhängige Spitzenwerte (Winter 200, Sommer 800)│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Jahreszeitenkorrektur (g-Multiplikator)
+
+Die Einstellung **"Jahreszeitlicher Solargewinn (g)"** passt die Effektivität der Sonneneinstrahlung pro Jahreszeit an:
+
+| Monat | Multiplikator | Grund |
+|-------|---------------|-------|
+| Dez-Feb | 60% | Tiefe Wintersonne, viel Bewölkung |
+| Mär, Nov | 80% | Übergangsperioden |
+| Apr, Okt | 100% | Referenz-Baseline |
+| Mai, Sep | 120% | Höhere Sonne, besserer Einfallswinkel |
+| Jun-Aug | 130% | Maximale Sommereinstrahlung |
+
+> [!IMPORTANT]
+> **Automatische Erkennung (v2.7.0):** Die Jahreszeitenkorrektur wird **nur** bei geschätzter Strahlung angewendet. Bei Verwendung von Solarpanels oder Wetterstationsdaten wird die Korrektur automatisch deaktiviert, da diese Quellen bereits den tatsächlichen Jahreszeiten- und Wettereffekt enthalten.
+
+### Welche Quelle verwenden?
+
+| Quelle | Vorteile | Nachteile | Setup |
+|--------|----------|-----------|-------|
+| **Solarpanels** | Am genauesten, Echtzeit | Erfordert Solarpanel-Integration | Flow: Panel → ADLAR |
+| **Wetterstation** | Gemessene Daten, keine Panels nötig | Kann 10-60 Min verzögert sein | Flow: Wetter-App → ADLAR |
+| **Schätzung** | Kein Setup nötig, immer verfügbar | Weniger genau bei Bewölkung | Automatisch aktiv |
+
+**Empfehlung:** Wenn Sie Solarpanels haben, leiten Sie deren Leistung weiter. Ansonsten ist die sinusförmige Schätzung mit Jahreszeitenkorrektur für die meisten Situationen ausreichend genau.
 
 ---
 

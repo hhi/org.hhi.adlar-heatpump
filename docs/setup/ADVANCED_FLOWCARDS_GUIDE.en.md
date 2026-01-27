@@ -1,7 +1,7 @@
 # 🔧 Flow Cards Documentation: Advanced Features
 
-> **Version**: 2.6.x  
-> **Purpose**: Flow cards for adaptive control, building model, energy optimizer, COP optimizer, and building insights
+> **Version**: 2.7.x  
+> **Purpose**: Flow cards for adaptive control, building model, energy optimizer, COP optimizer, building insights, and wind/solar data
 
 ---
 
@@ -14,6 +14,7 @@
 | Energy/Price Optimizer | 2 | 3 | 1 | **6** |
 | COP Optimizer | 5 | 5 | 0 | **10** |
 | Building Insights | 2 | 1 | 2 | **5** |
+| Wind & Solar (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -215,6 +216,82 @@
 | Flow ID | Title | Description |
 |---------|-------|-------------|
 | `insight_is_active` | Insight is active | Check if category is active |
+
+---
+
+## 6️⃣ Wind & Solar Data (v2.7.0)
+
+> **New in v2.7.0**: External wind and solar radiation data for more accurate building model and wind correction.
+
+### 🟢 ACTIONS
+
+| Flow ID | Title | Description |
+|---------|-------|-------------|
+| `receive_external_wind_speed` ⭐ | Send wind speed to heat pump | Wind data for heat loss correction |
+| `receive_external_solar_power` ⭐ | Send solar power to heat pump | Solar panel output (W) |
+| `receive_external_solar_radiation` | Send solar radiation to heat pump | Direct radiation (W/m²) |
+
+#### `receive_external_wind_speed` - Parameters
+| Parameter | Type | Range | Description |
+|-----------|------|-------|-------------|
+| `speed_value` | number | 0-30 m/s | Wind speed in meters per second |
+
+**Wind correction formula:**
+```
+correction = α × windSpeed × ΔT / 100
+```
+* `α` = wind sensitivity coefficient (learned or manual)
+* `ΔT` = (T_indoor - T_outdoor)
+
+**Wind α reference table (v2.7.0):**
+| α value | Meaning | Typical Building |
+|---------|---------|------------------|
+| 0.03-0.05 | Low wind sensitivity | Sheltered location |
+| 0.05-0.08 | Average | Standard home |
+| 0.08-0.12 | Wind sensitive | Detached, exposed |
+
+**Example flow:**
+```
+WHEN Wind speed changed (weather app)
+THEN Send wind speed to heat pump ({{wind_speed}})
+```
+
+---
+
+#### `receive_external_solar_power` - Parameters
+| Parameter | Type | Range | Description |
+|-----------|------|-------|-------------|
+| `power_value` | number | 0-50000 W | Current solar panel output in Watts |
+
+**Conversion to radiation:**
+```
+radiation = P_panel / Wp × 1000 W/m²
+```
+* `Wp` = Peak solar panel capacity (setting: solar_panel_wp)
+
+**Example flow:**
+```
+WHEN Solar panel power changed (SolarEdge/Enphase app)
+THEN Send solar power to heat pump ({{current_power}})
+```
+
+> [!TIP]
+> Configure `solar_panel_wp` in device settings for accurate conversion.
+
+---
+
+#### `receive_external_solar_radiation` - Parameters
+| Parameter | Type | Range | Description |
+|-----------|------|-------|-------------|
+| `radiation_value` | number | 0-1200 W/m² | Direct solar radiation in W/m² |
+
+**Example flow:**
+```
+WHEN Solar radiation changed (weather station/KNMI app)
+THEN Send solar radiation to heat pump ({{radiation}})
+```
+
+**Priority cascade:** When both solar power and radiation are received, solar power takes priority (more accurate).
 
 ---
 
