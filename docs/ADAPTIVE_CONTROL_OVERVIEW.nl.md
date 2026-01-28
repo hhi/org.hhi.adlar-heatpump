@@ -69,5 +69,5 @@ De app leert automatisch:
 
 ---
 
-*Meer info: [Advanced Features Introduction](docs/setup/Advanced_Features_Intro.nl.md)*
+*Meer info: [Advanced Features Introduction](setup/advanced-control/Advanced_Features_Intro.nl.md)*
 *Meer info: [Configuration Guide](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) - Sectie 5*

@@ -102,5 +102,5 @@ Nach dem Lernen Ihres Gebäudes liefert die App **konkrete Empfehlungen** mit ge
 
 ---
 
-*Mehr Infos: [Advanced Features Introduction](setup/Advanced_Features_Intro.de.md)*
+*Mehr Infos: [Advanced Features Introduction](setup/advanced-control/Advanced_Features_Intro.de.md)*
 *Mehr Infos: [Configuration Guide](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) - Abschnitt 6 & 7*

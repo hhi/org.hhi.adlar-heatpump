@@ -4471,7 +4471,7 @@ class MyDevice extends Homey.Device {
       'adlar_picker_countdown_set', // Heating curve picker
     ];
 
-    // Building Model capabilities (v2.5.10+)
+    // Building Model capabilities (v2.5.10+, v2.7.2+)
     const buildingModelCapabilities = [
       'adlar_building_c',
       'adlar_building_ua',
@@ -4479,6 +4479,9 @@ class MyDevice extends Homey.Device {
       'adlar_building_g',
       'adlar_building_pint',
       'building_model_diagnostics',
+      'adlar_external_wind_speed', // v2.7.2: Wind correction input
+      'adlar_external_solar_power', // v2.7.2: Solar radiation input
+      'adlar_external_solar_radiation', // v2.7.2: Solar radiation input
     ];
 
     // Building Insights capabilities (v2.5.10+)

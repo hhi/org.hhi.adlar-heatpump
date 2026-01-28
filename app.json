@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -8849,10 +8849,10 @@
         {
           "type": "group",
           "label": {
-            "en": "Adaptive Temperature Control",
-            "nl": "Adaptieve Temperatuur Regeling",
-            "de": "Adaptive Temperatursteuerung",
-            "fr": "Contrôle Adaptatif de Température"
+            "en": "Adaptive Temperature Control (new sensors, restart app)",
+            "nl": "Adaptieve Temperatuur Regeling (nieuwe sensoren, herstart app)",
+            "de": "Adaptive Temperatursteuerung (neue Sensoren, App neu starten)",
+            "fr": "Contrôle Adaptatif de Température (nouveaux capteurs, redémarrer app)"
           },
           "children": [
             {
@@ -8938,10 +8938,10 @@
         {
           "type": "group",
           "label": {
-            "en": "Building Model Learning",
-            "nl": "Gebouwmodel Leren",
-            "de": "Gebäudemodell-Lernen",
-            "fr": "Apprentissage du Modèle de Bâtiment"
+            "en": "Building Model Learning (new sensors, restart app)",
+            "nl": "Gebouwmodel Leren (nieuwe sensoren, herstart app)",
+            "de": "Gebäudemodell-Lernen (neue Sensoren, App neu starten)",
+            "fr": "Apprentissage du Modèle de Bâtiment (nouveaux capteurs, redémarrer app)"
           },
           "children": [
             {
@@ -9093,10 +9093,10 @@
         {
           "type": "group",
           "label": {
-            "en": "Building Insights & Recommendations",
-            "nl": "Gebouw Inzichten & Aanbevelingen",
-            "de": "Gebäudeerkenntnisse & Empfehlungen",
-            "fr": "Aperçus & Recommandations du Bâtiment"
+            "en": "Building Insights & Recommendations (new sensors, restart app)",
+            "nl": "Gebouw Inzichten & Aanbevelingen (nieuwe sensoren, herstart app)",
+            "de": "Gebäudeerkenntnisse & Empfehlungen (neue Sensoren, App neu starten)",
+            "fr": "Aperçus & Recommandations du Bâtiment (nouveaux capteurs, redémarrer app)"
           },
           "children": [
             {
@@ -9142,10 +9142,10 @@
         {
           "type": "group",
           "label": {
-            "en": "Energy Price Optimization",
-            "nl": "Energieprijs Optimalisatie",
-            "de": "Energiepreis-Optimierung",
-            "fr": "Optimisation du Prix de l'Énergie"
+            "en": "Energy Price Optimization (new sensors, restart app)",
+            "nl": "Energieprijs Optimalisatie (nieuwe sensoren, herstart app)",
+            "de": "Energiepreis-Optimierung (neue Sensoren, App neu starten)",
+            "fr": "Optimisation du Prix de l'Énergie (nouveaux capteurs, redémarrer app)"
           },
           "children": [
             {

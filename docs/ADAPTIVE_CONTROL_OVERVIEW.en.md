@@ -69,5 +69,5 @@ The app automatically learns:
 
 ---
 
-*More info: [Advanced Features Introduction](setup/Advanced_Features_Intro.en.md)*
+*More info: [Advanced Features Introduction](setup/advanced-control/Advanced_Features_Intro.en.md)*
 *More info: [Configuration Guide](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) - Section 5*
