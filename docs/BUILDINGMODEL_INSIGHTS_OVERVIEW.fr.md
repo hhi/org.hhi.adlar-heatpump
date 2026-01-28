@@ -102,5 +102,5 @@ Après avoir appris votre bâtiment, l'application fournit des **recommandations
 
 ---
 
-*Plus d'infos : [Advanced Features Introduction](setup/Advanced_Features_Intro.fr.md)*
+*Plus d'infos : [Advanced Features Introduction](setup/advanced-control/Advanced_Features_Intro.fr.md)*
 *Plus d'infos : [Configuration Guide](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) - Section 6 & 7*

@@ -22,7 +22,7 @@ Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
 
 | Dokument | 🇳🇱 NL | 🇬🇧 EN | 🇩🇪 DE | 🇫🇷 FR |
 |----------|--------|--------|--------|--------|
-| Einführung Erweiterte Funktionen | [NL](setup/Advanced_Features_Intro.nl.md) | [EN](setup/Advanced_Features_Intro.en.md) | [DE](setup/Advanced_Features_Intro.de.md) | [FR](setup/Advanced_Features_Intro.fr.md) |
+| Einführung Erweiterte Funktionen | [NL](setup/advanced-control/Advanced_Features_Intro.nl.md) | [EN](setup/advanced-control/Advanced_Features_Intro.en.md) | [DE](setup/advanced-control/Advanced_Features_Intro.de.md) | [FR](setup/advanced-control/Advanced_Features_Intro.fr.md) |
 | **Adaptive Regelung Übersicht** | [NL](ADAPTIVE_CONTROL_OVERVIEW.nl.md) | [EN](ADAPTIVE_CONTROL_OVERVIEW.en.md) | [DE](ADAPTIVE_CONTROL_OVERVIEW.de.md) | [FR](ADAPTIVE_CONTROL_OVERVIEW.fr.md) |
 | **Gebäudemodell & Insights Übersicht** | [NL](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md) | [EN](BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md) | [DE](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md) | [FR](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md) |
 | COP Flow-Karten-Einrichtung | [NL](setup/COP%20flow-card-setup.nl.md) | [EN](setup/COP%20flow-card-setup.en.md) | [DE](setup/COP%20flow-card-setup.de.md) | [FR](setup/COP%20flow-card-setup.fr.md) |
@@ -85,7 +85,7 @@ Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
 **Neuer Benutzer?** Beginnen Sie hier:
 1. [Tuya LocalKey-Anleitung](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) — Holen Sie sich Ihre Anmeldedaten
 2. [Protokollversions-Leitfaden](setup/PROTOCOL_VERSION_GUIDE.de.md) — Wählen Sie das richtige Protokoll
-3. [Einführung Erweiterte Funktionen](setup/Advanced_Features_Intro.de.md) — Schalten Sie die volle Funktionalität frei
+3. [Einführung Erweiterte Funktionen](setup/advanced-control/Advanced_Features_Intro.de.md) — Schalten Sie die volle Funktionalität frei
 
 **Probleme?** Prüfen Sie die [Schnelle Problemlösung](setup/USER_QUICK_FIX.de.md)
 
