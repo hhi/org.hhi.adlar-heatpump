@@ -1,6 +1,9 @@
-# Flow Cards Implementatiegids (v1.0.7)
+# Flow Cards Implementatiegids: Basis Device Flow Cards (v2.7.x)
 
-Deze gids documenteert de nieuw geïmplementeerde flow cards in versie 1.0.7, met praktische voorbeelden, configuratietips en probleemoplossingadvies.
+> **Scope**: Deze gids documenteert **basis device flow cards** voor apparaatmonitoring, energie tracking en calculators.
+> **Geavanceerde features**: Zie [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md) voor adaptieve regeling, building model, COP optimizer, energy optimizer, building insights en wind/solar integratie.
+
+Deze gids biedt praktische voorbeelden, configuratietips en probleemoplossingadvies voor de basis flow cards van de Adlar Warmtepomp app.
 
 ---
 
@@ -352,7 +355,7 @@ THEN: Stuur alarm "Efficiëntie daalt"
 
 **ID**: `temperature_differential`
 **Categorie**: Systeemgezondheid
-**Status**: ✅ **Productie-klaar sinds v0.99** (geverifieerd in v1.0.7)
+**Status**: ✅ **Productie-klaar** (beschikbaar in v2.7.x)
 
 #### Configuratie
 

@@ -23,8 +23,12 @@ Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
 | Dokument | 🇳🇱 NL | 🇬🇧 EN | 🇩🇪 DE | 🇫🇷 FR |
 |----------|--------|--------|--------|--------|
 | Einführung Erweiterte Funktionen | [NL](setup/advanced-control/Advanced_Features_Intro.nl.md) | [EN](setup/advanced-control/Advanced_Features_Intro.en.md) | [DE](setup/advanced-control/Advanced_Features_Intro.de.md) | [FR](setup/advanced-control/Advanced_Features_Intro.fr.md) |
+| Erweiterter Flow-Karten-Leitfaden | [NL](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md) | [EN](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.en.md) | [DE](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.de.md) | [FR](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.fr.md) |
 | **Adaptive Regelung Übersicht** | [NL](ADAPTIVE_CONTROL_OVERVIEW.nl.md) | [EN](ADAPTIVE_CONTROL_OVERVIEW.en.md) | [DE](ADAPTIVE_CONTROL_OVERVIEW.de.md) | [FR](ADAPTIVE_CONTROL_OVERVIEW.fr.md) |
 | **Gebäudemodell & Insights Übersicht** | [NL](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md) | [EN](BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md) | [DE](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md) | [FR](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md) |
+| Flow-Karten-Implementierungsleitfaden | [NL](setup/guide/FLOW_CARDS_GUIDE.nl.md) | [EN](setup/guide/FLOW_CARDS_GUIDE.en.md) | [DE](setup/guide/FLOW_CARDS_GUIDE.de.md) | [FR](setup/guide/FLOW_CARDS_GUIDE.fr.md) |
+| Adaptive Regelung Leitfaden | [NL](setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md) | [EN](setup/guide/ADAPTIVE_CONTROL_GUIDE.en.md) | [DE](setup/guide/ADAPTIVE_CONTROL_GUIDE.de.md) | [FR](setup/guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
+| Building Insights Leitfaden | [NL](setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md) | [EN](setup/guide/BUILDING_INSIGHTS_GUIDE.en.md) | [DE](setup/guide/BUILDING_INSIGHTS_GUIDE.de.md) | [FR](setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
 | COP Flow-Karten-Einrichtung | [NL](setup/COP%20flow-card-setup.nl.md) | [EN](setup/COP%20flow-card-setup.en.md) | [DE](setup/COP%20flow-card-setup.de.md) | [FR](setup/COP%20flow-card-setup.fr.md) |
 | Protokollversions-Leitfaden | [NL](setup/PROTOCOL_VERSION_GUIDE.nl.md) | [EN](setup/PROTOCOL_VERSION_GUIDE.en.md) | [DE](setup/PROTOCOL_VERSION_GUIDE.de.md) | [FR](setup/PROTOCOL_VERSION_GUIDE.fr.md) |
 | Konfigurationshandbuch | [NL](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) |
@@ -44,7 +48,7 @@ Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
 - **Konfigurationshandbuch** — Vollständige Einstellungsreferenz
 - **Tuya LocalKey-Anleitung** — Wie man Tuya-Anmeldedaten erhält (PDF)
 - **Schnelle Problemlösung** — Häufige Probleme und Lösungen
-- **guide/** — Zusätzliche detaillierte Anleitungen (Flow-Karten, adaptive Regelung)
+- **guide/** — Zusätzliche detaillierte Anleitungen (Flow-Karten, adaptive Regelung, Building Insights)
 
 ### 📊 COP calculation/ — Effizienz-Algorithmen
 *Für: Fortgeschrittene Benutzer, HVAC-Profis, Entwickler*
@@ -91,4 +95,4 @@ Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
 
 ---
 
-*Letzte Aktualisierung: 2026-01-16*
+*Letzte Aktualisierung: 2026-01-29*

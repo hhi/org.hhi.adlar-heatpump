@@ -12,7 +12,7 @@
 2. [Component 2: Building Model Learner - RLS Algoritme](#component-2-building-model-learner)
 3. [Component 3: Energy Price Optimizer - API Integratie](#component-3-energy-price-optimizer)
 4. [Component 4: COP Controller - Multi-Horizon Logic](#component-4-cop-controller)
-5. [Systeem Integratie - Code Flow](#systeem-integratie)
+5. [Systeem Integratie - Code Flow](#systeem-integratie---complete-control-flow)
 6. [Performance Specificaties](#performance-specificaties)
 
 ---

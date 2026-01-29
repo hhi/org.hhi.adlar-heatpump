@@ -14,16 +14,15 @@
 6. [Comprendre vos aperçus](#comprendre-vos-aperçus)
 7. [Passer à l'action](#passer-à-laction)
 8. [Exemples de Flows](#exemples-de-flows)
-9. [Référence des cartes Flow](#référence-des-cartes-flow)
-10. [Paramètres](#paramètres)
-11. [Dépannage](#dépannage)
-12. [FAQ](#faq)
+9. [Paramètres](#paramètres)
+10. [Dépannage](#dépannage)
+11. [FAQ](#faq)
 
 ---
 
 ## Introduction
 
-La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après 24-48 heures d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables** avec des économies estimées en euros par mois.
+La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après 48-72 heures d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables** avec des économies estimées en euros par mois.
 
 ### Avantages clés
 
@@ -38,7 +37,7 @@ La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre 
 
 ## Que sont les Aperçus du Bâtiment ?
 
-Les Aperçus du Bâtiment analysent les **5 paramètres thermiques** appris par le Modèle du Bâtiment :
+Les Aperçus du Bâtiment analysent les **6 paramètres thermiques** appris par le Modèle du Bâtiment :
 
 | Paramètre | Symbole | Signification | Plage typique |
 |-----------|---------|---------------|---------------|
@@ -47,6 +46,7 @@ Les Aperçus du Bâtiment analysent les **5 paramètres thermiques** appris par 
 | **Constante de temps** | τ (tau) | Vitesse de chauffage/refroidissement (τ = C/UA) | 5-25 heures |
 | **Facteur de gain solaire** | g | Efficacité du rayonnement solaire | 0,3-0,6 |
 | **Gains thermiques internes** | P_int | Chaleur des personnes, appareils, cuisine | 0,2-0,5 kW |
+| **Correction du vent** | W_corr | Perte de chaleur supplémentaire par vent fort (v2.7.0+) | 0-50 W/°C |
 
 Le système compare les valeurs apprises avec :
 - **Votre profil de bâtiment sélectionné** (Léger/Moyen/Lourd/Passif)
@@ -59,7 +59,7 @@ Lorsque des opportunités d'optimisation sont détectées, il génère des **ape
 
 ## Comment ça fonctionne
 
-### Phase d'apprentissage (24-48 heures)
+### Phase d'apprentissage (48-72 heures)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -134,7 +134,7 @@ Le système choisit automatiquement la meilleure source disponible :
 └─────────────────────────────────────────────────────────────┘
                          ↓ (non disponible)
 ┌─────────────────────────────────────────────────────────────┐
-│  PRIORITÉ 2 : Données de station météo                      │
+│  PRIORITÉ 2 : Données KNMI                                  │
 │  - Rayonnement réellement mesuré                            │
 │  - Requiert : carte Flow "Recevoir rayonnement externe"     │
 │  - Source : ex. app météo ou intégration station météo      │
@@ -161,14 +161,14 @@ Le paramètre **"Gain solaire saisonnier (g)"** ajuste l'efficacité du rayonnem
 | Juin-Août | 130% | Rayonnement maximal d'été |
 
 > [!IMPORTANT]
-> **Détection automatique (v2.7.0) :** La correction saisonnière est **uniquement** appliquée au rayonnement estimé. Lors de l'utilisation de panneaux solaires ou de données météo, la correction est automatiquement désactivée, car ces sources contiennent déjà l'effet réel de saison et de météo.
+> **Détection automatique (v2.7.0) :** La correction saisonnière est **uniquement** appliquée au rayonnement estimé. Lors de l'utilisation de panneaux solaires ou de données KNMI, la correction est automatiquement désactivée, car ces sources contiennent déjà l'effet réel de saison et de météo.
 
 ### Quelle source utiliser ?
 
 | Source | Avantages | Inconvénients | Configuration |
 |--------|-----------|---------------|---------------|
 | **Panneaux** | Plus précis, temps réel | Nécessite intégration panneau | Flow : panneau → ADLAR |
-| **Météo** | Données mesurées, pas de panneaux | Peut être retardé 10-60 min | Flow : app météo → ADLAR |
+| **KNMI** | Données mesurées, pas de panneaux | Peut être retardé 10-60 min | Flow : app météo → ADLAR |
 | **Estimation** | Pas de config nécessaire | Moins précis par temps nuageux | Automatiquement actif |
 
 **Recommandation :** Si vous avez des panneaux solaires, transmettez leur puissance. Sinon, l'estimation sinusoïdale avec correction saisonnière est suffisamment précise pour la plupart des situations.
@@ -210,19 +210,16 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 - Réponse thermique moyenne (τ 5-15 heures)
 - Réponse thermique lente (τ > 15 heures)
 
-**Exemple d'aperçu :**
-> « ⏱️ Réponse thermique rapide - le bâtiment chauffe en 4,2 heures »
+**Exemple d'aperçu (v2.6.0) :**
+> « Rapide (~2 heures pour 2°C) » / « Normal (~4 heures pour 2°C) » / « Lent (~8 heures pour 2°C) »
 
-**Exemple de recommandation :**
-> « Activez une réduction nocturne agressive à 16°C, préchauffez 2 heures avant le réveil (05:00 → 07:00 prêt). Est. 12% d'économies d'énergie. »
+**Recommandations par type :**
 
-**Actions recommandées par type :**
-
-| Type de réponse | τ | Réduction nocturne | Préchauffage | Économies |
-|-----------------|---|--------------------|--------------|-----------|
-| Rapide | <5h | Agressive (16-17°C) | 2-3 heures | 10-15% |
-| Moyenne | 5-15h | Modérée (17-18°C) | 4-5 heures | 6-10% |
-| Lente | >15h | Minimale ou aucune | Non pratique | 3-5% |
+| Type de réponse | τ | Conseil |
+|-----------------|---|--------|
+| Rapide | <5h | Chauffage stable, planification flexible possible |
+| Moyenne | 5-15h | Planifier 4+ heures à l'avance pour la hausse de température |
+| Lente | >15h | Chauffage continu optimal pour la pompe à chaleur |
 
 ---
 
@@ -406,6 +403,157 @@ ALORS
 
 ---
 
+### Flow 4 : Auto-correction du Profil Inadéquat
+
+```
+QUAND Discordance du profil de bâtiment détectée
+
+ET {{deviation_percent}} est supérieur à 40
+
+ALORS
+  1. Modifier le paramètre d'appareil "building_profile" vers {{suggested_profile}}
+  2. Notification :
+     "Profil du bâtiment mis à jour de {{current_profile}} à {{suggested_profile}}"
+```
+
+---
+
+### Flow 5 : Masquer un Aperçu Temporairement (Dismiss)
+
+```
+QUAND Aperçu du bâtiment détecté, catégorie = "insulation_performance"
+
+ET l'utilisateur a décidé d'ignorer l'isolation (problème connu)
+
+ALORS
+  Masquer l'aperçu "insulation_performance" pendant 90 jours
+    (action : Dismiss insight)
+
+  Notification : "Aperçu d'isolation masqué pendant 3 mois"
+```
+
+**Use case :** Après des travaux de rénovation en cours, ou si vous savez que l'isolation est prévue mais pas encore réalisée.
+
+---
+
+### Flow 6 : Forcer l'Analyse des Aperçus (On-Demand)
+
+```
+QUAND l'utilisateur appuie sur le bouton virtuel "Analyser le bâtiment maintenant"
+  (ou quotidiennement à 08:00 pour le rapport du matin)
+
+ALORS
+  1. Forcer l'analyse des aperçus
+     (action : Force insight analysis)
+     Retourne : {{insights_detected}}, {{confidence}}
+
+  2. QUAND {{insights_detected}} est supérieur à 0
+     ALORS Notification :
+       "Analyse du bâtiment : {{insights_detected}} aperçu(s) trouvés"
+       "Fiabilité du modèle : {{confidence}}%"
+```
+
+**Use case :** Vérifier immédiatement après des changements majeurs (météo, réglages) sans attendre 50 minutes.
+
+---
+
+### Flow 7 : Réinitialisation Après Rénovation
+
+```
+QUAND le bouton virtuel "Rénovation terminée" est pressé
+
+ALORS
+  1. Réinitialiser l'historique des aperçus [✓ Confirmer la réinitialisation]
+     (action : Reset insight history - la case DOIT être cochée)
+
+  2. Notification :
+     "Aperçus réinitialisés. Nouvel apprentissage démarré - attendez de nouveaux aperçus après 24-48h"
+```
+
+**Use case :** Après de grands changements du bâtiment (isolation, nouvelles fenêtres, rénovation) - réinitialiser les aperçus tout en conservant le modèle du bâtiment.
+
+---
+
+### Flow 8 : Seuil de Confiance Dynamique (Adaptatif)
+
+```
+QUAND un jalon d'apprentissage du modèle de bâtiment est atteint
+  milestone = "convergence_reached" (après 7 jours d'apprentissage stable)
+
+ALORS
+  Définir le seuil de confiance à 60%
+    (action : Set confidence threshold)
+
+  Notification : "Modèle stable - seuil de confiance abaissé pour plus d'aperçus"
+```
+
+**Use case :** Démarrer conservateur (70%), baisser le seuil quand le modèle est stable pour plus de granularité d'aperçus.
+
+---
+
+### Flow 9 : Notifier Seulement les Aperçus à Fort ROI (Condition)
+
+```
+QUAND Aperçu du bâtiment détecté
+
+ET Économies estimées au-dessus de €100/mois
+  (condition : Savings above threshold - category, €100)
+
+ET Confiance du modèle au-dessus de 75%
+  (condition : Confidence above threshold - 75%)
+
+ALORS
+  Envoyer une notification push :
+    "💰 Grande opportunité d'économies !"
+    "{{insight}}"
+    "Action : {{recommendation}}"
+    "Potentiel : €{{estimated_savings_eur_month}}/mois"
+```
+
+**Use case :** Filtrer le "bruit" des conseils - seulement les notifications pour des économies significatives avec forte certitude.
+
+---
+
+### Flow 10 : Stockage Thermique Seulement Quand Actif (Condition)
+
+```
+QUAND Bloc d'énergie le moins cher démarré
+  (de l'app Energy Prices)
+
+ET Aperçu de stockage thermique est actif
+  (condition : Insight is active - category "thermal_storage")
+
+ALORS
+  Augmenter la température cible de 2°C
+  Notification : "Stockage thermique : préchauffage actif"
+
+SINON
+  (Aucune action - stockage thermique pas possible pour ce bâtiment)
+```
+
+**Use case :** Automatisation conditionnelle - appliquer la stratégie de stockage thermique uniquement si le bâtiment est adapté.
+
+---
+
+### Flow 11 : Ignorer l'Aperçu d'Isolation Jusqu'au Printemps (Saisonnier)
+
+```
+QUAND Aperçu du bâtiment détecté, catégorie = "insulation_performance"
+
+ET le mois actuel est entre octobre et mars (hiver)
+
+ALORS
+  Masquer l'aperçu "insulation_performance" pendant 180 jours
+    (action : Dismiss insight)
+
+  Notification :
+    "Aperçu d'isolation reporté jusqu'au printemps (avril) pour des conditions de rénovation plus chaudes"
+```
+
+**Use case :** Planifier les travaux d'isolation de manière stratégique pendant des saisons favorables.
+
+---
+
 ## Référence des cartes Flow
 
 ### Cartes de déclenchement (3)
@@ -531,6 +679,15 @@ ALORS
 - `building_tau` (number) - Constante de temps thermique τ (heures)
 
 **Usage :** Planifier le préchauffage pour des moments spécifiques, automatisation du stockage thermique
+
+**Exemple de flow :**
+```
+QUAND Bloc le moins cher approche (2 heures à l'avance)
+ALORS
+  1. Calculer la durée de préchauffage (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Démarrer le préchauffage maintenant
+```
 
 ---
 
@@ -662,7 +819,7 @@ Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 
 ### Q : Combien de temps dure l'apprentissage ?
 
-**R :** 24-48 heures pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
+**R :** 48-72 heures pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
 
 ### Q : Les aperçus se mettent-ils à jour si j'améliore l'isolation ?
 

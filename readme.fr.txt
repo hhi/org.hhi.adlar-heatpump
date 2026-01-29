@@ -14,11 +14,11 @@ CONTRÔLE LOCAL
 - Temps de réponse rapides et connexion fiable
 
 SURVEILLANCE AVANCÉE
-- Mesures de température en temps réel (12 capteurs différents)
+- Mesures de température en temps réel (capteurs internes de la pompe à chaleur)
 - Surveillance de la consommation électrique et de l'efficacité
 - Calcul automatique du COP (coefficient de performance) avec 8 méthodes différentes
 - Analyse SCOP saisonnière selon les normes européennes
-- Plus de 60 fonctionnalités dans 9 catégories
+- Fonctionnalités étendues pour un contrôle complet
 
 EXPLOITATION COMPLÈTE
 - Réglage de la température et modes de chauffage
@@ -27,17 +27,21 @@ EXPLOITATION COMPLÈTE
 - Fonctions de minuterie et automatiques
 
 AUTOMATISATION INTELLIGENTE
-- 78 cartes de flux pour une automatisation avancée
+- Cartes de flux étendues pour une automatisation avancée
 - Détection et récupération intelligentes des erreurs
 - Optimisation en fonction de la météo
 - Tendances et avertissements d'efficacité énergétique
 - Planification temporelle et détection du mode saisonnier
-- Régulation adaptative de la température avec contrôleur PI (v2.0+)
-- Apprentissage du modèle de bâtiment avec machine learning (v2.0+)
-- Insights & Recommandations Bâtiment avec estimations ROI (v2.4+)
-- Optimisation des prix de l'énergie avec tarifs day-ahead (v2.0+)
-- Optimisation COP pour une efficacité maximale (v2.0+)
-- Outils de diagnostic complets pour le dépannage (v2.0.1+)
+- Régulation adaptative de la température avec contrôleur PI
+- Apprentissage du modèle de bâtiment avec machine learning
+- Insights & Recommandations Bâtiment avec estimations ROI
+- Optimisation des prix de l'énergie avec tarifs day-ahead
+- Optimisation COP pour une efficacité maximale
+- Outils de diagnostic complets pour le dépannage
+- Intégration éolienne et solaire pour le modèle de bâtiment
+  * Vitesse du vent externe pour la correction du refroidissement éolien des pertes de chaleur
+  * Rayonnement solaire et puissance PV pour un calcul précis du gain solaire
+  * Améliore la précision d'apprentissage du modèle de bâtiment avec des données météo en temps réel
 
 CONVIVIAL
 - Interface entièrement localisée
@@ -201,7 +205,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - Gains de chaleur internes dynamiques par heure de la journée
 - Ajustement saisonnier du gain solaire
 
-INSIGHTS & RECOMMANDATIONS BÂTIMENT (NOUVEAU v2.4)
+INSIGHTS & RECOMMANDATIONS BÂTIMENT
 Analyse automatisée du modèle thermique du bâtiment :
 - Recommandations d'économie d'énergie avec estimations ROI
 - Les insights apparaissent après 24-48 heures d'apprentissage (70% de confiance)
@@ -271,13 +275,16 @@ BESOIN D'AIDE ?
 - Problèmes : Signalez les problèmes sur GitHub
 
 INTÉGRATION INTER-APPLICATIONS
-Connectez-vous à d'autres applications Homey pour un calcul COP amélioré :
+Connectez-vous à d'autres applications Homey pour un calcul COP amélioré et modèle de bâtiment :
 - Mesures de puissance externes (de votre compteur intelligent)
 - Données de débit d'eau externes
-- Données de température ambiante externes
+- Données de température ambiante externes (par ex. application météo KNMI)
 - Température intérieure externe pour régulation adaptative
+- Données de vitesse du vent pour la compensation du refroidissement éolien
+- Intensité du rayonnement solaire pour le calcul du gain solaire
+- Puissance PV pour les gains d'énergie solaire en temps réel
 
-DIAGNOSTIC DU MODÈLE DE BÂTIMENT (v2.0.1+)
+DIAGNOSTIC DU MODÈLE DE BÂTIMENT
 Dépannage pour les problèmes d'apprentissage thermique lorsque votre modèle de bâtiment ne se met pas à jour :
 - Carte de flux de diagnostic complète
 - Vérifier l'état des capteurs de température intérieure/extérieure
@@ -286,6 +293,35 @@ Dépannage pour les problèmes d'apprentissage thermique lorsque votre modèle d
 - Suivre la chronologie d'apprentissage (T+0 → T+50min → T+24h)
 
 Utilisation : Créez le flux "Diagnostiquer l'apprentissage du modèle de bâtiment" pour voir l'état détaillé dans les logs de l'application
+
+INTÉGRATION ÉOLIENNE & SOLAIRE
+Améliorez la précision du modèle thermique du bâtiment avec des données météo externes :
+
+Correction de la vitesse du vent :
+- Ajustement automatique des pertes de chaleur basé sur l'effet de refroidissement éolien
+- Carte de flux : "Définir la vitesse du vent externe" (km/h)
+- Réduit le temps d'apprentissage du modèle de bâtiment de 30-50%
+- Compatible avec l'application météo KNMI et autres capteurs de vent
+
+Intégration du rayonnement solaire :
+- Calcul précis des gains solaires via la surface du bâtiment
+- Carte de flux : "Définir le rayonnement solaire externe" (W/m²)
+- Ajustement saisonnier (hiver 60%, été 130%)
+- Supporte les données de rayonnement solaire KNMI
+
+Suivi de la puissance PV :
+- Surveillance en temps réel de la production des panneaux solaires
+- Carte de flux : "Définir la puissance PV externe" (W)
+- Utilisé pour la correction du gain de chaleur interne
+- Améliore la fiabilité du modèle de bâtiment jusqu'à 85%+
+
+Sources de données : Application météo KNMI, application Homey Energy, ou capteurs propres
+
+CONFIGURATION D'INTÉGRATION AVANCÉE
+Pour des instructions détaillées sur l'intégration de données externes :
+- Configuration éolienne & solaire : /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md
+- Guide des cartes de flux : /docs/setup/guide/FLOW_CARDS_GUIDE.fr.md
+- Configuration complète : /docs/setup/advanced-settings/CONFIGURATION_GUIDE.fr.md
 
 SÉCURITÉ ET FIABILITÉ
 

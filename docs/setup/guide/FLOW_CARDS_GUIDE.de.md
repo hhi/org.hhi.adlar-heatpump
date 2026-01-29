@@ -1,6 +1,9 @@
-# Flow-Karten Implementierungsleitfaden (v1.0.7)
+# Flow-Karten Implementierungsleitfaden: Basis Device Flow Cards (v2.7.x)
 
-Dieser Leitfaden dokumentiert die neu implementierten Flow-Karten in Version 1.0.7 und bietet praktische Beispiele, Konfigurationstipps und Hilfe zur Fehlerbehebung.
+> **Scope**: Dieser Leitfaden dokumentiert **Basis-Device-Flow-Karten** für Geräte-Monitoring, Energy Tracking und Calculatoren.
+> **Erweiterte Features**: Siehe [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.de.md) für adaptive Regelung, Gebäudemodell, COP-Optimierer, Energieoptimierer, Gebäudeerkenntnisse und Wind/Solar-Integration.
+
+Dieser Leitfaden bietet praktische Beispiele, Konfigurationstipps und Hilfe zur Fehlerbehebung für die Basis-Flow-Karten der Adlar Wärmepumpen-App.
 
 ---
 
@@ -86,6 +89,14 @@ DANN: 5 Minuten warten
   UND Prüfen, ob Störung behoben
 ```
 
+**Frostschutz-Alarm**:
+```
+WENN: Störung erkannt
+  UND fault_code ist 11
+DANN: Benachrichtigung senden "Frostschutz aktiviert"
+  UND Zieltemperatur um 2°C erhöhen
+```
+
 #### Technische Details
 
 - **Erkennung**: Überwacht DPS 15 (`adlar_fault` Capability)
@@ -93,6 +104,14 @@ DANN: 5 Minuten warten
 - **Deduplizierung**: Gleicher Störungscode löst nicht erneut aus, bis behoben (Code kehrt zu 0 zurück)
 - **Sprachunterstützung**: Störungsbeschreibungen automatisch lokalisiert (EN/NL/DE)
 - **Leistung**: Kein Overhead, wenn keine Störung vorhanden
+
+#### Fehlerbehebung
+
+**Problem**: Störungstrigger löst wiederholt für dieselbe Störung aus
+**Lösung**: Sollte wegen Änderungserkennung nicht passieren. Gerätelogs auf Störungscode-Oszillation prüfen.
+
+**Problem**: Störungsbeschreibung zeigt "Unknown fault (code: X)"
+**Lösung**: Störungscode ist nicht in der Standard-Mappingtabelle. Code an Entwickler melden zur Ergänzung.
 
 ---
 
@@ -122,10 +141,12 @@ WENN: Stromverbrauch überschritt [threshold] W
 **Hysterese-Schutz** (5%):
 - Einmal bei 3000W ausgelöst, muss unter 2850W fallen, um zurückzusetzen
 - Verhindert Trigger-Spam bei Leistungsschwankungen
+- Beispiel: 2990W → 3010W → TRIGGER → 2995W → (kein erneutes Auslösen)
 
 **Ratenbegrenzung** (5 Minuten):
 - Maximum 1 Trigger pro 5 Minuten
 - Verhindert Benachrichtigungsflut bei anhaltender Überlast
+- Protokolliert rate-limitierte Ereignisse für Diagnose
 
 #### Beispiel-Flows
 
@@ -142,6 +163,14 @@ WENN: Leistungsschwelle überschritten 4500W
 DANN: Zieltemperatur um 2°C senken
   UND 5 Minuten warten
   UND Prüfen, ob Leistung unter 4000W gefallen
+```
+
+**Zeit-der-Nutzung-Optimierung**:
+```
+WENN: Leistungsschwelle überschritten 3000W
+  UND Zeit ist zwischen 17:00 und 21:00 (Spitzenzeiten)
+DANN: In Economy-Modus wechseln
+  UND Benachrichtigung senden "Während Spitzenzeiten auf Economy-Modus umgeschaltet"
 ```
 
 ---
@@ -181,6 +210,24 @@ Bei Installation der App mit bestehendem Verbrauch (z.B. 523 kWh):
 - Überlebt App-Neustarts und Updates
 - Kann bei Bedarf manuell zurückgesetzt werden
 
+#### Beispiel-Flows
+
+**Monatliches Budget-Tracking**:
+```
+WENN: Meilenstein erreicht 300 kWh
+DANN: Benachrichtigung senden "Monatliches Budget erreicht: {{total_consumption}} kWh"
+  UND Kosten berechnen: {{total_consumption}} * €0.30
+  UND In Insights protokollieren
+```
+
+**Saisonales Ziel-Tracking**:
+```
+WENN: Meilenstein erreicht 1000 kWh
+DANN: Benachrichtigung senden "Saison-Meilenstein: {{milestone_value}} kWh"
+  UND Mit Vorjahresdaten vergleichen
+  UND Effizienzbericht senden
+```
+
 ---
 
 ## Bedingungen
@@ -210,6 +257,28 @@ WENN: COP-Effizienz ist über/unter [threshold]
 - Warum? COP=0 im Leerlauf ist technisch korrekt, aber irreführend in Flows
 - Verhindert Fehlalarme in "WENN COP < 2.0" Flows
 
+**Echtzeit-Überwachung**:
+- Verwendet die aktuelle `adlar_cop` Capability (alle 30 Sekunden aktualisiert)
+- Spiegelt momentane Effizienz wider, keine Durchschnittswerte
+
+#### Beispiel-Flows
+
+**Effizienz-Alarm**:
+```
+WENN: COP-Effizienz ist unter 2.5
+  UND Gerät ist an
+DANN: Benachrichtigung senden "Niedrige Effizienz: COP {{adlar_cop}}"
+  UND Auf Probleme prüfen
+```
+
+**Optimierungs-Trigger**:
+```
+WENN: COP-Effizienz ist über 4.0
+  UND Außentemperatur < 0°C
+DANN: Benachrichtigung senden "Ausgezeichnete Effizienz trotz Kälte!"
+  UND Als Referenzpunkt protokollieren
+```
+
 ---
 
 ### 5. 📊 Tages-COP über Schwelle
@@ -229,15 +298,17 @@ WENN: Tages-COP ist über/unter [threshold]
   - Standard: 2.5
   - Empfohlen: 3.0 für gute Tagesleistung
 
-#### Beispiel-Flows
+#### Intelligentes Verhalten
 
-**Täglicher Leistungsbericht**:
-```
-JEDEN TAG um 23:59:
-WENN: Tages-COP über 3.0
-DANN: Benachrichtigung senden "Gute Tageseffizienz: {{adlar_cop_daily}}"
-SONST: Benachrichtigung senden "Unter Ziel: {{adlar_cop_daily}} (Ziel: 3.0)"
-```
+**Datenverfügbarkeitsprüfung**:
+- **Gibt `false` zurück, wenn unzureichende Daten vorhanden** (dailyCOP = 0)
+- Erfordert mindestens 10 Datenpunkte (~5 Minuten Betrieb)
+- Verhindert Fehlalarme beim Start
+
+**Gleitender Durchschnitt**:
+- Berechnet COP über die letzten 24 Stunden
+- Gewichtet nach Laufzeit (Leerlaufzeiten ausgeschlossen)
+- Stabiler als Echtzeit-COP
 
 ---
 
@@ -258,13 +329,33 @@ WENN: Monats-COP ist über/unter [threshold]
   - Standard: 3.0
   - Ziel: > 3.5 für ausgezeichnete saisonale Leistung
 
+#### Beispiel-Flows
+
+**Monatlicher Bericht**:
+```
+JEDEN 1. Tag des Monats um 09:00:
+WENN: Monats-COP über 3.5
+DANN: Benachrichtigung senden "Ausgezeichnete monatliche Effizienz: {{adlar_cop_monthly}}"
+  UND Geschätzte Kosten berechnen
+  UND Mit vorherigen Monaten vergleichen
+```
+
+**Vorausschauende Wartung**:
+```
+JEDEN MONAT:
+WENN: Monats-COP um > 10% gegenüber dem Vormonat gesunken
+DANN: Alarm senden "Effizienz sinkt"
+  UND Filterprüfung empfehlen
+  UND Professionelle Inspektion planen
+```
+
 ---
 
 ### 7. ✅ Temperaturdifferenz
 
 **ID**: `temperature_differential`
 **Kategorie**: Systemzustand
-**Status**: ✅ **Produktionsreif seit v0.99** (verifiziert in v1.0.7)
+**Status**: ✅ **Produktionsreif** (verfügbar in v2.7.x)
 
 #### Konfiguration
 
@@ -278,6 +369,25 @@ WENN: Temperaturdifferenz ist über/unter [differential]°C
   - Zu niedrig (< 3°C): Schlechte Wärmeübertragung
   - Zu hoch (> 15°C): Mögliche Durchflussprobleme
 
+#### Beispiel-Flows
+
+**Wärmeübertragungs-Effizienz**:
+```
+WENN: Temperaturdifferenz unter 3°C
+  UND Kompressor läuft
+DANN: Benachrichtigung senden "Schlechte Wärmeübertragung erkannt"
+  UND Wasserdurchfluss prüfen
+  UND Pumpenfunktion verifizieren
+```
+
+**Durchflussproblem-Erkennung**:
+```
+WENN: Temperaturdifferenz über 15°C
+  UND Wasserdurchfluss unter 20 L/min
+DANN: Alarm senden "Mögliche Durchflussbeschränkung"
+  UND Filterprüfung empfehlen
+```
+
 ---
 
 ## Aktionen
@@ -287,6 +397,10 @@ WENN: Temperaturdifferenz ist über/unter [differential]°C
 **ID**: `calculate_time_based_value`
 **Kategorie**: Zeitbasierte Automatisierung
 **Zweck**: Aktuelle Zeit gegen Tagespläne auswerten, um Ausgabewerte zu berechnen
+
+#### Übersicht
+
+Der Zeitplan-Rechner ermöglicht **Zeit-des-Tages-Programmierung** für automatisierte Temperaturschemata, Zeit-der-Nutzung-Optimierung und tägliche Routinen.
 
 #### Konfiguration
 
@@ -312,6 +426,7 @@ AKTION: Wert aus Zeitplan berechnen
 - Unterstützt **Übernacht-Bereiche** (z.B. `23:00-06:00` überspannt Mitternacht)
 - Maximum **30 Zeitbereiche** pro Zeitplan
 - **Standard-Fallback**-Unterstützung (`default: wert`)
+- Komma- oder Zeilenumbruch-getrennte Eingaben
 
 #### Beispiel-Flows
 
@@ -323,6 +438,14 @@ DANN: Wert aus Zeitplan berechnen
   UND Zieltemperatur auf {{result_value}} setzen
 ```
 
+**Zeit-der-Nutzung-Optimierung**:
+```
+JEDEN STUNDE:
+DANN: Wert aus Zeitplan berechnen
+      Zeitplan: 17:00-21:00: 2500, default: 4000
+  UND Maximales Leistungslimit auf {{result_value}}W setzen
+```
+
 ---
 
 ### 9. 🌡️ Saisonmodus abrufen
@@ -330,6 +453,10 @@ DANN: Wert aus Zeitplan berechnen
 **ID**: `get_seasonal_mode`
 **Kategorie**: Saisonale Automatisierung
 **Zweck**: Automatische Erkennung der Heiz-/Kühlsaison basierend auf aktuellem Datum
+
+#### Übersicht
+
+Der Saisonmodus-Rechner bietet **automatische Saisondetektion** abgestimmt auf den EN 14825 SCOP Standard. Perfekt für das Umschalten zwischen Winter- und Sommerzeitplänen ohne manuelle Eingriffe.
 
 #### Konfiguration
 
@@ -342,14 +469,24 @@ AKTION: Saisonmodus abrufen
     - {{days_until_season_change}} - Zahl
 ```
 
+**Parameter**: Keine (verwendet aktuelles Datum)
+
+**Rückgabe**:
+- `mode` (string): Aktueller Saisonmodus ("heating" oder "cooling")
+- `is_heating_season` (boolean): True wenn 1. Okt - 15. Mai
+- `is_cooling_season` (boolean): True wenn 16. Mai - 30. Sep
+- `days_until_season_change` (number): Tage bis zur nächsten Saison
+
 #### Saison-Definitionen
 
 **Heizsaison**: 1. Oktober - 15. Mai (227 Tage)
 - Ausgerichtet am **EN 14825 SCOP Standard**
+- Entspricht dem bestehenden SCOP-Berechnungszeitraum
 - Typische europäische Heizsaison
 
 **Kühlsaison**: 16. Mai - 30. September (138 Tage)
 - Übergangszeit + Sommer
+- Zeitraum mit reduziertem Heizbedarf
 
 #### Beispiel-Flows
 
@@ -360,6 +497,14 @@ DANN: Saisonmodus abrufen
   UND WENN {{is_heating_season}} wahr ist
     DANN: Winterzeitplan aktivieren (hohe Temperaturen)
     SONST: Sommerzeitplan aktivieren (niedrigere Temperaturen)
+```
+
+**Saisonwechsel-Benachrichtigung**:
+```
+JEDEN TAG um 09:00:
+DANN: Saisonmodus abrufen
+  UND WENN {{days_until_season_change}} < 7
+    DANN: Benachrichtigung senden "Saison wechselt in {{days_until_season_change}} Tagen"
 ```
 
 ---
@@ -386,7 +531,7 @@ AKTION: Wert aus Kurve berechnen
 **Parameter**:
 
 - `input_value` (Zahl oder Ausdruck): Der zu bewertende Eingabewert
-- `curve` (text): Kurvendefinitionsstring
+- `curve` (text): Kurvendefinitionsstring (Komma oder Zeilenumbruch getrennt)
 
 **Rückgabe**:
 
@@ -399,12 +544,18 @@ AKTION: Wert aus Kurve berechnen
 **Unterstützte Operatoren**:
 
 - `>` - Größer als
-- `>=` - Größer oder gleich (Standard ohne Operator)
+- `>=` - Größer oder gleich
 - `<` - Kleiner als
 - `<=` - Kleiner oder gleich
 - `==` - Gleich
 - `!=` - Ungleich
 - `default` oder `*` - Fallback-Wert (immer passend, als letzte Zeile verwenden)
+
+**Auswertungsregeln**:
+1. Wird **von oben nach unten** ausgewertet
+2. Gibt die **erste passende** Bedingung zurück
+3. Fällt auf `default` zurück, wenn keine Übereinstimmung (empfohlen immer anzugeben)
+4. Maximum 50 Einträge pro Kurve
 
 #### Beispiel-Flows
 
@@ -426,6 +577,22 @@ DANN: Wert aus Kurve berechnen
   UND Zieltemperatur um {{result_value}}°C anpassen
 ```
 
+**Mehrstufige Heizkurve**:
+```
+WENN: Außentemperatur geändert
+DANN: Wert aus Kurve berechnen
+      Eingabe: {{outdoor_temperature}}
+      Kurve:
+        < -10 : 65
+        < -5  : 60
+        < 0   : 55
+        < 5   : 50
+        < 10  : 45
+        < 15  : 40
+        default : 35
+  UND Heizungs-Sollwert auf {{result_value}} setzen
+```
+
 #### Best Practices
 
 **✅ TUN**:
@@ -433,19 +600,22 @@ DANN: Wert aus Kurve berechnen
 - Zeilenumbrüche oder Kommas zur Trennung von Regeln verwenden
 - Kurve mit verschiedenen Eingaben testen vor dem Einsatz
 - Kurven einfach halten (unter 20 Einträge empfohlen)
+- Kurvenlogik in der Flow-Beschreibung dokumentieren
 
 **⚠️ NICHT TUN**:
 - 50 Einträge überschreiten (harte Grenze)
 - Standard-Fallback vergessen (verursacht Fehler bei keiner Übereinstimmung)
 - Heiz-/Kühllogik in derselben Kurve mischen (separate Flows verwenden)
+- Auswertungsreihenfolge ignorieren (oben nach unten ist wichtig!)
 
 #### Fehlermeldungen
 
 | Fehlermeldung | Ursache | Lösung |
 |---------------|---------|--------|
-| `"Eingabewert muss gültige Zahl sein"` | Ungültiger Eingabe-Tag oder Null-Wert | Eingabe-Token/Variable prüfen |
-| `"Keine passende Kurvenbedingung für Eingabewert: X"` | Keine Bedingung passte und kein Standard | `default : <wert>` als letzte Zeile hinzufügen |
-| `"Ungültige Kurvensyntax in Zeile N"` | Fehlerhafte Bedingung | Format prüfen: `operator schwelle : wert` |
+| `"Input value must be a valid number"` | Ungültiger Eingabe-Tag oder Null-Wert | Eingabe-Token/Variable prüfen |
+| `"No matching curve condition found"` | Keine Bedingung passte und kein Standard | `default : <wert>` als letzte Zeile hinzufügen |
+| `"Invalid curve syntax at line N"` | Fehlerhafte Bedingung | Format prüfen: `operator schwelle : wert` |
+| `"Curve exceeds maximum allowed entries (50)"` | Zu viele Zeilen in der Kurve | Kurve vereinfachen oder in mehrere Flows aufteilen |
 
 ---
 
@@ -458,6 +628,8 @@ Um benutzerdefinierte Leistungsschwelle zu konfigurieren:
 2. "Leistungsschwelle (W)" Einstellung finden
 3. Gewünschte Schwelle setzen (100-10000W)
 4. Standard: 3000W
+
+**Hinweis**: Wenn die Einstellung nicht existiert, verwendet der Trigger den hartcodierten Standard (3000W).
 
 ---
 
@@ -482,6 +654,23 @@ Um benutzerdefinierte Leistungsschwelle zu konfigurieren:
 2. Verifizieren, dass Gerät betriebsbereit ist (nicht offline)
 3. Spezifische Bedingungsanforderungen prüfen (z.B. Kompressor läuft für COP)
 4. Debug-Modus aktivieren und Protokolle prüfen
+
+### Diagnostische Kommandos
+
+**Capability-Werte prüfen**:
+```javascript
+// In Homey Developer Tools → Device Capabilities
+adlar_cop // Sollte aktuellen COP anzeigen
+adlar_fault // Sollte 0 (keine Störung) oder Störungscode anzeigen
+measure_power // Sollte aktuelle Leistung in Watt anzeigen
+meter_power.electric_total // Sollte kumulative kWh anzeigen
+```
+
+**Getriggerte Meilensteine prüfen**:
+```javascript
+// In Homey Developer Tools → Device Storage
+triggered_energy_milestones // Array der getriggerten Meilensteine
+```
 
 ---
 
@@ -508,6 +697,16 @@ WENN: Leistungsschwelle überschritten
 DANN: 5 Minuten warten
   UND WENN noch über Schwelle
     DANN Maßnahme ergreifen
+```
+
+**4. Für Analyse protokollieren**:
+```
+WENN: Jeder Effizienz-Trigger
+DANN: In Insights mit allen relevanten Daten protokollieren
+  - Zeitstempel
+  - COP-Wert
+  - Außentemperatur
+  - Leistungsaufnahme
 ```
 
 ### Benachrichtigungsverwaltung

@@ -151,7 +151,7 @@ L'application prend en charge 6 méthodes de calcul différentes avec une préci
 
 ## 3. Paramètres de Fonctionnalités
 
-Ces paramètres déterminent quelles fonctionnalités sont visibles dans l'interface de l'application Homey. **Remarque : Les modifications nécessitent un redémarrage de l'application.**
+Ces paramètres déterminent quelles fonctionnalités sont visibles dans l'interface de l'application Homey. **Remarque : Les modifications nécessitent un redémarrage et la fermeture de l'application.**
 
 ### Afficher les Paramètres de Contrôle de Courbe
 - **Par défaut** : Désactivé
@@ -305,14 +305,14 @@ Analyse automatisée du modèle thermique du bâtiment avec recommandations d'é
 ### Activer les Aperçus du Bâtiment
 - **Par défaut** : Activé
 - **Fonction** : Analyse le modèle thermique du bâtiment et fournit des recommandations d'économie d'énergie
-- **Temps d'apprentissage** : Les aperçus apparaissent après 24-48 heures d'apprentissage
+- **Temps d'apprentissage** : Les aperçus apparaissent après 48-72 heures d'apprentissage
 - **Prérequis** : L'apprentissage du modèle de bâtiment doit être activé
 
 ### Confiance Minimum
 - **Par défaut** : 70%
 - **Plage** : 50% - 90%
 - **Fonction** : Affiche les aperçus uniquement lorsque la confiance du modèle de bâtiment dépasse ce seuil
-- **70%** : ~24-48 heures d'apprentissage
+- **70%** : ~48-72 heures d'apprentissage
 - **Valeurs inférieures** : Aperçus plus tôt, moins de précision
 
 ### Max Aperçus Actifs

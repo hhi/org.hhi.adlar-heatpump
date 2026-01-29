@@ -305,14 +305,14 @@ Automated analysis of the thermal building model with energy-saving recommendati
 ### Enable Building Insights
 - **Default**: Enabled
 - **Function**: Analyze thermal building model and provide energy-saving recommendations
-- **Learning time**: Insights appear after 24-48 hours of learning
+- **Learning time**: Insights appear after 48-72 hours of learning
 - **Requirements**: Building model learning must be enabled
 
 ### Minimum Confidence
 - **Default**: 70%
 - **Range**: 50% - 90%
 - **Function**: Only show insights when building model confidence exceeds this threshold
-- **70%**: ~24-48 hours of learning
+- **70%**: ~48-72 hours of learning
 - **Lower values**: Earlier insights, less accuracy
 
 ### Max Active Insights
@@ -598,4 +598,3 @@ Use flows for:
 ```
 
 ---
-

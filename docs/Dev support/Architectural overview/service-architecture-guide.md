@@ -2454,6 +2454,6 @@ The service-oriented architecture provides a robust, maintainable, and extensibl
 For more information on specific services, see:
 
 - [Architecture Overview](architecture-overview.md) - High-level architecture summary
-- [COP Calculation](../../COP-calculation.md) - COPCalculator service details
-- [SCOP Calculation](../../SCOP-calculation.md) - SCOPCalculator service details
-- [Rolling COP](../../rolling-cop-calculation.md) - RollingCOPCalculator service details
+- [COP Calculation](../../COP%20calculation/COP-calculation.md) - COPCalculator service details
+- [SCOP Calculation](../../COP%20calculation/SCOP-calculation.md) - SCOPCalculator service details
+- [Rolling COP](rolling-cop-architecture.md) - RollingCOPCalculator service details

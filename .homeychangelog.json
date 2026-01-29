@@ -1,4 +1,10 @@
 {
+  "2.7.4": {
+    "en": "Documentation: Expanded advanced-control guides (intro, flow cards, adaptive control, building insights) and the configuration guide. Added new setup screenshots plus German/French adaptive-control guides.",
+    "nl": "Documentatie: Geavanceerde-controle gidsen (intro, flow cards, adaptieve regeling, building insights) en de configuratiegids uitgebreid. Nieuwe setup-screenshots en Duitse/Franse adaptieve-regeling gidsen toegevoegd.",
+    "de": "Dokumentation: Leitfäden zur erweiterten Steuerung (Intro, Flow-Cards, Adaptive Steuerung, Building Insights) und Konfiguration erweitert. Neue Setup-Screenshots sowie deutsche/französische Leitfäden zur adaptiven Steuerung hinzugefügt.",
+    "fr": "Documentation : Guides de contrôle avancé (intro, cartes de flux, contrôle adaptatif, building insights) et guide de configuration enrichis. Nouvelles captures d’écran de configuration et guides de contrôle adaptatif en allemand/français ajoutés."
+  },
   "2.7.2": {
     "en": "Added: External wind speed, solar radiation, and solar power flow cards for building model integration. Wind correction adjusts heat loss based on wind chill. Fixed: RLS learning stability - parameters (C/UA/g/pInt) now only update when error exceeds threshold, preventing numerical instability. Changed: Building profile dropdown shows parameter values (C, UA, τ). Removed: wind_alpha_manual setting (system learns automatically). Documentation: Solar Radiation Sources section added to all 4 languages.",
     "nl": "Toegevoegd: Externe windsnelheid, zonnestraling en zonne-energie flow cards voor gebouwmodel. Windcorrectie past warmteverlies aan op windchill. Opgelost: RLS leer-stabiliteit - parameters (C/UA/g/pInt) updaten nu alleen bij voldoende fout, voorkomt numerieke instabiliteit. Gewijzigd: Gebouwprofiel dropdown toont parameterwaarden (C, UA, τ). Verwijderd: wind_alpha_manual instelling (systeem leert automatisch). Documentatie: Zonnestraling Bronnen sectie toegevoegd aan alle 4 talen.",

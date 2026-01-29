@@ -22,7 +22,7 @@
 
 ## Introductie
 
-De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van een simpele temperatuurregelaar naar een intelligente energieadviseur. Na 24-48 uur leren van de thermische eigenschappen van je gebouw, geeft het systeem **concrete, bruikbare aanbevelingen** met geschatte besparingen in euro's per maand.
+De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van een simpele temperatuurregelaar naar een intelligente energieadviseur. Na 48-72 uur leren van de thermische eigenschappen van je gebouw, geeft het systeem **concrete, bruikbare aanbevelingen** met geschatte besparingen in euro's per maand.
 
 ### Belangrijkste Voordelen
 
@@ -37,7 +37,7 @@ De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van e
 
 ## Wat zijn Gebouwinzichten?
 
-Gebouwinzichten analyseren de **5 thermische parameters** die door het Gebouwmodel worden geleerd:
+Gebouwinzichten analyseren de **6 thermische parameters** die door het Gebouwmodel worden geleerd:
 
 | Parameter | Symbool | Betekenis | Typisch Bereik |
 |-----------|---------|-----------|----------------|
@@ -46,6 +46,7 @@ Gebouwinzichten analyseren de **5 thermische parameters** die door het Gebouwmod
 | **Tijdsconstante** | τ (tau) | Hoe snel gebouw opwarmt/afkoelt (τ = C/UA) | 5-25 uur |
 | **Zonnewinst Factor** | g | Effectiviteit van zonnestraling opwarming | 0.3-0.6 |
 | **Interne Warmtewinst** | P_int | Warmte van mensen, apparaten, koken | 0.2-0.5 kW |
+| **Windcorrectie** | W_corr | Extra warmteverlies bij harde wind (v2.7.0+) | 0-50 W/°C |
 
 Het systeem vergelijkt geleerde waarden met:
 - **Je geselecteerde gebouwprofiel** (Licht/Gemiddeld/Zwaar/Passief)
@@ -58,7 +59,7 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 
 ## Hoe het werkt
 
-### Leerfase (24-48 uur)
+### Leerfase (48-72 uur)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -818,7 +819,7 @@ Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 
 ### V: Hoe lang duurt het leren?
 
-**A:** 24-48 uur voor 70% confidence (standaard drempel). Je kunt verlagen naar 50% voor eerdere inzichten (minder accuraat). Volledige convergentie duurt 1-3 weken.
+**A:** 48-72 uur voor 70% confidence (standaard drempel). Je kunt verlagen naar 50% voor eerdere inzichten (minder accuraat). Volledige convergentie duurt 1-3 weken.
 
 ### V: Worden inzichten bijgewerkt als ik isolatie verbeter?
 

@@ -1,6 +1,6 @@
 # Adlar Warmtepomp — Adaptieve Regeling Systeem
 
-**Versie:** 2.4.0 | **Datum:** Januari 2026
+**Versie:** 2.7.x | **Datum:** Januari 2026
 
 ---
 
@@ -32,14 +32,14 @@ Dit systeem regelt je Adlar Castra warmtepomp intelligent voor:
 │  │          Adlar Heat Pump Device - Main Controller             │  │
 │  └─────────────────────────────┬─────────────────────────────────┘  │
 │                                │                                    │
-│        ┌───────────┬───────────┼───────────┬───────────┐            │
-│        │           │           │           │           │            │
-│        ▼           ▼           ▼           ▼           │            │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐            │
-│  │  Heating  │ │ Building  │ │  Energy   │ │    COP    │            │
-│  │  Control  │ │  Learner  │ │ Optimizer │ │Controller │            │
-│  │    60%    │ │   Info    │ │    15%    │ │    25%    │            │
-│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘            │
+│        ┌───────────┬───────────┼───────────┬───────────┬───────────┐  │
+│        │           │           │           │           │           │  │
+│        ▼           ▼           ▼           ▼           ▼           │  │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ │
+│  │  Comfort  │ │ Building  │ │  Energy   │ │    COP    │ │ Thermisch │ │
+│  │  Control  │ │  Learner  │ │ Optimizer │ │ Optimizer │ │   Model   │ │
+│  │    50%    │ │   Info    │ │    15%    │ │    15%    │ │    20%    │ │
+│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ │
 │        │             │             │             │                  │
 └────────┼─────────────┼─────────────┼─────────────┼──────────────────┘
          │             │             │             │
@@ -69,7 +69,7 @@ Dit systeem regelt je Adlar Castra warmtepomp intelligent voor:
 
 1. **Data verzamelen** — Binnen/buiten temp, vermogen, prijzen
 2. **Controllers berekenen** — Elk component geeft advies
-3. **Gewogen beslissing** — 60% comfort + 25% COP + 15% prijs
+3. **Gewogen beslissing** — 50% comfort + 15% efficiency + 15% kosten + 20% thermisch
 4. **Uitvoeren** — Update steltemperatuur (DPS 4)
 
 ---
@@ -116,6 +116,7 @@ De **PI (Proportional-Integral) controller** combineert:
 | Warmteverlies | UA | kW/°C | 0.1-0.4 |
 | Zonnewinst factor | g | - | 0.3-0.6 |
 | Interne warmte | P_int | kW | 0.2-0.5 |
+| Windcorrectie | W_corr | - | 0.03-0.12 |
 | Tijdsconstante | τ | uur | 4-16 |
 
 ### Machine Learning: RLS
@@ -237,9 +238,10 @@ De wegingsfactoren zijn **configureerbaar** via Apparaatinstellingen → Adaptie
 
 | Prioriteit | Standaard | Bereik | Functie |
 |------------|-----------|--------|---------|
-| **Comfort** | 60% | 0-100% | Gewicht voor PI temperatuurregeling |
-| **Efficiëntie** | 25% | 0-100% | Gewicht voor COP optimalisatie |
+| **Comfort** | 50% | 0-100% | Gewicht voor PI temperatuurregeling |
+| **Efficiëntie** | 15% | 0-100% | Gewicht voor COP optimalisatie |
 | **Kosten** | 15% | 0-100% | Gewicht voor prijsoptimalisatie |
+| **Thermisch** | 20% | 0-100% | Gewicht voor thermisch model voorspelling |
 
 > [!NOTE]
 > Waarden worden automatisch genormaliseerd naar totaal 100%.
@@ -248,16 +250,18 @@ De wegingsfactoren zijn **configureerbaar** via Apparaatinstellingen → Adaptie
 
 **Voorbeeld:**
 ```
-Temp Controller:  "Verhoog +2°C" (te koud!)
-COP Controller:   "Verlaag -1°C" (slechte COP)
-Price Optimizer:  "Verlaag -1°C" (dure prijs)
+Comfort Controller:  "Verhoog +2°C" (te koud!)
+COP Optimizer:       "Verlaag -1°C" (slechte COP)
+Price Optimizer:     "Verlaag -1°C" (dure prijs)
+Thermal Model:       "Verhoog +0.5°C" (voorspelling)
 
 Berekening:
-+2 × 0.60 = +1.20°C
--1 × 0.25 = -0.25°C
--1 × 0.15 = -0.15°C
++2.0 × 0.50 = +1.00°C
+-1.0 × 0.15 = -0.15°C
+-1.0 × 0.15 = -0.15°C
++0.5 × 0.20 = +0.10°C
 ─────────────────────
-Totaal:    +0.80°C
+Totaal:      +0.80°C
 ```
 
 ### Override Regels
@@ -275,7 +279,7 @@ Totaal:    +0.80°C
 1. **Installeer app** op Homey Pro
 2. **Configureer externe sensor** (thermostaat)
 3. **Stooklijn → OFF** (app doet dit automatisch)
-4. **Wacht 24 uur** voor eerste resultaten
+4. **Wacht 48-72 uur** voor eerste betrouwbare resultaten
 5. **Activeer optimalisaties** na 1 week
 
 ### Installatie Fases

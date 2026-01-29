@@ -1,7 +1,7 @@
 # 🔧 Flow Cards Dokumentation: Erweiterte Funktionen
 
 > **Version**: 2.7.x  
-> **Zweck**: Flow Cards für adaptive Regelung, Gebäudemodell, Energieoptimierer, COP-Optimierer, Gebäudeeinblicke und Wind-/Solardaten
+> **Zweck**: Flow Cards für adaptive Regelung, Gebäudemodell, Energieoptimierer, COP-Optimierer, Gebäudeeinblicke und Wind-/Sonnenstrahlungsdaten
 
 ---
 
@@ -14,7 +14,7 @@
 | Energie/Preis-Optimierer | 2 | 3 | 1 | **6** |
 | COP-Optimierer | 5 | 5 | 0 | **10** |
 | Gebäudeeinblicke | 2 | 1 | 2 | **5** |
-| Wind & Solar (v2.7.0) | 0 | 0 | 3 | **3** |
+| Wind & Sonnenstrahlung (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -48,6 +48,7 @@
 | `comfort_component` | number | Komfort-Beitrag (°C) |
 | `efficiency_component` | number | COP-Beitrag (°C) |
 | `cost_component` | number | Kosten-Beitrag (°C) |
+| `thermal_component` | number | Beitrag thermisches Modell (°C) |
 | `building_model_confidence` | number | Gebäudemodell-Vertrauen (%) |
 | `cop_confidence` | number | COP-Vertrauen (%) |
 | `reasoning` | string | Berechnungserklärung |
@@ -209,6 +210,16 @@
 | `confidence` | number | Modellvertrauen (%) |
 | `building_tau` | number | Thermische Zeitkonstante τ (Stunden) |
 
+**Beispiel-Flow:**
+```
+WHEN Günstigster Preisblock nähert sich (2 Stunden vorher)
+THEN
+  1. Vorheiz-Dauer berechnen (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Jetzt vorheizen starten
+  3. Benachrichtigung: "Vorheizen dauert {{preheat_hours}}h"
+```
+
 ---
 
 ### 🟡 CONDITIONS
@@ -219,7 +230,7 @@
 
 ---
 
-## 6️⃣ Wind- & Solardaten (v2.7.0)
+## 6️⃣ Wind- & Sonnenstrahlungsdaten (v2.7.0)
 
 > **Neu in v2.7.0**: Externe Wind- und Solarstrahlungsdaten für ein genaueres Gebäudemodell und Windkorrektur.
 
@@ -227,14 +238,14 @@
 
 | Flow ID | Titel | Beschreibung |
 |---------|-------|--------------|
-| `receive_external_wind_speed` ⭐ | Windgeschwindigkeit an Wärmepumpe senden | Winddaten für Wärmeverlustkorrektur |
+| `receive_external_wind_data` ⭐ | Windgeschwindigkeit an Wärmepumpe senden | Winddaten für Wärmeverlustkorrektur |
 | `receive_external_solar_power` ⭐ | Solarleistung an Wärmepumpe senden | Solar-Panel-Ausgang (W) |
 | `receive_external_solar_radiation` | Solarstrahlung an Wärmepumpe senden | Direkte Strahlung (W/m²) |
 
-#### `receive_external_wind_speed` - Parameter
+#### `receive_external_wind_data` - Parameter
 | Parameter | Typ | Bereich | Beschreibung |
 |-----------|-----|--------|--------------|
-| `speed_value` | number | 0-30 m/s | Windgeschwindigkeit in Metern pro Sekunde |
+| `wind_speed` | number | 0-200 km/h | Windgeschwindigkeit in Kilometern pro Stunde |
 
 **Windkorrektur-Formel:**
 ```
@@ -283,7 +294,7 @@ THEN Solarleistung an Wärmepumpe senden ({{current_power}})
 #### `receive_external_solar_radiation` - Parameter
 | Parameter | Typ | Bereich | Beschreibung |
 |-----------|-----|--------|--------------|
-| `radiation_value` | number | 0-1200 W/m² | Direkte Solarstrahlung in W/m² |
+| `radiation_value` | number | 0-1500 W/m² | Direkte Solarstrahlung in W/m² |
 
 **Beispiel-Flow:**
 ```
@@ -335,6 +346,9 @@ THEN Solarstrahlung an Wärmepumpe senden ({{radiation}})
 | `receive_external_flow_data` | `flow-card-manager-service.ts:964` |
 | `receive_external_ambient_data` | `flow-card-manager-service.ts:976` |
 | `force_insight_analysis` | `flow-card-manager-service.ts:745` |
+| `receive_external_wind_data` | `flow-card-manager-service.ts:984` |
+| `receive_external_solar_power` | `flow-card-manager-service.ts:996` |
+| `receive_external_solar_radiation` | `flow-card-manager-service.ts:1008` |
 
 #### CONDITIONS
 
@@ -349,4 +363,4 @@ THEN Solarstrahlung an Wärmepumpe senden ({{radiation}})
 
 ---
 
-*Siehe: [Configuration Guide](./advanced-settings/CONFIGURATION_GUIDE.de.md) für alle Einstellungen*
+*Siehe: [Configuration Guide](../advanced-settings/CONFIGURATION_GUIDE.de.md) für alle Einstellungen*

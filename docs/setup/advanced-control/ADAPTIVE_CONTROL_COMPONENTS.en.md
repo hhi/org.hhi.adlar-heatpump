@@ -1,6 +1,6 @@
 # Adlar Heat Pump — Adaptive Control System
 
-**Version:** 2.4.0 | **Date:** January 2026
+**Version:** 2.7.x | **Date:** January 2026
 
 ---
 
@@ -32,14 +32,14 @@ This system intelligently controls your Adlar Castra heat pump for:
 │  │          Adlar Heat Pump Device - Main Controller             │  │
 │  └─────────────────────────────┬─────────────────────────────────┘  │
 │                                │                                    │
-│        ┌───────────┬───────────┼───────────┬───────────┐            │
-│        │           │           │           │           │            │
-│        ▼           ▼           ▼           ▼           │            │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐            │
-│  │  Heating  │ │ Building  │ │  Energy   │ │    COP    │            │
-│  │  Control  │ │  Learner  │ │ Optimizer │ │Controller │            │
-│  │    60%    │ │   Info    │ │    15%    │ │    25%    │            │
-│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘            │
+│        ┌───────────┬───────────┼───────────┬───────────┬───────────┐  │
+│        │           │           │           │           │           │  │
+│        ▼           ▼           ▼           ▼           ▼           │  │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ │
+│  │  Comfort  │ │ Building  │ │  Energy   │ │    COP    │ │  Thermal  │ │
+│  │  Control  │ │  Learner  │ │ Optimizer │ │ Optimizer │ │   Model   │ │
+│  │    50%    │ │   Info    │ │    15%    │ │    15%    │ │    20%    │ │
+│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ │
 │        │             │             │             │                  │
 └────────┼─────────────┼─────────────┼─────────────┼──────────────────┘
          │             │             │             │
@@ -69,7 +69,7 @@ This system intelligently controls your Adlar Castra heat pump for:
 
 1. **Collect data** — Indoor/outdoor temp, power, prices
 2. **Calculate controllers** — Each component provides advice
-3. **Weighted decision** — 60% comfort + 25% COP + 15% price
+3. **Weighted decision** — 50% comfort + 15% efficiency + 15% cost + 20% thermal
 4. **Execute** — Update target temperature (DPS 4)
 
 ---
@@ -116,6 +116,7 @@ The **PI (Proportional-Integral) controller** combines:
 | Heat loss | UA | kW/°C | 0.1-0.4 |
 | Solar gain factor | g | - | 0.3-0.6 |
 | Internal heat | P_int | kW | 0.2-0.5 |
+| Wind correction | W_corr | - | 0.03-0.12 |
 | Time constant | τ | hour | 4-16 |
 
 ### Machine Learning: RLS
@@ -237,9 +238,10 @@ The weighting factors are **configurable** via Device Settings → Adaptive Cont
 
 | Priority | Default | Range | Function |
 |----------|---------|-------|----------|
-| **Comfort** | 60% | 0-100% | Weight for PI temperature control |
-| **Efficiency** | 25% | 0-100% | Weight for COP optimization |
+| **Comfort** | 50% | 0-100% | Weight for PI temperature control |
+| **Efficiency** | 15% | 0-100% | Weight for COP optimization |
 | **Cost** | 15% | 0-100% | Weight for price optimization |
+| **Thermal** | 20% | 0-100% | Weight for thermal model prediction |
 
 > [!NOTE]
 > Values are automatically normalized to total 100%.
@@ -248,14 +250,16 @@ The weighting factors are **configurable** via Device Settings → Adaptive Cont
 
 **Example:**
 ```
-Temp Controller:  "Increase +2°C" (too cold!)
-COP Controller:   "Decrease -1°C" (poor COP)
-Price Optimizer:  "Decrease -1°C" (expensive price)
+Comfort Controller: "Increase +2°C" (too cold!)
+COP Optimizer:      "Decrease -1°C" (poor COP)
+Price Optimizer:    "Decrease -1°C" (expensive price)
+Thermal Model:      "Increase +0.5°C" (prediction)
 
 Calculation:
-+2 × 0.60 = +1.20°C
--1 × 0.25 = -0.25°C
--1 × 0.15 = -0.15°C
++2.0 × 0.50 = +1.00°C
+-1.0 × 0.15 = -0.15°C
+-1.0 × 0.15 = -0.15°C
++0.5 × 0.20 = +0.10°C
 ─────────────────────
 Total:     +0.80°C
 ```
@@ -275,7 +279,7 @@ Total:     +0.80°C
 1. **Install app** on Homey Pro
 2. **Configure external sensor** (thermostat)
 3. **Heating curve → OFF** (app does this automatically)
-4. **Wait 24 hours** for first results
+4. **Wait 48-72 hours** for first reliable results
 5. **Activate optimizations** after 1 week
 
 ### Installation Phases

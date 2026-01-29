@@ -48,6 +48,7 @@
 | `comfort_component` | number | Bijdrage comfort (°C) |
 | `efficiency_component` | number | Bijdrage COP (°C) |
 | `cost_component` | number | Bijdrage prijs (°C) |
+| `thermal_component` | number | Bijdrage thermisch model (°C) |
 | `building_model_confidence` | number | Gebouwmodel betrouwbaarheid (%) |
 | `cop_confidence` | number | COP betrouwbaarheid (%) |
 | `reasoning` | string | Uitleg berekening |
@@ -237,14 +238,14 @@ THEN
 
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
-| `receive_external_wind_speed` ⭐ | Stuur windsnelheid naar warmtepomp | Wind data voor warmteverlies correctie |
+| `receive_external_wind_data` ⭐ | Stuur windsnelheid naar warmtepomp | Wind data voor warmteverlies correctie |
 | `receive_external_solar_power` ⭐ | Stuur zonnestroom naar warmtepomp | Zonnepaneel vermogen (W) |
 | `receive_external_solar_radiation` | Stuur zonnestraling naar warmtepomp | Directe straling (W/m²) |
 
-#### `receive_external_wind_speed` - Parameters
+#### `receive_external_wind_data` - Parameters
 | Parameter | Type | Bereik | Beschrijving |
 |-----------|------|--------|--------------|
-| `speed_value` | number | 0-30 m/s | Windsnelheid in meters per seconde |
+| `wind_speed` | number | 0-200 km/h | Windsnelheid in kilometers per uur |
 
 **Windcorrectie formule:**
 ```
@@ -293,7 +294,7 @@ THEN Stuur zonnestroom naar warmtepomp ({{current_power}})
 #### `receive_external_solar_radiation` - Parameters
 | Parameter | Type | Bereik | Beschrijving |
 |-----------|------|--------|--------------|
-| `radiation_value` | number | 0-1200 W/m² | Directe zonnestraling in W/m² |
+| `radiation_value` | number | 0-1500 W/m² | Directe zonnestraling in W/m² |
 
 **Voorbeeld flow:**
 ```
@@ -345,6 +346,9 @@ THEN Stuur zonnestraling naar warmtepomp ({{radiation}})
 | `receive_external_flow_data` | `flow-card-manager-service.ts:964` |
 | `receive_external_ambient_data` | `flow-card-manager-service.ts:976` |
 | `force_insight_analysis` | `flow-card-manager-service.ts:745` |
+| `receive_external_wind_data` | `flow-card-manager-service.ts:984` |
+| `receive_external_solar_power` | `flow-card-manager-service.ts:996` |
+| `receive_external_solar_radiation` | `flow-card-manager-service.ts:1008` |
 
 #### CONDITIONS
 
@@ -359,5 +363,5 @@ THEN Stuur zonnestraling naar warmtepomp ({{radiation}})
 
 ---
 
-*Zie: [Configuration Guide](./advanced-settings/CONFIGURATION_GUIDE.nl.md) voor alle instellingen*
+*Zie: [Configuration Guide](../advanced-settings/CONFIGURATION_GUIDE.nl.md) voor alle instellingen*
 

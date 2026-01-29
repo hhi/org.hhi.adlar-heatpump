@@ -1,7 +1,7 @@
 # DPS Mapping & Data Processing
 
 **Parent Documentation**: [CLAUDE.md](../../CLAUDE.md)
-**Related**: [SERVICE_ARCHITECTURE.md](SERVICE_ARCHITECTURE.md#capabilityhealthservice)
+**Related**: [SERVICE_ARCHITECTURE.md](SERVICE_ARCHITECTURE.md#2-capabilityhealthservice)
 
 ## Overview
 
@@ -343,5 +343,5 @@ Device with 44 total capabilities:
 
 **Related Documentation**:
 - [Service Architecture](SERVICE_ARCHITECTURE.md)
-- [Capability Health Tracking](SERVICE_ARCHITECTURE.md#capabilityhealthservice)
+- [Capability Health Tracking](SERVICE_ARCHITECTURE.md#2-capabilityhealthservice)
 - [Error Handling](ERROR_HANDLING.md)

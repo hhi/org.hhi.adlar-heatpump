@@ -724,7 +724,7 @@ export class DeviceConstants {
 
 - [Service Architecture Guide](service-architecture-guide.md) - How services use constants
 - [Architecture Overview](architecture-overview.md) - DeviceConstants in system architecture
-- [CLAUDE.md](../../CLAUDE.md) - Development patterns using constants
+- [CLAUDE.md](../../../CLAUDE.md) - Development patterns using constants
 
 ---
 

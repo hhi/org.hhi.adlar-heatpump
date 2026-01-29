@@ -1,5 +1,5 @@
 # Adaptive Temperature Control
-## User Guide v2.3.0
+## User Guide v2.7.x
 
 Intelligent temperature control for a **constant indoor temperature** with optimal efficiency.
 
@@ -35,7 +35,7 @@ Intelligent temperature control for a **constant indoor temperature** with optim
 ### When to use?
 
 - ✅ You have a thermostat or temperature sensor in the living room
-- ✅ You want an **exact** indoor temperature (e.g., 21.0°C constant)
+- ✅ You want an **exact** indoor temperature (e.g., constant 21.0°C)
 - ✅ Your heat pump often has temperature fluctuations
 - ✅ You want to optimize efficiency
 
@@ -56,7 +56,7 @@ Adaptive Control uses a **PI control system** (Proportional-Integral controller)
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 2️⃣ COMPARE                                                          │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │ Desired: 21.0°C   Actual: 20.5°C   Deviation: -0.5°C          │  │
+│  │ Target: 21.0°C   Actual: 20.5°C   Deviation: -0.5°C          │  │
 │  └───────────────────────────────┬───────────────────────────────┘  │
 └──────────────────────────────────┼──────────────────────────────────┘
                                    ▼
@@ -64,7 +64,7 @@ Adaptive Control uses a **PI control system** (Proportional-Integral controller)
 │ 3️⃣ PI ALGORITHM                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │ P-term: 3.0 × -0.5 = -1.5°C                                   │  │
-│  │ I-term: historical correction                                 │  │
+│  │ I-term: historical correction                                │  │
 │  │ Total: -1.5°C                                                 │  │
 │  └───────────────────────────────┬───────────────────────────────┘  │
 └──────────────────────────────────┼──────────────────────────────────┘
@@ -81,7 +81,7 @@ Adaptive Control uses a **PI control system** (Proportional-Integral controller)
                                                                   │
                                    ┌──────────────────────────────┘
                                    ▼
-                             (Back to MEASURE)
+                            (Back to MEASURE)
 ```
 
 ### Features
@@ -96,7 +96,7 @@ Adaptive Control uses a **PI control system** (Proportional-Integral controller)
 
 ### Why whole degrees?
 
-The heat pump setpoint uses **1°C steps**. However, the PI controller calculates fractional adjustments (e.g., +0.7°C).
+The heat pump setpoint uses **steps of 1°C**. However, the PI controller calculates fractional adjustments (e.g., +0.7°C).
 
 **Solution**: The **Smart Accumulator** collects fractional calculations:
 
@@ -106,15 +106,48 @@ Cycle 2: PI = +0.4°C → Accumulator: 0.7 → Apply +1°C, Rest: -0.3
 Cycle 3: PI = +0.2°C → Accumulator: -0.1 → Wait
 ```
 
+### 4-Pillar Weighted Decision System (v2.6.0+)
+
+Adaptive Control combines **4 intelligent components** in each decision:
+
+| Component | Weight | Function |
+|-----------|--------|----------|
+| 🛋️ **Comfort** | 50% | PI control for stable indoor temperature |
+| ⚡ **Efficiency** | 15% | COP optimization via flow temperature |
+| 💰 **Cost** | 15% | Price optimization (pre-heating during cheap electricity) |
+| 🏠 **Thermal** | 20% | Predictive control via learned building model |
+
+**Example calculation:**
+
+```
+Comfort wants: +2.0°C (too cold)
+Efficiency wants: -0.5°C (lower flow temp for better COP)
+Cost wants: +1.0°C (cheap electricity, pre-heat)
+Thermal wants: +0.5°C (building cools quickly, predictive heating)
+
+Weighted total: (2.0×50% + -0.5×15% + 1.0×15% + 0.5×20%) = 1.15°C
+```
+
+**Result**: Heat pump setpoint increases by +1°C (rounded).
+
+> [!NOTE]
+> The weights are **configurable** via device settings (Expert mode). Default values are optimized for most situations.
+
 ---
 
 ## Getting Started
 
 ### Requirements
 
-- **Homey Pro** with Adlar Heat Pump app v2.3.0+
+- **Homey Pro** with Adlar Heat Pump app v2.7.0+
 - **Working heat pump** with stable connection
 - **Temperature sensor** (Tado, Nest, Netatmo, Fibaro, Xiaomi, etc.)
+
+**Optional for extended optimization (v2.7.0+):**
+
+- ☁️ Wind speed sensor (for building model wind correction)
+- ☀️ Solar radiation sensor (for solar gain optimization)
+- 💰 Dynamic energy contract (for price optimization)
 
 ### Step 1: Temperature Data Flow
 
@@ -129,7 +162,7 @@ THEN: Adlar Heat Pump → Send indoor temperature
 
 **Fibaro sensor:**
 ```
-WHEN: Fibaro Motion Sensor → Temperature has changed  
+WHEN: Fibaro Motion Sensor → Temperature has changed
 THEN: Adlar Heat Pump → Send indoor temperature
       └─ Temperature: {{Fibaro temperature}}
 ```
@@ -157,7 +190,7 @@ Check the following points:
 
 - ✅ **External Indoor Temperature** capability shows current value
 - ✅ Test flow: "Adaptive control recommends temperature adjustment" triggers
-- ✅ Insights: graph shows continuous temperature data
+- ✅ Insights: chart shows continuous temperature data
 
 ---
 
@@ -188,7 +221,7 @@ Triggers when adaptive control calculates a setpoint change.
 | `controller` | String | Controller type |
 
 > [!NOTE]
-> `adjustment` is the calculated recommendation and can be fractional. The actual adjustment is always an integer.
+> `adjustment` is the calculated recommendation and can be fractional. The actual adjustment is always a whole number.
 
 **Example:**
 ```
@@ -214,6 +247,7 @@ Triggers for monitoring/logging without actual adjustments.
 | `comfort_component` | Number | Comfort contribution (°C) |
 | `efficiency_component` | Number | Efficiency contribution (°C) |
 | `cost_component` | Number | Cost contribution (°C) |
+| `thermal_component` | Number | Thermal model contribution (°C) (v2.6.0+) |
 | `reasoning` | String | Reasoning |
 
 ---
@@ -252,14 +286,14 @@ THEN: Send notification "✅ Adaptive control activated"
 | Setting | Default | Range | Description |
 |---------|---------|-------|-------------|
 | **Kp** (Proportional Gain) | 3.0 | 0.5 - 10.0 | Direct response to deviation |
-| **Ki** (Integral Gain) | 1.5 | 0.1 - 5.0 | Correction for long-term deviation |
+| **Ki** (Integral Gain) | 1.5 | 0.1 - 5.0 | Correction of long-term deviation |
 | **Deadband** | 0.3°C | 0.1 - 1.0°C | Tolerance zone |
 
 **Tuning tips:**
 
 | Problem | Solution |
 |---------|----------|
-| Oscillation/overshoot | Lower Kp (e.g., 3.0 → 2.0) |
+| Oscillation/overshoot | Decrease Kp (e.g., 3.0 → 2.0) |
 | Too slow response | Increase Kp (e.g., 3.0 → 4.0) |
 | Structural deviation | Increase Ki (e.g., 1.5 → 2.0) |
 | Too many small corrections | Increase deadband (e.g., 0.3 → 0.5) |
@@ -294,24 +328,24 @@ THEN: Log "Recommended: {{recommended_temperature}}°C ({{reason}})"
 
 ```
 WHEN: Timer every 5 minutes
-THEN: 
-  avg_temp = ({{Living Room}} + {{Kitchen}} + {{Hallway}}) / 3
+THEN:
+  avg_temp = ({{Living room}} + {{Kitchen}} + {{Hallway}}) / 3
   Send indoor temperature → {{avg_temp}}
 ```
 
-**Benefit:** Prevents overreaction to local fluctuations (e.g., sun on 1 sensor)
+**Advantage:** Prevents overreaction to local fluctuations (e.g., sun on 1 sensor)
 
 ---
 
 ### Night/day mode
 
-**Goal:** 21°C during the day, 18°C at night
+**Goal:** 21°C during day, 18°C at night
 
 ```
 WHEN: Time is 23:00
 THEN: Logic variable 'Target' = 18.0
 
-WHEN: Time is 07:00  
+WHEN: Time is 07:00
 THEN: Logic variable 'Target' = 21.0
 
 WHEN: Sensor → Temperature has changed
@@ -325,12 +359,12 @@ THEN: error = {{Target}} - {{Sensor}}
 ### Weather compensation
 
 ```
-WHEN: Weather → Outdoor temperature has changed
+WHEN: Weather app → Outdoor temperature has changed
 THEN:
   IF: Outdoor temp < 0°C  → offset = +1.0°C
   IF: Outdoor temp < -5°C → offset = +2.0°C
   ELSE: offset = 0°C
-  
+
   Send indoor temperature → {{Sensor}} + {{offset}}
 ```
 
@@ -362,19 +396,19 @@ THEN:
 
 ### ❌ Temperature oscillates
 
-**Symptom:** Temperature keeps overshooting target
+**Symptom:** Temperature constantly overshoots target
 
 **Possible causes & solutions:**
 
 | Cause | Solution |
 |-------|----------|
-| Kp too high | Lower to 2.0 |
-| Ki too high | Lower to 1.0 |
+| Kp too high | Decrease to 2.0 |
+| Ki too high | Decrease to 1.0 |
 | Deadband too small | Increase to 0.5°C |
-| Sensor near heat source | Move sensor or use average |
+| Sensor near heat source | Relocate sensor or use average |
 
 **Approach:**
-1. Start by lowering Kp (biggest impact)
+1. Start by decreasing Kp (biggest impact)
 2. Monitor 24 hours
 3. Adjust Ki if needed
 
@@ -417,7 +451,7 @@ Determines direct response to current deviation.
 
 #### Ki — Integral Gain
 
-Corrects long-term deviations that P-term doesn't resolve.
+Corrects long-term deviations that P-term doesn't solve.
 
 **Formula:** `I-term = Ki × (average error last 2 hours)`
 
@@ -427,14 +461,14 @@ Corrects long-term deviations that P-term doesn't resolve.
 
 #### Deadband
 
-Zone where no action is taken.
+Zone within which no action is taken.
 
 **Example** (target 21.0°C, deadband 0.3°C):
 - 20.8°C: Within zone → No action ✅
-- 21.2°C: Within zone → No action ✅  
+- 21.2°C: Within zone → No action ✅
 - 21.4°C: Outside zone → Action ⚡
 
-**Sweet spot:** 
+**Sweet spot:**
 - **Comfort:** 0.2 - 0.4°C
 - **Efficiency:** 0.4 - 0.6°C
 
@@ -448,13 +482,13 @@ Zone where no action is taken.
 - Note: oscillation? too slow? overshoot?
 
 #### Phase 2: Adjust Kp (week 2)
-- **Oscillation:** Lower 20% (3.0 → 2.4)
+- **Oscillation:** Decrease 20% (3.0 → 2.4)
 - **Too slow:** Increase 30% (3.0 → 3.9)
 - Test 3 days
 
 #### Phase 3: Adjust Ki (week 3)
 - **Structurally too cold/warm:** Increase 20%
-- **Slow oscillation:** Lower 30%
+- **Slow oscillation:** Decrease 30%
 - Test 5 days
 
 #### Phase 4: Deadband (week 4)
@@ -465,7 +499,7 @@ Zone where no action is taken.
 
 ### Advanced Problems
 
-#### "Hunting behavior"
+#### "Hunting Behavior"
 
 **Symptom:** Oscillation with period 1-3 hours
 
@@ -477,20 +511,20 @@ Zone where no action is taken.
 ```
 
 **Solution:**
-1. Lower Kp by 30%
+1. Decrease Kp by 30%
 2. Increase deadband to 0.4-0.5°C
-3. Lower Ki by 20%
+3. Decrease Ki by 20%
 
 ---
 
-#### "Integral windup"
+#### "Integral Windup"
 
-**Symptom:** Large overcorrection after prolonged deviation
+**Symptom:** Large overcorrection after long-term deviation
 
 **Solution:**
-1. Lower Ki by 40%
+1. Decrease Ki by 40%
 2. Check external factors (sun, open window)
-3. Reset I-term: toggle adaptive control off/on
+3. Reset I-term: adaptive control off/on
 
 ---
 
@@ -498,7 +532,7 @@ Zone where no action is taken.
 
 ### General
 
-**Should I keep adaptive control on 24/7?**
+**Should I leave adaptive control on 24/7?**
 > Yes, the system learns from history and performs better the longer it runs.
 
 **Does it work with underfloor heating?**
@@ -525,7 +559,7 @@ Zone where no action is taken.
 
 ---
 
-### Privacy & Safety
+### Privacy & Security
 
 **Is data sent to the cloud?**
 > No, all calculations happen locally on Homey.

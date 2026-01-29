@@ -12,7 +12,7 @@ To unlock the full functionality of the app, you can connect external sensors an
 
 Connect an external power meter (e.g., from your electrical panel) for accurate COP calculation.
 
-![External power setup](images/Setup%20-%20extern%20vermogen.png)
+![External power setup](../images/Setup%20-%20extern%20vermogen.png)
 
 **How to set up:**
 ```
@@ -51,7 +51,7 @@ THEN: [Intelligent Heat Pump] Send {{Power}} W to heat pump for COP calculation
 
 Connect a room thermostat or temperature sensor for adaptive temperature control.
 
-![External indoor temperature setup](images/Setup%20-%20externe%20binnentemperatuur.png)
+![External indoor temperature setup](../images/Setup%20-%20externe%20binnentemperatuur.png)
 
 **How to set up:**
 ```
@@ -71,7 +71,7 @@ THEN: [Intelligent Heat Pump] Send {{Temperature}} °C indoor temperature for ad
 
 Connect a weather station or weather service data for better thermal predictions.
 
-![External outdoor temperature setup](images/Setup%20-%20externe%20buitentemperatuur.png)
+![External outdoor temperature setup](../images/Setup%20-%20externe%20buitentemperatuur.png)
 
 **How to set up:**
 ```
@@ -108,7 +108,7 @@ THEN: [Intelligent Heat Pump] Send {{Current temperature}} °C to heat pump for 
 
 Connect a dynamic energy price app (e.g., PBTH or EnergyZero) for smart price optimization.
 
-![External energy prices setup](images/Setup%20-%20externe%20energietarieven.png)
+![External energy prices setup](../images/Setup%20-%20externe%20energietarieven.png)
 
 **How to set up:**
 ```
@@ -124,11 +124,139 @@ THEN: [Intelligent Heat Pump] Send external energy prices {{Prices}} for price o
 
 ---
 
-### 1.5 Overview: Features and Dependencies
+### 1.5 Connect External Solar Radiation (for Building Model Solar Gain)
+
+Connect a solar radiation sensor (e.g., KNMI) for accurate solar gain calculation in the building model.
+
+![KNMI radiation intensity setup](../images/Setup%20-%20KNMI%20stralingsintensiteit.png)
+
+**How to set up:**
+```
+WHEN: [KNMI] Radiation intensity changed
+THEN: [Intelligent Heat Pump] Send solar radiation {{Radiation intensity}} W/m² to heat pump
+```
+
+**What this unlocks:**
+
+- ✅ Accurate g-factor (solar gain coefficient) in building model
+- ✅ Better heating demand prediction on sunny days
+- ✅ Optimal passive solar gain utilization
+- ✅ Reduced heating demand during high irradiation
+
+> [!NOTE]
+> **Benefit of external solar radiation sensor:**
+>
+> Without an external sensor, the app can only infer solar gain indirectly from temperature increases. With direct radiation measurement, the **g-factor is 30-40% more accurate**.
+>
+> | Source | g-factor accuracy | Remark |
+> |--------|-------------------|--------|
+> | **With radiation sensor** | ±15% | Direct irradiation measurement |
+> | **Without sensor** | ±40-50% | Derived from temp deltas |
+>
+> **Impact:**
+>
+> - Building model: g-factor represents actual glass surface and orientation
+> - Predictions: Better anticipation of sunny periods
+> - Energy savings: Up to 5-10% heating demand reduction on sunny days
+>
+> **Conclusion:** External connection is *optional* but provides significantly better solar gain modeling.
+
+---
+
+### 1.6 Connect External Wind Speed (for Building Model Wind Correction)
+
+Connect a wind speed sensor (e.g., KNMI) for accurate calculation of wind-related heat loss.
+
+![KNMI wind speed setup](../images/Setup%20-%20KNMI%20windsnelheid%20kmh.png)
+
+**How to set up:**
+```
+WHEN: [KNMI] Wind speed changed
+THEN: [Intelligent Heat Pump] Send wind speed {{Wind speed}} km/h to heat pump
+```
+
+**What this unlocks:**
+
+- ✅ W_corr parameter in building model (wind correction factor)
+- ✅ Dynamic UA correction during strong wind (+20-50% additional heat loss)
+- ✅ Better heating demand prediction during storms
+- ✅ More accurate τ (time constant) calculation
+
+> [!NOTE]
+> **Impact of wind on heat loss:**
+>
+> Wind increases heat loss through **convective cooling** of facades. During storms (>50 km/h), heat loss can be **20-50% higher** than in calm conditions.
+>
+> | Wind speed | Extra heat loss | W_corr typical |
+> |------------|-----------------|---------------:|
+> | 0-10 km/h | Negligible | 0.00-0.03 |
+> | 10-30 km/h | +5-15% | 0.03-0.07 |
+> | 30-50 km/h | +15-30% | 0.07-0.10 |
+> | >50 km/h | +30-50% | 0.10-0.12 |
+>
+> **Functions without wind correction:**
+>
+> - Building model still works, but UA value is an average without wind correction
+> - During storms, prediction can deviate by 10-20%
+>
+> **Conclusion:** External connection is *optional* but provides significantly better predictions with variable wind.
+
+---
+
+### 1.7 Connect External Solar Panel Power (for Solar Radiation Calculation)
+
+Connect your solar inverter (e.g., SolarEdge, Enphase) for accurate solar radiation calculation based on current PV power.
+
+![PV current power setup](../images/Setup%20-%20PV%20actueel%20vermogen.png)
+
+**How to set up:**
+```
+WHEN: [SolarEdge] Power changed
+THEN: [Intelligent Heat Pump] Send solar panel power {{Power}}W to heat pump
+```
+
+**What this unlocks:**
+
+- ✅ Calculate solar radiation from PV power and panel specifications
+- ✅ Alternative to direct radiation sensor (if not available)
+- ✅ Accurate g-factor determination in building model
+- ✅ Optimal solar gain modeling
+
+> [!NOTE]
+> **Deriving solar radiation from PV power:**
+>
+> The app can **calculate** solar radiation from your solar panels' current power:
+>
+> **Formula:** `Radiation (W/m²) = PV power (W) / (Panel area (m²) × Efficiency (%))`
+>
+> **Example:**
+>
+> - 10 panels of 1.7m² with 20% efficiency = 3.4 m² effective area
+> - At 2000W PV power → Radiation = 2000 / 3.4 = ~588 W/m²
+>
+> **Advantages vs. direct radiation sensor:**
+>
+> - ✅ No additional sensor needed (uses existing PV monitoring)
+> - ✅ Represents actual radiation at your location and orientation
+> - ⚠️ However less accurate with dirty panels or shade
+>
+> **Choice between PV power and radiation sensor:**
+>
+> | Situation | Best choice |
+> |-----------|-------------|
+> | Solar panels available | PV power (pragmatic) |
+> | No solar panels | KNMI radiation sensor |
+> | Optimal accuracy | Connect both (app uses best source) |
+>
+> **Conclusion:** PV power is a *smart alternative source* for solar radiation data.
+
+---
+
+### 1.8 Overview: Features and Dependencies
 
 The diagram below shows the relationship between advanced features and their required data sources.
 
-![Feature Dependencies Diagram](images/feature_dependencies.png)
+![Feature Dependencies Diagram](../images/feature_dependencies.png)
 
 **Legend:**
 | Color | Meaning |
@@ -158,7 +286,7 @@ After connecting external data, you can use powerful calculator flow cards.
 
 Automatically calculate the optimal supply temperature based on outdoor temperature using a heating curve.
 
-![Curve calculator demo](images/Curve%20calculator.png)
+![Curve calculator demo](../images/Curve%20calculator.png)
 
 **How it works:**
 ```
@@ -189,7 +317,7 @@ THEN: [Timeline] Create notification with Heating value: {{Calculated Value}}
 
 Calculate a heating curve with a mathematical formula (y = ax + b), perfect for Adlar L28/L29 parameters.
 
-![Custom heating curve demo](images/custom%20stooklijn.png)
+![Custom heating curve demo](../images/custom%20stooklijn.png)
 
 **How it works:**
 ```
@@ -216,7 +344,7 @@ THEN: [Timeline] Create notification with custom heating curve:
 
 Calculate values from time periods with support for dynamic variables.
 
-![Time slots with variables demo](images/tijdsloten%20met%20vars.png)
+![Time slots with variables demo](../images/tijdsloten%20met%20vars.png)
 
 **How it works:**
 ```
@@ -263,9 +391,9 @@ THEN: [Timeline] Create notification with Value at {{Time}} is: {{Result value}}
 ---
 
 *See also:*
-- [Configuration Guide](advanced-settings/CONFIGURATION_GUIDE.en.md) - All settings explained
-- [Flow Cards Guide](guide/FLOW_CARDS_GUIDE.en.md) - Complete flow card documentation
-- [Adaptive Control Guide](guide/ADAPTIVE_CONTROL_GUIDE.en.md) - In-depth adaptive control explanation
+- [Configuration Guide](../advanced-settings/CONFIGURATION_GUIDE.en.md) - All settings explained
+- [Flow Cards Guide](../guide/FLOW_CARDS_GUIDE.en.md) - Complete flow card documentation
+- [Adaptive Control Guide](../guide/ADAPTIVE_CONTROL_GUIDE.en.md) - In-depth adaptive control explanation
 
 ---
 

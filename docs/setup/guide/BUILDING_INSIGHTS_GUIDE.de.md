@@ -14,16 +14,15 @@
 6. [Ihre Erkenntnisse verstehen](#ihre-erkenntnisse-verstehen)
 7. [Maßnahmen ergreifen](#maßnahmen-ergreifen)
 8. [Beispiel-Flows](#beispiel-flows)
-9. [Flow-Karten Referenz](#flow-karten-referenz)
-10. [Einstellungen](#einstellungen)
-11. [Fehlerbehebung](#fehlerbehebung)
-12. [FAQ](#faq)
+9. [Einstellungen](#einstellungen)
+10. [Fehlerbehebung](#fehlerbehebung)
+11. [FAQ](#faq)
 
 ---
 
 ## Einführung
 
-Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe von einem einfachen Temperaturregler in einen intelligenten Energieberater. Nach 24-48 Stunden Lernphase der thermischen Eigenschaften Ihres Gebäudes liefert das System **konkrete, umsetzbare Empfehlungen** mit geschätzten Einsparungen in Euro pro Monat.
+Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe von einem einfachen Temperaturregler in einen intelligenten Energieberater. Nach 48-72 Stunden Lernphase der thermischen Eigenschaften Ihres Gebäudes liefert das System **konkrete, umsetzbare Empfehlungen** mit geschätzten Einsparungen in Euro pro Monat.
 
 ### Hauptvorteile
 
@@ -38,7 +37,7 @@ Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe
 
 ## Was sind Gebäudeerkenntnisse?
 
-Gebäudeerkenntnisse analysieren die **5 thermischen Parameter**, die vom Gebäudemodell gelernt werden:
+Gebäudeerkenntnisse analysieren die **6 thermischen Parameter**, die vom Gebäudemodell gelernt werden:
 
 | Parameter | Symbol | Bedeutung | Typischer Bereich |
 |-----------|--------|-----------|-------------------|
@@ -47,6 +46,7 @@ Gebäudeerkenntnisse analysieren die **5 thermischen Parameter**, die vom Gebäu
 | **Zeitkonstante** | τ (tau) | Wie schnell das Gebäude heizt/kühlt (τ = C/UA) | 5-25 Stunden |
 | **Solargewinnfaktor** | g | Effektivität der Sonneneinstrahlung | 0,3-0,6 |
 | **Interne Wärmegewinne** | P_int | Wärme von Menschen, Geräten, Kochen | 0,2-0,5 kW |
+| **Windkorrektur** | W_corr | Zusätzlicher Wärmeverlust bei starkem Wind (v2.7.0+) | 0-50 W/°C |
 
 Das System vergleicht gelernte Werte mit:
 - **Ihrem ausgewählten Gebäudeprofil** (Leicht/Mittel/Schwer/Passiv)
@@ -59,7 +59,7 @@ Bei Optimierungsmöglichkeiten generiert es **Erkenntnisse** mit spezifischen Em
 
 ## Wie es funktioniert
 
-### Lernphase (24-48 Stunden)
+### Lernphase (48-72 Stunden)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -134,7 +134,7 @@ Das System wählt automatisch die beste verfügbare Quelle:
 └─────────────────────────────────────────────────────────────┘
                          ↓ (nicht verfügbar)
 ┌─────────────────────────────────────────────────────────────┐
-│  PRIORITÄT 2: Wetterstation Strahlungsdaten                 │
+│  PRIORITÄT 2: KNMI Strahlungsdaten                          │
 │  - Tatsächlich gemessene Strahlung                          │
 │  - Erfordert: Flow-Karte "Externe Sonneneinstrahlung"       │
 │  - Quelle: z.B. Wetter-App oder Wetterstation-Integration   │
@@ -161,14 +161,14 @@ Die Einstellung **"Jahreszeitlicher Solargewinn (g)"** passt die Effektivität d
 | Jun-Aug | 130% | Maximale Sommereinstrahlung |
 
 > [!IMPORTANT]
-> **Automatische Erkennung (v2.7.0):** Die Jahreszeitenkorrektur wird **nur** bei geschätzter Strahlung angewendet. Bei Verwendung von Solarpanels oder Wetterstationsdaten wird die Korrektur automatisch deaktiviert, da diese Quellen bereits den tatsächlichen Jahreszeiten- und Wettereffekt enthalten.
+> **Automatische Erkennung (v2.7.0):** Die Jahreszeitenkorrektur wird **nur** bei geschätzter Strahlung angewendet. Bei Verwendung von Solarpanels oder KNMI-Daten wird die Korrektur automatisch deaktiviert, da diese Quellen bereits den tatsächlichen Jahreszeiten- und Wettereffekt enthalten.
 
 ### Welche Quelle verwenden?
 
 | Quelle | Vorteile | Nachteile | Setup |
 |--------|----------|-----------|-------|
 | **Solarpanels** | Am genauesten, Echtzeit | Erfordert Solarpanel-Integration | Flow: Panel → ADLAR |
-| **Wetterstation** | Gemessene Daten, keine Panels nötig | Kann 10-60 Min verzögert sein | Flow: Wetter-App → ADLAR |
+| **KNMI** | Gemessene Daten, keine Panels nötig | Kann 10-60 Min verzögert sein | Flow: Wetter-App → ADLAR |
 | **Schätzung** | Kein Setup nötig, immer verfügbar | Weniger genau bei Bewölkung | Automatisch aktiv |
 
 **Empfehlung:** Wenn Sie Solarpanels haben, leiten Sie deren Leistung weiter. Ansonsten ist die sinusförmige Schätzung mit Jahreszeitenkorrektur für die meisten Situationen ausreichend genau.
@@ -210,19 +210,16 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 - Mittlere thermische Reaktion (τ 5-15 Stunden)
 - Langsame thermische Reaktion (τ > 15 Stunden)
 
-**Beispiel-Erkenntnis:**
-> „⏱️ Schnelle thermische Reaktion - Gebäude heizt in 4,2 Stunden auf"
+**Beispiel-Erkenntnis (v2.6.0):**
+> „Schnell (~2 Stunden für 2°C)" / „Normal (~4 Stunden für 2°C)" / „Langsam (~8 Stunden für 2°C)"
 
-**Beispiel-Empfehlung:**
-> „Aktivieren Sie aggressive Nachtabsenkung auf 16°C, Vorheizen 2 Stunden vor Aufwachzeit (05:00 → 07:00 fertig). Gesch. 12% Energieeinsparung."
+**Empfehlungen nach Typ:**
 
-**Empfohlene Maßnahmen nach Typ:**
-
-| Reaktionstyp | τ | Nachtabsenkung | Vorheizen | Einsparung |
-|--------------|---|----------------|-----------|------------|
-| Schnell | <5h | Aggressiv (16-17°C) | 2-3 Stunden | 10-15% |
-| Mittel | 5-15h | Moderat (17-18°C) | 4-5 Stunden | 6-10% |
-| Langsam | >15h | Minimal oder keine | Nicht praktikabel | 3-5% |
+| Reaktionstyp | τ | Empfehlung |
+|--------------|---|------------|
+| Schnell | <5h | Stabiles Heizen, flexible Planung möglich |
+| Normal | 5-15h | 4+ Stunden im Voraus für Temperaturanstieg planen |
+| Langsam | >15h | Kontinuierliches Heizen optimal für Wärmepumpe |
 
 ---
 
@@ -271,7 +268,7 @@ Monatliche Einsparung = €5,04 × 30 = €151/Monat
 | Profil | C (kWh/°C) | UA (kW/°C) | τ (Stunden) | Gebäudetyp |
 |--------|-----------|-----------|-------------|------------|
 | **Leicht** | 7 | 0,35 | 20 | Holzrahmen, Basisdämmung, schnelle Temp-Änderungen |
-| **Mittel** | 15 | 0,30 | 50 | Ziegel, Hohlwände, Doppelverglasung (typisch DE) |
+| **Mittel** | 15 | 0,30 | 50 | Ziegel, Hohlwände, Doppelverglasung (typisch NL) |
 | **Schwer** | 20 | 0,25 | 80 | Beton/Stein, gute Dämmung, HR++ Glas |
 | **Passiv** | 30 | 0,05 | 600 | Passivhaus, HR+++, luftdicht, Wärmerückgewinnung |
 
@@ -290,7 +287,7 @@ Monatliche Einsparung = €5,04 × 30 = €151/Monat
 
 **Flow-Trigger-Karten:**
 1. **„Neue Gebäudeerkenntnis erkannt"** — Löst bei neuen Erkenntnissen aus
-2. **„Vorheizzeit-Empfehlung"** — Täglicher Trigger um 23:00
+2. **„Vorheizzeit-Empfehlung"** — Triggert wenn ΔT > 1.5°C (max 1x pro 4 Stunden)
 3. **„Gebäudeprofil-Abweichung erkannt"** — Einmaliger Trigger
 
 ### Erkenntnislebenszyklus
@@ -403,6 +400,157 @@ DANN
     „Maßnahme: {{recommendation}}"
     „Potenzial: €{{estimated_savings_eur_month}}/Monat"
 ```
+
+---
+
+### Flow 4: Profil-Abweichung Auto-Korrektur
+
+```
+WENN Gebäudeprofil-Abweichung erkannt
+
+UND {{deviation_percent}} ist größer als 40
+
+DANN
+  1. Geräteeinstellung "building_profile" auf {{suggested_profile}} ändern
+  2. Benachrichtigung:
+     "Gebäudeprofil aktualisiert von {{current_profile}} auf {{suggested_profile}}"
+```
+
+---
+
+### Flow 5: Erkenntnis vorübergehend ausblenden (Dismiss)
+
+```
+WENN Gebäudeerkenntnis erkannt, Kategorie = "insulation_performance"
+
+UND Benutzer hat entschieden, Isolierung zu ignorieren (bekanntes Problem)
+
+DANN
+  Erkenntnis "insulation_performance" für 90 Tage ausblenden
+    (Aktion: Dismiss insight)
+
+  Benachrichtigung: "Dämmungs-Erkenntnis für 3 Monate ausgeblendet"
+```
+
+**Use case:** Nach Renovierungsarbeiten in Planung oder wenn Isolierung bereits bekannt ist, aber noch nicht umgesetzt wurde.
+
+---
+
+### Flow 6: Erkenntnisanalyse erzwingen (On-Demand)
+
+```
+WENN Benutzer die virtuelle Taste "Gebäude jetzt analysieren" drückt
+  (oder täglich um 08:00 für den Morgenbericht)
+
+DANN
+  1. Erkenntnisanalyse erzwingen
+     (Aktion: Force insight analysis)
+     Rückgabe: {{insights_detected}}, {{confidence}}
+
+  2. WENN {{insights_detected}} ist größer als 0
+     DANN Benachrichtigung:
+       "Gebäudeanalyse: {{insights_detected}} Erkenntnis(se) gefunden"
+       "Modellvertrauen: {{confidence}}%"
+```
+
+**Use case:** Sofort nach größeren Änderungen (Wetter, Einstellungen) prüfen, ohne 50 Minuten zu warten.
+
+---
+
+### Flow 7: Reset nach Renovierung
+
+```
+WENN Virtuelle Taste "Renovierung abgeschlossen" gedrückt
+
+DANN
+  1. Erkenntnishistorie zurücksetzen [✓ Reset bestätigen]
+     (Aktion: Reset insight history - Checkbox MUSS angekreuzt sein)
+
+  2. Benachrichtigung:
+     "Erkenntnisse zurückgesetzt. Neues Lernen startet - erwarten Sie neue Erkenntnisse nach 24-48h"
+```
+
+**Use case:** Nach großen Gebäudeänderungen (Dämmung, neue Fenster, Umbau) - Insights zurücksetzen, Gebäudemodell behalten.
+
+---
+
+### Flow 8: Dynamische Vertrauensschwelle (Adaptiv)
+
+```
+WENN Gebäudemodell-Lernmeilenstein erreicht
+  milestone = "convergence_reached" (nach 7 Tagen stabilem Lernen)
+
+DANN
+  Vertrauensschwelle auf 60% setzen
+    (Aktion: Set confidence threshold)
+
+  Benachrichtigung: "Modell stabil - Vertrauensschwelle für mehr Erkenntnisse gesenkt"
+```
+
+**Use case:** Konservativ starten (70%), Schwelle senken wenn Modell stabil ist für mehr Erkenntnis-Granularität.
+
+---
+
+### Flow 9: Nur hohe ROI-Erkenntnisse benachrichtigen (Condition)
+
+```
+WENN Gebäudeerkenntnis erkannt
+
+UND Geschätzte Einsparung ist über €100/Monat
+  (Bedingung: Savings above threshold - category, €100)
+
+UND Modellvertrauen ist über 75%
+  (Bedingung: Confidence above threshold - 75%)
+
+DANN
+  Push-Benachrichtigung senden:
+    "💰 Große Einsparchance!"
+    "{{insight}}"
+    "Aktion: {{recommendation}}"
+    "Potenzial: €{{estimated_savings_eur_month}}/Monat"
+```
+
+**Use case:** "Beratungsrauschen" filtern - nur Benachrichtigungen für signifikante Einsparungen mit hoher Sicherheit.
+
+---
+
+### Flow 10: Thermische Speicherung nur wenn aktiv (Condition)
+
+```
+WENN Günstigster Energieblock gestartet
+  (von der Energy Prices App)
+
+UND Thermische Speicher-Erkenntnis ist aktiv
+  (Bedingung: Insight is active - category "thermal_storage")
+
+DANN
+  Zieltemperatur um 2°C erhöhen
+  Benachrichtigung: "Thermische Speicherung: Vorheizen aktiv"
+
+SONST
+  (Keine Aktion - thermische Speicherung für dieses Gebäude nicht möglich)
+```
+
+**Use case:** Bedingte Automatisierung - thermische Speicherstrategie nur anwenden, wenn Gebäude geeignet ist.
+
+---
+
+### Flow 11: Dämmungs-Erkenntnis bis Frühling ausblenden (Saisonal)
+
+```
+WENN Gebäudeerkenntnis erkannt, Kategorie = "insulation_performance"
+
+UND aktueller Monat zwischen Oktober und März (Winter)
+
+DANN
+  Erkenntnis "insulation_performance" für 180 Tage ausblenden
+    (Aktion: Dismiss insight)
+
+  Benachrichtigung:
+    "Dämmungs-Erkenntnis bis Frühling (April) verschoben für wärmere Renovierungsbedingungen"
+```
+
+**Use case:** Dämmungsarbeiten strategisch in günstigeren Jahreszeiten planen.
 
 ---
 
@@ -531,6 +679,15 @@ DANN
 - `building_tau` (number) - Thermische Zeitkonstante τ (Stunden)
 
 **Verwendung:** Vorheizen für bestimmte Zeiten planen, thermische Speicher-Automatisierung
+
+**Beispiel-Flow:**
+```
+WENN Günstigster Preisblock nähert sich (2 Stunden vorher)
+DANN
+  1. Vorheizdauer berechnen (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Jetzt vorheizen starten
+```
 
 ---
 
@@ -662,7 +819,7 @@ Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 
 ### F: Wie lange dauert das Lernen?
 
-**A:** 24-48 Stunden für 70% Vertrauen (Standardschwelle). Sie können auf 50% senken für frühere Erkenntnisse (weniger genau). Vollständige Konvergenz dauert 1-3 Wochen.
+**A:** 48-72 Stunden für 70% Vertrauen (Standardschwelle). Sie können auf 50% senken für frühere Erkenntnisse (weniger genau). Vollständige Konvergenz dauert 1-3 Wochen.
 
 ### F: Werden Erkenntnisse aktualisiert, wenn ich die Dämmung verbessere?
 

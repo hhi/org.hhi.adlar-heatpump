@@ -9,13 +9,14 @@
 
 De Adlar app leert nu **zelf** hoe jouw woning zich gedraagt en past automatisch de warmtepomp aan voor optimaal comfort én maximale besparing.
 
-### De 3 Pijlers: Comfort • Efficiëntie • Kosten
+### De 4 Pijlers: Comfort • Efficiëntie • Kosten • Thermisch
 
 | Factor | Wat het doet | Instelling |
 |--------|--------------|------------|
-| 🛋️ **Comfort** | Stabiele binnentemperatuur (±0.3°C) via PI-regeling | 60% (standaard) |
-| ⚡ **Efficiëntie** | Optimale COP door slimme aanvoertemperatuur | 25% (standaard) |
+| 🛋️ **Comfort** | Stabiele binnentemperatuur (±0.3°C) via PI-regeling | 50% (standaard) |
+| ⚡ **Efficiëntie** | Optimale COP door slimme aanvoertemperatuur | 15% (standaard) |
 | 💰 **Kosten** | Voorverwarmen bij goedkope stroom, afschalen bij dure | 15% (standaard) |
+| 🏠 **Thermisch** | Predictieve regeling via geleerd gebouwmodel (τ, C, UA) | 20% (standaard) |
 
 *De gewichten zijn instelbaar en normaliseren automatisch naar 100%.*
 
@@ -31,12 +32,18 @@ De Adlar app leert nu **zelf** hoe jouw woning zich gedraagt en past automatisch
 - **COP Optimalisatie**: Leert optimale aanvoertemperatuur per buitentemperatuur → €200-300/jaar
 - **Prijsoptimalisatie**: Verwarmt vooraf tijdens goedkope uren → €400-600/jaar
 
-### 3. Slimmer Gebouwmodel
-De app leert automatisch:
-- **Thermische massa (C)**: Hoe snel je huis afkoelt
+### 3. Slimmer Gebouwmodel (v2.6.0+)
+
+De app leert automatisch jouw woning kennen:
+
+- **Thermische massa (C)**: Hoe snel je huis afkoelt/opwarmt
 - **Warmteverlies (UA)**: Isolatiekwaliteit
-- **Tijdsconstante (τ)**: Hoeveel uur tot stabiele temperatuur
-- **Zonnewinst (g)**: Bijverwarming door zon
+- **Tijdsconstante (τ)**: Reactiesnelheid op temperatuurverandering
+- **Zonnewinst (g)**: Bijverwarming door zon (indien sensor beschikbaar)
+- **Windcorrectie**: Extra warmteverlies bij harde wind (v2.7.0+)
+
+**Learning periode**: 48-72 uur voor betrouwbaar model
+**Updates**: Continu bijleren bij veranderende omstandigheden
 
 ---
 
@@ -49,14 +56,18 @@ De app leert automatisch:
 └─────────────────────────────────────────────────────┘
 ```
 
-**Minimale vereiste:**
-1. ✅ Binnentemperatuur sensor (bijv. Aqara, Tado, Homey thermostaat)
-2. ✅ Flow: `WANNEER temp verandert` → `Stuur naar warmtepomp`
+**Minimaal vereist:**
 
-**Optioneel voor extra functies:**
-- Buitentemperatuur sensor (KNMI, weerstation)
-- Externe vermogensmeter (voor COP)
-- Dynamisch energiecontract (voor prijsoptimalisatie)
+1. ✅ Binnentemperatuur sensor (bijv. Aqara, Tado, Homey thermostaat)
+2. ✅ Flow: `WANNEER temp verandert` → `Stuur binnentemperatuur naar warmtepomp`
+
+**Optioneel voor uitgebreide optimalisatie:**
+
+- 🌡️ Buitentemperatuur sensor (voor gebouwmodel learning en COP optimalisatie)
+- 💡 Externe vermogensmeter (voor nauwkeurige COP berekening)
+- 💰 Dynamisch energiecontract (voor prijsoptimalisatie)
+- ☁️ Windsnelheid sensor (voor wind correctie op warmteverlies)
+- ☀️ Zonnestraling sensor (voor zonne-winst correctie)
 
 ---
 
@@ -64,8 +75,9 @@ De app leert automatisch:
 
 1. **Device Settings** → Schakel `Adaptieve temperatuurregeling` in
 2. Maak flow voor binnentemperatuur
-3. Wacht 24-48 uur voor gebouwmodel learning
+3. Wacht 48-72 uur voor volledig gebouwmodel learning
 4. Optioneel: Schakel COP/Prijsoptimalisatie in
+5. Optioneel: Configureer wind/solar sensoren voor extra optimalisatie
 
 ---
 
