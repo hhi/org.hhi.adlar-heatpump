@@ -1,13 +1,14 @@
 # 🏠 Nouvelle Fonctionnalité : Modèle de Bâtiment & Building Insights
 
 > **Statut** : Disponible à partir de la version 2.5.x  
-> **Prérequis** : Contrôle Adaptatif de Température actif + température intérieure/extérieure
+> **Prérequis** : Contrôle Adaptatif de Température actif + température intérieure/extérieure  
+> **Correction du vent (W_corr)** : Disponible à partir de 2.7.0+ (optionnel)
 
 ---
 
 ## Qu'est-ce que le Modèle de Bâtiment ?
 
-L'application **apprend automatiquement** les propriétés thermiques de votre maison en analysant les données de température. Après 24-48 heures, l'application connaît votre maison mieux que vous.
+L'application **apprend automatiquement** les propriétés thermiques de votre maison en analysant les données de température. Après 48-72 heures, l'application connaît votre maison mieux que vous.
 
 ### Qu'Apprend l'Application ?
 
@@ -18,6 +19,7 @@ L'application **apprend automatiquement** les propriétés thermiques de votre m
 | **τ** (Constante de temps) | Heures jusqu'à température stable | τ = 50h = refroidissement lent |
 | **g** (Gain solaire) | Contribution du chauffage par le soleil | Vitrage sud = g élevé |
 | **P_int** (Chaleur interne) | Production de chaleur par occupants/appareils | Famille avec PCs = P_int plus élevé |
+| **W_corr** (Correction du vent) | Perte de chaleur supplémentaire par vent fort | Tempête = +20-50% UA (v2.7.0+) |
 
 ---
 
@@ -51,8 +53,8 @@ Après avoir appris votre bâtiment, l'application fournit des **recommandations
 │  Étape 2 : Machine Learning                                 │
 │  ──────────────────────────                                 │
 │  • Après 10 échantillons : première analyse                 │
-│  • Après 24 heures : 70% de confiance                       │
-│  • Après 1 semaine : configuration de profil complète       │
+│  • Après 48 heures : 70% de confiance                       │
+│  • Après 72 heures : configuration de profil complète       │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -99,6 +101,8 @@ Après avoir appris votre bâtiment, l'application fournit des **recommandations
 **Recommandé :**
 - ✅ Température extérieure externe (service météo/station météo)
 - ✅ Mesure de puissance externe (pour économies € dans insights)
+- ☁️ Capteur de vitesse du vent (pour correction UA précise par vent)
+- ☀️ Capteur de rayonnement solaire (pour apprentissage optimal du facteur g)
 
 ---
 

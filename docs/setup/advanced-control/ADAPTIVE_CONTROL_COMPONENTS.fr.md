@@ -1,6 +1,6 @@
 # Pompe à Chaleur Adlar — Système de Contrôle Adaptatif
 
-**Version :** 2.4.0 | **Date :** Janvier 2026
+**Version :** 2.7.x | **Date :** Janvier 2026
 
 ---
 
@@ -32,14 +32,14 @@ Ce système contrôle intelligemment votre pompe à chaleur Adlar Castra pour :
 │  │          Adlar Heat Pump Device - Main Controller             │  │
 │  └─────────────────────────────┬─────────────────────────────────┘  │
 │                                │                                    │
-│        ┌───────────┬───────────┼───────────┬───────────┐            │
-│        │           │           │           │           │            │
-│        ▼           ▼           ▼           ▼           │            │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐            │
-│  │  Heating  │ │ Building  │ │  Energy   │ │    COP    │            │
-│  │  Control  │ │  Learner  │ │ Optimizer │ │Controller │            │
-│  │    60%    │ │   Info    │ │    15%    │ │    25%    │            │
-│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘            │
+│        ┌───────────┬───────────┼───────────┬───────────┬───────────┐  │
+│        │           │           │           │           │           │  │
+│        ▼           ▼           ▼           ▼           ▼           │  │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ │
+│  │  Comfort  │ │ Building  │ │  Energy   │ │    COP    │ │ Thermique │ │
+│  │  Control  │ │  Learner  │ │ Optimizer │ │ Optimizer │ │  Model    │ │
+│  │    50%    │ │   Info    │ │    15%    │ │    15%    │ │    20%    │ │
+│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ │
 │        │             │             │             │                  │
 └────────┼─────────────┼─────────────┼─────────────┼──────────────────┘
          │             │             │             │
@@ -69,7 +69,7 @@ Ce système contrôle intelligemment votre pompe à chaleur Adlar Castra pour :
 
 1. **Collecter les données** — Temp intérieure/extérieure, puissance, prix
 2. **Calculer les contrôleurs** — Chaque composant fournit des conseils
-3. **Décision pondérée** — 60% confort + 25% COP + 15% prix
+3. **Décision pondérée** — 50% confort + 15% efficacité + 15% coût + 20% thermique
 4. **Exécuter** — Mettre à jour la température cible (DPS 4)
 
 ---
@@ -116,6 +116,7 @@ Le **contrôleur PI (Proportionnel-Intégral)** combine :
 | Perte de chaleur | UA | kW/°C | 0.1-0.4 |
 | Facteur gain solaire | g | - | 0.3-0.6 |
 | Chaleur interne | P_int | kW | 0.2-0.5 |
+| Correction du vent | W_corr | - | 0.03-0.12 |
 | Constante de temps | τ | heure | 4-16 |
 
 ### Apprentissage Automatique : RLS
@@ -237,9 +238,10 @@ Les facteurs de pondération sont **configurables** via Paramètres de l'Apparei
 
 | Priorité | Défaut | Plage | Fonction |
 |----------|--------|-------|----------|
-| **Confort** | 60% | 0-100% | Poids pour contrôle de température PI |
-| **Efficacité** | 25% | 0-100% | Poids pour optimisation COP |
+| **Confort** | 50% | 0-100% | Poids pour contrôle de température PI |
+| **Efficacité** | 15% | 0-100% | Poids pour optimisation COP |
 | **Coût** | 15% | 0-100% | Poids pour optimisation des prix |
+| **Thermique** | 20% | 0-100% | Poids pour modèle thermique |
 
 > [!NOTE]
 > Les valeurs sont automatiquement normalisées à 100% au total.
@@ -248,14 +250,16 @@ Les facteurs de pondération sont **configurables** via Paramètres de l'Apparei
 
 **Exemple :**
 ```
-Contrôleur Temp :   "Augmenter +2°C" (trop froid !)
-Contrôleur COP :    "Diminuer -1°C" (mauvais COP)
-Optimiseur Prix :   "Diminuer -1°C" (prix élevé)
+Contrôleur Confort : "Augmenter +2°C" (trop froid !)
+Optimiseur COP :     "Diminuer -1°C" (mauvais COP)
+Optimiseur Prix :    "Diminuer -1°C" (prix élevé)
+Modèle Thermique :   "Augmenter +0.5°C" (prédiction)
 
 Calcul :
-+2 × 0.60 = +1.20°C
--1 × 0.25 = -0.25°C
--1 × 0.15 = -0.15°C
++2.0 × 0.50 = +1.00°C
+-1.0 × 0.15 = -0.15°C
+-1.0 × 0.15 = -0.15°C
++0.5 × 0.20 = +0.10°C
 ─────────────────────
 Total :    +0.80°C
 ```
@@ -275,7 +279,7 @@ Total :    +0.80°C
 1. **Installer l'app** sur Homey Pro
 2. **Configurer le capteur externe** (thermostat)
 3. **Courbe de chauffe → OFF** (l'app le fait automatiquement)
-4. **Attendre 24 heures** pour les premiers résultats
+4. **Attendre 48-72 heures** pour les premiers résultats
 5. **Activer les optimisations** après 1 semaine
 
 ### Phases d'Installation

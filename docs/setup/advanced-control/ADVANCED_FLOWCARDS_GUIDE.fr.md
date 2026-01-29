@@ -1,7 +1,7 @@
 # 🔧 Documentation des Flow Cards : Fonctions Avancées
 
 > **Version** : 2.7.x  
-> **Objectif** : Flow cards pour le contrôle adaptatif, modèle de bâtiment, optimiseur d'énergie, optimiseur COP, aperçus du bâtiment et données vent/solaire
+> **Objectif** : Flow cards pour le contrôle adaptatif, modèle de bâtiment, optimiseur d'énergie, optimiseur COP, aperçus du bâtiment et données vent/rayonnement solaire
 
 ---
 
@@ -14,7 +14,7 @@
 | Optimiseur Énergie/Prix | 2 | 3 | 1 | **6** |
 | Optimiseur COP | 5 | 5 | 0 | **10** |
 | Aperçus du Bâtiment | 2 | 1 | 2 | **5** |
-| Vent & Solaire (v2.7.0) | 0 | 0 | 3 | **3** |
+| Vent & Rayonnement Solaire (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -48,6 +48,7 @@
 | `comfort_component` | number | Contribution confort (°C) |
 | `efficiency_component` | number | Contribution COP (°C) |
 | `cost_component` | number | Contribution coût (°C) |
+| `thermal_component` | number | Contribution modèle thermique (°C) |
 | `building_model_confidence` | number | Confiance du modèle de bâtiment (%) |
 | `cop_confidence` | number | Confiance COP (%) |
 | `reasoning` | string | Explication du calcul |
@@ -209,6 +210,16 @@
 | `confidence` | number | Confiance du modèle (%) |
 | `building_tau` | number | Constante de temps thermique τ (heures) |
 
+**Exemple de flow :**
+```
+WHEN Bloc de prix le moins cher approche (2 heures à l'avance)
+THEN
+  1. Calculer durée de préchauffage (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Démarrer le préchauffage maintenant
+  3. Notification : "Le préchauffage dure {{preheat_hours}}h"
+```
+
 ---
 
 ### 🟡 CONDITIONS
@@ -219,7 +230,7 @@
 
 ---
 
-## 6️⃣ Données Vent & Solaire (v2.7.0)
+## 6️⃣ Données Vent & Rayonnement Solaire (v2.7.0)
 
 > **Nouveau en v2.7.0** : Données externes de vent et de radiation solaire pour un modèle de bâtiment plus précis et une correction du vent.
 
@@ -227,14 +238,14 @@
 
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
-| `receive_external_wind_speed` ⭐ | Envoyer vitesse du vent à la pompe à chaleur | Données de vent pour correction des pertes de chaleur |
+| `receive_external_wind_data` ⭐ | Envoyer vitesse du vent à la pompe à chaleur | Données de vent pour correction des pertes de chaleur |
 | `receive_external_solar_power` ⭐ | Envoyer puissance solaire à la pompe à chaleur | Puissance des panneaux solaires (W) |
 | `receive_external_solar_radiation` | Envoyer radiation solaire à la pompe à chaleur | Radiation directe (W/m²) |
 
-#### `receive_external_wind_speed` - Paramètres
+#### `receive_external_wind_data` - Paramètres
 | Paramètre | Type | Plage | Description |
 |-----------|------|-------|-------------|
-| `speed_value` | number | 0-30 m/s | Vitesse du vent en mètres par seconde |
+| `wind_speed` | number | 0-200 km/h | Vitesse du vent en kilomètres par heure |
 
 **Formule de correction du vent :**
 ```
@@ -283,7 +294,7 @@ THEN Envoyer puissance solaire à la pompe à chaleur ({{current_power}})
 #### `receive_external_solar_radiation` - Paramètres
 | Paramètre | Type | Plage | Description |
 |-----------|------|-------|-------------|
-| `radiation_value` | number | 0-1200 W/m² | Radiation solaire directe en W/m² |
+| `radiation_value` | number | 0-1500 W/m² | Radiation solaire directe en W/m² |
 
 **Exemple de flow :**
 ```
@@ -335,6 +346,9 @@ THEN Envoyer radiation solaire à la pompe à chaleur ({{radiation}})
 | `receive_external_flow_data` | `flow-card-manager-service.ts:964` |
 | `receive_external_ambient_data` | `flow-card-manager-service.ts:976` |
 | `force_insight_analysis` | `flow-card-manager-service.ts:745` |
+| `receive_external_wind_data` | `flow-card-manager-service.ts:984` |
+| `receive_external_solar_power` | `flow-card-manager-service.ts:996` |
+| `receive_external_solar_radiation` | `flow-card-manager-service.ts:1008` |
 
 #### CONDITIONS
 
@@ -349,4 +363,4 @@ THEN Envoyer radiation solaire à la pompe à chaleur ({{radiation}})
 
 ---
 
-*Voir : [Configuration Guide](./advanced-settings/CONFIGURATION_GUIDE.fr.md) pour tous les paramètres*
+*Voir : [Configuration Guide](../advanced-settings/CONFIGURATION_GUIDE.fr.md) pour tous les paramètres*

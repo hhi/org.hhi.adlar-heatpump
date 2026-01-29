@@ -305,14 +305,14 @@ Geautomatiseerde analyse van het thermische gebouwmodel met energie-besparende a
 ### Gebouw Inzichten Inschakelen
 - **Standaard**: Ingeschakeld
 - **Functie**: Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen
-- **Leertijd**: Inzichten verschijnen na 24-48 uur leren
+- **Leertijd**: Inzichten verschijnen na 48-72 uur leren
 - **Vereisten**: Gebouwmodel leren moet ingeschakeld zijn
 
 ### Minimale Betrouwbaarheid
 - **Standaard**: 70%
 - **Bereik**: 50% - 90%
 - **Functie**: Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt
-- **70%**: ~24-48 uur leren
+- **70%**: ~48-72 uur leren
 - **Lagere waarden**: Eerdere inzichten, minder nauwkeurigheid
 
 ### Max Actieve Inzichten

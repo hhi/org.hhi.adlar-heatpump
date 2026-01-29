@@ -8,43 +8,32 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 
 ## Features
 
-- **Real-time Connection Status (v0.99.47)**: Live device connection monitoring with 4 distinct states (connected, disconnected, reconnecting, error) updated every 5 seconds
-- **Production-Ready Stability (v0.99.46)**: Crash-proof error handling with triple-layer protection, automatic device status sync, and global error handlers
-- **Protocol Version Selection (v0.99.59)**: Choose Tuya protocol version during pairing (3.3, 3.4, 3.5) to resolve ECONNRESET connection issues
-- **Settings-Based Credential Updates (v0.99.62)**: Update device credentials and protocol version directly in settings without re-pairing
-- **Service-Oriented Architecture (v0.99.23+)**: 8 specialized services managed by ServiceCoordinator for code organization, testability, and maintainability
-- **Local API Integration**: Direct communication via Tuya local protocol
-- **Complete Device Control**: Access to all 48+ device capabilities including enhanced diagnostics
-- **Real-time Monitoring**: Live sensor data and system status updates managed by TuyaConnectionService
-- **Automated Reconnection**: Robust connection handling with automatic recovery and device availability status sync
-- **Multi-language Support**: English and Dutch interface
-- **COP Efficiency Monitoring**: Real-time coefficient of performance calculation with 8 different methods and diagnostic feedback (COPCalculator service)
-- **SCOP Seasonal Analysis**: Seasonal coefficient of performance according to EN 14825 standards (SCOPCalculator service)
-- **Rolling COP Analysis**: Time-series efficiency tracking with daily/weekly/monthly averages (RollingCOPCalculator service)
-- **Cross-App Integration**: External data exchange via flow cards for enhanced accuracy
-- **Flow Card Control**: Individual control over 8 flow card categories (64 total cards) via FlowCardManagerService
-- **Enhanced Error Handling**: Smart retry logic with user-friendly recovery guidance, crash prevention, and ECONNRESET resilience
-- **Settings Management**: Race condition prevention with deferred updates (SettingsManagerService)
-- **Health Monitoring**: Real-time capability monitoring with intelligent flow card registration (CapabilityHealthService)
-- **Safety Monitoring**: Critical temperature, connection, and system fault alerts
-- **Adaptive Temperature Control (v2.0.0+)**: PI regulation, thermal predictions, energy price optimization, and COP optimization
-- **Building Model Learning (v2.0.0+)**: Machine learning for thermal properties (C, UA, τ, g, P_int) with seasonal adjustments
-- **Building Insights & Recommendations (v2.4.0+)**: Automated energy-saving recommendations with ROI estimates based on learned building model
-- **Building Model Diagnostics (v2.0.1+)**: Comprehensive troubleshooting tool for tau/C/UA learning issues with detailed status reporting
+- **Local API Integration**: Direct communication via Tuya local protocol (no cloud dependency)
+- **Connection Monitoring & Auto-Reconnect**: Live connection status with automatic recovery and availability sync
+- **Protocol Version Selection**: Choose Tuya protocol version during pairing (3.3, 3.4, 3.5)
+- **Settings-Based Credential Updates**: Update device credentials and protocol version directly in settings without re-pairing
+- **Service-Oriented Architecture**: 9 specialized services managed by ServiceCoordinator for modularity and maintainability
+- **Complete Device Control**: Access to 88 capabilities including diagnostics, energy, and advanced controls
+- **Flow Card Ecosystem**: 93 total flow cards with per-category control and health-based registration
+- **Efficiency Monitoring**: COP (real-time), Rolling COP (daily/weekly/monthly), and SCOP per EN 14825
+- **Adaptive Control & Building Model**: PI regulation, thermal predictions, COP/energy optimization, and building model learning
+- **Building Insights & Diagnostics**: Automated recommendations and detailed learning diagnostics
+- **Energy Price Optimization**: Day-ahead price scheduling and cost-aware control
+- **Multi-language Support**: English, Dutch, German, and French
 
 ## Capabilities
 
-The app provides access to **60+ capabilities** across nine categories:
+The app provides access to **88 capabilities** across key categories:
 
-- **Connection Status (1)**: Real-time Tuya connection state (connected/disconnected/reconnecting/error)
-- **Temperature Sensors (9)**: Inlet/outlet water, coiler, discharge, ambient, and saturation temperatures
-- **Power & Electrical (9)**: 3-phase voltage/current monitoring, power consumption, energy usage, external power input, calculated external energy total
-- **System Control (8)**: Heating modes, temperature setpoints, capacity settings, timer control
-- **System States (6)**: Compressor status, defrost state, backwater state, fault detection
-- **Valve Control (2)**: EEV and EVI pulse steps monitoring
-- **Efficiency Monitoring (6)**: Real-time COP with diagnostics, calculation method, seasonal SCOP with data quality, rolling averages (daily/weekly/monthly), trend analysis
-- **Adaptive Control (8)**: Simulated target, price category, current/next price, hourly/daily costs, energy price data, adaptive diagnostics
-- **Additional Monitoring (7)**: Water flow, diagnostic parameters, system optimization, external power integration
+- **Connection Status**: Real-time Tuya connection state (connected/disconnected/reconnecting/error)
+- **Temperature Sensors**: Inlet/outlet water, coil, discharge, ambient, and saturation temperatures
+- **Power & Electrical**: 3-phase voltage/current, power consumption, energy usage, external power input, calculated totals
+- **System Control**: Heating modes, temperature setpoints, capacity settings, timer control
+- **System States & Safety**: Compressor, defrost, backwater, fault detection, protections
+- **Valve & Pump Monitoring**: EEV/EVI pulse steps, water flow
+- **Efficiency Monitoring**: COP diagnostics, rolling averages, SCOP quality and trend analysis
+- **Adaptive & Price Control**: Simulated targets, price categories, costs, and adaptive diagnostics
+- **Diagnostics & Insights**: Building model diagnostics, insights, and optimization signals
 
 ## Installation & Setup
 
@@ -57,8 +46,8 @@ The app provides access to **60+ capabilities** across nine categories:
 
 ### Getting Device Credentials
 
-To obtain the required local key, refer to the documentation:
-`docs/setup/Get Local Keys - instruction.pdf`
+To obtain the required local key, refer to:
+`docs/setup/Tuya_LocalKey_Homey_Guide_EN.pdf`
 
 ### Installation Steps
 
@@ -71,7 +60,7 @@ To obtain the required local key, refer to the documentation:
    - **Protocol Version**: Tuya protocol version (3.3, 3.4, or 3.5) - Default: 3.3
 4. Complete the pairing process
 
-**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version in device settings (Settings → Connection Settings → Protocol Version). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.md](docs/setup/USER_QUICK_FIX.md) for troubleshooting guidance.
+**Note:** If you experience connection issues (ECONNRESET errors), try changing the protocol version in device settings (Settings → Connection Settings → Protocol Version). Most devices use 3.3, but some newer models require 3.4 or 3.5. See [USER_QUICK_FIX.en.md](docs/setup/USER_QUICK_FIX.en.md) for troubleshooting guidance.
 
 ## Configuration
 
@@ -79,12 +68,7 @@ To obtain the required local key, refer to the documentation:
 
 #### Flow Card Controls
 
-**FlowCardManagerService** dynamically manages 64 total flow cards across 8 categories:
-
-- **Temperature Alerts** (11 cards), **Voltage Alerts** (3 cards), **Current Alerts** (3 cards)
-- **Power Alerts** (3 cards), **Pulse-steps Alerts** (2 cards), **State Alerts** (5 cards)
-- **Efficiency Alerts** (3 cards): COP thresholds, outlier detection, method-based automation
-- **Expert Mode** (3 cards)
+**FlowCardManagerService** dynamically manages flow cards with per-category controls and health-based registration.
 
 Three modes per category (managed via SettingsManagerService + CapabilityHealthService):
 
@@ -112,7 +96,7 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 **SCOPCalculator Service** provides seasonal efficiency per EN 14825:
 
-- **SCOP Calculation**: Heating season average (Oct 1 - May 15, 228 days)
+- **SCOP Calculation**: Heating season average (Oct 1 - May 15, 227 days)
 - **Temperature Bin Method**: 6 temperature bins with load ratio weighting
 - **Quality Assessment**: High/medium/low confidence based on data coverage
 
@@ -160,9 +144,9 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 ## Flow Cards
 
-**78 Total Cards**: 39 triggers, 23 conditions, 16 actions
+**93 Total Cards**: 41 triggers, 29 conditions, 23 actions
 
-### Triggers (39)
+### Triggers (41)
 
 - **Temperature, voltage, current, and power alerts**
 - **System state changes and fault detection**
@@ -170,7 +154,7 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **External Data Requests**: Automatic requests for power, flow, and ambient data from other devices
 - **Safety monitoring with rate limiting**
 
-### Conditions (23)
+### Conditions (29)
 
 - **Temperature thresholds and system status verification**
 - **COP efficiency checks** with threshold-based logic
@@ -178,7 +162,7 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Action-based conditions** for all controllable settings
 - **Inverse operator support** for "is" and "is not" logic
 
-### Actions (16)
+### Actions (23)
 
 - **Temperature setpoint and mode control**
 - **System on/off and heating curve adjustments**
@@ -215,7 +199,7 @@ Each line: `[operator] threshold : output_value`
 ##### Supported Operators
 
 - `>` - Greater than
-- `>=` - Greater than or equal (default if no operator specified)
+- `>=` - Greater than or equal
 - `<` - Less than
 - `<=` - Less than or equal
 - `==` - Equal to
@@ -499,15 +483,15 @@ The diagnostic tool helps ensure the Building Model Learner works correctly:
 
 ## Internationalization
 
-**Fully Localized Experience** in English and Dutch:
+**Fully Localized Experience** in English, Dutch, German, and French:
 
 - **COP Method Names**: All 8 calculation methods with localized descriptions
-- **COP Method Descriptions**: Detailed accuracy information (±5% to ±30%) in both languages
+- **COP Method Descriptions**: Detailed accuracy information (±5% to ±30%) in all supported languages
 - **COP Diagnostic Messages**: Specific error indicators ("No Power", "No Flow", "No Temp Δ", "Multi Fail") optimized for 22-character display
 - **Trend Analysis**: 7 efficiency trend descriptions ("Strong improvement", "Moderate decline", etc.)
 - **SCOP Status Messages**: Seasonal calculation progress with mobile-optimized text (≤22 chars)
 - **Flow Card Labels**: All triggers, conditions, and actions with proper translations
-- **Settings Interface**: Complete settings UI in both languages with context-appropriate hints
+- **Settings Interface**: Complete settings UI in all supported languages with context-appropriate hints
 
 **Mobile Optimization**: All sensor values and status messages optimized for iPhone display constraints.
 
@@ -545,8 +529,8 @@ If your device repeatedly disconnects or shows ECONNRESET errors:
 
 **Detailed Guides:**
 
-- [USER_QUICK_FIX.md](docs/setup/USER_QUICK_FIX.md) - Step-by-step instructions
-- [PROTOCOL_VERSION_GUIDE.md](docs/setup/PROTOCOL_VERSION_GUIDE.md) - Comprehensive troubleshooting
+- [USER_QUICK_FIX.en.md](docs/setup/USER_QUICK_FIX.en.md) - Step-by-step instructions
+- [PROTOCOL_VERSION_GUIDE.en.md](docs/setup/PROTOCOL_VERSION_GUIDE.en.md) - Comprehensive troubleshooting
 
 ### Device Pairing Issues
 
@@ -556,7 +540,7 @@ If pairing fails:
 2. Ensure heat pump is on local network
 3. Try different protocol versions (3.3 → 3.4 → 3.5)
 4. Check firewall/network restrictions
-5. See `docs/setup/Get Local Keys - instruction.pdf` for credential retrieval
+5. See `docs/setup/Tuya_LocalKey_Homey_Guide_EN.pdf` for credential retrieval
 
 ## Documentation & Support
 
@@ -575,7 +559,7 @@ Complete documentation is available in **4 languages** (🇳🇱 NL, 🇬🇧 EN
 
 | Guide | Description |
 |-------|-------------|
-| [Advanced Features Introduction](docs/setup/Advanced_Features_Intro.en.md) | Unlock full functionality with external data |
+| [Advanced Features Introduction](docs/setup/advanced-control/Advanced_Features_Intro.en.md) | Unlock full functionality with external data |
 | [Configuration Guide](docs/setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | All settings explained |
 | [COP Flow Card Setup](docs/setup/COP%20flow-card-setup.en.md) | Step-by-step COP measurement configuration |
 | [Protocol Version Guide](docs/setup/PROTOCOL_VERSION_GUIDE.en.md) | Tuya protocol troubleshooting (3.3/3.4/3.5) |
@@ -601,7 +585,17 @@ Located in `/docs` directory:
 
 ## Release Notes
 
-### v2.4.0 - Building Insights & Recommendations (Current)
+### v2.7.3 - Documentation Updates (Current)
+
+**Documentation:**
+
+- ✅ Expanded advanced-control guides (intro, flow cards, adaptive control, building insights)
+- ✅ Updated configuration guide and added new setup screenshots
+- ✅ Added German/French adaptive-control guides
+
+---
+
+### v2.4.0 - Building Insights & Recommendations
 
 **New Feature:**
 
@@ -612,7 +606,7 @@ Located in `/docs` directory:
 
 **Documentation:**
 
-- ✅ Updated CONFIGURATIEGIDS.md with new section 7
+- ✅ Updated `CONFIGURATION_GUIDE.nl.md` with new section 7
 - ✅ Full Dutch localization for all new settings
 
 ---
@@ -726,7 +720,7 @@ This release simplifies credential management by eliminating the intermediary re
 
 - ✅ Protocol version stored in both device store and settings for reliability
 - ✅ Automatic reconnection when protocol version changes
-- ✅ Comprehensive user documentation ([USER_QUICK_FIX.md](docs/setup/USER_QUICK_FIX.md), [PROTOCOL_VERSION_GUIDE.md](docs/setup/PROTOCOL_VERSION_GUIDE.md))
+- ✅ Comprehensive user documentation ([USER_QUICK_FIX.en.md](docs/setup/USER_QUICK_FIX.en.md), [PROTOCOL_VERSION_GUIDE.en.md](docs/setup/PROTOCOL_VERSION_GUIDE.en.md))
 
 This release resolved connection stability issues for users with devices requiring non-default protocol versions.
 

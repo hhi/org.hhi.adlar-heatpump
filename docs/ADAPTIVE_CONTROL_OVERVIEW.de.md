@@ -9,13 +9,14 @@
 
 Die Adlar App **lernt** jetzt, wie sich Ihr Zuhause verhält und passt die Wärmepumpe automatisch für optimalen Komfort und maximale Einsparungen an.
 
-### Die 3 Säulen: Komfort • Effizienz • Kosten
+### Die 4 Säulen: Komfort • Effizienz • Kosten • Thermisch
 
 | Faktor | Was es tut | Einstellung |
 |--------|------------|-------------|
-| 🛋️ **Komfort** | Stabile Raumtemperatur (±0.3°C) via PI-Regelung | 60% (Standard) |
-| ⚡ **Effizienz** | Optimaler COP durch intelligente Vorlauftemperatur | 25% (Standard) |
+| 🛋️ **Komfort** | Stabile Raumtemperatur (±0.3°C) via PI-Regelung | 50% (Standard) |
+| ⚡ **Effizienz** | Optimaler COP durch intelligente Vorlauftemperatur | 15% (Standard) |
 | 💰 **Kosten** | Vorheizen bei günstigem Strom, reduzieren bei teurem | 15% (Standard) |
+| 🏠 **Thermisch** | Prädiktive Regelung via gelerntes Gebäudemodell (τ, C, UA) | 20% (Standard) |
 
 *Gewichtungen sind einstellbar und normalisieren automatisch auf 100%.*
 
@@ -31,12 +32,18 @@ Die Adlar App **lernt** jetzt, wie sich Ihr Zuhause verhält und passt die Wärm
 - **COP-Optimierung**: Lernt optimale Vorlauftemperatur pro Außentemperatur → €200-300/Jahr
 - **Preisoptimierung**: Heizt vor während günstiger Stunden → €400-600/Jahr
 
-### 3. Intelligenteres Gebäudemodell
+### 3. Intelligenteres Gebäudemodell (v2.6.0+)
+
 Die App lernt automatisch:
+
 - **Thermische Masse (C)**: Wie schnell Ihr Haus abkühlt
 - **Wärmeverlust (UA)**: Dämmungsqualität
 - **Zeitkonstante (τ)**: Stunden bis zur stabilen Temperatur
-- **Solargewinn (g)**: Heizungsbeitrag durch Sonne
+- **Solargewinn (g)**: Heizungsbeitrag durch Sonne (wenn Sensor verfügbar)
+- **Windkorrektur**: Zusätzlicher Wärmeverlust bei starkem Wind (v2.7.0+)
+
+**Lernperiode**: 48-72 Stunden für ein zuverlässiges Modell  
+**Updates**: Kontinuierliches Lernen bei veränderten Bedingungen
 
 ---
 
@@ -57,6 +64,8 @@ Die App lernt automatisch:
 - Außentemperatursensor (Wetterdienst, Wetterstation)
 - Externes Leistungsmessgerät (für COP)
 - Dynamischer Energievertrag (für Preisoptimierung)
+- Windsensor (für Windkorrektur des Wärmeverlusts)
+- Sonneneinstrahlungssensor (für Solargewinn-Lernen)
 
 ---
 
@@ -64,8 +73,9 @@ Die App lernt automatisch:
 
 1. **Geräteeinstellungen** → `Adaptive Temperaturregelung` aktivieren
 2. Flow für Raumtemperatur erstellen
-3. 24-48 Stunden für Gebäudemodell-Lernen warten
+3. 48-72 Stunden für Gebäudemodell-Lernen warten
 4. Optional: COP-/Preisoptimierung aktivieren
+5. Optional: Wind-/Solarsensoren für zusätzliche Optimierung konfigurieren
 
 ---
 

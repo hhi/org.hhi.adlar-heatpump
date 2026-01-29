@@ -14,16 +14,15 @@
 6. [Understanding Your Insights](#understanding-your-insights)
 7. [Taking Action](#taking-action)
 8. [Example Flows](#example-flows)
-9. [Flow Cards Reference](#flow-cards-reference)
-10. [Settings](#settings)
-11. [Troubleshooting](#troubleshooting)
-12. [FAQ](#faq)
+9. [Settings](#settings)
+10. [Troubleshooting](#troubleshooting)
+11. [FAQ](#faq)
 
 ---
 
 ## Introduction
 
-The **Building Insights & Recommendations** feature transforms your heat pump from a simple temperature controller into an intelligent energy advisor. After learning your building's thermal characteristics for 24-48 hours, the system provides **concrete, actionable recommendations** with estimated savings in euros per month.
+The **Building Insights & Recommendations** feature transforms your heat pump from a simple temperature controller into an intelligent energy advisor. After learning your building's thermal characteristics for 48-72 hours, the system provides **concrete, actionable recommendations** with estimated savings in euros per month.
 
 ### Key Benefits
 
@@ -38,7 +37,7 @@ The **Building Insights & Recommendations** feature transforms your heat pump fr
 
 ## What Are Building Insights?
 
-Building Insights analyze the **5 thermal parameters** learned by the Building Model:
+Building Insights analyze the **6 thermal parameters** learned by the Building Model:
 
 | Parameter | Symbol | Meaning | Typical Range |
 |-----------|--------|---------|---------------|
@@ -47,6 +46,7 @@ Building Insights analyze the **5 thermal parameters** learned by the Building M
 | **Time Constant** | τ (tau) | How fast building heats/cools (τ = C/UA) | 5-25 hours |
 | **Solar Gain Factor** | g | Effectiveness of solar radiation heating | 0.3-0.6 |
 | **Internal Heat Gains** | P_int | Heat from people, appliances, cooking | 0.2-0.5 kW |
+| **Wind Correction** | W_corr | Extra heat loss in high wind (v2.7.0+) | 0-50 W/°C |
 
 The system compares learned values with:
 - **Your selected building profile** (Light/Average/Heavy/Passive)
@@ -59,7 +59,7 @@ When optimization opportunities are detected, it generates **insights** with spe
 
 ## How It Works
 
-### Learning Phase (24-48 Hours)
+### Learning Phase (48-72 Hours)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -134,7 +134,7 @@ The system automatically selects the best available source:
 └─────────────────────────────────────────────────────────────┘
                          ↓ (not available)
 ┌─────────────────────────────────────────────────────────────┐
-│  PRIORITY 2: Weather Station Radiation Data                 │
+│  PRIORITY 2: KNMI Radiation Data                            │
 │  - Actual measured radiation from weather station           │
 │  - Requires: flow card "Receive external solar radiation"   │
 │  - Source: e.g., KNMI app or weather station integration    │
@@ -161,14 +161,14 @@ The **"Seasonal solar gain (g)"** setting adjusts solar radiation effectiveness 
 | Jun-Aug | 130% | Maximum summer radiation |
 
 > [!IMPORTANT]
-> **Automatic detection (v2.7.0):** Seasonal correction is **only** applied for estimated radiation (sinusoidal fallback). When using solar panels or weather station data, the correction is automatically disabled because these sources already include actual seasonal/weather effects.
+> **Automatic detection (v2.7.0):** Seasonal correction is **only** applied for estimated radiation (sinusoidal fallback). When using solar panels or KNMI data, the correction is automatically disabled because these sources already include actual seasonal/weather effects.
 
 ### Which Source Should I Use?
 
 | Source | Advantages | Disadvantages | Setup |
 |--------|------------|---------------|-------|
 | **Solar Panels** | Most accurate, real-time | Requires solar panel integration | Flow: solar panel → ADLAR |
-| **Weather Station** | Measured data, no panels needed | May be 10-60 min delayed | Flow: weather app → ADLAR |
+| **KNMI** | Measured data, no panels needed | May be 10-60 min delayed | Flow: weather app → ADLAR |
 | **Estimation** | No setup needed, always available | Less accurate during clouds | Automatically active |
 
 **Recommendation:** If you have solar panels, forward their power output. Otherwise, the sinusoidal estimation with seasonal correction is sufficiently accurate for most situations.
@@ -210,19 +210,16 @@ The system provides **4 category-specific sensors** (v2.5.10+):
 - Medium thermal response (τ 5-15 hours)
 - Slow thermal response (τ > 15 hours)
 
-**Example Insight:**
-> "⏱️ Fast thermal response - building heats in 4.2 hours"
+**Example Insight (v2.6.0):**
+> "Fast (~2 hours for 2°C)" / "Normal (~4 hours for 2°C)" / "Slow (~8 hours for 2°C)"
 
-**Example Recommendation:**
-> "Enable aggressive night setback to 16°C, pre-heat 2 hours before wake time (05:00 → 07:00 ready). Est. 12% energy savings."
+**Recommendations by type:**
 
-**Recommended actions by type:**
-
-| Response Type | τ | Night Setback | Pre-Heating | Savings |
-|---------------|---|---------------|-------------|---------|
-| Fast | <5h | Aggressive (16-17°C) | 2-3 hours | 10-15% |
-| Medium | 5-15h | Moderate (17-18°C) | 4-5 hours | 6-10% |
-| Slow | >15h | Minimal or none | Not practical | 3-5% |
+| Response Type | τ | Advice |
+|---------------|---|--------|
+| Fast | <5h | Stable heating, flexible scheduling possible |
+| Normal | 5-15h | Plan 4+ hours ahead for temperature increase |
+| Slow | >15h | Continuous heating optimal for heat pump |
 
 ---
 
@@ -290,7 +287,7 @@ Monthly savings = €5.04 × 30 = €151/month
 
 **Flow Trigger Cards:**
 1. **"New building insight detected"** — Triggers on new insights
-2. **"Pre-heating time recommendation"** — Daily trigger at 23:00
+2. **"Pre-heating time recommendation"** — Triggers when ΔT > 1.5°C (max 1x per 4 hours)
 3. **"Building profile mismatch detected"** — One-time trigger
 
 ### Insight Lifecycle
@@ -683,6 +680,15 @@ THEN
 
 **Use:** Plan pre-heating for specific times, thermal storage automation
 
+**Example flow:**
+```
+WHEN Cheapest price block approaching (2 hours ahead)
+THEN
+  1. Calculate pre-heat duration (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Start pre-heating now
+```
+
 ---
 
 ### Condition Cards (3)
@@ -813,7 +819,7 @@ Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 
 ### Q: How long does learning take?
 
-**A:** 24-48 hours for 70% confidence (default threshold). You can lower to 50% for earlier insights (less accurate). Full convergence takes 1-3 weeks.
+**A:** 48-72 hours for 70% confidence (default threshold). You can lower to 50% for earlier insights (less accurate). Full convergence takes 1-3 weeks.
 
 ### Q: Do insights update if I improve insulation?
 

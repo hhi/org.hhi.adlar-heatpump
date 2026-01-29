@@ -12,7 +12,7 @@ Pour exploiter pleinement les fonctionnalités de l'application, vous pouvez con
 
 Connectez un compteur de puissance externe (par ex. de votre tableau électrique) pour un calcul COP précis.
 
-![Configuration puissance externe](images/Setup%20-%20extern%20vermogen.png)
+![Configuration puissance externe](../images/Setup%20-%20extern%20vermogen.png)
 
 **Comment configurer :**
 ```
@@ -51,7 +51,7 @@ ALORS : [Intelligent Heat Pump] Envoyer {{Puissance}} W à la pompe à chaleur p
 
 Connectez un thermostat d'ambiance ou un capteur de température pour le contrôle adaptatif de température.
 
-![Configuration température intérieure externe](images/Setup%20-%20externe%20binnentemperatuur.png)
+![Configuration température intérieure externe](../images/Setup%20-%20externe%20binnentemperatuur.png)
 
 **Comment configurer :**
 ```
@@ -71,7 +71,7 @@ ALORS : [Intelligent Heat Pump] Envoyer {{Température}} °C température intér
 
 Connectez une station météo ou des données de service météo pour de meilleures prédictions thermiques.
 
-![Configuration température extérieure externe](images/Setup%20-%20externe%20buitentemperatuur.png)
+![Configuration température extérieure externe](../images/Setup%20-%20externe%20buitentemperatuur.png)
 
 **Comment configurer :**
 ```
@@ -108,7 +108,7 @@ ALORS : [Intelligent Heat Pump] Envoyer {{Température actuelle}} °C à la pomp
 
 Connectez une application de prix d'énergie dynamique (par ex. PBTH ou EnergyZero) pour une optimisation intelligente des prix.
 
-![Configuration prix de l'énergie externes](images/Setup%20-%20externe%20energietarieven.png)
+![Configuration prix de l'énergie externes](../images/Setup%20-%20externe%20energietarieven.png)
 
 **Comment configurer :**
 ```
@@ -124,11 +124,139 @@ ALORS : [Intelligent Heat Pump] Envoyer les prix d'énergie externes {{Prix}} po
 
 ---
 
-### 1.5 Aperçu : Fonctions et Dépendances
+### 1.5 Connecter le Rayonnement Solaire Externe (pour Gain Solaire du Modèle de Bâtiment)
+
+Connectez un capteur de rayonnement solaire (par ex. KNMI) pour un calcul précis du gain solaire dans le modèle de bâtiment.
+
+![Configuration intensité rayonnement KNMI](../images/Setup%20-%20KNMI%20stralingsintensiteit.png)
+
+**Comment configurer :**
+```
+QUAND : [KNMI] L'intensité de rayonnement a changé
+ALORS : [Intelligent Heat Pump] Envoyer rayonnement solaire {{Intensité rayonnement}} W/m² à la pompe à chaleur
+```
+
+**Ce que cela déverrouille :**
+
+- ✅ Facteur g précis (coefficient de gain solaire) dans le modèle de bâtiment
+- ✅ Meilleure prévision du besoin de chauffage lors de journées ensoleillées
+- ✅ Utilisation optimale du gain solaire passif
+- ✅ Besoin de chauffage réduit lors de forte irradiation
+
+> [!NOTE]
+> **Avantage d'un capteur de rayonnement solaire externe :**
+>
+> Sans capteur externe, l'application ne peut déduire le gain solaire qu'indirectement à partir des augmentations de température. Avec une mesure directe du rayonnement, le **facteur g est 30-40% plus précis**.
+>
+> | Source | Précision facteur g | Remarque |
+> |--------|---------------------|----------|
+> | **Avec capteur rayonnement** | ±15% | Mesure directe irradiation |
+> | **Sans capteur** | ±40-50% | Déduit des deltas temp |
+>
+> **Impact :**
+>
+> - Modèle de bâtiment : le facteur g représente la surface et l'orientation réelles du vitrage
+> - Prévisions : Meilleure anticipation des périodes ensoleillées
+> - Économie d'énergie : Jusqu'à 5-10% de réduction du besoin de chauffage les jours ensoleillés
+>
+> **Conclusion :** La connexion externe est *optionnelle* mais offre une modélisation du gain solaire nettement meilleure.
+
+---
+
+### 1.6 Connecter la Vitesse du Vent Externe (pour Correction de Vent du Modèle de Bâtiment)
+
+Connectez un capteur de vitesse du vent (par ex. KNMI) pour un calcul précis des pertes de chaleur liées au vent.
+
+![Configuration vitesse du vent KNMI](../images/Setup%20-%20KNMI%20windsnelheid%20kmh.png)
+
+**Comment configurer :**
+```
+QUAND : [KNMI] La vitesse du vent a changé
+ALORS : [Intelligent Heat Pump] Envoyer vitesse du vent {{Vitesse vent}} km/h à la pompe à chaleur
+```
+
+**Ce que cela déverrouille :**
+
+- ✅ Paramètre W_corr dans le modèle de bâtiment (facteur de correction vent)
+- ✅ Correction dynamique UA lors de vent fort (+20-50% perte de chaleur supplémentaire)
+- ✅ Meilleure prévision du besoin de chauffage lors de tempêtes
+- ✅ Calcul τ (constante de temps) plus précis
+
+> [!NOTE]
+> **Impact du vent sur les pertes de chaleur :**
+>
+> Le vent augmente les pertes de chaleur par **refroidissement convectif** des façades. Lors de tempêtes (>50 km/h), les pertes de chaleur peuvent être **20-50% plus élevées** qu'en air calme.
+>
+> | Vitesse du vent | Perte de chaleur extra | W_corr typique |
+> |-----------------|------------------------|---------------:|
+> | 0-10 km/h | Négligeable | 0.00-0.03 |
+> | 10-30 km/h | +5-15% | 0.03-0.07 |
+> | 30-50 km/h | +15-30% | 0.07-0.10 |
+> | >50 km/h | +30-50% | 0.10-0.12 |
+>
+> **Fonctions sans correction vent :**
+>
+> - Le modèle de bâtiment fonctionne toujours, mais la valeur UA est une moyenne sans correction vent
+> - Lors de tempêtes, la prévision peut dévier de 10-20%
+>
+> **Conclusion :** La connexion externe est *optionnelle* mais offre des prévisions nettement meilleures lors de vent variable.
+
+---
+
+### 1.7 Connecter la Puissance des Panneaux Solaires Externe (pour Calcul du Rayonnement Solaire)
+
+Connectez votre onduleur solaire (par ex. SolarEdge, Enphase) pour un calcul précis du rayonnement solaire basé sur la puissance PV actuelle.
+
+![Configuration puissance PV actuelle](../images/Setup%20-%20PV%20actueel%20vermogen.png)
+
+**Comment configurer :**
+```
+QUAND : [SolarEdge] La puissance a changé
+ALORS : [Intelligent Heat Pump] Envoyer puissance panneau solaire {{Puissance}}W à la pompe à chaleur
+```
+
+**Ce que cela déverrouille :**
+
+- ✅ Calcul du rayonnement solaire à partir de la puissance PV et des spécifications des panneaux
+- ✅ Alternative au capteur de rayonnement direct (si non disponible)
+- ✅ Détermination précise du facteur g dans le modèle de bâtiment
+- ✅ Modélisation optimale du gain solaire
+
+> [!NOTE]
+> **Déduire le rayonnement solaire de la puissance PV :**
+>
+> L'application peut **calculer** le rayonnement solaire à partir de la puissance actuelle de vos panneaux solaires :
+>
+> **Formule :** `Rayonnement (W/m²) = Puissance PV (W) / (Surface panneau (m²) × Rendement (%))`
+>
+> **Exemple :**
+>
+> - 10 panneaux de 1,7m² avec 20% de rendement = 3,4 m² de surface effective
+> - À 2000W de puissance PV → Rayonnement = 2000 / 3,4 = ~588 W/m²
+>
+> **Avantages vs. capteur de rayonnement direct :**
+>
+> - ✅ Pas de capteur supplémentaire nécessaire (utilise le monitoring PV existant)
+> - ✅ Représente le rayonnement réel à votre emplacement et orientation
+> - ⚠️ Cependant moins précis avec panneaux sales ou ombragés
+>
+> **Choix entre puissance PV et capteur de rayonnement :**
+>
+> | Situation | Meilleur choix |
+> |-----------|----------------|
+> | Panneaux solaires disponibles | Puissance PV (pragmatique) |
+> | Pas de panneaux solaires | Capteur rayonnement KNMI |
+> | Précision optimale | Connecter les deux (app utilise meilleure source) |
+>
+> **Conclusion :** La puissance PV est une *source alternative intelligente* pour les données de rayonnement solaire.
+
+---
+
+### 1.8 Aperçu : Fonctions et Dépendances
 
 Le diagramme ci-dessous montre la relation entre les fonctions avancées et leurs sources de données requises.
 
-![Feature Dependencies Diagram](images/feature_dependencies.png)
+![Feature Dependencies Diagram](../images/feature_dependencies.png)
 
 **Légende :**
 | Couleur | Signification |
@@ -158,7 +286,7 @@ Après avoir connecté les données externes, vous pouvez utiliser de puissantes
 
 Calculez automatiquement la température de départ optimale en fonction de la température extérieure avec une courbe de chauffe.
 
-![Démo calculateur de courbe](images/Curve%20calculator.png)
+![Démo calculateur de courbe](../images/Curve%20calculator.png)
 
 **Comment cela fonctionne :**
 ```
@@ -189,7 +317,7 @@ ALORS : [Timeline] Créer notification avec Valeur de chauffe : {{Valeur Calcul�
 
 Calculez une courbe de chauffe avec une formule mathématique (y = ax + b), parfait pour les paramètres Adlar L28/L29.
 
-![Démo courbe de chauffe personnalisée](images/custom%20stooklijn.png)
+![Démo courbe de chauffe personnalisée](../images/custom%20stooklijn.png)
 
 **Comment cela fonctionne :**
 ```
@@ -216,7 +344,7 @@ ALORS : [Timeline] Créer notification avec courbe de chauffe personnalisée :
 
 Calculez des valeurs à partir de périodes de temps avec prise en charge des variables dynamiques.
 
-![Démo créneaux horaires avec variables](images/tijdsloten%20met%20vars.png)
+![Démo créneaux horaires avec variables](../images/tijdsloten%20met%20vars.png)
 
 **Comment cela fonctionne :**
 ```
@@ -263,9 +391,9 @@ ALORS : [Timeline] Créer notification avec Valeur à {{Heure}} est : {{Valeur r
 ---
 
 *Voir aussi :*
-- [Guide de Configuration](advanced-settings/CONFIGURATION_GUIDE.fr.md) - Tous les paramètres expliqués
-- [Guide Flow Cards](guide/FLOW_CARDS_GUIDE.fr.md) - Documentation complète des cartes de flux
-- [Guide Contrôle Adaptatif](guide/ADAPTIVE_CONTROL_GUIDE.fr.md) - Explication approfondie du contrôle adaptatif
+- [Guide de Configuration](../advanced-settings/CONFIGURATION_GUIDE.fr.md) - Tous les paramètres expliqués
+- [Guide Flow Cards](../guide/FLOW_CARDS_GUIDE.fr.md) - Documentation complète des cartes de flux
+- [Guide Contrôle Adaptatif](../guide/ADAPTIVE_CONTROL_GUIDE.fr.md) - Explication approfondie du contrôle adaptatif
 
 ---
 

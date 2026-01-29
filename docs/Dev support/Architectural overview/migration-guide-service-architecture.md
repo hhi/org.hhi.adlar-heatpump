@@ -641,7 +641,7 @@ async onSettings(oldSettings, newSettings, changedKeys) {
 
 - [Service Architecture Guide](service-architecture-guide.md) - Comprehensive service documentation
 - [Architecture Overview](architecture-overview.md) - High-level architecture summary
-- [CLAUDE.md](../../CLAUDE.md) - Development guidelines with service patterns
+- [CLAUDE.md](../../../CLAUDE.md) - Development guidelines with service patterns
 
 ---
 

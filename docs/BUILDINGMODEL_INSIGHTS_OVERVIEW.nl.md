@@ -1,13 +1,14 @@
 # 🏠 Nieuwe Functionaliteit: Gebouwmodel & Building Insights
 
 > **Status**: Beschikbaar vanaf versie 2.5.x  
-> **Vereist**: Adaptieve Temperatuurregeling actief + binnen-/buitentemperatuur
+> **Vereist**: Adaptieve Temperatuurregeling actief + binnen-/buitentemperatuur  
+> **Windcorrectie (W_corr)**: Beschikbaar vanaf 2.7.0+ (optioneel)
 
 ---
 
 ## Wat is het Gebouwmodel?
 
-De app leert **automatisch** de thermische eigenschappen van jouw woning door temperatuurdata te analyseren. Na 24-48 uur kent de app je huis beter dan jijzelf.
+De app leert **automatisch** de thermische eigenschappen van jouw woning door temperatuurdata te analyseren. Na 48-72 uur kent de app je huis beter dan jijzelf.
 
 ### Wat Leert de App?
 
@@ -18,6 +19,7 @@ De app leert **automatisch** de thermische eigenschappen van jouw woning door te
 | **τ** (Tijdsconstante) | Uren tot stabiele temperatuur | τ = 50u = trage afkoeling |
 | **g** (Zonnewinst) | Bijverwarming door zonlicht | Zuid-glas = hoge g |
 | **P_int** (Interne warmte) | Warmteproductie door bewoners/apparaten | Gezin met PC's = hogere P_int |
+| **W_corr** (Windcorrectie) | Extra warmteverlies bij harde wind | Storm = +20-50% UA (v2.7.0+) |
 
 ---
 
@@ -51,8 +53,9 @@ Na het leren van je gebouw geeft de app **concrete aanbevelingen** met geschatte
 │  Stap 2: Machine Learning                                   │
 │  ────────────────────────                                   │
 │  • Na 10 samples: eerste analyse                            │
-│  • Na 24 uur: 70% confidence                                │
-│  • Na 1 week: volledige profielconfiguratie                 │
+│  • Na 48 uur: 70% confidence                                │
+│  • Na 72 uur: volledige profielconfiguratie                 │
+│  • Continu: bijleren bij veranderende omstandigheden        │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -93,12 +96,16 @@ Na het leren van je gebouw geeft de app **concrete aanbevelingen** met geschatte
 ## Vereisten
 
 **Minimaal:**
+
 - ✅ Adaptieve temperatuurregeling actief
 - ✅ Binnentemperatuur sensor
 
 **Aanbevolen:**
+
 - ✅ Externe buitentemperatuur (KNMI/weerstation)
 - ✅ Externe vermogensmeting (voor €-besparingen in insights)
+- ☁️ Windsnelheid sensor (voor nauwkeurige UA-correctie bij wind)
+- ☀️ Zonnestraling sensor (voor optimale g-factor learning)
 
 ---
 

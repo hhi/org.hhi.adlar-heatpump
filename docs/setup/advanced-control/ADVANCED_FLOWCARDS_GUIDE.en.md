@@ -1,7 +1,7 @@
 # 🔧 Flow Cards Documentation: Advanced Features
 
 > **Version**: 2.7.x  
-> **Purpose**: Flow cards for adaptive control, building model, energy optimizer, COP optimizer, building insights, and wind/solar data
+> **Purpose**: Flow cards for adaptive control, building model, energy optimizer, COP optimizer, building insights, and wind/solar radiation data
 
 ---
 
@@ -14,7 +14,7 @@
 | Energy/Price Optimizer | 2 | 3 | 1 | **6** |
 | COP Optimizer | 5 | 5 | 0 | **10** |
 | Building Insights | 2 | 1 | 2 | **5** |
-| Wind & Solar (v2.7.0) | 0 | 0 | 3 | **3** |
+| Wind & Solar Radiation (v2.7.0) | 0 | 0 | 3 | **3** |
 
 ---
 
@@ -48,6 +48,7 @@
 | `comfort_component` | number | Comfort contribution (°C) |
 | `efficiency_component` | number | COP contribution (°C) |
 | `cost_component` | number | Cost contribution (°C) |
+| `thermal_component` | number | Thermal model contribution (°C) |
 | `building_model_confidence` | number | Building model confidence (%) |
 | `cop_confidence` | number | COP confidence (%) |
 | `reasoning` | string | Calculation explanation |
@@ -209,6 +210,16 @@
 | `confidence` | number | Model confidence (%) |
 | `building_tau` | number | Thermal time constant τ (hours) |
 
+**Example flow:**
+```
+WHEN Cheapest price block approaching (2 hours ahead)
+THEN
+  1. Calculate pre-heat duration (temperature_rise = 2.0)
+  2. IF preheat_hours < 3 THEN
+       → Start pre-heating now
+  3. Notification: "Pre-heating takes {{preheat_hours}}h"
+```
+
 ---
 
 ### 🟡 CONDITIONS
@@ -219,7 +230,7 @@
 
 ---
 
-## 6️⃣ Wind & Solar Data (v2.7.0)
+## 6️⃣ Wind & Solar Radiation Data (v2.7.0)
 
 > **New in v2.7.0**: External wind and solar radiation data for more accurate building model and wind correction.
 
@@ -227,14 +238,14 @@
 
 | Flow ID | Title | Description |
 |---------|-------|-------------|
-| `receive_external_wind_speed` ⭐ | Send wind speed to heat pump | Wind data for heat loss correction |
+| `receive_external_wind_data` ⭐ | Send wind speed to heat pump | Wind data for heat loss correction |
 | `receive_external_solar_power` ⭐ | Send solar power to heat pump | Solar panel output (W) |
 | `receive_external_solar_radiation` | Send solar radiation to heat pump | Direct radiation (W/m²) |
 
-#### `receive_external_wind_speed` - Parameters
+#### `receive_external_wind_data` - Parameters
 | Parameter | Type | Range | Description |
 |-----------|------|-------|-------------|
-| `speed_value` | number | 0-30 m/s | Wind speed in meters per second |
+| `wind_speed` | number | 0-200 km/h | Wind speed in kilometers per hour |
 
 **Wind correction formula:**
 ```
@@ -283,7 +294,7 @@ THEN Send solar power to heat pump ({{current_power}})
 #### `receive_external_solar_radiation` - Parameters
 | Parameter | Type | Range | Description |
 |-----------|------|-------|-------------|
-| `radiation_value` | number | 0-1200 W/m² | Direct solar radiation in W/m² |
+| `radiation_value` | number | 0-1500 W/m² | Direct solar radiation in W/m² |
 
 **Example flow:**
 ```
@@ -335,6 +346,9 @@ THEN Send solar radiation to heat pump ({{radiation}})
 | `receive_external_flow_data` | `flow-card-manager-service.ts:964` |
 | `receive_external_ambient_data` | `flow-card-manager-service.ts:976` |
 | `force_insight_analysis` | `flow-card-manager-service.ts:745` |
+| `receive_external_wind_data` | `flow-card-manager-service.ts:984` |
+| `receive_external_solar_power` | `flow-card-manager-service.ts:996` |
+| `receive_external_solar_radiation` | `flow-card-manager-service.ts:1008` |
 
 #### CONDITIONS
 
@@ -349,4 +363,4 @@ THEN Send solar radiation to heat pump ({{radiation}})
 
 ---
 
-*See: [Configuration Guide](./advanced-settings/CONFIGURATION_GUIDE.en.md) for all settings*
+*See: [Configuration Guide](../advanced-settings/CONFIGURATION_GUIDE.en.md) for all settings*

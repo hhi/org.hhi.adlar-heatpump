@@ -14,11 +14,11 @@ LOKALE CONTROLE
 - Snelle reactietijden en betrouwbare verbinding
 
 GEAVANCEERDE MONITORING
-- Real-time temperatuurmetingen (12 verschillende sensoren)
+- Real-time temperatuurmetingen (warmtepomp interne sensoren)
 - Stroomverbruik en efficiëntie monitoring
 - Automatische COP (prestatiecoëfficiënt) berekening met 8 verschillende methoden
 - Seizoensgebonden SCOP analyse volgens Europese normen
-- 60+ capabilities in 9 categorieën
+- Uitgebreide capabilities voor volledige controle
 
 VOLLEDIGE BEDIENING
 - Temperatuur instelling en verwarmingsmodi
@@ -27,17 +27,21 @@ VOLLEDIGE BEDIENING
 - Timer en automatische functies
 
 INTELLIGENTE AUTOMATISERING
-- 78 flow kaarten voor geavanceerde automatisering
+- Uitgebreide flow kaarten voor geavanceerde automatisering
 - Slimme foutdetectie en herstel
 - Weersafhankelijke optimalisatie
 - Energie-efficiëntie trends en waarschuwingen
 - Tijdgebaseerde planning en seizoensmodus detectie
-- Adaptieve temperatuurregeling met PI-regelaar (v2.0+)
-- Gebouwmodel leren met machine learning (v2.0+)
-- Gebouw Inzichten & Aanbevelingen met ROI-schattingen (v2.4+)
-- Energieprijs optimalisatie met day-ahead prijzen (v2.0+)
-- COP optimalisatie voor maximale efficiëntie (v2.0+)
-- Uitgebreide diagnostische tools voor probleemoplossing (v2.0.1+)
+- Adaptieve temperatuurregeling met PI-regelaar
+- Gebouwmodel leren met machine learning
+- Gebouw Inzichten & Aanbevelingen met ROI-schattingen
+- Energieprijs optimalisatie met day-ahead prijzen
+- COP optimalisatie voor maximale efficiëntie
+- Uitgebreide diagnostische tools voor probleemoplossing
+- Wind en zonne-integratie voor gebouwmodel
+  * Externe windsnelheid voor windchill correctie van warmteverlies
+  * Zonnestraling en PV-vermogen voor nauwkeurige zonnewinst berekening
+  * Verbetert gebouwmodel leer-nauwkeurigheid met realtime weerdata
 
 GEBRUIKSVRIENDELIJK
 - Volledig Nederlandse interface
@@ -201,7 +205,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert:
 - Dynamische interne warmtewinsten per tijdstip
 - Seizoensgebonden zonnewinst aanpassing
 
-GEBOUW INZICHTEN & AANBEVELINGEN (NIEUW v2.4)
+GEBOUW INZICHTEN & AANBEVELINGEN
 Geautomatiseerde analyse van het thermische gebouwmodel:
 - Energie-besparende aanbevelingen met ROI-schattingen
 - Inzichten verschijnen na 24-48 uur leren (70% betrouwbaarheid)
@@ -271,13 +275,16 @@ HULP NODIG?
 - Issues: Meld problemen op GitHub
 
 CROSS-APP INTEGRATIE
-Verbind met andere Homey apps voor verbeterde COP berekening:
+Verbind met andere Homey apps voor verbeterde COP berekening en gebouwmodel:
 - Externe vermogensmetingen (van uw slimme meter)
 - Externe water doorstroom gegevens
-- Externe buitentemperatuur gegevens
+- Externe buitentemperatuur gegevens (bijv. KNMI weer-app)
 - Externe binnentemperatuur voor adaptieve regeling
+- Windsnelheid data voor windchill compensatie
+- Zonnestraling intensiteit voor zonnewinst berekening
+- PV-vermogen voor realtime zonne-energiewinsten
 
-GEBOUWMODEL DIAGNOSTIEK (v2.0.1+)
+GEBOUWMODEL DIAGNOSTIEK
 Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet update:
 - Uitgebreide diagnostische flow kaart
 - Controleer binnen/buiten temperatuur sensor status
@@ -286,6 +293,35 @@ Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet upd
 - Volg leer tijdlijn (T+0 → T+50min → T+24u)
 
 Gebruik: Maak flow "Diagnosticeer gebouwmodel leren" om gedetailleerde status te zien in app logs
+
+WIND & ZONNE-INTEGRATIE
+Verbeter de nauwkeurigheid van het thermische gebouwmodel met externe weerdata:
+
+Windsnelheid Correctie:
+- Automatische aanpassing van warmteverlies op basis van windchill effect
+- Flow card: "Stel externe windsnelheid in" (km/h)
+- Vermindert leer-tijd gebouwmodel met 30-50%
+- Compatibel met KNMI Weer app en andere wind sensoren
+
+Zonnestraling Integratie:
+- Nauwkeurige berekening van zonnewinsten via gebouwoppervlak
+- Flow card: "Stel externe zonnestraling in" (W/m²)
+- Seizoensgebonden aanpassing (winter 60%, zomer 130%)
+- Ondersteunt KNMI zonnestraling data
+
+PV-vermogen Tracking:
+- Real-time monitoring van zonnepaneel opbrengst
+- Flow card: "Stel extern PV-vermogen in" (W)
+- Gebruikt voor interne warmtewinst correctie
+- Verbetert gebouwmodel betrouwbaarheid tot 85%+
+
+Data bronnen: KNMI Weer app, Homey Energy app, of eigen sensoren
+
+GEAVANCEERDE INTEGRATIE SETUP
+Voor gedetailleerde instructies over externe data integratie:
+- Wind & Zonne Setup: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md
+- Flow Cards Gids: /docs/setup/guide/FLOW_CARDS_GUIDE.nl.md
+- Volledige Configuratie: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.nl.md
 
 VEILIGHEID EN BETROUWBAARHEID
 

@@ -376,7 +376,7 @@ Find and replace trigger calls with event emissions.
    - flow-helpers.ts trigger storage (lines 49-118) - confirmed unused
 
 2. **Update CLAUDE.md**:
-   ```markdown
+   ````markdown
    ## Flow Card Architecture (v2.5.0+)
 
    **CRITICAL**: ALL flow card trigger invocations MUST go through FlowCardManagerService.
@@ -392,6 +392,7 @@ Find and replace trigger calls with event emissions.
 
    // FlowCardManagerService automatically handles trigger invocation
    ```
+   ````
 
 3. **Update SERVICE_ARCHITECTURE.md**:
    - Update FlowCardManagerService responsibilities

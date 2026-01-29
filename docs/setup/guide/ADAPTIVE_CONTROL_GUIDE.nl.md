@@ -1,5 +1,5 @@
 # Adaptive Temperature Control
-## Gebruikershandleiding v2.3.0
+## Gebruikershandleiding v2.7.x
 
 Intelligente temperatuurregeling voor een **constante binnentemperatuur** met optimale efficiëntie.
 
@@ -106,15 +106,48 @@ Cyclus 2: PI = +0.4°C → Accumulator: 0.7 → Apply +1°C, Rest: -0.3
 Cyclus 3: PI = +0.2°C → Accumulator: -0.1 → Wacht
 ```
 
+### 4-Pilaar Weighted Decision System (v2.6.0+)
+
+Adaptive Control combineert **4 intelligente componenten** in elke beslissing:
+
+| Component | Gewicht | Functie |
+|-----------|---------|---------|
+| 🛋️ **Comfort** | 50% | PI-regeling voor stabiele binnentemperatuur |
+| ⚡ **Efficiëntie** | 15% | COP-optimalisatie via aanvoertemperatuur |
+| 💰 **Kosten** | 15% | Prijsoptimalisatie (voorverwarmen bij goedkope stroom) |
+| 🏠 **Thermisch** | 20% | Predictieve regeling via geleerd gebouwmodel |
+
+**Voorbeeld berekening:**
+
+```
+Comfort wil: +2.0°C (te koud)
+Efficiency wil: -0.5°C (lagere aanvoertemp voor betere COP)
+Cost wil: +1.0°C (goedkope stroom, voorverwarmen)
+Thermal wil: +0.5°C (gebouw koelt snel af, voorspellend opwarmen)
+
+Gewogen totaal: (2.0×50% + -0.5×15% + 1.0×15% + 0.5×20%) = 1.15°C
+```
+
+**Resultaat**: Warmtepomp setpoint gaat +1°C omhoog (afgerond).
+
+> [!NOTE]
+> De gewichten zijn **configureerbaar** via device settings (Expert mode). Standaardwaarden zijn geoptimaliseerd voor meeste situaties.
+
 ---
 
 ## Aan de slag
 
 ### Vereisten
 
-- **Homey Pro** met Adlar Heat Pump app v2.3.0+
+- **Homey Pro** met Adlar Heat Pump app v2.7.0+
 - **Werkende warmtepomp** met stabiele verbinding
 - **Temperatuursensor** (Tado, Nest, Netatmo, Fibaro, Xiaomi, etc.)
+
+**Optioneel voor uitgebreide optimalisatie (v2.7.0+):**
+
+- ☁️ Windsnelheid sensor (voor gebouwmodel wind correctie)
+- ☀️ Zonnestraling sensor (voor zonne-winst optimalisatie)
+- 💰 Dynamisch energiecontract (voor prijsoptimalisatie)
 
 ### Stap 1: Temperatuurdata Flow
 
@@ -214,6 +247,7 @@ Triggert voor monitoring/logging zonder echte aanpassingen.
 | `comfort_component` | Number | Comfort bijdrage (°C) |
 | `efficiency_component` | Number | Efficiëntie bijdrage (°C) |
 | `cost_component` | Number | Kosten bijdrage (°C) |
+| `thermal_component` | Number | Thermisch model bijdrage (°C) (v2.6.0+) |
 | `reasoning` | String | Redenering |
 
 ---

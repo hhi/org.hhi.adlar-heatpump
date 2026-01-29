@@ -9,13 +9,14 @@
 
 L'application Adlar **apprend** maintenant comment votre maison se comporte et ajuste automatiquement la pompe à chaleur pour un confort optimal et des économies maximales.
 
-### Les 3 Piliers : Confort • Efficacité • Coût
+### Les 4 Piliers : Confort • Efficacité • Coût • Thermique
 
 | Facteur | Ce qu'il fait | Paramètre |
 |---------|---------------|-----------|
-| 🛋️ **Confort** | Température intérieure stable (±0.3°C) via contrôle PI | 60% (par défaut) |
-| ⚡ **Efficacité** | COP optimal grâce à une température d'alimentation intelligente | 25% (par défaut) |
+| 🛋️ **Confort** | Température intérieure stable (±0.3°C) via contrôle PI | 50% (par défaut) |
+| ⚡ **Efficacité** | COP optimal grâce à une température d'alimentation intelligente | 15% (par défaut) |
 | 💰 **Coût** | Préchauffage pendant l'électricité bon marché, réduction pendant les pics | 15% (par défaut) |
+| 🏠 **Thermique** | Contrôle prédictif via modèle de bâtiment appris (τ, C, UA) | 20% (par défaut) |
 
 *Les pondérations sont réglables et se normalisent automatiquement à 100%.*
 
@@ -31,12 +32,18 @@ L'application Adlar **apprend** maintenant comment votre maison se comporte et a
 - **Optimisation COP** : Apprend la température d'alimentation optimale par température extérieure → €200-300/an
 - **Optimisation des Prix** : Préchauffe pendant les heures bon marché → €400-600/an
 
-### 3. Modèle de Bâtiment Plus Intelligent
+### 3. Modèle de Bâtiment Plus Intelligent (v2.6.0+)
+
 L'application apprend automatiquement :
+
 - **Masse thermique (C)** : À quelle vitesse votre maison refroidit
 - **Perte de chaleur (UA)** : Qualité d'isolation
 - **Constante de temps (τ)** : Heures jusqu'à température stable
-- **Gain solaire (g)** : Contribution du chauffage par le soleil
+- **Gain solaire (g)** : Contribution du chauffage par le soleil (si capteur disponible)
+- **Correction du vent** : Perte de chaleur supplémentaire par vent fort (v2.7.0+)
+
+**Période d'apprentissage** : 48-72 heures pour un modèle fiable  
+**Mises à jour** : Apprentissage continu en fonction des conditions
 
 ---
 
@@ -57,6 +64,8 @@ L'application apprend automatiquement :
 - Capteur de température extérieure (service météo, station météo)
 - Compteur de puissance externe (pour COP)
 - Contrat d'énergie dynamique (pour optimisation des prix)
+- Capteur de vitesse du vent (pour correction du vent sur les pertes de chaleur)
+- Capteur de rayonnement solaire (pour apprentissage du gain solaire)
 
 ---
 
@@ -64,8 +73,9 @@ L'application apprend automatiquement :
 
 1. **Paramètres Appareil** → Activer `Contrôle adaptatif de température`
 2. Créer un flux pour la température intérieure
-3. Attendre 24-48 heures pour l'apprentissage du modèle de bâtiment
+3. Attendre 48-72 heures pour l'apprentissage du modèle de bâtiment
 4. Optionnel : Activer l'optimisation COP/Prix
+5. Optionnel : Configurer les capteurs vent/solaire pour optimisation supplémentaire
 
 ---
 

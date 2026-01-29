@@ -276,12 +276,12 @@ expect(validation.errors.length).toBeGreaterThan(0);
 **User Documentation**:
 
 - [README.md](../../README.md#advanced-calculate-value-from-curve) - Lines 147-230
-- [FLOW_CARDS_GUIDE.md](../setup/FLOW_CARDS_GUIDE.md#8--calculate-value-from-curve) - Comprehensive guide
+- [FLOW_CARDS_GUIDE.md](../setup/guide/FLOW_CARDS_GUIDE.en.md#10--calculate-value-from-curve) - Comprehensive guide
 
 **Technical Documentation**:
 
 - [lib/curve-calculator.ts](../../lib/curve-calculator.ts) - Implementation
-- [app.ts](../../app.ts:367-409) - Flow card registration
+- [app.ts](../../app.ts#L367-L409) - Flow card registration
 - [.homeycompose/flow/actions/calculate_curve_value.json](../../.homeycompose/flow/actions/calculate_curve_value.json) - Flow card definition
 
 ---

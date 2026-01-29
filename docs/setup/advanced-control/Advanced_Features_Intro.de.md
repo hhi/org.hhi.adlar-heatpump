@@ -12,7 +12,7 @@ Um die volle Funktionalität der App zu nutzen, können Sie externe Sensoren und
 
 Verbinden Sie ein externes Leistungsmessgerät (z.B. aus Ihrem Sicherungskasten) für eine genaue COP-Berechnung.
 
-![Externe Leistungsmessung Setup](images/Setup%20-%20extern%20vermogen.png)
+![Externe Leistungsmessung Setup](../images/Setup%20-%20extern%20vermogen.png)
 
 **So richten Sie es ein:**
 ```
@@ -51,7 +51,7 @@ DANN: [Intelligent Heat Pump] Sende {{Leistung}} W an Wärmepumpe für COP-Berec
 
 Verbinden Sie einen Raumthermostat oder Temperatursensor für adaptive Temperaturregelung.
 
-![Externe Innentemperatur Setup](images/Setup%20-%20externe%20binnentemperatuur.png)
+![Externe Innentemperatur Setup](../images/Setup%20-%20externe%20binnentemperatuur.png)
 
 **So richten Sie es ein:**
 ```
@@ -71,7 +71,7 @@ DANN: [Intelligent Heat Pump] Sende {{Temperatur}} °C Innentemperatur für adap
 
 Verbinden Sie eine Wetterstation oder Wetterdienst-Daten für bessere thermische Vorhersagen.
 
-![Externe Außentemperatur Setup](images/Setup%20-%20externe%20buitentemperatuur.png)
+![Externe Außentemperatur Setup](../images/Setup%20-%20externe%20buitentemperatuur.png)
 
 **So richten Sie es ein:**
 ```
@@ -108,7 +108,7 @@ DANN: [Intelligent Heat Pump] Sende {{Aktuelle Temperatur}} °C an Wärmepumpe f
 
 Verbinden Sie eine dynamische Energiepreis-App (z.B. PBTH oder EnergyZero) für intelligente Preisoptimierung.
 
-![Externe Energiepreise Setup](images/Setup%20-%20externe%20energietarieven.png)
+![Externe Energiepreise Setup](../images/Setup%20-%20externe%20energietarieven.png)
 
 **So richten Sie es ein:**
 ```
@@ -124,11 +124,139 @@ DANN: [Intelligent Heat Pump] Sende externe Energiepreise {{Preise}} für Preiso
 
 ---
 
-### 1.5 Übersicht: Funktionen und Abhängigkeiten
+### 1.5 Externe Sonnenstrahlung Koppeln (für Gebäudemodell Solargewinn)
+
+Koppeln Sie einen Sonnenstrahlungssensor (z.B. KNMI) für präzise Berechnung des Solargewinns im Gebäudemodell.
+
+![KNMI Strahlungsintensität Setup](../images/Setup%20-%20KNMI%20stralingsintensiteit.png)
+
+**So richten Sie es ein:**
+```
+WENN: [KNMI] Strahlungsintensität hat sich geändert
+DANN: [Intelligent Heat Pump] Sende Sonnenstrahlung {{Strahlungsintensität}} W/m² an Wärmepumpe
+```
+
+**Was dies freischaltet:**
+
+- ✅ Präziser g-Faktor (Solargewinn-Koeffizient) im Gebäudemodell
+- ✅ Bessere Vorhersage des Wärmebedarfs an sonnigen Tagen
+- ✅ Optimale Nutzung passiven Solargewinns
+- ✅ Reduzierter Heizbedarf bei hoher Einstrahlung
+
+> [!NOTE]
+> **Vorteil eines externen Sonnenstrahlungssensors:**
+>
+> Ohne externen Sensor kann die App Solargewinn nur indirekt aus Temperaturanstiegen ableiten. Mit direkter Strahlungsmessung wird der **g-Faktor 30-40% genauer** bestimmt.
+>
+> | Quelle | g-Faktor Genauigkeit | Anmerkung |
+> |--------|----------------------|-----------|
+> | **Mit Strahlungssensor** | ±15% | Direkte Einstrahlungsmessung |
+> | **Ohne Sensor** | ±40-50% | Abgeleitet aus Temp-Deltas |
+>
+> **Auswirkung:**
+>
+> - Gebäudemodell: g-Faktor repräsentiert tatsächliche Glasfläche und Ausrichtung
+> - Vorhersagen: Bessere Antizipation sonniger Perioden
+> - Energieeinsparung: Bis zu 5-10% Reduktion des Heizbedarfs an sonnigen Tagen
+>
+> **Fazit:** Externe Kopplung ist *optional*, bietet aber deutlich bessere Solargewinn-Modellierung.
+
+---
+
+### 1.6 Externe Windgeschwindigkeit Koppeln (für Gebäudemodell Windkorrektur)
+
+Koppeln Sie einen Windgeschwindigkeitssensor (z.B. KNMI) für präzise Berechnung windbedingter Wärmeverluste.
+
+![KNMI Windgeschwindigkeit Setup](../images/Setup%20-%20KNMI%20windsnelheid%20kmh.png)
+
+**So richten Sie es ein:**
+```
+WENN: [KNMI] Windgeschwindigkeit hat sich geändert
+DANN: [Intelligent Heat Pump] Sende Windgeschwindigkeit {{Windgeschwindigkeit}} km/h an Wärmepumpe
+```
+
+**Was dies freischaltet:**
+
+- ✅ W_corr Parameter im Gebäudemodell (Windkorrekturfaktor)
+- ✅ Dynamische UA-Korrektur bei starkem Wind (+20-50% zusätzlicher Wärmeverlust)
+- ✅ Bessere Vorhersage des Wärmebedarfs bei Sturm
+- ✅ Genauere τ (Zeitkonstante) Berechnung
+
+> [!NOTE]
+> **Einfluss von Wind auf Wärmeverluste:**
+>
+> Wind erhöht Wärmeverluste durch **konvektive Kühlung** der Fassaden. Bei Sturm (>50 km/h) können Wärmeverluste **20-50% höher** sein als bei Windstille.
+>
+> | Windgeschwindigkeit | Extra Wärmeverlust | W_corr typisch |
+> |---------------------|--------------------|--------------: |
+> | 0-10 km/h | Vernachlässigbar | 0.00-0.03 |
+> | 10-30 km/h | +5-15% | 0.03-0.07 |
+> | 30-50 km/h | +15-30% | 0.07-0.10 |
+> | >50 km/h | +30-50% | 0.10-0.12 |
+>
+> **Funktionen ohne Windkorrektur:**
+>
+> - Gebäudemodell funktioniert noch, aber UA-Wert ist Durchschnitt ohne Windkorrektur
+> - Bei Stürmen kann Vorhersage 10-20% abweichen
+>
+> **Fazit:** Externe Kopplung ist *optional*, bietet aber deutlich bessere Vorhersagen bei wechselndem Wind.
+
+---
+
+### 1.7 Externes Solarpanel-Leistung Koppeln (für Sonnenstrahlungsberechnung)
+
+Koppeln Sie Ihren Solarwechselrichter (z.B. SolarEdge, Enphase) für präzise Sonnenstrahlungsberechnung basierend auf aktueller PV-Leistung.
+
+![PV aktuelle Leistung Setup](../images/Setup%20-%20PV%20actueel%20vermogen.png)
+
+**So richten Sie es ein:**
+```
+WENN: [SolarEdge] Die Leistung hat sich geändert
+DANN: [Intelligent Heat Pump] Sende Solarleistung {{Leistung}}W an Wärmepumpe
+```
+
+**Was dies freischaltet:**
+
+- ✅ Berechnung der Sonnenstrahlung aus PV-Leistung und Panel-Spezifikationen
+- ✅ Alternative zu direktem Strahlungssensor (falls nicht verfügbar)
+- ✅ Präzise g-Faktor Bestimmung im Gebäudemodell
+- ✅ Optimale Solargewinn-Modellierung
+
+> [!NOTE]
+> **Sonnenstrahlung aus PV-Leistung ableiten:**
+>
+> Die App kann Sonnenstrahlung **berechnen** aus der aktuellen Leistung Ihrer Solarpanels:
+>
+> **Formel:** `Strahlung (W/m²) = PV-Leistung (W) / (Panel-Fläche (m²) × Wirkungsgrad (%))`
+>
+> **Beispiel:**
+>
+> - 10 Panels von 1,7m² mit 20% Wirkungsgrad = 3,4 m² effektive Fläche
+> - Bei 2000W PV-Leistung → Strahlung = 2000 / 3,4 = ~588 W/m²
+>
+> **Vorteile vs. direkter Strahlungssensor:**
+>
+> - ✅ Kein zusätzlicher Sensor erforderlich (nutzt vorhandenes PV-Monitoring)
+> - ✅ Repräsentiert tatsächliche Strahlung an Ihrem Standort und Ausrichtung
+> - ⚠️ Jedoch weniger genau bei verschmutzten Panels oder Schatten
+>
+> **Wahl zwischen PV-Leistung und Strahlungssensor:**
+>
+> | Situation | Beste Wahl |
+> |-----------|-------------|
+> | Solarpanels verfügbar | PV-Leistung (pragmatisch) |
+> | Keine Solarpanels | KNMI Strahlungssensor |
+> | Optimale Genauigkeit | Beide koppeln (App nutzt beste Quelle) |
+>
+> **Fazit:** PV-Leistung ist eine *intelligente alternative Quelle* für Sonnenstrahlungsdaten.
+
+---
+
+### 1.8 Übersicht: Funktionen und Abhängigkeiten
 
 Das untenstehende Diagramm zeigt die Beziehung zwischen erweiterten Funktionen und ihren erforderlichen Datenquellen.
 
-![Feature Dependencies Diagram](images/feature_dependencies.png)
+![Feature Dependencies Diagram](../images/feature_dependencies.png)
 
 **Legende:**
 | Farbe | Bedeutung |
@@ -158,7 +286,7 @@ Nach dem Verbinden externer Daten können Sie leistungsstarke Rechner-Flow-Karte
 
 Berechnen Sie automatisch die optimale Vorlauftemperatur basierend auf der Außentemperatur mit einer Heizkurve.
 
-![Kurvenrechner Demo](images/Curve%20calculator.png)
+![Kurvenrechner Demo](../images/Curve%20calculator.png)
 
 **So funktioniert es:**
 ```
@@ -189,7 +317,7 @@ DANN: [Timeline] Erstelle Benachrichtigung mit Heizwert: {{Berechneter Wert}}
 
 Berechnen Sie eine Heizkurve mit einer mathematischen Formel (y = ax + b), perfekt für Adlar L28/L29 Parameter.
 
-![Benutzerdefinierte Heizkurve Demo](images/custom%20stooklijn.png)
+![Benutzerdefinierte Heizkurve Demo](../images/custom%20stooklijn.png)
 
 **So funktioniert es:**
 ```
@@ -216,7 +344,7 @@ DANN: [Timeline] Erstelle Benachrichtigung mit benutzerdefinierter Heizkurve:
 
 Berechnen Sie Werte aus Zeitperioden mit Unterstützung für dynamische Variablen.
 
-![Zeitfenster mit Variablen Demo](images/tijdsloten%20met%20vars.png)
+![Zeitfenster mit Variablen Demo](../images/tijdsloten%20met%20vars.png)
 
 **So funktioniert es:**
 ```
@@ -263,9 +391,9 @@ DANN: [Timeline] Erstelle Benachrichtigung mit Wert um {{Zeit}} ist: {{Ergebnisw
 ---
 
 *Siehe auch:*
-- [Konfigurationshandbuch](advanced-settings/CONFIGURATION_GUIDE.de.md) - Alle Einstellungen erklärt
-- [Flow Cards Guide](guide/FLOW_CARDS_GUIDE.de.md) - Vollständige Flow-Karten-Dokumentation
-- [Adaptive Control Guide](guide/ADAPTIVE_CONTROL_GUIDE.de.md) - Ausführliche Erklärung der adaptiven Regelung
+- [Konfigurationshandbuch](../advanced-settings/CONFIGURATION_GUIDE.de.md) - Alle Einstellungen erklärt
+- [Flow Cards Guide](../guide/FLOW_CARDS_GUIDE.de.md) - Vollständige Flow-Karten-Dokumentation
+- [Adaptive Control Guide](../guide/ADAPTIVE_CONTROL_GUIDE.de.md) - Ausführliche Erklärung der adaptiven Regelung
 
 ---
 

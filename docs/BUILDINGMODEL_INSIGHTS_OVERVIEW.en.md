@@ -1,13 +1,14 @@
 # 🏠 New Feature: Building Model & Building Insights
 
 > **Status**: Available from version 2.5.x  
-> **Requires**: Adaptive Temperature Control active + indoor/outdoor temperature
+> **Requires**: Adaptive Temperature Control active + indoor/outdoor temperature  
+> **Wind correction (W_corr)**: Available from 2.7.0+ (optional)
 
 ---
 
 ## What is the Building Model?
 
-The app **automatically** learns the thermal properties of your home by analyzing temperature data. After 24-48 hours, the app knows your house better than you do.
+The app **automatically** learns the thermal properties of your home by analyzing temperature data. After 48-72 hours, the app knows your house better than you do.
 
 ### What Does the App Learn?
 
@@ -18,6 +19,7 @@ The app **automatically** learns the thermal properties of your home by analyzin
 | **τ** (Time constant) | Hours until stable temperature | τ = 50h = slow cooling |
 | **g** (Solar gain) | Heating contribution from sunlight | South-facing glass = high g |
 | **P_int** (Internal heat) | Heat production by occupants/appliances | Family with PCs = higher P_int |
+| **W_corr** (Wind correction) | Extra heat loss during strong wind | Storm = +20-50% UA (v2.7.0+) |
 
 ---
 
@@ -51,8 +53,8 @@ After learning your building, the app provides **concrete recommendations** with
 │  Step 2: Machine Learning                                   │
 │  ────────────────────────                                   │
 │  • After 10 samples: first analysis                         │
-│  • After 24 hours: 70% confidence                           │
-│  • After 1 week: complete profile configuration             │
+│  • After 48 hours: 70% confidence                           │
+│  • After 72 hours: complete profile configuration           │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -99,6 +101,8 @@ After learning your building, the app provides **concrete recommendations** with
 **Recommended:**
 - ✅ External outdoor temperature (weather service/weather station)
 - ✅ External power measurement (for € savings in insights)
+- ☁️ Wind speed sensor (for accurate UA correction during wind)
+- ☀️ Solar radiation sensor (for optimal g-factor learning)
 
 ---
 

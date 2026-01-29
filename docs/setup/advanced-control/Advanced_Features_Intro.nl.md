@@ -2,6 +2,11 @@
 
 Deze handleiding laat zien hoe je de geavanceerde functies van de Adlar Warmtepomp app kunt activeren door externe data te koppelen, en demonstreert de krachtige calculator flow cards.
 
+De externe data is te verkrijgen door het opzetten van externe APPs die de benodigde data bijhouden. 
+Onderstaande een opzet van de devices die hier in de subparagrafen gebruikt worden.
+
+![Externe devices](../images/Setup-%20Externe%20devices%20WP.png)
+
 ---
 
 ## Deel 1: Externe Data Koppelen (Setup)
@@ -12,7 +17,7 @@ Om de volledige functionaliteit van de app te benutten, kun je externe sensoren 
 
 Koppel een externe vermogensmeter (bijv. van je meterkast) voor nauwkeurige COP-berekening.
 
-![Extern vermogen setup](images/Setup%20-%20extern%20vermogen.png)
+![Extern vermogen setup](../images/Setup%20-%20extern%20vermogen.png)
 
 **Hoe in te stellen:**
 ```
@@ -51,7 +56,7 @@ DAN: [Intelligent Heat Pump] Stuur {{Vermogen}} W naar warmtepomp voor COP berek
 
 Koppel een kamerthermostaat of temperatuursensor voor adaptieve temperatuurregeling.
 
-![Externe binnentemperatuur setup](images/Setup%20-%20externe%20binnentemperatuur.png)
+![Externe binnentemperatuur setup](../images/Setup%20-%20externe%20binnentemperatuur.png)
 
 **Hoe in te stellen:**
 ```
@@ -71,7 +76,7 @@ DAN: [Intelligent Heat Pump] Stuur {{Temperatuur}} °C binnentemperatuur voor ad
 
 Koppel een weerstation of KNMI-data voor betere thermische voorspellingen.
 
-![Externe buitentemperatuur setup](images/Setup%20-%20externe%20buitentemperatuur.png)
+![Externe buitentemperatuur setup](../images/Setup%20-%20externe%20buitentemperatuur.png)
 
 **Hoe in te stellen:**
 ```
@@ -108,7 +113,7 @@ DAN: [Intelligent Heat Pump] Stuur {{Huidige temperatuur}} °C naar warmtepomp v
 
 Koppel een dynamische energieprijs app (bijv. PBTH of EnergyZero) voor slimme prijsoptimalisatie.
 
-![Externe energietarieven setup](images/Setup%20-%20externe%20energietarieven.png)
+![Externe energietarieven setup](../images/Setup%20-%20externe%20energietarieven.png)
 
 **Hoe in te stellen:**
 ```
@@ -124,11 +129,139 @@ DAN: [Intelligent Heat Pump] Stuur externe energieprijzen {{Prijzen}} voor prijs
 
 ---
 
-### 1.5 Overzicht: Features en Afhankelijkheden
+### 1.5 Externe Zonnestraling Koppelen (voor Gebouwmodel Zonnewinst)
+
+Koppel een zonnestraling sensor (bijv. KNMI) voor nauwkeurige berekening van zonne-winst in het gebouwmodel.
+
+![KNMI stralingsintensiteit setup](../images/Setup%20-%20KNMI%20stralingsintensiteit.png)
+
+**Hoe in te stellen:**
+```
+WANNEER: [KNMI] Stralingsintensiteit is veranderd
+DAN: [Intelligent Heat Pump] Stuur zonnestraling {{Stralingsintensiteit}} W/m² naar warmtepomp
+```
+
+**Wat dit ontsluit:**
+
+- ✅ Nauwkeurige g-factor (zonnewinst coefficient) in gebouwmodel
+- ✅ Betere voorspelling warmtebehoefte op zonnige dagen
+- ✅ Optimale benutting passieve zonnewinst
+- ✅ Verminderde verwarmingsbehoefte bij hoge instraling
+
+> [!NOTE]
+> **Voordeel van externe zonnestraling sensor:**
+>
+> Zonder externe sensor kan de app alleen indirect zonnewinst afleiden uit temperatuurstijgingen. Met een directe stralingsmeting wordt de **g-factor 30-40% nauwkeuriger** bepaald.
+>
+> | Bron | g-factor nauwkeurigheid | Opmerking |
+> |------|------------------------|-----------|
+> | **Met stralingsensor** | ±15% | Directe meting instraling |
+> | **Zonder sensor** | ±40-50% | Afgeleid uit temp-delta's |
+>
+> **Impact:**
+>
+> - Gebouwmodel: g-factor representeert daadwerkelijke glasoppervlak en oriëntatie
+> - Voorspellingen: Betere anticipatie op zonnige perioden
+> - Energiebesparing: Tot 5-10% reductie verwarmingsbehoefte op zonnige dagen
+>
+> **Conclusie:** Externe koppeling is *optioneel* maar geeft aanzienlijk betere zonnewinst-modellering.
+
+---
+
+### 1.6 Externe Windsnelheid Koppelen (voor Gebouwmodel Windcorrectie)
+
+Koppel een windsnelheid sensor (bijv. KNMI) voor nauwkeurige berekening van wind-gerelateerd warmteverlies.
+
+![KNMI windsnelheid setup](../images/Setup%20-%20KNMI%20windsnelheid%20kmh.png)
+
+**Hoe in te stellen:**
+```
+WANNEER: [KNMI] Windsnelheid is veranderd
+DAN: [Intelligent Heat Pump] Stuur windsnelheid {{Windsnelheid}} km/h naar warmtepomp
+```
+
+**Wat dit ontsluit:**
+
+- ✅ W_corr parameter in gebouwmodel (wind correctie factor)
+- ✅ Dynamische UA-correctie bij harde wind (+20-50% extra warmteverlies)
+- ✅ Betere voorspelling verwarmingsbehoefte bij storm
+- ✅ Nauwkeurigere τ (tijdsconstante) berekening
+
+> [!NOTE]
+> **Impact van wind op warmteverlies:**
+>
+> Wind verhoogt het warmteverlies door **convectieve koeling** van de gevels. Bij storm (>50 km/h) kan het warmteverlies **20-50% hoger** zijn dan bij windstil weer.
+>
+> | Windsnelheid | Extra warmteverlies | W_corr typisch |
+> |--------------|---------------------|---------------: |
+> | 0-10 km/h | Verwaarloosbaar | 0.00-0.03 |
+> | 10-30 km/h | +5-15% | 0.03-0.07 |
+> | 30-50 km/h | +15-30% | 0.07-0.10 |
+> | >50 km/h | +30-50% | 0.10-0.12 |
+>
+> **Functies zonder windcorrectie:**
+>
+> - Gebouwmodel werkt nog steeds, maar UA-waarde is een gemiddelde zonder windcorrectie
+> - Bij stormen kan voorspelling 10-20% afwijken
+>
+> **Conclusie:** Externe koppeling is *optioneel* maar geeft aanzienlijk betere voorspellingen bij wisselende wind.
+
+---
+
+### 1.7 Extern Zonnepanelen Vermogen Koppelen (voor Zonnestraling Berekening)
+
+Koppel je zonnepanelen omvormer (bijv. SolarEdge, Enphase) voor nauwkeurige zonnestraling berekening op basis van actueel PV-vermogen.
+
+![PV actueel vermogen setup](../images/Setup%20-%20PV%20actueel%20vermogen.png)
+
+**Hoe in te stellen:**
+```
+WANNEER: [SolarEdge] Het vermogen is veranderd
+DAN: [Intelligent Heat Pump] Stuur zonnepaneel vermogen {{Vermogen}}W naar warmtepomp
+```
+
+**Wat dit ontsluit:**
+
+- ✅ Berekening zonnestraling uit PV-vermogen en paneel-specificaties
+- ✅ Alternatief voor directe stralingsensor (indien niet beschikbaar)
+- ✅ Nauwkeurige g-factor bepaling in gebouwmodel
+- ✅ Optimale zonnewinst modellering
+
+> [!NOTE]
+> **Zonnestraling afleiden uit PV-vermogen:**
+>
+> De app kan zonnestraling **berekenen** uit het actuele vermogen van je zonnepanelen:
+>
+> **Formule:** `Straling (W/m²) = PV-vermogen (W) / (Paneel oppervlak (m²) × Efficiency (%))`
+>
+> **Voorbeeld:**
+>
+> - 10 panelen van 1.7m² met 20% rendement = 3.4 m² effectief oppervlak
+> - Bij 2000W PV-vermogen → Straling = 2000 / 3.4 = ~588 W/m²
+>
+> **Voordelen vs. directe stralingsensor:**
+>
+> - ✅ Geen extra sensor nodig (gebruik bestaande PV-monitoring)
+> - ✅ Representeert daadwerkelijke straling op jouw locatie en oriëntatie
+> - ⚠️ Wel minder nauwkeurig bij vuile panelen of schaduw
+>
+> **Keuze tussen PV-vermogen en stralingsensor:**
+>
+> | Situatie | Beste keuze |
+> |----------|-------------|
+> | Zonnepanelen beschikbaar | PV-vermogen (pragmatisch) |
+> | Geen zonnepanelen | KNMI stralingsensor |
+> | Optimale nauwkeurigheid | Beide koppelen (app gebruikt beste bron) |
+>
+> **Conclusie:** PV-vermogen is een *slimme alternatieve bron* voor zonnestraling data.
+
+---
+
+### 1.8 Overzicht: Features en Afhankelijkheden
 
 Het onderstaande diagram toont de relatie tussen de geavanceerde features en hun vereiste data bronnen.
 
-![Feature Dependencies Diagram](images/feature_dependencies.png)
+![Feature Dependencies Diagram](../images/feature_dependencies.png)
 
 **Legenda:**
 | Kleur | Betekenis |
@@ -158,7 +291,7 @@ Na het koppelen van externe data kun je gebruikmaken van krachtige calculator fl
 
 Bereken automatisch de optimale aanvoertemperatuur op basis van de buitentemperatuur met een verwarmingscurve.
 
-![Curve calculator demo](images/Curve%20calculator.png)
+![Curve calculator demo](../images/Curve%20calculator.png)
 
 **Hoe het werkt:**
 ```
@@ -189,7 +322,7 @@ DAN: [Timeline] Maak een notificatie met Stookwaarde: {{Berekend Waarde}}
 
 Bereken een stooklijn met een wiskundige formule (y = ax + b), perfect voor Adlar L28/L29 parameters.
 
-![Custom stooklijn demo](images/custom%20stooklijn.png)
+![Custom stooklijn demo](../images/custom%20stooklijn.png)
 
 **Hoe het werkt:**
 ```
@@ -216,7 +349,7 @@ DAN: [Timeline] Maak een notificatie met custom stooklijn:
 
 Bereken waarden uit tijdsperioden met ondersteuning voor dynamische variabelen.
 
-![Tijdsloten met variabelen demo](images/tijdsloten%20met%20vars.png)
+![Tijdsloten met variabelen demo](../images/tijdsloten%20met%20vars.png)
 
 **Hoe het werkt:**
 ```
@@ -263,11 +396,11 @@ DAN: [Timeline] Maak een notificatie met Waarde op {{Tijd}} is: {{Resultaat waar
 ---
 
 *Zie ook:*
-- [Configuratiegids](advanced-settings/CONFIGURATIEGIDS.md) - Alle instellingen uitgelegd
-- [Flow Cards Guide](guide/FLOW_CARDS_GUIDE.nl.md) - Complete flow card documentatie
-- [Adaptive Control Guide](guide/ADAPTIVE_CONTROL_GUIDE.nl.md) - Diepgaande uitleg adaptieve regeling
+- [Configuratiegids](../advanced-settings/CONFIGURATION_GUIDE.nl.md) - Alle instellingen uitgelegd
+- [Flow Cards Guide](../guide/FLOW_CARDS_GUIDE.nl.md) - Complete flow card documentatie
+- [Adaptive Control Guide](../guide/ADAPTIVE_CONTROL_GUIDE.nl.md) - Diepgaande uitleg adaptieve regeling
 
 ---
 
-*Laatste update: 2026-01-12*
-*Versie: 2.5.9*
+*Laatste update: 2026-01-29*
+*Versie: 2.7.x*

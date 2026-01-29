@@ -50,10 +50,10 @@ Device Settings → Scroll to top → Edit credential fields → Save
 ```
 
 **Implementation Reference**:
-- **Settings Schema**: [driver.settings.compose.json:2-76](../../drivers/intelligent-heat-pump/driver.settings.compose.json)
-- **Credential Detection**: [device.ts:2527-2530](../../drivers/intelligent-heat-pump/device.ts)
-- **Auto-Reconnection**: [device.ts:2544-2569](../../drivers/intelligent-heat-pump/device.ts)
-- **Reinitialize Method**: [tuya-connection-service.ts:125-193](../../lib/services/tuya-connection-service.ts)
+- **Settings Schema**: [driver.settings.compose.json:2-76](../../../drivers/intelligent-heat-pump/driver.settings.compose.json)
+- **Credential Detection**: [device.ts:2527-2530](../../../drivers/intelligent-heat-pump/device.ts)
+- **Auto-Reconnection**: [device.ts:2544-2569](../../../drivers/intelligent-heat-pump/device.ts)
+- **Reinitialize Method**: [tuya-connection-service.ts:125-193](../../../lib/services/tuya-connection-service.ts)
 
 ---
 
@@ -78,9 +78,9 @@ Device Settings → Scroll to top → Edit credential fields → Save
 - No platform convention requirements for credential updates
 
 **Removed Components**:
-- `"repair": [...]` section from [driver.compose.json](../../drivers/intelligent-heat-pump/driver.compose.json)
-- `onRepair()` method from [driver.ts](../../drivers/intelligent-heat-pump/driver.ts) (commented out with explanation)
-- Custom repair HTML view still exists at [enter_device_info.html](../../drivers/intelligent-heat-pump/pair/enter_device_info.html) but only used for pairing
+- `"repair": [...]` section from [driver.compose.json](../../../drivers/intelligent-heat-pump/driver.compose.json)
+- `onRepair()` method from [driver.ts](../../../drivers/intelligent-heat-pump/driver.ts) (commented out with explanation)
+- Custom repair HTML view still exists at [enter_device_info.html](../../../drivers/intelligent-heat-pump/pair/enter_device_info.html) but only used for pairing
 
 ---
 
@@ -168,7 +168,7 @@ homey app validate
 
 ## Related Documentation
 
-- [CLAUDE.md - Credential Management](../../CLAUDE.md#credential-management-v09962) - Developer guide
-- [Settings Configuration](../../drivers/intelligent-heat-pump/driver.settings.compose.json) - Settings schema
-- [Device onSettings Handler](../../drivers/intelligent-heat-pump/device.ts#L2527) - Implementation
-- [TuyaConnectionService.reinitialize()](../../lib/services/tuya-connection-service.ts#L125) - Reconnection logic
+- [CLAUDE.md - Credential Management](../../../CLAUDE.md) - Developer guide
+- [Settings Configuration](../../../drivers/intelligent-heat-pump/driver.settings.compose.json) - Settings schema
+- [Device onSettings Handler](../../../drivers/intelligent-heat-pump/device.ts#L2527) - Implementation
+- [TuyaConnectionService.reinitialize()](../../../lib/services/tuya-connection-service.ts#L125) - Reconnection logic

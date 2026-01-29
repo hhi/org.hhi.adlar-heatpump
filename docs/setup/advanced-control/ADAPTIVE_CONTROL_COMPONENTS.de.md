@@ -1,6 +1,6 @@
 # Adlar Wärmepumpe — Adaptives Regelsystem
 
-**Version:** 2.4.0 | **Datum:** Januar 2026
+**Version:** 2.7.x | **Datum:** Januar 2026
 
 ---
 
@@ -32,14 +32,14 @@ Dieses System steuert Ihre Adlar Castra Wärmepumpe intelligent für:
 │  │          Adlar Heat Pump Device - Main Controller             │  │
 │  └─────────────────────────────┬─────────────────────────────────┘  │
 │                                │                                    │
-│        ┌───────────┬───────────┼───────────┬───────────┐            │
-│        │           │           │           │           │            │
-│        ▼           ▼           ▼           ▼           │            │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐            │
-│  │  Heating  │ │ Building  │ │  Energy   │ │    COP    │            │
-│  │  Control  │ │  Learner  │ │ Optimizer │ │Controller │            │
-│  │    60%    │ │   Info    │ │    15%    │ │    25%    │            │
-│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘            │
+│        ┌───────────┬───────────┼───────────┬───────────┬───────────┐  │
+│        │           │           │           │           │           │  │
+│        ▼           ▼           ▼           ▼           ▼           │  │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ │
+│  │  Comfort  │ │ Building  │ │  Energy   │ │    COP    │ │ Thermisch │ │
+│  │  Control  │ │  Learner  │ │ Optimizer │ │ Optimizer │ │   Model   │ │
+│  │    50%    │ │   Info    │ │    15%    │ │    15%    │ │    20%    │ │
+│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ │
 │        │             │             │             │                  │
 └────────┼─────────────┼─────────────┼─────────────┼──────────────────┘
          │             │             │             │
@@ -69,7 +69,7 @@ Dieses System steuert Ihre Adlar Castra Wärmepumpe intelligent für:
 
 1. **Daten sammeln** — Innen-/Außentemp, Leistung, Preise
 2. **Regler berechnen** — Jede Komponente gibt Empfehlung
-3. **Gewichtete Entscheidung** — 60% Komfort + 25% COP + 15% Preis
+3. **Gewichtete Entscheidung** — 50% Komfort + 15% Effizienz + 15% Kosten + 20% Thermisch
 4. **Ausführen** — Zieltemperatur aktualisieren (DPS 4)
 
 ---
@@ -116,6 +116,7 @@ Der **PI (Proportional-Integral) Regler** kombiniert:
 | Wärmeverlust | UA | kW/°C | 0.1-0.4 |
 | Solargewinn-Faktor | g | - | 0.3-0.6 |
 | Interne Wärme | P_int | kW | 0.2-0.5 |
+| Windkorrektur | W_corr | - | 0.03-0.12 |
 | Zeitkonstante | τ | Stunde | 4-16 |
 
 ### Maschinelles Lernen: RLS
@@ -237,9 +238,10 @@ Die Gewichtungsfaktoren sind **konfigurierbar** über Geräteeinstellungen → G
 
 | Priorität | Standard | Bereich | Funktion |
 |-----------|----------|---------|----------|
-| **Komfort** | 60% | 0-100% | Gewicht für PI-Temperaturregelung |
-| **Effizienz** | 25% | 0-100% | Gewicht für COP-Optimierung |
+| **Komfort** | 50% | 0-100% | Gewicht für PI-Temperaturregelung |
+| **Effizienz** | 15% | 0-100% | Gewicht für COP-Optimierung |
 | **Kosten** | 15% | 0-100% | Gewicht für Preisoptimierung |
+| **Thermisch** | 20% | 0-100% | Gewicht für thermisches Modell |
 
 > [!NOTE]
 > Werte werden automatisch auf insgesamt 100% normalisiert.
@@ -248,14 +250,16 @@ Die Gewichtungsfaktoren sind **konfigurierbar** über Geräteeinstellungen → G
 
 **Beispiel:**
 ```
-Temp-Regler:      "Erhöhen +2°C" (zu kalt!)
-COP-Regler:       "Senken -1°C" (schlechter COP)
+Komfort-Regler:   "Erhöhen +2°C" (zu kalt!)
+COP-Optimierer:   "Senken -1°C" (schlechter COP)
 Preis-Optimierer: "Senken -1°C" (teurer Preis)
+Thermisches Modell: "Erhöhen +0.5°C" (Vorhersage)
 
 Berechnung:
-+2 × 0.60 = +1.20°C
--1 × 0.25 = -0.25°C
--1 × 0.15 = -0.15°C
++2.0 × 0.50 = +1.00°C
+-1.0 × 0.15 = -0.15°C
+-1.0 × 0.15 = -0.15°C
++0.5 × 0.20 = +0.10°C
 ─────────────────────
 Gesamt:    +0.80°C
 ```
@@ -275,7 +279,7 @@ Gesamt:    +0.80°C
 1. **App installieren** auf Homey Pro
 2. **Externen Sensor konfigurieren** (Thermostat)
 3. **Heizkurve → AUS** (App macht das automatisch)
-4. **24 Stunden warten** für erste Ergebnisse
+4. **48-72 Stunden warten** für erste Ergebnisse
 5. **Optimierungen aktivieren** nach 1 Woche
 
 ### Installationsphasen

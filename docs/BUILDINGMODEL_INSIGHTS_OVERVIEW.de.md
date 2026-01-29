@@ -1,13 +1,14 @@
 # 🏠 Neue Funktion: Gebäudemodell & Building Insights
 
 > **Status**: Verfügbar ab Version 2.5.x  
-> **Voraussetzung**: Adaptive Temperaturregelung aktiv + Innen-/Außentemperatur
+> **Voraussetzung**: Adaptive Temperaturregelung aktiv + Innen-/Außentemperatur  
+> **Windkorrektur (W_corr)**: Verfügbar ab 2.7.0+ (optional)
 
 ---
 
 ## Was ist das Gebäudemodell?
 
-Die App **lernt automatisch** die thermischen Eigenschaften Ihres Hauses durch Analyse von Temperaturdaten. Nach 24-48 Stunden kennt die App Ihr Haus besser als Sie selbst.
+Die App **lernt automatisch** die thermischen Eigenschaften Ihres Hauses durch Analyse von Temperaturdaten. Nach 48-72 Stunden kennt die App Ihr Haus besser als Sie selbst.
 
 ### Was Lernt die App?
 
@@ -18,6 +19,7 @@ Die App **lernt automatisch** die thermischen Eigenschaften Ihres Hauses durch A
 | **τ** (Zeitkonstante) | Stunden bis stabile Temperatur | τ = 50h = langsame Abkühlung |
 | **g** (Solargewinn) | Heizungsbeitrag durch Sonnenlicht | Südglas = hoher g-Wert |
 | **P_int** (Interne Wärme) | Wärmeproduktion durch Bewohner/Geräte | Familie mit PCs = höherer P_int |
+| **W_corr** (Windkorrektur) | Zusätzlicher Wärmeverlust bei starkem Wind | Sturm = +20-50% UA (v2.7.0+) |
 
 ---
 
@@ -51,8 +53,8 @@ Nach dem Lernen Ihres Gebäudes liefert die App **konkrete Empfehlungen** mit ge
 │  Schritt 2: Machine Learning                                │
 │  ───────────────────────────                                │
 │  • Nach 10 Samples: erste Analyse                           │
-│  • Nach 24 Stunden: 70% Konfidenz                           │
-│  • Nach 1 Woche: vollständige Profilkonfiguration           │
+│  • Nach 48 Stunden: 70% Konfidenz                           │
+│  • Nach 72 Stunden: vollständige Profilkonfiguration        │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -99,6 +101,8 @@ Nach dem Lernen Ihres Gebäudes liefert die App **konkrete Empfehlungen** mit ge
 **Empfohlen:**
 - ✅ Externe Außentemperatur (Wetterdienst/Wetterstation)
 - ✅ Externe Leistungsmessung (für €-Einsparungen in Insights)
+- ☁️ Windsensor (für genaue UA-Korrektur bei Wind)
+- ☀️ Sonneneinstrahlungssensor (für optimales g-Faktor-Lernen)
 
 ---
 

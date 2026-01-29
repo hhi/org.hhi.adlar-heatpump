@@ -14,11 +14,11 @@ LOKALE STEUERUNG
 - Schnelle Reaktionszeiten und zuverlässige Verbindung
 
 ERWEITERTE ÜBERWACHUNG
-- Echtzeit-Temperaturmessungen (12 verschiedene Sensoren)
+- Echtzeit-Temperaturmessungen (interne Wärmepumpensensoren)
 - Stromverbrauch und Effizienzüberwachung
 - Automatische COP (Leistungszahl) Berechnung mit 8 verschiedenen Methoden
 - Saisonale SCOP-Analyse nach europäischen Standards
-- 60+ Funktionen in 9 Kategorien
+- Umfangreiche Funktionen für vollständige Kontrolle
 
 VOLLSTÄNDIGE BEDIENUNG
 - Temperatureinstellung und Heizmodi
@@ -27,17 +27,21 @@ VOLLSTÄNDIGE BEDIENUNG
 - Timer und automatische Funktionen
 
 INTELLIGENTE AUTOMATISIERUNG
-- 78 Flow-Karten für erweiterte Automatisierung
+- Umfangreiche Flow-Karten für erweiterte Automatisierung
 - Intelligente Fehlererkennung und -behebung
 - Wetterabhängige Optimierung
 - Energieeffizienztrends und Warnungen
 - Zeitbasierte Planung und Saisonmoduserkennung
-- Adaptive Temperaturregelung mit PI-Regler (v2.0+)
-- Gebäudemodell-Lernen mit maschinellem Lernen (v2.0+)
-- Gebäudeeinblicke & Empfehlungen mit ROI-Schätzungen (v2.4+)
-- Energiepreisoptimierung mit Day-Ahead-Preisen (v2.0+)
-- COP-Optimierung für maximale Effizienz (v2.0+)
-- Umfassende Diagnosetools zur Fehlerbehebung (v2.0.1+)
+- Adaptive Temperaturregelung mit PI-Regler
+- Gebäudemodell-Lernen mit maschinellem Lernen
+- Gebäudeeinblicke & Empfehlungen mit ROI-Schätzungen
+- Energiepreisoptimierung mit Day-Ahead-Preisen
+- COP-Optimierung für maximale Effizienz
+- Umfassende Diagnosetools zur Fehlerbehebung
+- Wind- und Solarintegration für Gebäudemodell
+  * Externe Windgeschwindigkeit für Windchill-Korrektur des Wärmeverlusts
+  * Sonneneinstrahlung und PV-Leistung für präzise Solargewinn-Berechnung
+  * Verbessert Gebäudemodell-Lerngenauigkeit mit Echtzeit-Wetterdaten
 
 BENUTZERFREUNDLICH
 - Vollständig lokalisierte Benutzeroberfläche
@@ -201,7 +205,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 - Dynamische interne Wärmegewinne nach Tageszeit
 - Saisonale Solargewinn-Anpassung
 
-GEBÄUDEEINBLICKE & EMPFEHLUNGEN (NEU v2.4)
+GEBÄUDEEINBLICKE & EMPFEHLUNGEN
 Automatisierte Analyse des thermischen Gebäudemodells:
 - Energiesparempfehlungen mit ROI-Schätzungen
 - Einblicke erscheinen nach 24-48 Stunden Lernen (70% Vertrauen)
@@ -271,13 +275,16 @@ BENÖTIGEN SIE HILFE?
 - Probleme: Melden Sie Probleme auf GitHub
 
 APP-ÜBERGREIFENDE INTEGRATION
-Verbinden Sie sich mit anderen Homey-Apps für verbesserte COP-Berechnung:
+Verbinden Sie sich mit anderen Homey-Apps für verbesserte COP-Berechnung und Gebäudemodell:
 - Externe Leistungsmessungen (von Ihrem Smart Meter)
 - Externe Wasserdurchflussdaten
-- Externe Umgebungstemperaturdaten
+- Externe Umgebungstemperaturdaten (z.B. KNMI Wetter-App)
 - Externe Innentemperatur für adaptive Regelung
+- Windgeschwindigkeitsdaten für Windchill-Kompensation
+- Sonnenstrahlungsintensität für Solargewinn-Berechnung
+- PV-Leistung für Echtzeit-Solarenergiegewinne
 
-GEBÄUDEMODELL-DIAGNOSE (v2.0.1+)
+GEBÄUDEMODELL-DIAGNOSE
 Fehlerbehebung für thermische Lernprobleme, wenn Ihr Gebäudemodell nicht aktualisiert wird:
 - Umfassende Diagnose-Flow-Karte
 - Innen-/Außentemperatursensor-Status prüfen
@@ -286,6 +293,35 @@ Fehlerbehebung für thermische Lernprobleme, wenn Ihr Gebäudemodell nicht aktua
 - Lern-Zeitlinie verfolgen (T+0 → T+50min → T+24h)
 
 Verwendung: Erstellen Sie Flow "Gebäudemodell-Lernen diagnostizieren" für detaillierten Status in App-Logs
+
+WIND- & SOLARINTEGRATION
+Verbessern Sie die Genauigkeit des thermischen Gebäudemodells mit externen Wetterdaten:
+
+Windgeschwindigkeits-Korrektur:
+- Automatische Anpassung des Wärmeverlusts basierend auf Windchill-Effekt
+- Flow-Karte: "Externe Windgeschwindigkeit einstellen" (km/h)
+- Reduziert Gebäudemodell-Lernzeit um 30-50%
+- Kompatibel mit KNMI Wetter-App und anderen Windsensoren
+
+Sonnenstrahlungs-Integration:
+- Genaue Berechnung der Solargewinne über Gebäudeoberfläche
+- Flow-Karte: "Externe Sonneneinstrahlung einstellen" (W/m²)
+- Saisonale Anpassung (Winter 60%, Sommer 130%)
+- Unterstützt KNMI Sonnenstrahlungsdaten
+
+PV-Leistungs-Tracking:
+- Echtzeit-Überwachung der Solarpanel-Leistung
+- Flow-Karte: "Externe PV-Leistung einstellen" (W)
+- Verwendet für interne Wärmegewinn-Korrektur
+- Verbessert Gebäudemodell-Zuverlässigkeit auf 85%+
+
+Datenquellen: KNMI Wetter-App, Homey Energy App, oder eigene Sensoren
+
+ERWEITERTE INTEGRATIONS-EINRICHTUNG
+Für detaillierte Anweisungen zur externen Datenintegration:
+- Wind & Solar Setup: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.de.md
+- Flow-Karten Anleitung: /docs/setup/guide/FLOW_CARDS_GUIDE.de.md
+- Vollständige Konfiguration: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.de.md
 
 SICHERHEIT UND ZUVERLÄSSIGKEIT
 

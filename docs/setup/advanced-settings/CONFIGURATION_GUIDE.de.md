@@ -151,7 +151,7 @@ Die App unterstützt 6 verschiedene Berechnungsmethoden mit unterschiedlicher Ge
 
 ## 3. Funktionseinstellungen
 
-Diese Einstellungen bestimmen, welche Funktionen in der Homey-App-Oberfläche sichtbar sind. **Hinweis: Änderungen erfordern App-Neustart.**
+Diese Einstellungen bestimmen, welche Funktionen in der Homey-App-Oberfläche sichtbar sind. **Hinweis: Änderungen erfordern App-Neustart und Schließen der App.**
 
 ### Kurvensteuerungseinstellungen anzeigen
 - **Standard**: Deaktiviert
@@ -305,14 +305,14 @@ Automatisierte Analyse des thermischen Gebäudemodells mit Energiespar-Empfehlun
 ### Gebäude-Einblicke aktivieren
 - **Standard**: Aktiviert
 - **Funktion**: Analysiert thermisches Gebäudemodell und liefert Energiespar-Empfehlungen
-- **Lernzeit**: Einblicke erscheinen nach 24-48 Stunden Lernen
+- **Lernzeit**: Einblicke erscheinen nach 48-72 Stunden Lernen
 - **Voraussetzungen**: Gebäudemodell-Lernen muss aktiviert sein
 
 ### Mindestvertrauen
 - **Standard**: 70%
 - **Bereich**: 50% - 90%
 - **Funktion**: Zeigt Einblicke nur, wenn Gebäudemodell-Vertrauen diesen Schwellenwert überschreitet
-- **70%**: ~24-48 Stunden Lernen
+- **70%**: ~48-72 Stunden Lernen
 - **Niedrigere Werte**: Frühere Einblicke, weniger Genauigkeit
 
 ### Max Aktive Einblicke

@@ -270,6 +270,6 @@ scheduleNextReconnectionAttempt(): void {
 ---
 
 **Related Documentation**:
-- [Service Architecture](SERVICE_ARCHITECTURE.md#tuyaconnectionservice)
+- [Service Architecture](SERVICE_ARCHITECTURE.md#1-tuyaconnectionservice)
 - [Reconnection Resilience](SERVICE_ARCHITECTURE.md#reconnection-resilience-v105)
 - [Error Handling](ERROR_HANDLING.md)

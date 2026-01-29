@@ -14,11 +14,11 @@ LOCAL CONTROL
 - Fast response times and reliable connection
 
 ADVANCED MONITORING
-- Real-time temperature measurements (12 different sensors)
+- Real-time temperature measurements (heat pump internal sensors)
 - Power consumption and efficiency monitoring
 - Automatic COP (coefficient of performance) calculation with 8 different methods
 - Seasonal SCOP analysis according to European standards
-- 60+ capabilities in 9 categories
+- Extensive capabilities for complete control
 
 COMPLETE OPERATION
 - Temperature setting and heating modes
@@ -27,17 +27,21 @@ COMPLETE OPERATION
 - Timer and automatic functions
 
 INTELLIGENT AUTOMATION
-- 78 flow cards for advanced automation
+- Extensive flow cards for advanced automation
 - Smart error detection and recovery
 - Weather-dependent optimization
 - Energy efficiency trends and warnings
 - Time-based scheduling and seasonal mode detection
-- Adaptive temperature control with PI controller (v2.0+)
-- Building model learning with machine learning (v2.0+)
-- Building Insights & Recommendations with ROI estimates (v2.4+)
-- Energy price optimization with day-ahead pricing (v2.0+)
-- COP optimization for maximum efficiency (v2.0+)
-- Comprehensive diagnostic tools for troubleshooting (v2.0.1+)
+- Adaptive temperature control with PI controller
+- Building model learning with machine learning
+- Building Insights & Recommendations with ROI estimates
+- Energy price optimization with day-ahead pricing
+- COP optimization for maximum efficiency
+- Comprehensive diagnostic tools for troubleshooting
+- Wind and solar integration for building model
+  * External wind speed for wind chill correction of heat loss
+  * Solar radiation and PV power for accurate solar gain calculation
+  * Improves building model learning accuracy with real-time weather data
 
 USER-FRIENDLY
 - Fully localized interface
@@ -201,7 +205,7 @@ Machine learning algorithm that learns the thermal properties of your home:
 - Dynamic internal heat gains by time of day
 - Seasonal solar gain adjustment
 
-BUILDING INSIGHTS & RECOMMENDATIONS (NEW v2.4)
+BUILDING INSIGHTS & RECOMMENDATIONS
 Automated analysis of the thermal building model:
 - Energy-saving recommendations with ROI estimates
 - Insights appear after 24-48 hours of learning (70% confidence)
@@ -271,13 +275,16 @@ NEED HELP?
 - Issues: Report problems on GitHub
 
 CROSS-APP INTEGRATION
-Connect with other Homey apps for enhanced COP calculation:
+Connect with other Homey apps for enhanced COP calculation and building model:
 - External power measurements (from your smart meter)
 - External water flow data
-- External ambient temperature data
+- External ambient temperature data (e.g., KNMI weather app)
 - External indoor temperature for adaptive control
+- Wind speed data for wind chill compensation
+- Solar radiation intensity for solar gain calculation
+- PV power for real-time solar energy gains
 
-BUILDING MODEL DIAGNOSTICS (v2.0.1+)
+BUILDING MODEL DIAGNOSTICS
 Troubleshooting for thermal learning issues when your building model doesn't update:
 - Comprehensive diagnostic flow card
 - Check indoor/outdoor temperature sensor status
@@ -286,6 +293,35 @@ Troubleshooting for thermal learning issues when your building model doesn't upd
 - Follow learning timeline (T+0 → T+50min → T+24h)
 
 Usage: Create flow "Diagnose building model learning" to see detailed status in app logs
+
+WIND & SOLAR INTEGRATION
+Improve the accuracy of the thermal building model with external weather data:
+
+Wind Speed Correction:
+- Automatic adjustment of heat loss based on wind chill effect
+- Flow card: "Set external wind speed" (km/h)
+- Reduces building model learning time by 30-50%
+- Compatible with KNMI Weather app and other wind sensors
+
+Solar Radiation Integration:
+- Accurate calculation of solar gains via building surface
+- Flow card: "Set external solar radiation" (W/m²)
+- Seasonal adjustment (winter 60%, summer 130%)
+- Supports KNMI solar radiation data
+
+PV Power Tracking:
+- Real-time monitoring of solar panel output
+- Flow card: "Set external PV power" (W)
+- Used for internal heat gain correction
+- Improves building model reliability to 85%+
+
+Data sources: KNMI Weather app, Homey Energy app, or own sensors
+
+ADVANCED INTEGRATION SETUP
+For detailed instructions on external data integration:
+- Wind & Solar Setup: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.en.md
+- Flow Cards Guide: /docs/setup/guide/FLOW_CARDS_GUIDE.en.md
+- Complete Configuration: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.en.md
 
 SAFETY AND RELIABILITY
 

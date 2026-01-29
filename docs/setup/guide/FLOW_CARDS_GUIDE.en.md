@@ -1,6 +1,9 @@
-# Flow Cards Implementation Guide (v1.0.7)
+# Flow Cards Implementation Guide: Basic Device Flow Cards (v2.7.x)
 
-This guide documents the newly implemented flow cards in version 1.0.7, providing practical examples, configuration tips, and troubleshooting advice.
+> **Scope**: This guide documents **basic device flow cards** for device monitoring, energy tracking and calculators.
+> **Advanced features**: See [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.en.md) for adaptive control, building model, COP optimizer, energy optimizer, building insights and wind/solar integration.
+
+This guide provides practical examples, configuration tips, and troubleshooting advice for the basic flow cards of the Adlar Heat Pump app.
 
 ---
 
@@ -47,7 +50,7 @@ WHEN: Fault code [fault_code] detected
 
 #### Supported Fault Codes
 
-| Code | English | Nederlands |
+| Code | English | Dutch |
 |------|---------|------------|
 | 0 | No fault | Geen storing |
 | 1 | High pressure protection | Hogedrukbeveiliging |
@@ -110,12 +113,6 @@ THEN: Send notification "Antifreeze protection activated"
 **Problem**: Fault description shows "Unknown fault (code: X)"
 **Solution**: The fault code is not in the standard mapping table. Report code to developer for addition.
 
-**Problem**: Trigger doesn't fire despite fault visible in device status
-**Solution**:
-1. Check trigger is not disabled in flow settings
-2. Verify flow card is enabled in device settings → Flow Card Control
-3. Check app logs for error messages
-
 ---
 
 ### 2. ⚡ Power Threshold Exceeded
@@ -176,51 +173,6 @@ THEN: Switch to Economy mode
   AND Send notification "Switched to economy mode during peak hours"
 ```
 
-**Smart Home Integration**:
-```
-WHEN: Power threshold exceeded 4000W
-THEN: Check if EV is charging
-  AND Pause EV charging temporarily
-  AND Resume after 15 minutes
-```
-
-#### Configuration Tips
-
-**Setting the Right Threshold**:
-1. Monitor normal operation for 24 hours
-2. Note maximum power during heating cycle (~3000-4000W typical)
-3. Set threshold to 120% of maximum (e.g., 4800W if max is 4000W)
-4. This ensures trigger only on genuine overload
-
-**Device Settings Integration**:
-- Go to Device Settings → Advanced → Power Threshold
-- Set custom threshold (default: 3000W)
-- Service will automatically use this value
-
-#### Technical Details
-
-- **Monitoring**: Checks every power update (~10 seconds)
-- **State Machine**: Tracks `powerAboveThreshold` boolean
-- **Hysteresis Formula**: `reset_threshold = threshold * 0.95`
-- **Rate Limit**: 300,000ms (5 minutes) minimum between triggers
-- **Performance**: ~2ms processing time per check
-
-#### Troubleshooting
-
-**Problem**: Trigger fires too often (every minute)
-**Solution**:
-- Threshold too low - increase by 500W increments
-- Check rate limiting is working (should see "rate limited" in logs)
-
-**Problem**: Trigger never fires despite high power
-**Solution**:
-1. Verify power monitoring is enabled (Device Settings → Energy Tracking)
-2. Check `measure_power` capability has valid data
-3. Confirm threshold is set correctly in settings
-
-**Problem**: Trigger fires and immediately resets
-**Solution**: This is normal behavior with hysteresis. Power dropped below 95% threshold.
-
 ---
 
 ### 3. 🎯 Total Consumption Milestone
@@ -276,62 +228,6 @@ THEN: Send notification "Seasonal milestone: {{milestone_value}} kWh"
   AND Send efficiency report
 ```
 
-**Cost Alert**:
-```
-WHEN: Milestone reached [any]
-THEN: Calculate cost: {{milestone_value}} * €0.30
-  AND IF cost > monthly budget
-    THEN Send warning notification
-```
-
-**Gamification**:
-```
-WHEN: Milestone reached [any]
-THEN: Send positive notification "Achievement unlocked: {{milestone_value}} kWh!"
-  AND Show progress bar: {{total_consumption}} / 2000 kWh target
-```
-
-#### Configuration Tips
-
-**Understanding Milestones**:
-- 100 kWh ≈ €30-50 typical electricity cost
-- Average heat pump: ~100-150 kWh per week in winter
-- Annual consumption: ~5000-8000 kWh (= 50-80 milestones)
-
-**Resetting Milestones** (if needed):
-```javascript
-// In Homey Developer Tools → Device Storage
-// Delete key: 'triggered_energy_milestones'
-// Next milestone will catch up from zero
-```
-
-#### Technical Details
-
-- **Trigger Point**: After each energy update (~30 seconds)
-- **Storage**: Array of triggered milestones in device store
-- **Deduplication**: `if (!triggeredMilestones.includes(milestone))`
-- **Catch-Up Logic**: Loops from 100 to `highestMilestone` on first run
-- **Performance**: O(n) where n = number of milestones (negligible)
-
-#### Troubleshooting
-
-**Problem**: Multiple milestone triggers at once
-**Solution**: Normal on first install. Each milestone triggers once. Subsequent runs trigger only new milestones.
-
-**Problem**: Milestone doesn't trigger despite reaching 100 kWh
-**Solution**:
-1. Check `meter_power.electric_total` capability has data
-2. Verify energy tracking is enabled
-3. Check device logs for milestone check execution
-
-**Problem**: Want to change milestone increment (not 100 kWh)
-**Solution**: Currently fixed at 100 kWh. Use flow conditions to filter:
-```
-WHEN: Milestone reached [any]
-  AND milestone_value MOD 500 = 0
-THEN: (only triggers at 500, 1000, 1500, etc.)
-```
-
 ---
 
 ## Conditions
@@ -382,64 +278,6 @@ IF: COP efficiency is above 4.0
 THEN: Send notification "Excellent efficiency despite cold weather!"
   AND Log as reference point
 ```
-
-**Dynamic Temperature Adjustment**:
-```
-IF: COP efficiency is below 2.0
-  AND Running for > 30 minutes
-THEN: Decrease target temperature by 1°C
-  AND Wait 15 minutes
-  AND Recheck efficiency
-```
-
-**Smart Defrost Detection**:
-```
-IF: COP efficiency is below 1.5
-  AND Compressor is running
-  AND Coil temperature < outlet temperature
-THEN: Assume defrost needed
-  AND Log timestamp for pattern analysis
-```
-
-#### Configuration Tips
-
-**Setting Thresholds**:
-- **Critical threshold**: < 2.0 (investigate immediately)
-- **Warning threshold**: < 2.5 (monitor closely)
-- **Good target**: > 3.0 (typical operation)
-- **Excellent**: > 4.0 (ideal conditions)
-
-**Factors Affecting COP**:
-- Outdoor temperature (major impact)
-- Water flow rate
-- Temperature differential
-- System age and maintenance
-- Defrost cycles (temporarily lower COP)
-
-#### Technical Details
-
-- **Data Source**: `adlar_cop` capability (real-time)
-- **Compressor Check**: `measure_frequency.compressor_strength > 0`
-- **Update Frequency**: Every 30 seconds (follows COP calculation interval)
-- **Return Logic**: `false` if idle, `(currentCOP > threshold)` if running
-
-#### Troubleshooting
-
-**Problem**: Condition always returns false
-**Solution**: Check if compressor is running. Condition intentionally returns false during idle.
-
-**Problem**: COP reads as 0 but compressor is running
-**Solution**:
-1. Check power measurement is available
-2. Verify temperature sensors have valid data
-3. Check COP calculation is enabled in settings
-
-**Problem**: Condition triggers false alarms
-**Solution**: Increase threshold slightly. COP can temporarily dip during:
-- Defrost cycles
-- System startup
-- Extreme outdoor temperatures
-
 ---
 
 ### 5. 📊 Daily COP Above Threshold
@@ -471,53 +309,6 @@ IF: Daily COP is above/below [threshold]
 - Weighted by runtime (idle periods excluded)
 - More stable than real-time COP
 
-#### Example Flows
-
-**Daily Performance Report**:
-```
-EVERY DAY at 23:59:
-IF: Daily COP above 3.0
-THEN: Send notification "Good daily efficiency: {{adlar_cop_daily}}"
-ELSE: Send notification "Below target: {{adlar_cop_daily}} (target: 3.0)"
-```
-
-**Maintenance Scheduling**:
-```
-EVERY WEEK:
-IF: Daily COP below 2.5
-  FOR 3 consecutive days
-THEN: Send notification "Maintenance may be needed"
-  AND Schedule inspection
-```
-
-**Weather Correlation**:
-```
-EVERY DAY at 22:00:
-IF: Daily COP above 3.5
-  AND Average outdoor temperature < -5°C
-THEN: Log as "Excellent performance in cold weather"
-```
-
-#### Configuration Tips
-
-**Understanding Daily COP**:
-- Smooths out short-term fluctuations
-- Better indicator of overall system health
-- Less sensitive to defrost cycles than real-time COP
-
-**Typical Daily Values**:
-- Winter (< 0°C): 2.5-3.5
-- Spring/Fall (5-15°C): 3.5-4.5
-- Summer (> 20°C): 4.0-5.0+
-
-#### Technical Details
-
-- **Data Source**: `adlar_cop_daily` capability
-- **Calculation**: RollingCOPCalculator.getDailyCOP()
-- **Update Frequency**: Every 5 minutes
-- **Data Points**: Circular buffer of last 1440 points (24 hours @ 1/min)
-- **Idle Awareness**: Excludes periods with compressor off
-
 ---
 
 ### 6. 📈 Monthly COP Above Threshold
@@ -537,17 +328,6 @@ IF: Monthly COP is above/below [threshold]
   - Default: 3.0
   - Target: > 3.5 for excellent seasonal performance
 
-#### Smart Behavior
-
-**Long-Term Averaging**:
-- 30-day rolling window
-- Smooths weather variations
-- Best indicator of system efficiency over time
-
-**Data Validation**:
-- Returns `false` if monthlyCOP = 0 (insufficient data)
-- Requires multiple days of operation for reliable average
-
 #### Example Flows
 
 **Monthly Report**:
@@ -559,16 +339,6 @@ THEN: Send notification "Excellent monthly efficiency: {{adlar_cop_monthly}}"
   AND Compare to previous months
 ```
 
-**Seasonal Optimization**:
-```
-EVERY MONTH:
-IF: Monthly COP below 3.0
-  AND Season is Winter
-THEN: Review system settings
-  AND Consider insulation improvements
-  AND Send efficiency tips
-```
-
 **Predictive Maintenance**:
 ```
 EVERY MONTH:
@@ -577,37 +347,13 @@ THEN: Send alert "Efficiency declining"
   AND Recommend filter check
   AND Schedule professional inspection
 ```
-
-#### Configuration Tips
-
-**Seasonal Expectations**:
-- Heating Season (Oct-Apr): Target > 3.0
-- Shoulder Seasons (Mar-May, Sep-Oct): Target > 4.0
-- Cooling Season (Jun-Aug): Target > 4.5
-
-**Trend Analysis**:
-- Track monthly COP over time
-- Declining trend may indicate:
-  - System aging
-  - Need for maintenance
-  - Refrigerant loss
-  - Component failure
-
-#### Technical Details
-
-- **Data Source**: `adlar_cop_monthly` capability
-- **Calculation**: RollingCOPCalculator.getMonthlyCOP()
-- **Update Frequency**: Every 5 minutes
-- **Data Points**: 30-day circular buffer
-- **Weighting**: Runtime-weighted average
-
 ---
 
 ### 7. ✅ Temperature Differential
 
 **ID**: `temperature_differential`
 **Category**: System Health
-**Status**: ✅ **Production-ready since v0.99** (verified in v1.0.7)
+**Status**: ✅ **Production-ready** (available in v2.7.x)
 
 #### Configuration
 
@@ -621,18 +367,6 @@ IF: Temperature differential is above/below [differential]°C
   - Too low (< 3°C): Poor heat transfer
   - Too high (> 15°C): Possible flow issues
 
-#### Smart Behavior
-
-**Null-Safe Calculation**:
-- Falls back to 0°C if sensor unavailable
-- Logs fallback usage for debugging
-- Prevents flow errors from missing data
-
-**Bidirectional Check**:
-- Uses `Math.abs(inlet - outlet)`
-- Works regardless of flow direction
-- Suitable for both heating and cooling modes
-
 #### Example Flows
 
 **Heat Transfer Efficiency**:
@@ -644,13 +378,6 @@ THEN: Send notification "Poor heat transfer detected"
   AND Verify pump operation
 ```
 
-**Ideal Operating Point**:
-```
-IF: Temperature differential between 5°C and 10°C
-  AND Power consumption < 3000W
-THEN: Log as "Ideal efficiency point"
-```
-
 **Flow Problem Detection**:
 ```
 IF: Temperature differential above 15°C
@@ -658,13 +385,6 @@ IF: Temperature differential above 15°C
 THEN: Send alert "Possible flow restriction"
   AND Recommend filter check
 ```
-
-#### Technical Details
-
-- **Calculation**: `Math.abs(temp_top - temp_bottom)`
-- **Sensors**: `measure_temperature.temp_top`, `measure_temperature.temp_bottom`
-- **Null Handling**: Defaults to 0 with debug logging
-- **Update Frequency**: Every DPS update (~10 seconds)
 
 ---
 
@@ -678,7 +398,7 @@ THEN: Send alert "Possible flow restriction"
 
 #### Overview
 
-The time schedule calculator enables **time-of-day programming** for automated temperature schedules, time-of-use optimization, and daily routines. Unlike curve-based calculations, this uses time ranges to determine output values.
+The time schedule calculator enables **time-of-day programming** for automated temperature schedules, time-of-use optimization, and daily routines.
 
 #### Configuration
 
@@ -706,11 +426,6 @@ ACTION: Calculate value from time schedule
 - **Default fallback** support (`default: value`)
 - Comma or newline separated entries
 
-**Evaluation Rules**:
-1. Evaluates from **top to bottom**
-2. Returns **first matching** time range
-3. Falls back to `default` if no match
-
 #### Example Flows
 
 **Daily Temperature Programming**:
@@ -728,80 +443,6 @@ THEN: Calculate value from time schedule
       Schedule: 17:00-21:00: 2500, default: 4000
   AND Set maximum power limit to {{result_value}}W
 ```
-
-**Hot Water Schedule**:
-```
-EVERY 30 MINUTES:
-THEN: Calculate value from time schedule
-      Schedule: 06:00-09:00: 60, 17:00-23:00: 55, default: 45
-  AND Set hot water temperature to {{result_value}}°C
-```
-
-**Weekend vs Weekday**:
-```
-IF: Day is Saturday or Sunday
-THEN: Use weekend schedule: 08:00-12:00: 22, 12:00-20:00: 21, default: 19
-ELSE: Use weekday schedule: 06:00-09:00: 22, 09:00-17:00: 19, default: 20
-```
-
-**Overnight Range Example**:
-```
-EVERY 15 MINUTES:
-THEN: Calculate comfort level
-      Schedule: 23:00-06:00: 18, 06:00-23:00: 21
-  AND Adjust heating to {{result_value}}°C
-```
-
-#### Best Practices
-
-**✅ DO**:
-- Always include `default: <value>` as fallback
-- Use 24-hour format (HH:MM)
-- Test overnight ranges carefully (23:00-06:00)
-- Keep schedules under 20 entries for readability
-- Document time zones if relevant
-
-**⚠️ DON'T**:
-- Exceed 30 time ranges (hard limit)
-- Forget default fallback (causes errors)
-- Use overlapping time ranges (first match wins)
-- Mix 12-hour and 24-hour formats
-
-#### Error Messages
-
-| Error Message | Cause | Solution |
-|---------------|-------|----------|
-| `"Invalid schedule syntax at line N"` | Malformed time range | Use format: `HH:MM-HH:MM: value` |
-| `"Invalid time component at line N"` | Hour/minute out of range | Hours: 0-23, Minutes: 0-59 |
-| `"Schedule exceeds maximum entries (30)"` | Too many ranges | Simplify schedule or use multiple flows |
-| `"No matching time range found for current time"` | No match and no default | Add `default: <value>` as last line |
-| `"Invalid output value at line N"` | Non-numeric output | Output must be valid number |
-
-#### Technical Details
-
-- **Implementation**: `lib/time-schedule-calculator.ts` - TimeScheduleCalculator utility class
-- **Registration**: `app.ts` - registerTimeScheduleCard()
-- **Update Frequency**: Evaluates on-demand (use timer-based flows)
-- **Overnight Logic**: `isOvernight = endMinutes <= startMinutes`
-- **Performance**: ~1ms parsing time for typical 10-range schedule
-- **Thread-Safe**: Stateless utility class
-
-#### Troubleshooting
-
-**Problem**: "No matching time range" error despite valid time
-
-**Solution**: Add `default: <value>` as last line in schedule
-
-**Problem**: Overnight range (23:00-06:00) not working correctly
-
-**Solution**:
-1. Verify end time is earlier than start time (triggers overnight mode)
-2. Test at boundary times (22:59, 23:00, 06:00, 06:01)
-3. Check for overlapping ranges
-
-**Problem**: Schedule works initially but stops after time
-
-**Solution**: Time schedule needs periodic re-evaluation. Use timer trigger (every 5-15 minutes)
 
 ---
 
@@ -857,15 +498,6 @@ THEN: Get seasonal mode
     ELSE: Enable summer schedule (lower temperatures)
 ```
 
-**Combined with Time Schedule**:
-```
-EVERY 15 MINUTES:
-THEN: Get seasonal mode
-  AND IF {{is_heating_season}} is true
-    THEN: Use winter schedule: 06:00-09:00: 22, 09:00-17:00: 19, default: 18
-    ELSE: Use summer schedule: 06:00-09:00: 20, 09:00-17:00: 18, default: 16
-```
-
 **Season Change Notification**:
 ```
 EVERY DAY at 09:00:
@@ -873,87 +505,6 @@ THEN: Get seasonal mode
   AND IF {{days_until_season_change}} < 7
     THEN: Send notification "Season changes in {{days_until_season_change}} days"
 ```
-
-**Weather + Season Optimization**:
-```
-WHEN: Outdoor temperature changed
-THEN: Get seasonal mode
-  AND IF {{mode}} is "heating"
-    THEN: Calculate from curve: < 0 : 55, < 5 : 50, < 10 : 45, default : 40
-    ELSE: Calculate from curve: > 25 : 18, > 20 : 20, default : 22
-  AND Set target temperature to {{result_value}}
-```
-
-**Maintenance Scheduling**:
-```
-EVERY WEEK:
-THEN: Get seasonal mode
-  AND IF {{is_heating_season}} is true
-    AND {{days_until_season_change}} < 30
-    THEN: Send notification "Schedule pre-summer maintenance"
-```
-
-#### Use Cases
-
-1. **Automatic Schedule Switching**: Different temperatures for winter/summer
-2. **Energy Management**: Seasonal power limits and optimization
-3. **Maintenance Planning**: Pre-season service reminders
-4. **Hot Water Control**: Seasonal hot water temperature adjustment
-5. **Flow Card Logic**: Season-aware automation rules
-
-#### Best Practices
-
-**✅ DO**:
-- Use daily or periodic checks (not continuous polling)
-- Combine with time schedules for comprehensive automation
-- Set up pre-season notifications (7-14 days before change)
-- Test flows before season boundaries (around May 15 and Oct 1)
-
-**⚠️ DON'T**:
-- Poll every minute (once per day is sufficient)
-- Assume calendar year = heating season (spans Oct-May)
-- Forget leap years (calculator handles automatically)
-
-#### Technical Details
-
-- **Implementation**: `lib/seasonal-mode-calculator.ts` - SeasonalModeCalculator utility class
-- **Registration**: `app.ts` - registerSeasonalModeCard()
-- **Heating Season**: Oct 1 (month 10, day 1) to May 15 (month 5, day 15)
-- **Cooling Season**: Inverse of heating season
-- **Day Calculation**: Accounts for year boundaries and leap years
-- **Performance**: <1ms calculation time
-- **Thread-Safe**: Stateless utility class
-
-#### Season Boundary Behavior
-
-**May 15 → May 16 Transition**:
-- May 15 23:59: `is_heating_season = true`, `days_until_season_change = 0`
-- May 16 00:00: `is_cooling_season = true`, `days_until_season_change = 138`
-
-**September 30 → October 1 Transition**:
-- Sep 30 23:59: `is_cooling_season = true`, `days_until_season_change = 0`
-- Oct 1 00:00: `is_heating_season = true`, `days_until_season_change = 227`
-
-#### Troubleshooting
-
-**Problem**: Season doesn't match local climate
-
-**Solution**:
-- EN 14825 standard is European-focused
-- For other regions, use curve calculator with local date ranges
-- Consider creating custom logic based on `{{mode}}` token
-
-**Problem**: `days_until_season_change` shows unexpected value
-
-**Solution**:
-1. Check current date is correct on Homey
-2. Verify timezone settings
-3. Remember: Calculation uses UTC date internally
-
-**Problem**: Flow doesn't trigger at season boundary
-
-**Solution**: Set up daily check flow (e.g., 00:00) to detect season changes
-
 ---
 
 ### 10. 📊 Calculate Value from Curve
@@ -977,10 +528,7 @@ ACTION: Calculate value from curve
 
 **Parameters**:
 
-- `input_value` (number or expression): The input value to evaluate. Accepts:
-  - Direct numbers: `5.2`, `-10`, `20.5`
-  - Token expressions: `{{ outdoor_temperature }}`, `{{ logic|temperature }}`
-  - Calculated expressions: `{{ outdoor_temperature + 2 }}`, `{{ ambient_temp - 5 }}`
+- `input_value` (number or expression): The input value to evaluate
 - `curve` (text): Curve definition string (comma or newline separated)
 
 **Returns**:
@@ -994,7 +542,7 @@ ACTION: Calculate value from curve
 **Supported Operators**:
 
 - `>` - Greater than
-- `>=` - Greater than or equal (default if no operator specified)
+- `>=` - Greater than or equal
 - `<` - Less than
 - `<=` - Less than or equal
 - `==` - Equal to
@@ -1011,35 +559,12 @@ ACTION: Calculate value from curve
 #### Example Flows
 
 **Weather-Compensated Heating** (Primary Use Case):
-
-
-**Visual Example**: The curve calculator with a 14-point weather compensation curve applied in real-time:
-
-![Curve Calculator Example](../images/Curve%20calculator.png)
-
-This screenshot demonstrates:
-- **Input value**: Current outdoor temperature (-10°C)
-- **Curve definition**: 14 progressive thresholds from -18°C to +18°C
-- **Output value**: Calculated heating setpoint (28°C)
-- **Live timeline**: Real-world results at different temperatures
-
-*Real-world example: Weather-compensated heating with 14-point curve and live timeline results*
-
 ```
 WHEN: Outdoor temperature changed
 THEN: Calculate value from curve
       Input: {{outdoor_temperature}}
       Curve: < -5 : 60, < 0 : 55, < 5 : 50, < 10 : 45, < 15 : 40, default : 35
   AND Set target temperature to {{result_value}}
-```
-
-**Time-Based Hot Water Optimization**:
-```
-EVERY HOUR:
-THEN: Calculate value from curve
-      Input: {{current_hour}}
-      Curve: >= 22 : 45, >= 18 : 55, >= 6 : 60, default : 45
-  AND Set hot water temperature to {{result_value}}
 ```
 
 **COP-Based Dynamic Adjustment**:
@@ -1067,46 +592,6 @@ THEN: Calculate value from curve
   AND Set heating setpoint to {{result_value}}
 ```
 
-**Peak Hours Power Limiting**:
-```
-WHEN: Current hour changed
-THEN: Calculate value from curve
-      Input: {{current_hour}}
-      Curve: >= 17 < 21 : 3000, default : 4500
-  AND Set maximum power limit to {{result_value}}W
-```
-
-#### Advanced Techniques
-
-**Nested Calculations** (Calculate intermediate values):
-```
-WHEN: Outdoor temperature changed
-THEN: Calculate outdoor adjustment
-      Input: {{outdoor_temp}}
-      Curve: < 0 : 10, < 10 : 5, default : 0
-  AND Calculate COP adjustment
-      Input: {{adlar_cop}}
-      Curve: < 2.5 : -3, >= 3.5 : +2, default : 0
-  AND Set target = base_temp + outdoor_adj + cop_adj
-```
-
-**Seasonal Curves** (Use different curves per season):
-```
-IF: Month is between October and March (heating season)
-THEN: Use winter curve: < 0 : 55, < 5 : 50, default : 45
-ELSE: Use summer curve: >= 25 : 50, >= 20 : 55, default : 60
-```
-
-**Hysteresis Implementation** (Prevent oscillation):
-```
-WHEN: Temperature changed
-  AND Temperature rising
-THEN: Use curve: > 25 : off, > 20 : low, default : high
-WHEN: Temperature changed
-  AND Temperature falling
-THEN: Use curve: < 22 : high, < 18 : low, default : off
-```
-
 #### Best Practices
 
 **✅ DO**:
@@ -1116,124 +601,22 @@ THEN: Use curve: < 22 : high, < 18 : low, default : off
 - Test your curve with different inputs before deploying
 - Keep curves simple (under 20 entries recommended)
 - Document your curve logic in flow description
-- Use consistent operator direction (all `<` or all `>`)
 
 **⚠️ DON'T**:
 
 - Exceed 50 entries (hard limit)
 - Forget the default fallback (causes errors on no match)
 - Mix heating/cooling logic in same curve (use separate flows)
-- Use complex operators when simple ones suffice
 - Ignore evaluation order (top to bottom matters!)
 
 #### Error Messages
 
-The calculator provides user-friendly error messages:
-
 | Error Message | Cause | Solution |
 |---------------|-------|----------|
 | `"Input value must be a valid number"` | Invalid input tag or null value | Check your input token/variable |
-| `"No matching curve condition found for input value: X"` | No condition matched and no default | Add `default : <value>` as last line |
-| `"Invalid curve syntax at line N"` | Malformed condition (e.g., missing colon) | Check format: `operator threshold : value` |
-| `"Curve exceeds maximum allowed entries (50)"` | Too many lines in curve | Simplify your curve or split into multiple flows |
-| `"Unsupported operator at line N"` | Unknown operator used | Use only: >, >=, <, <=, ==, !=, default |
-| `"Invalid output value at line N"` | Non-numeric output value | Output must be valid number |
-
-#### Technical Details
-
-- **Implementation**: `lib/curve-calculator.ts` - CurveCalculator utility class
-- **Registration**: `app.ts:367` - registerCurveCalculatorCard()
-- **Parsing**: Regex-based with comprehensive validation
-- **Performance**: ~1ms parsing time for typical 10-entry curve
-- **Memory**: ~100 bytes per curve entry (5KB max for 50 entries)
-- **Thread-Safe**: Stateless utility class (no shared state)
-
-**Validation System**:
-```typescript
-// Example: Validate curve before using
-const result = CurveCalculator.validateCurve(userInput);
-if (!result.valid) {
-  // Show errors: result.errors
-}
-```
-
-**Safe Evaluation** (with fallback):
-```typescript
-// Never throws, returns fallback on error
-const value = CurveCalculator.evaluateWithFallback(input, curve, defaultValue);
-```
-
-#### Common Issues
-
-**Problem**: Flow card not visible in actions
-
-**Solution**:
-
-1. Check app version is 1.0.8 or higher
-2. Restart Homey app
-3. Check device is available (not offline)
-
-**Problem**: "No matching curve condition" error
-
-**Solution**: Add `default : <value>` as last line in your curve
-
-**Problem**: Curve calculates wrong values
-
-**Solution**:
-
-1. Test curve order - rules evaluate top to bottom
-2. Check operator direction (< vs >)
-3. Verify threshold values are correct
-4. Use debug flow to log input and output
-
-**Problem**: "Invalid curve syntax" error
-
-**Solution**:
-
-1. Check format: `[operator] threshold : output`
-2. Ensure colon (`:`) separates condition from value
-3. Use comma (`,`) or newline between entries
-4. Remove trailing commas
-
-**Problem**: Curve works initially but stops after Homey restart
-
-**Solution**: Curves are stateless (no memory). Check if input token is still valid.
-
-#### Example: Complete Weather-Compensation System
-
-**Reference Implementation**: The screenshot above shows a production-ready 14-point weather compensation curve:
-
-- **Temperature range**: -18°C to +18°C
-- **Heating range**: 20°C (warm) to 35°C (extreme cold)
-- **Curve logic**: `> 18 : 20, > 15 : 23, > 12 : 24, ... > -18 : 30, default: 35`
-- **Timeline results**: Real-world calculations shown (28°C for -10°C outdoor, 35°C for -19°C outdoor)
-
-**Multi-Flow Integration Pattern**:
-
-```
-─────────── FLOW 1: Update Heating Setpoint ───────────
-WHEN: Outdoor temperature changed
-THEN: Calculate heating setpoint
-      Input: {{outdoor_temperature}}
-      Curve: < -5 : 60, < 0 : 55, < 5 : 50, < 10 : 45, default : 40
-  AND Store in variable: calculated_setpoint
-  AND Log: "Outdoor {{outdoor_temp}}°C → Setpoint {{result_value}}°C"
-
-─────────── FLOW 2: Apply Setpoint with Hysteresis ─────
-WHEN: Variable calculated_setpoint changed
-  AND |calculated_setpoint - current_target| > 2°C
-THEN: Set target temperature to {{calculated_setpoint}}
-  AND Send notification: "Heating adjusted to {{calculated_setpoint}}°C"
-
-─────────── FLOW 3: COP-Based Fine-Tuning ─────────────
-WHEN: COP below 2.5
-  AND Running for > 30 minutes
-THEN: Calculate adjustment
-      Input: {{adlar_cop}}
-      Curve: < 2.0 : -3, < 2.5 : -2, default : 0
-  AND Reduce target by {{result_value}}°C
-  AND Log: "Low COP {{adlar_cop}} → Reduced setpoint by {{result_value}}°C"
-```
+| `"No matching curve condition found"` | No condition matched and no default | Add `default : <value>` as last line |
+| `"Invalid curve syntax at line N"` | Malformed condition | Check format: `operator threshold : value` |
+| `"Curve exceeds maximum allowed entries (50)"` | Too many lines in curve | Simplify curve or split into multiple flows |
 
 ---
 
@@ -1288,12 +671,6 @@ meter_power.electric_total // Should show cumulative kWh
 ```javascript
 // In Homey Developer Tools → Device Storage
 triggered_energy_milestones // Array of triggered milestones
-```
-
-**Reset milestone tracking**:
-```javascript
-// Delete storage key: triggered_energy_milestones
-// Next milestone will retrigger from zero
 ```
 
 ---
