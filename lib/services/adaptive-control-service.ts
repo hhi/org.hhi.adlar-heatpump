@@ -174,6 +174,7 @@ export class AdaptiveControlService {
       comfort: 0.60,
       efficiency: 0.25,
       cost: 0.15,
+      thermal: 0.20,
     });
 
     // Initialize Component 5: Wind Correction Service (v2.7.0+)
@@ -1039,14 +1040,16 @@ export class AdaptiveControlService {
       const comfortPct = (await this.device.getSetting('priority_comfort')) ?? 60;
       const efficiencyPct = (await this.device.getSetting('priority_efficiency')) ?? 25;
       const costPct = (await this.device.getSetting('priority_cost')) ?? 15;
+      const thermalPct = (await this.device.getSetting('priority_thermal')) ?? 20;
 
       // Validate: at least one priority must be > 0
-      if (comfortPct === 0 && efficiencyPct === 0 && costPct === 0) {
-        this.logger('AdaptiveControlService: All priorities are 0%, using defaults (60/25/15)');
+      if (comfortPct === 0 && efficiencyPct === 0 && costPct === 0 && thermalPct === 0) {
+        this.logger('AdaptiveControlService: All priorities are 0%, using defaults (60/25/15/20)');
         this.decisionMaker.setPriorities({
           comfort: 0.60,
           efficiency: 0.25,
           cost: 0.15,
+          thermal: 0.20,
         });
         return;
       }
@@ -1057,12 +1060,14 @@ export class AdaptiveControlService {
         comfort: comfortPct / 100,
         efficiency: efficiencyPct / 100,
         cost: costPct / 100,
+        thermal: thermalPct / 100,
       });
 
       this.logger('AdaptiveControlService: Priorities loaded from settings', {
         comfort: `${comfortPct}%`,
         efficiency: `${efficiencyPct}%`,
         cost: `${costPct}%`,
+        thermal: `${thermalPct}%`,
         normalized: this.decisionMaker.getPriorities(),
       });
     } catch (error) {
@@ -1074,6 +1079,7 @@ export class AdaptiveControlService {
         comfort: 0.60,
         efficiency: 0.25,
         cost: 0.15,
+        thermal: 0.20,
       });
     }
   }
@@ -1235,7 +1241,8 @@ export class AdaptiveControlService {
     // Handle priority settings changes (v2.4.1: bug fix - settings were defined but not used)
     if (changedKeys.includes('priority_comfort')
       || changedKeys.includes('priority_efficiency')
-      || changedKeys.includes('priority_cost')) {
+      || changedKeys.includes('priority_cost')
+      || changedKeys.includes('priority_thermal')) {
       await this.loadPrioritySettings();
 
       // Log the change for transparency
@@ -1244,6 +1251,7 @@ export class AdaptiveControlService {
         comfort: `${Math.round(priorities.comfort * 100)}%`,
         efficiency: `${Math.round(priorities.efficiency * 100)}%`,
         cost: `${Math.round(priorities.cost * 100)}%`,
+        thermal: priorities.thermal ? `${Math.round(priorities.thermal * 100)}%` : 'N/A',
       });
     }
 
@@ -1579,7 +1587,7 @@ export class AdaptiveControlService {
   /**
    * Update weighted priorities (Expert Mode / Settings)
    */
-  public updatePriorities(priorities: { comfort: number; efficiency: number; cost: number }): void {
+  public updatePriorities(priorities: { comfort: number; efficiency: number; cost: number; thermal?: number }): void {
     this.decisionMaker.setPriorities(priorities);
     this.logger('AdaptiveControlService: Updated priorities', priorities);
   }

@@ -684,10 +684,10 @@
           "fr": "Activer les cartes de HVAC fonctionnalités d'expert"
         },
         "hint": {
-          "en": "Enable diagnostic and system analysis flow cards (compressor/fan motor/water flow) for HVAC experts",
-          "nl": "Schakel diagnose en systeem analyse flow kaarten (compressor/fan motor/water flow) in voor HVAC experts",
-          "de": "Aktivieren Sie Diagnose- und Systemanalyse-Flow-Karten (Kompressor/Lüftermotor/Wasserfluss) für HVAC-Experten",
-          "fr": "Activer les cartes de flux de diagnostic et d'analyse système (compressor/fan motor/water flow) pour les experts HVAC"
+          "en": "Enable diagnostic and system analysis flow cards (compressor/fan motor/water alert flows) for HVAC experts. This setting only affects flow card availability, NOT adaptive control or building model parameters.",
+          "nl": "Schakel diagnose en systeem analyse flow kaarten (compressor/fan motor/water alert flows) in voor HVAC experts. Deze instelling beïnvloedt alleen flow kaarten, NIET adaptieve regeling of gebouwmodel parameters.",
+          "de": "Aktivieren Sie Diagnose- und Systemanalyse-Flow-Karten (Kompressor/Lüftermotor/Wasser Alarm-flows) für HVAC-Experten. Diese Einstellung betrifft nur die Verfügbarkeit von Flow-Karten, NICHT die adaptive Steuerung oder Gebäudemodellparameter.",
+          "fr": "Activer les cartes de flux de diagnostic et d'analyse système (compressor/fan motor/water alert flows) pour les experts HVAC. Ce paramètre affecte uniquement la disponibilité des cartes de flux, PAS le contrôle adaptatif ou les paramètres du modèle de bâtiment."
         },
         "value": true
       },
@@ -730,10 +730,10 @@
           "fr": "Activer le contrôle adaptatif de température"
         },
         "hint": {
-          "en": "Automatically adjusts target temperature based on external indoor temperature sensor. Requires external temperature via flow card 'Send indoor temperature'. Uses PI control algorithm for ±0.3°C stability.",
-          "nl": "Past doeltemperatuur automatisch aan op basis van externe binnentemperatuur sensor. Vereist externe temperatuur via flow kaart 'Stuur binnentemperatuur'. Gebruikt PI regeling voor ±0.3°C stabiliteit.",
-          "de": "Passt die Zieltemperatur automatisch basierend auf einem externen Raumtemperatursensor an. Erfordert externe Temperatur über Flow-Karte 'Raumtemperatur senden'. Verwendet PI-Regelung für ±0,3°C Stabilität.",
-          "fr": "Ajuste automatiquement la température cible basée sur un capteur de température intérieure externe. Nécessite une température externe via la carte de flux 'Envoyer température intérieure'. Utilise un algorithme de contrôle PI pour une stabilité de ±0.3°C."
+          "en": "Automatically adjusts target temperature based on external indoor temperature sensor. Requires external temperature via flow card 'Send indoor temperature'. Uses PI control algorithm for ±0.3°C stability. ⚠️ Advanced PI controller settings will appear below when enabled.",
+          "nl": "Past doeltemperatuur automatisch aan op basis van externe binnentemperatuur sensor. Vereist externe temperatuur via flow kaart 'Stuur binnentemperatuur'. Gebruikt PI regeling voor ±0.3°C stabiliteit. ⚠️ Geavanceerde PI regelaar instellingen verschijnen hieronder wanneer ingeschakeld.",
+          "de": "Passt die Zieltemperatur automatisch basierend auf einem externen Raumtemperatursensor an. Erfordert externe Temperatur über Flow-Karte 'Raumtemperatur senden'. Verwendet PI-Regelung für ±0,3°C Stabilität. ⚠️ Erweiterte PI-Regler-Einstellungen erscheinen unten, wenn aktiviert.",
+          "fr": "Ajuste automatiquement la température cible basée sur un capteur de température intérieure externe. Nécessite une température externe via la carte de flux 'Envoyer température intérieure'. Utilise un algorithme de contrôle PI pour une stabilité de ±0.3°C. ⚠️ Les paramètres avancés du contrôleur PI apparaîtront ci-dessous lorsqu'activé."
         },
         "value": false
       },
@@ -747,17 +747,17 @@
           "fr": "Contrôleur PI: Gain Proportionnel (Kp)"
         },
         "hint": {
-          "en": "Expert setting: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Default: 3.0",
-          "nl": "Expert instelling: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Standaard: 3.0",
-          "de": "Experteneinstellung: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Standard: 3.0",
-          "fr": "Paramètre expert: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. Défaut: 3.0"
+          "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 3.0",
+          "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 3.0",
+          "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 3.0",
+          "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 3.0"
         },
         "value": 3.0,
         "min": 0.5,
         "max": 10.0,
         "step": 0.1,
         "$visibleIf": {
-          "flow_expert_mode": true
+          "adaptive_control_enabled": true
         }
       },
       {
@@ -770,17 +770,17 @@
           "fr": "Contrôleur PI: Gain Intégral (Ki)"
         },
         "hint": {
-          "en": "Expert setting: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Default: 1.5",
-          "nl": "Expert instelling: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Standaard: 1.5",
-          "de": "Experteneinstellung: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Standard: 1.5",
-          "fr": "Paramètre expert: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. Défaut: 1.5"
+          "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5",
+          "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5",
+          "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5",
+          "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5"
         },
         "value": 1.5,
         "min": 0.1,
         "max": 5.0,
         "step": 0.1,
         "$visibleIf": {
-          "flow_expert_mode": true
+          "adaptive_control_enabled": true
         }
       },
       {
@@ -793,17 +793,17 @@
           "fr": "Contrôleur PI: Zone Morte (°C)"
         },
         "hint": {
-          "en": "Expert setting: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Default: 0.3°C",
-          "nl": "Expert instelling: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Standaard: 0.3°C",
-          "de": "Experteneinstellung: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Standard: 0.3°C",
-          "fr": "Paramètre expert: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. Défaut: 0.3°C"
+          "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C",
+          "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C",
+          "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C",
+          "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C"
         },
         "value": 0.3,
         "min": 0.1,
         "max": 1.0,
         "step": 0.1,
         "$visibleIf": {
-          "flow_expert_mode": true
+          "adaptive_control_enabled": true
         }
       }
     ]
@@ -828,10 +828,10 @@
           "fr": "Activer l'apprentissage du modèle de bâtiment"
         },
         "hint": {
-          "en": "Learn thermal properties of your home (thermal mass, heat loss, solar gain). Enables temperature predictions and improves control accuracy over time.",
-          "nl": "Leer thermische eigenschappen van je woning (thermische massa, warmteverlies, zonnewinst). Maakt temperatuurvoorspellingen mogelijk en verbetert regelnauwkeurigheid in de loop van de tijd.",
-          "de": "Lernen Sie thermische Eigenschaften Ihres Hauses (thermische Masse, Wärmeverlust, Solargewinn). Ermöglicht Temperaturvorhersagen und verbessert die Regelgenauigkeit im Laufe der Zeit.",
-          "fr": "Apprenez les propriétés thermiques de votre maison (masse thermique, perte de chaleur, gain solaire). Permet les prédictions de température et améliore la précision du contrôle au fil du temps."
+          "en": "Learn thermal properties of your home (thermal mass, heat loss, solar gain). Enables temperature predictions and improves control accuracy over time. ⚠️ Advanced learning parameter will appear below when enabled.",
+          "nl": "Leer thermische eigenschappen van je woning (thermische massa, warmteverlies, zonnewinst). Maakt temperatuurvoorspellingen mogelijk en verbetert regelnauwkeurigheid in de loop van de tijd. ⚠️ Geavanceerde leer parameter verschijnt hieronder wanneer ingeschakeld.",
+          "de": "Lernen Sie thermische Eigenschaften Ihres Hauses (thermische Masse, Wärmeverlust, Solargewinn). Ermöglicht Temperaturvorhersagen und verbessert die Regelgenauigkeit im Laufe der Zeit. ⚠️ Erweiterter Lernparameter erscheint unten, wenn aktiviert.",
+          "fr": "Apprenez les propriétés thermiques de votre maison (masse thermique, perte de chaleur, gain solaire). Permet les prédictions de température et améliore la précision du contrôle au fil du temps. ⚠️ Le paramètre d'apprentissage avancé apparaîtra ci-dessous lorsqu'activé."
         },
         "value": false
       },
@@ -845,17 +845,17 @@
           "fr": "Apprentissage: Facteur d'Oubli"
         },
         "hint": {
-          "en": "Expert setting: How quickly the model adapts to changes. Higher = more stable, better confidence. Lower = faster adaptation. Range 0.990-0.9995. Default: 0.999",
-          "nl": "Expert instelling: Hoe snel het model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid. Lager = snellere aanpassing. Bereik 0.990-0.9995. Standaard: 0.999",
-          "de": "Experteneinstellung: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen. Niedriger = schnellere Anpassung. Bereich 0.990-0.9995. Standard: 0.999",
-          "fr": "Paramètre expert: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. Plus bas = adaptation plus rapide. Plage 0.990-0.9995. Défaut: 0.999"
+          "en": "⚠️ Advanced: How quickly the model adapts to changes. Higher = more stable, better confidence. DO NOT change unless experiencing specific learning issues. Range 0.990-0.9995. Default: 0.999",
+          "nl": "⚠️ Geavanceerd: Hoe snel het model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid. PAS NIET AAN tenzij je specifieke leerproblemen hebt. Bereik 0.990-0.9995. Standaard: 0.999",
+          "de": "⚠️ Erweitert: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen. NICHT ändern, außer bei spezifischen Lernproblemen. Bereich 0.990-0.9995. Standard: 0.999",
+          "fr": "⚠️ Avancé: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. NE PAS modifier sauf problèmes d'apprentissage spécifiques. Plage 0.990-0.9995. Défaut: 0.999"
         },
         "value": 0.999,
         "min": 0.99,
         "max": 0.9995,
         "step": 0.0005,
         "$visibleIf": {
-          "flow_expert_mode": true
+          "building_model_enabled": true
         }
       },
       {
