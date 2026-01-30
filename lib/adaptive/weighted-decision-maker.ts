@@ -72,11 +72,12 @@ export class WeightedDecisionMaker {
 
   constructor(priorities: WeightedPriorities) {
     // Normalize priorities to sum to 1.0
-    const total = priorities.comfort + priorities.efficiency + priorities.cost;
+    const total = priorities.comfort + priorities.efficiency + priorities.cost + (priorities.thermal ?? 0);
     this.priorities = {
       comfort: priorities.comfort / total,
       efficiency: priorities.efficiency / total,
       cost: priorities.cost / total,
+      thermal: priorities.thermal ? priorities.thermal / total : undefined,
     };
   }
 
@@ -211,11 +212,11 @@ export class WeightedDecisionMaker {
     // Reduce weights for low-confidence optimizers, redistribute to comfort
     // =========================================================================
 
-    // Default priorities for 4-way: comfort=50%, efficiency=15%, cost=15%, thermal=20%
+    // Use configured priorities (or fallback to defaults if thermal not configured)
     const basePriorities = {
-      comfort: this.priorities.thermal !== undefined ? 0.50 : this.priorities.comfort,
-      efficiency: this.priorities.thermal !== undefined ? 0.15 : this.priorities.efficiency,
-      cost: this.priorities.thermal !== undefined ? 0.15 : this.priorities.cost,
+      comfort: this.priorities.comfort,
+      efficiency: this.priorities.efficiency,
+      cost: this.priorities.cost,
       thermal: this.priorities.thermal ?? 0.20,
     };
 
@@ -411,11 +412,12 @@ export class WeightedDecisionMaker {
    * Automatically normalizes to ensure sum = 1.0
    */
   public setPriorities(priorities: WeightedPriorities): void {
-    const total = priorities.comfort + priorities.efficiency + priorities.cost;
+    const total = priorities.comfort + priorities.efficiency + priorities.cost + (priorities.thermal ?? 0);
     this.priorities = {
       comfort: priorities.comfort / total,
       efficiency: priorities.efficiency / total,
       cost: priorities.cost / total,
+      thermal: priorities.thermal ? priorities.thermal / total : undefined,
     };
   }
 
@@ -434,6 +436,6 @@ export class WeightedDecisionMaker {
    */
   public destroy(): void {
     // Reset to neutral priorities
-    this.priorities = { comfort: 0.6, efficiency: 0.25, cost: 0.15 };
+    this.priorities = { comfort: 0.6, efficiency: 0.25, cost: 0.15, thermal: undefined };
   }
 }

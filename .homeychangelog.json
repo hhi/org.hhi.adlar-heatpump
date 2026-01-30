@@ -1,4 +1,10 @@
 {
+  "2.7.5": {
+    "en": "Fixed: Adaptive control priority settings now include thermal properties priority in automatic 100% normalization.",
+    "nl": "Opgelost: Adaptieve regeling prioriteitsinstellingen houden nu ook rekening met thermische eigenschappen prioriteit bij automatische 100% normalisatie.",
+    "de": "Behoben: Adaptive Regelungs-Prioritätseinstellungen berücksichtigen jetzt auch thermische Eigenschaften-Priorität bei automatischer 100%-Normalisierung.",
+    "fr": "Corrigé: Les paramètres de priorité du contrôle adaptatif incluent maintenant la priorité des propriétés thermiques dans la normalisation automatique à 100%."
+  },
   "2.7.4": {
     "en": "Documentation: Expanded advanced-control guides (intro, flow cards, adaptive control, building insights) and the configuration guide. Added new setup screenshots plus German/French adaptive-control guides.",
     "nl": "Documentatie: Geavanceerde-controle gidsen (intro, flow cards, adaptieve regeling, building insights) en de configuratiegids uitgebreid. Nieuwe setup-screenshots en Duitse/Franse adaptieve-regeling gidsen toegevoegd.",

@@ -59,8 +59,8 @@ WAT HEEFT U NODIG?
 
 HOE VERKRIJGT U DE APPARAAT GEGEVENS?
 De benodigde lokale sleutel en andere gegevens kunt u verkrijgen door de instructies te volgen in:
-/docs/setup/Tuya_LocalKey_Homey_Guide_NL.pdf
-
+/docs/setup/Tuya_LocalKey_Homey_Guide_NL.pdf op de Source-Code pagina van deze App.
+ 
 INSTALLATIESTAPPEN
 1. Installeer de app via de Homey App Store
 2. Voeg een nieuw apparaat toe en selecteer "Intelligent Heat Pump"
@@ -189,7 +189,11 @@ WAT BETEKENEN COP WAARDEN?
 - COP 3.0-4.0: Goede prestatie
 - COP 4.0+: Uitstekende prestatie
 
-GEAVANCEERDE INSTELLINGEN
+
+GEAVANCEERDE FEATURES
+Zie de inleiding op /docs/setup/advanced-control/Advanced_Features_Intro.nl.md
+Om de onderstaande componten mogelijk te maken is de ervaring om eerst de externe databronnen aan te sluiten. 
+Vervolgends actief je de Adaptieve Temperatuur Regeling in combinatie met onderstaande componenten naar gelang.
 
 ADAPTIEVE TEMPERATUURREGELING
 Automatische regeling van de doeltemperatuur op basis van externe binnentemperatuur sensor:
@@ -229,13 +233,86 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiëntie:
 - Strategieën: Conservatief/Gebalanceerd/Agressief
 
 ADAPTIEVE REGELING WEGINGSFACTOREN
-Drie prioriteiten die samen bepalen hoe het systeem beslissingen maakt:
-- Comfort Prioriteit (standaard 60%): Gewicht voor PI temperatuurregeling
-- Efficiëntie Prioriteit (standaard 25%): Gewicht voor COP optimalisatie
+Vier prioriteiten die samen bepalen hoe het systeem beslissingen maakt:
+- Comfort Prioriteit (standaard 50%): Gewicht voor PI temperatuurregeling
+- Efficiëntie Prioriteit (standaard 15%): Gewicht voor COP optimalisatie
 - Kosten Prioriteit (standaard 15%): Gewicht voor prijsoptimalisatie
+- Thermische Warmte Prioriteit (standaard 20%): Gewicht voor meeweging thermische eigenschappen woning
 - Waarden worden automatisch genormaliseerd naar totaal 100%
 
+GEBOUWMODEL DIAGNOSTIEK
+Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet update:
+- Uitgebreide diagnostische flow kaart
+- Controleer binnen/buiten temperatuur sensor status
+- Monitor leerproces (samples, betrouwbaarheid, tijdsconstante)
+- Identificeer specifieke blokkerende redenen met oplossingen
+- Volg leer tijdlijn (T+0 → T+50min → T+24u)
+
+WIND & ZONNE-INTEGRATIE
+Verbeter de nauwkeurigheid van het thermische gebouwmodel met externe weerdata:
+
+Windsnelheid Correctie:
+- Automatische aanpassing van warmteverlies op basis van windchill effect
+- Flow card: "Stel externe windsnelheid in" (km/h)
+- Vermindert leer-tijd gebouwmodel met 30-50%
+- Compatibel met KNMI Weer app en andere wind sensoren
+
+Zonnestraling Integratie:
+- Nauwkeurige berekening van zonnewinsten via gebouwoppervlak
+- Flow card: "Stel externe zonnestraling in" (W/m²)
+- Seizoensgebonden aanpassing (winter 60%, zomer 130%)
+- Ondersteunt KNMI zonnestraling data
+
+PV-vermogen Tracking:
+- Real-time monitoring van zonnepaneel opbrengst
+- Flow card: "Stel extern PV-vermogen in" (W)
+- Gebruikt voor interne warmtewinst correctie
+- Verbetert gebouwmodel betrouwbaarheid tot 85%+
+
+
+CROSS-APP INTEGRATIE
+
+Data bronnen: KNMI Weer app, Homey Energy app, of eigen sensoren
+
+Verbind met conforme Homey apps voor verbeterde COP berekening en adaptieve regeling en gebouwmodel:
+- Externe vermogensmetingen (van uw slimme meter)
+- Externe water doorstroom gegevens
+- Externe buitentemperatuur gegevens (bijv. KNMI weer-app)
+- Externe binnentemperatuur voor adaptieve regeling
+- Windsnelheid data voor windchill compensatie
+- Zonnestraling intensiteit voor zonnewinst berekening
+- PV-vermogen voor realtime zonne-energiewinsten
+
+
+VEILIGHEID EN BETROUWBAARHEID
+
+AUTOMATISCHE MONITORING
+- Kritieke temperatuur waarschuwingen
+- Verbindingsstatus controle
+- Systeemfout detectie
+- Systeem timer meldingen
+- COP outlier detectie
+
+INTELLIGENTE HERSTEL
+- Automatische herverbinding
+- Foutcorrectie
+- Status herstel
+- Gebruiksvriendelijke foutmeldingen
+
 TROUBLESHOOTING EN ONDERSTEUNING
+
+GEAVANCEERDE INTEGRATIE SETUP en DOCUMENTATIE
+
+Voor gedetailleerde instructies en externe data integratie:
+- Adaptieve Temperatuur Regeling Guide: /docs/setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md
+- Adaptieve regeling Componenten: /docs/setup/advanced-control/ADAPTIVE_CONTROL_COMPONENTS.nl.md
+- Advanced Features Flow Cards: /docs/setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md
+- Wind & Zonne Setup: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md
+- Flow Cards Gids: /docs/setup/guide/FLOW_CARDS_GUIDE.nl.md
+- Volledige Configuratie: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.nl.md
+- Info en Specs Warmtepomp: /docs/Heatpump specs/ directory
+- COP Calculatie Methodes: /docs/COP calculation/COP-calculation.md
+- SCOP Calculatie: /docs/COP calculation/SCOP-calculation.md
 
 VEELVOORKOMENDE PROBLEMEN
 
@@ -273,67 +350,3 @@ HULP NODIG?
 - Configuratiegids: /docs/setup/advanced-settings/CONFIGURATIEGIDS.md (complete instellingen referentie)
 - Community: Homey Community Forum (Topic ID: 143690)
 - Issues: Meld problemen op GitHub
-
-CROSS-APP INTEGRATIE
-Verbind met andere Homey apps voor verbeterde COP berekening en gebouwmodel:
-- Externe vermogensmetingen (van uw slimme meter)
-- Externe water doorstroom gegevens
-- Externe buitentemperatuur gegevens (bijv. KNMI weer-app)
-- Externe binnentemperatuur voor adaptieve regeling
-- Windsnelheid data voor windchill compensatie
-- Zonnestraling intensiteit voor zonnewinst berekening
-- PV-vermogen voor realtime zonne-energiewinsten
-
-GEBOUWMODEL DIAGNOSTIEK
-Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet update:
-- Uitgebreide diagnostische flow kaart
-- Controleer binnen/buiten temperatuur sensor status
-- Monitor leerproces (samples, betrouwbaarheid, tijdsconstante)
-- Identificeer specifieke blokkerende redenen met oplossingen
-- Volg leer tijdlijn (T+0 → T+50min → T+24u)
-
-Gebruik: Maak flow "Diagnosticeer gebouwmodel leren" om gedetailleerde status te zien in app logs
-
-WIND & ZONNE-INTEGRATIE
-Verbeter de nauwkeurigheid van het thermische gebouwmodel met externe weerdata:
-
-Windsnelheid Correctie:
-- Automatische aanpassing van warmteverlies op basis van windchill effect
-- Flow card: "Stel externe windsnelheid in" (km/h)
-- Vermindert leer-tijd gebouwmodel met 30-50%
-- Compatibel met KNMI Weer app en andere wind sensoren
-
-Zonnestraling Integratie:
-- Nauwkeurige berekening van zonnewinsten via gebouwoppervlak
-- Flow card: "Stel externe zonnestraling in" (W/m²)
-- Seizoensgebonden aanpassing (winter 60%, zomer 130%)
-- Ondersteunt KNMI zonnestraling data
-
-PV-vermogen Tracking:
-- Real-time monitoring van zonnepaneel opbrengst
-- Flow card: "Stel extern PV-vermogen in" (W)
-- Gebruikt voor interne warmtewinst correctie
-- Verbetert gebouwmodel betrouwbaarheid tot 85%+
-
-Data bronnen: KNMI Weer app, Homey Energy app, of eigen sensoren
-
-GEAVANCEERDE INTEGRATIE SETUP
-Voor gedetailleerde instructies over externe data integratie:
-- Wind & Zonne Setup: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md
-- Flow Cards Gids: /docs/setup/guide/FLOW_CARDS_GUIDE.nl.md
-- Volledige Configuratie: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.nl.md
-
-VEILIGHEID EN BETROUWBAARHEID
-
-AUTOMATISCHE MONITORING
-- Kritieke temperatuur waarschuwingen
-- Verbindingsstatus controle
-- Systeemfout detectie
-- Systeem timer meldingen
-- COP outlier detectie
-
-INTELLIGENTE HERSTEL
-- Automatische herverbinding
-- Foutcorrectie
-- Status herstel
-- Gebruiksvriendelijke foutmeldingen
