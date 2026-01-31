@@ -418,25 +418,7 @@ THEN
 
 ---
 
-### Flow 5: Dismiss Insight Temporarily
-
-```
-WHEN Building insight detected, category = "insulation_performance"
-
-AND User has decided to ignore insulation (known issue)
-
-THEN
-  Dismiss "insulation_performance" insight for 90 days
-    (action: Dismiss insight)
-
-  Notify: "Insulation insight hidden for 3 months"
-```
-
-**Use case:** After renovation work in progress, or if you know insulation is planned but not yet executed.
-
----
-
-### Flow 6: Force Insight Analysis (On-Demand)
+### Flow 5: Force Insight Analysis (On-Demand)
 
 ```
 WHEN User presses virtual button "Analyze Building Now"
@@ -457,41 +439,7 @@ THEN
 
 ---
 
-### Flow 7: Reset After Renovation
-
-```
-WHEN Virtual button "Renovation Completed" pressed
-
-THEN
-  1. Reset insight history [✓ Confirm reset]
-     (action: Reset insight history - checkbox MUST be checked)
-
-  2. Notify:
-     "Insights reset. New learning starts - expect new insights after 24-48h"
-```
-
-**Use case:** After major building changes (insulation, new windows, renovation) - reset insights but keep building model.
-
----
-
-### Flow 8: Dynamic Confidence Threshold (Adaptive)
-
-```
-WHEN Building model learning milestone reached
-  milestone = "convergence_reached" (after 7 days stable learning)
-
-THEN
-  Set confidence threshold to 60%
-    (action: Set confidence threshold)
-
-  Notify: "Model stable - confidence threshold lowered for more insights"
-```
-
-**Use case:** Start conservative (70%), lower threshold when model is stable for more insight granularity.
-
----
-
-### Flow 9: Only Notify High ROI Insights (Condition)
+### Flow 6: Only Notify High ROI Insights (Condition)
 
 ```
 WHEN Building insight detected
@@ -514,7 +462,7 @@ THEN
 
 ---
 
-### Flow 10: Thermal Storage Only When Active (Condition)
+### Flow 7: Thermal Storage Only When Active (Condition)
 
 ```
 WHEN Cheapest energy block started
@@ -532,25 +480,6 @@ ELSE
 ```
 
 **Use case:** Conditional automation - only apply thermal storage strategy if building is suitable.
-
----
-
-### Flow 11: Ignore Insulation Insight Until Spring (Seasonal)
-
-```
-WHEN Building insight detected, category = "insulation_performance"
-
-AND Current month is between October and March (winter)
-
-THEN
-  Dismiss "insulation_performance" insight for 180 days
-    (action: Dismiss insight)
-
-  Notify:
-    "Insulation insight postponed until spring (April) for warmer renovation weather conditions"
-```
-
-**Use case:** Strategically plan insulation work in favorable seasons.
 
 ---
 
@@ -608,22 +537,9 @@ THEN
 
 ---
 
-### Action Cards (5)
+### Action Cards (2)
 
-#### 1. Dismiss insight
-
-**Function:** Temporarily hide specific insight category
-
-**Parameters:**
-
-- `category` (dropdown) - Category to hide
-- `duration` (number 1-365) - Number of days
-
-**Use:** After renovation planning, ignore known problem
-
----
-
-#### 2. Force insight analysis
+#### 1. Force insight analysis
 
 **Function:** Trigger immediate evaluation (don't wait for 50-min interval)
 
@@ -636,35 +552,7 @@ THEN
 
 ---
 
-#### 3. Reset insight history
-
-**Function:** Clear all active insights and history (building model stays intact)
-
-**Parameters:**
-
-- `confirm` (checkbox) - MUST be checked to execute reset
-
-**Use:** After major building changes (insulation, renovation, new windows)
-
-**IMPORTANT:** Building model (C, UA, τ, g, P_int) is preserved - only insights are reset
-
----
-
-#### 4. Set confidence threshold
-
-**Function:** Dynamically adjust minimum confidence threshold
-
-**Parameters:**
-
-- `threshold` (number 50-90) - New threshold in %
-
-**Effect:** Higher threshold = fewer insights (very reliable), lower = more insights (earlier, less accurate)
-
-**Use:** Adaptive threshold - start 70%, lower to 60% after convergence
-
----
-
-#### 5. Calculate pre-heat duration (v2.6.0)
+#### 2. Calculate pre-heat duration (v2.6.0)
 
 **Function:** Calculates time needed for X°C temperature rise
 

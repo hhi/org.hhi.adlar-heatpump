@@ -387,25 +387,7 @@ T+31h: BuildingInsightsService: Insight insulation_performance already triggered
 
 ---
 
-### **Problem 3: Invalid wake_time errors**
-
-**Symptoms:**
-- Log: `Invalid wake_time format: undefined`
-- Pre-heat recommendation at 23:00 fails
-
-**Cause:**
-- Setting not saved or corrupt
-
-**Solution:**
-```bash
-# Set wake_time in device settings
-# Format: HH:MM (e.g., "07:00")
-# Valid range: 00:00 - 23:59
-```
-
----
-
-### **Problem 4: Unrealistic savings estimates**
+### **Problem 3: Unrealistic savings estimates**
 
 **Symptoms:**
 - Insight shows €1000/month savings (clearly wrong)
@@ -516,8 +498,6 @@ Copy this template and fill in results:
 - **Notes:**
 
 ### Edge Cases Tested
-- [ ] Invalid settings (wake_time format)
-- [ ] Confidence threshold changes
 - [ ] Advice fatigue (24h rate limit)
 - [ ] Missing capabilities handled gracefully
 - [ ] Invalid model data (NaN/Infinity) handled

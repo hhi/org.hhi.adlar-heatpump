@@ -126,7 +126,6 @@ homey app run
 |-------------|---------------|
 | No insights after 48h | Lower confidence to 50%, check model values |
 | Flow cards not triggering | Restart app, verify flow uses correct device |
-| "Invalid wake_time" error | Set wake_time in settings (format: HH:MM) |
 | Missing capabilities | Rebuild: `npm run build && homey app run` |
 | App crashes on start | Check logs for initialization errors |
 

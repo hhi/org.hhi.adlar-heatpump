@@ -1,6 +1,6 @@
 # 📚 Adlar Wärmepumpe Dokumentation
 
-Willkommen zur Dokumentation der Adlar Wärmepumpe Homey App.
+Willkommen zur Dokumentation der Adlar-Wärmepumpe-Homey-App.
 
 ---
 
@@ -18,7 +18,7 @@ Willkommen zur Dokumentation der Adlar Wärmepumpe Homey App.
 
 ## 🌍 Verfügbare Sprachen
 
-Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
+Der Großteil der Benutzerdokumentation ist in vier Sprachen verfügbar:
 
 | Dokument | 🇳🇱 NL | 🇬🇧 EN | 🇩🇪 DE | 🇫🇷 FR |
 |----------|--------|--------|--------|--------|
@@ -42,11 +42,11 @@ Die meiste Benutzerdokumentation ist in vier Sprachen verfügbar:
 ### 👤 setup/ — Benutzerdokumentation
 *Für: Endbenutzer, Installateure, HVAC-Profis*
 
-- **Einführung Erweiterte Funktionen** — Wie man erweiterte Funktionen mit externen Daten freischaltet
+- **Einführung Erweiterte Funktionen** — So schalten Sie erweiterte Funktionen mit externen Daten frei
 - **COP Flow-Karten-Einrichtung** — Schritt-für-Schritt COP-Messkonfiguration
 - **Protokollversions-Leitfaden** — Tuya-Protokollversion-Auswahl (3.3/3.4/3.5)
 - **Konfigurationshandbuch** — Vollständige Einstellungsreferenz
-- **Tuya LocalKey-Anleitung** — Wie man Tuya-Anmeldedaten erhält (PDF)
+- **Tuya LocalKey-Anleitung** — So erhalten Sie Tuya-Anmeldedaten (PDF)
 - **Schnelle Problemlösung** — Häufige Probleme und Lösungen
 - **guide/** — Zusätzliche detaillierte Anleitungen (Flow-Karten, adaptive Regelung, Building Insights)
 
