@@ -13,6 +13,13 @@
     "fr": "Se déclenche lorsque ΔT (cible - intérieur) dépasse 1.5°C. Fournit la durée de préchauffage basée sur la réponse thermique du bâtiment (τ). Nécessite ≥70% de confiance du modèle. Max 1x par 4 heures."
   },
   "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    }
+  ],
   "tokens": [
     {
       "name": "duration_hours",

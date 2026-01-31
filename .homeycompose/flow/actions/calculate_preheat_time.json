@@ -18,7 +18,7 @@
         "de": "Berechnet, wann mit dem Heizen begonnen werden soll, um die gewünschte Innentemperatur zu einer bestimmten Zeit zu erreichen. Verwendet die thermische Zeitkonstante (τ) des Gebäudemodells für genaue Vorhersage.",
         "fr": "Calcule quand commencer à chauffer pour atteindre la température intérieure souhaitée à une heure précise. Utilise la constante de temps thermique (τ) du modèle de bâtiment pour une prédiction précise."
     },
-    "highight": true,
+    "highlight": true,
     "args": [
         {
             "type": "device",
