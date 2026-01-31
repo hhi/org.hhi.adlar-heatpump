@@ -418,25 +418,7 @@ ALORS
 
 ---
 
-### Flow 5 : Masquer un Aperçu Temporairement (Dismiss)
-
-```
-QUAND Aperçu du bâtiment détecté, catégorie = "insulation_performance"
-
-ET l'utilisateur a décidé d'ignorer l'isolation (problème connu)
-
-ALORS
-  Masquer l'aperçu "insulation_performance" pendant 90 jours
-    (action : Dismiss insight)
-
-  Notification : "Aperçu d'isolation masqué pendant 3 mois"
-```
-
-**Use case :** Après des travaux de rénovation en cours, ou si vous savez que l'isolation est prévue mais pas encore réalisée.
-
----
-
-### Flow 6 : Forcer l'Analyse des Aperçus (On-Demand)
+### Flow 5 : Forcer l'Analyse des Aperçus (On-Demand)
 
 ```
 QUAND l'utilisateur appuie sur le bouton virtuel "Analyser le bâtiment maintenant"
@@ -457,41 +439,7 @@ ALORS
 
 ---
 
-### Flow 7 : Réinitialisation Après Rénovation
-
-```
-QUAND le bouton virtuel "Rénovation terminée" est pressé
-
-ALORS
-  1. Réinitialiser l'historique des aperçus [✓ Confirmer la réinitialisation]
-     (action : Reset insight history - la case DOIT être cochée)
-
-  2. Notification :
-     "Aperçus réinitialisés. Nouvel apprentissage démarré - attendez de nouveaux aperçus après 24-48h"
-```
-
-**Use case :** Après de grands changements du bâtiment (isolation, nouvelles fenêtres, rénovation) - réinitialiser les aperçus tout en conservant le modèle du bâtiment.
-
----
-
-### Flow 8 : Seuil de Confiance Dynamique (Adaptatif)
-
-```
-QUAND un jalon d'apprentissage du modèle de bâtiment est atteint
-  milestone = "convergence_reached" (après 7 jours d'apprentissage stable)
-
-ALORS
-  Définir le seuil de confiance à 60%
-    (action : Set confidence threshold)
-
-  Notification : "Modèle stable - seuil de confiance abaissé pour plus d'aperçus"
-```
-
-**Use case :** Démarrer conservateur (70%), baisser le seuil quand le modèle est stable pour plus de granularité d'aperçus.
-
----
-
-### Flow 9 : Notifier Seulement les Aperçus à Fort ROI (Condition)
+### Flow 6 : Notifier Seulement les Aperçus à Fort ROI (Condition)
 
 ```
 QUAND Aperçu du bâtiment détecté
@@ -514,7 +462,7 @@ ALORS
 
 ---
 
-### Flow 10 : Stockage Thermique Seulement Quand Actif (Condition)
+### Flow 7 : Stockage Thermique Seulement Quand Actif (Condition)
 
 ```
 QUAND Bloc d'énergie le moins cher démarré
@@ -532,25 +480,6 @@ SINON
 ```
 
 **Use case :** Automatisation conditionnelle - appliquer la stratégie de stockage thermique uniquement si le bâtiment est adapté.
-
----
-
-### Flow 11 : Ignorer l'Aperçu d'Isolation Jusqu'au Printemps (Saisonnier)
-
-```
-QUAND Aperçu du bâtiment détecté, catégorie = "insulation_performance"
-
-ET le mois actuel est entre octobre et mars (hiver)
-
-ALORS
-  Masquer l'aperçu "insulation_performance" pendant 180 jours
-    (action : Dismiss insight)
-
-  Notification :
-    "Aperçu d'isolation reporté jusqu'au printemps (avril) pour des conditions de rénovation plus chaudes"
-```
-
-**Use case :** Planifier les travaux d'isolation de manière stratégique pendant des saisons favorables.
 
 ---
 
@@ -608,22 +537,9 @@ ALORS
 
 ---
 
-### Cartes d'action (5)
+### Cartes d'action (2)
 
-#### 1. Masquer l'aperçu
-
-**Fonction :** Masquer temporairement une catégorie d'aperçu spécifique
-
-**Paramètres :**
-
-- `category` (liste déroulante) - Catégorie à masquer
-- `duration` (number 1-365) - Nombre de jours
-
-**Usage :** Après planification de rénovation, ignorer un problème connu
-
----
-
-#### 2. Forcer l'analyse des aperçus
+#### 1. Forcer l'analyse des aperçus
 
 **Fonction :** Déclencher une évaluation immédiate (ne pas attendre l'intervalle de 50 min)
 
@@ -636,35 +552,7 @@ ALORS
 
 ---
 
-#### 3. Réinitialiser l'historique des aperçus
-
-**Fonction :** Effacer tous les aperçus actifs et l'historique (le modèle du bâtiment reste intact)
-
-**Paramètres :**
-
-- `confirm` (case à cocher) - DOIT être cochée pour exécuter la réinitialisation
-
-**Usage :** Après des changements majeurs du bâtiment (isolation, rénovation, nouvelles fenêtres)
-
-**IMPORTANT :** Le modèle du bâtiment (C, UA, τ, g, P_int) est préservé - seuls les aperçus sont réinitialisés
-
----
-
-#### 4. Définir le seuil de confiance
-
-**Fonction :** Ajuster dynamiquement le seuil de confiance minimum
-
-**Paramètres :**
-
-- `threshold` (number 50-90) - Nouveau seuil en %
-
-**Effet :** Seuil plus élevé = moins d'aperçus (très fiables), plus bas = plus d'aperçus (plus tôt, moins précis)
-
-**Usage :** Seuil adaptatif - commencer à 70%, baisser à 60% après convergence
-
----
-
-#### 5. Calculer la durée de préchauffage (v2.6.0)
+#### 2. Calculer la durée de préchauffage (v2.6.0)
 
 **Fonction :** Calcule le temps nécessaire pour X°C de hausse de température
 

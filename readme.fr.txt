@@ -213,8 +213,6 @@ INSIGHTS & RECOMMANDATIONS DU BÂTIMENT
 Analyse automatisée du modèle thermique du bâtiment:
 - Recommandations d'économie d'énergie avec estimations ROI
 - Les insights apparaissent après 24-48 heures d'apprentissage (70% de confiance)
-- "Heure de réveil" configurable pour calculs de préchauffage
-- Paramètre de réduction nocturne pour estimations d'économies
 - Nombre maximum d'insights actifs configurable (1-5)
 
 OPTIMISATION DU PRIX DE L'ÉNERGIE

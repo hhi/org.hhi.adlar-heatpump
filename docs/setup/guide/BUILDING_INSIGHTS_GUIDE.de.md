@@ -418,25 +418,7 @@ DANN
 
 ---
 
-### Flow 5: Erkenntnis vorübergehend ausblenden (Dismiss)
-
-```
-WENN Gebäudeerkenntnis erkannt, Kategorie = "insulation_performance"
-
-UND Benutzer hat entschieden, Isolierung zu ignorieren (bekanntes Problem)
-
-DANN
-  Erkenntnis "insulation_performance" für 90 Tage ausblenden
-    (Aktion: Dismiss insight)
-
-  Benachrichtigung: "Dämmungs-Erkenntnis für 3 Monate ausgeblendet"
-```
-
-**Use case:** Nach Renovierungsarbeiten in Planung oder wenn Isolierung bereits bekannt ist, aber noch nicht umgesetzt wurde.
-
----
-
-### Flow 6: Erkenntnisanalyse erzwingen (On-Demand)
+### Flow 5: Erkenntnisanalyse erzwingen (On-Demand)
 
 ```
 WENN Benutzer die virtuelle Taste "Gebäude jetzt analysieren" drückt
@@ -457,41 +439,7 @@ DANN
 
 ---
 
-### Flow 7: Reset nach Renovierung
-
-```
-WENN Virtuelle Taste "Renovierung abgeschlossen" gedrückt
-
-DANN
-  1. Erkenntnishistorie zurücksetzen [✓ Reset bestätigen]
-     (Aktion: Reset insight history - Checkbox MUSS angekreuzt sein)
-
-  2. Benachrichtigung:
-     "Erkenntnisse zurückgesetzt. Neues Lernen startet - erwarten Sie neue Erkenntnisse nach 24-48h"
-```
-
-**Use case:** Nach großen Gebäudeänderungen (Dämmung, neue Fenster, Umbau) - Insights zurücksetzen, Gebäudemodell behalten.
-
----
-
-### Flow 8: Dynamische Vertrauensschwelle (Adaptiv)
-
-```
-WENN Gebäudemodell-Lernmeilenstein erreicht
-  milestone = "convergence_reached" (nach 7 Tagen stabilem Lernen)
-
-DANN
-  Vertrauensschwelle auf 60% setzen
-    (Aktion: Set confidence threshold)
-
-  Benachrichtigung: "Modell stabil - Vertrauensschwelle für mehr Erkenntnisse gesenkt"
-```
-
-**Use case:** Konservativ starten (70%), Schwelle senken wenn Modell stabil ist für mehr Erkenntnis-Granularität.
-
----
-
-### Flow 9: Nur hohe ROI-Erkenntnisse benachrichtigen (Condition)
+### Flow 6: Nur hohe ROI-Erkenntnisse benachrichtigen (Condition)
 
 ```
 WENN Gebäudeerkenntnis erkannt
@@ -514,7 +462,7 @@ DANN
 
 ---
 
-### Flow 10: Thermische Speicherung nur wenn aktiv (Condition)
+### Flow 7: Thermische Speicherung nur wenn aktiv (Condition)
 
 ```
 WENN Günstigster Energieblock gestartet
@@ -532,25 +480,6 @@ SONST
 ```
 
 **Use case:** Bedingte Automatisierung - thermische Speicherstrategie nur anwenden, wenn Gebäude geeignet ist.
-
----
-
-### Flow 11: Dämmungs-Erkenntnis bis Frühling ausblenden (Saisonal)
-
-```
-WENN Gebäudeerkenntnis erkannt, Kategorie = "insulation_performance"
-
-UND aktueller Monat zwischen Oktober und März (Winter)
-
-DANN
-  Erkenntnis "insulation_performance" für 180 Tage ausblenden
-    (Aktion: Dismiss insight)
-
-  Benachrichtigung:
-    "Dämmungs-Erkenntnis bis Frühling (April) verschoben für wärmere Renovierungsbedingungen"
-```
-
-**Use case:** Dämmungsarbeiten strategisch in günstigeren Jahreszeiten planen.
 
 ---
 
@@ -608,22 +537,9 @@ DANN
 
 ---
 
-### Aktions-Karten (5)
+### Aktions-Karten (2)
 
-#### 1. Erkenntnis ausblenden
-
-**Funktion:** Spezifische Erkenntniskategorie temporär ausblenden
-
-**Parameter:**
-
-- `category` (Dropdown) - Auszublendende Kategorie
-- `duration` (number 1-365) - Anzahl Tage
-
-**Verwendung:** Nach Renovierungsplanung, bekanntes Problem ignorieren
-
----
-
-#### 2. Erkenntnisanalyse erzwingen
+#### 1. Erkenntnisanalyse erzwingen
 
 **Funktion:** Sofortige Auswertung auslösen (nicht auf 50-Min-Intervall warten)
 
@@ -636,35 +552,7 @@ DANN
 
 ---
 
-#### 3. Erkenntnishistorie zurücksetzen
-
-**Funktion:** Alle aktiven Erkenntnisse und Historie löschen (Gebäudemodell bleibt erhalten)
-
-**Parameter:**
-
-- `confirm` (Checkbox) - MUSS angekreuzt sein, um Reset auszuführen
-
-**Verwendung:** Nach großen Gebäudeänderungen (Dämmung, Renovierung, neue Fenster)
-
-**WICHTIG:** Gebäudemodell (C, UA, τ, g, P_int) bleibt erhalten - nur Erkenntnisse werden zurückgesetzt
-
----
-
-#### 4. Vertrauensschwelle setzen
-
-**Funktion:** Mindestvertrauensschwelle dynamisch anpassen
-
-**Parameter:**
-
-- `threshold` (number 50-90) - Neue Schwelle in %
-
-**Effekt:** Höhere Schwelle = weniger Erkenntnisse (sehr zuverlässig), niedriger = mehr Erkenntnisse (früher, weniger genau)
-
-**Verwendung:** Adaptive Schwelle - mit 70% starten, nach Konvergenz auf 60% senken
-
----
-
-#### 5. Vorheizdauer berechnen (v2.6.0)
+#### 2. Vorheizdauer berechnen (v2.6.0)
 
 **Funktion:** Berechnet Zeit für X°C Temperaturanstieg
 

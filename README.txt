@@ -213,8 +213,6 @@ BUILDING INSIGHTS & RECOMMENDATIONS
 Automated analysis of the thermal building model:
 - Energy-saving recommendations with ROI estimates
 - Insights appear after 24-48 hours of learning (70% confidence)
-- Configurable "wake-up time" for pre-heat calculations
-- Night setback setting for savings estimates
 - Maximum number of active insights configurable (1-5)
 
 ENERGY PRICE OPTIMIZATION

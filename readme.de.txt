@@ -213,8 +213,6 @@ GEBÄUDEEINBLICKE & EMPFEHLUNGEN
 Automatisierte Analyse des thermischen Gebäudemodells:
 - Energiesparende Empfehlungen mit ROI-Schätzungen
 - Einblicke erscheinen nach 24-48 Stunden Lernen (70% Vertrauen)
-- Konfigurierbare "Aufstehzeit" für Vorwärmberechnungen
-- Nachtabsenkungseinstellung für Sparpotential-Schätzungen
 - Maximale Anzahl aktiver Einblicke einstellbar (1-5)
 
 ENERGIEPREIS-OPTIMIERUNG

@@ -418,25 +418,7 @@ THEN
 
 ---
 
-### Flow 5: Inzicht Tijdelijk Verbergen (Dismiss)
-
-```
-WHEN Gebouwinzicht gedetecteerd, categorie = "insulation_performance"
-
-AND Gebruiker heeft besloten isolatie te negeren (bekend probleem)
-
-THEN
-  Verberg "insulation_performance" inzicht voor 90 dagen
-    (actie: Dismiss insight)
-
-  Notificatie: "Isolatie inzicht verborgen voor 3 maanden"
-```
-
-**Use case:** Na renovatie werk in progress, of als je weet dat isolatie op planning staat maar nog niet uitgevoerd.
-
----
-
-### Flow 6: Forceer Inzicht Analyse (On-Demand)
+### Flow 5: Forceer Inzicht Analyse (On-Demand)
 
 ```
 WHEN Gebruiker drukt op virtuele knop "Analyseer Gebouw Nu"
@@ -457,41 +439,7 @@ THEN
 
 ---
 
-### Flow 7: Reset na Renovatie
-
-```
-WHEN Virtuele knop "Renovatie Voltooid" ingedrukt
-
-THEN
-  1. Reset inzicht geschiedenis [✓ Bevestig reset]
-     (actie: Reset insight history - checkbox MOET aangevinkt)
-
-  2. Notificatie:
-     "Inzichten gereset. Nieuw leren start - verwacht nieuwe inzichten na 24-48u"
-```
-
-**Use case:** Na grote gebouw wijzigingen (isolatie, nieuwe ramen, verbouwing) - reset insights maar behoud building model.
-
----
-
-### Flow 8: Dynamische Confidence Drempel (Adaptief)
-
-```
-WHEN Gebouwmodel leermijlpaal bereikt
-  milestone = "convergence_reached" (na 7 dagen stabiel leren)
-
-THEN
-  Stel betrouwbaarheidsdrempel in op 60%
-    (actie: Set confidence threshold)
-
-  Notificatie: "Model stabiel - confidence drempel verlaagd voor meer inzichten"
-```
-
-**Use case:** Start conservatief (70%), verlaag drempel als model stabiel is voor meer inzicht granulariteit.
-
----
-
-### Flow 9: Alleen Hoge ROI Inzichten Notificeren (Condition)
+### Flow 6: Alleen Hoge ROI Inzichten Notificeren (Condition)
 
 ```
 WHEN Gebouwinzicht gedetecteerd
@@ -514,7 +462,7 @@ THEN
 
 ---
 
-### Flow 10: Thermische Opslag Alleen Wanneer Actief (Condition)
+### Flow 7: Thermische Opslag Alleen Wanneer Actief (Condition)
 
 ```
 WHEN Goedkoopste energieblok gestart
@@ -532,25 +480,6 @@ ELSE
 ```
 
 **Use case:** Conditionele automatisering - alleen thermische opslag strategie toepassen als gebouw geschikt is.
-
----
-
-### Flow 11: Isolatie Inzicht Negeren tot Lente (Seasonal)
-
-```
-WHEN Gebouwinzicht gedetecteerd, categorie = "insulation_performance"
-
-AND Huidige maand is tussen Oktober en Maart (winter)
-
-THEN
-  Verberg "insulation_performance" inzicht voor 180 dagen
-    (actie: Dismiss insight)
-
-  Notificatie:
-    "Isolatie inzicht uitgesteld tot lente (april) voor warmere renovatieweersomstandigheden"
-```
-
-**Use case:** Strategisch plannen van isolatie werk in gunstige seizoenen.
 
 ---
 
@@ -608,22 +537,9 @@ THEN
 
 ---
 
-### Actie Kaarten (5)
+### Actie Kaarten (2)
 
-#### 1. Verberg inzicht (Dismiss insight)
-
-**Functie:** Verberg specifieke inzicht categorie tijdelijk
-
-**Parameters:**
-
-- `category` (dropdown) - Categorie om te verbergen
-- `duration` (number 1-365) - Aantal dagen
-
-**Gebruik:** Na renovatie planning, bekend probleem negeren
-
----
-
-#### 2. Forceer inzicht analyse
+#### 1. Forceer inzicht analyse
 
 **Functie:** Trigger onmiddellijke evaluatie (niet wachten op 50-min interval)
 
@@ -636,35 +552,7 @@ THEN
 
 ---
 
-#### 3. Reset inzicht geschiedenis
-
-**Functie:** Wis alle actieve inzichten en geschiedenis (gebouwmodel blijft intact)
-
-**Parameters:**
-
-- `confirm` (checkbox) - MOET aangevinkt om reset uit te voeren
-
-**Gebruik:** Na grote gebouw wijzigingen (isolatie, renovatie, nieuwe ramen)
-
-**BELANGRIJK:** Gebouwmodel (C, UA, τ, g, P_int) blijft behouden - alleen insights worden gereset
-
----
-
-#### 4. Stel betrouwbaarheidsdrempel in
-
-**Functie:** Pas dynamisch minimum confidence threshold aan
-
-**Parameters:**
-
-- `threshold` (number 50-90) - Nieuwe drempel in %
-
-**Effec:** Hogere drempel = minder inzichten (zeer betrouwbaar), lagere = meer inzichten (vroeger, minder accuraat)
-
-**Gebruik:** Adaptieve drempel - start 70%, verlaag naar 60% na convergentie
-
----
-
-#### 5. Bereken voorverwarmen duur (v2.6.0)
+#### 2. Bereken voorverwarmen duur (v2.6.0)
 
 **Functie:** Berekent de tijd nodig om X°C temperatuurstijging te bereiken
 

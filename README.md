@@ -120,8 +120,6 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Enable Building Insights**: Analyze thermal model and provide energy-saving recommendations with ROI
 - **Minimum Confidence**: Threshold for showing insights (70% = ~24-48 hours learning)
 - **Max Active Insights**: Limit simultaneous recommendations (1-5, default: 3)
-- **Wake Time**: Target time for building to reach temperature (for pre-heat calculations)
-- **Night Setback**: Temperature reduction at night (for energy savings estimates)
 
 #### Energy Price Optimization
 
@@ -393,82 +391,7 @@ THEN   Set target temperature: {{base_setpoint}} + {{time_adjustment}}
 
 ### Troubleshooting Thermal Learning
 
-The **Building Model Learner** (adaptive control component 2) learns your home's thermal properties using machine learning. If the time constant (tau) remains at 50 hours or thermal mass (C) doesn't update, use the diagnostic tool to identify the issue.
-
-### Diagnostic Flow Card
-
-**Action**: `Diagnose building model learning`
-
-**Usage**:
-
-```text
-WHEN   Manual trigger (or scheduled)
-THEN   Adlar Heat Pump → Diagnose building model learning
-```
-
-**Output** (in app logs):
-
-```text
-═══ Building Model Diagnostic Status ═══
-Enabled: ✅ / ❌
-Indoor temp: ✅ 21.5°C / ❌ Not available
-Outdoor temp: ✅ 5.2°C / ❌ Not available
-Samples collected: 47
-Confidence: 16%
-Current tau: 48.3h (LEARNED) / 50.0h (DEFAULT)
-Next update in: 3 samples (15min)
-⚠️ BLOCKING REASON: [specific issue]
-✅ Learning active, collecting data
-═══════════════════════════════════════
-```
-
-### Status Fields Explained
-
-| Field | Meaning | Action if ❌ |
-| ----- | ------- | ------------ |
-| **Enabled** | Building model learning setting active | Enable in device settings → `building_model_enabled` |
-| **Indoor temp** | External sensor flow working | Setup `receive_external_indoor_temperature` flow |
-| **Outdoor temp** | Ambient sensor data available | Check DPS 25 (`measure_temperature.temp_ambient`) |
-| **Samples** | Data points collected | Wait (10 samples = 50 minutes for first update) |
-| **Confidence** | Learning accuracy (0-100%) | Normal progression: 0% → 16% → 70% over 24 hours |
-| **Tau** | Time constant status | 50.0h = DEFAULT (not learned), other values = LEARNED |
-
-### Common Blocking Reasons
-
-#### "No indoor temperature (external sensor flow not running)"
-
-- **Cause**: Flow card `receive_external_indoor_temperature` not configured
-- **Solution**: Create flow `WHEN thermostat changes THEN send temperature to heat pump`
-
-#### "No outdoor temperature (ambient sensor not available)"
-
-- **Cause**: DPS 25 sensor not providing data
-- **Solution**: Check heat pump sensor connections
-
-#### "Collecting initial samples (X/10)"
-
-- **Cause**: Normal - waiting for minimum data points
-- **Solution**: Wait 50 minutes (10 samples × 5-minute interval)
-
-#### "Learning disabled in settings"
-
-- **Cause**: Building model learning turned off
-- **Solution**: Device Settings → `building_model_enabled` = ON
-
-### Learning Timeline
-
-```text
-┌──────────────────────────────────────────────────────┐
-│        Building Model Learning Timeline              │
-├──────────────────────────────────────────────────────┤
-│  T+0        : tau = 50.0h (default)                  │
-│  T+50 min   : First ML update after 10 samples       │
-│  T+100 min  : Second update (tau evolving)           │
-│  T+24 hours : 70% confidence milestone               │
-│             : 288 samples collected                  │
-│             : Trigger: learning_milestone_reached    │
-└──────────────────────────────────────────────────────┘
-```
+The **Building Model Learner** (adaptive control component 2) learns your home's thermal properties using machine learning. The thermal time constant (tau) and thermal mass (C) are learned automatically from temperature data.
 
 ### Integration with Adaptive Control
 
@@ -601,7 +524,6 @@ Located in `/docs` directory:
 
 - ✅ **Building Insights & Recommendations**: Automated energy-saving recommendations with ROI estimates
 - ✅ **Configurable Confidence Threshold**: Show insights after 24-48 hours learning (default: 70%)
-- ✅ **Wake Time & Night Setback**: Pre-heat timing and savings calculations
 - ✅ **Max Active Insights**: Limit info overload (1-5 insights, default: 3)
 
 **Documentation:**
