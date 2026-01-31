@@ -217,8 +217,6 @@ Analyse automatisée du modèle thermique du bâtiment:
 
 OPTIMISATION DU PRIX DE L'ÉNERGIE
 Optimisation automatique basée sur les prix de l'énergie day-ahead:
-- Source de données: API EnergyZero (gratuit, pas de compte nécessaire)
-- Économie estimée: €400-600 par an
 - Seuils de prix: Très Bas/Bas/Normal/Élevé basés sur les percentiles 2024
 - Mode de calcul des prix: Prix marché/Marché+/Prix all-in
 - Majoration fournisseur et taxe énergétique configurables
@@ -227,7 +225,6 @@ Optimisation automatique basée sur les prix de l'énergie day-ahead:
 OPTIMISATION COP
 Optimisation automatique de la température de départ pour une efficacité maximale:
 - Apprend la température de départ optimale par température extérieure
-- Économie estimée: €200-300/an
 - Stratégies: Conservatif/Équilibré/Agressif
 
 FACTEURS DE PONDÉRATION DE RÉGULATION ADAPTATIVE
@@ -307,7 +304,7 @@ Pour des instructions détaillées et l'intégration de données externes:
 - Cartes de flux des fonctionnalités avancées: /docs/setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md
 - Configuration Vent & Soleil: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md
 - Guide des cartes de flux: /docs/setup/guide/FLOW_CARDS_GUIDE.nl.md
-- Configuration complète: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.nl.md
+- Configuration complète: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.fr.md
 - Info et spécifications pompe à chaleur: répertoire /docs/Heatpump specs/
 - Méthodes de calcul COP: /docs/COP calculation/COP-calculation.md
 - Calcul SCOP: /docs/COP calculation/SCOP-calculation.md

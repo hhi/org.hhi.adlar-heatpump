@@ -123,14 +123,14 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 #### Energy Price Optimization
 
-- **Price Optimization**: Day-ahead price-based heating (EnergyZero API, €400-600/year savings)
+- **Price Optimization**: Day-ahead price-based heating
 - **Price Calculation Mode**: Market/Market+/All-in pricing with configurable supplier fees and taxes
 - **Price Thresholds**: Very Low/Low/Normal/High categories with P10-P90 percentile defaults
 - **Price Block Detection**: Cheapest/expensive block identification for day-ahead planning
 
 #### COP Optimization
 
-- **COP Optimizer**: Learn optimal supply temperature per outdoor temperature (€200-300/year)
+- **COP Optimizer**: Learn optimal supply temperature per outdoor temperature
 - **Strategy**: Conservative/Balanced/Aggressive optimization approaches
 
 #### Adaptive Control Weighting

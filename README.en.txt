@@ -217,8 +217,6 @@ Automated analysis of the thermal building model:
 
 ENERGY PRICE OPTIMIZATION
 Automatic optimization based on day-ahead energy prices:
-- Data source: EnergyZero API (free, no account needed)
-- Estimated savings: €400-600 per year
 - Price thresholds: Very Low/Low/Normal/High based on 2024 percentiles
 - Price calculation mode: Market price/Market+/All-in price
 - Configurable supplier markup and energy tax
@@ -227,7 +225,6 @@ Automatic optimization based on day-ahead energy prices:
 COP OPTIMIZATION
 Automatic optimization of supply temperature for maximum efficiency:
 - Learns optimal supply temperature per outdoor temperature
-- Estimated savings: €200-300/year
 - Strategies: Conservative/Balanced/Aggressive
 
 ADAPTIVE CONTROL WEIGHTING FACTORS
@@ -345,6 +342,6 @@ You can update device credentials without re-pairing:
 
 NEED HELP?
 - Documentation: View the /docs folder in the source code on GitHub for detailed information
-- Configuration Guide: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.md (complete settings reference)
+- Configuration Guide: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.en.md (complete settings reference)
 - Community: Homey Community Forum (Topic ID: 143690)
 - Issues: Report problems on GitHub

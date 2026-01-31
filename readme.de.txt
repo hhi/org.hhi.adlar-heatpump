@@ -217,8 +217,6 @@ Automatisierte Analyse des thermischen Gebäudemodells:
 
 ENERGIEPREIS-OPTIMIERUNG
 Automatische Optimierung basierend auf Day-Ahead-Energiepreisen:
-- Datenquelle: EnergyZero API (kostenlos, kein Konto erforderlich)
-- Geschätzte Einsparung: €400-600 pro Jahr
 - Preisschwellen: Sehr Niedrig/Niedrig/Normal/Hoch basierend auf 2024-Perzentilen
 - Preisberechnungsmodus: Marktpreis/Markt+/All-in-Preis
 - Konfigurierbare Anbieteraufschläge und Energiesteuern
@@ -227,7 +225,6 @@ Automatische Optimierung basierend auf Day-Ahead-Energiepreisen:
 COP-OPTIMIERUNG
 Automatische Optimierung der Vorlauftemperatur für maximale Effizienz:
 - Lernt optimale Vorlauftemperatur pro Außentemperatur
-- Geschätzte Einsparung: €200-300/Jahr
 - Strategien: Konservativ/Ausgewogen/Aggressiv
 
 ADAPTIVE REGELUNGS-GEWICHTUNGSFAKTOREN
@@ -307,7 +304,7 @@ Für detaillierte Anweisungen und externe Datenintegration:
 - Advanced Features Flow-Karten: /docs/setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md
 - Wind- & Sonnen-Setup: /docs/setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md
 - Flow-Karten-Leitfaden: /docs/setup/guide/FLOW_CARDS_GUIDE.nl.md
-- Vollständige Konfiguration: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.nl.md
+- Vollständige Konfiguration: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.de.md
 - Info und Spezifikationen Wärmepumpe: /docs/Heatpump specs/ Verzeichnis
 - COP-Berechnungsmethoden: /docs/COP calculation/COP-calculation.md
 - SCOP-Berechnung: /docs/COP calculation/SCOP-calculation.md
