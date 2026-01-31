@@ -18,6 +18,7 @@
  */
 
 import Homey from 'homey';
+import { getPreHeatCategory, calculatePreHeatDuration } from '../utils/preheat-calculator';
 import type { BuildingModelService } from './building-model-service';
 import type { AdaptiveControlService } from './adaptive-control-service';
 import { BUILDING_PROFILES, type BuildingProfileType } from '../adaptive/building-model-learner';
@@ -428,30 +429,21 @@ export class BuildingInsightsService {
       return null;
     }
 
-    // Categorize thermal response and provide compact recommendation
-    let category: string;
-    let recommendation: string;
-    let priority: number;
+    // Use central helper for pre-heat category
+    const { category, hoursFor2DegC, priority } = getPreHeatCategory(tau);
 
-    if (tau < 5) {
-      category = 'fast_response';
-      priority = 75;
-      recommendation = lang === 'nl'
-        ? 'Snel (~2 uur voor 2°C)'
-        : 'Fast (~2 hours for 2°C)';
-    } else if (tau < 15) {
-      category = 'medium_response';
-      priority = 60;
-      recommendation = lang === 'nl'
-        ? 'Normaal (~4 uur voor 2°C)'
-        : 'Normal (~4 hours for 2°C)';
-    } else {
-      category = 'slow_response';
-      priority = 50;
-      recommendation = lang === 'nl'
-        ? 'Langzaam (~8 uur voor 2°C)'
-        : 'Slow (~8 hours for 2°C)';
-    }
+    // Generate localized recommendation text
+    const recommendationTexts: Record<string, { nl: string; en: string }> = {
+      very_fast_response: { nl: 'Zeer snel (~2 uur voor 2°C)', en: 'Very fast (~2 hours for 2°C)' },
+      fast_response: { nl: 'Snel (~4 uur voor 2°C)', en: 'Fast (~4 hours for 2°C)' },
+      medium_response: { nl: 'Normaal (~8 uur voor 2°C)', en: 'Normal (~8 hours for 2°C)' },
+      slow_response: { nl: 'Langzaam (~16 uur voor 2°C)', en: 'Slow (~16 hours for 2°C)' },
+      very_slow_response: { nl: 'Zeer langzaam (~24 uur voor 2°C)', en: 'Very slow (~24 hours for 2°C)' },
+      extremely_slow_response: { nl: 'Extreem langzaam (~32 uur voor 2°C)', en: 'Extremely slow (~32 hours for 2°C)' },
+    };
+    const recommendation = lang === 'nl'
+      ? recommendationTexts[category]?.nl || `~${hoursFor2DegC} uur voor 2°C`
+      : recommendationTexts[category]?.en || `~${hoursFor2DegC} hours for 2°C`;
 
     return {
       id: `pre_heating_${category}_${Date.now()}`,
@@ -955,13 +947,18 @@ export class BuildingInsightsService {
       return;
     }
 
-    // Calculate optimal pre-heat duration: τ × ln(ΔT_target / ΔT_residual)
-    const preHeatHours = tau * Math.log(tempDelta / 0.3); // 0.3°C residual
+    // Use central helper for pre-heat duration calculation
+    const preHeatHours = calculatePreHeatDuration(tau, tempDelta);
 
-    // Defensive: Validate preHeatHours is reasonable (0.25h - 12h)
-    if (!Number.isFinite(preHeatHours) || preHeatHours < 0.25 || preHeatHours > 12) {
-      this.logger('BuildingInsightsService: Pre-heat duration out of range:', preHeatHours);
+    // Defensive: Validate preHeatHours is reasonable
+    if (!Number.isFinite(preHeatHours) || preHeatHours < 0.25) {
+      this.logger('BuildingInsightsService: Pre-heat duration invalid:', preHeatHours);
       return;
+    }
+
+    // Log warning if very long pre-heat required (>24 hours)
+    if (preHeatHours > 24) {
+      this.logger(`BuildingInsightsService: ⚠️ Pre-heat requires ${preHeatHours.toFixed(0)} hours - very slow building (τ=${tau.toFixed(1)}h)`);
     }
 
     try {

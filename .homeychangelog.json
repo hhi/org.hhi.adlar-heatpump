@@ -1,4 +1,10 @@
 {
+  "2.7.6": {
+    "en": "Further finetuning of the building learning module.",
+    "nl": "Verdere finetuning van de gebouw leermodule.",
+    "de": "Weitere Feinabstimmung des Gebäudelernmoduls.",
+    "fr": "Affinement supplémentaire du module d'apprentissage du bâtiment."
+  },
   "2.7.5": {
     "en": "Fixed: Adaptive control priority settings now include thermal properties priority in automatic 100% normalization.",
     "nl": "Opgelost: Adaptieve regeling prioriteitsinstellingen houden nu ook rekening met thermische eigenschappen prioriteit bij automatische 100% normalisatie.",

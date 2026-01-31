@@ -4,6 +4,7 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { TuyaErrorCategorizer } from '../error-types';
+import { calculatePreHeatDuration } from '../utils/preheat-calculator';
 import { CapabilityCategories, UserFlowPreferences } from '../types/shared-interfaces';
 import type { BuildingInsightsService } from './building-insights-service';
 
@@ -799,10 +800,13 @@ export class FlowCardManagerService {
           };
         }
 
-        // Calculate pre-heat duration using thermal model
-        // t = τ × ln(ΔT_target / ΔT_residual)
-        const residualDelta = 0.3; // °C acceptable residual
-        const durationHours = tau * Math.log(tempDelta / residualDelta);
+        // Use central helper for empirical pre-heat time calculation
+        const durationHours = calculatePreHeatDuration(tau, tempDelta);
+
+        // Validate result is reasonable
+        if (!Number.isFinite(durationHours) || durationHours < 0) {
+          throw new Error('Unable to calculate pre-heat time');
+        }
 
         // Calculate start time
         const targetTime = new Date();
