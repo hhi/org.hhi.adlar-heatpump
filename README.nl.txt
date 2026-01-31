@@ -213,14 +213,10 @@ GEBOUW INZICHTEN & AANBEVELINGEN
 Geautomatiseerde analyse van het thermische gebouwmodel:
 - Energie-besparende aanbevelingen met ROI-schattingen
 - Inzichten verschijnen na 24-48 uur leren (70% betrouwbaarheid)
-- Configureerbare "sta-op tijd" voor voorverwarm berekeningen
-- Nacht verlaging instelling voor besparingsschattingen
 - Maximum aantal actieve inzichten instelbaar (1-5)
 
 ENERGIEPRIJS OPTIMALISATIE
 Automatische optimalisatie op basis van day-ahead energieprijzen:
-- Data bron: EnergyZero API (gratis, geen account nodig)
-- Geschatte besparing: €400-600 per jaar
 - Prijsdrempels: Zeer Laag/Laag/Normaal/Hoog gebaseerd op 2024 percentielen
 - Prijsberekening modus: Marktprijs/Markt+/All-in prijs
 - Configureerbare leveranciersopslag en energiebelasting
@@ -229,7 +225,6 @@ Automatische optimalisatie op basis van day-ahead energieprijzen:
 COP OPTIMALISATIE
 Automatische optimalisatie van aanvoertemperatuur voor maximale efficiëntie:
 - Leert optimale aanvoertemperatuur per buitentemperatuur
-- Geschatte besparing: €200-300/jaar
 - Strategieën: Conservatief/Gebalanceerd/Agressief
 
 ADAPTIEVE REGELING WEGINGSFACTOREN
@@ -347,6 +342,6 @@ U kunt apparaatgegevens bijwerken zonder opnieuw te koppelen:
 
 HULP NODIG?
 - Documentatie: Bekijk de /docs map in de broncode op GitHub voor gedetailleerde informatie
-- Configuratiegids: /docs/setup/advanced-settings/CONFIGURATIEGIDS.md (complete instellingen referentie)
+- Configuratiegids: /docs/setup/advanced-settings/CONFIGURATION_GUIDE.nl.md (complete instellingen referentie)
 - Community: Homey Community Forum (Topic ID: 143690)
 - Issues: Meld problemen op GitHub
