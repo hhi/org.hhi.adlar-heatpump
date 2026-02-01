@@ -213,7 +213,6 @@ BUILDING INSIGHTS & RECOMMENDATIONS
 Automated analysis of the thermal building model:
 - Energy-saving recommendations with ROI estimates
 - Insights appear after 24-48 hours of learning (70% confidence)
-- Maximum number of active insights configurable (1-5)
 
 ENERGY PRICE OPTIMIZATION
 Automatic optimization based on day-ahead energy prices:
@@ -237,7 +236,7 @@ Four priorities that together determine how the system makes decisions:
 
 BUILDING MODEL DIAGNOSTICS
 Troubleshooting for thermal learning problems when your building model doesn't update:
-- Extensive diagnostic flow card
+- Comprehensive diagnostics via building_model_diagnostics capability
 - Check indoor/outdoor temperature sensor status
 - Monitor learning process (samples, confidence, time constant)
 - Identify specific blocking reasons with solutions
@@ -249,7 +248,7 @@ Improve the accuracy of the thermal building model with external weather data:
 Wind Speed Correction:
 - Automatic adjustment of heat loss based on windchill effect
 - Flow card: "Set external wind speed" (km/h)
-- Reduces building model learning time by 30-50%
+- Improves building model heat loss calculation accuracy
 - Compatible with KNMI Weather app and other wind sensors
 
 Solar Radiation Integration:
@@ -262,7 +261,7 @@ PV Power Tracking:
 - Real-time monitoring of solar panel yield
 - Flow card: "Set external PV power" (W)
 - Used for internal heat gain correction
-- Improves building model confidence to 85%+
+- Improves building model accuracy with additional data source
 
 
 CROSS-APP INTEGRATION

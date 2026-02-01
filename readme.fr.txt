@@ -213,7 +213,6 @@ INSIGHTS & RECOMMANDATIONS DU BÂTIMENT
 Analyse automatisée du modèle thermique du bâtiment:
 - Recommandations d'économie d'énergie avec estimations ROI
 - Les insights apparaissent après 24-48 heures d'apprentissage (70% de confiance)
-- Nombre maximum d'insights actifs configurable (1-5)
 
 OPTIMISATION DU PRIX DE L'ÉNERGIE
 Optimisation automatique basée sur les prix de l'énergie day-ahead:
@@ -237,7 +236,7 @@ Quatre priorités qui déterminent ensemble comment le système prend des décis
 
 DIAGNOSTIC DU MODÈLE DU BÂTIMENT
 Dépannage pour problèmes d'apprentissage thermique lorsque votre modèle du bâtiment ne se met pas à jour:
-- Carte de flux diagnostique complète
+- Informations de diagnostic via la capability building_model_diagnostics
 - Vérifier l'état du capteur de température intérieure/extérieure
 - Surveiller le processus d'apprentissage (échantillons, confiance, constante de temps)
 - Identifier les raisons de blocage spécifiques avec solutions
@@ -249,7 +248,7 @@ Améliorez la précision du modèle thermique du bâtiment avec des données mé
 Correction de la vitesse du vent:
 - Ajustement automatique de la perte de chaleur basé sur l'effet windchill
 - Carte de flux: "Définir la vitesse du vent externe" (km/h)
-- Réduit le temps d'apprentissage du modèle du bâtiment de 30-50%
+- Améliore la précision du calcul des pertes de chaleur du modèle
 - Compatible avec l'application météo KNMI et autres capteurs de vent
 
 Intégration du rayonnement solaire:
@@ -262,7 +261,7 @@ Suivi de la puissance PV:
 - Surveillance en temps réel du rendement des panneaux solaires
 - Carte de flux: "Définir la puissance PV externe" (W)
 - Utilisé pour la correction des gains de chaleur internes
-- Améliore la confiance du modèle du bâtiment jusqu'à 85%+
+- Améliore la précision du modèle avec une source de données supplémentaire
 
 
 INTÉGRATION CROSS-APP

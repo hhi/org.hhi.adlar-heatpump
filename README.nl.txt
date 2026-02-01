@@ -213,7 +213,6 @@ GEBOUW INZICHTEN & AANBEVELINGEN
 Geautomatiseerde analyse van het thermische gebouwmodel:
 - Energie-besparende aanbevelingen met ROI-schattingen
 - Inzichten verschijnen na 24-48 uur leren (70% betrouwbaarheid)
-- Maximum aantal actieve inzichten instelbaar (1-5)
 
 ENERGIEPRIJS OPTIMALISATIE
 Automatische optimalisatie op basis van day-ahead energieprijzen:
@@ -237,7 +236,7 @@ Vier prioriteiten die samen bepalen hoe het systeem beslissingen maakt:
 
 GEBOUWMODEL DIAGNOSTIEK
 Probleemoplossing voor thermische leer-problemen wanneer uw gebouwmodel niet update:
-- Uitgebreide diagnostische flow kaart
+- Diagnostische informatie via building_model_diagnostics capability
 - Controleer binnen/buiten temperatuur sensor status
 - Monitor leerproces (samples, betrouwbaarheid, tijdsconstante)
 - Identificeer specifieke blokkerende redenen met oplossingen
@@ -249,7 +248,7 @@ Verbeter de nauwkeurigheid van het thermische gebouwmodel met externe weerdata:
 Windsnelheid Correctie:
 - Automatische aanpassing van warmteverlies op basis van windchill effect
 - Flow card: "Stel externe windsnelheid in" (km/h)
-- Vermindert leer-tijd gebouwmodel met 30-50%
+- Verbetert nauwkeurigheid gebouwmodel warmteverlies berekening
 - Compatibel met KNMI Weer app en andere wind sensoren
 
 Zonnestraling Integratie:
@@ -262,7 +261,7 @@ PV-vermogen Tracking:
 - Real-time monitoring van zonnepaneel opbrengst
 - Flow card: "Stel extern PV-vermogen in" (W)
 - Gebruikt voor interne warmtewinst correctie
-- Verbetert gebouwmodel betrouwbaarheid tot 85%+
+- Verbetert gebouwmodel nauwkeurigheid met extra databron
 
 
 CROSS-APP INTEGRATIE
