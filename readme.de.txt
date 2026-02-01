@@ -213,7 +213,6 @@ GEBÄUDEEINBLICKE & EMPFEHLUNGEN
 Automatisierte Analyse des thermischen Gebäudemodells:
 - Energiesparende Empfehlungen mit ROI-Schätzungen
 - Einblicke erscheinen nach 24-48 Stunden Lernen (70% Vertrauen)
-- Maximale Anzahl aktiver Einblicke einstellbar (1-5)
 
 ENERGIEPREIS-OPTIMIERUNG
 Automatische Optimierung basierend auf Day-Ahead-Energiepreisen:
@@ -237,7 +236,7 @@ Vier Prioritäten, die zusammen bestimmen, wie das System Entscheidungen trifft:
 
 GEBÄUDEMODELL-DIAGNOSTIK
 Problemlösung für thermische Lernprobleme, wenn Ihr Gebäudemodell nicht aktualisiert wird:
-- Umfassende diagnostische Flow-Karte
+- Diagnoseinformationen über die building_model_diagnostics Capability
 - Überprüfen Sie Innen-/Außentemperatursensor-Status
 - Überwachen Sie Lernprozess (Proben, Vertrauen, Zeitkonstante)
 - Identifizieren Sie spezifische blockierende Gründe mit Lösungen
@@ -249,7 +248,7 @@ Verbessern Sie die Genauigkeit des thermischen Gebäudemodells mit externen Wett
 Windgeschwindigkeitskorrektur:
 - Automatische Anpassung des Wärmeverlusts basierend auf Windchill-Effekt
 - Flow-Karte: "Externe Windgeschwindigkeit einstellen" (km/h)
-- Reduziert Gebäudemodell-Lernzeit um 30-50%
+- Verbessert die Genauigkeit der Gebäudemodell-Wärmeverlustberechnung
 - Kompatibel mit KNMI Wetter-App und anderen Windsensoren
 
 Sonnenstrahlungsintegration:
@@ -262,7 +261,7 @@ PV-Leistungsverfolgung:
 - Echtzeit-Überwachung der Solarmodulausbeute
 - Flow-Karte: "Externes PV-Leistung einstellen" (W)
 - Wird für interne Wärmegewinn-Korrektur verwendet
-- Verbessert Gebäudemodell-Vertrauen auf 85%+
+- Verbessert Gebäudemodell-Genauigkeit mit zusätzlicher Datenquelle
 
 
 CROSS-APP-INTEGRATION
