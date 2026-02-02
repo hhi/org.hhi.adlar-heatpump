@@ -1,4 +1,10 @@
 {
+  "2.7.7": {
+    "en": "Enhanced RLS building model learning with three scientific safeguards: (1) Variable Forgetting Factor adapts learning rate based on prediction error, (2) Parameter Rate Limiting prevents rapid C changes (max 5%/sample), (3) Covariance Upper Bound prevents wind-up instability.",
+    "nl": "RLS gebouwmodel leren verbeterd met drie wetenschappelijke safeguards: (1) Variable Forgetting Factor past leersnelheid aan op basis van voorspellingsfout, (2) Parameter Rate Limiting voorkomt snelle C-veranderingen (max 5%/sample), (3) Covariance Upper Bound voorkomt wind-up instabiliteit.",
+    "de": "RLS-Gebäudemodell-Lernen mit drei wissenschaftlichen Sicherheitsmaßnahmen verbessert: (1) Variable Forgetting Factor passt Lernrate basierend auf Vorhersagefehler an, (2) Parameter Rate Limiting verhindert schnelle C-Änderungen (max 5%/Sample), (3) Covariance Upper Bound verhindert Wind-up-Instabilität.",
+    "fr": "Apprentissage du modèle de bâtiment RLS amélioré avec trois mécanismes de sécurité scientifiques: (1) Variable Forgetting Factor adapte le taux d'apprentissage selon l'erreur de prédiction, (2) Parameter Rate Limiting empêche les changements rapides de C (max 5%/sample), (3) Covariance Upper Bound empêche l'instabilité wind-up."
+  },
   "2.7.6": {
     "en": "Further finetuning of the building learning module.",
     "nl": "Verdere finetuning van de gebouw leermodule.",
