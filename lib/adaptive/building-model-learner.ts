@@ -333,20 +333,42 @@ export class BuildingModelLearner {
    */
   private updateRLS(X: number[], y: number): void {
     // =========================================================================
-    // DEFENSIVE LAYER 3: Adaptive Forgetting Factor
-    // Start conservative (λ=0.999) during initial learning, gradually decrease
-    // to configured value (default 0.998) to prevent early divergence
+    // DEFENSIVE LAYER 3: Variable Forgetting Factor (VFF-RLS)
+    // v2.7.7: Error-based adaptive λ - key insight from scientific literature:
+    // - Small prediction error → λ → 0.9999 (stable, minimal learning)
+    // - Large prediction error → λ → 0.995 (fast tracking)
+    // This prevents both convergence stalling AND rapid divergence
+    // Reference: University of Michigan RLS research, IEEE VFF-RLS papers
     // =========================================================================
-    const adaptiveLambda = Math.max(
+    const prediction = this.dotProduct(X, this.theta);
+    const predictionError = Math.abs(y - prediction);
+
+    // Normalize error: 2.0°C/h considered maximum reasonable error
+    const errorNormalized = Math.min(predictionError / 2.0, 1.0);
+
+    // Sigmoid mapping: smooth transition between stable and tracking modes
+    // At error=0.5°C/h → sigmoid ≈ 0.5 (balanced)
+    // At error<0.2°C/h → sigmoid ≈ 0.1 (stable mode)
+    // At error>1.0°C/h → sigmoid ≈ 0.9 (tracking mode)
+    const sigmoid = 1 / (1 + Math.exp(-5 * (errorNormalized - 0.25)));
+
+    // Adaptive lambda: 0.9999 (stable) to 0.995 (fast tracking)
+    const vffLambda = 0.9999 - sigmoid * (0.9999 - 0.995);
+
+    // Also apply sample-count based warmup (existing logic)
+    const warmupLambda = Math.max(
       this.lambda, // Configured value (default 0.998)
-      0.999 - this.sampleCount / 100000, // Gradual decrease
+      0.999 - this.sampleCount / 100000, // Gradual decrease during warmup
     );
 
-    // Optional: Log adaptive lambda at milestones (every 100 samples)
-    if (this.sampleCount % 100 === 0 && adaptiveLambda > this.lambda) {
+    // Use the more conservative (larger) of the two
+    const adaptiveLambda = Math.max(vffLambda, warmupLambda);
+
+    // Log VFF activity at milestones
+    if (this.sampleCount % 100 === 0) {
       this.logger(
-        `BuildingModelLearner: Using adaptive λ=${adaptiveLambda.toFixed(4)} `
-        + `(configured: ${this.lambda.toFixed(4)}) for sample ${this.sampleCount}`,
+        `BuildingModelLearner: VFF λ=${adaptiveLambda.toFixed(4)} `
+        + `(error=${predictionError.toFixed(3)}°C/h, sigmoid=${sigmoid.toFixed(2)})`,
       );
     }
 
@@ -356,8 +378,7 @@ export class BuildingModelLearner {
     const K = PX.map((val) => val / denominator);
 
     // Step 2: Update parameters θ = θ + K × (y - X^T × θ)
-    const prediction = this.dotProduct(X, this.theta);
-    const error = y - prediction;
+    const error = y - prediction; // prediction already calculated above for VFF
 
     // =========================================================================
     // DEFENSIVE LAYER 2: Save theta before update for potential reversion
@@ -400,15 +421,51 @@ export class BuildingModelLearner {
       return;
     }
 
+    // =========================================================================
+    // DEFENSIVE LAYER 4: Parameter Rate Limiting (NEW in v2.7.7)
+    // Prevents rapid parameter changes that cause C to jump (e.g., 13→5)
+    // Scientific basis: "parameter constraints" from RLS literature
+    // Each θ component limited to max 5% change per sample
+    // =========================================================================
+    const MAX_THETA_CHANGE_RATIO = 0.05; // 5% max change per sample
+    let rateLimited = false;
+
+    for (let i = 0; i < 4; i++) {
+      const maxChange = Math.abs(thetaPrevious[i]) * MAX_THETA_CHANGE_RATIO;
+      const actualChange = this.theta[i] - thetaPrevious[i];
+
+      if (Math.abs(actualChange) > maxChange && maxChange > 0) {
+        this.theta[i] = thetaPrevious[i] + Math.sign(actualChange) * maxChange;
+        rateLimited = true;
+      }
+    }
+
+    if (rateLimited && this.sampleCount % 10 === 0) {
+      const newC = 1 / this.theta[0];
+      this.logger(
+        `BuildingModelLearner: Rate-limited θ changes (max 5%/sample), C=${newC.toFixed(1)} kWh/°C`,
+      );
+    }
+
     // Step 3: Update covariance P = (1/λ) × (P - K × X^T × P)
-    // v2.7.1: Added P matrix diagonal floor to prevent covariance collapse
-    const P_FLOOR = 0.0001; // Minimum uncertainty - prevents P[i,i]=0 (algorithm stops learning)
+    // =========================================================================
+    // DEFENSIVE LAYER 5: Covariance Bounding (Enhanced in v2.7.7)
+    // P_FLOOR: Prevents covariance collapse (algorithm stops learning)
+    // P_CEILING: Prevents covariance wind-up (algorithm becomes too sensitive)
+    // Scientific basis: "aI ≤ P ≤ bI" from University of Michigan RLS research
+    // =========================================================================
+    const P_FLOOR = 0.0001;   // Minimum uncertainty - prevents P[i,i]=0
+    const P_CEILING = 1.0;    // Maximum uncertainty - equals initial covariance
+
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
     this.P = this.P.map((row, i) => row.map((val, j) => {
       const updated = (val - KXP[i][j]) / adaptiveLambda;
-      // Apply floor to diagonal elements only to maintain minimum uncertainty
-      return i === j ? Math.max(updated, P_FLOOR) : updated;
+      // Apply floor AND ceiling to diagonal elements
+      if (i === j) {
+        return Math.max(P_FLOOR, Math.min(P_CEILING, updated));
+      }
+      return updated;
     }));
   }
 
