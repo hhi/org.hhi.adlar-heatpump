@@ -1,4 +1,10 @@
 {
+  "2.7.8": {
+    "en": "Adaptive Control sensors textual improvements.",
+    "nl": "Adaptieve Regeling sensoren tekstuele verbeteringen.",
+    "de": "Adaptive Regelung Sensoren textuelle Verbesserungen.",
+    "fr": "Améliorations textuelles des capteurs du contrôle adaptatif."
+  },
   "2.7.7": {
     "en": "Enhanced RLS building model learning with three scientific safeguards: (1) Variable Forgetting Factor adapts learning rate based on prediction error, (2) Parameter Rate Limiting prevents rapid C changes (max 5%/sample), (3) Covariance Upper Bound prevents wind-up instability.",
     "nl": "RLS gebouwmodel leren verbeterd met drie wetenschappelijke safeguards: (1) Variable Forgetting Factor past leersnelheid aan op basis van voorspellingsfout, (2) Parameter Rate Limiting voorkomt snelle C-veranderingen (max 5%/sample), (3) Covariance Upper Bound voorkomt wind-up instabiliteit.",

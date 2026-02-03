@@ -504,59 +504,93 @@ export class BuildingInsightsService {
 
     const hasDynamicPricing = this.adaptiveControl.hasDynamicPricing();
 
-    // High thermal mass + slow response = thermal storage potential
-    if (model.C > 18 && tau > 12) {
-      if (hasDynamicPricing) {
-        // v2.6.0: Calculate optimal boost/reduce based on building model
-        const optimalBoost = Math.min(2.5, model.C / 15 + tau / 20);
-        const optimalReduce = optimalBoost * 0.5;
-        const savingsEstimate = this.estimateThermalStorageSavingsWithBoost(model.C, optimalBoost);
+    // =========================================================================
+    // v2.7.8: 9-value matrix for thermal storage insight
+    // Matrix based on C (buffer size) × τ (loss rate)
+    // Format: [emoji] [Buffer] • [Verlies]
+    // =========================================================================
 
-        const boostStr = optimalBoost.toFixed(1);
-        const reduceStr = optimalReduce.toFixed(1);
-
-        const recommendation = lang === 'nl'
-          ? `💰 +${boostStr}°C dal, -${reduceStr}°C piek • €${savingsEstimate}/mnd`
-          : `💰 +${boostStr}°C off-peak, -${reduceStr}°C peak • €${savingsEstimate}/mo`;
-
-        return {
-          id: `thermal_storage_active_${Date.now()}`,
-          category: 'thermal_storage',
-          priority: 90,
-          confidence: diagnostics.confidence,
-          detectedAt: Date.now(),
-          insight: recommendation,
-          recommendation,
-          estimatedSavings: savingsEstimate,
-          status: 'new',
-        };
-      }
-      // Potential exists but dynamic pricing not configured
-      const recommendation = lang === 'nl'
-        ? '💡 Voeg dynamische prijzen toe • 15-25% potentieel'
-        : '💡 Add dynamic pricing • 15-25% potential';
-
-      return {
-        id: `thermal_storage_potential_${Date.now()}`,
-        category: 'thermal_storage',
-        priority: 65,
-        confidence: diagnostics.confidence,
-        detectedAt: Date.now(),
-        insight: recommendation,
-        recommendation,
-        status: 'new',
-      };
+    // Determine buffer category based on C
+    let bufferCategory: 'small' | 'medium' | 'large';
+    if (model.C < 10) {
+      bufferCategory = 'small';
+    } else if (model.C <= 18) {
+      bufferCategory = 'medium';
+    } else {
+      bufferCategory = 'large';
     }
 
-    // Low thermal mass - not suitable for load shifting
-    const recommendation = lang === 'nl'
-      ? 'ℹ️ Beperkte massa • Niet rendabel'
-      : 'ℹ️ Limited mass • Not economical';
+    // Determine loss category based on τ
+    let lossCategory: 'high' | 'medium' | 'low';
+    if (tau < 12) {
+      lossCategory = 'high';
+    } else if (tau <= 40) {
+      lossCategory = 'medium';
+    } else {
+      lossCategory = 'low';
+    }
+
+    // Build insight text based on matrix position
+    const bufferTexts = {
+      small: { nl: 'Kleine buffer', en: 'Small buffer' },
+      medium: { nl: 'Gem. buffer', en: 'Med. buffer' },
+      large: { nl: 'Grote buffer', en: 'Large buffer' },
+    };
+
+    const lossTexts = {
+      high: { nl: 'Veel verlies', en: 'High loss' },
+      medium: { nl: 'Gem. verlies', en: 'Med. loss' },
+      low: { nl: 'Weinig verlies', en: 'Low loss' },
+    };
+
+    // Determine emoji and priority based on matrix position
+    // 🔴 = not suitable, 🟠 = marginal, 🟡 = limited, 🟢 = suitable
+    let emoji: string;
+    let priority: number;
+    let suitableForOptimization = false;
+
+    if (bufferCategory === 'small' && lossCategory === 'high') {
+      // C < 10, τ < 12: Not suitable
+      emoji = '🔴';
+      priority = 20;
+    } else if (bufferCategory === 'small') {
+      // C < 10, τ >= 12: Limited (good insulation but small buffer)
+      emoji = '🟡';
+      priority = 40;
+    } else if (lossCategory === 'high') {
+      // C >= 10, τ < 12: Marginal (buffer exists but leaks fast)
+      emoji = '🟠';
+      priority = 50;
+    } else {
+      // C >= 10, τ >= 12: Suitable for optimization
+      emoji = '🟢';
+      priority = 75;
+      suitableForOptimization = true;
+    }
+
+    const bufferText = lang === 'nl' ? bufferTexts[bufferCategory].nl : bufferTexts[bufferCategory].en;
+    const lossText = lang === 'nl' ? lossTexts[lossCategory].nl : lossTexts[lossCategory].en;
+    let recommendation = `${emoji} ${bufferText} • ${lossText}`;
+
+    // If suitable and dynamic pricing available, add savings estimate
+    if (suitableForOptimization && hasDynamicPricing) {
+      const optimalBoost = Math.min(2.5, model.C / 15 + tau / 20);
+      const savingsEstimate = this.estimateThermalStorageSavingsWithBoost(model.C, optimalBoost);
+      recommendation += lang === 'nl'
+        ? ` • €${savingsEstimate}/mnd`
+        : ` • €${savingsEstimate}/mo`;
+      priority = 90;
+    } else if (suitableForOptimization && !hasDynamicPricing) {
+      // Suitable but no dynamic pricing configured
+      recommendation += lang === 'nl'
+        ? ' • Voeg dynamische prijzen toe'
+        : ' • Add dynamic pricing';
+    }
 
     return {
-      id: `thermal_storage_unsuitable_${Date.now()}`,
+      id: `thermal_storage_${bufferCategory}_${lossCategory}_${Date.now()}`,
       category: 'thermal_storage',
-      priority: 30,
+      priority,
       confidence: diagnostics.confidence,
       detectedAt: Date.now(),
       insight: recommendation,
