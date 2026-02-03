@@ -1659,7 +1659,16 @@ export class AdaptiveControlService {
         Math.round(effectiveCurrentPrice * 10000) / 10000);
 
       // Category always based on RAW market price (for correct threshold detection)
-      await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
+      // v2.7.8: Add color emoji prefix for visual clarity
+      const categoryEmojis: Record<string, string> = {
+        very_low: '🟢',
+        low: '🟢',
+        normal: '⚪',
+        high: '🟠',
+        very_high: '🔴',
+      };
+      const emoji = categoryEmojis[currentPrice.category] || '⚪';
+      await this.device.setCapabilityValue('adlar_energy_price_category', `${emoji} ${currentPrice.category}`);
 
       // Next hour price (effective)
       if (effectiveNextPrice > 0) {
@@ -1694,8 +1703,9 @@ export class AdaptiveControlService {
           const formatTime = (date: Date) => {
             return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
           };
+          // v2.7.8: Show full block range (e.g., "01:00-05:00") instead of just start time
           await this.device.setCapabilityValue('adlar_cheapest_block_start',
-            formatTime(cheapestBlock.startTime));
+            `${formatTime(cheapestBlock.startTime)}-${formatTime(cheapestBlock.endTime)}`);
         } else {
           await this.device.setCapabilityValue('adlar_cheapest_block_start', 'N/A');
         }
