@@ -17,9 +17,20 @@ import {
   type BuildingModelConfig,
   type MeasurementData,
   type BuildingProfileType,
-  getDynamicPInt,
   getSeasonalGMultiplier,
 } from '../adaptive/building-model-learner';
+
+interface EnergyTrackingService {
+  getCurrentPowerMeasurement(): { value: number } | null;
+}
+
+interface ServiceCoordinator {
+  getEnergyTracking(): EnergyTrackingService | null;
+}
+
+interface DeviceWithServiceCoordinator extends Homey.Device {
+  serviceCoordinator?: ServiceCoordinator;
+}
 
 export interface BuildingModelServiceConfig {
   device: Homey.Device;
@@ -149,7 +160,7 @@ export class BuildingModelService {
       let powerElectric = 0;
       // usage of EnergyTrackingService is MANDATORY for correct power readings
       // If this fails, we skip the cycle rather than using unreliable fallback data
-      const energyTracking = (this.device as any).serviceCoordinator?.getEnergyTracking();
+      const energyTracking = (this.device as DeviceWithServiceCoordinator).serviceCoordinator?.getEnergyTracking();
       const powerMeasurement = energyTracking?.getCurrentPowerMeasurement();
 
       if (!powerMeasurement || typeof powerMeasurement.value !== 'number') {
@@ -410,7 +421,7 @@ export class BuildingModelService {
     // Calculate solar gain using priority cascade (panel > KNMI > estimation)
     // getSolarRadiationWithPriority returns W/m², g is kW per kW/m²
     const { radiation: solarRadiation } = this.getSolarRadiationWithPriority();
-    const solarGain = model.g * solarRadiation / 1000; // kW
+    const solarGain = model.g * (solarRadiation / 1000); // kW
 
     // Total extra gains (kW)
     const totalGains = solarGain + effectivePInt;
@@ -453,7 +464,8 @@ export class BuildingModelService {
         reason: `Thermal: τ=${effectiveTau.toFixed(0)}h (corr.), ${predictedHours.toFixed(1)}h to target → +0.5°C boost`,
         priority: 'medium',
       };
-    } else if (predictedHours < 0.5 && tempDelta < 0.5) {
+    }
+    if (predictedHours < 0.5 && tempDelta < 0.5) {
       // Near target: reduce setpoint to prevent overshoot
       return {
         adjustment: -0.3,
@@ -763,7 +775,12 @@ export class BuildingModelService {
 
     // Calculate P matrix trace (sum of diagonal elements)
     const pTrace = state.P.reduce((sum, row, i) => sum + row[i], 0);
-    const pTraceStatus = pTrace > 400 ? '⚠️ ABNORMALLY HIGH (corrupt?)' : pTrace < 10 ? '⚠️ TOO LOW (over-confident?)' : '✅ OK';
+    let pTraceStatus = '✅ OK';
+    if (pTrace > 400) {
+      pTraceStatus = '⚠️ ABNORMALLY HIGH (corrupt?)';
+    } else if (pTrace < 10) {
+      pTraceStatus = '⚠️ TOO LOW (over-confident?)';
+    }
     this.logger(`   P matrix trace: ${pTrace.toFixed(1)} ${pTraceStatus}`);
     this.logger(`   P[0][0]: ${state.P[0][0].toFixed(3)} (1/C variance)`);
     this.logger(`   P[1][1]: ${state.P[1][1].toFixed(3)} (UA/C variance)`);
@@ -781,7 +798,12 @@ export class BuildingModelService {
     this.logger('🏠 Learned Building Parameters:');
     const cStatus = model.C > 0 && model.C < 100 ? '✅' : '⚠️ UNREALISTIC';
     const uaStatus = model.UA > 0 && model.UA < 2 ? '✅' : '⚠️ UNREALISTIC';
-    const tauStatus = model.tau > 0 && model.tau < 500 ? '✅' : model.tau < 0 ? '❌ NEGATIVE (IMPOSSIBLE!)' : '⚠️ UNREALISTIC';
+    let tauStatus = '⚠️ UNREALISTIC';
+    if (model.tau > 0 && model.tau < 500) {
+      tauStatus = '✅';
+    } else if (model.tau < 0) {
+      tauStatus = '❌ NEGATIVE (IMPOSSIBLE!)';
+    }
     this.logger(`   C (Thermal Mass):  ${model.C.toFixed(1)} kWh/°C ${cStatus}`);
     this.logger(`   UA (Heat Loss):    ${model.UA.toFixed(3)} kW/°C ${uaStatus}`);
     this.logger(`   τ (Time Constant): ${model.tau.toFixed(1)}h ${tauStatus}`);

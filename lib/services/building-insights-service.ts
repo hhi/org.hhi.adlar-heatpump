@@ -183,7 +183,6 @@ export class BuildingInsightsService {
       configChanged = true;
     }
 
-
     // Note: insights_max_active setting removed in v2.5.10
 
     if (configChanged && this.enabled) {
@@ -720,7 +719,7 @@ export class BuildingInsightsService {
 
   /**
    * Check if insight should trigger (advice fatigue prevention)
-   * 
+   *
    * Logic order (v2.5.1 fix):
    * 1. Check if dismissed by user
    * 2. Check for significant drift (>10%) - bypasses time limit if true
@@ -884,7 +883,7 @@ export class BuildingInsightsService {
   /**
    * Check if pre-heat recommendation should be triggered based on ΔT threshold
    * v2.6.0: Replaces fixed 23:00 schedule with dynamic condition-based trigger
-   * 
+   *
    * Triggers when:
    * - ΔT (target - indoor) > 1.5°C
    * - Confidence >= minConfidence
@@ -902,8 +901,8 @@ export class BuildingInsightsService {
     const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
     const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
 
-    if (indoorTemp === null || indoorTemp === undefined ||
-      targetTemp === null || targetTemp === undefined) {
+    if (indoorTemp === null || indoorTemp === undefined
+      || targetTemp === null || targetTemp === undefined) {
       return;
     }
 
@@ -918,8 +917,8 @@ export class BuildingInsightsService {
     // Check fatigue prevention (4 hours between triggers)
     const FATIGUE_HOURS = 4;
     const lastTrigger = this.insightHistory.find(
-      (h) => h.category === 'pre_heating' &&
-        Date.now() - h.detectedAt < FATIGUE_HOURS * 60 * 60 * 1000,
+      (h) => h.category === 'pre_heating'
+        && Date.now() - h.detectedAt < FATIGUE_HOURS * 60 * 60 * 1000,
     );
     if (lastTrigger) {
       return;

@@ -10,6 +10,7 @@ import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { WeightedDecisionMaker, type ConfidenceMetrics } from '../adaptive/weighted-decision-maker';
 import { WindCorrectionService } from './wind-correction-service';
+import { WeatherForecastService, type ForecastAdvice } from './weather-forecast-service';
 import { DeviceConstants } from '../constants';
 
 /**
@@ -81,6 +82,10 @@ export class AdaptiveControlService {
   // Component 5: Wind Correction Service (v2.7.0+)
   private windCorrection: WindCorrectionService;
 
+  // Component 6: Weather Forecast Service (v2.8.0+)
+  private weatherForecast: WeatherForecastService;
+  private lastForecastAdviceSignature: string | null = null;
+
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
   private isEnabled = false;
@@ -141,10 +146,10 @@ export class AdaptiveControlService {
     // Note: thresholds here are defaults, will be overwritten by loadPriceSettings()
     this.energyOptimizer = new EnergyPriceOptimizer({
       thresholds: {
-        veryLow: 0.04,  // P10 percentile (2024 NL EPEX)
-        low: 0.06,      // P30 percentile
-        normal: 0.10,   // P70 percentile
-        high: 0.12,     // P90 percentile
+        veryLow: 0.04, // P10 percentile (2024 NL EPEX)
+        low: 0.06, // P30 percentile
+        normal: 0.10, // P70 percentile
+        high: 0.12, // P90 percentile
       },
       maxPreHeatOffset: 1.5,
       maxReduceOffset: -1.0,
@@ -183,7 +188,13 @@ export class AdaptiveControlService {
       logger: this.logger,
     });
 
-    this.logger('AdaptiveControlService: Initialized with all 5 components');
+    // Initialize Component 6: Weather Forecast Service (v2.8.0+)
+    this.weatherForecast = new WeatherForecastService({
+      device: this.device,
+      logger: this.logger,
+    });
+
+    this.logger('AdaptiveControlService: Initialized with all 6 components');
   }
 
   /**
@@ -276,6 +287,11 @@ export class AdaptiveControlService {
 
       // Restore PI controller history from device store
       await this.restorePIHistory();
+
+      // Start weather forecast updates if enabled
+      if (this.device.getSetting('enable_weather_forecast') === true) {
+        this.weatherForecast.startUpdates();
+      }
 
       // Initialize Component 2: Building Model Service
       await this.buildingModel.initialize();
@@ -635,6 +651,9 @@ export class AdaptiveControlService {
       // Get outdoor temperature for thermal calculation
       // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback()
       const outdoorTempForThermal = this.device.getOutdoorTemperatureWithFallback() || 0;
+
+      // Step 5B.5: Update weather forecast advice (v2.8.0+)
+      await this.updateWeatherForecastAdvice(outdoorTempForThermal);
 
       // Step 5C: Calculate thermal action (4th component)
       const thermalAction = this.buildingModel.calculateThermalAdjustment({
@@ -1023,6 +1042,73 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Update weather forecast advice capabilities and flow trigger
+   * @version 2.8.0
+   */
+  private async updateWeatherForecastAdvice(currentOutdoorTemp: number): Promise<void> {
+    if (this.device.getSetting('enable_weather_forecast') !== true) {
+      return;
+    }
+
+    try {
+      // Refresh forecast if cache is stale
+      if (!this.weatherForecast.hasFreshForecast()) {
+        await this.weatherForecast.updateForecast();
+      }
+
+      const advice = this.weatherForecast.calculateAdvice(currentOutdoorTemp, 6);
+      if (!advice) {
+        return;
+      }
+
+      if (this.device.hasCapability('adlar_forecast_advice')) {
+        await this.device.setCapabilityValue('adlar_forecast_advice', advice.adviceText);
+      }
+
+      if (this.device.hasCapability('adlar_optimal_delay')) {
+        await this.device.setCapabilityValue('adlar_optimal_delay', advice.delayHours);
+      }
+
+      // Trigger flow card only when advice meaningfully changes
+      const signature = `${advice.delayHours}|${advice.currentCop.toFixed(2)}|${advice.expectedCop.toFixed(2)}`;
+      if (signature !== this.lastForecastAdviceSignature) {
+        this.lastForecastAdviceSignature = signature;
+        await this.triggerForecastHeatingAdvice(advice);
+      }
+    } catch (error) {
+      this.logger('AdaptiveControlService: Weather forecast advice update failed', {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  /**
+   * Trigger: forecast_heating_advice
+   * Fired when weather forecast advice changes
+   * @version 2.8.0
+   */
+  private async triggerForecastHeatingAdvice(advice: ForecastAdvice): Promise<void> {
+    try {
+      const trigger = this.device.homey.flow.getDeviceTriggerCard('forecast_heating_advice');
+      await trigger.trigger(this.device, {
+        delay_hours: advice.delayHours,
+        expected_cop: advice.expectedCop,
+        current_cop: advice.currentCop,
+        advice_text: advice.adviceText,
+      });
+      this.logger('AdaptiveControlService: Triggered forecast_heating_advice flow card', {
+        delayHours: advice.delayHours,
+        currentCop: advice.currentCop.toFixed(2),
+        expectedCop: advice.expectedCop.toFixed(2),
+      });
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to trigger forecast_heating_advice', {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  /**
    * Receive external indoor temperature (called by flow card handler)
    */
   async receiveExternalTemperature(temperature: number): Promise<void> {
@@ -1235,6 +1321,27 @@ export class AdaptiveControlService {
         }
       } else if (!enabled && this.isEnabled) {
         await this.stop();
+      }
+    }
+
+    // Handle weather forecast toggle (v2.8.0+)
+    if (changedKeys.includes('enable_weather_forecast')) {
+      const enabled = newSettings.enable_weather_forecast as boolean;
+      if (enabled) {
+        this.weatherForecast.startUpdates();
+        this.logger('AdaptiveControlService: Weather forecast enabled');
+      } else {
+        this.weatherForecast.stopUpdates();
+        this.lastForecastAdviceSignature = null;
+        this.logger('AdaptiveControlService: Weather forecast disabled');
+      }
+    }
+
+    // Handle weather forecast location changes
+    if (changedKeys.includes('forecast_location_lat') || changedKeys.includes('forecast_location_lon')) {
+      if (this.device.getSetting('enable_weather_forecast') === true) {
+        await this.weatherForecast.updateForecast();
+        this.logger('AdaptiveControlService: Weather forecast location updated and forecast refreshed');
       }
     }
 
@@ -1528,8 +1635,9 @@ export class AdaptiveControlService {
     this.energyOptimizer.destroy();
     this.decisionMaker.destroy();
     await this.windCorrection.destroy(); // v2.7.0+: Persist learned alpha
+    this.weatherForecast.destroy(); // v2.8.0+: Stop forecast updates and clear cache
 
-    this.logger('AdaptiveControlService: Destroyed (all 7 components cleaned up)');
+    this.logger('AdaptiveControlService: Destroyed (all 8 components cleaned up)');
   }
 
   /**

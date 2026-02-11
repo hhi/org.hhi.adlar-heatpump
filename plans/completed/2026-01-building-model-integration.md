@@ -3,7 +3,7 @@
 **Status**: 🟡 Planning  
 **Aangemaakt**: 2026-01-20  
 **Laatste update**: 2026-01-20  
-**Auteur**: Gemini (met Herman)
+**Auteur**: Gemini 
 
 ---
 

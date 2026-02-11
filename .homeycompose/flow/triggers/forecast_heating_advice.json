@@ -1,0 +1,61 @@
+{
+    "id": "forecast_heating_advice",
+    "title": {
+        "en": "Forecast heating advice available",
+        "nl": "Forecast verwarmingsadvies beschikbaar",
+        "de": "Prognose-Heizempfehlung verfügbar",
+        "fr": "Conseil de chauffage prévisionnel disponible"
+    },
+    "hint": {
+        "en": "Triggers when new COP-optimized heating advice is available based on temperature forecast",
+        "nl": "Activeert wanneer nieuw COP-geoptimaliseerd verwarmingsadvies beschikbaar is op basis van temperatuurprognose",
+        "de": "Wird ausgelöst, wenn neue COP-optimierte Heizempfehlung basierend auf Temperaturvorhersage verfügbar ist",
+        "fr": "Se déclenche lorsqu'un nouveau conseil de chauffage optimisé COP est disponible basé sur la prévision de température"
+    },
+    "tokens": [
+        {
+            "name": "delay_hours",
+            "type": "number",
+            "title": {
+                "en": "Delay hours",
+                "nl": "Wacht uren",
+                "de": "Wartezeit (Stunden)",
+                "fr": "Délai (heures)"
+            },
+            "example": 2.5
+        },
+        {
+            "name": "expected_cop",
+            "type": "number",
+            "title": {
+                "en": "Expected COP",
+                "nl": "Verwachte COP",
+                "de": "Erwarteter COP",
+                "fr": "COP attendu"
+            },
+            "example": 4.2
+        },
+        {
+            "name": "current_cop",
+            "type": "number",
+            "title": {
+                "en": "Current COP",
+                "nl": "Huidige COP",
+                "de": "Aktueller COP",
+                "fr": "COP actuel"
+            },
+            "example": 3.0
+        },
+        {
+            "name": "advice_text",
+            "type": "string",
+            "title": {
+                "en": "Advice",
+                "nl": "Advies",
+                "de": "Empfehlung",
+                "fr": "Conseil"
+            },
+            "example": "Wait 2h for better COP (3.0 → 4.2)"
+        }
+    ]
+}

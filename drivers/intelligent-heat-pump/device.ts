@@ -3477,6 +3477,41 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Add weather forecast capabilities for existing devices (v2.8.0+: optional via setting)
+      // Only add if setting enabled (defaults to false for new installs)
+      const enableWeatherForecast = this.getSettings().enable_weather_forecast === true;
+      const weatherForecastCapabilities = [
+        'adlar_forecast_advice',
+        'adlar_optimal_delay',
+      ];
+
+      for (const capability of weatherForecastCapabilities) {
+        if (enableWeatherForecast && !this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+
+            // Initialize default values to avoid empty sensor state
+            if (capability === 'adlar_forecast_advice') {
+              await this.setCapabilityValue(capability, 'N/A');
+            } else if (capability === 'adlar_optimal_delay') {
+              await this.setCapabilityValue(capability, 0);
+            }
+
+            this.log(`✅ Added ${capability} capability (weather forecast enabled)`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        } else if (!enableWeatherForecast && this.hasCapability(capability)) {
+          // Remove if setting disabled (cleanup for devices that had it)
+          try {
+            await this.removeCapability(capability);
+            this.log(`🗑️ Removed ${capability} capability (weather forecast disabled)`);
+          } catch (error) {
+            this.error(`Failed to remove ${capability} capability:`, error);
+          }
+        }
+      }
+
       // Migration v1.4.0+: Add adlar_external_indoor_temperature capability to existing devices
       if (!this.hasCapability('adlar_external_indoor_temperature')) {
         await this.addCapability('adlar_external_indoor_temperature');
@@ -4148,6 +4183,41 @@ class MyDevice extends Homey.Device {
           this.log('🗑️ Disabled daily disconnect count capability');
         } catch (error) {
           this.error('Failed to remove adlar_daily_disconnect_count capability:', error);
+        }
+      }
+    }
+
+    // Handle weather forecast capability visibility (v2.8.0+)
+    if (changedKeys.includes('enable_weather_forecast')) {
+      const enableWeatherForecast = newSettings.enable_weather_forecast === true;
+      const weatherForecastCapabilities = [
+        'adlar_forecast_advice',
+        'adlar_optimal_delay',
+      ];
+
+      for (const capability of weatherForecastCapabilities) {
+        if (enableWeatherForecast && !this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+
+            // Initialize default values to avoid empty sensor state
+            if (capability === 'adlar_forecast_advice') {
+              await this.setCapabilityValue(capability, 'N/A');
+            } else if (capability === 'adlar_optimal_delay') {
+              await this.setCapabilityValue(capability, 0);
+            }
+
+            this.log(`✅ Enabled weather forecast capability: ${capability}`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        } else if (!enableWeatherForecast && this.hasCapability(capability)) {
+          try {
+            await this.removeCapability(capability);
+            this.log(`🗑️ Disabled weather forecast capability: ${capability}`);
+          } catch (error) {
+            this.error(`Failed to remove ${capability} capability:`, error);
+          }
         }
       }
     }

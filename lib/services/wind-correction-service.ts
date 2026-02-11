@@ -71,7 +71,11 @@ export class WindCorrectionService {
     this.logger = config.logger || (() => {});
 
     // Restore learned alpha from device store
-    this.restoreLearnedAlpha();
+    this.restoreLearnedAlpha().catch((error) => {
+      this.logger('WindCorrectionService: Error restoring learned alpha', {
+        error: (error as Error).message,
+      });
+    });
 
     this.logger('WindCorrectionService: Initialized');
   }
@@ -258,7 +262,7 @@ export class WindCorrectionService {
 
     // Calculate raw correction
     // Formula: α × windSpeed × ΔT / 100
-    const rawCorrection = alpha * windSpeed * deltaT / 100;
+    const rawCorrection = (alpha * windSpeed * deltaT) / 100;
 
     // Apply cap
     const cappedCorrection = Math.min(rawCorrection, maxCorrection);
@@ -332,8 +336,8 @@ export class WindCorrectionService {
       const impliedAlpha = (residual * 100) / (windSpeed * deltaT * baseUA);
 
       // Validate implied alpha is reasonable
-      if (impliedAlpha < WindCorrectionService.MIN_ALPHA ||
-          impliedAlpha > WindCorrectionService.MAX_ALPHA) {
+      if (impliedAlpha < WindCorrectionService.MIN_ALPHA
+          || impliedAlpha > WindCorrectionService.MAX_ALPHA) {
         this.logger('WindCorrectionService: Implied alpha out of reasonable range, skipping', {
           impliedAlpha: impliedAlpha.toFixed(4),
           validRange: `${WindCorrectionService.MIN_ALPHA}-${WindCorrectionService.MAX_ALPHA}`,
@@ -343,8 +347,8 @@ export class WindCorrectionService {
 
       // Apply exponential moving average
       const oldAlpha = this.learnedAlpha;
-      this.learnedAlpha = (1 - WindCorrectionService.LEARNING_RATE) * this.learnedAlpha +
-                          WindCorrectionService.LEARNING_RATE * impliedAlpha;
+      this.learnedAlpha = (1 - WindCorrectionService.LEARNING_RATE) * this.learnedAlpha
+                          + WindCorrectionService.LEARNING_RATE * impliedAlpha;
       this.learningCount++;
 
       // Persist periodically (every 10 learning cycles)
@@ -435,9 +439,9 @@ export class WindCorrectionService {
    * @returns true if wind correction is enabled and wind data is available
    */
   isConfigured(): boolean {
-    return this.device.getSetting('wind_correction_enabled') === true &&
-           this.device.hasCapability('adlar_external_wind_speed') &&
-           this.getWindSpeed() !== null;
+    return this.device.getSetting('wind_correction_enabled') === true
+           && this.device.hasCapability('adlar_external_wind_speed')
+           && this.getWindSpeed() !== null;
   }
 
   /**
@@ -455,7 +459,7 @@ export class WindCorrectionService {
 
     for (const wind of winds) {
       for (const deltaT of deltaTs) {
-        const raw = alpha * wind * deltaT / 100;
+        const raw = (alpha * wind * deltaT) / 100;
         table.push({
           wind,
           deltaT,

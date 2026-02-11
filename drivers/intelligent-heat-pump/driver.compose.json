@@ -92,7 +92,9 @@
     "cop_optimizer_diagnostics",
     "adlar_external_wind_speed",
     "adlar_external_solar_power",
-    "adlar_external_solar_radiation"
+    "adlar_external_solar_radiation",
+    "adlar_forecast_advice",
+    "adlar_optimal_delay"
   ],
   "capabilitiesOptions": {
     "measure_power": {
