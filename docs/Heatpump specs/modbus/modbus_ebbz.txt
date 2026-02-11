@@ -1,0 +1,406 @@
+uart:
+  - id: uart_modbus
+    tx_pin: GPIO15
+    rx_pin: GPIO39
+    baud_rate: 9600
+    data_bits: 8
+    stop_bits: 1
+    parity: NONE
+
+modbus:
+  - uart_id: uart_modbus
+    id: modbus_client
+
+modbus_controller:
+  - id: modbus_adlar
+    modbus_id: modbus_client
+    address: 0x1
+    update_interval: 30s
+
+sensor:
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Compressor Target Frequency"
+    register_type: holding
+    address: 0x0027
+    device_class: frequency
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: Hz
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Compressor Running Frequency"
+    register_type: holding
+    address: 0x0040
+    device_class: frequency
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: Hz
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Fan Running Speed"
+    register_type: holding
+    address: 0x0041
+    device_class: frequency
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: Hz
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "EEV Open Step"
+    register_type: holding
+    address: 0x0042
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: P
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "EVI Valve Open Step"
+    register_type: holding
+    address: 0x0043
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: P
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "AC Input Voltage"
+    register_type: holding
+    address: 0x0044
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: voltage
+    unit_of_measurement: V
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "AC Input Current"
+    register_type: holding
+    address: 0x0045
+    value_type: S_WORD
+    accuracy_decimals: 1
+    device_class: current
+    unit_of_measurement: A
+    filters:
+      - multiply: 0.1
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Compressor Phase Current"
+    register_type: holding
+    address: 0x0046
+    value_type: S_WORD
+    accuracy_decimals: 1
+    device_class: current
+    unit_of_measurement: A
+    filters:
+      - multiply: 0.1
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Compressor IPM Temp."
+    register_type: holding
+    address: 0x0047
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "High Pressure Saturation Temp."
+    register_type: holding
+    address: 0x0048
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Low  Pressure Saturation Temp."
+    register_type: holding
+    address: 0x0049
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Ambient Temp. T1"
+    register_type: holding
+    address: 0x004A
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Outer Coil Temp. T2"
+    register_type: holding
+    address: 0x004B
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Inner Coil Temp. T3"
+    register_type: holding
+    address: 0x004C
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Suction Temp. T4"
+    register_type: holding
+    address: 0x004D
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Exhaust Temp. T5"
+    register_type: holding
+    address: 0x004E
+    value_type: S_WORD
+    accuracy_decimals: 0
+    device_class: temperature
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Water Inlet Temp. T6"
+    register_type: holding
+    address: 0x004F
+    device_class: temperature
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: °C  
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Water Outlet Temp. T7"
+    register_type: holding
+    address: 0x0050
+    device_class: temperature
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Economizer Inlet Temp. T8"
+    register_type: holding
+    address: 0x0051
+    device_class: temperature
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Economizer Outlet Temp. T9"
+    register_type: holding
+    address: 0x0052
+    device_class: temperature
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Plate Heat Exchanger Exhaust Temp."
+    register_type: holding
+    address: 0x0055
+    device_class: temperature
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Water Pump Speed PWM"
+    register_type: holding
+    address: 0x0057
+    device_class: frequency
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: Hz
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Water Flow"
+    register_type: holding
+    address: 0x0058
+    device_class: volume_flow_rate
+    value_type: S_WORD
+    accuracy_decimals: 0
+    unit_of_measurement: L/min
+    
+number:
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Temp. Set-Cooling"
+    register_type: holding
+    address: 0x0300
+    device_class: temperature
+    value_type: S_WORD
+    max_value: 25
+    min_value: 7
+    step: 1
+    unit_of_measurement: °C
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "Temp. Set-Floor Heating"
+    register_type: holding
+    address: 0x0303
+    device_class: temperature
+    value_type: S_WORD
+    max_value: 60
+    min_value: 20
+    step: 1
+    unit_of_measurement: °C    
+
+switch:
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    name: "ON/OFF"
+    register_type: holding
+    address: 0x0305
+
+select:
+  - platform: modbus_controller
+    name: "MODE"
+    address: 0x0304
+    value_type: U_WORD
+    optionsmap: 
+      "Cooling": 0
+      "Heating": 1
+      "Floor Heating": 3
+  - platform: modbus_controller
+    name: "Running Mode"
+    address: 0x0307
+    value_type: U_WORD
+    optionsmap: 
+      "Standard Mode": 0
+      "BOOST": 1
+      "SILENT": 2
+  - platform: modbus_controller
+    name: "Cooling Setting Curve"
+    address: 0x0313
+    value_type: U_WORD
+    optionsmap: 
+      "Off": 0
+      "H1": 1
+      "H2": 2
+      "H3": 3
+      "H4": 4
+      "H5": 5
+      "H6": 6
+      "H7": 7
+      "H8": 8
+      "L1": 11
+      "L2": 12
+      "L3": 13
+      "L4": 14
+      "L5": 15
+      "L6": 16
+      "L7": 17
+      "L8": 18
+  - platform: modbus_controller
+    name: "Heating Setting Curve"
+    address: 0x0314
+    value_type: U_WORD
+    optionsmap: 
+      "Off": 0
+      "H1": 1
+      "H2": 2
+      "H3": 3
+      "H4": 4
+      "H5": 5
+      "H6": 6
+      "H7": 7
+      "H8": 8
+      "L1": 11
+      "L2": 12
+      "L3": 13
+      "L4": 14
+      "L5": 15
+      "L6": 16
+      "L7": 17
+      "L8": 18
+  - platform: modbus_controller
+    name: "Underfloor Heating Setting Curve"
+    address: 0x0316
+    value_type: U_WORD
+    optionsmap: 
+      "Off": 0
+      "H1": 1
+      "H2": 2
+      "H3": 3
+      "H4": 4
+      "H5": 5
+      "H6": 6
+      "H7": 7
+      "H8": 8
+      "L1": 11
+      "L2": 12
+      "L3": 13
+      "L4": 14
+      "L5": 15
+      "L6": 16
+      "L7": 17
+      "L8": 18
+
+binary_sensor:
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x1
+    name: "Running Status: Refrigerant Recovery"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x2
+    name: "Running Status: Primary Anti-freeze"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x4
+    name: "Running Status: Secondary Anti-freeze"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x8
+    name: "Running Status: Fault Alarm"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x10
+    name: "Running Status: System oil return"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x100
+    name: "Running Status: System Frosting"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x1000
+    name: "Running Status: Shutdown after Reaching Temp"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x2000
+    name: "Running Status: Shutdown after Unit Failure"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000    
+    register_type: holding
+    bitmask: 0x4000
+    name: "Running Status: Unit Operation"
+  - platform: modbus_controller
+    modbus_controller_id: modbus_adlar
+    address: 0x0000
+    register_type: holding
+    bitmask: 0x8000
+    name: "Running Status: Unit Waiting for Operation"

@@ -1,0 +1,14 @@
+{
+    "id": "adlar_forecast_advice",
+    "type": "string",
+    "title": {
+        "en": "Forecast advice",
+        "nl": "Forecast advies",
+        "de": "Prognose-Empfehlung",
+        "fr": "Conseil de prévision"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "icon": "/assets/forecast.svg"
+}

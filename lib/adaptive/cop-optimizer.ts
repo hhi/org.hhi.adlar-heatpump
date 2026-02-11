@@ -308,6 +308,95 @@ export class COPOptimizer {
   }
 
   /**
+   * Estimate COP at a given outdoor temperature using learned data.
+   *
+   * Three-layer lookup strategy:
+   * 1. Exact bucket match (2°C buckets, ≥5 samples)
+   * 2. Linear interpolation between two nearest known buckets
+   * 3. Linear extrapolation from the two nearest edge buckets
+   *
+   * Returns null if fewer than 2 learned buckets exist (insufficient data).
+   *
+   * @param outdoorTemp - Outdoor temperature to estimate COP for
+   * @returns Estimated COP or null if not enough learned data
+   */
+  public getEstimatedCopAtTemp(outdoorTemp: number): number | null {
+    // Build average COP per bucket from history
+    const bucketCop = this.getAverageCopPerBucket();
+    if (bucketCop.size === 0) return null;
+
+    const queryBucket = Math.round(outdoorTemp / 2) * 2;
+
+    // Layer 1: Exact bucket match
+    if (bucketCop.has(queryBucket)) {
+      return bucketCop.get(queryBucket)!;
+    }
+
+    // Sort known buckets for interpolation/extrapolation
+    const sortedBuckets = Array.from(bucketCop.entries())
+      .sort((a, b) => a[0] - b[0]);
+
+    if (sortedBuckets.length < 2) {
+      // Only one bucket: return its COP as best guess
+      return sortedBuckets[0][1];
+    }
+
+    // Layer 2: Interpolation — find two buckets that surround the query
+    let lower: [number, number] | null = null;
+    let upper: [number, number] | null = null;
+
+    for (const entry of sortedBuckets) {
+      if (entry[0] <= queryBucket) lower = entry;
+      if (entry[0] >= queryBucket && !upper) upper = entry;
+    }
+
+    if (lower && upper && lower[0] !== upper[0]) {
+      // Linear interpolation between two surrounding buckets
+      const fraction = (outdoorTemp - lower[0]) / (upper[0] - lower[0]);
+      return lower[1] + fraction * (upper[1] - lower[1]);
+    }
+
+    // Layer 3: Extrapolation — query is outside known range
+    if (outdoorTemp < sortedBuckets[0][0]) {
+      // Below lowest bucket: extrapolate from two lowest
+      const [t1, cop1] = sortedBuckets[0];
+      const [t2, cop2] = sortedBuckets[1];
+      const slope = (cop2 - cop1) / (t2 - t1);
+      return cop1 + slope * (outdoorTemp - t1);
+    }
+
+    // Above highest bucket: extrapolate from two highest
+    const [tA, copA] = sortedBuckets[sortedBuckets.length - 2];
+    const [tB, copB] = sortedBuckets[sortedBuckets.length - 1];
+    const slope = (copB - copA) / (tB - tA);
+    return copB + slope * (outdoorTemp - tB);
+  }
+
+  /**
+   * Get average COP per outdoor temperature bucket (2°C buckets, ≥5 samples)
+   */
+  private getAverageCopPerBucket(): Map<number, number> {
+    const grouped = new Map<number, number[]>();
+
+    this.history.forEach((point) => {
+      const bucket = Math.round(point.outdoorTemp / 2) * 2;
+      if (!grouped.has(bucket)) {
+        grouped.set(bucket, []);
+      }
+      grouped.get(bucket)!.push(point.cop);
+    });
+
+    const result = new Map<number, number>();
+    grouped.forEach((cops, bucket) => {
+      if (cops.length >= 5) { // Same threshold as updateOptimalSettings
+        result.set(bucket, cops.reduce((a, b) => a + b, 0) / cops.length);
+      }
+    });
+
+    return result;
+  }
+
+  /**
    * Export state for persistence
    */
   public getState() {

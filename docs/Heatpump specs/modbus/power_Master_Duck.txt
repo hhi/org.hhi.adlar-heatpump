@@ -1,0 +1,27 @@
+Topic: Adlår Castra Aurora 2 Warmtepompen ervaringen in Duurzame energie en installaties
+
+woensdag 25 juni 2025 12:44
+Master_duck
+
+voor degene die modbus gebruiken.
+
+ik heb de verbruik en vermogen toegevoegd aan de yaml file voor home assistant.
+het verbruik denk ik dat dit het dag verbruik is. maar weet niet zeker
+
+als iemand op af aanmerkingen heeft hoor ik dat graag.
+ik denk wel dat je een versie WP nodig hebt waar je het verbuik kan uitlezen anders werkt het niet
+
+- name: "Unit Input Power / W"
+slave: 1
+address: 0x005c
+data_type: int16
+precision: 1
+unit_of_measurement: W
+scale: 10
+- name: "Unit Power Consumtion / KWh"
+slave: 1
+address: 0x005D
+data_type: int16
+precision: 1
+unit_of_measurement: KWh
+scale: 0.0001

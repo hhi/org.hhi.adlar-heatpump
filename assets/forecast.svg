@@ -1,0 +1,41 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0 30)">
+    <!-- Sun circle (weather indicator) -->
+    <circle cx="20" cy="20" r="8" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Sun rays (simplified) -->
+    <line x1="20" y1="4" x2="20" y2="0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="32" y1="8" x2="35" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="8" x2="5" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="36" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="20" x2="4" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="32" x2="5" y2="35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="20" y1="36" x2="20" y2="40" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Cloud shape (compact, positioned with slight sun overlap for visual integration) -->
+    <!-- Natural cumulus cloud silhouette, balanced position for good sun integration -->
+    <path d="M 22 35 Q 18 35 16 31 Q 16 25 22 23 Q 24 19 30 19 Q 34 15 40 15 Q 46 15 50 19 Q 54 17 57 21 Q 60 20 62 24 Q 63 22 65 26 Q 65 32 60 37 Q 50 41 38 41 Q 26 41 22 37 Z" fill="currentColor" fill-opacity="0.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Bottom-right ray drawn after cloud to keep it visible -->
+    <line x1="32" y1="32" x2="37" y2="37" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Thermometer stem -->
+  <rect x="75.5" y="42" width="4" height="34" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Thermometer bulb -->
+  <circle cx="77.5" cy="77" r="5.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Thermometer liquid fill (temperature indicator) -->
+  <circle cx="77.5" cy="77" r="3" fill="currentColor"/>
+
+  <!-- Temperature markings (3 tick marks) -->
+  <line x1="75.5" y1="52" x2="71" y2="52" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="75.5" y1="62" x2="71" y2="62" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="75.5" y1="72" x2="71" y2="72" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- +/- symbol (compact temperature variation indicator, positioned top-right) -->
+  <line x1="82" y1="24" x2="92" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <line x1="87" y1="19" x2="87" y2="29" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <line x1="82" y1="36" x2="92" y2="36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.7.8",
+  "version": "2.8.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -2140,6 +2140,67 @@
               "fr": "Description du défaut"
             },
             "example": "Compressor overheating"
+          }
+        ]
+      },
+      {
+        "id": "forecast_heating_advice",
+        "title": {
+          "en": "Forecast heating advice available",
+          "nl": "Forecast verwarmingsadvies beschikbaar",
+          "de": "Prognose-Heizempfehlung verfügbar",
+          "fr": "Conseil de chauffage prévisionnel disponible"
+        },
+        "hint": {
+          "en": "Triggers when new COP-optimized heating advice is available based on temperature forecast",
+          "nl": "Activeert wanneer nieuw COP-geoptimaliseerd verwarmingsadvies beschikbaar is op basis van temperatuurprognose",
+          "de": "Wird ausgelöst, wenn neue COP-optimierte Heizempfehlung basierend auf Temperaturvorhersage verfügbar ist",
+          "fr": "Se déclenche lorsqu'un nouveau conseil de chauffage optimisé COP est disponible basé sur la prévision de température"
+        },
+        "tokens": [
+          {
+            "name": "delay_hours",
+            "type": "number",
+            "title": {
+              "en": "Delay hours",
+              "nl": "Wacht uren",
+              "de": "Wartezeit (Stunden)",
+              "fr": "Délai (heures)"
+            },
+            "example": 2.5
+          },
+          {
+            "name": "expected_cop",
+            "type": "number",
+            "title": {
+              "en": "Expected COP",
+              "nl": "Verwachte COP",
+              "de": "Erwarteter COP",
+              "fr": "COP attendu"
+            },
+            "example": 4.2
+          },
+          {
+            "name": "current_cop",
+            "type": "number",
+            "title": {
+              "en": "Current COP",
+              "nl": "Huidige COP",
+              "de": "Aktueller COP",
+              "fr": "COP actuel"
+            },
+            "example": 3
+          },
+          {
+            "name": "advice_text",
+            "type": "string",
+            "title": {
+              "en": "Advice",
+              "nl": "Advies",
+              "de": "Empfehlung",
+              "fr": "Conseil"
+            },
+            "example": "Wait 2h for better COP (3.0 → 4.2)"
           }
         ]
       },
@@ -7354,7 +7415,9 @@
         "cop_optimizer_diagnostics",
         "adlar_external_wind_speed",
         "adlar_external_solar_power",
-        "adlar_external_solar_radiation"
+        "adlar_external_solar_radiation",
+        "adlar_forecast_advice",
+        "adlar_optimal_delay"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -9143,6 +9206,75 @@
               "max": 90,
               "step": 5,
               "units": "%"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Temperature Forecast (new sensors, restart app)",
+            "nl": "Temperatuurprognose (nieuwe sensoren, herstart app)",
+            "de": "Temperaturvorhersage (neue Sensoren, App neu starten)",
+            "fr": "Prévision de Température (nouveaux capteurs, redémarrer app)"
+          },
+          "children": [
+            {
+              "id": "enable_weather_forecast",
+              "type": "checkbox",
+              "highlight": true,
+              "label": {
+                "en": "Enable temperature forecast",
+                "nl": "Temperatuurprognose inschakelen",
+                "de": "Temperaturvorhersage aktivieren",
+                "fr": "Activer la prévision de température"
+              },
+              "hint": {
+                "en": "Use Open-Meteo 48-hour temperature forecast to optimize heating timing. Suggests waiting for higher outdoor temperatures (better COP) or heating now when temperatures drop. Free API, no account needed. ⚠️ Requires: COP Optimization must be enabled.",
+                "nl": "Gebruik Open-Meteo 48-uurs temperatuurprognose om verwarmingstiming te optimaliseren. Suggereert wachten op hogere buitentemperatuur (betere COP) of direct verwarmen bij dalende temperatuur. Gratis API, geen account nodig. ⚠️ Vereist: COP Optimalisatie moet ingeschakeld zijn.",
+                "de": "Verwenden Sie die Open-Meteo 48-Stunden-Temperaturvorhersage zur Optimierung des Heizzeitpunkts. Empfiehlt Warten auf höhere Außentemperaturen (besserer COP) oder sofortiges Heizen bei sinkenden Temperaturen. Kostenlose API, kein Konto erforderlich. ⚠️ Voraussetzung: COP-Optimierung muss aktiviert sein.",
+                "fr": "Utilisez la prévision de température Open-Meteo 48 heures pour optimiser le timing du chauffage. Suggère d'attendre des températures extérieures plus élevées (meilleur COP) ou de chauffer immédiatement en cas de baisse. API gratuite, aucun compte requis. ⚠️ Prérequis: L'optimisation COP doit être activée."
+              },
+              "value": false
+            },
+            {
+              "id": "forecast_location_lat",
+              "type": "number",
+              "label": {
+                "en": "Location: Latitude",
+                "nl": "Locatie: Breedtegraad",
+                "de": "Standort: Breitengrad",
+                "fr": "Localisation: Latitude"
+              },
+              "hint": {
+                "en": "Latitude coordinate for weather forecast (e.g., Amsterdam = 52.37). Find your coordinates at maps.google.com.",
+                "nl": "Breedtegraad coördinaat voor weerprognose (bijv. Amsterdam = 52.37). Vind je coördinaten op maps.google.com.",
+                "de": "Breitengrad für Wettervorhersage (z.B. Amsterdam = 52.37). Finden Sie Ihre Koordinaten auf maps.google.com.",
+                "fr": "Latitude pour la prévision météo (ex. Amsterdam = 52.37). Trouvez vos coordonnées sur maps.google.com."
+              },
+              "value": 52.37,
+              "min": -90,
+              "max": 90,
+              "step": 0.01
+            },
+            {
+              "id": "forecast_location_lon",
+              "type": "number",
+              "label": {
+                "en": "Location: Longitude",
+                "nl": "Locatie: Lengtegraad",
+                "de": "Standort: Längengrad",
+                "fr": "Localisation: Longitude"
+              },
+              "hint": {
+                "en": "Longitude coordinate for weather forecast (e.g., Amsterdam = 4.90). Find your coordinates at maps.google.com.",
+                "nl": "Lengtegraad coördinaat voor weerprognose (bijv. Amsterdam = 4.90). Vind je coördinaten op maps.google.com.",
+                "de": "Längengrad für Wettervorhersage (z.B. Amsterdam = 4.90). Finden Sie Ihre Koordinaten auf maps.google.com.",
+                "fr": "Longitude pour la prévision météo (ex. Amsterdam = 4.90). Trouvez vos coordonnées sur maps.google.com."
+              },
+              "value": 4.9,
+              "min": -180,
+              "max": 180,
+              "step": 0.01
             }
           ]
         },
@@ -11435,6 +11567,20 @@
         "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)"
       }
     },
+    "adlar_forecast_advice": {
+      "id": "adlar_forecast_advice",
+      "type": "string",
+      "title": {
+        "en": "Forecast advice",
+        "nl": "Forecast advies",
+        "de": "Prognose-Empfehlung",
+        "fr": "Conseil de prévision"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/forecast.svg"
+    },
     "adlar_hotwater": {
       "id": "adlar_hotwater",
       "title": {
@@ -11602,6 +11748,29 @@
       "description": {
         "nl": "dp 16 : temp_current - EEV Open"
       }
+    },
+    "adlar_optimal_delay": {
+      "id": "adlar_optimal_delay",
+      "type": "number",
+      "title": {
+        "en": "Optimal delay",
+        "nl": "Optimale wachttijd",
+        "de": "Optimale Wartezeit",
+        "fr": "Délai optimal"
+      },
+      "units": {
+        "en": "h",
+        "nl": "u",
+        "de": "h",
+        "fr": "h"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/timer.svg",
+      "decimals": 1,
+      "min": -48,
+      "max": 48
     },
     "adlar_picker_countdown_set": {
       "id": "adlar_picker_countdown_set",
