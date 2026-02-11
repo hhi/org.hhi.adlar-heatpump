@@ -578,7 +578,7 @@ export class AdaptiveControlService {
           // Step 4D: Price Block Detection (v2.5.0+)
           await this.detectPriceBlocks();
         } catch (err) {
-          this.logger('Energy optimizer failed:', err);
+          this.device.error('Energy optimizer failed:', err);
         }
       }
 
@@ -609,7 +609,7 @@ export class AdaptiveControlService {
             });
           }
         } catch (err) {
-          this.logger('COP optimizer failed:', err);
+          this.device.error('COP optimizer failed:', err);
         }
       } else if (copOptimizerEnabled && !copCalculationEnabled) {
         // Log warning: optimizer enabled but calculation disabled - misconfiguration
@@ -1420,7 +1420,7 @@ export class AdaptiveControlService {
           await this.device.setSettings({ reset_building_model: false });
           this.logger('✅ Building model reset complete - toggle automatically disabled');
         } catch (error) {
-          this.logger('❌ Building model reset failed:', error);
+          this.device.error('❌ Building model reset failed:', error);
           // Still turn off toggle to prevent repeated failures
           await this.device.setSettings({ reset_building_model: false });
         }
@@ -1522,7 +1522,7 @@ export class AdaptiveControlService {
         priority: diagnostics.priority,
       });
     } catch (error) {
-      this.logger('⚠️ Failed to update diagnostic capability:', error);
+      this.device.error('⚠️ Failed to update diagnostic capability:', error);
       // Non-critical: don't throw, just log warning
     }
   }
@@ -1556,7 +1556,7 @@ export class AdaptiveControlService {
         heatLoss: model ? Number(model.UA.toFixed(3)) : 0,
       };
     } catch (error) {
-      this.logger('⚠️ Failed to get building model diagnostics:', error);
+      this.device.error('⚠️ Failed to get building model diagnostics:', error);
       return null;
     }
   }
@@ -1624,7 +1624,7 @@ export class AdaptiveControlService {
       await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
       this.logger('AdaptiveControlService: Saved optimizer states before destroy');
     } catch (error) {
-      this.logger('AdaptiveControlService: Error saving optimizer states during destroy:', error);
+      this.device.error('AdaptiveControlService: Error saving optimizer states during destroy:', error);
     }
 
     // Destroy all sub-services (v2.0.1+: added missing components)
@@ -1717,7 +1717,7 @@ export class AdaptiveControlService {
         `(${Object.keys(pricesObject).length} hours)`,
       );
     } catch (error) {
-      this.logger('AdaptiveControlService: Failed to set external energy prices:', error);
+      this.device.error('AdaptiveControlService: Failed to set external energy prices:', error);
       throw error;
     }
   }
@@ -1738,7 +1738,7 @@ export class AdaptiveControlService {
       // Update capabilities immediately
       await this.updateEnergyPriceCapabilities();
     } catch (error) {
-      this.logger('AdaptiveControlService: Error receiving external prices data:', error);
+      this.device.error('AdaptiveControlService: Error receiving external prices data:', error);
       throw error;
     }
   }
@@ -1767,16 +1767,9 @@ export class AdaptiveControlService {
         Math.round(effectiveCurrentPrice * 10000) / 10000);
 
       // Category always based on RAW market price (for correct threshold detection)
-      // v2.7.8: Add color emoji prefix for visual clarity
-      const categoryEmojis: Record<string, string> = {
-        very_low: '🟢',
-        low: '🟢',
-        normal: '⚪',
-        high: '🟠',
-        very_high: '🔴',
-      };
-      const emoji = categoryEmojis[currentPrice.category] || '⚪';
-      await this.device.setCapabilityValue('adlar_energy_price_category', `${emoji} ${currentPrice.category}`);
+      // v2.7.8: Emoji prefix removed - enum capabilities require exact enum values without modification
+      // The Homey SDK validates enum values and rejects any string that doesn't match the defined enum IDs
+      await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
 
       // Next hour price (effective)
       if (effectiveNextPrice > 0) {
@@ -1831,7 +1824,8 @@ export class AdaptiveControlService {
         + `Next €${effectiveNextPrice > 0 ? effectiveNextPrice.toFixed(4) : 'N/A'}/kWh, Mode: ${this.energyOptimizer.getPriceMode()}`,
       );
     } catch (err) {
-      this.logger('Failed to update energy price capabilities:', err);
+      // Use device.error() for exceptions to show ❌ instead of debug 🔍
+      this.device.error('Failed to update energy price capabilities:', err);
     }
   }
 
@@ -1987,7 +1981,7 @@ export class AdaptiveControlService {
       this.logger(`EnergyPriceOptimizer: Daily savings potential: €${savings.toFixed(2)} (${dailyKWh.toFixed(1)} kWh × 20% shifted × 30% cheaper)`);
       return savings;
     } catch (error) {
-      this.logger('EnergyPriceOptimizer: Error calculating savings potential:', error);
+      this.device.error('EnergyPriceOptimizer: Error calculating savings potential:', error);
       return 0;
     }
   }
@@ -2115,7 +2109,7 @@ export class AdaptiveControlService {
         this.lastPriceTrend = currentTrend;
       }
     } catch (error) {
-      this.logger('AdaptiveControlService: Error detecting price blocks:', error);
+      this.device.error('AdaptiveControlService: Error detecting price blocks:', error);
     }
   }
 }

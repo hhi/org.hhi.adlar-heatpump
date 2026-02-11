@@ -1154,7 +1154,11 @@ export class FlowCardManagerService {
    * Handler for receive external energy prices action flow (v2.4.0+).
    * Accepts hourly energy prices from external sources to replace EnergyZero API.
    *
-   * @param args.prices_json - JSON string with hour offsets as keys: {"0":0.11,"1":0.10,...}
+   * v2.8.2: Supports two input formats:
+   * - Array (primary):  [0.0829, 0.083, ...] where index = hour offset from current hour
+   * - Object (legacy):  {"0": 0.2747, "1": 0.2510, ...} with hour offsets as keys
+   *
+   * @param args.prices_json - JSON string with prices in either format
    */
   // eslint-disable-next-line camelcase
   async handleReceiveExternalEnergyPrices(args: { prices_json: string }): Promise<void> {
@@ -1163,16 +1167,30 @@ export class FlowCardManagerService {
 
       this.logger(`FlowCardManagerService: Received external energy prices (${pricesJsonRaw.length} chars)`);
 
-      // Parse JSON string to object
+      // v2.8.2: Parse JSON string — supports two formats:
+      // 1. Array (primary):  [0.0829, 0.083, ...] where index = hour offset from current hour
+      // 2. Object (legacy):  {"0": 0.2747, "1": 0.2510, ...} with hour offsets as keys
       let pricesObject: Record<string, number>;
       try {
         const parsed = JSON.parse(pricesJsonRaw);
-        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-          throw new Error('Prices must be an object with hour offsets as keys (e.g., {"0":0.11,"1":0.10,...})');
+
+        if (Array.isArray(parsed)) {
+          // Primary format: array → convert to object with index as hour offset key
+          pricesObject = {};
+          for (let i = 0; i < parsed.length; i++) {
+            if (typeof parsed[i] === 'number' && !Number.isNaN(parsed[i])) {
+              pricesObject[String(i)] = parsed[i];
+            }
+          }
+          this.logger(`FlowCardManagerService: Converted array format (${parsed.length} entries) to hour-offset object`);
+        } else if (typeof parsed === 'object' && parsed !== null) {
+          // Legacy format: object with hour offsets as keys
+          pricesObject = parsed as Record<string, number>;
+        } else {
+          throw new Error('Prices must be an array [0.11, 0.10, ...] or object {"0":0.11, "1":0.10, ...}');
         }
-        pricesObject = parsed as Record<string, number>;
       } catch (error) {
-        this.logger('FlowCardManagerService: Failed to parse prices JSON:', error);
+        this.device.error('❌ FlowCardManagerService: Failed to parse prices JSON:', error);
         throw new Error(`Invalid JSON format: ${(error as Error).message}`);
       }
 
@@ -1254,7 +1272,7 @@ export class FlowCardManagerService {
       // Delegate to AdaptiveControlService for immediate capability updates via callback
       await this.onExternalPricesData(pricesObject);
     } catch (error) {
-      this.logger('FlowCardManagerService: Error receiving external energy prices:', error);
+      this.device.error('❌ FlowCardManagerService: Error receiving external energy prices:', error);
       throw error;
     }
   }
