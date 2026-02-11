@@ -73,6 +73,11 @@
     "internal_gains_title": "ML Interne Gewinne",
     "status_learned": "LERNEND",
     "status_default": "STANDARD",
+    "status_blocked": "BLOCKIERT",
+    "blocked_no_indoor_temp": "Keine Innentemp",
+    "blocked_no_outdoor_temp": "Keine Außentemp",
+    "blocked_no_power": "Keine Leistung",
+    "blocked_disabled": "Deaktiviert",
     "period_night": "Nacht",
     "period_day": "Tag",
     "period_evening": "Abend"

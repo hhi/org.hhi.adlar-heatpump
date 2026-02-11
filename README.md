@@ -19,6 +19,7 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 - **Adaptive Control & Building Model**: PI regulation, thermal predictions, COP/energy optimization, and building model learning
 - **Building Insights & Diagnostics**: Automated recommendations and detailed learning diagnostics
 - **Energy Price Optimization**: Day-ahead price scheduling and cost-aware control
+- **Weather Forecast Service**: COP-optimized heating timing advice via Open-Meteo API
 - **Multi-language Support**: English, Dutch, German, and French
 
 ## Capabilities
@@ -132,6 +133,14 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 
 - **COP Optimizer**: Learn optimal supply temperature per outdoor temperature
 - **Strategy**: Conservative/Balanced/Aggressive optimization approaches
+
+#### Weather Forecast Service
+
+- **Weather Forecast**: COP-optimized heating timing advice using Open-Meteo API (no API key required)
+- **COP Estimation**: Uses learned data from COP Optimizer or with fallback via linear extrapolation
+- **New Capabilities**: Forecast advice text and optimal delay hours
+- **Flow Trigger**: `forecast_heating_advice` fires when COP-based timing advice changes
+- **Settings**: Enable/disable weather forecast, configurable location coordinates
 
 #### Adaptive Control Weighting
 
@@ -508,7 +517,19 @@ Located in `/docs` directory:
 
 ## Release Notes
 
-### v2.7.3 - Documentation Updates (Current)
+### v2.8.0 - Weather Forecast Service
+
+**New Feature:**
+
+- ✅ **Weather Forecast Service**: COP-optimized heating timing advice using Open-Meteo API
+- ✅ **COP Estimation**: Uses learned data from COP Optimizer or with fallback via linear extrapolation
+- ✅ **New Capabilities**: Forecast advice text and optimal delay hours
+- ✅ **New Flow Trigger**: `forecast_heating_advice` fires when COP-based timing advice changes
+- ✅ **Settings**: Weather forecast toggle, configurable location coordinates
+
+---
+
+### v2.7.3 - Documentation Updates
 
 **Documentation:**
 

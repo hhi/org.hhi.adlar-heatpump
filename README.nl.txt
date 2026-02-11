@@ -37,6 +37,7 @@ INTELLIGENTE AUTOMATISERING
 - Gebouw Inzichten & Aanbevelingen met ROI-schattingen
 - Energieprijs optimalisatie met day-ahead prijzen
 - COP optimalisatie voor maximale efficiëntie
+- Weersverwachting service voor COP-geoptimaliseerd verwarmingsadvies
 - Uitgebreide diagnostische tools voor probleemoplossing
 - Wind en zonne-integratie voor gebouwmodel
   * Externe windsnelheid voor windchill correctie van warmteverlies
@@ -225,6 +226,14 @@ COP OPTIMALISATIE
 Automatische optimalisatie van aanvoertemperatuur voor maximale efficiëntie:
 - Leert optimale aanvoertemperatuur per buitentemperatuur
 - Strategieën: Conservatief/Gebalanceerd/Agressief
+
+WEERSVERWACHTING SERVICE
+COP-geoptimaliseerd verwarmingsadvies met Open-Meteo weersverwachtingen:
+- Automatische weerdata ophaling via Open-Meteo API (geen API-sleutel vereist)
+- COP-schatting met geleerde data van COP Optimizer of met fallback via lineaire extrapolatie
+- Nieuwe capabilities: Advies tekst en optimale vertraging in uren
+- Flow trigger: forecast_heating_advice vuurt wanneer COP-gebaseerd advies verandert
+- Instellingen: Weersverwachting aan/uit, configureerbare locatie coördinaten
 
 ADAPTIEVE REGELING WEGINGSFACTOREN
 Vier prioriteiten die samen bepalen hoe het systeem beslissingen maakt:

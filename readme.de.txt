@@ -37,6 +37,7 @@ INTELLIGENTE AUTOMATISIERUNG
 - Gebäudeeinblicke & Empfehlungen mit ROI-Schätzungen
 - Energiepreis-Optimierung mit Day-Ahead-Preisen
 - COP-Optimierung für maximale Effizienz
+- Wettervorhersage-Service für COP-optimierte Heizzeitberatung
 - Umfassende Diagnosetools zur Problemlösung
 - Wind- und Sonnenintegration für Gebäudemodell
   * Externe Windgeschwindigkeit für Windchill-Korrektur des Wärmeverlusts
@@ -225,6 +226,14 @@ COP-OPTIMIERUNG
 Automatische Optimierung der Vorlauftemperatur für maximale Effizienz:
 - Lernt optimale Vorlauftemperatur pro Außentemperatur
 - Strategien: Konservativ/Ausgewogen/Aggressiv
+
+WETTERVORHERSAGE-SERVICE
+COP-optimierte Heizzeitberatung mit Open-Meteo Wettervorhersagen:
+- Automatischer Wetterdatenabruf über Open-Meteo API (kein API-Schlüssel erforderlich)
+- COP-Schätzung mit gelernten Daten vom COP-Optimizer oder mit Fallback via lineare Extrapolation
+- Neue Capabilities: Beratungstext und optimale Verzögerungsstunden
+- Flow-Trigger: forecast_heating_advice feuert bei Änderung der COP-basierten Beratung
+- Einstellungen: Wettervorhersage ein/aus, konfigurierbare Standortkoordinaten
 
 ADAPTIVE REGELUNGS-GEWICHTUNGSFAKTOREN
 Vier Prioritäten, die zusammen bestimmen, wie das System Entscheidungen trifft:

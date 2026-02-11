@@ -73,6 +73,11 @@
     "internal_gains_title": "ML Gains Internes",
     "status_learned": "EN APPRENTISSAGE",
     "status_default": "PAR DÉFAUT",
+    "status_blocked": "BLOQUÉ",
+    "blocked_no_indoor_temp": "Pas de temp int",
+    "blocked_no_outdoor_temp": "Pas de temp ext",
+    "blocked_no_power": "Pas de puissance",
+    "blocked_disabled": "Désactivé",
     "period_night": "Nuit",
     "period_day": "Jour",
     "period_evening": "Soir"
