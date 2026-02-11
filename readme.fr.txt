@@ -37,6 +37,7 @@ AUTOMATISATION INTELLIGENTE
 - Insights & Recommandations du bâtiment avec estimations ROI
 - Optimisation du prix de l'énergie avec tarifs day-ahead
 - Optimisation COP pour une efficacité maximale
+- Service de prévisions météo pour conseils de chauffage optimisés par COP
 - Outils de diagnostic complets pour le dépannage
 - Intégration du vent et du soleil pour le modèle du bâtiment
   * Vitesse du vent externe pour la correction windchill de la perte de chaleur
@@ -225,6 +226,14 @@ OPTIMISATION COP
 Optimisation automatique de la température de départ pour une efficacité maximale:
 - Apprend la température de départ optimale par température extérieure
 - Stratégies: Conservatif/Équilibré/Agressif
+
+SERVICE DE PRÉVISIONS MÉTÉO
+Conseils de timing de chauffage optimisés par COP avec prévisions météo Open-Meteo:
+- Récupération automatique des données météo via l'API Open-Meteo (aucune clé API requise)
+- Estimation du COP avec données apprises du COP Optimizer ou avec repli via extrapolation linéaire
+- Nouvelles capacités: Texte de conseil et heures de délai optimal
+- Déclencheur de flux: forecast_heating_advice se déclenche lorsque le conseil COP change
+- Paramètres: Prévisions météo activation/désactivation, coordonnées de localisation configurables
 
 FACTEURS DE PONDÉRATION DE RÉGULATION ADAPTATIVE
 Quatre priorités qui déterminent ensemble comment le système prend des décisions:

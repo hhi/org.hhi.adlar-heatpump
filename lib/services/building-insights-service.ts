@@ -286,6 +286,26 @@ export class BuildingInsightsService {
   }
 
   /**
+   * v2.8.1: Get short localized blocked reason for insight display
+   * Maps internal blocking reason strings to short user-facing text
+   */
+  private getShortBlockedReason(blockingReason: string, lang: string): string {
+    if (blockingReason.includes('indoor temperature')) {
+      return lang === 'nl' ? 'Geblokkeerd: Geen binnentemp' : 'Blocked: No indoor temp';
+    }
+    if (blockingReason.includes('outdoor temperature')) {
+      return lang === 'nl' ? 'Geblokkeerd: Geen buitentemp' : 'Blocked: No outdoor temp';
+    }
+    if (blockingReason.includes('power measurement')) {
+      return lang === 'nl' ? 'Geblokkeerd: Geen vermogen' : 'Blocked: No power data';
+    }
+    if (blockingReason.includes('disabled')) {
+      return lang === 'nl' ? 'Geblokkeerd: Uitgeschakeld' : 'Blocked: Disabled';
+    }
+    return lang === 'nl' ? 'Geblokkeerd' : 'Blocked';
+  }
+
+  /**
    * Detect insulation performance insights
    * - Compare learned UA with expected UA from building profile
    * - Calculate potential savings from insulation upgrades
@@ -294,6 +314,21 @@ export class BuildingInsightsService {
   private detectInsulationInsights(diagnostics: BuildingModelDiagnostics): Insight | null {
     const model = this.buildingModel.getLearner().getModel();
     const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `insulation_blocked_${Date.now()}`,
+        category: 'insulation_performance',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
 
     // Learning phase - insufficient confidence
     if (diagnostics.confidence < this.minConfidence) {
@@ -393,6 +428,21 @@ export class BuildingInsightsService {
     const model = this.buildingModel.getLearner().getModel();
     const lang = this.getLanguage();
 
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `pre_heating_blocked_${Date.now()}`,
+        category: 'pre_heating',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
     // Learning phase - insufficient confidence
     if (diagnostics.confidence < this.minConfidence) {
       return {
@@ -466,6 +516,21 @@ export class BuildingInsightsService {
   private detectThermalStorageInsights(diagnostics: BuildingModelDiagnostics): Insight | null {
     const model = this.buildingModel.getLearner().getModel();
     const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `thermal_storage_blocked_${Date.now()}`,
+        category: 'thermal_storage',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
 
     // Learning phase - insufficient confidence
     if (diagnostics.confidence < this.minConfidence) {
@@ -608,6 +673,21 @@ export class BuildingInsightsService {
   private detectProfileMismatch(diagnostics: BuildingModelDiagnostics): Insight | null {
     const model = this.buildingModel.getLearner().getModel();
     const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `profile_blocked_${Date.now()}`,
+        category: 'profile_mismatch',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
 
     // Learning phase - lower threshold (50%) for rough detection
     if (diagnostics.confidence < 50) {

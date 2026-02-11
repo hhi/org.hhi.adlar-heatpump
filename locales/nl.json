@@ -73,6 +73,11 @@
     "internal_gains_title": "ML Interne Winst",
     "status_learned": "LERENDE",
     "status_default": "STANDAARD",
+    "status_blocked": "GEBLOKKEERD",
+    "blocked_no_indoor_temp": "Geen binnentemp",
+    "blocked_no_outdoor_temp": "Geen buitentemp",
+    "blocked_no_power": "Geen vermogen",
+    "blocked_disabled": "Uitgeschakeld",
     "period_night": "Nacht",
     "period_day": "Dag",
     "period_evening": "Avond"

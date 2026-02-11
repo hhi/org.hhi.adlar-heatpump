@@ -37,6 +37,7 @@ INTELLIGENT AUTOMATION
 - Building Insights & Recommendations with ROI estimates
 - Energy price optimization with day-ahead pricing
 - COP optimization for maximum efficiency
+- Weather forecast service for COP-optimized heating timing
 - Extensive diagnostic tools for troubleshooting
 - Wind and solar integration for building model
   * External wind speed for windchill correction of heat loss
@@ -225,6 +226,14 @@ COP OPTIMIZATION
 Automatic optimization of supply temperature for maximum efficiency:
 - Learns optimal supply temperature per outdoor temperature
 - Strategies: Conservative/Balanced/Aggressive
+
+WEATHER FORECAST SERVICE
+COP-optimized heating timing advice using Open-Meteo weather forecasts:
+- Automatic weather data retrieval via Open-Meteo API (no API key required)
+- COP estimation using learned data from COP Optimizer or with fallback via linear extrapolation
+- New capabilities: Forecast advice text and optimal delay hours
+- Flow trigger: forecast_heating_advice fires when COP-based timing advice changes
+- Settings: Enable/disable weather forecast, configurable location coordinates
 
 ADAPTIVE CONTROL WEIGHTING FACTORS
 Four priorities that together determine how the system makes decisions:

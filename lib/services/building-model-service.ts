@@ -59,6 +59,12 @@ export class BuildingModelService {
   private readonly UPDATE_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   private missingCapabilitiesLogged = new Set<string>();
 
+  // v2.8.1: Track blocking reason for user-visible guard rail status
+  // Set during each collectAndLearn() cycle; null = data flowing normally
+  private lastBlockingReason: string | null = null;
+  // Locale key for the blocking reason (used in Tau title)
+  private lastBlockingReasonKey: string | null = null;
+
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
     this.logger = config.logger || (() => { });
@@ -126,7 +132,10 @@ export class BuildingModelService {
       // Check if building model learning is enabled
       const enabled = await this.device.getSetting('building_model_enabled');
       if (!enabled) {
+        this.lastBlockingReason = 'Learning disabled in settings';
+        this.lastBlockingReasonKey = 'building_model.blocked_disabled';
         this.logger('BuildingModelService: Learning disabled, skipping');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
         return;
       }
 
@@ -138,7 +147,10 @@ export class BuildingModelService {
         .getIndoorTemperature();
 
       if (indoorTemp === null) {
+        this.lastBlockingReason = 'No indoor temperature (external sensor flow not running)';
+        this.lastBlockingReasonKey = 'building_model.blocked_no_indoor_temp';
         this.logger('BuildingModelService: ❌ EXIT - No indoor temp available, skipping');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
         return;
       }
       this.logger(`BuildingModelService: ✅ Indoor temp OK: ${indoorTemp.toFixed(1)}°C`);
@@ -149,7 +161,10 @@ export class BuildingModelService {
       const outdoorTemp = this.device.getOutdoorTemperatureWithFallback();
 
       if (outdoorTemp === null) {
+        this.lastBlockingReason = 'No outdoor temperature (ambient sensor not available)';
+        this.lastBlockingReasonKey = 'building_model.blocked_no_outdoor_temp';
         this.logger('BuildingModelService: ❌ EXIT - No outdoor temp available, skipping');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
         return;
       }
       this.logger(`BuildingModelService: ✅ Outdoor temp OK: ${outdoorTemp.toFixed(1)}°C`);
@@ -164,7 +179,10 @@ export class BuildingModelService {
       const powerMeasurement = energyTracking?.getCurrentPowerMeasurement();
 
       if (!powerMeasurement || typeof powerMeasurement.value !== 'number') {
-        this.logger('BuildingModelService: ⚠️ No valid power measurement available - skipping cycle');
+        this.lastBlockingReason = 'No valid power measurement available';
+        this.lastBlockingReasonKey = 'building_model.blocked_no_power';
+        this.logger('BuildingModelService: ❌ EXIT - No valid power measurement available - skipping cycle');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
         return;
       }
       powerElectric = powerMeasurement.value;
@@ -190,6 +208,11 @@ export class BuildingModelService {
 
       // Add measurement to learner
       this.learner.addMeasurement(measurement);
+
+      // Clear blocking reason - data is flowing successfully
+      this.lastBlockingReason = null;
+      this.lastBlockingReasonKey = null;
+
       const state = this.learner.getState();
       this.logger(`BuildingModelService: ✅ Sample #${state.sampleCount} added (power: ${thermalPower.toFixed(2)}kW, COP: ${cop.toFixed(1)})`);
 
@@ -215,9 +238,8 @@ export class BuildingModelService {
     // Determine if using default values (v2.0.3)
     const isDefault = Math.abs(model.tau - 50) < 0.5 && state.sampleCount < 10;
 
-    // Determine learning status and confidence emoji (v2.0.3)
-    const statusKey = isDefault ? 'building_model.status_default' : 'building_model.status_learned';
-    const status = this.device.homey.__(statusKey);
+    // v2.8.1: 3-state status model: BLOCKED → LEARNING → learned
+    // Priority: blocked reason > learning phase > learned
     const confidencePercent = model.confidence.toFixed(1); // v2.5.21: Show 1 decimal for visible progress
     let confidenceEmoji = '🔴'; // Default: low confidence
     if (model.confidence >= 70) {
@@ -237,13 +259,27 @@ export class BuildingModelService {
       title: this.device.homey.__('building_model.heat_loss_title'),
     });
 
-    // Tau: learning status and sample progress
-    // When minimum samples (288) reached, show only current count without "LERENDE" status
-    // Otherwise show "LERENDE" with ratio (huidig/minimum)
+    // Tau: 3-state status display with guard rail (v2.8.1)
+    // State 1: BLOCKED - external data source not available (user-visible guard rail)
+    // State 2: LEARNING - data flowing, samples accumulating
+    // State 3: Learned - minimum samples reached
     const minSamples = 288;
-    const tauTitle = state.sampleCount >= minSamples
-      ? `${this.device.homey.__('building_model.time_constant_title')} (#${state.sampleCount})`
-      : `${this.device.homey.__('building_model.time_constant_title')} (${status}, #${state.sampleCount}/${minSamples})`;
+    const tauBaseTitle = this.device.homey.__('building_model.time_constant_title');
+    let tauTitle: string;
+
+    if (this.lastBlockingReasonKey) {
+      // BLOCKED: Show localized blocked status only (reason shown in Building Insights)
+      const blockedStatus = this.device.homey.__('building_model.status_blocked');
+      tauTitle = `${tauBaseTitle} (${blockedStatus})`;
+    } else if (state.sampleCount >= minSamples) {
+      // Learned: Show sample count only
+      tauTitle = `${tauBaseTitle} (#${state.sampleCount})`;
+    } else {
+      // LEARNING: Show status with progress ratio
+      const learningStatus = this.device.homey.__('building_model.status_learned');
+      tauTitle = `${tauBaseTitle} (${learningStatus}, #${state.sampleCount}/${minSamples})`;
+    }
+
     await this.updateCapabilityIfPresent('adlar_building_tau', model.tau, {
       title: tauTitle,
     });
@@ -586,15 +622,21 @@ export class BuildingModelService {
     const state = this.learner.getState();
 
     // Determine blocking reason
-    let blockingReason: string | null = null;
+    // v2.8.1: Use live lastBlockingReason from collectAndLearn() cycles
+    // This is more accurate than re-checking sensors here, because it reflects
+    // the actual last attempt to collect data (including power measurement check)
+    let blockingReason: string | null = this.lastBlockingReason;
     if (!enabled) {
       blockingReason = 'Learning disabled in settings';
-    } else if (indoorTemp === null) {
-      blockingReason = 'No indoor temperature (external sensor flow not running)';
-    } else if (outdoorTemp === null || outdoorTemp === undefined) {
-      blockingReason = 'No outdoor temperature (ambient sensor not available)';
-    } else if (state.sampleCount < 10) {
-      blockingReason = `Collecting initial samples (${state.sampleCount}/10)`;
+    } else if (blockingReason === null) {
+      // No blocking from collectAndLearn, but check initial samples phase
+      if (indoorTemp === null) {
+        blockingReason = 'No indoor temperature (external sensor flow not running)';
+      } else if (outdoorTemp === null || outdoorTemp === undefined) {
+        blockingReason = 'No outdoor temperature (ambient sensor not available)';
+      } else if (state.sampleCount < 10) {
+        blockingReason = `Collecting initial samples (${state.sampleCount}/10)`;
+      }
     }
 
     // Check if still using default values
