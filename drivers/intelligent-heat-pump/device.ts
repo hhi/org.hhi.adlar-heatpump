@@ -2881,64 +2881,79 @@ class MyDevice extends Homey.Device {
               const FLOW_CHANGE_THRESHOLD = 1; // Minimum L/min change to trigger
 
               // Compressor frequency (measure_frequency.compressor_strength)
-              if (capability === 'measure_frequency.compressor_strength' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_frequency.compressor_strength' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastCompressorFreq !== null && Math.abs(transformedValue - this.lastCompressorFreq) >= FREQUENCY_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastCompressorFreq;
                   const condition = delta > 0 ? 'above' : 'below';
 
                   this.log(`⚙️  compressor_efficiency_alert TRIGGER: ${this.lastCompressorFreq} Hz → ${transformedValue} Hz (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`);
 
-                  this.triggerFlowCard('compressor_efficiency_alert', {
-                    current_frequency: Math.round(transformedValue * 10) / 10,
-                    threshold_frequency: transformedValue,
-                  }, {
-                    condition,
-                    frequency: transformedValue,
-                  }).catch((err) => {
-                    this.error('Failed to trigger compressor_efficiency_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedFreq = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedFreq)) {
+                    this.triggerFlowCard('compressor_efficiency_alert', {
+                      current_frequency: roundedFreq,
+                      threshold_frequency: transformedValue,
+                    }, {
+                      condition,
+                      frequency: transformedValue,
+                    }).catch((err) => {
+                      this.error('Failed to trigger compressor_efficiency_alert:', err);
+                    });
+                  }
                 }
                 this.lastCompressorFreq = transformedValue;
               }
 
               // Fan motor frequency (measure_frequency.fan_motor_frequency)
-              if (capability === 'measure_frequency.fan_motor_frequency' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_frequency.fan_motor_frequency' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastFanMotorFreq !== null && Math.abs(transformedValue - this.lastFanMotorFreq) >= FREQUENCY_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastFanMotorFreq;
                   const condition = delta > 0 ? 'above' : 'below';
 
                   this.log(`💨 fan_motor_efficiency_alert TRIGGER: ${this.lastFanMotorFreq} Hz → ${transformedValue} Hz (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`);
 
-                  this.triggerFlowCard('fan_motor_efficiency_alert', {
-                    current_fan_frequency: Math.round(transformedValue * 10) / 10,
-                    threshold_frequency: transformedValue,
-                  }, {
-                    condition,
-                    frequency: transformedValue,
-                  }).catch((err) => {
-                    this.error('Failed to trigger fan_motor_efficiency_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedFreq = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedFreq)) {
+                    this.triggerFlowCard('fan_motor_efficiency_alert', {
+                      current_fan_frequency: roundedFreq,
+                      threshold_frequency: transformedValue,
+                    }, {
+                      condition,
+                      frequency: transformedValue,
+                    }).catch((err) => {
+                      this.error('Failed to trigger fan_motor_efficiency_alert:', err);
+                    });
+                  }
                 }
                 this.lastFanMotorFreq = transformedValue;
               }
 
               // Water flow rate (measure_water)
-              if (capability === 'measure_water' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_water' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastWaterFlow !== null && Math.abs(transformedValue - this.lastWaterFlow) >= FLOW_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastWaterFlow;
                   const condition = delta > 0 ? 'above' : 'below';
 
                   this.log(`💧 water_flow_alert TRIGGER: ${this.lastWaterFlow} L/min → ${transformedValue} L/min (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} L/min, condition: ${condition})`);
 
-                  this.triggerFlowCard('water_flow_alert', {
-                    current_flow_rate: Math.round(transformedValue * 10) / 10,
-                    threshold_flow_rate: transformedValue,
-                  }, {
-                    condition,
-                    flow_rate: transformedValue,
-                  }).catch((err) => {
-                    this.error('Failed to trigger water_flow_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedFlow = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedFlow)) {
+                    this.triggerFlowCard('water_flow_alert', {
+                      current_flow_rate: roundedFlow,
+                      threshold_flow_rate: transformedValue,
+                    }, {
+                      condition,
+                      flow_rate: transformedValue,
+                    }).catch((err) => {
+                      this.error('Failed to trigger water_flow_alert:', err);
+                    });
+                  }
                 }
                 this.lastWaterFlow = transformedValue;
               }
@@ -2947,145 +2962,190 @@ class MyDevice extends Homey.Device {
               const TEMP_CHANGE_THRESHOLD = 2; // Minimum °C change to trigger
 
               // Coiler temperature (measure_temperature.coiler_temp)
-              if (capability === 'measure_temperature.coiler_temp' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.coiler_temp' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastCoilerTemp !== null && Math.abs(transformedValue - this.lastCoilerTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastCoilerTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ coiler_temperature_alert TRIGGER: ${this.lastCoilerTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('coiler_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger coiler_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('coiler_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger coiler_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastCoilerTemp = transformedValue;
               }
 
               // Discharge temperature (measure_temperature.venting_temp)
-              if (capability === 'measure_temperature.venting_temp' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.venting_temp' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastDischargeTemp !== null && Math.abs(transformedValue - this.lastDischargeTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastDischargeTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ discharge_temperature_alert TRIGGER: ${this.lastDischargeTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('discharge_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger discharge_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('discharge_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger discharge_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastDischargeTemp = transformedValue;
               }
 
               // Suction temperature (measure_temperature.coiler_temp_f)
-              if (capability === 'measure_temperature.coiler_temp_f' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.coiler_temp_f' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastSuctionTemp !== null && Math.abs(transformedValue - this.lastSuctionTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastSuctionTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ suction_temperature_alert TRIGGER: ${this.lastSuctionTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('suction_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger suction_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('suction_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger suction_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastSuctionTemp = transformedValue;
               }
 
               // High pressure temperature (measure_temperature.temp_current_f)
-              if (capability === 'measure_temperature.temp_current_f' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.temp_current_f' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastHighPressureTemp !== null && Math.abs(transformedValue - this.lastHighPressureTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastHighPressureTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ high_pressure_temperature_alert TRIGGER: ${this.lastHighPressureTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('high_pressure_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger high_pressure_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('high_pressure_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger high_pressure_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastHighPressureTemp = transformedValue;
               }
 
               // Low pressure temperature (measure_temperature.top_temp_f)
-              if (capability === 'measure_temperature.top_temp_f' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.top_temp_f' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastLowPressureTemp !== null && Math.abs(transformedValue - this.lastLowPressureTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastLowPressureTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ low_pressure_temperature_alert TRIGGER: ${this.lastLowPressureTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('low_pressure_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger low_pressure_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('low_pressure_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger low_pressure_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastLowPressureTemp = transformedValue;
               }
 
               // Incoiler temperature (measure_temperature.bottom_temp_f)
-              if (capability === 'measure_temperature.bottom_temp_f' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.bottom_temp_f' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastIncoilerTemp !== null && Math.abs(transformedValue - this.lastIncoilerTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastIncoilerTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ incoiler_temperature_alert TRIGGER: ${this.lastIncoilerTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('incoiler_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger incoiler_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('incoiler_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger incoiler_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastIncoilerTemp = transformedValue;
               }
 
               // Tank temperature (measure_temperature.around_temp_f)
-              if (capability === 'measure_temperature.around_temp_f' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.around_temp_f' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastTankTemp !== null && Math.abs(transformedValue - this.lastTankTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastTankTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ tank_temperature_alert TRIGGER: ${this.lastTankTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('tank_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger tank_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('tank_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger tank_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastTankTemp = transformedValue;
               }
 
               // Economizer inlet temperature (measure_temperature.evlin)
-              if (capability === 'measure_temperature.evlin' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.evlin' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastEconomizerInletTemp !== null && Math.abs(transformedValue - this.lastEconomizerInletTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastEconomizerInletTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ economizer_inlet_temperature_alert TRIGGER: ${this.lastEconomizerInletTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('economizer_inlet_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger economizer_inlet_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('economizer_inlet_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger economizer_inlet_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastEconomizerInletTemp = transformedValue;
               }
 
               // Economizer outlet temperature (measure_temperature.eviout)
-              if (capability === 'measure_temperature.eviout' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'measure_temperature.eviout' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastEconomizerOutletTemp !== null && Math.abs(transformedValue - this.lastEconomizerOutletTemp) >= TEMP_CHANGE_THRESHOLD) {
                   const delta = transformedValue - this.lastEconomizerOutletTemp;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🌡️ economizer_outlet_temperature_alert TRIGGER: ${this.lastEconomizerOutletTemp}°C → ${transformedValue}°C`);
-                  this.triggerFlowCard('economizer_outlet_temperature_alert', {
-                    current_temperature: Math.round(transformedValue * 10) / 10,
-                    threshold_temperature: transformedValue,
-                  }, { condition, temperature: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger economizer_outlet_temperature_alert:', err);
-                  });
+                  // v2.8.2: Pre-calculate and validate rounded value before triggering
+                  const roundedTemp = Math.round(transformedValue * 10) / 10;
+                  if (Number.isFinite(roundedTemp)) {
+                    this.triggerFlowCard('economizer_outlet_temperature_alert', {
+                      current_temperature: roundedTemp,
+                      threshold_temperature: transformedValue,
+                    }, { condition, temperature: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger economizer_outlet_temperature_alert:', err);
+                    });
+                  }
                 }
                 this.lastEconomizerOutletTemp = transformedValue;
               }
@@ -3094,33 +3154,47 @@ class MyDevice extends Homey.Device {
               const PULSE_STEPS_THRESHOLD = 20; // Minimum steps change to trigger
 
               // EEV pulse steps (adlar_measure_pulse_steps_temp_current)
-              if (capability === 'adlar_measure_pulse_steps_temp_current' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'adlar_measure_pulse_steps_temp_current' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastEevPulseSteps !== null && Math.abs(transformedValue - this.lastEevPulseSteps) >= PULSE_STEPS_THRESHOLD) {
                   const delta = transformedValue - this.lastEevPulseSteps;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🔧 eev_pulse_steps_alert TRIGGER: ${this.lastEevPulseSteps} → ${transformedValue} steps`);
-                  this.triggerFlowCard('eev_pulse_steps_alert', {
-                    current_pulse_steps: transformedValue,
-                    threshold_pulse_steps: transformedValue,
-                  }, { condition, pulse_steps: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger eev_pulse_steps_alert:', err);
-                  });
+
+                  // v2.8.2: Upgraded validation from !isNaN() to isFinite() to catch Infinity
+                  if (Number.isFinite(transformedValue)) {
+                    this.triggerFlowCard('eev_pulse_steps_alert', {
+                      current_pulse_steps: transformedValue,
+                      threshold_pulse_steps: transformedValue,
+                    }, { condition, pulse_steps: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger eev_pulse_steps_alert:', err);
+                    });
+                  } else {
+                    this.error(`⚠️ Skipped eev_pulse_steps_alert trigger - invalid value: ${transformedValue}`);
+                  }
                 }
                 this.lastEevPulseSteps = transformedValue;
               }
 
               // EVI pulse steps (adlar_measure_pulse_steps_effluent_temp)
-              if (capability === 'adlar_measure_pulse_steps_effluent_temp' && typeof transformedValue === 'number') {
+              // v2.8.2: Added Number.isFinite() check to prevent NaN/Infinity token validation errors
+              if (capability === 'adlar_measure_pulse_steps_effluent_temp' && typeof transformedValue === 'number' && Number.isFinite(transformedValue)) {
                 if (this.lastEviPulseSteps !== null && Math.abs(transformedValue - this.lastEviPulseSteps) >= PULSE_STEPS_THRESHOLD) {
                   const delta = transformedValue - this.lastEviPulseSteps;
                   const condition = delta > 0 ? 'above' : 'below';
                   this.log(`🔧 evi_pulse_steps_alert TRIGGER: ${this.lastEviPulseSteps} → ${transformedValue} steps`);
-                  this.triggerFlowCard('evi_pulse_steps_alert', {
-                    current_pulse_steps: transformedValue,
-                    threshold_pulse_steps: transformedValue,
-                  }, { condition, pulse_steps: transformedValue }).catch((err) => {
-                    this.error('Failed to trigger evi_pulse_steps_alert:', err);
-                  });
+
+                  // v2.8.2: Upgraded validation from !isNaN() to isFinite() to catch Infinity
+                  if (Number.isFinite(transformedValue)) {
+                    this.triggerFlowCard('evi_pulse_steps_alert', {
+                      current_pulse_steps: transformedValue,
+                      threshold_pulse_steps: transformedValue,
+                    }, { condition, pulse_steps: transformedValue }).catch((err) => {
+                      this.error('Failed to trigger evi_pulse_steps_alert:', err);
+                    });
+                  } else {
+                    this.error(`⚠️ Skipped evi_pulse_steps_alert trigger - invalid value: ${transformedValue}`);
+                  }
                 }
                 this.lastEviPulseSteps = transformedValue;
               }
@@ -3958,7 +4032,7 @@ class MyDevice extends Homey.Device {
       // Initialize Service Coordinator with Tuya configuration
       this.serviceCoordinator = new ServiceCoordinator({
         device: this,
-        logger: this.debugLog.bind(this),
+        logger: this.logger.debug.bind(this.logger),
       });
 
       // Initialize services via coordinator

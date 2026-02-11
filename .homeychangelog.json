@@ -1,4 +1,10 @@
 {
+  "2.8.2": {
+    "en": "Fixed: Alert flow cards no longer fail with invalid values. Improved: Energy price flow card now accepts both array format [0.11,0.10,...] (primary) and legacy object format {\"0\":0.11,\"1\":0.10,...}.",
+    "nl": "Opgelost: Alert flow kaartjes falen niet meer met ongeldige waarden. Verbeterd: Energieprijs flow card accepteert nu zowel array formaat [0.11,0.10,...] (primair) als legacy object formaat {\"0\":0.11,\"1\":0.10,...}.",
+    "de": "Behoben: Alert-Flow-Karten schlagen nicht mehr mit ungültigen Werten fehl. Verbessert: Energiepreis-Flow-Karte akzeptiert jetzt sowohl Array-Format [0.11,0.10,...] (primär) als auch Legacy-Objekt-Format {\"0\":0.11,\"1\":0.10,...}.",
+    "fr": "Corrigé: Les cartes de flux d'alerte n'échouent plus avec des valeurs invalides. Amélioré: La carte de flux des prix de l'énergie accepte maintenant le format array [0.11,0.10,...] (principal) et le format objet legacy {\"0\":0.11,\"1\":0.10,...}."
+  },
   "2.8.1": {
     "en": "Added: Building model guard rails. Tau title now shows 3-state status: BLOCKED → LEARNING (#samples/288) → learned (#samples). Building Insights show specific blocked reason (no indoor temp, no outdoor temp, no power data) instead of misleading 'Learning' when external data sources are not connected.",
     "nl": "Toegevoegd: Guard rails voor gebouwmodel. Tau-titel toont nu 3-stappen status: GEBLOKKEERD → LERENDE (#samples/288) → geleerd (#samples). Gebouw Inzichten tonen specifieke blokkeerreden (geen binnentemp, geen buitentemp, geen vermogen) in plaats van misleidend 'Aan het leren' wanneer externe databronnen niet zijn aangesloten.",

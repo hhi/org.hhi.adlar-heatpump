@@ -13,10 +13,10 @@
     "fr": "Envoyer les prix de l'énergie externes [[prices_json]] pour l'optimisation des prix"
   },
   "hint": {
-    "en": "Sends hourly energy prices (€/kWh) from external source to enable price-based optimization. Format: {\"0\":0.11,\"1\":0.10,...} where keys are hours from now (0=current hour). Replaces EnergyZero API.",
-    "nl": "Stuurt uurlijkse energieprijzen (€/kWh) van externe bron om prijsgebaseerde optimalisatie mogelijk te maken. Formaat: {\"0\":0.11,\"1\":0.10,...} waarbij keys uren vanaf nu zijn (0=huidig uur). Vervangt EnergyZero API.",
-    "de": "Sendet stündliche Energiepreise (€/kWh) von externer Quelle zur preisbasierten Optimierung. Format: {\"0\":0.11,\"1\":0.10,...} wobei Schlüssel Stunden ab jetzt sind (0=aktuelle Stunde). Ersetzt EnergyZero API.",
-    "fr": "Envoie les prix horaires de l'énergie (€/kWh) depuis une source externe pour l'optimisation basée sur les prix. Format: {\"0\":0.11,\"1\":0.10,...} où les clés sont les heures à partir de maintenant (0=heure actuelle). Remplace l'API EnergyZero."
+    "en": "Sends hourly energy prices (€/kWh) from external source to enable price-based optimization. Accepts two formats: Array [0.11,0.10,...] where index=hour offset (0=current hour), or Object {\"0\":0.11,\"1\":0.10,...} with hour keys.",
+    "nl": "Stuurt uurlijkse energieprijzen (€/kWh) van externe bron om prijsgebaseerde optimalisatie mogelijk te maken. Accepteert twee formaten: Array [0.11,0.10,...] waarbij index=uur offset (0=huidig uur), of Object {\"0\":0.11,\"1\":0.10,...} met uur-keys.",
+    "de": "Sendet stündliche Energiepreise (€/kWh) von externer Quelle zur preisbasierten Optimierung. Akzeptiert zwei Formate: Array [0.11,0.10,...] wobei Index=Stundenoffset (0=aktuelle Stunde), oder Objekt {\"0\":0.11,\"1\":0.10,...} mit Stundenschlüsseln.",
+    "fr": "Envoie les prix horaires de l'énergie (€/kWh) depuis une source externe pour l'optimisation basée sur les prix. Accepte deux formats: Array [0.11,0.10,...] où index=décalage horaire (0=heure actuelle), ou Objet {\"0\":0.11,\"1\":0.10,...} avec clés horaires."
   },
   "highlight": true,
   "args": [
@@ -35,10 +35,10 @@
         "fr": "Prix de l'énergie (JSON)"
       },
       "placeholder": {
-        "en": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
-        "nl": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
-        "de": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}",
-        "fr": "{\"0\":0.11,\"1\":0.10,\"2\":0.09,...}"
+        "en": "[0.11,0.10,0.09,...] or {\"0\":0.11,\"1\":0.10,...}",
+        "nl": "[0.11,0.10,0.09,...] of {\"0\":0.11,\"1\":0.10,...}",
+        "de": "[0.11,0.10,0.09,...] oder {\"0\":0.11,\"1\":0.10,...}",
+        "fr": "[0.11,0.10,0.09,...] ou {\"0\":0.11,\"1\":0.10,...}"
       }
     }
   ]
