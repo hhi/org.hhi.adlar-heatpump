@@ -138,8 +138,8 @@ flowchart TD
     FEASIBLE -->|Ja| ADVISE_WAIT["delay = +Xu\n'Wacht Xu, Y% zuiniger bij Z°C'"]
     FEASIBLE -->|Nee| REDUCE["Verkort delay\nnaar max τ/3"]
     REDUCE --> ADVISE_WAIT
-    RISING -->|Nee| DROPPING{Dal ≥ 5%\nduurder?}
-    DROPPING -->|Ja| ADVISE_NOW["delay = -Xu\n'Verwarm nú, over Xu Y% duurder'"]
+    RISING -->|Nee| DROPPING{Dal ≥ 5%\nminder efficiënt?}
+    DROPPING -->|Ja| ADVISE_NOW["delay = -Xu\n'Verwarm nú, over Xu Y% minder efficiënt'"]
     DROPPING -->|Nee| STABLE["delay = 0\n'Geen forecast-voordeel'"]
 ```
 
@@ -163,7 +163,7 @@ delay = +2u, advice = "Wacht 2u, 11% zuiniger bij 7°C"
 17:00   5°C  COP 3.8
 19:00   1°C  COP 3.5  ← Dal
 
-delay = -4u, advice = "Verwarm nú, over 4u 17% duurder"
+delay = -4u, advice = "Verwarm nú, over 4u 17% minder efficiënt"
 ```
 
 #### ➡️ Stabiel
@@ -195,13 +195,13 @@ Voorkomt dat het systeem adviseert om langer te wachten dan het gebouw aankan:
 |--------|-----------|-----------|
 | `+3.0 u` | Wacht 3 uur | `als delay > 0 → stel uit` |
 | `0 u` | Geen voordeel | `als delay = 0 → normaal` |
-| `-4.0 u` | Over 4u duurder | `als delay < 0 → verwarm nú` |
+| `-4.0 u` | Over 4u minder efficiënt | `als delay < 0 → verwarm nú` |
 
 ### adlar_forecast_advice (string)
 
 De menselijke context bij het getal:
 - `"Wacht 3u, 8% zuiniger bij 10°C"`
-- `"Verwarm nú, over 4u 12% duurder"`
+- `"Verwarm nú, over 4u 12% minder efficiënt"`
 - `"Geen forecast-voordeel"`
 
 ### forecast_heating_advice (trigger)

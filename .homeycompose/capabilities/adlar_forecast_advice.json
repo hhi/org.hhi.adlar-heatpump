@@ -2,10 +2,10 @@
     "id": "adlar_forecast_advice",
     "type": "string",
     "title": {
-        "en": "Forecast advice",
-        "nl": "Forecast advies",
-        "de": "Prognose-Empfehlung",
-        "fr": "Conseil de prévision"
+        "en": "Efficiency Forecast advice",
+        "nl": "Efficiëntie forecast advies",
+        "de": "Effizienzprognose-Empfehlung",
+        "fr": "Conseil de prévision d'efficacité"
     },
     "getable": true,
     "setable": false,

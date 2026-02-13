@@ -31,7 +31,7 @@ export interface ForecastAdvice {
   currentCop: number; // Current COP
   expectedTemp: number; // Expected outdoor temp at recommended time
   currentTemp: number; // Current outdoor temp
-  pctSavings: number; // % zuiniger (positive) or % duurder (negative)
+  pctSavings: number; // % zuiniger (positive) or % minder efficiënt (negative)
   trend: 'rising' | 'dropping' | 'stable'; // Temperature trend
   adviceText: string; // Human readable advice
 }
@@ -338,7 +338,7 @@ export class WeatherForecastService {
         currentTemp: currentOutdoorTemp,
         pctSavings: -Math.round(pctDropping),
         trend: 'dropping',
-        adviceText: `Verwarm nú, over ${troughHour}u ${Math.round(pctDropping)}% duurder`,
+        adviceText: `Verwarm nú, over ${troughHour}u ${Math.round(pctDropping)}% minder efficiënt`,
       };
     }
 
