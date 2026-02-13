@@ -11656,10 +11656,10 @@
       "id": "adlar_forecast_cop_correction",
       "type": "number",
       "title": {
-        "en": "Forecast COP Correction",
-        "nl": "Forecast COP correctie",
-        "de": "Prognose COP Korrektur",
-        "fr": "Correction COP prévision"
+        "en": "Wind & Frost COP Effect",
+        "nl": "Wind & Vorst COP effect",
+        "de": "Wind & Frost COP Effekt",
+        "fr": "Effet COP vent & givre"
       },
       "units": {
         "en": "%",
@@ -11669,13 +11669,13 @@
       },
       "getable": true,
       "setable": false,
-      "uiComponent": null,
+      "uiComponent": "sensor",
       "insights": true,
       "insightsTitle": {
-        "en": "Forecast COP Weather Correction",
-        "nl": "Forecast COP weercorrectie",
-        "de": "Prognose COP Wetterkorrektur",
-        "fr": "Correction météo COP prévision"
+        "en": "Wind & Frost COP Effect",
+        "nl": "Wind & Vorst COP effect",
+        "de": "Wind & Frost COP Effekt",
+        "fr": "Effet COP vent & givre"
       },
       "icon": "/assets/forecast-cop-correction.svg",
       "decimals": 1,
