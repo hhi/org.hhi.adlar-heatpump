@@ -1,4 +1,10 @@
 {
+  "2.8.3": {
+    "en": "Changed: Forecast heating advice now uses efficiency wording for worsening conditions (no longer shown as 'more expensive'). Added: The optimal delay capability now stores Insights history with a localized title.",
+    "nl": "Gewijzigd: Forecast verwarmingsadvies gebruikt nu efficiëntie-woordkeuze bij verslechterende omstandigheden (niet langer als 'duurder'). Toegevoegd: De optimale wachttijd-capability slaat nu Insights-geschiedenis op met gelokaliseerde titel.",
+    "de": "Geändert: Die Forecast-Heizempfehlung verwendet bei schlechteren Bedingungen jetzt Effizienz-Formulierungen (nicht mehr als 'teurer'). Hinzugefügt: Die Capability für optimale Verzögerung speichert jetzt die Insights-Historie mit lokalisiertem Titel.",
+    "fr": "Modifié : Le conseil de chauffage forecast utilise désormais une formulation d'efficacité lorsque les conditions se dégradent (plus affiché comme 'plus cher'). Ajouté : La capacité de délai optimal enregistre désormais l'historique Insights avec un titre localisé."
+  },
   "2.8.2": {
     "en": "Fixed: Alert flow cards no longer fail with invalid values. Improved: Energy price flow card now accepts both array format [0.11,0.10,...] (primary) and legacy object format {\"0\":0.11,\"1\":0.10,...}.",
     "nl": "Opgelost: Alert flow kaartjes falen niet meer met ongeldige waarden. Verbeterd: Energieprijs flow card accepteert nu zowel array formaat [0.11,0.10,...] (primair) als legacy object formaat {\"0\":0.11,\"1\":0.10,...}.",

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.8.2",
+  "version": "2.8.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -11579,10 +11579,10 @@
       "id": "adlar_forecast_advice",
       "type": "string",
       "title": {
-        "en": "Forecast advice",
-        "nl": "Forecast advies",
-        "de": "Prognose-Empfehlung",
-        "fr": "Conseil de prévision"
+        "en": "Efficiency Forecast advice",
+        "nl": "Efficiëntie forecast advies",
+        "de": "Effizienzprognose-Empfehlung",
+        "fr": "Conseil de prévision d'efficacité"
       },
       "getable": true,
       "setable": false,
@@ -11775,6 +11775,13 @@
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Optimal delay",
+        "nl": "Optimale wachttijd",
+        "de": "Optimale Wartezeit",
+        "fr": "Délai optimal"
+      },
       "icon": "/assets/timer.svg",
       "decimals": 1,
       "min": -48,
