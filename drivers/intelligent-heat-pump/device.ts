@@ -235,6 +235,7 @@ class MyDevice extends Homey.Device {
   // Boolean state change tracking (v1.1.0 - state change triggers)
   private lastCompressorState: boolean | null = null;
   private lastDefrostState: boolean | null = null;
+  private defrostStartTime: number | null = null; // v2.9.0: DefrostLearner event tracking
   private lastBackwaterState: boolean | null = null;
 
   // Enum mode change tracking (v1.1.0 - enum state change triggers)
@@ -2724,6 +2725,19 @@ class MyDevice extends Homey.Device {
               if (this.lastDefrostState !== null && currentState !== this.lastDefrostState) {
                 const stateLabel = currentState ? 'active' : 'inactive';
                 this.log(`🧊 Defrost state changed to: ${stateLabel} (Homey auto-triggers flow cards)`);
+
+                // v2.9.0: Track defrost events for DefrostLearner
+                if (currentState === true) {
+                  // Defrost STARTED
+                  this.defrostStartTime = Date.now();
+                } else if (this.defrostStartTime) {
+                  // Defrost ENDED — notify adaptive control for learning
+                  const durationSec = (Date.now() - this.defrostStartTime) / 1000;
+                  const outdoorTemp = this.getCapabilityValue('measure_temperature.outdoor')
+                    ?? this.getCapabilityValue('measure_temperature') ?? 0;
+                  this.serviceCoordinator?.onDefrostComplete(outdoorTemp, durationSec);
+                  this.defrostStartTime = null;
+                }
               }
               this.lastDefrostState = currentState;
 
@@ -3557,6 +3571,7 @@ class MyDevice extends Homey.Device {
       const weatherForecastCapabilities = [
         'adlar_forecast_advice',
         'adlar_optimal_delay',
+        'adlar_forecast_cop_correction', // v2.9.0: Weather COP correction %
       ];
 
       for (const capability of weatherForecastCapabilities) {
@@ -3568,6 +3583,8 @@ class MyDevice extends Homey.Device {
             if (capability === 'adlar_forecast_advice') {
               await this.setCapabilityValue(capability, 'N/A');
             } else if (capability === 'adlar_optimal_delay') {
+              await this.setCapabilityValue(capability, 0);
+            } else if (capability === 'adlar_forecast_cop_correction') {
               await this.setCapabilityValue(capability, 0);
             }
 
@@ -3646,7 +3663,6 @@ class MyDevice extends Homey.Device {
           this.error('Failed to add target_temperature.indoor capability:', error);
         }
       }
-
 
       // Migration v2.3.7: Add defrost_active_power capability for defrost monitoring
       if (!this.hasCapability('defrost_active_power')) {
@@ -4107,7 +4123,6 @@ class MyDevice extends Homey.Device {
     this.log('MyDevice has been added');
   }
 
-
   /**
    * onSettings is called when the user updates the device's settings.
    * @param {object} event the onSettings event data
@@ -4267,6 +4282,7 @@ class MyDevice extends Homey.Device {
       const weatherForecastCapabilities = [
         'adlar_forecast_advice',
         'adlar_optimal_delay',
+        'adlar_forecast_cop_correction', // v2.9.0: Weather COP correction %
       ];
 
       for (const capability of weatherForecastCapabilities) {
@@ -4278,6 +4294,8 @@ class MyDevice extends Homey.Device {
             if (capability === 'adlar_forecast_advice') {
               await this.setCapabilityValue(capability, 'N/A');
             } else if (capability === 'adlar_optimal_delay') {
+              await this.setCapabilityValue(capability, 0);
+            } else if (capability === 'adlar_forecast_cop_correction') {
               await this.setCapabilityValue(capability, 0);
             }
 

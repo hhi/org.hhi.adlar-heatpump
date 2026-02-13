@@ -94,7 +94,8 @@
     "adlar_external_solar_power",
     "adlar_external_solar_radiation",
     "adlar_forecast_advice",
-    "adlar_optimal_delay"
+    "adlar_optimal_delay",
+    "adlar_forecast_cop_correction"
   ],
   "capabilitiesOptions": {
     "measure_power": {

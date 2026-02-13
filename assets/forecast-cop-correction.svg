@@ -1,0 +1,41 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle for gauge -->
+  <circle cx="50" cy="60" r="32" fill="none" stroke="currentColor" stroke-width="2"/>
+
+  <!-- Gauge arc (COP performance) -->
+  <path d="M 24 60 A 26 26 0 0 1 76 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Gauge fill indicator (dynamic appearance) -->
+  <path d="M 30 75 A 26 26 0 0 1 65 45" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+
+  <!-- Cloud symbol (weather influence) -->
+  <g>
+    <!-- Cloud outline -->
+    <path d="M 35 25 Q 32 18 40 15 Q 45 12 50 15 Q 58 10 62 18 Q 70 15 70 25 Q 72 35 65 38 L 35 38 Q 28 36 28 28 Q 28 22 35 25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Center point indicator -->
+  <circle cx="50" cy="60" r="3" fill="currentColor" stroke="none"/>
+
+  <!-- Correction adjustment indicator (±) -->
+  <g>
+    <!-- Plus symbol (upward adjustment) -->
+    <line x1="50" y1="82" x2="50" y2="90" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="46" y1="86" x2="54" y2="86" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Arrow up (positive correction) -->
+    <path d="M 50 78 L 48 82 L 52 82 Z" fill="currentColor" stroke="none"/>
+  </g>
+
+  <!-- Side adjustment indicator (alternative minus for balance) -->
+  <g opacity="0.6">
+    <!-- Minus symbol (adjustment balance) -->
+    <line x1="20" y1="60" x2="28" y2="60" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Percentage-like indicator on right side -->
+  <g opacity="0.6">
+    <!-- Plus/adjustment indicator -->
+    <line x1="72" y1="60" x2="80" y2="60" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>

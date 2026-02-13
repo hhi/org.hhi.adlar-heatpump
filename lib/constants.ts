@@ -306,6 +306,35 @@ export class DeviceConstants {
     }, // Bivalent temperature
   ];
 
+  // Weather Forecast COP Correction constants (v2.9.0)
+  /** Defrost learning model constants for forecast COP correction */
+  static readonly FORECAST_DEFROST = {
+    /** Lower bound of icing temperature band (°C) — below this, air is too dry for rapid frost */
+    TEMP_LOW: -7.0,
+    /** Upper bound of icing temperature band (°C) — above this, evaporator stays above 0°C */
+    TEMP_HIGH: 7.0,
+    /** Humidity threshold below which defrost risk is negligible (%) */
+    HUMIDITY_THRESHOLD: 80,
+    /** Maximum COP reduction at worst conditions — only used as fallback without learned data */
+    FALLBACK_MAX_PENALTY: 0.15,
+    /** Temperature bucket size in °C (matches COPOptimizer bucketing) */
+    BUCKET_SIZE: 2,
+    /** Minimum events per bucket before learned data is used instead of fallback */
+    MIN_EVENTS_PER_BUCKET: 3,
+    /** Maximum defrost events to keep in rolling FIFO history */
+    MAX_HISTORY_SIZE: 500,
+  };
+
+  /** Wind-driven evaporator convection correction for forecast COP estimation */
+  static readonly FORECAST_WIND_EVAPORATOR = {
+    /** Above this outdoor temperature, wind has no meaningful evaporator benefit (°C) */
+    TEMP_UPPER_LIMIT: 15.0,
+    /** Empirical forced-convection scaling factor (°C gain per sqrt(km/h)) */
+    CONVECTION_FACTOR: 0.15,
+    /** Maximum effective temperature gain at evaporator (°C) */
+    MAX_TEMP_BOOST: 2.0,
+  };
+
   /** SCOP data storage limits */
   static readonly SCOP_DATA_LIMITS = {
     MAX_DAILY_RECORDS: 200, // Maximum daily COP records to store

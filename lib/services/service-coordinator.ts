@@ -415,6 +415,21 @@ export class ServiceCoordinator {
   }
 
   /**
+   * Called when a defrost cycle completes (DPS 33 true→false).
+   * Routes to AdaptiveControlService's DefrostLearner for learning.
+   * @version 2.9.0
+   */
+  onDefrostComplete(outdoorTemp: number, durationSec: number): void {
+    try {
+      this.adaptiveControl?.onDefrostComplete(outdoorTemp, durationSec);
+    } catch (error) {
+      this.logger('ServiceCoordinator: Failed to notify defrost complete', {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  /**
    * Called when device settings change; delegates to SettingsManagerService and AdaptiveControlService.
    */
   async onSettings(oldSettings: Record<string, unknown>, newSettings: Record<string, unknown>, changedKeys: string[]): Promise<void> {
