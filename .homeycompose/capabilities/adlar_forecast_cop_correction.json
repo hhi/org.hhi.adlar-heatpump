@@ -15,7 +15,7 @@
     },
     "getable": true,
     "setable": false,
-    "uiComponent": "sensor",
+    "uiComponent": null,
     "insights": true,
     "insightsTitle": {
         "en": "Forecast COP Weather Correction",

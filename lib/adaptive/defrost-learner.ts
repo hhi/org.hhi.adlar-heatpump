@@ -406,6 +406,24 @@ export class DefrostLearner {
   }
 
   /**
+   * Returns defrost statistics for the rolling 24-hour window.
+   *
+   * Filters the event history to events that started within the last 24 hours.
+   * Count and total duration reflect only that window, not lifetime averages.
+   *
+   * @returns { count, totalMinutes } — count of cycles and summed duration (minutes, 1 decimal)
+   */
+  public getLast24hStats(): { count: number; totalMinutes: number } {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = this.history.filter((e) => e.timestamp >= cutoff);
+    const totalMinutes = recent.reduce((sum, e) => sum + e.durationSec / 60, 0);
+    return {
+      count: recent.length,
+      totalMinutes: Math.round(totalMinutes * 10) / 10,
+    };
+  }
+
+  /**
    * Cleanup and release memory
    */
   public destroy(): void {

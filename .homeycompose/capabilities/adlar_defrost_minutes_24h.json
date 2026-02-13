@@ -1,0 +1,30 @@
+{
+    "id": "adlar_defrost_minutes_24h",
+    "type": "number",
+    "title": {
+        "en": "Defrost duration (24h)",
+        "nl": "Ontdooitijd (24u)",
+        "de": "Abtaudauer (24h)",
+        "fr": "Durée de dégivrage (24h)"
+    },
+    "units": {
+        "en": "min",
+        "nl": "min",
+        "de": "min",
+        "fr": "min"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "insights": true,
+    "insightsTitle": {
+        "en": "Defrost duration last 24 hours",
+        "nl": "Ontdooitijd afgelopen 24 uur",
+        "de": "Abtaudauer letzte 24 Stunden",
+        "fr": "Durée de dégivrage dernières 24 heures"
+    },
+    "icon": "/assets/defrost-duration.svg",
+    "decimals": 1,
+    "min": 0,
+    "max": 300
+}

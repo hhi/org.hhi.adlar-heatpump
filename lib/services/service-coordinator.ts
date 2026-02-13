@@ -420,13 +420,11 @@ export class ServiceCoordinator {
    * @version 2.9.0
    */
   onDefrostComplete(outdoorTemp: number, durationSec: number): void {
-    try {
-      this.adaptiveControl?.onDefrostComplete(outdoorTemp, durationSec);
-    } catch (error) {
+    this.adaptiveControl?.onDefrostComplete(outdoorTemp, durationSec).catch((error: Error) => {
       this.logger('ServiceCoordinator: Failed to notify defrost complete', {
-        error: (error as Error).message,
+        error: error.message,
       });
-    }
+    });
   }
 
   /**

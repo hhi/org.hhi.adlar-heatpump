@@ -3803,6 +3803,20 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.9.1: Add rolling 24h defrost statistics capabilities
+      const defrost24hCapabilities = ['adlar_defrost_count_24h', 'adlar_defrost_minutes_24h'];
+      for (const capability of defrost24hCapabilities) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            await this.setCapabilityValue(capability, 0);
+            this.log(`Migration v2.9.1: Added ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -7378,6 +7378,8 @@
         "adlar_state_compressor_state",
         "adlar_state_defrost_state",
         "defrost_active_power",
+        "adlar_defrost_count_24h",
+        "adlar_defrost_minutes_24h",
         "adlar_state_backwater",
         "adlar_external_power",
         "adlar_external_energy_total",
@@ -10686,6 +10688,66 @@
         "fr": "Compte le nombre de déconnexions aujourd'hui (fuseau horaire Homey). Réinitialisation automatique chaque jour."
       }
     },
+    "adlar_defrost_count_24h": {
+      "id": "adlar_defrost_count_24h",
+      "type": "number",
+      "title": {
+        "en": "Defrost cycles (24h)",
+        "nl": "Ontdooicycli (24u)",
+        "de": "Abtauzyklen (24h)",
+        "fr": "Cycles de dégivrage (24h)"
+      },
+      "units": {
+        "en": "x",
+        "nl": "x",
+        "de": "x",
+        "fr": "x"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Defrost cycles last 24 hours",
+        "nl": "Ontdooicycli afgelopen 24 uur",
+        "de": "Abtauzyklen letzte 24 Stunden",
+        "fr": "Cycles de dégivrage dernières 24 heures"
+      },
+      "icon": "/assets/defrost-count.svg",
+      "decimals": 0,
+      "min": 0,
+      "max": 100
+    },
+    "adlar_defrost_minutes_24h": {
+      "id": "adlar_defrost_minutes_24h",
+      "type": "number",
+      "title": {
+        "en": "Defrost duration (24h)",
+        "nl": "Ontdooitijd (24u)",
+        "de": "Abtaudauer (24h)",
+        "fr": "Durée de dégivrage (24h)"
+      },
+      "units": {
+        "en": "min",
+        "nl": "min",
+        "de": "min",
+        "fr": "min"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Defrost duration last 24 hours",
+        "nl": "Ontdooitijd afgelopen 24 uur",
+        "de": "Abtaudauer letzte 24 Stunden",
+        "fr": "Durée de dégivrage dernières 24 heures"
+      },
+      "icon": "/assets/defrost-duration.svg",
+      "decimals": 1,
+      "min": 0,
+      "max": 300
+    },
     "adlar_energy_cost_daily": {
       "id": "adlar_energy_cost_daily",
       "type": "number",
@@ -11607,7 +11669,7 @@
       },
       "getable": true,
       "setable": false,
-      "uiComponent": "sensor",
+      "uiComponent": null,
       "insights": true,
       "insightsTitle": {
         "en": "Forecast COP Weather Correction",

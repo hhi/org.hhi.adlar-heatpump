@@ -1136,7 +1136,7 @@ export class AdaptiveControlService {
    * Called by ServiceCoordinator when DPS 33 transitions true→false.
    * @version 2.9.0
    */
-  onDefrostComplete(outdoorTemp: number, durationSec: number): void {
+  async onDefrostComplete(outdoorTemp: number, durationSec: number): Promise<void> {
     // Get current humidity from forecast if available
     let humidity: number | null = null;
     const forecast = this.weatherForecast.getForecast();
@@ -1152,6 +1152,15 @@ export class AdaptiveControlService {
       humidity: humidity !== null ? `${humidity}%` : 'unknown',
       totalEvents: this.defrostLearner.getEventCount(),
     });
+
+    // v2.9.1: Update rolling 24h defrost statistics capabilities
+    const stats = this.defrostLearner.getLast24hStats();
+    if (this.device.hasCapability('adlar_defrost_count_24h')) {
+      await this.device.setCapabilityValue('adlar_defrost_count_24h', stats.count);
+    }
+    if (this.device.hasCapability('adlar_defrost_minutes_24h')) {
+      await this.device.setCapabilityValue('adlar_defrost_minutes_24h', stats.totalMinutes);
+    }
   }
 
   /**
