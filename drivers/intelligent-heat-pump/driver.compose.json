@@ -47,6 +47,8 @@
     "adlar_state_compressor_state",
     "adlar_state_defrost_state",
     "defrost_active_power",
+    "adlar_defrost_count_24h",
+    "adlar_defrost_minutes_24h",
     "adlar_state_backwater",
     "adlar_external_power",
     "adlar_external_energy_total",

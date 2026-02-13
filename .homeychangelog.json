@@ -1,4 +1,10 @@
 {
+  "2.9.1": {
+    "en": "Added: Two new sensors showing defrost activity over the last 24 hours: number of defrost cycles and total defrost duration (minutes). Forecast advice now shows learned defrost COP impact in parentheses when available (e.g. 'Heat now (❄️-9%)').",
+    "nl": "Toegevoegd: Twee nieuwe sensoren met ontdooiactiviteit over de afgelopen 24 uur: aantal ontdooicycli en totale ontdooitijd (minuten). Forecast advies toont nu geleerde defrost COP-impact tussen haakjes wanneer beschikbaar (bijv. 'Verwarm nú (❄️-9%)').",
+    "de": "Hinzugefügt: Zwei neue Sensoren zeigen Abtauaktivität der letzten 24 Stunden: Anzahl der Abtauzyklen und gesamte Abtaudauer (Minuten). Forecast-Empfehlung zeigt jetzt gelernte Defrost-COP-Auswirkung in Klammern wenn verfügbar (z.B. 'Jetzt heizen (❄️-9%)').",
+    "fr": "Ajouté: Deux nouveaux capteurs affichant l'activité de dégivrage sur les dernières 24 heures: nombre de cycles de dégivrage et durée totale de dégivrage (minutes). Le conseil forecast affiche maintenant l'impact COP de dégivrage appris entre parenthèses si disponible (ex: 'Chauffer maintenant (❄️-9%)')."
+  },
   "2.8.3": {
     "en": "Changed: Forecast heating advice now uses efficiency wording for worsening conditions (no longer shown as 'more expensive'). Added: The optimal delay capability now stores Insights history with a localized title.",
     "nl": "Gewijzigd: Forecast verwarmingsadvies gebruikt nu efficiëntie-woordkeuze bij verslechterende omstandigheden (niet langer als 'duurder'). Toegevoegd: De optimale wachttijd-capability slaat nu Insights-geschiedenis op met gelokaliseerde titel.",

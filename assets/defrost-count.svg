@@ -1,0 +1,31 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main snowflake (top 60%) -->
+  <!-- Vertical line -->
+  <line x1="50" y1="8" x2="50" y2="48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Horizontal line -->
+  <line x1="20" y1="28" x2="80" y2="28" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Diagonal lines -->
+  <line x1="28" y1="16" x2="72" y2="40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="28" y1="40" x2="72" y2="16" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Small branches on vertical line -->
+  <line x1="50" y1="18" x2="38" y2="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="18" x2="62" y2="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="38" x2="38" y2="42" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="38" x2="62" y2="42" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Count representation: 3 tally dots at bottom -->
+  <!-- Dot 1 (left) -->
+  <circle cx="32" cy="72" r="4" fill="none" stroke="currentColor" stroke-width="3"/>
+
+  <!-- Dot 2 (center) -->
+  <circle cx="50" cy="72" r="4" fill="none" stroke="currentColor" stroke-width="3"/>
+
+  <!-- Dot 3 (right) -->
+  <circle cx="68" cy="72" r="4" fill="none" stroke="currentColor" stroke-width="3"/>
+
+  <!-- Connecting line between dots -->
+  <line x1="32" y1="78" x2="68" y2="78" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
