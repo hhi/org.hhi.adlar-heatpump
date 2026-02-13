@@ -1,5 +1,10 @@
 /* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 import Homey from 'homey';
+import { DeviceConstants } from '../constants';
+import { DefrostLearner } from '../adaptive/defrost-learner';
 
 /**
  * Hourly temperature forecast data point
@@ -9,6 +14,8 @@ export interface HourlyForecast {
   timestamp: number; // Unix timestamp (ms)
   temperature: number; // Outdoor temperature °C
   cloudCover?: number; // Cloud cover 0-100%
+  humidity?: number; // Relative humidity 2m, 0-100%
+  windSpeed?: number; // Wind speed 10m, km/h
 }
 
 /**
@@ -45,6 +52,11 @@ export interface WeatherForecastServiceOptions {
    * When null/undefined, the service falls back to a linear model.
    */
   copLookup?: (outdoorTemp: number) => number | null;
+  /**
+   * Optional DefrostLearner for learned defrost COP penalties.
+   * When null/undefined, falls back to static humidity model.
+   */
+  defrostLearner?: DefrostLearner | null;
 }
 
 /**
@@ -58,6 +70,7 @@ export class WeatherForecastService {
   private device: Homey.Device;
   private logger: (message: string, ...args: unknown[]) => void;
   private copLookup: ((outdoorTemp: number) => number | null) | null;
+  private defrostLearner: DefrostLearner | null;
 
   // Cached forecast data
   private forecast: WeatherForecast | null = null;
@@ -85,7 +98,8 @@ export class WeatherForecastService {
     this.device = options.device;
     this.logger = options.logger || (() => { });
     this.copLookup = options.copLookup ?? null;
-    this.logger(`WeatherForecastService: Initialized (COP source: ${this.copLookup ? 'learned' : 'linear model'})`);
+    this.defrostLearner = options.defrostLearner ?? null;
+    this.logger(`WeatherForecastService: Initialized (COP source: ${this.copLookup ? 'learned' : 'linear model'}, defrost: ${this.defrostLearner ? 'learned' : 'static model'})`);
   }
 
   /**
@@ -94,6 +108,14 @@ export class WeatherForecastService {
   public setCopLookup(lookup: ((outdoorTemp: number) => number | null) | null): void {
     this.copLookup = lookup;
     this.logger(`WeatherForecastService: COP source changed to ${lookup ? 'learned' : 'linear model'}`);
+  }
+
+  /**
+   * Update DefrostLearner reference (e.g. when learner becomes available after init)
+   */
+  public setDefrostLearner(learner: DefrostLearner | null): void {
+    this.defrostLearner = learner;
+    this.logger(`WeatherForecastService: Defrost source changed to ${learner ? 'learned' : 'static model'}`);
   }
 
   /**
@@ -139,7 +161,8 @@ export class WeatherForecastService {
     const lat = settings.forecast_location_lat ?? 52.37;
     const lon = settings.forecast_location_lon ?? 4.90;
 
-    const url = `${WeatherForecastService.API_BASE}?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,cloud_cover&forecast_hours=${WeatherForecastService.FORECAST_HOURS}&timezone=auto`;
+    const hourlyParams = 'temperature_2m,cloud_cover,relative_humidity_2m,wind_speed_10m';
+    const url = `${WeatherForecastService.API_BASE}?latitude=${lat}&longitude=${lon}&hourly=${hourlyParams}&forecast_hours=${WeatherForecastService.FORECAST_HOURS}&timezone=auto`;
 
     this.logger('WeatherForecastService: Fetching from Open-Meteo API');
 
@@ -153,6 +176,8 @@ export class WeatherForecastService {
         timestamp: new Date(time).getTime(),
         temperature: data.hourly.temperature_2m[index],
         cloudCover: data.hourly.cloud_cover?.[index],
+        humidity: data.hourly.relative_humidity_2m?.[index],
+        windSpeed: data.hourly.wind_speed_10m?.[index],
       }));
 
       this.forecast = {
@@ -215,24 +240,108 @@ export class WeatherForecastService {
   }
 
   /**
-   * Estimate COP for a given outdoor temperature.
+   * Estimate COP for a given outdoor temperature with optional weather corrections.
    *
-   * Uses learned COP data from COPOptimizer when available.
-   * Falls back to simplified linear model when no learned data exists.
+   * Correction pipeline:
+   * 1. Base COP from learned data (COPOptimizer) or linear fallback model
+   * 2. Wind boost: forced convection improves effective evaporator temperature
+   * 3. Defrost penalty: learned or humidity-based COP reduction
+   *
+   * @param outdoorTemp - Outdoor temperature (°C)
+   * @param humidity - Optional relative humidity (0-100%)
+   * @param windSpeed - Optional wind speed (km/h)
    */
-  public estimateCop(outdoorTemp: number): number {
-    // Try learned COP first
+  public estimateCop(outdoorTemp: number, humidity?: number, windSpeed?: number): number {
+    // Step 1: Base COP (learned or linear model)
+    let baseCop: number;
     if (this.copLookup) {
       const learnedCop = this.copLookup(outdoorTemp);
       if (learnedCop != null && learnedCop > 0) {
-        return Math.max(1.5, Math.min(7.0, learnedCop));
+        baseCop = Math.max(1.5, Math.min(7.0, learnedCop));
+      } else {
+        baseCop = this.linearCopModel(outdoorTemp);
       }
+    } else {
+      baseCop = this.linearCopModel(outdoorTemp);
     }
 
-    // Fallback: linear model
+    // Step 2: Wind-driven evaporator convection boost
+    const effectiveTemp = this.calculateEffectiveEvaporatorTemp(outdoorTemp, windSpeed);
+    if (effectiveTemp !== outdoorTemp) {
+      const windCopBoost = (effectiveTemp - outdoorTemp) * WeatherForecastService.COP_TEMP_COEFFICIENT;
+      baseCop += windCopBoost;
+    }
+
+    // Step 3: Defrost penalty (learned or static humidity model)
+    let defrostFactor = 1.0;
+    if (this.defrostLearner) {
+      defrostFactor = this.defrostLearner.getDefrostPenalty(outdoorTemp, humidity);
+    } else {
+      defrostFactor = this.staticDefrostFallback(outdoorTemp, humidity);
+    }
+    const correctedCop = baseCop * defrostFactor;
+
+    return Math.max(1.5, Math.min(7.0, correctedCop));
+  }
+
+  /**
+   * Linear COP fallback model (used when no learned data available)
+   */
+  private linearCopModel(outdoorTemp: number): number {
     const tempDiff = outdoorTemp - WeatherForecastService.COP_REFERENCE_TEMP;
     const cop = WeatherForecastService.COP_REFERENCE_VALUE + (tempDiff * WeatherForecastService.COP_TEMP_COEFFICIENT);
     return Math.max(1.5, Math.min(7.0, cop));
+  }
+
+  /**
+   * Calculate effective evaporator temperature accounting for wind-driven convection.
+   *
+   * Forced airflow across the evaporator improves heat transfer, effectively
+   * raising the temperature the evaporator "sees". This is a small positive
+   * effect (max +2°C), not to be confused with human wind chill.
+   */
+  private calculateEffectiveEvaporatorTemp(temperature: number, windSpeed?: number): number {
+    if (windSpeed === undefined || windSpeed === null || windSpeed <= 0) return temperature;
+
+    const windConst = DeviceConstants.FORECAST_WIND_EVAPORATOR;
+
+    // No correction above the upper limit (evaporator not limited at warm temps)
+    if (temperature > windConst.TEMP_UPPER_LIMIT) return temperature;
+
+    // Enhanced convection: Nu ~ Re^0.5 ~ windSpeed^0.5
+    const tempBelowThreshold = Math.max(0, windConst.TEMP_UPPER_LIMIT - temperature);
+    const normalizedTempFactor = Math.min(tempBelowThreshold / windConst.TEMP_UPPER_LIMIT, 1.0);
+    const windBoost = windConst.CONVECTION_FACTOR * Math.sqrt(windSpeed) * normalizedTempFactor;
+
+    return temperature + Math.min(windConst.MAX_TEMP_BOOST, windBoost);
+  }
+
+  /**
+   * Static defrost penalty when no DefrostLearner is available.
+   * Delegates to DefrostLearner's static model for consistency.
+   */
+  private staticDefrostFallback(temperature: number, humidity?: number): number {
+    const constants = DeviceConstants.FORECAST_DEFROST;
+
+    // Outside icing band: no penalty
+    if (temperature < constants.TEMP_LOW || temperature > constants.TEMP_HIGH) return 1.0;
+
+    // No humidity data: apply half the max penalty as conservative estimate
+    if (humidity === undefined || humidity === null) {
+      const tempDist = Math.abs(temperature);
+      const tempFactor = Math.max(0, 1.0 - tempDist / constants.TEMP_HIGH);
+      return 1.0 - (constants.FALLBACK_MAX_PENALTY * 0.5 * tempFactor);
+    }
+
+    // Below humidity threshold: negligible
+    if (humidity <= constants.HUMIDITY_THRESHOLD) return 1.0;
+
+    // Tent function at 0°C × linear humidity scaling
+    const tempFactor = Math.max(0, 1.0 - Math.abs(temperature) / constants.TEMP_HIGH);
+    const humidityFactor = (humidity - constants.HUMIDITY_THRESHOLD)
+      / (100.0 - constants.HUMIDITY_THRESHOLD);
+
+    return 1.0 - (constants.FALLBACK_MAX_PENALTY * tempFactor * humidityFactor);
   }
 
   /**
@@ -257,30 +366,34 @@ export class WeatherForecastService {
       return null;
     }
 
+    // Current COP: no weather corrections (actual conditions already experienced)
     const currentCop = this.estimateCop(currentOutdoorTemp);
     const lookAhead = Math.min(maxDelayHours, this.forecast.hourly.length - 1);
 
     // Step 1: Find peak and trough within lookahead window
+    // Use weather-corrected COP for forecast hours (includes humidity + wind effects)
     let peakHour = 0;
     let peakTemp = currentOutdoorTemp;
+    let peakCop = currentCop;
     let troughHour = 0;
     let troughTemp = currentOutdoorTemp;
+    let troughCop = currentCop;
 
     for (let h = 1; h <= lookAhead; h++) {
-      const temp = this.forecast.hourly[h]?.temperature;
-      if (temp === undefined) continue;
-      if (temp > peakTemp) {
+      const entry = this.forecast.hourly[h];
+      if (!entry || entry.temperature === undefined) continue;
+      const hourCop = this.estimateCop(entry.temperature, entry.humidity, entry.windSpeed);
+      if (hourCop > peakCop) {
         peakHour = h;
-        peakTemp = temp;
+        peakTemp = entry.temperature;
+        peakCop = hourCop;
       }
-      if (temp < troughTemp) {
+      if (hourCop < troughCop) {
         troughHour = h;
-        troughTemp = temp;
+        troughTemp = entry.temperature;
+        troughCop = hourCop;
       }
     }
-
-    const peakCop = this.estimateCop(peakTemp);
-    const troughCop = this.estimateCop(troughTemp);
 
     // Step 2: Calculate potential savings (rising) and losses (dropping)
     const pctRising = currentCop > 0 ? (1 - currentCop / peakCop) * 100 : 0;
@@ -296,10 +409,13 @@ export class WeatherForecastService {
       let bestHour = peakHour;
 
       for (let h = 1; h < peakHour; h++) {
-        const temp = this.forecast.hourly[h]?.temperature;
-        if (temp !== undefined && this.estimateCop(temp) >= goodEnoughCop) {
-          bestHour = h;
-          break;
+        const entry = this.forecast.hourly[h];
+        if (entry && entry.temperature !== undefined) {
+          const hourCop = this.estimateCop(entry.temperature, entry.humidity, entry.windSpeed);
+          if (hourCop >= goodEnoughCop) {
+            bestHour = h;
+            break;
+          }
         }
       }
 
@@ -312,10 +428,12 @@ export class WeatherForecastService {
         }
       }
 
-      const bestTemp = this.forecast.hourly[bestHour]?.temperature ?? peakTemp;
-      const bestCop = this.estimateCop(bestTemp);
+      const bestEntry = this.forecast.hourly[bestHour];
+      const bestTemp = bestEntry?.temperature ?? peakTemp;
+      const bestCop = this.estimateCop(bestTemp, bestEntry?.humidity, bestEntry?.windSpeed);
       const actualSavings = (1 - currentCop / bestCop) * 100;
 
+      const risingDefrost = this.getDefrostSuffix(currentOutdoorTemp, this.forecast.hourly[0]?.humidity);
       return {
         delayHours: bestHour,
         expectedCop: bestCop,
@@ -324,12 +442,13 @@ export class WeatherForecastService {
         currentTemp: currentOutdoorTemp,
         pctSavings: Math.round(actualSavings),
         trend: 'rising',
-        adviceText: `Wacht ${bestHour}u, ${Math.round(actualSavings)}% zuiniger bij ${bestTemp.toFixed(0)}°C`,
+        adviceText: `Wacht ${bestHour}u, ${Math.round(actualSavings)}% zuiniger bij ${bestTemp.toFixed(0)}°C${risingDefrost}`,
       };
     }
 
     // --- DROPPING: temperature falling, heat now ---
     if (pctDropping >= threshold && troughHour > 0) {
+      const droppingDefrost = this.getDefrostSuffix(currentOutdoorTemp, this.forecast.hourly[0]?.humidity);
       return {
         delayHours: -troughHour,
         expectedCop: troughCop,
@@ -338,7 +457,7 @@ export class WeatherForecastService {
         currentTemp: currentOutdoorTemp,
         pctSavings: -Math.round(pctDropping),
         trend: 'dropping',
-        adviceText: `Verwarm nú, over ${troughHour}u ${Math.round(pctDropping)}% minder efficiënt`,
+        adviceText: `Verwarm nú, over ${troughHour}u ${Math.round(pctDropping)}% minder efficiënt${droppingDefrost}`,
       };
     }
 
@@ -350,6 +469,7 @@ export class WeatherForecastService {
    * Build advice for stable temperature conditions
    */
   private buildStableAdvice(currentTemp: number, currentCop: number): ForecastAdvice {
+    const stableDefrost = this.getDefrostSuffix(currentTemp, this.forecast?.hourly[0]?.humidity);
     return {
       delayHours: 0,
       expectedCop: currentCop,
@@ -358,8 +478,25 @@ export class WeatherForecastService {
       currentTemp,
       pctSavings: 0,
       trend: 'stable',
-      adviceText: 'Geen forecast-voordeel',
+      adviceText: `Geen forecast-voordeel${stableDefrost}`,
     };
+  }
+
+  /**
+   * Returns a parenthesised defrost-pattern suffix when the DefrostLearner has
+   * sufficient learned data and the penalty exceeds the display threshold.
+   *
+   * Example: " (❄️-9%)" or "" when not applicable.
+   */
+  private getDefrostSuffix(outdoorTemp: number, humidity?: number): string {
+    if (!this.defrostLearner) return '';
+    if (this.defrostLearner.getQualifiedBucketCount() === 0) return '';
+
+    const penalty = this.defrostLearner.getDefrostPenalty(outdoorTemp, humidity);
+    const pct = Math.round((1 - penalty) * 100);
+
+    if (pct < 3) return '';
+    return ` (❄️-${pct}%)`;
   }
 
   /**
@@ -403,6 +540,27 @@ export class WeatherForecastService {
    */
   public getForecast(): WeatherForecast | null {
     return this.forecast;
+  }
+
+  /**
+   * Calculate the net COP correction percentage for the current forecast hour.
+   *
+   * Compares base COP (temperature only) to corrected COP (with wind + defrost).
+   * Positive = beneficial (wind boost), negative = penalty (defrost).
+   *
+   * @returns Correction percentage (e.g. -8.5 means 8.5% COP reduction) or null
+   */
+  public getCurrentCopCorrectionPct(): number | null {
+    if (!this.forecast || this.forecast.hourly.length === 0) return null;
+
+    const current = this.forecast.hourly[0];
+    if (!current) return null;
+
+    const baseCop = this.estimateCop(current.temperature);
+    const correctedCop = this.estimateCop(current.temperature, current.humidity, current.windSpeed);
+
+    if (baseCop === 0) return null;
+    return Math.round(((correctedCop - baseCop) / baseCop) * 1000) / 10;
   }
 
   /**

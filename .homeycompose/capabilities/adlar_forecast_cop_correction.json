@@ -1,0 +1,30 @@
+{
+    "id": "adlar_forecast_cop_correction",
+    "type": "number",
+    "title": {
+        "en": "Forecast COP Correction",
+        "nl": "Forecast COP correctie",
+        "de": "Prognose COP Korrektur",
+        "fr": "Correction COP prévision"
+    },
+    "units": {
+        "en": "%",
+        "nl": "%",
+        "de": "%",
+        "fr": "%"
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "insights": true,
+    "insightsTitle": {
+        "en": "Forecast COP Weather Correction",
+        "nl": "Forecast COP weercorrectie",
+        "de": "Prognose COP Wetterkorrektur",
+        "fr": "Correction météo COP prévision"
+    },
+    "icon": "/assets/forecast-cop-correction.svg",
+    "decimals": 1,
+    "min": -25,
+    "max": 10
+}

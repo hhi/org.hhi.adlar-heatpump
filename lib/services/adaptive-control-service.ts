@@ -8,6 +8,7 @@ import { ExternalTemperatureService } from './external-temperature-service';
 import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
+import { DefrostLearner } from '../adaptive/defrost-learner';
 import { WeightedDecisionMaker, type ConfidenceMetrics } from '../adaptive/weighted-decision-maker';
 import { WindCorrectionService } from './wind-correction-service';
 import { WeatherForecastService, type ForecastAdvice } from './weather-forecast-service';
@@ -85,6 +86,9 @@ export class AdaptiveControlService {
   // Component 6: Weather Forecast Service (v2.8.0+)
   private weatherForecast: WeatherForecastService;
   private lastForecastAdviceSignature: string | null = null;
+
+  // Component 7: Defrost Learner (v2.9.0+)
+  private defrostLearner: DefrostLearner;
 
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
@@ -188,13 +192,19 @@ export class AdaptiveControlService {
       logger: this.logger,
     });
 
+    // Initialize Component 7: Defrost Learner (v2.9.0+)
+    this.defrostLearner = new DefrostLearner({
+      logger: this.logger,
+    });
+
     // Initialize Component 6: Weather Forecast Service (v2.8.0+)
     this.weatherForecast = new WeatherForecastService({
       device: this.device,
       logger: this.logger,
+      defrostLearner: this.defrostLearner,
     });
 
-    this.logger('AdaptiveControlService: Initialized with all 6 components');
+    this.logger('AdaptiveControlService: Initialized with all 7 components');
   }
 
   /**
@@ -355,6 +365,12 @@ export class AdaptiveControlService {
       const copState = await this.device.getStoreValue('cop_optimizer_state');
       if (copState) {
         this.copOptimizer.restoreState(copState);
+      }
+
+      // Restore Component 7: Defrost Learner state (v2.9.0+)
+      const defrostState = await this.device.getStoreValue('defrost_learning_state');
+      if (defrostState) {
+        this.defrostLearner.restoreState(defrostState);
       }
 
       // Load priority settings from device settings (v2.4.1: bug fix - settings were defined but not used)
@@ -901,6 +917,7 @@ export class AdaptiveControlService {
     // Persist optimizer states
     await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
     await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
+    await this.device.setStoreValue('defrost_learning_state', this.defrostLearner.getState());
 
     // Update and persist last adjustment timestamp (throttling)
     this.lastAdjustmentTime = Date.now();
@@ -1069,6 +1086,12 @@ export class AdaptiveControlService {
         await this.device.setCapabilityValue('adlar_optimal_delay', advice.delayHours);
       }
 
+      // v2.9.0: Update weather correction percentage
+      const correctionPct = this.weatherForecast.getCurrentCopCorrectionPct();
+      if (correctionPct !== null && this.device.hasCapability('adlar_forecast_cop_correction')) {
+        await this.device.setCapabilityValue('adlar_forecast_cop_correction', correctionPct);
+      }
+
       // Trigger flow card only when advice meaningfully changes
       const signature = `${advice.delayHours}|${advice.currentCop.toFixed(2)}|${advice.expectedCop.toFixed(2)}`;
       if (signature !== this.lastForecastAdviceSignature) {
@@ -1106,6 +1129,29 @@ export class AdaptiveControlService {
         error: (error as Error).message,
       });
     }
+  }
+
+  /**
+   * Record a completed defrost cycle for the DefrostLearner.
+   * Called by ServiceCoordinator when DPS 33 transitions true→false.
+   * @version 2.9.0
+   */
+  onDefrostComplete(outdoorTemp: number, durationSec: number): void {
+    // Get current humidity from forecast if available
+    let humidity: number | null = null;
+    const forecast = this.weatherForecast.getForecast();
+    if (forecast && forecast.hourly.length > 0) {
+      humidity = forecast.hourly[0].humidity ?? null;
+    }
+
+    this.defrostLearner.recordEvent(outdoorTemp, durationSec, humidity);
+
+    this.logger('AdaptiveControlService: Defrost event recorded', {
+      outdoorTemp: `${outdoorTemp.toFixed(1)}°C`,
+      durationSec: `${durationSec.toFixed(0)}s`,
+      humidity: humidity !== null ? `${humidity}%` : 'unknown',
+      totalEvents: this.defrostLearner.getEventCount(),
+    });
   }
 
   /**
@@ -1622,6 +1668,7 @@ export class AdaptiveControlService {
     try {
       await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
       await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
+      await this.device.setStoreValue('defrost_learning_state', this.defrostLearner.getState());
       this.logger('AdaptiveControlService: Saved optimizer states before destroy');
     } catch (error) {
       this.device.error('AdaptiveControlService: Error saving optimizer states during destroy:', error);
@@ -1636,8 +1683,9 @@ export class AdaptiveControlService {
     this.decisionMaker.destroy();
     await this.windCorrection.destroy(); // v2.7.0+: Persist learned alpha
     this.weatherForecast.destroy(); // v2.8.0+: Stop forecast updates and clear cache
+    this.defrostLearner.destroy(); // v2.9.0+: Clear defrost learning history
 
-    this.logger('AdaptiveControlService: Destroyed (all 8 components cleaned up)');
+    this.logger('AdaptiveControlService: Destroyed (all 9 components cleaned up)');
   }
 
   /**
