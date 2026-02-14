@@ -37,7 +37,7 @@ AUTOMATISATION INTELLIGENTE
 - Insights & Recommandations du bâtiment avec estimations ROI
 - Optimisation du prix de l'énergie avec tarifs day-ahead
 - Optimisation COP pour une efficacité maximale
-- Service de prévisions météo pour conseils de chauffage optimisés par COP
+- Service de prévisions météo pour conseils de chauffage optimisés COP et corrections vent & givre
 - Outils de diagnostic complets pour le dépannage
 - Intégration du vent et du soleil pour le modèle du bâtiment
   * Vitesse du vent externe pour la correction windchill de la perte de chaleur
@@ -228,11 +228,13 @@ Optimisation automatique de la température de départ pour une efficacité maxi
 - Stratégies: Conservatif/Équilibré/Agressif
 
 SERVICE DE PRÉVISIONS MÉTÉO
-Conseils de timing de chauffage optimisés par COP avec prévisions météo Open-Meteo:
-- Récupération automatique des données météo via l'API Open-Meteo (aucune clé API requise)
+Conseils de timing de chauffage optimisés COP et corrections vent & givre avec prévisions météo Open-Meteo:
+- Récupération automatique des données météo via l'API Open-Meteo (aucune clé API requise): température, vitesse du vent et humidité
 - Estimation du COP avec données apprises du COP Optimizer ou avec repli via extrapolation linéaire
-- Nouvelles capacités: Texte de conseil et heures de délai optimal
-- Déclencheur de flux: forecast_heating_advice se déclenche lorsque le conseil COP change
+- Effet COP Vent & Givre: pourcentage de correction en temps réel pour l'impact du vent et du givre sur le COP
+- Statistiques de dégivrage: comptage et minutes totales des cycles de dégivrage sur 24 heures glissantes
+- Capacités: Texte de conseil, heures de délai optimal, correction COP Vent & Givre
+- Déclencheur de flux: forecast_heating_advice se déclenche lorsque le conseil COP change (jetons: delay_hours, expected_cop, current_cop, advice_text)
 - Paramètres: Prévisions météo activation/désactivation, coordonnées de localisation configurables
 
 FACTEURS DE PONDÉRATION DE RÉGULATION ADAPTATIVE

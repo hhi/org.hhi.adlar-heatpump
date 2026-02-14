@@ -37,7 +37,7 @@ INTELLIGENTE AUTOMATISERING
 - Gebouw Inzichten & Aanbevelingen met ROI-schattingen
 - Energieprijs optimalisatie met day-ahead prijzen
 - COP optimalisatie voor maximale efficiëntie
-- Weersverwachting service voor COP-geoptimaliseerd verwarmingsadvies
+- Weerprognose service voor COP-geoptimaliseerd verwarmingsadvies en wind- & vorstcorrecties
 - Uitgebreide diagnostische tools voor probleemoplossing
 - Wind en zonne-integratie voor gebouwmodel
   * Externe windsnelheid voor windchill correctie van warmteverlies
@@ -227,13 +227,15 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiëntie:
 - Leert optimale aanvoertemperatuur per buitentemperatuur
 - Strategieën: Conservatief/Gebalanceerd/Agressief
 
-WEERSVERWACHTING SERVICE
-COP-geoptimaliseerd verwarmingsadvies met Open-Meteo weersverwachtingen:
-- Automatische weerdata ophaling via Open-Meteo API (geen API-sleutel vereist)
+WEERPROGNOSE SERVICE
+COP-geoptimaliseerd verwarmingsadvies en wind- & vorstcorrecties met Open-Meteo weerprognoses:
+- Automatische weerdata ophaling via Open-Meteo API (geen API-sleutel vereist): temperatuur, windsnelheid en luchtvochtigheid
 - COP-schatting met geleerde data van COP Optimizer of met fallback via lineaire extrapolatie
-- Nieuwe capabilities: Advies tekst en optimale vertraging in uren
-- Flow trigger: forecast_heating_advice vuurt wanneer COP-gebaseerd advies verandert
-- Instellingen: Weersverwachting aan/uit, configureerbare locatie coördinaten
+- Wind & Vorst COP effect: real-time correctiepercentage voor wind- en vorstinvloed op COP
+- Defrost statistieken: 24-uurs rollend aantal ontdooicycli en totaal minuten
+- Capabilities: Advies tekst, optimale vertraging in uren, Wind & Vorst COP correctie
+- Flow trigger: forecast_heating_advice vuurt wanneer COP-gebaseerd advies verandert (tokens: delay_hours, expected_cop, current_cop, advice_text)
+- Instellingen: Weerprognose aan/uit, configureerbare locatie coördinaten
 
 ADAPTIEVE REGELING WEGINGSFACTOREN
 Vier prioriteiten die samen bepalen hoe het systeem beslissingen maakt:

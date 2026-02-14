@@ -37,7 +37,7 @@ INTELLIGENTE AUTOMATISIERUNG
 - Gebäudeeinblicke & Empfehlungen mit ROI-Schätzungen
 - Energiepreis-Optimierung mit Day-Ahead-Preisen
 - COP-Optimierung für maximale Effizienz
-- Wettervorhersage-Service für COP-optimierte Heizzeitberatung
+- Wettervorhersage-Service für COP-optimierte Heizzeitberatung und Wind- & Frost-Korrekturen
 - Umfassende Diagnosetools zur Problemlösung
 - Wind- und Sonnenintegration für Gebäudemodell
   * Externe Windgeschwindigkeit für Windchill-Korrektur des Wärmeverlusts
@@ -228,11 +228,13 @@ Automatische Optimierung der Vorlauftemperatur für maximale Effizienz:
 - Strategien: Konservativ/Ausgewogen/Aggressiv
 
 WETTERVORHERSAGE-SERVICE
-COP-optimierte Heizzeitberatung mit Open-Meteo Wettervorhersagen:
-- Automatischer Wetterdatenabruf über Open-Meteo API (kein API-Schlüssel erforderlich)
+COP-optimierte Heizzeitberatung und Wind- & Frost-Korrekturen mit Open-Meteo Wettervorhersagen:
+- Automatischer Wetterdatenabruf über Open-Meteo API (kein API-Schlüssel erforderlich): Temperatur, Windgeschwindigkeit und Luftfeuchtigkeit
 - COP-Schätzung mit gelernten Daten vom COP-Optimizer oder mit Fallback via lineare Extrapolation
-- Neue Capabilities: Beratungstext und optimale Verzögerungsstunden
-- Flow-Trigger: forecast_heating_advice feuert bei Änderung der COP-basierten Beratung
+- Wind & Frost COP-Effekt: Echtzeit-Korrektprozentsatz für Wind- und Frosteinfluss auf COP
+- Abtaustatistiken: 24-Stunden-Rollanzahl der Abtauzyklen und Gesamtminuten
+- Capabilities: Beratungstext, optimale Verzögerungsstunden, Wind & Frost COP-Korrektur
+- Flow-Trigger: forecast_heating_advice feuert bei Änderung der COP-basierten Beratung (Tokens: delay_hours, expected_cop, current_cop, advice_text)
 - Einstellungen: Wettervorhersage ein/aus, konfigurierbare Standortkoordinaten
 
 ADAPTIVE REGELUNGS-GEWICHTUNGSFAKTOREN
