@@ -902,6 +902,12 @@ class MyDevice extends Homey.Device {
     }
 
     try {
+      // Guard: skip invalid COP values (sensor error, not an idle period)
+      if (!copResult.cop || copResult.cop <= 0 || !isFinite(copResult.cop)) {
+        this.categoryLog('cop', '⚠️ Rolling COP: Skipping sample — invalid COP value', copResult.cop);
+        return;
+      }
+
       // Create rolling COP data point
       const dataPoint: COPDataPoint = {
         timestamp: Date.now(),

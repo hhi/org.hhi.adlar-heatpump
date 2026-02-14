@@ -189,6 +189,13 @@ export class BuildingModelService {
 
       // Calculate thermal power using COP estimation
       const cop = (this.device.getCapabilityValue('adlar_cop') as number) || 3.0;
+
+      // Skip sample if COP=0 with active power: indicates sensor inconsistency
+      if (cop <= 0 && powerElectric > 0) {
+        this.logger('BuildingModelService: ⚠️ Skipping sample — COP=0 with active power (sensor inconsistency)');
+        return;
+      }
+
       const thermalPower = (powerElectric / 1000) * cop; // Convert W to kW
 
       // Get solar radiation with priority cascade (panel > KNMI > estimation)
