@@ -24,6 +24,11 @@ import Homey from 'homey';
  * @version 1.0.0
  */
 
+// Minimal interface to avoid circular dependency with WeatherForecastService
+interface IWeatherForecastService {
+  getCurrentWindSpeed(): number | null;
+}
+
 export interface WindCorrectionServiceConfig {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
@@ -53,6 +58,7 @@ export class WindCorrectionService {
   private lastReceivedTimestamp: number = 0;
   private learnedAlpha: number = 0.006; // Default starting value
   private learningCount: number = 0;
+  private weatherForecast: IWeatherForecastService | null = null;
 
   // Constants for alpha learning
   private static readonly DEFAULT_ALPHA = 0.006;
@@ -118,35 +124,44 @@ export class WindCorrectionService {
   }
 
   /**
-   * Get current wind speed from external sensor
+   * Set WeatherForecastService for Open Meteo wind speed fallback.
+   * Called by AdaptiveControlService after all services are initialized.
+   */
+  public setWeatherForecastService(service: IWeatherForecastService): void {
+    this.weatherForecast = service;
+  }
+
+  /**
+   * Get current wind speed with priority cascade:
+   * 1. Flow card input (adlar_external_wind_speed) — local sensor, highest accuracy
+   * 2. Open Meteo wind_speed_10m — already fetched, no extra API cost
+   * 3. null — no correction applied
    *
-   * Reads the `adlar_external_wind_speed` capability which is
-   * updated by the `receive_external_wind_data` flow card.
-   *
-   * @returns Wind speed in km/h, or null if no data received yet
+   * @returns Wind speed in km/h, or null if no data available
    */
   getWindSpeed(): number | null {
     try {
-      if (!this.device.hasCapability('adlar_external_wind_speed')) {
-        return null;
+      // Priority 1: Flow card input (local sensor / KNMI / weather app)
+      if (this.device.hasCapability('adlar_external_wind_speed')) {
+        const windSpeed = this.device.getCapabilityValue('adlar_external_wind_speed') as number | null;
+
+        if (windSpeed !== null && windSpeed !== undefined && windSpeed >= 0 && windSpeed <= 200) {
+          return windSpeed;
+        }
       }
 
-      const windSpeed = this.device.getCapabilityValue('adlar_external_wind_speed') as number | null;
-
-      if (windSpeed === null || windSpeed === undefined) {
-        return null;
+      // Priority 2: Open Meteo forecast (current hour, already fetched)
+      if (this.weatherForecast) {
+        const forecastWind = this.weatherForecast.getCurrentWindSpeed();
+        if (forecastWind !== null && forecastWind >= 0 && forecastWind <= 200) {
+          this.logger('WindCorrectionService: Using Open Meteo wind speed fallback', {
+            windSpeed: forecastWind.toFixed(1),
+          });
+          return forecastWind;
+        }
       }
 
-      // Sanity check: wind speed should be within reasonable range
-      if (windSpeed < 0 || windSpeed > 200) {
-        this.logger('WindCorrectionService: Wind speed out of valid range', {
-          windSpeed,
-          validRange: '0-200 km/h',
-        });
-        return null;
-      }
-
-      return windSpeed;
+      return null;
 
     } catch (error) {
       this.logger('WindCorrectionService: Error reading wind speed', {

@@ -114,7 +114,7 @@ export interface MeasurementData {
   tOutdoor: number; // Outdoor temperature (°C)
   pHeating: number; // Thermal heating power (kW)
   solarRadiation?: number; // Solar radiation (W/m²) - optional
-  solarSource?: 'solar_panels' | 'knmi_radiation' | 'estimation'; // Source of solar data (v2.7.0)
+  solarSource?: 'solar_panels' | 'knmi_radiation' | 'open_meteo' | 'estimation'; // Source of solar data (v2.7.0)
   deltaTPerHour: number; // Temperature change rate (°C/h) - calculated internally
 }
 
@@ -283,7 +283,7 @@ export class BuildingModelLearner {
 
     // Apply seasonal solar gain multiplier if enabled
     // v2.7.0: Only apply seasonal correction for estimated solar data
-    // External sources (solar_panels, knmi_radiation) already include seasonal/weather effects
+    // External sources (solar_panels, knmi_radiation, open_meteo) already include seasonal/weather effects
     const month = new Date(data.timestamp).getMonth();
     const useEstimation = data.solarSource === 'estimation' || data.solarSource === undefined;
     const applySeasonalG = this.enableSeasonalG && useEstimation;
