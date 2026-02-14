@@ -1006,10 +1006,10 @@
   {
     "type": "group",
     "label": {
-      "en": "Temperature Forecast (new sensors, restart app)",
-      "nl": "Temperatuurprognose (nieuwe sensoren, herstart app)",
-      "de": "Temperaturvorhersage (neue Sensoren, App neu starten)",
-      "fr": "Prévision de Température (nouveaux capteurs, redémarrer app)"
+      "en": "Weather Forecast (new sensors, restart app)",
+      "nl": "Weerprognose (nieuwe sensoren, herstart app)",
+      "de": "Wettervorhersage (neue Sensoren, App neu starten)",
+      "fr": "Prévision Météo (nouveaux capteurs, redémarrer app)"
     },
     "children": [
       {
@@ -1017,16 +1017,16 @@
         "type": "checkbox",
         "highlight": true,
         "label": {
-          "en": "Enable temperature forecast",
-          "nl": "Temperatuurprognose inschakelen",
-          "de": "Temperaturvorhersage aktivieren",
-          "fr": "Activer la prévision de température"
+          "en": "Enable weather forecast",
+          "nl": "Weerprognose inschakelen",
+          "de": "Wettervorhersage aktivieren",
+          "fr": "Activer la prévision météo"
         },
         "hint": {
-          "en": "Use Open-Meteo 48-hour temperature forecast to optimize heating timing. Suggests waiting for higher outdoor temperatures (better COP) or heating now when temperatures drop. Free API, no account needed. ⚠️ Requires: COP Optimization must be enabled.",
-          "nl": "Gebruik Open-Meteo 48-uurs temperatuurprognose om verwarmingstiming te optimaliseren. Suggereert wachten op hogere buitentemperatuur (betere COP) of direct verwarmen bij dalende temperatuur. Gratis API, geen account nodig. ⚠️ Vereist: COP Optimalisatie moet ingeschakeld zijn.",
-          "de": "Verwenden Sie die Open-Meteo 48-Stunden-Temperaturvorhersage zur Optimierung des Heizzeitpunkts. Empfiehlt Warten auf höhere Außentemperaturen (besserer COP) oder sofortiges Heizen bei sinkenden Temperaturen. Kostenlose API, kein Konto erforderlich. ⚠️ Voraussetzung: COP-Optimierung muss aktiviert sein.",
-          "fr": "Utilisez la prévision de température Open-Meteo 48 heures pour optimiser le timing du chauffage. Suggère d'attendre des températures extérieures plus élevées (meilleur COP) ou de chauffer immédiatement en cas de baisse. API gratuite, aucun compte requis. ⚠️ Prérequis: L'optimisation COP doit être activée."
+          "en": "Use Open-Meteo 48-hour weather forecast to optimize heating timing and COP. Analyses temperature, wind speed and humidity to advise optimal heating start time, calculate wind & frost COP corrections, and provide defrost cycle learning context. Free API, no account needed. ⚠️ Requires: COP Optimization must be enabled.",
+          "nl": "Gebruik Open-Meteo 48-uurs weerprognose om verwarmingstiming en COP te optimaliseren. Analyseert temperatuur, windsnelheid en luchtvochtigheid voor optimaal starttijdadvies, wind- & vorst-COP-correcties en defrost leercontext. Gratis API, geen account nodig. ⚠️ Vereist: COP Optimalisatie moet ingeschakeld zijn.",
+          "de": "Verwenden Sie die Open-Meteo 48-Stunden-Wettervorhersage zur Optimierung von Heizzeitpunkt und COP. Analysiert Temperatur, Windgeschwindigkeit und Luftfeuchtigkeit für optimale Startzeit-Empfehlung, Wind- & Frost-COP-Korrekturen und Abtau-Lernkontext. Kostenlose API, kein Konto erforderlich. ⚠️ Voraussetzung: COP-Optimierung muss aktiviert sein.",
+          "fr": "Utilisez la prévision météo Open-Meteo 48 heures pour optimiser le timing de chauffage et le COP. Analyse la température, la vitesse du vent et l'humidité pour conseiller le meilleur moment de démarrage, calculer les corrections COP vent & givre et fournir un contexte d'apprentissage du dégivrage. API gratuite, aucun compte requis. ⚠️ Prérequis: L'optimisation COP doit être activée."
         },
         "value": false
       },
