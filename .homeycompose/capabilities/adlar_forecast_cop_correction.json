@@ -2,10 +2,10 @@
     "id": "adlar_forecast_cop_correction",
     "type": "number",
     "title": {
-        "en": "Wind & Frost COP Effect",
-        "nl": "Wind & Vorst COP effect",
-        "de": "Wind & Frost COP Effekt",
-        "fr": "Effet COP vent & givre"
+        "en": "COP Weather Conditions Performance",
+        "nl": "COP rendement weercondities",
+        "de": "COP Leistung Wetterbedingungen",
+        "fr": "COP rendement conditions météo"
     },
     "units": {
         "en": "%",
@@ -18,10 +18,10 @@
     "uiComponent": "sensor",
     "insights": true,
     "insightsTitle": {
-        "en": "Wind & Frost COP Effect",
-        "nl": "Wind & Vorst COP effect",
-        "de": "Wind & Frost COP Effekt",
-        "fr": "Effet COP vent & givre"
+        "en": "COP Weather Conditions Performance",
+        "nl": "COP rendement weercondities",
+        "de": "COP Leistung Wetterbedingungen",
+        "fr": "COP rendement conditions météo"
     },
     "icon": "/assets/forecast-cop-correction.svg",
     "decimals": 1,
