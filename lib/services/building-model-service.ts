@@ -32,6 +32,11 @@ interface DeviceWithServiceCoordinator extends Homey.Device {
   serviceCoordinator?: ServiceCoordinator;
 }
 
+// Minimal interface to avoid circular dependency with WeatherForecastService
+interface IWeatherForecastService {
+  getCurrentSolarRadiation(): number | null;
+}
+
 export interface BuildingModelServiceConfig {
   device: Homey.Device;
   buildingProfile?: BuildingProfileType;
@@ -58,6 +63,7 @@ export class BuildingModelService {
   private updateInterval: NodeJS.Timeout | null = null;
   private readonly UPDATE_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   private missingCapabilitiesLogged = new Set<string>();
+  private weatherForecast: IWeatherForecastService | null = null;
 
   // v2.8.1: Track blocking reason for user-visible guard rail status
   // Set during each collectAndLearn() cycle; null = data flowing normally
@@ -542,12 +548,21 @@ export class BuildingModelService {
   }
 
   /**
+   * Set WeatherForecastService for Open Meteo solar radiation fallback.
+   * Called by AdaptiveControlService after all services are initialized.
+   */
+  public setWeatherForecastService(service: IWeatherForecastService): void {
+    this.weatherForecast = service;
+  }
+
+  /**
    * Get solar radiation with priority cascade
    *
    * Priority order:
    * 1. Solar panel power (most accurate - hyperlocal measurement)
-   * 2. KNMI radiation (good accuracy - regional measurement)
-   * 3. Sinusoidal estimation (fallback)
+   * 2. Flow card input / KNMI (regional measurement via external source)
+   * 3. Open Meteo shortwave_radiation (model-based, already fetched)
+   * 4. Sinusoidal estimation (last fallback)
    *
    * @returns Solar radiation in W/m² and the source used
    */
@@ -574,16 +589,25 @@ export class BuildingModelService {
       }
     }
 
-    // Priority 2: KNMI radiation (direct W/m²)
+    // Priority 2: Flow card input / KNMI radiation (direct W/m²)
     if (source === 'auto' || source === 'knmi_radiation') {
       const radiation = this.device.getCapabilityValue('adlar_external_solar_radiation') as number | null;
       if (radiation !== null && radiation >= 0) {
-        this.logger('Solar radiation from KNMI', { radiation });
+        this.logger('Solar radiation from flow card / KNMI', { radiation });
         return { radiation, source: 'knmi_radiation' };
       }
     }
 
-    // Priority 3: Sinusoidal estimation (fallback)
+    // Priority 3: Open Meteo shortwave_radiation (already fetched, no extra API cost)
+    if (source === 'auto' && this.weatherForecast) {
+      const radiation = this.weatherForecast.getCurrentSolarRadiation();
+      if (radiation !== null && radiation >= 0) {
+        this.logger('Solar radiation from Open Meteo', { radiation: radiation.toFixed(0) });
+        return { radiation, source: 'open_meteo' };
+      }
+    }
+
+    // Priority 4: Sinusoidal estimation (last fallback)
     const hour = new Date().getHours();
     const radiation = this.estimateSolarRadiation(hour);
     return { radiation, source: 'estimation' };

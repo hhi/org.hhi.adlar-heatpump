@@ -204,6 +204,11 @@ export class AdaptiveControlService {
       defrostLearner: this.defrostLearner,
     });
 
+    // Wire WeatherForecastService to BuildingModelService and WindCorrectionService
+    // for Open Meteo solar radiation and wind speed fallbacks
+    this.buildingModel.setWeatherForecastService(this.weatherForecast);
+    this.windCorrection.setWeatherForecastService(this.weatherForecast);
+
     this.logger('AdaptiveControlService: Initialized with all 7 components');
   }
 

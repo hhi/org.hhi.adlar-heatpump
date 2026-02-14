@@ -1,4 +1,10 @@
 {
+  "2.9.2": {
+    "en": "Open Meteo now also provides solar radiation and wind speed as automatic fallback when no local sensor or flow card is connected.",
+    "nl": "Open Meteo levert nu ook zonnestraling en windsnelheid als automatisch vangnet wanneer geen lokale sensor of flow card is aangesloten.",
+    "de": "Open Meteo liefert jetzt auch Sonnenstrahlung und Windgeschwindigkeit als automatischen Fallback, wenn kein lokaler Sensor oder Flow-Karte angeschlossen ist.",
+    "fr": "Open Meteo fournit désormais aussi le rayonnement solaire et la vitesse du vent en repli automatique lorsqu'aucun capteur local ou carte de flux n'est connecté."
+  },
   "2.9.1": {
     "en": "Added: Two new sensors showing defrost activity over the last 24 hours: number of defrost cycles and total defrost duration (minutes). Forecast advice now shows learned defrost COP impact in parentheses when available (e.g. 'Heat now (❄️-9%)').",
     "nl": "Toegevoegd: Twee nieuwe sensoren met ontdooiactiviteit over de afgelopen 24 uur: aantal ontdooicycli en totale ontdooitijd (minuten). Forecast advies toont nu geleerde defrost COP-impact tussen haakjes wanneer beschikbaar (bijv. 'Verwarm nú (❄️-9%)').",

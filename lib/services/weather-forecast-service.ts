@@ -13,9 +13,9 @@ export interface HourlyForecast {
   hour: number; // Hours from now (0 = current hour)
   timestamp: number; // Unix timestamp (ms)
   temperature: number; // Outdoor temperature °C
-  cloudCover?: number; // Cloud cover 0-100%
   humidity?: number; // Relative humidity 2m, 0-100%
   windSpeed?: number; // Wind speed 10m, km/h
+  solarRadiation?: number; // Shortwave solar radiation W/m² (GHI, average of preceding hour)
 }
 
 /**
@@ -161,7 +161,7 @@ export class WeatherForecastService {
     const lat = settings.forecast_location_lat ?? 52.37;
     const lon = settings.forecast_location_lon ?? 4.90;
 
-    const hourlyParams = 'temperature_2m,cloud_cover,relative_humidity_2m,wind_speed_10m';
+    const hourlyParams = 'temperature_2m,relative_humidity_2m,wind_speed_10m,shortwave_radiation';
     const url = `${WeatherForecastService.API_BASE}?latitude=${lat}&longitude=${lon}&hourly=${hourlyParams}&forecast_hours=${WeatherForecastService.FORECAST_HOURS}&timezone=auto`;
 
     this.logger('WeatherForecastService: Fetching from Open-Meteo API');
@@ -175,9 +175,9 @@ export class WeatherForecastService {
         hour: index,
         timestamp: new Date(time).getTime(),
         temperature: data.hourly.temperature_2m[index],
-        cloudCover: data.hourly.cloud_cover?.[index],
         humidity: data.hourly.relative_humidity_2m?.[index],
         windSpeed: data.hourly.wind_speed_10m?.[index],
+        solarRadiation: data.hourly.shortwave_radiation?.[index],
       }));
 
       this.forecast = {
@@ -561,6 +561,28 @@ export class WeatherForecastService {
 
     if (baseCop === 0) return null;
     return Math.round(((correctedCop - baseCop) / baseCop) * 1000) / 10;
+  }
+
+  /**
+   * Get current hour's solar radiation from forecast (W/m²).
+   * Returns null when no fresh forecast is available.
+   */
+  public getCurrentSolarRadiation(): number | null {
+    if (!this.forecast || this.forecast.hourly.length === 0) return null;
+    const current = this.forecast.hourly[0];
+    if (!current || current.solarRadiation === undefined || current.solarRadiation === null) return null;
+    return current.solarRadiation;
+  }
+
+  /**
+   * Get current hour's wind speed from forecast (km/h).
+   * Returns null when no fresh forecast is available.
+   */
+  public getCurrentWindSpeed(): number | null {
+    if (!this.forecast || this.forecast.hourly.length === 0) return null;
+    const current = this.forecast.hourly[0];
+    if (!current || current.windSpeed === undefined || current.windSpeed === null) return null;
+    return current.windSpeed;
   }
 
   /**
