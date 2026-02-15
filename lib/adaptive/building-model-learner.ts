@@ -11,7 +11,7 @@
  * y = X^T × θ
  * where:
  *   y = dT/dt (temperature change rate)
- *   X = [P_heating, (T_in - T_out), Solar, 1] (input vector)
+ *   X = [P_heating, (T_out - T_in), Solar_kW, 1] (input vector)
  *   θ = [1/C, UA/C, g/C, P_int/C] (parameters to learn)
  *
  * @version 2.2.0 - Added building profiles, dynamic P_int, seasonal g-factor
@@ -296,12 +296,14 @@ export class BuildingModelLearner {
       this.logger(`ℹ️ Seasonal g-factor disabled: using ${data.solarSource} radiation data`);
     }
 
-    // Build input vector X = [pHeating, (tIn - tOut), Solar, constant_term]
-    // Apply dynamic adjustments to solar radiation and internal gains
+    // Build input vector X = [pHeating, (tOut - tIn), Solar_kW, constant_term]
+    // Sign convention: (tOut - tIn) is negative in winter (indoor warmer than outdoor)
+    // → θ[1] × (tOut - tIn) correctly gives negative heat loss contribution to dT/dt
+    // Solar converted to kW/m² (÷1000) to match θ[2] calibration (g/C in kW per kW/m²)
     const X = [
       data.pHeating, // Heating power (kW)
-      data.tIndoor - data.tOutdoor, // Temperature difference (°C)
-      (data.solarRadiation || 0) * solarMultiplier, // Solar with seasonal adjustment
+      data.tOutdoor - data.tIndoor, // Temperature difference (°C) — negative in winter → heat loss subtracts
+      ((data.solarRadiation || 0) / 1000) * solarMultiplier, // Solar in kW/m² with seasonal adjustment
       pIntMultiplier, // Constant term scaled for time-varying P_int
     ];
 
@@ -325,6 +327,13 @@ export class BuildingModelLearner {
 
   /**
    * RLS algorithm implementation
+   *
+   * Physical model: dT/dt = (1/C)×P - (UA/C)×(T_in - T_out) + (g/C)×Solar + (P_int/C)
+   * Rewritten as:   dT/dt = (1/C)×P + (UA/C)×(T_out - T_in) + (g/C)×Solar_kW + (P_int/C)
+   *
+   * X = [P_heating, (T_out - T_in), Solar_kW, 1]
+   *   → (T_out - T_in) is negative in winter, making UA/C term correctly subtract from dT/dt
+   *   → Solar in kW/m² matches θ[2] = g/C calibration in kW per kW/m²
    *
    * Update equations:
    * K = P × X / (λ + X^T × P × X)         (Kalman gain)
