@@ -1,4 +1,10 @@
 {
+  "2.9.5": {
+    "en": "Solar estimation now calculates sunrise/sunset times based on geographic location and season. Device settings now display App, Homey, and System information.",
+    "nl": "Zonnestraling berekent nu zonsopgang/zonsondergang tijden op basis van geografische locatie en seizoen. Apparaatinstellingen tonen nu App, Homey en Systeem informatie.",
+    "de": "Solarschätzung berechnet nun Sonnenaufgangs-/Sonnenuntergangszeiten basierend auf geografischem Standort und Jahreszeit. Geräteeinstellungen zeigen nun App-, Homey- und Systeminformationen.",
+    "fr": "L'estimation solaire calcule maintenant les heures de lever/coucher du soleil en fonction de la localisation géographique et de la saison. Les paramètres de l'appareil affichent maintenant les informations App, Homey et Système."
+  },
   "2.9.3": {
     "en": "Building model now learns correctly after a manual reset and the solar gain (g) is now calculated accurately.",
     "nl": "Gebouwmodel leert nu correct na een handmatige reset en de zonnewinst (g) wordt nu nauwkeurig berekend.",

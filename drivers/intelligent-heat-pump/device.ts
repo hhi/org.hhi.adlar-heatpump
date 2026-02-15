@@ -1,6 +1,7 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
+import os from 'os';
 import Homey from 'homey';
 import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
@@ -4121,6 +4122,29 @@ class MyDevice extends Homey.Device {
       if (this.getSetting('enable_intelligent_energy_tracking')) {
         await this.initializeEnergyTracking();
         this.log('🔋 Intelligent energy tracking initialized');
+      }
+
+      // Populate read-only info settings with runtime values
+      try {
+        const uptimeSec = os.uptime();
+        const manifestName = this.homey.manifest.name as { en?: string } | string;
+        await this.setSettings({
+          info_app_version: String(this.homey.manifest.version ?? ''),
+          info_app_id: String(this.homey.manifest.id ?? ''),
+          info_app_name: String(
+            (manifestName as { en?: string })?.en ?? manifestName ?? '',
+          ),
+          info_homey_version: String(this.homey.version ?? ''),
+          info_homey_platform: String(this.homey.platform ?? 'local'),
+          info_homey_platform_version: String(this.homey.platformVersion ?? ''),
+          info_node_version: process.version,
+          info_platform: os.platform(),
+          info_arch: os.arch(),
+          info_uptime: `${Math.floor(uptimeSec / 3600)}h ${Math.floor((uptimeSec % 3600) / 60)}m`,
+        });
+        this.logger.info('Info settings populated');
+      } catch (error) {
+        this.logger.warn('Failed to populate info settings:', error);
       }
 
       // Set device as available after successful initialization

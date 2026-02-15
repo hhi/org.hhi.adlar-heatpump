@@ -1969,5 +1969,98 @@
         "value": false
       }
     ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "App Info",
+      "nl": "App Info",
+      "de": "App Info",
+      "fr": "Info App"
+    },
+    "children": [
+      {
+        "id": "info_app_version",
+        "type": "text",
+        "label": { "en": "Version", "nl": "Versie", "de": "Version", "fr": "Version" },
+        "value": ""
+      },
+      {
+        "id": "info_app_id",
+        "type": "text",
+        "label": { "en": "App ID", "nl": "App ID", "de": "App ID", "fr": "ID App" },
+        "value": ""
+      },
+      {
+        "id": "info_app_name",
+        "type": "text",
+        "label": { "en": "Name", "nl": "Naam", "de": "Name", "fr": "Nom" },
+        "value": ""
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Homey",
+      "nl": "Homey",
+      "de": "Homey",
+      "fr": "Homey"
+    },
+    "children": [
+      {
+        "id": "info_homey_version",
+        "type": "text",
+        "label": { "en": "Homey Version", "nl": "Homey Versie", "de": "Homey Version", "fr": "Version Homey" },
+        "value": ""
+      },
+      {
+        "id": "info_homey_platform",
+        "type": "text",
+        "label": { "en": "Platform", "nl": "Platform", "de": "Plattform", "fr": "Plateforme" },
+        "value": ""
+      },
+      {
+        "id": "info_homey_platform_version",
+        "type": "text",
+        "label": { "en": "Platform Version", "nl": "Platform Versie", "de": "Plattformversion", "fr": "Version Plateforme" },
+        "value": ""
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "System",
+      "nl": "Systeem",
+      "de": "System",
+      "fr": "Système"
+    },
+    "children": [
+      {
+        "id": "info_node_version",
+        "type": "text",
+        "label": { "en": "Node.js Version", "nl": "Node.js Versie", "de": "Node.js Version", "fr": "Version Node.js" },
+        "value": ""
+      },
+      {
+        "id": "info_platform",
+        "type": "text",
+        "label": { "en": "OS Platform", "nl": "OS Platform", "de": "OS-Plattform", "fr": "Plateforme OS" },
+        "value": ""
+      },
+      {
+        "id": "info_arch",
+        "type": "text",
+        "label": { "en": "Architecture", "nl": "Architectuur", "de": "Architektur", "fr": "Architecture" },
+        "value": ""
+      },
+      {
+        "id": "info_uptime",
+        "type": "text",
+        "label": { "en": "System Uptime", "nl": "Systeem Uptime", "de": "Systemlaufzeit", "fr": "Temps de fonctionnement" },
+        "value": ""
+      }
+    ]
   }
 ]

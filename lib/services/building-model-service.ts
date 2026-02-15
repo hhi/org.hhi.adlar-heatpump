@@ -531,20 +531,51 @@ export class BuildingModelService {
     };
   }
 
-  /**
-   * Estimate solar radiation based on time of day
-   *
-   * Simplified model: 0 at night, peak at noon
-   * Can be enhanced with actual solar sensor data or API integration
-   */
-  private estimateSolarRadiation(hour: number): number {
-    // Night hours (18:00 - 06:00)
-    if (hour < 6 || hour > 20) return 0;
+  /** Returns day of year (1–365/366) for a given Date */
+  private getDayOfYear(date: Date): number {
+    const start = new Date(date.getFullYear(), 0, 0);
+    return Math.floor((date.getTime() - start.getTime()) / 86400000);
+  }
 
-    // Daytime hours (06:00 - 20:00)
-    // Peak at noon (12:00), sinusoidal curve
-    const solarHour = hour - 6; // 0-14 range
-    return Math.max(0, 500 * Math.sin((solarHour / 14) * Math.PI));
+  /**
+   * Compute astronomical sunrise and sunset times as decimal hours (local solar time).
+   *
+   * Algorithm: solar declination angle + hour angle (NOAA simplified equations).
+   *
+   * Edge cases:
+   *   - Polar night (cosω > 1)  → { sunrise: 12, sunset: 12 } → 0 radiation all day
+   *   - Polar day  (cosω < -1) → { sunrise: 0, sunset: 24 }  → radiation 24 h
+   *   - Latitude clamped to ±89.9° to avoid tan(90°) = ±Infinity
+   */
+  private computeSunriseSunset(lat: number, dayOfYear: number): { sunrise: number; sunset: number } {
+    const latRad = (Math.max(-89.9, Math.min(89.9, lat)) * Math.PI) / 180;
+    const declRad = (23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81)) * Math.PI) / 180;
+    const cosOmega = -Math.tan(latRad) * Math.tan(declRad);
+    if (cosOmega > 1) return { sunrise: 12, sunset: 12 }; // polar night
+    if (cosOmega < -1) return { sunrise: 0, sunset: 24 };  // polar day
+    const halfDay = (Math.acos(cosOmega) * 180) / Math.PI / 15;
+    return { sunrise: 12 - halfDay, sunset: 12 + halfDay };
+  }
+
+  /**
+   * Estimate solar radiation using astronomical sunrise/sunset times.
+   *
+   * Location-aware (latitude) and season-aware (day of year):
+   *   - Strictly 0 outside the sunrise–sunset window
+   *   - Peak irradiance scales with solar declination: ~200 W/m² (winter) → ~800 W/m² (summer)
+   *   - Sinusoidal curve between sunrise and sunset with peak at solar noon
+   *
+   * @param hour      - Fractional local hour (e.g. 14.5 = 14:30)
+   * @param lat       - Latitude in degrees from settings (default 52.37 = Amsterdam)
+   * @param dayOfYear - Day of year 1–365
+   */
+  private estimateSolarRadiation(hour: number, lat: number, dayOfYear: number): number {
+    const { sunrise, sunset } = this.computeSunriseSunset(lat, dayOfYear);
+    const dayLength = sunset - sunrise;
+    if (dayLength <= 0 || hour < sunrise || hour > sunset) return 0;
+    const declDeg = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+    const peak = 500 + (declDeg / 23.45) * 300; // 200–800 W/m²
+    return Math.max(0, peak * Math.sin(((hour - sunrise) / dayLength) * Math.PI));
   }
 
   /**
@@ -607,9 +638,15 @@ export class BuildingModelService {
       }
     }
 
-    // Priority 4: Sinusoidal estimation (last fallback)
-    const hour = new Date().getHours();
-    const radiation = this.estimateSolarRadiation(hour);
+    // Priority 4: Astronomical estimation (last fallback - location & season aware)
+    const now = new Date();
+    const hour = now.getHours() + now.getMinutes() / 60;
+    const lat = (this.device.getSetting('forecast_location_lat') as number) ?? 52.37;
+    const dayOfYear = this.getDayOfYear(now);
+    const radiation = this.estimateSolarRadiation(hour, lat, dayOfYear);
+    this.logger('Solar estimation (astronomical)', {
+      hour: hour.toFixed(2), lat, dayOfYear, radiation: radiation.toFixed(0),
+    });
     return { radiation, source: 'estimation' };
   }
 
