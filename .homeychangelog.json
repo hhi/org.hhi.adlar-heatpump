@@ -1,4 +1,10 @@
 {
+  "2.9.3": {
+    "en": "Building model now learns correctly after a manual reset and the solar gain (g) is now calculated accurately.",
+    "nl": "Gebouwmodel leert nu correct na een handmatige reset en de zonnewinst (g) wordt nu nauwkeurig berekend.",
+    "de": "Das Gebäudemodell lernt jetzt korrekt nach einem manuellen Reset und der Solargewinn (g) wird jetzt genau berechnet.",
+    "fr": "Le modèle du bâtiment apprend désormais correctement après une réinitialisation manuelle et le gain solaire (g) est maintenant calculé avec précision."
+  },
   "2.9.2": {
     "en": "Open Meteo now also provides solar radiation and wind speed as automatic fallback when no local sensor or flow card is connected.",
     "nl": "Open Meteo levert nu ook zonnestraling en windsnelheid als automatisch vangnet wanneer geen lokale sensor of flow card is aangesloten.",
