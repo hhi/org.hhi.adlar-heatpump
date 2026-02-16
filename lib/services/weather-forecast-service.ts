@@ -77,7 +77,7 @@ export class WeatherForecastService {
 
   // API configuration
   private static readonly API_BASE = 'https://api.open-meteo.com/v1/forecast';
-  private static readonly CACHE_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
+  private static readonly CACHE_DURATION_MS = 1 * 60 * 60 * 1000; // 1 hour
   private static readonly MAX_CACHE_AGE_MS = 6 * 60 * 60 * 1000; // 6 hours fallback
   private static readonly FORECAST_HOURS = 48;
 
@@ -121,7 +121,7 @@ export class WeatherForecastService {
   /**
    * Start periodic forecast updates
    */
-  public startUpdates(intervalMs: number = 2 * 60 * 60 * 1000): void {
+  public startUpdates(intervalMs: number = 1 * 60 * 60 * 1000): void {
     // Prevent duplicate intervals when settings are toggled repeatedly
     if (this.updateInterval) {
       this.stopUpdates();

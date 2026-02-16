@@ -593,7 +593,7 @@ export class BuildingModelService {
    * @returns Solar radiation in W/m² and the source used
    */
   public getSolarRadiationWithPriority(): { radiation: number; source: string } {
-    const TTL_MS = 2 * 60 * 60 * 1000;
+    const TTL_MS = 1 * 60 * 60 * 1000;
     const now = Date.now();
 
     // Priority 1: Solar panels (convert W to W/m²) — only if flow card sent data within TTL

@@ -60,8 +60,8 @@ export class WindCorrectionService {
   private learningCount: number = 0;
   private weatherForecast: IWeatherForecastService | null = null;
 
-  // Flow card TTL: after 2 hours without a new flow card update, fall back to Open-Meteo
-  private static readonly FLOW_CARD_TTL_MS = 2 * 60 * 60 * 1000;
+  // Flow card TTL: after 1 hour without a new flow card update, fall back to Open-Meteo
+  private static readonly FLOW_CARD_TTL_MS = 1 * 60 * 60 * 1000;
 
   // Constants for alpha learning
   private static readonly DEFAULT_ALPHA = 0.006;

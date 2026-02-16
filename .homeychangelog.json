@@ -1,4 +1,10 @@
 {
+  "2.9.9": {
+    "en": "Open-Meteo weather data is now fetched every hour instead of every 2 hours. Flow card data (wind, outdoor temperature, solar radiation) now takes priority for up to 1 hour; after 1 hour without a new update, Open-Meteo data is used automatically.",
+    "nl": "Open-Meteo weerdata wordt nu elk uur opgehaald in plaats van elke 2 uur. Flow kaart data (wind, buitentemperatuur, zonnestraling) heeft nu prioriteit gedurende maximaal 1 uur; na 1 uur zonder nieuwe meting wordt automatisch Open-Meteo data gebruikt.",
+    "de": "Open-Meteo-Wetterdaten werden jetzt stündlich statt alle 2 Stunden abgerufen. Flow-Karten-Daten (Wind, Außentemperatur, Sonnenstrahlung) haben jetzt bis zu 1 Stunde Priorität; nach 1 Stunde ohne neue Messung werden automatisch Open-Meteo-Daten verwendet.",
+    "fr": "Les données météo Open-Meteo sont désormais récupérées toutes les heures au lieu de toutes les 2 heures. Les données de carte de flux (vent, température extérieure, rayonnement solaire) ont maintenant la priorité pendant 1 heure maximum; après 1 heure sans nouvelle mesure, les données Open-Meteo sont utilisées automatiquement."
+  },
   "2.9.8": {
     "en": "Added 6 diagnostic data points visible in Homey Developer Tools: last Open-Meteo fetch (temperature, wind, solar, humidity), and last received timestamp per flow card source (outdoor temperature, wind speed, solar panel power, solar radiation, indoor temperature).",
     "nl": "6 diagnostische datapunten toegevoegd, zichtbaar in Homey Developer Tools: laatste Open-Meteo ophaling (temperatuur, wind, zon, vochtigheid) en laatste ontvangsttijdstip per flow kaart bron (buitentemperatuur, windsnelheid, zonnepaneelvermogen, zonnestraling, binnentemperatuur).",
