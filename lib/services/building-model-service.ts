@@ -17,7 +17,6 @@ import {
   type BuildingModelConfig,
   type MeasurementData,
   type BuildingProfileType,
-  getSeasonalGMultiplier,
 } from '../adaptive/building-model-learner';
 
 interface EnergyTrackingService {
@@ -42,7 +41,6 @@ export interface BuildingModelServiceConfig {
   buildingProfile?: BuildingProfileType;
   forgettingFactor?: number;
   enableDynamicPInt?: boolean;
-  enableSeasonalG?: boolean;
   logger?: (msg: string, ...args: unknown[]) => void;
 }
 
@@ -89,7 +87,6 @@ export class BuildingModelService {
       minSamplesForConfidence: 288, // 24 hours @ 5min intervals
       buildingProfile: config.buildingProfile || 'average', // Default to average building
       enableDynamicPInt: config.enableDynamicPInt ?? true, // Enable by default
-      enableSeasonalG: config.enableSeasonalG ?? true, // Enable by default
       logger: this.logger,
     };
 
@@ -297,17 +294,15 @@ export class BuildingModelService {
       title: tauTitle,
     });
 
-    // g: solar gain with seasonal variation (v2.3.1 - localized)
+    // g: solar gain factor (v2.9.6 - seasonal multiplier removed, astronomical estimation encodes seasonality)
     const now = new Date();
-    const month = now.getMonth();
     const hour = now.getHours();
 
     // Get localized short month name using browser's locale
     const lang = this.device.homey.i18n.getLanguage();
     const monthName = now.toLocaleDateString(lang, { month: 'short' });
-    const seasonalMultiplier = getSeasonalGMultiplier(month);
     await this.updateCapabilityIfPresent('adlar_building_g', model.g, {
-      title: `${this.device.homey.__('building_model.solar_gain_title')} (${monthName} ×${seasonalMultiplier.toFixed(1)})`,
+      title: `${this.device.homey.__('building_model.solar_gain_title')} (${monthName})`,
     });
 
     // P_int: internal gains with time-of-day variation (v2.3.1 - localized)
@@ -971,7 +966,6 @@ export class BuildingModelService {
       // Get current settings for building profile and features
       const buildingProfile = this.device.getSetting('building_profile') || 'average';
       const enableDynamicPInt = this.device.getSetting('enable_dynamic_pint') ?? true;
-      const enableSeasonalG = this.device.getSetting('enable_seasonal_g') ?? true;
       const forgettingFactor = this.device.getSetting('building_model_forgetting_factor') ?? 0.999;
 
       // Create new learner instance with building profile defaults (no restored state)
@@ -981,7 +975,6 @@ export class BuildingModelService {
         minSamplesForConfidence: 288, // 24 hours @ 5min intervals
         buildingProfile, // Will use profile defaults
         enableDynamicPInt,
-        enableSeasonalG,
         logger: this.logger,
       };
 

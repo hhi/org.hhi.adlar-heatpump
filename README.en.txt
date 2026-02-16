@@ -208,7 +208,7 @@ Machine learning algorithm that learns the thermal properties of your home:
 - Learning time: 24-72 hours for basic model, 2-4 weeks for accurate model
 - Building type selection: Light/Average/Heavy/Passive
 - Dynamic internal heat gains per time of day
-- Seasonal solar gain adjustment
+- Location and season-aware solar calculation based on geographic latitude
 
 BUILDING INSIGHTS & RECOMMENDATIONS
 Automated analysis of the thermal building model:
@@ -265,7 +265,7 @@ Wind Speed Correction:
 Solar Radiation Integration:
 - Accurate calculation of solar gains via building surface
 - Flow card: "Set external solar radiation" (W/m²)
-- Seasonal adjustment (winter 60%, summer 130%)
+- Astronomical fallback estimation: sunrise/sunset calculated from geographic latitude
 - Supports KNMI solar radiation data
 
 PV Power Tracking:

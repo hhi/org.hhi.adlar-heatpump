@@ -1,4 +1,10 @@
 {
+  "2.9.6": {
+    "en": "Solar gain fallback now calculates sunrise/sunset based on geographic latitude instead of a fixed seasonal table. The 'Seasonal solar gain adjustment' setting has been removed.",
+    "nl": "Zonnewinst fallback berekent nu zonsopgang/ondergang op basis van geografische breedtegraad in plaats van een vaste seizoenstabel. De instelling 'Seizoensgebonden zonnewinst aanpassing' is verwijderd.",
+    "de": "Solar-Fallback berechnet jetzt Sonnenauf-/-untergang basierend auf dem geografischen Breitengrad statt einer festen Saisontabelle. Die Einstellung 'Saisonale Sonnengewinn-Anpassung' wurde entfernt.",
+    "fr": "L'estimation solaire de repli calcule maintenant le lever/coucher du soleil à partir de la latitude géographique au lieu d'un tableau saisonnier fixe. Le paramètre 'Ajustement saisonnier des gains solaires' a été supprimé."
+  },
   "2.9.5": {
     "en": "Solar estimation now calculates sunrise/sunset times based on geographic location and season. Device settings now display App, Homey, and System information.",
     "nl": "Zonnestraling berekent nu zonsopgang/zonsondergang tijden op basis van geografische locatie en seizoen. Apparaatinstellingen tonen nu App, Homey en Systeem informatie.",

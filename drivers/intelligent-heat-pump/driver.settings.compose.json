@@ -934,23 +934,6 @@
           "fr": "Tient compte chaleur des personnes, cuisine, appareils selon heure. Nuit (23-06h): 40% (sommeil), Jour (06-18h): 100% (normal), Soir (18-23h): 180% (cuisine, TV). Améliore prévision ~10-15%."
         },
         "value": true
-      },
-      {
-        "id": "enable_seasonal_g",
-        "type": "checkbox",
-        "label": {
-          "en": "Seasonal solar gain adjustment",
-          "nl": "Seizoensgebonden zonnewinst aanpassing",
-          "de": "Saisonale Solargewinn-Anpassung",
-          "fr": "Ajustement saisonnier du gain solaire"
-        },
-        "hint": {
-          "en": "Accounts for sun angle changing with seasons. Low winter sun (Dec-Feb: 60%) heats less effectively than high summer sun (Jun-Jul: 130%). Contributes 5-20% of total heat depending on window size and orientation. ⚠️ Only applies to estimated radiation - disabled when using external sources (solar panels/KNMI).",
-          "nl": "Houdt rekening met zonnehoek per seizoen. Lage winterzon (dec-feb: 60%) verwarmt minder effectief dan hoge zomerzon (jun-jul: 130%). Draagt 5-20% bij aan totale warmte afhankelijk van raamgrootte en oriëntatie. ⚠️ Seizoenscorrectie alleen bij geschatte straling van toepassing - uitgeschakeld bij externe bronnen (zonnepanelen/KNMI).",
-          "de": "Berücksichtigt Sonnenwinkel je Jahreszeit. Niedrige Wintersonne (Dez-Feb: 60%) heizt weniger als hohe Sommersonne (Jun-Jul: 130%). Trägt 5-20% zur Gesamtwärme bei je nach Fenstergröße und Ausrichtung. ⚠️ Gilt nur für geschätzte Strahlung - deaktiviert bei externen Quellen (Solarpanels/KNMI).",
-          "fr": "Tient compte angle soleil selon saisons. Soleil bas hiver (déc-fév: 60%) chauffe moins que soleil haut été (juin-juil: 130%). Contribue 5-20% chaleur totale selon taille fenêtres et orientation. ⚠️ S'applique uniquement au rayonnement estimé - désactivé pour sources externes (panneaux solaires/KNMI)."
-        },
-        "value": true
       }
     ]
   },

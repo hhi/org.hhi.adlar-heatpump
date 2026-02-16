@@ -208,7 +208,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert:
 - Leertijd: 24-72 uur voor basismodel, 2-4 weken voor nauwkeurig model
 - Gebouwtype selectie: Licht/Gemiddeld/Zwaar/Passief
 - Dynamische interne warmtewinsten per tijdstip
-- Seizoensgebonden zonnewinst aanpassing
+- Locatie- en seizoensafhankelijke zonneberekening op basis van breedtegraad
 
 GEBOUW INZICHTEN & AANBEVELINGEN
 Geautomatiseerde analyse van het thermische gebouwmodel:
@@ -265,7 +265,7 @@ Windsnelheid Correctie:
 Zonnestraling Integratie:
 - Nauwkeurige berekening van zonnewinsten via gebouwoppervlak
 - Flow card: "Stel externe zonnestraling in" (W/m²)
-- Seizoensgebonden aanpassing (winter 60%, zomer 130%)
+- Astronomische schatting als fallback: zonsopgang/ondergang berekend op basis van breedtegraad
 - Ondersteunt KNMI zonnestraling data
 
 PV-vermogen Tracking:

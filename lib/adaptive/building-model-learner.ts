@@ -75,28 +75,6 @@ export function getDynamicPInt(hour: number, basePInt: number): number {
   return basePInt * 1.8; // Evening: 180% of base (0.54 kW)
 }
 
-/**
- * Get seasonal solar gain multiplier
- * Accounts for sun angle and seasonal variation
- */
-export function getSeasonalGMultiplier(month: number): number {
-  const seasonalFactors: Record<number, number> = {
-    0: 0.6, // Jan: Low sun angle
-    1: 0.7, // Feb
-    2: 0.9, // Mar
-    3: 1.0, // Apr
-    4: 1.1, // May
-    5: 1.3, // Jun: High sun angle
-    6: 1.3, // Jul
-    7: 1.2, // Aug
-    8: 1.0, // Sep
-    9: 0.9, // Oct
-    10: 0.7, // Nov
-    11: 0.6, // Dec
-  };
-
-  return seasonalFactors[month] || 1.0;
-}
 
 export interface BuildingModelConfig {
   forgettingFactor: number; // 0.995-0.9995, default 0.999 = balance stability/adaptivity
@@ -104,7 +82,6 @@ export interface BuildingModelConfig {
   minSamplesForConfidence: number; // 288 = 24 hours @ 5min intervals
   buildingProfile?: BuildingProfileType; // Building type for initial parameters
   enableDynamicPInt?: boolean; // Enable time-of-day P_int adjustment
-  enableSeasonalG?: boolean; // Enable seasonal g-factor adjustment
   logger?: (msg: string, ...args: unknown[]) => void;
 }
 
@@ -139,7 +116,6 @@ export class BuildingModelLearner {
   private minSamplesForConfidence: number;
   private logger: (message: string, ...args: unknown[]) => void;
   private enableDynamicPInt: boolean;
-  private enableSeasonalG: boolean;
   private basePInt: number; // Base P_int value for dynamic calculation
 
   // =========================================================================
@@ -191,7 +167,6 @@ export class BuildingModelLearner {
 
     this.basePInt = profile.pInt; // Store for dynamic P_int calculation
     this.enableDynamicPInt = config.enableDynamicPInt ?? false;
-    this.enableSeasonalG = config.enableSeasonalG ?? false;
 
     // Initialize covariance matrix with high uncertainty
     const initCov = config.initialCovariance;
@@ -281,29 +256,16 @@ export class BuildingModelLearner {
       ? getDynamicPInt(hour, this.basePInt) / this.basePInt
       : 1.0;
 
-    // Apply seasonal solar gain multiplier if enabled
-    // v2.7.0: Only apply seasonal correction for estimated solar data
-    // External sources (solar_panels, knmi_radiation, open_meteo) already include seasonal/weather effects
-    const month = new Date(data.timestamp).getMonth();
-    const useEstimation = data.solarSource === 'estimation' || data.solarSource === undefined;
-    const applySeasonalG = this.enableSeasonalG && useEstimation;
-    const solarMultiplier = applySeasonalG
-      ? getSeasonalGMultiplier(month)
-      : 1.0;
-
-    // Log when seasonal g is skipped due to external solar data (first occurrence per session)
-    if (this.enableSeasonalG && !useEstimation && this.sampleCount % 100 === 1) {
-      this.logger(`ℹ️ Seasonal g-factor disabled: using ${data.solarSource} radiation data`);
-    }
-
     // Build input vector X = [pHeating, (tOut - tIn), Solar_kW, constant_term]
     // Sign convention: (tOut - tIn) is negative in winter (indoor warmer than outdoor)
     // → θ[1] × (tOut - tIn) correctly gives negative heat loss contribution to dT/dt
     // Solar converted to kW/m² (÷1000) to match θ[2] calibration (g/C in kW per kW/m²)
+    // v2.9.6: No seasonal multiplier — astronomical estimation already encodes seasonal variation
+    // via declination-based peak irradiance (200–800 W/m²) and correct sunrise/sunset times.
     const X = [
       data.pHeating, // Heating power (kW)
       data.tOutdoor - data.tIndoor, // Temperature difference (°C) — negative in winter → heat loss subtracts
-      ((data.solarRadiation || 0) / 1000) * solarMultiplier, // Solar in kW/m² with seasonal adjustment
+      (data.solarRadiation || 0) / 1000, // Solar in kW/m²
       pIntMultiplier, // Constant term scaled for time-varying P_int
     ];
 
@@ -577,7 +539,6 @@ export class BuildingModelLearner {
       lastMeasurement: this.lastMeasurement,
       basePInt: this.basePInt,
       enableDynamicPInt: this.enableDynamicPInt,
-      enableSeasonalG: this.enableSeasonalG,
     };
   }
 
@@ -591,7 +552,6 @@ export class BuildingModelLearner {
     lastMeasurement: MeasurementData | null;
     basePInt?: number;
     enableDynamicPInt?: boolean;
-    enableSeasonalG?: boolean;
   }): void {
     // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
     let stateIsValid = true;
@@ -656,7 +616,6 @@ export class BuildingModelLearner {
     // Restore configuration (with defaults for backward compatibility)
     this.basePInt = state.basePInt ?? 0.3;
     this.enableDynamicPInt = state.enableDynamicPInt ?? false;
-    this.enableSeasonalG = state.enableSeasonalG ?? false;
     this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
   }
 
