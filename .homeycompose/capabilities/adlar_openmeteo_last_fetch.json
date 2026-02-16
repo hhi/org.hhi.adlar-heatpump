@@ -1,0 +1,20 @@
+{
+  "id": "adlar_openmeteo_last_fetch",
+  "type": "string",
+  "title": {
+    "en": "Open-Meteo Last Fetch",
+    "nl": "Open-Meteo Laatste Ophaling",
+    "de": "Open-Meteo Letzter Abruf",
+    "fr": "Open-Meteo Dernier Chargement"
+  },
+  "desc": {
+    "en": "Timestamp and values of the last Open-Meteo fetch (temperature, wind, solar radiation, humidity)",
+    "nl": "Tijdstip en waarden van de laatste Open-Meteo ophaling (temperatuur, wind, zonnestraling, vochtigheid)",
+    "de": "Zeitstempel und Werte des letzten Open-Meteo-Abrufs (Temperatur, Wind, Sonnenstrahlung, Feuchtigkeit)",
+    "fr": "Horodatage et valeurs du dernier chargement Open-Meteo (température, vent, rayonnement solaire, humidité)"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": null,
+  "icon": "/assets/adaptive-control-diagnostics.svg"
+}

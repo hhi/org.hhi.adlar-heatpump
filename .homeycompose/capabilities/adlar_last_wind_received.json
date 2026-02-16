@@ -1,0 +1,20 @@
+{
+  "id": "adlar_last_wind_received",
+  "type": "string",
+  "title": {
+    "en": "Last Wind Speed (Flow Card)",
+    "nl": "Laatste Windsnelheid (Flow Kaart)",
+    "de": "Letzte Windgeschwindigkeit (Flow-Karte)",
+    "fr": "Dernière Vitesse de Vent (Carte Flux)"
+  },
+  "desc": {
+    "en": "Timestamp and value of the last wind speed received via flow card",
+    "nl": "Tijdstip en waarde van de laatste windsnelheid ontvangen via flow kaart",
+    "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Windgeschwindigkeit",
+    "fr": "Horodatage et valeur de la dernière vitesse de vent reçue via carte de flux"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": null,
+  "icon": "/assets/adaptive-control-diagnostics.svg"
+}
