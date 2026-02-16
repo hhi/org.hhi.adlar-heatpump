@@ -593,10 +593,12 @@ export class BuildingModelService {
    * @returns Solar radiation in W/m² and the source used
    */
   public getSolarRadiationWithPriority(): { radiation: number; source: string } {
-    const source = this.device.getSetting('solar_source') as string || 'auto';
+    const TTL_MS = 2 * 60 * 60 * 1000;
+    const now = Date.now();
 
-    // Priority 1: Solar panels (convert W to W/m²)
-    if (source === 'auto' || source === 'solar_panels') {
+    // Priority 1: Solar panels (convert W to W/m²) — only if flow card sent data within TTL
+    const solarPowerTs = this.device.getStoreValue('external_solar_power_timestamp') as number | null;
+    if (solarPowerTs && (now - solarPowerTs) < TTL_MS) {
       const power = this.device.getCapabilityValue('adlar_external_solar_power') as number | null;
       const wp = this.device.getSetting('solar_panel_wp') as number || 0;
       const eff = this.device.getSetting('solar_panel_efficiency') as number || 0.85;
@@ -615,8 +617,9 @@ export class BuildingModelService {
       }
     }
 
-    // Priority 2: Flow card input / KNMI radiation (direct W/m²)
-    if (source === 'auto' || source === 'knmi_radiation') {
+    // Priority 2: KNMI flow card radiation (direct W/m²) — only if within TTL
+    const knmiTs = this.device.getStoreValue('external_solar_radiation_timestamp') as number | null;
+    if (knmiTs && (now - knmiTs) < TTL_MS) {
       const radiation = this.device.getCapabilityValue('adlar_external_solar_radiation') as number | null;
       if (radiation !== null && radiation >= 0) {
         this.logger('Solar radiation from flow card / KNMI', { radiation });
@@ -625,7 +628,7 @@ export class BuildingModelService {
     }
 
     // Priority 3: Open Meteo shortwave_radiation (already fetched, no extra API cost)
-    if (source === 'auto' && this.weatherForecast) {
+    if (this.weatherForecast) {
       const radiation = this.weatherForecast.getCurrentSolarRadiation();
       if (radiation !== null && radiation >= 0) {
         this.logger('Solar radiation from Open Meteo', { radiation: radiation.toFixed(0) });
@@ -634,10 +637,10 @@ export class BuildingModelService {
     }
 
     // Priority 4: Astronomical estimation (last fallback - location & season aware)
-    const now = new Date();
-    const hour = now.getHours() + now.getMinutes() / 60;
+    const nowDate = new Date();
+    const hour = nowDate.getHours() + nowDate.getMinutes() / 60;
     const lat = (this.device.getSetting('forecast_location_lat') as number) ?? 52.37;
-    const dayOfYear = this.getDayOfYear(now);
+    const dayOfYear = this.getDayOfYear(nowDate);
     const radiation = this.estimateSolarRadiation(hour, lat, dayOfYear);
     this.logger('Solar estimation (astronomical)', {
       hour: hour.toFixed(2), lat, dayOfYear, radiation: radiation.toFixed(0),

@@ -76,7 +76,7 @@ export class ExternalTemperatureService {
       if (temperature < -10 || temperature > 50) {
         this.logger('ExternalTemperatureService: Temperature out of valid range', {
           temperature,
-          validRange: '-10°C to +50°C',
+          validRange: '-20°C to +50°C',
         });
         return null;
       }

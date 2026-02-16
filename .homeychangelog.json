@@ -1,4 +1,10 @@
 {
+  "2.9.7": {
+    "en": "Weather data (wind, outdoor temperature, solar radiation) is no longer required via a flow card. Open-Meteo is now always the automatic fallback. Use a flow card only if your own source is more accurate — it takes priority as long as data arrives at least once every 2 hours. The 'Solar source' setting has been removed.",
+    "nl": "Weerdata (wind, buitentemperatuur, zonnestraling) hoeft niet meer via een flow kaartje te worden aangeleverd. Open-Meteo is nu altijd de automatische achtervang. Gebruik een flow kaartje alleen als je eigen bron nauwkeuriger is — deze heeft prioriteit zolang er minimaal eens per 2 uur een meting binnenkomt. De instelling 'Zonnebron' is verwijderd.",
+    "de": "Wetterdaten (Wind, Außentemperatur, Sonnenstrahlung) müssen nicht mehr per Flow-Karte geliefert werden. Open-Meteo dient jetzt immer als automatischer Fallback. Verwende eine Flow-Karte nur, wenn deine eigene Quelle genauer ist — diese hat Priorität, solange mindestens alle 2 Stunden ein Messwert eintrifft. Die Einstellung 'Sonnenquelle' wurde entfernt.",
+    "fr": "Les données météo (vent, température extérieure, rayonnement solaire) ne doivent plus être fournies via une carte de flux. Open-Meteo est désormais le repli automatique. Utilisez une carte de flux uniquement si votre propre source est plus précise — elle a priorité tant qu'une mesure arrive au moins toutes les 2 heures. Le paramètre 'Source solaire' a été supprimé."
+  },
   "2.9.6": {
     "en": "Solar gain fallback now calculates sunrise/sunset based on geographic latitude instead of a fixed seasonal table. The 'Seasonal solar gain adjustment' setting has been removed.",
     "nl": "Zonnewinst fallback berekent nu zonsopgang/ondergang op basis van geografische breedtegraad in plaats van een vaste seizoenstabel. De instelling 'Seizoensgebonden zonnewinst aanpassing' is verwijderd.",

@@ -1095,6 +1095,7 @@ export class FlowCardManagerService {
 
         // Store for persistence across app updates
         await this.device.setStoreValue('external_outdoor_temp', args.temperature_value);
+        await this.device.setStoreValue('external_outdoor_temp_timestamp', Date.now());
 
         // Emit event for other services
         this.device.emit('external-data:ambient', args.temperature_value);

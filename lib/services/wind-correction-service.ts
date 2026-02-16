@@ -60,6 +60,9 @@ export class WindCorrectionService {
   private learningCount: number = 0;
   private weatherForecast: IWeatherForecastService | null = null;
 
+  // Flow card TTL: after 2 hours without a new flow card update, fall back to Open-Meteo
+  private static readonly FLOW_CARD_TTL_MS = 2 * 60 * 60 * 1000;
+
   // Constants for alpha learning
   private static readonly DEFAULT_ALPHA = 0.006;
   private static readonly MIN_ALPHA = 0.001;
@@ -102,6 +105,15 @@ export class WindCorrectionService {
           learningCount: this.learningCount,
         });
       }
+
+      // Restore flow card timestamp so TTL check survives app restarts
+      const storedTs = this.device.getStoreValue('external_wind_speed_timestamp') as number | null;
+      if (storedTs && typeof storedTs === 'number') {
+        this.lastReceivedTimestamp = storedTs;
+        this.logger('WindCorrectionService: Restored wind timestamp', {
+          age: `${Math.round((Date.now() - storedTs) / 60000)} min`,
+        });
+      }
     } catch (error) {
       this.logger('WindCorrectionService: Error restoring learned alpha', {
         error: (error as Error).message,
@@ -141,11 +153,13 @@ export class WindCorrectionService {
    */
   getWindSpeed(): number | null {
     try {
-      // Priority 1: Flow card input (local sensor / KNMI / weather app)
+      // Priority 1: Flow card input (local sensor / KNMI / weather app) — only if within TTL
       if (this.device.hasCapability('adlar_external_wind_speed')) {
         const windSpeed = this.device.getCapabilityValue('adlar_external_wind_speed') as number | null;
+        const isFlowCardFresh = this.lastReceivedTimestamp > 0
+          && (Date.now() - this.lastReceivedTimestamp) < WindCorrectionService.FLOW_CARD_TTL_MS;
 
-        if (windSpeed !== null && windSpeed !== undefined && windSpeed >= 0 && windSpeed <= 200) {
+        if (windSpeed !== null && windSpeed !== undefined && windSpeed >= 0 && windSpeed <= 200 && isFlowCardFresh) {
           return windSpeed;
         }
       }
