@@ -730,10 +730,10 @@
           "fr": "Activer le contrôle adaptatif de température"
         },
         "hint": {
-          "en": "Automatically adjusts target temperature based on external indoor temperature sensor. Requires external temperature via flow card 'Send indoor temperature'. Uses PI control algorithm for ±0.3°C stability. ⚠️ Advanced PI controller settings will appear below when enabled.",
-          "nl": "Past doeltemperatuur automatisch aan op basis van externe binnentemperatuur sensor. Vereist externe temperatuur via flow kaart 'Stuur binnentemperatuur'. Gebruikt PI regeling voor ±0.3°C stabiliteit. ⚠️ Geavanceerde PI regelaar instellingen verschijnen hieronder wanneer ingeschakeld.",
-          "de": "Passt die Zieltemperatur automatisch basierend auf einem externen Raumtemperatursensor an. Erfordert externe Temperatur über Flow-Karte 'Raumtemperatur senden'. Verwendet PI-Regelung für ±0,3°C Stabilität. ⚠️ Erweiterte PI-Regler-Einstellungen erscheinen unten, wenn aktiviert.",
-          "fr": "Ajuste automatiquement la température cible basée sur un capteur de température intérieure externe. Nécessite une température externe via la carte de flux 'Envoyer température intérieure'. Utilise un algorithme de contrôle PI pour une stabilité de ±0.3°C. ⚠️ Les paramètres avancés du contrôleur PI apparaîtront ci-dessous lorsqu'activé."
+          "en": "Master switch for the adaptive control loop. Enables: PI temperature control (requires indoor temperature via flow card 'Send indoor temperature'), COP optimization, energy price optimization, building model learning, wind correction, and Open-Meteo weather fallback for wind/temperature/solar. Weather forecast sensors additionally require 'Show weather forecast sensors' to be enabled. ⚠️ Advanced PI controller settings will appear below when enabled.",
+          "nl": "Hoofdschakelaar voor de adaptieve regelkring. Schakelt in: PI temperatuurregeling (vereist binnentemperatuur via flow kaart 'Stuur binnentemperatuur'), COP optimalisatie, energieprijsoptimalisatie, gebouwmodel leren, windcorrectie, en Open-Meteo weersfallback voor wind/temperatuur/zon. Weersverwachting sensoren vereisen ook 'Toon weersvoorspelling sensoren'. ⚠️ Geavanceerde PI regelaar instellingen verschijnen hieronder wanneer ingeschakeld.",
+          "de": "Hauptschalter für die adaptive Regelschleife. Aktiviert: PI-Temperaturregelung (erfordert Innentemperatur über Flow-Karte 'Raumtemperatur senden'), COP-Optimierung, Energiepreisoptimierung, Gebäudemodell-Lernen, Windkorrektur und Open-Meteo-Wetter-Fallback für Wind/Temperatur/Solar. Wettervorhersage-Sensoren erfordern zusätzlich 'Wettervorhersage-Sensoren anzeigen'. ⚠️ Erweiterte PI-Regler-Einstellungen erscheinen unten, wenn aktiviert.",
+          "fr": "Interrupteur principal pour la boucle de contrôle adaptative. Active: contrôle PI de température (nécessite température intérieure via carte de flux 'Envoyer température intérieure'), optimisation COP, optimisation du prix d'énergie, apprentissage du modèle de bâtiment, correction du vent et fallback météo Open-Meteo pour vent/température/solaire. Les capteurs de prévision météo nécessitent aussi 'Afficher les capteurs de prévision météo'. ⚠️ Les paramètres avancés du contrôleur PI apparaîtront ci-dessous lorsqu'activé."
         },
         "value": false
       },
@@ -1000,16 +1000,16 @@
         "type": "checkbox",
         "highlight": true,
         "label": {
-          "en": "Enable weather forecast",
-          "nl": "Weerprognose inschakelen",
-          "de": "Wettervorhersage aktivieren",
-          "fr": "Activer la prévision météo"
+          "en": "Enable weather forecast, besides the regular data ingestion",
+          "nl": "Weerprognose inschakelen naast de reguliere gegevensinvoer",
+          "de": "Wettervorhersage aktivieren neben der regulären Datenerfassung",
+          "fr": "Activer la prévision météo, en plus de l'ingestion de données régulière"
         },
         "hint": {
-          "en": "Use Open-Meteo 48-hour weather forecast to optimize heating timing and COP. Analyses temperature, wind speed and humidity to advise optimal heating start time, calculate wind & frost COP corrections, and provide defrost cycle learning context. Free API, no account needed. ⚠️ Requires: COP Optimization must be enabled.",
-          "nl": "Gebruik Open-Meteo 48-uurs weerprognose om verwarmingstiming en COP te optimaliseren. Analyseert temperatuur, windsnelheid en luchtvochtigheid voor optimaal starttijdadvies, wind- & vorst-COP-correcties en defrost leercontext. Gratis API, geen account nodig. ⚠️ Vereist: COP Optimalisatie moet ingeschakeld zijn.",
-          "de": "Verwenden Sie die Open-Meteo 48-Stunden-Wettervorhersage zur Optimierung von Heizzeitpunkt und COP. Analysiert Temperatur, Windgeschwindigkeit und Luftfeuchtigkeit für optimale Startzeit-Empfehlung, Wind- & Frost-COP-Korrekturen und Abtau-Lernkontext. Kostenlose API, kein Konto erforderlich. ⚠️ Voraussetzung: COP-Optimierung muss aktiviert sein.",
-          "fr": "Utilisez la prévision météo Open-Meteo 48 heures pour optimiser le timing de chauffage et le COP. Analyse la température, la vitesse du vent et l'humidité pour conseiller le meilleur moment de démarrage, calculer les corrections COP vent & givre et fournir un contexte d'apprentissage du dégivrage. API gratuite, aucun compte requis. ⚠️ Prérequis: L'optimisation COP doit être activée."
+          "en": "Show weather forecast sensors (forecast advice, optimal delay, COP correction). Open-Meteo data is fetched in the background as fallback for wind, temperature and solar radiation. Requires: Adaptive Control must be enabled. Free API, no account needed.",
+          "nl": "Toon weerprognose sensoren (prognose advies, optimale vertraging, COP correctie). Open-Meteo data wordt op de achtergrond opgehaald als fallback voor wind, temperatuur en zonnestraling. Vereist: Adaptieve Regeling moet ingeschakeld zijn. Gratis API, geen account nodig.",
+          "de": "Wettervorhersage-Sensoren anzeigen (Prognoseberatung, optimale Verzögerung, COP-Korrektur). Open-Meteo-Daten werden im Hintergrund als Fallback für Wind, Temperatur und Solarstrahlung abgerufen. Voraussetzung: Adaptive Steuerung muss aktiviert sein. Kostenlose API, kein Konto erforderlich.",
+          "fr": "Afficher les capteurs de prévision météo (conseil de prévision, délai optimal, correction COP). Les données Open-Meteo sont récupérées en arrière-plan comme solution de repli pour le vent, la température et le rayonnement solaire. Prérequis: La régulation adaptative doit être activée. API gratuite, aucun compte requis."
         },
         "value": false
       },
@@ -1596,61 +1596,6 @@
       "fr": "Source de rayonnement solaire"
     },
     "children": [
-      {
-        "id": "solar_source",
-        "type": "dropdown",
-        "label": {
-          "en": "Solar radiation source",
-          "nl": "Zonnestraling bron",
-          "de": "Sonnenstrahlungsquelle",
-          "fr": "Source de rayonnement solaire"
-        },
-        "hint": {
-          "en": "Select the source for solar radiation data. Auto uses the best available source.",
-          "nl": "Selecteer de bron voor zonnestralinggegevens. Auto gebruikt de best beschikbare bron.",
-          "de": "Wählen Sie die Quelle für Sonnenstrahlungsdaten. Auto verwendet die beste verfügbare Quelle.",
-          "fr": "Sélectionnez la source des données de rayonnement solaire. Auto utilise la meilleure source disponible."
-        },
-        "value": "auto",
-        "values": [
-          {
-            "id": "auto",
-            "label": {
-              "en": "Auto (best available)",
-              "nl": "Auto (beste beschikbaar)",
-              "de": "Auto (beste verfügbar)",
-              "fr": "Auto (meilleur disponible)"
-            }
-          },
-          {
-            "id": "solar_panels",
-            "label": {
-              "en": "Solar panels only",
-              "nl": "Alleen zonnepanelen",
-              "de": "Nur Solarmodule",
-              "fr": "Panneaux solaires uniquement"
-            }
-          },
-          {
-            "id": "knmi_radiation",
-            "label": {
-              "en": "KNMI radiation only",
-              "nl": "Alleen KNMI straling",
-              "de": "Nur KNMI-Strahlung",
-              "fr": "Rayonnement KNMI uniquement"
-            }
-          },
-          {
-            "id": "estimation",
-            "label": {
-              "en": "Estimation only",
-              "nl": "Alleen schatting",
-              "de": "Nur Schätzung",
-              "fr": "Estimation uniquement"
-            }
-          }
-        ]
-      },
       {
         "id": "solar_panel_wp",
         "type": "number",

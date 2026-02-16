@@ -302,10 +302,8 @@ export class AdaptiveControlService {
       // Restore PI controller history from device store
       await this.restorePIHistory();
 
-      // Start weather forecast updates if enabled
-      if (this.device.getSetting('enable_weather_forecast') === true) {
-        this.weatherForecast.startUpdates();
-      }
+      // Always start weather forecast — used as TTL fallback for wind/temp/solar even without forecast sensors
+      this.weatherForecast.startUpdates();
 
       // Initialize Component 2: Building Model Service
       await this.buildingModel.initialize();
@@ -610,9 +608,8 @@ export class AdaptiveControlService {
         try {
           const currentCOP = (this.device.getCapabilityValue('adlar_cop') as number) || 0;
           const dailyCOP = (this.device.getCapabilityValue('adlar_cop_daily') as number) || 0;
-          // Get outdoor temperature with priority fallback (v2.0.2): external sensor → heat pump sensor
-          // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
-          const outdoorTemp = this.device.getOutdoorTemperatureWithFallback() || 0;
+          // Get outdoor temperature with TTL-based source priority (v2.10.0): flow card → Open-Meteo → heat pump sensor
+          const outdoorTemp = await this.getEffectiveOutdoorTemp();
 
           // COP optimizer uses current warmtepomp setpoint for efficiency calculation
           copAction = this.copOptimizer.calculateAction(currentCOP, dailyCOP, outdoorTemp, currentSetpoint);
@@ -668,9 +665,8 @@ export class AdaptiveControlService {
       // Update EnergyPriceOptimizer with thermal capacity (for load shifting)
       this.energyOptimizer.setThermalCapacity(buildingModel.C);
 
-      // Get outdoor temperature for thermal calculation
-      // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback()
-      const outdoorTempForThermal = this.device.getOutdoorTemperatureWithFallback() || 0;
+      // Get outdoor temperature for thermal calculation with TTL-based source priority (v2.10.0)
+      const outdoorTempForThermal = await this.getEffectiveOutdoorTemp();
 
       // Step 5B.5: Update weather forecast advice (v2.8.0+)
       await this.updateWeatherForecastAdvice(outdoorTempForThermal);
@@ -1063,6 +1059,46 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Get effective outdoor temperature with TTL-based source priority:
+   * 1. Flow card (adlar_external_ambient) — if received within 2 hours
+   * 2. Open-Meteo current hour — already fetched, no extra API cost
+   * 3. Heat pump internal sensor — last resort
+   *
+   * @version 2.10.0
+   */
+  private async getEffectiveOutdoorTemp(): Promise<number> {
+    const TTL_MS = 2 * 60 * 60 * 1000;
+
+    // Priority 1: Flow card — only if timestamp is within TTL
+    const storedTs = await this.device.getStoreValue('external_outdoor_temp_timestamp') as number | null;
+    if (storedTs !== null && (Date.now() - storedTs) < TTL_MS) {
+      const flowTemp = this.device.getCapabilityValue('adlar_external_ambient') as number | null;
+      if (flowTemp !== null && flowTemp > -50 && flowTemp < 60) {
+        this.logger('AdaptiveControlService: Using flow card outdoor temp', {
+          temp: flowTemp.toFixed(1),
+          ageMin: Math.round((Date.now() - storedTs) / 60000),
+        });
+        return flowTemp;
+      }
+    }
+
+    // Priority 2: Open-Meteo current hour
+    if (this.weatherForecast) {
+      const forecastTemp = this.weatherForecast.getTempAt(0);
+      if (forecastTemp !== null) {
+        this.logger('AdaptiveControlService: Using Open-Meteo outdoor temp (flow card stale/absent)', {
+          temp: forecastTemp.toFixed(1),
+        });
+        return forecastTemp;
+      }
+    }
+
+    // Priority 3: Heat pump internal sensor (last resort)
+    // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
+    return this.device.getOutdoorTemperatureWithFallback() || 0;
+  }
+
+  /**
    * Update weather forecast advice capabilities and flow trigger
    * @version 2.8.0
    */
@@ -1383,25 +1419,19 @@ export class AdaptiveControlService {
       }
     }
 
-    // Handle weather forecast toggle (v2.8.0+)
+    // Handle weather forecast sensor visibility toggle (v2.10.0: API always runs, toggle only controls output sensors)
     if (changedKeys.includes('enable_weather_forecast')) {
       const enabled = newSettings.enable_weather_forecast as boolean;
-      if (enabled) {
-        this.weatherForecast.startUpdates();
-        this.logger('AdaptiveControlService: Weather forecast enabled');
-      } else {
-        this.weatherForecast.stopUpdates();
+      if (!enabled) {
         this.lastForecastAdviceSignature = null;
-        this.logger('AdaptiveControlService: Weather forecast disabled');
       }
+      this.logger(`AdaptiveControlService: Weather forecast sensors ${enabled ? 'enabled' : 'disabled'}`);
     }
 
-    // Handle weather forecast location changes
+    // Handle weather forecast location changes — always refresh regardless of sensor toggle
     if (changedKeys.includes('forecast_location_lat') || changedKeys.includes('forecast_location_lon')) {
-      if (this.device.getSetting('enable_weather_forecast') === true) {
-        await this.weatherForecast.updateForecast();
-        this.logger('AdaptiveControlService: Weather forecast location updated and forecast refreshed');
-      }
+      await this.weatherForecast.updateForecast();
+      this.logger('AdaptiveControlService: Weather forecast location updated and forecast refreshed');
     }
 
     // Handle priority settings changes (v2.4.1: bug fix - settings were defined but not used)
