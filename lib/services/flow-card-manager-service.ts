@@ -1097,6 +1097,13 @@ export class FlowCardManagerService {
         await this.device.setStoreValue('external_outdoor_temp', args.temperature_value);
         await this.device.setStoreValue('external_outdoor_temp_timestamp', Date.now());
 
+        // Update diagnostic capability
+        if (this.device.hasCapability('adlar_last_outdoor_temp_received')) {
+          const d = new Date();
+          const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+          await this.device.setCapabilityValue('adlar_last_outdoor_temp_received', `${ts} | ${args.temperature_value.toFixed(1)}°C`); // eslint-disable-line camelcase
+        }
+
         // Emit event for other services
         this.device.emit('external-data:ambient', args.temperature_value);
       }
@@ -1308,6 +1315,13 @@ export class FlowCardManagerService {
       await this.device.setStoreValue('external_wind_speed', windSpeed);
       await this.device.setStoreValue('external_wind_speed_timestamp', Date.now());
 
+      // Update diagnostic capability
+      if (this.device.hasCapability('adlar_last_wind_received')) {
+        const d = new Date();
+        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        await this.device.setCapabilityValue('adlar_last_wind_received', `${ts} | ${windSpeed.toFixed(0)}km/h`);
+      }
+
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external wind data:', error);
       throw error;
@@ -1344,6 +1358,13 @@ export class FlowCardManagerService {
       await this.device.setStoreValue('external_solar_power', powerValue);
       await this.device.setStoreValue('external_solar_power_timestamp', Date.now());
 
+      // Update diagnostic capability
+      if (this.device.hasCapability('adlar_last_solar_power_received')) {
+        const d = new Date();
+        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        await this.device.setCapabilityValue('adlar_last_solar_power_received', `${ts} | ${powerValue.toFixed(0)}W`);
+      }
+
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external solar power:', error);
       throw error;
@@ -1379,6 +1400,13 @@ export class FlowCardManagerService {
       // Store for persistence
       await this.device.setStoreValue('external_solar_radiation', radiationValue);
       await this.device.setStoreValue('external_solar_radiation_timestamp', Date.now());
+
+      // Update diagnostic capability
+      if (this.device.hasCapability('adlar_last_solar_radiation_received')) {
+        const d = new Date();
+        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        await this.device.setCapabilityValue('adlar_last_solar_radiation_received', `${ts} | ${radiationValue.toFixed(0)}W/m²`);
+      }
 
     } catch (error) {
       this.logger('FlowCardManagerService: Error receiving external solar radiation:', error);

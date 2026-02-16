@@ -189,6 +189,19 @@ export class WeatherForecastService {
       };
 
       this.logger(`WeatherForecastService: Received ${hourly.length} hours of forecast data`);
+
+      // Update diagnostic capability with last fetch summary (uiComponent: null — visible in Developer Tools)
+      if (this.device.hasCapability('adlar_openmeteo_last_fetch')) {
+        const current = hourly[0];
+        const d = new Date(now);
+        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const temp = current?.temperature != null ? `T:${current.temperature.toFixed(1)}°C` : 'T:?';
+        const wind = current?.windSpeed != null ? `W:${current.windSpeed.toFixed(0)}km/h` : 'W:?';
+        const solar = current?.solarRadiation != null ? `S:${current.solarRadiation.toFixed(0)}W/m²` : 'S:?';
+        const hum = current?.humidity != null ? `H:${current.humidity.toFixed(0)}%` : 'H:?';
+        await this.device.setCapabilityValue('adlar_openmeteo_last_fetch', `${ts} | ${temp} | ${wind} | ${solar} | ${hum}`);
+      }
+
       return this.forecast;
     } catch (error) {
       const err = error as Error;

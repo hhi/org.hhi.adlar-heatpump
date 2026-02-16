@@ -1,0 +1,20 @@
+{
+  "id": "adlar_last_solar_power_received",
+  "type": "string",
+  "title": {
+    "en": "Last Solar Panel Power (Flow Card)",
+    "nl": "Laatste Zonnepaneelvermogen (Flow Kaart)",
+    "de": "Letzte Solaranlagenleistung (Flow-Karte)",
+    "fr": "Dernière Puissance Panneaux Solaires (Carte Flux)"
+  },
+  "desc": {
+    "en": "Timestamp and value of the last solar panel power (W) received via flow card",
+    "nl": "Tijdstip en waarde van het laatste zonnepaneelvermogen (W) ontvangen via flow kaart",
+    "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Solaranlagenleistung (W)",
+    "fr": "Horodatage et valeur de la dernière puissance de panneaux solaires (W) reçue via carte de flux"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": null,
+  "icon": "/assets/adaptive-control-diagnostics.svg"
+}

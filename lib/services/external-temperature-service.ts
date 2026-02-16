@@ -131,6 +131,13 @@ export class ExternalTemperatureService {
         timestamp: new Date(this.lastReceivedTimestamp).toISOString(),
       });
 
+      // Update diagnostic capability
+      if (this.device.hasCapability('adlar_last_indoor_temp_received')) {
+        const d = new Date(this.lastReceivedTimestamp);
+        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        await this.device.setCapabilityValue('adlar_last_indoor_temp_received', `${ts} | ${temperature.toFixed(1)}°C`);
+      }
+
     } catch (error) {
       this.logger('ExternalTemperatureService: Error receiving external temperature', {
         temperature,

@@ -3824,6 +3824,26 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.9.7: Add data source diagnostic capabilities (uiComponent: null)
+      const dataSourceDiagCapabilities = [
+        'adlar_openmeteo_last_fetch',
+        'adlar_last_outdoor_temp_received',
+        'adlar_last_wind_received',
+        'adlar_last_solar_power_received',
+        'adlar_last_solar_radiation_received',
+        'adlar_last_indoor_temp_received',
+      ];
+      for (const capability of dataSourceDiagCapabilities) {
+        if (!this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`Migration v2.9.7: Added ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');

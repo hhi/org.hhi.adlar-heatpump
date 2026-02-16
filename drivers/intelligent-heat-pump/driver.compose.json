@@ -97,7 +97,13 @@
     "adlar_external_solar_radiation",
     "adlar_forecast_advice",
     "adlar_optimal_delay",
-    "adlar_forecast_cop_correction"
+    "adlar_forecast_cop_correction",
+    "adlar_openmeteo_last_fetch",
+    "adlar_last_outdoor_temp_received",
+    "adlar_last_wind_received",
+    "adlar_last_solar_power_received",
+    "adlar_last_solar_radiation_received",
+    "adlar_last_indoor_temp_received"
   ],
   "capabilitiesOptions": {
     "measure_power": {
