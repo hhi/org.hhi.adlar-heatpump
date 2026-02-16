@@ -1067,7 +1067,7 @@ export class AdaptiveControlService {
    * @version 2.10.0
    */
   private async getEffectiveOutdoorTemp(): Promise<number> {
-    const TTL_MS = 2 * 60 * 60 * 1000;
+    const TTL_MS = 1 * 60 * 60 * 1000;
 
     // Priority 1: Flow card — only if timestamp is within TTL
     const storedTs = await this.device.getStoreValue('external_outdoor_temp_timestamp') as number | null;
