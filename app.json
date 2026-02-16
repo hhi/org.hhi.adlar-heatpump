@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.9.7",
+  "version": "2.9.8",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -7428,7 +7428,13 @@
         "adlar_external_solar_radiation",
         "adlar_forecast_advice",
         "adlar_optimal_delay",
-        "adlar_forecast_cop_correction"
+        "adlar_forecast_cop_correction",
+        "adlar_openmeteo_last_fetch",
+        "adlar_last_outdoor_temp_received",
+        "adlar_last_wind_received",
+        "adlar_last_solar_power_received",
+        "adlar_last_solar_radiation_received",
+        "adlar_last_indoor_temp_received"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -11785,6 +11791,106 @@
         "nl": "dp 101 : minitemp_set - Hot Water Set Temp"
       }
     },
+    "adlar_last_indoor_temp_received": {
+      "id": "adlar_last_indoor_temp_received",
+      "type": "string",
+      "title": {
+        "en": "Last Indoor Temperature (Flow Card)",
+        "nl": "Laatste Binnentemperatuur (Flow Kaart)",
+        "de": "Letzte Innentemperatur (Flow-Karte)",
+        "fr": "Dernière Température Intérieure (Carte Flux)"
+      },
+      "desc": {
+        "en": "Timestamp and value of the last indoor temperature received via flow card",
+        "nl": "Tijdstip en waarde van de laatste binnentemperatuur ontvangen via flow kaart",
+        "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Innentemperatur",
+        "fr": "Horodatage et valeur de la dernière température intérieure reçue via carte de flux"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
+    "adlar_last_outdoor_temp_received": {
+      "id": "adlar_last_outdoor_temp_received",
+      "type": "string",
+      "title": {
+        "en": "Last Outdoor Temperature (Flow Card)",
+        "nl": "Laatste Buitentemperatuur (Flow Kaart)",
+        "de": "Letzte Außentemperatur (Flow-Karte)",
+        "fr": "Dernière Température Extérieure (Carte Flux)"
+      },
+      "desc": {
+        "en": "Timestamp and value of the last outdoor temperature received via flow card",
+        "nl": "Tijdstip en waarde van de laatste buitentemperatuur ontvangen via flow kaart",
+        "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Außentemperatur",
+        "fr": "Horodatage et valeur de la dernière température extérieure reçue via carte de flux"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
+    "adlar_last_solar_power_received": {
+      "id": "adlar_last_solar_power_received",
+      "type": "string",
+      "title": {
+        "en": "Last Solar Panel Power (Flow Card)",
+        "nl": "Laatste Zonnepaneelvermogen (Flow Kaart)",
+        "de": "Letzte Solaranlagenleistung (Flow-Karte)",
+        "fr": "Dernière Puissance Panneaux Solaires (Carte Flux)"
+      },
+      "desc": {
+        "en": "Timestamp and value of the last solar panel power (W) received via flow card",
+        "nl": "Tijdstip en waarde van het laatste zonnepaneelvermogen (W) ontvangen via flow kaart",
+        "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Solaranlagenleistung (W)",
+        "fr": "Horodatage et valeur de la dernière puissance de panneaux solaires (W) reçue via carte de flux"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
+    "adlar_last_solar_radiation_received": {
+      "id": "adlar_last_solar_radiation_received",
+      "type": "string",
+      "title": {
+        "en": "Last Solar Radiation (Flow Card)",
+        "nl": "Laatste Zonnestraling (Flow Kaart)",
+        "de": "Letzte Sonnenstrahlung (Flow-Karte)",
+        "fr": "Dernier Rayonnement Solaire (Carte Flux)"
+      },
+      "desc": {
+        "en": "Timestamp and value of the last solar radiation (W/m²) received via flow card",
+        "nl": "Tijdstip en waarde van de laatste zonnestraling (W/m²) ontvangen via flow kaart",
+        "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Sonnenstrahlung (W/m²)",
+        "fr": "Horodatage et valeur du dernier rayonnement solaire (W/m²) reçu via carte de flux"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
+    "adlar_last_wind_received": {
+      "id": "adlar_last_wind_received",
+      "type": "string",
+      "title": {
+        "en": "Last Wind Speed (Flow Card)",
+        "nl": "Laatste Windsnelheid (Flow Kaart)",
+        "de": "Letzte Windgeschwindigkeit (Flow-Karte)",
+        "fr": "Dernière Vitesse de Vent (Carte Flux)"
+      },
+      "desc": {
+        "en": "Timestamp and value of the last wind speed received via flow card",
+        "nl": "Tijdstip en waarde van de laatste windsnelheid ontvangen via flow kaart",
+        "de": "Zeitstempel und Wert der letzten über Flow-Karte empfangenen Windgeschwindigkeit",
+        "fr": "Horodatage et valeur de la dernière vitesse de vent reçue via carte de flux"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
     "adlar_measure_pressure_effluent_temp": {
       "id": "adlar_measure_pressure_effluent_temp",
       "title": {
@@ -11920,6 +12026,26 @@
       "description": {
         "nl": "dp 16 : temp_current - EEV Open"
       }
+    },
+    "adlar_openmeteo_last_fetch": {
+      "id": "adlar_openmeteo_last_fetch",
+      "type": "string",
+      "title": {
+        "en": "Open-Meteo Last Fetch",
+        "nl": "Open-Meteo Laatste Ophaling",
+        "de": "Open-Meteo Letzter Abruf",
+        "fr": "Open-Meteo Dernier Chargement"
+      },
+      "desc": {
+        "en": "Timestamp and values of the last Open-Meteo fetch (temperature, wind, solar radiation, humidity)",
+        "nl": "Tijdstip en waarden van de laatste Open-Meteo ophaling (temperatuur, wind, zonnestraling, vochtigheid)",
+        "de": "Zeitstempel und Werte des letzten Open-Meteo-Abrufs (Temperatur, Wind, Sonnenstrahlung, Feuchtigkeit)",
+        "fr": "Horodatage et valeurs du dernier chargement Open-Meteo (température, vent, rayonnement solaire, humidité)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
     },
     "adlar_optimal_delay": {
       "id": "adlar_optimal_delay",
