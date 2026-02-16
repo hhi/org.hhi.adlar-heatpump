@@ -208,7 +208,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - Temps d'apprentissage: 24-72 heures pour modèle de base, 2-4 semaines pour modèle précis
 - Sélection du type de bâtiment: Léger/Moyen/Lourd/Passif
 - Gains de chaleur internes dynamiques par période
-- Ajustement saisonnier des gains solaires
+- Calcul solaire dépendant de la localisation et de la saison basé sur la latitude
 
 INSIGHTS & RECOMMANDATIONS DU BÂTIMENT
 Analyse automatisée du modèle thermique du bâtiment:
@@ -265,7 +265,7 @@ Correction de la vitesse du vent:
 Intégration du rayonnement solaire:
 - Calcul précis des gains solaires via la surface du bâtiment
 - Carte de flux: "Définir le rayonnement solaire externe" (W/m²)
-- Ajustement saisonnier (hiver 60%, été 130%)
+- Estimation astronomique en repli: lever/coucher du soleil calculé à partir de la latitude
 - Supporte les données de rayonnement solaire KNMI
 
 Suivi de la puissance PV:

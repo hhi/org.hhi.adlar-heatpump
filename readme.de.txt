@@ -208,7 +208,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 - Lernzeit: 24-72 Stunden für Basismodell, 2-4 Wochen für genaues Modell
 - Gebäudetypauswahl: Leicht/Durchschnitt/Schwer/Passiv
 - Dynamische interne Wärmegewinne pro Zeitpunkt
-- Saisonale Sonnengewinn-Anpassung
+- Standort- und jahreszeitabhängige Sonnenberechnung basierend auf dem Breitengrad
 
 GEBÄUDEEINBLICKE & EMPFEHLUNGEN
 Automatisierte Analyse des thermischen Gebäudemodells:
@@ -265,7 +265,7 @@ Windgeschwindigkeitskorrektur:
 Sonnenstrahlungsintegration:
 - Genaue Berechnung der Sonnengewinne über Gebäudefläche
 - Flow-Karte: "Externe Sonneneinstrahlung einstellen" (W/m²)
-- Saisonale Anpassung (Winter 60%, Sommer 130%)
+- Astronomische Fallback-Schätzung: Sonnenauf-/-untergang berechnet aus dem Breitengrad
 - Unterstützt KNMI Sonnenstrahlungsdaten
 
 PV-Leistungsverfolgung:
