@@ -1,4 +1,10 @@
 {
+  "2.9.10": {
+    "en": "Added: Performance Report scores your heat pump across 7 domains (efficiency, building, defrost, energy, pricing, telemetry, health) with an overall score and actionable recommendations. New flow action 'Generate performance report' and daily trigger 'Performance report ready' (23:00) both return score, rating, summary, and full JSON.",
+    "nl": "Toegevoegd: Prestatierapport beoordeelt je warmtepomp op 7 domeinen (efficiëntie, gebouwmodel, ontdooiing, energie, energieprijzen, telemetrie, gezondheid) met een totaalscore en actiegerichte aanbevelingen. Nieuwe flow actie 'Genereer prestatierapport' en dagelijkse trigger 'Prestatierapport gereed' (23:00) retourneren beide score, beoordeling, samenvatting en volledig JSON.",
+    "de": "Hinzugefügt: Leistungsbericht bewertet Ihre Wärmepumpe in 7 Bereichen (Effizienz, Gebäudemodell, Abtauung, Energie, Energiepreise, Telemetrie, Gesundheit) mit Gesamtbewertung und umsetzbaren Empfehlungen. Neue Flow-Aktion 'Leistungsbericht erstellen' und täglicher Trigger 'Leistungsbericht bereit' (23:00) geben beide Score, Einstufung, Zusammenfassung und vollständiges JSON zurück.",
+    "fr": "Ajouté: Rapport de performance évalue votre pompe à chaleur sur 7 domaines (efficacité, bâtiment, dégivrage, énergie, prix, télémétrie, santé) avec un score global et des recommandations concrètes. Nouvelle action de flux 'Générer rapport de performance' et déclencheur quotidien 'Rapport de performance prêt' (23h00) retournent tous deux score, évaluation, résumé et JSON complet."
+  },
   "2.9.9": {
     "en": "Open-Meteo weather data is now fetched every hour instead of every 2 hours. Flow card data (wind, outdoor temperature, solar radiation) now takes priority for up to 1 hour; after 1 hour without a new update, Open-Meteo data is used automatically.",
     "nl": "Open-Meteo weerdata wordt nu elk uur opgehaald in plaats van elke 2 uur. Flow kaart data (wind, buitentemperatuur, zonnestraling) heeft nu prioriteit gedurende maximaal 1 uur; na 1 uur zonder nieuwe meting wordt automatisch Open-Meteo data gebruikt.",

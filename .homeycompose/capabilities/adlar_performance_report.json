@@ -1,0 +1,26 @@
+{
+    "id": "adlar_performance_report",
+    "type": "string",
+    "title": {
+        "en": "Performance Report",
+        "nl": "Prestatierapport",
+        "de": "Leistungsbericht",
+        "fr": "Rapport de Performance"
+    },
+    "desc": {
+        "en": "Structured JSON performance scorecard with 7 domains: efficiency, building, defrost, energy, pricing, telemetry, health (0-100 scores with recommendations)",
+        "nl": "Gestructureerd JSON prestatierapport met 7 domeinen: efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie, gezondheid (0-100 scores met aanbevelingen)",
+        "de": "Strukturierter JSON-Leistungsbericht mit 7 Bereichen: Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie, Gesundheit (0-100 Bewertungen mit Empfehlungen)",
+        "fr": "Rapport de performance JSON structuré avec 7 domaines : efficacité, bâtiment, dégivrage, énergie, prix, télémétrie, santé (scores 0-100 avec recommandations)"
+    },
+    "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+    },
+    "getable": true,
+    "setable": false,
+    "uiComponent": null,
+    "icon": "/assets/adaptive-control-diagnostics.svg"
+}

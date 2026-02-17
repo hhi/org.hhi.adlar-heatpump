@@ -439,8 +439,13 @@ export class AdaptiveControlService {
       this.controlIntervalMs,
     );
 
-    // Execute first cycle immediately
-    await this.executeControlCycle();
+    // Execute first cycle shortly after start — non-blocking to prevent onSettings timeout (v2.10.0)
+    // Homey enforces a 10s timeout on onSettings; running the full cycle inline risks exceeding it.
+    this.device.homey.setTimeout(() => {
+      this.executeControlCycle().catch((err) => {
+        this.device.error('AdaptiveControlService: Initial cycle failed:', err);
+      });
+    }, 1000);
 
     // Emit status change trigger
     await this.triggerStatusChange(
