@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.9.9",
+  "version": "2.9.10",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -2939,6 +2939,75 @@
               "fr": "Température de sortie actuelle"
             },
             "example": 25.5
+          }
+        ]
+      },
+      {
+        "id": "performance_report_ready",
+        "title": {
+          "en": "Performance report is ready",
+          "nl": "Prestatierapport is beschikbaar",
+          "de": "Leistungsbericht ist verfügbar",
+          "fr": "Le rapport de performance est prêt"
+        },
+        "hint": {
+          "en": "Triggered daily at 23:00 with a comprehensive performance report. Use in combination with a notification action to receive daily performance summaries.",
+          "nl": "Wordt dagelijks om 23:00 afgevuurd met een uitgebreid prestatierapport. Gebruik in combinatie met een melding-actie om dagelijkse prestatieoverzichten te ontvangen.",
+          "de": "Wird täglich um 23:00 Uhr mit einem umfassenden Leistungsbericht ausgelöst. Verwenden Sie in Kombination mit einer Benachrichtigungsaktion für tägliche Leistungszusammenfassungen.",
+          "fr": "Déclenché quotidiennement à 23h00 avec un rapport de performance complet. Utilisez en combinaison avec une action de notification pour recevoir des résumés quotidiens."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "overall_score",
+            "type": "number",
+            "title": {
+              "en": "Overall score (0-100)",
+              "nl": "Totaalscore (0-100)",
+              "de": "Gesamtbewertung (0-100)",
+              "fr": "Score global (0-100)"
+            },
+            "example": 82
+          },
+          {
+            "name": "rating",
+            "type": "string",
+            "title": {
+              "en": "Rating",
+              "nl": "Beoordeling",
+              "de": "Bewertung",
+              "fr": "Évaluation"
+            },
+            "example": "Good"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "title": {
+              "en": "Summary",
+              "nl": "Samenvatting",
+              "de": "Zusammenfassung",
+              "fr": "Résumé"
+            },
+            "example": "Your heat pump is performing well (82/100)."
+          },
+          {
+            "name": "report_json",
+            "type": "string",
+            "title": {
+              "en": "Full report (JSON)",
+              "nl": "Volledig rapport (JSON)",
+              "de": "Vollständiger Bericht (JSON)",
+              "fr": "Rapport complet (JSON)"
+            },
+            "example": "{}"
           }
         ]
       },
@@ -6119,6 +6188,75 @@
         ]
       },
       {
+        "id": "generate_performance_report",
+        "title": {
+          "en": "Generate performance report",
+          "nl": "Genereer prestatierapport",
+          "de": "Leistungsbericht erstellen",
+          "fr": "Générer un rapport de performance"
+        },
+        "hint": {
+          "en": "Generate a comprehensive heat pump performance report with scores across 7 domains (efficiency, building, defrost, energy, pricing, telemetry, health). Returns overall score, rating, and actionable recommendations.",
+          "nl": "Genereer een uitgebreid warmtepomp prestatierapport met scores over 7 domeinen (efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie, gezondheid). Retourneert totaalscore, beoordeling en bruikbare aanbevelingen.",
+          "de": "Erstellen Sie einen umfassenden Wärmepumpen-Leistungsbericht mit Bewertungen in 7 Bereichen (Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie, Gesundheit). Gibt Gesamtbewertung, Einstufung und umsetzbare Empfehlungen zurück.",
+          "fr": "Générez un rapport complet de performance de la pompe à chaleur avec des scores dans 7 domaines (efficacité, bâtiment, dégivrage, énergie, prix, télémétrie, santé). Retourne le score global, l'évaluation et des recommandations pratiques."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "overall_score",
+            "type": "number",
+            "title": {
+              "en": "Overall score (0-100)",
+              "nl": "Totaalscore (0-100)",
+              "de": "Gesamtbewertung (0-100)",
+              "fr": "Score global (0-100)"
+            },
+            "example": 82
+          },
+          {
+            "name": "rating",
+            "type": "string",
+            "title": {
+              "en": "Rating",
+              "nl": "Beoordeling",
+              "de": "Bewertung",
+              "fr": "Évaluation"
+            },
+            "example": "Good"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "title": {
+              "en": "Summary",
+              "nl": "Samenvatting",
+              "de": "Zusammenfassung",
+              "fr": "Résumé"
+            },
+            "example": "Your heat pump is performing well (82/100)."
+          },
+          {
+            "name": "report_json",
+            "type": "string",
+            "title": {
+              "en": "Full report (JSON)",
+              "nl": "Volledig rapport (JSON)",
+              "de": "Vollständiger Bericht (JSON)",
+              "fr": "Rapport complet (JSON)"
+            },
+            "example": "{}"
+          }
+        ]
+      },
+      {
         "id": "get_seasonal_mode",
         "title": {
           "en": "Get current seasonal mode",
@@ -7434,7 +7572,8 @@
         "adlar_last_wind_received",
         "adlar_last_solar_power_received",
         "adlar_last_solar_radiation_received",
-        "adlar_last_indoor_temp_received"
+        "adlar_last_indoor_temp_received",
+        "adlar_performance_report"
       ],
       "capabilitiesOptions": {
         "measure_power": {
@@ -12076,6 +12215,32 @@
       "decimals": 1,
       "min": -48,
       "max": 48
+    },
+    "adlar_performance_report": {
+      "id": "adlar_performance_report",
+      "type": "string",
+      "title": {
+        "en": "Performance Report",
+        "nl": "Prestatierapport",
+        "de": "Leistungsbericht",
+        "fr": "Rapport de Performance"
+      },
+      "desc": {
+        "en": "Structured JSON performance scorecard with 7 domains: efficiency, building, defrost, energy, pricing, telemetry, health (0-100 scores with recommendations)",
+        "nl": "Gestructureerd JSON prestatierapport met 7 domeinen: efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie, gezondheid (0-100 scores met aanbevelingen)",
+        "de": "Strukturierter JSON-Leistungsbericht mit 7 Bereichen: Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie, Gesundheit (0-100 Bewertungen mit Empfehlungen)",
+        "fr": "Rapport de performance JSON structuré avec 7 domaines : efficacité, bâtiment, dégivrage, énergie, prix, télémétrie, santé (scores 0-100 avec recommandations)"
+      },
+      "units": {
+        "en": "",
+        "nl": "",
+        "de": "",
+        "fr": ""
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/adaptive-control-diagnostics.svg"
     },
     "adlar_picker_countdown_set": {
       "id": "adlar_picker_countdown_set",

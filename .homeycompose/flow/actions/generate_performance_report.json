@@ -1,0 +1,69 @@
+{
+    "id": "generate_performance_report",
+    "title": {
+        "en": "Generate performance report",
+        "nl": "Genereer prestatierapport",
+        "de": "Leistungsbericht erstellen",
+        "fr": "Générer un rapport de performance"
+    },
+    "hint": {
+        "en": "Generate a comprehensive heat pump performance report with scores across 7 domains (efficiency, building, defrost, energy, pricing, telemetry, health). Returns overall score, rating, and actionable recommendations.",
+        "nl": "Genereer een uitgebreid warmtepomp prestatierapport met scores over 7 domeinen (efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie, gezondheid). Retourneert totaalscore, beoordeling en bruikbare aanbevelingen.",
+        "de": "Erstellen Sie einen umfassenden Wärmepumpen-Leistungsbericht mit Bewertungen in 7 Bereichen (Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie, Gesundheit). Gibt Gesamtbewertung, Einstufung und umsetzbare Empfehlungen zurück.",
+        "fr": "Générez un rapport complet de performance de la pompe à chaleur avec des scores dans 7 domaines (efficacité, bâtiment, dégivrage, énergie, prix, télémétrie, santé). Retourne le score global, l'évaluation et des recommandations pratiques."
+    },
+    "highlight": true,
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+        }
+    ],
+    "tokens": [
+        {
+            "name": "overall_score",
+            "type": "number",
+            "title": {
+                "en": "Overall score (0-100)",
+                "nl": "Totaalscore (0-100)",
+                "de": "Gesamtbewertung (0-100)",
+                "fr": "Score global (0-100)"
+            },
+            "example": 82
+        },
+        {
+            "name": "rating",
+            "type": "string",
+            "title": {
+                "en": "Rating",
+                "nl": "Beoordeling",
+                "de": "Bewertung",
+                "fr": "Évaluation"
+            },
+            "example": "Good"
+        },
+        {
+            "name": "summary",
+            "type": "string",
+            "title": {
+                "en": "Summary",
+                "nl": "Samenvatting",
+                "de": "Zusammenfassung",
+                "fr": "Résumé"
+            },
+            "example": "Your heat pump is performing well (82/100)."
+        },
+        {
+            "name": "report_json",
+            "type": "string",
+            "title": {
+                "en": "Full report (JSON)",
+                "nl": "Volledig rapport (JSON)",
+                "de": "Vollständiger Bericht (JSON)",
+                "fr": "Rapport complet (JSON)"
+            },
+            "example": "{}"
+        }
+    ]
+}

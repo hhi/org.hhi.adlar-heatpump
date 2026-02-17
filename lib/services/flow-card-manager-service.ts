@@ -25,6 +25,8 @@ export class FlowCardManagerService {
   private flowCardListeners = new Map<string, unknown>();
   private isInitialized = false;
   private initializationRetryTimer: NodeJS.Timeout | null = null;
+  private dailyReportTimer: NodeJS.Timeout | null = null;
+  private dailyReportInterval: NodeJS.Timeout | null = null;
 
   /**
    * FlowCardManagerService manages registering/unregistering and invoking flow cards
@@ -109,6 +111,9 @@ export class FlowCardManagerService {
 
       // Register external data action cards (v2.6.1 - consolidates from device.ts)
       await this.registerExternalDataActionCards();
+
+      // Register Performance Report action card (v2.9.0)
+      await this.registerPerformanceReportCard();
 
       this.logger('FlowCardManagerService: Flow cards updated successfully');
     } catch (error) {
@@ -890,6 +895,117 @@ export class FlowCardManagerService {
   }
 
   /**
+   * Register Performance Report flow cards (v2.9.0)
+   * - Action: Generate performance report (on-demand)
+   * - Trigger: Performance report ready (daily at 23:00)
+   */
+  private async registerPerformanceReportCard(): Promise<void> {
+    try {
+      // ── Action Card: Generate Performance Report ──
+      const generateReportCard = this.device.homey.flow.getActionCard('generate_performance_report');
+      const generateReportListener = generateReportCard.registerRunListener(async () => {
+        this.logger('FlowCardManagerService: Generate performance report action triggered');
+        return this.generateAndStoreReport();
+      });
+      this.flowCardListeners.set('generate_performance_report', generateReportListener);
+
+      // ── Trigger Card: Performance Report Ready (daily) ──
+      const reportReadyTrigger = this.device.homey.flow.getDeviceTriggerCard('performance_report_ready');
+      this.flowCardListeners.set('performance_report_ready', reportReadyTrigger);
+
+      // Schedule daily report at 23:00
+      this.scheduleDailyReportTimer(reportReadyTrigger);
+
+      this.logger('FlowCardManagerService: Performance Report cards registered (1 action + 1 trigger)');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering Performance Report cards:', error);
+    }
+  }
+
+  /**
+   * Generate a performance report, store it in the capability, and return tokens.
+   */
+  private async generateAndStoreReport(): Promise<{
+    overall_score: number; rating: string; summary: string; report_json: string;
+  }> {
+    const { PerformanceReportService } = await import('./performance-report-service.js');
+    const reportService = new PerformanceReportService({
+      device: this.device,
+      logger: this.logger,
+    });
+
+    const report = reportService.generateReport();
+
+    // Store report in capability
+    const reportJson = JSON.stringify(report);
+    if (this.device.hasCapability('adlar_performance_report')) {
+      await this.device.setCapabilityValue('adlar_performance_report', reportJson);
+    }
+
+    this.logger(`FlowCardManagerService: Performance report generated — score ${report.overallScore}, ${report.scoredDomains}/${report.totalDomains} domains`);
+
+    return {
+      overall_score: report.overallScore,
+      rating: report.rating,
+      summary: report.summary,
+      report_json: reportJson,
+    };
+  }
+
+  /**
+   * Schedule daily performance report trigger at 23:00 local time.
+   * Uses setTimeout to align to the next 23:00, then setInterval for subsequent days.
+   */
+  private scheduleDailyReportTimer(triggerCard: unknown): void {
+    // Clear any existing timer
+    if (this.dailyReportTimer !== null) {
+      this.device.homey.clearTimeout(this.dailyReportTimer);
+      this.dailyReportTimer = null;
+    }
+    if (this.dailyReportInterval !== null) {
+      this.device.homey.clearInterval(this.dailyReportInterval);
+      this.dailyReportInterval = null;
+    }
+
+    // Calculate ms until next 23:00
+    const now = new Date();
+    const next2300 = new Date();
+    next2300.setHours(23, 0, 0, 0);
+    if (now >= next2300) {
+      next2300.setDate(next2300.getDate() + 1);
+    }
+    const msUntil2300 = next2300.getTime() - now.getTime();
+
+    this.logger(`FlowCardManagerService: Daily report scheduled in ${(msUntil2300 / 3600000).toFixed(1)}h (${next2300.toISOString()})`);
+
+    const fireDailyReport = async () => {
+      try {
+        const tokens = await this.generateAndStoreReport();
+
+        // Fire trigger card with tokens
+        if (triggerCard && typeof (triggerCard as { trigger: Function }).trigger === 'function') {
+          await (triggerCard as { trigger: (device: unknown, tokens: unknown) => Promise<void> })
+            .trigger(this.device, tokens);
+          this.logger('FlowCardManagerService: Daily performance report trigger fired');
+        }
+      } catch (error) {
+        this.logger('FlowCardManagerService: Error firing daily report trigger:', error);
+      }
+    };
+
+    // First fire: align to 23:00
+    this.dailyReportTimer = this.device.homey.setTimeout(async () => {
+      await fireDailyReport();
+
+      // Subsequent fires: every 24 hours
+      this.dailyReportInterval = this.device.homey.setInterval(
+        () => { fireDailyReport(); },
+        24 * 60 * 60 * 1000,
+      );
+    }, msUntil2300);
+  }
+
+  /**
    * Register external data action cards (v2.6.1)
    * Consolidates all receive_external_* action cards and diagnose_building_model
    * Previously in device.ts registerFlowCardActionListeners()
@@ -1042,6 +1158,17 @@ export class FlowCardManagerService {
       }
     });
     this.flowCardListeners.clear();
+
+    // Clean up daily report timer (v2.9.0)
+    if (this.dailyReportTimer !== null) {
+      this.device.homey.clearTimeout(this.dailyReportTimer);
+      this.dailyReportTimer = null;
+    }
+    if (this.dailyReportInterval !== null) {
+      this.device.homey.clearInterval(this.dailyReportInterval);
+      this.dailyReportInterval = null;
+    }
+
     this.logger('All flow card listeners unregistered');
   }
 

@@ -1,0 +1,69 @@
+{
+    "id": "performance_report_ready",
+    "title": {
+        "en": "Performance report is ready",
+        "nl": "Prestatierapport is beschikbaar",
+        "de": "Leistungsbericht ist verfügbar",
+        "fr": "Le rapport de performance est prêt"
+    },
+    "hint": {
+        "en": "Triggered daily at 23:00 with a comprehensive performance report. Use in combination with a notification action to receive daily performance summaries.",
+        "nl": "Wordt dagelijks om 23:00 afgevuurd met een uitgebreid prestatierapport. Gebruik in combinatie met een melding-actie om dagelijkse prestatieoverzichten te ontvangen.",
+        "de": "Wird täglich um 23:00 Uhr mit einem umfassenden Leistungsbericht ausgelöst. Verwenden Sie in Kombination mit einer Benachrichtigungsaktion für tägliche Leistungszusammenfassungen.",
+        "fr": "Déclenché quotidiennement à 23h00 avec un rapport de performance complet. Utilisez en combinaison avec une action de notification pour recevoir des résumés quotidiens."
+    },
+    "highlight": true,
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heat-pump"
+        }
+    ],
+    "tokens": [
+        {
+            "name": "overall_score",
+            "type": "number",
+            "title": {
+                "en": "Overall score (0-100)",
+                "nl": "Totaalscore (0-100)",
+                "de": "Gesamtbewertung (0-100)",
+                "fr": "Score global (0-100)"
+            },
+            "example": 82
+        },
+        {
+            "name": "rating",
+            "type": "string",
+            "title": {
+                "en": "Rating",
+                "nl": "Beoordeling",
+                "de": "Bewertung",
+                "fr": "Évaluation"
+            },
+            "example": "Good"
+        },
+        {
+            "name": "summary",
+            "type": "string",
+            "title": {
+                "en": "Summary",
+                "nl": "Samenvatting",
+                "de": "Zusammenfassung",
+                "fr": "Résumé"
+            },
+            "example": "Your heat pump is performing well (82/100)."
+        },
+        {
+            "name": "report_json",
+            "type": "string",
+            "title": {
+                "en": "Full report (JSON)",
+                "nl": "Volledig rapport (JSON)",
+                "de": "Vollständiger Bericht (JSON)",
+                "fr": "Rapport complet (JSON)"
+            },
+            "example": "{}"
+        }
+    ]
+}
