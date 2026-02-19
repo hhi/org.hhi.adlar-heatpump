@@ -73,6 +73,7 @@ interface Translations {
   recommendations: Record<string, string>;
   summaryTemplate: string;
   summaryPartial: string;
+  summaryDisabled: string;
   domainNames: Record<string, string>;
   telemetry: Record<string, string>;
 }
@@ -102,6 +103,7 @@ const TRANSLATIONS: Record<string, Translations> = {
     },
     summaryTemplate: 'Je warmtepomp presteert {rating} ({score}/100 op basis van {scored} van {total} domeinen).',
     summaryPartial: ' {missing} niet beschikbaar.',
+    summaryDisabled: ' Activeer {disabled} voor een vollediger rapport.',
     domainNames: {
       efficiency: 'Efficiëntie', building: 'Gebouwmodel', defrost: 'Ontdooiing',
       energy: 'Energie', pricing: 'Energieprijzen', telemetry: 'Telemetrie', health: 'Gezondheid',
@@ -138,6 +140,7 @@ const TRANSLATIONS: Record<string, Translations> = {
     },
     summaryTemplate: 'Your heat pump is performing {rating} ({score}/100 based on {scored} of {total} domains).',
     summaryPartial: ' {missing} not available.',
+    summaryDisabled: ' Enable {disabled} for a more complete report.',
     domainNames: {
       efficiency: 'Efficiency', building: 'Building model', defrost: 'Defrost',
       energy: 'Energy', pricing: 'Energy prices', telemetry: 'Telemetry', health: 'Health',
@@ -174,6 +177,7 @@ const TRANSLATIONS: Record<string, Translations> = {
     },
     summaryTemplate: 'Ihre Wärmepumpe arbeitet {rating} ({score}/100 basierend auf {scored} von {total} Bereichen).',
     summaryPartial: ' {missing} nicht verfügbar.',
+    summaryDisabled: ' Aktivieren Sie {disabled} für einen vollständigeren Bericht.',
     domainNames: {
       efficiency: 'Effizienz', building: 'Gebäudemodell', defrost: 'Abtauung',
       energy: 'Energie', pricing: 'Energiepreise', telemetry: 'Telemetrie', health: 'Gesundheit',
@@ -210,6 +214,7 @@ const TRANSLATIONS: Record<string, Translations> = {
     },
     summaryTemplate: 'Votre pompe à chaleur fonctionne {rating} ({score}/100 basé sur {scored} sur {total} domaines).',
     summaryPartial: ' {missing} non disponible(s).',
+    summaryDisabled: ' Activez {disabled} pour un rapport plus complet.',
     domainNames: {
       efficiency: 'Efficacité', building: 'Modèle bâtiment', defrost: 'Dégivrage',
       energy: 'Énergie', pricing: 'Prix énergie', telemetry: 'Télémétrie', health: 'Santé',
@@ -817,13 +822,21 @@ export class PerformanceReportService {
       .replace('{scored}', String(scoredDomains))
       .replace('{total}', String(TOTAL_DOMAINS));
 
-    // List missing domains
-    const missingDomains = Object.entries(scores)
-      .filter(([, v]) => v.status !== 'scored')
+    // List unavailable/learning domains separately from disabled domains
+    const unavailableDomains = Object.entries(scores)
+      .filter(([, v]) => v.status === 'unavailable' || v.status === 'learning')
       .map(([k]) => t.domainNames[k] || k);
 
-    if (missingDomains.length > 0) {
-      summary += t.summaryPartial.replace('{missing}', missingDomains.join(', '));
+    const disabledDomains = Object.entries(scores)
+      .filter(([, v]) => v.status === 'disabled')
+      .map(([k]) => t.domainNames[k] || k);
+
+    if (unavailableDomains.length > 0) {
+      summary += t.summaryPartial.replace('{missing}', unavailableDomains.join(', '));
+    }
+
+    if (disabledDomains.length > 0) {
+      summary += t.summaryDisabled.replace('{disabled}', disabledDomains.join(', '));
     }
 
     return summary;

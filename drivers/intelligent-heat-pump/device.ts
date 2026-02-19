@@ -3844,6 +3844,16 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.9.11: Add performance score sensor capability (insights-enabled)
+      if (!this.hasCapability('adlar_performance_score')) {
+        try {
+          await this.addCapability('adlar_performance_score');
+          this.log('Migration v2.9.11: Added adlar_performance_score capability');
+        } catch (error) {
+          this.error('Failed to add adlar_performance_score capability:', error);
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');

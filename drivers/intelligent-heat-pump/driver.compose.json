@@ -104,6 +104,7 @@
     "adlar_last_solar_power_received",
     "adlar_last_solar_radiation_received",
     "adlar_last_indoor_temp_received",
+    "adlar_performance_score",
     "adlar_performance_report"
   ],
   "capabilitiesOptions": {
