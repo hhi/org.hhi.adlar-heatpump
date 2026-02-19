@@ -55,6 +55,17 @@
             "example": "Your heat pump is performing well (82/100)."
         },
         {
+            "name": "recommendations",
+            "type": "string",
+            "title": {
+                "en": "Recommendations",
+                "nl": "Aanbevelingen",
+                "de": "Empfehlungen",
+                "fr": "Recommandations"
+            },
+            "example": "COP trend is stable — good performance\nWater ΔT is high — check water flow rate and filter"
+        },
+        {
             "name": "report_json",
             "type": "string",
             "title": {

@@ -27,6 +27,7 @@ export class FlowCardManagerService {
   private initializationRetryTimer: NodeJS.Timeout | null = null;
   private dailyReportTimer: NodeJS.Timeout | null = null;
   private dailyReportInterval: NodeJS.Timeout | null = null;
+  private initReportScheduled: boolean = false;
 
   /**
    * FlowCardManagerService manages registering/unregistering and invoking flow cards
@@ -916,6 +917,15 @@ export class FlowCardManagerService {
       // Schedule daily report at 23:00
       this.scheduleDailyReportTimer(reportReadyTrigger);
 
+      // Schedule one-time init report 2 minutes after startup (v2.9.11)
+      if (!this.initReportScheduled) {
+        this.initReportScheduled = true;
+        this.device.homey.setTimeout(() => {
+          this.refreshPerformanceReportSilently();
+        }, 2 * 60 * 1000);
+        this.logger('FlowCardManagerService: Init performance report scheduled in 2 minutes');
+      }
+
       this.logger('FlowCardManagerService: Performance Report cards registered (1 action + 1 trigger)');
     } catch (error) {
       this.logger('FlowCardManagerService: Error registering Performance Report cards:', error);
@@ -923,10 +933,24 @@ export class FlowCardManagerService {
   }
 
   /**
+   * Silently refresh the performance report and store result in capabilities.
+   * Does NOT fire the performance_report_ready trigger card.
+   * Called on app init (after 2 min delay) and on domain-affecting settings changes.
+   */
+  public async refreshPerformanceReportSilently(): Promise<void> {
+    try {
+      await this.generateAndStoreReport();
+      this.logger('FlowCardManagerService: Performance report refreshed silently');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Silent report refresh failed:', error);
+    }
+  }
+
+  /**
    * Generate a performance report, store it in the capability, and return tokens.
    */
   private async generateAndStoreReport(): Promise<{
-    overall_score: number; rating: string; summary: string; report_json: string;
+    overall_score: number; rating: string; summary: string; recommendations: string; report_json: string;
   }> {
     const { PerformanceReportService } = await import('./performance-report-service.js');
     const reportService = new PerformanceReportService({
@@ -936,8 +960,11 @@ export class FlowCardManagerService {
 
     const report = reportService.generateReport();
 
-    // Store report in capability
+    // Store report in capabilities
     const reportJson = JSON.stringify(report);
+    if (this.device.hasCapability('adlar_performance_score')) {
+      await this.device.setCapabilityValue('adlar_performance_score', report.overallScore);
+    }
     if (this.device.hasCapability('adlar_performance_report')) {
       await this.device.setCapabilityValue('adlar_performance_report', reportJson);
     }
@@ -948,6 +975,7 @@ export class FlowCardManagerService {
       overall_score: report.overallScore,
       rating: report.rating,
       summary: report.summary,
+      recommendations: report.recommendations.join('\n'),
       report_json: reportJson,
     };
   }

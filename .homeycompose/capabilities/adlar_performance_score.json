@@ -1,0 +1,37 @@
+{
+  "id": "adlar_performance_score",
+  "title": {
+    "en": "Performance Score",
+    "nl": "Prestatiescore",
+    "de": "Leistungsbewertung",
+    "fr": "Score de performance"
+  },
+  "type": "number",
+  "units": {
+    "en": "/100",
+    "nl": "/100",
+    "de": "/100",
+    "fr": "/100"
+  },
+  "min": 0,
+  "max": 100,
+  "step": 1,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Daily Heat Pump Performance Score",
+    "nl": "Dagelijkse Warmtepomp Prestatiescore",
+    "de": "Tägliche Wärmepumpen-Leistungsbewertung",
+    "fr": "Score de performance quotidien de la pompe à chaleur"
+  },
+  "icon": "/assets/adaptive-control-diagnostics.svg",
+  "description": {
+    "en": "Overall daily performance score (0-100) across 7 domains: efficiency, building, defrost, energy, pricing, telemetry and health. Updated daily at 23:00 and on demand.",
+    "nl": "Dagelijkse totale prestatiescore (0-100) over 7 domeinen: efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie en gezondheid. Dagelijks bijgewerkt om 23:00 en op aanvraag.",
+    "de": "Täglicher Gesamt-Leistungsscore (0-100) über 7 Bereiche: Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie und Gesundheit. Täglich um 23:00 Uhr und auf Anfrage aktualisiert.",
+    "fr": "Score de performance global quotidien (0-100) sur 7 domaines : efficacité, bâtiment, dégivrage, énergie, prix, télémétrie et santé. Mis à jour quotidiennement à 23h00 et à la demande."
+  }
+}

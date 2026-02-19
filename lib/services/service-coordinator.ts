@@ -455,6 +455,21 @@ export class ServiceCoordinator {
       this.logger('ServiceCoordinator: BuildingInsights settings update failed (non-critical)', error);
       // Don't throw - allow settings save to succeed even if insights fail
     }
+
+    // Refresh performance report when domain-affecting settings change (v2.9.11)
+    const reportDomainKeys = [
+      'cop_calculation_enabled',
+      'adaptive_control_enabled',
+      'enable_intelligent_energy_tracking',
+      'price_optimizer_enabled',
+    ];
+    if (changedKeys.some((k) => reportDomainKeys.includes(k))) {
+      try {
+        await this.flowCardManager.refreshPerformanceReportSilently();
+      } catch (error) {
+        this.logger('ServiceCoordinator: Performance report refresh after settings change failed (non-critical)', error);
+      }
+    }
   }
 
   /**

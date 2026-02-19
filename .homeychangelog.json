@@ -1,4 +1,10 @@
 {
+  "2.9.11": {
+    "en": "Added: Performance Score capability (0–100) now tracks daily heat pump performance in Homey Insights. Performance report flow cards include a new Recommendations token with actionable diagnostics per domain.",
+    "nl": "Toegevoegd: Prestatiescore capability (0–100) volgt nu dagelijkse warmtepomp prestaties in Homey Insights. Performance rapport flow cards bevatten nu een Aanbevelingen token met bruikbare diagnostiek per domein.",
+    "de": "Hinzugefügt: Leistungsbewertungs-Capability (0–100) verfolgt jetzt die tägliche Wärmepumpen-Leistung in Homey Insights. Performance-Bericht-Flow-Karten enthalten jetzt ein Empfehlungen-Token mit umsetzbaren Diagnosen pro Bereich.",
+    "fr": "Ajouté: Capacité Score de performance (0–100) suit maintenant les performances quotidiennes de la pompe à chaleur dans Homey Insights. Les cartes de flux de rapport de performance incluent un nouveau token Recommandations avec diagnostics pratiques par domaine."
+  },
   "2.9.10": {
     "en": "Added: Performance Report scores your heat pump across 7 domains (efficiency, building, defrost, energy, pricing, telemetry, health) with an overall score and actionable recommendations. New flow action 'Generate performance report' and daily trigger 'Performance report ready' (23:00) both return score, rating, summary, and full JSON.",
     "nl": "Toegevoegd: Prestatierapport beoordeelt je warmtepomp op 7 domeinen (efficiëntie, gebouwmodel, ontdooiing, energie, energieprijzen, telemetrie, gezondheid) met een totaalscore en actiegerichte aanbevelingen. Nieuwe flow actie 'Genereer prestatierapport' en dagelijkse trigger 'Prestatierapport gereed' (23:00) retourneren beide score, beoordeling, samenvatting en volledig JSON.",
