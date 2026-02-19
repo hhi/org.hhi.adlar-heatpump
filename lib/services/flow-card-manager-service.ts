@@ -28,6 +28,7 @@ export class FlowCardManagerService {
   private dailyReportTimer: NodeJS.Timeout | null = null;
   private dailyReportInterval: NodeJS.Timeout | null = null;
   private initReportScheduled: boolean = false;
+  private reportReadyTriggerCard: unknown = null;
 
   /**
    * FlowCardManagerService manages registering/unregistering and invoking flow cards
@@ -911,11 +912,16 @@ export class FlowCardManagerService {
       this.flowCardListeners.set('generate_performance_report', generateReportListener);
 
       // ── Trigger Card: Performance Report Ready (daily) ──
-      const reportReadyTrigger = this.device.homey.flow.getDeviceTriggerCard('performance_report_ready');
-      this.flowCardListeners.set('performance_report_ready', reportReadyTrigger);
+      // Store as a dedicated class property — NOT in flowCardListeners.
+      // This prevents unregisterAllFlowCards() from calling unregister() on it
+      // and keeps the 23:00 timer lifecycle independent from flow card re-registration.
+      this.reportReadyTriggerCard = this.device.homey.flow.getDeviceTriggerCard('performance_report_ready');
 
-      // Schedule daily report at 23:00
-      this.scheduleDailyReportTimer(reportReadyTrigger);
+      // Schedule daily report at 23:00 only if not already scheduled.
+      // The timer must survive updateFlowCards() calls — it is only cleared in destroy().
+      if (this.dailyReportTimer === null && this.dailyReportInterval === null) {
+        this.scheduleDailyReportTimer(this.reportReadyTriggerCard);
+      }
 
       // Schedule one-time init report 2 minutes after startup (v2.9.11)
       if (!this.initReportScheduled) {
@@ -1187,15 +1193,9 @@ export class FlowCardManagerService {
     });
     this.flowCardListeners.clear();
 
-    // Clean up daily report timer (v2.9.0)
-    if (this.dailyReportTimer !== null) {
-      this.device.homey.clearTimeout(this.dailyReportTimer);
-      this.dailyReportTimer = null;
-    }
-    if (this.dailyReportInterval !== null) {
-      this.device.homey.clearInterval(this.dailyReportInterval);
-      this.dailyReportInterval = null;
-    }
+    // Note: dailyReportTimer and dailyReportInterval are intentionally NOT cleared here.
+    // The 23:00 scheduler lifecycle is independent from flow card re-registration.
+    // Timers are only cleared in destroy() when the service is fully shut down.
 
     this.logger('All flow card listeners unregistered');
   }
@@ -1618,6 +1618,16 @@ export class FlowCardManagerService {
     if (this.initializationRetryTimer) {
       clearTimeout(this.initializationRetryTimer);
       this.initializationRetryTimer = null;
+    }
+
+    // Clear daily report timer — only place where these are intentionally destroyed
+    if (this.dailyReportTimer !== null) {
+      this.device.homey.clearTimeout(this.dailyReportTimer);
+      this.dailyReportTimer = null;
+    }
+    if (this.dailyReportInterval !== null) {
+      this.device.homey.clearInterval(this.dailyReportInterval);
+      this.dailyReportInterval = null;
     }
 
     this.unregisterAllFlowCards();
