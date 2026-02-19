@@ -1,4 +1,10 @@
 {
+  "2.9.12": {
+    "en": "Fixed: Performance report trigger (23:00) no longer gets cancelled by flow card re-registration events.",
+    "nl": "Opgelost: Prestatierapport trigger (23:00) wordt niet meer geannuleerd door flow kaart herregistratie-events.",
+    "de": "Behoben: Leistungsbericht-Trigger (23:00) wird nicht mehr durch Flow-Karten-Neuerstellungsereignisse abgebrochen.",
+    "fr": "Corrigé: Le déclencheur du rapport de performance (23:00) ne peut plus être annulé par les événements de réinscription des cartes de flux."
+  },
   "2.9.11": {
     "en": "Added: Performance Score capability (0–100) now tracks daily heat pump performance in Homey Insights. Performance report flow cards include a new Recommendations token with actionable diagnostics per domain.",
     "nl": "Toegevoegd: Prestatiescore capability (0–100) volgt nu dagelijkse warmtepomp prestaties in Homey Insights. Performance rapport flow cards bevatten nu een Aanbevelingen token met bruikbare diagnostiek per domein.",
