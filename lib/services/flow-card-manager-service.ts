@@ -27,6 +27,7 @@ export class FlowCardManagerService {
   private initializationRetryTimer: NodeJS.Timeout | null = null;
   private dailyReportTimer: NodeJS.Timeout | null = null;
   private dailyReportInterval: NodeJS.Timeout | null = null;
+  private hourlyScoreInterval: NodeJS.Timeout | null = null;
   private initReportScheduled: boolean = false;
   private reportReadyTriggerCard: unknown = null;
 
@@ -923,6 +924,14 @@ export class FlowCardManagerService {
         this.scheduleDailyReportTimer(this.reportReadyTriggerCard);
       }
 
+      // Hourly silent score update for Homey Insights (v2.9.13)
+      if (this.hourlyScoreInterval === null) {
+        this.hourlyScoreInterval = this.device.homey.setInterval(() => {
+          this.refreshPerformanceReportSilently();
+        }, 60 * 60 * 1000);
+        this.logger('FlowCardManagerService: Hourly performance score update scheduled');
+      }
+
       // Schedule one-time init report 2 minutes after startup (v2.9.11)
       if (!this.initReportScheduled) {
         this.initReportScheduled = true;
@@ -1618,6 +1627,12 @@ export class FlowCardManagerService {
     if (this.initializationRetryTimer) {
       clearTimeout(this.initializationRetryTimer);
       this.initializationRetryTimer = null;
+    }
+
+    // Clear hourly score interval
+    if (this.hourlyScoreInterval !== null) {
+      this.device.homey.clearInterval(this.hourlyScoreInterval);
+      this.hourlyScoreInterval = null;
     }
 
     // Clear daily report timer — only place where these are intentionally destroyed

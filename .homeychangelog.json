@@ -1,4 +1,10 @@
 {
+  "2.9.13": {
+    "en": "Performance score now updates every hour for continuous Homey Insights tracking.",
+    "nl": "Prestatiescore wordt nu elk uur bijgewerkt voor doorlopende Homey Insights registratie.",
+    "de": "Leistungsbewertung wird jetzt stündlich aktualisiert für kontinuierliche Homey Insights-Aufzeichnung.",
+    "fr": "Le score de performance est maintenant mis à jour toutes les heures pour un suivi continu dans Homey Insights."
+  },
   "2.9.12": {
     "en": "Fixed: Performance report trigger (23:00) no longer gets cancelled by flow card re-registration events.",
     "nl": "Opgelost: Prestatierapport trigger (23:00) wordt niet meer geannuleerd door flow kaart herregistratie-events.",
