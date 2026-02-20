@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.9.12",
+  "version": "2.9.13",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -12268,10 +12268,10 @@
     "adlar_performance_score": {
       "id": "adlar_performance_score",
       "title": {
-        "en": "Performance Score",
-        "nl": "Prestatiescore",
-        "de": "Leistungsbewertung",
-        "fr": "Score de performance"
+        "en": "Performance Score (hourly)",
+        "nl": "Prestatiescore (per uur)",
+        "de": "Leistungsbewertung (stündlich)",
+        "fr": "Score de performance (horaire)"
       },
       "type": "number",
       "units": {
@@ -12289,17 +12289,17 @@
       "uiComponent": "sensor",
       "insights": true,
       "insightsTitle": {
-        "en": "Daily Heat Pump Performance Score",
-        "nl": "Dagelijkse Warmtepomp Prestatiescore",
-        "de": "Tägliche Wärmepumpen-Leistungsbewertung",
-        "fr": "Score de performance quotidien de la pompe à chaleur"
+        "en": "Heat Pump Performance Score (hourly)",
+        "nl": "Warmtepomp Prestatiescore (per uur)",
+        "de": "Wärmepumpen-Leistungsbewertung (stündlich)",
+        "fr": "Score de performance de la pompe à chaleur (horaire)"
       },
       "icon": "/assets/adaptive-control-diagnostics.svg",
       "description": {
-        "en": "Overall daily performance score (0-100) across 7 domains: efficiency, building, defrost, energy, pricing, telemetry and health. Updated daily at 23:00 and on demand.",
-        "nl": "Dagelijkse totale prestatiescore (0-100) over 7 domeinen: efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie en gezondheid. Dagelijks bijgewerkt om 23:00 en op aanvraag.",
-        "de": "Täglicher Gesamt-Leistungsscore (0-100) über 7 Bereiche: Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie und Gesundheit. Täglich um 23:00 Uhr und auf Anfrage aktualisiert.",
-        "fr": "Score de performance global quotidien (0-100) sur 7 domaines : efficacité, bâtiment, dégivrage, énergie, prix, télémétrie et santé. Mis à jour quotidiennement à 23h00 et à la demande."
+        "en": "Overall performance score (0-100) across 7 domains: efficiency, building, defrost, energy, pricing, telemetry and health. Updated every hour and at 23:00 daily.",
+        "nl": "Totale prestatiescore (0-100) over 7 domeinen: efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie en gezondheid. Elk uur en dagelijks om 23:00 bijgewerkt.",
+        "de": "Gesamt-Leistungsscore (0-100) über 7 Bereiche: Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie und Gesundheit. Stündlich und täglich um 23:00 Uhr aktualisiert.",
+        "fr": "Score de performance global (0-100) sur 7 domaines : efficacité, bâtiment, dégivrage, énergie, prix, télémétrie et santé. Mis à jour toutes les heures et quotidiennement à 23h00."
       }
     },
     "adlar_picker_countdown_set": {
