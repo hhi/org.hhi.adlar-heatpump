@@ -239,6 +239,10 @@ class MyDevice extends Homey.Device {
   private defrostStartTime: number | null = null; // v2.9.0: DefrostLearner event tracking
   private lastBackwaterState: boolean | null = null;
 
+  // Rolling 24h defrost statistics (v2.9.14: moved from AdaptiveControlService)
+  private defrostHistory: { timestamp: number; durationSec: number }[] = [];
+  private defrost24hRefreshInterval: NodeJS.Timeout | null = null;
+
   // Enum mode change tracking (v1.1.0 - enum state change triggers)
   private lastHeatingMode: string | null = null;
   private lastWorkMode: string | null = null;
@@ -1526,6 +1530,13 @@ class MyDevice extends Homey.Device {
         this.categoryLog('energy', 'Defrost active power capability initialized with default value (0 W)');
       }
 
+      // v2.9.14: Restore and start 24h defrost counter tracking
+      if (this.hasCapability('adlar_defrost_count_24h') || this.hasCapability('adlar_defrost_minutes_24h')) {
+        await this.restoreDefrost24hHistory();
+        this.updateDefrost24hCapabilities();
+        this.startDefrost24hRefresh();
+      }
+
       // Initialize external flow capability with default value
       if (this.hasCapability('adlar_external_flow')) {
         await this.setCapabilityValue('adlar_external_flow', null);
@@ -1885,6 +1896,102 @@ class MyDevice extends Homey.Device {
       this.categoryLog('cop', 'Stopped COP calculation interval');
     }
   }
+
+  // ─── Rolling 24h defrost statistics (v2.9.14) ─────────────────────────────
+
+  /**
+   * Record a completed defrost cycle and update the 24h capability counters.
+   * Called from DPS 33 false-transition handler in device.ts.
+   */
+  private recordDefrostEvent(durationSec: number): void {
+    const now = Date.now();
+    const cutoff = now - 24 * 60 * 60 * 1000;
+
+    this.defrostHistory.push({ timestamp: now, durationSec });
+    // Trim events older than 24h
+    this.defrostHistory = this.defrostHistory.filter((e) => e.timestamp >= cutoff);
+
+    // Persist so the counter survives app restarts/updates
+    this.setStoreValue('defrost_24h_history', this.defrostHistory).catch((err) => {
+      this.error('Failed to persist defrost_24h_history:', err);
+    });
+
+    this.updateDefrost24hCapabilities();
+  }
+
+  /**
+   * Recompute and write adlar_defrost_count_24h and adlar_defrost_minutes_24h
+   * from the rolling defrostHistory. Safe to call at any time (no side effects).
+   */
+  private updateDefrost24hCapabilities(): void {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = this.defrostHistory.filter((e) => e.timestamp >= cutoff);
+    const count = recent.length;
+    const totalMinutes = Math.round(
+      recent.reduce((sum, e) => sum + e.durationSec / 60, 0) * 10,
+    ) / 10;
+
+    if (this.hasCapability('adlar_defrost_count_24h')) {
+      this.setCapabilityValue('adlar_defrost_count_24h', count).catch((err) => {
+        this.error('Failed to update adlar_defrost_count_24h:', err);
+      });
+    }
+    if (this.hasCapability('adlar_defrost_minutes_24h')) {
+      this.setCapabilityValue('adlar_defrost_minutes_24h', totalMinutes).catch((err) => {
+        this.error('Failed to update adlar_defrost_minutes_24h:', err);
+      });
+    }
+  }
+
+  /**
+   * Start periodic refresh of 24h defrost counters so they decay correctly
+   * even when no new defrost cycles occur.
+   */
+  private startDefrost24hRefresh(): void {
+    const interval = this.homey.setInterval(() => {
+      // Trim stale events and refresh capabilities (handles natural decay)
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      this.defrostHistory = this.defrostHistory.filter((e) => e.timestamp >= cutoff);
+      this.updateDefrost24hCapabilities();
+    }, 30 * 60 * 1000); // every 30 minutes
+
+    if (interval) {
+      this.defrost24hRefreshInterval = interval;
+    } else {
+      this.error('Failed to start defrost 24h refresh interval');
+    }
+  }
+
+  /**
+   * Stop periodic 24h defrost refresh interval.
+   */
+  private stopDefrost24hRefresh(): void {
+    if (this.defrost24hRefreshInterval) {
+      this.homey.clearInterval(this.defrost24hRefreshInterval);
+      this.defrost24hRefreshInterval = null;
+    }
+  }
+
+  /**
+   * Restore defrost history from persistent store after app restart/update.
+   * Filters out events older than 24h before restoring.
+   */
+  private async restoreDefrost24hHistory(): Promise<void> {
+    try {
+      const saved = await this.getStoreValue('defrost_24h_history') as
+        | { timestamp: number; durationSec: number }[]
+        | null;
+      if (Array.isArray(saved) && saved.length > 0) {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        this.defrostHistory = saved.filter((e) => e.timestamp >= cutoff);
+        this.log(`Restored ${this.defrostHistory.length} defrost events from store`);
+      }
+    } catch (err) {
+      this.error('Failed to restore defrost_24h_history:', err);
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
 
   /**
    * Start SCOP update interval for daily/periodic SCOP recalculation
@@ -2738,12 +2845,15 @@ class MyDevice extends Homey.Device {
                   // Defrost STARTED
                   this.defrostStartTime = Date.now();
                 } else if (this.defrostStartTime) {
-                  // Defrost ENDED — notify adaptive control for learning
+                  // Defrost ENDED — notify adaptive control for COP learning
                   const durationSec = (Date.now() - this.defrostStartTime) / 1000;
                   const outdoorTemp = this.getCapabilityValue('measure_temperature.outdoor')
                     ?? this.getCapabilityValue('measure_temperature') ?? 0;
                   this.serviceCoordinator?.onDefrostComplete(outdoorTemp, durationSec);
                   this.defrostStartTime = null;
+
+                  // v2.9.14: Update rolling 24h defrost statistics in device.ts
+                  this.recordDefrostEvent(durationSec);
                 }
               }
               this.lastDefrostState = currentState;
@@ -5125,6 +5235,9 @@ class MyDevice extends Homey.Device {
 
     // Stop idle monitoring
     this.stopIdleMonitoring();
+
+    // Stop 24h defrost counter refresh
+    this.stopDefrost24hRefresh();
 
     // Save rolling COP data before shutdown
     await this.saveRollingCOPData();
