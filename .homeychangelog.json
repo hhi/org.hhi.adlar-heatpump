@@ -1,4 +1,10 @@
 {
+  "2.9.14": {
+    "en": "Fixed: Defrost counters (24h count and duration) now correctly decrease when old cycles age out of the 24-hour window, even without new defrost activity. Counters are now preserved across app restarts and updates.",
+    "nl": "Opgelost: Ontdooi-tellers (24u aantal en duur) dalen nu correct als oude cycli buiten het 24-uursvenster vallen, ook zonder nieuwe ontdooiactiviteit. Tellers blijven nu bewaard na een app herstart of update.",
+    "de": "Behoben: Abtauzähler (24h-Anzahl und -Dauer) sinken jetzt korrekt, wenn alte Zyklen das 24-Stunden-Fenster verlassen, auch ohne neue Abtauaktivität. Zähler bleiben jetzt nach einem App-Neustart oder Update erhalten.",
+    "fr": "Corrigé: Les compteurs de dégivrage (nombre et durée sur 24h) diminuent maintenant correctement lorsque les anciens cycles sortent de la fenêtre de 24 heures, même sans nouvelle activité de dégivrage. Les compteurs sont maintenant conservés après un redémarrage ou une mise à jour de l'application."
+  },
   "2.9.13": {
     "en": "Performance score now updates every hour for continuous Homey Insights tracking.",
     "nl": "Prestatiescore wordt nu elk uur bijgewerkt voor doorlopende Homey Insights registratie.",

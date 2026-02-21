@@ -70,75 +70,10 @@ export class DefrostLearner {
   private bucketMap: Map<number, DefrostBucket> = new Map();
   private logger: (msg: string, ...args: unknown[]) => void;
 
-  // In-flight defrost tracking (start time stored until end event)
-  private pendingDefrostStart: {
-    timestamp: number;
-    outdoorTemp: number;
-    humidity: number | null;
-  } | null = null;
-
   private static readonly CONSTANTS = DeviceConstants.FORECAST_DEFROST;
 
   constructor(config: DefrostLearnerConfig = {}) {
     this.logger = config.logger || (() => { });
-  }
-
-  /**
-   * Record the start of a defrost cycle.
-   * Called when DPS 33 transitions false → true.
-   */
-  public onDefrostStart(outdoorTemp: number, humidity?: number | null): void {
-    this.pendingDefrostStart = {
-      timestamp: Date.now(),
-      outdoorTemp,
-      humidity: humidity ?? null,
-    };
-    this.logger('DefrostLearner: Defrost started', {
-      outdoorTemp: outdoorTemp.toFixed(1),
-      humidity: humidity ?? 'unknown',
-    });
-  }
-
-  /**
-   * Record the end of a defrost cycle.
-   * Called when DPS 33 transitions true → false.
-   * Computes duration and adds event to history.
-   */
-  public onDefrostEnd(outdoorTemp: number): void {
-    if (!this.pendingDefrostStart) {
-      this.logger('DefrostLearner: Defrost end without matching start — skipped');
-      return;
-    }
-
-    const durationSec = (Date.now() - this.pendingDefrostStart.timestamp) / 1000;
-
-    // Validate: defrost cycles typically last 30s to 15 min
-    if (durationSec < 10 || durationSec > 1200) {
-      this.logger(`DefrostLearner: Defrost duration ${durationSec.toFixed(0)}s outside valid range (10-1200s) — skipped`);
-      this.pendingDefrostStart = null;
-      return;
-    }
-
-    const event: DefrostEvent = {
-      timestamp: this.pendingDefrostStart.timestamp,
-      outdoorTemp: this.pendingDefrostStart.outdoorTemp,
-      humidity: this.pendingDefrostStart.humidity,
-      durationSec,
-    };
-
-    this.history.push(event);
-
-    // Keep history size manageable (FIFO)
-    if (this.history.length > DefrostLearner.CONSTANTS.MAX_HISTORY_SIZE) {
-      this.history.shift();
-    }
-
-    this.pendingDefrostStart = null;
-
-    // Rebuild bucket statistics
-    this.rebuildBuckets();
-
-    this.logger(`DefrostLearner: Defrost recorded — ${durationSec.toFixed(0)}s at ${outdoorTemp.toFixed(1)}°C (${this.history.length} total events)`);
   }
 
   /**
@@ -354,13 +289,6 @@ export class DefrostLearner {
   }
 
   /**
-   * Check if a pending (in-flight) defrost is active
-   */
-  public hasPendingDefrost(): boolean {
-    return this.pendingDefrostStart !== null;
-  }
-
-  /**
    * Get the number of learned events
    */
   public getEventCount(): number {
@@ -406,24 +334,6 @@ export class DefrostLearner {
   }
 
   /**
-   * Returns defrost statistics for the rolling 24-hour window.
-   *
-   * Filters the event history to events that started within the last 24 hours.
-   * Count and total duration reflect only that window, not lifetime averages.
-   *
-   * @returns { count, totalMinutes } — count of cycles and summed duration (minutes, 1 decimal)
-   */
-  public getLast24hStats(): { count: number; totalMinutes: number } {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    const recent = this.history.filter((e) => e.timestamp >= cutoff);
-    const totalMinutes = recent.reduce((sum, e) => sum + e.durationSec / 60, 0);
-    return {
-      count: recent.length,
-      totalMinutes: Math.round(totalMinutes * 10) / 10,
-    };
-  }
-
-  /**
    * Cleanup and release memory
    */
   public destroy(): void {
@@ -432,7 +342,6 @@ export class DefrostLearner {
 
     this.history = [];
     this.bucketMap.clear();
-    this.pendingDefrostStart = null;
 
     this.logger(`DefrostLearner: Destroyed — released ${eventCount} events, ${bucketCount} buckets`);
   }
