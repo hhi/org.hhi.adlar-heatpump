@@ -1,4 +1,10 @@
 {
+  "2.9.15": {
+    "en": "Updated ajv dependency to address security vulnerabilities.",
+    "nl": "ajv-afhankelijkheid bijgewerkt om beveiligingsproblemen op te lossen.",
+    "de": "ajv-Abhängigkeit aktualisiert, um Sicherheitslücken zu schließen.",
+    "fr": "Dépendance ajv mise à jour pour corriger des vulnérabilités de sécurité."
+  },
   "2.9.14": {
     "en": "Fixed: Defrost counters (24h count and duration) now correctly decrease when old cycles age out of the 24-hour window, even without new defrost activity. Counters are now preserved across app restarts and updates.",
     "nl": "Opgelost: Ontdooi-tellers (24u aantal en duur) dalen nu correct als oude cycli buiten het 24-uursvenster vallen, ook zonder nieuwe ontdooiactiviteit. Tellers blijven nu bewaard na een app herstart of update.",
