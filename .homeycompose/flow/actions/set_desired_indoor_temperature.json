@@ -1,0 +1,49 @@
+{
+  "id": "set_desired_indoor_temperature",
+  "title": {
+    "en": "Set desired indoor temperature",
+    "nl": "Gewenste binnentemperatuur instellen",
+    "de": "Gewünschte Innentemperatur einstellen",
+    "fr": "Régler la température intérieure souhaitée"
+  },
+  "titleFormatted": {
+    "en": "Set desired indoor temperature to [[temperature]]°C",
+    "nl": "Gewenste binnentemperatuur instellen op [[temperature]]°C",
+    "de": "Gewünschte Innentemperatur einstellen auf [[temperature]]°C",
+    "fr": "Régler la température intérieure souhaitée sur [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Set the desired room temperature for adaptive control. The adaptive control system will adjust the heat pump setpoint to reach this temperature.",
+    "nl": "Stel de gewenste kamertemperatuur in voor adaptieve regeling. Het adaptieve systeem past het warmtepomp setpoint aan om deze temperatuur te bereiken.",
+    "de": "Stellen Sie die gewünschte Raumtemperatur für die adaptive Steuerung ein. Das adaptive System passt den Wärmepumpen-Sollwert an, um diese Temperatur zu erreichen.",
+    "fr": "Réglez la température ambiante souhaitée pour le contrôle adaptatif. Le système adaptatif ajustera la consigne de la pompe à chaleur pour atteindre cette température."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heat-pump"
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": "Indoor Temperature ",
+        "nl": "Binnentemperatuur ",
+        "de": "Innentemperatur ",
+        "fr": "Température intérieure "
+      },
+      "min": 15,
+      "max": 25,
+      "step": 0.5,
+      "units": "°C",
+      "placeholder": {
+        "en": "Desired indoor temperature in °C",
+        "nl": "Gewenste binnentemperatuur in °C",
+        "de": "Gewünschte Innentemperatur in °C",
+        "fr": "Température intérieure souhaitée en °C"
+      }
+    }
+  ]
+}
