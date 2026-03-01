@@ -1,4 +1,10 @@
 {
+  "2.9.17": {
+    "en": "New flow action: 'Set desired indoor temperature' to set the adaptive control comfort temperature (15–25°C) via a flow.",
+    "nl": "Nieuw flow-actiekaartje: 'Gewenste binnentemperatuur instellen' om de comforttemperatuur voor adaptieve regeling (15–25°C) via een flow in te stellen.",
+    "de": "Neue Flow-Aktion: 'Gewünschte Innentemperatur einstellen' zum Festlegen der Komforttemperatur für die adaptive Steuerung (15–25°C) per Flow.",
+    "fr": "Nouvelle action de flow: 'Régler la température intérieure souhaitée' pour définir la température de confort du contrôle adaptatif (15–25°C) via un flow."
+  },
   "2.9.15": {
     "en": "Updated ajv dependency to address security vulnerabilities.",
     "nl": "ajv-afhankelijkheid bijgewerkt om beveiligingsproblemen op te lossen.",

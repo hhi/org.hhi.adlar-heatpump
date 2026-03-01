@@ -274,6 +274,7 @@ export const FLOW_PATTERNS = {
    */
   simpleActions: [
     { cardId: 'set_target_temperature', pattern: 'simple_action' as const, capabilityName: 'target_temperature' },
+    { cardId: 'set_desired_indoor_temperature', pattern: 'simple_action' as const, capabilityName: 'target_temperature.indoor' },
     { cardId: 'set_hotwater_temperature', pattern: 'simple_action' as const, capabilityName: 'adlar_hotwater' },
     { cardId: 'set_heating_mode', pattern: 'simple_action' as const, capabilityName: 'adlar_enum_mode' },
     { cardId: 'set_work_mode', pattern: 'simple_action' as const, capabilityName: 'adlar_enum_work_mode' },
