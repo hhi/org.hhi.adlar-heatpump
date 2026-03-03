@@ -28,6 +28,7 @@ export class AdlarMapping {
   };
 
   static customCapabilities: Record<string, number[]> = {
+    'measure_power.internal': [104],
     'meter_power.power_consumption': [18],
     'meter_power.electric_total': [105],
     'measure_current.cur_current': [102],

@@ -28,6 +28,7 @@ export class EnergyTrackingService {
   private lastExternalPowerUpdate: number = 0;
   private lastEnergyCalculation: number = 0;
   private isEnabled = false;
+  private isDeviceConnected = false;
 
   // State tracking for flow card triggers (v1.0.8)
   private dailyThresholdTriggered = false; // Reset daily at midnight
@@ -80,7 +81,7 @@ export class EnergyTrackingService {
    * Returns null if tracking is disabled.
    */
   async updateIntelligentPowerMeasurement(): Promise<PowerMeasurement | null> {
-    if (!this.isEnabled) {
+    if (!this.isEnabled || !this.isDeviceConnected) {
       return null;
     }
 
@@ -209,7 +210,7 @@ export class EnergyTrackingService {
 
     } catch (error) {
       this.logger('EnergyTrackingService: Error calculating estimated power, using default:', error);
-      return 2500; // Default average consumption
+      return 0;
     }
   }
 
@@ -575,6 +576,29 @@ export class EnergyTrackingService {
    * Updates the external-power capability and triggers energy recalculation.
    * @param powerValue - power in Watts
    */
+  /**
+   * Notify the service of Tuya connection state changes.
+   * On disconnect: clears stale power data and resets measure_power to 0.
+   * On connect: resumes power measurement updates.
+   */
+  async setConnectionState(connected: boolean): Promise<void> {
+    this.isDeviceConnected = connected;
+
+    if (!connected) {
+      // Clear stale external power so Priority 1 falls through after reconnect
+      if (this.device.hasCapability('adlar_external_power')) {
+        await this.device.setCapabilityValue('adlar_external_power', null);
+      }
+      // Show 0W while disconnected — state is unknown
+      if (this.device.hasCapability('measure_power')) {
+        await this.device.setCapabilityValue('measure_power', 0);
+      }
+      this.logger('EnergyTrackingService: Device disconnected — power data cleared');
+    } else {
+      this.logger('EnergyTrackingService: Device connected — power measurement resumed');
+    }
+  }
+
   async receiveExternalPowerData(powerValue: number): Promise<void> {
     try {
       if (this.device.hasCapability('adlar_external_power')) {

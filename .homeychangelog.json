@@ -1,4 +1,10 @@
 {
+  "2.9.18": {
+    "en": "Fixed: Power spikes in energy tracking after reconnection. Updated minimatch dependency to address a security vulnerability. Added: Changing the building profile (light/average/heavy/passive) now triggers a soft reset of the building model — parameters transition to the new profile defaults, confidence drops to ~25-35%, and learning continues from halved sample count.",
+    "nl": "Opgelost: Vermogenpieken in energiemeting na herverbinding. Minimatch-afhankelijkheid bijgewerkt vanwege een beveiligingslek. Toegevoegd: Wijzigen van het gebouwprofiel (licht/gemiddeld/zwaar/passief) triggert nu een zachte reset van het gebouwmodel — parameters schakelen over naar de nieuwe profielstandaarden, betrouwbaarheid daalt naar ~25-35%, en het leerproces gaat verder met gehalveerd aantal samples.",
+    "de": "Behoben: Leistungsspitzen in der Energiemessung nach einer Neuverbindung. Minimatch-Abhängigkeit aufgrund einer Sicherheitslücke aktualisiert. Hinzugefügt: Das Ändern des Gebäudeprofils (leicht/durchschnitt/schwer/passiv) löst jetzt einen Soft-Reset des Gebäudemodells aus — Parameter wechseln zu den neuen Profilstandards, Vertrauen sinkt auf ~25-35%, und das Lernen wird mit halbierter Sampleanzahl fortgesetzt.",
+    "fr": "Corrigé: Pics de puissance dans le suivi d'énergie après reconnexion. Dépendance minimatch mise à jour pour corriger une vulnérabilité de sécurité. Ajouté: Le changement du profil de bâtiment (léger/moyen/lourd/passif) déclenche maintenant une réinitialisation douce du modèle — les paramètres passent aux valeurs par défaut du nouveau profil, la confiance descend à ~25-35%, et l'apprentissage continue avec un nombre d'échantillons divisé par deux."
+  },
   "2.9.17": {
     "en": "New flow action: 'Set desired indoor temperature' to set the adaptive control comfort temperature (15–25°C) via a flow.",
     "nl": "Nieuw flow-actiekaartje: 'Gewenste binnentemperatuur instellen' om de comforttemperatuur voor adaptieve regeling (15–25°C) via een flow in te stellen.",

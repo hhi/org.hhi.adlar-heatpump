@@ -690,7 +690,10 @@ export class BuildingInsightsService {
     }
 
     // Learning phase - lower threshold (50%) for rough detection
+    // After a soft reset (profile change), show profile-aware verification message
+    // instead of generic "Learning" to avoid stale "switch to X" advice lingering
     if (diagnostics.confidence < 50) {
+      const activeProfile = this.device.getSetting('building_profile') || 'average';
       return {
         id: `profile_learning_${Date.now()}`,
         category: 'profile_mismatch',
@@ -698,8 +701,8 @@ export class BuildingInsightsService {
         confidence: diagnostics.confidence,
         detectedAt: Date.now(),
         insight: lang === 'nl'
-          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
-          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
+          ? `🔄 Profiel '${activeProfile}' actief — wordt geverifieerd (${diagnostics.confidence.toFixed(1)}%)`
+          : `🔄 Profile '${activeProfile}' active — verifying (${diagnostics.confidence.toFixed(1)}%)`,
         recommendation: '',
         status: 'new',
       };

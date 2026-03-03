@@ -529,6 +529,59 @@ export class BuildingModelLearner {
   }
 
   /**
+   * Soft reset: transition to a new building profile without losing all learning progress.
+   *
+   * Strategy B — balances between hard reset and no action:
+   * - Theta → new profile defaults (the old parameters are invalid for a different building type)
+   * - P-matrix → intermediate uncertainty (50, half of initial 100)
+   *   Rationale: we're not starting from scratch, but the new profile needs room to converge
+   * - Sample count → halved (retains partial "data seen" credit for confidence calculation)
+   * - lastMeasurement → preserved (no gap in data continuity)
+   *
+   * Expected confidence outcome: drops to ~25-35%, recovers within 24h of new data.
+   *
+   * @param profileType - The new building profile to transition to
+   */
+  public softReset(profileType: BuildingProfileType): void {
+    const profile = BUILDING_PROFILES[profileType];
+    const oldC = 1 / this.theta[0];
+    const oldSampleCount = this.sampleCount;
+
+    // Re-initialize theta from new profile
+    this.theta = [
+      1 / profile.C,        // 1/C
+      profile.UA / profile.C, // UA/C
+      profile.g / profile.C,  // g/C
+      profile.pInt / profile.C, // P_int/C
+    ];
+
+    // Raise P-matrix to intermediate uncertainty (50 = half of initial 100)
+    // Lower than hard reset (100) because we still have measurement history
+    // Higher than converged state (~10-50) to allow re-learning
+    const softCov = 50;
+    this.P = [
+      [softCov, 0, 0, 0],
+      [0, softCov, 0, 0],
+      [0, 0, softCov, 0],
+      [0, 0, 0, softCov],
+    ];
+
+    // Halve sample count (partial credit for confidence calculation)
+    this.sampleCount = Math.floor(this.sampleCount / 2);
+
+    // Update base P_int for dynamic calculation
+    this.basePInt = profile.pInt;
+
+    // lastMeasurement intentionally preserved — no gap in data continuity
+
+    this.logger(
+      `BuildingModelLearner: Soft reset to profile '${profileType}' `
+      + `(C: ${oldC.toFixed(1)} → ${profile.C}, `
+      + `samples: ${oldSampleCount} → ${this.sampleCount})`,
+    );
+  }
+
+  /**
    * Export state for persistence
    */
   public getState() {

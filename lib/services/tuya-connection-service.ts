@@ -882,6 +882,24 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Reset daily disconnect counter to 0 (called at midnight by device.ts).
+   * Updates both the store and the capability value.
+   */
+  async resetDailyDisconnectCounter(): Promise<void> {
+    const todayKey = this.getTodayKeyInHomeyTimezone();
+    await this.device.setStoreValue(this.DAILY_DISCONNECT_DATE_KEY, todayKey);
+    await this.device.setStoreValue(this.DAILY_DISCONNECT_COUNT_KEY, 0);
+
+    if (this.device.hasCapability('adlar_daily_disconnect_count')) {
+      try {
+        await this.device.setCapabilityValue('adlar_daily_disconnect_count', 0);
+      } catch (error) {
+        this.logger(`TuyaConnectionService: Failed to reset adlar_daily_disconnect_count: ${error}`);
+      }
+    }
+  }
+
+  /**
    * Return the underlying Tuya/TuyAPI instance if available (nullable).
    */
   getTuyaInstance(): TuyAPI | null {

@@ -947,6 +947,58 @@ export class BuildingModelService {
   }
 
   /**
+   * Soft reset building model - transition to a new building profile
+   * Preserves partial learning progress (halved samples, intermediate uncertainty)
+   * while re-initializing model parameters to the new profile defaults.
+   *
+   * Called automatically when user changes the building_profile setting.
+   *
+   * @param newProfile - The new building profile type to transition to
+   */
+  public async softReset(newProfile: BuildingProfileType): Promise<void> {
+    this.logger('BuildingModelService: Soft reset triggered for new profile:', newProfile);
+
+    try {
+      // Log old values before soft reset
+      const oldModel = this.learner.getModel();
+      const oldState = this.learner.getState();
+      this.logger('═══════════════════════════════════════');
+      this.logger('📊 Before soft reset:');
+      this.logger(`   C:          ${oldModel.C.toFixed(1)} kWh/°C`);
+      this.logger(`   τ:          ${oldModel.tau.toFixed(1)} hours`);
+      this.logger(`   Confidence: ${oldModel.confidence.toFixed(0)}%`);
+      this.logger(`   Samples:    ${oldState.sampleCount}`);
+
+      // Perform soft reset on learner
+      this.learner.softReset(newProfile);
+
+      // Log new values after soft reset
+      const newModel = this.learner.getModel();
+      const newState = this.learner.getState();
+      this.logger('📊 After soft reset:');
+      this.logger(`   Profile:    ${newProfile}`);
+      this.logger(`   C:          ${newModel.C.toFixed(1)} kWh/°C`);
+      this.logger(`   τ:          ${newModel.tau.toFixed(1)} hours`);
+      this.logger(`   Confidence: ${newModel.confidence.toFixed(0)}%`);
+      this.logger(`   Samples:    ${newState.sampleCount}`);
+      this.logger('═══════════════════════════════════════');
+
+      // Update capabilities to reflect new model values
+      await this.updateModelCapabilities();
+
+      // Persist the soft-reset state
+      await this.persistState();
+
+      this.logger(`✅ BuildingModelService: Soft reset complete - profile '${newProfile}', confidence ${newModel.confidence.toFixed(0)}%`);
+      this.logger('🔄 RLS learning will continue from halved sample count');
+
+    } catch (error) {
+      this.logger('BuildingModelService: Failed to soft reset:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Reset building model - reinitialize learner with building profile defaults
    * Clears all learned parameters and restarts learning from scratch
    */
