@@ -13,6 +13,7 @@ import { HeatingCurveVisualizationService } from './heating-curve-visualization-
 import { BuildingInsightsService } from './building-insights-service';
 import { CategorizedError } from '../error-types';
 import { AdlarMapping } from '../definitions/adlar-mapping';
+import { type BuildingProfileType } from '../adaptive/building-model-learner';
 
 export interface ServiceCoordinatorOptions {
   device: Homey.Device;
@@ -361,6 +362,9 @@ export class ServiceCoordinator {
   private handleTuyaConnected(): void {
     this.logger('ServiceCoordinator: Tuya device connected');
     this.serviceHealth.set('tuya', true);
+    this.energyTracking.setConnectionState(true).catch((err) => {
+      this.logger('ServiceCoordinator: Failed to set energy tracking connection state:', err);
+    });
   }
 
   /**
@@ -369,6 +373,9 @@ export class ServiceCoordinator {
   private handleTuyaDisconnected(): void {
     this.logger('ServiceCoordinator: Tuya device disconnected');
     this.serviceHealth.set('tuya', false);
+    this.energyTracking.setConnectionState(false).catch((err) => {
+      this.logger('ServiceCoordinator: Failed to set energy tracking connection state:', err);
+    });
   }
 
   /**
@@ -446,6 +453,23 @@ export class ServiceCoordinator {
       this.logger('ServiceCoordinator: AdaptiveControl settings update failed (non-critical)', error);
       // Don't throw - allow settings save to succeed even if adaptive control fails
       // User's other settings changes are preserved, adaptive control degrades gracefully
+    }
+
+    // Handle building profile change → soft reset building model
+    if (changedKeys.includes('building_profile')) {
+      const newProfile = newSettings.building_profile as BuildingProfileType;
+      try {
+        const buildingModel = this.adaptiveControl.getBuildingModelService();
+        await buildingModel.softReset(newProfile);
+        this.logger('ServiceCoordinator: Building model soft-reset for new profile:', newProfile);
+
+        // Immediately re-evaluate insights so stale "switch to X" advice is replaced
+        // by the new profile-aware verification message
+        await this.buildingInsights.evaluateInsights();
+        this.logger('ServiceCoordinator: Building insights re-evaluated after profile change');
+      } catch (error) {
+        this.logger('ServiceCoordinator: Building model soft-reset failed (non-critical)', error);
+      }
     }
 
     // BuildingInsights third (optional feature - graceful degradation if it fails)

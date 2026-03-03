@@ -3964,6 +3964,16 @@ class MyDevice extends Homey.Device {
         }
       }
 
+      // Migration v2.9.18: Add internal power capability (hidden DPS 104 source for energy tracking)
+      if (!this.hasCapability('measure_power.internal')) {
+        try {
+          await this.addCapability('measure_power.internal');
+          this.log('Migration v2.9.18: Added measure_power.internal capability');
+        } catch (error) {
+          this.error('Failed to add measure_power.internal capability:', error);
+        }
+      }
+
       // Migration v1.4.0+: Cleanup energy pricing capabilities when optimizer disabled
       // Updated v2.5.0: Added energy_prices_data and 4 display capabilities
       const priceOptimizerEnabled = await this.getSetting('price_optimizer_enabled');
@@ -5175,6 +5185,10 @@ class MyDevice extends Homey.Device {
         await this.setStoreValue('external_daily_consumption_kwh', 0);
         this.log('🔄 External daily energy consumption reset to 0 kWh');
       }
+
+      // Reset daily disconnect counter at midnight (v2.9.18)
+      await this.serviceCoordinator?.getTuyaConnection()?.resetDailyDisconnectCounter();
+      this.log('🔄 Daily disconnect counter reset to 0');
     } catch (error) {
       this.error('Error resetting daily energy:', error);
     }

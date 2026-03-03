@@ -36,6 +36,7 @@
     "adlar_measure_pulse_steps_temp_current",
     "adlar_measure_pulse_steps_effluent_temp",
     "measure_power",
+    "measure_power.internal",
     "meter_power.power_consumption",
     "meter_power.electric_total",
     "measure_current.cur_current",
@@ -119,6 +120,24 @@
       "max": 9999999,
       "description": {
         "nl": " dps_104: cur_power - Power"
+      }
+    },
+    "measure_power.internal": {
+      "title": {
+        "en": "Internal Power (DPS)",
+        "nl": "Intern Vermogen (DPS)",
+        "de": "Internes Leistung (DPS)",
+        "fr": "Puissance Interne (DPS)"
+      },
+      "min": 0,
+      "max": 9999999,
+      "uiComponent": null,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Internal Power (DPS)",
+        "nl": "Intern Vermogen (DPS)",
+        "de": "Internes Leistung (DPS)",
+        "fr": "Puissance Interne (DPS)"
       }
     },
     "measure_water": {
