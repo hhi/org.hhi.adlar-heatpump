@@ -165,7 +165,7 @@ export class AdaptiveControlService {
       minAcceptableCOP: 2.5,
       targetCOP: 3.5,
       strategy: 'balanced',
-      minSupplyTemp: 25,
+      minSupplyTemp: this._getMinSetpoint(),
       maxSupplyTemp: 55,
       historySize: 1000,
       logger: this.logger,
@@ -507,6 +507,10 @@ export class AdaptiveControlService {
    *
    * @returns Current warmtepomp setpoint (DPS 4)
    */
+  private _getMinSetpoint(): number {
+    return (this.device.getSetting('adaptive_min_setpoint') as number | null) ?? 18;
+  }
+
   private getEffectiveTargetTemp(): number | null {
     // Always read current warmtepomp setpoint (DPS 4) - this is the base for all adjustments
     // In simulate mode, we still need the real value to calculate "what would happen"
@@ -763,7 +767,7 @@ export class AdaptiveControlService {
       // Calculate recommended warmtepomp setpoint (integer adjusted, clamped to realistic range)
       const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
       const recommendedTemp = Math.max(
-        DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+        this._getMinSetpoint(),
         Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
       );
 
@@ -849,7 +853,7 @@ export class AdaptiveControlService {
 
     // Safety: clamp warmtepomp setpoint to realistic range (25-65°C for floor heating/radiators)
     const clampedSetpoint = Math.max(
-      DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+      this._getMinSetpoint(),
       Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, newSetpoint),
     );
 
@@ -1033,7 +1037,7 @@ export class AdaptiveControlService {
       // Calculate simulated target (what the system recommends)
       const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
       const simulatedTarget = Math.max(
-        DeviceConstants.ADAPTIVE_MIN_SETPOINT,
+        this._getMinSetpoint(),
         Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
       );
       const delta = simulatedTarget - currentSetpoint;
@@ -1453,6 +1457,15 @@ export class AdaptiveControlService {
       const Ki = newSettings.adaptive_pi_ki as number || 1.5;
       const deadband = newSettings.adaptive_pi_deadband as number || 0.3;
       this.updatePIParameters(Kp, Ki, deadband);
+    }
+
+    // Handle adaptive_min_setpoint changes
+    if (changedKeys.includes('adaptive_min_setpoint')) {
+      const newMinSetpoint = (newSettings.adaptive_min_setpoint as number | null) ?? 18;
+      this.logger('AdaptiveControlService: Min setpoint changed', {
+        newValue: `${newMinSetpoint}°C`,
+      });
+      this.copOptimizer.updateMinSupplyTemp(newMinSetpoint);
     }
 
     // Handle energy price settings changes

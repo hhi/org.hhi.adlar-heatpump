@@ -115,14 +115,11 @@ export class DeviceConstants {
   /** Maximum temperature adjustment per control cycle (safety limit) */
   static readonly ADAPTIVE_MAX_TEMP_ADJUSTMENT = 3.0; // ±3°C
 
-  /** Absolute minimum target temperature (safety clamp) - DEPRECATED: use ADAPTIVE_MIN_SETPOINT */
+  /** Absolute minimum target temperature (safety clamp) - legacy indoor temp range */
   static readonly ADAPTIVE_MIN_TARGET_TEMP = 15.0; // °C (legacy indoor temp range)
 
-  /** Absolute maximum target temperature (safety clamp) - DEPRECATED: use ADAPTIVE_MAX_SETPOINT */
+  /** Absolute maximum target temperature (safety clamp) - legacy indoor temp range */
   static readonly ADAPTIVE_MAX_TARGET_TEMP = 28.0; // °C (legacy indoor temp range)
-
-  /** Minimum warmtepomp setpoint (DPS 4) - cascade control safety clamp */
-  static readonly ADAPTIVE_MIN_SETPOINT = 25.0; // °C (realistic floor heating minimum)
 
   /** Maximum warmtepomp setpoint (DPS 4) - cascade control safety clamp */
   static readonly ADAPTIVE_MAX_SETPOINT = 65.0; // °C (realistic radiator maximum)

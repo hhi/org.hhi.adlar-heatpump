@@ -1,4 +1,10 @@
 {
+  "2.9.20": {
+    "en": "Minimum water temperature for adaptive control is now configurable (15–30°C, default 18°C). Match to your heat pump's P111 parameter for correct night setback.",
+    "nl": "Minimale watertemperatuur voor adaptieve regeling is nu instelbaar (15–30°C, standaard 18°C). Stem af op de P111-waarde van uw warmtepomp voor correcte nachtterugval.",
+    "de": "Minimale Wassertemperatur für die adaptive Regelung ist jetzt konfigurierbar (15–30°C, Standard 18°C). Abstimmen auf den P111-Parameter Ihrer Wärmepumpe für korrekte Nachtabsenkung.",
+    "fr": "La température d'eau minimale pour la régulation adaptative est maintenant configurable (15–30°C, défaut 18°C). Alignez sur le paramètre P111 de votre pompe à chaleur pour un setback nocturne correct."
+  },
   "2.9.18": {
     "en": "Fixed: Power spikes in energy tracking after reconnection. Updated minimatch dependency to address a security vulnerability. Added: Changing the building profile (light/average/heavy/passive) now triggers a soft reset of the building model — parameters transition to the new profile defaults, confidence drops to ~25-35%, and learning continues from halved sample count.",
     "nl": "Opgelost: Vermogenpieken in energiemeting na herverbinding. Minimatch-afhankelijkheid bijgewerkt vanwege een beveiligingslek. Toegevoegd: Wijzigen van het gebouwprofiel (licht/gemiddeld/zwaar/passief) triggert nu een zachte reset van het gebouwmodel — parameters schakelen over naar de nieuwe profielstandaarden, betrouwbaarheid daalt naar ~25-35%, en het leerproces gaat verder met gehalveerd aantal samples.",

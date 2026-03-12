@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.9.19",
+  "version": "2.9.20",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -9249,6 +9249,27 @@
               "min": 0.1,
               "max": 1,
               "step": 0.1
+            },
+            {
+              "id": "adaptive_min_setpoint",
+              "type": "number",
+              "label": {
+                "en": "Minimum water temperature",
+                "nl": "Minimale watertemperatuur",
+                "de": "Minimale Wassertemperatur",
+                "fr": "Température d'eau minimale"
+              },
+              "hint": {
+                "en": "The lowest water temperature the adaptive control will recommend. Match this to your heat pump's P111 parameter (Adlar factory default: 18°C). Range: 15–30°C.",
+                "nl": "De laagste watertemperatuur die de adaptieve regeling kan aanbevelen. Stem dit af op de P111-waarde van uw warmtepomp (Adlar fabrieksinstelling: 18°C). Bereik: 15–30°C.",
+                "de": "Die niedrigste Wassertemperatur, die die adaptive Regelung empfehlen kann. Stimmen Sie dies auf den P111-Parameter Ihrer Wärmepumpe ab (Adlar Werkseinstellung: 18°C). Bereich: 15–30°C.",
+                "fr": "La température d'eau minimale que la régulation adaptative peut recommander. Alignez sur le paramètre P111 de votre pompe à chaleur (réglage usine Adlar: 18°C). Plage: 15–30°C."
+              },
+              "value": 18,
+              "min": 15,
+              "max": 30,
+              "step": 0.5,
+              "units": "°C"
             }
           ]
         },
