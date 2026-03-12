@@ -99,6 +99,7 @@ export class AdaptiveControlService {
   private lastAdjustmentTime: number = 0; // Last time target_temperature was adjusted (throttling)
   private controlIntervalMs: number = 5 * 60 * 1000; // 5 minutes default
   private accumulatedAdjustment: number = 0; // Accumulates fractional adjustments until ≥0.5°C (for step:1 rounding)
+  private lastRecommendedTemp: number | undefined = undefined; // Change detection for temperature_adjustment_recommended
 
   // Energy price tracking (for change detection and flow card triggers)
   private lastPriceCategory: string | null = null; // Track category changes
@@ -478,8 +479,9 @@ export class AdaptiveControlService {
       });
     }
 
-    // Clear simulated target (will be reinitialized on next start)
+    // Clear simulated target and recommendation state (will be reinitialized on next start)
     this.simulatedTargetTemp = null;
+    this.lastRecommendedTemp = undefined;
 
     this.isEnabled = false;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, false);
@@ -745,9 +747,30 @@ export class AdaptiveControlService {
         confidenceMetrics,
       );
 
-      // Step 7: Check if significant action is needed
-      if (heatingAction === null && Math.abs(combinedAction.finalAdjustment) < 0.1) {
-        this.logger('AdaptiveControlService: No significant action needed');
+      // Step 7: Change detection — trigger only when recommendation changes or PI sees comfort deviation
+      // Calculate recommended setpoint BEFORE the check so we can compare with lastRecommendedTemp
+      const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
+      const recommendedTemp = Math.max(
+        this._getMinSetpoint(),
+        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
+      );
+
+      // Initialize on current setpoint so first run only triggers on real deviation (ADR-020)
+      if (this.lastRecommendedTemp === undefined) {
+        this.lastRecommendedTemp = currentSetpoint;
+      }
+
+      const recommendationChanged = recommendedTemp !== this.lastRecommendedTemp;
+      const significantAction = heatingAction !== null;
+
+      this.logger(
+        `AdaptiveControlService: Recommendation check — `
+        + `changed: ${recommendationChanged} (prev: ${this.lastRecommendedTemp}°C, `
+        + `new: ${recommendedTemp}°C), significant: ${significantAction}`,
+      );
+
+      if (!recommendationChanged && !significantAction) {
+        this.logger('AdaptiveControlService: No significant action needed and recommendation unchanged');
 
         // v2.5.1 Fix: Always update adlar_simulated_target to current setpoint to prevent stale values
         // Without this, the capability could retain an old value from a previous session
@@ -760,16 +783,12 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 9: Flow-assisted mode (v2.5.0: automatic mode removed)
-      // Always trigger recommendation flow card - user controls execution via flows
-      this.logger('⚙️ FLOW-ASSISTED MODE: Triggering recommendation for user flow execution');
+      // Update last recommended temp for next cycle comparison
+      this.lastRecommendedTemp = recommendedTemp;
 
-      // Calculate recommended warmtepomp setpoint (integer adjusted, clamped to realistic range)
-      const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
-      const recommendedTemp = Math.max(
-        this._getMinSetpoint(),
-        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
-      );
+      // Step 9: Flow-assisted mode (v2.5.0: automatic mode removed)
+      // Trigger recommendation flow card - user controls execution via flows
+      this.logger('⚙️ FLOW-ASSISTED MODE: Triggering recommendation for user flow execution');
 
       // Trigger recommendation flow card (with confidence for user filtering)
       await this.triggerTemperatureRecommendation(
