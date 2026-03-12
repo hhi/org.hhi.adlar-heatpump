@@ -29,6 +29,8 @@ export class FlowCardManagerService {
   private dailyReportInterval: NodeJS.Timeout | null = null;
   private hourlyScoreInterval: NodeJS.Timeout | null = null;
   private initReportScheduled: boolean = false;
+  /** Handle for the one-time init performance report timeout (ADR-022) */
+  private initReportTimeout: NodeJS.Timeout | null = null;
   private reportReadyTriggerCard: unknown = null;
 
   /**
@@ -935,8 +937,9 @@ export class FlowCardManagerService {
       // Schedule one-time init report 2 minutes after startup (v2.9.11)
       if (!this.initReportScheduled) {
         this.initReportScheduled = true;
-        this.device.homey.setTimeout(() => {
+        this.initReportTimeout = this.device.homey.setTimeout(() => {
           this.refreshPerformanceReportSilently();
+          this.initReportTimeout = null; // Auto-cleanup na uitvoering
         }, 2 * 60 * 1000);
         this.logger('FlowCardManagerService: Init performance report scheduled in 2 minutes');
       }
@@ -1643,6 +1646,12 @@ export class FlowCardManagerService {
     if (this.dailyReportInterval !== null) {
       this.device.homey.clearInterval(this.dailyReportInterval);
       this.dailyReportInterval = null;
+    }
+
+    // Clear init performance report timeout (ADR-022)
+    if (this.initReportTimeout) {
+      this.device.homey.clearTimeout(this.initReportTimeout);
+      this.initReportTimeout = null;
     }
 
     this.unregisterAllFlowCards();
