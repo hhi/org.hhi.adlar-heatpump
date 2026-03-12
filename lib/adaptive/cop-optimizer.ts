@@ -559,6 +559,11 @@ export class COPOptimizer {
    * Called during device deletion to prevent memory leaks.
    * Clears the history array and optimal settings map.
    */
+  public updateMinSupplyTemp(minTemp: number): void {
+    this.config.minSupplyTemp = minTemp;
+    this.logger(`COPOptimizer: minSupplyTemp updated to ${minTemp}°C`);
+  }
+
   public destroy(): void {
     const historySize = this.history.length;
     const settingsSize = this.optimalSettings.size;
