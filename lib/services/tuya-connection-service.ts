@@ -120,6 +120,9 @@ export class TuyaConnectionService {
   private onDisconnectedHandler?: () => void;
   private onErrorHandler?: (error: CategorizedError) => void;
 
+  /** Reference to the deep socket error handler for targeted cleanup (v2.9.22) */
+  private deepSocketErrorHandler: ((error: Error) => void) | null = null;
+
   /**
    * Manages a local Tuya device connection with reconnection/backoff, event handling,
    * and safe command dispatch.
@@ -339,11 +342,11 @@ export class TuyaConnectionService {
     try {
       this.logger('TuyaConnectionService: Attempting connection...');
 
-      // Install deep socket error handler PROACTIVELY before connection attempt (v1.0.33)
-      // CRITICAL FIX: TuyAPI creates the internal TCP socket during find()/connect() calls
-      // without our error handler attached yet. This race condition window allows ECONNRESET
-      // to occur on the unprotected socket and become an unhandled rejection (crash report).
-      // Installing the handler here (before any socket operations) prevents the crash.
+      // Install deep socket error handler PROACTIVELY before connection attempt (v1.0.33).
+      // NOTE: When this.tuya.client is null (standard pre-connect path), this is a deliberate
+      // no-op — the handler will be effectively installed after connect() completes.
+      // The pre-connect call is a safeguard for reconnect paths where a previous socket
+      // may still exist, preventing the ECONNRESET race condition window on that socket.
       this.installDeepSocketErrorHandler();
 
       // v1.0.12: Progressive reconnection strategy
@@ -940,12 +943,13 @@ export class TuyaConnectionService {
       const tuyaSocket = this.tuya.client;
 
       if (tuyaSocket) {
-        // Remove any existing error listeners to prevent duplicates (idempotent)
-        tuyaSocket.removeAllListeners('error');
+        // Remove only our own previous handler (preserves TuyAPI's own socket error listener)
+        if (this.deepSocketErrorHandler) {
+          tuyaSocket.removeListener('error', this.deepSocketErrorHandler);
+        }
 
-        // Install error handler on TuyAPI's internal socket
-        // This catches socket-level errors (ECONNRESET, etc.) BEFORE they bubble up
-        tuyaSocket.on('error', (error: Error) => {
+        // Create and store new handler reference
+        this.deepSocketErrorHandler = (error: Error) => {
           this.logger('TuyaConnectionService: 🛡️ Deep socket error intercepted (crash prevented):', error.message);
 
           // Categorize the error for proper handling
@@ -968,7 +972,11 @@ export class TuyaConnectionService {
           this.scheduleNextReconnectionAttempt();
 
           this.logger('TuyaConnectionService: Deep socket error handled gracefully - reconnection scheduled');
-        });
+        };
+
+        // Install handler on TuyAPI's internal socket
+        // This catches socket-level errors (ECONNRESET, etc.) BEFORE they bubble up
+        tuyaSocket.on('error', this.deepSocketErrorHandler);
 
         this.logger('TuyaConnectionService: ✅ Deep socket error handler installed successfully on TuyAPI socket');
       } else {
@@ -1355,9 +1363,11 @@ export class TuyaConnectionService {
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-      // Perform lightweight DPS query (NAT keep-alive only, v1.0.31)
-      // CHANGE (v1.0.31): DPS refresh is NOW NAT keep-alive only - heartbeat handles zombie detection
-      // This removes the 10-second wait loop and forceReconnect call that caused temporal paradoxes
+      // Perform lightweight DPS query (TCP keepalive + diagnostics, v1.0.31)
+      // CHANGE (v1.0.31): DPS refresh generates periodic TCP traffic and verifies data-event
+      // reception. For LAN communication (Homey ↔ heat pump on same subnet), NAT is not
+      // applicable — the value is in preventing idle socket closes and providing diagnostics.
+      // Heartbeat handles zombie detection.
 
       // DIAGNOSTIC TEST (v1.0.37): Track if DPS refresh triggers actual data events
       const preRefreshDataTime = this.lastDataEventReceived;
@@ -2248,14 +2258,15 @@ export class TuyaConnectionService {
     }
 
     if (this.tuya) {
-      // Remove deep socket error handler BEFORE removeAllListeners (v1.0.2)
+      // Remove deep socket error handler BEFORE removeAllListeners (v2.9.22)
       try {
         // @ts-expect-error - Accessing TuyAPI internal socket for cleanup
-        const tuyaSocket = this.tuya.device?.client;
-        if (tuyaSocket) {
-          tuyaSocket.removeAllListeners('error');
+        const tuyaSocket = this.tuya.client;  // FIX v2.9.22: was this.tuya.device?.client (undefined)
+        if (tuyaSocket && this.deepSocketErrorHandler) {
+          tuyaSocket.removeListener('error', this.deepSocketErrorHandler);
           this.logger('TuyaConnectionService: Deep socket error handler removed');
         }
+        this.deepSocketErrorHandler = null;
       } catch (error) {
         this.logger('TuyaConnectionService: Error removing deep socket handler:', error);
       }
