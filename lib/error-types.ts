@@ -138,6 +138,27 @@ export class TuyaErrorCategorizer {
       };
     }
 
+    // Device offline
+    if (
+      errorMessage.includes('device offline') ||
+      errorMessage.includes('not responding') ||
+      errorMessage.includes('device is offline')
+    ) {
+      return {
+        type: TuyaErrorType.DEVICE_OFFLINE,
+        originalError: error,
+        context,
+        recoverable: true,
+        retryable: true,
+        userMessage: 'Device is offline — check power supply and network connection.',
+        recoveryActions: [
+          'Verify device is powered on',
+          'Check network connection',
+          'Wait a moment and try again',
+        ],
+      };
+    }
+
     // Authentication errors
     if (errorMessage.includes('auth')
         || errorMessage.includes('credential')

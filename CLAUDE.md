@@ -159,6 +159,21 @@ For Markdown files adhere to markdownlint rules
   }
   ```
 
+**Settings Changes (`onSettings()`)**:
+
+- **ALWAYS** read new values from the `newSettings` parameter, **NEVER** from `this.device.getSetting()` inside `onSettings()`
+- **WHY**: Homey calls the handler *before* persisting the new values — `getSetting()` may still return the old value at that point
+- **Pattern**:
+  ```typescript
+  if (changedKeys.includes('my_setting')) {
+    // ✅ CORRECT — reads from parameter (guaranteed new value)
+    const newValue = (newSettings.my_setting as number | null) ?? defaultValue;
+
+    // ❌ WRONG — getSetting() may still return the old value
+    // const newValue = this.device.getSetting('my_setting');
+  }
+  ```
+
 **Type Safety**:
 - **NEVER** use `as any` - it disables TypeScript's type checking entirely
 - **PREFER** `@ts-expect-error` with explanatory comment when accessing library internals

@@ -1,4 +1,10 @@
 {
+  "2.9.22": {
+    "en": "Small bug fixes.",
+    "nl": "Kleine bugfixes.",
+    "de": "Kleine Fehlerbehebungen.",
+    "fr": "Petites corrections de bugs."
+  },
   "2.9.21": {
     "en": "The 'temperature_adjustment_recommended' flow card now triggers only when the recommended setpoint actually changes or when the PI controller detects a comfort deviation, preventing unnecessary triggers when the rounded recommendation stays the same.",
     "nl": "De 'temperature_adjustment_recommended' flow kaart wordt nu alleen geactiveerd wanneer de aanbevolen setpoint daadwerkelijk verandert of wanneer de PI controller een comfort afwijking detecteert, waardoor onnodige activaties worden voorkomen.",
