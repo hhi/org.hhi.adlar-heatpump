@@ -259,9 +259,9 @@ export class AdaptiveControlService {
               value: `${currentDPS4}°C`,
             });
           } else {
-            // Device not connected yet - set to null
-            await this.device.setCapabilityValue('adlar_simulated_target', null);
-            this.logger('AdaptiveControlService: Early restore - DPS 4 unavailable, set adlar_simulated_target to null');
+            // Device not connected yet — leave capability at its last persisted value
+            // rather than writing null (null fails Advanced Flow token type validation)
+            this.logger('AdaptiveControlService: Early restore - DPS 4 unavailable, leaving adlar_simulated_target at last known value');
           }
         }
       }
@@ -1357,6 +1357,23 @@ export class AdaptiveControlService {
   }
 
   /**
+   * Called by ServiceCoordinator when the Tuya connection is re-established.
+   * Schedules an immediate control cycle so the first recommendation after
+   * reconnection arrives within seconds instead of waiting for the next
+   * scheduled 5-minute interval tick.
+   */
+  onConnectionRestored(): void {
+    if (!this.isEnabled || this.controlLoopInterval === null) return;
+    this.logger('AdaptiveControlService: Connection restored — scheduling immediate cycle');
+    // Short delay so the DPS refresh triggered by reconnection can complete first
+    this.device.homey.setTimeout(() => {
+      this.executeControlCycle().catch((err: Error) => {
+        this.device.error('AdaptiveControlService: Post-reconnect cycle failed:', err);
+      });
+    }, 3000);
+  }
+
+  /**
    * Update PI controller parameters (Expert Mode)
    */
   updatePIParameters(Kp: number, Ki: number, deadband: number): void {
@@ -1891,11 +1908,11 @@ export class AdaptiveControlService {
       await this.device.setCapabilityValue('adlar_energy_price_category', currentPrice.category);
 
       // Next hour price (effective)
+      // Only write when there is a valid price — skip the write when unavailable
+      // rather than setting null (null fails Advanced Flow token type validation)
       if (effectiveNextPrice > 0) {
         await this.device.setCapabilityValue('adlar_energy_price_next',
           Math.round(effectiveNextPrice * 10000) / 10000);
-      } else {
-        await this.device.setCapabilityValue('adlar_energy_price_next', null);
       }
 
       // Update forecast capabilities (v2.5.0+)
