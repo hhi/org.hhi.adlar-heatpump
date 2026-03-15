@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.9.22",
+  "version": "2.9.23",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -13,10 +13,10 @@
     "fr": "Pompe à chaleur Adlar Castra"
   },
   "description": {
-    "en": "Local access to the Aurora series heatpump device.",
-    "nl": "Lokale toegang tot het Aurora-serie warmtepompapparaat.",
-    "de": "Lokaler Zugriff auf das Wärmepumpengerät der Aurora-Serie.",
-    "fr": "Accès local à la pompe à chaleur de la série Aurora."
+    "en": "Local access to the Adlar Castra series heatpump device.",
+    "nl": "Lokale toegang tot het Adlar Castra-serie warmtepompapparaat.",
+    "de": "Lokaler Zugriff auf das Adlar Castra Wärmepumpengerät.",
+    "fr": "Accès local à la pompe à chaleur de la série Adlar Castra."
   },
   "category": [
     "climate"

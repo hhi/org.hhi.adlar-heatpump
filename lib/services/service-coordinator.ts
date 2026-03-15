@@ -365,6 +365,10 @@ export class ServiceCoordinator {
     this.energyTracking.setConnectionState(true).catch((err) => {
       this.logger('ServiceCoordinator: Failed to set energy tracking connection state:', err);
     });
+    // Trigger immediate adaptive control cycle after reconnection so the first
+    // recommendation arrives within seconds instead of waiting up to 5 minutes
+    // for the next scheduled interval tick.
+    this.adaptiveControl.onConnectionRestored();
   }
 
   /**
