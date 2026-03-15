@@ -104,6 +104,9 @@ export class TuyaConnectionService {
   private dataEventContext: string = 'spontaneous';
   private contextResetTimer: NodeJS.Timeout | null = null;
 
+  // Zombie recovery escalation counter (ADR-026)
+  private zombieRecoveryAttempts = 0; // Escalating zombie recovery counter (ADR-026)
+
   // Diagnostic tracking for 06:35 disconnect investigation (v1.0.4)
   private lastDisconnectSource: string | null = null;
   private lastDisconnectTime: number = 0;
@@ -191,6 +194,13 @@ export class TuyaConnectionService {
       });
 
       this.setupTuyaEventHandlers();
+
+      // Startup delay: allow previous app instance's TCP socket to be released (ADR-026 Optie B)
+      // Best-effort: covers fast restarts; persistent zombies handled by Optie A escalation
+      await new Promise((resolve) => {
+        this.device.homey.setTimeout(resolve, 5000);
+      });
+      this.logger('TuyaConnectionService: Startup delay complete — proceeding with initial connection');
 
       // Attempt initial connection
       await this.connectTuya();
@@ -1103,6 +1113,12 @@ export class TuyaConnectionService {
       this.lastDataEventReceived = Date.now();
       this.waitingForDataEvent = false;
 
+      // Reset zombie recovery counter on successful data reception (ADR-026)
+      if (this.zombieRecoveryAttempts > 0) {
+        this.logger(`TuyaConnectionService: Data event received — resetting zombie recovery counter (was ${this.zombieRecoveryAttempts})`);
+        this.zombieRecoveryAttempts = 0;
+      }
+
       // Forward to data handler only if dps is valid (v0.99.63 - crash fix)
       if (this.onDataHandler && data.dps && typeof data.dps === 'object') {
         this.onDataHandler(data);
@@ -1667,8 +1683,16 @@ export class TuyaConnectionService {
         `Heartbeat detecteerde geen data events. Layer1(get): ${layer1Status}, Layer2(set): ${layer2Status}. Automatisch herverbinden...`,
       );
 
-      // Force reconnection to clear zombie state
-      await this.forceReconnect();
+      // Escalating zombie recovery (ADR-026)
+      this.zombieRecoveryAttempts += 1;
+
+      if (this.zombieRecoveryAttempts <= 1) {
+        this.logger(`TuyaConnectionService: Zombie recovery attempt ${this.zombieRecoveryAttempts} — forceReconnect`);
+        await this.forceReconnect();
+      } else {
+        this.logger(`TuyaConnectionService: Zombie recovery attempt ${this.zombieRecoveryAttempts} — escalating to reinitialize (ADR-026)`);
+        await this.reinitialize(this.deviceConfig!);
+      }
 
     } catch (error) {
       // Both heartbeat layers failed - mark as disconnected
