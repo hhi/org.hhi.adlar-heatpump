@@ -105,7 +105,9 @@ export class HeatingController {
     // When approaching target and building has high τ, stop earlier to prevent overshoot
     if (this.thermalInertia > 0 && error > 0 && error < 2.0) {
       const heatingRate = 0.3; // Estimated °C/hour during heating
-      const overshootMargin = this.thermalInertia * heatingRate * 0.2;
+      // ADR-027: Cap τ at 8h — buildings with higher thermal mass damp overshoot, not amplify it
+      const effectiveTau = Math.min(this.thermalInertia, 8); // Cap at 8 hours
+      const overshootMargin = effectiveTau * heatingRate * 0.2;
       if (error < overshootMargin) {
         this.logger('HeatingController: Overshoot prevention - stopping early', {
           error: error.toFixed(2),
