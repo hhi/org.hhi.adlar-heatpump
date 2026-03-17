@@ -1,4 +1,10 @@
 {
+  "2.9.25": {
+    "en": "Improved: Addressed potential causes of the adaptive control trigger stopping after an app restart.",
+    "nl": "Verbeterd: Mogelijke oorzaken van de adaptieve regeling trigger die stopt na een app herstart aangepakt.",
+    "de": "Verbessert: Mögliche Ursachen behoben, durch die der Trigger der adaptiven Regelung nach einem App-Neustart aufhört zu feuern.",
+    "fr": "Amélioré: Causes potentielles du déclencheur du contrôle adaptatif qui s'arrête après un redémarrage traitées."
+  },
   "2.9.24": {
     "en": "User reported bug fixes.",
     "nl": "Gebruikersgerapporteerde bugfixes.",

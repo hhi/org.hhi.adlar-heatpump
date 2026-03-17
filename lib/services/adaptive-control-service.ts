@@ -552,15 +552,6 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 2: Check temperature data health
-      const tempHealth = this.externalTemperature.getTemperatureHealth(10); // 10 min max age
-      if (!tempHealth.hasValidData) {
-        this.logger('AdaptiveControlService: Temperature data unhealthy, skipping cycle', {
-          error: tempHealth.error,
-        });
-        return;
-      }
-
       // Step 3: Read current warmtepomp setpoint (simulated or actual DPS 4)
       const currentSetpoint = this.getEffectiveTargetTemp();
       if (currentSetpoint === null) {
@@ -644,67 +635,71 @@ export class AdaptiveControlService {
         this.logger('⚠️ COP optimizer skipped: cop_calculation_enabled is off (required dependency)');
       }
 
-      // Step 5: Collect confidence metrics for adaptive weighting (v2.4.14+)
-      const buildingDiagnostics = await this.buildingModel.getDiagnosticStatus();
-
+      // Step 5-5D: Building model integration + thermal/wind (fail-safe, ADR-027)
+      // If any sub-step fails, the cycle continues with safe defaults
+      // so the PI + COP + price components still produce a recommendation
       const confidenceMetrics: ConfidenceMetrics = {
-        // COP optimizer confidence: based on bucket quality distribution
         copConfidence: this.calculateCOPConfidence(),
-
-        // Building model confidence: from RLS algorithm (0-100%, convert to 0.0-1.0)
-        buildingModelConfidence: buildingDiagnostics.confidence / 100,
-
-        // Energy price data availability: binary check
+        buildingModelConfidence: 0,
         priceDataAvailable: this.energyOptimizer.getPriceData().length > 0,
       };
-
-      this.logger(
-        `📊 Confidence: COP=${(confidenceMetrics.copConfidence * 100).toFixed(0)}%, `
-        + `Building=${(confidenceMetrics.buildingModelConfidence * 100).toFixed(0)}%, `
-        + `Price=${confidenceMetrics.priceDataAvailable ? 'Yes' : 'No'}`,
-      );
-
-      // v2.6.0: Step 5B - Building Model Integration
-      // Pass building parameters to controllers for predictive features
-      const buildingModel = this.buildingModel.getLearner().getModel();
-      const tau = buildingModel.C / buildingModel.UA;
-
-      // Update HeatingController with thermal inertia (for overshoot prevention)
-      this.heatingController.setThermalInertia(tau);
-      this.heatingController.setDynamicDeadbandUA(buildingModel.UA);
-
-      // Update EnergyPriceOptimizer with thermal capacity (for load shifting)
-      this.energyOptimizer.setThermalCapacity(buildingModel.C);
-
-      // Get outdoor temperature for thermal calculation with TTL-based source priority (v2.10.0)
-      const outdoorTempForThermal = await this.getEffectiveOutdoorTemp();
-
-      // Step 5B.5: Update weather forecast advice (v2.8.0+)
-      await this.updateWeatherForecastAdvice(outdoorTempForThermal);
-
-      // Step 5C: Calculate thermal action (4th component)
-      const thermalAction = this.buildingModel.calculateThermalAdjustment({
-        indoorTemp,
-        targetIndoorTemp: desiredIndoorTemp,
-        outdoorTemp: outdoorTempForThermal,
-      });
-
-      // Step 5D: Calculate wind correction (5th component, v2.7.0+)
-      // Wind correction adds to thermal adjustment to compensate for wind-induced heat loss
+      let thermalAction: { adjustment: number; reason: string; priority: 'low' | 'medium' | 'high' } = {
+        adjustment: 0,
+        reason: 'Building model unavailable',
+        priority: 'low',
+      };
       let windCorrectionValue = 0;
-      if (this.device.getSetting('wind_correction_enabled')) {
-        const windResult = this.windCorrection.calculateCorrection(indoorTemp, outdoorTempForThermal);
-        windCorrectionValue = windResult.correction;
 
-        if (windCorrectionValue > 0) {
-          this.logger(
-            `💨 Wind correction: +${windCorrectionValue.toFixed(2)}°C `
-            + `(wind: ${windResult.windSpeed} km/h, ΔT: ${windResult.deltaT.toFixed(1)}°C, `
-            + `α: ${windResult.alpha.toFixed(4)} [${windResult.alphaSource}]${windResult.capped ? ' CAPPED' : ''})`,
-          );
-          // Add wind correction to thermal adjustment
-          thermalAction.adjustment += windCorrectionValue;
+      try {
+        // Step 5: Collect confidence metrics
+        const buildingDiagnostics = await this.buildingModel.getDiagnosticStatus();
+        confidenceMetrics.buildingModelConfidence = buildingDiagnostics.confidence / 100;
+
+        this.logger(
+          `📊 Confidence: COP=${(confidenceMetrics.copConfidence * 100).toFixed(0)}%, `
+          + `Building=${(confidenceMetrics.buildingModelConfidence * 100).toFixed(0)}%, `
+          + `Price=${confidenceMetrics.priceDataAvailable ? 'Yes' : 'No'}`,
+        );
+
+        // Step 5B: Building Model Integration
+        const buildingModel = this.buildingModel.getLearner().getModel();
+        const tau = buildingModel.UA > 0 ? buildingModel.C / buildingModel.UA : 0;
+
+        this.heatingController.setThermalInertia(tau);
+        this.heatingController.setDynamicDeadbandUA(buildingModel.UA);
+        this.energyOptimizer.setThermalCapacity(buildingModel.C);
+
+        // Get outdoor temperature for thermal calculation with TTL-based source priority (v2.10.0)
+        const outdoorTempForThermal = await this.getEffectiveOutdoorTemp();
+
+        // Step 5B.5: Update weather forecast advice (v2.8.0+)
+        await this.updateWeatherForecastAdvice(outdoorTempForThermal);
+
+        // Step 5C: Calculate thermal action (4th component)
+        thermalAction = this.buildingModel.calculateThermalAdjustment({
+          indoorTemp,
+          targetIndoorTemp: desiredIndoorTemp,
+          outdoorTemp: outdoorTempForThermal,
+        });
+
+        // Step 5D: Calculate wind correction (5th component, v2.7.0+)
+        if (this.device.getSetting('wind_correction_enabled')) {
+          const windResult = this.windCorrection.calculateCorrection(indoorTemp, outdoorTempForThermal);
+          windCorrectionValue = windResult.correction;
+
+          if (windCorrectionValue > 0) {
+            this.logger(
+              `💨 Wind correction: +${windCorrectionValue.toFixed(2)}°C `
+              + `(wind: ${windResult.windSpeed} km/h, ΔT: ${windResult.deltaT.toFixed(1)}°C, `
+              + `α: ${windResult.alpha.toFixed(4)} [${windResult.alphaSource}]${windResult.capped ? ' CAPPED' : ''})`,
+            );
+            thermalAction.adjustment += windCorrectionValue;
+          }
         }
+      } catch (error) {
+        this.logger('AdaptiveControlService: Building model/thermal step failed, using defaults', {
+          error: (error as Error).message,
+        });
       }
 
       // Step 6: Combine actions using Weighted Decision Maker with 4-way thermal weighting
