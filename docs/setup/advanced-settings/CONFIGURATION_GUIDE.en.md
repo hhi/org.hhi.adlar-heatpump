@@ -246,6 +246,23 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Range**: 0.1 - 1.0°C
 - **Function**: Tolerance before adjustments are made
 
+#### Coast Offset (v2.8.0+)
+- **Default**: 1.0°C
+- **Range**: 0.5 - 5.0°C
+- **Function**: Degrees below outlet temperature for coast target value
+- **Lower**: Compressor stops sooner, less heating
+- **Higher**: More cautious coast, more margin
+
+#### Coast Hysteresis (v2.8.0+)
+- **Default**: 0.3°C
+- **Range**: 0.1 - 1.0°C
+- **Function**: Overshoot margin above setpoint for coast mode activation
+
+#### Coast Strength (v2.8.0+)
+- **Default**: 0.80
+- **Range**: 0.60 - 0.95
+- **Function**: Weight share of coast in weighted decision (dominant when active)
+
 ---
 
 ## 6. Building Model Learning
@@ -437,7 +454,7 @@ Automatic supply temperature optimization for maximum efficiency.
 
 ## 10. Adaptive Control Weighting Factors
 
-These four priorities together determine how the system makes decisions. **Values are automatically normalized to total 100%.**
+These five priorities together determine how the system makes decisions. **Values are automatically normalized to total 100%.** When coast mode is active, the coast component dominates (80% default).
 
 ### Comfort Priority
 - **Default**: 50%

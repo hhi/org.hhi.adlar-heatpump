@@ -246,6 +246,23 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - **Bereik**: 0.1 - 1.0°C
 - **Functie**: Tolerantie voordat aanpassingen worden gemaakt
 
+#### Coast Offset (v2.8.0+)
+- **Standaard**: 1.0°C
+- **Bereik**: 0.5 - 5.0°C
+- **Functie**: Graden onder uitlaattemperatuur voor coast-doelwaarde
+- **Lager**: Eerder stoppen van compressor, minder verwarming
+- **Hoger**: Voorzichtiger coast, meer marge
+
+#### Coast Hysterese (v2.8.0+)
+- **Standaard**: 0.3°C
+- **Bereik**: 0.1 - 1.0°C
+- **Functie**: Overshoot-marge boven setpoint voor activatie coast-modus
+
+#### Coast Sterkte (v2.8.0+)
+- **Standaard**: 0.80
+- **Bereik**: 0.60 - 0.95
+- **Functie**: Gewichtsaandeel van coast in gewogen beslissing (dominant bij activatie)
+
 ---
 
 ## 6. Gebouwmodel Leren
@@ -437,7 +454,7 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
 
 ## 10. Adaptieve Regeling Wegingsfactoren
 
-Deze vier prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.**
+Deze vijf prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.** Bij actieve coast-modus domineert de coast-component (80% standaard).
 
 ### Comfort Prioriteit
 - **Standaard**: 50%

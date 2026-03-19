@@ -1,6 +1,6 @@
 # Adlar Wärmepumpe — Adaptives Regelsystem
 
-**Version:** 2.7.x | **Datum:** Januar 2026
+**Version:** 2.8.x | **Datum:** März 2026
 
 ---
 
@@ -9,6 +9,7 @@
 Dieses System steuert Ihre Adlar Castra Wärmepumpe intelligent für:
 
 - **Konstante Innentemperatur** (±0.3°C)
+- **Passiver Kühlmodus** (Coast) — verhindert unnötiges Heizen
 - **Energieoptimierung** über dynamische Preise
 - **COP-Maximierung** für maximale Effizienz
 - **Automatisches Lernen** wie Ihr Haus reagiert
@@ -68,9 +69,10 @@ Dieses System steuert Ihre Adlar Castra Wärmepumpe intelligent für:
 ### Regelkreis (alle 5 Min)
 
 1. **Daten sammeln** — Innen-/Außentemp, Leistung, Preise
-2. **Regler berechnen** — Jede Komponente gibt Empfehlung
-3. **Gewichtete Entscheidung** — 50% Komfort + 15% Effizienz + 15% Kosten + 20% Thermisch
-4. **Ausführen** — Zieltemperatur aktualisieren (DPS 4)
+2. **Abkühlerkennung** — Tist > Tsoll + Hysterese? → Coast-Modus
+3. **Regler berechnen** — Jede Komponente gibt Empfehlung
+4. **Gewichtete Entscheidung** — 50% Komfort + 15% Effizienz + 15% Kosten + 20% Thermisch (+ 80% Coast wenn aktiv)
+5. **Ausführen** — Zieltemperatur aktualisieren (DPS 4)
 
 ---
 
@@ -103,6 +105,49 @@ Der **PI (Proportional-Integral) Regler** kombiniert:
 | Aggressiv | 4.0-5.0 | 2.0-3.0 | 0.2°C | Schlecht gedämmt |
 | **Ausgewogen** | 3.0 | 1.5 | 0.3°C | **Empfohlen** |
 | Konservativ | 2.0 | 1.0 | 0.5°C | Gute Dämmung |
+
+---
+
+## Komponente 5: Coast-Strategie (Passiver Kühlmodus)
+
+> Neu in v2.8.0 — [ADR-024](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+
+### Was macht es?
+
+Wenn die Raumtemperatur **über dem Sollwert** liegt (z.B. durch Solargewinne), erkennt das System dies und **verhindert unnötiges Heizen**. Die Wärmepumpe bleibt aus, während der Raum passiv auf das gewünschte Niveau abkühlt.
+
+### Wie funktioniert es?
+
+| Schritt | Beschreibung |
+|---------|--------------|
+| 1️⃣ **Erkennung** | Tist > Tsoll + Hysterese (Standard 0.3°C) |
+| 2️⃣ **Bestätigung** | Mindestens 2 aufeinanderfolgende Messungen (~10 Min) |
+| 3️⃣ **Trendprüfung** | Temperatur steigt oder ist stabil (nicht fallend) |
+| 4️⃣ **Coast aktiv** | Zieltemperatur → unter aktuelle Wassertemperatur |
+| 5️⃣ **Exit** | Wenn Tist < Tsoll + Hysterese/2 → zurück zum Heizen |
+
+### Gewicht in der Entscheidung
+
+Die Coast-Strategie erhält ein **dominantes Gewicht** (Standard 80%) in der gewichteten Entscheidung:
+
+```
+Bei aktivem Coast-Modus:
+  Coast:     80%  (dominant — verhindert Heizen)
+  Komfort:   10%  (PI — auch negativ, verstärkt Coast)
+  Thermisch:  4%  (Windkorrektur, vernachlässigbar)
+  Andere:     6%  (COP + Preis)
+```
+
+> [!NOTE]
+> Der PI-Regler wird beim Verlassen des Coast-Modus **zurückgesetzt** (I-Term gelöscht) um Verzerrungen zu vermeiden.
+
+### Einstellungen
+
+| Einstellung | Standard | Effekt |
+|-------------|----------|--------|
+| Coast Offset | 1°C | Grad unter Auslasstemperatur für Coast-Ziel |
+| Coast Hysterese | 0.3°C | Überschwingspanne über Sollwert für Aktivierung |
+| Coast Stärke | 0.80 | Gewichtsanteil in der gewichteten Entscheidung |
 
 ---
 
@@ -264,6 +309,25 @@ Berechnung:
 Gesamt:    +0.80°C
 ```
 
+### Beispiel: Coast-Modus aktiv
+
+```
+Komfort-Regler:     "Senken -1°C" (PI erkennt Überschwingung)
+COP-Optimierer:     "Senken -0.5°C" (niedrigerer Vorlauf = höherer COP)
+Preis-Optimierer:   "Halten 0°C" (normaler Preis)
+Thermisches Modell: "Erhöhen +0.3°C" (Windkorrektur)
+Coast-Strategie:    "Senken -4°C" (Coast-Ziel = Auslasstemp - Offset)
+
+Berechnung (mit Coast-Stärke = 0.80):
+-4.0 × 0.80       = -3.20°C  (Coast dominant)
+-1.0 × 0.50 × 0.20 = -0.10°C  (Komfort skaliert)
+-0.5 × 0.15 × 0.20 = -0.02°C  (COP skaliert)
+ 0.0 × 0.15 × 0.20 =  0.00°C  (Preis skaliert)
++0.3 × 0.20 × 0.20 = +0.01°C  (Thermisch skaliert)
+───────────────────────────────
+Gesamt:            -3.31°C → Sollwert << P111 → Kompressor stoppt ✅
+```
+
 ### Vorrang-Regeln
 
 1. **Sicherheit zuerst** — Außerhalb 15-28°C Bereich: alles ignorieren
@@ -327,6 +391,15 @@ Gesamt:    +0.80°C
   "cop_strategy": "balanced"
 }
 ```
+<!-- slide -->
+```json
+// Coast-Strategie (Passiver Kühlmodus)
+{
+  "adaptive_cooldown_offset": 1.0,
+  "adaptive_cooldown_hysteresis": 0.3,
+  "adaptive_cooldown_strength": 0.80
+}
+```
 ````
 
 ---
@@ -387,6 +460,8 @@ DANN: COP-Metriken abrufen
 | Modell-Vertrauen niedrig | Inkonsistente Daten | Länger warten oder Modell zurücksetzen |
 | Keine Preisdaten | API-Probleme | Internetverbindung prüfen |
 | COP unrealistisch | WP in Übergang | 24h auf Stabilisierung warten |
+| WP heizt bei hoher Raumtemp | Coast nicht aktiv | Hysterese-Einstellung prüfen, 10 Min warten |
+| Oszillation nach Abkühlung | I-Term Verzerrung | Coast-Exit-Reset funktioniert nicht → Adaptive Regelung neustarten |
 
 ### Abstimmungsprobleme
 

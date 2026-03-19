@@ -692,7 +692,11 @@ class SCOPCalculator {
 │  │  │  • AdaptiveControlService                                  │    │    │
 │  │  │       │                                                     │    │    │
 │  │  │       ├── HeatingController (PI Algorithm)                 │    │    │
-│  │  │       │                                                     │    │    │
+│  │  │       ├── WeightedDecisionMaker (5-component)              │    │    │
+│  │  │       ├── BuildingModelLearner (RLS)                       │    │    │
+│  │  │       ├── EnergyPriceOptimizer                             │    │    │
+│  │  │       ├── COPOptimizer                                     │    │    │
+│  │  │       ├── Coast Detection (ADR-024)                        │    │    │
 │  │  │       └── ExternalTemperatureService                        │    │    │
 │  │  │                                                             │    │    │
 │  │  └─────────────────────────────────────────────────────────────┘    │    │

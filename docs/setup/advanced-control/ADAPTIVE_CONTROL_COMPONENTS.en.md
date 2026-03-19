@@ -1,6 +1,6 @@
 # Adlar Heat Pump — Adaptive Control System
 
-**Version:** 2.7.x | **Date:** January 2026
+**Version:** 2.8.x | **Date:** March 2026
 
 ---
 
@@ -9,6 +9,7 @@
 This system intelligently controls your Adlar Castra heat pump for:
 
 - **Constant indoor temperature** (±0.3°C)
+- **Passive cooling mode** (coast) — prevents unnecessary heating
 - **Energy optimization** via dynamic prices
 - **COP maximization** for maximum efficiency
 - **Automatic learning** how your home responds
@@ -68,9 +69,10 @@ This system intelligently controls your Adlar Castra heat pump for:
 ### Control Loop (every 5 min)
 
 1. **Collect data** — Indoor/outdoor temp, power, prices
-2. **Calculate controllers** — Each component provides advice
-3. **Weighted decision** — 50% comfort + 15% efficiency + 15% cost + 20% thermal
-4. **Execute** — Update target temperature (DPS 4)
+2. **Cooldown detection** — Tist > Tsoll + hysteresis? → Coast mode
+3. **Calculate controllers** — Each component provides advice
+4. **Weighted decision** — 50% comfort + 15% efficiency + 15% cost + 20% thermal (+ 80% coast when active)
+5. **Execute** — Update target temperature (DPS 4)
 
 ---
 
@@ -103,6 +105,49 @@ The **PI (Proportional-Integral) controller** combines:
 | Aggressive | 4.0-5.0 | 2.0-3.0 | 0.2°C | Poorly insulated |
 | **Balanced** | 3.0 | 1.5 | 0.3°C | **Recommended** |
 | Conservative | 2.0 | 1.0 | 0.5°C | Good insulation |
+
+---
+
+## Component 5: Coast Strategy (Passive Cooling Mode)
+
+> New in v2.8.0 — [ADR-024](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+
+### What does it do?
+
+When the room temperature is **above the setpoint** (e.g. due to solar gain), the system detects this and **prevents unnecessary heating**. The heat pump stays off while the room passively cools to the desired level.
+
+### How does it work?
+
+| Step | Description |
+|------|--------------|
+| 1️⃣ **Detection** | Tist > Tsoll + hysteresis (default 0.3°C) |
+| 2️⃣ **Confirmation** | At least 2 consecutive measurements (~10 min) |
+| 3️⃣ **Trend check** | Temperature rising or stable (not falling) |
+| 4️⃣ **Coast active** | Target temperature → below current water temperature |
+| 5️⃣ **Exit** | When Tist < Tsoll + hysteresis/2 → back to heating |
+
+### Weight in Decision
+
+The coast strategy receives a **dominant weight** (default 80%) in the weighted decision:
+
+```
+When coast mode active:
+  Coast:    80%  (dominant — prevents heating)
+  Comfort:  10%  (PI — also negative, reinforces coast)
+  Thermal:   4%  (wind correction, negligible)
+  Other:     6%  (COP + price)
+```
+
+> [!NOTE]
+> The PI controller is **reset** (I-term cleared) upon leaving coast mode to prevent bias.
+
+### Settings
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| Coast Offset | 1°C | Degrees below outlet temperature for coast target |
+| Coast Hysteresis | 0.3°C | Overshoot margin above setpoint for activation |
+| Coast Strength | 0.80 | Weight share in the weighted decision |
 
 ---
 
@@ -264,6 +309,25 @@ Calculation:
 Total:     +0.80°C
 ```
 
+### Example: Coast Mode Active
+
+```
+Comfort Controller: "Decrease -1°C" (PI detects overshoot)
+COP Optimizer:      "Decrease -0.5°C" (lower supply = higher COP)
+Price Optimizer:    "Maintain 0°C" (normal price)
+Thermal Model:      "Increase +0.3°C" (wind correction)
+Coast Strategy:     "Decrease -4°C" (coast target = outlet - offset)
+
+Calculation (with coast strength = 0.80):
+-4.0 × 0.80       = -3.20°C  (coast dominant)
+-1.0 × 0.50 × 0.20 = -0.10°C  (comfort scaled)
+-0.5 × 0.15 × 0.20 = -0.02°C  (COP scaled)
+ 0.0 × 0.15 × 0.20 =  0.00°C  (price scaled)
++0.3 × 0.20 × 0.20 = +0.01°C  (thermal scaled)
+───────────────────────────────
+Total:            -3.31°C → Setpoint << P111 → compressor stops ✅
+```
+
 ### Override Rules
 
 1. **Safety First** — Outside 15-28°C range: ignore everything
@@ -327,6 +391,15 @@ Total:     +0.80°C
   "cop_strategy": "balanced"
 }
 ```
+<!-- slide -->
+```json
+// Coast Strategy (Passive Cooling Mode)
+{
+  "adaptive_cooldown_offset": 1.0,
+  "adaptive_cooldown_hysteresis": 0.3,
+  "adaptive_cooldown_strength": 0.80
+}
+```
 ````
 
 ---
@@ -387,6 +460,8 @@ THEN: Get COP metrics
 | Model confidence low | Inconsistent data | Wait longer or reset model |
 | No price data | API issues | Check internet connection |
 | COP unrealistic | HP in transition | Wait 24h for stabilization |
+| HP heats at high room temp | Coast not active | Check hysteresis setting, wait 10 min |
+| Oscillation after cooling | I-term bias | Coast exit reset not working → restart adaptive control |
 
 ### Tuning Problems
 

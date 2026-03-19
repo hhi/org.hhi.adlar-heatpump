@@ -815,8 +815,70 @@
         "value": 18,
         "min": 15,
         "max": 30,
+        "step": 1,
+        "units": "°C"
+      },
+      {
+        "id": "adaptive_cooldown_offset",
+        "type": "number",
+        "label": {
+          "en": "Cooldown water temperature offset",
+          "nl": "Watertemperatuur offset tijdens afkoeling",
+          "de": "Wassertemperatur-Offset beim Abkühlen",
+          "fr": "Décalage température eau lors du refroidissement"
+        },
+        "hint": {
+          "en": "During cooldown (room temperature above setpoint), the coast signal targets this many degrees below the current water temperature. This prevents the heat pump from activating while the room cools down. Default: 1°C.",
+          "nl": "Tijdens afkoeling (kamertemperatuur boven setpoint) richt het coast-signaal zich op dit aantal graden onder de huidige watertemperatuur. Dit voorkomt dat de warmtepomp aanslaat tijdens het afkoelen. Standaard: 1°C.",
+          "de": "Beim Abkühlen (Raumtemperatur über Sollwert) zielt das Coast-Signal auf diese Gradzahl unter der aktuellen Wassertemperatur. Dies verhindert, dass die Wärmepumpe beim Abkühlen anläuft. Standard: 1°C.",
+          "fr": "En mode refroidissement (température pièce au-dessus du point de consigne), le signal coast cible cette valeur en dessous de la température d'eau actuelle. Empêche la pompe à chaleur de s'activer pendant le refroidissement. Défaut: 1°C."
+        },
+        "value": 1,
+        "min": 0.5,
+        "max": 5,
         "step": 0.5,
         "units": "°C"
+      },
+      {
+        "id": "adaptive_cooldown_hysteresis",
+        "type": "number",
+        "label": {
+          "en": "Cooldown activation hysteresis",
+          "nl": "Hysterese voor afkoelmodus",
+          "de": "Hysterese für Abkühlmodus",
+          "fr": "Hystérésis d'activation du refroidissement"
+        },
+        "hint": {
+          "en": "The room temperature must exceed the setpoint by this margin before cooldown mode activates. Prevents rapid switching between heating and cooldown. Default: 0.3°C.",
+          "nl": "De kamertemperatuur moet het setpoint met deze marge overschrijden voordat de afkoelmodus activeert. Voorkomt snel schakelen tussen verwarmen en afkoelen. Standaard: 0,3°C.",
+          "de": "Die Raumtemperatur muss den Sollwert um diese Marge überschreiten, bevor der Abkühlmodus aktiviert wird. Verhindert schnelles Umschalten zwischen Heizen und Abkühlen. Standard: 0,3°C.",
+          "fr": "La température de la pièce doit dépasser le point de consigne de cette marge avant l'activation du mode refroidissement. Prévient les commutations rapides entre chauffage et refroidissement. Défaut: 0,3°C."
+        },
+        "value": 0.3,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.1,
+        "units": "°C"
+      },
+      {
+        "id": "adaptive_cooldown_strength",
+        "type": "number",
+        "label": {
+          "en": "Cooldown coast strength",
+          "nl": "Sterkte coast-component bij afkoeling",
+          "de": "Coast-Stärke beim Abkühlen",
+          "fr": "Force du signal coast lors du refroidissement"
+        },
+        "hint": {
+          "en": "Weight share of the coast signal in the combined decision during cooldown (0.60–0.95). Higher values mean coast dominates more strongly. Default: 0.80.",
+          "nl": "Gewichtsaandeel van het coast-signaal in de gecombineerde beslissing tijdens afkoeling (0,60–0,95). Hogere waarden betekenen dat coast sterker domineert. Standaard: 0,80.",
+          "de": "Gewichtsanteil des Coast-Signals in der kombinierten Entscheidung beim Abkühlen (0,60–0,95). Höhere Werte bedeuten stärkere Dominanz des Coast-Signals. Standard: 0,80.",
+          "fr": "Part de poids du signal coast dans la décision combinée lors du refroidissement (0,60–0,95). Des valeurs plus élevées signifient une dominance plus forte du signal coast. Défaut: 0,80."
+        },
+        "value": 0.8,
+        "min": 0.6,
+        "max": 0.95,
+        "step": 0.05
       }
     ]
   },

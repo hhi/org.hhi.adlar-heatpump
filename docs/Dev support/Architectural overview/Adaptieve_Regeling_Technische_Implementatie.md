@@ -562,6 +562,98 @@ class COPController {
 }
 ```
 
+## Component 5: Coast-Strategie (Passieve Koelmodus)
+
+> Referentie: [ADR-024 — Adaptive Control: Passieve Afkoelmodus](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+
+### Probleem
+
+Wanneer de kamertemperatuur boven het setpoint ligt (bijv. door zonnewinst of restwarmte), blijft de PI-regelaar een positieve correctie berekenen — de I-term accumuleert een "te koud" fout die in werkelijkheid niet bestaat. Hierdoor blijft de warmtepomp onnodig actief terwijl passief afkoelen het gewenste gedrag is.
+
+### Detectie: Drie Criteria
+
+```typescript
+// Alle drie moeten true zijn voor activatie
+private _isCooldownConfirmed(indoorTemp: number, targetTemp: number): boolean {
+  const effectiveHysteresis = this.settings.adaptive_cooldown_hysteresis;
+  
+  // Criterium 1: MAGNITUDE — Tist > Tsoll + hysterese
+  const aboveSetpoint = indoorTemp > targetTemp + effectiveHysteresis;
+  
+  // Criterium 2: DUUR — Minimaal 2 opeenvolgende cycles
+  if (aboveSetpoint) {
+    this._cooldownCycleCount++;
+  } else {
+    this._cooldownCycleCount = 0;
+    return false;
+  }
+  const durationMet = this._cooldownCycleCount >= 2;
+  
+  // Criterium 3: TREND — Temperatuur stijgt of is stabiel
+  const trendRising = this._isTemperatureRising();
+  
+  return aboveSetpoint && durationMet && trendRising;
+}
+```
+
+### Coast Delta Berekening
+
+```text
+coastAdjust = (uitlaatTemperatuur − offset) − huidigSetpoint
+
+Voorbeeld: uitlaat = 27°C, offset = 1°C, setpoint = 30°C
+→ coastAdjust = (27 − 1) − 30 = −4°C
+```
+
+Het resultaat is altijd negatief — het systeem stuurt het setpoint ver onder de huidige watertemperatuur zodat de warmtepomp het interne minimum (P111, typisch 24–26°C) bereikt en de compressor stopt.
+
+### I-term Reset bij Exit
+
+```typescript
+// Bij exit van cooldown: PI-historie wissen
+private _handleCooldownExit(): void {
+  if (this._coastActive) {
+    this.heatingController.resetHistory();  // I-term → 0
+    this._coastActive = false;
+    this._cooldownCycleCount = 0;
+    this.logger('Coast exit: I-term reset, PI start met schone historie');
+  }
+}
+```
+
+Dit voorkomt dat de PI-regelaar na de afkoelfase een **post-coast bias** heeft door de geaccumuleerde I-term.
+
+### Integratie in WeightedDecisionMaker
+
+De `CoastAction` wordt doorgegeven als een dominant gewogen component:
+
+```typescript
+interface CoastAction {
+  adjustment: number;   // altijd negatief tijdens actieve coast
+  reason: string;
+  priority: 'high';
+  strength: number;     // 0.0–1.0, standaard 0.80
+}
+```
+
+De bestaande 4 componenten worden geschaald met `existingScale = 1 - strength`:
+
+```text
+Bij strength = 0.80:
+  coast    ≈ 82.5%  (dominant)
+  comfort  ≈ 10.3%  (PI — ook negatief, versterkt coast)
+  thermal  ≈  4.1%  (wind correctie max +0.06°C → verwaarloosbaar)
+  overig   ≈  3.1%
+```
+
+### Gebruikersinstellingen
+
+| Instelling | Default | Bereik | Functie |
+|------------|---------|--------|---------|
+| `adaptive_cooldown_offset` | 1°C | 0.5–5°C | Graden onder uitlaattemperatuur voor coast-doel |
+| `adaptive_cooldown_hysteresis` | 0.3°C | 0.1–1.0°C | Overshoot-marge boven setpoint voor activatie |
+| `adaptive_cooldown_strength` | 0.80 | 0.60–0.95 | Gewichtsaandeel van coast-component |
+
 ---
 
 ## Systeem Integratie - Complete Control Flow
@@ -572,6 +664,12 @@ class AdaptiveControlService {
   private buildingModel: BuildingModelLearner;
   private priceOptimizer: EnergyPriceOptimizer;
   private copController: COPController;
+  private weightedDecisionMaker: WeightedDecisionMaker;
+
+  // Coast state (in-memory, reset bij stop())
+  private _coastActive = false;
+  private _cooldownCycleCount = 0;
+  private _indoorTempHistory: number[] = [];
 
   async executeControlCycle(): Promise<void> {
     // 1. Collect current state
@@ -581,54 +679,69 @@ class AdaptiveControlService {
     const currentPrice = this.priceOptimizer.getCurrentPrice();
     const buildingModel = this.buildingModel.getModel();
 
-    // 2. Get recommendations from each component
-    const copRecommendation = this.copController.analyzeAndRecommend(
-      copMetrics,
-      buildingModel,
-      currentTemp,
-      targetTemp,
-      this.priceOptimizer.getPriceCategory(currentPrice)
-    );
-
-    const priceRecommendation = this.priceOptimizer.calculatePreHeatRecommendation(
-      buildingModel,
-      currentTemp,
-      targetTemp,
-      currentPrice
-    );
-
-    // 3. Apply priority weighting
-    const priorities = await this.getPriorities(); // { comfort: 50%, efficiency: 30%, cost: 20% }
-
-    const weightedAdjustment =
-      (priorities.comfort * 0) +  // Comfort = no adjustment (maintain target)
-      (priorities.efficiency * copRecommendation.adjustment) +
-      (priorities.cost * priceRecommendation.targetAdjustment);
-
-    // 4. Apply adjustment via PI controller
-    const adjustedTarget = targetTemp + weightedAdjustment;
-    const piAdjustment = await this.heatingController.calculateAdjustment(
-      currentTemp,
-      adjustedTarget
-    );
-
-    // 5. Apply to heat pump (if in active mode)
-    if (await this.isActiveMode()) {
-      await this.applySetpointAdjustment(piAdjustment);
-    } else {
-      // Monitoring mode - log only
-      this.log('MONITORING MODE: Would adjust by', piAdjustment);
+    // 2. Record indoor temp in sliding window (max 3, FIFO)
+    this._indoorTempHistory.push(currentTemp);
+    if (this._indoorTempHistory.length > 3) {
+      this._indoorTempHistory.shift();
     }
 
-    // 6. Log decision
+    // 3. Check coast EXIT condition (lower hysteresis to prevent flip-flop)
+    if (this._coastActive) {
+      const exitHysteresis = this.settings.adaptive_cooldown_hysteresis / 2;
+      if (currentTemp < targetTemp + exitHysteresis) {
+        this.heatingController.resetHistory();  // I-term reset!
+        this._coastActive = false;
+        this._cooldownCycleCount = 0;
+      }
+    }
+
+    // 4. Check coast ACTIVATION (magnitude + duration + trend)
+    if (!this._coastActive && this._isCooldownConfirmed(currentTemp, targetTemp)) {
+      this._coastActive = true;
+    }
+
+    // 5. Get recommendations from each component
+    const heatingAction = this.heatingController.calculateAction(currentTemp, targetTemp);
+    const copAction = this.copController.analyzeAndRecommend(
+      copMetrics, buildingModel, currentTemp, targetTemp,
+      this.priceOptimizer.getPriceCategory(currentPrice)
+    );
+    const priceAction = this.priceOptimizer.calculatePreHeatRecommendation(
+      buildingModel, currentTemp, targetTemp, currentPrice
+    );
+    const thermalAction = buildingModel.calculateThermalAction();
+
+    // 6. Build coast action (null if coast not active)
+    const coastAction = this._coastActive
+      ? this._buildCoastAction(targetTemp)
+      : null;
+
+    // 7. Combined weighted decision (5 components)
+    const combinedAction = this.weightedDecisionMaker.combineActionsWithThermal(
+      heatingAction, copAction, priceAction, thermalAction,
+      this.getConfidenceMetrics(),
+      coastAction,  // null → geen effect, backwards-compatible
+    );
+
+    // 8. Apply adjustment via smart accumulator
+    if (await this.isActiveMode()) {
+      await this.applySetpointAdjustment(combinedAction.finalAdjustment);
+    }
+
+    // 9. Trigger flow cards with coast-aware tokens
+    await this.triggerFlowCards({
+      ...combinedAction,
+      control_mode: this._coastActive ? 'cooldown' : 'heating',
+      coast_component: combinedAction.breakdown.coast ?? 0,
+    });
+
+    // 10. Log decision
     this.logControlDecision({
-      currentTemp,
-      targetTemp,
-      adjustedTarget,
-      piAdjustment,
-      copReason: copRecommendation.reason,
-      priceCategory: this.priceOptimizer.getPriceCategory(currentPrice),
-      buildingModelConfidence: buildingModel.confidence
+      currentTemp, targetTemp,
+      finalAdjustment: combinedAction.finalAdjustment,
+      breakdown: combinedAction.breakdown,
+      coastActive: this._coastActive,
+      controlMode: this._coastActive ? 'cooldown' : 'heating',
     });
   }
 }
@@ -680,6 +793,17 @@ class AdaptiveControlService {
 ---
 
 ## Versie Historie
+
+**v2.3.0 (Maart 2026)** - Passieve Koelmodus (Coast-Strategie)
+
+- ✨ Coast-strategie geïmplementeerd (ADR-024)
+- ✨ WeightedDecisionMaker uitgebreid met `CoastAction` interface
+- ✨ 3-criteria koeldetectie (magnitude + duur + trend)
+- ✨ I-term reset bij coast-exit om post-coast bias te voorkomen
+- ✨ Flow card `temperature_adjustment_recommended` uitgebreid met `control_mode` token
+- ✨ Flow card `adaptive_simulation_update` uitgebreid met `coast_component` token
+- 🔧 3 nieuwe gebruikersinstellingen: offset, hysterese, sterkte
+- 📖 Component 5 sectie toegevoegd aan technische documentatie
 
 **v2.2.0 (December 2025)** - Building Model Enhancements
 

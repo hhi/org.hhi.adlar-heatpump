@@ -201,6 +201,9 @@ Automatic control of target temperature based on external indoor temperature sen
 - PI (Proportional-Integral) controller for stable indoor temperature
 - Performance: ±0.3°C stability
 - Requires: External temperature sensor via flow card
+- Passive Cooling Mode: Automatically stops heating when room temperature
+  rises above setpoint, allowing the building to cool down passively
+- Prevents overshoot from solar gains or internal heat sources
 
 BUILDING MODEL LEARNING
 Machine learning algorithm that learns the thermal properties of your home:
@@ -238,11 +241,12 @@ COP-optimized heating timing and wind & frost corrections using Open-Meteo weath
 - Settings: Enable/disable weather forecast, configurable location coordinates
 
 ADAPTIVE CONTROL WEIGHTING FACTORS
-Four priorities that together determine how the system makes decisions:
+Five priorities that together determine how the system makes decisions:
 - Comfort Priority (default 50%): Weight for PI temperature control
 - Efficiency Priority (default 15%): Weight for COP optimization
 - Cost Priority (default 15%): Weight for price optimization
 - Thermal Prediction Priority (default 20%): Weight for thermal property consideration
+- Coast Priority (default 80% when active): Passive cooling during overshoot — dominates the decision
 - Values are automatically normalized to total 100%
 
 BUILDING MODEL DIAGNOSTICS
