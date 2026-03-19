@@ -16,7 +16,7 @@ This Homey app provides comprehensive local control and monitoring of Adlar Cast
 - **Complete Device Control**: Access to 88 capabilities including diagnostics, energy, and advanced controls
 - **Flow Card Ecosystem**: 93 total flow cards with per-category control and health-based registration
 - **Efficiency Monitoring**: COP (real-time), Rolling COP (daily/weekly/monthly), and SCOP per EN 14825
-- **Adaptive Control & Building Model**: PI regulation, thermal predictions, COP/energy optimization, and building model learning
+- **Adaptive Control & Building Model**: PI regulation, thermal predictions, COP/energy optimization, building model learning, and passive cooling (coast strategy)
 - **Building Insights & Diagnostics**: Automated recommendations and detailed learning diagnostics
 - **Energy Price Optimization**: Day-ahead price scheduling and cost-aware control
 - **Weather Forecast Service**: COP-optimized heating timing advice via Open-Meteo API
@@ -147,6 +147,7 @@ Three modes per category (managed via SettingsManagerService + CapabilityHealthS
 - **Comfort Priority**: Weight for PI temperature control (default: 60%)
 - **Efficiency Priority**: Weight for COP optimization (default: 25%)
 - **Cost Priority**: Weight for price optimization (default: 15%)
+- **Coast Strategy** (v2.8.0+): Passive cooling mode dominates weighting (80%) when overshoot detected
 - Values auto-normalize to 100%
 
 ## Flow Cards
@@ -410,6 +411,7 @@ The diagnostic tool helps ensure the Building Model Learner works correctly:
 - **Component 2** (BuildingModelLearner): Direct diagnostic via this flow card
 - **Component 3** (EnergyPriceOptimizer): Check energy price API connectivity
 - **Component 4** (COPOptimizer): Check COP capability data quality
+- **Component 5** (Coast Strategy, v2.8.0+): Passive cooling via dominant weighted action
 
 **All components** log to the same diagnostic framework for unified troubleshooting.
 

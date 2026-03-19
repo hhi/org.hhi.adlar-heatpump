@@ -43,6 +43,13 @@ export interface ConfidenceMetrics {
   priceDataAvailable: boolean; // Whether energy price data is available
 }
 
+export interface CoastAction {
+  adjustment: number;   // (uitlaatTemp − offset) − huidigSetpoint (always negative when coast active)
+  reason: string;
+  priority: 'high';
+  strength: number;     // 0.0–1.0, share of total weight (default: 0.80)
+}
+
 export interface CombinedAction {
   finalAdjustment: number; // °C to adjust target_temperature
   breakdown: {
@@ -50,6 +57,7 @@ export interface CombinedAction {
     efficiency: number;
     cost: number;
     thermal?: number; // v2.6.0: building model component
+    coast?: number;   // v2.10.0: passive cooldown coast component
   };
   reasoning: string[];
   priority: 'low' | 'medium' | 'high';
@@ -58,6 +66,7 @@ export interface CombinedAction {
     efficiency: number;
     cost: number;
     thermal?: number; // v2.6.0
+    coast?: number;   // v2.10.0
   };
 }
 
@@ -198,6 +207,7 @@ export class WeightedDecisionMaker {
     priceAction: PriceAction | null,
     thermalAction: { adjustment: number; reason: string; priority: 'low' | 'medium' | 'high' } | null,
     confidenceMetrics: ConfidenceMetrics,
+    coastAction?: CoastAction | null,   // v2.10.0: optional passive cooldown coast component
   ): CombinedAction {
     const reasoning: string[] = [];
 
@@ -208,8 +218,9 @@ export class WeightedDecisionMaker {
     const thermalAdjust = thermalAction?.adjustment || 0;
 
     // =========================================================================
-    // 4-WAY CONFIDENCE-AWARE WEIGHT ADJUSTMENT
-    // Reduce weights for low-confidence optimizers, redistribute to comfort
+    // 5-WAY CONFIDENCE-AWARE WEIGHT ADJUSTMENT
+    // v2.10.0: Coast scales all existing weights to (1 - coastStrength).
+    // When coastAction is null: coastStrength=0, existingScale=1.0 → identical to prior behaviour.
     // =========================================================================
 
     // Use configured priorities (or fallback to defaults if thermal not configured)
@@ -235,20 +246,28 @@ export class WeightedDecisionMaker {
       }
     }
 
-    // Apply confidence multipliers
-    const effectiveEfficiencyWeight = basePriorities.efficiency * confidenceMetrics.copConfidence;
-    const effectiveCostWeight = basePriorities.cost * costMultiplier * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
-    const effectiveThermalWeight = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0);
+    // v2.10.0: Coast shrinks all existing components proportionally
+    const coastStrength = coastAction?.strength ?? 0;
+    const existingScale = 1 - coastStrength;
+    const coastAdjust = coastAction?.adjustment ?? 0;
+
+    // Apply confidence multipliers and coast scale
+    const effectiveComfortWeight = basePriorities.comfort * existingScale;
+    const effectiveEfficiencyWeight = basePriorities.efficiency * confidenceMetrics.copConfidence * existingScale;
+    const effectiveCostWeight = basePriorities.cost * costMultiplier * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0) * existingScale;
+    const effectiveThermalWeight = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0) * existingScale;
+    const effectiveCoastWeight = coastStrength;
 
     // Calculate total effective weight
-    const totalEffectiveWeight = basePriorities.comfort + effectiveEfficiencyWeight + effectiveCostWeight + effectiveThermalWeight;
+    const totalEffectiveWeight = effectiveComfortWeight + effectiveEfficiencyWeight + effectiveCostWeight + effectiveThermalWeight + effectiveCoastWeight;
 
     // Normalize weights to sum to 1.0
     const normalizedWeights = {
-      comfort: basePriorities.comfort / totalEffectiveWeight,
+      comfort: effectiveComfortWeight / totalEffectiveWeight,
       efficiency: effectiveEfficiencyWeight / totalEffectiveWeight,
       cost: effectiveCostWeight / totalEffectiveWeight,
       thermal: effectiveThermalWeight / totalEffectiveWeight,
+      coast: effectiveCoastWeight / totalEffectiveWeight,
     };
 
     // Add reasoning for each component WITH weight percentages
@@ -256,6 +275,7 @@ export class WeightedDecisionMaker {
     const efficiencyPct = Math.round(normalizedWeights.efficiency * 100);
     const costPct = Math.round(normalizedWeights.cost * 100);
     const thermalPct = Math.round(normalizedWeights.thermal * 100);
+    const coastPct = Math.round(normalizedWeights.coast * 100);
 
     // Cost multiplier indicator for transparency
     const costMultiplierStr = costMultiplier > 1 ? `×${costMultiplier.toFixed(0)}` : '';
@@ -274,12 +294,16 @@ export class WeightedDecisionMaker {
     } else if (confidenceMetrics.buildingModelConfidence < 0.5) {
       reasoning.push('⚠️ Thermal (0%): conf <50%, disabled');
     }
+    if (coastAction) {
+      reasoning.push(`Coast (${coastPct}%): ${coastAction.reason}`);
+    }
 
-    // Apply normalized weights (4-way)
+    // Apply normalized weights (5-way)
     const finalAdjustment = comfortAdjust * normalizedWeights.comfort
       + efficiencyAdjust * normalizedWeights.efficiency
       + costAdjust * normalizedWeights.cost
-      + thermalAdjust * normalizedWeights.thermal;
+      + thermalAdjust * normalizedWeights.thermal
+      + coastAdjust * normalizedWeights.coast;
 
     // Determine overall priority (highest wins)
     const allPriorities = [
@@ -287,6 +311,7 @@ export class WeightedDecisionMaker {
       copAction?.priority,
       priceAction?.priority,
       thermalAction?.priority,
+      coastAction?.priority,
     ].filter(Boolean) as ('low' | 'medium' | 'high')[];
 
     let priority: 'low' | 'medium' | 'high' = 'low';
@@ -300,6 +325,7 @@ export class WeightedDecisionMaker {
         efficiency: efficiencyAdjust * normalizedWeights.efficiency,
         cost: costAdjust * normalizedWeights.cost,
         thermal: thermalAdjust * normalizedWeights.thermal,
+        coast: coastAdjust * normalizedWeights.coast,
       },
       reasoning,
       priority,

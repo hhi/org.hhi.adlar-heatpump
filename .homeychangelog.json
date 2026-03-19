@@ -1,4 +1,10 @@
 {
+  "2.10.0": {
+    "en": "Adaptive control now detects when the room is above setpoint and suppresses the heat pump via a passive cooldown (coast) signal — keeping the room from heating further while it cools naturally. Minimum water temperature for adaptive control is now configurable (15–30°C, default 18°C); match it to your heat pump's P111 parameter for correct night setback.",
+    "nl": "Adaptieve regeling herkent nu wanneer de kamer boven het setpoint is en onderdrukt de warmtepomp via een passief afkoelsignaal (coast) — zodat de kamer verder kan afkoelen zonder onnodig te verwarmen. De minimale watertemperatuur voor adaptieve regeling is nu instelbaar (15–30°C, standaard 18°C); stem dit af op de P111-waarde van uw warmtepomp voor correcte nachtterugval.",
+    "de": "Die adaptive Regelung erkennt jetzt, wenn der Raum über dem Sollwert liegt, und unterdrückt die Wärmepumpe über ein passives Abkühlsignal (Coast) — damit der Raum natürlich abkühlen kann. Die minimale Wassertemperatur für die adaptive Regelung ist jetzt einstellbar (15–30°C, Standard 18°C); stimmen Sie es auf den P111-Parameter Ihrer Wärmepumpe für korrekten Nacht-Setback ab.",
+    "fr": "La régulation adaptative détecte maintenant quand la pièce est au-dessus du point de consigne et supprime la pompe à chaleur via un signal de refroidissement passif (coast) — permettant à la pièce de refroidir naturellement. La température d'eau minimale pour la régulation adaptative est maintenant configurable (15–30°C, défaut 18°C); alignez-la sur le paramètre P111 de votre pompe à chaleur pour un setback nocturne correct."
+  },
   "2.9.25": {
     "en": "Improved: Addressed potential causes of the adaptive control trigger stopping after an app restart.",
     "nl": "Verbeterd: Mogelijke oorzaken van de adaptieve regeling trigger die stopt na een app herstart aangepakt.",

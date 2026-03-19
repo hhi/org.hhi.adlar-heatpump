@@ -106,9 +106,9 @@ Zyklus 2: PI = +0,4°C → Accumulator: 0,7 → Anwenden +1°C, Rest: -0,3
 Zyklus 3: PI = +0,2°C → Accumulator: -0,1 → Warten
 ```
 
-### 4-Säulen Weighted Decision System (v2.6.0+)
+### 5-Säulen Weighted Decision System (v2.6.0+)
 
-Adaptive Control kombiniert **4 intelligente Komponenten** in jeder Entscheidung:
+Adaptive Control kombiniert **5 intelligente Komponenten** in jeder Entscheidung:
 
 | Komponente | Gewicht | Funktion |
 |------------|---------|----------|
@@ -116,8 +116,9 @@ Adaptive Control kombiniert **4 intelligente Komponenten** in jeder Entscheidung
 | ⚡ **Effizienz** | 15% | COP-Optimierung über Vorlauftemperatur |
 | 💰 **Kosten** | 15% | Preisoptimierung (Vorheizen bei günstigem Strom) |
 | 🏠 **Thermisch** | 20% | Prädiktive Regelung über gelerntes Gebäudemodell |
+| ❄️ **Coast** | 80% (wenn aktiv) | Passive Kühlung — verhindert Heizen über Sollwert |
 
-**Beispielberechnung:**
+**Beispielberechnung (normal):**
 
 ```
 Komfort will: +2,0°C (zu kalt)
@@ -128,7 +129,17 @@ Thermisch will: +0,5°C (Gebäude kühlt schnell ab, vorausschauend heizen)
 Gewichtetes Gesamt: (2,0×50% + -0,5×15% + 1,0×15% + 0,5×20%) = 1,15°C
 ```
 
-**Ergebnis**: Wärmepumpen-Sollwert steigt um +1°C (gerundet).
+**Beispielberechnung (Coast-Modus aktiv):**
+
+```
+Coast will: -4,0°C (Auslasstemperatur - Offset) ← dominant 80%
+Komfort will: -1,0°C (PI erkennt Überschwingung)
+Übrige Komponenten: skaliert mit 0,20
+
+Ergebnis: -3,31°C → Kompressor stoppt ✅
+```
+
+**Ergebnis**: Wärmepumpen-Sollwert steigt um +1°C (gerundet), oder sinkt deutlich bei Coast.
 
 > [!NOTE]
 > Die Gewichte sind **konfigurierbar** über Geräteeinstellungen (Expert Mode). Standardwerte sind für die meisten Situationen optimiert.
@@ -219,6 +230,8 @@ Triggert wenn Adaptive Control eine Sollwertänderung berechnet.
 | `adjustment` | Number | Berechnete Anpassung |
 | `reason` | String | Erklärung der Berechnung |
 | `controller` | String | Controller-Typ |
+| `control_mode` | String | `heating` oder `cooldown` (v2.8.0+) |
+| `coast_component` | Number | Coast-Beitrag zur Empfehlung (v2.8.0+) |
 
 > [!NOTE]
 > `adjustment` ist die berechnete Empfehlung und kann fraktional sein. Die tatsächliche Anpassung ist immer eine ganze Zahl.
@@ -248,6 +261,7 @@ Triggert für Monitoring/Logging ohne echte Anpassungen.
 | `efficiency_component` | Number | Effizienz-Beitrag (°C) |
 | `cost_component` | Number | Kosten-Beitrag (°C) |
 | `thermal_component` | Number | Thermisches Modell-Beitrag (°C) (v2.6.0+) |
+| `coast_component` | Number | Coast-Beitrag (°C) (v2.8.0+) |
 | `reasoning` | String | Begründung |
 
 ---
@@ -297,6 +311,14 @@ THEN: Benachrichtigung senden "✅ Adaptive Control aktiviert"
 | Zu langsame Reaktion | Erhöhen Sie Kp (z.B. 3,0 → 4,0) |
 | Strukturelle Abweichung | Erhöhen Sie Ki (z.B. 1,5 → 2,0) |
 | Zu viele kleine Korrekturen | Erhöhen Sie Deadband (z.B. 0,3 → 0,5) |
+
+### Coast-Einstellungen (v2.8.0+)
+
+| Einstellung | Standard | Bereich | Beschreibung |
+|-------------|----------|---------|--------------|
+| **Coast Offset** | 1,0°C | 0,5 - 5,0°C | Grad unter Auslasstemperatur für Coast-Ziel |
+| **Coast Hysterese** | 0,3°C | 0,1 - 1,0°C | Überschwingspanne über Sollwert für Aktivierung |
+| **Coast Stärke** | 0,80 | 0,60 - 0,95 | Gewichtsanteil in der gewichteten Entscheidung |
 
 ---
 
@@ -423,6 +445,29 @@ THEN:
 | Kp zu niedrig | Erhöhen auf 4,0 oder 5,0 |
 | Große thermische Masse | Erhöhen Sie Ki für bessere Langzeitkorrektur |
 | Sollwertbereich begrenzt | Prüfen Sie manuellen Sollwert |
+
+---
+
+### ❄️ Wärmepumpe heizt bei hoher Raumtemperatur (v2.8.0+)
+
+**Symptom:** Raum ist wärmer als Sollwert, aber Wärmepumpe läuft weiter
+
+| Ursache | Lösung |
+|---------|--------|
+| Coast noch nicht aktiv | Mindestens 10 Min warten (2 Zyklen) |
+| Hysterese zu hoch | Coast-Hysterese verringern (z.B. 0,3 → 0,2°C) |
+| Trend fallend | Coast aktiviert nicht bei fallender Temp — normales Verhalten |
+
+---
+
+### ❄️ Oszillation nach Abkühlphase
+
+**Symptom:** Nach Verlassen des Coast-Modus schießt Temperatur über
+
+| Ursache | Lösung |
+|---------|--------|
+| I-Term nicht zurückgesetzt | Adaptive Control neu starten |
+| Kp zu hoch nach Coast | Kp auf 2,0-2,5 verringern |
 
 ---
 

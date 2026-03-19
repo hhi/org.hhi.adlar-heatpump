@@ -201,6 +201,9 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - PI (Proportioneel-Integraal) regelaar voor stabiele binnentemperatuur
 - Prestaties: ±0.3°C stabiliteit
 - Vereist: Externe temperatuursensor via flow kaart
+- Passieve Koelmodus: Stopt automatisch verwarming wanneer de
+  kamertemperatuur boven het setpoint stijgt, zodat het gebouw passief afkoelt
+- Voorkomt overshoot na zonne-instraling of interne warmtebronnen
 
 GEBOUWMODEL LEREN
 Machine learning algoritme dat de thermische eigenschappen van je woning leert:
@@ -238,11 +241,12 @@ COP-geoptimaliseerd verwarmingsadvies en wind- & vorstcorrecties met Open-Meteo 
 - Instellingen: Weerprognose aan/uit, configureerbare locatie coördinaten
 
 ADAPTIEVE REGELING WEGINGSFACTOREN
-Vier prioriteiten die samen bepalen hoe het systeem beslissingen maakt:
+Vijf prioriteiten die samen bepalen hoe het systeem beslissingen maakt:
 - Comfort Prioriteit (standaard 50%): Gewicht voor PI temperatuurregeling
 - Efficiëntie Prioriteit (standaard 15%): Gewicht voor COP optimalisatie
 - Kosten Prioriteit (standaard 15%): Gewicht voor prijsoptimalisatie
 - Thermische Warmte Prioriteit (standaard 20%): Gewicht voor meeweging thermische eigenschappen woning
+- Coast Prioriteit (standaard 80% bij activatie): Passieve koeling bij overshoot — domineert de beslissing
 - Waarden worden automatisch genormaliseerd naar totaal 100%
 
 GEBOUWMODEL DIAGNOSTIEK

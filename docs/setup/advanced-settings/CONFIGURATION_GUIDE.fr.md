@@ -246,6 +246,23 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 - **Plage** : 0.1 - 1.0°C
 - **Fonction** : Tolérance avant que les ajustements soient effectués
 
+#### Coast Offset (v2.8.0+)
+- **Par défaut** : 1,0°C
+- **Plage** : 0,5 - 5,0°C
+- **Fonction** : Degrés en dessous de la température de sortie pour la valeur cible coast
+- **Plus bas** : Compresseur s’arrête plus tôt, moins de chauffage
+- **Plus haut** : Coast plus prudent, plus de marge
+
+#### Coast Hystérésis (v2.8.0+)
+- **Par défaut** : 0,3°C
+- **Plage** : 0,1 - 1,0°C
+- **Fonction** : Marge de dépassement au-dessus de la consigne pour l’activation du mode coast
+
+#### Coast Force (v2.8.0+)
+- **Par défaut** : 0,80
+- **Plage** : 0,60 - 0,95
+- **Fonction** : Part de poids du coast dans la décision pondérée (dominant lors de l’activation)
+
 ---
 
 ## 6. Apprentissage du Modèle de Bâtiment
@@ -437,7 +454,7 @@ Optimisation automatique de la température de départ pour une efficacité maxi
 
 ## 10. Facteurs de Pondération du Contrôle Adaptatif
 
-Ces quatre priorités déterminent ensemble comment le système prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.**
+Ces cinq priorités déterminent ensemble comment le système prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.** En mode coast actif, le composant coast domine (80% par défaut).
 
 ### Priorité Confort
 - **Par défaut** : 50%

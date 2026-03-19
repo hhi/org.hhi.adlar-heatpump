@@ -1,6 +1,6 @@
 # 🚀 Neue Funktion: Adaptive Temperaturregelung
 
-> **Status**: Verfügbar ab Version 2.5.x  
+> **Status**: Verfügbar ab Version 2.8.x  
 > **Voraussetzung**: Externer Raumtemperatursensor über Homey Flow
 
 ---
@@ -9,7 +9,7 @@
 
 Die Adlar App **lernt** jetzt, wie sich Ihr Zuhause verhält und passt die Wärmepumpe automatisch für optimalen Komfort und maximale Einsparungen an.
 
-### Die 4 Säulen: Komfort • Effizienz • Kosten • Thermisch
+### Die 5 Säulen: Komfort • Effizienz • Kosten • Thermisch • Coast
 
 | Faktor | Was es tut | Einstellung |
 |--------|------------|-------------|
@@ -17,6 +17,7 @@ Die Adlar App **lernt** jetzt, wie sich Ihr Zuhause verhält und passt die Wärm
 | ⚡ **Effizienz** | Optimaler COP durch intelligente Vorlauftemperatur | 15% (Standard) |
 | 💰 **Kosten** | Vorheizen bei günstigem Strom, reduzieren bei teurem | 15% (Standard) |
 | 🏠 **Thermisch** | Prädiktive Regelung via gelerntes Gebäudemodell (τ, C, UA) | 20% (Standard) |
+| ❄️ **Coast** | Passive Kühlung — verhindert unnötiges Heizen über Sollwert | 80% (wenn aktiv) |
 
 *Gewichtungen sind einstellbar und normalisieren automatisch auf 100%.*
 
@@ -44,6 +45,12 @@ Die App lernt automatisch:
 
 **Lernperiode**: 48-72 Stunden für ein zuverlässiges Modell  
 **Updates**: Kontinuierliches Lernen bei veränderten Bedingungen
+
+### 4. Passiver Kühlmodus (v2.8.0+)
+
+- **Problem**: Wärmepumpe heizt weiter, obwohl der Raum bereits zu warm ist (z.B. durch Solargewinne)
+- **Lösung**: Coast-Strategie erkennt Überschwingung → senkt Sollwert unter Wassertemperatur → Kompressor stoppt
+- **I-Term Reset**: PI-Regler startet nach Abkühlphase frisch
 
 ---
 

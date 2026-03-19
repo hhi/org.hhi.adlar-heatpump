@@ -1,6 +1,6 @@
 # Pompe à Chaleur Adlar — Système de Contrôle Adaptatif
 
-**Version :** 2.7.x | **Date :** Janvier 2026
+**Version :** 2.8.x | **Date :** Mars 2026
 
 ---
 
@@ -9,6 +9,7 @@
 Ce système contrôle intelligemment votre pompe à chaleur Adlar Castra pour :
 
 - **Température intérieure constante** (±0.3°C)
+- **Mode de refroidissement passif** (coast) — empêche le chauffage inutile
 - **Optimisation énergétique** via prix dynamiques
 - **Maximisation du COP** pour une efficacité maximale
 - **Apprentissage automatique** de la réponse de votre maison
@@ -68,9 +69,10 @@ Ce système contrôle intelligemment votre pompe à chaleur Adlar Castra pour :
 ### Boucle de Contrôle (toutes les 5 min)
 
 1. **Collecter les données** — Temp intérieure/extérieure, puissance, prix
-2. **Calculer les contrôleurs** — Chaque composant fournit des conseils
-3. **Décision pondérée** — 50% confort + 15% efficacité + 15% coût + 20% thermique
-4. **Exécuter** — Mettre à jour la température cible (DPS 4)
+2. **Détection de refroidissement** — Tist > Tsoll + hystérésis ? → Mode coast
+3. **Calculer les contrôleurs** — Chaque composant fournit des conseils
+4. **Décision pondérée** — 50% confort + 15% efficacité + 15% coût + 20% thermique (+ 80% coast si actif)
+5. **Exécuter** — Mettre à jour la température cible (DPS 4)
 
 ---
 
@@ -103,6 +105,49 @@ Le **contrôleur PI (Proportionnel-Intégral)** combine :
 | Agressif | 4.0-5.0 | 2.0-3.0 | 0.2°C | Mauvaise isolation |
 | **Équilibré** | 3.0 | 1.5 | 0.3°C | **Recommandé** |
 | Conservateur | 2.0 | 1.0 | 0.5°C | Bonne isolation |
+
+---
+
+## Composant 5 : Stratégie Coast (Mode de Refroidissement Passif)
+
+> Nouveau dans v2.8.0 — [ADR-024](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+
+### Que fait-il ?
+
+Lorsque la température de la pièce est **au-dessus de la consigne** (par ex. en raison d'apports solaires), le système détecte cela et **empêche le chauffage inutile**. La pompe à chaleur reste éteinte pendant que la pièce refroidit passivement au niveau souhaité.
+
+### Comment ça marche ?
+
+| Étape | Description |
+|-------|--------------|
+| 1️⃣ **Détection** | Tist > Tsoll + hystérésis (défaut 0.3°C) |
+| 2️⃣ **Confirmation** | Au moins 2 mesures consécutives (~10 min) |
+| 3️⃣ **Vérification tendance** | Température en hausse ou stable (pas en baisse) |
+| 4️⃣ **Coast actif** | Température cible → en dessous de la température d'eau actuelle |
+| 5️⃣ **Sortie** | Quand Tist < Tsoll + hystérésis/2 → retour au chauffage |
+
+### Poids dans la Décision
+
+La stratégie coast reçoit un **poids dominant** (défaut 80%) dans la décision pondérée :
+
+```
+En mode coast actif :
+  Coast :    80%  (dominant — empêche le chauffage)
+  Confort :  10%  (PI — aussi négatif, renforce le coast)
+  Thermique : 4%  (correction du vent, négligeable)
+  Autre :     6%  (COP + prix)
+```
+
+> [!NOTE]
+> Le contrôleur PI est **réinitialisé** (terme I effacé) en quittant le mode coast pour éviter un biais.
+
+### Réglages
+
+| Réglage | Défaut | Effet |
+|---------|--------|-------|
+| Coast Offset | 1°C | Degrés en dessous de la température de sortie pour cible coast |
+| Coast Hystérésis | 0.3°C | Marge de dépassement au-dessus de la consigne pour activation |
+| Coast Force | 0.80 | Part de poids dans la décision pondérée |
 
 ---
 
@@ -264,6 +309,25 @@ Calcul :
 Total :    +0.80°C
 ```
 
+### Exemple : Mode Coast Actif
+
+```
+Contrôleur Confort : "Diminuer -1°C" (PI détecte dépassement)
+Optimiseur COP :     "Diminuer -0.5°C" (départ plus bas = COP plus élevé)
+Optimiseur Prix :    "Maintenir 0°C" (prix normal)
+Modèle Thermique :   "Augmenter +0.3°C" (correction du vent)
+Stratégie Coast :    "Diminuer -4°C" (cible coast = sortie - offset)
+
+Calcul (avec force coast = 0.80) :
+-4.0 × 0.80       = -3.20°C  (coast dominant)
+-1.0 × 0.50 × 0.20 = -0.10°C  (confort mis à l'échelle)
+-0.5 × 0.15 × 0.20 = -0.02°C  (COP mis à l'échelle)
+ 0.0 × 0.15 × 0.20 =  0.00°C  (prix mis à l'échelle)
++0.3 × 0.20 × 0.20 = +0.01°C  (thermique mis à l'échelle)
+───────────────────────────────
+Total :            -3.31°C → Consigne << P111 → compresseur s'arrête ✅
+```
+
 ### Règles de Priorité
 
 1. **Sécurité d'abord** — Hors de la plage 15-28°C : ignorer tout
@@ -327,6 +391,15 @@ Total :    +0.80°C
   "cop_strategy": "balanced"
 }
 ```
+<!-- slide -->
+```json
+// Stratégie Coast (Mode de Refroidissement Passif)
+{
+  "adaptive_cooldown_offset": 1.0,
+  "adaptive_cooldown_hysteresis": 0.3,
+  "adaptive_cooldown_strength": 0.80
+}
+```
 ````
 
 ---
@@ -387,6 +460,8 @@ ALORS : Obtenir métriques COP
 | Confiance modèle basse | Données incohérentes | Attendre plus longtemps ou réinitialiser modèle |
 | Pas de données prix | Problèmes API | Vérifier connexion internet |
 | COP irréaliste | PAC en transition | Attendre 24h pour stabilisation |
+| PAC chauffe à haute temp pièce | Coast non actif | Vérifier réglage hystérésis, attendre 10 min |
+| Oscillation après refroidissement | Biais terme I | Réinitialisation coast exit ne fonctionne pas → redémarrer contrôle adaptatif |
 
 ### Problèmes de Réglage
 

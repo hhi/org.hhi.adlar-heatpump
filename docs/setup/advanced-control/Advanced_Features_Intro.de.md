@@ -274,7 +274,8 @@ Das untenstehende Diagramm zeigt die Beziehung zwischen erweiterten Funktionen u
 2. **Energy Price Optimizer** und **COP Optimizer** bauen auf Adaptive Control auf
 3. **Building Model Learning** benötigt Innentemperatur + Außentemperatur
 4. **Building Insights** erfordert zuerst ein funktionierendes Building Model
-5. **Weight Calculator** kombiniert alle drei Optimizer für Entscheidungen
+5. **Weight Calculator** kombiniert alle vier Optimizer plus Coast-Strategie für Entscheidungen
+6. **Coast-Strategie** (v2.8.0+) erkennt Überschwingung und stoppt Heizung passiv
 
 ---
 
@@ -378,6 +379,7 @@ DANN: [Timeline] Erstelle Benachrichtigung mit Wert um {{Zeit}} ist: {{Ergebnisw
 | **Innentemperatur** (Sensor) | Adaptive Regelung, Gebäudemodell, Building Insights |
 | **Außentemperatur** (Wetter) | Thermisches Modell, Witterungskompensation, Saisonanpassung |
 | **Energiepreise** (dynamisch) | Preisoptimierung, Vorheizen, Kosteneinsparung |
+| *Keine extra Daten* | **Coast-Strategie** (v2.8.0+): passive Kühlung bei Überschwingung |
 
 ---
 
@@ -397,5 +399,5 @@ DANN: [Timeline] Erstelle Benachrichtigung mit Wert um {{Zeit}} ist: {{Ergebnisw
 
 ---
 
-*Letzte Aktualisierung: 2026-01-16*
-*Version: 2.5.9*
+*Letzte Aktualisierung: 2026-03-19*
+*Version: 2.8.x*

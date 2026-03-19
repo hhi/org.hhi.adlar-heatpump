@@ -274,7 +274,8 @@ The diagram below shows the relationship between advanced features and their req
 2. **Energy Price Optimizer** and **COP Optimizer** build on Adaptive Control
 3. **Building Model Learning** needs indoor temperature + outdoor temperature
 4. **Building Insights** requires a working Building Model first
-5. **Weight Calculator** combines all three optimizers for decisions
+5. **Weight Calculator** combines all four optimizers plus coast strategy for decisions
+6. **Coast Strategy** (v2.8.0+) detects overshoot and passively stops heating
 
 ---
 
@@ -378,6 +379,7 @@ THEN: [Timeline] Create notification with Value at {{Time}} is: {{Result value}}
 | **Indoor Temperature** (sensor) | Adaptive control, building model, building insights |
 | **Outdoor Temperature** (weather) | Thermal model, weather compensation, seasonal adjustment |
 | **Energy Prices** (dynamic) | Price optimization, pre-heating, cost savings |
+| *No extra data* | **Coast strategy** (v2.8.0+): passive cooling during overshoot |
 
 ---
 
@@ -397,5 +399,5 @@ THEN: [Timeline] Create notification with Value at {{Time}} is: {{Result value}}
 
 ---
 
-*Last updated: 2026-01-16*
-*Version: 2.5.9*
+*Last updated: 2026-03-19*
+*Version: 2.8.x*

@@ -106,9 +106,9 @@ Cycle 2: PI = +0,4°C → Accumulateur: 0,7 → Appliquer +1°C, Reste: -0,3
 Cycle 3: PI = +0,2°C → Accumulateur: -0,1 → Attendre
 ```
 
-### Système de décision pondérée à 4 piliers (v2.6.0+)
+### Système de décision pondérée à 5 piliers (v2.6.0+)
 
-Adaptive Control combine **4 composants intelligents** dans chaque décision:
+Adaptive Control combine **5 composants intelligents** dans chaque décision:
 
 | Composant | Poids | Fonction |
 |-----------|-------|----------|
@@ -116,8 +116,9 @@ Adaptive Control combine **4 composants intelligents** dans chaque décision:
 | ⚡ **Efficacité** | 15% | Optimisation COP via température de départ |
 | 💰 **Coûts** | 15% | Optimisation des prix (préchauffage avec électricité bon marché) |
 | 🏠 **Thermique** | 20% | Régulation prédictive via modèle de bâtiment appris |
+| ❄️ **Coast** | 80% (si actif) | Refroidissement passif — empêche le chauffage au-dessus de la consigne |
 
-**Exemple de calcul:**
+**Exemple de calcul (normal):**
 
 ```
 Confort veut: +2,0°C (trop froid)
@@ -128,7 +129,17 @@ Thermique veut: +0,5°C (bâtiment refroidit rapidement, chauffage anticipatif)
 Total pondéré: (2,0×50% + -0,5×15% + 1,0×15% + 0,5×20%) = 1,15°C
 ```
 
-**Résultat**: La consigne de la pompe à chaleur augmente de +1°C (arrondi).
+**Exemple de calcul (mode coast actif):**
+
+```
+Coast veut: -4,0°C (sortie - offset) ← dominant 80%
+Confort veut: -1,0°C (PI détecte dépassement)
+Autres composants: mis à l’échelle par 0,20
+
+Résultat: -3,31°C → compresseur s'arrête ✅
+```
+
+**Résultat**: La consigne augmente de +1°C (arrondi), ou diminue fortement en mode coast.
 
 > [!NOTE]
 > Les poids sont **configurables** via les paramètres de l'appareil (Mode Expert). Les valeurs par défaut sont optimisées pour la plupart des situations.
@@ -219,6 +230,8 @@ Se déclenche lorsque Adaptive Control calcule un changement de consigne.
 | `adjustment` | Number | Ajustement calculé |
 | `reason` | String | Explication du calcul |
 | `controller` | String | Type de contrôleur |
+| `control_mode` | String | `heating` ou `cooldown` (v2.8.0+) |
+| `coast_component` | Number | Contribution coast à la recommandation (v2.8.0+) |
 
 > [!NOTE]
 > `adjustment` est la recommandation calculée et peut être fractionnaire. L'ajustement réel est toujours un nombre entier.
@@ -248,6 +261,7 @@ Se déclenche pour surveillance/journalisation sans ajustements réels.
 | `efficiency_component` | Number | Contribution efficacité (°C) |
 | `cost_component` | Number | Contribution coûts (°C) |
 | `thermal_component` | Number | Contribution modèle thermique (°C) (v2.6.0+) |
+| `coast_component` | Number | Contribution coast (°C) (v2.8.0+) |
 | `reasoning` | String | Raisonnement |
 
 ---
@@ -297,6 +311,14 @@ THEN: Envoyer notification "✅ Contrôle adaptatif activé"
 | Réaction trop lente | Augmentez Kp (par ex. 3,0 → 4,0) |
 | Écart structurel | Augmentez Ki (par ex. 1,5 → 2,0) |
 | Trop de petites corrections | Augmentez deadband (par ex. 0,3 → 0,5) |
+
+### Paramètres Coast (v2.8.0+)
+
+| Paramètre | Par défaut | Plage | Description |
+|-----------|------------|-------|-------------|
+| **Coast Offset** | 1,0°C | 0,5 - 5,0°C | Degrés en dessous de la température de sortie pour cible coast |
+| **Coast Hystérésis** | 0,3°C | 0,1 - 1,0°C | Marge de dépassement au-dessus de la consigne pour activation |
+| **Coast Force** | 0,80 | 0,60 - 0,95 | Part de poids dans la décision pondérée |
 
 ---
 
@@ -423,6 +445,29 @@ THEN:
 | Kp trop bas | Augmenter à 4,0 ou 5,0 |
 | Grande masse thermique | Augmentez Ki pour meilleure correction à long terme |
 | Plage de consigne limitée | Vérifiez consigne manuelle |
+
+---
+
+### ❄️ La PAC chauffe à haute température de pièce (v2.8.0+)
+
+**Symptôme:** La pièce est plus chaude que la consigne, mais la PAC continue de chauffer
+
+| Cause | Solution |
+|-------|----------|
+| Coast pas encore actif | Attendre au moins 10 min (2 cycles) |
+| Hystérésis trop haute | Diminuer hystérésis coast (par ex. 0,3 → 0,2°C) |
+| Tendance en baisse | Coast ne s'active pas si temp est en baisse — comportement normal |
+
+---
+
+### ❄️ Oscillation après phase de refroidissement
+
+**Symptôme:** La température dépasse après sortie du mode coast
+
+| Cause | Solution |
+|-------|----------|
+| Terme I non réinitialisé | Redémarrer contrôle adaptatif |
+| Kp trop haut après coast | Diminuer Kp à 2,0-2,5 |
 
 ---
 

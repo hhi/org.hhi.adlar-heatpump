@@ -1,6 +1,6 @@
 # 🚀 New Feature: Adaptive Temperature Control
 
-> **Status**: Available from version 2.5.x  
+> **Status**: Available from version 2.8.x  
 > **Requires**: External indoor temperature sensor via Homey Flow
 
 ---
@@ -9,7 +9,7 @@
 
 The Adlar app now **learns** how your home behaves and automatically adjusts the heat pump for optimal comfort and maximum savings.
 
-### The 4 Pillars: Comfort • Efficiency • Cost • Thermal
+### The 5 Pillars: Comfort • Efficiency • Cost • Thermal • Coast
 
 | Factor | What it does | Setting |
 |--------|--------------|---------|
@@ -17,6 +17,7 @@ The Adlar app now **learns** how your home behaves and automatically adjusts the
 | ⚡ **Efficiency** | Optimal COP through smart supply temperature | 15% (default) |
 | 💰 **Cost** | Pre-heat during cheap electricity, reduce during expensive | 15% (default) |
 | 🏠 **Thermal** | Predictive control via learned building model (τ, C, UA) | 20% (default) |
+| ❄️ **Coast** | Passive cooling — prevents unnecessary heating above setpoint | 80% (when active) |
 
 *Weights are adjustable and automatically normalize to 100%.*
 
@@ -44,6 +45,12 @@ The app automatically learns:
 
 **Learning period**: 48-72 hours for a reliable model  
 **Updates**: Continuous learning as conditions change
+
+### 4. Passive Cooling Mode (v2.8.0+)
+
+- **Problem**: Heat pump keeps heating while the room is already too warm (e.g. from solar gain)
+- **Solution**: Coast strategy detects overshoot → lowers setpoint below water temperature → compressor stops
+- **I-term reset**: PI controller starts fresh after cooling phase
 
 ---
 

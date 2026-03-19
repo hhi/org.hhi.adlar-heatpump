@@ -4,8 +4,8 @@ This document provides a comprehensive overview of all flow cards available in t
 
 ## Summary Statistics (v0.99.40)
 
-- **Total Flow Cards**: 60
-- **Triggers**: 32
+- **Total Flow Cards**: 64
+- **Triggers**: 36 (incl. 4 adaptive control)
 - **Actions**: 9
 - **Conditions**: 19 (+9 action-based conditions)
 - **Highlighted Cards**: 8 (essential for basic operation)
@@ -212,6 +212,42 @@ THEN set_work_mode to ECO
 - **Purpose**: Internal coil temperature monitoring
 - **Range**: -20°C to 80°C (0.5°C steps)
 - **Use Case**: Advanced thermal diagnostics
+
+---
+
+### Adaptive Control Triggers (4 cards)
+
+> These triggers are registered by AdaptiveControlService and are only available when adaptive control is enabled.
+
+##### **target_temperature_adjusted**
+- **Purpose**: Notify when heat pump target temperature adjusted by PI controller
+- **Tokens**: `adjustment` (number, °C), `new_target` (number, °C), `reason` (string), `priority` (string: low/medium/high)
+- **Advanced Flow**: Create alerts for large corrections
+```
+WHEN target_temperature_adjusted
+  AND priority = "high"
+THEN send notification "Large correction: {{adjustment}}°C ({{reason}})"
+```
+
+##### **adaptive_status_change**
+- **Purpose**: Track adaptive control status transitions
+- **Tokens**: `status` (string: enabled/disabled/error_no_external_temp)
+
+##### **temperature_adjustment_recommended**
+- **Purpose**: Weighted decision system recommendation with breakdown
+- **Tokens**: `adjustment` (number, °C), `comfort_component` (number), `efficiency_component` (number), `cost_component` (number), `thermal_component` (number), `coast_component` (number), `control_mode` (string: heating/cooldown)
+- **Coast-aware**: `control_mode` indicates whether the system is in normal heating or passive cooldown (ADR-024)
+- **Advanced Flow**: React differently based on control mode
+```
+WHEN temperature_adjustment_recommended
+  AND control_mode = "cooldown"
+THEN send notification "🌡️ Coast mode: passive cooling active"
+```
+
+##### **adaptive_simulation_update**
+- **Purpose**: Detailed simulation diagnostics with per-component breakdown
+- **Tokens**: `final_adjustment` (number), `comfort_component` (number), `efficiency_component` (number), `cost_component` (number), `thermal_component` (number), `coast_component` (number), `building_confidence` (number), `effective_weights` (string, JSON)
+- **Coast-aware**: `coast_component` shows the coast strategy's individual contribution to the final adjustment
 
 ---
 

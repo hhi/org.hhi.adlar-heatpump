@@ -1,6 +1,6 @@
 # 🚀 Nouvelle Fonctionnalité : Contrôle Adaptatif de Température
 
-> **Statut** : Disponible à partir de la version 2.5.x  
+> **Statut** : Disponible à partir de la version 2.8.x  
 > **Prérequis** : Capteur de température intérieure externe via Homey Flow
 
 ---
@@ -9,7 +9,7 @@
 
 L'application Adlar **apprend** maintenant comment votre maison se comporte et ajuste automatiquement la pompe à chaleur pour un confort optimal et des économies maximales.
 
-### Les 4 Piliers : Confort • Efficacité • Coût • Thermique
+### Les 5 Piliers : Confort • Efficacité • Coût • Thermique • Coast
 
 | Facteur | Ce qu'il fait | Paramètre |
 |---------|---------------|-----------|
@@ -17,6 +17,7 @@ L'application Adlar **apprend** maintenant comment votre maison se comporte et a
 | ⚡ **Efficacité** | COP optimal grâce à une température d'alimentation intelligente | 15% (par défaut) |
 | 💰 **Coût** | Préchauffage pendant l'électricité bon marché, réduction pendant les pics | 15% (par défaut) |
 | 🏠 **Thermique** | Contrôle prédictif via modèle de bâtiment appris (τ, C, UA) | 20% (par défaut) |
+| ❄️ **Coast** | Refroidissement passif — empêche le chauffage inutile au-dessus de la consigne | 80% (si actif) |
 
 *Les pondérations sont réglables et se normalisent automatiquement à 100%.*
 
@@ -44,6 +45,12 @@ L'application apprend automatiquement :
 
 **Période d'apprentissage** : 48-72 heures pour un modèle fiable  
 **Mises à jour** : Apprentissage continu en fonction des conditions
+
+### 4. Mode de Refroidissement Passif (v2.8.0+)
+
+- **Problème** : La pompe à chaleur continue de chauffer alors que la pièce est déjà trop chaude (par ex. par apports solaires)
+- **Solution** : La stratégie coast détecte le dépassement → abaisse la consigne sous la température d'eau → le compresseur s'arrête
+- **Réinitialisation terme I** : Le contrôleur PI redémarre proprement après la phase de refroidissement
 
 ---
 

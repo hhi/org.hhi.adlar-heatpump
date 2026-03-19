@@ -201,6 +201,9 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 - Régulateur PI (Proportionnel-Intégral) pour une température intérieure stable
 - Performance: Stabilité ±0.3°C
 - Requis: Capteur de température externe via carte de flux
+- Mode refroidissement passif: Arrête automatiquement le chauffage lorsque la
+  température ambiante dépasse la consigne, permettant au bâtiment de refroidir passivement
+- Prévient le dépassement dû aux gains solaires ou aux sources de chaleur internes
 
 APPRENTISSAGE DU MODÈLE DU BÂTIMENT
 Algorithme d'apprentissage automatique qui apprend les propriétés thermiques de votre maison:
@@ -238,11 +241,12 @@ Conseils de timing de chauffage optimisés COP et corrections vent & givre avec 
 - Paramètres: Prévisions météo activation/désactivation, coordonnées de localisation configurables
 
 FACTEURS DE PONDÉRATION DE RÉGULATION ADAPTATIVE
-Quatre priorités qui déterminent ensemble comment le système prend des décisions:
+Cinq priorités qui déterminent ensemble comment le système prend des décisions:
 - Priorité Confort (par défaut 50%): Poids pour la régulation de température PI
 - Priorité Efficacité (par défaut 15%): Poids pour l'optimisation COP
 - Priorité Coût (par défaut 15%): Poids pour l'optimisation des prix
 - Priorité Chaleur Thermique (par défaut 20%): Poids pour la prise en compte des propriétés thermiques du bâtiment
+- Priorité Coast (par défaut 80% lors de l'activation): Refroidissement passif en cas de dépassement — domine la décision
 - Les valeurs sont automatiquement normalisées pour un total de 100%
 
 DIAGNOSTIC DU MODÈLE DU BÂTIMENT

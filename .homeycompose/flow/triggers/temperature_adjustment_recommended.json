@@ -92,6 +92,17 @@
         "fr": "Confiance du Modèle (%)"
       },
       "example": 72
+    },
+    {
+      "name": "control_mode",
+      "type": "string",
+      "title": {
+        "en": "Control mode",
+        "nl": "Regelmodus",
+        "de": "Regelmodus",
+        "fr": "Mode de contrôle"
+      },
+      "example": "heating"
     }
   ]
 }

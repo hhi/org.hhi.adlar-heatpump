@@ -106,9 +106,9 @@ Cycle 2: PI = +0.4°C → Accumulator: 0.7 → Apply +1°C, Rest: -0.3
 Cycle 3: PI = +0.2°C → Accumulator: -0.1 → Wait
 ```
 
-### 4-Pillar Weighted Decision System (v2.6.0+)
+### 5-Pillar Weighted Decision System (v2.6.0+)
 
-Adaptive Control combines **4 intelligent components** in each decision:
+Adaptive Control combines **5 intelligent components** in each decision:
 
 | Component | Weight | Function |
 |-----------|--------|----------|
@@ -116,8 +116,9 @@ Adaptive Control combines **4 intelligent components** in each decision:
 | ⚡ **Efficiency** | 15% | COP optimization via flow temperature |
 | 💰 **Cost** | 15% | Price optimization (pre-heating during cheap electricity) |
 | 🏠 **Thermal** | 20% | Predictive control via learned building model |
+| ❄️ **Coast** | 80% (when active) | Passive cooling — prevents heating above setpoint |
 
-**Example calculation:**
+**Example calculation (normal):**
 
 ```
 Comfort wants: +2.0°C (too cold)
@@ -128,7 +129,17 @@ Thermal wants: +0.5°C (building cools quickly, predictive heating)
 Weighted total: (2.0×50% + -0.5×15% + 1.0×15% + 0.5×20%) = 1.15°C
 ```
 
-**Result**: Heat pump setpoint increases by +1°C (rounded).
+**Example calculation (coast mode active):**
+
+```
+Coast wants: -4.0°C (outlet - offset) ← dominant 80%
+Comfort wants: -1.0°C (PI detects overshoot)
+Other components: scaled by 0.20
+
+Result: -3.31°C → compressor stops ✅
+```
+
+**Result**: Heat pump setpoint increases by +1°C (rounded), or decreases significantly during coast.
 
 > [!NOTE]
 > The weights are **configurable** via device settings (Expert mode). Default values are optimized for most situations.
@@ -219,6 +230,8 @@ Triggers when adaptive control calculates a setpoint change.
 | `adjustment` | Number | Calculated adjustment |
 | `reason` | String | Explanation of calculation |
 | `controller` | String | Controller type |
+| `control_mode` | String | `heating` or `cooldown` (v2.8.0+) |
+| `coast_component` | Number | Coast contribution to recommendation (v2.8.0+) |
 
 > [!NOTE]
 > `adjustment` is the calculated recommendation and can be fractional. The actual adjustment is always a whole number.
@@ -248,6 +261,7 @@ Triggers for monitoring/logging without actual adjustments.
 | `efficiency_component` | Number | Efficiency contribution (°C) |
 | `cost_component` | Number | Cost contribution (°C) |
 | `thermal_component` | Number | Thermal model contribution (°C) (v2.6.0+) |
+| `coast_component` | Number | Coast contribution (°C) (v2.8.0+) |
 | `reasoning` | String | Reasoning |
 
 ---
@@ -297,6 +311,14 @@ THEN: Send notification "✅ Adaptive control activated"
 | Too slow response | Increase Kp (e.g., 3.0 → 4.0) |
 | Structural deviation | Increase Ki (e.g., 1.5 → 2.0) |
 | Too many small corrections | Increase deadband (e.g., 0.3 → 0.5) |
+
+### Coast Settings (v2.8.0+)
+
+| Setting | Default | Range | Description |
+|---------|---------|-------|-------------|
+| **Coast Offset** | 1.0°C | 0.5 - 5.0°C | Degrees below outlet temperature for coast target |
+| **Coast Hysteresis** | 0.3°C | 0.1 - 1.0°C | Overshoot margin above setpoint for activation |
+| **Coast Strength** | 0.80 | 0.60 - 0.95 | Weight share in the weighted decision |
 
 ---
 
@@ -423,6 +445,29 @@ THEN:
 | Kp too low | Increase to 4.0 or 5.0 |
 | Large thermal mass | Increase Ki for better long-term correction |
 | Setpoint range limited | Check manual setpoint |
+
+---
+
+### ❄️ Heat pump heats at high room temperature (v2.8.0+)
+
+**Symptom:** Room is warmer than setpoint, but heat pump keeps running
+
+| Cause | Solution |
+|-------|----------|
+| Coast not yet active | Wait at least 10 min (2 cycles) |
+| Hysteresis too high | Decrease coast hysteresis (e.g., 0.3 → 0.2°C) |
+| Trend falling | Coast doesn’t activate when temp is falling — normal behavior |
+
+---
+
+### ❄️ Oscillation after cooling phase
+
+**Symptom:** Temperature overshoots after leaving coast mode
+
+| Cause | Solution |
+|-------|----------|
+| I-term not reset | Restart adaptive control |
+| Kp too high after coast | Decrease Kp to 2.0-2.5 |
 
 ---
 

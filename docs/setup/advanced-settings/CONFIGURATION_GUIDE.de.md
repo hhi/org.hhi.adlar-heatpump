@@ -242,9 +242,26 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 - **Funktion**: Beseitigt anhaltende Abweichungen (stationärer Fehler)
 
 #### Totzone
-- **Standard**: 0.3°C
-- **Bereich**: 0.1 - 1.0°C
+- **Standard**: 0,3°C
+- **Bereich**: 0,1 - 1,0°C
 - **Funktion**: Toleranz bevor Anpassungen vorgenommen werden
+
+#### Coast Offset (v2.8.0+)
+- **Standard**: 1,0°C
+- **Bereich**: 0,5 - 5,0°C
+- **Funktion**: Grad unter Auslasstemperatur für Coast-Zielwert
+- **Niedriger**: Kompressor stoppt früher, weniger Heizung
+- **Höher**: Vorsichtigerer Coast, mehr Spielraum
+
+#### Coast Hysterese (v2.8.0+)
+- **Standard**: 0,3°C
+- **Bereich**: 0,1 - 1,0°C
+- **Funktion**: Überschwingungsmarge über Sollwert für Coast-Modus-Aktivierung
+
+#### Coast Stärke (v2.8.0+)
+- **Standard**: 0,80
+- **Bereich**: 0,60 - 0,95
+- **Funktion**: Gewichtsanteil von Coast in gewichteter Entscheidung (dominant bei Aktivierung)
 
 ---
 
@@ -437,7 +454,7 @@ Automatische Vorlauftemperatur-Optimierung für maximale Effizienz.
 
 ## 10. Gewichtungsfaktoren der Adaptiven Regelung
 
-Diese vier Prioritäten bestimmen gemeinsam, wie das System Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.**
+Diese fünf Prioritäten bestimmen gemeinsam, wie das System Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.** Bei aktivem Coast-Modus dominiert die Coast-Komponente (80% Standard).
 
 ### Komfort-Priorität
 - **Standard**: 50%

@@ -1,6 +1,6 @@
 # Adlar Warmtepomp — Adaptieve Regeling Systeem
 
-**Versie:** 2.7.x | **Datum:** Januari 2026
+**Versie:** 2.8.x | **Datum:** Maart 2026
 
 ---
 
@@ -9,6 +9,7 @@
 Dit systeem regelt je Adlar Castra warmtepomp intelligent voor:
 
 - **Constante binnentemperatuur** (±0.3°C)
+- **Passieve koelmodus** (coast) — voorkomt onnodig stoken
 - **Energie optimalisatie** via dynamische prijzen
 - **COP maximalisatie** voor maximale efficiëntie
 - **Automatisch leren** hoe jouw woning reageert
@@ -68,9 +69,10 @@ Dit systeem regelt je Adlar Castra warmtepomp intelligent voor:
 ### Control Loop (elke 5 min)
 
 1. **Data verzamelen** — Binnen/buiten temp, vermogen, prijzen
-2. **Controllers berekenen** — Elk component geeft advies
-3. **Gewogen beslissing** — 50% comfort + 15% efficiency + 15% kosten + 20% thermisch
-4. **Uitvoeren** — Update steltemperatuur (DPS 4)
+2. **Afkoeldetectie** — Tist > Tsoll + hysterese? → Coast-modus
+3. **Controllers berekenen** — Elk component geeft advies
+4. **Gewogen beslissing** — 50% comfort + 15% efficiency + 15% kosten + 20% thermisch (+ 80% coast indien actief)
+5. **Uitvoeren** — Update steltemperatuur (DPS 4)
 
 ---
 
@@ -103,6 +105,49 @@ De **PI (Proportional-Integral) controller** combineert:
 | Agressief | 4.0-5.0 | 2.0-3.0 | 0.2°C | Slecht geïsoleerd |
 | **Gebalanceerd** | 3.0 | 1.5 | 0.3°C | **Aanbevolen** |
 | Conservatief | 2.0 | 1.0 | 0.5°C | Goede isolatie |
+
+---
+
+## Component 5: Coast-Strategie (Passieve Koelmodus)
+
+> Nieuw in v2.8.0 — [ADR-024](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+
+### Wat doet het?
+
+Wanneer de kamertemperatuur **boven het setpoint** ligt (bijv. door zonnewinst), herkent het systeem dit en **voorkomt onnodig stoken**. De warmtepomp blijft uit terwijl de kamer passief afkoelt naar het gewenste niveau.
+
+### Hoe werkt het?
+
+| Stap | Beschrijving |
+|------|--------------|
+| 1️⃣ **Detectie** | Tist > Tsoll + hysterese (standaard 0.3°C) |
+| 2️⃣ **Bevestiging** | Minimaal 2 opeenvolgende metingen (~10 min) |
+| 3️⃣ **Trendcheck** | Temperatuur stijgt of is stabiel (niet dalend) |
+| 4️⃣ **Coast actief** | Steltemperatuur → onder huidige watertemperatuur |
+| 5️⃣ **Exit** | Zodra Tist < Tsoll + hysterese/2 → terug naar verwarmen |
+
+### Gewicht in Beslissing
+
+De coast-strategie krijgt een **dominant gewicht** (standaard 80%) in de gewogen beslissing:
+
+```
+Bij coast-modus actief:
+  Coast:    80%  (dominant — voorkomt stoken)
+  Comfort:  10%  (PI — ook negatief, versterkt coast)
+  Thermisch: 4%  (wind correctie, verwaarloosbaar)
+  Overig:    6%  (COP + prijs)
+```
+
+> [!NOTE]
+> De PI-regelaar wordt na het verlaten van coast-modus **gereset** (I-term gewist) om bias te voorkomen.
+
+### Instellingen
+
+| Instelling | Default | Effect |
+|------------|---------|--------|
+| Coast Offset | 1°C | Graden onder uitlaattemperatuur voor coast-doel |
+| Coast Hysterese | 0.3°C | Overshoot-marge boven setpoint voor activatie |
+| Coast Sterkte | 0.80 | Gewichtsaandeel in de gewogen beslissing |
 
 ---
 
@@ -264,6 +309,25 @@ Berekening:
 Totaal:      +0.80°C
 ```
 
+### Voorbeeld: Coast-modus actief
+
+```
+Comfort Controller:  "Verlaag -1°C" (PI detecteert overshoot)
+COP Optimizer:       "Verlaag -0.5°C" (lagere aanvoer = hogere COP)
+Price Optimizer:     "Handhaven 0°C" (normale prijs)
+Thermal Model:       "Verhoog +0.3°C" (wind correctie)
+Coast Strategie:     "Verlaag -4°C" (coast target = uitlaat - offset)
+
+Berekening (met coast strength = 0.80):
+-4.0 × 0.80       = -3.20°C  (coast dominant)
+-1.0 × 0.50 × 0.20 = -0.10°C  (comfort geschaald)
+-0.5 × 0.15 × 0.20 = -0.02°C  (COP geschaald)
+ 0.0 × 0.15 × 0.20 =  0.00°C  (prijs geschaald)
++0.3 × 0.20 × 0.20 = +0.01°C  (thermisch geschaald)
+───────────────────────────────
+Totaal:            -3.31°C → Setpoint << P111 → compressor stopt ✅
+```
+
 ### Override Regels
 
 1. **Safety First** — Buiten 15-28°C range: negeer alles
@@ -327,6 +391,15 @@ Totaal:      +0.80°C
   "cop_strategy": "balanced"
 }
 ```
+<!-- slide -->
+```json
+// Coast-Strategie (Passieve Koelmodus)
+{
+  "adaptive_cooldown_offset": 1.0,
+  "adaptive_cooldown_hysteresis": 0.3,
+  "adaptive_cooldown_strength": 0.80
+}
+```
 ````
 
 ---
@@ -387,6 +460,8 @@ THEN: Get COP metrics
 | Model confidence laag | Inconsistente data | Wacht langer of reset model |
 | Geen prijsdata | API issues | Check internetverbinding |
 | COP onrealistisch | WP in transitie | Wacht 24u voor stabilisatie |
+| WP stookt bij hoge kamertemp | Coast niet actief | Check hysterese instelling, wacht 10 min |
+| Oscillatie na afkoeling | I-term bias | Coast exit reset werkt niet → herstart adaptive control |
 
 ### Tuning Problemen
 

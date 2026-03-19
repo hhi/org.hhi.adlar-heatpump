@@ -279,7 +279,8 @@ Het onderstaande diagram toont de relatie tussen de geavanceerde features en hun
 2. **Energy Price Optimizer** en **COP Optimizer** bouwen voort op Adaptive Control
 3. **Building Model Learning** heeft binnentemperatuur + buitentemperatuur nodig
 4. **Building Insights** vereist eerst een werkend Building Model
-5. **Weight Calculator** combineert alle drie optimizers voor beslissingen
+5. **Weight Calculator** combineert alle vier optimizers plus coast-strategie voor beslissingen
+6. **Coast Strategy** (v2.8.0+) detecteert overshoot en stopt verwarming passief
 
 ---
 
@@ -383,6 +384,7 @@ DAN: [Timeline] Maak een notificatie met Waarde op {{Tijd}} is: {{Resultaat waar
 | **Binnentemperatuur** (sensor) | Adaptieve regeling, gebouwmodel, building insights |
 | **Buitentemperatuur** (weer) | Thermisch model, weercompensatie, seizoensaanpassing |
 | **Energieprijzen** (dynamisch) | Prijsoptimalisatie, voorverwarmen, kostenbesparing |
+| *Geen extra data* | **Coast-strategie** (v2.8.0+): passieve koeling bij overshoot |
 
 ---
 
@@ -402,5 +404,5 @@ DAN: [Timeline] Maak een notificatie met Waarde op {{Tijd}} is: {{Resultaat waar
 
 ---
 
-*Laatste update: 2026-01-29*
-*Versie: 2.7.x*
+*Laatste update: 2026-03-19*
+*Versie: 2.8.x*

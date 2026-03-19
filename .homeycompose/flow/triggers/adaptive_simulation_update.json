@@ -127,6 +127,17 @@
       "example": 65
     },
     {
+      "name": "coast_component",
+      "type": "number",
+      "title": {
+        "en": "Coast Component (°C)",
+        "nl": "Coast-component (°C)",
+        "de": "Coast-Komponente (°C)",
+        "fr": "Composante coast (°C)"
+      },
+      "example": -3.3
+    },
+    {
       "name": "reasoning",
       "type": "string",
       "title": {

@@ -9,7 +9,7 @@ import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { DefrostLearner } from '../adaptive/defrost-learner';
-import { WeightedDecisionMaker, type ConfidenceMetrics } from '../adaptive/weighted-decision-maker';
+import { WeightedDecisionMaker, type ConfidenceMetrics, type CoastAction, type CombinedAction } from '../adaptive/weighted-decision-maker';
 import { WindCorrectionService } from './wind-correction-service';
 import { WeatherForecastService, type ForecastAdvice } from './weather-forecast-service';
 import { DeviceConstants } from '../constants';
@@ -89,6 +89,12 @@ export class AdaptiveControlService {
 
   // Component 7: Defrost Learner (v2.9.0+)
   private defrostLearner: DefrostLearner;
+
+  // Component 8: Passive Cooldown / Coast (v2.10.0 ADR-024)
+  private _coastActive = false;
+  private _cooldownCycleCount = 0;
+  private _indoorTempHistory: number[] = [];
+  private static readonly TREND_WINDOW_SIZE = 3; // 3 measurements × 5 min = 15 min window
 
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
@@ -483,6 +489,12 @@ export class AdaptiveControlService {
     this.simulatedTargetTemp = null;
     this.lastRecommendedTemp = undefined;
 
+    // ADR-024: Reset coast state — prevents stale state from prior session carrying over
+    this._coastActive = false;
+    this._cooldownCycleCount = 0;
+    this._indoorTempHistory = [];
+    this.logger('AdaptiveControlService: Coast-state gereset bij stop');
+
     this.isEnabled = false;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, false);
 
@@ -511,6 +523,93 @@ export class AdaptiveControlService {
    */
   private _getMinSetpoint(): number {
     return (this.device.getSetting('adaptive_min_setpoint') as number | null) ?? 18;
+  }
+
+  // =========================================================================
+  // ADR-024: Passive Cooldown / Coast helpers (v2.10.0)
+  // =========================================================================
+
+  /** Returns the configured cooldown hysteresis (°C above setpoint required to activate). */
+  private _getEffectiveHysteresis(): number {
+    return (this.device.getSetting('adaptive_cooldown_hysteresis') as number | null) ?? 0.3;
+  }
+
+  /** Records current indoor temperature into the sliding window (always, not just in cooldown). */
+  private _recordIndoorTemp(indoorTemp: number): void {
+    this._indoorTempHistory.push(indoorTemp);
+    if (this._indoorTempHistory.length > AdaptiveControlService.TREND_WINDOW_SIZE) {
+      this._indoorTempHistory.shift();
+    }
+  }
+
+  /**
+   * True if indoor temperature is rising or stable over the sliding window.
+   * Fail-safe: returns true when insufficient data (activates coast earlier → safe).
+   */
+  private _isTemperatureRising(): boolean {
+    if (this._indoorTempHistory.length < AdaptiveControlService.TREND_WINDOW_SIZE) {
+      return true;
+    }
+    const oldest = this._indoorTempHistory[0];
+    const newest = this._indoorTempHistory[this._indoorTempHistory.length - 1];
+    return newest >= oldest;
+  }
+
+  /**
+   * True when all three activation criteria are met (magnitude + duration + trend).
+   * Also updates the duration counter.
+   */
+  private _isCooldownConfirmed(indoorTemp: number, targetTemp: number): boolean {
+    const hysteresis = this._getEffectiveHysteresis();
+    const magnitudeOk = indoorTemp > targetTemp + hysteresis;
+    const trendOk = this._isTemperatureRising();
+
+    if (magnitudeOk && trendOk) {
+      this._cooldownCycleCount++;
+    } else {
+      this._cooldownCycleCount = 0;
+    }
+
+    return this._cooldownCycleCount >= 2;
+  }
+
+  /**
+   * True when the room has cooled sufficiently to exit coast mode.
+   * Lower threshold than activation to prevent flip-flop.
+   */
+  private _isCooldownExitCondition(indoorTemp: number, targetTemp: number): boolean {
+    const hysteresis = this._getEffectiveHysteresis();
+    return indoorTemp < targetTemp + hysteresis / 2;
+  }
+
+  /**
+   * Builds a CoastAction from the current outlet temperature and setpoint.
+   * Returns null when coast is inactive or outlet temperature is unavailable.
+   */
+  private _buildCoastAction(currentSetpoint: number): CoastAction | null {
+    const outletTemp = this.device.getCapabilityValue('measure_temperature.temp_bottom') as number | null;
+
+    if (outletTemp === null) {
+      this.logger('AdaptiveControlService: Geen uitlaattemperatuur beschikbaar voor coast-berekening');
+      return null;
+    }
+
+    const offset = (this.device.getSetting('adaptive_cooldown_offset') as number | null) ?? 1.0;
+    const strength = (this.device.getSetting('adaptive_cooldown_strength') as number | null) ?? 0.80;
+    const rawAdjustment = (outletTemp - offset) - currentSetpoint;
+
+    // Guard: coast delta must always be negative.
+    // If outletTemp has already dropped below currentSetpoint + offset (after multiple coast cycles),
+    // the formula would yield a positive delta — coast would then recommend a higher setpoint.
+    // Math.min(0, ...) prevents this: coast contributes 0 and the other components decide.
+    const adjustment = Math.min(0, rawAdjustment);
+
+    return {
+      adjustment,
+      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${adjustment.toFixed(1)}°C`,
+      priority: 'high',
+      strength,
+    };
   }
 
   private getEffectiveTargetTemp(): number | null {
@@ -566,9 +665,31 @@ export class AdaptiveControlService {
         return;
       }
 
+      // ADR-024: Record indoor temp in sliding window (always, not just in cooldown)
+      this._recordIndoorTemp(indoorTemp);
+
+      // ADR-024: Exit coast mode when room has cooled sufficiently (before PI calculation)
+      if (this._coastActive && this._isCooldownExitCondition(indoorTemp, desiredIndoorTemp)) {
+        this.heatingController.resetHistory();
+        this._coastActive = false;
+        this._cooldownCycleCount = 0;
+        this.logger('AdaptiveControl: 🌡️ verlaat afkoelmodus — PI-integraalterm gereset');
+      }
+
+      // ADR-024: Activate coast mode when all three criteria are met
+      if (!this._coastActive) {
+        this._coastActive = this._isCooldownConfirmed(indoorTemp, desiredIndoorTemp);
+        if (this._coastActive) {
+          this.logger(
+            `AdaptiveControl: 🌊 afkoelmodus geactiveerd (cycle ${this._cooldownCycleCount}) — `
+            + `Tist ${indoorTemp.toFixed(1)}°C > Tsoll ${desiredIndoorTemp.toFixed(1)}°C`,
+          );
+        }
+      }
+
       this.logger(
         `Indoor: ${indoorTemp.toFixed(1)}°C, Desired: ${desiredIndoorTemp.toFixed(1)}°C, `
-        + `Setpoint: ${currentSetpoint.toFixed(1)}°C [DPS 4]`,
+        + `Setpoint: ${currentSetpoint.toFixed(1)}°C [DPS 4]${this._coastActive ? ' 🌊 COAST' : ''}`,
       );
 
       // Step 4A: Component 1 - Heating Controller (PI control)
@@ -702,13 +823,22 @@ export class AdaptiveControlService {
         });
       }
 
-      // Step 6: Combine actions using Weighted Decision Maker with 4-way thermal weighting
+      // ADR-024: Build coast action (null when coast is inactive — backwards-compatible)
+      const coastAction = this._coastActive ? this._buildCoastAction(currentSetpoint) : null;
+      if (coastAction) {
+        this.logger(
+          `🌊 Coast: ${coastAction.adjustment.toFixed(2)}°C (sterkte: ${(coastAction.strength * 100).toFixed(0)}%)`,
+        );
+      }
+
+      // Step 6: Combine actions using Weighted Decision Maker with 5-way weighting (v2.10.0: coast added)
       const combinedAction = this.decisionMaker.combineActionsWithThermal(
         heatingAction,
         copAction,
         priceAction,
         thermalAction,
         confidenceMetrics,
+        coastAction,
       );
 
       // Log effective weights (confidence-adjusted)
@@ -717,7 +847,8 @@ export class AdaptiveControlService {
           `⚖️ Effective Weights: Comfort=${(combinedAction.effectiveWeights.comfort * 100).toFixed(1)}%, `
           + `Efficiency=${(combinedAction.effectiveWeights.efficiency * 100).toFixed(1)}%, `
           + `Cost=${(combinedAction.effectiveWeights.cost * 100).toFixed(1)}%, `
-          + `Thermal=${((combinedAction.effectiveWeights.thermal || 0) * 100).toFixed(1)}%`,
+          + `Thermal=${((combinedAction.effectiveWeights.thermal || 0) * 100).toFixed(1)}%, `
+          + `Coast=${((combinedAction.effectiveWeights.coast || 0) * 100).toFixed(1)}%`,
         );
       }
 
@@ -726,7 +857,8 @@ export class AdaptiveControlService {
         `Breakdown: Comfort=${combinedAction.breakdown.comfort.toFixed(2)}°C, `
         + `Efficiency=${combinedAction.breakdown.efficiency.toFixed(2)}°C, `
         + `Cost=${combinedAction.breakdown.cost.toFixed(2)}°C, `
-        + `Thermal=${(combinedAction.breakdown.thermal || 0).toFixed(2)}°C`,
+        + `Thermal=${(combinedAction.breakdown.thermal || 0).toFixed(2)}°C, `
+        + `Coast=${(combinedAction.breakdown.coast || 0).toFixed(2)}°C`,
       );
       this.logger(`Final Adjustment: ${combinedAction.finalAdjustment.toFixed(2)}°C (${combinedAction.priority} priority)`);
       combinedAction.reasoning.forEach((reason) => this.logger(`  - ${reason}`));
@@ -791,6 +923,7 @@ export class AdaptiveControlService {
         recommendedTemp,
         combinedAction,
         confidenceMetrics.buildingModelConfidence,
+        this._coastActive ? 'cooldown' : 'heating',
       );
 
       // Always update recommended temp for Insights tracking (v2.5.0: simulate mode implicit)
@@ -819,7 +952,7 @@ export class AdaptiveControlService {
    */
   private async applyTemperatureAdjustment(
     currentSetpoint: number,
-    combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
+    combinedAction: CombinedAction,
   ): Promise<void> {
     // Accumulate fractional adjustment (for step:1 rounding)
     this.accumulatedAdjustment += combinedAction.finalAdjustment;
@@ -1016,6 +1149,7 @@ export class AdaptiveControlService {
     recommendedTemp: number,
     combinedAction: { finalAdjustment: number; reasoning: string[]; priority: string },
     buildingModelConfidence: number = 0,
+    controlMode: 'heating' | 'cooldown' = 'heating',
   ): Promise<void> {
     try {
       const trigger = this.device.homey.flow.getDeviceTriggerCard('temperature_adjustment_recommended');
@@ -1024,8 +1158,9 @@ export class AdaptiveControlService {
         recommended_temperature: recommendedTemp,
         adjustment: combinedAction.finalAdjustment,
         reason: combinedAction.reasoning.join('; '),
-        controller: 'weighted', // All 4 components combined
+        controller: 'weighted', // All components combined
         building_model_confidence: Math.round(buildingModelConfidence * 100), // 0-100%
+        control_mode: controlMode,
       });
       this.logger('AdaptiveControlService: Triggered temperature_adjustment_recommended flow card', {
         confidence: `${Math.round(buildingModelConfidence * 100)}%`,
@@ -1044,7 +1179,7 @@ export class AdaptiveControlService {
    */
   private async triggerSimulationUpdate(
     currentSetpoint: number,
-    combinedAction: { finalAdjustment: number; breakdown: { comfort: number; efficiency: number; cost: number }; reasoning: string[]; priority: string },
+    combinedAction: CombinedAction,
     confidenceMetrics: ConfidenceMetrics,
   ): Promise<void> {
     try {
@@ -1065,6 +1200,7 @@ export class AdaptiveControlService {
         comfort_component: combinedAction.breakdown.comfort,
         efficiency_component: combinedAction.breakdown.efficiency,
         cost_component: combinedAction.breakdown.cost,
+        coast_component: combinedAction.breakdown.coast ?? 0,
         building_model_confidence: Math.round(confidenceMetrics.buildingModelConfidence * 100), // 0-100%
         cop_confidence: Math.round(confidenceMetrics.copConfidence * 100), // 0-100%
         reasoning: combinedAction.reasoning.join('; '),
@@ -1571,13 +1707,7 @@ export class AdaptiveControlService {
    * @param combinedAction - Combined action from weighted decision maker
    */
   private async updateDiagnosticsCapability(
-    combinedAction: {
-      finalAdjustment: number;
-      breakdown: { comfort: number; efficiency: number; cost: number };
-      reasoning: string[];
-      priority: string;
-      effectiveWeights?: { comfort: number; efficiency: number; cost: number };
-    },
+    combinedAction: CombinedAction,
   ): Promise<void> {
     try {
       // Check if capability exists (should always be true, but defensive)
@@ -1602,6 +1732,7 @@ export class AdaptiveControlService {
           comfort: Number(combinedAction.breakdown.comfort.toFixed(2)),
           efficiency: Number(combinedAction.breakdown.efficiency.toFixed(2)),
           cost: Number(combinedAction.breakdown.cost.toFixed(2)),
+          coast: Number((combinedAction.breakdown.coast ?? 0).toFixed(2)),
         },
         priorities: {
           comfort: Number(priorities.comfort.toFixed(2)),
@@ -1613,7 +1744,8 @@ export class AdaptiveControlService {
           comfort: Number(combinedAction.effectiveWeights.comfort.toFixed(2)),
           efficiency: Number(combinedAction.effectiveWeights.efficiency.toFixed(2)),
           cost: Number(combinedAction.effectiveWeights.cost.toFixed(2)),
-          thermal: Number(((combinedAction.effectiveWeights as { thermal?: number }).thermal ?? 0).toFixed(2)),
+          thermal: Number((combinedAction.effectiveWeights.thermal ?? 0).toFixed(2)),
+          coast: Number((combinedAction.effectiveWeights.coast ?? 0).toFixed(2)),
         } : undefined,
         reasoning: combinedAction.reasoning,
         priority: combinedAction.priority,

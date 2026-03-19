@@ -201,6 +201,9 @@ Automatische Regelung der Zieltemperatur basierend auf externem Innentemperaturs
 - PI (Proportional-Integral) Regler für stabile Innentemperatur
 - Leistung: ±0.3°C Stabilität
 - Erforderlich: Externer Temperatursensor über Flow-Karte
+- Passive Kühlmodus: Stoppt automatisch die Heizung wenn die Raumtemperatur
+  über den Sollwert steigt, sodass das Gebäude passiv abkühlt
+- Verhindert Überschwingung nach Sonneneinstrählung oder internen Wärmequellen
 
 GEBÄUDEMODELL-LERNEN
 Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses lernt:
@@ -238,11 +241,12 @@ COP-optimierte Heizzeitberatung und Wind- & Frost-Korrekturen mit Open-Meteo Wet
 - Einstellungen: Wettervorhersage ein/aus, konfigurierbare Standortkoordinaten
 
 ADAPTIVE REGELUNGS-GEWICHTUNGSFAKTOREN
-Vier Prioritäten, die zusammen bestimmen, wie das System Entscheidungen trifft:
+Fünf Prioritäten, die zusammen bestimmen, wie das System Entscheidungen trifft:
 - Komfort-Priorität (Standard 50%): Gewicht für PI-Temperaturregelung
 - Effizienz-Priorität (Standard 15%): Gewicht für COP-Optimierung
 - Kosten-Priorität (Standard 15%): Gewicht für Preisoptimierung
 - Thermische Wärme-Priorität (Standard 20%): Gewicht für Berücksichtigung thermischer Eigenschaften des Gebäudes
+- Coast-Priorität (Standard 80% bei Aktivierung): Passive Kühlung bei Überschwingung — dominiert die Entscheidung
 - Werte werden automatisch auf insgesamt 100% normalisiert
 
 GEBÄUDEMODELL-DIAGNOSTIK

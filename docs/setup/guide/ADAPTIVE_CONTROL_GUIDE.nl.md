@@ -106,9 +106,9 @@ Cyclus 2: PI = +0.4°C → Accumulator: 0.7 → Apply +1°C, Rest: -0.3
 Cyclus 3: PI = +0.2°C → Accumulator: -0.1 → Wacht
 ```
 
-### 4-Pilaar Weighted Decision System (v2.6.0+)
+### 5-Pilaar Weighted Decision System (v2.6.0+)
 
-Adaptive Control combineert **4 intelligente componenten** in elke beslissing:
+Adaptive Control combineert **5 intelligente componenten** in elke beslissing:
 
 | Component | Gewicht | Functie |
 |-----------|---------|---------|
@@ -116,8 +116,9 @@ Adaptive Control combineert **4 intelligente componenten** in elke beslissing:
 | ⚡ **Efficiëntie** | 15% | COP-optimalisatie via aanvoertemperatuur |
 | 💰 **Kosten** | 15% | Prijsoptimalisatie (voorverwarmen bij goedkope stroom) |
 | 🏠 **Thermisch** | 20% | Predictieve regeling via geleerd gebouwmodel |
+| ❄️ **Coast** | 80% (indien actief) | Passieve koeling — voorkomt stoken boven setpoint |
 
-**Voorbeeld berekening:**
+**Voorbeeld berekening (normaal):**
 
 ```
 Comfort wil: +2.0°C (te koud)
@@ -128,7 +129,17 @@ Thermal wil: +0.5°C (gebouw koelt snel af, voorspellend opwarmen)
 Gewogen totaal: (2.0×50% + -0.5×15% + 1.0×15% + 0.5×20%) = 1.15°C
 ```
 
-**Resultaat**: Warmtepomp setpoint gaat +1°C omhoog (afgerond).
+**Voorbeeld berekening (coast-modus actief):**
+
+```
+Coast wil: -4.0°C (uitlaat - offset) ← dominant 80%
+Comfort wil: -1.0°C (PI detecteert overshoot)
+Overige componenten: geschaald met 0.20
+
+Resultaat: -3.31°C → compressor stopt ✅
+```
+
+**Resultaat**: Warmtepomp setpoint gaat +1°C omhoog (afgerond), of ver omlaag bij coast.
 
 > [!NOTE]
 > De gewichten zijn **configureerbaar** via device settings (Expert mode). Standaardwaarden zijn geoptimaliseerd voor meeste situaties.
@@ -219,6 +230,8 @@ Triggert wanneer adaptive control een setpoint-wijziging berekent.
 | `adjustment` | Number | Berekende aanpassing |
 | `reason` | String | Uitleg van berekening |
 | `controller` | String | Controller type |
+| `control_mode` | String | `heating` of `cooldown` (v2.8.0+) |
+| `coast_component` | Number | Coast-bijdrage aan de aanbeveling (v2.8.0+) |
 
 > [!NOTE]
 > `adjustment` is de berekende aanbeveling en kan fractional zijn. De werkelijke aanpassing is altijd een geheel getal.
@@ -248,6 +261,7 @@ Triggert voor monitoring/logging zonder echte aanpassingen.
 | `efficiency_component` | Number | Efficiëntie bijdrage (°C) |
 | `cost_component` | Number | Kosten bijdrage (°C) |
 | `thermal_component` | Number | Thermisch model bijdrage (°C) (v2.6.0+) |
+| `coast_component` | Number | Coast-bijdrage (°C) (v2.8.0+) |
 | `reasoning` | String | Redenering |
 
 ---
@@ -297,6 +311,14 @@ THEN: Stuur notificatie "✅ Adaptive control geactiveerd"
 | Te trage reactie | Verhoog Kp (bijv. 3.0 → 4.0) |
 | Structurele afwijking | Verhoog Ki (bijv. 1.5 → 2.0) |
 | Te veel kleine correcties | Verhoog deadband (bijv. 0.3 → 0.5) |
+
+### Coast Instellingen (v2.8.0+)
+
+| Instelling | Standaard | Bereik | Beschrijving |
+|------------|-----------|--------|--------------|
+| **Coast Offset** | 1.0°C | 0.5 - 5.0°C | Graden onder uitlaattemperatuur voor coast-doel |
+| **Coast Hysterese** | 0.3°C | 0.1 - 1.0°C | Overshoot-marge boven setpoint voor activatie |
+| **Coast Sterkte** | 0.80 | 0.60 - 0.95 | Gewichtsaandeel in gewogen beslissing |
 
 ---
 
@@ -423,6 +445,29 @@ THEN:
 | Kp te laag | Verhoog naar 4.0 of 5.0 |
 | Grote thermische massa | Verhoog Ki voor betere lange-termijn correctie |
 | Setpoint range beperkt | Check handmatige setpoint |
+
+---
+
+### ❄️ Warmtepomp stookt bij hoge kamertemperatuur (v2.8.0+)
+
+**Symptoom:** Kamer is warmer dan setpoint, maar warmtepomp blijft draaien
+
+| Oorzaak | Oplossing |
+|---------|-----------|
+| Coast nog niet actief | Wacht minimaal 10 min (2 cycles) |
+| Hysterese te hoog | Verlaag coast hysterese (bijv. 0.3 → 0.2°C) |
+| Trend dalend | Coast activeert niet als temp dalende is — normaal gedrag |
+
+---
+
+### ❄️ Oscillatie na afkoelfase
+
+**Symptoom:** Na het verlaten van coast-modus schiet de temperatuur door
+
+| Oorzaak | Oplossing |
+|---------|-----------|
+| I-term niet gereset | Herstart adaptive control |
+| Kp te hoog na coast | Verlaag Kp naar 2.0-2.5 |
 
 ---
 

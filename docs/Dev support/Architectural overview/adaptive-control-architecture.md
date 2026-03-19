@@ -1,6 +1,6 @@
-# Adaptive Control Architecture Guide (v1.4.0 - Fase 1)
+# Adaptive Control Architecture Guide (v1.5.0 - Coast Strategy)
 
-This comprehensive guide documents the Adaptive Temperature Control system implemented in the Adlar Heat Pump Homey app, providing architectural details, implementation patterns, and integration strategies for PI-based temperature control.
+This comprehensive guide documents the Adaptive Temperature Control system implemented in the Adlar Heat Pump Homey app, providing architectural details, implementation patterns, and integration strategies for PI-based temperature control with passive cooling mode (coast strategy).
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ This comprehensive guide documents the Adaptive Temperature Control system imple
 
 The Adaptive Control system enables **automatic temperature regulation** using external room temperature sensors (Homey thermostats, sensors) to maintain a stable indoor temperature (±0.3°C) by dynamically adjusting the heat pump's target temperature setpoint.
 
-**Current Status**: **Fase 1 MVP Complete** (PI Heating Controller only)
+**Current Status**: **Weighted Decision System with Coast Strategy** (5-component architecture)
 
 **Key Capabilities**:
 
@@ -32,9 +32,11 @@ The Adaptive Control system enables **automatic temperature regulation** using e
 - ✅ **External sensor integration** - Flow card-based data input from Homey devices
 - ✅ **Persistent state** - Survives app updates and Homey restarts
 - ✅ **Transparency** - Flow triggers show adjustment reasons and magnitudes
-- ❌ **Predictive control** - Not implemented (Fase 2: Building Model Learner)
-- ❌ **Cost optimization** - Not implemented (Fase 3: Energy Price Optimizer)
-- ❌ **Efficiency optimization** - Not implemented (Fase 4: COP Controller)
+- ✅ **Passive cooling mode** - Coast strategy prevents heat pump activation when room is above setpoint (ADR-024)
+- ✅ **Weighted decision system** - 5-component architecture: comfort, efficiency, cost, thermal, coast
+- ✅ **Building model integration** - RLS-based thermal model with wind/solar correction
+- ✅ **COP optimization** - Supply curve learning for efficiency optimization
+- ✅ **Energy price optimization** - Pre-heating during low-cost periods
 
 ### Why Adaptive Control?
 
@@ -329,7 +331,160 @@ The PI controller is a **feedback control system** that minimizes error over tim
 
 ---
 
-### 3. ExternalTemperatureService
+### 3. WeightedDecisionMaker
+
+**File**: `lib/adaptive/weighted-decision-maker.ts`
+
+**Responsibility**: Combines adjustment recommendations from all components into a single weighted decision
+
+**Key Features**:
+
+- **5-component architecture** - comfort (PI), efficiency (COP), cost (price), thermal (building model), coast
+- **Dynamic weight normalization** - All weights automatically normalize to 100%
+- **Confidence-based scaling** - Component weights reduced when confidence is low
+- **Coast dominance** - During passive cooling, coast component gets configurable weight share (default 80%)
+- **costMultiplier precedent** - Energy price component uses dynamic multiplier for peak pricing
+- **Backwards-compatible** - When `coastAction = null`, behavior is identical to pre-coast implementation
+
+**Public Interface**:
+
+```typescript
+class WeightedDecisionMaker {
+  combineActionsWithThermal(
+    heatingAction: ControllerAction | null,
+    copAction: COPAction | null,
+    priceAction: PriceAction | null,
+    thermalAction: ThermalAction | null,
+    confidenceMetrics: ConfidenceMetrics,
+    coastAction?: CoastAction | null,
+  ): CombinedAction;
+}
+
+interface CoastAction {
+  adjustment: number;   // (outletTemp − offset) − currentSetpoint (always negative during active coast)
+  reason: string;
+  priority: 'high';
+  strength: number;     // 0.0–1.0, weight share of total (default: 0.80)
+}
+
+interface CombinedAction {
+  finalAdjustment: number;
+  breakdown: {
+    comfort: number;
+    efficiency: number;
+    cost: number;
+    thermal?: number;
+    coast?: number;
+  };
+  reasoning: string[];
+  priority: 'low' | 'medium' | 'high';
+  effectiveWeights?: {
+    comfort: number;
+    efficiency: number;
+    cost: number;
+    thermal?: number;
+    coast?: number;
+  };
+}
+```
+
+**Weight Calculation During Coast Mode**:
+
+```typescript
+// Coast scales all existing weights to (1 - coastStrength)
+const coastStrength = coastAction?.strength ?? 0;
+const existingScale = 1 - coastStrength;
+
+// Existing weights scaled (internal ratios preserved)
+const effectiveComfortWeight    = basePriorities.comfort    * existingScale;
+const effectiveEfficiencyWeight = basePriorities.efficiency * copConfidence * existingScale;
+const effectiveCostWeight       = basePriorities.cost       * costMultiplier * existingScale;
+const effectiveThermalWeight    = basePriorities.thermal    * existingScale;
+
+// Coast weight
+const effectiveCoastWeight = coastStrength;
+
+// After normalization with S=0.80:
+//   coast ≈ 82.5%, comfort ≈ 10.3%, thermal ≈ 4.1%, rest ≈ 3.1%
+```
+
+**Dependencies**: None (pure decision algorithm)
+
+---
+
+### 4. Coast Detection (Passive Cooling Mode)
+
+**Location**: `lib/services/adaptive-control-service.ts` (integrated into `executeControlCycle()`)
+
+**Responsibility**: Detects when room is above setpoint and generates coast signal to prevent unnecessary heat pump activation
+
+**Reference**: [ADR-024 — Adaptive Control: Passive Cooling Mode](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+
+**Key Features**:
+
+- **Three-criteria detection** - Magnitude + Duration + Trend (all must be satisfied)
+- **Hysteresis-based exit** - Lower threshold for exiting cooldown prevents flip-flop
+- **I-term reset on exit** - PI integral history cleared when leaving cooldown to prevent post-coast bias
+- **Sliding window trend** - 3-measurement window (15 min) filters sensor noise
+- **Fail-safe** - Insufficient trend data assumes rising temperature (activates coast sooner)
+
+**Detection Criteria**:
+
+```text
+Cooldown mode activates when ALL THREE conditions are met:
+  (1) Tist > Tsoll + effective_hysteresis           [magnitude]
+  (2) This condition persisted for ≥ 2 control cycles  [duration, ~10 min]
+  (3) Tist(now) ≥ Tist(15 min ago)                    [trend — rising or stable]
+
+Cooldown mode deactivates when:
+  Tist < Tsoll + effective_hysteresis / 2             [lower threshold → no flip-flop]
+```
+
+**Coast Delta Formula**:
+
+```text
+coastAdjust = (outletTemperature − offset) − currentSetpoint
+
+Example: outletTemp = 27°C, offset = 1°C, setpoint = 30°C
+→ coastAdjust = (27 − 1) − 30 = −4°C
+```
+
+**State Properties** (in-memory, reset on `stop()`):
+
+```typescript
+private _coastActive = false;                    // current coast state
+private _cooldownCycleCount = 0;                 // consecutive cycles above setpoint
+private _indoorTempHistory: number[] = [];       // sliding window (max 3, FIFO)
+```
+
+**Execution Order in `executeControlCycle()`**:
+
+```text
+1. Record indoor temp in sliding window
+2. Check coast exit condition → if exiting: resetHistory(), set _coastActive = false
+3. Check coast activation (magnitude + duration + trend)
+4. Calculate heatingAction via HeatingController
+5. Build coastAction (null if coast not active)
+6. combineActionsWithThermal(..., coastAction)
+7. Apply result (trigger flow card with control_mode token)
+```
+
+**User Settings**:
+
+| Setting | Default | Range | Purpose |
+|---------|---------|-------|---------|
+| `adaptive_cooldown_offset` | 1°C | 0.5–5°C | Degrees below outlet temperature for coast target |
+| `adaptive_cooldown_hysteresis` | 0.3°C | 0.1–1.0°C | Room overshoot margin required for activation |
+| `adaptive_cooldown_strength` | 0.80 | 0.60–0.95 | Weight share of coast component in weighted decision |
+
+**Dependencies**: 
+
+- Device capability `measure_temperature.temp_bottom` (DPS 22 — water outlet temperature)
+- HeatingController (for I-term reset via `resetHistory()`)
+
+---
+
+### 5. ExternalTemperatureService
 
 **File**: `lib/services/external-temperature-service.ts`
 
@@ -1362,61 +1517,50 @@ For given outdoor temperature:
 
 ---
 
-### Weighted Decision System ❌ NOT IMPLEMENTED
+### Weighted Decision System ✅ IMPLEMENTED (v1.4.0+)
 
-**Goal**: Combine all 4 controllers with user-defined priorities
+**Goal**: Combine all controllers with user-defined priorities and coast override
 
-**Architecture** (Planned):
+**Architecture** (Current — 5-component system with coast strategy):
 
-```typescript
-class AdaptiveControlService {
-  private heatingController: HeatingController;       // Comfort (60% weight)
-  private buildingLearner: BuildingModelLearner;      // Prediction (info only)
-  private energyOptimizer: EnergyPriceOptimizer;      // Cost (15% weight)
-  private copController: COPController;               // Efficiency (25% weight)
+The `WeightedDecisionMaker` in `lib/adaptive/weighted-decision-maker.ts` combines recommendations from 5 components:
 
-  async calculateFinalAdjustment(): Promise<number> {
-    // Get recommendations from each controller
-    const comfortAdj = await this.heatingController.calculateAction(sensorData);
-    const priceAdj = await this.energyOptimizer.calculateAdjustment(currentPrice);
-    const efficiencyAdj = await this.copController.calculateAdjustment(currentCOP);
+| Component | Base Weight | Source | Direction during coast |
+|-----------|-------------|--------|-----------------------|
+| **Comfort (PI)** | 50% | HeatingController | ← negative (same as coast) |
+| **Efficiency (COP)** | 15% | COP Optimizer | ← neutral/negative |
+| **Cost (price)** | 15% | Energy Price Optimizer | ← neutral |
+| **Thermal (building)** | 20% | Building Model | → positive (wind correction counteracts) |
+| **Coast** | 80% (when active) | Coast detection | ← dominant negative |
 
-    // Weighted average (user-configurable)
-    const weights = this.getUserWeights(); // e.g., { comfort: 0.6, cost: 0.15, efficiency: 0.25 }
+**During normal operation** (`coastAction = null`): Coast weight is 0, `existingScale = 1.0`, behavior is identical to pre-coast 4-component system.
 
-    const finalAdj =
-      comfortAdj.adjustment * weights.comfort +
-      priceAdj.adjustment * weights.cost +
-      efficiencyAdj.adjustment * weights.efficiency;
+**During coast mode** (`coastAction` active with `strength = 0.80`):
 
-    return finalAdj;
-  }
-}
+```text
+All existing weights scaled by existingScale = 1 - 0.80 = 0.20
+After normalization:
+  coast   ≈ 82.5%  (dominant)
+  comfort ≈ 10.3%  (also negative → reinforces coast)
+  thermal ≈  4.1%  (wind correction max +0.06°C → negligible)
+  other   ≈  3.1%
 ```
 
-**User Settings** (Planned):
+**Coast follows the same pattern as `costMultiplier`** — a dynamic weight modifier on a single component, not a pipeline bypass. This is architecturally consistent.
+
+**User Settings** (Current):
 
 ```json
 {
-  "adaptive_priority_comfort": 60,      // % weight
-  "adaptive_priority_cost": 15,         // % weight
-  "adaptive_priority_efficiency": 25    // % weight
-  // Total must equal 100%
+  "adaptive_priority_comfort": 50,
+  "adaptive_priority_efficiency": 15,
+  "adaptive_priority_cost": 15,
+  "adaptive_priority_thermal": 20,
+  "adaptive_cooldown_strength": 0.80
 }
 ```
 
-**Example Scenarios**:
-
-| User Profile | Comfort | Cost | Efficiency | Behavior |
-|--------------|---------|------|-----------|----------|
-| **Default (balanced)** | 60% | 15% | 25% | Prioritize comfort, some savings |
-| **Cost-focused** | 40% | 40% | 20% | Aggressive price optimization |
-| **Eco-focused** | 40% | 10% | 50% | Maximize COP, minimal cost focus |
-| **Comfort-focused** | 90% | 5% | 5% | Ignore cost/efficiency, stable temp |
-
-**Complexity**: **LOW** (once Fase 2-4 complete) - Just weighted averaging
-
-**Estimated Effort**: 1 day (assuming all controllers implemented)
+**Reference**: [ADR-024 §3 — Coast as weighted component](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
 
 ---
 
@@ -1844,9 +1988,19 @@ Result: At 09:00, indoor stabilizes at 20.0°C (user sees no drop)
 
 **PI Controller**: Proportional-Integral feedback control algorithm
 
+**Coast Strategy**: Passive cooling mode that sets water temperature below current outlet temperature to prevent heat pump activation when room is above setpoint (ADR-024)
+
+**Coast Strength (S)**: Weight share of the coast component in the weighted decision (default 0.80 = 80%)
+
+**Cooldown Mode**: State where the system detects room temperature above setpoint and activates coast strategy
+
 **Deadband**: Temperature range where no control action taken (prevents oscillation)
 
 **Error**: Difference between target and actual temperature
+
+**I-term Reset**: Clearing PI integral history when exiting cooldown mode to prevent post-coast bias
+
+**P111**: Heat pump internal minimum flow temperature parameter (typically 24–26°C). When setpoint ≥ P111, the compressor activates.
 
 **Proportional Term (P)**: Control response proportional to current error
 
@@ -1856,9 +2010,13 @@ Result: At 09:00, indoor stabilizes at 20.0°C (user sees no drop)
 
 **Heat Loss Coefficient (UA)**: Rate of heat loss through walls/windows (insulation quality)
 
+**WeightedDecisionMaker**: Component that combines all controller recommendations with configurable weights into a single adjustment value
+
 **DPS 4**: Tuya data point for target temperature (steltemperatuur)
 
 **DPS 13**: Tuya data point for heating curve (stooklijn)
+
+**DPS 22**: Tuya data point for water outlet temperature — used by coast strategy for delta calculation
 
 **Step:1**: Capability constraint allowing only integer values (no decimals)
 
@@ -1869,6 +2027,26 @@ Result: At 09:00, indoor stabilizes at 20.0°C (user sees no drop)
 ---
 
 ## Version History
+
+**v1.5.0 (March 2026)** - Coast Strategy (ADR-024)
+
+- ✅ Passive cooling mode (coast strategy) implemented
+- ✅ WeightedDecisionMaker extended with `CoastAction` interface
+- ✅ 3-criteria cooldown detection (magnitude + duration + trend)
+- ✅ I-term reset on coast exit
+- ✅ Flow card `temperature_adjustment_recommended` extended with `control_mode` token
+- ✅ Flow card `adaptive_simulation_update` extended with `coast_component` token
+- ✅ 3 new user settings: `adaptive_cooldown_offset`, `adaptive_cooldown_hysteresis`, `adaptive_cooldown_strength`
+- ✅ Coast state reset in `stop()` lifecycle method
+- ✅ Diagnostics extended with coast breakdown and effective weights
+
+**v1.4.0 (2025)** - Weighted Decision System & Building Model
+
+- ✅ WeightedDecisionMaker (5-component architecture)
+- ✅ Building Model Learner (RLS algorithm)
+- ✅ Energy Price Optimizer
+- ✅ COP Optimizer with supply curve learning
+- ✅ Thermal wind/solar correction
 
 **v1.3.0 (December 2024)** - Fase 1 MVP Complete
 
@@ -1881,14 +2059,6 @@ Result: At 09:00, indoor stabilizes at 20.0°C (user sees no drop)
 - ✅ Documentation: Setup guide, architecture guide
 - ✅ Persistence strategy implemented
 - ✅ Accumulation logic for step:1 rounding
-
-**Future Versions**:
-
-- **v1.4.0** (Planned) - Expert Mode settings (enable/disable, PI tuning)
-- **v1.5.0** (Planned) - Fase 2: Building Model Learner
-- **v1.6.0** (Planned) - Fase 3: Energy Price Optimizer
-- **v1.7.0** (Planned) - Fase 4: COP Controller
-- **v2.0.0** (Planned) - Weighted Decision System (all 4 controllers)
 
 ---
 
