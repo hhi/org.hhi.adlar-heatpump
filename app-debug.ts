@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable node/no-unsupported-features/node-builtins */
 // This file is used to enable the Node.js inspector for debugging purposes.
 // It is only imported when the DEBUG environment variable is set to '1'.
 // This allows you to debug your Homey app using Chrome DevTools or any other Node.js
@@ -15,17 +17,14 @@ export default async function enableDebugInspector() {
     && process.versions
     && process.versions.node
   ) {
-    await (async () => {
-      try {
-        // Only import if needed
-        const inspector: typeof import('inspector') = await import('inspector');
-        console.log('WaitForDebugger inspector for debugging');
-        inspector.waitForDebugger();
-      } catch (error) {
-        const inspector: typeof import('inspector') = await import('inspector');
-        console.log('Open inspector for debugging');
-        inspector.open(9225, '0.0.0.0', true);
-      }
-    })();
+    try {
+      const inspector = require('inspector') as typeof import('inspector');
+      process.stderr.write('WaitForDebugger inspector for debugging\n');
+      inspector.waitForDebugger();
+    } catch (error) {
+      const inspector = require('inspector') as typeof import('inspector');
+      process.stderr.write('Open inspector for debugging\n');
+      inspector.open(9225, '0.0.0.0', true);
+    }
   }
 }

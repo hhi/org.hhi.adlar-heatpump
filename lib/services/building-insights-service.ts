@@ -54,6 +54,11 @@ export interface InsightState {
   lastEvaluation: number;
 }
 
+export interface ForceInsightAnalysisResult {
+  'insights_detected': number;
+  confidence: number;
+}
+
 /**
  * Building Insights Service
  *
@@ -1283,7 +1288,7 @@ export class BuildingInsightsService {
    * Used by: force_insight_analysis flow action card
    * @returns Object with insights_detected and confidence for flow tokens
    */
-  public async forceInsightAnalysis(): Promise<{ insights_detected: number; confidence: number }> {
+  public async forceInsightAnalysis(): Promise<ForceInsightAnalysisResult> {
     this.logger('BuildingInsightsService: Force insight analysis triggered');
 
     await this.evaluateInsights();

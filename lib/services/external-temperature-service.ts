@@ -134,7 +134,16 @@ export class ExternalTemperatureService {
       // Update diagnostic capability
       if (this.device.hasCapability('adlar_last_indoor_temp_received')) {
         const d = new Date(this.lastReceivedTimestamp);
-        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const tsDate = [
+          d.getFullYear(),
+          String(d.getMonth() + 1).padStart(2, '0'),
+          String(d.getDate()).padStart(2, '0'),
+        ].join('-');
+        const tsTime = [
+          String(d.getHours()).padStart(2, '0'),
+          String(d.getMinutes()).padStart(2, '0'),
+        ].join(':');
+        const ts = `${tsDate} ${tsTime}`;
         await this.device.setCapabilityValue('adlar_last_indoor_temp_received', `${ts} | ${temperature.toFixed(1)}°C`);
       }
 

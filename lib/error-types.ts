@@ -140,9 +140,9 @@ export class TuyaErrorCategorizer {
 
     // Device offline
     if (
-      errorMessage.includes('device offline') ||
-      errorMessage.includes('not responding') ||
-      errorMessage.includes('device is offline')
+      errorMessage.includes('device offline')
+      || errorMessage.includes('not responding')
+      || errorMessage.includes('device is offline')
     ) {
       return {
         type: TuyaErrorType.DEVICE_OFFLINE,

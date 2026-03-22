@@ -235,7 +235,7 @@ export class COPOptimizer {
       // Lower threshold for higher sub-priority (medium-high: 2°C, medium: 2.5°C, medium-low: 3°C)
       const thresholdMap: Record<'medium-high' | 'medium' | 'medium-low', number> = {
         'medium-high': 2,
-        'medium': 2.5,
+        medium: 2.5,
         'medium-low': 3,
       };
       const threshold = thresholdMap[subPriority];
@@ -440,7 +440,7 @@ export class COPOptimizer {
       strategy: string;
       tempRange: string;
     };
-  } {
+    } {
     // Calculate samples per bucket for confidence assessment
     const bucketSamples = new Map<number, number>();
     this.history.forEach((point) => {

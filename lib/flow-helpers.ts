@@ -57,8 +57,6 @@ export function registerTemperatureAlerts(app: ExtendedApp, patterns: FlowCardPa
   }
 }
 
-
-
 /**
  * Register pulse-steps alert triggers with pattern-based logic
  */

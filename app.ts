@@ -635,12 +635,12 @@ class MyApp extends App {
     linearCurveCard.registerRunListener(async (args, state) => {
       const {
         outdoor_temp: outdoorTempRaw,
-        reference_temp,
-        slope_grade,
+        reference_temp: referenceTemp,
+        slope_grade: slopeGrade,
       } = args;
 
       // Adlar Custom heating curve always uses -15°C as reference outdoor temperature
-      const reference_outdoor = -15;
+      const referenceOutdoor = -15;
 
       try {
         // Parse outdoor temperature (supports number, string, tokens)
@@ -659,19 +659,19 @@ class MyApp extends App {
         }
 
         // Validate other parameters
-        if (Number.isNaN(reference_temp) || Number.isNaN(slope_grade)) {
+        if (Number.isNaN(referenceTemp) || Number.isNaN(slopeGrade)) {
           throw new Error('All parameters must be valid numbers');
         }
 
         // Convert Adlar L28 (slope grade per 10°C) to slope per degree
         // Example: L28 = -5 → slope = -5/10 = -0.5 per degree
-        const slope = slope_grade / 10;
+        const slope = slopeGrade / 10;
 
         // Calculate supply temperature using Adlar Custom heating curve (L28/L29)
         // Formula: y = slope * x + intercept
         // Intercept: b = L29 - (slope * -15°C)
         // Reference point: (-15°C, L29) as per Adlar specification
-        const intercept = reference_temp - (slope * reference_outdoor);
+        const intercept = referenceTemp - (slope * referenceOutdoor);
         const supplyTemperature = (slope * outdoorTemp) + intercept;
 
         // Round to 1 decimal place for practical use
@@ -686,8 +686,8 @@ class MyApp extends App {
         // Log results (debug mode)
         this.debugLog(`Adlar Custom heating curve: ${outdoorTemp}°C → ${roundedSupplyTemp}°C`, {
           outdoorTemp,
-          L29: `${reference_temp}°C @ -15°C`,
-          L28: slope_grade,
+          L29: `${referenceTemp}°C @ -15°C`,
+          L28: slopeGrade,
           slopePerDegree: slope,
           intercept,
           formula,
@@ -695,7 +695,11 @@ class MyApp extends App {
         });
 
         // Standard logging for production
-        this.log(`Custom stooklijn (L29=${reference_temp}, L28=${slope_grade}): ${outdoorTemp}°C → ${roundedSupplyTemp}°C (${formula})`);
+        const customHeatingCurveMessage = [
+          `Custom stooklijn (L29=${referenceTemp}, L28=${slopeGrade}):`,
+          `${outdoorTemp}°C → ${roundedSupplyTemp}°C (${formula})`,
+        ].join(' ');
+        this.log(customHeatingCurveMessage);
 
         return {
           supply_temperature: roundedSupplyTemp,
@@ -927,7 +931,12 @@ class MyApp extends App {
           ? currentTemp >= userThreshold
           : currentTemp <= userThreshold;
 
-        this.debugLog(`🔍 ${featureName}: User wants ${userCondition.toUpperCase()} ${userThreshold}°C, current: ${currentTemp}°C (crossed ${triggerCondition}) → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        const bufferTempDebugMessage = [
+          `🔍 ${featureName}: User wants ${userCondition.toUpperCase()} ${userThreshold}°C,`,
+          `current: ${currentTemp}°C (crossed ${triggerCondition})`,
+          `→ ${shouldExecute ? 'EXECUTE' : 'SKIP'}`,
+        ].join(' ');
+        this.debugLog(bufferTempDebugMessage);
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
@@ -967,7 +976,12 @@ class MyApp extends App {
           ? currentTemp >= userThreshold
           : currentTemp <= userThreshold;
 
-        this.debugLog(`🔍 ${featureName}: User wants ${userCondition.toUpperCase()} ${userThreshold}°C, current: ${currentTemp}°C (crossed ${triggerCondition}) → ${shouldExecute ? 'EXECUTE' : 'SKIP'}`);
+        const outletTempDebugMessage = [
+          `🔍 ${featureName}: User wants ${userCondition.toUpperCase()} ${userThreshold}°C,`,
+          `current: ${currentTemp}°C (crossed ${triggerCondition})`,
+          `→ ${shouldExecute ? 'EXECUTE' : 'SKIP'}`,
+        ].join(' ');
+        this.debugLog(outletTempDebugMessage);
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
@@ -1339,7 +1353,12 @@ class MyApp extends App {
       });
     }
 
-    this.log(`Changed trigger runListeners registered successfully (23 triggers with self-healing: 9 standard + 3 expert mode + 11 new alerts, threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`);
+    const changedTriggerSummary = [
+      'Changed trigger runListeners registered successfully',
+      '(23 triggers with self-healing: 9 standard + 3 expert mode + 11 new alerts,',
+      `threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`,
+    ].join(' ');
+    this.log(changedTriggerSummary);
   }
 }
 

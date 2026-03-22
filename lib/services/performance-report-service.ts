@@ -80,7 +80,9 @@ interface Translations {
 
 const TRANSLATIONS: Record<string, Translations> = {
   nl: {
-    ratings: { excellent: 'uitstekend', good: 'goed', fair: 'matig', poor: 'slecht' },
+    ratings: {
+      excellent: 'uitstekend', good: 'goed', fair: 'matig', poor: 'slecht',
+    },
     recommendations: {
       defrost_high: 'Defrost-frequentie is hoger dan normaal bij deze temperatuur — controleer buitenunit',
       cop_stable: 'COP-trend is stabiel — goede prestatie',
@@ -105,19 +107,31 @@ const TRANSLATIONS: Record<string, Translations> = {
     summaryPartial: ' {missing} niet beschikbaar.',
     summaryDisabled: ' Activeer {disabled} voor een vollediger rapport.',
     domainNames: {
-      efficiency: 'Efficiëntie', building: 'Gebouwmodel', defrost: 'Ontdooiing',
-      energy: 'Energie', pricing: 'Energieprijzen', telemetry: 'Telemetrie', health: 'Gezondheid',
+      efficiency: 'Efficiëntie',
+      building: 'Gebouwmodel',
+      defrost: 'Ontdooiing',
+      energy: 'Energie',
+      pricing: 'Energieprijzen',
+      telemetry: 'Telemetrie',
+      health: 'Gezondheid',
     },
     telemetry: {
-      normal_flow: 'Normaal debiet', high_flow: 'Te hoog debiet of lage last',
-      low_flow: 'Te laag debiet, pomp/filter controleren', linear: 'Lineair verband',
-      nonlinear: 'Niet-lineair, lucht in systeem?', curve_ok: 'Verwarmingscurve passend',
-      curve_steep: 'Verwarmingscurve te steil', optimal_range: 'Optimaal bereik',
-      too_high: 'Te hoog ingesteld', too_low: 'Onderdimensionering of laag vermogen',
+      normal_flow: 'Normaal debiet',
+      high_flow: 'Te hoog debiet of lage last',
+      low_flow: 'Te laag debiet, pomp/filter controleren',
+      linear: 'Lineair verband',
+      nonlinear: 'Niet-lineair, lucht in systeem?',
+      curve_ok: 'Verwarmingscurve passend',
+      curve_steep: 'Verwarmingscurve te steil',
+      optimal_range: 'Optimaal bereik',
+      too_high: 'Te hoog ingesteld',
+      too_low: 'Onderdimensionering of laag vermogen',
     },
   },
   en: {
-    ratings: { excellent: 'excellent', good: 'good', fair: 'fair', poor: 'poor' },
+    ratings: {
+      excellent: 'excellent', good: 'good', fair: 'fair', poor: 'poor',
+    },
     recommendations: {
       defrost_high: 'Defrost frequency is higher than normal for this temperature — check outdoor unit',
       cop_stable: 'COP trend is stable — good performance',
@@ -142,19 +156,31 @@ const TRANSLATIONS: Record<string, Translations> = {
     summaryPartial: ' {missing} not available.',
     summaryDisabled: ' Enable {disabled} for a more complete report.',
     domainNames: {
-      efficiency: 'Efficiency', building: 'Building model', defrost: 'Defrost',
-      energy: 'Energy', pricing: 'Energy prices', telemetry: 'Telemetry', health: 'Health',
+      efficiency: 'Efficiency',
+      building: 'Building model',
+      defrost: 'Defrost',
+      energy: 'Energy',
+      pricing: 'Energy prices',
+      telemetry: 'Telemetry',
+      health: 'Health',
     },
     telemetry: {
-      normal_flow: 'Normal flow', high_flow: 'Too high flow or low demand',
-      low_flow: 'Too low flow, check pump/filter', linear: 'Linear relation',
-      nonlinear: 'Non-linear, air in system?', curve_ok: 'Heating curve fitting',
-      curve_steep: 'Heating curve too steep', optimal_range: 'Optimal range',
-      too_high: 'Set too high', too_low: 'Undersized or low power',
+      normal_flow: 'Normal flow',
+      high_flow: 'Too high flow or low demand',
+      low_flow: 'Too low flow, check pump/filter',
+      linear: 'Linear relation',
+      nonlinear: 'Non-linear, air in system?',
+      curve_ok: 'Heating curve fitting',
+      curve_steep: 'Heating curve too steep',
+      optimal_range: 'Optimal range',
+      too_high: 'Set too high',
+      too_low: 'Undersized or low power',
     },
   },
   de: {
-    ratings: { excellent: 'ausgezeichnet', good: 'gut', fair: 'mäßig', poor: 'schlecht' },
+    ratings: {
+      excellent: 'ausgezeichnet', good: 'gut', fair: 'mäßig', poor: 'schlecht',
+    },
     recommendations: {
       defrost_high: 'Abtaufrequenz ist höher als normal bei dieser Temperatur — Außengerät prüfen',
       cop_stable: 'COP-Trend ist stabil — gute Leistung',
@@ -179,19 +205,31 @@ const TRANSLATIONS: Record<string, Translations> = {
     summaryPartial: ' {missing} nicht verfügbar.',
     summaryDisabled: ' Aktivieren Sie {disabled} für einen vollständigeren Bericht.',
     domainNames: {
-      efficiency: 'Effizienz', building: 'Gebäudemodell', defrost: 'Abtauung',
-      energy: 'Energie', pricing: 'Energiepreise', telemetry: 'Telemetrie', health: 'Gesundheit',
+      efficiency: 'Effizienz',
+      building: 'Gebäudemodell',
+      defrost: 'Abtauung',
+      energy: 'Energie',
+      pricing: 'Energiepreise',
+      telemetry: 'Telemetrie',
+      health: 'Gesundheit',
     },
     telemetry: {
-      normal_flow: 'Normaler Durchfluss', high_flow: 'Zu hoher Durchfluss oder geringe Last',
-      low_flow: 'Zu geringer Durchfluss, Pumpe/Filter prüfen', linear: 'Linearer Zusammenhang',
-      nonlinear: 'Nicht-linear, Luft im System?', curve_ok: 'Heizkurve passend',
-      curve_steep: 'Heizkurve zu steil', optimal_range: 'Optimaler Bereich',
-      too_high: 'Zu hoch eingestellt', too_low: 'Unterdimensioniert oder geringe Leistung',
+      normal_flow: 'Normaler Durchfluss',
+      high_flow: 'Zu hoher Durchfluss oder geringe Last',
+      low_flow: 'Zu geringer Durchfluss, Pumpe/Filter prüfen',
+      linear: 'Linearer Zusammenhang',
+      nonlinear: 'Nicht-linear, Luft im System?',
+      curve_ok: 'Heizkurve passend',
+      curve_steep: 'Heizkurve zu steil',
+      optimal_range: 'Optimaler Bereich',
+      too_high: 'Zu hoch eingestellt',
+      too_low: 'Unterdimensioniert oder geringe Leistung',
     },
   },
   fr: {
-    ratings: { excellent: 'excellent', good: 'bon', fair: 'moyen', poor: 'mauvais' },
+    ratings: {
+      excellent: 'excellent', good: 'bon', fair: 'moyen', poor: 'mauvais',
+    },
     recommendations: {
       defrost_high: 'La fréquence de dégivrage est supérieure à la normale pour cette température — vérifier l\'unité extérieure',
       cop_stable: 'Tendance COP stable — bonne performance',
@@ -216,15 +254,25 @@ const TRANSLATIONS: Record<string, Translations> = {
     summaryPartial: ' {missing} non disponible(s).',
     summaryDisabled: ' Activez {disabled} pour un rapport plus complet.',
     domainNames: {
-      efficiency: 'Efficacité', building: 'Modèle bâtiment', defrost: 'Dégivrage',
-      energy: 'Énergie', pricing: 'Prix énergie', telemetry: 'Télémétrie', health: 'Santé',
+      efficiency: 'Efficacité',
+      building: 'Modèle bâtiment',
+      defrost: 'Dégivrage',
+      energy: 'Énergie',
+      pricing: 'Prix énergie',
+      telemetry: 'Télémétrie',
+      health: 'Santé',
     },
     telemetry: {
-      normal_flow: 'Débit normal', high_flow: 'Débit trop élevé ou faible demande',
-      low_flow: 'Débit trop faible, vérifier pompe/filtre', linear: 'Relation linéaire',
-      nonlinear: 'Non-linéaire, air dans le système?', curve_ok: 'Courbe de chauffe adaptée',
-      curve_steep: 'Courbe de chauffe trop raide', optimal_range: 'Plage optimale',
-      too_high: 'Réglage trop élevé', too_low: 'Sous-dimensionné ou faible puissance',
+      normal_flow: 'Débit normal',
+      high_flow: 'Débit trop élevé ou faible demande',
+      low_flow: 'Débit trop faible, vérifier pompe/filtre',
+      linear: 'Relation linéaire',
+      nonlinear: 'Non-linéaire, air dans le système?',
+      curve_ok: 'Courbe de chauffe adaptée',
+      curve_steep: 'Courbe de chauffe trop raide',
+      optimal_range: 'Plage optimale',
+      too_high: 'Réglage trop élevé',
+      too_low: 'Sous-dimensionné ou faible puissance',
     },
   },
 };
@@ -350,11 +398,13 @@ export class PerformanceReportService {
       score = Math.min(100, score + 5);
     }
 
-    const detail = `COP ${(cop ?? 0).toFixed(1)}` +
-      (copDaily !== null ? `, dag-COP ${copDaily.toFixed(1)}` : '') +
-      (scop !== null ? `, SCOP ${scop.toFixed(1)}` : '');
+    const detail = `COP ${(cop ?? 0).toFixed(1)}${
+      copDaily !== null ? `, dag-COP ${copDaily.toFixed(1)}` : ''
+    }${scop !== null ? `, SCOP ${scop.toFixed(1)}` : ''}`;
 
-    return { status: 'scored', score, rating: this.scoreToRating(score, t), detail };
+    return {
+      status: 'scored', score, rating: this.scoreToRating(score, t), detail,
+    };
   }
 
   private scoreBuilding(t: Translations): DomainScore {
@@ -394,11 +444,13 @@ export class PerformanceReportService {
     else if (ua !== null && ua > 0.3) score = Math.max(0, score - 10);
 
     const profile = this.device.getSetting('building_profile') || 'medium';
-    const detail = (ua !== null ? `UA ${ua.toFixed(2)}` : '') +
-      (tau !== null ? `${ua !== null ? ', ' : ''}τ ${tau.toFixed(1)}h` : '') +
-      `, ${profile} profiel`;
+    const detail = `${(ua !== null ? `UA ${ua.toFixed(2)}` : '')
+      + (tau !== null ? `${ua !== null ? ', ' : ''}τ ${tau.toFixed(1)}h` : '')
+    }, ${profile} profiel`;
 
-    return { status: 'scored', score, rating: this.scoreToRating(score, t), detail };
+    return {
+      status: 'scored', score, rating: this.scoreToRating(score, t), detail,
+    };
   }
 
   private scoreDefrost(t: Translations): DomainScore {
@@ -429,7 +481,9 @@ export class PerformanceReportService {
 
     const detail = `${defrostCount} cycli, ${defrostMinutes}min, ${copPenaltyPct}% COP-verlies`;
 
-    return { status: 'scored', score, rating: this.scoreToRating(score, t), detail };
+    return {
+      status: 'scored', score, rating: this.scoreToRating(score, t), detail,
+    };
   }
 
   private scoreEnergy(t: Translations): DomainScore {
@@ -466,7 +520,9 @@ export class PerformanceReportService {
     if (costDaily !== null) parts.push(`€${costDaily.toFixed(2)}/dag`);
 
     return {
-      status: 'scored', score, rating: this.scoreToRating(score, t),
+      status: 'scored',
+      score,
+      rating: this.scoreToRating(score, t),
       detail: parts.join(', ') || 'Energie tracking actief',
     };
   }
@@ -486,12 +542,14 @@ export class PerformanceReportService {
     const currentPrice = this.getCapNum('adlar_energy_price_current');
     const costDaily = this.getCapNum('adlar_energy_cost_daily');
 
-    let score = 75; // Default for having dynamic pricing
-    const detail = (currentPrice !== null ? `€${currentPrice.toFixed(4)}/kWh` : '')
+    const score = 75; // Default for having dynamic pricing
+    const detail = `${(currentPrice !== null ? `€${currentPrice.toFixed(4)}/kWh` : '')
       + (costDaily !== null ? `, €${costDaily.toFixed(2)}/dag` : '')
-      + ', dynamisch tarief';
+    }, dynamisch tarief`;
 
-    return { status: 'scored', score, rating: this.scoreToRating(score, t), detail };
+    return {
+      status: 'scored', score, rating: this.scoreToRating(score, t), detail,
+    };
   }
 
   private scoreTelemetry(t: Translations): DomainScore & Partial<TelemetrySubCategories> {
@@ -511,19 +569,23 @@ export class PerformanceReportService {
     // ── Water circuit checks ──
     let waterDeltaCheck: TelemetryCheck;
     let deltaVsCompressorCheck: TelemetryCheck & { correlation?: number };
-    let flowIndicationCheck: TelemetryCheck & { flow?: number; compressorActive?: boolean };
-
     if (inlet !== null && outlet !== null && isCompressorActive) {
       const deltaT = outlet - inlet; // Heating mode: outlet > inlet
       const absDelta = Math.abs(deltaT);
 
       let deltaOk: boolean;
       let deltaInterp: string;
-      if (absDelta >= 3 && absDelta <= 6) { deltaOk = true; deltaInterp = t.telemetry.normal_flow; }
-      else if (absDelta < 3) { deltaOk = false; deltaInterp = t.telemetry.high_flow; }
-      else { deltaOk = false; deltaInterp = t.telemetry.low_flow; }
+      if (absDelta >= 3 && absDelta <= 6) {
+        deltaOk = true; deltaInterp = t.telemetry.normal_flow;
+      } else if (absDelta < 3) {
+        deltaOk = false; deltaInterp = t.telemetry.high_flow;
+      } else {
+        deltaOk = false; deltaInterp = t.telemetry.low_flow;
+      }
 
-      waterDeltaCheck = { value: Number(absDelta.toFixed(1)), optimal: '3-6', ok: deltaOk, interpretation: deltaInterp };
+      waterDeltaCheck = {
+        value: Number(absDelta.toFixed(1)), optimal: '3-6', ok: deltaOk, interpretation: deltaInterp,
+      };
     } else {
       waterDeltaCheck = { ok: true, interpretation: 'Compressor inactief' };
     }
@@ -546,7 +608,7 @@ export class PerformanceReportService {
     }
 
     // Flow indication
-    flowIndicationCheck = {
+    const flowIndicationCheck = {
       flow: flow ?? undefined,
       compressorActive: isCompressorActive,
       ok: !isCompressorActive || flow === null || flow > 0,
@@ -560,7 +622,8 @@ export class PerformanceReportService {
     if (discharge !== null && highPressureSat !== null && isCompressorActive) {
       const superheat = discharge - highPressureSat;
       dischargeSuperHeatCheck = {
-        value: Number(superheat.toFixed(1)), optimal: '10-40',
+        value: Number(superheat.toFixed(1)),
+        optimal: '10-40',
         ok: superheat >= 10 && superheat <= 40,
       };
     } else {
@@ -570,7 +633,8 @@ export class PerformanceReportService {
     if (condenser !== null && outlet !== null && isCompressorActive) {
       const approach = condenser - outlet;
       condensationApproachCheck = {
-        value: Number(approach.toFixed(1)), optimal: '0-5',
+        value: Number(approach.toFixed(1)),
+        optimal: '0-5',
         ok: approach >= 0 && approach <= 5,
       };
     } else {
@@ -580,7 +644,8 @@ export class PerformanceReportService {
     if (highPressureSat !== null && lowPressureSat !== null && isCompressorActive) {
       const spread = highPressureSat - lowPressureSat;
       pressureTempSpreadCheck = {
-        value: Number(spread.toFixed(1)), optimal: '20-60',
+        value: Number(spread.toFixed(1)),
+        optimal: '20-60',
         ok: spread >= 20 && spread <= 60,
       };
     } else {
@@ -595,12 +660,17 @@ export class PerformanceReportService {
       const lift = outlet - ambient;
       let liftRating: string;
       let liftOk: boolean;
-      if (lift < 30) { liftRating = 'bonus'; liftOk = true; }
-      else if (lift <= 45) { liftRating = 'normaal'; liftOk = true; }
-      else { liftRating = 'penalty'; liftOk = false; }
+      if (lift < 30) {
+        liftRating = 'bonus'; liftOk = true;
+      } else if (lift <= 45) {
+        liftRating = 'normaal'; liftOk = true;
+      } else {
+        liftRating = 'penalty'; liftOk = false;
+      }
 
       temperatureLiftCheck = {
-        value: Number(lift.toFixed(1)), ok: liftOk,
+        value: Number(lift.toFixed(1)),
+        ok: liftOk,
         rating: liftRating,
         interpretation: liftOk ? t.telemetry.curve_ok : t.telemetry.curve_steep,
       };
@@ -616,7 +686,9 @@ export class PerformanceReportService {
       else interpretation = t.telemetry.too_low;
 
       supplyTempCheck = {
-        value: Number(outlet.toFixed(1)), optimal: '35-45', ok: supplyOk,
+        value: Number(outlet.toFixed(1)),
+        optimal: '35-45',
+        ok: supplyOk,
         interpretation,
       };
     } else {
@@ -693,10 +765,12 @@ export class PerformanceReportService {
 
     score = Math.max(0, Math.min(100, score));
 
-    const detail = `${dc} disconnects` +
-      (fault && fault !== '0' ? `, fault: ${fault}` : ', geen fouten');
+    const detail = `${dc} disconnects${
+      fault && fault !== '0' ? `, fault: ${fault}` : ', geen fouten'}`;
 
-    return { status: 'scored', score, rating: this.scoreToRating(score, t), detail };
+    return {
+      status: 'scored', score, rating: this.scoreToRating(score, t), detail,
+    };
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
