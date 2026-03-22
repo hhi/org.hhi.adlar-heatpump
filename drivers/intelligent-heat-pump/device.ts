@@ -12,7 +12,7 @@ import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-cal
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
 import { ServiceCoordinator } from '../../lib/services/service-coordinator';
 import { enableFlowCardLogging } from '../../lib/flow-handler-wrapper';
-import { Logger, LogLevel } from '../../lib/logger';
+import { Logger } from '../../lib/logger';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -908,7 +908,7 @@ class MyDevice extends Homey.Device {
 
     try {
       // Guard: skip invalid COP values (sensor error, not an idle period)
-      if (!copResult.cop || copResult.cop <= 0 || !isFinite(copResult.cop)) {
+      if (!copResult.cop || copResult.cop <= 0 || !Number.isFinite(copResult.cop)) {
         this.categoryLog('cop', '⚠️ Rolling COP: Skipping sample — invalid COP value', copResult.cop);
         return;
       }
@@ -3018,7 +3018,11 @@ class MyDevice extends Homey.Device {
                   const delta = transformedValue - this.lastCompressorFreq;
                   const condition = delta > 0 ? 'above' : 'below';
 
-                  this.log(`⚙️  compressor_efficiency_alert TRIGGER: ${this.lastCompressorFreq} Hz → ${transformedValue} Hz (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`);
+                  const compressorAlertMessage = [
+                    `⚙️  compressor_efficiency_alert TRIGGER: ${this.lastCompressorFreq} Hz → ${transformedValue} Hz`,
+                    `(delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`,
+                  ].join(' ');
+                  this.log(compressorAlertMessage);
 
                   // v2.8.2: Pre-calculate and validate rounded value before triggering
                   const roundedFreq = Math.round(transformedValue * 10) / 10;
@@ -3044,7 +3048,11 @@ class MyDevice extends Homey.Device {
                   const delta = transformedValue - this.lastFanMotorFreq;
                   const condition = delta > 0 ? 'above' : 'below';
 
-                  this.log(`💨 fan_motor_efficiency_alert TRIGGER: ${this.lastFanMotorFreq} Hz → ${transformedValue} Hz (delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`);
+                  const fanMotorAlertMessage = [
+                    `💨 fan_motor_efficiency_alert TRIGGER: ${this.lastFanMotorFreq} Hz → ${transformedValue} Hz`,
+                    `(delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} Hz, condition: ${condition})`,
+                  ].join(' ');
+                  this.log(fanMotorAlertMessage);
 
                   // v2.8.2: Pre-calculate and validate rounded value before triggering
                   const roundedFreq = Math.round(transformedValue * 10) / 10;
@@ -4936,7 +4944,7 @@ class MyDevice extends Homey.Device {
    * @returns The validated and possibly converted value
    * @throws Error if value is invalid for the capability
    */
-  private validateCapabilityValue(capability: string, value: unknown, opts?: { decimal_handling?: 'round' | 'error' }): unknown {
+  private validateCapabilityValue(capability: string, value: unknown, opts?: { 'decimal_handling'?: 'round' | 'error' }): unknown {
     // Check for null/undefined values first
     if (value === null || value === undefined) {
       throw new Error(`Value for capability ${capability} cannot be null or undefined`);
@@ -4962,10 +4970,10 @@ class MyDevice extends Homey.Device {
             const roundedTemp = Math.round(temp);
             this.logger.warn(`Target temperature ${temp}°C rounded to ${roundedTemp}°C`);
             return roundedTemp;
-          } else {
-            // Show error - decimal not allowed
-            throw new Error(`Temperature must be a whole number (received: ${temp}°C). Enable auto-rounding or use a whole number.`);
           }
+          // Show error - decimal not allowed
+          throw new Error(`Temperature must be a whole number (received: ${temp}°C). Enable auto-rounding or use a whole number.`);
+
         }
 
         return temp;

@@ -6,7 +6,27 @@ import Homey from 'homey';
 import { TuyaErrorCategorizer } from '../error-types';
 import { calculatePreHeatDuration } from '../utils/preheat-calculator';
 import { CapabilityCategories, UserFlowPreferences } from '../types/shared-interfaces';
-import type { BuildingInsightsService } from './building-insights-service';
+import { PerformanceReportService } from './performance-report-service';
+import type { BuildingInsightsService, InsightCategory } from './building-insights-service';
+
+type PerformanceReportFlowTokens = {
+  'overall_score': number;
+  rating: string;
+  summary: string;
+  recommendations: string;
+  'report_json': string;
+};
+
+interface PerformanceReportTriggerCard {
+  trigger(device: Homey.Device, tokens: PerformanceReportFlowTokens): Promise<void>;
+}
+
+const INSIGHT_CATEGORIES: ReadonlyArray<InsightCategory> = [
+  'insulation_performance',
+  'pre_heating',
+  'thermal_storage',
+  'profile_mismatch',
+];
 
 export interface FlowCardManagerOptions {
   device: Homey.Device;
@@ -48,6 +68,32 @@ export class FlowCardManagerService {
     this.onExternalPowerData = options.onExternalPowerData || (async () => { });
     this.onExternalPricesData = options.onExternalPricesData || (async () => { });
     this.buildingInsightsService = options.buildingInsightsService; // v2.5.0
+  }
+
+  private isInsightCategory(category: string): category is InsightCategory {
+    return INSIGHT_CATEGORIES.some((value) => value === category);
+  }
+
+  private isPerformanceReportTriggerCard(card: unknown): card is PerformanceReportTriggerCard {
+    if (typeof card !== 'object' || card === null) {
+      return false;
+    }
+
+    const candidate = card as { trigger?: unknown };
+    return typeof candidate.trigger === 'function';
+  }
+
+  private formatDiagnosticTimestamp(date: Date): string {
+    const datePart = [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, '0'),
+      String(date.getDate()).padStart(2, '0'),
+    ].join('-');
+    const timePart = [
+      String(date.getHours()).padStart(2, '0'),
+      String(date.getMinutes()).padStart(2, '0'),
+    ].join(':');
+    return `${datePart} ${timePart}`;
   }
 
   /**
@@ -745,7 +791,9 @@ export class FlowCardManagerService {
         }
 
         const result = await this.buildingInsightsService.forceInsightAnalysis();
-        this.logger(`FlowCardManagerService: Force analysis complete - ${result.insights_detected} insights at ${result.confidence}% confidence`);
+        this.logger(
+          `FlowCardManagerService: Force analysis complete - ${result['insights_detected']} insights at ${result.confidence}% confidence`,
+        );
 
         // Return tokens for use in flows
         return result;
@@ -755,8 +803,8 @@ export class FlowCardManagerService {
       // Action: Calculate pre-heat start time (v2.6.0)
       const calculatePreHeatCard = this.device.homey.flow.getActionCard('calculate_preheat_time');
       const calculatePreHeatListener = calculatePreHeatCard.registerRunListener(async (args: {
-        target_indoor_temp: number;
-        target_clock_time: string;
+        'target_indoor_temp': number;
+        'target_clock_time': string;
       }) => {
         this.logger('FlowCardManagerService: Calculate pre-heat time action triggered', {
           target_indoor_temp: args.target_indoor_temp,
@@ -779,7 +827,7 @@ export class FlowCardManagerService {
 
         const model = buildingModelService.getLearner().getModel();
         const tau = model.C / model.UA; // Time constant in hours
-        const confidence = model.confidence;
+        const { confidence } = model;
 
         // Get current indoor temperature
         // @ts-expect-error - Accessing MyDevice.serviceCoordinator
@@ -855,7 +903,12 @@ export class FlowCardManagerService {
           return false;
         }
 
-        const isActive = this.buildingInsightsService.isInsightActive(args.category as any);
+        if (!this.isInsightCategory(args.category)) {
+          this.logger(`FlowCardManagerService: Unknown insight category "${args.category}"`);
+          return false;
+        }
+
+        const isActive = this.buildingInsightsService.isInsightActive(args.category);
         this.logger(`FlowCardManagerService: Insight ${args.category} is ${isActive ? 'active' : 'not active'}`);
         return isActive;
       });
@@ -887,7 +940,12 @@ export class FlowCardManagerService {
           return false;
         }
 
-        const isAbove = this.buildingInsightsService.areSavingsAbove(args.category as any, args.threshold);
+        if (!this.isInsightCategory(args.category)) {
+          this.logger(`FlowCardManagerService: Unknown savings category "${args.category}"`);
+          return false;
+        }
+
+        const isAbove = this.buildingInsightsService.areSavingsAbove(args.category, args.threshold);
         this.logger(`FlowCardManagerService: Savings for ${args.category} are ${isAbove ? 'above' : 'below'} €${args.threshold}/month`);
         return isAbove;
       });
@@ -929,7 +987,9 @@ export class FlowCardManagerService {
       // Hourly silent score update for Homey Insights (v2.9.13)
       if (this.hourlyScoreInterval === null) {
         this.hourlyScoreInterval = this.device.homey.setInterval(() => {
-          this.refreshPerformanceReportSilently();
+          this.refreshPerformanceReportSilently().catch((error) => {
+            this.logger('FlowCardManagerService: Hourly silent refresh failed:', error);
+          });
         }, 60 * 60 * 1000);
         this.logger('FlowCardManagerService: Hourly performance score update scheduled');
       }
@@ -938,7 +998,9 @@ export class FlowCardManagerService {
       if (!this.initReportScheduled) {
         this.initReportScheduled = true;
         this.initReportTimeout = this.device.homey.setTimeout(() => {
-          this.refreshPerformanceReportSilently();
+          this.refreshPerformanceReportSilently().catch((error) => {
+            this.logger('FlowCardManagerService: Init silent refresh failed:', error);
+          });
           this.initReportTimeout = null; // Auto-cleanup na uitvoering
         }, 2 * 60 * 1000);
         this.logger('FlowCardManagerService: Init performance report scheduled in 2 minutes');
@@ -967,10 +1029,7 @@ export class FlowCardManagerService {
   /**
    * Generate a performance report, store it in the capability, and return tokens.
    */
-  private async generateAndStoreReport(): Promise<{
-    overall_score: number; rating: string; summary: string; recommendations: string; report_json: string;
-  }> {
-    const { PerformanceReportService } = await import('./performance-report-service.js');
+  private async generateAndStoreReport(): Promise<PerformanceReportFlowTokens> {
     const reportService = new PerformanceReportService({
       device: this.device,
       logger: this.logger,
@@ -1029,9 +1088,8 @@ export class FlowCardManagerService {
         const tokens = await this.generateAndStoreReport();
 
         // Fire trigger card with tokens
-        if (triggerCard && typeof (triggerCard as { trigger: Function }).trigger === 'function') {
-          await (triggerCard as { trigger: (device: unknown, tokens: unknown) => Promise<void> })
-            .trigger(this.device, tokens);
+        if (this.isPerformanceReportTriggerCard(triggerCard)) {
+          await triggerCard.trigger(this.device, tokens);
           this.logger('FlowCardManagerService: Daily performance report trigger fired');
         }
       } catch (error) {
@@ -1045,7 +1103,11 @@ export class FlowCardManagerService {
 
       // Subsequent fires: every 24 hours
       this.dailyReportInterval = this.device.homey.setInterval(
-        () => { fireDailyReport(); },
+        () => {
+          fireDailyReport().catch((error) => {
+            this.logger('FlowCardManagerService: Scheduled daily report execution failed:', error);
+          });
+        },
         24 * 60 * 60 * 1000,
       );
     }, msUntil2300);
@@ -1267,7 +1329,7 @@ export class FlowCardManagerService {
         // Update diagnostic capability
         if (this.device.hasCapability('adlar_last_outdoor_temp_received')) {
           const d = new Date();
-          const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+          const ts = this.formatDiagnosticTimestamp(d);
           await this.device.setCapabilityValue('adlar_last_outdoor_temp_received', `${ts} | ${args.temperature_value.toFixed(1)}°C`); // eslint-disable-line camelcase
         }
 
@@ -1410,7 +1472,7 @@ export class FlowCardManagerService {
             hour: hourStr,
             price: Math.round(pd.price * 10000) / 10000, // 4 decimals
             category: pd.category,
-            advice: advice,
+            advice,
           };
         });
 
@@ -1436,8 +1498,8 @@ export class FlowCardManagerService {
         const richData = {
           timestamp: new Date().toISOString(),
           hoursAvailable: priceDataArray.length,
-          summary: summary,
-          schedule: schedule,
+          summary,
+          schedule,
         };
 
         await this.device.setCapabilityValue('energy_prices_data', JSON.stringify(richData));
@@ -1485,7 +1547,7 @@ export class FlowCardManagerService {
       // Update diagnostic capability
       if (this.device.hasCapability('adlar_last_wind_received')) {
         const d = new Date();
-        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const ts = this.formatDiagnosticTimestamp(d);
         await this.device.setCapabilityValue('adlar_last_wind_received', `${ts} | ${windSpeed.toFixed(0)}km/h`);
       }
 
@@ -1528,7 +1590,7 @@ export class FlowCardManagerService {
       // Update diagnostic capability
       if (this.device.hasCapability('adlar_last_solar_power_received')) {
         const d = new Date();
-        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const ts = this.formatDiagnosticTimestamp(d);
         await this.device.setCapabilityValue('adlar_last_solar_power_received', `${ts} | ${powerValue.toFixed(0)}W`);
       }
 
@@ -1571,7 +1633,7 @@ export class FlowCardManagerService {
       // Update diagnostic capability
       if (this.device.hasCapability('adlar_last_solar_radiation_received')) {
         const d = new Date();
-        const ts = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const ts = this.formatDiagnosticTimestamp(d);
         await this.device.setCapabilityValue('adlar_last_solar_radiation_received', `${ts} | ${radiationValue.toFixed(0)}W/m²`);
       }
 

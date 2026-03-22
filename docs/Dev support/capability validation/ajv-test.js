@@ -1,6 +1,5 @@
-// or ESM/TypeScript import
-import Ajv from 'ajv';
-// Node.js require:
+'use strict';
+
 const Ajv = require('ajv');
 
 const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
@@ -214,4 +213,6 @@ const data = {
 
 const validate = ajv.compile(schema);
 const valid = validate(data);
-if (!valid) console.log(validate.errors);
+if (!valid) {
+  process.stdout.write(`${JSON.stringify(validate.errors, null, 2)}\n`);
+}

@@ -75,7 +75,6 @@ export function getDynamicPInt(hour: number, basePInt: number): number {
   return basePInt * 1.8; // Evening: 180% of base (0.54 kW)
 }
 
-
 export interface BuildingModelConfig {
   forgettingFactor: number; // 0.995-0.9995, default 0.999 = balance stability/adaptivity
   initialCovariance: number; // 100 = high initial uncertainty
@@ -381,7 +380,12 @@ export class BuildingModelLearner {
       this.logger(`  θ[1] (UA/C):    ${this.theta[1].toFixed(6)} [valid: ${bounds.theta1_min.toFixed(6)} - ${bounds.theta1_max.toFixed(6)}] ${theta1Valid ? '✅' : '❌'}`);
       this.logger(`  θ[2] (g/C):     ${this.theta[2].toFixed(6)} [valid: ${bounds.g_c_min.toFixed(6)} - ${bounds.g_c_max.toFixed(6)}] ${theta2Valid ? '✅' : '❌'}`);
       this.logger(`  θ[3] (P_int/C): ${this.theta[3].toFixed(6)} [valid: ${bounds.pint_c_min.toFixed(6)} - ${bounds.pint_c_max.toFixed(6)}] ${theta3Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)} [valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}] ${ratioMinValid && ratioMaxValid ? '✅' : '❌'}`);
+      const ratioMessage = [
+        `  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)}`,
+        `[valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}]`,
+        ratioMinValid && ratioMaxValid ? '✅' : '❌',
+      ].join(' ');
+      this.logger(ratioMessage);
       this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: 1.25 - 500]`);
       this.logger('  Action: Reverted to previous theta, kept P matrix for uncertainty tracking');
 
@@ -425,8 +429,8 @@ export class BuildingModelLearner {
     // P_CEILING: Prevents covariance wind-up (algorithm becomes too sensitive)
     // Scientific basis: "aI ≤ P ≤ bI" from University of Michigan RLS research
     // =========================================================================
-    const P_FLOOR = 0.0001;   // Minimum uncertainty - prevents P[i,i]=0
-    const P_CEILING = 1.0;    // Maximum uncertainty - equals initial covariance
+    const P_FLOOR = 0.0001; // Minimum uncertainty - prevents P[i,i]=0
+    const P_CEILING = 1.0; // Maximum uncertainty - equals initial covariance
 
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
@@ -549,9 +553,9 @@ export class BuildingModelLearner {
 
     // Re-initialize theta from new profile
     this.theta = [
-      1 / profile.C,        // 1/C
+      1 / profile.C, // 1/C
       profile.UA / profile.C, // UA/C
-      profile.g / profile.C,  // g/C
+      profile.g / profile.C, // g/C
       profile.pInt / profile.C, // P_int/C
     ];
 

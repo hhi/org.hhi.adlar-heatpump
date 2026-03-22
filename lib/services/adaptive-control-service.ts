@@ -9,7 +9,9 @@ import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { DefrostLearner } from '../adaptive/defrost-learner';
-import { WeightedDecisionMaker, type ConfidenceMetrics, type CoastAction, type CombinedAction } from '../adaptive/weighted-decision-maker';
+import {
+  WeightedDecisionMaker, type ConfidenceMetrics, type CoastAction, type CombinedAction,
+} from '../adaptive/weighted-decision-maker';
 import { WindCorrectionService } from './wind-correction-service';
 import { WeatherForecastService, type ForecastAdvice } from './weather-forecast-service';
 import { DeviceConstants } from '../constants';
@@ -891,7 +893,7 @@ export class AdaptiveControlService {
       const significantAction = heatingAction !== null;
 
       this.logger(
-        `AdaptiveControlService: Recommendation check — `
+        'AdaptiveControlService: Recommendation check — '
         + `changed: ${recommendationChanged} (prev: ${this.lastRecommendedTemp}°C, `
         + `new: ${recommendedTemp}°C), significant: ${significantAction}`,
       );

@@ -22,8 +22,8 @@ export interface CapabilityCategories {
   calculated: string[]; // COP/SCOP calculations (excluded from health metrics)
   external: string[]; // External integrations (excluded from health metrics)
   monitoring: string[]; // Connection monitoring, disconnect counts (excluded from health metrics)
-  building_model: string[]; // Building thermal parameters learned by RLS (excluded from health metrics)
-  energy_pricing: string[]; // Energy price/cost data from API (excluded from health metrics)
+  'building_model': string[]; // Building thermal parameters learned by RLS (excluded from health metrics)
+  'energy_pricing': string[]; // Energy price/cost data from API (excluded from health metrics)
 }
 
 /**

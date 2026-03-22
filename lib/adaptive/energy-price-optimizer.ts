@@ -222,7 +222,7 @@ export class EnergyPriceOptimizer {
         }
         break;
 
-      case PriceCategory.LOW:
+      case PriceCategory.LOW: {
         // Pre-heat moderately - half of thermal boost
         const lowBoost = thermalBoost / 2;
         if (currentIndoorTemp < targetTemp + lowBoost) {
@@ -236,6 +236,7 @@ export class EnergyPriceOptimizer {
           };
         }
         break;
+      }
 
       case PriceCategory.HIGH:
         // Reduce moderately
@@ -479,7 +480,7 @@ export class EnergyPriceOptimizer {
       : sortedPrices[mid];
 
     // Calculate standard deviation
-    const variance = prices.reduce((acc, p) => acc + Math.pow(p - avg, 2), 0) / prices.length;
+    const variance = prices.reduce((acc, p) => acc + ((p - avg) ** 2), 0) / prices.length;
     const stdDev = Math.sqrt(variance);
 
     return {
@@ -529,9 +530,12 @@ export class EnergyPriceOptimizer {
 
     // Calculate R² (coefficient of determination) for confidence
     const meanY = sumY / n;
-    const ssTotal = y.reduce((acc, val) => acc + Math.pow(val - meanY, 2), 0);
+    const ssTotal = y.reduce((acc, val) => acc + ((val - meanY) ** 2), 0);
     const intercept = (sumY - slope * sumX) / n;
-    const ssResidual = y.reduce((acc, val, i) => acc + Math.pow(val - (slope * x[i] + intercept), 2), 0);
+    const ssResidual = y.reduce(
+      (acc, val, i) => acc + ((val - ((slope * x[i]) + intercept)) ** 2),
+      0,
+    );
     const rSquared = 1 - (ssResidual / ssTotal);
 
     // Classify trend (threshold: ±0.0001 €/kWh per hour)
@@ -799,7 +803,13 @@ export class EnergyPriceOptimizer {
       this.accumulatedHourlyCost = deltaKWh * effectivePrice;
     }
 
-    this.logger(`EnergyPriceOptimizer DEBUG: Hourly Cost Check - Total=${currentEnergyTotal.toFixed(3)}, Start=${this.hourStartEnergy.toFixed(3)}, Delta=${deltaKWh.toFixed(5)}, Price=${effectivePrice.toFixed(3)}, Cost=${this.accumulatedHourlyCost.toFixed(4)}`);
+    this.logger('EnergyPriceOptimizer DEBUG: Hourly Cost Check', {
+      total: currentEnergyTotal.toFixed(3),
+      start: this.hourStartEnergy.toFixed(3),
+      delta: deltaKWh.toFixed(5),
+      price: effectivePrice.toFixed(3),
+      cost: this.accumulatedHourlyCost.toFixed(4),
+    });
 
     return this.accumulatedHourlyCost;
   }

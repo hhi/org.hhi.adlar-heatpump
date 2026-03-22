@@ -37,12 +37,12 @@ export interface PreHeatCategory {
  * - Extreme (τ≥80h):    Passive house or very heavy construction
  */
 export function getPreHeatCategory(tau: number): PreHeatCategory {
-    if (tau < 5) return { category: 'very_fast_response', hoursFor2DegC: 2, priority: 80 };
-    if (tau < 10) return { category: 'fast_response', hoursFor2DegC: 4, priority: 75 };
-    if (tau < 20) return { category: 'medium_response', hoursFor2DegC: 8, priority: 60 };
-    if (tau < 40) return { category: 'slow_response', hoursFor2DegC: 16, priority: 50 };
-    if (tau < 80) return { category: 'very_slow_response', hoursFor2DegC: 24, priority: 40 };
-    return { category: 'extremely_slow_response', hoursFor2DegC: 32, priority: 30 };
+  if (tau < 5) return { category: 'very_fast_response', hoursFor2DegC: 2, priority: 80 };
+  if (tau < 10) return { category: 'fast_response', hoursFor2DegC: 4, priority: 75 };
+  if (tau < 20) return { category: 'medium_response', hoursFor2DegC: 8, priority: 60 };
+  if (tau < 40) return { category: 'slow_response', hoursFor2DegC: 16, priority: 50 };
+  if (tau < 80) return { category: 'very_slow_response', hoursFor2DegC: 24, priority: 40 };
+  return { category: 'extremely_slow_response', hoursFor2DegC: 32, priority: 30 };
 }
 
 /**
@@ -59,23 +59,23 @@ export function getPreHeatCategory(tau: number): PreHeatCategory {
  * @returns Duration in hours to achieve tempDelta
  */
 export function calculatePreHeatDuration(
-    tau: number,
-    tempDelta: number,
-    maxHours: number = 48,
+  tau: number,
+  tempDelta: number,
+  maxHours: number = 48,
 ): number {
-    // No heating needed if already at or above target
-    if (!Number.isFinite(tempDelta) || tempDelta <= 0) {
-        return 0;
-    }
+  // No heating needed if already at or above target
+  if (!Number.isFinite(tempDelta) || tempDelta <= 0) {
+    return 0;
+  }
 
-    // Validate tau
-    if (!Number.isFinite(tau) || tau <= 0) {
-        // Fallback to average building assumption
-        tau = 20;
-    }
+  // Validate tau
+  if (!Number.isFinite(tau) || tau <= 0) {
+    // Fallback to average building assumption
+    tau = 20;
+  }
 
-    const { hoursFor2DegC } = getPreHeatCategory(tau);
+  const { hoursFor2DegC } = getPreHeatCategory(tau);
 
-    // Scale linearly with temperature delta, cap at maxHours
-    return Math.min(maxHours, (hoursFor2DegC * tempDelta) / 2.0);
+  // Scale linearly with temperature delta, cap at maxHours
+  return Math.min(maxHours, (hoursFor2DegC * tempDelta) / 2.0);
 }

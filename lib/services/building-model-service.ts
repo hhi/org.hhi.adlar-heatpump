@@ -245,9 +245,6 @@ export class BuildingModelService {
     const model = this.learner.getModel();
     const state = this.learner.getState();
 
-    // Determine if using default values (v2.0.3)
-    const isDefault = Math.abs(model.tau - 50) < 0.5 && state.sampleCount < 10;
-
     // v2.8.1: 3-state status model: BLOCKED → LEARNING → learned
     // Priority: blocked reason > learning phase > learned
     const confidencePercent = model.confidence.toFixed(1); // v2.5.21: Show 1 decimal for visible progress
@@ -544,10 +541,10 @@ export class BuildingModelService {
    */
   private computeSunriseSunset(lat: number, dayOfYear: number): { sunrise: number; sunset: number } {
     const latRad = (Math.max(-89.9, Math.min(89.9, lat)) * Math.PI) / 180;
-    const declRad = (23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81)) * Math.PI) / 180;
+    const declRad = (23.45 * Math.sin((((2 * Math.PI) / 365) * (dayOfYear - 81))) * Math.PI) / 180;
     const cosOmega = -Math.tan(latRad) * Math.tan(declRad);
     if (cosOmega > 1) return { sunrise: 12, sunset: 12 }; // polar night
-    if (cosOmega < -1) return { sunrise: 0, sunset: 24 };  // polar day
+    if (cosOmega < -1) return { sunrise: 0, sunset: 24 }; // polar day
     const halfDay = (Math.acos(cosOmega) * 180) / Math.PI / 15;
     return { sunrise: 12 - halfDay, sunset: 12 + halfDay };
   }
@@ -568,7 +565,7 @@ export class BuildingModelService {
     const { sunrise, sunset } = this.computeSunriseSunset(lat, dayOfYear);
     const dayLength = sunset - sunrise;
     if (dayLength <= 0 || hour < sunrise || hour > sunset) return 0;
-    const declDeg = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+    const declDeg = 23.45 * Math.sin((((2 * Math.PI) / 365) * (dayOfYear - 81)));
     const peak = 500 + (declDeg / 23.45) * 300; // 200–800 W/m²
     return Math.max(0, peak * Math.sin(((hour - sunrise) / dayLength) * Math.PI));
   }

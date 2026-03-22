@@ -1952,11 +1952,24 @@ export class TuyaConnectionService {
     this.nextReconnectionTime = Date.now() + adaptiveInterval;
 
     const nextAttemptTime = new Date(this.nextReconnectionTime);
-    const nextTimeStr = `${nextAttemptTime.getHours().toString().padStart(2, '0')}:${nextAttemptTime.getMinutes().toString().padStart(2, '0')}:${nextAttemptTime.getSeconds().toString().padStart(2, '0')}`;
+    const nextTimeStr = [
+      nextAttemptTime.getHours().toString().padStart(2, '0'),
+      nextAttemptTime.getMinutes().toString().padStart(2, '0'),
+      nextAttemptTime.getSeconds().toString().padStart(2, '0'),
+    ].join(':');
+    const secondsUntilRetry = Math.round(adaptiveInterval / 1000);
+    const nextAttemptPadding = Math.max(
+      0,
+      14 - secondsUntilRetry.toString().length - nextTimeStr.length,
+    );
+    const nextAttemptLine = [
+      `║ Next attempt in: ${secondsUntilRetry}s (at ${nextTimeStr})`,
+      `${' '.repeat(nextAttemptPadding)}║`,
+    ].join('');
 
     this.logger('╔═════════════════════════════════════════════════════╗');
     this.logger('║ RECONNECTION SCHEDULED                              ║');
-    this.logger(`║ Next attempt in: ${Math.round(adaptiveInterval / 1000)}s (at ${nextTimeStr})${' '.repeat(Math.max(0, 14 - Math.round(adaptiveInterval / 1000).toString().length - nextTimeStr.length))}║`);
+    this.logger(nextAttemptLine);
     this.logger(`║ Backoff multiplier: ${this.backoffMultiplier}x${' '.repeat(29 - this.backoffMultiplier.toString().length)}║`);
     this.logger(`║ Circuit breaker: ${this.circuitBreakerOpen ? 'OPEN' : 'CLOSED'}${' '.repeat(28 - (this.circuitBreakerOpen ? 4 : 6))}║`);
     this.logger('╚═════════════════════════════════════════════════════╝');
@@ -2285,7 +2298,7 @@ export class TuyaConnectionService {
       // Remove deep socket error handler BEFORE removeAllListeners (v2.9.22)
       try {
         // @ts-expect-error - Accessing TuyAPI internal socket for cleanup
-        const tuyaSocket = this.tuya.client;  // FIX v2.9.22: was this.tuya.device?.client (undefined)
+        const tuyaSocket = this.tuya.client; // FIX v2.9.22: was this.tuya.device?.client (undefined)
         if (tuyaSocket && this.deepSocketErrorHandler) {
           tuyaSocket.removeListener('error', this.deepSocketErrorHandler);
           this.logger('TuyaConnectionService: Deep socket error handler removed');

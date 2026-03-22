@@ -44,10 +44,10 @@ export interface ConfidenceMetrics {
 }
 
 export interface CoastAction {
-  adjustment: number;   // (uitlaatTemp − offset) − huidigSetpoint (always negative when coast active)
+  adjustment: number; // (uitlaatTemp − offset) − huidigSetpoint (always negative when coast active)
   reason: string;
   priority: 'high';
-  strength: number;     // 0.0–1.0, share of total weight (default: 0.80)
+  strength: number; // 0.0–1.0, share of total weight (default: 0.80)
 }
 
 export interface CombinedAction {
@@ -57,7 +57,7 @@ export interface CombinedAction {
     efficiency: number;
     cost: number;
     thermal?: number; // v2.6.0: building model component
-    coast?: number;   // v2.10.0: passive cooldown coast component
+    coast?: number; // v2.10.0: passive cooldown coast component
   };
   reasoning: string[];
   priority: 'low' | 'medium' | 'high';
@@ -66,7 +66,7 @@ export interface CombinedAction {
     efficiency: number;
     cost: number;
     thermal?: number; // v2.6.0
-    coast?: number;   // v2.10.0
+    coast?: number; // v2.10.0
   };
 }
 
@@ -207,7 +207,7 @@ export class WeightedDecisionMaker {
     priceAction: PriceAction | null,
     thermalAction: { adjustment: number; reason: string; priority: 'low' | 'medium' | 'high' } | null,
     confidenceMetrics: ConfidenceMetrics,
-    coastAction?: CoastAction | null,   // v2.10.0: optional passive cooldown coast component
+    coastAction?: CoastAction | null, // v2.10.0: optional passive cooldown coast component
   ): CombinedAction {
     const reasoning: string[] = [];
 
@@ -462,6 +462,8 @@ export class WeightedDecisionMaker {
    */
   public destroy(): void {
     // Reset to neutral priorities
-    this.priorities = { comfort: 0.6, efficiency: 0.25, cost: 0.15, thermal: undefined };
+    this.priorities = {
+      comfort: 0.6, efficiency: 0.25, cost: 0.15, thermal: undefined,
+    };
   }
 }
