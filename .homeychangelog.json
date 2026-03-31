@@ -1,4 +1,10 @@
 {
+  "2.10.3": {
+    "en": "Security audit fixes.",
+    "nl": "Opgelost: Beveiligingsproblemen uit de security audit.",
+    "de": "Behoben: Sicherheitsprobleme aus dem Security-Audit.",
+    "fr": "Corrigé : problèmes de sécurité issus de l'audit de sécurité."
+  },
   "2.10.0": {
     "en": "Adaptive control now detects when the room is above setpoint and suppresses the heat pump via a passive cooldown (coast) signal — keeping the room from heating further while it cools naturally. Minimum water temperature for adaptive control is now configurable (15–30°C, default 18°C); match it to your heat pump's P111 parameter for correct night setback.",
     "nl": "Adaptieve regeling herkent nu wanneer de kamer boven het setpoint is en onderdrukt de warmtepomp via een passief afkoelsignaal (coast) — zodat de kamer verder kan afkoelen zonder onnodig te verwarmen. De minimale watertemperatuur voor adaptieve regeling is nu instelbaar (15–30°C, standaard 18°C); stem dit af op de P111-waarde van uw warmtepomp voor correcte nachtterugval.",
