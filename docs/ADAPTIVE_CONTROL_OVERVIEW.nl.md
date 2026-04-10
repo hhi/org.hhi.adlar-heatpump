@@ -17,7 +17,7 @@ De Adlar app leert nu **zelf** hoe jouw woning zich gedraagt en past automatisch
 | ⚡ **Efficiëntie** | Optimale COP door slimme aanvoertemperatuur | 15% (standaard) |
 | 💰 **Kosten** | Voorverwarmen bij goedkope stroom, afschalen bij dure | 15% (standaard) |
 | 🏠 **Thermisch** | Predictieve regeling via geleerd gebouwmodel (τ, C, UA) | 20% (standaard) |
-| ❄️ **Coast** | Passieve koeling — voorkomt onnodig stoken boven setpoint | 80% (indien actief) |
+| ❄️ **Coast** | Passieve koeling — voorkomt onnodig stoken boven setpoint | max. 80% (conditioneel) |
 
 *De gewichten zijn instelbaar en normaliseren automatisch naar 100%.*
 
@@ -51,6 +51,7 @@ De app leert automatisch jouw woning kennen:
 - **Probleem**: Warmtepomp stookt door terwijl de kamer al te warm is (bijv. door zon)
 - **Oplossing**: Coast-strategie detecteert overshoot → verlaagt setpoint onder watertemperatuur → compressor stopt
 - **I-term reset**: PI-regelaar wordt na afkoelfase schoon herstart
+- **Hydraulische vertraging (v2.10.x+)**: Coast geeft zijn gewicht automatisch terug aan de PI-regelaar zolang de uitlaattemperatuur nog niet reageert op een setpoint-verlaging — zodat bijsturing nooit wordt geblokkeerd
 
 ---
 

@@ -17,7 +17,7 @@ L'application Adlar **apprend** maintenant comment votre maison se comporte et a
 | ⚡ **Efficacité** | COP optimal grâce à une température d'alimentation intelligente | 15% (par défaut) |
 | 💰 **Coût** | Préchauffage pendant l'électricité bon marché, réduction pendant les pics | 15% (par défaut) |
 | 🏠 **Thermique** | Contrôle prédictif via modèle de bâtiment appris (τ, C, UA) | 20% (par défaut) |
-| ❄️ **Coast** | Refroidissement passif — empêche le chauffage inutile au-dessus de la consigne | 80% (si actif) |
+| ❄️ **Coast** | Refroidissement passif — empêche le chauffage inutile au-dessus de la consigne | max. 80% (conditionnel) |
 
 *Les pondérations sont réglables et se normalisent automatiquement à 100%.*
 
@@ -51,6 +51,7 @@ L'application apprend automatiquement :
 - **Problème** : La pompe à chaleur continue de chauffer alors que la pièce est déjà trop chaude (par ex. par apports solaires)
 - **Solution** : La stratégie coast détecte le dépassement → abaisse la consigne sous la température d'eau → le compresseur s'arrête
 - **Réinitialisation terme I** : Le contrôleur PI redémarre proprement après la phase de refroidissement
+- **Retard hydraulique (v2.10.x+)** : Coast cède automatiquement son poids au contrôleur PI tant que la température de départ n'a pas encore répondu à une baisse de consigne — la correction n'est ainsi jamais bloquée
 
 ---
 

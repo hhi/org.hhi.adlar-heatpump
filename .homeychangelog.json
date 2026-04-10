@@ -1,4 +1,10 @@
 {
+  "2.11.0": {
+    "en": "Passive cooldown (coast) no longer blocks PI correction during hydraulic lag — the controller now recovers its full adjustment budget while the outlet temperature catches up after a setpoint decrease. Coast correction is now also scaled based on how quickly the outlet temperature is dropping.",
+    "nl": "Passieve koelmodus (coast) blokkeert de PI-bijsturing niet langer tijdens hydraulische vertraging — de regelaar krijgt zijn volledige bijstuurruimte terug terwijl de uitlaattemperatuur een setpoint-verlaging inhaalt. De coast-correctie wordt nu ook afgeschaald op basis van hoe snel de uitlaattemperatuur daalt.",
+    "de": "Die passive Kühlstrategie (Coast) blockiert die PI-Nachregelung bei hydraulischer Verzögerung nicht mehr — der Regler erhält sein volles Korrekturbudget zurück, während die Vorlauftemperatur eine Sollwertabsenkung aufholt. Die Coast-Korrektur wird jetzt auch skaliert, je nachdem wie schnell die Vorlauftemperatur fällt.",
+    "fr": "Le refroidissement passif (coast) ne bloque plus la correction PI lors d'un retard hydraulique — le contrôleur retrouve son budget de correction complet pendant que la température de départ rattrape une baisse de consigne. La correction coast est maintenant également mise à l'échelle selon la vitesse de chute de la température de départ."
+  },
   "2.10.3": {
     "en": "Security audit fixes.",
     "nl": "Opgelost: Beveiligingsproblemen uit de security audit.",

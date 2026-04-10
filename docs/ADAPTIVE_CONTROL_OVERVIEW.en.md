@@ -17,7 +17,7 @@ The Adlar app now **learns** how your home behaves and automatically adjusts the
 | ⚡ **Efficiency** | Optimal COP through smart supply temperature | 15% (default) |
 | 💰 **Cost** | Pre-heat during cheap electricity, reduce during expensive | 15% (default) |
 | 🏠 **Thermal** | Predictive control via learned building model (τ, C, UA) | 20% (default) |
-| ❄️ **Coast** | Passive cooling — prevents unnecessary heating above setpoint | 80% (when active) |
+| ❄️ **Coast** | Passive cooling — prevents unnecessary heating above setpoint | max. 80% (conditional) |
 
 *Weights are adjustable and automatically normalize to 100%.*
 
@@ -51,6 +51,7 @@ The app automatically learns:
 - **Problem**: Heat pump keeps heating while the room is already too warm (e.g. from solar gain)
 - **Solution**: Coast strategy detects overshoot → lowers setpoint below water temperature → compressor stops
 - **I-term reset**: PI controller starts fresh after cooling phase
+- **Hydraulic lag (v2.10.x+)**: Coast automatically yields its weight back to the PI controller while the outlet temperature has not yet responded to a setpoint decrease — ensuring correction is never blocked
 
 ---
 

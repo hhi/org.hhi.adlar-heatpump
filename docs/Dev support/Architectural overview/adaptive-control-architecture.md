@@ -1,4 +1,4 @@
-# Adaptive Control Architecture Guide (v1.5.0 - Coast Strategy)
+# Adaptive Control Architecture Guide (v1.6.0 - Coast Strategy + ADR-040)
 
 This comprehensive guide documents the Adaptive Temperature Control system implemented in the Adlar Heat Pump Homey app, providing architectural details, implementation patterns, and integration strategies for PI-based temperature control with passive cooling mode (coast strategy).
 
@@ -401,11 +401,15 @@ const effectiveEfficiencyWeight = basePriorities.efficiency * copConfidence * ex
 const effectiveCostWeight       = basePriorities.cost       * costMultiplier * existingScale;
 const effectiveThermalWeight    = basePriorities.thermal    * existingScale;
 
-// Coast weight
-const effectiveCoastWeight = coastStrength;
+// ADR-040A: Coast krijgt alleen gewicht wanneer het daadwerkelijk bijdraagt (coastAdjust < 0).
+// Bij hydraulische vertraging na setpoint-verlaging is coastAdjust = 0 — dan neemt PI het volledige budget over.
+// Consistent patroon met effectiveCostWeight (priceDataAvailable) en effectiveThermalWeight (buildingModelConfidence).
+const effectiveCoastWeight = (coastAdjust < 0) ? coastStrength : 0;
 
-// After normalization with S=0.80:
+// After normalization with S=0.80 and coastAdjust < 0:
 //   coast ≈ 82.5%, comfort ≈ 10.3%, thermal ≈ 4.1%, rest ≈ 3.1%
+// When coastAdjust = 0 (hydraulic lag after setpoint decrease):
+//   coast = 0%, PI takes full 100% budget
 ```
 
 **Dependencies**: None (pure decision algorithm)
@@ -425,8 +429,10 @@ const effectiveCoastWeight = coastStrength;
 - **Three-criteria detection** - Magnitude + Duration + Trend (all must be satisfied)
 - **Hysteresis-based exit** - Lower threshold for exiting cooldown prevents flip-flop
 - **I-term reset on exit** - PI integral history cleared when leaving cooldown to prevent post-coast bias
-- **Sliding window trend** - 3-measurement window (15 min) filters sensor noise
+- **Sliding window trend** - 3-measurement window (15 min) filters sensor noise for indoor temp
 - **Fail-safe** - Insufficient trend data assumes rising temperature (activates coast sooner)
+- **ADR-040A: Conditional weight** - Coast weight is 0 when `coastAdjust = 0`; PI takes full budget during hydraulic lag
+- **ADR-040B: Outlet drop rate** - 4-measurement outlet window (20 min) scales coast correction; fast-dropping outlet → reduced coast pressure (min 0.3×)
 
 **Detection Criteria**:
 
@@ -454,7 +460,8 @@ Example: outletTemp = 27°C, offset = 1°C, setpoint = 30°C
 ```typescript
 private _coastActive = false;                    // current coast state
 private _cooldownCycleCount = 0;                 // consecutive cycles above setpoint
-private _indoorTempHistory: number[] = [];       // sliding window (max 3, FIFO)
+private _indoorTempHistory: number[] = [];       // indoor sliding window (max 3, 15 min — lagging indicator)
+private _outletTempHistory: number[] = [];       // ADR-040B: outlet sliding window (max 4, 20 min — leading indicator)
 ```
 
 **Execution Order in `executeControlCycle()`**:
@@ -2027,6 +2034,13 @@ Result: At 09:00, indoor stabilizes at 20.0°C (user sees no drop)
 ---
 
 ## Version History
+
+**v1.6.0 (April 2026)** - Coast Effectiveness (ADR-040)
+
+- ✅ Conditional coast weight: `effectiveCoastWeight = (coastAdjust < 0) ? coastStrength : 0`
+- ✅ Outlet temperature sliding window (4 × 5 min = 20 min) as leading indicator
+- ✅ `dropRateMultiplier` scales coast correction based on outlet drop rate (min 0.3×)
+- ✅ `_outletTempHistory` reset in `stop()` lifecycle method
 
 **v1.5.0 (March 2026)** - Coast Strategy (ADR-024)
 
