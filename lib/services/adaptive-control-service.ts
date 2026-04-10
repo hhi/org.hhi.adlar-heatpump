@@ -97,6 +97,8 @@ export class AdaptiveControlService {
   private _cooldownCycleCount = 0;
   private _indoorTempHistory: number[] = [];
   private static readonly TREND_WINDOW_SIZE = 3; // 3 measurements × 5 min = 15 min window
+  private _outletTempHistory: number[] = []; // ADR-040B: leading indicator voor coast-modulatie
+  private static readonly OUTLET_TREND_WINDOW_SIZE = 4; // 4 × 5 min = 20 min venster
 
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
@@ -495,6 +497,7 @@ export class AdaptiveControlService {
     this._coastActive = false;
     this._cooldownCycleCount = 0;
     this._indoorTempHistory = [];
+    this._outletTempHistory = []; // ADR-040B: reset outlet trend history
     this.logger('AdaptiveControlService: Coast-state gereset bij stop');
 
     this.isEnabled = false;
@@ -542,6 +545,27 @@ export class AdaptiveControlService {
     if (this._indoorTempHistory.length > AdaptiveControlService.TREND_WINDOW_SIZE) {
       this._indoorTempHistory.shift();
     }
+  }
+
+  /** ADR-040B: Records outlet temperature into the sliding window for drop-rate calculation. */
+  private _recordOutletTemp(outletTemp: number): void {
+    this._outletTempHistory.push(outletTemp);
+    if (this._outletTempHistory.length > AdaptiveControlService.OUTLET_TREND_WINDOW_SIZE) {
+      this._outletTempHistory.shift();
+    }
+  }
+
+  /**
+   * ADR-040B: Berekent de outlet-dalingsnelheid over het 20-minuten venster (4 cycli × 5 min).
+   * Retourneert °C/cyclus (negatief = dalend). Bij onvoldoende data: 0 (geen schaling).
+   */
+  private _calculateOutletDropRate(): number {
+    if (this._outletTempHistory.length < AdaptiveControlService.OUTLET_TREND_WINDOW_SIZE) {
+      return 0;
+    }
+    const oldest = this._outletTempHistory[0];
+    const newest = this._outletTempHistory[this._outletTempHistory.length - 1];
+    return (newest - oldest) / AdaptiveControlService.OUTLET_TREND_WINDOW_SIZE;
   }
 
   /**
@@ -596,6 +620,9 @@ export class AdaptiveControlService {
       return null;
     }
 
+    // ADR-040B: Record outlet temp voor leading indicator berekening (altijd, ook buiten coast-actief)
+    this._recordOutletTemp(outletTemp);
+
     const offset = (this.device.getSetting('adaptive_cooldown_offset') as number | null) ?? 1.0;
     const strength = (this.device.getSetting('adaptive_cooldown_strength') as number | null) ?? 0.80;
     const rawAdjustment = (outletTemp - offset) - currentSetpoint;
@@ -604,11 +631,21 @@ export class AdaptiveControlService {
     // If outletTemp has already dropped below currentSetpoint + offset (after multiple coast cycles),
     // the formula would yield a positive delta — coast would then recommend a higher setpoint.
     // Math.min(0, ...) prevents this: coast contributes 0 and the other components decide.
-    const adjustment = Math.min(0, rawAdjustment);
+    const baseAdjustment = Math.min(0, rawAdjustment);
+
+    // ADR-040B: Schaal coast-correctie op basis van outlet-dalingsnelheid (leading indicator).
+    // Snel dalend (outletDropRate << 0): installatie reageert goed → verminder coast druk.
+    // Traag dalend / stabiel (outletDropRate ≈ 0): installatie reageert traag → volledige correctie.
+    // Minimum multiplier 0.3: coast blijft altijd minimaal aanwezig bij negatieve rawAdjustment.
+    const outletDropRate = this._calculateOutletDropRate(); // °C/cyclus, negatief = dalend
+    const dropRateMultiplier = outletDropRate < 0
+      ? Math.max(0.3, 1.0 + outletDropRate * 0.5)
+      : 1.0;
+    const adjustment = baseAdjustment * dropRateMultiplier;
 
     return {
       adjustment,
-      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${adjustment.toFixed(1)}°C`,
+      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${adjustment.toFixed(1)}°C (dropRate: ${outletDropRate.toFixed(2)}°C/cyclus, multiplier: ${dropRateMultiplier.toFixed(2)})`,
       priority: 'high',
       strength,
     };

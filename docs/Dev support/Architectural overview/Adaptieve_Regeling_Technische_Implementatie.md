@@ -607,6 +607,60 @@ Voorbeeld: uitlaat = 27°C, offset = 1°C, setpoint = 30°C
 
 Het resultaat is altijd negatief — het systeem stuurt het setpoint ver onder de huidige watertemperatuur zodat de warmtepomp het interne minimum (P111, typisch 24–26°C) bereikt en de compressor stopt.
 
+### ADR-040A: Conditioneel Gewicht
+
+> Referentie: [ADR-040 — Coast Effectiviteitsverbetering](../../../plans/decisions/ADR-040-coast-effectiviteitsverbetering.md)
+
+**Probleem:** Na elke setpoint-verlaging loopt de gemeten uitlaattemperatuur door hydraulische traagheid tijdelijk achter. In die periode is `coastAdjust = 0`, maar coast claimde toch 88% van het gewichtsbudget — waardoor de PI-controller slechts ~11% gewicht had.
+
+**Oplossing:** Coast krijgt alleen gewicht wanneer het daadwerkelijk bijdraagt:
+
+```typescript
+// ADR-040A: Coast krijgt alleen gewicht wanneer coastAdjust < 0
+// Consistent patroon met effectiveCostWeight en effectiveThermalWeight
+const effectiveCoastWeight = (coastAdjust < 0) ? coastStrength : 0;
+```
+
+Bij `coastAdjust = 0` (hydraulische vertraging) valt het coast-gewicht terug naar nul, waardoor PI het volledige budget overneemt en de volledige bijsturing kan leveren.
+
+### ADR-040B: Outlet-Dalingstrend als Leading Indicator
+
+**Motivatie:** De huidige coast-formule gebruikt een momenteel verschil (lagging indicator). De uitlaattemperatuur reageert op setpoint-wijzigingen binnen minuten — dit is een leading indicator die al vroeg signaleert of de installatie voldoende reageert.
+
+**Sliding window:** 4 metingen × 5 min = 20 min venster
+
+```typescript
+private _outletTempHistory: number[] = [];
+private static readonly OUTLET_TREND_WINDOW_SIZE = 4;
+
+// °C/cyclus (negatief = dalend)
+private _calculateOutletDropRate(): number {
+  if (this._outletTempHistory.length < AdaptiveControlService.OUTLET_TREND_WINDOW_SIZE) {
+    return 0; // Graceful fallback: geen schaling bij onvoldoende data
+  }
+  const oldest = this._outletTempHistory[0];
+  const newest = this._outletTempHistory[this._outletTempHistory.length - 1];
+  return (newest - oldest) / AdaptiveControlService.OUTLET_TREND_WINDOW_SIZE;
+}
+```
+
+**Schaalfactor in `_buildCoastAction()`:**
+
+```typescript
+const outletDropRate = this._calculateOutletDropRate();
+const dropRateMultiplier = outletDropRate < 0
+  ? Math.max(0.3, 1.0 + outletDropRate * 0.5)
+  : 1.0;
+const adjustment = baseAdjustment * dropRateMultiplier;
+```
+
+| outletDropRate | multiplier | Betekenis |
+| --- | --- | --- |
+| 0,0 °C/cyclus | 1,00 | Trage daling — volledige coast correctie |
+| −0,5 °C/cyclus | 0,75 | Matige daling — coast 25% gereduceerd |
+| −1,0 °C/cyclus | 0,50 | Snelle daling — coast 50% gereduceerd |
+| ≤ −1,4 °C/cyclus | 0,30 | Zeer snelle daling — minimum coast correctie |
+
 ### I-term Reset bij Exit
 
 ```typescript
@@ -793,6 +847,14 @@ class AdaptiveControlService {
 ---
 
 ## Versie Historie
+
+**v2.4.0 (April 2026)** - Coast Effectiviteitsverbetering (ADR-040)
+
+- ✨ Conditioneel coast-gewicht: `effectiveCoastWeight = (coastAdjust < 0) ? coastStrength : 0`
+- ✨ Outlet-temperatuur sliding window (4 × 5 min = 20 min) als leading indicator
+- ✨ `dropRateMultiplier` schaalt coast-correctie op basis van dalingsnelheid outlet (min 0,3×)
+- ✨ `_outletTempHistory` gereset in `stop()` lifecycle methode
+- 📖 ADR-040A en ADR-040B secties toegevoegd aan technische documentatie
 
 **v2.3.0 (Maart 2026)** - Passieve Koelmodus (Coast-Strategie)
 

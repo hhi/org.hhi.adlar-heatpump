@@ -17,7 +17,7 @@ Die Adlar App **lernt** jetzt, wie sich Ihr Zuhause verhält und passt die Wärm
 | ⚡ **Effizienz** | Optimaler COP durch intelligente Vorlauftemperatur | 15% (Standard) |
 | 💰 **Kosten** | Vorheizen bei günstigem Strom, reduzieren bei teurem | 15% (Standard) |
 | 🏠 **Thermisch** | Prädiktive Regelung via gelerntes Gebäudemodell (τ, C, UA) | 20% (Standard) |
-| ❄️ **Coast** | Passive Kühlung — verhindert unnötiges Heizen über Sollwert | 80% (wenn aktiv) |
+| ❄️ **Coast** | Passive Kühlung — verhindert unnötiges Heizen über Sollwert | max. 80% (bedingt) |
 
 *Gewichtungen sind einstellbar und normalisieren automatisch auf 100%.*
 
@@ -51,6 +51,7 @@ Die App lernt automatisch:
 - **Problem**: Wärmepumpe heizt weiter, obwohl der Raum bereits zu warm ist (z.B. durch Solargewinne)
 - **Lösung**: Coast-Strategie erkennt Überschwingung → senkt Sollwert unter Wassertemperatur → Kompressor stoppt
 - **I-Term Reset**: PI-Regler startet nach Abkühlphase frisch
+- **Hydraulische Verzögerung (v2.10.x+)**: Coast gibt sein Gewicht automatisch an den PI-Regler zurück, solange die Vorlauftemperatur noch nicht auf eine Sollwertabsenkung reagiert hat — damit wird Korrektur nie blockiert
 
 ---
 
