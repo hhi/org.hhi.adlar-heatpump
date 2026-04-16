@@ -1,4 +1,10 @@
 {
+  "2.12.0": {
+    "en": "Passive cooldown (coast) now exits automatically after 2 hours maximum. Recovery setpoint adjustments are now limited to 1.5°C per cycle. Coast also self-exits when the room is already cooling and no further correction is needed.",
+    "nl": "Passieve koelmodus (coast) wordt nu automatisch beëindigd na maximaal 2 uur. Setpoint-aanpassingen bij herstel zijn begrensd op 1,5°C per cyclus. Coast stopt ook vanzelf wanneer de kamer al afkoelt en verdere correctie niet nodig is.",
+    "de": "Die passive Kühlstrategie (Coast) beendet sich jetzt automatisch nach maximal 2 Stunden. Sollwertanpassungen bei der Rückkehr sind auf 1,5°C pro Zyklus begrenzt. Coast deaktiviert sich auch selbst, wenn der Raum bereits abkühlt und keine weitere Korrektur erforderlich ist.",
+    "fr": "Le refroidissement passif (coast) se termine maintenant automatiquement après 2 heures maximum. Les ajustements de consigne lors de la récupération sont limités à 1,5°C par cycle. Coast se désactive aussi automatiquement lorsque la pièce refroidit déjà et qu'aucune correction supplémentaire n'est nécessaire."
+  },
   "2.11.0": {
     "en": "Passive cooldown (coast) no longer blocks PI correction during hydraulic lag — the controller now recovers its full adjustment budget while the outlet temperature catches up after a setpoint decrease. Coast correction is now also scaled based on how quickly the outlet temperature is dropping.",
     "nl": "Passieve koelmodus (coast) blokkeert de PI-bijsturing niet langer tijdens hydraulische vertraging — de regelaar krijgt zijn volledige bijstuurruimte terug terwijl de uitlaattemperatuur een setpoint-verlaging inhaalt. De coast-correctie wordt nu ook afgeschaald op basis van hoe snel de uitlaattemperatuur daalt.",
