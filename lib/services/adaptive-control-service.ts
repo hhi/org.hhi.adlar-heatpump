@@ -92,13 +92,17 @@ export class AdaptiveControlService {
   // Component 7: Defrost Learner (v2.9.0+)
   private defrostLearner: DefrostLearner;
 
-  // Component 8: Passive Cooldown / Coast (v2.10.0 ADR-024)
+  // Component 8: Passive Cooldown / Coast (v2.10.0 ADR-024, v2.12.0 ADR-047)
   private _coastActive = false;
   private _cooldownCycleCount = 0;
+  private _coastCycleCount = 0; // ADR-047: watchdog-teller (cycli dat coast actief is)
   private _indoorTempHistory: number[] = [];
   private static readonly TREND_WINDOW_SIZE = 3; // 3 measurements × 5 min = 15 min window
   private _outletTempHistory: number[] = []; // ADR-040B: leading indicator voor coast-modulatie
   private static readonly OUTLET_TREND_WINDOW_SIZE = 4; // 4 × 5 min = 20 min venster
+  private static readonly COAST_MAX_CYCLES = 24; // ADR-047: watchdog grens (24 × 5 min = 2 uur)
+  private static readonly COAST_STEP_LIMIT = -1.5; // ADR-047: maximale aanpassing per cyclus (°C)
+  private static readonly STALE_COAST_ADJ_THRESHOLD = 0.5; // ADR-047: zachte exit drempel (°C)
 
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
@@ -493,12 +497,13 @@ export class AdaptiveControlService {
     this.simulatedTargetTemp = null;
     this.lastRecommendedTemp = undefined;
 
-    // ADR-024: Reset coast state — prevents stale state from prior session carrying over
+    // ADR-024/ADR-047: Reset coast state — prevents stale state from prior session carrying over
     this._coastActive = false;
     this._cooldownCycleCount = 0;
+    this._coastCycleCount = 0; // ADR-047: reset watchdog-teller
     this._indoorTempHistory = [];
     this._outletTempHistory = []; // ADR-040B: reset outlet trend history
-    this.logger('AdaptiveControlService: Coast-state gereset bij stop');
+    this.logger('AdaptiveControlService: Coast-state gereset bij stop (incl. ADR-047 watchdog-teller)');
 
     this.isEnabled = false;
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, false);
@@ -609,29 +614,34 @@ export class AdaptiveControlService {
   }
 
   /**
-   * Builds a CoastAction from the current outlet temperature and setpoint.
-   * Returns null when coast is inactive or outlet temperature is unavailable.
+   * ADR-047: Berekent de coast-aanpassing vóór de exit-checks worden uitgevoerd.
+   * De zachte exit heeft coastAdj nodig als invoer, dus moet dit eerder in de cyclus plaatsvinden.
+   *
+   * Null-contract: outletTemp === null → adj = 0.
+   *   |0| < STALE_COAST_ADJ_THRESHOLD is altijd waar → zachte exit leunt alleen op isFalling.
+   *   Harde exit en watchdog zijn onafhankelijk van outlet-data en blijven gewoon werken.
+   *
+   * @returns adj en outletTemp (null bij geen data)
    */
-  private _buildCoastAction(currentSetpoint: number): CoastAction | null {
+  private _computeCoastAdjustment(currentSetpoint: number): { adj: number; outletTemp: number | null } {
     const outletTemp = this.device.getCapabilityValue('measure_temperature.temp_bottom') as number | null;
 
     if (outletTemp === null) {
-      this.logger('AdaptiveControlService: Geen uitlaattemperatuur beschikbaar voor coast-berekening');
-      return null;
+      this.logger('AdaptiveControlService: Geen uitlaattemperatuur — coastAdj = 0 (null-contract ADR-047)');
+      return { adj: 0, outletTemp: null };
     }
 
     // ADR-040B: Record outlet temp voor leading indicator berekening (altijd, ook buiten coast-actief)
     this._recordOutletTemp(outletTemp);
 
     const offset = (this.device.getSetting('adaptive_cooldown_offset') as number | null) ?? 1.0;
-    const strength = (this.device.getSetting('adaptive_cooldown_strength') as number | null) ?? 0.80;
     const rawAdjustment = (outletTemp - offset) - currentSetpoint;
 
     // Guard: coast delta must always be negative.
-    // If outletTemp has already dropped below currentSetpoint + offset (after multiple coast cycles),
-    // the formula would yield a positive delta — coast would then recommend a higher setpoint.
-    // Math.min(0, ...) prevents this: coast contributes 0 and the other components decide.
     const baseAdjustment = Math.min(0, rawAdjustment);
+
+    // ADR-047: Stap-limiet — voorkomt agressieve eerste aanpassing (was tot -2.7°C mogelijk).
+    const clampedAdjustment = Math.max(AdaptiveControlService.COAST_STEP_LIMIT, baseAdjustment);
 
     // ADR-040B: Schaal coast-correctie op basis van outlet-dalingsnelheid (leading indicator).
     // Snel dalend (outletDropRate << 0): installatie reageert goed → verminder coast druk.
@@ -641,11 +651,40 @@ export class AdaptiveControlService {
     const dropRateMultiplier = outletDropRate < 0
       ? Math.max(0.3, 1.0 + outletDropRate * 0.5)
       : 1.0;
-    const adjustment = baseAdjustment * dropRateMultiplier;
+
+    return { adj: clampedAdjustment * dropRateMultiplier, outletTemp };
+  }
+
+  /**
+   * ADR-047: Zachte exit — retourneert true als de kamer een negatieve trend vertoont
+   * (eindwaarde < beginwaarde over het 15-minuten window) én de coast-aanpassing
+   * verwaarloosbaar klein is. Ruimt een lege _coastActive-state op.
+   *
+   * Trenddefinitie: negatieve trend over het window (eindwaarde < beginwaarde).
+   * Bewust geen pairwise-check — een zig-zag zoals 21.4→21.6→21.3 kwalificeert ook.
+   */
+  private _isStaleCoast(coastAdj: number): boolean {
+    const isFalling = this._indoorTempHistory.length >= AdaptiveControlService.TREND_WINDOW_SIZE
+      && this._indoorTempHistory[this._indoorTempHistory.length - 1] < this._indoorTempHistory[0];
+    const isNegligible = Math.abs(coastAdj) < AdaptiveControlService.STALE_COAST_ADJ_THRESHOLD;
+    return isFalling && isNegligible;
+  }
+
+  /**
+   * Builds a CoastAction from a pre-computed adjustment (ADR-047: computed before exit checks).
+   * outletTemp is passed for the reason string only — no side effects.
+   */
+  private _buildCoastAction(coastAdj: number, outletTemp: number, currentSetpoint: number): CoastAction {
+    const offset = (this.device.getSetting('adaptive_cooldown_offset') as number | null) ?? 1.0;
+    const strength = (this.device.getSetting('adaptive_cooldown_strength') as number | null) ?? 0.80;
+    const outletDropRate = this._calculateOutletDropRate();
+    const dropRateMultiplier = outletDropRate < 0
+      ? Math.max(0.3, 1.0 + outletDropRate * 0.5)
+      : 1.0;
 
     return {
-      adjustment,
-      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${adjustment.toFixed(1)}°C (dropRate: ${outletDropRate.toFixed(2)}°C/cyclus, multiplier: ${dropRateMultiplier.toFixed(2)})`,
+      adjustment: coastAdj,
+      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${coastAdj.toFixed(1)}°C (dropRate: ${outletDropRate.toFixed(2)}°C/cyclus, multiplier: ${dropRateMultiplier.toFixed(2)}, staplimiet: ${AdaptiveControlService.COAST_STEP_LIMIT}°C)`,
       priority: 'high',
       strength,
     };
@@ -707,23 +746,58 @@ export class AdaptiveControlService {
       // ADR-024: Record indoor temp in sliding window (always, not just in cooldown)
       this._recordIndoorTemp(indoorTemp);
 
-      // ADR-024: Exit coast mode when room has cooled sufficiently (before PI calculation)
+      // ADR-047: Stap 2 — Compute coastAdj vóór exit-checks (zachte exit heeft coastAdj nodig)
+      const { adj: coastAdj, outletTemp: outletTempForCoast } = this._computeCoastAdjustment(currentSetpoint);
+
+      // ADR-047: Stap 3 — Harde exit (bestaand)
       if (this._coastActive && this._isCooldownExitCondition(indoorTemp, desiredIndoorTemp)) {
         this.heatingController.resetHistory();
         this._coastActive = false;
         this._cooldownCycleCount = 0;
-        this.logger('AdaptiveControl: 🌡️ verlaat afkoelmodus — PI-integraalterm gereset');
+        this._coastCycleCount = 0;
+        this.logger(
+          `AdaptiveControl: 🌡️ EXIT-hard — Tist ${indoorTemp.toFixed(1)}°C onder drempel, PI-integraalterm gereset`,
+        );
       }
 
-      // ADR-024: Activate coast mode when all three criteria are met
+      // ADR-047: Stap 4 — Zachte exit (stale-coast: kamer daalt én coastAdj verwaarloosbaar)
+      if (this._coastActive && this._isStaleCoast(coastAdj)) {
+        this.heatingController.resetHistory();
+        this._coastActive = false;
+        this._cooldownCycleCount = 0;
+        this._coastCycleCount = 0;
+        this.logger(
+          `AdaptiveControl: 🌿 EXIT-zacht — kamer daalt, coastAdj=${coastAdj.toFixed(2)}°C verwaarloosbaar, PI hervat`,
+        );
+      }
+
+      // ADR-047: Stap 5 — Watchdog (backstop bij aanhoudende stale coast)
+      if (this._coastActive && this._coastCycleCount >= AdaptiveControlService.COAST_MAX_CYCLES) {
+        this.heatingController.resetHistory();
+        this._coastActive = false;
+        this._cooldownCycleCount = 0;
+        this._coastCycleCount = 0;
+        this.logger(
+          `AdaptiveControl: ⏱️ EXIT-watchdog — coast actief voor ${AdaptiveControlService.COAST_MAX_CYCLES} cycli `
+          + `(${AdaptiveControlService.COAST_MAX_CYCLES * 5} min), PI hervat`,
+        );
+      }
+
+      // ADR-047: Stap 6 — Activatie NA alle exits (exit in deze cyclus blokkeert heractivatie)
       if (!this._coastActive) {
         this._coastActive = this._isCooldownConfirmed(indoorTemp, desiredIndoorTemp);
         if (this._coastActive) {
+          this._coastCycleCount = 0; // herstart watchdog-teller bij nieuwe activatie
           this.logger(
             `AdaptiveControl: 🌊 afkoelmodus geactiveerd (cycle ${this._cooldownCycleCount}) — `
             + `Tist ${indoorTemp.toFixed(1)}°C > Tsoll ${desiredIndoorTemp.toFixed(1)}°C`,
           );
         }
+      }
+
+      // ADR-047: Stap 7 — Increment watchdog-teller
+      if (this._coastActive) {
+        this._coastCycleCount++;
       }
 
       this.logger(
@@ -862,11 +936,14 @@ export class AdaptiveControlService {
         });
       }
 
-      // ADR-024: Build coast action (null when coast is inactive — backwards-compatible)
-      const coastAction = this._coastActive ? this._buildCoastAction(currentSetpoint) : null;
+      // ADR-024/ADR-047: Build coast action (null when coast is inactive — backwards-compatible)
+      // coastAdj en outletTempForCoast zijn berekend in stap 2 (vóór exit-checks)
+      const coastAction = (this._coastActive && outletTempForCoast !== null)
+        ? this._buildCoastAction(coastAdj, outletTempForCoast, currentSetpoint)
+        : null;
       if (coastAction) {
         this.logger(
-          `🌊 Coast: ${coastAction.adjustment.toFixed(2)}°C (sterkte: ${(coastAction.strength * 100).toFixed(0)}%)`,
+          `🌊 Coast: ${coastAction.adjustment.toFixed(2)}°C (sterkte: ${(coastAction.strength * 100).toFixed(0)}%, watchdog: ${this._coastCycleCount}/${AdaptiveControlService.COAST_MAX_CYCLES})`,
         );
       }
 
