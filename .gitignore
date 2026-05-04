@@ -10,3 +10,4 @@ todo/
 plans
 plans/
 .claude/settings.local.json
+.DS_Store
