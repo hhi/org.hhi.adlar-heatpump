@@ -1,6 +1,6 @@
 {
   "name": "org.hhi.adlar-heatpump",
-  "version": "1.0.0",
+  "version": "2.12.1",
   "engines": {
     "node": ">=12.16.1"
   },

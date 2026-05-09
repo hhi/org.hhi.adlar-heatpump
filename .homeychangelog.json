@@ -1,4 +1,10 @@
 {
+  "2.12.1": {
+    "en": "Security patch applied.",
+    "nl": "Beveiligingspatch toegepast.",
+    "de": "Sicherheitspatch angewendet.",
+    "fr": "Patch de sécurité appliqué."
+  },
   "2.12.0": {
     "en": "Passive cooldown (coast) now exits automatically after 2 hours maximum. Recovery setpoint adjustments are now limited to 1.5°C per cycle. Coast also self-exits when the room is already cooling and no further correction is needed.",
     "nl": "Passieve koelmodus (coast) wordt nu automatisch beëindigd na maximaal 2 uur. Setpoint-aanpassingen bij herstel zijn begrensd op 1,5°C per cyclus. Coast stopt ook vanzelf wanneer de kamer al afkoelt en verdere correctie niet nodig is.",
