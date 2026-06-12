@@ -62,17 +62,26 @@ export const BUILDING_PROFILES: Record<BuildingProfileType, BuildingProfile> = {
 };
 
 /**
- * Get internal gains based on time of day
- * Pattern: Low at night, moderate during day, higher in evening
+ * Time-of-day P_int multiplier — single source of truth (ADR-056).
+ * Pattern: Low at night (23–6u), moderate during day (6–18u), higher in evening (18–23u).
+ * Used by the learner (RLS input), the thermal advice and the capability display,
+ * so learning, advising and UI always share the same windows.
  */
-export function getDynamicPInt(hour: number, basePInt: number): number {
+export function getPIntMultiplier(hour: number): number {
   if (hour >= 23 || hour < 6) {
-    return basePInt * 0.4; // Night: 40% of base (0.12 kW for base 0.3)
+    return 0.4; // Night: 40% of base
   }
   if (hour >= 6 && hour < 18) {
-    return basePInt * 1.0; // Day: 100% of base (0.3 kW)
+    return 1.0; // Day: 100% of base
   }
-  return basePInt * 1.8; // Evening: 180% of base (0.54 kW)
+  return 1.8; // Evening: 180% of base
+}
+
+/**
+ * Get internal gains based on time of day
+ */
+export function getDynamicPInt(hour: number, basePInt: number): number {
+  return basePInt * getPIntMultiplier(hour);
 }
 
 export interface BuildingModelConfig {
@@ -117,6 +126,12 @@ export class BuildingModelLearner {
   private enableDynamicPInt: boolean;
   private basePInt: number; // Base P_int value for dynamic calculation
 
+  // ADR-057 W3 (referentieproject): excitation diagnostics — structural reverts mean
+  // theta is pinned against physical bounds (poor excitation), which the revert masks
+  private consecutiveReverts = 0;
+  private totalReverts = 0;
+  private rateLimitActivations = 0;
+
   // =========================================================================
   // DEFENSIVE LAYER 1: Measurement Validation Bounds
   // Reject physically impossible or extreme measurement values BEFORE RLS update
@@ -126,10 +141,27 @@ export class BuildingModelLearner {
     pHeating_min: 0.0, // Minimum thermal power (kW)
     pHeating_max: 20.0, // Maximum thermal power (kW) - based on 5kW electric × 4 COP
     tIndoor_min: 5.0, // Minimum indoor temp (°C)
-    tIndoor_max: 30.0, // Maximum indoor temp (°C)
-    tOutdoor_min: -10.0, // Minimum outdoor temp (°C)
+    tIndoor_max: 35.0, // Maximum indoor temp (°C) — ADR-056: verruimd van 30, hete zomerdag is valide
+    tOutdoor_min: -25.0, // Minimum outdoor temp (°C) — ADR-056: verruimd van -10, koudegolf is juist waardevol leermoment
     tOutdoor_max: 50.0, // Maximum outdoor temp (°C)
     solarRadiation_max: 1200.0, // Maximum solar radiation (W/m²)
+    dt_max_hours: 0.25, // ADR-056: max 15 min (3× meetinterval) tussen samples — daarboven is
+    // dT/dt een gemiddelde over een gat terwijl X de huidige condities beschrijft (fysisch ongeldig)
+  };
+
+  // =========================================================================
+  // ADR-057 W1 (referentieproject): Single source of truth for covariance matrix
+  // assumptions. P starts at INITIAL on the diagonal, but updateRLS() clamps
+  // diagonals to [P_FLOOR, P_CEILING] from the very first update onwards — so any
+  // state that has seen ≥1 update has trace ≤ TRACE_MAX. Confidence calculation,
+  // restore validation and diagnostics warnings must all derive from these.
+  // =========================================================================
+  public static readonly RLS_COVARIANCE = {
+    INITIAL: 100, // Diagonal value before the first RLS update (trace 400)
+    P_FLOOR: 0.0001, // Minimum diagonal - prevents covariance collapse (stops learning)
+    P_CEILING: 1.0, // Maximum diagonal after update - prevents covariance wind-up (v2.7.7)
+    TRACE_MAX: 4.0, // 4 × P_CEILING - real trace range after first update
+    TRACE_HEALTHY_MIN: 4 * 0.0001, // 4 × P_FLOOR - below this the algorithm is over-confident
   };
 
   // =========================================================================
@@ -144,8 +176,8 @@ export class BuildingModelLearner {
     theta1_max: 1.0 / 5, // Max UA/C (UA=1.0 kW/°C poor insulation, C=5)
     theta1_theta0_ratio_min: 0.002, // θ[1]/θ[0] > 0.002 ensures τ < 500h (v2.7.1: NEW)
     theta1_theta0_ratio_max: 0.8, // θ[1]/θ[0] < 0.8 ensures τ > 1.25h
-    g_c_min: 0.2 / 40, // Min g/C (g=0.2 base × 0.6 seasonal winter)
-    g_c_max: 0.8 / 5, // Max g/C (g=0.8 base × 1.3 seasonal summer)
+    g_c_min: 0.2 / 40, // Min g/C (g=0.2 lowest base profile value) - ADR-057 E4: seasonal multiplier removed in v2.9.6
+    g_c_max: 0.8 / 5, // Max g/C (g=0.8 highest plausible base value)
     pint_c_min: 0.1 / 40, // Min P_int/C (0.1kW base × 0.4 night)
     pint_c_max: 0.6 / 5, // Max P_int/C (0.6kW base × 1.8 evening)
   };
@@ -205,6 +237,19 @@ export class BuildingModelLearner {
     const dt = (data.timestamp - this.lastMeasurement.timestamp) / 3600000; // Convert ms to hours
     if (dt <= 0) {
       this.logger('BuildingModelLearner: Invalid time delta, skipping measurement');
+      return;
+    }
+
+    // ADR-056: dt-gap guard — na een app-herstart of gemiste ticks is dT/dt over het gat
+    // gemiddeld terwijl de X-vector (vermogen, temperaturen, solar) van nú is.
+    // Sample niet leren, maar wél als nieuw referentiepunt opslaan zodat de volgende meting klopt.
+    if (dt > BuildingModelLearner.MEASUREMENT_BOUNDS.dt_max_hours) {
+      this.logger(
+        `BuildingModelLearner: ⚠️ Time gap ${(dt * 60).toFixed(0)}min > `
+        + `${BuildingModelLearner.MEASUREMENT_BOUNDS.dt_max_hours * 60}min — skipping RLS update, `
+        + 'measurement stored as new reference point',
+      );
+      this.lastMeasurement = data;
       return;
     }
 
@@ -325,14 +370,10 @@ export class BuildingModelLearner {
     // Adaptive lambda: 0.9999 (stable) to 0.995 (fast tracking)
     const vffLambda = 0.9999 - sigmoid * (0.9999 - 0.995);
 
-    // Also apply sample-count based warmup (existing logic)
-    const warmupLambda = Math.max(
-      this.lambda, // Configured value (default 0.998)
-      0.999 - this.sampleCount / 100000, // Gradual decrease during warmup
-    );
-
-    // Use the more conservative (larger) of the two
-    const adaptiveLambda = Math.max(vffLambda, warmupLambda);
+    // ADR-056: voormalig warmup-mechanisme (0.999 − n/100000) verwijderd — met de
+    // geconfigureerde λ ≥ 0.999 was die term vanaf sample 1 al inert.
+    // De geconfigureerde forgetting factor fungeert als ondergrens; VFF kan alleen verhogen.
+    const adaptiveLambda = Math.max(vffLambda, this.lambda);
 
     // Log VFF activity at milestones
     if (this.sampleCount % 100 === 0) {
@@ -380,21 +421,28 @@ export class BuildingModelLearner {
       this.logger(`  θ[1] (UA/C):    ${this.theta[1].toFixed(6)} [valid: ${bounds.theta1_min.toFixed(6)} - ${bounds.theta1_max.toFixed(6)}] ${theta1Valid ? '✅' : '❌'}`);
       this.logger(`  θ[2] (g/C):     ${this.theta[2].toFixed(6)} [valid: ${bounds.g_c_min.toFixed(6)} - ${bounds.g_c_max.toFixed(6)}] ${theta2Valid ? '✅' : '❌'}`);
       this.logger(`  θ[3] (P_int/C): ${this.theta[3].toFixed(6)} [valid: ${bounds.pint_c_min.toFixed(6)} - ${bounds.pint_c_max.toFixed(6)}] ${theta3Valid ? '✅' : '❌'}`);
-      const ratioMessage = [
-        `  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)}`,
-        `[valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}]`,
-        ratioMinValid && ratioMaxValid ? '✅' : '❌',
-      ].join(' ');
-      this.logger(ratioMessage);
+      this.logger(
+        `  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)}`
+        + ` [valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}]`
+        + ` ${ratioMinValid && ratioMaxValid ? '✅' : '❌'}`,
+      );
       this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: 1.25 - 500]`);
       this.logger('  Action: Reverted to previous theta, kept P matrix for uncertainty tracking');
 
       // REVERT: Restore previous theta (keep P matrix to maintain uncertainty)
       this.theta = thetaPrevious;
 
+      // ADR-057 W3: Track reverts — structural reverting means parameters are
+      // pinned against physical bounds (poor excitation), which the revert masks
+      this.consecutiveReverts++;
+      this.totalReverts++;
+
       // Skip P matrix update by returning early
       return;
     }
+
+    // ADR-057 W3: Valid update — reset the consecutive revert streak
+    this.consecutiveReverts = 0;
 
     // =========================================================================
     // DEFENSIVE LAYER 4: Parameter Rate Limiting (NEW in v2.7.7)
@@ -415,6 +463,10 @@ export class BuildingModelLearner {
       }
     }
 
+    if (rateLimited) {
+      this.rateLimitActivations++; // ADR-057 W3: excitation diagnostics
+    }
+
     if (rateLimited && this.sampleCount % 10 === 0) {
       const newC = 1 / this.theta[0];
       this.logger(
@@ -424,13 +476,20 @@ export class BuildingModelLearner {
 
     // Step 3: Update covariance P = (1/λ) × (P - K × X^T × P)
     // =========================================================================
-    // DEFENSIVE LAYER 5: Covariance Bounding (Enhanced in v2.7.7)
+    // DEFENSIVE LAYER 5: Covariance Bounding (Enhanced in v2.7.7, herijkt ADR-056)
     // P_FLOOR: Prevents covariance collapse (algorithm stops learning)
     // P_CEILING: Prevents covariance wind-up (algorithm becomes too sensitive)
     // Scientific basis: "aI ≤ P ≤ bI" from University of Michigan RLS research
+    //
+    // ADR-056: P_CEILING = 1.0 is een BEWUSTE ontwerpkeuze, géén gelijke aan de
+    // initiële covariantie (100). De hoge startonzekerheid werkt dus maar één
+    // update lang; daarna leert het algoritme traag-maar-stabiel. Dit gedrag is
+    // bevochten op de divergentie-incidenten die tot de v2.7.x-mitigaties leidden.
+    // De confidence-formule en diagnostiekdrempels zijn op deze range geijkt
+    // (trace na eerste update: ~0.0004 – 4.0).
     // =========================================================================
-    const P_FLOOR = 0.0001; // Minimum uncertainty - prevents P[i,i]=0
-    const P_CEILING = 1.0; // Maximum uncertainty - equals initial covariance
+    // ADR-057 W1 (referentieproject): bounds come from RLS_COVARIANCE (single source of truth)
+    const { P_FLOOR, P_CEILING } = BuildingModelLearner.RLS_COVARIANCE;
 
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
@@ -442,6 +501,23 @@ export class BuildingModelLearner {
       }
       return updated;
     }));
+
+    // =========================================================================
+    // ADR-056: Symmetrie-afdwinging + off-diagonaal-clip
+    // De diagonale clamping hierboven kan P asymmetrisch/niet-PSD maken terwijl
+    // off-diagonalen door de λ-deling onbegrensd groeien. Twee goedkope correcties:
+    // 1. P = (P + Pᵀ)/2 — herstelt symmetrie
+    // 2. |P[i][j]| ≤ √(P[i][i]·P[j][j]) — garandeert een consistente correlatiestructuur
+    // =========================================================================
+    for (let i = 0; i < 4; i++) {
+      for (let j = i + 1; j < 4; j++) {
+        const symmetrized = (this.P[i][j] + this.P[j][i]) / 2;
+        const maxAbs = Math.sqrt(this.P[i][i] * this.P[j][j]);
+        const clipped = Math.max(-maxAbs, Math.min(maxAbs, symmetrized));
+        this.P[i][j] = clipped;
+        this.P[j][i] = clipped;
+      }
+    }
   }
 
   /**
@@ -504,6 +580,7 @@ export class BuildingModelLearner {
    * @version 2.4.6 - Threshold increased from 400 to 500 to show learning progress from initialization
    * @version 2.5.21 - Added logarithmic bonus for samples beyond minimum for visible progress
    * @version 2.5.22 - Added final clamp to ensure confidence never exceeds 100%
+   * @version ADR-056 - Covariance-component herijkt op de werkelijke trace-range na P_CEILING-clamping
    */
   private calculateConfidence(): number {
     // Component 1: Sample count coverage (base + bonus for extra samples)
@@ -522,10 +599,14 @@ export class BuildingModelLearner {
     const sampleCoverage = Math.min(baseCoverage + extraSamplesBonus, 1.15);
 
     // Component 2: Parameter certainty (lower covariance = higher certainty)
-    // Trace range: 400 (init) → 100 (converged) → 10-50 (fully learned)
-    // Threshold 500 allows showing confidence from initialization onwards
+    // ADR-057 W1 (referentieproject): normalized on the REAL trace range. P diagonals
+    // are clamped to P_CEILING from the first update, so trace ∈ (TRACE_HEALTHY_MIN, TRACE_MAX]
+    // after any update. Fresh clamped state (trace ≈ TRACE_MAX) → ~0.5,
+    // converged state (trace → 0) → ~1.0. Before the first update (trace 400)
+    // this clamps to 0, which is correct: no information yet.
+    const { TRACE_MAX } = BuildingModelLearner.RLS_COVARIANCE;
     const trace = this.P.reduce((sum, row, i) => sum + row[i], 0);
-    const covarianceConfidence = Math.max(0, 1 - trace / 500);
+    const covarianceConfidence = Math.max(0, Math.min(1, 1 - trace / (2 * TRACE_MAX)));
 
     // Combined confidence, clamped to 0-100%
     const rawConfidence = sampleCoverage * covarianceConfidence * 100;
@@ -576,6 +657,9 @@ export class BuildingModelLearner {
     // Update base P_int for dynamic calculation
     this.basePInt = profile.pInt;
 
+    // ADR-057 W3: new profile = fresh excitation streak (keep lifetime totals)
+    this.consecutiveReverts = 0;
+
     // lastMeasurement intentionally preserved — no gap in data continuity
 
     this.logger(
@@ -596,6 +680,27 @@ export class BuildingModelLearner {
       lastMeasurement: this.lastMeasurement,
       basePInt: this.basePInt,
       enableDynamicPInt: this.enableDynamicPInt,
+      // ADR-057 W3: excitation diagnostics (persisted)
+      consecutiveReverts: this.consecutiveReverts,
+      totalReverts: this.totalReverts,
+      rateLimitActivations: this.rateLimitActivations,
+    };
+  }
+
+  /**
+   * ADR-057 W3 (referentieproject): Excitation diagnostics for getDiagnostics() and insights.
+   * High consecutiveReverts means theta is structurally pinned against physical
+   * bounds — the RLS input carries too little information (poor excitation).
+   */
+  public getExcitationDiagnostics(): {
+    consecutiveReverts: number;
+    totalReverts: number;
+    rateLimitActivations: number;
+    } {
+    return {
+      consecutiveReverts: this.consecutiveReverts,
+      totalReverts: this.totalReverts,
+      rateLimitActivations: this.rateLimitActivations,
     };
   }
 
@@ -609,26 +714,38 @@ export class BuildingModelLearner {
     lastMeasurement: MeasurementData | null;
     basePInt?: number;
     enableDynamicPInt?: boolean;
+    consecutiveReverts?: number;
+    totalReverts?: number;
+    rateLimitActivations?: number;
   }): void {
     // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
     let stateIsValid = true;
     const validationErrors: string[] = [];
 
-    // Validate theta parameters (must be physically possible)
+    // ADR-057 E5 (referentieproject): Validate theta against the SAME physical bounds
+    // as runtime (THETA_BOUNDS) — previously only positivity and τ>1h were checked, so
+    // an out-of-bounds persisted state could re-enter the algorithm via restore.
+    const bounds = BuildingModelLearner.THETA_BOUNDS;
     if (state.theta && state.theta.length === 4) {
-      // θ[0] = 1/C must be positive (C > 0)
-      if (state.theta[0] <= 0) {
-        validationErrors.push(`θ[0]=${state.theta[0]} (must be positive, represents 1/C)`);
+      if (state.theta[0] < bounds.theta0_min || state.theta[0] > bounds.theta0_max) {
+        validationErrors.push(`θ[0]=${state.theta[0]} outside [${bounds.theta0_min.toFixed(6)}, ${bounds.theta0_max.toFixed(6)}] (1/C)`);
         stateIsValid = false;
       }
-      // θ[1] = UA/C must be positive (UA > 0)
-      if (state.theta[1] <= 0) {
-        validationErrors.push(`θ[1]=${state.theta[1]} (must be positive, represents UA/C)`);
+      if (state.theta[1] < bounds.theta1_min || state.theta[1] > bounds.theta1_max) {
+        validationErrors.push(`θ[1]=${state.theta[1]} outside [${bounds.theta1_min.toFixed(6)}, ${bounds.theta1_max.toFixed(6)}] (UA/C)`);
         stateIsValid = false;
       }
-      // θ[1] must be smaller than θ[0] (otherwise tau < 1 hour, unrealistic)
-      if (state.theta[1] >= state.theta[0]) {
-        validationErrors.push(`θ[1]=${state.theta[1]} >= θ[0]=${state.theta[0]} (would give tau < 1h)`);
+      if (state.theta[2] < bounds.g_c_min || state.theta[2] > bounds.g_c_max) {
+        validationErrors.push(`θ[2]=${state.theta[2]} outside [${bounds.g_c_min.toFixed(6)}, ${bounds.g_c_max.toFixed(6)}] (g/C)`);
+        stateIsValid = false;
+      }
+      if (state.theta[3] < bounds.pint_c_min || state.theta[3] > bounds.pint_c_max) {
+        validationErrors.push(`θ[3]=${state.theta[3]} outside [${bounds.pint_c_min.toFixed(6)}, ${bounds.pint_c_max.toFixed(6)}] (P_int/C)`);
+        stateIsValid = false;
+      }
+      const ratio = state.theta[0] > 0 ? state.theta[1] / state.theta[0] : -1;
+      if (ratio < bounds.theta1_theta0_ratio_min || ratio > bounds.theta1_theta0_ratio_max) {
+        validationErrors.push(`θ[1]/θ[0]=${ratio.toFixed(6)} outside [${bounds.theta1_theta0_ratio_min}, ${bounds.theta1_theta0_ratio_max}] (τ range)`);
         stateIsValid = false;
       }
     } else {
@@ -636,12 +753,15 @@ export class BuildingModelLearner {
       stateIsValid = false;
     }
 
-    // Validate P matrix (covariance matrix trace should be reasonable)
+    // Validate P matrix trace against the real covariance range (ADR-057 W1, referentieproject).
+    // A state from BEFORE the first update has trace up to 4×INITIAL; any state
+    // after an update has trace ≤ TRACE_MAX. Both are valid — corruption shows
+    // as negative or absurdly high values.
+    const { INITIAL } = BuildingModelLearner.RLS_COVARIANCE;
     if (state.P && state.P.length === 4 && state.P[0].length === 4) {
       const pTrace = state.P.reduce((sum, row, i) => sum + row[i], 0);
-      // Abnormally high trace indicates corruption (healthy range: 10-400)
-      if (pTrace > 400 || pTrace < 0) {
-        validationErrors.push(`P matrix trace=${pTrace.toFixed(1)} (healthy: 10-400)`);
+      if (pTrace > 4 * INITIAL || pTrace <= 0) {
+        validationErrors.push(`P matrix trace=${pTrace.toFixed(1)} (valid: 0 < trace ≤ ${4 * INITIAL})`);
         stateIsValid = false;
       }
     } else {
@@ -673,6 +793,10 @@ export class BuildingModelLearner {
     // Restore configuration (with defaults for backward compatibility)
     this.basePInt = state.basePInt ?? 0.3;
     this.enableDynamicPInt = state.enableDynamicPInt ?? false;
+    // ADR-057 W3: restore excitation counters (default 0 for pre-existing states)
+    this.consecutiveReverts = state.consecutiveReverts ?? 0;
+    this.totalReverts = state.totalReverts ?? 0;
+    this.rateLimitActivations = state.rateLimitActivations ?? 0;
     this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
   }
 

@@ -1,4 +1,10 @@
 {
+  "2.13.0": {
+    "en": "Building model learning now skips samples during hot water production, defrost and data gaps. The model confidence percentage has been recalibrated and may differ slightly after this update. Temperature recommendations now include small contributions from efficiency and price optimization. Learned building model data is now saved after every sample.",
+    "nl": "Gebouwmodel-leren slaat nu samples over tijdens warmwaterproductie, ontdooien en datagaten. Het betrouwbaarheidspercentage van het gebouwmodel is herijkt en kan na deze update iets afwijken. Temperatuuradviezen bevatten nu ook kleine bijdragen van efficiëntie- en prijsoptimalisatie. Geleerde gebouwmodel-gegevens worden nu na elke meting opgeslagen.",
+    "de": "Das Gebäudemodell-Lernen überspringt jetzt Messungen während Warmwasserbereitung, Abtauung und Datenlücken. Der Vertrauenswert des Gebäudemodells wurde neu kalibriert und kann nach diesem Update leicht abweichen. Temperaturempfehlungen enthalten jetzt auch kleine Beiträge der Effizienz- und Preisoptimierung. Gelernte Gebäudemodell-Daten werden jetzt nach jeder Messung gespeichert.",
+    "fr": "L'apprentissage du modèle de bâtiment ignore désormais les mesures pendant la production d'eau chaude, le dégivrage et les interruptions de données. Le pourcentage de confiance du modèle a été recalibré et peut légèrement différer après cette mise à jour. Les recommandations de température incluent désormais de petites contributions de l'optimisation de l'efficacité et des prix. Les données apprises du modèle de bâtiment sont désormais enregistrées après chaque mesure."
+  },
   "2.12.1": {
     "en": "Security patch applied.",
     "nl": "Beveiligingspatch toegepast.",

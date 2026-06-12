@@ -78,6 +78,9 @@
     "blocked_no_outdoor_temp": "Geen buitentemp",
     "blocked_no_power": "Geen vermogen",
     "blocked_disabled": "Uitgeschakeld",
+    "blocked_dhw_mode": "Niet in verwarmingsmodus",
+    "blocked_defrost": "Ontdooien actief",
+    "blocked_no_cop": "Geen COP-meting",
     "period_night": "Nacht",
     "period_day": "Dag",
     "period_evening": "Avond"

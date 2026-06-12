@@ -346,6 +346,11 @@ The PI controller is a **feedback control system** that minimizes error over tim
 - **costMultiplier precedent** - Energy price component uses dynamic multiplier for peak pricing
 - **Backwards-compatible** - When `coastAction = null`, behavior is identical to pre-coast implementation
 
+**Documented Coast Behaviors (ADR-058, not bugs)**:
+
+- **Cold-start fail-safe**: with fewer than 3 indoor temperature samples (first 15 minutes after service start), the rising-trend check returns `true`, so coast can activate on the magnitude criterion alone. This is intentional ("fail towards less heating"); a false-positive activation is cleaned up by the soft exit within 15 minutes once trend data is available.
+- **Watchdog re-activation**: a watchdog exit (2 hours of coast) resets all counters; if the room is still above `target + hysteresis` and not falling, coast re-activates after 2 confirmation cycles. Repeated watchdog exits (≥2 consecutive) are logged as a warning — this pattern indicates an external heat source (sun, wood stove) that coast cannot compensate.
+
 **Public Interface**:
 
 ```typescript

@@ -78,6 +78,9 @@
     "blocked_no_outdoor_temp": "Pas de temp ext",
     "blocked_no_power": "Pas de puissance",
     "blocked_disabled": "Désactivé",
+    "blocked_dhw_mode": "Pas en mode chauffage",
+    "blocked_defrost": "Dégivrage actif",
+    "blocked_no_cop": "Pas de mesure COP",
     "period_night": "Nuit",
     "period_day": "Jour",
     "period_evening": "Soir"
