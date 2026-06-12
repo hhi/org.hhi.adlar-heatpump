@@ -78,6 +78,9 @@
     "blocked_no_outdoor_temp": "No outdoor temp",
     "blocked_no_power": "No power data",
     "blocked_disabled": "Disabled",
+    "blocked_dhw_mode": "Not in heating mode",
+    "blocked_defrost": "Defrost active",
+    "blocked_no_cop": "No COP measurement",
     "period_night": "Night",
     "period_day": "Day",
     "period_evening": "Evening"

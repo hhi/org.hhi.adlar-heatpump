@@ -96,6 +96,9 @@ export class AdaptiveControlService {
   private _coastActive = false;
   private _cooldownCycleCount = 0;
   private _coastCycleCount = 0; // ADR-047: watchdog-teller (cycli dat coast actief is)
+  // ADR-058 R1: opeenvolgende watchdog-exits — ≥2 duidt op een externe warmtebron
+  // (zon, houtkachel) waar coast niet tegenop kan; gereset bij harde/zachte exit
+  private _consecutiveWatchdogExits = 0;
   private _indoorTempHistory: number[] = [];
   private static readonly TREND_WINDOW_SIZE = 3; // 3 measurements × 5 min = 15 min window
   private _outletTempHistory: number[] = []; // ADR-040B: leading indicator voor coast-modulatie
@@ -107,13 +110,15 @@ export class AdaptiveControlService {
   // Control loop state
   private controlLoopInterval: NodeJS.Timeout | null = null;
   private isEnabled = false;
-  private isSimulateMode = true; // Always true - simulates adjustments, user executes via flows (v2.5.0: implicit, no setting)
   private simulatedTargetTemp: number | null = null; // Simulated target temp (tracked for Insights)
   private lastControlCycleTime: number = 0;
-  private lastAdjustmentTime: number = 0; // Last time target_temperature was adjusted (throttling)
   private controlIntervalMs: number = 5 * 60 * 1000; // 5 minutes default
-  private accumulatedAdjustment: number = 0; // Accumulates fractional adjustments until ≥0.5°C (for step:1 rounding)
+  private accumulatedAdjustment: number = 0; // ADR-059 W1: accumulates fractional adjustments across cycles (settled when user flow applies)
+  private lastObservedSetpoint: number | null = null; // ADR-059 W1: DPS 4 at previous cycle, for settlement-on-observation
   private lastRecommendedTemp: number | undefined = undefined; // Change detection for temperature_adjustment_recommended
+  // ADR-059 W1: accumulator bounds — a user who structurally ignores recommendations
+  // must not cause unbounded build-up
+  private static readonly ACCUMULATOR_CLAMP = 2.0; // ±°C
 
   // Energy price tracking (for change detection and flow card triggers)
   private lastPriceCategory: string | null = null; // Track category changes
@@ -127,8 +132,6 @@ export class AdaptiveControlService {
 
   // Persistence keys
   private readonly STORE_KEY_PI_HISTORY = 'adaptive_pi_history';
-  private readonly STORE_KEY_LAST_ACTION = 'adaptive_last_action';
-  private readonly STORE_KEY_LAST_ADJUSTMENT = 'adaptive_last_adjustment_time';
   private readonly STORE_KEY_ENABLED = 'adaptive_control_enabled';
   private readonly STORE_KEY_ACCUMULATED_ADJUSTMENT = 'adaptive_accumulated_adjustment';
   private readonly STORE_KEY_LAST_DPS4 = 'adaptive_last_dps4'; // v2.5.1: Store last known DPS 4 for capability sync
@@ -295,23 +298,24 @@ export class AdaptiveControlService {
         }
       }
 
-      // Restore last adjustment timestamp (for throttling)
-      const savedLastAdjustment = await this.device.getStoreValue(this.STORE_KEY_LAST_ADJUSTMENT);
-      if (typeof savedLastAdjustment === 'number' && savedLastAdjustment > 0) {
-        this.lastAdjustmentTime = savedLastAdjustment;
-        const minutesSinceAdjustment = Math.round((Date.now() - savedLastAdjustment) / 60000);
-        this.logger('AdaptiveControlService: Restored last adjustment time', {
-          minutesAgo: minutesSinceAdjustment,
-        });
-      }
-
-      // Restore accumulated adjustment (for step:1 rounding continuity)
-      const savedAccumulated = await this.device.getStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT);
-      if (typeof savedAccumulated === 'number') {
-        this.accumulatedAdjustment = savedAccumulated;
-        this.logger('AdaptiveControlService: Restored accumulated adjustment', {
-          accumulated: this.accumulatedAdjustment.toFixed(2),
-        });
+      // ADR-059 W1: One-time migration — before v2.13.0 the accumulator was restored
+      // but never settled (the decrement lived in dead code), so a stale persisted
+      // value permanently biased every recommendation. Reset once, then restore normally.
+      const accumulatorMigrated = await this.device.getStoreValue('adaptive_accumulator_v213_reset');
+      if (!accumulatorMigrated) {
+        this.accumulatedAdjustment = 0;
+        await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, 0);
+        await this.device.setStoreValue('adaptive_accumulator_v213_reset', true);
+        this.logger('AdaptiveControlService: Accumulator reset (one-time v2.13.0 migration, clears pre-existing bias)');
+      } else {
+        // Restore accumulated adjustment (continuity across restarts)
+        const savedAccumulated = await this.device.getStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT);
+        if (typeof savedAccumulated === 'number') {
+          this.accumulatedAdjustment = savedAccumulated;
+          this.logger('AdaptiveControlService: Restored accumulated adjustment', {
+            accumulated: this.accumulatedAdjustment.toFixed(2),
+          });
+        }
       }
 
       // Restore PI controller history from device store
@@ -501,6 +505,7 @@ export class AdaptiveControlService {
     this._coastActive = false;
     this._cooldownCycleCount = 0;
     this._coastCycleCount = 0; // ADR-047: reset watchdog-teller
+    this._consecutiveWatchdogExits = 0; // ADR-058 R1
     this._indoorTempHistory = [];
     this._outletTempHistory = []; // ADR-040B: reset outlet trend history
     this.logger('AdaptiveControlService: Coast-state gereset bij stop (incl. ADR-047 watchdog-teller)');
@@ -623,12 +628,16 @@ export class AdaptiveControlService {
    *
    * @returns adj en outletTemp (null bij geen data)
    */
-  private _computeCoastAdjustment(currentSetpoint: number): { adj: number; outletTemp: number | null } {
+  private _computeCoastAdjustment(currentSetpoint: number): {
+    adj: number; outletTemp: number | null; dropRateMultiplier: number; outletDropRate: number;
+  } {
     const outletTemp = this.device.getCapabilityValue('measure_temperature.temp_bottom') as number | null;
 
     if (outletTemp === null) {
       this.logger('AdaptiveControlService: Geen uitlaattemperatuur — coastAdj = 0 (null-contract ADR-047)');
-      return { adj: 0, outletTemp: null };
+      return {
+        adj: 0, outletTemp: null, dropRateMultiplier: 1.0, outletDropRate: 0,
+      };
     }
 
     // ADR-040B: Record outlet temp voor leading indicator berekening (altijd, ook buiten coast-actief)
@@ -647,12 +656,16 @@ export class AdaptiveControlService {
     // Snel dalend (outletDropRate << 0): installatie reageert goed → verminder coast druk.
     // Traag dalend / stabiel (outletDropRate ≈ 0): installatie reageert traag → volledige correctie.
     // Minimum multiplier 0.3: coast blijft altijd minimaal aanwezig bij negatieve rawAdjustment.
+    // ADR-058 R3: enige plek waar de multiplier wordt berekend — _buildCoastAction
+    // ontvangt hem als parameter zodat reason-string en toegepaste waarde altijd matchen
     const outletDropRate = this._calculateOutletDropRate(); // °C/cyclus, negatief = dalend
     const dropRateMultiplier = outletDropRate < 0
       ? Math.max(0.3, 1.0 + outletDropRate * 0.5)
       : 1.0;
 
-    return { adj: clampedAdjustment * dropRateMultiplier, outletTemp };
+    return {
+      adj: clampedAdjustment * dropRateMultiplier, outletTemp, dropRateMultiplier, outletDropRate,
+    };
   }
 
   /**
@@ -674,13 +687,14 @@ export class AdaptiveControlService {
    * Builds a CoastAction from a pre-computed adjustment (ADR-047: computed before exit checks).
    * outletTemp is passed for the reason string only — no side effects.
    */
-  private _buildCoastAction(coastAdj: number, outletTemp: number, currentSetpoint: number): CoastAction {
+  private _buildCoastAction(
+    coastAdj: number,
+    outletTemp: number,
+    dropRateMultiplier: number,
+    outletDropRate: number,
+  ): CoastAction {
     const offset = (this.device.getSetting('adaptive_cooldown_offset') as number | null) ?? 1.0;
     const strength = (this.device.getSetting('adaptive_cooldown_strength') as number | null) ?? 0.80;
-    const outletDropRate = this._calculateOutletDropRate();
-    const dropRateMultiplier = outletDropRate < 0
-      ? Math.max(0.3, 1.0 + outletDropRate * 0.5)
-      : 1.0;
 
     return {
       adjustment: coastAdj,
@@ -743,11 +757,40 @@ export class AdaptiveControlService {
         return;
       }
 
+      // ADR-059 W1: Settlement-on-observation — when DPS 4 moved towards our last
+      // recommendation since the previous cycle, the user flow has applied it and
+      // the applied delta is settled against the accumulator. Changes that do NOT
+      // land near the recommendation (within 1°C) are treated as manual and left alone.
+      if (this.lastObservedSetpoint !== null && currentSetpoint !== this.lastObservedSetpoint) {
+        const appliedDelta = currentSetpoint - this.lastObservedSetpoint;
+        const matchesRecommendation = this.lastRecommendedTemp !== undefined
+          && Math.abs(currentSetpoint - this.lastRecommendedTemp) <= 1.0;
+        if (matchesRecommendation) {
+          this.accumulatedAdjustment -= appliedDelta;
+          await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
+          this.logger('AdaptiveControlService: Recommendation applied — accumulator settled', {
+            appliedDelta,
+            remainingAccumulated: this.accumulatedAdjustment.toFixed(2),
+          });
+        } else {
+          this.logger('AdaptiveControlService: Manual setpoint change detected — accumulator untouched', {
+            from: this.lastObservedSetpoint,
+            to: currentSetpoint,
+          });
+        }
+      }
+      this.lastObservedSetpoint = currentSetpoint;
+
       // ADR-024: Record indoor temp in sliding window (always, not just in cooldown)
       this._recordIndoorTemp(indoorTemp);
 
       // ADR-047: Stap 2 — Compute coastAdj vóór exit-checks (zachte exit heeft coastAdj nodig)
-      const { adj: coastAdj, outletTemp: outletTempForCoast } = this._computeCoastAdjustment(currentSetpoint);
+      const {
+        adj: coastAdj,
+        outletTemp: outletTempForCoast,
+        dropRateMultiplier: coastDropMultiplier,
+        outletDropRate: coastDropRate,
+      } = this._computeCoastAdjustment(currentSetpoint);
 
       // ADR-047: Stap 3 — Harde exit (bestaand)
       if (this._coastActive && this._isCooldownExitCondition(indoorTemp, desiredIndoorTemp)) {
@@ -755,6 +798,7 @@ export class AdaptiveControlService {
         this._coastActive = false;
         this._cooldownCycleCount = 0;
         this._coastCycleCount = 0;
+        this._consecutiveWatchdogExits = 0; // ADR-058 R1: reguliere exit doorbreekt het watchdog-patroon
         this.logger(
           `AdaptiveControl: 🌡️ EXIT-hard — Tist ${indoorTemp.toFixed(1)}°C onder drempel, PI-integraalterm gereset`,
         );
@@ -766,6 +810,7 @@ export class AdaptiveControlService {
         this._coastActive = false;
         this._cooldownCycleCount = 0;
         this._coastCycleCount = 0;
+        this._consecutiveWatchdogExits = 0; // ADR-058 R1: reguliere exit doorbreekt het watchdog-patroon
         this.logger(
           `AdaptiveControl: 🌿 EXIT-zacht — kamer daalt, coastAdj=${coastAdj.toFixed(2)}°C verwaarloosbaar, PI hervat`,
         );
@@ -777,10 +822,19 @@ export class AdaptiveControlService {
         this._coastActive = false;
         this._cooldownCycleCount = 0;
         this._coastCycleCount = 0;
+        this._consecutiveWatchdogExits++;
         this.logger(
           `AdaptiveControl: ⏱️ EXIT-watchdog — coast actief voor ${AdaptiveControlService.COAST_MAX_CYCLES} cycli `
           + `(${AdaptiveControlService.COAST_MAX_CYCLES * 5} min), PI hervat`,
         );
+        // ADR-058 R1: herhaalde watchdog-exits = coast kan de warmte niet wegwerken;
+        // duidt op een externe warmtebron (zon, houtkachel) — geen coast-bug
+        if (this._consecutiveWatchdogExits >= 2) {
+          this.logger(
+            `AdaptiveControl: ⚠️ WARN — ${this._consecutiveWatchdogExits} opeenvolgende watchdog-exits; `
+            + 'vermoedelijk externe warmtebron (zon/houtkachel), coast kan dit niet compenseren',
+          );
+        }
       }
 
       // ADR-047: Stap 6 — Activatie NA alle exits (exit in deze cyclus blokkeert heractivatie)
@@ -916,7 +970,11 @@ export class AdaptiveControlService {
           outdoorTemp: outdoorTempForThermal,
         });
 
-        // Step 5D: Calculate wind correction (5th component, v2.7.0+)
+        // Step 5D: Calculate wind correction (v2.7.0+)
+        // ADR-059 W3: no longer added to thermalAction — wind correction is a
+        // physical compensation for wind-driven heat loss, not an optimization
+        // preference, so it must not be scaled (or silently zeroed) by building
+        // model confidence. Applied as an unweighted additive term after weighting.
         if (this.device.getSetting('wind_correction_enabled')) {
           const windResult = this.windCorrection.calculateCorrection(indoorTemp, outdoorTempForThermal);
           windCorrectionValue = windResult.correction;
@@ -927,7 +985,6 @@ export class AdaptiveControlService {
               + `(wind: ${windResult.windSpeed} km/h, ΔT: ${windResult.deltaT.toFixed(1)}°C, `
               + `α: ${windResult.alpha.toFixed(4)} [${windResult.alphaSource}]${windResult.capped ? ' CAPPED' : ''})`,
             );
-            thermalAction.adjustment += windCorrectionValue;
           }
         }
       } catch (error) {
@@ -939,7 +996,7 @@ export class AdaptiveControlService {
       // ADR-024/ADR-047: Build coast action (null when coast is inactive — backwards-compatible)
       // coastAdj en outletTempForCoast zijn berekend in stap 2 (vóór exit-checks)
       const coastAction = (this._coastActive && outletTempForCoast !== null)
-        ? this._buildCoastAction(coastAdj, outletTempForCoast, currentSetpoint)
+        ? this._buildCoastAction(coastAdj, outletTempForCoast, coastDropMultiplier, coastDropRate)
         : null;
       if (coastAction) {
         this.logger(
@@ -956,6 +1013,14 @@ export class AdaptiveControlService {
         confidenceMetrics,
         coastAction,
       );
+
+      // ADR-059 W3: Wind correction as unweighted additive term — independent of
+      // building model confidence and the weight normalization above
+      if (windCorrectionValue > 0) {
+        combinedAction.finalAdjustment += windCorrectionValue;
+        combinedAction.breakdown.wind = windCorrectionValue;
+        combinedAction.reasoning.push(`Wind (additive): +${windCorrectionValue.toFixed(2)}°C compensation for wind-driven heat loss`);
+      }
 
       // Log effective weights (confidence-adjusted)
       if (combinedAction.effectiveWeights) {
@@ -974,10 +1039,26 @@ export class AdaptiveControlService {
         + `Efficiency=${combinedAction.breakdown.efficiency.toFixed(2)}°C, `
         + `Cost=${combinedAction.breakdown.cost.toFixed(2)}°C, `
         + `Thermal=${(combinedAction.breakdown.thermal || 0).toFixed(2)}°C, `
-        + `Coast=${(combinedAction.breakdown.coast || 0).toFixed(2)}°C`,
+        + `Coast=${(combinedAction.breakdown.coast || 0).toFixed(2)}°C, `
+        + `Wind=${(combinedAction.breakdown.wind || 0).toFixed(2)}°C`,
       );
       this.logger(`Final Adjustment: ${combinedAction.finalAdjustment.toFixed(2)}°C (${combinedAction.priority} priority)`);
       combinedAction.reasoning.forEach((reason) => this.logger(`  - ${reason}`));
+
+      // ADR-059 W1: Accrue this cycle's fractional adjustment into the accumulator.
+      // Small contributions (COP/price/thermal at ~±0.1°C) now build up across
+      // cycles instead of vanishing in per-cycle rounding. Clamped so ignored
+      // recommendations cannot cause unbounded build-up.
+      this.accumulatedAdjustment += combinedAction.finalAdjustment;
+      this.accumulatedAdjustment = Math.max(
+        -AdaptiveControlService.ACCUMULATOR_CLAMP,
+        Math.min(AdaptiveControlService.ACCUMULATOR_CLAMP, this.accumulatedAdjustment),
+      );
+      await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
+      this.logger('AdaptiveControlService: Accumulator updated', {
+        cycleAdjustment: combinedAction.finalAdjustment.toFixed(2),
+        accumulated: this.accumulatedAdjustment.toFixed(2),
+      });
 
       // Step 6.5: Update diagnostic capability with weighted decision breakdown
       await this.updateDiagnosticsCapability(combinedAction);
@@ -991,8 +1072,8 @@ export class AdaptiveControlService {
       );
 
       // Step 7: Change detection — trigger only when recommendation changes or PI sees comfort deviation
-      // Calculate recommended setpoint BEFORE the check so we can compare with lastRecommendedTemp
-      const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
+      // ADR-059 W1: finalAdjustment is already accrued above — recommendation is round(accumulator)
+      const integerAdjustment = Math.round(this.accumulatedAdjustment);
       const recommendedTemp = Math.max(
         this._getMinSetpoint(),
         Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
@@ -1055,149 +1136,6 @@ export class AdaptiveControlService {
         error: (error as Error).message,
       });
     }
-  }
-
-  /**
-   * Apply temperature adjustment to warmtepomp setpoint (CASCADE CONTROL)
-   *
-   * The PI controller calculates a delta based on indoor temperature error,
-   * and this delta is applied to the current warmtepomp setpoint (DPS 4).
-   *
-   * @param currentSetpoint - Current warmtepomp setpoint (simulated or actual DPS 4)
-   * @param combinedAction - Combined action from weighted decision maker
-   */
-  private async applyTemperatureAdjustment(
-    currentSetpoint: number,
-    combinedAction: CombinedAction,
-  ): Promise<void> {
-    // Accumulate fractional adjustment (for step:1 rounding)
-    this.accumulatedAdjustment += combinedAction.finalAdjustment;
-
-    this.logger('AdaptiveControlService: Combined adjustment calculated', {
-      combinedAdjustment: combinedAction.finalAdjustment.toFixed(2),
-      accumulatedTotal: this.accumulatedAdjustment.toFixed(2),
-      reasoning: combinedAction.reasoning.join('; '),
-    });
-
-    // Round accumulated adjustment to nearest integer (step:1 requirement)
-    const integerAdjustment = Math.round(this.accumulatedAdjustment);
-
-    // Only apply if rounded adjustment is non-zero
-    if (integerAdjustment === 0) {
-      this.logger('AdaptiveControlService: Accumulating adjustment (waiting for ≥0.5°C)', {
-        accumulated: this.accumulatedAdjustment.toFixed(2),
-        needMore: (0.5 - Math.abs(this.accumulatedAdjustment)).toFixed(2),
-      });
-
-      // Persist accumulator even when not applying
-      await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
-      this.lastControlCycleTime = Date.now();
-      return;
-    }
-
-    // Throttling check - minimum 20 minutes between actual adjustments
-    const timeSinceLastAdjustment = Date.now() - this.lastAdjustmentTime;
-    const minWaitTime = DeviceConstants.ADAPTIVE_MIN_WAIT_BETWEEN_ADJUSTMENTS_MS;
-
-    if (this.lastAdjustmentTime > 0 && timeSinceLastAdjustment < minWaitTime) {
-      const minutesRemaining = Math.ceil((minWaitTime - timeSinceLastAdjustment) / 60000);
-      this.logger('AdaptiveControlService: Adjustment throttled (anti-oscillation)', {
-        minutesSinceLastAdjustment: Math.round(timeSinceLastAdjustment / 60000),
-        minutesUntilNextAllowed: minutesRemaining,
-        integerAdjustment,
-        accumulated: this.accumulatedAdjustment.toFixed(2),
-      });
-      this.lastControlCycleTime = Date.now();
-      return;
-    }
-
-    // Calculate new warmtepomp setpoint with integer adjustment (cascade control)
-    const newSetpoint = currentSetpoint + integerAdjustment;
-
-    // Safety: clamp warmtepomp setpoint to realistic range (25-65°C for floor heating/radiators)
-    const clampedSetpoint = Math.max(
-      this._getMinSetpoint(),
-      Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, newSetpoint),
-    );
-
-    // Calculate actual applied adjustment (may differ if clamped)
-    const actualAdjustment = clampedSetpoint - currentSetpoint;
-
-    this.logger('AdaptiveControlService: Applying warmtepomp setpoint adjustment (CASCADE CONTROL)', {
-      mode: this.isSimulateMode ? 'SIMULATE' : 'ACTIVE',
-      currentSetpoint,
-      delta: integerAdjustment,
-      actualDelta: actualAdjustment,
-      newSetpoint: clampedSetpoint,
-      accumulated: this.accumulatedAdjustment.toFixed(2),
-      reasoning: combinedAction.reasoning.join('; '),
-      priority: combinedAction.priority,
-    });
-
-    if (this.isSimulateMode) {
-      // SIMULATE MODE: Update internal simulated warmtepomp setpoint AND capability
-      this.simulatedTargetTemp = clampedSetpoint;
-
-      // Update capability for Insights
-      if (this.device.hasCapability('adlar_simulated_target')) {
-        await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
-      }
-
-      // Get actual warmtepomp setpoint (DPS 4) for delta calculation
-      const actualSetpoint = this.device.getCapabilityValue('target_temperature') as number;
-      const delta = this.simulatedTargetTemp - actualSetpoint;
-
-      this.logger('Simulated warmtepomp setpoint updated', {
-        simulated: this.simulatedTargetTemp.toFixed(1),
-        actual: actualSetpoint.toFixed(1),
-        delta: delta.toFixed(1),
-      });
-
-      // Trigger simulation flow card
-      await this.device.homey.flow
-        .getDeviceTriggerCard('adaptive_simulation_update')
-        .trigger(this.device, {
-          simulated_target: this.simulatedTargetTemp,
-          actual_target: actualSetpoint,
-          delta,
-          adjustment: actualAdjustment,
-          comfort_component: combinedAction.breakdown.comfort,
-          efficiency_component: combinedAction.breakdown.efficiency,
-          cost_component: combinedAction.breakdown.cost,
-          reasoning: combinedAction.reasoning.join('; '),
-        })
-        .catch((err) => this.logger('Failed to trigger simulation card:', err));
-
-    } else {
-      // ACTIVE MODE: Write to actual warmtepomp setpoint (DPS 4)
-      await this.device.setCapabilityValue('target_temperature', clampedSetpoint);
-    }
-
-    // Subtract applied adjustment from accumulator
-    this.accumulatedAdjustment -= actualAdjustment;
-
-    this.logger('AdaptiveControlService: Accumulator updated after application', {
-      appliedAdjustment: actualAdjustment,
-      remainingAccumulated: this.accumulatedAdjustment.toFixed(2),
-    });
-
-    // Save state for all components
-    await this.savePIHistory();
-    await this.device.setStoreValue(this.STORE_KEY_LAST_ACTION, Date.now());
-    await this.device.setStoreValue(this.STORE_KEY_ACCUMULATED_ADJUSTMENT, this.accumulatedAdjustment);
-
-    // Persist optimizer states
-    await this.device.setStoreValue('energy_optimizer_state', this.energyOptimizer.getState());
-    await this.device.setStoreValue('cop_optimizer_state', this.copOptimizer.getState());
-    await this.device.setStoreValue('defrost_learning_state', this.defrostLearner.getState());
-
-    // Update and persist last adjustment timestamp (throttling)
-    this.lastAdjustmentTime = Date.now();
-    await this.device.setStoreValue(this.STORE_KEY_LAST_ADJUSTMENT, this.lastAdjustmentTime);
-
-    this.lastControlCycleTime = Date.now();
-
-    this.logger('AdaptiveControlService: Temperature adjustment applied successfully');
   }
 
   /**
@@ -1300,7 +1238,8 @@ export class AdaptiveControlService {
   ): Promise<void> {
     try {
       // Calculate simulated target (what the system recommends)
-      const integerAdjustment = Math.round(this.accumulatedAdjustment + combinedAction.finalAdjustment);
+      // ADR-059 W1: finalAdjustment is already accrued into the accumulator
+      const integerAdjustment = Math.round(this.accumulatedAdjustment);
       const simulatedTarget = Math.max(
         this._getMinSetpoint(),
         Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
@@ -1736,7 +1675,7 @@ export class AdaptiveControlService {
 
     // Handle PI parameter changes (Expert Mode)
     if (changedKeys.includes('adaptive_pi_kp') || changedKeys.includes('adaptive_pi_ki') || changedKeys.includes('adaptive_pi_deadband')) {
-      const Kp = newSettings.adaptive_pi_kp as number || 3.0;
+      const Kp = newSettings.adaptive_pi_kp as number || 5.0; // ADR-059 W2: default recalibrated for fixed comfort anchor
       const Ki = newSettings.adaptive_pi_ki as number || 1.5;
       const deadband = newSettings.adaptive_pi_deadband as number || 0.3;
       this.updatePIParameters(Kp, Ki, deadband);

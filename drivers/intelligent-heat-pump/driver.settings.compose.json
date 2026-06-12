@@ -752,7 +752,7 @@
           "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 3.0",
           "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 3.0"
         },
-        "value": 3.0,
+        "value": 5.0,
         "min": 0.5,
         "max": 10.0,
         "step": 0.1

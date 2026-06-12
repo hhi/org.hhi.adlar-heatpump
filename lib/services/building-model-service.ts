@@ -14,6 +14,7 @@
 import Homey from 'homey';
 import {
   BuildingModelLearner,
+  getDynamicPInt,
   type BuildingModelConfig,
   type MeasurementData,
   type BuildingProfileType,
@@ -103,10 +104,29 @@ export class BuildingModelService {
     this.logger('BuildingModelService: Initializing...');
 
     // Restore state from device store
+    // ADR-061: log explicitly which of the three restore outcomes occurred —
+    // absent / restored (with count + confidence) / rejected (learner logs why)
     const storedState = await this.device.getStoreValue('building_model_state');
     if (storedState) {
+      const sampleCountBefore = (storedState.sampleCount as number) ?? 0;
       this.learner.restoreState(storedState);
-      this.logger('BuildingModelService: Restored state from storage');
+      const restored = this.learner.getState();
+      if (restored.sampleCount === sampleCountBefore) {
+        const model = this.learner.getModel();
+        this.logger(
+          `BuildingModelService: ✅ State RESTORED from store — ${restored.sampleCount} samples, `
+          + `confidence ${model.confidence.toFixed(0)}%, C=${model.C.toFixed(1)} kWh/°C, τ=${model.tau.toFixed(1)}h`,
+        );
+      } else {
+        // restoreState() rejected the persisted state and reset to defaults;
+        // the learner already logged the specific validation errors
+        this.logger(
+          `BuildingModelService: ⚠️ State REJECTED on restore (was ${sampleCountBefore} samples) — `
+          + 'learning restarts from profile defaults, see learner validation log above',
+        );
+      }
+    } else {
+      this.logger('BuildingModelService: ℹ️ No persisted state found — fresh start from profile defaults');
     }
 
     // Update capabilities with current model
@@ -172,6 +192,32 @@ export class BuildingModelService {
       }
       this.logger(`BuildingModelService: ✅ Outdoor temp OK: ${outdoorTemp.toFixed(1)}°C`);
 
+      // ADR-057 W2b: Mode gate — in pure DHW or cooling modes the thermal power
+      // does not heat the building, so the sample would bias C/UA.
+      // Limitation: in combined modes (heating_and_hot_water etc.) DPS 2 is the
+      // CONFIGURED mode, not the current operation — DHW cycles within combined
+      // modes cannot be detected and are accepted as model noise.
+      const heatingMode = this.device.getCapabilityValue('adlar_enum_mode') as string | null;
+      const nonHeatingModes = ['hot_water', 'cold', 'cold_and_hotwater'];
+      if (heatingMode !== null && nonHeatingModes.includes(heatingMode)) {
+        this.lastBlockingReason = `Not in heating mode (current: ${heatingMode})`;
+        this.lastBlockingReasonKey = 'building_model.blocked_dhw_mode';
+        this.logger(`BuildingModelService: ⏭️ EXIT - Mode '${heatingMode}' does not heat the building, skipping`);
+        await this.updateModelCapabilities(); // Update UI to show blocked status
+        return;
+      }
+
+      // ADR-057 W2b: Defrost gate — during defrost the machine EXTRACTS heat
+      // from the system; the sample would be inverted relative to the model.
+      const defrostActive = this.device.getCapabilityValue('adlar_state_defrost_state') as boolean | null;
+      if (defrostActive === true) {
+        this.lastBlockingReason = 'Defrost cycle active';
+        this.lastBlockingReasonKey = 'building_model.blocked_defrost';
+        this.logger('BuildingModelService: ⏭️ EXIT - Defrost active, skipping sample');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
+        return;
+      }
+
       // Get electrical power consumption
       // FIX: Use EnergyTrackingService to get the best available power measurement (internal or external)
       // This solves the issue where measure_power is 0 or unavailable (causing phantom high Tau values)
@@ -190,12 +236,15 @@ export class BuildingModelService {
       }
       powerElectric = powerMeasurement.value;
 
-      // Calculate thermal power using COP estimation
-      const cop = (this.device.getCapabilityValue('adlar_cop') as number) || 3.0;
-
-      // Skip sample if COP=0 with active power: indicates sensor inconsistency
-      if (cop <= 0 && powerElectric > 0) {
-        this.logger('BuildingModelService: ⚠️ Skipping sample — COP=0 with active power (sensor inconsistency)');
+      // ADR-057 W2b: COP gate — thermal power = electric × COP, so any COP error
+      // propagates 1:1 into C and UA. The old fallback of 3.0 is removed from the
+      // LEARNING path (it remains acceptable for control in calculateThermalAdjustment).
+      const cop = this.device.getCapabilityValue('adlar_cop') as number | null;
+      if (cop === null || cop <= 0) {
+        this.lastBlockingReason = 'No valid COP measurement (required for thermal power)';
+        this.lastBlockingReasonKey = 'building_model.blocked_no_cop';
+        this.logger('BuildingModelService: ⏭️ EXIT - No valid COP, skipping sample (no fallback in learning path)');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
         return;
       }
 
@@ -206,13 +255,15 @@ export class BuildingModelService {
       this.logger(`BuildingModelService: Solar radiation ${solarRadiation.toFixed(0)} W/m² (source: ${solarSource})`);
 
       // Create measurement data (v2.7.0: include solarSource for conditional seasonal g)
+      // ADR-057 E3: cast to the exported union type — the previous inline union
+      // silently dropped 'open_meteo' which the learner type does include
       const measurement: MeasurementData = {
         timestamp: Date.now(),
         tIndoor: indoorTemp,
         tOutdoor: outdoorTemp,
         pHeating: thermalPower,
         solarRadiation,
-        solarSource: solarSource as 'solar_panels' | 'knmi_radiation' | 'estimation',
+        solarSource: solarSource as MeasurementData['solarSource'],
         deltaTPerHour: 0, // Calculated by learner
       };
 
@@ -226,12 +277,20 @@ export class BuildingModelService {
       const state = this.learner.getState();
       this.logger(`BuildingModelService: ✅ Sample #${state.sampleCount} added (power: ${thermalPower.toFixed(2)}kW, COP: ${cop.toFixed(1)})`);
 
-      // Update capabilities every 10 samples (every 50 minutes)
+      // ADR-061: Persist EVERY accepted sample — learning state is scarce (gates
+      // make samples rarer since v2.13.0) and a hard restart must not lose it.
+      // Persist failure is logged but never blocks learning.
+      try {
+        await this.persistState();
+      } catch (persistError) {
+        this.logger('BuildingModelService: ⚠️ Failed to persist state (learning continues):', persistError);
+      }
+
+      // Update capabilities + diagnostics every 10 samples (UI rate-limiting only)
       if (state.sampleCount % 10 === 0) {
         await this.updateModelCapabilities();
         await this.updateDiagnosticsCapability();
-        await this.persistState();
-        this.logger(`BuildingModelService: 💾 Capabilities + diagnostics + state persisted (sample ${state.sampleCount})`);
+        this.logger(`BuildingModelService: 💾 Capabilities + diagnostics updated (sample ${state.sampleCount})`);
       }
     } catch (error) {
       this.logger('BuildingModelService: Error during learning:', error);
@@ -455,9 +514,9 @@ export class BuildingModelService {
     // pInt = internal gains (kW from occupants/appliances)
     const hour = new Date().getHours();
 
-    // Time-based pInt multiplier (evening when people are home)
-    const pIntMultiplier = (hour >= 17 && hour <= 22) ? 1.8 : 1.0;
-    const effectivePInt = model.pInt * pIntMultiplier;
+    // ADR-057 E2: reuse the learner's time-of-day curve (night ×0.4 / day ×1.0 /
+    // evening 18-23h ×1.8) — previously this used a divergent 17-22h window
+    const effectivePInt = getDynamicPInt(hour, model.pInt);
 
     // Calculate solar gain using priority cascade (panel > KNMI > estimation)
     // getSolarRadiationWithPriority returns W/m², g is kW per kW/m²
@@ -777,10 +836,26 @@ export class BuildingModelService {
     } else if (model.tau > 500) {
       warnings.push(`⚠️ Unrealistic time constant τ=${model.tau.toFixed(1)}h (expected 0-500)`);
     }
-    if (pTrace > 400) {
-      warnings.push('⚠️ P matrix trace abnormally high - possible RLS state corruption');
-    } else if (pTrace < 10) {
-      warnings.push('⚠️ P matrix trace very low - algorithm may be over-confident');
+    // ADR-057 W1: thresholds derived from RLS_COVARIANCE — after the first update
+    // the trace is clamped to ≤ TRACE_MAX, so the old "10-400 healthy" range
+    // produced a false over-confidence warning on every healthy state
+    const { INITIAL, TRACE_MAX, TRACE_HEALTHY_MIN } = BuildingModelLearner.RLS_COVARIANCE;
+    if (pTrace > 4 * INITIAL || pTrace <= 0) {
+      warnings.push(`⚠️ P matrix trace=${pTrace.toFixed(1)} outside valid range (0, ${4 * INITIAL}] - possible RLS state corruption`);
+    } else if (state.sampleCount > 1 && pTrace > TRACE_MAX) {
+      warnings.push(`⚠️ P matrix trace=${pTrace.toFixed(1)} > ${TRACE_MAX} after updates - state may predate covariance bounding`);
+    } else if (state.sampleCount > 1 && pTrace < TRACE_HEALTHY_MIN) {
+      warnings.push('⚠️ P matrix trace at floor - algorithm may be over-confident');
+    }
+
+    // ADR-057 W3: excitation warning — structural reverts mean parameters are
+    // pinned against physical bounds and the model is not learning effectively
+    const excitation = this.learner.getExcitationDiagnostics();
+    if (excitation.consecutiveReverts >= 10) {
+      warnings.push(
+        `⚠️ RLS parameters pinned against physical bounds (${excitation.consecutiveReverts} consecutive reverts) - `
+        + 'model may not be learning effectively (poor excitation)',
+      );
     }
 
     return {
@@ -841,6 +916,10 @@ export class BuildingModelService {
         P_diag: state.P.map((row, i) => Number(row[i].toFixed(3))),
         P_trace: Number(pTrace.toFixed(1)),
         sampleCount: state.sampleCount,
+        // ADR-057 W3: excitation diagnostics
+        consecutiveReverts: excitation.consecutiveReverts,
+        totalReverts: excitation.totalReverts,
+        rateLimitActivations: excitation.rateLimitActivations,
       },
       validation: {
         parametersRealistic: warnings.length === 0,
@@ -879,12 +958,14 @@ export class BuildingModelService {
     this.logger('📊 RLS Algorithm Internal State:');
 
     // Calculate P matrix trace (sum of diagonal elements)
+    // ADR-057 W1: thresholds from RLS_COVARIANCE (trace ≤ TRACE_MAX after first update)
+    const covBounds = BuildingModelLearner.RLS_COVARIANCE;
     const pTrace = state.P.reduce((sum, row, i) => sum + row[i], 0);
     let pTraceStatus = '✅ OK';
-    if (pTrace > 400) {
-      pTraceStatus = '⚠️ ABNORMALLY HIGH (corrupt?)';
-    } else if (pTrace < 10) {
-      pTraceStatus = '⚠️ TOO LOW (over-confident?)';
+    if (pTrace > 4 * covBounds.INITIAL || pTrace <= 0) {
+      pTraceStatus = '⚠️ OUTSIDE VALID RANGE (corrupt?)';
+    } else if (state.sampleCount > 1 && pTrace < covBounds.TRACE_HEALTHY_MIN) {
+      pTraceStatus = '⚠️ AT FLOOR (over-confident?)';
     }
     this.logger(`   P matrix trace: ${pTrace.toFixed(1)} ${pTraceStatus}`);
     this.logger(`   P[0][0]: ${state.P[0][0].toFixed(3)} (1/C variance)`);
@@ -933,7 +1014,7 @@ export class BuildingModelService {
       this.logger('🚨 CRITICAL: Negative parameters detected!');
       this.logger('   This indicates RLS state corruption.');
       this.logger('   Recommendation: Reset building model via flow card action.');
-    } else if (pTrace > 400) {
+    } else if (pTrace > 4 * covBounds.INITIAL) {
       this.logger('');
       this.logger('⚠️ WARNING: High covariance matrix trace detected.');
       this.logger('   This may indicate state restore failure after app restart.');

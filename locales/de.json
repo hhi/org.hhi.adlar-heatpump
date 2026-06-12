@@ -78,6 +78,9 @@
     "blocked_no_outdoor_temp": "Keine Außentemp",
     "blocked_no_power": "Keine Leistung",
     "blocked_disabled": "Deaktiviert",
+    "blocked_dhw_mode": "Nicht im Heizmodus",
+    "blocked_defrost": "Abtauen aktiv",
+    "blocked_no_cop": "Keine COP-Messung",
     "period_night": "Nacht",
     "period_day": "Tag",
     "period_evening": "Abend"

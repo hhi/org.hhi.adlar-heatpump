@@ -58,6 +58,7 @@ export interface CombinedAction {
     cost: number;
     thermal?: number; // v2.6.0: building model component
     coast?: number; // v2.10.0: passive cooldown coast component
+    wind?: number; // ADR-059 W3: unweighted additive wind correction (applied after weighting)
   };
   reasoning: string[];
   priority: 'low' | 'medium' | 'high';
@@ -87,99 +88,6 @@ export class WeightedDecisionMaker {
       efficiency: priorities.efficiency / total,
       cost: priorities.cost / total,
       thermal: priorities.thermal ? priorities.thermal / total : undefined,
-    };
-  }
-
-  /**
-   * Combine all controller actions into single weighted decision
-   * WITH confidence-aware weighting (v2.4.14+)
-   *
-   * Reduces influence of optimizers with low confidence:
-   * - COP optimizer with few samples gets reduced weight
-   * - Building model with low confidence gets reduced weight
-   * - Energy price without data gets zero weight
-   * Unused weights are redistributed to comfort (safe fallback)
-   *
-   * @param heatingAction - PI controller action (always trusted)
-   * @param copAction - COP optimizer action
-   * @param priceAction - Energy price optimizer action
-   * @param confidenceMetrics - Confidence levels for adaptive weighting
-   * @returns Combined action with effective weights
-   *
-   * @version 2.4.14
-   * @since 2.4.14
-   */
-  public combineActionsWithConfidence(
-    heatingAction: ControllerAction | null,
-    copAction: COPAction | null,
-    priceAction: PriceAction | null,
-    confidenceMetrics: ConfidenceMetrics,
-  ): CombinedAction {
-    const reasoning: string[] = [];
-
-    // Extract adjustments from each controller
-    const comfortAdjust = heatingAction?.temperatureAdjustment || 0;
-    const efficiencyAdjust = this.extractCOPAdjustment(copAction);
-    const costAdjust = this.extractPriceAdjustment(priceAction);
-
-    // =========================================================================
-    // CONFIDENCE-AWARE WEIGHT ADJUSTMENT
-    // Reduce weights for low-confidence optimizers, redistribute to comfort
-    // =========================================================================
-
-    // Apply confidence multipliers to configured weights
-    const effectiveEfficiencyWeight = this.priorities.efficiency * confidenceMetrics.copConfidence;
-    const effectiveCostWeight = this.priorities.cost * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
-
-    // Calculate total effective weight (comfort always at full weight)
-    const totalEffectiveWeight = this.priorities.comfort + effectiveEfficiencyWeight + effectiveCostWeight;
-
-    // Normalize weights to sum to 1.0 (redistributes unused weight to comfort)
-    const normalizedWeights = {
-      comfort: this.priorities.comfort / totalEffectiveWeight,
-      efficiency: effectiveEfficiencyWeight / totalEffectiveWeight,
-      cost: effectiveCostWeight / totalEffectiveWeight,
-    };
-
-    // Add reasoning for each component WITH weight percentages
-    const comfortPct = Math.round(normalizedWeights.comfort * 100);
-    const efficiencyPct = Math.round(normalizedWeights.efficiency * 100);
-    const costPct = Math.round(normalizedWeights.cost * 100);
-
-    if (heatingAction) {
-      reasoning.push(`Comfort (${comfortPct}%): ${heatingAction.reason}`);
-    }
-    if (copAction && copAction.action !== 'maintain') {
-      reasoning.push(`Efficiency (${efficiencyPct}%): ${copAction.reason}`);
-      // Add confidence warning if COP confidence is low
-      if (confidenceMetrics.copConfidence < 0.3) {
-        reasoning.push(`⚠️ COP: low conf (${(confidenceMetrics.copConfidence * 100).toFixed(0)}%)`);
-      }
-    }
-    if (priceAction && priceAction.action !== 'maintain') {
-      reasoning.push(`Cost (${costPct}%): ${priceAction.reason}`);
-    } else if (!confidenceMetrics.priceDataAvailable) {
-      reasoning.push('Cost (0%): no price data, redistributed to comfort');
-    }
-
-    // Apply normalized weights (confidence-adjusted)
-    const finalAdjustment = comfortAdjust * normalizedWeights.comfort
-      + efficiencyAdjust * normalizedWeights.efficiency
-      + costAdjust * normalizedWeights.cost;
-
-    // Determine overall priority (highest wins)
-    const priority = this.determinePriority(heatingAction, copAction, priceAction);
-
-    return {
-      finalAdjustment,
-      breakdown: {
-        comfort: comfortAdjust * normalizedWeights.comfort,
-        efficiency: efficiencyAdjust * normalizedWeights.efficiency,
-        cost: costAdjust * normalizedWeights.cost,
-      },
-      reasoning,
-      priority,
-      effectiveWeights: normalizedWeights, // Show confidence-adjusted weights
     };
   }
 
@@ -246,31 +154,42 @@ export class WeightedDecisionMaker {
       }
     }
 
-    // v2.10.0: Coast shrinks all existing components proportionally
-    const coastStrength = coastAction?.strength ?? 0;
-    const existingScale = 1 - coastStrength;
+    // =========================================================================
+    // ADR-059 W2: Fixed comfort anchor — the PI contribution is NOT renormalized
+    // against optimizer confidence. Renormalizing made the effective loop gain
+    // (Kp × comfort weight) drift between ~0.35× and ~0.95× depending on data
+    // availability, making PI tuning unpredictable. The anchor keeps the loop
+    // gain constant; only the optimizers renormalize within their own budget.
+    // Coast keeps its displacement mechanism (ADR-024/040A, intentional design).
+    // =========================================================================
     const coastAdjust = coastAction?.adjustment ?? 0;
-
-    // Apply confidence multipliers and coast scale
-    const effectiveComfortWeight = basePriorities.comfort * existingScale;
-    const effectiveEfficiencyWeight = basePriorities.efficiency * confidenceMetrics.copConfidence * existingScale;
-    const effectiveCostWeight = basePriorities.cost * costMultiplier * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0) * existingScale;
-    const effectiveThermalWeight = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0) * existingScale;
     // ADR-040A: Coast krijgt alleen gewicht wanneer het daadwerkelijk bijdraagt (coastAdjust < 0).
-    // Bij hydraulische vertraging na setpoint-verlaging is coastAdjust = 0 — dan neemt PI het volledige budget over.
-    // Patroon consistent met effectiveCostWeight (priceDataAvailable) en effectiveThermalWeight (buildingModelConfidence).
-    const effectiveCoastWeight = (coastAdjust < 0) ? coastStrength : 0;
+    // Bij hydraulische vertraging na setpoint-verlaging is coastAdjust = 0 — dan geldt het normale anker.
+    const effectiveCoastWeight = (coastAdjust < 0) ? (coastAction?.strength ?? 0) : 0;
+    const existingScale = 1 - effectiveCoastWeight;
 
-    // Calculate total effective weight
-    const totalEffectiveWeight = effectiveComfortWeight + effectiveEfficiencyWeight + effectiveCostWeight + effectiveThermalWeight + effectiveCoastWeight;
+    // Comfort anchor: comfort share within the classic trio (comfort/efficiency/cost,
+    // default 0.6/0.25/0.15 → anchor 0.6). ADR-060: deliberately EXCLUDES thermal from
+    // the denominator — the constructor normalizes over all four priorities (total 1.2),
+    // which silently lowered the anchor to 0.5 and the effective loop gain to Kp × 0.5.
+    // Thermal competes within the optimizer budget like the other optimizers.
+    const trioTotal = this.priorities.comfort + this.priorities.efficiency + this.priorities.cost;
+    const comfortAnchor = trioTotal > 0 ? this.priorities.comfort / trioTotal : 0.6;
 
-    // Normalize weights to sum to 1.0
+    // Optimizers renormalize within their own budget (1 - anchor); an unavailable
+    // optimizer redistributes to the other optimizers, never to comfort
+    const rawEfficiency = basePriorities.efficiency * confidenceMetrics.copConfidence;
+    const rawCost = basePriorities.cost * costMultiplier * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
+    const rawThermal = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0);
+    const rawOptimizerSum = rawEfficiency + rawCost + rawThermal;
+    const optimizerBudget = (1 - comfortAnchor) * existingScale;
+
     const normalizedWeights = {
-      comfort: effectiveComfortWeight / totalEffectiveWeight,
-      efficiency: effectiveEfficiencyWeight / totalEffectiveWeight,
-      cost: effectiveCostWeight / totalEffectiveWeight,
-      thermal: effectiveThermalWeight / totalEffectiveWeight,
-      coast: effectiveCoastWeight / totalEffectiveWeight,
+      comfort: comfortAnchor * existingScale,
+      efficiency: rawOptimizerSum > 0 ? (rawEfficiency / rawOptimizerSum) * optimizerBudget : 0,
+      cost: rawOptimizerSum > 0 ? (rawCost / rawOptimizerSum) * optimizerBudget : 0,
+      thermal: rawOptimizerSum > 0 ? (rawThermal / rawOptimizerSum) * optimizerBudget : 0,
+      coast: effectiveCoastWeight,
     };
 
     // Add reasoning for each component WITH weight percentages
@@ -337,59 +256,6 @@ export class WeightedDecisionMaker {
   }
 
   /**
-   * Combine all controller actions into single weighted decision
-   * LEGACY METHOD without confidence-aware weighting
-   *
-   * @deprecated Use combineActionsWithConfidence() for confidence-aware weighting
-   */
-  public combineActions(
-    heatingAction: ControllerAction | null,
-    copAction: COPAction | null,
-    priceAction: PriceAction | null,
-  ): CombinedAction {
-    const reasoning: string[] = [];
-
-    // Extract adjustments from each controller
-    const comfortAdjust = heatingAction?.temperatureAdjustment || 0;
-    const efficiencyAdjust = this.extractCOPAdjustment(copAction);
-    const costAdjust = this.extractPriceAdjustment(priceAction);
-
-    // Add reasoning for each component WITH weight percentages
-    const comfortPct = Math.round(this.priorities.comfort * 100);
-    const efficiencyPct = Math.round(this.priorities.efficiency * 100);
-    const costPct = Math.round(this.priorities.cost * 100);
-
-    if (heatingAction) {
-      reasoning.push(`Comfort (${comfortPct}%): ${heatingAction.reason}`);
-    }
-    if (copAction && copAction.action !== 'maintain') {
-      reasoning.push(`Efficiency (${efficiencyPct}%): ${copAction.reason}`);
-    }
-    if (priceAction && priceAction.action !== 'maintain') {
-      reasoning.push(`Cost (${costPct}%): ${priceAction.reason}`);
-    }
-
-    // Apply weighted combination
-    const finalAdjustment = comfortAdjust * this.priorities.comfort
-      + efficiencyAdjust * this.priorities.efficiency
-      + costAdjust * this.priorities.cost;
-
-    // Determine overall priority (highest wins)
-    const priority = this.determinePriority(heatingAction, copAction, priceAction);
-
-    return {
-      finalAdjustment,
-      breakdown: {
-        comfort: comfortAdjust * this.priorities.comfort,
-        efficiency: efficiencyAdjust * this.priorities.efficiency,
-        cost: costAdjust * this.priorities.cost,
-      },
-      reasoning,
-      priority,
-    };
-  }
-
-  /**
    * Extract temperature adjustment from COP action
    *
    * COP controller adjusts supply temp, which maps approximately 1:1 to target temp
@@ -410,29 +276,6 @@ export class WeightedDecisionMaker {
 
     // Price optimizer already provides target temp adjustment
     return action.magnitude;
-  }
-
-  /**
-   * Determine overall priority from individual priorities
-   *
-   * Uses highest priority among all controllers
-   */
-  private determinePriority(
-    heating: ControllerAction | null,
-    cop: COPAction | null,
-    price: PriceAction | null,
-  ): 'low' | 'medium' | 'high' {
-    // High if ANY controller says high priority
-    if (heating?.priority === 'high' || cop?.priority === 'high' || price?.priority === 'high') {
-      return 'high';
-    }
-
-    // Medium if ANY controller says medium
-    if (heating?.priority === 'medium' || cop?.priority === 'medium' || price?.priority === 'medium') {
-      return 'medium';
-    }
-
-    return 'low';
   }
 
   /**

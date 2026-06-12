@@ -110,7 +110,6 @@ export class DeviceConstants {
   static readonly ADAPTIVE_CONTROL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
   /** Minimum wait time between temperature adjustments (prevent oscillation) */
-  static readonly ADAPTIVE_MIN_WAIT_BETWEEN_ADJUSTMENTS_MS = 20 * 60 * 1000; // 20 minutes
 
   /** Maximum temperature adjustment per control cycle (safety limit) */
   static readonly ADAPTIVE_MAX_TEMP_ADJUSTMENT = 3.0; // ±3°C
