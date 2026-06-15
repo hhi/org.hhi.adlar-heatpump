@@ -1,0 +1,214 @@
+
+> org.hhi.adlar-heatpump@2.13.0 simulate
+> npm run build && node test/simulation/adaptive-simulation.js
+
+
+> org.hhi.adlar-heatpump@2.13.0 build
+> tsc
+
+Offline simulatie adaptieve regeling — ADR-060 geharmoniseerd gedrag
+(pure componenten uit .homeybuild/, geen Homey of hardware nodig)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO A — Building model: varianten voor gating en dynamische P_int
+══════════════════════════════════════════════════════════════════════════════
+  Waar huis:  C=12 kWh/°C, UA=0.25 kW/°C, g=0.5, P_int=0.3 kW
+  Startprofiel learner: average (C=15, UA=0.3) — moet richting waarheid bewegen
+
+  A1 — DHW/defrost-gating met statische P_int
+  tijd   | binnen | buiten | status   || GATED C/UA/conf      || UNGATED C/UA/conf
+  -------|--------|--------|----------||----------------------||------------------
+    12u |   20.1 |    4.8 | verwarmt || C= 14.3 UA=0.218  40% || C= 14.6 UA=0.270  48%
+    24u |   20.6 |   -0.8 | verwarmt || C= 14.2 UA=0.239  85% || C= 14.5 UA=0.272  97%
+    36u |   20.5 |    4.9 | uit      || C= 14.0 UA=0.246  99% || C= 14.4 UA=0.298 100%
+    48u |   20.5 |   -1.0 | verwarmt || C= 13.9 UA=0.251 100% || C= 14.3 UA=0.281 100%
+    72u |   20.5 |   -0.7 | verwarmt || C= 13.8 UA=0.237 100% || C= 14.4 UA=0.270 100%
+    84u |   20.7 |    4.7 | uit      || C= 13.7 UA=0.231 100% || C= 14.3 UA=0.284 100%
+
+  Eindresultaat na 4 dagen:
+                C (waar 12.0)  UA (waar 0.250)   τ (waar 48h)  confidence  reverts
+    GATED:               13.5            0.243           55.8        100%        7
+    UNGATED:             14.3            0.283           50.7        100%        6
+
+  Guard-activaties (gated learner): dt-gap=28×, invalid=0×, divergence=7×
+  ✅ A1 gating verbetert gecombineerde score (1.69 vs 2.99; |ΔC| 1.55 vs 2.34, |ΔUA| 0.007 vs 0.033)
+  ✅ A1 gated C binnen 3 kWh/°C van waarheid (Δ=1.55)
+  ✅ A1 dt-gap-guard actief: herstart + eerste sample na elk gated DHW/defrost-venster (28× baseline-verversing)
+  ✅ A1 confidence na 4 dagen ≥ 40% (nu 100%)
+  ✅ A1 τ binnen fysieke bounds (55.8h)
+
+  A2 — dynamische P_int zonder DHW/defrost
+    dynamic P_int: C=13.3, UA=0.233, score=1.60
+    static P_int:  C=13.3, UA=0.233, score=1.65
+  ✅ A2 dynamische P_int is niet slechter dan statisch buiten marge (1.60 vs 1.65)
+  ✅ A2 dynamic C binnen 3 kWh/°C van waarheid (Δ=1.26)
+  ✅ A2 dynamic UA binnen 0.06 kW/°C van waarheid (Δ=0.017)
+
+  A3 — dynamische P_int + DHW/defrost stress-case
+    gated:   C=13.8, UA=0.237, score=2.08, reverts=7
+    ungated: C=14.1, UA=0.273, score=2.59, reverts=15
+  ✅ A3 gated gecombineerde score niet slechter dan ungated buiten marge (2.08 vs 2.59)
+  ✅ A3 gated parameters blijven fysiek plausibel (C=13.8, UA=0.237)
+  ✅ A3 τ binnen fysieke bounds (58.4h)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO B — Adviesketen: comfort-anker, accumulator en settlement
+══════════════════════════════════════════════════════════════════════════════
+
+  B1. Vast comfort-anker (productieconfig mét thermal):
+     PI-uitvoer bij fout 0.6°C: 3.00°C (Kp=5.0)
+     comfort-gewicht vol vertrouwen: 0.600, geen vertrouwen: 0.600
+  ✅ Anker = 0,6 mét thermal geconfigureerd (was 0,5 vóór de fix)
+  ✅ Comfort-bijdrage onafhankelijk van optimizer-confidence
+     effectieve lusversterking: 3.00 (doel ≈ 3,0 = Kp 5,0 × anker 0,6; incl. I-term iets hoger)
+  ✅ Effectieve versterking in de buurt van 3,0 (3.00)
+
+  B2. Accumulator: kleine bijdragen bereiken de gebruiker:
+     cyclus 9: advies 35 → 36°C (accumulator 0.51°C, per cyclus +0.06°C)
+     settlement: toegepast +1°C, accumulator terug naar -0.49°C
+  ✅ Sub-graad prijsbijdrage cumuleerde in 9 cycli (45 min) tot een heel-graads advies
+  ✅ Accumulator direct na settlement netjes klein (-0.49°C)
+
+  B3. Clamp ±2,0 °C bij genegeerde adviezen:
+     na 200 genegeerde cycli met fout 1,0°C: accumulator = 2.00°C
+  ✅ Accumulator geklemd op +2°C — geen onbegrensde opbouw
+
+  B4. Coast-verdringing:
+     gewichten: comfort=0.12, coast=0.80, advies=-1.32°C
+  ✅ Coast verdringt naar 80% en het advies is negatief (afkoelen)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO C — Gesloten lus: kamer 18,5 °C → gewenst 21,0 °C (12 uur, 5-min cycli)
+══════════════════════════════════════════════════════════════════════════════
+  De gesimuleerde gebruikersflow past elke aanbeveling direct toe (flow-assisted).
+  Het water volgt het setpoint eerste-orde (τ ≈ 30 min) — zoals een echt afgiftesysteem.
+
+  tijd | kamer  | fout   | PI-advies | accu  | setpoint | water | P_wp
+  -----|--------|--------|-----------|-------|----------|-------|------
+    1u |  18.75 |   2.25 |      3.00 |  0.00 |       53 |  43.3 |  8.0 kW
+    2u |  19.25 |   1.75 |      3.00 |  2.00 |       55 |  53.6 |  8.0 kW
+    3u |  19.75 |   1.25 |      3.00 |  2.00 |       55 |  54.8 |  8.0 kW
+    4u |  20.22 |   0.78 |      3.00 |  2.00 |       55 |  55.0 |  8.0 kW
+    5u |  20.68 |   0.32 |      2.72 |  2.00 |       55 |  55.0 |  8.0 kW
+    6u |  21.13 |  -0.13 |  deadband |  2.00 |       55 |  55.0 |  8.0 kW
+    7u |  21.56 |  -0.56 |     -2.43 | -0.10 |       50 |  53.9 |  8.0 kW
+    8u |  21.93 |  -0.93 |     -3.00 |  0.00 |       29 |  38.7 |  5.9 kW
+    9u |  21.65 |  -0.65 |     -3.00 | -2.00 |       20 |  22.9 |  0.4 kW
+   10u |  21.09 |  -0.09 |  deadband | -2.00 |       20 |  20.3 |  0.0 kW
+   11u |  20.54 |   0.46 |      1.53 | -0.45 |       21 |  20.0 |  0.0 kW
+   12u |  20.18 |   0.82 |      3.00 |  0.00 |       40 |  31.0 |  3.8 kW
+
+  Aanbevelingen toegepast: 47; op temperatuur (±0,3°C) na 5.1 uur
+
+  Toetsing:
+  ✅ Kamer bereikt de gewenste zone (eerste keer na 5.1u)
+  ✅ Overshoot begrensd (max 21.94°C ≤ 22.0°C)
+  ✅ Laatste 2 uur gemiddeld op doel: 20.54°C (doel 21 ± 0,5)
+  ✅ Setpoint bleef binnen [20, 55] (eind: 40°C)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO D — Identificeerbaarheid: varianten voor excitatie en regressoren
+══════════════════════════════════════════════════════════════════════════════
+  Waar C=15, startprofiel C≈7
+  D1 weinig excitatie:       C=7.2, UA=0.300, score=7.82, confidence=93%
+  D2 vermogen/weer-variatie: C=15.0, UA=0.461, score=3.25, confidence=100%
+  D3 + zon/dyn P_int:        C=13.7, UA=0.408, score=3.42, confidence=100%
+
+  Toetsing:
+  ✅ D1 zonder excitatie blijft C dicht bij het verkeerde startprofiel (ΔC=7.8)
+  ✅ D2 variatie verbetert C én gecombineerde score (ΔC 0.0 vs 7.8, score 3.25 vs 7.82)
+  ✅ D2 UA blijft informatief begrensd (ΔUA=0.161)
+  ✅ D3 regressoren blijven identificeerbaar beter dan weinig excitatie (score 3.42 vs 7.82)
+  ✅ D3 solar gain blijft fysiek plausibel (g=0.075)
+  ✅ D2 excitatiepad activeert beschermlagen zichtbaar (1552 vs 0 reverts)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO E — Verborgen DHW in gecombineerde modus: bias kwantificeren
+══════════════════════════════════════════════════════════════════════════════
+  Verborgen DHW-samples: 48
+  ideaal gegated: C=12.8, UA=0.246, confidence=100%
+  verborgen DHW:  C=13.1, UA=0.260, confidence=100%
+
+  Toetsing:
+  ✅ DHW-vensters zijn daadwerkelijk aanwezig (48 samples)
+  ✅ Verborgen DHW geeft meetbare extra bias (score 1.31 vs 0.91)
+  ✅ Bias blijft begrensd in deze nominale casus (C=13.1)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO F — Datagaten: ontbrekende COP/power/sensor-data voegt geen samples toe
+══════════════════════════════════════════════════════════════════════════════
+  vóór datagat: samples=288, confidence=87%
+  na 24u stilte: samples=288, confidence=87%
+  herstel: eerste sample na gap=288, tweede=289
+
+  Toetsing:
+  ✅ Geen samplegroei tijdens ontbrekende data (288 → 288)
+  ✅ Confidence loopt niet op tijdens datastilte (87.5% → 87.5%)
+  ✅ Eerste sample na lange gap ververst alleen de baseline
+  ✅ Tweede sample na herstel leert weer normaal
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO G — Gesloten lus: zwaar huis en traag afgiftesysteem (24 uur)
+══════════════════════════════════════════════════════════════════════════════
+  Zware gebouwmassa: C=20 kWh/°C, watertraagheid τ≈2 uur.
+
+  tijd | kamer  | fout   | PI-advies | accu  | setpoint | water | P_wp
+  -----|--------|--------|-----------|-------|----------|-------|------
+    2u |  19.00 |   2.00 |      3.00 |  2.00 |       55 |  43.5 |  4.4 kW
+    4u |  19.21 |   1.79 |      3.00 |  2.00 |       55 |  50.9 |  5.7 kW
+    6u |  19.48 |   1.52 |      3.00 |  2.00 |       55 |  53.5 |  6.0 kW
+    8u |  19.76 |   1.24 |      3.00 |  2.00 |       55 |  54.5 |  6.0 kW
+   10u |  20.03 |   0.97 |      3.00 |  2.00 |       55 |  54.8 |  6.0 kW
+   12u |  20.30 |   0.70 |      3.00 |  2.00 |       55 |  54.9 |  6.0 kW
+   14u |  20.56 |   0.44 |  deadband |  2.00 |       55 |  55.0 |  6.0 kW
+   16u |  20.82 |   0.18 |  deadband |  2.00 |       55 |  55.0 |  6.0 kW
+   18u |  21.07 |  -0.07 |  deadband |  2.00 |       55 |  55.0 |  6.0 kW
+   20u |  21.32 |  -0.32 |  deadband |  2.00 |       55 |  55.0 |  6.0 kW
+   22u |  21.53 |  -0.53 |     -3.00 |  0.20 |       28 |  47.8 |  4.7 kW
+   24u |  21.47 |  -0.47 |     -3.00 | -2.00 |       20 |  30.4 |  1.6 kW
+
+  Aanbevelingen toegepast: 36; op temperatuur (±0,3°C) na 15.1 uur
+
+  Toetsing:
+  ✅ Zwaar huis bereikt de gewenste zone binnen 20 uur (15.1u)
+  ✅ Overshoot blijft begrensd bij trage afgifte (max 21.55°C)
+  ✅ Laatste 4 uur gemiddeld dicht bij doel: 21.48°C (doel 21 ± 0,6)
+  ✅ Setpoint bleef binnen [20, 55] (eind: 20°C)
+
+══════════════════════════════════════════════════════════════════════════════
+  SCENARIO H — Passive cooldown / coast: activatie, weging, settlement en exit
+══════════════════════════════════════════════════════════════════════════════
+  Start: kamer boven doel en stijgend, uitlaat warmer dan het gewenste lagere setpoint.
+
+  cyclus | kamer | uitlaat | setpoint | coastAdj | coastW | advies
+  -------|-------|---------|----------|----------|--------|-------
+       1 | 21.46 |    43.9 |       43 |    -1.50 |   0.00 | -1.79 (-2°C toegepast)
+       2 | 21.50 |    43.7 |       43 |    -0.34 |   0.80 | -0.63
+       3 | 21.54 |    43.5 |       42 |    -0.52 |   0.80 | -0.78 (-1°C toegepast)
+       4 | 21.58 |    43.1 |       40 |     0.00 |   0.00 | -1.80 (-2°C toegepast)
+       5 | 21.50 |    42.2 |       38 |     0.00 |   0.00 | -1.80 (-2°C toegepast)
+       6 | 21.42 |    41.0 |       37 |     0.00 |   0.00 | -1.67 (-1°C toegepast)
+       7 | 21.34 |    39.9 |       35 |     0.00 |   0.00 | -1.40 (-2°C toegepast)
+       8 | 21.26 |    38.5 |       35 |     0.00 |   0.00 |  0.00
+       9 | 21.18 |    37.5 |       35 |     0.00 |   0.00 |  0.00
+      10 | 21.10 |    36.8 |       35 |     0.00 |   0.00 |  0.00
+      11 | 21.02 |    36.3 |       35 |     0.00 |   0.00 |  0.00
+      12 | 20.94 |    35.9 |       35 |    -0.04 |   0.00 |  0.00
+      13 | 20.86 |    35.7 |       35 |    -0.27 |   0.00 |  0.00
+      14 | 20.78 |    35.5 |       35 |    -0.46 |   0.00 |  0.00
+      15 | 20.70 |    35.4 |       35 |    -0.60 |   0.00 |  0.00
+      16 | 20.62 |    35.3 |       36 |    -0.71 |   0.00 |  0.94 (+1°C toegepast)
+      17 | 20.54 |    35.5 |       37 |    -1.49 |   0.00 |  1.30 (+1°C toegepast)
+      18 | 20.46 |    35.9 |       39 |    -1.50 |   0.00 |  1.64 (+2°C toegepast)
+
+  Toetsing:
+  ✅ Coast activeert na twee bevestigde cycli boven hysterese (cyclus 2)
+  ✅ Negatieve coast-delta verdringt naar 80% gewicht
+  ✅ Coast-stap blijft binnen limiet -1.5°C (min -1.50°C)
+  ✅ Settlement past setpointverlagingen toe (totaal -10°C)
+  ✅ Coast verlaat weer via zachte stale-coast exit
+  ✅ CoastAction met delta 0 krijgt 0% coast-gewicht
+
+══════════════════════════════════════════════════════════════════════════════
+  RESULTAAT: alle toetsen geslaagd
+══════════════════════════════════════════════════════════════════════════════
