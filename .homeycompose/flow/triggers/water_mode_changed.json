@@ -7,10 +7,10 @@
     "fr": "Mode d'eau changé"
   },
   "titleFormatted": {
-    "en": "Water mode changed to [[mode]]",
-    "nl": "Watermodus gewijzigd naar [[mode]]",
-    "de": "Wassermodus zu [[mode]] geändert",
-    "fr": "Mode d'eau changé à [[mode]]"
+    "en": "Water mode changed",
+    "nl": "Watermodus gewijzigd",
+    "de": "Wassermodus geändert",
+    "fr": "Mode d'eau changé"
   },
   "hint": {
     "en": "Triggers when the water control temperature mode changes",

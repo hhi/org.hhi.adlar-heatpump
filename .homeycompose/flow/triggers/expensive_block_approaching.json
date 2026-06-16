@@ -7,10 +7,10 @@
     "fr": "Période coûteuse approche"
   },
   "titleFormatted": {
-    "en": "Expensive period starts in [[warning_hours]] hour(s)",
-    "nl": "Dure periode begint over [[warning_hours]] uur/uren",
-    "de": "Teure Periode beginnt in [[warning_hours]] Stunde(n)",
-    "fr": "Période coûteuse commence dans [[warning_hours]] heure(s)"
+    "en": "Expensive period approaching",
+    "nl": "Dure periode nadert",
+    "de": "Teure Periode naht",
+    "fr": "Période coûteuse approche"
   },
   "hint": {
     "en": "Triggers N hours before the most expensive electricity price block starts. Use to pre-heat or prepare before high-price periods.",

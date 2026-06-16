@@ -7,10 +7,10 @@
     "fr": "Bloc le moins cher commencé"
   },
   "titleFormatted": {
-    "en": "Cheapest [[hours]]-hour block started",
-    "nl": "Goedkoopste [[hours]]-uurs blok gestart",
-    "de": "Günstigster [[hours]]-Stunden-Block gestartet",
-    "fr": "Bloc de [[hours]] heures le moins cher commencé"
+    "en": "Cheapest block started",
+    "nl": "Goedkoopste blok gestart",
+    "de": "Günstigster Block gestartet",
+    "fr": "Bloc le moins cher commencé"
   },
   "hint": {
     "en": "Triggers when the cheapest electricity price block of the day starts. Use to maximize energy consumption during low-price periods.",

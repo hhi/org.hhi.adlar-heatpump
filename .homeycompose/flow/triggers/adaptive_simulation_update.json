@@ -7,10 +7,10 @@
     "fr": "Température simulée mise à jour"
   },
   "titleFormatted": {
-    "en": "Simulated target: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
-    "nl": "Gesimuleerd doel: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
-    "de": "Simuliertes Ziel: [[simulated_target]]°C (Δ[[delta]]°C, Konf: [[building_model_confidence]]%)",
-    "fr": "Cible simulée: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)"
+    "en": "Simulated target temperature updated",
+    "nl": "Gesimuleerde doeltemperatuur bijgewerkt",
+    "de": "Simulierte Zieltemperatur aktualisiert",
+    "fr": "Température cible simulée mise à jour"
   },
   "hint": {
     "en": "Triggers every control cycle (5 min) with full breakdown of what adaptive control calculates. Use for monitoring, logging, and confidence-based filtering. Filter on building_model_confidence to only act on high-confidence recommendations.",

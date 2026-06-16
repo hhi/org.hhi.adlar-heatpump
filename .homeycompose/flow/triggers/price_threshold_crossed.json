@@ -7,10 +7,10 @@
     "fr": "Seuil de prix de l'énergie franchi"
   },
   "titleFormatted": {
-    "en": "Energy price became [[category]]",
-    "nl": "Energieprijs werd [[category]]",
-    "de": "Energiepreis wurde [[category]]",
-    "fr": "Prix de l'énergie devenu [[category]]"
+    "en": "Energy price crossed threshold",
+    "nl": "Energieprijs drempel overschreden",
+    "de": "Energiepreis-Schwellenwert überschritten",
+    "fr": "Seuil de prix de l'énergie franchi"
   },
   "hint": {
     "en": "Triggers when energy price category changes (very_low, low, normal, high, very_high)",

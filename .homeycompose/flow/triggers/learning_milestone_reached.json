@@ -7,10 +7,10 @@
     "fr": "Jalon d'apprentissage du modèle de bâtiment"
   },
   "titleFormatted": {
-    "en": "Building model reached [[milestone]] confidence",
-    "nl": "Gebouwmodel bereikte [[milestone]] vertrouwen",
-    "de": "Gebäudemodell erreichte [[milestone]] Vertrauen",
-    "fr": "Modèle de bâtiment a atteint [[milestone]] de confiance"
+    "en": "Building model learning milestone",
+    "nl": "Gebouwmodel leer mijlpaal",
+    "de": "Gebäudemodell-Lernmeilenstein",
+    "fr": "Jalon d'apprentissage du modèle de bâtiment"
   },
   "hint": {
     "en": "Triggers when the building thermal model reaches a learning milestone (e.g., 70% confidence)",
