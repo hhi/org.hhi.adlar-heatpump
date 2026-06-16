@@ -7,10 +7,10 @@
     "fr": "État du contrôle adaptatif modifié"
   },
   "titleFormatted": {
-    "en": "Adaptive control [[status]]",
-    "nl": "Adaptieve regeling [[status]]",
-    "de": "Adaptive Steuerung [[status]]",
-    "fr": "Contrôle adaptatif [[status]]"
+    "en": "Adaptive control status changed",
+    "nl": "Adaptieve regeling status gewijzigd",
+    "de": "Adaptive Steuerung Status geändert",
+    "fr": "État du contrôle adaptatif modifié"
   },
   "hint": {
     "en": "Triggered when adaptive temperature control is enabled or disabled",

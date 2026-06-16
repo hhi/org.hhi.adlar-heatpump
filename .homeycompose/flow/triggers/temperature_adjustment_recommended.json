@@ -7,10 +7,10 @@
     "fr": "Contrôle adaptatif recommande un ajustement de température"
   },
   "titleFormatted": {
-    "en": "Adaptive control recommends [[recommended_temperature]]°C (conf: [[building_model_confidence]]%)",
-    "nl": "Adaptieve regeling beveelt [[recommended_temperature]]°C aan (conf: [[building_model_confidence]]%)",
-    "de": "Adaptive Regelung empfiehlt [[recommended_temperature]]°C (Konf: [[building_model_confidence]]%)",
-    "fr": "Contrôle adaptatif recommande [[recommended_temperature]]°C (conf: [[building_model_confidence]]%)"
+    "en": "Adaptive control recommends temperature adjustment",
+    "nl": "Adaptieve regeling beveelt temperatuur aanpassing aan",
+    "de": "Adaptive Regelung empfiehlt Temperaturanpassung",
+    "fr": "Contrôle adaptatif recommande un ajustement de température"
   },
   "hint": {
     "en": "Triggered when adaptive control calculates a recommended temperature adjustment (only when significant action needed). Use building_model_confidence to filter on model confidence. Use 'Set target temperature' action to apply.",

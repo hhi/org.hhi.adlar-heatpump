@@ -7,10 +7,10 @@
     "fr": "Mode de chauffage changé"
   },
   "titleFormatted": {
-    "en": "Heating mode changed to [[mode]]",
-    "nl": "Verwarmingsmodus gewijzigd naar [[mode]]",
-    "de": "Heizmodus zu [[mode]] geändert",
-    "fr": "Mode de chauffage changé à [[mode]]"
+    "en": "Heating mode changed",
+    "nl": "Verwarmingsmodus gewijzigd",
+    "de": "Heizmodus geändert",
+    "fr": "Mode de chauffage changé"
   },
   "hint": {
     "en": "Triggers when the heating mode changes",

@@ -1,4 +1,10 @@
 {
+  "2.13.1": {
+    "en": "Flow card titles no longer show raw placeholders such as [[mode]] or [[status]].",
+    "nl": "Flow-kaarttitels tonen niet langer ruwe placeholders zoals [[mode]] of [[status]].",
+    "de": "Flow-Kartentitel zeigen keine rohen Platzhalter wie [[mode]] oder [[status]] mehr an.",
+    "fr": "Les titres des cartes de flux n'affichent plus de placeholders bruts tels que [[mode]] ou [[status]]."
+  },
   "2.13.0": {
     "en": "Building model learning now skips samples during hot water production, defrost and data gaps. The model confidence percentage has been recalibrated and may differ slightly after this update. Temperature recommendations now include small contributions from efficiency and price optimization. Learned building model data is now saved after every sample.",
     "nl": "Gebouwmodel-leren slaat nu samples over tijdens warmwaterproductie, ontdooien en datagaten. Het betrouwbaarheidspercentage van het gebouwmodel is herijkt en kan na deze update iets afwijken. Temperatuuradviezen bevatten nu ook kleine bijdragen van efficiëntie- en prijsoptimalisatie. Geleerde gebouwmodel-gegevens worden nu na elke meting opgeslagen.",

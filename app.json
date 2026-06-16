@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "2.13.0",
+  "version": "2.13.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -76,10 +76,10 @@
           "fr": "Température simulée mise à jour"
         },
         "titleFormatted": {
-          "en": "Simulated target: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
-          "nl": "Gesimuleerd doel: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)",
-          "de": "Simuliertes Ziel: [[simulated_target]]°C (Δ[[delta]]°C, Konf: [[building_model_confidence]]%)",
-          "fr": "Cible simulée: [[simulated_target]]°C (Δ[[delta]]°C, conf: [[building_model_confidence]]%)"
+          "en": "Simulated target temperature updated",
+          "nl": "Gesimuleerde doeltemperatuur bijgewerkt",
+          "de": "Simulierte Zieltemperatur aktualisiert",
+          "fr": "Température cible simulée mise à jour"
         },
         "hint": {
           "en": "Triggers every control cycle (5 min) with full breakdown of what adaptive control calculates. Use for monitoring, logging, and confidence-based filtering. Filter on building_model_confidence to only act on high-confidence recommendations.",
@@ -228,10 +228,10 @@
           "fr": "État du contrôle adaptatif modifié"
         },
         "titleFormatted": {
-          "en": "Adaptive control [[status]]",
-          "nl": "Adaptieve regeling [[status]]",
-          "de": "Adaptive Steuerung [[status]]",
-          "fr": "Contrôle adaptatif [[status]]"
+          "en": "Adaptive control status changed",
+          "nl": "Adaptieve regeling status gewijzigd",
+          "de": "Adaptive Steuerung Status geändert",
+          "fr": "État du contrôle adaptatif modifié"
         },
         "hint": {
           "en": "Triggered when adaptive temperature control is enabled or disabled",
@@ -555,10 +555,10 @@
           "fr": "Bloc le moins cher commencé"
         },
         "titleFormatted": {
-          "en": "Cheapest [[hours]]-hour block started",
-          "nl": "Goedkoopste [[hours]]-uurs blok gestart",
-          "de": "Günstigster [[hours]]-Stunden-Block gestartet",
-          "fr": "Bloc de [[hours]] heures le moins cher commencé"
+          "en": "Cheapest block started",
+          "nl": "Goedkoopste blok gestart",
+          "de": "Günstigster Block gestartet",
+          "fr": "Bloc le moins cher commencé"
         },
         "hint": {
           "en": "Triggers when the cheapest electricity price block of the day starts. Use to maximize energy consumption during low-price periods.",
@@ -1924,10 +1924,10 @@
           "fr": "Période coûteuse approche"
         },
         "titleFormatted": {
-          "en": "Expensive period starts in [[warning_hours]] hour(s)",
-          "nl": "Dure periode begint over [[warning_hours]] uur/uren",
-          "de": "Teure Periode beginnt in [[warning_hours]] Stunde(n)",
-          "fr": "Période coûteuse commence dans [[warning_hours]] heure(s)"
+          "en": "Expensive period approaching",
+          "nl": "Dure periode nadert",
+          "de": "Teure Periode naht",
+          "fr": "Période coûteuse approche"
         },
         "hint": {
           "en": "Triggers N hours before the most expensive electricity price block starts. Use to pre-heat or prepare before high-price periods.",
@@ -2232,10 +2232,10 @@
           "fr": "Mode de chauffage changé"
         },
         "titleFormatted": {
-          "en": "Heating mode changed to [[mode]]",
-          "nl": "Verwarmingsmodus gewijzigd naar [[mode]]",
-          "de": "Heizmodus zu [[mode]] geändert",
-          "fr": "Mode de chauffage changé à [[mode]]"
+          "en": "Heating mode changed",
+          "nl": "Verwarmingsmodus gewijzigd",
+          "de": "Heizmodus geändert",
+          "fr": "Mode de chauffage changé"
         },
         "hint": {
           "en": "Triggers when the heating mode changes",
@@ -2580,10 +2580,10 @@
           "fr": "Jalon d'apprentissage du modèle de bâtiment"
         },
         "titleFormatted": {
-          "en": "Building model reached [[milestone]] confidence",
-          "nl": "Gebouwmodel bereikte [[milestone]] vertrouwen",
-          "de": "Gebäudemodell erreichte [[milestone]] Vertrauen",
-          "fr": "Modèle de bâtiment a atteint [[milestone]] de confiance"
+          "en": "Building model learning milestone",
+          "nl": "Gebouwmodel leer mijlpaal",
+          "de": "Gebäudemodell-Lernmeilenstein",
+          "fr": "Jalon d'apprentissage du modèle de bâtiment"
         },
         "hint": {
           "en": "Triggers when the building thermal model reaches a learning milestone (e.g., 70% confidence)",
@@ -3194,10 +3194,10 @@
           "fr": "Seuil de prix de l'énergie franchi"
         },
         "titleFormatted": {
-          "en": "Energy price became [[category]]",
-          "nl": "Energieprijs werd [[category]]",
-          "de": "Energiepreis wurde [[category]]",
-          "fr": "Prix de l'énergie devenu [[category]]"
+          "en": "Energy price crossed threshold",
+          "nl": "Energieprijs drempel overschreden",
+          "de": "Energiepreis-Schwellenwert überschritten",
+          "fr": "Seuil de prix de l'énergie franchi"
         },
         "hint": {
           "en": "Triggers when energy price category changes (very_low, low, normal, high, very_high)",
@@ -3257,10 +3257,10 @@
           "fr": "Tendance des prix changée"
         },
         "titleFormatted": {
-          "en": "Price trend changed from [[old_trend]] to [[new_trend]]",
-          "nl": "Prijstrend veranderd van [[old_trend]] naar [[new_trend]]",
-          "de": "Preistrend geändert von [[old_trend]] zu [[new_trend]]",
-          "fr": "Tendance des prix changée de [[old_trend]] à [[new_trend]]"
+          "en": "Price trend changed",
+          "nl": "Prijstrend veranderd",
+          "de": "Preistrend geändert",
+          "fr": "Tendance des prix changée"
         },
         "hint": {
           "en": "Triggers when electricity price trend direction changes (rising, falling, stable). Based on linear regression analysis with confidence threshold.",
@@ -3525,10 +3525,10 @@
           "fr": "Contrôle adaptatif recommande un ajustement de température"
         },
         "titleFormatted": {
-          "en": "Adaptive control recommends [[recommended_temperature]]°C (conf: [[building_model_confidence]]%)",
-          "nl": "Adaptieve regeling beveelt [[recommended_temperature]]°C aan (conf: [[building_model_confidence]]%)",
-          "de": "Adaptive Regelung empfiehlt [[recommended_temperature]]°C (Konf: [[building_model_confidence]]%)",
-          "fr": "Contrôle adaptatif recommande [[recommended_temperature]]°C (conf: [[building_model_confidence]]%)"
+          "en": "Adaptive control recommends temperature adjustment",
+          "nl": "Adaptieve regeling beveelt temperatuur aanpassing aan",
+          "de": "Adaptive Regelung empfiehlt Temperaturanpassung",
+          "fr": "Contrôle adaptatif recommande un ajustement de température"
         },
         "hint": {
           "en": "Triggered when adaptive control calculates a recommended temperature adjustment (only when significant action needed). Use building_model_confidence to filter on model confidence. Use 'Set target temperature' action to apply.",
@@ -3808,10 +3808,10 @@
           "fr": "Mode d'eau changé"
         },
         "titleFormatted": {
-          "en": "Water mode changed to [[mode]]",
-          "nl": "Watermodus gewijzigd naar [[mode]]",
-          "de": "Wassermodus zu [[mode]] geändert",
-          "fr": "Mode d'eau changé à [[mode]]"
+          "en": "Water mode changed",
+          "nl": "Watermodus gewijzigd",
+          "de": "Wassermodus geändert",
+          "fr": "Mode d'eau changé"
         },
         "hint": {
           "en": "Triggers when the water control temperature mode changes",
@@ -3861,10 +3861,10 @@
           "fr": "Mode de fonctionnement changé"
         },
         "titleFormatted": {
-          "en": "Work mode changed to [[mode]]",
-          "nl": "Bedrijfsmodus gewijzigd naar [[mode]]",
-          "de": "Betriebsmodus zu [[mode]] geändert",
-          "fr": "Mode de fonctionnement changé à [[mode]]"
+          "en": "Work mode changed",
+          "nl": "Bedrijfsmodus gewijzigd",
+          "de": "Betriebsmodus geändert",
+          "fr": "Mode de fonctionnement changé"
         },
         "hint": {
           "en": "Triggers when the work mode changes (ECO, Normal, Boost)",
