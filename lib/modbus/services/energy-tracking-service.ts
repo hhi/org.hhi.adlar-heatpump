@@ -1,0 +1,799 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
+import Homey from 'homey';
+import { DeviceConstants } from '../constants';
+import { EnergyPriceOptimizer } from '../adaptive/energy-price-optimizer';
+
+export interface EnergyTrackingOptions {
+  device: Homey.Device;
+  logger?: (message: string, ...args: unknown[]) => void;
+  energyPriceOptimizer?: EnergyPriceOptimizer;
+}
+
+export interface PowerMeasurement {
+  value: number;
+  source: 'external' | 'internal' | 'calculated';
+  confidence: 'high' | 'medium' | 'low';
+  timestamp: number;
+}
+
+export class EnergyTrackingService {
+  private device: Homey.Device;
+  private logger: (message: string, ...args: unknown[]) => void;
+  private energyTrackingInterval: NodeJS.Timeout | null = null;
+  private dailyResetTimeout: NodeJS.Timeout | null = null;
+  private dailyResetInterval: NodeJS.Timeout | null = null;
+  private lastExternalPowerUpdate: number = 0;
+  private lastEnergyCalculation: number = 0;
+  private isEnabled = false;
+  private isDeviceConnected = false;
+
+  // State tracking for flow card triggers (v1.0.8)
+  private dailyThresholdTriggered = false; // Reset daily at midnight
+  private lastDailyConsumptionCheck = 0; // For rate limiting
+
+  // Overlap protection guard (v1.0.2)
+  private energyCalculationInProgress = false;
+
+  // Power threshold monitoring (v1.0.7 - power_threshold_exceeded trigger)
+  private powerAboveThreshold = false;
+  private lastPowerThresholdTrigger = 0;
+  private readonly POWER_THRESHOLD_HYSTERESIS = 0.05; // 5% hysteresis
+  private readonly POWER_THRESHOLD_RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+
+  // Power measurement state (v1.1.0)
+  private lastPowerMeasurement: PowerMeasurement | null = null;
+
+  // Cumulative energy state (v1.1.2 - internal tracking for robust cost calculation)
+  private currentCumulativeEnergy: number = 0;
+
+  /**
+   * EnergyTrackingService tracks energy/power measurements, updates power-related capabilities,
+   * and maintains daily/cumulative energy totals.
+   * @param options.device - The Homey device that owns this service.
+   * @param options.logger - Optional logger function.
+   * @param options.energyPriceOptimizer - Optional energy price optimizer for cost accumulation.
+   */
+  // Energy price optimizer for cost accumulation (injected dependency)
+  private energyPriceOptimizer: EnergyPriceOptimizer | null = null;
+
+  constructor(options: EnergyTrackingOptions) {
+    this.device = options.device;
+    this.logger = options.logger || (() => { });
+    this.energyPriceOptimizer = options.energyPriceOptimizer || null;
+  }
+
+  /**
+   * Get the current power measurement (value, source, confidence)
+   * accessible regardless of capability availability
+   */
+  public getCurrentPowerMeasurement(): PowerMeasurement | null {
+    return this.lastPowerMeasurement;
+  }
+
+  /**
+   * Calculate and return the most reliable power measurement using:
+   * 1) external flow card value (`adlar_external_power`),
+   * 2) internal DPS-based measurement,
+   * 3) calculated estimation.
+   * Returns null if tracking is disabled.
+   */
+  async updateIntelligentPowerMeasurement(): Promise<PowerMeasurement | null> {
+    if (!this.isEnabled || !this.isDeviceConnected) {
+      return null;
+    }
+
+    try {
+      let powerValue: number | null = null;
+      let powerSource: 'external' | 'internal' | 'calculated' = 'calculated';
+      let confidence: 'high' | 'medium' | 'low' = 'low';
+
+      // Priority 1: External power measurement (from flow cards)
+      const externalPower = this.device.getCapabilityValue('adlar_external_power');
+      // FIX: Accept 0 as a valid measurement (idling/standby) - checks for null/undefined only
+      if (externalPower !== null && externalPower !== undefined) {
+        powerValue = externalPower;
+        powerSource = 'external';
+        confidence = 'high';
+      }
+
+      // Priority 2: Internal power measurement (DPS 104)
+      if (powerValue === null) {
+        const internalPower = await this.getInternalPowerMeasurement();
+        if (internalPower !== null && internalPower > 0) {
+          powerValue = internalPower;
+          powerSource = 'internal';
+          confidence = 'high';
+        }
+      }
+
+      // Priority 3: Calculated estimation based on system state
+      if (powerValue === null) {
+        powerValue = this.calculateEstimatedPower();
+        powerSource = 'calculated';
+        confidence = 'medium';
+      }
+
+      const measurement: PowerMeasurement = {
+        value: powerValue || 0,
+        source: powerSource,
+        confidence,
+        timestamp: Date.now(),
+      };
+
+      // Store measurement internally (robustness against capability changes)
+      this.lastPowerMeasurement = measurement;
+
+      this.logger(`EnergyTrackingService: Power measurement: ${Math.round(powerValue ?? 0)}W (source: ${powerSource}, confidence: ${confidence})`);
+
+      // Check power threshold for trigger (v1.0.7 - power_threshold_exceeded)
+      if (powerValue !== null) {
+        await this.checkPowerThreshold(powerValue);
+      }
+
+      // Update cumulative energy based on the new power measurement
+      if (powerValue !== null) {
+        await this.updateCumulativeEnergy();
+      }
+
+      return measurement;
+
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error in intelligent power measurement update:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get internal power measurement from DPS 104 via device capability.
+   * Note: Direct TuyAPI access removed - now uses device capabilities only.
+   */
+  private getInternalPowerMeasurement(): number | null {
+    try {
+      // Access internal power through device capability if available
+      // This avoids direct TuyAPI dependency and uses proper device abstraction
+      const internalPower = this.device.getCapabilityValue('measure_power');
+      if (typeof internalPower === 'number' && internalPower > 0) {
+        return internalPower;
+      }
+    } catch (error) {
+      this.logger('Could not access internal power capability:', error);
+    }
+
+    // Fallback: Return null to trigger calculated estimation
+    return null;
+  }
+
+  /**
+   * Estimate the current power use based on system state (compressor, flow, temperatures).
+   * Used as a fallback when direct measurement is unavailable.
+   */
+  private calculateEstimatedPower(): number {
+    try {
+      const compressorRunning = this.device.getCapabilityValue('adlar_state_compressor_state');
+      const compressorFreq = this.device.getCapabilityValue('measure_frequency.compressor_freq') || 0;
+      const fanFreq = this.device.getCapabilityValue('adlar_fan_speed') || 0;
+      const defrosting = this.device.getCapabilityValue('adlar_defrosting');
+
+      // Base standby power
+      let estimatedPower = 150;
+
+      if (compressorRunning) {
+        // Compressor power estimation based on frequency
+        // Typical heat pump: 15-80Hz = 800-4000W
+        const normalizedFreq = Math.max(0, Math.min(1, (compressorFreq - 15) / 65));
+        const compressorPower = 800 + (normalizedFreq * 3200);
+        estimatedPower += compressorPower;
+
+        // Fan motor contribution
+        const fanPower = (fanFreq / 100) * 200; // 0-200W based on fan speed
+        estimatedPower += fanPower;
+
+        // Defrost mode adds extra power
+        if (defrosting) {
+          estimatedPower += 500;
+        }
+      }
+
+      this.logger(`EnergyTrackingService: Estimated power: ${Math.round(estimatedPower)}W (compressor: ${compressorRunning}, freq: ${compressorFreq}Hz)`);
+      return Math.round(estimatedPower);
+
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error calculating estimated power, using default:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Initialize persistent values used for tracking (store values, last update times).
+   */
+  private async initializeEnergyTracking(): Promise<void> {
+    try {
+      // Initialize energy tracking timestamp if not exists
+      const lastUpdate = await this.device.getStoreValue('last_energy_update');
+      if (!lastUpdate) {
+        await this.device.setStoreValue('last_energy_update', Date.now());
+        this.logger('EnergyTrackingService: Energy tracking initialized');
+      }
+
+      // Initialize external energy tracking timestamp if not exists
+      const lastExternalUpdate = await this.device.getStoreValue('last_external_energy_update');
+      if (!lastExternalUpdate) {
+        await this.device.setStoreValue('last_external_energy_update', Date.now());
+        this.logger('EnergyTrackingService: External energy tracking initialized');
+      }
+
+      // Initialize cumulative energy from store (authoritative source)
+      const storedEnergy = await this.device.getStoreValue('cumulative_energy_kwh');
+      if (typeof storedEnergy === 'number') {
+        this.currentCumulativeEnergy = storedEnergy;
+      }
+
+      // Restore meter_power capability from store
+      if (this.device.hasCapability('meter_power')) {
+        const currentTotal = this.device.getCapabilityValue('meter_power');
+        if ((!currentTotal || currentTotal === 0) && this.currentCumulativeEnergy > 0) {
+          await this.device.setCapabilityValue('meter_power', this.currentCumulativeEnergy);
+          this.logger(`EnergyTrackingService: Restored cumulative energy: ${this.currentCumulativeEnergy} kWh`);
+        }
+      }
+
+      // Initialize external energy tracking capability
+      if (this.device.hasCapability('adlar_external_energy_total')) {
+        const currentExternalTotal = this.device.getCapabilityValue('adlar_external_energy_total');
+        if (!currentExternalTotal || currentExternalTotal === 0) {
+          // Check if we have stored external energy from previous sessions
+          const storedExternalTotal = await this.device.getStoreValue('external_cumulative_energy_kwh') || 0;
+          if (storedExternalTotal > 0) {
+            await this.device.setCapabilityValue('adlar_external_energy_total', storedExternalTotal);
+            this.logger(`EnergyTrackingService: Restored external energy: ${storedExternalTotal} kWh`);
+          }
+        }
+      }
+
+      // Initialize external daily energy tracking capability
+      if (this.device.hasCapability('adlar_external_energy_daily')) {
+        const currentExternalDaily = this.device.getCapabilityValue('adlar_external_energy_daily');
+        if (!currentExternalDaily || currentExternalDaily === 0) {
+          // Check if we have stored external daily energy from previous sessions
+          const storedExternalDaily = await this.device.getStoreValue('external_daily_consumption_kwh') || 0;
+          if (storedExternalDaily > 0) {
+            await this.device.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
+            this.logger(`EnergyTrackingService: Restored external daily energy: ${storedExternalDaily} kWh`);
+          }
+        }
+      }
+
+      // Restore hourly cost capability from store (survives app restarts)
+      if (this.device.hasCapability('adlar_energy_cost_hourly')) {
+        const storedHourlyCost = await this.device.getStoreValue('hourly_cost_cache') || 0;
+        if (storedHourlyCost > 0) {
+          await this.device.setCapabilityValue('adlar_energy_cost_hourly', storedHourlyCost);
+          this.logger(`EnergyTrackingService: Restored hourly cost: €${storedHourlyCost.toFixed(2)}`);
+        }
+      }
+
+      // Restore daily cost capability from store (survives app restarts)
+      if (this.device.hasCapability('adlar_energy_cost_daily')) {
+        const storedDailyCost = await this.device.getStoreValue('daily_cost_cache') || 0;
+        if (storedDailyCost > 0) {
+          await this.device.setCapabilityValue('adlar_energy_cost_daily', storedDailyCost);
+          this.logger(`EnergyTrackingService: Restored daily cost: €${storedDailyCost.toFixed(2)}`);
+        }
+      }
+
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error initializing energy tracking:', error);
+    }
+  }
+
+  /**
+   * Update cumulative energy totals (daily/total) based on new power measurement(s).
+   * Protected against overlapping executions (v1.0.2)
+   */
+  private async updateCumulativeEnergy(): Promise<void> {
+    if (!this.isEnabled) {
+      return;
+    }
+
+    // Prevent overlapping executions (v1.0.2 - fixes queue buildup)
+    if (this.energyCalculationInProgress) {
+      this.logger('EnergyTrackingService: Skipping update - calculation already in progress');
+      return;
+    }
+
+    this.energyCalculationInProgress = true;
+
+    try {
+      // Use internal power measurement state independent of Homey capability
+      const powerMeasurement = this.getCurrentPowerMeasurement();
+      const currentPower = powerMeasurement ? powerMeasurement.value : 0;
+      const externalPower = this.device.getCapabilityValue('adlar_external_power') || 0;
+
+      const lastUpdate = await this.device.getStoreValue('last_energy_update') || Date.now();
+      const currentTime = Date.now();
+      const hoursElapsed = (currentTime - lastUpdate) / (1000 * 60 * 60);
+
+      // Only accumulate internal energy when we have reliable positive power data
+      if (currentPower > 0) {
+        // Calculate energy increment in kWh
+        const energyIncrement = (currentPower / 1000) * hoursElapsed;
+
+        // Update total cumulative energy (Internal State v1.1.2)
+        this.currentCumulativeEnergy += energyIncrement;
+        const newTotal = this.currentCumulativeEnergy;
+
+        // Store in device storage for persistence
+        await this.device.setStoreValue('cumulative_energy_kwh', newTotal);
+
+        // Update capability if it exists (for visualization only - decoupling v1.1.2)
+        if (this.device.hasCapability('meter_power')) {
+          await this.device.setCapabilityValue('meter_power', Math.round(newTotal * 100) / 100);
+        }
+
+        // Check for energy milestones (v1.0.7 - total_consumption_milestone trigger)
+        await this.checkEnergyMilestones(newTotal);
+
+        // Update daily consumption (store only — no dedicated capability)
+        const dailyConsumption = await this.device.getStoreValue('daily_consumption_kwh') || 0;
+        const newDailyTotal = dailyConsumption + energyIncrement;
+        await this.device.setStoreValue('daily_consumption_kwh', newDailyTotal);
+
+        // Check daily consumption threshold (v1.0.8)
+        await this.checkDailyConsumptionThreshold(newDailyTotal);
+
+        // === UNIFIED COST CALCULATION (v1.1.0) ===
+        // Calculate costs regardless of power source (internal/external/calculated)
+        if (this.energyPriceOptimizer) {
+          const effectivePrice = this.energyPriceOptimizer.getEffectivePrice();
+          this.logger(`EnergyTrackingService DEBUG: Power=${currentPower}W, Increment=${(energyIncrement * 1000).toFixed(4)}Wh, Price=€${effectivePrice.toFixed(4)}/kWh`);
+
+          // 1. Accumulate Daily Cost
+          // Adds incremental cost to the daily total based on current energy increment and effective price
+          this.energyPriceOptimizer.accumulateCost(energyIncrement);
+
+          if (this.device.hasCapability('adlar_energy_cost_daily')) {
+            const dailyCost = this.energyPriceOptimizer.getAccumulatedDailyCost();
+            const roundedDailyCost = Math.round(dailyCost * 10000) / 10000;
+            await this.device.setCapabilityValue('adlar_energy_cost_daily', roundedDailyCost);
+            // Persist for app restart recovery
+            await this.device.setStoreValue('daily_cost_cache', roundedDailyCost);
+          }
+
+          // 2. Accumulate Hourly Cost
+          // Use INTERNAL total energy counter to track hourly deltas (Decoupled from capability v1.1.2)
+          if (this.device.hasCapability('adlar_energy_cost_hourly')) {
+            // We use the monotonic internal counter for correct delta tracking
+            // This works even if meter_power.electric_total capability is disabled/missing
+            const hourlyCost = this.energyPriceOptimizer.accumulateHourlyCost(this.currentCumulativeEnergy);
+
+            const roundedHourlyCost = Math.round(hourlyCost * 10000) / 10000;
+            await this.device.setCapabilityValue('adlar_energy_cost_hourly', roundedHourlyCost);
+            // Persist for app restart recovery
+            await this.device.setStoreValue('hourly_cost_cache', roundedHourlyCost);
+          }
+
+          // Persist optimizer state to ensure hourStartEnergy and accumulated costs are saved immediately
+          // This makes the calculation resilient to app restarts (v1.1.1)
+          await this.device.setStoreValue('energy_optimizer_state', this.energyPriceOptimizer.getState());
+        }
+
+        this.logger(`EnergyTrackingService: Energy updated: +${(energyIncrement * 1000).toFixed(1)}Wh (power: ${currentPower}W, time: ${(hoursElapsed * 60).toFixed(1)}min)`);
+      }
+
+      // Track external energy separately when external power is being used
+      // Note: Cost calculation removed from here as it is now handled above for all sources
+      await this.updateExternalEnergy(externalPower, currentTime);
+
+      // Update timestamp for next calculation
+      if (currentPower > 0 || externalPower > 0) {
+        await this.device.setStoreValue('last_energy_update', currentTime);
+      }
+
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error updating cumulative energy:', error);
+    } finally {
+      // Always release guard (v1.0.2)
+      this.energyCalculationInProgress = false;
+    }
+  }
+
+  /**
+   * Update external energy counters using the provided external power and elapsed time.
+   * Stores updates to device capabilities `adlar_external_energy_total` / `adlar_external_energy_daily`.
+   * @param externalPower - external power in Watts
+   * @param currentTime - current timestamp (ms)
+   */
+  private async updateExternalEnergy(externalPower: number, currentTime: number): Promise<void> {
+    const lastExternalUpdate = await this.device.getStoreValue('last_external_energy_update') || (currentTime - 10000);
+    const externalHoursElapsed = (currentTime - lastExternalUpdate) / (1000 * 60 * 60);
+
+    this.logger(`EnergyTrackingService: External energy check: power=${externalPower}W, `
+      + `hasCapability=${this.device.hasCapability('adlar_external_energy_total')}, `
+      + `externalHoursElapsed=${externalHoursElapsed.toFixed(6)}h`);
+
+    if (externalPower > 0 && this.device.hasCapability('adlar_external_energy_total')) {
+      // Check if this is the first external energy update
+      const isFirstExternalUpdate = !(await this.device.getStoreValue('last_external_energy_update'));
+
+      // Use a small threshold for frequent updates (minimum 3.6 seconds OR first update)
+      if (externalHoursElapsed > 0.001 || isFirstExternalUpdate) {
+        // For first update, use minimum time increment to avoid zero energy calculation
+        const effectiveHoursElapsed = isFirstExternalUpdate ? 0.002778 : externalHoursElapsed; // 10 seconds minimum
+
+        const externalEnergyIncrement = (externalPower / 1000) * effectiveHoursElapsed;
+        const currentExternalTotal = this.device.getCapabilityValue('adlar_external_energy_total') || 0;
+        const newExternalTotal = currentExternalTotal + externalEnergyIncrement;
+        await this.device.setCapabilityValue('adlar_external_energy_total', Math.round(newExternalTotal * 1000) / 1000);
+
+        // Also update external daily energy consumption
+        if (this.device.hasCapability('adlar_external_energy_daily')) {
+          const currentExternalDaily = this.device.getCapabilityValue('adlar_external_energy_daily') || 0;
+          const newExternalDaily = currentExternalDaily + externalEnergyIncrement;
+          const roundedDaily = Math.round(newExternalDaily * 1000000) / 1000000;
+          await this.device.setCapabilityValue('adlar_external_energy_daily', roundedDaily);
+
+          // Store external daily energy for persistence and reset functionality
+          await this.device.setStoreValue('external_daily_consumption_kwh', newExternalDaily);
+        }
+
+        // Note: Cost accumulation logic moved to updateCumulativeEnergy (v1.1.0)
+        // This ensures unified tracking for all power sources (internal/external/calculated)
+
+        // Store external energy in device storage for persistence
+        await this.device.setStoreValue('external_cumulative_energy_kwh', newExternalTotal);
+        // Update external energy timestamp
+        await this.device.setStoreValue('last_external_energy_update', currentTime);
+
+        this.logger(`EnergyTrackingService: External energy updated: +${(externalEnergyIncrement * 1000).toFixed(1)}Wh `
+          + `(external power: ${externalPower}W, time: ${(effectiveHoursElapsed * 60).toFixed(2)}min, `
+          + `total: ${newExternalTotal.toFixed(3)}kWh)${isFirstExternalUpdate ? ' [FIRST UPDATE]' : ''}`);
+      }
+    }
+  }
+
+  /**
+   * Start the frequent energy tracking interval (e.g. every 30s).
+   * Uses Homey timers and stores the interval reference for later clearing.
+   */
+  private startEnergyTrackingInterval(): void {
+    // Start frequent energy tracking interval (every 30 seconds)
+    this.energyTrackingInterval = this.device.homey.setInterval(() => {
+      // Refresh intelligent power measurement continuously
+      // This ensures we have the latest power data AND triggers accumulation via the update chain
+      this.updateIntelligentPowerMeasurement().catch((error) => {
+        this.logger('EnergyTrackingService: Error in energy tracking interval:', error);
+      });
+    }, DeviceConstants.ENERGY_TRACKING_INTERVAL_MS);
+
+    this.logger('EnergyTrackingService: Started energy tracking interval');
+  }
+
+  /**
+   * Stop the energy tracking interval if running.
+   */
+  private stopEnergyTrackingInterval(): void {
+    if (this.energyTrackingInterval) {
+      clearInterval(this.energyTrackingInterval);
+      this.energyTrackingInterval = null;
+      this.logger('EnergyTrackingService: Stopped energy tracking interval');
+    }
+  }
+
+  /**
+   * Schedule midnight reset for daily counters
+   * Uses a timeout to midnight, then a 24-hour interval
+   */
+  private scheduleMidnightReset(): void {
+    // Calculate milliseconds until next midnight
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0); // Next midnight
+    const msUntilMidnight = midnight.getTime() - now.getTime();
+
+    this.logger(`EnergyTrackingService: Scheduling midnight reset in ${Math.round(msUntilMidnight / 60000)} minutes`);
+
+    // First: wait until midnight
+    this.dailyResetTimeout = this.device.homey.setTimeout(() => {
+      this.performDailyReset().catch((error) => {
+        this.logger('EnergyTrackingService: Error in daily reset timeout:', error);
+      });
+
+      // Then: repeat every 24 hours
+      this.dailyResetInterval = this.device.homey.setInterval(() => {
+        this.performDailyReset().catch((error) => {
+          this.logger('EnergyTrackingService: Error in daily reset interval:', error);
+        });
+      }, 24 * 60 * 60 * 1000); // 24 hours
+
+    }, msUntilMidnight);
+  }
+
+  /**
+   * Perform daily reset of energy and cost counters
+   * Called at midnight
+   */
+  private async performDailyReset(): Promise<void> {
+    this.logger('EnergyTrackingService: Performing daily reset at midnight');
+
+    try {
+      // Reset external daily energy
+      if (this.device.hasCapability('adlar_external_energy_daily')) {
+        await this.device.setCapabilityValue('adlar_external_energy_daily', 0);
+        await this.device.setStoreValue('external_daily_consumption_kwh', 0);
+      }
+
+      // Reset internal daily consumption (store only — no dedicated capability)
+      await this.device.setStoreValue('daily_consumption_kwh', 0);
+
+      // Reset daily cost via EnergyPriceOptimizer
+      this.resetDailyCost();
+
+      // Reset daily cost capability and cache
+      if (this.device.hasCapability('adlar_energy_cost_daily')) {
+        await this.device.setCapabilityValue('adlar_energy_cost_daily', 0);
+        await this.device.setStoreValue('daily_cost_cache', 0);
+      }
+
+      // Reset hourly cost cache as well (new day starts fresh)
+      await this.device.setStoreValue('hourly_cost_cache', 0);
+
+      // Reset daily threshold trigger flag
+      this.dailyThresholdTriggered = false;
+
+      this.logger('EnergyTrackingService: Daily reset completed');
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error during daily reset:', error);
+    }
+  }
+
+  /**
+   * Receive and process external power data pushed via flow/action cards.
+   * Updates the external-power capability and triggers energy recalculation.
+   * @param powerValue - power in Watts
+   */
+  /**
+   * Notify the service of Tuya connection state changes.
+   * On disconnect: clears stale power data and resets measure_power to 0.
+   * On connect: resumes power measurement updates.
+   */
+  async setConnectionState(connected: boolean): Promise<void> {
+    this.isDeviceConnected = connected;
+
+    if (!connected) {
+      // Note: measure_power is intentionally NOT reset to 0 on disconnect.
+      // adlar_external_power comes from flow cards and is unaffected by Modbus state.
+      // Injecting 0 causes energy dashboard noise on short reconnect cycles.
+      this.logger('EnergyTrackingService: Device disconnected — power display retained at last known value');
+    } else {
+      this.logger('EnergyTrackingService: Device connected — power measurement resumed');
+    }
+  }
+
+  async receiveExternalPowerData(powerValue: number): Promise<void> {
+    try {
+      if (this.device.hasCapability('adlar_external_power')) {
+        await this.device.setCapabilityValue('adlar_external_power', powerValue);
+        this.logger(`EnergyTrackingService: External power data received: ${powerValue}W`);
+
+        // Update defrost active power if applicable
+        if (this.device.hasCapability('defrost_active_power')) {
+          const isDefrosting = this.device.getCapabilityValue('adlar_defrosting') || false;
+          const newValue = isDefrosting ? powerValue : 0;
+          await this.device.setCapabilityValue('defrost_active_power', newValue);
+        }
+
+        // Trigger immediate power measurement update
+        await this.updateIntelligentPowerMeasurement();
+      }
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error receiving external power data:', error);
+    }
+  }
+
+  /**
+   * Run once initialization for the EnergyTrackingService (non-scheduled setup).
+   */
+  async initialize(): Promise<void> {
+    this.logger('EnergyTrackingService: Initializing energy tracking service');
+
+    this.isEnabled = true;
+
+    await this.initializeEnergyTracking();
+    this.startEnergyTrackingInterval();
+    this.scheduleMidnightReset();
+
+    this.logger('EnergyTrackingService: Energy tracking enabled and interval started');
+
+    // Start initial power measurement update
+    await this.updateIntelligentPowerMeasurement();
+    this.logger('EnergyTrackingService: Energy tracking service initialized');
+  }
+
+  /**
+   * Handle settings changes (v1.0.9)
+   * Enables or disables energy tracking based on user settings
+   */
+  async onSettings(
+    _oldSettings: Record<string, unknown>,
+    _newSettings: Record<string, unknown>,
+    _changedKeys: string[],
+  ): Promise<void> {
+    // Intentionally empty: this service derives all its state from the Modbus poll
+    // cycle, so no settings change requires action here. The method exists to satisfy
+    // the service lifecycle contract shared with the other services.
+  }
+
+  /**
+   * Check if power exceeds user-defined threshold and trigger flow card (v1.0.7)
+   * Implements hysteresis and rate limiting to prevent trigger spam
+   * @param currentPower - Current power consumption in watts
+   */
+  private async checkPowerThreshold(currentPower: number): Promise<void> {
+    try {
+      // Get user-defined threshold from settings (default 3000W)
+      const userThreshold = (this.device.getSetting('power_threshold_watts') as number) || 3000;
+      const now = Date.now();
+
+      // Hysteresis calculation: 5% below threshold = reset state
+      const thresholdReset = userThreshold * (1 - this.POWER_THRESHOLD_HYSTERESIS);
+      const isAboveThreshold = currentPower > userThreshold;
+      const isBelowReset = currentPower < thresholdReset;
+
+      // Check if we should trigger (crossing threshold upward)
+      if (isAboveThreshold && !this.powerAboveThreshold) {
+        // Rate limiting: max 1 trigger per 5 minutes
+        if (now - this.lastPowerThresholdTrigger > this.POWER_THRESHOLD_RATE_LIMIT_MS) {
+          // Trigger the flow card
+          try {
+            const triggerCard = this.device.homey.flow.getDeviceTriggerCard('power_threshold_exceeded');
+            await triggerCard.trigger(this.device, {
+              current_power: Math.round(currentPower),
+              threshold_power: userThreshold,
+            }, {});
+
+            this.logger(`EnergyTrackingService: ⚡ Power threshold exceeded: ${Math.round(currentPower)}W > ${userThreshold}W`);
+            this.lastPowerThresholdTrigger = now;
+          } catch (err) {
+            this.logger('EnergyTrackingService: Failed to trigger power_threshold_exceeded:', err);
+          }
+        } else {
+          this.logger(`EnergyTrackingService: Power threshold exceeded but rate limited (${Math.round((now - this.lastPowerThresholdTrigger) / 1000)}s since last trigger)`);
+        }
+
+        this.powerAboveThreshold = true;
+      } else if (isBelowReset && this.powerAboveThreshold) {
+        // Reset state when power drops below hysteresis threshold
+        this.powerAboveThreshold = false;
+        this.logger(`EnergyTrackingService: Power below reset threshold: ${Math.round(currentPower)}W < ${Math.round(thresholdReset)}W`);
+      }
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error in power threshold check:', error);
+    }
+  }
+
+  /**
+   * Check and trigger daily consumption threshold (v1.0.8)
+   * Fires when daily energy consumption exceeds specified threshold
+   * Resets daily at midnight
+   */
+  private async checkDailyConsumptionThreshold(dailyConsumption: number): Promise<void> {
+    try {
+      const settings = await this.device.getSettings();
+      const threshold = settings.daily_consumption_threshold_kwh || 50; // Default 50 kWh
+
+      // Only trigger once per day when threshold is exceeded
+      if (!this.dailyThresholdTriggered && dailyConsumption >= threshold) {
+        // Fire trigger - cast device to access triggerFlowCard method
+        const deviceWithTrigger = this.device as unknown as {
+          triggerFlowCard: (cardId: string, tokens: Record<string, unknown>) => Promise<void>;
+        };
+
+        await deviceWithTrigger.triggerFlowCard('daily_consumption_threshold', {
+          daily_consumption: Math.round(dailyConsumption * 100) / 100,
+          threshold_value: threshold,
+          exceeded_by: Math.round((dailyConsumption - threshold) * 100) / 100,
+        });
+
+        this.dailyThresholdTriggered = true;
+        this.logger(`Daily consumption threshold exceeded: ${dailyConsumption.toFixed(2)} kWh >= ${threshold} kWh`);
+      }
+    } catch (error) {
+      this.logger('Error in checkDailyConsumptionThreshold:', error);
+    }
+  }
+
+  /**
+   * Check if cumulative energy has reached milestone thresholds and trigger flow card (v1.0.7)
+   * Milestones are triggered at 100 kWh increments (100, 200, 300, etc.)
+   * Uses deduplication to prevent multiple triggers for the same milestone
+   * @param currentTotal - Current cumulative energy in kWh
+   */
+  private async checkEnergyMilestones(currentTotal: number): Promise<void> {
+    try {
+      // Milestone increment (100 kWh steps)
+      const MILESTONE_INCREMENT = 100;
+
+      // Get list of already triggered milestones from store
+      const triggeredMilestones = (await this.device.getStoreValue('triggered_energy_milestones') as number[]) || [];
+
+      // Calculate which milestones have been reached
+      // Example: currentTotal = 523 kWh → milestones reached: 100, 200, 300, 400, 500
+      const highestMilestone = Math.floor(currentTotal / MILESTONE_INCREMENT) * MILESTONE_INCREMENT;
+
+      // Check each milestone from last triggered to current
+      for (let milestone = MILESTONE_INCREMENT; milestone <= highestMilestone; milestone += MILESTONE_INCREMENT) {
+        // Only trigger if this milestone hasn't been triggered before
+        if (!triggeredMilestones.includes(milestone)) {
+          try {
+            // Trigger the flow card
+            const triggerCard = this.device.homey.flow.getDeviceTriggerCard('total_consumption_milestone');
+            await triggerCard.trigger(this.device, {
+              total_consumption: Math.round(currentTotal * 100) / 100,
+              milestone_value: milestone,
+            }, {});
+
+            this.logger(`EnergyTrackingService: 🎯 Energy milestone reached: ${milestone} kWh (total: ${Math.round(currentTotal * 100) / 100} kWh)`);
+
+            // Add to triggered list
+            triggeredMilestones.push(milestone);
+          } catch (err) {
+            this.logger(`EnergyTrackingService: Failed to trigger milestone ${milestone}:`, err);
+          }
+        }
+      }
+
+      // Save updated triggered milestones list (if any new milestones were added)
+      if (triggeredMilestones.length > 0) {
+        await this.device.setStoreValue('triggered_energy_milestones', triggeredMilestones);
+      }
+    } catch (error) {
+      this.logger('EnergyTrackingService: Error checking energy milestones:', error);
+    }
+  }
+
+  /**
+   * Stop timers and cleanup; safe to call during device destruction.
+   */
+  destroy(): void {
+    this.logger('EnergyTrackingService: Destroying service');
+
+    // Stop energy tracking interval
+    this.stopEnergyTrackingInterval();
+
+    // Clear daily reset timers if they exist
+    if (this.dailyResetTimeout) {
+      clearTimeout(this.dailyResetTimeout);
+      this.dailyResetTimeout = null;
+    }
+
+    if (this.dailyResetInterval) {
+      clearInterval(this.dailyResetInterval);
+      this.dailyResetInterval = null;
+    }
+
+    this.logger('EnergyTrackingService: Service destroyed - all timers cleared');
+  }
+
+  /**
+   * Set the energy price optimizer for cost accumulation
+   * Used for late dependency injection after constructor
+   */
+  public setEnergyPriceOptimizer(optimizer: EnergyPriceOptimizer): void {
+    this.energyPriceOptimizer = optimizer;
+    this.logger('EnergyTrackingService: EnergyPriceOptimizer injected');
+  }
+
+  /**
+   * Reset daily cost accumulator (called at midnight)
+   * Delegates to EnergyPriceOptimizer if available
+   */
+  public resetDailyCost(): void {
+    if (this.energyPriceOptimizer) {
+      this.energyPriceOptimizer.resetDailyCost();
+      this.logger('EnergyTrackingService: Daily cost reset delegated to EnergyPriceOptimizer');
+    }
+  }
+}

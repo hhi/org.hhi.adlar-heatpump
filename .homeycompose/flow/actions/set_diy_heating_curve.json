@@ -1,0 +1,47 @@
+{
+  "id": "set_diy_heating_curve",
+  "title": {
+    "en": "Set Custom heating curve (L28/L29)",
+    "nl": "Stel Custom stooklijn in (L28/L29)"
+  },
+  "titleFormatted": {
+    "en": "Set Custom heating curve: slope [[slope]], intercept [[intercept]]°C",
+    "nl": "Stel Custom stooklijn in: helling [[slope]], intercept [[intercept]]°C"
+  },
+  "hint": {
+    "en": "Writes the DIY heating curve directly to Modbus registers L27, L28 and L29. slope is the curve coefficient k (e.g. -0.5), intercept is the supply temperature at -15°C outdoor (L29, e.g. 55). Valid range: slope -5.0..0.0, intercept 30..80. Capabilities heating_curve_slope and heating_curve_intercept are updated within 30 seconds via polling.",
+    "nl": "Schrijft de DIY stooklijn direct naar Modbus-registers L27, L28 en L29. slope is de hellingscoëfficiënt k (bijv. -0.5), intercept is de aanvoertemperatuur bij -15°C buiten (L29, bijv. 55). Geldig bereik: slope -5,0..0,0, intercept 30..80. Capabilities heating_curve_slope en heating_curve_intercept worden binnen 30 seconden bijgewerkt via polling."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "name": "slope",
+      "type": "number",
+      "title": {
+        "en": "Slope (k, e.g. -0.5)",
+        "nl": "Helling (k, bijv. -0.5)"
+      },
+      "placeholder": {
+        "en": "e.g. -0.5",
+        "nl": "bijv. -0.5"
+      }
+    },
+    {
+      "name": "intercept",
+      "type": "number",
+      "title": {
+        "en": "Intercept (supply temp at -15°C, e.g. 55)",
+        "nl": "Intercept (aanvoertemp bij -15°C, bijv. 55)"
+      },
+      "placeholder": {
+        "en": "e.g. 55",
+        "nl": "bijv. 55"
+      }
+    }
+  ]
+}

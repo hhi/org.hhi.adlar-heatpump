@@ -17,7 +17,7 @@ Module._load = function load(request, parent, isMain) {
   return originalLoad.call(this, request, parent, isMain);
 };
 
-const { BuildingModelService } = require('../../.homeybuild/lib/services/building-model-service');
+const { BuildingModelService } = require('../../.homeybuild/lib/tuya/services/building-model-service');
 
 function createHomey() {
   return {
@@ -70,7 +70,9 @@ function createDevice(overrides = {}) {
     },
     getSetting: (key) => settings[key],
     getStoreValue: (key) => store[key],
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: () => false,
     setCapabilityValue: async () => {},

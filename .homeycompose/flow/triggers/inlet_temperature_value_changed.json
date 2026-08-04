@@ -1,0 +1,58 @@
+{
+  "id": "inlet_temperature_value_changed",
+  "title": {
+    "en": "Inlet temperature has changed",
+    "nl": "Water intrede temperatuur is veranderd",
+    "de": "Vorlauftemperatur hat sich geändert",
+    "fr": "La température d'entrée a changé"
+  },
+  "hint": {
+    "en": "Triggers when water inlet temperature changes by at least 0.5°C",
+    "nl": "Wordt geactiveerd wanneer de water intrede temperatuur minimaal 0,5°C wijzigt",
+    "de": "Wird ausgelöst, wenn sich die Vorlauftemperatur um mindestens 0,5°C ändert",
+    "fr": "Se déclenche lorsque la température d'entrée d'eau change d'au moins 0,5°C"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current inlet temperature",
+        "nl": "Huidige water intrede temperatuur",
+        "de": "Aktuelle Vorlauftemperatur",
+        "fr": "Température d'entrée actuelle"
+      },
+      "example": 45.5
+    },
+    {
+      "type": "number",
+      "name": "previous_temperature",
+      "title": {
+        "en": "Previous inlet temperature",
+        "nl": "Vorige water intrede temperatuur",
+        "de": "Vorherige Vorlauftemperatur",
+        "fr": "Température d'entrée précédente"
+      },
+      "example": 44.8
+    },
+    {
+      "type": "number",
+      "name": "delta_temperature",
+      "title": {
+        "en": "Temperature change",
+        "nl": "Temperatuurverschil",
+        "de": "Temperaturänderung",
+        "fr": "Variation de température"
+      },
+      "example": 0.7
+    }
+  ]
+}

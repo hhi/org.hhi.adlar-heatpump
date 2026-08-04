@@ -1,0 +1,25 @@
+{
+  "name": {
+    "en": "Adlar Live Operation",
+    "nl": "Adlar Live Bedrijf"
+  },
+  "description": {
+    "en": "Shows current heat pump operation, water delta, flow, power, output and COP.",
+    "nl": "Toont actuele warmtepompwerking, waterdelta, debiet, vermogen, output en COP."
+  },
+  "height": 340,
+  "devices": {
+    "type": "app",
+    "singular": true,
+    "filter": {
+      "class": "heatpump",
+      "capabilities": "measure_temperature.outlet,measure_temperature.inlet"
+    }
+  },
+  "api": {
+    "getState": {
+      "method": "GET",
+      "path": "/"
+    }
+  }
+}

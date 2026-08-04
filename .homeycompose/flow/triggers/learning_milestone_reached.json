@@ -23,7 +23,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_building_c"
+      "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=adlar_building_c"
     }
   ],
   "tokens": [

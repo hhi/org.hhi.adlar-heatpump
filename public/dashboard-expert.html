@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adlar Aurora II — Expert Modbus Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 1.5rem; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.5rem; }
+  nav { margin: -1.5rem -1.5rem 1.5rem; padding: 8px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; gap: 8px; flex-wrap: wrap; }
+  nav a { font-size: 12px; font-weight: 600; color: #94a3b8; text-decoration: none; padding: 4px 12px; border-radius: 9999px; border: 1px solid #334155; transition: background 0.15s, color 0.15s; }
+  nav a:hover { background: #334155; color: #f8fafc; }
+  nav a.active { background: #0f172a; color: #38bdf8; border-color: #38bdf8; }
+  .status-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+  .dot.ok { background: #22c55e; }
+  .read-progress { margin-left: auto; font-size: 0.78rem; color: #38bdf8; }
+  .view-toggle { display: inline-flex; gap: 2px; padding: 3px; margin: 0 0 1rem; background: #111827; border: 1px solid #334155; border-radius: 7px; }
+  .view-toggle button { border: 0; background: transparent; color: #94a3b8; padding: 0.35rem 0.75rem; border-radius: 5px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+  .view-toggle button:hover { color: #f8fafc; background: #1e293b; }
+  .view-toggle button.active { color: #e0f2fe; background: #075985; }
+
+  /* Accordion */
+  .block { border: 1px solid #2d3548; border-radius: 10px; margin-bottom: 0.75rem; overflow: visible; }
+  .block-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; background: #1a1f2e; cursor: pointer; user-select: none; }
+  .block-header:hover { background: #1e2433; }
+  .block-title { font-size: 0.9rem; font-weight: 600; color: #cbd5e1; flex: 1; }
+  .block-badge { font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 600; }
+  .badge-ro { background: #1e3a5f; color: #60a5fa; }
+  .badge-rw { background: #14532d; color: #4ade80; }
+  .chevron { font-size: 0.75rem; color: #64748b; transition: transform 0.2s; }
+  .block.open .chevron { transform: rotate(90deg); }
+  .block-body { display: none; }
+  .block.open .block-body { display: block; }
+
+  /* Register tabel */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { background: #161b27; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.04em; padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #2d3548; }
+  td { padding: 0.45rem 0.75rem; border-bottom: 1px solid #1a1f2e; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1a1f2e; }
+  .addr { font-family: monospace; color: #818cf8; }
+  .reg-id { font-family: monospace; color: #38bdf8; font-weight: 600; white-space: nowrap; }
+  .range-warning { display: none; margin-left: 0.35rem; color: #f59e0b; font-weight: 800; }
+  .val-raw { font-family: monospace; color: #f1f5f9; }
+  .val-scaled { color: #94a3b8; font-size: 0.78rem; }
+  .unit { color: #475569; font-size: 0.75rem; }
+  .svc-badge { display: inline-block; font-size: 0.65rem; background: #7c2d12; color: #fca5a5; border-radius: 3px; padding: 0.1rem 0.3rem; margin-left: 0.3rem; }
+  .poll-cell { white-space: nowrap; }
+  .poll-badge { display: inline-block; font-size: 0.65rem; border-radius: 3px; padding: 0.1rem 0.3rem; margin: 0 0.2rem 0.2rem 0; font-weight: 700; text-transform: uppercase; }
+  .poll-superfast { background: #7f1d1d; color: #fecaca; }
+  .poll-fast { background: #713f12; color: #fde68a; }
+  .poll-medium { background: #164e63; color: #a5f3fc; }
+  .poll-slow { background: #312e81; color: #c7d2fe; }
+  .poll-once { background: #334155; color: #cbd5e1; }
+  .poll-none { background: #1f2937; color: #64748b; }
+  .name-cell { max-width: 220px; }
+  .desc-text { font-size: 0.72rem; color: #475569; margin-top: 0.2rem; }
+  .bits-toggle { font-size: 0.7rem; color: #3b82f6; cursor: pointer; text-decoration: underline; margin-left: 0.4rem; }
+  .bits-row td { background: #0f1117; padding: 0.3rem 0.75rem 0.3rem 2rem; }
+  .bits-row { display: none; }
+  .bits-table { font-size: 0.75rem; border-collapse: collapse; }
+  .bits-table td { padding: 0.15rem 0.5rem; border: none; }
+  .bit-on { color: #22c55e; }
+  .bit-off { color: #4b5563; }
+
+  /* Acties */
+  .btn-read { padding: 0.25rem 0.6rem; border-radius: 5px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 0.75rem; cursor: pointer; }
+  .btn-read:hover { background: #1e2433; color: #f1f5f9; }
+  .btn-read:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-read:disabled:hover { background: transparent; color: #94a3b8; }
+  .btn-write { padding: 0.25rem 0.6rem; border-radius: 5px; border: none; background: #1d4ed8; color: #fff; font-size: 0.75rem; cursor: pointer; }
+  .btn-write:hover { background: #2563eb; }
+  .actions-cell { white-space: nowrap; }
+  .reading { color: #64748b; font-size: 0.75rem; font-style: italic; }
+  .value-source { display: inline-block; margin-left: 0.35rem; color: #64748b; font-size: 0.68rem; font-weight: 600; }
+  .value-source.direct { color: #22c55e; }
+  .value-source.cache { color: #38bdf8; }
+
+  /* Dialog / popup */
+  dialog { background: #1e2433; border: 1px solid #2d3548; border-radius: 12px; color: #e2e8f0; padding: 1.5rem; max-width: 420px; width: 100%; }
+  dialog::backdrop { background: rgba(0,0,0,0.6); }
+  dialog h2 { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+  dialog .dlg-addr { font-size: 0.78rem; color: #64748b; margin-bottom: 1rem; font-family: monospace; }
+  dialog .dlg-current { font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem; }
+  dialog .dlg-warning { background: #7c2d12; color: #fca5a5; border-radius: 6px; padding: 0.6rem 0.75rem; font-size: 0.8rem; margin-bottom: 1rem; }
+  dialog label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.4rem; }
+  dialog input[type=number], dialog select { width: 100%; background: #0f1117; border: 1px solid #374151; border-radius: 6px; color: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.9rem; margin-bottom: 0.5rem; }
+  dialog textarea { width: 100%; min-height: 55vh; resize: vertical; background: #0f1117; border: 1px solid #374151; border-radius: 6px; color: #dbeafe; padding: 0.75rem; font: 0.78rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0.75rem 0; }
+  dialog input:focus, dialog select:focus { outline: none; border-color: #3b82f6; }
+  dialog textarea:focus { outline: none; border-color: #3b82f6; }
+  .report-dialog { max-width: 960px; }
+  .report-meta { font-size: 0.78rem; color: #94a3b8; margin-top: 0.35rem; }
+  .dlg-raw-preview { font-size: 0.78rem; color: #64748b; margin-bottom: 0.75rem; }
+  .dlg-range { font-size: 0.75rem; color: #475569; margin-bottom: 1rem; }
+  .dlg-buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.25rem; }
+  .btn-cancel { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #374151; background: transparent; color: #94a3b8; font-size: 0.85rem; cursor: pointer; }
+  .btn-cancel:hover { background: #1a1f2e; }
+  .btn-ok { padding: 0.5rem 1rem; border-radius: 6px; border: none; background: #3b82f6; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+  .btn-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ok:hover:not(:disabled) { background: #2563eb; }
+  .dlg-feedback { font-size: 0.8rem; margin-top: 0.5rem; height: 1em; }
+  .dlg-feedback.ok { color: #22c55e; }
+  .dlg-feedback.err { color: #ef4444; }
+
+  .flash-green td { animation: flashGreen 1.2s ease; }
+  @keyframes flashGreen { 0%,100% { background: transparent; } 30% { background: rgba(34,197,94,0.15); } }
+  .row-reading td { background: rgba(56, 189, 248, 0.07); }
+  .row-reading td:first-child { box-shadow: inset 2px 0 0 #38bdf8; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .filter-search { flex: 1; min-width: 180px; background: #111827; border: 1px solid #334155; border-radius: 7px; color: #f1f5f9; padding: 0.4rem 0.75rem; font-size: 0.82rem; outline: none; }
+  .filter-search:focus { border-color: #3b82f6; }
+  .filter-search::placeholder { color: #475569; }
+  .poll-filters { display: flex; flex-wrap: wrap; gap: 3px; }
+  .poll-filters button { border: 1px solid transparent; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; cursor: pointer; opacity: 0.45; transition: opacity 0.15s; }
+  .poll-filters button.active { opacity: 1; }
+  .poll-filters button.f-superfast { background: #7f1d1d; color: #fecaca; }
+  .poll-filters button.f-fast { background: #713f12; color: #fde68a; }
+  .poll-filters button.f-medium { background: #164e63; color: #a5f3fc; }
+  .poll-filters button.f-slow { background: #312e81; color: #c7d2fe; }
+  .poll-filters button.f-once { background: #334155; color: #cbd5e1; }
+  .poll-filters button.f-manual { background: #1f2937; color: #64748b; border-color: #374151; }
+  .filter-writable { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #94a3b8; cursor: pointer; white-space: nowrap; }
+  .filter-writable input { accent-color: #3b82f6; cursor: pointer; }
+  .filter-out-of-range { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #f59e0b; cursor: pointer; white-space: nowrap; }
+  .filter-out-of-range input { accent-color: #f59e0b; cursor: pointer; }
+  .filter-count { font-size: 0.75rem; color: #475569; white-space: nowrap; margin-left: auto; }
+  .range-summary { min-height: 1rem; margin: -0.55rem 0 1rem; font-size: 0.75rem; color: #64748b; text-align: right; }
+  .range-summary strong { color: #f59e0b; font-weight: 700; }
+  .toolbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .toolbar .view-toggle { margin: 0; }
+  .btn-expand { font-size: 0.75rem; }
+  .roe-label { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #94a3b8; cursor: pointer; -webkit-user-select: none; user-select: none; white-space: nowrap; }
+  .roe-input { display: none; }
+  .roe-switch { position: relative; width: 36px; height: 20px; background: #334155; border-radius: 10px; flex-shrink: 0; transition: background 0.2s; }
+  .roe-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #64748b; transition: transform 0.2s, background 0.2s; }
+  .roe-input:checked + .roe-switch { background: #22c55e; }
+  .roe-input:checked + .roe-switch::after { transform: translateX(16px); background: #fff; }
+  .dlg-hidden { display: none; }
+
+  /* Tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f1117;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    white-space: normal;
+    width: max-content;
+    max-width: min(320px, calc(100vw - 2rem));
+    line-height: 1.25;
+    text-align: left;
+    padding: 0.3rem 0.55rem;
+    border-radius: 5px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+  }
+  .actions-cell [data-tip]::after {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+  @media (prefers-color-scheme: light) {
+    body { background: #f8fafc; color: #0f172a; }
+    h1 { color: #0f172a; }
+    .subtitle { color: #475569; }
+    .status-bar { color: #475569; }
+    .view-toggle { background: #f1f5f9; border-color: #e2e8f0; }
+    .view-toggle button { color: #475569; }
+    .view-toggle button:hover { background: #e2e8f0; color: #0f172a; }
+    .view-toggle button.active { background: #bae6fd; color: #0369a1; }
+    .block { border-color: #e2e8f0; }
+    .block-header { background: #ffffff; }
+    .block-header:hover { background: #f1f5f9; }
+    .block-title { color: #1e293b; }
+    .badge-ro { background: #e0f2fe; color: #0369a1; }
+    .badge-rw { background: #dcfce7; color: #166534; }
+    .chevron { color: #94a3b8; }
+    table { background: #ffffff; }
+    thead th { background: #f1f5f9; color: #475569; border-bottom-color: #e2e8f0; border-right-color: #e2e8f0; }
+    tbody tr { border-bottom-color: #f1f5f9; }
+    tbody tr:hover { background: #f1f5f9; }
+    td { color: #0f172a; border-right-color: #f1f5f9; }
+    .poll-badge { filter: brightness(0.9) saturate(0.8); }
+    .filter-bar { background: #ffffff; border-color: #e2e8f0; }
+    .filter-search { background: #f8fafc; border-color: #e2e8f0; color: #0f172a; }
+    .filter-search::placeholder { color: #94a3b8; }
+    .poll-filters button { border-color: #e2e8f0; color: #475569; background: #f8fafc; }
+    .filter-count, .range-summary { color: #475569; }
+    .toolbar .btn-read, .toolbar .btn-expand { background: #f1f5f9; border-color: #e2e8f0; color: #1e293b; }
+    .toolbar .btn-read:hover, .toolbar .btn-expand:hover { background: #e2e8f0; }
+    [data-tip]::after { background: #ffffff; border-color: #e2e8f0; color: #0f172a; }
+    nav { background: #ffffff; border-bottom-color: #e2e8f0; }
+    nav a { color: #475569; border-color: #e2e8f0; }
+    nav a:hover { background: #e2e8f0; color: #0f172a; }
+    nav a.active { background: #e0f2fe; color: #0284c7; border-color: #0284c7; }
+    .roe-label { color: #475569; }
+    .roe-switch { background: #cbd5e1; }
+    .roe-switch::after { background: #94a3b8; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/">Dashboard</a>
+  <a href="/interactive">Interactief</a>
+  <a href="/live">Live</a>
+  <a href="/expert" class="active">Expert</a>
+  <a href="/changelog">Change Log</a>
+  <a href="/heating-curve">Stooklijn</a>
+</nav>
+<h1>Expert Dashboard</h1>
+<p class="subtitle">Adlar Castra / Aurora II &mdash; volledig registeroverzicht</p>
+
+<div class="status-bar">
+  <span class="dot" id="dot"></span>
+  <span id="status-text">Laden&hellip;</span>
+  <span class="read-progress" id="read-progress"></span>
+</div>
+
+<div class="toolbar">
+  <div class="view-toggle" aria-label="Dashboard weergave">
+    <button type="button" id="view-address" class="active" onclick="setViewMode('address')">Adresweergave</button>
+    <button type="button" id="view-functional" onclick="setViewMode('functional')">Functioneel</button>
+    <button type="button" id="view-unit" onclick="setViewMode('unit')">Eenheid</button>
+  </div>
+  <button type="button" class="btn-read btn-expand" data-tip="Klap alle blokken open en toon beschikbare cachewaarden" onclick="expandAll()">&#9660; Alles uitklappen</button>
+  <button type="button" class="btn-read btn-expand" onclick="collapseAll()">&#9650; Alles inklappen</button>
+  <label class="roe-label" for="read-on-expand-cb" data-tip="Lees registers direct via Modbus bij het uitklappen van een blok">
+    <input type="checkbox" id="read-on-expand-cb" class="roe-input">
+    <span class="roe-switch"></span>
+    &#8635; Lezen bij uitklappen
+  </label>
+  <button type="button" class="btn-read btn-expand" id="report-btn" onclick="openReportDialog()" disabled title="Nog geen cache- of directwaarden beschikbaar">Markdown rapport</button>
+</div>
+
+<div class="filter-bar">
+  <input class="filter-search" id="filter-search" type="search" placeholder="Zoek op naam, ID (P88, L22) of adres…" oninput="onFilterChange()">
+  <div class="poll-filters" id="poll-filters">
+    <button type="button" class="f-superfast" data-group="superfast" onclick="togglePollFilter('superfast',this)">superfast</button>
+    <button type="button" class="f-fast" data-group="fast" onclick="togglePollFilter('fast',this)">fast</button>
+    <button type="button" class="f-medium" data-group="medium" onclick="togglePollFilter('medium',this)">medium</button>
+    <button type="button" class="f-slow" data-group="slow" onclick="togglePollFilter('slow',this)">slow</button>
+    <button type="button" class="f-once" data-group="once" onclick="togglePollFilter('once',this)">once</button>
+    <button type="button" class="f-manual" data-group="manual" onclick="togglePollFilter('manual',this)">manual</button>
+  </div>
+  <label class="filter-writable"><input type="checkbox" id="filter-writable" onchange="onFilterChange()"> Alleen schrijfbaar</label>
+  <label class="filter-out-of-range"><input type="checkbox" id="filter-out-of-range" onchange="onFilterChange()"> Alleen buiten bereik</label>
+  <span class="filter-count" id="filter-count"></span>
+</div>
+<div class="range-summary" id="range-summary"></div>
+
+<div id="blocks-container"></div>
+
+<!-- Write popup -->
+<dialog id="write-dialog">
+  <h2 id="dlg-title">Schrijf naar register</h2>
+  <div class="dlg-addr" id="dlg-addr"></div>
+  <div class="dlg-current" id="dlg-current"></div>
+  <div class="dlg-warning dlg-hidden" id="dlg-warning"></div>
+  <label id="dlg-input-label">Nieuwe waarde</label>
+  <input type="number" id="dlg-input" step="any">
+  <select id="dlg-select" class="dlg-hidden"></select>
+  <div class="dlg-raw-preview" id="dlg-raw-preview"></div>
+  <div class="dlg-range" id="dlg-range"></div>
+  <div class="dlg-buttons">
+    <button type="button" class="btn-cancel" onclick="closeDialog()">Annuleren</button>
+    <button type="button" class="btn-ok" id="dlg-ok" onclick="confirmWrite()">OK Schrijven</button>
+  </div>
+  <div class="dlg-feedback" id="dlg-feedback"></div>
+</dialog>
+
+<!-- Markdown report popup -->
+<dialog id="report-dialog" class="report-dialog">
+  <h2>Markdown rapport</h2>
+  <div class="report-meta" id="report-meta"></div>
+  <textarea id="report-output" readonly spellcheck="false"></textarea>
+  <div class="dlg-buttons">
+    <button type="button" class="btn-cancel" onclick="copyReport()">Kopiëren</button>
+    <button type="button" class="btn-cancel" onclick="downloadReport()">Download .md</button>
+    <button type="button" class="btn-ok" onclick="closeReportDialog()">Sluiten</button>
+  </div>
+  <div class="dlg-feedback" id="report-feedback"></div>
+</dialog>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let blocks = [];
+let functionalBlocks = [];
+let unitBlocks = [];
+let visibleBlocks = [];
+let viewMode = 'address';
+let pendingWrite = null; // { reg, rowEl }
+let filterText = '';
+let filterPollGroups = new Set();
+let filterWritable = false;
+let filterOutOfRange = false;
+const outOfRangeRegisters = new Set();
+const rangeCheckedRegisters = new Set();
+const rangeWarningTips = new Map();
+const readRegisters = new Map();
+const readErrors = new Map();
+const cachedRegisters = new Map();
+const directReadInFlight = new Set();
+let readProgressRun = 0;
+let readProgressClearTimer = null;
+let activeReadAddr = null;
+let cacheRefreshTimer = null;
+let cacheRefreshInFlight = false;
+const CACHE_REFRESH_MS = 5000;
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const r = await fetch('/api/registers');
+    if (!r.ok) throw new Error(r.statusText);
+    blocks = await r.json();
+    functionalBlocks = buildFunctionalBlocks(blocks);
+    unitBlocks = buildUnitBlocks(blocks);
+    visibleBlocks = blocks;
+    renderBlocks();
+    await loadRegisterCache();
+    updateRangeSummary();
+    updateReportButton();
+    document.getElementById('dot').className = 'dot ok';
+    document.getElementById('status-text').textContent = `Registermetadata geladen, ${cachedRegisters.size} cachewaarden beschikbaar`;
+    startCacheRefresh();
+  } catch (e) {
+    document.getElementById('status-text').textContent = 'Fout bij laden registerdata: ' + e.message;
+  }
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+function onFilterChange() {
+  filterText = document.getElementById('filter-search').value.trim().toLowerCase();
+  filterWritable = document.getElementById('filter-writable').checked;
+  filterOutOfRange = document.getElementById('filter-out-of-range').checked;
+  renderBlocks();
+}
+
+function togglePollFilter(group, btn) {
+  if (filterPollGroups.has(group)) {
+    filterPollGroups.delete(group);
+    btn.classList.remove('active');
+  } else {
+    filterPollGroups.add(group);
+    btn.classList.add('active');
+  }
+  renderBlocks();
+}
+
+function applyFilters(sourceBlocks) {
+  let total = 0, shown = 0;
+  const filtered = sourceBlocks.map(block => {
+    const regs = block.registers.filter(reg => {
+      total++;
+      if (filterText) {
+        const addr = '0x' + reg.address.toString(16).padStart(4, '0');
+        const haystack = `${reg.registerId || ''} ${reg.name || ''} ${reg.desc || ''} ${addr} ${reg.address}`.toLowerCase();
+        if (!haystack.includes(filterText)) return false;
+      }
+      if (filterPollGroups.size > 0) {
+        const groups = (reg.pollGroups && reg.pollGroups.length > 0) ? reg.pollGroups : ['manual'];
+        if (!groups.some(g => filterPollGroups.has(g))) return false;
+      }
+      if (filterWritable && (reg.readOnly || block.readOnly)) return false;
+      if (filterOutOfRange && !outOfRangeRegisters.has(reg.address)) return false;
+      shown++;
+      return true;
+    });
+    return { ...block, registers: regs };
+  }).filter(b => b.registers.length > 0);
+
+  const isFiltered = filterText || filterPollGroups.size > 0 || filterWritable || filterOutOfRange;
+  document.getElementById('filter-count').textContent = isFiltered ? `${shown} van ${total} registers` : '';
+  updateRangeSummary();
+  return filtered;
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+function renderBlocks() {
+  const container = document.getElementById('blocks-container');
+  container.innerHTML = '';
+  const source = viewMode === 'functional' ? functionalBlocks : viewMode === 'unit' ? unitBlocks : blocks;
+  visibleBlocks = applyFilters(source);
+  const isFiltered = filterText || filterPollGroups.size > 0 || filterWritable || filterOutOfRange;
+  for (const block of visibleBlocks) {
+    const el = document.createElement('div');
+    el.className = 'block' + (isFiltered ? ' open' : '');
+    el.id = 'block-' + block.id;
+    el.innerHTML = `
+      <div class="block-header" onclick="toggleBlock('${block.id}')">
+        <span class="chevron">&#9654;</span>
+        <span class="block-title">${esc(block.label)}</span>
+        <span class="block-badge ${block.readOnly ? 'badge-ro' : 'badge-rw'}" data-tip="${block.readOnly ? 'Alleen lezen' : 'Lezen en schrijven'}">${block.readOnly ? 'R' : 'R/W'}</span>
+        <button type="button" class="btn-read btn-expand" data-tip="Lees alle registers in dit blok direct via Modbus" onclick="event.stopPropagation();readBlock('${block.id}')">&#8635; Ververs blok</button>
+      </div>
+      <div class="block-body">
+        <table>
+          <thead><tr>
+            <th>Adres</th><th>ID</th><th>Naam</th><th>Poll</th><th>Wire raw</th><th>Registerwaarde</th><th>Geschaald</th><th>Eenheid</th><th>Bereik</th><th></th>
+          </tr></thead>
+          <tbody id="tbody-${block.id}">
+            ${block.registers.map(reg => renderRow(block, reg)).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    container.appendChild(el);
+  }
+  applyRegisterCacheToVisibleRows();
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.getElementById('view-address').classList.toggle('active', mode === 'address');
+  document.getElementById('view-functional').classList.toggle('active', mode === 'functional');
+  document.getElementById('view-unit').classList.toggle('active', mode === 'unit');
+  renderBlocks();
+}
+
+function buildFunctionalBlocks(sourceBlocks) {
+  const categories = [
+    { id: 'func_status', label: 'Status & storingen', match: r => inAddress(r, 0x0000, 0x0028) || hasAny(r, ['fault', 'status', 'state', 'switch', 'relay']) },
+    { id: 'func_heating', label: 'Verwarming', match: r => hasAny(r, ['heating', 'heat', 'floor', 'zone', 'curve', 'stooklijn', 'water outlet', 'water inlet']) || inAddress(r, 0x0301, 0x0303) },
+    { id: 'func_dhw', label: 'Tapwater & retourcirculatie', match: r => hasAny(r, ['dhw', 'hot water', 'tank', 'backwater', 'return water', 'sterilization']) || inAddress(r, 0x080B, 0x080F) || r.address === 0x0054 || r.address === 0x0059 },
+    { id: 'func_cooling', label: 'Koeling', match: r => hasAny(r, ['cooling', 'cool']) || r.address === 0x0300 },
+    { id: 'func_service', label: 'Service & firmware', match: r => r.address === 0x0053 || hasAny(r, ['version', 'firmware', 'protocol', 'manufacturer', 'protection', 'password', 'tooling']) || inAddress(r, 0x0360, 0x0363) || !!r.serviceOnly },
+    { id: 'func_compressor', label: 'Compressor & ventilator', match: r => hasAny(r, ['compressor', 'fan', 'ipm', 'four-way', 'strong mode', 'powerful mode']) || inAddress(r, 0x0040, 0x0048) },
+    { id: 'func_eev', label: 'EEV & ventielregeling', match: r => hasAny(r, ['eev', 'valve', 'enthalpy', 'superheat', 'opening', 'coeff']) },
+    { id: 'func_evi', label: 'EVI & vloeistofinjector', match: r => hasAny(r, ['evi', 'liquid injection']) },
+    { id: 'func_freqshield', label: 'Frequentie-afscherming', match: r => hasAny(r, ['freq shield', 'frequency shield']) },
+    { id: 'func_defrost', label: 'Ontdooiing & antibevriezing', match: r => hasAny(r, ['defrost', 'antifreeze', 'anti-condensation', 'throttle bypass', 'dew point', 'constant temp operation']) },
+    { id: 'func_water', label: 'Watercircuit', match: r => hasAny(r, ['water', 'flow', 'pump', 'pressure', 'buffer', 'tank temp']) },
+    { id: 'func_loadshedding', label: 'Load shedding & cascading', match: r => hasAny(r, ['load shedding', 'loading cycle', 'emergency stop return', 'start ratio']) },
+    { id: 'func_dualzone', label: 'Dubbele zone & mengklep', match: r => hasAny(r, ['dual', 'mixing']) },
+    { id: 'func_workcond', label: 'Werkconditie-ijkpunten', match: r => hasAny(r, ['working cond', 'pfc']) },
+    { id: 'func_energy', label: 'Energie & COP', match: r => hasAny(r, ['energy', 'power', 'current', 'voltage', 'consumption', 'cop']) },
+    { id: 'func_smartgrid', label: "Smart Grid & commando's", match: r => hasAny(r, ['smart grid', 'command', 'mode']) || inAddress(r, 0x0330, 0x0345) || !!r.isCoil },
+    { id: 'func_temperature', label: 'Temperatuur', match: r => r.unit === '°C' || !!r.isTemperatureRegister },
+  ];
+
+  const flat = [];
+  for (const block of sourceBlocks) {
+    for (const reg of block.registers) {
+      flat.push({ ...reg, sourceBlockId: block.id, sourceBlockLabel: block.label, readOnly: reg.readOnly || block.readOnly });
+    }
+  }
+
+  const matchedAddresses = new Set();
+  const result = categories.map(category => {
+    const registers = flat.filter(reg => {
+      if (!category.match(reg)) return false;
+      matchedAddresses.add(reg.address);
+      return true;
+    });
+    return {
+      id: category.id,
+      label: category.label,
+      readOnly: registers.every(reg => reg.readOnly),
+      registers,
+    };
+  }).filter(block => block.registers.length > 0);
+
+  const uncharted = flat.filter(reg => !matchedAddresses.has(reg.address) && (reg.sourceBlockId === 'blok10_p_uncharted' || reg.sourceBlockId === 'blok11_l_uncharted'));
+  uncharted.forEach(reg => matchedAddresses.add(reg.address));
+
+  const remaining = flat.filter(reg => !matchedAddresses.has(reg.address) && reg.sourceBlockId !== 'blok10_p_uncharted' && reg.sourceBlockId !== 'blok11_l_uncharted');
+  if (remaining.length > 0) {
+    result.push({
+      id: 'func_overig',
+      label: 'Overig',
+      readOnly: remaining.every(reg => reg.readOnly),
+      registers: remaining,
+    });
+  }
+
+  if (uncharted.length > 0) {
+    result.push({
+      id: 'func_uncharted',
+      label: 'Overig — ongedocumenteerd',
+      readOnly: true,
+      registers: uncharted,
+    });
+  }
+
+  return result;
+}
+
+function buildUnitBlocks(sourceBlocks) {
+  const flat = [];
+  for (const block of sourceBlocks) {
+    for (const reg of block.registers) {
+      flat.push({ ...reg, sourceBlockId: block.id, sourceBlockLabel: block.label, readOnly: reg.readOnly || block.readOnly });
+    }
+  }
+
+  const unitMap = new Map();
+  for (const reg of flat) {
+    const unit = reg.unit || '';
+    if (!unitMap.has(unit)) unitMap.set(unit, []);
+    unitMap.get(unit).push(reg);
+  }
+
+  const unitOrder = ['°C', 'Hz', '%', 'min', 's', 'W', 'kW', 'kWh', 'A', 'V', 'RPM', 'Pa', 'bar', 'days', 'P'];
+  const result = [];
+  const handled = new Set();
+
+  for (const unit of unitOrder) {
+    if (!unitMap.has(unit)) continue;
+    const regs = unitMap.get(unit);
+    result.push({
+      id: 'unit_' + (unit || 'none').replace(/[^a-zA-Z0-9]/g, '_'),
+      label: unit || '(geen eenheid)',
+      readOnly: regs.every(r => r.readOnly),
+      registers: regs.sort((a, b) => a.address - b.address),
+    });
+    handled.add(unit);
+  }
+
+  for (const [unit, regs] of unitMap.entries()) {
+    if (handled.has(unit)) continue;
+    result.push({
+      id: 'unit_' + (unit || 'none').replace(/[^a-zA-Z0-9]/g, '_'),
+      label: unit || '(geen eenheid)',
+      readOnly: regs.every(r => r.readOnly),
+      registers: regs.sort((a, b) => a.address - b.address),
+    });
+  }
+
+  return result;
+}
+
+function hasAny(reg, terms) {
+  const text = `${reg.key || ''} ${reg.registerId || ''} ${reg.name || ''} ${reg.desc || ''}`.toLowerCase();
+  return terms.some(term => new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(text));
+}
+
+function inAddress(reg, start, end) {
+  return reg.address >= start && reg.address <= end;
+}
+
+function renderRow(block, reg) {
+  const addrHex = '0x' + reg.address.toString(16).toUpperCase().padStart(4, '0');
+  const range = rangeStr(reg);
+  const rangeWarningTip = rangeWarningTips.get(reg.address);
+  const rangeWarningAttrs = outOfRangeRegisters.has(reg.address)
+    ? ` style="display:inline-block"${rangeWarningTip ? ` data-tip="${esc(rangeWarningTip)}"` : ''}`
+    : '';
+  const nameHtml = `${esc(reg.name || reg.key)}${reg.serviceOnly ? '<span class="svc-badge">service</span>' : ''}${reg.desc ? `<div class="desc-text">${esc(reg.desc)}</div>` : ''}`;
+  const hasBits = reg.bits && Object.keys(reg.bits).length > 0;
+  const bitsBtn = hasBits ? `<span class="bits-toggle" data-tip="Toon/verberg afzonderlijke bits" onclick="toggleBits('${reg.address}')">bits</span>` : '';
+  const canWrite = !block.readOnly && !reg.readOnly;
+  const fc = reg.isCoil ? 'FC01' : 'FC03';
+  const readTip = `Lees register direct (${fc}) — adres ${addrHex}`;
+  const writeTip = reg.serviceOnly
+    ? `Schrijf naar ${reg.name || reg.key} ⚠ service-only register`
+    : `Schrijf naar ${reg.name || reg.key}`;
+  const writeBtn = canWrite
+    ? `<button class="btn-write" data-tip="${esc(writeTip)}" onclick="openWriteDialog(${reg.address})">&#9998;</button>`
+    : '';
+
+  return `
+    <tr id="row-${reg.address}" data-addr="${reg.address}" data-multiply="${reg.multiply||1}" data-iscoil="${!!reg.isCoil}">
+      <td class="addr">${addrHex}${bitsBtn}</td>
+      <td class="reg-id">${esc(reg.registerId || '')}<span class="range-warning" id="range-warn-${reg.address}" aria-label="Waarde buiten gedocumenteerd bereik"${rangeWarningAttrs}>!</span></td>
+      <td class="name-cell">${nameHtml}</td>
+      <td class="poll-cell">${renderPollGroups(reg.pollGroups)}</td>
+      <td class="val-raw" id="wire-${reg.address}">—</td>
+      <td class="val-raw" id="raw-${reg.address}">—</td>
+      <td class="val-scaled" id="scaled-${reg.address}">—</td>
+      <td class="unit">${esc(reg.unit||'')}</td>
+      <td class="unit">${range}</td>
+      <td class="actions-cell">
+        <button class="btn-read" data-tip="${esc(readTip)}" onclick="readRow(${reg.address},${!!reg.isCoil},${reg.multiply||1})">&#8635;</button>
+        ${writeBtn}
+      </td>
+    </tr>
+    ${hasBits ? `<tr class="bits-row" id="bits-${reg.address}"><td colspan="10">${renderBitsTable(reg)}</td></tr>` : ''}`;
+}
+
+function renderPollGroups(pollGroups) {
+  if (!pollGroups || pollGroups.length === 0) {
+    return '<span class="poll-badge poll-none" data-tip="Niet automatisch gepolld; alleen direct lezen via knop">manual</span>';
+  }
+
+  return pollGroups.map(group => {
+    const css = 'poll-' + group;
+    const tip = group === 'superfast'
+      ? 'Supersnel/adaptief gepolld'
+      : `Gepolld via ${group}`;
+    return `<span class="poll-badge ${css}" data-tip="${esc(tip)}">${esc(group)}</span>`;
+  }).join('');
+}
+
+function renderBitsTable(reg) {
+  if (!reg.bits) return '';
+  const rows = Object.entries(reg.bits).map(([name, mask]) =>
+    `<tr><td class="bit-off" id="bit-${reg.address}-${mask}">○</td><td>${esc(name)}</td><td style="color:#475569;font-family:monospace;">bit ${Math.log2(mask)|0}</td></tr>`
+  ).join('');
+  return `<table class="bits-table">${rows}</table>`;
+}
+
+function rangeStr(reg) {
+  if (reg.isCoil) return 'bool';
+  if (reg.min != null && reg.max != null) {
+    const mul = scaleMultiply(reg);
+    return `${(reg.min*mul).toFixed(mul<1?1:0)}–${(reg.max*mul).toFixed(mul<1?1:0)}`;
+  }
+  return '—';
+}
+
+function scaleMultiply(reg) {
+  return reg.scaleMultiply || reg.multiply || 1;
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toggle accordion ──────────────────────────────────────────────────────────
+function toggleBlock(id) {
+  const el = document.getElementById('block-' + id);
+  const wasOpen = el.classList.contains('open');
+  el.classList.toggle('open');
+  applyRegisterCacheToVisibleRows();
+  if (!wasOpen && el.classList.contains('open') && document.getElementById('read-on-expand-cb').checked) {
+    readBlock(id);
+  }
+}
+
+async function expandAll() {
+  visibleBlocks.forEach(block => {
+    const el = document.getElementById('block-' + block.id);
+    if (el && !el.classList.contains('open')) el.classList.add('open');
+  });
+  applyRegisterCacheToVisibleRows();
+
+  if (document.getElementById('read-on-expand-cb').checked) {
+    const totalRegs = visibleBlocks.reduce((sum, b) => sum + b.registers.length, 0);
+    const progress = startReadProgress(totalRegs, 'Alles lezen');
+    for (const block of visibleBlocks) {
+      await readBlock(block.id, progress);
+    }
+    finishReadProgress(progress);
+  }
+}
+
+function collapseAll() {
+  visibleBlocks.forEach(block => {
+    const el = document.getElementById('block-' + block.id);
+    if (el) el.classList.remove('open');
+  });
+}
+
+function toggleBits(addr) {
+  const row = document.getElementById('bits-' + addr);
+  if (row) row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
+}
+
+// ── Direct lezen ────────────────────────────────────────────────────────────────
+async function loadRegisterCache() {
+  if (cacheRefreshInFlight) return;
+  cacheRefreshInFlight = true;
+  try {
+    const r = await fetch('/api/register-cache');
+    if (!r.ok) return;
+    const entries = await r.json();
+    cachedRegisters.clear();
+    for (const entry of entries) {
+      cachedRegisters.set(entry.address, entry);
+    }
+    applyRegisterCacheToVisibleRows();
+    updateCacheStatus(entries.length);
+  } catch {
+    // Expert blijft bruikbaar met handmatige directe reads.
+  } finally {
+    cacheRefreshInFlight = false;
+  }
+}
+
+function startCacheRefresh() {
+  if (cacheRefreshTimer) clearInterval(cacheRefreshTimer);
+  cacheRefreshTimer = setInterval(loadRegisterCache, CACHE_REFRESH_MS);
+}
+
+function updateCacheStatus(count) {
+  const status = document.getElementById('status-text');
+  if (!status) return;
+  const ts = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  status.textContent = `Registermetadata geladen, ${count} cachewaarden beschikbaar · cache bijgewerkt ${ts}`;
+}
+
+function applyRegisterCacheToVisibleRows() {
+  for (const entry of cachedRegisters.values()) {
+    if (directReadInFlight.has(entry.address)) continue;
+    applyRegisterValue(entry.address, entry.rawValue, entry.scaledValue, entry.isCoil, 'cache', entry.wireRawValue);
+  }
+}
+
+function applyRegisterValue(addr, rawValue, scaledValue, isCoil, source, wireRawValue = rawValue) {
+  const wireEl = document.getElementById('wire-' + addr);
+  const rawEl = document.getElementById('raw-' + addr);
+  const scEl  = document.getElementById('scaled-' + addr);
+  if (!wireEl || !rawEl || !scEl) return;
+
+  const displayValue = isCoil ? (rawValue ? '1 (aan)' : '0 (uit)') : String(rawValue);
+  wireEl.textContent = String(wireRawValue);
+  rawEl.innerHTML = `${displayValue} <span class="value-source ${source}">${source === 'direct' ? 'direct' : 'cache'}</span>`;
+  scEl.textContent = isCoil ? '' : String(scaledValue);
+  recordRegisterRead(addr, rawValue, isCoil ? null : scaledValue, isCoil, source, wireRawValue);
+  updateRangeWarning(addr, isCoil ? null : scaledValue);
+  updateBits(addr, rawValue);
+}
+
+async function readRow(addr, isCoil, multiply) {
+  const rawEl = document.getElementById('raw-' + addr);
+  const scEl  = document.getElementById('scaled-' + addr);
+  directReadInFlight.add(addr);
+  rawEl.innerHTML = '<span class="reading">…</span>';
+
+  try {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const r = await fetch('/api/expert/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: addr, isCoil, multiply }),
+        });
+        const j = await r.json();
+        if (j.ok) {
+          cachedRegisters.set(addr, {
+            address: addr,
+            wireRawValue: j.rawValue,
+            rawValue: j.rawValue,
+            scaledValue: isCoil ? null : j.scaledValue,
+            isCoil,
+            source: 'direct',
+          });
+          applyRegisterValue(addr, j.rawValue, isCoil ? null : j.scaledValue, isCoil, 'direct');
+          flashRow(addr);
+          return;
+        }
+        if (attempt < 2) { await sleep(r.status === 503 ? 4000 : 600); continue; }
+        rawEl.textContent = '⚠ ' + (j.error || 'fout');
+        scEl.textContent = '';
+        recordRegisterError(addr, j.error || 'fout');
+        updateRangeWarning(addr, null);
+      } catch (e) {
+        if (attempt < 2) { await sleep(600); continue; }
+        rawEl.textContent = '⚠ ' + e.message;
+        scEl.textContent = '';
+        recordRegisterError(addr, e.message);
+        updateRangeWarning(addr, null);
+      }
+    }
+  } finally {
+    directReadInFlight.delete(addr);
+  }
+}
+
+function recordRegisterRead(addr, rawValue, scaledValue, isCoil, source = 'direct', wireRawValue = rawValue) {
+  readErrors.delete(addr);
+  readRegisters.set(addr, {
+    wireRawValue,
+    rawValue,
+    scaledValue,
+    isCoil,
+    source,
+    readAt: new Date(),
+  });
+  updateReportButton();
+}
+
+function recordRegisterError(addr, message) {
+  readRegisters.delete(addr);
+  readErrors.set(addr, {
+    message,
+    readAt: new Date(),
+  });
+  updateReportButton();
+}
+
+function updateReportButton() {
+  const btn = document.getElementById('report-btn');
+  if (!btn) return;
+  const disabled = readRegisters.size === 0;
+  btn.disabled = disabled;
+  const tip = disabled
+    ? 'Nog geen cache- of directwaarden beschikbaar'
+    : 'Maak een Markdown rapport van de gelezen registers';
+  btn.title = tip;
+  btn.setAttribute('data-tip', tip);
+}
+
+async function readBlock(blockId, progress = null) {
+  const block = visibleBlocks.find(b => b.id === blockId);
+  if (!block) return;
+  const ownProgress = progress === null;
+  const activeProgress = progress || startReadProgress(block.registers.length, 'Blok lezen');
+
+  // Lees registers met korte pauze om Modbus niet te overbelasten
+  for (const reg of block.registers) {
+    setReadProgressCurrent(activeProgress, reg);
+    setActiveReadRow(reg.address);
+    await readRow(reg.address, !!reg.isCoil, reg.multiply || 1);
+    incrementReadProgress(activeProgress);
+    await sleep(120);
+  }
+
+  if (ownProgress) finishReadProgress(activeProgress);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function startReadProgress(total, label) {
+  const progress = { token: ++readProgressRun, done: 0, total, label };
+  if (readProgressClearTimer) clearTimeout(readProgressClearTimer);
+  renderReadProgress(progress);
+  return progress;
+}
+
+function incrementReadProgress(progress) {
+  if (!progress || progress.token !== readProgressRun) return;
+  progress.done += 1;
+  renderReadProgress(progress);
+}
+
+function setReadProgressCurrent(progress, reg) {
+  if (!progress || progress.token !== readProgressRun) return;
+  progress.current = `${formatAddress(reg.address)} ${reg.registerId || reg.key || reg.name || ''}`.trim();
+  renderReadProgress(progress);
+}
+
+function finishReadProgress(progress) {
+  if (!progress || progress.token !== readProgressRun) return;
+  progress.done = progress.total;
+  progress.current = null;
+  renderReadProgress(progress, true);
+  readProgressClearTimer = setTimeout(() => {
+    if (progress.token === readProgressRun) {
+      document.getElementById('read-progress').textContent = '';
+      setActiveReadRow(null);
+    }
+  }, 4000);
+}
+
+function renderReadProgress(progress, finished = false) {
+  const el = document.getElementById('read-progress');
+  if (!el || !progress) return;
+  const prefix = finished ? 'Gereed' : progress.label;
+  const current = !finished && progress.current ? ` · bezig ${progress.current}` : '';
+  el.textContent = `${prefix}: ${progress.done}/${progress.total} registers${current}`;
+}
+
+function getRangeEligibleRegisterCount() {
+  const seen = new Set();
+  const source = viewMode === 'functional' ? functionalBlocks : viewMode === 'unit' ? unitBlocks : blocks;
+  source.forEach(block => {
+    block.registers.forEach(reg => {
+      if (!reg.isCoil && (reg.min != null || reg.max != null)) seen.add(reg.address);
+    });
+  });
+  return seen.size;
+}
+
+function updateRangeSummary() {
+  const el = document.getElementById('range-summary');
+  if (!el) return;
+  const total = getRangeEligibleRegisterCount();
+  if (total === 0) {
+    el.textContent = '';
+    return;
+  }
+  const checked = rangeCheckedRegisters.size;
+  const out = outOfRangeRegisters.size;
+  const hint = filterOutOfRange && checked === 0
+    ? ' Nog geen bereikcontrole uitgevoerd. Lees eerst een blok of gebruik Alles uitklappen.'
+    : '';
+  el.innerHTML = `Bereikcontrole: ${checked} van ${total} registers met gedocumenteerd bereik gecontroleerd. <strong>${out}</strong> buiten bereik.${hint}`;
+}
+
+function findVisibleRegister(addr) {
+  const block = visibleBlocks.find(b => b.registers.some(r => r.address === addr));
+  return block ? block.registers.find(r => r.address === addr) : null;
+}
+
+function updateRangeWarning(addr, scaledValue) {
+  const warn = document.getElementById('range-warn-' + addr);
+  if (!warn) return;
+
+  const reg = findVisibleRegister(addr);
+  const value = Number(scaledValue);
+  if (!reg || reg.isCoil || !Number.isFinite(value) || (reg.min == null && reg.max == null)) {
+    rangeCheckedRegisters.delete(addr);
+    outOfRangeRegisters.delete(addr);
+    rangeWarningTips.delete(addr);
+    warn.style.display = 'none';
+    warn.removeAttribute('data-tip');
+    updateRangeSummary();
+    return;
+  }
+
+  rangeCheckedRegisters.add(addr);
+  const mul = scaleMultiply(reg);
+  const min = reg.min == null ? null : reg.min * mul;
+  const max = reg.max == null ? null : reg.max * mul;
+  const below = min != null && value < min;
+  const above = max != null && value > max;
+
+  if (!below && !above) {
+    outOfRangeRegisters.delete(addr);
+    rangeWarningTips.delete(addr);
+    warn.style.display = 'none';
+    warn.removeAttribute('data-tip');
+    updateRangeSummary();
+    return;
+  }
+
+  outOfRangeRegisters.add(addr);
+  const expected = min != null && max != null
+    ? `${formatRangeNumber(min, mul)}–${formatRangeNumber(max, mul)}`
+    : (min != null ? `minimaal ${formatRangeNumber(min, mul)}` : `maximaal ${formatRangeNumber(max, mul)}`);
+  const unit = reg.unit ? ` ${reg.unit}` : '';
+  const tip = `Waarde buiten gedocumenteerd bereik: ${value}${unit}, verwacht ${expected}${unit}`;
+  rangeWarningTips.set(addr, tip);
+  warn.style.display = 'inline-block';
+  warn.setAttribute('data-tip', tip);
+  updateRangeSummary();
+}
+
+function formatRangeNumber(value, mul) {
+  return Number(value).toFixed(mul < 1 ? 1 : 0);
+}
+
+// ── Markdown rapport ─────────────────────────────────────────────────────────
+function openReportDialog() {
+  if (readRegisters.size === 0) return;
+
+  const report = buildMarkdownReport();
+  const output = document.getElementById('report-output');
+  output.value = report;
+  document.getElementById('report-meta').textContent = `${readRegisters.size} gelezen registers, ${readErrors.size} leesfouten`;
+  document.getElementById('report-feedback').textContent = '';
+  document.getElementById('report-feedback').className = 'dlg-feedback';
+  document.getElementById('report-dialog').showModal();
+  output.focus();
+  output.select();
+}
+
+function closeReportDialog() {
+  document.getElementById('report-dialog').close();
+}
+
+async function copyReport() {
+  const output = document.getElementById('report-output');
+  const fb = document.getElementById('report-feedback');
+  try {
+    await navigator.clipboard.writeText(output.value);
+    fb.textContent = 'Gekopieerd';
+    fb.className = 'dlg-feedback ok';
+  } catch (e) {
+    output.focus();
+    output.select();
+    document.execCommand('copy');
+    fb.textContent = 'Gekopieerd';
+    fb.className = 'dlg-feedback ok';
+  }
+}
+
+function downloadReport() {
+  const output = document.getElementById('report-output');
+  const stamp = compactDateStamp(new Date());
+  const blob = new Blob([output.value], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `modbus-expert-rapport-${stamp}.md`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function buildMarkdownReport() {
+  const now = new Date();
+  const totalRegisters = getAllRegisterCount();
+  const totalRange = getRangeEligibleRegisterCount();
+  const visibleReadRows = getVisibleReadRows();
+  const visibleErrorRows = getVisibleErrorRows();
+  const outOfRangeRows = visibleReadRows.filter(row => outOfRangeRegisters.has(row.reg.address));
+  const lines = [];
+
+  lines.push('# Modbus Expert Dashboard Rapport');
+  lines.push('');
+  lines.push(`Datum: ${formatDateTime(now)}`);
+  lines.push(`Weergave: ${viewMode === 'functional' ? 'Functioneel' : viewMode === 'unit' ? 'Eenheid' : 'Adresweergave'}`);
+  lines.push(`Filters: ${activeFilterDescription()}`);
+  lines.push('');
+  lines.push('## Samenvatting');
+  lines.push('');
+  lines.push(`- Gelezen registers: ${readRegisters.size} van ${totalRegisters} totaal`);
+  lines.push(`- Registers met gedocumenteerd bereik gecontroleerd: ${rangeCheckedRegisters.size} van ${totalRange}`);
+  lines.push(`- Buiten bereik: ${outOfRangeRegisters.size}`);
+  lines.push(`- Leesfouten: ${readErrors.size}`);
+  lines.push(`- Registers in huidige weergave opgenomen in rapport: ${visibleReadRows.length}`);
+  lines.push(`- Cachewaarden: ${visibleReadRows.filter(row => row.read.source === 'cache').length}`);
+  lines.push(`- Direct gelezen waarden: ${visibleReadRows.filter(row => row.read.source === 'direct').length}`);
+  lines.push('');
+
+  lines.push('## Registers buiten bereik');
+  lines.push('');
+  if (outOfRangeRows.length === 0) {
+    lines.push('Geen registers buiten bereik gevonden in de gecontroleerde registers van de huidige weergave.');
+  } else {
+    lines.push('| Register | Adres | Naam | Waarde | Bereik | Eenheid |');
+    lines.push('|---|---:|---|---:|---:|---|');
+    outOfRangeRows.forEach(row => {
+      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(reportValue(row))} | ${md(rangeStr(row.reg))} | ${md(row.reg.unit || '')} |`);
+    });
+  }
+  lines.push('');
+
+  lines.push('## Leesfouten');
+  lines.push('');
+  if (visibleErrorRows.length === 0) {
+    lines.push('Geen leesfouten in de huidige weergave.');
+  } else {
+    lines.push('| Register | Adres | Naam | Fout | Tijd |');
+    lines.push('|---|---:|---|---|---|');
+    visibleErrorRows.forEach(row => {
+      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(row.error.message)} | ${formatDateTime(row.error.readAt)} |`);
+    });
+  }
+  lines.push('');
+
+  lines.push('## Gelezen registers');
+  lines.push('');
+  if (visibleReadRows.length === 0) {
+    lines.push('Geen gelezen registers in de huidige gefilterde weergave.');
+  } else {
+    lines.push('| Register | Adres | Naam | Wire raw | Raw | Geschaald | Bron | Bereik | Status | Tijd |');
+    lines.push('|---|---:|---|---:|---:|---:|---|---|---|---|');
+    visibleReadRows.forEach(row => {
+      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(String(row.read.wireRawValue ?? row.read.rawValue))} | ${md(String(row.read.rawValue))} | ${md(reportValue(row))} | ${md(row.read.source === 'direct' ? 'direct' : 'cache')} | ${md(rangeStr(row.reg))} | ${md(reportStatus(row.reg))} | ${formatDateTime(row.read.readAt)} |`);
+    });
+  }
+
+  return lines.join('\n');
+}
+
+function getVisibleReadRows() {
+  const rows = [];
+  visibleBlocks.forEach(block => {
+    block.registers.forEach(reg => {
+      const read = readRegisters.get(reg.address);
+      if (read) rows.push({ block, reg, read });
+    });
+  });
+  return rows;
+}
+
+function getVisibleErrorRows() {
+  const rows = [];
+  visibleBlocks.forEach(block => {
+    block.registers.forEach(reg => {
+      const error = readErrors.get(reg.address);
+      if (error) rows.push({ block, reg, error });
+    });
+  });
+  return rows;
+}
+
+function getAllRegisterCount() {
+  const seen = new Set();
+  blocks.forEach(block => {
+    block.registers.forEach(reg => seen.add(reg.address));
+  });
+  return seen.size;
+}
+
+function activeFilterDescription() {
+  const filters = [];
+  if (filterText) filters.push(`zoekterm "${filterText}"`);
+  if (filterPollGroups.size > 0) filters.push(`pollgroep ${Array.from(filterPollGroups).join(', ')}`);
+  if (filterWritable) filters.push('alleen schrijfbaar');
+  if (filterOutOfRange) filters.push('alleen buiten bereik');
+  return filters.length > 0 ? filters.join('; ') : 'geen';
+}
+
+function reportValue(row) {
+  if (row.read.isCoil) return row.read.rawValue ? 'aan' : 'uit';
+  return String(row.read.scaledValue);
+}
+
+function reportStatus(reg) {
+  if (outOfRangeRegisters.has(reg.address)) return 'buiten bereik';
+  if (rangeCheckedRegisters.has(reg.address)) return 'binnen bereik';
+  return 'gelezen';
+}
+
+function formatAddress(addr) {
+  return '0x' + addr.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function formatDateTime(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  const pad = value => String(value).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function compactDateStamp(date) {
+  const pad = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+}
+
+function md(value) {
+  return String(value == null ? '' : value).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+}
+
+function updateBits(addr, rawValue) {
+  const bitsRow = document.getElementById('bits-' + addr);
+  if (!bitsRow) return;
+  const block = visibleBlocks.find(b => b.registers.some(r => r.address === addr));
+  if (!block) return;
+  const reg = block.registers.find(r => r.address === addr);
+  if (!reg || !reg.bits) return;
+  for (const [, mask] of Object.entries(reg.bits)) {
+    const el = document.getElementById('bit-' + addr + '-' + mask);
+    if (!el) continue;
+    const on = (rawValue & Number(mask)) !== 0;
+    el.textContent = on ? '●' : '○';
+    el.className = on ? 'bit-on' : 'bit-off';
+  }
+}
+
+function flashRow(addr) {
+  const row = document.getElementById('row-' + addr);
+  if (!row) return;
+  row.classList.remove('flash-green');
+  void row.offsetWidth; // reflow
+  row.classList.add('flash-green');
+}
+
+function setActiveReadRow(addr) {
+  if (activeReadAddr !== null) {
+    const prev = document.getElementById('row-' + activeReadAddr);
+    if (prev) prev.classList.remove('row-reading');
+  }
+  activeReadAddr = addr;
+  if (addr !== null) {
+    const row = document.getElementById('row-' + addr);
+    if (row) {
+      row.classList.add('row-reading');
+      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+}
+
+// ── Write dialog ──────────────────────────────────────────────────────────────
+function openWriteDialog(addr) {
+  const block = visibleBlocks.find(b => b.registers.some(r => r.address === addr));
+  if (!block) return;
+  const reg = block.registers.find(r => r.address === addr);
+  if (!reg) return;
+
+  pendingWrite = { reg, addr };
+
+  const addrHex = '0x' + addr.toString(16).toUpperCase().padStart(4, '0');
+  document.getElementById('dlg-title').textContent = 'Schrijf naar ' + (reg.name || reg.key);
+  document.getElementById('dlg-addr').textContent = `${reg.registerId ? reg.registerId + '  ·  ' : ''}${addrHex}${reg.isCoil ? '  ·  Type: Coil (FC05)' : '  ·  FC06'}`;
+  document.getElementById('dlg-feedback').textContent = '';
+  document.getElementById('dlg-feedback').className = 'dlg-feedback';
+
+  // Haal huidige waarde op
+  const rawEl = document.getElementById('raw-' + addr);
+  const curRaw = rawEl ? rawEl.textContent : '—';
+  document.getElementById('dlg-current').textContent = 'Huidige waarde: ' + curRaw;
+
+  // Waarschuwing serviceOnly
+  const warn = document.getElementById('dlg-warning');
+  if (reg.serviceOnly) {
+    warn.textContent = '⚠ Service-only register. Ongeldige waarden kunnen de warmtepomp beschadigen. Alleen voor servicemonteurs.';
+    warn.classList.remove('dlg-hidden');
+  } else {
+    warn.classList.add('dlg-hidden');
+  }
+
+  // Input of select
+  const inputEl  = document.getElementById('dlg-input');
+  const selectEl = document.getElementById('dlg-select');
+
+  if (reg.isCoil) {
+    inputEl.classList.add('dlg-hidden');
+    selectEl.classList.remove('dlg-hidden');
+    selectEl.innerHTML = '<option value="1">Aan (1)</option><option value="0">Uit (0)</option>';
+    document.getElementById('dlg-input-label').textContent = 'Nieuwe toestand';
+    document.getElementById('dlg-raw-preview').textContent = '';
+    document.getElementById('dlg-range').textContent = 'Type: boolean coil';
+  } else {
+    inputEl.classList.remove('dlg-hidden');
+    selectEl.classList.add('dlg-hidden');
+    const mul = scaleMultiply(reg);
+    document.getElementById('dlg-input-label').textContent = 'Nieuwe waarde' + (reg.unit ? ' (' + reg.unit + ')' : '');
+    inputEl.value = '';
+    inputEl.step = mul < 1 ? String(mul) : '1';
+    if (reg.min != null) inputEl.min = String(reg.min * mul);
+    if (reg.max != null) inputEl.max = String(reg.max * mul);
+    document.getElementById('dlg-range').textContent = rangeStr(reg) + (reg.unit ? ' ' + reg.unit : '');
+    inputEl.oninput = () => updateRawPreview(reg);
+    updateRawPreview(reg);
+  }
+
+  validateDlgOk();
+  inputEl.oninput = () => { updateRawPreview(reg); validateDlgOk(); };
+  document.getElementById('write-dialog').showModal();
+}
+
+function updateRawPreview(reg) {
+  const inputEl = document.getElementById('dlg-input');
+  const previewEl = document.getElementById('dlg-raw-preview');
+  const v = parseFloat(inputEl.value);
+  if (isNaN(v)) { previewEl.textContent = ''; return; }
+  const mul = scaleMultiply(reg);
+  const raw = Math.round(v / mul);
+  previewEl.textContent = '→ Registerwaarde: ' + raw;
+}
+
+function validateDlgOk() {
+  const reg = pendingWrite ? pendingWrite.reg : null;
+  const btn = document.getElementById('dlg-ok');
+  if (!reg) { btn.disabled = true; return; }
+  if (reg.isCoil) { btn.disabled = false; return; }
+  const v = parseFloat(document.getElementById('dlg-input').value);
+  if (isNaN(v)) { btn.disabled = true; return; }
+  const mul = scaleMultiply(reg);
+  const ok = (reg.min == null || v >= reg.min * mul) && (reg.max == null || v <= reg.max * mul);
+  btn.disabled = !ok;
+}
+
+function closeDialog() {
+  document.getElementById('write-dialog').close();
+  pendingWrite = null;
+}
+
+async function confirmWrite() {
+  if (!pendingWrite) return;
+  const { reg, addr } = pendingWrite;
+  const fb = document.getElementById('dlg-feedback');
+  fb.textContent = 'Bezig…'; fb.className = 'dlg-feedback';
+
+  let rawValue;
+  if (reg.isCoil) {
+    rawValue = parseInt(document.getElementById('dlg-select').value, 10);
+  } else {
+    const v = parseFloat(document.getElementById('dlg-input').value);
+    rawValue = Math.round(v / scaleMultiply(reg));
+  }
+
+  try {
+    const r = await fetch('/api/expert/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: addr, rawValue, isCoil: !!reg.isCoil }),
+    });
+    const j = await r.json();
+    if (j.ok) {
+      fb.textContent = 'Opgeslagen'; fb.className = 'dlg-feedback ok';
+      setTimeout(async () => {
+        closeDialog();
+        await sleep(1500);
+        readRow(addr, !!reg.isCoil, reg.multiply || 1);
+      }, 800);
+    } else {
+      fb.textContent = j.error || 'Fout'; fb.className = 'dlg-feedback err';
+    }
+  } catch (e) {
+    fb.textContent = e.message; fb.className = 'dlg-feedback err';
+  }
+}
+
+// Sluit dialog bij klik buiten
+document.getElementById('write-dialog').addEventListener('click', (e) => {
+  const rect = e.target.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) closeDialog();
+});
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+{
+  "id": "fan_motor_efficiency_alert_modbus",
+  "title": {
+    "en": "Fan motor efficiency alert (Expert)",
+    "nl": "Ventilator motor efficiëntie alarm (Expert)",
+    "de": "Lüftermotor-Effizienzalarm (Experte)",
+    "fr": "Alerte d'efficacité du moteur de ventilateur (Expert)"
+  },
+  "titleFormatted": {
+    "en": "Fan motor frequency [[condition]] [[frequency]] Hz (Expert)",
+    "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz (Expert)",
+    "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+    "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz (Expert)"
+  },
+  "hint": {
+    "en": "Triggers when fan motor frequency goes above or below a specified level.",
+    "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald niveau gaat.",
+    "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet.",
+    "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "frequency",
+      "title": {
+        "en": " Frequency ",
+        "nl": " Frequentie ",
+        "de": " Frequenz ",
+        "fr": " Fréquence "
+      },
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "units": "Hz",
+      "placeholder": {
+        "en": "Frequency threshold in Hz",
+        "nl": "Frequentie drempel in Hz",
+        "de": "Frequenzschwellenwert in Hz",
+        "fr": "Seuil de fréquence en Hz"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_fan_frequency",
+      "title": {
+        "en": "Current fan frequency",
+        "nl": "Huidige ventilator frequentie",
+        "de": "Aktuelle Lüfterfrequenz",
+        "fr": "Fréquence actuelle du ventilateur"
+      },
+      "example": 75
+    },
+    {
+      "type": "number",
+      "name": "threshold_frequency",
+      "title": {
+        "en": "Triggered frequency",
+        "nl": "Getriggerde frequentie",
+        "de": "Auslösende Frequenz",
+        "fr": "Fréquence déclencheuse"
+      },
+      "example": 80
+    }
+  ],
+  "highlight": true
+}

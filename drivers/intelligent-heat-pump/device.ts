@@ -4,15 +4,15 @@
 import os from 'os';
 import Homey from 'homey';
 import TuyaDevice from 'tuyapi';
-import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
-import { DeviceConstants } from '../../lib/constants';
-import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-types';
-import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/services/cop-calculator';
-import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
-import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
-import { ServiceCoordinator } from '../../lib/services/service-coordinator';
-import { enableFlowCardLogging } from '../../lib/flow-handler-wrapper';
-import { Logger } from '../../lib/logger';
+import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
+import { DeviceConstants } from '../../lib/tuya/constants';
+import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/shared/error-types';
+import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/shared/services/cop-calculator';
+import { SCOPCalculator, type COPMeasurement } from '../../lib/tuya/services/scop-calculator';
+import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/shared/services/rolling-cop-calculator';
+import { ServiceCoordinator } from '../../lib/tuya/services/service-coordinator';
+import { enableFlowCardLogging } from '../../lib/shared/flow-handler-wrapper';
+import { Logger } from '../../lib/shared/logger';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;

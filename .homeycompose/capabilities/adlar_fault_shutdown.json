@@ -1,0 +1,33 @@
+{
+  "id": "adlar_fault_shutdown",
+  "type": "boolean",
+  "title": {
+    "en": "Fault shutdown",
+    "nl": "Fout - unit gestopt",
+    "de": "Fehlerabschaltung",
+    "fr": "Arrêt sur défaut"
+  },
+  "icon": "/assets/fault.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Unit shut down due to fault",
+    "nl": "Unit gestopt door fout",
+    "de": "Gerät durch Fehler abgeschaltet",
+    "fr": "Unité arrêtée en raison d'un défaut"
+  },
+  "insightsTitleFalse": {
+    "en": "Fault shutdown cleared",
+    "nl": "Fout-stop opgeheven",
+    "de": "Fehlerabschaltung aufgehoben",
+    "fr": "Arrêt sur défaut effacé"
+  },
+  "description": {
+    "en": "Fault shutdown status from Modbus status register 0x0000, bit 13 (FAULT_SHUTDOWN). True when the heat pump has stopped due to a fault.",
+    "nl": "Fout-stopstatus uit Modbus-statusregister 0x0000, bit 13 (FAULT_SHUTDOWN). Waar wanneer de warmtepomp door een storing is gestopt.",
+    "de": "Fehlerabschaltstatus aus Modbus-Statusregister 0x0000, Bit 13 (FAULT_SHUTDOWN). Wahr, wenn die Wärmepumpe aufgrund eines Fehlers abgeschaltet wurde.",
+    "fr": "État d'arrêt sur défaut depuis le registre de statut Modbus 0x0000, bit 13 (FAULT_SHUTDOWN). Vrai lorsque la pompe à chaleur s'est arrêtée suite à un défaut."
+  }
+}

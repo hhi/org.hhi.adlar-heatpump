@@ -1,0 +1,15 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blade 1 -->
+  <path d="M12 12 C12.8 10.2 14.2 7.2 12.6 5.5 C11 3.8 9 5.5 9.5 8.5 C9.8 10.3 11 11.6 12 12Z"
+        fill="currentColor" stroke="none" fill-opacity="0.9"/>
+  <!-- Blade 2 (rotated 120°) -->
+  <path d="M12 12 C12.8 10.2 14.2 7.2 12.6 5.5 C11 3.8 9 5.5 9.5 8.5 C9.8 10.3 11 11.6 12 12Z"
+        fill="currentColor" stroke="none" fill-opacity="0.9"
+        transform="rotate(120 12 12)"/>
+  <!-- Blade 3 (rotated 240°) -->
+  <path d="M12 12 C12.8 10.2 14.2 7.2 12.6 5.5 C11 3.8 9 5.5 9.5 8.5 C9.8 10.3 11 11.6 12 12Z"
+        fill="currentColor" stroke="none" fill-opacity="0.9"
+        transform="rotate(240 12 12)"/>
+  <!-- Hub -->
+  <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>
+</svg>
