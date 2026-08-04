@@ -11,7 +11,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 
-const { BuildingModelService } = require('../../.homeybuild/lib/services/building-model-service');
+const { BuildingModelService } = require('../../.homeybuild/lib/tuya/services/building-model-service');
 
 /**
  * Minimal Homey.Device mock — just enough surface for collectAndLearn(),
@@ -38,7 +38,9 @@ function mockDevice(store) {
     serviceCoordinator,
     getSetting: (key) => settings[key] ?? null,
     getStoreValue: async (key) => store[key] ?? null,
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: () => false, // skip all capability UI updates in tests
     getOutdoorTemperatureWithFallback: () => 5.0,

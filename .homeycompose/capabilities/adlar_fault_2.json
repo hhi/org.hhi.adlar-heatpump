@@ -1,0 +1,33 @@
+{
+  "id": "adlar_fault_2",
+  "type": "boolean",
+  "title": {
+    "en": "Fault register 2 active",
+    "nl": "Foutregister 2 actief",
+    "de": "Fehlerregister 2 aktiv",
+    "fr": "Registre de défaut 2 actif"
+  },
+  "icon": "/assets/fault.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Fault register 2 triggered",
+    "nl": "Foutregister 2 actief",
+    "de": "Fehlerregister 2 ausgelöst",
+    "fr": "Registre de défaut 2 déclenché"
+  },
+  "insightsTitleFalse": {
+    "en": "Fault register 2 cleared",
+    "nl": "Foutregister 2 opgeheven",
+    "de": "Fehlerregister 2 zurückgesetzt",
+    "fr": "Registre de défaut 2 effacé"
+  },
+  "description": {
+    "en": "True when any F2-series fault bit is set in Modbus fault register 0x0003 (faultState2).",
+    "nl": "Waar wanneer een of meer F2-serie storingsbits actief zijn in Modbus-foutregister 0x0003 (faultState2).",
+    "de": "Wahr, wenn ein F2-Fehlerbit im Modbus-Fehlerregister 0x0003 (faultState2) gesetzt ist.",
+    "fr": "Vrai si un bit de défaut F2 est actif dans le registre de défaut Modbus 0x0003 (faultState2)."
+  }
+}

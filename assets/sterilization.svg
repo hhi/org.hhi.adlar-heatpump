@@ -1,0 +1,19 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Waterdruppel outline -->
+  <path d="M12 3.5 C12 3.5 6 10.5 6 15 A6 6 0 0 0 18 15 C18 10.5 12 3.5 12 3.5Z"
+        fill="none" stroke="currentColor" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Warmtegolf 1 -->
+  <path d="M8.8 13.5 C9.4 12.9 10 12.9 10.6 13.5 C11.2 14.1 11.8 14.1 12.4 13.5 C13 12.9 13.6 12.9 14.2 13.5 C14.8 14.1 15.2 14.1 15.5 13.8"
+        stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Warmtegolf 2 -->
+  <path d="M8.8 16 C9.4 15.4 10 15.4 10.6 16 C11.2 16.6 11.8 16.6 12.4 16 C13 15.4 13.6 15.4 14.2 16 C14.8 16.6 15.2 16.6 15.5 16.3"
+        stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Asterisk (sterilisatie-symbool) bovenin druppel -->
+  <line x1="12" y1="7" x2="12" y2="11"
+        stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="10.1" y1="8" x2="13.9" y2="10"
+        stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="10.1" y1="10" x2="13.9" y2="8"
+        stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+</svg>

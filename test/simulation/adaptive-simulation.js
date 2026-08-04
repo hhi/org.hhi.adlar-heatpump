@@ -54,9 +54,9 @@
 const {
   BuildingModelLearner,
   getDynamicPInt,
-} = require('../../.homeybuild/lib/adaptive/building-model-learner');
-const { HeatingController } = require('../../.homeybuild/lib/adaptive/heating-controller');
-const { WeightedDecisionMaker } = require('../../.homeybuild/lib/adaptive/weighted-decision-maker');
+} = require('../../.homeybuild/lib/shared/adaptive/building-model-learner');
+const { HeatingController } = require('../../.homeybuild/lib/tuya/adaptive/heating-controller');
+const { WeightedDecisionMaker } = require('../../.homeybuild/lib/tuya/adaptive/weighted-decision-maker');
 
 // ---------------------------------------------------------------------------
 // Hulpmiddelen
@@ -332,7 +332,9 @@ async function scenarioB() {
   for (let cycle = 1; cycle <= 40; cycle++) {
     // Kamer op temperatuur (PI in deadband → null), maar prijs is laag: preheat-advies +0.5
     const heating = await piIdle.calculateAction({ indoorTemp: 20.0, targetTemp: 20.0, timestamp: cycle * 300000 });
-    const price = { action: 'preheat', magnitude: 0.5, reason: 'goedkoop blok', priority: 'low' };
+    const price = {
+      action: 'preheat', magnitude: 0.5, reason: 'goedkoop blok', priority: 'low',
+    };
     const combined = dm.combineActionsWithThermal(heating, null, price, null, FULL, null);
 
     accumulator = Math.max(-CLAMP, Math.min(CLAMP, accumulator + combined.finalAdjustment));
@@ -559,7 +561,9 @@ function scenarioD() {
 function scenarioE() {
   header('SCENARIO E — Verborgen DHW in gecombineerde modus: bias kwantificeren');
 
-  const TRUE = { C: 12.0, UA: 0.25, g: 0.5, pIntBase: 0.3 };
+  const TRUE = {
+    C: 12.0, UA: 0.25, g: 0.5, pIntBase: 0.3,
+  };
   const rnd = mulberry32(57);
   const STEP_MIN = 5;
   const STEP_H = STEP_MIN / 60;

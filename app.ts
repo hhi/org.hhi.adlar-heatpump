@@ -15,13 +15,25 @@ import {
   registerSimpleActions,
   registerSimpleConditions,
   FLOW_PATTERNS,
-} from './lib/flow-helpers';
-import { CurveCalculator } from './lib/curve-calculator';
-import { TimeScheduleCalculator } from './lib/time-schedule-calculator';
-import { SeasonalModeCalculator } from './lib/seasonal-mode-calculator';
-import { SelfHealingRegistry } from './lib/self-healing-registry';
-import { enableFlowCardLogging } from './lib/flow-handler-wrapper';
-import { Logger, LogLevel } from './lib/logger';
+} from './lib/tuya/flow-helpers';
+import { CurveCalculator } from './lib/shared/curve-calculator';
+import { TimeScheduleCalculator } from './lib/shared/time-schedule-calculator';
+import { SeasonalModeCalculator } from './lib/shared/seasonal-mode-calculator';
+import { SelfHealingRegistry } from './lib/shared/self-healing-registry';
+import { enableFlowCardLogging } from './lib/shared/flow-handler-wrapper';
+import { Logger, LogLevel } from './lib/shared/logger';
+import { DashboardService } from './lib/modbus/services/dashboard-service';
+import { LiveOperationWidgetState } from './lib/modbus/services/widget-state-service';
+
+// ── Modbus-dashboard en -widget (fase 6) ─────────────────────────────
+const DEFAULT_DASHBOARD_PORT = 8090;
+/** De widget is uitsluitend voor de Modbus-driver; zie IMPLEMENTATIEPLAN-v3.md §6.1 */
+const ADLAR_DRIVER_ID = 'intelligent-heatpump-modbus';
+
+interface LiveOperationWidgetDevice {
+  getData(): unknown;
+  getLiveOperationWidgetState?: () => LiveOperationWidgetState;
+}
 
 // Type definitions for flow card arguments
 interface DeviceFlowArgs {
@@ -49,6 +61,34 @@ interface FlowState {
 }
 
 class MyApp extends App {
+
+  /**
+   * Scope a self-healing feature name to the driver of the device the Flow card
+   * acts on.
+   *
+   * The SelfHealingRegistry is app-wide and keyed on feature name alone. Without
+   * scoping, a device of one driver that repeatedly fails a shared card would
+   * disable that feature for *every* device, including those of the other driver.
+   * See docs/architecture/IMPLEMENTATIEPLAN-v3.md §5.1.
+   *
+   * Falls back to the bare feature name when the card has no device argument
+   * (the pure calculator actions), which keeps those app-wide by design.
+   */
+  private scopedFeature(featureName: string, args?: unknown): string {
+    const driverId = (args as { device?: { driver?: { id?: string } } } | undefined)
+      ?.device?.driver?.id;
+    return driverId ? `${featureName}:${driverId}` : featureName;
+  }
+
+  // Local HTTP dashboard server (ADR-041a) — alleen actief met een Modbus-device
+  private _dashboard: DashboardService | null = null;
+
+  private _dashboardPort = DEFAULT_DASHBOARD_PORT;
+
+  get dashboard(): DashboardService | null {
+    return this._dashboard;
+  }
+
   // Additional storage for pattern-based triggers
   triggers: { [key: string]: FlowCardTrigger } = {};
 
@@ -234,9 +274,27 @@ class MyApp extends App {
 
     await this.initFlowCards();
     this.log('MyApp has been initialized with production-ready error handlers');
+
+    // Start het lokale dashboard alleen wanneer er een Modbus-device gepaird is.
+    // Een Tuya-only installatie krijgt zo geen HTTP-server op poort 8090.
+    try {
+      const modbusDevices = this.homey.drivers.getDriver(ADLAR_DRIVER_ID).getDevices();
+      if (modbusDevices.length > 0) {
+        await this.setDashboardPort(DEFAULT_DASHBOARD_PORT);
+      } else {
+        this.logger.debug('App: no Modbus devices paired — dashboard server not started');
+      }
+    } catch (error) {
+      this.error('Failed to evaluate Modbus dashboard startup:', error);
+    }
   }
 
   async onUninit() {
+    if (this._dashboard) {
+      await this._dashboard.destroy();
+      this._dashboard = null;
+    }
+
     // Clean up self-healing registry (v1.3.5)
     if (this.selfHealing) {
       this.selfHealing.destroy();
@@ -306,7 +364,7 @@ class MyApp extends App {
 
       try {
         // Self-healing: Check if feature disabled (v1.3.6)
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           this.debugLog(`${featureName}: Disabled by self-healing - degraded mode`);
           return false; // Fail-safe: return false when filtering disabled
         }
@@ -314,7 +372,7 @@ class MyApp extends App {
         // Input validation
         if (!args?.device || typeof args.differential !== 'number') {
           this.error(`${featureName}: Invalid args`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -353,7 +411,7 @@ class MyApp extends App {
         return result;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false; // Fail-safe: return false on error
       }
     });
@@ -366,7 +424,7 @@ class MyApp extends App {
 
         try {
           // Self-healing: Check if feature disabled (v1.3.6)
-          if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
             this.debugLog(`${featureName}: Disabled by self-healing - degraded mode`);
             return false; // Fail-safe: return false when filtering disabled
           }
@@ -374,7 +432,7 @@ class MyApp extends App {
           // Input validation
           if (!args?.device || typeof args.tolerance !== 'number') {
             this.error(`${featureName}: Invalid args`, { args });
-            this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+            this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
             return false;
           }
 
@@ -435,7 +493,7 @@ class MyApp extends App {
           return result;
         } catch (error) {
           this.error(`${featureName} runListener error:`, error);
-          this.selfHealing.trackError(featureName, { error });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
           return false; // Fail-safe: return false on error
         }
       },
@@ -449,7 +507,7 @@ class MyApp extends App {
 
         try {
           // Self-healing: Check if feature disabled (v1.3.6)
-          if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
             this.debugLog(`${featureName}: Disabled by self-healing - degraded mode`);
             return false; // Fail-safe: return false when filtering disabled
           }
@@ -457,7 +515,7 @@ class MyApp extends App {
           // Input validation
           if (!args?.device || typeof args.flowRate !== 'number') {
             this.error(`${featureName}: Invalid args`, { args });
-            this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+            this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
             return false;
           }
 
@@ -486,7 +544,7 @@ class MyApp extends App {
           return result;
         } catch (error) {
           this.error(`${featureName} runListener error:`, error);
-          this.selfHealing.trackError(featureName, { error });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
           return false; // Fail-safe: return false on error
         }
       },
@@ -500,7 +558,7 @@ class MyApp extends App {
 
         try {
           // Self-healing: Check if feature disabled (v1.3.6)
-          if (!this.selfHealing.isFeatureEnabled(featureName)) {
+          if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
             this.debugLog(`${featureName}: Disabled by self-healing - degraded mode`);
             return false; // Fail-safe: return false when filtering disabled
           }
@@ -508,7 +566,7 @@ class MyApp extends App {
           // Input validation
           if (!args?.device || typeof args.differential !== 'number') {
             this.error(`${featureName}: Invalid args`, { args });
-            this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+            this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
             return false;
           }
 
@@ -547,7 +605,7 @@ class MyApp extends App {
           return result;
         } catch (error) {
           this.error(`${featureName} runListener error:`, error);
-          this.selfHealing.trackError(featureName, { error });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
           return false; // Fail-safe: return false on error
         }
       },
@@ -856,7 +914,7 @@ class MyApp extends App {
 
       try {
         // Self-healing: Check if feature disabled due to excessive errors (v1.3.5)
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           this.debugLog(`${featureName}: Disabled by self-healing - executing flow without filtering (degraded mode)`);
           return true; // Fail-open: execute all flows when filtering disabled
         }
@@ -864,12 +922,12 @@ class MyApp extends App {
         // Validate inputs (fail-safe: return false if invalid)
         if (!state?.condition || !state?.temperature || typeof state.temperature !== 'number') {
           this.error(`${featureName}: Invalid state object`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.temperature || typeof args.temperature !== 'number') {
           this.error(`${featureName}: Invalid args object`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -895,7 +953,7 @@ class MyApp extends App {
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false; // Fail-safe: don't execute flow on error
       }
     });
@@ -905,18 +963,18 @@ class MyApp extends App {
     inletTempCard.registerRunListener(async (args, state) => {
       const featureName = 'inlet_temperature_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           return true; // Degraded mode: execute all flows
         }
 
         if (!state?.condition || !state?.temperature || typeof state.temperature !== 'number') {
           this.error(`${featureName}: Invalid state`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.temperature || typeof args.temperature !== 'number') {
           this.error(`${featureName}: Invalid args`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -940,7 +998,7 @@ class MyApp extends App {
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -950,18 +1008,18 @@ class MyApp extends App {
     outletTempCard.registerRunListener(async (args, state) => {
       const featureName = 'outlet_temperature_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           return true; // Degraded mode: execute all flows
         }
 
         if (!state?.condition || !state?.temperature || typeof state.temperature !== 'number') {
           this.error(`${featureName}: Invalid state`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.temperature || typeof args.temperature !== 'number') {
           this.error(`${featureName}: Invalid args`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -985,7 +1043,7 @@ class MyApp extends App {
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -999,16 +1057,16 @@ class MyApp extends App {
     copEfficiencyCard.registerRunListener(async (args, state) => {
       const featureName = 'cop_efficiency_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) return true;
 
         if (!state?.condition || typeof state?.cop_value !== 'number') {
           this.error(`${featureName}: Invalid state`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || typeof args?.threshold !== 'number') {
           this.error(`${featureName}: Invalid args`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -1023,7 +1081,7 @@ class MyApp extends App {
         return triggerCondition === 'below' && currentCOP <= userThreshold;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -1033,16 +1091,16 @@ class MyApp extends App {
     dailyCOPCard.registerRunListener(async (args, state) => {
       const featureName = 'daily_cop_efficiency_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) return true;
 
         if (!state?.condition || typeof state?.cop_value !== 'number') {
           this.error(`${featureName}: Invalid state`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || typeof args?.threshold !== 'number') {
           this.error(`${featureName}: Invalid args`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -1057,7 +1115,7 @@ class MyApp extends App {
         return triggerCondition === 'below' && currentCOP <= userThreshold;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -1067,16 +1125,16 @@ class MyApp extends App {
     monthlyCOPCard.registerRunListener(async (args, state) => {
       const featureName = 'monthly_cop_efficiency_changed';
       try {
-        if (!this.selfHealing.isFeatureEnabled(featureName)) return true;
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) return true;
 
         if (!state?.condition || typeof state?.cop_value !== 'number') {
           this.error(`${featureName}: Invalid state`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || typeof args?.threshold !== 'number') {
           this.error(`${featureName}: Invalid args`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -1091,7 +1149,7 @@ class MyApp extends App {
         return triggerCondition === 'below' && currentCOP <= userThreshold;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -1113,7 +1171,7 @@ class MyApp extends App {
 
       try {
         // Self-healing check
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           this.debugLog(`${featureName}: Disabled by self-healing - executing flow (degraded mode)`);
           return true;
         }
@@ -1121,12 +1179,12 @@ class MyApp extends App {
         // Validate inputs
         if (!state?.condition || !state?.frequency || typeof state.frequency !== 'number') {
           this.error(`${featureName}: Invalid state object`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.frequency || typeof args.frequency !== 'number') {
           this.error(`${featureName}: Invalid args object`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -1150,7 +1208,7 @@ class MyApp extends App {
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -1162,7 +1220,7 @@ class MyApp extends App {
 
       try {
         // Self-healing check
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           this.debugLog(`${featureName}: Disabled by self-healing - executing flow (degraded mode)`);
           return true;
         }
@@ -1170,12 +1228,12 @@ class MyApp extends App {
         // Validate inputs
         if (!state?.condition || !state?.frequency || typeof state.frequency !== 'number') {
           this.error(`${featureName}: Invalid state object`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.frequency || typeof args.frequency !== 'number') {
           this.error(`${featureName}: Invalid args object`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -1199,7 +1257,7 @@ class MyApp extends App {
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -1211,7 +1269,7 @@ class MyApp extends App {
 
       try {
         // Self-healing check
-        if (!this.selfHealing.isFeatureEnabled(featureName)) {
+        if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(featureName, args))) {
           this.debugLog(`${featureName}: Disabled by self-healing - executing flow (degraded mode)`);
           return true;
         }
@@ -1219,12 +1277,12 @@ class MyApp extends App {
         // Validate inputs
         if (!state?.condition || !state?.flow_rate || typeof state.flow_rate !== 'number') {
           this.error(`${featureName}: Invalid state object`, { state });
-          this.selfHealing.trackError(featureName, { error: 'Invalid state', state });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid state', state });
           return false;
         }
         if (!args?.condition || !args?.flow_rate || typeof args.flow_rate !== 'number') {
           this.error(`${featureName}: Invalid args object`, { args });
-          this.selfHealing.trackError(featureName, { error: 'Invalid args', args });
+          this.selfHealing.trackError(this.scopedFeature(featureName, args), { error: 'Invalid args', args });
           return false;
         }
 
@@ -1248,7 +1306,7 @@ class MyApp extends App {
         return shouldExecute;
       } catch (error) {
         this.error(`${featureName} runListener error:`, error);
-        this.selfHealing.trackError(featureName, { error });
+        this.selfHealing.trackError(this.scopedFeature(featureName, args), { error });
         return false;
       }
     });
@@ -1271,7 +1329,7 @@ class MyApp extends App {
       card.registerRunListener(async (args, state) => {
         try {
           // Self-healing check
-          if (!this.selfHealing.isFeatureEnabled(alertId)) {
+          if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(alertId, args))) {
             this.debugLog(`${alertId}: Disabled by self-healing - executing flow (degraded mode)`);
             return true;
           }
@@ -1279,12 +1337,12 @@ class MyApp extends App {
           // Validate inputs
           if (!state?.condition || typeof state?.temperature !== 'number') {
             this.error(`${alertId}: Invalid state object`, { state });
-            this.selfHealing.trackError(alertId, { error: 'Invalid state', state });
+            this.selfHealing.trackError(this.scopedFeature(alertId, args), { error: 'Invalid state', state });
             return false;
           }
           if (!args?.condition || typeof args?.temperature !== 'number') {
             this.error(`${alertId}: Invalid args object`, { args });
-            this.selfHealing.trackError(alertId, { error: 'Invalid args', args });
+            this.selfHealing.trackError(this.scopedFeature(alertId, args), { error: 'Invalid args', args });
             return false;
           }
 
@@ -1302,7 +1360,7 @@ class MyApp extends App {
           return shouldExecute;
         } catch (error) {
           this.error(`${alertId} runListener error:`, error);
-          this.selfHealing.trackError(alertId, { error });
+          this.selfHealing.trackError(this.scopedFeature(alertId, args), { error });
           return false;
         }
       });
@@ -1316,7 +1374,7 @@ class MyApp extends App {
       card.registerRunListener(async (args, state) => {
         try {
           // Self-healing check
-          if (!this.selfHealing.isFeatureEnabled(alertId)) {
+          if (!this.selfHealing.isFeatureEnabled(this.scopedFeature(alertId, args))) {
             this.debugLog(`${alertId}: Disabled by self-healing - executing flow (degraded mode)`);
             return true;
           }
@@ -1324,12 +1382,12 @@ class MyApp extends App {
           // Validate inputs
           if (!state?.condition || typeof state?.pulse_steps !== 'number') {
             this.error(`${alertId}: Invalid state object`, { state });
-            this.selfHealing.trackError(alertId, { error: 'Invalid state', state });
+            this.selfHealing.trackError(this.scopedFeature(alertId, args), { error: 'Invalid state', state });
             return false;
           }
           if (!args?.condition || typeof args?.pulse_steps !== 'number') {
             this.error(`${alertId}: Invalid args object`, { args });
-            this.selfHealing.trackError(alertId, { error: 'Invalid args', args });
+            this.selfHealing.trackError(this.scopedFeature(alertId, args), { error: 'Invalid args', args });
             return false;
           }
 
@@ -1347,7 +1405,7 @@ class MyApp extends App {
           return shouldExecute;
         } catch (error) {
           this.error(`${alertId} runListener error:`, error);
-          this.selfHealing.trackError(alertId, { error });
+          this.selfHealing.trackError(this.scopedFeature(alertId, args), { error });
           return false;
         }
       });
@@ -1359,6 +1417,119 @@ class MyApp extends App {
       `threshold: ${this.selfHealing ? '50 errors/hour' : 'N/A'})`,
     ].join(' ');
     this.log(changedTriggerSummary);
+  }
+
+  getAdlarLiveOperationWidgetState(deviceId?: string): LiveOperationWidgetState {
+    const devices = this._getAdlarDevices();
+    if (devices.length === 0) {
+      return {
+        ok: false,
+        message: 'Geen Adlar warmtepomp gekoppeld.',
+        device: { name: '' },
+        status: {
+          running: false,
+          compressorOn: false,
+          defrosting: false,
+          mode: 'Unknown',
+          faultActive: '',
+          connectionStatus: 'unknown',
+          connectionLabel: 'Unknown',
+        },
+        temperatures: {
+          outletC: null,
+          inletC: null,
+          ambientC: null,
+          dhwC: null,
+          bufferC: null,
+        },
+        process: {
+          deltaTC: null,
+          flowLpm: null,
+          electricalPowerKw: null,
+          thermalPowerKw: null,
+          compressorHz: null,
+          liveCopEstimate: null,
+          capabilityCop: null,
+          flowSource: 'none',
+          powerSource: 'none',
+        },
+        regulation: {
+          mode: 'Unknown',
+          sensor: 'regelbron onbekend',
+          hysteresisC: null,
+          hysteresisSource: '-',
+          hysteresisText: 'Hysterese onbekend',
+          activeSetpointC: null,
+          activeSetpointText: 'Setpoint onbekend',
+          setpointDeviationC: null,
+          summary: 'Regeling onbekend',
+        },
+        data: {
+          timestamp: null,
+          ageMs: null,
+          freshness: 'no_data',
+          sourcePollGroup: null,
+        },
+      };
+    }
+
+    const device = this._findAdlarDevice(devices, deviceId) ?? devices[0];
+    if (typeof device.getLiveOperationWidgetState !== 'function') {
+      throw new Error('Selected device does not support the live operation widget.');
+    }
+
+    return device.getLiveOperationWidgetState();
+  }
+
+  private _getAdlarDevices(): LiveOperationWidgetDevice[] {
+    try {
+      return this.homey.drivers
+        .getDriver(ADLAR_DRIVER_ID)
+        .getDevices() as LiveOperationWidgetDevice[];
+    } catch {
+      return [];
+    }
+  }
+
+  private _findAdlarDevice(
+    devices: LiveOperationWidgetDevice[],
+    deviceId?: string,
+  ): LiveOperationWidgetDevice | null {
+    if (!deviceId) return null;
+
+    return devices.find((device) => {
+      const record = device as unknown as Record<string, unknown>;
+      const data = device.getData() as Record<string, unknown>;
+      const candidates = [
+        record.id,
+        record._id,
+        data.id,
+      ];
+      return candidates.some((candidate) => String(candidate) === deviceId);
+    }) ?? null;
+  }
+
+  async setDashboardPort(port: number): Promise<void> {
+    const nextPort = Number.isInteger(port) && port >= 1 && port <= 65535
+      ? port
+      : DEFAULT_DASHBOARD_PORT;
+
+    if (this._dashboard && this._dashboardPort === nextPort) {
+      return;
+    }
+
+    if (this._dashboard) {
+      await this._dashboard.destroy();
+      this._dashboard = null;
+    }
+
+    this._dashboardPort = nextPort;
+    this._dashboard = new DashboardService({
+      appDir: __dirname,
+      logger: (msg, ...args) => this.logger.info(String(msg), ...args),
+      port: this._dashboardPort,
+    });
+    this._dashboard.start();
   }
 }
 

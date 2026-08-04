@@ -1,0 +1,1382 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
+/**
+ * Building Insights Service - Actionable recommendations from Building Model
+ *
+ * Analyzes learned thermal parameters (C, UA, τ, g, P_int) and provides
+ * concrete recommendations for energy savings and comfort optimization.
+ *
+ * Insight Categories:
+ * 1. Insulation Performance (10-30% savings potential)
+ * 2. Pre-Heating Strategy (5-10% savings potential)
+ * 3. Thermal Storage Optimization (10-25% savings potential)
+ * 4. Building Profile Mismatch (diagnostic)
+ *
+ * @version 2.5.0
+ * @since 2.5.0
+ */
+
+import Homey from 'homey';
+import { getPreHeatCategory, calculatePreHeatDuration } from '../../shared/utils/preheat-calculator';
+import type { BuildingModelService } from './building-model-service';
+import type { AdaptiveControlService } from './adaptive-control-service';
+import { BUILDING_PROFILES, type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
+
+type BuildingModelDiagnostics = Awaited<ReturnType<BuildingModelService['getDiagnosticStatus']>>;
+
+export interface BuildingInsightsServiceConfig {
+  device: Homey.Device;
+  buildingModelService: BuildingModelService;
+  adaptiveControlService: AdaptiveControlService;
+  logger?: (msg: string, ...args: unknown[]) => void;
+}
+
+export type InsightCategory = 'insulation_performance' | 'pre_heating' | 'thermal_storage' | 'profile_mismatch';
+export type InsightStatus = 'new' | 'active' | 'dismissed';
+
+export interface Insight {
+  id: string; // "thermal_storage_2024_01_09"
+  category: InsightCategory;
+  priority: number; // 0-100
+  confidence: number; // 0-100
+  detectedAt: number; // timestamp
+  insight: string; // Human-readable message
+  recommendation: string; // Actionable advice
+  estimatedSavings?: number; // EUR/month
+  status: InsightStatus;
+  dismissedUntil?: number; // timestamp
+}
+
+export interface InsightState {
+  activeInsights: Insight[];
+  history: Insight[];
+  lastEvaluation: number;
+}
+
+export interface ForceInsightAnalysisResult {
+  'insights_detected': number;
+  confidence: number;
+}
+
+/**
+ * Building Insights Service
+ *
+ * Responsibilities:
+ * - Analyze building model every 10 samples (50 minutes)
+ * - Detect 3 priority insight categories + profile mismatch
+ * - Update 3 insight capabilities with recommendations
+ * - Trigger flow cards when new insights detected
+ * - Manage insight lifecycle (new → active → dismissed)
+ * - Persist insight history to device store
+ */
+export class BuildingInsightsService {
+  private device: Homey.Device;
+  private buildingModel: BuildingModelService;
+  private adaptiveControl: AdaptiveControlService;
+  private logger: (msg: string, ...args: unknown[]) => void;
+
+  // State
+  private activeInsights: Map<string, Insight> = new Map();
+  private insightHistory: Insight[] = [];
+  private lastEvaluationTime: number = 0;
+  private samplesSinceLastEval: number = 0;
+
+  // Config (from device settings)
+  private enabled: boolean = true;
+  private minConfidence: number = 70;
+  // Note: maxActiveInsights removed in v2.5.10 - each category has dedicated capability
+
+  // Timers
+  private evaluationTimer: NodeJS.Timeout | null = null;
+  private preHeatRecommendationTimer: NodeJS.Timeout | null = null;
+  private readonly EVALUATION_INTERVAL_MS = 50 * 60 * 1000; // 50 minutes (10 samples @ 5min)
+
+  constructor(config: BuildingInsightsServiceConfig) {
+    this.device = config.device;
+    this.buildingModel = config.buildingModelService;
+    this.adaptiveControl = config.adaptiveControlService;
+    this.logger = config.logger || (() => { });
+
+    // Load settings
+    this.enabled = this.device.getSetting('building_insights_enabled') ?? true;
+    this.minConfidence = this.device.getSetting('insights_min_confidence') ?? 70;
+    // insights_max_active setting removed - each category has dedicated capability
+  }
+
+  /**
+   * Get current Homey language (nl/en)
+   */
+  private getLanguage(): string {
+    return this.device.homey.i18n.getLanguage();
+  }
+
+  /**
+   * Initialize service
+   * - Restore persisted state
+   * - Start periodic insight evaluation
+   * - Schedule daily pre-heat recommendations
+   * - Update capabilities with current insights
+   */
+  public async initialize(): Promise<void> {
+    this.logger('BuildingInsightsService: Initializing...');
+
+    if (!this.enabled) {
+      this.logger('BuildingInsightsService: Disabled in settings, skipping initialization');
+      return;
+    }
+
+    // Restore state from device store
+    await this.restoreState();
+
+    // Evaluate insights immediately on initialization (v2.5.21)
+    // This ensures capabilities show current status right after app install/update
+    await this.evaluateInsights();
+
+    // Start periodic evaluation (every 50 minutes)
+    // Pre-heat recommendations are now triggered based on ΔT threshold during evaluation
+    this.evaluationTimer = this.device.homey.setInterval(
+      () => this.evaluateInsights().catch((err) => this.logger('BuildingInsightsService: Evaluation error:', err)),
+      this.EVALUATION_INTERVAL_MS,
+    );
+
+    this.logger(`BuildingInsightsService: Initialized successfully (interval: ${this.EVALUATION_INTERVAL_MS / 1000}s)`);
+  }
+
+  /**
+   * Destroy service
+   * - Clear all timers
+   * - Persist current state
+   */
+  public async destroy(): Promise<void> {
+    this.logger('BuildingInsightsService: Destroying...');
+
+    // Clear timers
+    if (this.evaluationTimer) {
+      clearInterval(this.evaluationTimer);
+      this.evaluationTimer = null;
+    }
+
+    if (this.preHeatRecommendationTimer) {
+      clearInterval(this.preHeatRecommendationTimer);
+      this.preHeatRecommendationTimer = null;
+    }
+
+    // Persist final state
+    await this.persistState();
+
+    this.logger('BuildingInsightsService: Destroyed successfully');
+  }
+
+  /**
+   * Handle settings changes
+   * - Update configuration
+   * - Re-evaluate insights if thresholds changed
+   */
+  public async onSettingsChanged(settings: Record<string, unknown>): Promise<void> {
+    this.logger('BuildingInsightsService: Settings changed, updating configuration...');
+
+    let configChanged = false;
+
+    if (typeof settings.building_insights_enabled === 'boolean') {
+      this.enabled = settings.building_insights_enabled;
+      configChanged = true;
+    }
+
+    if (typeof settings.insights_min_confidence === 'number') {
+      this.minConfidence = settings.insights_min_confidence;
+      configChanged = true;
+    }
+
+    // Note: insights_max_active setting removed in v2.5.10
+
+    if (configChanged && this.enabled) {
+      // Re-evaluate insights with new thresholds
+      await this.evaluateInsights();
+    }
+  }
+
+  /**
+   * Core insight evaluation (called every 50 minutes OR on-demand)
+   * - Check if model has sufficient confidence
+   * - Detect insights in all 4 categories
+   * - Prioritize top insights
+   * - Update capabilities and trigger flow cards
+   */
+  public async evaluateInsights(): Promise<void> {
+    this.logger('BuildingInsightsService: Evaluating insights...');
+
+    if (!this.enabled) {
+      this.logger('BuildingInsightsService: Disabled, skipping evaluation');
+      return;
+    }
+
+    // Defensive: Check if building model service is ready
+    try {
+      // Get building model diagnostics
+      const diagnostics = await this.buildingModel.getDiagnosticStatus();
+      this.logger(`BuildingInsightsService: Model confidence: ${diagnostics.confidence}%`);
+
+      // Defensive: Validate diagnostics object structure
+      if (!diagnostics || typeof diagnostics.confidence !== 'number') {
+        this.logger('BuildingInsightsService: Invalid diagnostics object, skipping evaluation');
+        return;
+      }
+    } catch (error) {
+      this.logger('BuildingInsightsService: Building model not ready yet, skipping evaluation:', error);
+      return;
+    }
+
+    // Re-fetch diagnostics for detection methods
+    const diagnostics = await this.buildingModel.getDiagnosticStatus();
+
+    // Detect insights in all categories
+    const detectedInsights: Insight[] = [];
+
+    // 1. Insulation Performance (requires 70% confidence)
+    const insulationInsight = this.detectInsulationInsights(diagnostics);
+    if (insulationInsight) detectedInsights.push(insulationInsight);
+
+    // 2. Pre-Heating Strategy (requires 70% confidence)
+    const preHeatingInsight = this.detectPreHeatingInsights(diagnostics);
+    if (preHeatingInsight) detectedInsights.push(preHeatingInsight);
+
+    // 3. Thermal Storage Optimization (requires 70% confidence)
+    const thermalStorageInsight = this.detectThermalStorageInsights(diagnostics);
+    if (thermalStorageInsight) detectedInsights.push(thermalStorageInsight);
+
+    // 4. Building Profile Mismatch (requires 50% confidence - diagnostic)
+    const profileMismatchInsight = this.detectProfileMismatch(diagnostics);
+    if (profileMismatchInsight) detectedInsights.push(profileMismatchInsight);
+
+    this.logger(`BuildingInsightsService: Detected ${detectedInsights.length} insights`);
+
+    // Prioritize insights
+    const prioritizedInsights = this.prioritizeInsights(detectedInsights);
+
+    // Process each insight
+    for (const insight of prioritizedInsights) {
+      // Always add/update in activeInsights (for UI display)
+      this.activeInsights.set(insight.category, insight);
+
+      // Check if we should trigger flow card (advice fatigue prevention)
+      if (this.shouldTriggerInsight(insight)) {
+        // Update status to active
+        this.updateInsightStatus(insight);
+
+        // Trigger appropriate flow card
+        await this.triggerInsightFlowCard(insight);
+
+        // Add to history
+        this.insightHistory.push(insight);
+      }
+    }
+
+    // Prune old history (keep last 50 entries)
+    if (this.insightHistory.length > 50) {
+      this.insightHistory = this.insightHistory.slice(-50);
+    }
+
+    // Update capabilities
+    await this.updateInsightCapabilities();
+
+    // Persist state
+    await this.persistState();
+
+    // v2.6.0: Check ΔT threshold for pre-heat recommendation trigger
+    await this.checkPreHeatThreshold(diagnostics);
+
+    this.lastEvaluationTime = Date.now();
+    this.logger('BuildingInsightsService: Evaluation complete');
+  }
+
+  /**
+   * v2.8.1: Get short localized blocked reason for insight display
+   * Maps internal blocking reason strings to short user-facing text
+   */
+  private getShortBlockedReason(blockingReason: string, lang: string): string {
+    if (blockingReason.includes('indoor temperature')) {
+      return lang === 'nl' ? 'Geblokkeerd: Geen binnentemp' : 'Blocked: No indoor temp';
+    }
+    if (blockingReason.includes('outdoor temperature')) {
+      return lang === 'nl' ? 'Geblokkeerd: Geen buitentemp' : 'Blocked: No outdoor temp';
+    }
+    if (blockingReason.includes('power measurement')) {
+      return lang === 'nl' ? 'Geblokkeerd: Geen vermogen' : 'Blocked: No power data';
+    }
+    if (blockingReason.includes('disabled')) {
+      return lang === 'nl' ? 'Geblokkeerd: Uitgeschakeld' : 'Blocked: Disabled';
+    }
+    return lang === 'nl' ? 'Geblokkeerd' : 'Blocked';
+  }
+
+  /**
+   * Detect insulation performance insights
+   * - Compare learned UA with expected UA from building profile
+   * - Calculate potential savings from insulation upgrades
+   * - Always returns an insight (learning/poor/good/average)
+   */
+  private detectInsulationInsights(diagnostics: BuildingModelDiagnostics): Insight | null {
+    const model = this.buildingModel.getLearner().getModel();
+    const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `insulation_blocked_${Date.now()}`,
+        category: 'insulation_performance',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Learning phase - insufficient confidence
+    if (diagnostics.confidence < this.minConfidence) {
+      return {
+        id: `insulation_learning_${Date.now()}`,
+        category: 'insulation_performance',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: lang === 'nl'
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Defensive: Validate UA is a valid number in expected range
+    if (!Number.isFinite(model.UA) || model.UA <= 0 || model.UA > 2.0) {
+      this.logger('BuildingInsightsService: Invalid UA value for insulation detection:', model.UA);
+      return null;
+    }
+
+    const profile = this.device.getSetting('building_profile') || 'average';
+
+    // Defensive: Validate profile exists
+    if (!(profile in BUILDING_PROFILES)) {
+      this.logger('BuildingInsightsService: Invalid building profile:', profile);
+      return null;
+    }
+
+    const expectedUA = BUILDING_PROFILES[profile as BuildingProfileType].UA;
+
+    // High heat loss detected (UA > 1.5× expected OR absolute high)
+    if (model.UA > expectedUA * 1.5 || model.UA > 0.5) {
+      const savingsEstimate = this.estimateInsulationSavings(model.UA, expectedUA);
+
+      const recommendation = lang === 'nl'
+        ? `🔴 Hoog verlies • Dak/muren/ramen • €${savingsEstimate}/mnd`
+        : `🔴 High loss • Roof/walls/windows • €${savingsEstimate}/mo`;
+
+      return {
+        id: `insulation_poor_${Date.now()}`,
+        category: 'insulation_performance',
+        priority: 85,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: recommendation,
+        recommendation,
+        estimatedSavings: savingsEstimate,
+        status: 'new',
+      };
+    }
+
+    // Good insulation (better than expected)
+    if (model.UA < expectedUA * 0.7) {
+      const recommendation = lang === 'nl'
+        ? '✅ Goed geïsoleerd'
+        : '✅ Well insulated';
+
+      return {
+        id: `insulation_good_${Date.now()}`,
+        category: 'insulation_performance',
+        priority: 30,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: recommendation,
+        recommendation,
+        status: 'new',
+      };
+    }
+
+    // Average insulation (within expectations)
+    const recommendation = lang === 'nl'
+      ? '✅ Binnen verwachting'
+      : '✅ Within expectations';
+
+    return {
+      id: `insulation_average_${Date.now()}`,
+      category: 'insulation_performance',
+      priority: 30,
+      confidence: diagnostics.confidence,
+      detectedAt: Date.now(),
+      insight: recommendation,
+      recommendation,
+      status: 'new',
+    };
+  }
+
+  /**
+   * Detect pre-heating strategy insights
+   * - Categorize thermal response speed (fast/medium/slow)
+   * - Suggest optimal night setback strategy
+   * - Always returns an insight (learning/fast/medium/slow)
+   */
+  private detectPreHeatingInsights(diagnostics: BuildingModelDiagnostics): Insight | null {
+    const model = this.buildingModel.getLearner().getModel();
+    const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `pre_heating_blocked_${Date.now()}`,
+        category: 'pre_heating',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Learning phase - insufficient confidence
+    if (diagnostics.confidence < this.minConfidence) {
+      return {
+        id: `pre_heating_learning_${Date.now()}`,
+        category: 'pre_heating',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: lang === 'nl'
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Defensive: Validate C and UA before division
+    if (!Number.isFinite(model.C) || model.C <= 0 || model.C > 100) {
+      this.logger('BuildingInsightsService: Invalid C value for pre-heating detection:', model.C);
+      return null;
+    }
+    if (!Number.isFinite(model.UA) || model.UA <= 0) {
+      this.logger('BuildingInsightsService: Invalid UA value (division by zero risk):', model.UA);
+      return null;
+    }
+
+    // Calculate time constant
+    const tau = model.C / model.UA; // hours
+
+    // Defensive: Validate tau is finite and in reasonable range (0.5h - 250h)
+    if (!Number.isFinite(tau) || tau < 0.5 || tau > 250) {
+      this.logger('BuildingInsightsService: Invalid tau calculated for pre-heating:', tau);
+      return null;
+    }
+
+    // Use central helper for pre-heat category
+    const { category, hoursFor2DegC, priority } = getPreHeatCategory(tau);
+
+    // Generate localized recommendation text
+    const recommendationTexts: Record<string, { nl: string; en: string }> = {
+      very_fast_response: { nl: 'Zeer snel (~2 uur voor 2°C)', en: 'Very fast (~2 hours for 2°C)' },
+      fast_response: { nl: 'Snel (~4 uur voor 2°C)', en: 'Fast (~4 hours for 2°C)' },
+      medium_response: { nl: 'Normaal (~8 uur voor 2°C)', en: 'Normal (~8 hours for 2°C)' },
+      slow_response: { nl: 'Langzaam (~16 uur voor 2°C)', en: 'Slow (~16 hours for 2°C)' },
+      very_slow_response: { nl: 'Zeer langzaam (~24 uur voor 2°C)', en: 'Very slow (~24 hours for 2°C)' },
+      extremely_slow_response: { nl: 'Extreem langzaam (~32 uur voor 2°C)', en: 'Extremely slow (~32 hours for 2°C)' },
+    };
+    const recommendation = lang === 'nl'
+      ? recommendationTexts[category]?.nl || `~${hoursFor2DegC} uur voor 2°C`
+      : recommendationTexts[category]?.en || `~${hoursFor2DegC} hours for 2°C`;
+
+    return {
+      id: `pre_heating_${category}_${Date.now()}`,
+      category: 'pre_heating',
+      priority,
+      confidence: diagnostics.confidence,
+      detectedAt: Date.now(),
+      insight: recommendation,
+      recommendation,
+      status: 'new',
+    };
+  }
+
+  /**
+   * Detect thermal storage optimization insights
+   * - Check for high thermal mass + slow response
+   * - Verify dynamic pricing availability
+   * - Calculate potential savings from load shifting
+   * - Always returns an insight (learning/active/potential/not-suitable)
+   */
+  private detectThermalStorageInsights(diagnostics: BuildingModelDiagnostics): Insight | null {
+    const model = this.buildingModel.getLearner().getModel();
+    const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `thermal_storage_blocked_${Date.now()}`,
+        category: 'thermal_storage',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Learning phase - insufficient confidence
+    if (diagnostics.confidence < this.minConfidence) {
+      return {
+        id: `thermal_storage_learning_${Date.now()}`,
+        category: 'thermal_storage',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: lang === 'nl'
+          ? `⏳ Aan het leren (${diagnostics.confidence.toFixed(1)}%)`
+          : `⏳ Learning (${diagnostics.confidence.toFixed(1)}%)`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Defensive: Validate C and UA before calculations
+    if (!Number.isFinite(model.C) || model.C <= 0 || model.C > 100) {
+      this.logger('BuildingInsightsService: Invalid C value for thermal storage detection:', model.C);
+      return null;
+    }
+    if (!Number.isFinite(model.UA) || model.UA <= 0) {
+      this.logger('BuildingInsightsService: Invalid UA value for thermal storage detection:', model.UA);
+      return null;
+    }
+
+    const tau = model.C / model.UA;
+
+    // Defensive: Validate tau
+    if (!Number.isFinite(tau) || tau < 0) {
+      this.logger('BuildingInsightsService: Invalid tau for thermal storage:', tau);
+      return null;
+    }
+
+    const hasDynamicPricing = this.adaptiveControl.hasDynamicPricing();
+
+    // =========================================================================
+    // v2.7.8: 9-value matrix for thermal storage insight
+    // Matrix based on C (buffer size) × τ (loss rate)
+    // Format: [emoji] [Buffer] • [Verlies]
+    // =========================================================================
+
+    // Determine buffer category based on C
+    let bufferCategory: 'small' | 'medium' | 'large';
+    if (model.C < 10) {
+      bufferCategory = 'small';
+    } else if (model.C <= 18) {
+      bufferCategory = 'medium';
+    } else {
+      bufferCategory = 'large';
+    }
+
+    // Determine loss category based on τ
+    let lossCategory: 'high' | 'medium' | 'low';
+    if (tau < 12) {
+      lossCategory = 'high';
+    } else if (tau <= 40) {
+      lossCategory = 'medium';
+    } else {
+      lossCategory = 'low';
+    }
+
+    // Build insight text based on matrix position
+    const bufferTexts = {
+      small: { nl: 'Kleine buffer', en: 'Small buffer' },
+      medium: { nl: 'Gem. buffer', en: 'Med. buffer' },
+      large: { nl: 'Grote buffer', en: 'Large buffer' },
+    };
+
+    const lossTexts = {
+      high: { nl: 'Veel verlies', en: 'High loss' },
+      medium: { nl: 'Gem. verlies', en: 'Med. loss' },
+      low: { nl: 'Weinig verlies', en: 'Low loss' },
+    };
+
+    // Determine emoji and priority based on matrix position
+    // 🔴 = not suitable, 🟠 = marginal, 🟡 = limited, 🟢 = suitable
+    let emoji: string;
+    let priority: number;
+    let suitableForOptimization = false;
+
+    if (bufferCategory === 'small' && lossCategory === 'high') {
+      // C < 10, τ < 12: Not suitable
+      emoji = '🔴';
+      priority = 20;
+    } else if (bufferCategory === 'small') {
+      // C < 10, τ >= 12: Limited (good insulation but small buffer)
+      emoji = '🟡';
+      priority = 40;
+    } else if (lossCategory === 'high') {
+      // C >= 10, τ < 12: Marginal (buffer exists but leaks fast)
+      emoji = '🟠';
+      priority = 50;
+    } else {
+      // C >= 10, τ >= 12: Suitable for optimization
+      emoji = '🟢';
+      priority = 75;
+      suitableForOptimization = true;
+    }
+
+    const bufferText = lang === 'nl' ? bufferTexts[bufferCategory].nl : bufferTexts[bufferCategory].en;
+    const lossText = lang === 'nl' ? lossTexts[lossCategory].nl : lossTexts[lossCategory].en;
+    let recommendation = `${emoji} ${bufferText} • ${lossText}`;
+
+    // If suitable and dynamic pricing available, add savings estimate
+    if (suitableForOptimization && hasDynamicPricing) {
+      const optimalBoost = Math.min(2.5, model.C / 15 + tau / 20);
+      const savingsEstimate = this.estimateThermalStorageSavingsWithBoost(model.C, optimalBoost);
+      recommendation += lang === 'nl'
+        ? ` • €${savingsEstimate}/mnd`
+        : ` • €${savingsEstimate}/mo`;
+      priority = 90;
+    } else if (suitableForOptimization && !hasDynamicPricing) {
+      // Suitable but no dynamic pricing configured
+      recommendation += lang === 'nl'
+        ? ' • Voeg dynamische prijzen toe'
+        : ' • Add dynamic pricing';
+    }
+
+    return {
+      id: `thermal_storage_${bufferCategory}_${lossCategory}_${Date.now()}`,
+      category: 'thermal_storage',
+      priority,
+      confidence: diagnostics.confidence,
+      detectedAt: Date.now(),
+      insight: recommendation,
+      recommendation,
+      status: 'new',
+    };
+  }
+
+  /**
+   * Detect building profile mismatch
+   * - Compare learned τ with profile τ
+   * - Suggest optimal profile for faster learning
+   * - Always returns an insight (learning/mismatch/matches)
+   * - Uses 50% confidence threshold (lower for rough detection)
+   */
+  private detectProfileMismatch(diagnostics: BuildingModelDiagnostics): Insight | null {
+    const model = this.buildingModel.getLearner().getModel();
+    const lang = this.getLanguage();
+
+    // v2.8.1: Guard rail - show blocked status if external data source not connected
+    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      return {
+        id: `profile_blocked_${Date.now()}`,
+        category: 'profile_mismatch',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: `🚫 ${shortReason}`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Learning phase - lower threshold (50%) for rough detection
+    // After a soft reset (profile change), show profile-aware verification message
+    // instead of generic "Learning" to avoid stale "switch to X" advice lingering
+    if (diagnostics.confidence < 50) {
+      const activeProfile = this.device.getSetting('building_profile') || 'average';
+      return {
+        id: `profile_learning_${Date.now()}`,
+        category: 'profile_mismatch',
+        priority: 10,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: lang === 'nl'
+          ? `🔄 Profiel '${activeProfile}' actief — wordt geverifieerd (${diagnostics.confidence.toFixed(1)}%)`
+          : `🔄 Profile '${activeProfile}' active — verifying (${diagnostics.confidence.toFixed(1)}%)`,
+        recommendation: '',
+        status: 'new',
+      };
+    }
+
+    // Defensive: Validate C and UA before calculations
+    if (!Number.isFinite(model.C) || model.C <= 0 || !Number.isFinite(model.UA) || model.UA <= 0) {
+      this.logger('BuildingInsightsService: Invalid C or UA for profile mismatch detection');
+      return null;
+    }
+
+    const currentProfile = this.device.getSetting('building_profile') || 'average';
+
+    // Defensive: Validate profile exists
+    if (!(currentProfile in BUILDING_PROFILES)) {
+      this.logger('BuildingInsightsService: Invalid current profile for mismatch detection:', currentProfile);
+      return null;
+    }
+
+    const currentProfileParams = BUILDING_PROFILES[currentProfile as BuildingProfileType];
+
+    const learnedTau = model.C / model.UA;
+    const profileTau = currentProfileParams.C / currentProfileParams.UA;
+
+    // Defensive: Validate calculated tau values
+    if (!Number.isFinite(learnedTau) || !Number.isFinite(profileTau) || profileTau <= 0) {
+      this.logger('BuildingInsightsService: Invalid tau values for profile mismatch');
+      return null;
+    }
+    const deviation = Math.abs(learnedTau - profileTau) / profileTau;
+
+    // Significant mismatch (>30% deviation)
+    if (deviation > 0.3) {
+      const suggestedProfile = this.findClosestProfile(model);
+
+      // v2.7.1: Check if suggested profile is already the current profile
+      // This can happen when model has diverged or profile is at boundary
+      if (suggestedProfile === currentProfile) {
+        // Current profile is already the closest match - show as "matches well"
+        const recommendation = lang === 'nl'
+          ? `✅ Profiel '${currentProfile}' is passend (τ wijkt ${Math.round(deviation * 100)}% af)`
+          : `✅ Profile '${currentProfile}' is appropriate (τ deviates ${Math.round(deviation * 100)}%)`;
+
+        return {
+          id: `profile_matches_${Date.now()}`,
+          category: 'profile_mismatch',
+          priority: 30,
+          confidence: diagnostics.confidence,
+          detectedAt: Date.now(),
+          insight: recommendation,
+          recommendation,
+          status: 'new',
+        };
+      }
+
+      const recommendation = lang === 'nl'
+        ? `🔄 Wijzig naar '${suggestedProfile}' profiel`
+        : `🔄 Change to '${suggestedProfile}' profile`;
+
+      return {
+        id: `profile_mismatch_${Date.now()}`,
+        category: 'profile_mismatch',
+        priority: 40,
+        confidence: diagnostics.confidence,
+        detectedAt: Date.now(),
+        insight: recommendation,
+        recommendation,
+        status: 'new',
+      };
+    }
+
+    // Profile matches well (≤30% deviation)
+    const recommendation = lang === 'nl'
+      ? `✅ Profiel '${currentProfile}' past goed`
+      : `✅ Profile '${currentProfile}' matches well`;
+
+    return {
+      id: `profile_matches_${Date.now()}`,
+      category: 'profile_mismatch',
+      priority: 30,
+      confidence: diagnostics.confidence,
+      detectedAt: Date.now(),
+      insight: recommendation,
+      recommendation,
+      status: 'new',
+    };
+  }
+
+  /**
+   * Prioritize insights by priority score
+   * - Sort by priority (high to low)
+   * Note: No limit needed - each category has a dedicated capability (v2.5.10)
+   */
+  private prioritizeInsights(insights: Insight[]): Insight[] {
+    return insights.sort((a, b) => b.priority - a.priority);
+  }
+
+  /**
+   * Check if insight should trigger (advice fatigue prevention)
+   *
+   * Logic order (v2.5.1 fix):
+   * 1. Check if dismissed by user
+   * 2. Check for significant drift (>10%) - bypasses time limit if true
+   * 3. Check time-based fatigue (12 hours)
+   */
+  private shouldTriggerInsight(insight: Insight): boolean {
+    const existingInsight = this.activeInsights.get(insight.category);
+
+    // STEP 1: Check if dismissed by user
+    if (existingInsight?.dismissedUntil && Date.now() < existingInsight.dismissedUntil) {
+      this.logger(`BuildingInsightsService: Insight ${insight.category} dismissed until ${new Date(existingInsight.dismissedUntil).toISOString()}`);
+      return false;
+    }
+
+    // STEP 2: Significant drift (>10%) bypasses time-based blocking
+    // This ensures important parameter changes are always reported
+    if (existingInsight) {
+      const confidenceDrift = Math.abs(insight.confidence - existingInsight.confidence) / 100;
+      if (confidenceDrift >= 0.10) {
+        this.logger(`BuildingInsightsService: Significant drift detected (${(confidenceDrift * 100).toFixed(1)}%) - bypassing time limit for ${insight.category}`);
+        return true; // Allow re-trigger regardless of time
+      }
+    }
+
+    // STEP 3: Time-based fatigue (12 hours for unchanged insights)
+    const FATIGUE_PERIOD_MS = 12 * 60 * 60 * 1000; // 12 hours (v2.5.1: reduced from 24h)
+    const recentInsight = this.insightHistory.find(
+      (h) => h.category === insight.category && Date.now() - h.detectedAt < FATIGUE_PERIOD_MS,
+    );
+    if (recentInsight) {
+      this.logger(`BuildingInsightsService: Insight ${insight.category} already triggered within 12 hours (no significant change)`);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Update insight status
+   * - Mark as active
+   * - Clear dismissed timestamp
+   */
+  private updateInsightStatus(insight: Insight): void {
+    insight.status = 'active';
+    delete insight.dismissedUntil;
+  }
+
+  /**
+   * Trigger appropriate flow card based on insight category
+   */
+  private async triggerInsightFlowCard(insight: Insight): Promise<void> {
+    try {
+      if (insight.category === 'profile_mismatch') {
+        // Trigger building_profile_mismatch
+        const model = this.buildingModel.getLearner().getModel();
+        const currentProfile = this.device.getSetting('building_profile') || 'average';
+        const currentProfileParams = BUILDING_PROFILES[currentProfile as BuildingProfileType];
+        const learnedTau = model.C / model.UA;
+        const profileTau = currentProfileParams.C / currentProfileParams.UA;
+        const deviation = Math.abs(learnedTau - profileTau) / profileTau;
+        const suggestedProfile = this.findClosestProfile(model);
+
+        await this.device.homey.flow
+          .getDeviceTriggerCard('building_profile_mismatch')
+          .trigger(this.device, {
+            current_profile: currentProfile,
+            suggested_profile: suggestedProfile,
+            tau_learned: learnedTau,
+            tau_profile: profileTau,
+            deviation_percent: Math.round(deviation * 100),
+            confidence: insight.confidence,
+          });
+
+        this.logger('BuildingInsightsService: Triggered profile_mismatch flow card');
+      } else {
+        // Trigger generic building_insight_detected
+        await this.device.homey.flow
+          .getDeviceTriggerCard('building_insight_detected')
+          .trigger(this.device, {
+            category: insight.category,
+            insight: insight.insight,
+            recommendation: insight.recommendation,
+            priority: insight.priority,
+            confidence: insight.confidence,
+            estimated_savings_eur_month: insight.estimatedSavings || 0,
+          });
+
+        this.logger(`BuildingInsightsService: Triggered insight_detected flow card for ${insight.category}`);
+      }
+    } catch (error) {
+      this.logger('BuildingInsightsService: Error triggering flow card:', error);
+    }
+  }
+
+  /**
+   * Update insight capabilities - one capability per category (v2.5.10+)
+   *
+   * Maps each insight category to its dedicated capability:
+   * - insulation_performance → building_insight_insulation
+   * - pre_heating → building_insight_preheating
+   * - thermal_storage → building_insight_thermal_storage
+   * - profile_mismatch → building_insight_profile
+   *
+   * Always shows status (learning/issue/optimal), never empty
+   */
+  private async updateInsightCapabilities(): Promise<void> {
+    try {
+      // Category to capability mapping
+      const categoryCapabilityMap: Record<InsightCategory, string> = {
+        insulation_performance: 'building_insight_insulation',
+        pre_heating: 'building_insight_preheating',
+        thermal_storage: 'building_insight_thermal_storage',
+        profile_mismatch: 'building_insight_profile',
+      };
+
+      // Update each capability with its category's insight
+      for (const [category, capabilityId] of Object.entries(categoryCapabilityMap)) {
+        if (this.device.hasCapability(capabilityId)) {
+          const insight = this.activeInsights.get(category as InsightCategory);
+          // Always show insight if available (learning/issue/optimal status)
+          const value = insight ? insight.insight : '';
+          await this.device.setCapabilityValue(capabilityId, value);
+        } else {
+          this.logger(`BuildingInsightsService: Capability ${capabilityId} not found (migration pending)`);
+        }
+      }
+
+      // Update diagnostics JSON
+      await this.updateDiagnosticsCapability();
+
+      const totalCount = this.activeInsights.size;
+      const activeCount = Array.from(this.activeInsights.values()).filter((i) => i.status === 'active').length;
+      this.logger(`BuildingInsightsService: Updated ${Object.keys(categoryCapabilityMap).length} category capabilities (${totalCount} displayed, ${activeCount} triggered flow cards)`);
+    } catch (error) {
+      this.logger('BuildingInsightsService: Error updating capabilities:', error);
+    }
+  }
+
+  /**
+   * Update diagnostics capability with full insight state (JSON)
+   */
+  private async updateDiagnosticsCapability(): Promise<void> {
+    if (!this.device.hasCapability('building_insights_diagnostics')) {
+      return;
+    }
+
+    const diagnostics = {
+      active_insights: Array.from(this.activeInsights.values()).filter((i) => i.status === 'active'),
+      insight_history: this.insightHistory.slice(-10), // Last 10
+      settings: {
+        enabled: this.enabled,
+        min_confidence: this.minConfidence,
+        // Note: max_active_insights removed in v2.5.10 - each category has dedicated capability
+      },
+      last_evaluation: this.lastEvaluationTime ? new Date(this.lastEvaluationTime).toISOString() : null,
+    };
+
+    await this.device.setCapabilityValue('building_insights_diagnostics', JSON.stringify(diagnostics, null, 2));
+  }
+
+  /**
+   * Check if pre-heat recommendation should be triggered based on ΔT threshold
+   * v2.6.0: Replaces fixed 23:00 schedule with dynamic condition-based trigger
+   *
+   * Triggers when:
+   * - ΔT (target - indoor) > 1.5°C
+   * - Confidence >= minConfidence
+   * - Not triggered in last 4 hours (fatigue prevention)
+   */
+  private async checkPreHeatThreshold(
+    diagnostics: Awaited<ReturnType<typeof this.buildingModel.getDiagnosticStatus>>,
+  ): Promise<void> {
+    if (!this.enabled || diagnostics.confidence < this.minConfidence) {
+      return;
+    }
+
+    // Get current temperatures
+    // @ts-expect-error - Accessing private externalTemperature from adaptiveControl
+    const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
+    const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
+
+    if (indoorTemp === null || indoorTemp === undefined
+      || targetTemp === null || targetTemp === undefined) {
+      return;
+    }
+
+    const tempDelta = targetTemp - indoorTemp;
+    const DELTA_THRESHOLD = 1.5; // °C
+
+    // Only trigger if ΔT exceeds threshold
+    if (tempDelta <= DELTA_THRESHOLD) {
+      return;
+    }
+
+    // Check fatigue prevention (4 hours between triggers)
+    const FATIGUE_HOURS = 4;
+    const lastTrigger = this.insightHistory.find(
+      (h) => h.category === 'pre_heating'
+        && Date.now() - h.detectedAt < FATIGUE_HOURS * 60 * 60 * 1000,
+    );
+    if (lastTrigger) {
+      return;
+    }
+
+    // Trigger the recommendation
+    this.logger(`BuildingInsightsService: ΔT=${tempDelta.toFixed(1)}°C > ${DELTA_THRESHOLD}°C threshold, triggering pre-heat recommendation`);
+    await this.triggerPreHeatRecommendation();
+  }
+
+  /**
+   * Trigger pre-heat recommendation flow card
+   * v2.6.0: Uses dynamic ΔT from actual indoor/target temps (not fixed settings)
+   * - Calculate optimal pre-heat duration based on τ and current temperature delta
+   */
+  private async triggerPreHeatRecommendation(): Promise<void> {
+    if (!this.enabled) {
+      return;
+    }
+
+    const model = this.buildingModel.getLearner().getModel();
+    const diagnostics = await this.buildingModel.getDiagnosticStatus();
+
+    if (diagnostics.confidence < this.minConfidence) {
+      this.logger('BuildingInsightsService: Insufficient confidence for pre-heat recommendation');
+      return;
+    }
+
+    // Defensive: Validate C and UA
+    if (!Number.isFinite(model.C) || model.C <= 0 || !Number.isFinite(model.UA) || model.UA <= 0) {
+      this.logger('BuildingInsightsService: Invalid model parameters for pre-heat recommendation');
+      return;
+    }
+
+    const tau = model.C / model.UA;
+
+    // Defensive: Validate tau
+    if (!Number.isFinite(tau) || tau < 0.5 || tau > 100) {
+      this.logger('BuildingInsightsService: Invalid tau for pre-heat recommendation:', tau);
+      return;
+    }
+
+    // v2.6.0: Get dynamic temperatures instead of fixed settings
+    // @ts-expect-error - Accessing private externalTemperature from adaptiveControl
+    const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
+    const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
+
+    if (indoorTemp === null || indoorTemp === undefined || targetTemp === null || targetTemp === undefined) {
+      this.logger('BuildingInsightsService: Missing indoor or target temperature');
+      return;
+    }
+
+    // Calculate dynamic temperature delta
+    const tempDelta = targetTemp - indoorTemp;
+
+    // Skip if already at or above target
+    if (tempDelta <= 0.5) {
+      this.logger('BuildingInsightsService: Already near target, no pre-heat needed');
+      return;
+    }
+
+    // Use central helper for pre-heat duration calculation
+    const preHeatHours = calculatePreHeatDuration(tau, tempDelta);
+
+    // Defensive: Validate preHeatHours is reasonable
+    if (!Number.isFinite(preHeatHours) || preHeatHours < 0.25) {
+      this.logger('BuildingInsightsService: Pre-heat duration invalid:', preHeatHours);
+      return;
+    }
+
+    // Log warning if very long pre-heat required (>24 hours)
+    if (preHeatHours > 24) {
+      this.logger(`BuildingInsightsService: ⚠️ Pre-heat requires ${preHeatHours.toFixed(0)} hours - very slow building (τ=${tau.toFixed(1)}h)`);
+    }
+
+    try {
+      await this.device.homey.flow
+        .getDeviceTriggerCard('pre_heat_recommendation')
+        .trigger(this.device, {
+          duration_hours: Math.round(preHeatHours * 10) / 10,
+          temp_rise: Math.round(tempDelta * 10) / 10,
+          current_temp: Math.round(indoorTemp * 10) / 10,
+          target_temp: Math.round(targetTemp * 10) / 10,
+          confidence: diagnostics.confidence,
+        });
+
+      this.logger(`BuildingInsightsService: Triggered pre_heat_recommendation: ΔT=${tempDelta.toFixed(1)}°C, duration=${preHeatHours.toFixed(1)}h`);
+    } catch (error) {
+      this.logger('BuildingInsightsService: Error triggering pre-heat recommendation:', error);
+    }
+  }
+
+  /**
+   * Find closest building profile based on learned parameters
+   */
+  private findClosestProfile(model: { C: number; UA: number }): BuildingProfileType {
+    // Defensive: Validate input parameters
+    if (!Number.isFinite(model.C) || model.C <= 0 || !Number.isFinite(model.UA) || model.UA <= 0) {
+      this.logger('BuildingInsightsService: Invalid model for profile matching, defaulting to average');
+      return 'average';
+    }
+
+    const learnedTau = model.C / model.UA;
+
+    // Defensive: Validate calculated tau
+    if (!Number.isFinite(learnedTau) || learnedTau <= 0) {
+      this.logger('BuildingInsightsService: Invalid learnedTau for profile matching, defaulting to average');
+      return 'average';
+    }
+
+    let closestProfile: BuildingProfileType = 'average';
+    let minDeviation = Infinity;
+
+    for (const [profileName, params] of Object.entries(BUILDING_PROFILES)) {
+      // Defensive: Validate profile parameters
+      if (!params || typeof params.C !== 'number' || typeof params.UA !== 'number' || params.UA <= 0) {
+        continue; // Skip invalid profiles
+      }
+
+      const profileTau = params.C / params.UA;
+
+      // Defensive: Skip if profileTau is invalid
+      if (!Number.isFinite(profileTau) || profileTau <= 0) {
+        continue;
+      }
+
+      const deviation = Math.abs(learnedTau - profileTau);
+      if (deviation < minDeviation) {
+        minDeviation = deviation;
+        closestProfile = profileName as BuildingProfileType;
+      }
+    }
+
+    return closestProfile;
+  }
+
+  /**
+   * Estimate insulation savings (EUR/month)
+   * - Calculate excess heat loss
+   * - Apply typical heating hours and COP
+   * - Convert to monthly cost
+   */
+  private estimateInsulationSavings(actualUA: number, targetUA: number): number {
+    // Defensive: Validate inputs
+    if (!Number.isFinite(actualUA) || !Number.isFinite(targetUA) || actualUA <= 0 || targetUA <= 0) {
+      this.logger('BuildingInsightsService: Invalid UA values for savings estimation');
+      return 0;
+    }
+
+    const excessHeatLoss = actualUA - targetUA; // kW/°C
+
+    // No savings if already better than target
+    if (excessHeatLoss <= 0) {
+      return 0;
+    }
+
+    const avgTempDiff = 15; // Average indoor-outdoor delta (°C)
+    const heatingHours = 4000; // Annual heating hours (typical)
+    const avgCOP = 3.5;
+    const energyPrice = 0.30; // €/kWh
+
+    const annualExcessEnergy = (excessHeatLoss * avgTempDiff * heatingHours) / avgCOP; // kWh
+    const annualCost = annualExcessEnergy * energyPrice;
+    const monthlySavings = annualCost / 12;
+
+    // Defensive: Validate result is reasonable (0-500 EUR/month)
+    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 500) {
+      this.logger('BuildingInsightsService: Unrealistic insulation savings calculated:', monthlySavings);
+      return 0;
+    }
+
+    return Math.round(monthlySavings);
+  }
+
+  /**
+   * Estimate thermal storage savings (EUR/month)
+   * - Calculate stored energy capacity
+   * - Apply price differential between peak/off-peak
+   * - Apply utilization factor
+   */
+  private estimateThermalStorageSavings(C: number, tau: number): number {
+    // Defensive: Validate inputs
+    if (!Number.isFinite(C) || C <= 0 || !Number.isFinite(tau) || tau <= 0) {
+      this.logger('BuildingInsightsService: Invalid C or tau for thermal storage savings');
+      return 0;
+    }
+
+    const avgTempShift = 2.0; // °C shift during cheap hours
+    const storedEnergy = C * avgTempShift; // kWh stored
+
+    // Defensive: Validate stored energy is reasonable (should be < 200 kWh for residential)
+    if (!Number.isFinite(storedEnergy) || storedEnergy <= 0 || storedEnergy > 200) {
+      this.logger('BuildingInsightsService: Unrealistic stored energy calculated:', storedEnergy);
+      return 0;
+    }
+
+    const dailyStorageCycles = 1; // Once per day
+    const priceDifferential = 0.15; // €/kWh (peak - off-peak)
+    const utilizationFactor = 0.7; // 70% of stored energy used during peak
+
+    const dailySavings = storedEnergy * dailyStorageCycles * priceDifferential * utilizationFactor;
+    const monthlySavings = dailySavings * 30;
+
+    // Defensive: Validate result is reasonable (0-300 EUR/month)
+    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 300) {
+      this.logger('BuildingInsightsService: Unrealistic thermal storage savings calculated:', monthlySavings);
+      return 0;
+    }
+
+    return Math.round(monthlySavings);
+  }
+
+  /**
+   * Estimate thermal storage savings with dynamic boost value (EUR/month)
+   * v2.6.0: Uses calculated optimal boost instead of fixed 2°C
+   */
+  private estimateThermalStorageSavingsWithBoost(C: number, boost: number): number {
+    // Defensive: Validate inputs
+    if (!Number.isFinite(C) || C <= 0 || !Number.isFinite(boost) || boost <= 0) {
+      this.logger('BuildingInsightsService: Invalid C or boost for savings calculation');
+      return 0;
+    }
+
+    const storedEnergy = C * boost; // kWh stored
+
+    // Defensive: Validate stored energy
+    if (!Number.isFinite(storedEnergy) || storedEnergy <= 0 || storedEnergy > 250) {
+      this.logger('BuildingInsightsService: Unrealistic stored energy:', storedEnergy);
+      return 0;
+    }
+
+    const dailyStorageCycles = 1;
+    const priceDifferential = 0.15; // €/kWh (peak - off-peak)
+    const utilizationFactor = 0.7;
+
+    const dailySavings = storedEnergy * dailyStorageCycles * priceDifferential * utilizationFactor;
+    const monthlySavings = dailySavings * 30;
+
+    // Defensive: Validate result (0-400 EUR/month)
+    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 400) {
+      this.logger('BuildingInsightsService: Unrealistic savings:', monthlySavings);
+      return 0;
+    }
+
+    return Math.round(monthlySavings);
+  }
+
+  /**
+   * Persist current state to device store
+   */
+  private async persistState(): Promise<void> {
+    const state: InsightState = {
+      activeInsights: Array.from(this.activeInsights.values()),
+      history: this.insightHistory.slice(-50), // Keep last 50
+      lastEvaluation: this.lastEvaluationTime,
+    };
+
+    await this.device.setStoreValue('building_insights_state', state);
+    this.logger('BuildingInsightsService: State persisted');
+  }
+
+  /**
+   * Restore state from device store
+   */
+  private async restoreState(): Promise<void> {
+    const state = await this.device.getStoreValue('building_insights_state') as InsightState | null;
+    if (state) {
+      this.activeInsights = new Map(state.activeInsights.map((i) => [i.category, i]));
+      this.insightHistory = state.history || [];
+      this.lastEvaluationTime = state.lastEvaluation || 0;
+      this.logger(`BuildingInsightsService: Restored ${this.activeInsights.size} active insights from storage`);
+    }
+  }
+
+  // ==================== PUBLIC API FOR FLOW CARDS ====================
+
+  /**
+   * Flow Action: Force immediate insight analysis
+   * Used by: force_insight_analysis flow action card
+   * @returns Object with insights_detected and confidence for flow tokens
+   */
+  public async forceInsightAnalysis(): Promise<ForceInsightAnalysisResult> {
+    this.logger('BuildingInsightsService: Force insight analysis triggered');
+
+    await this.evaluateInsights();
+
+    const diagnostics = await this.buildingModel.getDiagnosticStatus();
+    const insightsCount = Array.from(this.activeInsights.values()).filter((i) => i.status === 'active').length;
+
+    return {
+      insights_detected: insightsCount,
+      confidence: diagnostics.confidence,
+    };
+  }
+
+  /**
+   * Flow Condition: Check if specific insight category is active
+   * Used by: insight_is_active flow condition card
+   */
+  public isInsightActive(category: InsightCategory): boolean {
+    const insight = this.activeInsights.get(category);
+
+    // Active if exists, status is 'active', and not dismissed
+    if (!insight) {
+      return false;
+    }
+
+    if (insight.status !== 'active') {
+      return false;
+    }
+
+    // Check if still dismissed
+    if (insight.dismissedUntil && Date.now() < insight.dismissedUntil) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Flow Condition: Check if model confidence is above threshold
+   * Used by: confidence_above flow condition card
+   */
+  public async isConfidenceAbove(threshold: number): Promise<boolean> {
+    // Defensive: Validate threshold
+    if (typeof threshold !== 'number' || threshold < 0 || threshold > 100) {
+      this.logger('BuildingInsightsService: Invalid confidence threshold for condition:', threshold);
+      return false;
+    }
+
+    try {
+      const diagnostics = await this.buildingModel.getDiagnosticStatus();
+      return diagnostics.confidence > threshold;
+    } catch (error) {
+      this.logger('BuildingInsightsService: Error checking confidence:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Flow Condition: Check if savings for a category are above threshold
+   * Used by: savings_above flow condition card
+   */
+  public areSavingsAbove(category: InsightCategory, threshold: number): boolean {
+    // Defensive: Validate threshold
+    if (typeof threshold !== 'number' || threshold < 0 || threshold > 500) {
+      this.logger('BuildingInsightsService: Invalid savings threshold for condition:', threshold);
+      return false;
+    }
+
+    const insight = this.activeInsights.get(category);
+
+    if (!insight) {
+      return false; // No insight = no savings
+    }
+
+    if (insight.status !== 'active') {
+      return false; // Dismissed insight = don't consider savings
+    }
+
+    // estimatedSavings is optional (profile_mismatch doesn't have savings)
+    const savings = insight.estimatedSavings || 0;
+
+    return savings > threshold;
+  }
+
+  /**
+   * Public API: Get learner (for external access)
+   */
+  public getBuildingModel(): BuildingModelService {
+    return this.buildingModel;
+  }
+}

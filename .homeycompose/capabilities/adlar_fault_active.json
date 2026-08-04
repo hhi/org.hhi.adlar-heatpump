@@ -1,0 +1,20 @@
+{
+  "id": "adlar_fault_active",
+  "type": "string",
+  "title": {
+    "en": "Active fault description",
+    "nl": "Actieve foutomschrijving",
+    "de": "Aktive Fehlerbeschreibung",
+    "fr": "Description du défaut actif"
+  },
+  "icon": "/assets/fault.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "description": {
+    "en": "Decoded fault description from Modbus fault registers 0x0002–0x0009. Shows the active fault code and name, or empty when no fault is present.",
+    "nl": "Gedecodeerde storingsbeschrijving uit Modbus-foutregisters 0x0002–0x0009. Toont de actieve storingscode en naam, of is leeg bij geen storing.",
+    "de": "Dekodierte Fehlerbeschreibung aus den Modbus-Fehlerregistern 0x0002–0x0009. Zeigt den aktiven Fehlercode und -namen oder ist leer, wenn kein Fehler vorliegt.",
+    "fr": "Description de défaut décodée depuis les registres de défaut Modbus 0x0002–0x0009. Affiche le code et le nom du défaut actif, ou vide en l'absence de défaut."
+  }
+}

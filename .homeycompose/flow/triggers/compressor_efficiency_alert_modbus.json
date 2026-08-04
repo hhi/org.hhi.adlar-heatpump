@@ -1,0 +1,103 @@
+{
+  "id": "compressor_efficiency_alert_modbus",
+  "title": {
+    "en": "Compressor efficiency alert (Expert)",
+    "nl": "Compressor efficiëntie alarm (Expert)",
+    "de": "Kompressor-Effizienzalarm (Experte)",
+    "fr": "Alerte d'efficacité du compresseur (Expert)"
+  },
+  "titleFormatted": {
+    "en": "Compressor frequency [[condition]] [[frequency]] Hz (Expert)",
+    "nl": "Compressor frequentie [[condition]] [[frequency]] Hz (Expert)",
+    "de": "Kompressor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+    "fr": "Fréquence du compresseur [[condition]] [[frequency]] Hz (Expert)"
+  },
+  "hint": {
+    "en": "Triggers when compressor frequency goes above or below a specified level.",
+    "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald niveau gaat.",
+    "de": "Wird ausgelöst, wenn die Kompressor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet.",
+    "fr": "Se déclenche lorsque la fréquence du compresseur dépasse ou descend en dessous d'un niveau spécifié."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "frequency",
+      "title": {
+        "en": " Frequency ",
+        "nl": " Frequentie ",
+        "de": " Frequenz ",
+        "fr": " Fréquence "
+      },
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "units": "Hz",
+      "placeholder": {
+        "en": "Frequency threshold in Hz",
+        "nl": "Frequentie drempel in Hz",
+        "de": "Frequenzschwellenwert in Hz",
+        "fr": "Seuil de fréquence en Hz"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_frequency",
+      "title": {
+        "en": "Current frequency",
+        "nl": "Huidige frequentie",
+        "de": "Aktuelle Frequenz",
+        "fr": "Fréquence actuelle"
+      },
+      "example": 85
+    },
+    {
+      "type": "number",
+      "name": "threshold_frequency",
+      "title": {
+        "en": "Triggered frequency",
+        "nl": "Getriggerde frequentie",
+        "de": "Auslösende Frequenz",
+        "fr": "Fréquence déclencheuse"
+      },
+      "example": 90
+    }
+  ],
+  "highlight": true
+}

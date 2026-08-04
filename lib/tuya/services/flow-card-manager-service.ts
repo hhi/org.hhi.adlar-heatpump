@@ -1,0 +1,1677 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
+import Homey from 'homey';
+import { TuyaErrorCategorizer } from '../../shared/error-types';
+import { calculatePreHeatDuration } from '../../shared/utils/preheat-calculator';
+import { CapabilityCategories } from '../types/shared-interfaces';
+import { PerformanceReportService } from './performance-report-service';
+import type { BuildingInsightsService, InsightCategory } from './building-insights-service';
+
+type PerformanceReportFlowTokens = {
+  'overall_score': number;
+  rating: string;
+  summary: string;
+  recommendations: string;
+  'report_json': string;
+};
+
+interface PerformanceReportTriggerCard {
+  trigger(device: Homey.Device, tokens: PerformanceReportFlowTokens): Promise<void>;
+}
+
+/**
+ * Structural view of the per-device ServiceCoordinator, limited to what the Flow
+ * card handlers need. Declared structurally to avoid a circular import between
+ * ServiceCoordinator and this service.
+ */
+interface DeviceServiceCoordinator {
+  getAdaptiveControl?: () => {
+    getEnergyPriceOptimizer?: () => {
+      findCheapestBlock: (hours: number) => { startTime: Date; endTime: Date; avgPrice: number; totalHours: number } | null;
+      calculatePriceTrend: (hours: number) => { trend: 'rising' | 'falling' | 'stable'; slope: number; confidence: number } | null;
+      getCurrentPrice: (timestamp: number) => { price: number; category: string } | null;
+      getPriceStatistics: () => { avg: number; sampleSize: number } | null;
+    } | null;
+    getBuildingModelService?: () => {
+      getLearner: () => { getModel: () => { C: number; UA: number; confidence: number } };
+    } | null;
+    getExternalTemperatureService?: () => {
+      getIndoorTemperature: () => number | null;
+    } | null;
+    receiveExternalTemperature?: (temperature: number) => Promise<void>;
+  } | null;
+  getBuildingInsights?: () => BuildingInsightsService | null;
+  /**
+   * NOTE: not implemented by ServiceCoordinator. RollingCOPCalculator is a private
+   * field on the device class. Declared optional so callers must use `?.()` and
+   * degrade gracefully instead of throwing. See ADR-001 follow-up.
+   */
+  getRollingCOPCalculator?: () => {
+    getTrendAnalysis: (hours: number) => { trend: string; strength: number; trendKey: string } | null;
+  } | null;
+}
+
+const INSIGHT_CATEGORIES: ReadonlyArray<InsightCategory> = [
+  'insulation_performance',
+  'pre_heating',
+  'thermal_storage',
+  'profile_mismatch',
+];
+
+export interface FlowCardManagerOptions {
+  device: Homey.Device;
+  logger?: (message: string, ...args: unknown[]) => void;
+  onExternalPowerData?: (powerValue: number) => Promise<void>;
+  onExternalPricesData?: (pricesObject: Record<string, number>) => Promise<void>;
+  buildingInsightsService?: BuildingInsightsService; // v2.5.0: Building insights flow cards
+}
+
+export class FlowCardManagerService {
+  private device: Homey.Device;
+  private logger: (message: string, ...args: unknown[]) => void;
+  private onExternalPowerData: (powerValue: number) => Promise<void>;
+  private onExternalPricesData: (pricesObject: Record<string, number>) => Promise<void>;
+  private buildingInsightsService?: BuildingInsightsService; // v2.5.0
+  private flowCardListeners = new Map<string, unknown>();
+  private isInitialized = false;
+  private initializationRetryTimer: NodeJS.Timeout | null = null;
+  private dailyReportTimer: NodeJS.Timeout | null = null;
+  private dailyReportInterval: NodeJS.Timeout | null = null;
+  private hourlyScoreInterval: NodeJS.Timeout | null = null;
+  private initReportScheduled: boolean = false;
+  /** Handle for the one-time init performance report timeout (ADR-022) */
+  private initReportTimeout: NodeJS.Timeout | null = null;
+  private reportReadyTriggerCard: unknown = null;
+
+  /**
+   * The instance that registered the app-wide Flow card listeners.
+   *
+   * Flow cards are app-wide singletons and the Homey SDK offers no way to remove a
+   * run listener, so registering from every device instance is redundant: the last
+   * call simply overwrites the previous one. One registrar serves all devices
+   * because every handler resolves its target through `args.device`.
+   *
+   * Released in destroy() so a remaining device takes over when the registrar's
+   * device is removed.
+   */
+  private static registrar: FlowCardManagerService | null = null;
+
+  /**
+   * FlowCardManagerService manages registering/unregistering and invoking flow cards
+   * based on device capabilities and user preferences.
+   * @param options.device - device instance
+   * @param options.logger - optional logger
+   * @param options.onExternalPowerData - callback to delegate external power data to EnergyTrackingService
+   * @param options.onExternalPricesData - callback to delegate external prices data to AdaptiveControlService
+   * @param options.buildingInsightsService - v2.5.0: optional building insights service for flow cards
+   */
+  constructor(options: FlowCardManagerOptions) {
+    this.device = options.device;
+    this.logger = options.logger || (() => { });
+    this.onExternalPowerData = options.onExternalPowerData || (async () => { });
+    this.onExternalPricesData = options.onExternalPricesData || (async () => { });
+    this.buildingInsightsService = options.buildingInsightsService; // v2.5.0
+  }
+
+  private isInsightCategory(category: string): category is InsightCategory {
+    return INSIGHT_CATEGORIES.some((value) => value === category);
+  }
+
+  private isPerformanceReportTriggerCard(card: unknown): card is PerformanceReportTriggerCard {
+    if (typeof card !== 'object' || card === null) {
+      return false;
+    }
+
+    const candidate = card as { trigger?: unknown };
+    return typeof candidate.trigger === 'function';
+  }
+
+  private formatDiagnosticTimestamp(date: Date): string {
+    const datePart = [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, '0'),
+      String(date.getDate()).padStart(2, '0'),
+    ].join('-');
+    const timePart = [
+      String(date.getHours()).padStart(2, '0'),
+      String(date.getMinutes()).padStart(2, '0'),
+    ].join(':');
+    return `${datePart} ${timePart}`;
+  }
+
+  /**
+   * Resolve the device a Flow card must act on.
+   *
+   * Flow cards are app-wide singletons: `registerRunListener()` holds exactly one
+   * listener per card and every call overwrites the previous one. Because this
+   * service is instantiated per device, a handler that closes over `this.device`
+   * would operate on whichever device happened to register last — not on the
+   * device the user selected in the card.
+   *
+   * Every Flow card in this app declares a `device` argument, so `args.device` is
+   * the authoritative target. The fallback to `this.device` only covers a card
+   * invoked without a device argument, which should not occur.
+   */
+  private resolveDevice(args: unknown): Homey.Device {
+    const candidate = (args as { device?: Homey.Device } | undefined)?.device;
+    return candidate ?? this.device;
+  }
+
+  /**
+   * Resolve the ServiceCoordinator belonging to a specific device.
+   * Returns undefined when the device has not finished initializing.
+   */
+  private static coordinatorOf(device: Homey.Device): DeviceServiceCoordinator | undefined {
+    return (device as unknown as { serviceCoordinator?: DeviceServiceCoordinator }).serviceCoordinator;
+  }
+
+  /**
+   * Resolve the BuildingInsightsService of a specific device, falling back to the
+   * instance this service was constructed with.
+   */
+  private buildingInsightsOf(device: Homey.Device): BuildingInsightsService | undefined {
+    return FlowCardManagerService.coordinatorOf(device)?.getBuildingInsights?.()
+      ?? this.buildingInsightsService;
+  }
+
+  /**
+   * Initialize flow card registration. This will evaluate available capabilities,
+   * user preferences and register/unregister flow cards accordingly.
+   */
+  async initialize(): Promise<void> {
+    this.logger('FlowCardManagerService: Initializing flow cards');
+
+    try {
+      await this.updateFlowCards();
+      this.isInitialized = true;
+      this.logger('FlowCardManagerService: Flow cards initialized successfully');
+    } catch (error) {
+      const categorizedError = TuyaErrorCategorizer.categorize(error as Error, 'Initializing flow cards');
+      this.logger('FlowCardManagerService: Error initializing flow cards:', categorizedError.userMessage);
+
+      if (categorizedError.retryable) {
+        this.logger('FlowCardManagerService: Will retry flow card initialization in 5 seconds');
+        this.initializationRetryTimer = this.device.homey.setTimeout(() => this.initialize(), 5000);
+      }
+    }
+  }
+
+  /**
+   * Refresh the set of flow cards (re-register based on current capabilities and data availability).
+   * @param capabilitiesWithData - optional list of capabilities known to have recent data
+   */
+  async updateFlowCards(capabilitiesWithData?: string[]): Promise<void> {
+    try {
+      // Don't proceed if device isn't fully initialized yet
+      if (!this.isInitialized && Object.keys(this.device.homey.drivers.getDrivers()).length === 0) {
+        this.logger('FlowCardManagerService: Skipping flow card update - system not ready');
+        return;
+      }
+
+      // Flow cards are app-wide singletons: registerRunListener() holds exactly one
+      // listener per card, and a later call overwrites it. Registering from every
+      // device instance is therefore redundant — one registrar serves all devices,
+      // because each handler resolves its target through args.device.
+      //
+      // NOTE: the per-category conditional registration that used to live here
+      // (registerFlowCardsByCategory, driven by the flow_* settings) has been
+      // removed. It could not work: "register this card for device A but not for
+      // device B" has no meaning for a singleton. The methods it called registered
+      // nothing anyway — trigger cards come from the pattern-based system in
+      // app.ts — so the flow_* settings never affected Flow card visibility,
+      // despite what their labels promise.
+      //
+      // The settings are NOT unused: CapabilityHealthService.isCategoryEnabled()
+      // reads them to decide which capability categories take part in health
+      // tracking. Do not delete them without adjusting that service.
+      // See docs/architecture/IMPLEMENTATIEPLAN-v3.md, besluit B3 and fase 8.
+      const isRegistrar = FlowCardManagerService.registrar === null
+        || FlowCardManagerService.registrar === this;
+
+      if (isRegistrar) {
+        FlowCardManagerService.registrar = this;
+
+        // Clear the internal bookkeeping map before re-registering.
+        this.unregisterAllFlowCards();
+
+        // Register action-based condition cards (always available)
+        await this.registerActionBasedConditionCards();
+
+        // Register Building Insights cards (v2.5.0 - always available if service exists)
+        if (this.buildingInsightsService) {
+          await this.registerBuildingInsightsCards();
+        }
+
+        // Register external data action cards (v2.6.1 - consolidates from device.ts)
+        await this.registerExternalDataActionCards();
+
+        // Register Performance Report action card (v2.9.0)
+        await this.registerPerformanceReportCard();
+      } else {
+        this.logger(
+          'FlowCardManagerService: Flow card listeners already registered app-wide by another device — skipping registration',
+        );
+      }
+
+      // Per-device work that must run for every device, registrar or not:
+      // the performance report scheduler owns device-scoped timers.
+      this.schedulePerformanceReportTimers();
+
+      this.logger('FlowCardManagerService: Flow cards updated successfully');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error updating flow cards:', error);
+    }
+  }
+
+  /**
+   * Map a capability id to a flow-card category key.
+   * @returns one of the CapabilityCategories keys
+   */
+  private getCapabilityCategory(capability: string): keyof CapabilityCategories {
+    if (capability.startsWith('measure_temperature')) return 'temperature';
+    if (capability.startsWith('measure_voltage')) return 'voltage';
+    if (capability.startsWith('measure_current')) return 'current';
+    if (capability.includes('power') || capability.includes('energy')) return 'power';
+    if (capability.includes('pulse_steps')) return 'pulseSteps';
+    if (capability.startsWith('adlar_state')) return 'states';
+    if (capability.includes('cop') || capability.includes('scop')) return 'efficiency';
+    return 'temperature'; // Default fallback
+  }
+
+  /**
+   * Register action-based condition cards built from patterns in the app.
+   */
+  private async registerActionBasedConditionCards(): Promise<void> {
+    try {
+      // Device power state condition
+      const devicePowerCard = this.device.homey.flow.getConditionCard('device_power_is');
+      const devicePowerListener = devicePowerCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Device power condition triggered', { args });
+        const device = this.resolveDevice(args);
+        const currentValue = device.getCapabilityValue('onoff');
+        const expectedState = args.state === 'on';
+        return currentValue === expectedState;
+      });
+      this.flowCardListeners.set('device_power_is', devicePowerListener);
+
+      // Target temperature condition
+      const targetTempCard = this.device.homey.flow.getConditionCard('target_temperature_is');
+      const targetTempListener = targetTempCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Target temperature condition triggered', { args });
+        const device = this.resolveDevice(args);
+        const currentValue = device.getCapabilityValue('target_temperature') || 0;
+        const targetValue = args.temperature || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return Math.abs(currentValue - targetValue) < 0.5;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+      this.flowCardListeners.set('target_temperature_is', targetTempListener);
+
+      // Hot water temperature condition
+      const hotWaterTempCard = this.device.homey.flow.getConditionCard('hotwater_temperature_is');
+      const hotWaterTempListener = hotWaterTempCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Hot water temperature condition triggered', { args });
+        const device = this.resolveDevice(args);
+        const currentValue = device.getCapabilityValue('adlar_hotwater') || 0;
+        const targetValue = args.temperature || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return Math.abs(currentValue - targetValue) < 1;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+      this.flowCardListeners.set('hotwater_temperature_is', hotWaterTempListener);
+
+      // Heating mode condition
+      const heatingModeCard = this.device.homey.flow.getConditionCard('heating_mode_is');
+      const heatingModeListener = heatingModeCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Heating mode condition triggered', { args });
+        const currentValue = this.resolveDevice(args).getCapabilityValue('adlar_enum_mode');
+        return currentValue === args.mode;
+      });
+      this.flowCardListeners.set('heating_mode_is', heatingModeListener);
+
+      // Work mode condition
+      const workModeCard = this.device.homey.flow.getConditionCard('work_mode_is');
+      const workModeListener = workModeCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Work mode condition triggered', { args });
+        const currentValue = this.resolveDevice(args).getCapabilityValue('adlar_enum_work_mode');
+        return currentValue === args.mode;
+      });
+      this.flowCardListeners.set('work_mode_is', workModeListener);
+
+      // Water mode condition
+      const waterModeCard = this.device.homey.flow.getConditionCard('water_mode_is');
+      const waterModeListener = waterModeCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Water mode condition triggered', { args });
+        const currentValue = this.resolveDevice(args).getCapabilityValue('adlar_enum_water_mode') || 0;
+        const targetValue = args.mode || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return currentValue === targetValue;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+      this.flowCardListeners.set('water_mode_is', waterModeListener);
+
+      // Capacity setting condition
+      const capacitySettingCard = this.device.homey.flow.getConditionCard('capacity_setting_is');
+      const capacitySettingListener = capacitySettingCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Capacity setting condition triggered', { args });
+        const currentValue = this.resolveDevice(args).getCapabilityValue('adlar_enum_capacity_set');
+        return currentValue === args.capacity;
+      });
+      this.flowCardListeners.set('capacity_setting_is', capacitySettingListener);
+
+      // Heating curve condition
+      const heatingCurveCard = this.device.homey.flow.getConditionCard('heating_curve_is');
+      const heatingCurveListener = heatingCurveCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Heating curve condition triggered', { args });
+        const currentValue = this.resolveDevice(args).getCapabilityValue('adlar_enum_countdown_set');
+        return currentValue === args.curve;
+      });
+      this.flowCardListeners.set('heating_curve_is', heatingCurveListener);
+
+      // Volume setting condition
+      const volumeSettingCard = this.device.homey.flow.getConditionCard('volume_setting_is');
+      const volumeSettingListener = volumeSettingCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Volume setting condition triggered', { args });
+        const currentValue = this.resolveDevice(args).getCapabilityValue('adlar_enum_volume_set') || 0;
+        const targetValue = args.level || 0;
+
+        switch (args.comparison) {
+          case 'equal':
+            return currentValue === targetValue;
+          case 'greater':
+            return currentValue > targetValue;
+          case 'less':
+            return currentValue < targetValue;
+          default:
+            return false;
+        }
+      });
+      this.flowCardListeners.set('volume_setting_is', volumeSettingListener);
+
+      // COP efficiency check condition (v1.0.7)
+      const copEfficiencyCard = this.device.homey.flow.getConditionCard('cop_efficiency_check');
+      const copEfficiencyListener = copEfficiencyCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: COP efficiency check triggered', { args });
+
+        const device = this.resolveDevice(args);
+
+        // Get current COP value from capability
+        const currentCOP = device.getCapabilityValue('adlar_cop') as number || 0;
+        const threshold = args.threshold || 2.0;
+
+        // Check if compressor is actually running (COP only meaningful when active)
+        const compressorFrequency = device.getCapabilityValue('measure_frequency.compressor_strength') as number || 0;
+
+        if (compressorFrequency === 0) {
+          // Compressor idle - COP not meaningful
+          this.logger('FlowCardManagerService: COP check skipped - compressor idle');
+          return false;
+        }
+
+        return currentCOP > threshold;
+      });
+      this.flowCardListeners.set('cop_efficiency_check', copEfficiencyListener);
+
+      // Daily COP above threshold condition (v1.0.7)
+      const dailyCOPCard = this.device.homey.flow.getConditionCard('daily_cop_above_threshold');
+      const dailyCOPListener = dailyCOPCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Daily COP check triggered', { args });
+
+        const dailyCOP = this.resolveDevice(args).getCapabilityValue('adlar_cop_daily') as number || 0;
+        const threshold = args.threshold || 2.5;
+
+        // Need sufficient data for reliable daily average
+        if (dailyCOP === 0) {
+          this.logger('FlowCardManagerService: Daily COP check skipped - insufficient data');
+          return false;
+        }
+
+        return dailyCOP > threshold;
+      });
+      this.flowCardListeners.set('daily_cop_above_threshold', dailyCOPListener);
+
+      // Monthly COP above threshold condition (v1.0.7)
+      const monthlyCOPCard = this.device.homey.flow.getConditionCard('monthly_cop_above_threshold');
+      const monthlyCOPListener = monthlyCOPCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Monthly COP check triggered', { args });
+
+        const monthlyCOP = this.resolveDevice(args).getCapabilityValue('adlar_cop_monthly') as number || 0;
+        const threshold = args.threshold || 3.0;
+
+        // Need sufficient data for reliable monthly average
+        if (monthlyCOP === 0) {
+          this.logger('FlowCardManagerService: Monthly COP check skipped - insufficient data');
+          return false;
+        }
+
+        return monthlyCOP > threshold;
+      });
+      this.flowCardListeners.set('monthly_cop_above_threshold', monthlyCOPListener);
+
+      // COP trend analysis condition (v1.0.8)
+      const copTrendCard = this.device.homey.flow.getConditionCard('cop_trend_analysis');
+      const copTrendListener = copTrendCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: COP trend analysis triggered', { args });
+
+        // Get service coordinator to access RollingCOPCalculator
+        const serviceCoordinator = FlowCardManagerService.coordinatorOf(this.resolveDevice(args));
+
+        if (!serviceCoordinator) {
+          this.logger('FlowCardManagerService: Service coordinator not available');
+          return false;
+        }
+
+        // Optional call: ServiceCoordinator does not currently expose this accessor
+        // (RollingCOPCalculator is a private field on the device class). Calling it
+        // unconditionally threw a TypeError and aborted the Flow.
+        const rollingCOPCalculator = serviceCoordinator.getRollingCOPCalculator?.();
+        if (!rollingCOPCalculator) {
+          this.logger('FlowCardManagerService: RollingCOPCalculator not available');
+          return false;
+        }
+
+        const hours = args.hours || 24;
+        const trendAnalysis = rollingCOPCalculator.getTrendAnalysis(hours);
+
+        if (!trendAnalysis) {
+          this.logger('FlowCardManagerService: COP trend analysis skipped - insufficient data');
+          return false;
+        }
+
+        // The flow card uses !{{improving|stable|degrading}} syntax
+        // This means args will have the selected value, and we check if it matches
+        // The trend value from getTrendAnalysis is 'improving', 'stable', or 'degrading'
+        this.logger('FlowCardManagerService: COP trend analysis result', {
+          hours,
+          trend: trendAnalysis.trend,
+          strength: trendAnalysis.strength,
+          trendKey: trendAnalysis.trendKey,
+        });
+
+        // Note: Homey's !{{option1|option2|option3}} returns true for first option, false for others
+        // So we return true if trend matches the "improving" state, false otherwise
+        // This is controlled by the flow card UI selection
+        return trendAnalysis.trend === 'improving';
+      });
+      this.flowCardListeners.set('cop_trend_analysis', copTrendListener);
+
+      // Price in cheapest hours condition (v2.5.0)
+      const priceInCheapestHoursCard = this.device.homey.flow.getConditionCard('price_in_cheapest_hours');
+      const priceInCheapestHoursListener = priceInCheapestHoursCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Price in cheapest hours condition triggered', { args });
+
+        // Get service coordinator to access EnergyPriceOptimizer
+        const serviceCoordinator = FlowCardManagerService.coordinatorOf(this.resolveDevice(args));
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control not available');
+          return false;
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control service not available');
+          return false;
+        }
+
+        const energyOptimizer = adaptiveControl.getEnergyPriceOptimizer?.();
+        if (!energyOptimizer) {
+          this.logger('FlowCardManagerService: Energy price optimizer not available');
+          return false;
+        }
+
+        const hours = args.hours || 4;
+        const cheapestBlock = energyOptimizer.findCheapestBlock(hours);
+
+        if (!cheapestBlock) {
+          this.logger('FlowCardManagerService: No cheapest block found - insufficient price data');
+          return false;
+        }
+
+        // Check if current time is within the cheapest block
+        const now = Date.now();
+        const isInBlock = now >= cheapestBlock.startTime.getTime() && now < cheapestBlock.endTime.getTime();
+
+        this.logger('FlowCardManagerService: Price in cheapest hours result', {
+          hours,
+          blockStart: cheapestBlock.startTime.toISOString(),
+          blockEnd: cheapestBlock.endTime.toISOString(),
+          avgPrice: cheapestBlock.avgPrice,
+          isInBlock,
+        });
+
+        return isInBlock;
+      });
+      this.flowCardListeners.set('price_in_cheapest_hours', priceInCheapestHoursListener);
+
+      // Price trend is condition (v2.5.0)
+      const priceTrendIsCard = this.device.homey.flow.getConditionCard('price_trend_is');
+      const priceTrendIsListener = priceTrendIsCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Price trend is condition triggered', { args });
+
+        // Get service coordinator to access EnergyPriceOptimizer
+        const serviceCoordinator = FlowCardManagerService.coordinatorOf(this.resolveDevice(args));
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control not available');
+          return false;
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control service not available');
+          return false;
+        }
+
+        const energyOptimizer = adaptiveControl.getEnergyPriceOptimizer?.();
+        if (!energyOptimizer) {
+          this.logger('FlowCardManagerService: Energy price optimizer not available');
+          return false;
+        }
+
+        const hours = args.hours || 6;
+        const expectedTrend = args.trend || 'stable';
+        const trendAnalysis = energyOptimizer.calculatePriceTrend(hours);
+
+        if (!trendAnalysis) {
+          this.logger('FlowCardManagerService: No trend analysis available - insufficient price data');
+          return false;
+        }
+
+        // Only trust trends with confidence > 0.5 (R² from linear regression)
+        if (trendAnalysis.confidence <= 0.5) {
+          this.logger('FlowCardManagerService: Trend confidence too low', {
+            confidence: trendAnalysis.confidence,
+            threshold: 0.5,
+          });
+          return false;
+        }
+
+        const trendsMatch = trendAnalysis.trend === expectedTrend;
+
+        this.logger('FlowCardManagerService: Price trend is result', {
+          hours,
+          expectedTrend,
+          actualTrend: trendAnalysis.trend,
+          slope: trendAnalysis.slope,
+          confidence: trendAnalysis.confidence,
+          trendsMatch,
+        });
+
+        return trendsMatch;
+      });
+      this.flowCardListeners.set('price_trend_is', priceTrendIsListener);
+
+      // Price vs daily average condition (v2.5.0)
+      const priceVsDailyAverageCard = this.device.homey.flow.getConditionCard('price_vs_daily_average');
+      const priceVsDailyAverageListener = priceVsDailyAverageCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Price vs daily average condition triggered', { args });
+
+        // Get service coordinator to access EnergyPriceOptimizer
+        const serviceCoordinator = FlowCardManagerService.coordinatorOf(this.resolveDevice(args));
+
+        if (!serviceCoordinator?.getAdaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control not available');
+          return false;
+        }
+
+        const adaptiveControl = serviceCoordinator.getAdaptiveControl();
+        if (!adaptiveControl) {
+          this.logger('FlowCardManagerService: Adaptive control service not available');
+          return false;
+        }
+
+        const energyOptimizer = adaptiveControl.getEnergyPriceOptimizer?.();
+        if (!energyOptimizer) {
+          this.logger('FlowCardManagerService: Energy price optimizer not available');
+          return false;
+        }
+
+        const margin = args.margin || 10;
+        const now = Date.now();
+
+        const currentPriceData = energyOptimizer.getCurrentPrice(now);
+        if (!currentPriceData) {
+          this.logger('FlowCardManagerService: No current price available');
+          return false;
+        }
+
+        const priceStats = energyOptimizer.getPriceStatistics();
+        if (!priceStats || priceStats.sampleSize < 6) {
+          this.logger('FlowCardManagerService: Insufficient price data for daily average', {
+            sampleSize: priceStats?.sampleSize || 0,
+            required: 6,
+          });
+          return false;
+        }
+
+        const currentPrice = currentPriceData.price;
+        const dailyAverage = priceStats.avg;
+
+        // Calculate percentage deviation from average
+        const deviationPercent = ((currentPrice - dailyAverage) / dailyAverage) * 100;
+        const absDeviationPercent = Math.abs(deviationPercent);
+
+        // Check if deviation meets the margin requirement
+        const meetsMargin = absDeviationPercent >= margin;
+
+        // The !{{below|above}} syntax means:
+        // - Return true if price is below average AND deviation meets margin
+        // - Return false if price is above average OR deviation doesn't meet margin
+        const isBelow = deviationPercent < 0;
+        const result = isBelow && meetsMargin;
+
+        this.logger('FlowCardManagerService: Price vs daily average result', {
+          currentPrice,
+          dailyAverage,
+          deviationPercent: deviationPercent.toFixed(2),
+          margin,
+          meetsMargin,
+          isBelow,
+          result,
+        });
+
+        return result;
+      });
+      this.flowCardListeners.set('price_vs_daily_average', priceVsDailyAverageListener);
+
+      this.logger('FlowCardManagerService: Action-based condition cards registered');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering action-based condition cards:', error);
+    }
+  }
+
+  /**
+   * Register Building Insights flow cards (v2.5.0)
+   * - 4 action cards: dismiss, force analysis, reset history, set threshold
+   * - 3 condition cards: insight active, confidence above, savings above
+   */
+  private async registerBuildingInsightsCards(): Promise<void> {
+    if (!this.buildingInsightsService) {
+      this.logger('FlowCardManagerService: Building Insights service not available, skipping cards');
+      return;
+    }
+
+    try {
+      // ==================== ACTION CARDS ====================
+
+      // Action: Force insight analysis
+      const forceAnalysisCard = this.device.homey.flow.getActionCard('force_insight_analysis');
+      const forceAnalysisListener = forceAnalysisCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Force insight analysis action triggered');
+
+        const buildingInsights = this.buildingInsightsOf(this.resolveDevice(args));
+        if (!buildingInsights) {
+          throw new Error('Building Insights service not available');
+        }
+
+        const result = await buildingInsights.forceInsightAnalysis();
+        this.logger(
+          `FlowCardManagerService: Force analysis complete - ${result['insights_detected']} insights at ${result.confidence}% confidence`,
+        );
+
+        // Return tokens for use in flows
+        return result;
+      });
+      this.flowCardListeners.set('force_insight_analysis', forceAnalysisListener);
+
+      // Action: Calculate pre-heat start time (v2.6.0)
+      const calculatePreHeatCard = this.device.homey.flow.getActionCard('calculate_preheat_time');
+      const calculatePreHeatListener = calculatePreHeatCard.registerRunListener(async (args: {
+        'target_indoor_temp': number;
+        'target_clock_time': string;
+      }) => {
+        this.logger('FlowCardManagerService: Calculate pre-heat time action triggered', {
+          target_indoor_temp: args.target_indoor_temp,
+          target_clock_time: args.target_clock_time,
+        });
+
+        const device = this.resolveDevice(args);
+
+        if (!this.buildingInsightsOf(device)) {
+          throw new Error('Building Insights service not available');
+        }
+
+        // Get building model parameters via BuildingModelService
+        const buildingModelService = FlowCardManagerService.coordinatorOf(device)
+          ?.getAdaptiveControl?.()
+          ?.getBuildingModelService?.();
+
+        if (!buildingModelService) {
+          throw new Error('Building model service not available');
+        }
+
+        const model = buildingModelService.getLearner().getModel();
+        const tau = model.C / model.UA; // Time constant in hours
+        const { confidence } = model;
+
+        // Get current indoor temperature
+        const indoorTemp: number | null = FlowCardManagerService.coordinatorOf(device)
+          ?.getAdaptiveControl?.()
+          ?.getExternalTemperatureService?.()
+          ?.getIndoorTemperature() || null;
+
+        if (indoorTemp === null) {
+          throw new Error('No indoor temperature available');
+        }
+
+        // Parse target time
+        const [targetHour, targetMinute] = args.target_clock_time.split(':').map(Number);
+        if (Number.isNaN(targetHour) || Number.isNaN(targetMinute)) {
+          throw new Error('Invalid time format. Use HH:MM');
+        }
+
+        // Calculate temperature delta
+        const tempDelta = args.target_indoor_temp - indoorTemp;
+        if (tempDelta <= 0) {
+          // Already at or above target
+          return {
+            start_time: 'Now',
+            duration_hours: 0,
+            suggested_setpoint_boost: 0,
+            confidence,
+          };
+        }
+
+        // Use central helper for empirical pre-heat time calculation
+        const durationHours = calculatePreHeatDuration(tau, tempDelta);
+
+        // Validate result is reasonable
+        if (!Number.isFinite(durationHours) || durationHours < 0) {
+          throw new Error('Unable to calculate pre-heat time');
+        }
+
+        // Calculate start time
+        const targetTime = new Date();
+        targetTime.setHours(targetHour, targetMinute, 0, 0);
+        if (targetTime <= new Date()) {
+          // Target is in the past, assume next day
+          targetTime.setDate(targetTime.getDate() + 1);
+        }
+
+        const startTime = new Date(targetTime.getTime() - durationHours * 3600 * 1000);
+        const startTimeStr = `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')}`;
+
+        // Calculate suggested setpoint boost based on duration
+        const suggestedBoost = Math.min(3.0, Math.max(1.0, tempDelta * 0.5));
+
+        this.logger(`FlowCardManagerService: Pre-heat calculation - start: ${startTimeStr}, duration: ${durationHours.toFixed(1)}h, boost: ${suggestedBoost.toFixed(1)}°C`);
+
+        return {
+          start_time: startTimeStr,
+          duration_hours: Number(durationHours.toFixed(1)),
+          suggested_setpoint_boost: Number(suggestedBoost.toFixed(1)),
+          confidence,
+        };
+      });
+      this.flowCardListeners.set('calculate_preheat_time', calculatePreHeatListener);
+
+      // ==================== CONDITION CARDS ====================
+
+      // Condition 1: Insight is active
+      const insightActiveCard = this.device.homey.flow.getConditionCard('insight_is_active');
+      const insightActiveListener = insightActiveCard.registerRunListener(async (args: { category: string }) => {
+        this.logger('FlowCardManagerService: Insight is active condition triggered', { category: args.category });
+
+        if (!this.buildingInsightsService) {
+          this.logger('FlowCardManagerService: Building Insights service not available, returning false');
+          return false;
+        }
+
+        if (!this.isInsightCategory(args.category)) {
+          this.logger(`FlowCardManagerService: Unknown insight category "${args.category}"`);
+          return false;
+        }
+
+        const isActive = this.buildingInsightsService.isInsightActive(args.category);
+        this.logger(`FlowCardManagerService: Insight ${args.category} is ${isActive ? 'active' : 'not active'}`);
+        return isActive;
+      });
+      this.flowCardListeners.set('insight_is_active', insightActiveListener);
+
+      // Condition 2: Confidence above threshold
+      const confidenceAboveCard = this.device.homey.flow.getConditionCard('confidence_above');
+      const confidenceAboveListener = confidenceAboveCard.registerRunListener(async (args: { threshold: number }) => {
+        this.logger('FlowCardManagerService: Confidence above condition triggered', { threshold: args.threshold });
+
+        if (!this.buildingInsightsService) {
+          this.logger('FlowCardManagerService: Building Insights service not available, returning false');
+          return false;
+        }
+
+        const isAbove = await this.buildingInsightsService.isConfidenceAbove(args.threshold);
+        this.logger(`FlowCardManagerService: Confidence is ${isAbove ? 'above' : 'below'} ${args.threshold}%`);
+        return isAbove;
+      });
+      this.flowCardListeners.set('confidence_above', confidenceAboveListener);
+
+      // Condition 3: Savings above threshold
+      const savingsAboveCard = this.device.homey.flow.getConditionCard('savings_above');
+      const savingsAboveListener = savingsAboveCard.registerRunListener(async (args: { category: string; threshold: number }) => {
+        this.logger('FlowCardManagerService: Savings above condition triggered', { category: args.category, threshold: args.threshold });
+
+        if (!this.buildingInsightsService) {
+          this.logger('FlowCardManagerService: Building Insights service not available, returning false');
+          return false;
+        }
+
+        if (!this.isInsightCategory(args.category)) {
+          this.logger(`FlowCardManagerService: Unknown savings category "${args.category}"`);
+          return false;
+        }
+
+        const isAbove = this.buildingInsightsService.areSavingsAbove(args.category, args.threshold);
+        this.logger(`FlowCardManagerService: Savings for ${args.category} are ${isAbove ? 'above' : 'below'} €${args.threshold}/month`);
+        return isAbove;
+      });
+      this.flowCardListeners.set('savings_above', savingsAboveListener);
+
+      this.logger('FlowCardManagerService: Building Insights flow cards registered (4 actions + 3 conditions)');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering Building Insights flow cards:', error);
+    }
+  }
+
+  /**
+   * Register Performance Report flow cards (v2.9.0)
+   * - Action: Generate performance report (on-demand)
+   * - Trigger: Performance report ready (daily at 23:00)
+   */
+  private async registerPerformanceReportCard(): Promise<void> {
+    try {
+      // ── Action Card: Generate Performance Report ──
+      const generateReportCard = this.device.homey.flow.getActionCard('generate_performance_report');
+      const generateReportListener = generateReportCard.registerRunListener(async (args) => {
+        this.logger('FlowCardManagerService: Generate performance report action triggered');
+        return this.generateAndStoreReport(this.resolveDevice(args));
+      });
+      this.flowCardListeners.set('generate_performance_report', generateReportListener);
+
+      this.logger('FlowCardManagerService: Performance Report action card registered');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering Performance Report cards:', error);
+    }
+  }
+
+  /**
+   * Schedule the device-scoped performance report timers.
+   *
+   * Split out of registerPerformanceReportCard() because these timers belong to
+   * *this* device, whereas Flow card registration is app-wide and performed by a
+   * single registrar instance. Every device must schedule its own timers, also
+   * when another device registered the cards.
+   */
+  private schedulePerformanceReportTimers(): void {
+    try {
+      // ── Trigger Card: Performance Report Ready (daily) ──
+      // Store as a dedicated class property — NOT in flowCardListeners, so that
+      // clearing that map does not disturb the 23:00 timer lifecycle.
+      this.reportReadyTriggerCard = this.device.homey.flow.getDeviceTriggerCard('performance_report_ready');
+
+      // Schedule daily report at 23:00 only if not already scheduled.
+      // The timer must survive updateFlowCards() calls — it is only cleared in destroy().
+      if (this.dailyReportTimer === null && this.dailyReportInterval === null) {
+        this.scheduleDailyReportTimer(this.reportReadyTriggerCard);
+      }
+
+      // Hourly silent score update for Homey Insights (v2.9.13)
+      if (this.hourlyScoreInterval === null) {
+        this.hourlyScoreInterval = this.device.homey.setInterval(() => {
+          this.refreshPerformanceReportSilently().catch((error) => {
+            this.logger('FlowCardManagerService: Hourly silent refresh failed:', error);
+          });
+        }, 60 * 60 * 1000);
+        this.logger('FlowCardManagerService: Hourly performance score update scheduled');
+      }
+
+      // Schedule one-time init report 2 minutes after startup (v2.9.11)
+      if (!this.initReportScheduled) {
+        this.initReportScheduled = true;
+        this.initReportTimeout = this.device.homey.setTimeout(() => {
+          this.refreshPerformanceReportSilently().catch((error) => {
+            this.logger('FlowCardManagerService: Init silent refresh failed:', error);
+          });
+          this.initReportTimeout = null; // Auto-cleanup na uitvoering
+        }, 2 * 60 * 1000);
+        this.logger('FlowCardManagerService: Init performance report scheduled in 2 minutes');
+      }
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error scheduling performance report timers:', error);
+    }
+  }
+
+  /**
+   * Silently refresh the performance report and store result in capabilities.
+   * Does NOT fire the performance_report_ready trigger card.
+   * Called on app init (after 2 min delay) and on domain-affecting settings changes.
+   */
+  public async refreshPerformanceReportSilently(): Promise<void> {
+    try {
+      await this.generateAndStoreReport();
+      this.logger('FlowCardManagerService: Performance report refreshed silently');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Silent report refresh failed:', error);
+    }
+  }
+
+  /**
+   * Generate a performance report, store it in the capability, and return tokens.
+   */
+  /**
+   * Generate a performance report for a specific device and store it in that
+   * device's capabilities.
+   *
+   * @param device - target device; defaults to the device this service belongs to,
+   *   used by the internal schedulers. The Flow card handler passes args.device so
+   *   the report is generated for the device the user selected, not for whichever
+   *   device happened to register the card.
+   */
+  private async generateAndStoreReport(device: Homey.Device = this.device): Promise<PerformanceReportFlowTokens> {
+    const reportService = new PerformanceReportService({
+      device,
+      logger: this.logger,
+    });
+
+    const report = reportService.generateReport();
+
+    // Store report in capabilities
+    const reportJson = JSON.stringify(report);
+    if (device.hasCapability('adlar_performance_score')) {
+      await device.setCapabilityValue('adlar_performance_score', report.overallScore);
+    }
+    if (device.hasCapability('adlar_performance_report')) {
+      await device.setCapabilityValue('adlar_performance_report', reportJson);
+    }
+
+    this.logger(`FlowCardManagerService: Performance report generated — score ${report.overallScore}, ${report.scoredDomains}/${report.totalDomains} domains`);
+
+    return {
+      overall_score: report.overallScore,
+      rating: report.rating,
+      summary: report.summary,
+      recommendations: report.recommendations.join('\n'),
+      report_json: reportJson,
+    };
+  }
+
+  /**
+   * Schedule daily performance report trigger at 23:00 local time.
+   * Uses setTimeout to align to the next 23:00, then setInterval for subsequent days.
+   */
+  private scheduleDailyReportTimer(triggerCard: unknown): void {
+    // Clear any existing timer
+    if (this.dailyReportTimer !== null) {
+      this.device.homey.clearTimeout(this.dailyReportTimer);
+      this.dailyReportTimer = null;
+    }
+    if (this.dailyReportInterval !== null) {
+      this.device.homey.clearInterval(this.dailyReportInterval);
+      this.dailyReportInterval = null;
+    }
+
+    // Calculate ms until next 23:00
+    const now = new Date();
+    const next2300 = new Date();
+    next2300.setHours(23, 0, 0, 0);
+    if (now >= next2300) {
+      next2300.setDate(next2300.getDate() + 1);
+    }
+    const msUntil2300 = next2300.getTime() - now.getTime();
+
+    this.logger(`FlowCardManagerService: Daily report scheduled in ${(msUntil2300 / 3600000).toFixed(1)}h (${next2300.toISOString()})`);
+
+    const fireDailyReport = async () => {
+      try {
+        const tokens = await this.generateAndStoreReport();
+
+        // Fire trigger card with tokens
+        if (this.isPerformanceReportTriggerCard(triggerCard)) {
+          await triggerCard.trigger(this.device, tokens);
+          this.logger('FlowCardManagerService: Daily performance report trigger fired');
+        }
+      } catch (error) {
+        this.logger('FlowCardManagerService: Error firing daily report trigger:', error);
+      }
+    };
+
+    // First fire: align to 23:00
+    this.dailyReportTimer = this.device.homey.setTimeout(async () => {
+      await fireDailyReport();
+
+      // Subsequent fires: every 24 hours
+      this.dailyReportInterval = this.device.homey.setInterval(
+        () => {
+          fireDailyReport().catch((error) => {
+            this.logger('FlowCardManagerService: Scheduled daily report execution failed:', error);
+          });
+        },
+        24 * 60 * 60 * 1000,
+      );
+    }, msUntil2300);
+  }
+
+  /**
+   * Register external data action cards (v2.6.1)
+   * Consolidates all receive_external_* action cards and diagnose_building_model
+   * Previously in device.ts registerFlowCardActionListeners()
+   */
+  private async registerExternalDataActionCards(): Promise<void> {
+    try {
+      // 1. Receive external power data
+      const receiveExternalPowerCard = this.device.homey.flow.getActionCard('receive_external_power_data');
+      const receiveExternalPowerListener = receiveExternalPowerCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { power_value: number }) => {
+          this.logger(`FlowCardManagerService: 📊 Received external power data: ${args.power_value}W`);
+          const device = this.resolveDevice(args);
+          await this.handleReceiveExternalPowerData(device, args);
+
+          // Trigger intelligent power update if enabled
+          const energyTrackingEnabled = device.getSetting('enable_intelligent_energy_tracking');
+          if (energyTrackingEnabled) {
+            // @ts-expect-error - updateIntelligentPowerMeasurement exists in MyDevice
+            await device.updateIntelligentPowerMeasurement?.();
+          }
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_power_data', receiveExternalPowerListener);
+
+      // 2. Receive external flow data
+      const receiveExternalFlowCard = this.device.homey.flow.getActionCard('receive_external_flow_data');
+      const receiveExternalFlowListener = receiveExternalFlowCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { flow_value: number }) => {
+          this.logger(`FlowCardManagerService: 🌊 Received external flow data: ${args.flow_value}L/min`);
+          await this.handleReceiveExternalFlowData(this.resolveDevice(args), args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_flow_data', receiveExternalFlowListener);
+
+      // 3. Receive external ambient data
+      const receiveExternalAmbientCard = this.device.homey.flow.getActionCard('receive_external_ambient_data');
+      const receiveExternalAmbientListener = receiveExternalAmbientCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { temperature_value: number }) => {
+          this.logger(`FlowCardManagerService: 🌡️ Received external ambient data: ${args.temperature_value}°C`);
+          await this.handleReceiveExternalAmbientData(this.resolveDevice(args), args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_ambient_data', receiveExternalAmbientListener);
+
+      // 4. Receive external indoor temperature
+      const receiveExternalIndoorCard = this.device.homey.flow.getActionCard('receive_external_indoor_temperature');
+      const receiveExternalIndoorListener = receiveExternalIndoorCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { temperature_value: number | string }) => {
+          const { temperature_value: temperatureValueRaw } = args;
+
+          let temperatureValue: number;
+          if (typeof temperatureValueRaw === 'number') {
+            temperatureValue = temperatureValueRaw;
+          } else if (typeof temperatureValueRaw === 'string') {
+            temperatureValue = parseFloat(temperatureValueRaw);
+          } else {
+            throw new Error('Temperature value must be a number or numeric string');
+          }
+
+          if (Number.isNaN(temperatureValue) || !Number.isFinite(temperatureValue)) {
+            throw new Error(`Temperature value must be a valid number (received: "${temperatureValueRaw}")`);
+          }
+
+          this.logger(`FlowCardManagerService: 🏠 Received external indoor temperature: ${temperatureValue}°C`);
+
+          // Call AdaptiveControlService to store the temperature
+          const adaptiveControl = FlowCardManagerService
+            .coordinatorOf(this.resolveDevice(args))
+            ?.getAdaptiveControl?.();
+          if (adaptiveControl?.receiveExternalTemperature) {
+            await adaptiveControl.receiveExternalTemperature(temperatureValue);
+          }
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_indoor_temperature', receiveExternalIndoorListener);
+
+      // 5. Receive external energy prices
+      const receiveExternalPricesCard = this.device.homey.flow.getActionCard('receive_external_energy_prices');
+      const receiveExternalPricesListener = receiveExternalPricesCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { prices_json: string }) => {
+          this.logger(`FlowCardManagerService: 💰 Received external energy prices (${args.prices_json.length} chars)`);
+          await this.handleReceiveExternalEnergyPrices(this.resolveDevice(args), args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_energy_prices', receiveExternalPricesListener);
+
+      // 6. Receive external wind data
+      const receiveExternalWindCard = this.device.homey.flow.getActionCard('receive_external_wind_data');
+      const receiveExternalWindListener = receiveExternalWindCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { wind_speed: number }) => {
+          this.logger(`FlowCardManagerService: 💨 Received external wind speed: ${args.wind_speed} km/h`);
+          await this.handleReceiveExternalWindData(this.resolveDevice(args), args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_wind_data', receiveExternalWindListener);
+
+      // 7. Receive external solar power
+      const receiveExternalSolarPowerCard = this.device.homey.flow.getActionCard('receive_external_solar_power');
+      const receiveExternalSolarPowerListener = receiveExternalSolarPowerCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { power_value: number }) => {
+          this.logger(`FlowCardManagerService: ☀️ Received external solar power: ${args.power_value} W`);
+          await this.handleReceiveExternalSolarPower(this.resolveDevice(args), args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_solar_power', receiveExternalSolarPowerListener);
+
+      // 8. Receive external solar radiation
+      const receiveExternalSolarRadiationCard = this.device.homey.flow.getActionCard('receive_external_solar_radiation');
+      const receiveExternalSolarRadiationListener = receiveExternalSolarRadiationCard.registerRunListener(
+        // eslint-disable-next-line camelcase
+        async (args: { radiation_value: number }) => {
+          this.logger(`FlowCardManagerService: 🌞 Received external solar radiation: ${args.radiation_value} W/m²`);
+          await this.handleReceiveExternalSolarRadiation(this.resolveDevice(args), args);
+          return true;
+        },
+      );
+      this.flowCardListeners.set('receive_external_solar_radiation', receiveExternalSolarRadiationListener);
+
+      this.logger('FlowCardManagerService: External data action cards registered (8 cards)');
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error registering external data action cards:', error);
+    }
+  }
+
+  /**
+   * Unregister all flow card listeners that were previously registered by this service.
+   */
+  private unregisterAllFlowCards(): void {
+    this.flowCardListeners.forEach((listener, cardId) => {
+      try {
+        // Homey's FlowCard has no unregister API — registerRunListener() returns the
+        // FlowCard itself, not a subscription handle. This guard is therefore never
+        // true; it is kept only in case a future SDK version adds one. The previous
+        // log line claimed cards were unregistered, which was never the case and
+        // misled debugging.
+        if (listener && typeof (listener as { unregister?: () => void }).unregister === 'function') {
+          (listener as { unregister: () => void }).unregister();
+          this.logger(`Unregistered flow card: ${cardId}`);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        this.logger(`Flow card ${cardId} was not registered or already unregistered:`, errorMessage);
+      }
+    });
+    this.flowCardListeners.clear();
+
+    // Note: dailyReportTimer and dailyReportInterval are intentionally NOT cleared here.
+    // The 23:00 scheduler lifecycle is independent from flow card re-registration.
+    // Timers are only cleared in destroy() when the service is fully shut down.
+
+    this.logger('All flow card listeners unregistered');
+  }
+
+  /**
+   * Safely trigger a flow card by id with tokens; catches and logs errors.
+   * @param cardId - id of the flow card to trigger
+   * @param tokens - token object used to populate flow card tokens
+   */
+  private async triggerFlowCard(cardId: string, tokens: Record<string, unknown>) {
+    try {
+      // Check if the flow card is registered and should be triggered
+      const flowCard = this.flowCardListeners.get(cardId);
+      if (!flowCard) {
+        this.logger(`Flow card ${cardId} not registered, skipping trigger`);
+        return;
+      }
+
+      // Check if trigger method exists on the flow card
+      if (flowCard && typeof (flowCard as { trigger?: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger === 'function') {
+        await (flowCard as { trigger: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger(this, tokens, { device: this });
+        this.logger(`Triggered flow card: ${cardId}`, tokens);
+      } else {
+        // Fallback to app-level trigger for compatibility
+        const app = this.device.homey.app as unknown as { [key: string]: { trigger?: (device: unknown, tokens: unknown) => Promise<void> } };
+        const triggerName = `${cardId.replace(/_/g, '')}Trigger`;
+
+        if (app[triggerName]?.trigger) {
+          await app[triggerName].trigger(this, tokens);
+          this.logger(`Triggered flow card via app: ${cardId}`, tokens);
+        } else {
+          this.logger(`Flow card trigger method not found: ${cardId}`);
+        }
+      }
+    } catch (error) {
+      this.logger(`Failed to trigger flow card ${cardId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external ambient data action flow.
+   * Updates the device using FlowCardManagerService -> EnergyTrackingService.
+   * @param args - { temperature_value }
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalAmbientData(device: Homey.Device, args: { temperature_value: number }): Promise<void> {
+    try {
+      if (device.hasCapability('adlar_external_ambient')) {
+        await device.setCapabilityValue('adlar_external_ambient', args.temperature_value); // eslint-disable-line camelcase
+        this.logger(`FlowCardManagerService: External ambient temperature updated: ${args.temperature_value}°C`); // eslint-disable-line camelcase
+
+        // Store for persistence across app updates
+        await device.setStoreValue('external_outdoor_temp', args.temperature_value);
+        await device.setStoreValue('external_outdoor_temp_timestamp', Date.now());
+
+        // Update diagnostic capability
+        if (device.hasCapability('adlar_last_outdoor_temp_received')) {
+          const d = new Date();
+          const ts = this.formatDiagnosticTimestamp(d);
+          await device.setCapabilityValue('adlar_last_outdoor_temp_received', `${ts} | ${args.temperature_value.toFixed(1)}°C`); // eslint-disable-line camelcase
+        }
+
+        // Emit event for other services
+        device.emit('external-data:ambient', args.temperature_value);
+      }
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external ambient data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external flow action flow.
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalFlowData(device: Homey.Device, args: { flow_value: number }): Promise<void> {
+    try {
+      if (device.hasCapability('adlar_external_flow')) {
+        await device.setCapabilityValue('adlar_external_flow', args.flow_value); // eslint-disable-line camelcase
+        this.logger(`FlowCardManagerService: External flow data updated: ${args.flow_value} L/min`); // eslint-disable-line camelcase
+
+        // Emit event for other services
+        device.emit('external-data:flow', args.flow_value);
+      }
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external flow data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external power action flow.
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalPowerData(device: Homey.Device, args: { power_value: number }): Promise<void> {
+    try {
+      if (device.hasCapability('adlar_external_power')) {
+        await device.setCapabilityValue('adlar_external_power', args.power_value); // eslint-disable-line camelcase
+        this.logger(`FlowCardManagerService: External power data updated: ${args.power_value}W`); // eslint-disable-line camelcase
+
+        // Update defrost active power if applicable
+        if (device.hasCapability('defrost_active_power')) {
+          const isDefrosting = device.getCapabilityValue('adlar_state_defrost_state') || false;
+          const newValue = isDefrosting ? args.power_value : 0; // eslint-disable-line camelcase
+          await device.setCapabilityValue('defrost_active_power', newValue);
+        }
+
+        // Delegate to EnergyTrackingService for energy calculations via callback
+        await this.onExternalPowerData(args.power_value); // eslint-disable-line camelcase
+      }
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external power data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external energy prices action flow (v2.4.0+).
+   * Accepts hourly energy prices from external sources to replace EnergyZero API.
+   *
+   * v2.8.2: Supports two input formats:
+   * - Array (primary):  [0.0829, 0.083, ...] where index = hour offset from current hour
+   * - Object (legacy):  {"0": 0.2747, "1": 0.2510, ...} with hour offsets as keys
+   *
+   * @param args.prices_json - JSON string with prices in either format
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalEnergyPrices(device: Homey.Device, args: { prices_json: string }): Promise<void> {
+    try {
+      const { prices_json: pricesJsonRaw } = args;
+
+      this.logger(`FlowCardManagerService: Received external energy prices (${pricesJsonRaw.length} chars)`);
+
+      // v2.8.2: Parse JSON string — supports two formats:
+      // 1. Array (primary):  [0.0829, 0.083, ...] where index = hour offset from current hour
+      // 2. Object (legacy):  {"0": 0.2747, "1": 0.2510, ...} with hour offsets as keys
+      let pricesObject: Record<string, number>;
+      try {
+        const parsed = JSON.parse(pricesJsonRaw);
+
+        if (Array.isArray(parsed)) {
+          // Primary format: array → convert to object with index as hour offset key
+          pricesObject = {};
+          for (let i = 0; i < parsed.length; i++) {
+            if (typeof parsed[i] === 'number' && !Number.isNaN(parsed[i])) {
+              pricesObject[String(i)] = parsed[i];
+            }
+          }
+          this.logger(`FlowCardManagerService: Converted array format (${parsed.length} entries) to hour-offset object`);
+        } else if (typeof parsed === 'object' && parsed !== null) {
+          // Legacy format: object with hour offsets as keys
+          pricesObject = parsed as Record<string, number>;
+        } else {
+          throw new Error('Prices must be an array [0.11, 0.10, ...] or object {"0":0.11, "1":0.10, ...}');
+        }
+      } catch (error) {
+        device.error('❌ FlowCardManagerService: Failed to parse prices JSON:', error);
+        throw new Error(`Invalid JSON format: ${(error as Error).message}`);
+      }
+
+      // Validate that we have at least one price entry
+      if (Object.keys(pricesObject).length === 0) {
+        throw new Error('Prices object must contain at least one hour:price entry');
+      }
+
+      // Get ServiceCoordinator to access EnergyPriceOptimizer
+      // @ts-expect-error - Accessing device.serviceCoordinator (not in Homey.Device base type)
+      const energyOptimizer = device.serviceCoordinator?.getAdaptiveControl()?.getEnergyPriceOptimizer();
+      if (!energyOptimizer) {
+        throw new Error('Price optimizer not available. Enable adaptive control and price optimization in settings.');
+      }
+
+      // Update price optimizer with external prices
+      energyOptimizer.setExternalPrices(pricesObject);
+
+      const priceCount = Object.keys(pricesObject).length;
+      this.logger(`FlowCardManagerService: External energy prices updated: ${priceCount} hours received`);
+
+      if (device.hasCapability('energy_prices_data')) {
+        // Build rich JSON schedule from EnergyPriceOptimizer data
+        const priceDataArray = energyOptimizer.getPriceData();
+        const cheapestBlock = energyOptimizer.findCheapestBlock(4); // 4-hour block
+        const expensiveBlock = energyOptimizer.findMostExpensiveBlock(2); // 2-hour block
+
+        // Build per-hour schedule with category and advice
+        const schedule = priceDataArray.map((pd: { timestamp: number; price: number; category: string }) => {
+          const hourDate = new Date(pd.timestamp);
+          const hourStr = `${hourDate.getHours().toString().padStart(2, '0')}:00`;
+
+          // Determine advice based on category
+          let advice = 'maintain';
+          if (pd.category === 'very_low' || pd.category === 'low') {
+            advice = 'preheat';
+          } else if (pd.category === 'high' || pd.category === 'very_high') {
+            advice = 'reduce';
+          }
+
+          return {
+            hour: hourStr,
+            price: Math.round(pd.price * 10000) / 10000, // 4 decimals
+            category: pd.category,
+            advice,
+          };
+        });
+
+        // Build summary
+        const summary: Record<string, unknown> = {};
+        if (cheapestBlock) {
+          summary.cheapestBlock = {
+            start: `${cheapestBlock.startTime.getHours().toString().padStart(2, '0')}:00`,
+            end: `${cheapestBlock.endTime.getHours().toString().padStart(2, '0')}:00`,
+            avgPrice: Math.round(cheapestBlock.avgPrice * 10000) / 10000,
+            hours: cheapestBlock.totalHours,
+          };
+        }
+        if (expensiveBlock) {
+          summary.expensiveBlock = {
+            start: `${expensiveBlock.startTime.getHours().toString().padStart(2, '0')}:00`,
+            end: `${expensiveBlock.endTime.getHours().toString().padStart(2, '0')}:00`,
+            avgPrice: Math.round(expensiveBlock.avgPrice * 10000) / 10000,
+            hours: expensiveBlock.totalHours,
+          };
+        }
+
+        const richData = {
+          timestamp: new Date().toISOString(),
+          hoursAvailable: priceDataArray.length,
+          summary,
+          schedule,
+        };
+
+        await device.setCapabilityValue('energy_prices_data', JSON.stringify(richData));
+        this.logger(`FlowCardManagerService: energy_prices_data updated with ${priceDataArray.length} hours of data`);
+      }
+
+      // Delegate to AdaptiveControlService for immediate capability updates via callback
+      await this.onExternalPricesData(pricesObject);
+    } catch (error) {
+      device.error('❌ FlowCardManagerService: Error receiving external energy prices:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external wind data action flow (v2.7.0+).
+   * Updates the wind speed capability for wind correction calculations.
+   *
+   * @param args.wind_speed - Wind speed in km/h
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalWindData(device: Homey.Device, args: { wind_speed: number }): Promise<void> {
+    try {
+      const { wind_speed: windSpeed } = args;
+
+      // Validate wind speed
+      if (typeof windSpeed !== 'number' || Number.isNaN(windSpeed)) {
+        throw new Error(`Invalid wind speed value: ${windSpeed}`);
+      }
+
+      if (windSpeed < 0 || windSpeed > 200) {
+        throw new Error(`Wind speed out of valid range: ${windSpeed} km/h (must be 0-200 km/h)`);
+      }
+
+      // Update capability
+      if (device.hasCapability('adlar_external_wind_speed')) {
+        await device.setCapabilityValue('adlar_external_wind_speed', windSpeed);
+        this.logger(`FlowCardManagerService: External wind speed updated: ${windSpeed} km/h`);
+      }
+
+      // Store for persistence
+      await device.setStoreValue('external_wind_speed', windSpeed);
+      await device.setStoreValue('external_wind_speed_timestamp', Date.now());
+
+      // Update diagnostic capability
+      if (device.hasCapability('adlar_last_wind_received')) {
+        const d = new Date();
+        const ts = this.formatDiagnosticTimestamp(d);
+        await device.setCapabilityValue('adlar_last_wind_received', `${ts} | ${windSpeed.toFixed(0)}km/h`);
+      }
+
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external wind data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external solar power action flow (v2.7.0+).
+   * Updates the solar power capability for solar radiation calculations.
+   *
+   * @param args.power_value - Solar panel power in Watts
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalSolarPower(device: Homey.Device, args: { power_value: number }): Promise<void> {
+    try {
+      const { power_value: powerValue } = args;
+
+      // Validate power value
+      if (typeof powerValue !== 'number' || Number.isNaN(powerValue)) {
+        throw new Error(`Invalid solar power value: ${powerValue}`);
+      }
+
+      if (powerValue < 0 || powerValue > 50000) {
+        throw new Error(`Solar power out of valid range: ${powerValue} W (must be 0-50000 W)`);
+      }
+
+      // Update capability
+      if (device.hasCapability('adlar_external_solar_power')) {
+        await device.setCapabilityValue('adlar_external_solar_power', powerValue);
+        this.logger(`FlowCardManagerService: External solar power updated: ${powerValue} W`);
+      }
+
+      // Store for persistence
+      await device.setStoreValue('external_solar_power', powerValue);
+      await device.setStoreValue('external_solar_power_timestamp', Date.now());
+
+      // Update diagnostic capability
+      if (device.hasCapability('adlar_last_solar_power_received')) {
+        const d = new Date();
+        const ts = this.formatDiagnosticTimestamp(d);
+        await device.setCapabilityValue('adlar_last_solar_power_received', `${ts} | ${powerValue.toFixed(0)}W`);
+      }
+
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external solar power:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler for receive external solar radiation action flow (v2.7.0+).
+   * Updates the solar radiation capability for building model calculations.
+   *
+   * @param args.radiation_value - Solar radiation in W/m²
+   */
+  // eslint-disable-next-line camelcase
+  async handleReceiveExternalSolarRadiation(device: Homey.Device, args: { radiation_value: number }): Promise<void> {
+    try {
+      const { radiation_value: radiationValue } = args;
+
+      // Validate radiation value
+      if (typeof radiationValue !== 'number' || Number.isNaN(radiationValue)) {
+        throw new Error(`Invalid solar radiation value: ${radiationValue}`);
+      }
+
+      if (radiationValue < 0 || radiationValue > 1500) {
+        throw new Error(`Solar radiation out of valid range: ${radiationValue} W/m² (must be 0-1500 W/m²)`);
+      }
+
+      // Update capability
+      if (device.hasCapability('adlar_external_solar_radiation')) {
+        await device.setCapabilityValue('adlar_external_solar_radiation', radiationValue);
+        this.logger(`FlowCardManagerService: External solar radiation updated: ${radiationValue} W/m²`);
+      }
+
+      // Store for persistence
+      await device.setStoreValue('external_solar_radiation', radiationValue);
+      await device.setStoreValue('external_solar_radiation_timestamp', Date.now());
+
+      // Update diagnostic capability
+      if (device.hasCapability('adlar_last_solar_radiation_received')) {
+        const d = new Date();
+        const ts = this.formatDiagnosticTimestamp(d);
+        await device.setCapabilityValue('adlar_last_solar_radiation_received', `${ts} | ${radiationValue.toFixed(0)}W/m²`);
+      }
+
+    } catch (error) {
+      this.logger('FlowCardManagerService: Error receiving external solar radiation:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Return the list of registered flow-card IDs.
+   */
+  getRegisteredFlowCards(): string[] {
+    return Array.from(this.flowCardListeners.keys());
+  }
+
+  /**
+   * Return whether the flow manager has finished initialization.
+   */
+  getInitializationStatus(): boolean {
+    return this.isInitialized;
+  }
+
+  /**
+   * Destroy service and unregister flow cards/listeners.
+   */
+  destroy(): void {
+    this.logger('FlowCardManagerService: Destroying service');
+
+    // Clear any pending retry timer to prevent orphaned setTimeout callbacks
+    if (this.initializationRetryTimer) {
+      clearTimeout(this.initializationRetryTimer);
+      this.initializationRetryTimer = null;
+    }
+
+    // Clear hourly score interval
+    if (this.hourlyScoreInterval !== null) {
+      this.device.homey.clearInterval(this.hourlyScoreInterval);
+      this.hourlyScoreInterval = null;
+    }
+
+    // Clear daily report timer — only place where these are intentionally destroyed
+    if (this.dailyReportTimer !== null) {
+      this.device.homey.clearTimeout(this.dailyReportTimer);
+      this.dailyReportTimer = null;
+    }
+    if (this.dailyReportInterval !== null) {
+      this.device.homey.clearInterval(this.dailyReportInterval);
+      this.dailyReportInterval = null;
+    }
+
+    // Clear init performance report timeout (ADR-022)
+    if (this.initReportTimeout) {
+      this.device.homey.clearTimeout(this.initReportTimeout);
+      this.initReportTimeout = null;
+    }
+
+    this.unregisterAllFlowCards();
+
+    // Release the app-wide registrar role so another device can take it over.
+    // The listeners themselves cannot be removed (no SDK API); they are replaced
+    // as soon as the next device calls updateFlowCards().
+    if (FlowCardManagerService.registrar === this) {
+      FlowCardManagerService.registrar = null;
+      this.logger('FlowCardManagerService: Released app-wide flow card registrar role');
+    }
+
+    this.isInitialized = false;
+    this.logger('FlowCardManagerService: Service destroyed');
+  }
+}

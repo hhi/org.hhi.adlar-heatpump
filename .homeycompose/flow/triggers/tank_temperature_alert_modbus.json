@@ -1,0 +1,103 @@
+{
+  "id": "tank_temperature_alert_modbus",
+  "title": {
+    "en": "Tank temperature alert",
+    "nl": "Tapwater temperatuur alarm",
+    "de": "Warmwasser-Temperaturalarm",
+    "fr": "Alerte de température du ballon"
+  },
+  "titleFormatted": {
+    "en": "Tank temperature [[condition]] [[temperature]]°C",
+    "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C",
+    "de": "Warmwasser-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température du ballon [[condition]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggers when water tank temperature goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Warmwasser-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température du ballon dépasse ou descend en dessous d'un niveau spécifié"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température "
+      },
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C",
+        "de": "Temperaturschwellenwert in °C",
+        "fr": "Seuil de température en °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current Tank temperature",
+        "nl": "Huidige Tapwater temperatuur",
+        "de": "Aktuelle Warmwasser-Temperatur",
+        "fr": "Température actuelle du ballon"
+      },
+      "example": 55.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_temperature",
+      "title": {
+        "en": "Threshold temperature",
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
+      },
+      "example": 60
+    }
+  ],
+  "highlight": true
+}

@@ -1,0 +1,58 @@
+{
+  "id": "outlet_temperature_value_changed",
+  "title": {
+    "en": "Outlet temperature has changed",
+    "nl": "Water uittrede temperatuur is veranderd",
+    "de": "Rücklauftemperatur hat sich geändert",
+    "fr": "La température de sortie a changé"
+  },
+  "hint": {
+    "en": "Triggers when water outlet temperature changes by at least 0.5°C",
+    "nl": "Wordt geactiveerd wanneer de water uittrede temperatuur minimaal 0,5°C wijzigt",
+    "de": "Wird ausgelöst, wenn sich die Rücklauftemperatur um mindestens 0,5°C ändert",
+    "fr": "Se déclenche lorsque la température de sortie d'eau change d'au moins 0,5°C"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current outlet temperature",
+        "nl": "Huidige water uittrede temperatuur",
+        "de": "Aktuelle Rücklauftemperatur",
+        "fr": "Température de sortie actuelle"
+      },
+      "example": 25.5
+    },
+    {
+      "type": "number",
+      "name": "previous_temperature",
+      "title": {
+        "en": "Previous outlet temperature",
+        "nl": "Vorige water uittrede temperatuur",
+        "de": "Vorherige Rücklauftemperatur",
+        "fr": "Température de sortie précédente"
+      },
+      "example": 24.8
+    },
+    {
+      "type": "number",
+      "name": "delta_temperature",
+      "title": {
+        "en": "Temperature change",
+        "nl": "Temperatuurverschil",
+        "de": "Temperaturänderung",
+        "fr": "Variation de température"
+      },
+      "example": 0.7
+    }
+  ]
+}

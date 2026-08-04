@@ -1,0 +1,88 @@
+{
+  "id": "hotwater_temperature_is_modbus",
+  "title": {
+    "en": "Hot water temperature is",
+    "nl": "Warm water temperatuur is",
+    "de": "Warmwassertemperatur ist",
+    "fr": "La température de l'eau chaude est"
+  },
+  "titleFormatted": {
+    "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+    "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+    "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
+    "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Check if the hot water temperature matches the specified condition",
+    "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+    "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
+    "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "comparison",
+      "title": {
+        "en": "Comparison",
+        "nl": "Vergelijking",
+        "de": "Vergleich",
+        "fr": "Comparaison"
+      },
+      "values": [
+        {
+          "id": "equal",
+          "title": {
+            "en": "Equal to",
+            "nl": "Gelijk aan",
+            "de": "Gleich",
+            "fr": "Égal à"
+          }
+        },
+        {
+          "id": "greater",
+          "title": {
+            "en": "Greater than",
+            "nl": "Groter dan",
+            "de": "Größer als",
+            "fr": "Supérieur à"
+          }
+        },
+        {
+          "id": "less",
+          "title": {
+            "en": "Less than",
+            "nl": "Kleiner dan",
+            "de": "Kleiner als",
+            "fr": "Inférieur à"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": " Hot water temperature ",
+        "nl": " Warm water temperatuur ",
+        "de": " Warmwassertemperatur ",
+        "fr": " Température de l'eau chaude "
+      },
+      "min": 20,
+      "max": 75,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Hot water temperature in °C",
+        "nl": "Warm water temperatuur in °C",
+        "de": "Warmwassertemperatur in °C",
+        "fr": "Température de l'eau chaude en °C"
+      }
+    }
+  ],
+  "highlight": true
+}

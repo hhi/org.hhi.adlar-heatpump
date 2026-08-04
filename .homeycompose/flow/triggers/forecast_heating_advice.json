@@ -17,7 +17,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump"
+      "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
     }
   ],
   "tokens": [

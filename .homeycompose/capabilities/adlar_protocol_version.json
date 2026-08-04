@@ -1,0 +1,19 @@
+{
+  "id": "adlar_protocol_version",
+  "title": {
+    "en": "Protocol Version",
+    "nl": "Protocolversie",
+    "de": "Protokollversion",
+    "fr": "Version du protocole"
+  },
+  "type": "string",
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/firmware-mcu.svg",
+  "insights": false,
+  "description": {
+    "en": "Communication protocol version from Modbus register 0x0363, decoded as vX.Y.Z. Example: 100 = v1.0.0, 130 = v1.3.0.",
+    "nl": "Communicatieprotocolversie uit Modbus-register 0x0363, gedecodeerd als vX.Y.Z. Voorbeeld: 100 = v1.0.0, 130 = v1.3.0."
+  }
+}
