@@ -233,8 +233,8 @@ class MyApp extends App {
     );
     this.logger.info('✅ Self-Healing Registry initialized');
 
-    // Enable automatic flow card logging (v2.1.0 - respects logger level)
-    enableFlowCardLogging(this.homey, this.logger.debug.bind(this.logger));
+    // Enable device-aware Flow card logging before cards are registered.
+    enableFlowCardLogging(this.homey, this.error.bind(this));
 
     if (process.env.DEBUG === '1') {
       this.log('Development mode detected, enabling debug features');
@@ -275,18 +275,9 @@ class MyApp extends App {
     await this.initFlowCards();
     this.log('MyApp has been initialized with production-ready error handlers');
 
-    // Start het lokale dashboard alleen wanneer er een Modbus-device gepaird is.
-    // Een Tuya-only installatie krijgt zo geen HTTP-server op poort 8090.
-    try {
-      const modbusDevices = this.homey.drivers.getDriver(ADLAR_DRIVER_ID).getDevices();
-      if (modbusDevices.length > 0) {
-        await this.setDashboardPort(DEFAULT_DASHBOARD_PORT);
-      } else {
-        this.logger.debug('App: no Modbus devices paired — dashboard server not started');
-      }
-    } catch (error) {
-      this.error('Failed to evaluate Modbus dashboard startup:', error);
-    }
+    // Each paired Modbus device starts the dashboard from its own onInit(),
+    // after Homey has initialized the driver. Looking up the driver here is
+    // too early in the app lifecycle and throws on Tuya-only installations.
   }
 
   async onUninit() {

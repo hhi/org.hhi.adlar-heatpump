@@ -2413,6 +2413,7 @@ export const POLL_GROUP_SLOW = {
   name: 'slow',
   interval: 300_000,
   reads: [
+    { start: 0x00FA, count: 6, label: 'Actieve verwarmings-/tapwater-/koellimieten' },
     { start: 0x0174, count: 5, label: 'P116P120 (temp ctrl, antifreeze, refrigerant)' },
     { start: 0x011E, count: 1, label: 'P30 defrost mode' },
     { start: 0x0132, count: 10, label: 'P50P59 freq limits (constants+cooling+heating)' }, // v2.2: was 0x0133/9 0x0132/10

@@ -1,6 +1,6 @@
 # ADR-001 — Modbus-driver integreren in org.hhi.adlar-heatpump
 
-- **Status**: Voorgesteld (wacht op goedkeuring)
+- **Status**: Geaccepteerd en geïmplementeerd; hardwareacceptatie resteert
 - **Datum**: 2026-08-02
 - **Doelversie**: 3.0.0
 - **Bron-app**: `org.hhi.adlar-heatpump-modbus` v2.15.0
@@ -29,6 +29,22 @@ Drie leidende principes:
    onverenigbaar zijn krijgt Modbus een `_modbus`-suffix.
 3. **Services blijven voorlopig gescheiden.** Alleen de aantoonbaar identieke lib-bestanden
    worden gedeeld. Convergentie van de gedivergeerde services is een aparte, latere stap.
+
+### Implementatieamendementen
+
+De uitvoering heeft vier besluiten opgeleverd die dit ADR aanvullen. De volledige
+onderbouwing en het uitvoeringslog staan in
+[IMPLEMENTATIEPLAN-v3.md](IMPLEMENTATIEPLAN-v3.md).
+
+1. **Flow cards zijn verder gesplitst dan oorspronkelijk voorzien.** 66 overlappende
+   kaart-ID's hadden eigen, drivergebonden handlers in beide codebases. Eén gedeelde
+   listener zou daardoor worden overschreven; de kaarten zijn daarom per driver gesplitst.
+2. **De live-operation-widget blijft Modbus-only.** Het capability-filter sluit
+   Tuya-devices bewust uit; verbreden naar beide drivers zou een ander productonderdeel zijn.
+3. **`energy.approximation` voor Modbus is uitgesteld.** Dit is modelafhankelijk en geen
+   voorwaarde voor de merge.
+4. **Ontbrekende meetwaarden blijven voorlopig `0` in bestaande condities (B1).** Alleen
+   `electrical_balance_check` heeft nog een expliciete vervolgkeuze nodig.
 
 ## Uitgangssituatie in cijfers
 
@@ -213,7 +229,7 @@ twee verschillende kaarten; beide blijven bestaan.
 ### 3. Eindtotalen na merge
 
 - **99 capabilities** (86 + 81 − 68 gedeeld, incl. 3 splitsingen)
-- **105 flow cards** — 30 actions, 29 conditions, 46 triggers
+- **170 flow cards** — 73 Modbus-only, 79 Tuya-only en 18 gedeeld via een pipe-filter
 - **2 drivers**: `intelligent-heat-pump`, `intelligent-heatpump-modbus`
 
 ### 4. Lib-structuur
@@ -574,13 +590,10 @@ private _getAdlarDevices(): LiveOperationWidgetDevice[] {
 }
 ```
 
-Widgets zijn app-scoped, drivers niet. Na de merge toont deze widget uitsluitend devices van
-de driver in `ADLAR_DRIVER_ID`. Voor een Tuya-only gebruiker — 90% — betekent dat "Geen
-Adlar warmtepomp gekoppeld", terwijl er wel degelijk een pomp is.
-
-**Oplossing**: over beide drivers itereren, of de driver afleiden uit het meegegeven
-`deviceId`. `_findAdlarDevice()` matcht al op device-ID, dus de resolver hoeft alleen zijn
-kandidatenlijst te verbreden.
+**Besluit tijdens uitvoering: dit is geen risico.** De widget filtert op
+`measure_temperature.outlet` en `measure_temperature.inlet`; alleen de Modbus-driver heeft
+beide capabilities. De widget is dus bewust Modbus-only, en de hardcoded Modbus-driver is
+consistent met die productscope.
 
 #### Nieuw risico 6 — `flowLoggingEnabled` is een module-brede vlag
 
@@ -598,9 +611,9 @@ Impact is beperkt (alleen logging), maar het is precies het patroon dat schuilga
 "dit bestand is identiek, dus veilig te delen". Byte-gelijkheid zegt niets over de vraag of
 gedeelde *state* correct is.
 
-**Actie**: bij het samenvoegen van `lib/shared/` elk bestand niet alleen op gelijkheid maar
-ook op module-level mutable state controleren. Dit is het enige geval in de 11 identieke
-bestanden, maar de controle hoort in het proces.
+**Uitgevoerd:** de vlag registreert alleen nog de interceptor. Per Flow-uitvoering bepaalt
+`args.device.getSetting('log_level')` of debuglogging wordt geschreven. Een DEBUG-instelling
+van één device maakt dus geen logs voor andere devices zichtbaar.
 
 #### Nieuw risico 7 — asymmetrisch `energy`-object
 
@@ -615,8 +628,8 @@ klasse maar verschillend energiegedrag naast elkaar in één app — Modbus-devi
 dan niet of anders in het Energy-overzicht.
 
 Dit is geen merge-fout maar een bestaande inconsistentie die door de merge zichtbaar en
-vergelijkbaar wordt. **Actie**: bepalen of de Modbus-driver hetzelfde `approximation`-object
-moet krijgen, of dat hij `measure_power` levert en de benadering juist niet nodig heeft.
+vergelijkbaar wordt. **Besluit:** uitgesteld; de juiste benadering is modelafhankelijk en
+geen blokkade voor v3.0.0.
 
 ---
 
@@ -719,10 +732,10 @@ komt.
 | **0** | **Vóór de merge, aparte release**: run-listeners in `flow-card-manager-service.ts` omzetten naar `args.device`, registratie eenmalig maken (§5a risico 4) | Twee gepairde Tuya-devices bedienen elk hun eigen kaarten |
 | 1 | `lib/` herstructureren naar `shared/` + `tuya/`, imports bijwerken | `npm run build` + `homey app validate` groen, gedrag identiek aan v2.13.1 |
 | 2 | `lib/modbus/` toevoegen, driver-map + compose-bestanden overnemen | Build groen, Modbus-driver zichtbaar bij pairing |
-| 3 | De 89 gedeelde flow cards ontdubbelen (filters aanpassen) | `app.json` bevat 105 cards, geen dubbele ID's |
+| 3 | Gedeelde kaarten filteren waar mogelijk; 66 drivergebonden handlers splitsen | `app.json` bevat 170 cards, geen dubbele ID's |
 | 4 | De 4 splitsingen doorvoeren + 11 capabilities harmoniseren | 99 capabilities, validate groen |
 | 5 | SelfHealingRegistry per driver scopen (§5a) + filters op de 4 Tuya-only app-level kaarten | Modbus-fouten degraderen geen Tuya-functies |
-| 6 | Widget over beide drivers (§5c risico 5), `flowLoggingEnabled` scopen (risico 6), `energy`-object gelijktrekken (risico 7), dashboard conditioneel, locales aanvullen, lazy requires | Widget toont Tuya-devices; `homey app validate -l debug` groen |
+| 6 | Modbus-widget behouden, Flow-logging per device maken, dashboard conditioneel, locales beoordelen en lazy requires afwegen | `homey app validate -l debug` groen; `energy` bewust uitgesteld |
 | 7 | Regressietest op fysieke hardware, beide transports | Handmatige acceptatie |
 
 Fase 1 is de belangrijkste veiligheidsklep: die moet aantoonbaar gedragsneutraal zijn

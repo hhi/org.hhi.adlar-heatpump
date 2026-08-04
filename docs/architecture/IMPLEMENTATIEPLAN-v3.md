@@ -3,7 +3,7 @@
 - **Uitvoeringsplan bij** [ADR-001](ADR-001-MODBUS-DRIVER-MERGE.md)
 - **Doelversie**: 3.0.0 (huidig: 2.13.1)
 - **Datum**: 2026-08-03
-- **Status**: Concept — wacht op goedkeuring vóór uitvoering
+- **Status**: Uitvoering grotendeels afgerond; hardwareacceptatie en resterende curatie open
 
 ## Uitgangspunten
 
@@ -31,9 +31,9 @@ laten vallen zonder de merge te blokkeren.
 | **3** | 65× filter verwijderen, 24× `driver_id` schrappen, 4× bereik verbreden + clamp-logica | — |
 | **4** | 3 capability-splitsingen, 1 flow-card-splitsing, 11 harmonisaties | `check-capability-ownership.js`; 2 wees-capabilities opruimen |
 | **5** | SelfHealingRegistry per driver scopen (5.1); capability-filters op 4 app-level kaarten (5.2) | Null-afhandeling in condities (5.3); app-cast op `flow-card-manager-service.ts:1297` vervangen |
-| **6** | Widget over beide drivers; `energy`-object gelijktrekken; dashboard conditioneel | `flowLoggingEnabled` scopen; lazy `require`; doc-drift heartbeat-lagen corrigeren |
+| **6** | Modbus-widget behouden, dashboard conditioneel en app-voorzieningen samenvoegen | Flow-logging per device, lazy `require` afwegen; `energy` doorgeschoven |
 | **7** | Integratietest beide transports | — |
-| **8** | — | 8 dode `flow_*`-instellingen verwijderen; `advanced: true` op 11 diagnostische kaarten; `highlight` snoeien van 54 naar 11 |
+| **8** | — | 8 misleidend gelabelde `flow_*`-instellingen hernoemen; `advanced: true` op 11 diagnostische kaarten; `highlight` per variant behouden |
 
 ### Waarom fase 0 hier niet als "optioneel" staat
 
@@ -127,7 +127,7 @@ opnieuw groen.** Daarmee zijn fase 1 t/m 6.2 statisch geverifieerd.
 - of `applyModbusSnapshot()` na de capability-hernoeming de juiste waarden schrijft
   (string-substitutie, niet type-gevalideerd)
 - of de fase 0-wijziging correct werkt met twee gepairde devices
-- of de widget iets toont (app-level resolver ontbreekt tot fase 6)
+- of de Modbus-only widget op echte hardware de juiste live state toont
 - runtime-gedrag van beide drivers
 
 ### Lintresultaat — 554 meldingen, getrieerd
@@ -495,12 +495,11 @@ hier dus géén ID-conflict melden — anders dan het plan voorspelde. De ontdub
 fase 3 blijft nodig, maar om een andere reden: 72 kaarten dragen nog een Tuya-only
 `driver_id`-filter en zijn daardoor onzichtbaar voor Modbus-devices.
 
-**Nog niet gedaan — de widget werkt nog niet.** `widgets/adlar-live-operation/api.js` roept
+**Historische tussenstand, later opgelost in fase 6.2:** `widgets/adlar-live-operation/api.js` roept
 `homey.app.getAdlarLiveOperationWidgetState()` aan, en die methode zit in de *Modbus*
 `app.ts` (116 unieke regels: widget-state-resolver plus `setDashboardPort`). Die moeten naar
-de Tuya `app.ts`. Staat gepland in fase 6, samen met het over beide drivers laten itereren
-van `_getAdlarDevices()`. Tot dan is de widget aanwezig maar niet functioneel — dat blokkeert
-pairing en normale werking niet.
+de Tuya `app.ts`. De methodes zijn in fase 6.2 overgezet; `_getAdlarDevices()` blijft bewust
+op de Modbus-driver gericht, omdat de widget via capabilities al Modbus-only is gefilterd.
 
 ---
 
@@ -599,7 +598,7 @@ heeft die capability. Het `driver_id`-deel **blijft staan**. Zie ADR-001 §2b.
 
 ### Verificatie
 
-- `app.json` bevat 105 flow cards, geen dubbele ID's
+- `app.json` bevat 170 flow cards, geen dubbele ID's
 - `homey app validate -l debug` groen
 - Bestaande Tuya-flow met `set_target_temperature` opnieuw openen: argument en waarde
   ongewijzigd
@@ -1216,7 +1215,7 @@ kaart geen device-argument heeft (de rekenkaarten — die blijven bewust app-bre
 
 ### Verificatie
 
-- Tuya-only installatie: widget toont de Tuya-pomp, dashboard-server start niet
+- Tuya-only installatie: widget is niet beschikbaar, dashboard-server start niet
 - Modbus-only installatie: widget toont de Modbus-pomp, dashboard bereikbaar
 - `homey app validate -l debug` groen
 
@@ -1272,19 +1271,10 @@ Via `scripts/migration/05-merge-app-ts.py` (idempotent — een tweede run doet n
 | `ADLAR_DRIVER_ID` | blijft `intelligent-heatpump-modbus` (§6.1) |
 | `tsc --noEmit` | groen |
 
-**Dashboard start conditioneel:**
-
-```typescript
-const modbusDevices = this.homey.drivers.getDriver(ADLAR_DRIVER_ID).getDevices();
-if (modbusDevices.length > 0) {
-  await this.setDashboardPort(DEFAULT_DASHBOARD_PORT);
-} else {
-  this.logger.debug('App: no Modbus devices paired — dashboard server not started');
-}
-```
-
-Een Tuya-only installatie krijgt zo geen HTTP-server op poort 8090. `onUninit` ruimt de
-server op.
+**Dashboard start conditioneel:** elke gepairde Modbus-device start de app-brede server uit
+zijn eigen `onInit()`, nadat de driver beschikbaar is. Daarmee gebruikt een Tuya-only
+installatie geen dashboardpoort en wordt de te vroege `getDriver()`-lookup uit `app.onInit()`
+vermeden. `onUninit` ruimt de server op.
 
 > **Procesfout P4 — plaatsing van het startblok.** Mijn eerste versie van het script zette
 > dit blok aan het *begin* van `onInit()`. Daar bestaat `this.logger` nog niet — die wordt
@@ -1292,8 +1282,9 @@ server op.
 > `TypeError` gooien op elke Tuya-only installatie. `tsc` ziet dit niet: `this.logger` is
 > gedeclareerd met `!` (definite assignment), dus het type klopt.
 >
-> Blok verplaatst naar het einde van `onInit`; het script is gecorrigeerd met een
-> brace-teller die het einde van de methode zoekt, plus een commentaar dat de reden vastlegt.
+> Het blok werd eerst naar het einde van `onInit` verplaatst. Later is die app-level lookup
+> volledig vervangen door het starten vanuit de Modbus-device `onInit()`, omdat de driver in
+> `app.onInit()` nog niet gegarandeerd beschikbaar is.
 
 ### 6.3 — Lazy `require`: geadviseerd om **niet** te doen
 
@@ -1399,16 +1390,17 @@ implementatie worden ingelost.
 
 | Mechanisme | Werking | Nu in gebruik |
 |---|---|---|
-| `"highlight": true` | Kaart in een aparte lijst bovenaan | **54 van 97 kaarten** |
+| `"highlight": true` | Kaart in een aparte lijst bovenaan | **110 van 170 manifestdefinities**, verdeeld over Tuya- en Modbus-varianten |
 | `"advanced": true` | Kaart alleen beschikbaar in Advanced Flow | **0 kaarten** |
 | `filter: "capabilities=…"` | Statisch, per driver | 24 kaarten |
 | `"deprecated": true` | Verdwijnt uit de kiezer, bestaande flows blijven werken | 0 kaarten |
 
-Het mechanisme dat het probleem oplost — `advanced` — is ongebruikt. Het mechanisme dat
-alleen helpt bij spaarzaam gebruik is toegepast op 84% van de acties, 41% van de condities
-en 49% van de triggers. De Homey-documentatie waarschuwt daar expliciet voor: *"If you
-highlight too many cards this list can quickly become just as hard to navigate as the list
-of all Flow cards."*
+Het mechanisme dat het probleem oplost — `advanced` — is ongebruikt. De globale
+highlight-telling is echter geen bruikbare UX-maat: een Flow toont door device-filters alleen
+de kaarten van de gekozen transportvariant. `highlight` wordt bovendien bewust gebruikt als
+herkomstmarkering voor handmatig samengestelde kaarten, tegenover automatisch meegeleverde
+kaarten. De Homey-documentatie waarschuwt terecht voor een te lange highlight-lijst, maar
+een eventuele versobering moet daarom per variant worden beoordeeld.
 
 ### Voorstel
 
@@ -1448,17 +1440,12 @@ Dit realiseert alsnog het doel van `flow_expert_mode` — diagnostiek scheiden v
 gebruik — maar met het mechanisme dat Homey daarvoor heeft. Overweeg ook de vier
 `calculate_*`-acties; dat zijn rekenhulpen voor gevorderde flows.
 
-**8.3 — Snoei `highlight` van 54 naar ongeveer 11.** Voorstel:
-
-| Type | Behouden |
-|---|---|
-| Acties | `set_target_temperature`, `set_device_onoff`, `set_heating_mode`, `set_hotwater_temperature` |
-| Condities | `fault_active`, `compressor_running`, `temperature_above` |
-| Triggers | `fault_detected`, `heating_mode_changed`, `ambient_temperature_changed`, `cop_efficiency_changed` |
-
-De acht `receive_external_*`-acties zijn integratie-plumbing voor wie externe meetdata
-aankoppelt — nuttig, maar niet wat een gebruiker als eerste zoekt. Idem de
-`price_*`-condities en de `building_insight_*`-triggers.
+**8.3 — Behoud `highlight` als herkomstmarkering.** `highlight` onderscheidt bewust
+handmatig samengestelde kaarten van automatisch meegeleverde kaarten. De telling van 110 is
+app-breed en telt Tuya- en Modbus-varianten afzonderlijk; een gebruiker ziet afhankelijk van
+het gekozen device slechts één variant. Daarom wordt hier geen globale snoei naar 11 kaarten
+uitgevoerd. Herbeoordeel de zichtbaarheid alleen per drivervariant als gebruikers aangeven
+dat de highlight-sectie in hun eigen Flow-kiezer te groot is.
 
 ### Alternatief als je de instellingen wilt behouden
 
@@ -1471,7 +1458,7 @@ slechter dan eerlijk weggehaald.
 
 - `homey app validate` groen
 - Instellingenpagina toont geen niet-werkende opties meer
-- Standaard-flowkiezer toont 11 uitgelichte kaarten in plaats van 54
+- Highlight-status blijft per transportvariant een bewuste herkomstmarkering
 - De 11 diagnostische kaarten verschijnen alleen in Advanced Flow
 - Bestaande flows met die kaarten blijven werken (`advanced` verbergt alleen bij toevoegen)
 
@@ -1535,8 +1522,8 @@ fase 7 publiceren.
 | 4 — Capabilities | ✅ 3 splitsingen, 99 capabilities |
 | 5 — App-brede risico's | ✅ **Afgerond** — 5.1 gescoped (56 aanroepen), 5.2 + 5.2bis klaar, 5.3 vervallen (B1) |
 | 6 — App-voorzieningen | ✅ **Afgerond** — `app.ts` samengevoegd, dashboard conditioneel, lazy `require` beargumenteerd afgewezen. `energy` doorgeschoven (B2) |
-| 7 — Hardwaretest | ⬜ Niet begonnen |
-| 8 — Kaartcuratie | ⬜ Niet begonnen |
+| 7 — Hardwaretest | 🟡 Begonnen — Modbus-device gepaird en dashboard getest; volledige acceptatiematrix resteert |
+| 8 — Kaartcuratie | 🟡 Deels besloten — highlight per variant behouden; instellingenlabels en `advanced`-keuze resteert |
 
 **Twee keer `homey app validate -l publish` groen**: na fase 4 en na fase 6.2.
 
@@ -1625,8 +1612,8 @@ update niet meer.
 Alternatief als dat onacceptabel is: de `devices`-property uit
 `widgets/adlar-live-operation/widget.compose.json` halen. De widget verliest dan zijn
 device-koppeling — hij kan geen specifiek device meer tonen — maar de app blijft op
-`>=12.2.0`. Gezien de widget sowieso nog niet werkt (de app-level resolver ontbreekt tot
-fase 6) is dit een reële optie.
+`>=12.2.0`. Dit is alleen zinvol als de Modbus-only widget niet belangrijk genoeg is om de
+hogere firmware-eis te rechtvaardigen.
 
 **Te beslissen vóór publicatie.** Nu doorgevoerd als `>=12.3.0` omdat validatie anders
 blokkeert.
@@ -1638,7 +1625,7 @@ blokkeert.
 | P1 | Import-herschrijver in fase 1 loste specifiers op tegen de **nieuwe** maplocatie i.p.v. de oude → 14 kapotte imports | Tweede pass die tegen de oorspronkelijke map oploste |
 | P2 | Fase 3-script rekende de 7 in fase 2 gekopieerde Modbus-exclusieve kaarten tot de "gedeelde" set en verwijderde hun `driver_id`-filter | Filters hersteld via `git status --short` als bron van waarheid |
 | P3 | Regex-substitutie van "Tuya" in vertaalstrings liet `"Aktueller -Geräteverbindungsstatus"` achter | Alle vier vertalingen voluit geschreven. **Regel: geen regex op vertaalteksten** |
-| P4 | Dashboard-startblok ingevoegd aan het *begin* van `onInit()`, waar `this.logger` nog niet bestaat → `TypeError` op elke Tuya-only installatie. `tsc` ziet dit niet omdat `logger` met `!` is gedeclareerd | Verplaatst naar het einde van `onInit`; script gecorrigeerd met brace-teller |
+| P4 | Dashboard-startblok ingevoegd aan het *begin* van `onInit()`, waar `this.logger` nog niet bestaat → `TypeError` op elke Tuya-only installatie. `tsc` ziet dit niet omdat `logger` met `!` is gedeclareerd | Eerst verplaatst naar het einde; uiteindelijk vervangen door starten vanuit de Modbus-device `onInit()` |
 | P5 | Splitsing van `cop_efficiency_changed` c.s. leverde drie dode `_modbus`-kaarten op — Modbus vuurde die triggers nooit af | Originelen op Tuya-only gezet; de drie dode bestanden moeten lokaal worden verwijderd (§5.2bis) |
 
 ### Afwijkingen van het plan die bewust zijn gemaakt
@@ -1646,7 +1633,8 @@ blokkeert.
 - `lib/modbus/modbus/` → **`lib/modbus/protocol/`** (voorkomt het dubbele pad)
 - Fase 3 filterstrategie staat als één constante (`STRATEGY='remove'`) zodat de V1-uitkomst
   met één wijziging omgezet kan worden naar `'pipe'`
-- `flowLoggingEnabled` blijft bewust app-breed gedeeld; vastgelegd in het bestand zelf
+- `flowLoggingEnabled` blijft één app-brede interceptorvlag, maar de loggingbeslissing is
+  per Flow-uitvoering en per device (`log_level`) gemaakt
 
 ## Wat in dit plan nog niet is uitgewerkt
 
@@ -1658,7 +1646,7 @@ De volgende punten staan in het plan als richting, niet als uitvoerbare stap:
 | `check-capability-ownership.js` | 4 | ✅ **Uitgewerkt en getest** | — |
 | Locales de/fr | 6 | ✅ **Gemeten: vervalt** | — |
 | Clamp-logica bereikverbreding | 3C | 🟡 Voorbeeldcode aanwezig | Exacte veilige grenzen per capability uit `adlar-modbus-registers.ts` respectievelijk de DPS-definities |
-| Lazy `require` van transportbibliotheken | 6 | 🟡 Richting | Waar precies; `jsmodbus` wordt op moduleniveau geïmporteerd, dus dit vraagt een dynamische import en een typeaanpassing |
+| Lazy `require` van transportbibliotheken | 6 | ✅ **Bewust niet uitvoeren** | De geheugenswinst weegt niet op tegen het regressierisico; zie §6.3 |
 | Settings-export voor Modbus-migratie | Release | 🔴 Hand-wave | "Overweeg export/import als JSON" — geen ontwerp, geen inschatting. Ofwel uitwerken ofwel schrappen en handmatig invullen accepteren. **Valt buiten de gekozen scope**: dit is migratiegemak, geen merge-vereiste en geen bestaande schuld |
 | `energy.approximation` voor Modbus | 6 | ⏭️ **Doorgeschoven (B2)** | Naar TODO; modelafhankelijk. Verifieer of `measure_power` en `approximation` naast elkaar kunnen |
 | Fase 0 — registratieplaats | 0 | ✅ **Besloten (B3)** | `driver.ts`; conditie verhuist naar de handler |
@@ -1911,5 +1899,5 @@ verloren. De export beperkt zich tot instellingen — dat is de grootste handmat
 
 1. **B1-uitzondering** — `electrical_balance_check` laten weigeren te oordelen bij drie
    ontbrekende metingen, of fail-open accepteren?
-2. **V1 t/m V3** — de drie verificaties onder "Voorwaarden vooraf"; V1 bepaalt 89
-   bestandsbewerkingen en kost tien minuten.
+2. **V3** — verifieer of Homey conditiekaarten op een `setUnavailable()`-device evalueert.
+   V1 is beantwoord (pipe-filter werkt) en V2 is statisch bevestigd door publish-validatie.

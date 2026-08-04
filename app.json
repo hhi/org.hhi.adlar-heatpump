@@ -14177,11 +14177,6 @@
         "large": "/drivers/intelligent-heat-pump/assets/images/Aurora2-drv-large.png",
         "xlarge": "/drivers/intelligent-heat-pump/assets/images/Aurora2-drv-xlarge.png"
       },
-      "energy": {
-        "approximation": {
-          "usageConstant": 2500
-        }
-      },
       "pair": [
         {
           "id": "enter_device_info"
