@@ -53,6 +53,8 @@ import {
 
 // ── Whitelist voor ADR-044 interactief dashboard ───────────────────────────────
 
+const DASHBOARD_API_BUILD = '2026-08-04-json-errors-v2';
+
 interface WritableRegisterMeta {
   address: number;
   min: number;
@@ -225,10 +227,9 @@ export class DashboardService {
   start(): void {
     this.server = http.createServer((req, res) => {
       this._handleRequest(req, res).catch((err: Error) => {
-        this.logger('DashboardService: Onverwachte fout:', err.message);
+        this.logger('DashboardService: Onverwachte fout:', err.stack ?? err.message);
         if (!res.headersSent) {
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Internal Server Error');
+          this._jsonError(res, 500, err.message || 'Interne serverfout');
         }
       });
     });
@@ -242,7 +243,7 @@ export class DashboardService {
     });
 
     this.server.listen(this.port, () => {
-      this.logger(`DashboardService: Gestart op http://localhost:${this.port}/`);
+      this.logger(`DashboardService: Gestart op http://localhost:${this.port}/ (API-fouten retourneren JSON)`);
     });
   }
 
@@ -303,7 +304,7 @@ export class DashboardService {
       return;
     }
     if (method === 'GET' && url === '/api/registers') {
-      const tempScale = this.getTemperatureScale?.() ?? 'x1';
+      const tempScale = this._getTemperatureScale();
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify(buildRegisterBlocks(tempScale)));
       return;
@@ -370,7 +371,7 @@ export class DashboardService {
       return;
     }
 
-    const tempScale = this.getTemperatureScale?.() ?? 'x1';
+    const tempScale = this._getTemperatureScale();
     const pollGroupMap = this._buildPollGroupMap();
     const nameMap = this._buildNameMap();
     const metaMap = this._buildRegisterMetaMap(tempScale);
@@ -433,7 +434,7 @@ export class DashboardService {
       return;
     }
 
-    const tempScale = this.getTemperatureScale?.() ?? 'x1';
+    const tempScale = this._getTemperatureScale();
     const registerMeta = this._buildRegisterMetaMap(tempScale);
     const changeLog = this.getChangeLog?.() ?? new Map();
     const entries: object[] = [];
@@ -665,12 +666,30 @@ export class DashboardService {
     return 'once';
   }
 
+  /**
+   * Dashboard metadata must remain available while a device is reconnecting.
+   * The active scale only affects how temperature registers are displayed, so
+   * use the protocol default if the late-bound device callback is unavailable.
+   */
+  private _getTemperatureScale(): TemperatureRegisterScale {
+    try {
+      return this.getTemperatureScale?.() ?? 'x1';
+    } catch (error) {
+      this.logger(
+        'DashboardService: temperatuursschaal niet beschikbaar; x1 wordt gebruikt:',
+        (error as Error).message,
+      );
+      return 'x1';
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────────
 
   private _setCors(res: http.ServerResponse): void {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('X-Adlar-Dashboard-Build', DASHBOARD_API_BUILD);
   }
 
   private _serveFile(res: http.ServerResponse, filename: string): Promise<void> {
@@ -774,7 +793,7 @@ export class DashboardService {
       return;
     }
 
-    const tempScale = this.getTemperatureScale?.() ?? 'x1';
+    const tempScale = this._getTemperatureScale();
     const rawValue = meta.temperature
       ? encodeTemperatureRaw(value, tempScale)
       : Math.round(value / meta.multiply);
@@ -814,7 +833,7 @@ export class DashboardService {
 
     const coil = isCoil === true;
     const multiplyFactor = typeof multiply === 'number' ? multiply : 1;
-    const tempScale = this.getTemperatureScale?.() ?? 'x1';
+    const tempScale = this._getTemperatureScale();
 
     try {
       const rawValue = await this.onReadRegister(address, coil);

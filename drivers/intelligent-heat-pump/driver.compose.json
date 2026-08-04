@@ -882,11 +882,6 @@
     "large": "{{driverAssetsPath}}/images/Aurora2-drv-large.png",
     "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
   },
-  "energy": {
-    "approximation": {
-      "usageConstant": 2500
-    }
-  },
   "pair": [
     {
       "id": "enter_device_info"

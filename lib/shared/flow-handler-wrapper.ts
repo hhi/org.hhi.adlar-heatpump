@@ -11,7 +11,7 @@
  * - Zero code changes to existing handlers
  * - Automatic logging of ALL flow cards (actions, conditions, triggers)
  * - Easy debugging: grep for "🎬 Flow" to see all flow activity
- * - Respects logger level settings (pass logger.debug for DEBUG-only output)
+ * - Respects the log level of the device selected by the Flow card
  *
  * @version 2.1.0
  */
@@ -20,10 +20,9 @@
  * Global flag to track if flow card logging is enabled.
  *
  * SHARED MODULE STATE — deliberate. This module lives in lib/shared/ and is loaded
- * once per app, so this flag is shared by every driver rather than scoped per
- * driver or per device. That is acceptable here because it only gates diagnostic
- * logging: enabling it for one driver also enables it for the other, which is
- * harmless and arguably desirable when debugging.
+ * once per app, so the interception itself is enabled only once. The decision to
+ * emit a diagnostic log is made per Flow invocation from args.device, avoiding
+ * one device's DEBUG setting enabling logs for every other device.
  *
  * Anything added to lib/shared/ must be checked for this pattern. Byte-identical
  * files are not automatically safe to share — mutable module state crosses driver
@@ -34,6 +33,9 @@ let flowLoggingEnabled = false;
 type DeviceLike = {
   getName?: () => string;
   getData?: () => Record<string, unknown>;
+  getSetting?: (key: string) => unknown;
+  log?: (...args: unknown[]) => void;
+  error?: (...args: unknown[]) => void;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => (
@@ -99,28 +101,41 @@ const summarizeFlowPayload = (payload: unknown): unknown => {
   return summarized;
 };
 
+const getFlowDevice = (args: unknown): DeviceLike | null => {
+  if (!isRecord(args) || !isDeviceLike(args.device)) return null;
+  return args.device;
+};
+
+const isDebugEnabledForDevice = (device: DeviceLike | null): boolean => {
+  try {
+    return device?.getSetting?.('log_level') === 'debug';
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Enable automatic flow card logging by intercepting Homey's flow card methods
  *
- * Call this ONCE in app.ts onInit() or device.ts onInit() BEFORE any flow cards are registered.
- * Logging output is controlled by the logger function passed - use logger.debug for DEBUG-only output.
+ * Call this ONCE in app.ts onInit() BEFORE any flow cards are registered.
+ * Execution logs are emitted only for a selected device with log_level=debug.
  *
  * @param homey - Homey instance (this.homey from App or Device)
- * @param logger - Logger function (use this.logger.debug.bind(this.logger) for level-controlled output)
+ * @param appErrorLogger - Logger used for failures of app-wide cards without a device argument
  *
  * @example
  * ```typescript
  * // In app.ts or device.ts onInit():
  * async onInit() {
- *   // Flow card logs only shown at DEBUG level
- *   enableFlowCardLogging(this.homey, this.logger.debug.bind(this.logger));
+ *   // Device-bound Flow logs only show when that device is set to DEBUG.
+ *   enableFlowCardLogging(this.homey, this.error.bind(this));
  *   // ... rest of initialization
  * }
  * ```
  */
 export function enableFlowCardLogging(
   homey: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  logger: (message: string, ...args: unknown[]) => void,
+  appErrorLogger: (message: string, ...args: unknown[]) => void,
 ): void {
   if (flowLoggingEnabled) {
     return; // Already enabled, skip silently
@@ -146,24 +161,36 @@ export function enableFlowCardLogging(
         const wrappedHandler = async (args: any, state: any) => {
           const summarizedArgs = summarizeFlowPayload(args);
           const summarizedState = summarizeFlowPayload(state);
+          const device = getFlowDevice(args);
+          const logDebug = isDebugEnabledForDevice(device);
           try {
-            logger(`🎬 Flow ${cardType} fired: ${cardId}`, {
-              args: summarizedArgs,
-              state: summarizedState,
-            });
+            if (logDebug && device?.log) {
+              device.log(`🎬 Flow ${cardType} fired: ${cardId}`, {
+                args: summarizedArgs,
+                state: summarizedState,
+              });
+            }
 
             const result = await handler(args, state);
 
-            logger(`✅ Flow ${cardType} completed: ${cardId}`, { result });
+            if (logDebug && device?.log) {
+              device.log(`✅ Flow ${cardType} completed: ${cardId}`, { result });
+            }
 
             return result;
           } catch (error) {
-            logger(`❌ Flow ${cardType} failed: ${cardId}`, {
+            const message = `❌ Flow ${cardType} failed: ${cardId}`;
+            const details = {
               args: summarizedArgs,
               state: summarizedState,
               error: (error as Error).message,
               stack: (error as Error).stack,
-            });
+            };
+            if (device?.error) {
+              device.error(message, details);
+            } else {
+              appErrorLogger(message, details);
+            }
 
             throw error;
           }
@@ -175,6 +202,4 @@ export function enableFlowCardLogging(
       return card;
     };
   });
-
-  logger('🎯 Flow card interception active for: actions, conditions, triggers');
 }

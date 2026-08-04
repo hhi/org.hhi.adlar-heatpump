@@ -11,7 +11,6 @@ import { COPCalculator, type COPDataSources, type COPCalculationResult } from '.
 import { SCOPCalculator, type COPMeasurement } from '../../lib/tuya/services/scop-calculator';
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/shared/services/rolling-cop-calculator';
 import { ServiceCoordinator } from '../../lib/tuya/services/service-coordinator';
-import { enableFlowCardLogging } from '../../lib/shared/flow-handler-wrapper';
 import { Logger } from '../../lib/shared/logger';
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
@@ -3553,9 +3552,6 @@ class MyDevice extends Homey.Device {
         'Device',
       );
       this.logger.info('Device initializing with log level:', Logger.levelToString(logLevel));
-
-      // Enable automatic flow card logging (v2.1.0 - respects logger level)
-      enableFlowCardLogging(this.homey, this.logger.debug.bind(this.logger));
 
       // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
       // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
