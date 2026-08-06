@@ -1,0 +1,140 @@
+//copy this into your dashboard using the raw-editor
+ 
+ - title: Warmtepomp2
+    icon: mdi:heat-pump
+    cards: []
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: thermostat
+                entity: climate.warmtepomp
+                name: Warmtepomp
+              - type: entities
+                title: Bedieningen
+                entities:
+                  - entity: select.warmtepomp_stille_modus
+                    name: Stille modus
+          - type: vertical-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - entity: binary_sensor.wp_defrost_actief
+                    state: 'on'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Defrost actief
+                  secondary: Warmtepomp ontdooit (normaal proces)
+                  icon: mdi:snowflake-melt
+                  icon_color: blue
+                  entity: binary_sensor.wp_defrost_actief
+              - type: conditional
+                conditions:
+                  - entity: binary_sensor.wp_oil_return_actief
+                    state: 'on'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Oil return actief
+                  secondary: Compressor oliecirculatie
+                  icon: mdi:oil
+                  icon_color: amber
+                  entity: binary_sensor.wp_oil_return_actief
+              - type: conditional
+                conditions:
+                  - entity: binary_sensor.wp_anti_freezing_actief
+                    state: 'on'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Anti-freeze actief
+                  secondary: Vorstbeveiliging actief
+                  icon: mdi:snowflake-alert
+                  icon_color: light-blue
+                  entity: binary_sensor.wp_anti_freezing_actief
+              - type: conditional
+                conditions:
+                  - entity: >-
+                      binary_sensor.wp_buiten_temp_te_laag_compressor_geblokkeerd
+                    state: 'on'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Compressor geblokkeerd
+                  secondary: Buiten te koud om te starten
+                  icon: mdi:alert
+                  icon_color: red
+                  entity: binary_sensor.wp_buiten_temp_te_laag_compressor_geblokkeerd
+              - type: conditional
+                conditions:
+                  - entity: binary_sensor.wp_compressor_draait
+                    state: 'on'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Compressor actief
+                  icon: mdi:engine
+                  icon_color: green
+                  entity: binary_sensor.wp_compressor_draait
+      - type: grid
+        cards:
+          - type: entities
+            title: Prestatie
+            entities:
+              - entity: sensor.wp_cop
+                name: COP
+              - entity: sensor.wp_thermisch_vermogen
+                name: Thermisch vermogen (kW)
+              - entity: sensor.aurora_iii_pro_vermogen
+                name: Elektrisch vermogen (W)
+              - entity: sensor.wp_deltat
+                name: DeltaT (°C)
+          - type: entities
+            title: Pendelgedrag
+            entities:
+              - entity: sensor.wp_starts_per_uur
+                name: Starts per uur
+              - entity: sensor.wp_draaitijd_laatste_24u
+                name: Draaitijd (24u)
+              - entity: counter.wp_starts
+                name: Totale starts
+      - type: grid
+        cards:
+          - type: entities
+            title: Temperaturen & hydrauliek
+            entities:
+              - entity: sensor.wp_buiten_temperatuur
+                name: Buiten
+              - entity: sensor.wp_aanvoer_temperatuur
+                name: Aanvoer
+              - entity: sensor.wp_retour_temperatuur
+                name: Retour
+              - entity: sensor.wp_water_flow
+                name: Flow
+              - entity: sensor.wp_outlet_water_pressure
+                name: Druk
+              - entity: sensor.wp_percentage_pwm_output
+                name: Pomp PWM
+              - entity: sensor.wp_compressor_frequentie
+                name: Compressor frequentie
+              - entity: sensor.wp_fan_speed
+                icon: mdi:fan
+                name: Fan Speed
+          - type: custom:apexcharts-card
+            header:
+              title: Warmtepomp prestatie
+            graph_span: 24h
+            yaxis:
+              - id: cop
+                min: 2
+                max: 7.5
+                decimals: 1
+              - id: power
+                opposite: true
+            series:
+              - entity: sensor.wp_cop
+                name: COP
+                yaxis_id: cop
+                stroke_width: 1
+              - entity: sensor.wp_thermisch_vermogen
+                name: Thermisch kW
+                yaxis_id: power
+                stroke_width: 1

@@ -77,7 +77,10 @@
   "uiComponent": "picker",
   "preventInsights": true,
   "description": {
-    "nl": "dp 2 : mode - mode"
+    "en": "dp 2: mode - Heat pump operating mode (Heating / Cooling / Hot Water / Auto)",
+    "nl": "dp 2: mode - Warmtepomp bedrijfsmodus (Verwarmen / Koelen / Warm Water / Auto)",
+    "de": "dp 2: mode - Wärmepumpen-Betriebsmodus (Heizen / Kühlen / Warmwasser / Auto)",
+    "fr": "dp 2: mode - Mode de fonctionnement de la pompe à chaleur (Chauffage / Refroidissement / Eau chaude / Auto)"
   }
 }
 

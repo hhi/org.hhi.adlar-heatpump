@@ -1,0 +1,1303 @@
+{
+  "_comment": "Adlar Castra Aurora II — Realistische simulatie-registerwaarden",
+  "_scenario": "Verwarming actief, buitentemp 7°C, comp 55 Hz, T6=31°C T7=38°C, flow=15 L/min, Pin=1.5 kW, COP≈4.9",
+  "_source": "lib/modbus/adlar-modbus-registers.ts (poll groups FAST/MEDIUM/SLOW/ONCE)",
+  "outputMem": [],
+  "holdingReg": [
+
+    // =========================================================================
+    // POLL_GROUP_FAST — Status registers (0x0000–0x0001, elke 10s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 16384,
+        "address": 0,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0000 Running Status 1 [MACHINE_RUN=0x4000]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1024,
+        "address": 1,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0001 Running Status 2 [CONTROLLER_ON_OFF=0x0400]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_MEDIUM — Fault State 1–3 + Sys1 Faults (0x0002–0x0009, elke 30s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0002 Fault State 1 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 3,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0003 Fault State 2 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 4,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0004 Fault State 3 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 5,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0005 Sys1 Fault State 1 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 6,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0006 Sys1 Fault State 2 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 7,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0007 Sys1 Drive Fault 1 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 8,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0008 Sys1 Drive Fault 2 [geen storingen]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 9,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0009 Sys1 Drive Fault 3 [geen storingen]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_MEDIUM — Relay 1–4 + Switch 1–4 (0x0019–0x0020, elke 30s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 64,
+        "address": 25,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0019 Relay Output 1 [MAIN_CIRCULATING_PUMP=0x0040]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 41,
+        "address": 26,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x001A Relay Output 2 [COMP1=0x01|4WAY=0x08|FAN1=0x20 → 0x29=41]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 27,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x001B Relay Output 3 [geen aux relais actief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 28,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x001C Relay Output 4 [geen zone-pompen actief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 256,
+        "address": 29,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x001D Switch Port State 1 [WATER_FLOW_SWITCH=0x0100 → OK]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 384,
+        "address": 30,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x001E Switch Port State 2 [HP_SW1=0x80|LP_SW1=0x100 → druken OK]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 31,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x001F Switch Port State 3"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 32,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0020 Switch Port State 4"
+      }
+    },
+
+    // =========================================================================
+    // EXTRA_FAST — Compressor Target Frequency (0x0027, elke 10s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 55,
+        "address": 39,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0027 Compressor Target Freq [55 Hz]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_FAST — WP1 Sensors (0x0040–0x005D, 30 registers, elke 10s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 55,
+        "address": 64,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0040 Compressor Running Freq [55 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 900,
+        "address": 65,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0041 Fan Running Speed [900 RPM = 60 Hz × 15]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 280,
+        "address": 66,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0042 EEV Open Step [280 P]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 67,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0043 EVI Valve Open Step [0 P, geen EVI actief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 232,
+        "address": 68,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0044 AC Input Voltage [232 × 0.99 = 229.7 V ≈ 230 V]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 65,
+        "address": 69,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0045 AC Input Current [65 × 0.1 = 6.5 A raw; cal.curve → ~5.5 A werkelijk]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 58,
+        "address": 70,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0046 Compressor Phase Current [58 × 0.1 = 5.8 A]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 350,
+        "address": 71,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0047 Compressor IPM Temp [350 × 0.1 = 35.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 450,
+        "address": 72,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0048 High Pressure Sat Temp [450 × 0.1 = 45.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 65486,
+        "address": 73,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0049 Low Pressure Sat Temp [int16: -50 = -5.0 °C (65536-50=65486)]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 70,
+        "address": 74,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x004A T1 Ambient Temp [70 × 0.1 = 7.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 65516,
+        "address": 75,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x004B T2 Outer Coil Temp [int16: -20 = -2.0 °C (65536-20=65516)]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 380,
+        "address": 76,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x004C T3 Inner Coil Temp [380 × 0.1 = 38.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 65511,
+        "address": 77,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x004D T4 Suction Temp [int16: -25 = -2.5 °C (65536-25=65511)]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 750,
+        "address": 78,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x004E T5 Exhaust Temp [750 × 0.1 = 75.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 310,
+        "address": 79,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x004F T6 Water Inlet (return) [310 × 0.1 = 31.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 380,
+        "address": 80,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0050 T7 Water Outlet (aanvoer) [380 × 0.1 = 38.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 120,
+        "address": 81,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0051 T8 Economizer Inlet [120 × 0.1 = 12.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 180,
+        "address": 82,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0052 T9 Economizer Outlet [180 × 0.1 = 18.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 83,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0053 Device Tooling No"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 480,
+        "address": 84,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0054 DHW Tank Temp [480 × 0.1 = 48.0 °C, warmwaterboiler standby]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 600,
+        "address": 85,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0055 Plate HX Exhaust Temp [600 × 0.1 = 60.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 86,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0056 Drive Manufacturer Code [1]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 75,
+        "address": 87,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0057 Water Pump Speed [75 %PWM]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 15,
+        "address": 88,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0058 Water Flow [15 L/min]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 400,
+        "address": 89,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0059 DHW Return Water Temp [400 × 0.1 = 40.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 230,
+        "address": 90,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x005A Unit Input Voltage [230 V]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 652,
+        "address": 91,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x005B Unit Input Current [652 × 0.01 = 6.52 A → 1500 W / 230 V]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 150,
+        "address": 92,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x005C Unit Input Power [150 × 0.01 = 1.50 kW]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1847,
+        "address": 93,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x005D Total Energy Consumption [1847 kWh]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_MEDIUM — Aux / Buffer / Grid / Zone (0x0072–0x007D, elke 30s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 114,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0072 Solar Water Heater Temp [0 = geen sensor/zonne-energie]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 200,
+        "address": 115,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0073 Zone 2 Temp [200 × 0.1 = 20.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 350,
+        "address": 116,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0074 Buffer Tank Temp [350 × 0.1 = 35.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 380,
+        "address": 117,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0075 Total Water Outlet Temp [380 × 0.1 = 38.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 230,
+        "address": 118,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0076 B Phase Input Voltage [230 V]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 650,
+        "address": 119,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0077 B Phase Input Current [650 × 0.01 = 6.50 A]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 231,
+        "address": 120,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0078 C Phase Input Voltage [231 V]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 640,
+        "address": 121,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0079 C Phase Input Current [640 × 0.01 = 6.40 A]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 122,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x007A Smart Grid Status [0 = normaal]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 123,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x007B Zone 2 Mixing Valve Opening [0 %]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 380,
+        "address": 124,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x007C Zone 1 Mixing Temp [380 × 0.1 = 38.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 125,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x007D Zone 1 Mixing Valve Opening [0 %]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_ONCE — P00–P10 Protection Switches (0x0100–0x010A)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 256,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0100 P00 T1 Ambient Temp Sensor [0 = enabled]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 257,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0101 P01 High Voltage Switch [0 = enabled]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 258,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0102 P02 Low Pressure Switch [0 = enabled]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 259,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0103 P03 Water Flow Switch [1 = disabled, externe flowmeter actief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 260,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0104 P04 Thermal Overload Protection [0 = enabled]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 261,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0105 P05 Linkage Switch [0 = enabled]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 262,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0106 P06 Fan Type [1 = DC]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 263,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0107 P07 High Voltage Lock [0 = 3 locks]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 264,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0108 P08 Low Voltage Lock [0 = 3 locks]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 265,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0109 P09 Exhaust Lock [0 = 3 locks]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 266,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x010A P10 Water Flow Lock [0 = 3 locks]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_ONCE — P11–P16 Protection Values (0x010B–0x0110)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 115,
+        "address": 267,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x010B P11 High Pressure Protection [115 °C condensatieTemp]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 110,
+        "address": 268,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x010C P12 High Pressure Freq Limit [110 °C = P11 − 5]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 65506,
+        "address": 269,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x010D P13 Low Pressure Protection [int16: -30 °C (65536-30=65506)]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 65511,
+        "address": 270,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x010E P14 Low Pressure Freq Limit [int16: -25 °C (65536-25=65511)]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 120,
+        "address": 271,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x010F P15 Exhaust Temp Protection [120 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 110,
+        "address": 272,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0110 P16 Exhaust Temp Freq Limit [110 °C = P15 − 10]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P30 Defrost Mode (0x011E)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 286,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x011E P30 Defrost Mode [0 = Smart]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P50–P59 Freq Limits Koeling + Verwarming (0x0132–0x013B)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 306,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0132 P50 Cooling Target Freq Constant A"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 25,
+        "address": 307,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0133 P51 Cooling Min Freq [25 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 80,
+        "address": 308,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0134 P52 Cooling Target Freq Upper [80 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 30,
+        "address": 309,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0135 P53 Cooling Target Freq Lower [30 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 310,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0136 P54 Heating Target Freq Constant B"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 90,
+        "address": 311,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0137 P55 Heating Target Freq Upper [90 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 25,
+        "address": 312,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0138 P56 Heating Target Freq Lower [25 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 25,
+        "address": 313,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0139 P57 Heating Min Freq >0°C [25 Hz — COP-geoptimaliseerd]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 35,
+        "address": 314,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x013A P58 Heating Min Freq −10~0°C [35 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 45,
+        "address": 315,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x013B P59 Heating Min Freq <−10°C [45 Hz]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P60–P65 Freq Limits Warm Water (0x013C–0x0141)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 316,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x013C P60 DHW Target Freq Constant"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 80,
+        "address": 317,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x013D P61 DHW Target Freq Upper [80 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 25,
+        "address": 318,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x013E P62 DHW Target Freq Lower [25 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 25,
+        "address": 319,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x013F P63 DHW Min Freq >0°C [25 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 35,
+        "address": 320,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0140 P64 DHW Min Freq −10~0°C [35 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 45,
+        "address": 321,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0141 P65 DHW Min Freq <−10°C [45 Hz]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P88/P89 Silent Mode (0x0158–0x0159)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 35,
+        "address": 344,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0158 P88 Silent Mode Compressor Freq [35 Hz]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 30,
+        "address": 345,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0159 P89 Silent Mode Fan Freq [30 Hz → 450 RPM]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P101 Pump Control Mode (0x0165)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 357,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0165 P101 Pump Control Mode [1 = DC/PWM]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_ONCE — P114/P115 System Config (0x0172–0x0173)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 370,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0172 P114 Nr Compressors [1 = single]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 371,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0173 P115 Model Selection [0 = double supply]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P116–P120 Temp Control + Antifreeze + Koelmiddel (0x0174–0x0178)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 372,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0174 P116 Temp Control Mode [0 = inlet T6 (retour)]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 5,
+        "address": 373,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0175 P117 Antifreeze Ambient Temp [5 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 3,
+        "address": 374,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0176 P118 Antifreeze Outlet Water [3 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 2,
+        "address": 375,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0177 P119 Refrigerant Type [2 = R32 — Adlar Castra Aurora II]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 376,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0178 P120 Anti-condensation Function [0]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P164 Energy Level Control (0x01A4)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 420,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x01A4 P164 Energy Level Control [0 = geen beperking]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — P255/P256 Smart Grid (0x01FF–0x0200)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 511,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x01FF P255 Smart Grid [0 = inactief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 512,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0200 P256 Smart Grid [0 = inactief]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_MEDIUM — Control Registers (0x0300–0x0307, elke 30s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 120,
+        "address": 768,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0300 Set Cooling Temp [120 × 0.1 = 12.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 550,
+        "address": 769,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0301 Set Heating Temp [550 × 0.1 = 55.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 550,
+        "address": 770,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0302 Set Hot Water Temp [550 × 0.1 = 55.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 500,
+        "address": 771,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0303 Set Floor Heating Temp [500 × 0.1 = 50.0 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 772,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0304 Mode [1 = Heating]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 773,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0305 Main Switch [1 = ON]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 205,
+        "address": 774,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0306 Indoor Temp Setpoint [205 × 0.1 = 20.5 °C]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 775,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0307 Running Mode [0 = Standard]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — Curve Settings (0x0313–0x0316, elke 300s)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 787,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0313 Cooling Curve [0 = off]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 3,
+        "address": 788,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0314 Heating Curve [3 = High Temp Curve 3]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 789,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0315 Hot Water Curve [0 = off]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 790,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0316 Floor Heating Curve [0 = off]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_ONCE — Version Info (0x0360–0x0363)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 130,
+        "address": 864,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0360 Program Version [130 = V1.3.0]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 865,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0361 Product Type [0 = Commercial Inverter]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 866,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0362 Product Type ID [0 = 2-unit]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 130,
+        "address": 867,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0363 Protocol Version [130 = coil-support + aparte curve-registers actief]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — L27–L29 DIY Stooklijn (0x0810–0x0812)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 1,
+        "address": 2064,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0810 L27 Heating Low Temp Curve DIY [1 = disabled, preset curve actief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2065,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0811 L28 Heating Curve Coeff K [niet actief]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2066,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0812 L29 Heating Curve Constant B [niet actief]"
+      }
+    },
+
+    // =========================================================================
+    // POLL_GROUP_SLOW — L30–L36 Energieboekhouding (0x0813–0x0819)
+    // =========================================================================
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2067,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0813 L30 Heating Capacity Statistics [0 = enabled]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 15,
+        "address": 2068,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0814 L31 External Pump Flow Rate [15 L/min — klopt met waterflow sensor]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2069,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0815 L32 DHW E-Heater Power [0 W — geen elektrische bijverwarming]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2070,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0816 L33 Pipe E-Heater 1 Power [0 W]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2071,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0817 L34 Pipe E-Heater 2 Power [0 W]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 0,
+        "address": 2072,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0818 L35 Heating E-Heater Power [0 W]"
+      }
+    },
+    {
+      "modbusData": {
+        "registerValue": 50,
+        "address": 2073,
+        "dataSize": 16,
+        "displayFormat": { "Decimal": {} },
+        "title": "0x0819 L36 External Water Pump Power [50 W]"
+      }
+    }
+
+  ]
+}

@@ -51,6 +51,9 @@
   "icon": "/assets/backwater-state.svg",
   "insights": true,
   "description": {
-    "nl": "L22 (0x080B): DHW retourwater circulatiemodus"
+    "en": "L22 (0x080B): DHW return water circulation mode",
+    "nl": "L22 (0x080B): DHW retourwater circulatiemodus",
+    "de": "L22 (0x080B): Zirkulationsmodus für Warmwasserrücklauf",
+    "fr": "L22 (0x080B) : Mode de circulation d'eau de retour ECS"
   }
 }

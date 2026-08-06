@@ -3,7 +3,9 @@
   "type": "number",
   "title": {
     "en": "Heating Curve Intercept",
-    "nl": "Verwarmingscurve Intercept"
+    "nl": "Verwarmingscurve Intercept",
+    "de": "Heizkurven-Schnittpunkt",
+    "fr": "Ordonnée à l'origine de la courbe de chauffe"
   },
   "getable": true,
   "setable": false,
