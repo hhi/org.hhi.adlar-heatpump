@@ -3,7 +3,9 @@
   "type": "number",
   "title": {
     "en": "Reference Outdoor Temperature",
-    "nl": "Referentie Buitentemperatuur"
+    "nl": "Referentie Buitentemperatuur",
+    "de": "Referenz-Außentemperatur",
+    "fr": "Température extérieure de référence"
   },
   "getable": true,
   "setable": false,

@@ -30,6 +30,9 @@
   "icon": "/assets/pressure.svg",
 
   "description": {
-    "nl": "dp 25 : effluent_temp - EVI Open"
+    "en": "dp 25: effluent_temp - EVI opening pressure / temperature step",
+    "nl": "dp 25: effluent_temp - EVI-openingsdruk / temperatuurstap",
+    "de": "dp 25: effluent_temp - EVI-Öffnungsdruck / Temperaturschritt",
+    "fr": "dp 25: effluent_temp - Pression / pas de température d'ouverture EVI"
   }
 }

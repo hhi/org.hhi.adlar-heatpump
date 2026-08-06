@@ -1,4 +1,10 @@
 {
+  "3.0.0": {
+    "en": "Added a Modbus device driver for Adlar Castra Aurora heat pumps, with local dashboards and Modbus register controls. The existing Tuya driver remains available.",
+    "nl": "Een Modbus-apparaatdriver toegevoegd voor Adlar Castra Aurora-warmtepompen, met lokale dashboards en Modbus-registerbediening. De bestaande Tuya-driver blijft beschikbaar.",
+    "de": "Einen Modbus-Gerätetreiber für Adlar Castra Aurora-Wärmepumpen mit lokalen Dashboards und Modbus-Registersteuerung hinzugefügt. Der bestehende Tuya-Treiber bleibt verfügbar.",
+    "fr": "Ajout d'un pilote Modbus pour les pompes à chaleur Adlar Castra Aurora, avec tableaux de bord locaux et commande des registres Modbus. Le pilote Tuya existant reste disponible."
+  },
   "2.13.1": {
     "en": "Flow card titles no longer show raw placeholders such as [[mode]] or [[status]].",
     "nl": "Flow-kaarttitels tonen niet langer ruwe placeholders zoals [[mode]] of [[status]].",

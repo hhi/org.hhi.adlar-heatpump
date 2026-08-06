@@ -2,15 +2,21 @@
   "id": "set_diy_heating_curve",
   "title": {
     "en": "Set Custom heating curve (L28/L29)",
-    "nl": "Stel Custom stooklijn in (L28/L29)"
+    "nl": "Stel Custom stooklijn in (L28/L29)",
+    "de": "Benutzerdefinierte Heizkurve einstellen (L28/L29)",
+    "fr": "Régler la courbe de chauffe personnalisée (L28/L29)"
   },
   "titleFormatted": {
     "en": "Set Custom heating curve: slope [[slope]], intercept [[intercept]]°C",
-    "nl": "Stel Custom stooklijn in: helling [[slope]], intercept [[intercept]]°C"
+    "nl": "Stel Custom stooklijn in: helling [[slope]], intercept [[intercept]]°C",
+    "de": "Benutzerdefinierte Heizkurve einstellen: Neigung [[slope]], Schnittpunkt [[intercept]]°C",
+    "fr": "Régler la courbe de chauffe personnalisée: pente [[slope]], ordonnée [[intercept]]°C"
   },
   "hint": {
     "en": "Writes the DIY heating curve directly to Modbus registers L27, L28 and L29. slope is the curve coefficient k (e.g. -0.5), intercept is the supply temperature at -15°C outdoor (L29, e.g. 55). Valid range: slope -5.0..0.0, intercept 30..80. Capabilities heating_curve_slope and heating_curve_intercept are updated within 30 seconds via polling.",
-    "nl": "Schrijft de DIY stooklijn direct naar Modbus-registers L27, L28 en L29. slope is de hellingscoëfficiënt k (bijv. -0.5), intercept is de aanvoertemperatuur bij -15°C buiten (L29, bijv. 55). Geldig bereik: slope -5,0..0,0, intercept 30..80. Capabilities heating_curve_slope en heating_curve_intercept worden binnen 30 seconden bijgewerkt via polling."
+    "nl": "Schrijft de DIY stooklijn direct naar Modbus-registers L27, L28 en L29. slope is de hellingscoëfficiënt k (bijv. -0.5), intercept is de aanvoertemperatuur bij -15°C buiten (L29, bijv. 55). Geldig bereik: slope -5,0..0,0, intercept 30..80. Capabilities heating_curve_slope en heating_curve_intercept worden binnen 30 seconden bijgewerkt via polling.",
+    "de": "Schreibt die DIY-Heizkurve direkt in die Modbus-Register L27, L28 und L29. slope ist der Kurvenkoeffizient k (z. B. -0.5), intercept ist die Vorlauftemperatur bei -15°C Außen (L29, z. B. 55). Gültiger Bereich: slope -5.0..0.0, intercept 30..80. Die Capabilities heating_curve_slope und heating_curve_intercept werden innerhalb von 30 Sekunden per Polling aktualisiert.",
+    "fr": "Écrit la courbe de chauffe DIY directement dans les registres Modbus L27, L28 et L29. slope est le coefficient k (ex. -0.5), intercept est la température de départ à -15°C ext. (L29, ex. 55). Plage valide: slope -5.0..0.0, intercept 30..80. Les capabilities heating_curve_slope et heating_curve_intercept sont mises à jour sous 30 secondes via polling."
   },
   "highlight": true,
   "args": [
@@ -24,11 +30,15 @@
       "type": "number",
       "title": {
         "en": "Slope (k, e.g. -0.5)",
-        "nl": "Helling (k, bijv. -0.5)"
+        "nl": "Helling (k, bijv. -0.5)",
+        "de": "Neigung (k, z. B. -0.5)",
+        "fr": "Pente (k, ex. -0.5)"
       },
       "placeholder": {
         "en": "e.g. -0.5",
-        "nl": "bijv. -0.5"
+        "nl": "bijv. -0.5",
+        "de": "z. B. -0.5",
+        "fr": "ex. -0.5"
       }
     },
     {
@@ -36,11 +46,15 @@
       "type": "number",
       "title": {
         "en": "Intercept (supply temp at -15°C, e.g. 55)",
-        "nl": "Intercept (aanvoertemp bij -15°C, bijv. 55)"
+        "nl": "Intercept (aanvoertemp bij -15°C, bijv. 55)",
+        "de": "Schnittpunkt (Vorlauftemp. bei -15°C, z. B. 55)",
+        "fr": "Ordonnée (temp. départ à -15°C, ex. 55)"
       },
       "placeholder": {
         "en": "e.g. 55",
-        "nl": "bijv. 55"
+        "nl": "bijv. 55",
+        "de": "z. B. 55",
+        "fr": "ex. 55"
       }
     }
   ]

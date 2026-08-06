@@ -1,7 +1,7 @@
 {
   "name": {
-    "en": "intelligent-heat-pump",
-    "nl": "intelligent-heat-pump"
+    "en": "Adlar Castra Aurora Heat Pump (Tuya)",
+    "nl": "Adlar Castra Aurora-warmtepomp (Tuya)"
   },
   "class": "heatpump",
   "capabilities": [

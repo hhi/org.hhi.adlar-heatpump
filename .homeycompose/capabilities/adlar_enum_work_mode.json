@@ -12,7 +12,9 @@
       "id": "ECO",
       "title": {
         "en": "ECO",
-        "nl": "ECO"
+        "nl": "ECO",
+        "de": "ECO / Sparen",
+        "fr": "ECO / Économique"
       }
     },
     {
@@ -28,7 +30,9 @@
       "id": "Boost",
       "title": {
         "en": "Boost",
-        "nl": "Boost"
+        "nl": "Boost",
+        "de": "Boost / Schnell",
+        "fr": "Boost / Rapide"
       }
     }
   ],
@@ -38,6 +42,9 @@
   "preventInsights": true,
 
   "description": {
-    "nl": "dp 5 : work_mode - Working mode"
+    "en": "dp 5: work_mode - Controls operating capacity mode (ECO, Normal, Boost)",
+    "nl": "dp 5: work_mode - Beheert de capaciteitsmodus (ECO, Normaal, Boost)",
+    "de": "dp 5: work_mode - Steuert den Kapazitätsmodus (ECO, Normal, Boost)",
+    "fr": "dp 5: work_mode - Contrôle le mode de capacité (ECO, Normal, Boost)"
   }
 }

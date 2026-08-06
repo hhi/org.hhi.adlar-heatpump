@@ -12033,15 +12033,21 @@
         "id": "set_diy_heating_curve",
         "title": {
           "en": "Set Custom heating curve (L28/L29)",
-          "nl": "Stel Custom stooklijn in (L28/L29)"
+          "nl": "Stel Custom stooklijn in (L28/L29)",
+          "de": "Benutzerdefinierte Heizkurve einstellen (L28/L29)",
+          "fr": "Régler la courbe de chauffe personnalisée (L28/L29)"
         },
         "titleFormatted": {
           "en": "Set Custom heating curve: slope [[slope]], intercept [[intercept]]°C",
-          "nl": "Stel Custom stooklijn in: helling [[slope]], intercept [[intercept]]°C"
+          "nl": "Stel Custom stooklijn in: helling [[slope]], intercept [[intercept]]°C",
+          "de": "Benutzerdefinierte Heizkurve einstellen: Neigung [[slope]], Schnittpunkt [[intercept]]°C",
+          "fr": "Régler la courbe de chauffe personnalisée: pente [[slope]], ordonnée [[intercept]]°C"
         },
         "hint": {
           "en": "Writes the DIY heating curve directly to Modbus registers L27, L28 and L29. slope is the curve coefficient k (e.g. -0.5), intercept is the supply temperature at -15°C outdoor (L29, e.g. 55). Valid range: slope -5.0..0.0, intercept 30..80. Capabilities heating_curve_slope and heating_curve_intercept are updated within 30 seconds via polling.",
-          "nl": "Schrijft de DIY stooklijn direct naar Modbus-registers L27, L28 en L29. slope is de hellingscoëfficiënt k (bijv. -0.5), intercept is de aanvoertemperatuur bij -15°C buiten (L29, bijv. 55). Geldig bereik: slope -5,0..0,0, intercept 30..80. Capabilities heating_curve_slope en heating_curve_intercept worden binnen 30 seconden bijgewerkt via polling."
+          "nl": "Schrijft de DIY stooklijn direct naar Modbus-registers L27, L28 en L29. slope is de hellingscoëfficiënt k (bijv. -0.5), intercept is de aanvoertemperatuur bij -15°C buiten (L29, bijv. 55). Geldig bereik: slope -5,0..0,0, intercept 30..80. Capabilities heating_curve_slope en heating_curve_intercept worden binnen 30 seconden bijgewerkt via polling.",
+          "de": "Schreibt die DIY-Heizkurve direkt in die Modbus-Register L27, L28 und L29. slope ist der Kurvenkoeffizient k (z. B. -0.5), intercept ist die Vorlauftemperatur bei -15°C Außen (L29, z. B. 55). Gültiger Bereich: slope -5.0..0.0, intercept 30..80. Die Capabilities heating_curve_slope und heating_curve_intercept werden innerhalb von 30 Sekunden per Polling aktualisiert.",
+          "fr": "Écrit la courbe de chauffe DIY directement dans les registres Modbus L27, L28 et L29. slope est le coefficient k (ex. -0.5), intercept est la température de départ à -15°C ext. (L29, ex. 55). Plage valide: slope -5.0..0.0, intercept 30..80. Les capabilities heating_curve_slope et heating_curve_intercept sont mises à jour sous 30 secondes via polling."
         },
         "highlight": true,
         "args": [
@@ -12055,11 +12061,15 @@
             "type": "number",
             "title": {
               "en": "Slope (k, e.g. -0.5)",
-              "nl": "Helling (k, bijv. -0.5)"
+              "nl": "Helling (k, bijv. -0.5)",
+              "de": "Neigung (k, z. B. -0.5)",
+              "fr": "Pente (k, ex. -0.5)"
             },
             "placeholder": {
               "en": "e.g. -0.5",
-              "nl": "bijv. -0.5"
+              "nl": "bijv. -0.5",
+              "de": "z. B. -0.5",
+              "fr": "ex. -0.5"
             }
           },
           {
@@ -12067,11 +12077,15 @@
             "type": "number",
             "title": {
               "en": "Intercept (supply temp at -15°C, e.g. 55)",
-              "nl": "Intercept (aanvoertemp bij -15°C, bijv. 55)"
+              "nl": "Intercept (aanvoertemp bij -15°C, bijv. 55)",
+              "de": "Schnittpunkt (Vorlauftemp. bei -15°C, z. B. 55)",
+              "fr": "Ordonnée (temp. départ à -15°C, ex. 55)"
             },
             "placeholder": {
               "en": "e.g. 55",
-              "nl": "bijv. 55"
+              "nl": "bijv. 55",
+              "de": "z. B. 55",
+              "fr": "ex. 55"
             }
           }
         ]
@@ -13295,8 +13309,8 @@
   "drivers": [
     {
       "name": {
-        "en": "intelligent-heat-pump",
-        "nl": "intelligent-heat-pump"
+        "en": "Adlar Castra Aurora Heat Pump (Tuya)",
+        "nl": "Adlar Castra Aurora-warmtepomp (Tuya)"
       },
       "class": "heatpump",
       "capabilities": [
@@ -16331,8 +16345,8 @@
     },
     {
       "name": {
-        "en": "Adlar Castra Heat Pump (Aurora-II Modbus)",
-        "nl": "Adlar Castra Warmtepomp (Aurora-II Modbus)"
+        "en": "Adlar Castra Aurora Heat Pump (Modbus)",
+        "nl": "Adlar Castra Aurora-warmtepomp (Modbus)"
       },
       "class": "heatpump",
       "capabilities": [
@@ -19079,28 +19093,36 @@
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "Stufe H1",
+            "fr": "Niveau H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "Stufe H2",
+            "fr": "Niveau H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "Stufe H3",
+            "fr": "Niveau H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "Stufe H4",
+            "fr": "Niveau H4"
           }
         }
       ],
@@ -19138,28 +19160,36 @@
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "Stufe H1",
+            "fr": "Niveau H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "Stufe H2",
+            "fr": "Niveau H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "Stufe H3",
+            "fr": "Niveau H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "Stufe H4",
+            "fr": "Niveau H4"
           }
         }
       ],
@@ -19197,105 +19227,135 @@
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "H1",
+            "fr": "H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "H2",
+            "fr": "H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "H3",
+            "fr": "H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "H4",
+            "fr": "H4"
           }
         },
         {
           "id": "H5",
           "title": {
             "en": "H5",
-            "nl": "H5"
+            "nl": "H5",
+            "de": "H5",
+            "fr": "H5"
           }
         },
         {
           "id": "H6",
           "title": {
             "en": "H6",
-            "nl": "H6"
+            "nl": "H6",
+            "de": "H6",
+            "fr": "H6"
           }
         },
         {
           "id": "H7",
           "title": {
             "en": "H7",
-            "nl": "H7"
+            "nl": "H7",
+            "de": "H7",
+            "fr": "H7"
           }
         },
         {
           "id": "H8",
           "title": {
             "en": "H8",
-            "nl": "H8"
+            "nl": "H8",
+            "de": "H8",
+            "fr": "H8"
           }
         },
         {
           "id": "L1",
           "title": {
             "en": "L1",
-            "nl": "L1"
+            "nl": "L1",
+            "de": "L1",
+            "fr": "L1"
           }
         },
         {
           "id": "L2",
           "title": {
             "en": "L2",
-            "nl": "L2"
+            "nl": "L2",
+            "de": "L2",
+            "fr": "L2"
           }
         },
         {
           "id": "L3",
           "title": {
             "en": "L3",
-            "nl": "L3"
+            "nl": "L3",
+            "de": "L3",
+            "fr": "L3"
           }
         },
         {
           "id": "L4",
           "title": {
             "en": "L4",
-            "nl": "L4"
+            "nl": "L4",
+            "de": "L4",
+            "fr": "L4"
           }
         },
         {
           "id": "L5",
           "title": {
             "en": "L5",
-            "nl": "L5"
+            "nl": "L5",
+            "de": "L5",
+            "fr": "L5"
           }
         },
         {
           "id": "L6",
           "title": {
             "en": "L6",
-            "nl": "L6"
+            "nl": "L6",
+            "de": "L6",
+            "fr": "L6"
           }
         },
         {
           "id": "L7",
           "title": {
             "en": "L7",
-            "nl": "L7"
+            "nl": "L7",
+            "de": "L7",
+            "fr": "L7"
           }
         },
         {
@@ -19398,7 +19458,10 @@
       "uiComponent": "picker",
       "preventInsights": true,
       "description": {
-        "nl": "dp 2 : mode - mode"
+        "en": "dp 2: mode - Heat pump operating mode (Heating / Cooling / Hot Water / Auto)",
+        "nl": "dp 2: mode - Warmtepomp bedrijfsmodus (Verwarmen / Koelen / Warm Water / Auto)",
+        "de": "dp 2: mode - Wärmepumpen-Betriebsmodus (Heizen / Kühlen / Warmwasser / Auto)",
+        "fr": "dp 2: mode - Mode de fonctionnement de la pompe à chaleur (Chauffage / Refroidissement / Eau chaude / Auto)"
       }
     },
     "adlar_enum_volume_set": {
@@ -19418,7 +19481,10 @@
       "setable": true,
       "uiComponent": "slider",
       "description": {
-        "nl": "dp 106: volume_set - Electricity Consumption Checking"
+        "en": "dp 106: volume_set - Electricity consumption checking setting",
+        "nl": "dp 106: volume_set - Stroomverbruik controle-instelling",
+        "de": "dp 106: volume_set - Einstellung zur Stromverbrauchsüberprüfung",
+        "fr": "dp 106: volume_set - Réglage de vérification de la consommation électrique"
       }
     },
     "adlar_enum_water_mode": {
@@ -19439,7 +19505,10 @@
       "setable": true,
       "uiComponent": "slider",
       "description": {
-        "nl": "dp 10 : water_mode - Control Temperature"
+        "en": "dp 10: water_mode - Hot water control temperature setting",
+        "nl": "dp 10: water_mode - Warm water temperatuurregeling instelling",
+        "de": "dp 10: water_mode - Warmwasser-Temperaturregelungseinstellung",
+        "fr": "dp 10: water_mode - Réglage de la température de régulation d'eau chaude"
       }
     },
     "adlar_enum_work_mode": {
@@ -19456,7 +19525,9 @@
           "id": "ECO",
           "title": {
             "en": "ECO",
-            "nl": "ECO"
+            "nl": "ECO",
+            "de": "ECO / Sparen",
+            "fr": "ECO / Économique"
           }
         },
         {
@@ -19472,7 +19543,9 @@
           "id": "Boost",
           "title": {
             "en": "Boost",
-            "nl": "Boost"
+            "nl": "Boost",
+            "de": "Boost / Schnell",
+            "fr": "Boost / Rapide"
           }
         }
       ],
@@ -19481,7 +19554,10 @@
       "setable": true,
       "preventInsights": true,
       "description": {
-        "nl": "dp 5 : work_mode - Working mode"
+        "en": "dp 5: work_mode - Controls operating capacity mode (ECO, Normal, Boost)",
+        "nl": "dp 5: work_mode - Beheert de capaciteitsmodus (ECO, Normaal, Boost)",
+        "de": "dp 5: work_mode - Steuert den Kapazitätsmodus (ECO, Normal, Boost)",
+        "fr": "dp 5: work_mode - Contrôle le mode de capacité (ECO, Normal, Boost)"
       }
     },
     "adlar_enum_work_mode_modbus": {
@@ -19915,7 +19991,10 @@
         "fr": "Code d'état de défaut"
       },
       "description": {
-        "nl": "dp 15 : fault - Fault"
+        "en": "dp 15: fault - Heat pump system fault code",
+        "nl": "dp 15: fault - Warmtepomp systeem storingscode",
+        "de": "dp 15: fault - Wärmepumpensystem-Fehlercode",
+        "fr": "dp 15: fault - Code de défaut du système de pompe à chaleur"
       }
     },
     "adlar_fault_1": {
@@ -20086,7 +20165,9 @@
       "insights": false,
       "description": {
         "en": "DPS 14: MCU mainboard firmware version (e.g., v4.3.3)",
-        "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)"
+        "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)",
+        "de": "DPS 14: MCU-Hauptplatinen-Firmwareversion (z. B. v4.3.3)",
+        "fr": "DPS 14 : Version du micrologiciel de la carte mère MCU (ex. v4.3.3)"
       }
     },
     "adlar_forecast_advice": {
@@ -20162,7 +20243,10 @@
         "fr": "Température de consigne eau chaude"
       },
       "description": {
-        "nl": "dp 101 : minitemp_set - Hot Water Set Temp"
+        "en": "dp 101: minitemp_set - Domestic hot water target temperature setting",
+        "nl": "dp 101: minitemp_set - Sanitair warmwater gewenste temperatuur instelling",
+        "de": "dp 101: minitemp_set - Brauchwarmwasser-Solltemperatureinstellung",
+        "fr": "dp 101: minitemp_set - Réglage de la température de consigne de l'eau chaude sanitaire"
       }
     },
     "adlar_last_indoor_temp_received": {
@@ -20296,7 +20380,10 @@
       },
       "icon": "/assets/pressure.svg",
       "description": {
-        "nl": "dp 25 : effluent_temp - EVI Open"
+        "en": "dp 25: effluent_temp - EVI opening pressure / temperature step",
+        "nl": "dp 25: effluent_temp - EVI-openingsdruk / temperatuurstap",
+        "de": "dp 25: effluent_temp - EVI-Öffnungsdruck / Temperaturschritt",
+        "fr": "dp 25: effluent_temp - Pression / pas de température d'ouverture EVI"
       }
     },
     "adlar_measure_pressure_temp_current": {
@@ -20330,7 +20417,10 @@
       },
       "icon": "/assets/pressure.svg",
       "description": {
-        "nl": "dp 16 : temp_current - EEV Open"
+        "en": "dp 16: temp_current - Electronic Expansion Valve (EEV) opening steps / pressure",
+        "nl": "dp 16: temp_current - Elektronisch expansieventiel (EEV) openingsstappen / druk",
+        "de": "dp 16: temp_current - Elektronisches Expansionsventil (EEV) Öffnungsschritte / Druck",
+        "fr": "dp 16: temp_current - Pas d'ouverture du détendeur électronique (EEV) / pression"
       }
     },
     "adlar_measure_pulse_steps_effluent_temp": {
@@ -20364,7 +20454,10 @@
       },
       "icon": "/assets/pulse-steps.svg",
       "description": {
-        "nl": "dp 25 : effluent_temp - EVI Open"
+        "en": "dp 25: effluent_temp - EVI expansion valve pulse steps",
+        "nl": "dp 25: effluent_temp - EVI expansieventiel pulsstappen",
+        "de": "dp 25: effluent_temp - EVI-Expansionsventil-Impulsschritte",
+        "fr": "dp 25: effluent_temp - Pas d'impulsion du détendeur EVI"
       }
     },
     "adlar_measure_pulse_steps_temp_current": {
@@ -20398,7 +20491,10 @@
       },
       "icon": "/assets/pulse-steps.svg",
       "description": {
-        "nl": "dp 16 : temp_current - EEV Open"
+        "en": "dp 16: temp_current - Electronic Expansion Valve (EEV) pulse steps",
+        "nl": "dp 16: temp_current - Elektronisch expansieventiel (EEV) pulsstappen",
+        "de": "dp 16: temp_current - Elektronisches Expansionsventil (EEV) Impulsschritte",
+        "fr": "dp 16: temp_current - Pas d'impulsion du détendeur électronique (EEV)"
       }
     },
     "adlar_mode": {
@@ -20622,105 +20718,135 @@
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "H1",
+            "fr": "H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "H2",
+            "fr": "H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "H3",
+            "fr": "H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "H4",
+            "fr": "H4"
           }
         },
         {
           "id": "H5",
           "title": {
             "en": "H5",
-            "nl": "H5"
+            "nl": "H5",
+            "de": "H5",
+            "fr": "H5"
           }
         },
         {
           "id": "H6",
           "title": {
             "en": "H6",
-            "nl": "H6"
+            "nl": "H6",
+            "de": "H6",
+            "fr": "H6"
           }
         },
         {
           "id": "H7",
           "title": {
             "en": "H7",
-            "nl": "H7"
+            "nl": "H7",
+            "de": "H7",
+            "fr": "H7"
           }
         },
         {
           "id": "H8",
           "title": {
             "en": "H8",
-            "nl": "H8"
+            "nl": "H8",
+            "de": "H8",
+            "fr": "H8"
           }
         },
         {
           "id": "L1",
           "title": {
             "en": "L1",
-            "nl": "L1"
+            "nl": "L1",
+            "de": "L1",
+            "fr": "L1"
           }
         },
         {
           "id": "L2",
           "title": {
             "en": "L2",
-            "nl": "L2"
+            "nl": "L2",
+            "de": "L2",
+            "fr": "L2"
           }
         },
         {
           "id": "L3",
           "title": {
             "en": "L3",
-            "nl": "L3"
+            "nl": "L3",
+            "de": "L3",
+            "fr": "L3"
           }
         },
         {
           "id": "L4",
           "title": {
             "en": "L4",
-            "nl": "L4"
+            "nl": "L4",
+            "de": "L4",
+            "fr": "L4"
           }
         },
         {
           "id": "L5",
           "title": {
             "en": "L5",
-            "nl": "L5"
+            "nl": "L5",
+            "de": "L5",
+            "fr": "L5"
           }
         },
         {
           "id": "L6",
           "title": {
             "en": "L6",
-            "nl": "L6"
+            "nl": "L6",
+            "de": "L6",
+            "fr": "L6"
           }
         },
         {
           "id": "L7",
           "title": {
             "en": "L7",
-            "nl": "L7"
+            "nl": "L7",
+            "de": "L7",
+            "fr": "L7"
           }
         },
         {
@@ -20845,7 +20971,9 @@
       "insights": false,
       "description": {
         "en": "Communication protocol version from Modbus register 0x0363, decoded as vX.Y.Z. Example: 100 = v1.0.0, 130 = v1.3.0.",
-        "nl": "Communicatieprotocolversie uit Modbus-register 0x0363, gedecodeerd als vX.Y.Z. Voorbeeld: 100 = v1.0.0, 130 = v1.3.0."
+        "nl": "Communicatieprotocolversie uit Modbus-register 0x0363, gedecodeerd als vX.Y.Z. Voorbeeld: 100 = v1.0.0, 130 = v1.3.0.",
+        "de": "Kommunikationsprotokollversion aus Modbus-Register 0x0363, dekodiert als vX.Y.Z. Beispiel: 100 = v1.0.0, 130 = v1.3.0.",
+        "fr": "Version du protocole de communication du registre Modbus 0x0363, décodée sous forme vX.Y.Z. Exemple : 100 = v1.0.0, 130 = v1.3.0."
       }
     },
     "adlar_pump_pwm": {
@@ -20993,28 +21121,36 @@
           "id": "H1",
           "title": {
             "en": "H1",
-            "nl": "H1"
+            "nl": "H1",
+            "de": "Stufe H1",
+            "fr": "Niveau H1"
           }
         },
         {
           "id": "H2",
           "title": {
             "en": "H2",
-            "nl": "H2"
+            "nl": "H2",
+            "de": "Stufe H2",
+            "fr": "Niveau H2"
           }
         },
         {
           "id": "H3",
           "title": {
             "en": "H3",
-            "nl": "H3"
+            "nl": "H3",
+            "de": "Stufe H3",
+            "fr": "Niveau H3"
           }
         },
         {
           "id": "H4",
           "title": {
             "en": "H4",
-            "nl": "H4"
+            "nl": "H4",
+            "de": "Stufe H4",
+            "fr": "Niveau H4"
           }
         }
       ],
@@ -21095,7 +21231,10 @@
         "fr": "Retour est ÉTEINT"
       },
       "description": {
-        "nl": "dp 31 : backwater - Backwater state"
+        "en": "dp 31: backwater - Return water flow active state",
+        "nl": "dp 31: backwater - Retourwaterstroom actieve status",
+        "de": "dp 31: backwater - Rücklaufwasserfluss-Aktivstatus",
+        "fr": "dp 31: backwater - État actif du flux d'eau de retour"
       }
     },
     "adlar_state_backwater_modbus": {
@@ -21151,7 +21290,10 @@
       "icon": "/assets/backwater-state.svg",
       "insights": true,
       "description": {
-        "nl": "L22 (0x080B): DHW retourwater circulatiemodus"
+        "en": "L22 (0x080B): DHW return water circulation mode",
+        "nl": "L22 (0x080B): DHW retourwater circulatiemodus",
+        "de": "L22 (0x080B): Zirkulationsmodus für Warmwasserrücklauf",
+        "fr": "L22 (0x080B) : Mode de circulation d'eau de retour ECS"
       }
     },
     "adlar_state_compressor_state": {
@@ -21181,7 +21323,10 @@
         "fr": "Compresseur est ÉTEINT"
       },
       "description": {
-        "nl": "dp 27 : compressor_state - Compressor state"
+        "en": "dp 27: compressor_state - Compressor operating state (active/inactive)",
+        "nl": "dp 27: compressor_state - Compressor bedrijfsstatus (actief/inactief)",
+        "de": "dp 27: compressor_state - Kompressor-Betriebsstatus (aktiv/inaktiv)",
+        "fr": "dp 27: compressor_state - État de fonctionnement du compresseur (actif/inactif)"
       }
     },
     "adlar_state_defrost_state": {
@@ -21211,7 +21356,10 @@
         "fr": "Dégivrage inactif"
       },
       "description": {
-        "nl": "dp 33 : defrost_state - Defrosting"
+        "en": "dp 33: defrost_state - Heat pump defrost cycle active status",
+        "nl": "dp 33: defrost_state - Warmtepomp ontdooicyclus actieve status",
+        "de": "dp 33: defrost_state - Wärmepumpen-Abtauzyklus Aktivstatus",
+        "fr": "dp 33: defrost_state - État actif du cycle de dégivrage de la pompe à chaleur"
       }
     },
     "adlar_sterilization": {
@@ -21465,7 +21613,9 @@
       "type": "string",
       "title": {
         "en": "Heating Curve Formula",
-        "nl": "Verwarmingscurve Formule"
+        "nl": "Verwarmingscurve Formule",
+        "de": "Heizkurven-Formel",
+        "fr": "Formule de la courbe de chauffe"
       },
       "getable": true,
       "setable": false,
@@ -21476,7 +21626,9 @@
       "type": "number",
       "title": {
         "en": "Heating Curve Intercept",
-        "nl": "Verwarmingscurve Intercept"
+        "nl": "Verwarmingscurve Intercept",
+        "de": "Heizkurven-Schnittpunkt",
+        "fr": "Ordonnée à l'origine de la courbe de chauffe"
       },
       "getable": true,
       "setable": false,
@@ -21488,7 +21640,9 @@
       "type": "number",
       "title": {
         "en": "Reference Outdoor Temperature",
-        "nl": "Referentie Buitentemperatuur"
+        "nl": "Referentie Buitentemperatuur",
+        "de": "Referenz-Außentemperatur",
+        "fr": "Température extérieure de référence"
       },
       "getable": true,
       "setable": false,
@@ -21500,7 +21654,9 @@
       "type": "number",
       "title": {
         "en": "Reference Temperature",
-        "nl": "Referentie Temperatuur"
+        "nl": "Referentie Temperatuur",
+        "de": "Referenz-Vorlauftemperatur",
+        "fr": "Température de consigne de référence"
       },
       "getable": true,
       "setable": false,
@@ -21512,7 +21668,9 @@
       "type": "number",
       "title": {
         "en": "Heating Curve Slope",
-        "nl": "Verwarmingscurve Helling"
+        "nl": "Verwarmingscurve Helling",
+        "de": "Heizkurven-Neigung",
+        "fr": "Pente de la courbe de chauffe"
       },
       "getable": true,
       "setable": false,
