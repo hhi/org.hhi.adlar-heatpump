@@ -1131,7 +1131,7 @@ function compactDateStamp(date) {
 }
 
 function md(value) {
-  return String(value == null ? '' : value).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+  return String(value == null ? '' : value).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 }
 
 function updateBits(addr, rawValue) {
