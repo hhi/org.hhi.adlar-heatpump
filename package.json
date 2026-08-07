@@ -23,5 +23,10 @@
     "ajv": "^8.17.1",
     "jsmodbus": "^4.0.10",
     "tuyapi": "github:codetheweb/tuyapi"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
+    }
   }
 }
