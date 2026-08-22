@@ -11,6 +11,9 @@ export class DeviceConstants {
   /** Notification throttling - prevent spam notifications for 30 minutes */
   static readonly NOTIFICATION_THROTTLE_MS = 30 * 60 * 1000; // 30 minutes
 
+  /** Notify the user only after an outage has remained unresolved for this duration */
+  static readonly OUTAGE_NOTIFICATION_DELAY_MS = 15 * 60 * 1000; // 15 minutes
+
   /** Tuya device reconnection attempt interval */
   static readonly RECONNECTION_INTERVAL_MS = 20 * 1000; // 20 seconds
 

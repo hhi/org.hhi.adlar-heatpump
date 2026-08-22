@@ -35,6 +35,50 @@ export interface ConnectionStatus {
   connectionAttempts: number;
 }
 
+type TelemetryResponsePath = 'data' | 'dp_refresh' | 'none';
+type TelemetryDetector = 'layer0' | 'layer1' | 'layer2' | 'layer3' | 'layer4' | 'clean';
+
+interface TuyaTelemetryDay {
+  date: string;
+  dataEvents: number;
+  dpRefreshEvents: number;
+  layer1: Record<TelemetryResponsePath | 'request_failed', number>;
+  layer2: Record<TelemetryResponsePath | 'request_failed', number>;
+  detectors: Record<TelemetryDetector, number>;
+  disconnectsZombie: number;
+  reconnectAttempts: number;
+  instancesCreated: number;
+  instancesReusedOnReconnect: number;
+  recoveryCount: number;
+  totalRecoveryMs: number;
+}
+
+interface TuyaConnectionTelemetry {
+  version: 1;
+  days: TuyaTelemetryDay[];
+}
+
+const createTelemetryDay = (date: string): TuyaTelemetryDay => ({
+  date,
+  dataEvents: 0,
+  dpRefreshEvents: 0,
+  layer1: {
+    data: 0, dp_refresh: 0, none: 0, request_failed: 0,
+  },
+  layer2: {
+    data: 0, dp_refresh: 0, none: 0, request_failed: 0,
+  },
+  detectors: {
+    layer0: 0, layer1: 0, layer2: 0, layer3: 0, layer4: 0, clean: 0,
+  },
+  disconnectsZombie: 0,
+  reconnectAttempts: 0,
+  instancesCreated: 0,
+  instancesReusedOnReconnect: 0,
+  recoveryCount: 0,
+  totalRecoveryMs: 0,
+});
+
 export class TuyaConnectionService {
   private device: Homey.Device;
   private logger: (message: string, ...args: unknown[]) => void;
@@ -44,6 +88,8 @@ export class TuyaConnectionService {
   // Daily disconnect counter tracking (vNext)
   private readonly DAILY_DISCONNECT_COUNT_KEY = 'daily_disconnect_count';
   private readonly DAILY_DISCONNECT_DATE_KEY = 'daily_disconnect_date';
+  private readonly CONNECTION_TELEMETRY_KEY = 'tuya_connection_telemetry';
+  private readonly CONNECTION_TELEMETRY_RETENTION_DAYS = 14;
 
   // Connection status tracking (v0.99.47, enhanced v0.99.61 with timestamps, v2.6.1 added 'initializing')
   private currentStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error' | 'initializing' = 'initializing';
@@ -72,10 +118,10 @@ export class TuyaConnectionService {
   private circuitBreakerCycles = 0;
   private readonly MAX_CIRCUIT_BREAKER_CYCLES = 3; // 3 cycles = 15 min total
 
-  // Time-based notification tracking (v1.0.5 - Proposal 5)
-  private notificationSent2Min = false;
-  private notificationSent10Min = false;
-  private notificationSent30Min = false;
+  // User-visible outage tracking: one notification after a sustained outage, then optional recovery.
+  private outageId: string | null = null;
+  private outageNotificationSent = false;
+  private outageNotificationInProgress = false;
 
   // Intervals
   private reconnectInterval: NodeJS.Timeout | null = null;
@@ -84,7 +130,8 @@ export class TuyaConnectionService {
 
   // Data event tracking for zombie detection (v1.0.16)
   private lastDataEventReceived = 0;
-  private waitingForDataEvent = false;
+  private lastDataEventSource: Exclude<TelemetryResponsePath, 'none'> | null = null;
+  private lastSuccessfulRequestAt = 0;
   private lastNotificationTime: number = 0;
   private lastNotificationKey: string | null = null;
 
@@ -103,6 +150,12 @@ export class TuyaConnectionService {
   // Data event context tracking (v2.0.3 - improved diagnostic logging)
   private dataEventContext: string = 'spontaneous';
   private contextResetTimer: NodeJS.Timeout | null = null;
+
+  // ADR-002 A1 / ADR-003 F1-1: persistent, passive connection instrumentation.
+  private connectionTelemetry: TuyaConnectionTelemetry = { version: 1, days: [] };
+  private telemetryPersistTimer: NodeJS.Timeout | null = null;
+  private telemetryIncidentStartedAt = 0;
+  private telemetryIncidentDetector: TelemetryDetector | null = null;
 
   // Zombie recovery escalation counter (ADR-026)
   private zombieRecoveryAttempts = 0; // Escalating zombie recovery counter (ADR-026)
@@ -184,6 +237,8 @@ export class TuyaConnectionService {
 
       // Initialize daily disconnect counter from store (vNext)
       await this.initializeDailyDisconnectCounter();
+      await this.initializeConnectionTelemetry();
+      await this.publishTelemetryCapabilities();
 
       // Create Tuya device instance
       this.tuya = new TuyAPI({
@@ -191,6 +246,9 @@ export class TuyaConnectionService {
         key: config.key,
         ip: config.ip,
         version: config.version || '3.3',
+      });
+      this.recordConnectionTelemetry((day) => {
+        day.instancesCreated += 1;
       });
 
       this.setupTuyaEventHandlers();
@@ -249,22 +307,8 @@ export class TuyaConnectionService {
       this.stopPeriodicDpsRefresh();
 
       // Step 2: Disconnect and cleanup old instance
-      if (this.tuya) {
-        this.logger('TuyaConnectionService: Cleaning up old Tuya instance');
-        this.tuya.removeAllListeners();
-
-        if (this.isConnected) {
-          try {
-            await this.tuya.disconnect();
-          } catch (error) {
-            this.logger('TuyaConnectionService: Error disconnecting old instance:', error);
-          }
-        }
-
-        this.tuya = null;
-        this.isConnected = false;
-        await this.updateStatusTimestamp('disconnected');
-      }
+      await this.destroyTuyaInstance();
+      await this.updateStatusTimestamp('disconnected');
 
       // Step 3: Reset error recovery state for fresh start
       this.resetErrorRecoveryState();
@@ -279,6 +323,9 @@ export class TuyaConnectionService {
         key: config.key,
         ip: config.ip,
         version: config.version || '3.3',
+      });
+      this.recordConnectionTelemetry((day) => {
+        day.instancesCreated += 1;
       });
 
       // Step 5: Reattach event handlers
@@ -299,6 +346,8 @@ export class TuyaConnectionService {
 
       // Step 10: Restart periodic DPS refresh (v1.0.3)
       this.startPeriodicDpsRefresh();
+
+      await this.notifyRecoveryAndCompleteOutage();
 
       this.logger('TuyaConnectionService: Reinitialization completed successfully');
       this.logger(`TuyaConnectionService: Now using device ${config.id} at ${config.ip} (Protocol: ${config.version || '3.3'})`);
@@ -340,10 +389,21 @@ export class TuyaConnectionService {
         ip: this.deviceConfig.ip,
         version: this.deviceConfig.version || '3.3',
       });
+      this.recordConnectionTelemetry((day) => {
+        day.instancesCreated += 1;
+      });
 
       // Reattach event handlers to new instance
       this.setupTuyaEventHandlers();
       this.logger('TuyaConnectionService: ✅ TuyAPI instance recreated, event handlers attached');
+    } else if (this.hasEverConnected) {
+      // F0-4 invariant: every disconnect releases the instance, so a reconnect should always
+      // find `this.tuya === null`. Counted so the assumption stays checkable in the field
+      // instead of merely assumed. A non-zero value means a teardown path was missed.
+      this.recordConnectionTelemetry((day) => {
+        day.instancesReusedOnReconnect += 1;
+      });
+      this.logger('TuyaConnectionService: ⚠️ Reusing existing TuyAPI instance on reconnect');
     }
 
     this.connectionAttempts++;
@@ -458,23 +518,49 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Release the current TuyAPI instance. A TuyAPI instance is never reused after a disconnect:
+   * its internal ping timeout is not reset by the library when the socket closes.
+   */
+  private async destroyTuyaInstance(): Promise<void> {
+    const { tuya } = this;
+    const socketErrorHandler = this.deepSocketErrorHandler;
+    this.tuya = null;
+    this.isConnected = false;
+    this.stopNativeHeartbeatMonitoring();
+    this.deepSocketErrorHandler = null;
+
+    if (!tuya) {
+      return;
+    }
+
+    try {
+      // The deep handler sits on the raw net.Socket, which removeAllListeners() on the
+      // TuyAPI emitter does not touch (keeps the v2.9.22 fix intact).
+      if (socketErrorHandler) {
+        try {
+          // @ts-expect-error - Accessing TuyAPI internal socket for cleanup
+          const tuyaSocket = tuya.client;
+          if (tuyaSocket) {
+            tuyaSocket.removeListener('error', socketErrorHandler);
+          }
+        } catch (error) {
+          this.logger('TuyaConnectionService: Error removing deep socket handler:', error);
+        }
+      }
+
+      tuya.removeAllListeners();
+      await tuya.disconnect();
+      this.logger('TuyaConnectionService: TuyAPI instance destroyed');
+    } catch (error) {
+      this.logger('TuyaConnectionService: Error destroying TuyAPI instance:', error);
+    }
+  }
+
+  /**
    * Disconnect from Tuya and cleanup event handlers.
    */
   async disconnect(): Promise<void> {
-    if (this.tuya && this.isConnected) {
-      try {
-        // Stop Layer 0 monitoring before disconnecting
-        this.stopNativeHeartbeatMonitoring();
-
-        this.tuya.removeAllListeners();
-        await this.tuya.disconnect();
-        this.isConnected = false;
-        this.tuya = null; // CRITICAL FIX (v1.0.36): Clear stale TuyAPI instance to allow fresh reconnection
-        this.logger('TuyaConnectionService: Disconnected from Tuya device');
-      } catch (error) {
-        this.logger('TuyaConnectionService: Error during disconnect:', error);
-      }
-    }
+    await this.destroyTuyaInstance();
   }
 
   /**
@@ -577,6 +663,7 @@ export class TuyaConnectionService {
     // Step 5: Resume normal reconnection monitoring, heartbeat, and DPS refresh
     // ONLY if connection was successful
     if (connectSuccess) {
+      await this.notifyRecoveryAndCompleteOutage();
       this.startReconnectInterval();
       this.startHeartbeat();
       this.startPeriodicDpsRefresh();
@@ -846,6 +933,114 @@ export class TuyaConnectionService {
     return `${year}-${month}-${day}`;
   }
 
+  private async initializeConnectionTelemetry(): Promise<void> {
+    try {
+      const stored = await this.device.getStoreValue(this.CONNECTION_TELEMETRY_KEY);
+      if (typeof stored === 'object' && stored !== null
+        && Array.isArray((stored as { days?: unknown }).days)) {
+        const days = (stored as { days: unknown[] }).days
+          .filter((day): day is TuyaTelemetryDay => typeof day === 'object' && day !== null
+            && typeof (day as { date?: unknown }).date === 'string')
+          .slice(-this.CONNECTION_TELEMETRY_RETENTION_DAYS);
+        this.connectionTelemetry = { version: 1, days };
+      }
+      this.getTelemetryDay();
+    } catch (error) {
+      this.logger('TuyaConnectionService: Failed to load connection telemetry:', error);
+      this.connectionTelemetry = { version: 1, days: [] };
+      this.getTelemetryDay();
+    }
+  }
+
+  private getTelemetryDay(): TuyaTelemetryDay {
+    const today = this.getTodayKeyInHomeyTimezone();
+    let day = this.connectionTelemetry.days.find((entry) => entry.date === today);
+    if (!day) {
+      day = createTelemetryDay(today);
+      this.connectionTelemetry.days.push(day);
+      this.connectionTelemetry.days = this.connectionTelemetry.days
+        .slice(-this.CONNECTION_TELEMETRY_RETENTION_DAYS);
+    }
+    return day;
+  }
+
+  private recordConnectionTelemetry(record: (day: TuyaTelemetryDay) => void): void {
+    record(this.getTelemetryDay());
+    this.scheduleConnectionTelemetryPersist();
+  }
+
+  /**
+   * Persist immediately instead of waiting for the 60s debounce. Used for the rare, important
+   * events (a detection, a completed recovery) so an app restart cannot lose them; the frequent
+   * per-event counters keep using the debounce.
+   */
+  private flushConnectionTelemetry(): void {
+    if (this.telemetryPersistTimer) {
+      this.device.homey.clearTimeout(this.telemetryPersistTimer);
+      this.telemetryPersistTimer = null;
+    }
+    this.persistConnectionTelemetry().catch((error) => {
+      this.logger('TuyaConnectionService: Failed to flush connection telemetry:', error);
+    });
+    this.publishTelemetryCapabilities().catch((error) => {
+      this.logger('TuyaConnectionService: Failed to publish telemetry capabilities:', error);
+    });
+  }
+
+  /**
+   * Mirror the telemetry into optional capabilities so it is readable without developer tools.
+   * Both capabilities are gated by the `show_disconnect_diagnostic` device setting; when the
+   * setting is off they simply do not exist and this is a no-op.
+   */
+  private async publishTelemetryCapabilities(): Promise<void> {
+    const day = this.getTelemetryDay();
+
+    if (this.device.hasCapability('adlar_zombie_detections_daily')) {
+      const zombieDetections = day.detectors.layer1 + day.detectors.layer2;
+      try {
+        await this.device.setCapabilityValue('adlar_zombie_detections_daily', zombieDetections);
+      } catch (error) {
+        this.logger('TuyaConnectionService: Failed to update adlar_zombie_detections_daily:', error);
+      }
+    }
+
+    if (this.device.hasCapability('adlar_connection_diagnostics')) {
+      try {
+        await this.device.setCapabilityValue(
+          'adlar_connection_diagnostics',
+          JSON.stringify(this.connectionTelemetry),
+        );
+      } catch (error) {
+        this.logger('TuyaConnectionService: Failed to update adlar_connection_diagnostics:', error);
+      }
+    }
+  }
+
+  private scheduleConnectionTelemetryPersist(): void {
+    if (this.telemetryPersistTimer) return;
+    this.telemetryPersistTimer = this.device.homey.setTimeout(() => {
+      this.telemetryPersistTimer = null;
+      this.persistConnectionTelemetry().catch((error) => {
+        this.logger('TuyaConnectionService: Failed to persist connection telemetry:', error);
+      });
+    }, 60000);
+  }
+
+  private async persistConnectionTelemetry(): Promise<void> {
+    await this.device.setStoreValue(this.CONNECTION_TELEMETRY_KEY, this.connectionTelemetry);
+  }
+
+  private recordDetector(detector: TelemetryDetector, zombie = false): void {
+    if (this.telemetryIncidentDetector) return;
+    this.telemetryIncidentDetector = detector;
+    this.telemetryIncidentStartedAt = Date.now();
+    this.recordConnectionTelemetry((day) => {
+      day.detectors[detector] += 1;
+      if (zombie) day.disconnectsZombie += 1;
+    });
+    this.flushConnectionTelemetry();
+  }
+
   private async initializeDailyDisconnectCounter(): Promise<void> {
     const todayKey = this.getTodayKeyInHomeyTimezone();
     const storedDate = await this.device.getStoreValue(this.DAILY_DISCONNECT_DATE_KEY);
@@ -1063,19 +1258,14 @@ export class TuyaConnectionService {
       this.logger(`⚠️ TuyaConnectionService: Socket error at ${timeStr}: ${errorMsg}`);
       this.lastDisconnectSource = `socket_error: ${errorMsg}`;
       this.lastDisconnectTime = Date.now();
+      this.recordDetector('clean');
 
       const categorizedError = this.handleTuyaError(error, 'TuyAPI socket error');
 
       // Mark device as disconnected for socket connection errors
       this.isConnected = false;
 
-      // Send specific notification about socket error
-      this.sendCriticalNotification(
-        'Socket Error Disconnect',
-        `Socket fout om ${timeStr}: ${errorMsg}. ${categorizedError.recoverable ? 'Automatisch herverbinden...' : 'Handmatige interventie mogelijk vereist.'}`,
-      ).catch((err) => {
-        this.logger('Failed to send socket error notification:', err);
-      });
+      this.logger(`TuyaConnectionService: Socket error handled by automatic recovery: ${timeStr}`);
 
       // Update recovery strategy based on error type
       if (!categorizedError.recoverable) {
@@ -1111,7 +1301,10 @@ export class TuyaConnectionService {
 
       // Track data event reception for zombie detection (v1.0.16)
       this.lastDataEventReceived = Date.now();
-      this.waitingForDataEvent = false;
+      this.lastDataEventSource = 'data';
+      this.recordConnectionTelemetry((day) => {
+        day.dataEvents += 1;
+      });
 
       // Reset zombie recovery counter on successful data reception (ADR-026)
       if (this.zombieRecoveryAttempts > 0) {
@@ -1134,6 +1327,17 @@ export class TuyaConnectionService {
 
       // Update last data event timestamp (v0.99.98 - stale connection detection)
       this.lastDataEventTime = Date.now();
+      this.lastDataEventReceived = Date.now();
+      this.lastDataEventSource = 'dp_refresh';
+      this.recordConnectionTelemetry((day) => {
+        day.dpRefreshEvents += 1;
+      });
+
+      // A partial DPS refresh is valid device traffic and proves the connection recovered.
+      if (this.zombieRecoveryAttempts > 0) {
+        this.logger(`TuyaConnectionService: DP-refresh received — resetting zombie recovery counter (was ${this.zombieRecoveryAttempts})`);
+        this.zombieRecoveryAttempts = 0;
+      }
 
       // Forward to dp-refresh handler only if dps is valid (v0.99.63 - crash fix)
       if (this.onDpRefreshHandler && data.dps && typeof data.dps === 'object') {
@@ -1202,14 +1406,9 @@ export class TuyaConnectionService {
       this.logger(`🔴 TuyaConnectionService: Device disconnected at ${timeStr} (no data for ${Math.round(timeSinceLastData / 1000)}s)`);
       this.lastDisconnectSource = `tuya_disconnected_event (idle: ${Math.round(timeSinceLastData / 1000)}s)`;
       this.lastDisconnectTime = Date.now();
+      this.recordDetector('clean');
 
-      // Send specific notification about TuyAPI disconnect event
-      this.sendCriticalNotification(
-        'TuyAPI Disconnect Event',
-        `Device verbroken om ${timeStr}. Geen data ontvangen voor ${Math.round(timeSinceLastData / 1000)}s. Automatisch herverbinden...`,
-      ).catch((err) => {
-        this.logger('Failed to send disconnect notification:', err);
-      });
+      this.logger('TuyaConnectionService: TuyAPI disconnect handled by automatic recovery');
 
       this.isConnected = false;
       this.updateStatusTimestamp('disconnected').catch((err) => {
@@ -1317,6 +1516,7 @@ export class TuyaConnectionService {
         this.logger('╠═══════════════════════════════════════════════════╣');
         this.logger('║  🔄 Triggering reconnection attempt...');
         this.logger('╚═══════════════════════════════════════════════════╝');
+        this.recordDetector('layer0', true);
 
         // Mark as disconnected
         this.isConnected = false;
@@ -1569,6 +1769,7 @@ export class TuyaConnectionService {
       // LAYER 1: Try passive get() first (network-friendly)
       let timeoutHandle: NodeJS.Timeout | null = null;
       let layer1GetError: Error | null = null;
+      const preLayer1DataEventTime = this.lastDataEventReceived;
 
       // v2.0.3: Set context for improved logging
       this.setDataEventContext('heartbeat_probe');
@@ -1585,6 +1786,7 @@ export class TuyaConnectionService {
         ]);
 
         // Success with get() - device is responsive
+        this.lastSuccessfulRequestAt = Date.now();
         this.logger('TuyaConnectionService: ✅ LAYER 1 (get) successful - verifying data event reception...');
 
       } catch (getError) {
@@ -1602,7 +1804,17 @@ export class TuyaConnectionService {
       // Now check if Layer 1 succeeded in triggering data event
       const layer1DataEventReceived = await this.waitForDataEvent(
         DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+        preLayer1DataEventTime,
       );
+      this.recordConnectionTelemetry((day) => {
+        let outcome: TelemetryResponsePath | 'request_failed' = 'none';
+        if (layer1GetError) {
+          outcome = 'request_failed';
+        } else if (layer1DataEventReceived) {
+          outcome = this.lastDataEventSource ?? 'none';
+        }
+        day.layer1[outcome] += 1;
+      });
 
       if (layer1DataEventReceived) {
         // Layer 1 succeeded - data event confirmed
@@ -1617,6 +1829,7 @@ export class TuyaConnectionService {
 
       let layer2SetError: Error | null = null;
       const currentOnOff = this.device.getCapabilityValue('onoff') || false;
+      const preLayer2DataEventTime = this.lastDataEventReceived;
 
       try {
         // Attempt idempotent set() operation with timeout
@@ -1631,6 +1844,7 @@ export class TuyaConnectionService {
         ]);
 
         // Success with set() - device was sleeping but responded to command
+        this.lastSuccessfulRequestAt = Date.now();
         this.logger('TuyaConnectionService: ✅ LAYER 2 (set) successful - verifying data event reception...');
 
       } catch (setError) {
@@ -1648,7 +1862,17 @@ export class TuyaConnectionService {
       // Now check if Layer 2 succeeded in triggering data event
       const layer2DataEventReceived = await this.waitForDataEvent(
         DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+        preLayer2DataEventTime,
       );
+      this.recordConnectionTelemetry((day) => {
+        let outcome: TelemetryResponsePath | 'request_failed' = 'none';
+        if (layer2SetError) {
+          outcome = 'request_failed';
+        } else if (layer2DataEventReceived) {
+          outcome = this.lastDataEventSource ?? 'none';
+        }
+        day.layer2[outcome] += 1;
+      });
 
       if (layer2DataEventReceived) {
         // Layer 2 succeeded - data event confirmed after set()
@@ -1676,12 +1900,13 @@ export class TuyaConnectionService {
       const layer2Status = layer2SetError ? `failed: ${layer2SetError.message}` : 'no data event';
       this.lastDisconnectSource = `zombie_heartbeat (Layer1=${layer1Status}, Layer2=${layer2Status})`;
       this.lastDisconnectTime = Date.now();
+      // Only count this as a zombie when both probes reached the device at protocol level
+      // but produced no fresh telemetry. If either request timed out or rejected, the failure
+      // was detected by the request itself — that is a clean disconnect, not a silent socket.
+      const isZombie = !layer1GetError && !layer2SetError;
+      this.recordDetector(layer1GetError ? 'layer1' : 'layer2', isZombie);
 
-      // Send specific notification about zombie detection
-      await this.sendCriticalNotification(
-        'Zombie Verbinding Gedetecteerd',
-        `Heartbeat detecteerde geen data events. Layer1(get): ${layer1Status}, Layer2(set): ${layer2Status}. Automatisch herverbinden...`,
-      );
+      this.logger('TuyaConnectionService: Zombie detection handled by automatic recovery');
 
       // Escalating zombie recovery (ADR-026)
       this.zombieRecoveryAttempts += 1;
@@ -1703,11 +1928,7 @@ export class TuyaConnectionService {
       this.lastDisconnectSource = `heartbeat_exception (${errorMsg})`;
       this.lastDisconnectTime = Date.now();
 
-      // Send specific notification about heartbeat failure
-      await this.sendCriticalNotification(
-        'Heartbeat Timeout Disconnect',
-        `Heartbeat probe gefaald om ${timeStr}. Fout: ${errorMsg}. Automatisch herverbinden...`,
-      );
+      this.logger('TuyaConnectionService: Heartbeat failure handled by automatic recovery');
 
       // Mark as disconnected to trigger reconnection
       this.isConnected = false;
@@ -1733,23 +1954,21 @@ export class TuyaConnectionService {
    * @param timeoutMs - Maximum time to wait for data event
    * @returns Promise<boolean> - true if data event received, false if timeout
    */
-  private async waitForDataEvent(timeoutMs: number): Promise<boolean> {
+  private async waitForDataEvent(timeoutMs: number, previousDataEventTime: number): Promise<boolean> {
     const startTime = Date.now();
-    this.waitingForDataEvent = true;
 
     return new Promise((resolve) => {
       const checkInterval = this.device.homey.setInterval(() => {
-        // Check if data event was received
-        if (!this.waitingForDataEvent) {
-          clearInterval(checkInterval);
+        // Compare timestamps captured before the request so synchronous TuyAPI events count.
+        if (this.lastDataEventReceived > previousDataEventTime) {
+          this.device.homey.clearInterval(checkInterval);
           resolve(true);
           return;
         }
 
         // Check for timeout
         if (Date.now() - startTime >= timeoutMs) {
-          clearInterval(checkInterval);
-          this.waitingForDataEvent = false;
+          this.device.homey.clearInterval(checkInterval);
           resolve(false);
         }
       }, 100); // Check every 100ms
@@ -1778,7 +1997,8 @@ export class TuyaConnectionService {
     // Only start tracking if we've ever connected successfully before
     if (this.hasEverConnected && !this.isConnected && this.outageStartTime === 0) {
       this.outageStartTime = Date.now();
-      this.logger('📊 Outage tracking started');
+      this.outageId = `outage-${this.outageStartTime}`;
+      this.logger(`📊 Outage tracking started (${this.outageId})`);
     }
 
     // LAYER 2: Stale Connection Detection (v0.99.98)
@@ -1804,14 +2024,9 @@ export class TuyaConnectionService {
         // Store detailed disconnect source
         this.lastDisconnectSource = `stale_connection (idle: ${idleMinutes}min, threshold: ${DeviceConstants.STALE_CONNECTION_THRESHOLD_MS / 60000}min)`;
         this.lastDisconnectTime = Date.now();
+        this.recordDetector('layer3', true);
 
-        // Send specific notification about stale connection
-        this.sendCriticalNotification(
-          'Stale Connection Detected',
-          `Geen data ontvangen voor ${idleMinutes} minuten. Verbinding wordt als inactief beschouwd. Automatisch herverbinden...`,
-        ).catch((err) => {
-          this.logger('Failed to send stale connection notification:', err);
-        });
+        this.logger('TuyaConnectionService: Stale connection handled by automatic recovery');
 
         // Force disconnection to trigger reconnection
         this.isConnected = false;
@@ -1830,6 +2045,14 @@ export class TuyaConnectionService {
         const nextCheckIn = Math.round(DeviceConstants.RECONNECTION_INTERVAL_MS / 1000);
         this.logger(`TuyaConnectionService: Connection healthy (data received ${secondsSinceData}s ago), next health check in ${nextCheckIn}s`);
 
+        // Safety net: a connection that is demonstrably healthy has no open incident.
+        // Covers recoveries that never pass through attemptReconnectionWithRecovery().
+        if (this.outageStartTime > 0 || this.telemetryIncidentStartedAt > 0) {
+          this.notifyRecoveryAndCompleteOutage().catch((error) => {
+            this.logger('TuyaConnectionService: Failed to complete outage on healthy check:', error);
+          });
+        }
+
         // Schedule next health check at normal interval (don't apply backoff for healthy connections)
         this.reconnectInterval = this.device.homey.setTimeout(() => {
           this.scheduleNextReconnectionAttempt();
@@ -1838,39 +2061,24 @@ export class TuyaConnectionService {
       }
     }
 
-    // LAYER 3: Time-based notifications (v1.0.5 - Proposal 5)
+    // User-visible outage notification: one alert only after a sustained, unresolved outage.
     if (this.outageStartTime > 0) {
       const outageDuration = Date.now() - this.outageStartTime;
 
-      // 2-minute notification
-      if (outageDuration >= 2 * 60 * 1000 && !this.notificationSent2Min) {
-        this.sendCriticalNotification(
-          'Device Connection Lost',
-          'Heat pump has been offline for 2 minutes. Automatic recovery in progress.',
-        ).catch((err) => this.logger('Failed to send 2-min notification:', err));
-        this.notificationSent2Min = true;
-      }
-
-      // 10-minute notification + DIAGNOSTIC REPORT
-      if (outageDuration >= 10 * 60 * 1000 && !this.notificationSent10Min) {
-        this.logger('🔍 10-MINUTE OUTAGE - Generating diagnostic report...');
-        this.logDiagnosticReport();
-        this.sendCriticalNotification(
+      if (outageDuration >= DeviceConstants.OUTAGE_NOTIFICATION_DELAY_MS
+        && !this.outageNotificationSent
+        && !this.outageNotificationInProgress) {
+        this.outageNotificationInProgress = true;
+        this.sendUserNotification(
           'Extended Device Outage',
-          'Heat pump has been offline for 10 minutes. Please check network connectivity.',
-        ).catch((err) => this.logger('Failed to send 10-min notification:', err));
-        this.notificationSent10Min = true;
-      }
-
-      // 30-minute notification + DIAGNOSTIC REPORT
-      if (outageDuration >= 30 * 60 * 1000 && !this.notificationSent30Min) {
-        this.logger('🔍 30-MINUTE OUTAGE - Generating diagnostic report...');
-        this.logDiagnosticReport();
-        this.sendCriticalNotification(
-          'Critical Outage',
-          'Heat pump has been offline for 30 minutes. Manual intervention may be required.',
-        ).catch((err) => this.logger('Failed to send 30-min notification:', err));
-        this.notificationSent30Min = true;
+          'Heat pump has been offline for 15 minutes. Automatic recovery is still in progress.',
+        ).then((sent) => {
+          this.outageNotificationSent = sent;
+        }).catch((error) => {
+          this.logger('TuyaConnectionService: Failed to send outage notification:', error);
+        }).finally(() => {
+          this.outageNotificationInProgress = false;
+        });
       }
 
       // 1-hour diagnostic (logging only, no notification)
@@ -1998,20 +2206,21 @@ export class TuyaConnectionService {
     if (this.isConnected) {
       this.logger('TuyaConnectionService: Already connected, skipping reconnection attempt');
       this.resetErrorRecoveryState();
+      // The connection came back on its own (e.g. TuyAPI reconnected during a heartbeat
+      // wake-up probe, which calls connect() internally). Close the incident here too —
+      // otherwise telemetryIncidentDetector stays set and recordDetector() silently drops
+      // every later detection, and outageStartTime/outageNotificationSent keep suppressing
+      // the next outage notification.
+      await this.notifyRecoveryAndCompleteOutage();
       return;
     }
 
-    // FIX 1: Force disconnect to reset TuyAPI internal state before reconnect attempt
-    // This prevents "Already connected" errors when app state and TuyAPI state are out of sync
-    if (this.tuya) {
-      try {
-        await this.tuya.disconnect();
-        this.logger('TuyaConnectionService: Forced disconnect before reconnect attempt (state sync)');
-      } catch (err) {
-        // Expected error if socket was already closed - safe to ignore
-        this.logger('TuyaConnectionService: Disconnect failed (socket already closed):', err);
-      }
-    }
+    // Always discard the old instance to reset TuyAPI's internal ping timeout state.
+    this.recordConnectionTelemetry((day) => {
+      day.reconnectAttempts += 1;
+    });
+    await this.destroyTuyaInstance();
+    this.logger('TuyaConnectionService: Previous TuyAPI instance discarded before reconnect');
 
     // FIX 1.5: Stabilization delay to allow socket cleanup (v1.0.18)
     // CRITICAL: Prevents reusing corrupted socket state immediately after disconnect
@@ -2026,8 +2235,7 @@ export class TuyaConnectionService {
     try {
       await this.connectTuya();
 
-      // Success! Reset all error recovery state
-      const wasExtendedOutage = this.consecutiveFailures >= DeviceConstants.MAX_CONSECUTIVE_FAILURES;
+      // Success! Reset recovery state while retaining the outage until its recovery is reported.
       this.resetErrorRecoveryState();
       this.logger('TuyaConnectionService: Reconnection successful, error recovery state reset');
 
@@ -2039,13 +2247,7 @@ export class TuyaConnectionService {
         this.logger('TuyaConnectionService: Failed to set device available:', err);
       }
 
-      // Send recovery notification only if device was unavailable (extended outage)
-      if (wasExtendedOutage) {
-        await this.sendCriticalNotification(
-          'Verbinding Hersteld',
-          'Warmtepomp is weer online na verbindingsprobleem.',
-        );
-      }
+      await this.notifyRecoveryAndCompleteOutage();
 
       // CRITICAL FIX (v1.2.1): Restart health check loop after successful reconnection
       // Without this, stale connection detection and periodic health monitoring stops
@@ -2119,8 +2321,8 @@ export class TuyaConnectionService {
       }
     }
 
-    // Note: Time-based notifications (2min, 10min, 30min) are now sent from scheduleNextReconnectionAttempt()
-    // based on outage duration instead of failure count (v1.0.5 - Proposal 5)
+    // Time-based user notifications are handled in scheduleNextReconnectionAttempt():
+    // one alert after a 15-minute unresolved outage, plus recovery only if that alert was sent.
   }
 
   /**
@@ -2132,21 +2334,40 @@ export class TuyaConnectionService {
     this.circuitBreakerOpen = false;
     this.circuitBreakerOpenTime = 0;
 
-    // Reset outage tracking (v1.0.5)
-    this.outageStartTime = 0;
-    this.totalOutageDuration = 0;
     this.circuitBreakerCycles = 0;
-
-    // Reset notification flags (v1.0.5)
-    this.notificationSent2Min = false;
-    this.notificationSent10Min = false;
-    this.notificationSent30Min = false;
 
     // Reset next reconnection time (v1.0.6)
     this.nextReconnectionTime = 0;
 
     // Reset passive reconnection attempts (v1.0.12)
     this.passiveReconnectionAttempts = 0;
+  }
+
+  /** Finish a user-visible outage only after a successful reconnection. */
+  private async notifyRecoveryAndCompleteOutage(): Promise<void> {
+    if (this.outageNotificationSent) {
+      await this.sendUserNotification(
+        'Verbinding Hersteld',
+        'Warmtepomp is weer online na een langdurige verbindingsstoring.',
+      );
+    }
+
+    if (this.telemetryIncidentStartedAt > 0) {
+      const recoveryDuration = Date.now() - this.telemetryIncidentStartedAt;
+      this.recordConnectionTelemetry((day) => {
+        day.recoveryCount += 1;
+        day.totalRecoveryMs += recoveryDuration;
+      });
+      this.telemetryIncidentStartedAt = 0;
+      this.telemetryIncidentDetector = null;
+      this.flushConnectionTelemetry();
+    }
+
+    this.outageStartTime = 0;
+    this.totalOutageDuration = 0;
+    this.outageId = null;
+    this.outageNotificationSent = false;
+    this.outageNotificationInProgress = false;
   }
 
   /**
@@ -2174,6 +2395,20 @@ export class TuyaConnectionService {
    */
   private handleTuyaError(error: Error, context: string): CategorizedError {
     return TuyaErrorCategorizer.categorize(error, context);
+  }
+
+  /** Send a user-visible outage or recovery notification without cross-incident throttling. */
+  private async sendUserNotification(title: string, message: string): Promise<boolean> {
+    try {
+      await this.device.homey.notifications.createNotification({
+        excerpt: `${this.device.getName()}: ${title}`,
+      });
+      this.logger(`User notification sent: ${title} — ${message}`);
+      return true;
+    } catch (error) {
+      this.logger(`Failed to send user notification (${title}):`, error);
+      return false;
+    }
   }
 
   /**
@@ -2214,6 +2449,10 @@ export class TuyaConnectionService {
       hasReconnectInterval: !!this.reconnectInterval,
       tuyaInstanceExists: !!this.tuya,
       queryInProgress: this.queryInProgress, // v1.3.11
+      lastSuccessfulRequestAt: this.lastSuccessfulRequestAt,
+      outageId: this.outageId,
+      outageNotificationSent: this.outageNotificationSent,
+      connectionTelemetry: this.connectionTelemetry,
     };
   }
 
@@ -2294,35 +2533,17 @@ export class TuyaConnectionService {
       this.contextResetTimer = null;
     }
 
-    if (this.tuya) {
-      // Remove deep socket error handler BEFORE removeAllListeners (v2.9.22)
-      try {
-        // @ts-expect-error - Accessing TuyAPI internal socket for cleanup
-        const tuyaSocket = this.tuya.client; // FIX v2.9.22: was this.tuya.device?.client (undefined)
-        if (tuyaSocket && this.deepSocketErrorHandler) {
-          tuyaSocket.removeListener('error', this.deepSocketErrorHandler);
-          this.logger('TuyaConnectionService: Deep socket error handler removed');
-        }
-        this.deepSocketErrorHandler = null;
-      } catch (error) {
-        this.logger('TuyaConnectionService: Error removing deep socket handler:', error);
-      }
-
-      // Remove all TuyAPI event listeners
-      this.tuya.removeAllListeners();
-
-      // Disconnect if connected
-      if (this.isConnected) {
-        try {
-          this.tuya.disconnect();
-        } catch (error) {
-          this.logger('TuyaConnectionService: Error during cleanup disconnect:', error);
-        }
-      }
+    if (this.telemetryPersistTimer) {
+      this.device.homey.clearTimeout(this.telemetryPersistTimer);
+      this.telemetryPersistTimer = null;
     }
+    this.persistConnectionTelemetry().catch((error) => {
+      this.logger('TuyaConnectionService: Failed to persist telemetry during teardown:', error);
+    });
 
-    this.tuya = null;
-    this.isConnected = false;
+    this.destroyTuyaInstance().catch((error) => {
+      this.logger('TuyaConnectionService: Error during teardown:', error);
+    });
 
     // Reset in-progress flags (v1.0.31, v1.3.11)
     this.forceReconnectInProgress = false;
