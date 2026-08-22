@@ -428,11 +428,44 @@ export class BuildingModelService {
 
     if (options) {
       try {
-        await this.device.setCapabilityOptions(capability, options);
+        await this.setCapabilityOptionsIfChanged(capability, options);
       } catch (error) {
         this.logger(`BuildingModelService: Failed to set ${capability} options:`, error);
       }
     }
+  }
+
+  /**
+   * Write capability options only when they actually differ from the current ones.
+   *
+   * `setCapabilityOptions()` rewrites the device manifest, which makes Homey broadcast a
+   * device-update to every client and causes devices to flicker in Flow card device pickers.
+   * The dynamic titles written here change only every few learning cycles, so most writes
+   * were redundant.
+   *
+   * The patch is merged over the existing options so keys owned by other writers (e.g.
+   * `insights`, managed by the device) are preserved instead of being wiped.
+   *
+   * @param capability - Capability id to update
+   * @param patch - Option keys to apply
+   */
+  private async setCapabilityOptionsIfChanged(
+    capability: string,
+    patch: Record<string, unknown>,
+  ): Promise<void> {
+    let current: Record<string, unknown> = {};
+    try {
+      current = (this.device.getCapabilityOptions(capability) ?? {}) as Record<string, unknown>;
+    } catch {
+      // No options set yet - treat as empty and let setCapabilityOptions() surface real errors.
+    }
+
+    const hasChange = Object.entries(patch).some(([key, value]) => current[key] !== value);
+    if (!hasChange) {
+      return;
+    }
+
+    await this.device.setCapabilityOptions(capability, { ...current, ...patch });
   }
 
   /**
