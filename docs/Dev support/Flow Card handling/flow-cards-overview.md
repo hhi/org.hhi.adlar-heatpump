@@ -613,7 +613,7 @@ AND set_target_temperature to [[current_temperature - 1]]°C
 
 ## Dynamic Flow Card Management (v0.70.0+ / Service Architecture v0.99.23+)
 
-The app uses the **FlowCardManagerService** (`lib/services/flow-card-manager-service.ts`) to intelligently manage flow card registration based on device capabilities and sensor health. This service is managed by the ServiceCoordinator and provides comprehensive user control over automation complexity.
+The app uses the **FlowCardManagerService** (`lib/tuya/services/flow-card-manager-service.ts`) to intelligently manage flow card registration based on device capabilities and sensor health. This service is managed by the ServiceCoordinator and provides comprehensive user control over automation complexity.
 
 #### Service Architecture Integration
 
@@ -822,7 +822,7 @@ All device controls now work reliably from both Homey UI and flow cards with pro
 - **Implemented proper device communication** using `triggerCapabilityListener()` to ensure commands reach the physical device via DPS
 
 ### Technical Implementation
-- **Updated `registerSimpleActions` function** in `/lib/flow-helpers.ts` to use proper device communication methods
+- **Updated `registerSimpleActions` function** in `/lib/tuya/flow-helpers.ts` to use proper device communication methods
 - **Added fallback compatibility** for devices that may not support the new method signature
 - **Enhanced TypeScript typing** for improved code reliability and maintainability
 

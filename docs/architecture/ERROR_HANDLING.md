@@ -9,7 +9,7 @@ Comprehensive error categorization and recovery system via `TuyaErrorCategorizer
 
 ## Error Categorization System
 
-**Location**: `lib/error-types.ts`
+**Location**: `lib/shared/error-types.ts`
 
 ### 9 Error Categories
 

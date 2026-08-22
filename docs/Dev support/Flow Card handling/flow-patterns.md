@@ -2,7 +2,7 @@
 
 The pattern-based flow card management system simplifies and standardizes flow card registration in the Homey heat pump app. This system was refined in v0.75.0 to eliminate invalid flow card references, enhanced in v0.90.3 with robust error handling, expanded in v0.92.4+ with user-controlled dynamic registration, integrated with insights management in v0.92.6+, and transitioned to **service-oriented architecture in v0.99.23+**.
 
-**Service Architecture (v0.99.23+)**: Flow card management is now handled by the **FlowCardManagerService** (`lib/services/flow-card-manager-service.ts`), which uses the flow helpers pattern system while integrating with **CapabilityHealthService** for health-based registration and **SettingsManagerService** for user preference management.
+**Service Architecture (v0.99.23+)**: Flow card management is now handled by the **FlowCardManagerService** (`lib/tuya/services/flow-card-manager-service.ts`), which uses the flow helpers pattern system while integrating with **CapabilityHealthService** for health-based registration and **SettingsManagerService** for user preference management.
 
 ## Core Purpose
 

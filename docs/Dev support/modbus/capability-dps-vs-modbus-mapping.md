@@ -15,7 +15,7 @@ The Modbus columns show the current equivalent capability and register mapping.
 ## Source Files
 
 - DPS mapping: `../org.hhi.adlar-heatpump/lib/definitions/adlar-mapping.ts`
-- Modbus registers: `lib/modbus/adlar-modbus-registers.ts`
+- Modbus registers: `lib/modbus/protocol/adlar-modbus-registers.ts`
 - Modbus read wiring: `drivers/intelligent-heatpump-modbus/device.ts`
 - Modbus write wiring: `drivers/intelligent-heatpump-modbus/device.ts`
 

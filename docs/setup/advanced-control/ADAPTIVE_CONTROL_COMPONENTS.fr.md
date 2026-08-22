@@ -110,7 +110,7 @@ Le **contrôleur PI (Proportionnel-Intégral)** combine :
 
 ## Composant 5 : Stratégie Coast (Mode de Refroidissement Passif)
 
-> Nouveau dans v2.8.0 — [ADR-024](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+> Nouveau dans v2.8.0 — [ADR-024](../../../plans/completed/ADR-024-adaptive-cooldown-mode.md)
 
 ### Que fait-il ?
 

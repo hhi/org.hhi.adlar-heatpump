@@ -4,7 +4,7 @@ This document provides a comprehensive overview of the Adlar Heat Pump Homey app
 
 ## Service-Oriented Architecture (v0.99.23+)
 
-### ServiceCoordinator Pattern (`lib/services/service-coordinator.ts`)
+### ServiceCoordinator Pattern (`lib/tuya/services/service-coordinator.ts`)
 
 The app has been refactored from a monolithic device class to a service-oriented architecture using the ServiceCoordinator pattern. This eliminates code duplication and provides clear separation of concerns.
 
@@ -111,7 +111,7 @@ private async sendTuyaCommand(dp: number, value: string | number | boolean): Pro
 
 ## Constants Management System
 
-### DeviceConstants Class (`lib/constants.ts`)
+### DeviceConstants Class (`lib/tuya/constants.ts`)
 
 The `DeviceConstants` class centralizes all configuration values, magic numbers, and thresholds to improve code maintainability and prevent inconsistencies.
 
@@ -162,7 +162,7 @@ The `DeviceConstants` class centralizes all configuration values, magic numbers,
 ### Usage Pattern
 
 ```typescript
-import { DeviceConstants } from '../../lib/constants';
+import { DeviceConstants } from '../../lib/tuya/constants';
 
 // Instead of magic numbers:
 setTimeout(() => this.reconnect(), 20000); // ❌ Magic number
@@ -198,7 +198,7 @@ class ServiceCoordinator {
 }
 ```
 
-### COPCalculator Service (`lib/services/cop-calculator.ts`)
+### COPCalculator Service (`lib/shared/services/cop-calculator.ts`)
 
 **Purpose**: Real-time efficiency calculations with 8 different methods and automatic quality selection.
 
@@ -222,7 +222,7 @@ class ServiceCoordinator {
 4. Result published to `adlar_cop` capability with confidence indicators
 5. Events emitted to RollingCOPCalculator and SCOPCalculator for aggregation
 
-### RollingCOPCalculator Service (`lib/services/rolling-cop-calculator.ts`)
+### RollingCOPCalculator Service (`lib/shared/services/rolling-cop-calculator.ts`)
 
 **Purpose**: Time-series analysis with daily (24h), weekly (7d), and monthly (30d) rolling averages.
 
@@ -250,7 +250,7 @@ class ServiceCoordinator {
 - `adlar_cop_monthly`: 30-day rolling average
 - `adlar_cop_trend`: Text description with 7 trend classifications
 
-### SCOPCalculator Service (`lib/services/scop-calculator.ts`)
+### SCOPCalculator Service (`lib/tuya/services/scop-calculator.ts`)
 
 **Purpose**: Seasonal Coefficient of Performance per European standard EN 14825.
 
@@ -318,7 +318,7 @@ ServiceCoordinator
 
 ## COP (Coefficient of Performance) System Architecture (v0.96.3+)
 
-### COP Calculation Engine (`lib/services/cop-calculator.ts`)
+### COP Calculation Engine (`lib/shared/services/cop-calculator.ts`)
 
 The COP calculation system provides intelligent heat pump efficiency monitoring with multiple calculation methods and automatic data source selection.
 
@@ -491,7 +491,7 @@ static readonly POWER_ESTIMATION = {
 
 ## Error Handling Architecture (Enhanced v0.99.46)
 
-### TuyaErrorCategorizer (`lib/error-types.ts`)
+### TuyaErrorCategorizer (`lib/shared/error-types.ts`)
 
 The error handling system provides structured error categorization, recovery guidance, and improved debugging capabilities.
 
@@ -551,7 +551,7 @@ The production-ready architecture implements three layers of error protection to
 
 **Async setTimeout/setInterval Protection**:
 ```typescript
-// TuyaConnectionService reconnection (lib/services/tuya-connection-service.ts:357)
+// TuyaConnectionService reconnection (lib/tuya/services/tuya-connection-service.ts:357)
 this.reconnectInterval = this.device.homey.setTimeout(() => {
   this.attemptReconnectionWithRecovery().catch((error) => {
     // Prevent unhandled rejection crash
@@ -579,7 +579,7 @@ this.reconnectInterval = this.device.homey.setTimeout(() => {
 
 #### Layer 2: Device Status Synchronization
 
-**Automatic Unavailable Status** (lib/services/tuya-connection-service.ts:440-462):
+**Automatic Unavailable Status** (lib/tuya/services/tuya-connection-service.ts:440-462):
 ```typescript
 // Mark device unavailable on non-recoverable errors
 if (!error.recoverable && this.consecutiveFailures <= 3) {
@@ -592,7 +592,7 @@ if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
 }
 ```
 
-**Automatic Available Status** (lib/services/tuya-connection-service.ts:393-399):
+**Automatic Available Status** (lib/tuya/services/tuya-connection-service.ts:393-399):
 ```typescript
 // Restore availability on successful reconnection
 try {
@@ -655,7 +655,7 @@ Layer 3: Global Process Handler
 ### Error Handling Pattern
 
 ```typescript
-import { TuyaErrorCategorizer } from '../../lib/error-types';
+import { TuyaErrorCategorizer } from '../../lib/shared/error-types';
 
 try {
   await this.setCapabilityValue(capability, value);
@@ -1141,7 +1141,7 @@ DPS 13 → adlar_enum_countdown_set (read-only sensor) + adlar_picker_countdown_
 
 #### Enhanced DPS Mapping System
 
-**`AdlarMapping.dpsToCapabilities` (lib/definitions/adlar-mapping.ts:116-133):**
+**`AdlarMapping.dpsToCapabilities` (lib/tuya/definitions/adlar-mapping.ts:116-133):**
 
 ```typescript
 /**

@@ -1,7 +1,7 @@
 # Blok 1 — Status & Fault Registers (0x0000–0x0028)
 
 **Toegang:** Read-Only
-**Bron:** `lib/modbus/adlar-modbus-registers.ts`
+**Bron:** `lib/modbus/protocol/adlar-modbus-registers.ts`
 **Type:** 16-bit registers, grotendeels bitmaskers
 
 Elk register is een 16-bit waarde. Bij de bitmasker-registers is elke bit een afzonderlijke status- of foutindicator. Een gezette bit (1) betekent dat de betreffende conditie actief is.
