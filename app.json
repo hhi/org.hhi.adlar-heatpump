@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -14912,16 +14912,16 @@
               "id": "show_disconnect_diagnostic",
               "type": "checkbox",
               "label": {
-                "en": "Show daily disconnect count",
-                "nl": "Toon dagelijkse disconnect telling",
-                "de": "Tägliche Verbindungsabbrüche anzeigen",
-                "fr": "Afficher le nombre quotidien de déconnexions"
+                "en": "Show connection diagnostics",
+                "nl": "Toon verbindingsdiagnostiek",
+                "de": "Verbindungsdiagnose anzeigen",
+                "fr": "Afficher les diagnostics de connexion"
               },
               "hint": {
-                "en": "Display a sensor that counts daily device disconnections. Only useful for diagnosing connection stability issues.",
-                "nl": "Toon een sensor die dagelijkse apparaat disconnecties telt. Alleen nuttig voor diagnose van verbindingsstabiliteitsproblemen.",
-                "de": "Zeigen Sie einen Sensor an, der tägliche Gerätetrennungen zählt. Nur nützlich zur Diagnose von Verbindungsstabilitätsproblemen.",
-                "fr": "Afficher un capteur qui compte les déconnexions quotidiennes de l'appareil. Utile uniquement pour diagnostiquer les problèmes de stabilité de connexion."
+                "en": "Adds three diagnostic sensors: daily disconnects, daily zombie detections (connection open but silent), and the raw connection telemetry. Only useful for diagnosing connection stability.",
+                "nl": "Voegt drie diagnostische sensoren toe: dagelijkse disconnects, dagelijkse zombie-detecties (verbinding open maar stil) en de ruwe verbindingstelemetrie. Alleen nuttig voor diagnose van verbindingsstabiliteit.",
+                "de": "Fügt drei Diagnosesensoren hinzu: tägliche Verbindungsabbrüche, tägliche Zombie-Erkennungen (Verbindung offen, aber stumm) und die Rohtelemetrie. Nur zur Diagnose der Verbindungsstabilität nützlich.",
+                "fr": "Ajoute trois capteurs de diagnostic : déconnexions quotidiennes, détections de zombies quotidiennes (connexion ouverte mais silencieuse) et la télémétrie brute. Utile uniquement pour diagnostiquer la stabilité de la connexion."
               },
               "value": false
             }
@@ -18526,6 +18526,26 @@
       "uiComponent": "sensor",
       "icon": "/assets/connection-status.svg"
     },
+    "adlar_connection_diagnostics": {
+      "id": "adlar_connection_diagnostics",
+      "type": "string",
+      "title": {
+        "en": "Connection Diagnostics",
+        "nl": "Verbindingsdiagnostiek",
+        "de": "Verbindungsdiagnose",
+        "fr": "Diagnostics de connexion"
+      },
+      "desc": {
+        "en": "Per-day connection telemetry as JSON: probe outcomes, which layer detected a failure, reconnect attempts and recovery times. Kept for 14 days.",
+        "nl": "Verbindingstelemetrie per dag als JSON: probe-uitkomsten, welke laag een storing detecteerde, herverbindingspogingen en hersteltijden. Bewaard voor 14 dagen.",
+        "de": "Tägliche Verbindungstelemetrie als JSON: Prüfergebnisse, erkennende Schicht, Wiederverbindungsversuche und Wiederherstellungszeiten. 14 Tage aufbewahrt.",
+        "fr": "Télémétrie de connexion quotidienne en JSON : résultats des sondes, couche ayant détecté la panne, tentatives de reconnexion et temps de récupération. Conservée 14 jours."
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "icon": "/assets/connection-status.svg"
+    },
     "adlar_connection_status": {
       "id": "adlar_connection_status",
       "type": "string",
@@ -21393,6 +21413,37 @@
         "nl": "Status van de sterilisatiecyclus uit Modbus-statusregister 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Waar tijdens een actieve legionellapreventiecyclus.",
         "de": "Status des Sterilisierungszyklus aus Modbus-Statusregister 0x0001, Bit 0 (HIGH_TEMP_STERILIZATION). Wahr während eines aktiven Legionellen-Präventionszyklus.",
         "fr": "État du cycle de stérilisation depuis le registre de statut Modbus 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Vrai pendant un cycle actif de prévention de la légionellose."
+      }
+    },
+    "adlar_zombie_detections_daily": {
+      "id": "adlar_zombie_detections_daily",
+      "title": {
+        "en": "Daily Zombie Detections",
+        "nl": "Dagelijkse Zombie-detecties",
+        "de": "Tägliche Zombie-Erkennungen",
+        "fr": "Détections de zombies quotidiennes"
+      },
+      "type": "number",
+      "min": 0,
+      "max": 9999,
+      "step": 1,
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": null,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Daily zombie detections",
+        "nl": "Dagelijkse zombie-detecties",
+        "de": "Tägliche Zombie-Erkennungen",
+        "fr": "Détections de zombies quotidiennes"
+      },
+      "icon": "/assets/connection-status.svg",
+      "description": {
+        "en": "Counts how many times the heartbeat probe found the connection alive but silent today (Homey timezone). Compare with the daily disconnect count to see how much of the connection trouble is silent-socket versus clean disconnects. Resets each day.",
+        "nl": "Telt hoe vaak de heartbeat-probe de verbinding vandaag wel open maar stil aantrof (Homey-tijdzone). Vergelijk met de dagelijkse disconnect-telling om te zien welk deel van de verbindingsproblemen stille sockets zijn en welk deel schone disconnects. Reset elke dag.",
+        "de": "Zählt, wie oft die Heartbeat-Prüfung die Verbindung heute offen, aber stumm vorfand (Homey-Zeitzone). Vergleichen Sie den Wert mit den täglichen Verbindungsabbrüchen. Setzt sich täglich zurück.",
+        "fr": "Compte le nombre de fois où la sonde heartbeat a trouvé la connexion ouverte mais silencieuse aujourd'hui (fuseau horaire Homey). À comparer au nombre de déconnexions quotidiennes. Réinitialisation quotidienne."
       }
     },
     "building_insight_insulation": {
