@@ -1,0 +1,20 @@
+{
+  "id": "adlar_connection_diagnostics",
+  "type": "string",
+  "title": {
+    "en": "Connection Diagnostics",
+    "nl": "Verbindingsdiagnostiek",
+    "de": "Verbindungsdiagnose",
+    "fr": "Diagnostics de connexion"
+  },
+  "desc": {
+    "en": "Per-day connection telemetry as JSON: probe outcomes, which layer detected a failure, reconnect attempts and recovery times. Kept for 14 days.",
+    "nl": "Verbindingstelemetrie per dag als JSON: probe-uitkomsten, welke laag een storing detecteerde, herverbindingspogingen en hersteltijden. Bewaard voor 14 dagen.",
+    "de": "Tägliche Verbindungstelemetrie als JSON: Prüfergebnisse, erkennende Schicht, Wiederverbindungsversuche und Wiederherstellungszeiten. 14 Tage aufbewahrt.",
+    "fr": "Télémétrie de connexion quotidienne en JSON : résultats des sondes, couche ayant détecté la panne, tentatives de reconnexion et temps de récupération. Conservée 14 jours."
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": null,
+  "icon": "/assets/connection-status.svg"
+}
