@@ -190,7 +190,7 @@ met de merge, dan is een regressie niet toewijsbaar.
 
 ### Stappen
 
-1. In `lib/services/flow-card-manager-service.ts`: alle 30 run-listeners omzetten van
+1. In `lib/tuya/services/flow-card-manager-service.ts`: alle 30 run-listeners omzetten van
    `this.device` naar `args.device`.
 
    ```typescript
@@ -313,7 +313,7 @@ Per bestand niet alleen op byte-gelijkheid toetsen, maar ook op **module-level m
 state** (ADR-001 §5c risico 6). Bekend geval:
 
 ```typescript
-// lib/flow-handler-wrapper.ts
+// lib/shared/flow-handler-wrapper.ts
 let flowLoggingEnabled = false;   // wordt één vlag voor beide drivers
 ```
 
@@ -486,7 +486,7 @@ verwacht en wordt in fase 3 opgelost.
 | `tsc --noEmit` | 1 fout: `Cannot find module 'jsmodbus'` — verwacht, `npm install` nodig |
 
 **Afwijking van het plan**: de Modbus-app heeft een `lib/modbus/`-submap. Eén-op-één
-kopiëren zou `lib/modbus/modbus/adlar-modbus-registers.ts` opleveren. Die submap heet nu
+kopiëren zou `lib/modbus/protocol/adlar-modbus-registers.ts` opleveren. Die submap heet nu
 `lib/modbus/protocol/` — zelfde inhoud, leesbaarder pad.
 
 **Geen dubbele flow-card-ID's**: de 89 gedeelde kaarten bestonden al in de doel-app, dus
@@ -1360,7 +1360,7 @@ Bewijsketen:
 | Stap | Bevinding |
 |---|---|
 | `updateFlowCards()` roept 7× `registerFlowCardsByCategory()` aan | Die methode berekent `shouldRegister`, logt, en **registreert niets**. Code-commentaar: *"Flow cards are handled by the pattern-based system in app.ts"* |
-| Dat patroon-systeem staat in `lib/flow-helpers.ts` | Raadpleegt de `flow_*`-instellingen **0 keer** |
+| Dat patroon-systeem staat in `lib/tuya/flow-helpers.ts` | Raadpleegt de `flow_*`-instellingen **0 keer** |
 | `flow_expert_mode` gate `registerExpertFeatureCards()` | Die methode bevat **0** `registerRunListener`-aanroepen |
 
 De 30 werkelijke registraties komen uit `registerActionBasedConditionCards` (16),
@@ -1723,7 +1723,7 @@ Toevoegen aan de TODO-lijst, niet aan v3.0.0.
 **Besluit**: registratie verhuist naar `driver.ts` `onInit()`. Geen statische guard.
 
 Doorslaggevend is `updateFlowCards()` in
-`lib/services/flow-card-manager-service.ts:125`. De eerste regel van de body:
+`lib/tuya/services/flow-card-manager-service.ts:125`. De eerste regel van de body:
 
 ```typescript
 async updateFlowCards(capabilitiesWithData?: string[]): Promise<void> {

@@ -343,7 +343,7 @@ Dead Code (Never Reached):
 - [SERVICE_ARCHITECTURE.md](SERVICE_ARCHITECTURE.md) - Service migration details
 - [REFACTOR_PROPOSAL.md](REFACTOR_PROPOSAL.md) - Flow card consolidation proposal
 - [device.ts:540-727](../../drivers/intelligent-heat-pump/device.ts#L540-L727) - Dead code location
-- [TuyaConnectionService](../../lib/services/tuya-connection-service.ts) - Active replacement implementation
+- [TuyaConnectionService](../../lib/tuya/services/tuya-connection-service.ts) - Active replacement implementation
 
 ---
 

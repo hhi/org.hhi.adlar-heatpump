@@ -55,7 +55,7 @@ The Adlar Heat Pump app transitioned from a monolithic device class (v0.99.22 an
 
 #### 1. TuyaConnectionService
 
-**File**: `lib/services/tuya-connection-service.ts`
+**File**: `lib/tuya/services/tuya-connection-service.ts`
 
 **Responsibility**: Device communication via TuyAPI library
 
@@ -72,17 +72,20 @@ The Adlar Heat Pump app transitioned from a monolithic device class (v0.99.22 an
 - Automatic device availability status sync (unavailable during outages, available on reconnect)
 - Idempotent error handler installation with listener cleanup
 - **Heartbeat monitoring** (v0.99.98) - Proactive zombie connection detection every 5 minutes
-- **Intelligent skip logic** (v0.99.98) - Avoids heartbeat when device active (recent data within 4 minutes)
+- **Intelligent skip logic** (v0.99.98, tightened v1.0.32) - Avoids heartbeat when device active (recent data within 2.5 minutes, 50% of the interval)
 - **Hybrid heartbeat approach** (v1.0.9) - Two-layer probing: passive get() then active set() wake-up
 - **Sleep mode awareness** (v1.0.9) - Distinguishes sleeping devices from true disconnects
-- **Stale connection force-reconnect** (v0.99.98) - Automatic reconnect after 10 minutes idle
+- **Stale connection force-reconnect** (v0.99.98) - Evaluated every 20s by the health loop; reconnects after 15 minutes idle (`STALE_CONNECTION_THRESHOLD_MS`)
 - **Single-source connection truth** (v0.99.99) - Eliminates timer conflicts and race conditions
 - **Persistent outage tracking** (v1.0.5) - Tracks cumulative outage duration independent of circuit breaker resets
 - **Circuit breaker cycle limit** (v1.0.5) - Maximum 3 cycles (15 min) before switching to slow continuous retry
 - **Internet recovery detection** (v1.0.5) - DNS probes every 30s during cooldown for immediate reconnection
 - **User-visible outage timer** (v1.0.5) - Connection status shows outage duration and circuit breaker countdown
-- **Time-based notifications** (v1.0.5) - Notifications at 2, 10, and 30 minutes instead of failure-count-based
-- **Native heartbeat monitoring** (v1.1.2) - Layer 0 detection via TuyaAPI's built-in heartbeat events (35s timeout, fastest zombie detection)
+- **Outage notification** (v1.0.5, reworked v3.1.0) - One alert after 15 minutes of unresolved outage, deduplicated per outage; routine recovery cycles are logged only
+- **Native heartbeat monitoring** (v1.1.2) - Layer 0 detection via TuyaAPI's built-in heartbeat events (35s timeout)
+- **Correct freshness measurement** (v3.1.0) - Probe windows open *before* the request, so a `data` event emitted synchronously by TuyAPI counts; see [ADR-003](../../architecture/ADR-003-TUYA-ZOMBIE-DETECTIE-EN-DEFENSIEVE-LAGEN.md)
+- **Instance never reused after disconnect** (v3.1.0) - `destroyTuyaInstance()` keeps TuyAPI's native ping timeout armed
+- **Connection telemetry** (v3.1.0) - 14 days of per-day counters, exposed via two optional capabilities
 
 **Public Interface**:
 
@@ -114,7 +117,7 @@ class TuyaConnectionService {
 
 #### 2. CapabilityHealthService
 
-**File**: `lib/services/capability-health-service.ts`
+**File**: `lib/tuya/services/capability-health-service.ts`
 
 **Responsibility**: Real-time capability health tracking
 
@@ -145,7 +148,7 @@ class CapabilityHealthService {
 
 #### 3. FlowCardManagerService
 
-**File**: `lib/services/flow-card-manager-service.ts`
+**File**: `lib/tuya/services/flow-card-manager-service.ts`
 
 **Responsibility**: Dynamic flow card registration and management
 
@@ -186,7 +189,7 @@ class FlowCardManagerService {
 
 #### 4. EnergyTrackingService
 
-**File**: `lib/services/energy-tracking-service.ts`
+**File**: `lib/tuya/services/energy-tracking-service.ts`
 
 **Responsibility**: External power measurement integration and validation
 
@@ -216,7 +219,7 @@ class EnergyTrackingService {
 
 #### 5. SettingsManagerService
 
-**File**: `lib/services/settings-manager-service.ts`
+**File**: `lib/shared/services/settings-manager-service.ts`
 
 **Responsibility**: Settings validation, persistence, and race condition prevention
 
@@ -248,7 +251,7 @@ class SettingsManagerService {
 
 #### 6. COPCalculator
 
-**File**: `lib/services/cop-calculator.ts`
+**File**: `lib/shared/services/cop-calculator.ts`
 
 **Responsibility**: Real-time COP calculations with 8 methods
 
@@ -294,7 +297,7 @@ class COPCalculator {
 
 #### 7. RollingCOPCalculator
 
-**File**: `lib/services/rolling-cop-calculator.ts`
+**File**: `lib/shared/services/rolling-cop-calculator.ts`
 
 **Responsibility**: Time-series COP analysis (daily/weekly/monthly)
 
@@ -336,7 +339,7 @@ class RollingCOPCalculator {
 
 #### 8. SCOPCalculator
 
-**File**: `lib/services/scop-calculator.ts`
+**File**: `lib/tuya/services/scop-calculator.ts`
 
 **Responsibility**: Seasonal efficiency per EN 14825 European standard
 
@@ -377,7 +380,7 @@ class SCOPCalculator {
 
 ### Responsibilities
 
-**ServiceCoordinator** (`lib/services/service-coordinator.ts`) is the single point of control for all services:
+**ServiceCoordinator** (`lib/tuya/services/service-coordinator.ts`) is the single point of control for all services:
 
 1. **Initialization**: Creates and initializes all 8 services in dependency order
 2. **Lifecycle Management**: Coordinates startup, settings changes, and shutdown
@@ -745,7 +748,7 @@ class SCOPCalculator {
 
 ### Step 1: Create Service File
 
-**File**: `lib/services/my-new-service.ts`
+**File**: `lib/tuya/services/my-new-service.ts` (of `lib/modbus/services/` — gebruik `lib/shared/services/` wanneer beide drivers de service delen)
 
 ```typescript
 import Homey from 'homey';
@@ -841,7 +844,7 @@ class Device extends Homey.Device {
 **File**: `test/services/my-new-service.test.ts`
 
 ```typescript
-import { MyNewService } from '../../lib/services/my-new-service';
+import { MyNewService } from '../../lib/tuya/services/my-new-service';
 
 describe('MyNewService', () => {
   let service: MyNewService;
@@ -1109,7 +1112,7 @@ DPS 13 → adlar_enum_countdown_set (sensor) + adlar_picker_countdown_set (picke
 
 ### AdlarMapping Enhancement
 
-**File**: `lib/definitions/adlar-mapping.ts`
+**File**: `lib/tuya/definitions/adlar-mapping.ts`
 
 **New Primary Mapping System (Lines 102-133):**
 
@@ -1515,7 +1518,7 @@ The fastest disconnection detection mechanism, leveraging TuyaAPI's built-in hea
 
 #### Architecture
 
-**Location**: `lib/services/tuya-connection-service.ts:966-972, 1063-1115`
+**Location**: `lib/tuya/services/tuya-connection-service.ts:966-972, 1063-1115`
 
 **Core Components**:
 
@@ -1577,17 +1580,26 @@ private stopNativeHeartbeatMonitoring(): void {
 
 | Layer | Detection Time | Method | Network Overhead | Status |
 |-------|---------------|--------|------------------|--------|
+| TuyAPI native | ~12 seconds | Library ping/pong (10s ping, 2s timeout) | None | ✅ |
 | **Layer 0** | **35 seconds** | Native TuyaAPI heartbeat events | None (passive) | ✅ v1.1.2 |
-| Layer 1 | 5 minutes | Hybrid heartbeat (get/set probes) | Low (conditional) | ✅ v1.0.9 |
-| Layer 2 | 5 minutes | DPS refresh (NAT keep-alive) | Low (periodic) | ✅ v1.0.3 |
-| Layer 3 | 10 minutes | Stale connection force-reconnect | None (check only) | ✅ v0.99.98 |
+| Layer 1-2 | 5 minutes | Hybrid heartbeat (get/set probes) | Low (conditional) | ✅ v1.0.9 |
+| Layer 3 | 20s check, 15 min threshold | Stale connection force-reconnect | None (check only) | ✅ v0.99.98 |
+| DPS refresh | 15 minutes | Periodic `get({schema:true})` | Low (periodic) | ✅ v1.0.3 |
+
+> **Layer numbering** follows the log lines in the code (`[LAYER 3] STALE CONNECTION`). Older
+> revisions of this table numbered the DPS refresh as Layer 2 and the stale check as Layer 3.
 
 #### Why Layer 0 is Critical
 
-**Speed Advantage**: 5-8x faster detection than Layer 1-3 mechanisms
+**Speed Advantage**: much faster than the app-level probes
 
-- Pre-v1.1.2: 5-10 minute detection window
+- Pre-v1.1.2: 5-15 minute detection window
 - Post-v1.1.2: 35-second detection window
+
+Layer 0 is also **not redundant** with TuyAPI's own ping timeout, despite watching the same
+pong: the library leaves `_pingPongTimeout` set after a disconnect, so on a reused instance it
+never arms a new timeout until a pong arrives. Since v3.1.0 the instance is always released,
+but Layer 0 remains the backstop for that failure mode.
 
 **Zero False Positives**: If TuyaAPI heartbeats stop, connection is definitively dead
 
@@ -1620,10 +1632,11 @@ Layer 0: Native Heartbeat (35s detection) ← FASTEST
   │ Zero overhead, immediate zombie detection
   │ Signals: isConnected = false → triggers reconnection loop
   ↓
-Layer 1-3: App-Level Monitoring (5-10 min)
+Layer 1-3: App-Level Monitoring (5-15 min)
   │ Backup detection for edge cases
   │ Hybrid heartbeat (get/set) handles sleeping devices
-  │ DPS refresh maintains NAT mapping
+  │ Stale check runs on the 20s health loop, 15 min threshold
+  │ DPS refresh keeps the socket busy and provides diagnostics
   ↓
 Reconnection Loop (single source of truth)
   │ Handles all reconnection attempts
@@ -1635,7 +1648,7 @@ Reconnection Loop (single source of truth)
 
 **v0.99.98-v1.0.30**: Only Layer 1-3 mechanisms existed
 
-- Detection window: 5-10 minutes
+- Detection window: 5-15 minutes
 - User impact: Extended "stuck connected" status
 
 **v1.1.2**: Layer 0 added as primary detection
@@ -2058,7 +2071,7 @@ Version 1.0.5 introduces comprehensive improvements to the reconnection mechanis
 
 #### Proposal 1: Persistent Outage Tracking
 
-**Implementation**: [`tuya-connection-service.ts:57-58`](../../../lib/services/tuya-connection-service.ts#L57-L58)
+**Implementation**: [`tuya-connection-service.ts:57-58`](../../../lib/tuya/services/tuya-connection-service.ts#L57-L58)
 
 ```typescript
 // Persistent outage tracking (v1.0.5 - Proposal 1)
@@ -2081,7 +2094,7 @@ private totalOutageDuration = 0; // Cumulative outage duration
 
 #### Proposal 2: Circuit Breaker Cycle Limit
 
-**Implementation**: [`tuya-connection-service.ts:61-62`](../../../lib/services/tuya-connection-service.ts#L61-L62), [`tuya-connection-service.ts:973-989`](../../../lib/services/tuya-connection-service.ts#L973-L989)
+**Implementation**: [`tuya-connection-service.ts:61-62`](../../../lib/tuya/services/tuya-connection-service.ts#L61-L62), [`tuya-connection-service.ts:973-989`](../../../lib/tuya/services/tuya-connection-service.ts#L973-L989)
 
 ```typescript
 // Circuit breaker cycle limit (v1.0.5 - Proposal 2)
@@ -2119,7 +2132,7 @@ if (this.circuitBreakerCycles >= this.MAX_CIRCUIT_BREAKER_CYCLES) {
 
 #### Proposal 3: Internet Recovery Detection During Cooldown
 
-**Implementation**: [`tuya-connection-service.ts:947-960`](../../../lib/services/tuya-connection-service.ts#L947-L960)
+**Implementation**: [`tuya-connection-service.ts:947-960`](../../../lib/tuya/services/tuya-connection-service.ts#L947-L960)
 
 ```typescript
 // Proposal 3: Lightweight connectivity probe every 30 seconds during cooldown
@@ -2163,7 +2176,7 @@ Versus old behavior: wait until T+5:00 for cooldown to expire.
 
 #### Proposal 4: User-Visible Outage Timer
 
-**Implementation**: [`tuya-connection-service.ts:399-409`](../../../lib/services/tuya-connection-service.ts#L399-L409)
+**Implementation**: [`tuya-connection-service.ts:399-409`](../../../lib/tuya/services/tuya-connection-service.ts#L399-L409)
 
 ```typescript
 // Add context for circuit breaker or outage duration (v1.0.5)
@@ -2199,7 +2212,7 @@ return `${statusLabel}${contextInfo} (${timeString})`;
 
 #### Proposal 5: Time-Based Outage Notifications
 
-**Implementation**: [`tuya-connection-service.ts:906-936`](../../../lib/services/tuya-connection-service.ts#L906-L936)
+**Implementation**: [`tuya-connection-service.ts:906-936`](../../../lib/tuya/services/tuya-connection-service.ts#L906-L936)
 
 **Old System** (Failure-Count-Based):
 ```typescript

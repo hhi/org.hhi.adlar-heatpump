@@ -4,7 +4,7 @@
 > custom PLC/SCADA, Python/pymodbus, etc.) for the Adlar Castra / Aurora II air-to-water heat pump
 > family (SolarEast/HBG OEM controller) reached over an **Elfin EW11A** (or any RS485→TCP gateway).
 >
-> **The register model in `lib/modbus/adlar-modbus-registers.ts` is authoritative.** This document is
+> **The register model in `lib/modbus/protocol/adlar-modbus-registers.ts` is authoritative.** This document is
 > generated directly from that module (names, ranges, defaults, scaling, descriptions, bitmasks) and
 > annotated with a **live register snapshot** from the reference unit. Where a register exists in the
 > model but was not polled, the snapshot columns read `—` / `not polled`.
@@ -995,5 +995,5 @@ L32–L35 `0x0815–0x0818` e-heater powers (W); L36 `0x0819` external pump powe
 
 ---
 
-*Generated directly from `lib/modbus/adlar-modbus-registers.ts` (v2.2, authoritative) merged with the
+*Generated directly from `lib/modbus/protocol/adlar-modbus-registers.ts` (v2.2, authoritative) merged with the
 expert snapshot of 2026-06-15. Regenerate when the register model changes.*

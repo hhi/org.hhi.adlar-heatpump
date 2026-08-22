@@ -297,7 +297,7 @@ T+0:10   Full reconnect succeeds (connection reset)
 ### From Source Code
 ```
 TuyaConnectionService Location:
-/lib/services/tuya-connection-service.ts (1,683 lines)
+/lib/tuya/services/tuya-connection-service.ts (1,683 lines)
 
 Key Methods:
 - connectTuya() ..................... Line 281-384
@@ -313,8 +313,8 @@ Key Methods:
 ```
 
 ### Related Files
-- `lib/constants.ts` - Device constants (intervals, thresholds)
-- `lib/error-types.ts` - Error categorization system
+- `lib/tuya/constants.ts` - Device constants (intervals, thresholds)
+- `lib/shared/error-types.ts` - Error categorization system
 - `drivers/intelligent-heat-pump/device.ts` - Device integration
 
 ---

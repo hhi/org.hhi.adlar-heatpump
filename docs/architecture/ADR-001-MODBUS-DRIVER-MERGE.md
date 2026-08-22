@@ -308,7 +308,7 @@ self-healing-check, argumentvalidatie, debug-logging en een fail-safe `try/catch
 (`currentFlowRate > args.flowRate`).
 
 De patroongebaseerde kaarten (`registerPatternBasedCards`, 15 regels) zijn al wél
-gefactoriseerd naar `lib/flow-helpers.ts` met `FLOW_PATTERNS`-tabellen. Dezelfde behandeling
+gefactoriseerd naar `lib/tuya/flow-helpers.ts` met `FLOW_PATTERNS`-tabellen. Dezelfde behandeling
 toepassen op de 4 complexe condities en 11 triggers zou `app.ts` naar schatting tot onder
 de 400 regels terugbrengen — maar dat is opruiming, **geen voorwaarde voor de merge**.
 
@@ -492,7 +492,7 @@ verkeerde warmtepomp schrijven.
 **Waar het probleem níét zit** — twee registratiepaden doen het wel goed:
 
 - `app.ts` (19 kaarten): `const { device } = args;` ✓
-- `lib/flow-helpers.ts` `registerSimpleActions` (11 kaarten):
+- `lib/tuya/flow-helpers.ts` `registerSimpleActions` (11 kaarten):
   `device.triggerCapabilityListener(…)` op `args.device` ✓
 
 Uitsluitend `flow-card-manager-service.ts` is aangetast — 75 handlers over beide apps.
@@ -598,7 +598,7 @@ consistent met die productscope.
 #### Nieuw risico 6 — `flowLoggingEnabled` is een module-brede vlag
 
 ```typescript
-// lib/flow-handler-wrapper.ts — byte-identiek in beide apps
+// lib/shared/flow-handler-wrapper.ts — byte-identiek in beide apps
 let flowLoggingEnabled = false;
 ```
 
@@ -662,7 +662,7 @@ Het transportspecifieke werk is dan al gebeurd: `applyModbusSnapshot()` heeft re
 `0x00xx` gedecodeerd, respectievelijk de DPS-mapping heeft datapoint 39 geschaald. Wat in
 `measure_water` staat is een getal in l/min — identiek van herkomst-onafhankelijke vorm.
 
-**2. Schrijfkaarten** — `registerSimpleActions` in `lib/flow-helpers.ts` roept de
+**2. Schrijfkaarten** — `registerSimpleActions` in `lib/tuya/flow-helpers.ts` roept de
 capability-listener van het device aan:
 
 ```typescript
@@ -835,7 +835,7 @@ const result = currentFlowRate > args.flowRate;
 Verdeling: 175 regels logging-infrastructuur, 78 lifecycle, 47 registratie, 262 voor vier
 complexe condities, 284 voor vier rekenkaarten, en 520 voor elf device-triggers.
 
-De patroongebaseerde kaarten zijn al gefactoriseerd naar `lib/flow-helpers.ts` met
+De patroongebaseerde kaarten zijn al gefactoriseerd naar `lib/tuya/flow-helpers.ts` met
 `FLOW_PATTERNS`-tabellen; `registerPatternBasedCards` is daardoor maar 15 regels. Dezelfde
 behandeling toepassen op de vier condities en elf triggers brengt `app.ts` naar schatting
 onder de 400 regels.
@@ -867,7 +867,7 @@ heeft de DPS-mapping datapoint 39 al geschaald. Wat in `measure_water` staat is 
 in l/min zonder herkomst.
 
 **Schrijfkaarten** dispatchen via polymorfisme. `registerSimpleActions` in
-`lib/flow-helpers.ts` doet:
+`lib/tuya/flow-helpers.ts` doet:
 
 ```typescript
 await device.triggerCapabilityListener(pattern.capabilityName, value, {});

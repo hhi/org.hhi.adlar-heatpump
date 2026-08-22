@@ -68,6 +68,7 @@ The Adaptive Control system enables **automatic temperature regulation** using e
 
 ### High-Level Architecture
 
+```text
 │  │  │ • PI Action orchestration                        │    │    │    │
 │  │  │  │                                                   │    │    │    │
 │  │  │  │  ┌────────────────────────────────────────┐     │    │    │    │
@@ -141,7 +142,7 @@ The Adaptive Control system enables **automatic temperature regulation** using e
 
 ### 1. AdaptiveControlService
 
-**File**: `lib/services/adaptive-control-service.ts`
+**File**: `lib/tuya/services/adaptive-control-service.ts`
 
 **Responsibility**: Main orchestrator for adaptive temperature control
 
@@ -179,8 +180,8 @@ interface AdaptiveControlStatus {
 
 **Dependencies**:
 
-- **HeatingController** (lib/adaptive/heating-controller.ts) - PI algorithm
-- **ExternalTemperatureService** (lib/services/external-temperature-service.ts) - Sensor data
+- **HeatingController** (lib/tuya/adaptive/heating-controller.ts) - PI algorithm
+- **ExternalTemperatureService** (lib/tuya/services/external-temperature-service.ts) - Sensor data
 - **Device** (via Homey.Device reference) - Capability reads/writes, store operations
 
 **Events Emitted** (via Flow Cards):
@@ -211,7 +212,7 @@ interface AdaptiveControlStatus {
 
 ### 2. HeatingController
 
-**File**: `lib/adaptive/heating-controller.ts`
+**File**: `lib/tuya/adaptive/heating-controller.ts`
 
 **Responsibility**: PI (Proportional-Integral) temperature control algorithm
 
@@ -333,7 +334,7 @@ The PI controller is a **feedback control system** that minimizes error over tim
 
 ### 3. WeightedDecisionMaker
 
-**File**: `lib/adaptive/weighted-decision-maker.ts`
+**File**: `lib/tuya/adaptive/weighted-decision-maker.ts`
 
 **Responsibility**: Combines adjustment recommendations from all components into a single weighted decision
 
@@ -423,11 +424,11 @@ const effectiveCoastWeight = (coastAdjust < 0) ? coastStrength : 0;
 
 ### 4. Coast Detection (Passive Cooling Mode)
 
-**Location**: `lib/services/adaptive-control-service.ts` (integrated into `executeControlCycle()`)
+**Location**: `lib/tuya/services/adaptive-control-service.ts` (integrated into `executeControlCycle()`)
 
 **Responsibility**: Detects when room is above setpoint and generates coast signal to prevent unnecessary heat pump activation
 
-**Reference**: [ADR-024 — Adaptive Control: Passive Cooling Mode](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+**Reference**: [ADR-024 — Adaptive Control: Passive Cooling Mode](../../../plans/completed/ADR-024-adaptive-cooldown-mode.md)
 
 **Key Features**:
 
@@ -498,7 +499,7 @@ private _outletTempHistory: number[] = [];       // ADR-040B: outlet sliding win
 
 ### 5. ExternalTemperatureService
 
-**File**: `lib/services/external-temperature-service.ts`
+**File**: `lib/tuya/services/external-temperature-service.ts`
 
 **Responsibility**: Flow card-based external temperature data integration
 
@@ -1061,7 +1062,7 @@ THEN: Update external indoor temperature
       └─ temperature: {{temp}}
 ```
 
-**Handler** (`lib/services/external-temperature-service.ts:45-65`):
+**Handler** (`lib/tuya/services/external-temperature-service.ts:45-65`):
 
 ```typescript
 async receiveTemperature(temperature: number): Promise<void> {
@@ -1084,7 +1085,7 @@ async receiveTemperature(temperature: number): Promise<void> {
 }
 ```
 
-**Registration** (`lib/services/flow-card-manager-service.ts` integration):
+**Registration** (`lib/tuya/services/flow-card-manager-service.ts` integration):
 
 ```typescript
 // Register action card
@@ -1255,7 +1256,7 @@ private async triggerAdjustmentFlowCard(
 
 ### Registering AdaptiveControlService
 
-**File**: `lib/services/service-coordinator.ts`
+**File**: `lib/tuya/services/service-coordinator.ts`
 
 **Import**:
 
@@ -1384,7 +1385,7 @@ async onSettings(
 
 **Components** (Planned):
 
-- **BuildingModelLearner** (`lib/adaptive/building-model-learner.ts`)
+- **BuildingModelLearner** (`lib/shared/adaptive/building-model-learner.ts`)
   - Recursive Least Squares (RLS) algorithm
   - 4 parameters: C (thermal mass), UA (heat loss), g (solar gain), P_int (internal gains)
   - 4×4 covariance matrix (P-matrix)
@@ -1435,7 +1436,7 @@ Where:
 
 **Components** (Planned):
 
-- **EnergyPriceOptimizer** (`lib/adaptive/energy-price-optimizer.ts`)
+- **EnergyPriceOptimizer** (`lib/tuya/adaptive/energy-price-optimizer.ts`)
   - Day-ahead price API integration (Dutch market: ENTSO-E, EPEX SPOT)
   - Price categorization (zeer laag, laag, normaal, hoog, zeer hoog)
   - Pre-heating schedule optimization
@@ -1535,7 +1536,7 @@ For given outdoor temperature:
 
 **Architecture** (Current — 5-component system with coast strategy):
 
-The `WeightedDecisionMaker` in `lib/adaptive/weighted-decision-maker.ts` combines recommendations from 5 components:
+The `WeightedDecisionMaker` in `lib/tuya/adaptive/weighted-decision-maker.ts` combines recommendations from 5 components:
 
 | Component | Base Weight | Source | Direction during coast |
 |-----------|-------------|--------|-----------------------|
@@ -1572,7 +1573,7 @@ After normalization:
 }
 ```
 
-**Reference**: [ADR-024 §3 — Coast as weighted component](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+**Reference**: [ADR-024 §3 — Coast as weighted component](../../../plans/completed/ADR-024-adaptive-cooldown-mode.md)
 
 ---
 
@@ -2085,8 +2086,8 @@ Result: At 09:00, indoor stabilizes at 20.0°C (user sees no drop)
 
 **Internal Documentation**:
 
-- [CLAUDE.md - Service Architecture](../../CLAUDE.md#service-oriented-architecture-v09923)
-- [Setup Guide - Adaptive Control](../../setup/ADAPTIVE_CONTROL_GUIDE.md)
+- [CLAUDE.md - Service Architecture](../../../CLAUDE.md#service-oriented-architecture)
+- [Setup Guide - Adaptive Control](../../setup/guide/ADAPTIVE_CONTROL_GUIDE.en.md)
 - [Service Architecture Guide](./service-architecture-guide.md)
 
 **External Resources**:

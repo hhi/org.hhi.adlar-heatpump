@@ -3,7 +3,7 @@
 Gebaseerd op vergelijking tussen:
 - `docs/Heatpump specs/modbus/OEM/OPxPii-TB_TC_TD_protocol_V1.2.9_system_params_P.md`
 - `todo/scan-overige.p.registers.txt` (scan 192.168.50.92, 2026-05-09)
-- `lib/modbus/adlar-modbus-registers.ts` (P_PARAMETERS export)
+- `lib/modbus/protocol/adlar-modbus-registers.ts` (P_PARAMETERS export)
 
 Totaal ontbrekend: ~115 registers. Werkconditie-ijkpunten (P184–P253) zijn fabrieksinstelling en niet zinvol om toe te voegen.
 

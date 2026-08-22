@@ -1,6 +1,6 @@
 # Flow Card DPS vs Modbus Mapping
 
-> Current note: the local Modbus `lib/flow-helpers.ts` legacy file has been
+> Current note: the local Modbus `lib/tuya/flow-helpers.ts` legacy file has been
 > removed. Supported Modbus flow cards are registered through
 > `FlowCardManagerService` and service/device trigger hooks. Older conclusions
 > about a missing `flow-helpers.ts` bootstrap are historical only.

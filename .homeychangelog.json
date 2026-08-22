@@ -1,4 +1,10 @@
 {
+  "3.1.0": {
+    "en": "Fixed false 'zombie connection' detections that reconnected healthy devices. Connection alerts are now sent once, after 15 minutes of an unresolved outage, instead of at 2, 10 and 30 minutes. Optional connection diagnostics can be enabled in device settings.",
+    "nl": "Valse 'zombie-verbinding'-detecties opgelost die gezonde apparaten lieten herverbinden. Verbindingsmeldingen komen nu eenmalig na 15 minuten aanhoudende uitval, in plaats van na 2, 10 en 30 minuten. Optionele verbindingsdiagnostiek is aan te zetten in de apparaatinstellingen.",
+    "de": "Falsche „Zombie-Verbindung“-Erkennungen behoben, die funktionierende Geräte neu verbinden ließen. Verbindungsmeldungen erfolgen jetzt einmalig nach 15 Minuten anhaltender Störung statt nach 2, 10 und 30 Minuten. Optionale Verbindungsdiagnose lässt sich in den Geräteeinstellungen aktivieren.",
+    "fr": "Correction des fausses détections de « connexion zombie » qui reconnectaient des appareils sains. Les alertes de connexion sont désormais envoyées une seule fois, après 15 minutes de panne non résolue, au lieu de 2, 10 et 30 minutes. Des diagnostics de connexion optionnels sont activables dans les paramètres de l'appareil."
+  },
   "3.0.0": {
     "en": "Added a Modbus device driver for Adlar Castra Aurora heat pumps, with local dashboards and Modbus register controls. The existing Tuya driver remains available.",
     "nl": "Een Modbus-apparaatdriver toegevoegd voor Adlar Castra Aurora-warmtepompen, met lokale dashboards en Modbus-registerbediening. De bestaande Tuya-driver blijft beschikbaar.",
