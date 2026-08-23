@@ -1,0 +1,88 @@
+{
+  "id": "target_temperature_is_modbus",
+  "title": {
+    "en": "Target (setpoint) temperature is",
+    "nl": "Doel (setpoint) temperatuur is",
+    "de": "Zieltemperatur (Sollwert) ist",
+    "fr": "La température cible (consigne) est"
+  },
+  "titleFormatted": {
+    "en": "Target (setpoint) temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+    "nl": "Doel (setpoint) temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+    "de": "Zieltemperatur (Sollwert) !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
+    "fr": "La température cible (consigne) !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Check if the target (setpoint) temperature matches the specified condition",
+    "nl": "Controleer of de doel (setpoint) temperatuur voldoet aan de opgegeven voorwaarde",
+    "de": "Prüfen Sie, ob die Zieltemperatur (Sollwert) der angegebenen Bedingung entspricht",
+    "fr": "Vérifier si la température cible (consigne) correspond à la condition spécifiée"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "comparison",
+      "title": {
+        "en": "Comparison",
+        "nl": "Vergelijking",
+        "de": "Vergleich",
+        "fr": "Comparaison"
+      },
+      "values": [
+        {
+          "id": "equal",
+          "title": {
+            "en": "Equal to",
+            "nl": "Gelijk aan",
+            "de": "Gleich",
+            "fr": "Égal à"
+          }
+        },
+        {
+          "id": "greater",
+          "title": {
+            "en": "Greater than",
+            "nl": "Groter dan",
+            "de": "Größer als",
+            "fr": "Supérieur à"
+          }
+        },
+        {
+          "id": "less",
+          "title": {
+            "en": "Less than",
+            "nl": "Kleiner dan",
+            "de": "Kleiner als",
+            "fr": "Inférieur à"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température "
+      },
+      "min": 15,
+      "max": 60,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Target temperature in °C",
+        "nl": "Doel temperatuur in °C",
+        "de": "Zieltemperatur in °C",
+        "fr": "Température cible en °C"
+      }
+    }
+  ],
+  "highlight": true
+}

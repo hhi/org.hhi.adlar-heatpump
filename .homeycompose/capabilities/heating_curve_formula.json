@@ -3,7 +3,9 @@
   "type": "string",
   "title": {
     "en": "Heating Curve Formula",
-    "nl": "Verwarmingscurve Formule"
+    "nl": "Verwarmingscurve Formule",
+    "de": "Heizkurven-Formel",
+    "fr": "Formule de la courbe de chauffe"
   },
   "getable": true,
   "setable": false,

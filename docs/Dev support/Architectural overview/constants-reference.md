@@ -1,6 +1,6 @@
 # DeviceConstants Reference Guide
 
-This document provides a comprehensive reference for all constants defined in the `DeviceConstants` class (`lib/constants.ts`), explaining their purpose, usage, and rationale for specific values.
+This document provides a comprehensive reference for all constants defined in the `DeviceConstants` class (`lib/tuya/constants.ts`), explaining their purpose, usage, and rationale for specific values.
 
 ## Table of Contents
 
@@ -32,7 +32,7 @@ The `DeviceConstants` class centralizes all configuration constants used through
 ### Usage Pattern
 
 ```typescript
-import { DeviceConstants } from './lib/constants';
+import { DeviceConstants } from './lib/tuya/constants';
 
 // ✅ Good: Use DeviceConstants
 setTimeout(() => {
@@ -646,7 +646,7 @@ static readonly RECONNECTION_INTERVAL_MS = 45 * 1000; // 45 seconds
 ### Customization Example
 
 ```typescript
-// lib/constants.ts
+// lib/tuya/constants.ts
 export class DeviceConstants {
   // Customize for slow network environment
   static readonly RECONNECTION_INTERVAL_MS = 45 * 1000; // 45s instead of 20s

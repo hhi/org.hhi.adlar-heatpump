@@ -2,6 +2,9 @@
 
 **Parent Documentation**: [CLAUDE.md](../../CLAUDE.md)
 **Related**: [SERVICE_ARCHITECTURE.md](SERVICE_ARCHITECTURE.md), [ERROR_HANDLING.md](ERROR_HANDLING.md)
+**Updated**: v3.1.0 — see [ADR-003](ADR-003-TUYA-ZOMBIE-DETECTIE-EN-DEFENSIEVE-LAGEN.md) and the [zombie assessment](TUYA-ZOMBIE-ASSESSMENT-EN-DEFENSIESTRATEGIE.md), which are the source of truth for detection behaviour. This page describes the mechanism; those describe why it looks the way it does.
+
+> **Layer numbering**: this page follows the log lines in the code (`[LAYER 0]`, `[LAYER 1-2]`, `[LAYER 3]`). ADR-002 uses a different numbering in one table; the code wins.
 
 ## Overview
 
@@ -11,16 +14,19 @@ Multi-layer heartbeat system prevents zombie connections through complementary d
 
 | Layer | Detection Time | Method | Overhead | Added Version |
 |-------|---------------|--------|----------|---------------|
-| **Layer 0** | **35 seconds** | TuyaAPI heartbeat events | None (passive) | v1.1.2 |
+| TuyAPI native | ~12 seconds | Library ping/pong (10s ping, 2s timeout) | None | — |
+| **Layer 0** | **35 seconds** | TuyAPI heartbeat events | None (passive) | v1.1.2 |
 | Layer 1-2 | 5 minutes | Hybrid heartbeat (get/set) | Low (conditional) | v0.99.98 |
-| Layer 3 | 5 minutes | DPS refresh (NAT keep-alive) | Low (periodic) | - |
-| Layer 4 | 10 minutes | Stale connection force-reconnect | None (check only) | v0.99.98 |
+| Layer 3 | 20s check, 15 min threshold | Stale connection force-reconnect | None (check only) | v0.99.98 |
+| DPS refresh | 15 minutes | Periodic `get({schema:true})` | Low (periodic) | v1.0.3 |
+
+**Note on the native layer**: TuyAPI only arms its ping timeout while `_pingPongTimeout === null`, and does not reset that handle on `disconnect()`. On a reused instance the timeout therefore stays disarmed until the first pong arrives — precisely when the socket is silent. Since v3.1.0 the instance is always released on disconnect (`destroyTuyaInstance()`), which keeps the native layer armed. See the assessment §3.3.
 
 ## Layer 0: Native Heartbeat Monitoring (v1.1.2)
 
 **Purpose**: Fastest zombie connection detection via TuyaAPI's built-in heartbeat events.
 
-**Implementation**: `lib/services/tuya-connection-service.ts:966-972, 1063-1115`
+**Implementation**: `lib/tuya/services/tuya-connection-service.ts:966-972, 1063-1115`
 
 ### Architecture
 
@@ -86,19 +92,44 @@ private startNativeHeartbeatMonitoring(): void {
 
 1. **Heartbeat Interval**: Every 5 minutes (`CONNECTION_HEARTBEAT_INTERVAL_MS`)
 2. **Intelligent Skip Logic**:
-   - Skips heartbeat if device sent data within last 4 minutes (80% of interval)
+   - Skips heartbeat if device sent data within the last 2.5 minutes (50% of the interval, tightened in v1.0.32)
    - Prevents unnecessary network traffic for active connections
    - Only probes when device appears idle
 3. **Hybrid Zombie Detection (v1.0.9)**:
    - **Layer 1**: Passive `tuya.get({ schema: true })` query (network-friendly)
    - **Layer 2**: Active `tuya.set({ dps: 1 })` wake-up (idempotent write)
-   - 10-second timeout per layer (`HEARTBEAT_TIMEOUT_MS`)
-   - Only marks disconnected if both layers fail
-4. **Stale Connection Detection**:
-   - Secondary protection layer in `scheduleNextReconnectionAttempt()`
-   - Forces reconnection if no data for 10+ minutes (`STALE_CONNECTION_THRESHOLD_MS`)
+   - 20-second request timeout per layer (`HEARTBEAT_TIMEOUT_MS`)
+   - After each request, a 10-second window (`HEARTBEAT_DATA_EVENT_TIMEOUT_MS`) checks whether
+     fresh telemetry actually arrived
+   - Only escalates if both layers produce neither a response nor fresh data
+4. **Stale Connection Detection** (Layer 3):
+   - Lives in `scheduleNextReconnectionAttempt()`, which doubles as the 20-second health loop
+   - Forces reconnection if no data for 15+ minutes (`STALE_CONNECTION_THRESHOLD_MS`)
    - Applies moderate backoff (1.5x multiplier) instead of aggressive exponential backoff
    - Single-source connection truth (v0.99.99) - eliminates race conditions
+
+### Measuring freshness correctly (v3.1.0)
+
+Until v3.1.0 the data-event check opened its window *after* the request had already resolved.
+TuyAPI emits `data` synchronously **before** resolving the request promise, so the event had
+always passed by the time anything waited for it — the probe reported "no data event" on a
+perfectly healthy connection and escalated to a reconnect.
+
+`waitForDataEvent(timeoutMs, previousDataEventTime)` now takes a timestamp captured *before*
+the request and compares against it:
+
+```typescript
+const preLayer1DataEventTime = this.lastDataEventReceived;
+await Promise.race([this.tuya.get({ schema: true }), /* timeout */]);
+const fresh = await this.waitForDataEvent(
+  DeviceConstants.HEARTBEAT_DATA_EVENT_TIMEOUT_MS,
+  preLayer1DataEventTime,
+);
+```
+
+The `dp-refresh` handler updates the same fields as the `data` handler, so partial DPS updates
+(responses without `dps[1]`) count as valid traffic. Both changes are covered by
+`test/unit/tuya-connection-service.zombie.test.js`.
 
 ### Implementation (v1.0.9)
 
@@ -200,30 +231,79 @@ private async performHeartbeat(): Promise<void> {
 
 ### Connection Health Tracking
 
-Three timestamps track connection activity:
-- `lastDataEventTime` - Last time device sent sensor data (any DPS update)
+Timestamps and fields tracking connection activity:
+
+- `lastDataEventTime` - Last time device sent sensor data (any DPS update); drives the stale check
+- `lastDataEventReceived` - Same moment, used as the reference for probe freshness windows
+- `lastDataEventSource` - Whether that traffic arrived as `data` or `dp_refresh` (telemetry)
+- `lastSuccessfulRequestAt` - Last request that got a protocol response, regardless of freshness
 - `lastHeartbeatTime` - Last successful heartbeat probe
 - `lastStatusChangeTime` - Last connection status change (connected/disconnected)
 
-## Layer 4: Stale Connection Force-Reconnect (v0.99.98)
+`lastSuccessfulRequestAt` and `lastDataEventTime` are deliberately separate: a device can answer
+requests while no longer delivering telemetry, and only the second signals that.
 
-**Purpose**: Secondary protection layer that detects connections claiming to be active but haven't sent data in 10+ minutes.
+## Layer 3: Stale Connection Force-Reconnect (v0.99.98)
 
-The `scheduleNextReconnectionAttempt()` method includes Layer 4 protection:
+**Purpose**: Secondary protection layer that detects connections claiming to be active but haven't sent data in 15+ minutes.
+
+This is not a separate watchdog. `scheduleNextReconnectionAttempt()` *is* the health loop: on a
+healthy connection it reschedules itself every `RECONNECTION_INTERVAL_MS` (20 seconds), so the
+stale branch is evaluated at that cadence. The loop is started after every successful connect,
+reconnect and reinitialisation.
 
 ```typescript
-// Layer 4: Stale connection detection
+// Layer 3: stale connection detection, evaluated every 20 seconds
 if (this.isConnected) {
   const timeSinceLastData = Date.now() - this.lastDataEventTime;
-  if (timeSinceLastData > STALE_CONNECTION_THRESHOLD_MS) {
-    this.logger('⚠️ Stale connection detected - forcing reconnect');
-    this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 3);
-    await this.disconnect();
-    await this.connect();
+  if (timeSinceLastData > DeviceConstants.STALE_CONNECTION_THRESHOLD_MS) {
+    this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 8);
+    this.isConnected = false;          // falls through to the reconnection path below
+  } else {
+    // healthy: schedule the next health check and return
+    this.reconnectInterval = this.device.homey.setTimeout(
+      () => this.scheduleNextReconnectionAttempt(),
+      DeviceConstants.RECONNECTION_INTERVAL_MS,
+    );
     return;
   }
 }
 ```
+
+Because it reads `lastDataEventTime`, which both the `data` and `dp-refresh` handlers update,
+this layer is unaffected by devices that answer with partial DPS updates.
+
+## User Notifications (v3.1.0)
+
+Earlier versions notified at 2, 10 and 30 minutes of outage, and additionally on every socket
+error, TuyAPI disconnect, stale connection and zombie detection. In practice that meant push
+messages for recovery cycles that succeeded silently within seconds.
+
+Since v3.1.0:
+
+| Event | Behaviour |
+|---|---|
+| Socket error, disconnect event, stale connection, zombie detection | Logged only |
+| Outage lasting `OUTAGE_NOTIFICATION_DELAY_MS` (15 minutes) | **One** notification |
+| Recovery | Only if that outage notification was actually sent |
+| Non-recoverable error (wrong key/IP) | Notification retained |
+
+Deduplication is per outage, not per message: an outage of any length produces at most one alert.
+
+## Connection Telemetry (v3.1.0)
+
+Passive per-day counters are kept for 14 days in the device store: probe outcomes per layer
+(`data` / `dp_refresh` / `none` / `request_failed`), which layer detected a failure, reconnect
+attempts, instance reuse, and recovery durations.
+
+Two optional capabilities expose them, both gated by the `show_disconnect_diagnostic` setting
+and both `uiComponent: null`:
+
+- `adlar_zombie_detections_daily` — number with Insights; heartbeat zombie detections per day
+- `adlar_connection_diagnostics` — the full telemetry as JSON
+
+Read alongside `adlar_daily_disconnect_count`, the first gives the zombie-versus-clean ratio that
+[ADR-002](ADR-002-TUYA-VERBINDINGSMODEL.md) phase A2 depends on.
 
 ## Single-Source Connection Truth (v0.99.99)
 
@@ -248,7 +328,7 @@ scheduleNextReconnectionAttempt(): void {
 
 ## Overall Benefits
 
-- ✅ Detects zombie connections within 35 seconds (Layer 0) to 15 minutes (Layer 1-4)
+- ✅ Detects zombie connections within ~12 seconds (TuyAPI native) to 15 minutes (Layer 3)
 - ✅ Minimal network overhead (intelligent skip logic)
 - ✅ Works alongside reactive error handling (defense-in-depth)
 - ✅ Automatic recovery without user intervention
@@ -266,6 +346,8 @@ scheduleNextReconnectionAttempt(): void {
 - Sensor data resumes automatically after network disruptions
 - Reduced support burden (fewer manual interventions needed)
 - **Sleeping devices wake up transparently (v1.0.9)** - no false disconnect notifications
+- **No false zombie disconnects (v3.1.0)** - healthy connections are no longer torn down by a measurement error
+- **Quiet by default (v3.1.0)** - one notification per sustained outage instead of a cascade
 
 ---
 

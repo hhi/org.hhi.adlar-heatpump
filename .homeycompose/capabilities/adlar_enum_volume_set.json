@@ -16,6 +16,9 @@
   "uiComponent": "slider",
 
   "description": {
-    "nl": "dp 106: volume_set - Electricity Consumption Checking"
+    "en": "dp 106: volume_set - Electricity consumption checking setting",
+    "nl": "dp 106: volume_set - Stroomverbruik controle-instelling",
+    "de": "dp 106: volume_set - Einstellung zur Stromverbrauchsüberprüfung",
+    "fr": "dp 106: volume_set - Réglage de vérification de la consommation électrique"
   }
 }

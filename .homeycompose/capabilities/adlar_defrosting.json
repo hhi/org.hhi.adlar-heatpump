@@ -1,0 +1,33 @@
+{
+  "id": "adlar_defrosting",
+  "type": "boolean",
+  "title": {
+    "en": "Defrosting",
+    "nl": "Ontdooien",
+    "de": "Abtauen",
+    "fr": "Dégivrage"
+  },
+  "icon": "/assets/defrost-state.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Defrosting started",
+    "nl": "Ontdooien gestart",
+    "de": "Abtauen gestartet",
+    "fr": "Dégivrage démarré"
+  },
+  "insightsTitleFalse": {
+    "en": "Defrosting stopped",
+    "nl": "Ontdooien gestopt",
+    "de": "Abtauen gestoppt",
+    "fr": "Dégivrage arrêté"
+  },
+  "description": {
+    "en": "Defrost status from Modbus status register 0x0000, bit 8 (SYSTEM_DEFROST). True while the outdoor coil is actively being defrosted.",
+    "nl": "Ontdooistatus uit Modbus-statusregister 0x0000, bit 8 (SYSTEM_DEFROST). Waar zolang de buitenste spoel actief wordt ontdooid.",
+    "de": "Abtaustatus aus Modbus-Statusregister 0x0000, Bit 8 (SYSTEM_DEFROST). Wahr, solange der Außenluftkreis aktiv abgetaut wird.",
+    "fr": "État de dégivrage depuis le registre de statut Modbus 0x0000, bit 8 (SYSTEM_DEFROST). Vrai pendant le dégivrage actif de l'échangeur extérieur."
+  }
+}

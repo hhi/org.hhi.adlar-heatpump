@@ -53,7 +53,7 @@ Device Settings → Scroll to top → Edit credential fields → Save
 - **Settings Schema**: [driver.settings.compose.json:2-76](../../../drivers/intelligent-heat-pump/driver.settings.compose.json)
 - **Credential Detection**: [device.ts:2527-2530](../../../drivers/intelligent-heat-pump/device.ts)
 - **Auto-Reconnection**: [device.ts:2544-2569](../../../drivers/intelligent-heat-pump/device.ts)
-- **Reinitialize Method**: [tuya-connection-service.ts:125-193](../../../lib/services/tuya-connection-service.ts)
+- **Reinitialize Method**: [tuya-connection-service.ts:125-193](../../../lib/tuya/services/tuya-connection-service.ts)
 
 ---
 
@@ -171,4 +171,4 @@ homey app validate
 - [CLAUDE.md - Credential Management](../../../CLAUDE.md) - Developer guide
 - [Settings Configuration](../../../drivers/intelligent-heat-pump/driver.settings.compose.json) - Settings schema
 - [Device onSettings Handler](../../../drivers/intelligent-heat-pump/device.ts#L2527) - Implementation
-- [TuyaConnectionService.reinitialize()](../../../lib/services/tuya-connection-service.ts#L125) - Reconnection logic
+- [TuyaConnectionService.reinitialize()](../../../lib/tuya/services/tuya-connection-service.ts#L125) - Reconnection logic

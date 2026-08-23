@@ -9,7 +9,7 @@ Critical development patterns and best practices for working with this Homey app
 
 ## Constants Management System (v0.90.3+)
 
-**Location**: `lib/constants.ts`
+**Location**: `lib/tuya/constants.ts`
 
 Centralized configuration system in `DeviceConstants` class:
 

@@ -1,0 +1,31 @@
+{
+  "id": "adlar_zombie_detections_daily",
+  "title": {
+    "en": "Daily Zombie Detections",
+    "nl": "Dagelijkse Zombie-detecties",
+    "de": "Tägliche Zombie-Erkennungen",
+    "fr": "Détections de zombies quotidiennes"
+  },
+  "type": "number",
+  "min": 0,
+  "max": 9999,
+  "step": 1,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": null,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Daily zombie detections",
+    "nl": "Dagelijkse zombie-detecties",
+    "de": "Tägliche Zombie-Erkennungen",
+    "fr": "Détections de zombies quotidiennes"
+  },
+  "icon": "/assets/connection-status.svg",
+  "description": {
+    "en": "Counts how many times the heartbeat probe found the connection alive but silent today (Homey timezone). Compare with the daily disconnect count to see how much of the connection trouble is silent-socket versus clean disconnects. Resets each day.",
+    "nl": "Telt hoe vaak de heartbeat-probe de verbinding vandaag wel open maar stil aantrof (Homey-tijdzone). Vergelijk met de dagelijkse disconnect-telling om te zien welk deel van de verbindingsproblemen stille sockets zijn en welk deel schone disconnects. Reset elke dag.",
+    "de": "Zählt, wie oft die Heartbeat-Prüfung die Verbindung heute offen, aber stumm vorfand (Homey-Zeitzone). Vergleichen Sie den Wert mit den täglichen Verbindungsabbrüchen. Setzt sich täglich zurück.",
+    "fr": "Compte le nombre de fois où la sonde heartbeat a trouvé la connexion ouverte mais silencieuse aujourd'hui (fuseau horaire Homey). À comparer au nombre de déconnexions quotidiennes. Réinitialisation quotidienne."
+  }
+}

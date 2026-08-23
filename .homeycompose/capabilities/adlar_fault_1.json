@@ -1,0 +1,33 @@
+{
+  "id": "adlar_fault_1",
+  "type": "boolean",
+  "title": {
+    "en": "Fault register 1 active",
+    "nl": "Foutregister 1 actief",
+    "de": "Fehlerregister 1 aktiv",
+    "fr": "Registre de défaut 1 actif"
+  },
+  "icon": "/assets/fault.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Fault register 1 triggered",
+    "nl": "Foutregister 1 actief",
+    "de": "Fehlerregister 1 ausgelöst",
+    "fr": "Registre de défaut 1 déclenché"
+  },
+  "insightsTitleFalse": {
+    "en": "Fault register 1 cleared",
+    "nl": "Foutregister 1 opgeheven",
+    "de": "Fehlerregister 1 zurückgesetzt",
+    "fr": "Registre de défaut 1 effacé"
+  },
+  "description": {
+    "en": "True when any F1-series fault bit is set in Modbus fault register 0x0002 (faultState1).",
+    "nl": "Waar wanneer een of meer F1-serie storingsbits actief zijn in Modbus-foutregister 0x0002 (faultState1).",
+    "de": "Wahr, wenn ein F1-Fehlerbit im Modbus-Fehlerregister 0x0002 (faultState1) gesetzt ist.",
+    "fr": "Vrai si un bit de défaut F1 est actif dans le registre de défaut Modbus 0x0002 (faultState1)."
+  }
+}

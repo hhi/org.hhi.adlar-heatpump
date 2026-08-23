@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adlar Live Operation</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f8faf7;
+      --panel: #ffffff;
+      --panel-soft: #eef4f0;
+      --text: #17211b;
+      --muted: #68736c;
+      --border: rgba(22, 35, 27, 0.1);
+      --accent: #0f8f67;
+      --accent-soft: #dff5eb;
+      --warn: #b96500;
+      --warn-soft: #fff0d7;
+      --danger: #b42318;
+      --danger-soft: #ffe4df;
+      --shadow: 0 8px 24px rgba(15, 24, 18, 0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101512;
+        --panel: #18201b;
+        --panel-soft: #202a24;
+        --text: #edf4ee;
+        --muted: #9aa89f;
+        --border: rgba(238, 246, 240, 0.12);
+        --accent: #45d197;
+        --accent-soft: rgba(69, 209, 151, 0.14);
+        --warn: #ffb75d;
+        --warn-soft: rgba(255, 183, 93, 0.16);
+        --danger: #ff8a7d;
+        --danger-soft: rgba(255, 138, 125, 0.16);
+        --shadow: none;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      letter-spacing: 0;
+    }
+
+    .widget {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      min-height: 340px;
+      padding: 12px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .device-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .pill {
+      min-width: 0;
+      max-width: 115px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .pill.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .pill.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .pill.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .hero {
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .hero-label,
+    .metric-label,
+    .footer-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .delta {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .delta-value {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 0.95;
+    }
+
+    .delta-unit {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .regulation {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .regulation-line {
+      overflow-wrap: anywhere;
+    }
+
+    .regulation-main {
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .power-line {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .power-box,
+    .metric {
+      border-radius: 8px;
+      background: var(--panel-soft);
+      padding: 9px;
+      min-width: 0;
+    }
+
+    .power-value,
+    .metric-value {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .metric-value.small {
+      font-size: 16px;
+    }
+
+    .value-line {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .value-number {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .value-unit {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .footer {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .footer-item {
+      min-width: 0;
+      border-top: 1px solid var(--border);
+      padding-top: 7px;
+    }
+
+    .footer-value {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 316px;
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 360px) {
+      .widget {
+        gap: 8px;
+        padding: 10px;
+      }
+
+      .main {
+        grid-template-columns: 1fr;
+      }
+
+      .delta-value {
+        font-size: 34px;
+      }
+
+      .footer {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="root" class="empty">Live bedrijf wordt geladen...</main>
+
+  <script>
+    function onHomeyReady(Homey) {
+      var root = document.getElementById('root');
+      var refreshTimer = null;
+
+      function formatValue(value, suffix, decimals) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) return '-';
+        return Number(value).toFixed(decimals) + suffix;
+      }
+
+      function formatNumber(value, decimals) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) return '-';
+        return Number(value).toFixed(decimals);
+      }
+
+      function formatAge(ageMs) {
+        if (ageMs === null || ageMs === undefined) return '-';
+        var seconds = Math.max(0, Math.round(ageMs / 1000));
+        if (seconds < 2) return 'nu';
+        if (seconds < 60) return seconds + 's';
+        if (seconds < 3600) return Math.round(seconds / 60) + 'm';
+        return Math.round(seconds / 3600) + 'u';
+      }
+
+      function formatPoll(timestamp, ageMs) {
+        if (!timestamp) return '-';
+        var time = new Date(timestamp).toLocaleTimeString('nl-NL', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        return time + ' / ' + formatAge(ageMs);
+      }
+
+      function formatSetpointDeviation(state) {
+        if (!state.regulation || state.regulation.setpointDeviationC === null) return '-';
+        return formatNumber(state.regulation.setpointDeviationC, 1);
+      }
+
+      function statusClass(state) {
+        if (!state.ok || state.status.faultActive) return 'danger';
+        if (state.status.defrosting || state.data.freshness === 'stale') return 'warn';
+        if (state.status.running || state.status.compressorOn) return 'active';
+        return '';
+      }
+
+      function renderEmpty(message) {
+        root.className = 'empty';
+        root.textContent = message || 'Geen live data beschikbaar.';
+      }
+
+      function render(state) {
+        if (!state || !state.ok) {
+          renderEmpty(state && state.message ? state.message : 'Geen live data beschikbaar.');
+          return;
+        }
+
+        var cls = statusClass(state);
+        var statusText = state.status.faultActive
+          ? 'Storing'
+          : state.status.defrosting
+            ? 'Defrost'
+            : state.status.running || state.status.compressorOn
+              ? 'Actief'
+              : 'Standby';
+        var cop = state.process.liveCopEstimate !== null
+          ? state.process.liveCopEstimate
+          : state.process.capabilityCop;
+
+        root.className = 'widget';
+        root.innerHTML = [
+          '<section class="topbar">',
+          '<div class="device-name">' + escapeHtml(state.device.name || 'Adlar warmtepomp') + '</div>',
+          '<div class="pills">',
+          '<span class="pill ' + cls + '">' + escapeHtml(statusText) + '</span>',
+          '<span class="pill">' + escapeHtml(state.status.mode) + '</span>',
+          '<span class="pill ' + (state.data.freshness === 'stale' ? 'warn' : '') + '">' + escapeHtml(state.status.connectionLabel || state.status.connectionStatus) + '</span>',
+          '</div>',
+          '</section>',
+          '<section class="main">',
+          '<div class="hero">',
+          '<div>',
+          '<div class="hero-label">Aanvoer - retour</div>',
+          '<div class="delta"><span class="delta-value">' + formatValue(state.process.deltaTC, '', 1) + '</span><span class="delta-unit">C</span></div>',
+          '<div class="regulation">',
+          '<div class="regulation-line">Regeling</div>',
+          '<div class="regulation-line regulation-main">' + escapeHtml(state.regulation.summary || 'Regeling onbekend') + '</div>',
+          '<div class="regulation-line">Setpoint afwijking ' + escapeHtml(formatSetpointDeviation(state)) + ' C</div>',
+          '<div class="regulation-line">' + escapeHtml(state.regulation.hysteresisText || 'Hysterese onbekend') + '</div>',
+          '</div>',
+          '</div>',
+          '<div class="power-line">',
+          metricBox('Input', formatNumber(state.process.electricalPowerKw, 2), 'kW'),
+          metricBox('Output', formatNumber(state.process.thermalPowerKw, 2), 'kW'),
+          '</div>',
+          '</div>',
+          '<div class="grid">',
+          metricBox('Flow', formatNumber(state.process.flowLpm, 1), 'L/min'),
+          metricBox('Compressor', formatNumber(state.process.compressorHz, 0), 'Hz'),
+          metricBox('COP live', formatNumber(cop, 1), ''),
+          metricBox('Defrost', state.status.defrosting ? 'Ja' : 'Nee', ''),
+          '</div>',
+          '</section>',
+          '<section class="footer">',
+          footerItem('Aanvoer (T7)', formatValue(state.temperatures.outletC, ' C', 1)),
+          footerItem('Retour (T6)', formatValue(state.temperatures.inletC, ' C', 1)),
+          footerItem('Buiten', formatValue(state.temperatures.ambientC, ' C', 1)),
+          footerItem('Setpoint', formatValue(state.regulation.activeSetpointC, ' C', 1)),
+          footerItem('Laatste poll', formatPoll(state.data.timestamp, state.data.ageMs)),
+          '</section>',
+        ].join('');
+      }
+
+      function metricBox(label, value, unit) {
+        return [
+          '<div class="metric">',
+          '<div class="metric-label">' + escapeHtml(label) + '</div>',
+          '<div class="metric-value small value-line">',
+          '<span class="value-number">' + escapeHtml(value) + '</span>',
+          unit ? '<span class="value-unit">' + escapeHtml(unit) + '</span>' : '',
+          '</div>',
+          '</div>',
+        ].join('');
+      }
+
+      function footerItem(label, value) {
+        return [
+          '<div class="footer-item">',
+          '<div class="footer-label">' + escapeHtml(label) + '</div>',
+          '<div class="footer-value">' + escapeHtml(value) + '</div>',
+          '</div>',
+        ].join('');
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function getDeviceId() {
+        if (typeof Homey.getDeviceIds !== 'function') return '';
+        var ids = Homey.getDeviceIds();
+        return Array.isArray(ids) && ids.length > 0 ? ids[0] : '';
+      }
+
+      function load() {
+        var deviceId = getDeviceId();
+        var path = deviceId ? '/?deviceId=' + encodeURIComponent(deviceId) : '/';
+        Homey.api('GET', path, {})
+          .then(function(state) {
+            render(state);
+          })
+          .catch(function() {
+            renderEmpty('Live data kon niet worden geladen.');
+          });
+      }
+
+      load();
+      refreshTimer = setInterval(load, 10000);
+      window.addEventListener('beforeunload', function() {
+        if (refreshTimer) clearInterval(refreshTimer);
+      });
+      Homey.ready();
+    }
+  </script>
+</body>
+</html>

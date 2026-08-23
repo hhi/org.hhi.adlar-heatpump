@@ -1,4 +1,22 @@
 {
+  "3.1.1": {
+    "en": "Moved the Modbus dashboard reference out of the README into a dedicated guide (docs/setup/MODBUS_DASHBOARD_GUIDE) for easier navigation.",
+    "nl": "De Modbus-dashboardreferentie is uit de README gehaald en verplaatst naar een aparte gids (docs/setup/MODBUS_DASHBOARD_GUIDE) voor eenvoudigere navigatie.",
+    "de": "Die Modbus-Dashboard-Referenz wurde aus der README entfernt und in einen eigenen Leitfaden (docs/setup/MODBUS_DASHBOARD_GUIDE) verschoben, für einfachere Navigation.",
+    "fr": "La référence du tableau de bord Modbus a été déplacée du README vers un guide dédié (docs/setup/MODBUS_DASHBOARD_GUIDE) pour faciliter la navigation."
+  },
+  "3.1.0": {
+    "en": "Fixed false 'zombie connection' detections that reconnected healthy devices. Connection alerts are now sent once, after 15 minutes of an unresolved outage, instead of at 2, 10 and 30 minutes. Optional connection diagnostics can be enabled in device settings.",
+    "nl": "Valse 'zombie-verbinding'-detecties opgelost die gezonde apparaten lieten herverbinden. Verbindingsmeldingen komen nu eenmalig na 15 minuten aanhoudende uitval, in plaats van na 2, 10 en 30 minuten. Optionele verbindingsdiagnostiek is aan te zetten in de apparaatinstellingen.",
+    "de": "Falsche „Zombie-Verbindung“-Erkennungen behoben, die funktionierende Geräte neu verbinden ließen. Verbindungsmeldungen erfolgen jetzt einmalig nach 15 Minuten anhaltender Störung statt nach 2, 10 und 30 Minuten. Optionale Verbindungsdiagnose lässt sich in den Geräteeinstellungen aktivieren.",
+    "fr": "Correction des fausses détections de « connexion zombie » qui reconnectaient des appareils sains. Les alertes de connexion sont désormais envoyées une seule fois, après 15 minutes de panne non résolue, au lieu de 2, 10 et 30 minutes. Des diagnostics de connexion optionnels sont activables dans les paramètres de l'appareil."
+  },
+  "3.0.0": {
+    "en": "Added a Modbus device driver for Adlar Castra Aurora heat pumps, with local dashboards and Modbus register controls. The existing Tuya driver remains available.",
+    "nl": "Een Modbus-apparaatdriver toegevoegd voor Adlar Castra Aurora-warmtepompen, met lokale dashboards en Modbus-registerbediening. De bestaande Tuya-driver blijft beschikbaar.",
+    "de": "Einen Modbus-Gerätetreiber für Adlar Castra Aurora-Wärmepumpen mit lokalen Dashboards und Modbus-Registersteuerung hinzugefügt. Der bestehende Tuya-Treiber bleibt verfügbar.",
+    "fr": "Ajout d'un pilote Modbus pour les pompes à chaleur Adlar Castra Aurora, avec tableaux de bord locaux et commande des registres Modbus. Le pilote Tuya existant reste disponible."
+  },
   "2.13.1": {
     "en": "Flow card titles no longer show raw placeholders such as [[mode]] or [[status]].",
     "nl": "Flow-kaarttitels tonen niet langer ruwe placeholders zoals [[mode]] of [[status]].",

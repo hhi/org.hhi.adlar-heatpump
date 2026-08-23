@@ -26,6 +26,9 @@
   },
 
   "description": {
-    "nl": "dp 33 : defrost_state - Defrosting"
+    "en": "dp 33: defrost_state - Heat pump defrost cycle active status",
+    "nl": "dp 33: defrost_state - Warmtepomp ontdooicyclus actieve status",
+    "de": "dp 33: defrost_state - Wärmepumpen-Abtauzyklus Aktivstatus",
+    "fr": "dp 33: defrost_state - État actif du cycle de dégivrage de la pompe à chaleur"
   }
 }

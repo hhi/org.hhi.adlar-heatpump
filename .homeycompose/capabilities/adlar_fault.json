@@ -22,6 +22,9 @@
   },
 
   "description": {
-    "nl": "dp 15 : fault - Fault"
+    "en": "dp 15: fault - Heat pump system fault code",
+    "nl": "dp 15: fault - Warmtepomp systeem storingscode",
+    "de": "dp 15: fault - Wärmepumpensystem-Fehlercode",
+    "fr": "dp 15: fault - Code de défaut du système de pompe à chaleur"
   }
 }

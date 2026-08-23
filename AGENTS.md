@@ -17,7 +17,7 @@ Code is TypeScript-first with ES2020 modules.
 
 - Follow two-space indentation, trailing commas, and semicolons as enforced by ESLint.
 - Classes and flow card enumerations use PascalCase; functions, services, and capability IDs prefer camelCase.
-- Constants exported from `lib/constants.ts` stay UPPER_SNAKE_CASE.
+- Constants exported from `lib/tuya/constants.ts` stay UPPER_SNAKE_CASE.
 - Group imports by Homey SDK, third-party modules, then local files.
 - For Markdown files, adhere to markdownlint rules.
 

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adlar Aurora II — Interactief Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #080d18; color: #dde8f8; min-height: 100vh; padding: 1.5rem; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f0f6ff; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 0.85rem; color: #5a7a9a; margin-bottom: 1.5rem; }
+  .status-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #5a7a9a; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+  .dot.ok { background: #22c55e; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 1.25rem; }
+  .card-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #5a7a9a; margin-bottom: 0.5rem; }
+  .card-value { font-size: 1.6rem; font-weight: 700; color: #dde8f8; }
+  .card-unit { font-size: 0.85rem; color: #5a7a9a; margin-left: 0.25rem; }
+  .section-title { font-size: 0.85rem; font-weight: 700; color: #5cb3e8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #22334f; }
+  .write-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+  .write-card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 1.25rem; }
+  .write-card label { display: block; font-size: 0.8rem; font-weight: 600; color: #5a7a9a; margin-bottom: 0.5rem; }
+  .write-row { display: flex; gap: 0.5rem; align-items: center; }
+  .write-row input { flex: 1; background: #080d18; border: 1px solid #22334f; border-radius: 6px; color: #dde8f8; padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+  .write-row input:focus { outline: none; border-color: #3b82f6; }
+  .write-row .unit { font-size: 0.8rem; color: #5a7a9a; white-space: nowrap; }
+  .btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+  .feedback { font-size: 0.78rem; margin-top: 0.4rem; height: 1em; transition: color 0.2s; }
+  .feedback.ok { color: #22c55e; }
+  .feedback.err { color: #ef4444; }
+  .range-hint { font-size: 0.72rem; color: #3d5070; margin-top: 0.25rem; }
+  nav { margin: -1.5rem -1.5rem 1.5rem; padding: 8px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; gap: 8px; flex-wrap: wrap; }
+  nav a { font-size: 12px; font-weight: 600; color: #94a3b8; text-decoration: none; padding: 4px 12px; border-radius: 9999px; border: 1px solid #334155; transition: background 0.15s, color 0.15s; }
+  nav a:hover { background: #334155; color: #f8fafc; }
+  nav a.active { background: #0f172a; color: #38bdf8; border-color: #38bdf8; }
+  /* ── Live overzicht ── */
+  .live-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+  .live-card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 3px; border-left: 4px solid #22334f; transition: border-left-color 0.8s ease; }
+  .live-card-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #5a7a9a; }
+  .live-card-value { font-size: 1.5rem; font-weight: 700; color: #dde8f8; line-height: 1; }
+  .live-card-unit { font-size: 0.75rem; color: #5a7a9a; }
+  .live-card-spark { margin-top: 5px; width: 100%; height: 24px; display: block; }
+  .live-cop { font-size: 2.2rem; color: #22c55e; }
+  .live-cop.avg { color: #fbbf24; }
+  .live-cop.low { color: #ef4444; }
+  .machine-row { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .machine-card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 0.9rem 1.25rem; flex: 1; min-width: 140px; }
+  .machine-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #5a7a9a; margin-bottom: 6px; }
+  .machine-value { font-size: 1.1rem; font-weight: 700; color: #dde8f8; }
+  .machine-unit { font-size: 0.72rem; color: #5a7a9a; }
+  .bar-track { height: 6px; background: #22334f; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease, background-color 0.5s; width: 0%; }
+  .machine-val-row { display: flex; align-items: baseline; gap: 5px; }
+  .bar-fill-blue { background: #38bdf8; }
+  @media (prefers-color-scheme: light) {
+    body { background: #f1f5f9; color: #0f172a; }
+    h1 { color: #0f172a; }
+    .subtitle { color: #64748b; }
+    .status-bar { color: #64748b; }
+    .live-card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .live-card-label { color: #64748b; }
+    .live-card-value { color: #0f172a; }
+    .live-card-unit { color: #64748b; }
+    .machine-card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .machine-label { color: #64748b; }
+    .machine-value { color: #0f172a; }
+    .bar-track { background: #e2e8f0; }
+    .grid .card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .card-label { color: #64748b; }
+    .card-value { color: #0f172a; }
+    .card-unit  { color: #64748b; }
+    .section-title { color: #1d4ed8; border-bottom-color: #cbd5e1; }
+    .write-card, .write-grid .write-card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .write-card label { color: #64748b; }
+    .write-row input { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+    .write-row .unit { color: #64748b; }
+    .range-hint { color: #94a3b8; }
+    nav { background: #ffffff; border-bottom-color: #cbd5e1; }
+    nav a { color: #475569; border-color: #e2e8f0; }
+    nav a:hover { background: #e2e8f0; color: #0f172a; }
+    nav a.active { background: #e0f2fe; color: #0284c7; border-color: #0284c7; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/">Dashboard</a>
+  <a href="/interactive" class="active">Interactief</a>
+  <a href="/live">Live</a>
+  <a href="/expert">Expert</a>
+  <a href="/changelog">Change Log</a>
+  <a href="/heating-curve">Stooklijn</a>
+</nav>
+<h1>Interactief Dashboard</h1>
+<p class="subtitle">Adlar Castra / Aurora II &mdash; lees &amp; schrijf gebruikerssetpoints</p>
+
+<div class="status-bar">
+  <span class="dot" id="dot"></span>
+  <span id="status-text">Ophalen&hellip;</span>
+  <span style="margin-left:auto;font-size:0.75rem;" id="last-update"></span>
+</div>
+
+<!-- Live overzicht -->
+<p class="section-title">Live overzicht</p>
+<div class="live-grid" id="live-grid">
+  <div class="live-card" id="lc-cop">
+    <div class="live-card-label">Internal COP</div>
+    <div class="live-card-value live-cop" id="lv-cop">—</div>
+  </div>
+  <div class="live-card" id="lc-power">
+    <div class="live-card-label">Elektrisch vermogen</div>
+    <div class="live-card-value" id="lv-power">—</div>
+    <div class="live-card-unit">kW</div>
+  </div>
+  <div class="live-card" id="lc-outlet">
+    <div class="live-card-label">Aanvoer (T7)</div>
+    <div class="live-card-value" id="lv-outlet">—</div>
+    <div class="live-card-unit">°C</div>
+    <svg class="live-card-spark" id="sp-outlet" viewBox="0 0 120 24" preserveAspectRatio="none"></svg>
+  </div>
+  <div class="live-card" id="lc-inlet">
+    <div class="live-card-label">Retour (T6)</div>
+    <div class="live-card-value" id="lv-inlet">—</div>
+    <div class="live-card-unit">°C</div>
+    <svg class="live-card-spark" id="sp-inlet" viewBox="0 0 120 24" preserveAspectRatio="none"></svg>
+  </div>
+  <div class="live-card" id="lc-ambient">
+    <div class="live-card-label">Buiten (T1)</div>
+    <div class="live-card-value" id="lv-ambient">—</div>
+    <div class="live-card-unit">°C</div>
+    <svg class="live-card-spark" id="sp-ambient" viewBox="0 0 120 24" preserveAspectRatio="none"></svg>
+  </div>
+  <div class="live-card" id="lc-dhw">
+    <div class="live-card-label">Tapwater</div>
+    <div class="live-card-value" id="lv-dhw">—</div>
+    <div class="live-card-unit">°C</div>
+    <svg class="live-card-spark" id="sp-dhw" viewBox="0 0 120 24" preserveAspectRatio="none"></svg>
+  </div>
+</div>
+
+<div class="machine-row">
+  <div class="machine-card">
+    <div class="machine-label">Compressor</div>
+    <div class="machine-val-row">
+      <div class="machine-value" id="lv-comp">—</div>
+      <div class="machine-unit">Hz</div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="comp-bar"></div></div>
+  </div>
+  <div class="machine-card">
+    <div class="machine-label">Debiet</div>
+    <div class="machine-val-row">
+      <div class="machine-value" id="lv-flow">—</div>
+      <div class="machine-unit">L/min</div>
+    </div>
+  </div>
+  <div class="machine-card">
+    <div class="machine-label">Ventilator</div>
+    <div class="machine-val-row">
+      <div class="machine-value" id="lv-fan">—</div>
+      <div class="machine-unit">%</div>
+    </div>
+    <div class="bar-track"><div class="bar-fill bar-fill-blue" id="fan-bar"></div></div>
+  </div>
+  <div class="machine-card">
+    <div class="machine-label">ΔT water</div>
+    <div class="machine-val-row">
+      <div class="machine-value" id="lv-dt">—</div>
+      <div class="machine-unit">°C</div>
+    </div>
+  </div>
+</div>
+
+<!-- Live lees-sectie -->
+<!-- Schrijf-sectie -->
+<p class="section-title" style="margin-top:1rem;">Setpoints aanpassen</p>
+<div class="write-grid">
+
+  <div class="write-card">
+    <label>Verwarming setpoint</label>
+    <div class="write-row">
+      <input type="number" id="i-heat" min="15" max="60" step="0.5" placeholder="15–60">
+      <span class="unit">°C</span>
+      <button class="btn btn-primary" onclick="doWrite('tempSetHeating','i-heat','fb-heat')">Stel in</button>
+    </div>
+    <div class="range-hint">Bereik: 15–60 °C</div>
+    <div class="feedback" id="fb-heat"></div>
+  </div>
+
+  <div class="write-card">
+    <label>Tapwater setpoint</label>
+    <div class="write-row">
+      <input type="number" id="i-dhw" min="20" max="75" step="0.5" placeholder="20–75">
+      <span class="unit">°C</span>
+      <button class="btn btn-primary" onclick="doWrite('tempSetHotWater','i-dhw','fb-dhw')">Stel in</button>
+    </div>
+    <div class="range-hint">Bereik: 20–75 °C</div>
+    <div class="feedback" id="fb-dhw"></div>
+  </div>
+
+  <div class="write-card">
+    <label>Koeling setpoint</label>
+    <div class="write-row">
+      <input type="number" id="i-cool" min="7" max="25" step="0.5" placeholder="7–25">
+      <span class="unit">°C</span>
+      <button class="btn btn-primary" onclick="doWrite('tempSetCooling','i-cool','fb-cool')">Stel in</button>
+    </div>
+    <div class="range-hint">Bereik: 7–25 °C</div>
+    <div class="feedback" id="fb-cool"></div>
+  </div>
+
+  <div class="write-card">
+    <label>Hoofdschakelaar</label>
+    <div class="write-row">
+      <select id="i-switch" style="flex:1;background:#0f1117;border:1px solid #374151;border-radius:6px;color:#f1f5f9;padding:0.5rem 0.75rem;font-size:0.9rem;">
+        <option value="1">Aan</option>
+        <option value="0">Uit</option>
+      </select>
+      <button class="btn btn-primary" onclick="doWriteSelect('mainSwitch','i-switch','fb-switch')">Stel in</button>
+    </div>
+    <div class="feedback" id="fb-switch"></div>
+  </div>
+
+  <div class="write-card">
+    <label>Gebruikersmodus</label>
+    <div class="write-row">
+      <select id="i-mode" style="flex:1;background:#0f1117;border:1px solid #374151;border-radius:6px;color:#f1f5f9;padding:0.5rem 0.75rem;font-size:0.9rem;">
+        <option value="0">Standaard</option>
+        <option value="1">Krachtig</option>
+        <option value="2">Stil</option>
+      </select>
+      <button class="btn btn-primary" onclick="doWriteSelect('runningMode','i-mode','fb-mode')">Stel in</button>
+    </div>
+    <div class="feedback" id="fb-mode"></div>
+  </div>
+
+</div>
+
+<p style="margin-top:2rem;font-size:0.75rem;color:#374151;">
+  <a href="/live" style="color:#3b82f6;text-decoration:none;">Live dashboard (alle capabilities)</a>
+</p>
+
+<script>
+let refreshTimer = null;
+
+// ── Sparklines ─────────────────────────────────────────────────────────────
+const MAX_SP = 20;
+const SP_RANGE = { outlet: { min:10, max:65 }, inlet: { min:10, max:65 }, ambient: { min:-25, max:45 }, dhw: { min:20, max:70 } };
+const spData = { outlet: [], inlet: [], ambient: [], dhw: [] };
+
+function pushSp(key, val) {
+  if (!Number.isFinite(val)) return;
+  spData[key].push(val);
+  if (spData[key].length > MAX_SP) spData[key].shift();
+}
+
+function drawSp(id, key, color) {
+  const svg = document.getElementById(id);
+  if (!svg || spData[key].length < 2) return;
+  const { min, max } = SP_RANGE[key] || { min: -25, max: 75 };
+  const pts = spData[key].map((v, i) => {
+    const x = (i / (spData[key].length - 1)) * 120;
+    const y = 22 - (Math.max(min, Math.min(max, v)) - min) / (max - min) * 18;
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>`;
+}
+
+// ── Temperatuurkleur voor linkerrand ───────────────────────────────────────
+const T_STOPS = [
+  { t:-20, h:'#60a5fa' }, { t:5, h:'#38bdf8' },
+  { t:25, h:'#34d399' }, { t:40, h:'#fb923c' }, { t:60, h:'#f87171' },
+];
+function lerpHex(h1, h2, f) {
+  const p = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  const [r1,g1,b1] = p(h1), [r2,g2,b2] = p(h2);
+  return '#' + [Math.round(r1+f*(r2-r1)),Math.round(g1+f*(g2-g1)),Math.round(b1+f*(b2-b1))].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function tempHex(c) {
+  const s = T_STOPS;
+  if (c <= s[0].t) return s[0].h;
+  if (c >= s[s.length-1].t) return s[s.length-1].h;
+  for (let i = 0; i < s.length-1; i++) {
+    if (c >= s[i].t && c <= s[i+1].t) return lerpHex(s[i].h, s[i+1].h, (c-s[i].t)/(s[i+1].t-s[i].t));
+  }
+  return s[s.length-1].h;
+}
+
+function setLiveCard(cardId, valueId, sparkId, sparkKey, val) {
+  const el = document.getElementById(valueId);
+  if (!el) return;
+  if (!Number.isFinite(val)) { el.textContent = '—'; return; }
+  el.textContent = val.toFixed(1);
+  const card = document.getElementById(cardId);
+  if (card) card.style.borderLeftColor = tempHex(val);
+  pushSp(sparkKey, val);
+  drawSp(sparkId, sparkKey, tempHex(val));
+}
+
+function updateLiveOverview(d) {
+  const sensors = d.sensors ?? {};
+  const power   = d.power   ?? {};
+  const cop     = d.cop     ?? {};
+
+  // COP
+  const copEl = document.getElementById('lv-cop');
+  if (copEl) {
+    const v = cop.cop ?? 0;
+    copEl.textContent = cop.valid && v > 0 ? v.toFixed(2) : '—';
+    copEl.className = 'live-card-value live-cop' + (v >= 4 ? '' : v >= 2.5 ? ' avg' : v > 0 ? ' low' : '');
+  }
+
+  // Vermogen
+  const pwEl = document.getElementById('lv-power');
+  if (pwEl) pwEl.textContent = Number.isFinite(power.inputPowerKw) ? power.inputPowerKw.toFixed(2) : '—';
+
+  // Temperaturen
+  setLiveCard('lc-outlet',  'lv-outlet',  'sp-outlet',  'outlet',  sensors.outletT7?.value);
+  setLiveCard('lc-inlet',   'lv-inlet',   'sp-inlet',   'inlet',   sensors.inletT6?.value);
+  setLiveCard('lc-ambient', 'lv-ambient', 'sp-ambient', 'ambient', sensors.ambientT1?.value);
+  setLiveCard('lc-dhw',     'lv-dhw',     'sp-dhw',     'dhw',     sensors.dhwTankTemp?.value);
+
+  // Machine
+  const freq = sensors.compRunningFreq?.value;
+  const flow = sensors.waterFlow?.value;
+  const fan  = sensors.fanSpeed?.value;
+  const inlet = sensors.inletT6?.value;
+  const outlet = sensors.outletT7?.value;
+
+  const compEl = document.getElementById('lv-comp');
+  if (compEl) compEl.textContent = Number.isFinite(freq) ? Math.round(freq) : '—';
+  const compBar = document.getElementById('comp-bar');
+  if (compBar) {
+    const pct = Math.min(100, (freq ?? 0) / 120 * 100);
+    compBar.style.width = pct + '%';
+    compBar.style.backgroundColor = pct > 75 ? '#f97316' : pct > 40 ? '#22c55e' : '#38bdf8';
+  }
+  const flowEl = document.getElementById('lv-flow');
+  if (flowEl) flowEl.textContent = Number.isFinite(flow) ? flow.toFixed(1) : '—';
+  const fanEl = document.getElementById('lv-fan');
+  if (fanEl) fanEl.textContent = Number.isFinite(fan) ? Math.round(fan) : '—';
+  const fanBar = document.getElementById('fan-bar');
+  if (fanBar) fanBar.style.width = Math.min(100, (fan ?? 0)) + '%';
+  const dtEl = document.getElementById('lv-dt');
+  if (dtEl && Number.isFinite(inlet) && Number.isFinite(outlet)) {
+    dtEl.textContent = (outlet - inlet).toFixed(1);
+  }
+}
+
+// sensors[key] is een SensorValue object { value, raw, unit, label }
+function sv(sensors, key) {
+  const obj = sensors[key];
+  if (obj == null) return null;
+  return typeof obj === 'object' ? obj.value : obj;
+}
+
+function fmt(v, decimals = 1) {
+  if (v == null) return '—';
+  return typeof v === 'number' ? v.toFixed(decimals) : String(v);
+}
+
+async function refresh() {
+  const dot = document.getElementById('dot');
+  const statusText = document.getElementById('status-text');
+  try {
+    const r = await fetch('/api/snapshot');
+    if (r.status === 204) { statusText.textContent = 'Wachten op eerste poll…'; return; }
+    if (!r.ok) throw new Error(r.statusText);
+    const d = await r.json();
+
+    dot.className = 'dot ok';
+    statusText.textContent = 'Verbonden';
+    document.getElementById('last-update').textContent = 'Bijgewerkt: ' + new Date().toLocaleTimeString('nl-NL');
+
+    const sensors  = d.sensors  ?? {};
+    const control  = d.control  ?? {};
+
+    updateLiveOverview(d);
+
+    // Werk invoervelden bij met actuele waarden, behalve tijdens actieve invoer.
+    updateInputIfNotActive('i-heat', control.heatingSetpointC);
+    updateInputIfNotActive('i-dhw',  control.dhwSetpointC);
+    updateInputIfNotActive('i-cool', control.coolingSetpointC);
+    setSelectIfUnchanged('i-switch', control.on ? '1' : '0');
+    setSelectIfUnchanged('i-mode',   control.userMode != null ? String(control.userMode) : null);
+  } catch (e) {
+    dot.className = 'dot';
+    statusText.textContent = 'Geen verbinding: ' + e.message;
+  }
+}
+
+function updateInputIfNotActive(id, val) {
+  const el = document.getElementById(id);
+  if (!el || document.activeElement === el || val == null) return;
+  const formattedNewVal = Number(val).toFixed(1);
+  if (el.value !== formattedNewVal) el.value = formattedNewVal;
+}
+
+function setSelectIfUnchanged(id, val) {
+  if (val == null) return;
+  const el = document.getElementById(id);
+  if (el && !el.dataset.userChanged) el.value = val;
+}
+
+async function doWrite(key, inputId, fbId) {
+  const input = document.getElementById(inputId);
+  const fb = document.getElementById(fbId);
+  const value = parseFloat(input.value);
+  if (isNaN(value)) { setFb(fb, false, 'Voer een geldige waarde in'); return; }
+  fb.textContent = 'Bezig…'; fb.className = 'feedback';
+  try {
+    const r = await fetch('/api/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value }),
+    });
+    const j = await r.json();
+    if (j.ok) { setFb(fb, true, 'Opgeslagen'); setTimeout(() => refresh(), 2000); }
+    else setFb(fb, false, j.error ?? 'Fout');
+  } catch (e) { setFb(fb, false, e.message); }
+}
+
+async function doWriteSelect(key, selectId, fbId) {
+  const sel = document.getElementById(selectId);
+  const value = parseFloat(sel.value);
+  await doWriteValue(key, value, fbId);
+}
+
+async function doWriteValue(key, value, fbId) {
+  const fb = document.getElementById(fbId);
+  fb.textContent = 'Bezig…'; fb.className = 'feedback';
+  try {
+    const r = await fetch('/api/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value }),
+    });
+    const j = await r.json();
+    if (j.ok) { setFb(fb, true, 'Opgeslagen'); setTimeout(() => refresh(), 2000); }
+    else setFb(fb, false, j.error ?? 'Fout');
+  } catch (e) { setFb(fb, false, e.message); }
+}
+
+function setFb(el, ok, msg) {
+  el.textContent = msg;
+  el.className = 'feedback ' + (ok ? 'ok' : 'err');
+  setTimeout(() => { el.textContent = ''; el.className = 'feedback'; }, 4000);
+}
+
+refresh();
+refreshTimer = setInterval(refresh, 5000);
+</script>
+</body>
+</html>

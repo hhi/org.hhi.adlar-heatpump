@@ -1,0 +1,49 @@
+{
+  "id": "adlar_enum_work_mode_modbus",
+  "title": {
+    "en": "Work mode",
+    "nl": "Werkmodus",
+    "de": "Betriebsmodus",
+    "fr": "Mode de fonctionnement"
+  },
+  "type": "enum",
+  "values": [
+    {
+      "id": "ECO",
+      "title": {
+        "en": "ECO (Silent)",
+        "nl": "ECO (Stil)",
+        "de": "ECO (Leise)",
+        "fr": "ECO (Silencieux)"
+      }
+    },
+    {
+      "id": "Normal",
+      "title": {
+        "en": "Normal (Standard)",
+        "nl": "Normaal (Standaard)",
+        "de": "Normal (Standard)",
+        "fr": "Normal (Standard)"
+      }
+    },
+    {
+      "id": "Boost",
+      "title": {
+        "en": "Boost (High Power)",
+        "nl": "Boost (Hoog vermogen)",
+        "de": "Boost (Hochleistung)",
+        "fr": "Boost (Haute puissance)"
+      }
+    }
+  ],
+  "getable": true,
+  "setable": true,
+  "uiComponent": "sensor",
+  "icon": "/assets/cop-efficiency.svg",
+  "description": {
+    "en": "Register 0x0307: User function mode (0=Standard, 1=High Power, 2=Silent)",
+    "nl": "Register 0x0307: Gebruikersfunctiemodus (0=Standaard, 1=Hoog vermogen, 2=Stil)",
+    "de": "Register 0x0307: Benutzerfunktionsmodus (0=Standard, 1=Hochleistung, 2=Leise)",
+    "fr": "Registre 0x0307 : Mode fonction utilisateur (0=Standard, 1=Haute puissance, 2=Silencieux)"
+  }
+}

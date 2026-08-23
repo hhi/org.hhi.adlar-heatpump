@@ -4,15 +4,27 @@
 import os from 'os';
 import Homey from 'homey';
 import TuyaDevice from 'tuyapi';
-import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
-import { DeviceConstants } from '../../lib/constants';
-import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/error-types';
-import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/services/cop-calculator';
-import { SCOPCalculator, type COPMeasurement } from '../../lib/services/scop-calculator';
-import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/services/rolling-cop-calculator';
-import { ServiceCoordinator } from '../../lib/services/service-coordinator';
-import { enableFlowCardLogging } from '../../lib/flow-handler-wrapper';
-import { Logger } from '../../lib/logger';
+import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
+import { DeviceConstants } from '../../lib/tuya/constants';
+import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/shared/error-types';
+import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/shared/services/cop-calculator';
+import { SCOPCalculator, type COPMeasurement } from '../../lib/tuya/services/scop-calculator';
+import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/shared/services/rolling-cop-calculator';
+import { ServiceCoordinator } from '../../lib/tuya/services/service-coordinator';
+import { Logger } from '../../lib/shared/logger';
+
+/**
+ * Optional diagnostic capabilities, grouped by the device setting that gates them.
+ * They are added on demand and removed again when the setting is switched off, so a device
+ * that never enabled diagnostics keeps exactly the capabilities it already had.
+ */
+const DiagnosticCapabilities = {
+  connection: [
+    'adlar_daily_disconnect_count',
+    'adlar_zombie_detections_daily',
+    'adlar_connection_diagnostics',
+  ] as const,
+};
 
 // Extract allCapabilities and allArraysSwapped from AdlarMapping
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
@@ -151,22 +163,8 @@ class MyDevice extends Homey.Device {
   allCapabilities: Record<string, number[]> = allCapabilities;
   allArraysSwapped: Record<number, string> = allArraysSwapped;
   settableCapabilities: string[] = [];
-  // TODO: DEAD CODE - Fallback reconnection mechanism (never executed)
-  // TuyaConnectionService via ServiceCoordinator handles all active reconnection
-  // These properties are kept for reference but serve no purpose
-  reconnectInterval: NodeJS.Timeout | undefined;
-  consecutiveFailures: number = 0;
   lastNotificationTime: number = 0;
   lastNotificationKey: string = '';
-
-  // TODO: DEAD CODE - Enhanced error recovery state (never executed)
-  // TuyaConnectionService implements active exponential backoff and circuit breaker
-  // These properties are kept for reference but serve no purpose
-  private backoffMultiplier: number = 1;
-  private maxBackoffSeconds: number = 300; // 5 minutes max
-  private circuitBreakerOpen: boolean = false;
-  private circuitBreakerOpenTime: number = 0;
-  private circuitBreakerResetTime: number = 60000; // 1 minute before attempting reset
 
   // Note: Flow card management now handled by FlowCardManagerService via ServiceCoordinator
   private isFlowCardsInitialized: boolean = false;
@@ -552,198 +550,6 @@ class MyDevice extends Homey.Device {
 
         // Don't throw here to allow reconnection attempts
       }
-    }
-  }
-
-  // TODO: DEAD CODE - startReconnectInterval() is never called
-  // ServiceCoordinator always initializes successfully, making this method unreachable
-  // Kept for reference only - see TuyaConnectionService.startReconnectInterval() for active implementation
-  private startReconnectInterval() {
-    // If ServiceCoordinator is available, it handles reconnection internally
-    if (this.serviceCoordinator) {
-      this.debugLog('Reconnection managed by ServiceCoordinator TuyaConnectionService');
-      return;
-    }
-
-    // Fallback to direct reconnection management
-    this.debugLog('Using direct reconnection fallback');
-    // Clear any existing interval
-    this.stopReconnectInterval();
-
-    // Start enhanced reconnection with adaptive interval
-    this.scheduleNextReconnectionAttempt();
-  }
-
-  /**
-   * TODO: DEAD CODE - scheduleNextReconnectionAttempt() is never called
-   * Enhanced reconnection logic with exponential backoff and circuit breaker
-   * Kept for reference only - see TuyaConnectionService.scheduleNextReconnectionAttempt() for active implementation
-   */
-  private scheduleNextReconnectionAttempt() {
-    // Check circuit breaker state
-    if (this.circuitBreakerOpen) {
-      const timeSinceOpen = Date.now() - this.circuitBreakerOpenTime;
-      if (timeSinceOpen < this.circuitBreakerResetTime) {
-        // Still in cooldown period
-        this.debugLog(`Circuit breaker open, cooling down for ${Math.round((this.circuitBreakerResetTime - timeSinceOpen) / 1000)}s more`);
-        this.reconnectInterval = this.homey.setTimeout(() => {
-          try {
-            this.scheduleNextReconnectionAttempt();
-          } catch (error) {
-            this.error('MyDevice: Error during circuit breaker cooldown check:', error);
-          }
-        }, 10000); // Check every 10 seconds during cooldown
-        return;
-      }
-      // Try to reset circuit breaker
-      this.debugLog('Attempting to reset circuit breaker...');
-      this.circuitBreakerOpen = false;
-      this.backoffMultiplier = 1; // Reset backoff
-
-    }
-
-    // Calculate adaptive interval with exponential backoff
-    const baseInterval = DeviceConstants.RECONNECTION_INTERVAL_MS;
-    const adaptiveInterval = Math.min(
-      baseInterval * this.backoffMultiplier,
-      this.maxBackoffSeconds * 1000,
-    );
-
-    this.debugLog(`Next reconnection attempt in ${Math.round(adaptiveInterval / 1000)}s (backoff: ${this.backoffMultiplier}x)`);
-
-    this.reconnectInterval = this.homey.setTimeout(() => {
-      this.attemptReconnectionWithRecovery().catch((error) => {
-        // Prevent unhandled rejection crash
-        this.error('MyDevice: Critical error in scheduled reconnection:', error);
-
-        // Apply aggressive backoff and schedule retry
-        this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32);
-        this.consecutiveFailures++;
-        this.scheduleNextReconnectionAttempt();
-      });
-    }, adaptiveInterval);
-  }
-
-  /**
-   * TODO: DEAD CODE - attemptReconnectionWithRecovery() is never called
-   * Attempt reconnection with enhanced error recovery
-   * Kept for reference only - see TuyaConnectionService.attemptReconnectionWithRecovery() for active implementation
-   */
-  private async attemptReconnectionWithRecovery(): Promise<void> {
-    if (this.isDeviceConnected()) {
-      // Already connected, reset backoff and exit
-      this.resetErrorRecoveryState();
-      return;
-    }
-
-    this.debugLog(`Attempting to reconnect to Tuya device... (attempt ${this.consecutiveFailures + 1})`);
-
-    try {
-      await this.connectTuya();
-
-      // Success! Reset all error recovery state
-      this.resetErrorRecoveryState();
-      this.debugLog('Reconnection successful, error recovery state reset');
-
-    } catch (err) {
-      const categorizedError = this.handleTuyaError(err as Error, 'Enhanced reconnection attempt');
-      this.consecutiveFailures++;
-
-      // Determine recovery strategy based on error type
-      this.updateRecoveryStrategy(categorizedError);
-
-      // Send notifications based on failure patterns
-      await this.handleReconnectionFailureNotification(categorizedError);
-
-      // Schedule next attempt with updated strategy
-      this.scheduleNextReconnectionAttempt();
-    }
-  }
-
-  /**
-   * TODO: DEAD CODE - updateRecoveryStrategy() is never called
-   * Update recovery strategy based on error patterns
-   * Kept for reference only - see TuyaConnectionService.updateRecoveryStrategy() for active implementation
-   */
-  private updateRecoveryStrategy(error: CategorizedError): void {
-    // Exponential backoff for recoverable errors
-    if (error.recoverable) {
-      this.backoffMultiplier = Math.min(this.backoffMultiplier * 1.5, 16); // Cap at 16x
-    } else {
-      // For non-recoverable errors, use more aggressive backoff
-      this.backoffMultiplier = Math.min(this.backoffMultiplier * 2, 32); // Cap at 32x
-    }
-
-    // Activate circuit breaker after severe failure patterns
-    if (this.consecutiveFailures >= DeviceConstants.MAX_CONSECUTIVE_FAILURES * 2) {
-      this.debugLog(`Activating circuit breaker after ${this.consecutiveFailures} consecutive failures`);
-      this.circuitBreakerOpen = true;
-      this.circuitBreakerOpenTime = Date.now();
-    }
-  }
-
-  /**
-   * TODO: DEAD CODE - handleReconnectionFailureNotification() is never called
-   * Handle notifications for reconnection failures with smart throttling
-   * Kept for reference only - see TuyaConnectionService notifications (handleReconnectionFailureNotification) for active implementation
-   */
-  private async handleReconnectionFailureNotification(error: CategorizedError): Promise<void> {
-    // Immediate notification for critical infrastructure failures
-    if (!error.recoverable && this.consecutiveFailures <= 3) {
-      await this.sendCriticalNotification(
-        'Critical Device Error',
-        `Heat pump connection failed: ${error.userMessage}. Manual intervention may be required.`,
-      );
-      return;
-    }
-
-    // Standard notification after initial failure threshold
-    if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
-      await this.sendCriticalNotification(
-        'Device Connection Lost',
-        `Heat pump has been disconnected for over 1 minute. ${error.userMessage}`,
-      );
-      return;
-    }
-
-    // Extended outage notification
-    if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES * 3) {
-      await this.sendCriticalNotification(
-        'Extended Device Outage',
-        `Heat pump has been offline for over 5 minutes. Connection issues persist: ${error.userMessage}`,
-      );
-    }
-  }
-
-  /**
-   * TODO: DEAD CODE - resetErrorRecoveryState() is never called
-   * Reset error recovery state after successful connection
-   * Kept for reference only - see TuyaConnectionService.resetErrorRecoveryState() for active implementation
-   */
-  private resetErrorRecoveryState(): void {
-    this.consecutiveFailures = 0;
-    this.backoffMultiplier = 1;
-    this.circuitBreakerOpen = false;
-    this.circuitBreakerOpenTime = 0;
-  }
-
-  // TODO: DEAD CODE - stopReconnectInterval() body never executes
-  // Guard clause always returns early since ServiceCoordinator always exists
-  // Called from onDeleted() but the fallback cleanup code is unreachable (harmless no-op)
-  private stopReconnectInterval() {
-    // If ServiceCoordinator is available, it manages reconnection internally
-    if (this.serviceCoordinator) {
-      this.debugLog('Reconnection stop managed by ServiceCoordinator');
-      return;
-    }
-
-    // TODO: DEAD CODE - This fallback never executes
-    // Fallback to direct interval cleanup
-    if (this.reconnectInterval) {
-      // Enhanced interval can be either setTimeout or setInterval
-      this.homey.clearTimeout(this.reconnectInterval);
-      this.homey.clearInterval(this.reconnectInterval);
-      this.reconnectInterval = undefined;
     }
   }
 
@@ -3554,9 +3360,6 @@ class MyDevice extends Homey.Device {
       );
       this.logger.info('Device initializing with log level:', Logger.levelToString(logLevel));
 
-      // Enable automatic flow card logging (v2.1.0 - respects logger level)
-      enableFlowCardLogging(this.homey, this.logger.debug.bind(this.logger));
-
       // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
       // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
       if (this.hasCapability('adlar_connection_status')) {
@@ -3639,23 +3442,26 @@ class MyDevice extends Homey.Device {
         }
       }
 
-      // Add daily disconnect counter capability for existing devices (v1.3.12: now optional via setting)
-      // Only add if setting enabled (defaults to false for new installs)
+      // Connection diagnostic capabilities (v1.3.12 disconnect count, v3.1.0 zombie count and
+      // telemetry JSON). All three are optional and share the show_disconnect_diagnostic setting,
+      // so devices that never enabled diagnostics are untouched by the v3.1.0 upgrade.
       const showDisconnectDiagnostic = this.getSettings().show_disconnect_diagnostic === true;
-      if (showDisconnectDiagnostic && !this.hasCapability('adlar_daily_disconnect_count')) {
-        try {
-          await this.addCapability('adlar_daily_disconnect_count');
-          this.log('✅ Added adlar_daily_disconnect_count capability to existing device (setting enabled)');
-        } catch (error) {
-          this.error('Failed to add adlar_daily_disconnect_count capability:', error);
-        }
-      } else if (!showDisconnectDiagnostic && this.hasCapability('adlar_daily_disconnect_count')) {
-        // Remove if setting disabled (cleanup for devices that had it)
-        try {
-          await this.removeCapability('adlar_daily_disconnect_count');
-          this.log('🗑️ Removed adlar_daily_disconnect_count capability (setting disabled)');
-        } catch (error) {
-          this.error('Failed to remove adlar_daily_disconnect_count capability:', error);
+      for (const capability of DiagnosticCapabilities.connection) {
+        if (showDisconnectDiagnostic && !this.hasCapability(capability)) {
+          try {
+            await this.addCapability(capability);
+            this.log(`✅ Added ${capability} capability to existing device (setting enabled)`);
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
+          }
+        } else if (!showDisconnectDiagnostic && this.hasCapability(capability)) {
+          // Remove if setting disabled (cleanup for devices that had it)
+          try {
+            await this.removeCapability(capability);
+            this.log(`🗑️ Removed ${capability} capability (setting disabled)`);
+          } catch (error) {
+            this.error(`Failed to remove ${capability} capability:`, error);
+          }
         }
       }
 
@@ -4417,31 +4223,33 @@ class MyDevice extends Homey.Device {
       }
     }
 
-    // Handle disconnect diagnostic capability visibility (v1.3.12)
+    // Handle connection diagnostic capability visibility (v1.3.12, extended v3.1.0)
     if (changedKeys.includes('show_disconnect_diagnostic')) {
       const showDisconnectDiagnostic = newSettings.show_disconnect_diagnostic === true;
 
-      if (showDisconnectDiagnostic && !this.hasCapability('adlar_daily_disconnect_count')) {
-        // Enable: Add capability
-        try {
-          await this.addCapability('adlar_daily_disconnect_count');
-          this.log('✅ Enabled daily disconnect count capability');
+      for (const capability of DiagnosticCapabilities.connection) {
+        if (showDisconnectDiagnostic && !this.hasCapability(capability)) {
+          // Enable: Add capability
+          try {
+            await this.addCapability(capability);
+            this.log(`✅ Enabled ${capability} capability`);
 
-          // Initialize with current count from TuyaConnectionService
-          if (this.serviceCoordinator) {
-            const count = await this.getStoreValue('daily_disconnect_count') || 0;
-            await this.setCapabilityValue('adlar_daily_disconnect_count', count);
+            // Seed the disconnect counter with the value already tracked in the store.
+            if (capability === 'adlar_daily_disconnect_count' && this.serviceCoordinator) {
+              const count = await this.getStoreValue('daily_disconnect_count') || 0;
+              await this.setCapabilityValue('adlar_daily_disconnect_count', count);
+            }
+          } catch (error) {
+            this.error(`Failed to add ${capability} capability:`, error);
           }
-        } catch (error) {
-          this.error('Failed to add adlar_daily_disconnect_count capability:', error);
-        }
-      } else if (!showDisconnectDiagnostic && this.hasCapability('adlar_daily_disconnect_count')) {
-        // Disable: Remove capability
-        try {
-          await this.removeCapability('adlar_daily_disconnect_count');
-          this.log('🗑️ Disabled daily disconnect count capability');
-        } catch (error) {
-          this.error('Failed to remove adlar_daily_disconnect_count capability:', error);
+        } else if (!showDisconnectDiagnostic && this.hasCapability(capability)) {
+          // Disable: Remove capability
+          try {
+            await this.removeCapability(capability);
+            this.log(`🗑️ Disabled ${capability} capability`);
+          } catch (error) {
+            this.error(`Failed to remove ${capability} capability:`, error);
+          }
         }
       }
     }
@@ -4857,6 +4665,44 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Write capability options only when they actually differ from the current ones.
+   *
+   * `setCapabilityOptions()` rewrites the device manifest and makes Homey broadcast a
+   * device-update to every client. The Flow editor rebuilds its device list on that event
+   * and re-evaluates the `capabilities=` filters of Flow cards, which makes devices flicker
+   * in and out of Flow card device pickers. Writing unconditionally therefore caused a burst
+   * of manifest updates on every `handleOptionalCapabilities()` run.
+   *
+   * The patch is merged over the existing options instead of replacing them, so writers that
+   * own different keys (e.g. `insights` here vs. `title` in BuildingModelService) no longer
+   * overwrite each other.
+   *
+   * @param capability - Capability id to update
+   * @param patch - Option keys to apply
+   * @returns true when a write was performed, false when the options were already up to date
+   */
+  private async setCapabilityOptionsIfChanged(
+    capability: string,
+    patch: Record<string, unknown>,
+  ): Promise<boolean> {
+    let current: Record<string, unknown> = {};
+    try {
+      current = (this.getCapabilityOptions(capability) ?? {}) as Record<string, unknown>;
+    } catch {
+      // Capability has no options set yet (or does not exist) - treat as empty and let
+      // setCapabilityOptions() below surface any real error.
+    }
+
+    const hasChange = Object.entries(patch).some(([key, value]) => current[key] !== value);
+    if (!hasChange) {
+      return false;
+    }
+
+    await this.setCapabilityOptions(capability, { ...current, ...patch });
+    return true;
+  }
+
+  /**
    * Process a group of capabilities based on enable/disable setting
    */
   private async processCapabilityGroup(
@@ -4873,8 +4719,10 @@ class MyDevice extends Homey.Device {
           }
           // Enable insights when feature is enabled
           try {
-            await this.setCapabilityOptions(capability, { insights: true });
-            this.debugLog(`Enabled insights for ${featureName} capability: ${capability}`);
+            const written = await this.setCapabilityOptionsIfChanged(capability, { insights: true });
+            if (written) {
+              this.debugLog(`Enabled insights for ${featureName} capability: ${capability}`);
+            }
           } catch (error) {
             this.debugLog(`Could not enable insights for ${capability}:`, error);
           }
@@ -4882,8 +4730,10 @@ class MyDevice extends Homey.Device {
           // Feature is disabled - remove capability if it exists
           // Disable insights before removing capability to clear historical data visibility
           try {
-            await this.setCapabilityOptions(capability, { insights: false });
-            this.debugLog(`Disabled insights for ${featureName} capability: ${capability}`);
+            const written = await this.setCapabilityOptionsIfChanged(capability, { insights: false });
+            if (written) {
+              this.debugLog(`Disabled insights for ${featureName} capability: ${capability}`);
+            }
           } catch (error) {
             this.debugLog(`Could not disable insights for ${capability}:`, error);
           }
@@ -5211,9 +5061,6 @@ class MyDevice extends Homey.Device {
         this.error('Error destroying ServiceCoordinator:', error);
       }
     }
-
-    // Stop reconnection interval
-    this.stopReconnectInterval();
 
     // Stop health check interval
     // Note: Health check intervals managed by ServiceCoordinator
