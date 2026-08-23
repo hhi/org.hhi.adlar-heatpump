@@ -34,20 +34,7 @@ KEY FEATURES
   curve, schedule and seasonal calculations
 - Optional adaptive temperature control, building-model learning, energy-price
   and COP optimisation, plus weather-based advice
-
-MODBUS DASHBOARDS
-
-The Modbus driver provides local dashboards at
-http://<homey-ip>:8090/ by default:
-- /              live heat-pump overview
-- /interactive   overview with direct setpoint controls
-- /live          all capabilities grouped by category
-- /expert        Modbus registers, P/L parameter IDs and read/write tools
-- /changelog     register changes and polling recommendations
-- /heating-curve DIY heating-curve editor
-
-Replace <homey-ip> with your Homey Pro IP address. The dashboard port can be
-changed in the device settings.
+- Advanced local diagnostics and register inspection tools for Modbus setups
 
 IMPORTANT
 - Advanced Modbus write tools can change heat-pump behaviour. Use them only
@@ -61,6 +48,8 @@ IMPORTANT
 
 DOCUMENTATION
 
-The source-code page contains setup, Flow, COP and advanced-control guides.
+The source-code page contains setup, Flow, COP, heating-curve and advanced-
+control guides, including the Modbus diagnostics and dashboard guide:
+/docs/setup/MODBUS_DASHBOARD_GUIDE.en.md.
 For Tuya pairing, see /docs/setup/Tuya_LocalKey_Homey_Guide_EN.pdf and
 /docs/setup/PROTOCOL_VERSION_GUIDE.en.md.

@@ -1,4 +1,10 @@
 {
+  "3.1.1": {
+    "en": "Moved the Modbus dashboard reference out of the README into a dedicated guide (docs/setup/MODBUS_DASHBOARD_GUIDE) for easier navigation.",
+    "nl": "De Modbus-dashboardreferentie is uit de README gehaald en verplaatst naar een aparte gids (docs/setup/MODBUS_DASHBOARD_GUIDE) voor eenvoudigere navigatie.",
+    "de": "Die Modbus-Dashboard-Referenz wurde aus der README entfernt und in einen eigenen Leitfaden (docs/setup/MODBUS_DASHBOARD_GUIDE) verschoben, für einfachere Navigation.",
+    "fr": "La référence du tableau de bord Modbus a été déplacée du README vers un guide dédié (docs/setup/MODBUS_DASHBOARD_GUIDE) pour faciliter la navigation."
+  },
   "3.1.0": {
     "en": "Fixed false 'zombie connection' detections that reconnected healthy devices. Connection alerts are now sent once, after 15 minutes of an unresolved outage, instead of at 2, 10 and 30 minutes. Optional connection diagnostics can be enabled in device settings.",
     "nl": "Valse 'zombie-verbinding'-detecties opgelost die gezonde apparaten lieten herverbinden. Verbindingsmeldingen komen nu eenmalig na 15 minuten aanhoudende uitval, in plaats van na 2, 10 en 30 minuten. Optionele verbindingsdiagnostiek is aan te zetten in de apparaatinstellingen.",

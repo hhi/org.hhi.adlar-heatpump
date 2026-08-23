@@ -34,20 +34,7 @@ WICHTIGE FUNKTIONEN
   erweiterte Kurven-, Zeitplan- und Saisonberechnungen
 - Optionale adaptive Temperatursteuerung, Gebäudemodell-Lernen, Energiepreis-
   und COP-Optimierung sowie wetterbasierte Empfehlungen
-
-MODBUS-DASHBOARDS
-
-Der Modbus-Treiber stellt standardmäßig lokale Dashboards unter
-http://<homey-ip>:8090/ bereit:
-- /              Live-Übersicht der Wärmepumpe
-- /interactive   Übersicht mit direkter Sollwertsteuerung
-- /live          alle Capabilities nach Kategorie
-- /expert        Modbus-Register, P/L-Parameter-IDs und Lese-/Schreibwerkzeuge
-- /changelog     Registeränderungen und Abfrageempfehlungen
-- /heating-curve Editor für eine eigene Heizkurve
-
-Ersetzen Sie <homey-ip> durch die IP-Adresse Ihres Homey Pro. Der Dashboard-
-Port kann in den Geräteeinstellungen geändert werden.
+- Erweiterte lokale Diagnose- und Registerwerkzeuge für Modbus-Installationen
 
 WICHTIG
 - Erweiterte Modbus-Schreibwerkzeuge können das Verhalten der Wärmepumpe
@@ -62,6 +49,8 @@ WICHTIG
 
 DOKUMENTATION
 
-Auf der Quellcode-Seite finden Sie Einrichtungs-, Flow-, COP- und erweiterte
-Steuerungsanleitungen. Für die Tuya-Kopplung: /docs/setup/Tuya_LocalKey_Homey_Guide_DE.pdf
+Auf der Quellcode-Seite finden Sie Einrichtungs-, Flow-, COP-, Heizkurven- und
+erweiterte Steuerungsanleitungen, einschließlich des Modbus-Diagnose- und
+Dashboard-Leitfadens: /docs/setup/MODBUS_DASHBOARD_GUIDE.de.md.
+Für die Tuya-Kopplung: /docs/setup/Tuya_LocalKey_Homey_Guide_DE.pdf
 und /docs/setup/PROTOCOL_VERSION_GUIDE.de.md.

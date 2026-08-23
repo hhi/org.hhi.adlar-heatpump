@@ -34,20 +34,7 @@ FONCTIONNALITÉS PRINCIPALES
   calculs avancés de courbe, de planning et de saison
 - Régulation de température adaptative facultative, apprentissage du modèle du
   bâtiment, optimisation COP et du prix de l'énergie, et conseils météo
-
-TABLEAUX DE BORD MODBUS
-
-Le pilote Modbus fournit par défaut des tableaux de bord locaux sur
-http://<homey-ip>:8090/ :
-- /              aperçu en direct de la pompe à chaleur
-- /interactive   aperçu avec commande directe des consignes
-- /live          toutes les capacités par catégorie
-- /expert        registres Modbus, ID de paramètres P/L et outils de lecture/écriture
-- /changelog     changements de registres et recommandations d'interrogation
-- /heating-curve éditeur de courbe de chauffe personnalisée
-
-Remplacez <homey-ip> par l'adresse IP de votre Homey Pro. Le port des tableaux
-de bord peut être modifié dans les paramètres de l'appareil.
+- Outils locaux avancés de diagnostic et d'inspection des registres pour Modbus
 
 IMPORTANT
 - Les outils d'écriture Modbus avancés peuvent modifier le comportement de la
@@ -62,7 +49,8 @@ IMPORTANT
 
 DOCUMENTATION
 
-La page du code source contient les guides d'installation, de Flows, de COP et
-de régulation avancée. Pour l'appairage Tuya :
-/docs/setup/Tuya_LocalKey_Homey_Guide_FR.pdf et
+La page du code source contient les guides d'installation, de Flows, de COP, de
+courbe de chauffe et de régulation avancée, y compris le guide de diagnostic et
+du tableau de bord Modbus : /docs/setup/MODBUS_DASHBOARD_GUIDE.fr.md.
+Pour l'appairage Tuya : /docs/setup/Tuya_LocalKey_Homey_Guide_FR.pdf et
 /docs/setup/PROTOCOL_VERSION_GUIDE.fr.md.
