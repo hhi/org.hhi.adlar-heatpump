@@ -34,20 +34,7 @@ BELANGRIJKSTE FUNCTIES
   geavanceerde curve-, tijdschema- en seizoensberekeningen
 - Optionele adaptieve temperatuurregeling, gebouwmodel-leren, energieprijs- en
   COP-optimalisatie en weersafhankelijk advies
-
-MODBUS-DASHBOARDS
-
-De Modbus-driver biedt standaard lokale dashboards op
-http://<homey-ip>:8090/:
-- /              live-overzicht van de warmtepomp
-- /interactive   overzicht met directe setpuntbediening
-- /live          alle capabilities per categorie
-- /expert        Modbus-registers, P/L-parameter-ID's en lees-/schrijftools
-- /changelog     registerwijzigingen en polladviezen
-- /heating-curve editor voor een eigen stooklijn
-
-Vervang <homey-ip> door het IP-adres van uw Homey Pro. De dashboardpoort kan
-in de apparaatinstellingen worden gewijzigd.
+- Geavanceerde lokale diagnose- en registertools voor Modbus-installaties
 
 BELANGRIJK
 - Geavanceerde Modbus-schrijftools kunnen het gedrag van de warmtepomp
@@ -62,6 +49,8 @@ BELANGRIJK
 
 DOCUMENTATIE
 
-Op de broncodepagina staan installatie-, Flow-, COP- en geavanceerde
-regelingsgidsen. Voor Tuya-koppeling: /docs/setup/Tuya_LocalKey_Homey_Guide_NL.pdf
+Op de broncodepagina staan installatie-, Flow-, COP-, stooklijn- en
+geavanceerde regelingshandleidingen, inclusief de Modbus diagnose- en
+dashboardgids: /docs/setup/MODBUS_DASHBOARD_GUIDE.nl.md.
+Voor Tuya-koppeling: /docs/setup/Tuya_LocalKey_Homey_Guide_NL.pdf
 en /docs/setup/PROTOCOL_VERSION_GUIDE.nl.md.
