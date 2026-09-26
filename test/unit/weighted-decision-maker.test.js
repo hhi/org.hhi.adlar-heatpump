@@ -10,7 +10,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 
-const { WeightedDecisionMaker } = require('../../.homeybuild/lib/adaptive/weighted-decision-maker');
+const { WeightedDecisionMaker } = require('../../.homeybuild/lib/tuya/adaptive/weighted-decision-maker');
 
 const PRIORITIES = { comfort: 0.6, efficiency: 0.25, cost: 0.15 };
 

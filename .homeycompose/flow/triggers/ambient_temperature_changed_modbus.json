@@ -1,0 +1,92 @@
+{
+  "id": "ambient_temperature_changed_modbus",
+  "title": {
+    "en": "Ambient temperature changed",
+    "nl": "Buitentemperatuur gewijzigd",
+    "de": "Außentemperatur geändert",
+    "fr": "Température ambiante changée"
+  },
+  "titleFormatted": {
+    "en": "Ambient temperature changed [[condition]] [[temperature]]°C ",
+    "nl": "Buitentemperatuur gewijzigd [[condition]] [[temperature]]°C ",
+    "de": "Außentemperatur geändert [[condition]] [[temperature]]°C ",
+    "fr": "Température ambiante changée [[condition]] [[temperature]]°C "
+  },
+  "hint": {
+    "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
+    "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+    "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
+    "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température "
+      },
+      "min": -30,
+      "max": 50,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C",
+        "de": "Temperaturschwellenwert in °C",
+        "fr": "Seuil de température en °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current ambient temperature",
+        "nl": "Huidige buitentemperatuur",
+        "de": "Aktuelle Außentemperatur",
+        "fr": "Température ambiante actuelle"
+      },
+      "example": 15.5
+    }
+  ]
+}

@@ -1,0 +1,415 @@
+{
+  "name": {
+    "en": "Adlar Castra Aurora Heat Pump (Modbus)",
+    "nl": "Adlar Castra Aurora-warmtepomp (Modbus)"
+  },
+  "class": "heatpump",
+  "capabilities": [
+    "target_temperature",
+    "target_temperature.cooling",
+    "target_temperature.dhw",
+    "target_temperature.floor",
+    "onoff",
+    "measure_temperature.outlet",
+    "measure_temperature.inlet",
+    "measure_temperature.ambient",
+    "measure_temperature.outer_coil",
+    "measure_temperature.inner_coil",
+    "measure_temperature.suction",
+    "measure_temperature.exhaust",
+    "measure_temperature.dhw",
+    "measure_temperature.econ_in",
+    "measure_temperature.econ_out",
+    "measure_temperature.hp_sat",
+    "measure_temperature.lp_sat",
+    "measure_temperature.ipm",
+    "measure_temperature.plate_hx",
+    "measure_temperature.dhw_return",
+    "measure_temperature.buffer_tank",
+    "measure_temperature.total_outlet",
+    "measure_temperature.zone1_mix",
+    "measure_temperature.zone2",
+    "adlar_running",
+    "adlar_mode",
+    "adlar_state_compressor_state",
+    "adlar_state_defrost_state",
+    "adlar_state_backwater_modbus",
+    "adlar_antifreeze",
+    "adlar_sterilization",
+    "measure_frequency.compressor_freq",
+    "measure_frequency.comp_target_freq",
+    "adlar_fan_speed",
+    "adlar_eev_step",
+    "adlar_evi_step",
+    "adlar_pump_pwm",
+    "measure_water",
+    "adlar_defrosting",
+    "adlar_defrost_count_24h",
+    "adlar_defrost_minutes_24h",
+    "defrost_active_power",
+    "alarm_generic",
+    "adlar_fault",
+    "adlar_fault_shutdown",
+    "adlar_fault_1",
+    "adlar_fault_2",
+    "adlar_fault_3",
+    "adlar_fault_active",
+    "adlar_cop",
+    "adlar_cop_method",
+    "adlar_cop_daily",
+    "adlar_cop_weekly",
+    "adlar_cop_monthly",
+    "adlar_cop_trend",
+    "adlar_scop",
+    "adlar_scop_quality",
+    "heating_curve_formula",
+    "heating_curve_slope",
+    "heating_curve_intercept",
+    "heating_curve_ref_outdoor",
+    "heating_curve_ref_temp",
+    "measure_temperature.indoor",
+    "target_temperature.indoor",
+    "adlar_external_power",
+    "adlar_external_flow",
+    "adlar_external_ambient",
+    "adlar_external_solar_power",
+    "adlar_external_solar_radiation",
+    "adlar_external_wind_speed",
+    "adlar_external_indoor_temperature",
+    "adlar_last_indoor_temp_received",
+    "adlar_last_outdoor_temp_received",
+    "adlar_last_solar_power_received",
+    "adlar_last_solar_radiation_received",
+    "adlar_last_wind_received",
+    "adlar_energy_price_current",
+    "adlar_energy_price_next",
+    "adlar_energy_price_category",
+    "adlar_price_forecast_4h",
+    "adlar_price_forecast_24h",
+    "energy_prices_data",
+    "adlar_cheapest_block_start",
+    "adlar_price_savings_potential",
+    "adlar_energy_cost_daily",
+    "adlar_energy_cost_hourly",
+    "adlar_external_energy_daily",
+    "adlar_external_energy_total",
+    "adlar_simulated_target",
+    "adaptive_control_diagnostics",
+    "cop_optimizer_diagnostics",
+    "adlar_optimal_delay",
+    "adlar_building_ua",
+    "adlar_building_tau",
+    "adlar_building_g",
+    "adlar_building_c",
+    "adlar_building_pint",
+    "building_model_diagnostics",
+    "building_insight_insulation",
+    "building_insight_preheating",
+    "building_insight_profile",
+    "building_insight_thermal_storage",
+    "building_insights_diagnostics",
+    "adlar_forecast_advice",
+    "adlar_forecast_cop_correction",
+    "adlar_performance_report",
+    "adlar_performance_score",
+    "adlar_connection_status",
+    "adlar_connection_active",
+    "adlar_daily_disconnect_count",
+    "adlar_firmware_mcu",
+    "adlar_protocol_version",
+    "adlar_openmeteo_last_fetch",
+    "adlar_enum_countdown_set",
+    "adlar_enum_work_mode_modbus",
+    "adlar_enum_capacity_set_modbus"
+  ],
+  "capabilitiesOptions": {
+    "onoff": {
+      "uiQuickAction": false
+    },
+    "measure_frequency.compressor_freq": {
+      "title": {
+        "en": "Compressor frequency",
+        "nl": "Compressorfrequentie"
+      },
+      "icon": "/assets/compressor-freq.svg",
+      "type": "number",
+      "min": 0,
+      "max": 120,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Compressor frequency",
+        "nl": "Compressorfrequentie"
+      }
+    },
+    "measure_frequency.comp_target_freq": {
+      "title": {
+        "en": "Compressor target frequency",
+        "nl": "Compressor doelfrequentie"
+      },
+      "icon": "/assets/compressor-freq.svg",
+      "type": "number",
+      "min": 0,
+      "max": 120,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Compressor target frequency",
+        "nl": "Compressor doelfrequentie"
+      }
+    },
+    "target_temperature": {
+      "title": {
+        "en": "Heating setpoint",
+        "nl": "Verwarming setpoint"
+      },
+      "min": 15,
+      "max": 60,
+      "step": 1,
+      "unit": "°C",
+      "setable": true
+    },
+    "target_temperature.cooling": {
+      "title": {
+        "en": "Cooling setpoint",
+        "nl": "Koeling setpoint"
+      },
+      "min": 7,
+      "max": 25,
+      "step": 1
+    },
+    "target_temperature.dhw": {
+      "title": {
+        "en": "DHW setpoint",
+        "nl": "Warmwater setpoint"
+      },
+      "min": 20,
+      "max": 75,
+      "step": 1
+    },
+    "target_temperature.floor": {
+      "title": {
+        "en": "Floor heating setpoint",
+        "nl": "Vloerverwarming setpoint"
+      },
+      "min": 20,
+      "max": 60,
+      "step": 1
+    },
+    "target_temperature.indoor": {
+      "title": {
+        "en": "Desired Indoor Temperature",
+        "nl": "Binnentemperatuur gewenst",
+        "de": "Gewünschte Innentemperatur",
+        "fr": "Température Intérieure Souhaitée"
+      },
+      "desc": {
+        "en": "Target room temperature for adaptive control to maintain. Set your desired comfort temperature here.",
+        "nl": "Doel kamertemperatuur die adaptieve regeling moet handhaven. Stel hier je gewenste comfort temperatuur in.",
+        "de": "Zielraumtemperatur für adaptive Steuerung. Stellen Sie hier Ihre gewünschte Komforttemperatur ein.",
+        "fr": "Température cible pour le contrôle adaptatif. Définissez ici votre température de confort souhaitée."
+      },
+      "insightsTitle": {
+        "en": "Target Indoor Temperature",
+        "nl": "Binnentemperatuur gewenst",
+        "de": "Ziel-Innentemperatur",
+        "fr": "Température Intérieure Cible"
+      },
+      "units": "°C",
+      "decimals": 1,
+      "min": 15,
+      "max": 25,
+      "step": 0.5,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "thermostat",
+      "chartType": "stepLine",
+      "insights": true
+    },
+    "measure_temperature.outlet": {
+      "title": {
+        "en": "Outlet temperature (T7)",
+        "nl": "Uitlaattemperatuur (T7)"
+      }
+    },
+    "measure_temperature.inlet": {
+      "title": {
+        "en": "Inlet temperature (T6)",
+        "nl": "Inlaattemperatuur (T6)"
+      }
+    },
+    "measure_temperature.ambient": {
+      "title": {
+        "en": "Ambient temperature (T1)",
+        "nl": "Buitentemperatuur (T1)"
+      }
+    },
+    "measure_temperature.outer_coil": {
+      "title": {
+        "en": "Outer coil temperature (T2)",
+        "nl": "Buitenste spoel temperatuur (T2)"
+      }
+    },
+    "measure_temperature.inner_coil": {
+      "title": {
+        "en": "Inner coil temperature (T3)",
+        "nl": "Binnenste spoel temperatuur (T3)"
+      }
+    },
+    "measure_temperature.suction": {
+      "title": {
+        "en": "Suction temperature (T4)",
+        "nl": "Zuigtemperatuur (T4)"
+      }
+    },
+    "measure_temperature.exhaust": {
+      "title": {
+        "en": "Exhaust temperature (T5)",
+        "nl": "Uitlaattemperatuur compressor (T5)"
+      }
+    },
+    "measure_temperature.dhw": {
+      "title": {
+        "en": "DHW tank temperature",
+        "nl": "Warmwaterboiler temperatuur"
+      }
+    },
+    "measure_temperature.econ_in": {
+      "title": {
+        "en": "Economizer inlet (T8)",
+        "nl": "Economizer inlaat (T8)"
+      }
+    },
+    "measure_temperature.econ_out": {
+      "title": {
+        "en": "Economizer outlet (T9)",
+        "nl": "Economizer uitlaat (T9)"
+      }
+    },
+    "measure_temperature.hp_sat": {
+      "title": {
+        "en": "HP saturation temperature",
+        "nl": "HP saturatietemperatuur"
+      }
+    },
+    "measure_temperature.lp_sat": {
+      "title": {
+        "en": "LP saturation temperature",
+        "nl": "LP saturatietemperatuur"
+      }
+    },
+    "measure_temperature.ipm": {
+      "title": {
+        "en": "IPM temperature",
+        "nl": "IPM temperatuur"
+      }
+    },
+    "measure_temperature.plate_hx": {
+      "title": {
+        "en": "Plate heat exchanger temperature",
+        "nl": "Plaatwarmtewisselaar temperatuur"
+      }
+    },
+    "measure_temperature.dhw_return": {
+      "title": {
+        "en": "DHW return temperature",
+        "nl": "Warmwater retourtemperatuur"
+      }
+    },
+    "measure_temperature.buffer_tank": {
+      "title": {
+        "en": "Buffer tank temperature",
+        "nl": "Buffervat temperatuur"
+      }
+    },
+    "measure_temperature.total_outlet": {
+      "title": {
+        "en": "Total water outlet temperature",
+        "nl": "Totaal uitlaattemperatuur water"
+      }
+    },
+    "measure_temperature.zone1_mix": {
+      "title": {
+        "en": "Zone 1 mixing temperature",
+        "nl": "Zone 1 mengtemperatuur"
+      }
+    },
+    "measure_temperature.zone2": {
+      "title": {
+        "en": "Zone 2 temperature",
+        "nl": "Zone 2 temperatuur"
+      }
+    },
+    "measure_current.comp_phase": {
+      "title": {
+        "en": "Compressor phase current",
+        "nl": "Compressor fasestroom"
+      }
+    },
+    "measure_current.b_phase": {
+      "title": {
+        "en": "B-phase current",
+        "nl": "B-fase stroom"
+      }
+    },
+    "measure_current.c_phase": {
+      "title": {
+        "en": "C-phase current",
+        "nl": "C-fase stroom"
+      }
+    },
+    "measure_power": {
+      "min": 0,
+      "max": 20000
+    },
+    "measure_water": {
+      "title": {
+        "en": "Water flow",
+        "nl": "Waterdebiet",
+        "de": "Wasserdurchfluss",
+        "fr": "Débit d'eau"
+      },
+      "units": {
+        "en": "L/min",
+        "nl": "L/min",
+        "de": "L/min",
+        "fr": "L/min"
+      },
+      "insights": true,
+      "insightsTitle": {
+        "en": "Water Flow Rate",
+        "nl": "Waterdebiet",
+        "de": "Wasserdurchflussrate",
+        "fr": "Débit d'eau"
+      },
+      "min": 0,
+      "max": 100
+    }
+  },
+  "images": {
+    "small": "{{driverAssetsPath}}/images/Aurora2-drv-small.png",
+    "large": "{{driverAssetsPath}}/images/Aurora2-drv-large.png",
+    "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "enter_modbus_info"
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices",
+      "navigation": {
+        "next": "done"
+      }
+    },
+    {
+      "id": "done",
+      "template": "done"
+    }
+  ]
+}

@@ -47,6 +47,7 @@ Most user documentation is available in four languages:
 - **Protocol Version Guide** — Tuya protocol version selection (3.3/3.4/3.5)
 - **Configuration Guide** — Complete settings reference
 - **Tuya LocalKey Guide** — How to obtain Tuya credentials (PDF)
+- **Elfin EW11 Modbus Setup Guide** — [Modbus TCP Gateway Setup Guide](setup/modbus-elfin-ew11-setup.md)
 - **Quick Fix Guide** — Common problems and solutions
 - **guide/** — Additional detailed guides (flow cards, adaptive control, building insights)
 

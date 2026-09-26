@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adlar Aurora II — Modbus Register Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+      font-size: 13px;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f8fafc;
+      letter-spacing: 0.02em;
+    }
+
+    #indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    #indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #475569;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    #indicator-dot.green  { background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
+    #indicator-dot.orange { background: #f97316; }
+    #indicator-dot.red    { background: #ef4444; }
+
+    main { padding: 16px 20px 40px; }
+
+    #no-data {
+      margin-top: 60px;
+      text-align: center;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 24px 0 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+    }
+
+    .section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #1e293b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #475569;
+      padding: 6px 10px;
+      border-bottom: 1px solid #1e293b;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #1e293b;
+      transition: background 0.1s;
+    }
+
+    tbody tr:hover { background: #1e293b; }
+
+    tbody tr.fault-row { background: #2d1515; }
+    tbody tr.fault-row:hover { background: #3d1a1a; }
+
+    td {
+      padding: 5px 10px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    td.addr  { color: #64748b; font-size: 12px; width: 80px; }
+    td.name  { color: #cbd5e1; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+    td.value { color: #38bdf8; font-weight: 600; width: 160px; }
+    td.raw   { color: #475569; width: 70px; }
+    td.cat   { width: 90px; }
+    td.poll  { width: 70px; }
+
+    .badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-SUPERFAST { background: #7f1d1d; color: #fecaca; }
+    .badge-FAST   { background: #0c4a6e; color: #38bdf8; }
+    .badge-MEDIUM { background: #1e3a5f; color: #93c5fd; }
+    .badge-SLOW   { background: #1e1b4b; color: #a5b4fc; }
+    .badge-ONCE   { background: #1a2e1a; color: #86efac; }
+    .badge-Afl    { background: #1c1917; color: #d6d3d1; }
+
+    .badge-Sensors  { background: #0c2340; color: #7dd3fc; }
+    .badge-Status   { background: #1a2040; color: #93c5fd; }
+    .badge-Control  { background: #1e1b4b; color: #c4b5fd; }
+    .badge-Power    { background: #1a2e1a; color: #86efac; }
+    .badge-COP      { background: #1c1912; color: #fde68a; }
+    .badge-Version  { background: #1a1a2e; color: #a5b4fc; }
+    .badge-Faults   { background: #2d1515; color: #fca5a5; }
+    .badge-Diag     { background: #1c1917; color: #d6d3d1; }
+
+    #quality-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: #334155;
+      color: #94a3b8;
+      transition: background 0.3s, color 0.3s;
+    }
+    #quality-badge.q-online   { background: #14532d; color: #86efac; }
+    #quality-badge.q-degraded { background: #431407; color: #fdba74; }
+    #quality-badge.q-offline  { background: #450a0a; color: #fca5a5; }
+
+    nav {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 8px 20px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 1px solid #334155;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    nav a:hover { background: #334155; color: #f8fafc; }
+    nav a.active { background: #0f172a; color: #38bdf8; border-color: #38bdf8; }
+
+    @media (prefers-color-scheme: light) {
+      body    { background: #f8fafc; color: #0f172a; }
+      header  { background: #ffffff; border-bottom-color: #e2e8f0; }
+      h1      { color: #0f172a; }
+      #indicator { color: #475569; }
+      #indicator-dot { background: #94a3b8; }
+      #no-data { color: #94a3b8; }
+      .section-header { color: #94a3b8; }
+      .section-header::after { background: #e2e8f0; }
+      thead th { color: #64748b; border-bottom-color: #e2e8f0; }
+      tbody tr { border-bottom-color: #f1f5f9; }
+      tbody tr:hover { background: #f1f5f9; }
+      tbody tr.fault-row { background: #fee2e2; }
+      tbody tr.fault-row:hover { background: #fecaca; }
+      td.addr  { color: #94a3b8; }
+      td.name  { color: #1e293b; }
+      td.value { color: #0369a1; }
+      td.raw   { color: #94a3b8; }
+      .badge-SUPERFAST { background: #fee2e2; color: #991b1b; }
+      .badge-FAST      { background: #e0f2fe; color: #0369a1; }
+      .badge-MEDIUM    { background: #dbeafe; color: #1d4ed8; }
+      .badge-SLOW      { background: #ede9fe; color: #6d28d9; }
+      .badge-ONCE      { background: #dcfce7; color: #166534; }
+      .badge-Afl       { background: #f1f5f9; color: #475569; }
+      .badge-Sensors   { background: #e0f2fe; color: #0369a1; }
+      .badge-Status    { background: #dbeafe; color: #1d4ed8; }
+      .badge-Control   { background: #ede9fe; color: #6d28d9; }
+      .badge-Power     { background: #dcfce7; color: #166534; }
+      .badge-COP       { background: #fef9c3; color: #854d0e; }
+      .badge-Version   { background: #e0e7ff; color: #4338ca; }
+      .badge-Faults    { background: #fee2e2; color: #991b1b; }
+      .badge-Diag      { background: #f1f5f9; color: #475569; }
+      .badge-Internal\ COP { background: #fef9c3; color: #854d0e; }
+      #quality-badge           { background: #e2e8f0; color: #475569; }
+      #quality-badge.q-online  { background: #dcfce7; color: #166534; }
+      #quality-badge.q-degraded{ background: #ffedd5; color: #9a3412; }
+      #quality-badge.q-offline { background: #fee2e2; color: #991b1b; }
+      nav { background: #ffffff; border-bottom-color: #e2e8f0; }
+      nav a { color: #475569; border-color: #e2e8f0; }
+      nav a:hover { background: #e2e8f0; color: #0f172a; }
+      nav a.active { background: #e0f2fe; color: #0284c7; border-color: #0284c7; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Adlar Modbus — Register Dashboard</h1>
+  <div id="indicator">
+    <span id="indicator-dot"></span>
+    <span id="indicator-text">Ophalen...</span>
+    <span id="quality-badge">—</span>
+  </div>
+</header>
+
+<nav>
+  <a href="/" class="active">Dashboard</a>
+  <a href="/interactive">Interactief</a>
+  <a href="/live">Live</a>
+  <a href="/expert">Expert</a>
+  <a href="/changelog">Change Log</a>
+  <a href="/heating-curve">Stooklijn</a>
+</nav>
+
+<main>
+  <div id="no-data" hidden>Wachten op eerste Modbus-poll...</div>
+  <div id="dashboard"></div>
+</main>
+
+<script>
+// ── Poll-groep lookup ────────────────────────────────────────────────────────
+// Afgeleid uit adlar-modbus-registers.ts POLL_GROUP_FAST/MEDIUM/SLOW/ONCE
+const POLL_RANGES = [
+  { group: 'SUPERFAST', ranges: [[0x0000, 0x0001], [0x0027, 0x0027], [0x0040, 0x0040], [0x004F, 0x0050], [0x0057, 0x0058], [0x005C, 0x005C]] },
+  { group: 'FAST',   ranges: [[0x0000, 0x0001], [0x0040, 0x005D]] },
+  { group: 'MEDIUM', ranges: [[0x0002, 0x0009], [0x0019, 0x0020], [0x0072, 0x007D], [0x0300, 0x0307]] },
+  { group: 'SLOW',   ranges: [[0x0313, 0x0316], [0x01FF, 0x0200], [0x0174, 0x0178], [0x011E, 0x011E],
+                               [0x0132, 0x013B], [0x013C, 0x0141], [0x0158, 0x0159],
+                               [0x0165, 0x0165], [0x01A4, 0x01A4], [0x0810, 0x0812], [0x0813, 0x0819]] },
+  { group: 'ONCE',   ranges: [[0x0360, 0x0363], [0x0100, 0x010A], [0x010B, 0x0110], [0x0172, 0x0173]] },
+];
+
+function resolvePollGroup(address) {
+  for (const { group, ranges } of POLL_RANGES) {
+    for (const [lo, hi] of ranges) {
+      if (address >= lo && address <= hi) return group;
+    }
+  }
+  return 'SLOW';
+}
+
+// ── HTML helpers ─────────────────────────────────────────────────────────────
+function hex(addr) {
+  return '0x' + addr.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function badgePoll(g) {
+  const cls = g === 'Afgeleid' ? 'Afl' : g;
+  return `<span class="badge badge-${cls}">${g}</span>`;
+}
+
+function badgeCat(c) {
+  return `<span class="badge badge-${c}">${c}</span>`;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function row(r) {
+  const cls = r.fault ? ' class="fault-row"' : '';
+  return `<tr${cls}>
+    <td class="addr">${escHtml(r.address)}</td>
+    <td class="name">${escHtml(r.name)}</td>
+    <td class="value">${escHtml(r.value)}</td>
+    <td class="raw">${escHtml(r.raw)}</td>
+    <td class="cat">${badgeCat(r.category)}</td>
+    <td class="poll">${badgePoll(r.pollGroup)}</td>
+  </tr>`;
+}
+
+function tableHtml(rows) {
+  return `<table>
+    <thead><tr>
+      <th>Adres</th><th>Naam</th><th>Waarde</th>
+      <th>RAW</th><th>Categorie</th><th>Poll-groep</th>
+    </tr></thead>
+    <tbody>${rows.map(row).join('')}</tbody>
+  </table>`;
+}
+
+function sectionHeader(label) {
+  return `<div class="section-header">${escHtml(label)}</div>`;
+}
+
+// ── Quality badge ─────────────────────────────────────────────────────────────
+function updateQualityBadge(snap) {
+  const badge = document.getElementById('quality-badge');
+  if (!badge) return;
+  const q = snap.diagnostics?.connectionQuality ?? null;
+  if (!q) { badge.textContent = '—'; badge.className = ''; return; }
+  badge.textContent = q;
+  badge.className = `q-${q}`;
+}
+
+// ── Snapshot → rijen ─────────────────────────────────────────────────────────
+function buildRows(snap) {
+  const sections = [];
+  const hasFault = snap.status.faultAlarm || snap.status.activeFaults.length > 0;
+
+  // Diagnostics (ADR-042)
+  if (snap.diagnostics) {
+    const d = snap.diagnostics;
+    const serverNowMs = snap.serverNowMs ?? Date.now();
+    const age = d.lastSuccessfulFastPollAt
+      ? Math.round((serverNowMs - d.lastSuccessfulFastPollAt) / 1000) + 's geleden'
+      : 'nooit';
+    const diagRows = [
+      { address: '—', name: 'Connection quality',        value: d.connectionQuality,              raw: '—', category: 'Diag', pollGroup: '—', fault: false },
+      { address: '—', name: 'Fast poll failures',        value: String(d.consecutiveFastPollFailures), raw: '—', category: 'Diag', pollGroup: '—', fault: false },
+      { address: '—', name: 'Laatste fast/superfast poll', value: age,                            raw: '—', category: 'Diag', pollGroup: '—', fault: false },
+    ];
+    if (d.lastErrorContext) {
+      diagRows.push({ address: '—', name: 'Laatste foutcontext', value: d.lastErrorContext, raw: '—', category: 'Diag', pollGroup: '—', fault: false });
+    }
+    sections.push({ label: 'Diagnostics', rows: diagRows });
+  }
+
+  // Sensors
+  const sensorRows = Object.values(snap.sensors).map(sv => ({
+    address: hex(sv.address),
+    name: sv.label,
+    value: sv.unit ? `${sv.value} ${sv.unit}` : String(sv.value),
+    raw: sv.raw,
+    category: 'Sensors',
+    pollGroup: resolvePollGroup(sv.address),
+    fault: false,
+  }));
+  sensorRows.sort((a, b) => a.address.localeCompare(b.address));
+  if (sensorRows.length) sections.push({ label: `Sensors (${sensorRows.length})`, rows: sensorRows });
+
+  // Status
+  const statusRows = [
+    { address: '—', name: 'Running',           value: snap.status.running      ? 'ja' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: false },
+    { address: '—', name: 'Compressor on',      value: snap.status.compressorOn ? 'ja' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: false },
+    { address: '—', name: 'Defrosting',         value: snap.status.defrosting   ? 'ja' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: false },
+    { address: '—', name: 'Antifreeze',         value: snap.status.antifreeze   ? 'ja' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: false },
+    { address: '—', name: 'Sterilization',      value: snap.status.sterilization? 'ja' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: false },
+    { address: '—', name: 'Fault alarm',        value: snap.status.faultAlarm   ? 'JA' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: snap.status.faultAlarm },
+    { address: '—', name: 'Fault shutdown',     value: snap.status.faultShutdown? 'JA' : 'nee', raw: '—', category: 'Status', pollGroup: 'MEDIUM', fault: snap.status.faultShutdown },
+    { address: '—', name: 'Waiting',            value: snap.status.waiting      ? 'ja' : 'nee', raw: '—', category: 'Status', pollGroup: 'FAST',   fault: false },
+  ];
+  sections.push({ label: 'Status', rows: statusRows });
+
+  // Faults
+  if (snap.status.activeFaults.length > 0) {
+    const faultRows = snap.status.activeFaults.map(f => ({
+      address: '—', name: f, value: 'actief', raw: '—', category: 'Faults', pollGroup: 'MEDIUM', fault: true,
+    }));
+    sections.push({ label: `Actieve storingen (${faultRows.length})`, rows: faultRows });
+  }
+
+  // Control
+  const controlRows = [
+    { address: '—', name: 'On/off',           value: snap.control.on        ? 'aan' : 'uit', raw: '—', category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'Mode',             value: `${snap.control.modeName} (${snap.control.mode})`, raw: snap.control.mode, category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'User mode',        value: String(snap.control.userMode),              raw: snap.control.userMode, category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'Heating setpoint', value: `${snap.control.heatingSetpointC} °C`,      raw: '—', category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'Cooling setpoint', value: `${snap.control.coolingSetpointC} °C`,      raw: '—', category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'DHW setpoint',     value: `${snap.control.dhwSetpointC} °C`,          raw: '—', category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'Floor setpoint',   value: `${snap.control.floorSetpointC} °C`,        raw: '—', category: 'Control', pollGroup: 'MEDIUM', fault: false },
+    { address: '—', name: 'Heating curve',    value: String(snap.control.heatingCurve),          raw: '—', category: 'Control', pollGroup: 'SLOW',   fault: false },
+    { address: '—', name: 'Hot water curve',  value: String(snap.control.hotWaterCurve),         raw: '—', category: 'Control', pollGroup: 'SLOW',   fault: false },
+    { address: '—', name: 'Protocol version', value: String(snap.control.protocolVersion),       raw: '—', category: 'Control', pollGroup: 'ONCE',   fault: false },
+    { address: '—', name: 'Coils available',  value: snap.control.coilsAvailable ? 'ja' : 'nee',raw: '—', category: 'Control', pollGroup: 'ONCE',   fault: false },
+  ];
+  sections.push({ label: 'Control', rows: controlRows });
+
+  // Power
+  const powerSourceLabel = {
+    'unit-direct':  'Modbus 0x005C (direct)',
+    'unit-derived': 'Modbus 0x005A × 0x005B (afgeleid)',
+    'ac-derived':   'Backup AC 0x0044 × 0x0045',
+    'none':         'Geen data',
+  }[snap.power.powerSource] ?? snap.power.powerSource;
+
+  const powerRows = [
+    { address: hex(0x005C), name: 'Unit input power',              value: `${snap.power.inputPowerKw} kW`,    raw: '—', category: 'Power', pollGroup: 'SUPERFAST', fault: false },
+    { address: hex(0x005B), name: 'Unit input current',            value: `${snap.power.inputCurrentA} A`,    raw: '—', category: 'Power', pollGroup: 'FAST',      fault: false },
+    { address: hex(0x005A), name: 'Unit input voltage',            value: `${snap.power.inputVoltageV} V`,    raw: '—', category: 'Power', pollGroup: 'FAST',      fault: false },
+    { address: hex(0x0045), name: 'AC current (backup)',           value: `${snap.power.acCurrentA} A`,       raw: '—', category: 'Power', pollGroup: 'SUPERFAST', fault: false },
+    { address: hex(0x0044), name: 'AC voltage (backup)',           value: `${snap.power.acVoltageV} V`,       raw: '—', category: 'Power', pollGroup: 'SUPERFAST', fault: false },
+    { address: hex(0x005D), name: 'Total energy',                  value: `${snap.power.totalEnergyKwh} kWh`, raw: '—', category: 'Power', pollGroup: 'FAST',      fault: false },
+    { address: '—',         name: 'Derived power',                 value: `${snap.power.derivedPowerKw} kW`,  raw: '—', category: 'Power', pollGroup: 'Afgeleid',  fault: false },
+    { address: '—',         name: 'Internal COP power source',     value: powerSourceLabel,                    raw: '—', category: 'Power', pollGroup: 'Afgeleid',  fault: false },
+    { address: '—',         name: 'adlar_cop power source',        value: 'External meter (adlar_external_power) indien actief, anders Modbus',  raw: '—', category: 'Power', pollGroup: 'Afgeleid', fault: false },
+  ];
+  sections.push({ label: 'Power', rows: powerRows });
+
+  // COP
+  if (snap.cop.valid) {
+    const copRows = [
+      { address: '—', name: 'Internal COP (realtime)', value: snap.cop.cop.toFixed(2),                        raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+      { address: '—', name: '↳ power used',            value: `${snap.cop.electricalPowerKw.toFixed(2)} kW — ${powerSourceLabel}`, raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+      { address: '—', name: 'adlar_cop power used',    value: 'adlar_external_power (W) indien gezet, anders bovenstaande bron',   raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+      { address: '—', name: 'Thermal power',           value: `${snap.cop.thermalPowerKw.toFixed(2)} kW`,     raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+      { address: '—', name: 'ΔT water',                value: `${snap.cop.deltaTc.toFixed(1)} °C`,            raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+      { address: '—', name: 'Flow rate',               value: `${snap.cop.flowLpm} L/min`,                    raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+      { address: '—', name: 'Ambient (COP ref)',        value: `${snap.cop.ambientTempC} °C`,                  raw: '—', category: 'COP', pollGroup: 'Afgeleid', fault: false },
+    ];
+    sections.push({ label: 'Internal COP', rows: copRows });
+  }
+
+  // Version
+  if (snap.version.programVersion) {
+    const verRows = [
+      { address: hex(0x0360), name: 'Firmware version',  value: snap.version.programVersion,              raw: snap.version.programVersionRaw ?? '—', category: 'Version', pollGroup: 'ONCE', fault: false },
+      { address: hex(0x0053), name: 'Device tooling no',  value: String(snap.version.deviceToolingNo ?? '—'), raw: snap.version.deviceToolingNo ?? '—', category: 'Version', pollGroup: 'ONCE', fault: false },
+      { address: hex(0x0361), name: 'Product type',       value: String(snap.version.productType ?? '—'),    raw: snap.version.productType ?? '—',     category: 'Version', pollGroup: 'ONCE', fault: false },
+      { address: hex(0x0362), name: 'Product type ID',    value: String(snap.version.productTypeId ?? '—'),  raw: snap.version.productTypeId ?? '—',   category: 'Version', pollGroup: 'ONCE', fault: false },
+      { address: hex(0x0363), name: 'Protocol version',   value: snap.version.protocolVersionFormatted ?? '—', raw: snap.version.protocolVersion ?? '—', category: 'Version', pollGroup: 'ONCE', fault: false },
+    ];
+    sections.push({ label: 'Version', rows: verRows });
+  }
+
+  return sections;
+}
+
+// ── Indicator ────────────────────────────────────────────────────────────────
+function updateIndicator(ts) {
+  const dot  = document.getElementById('indicator-dot');
+  const text = document.getElementById('indicator-text');
+  const age  = Date.now() - ts;
+
+  if (age < 30_000) {
+    dot.className = 'green';
+    text.textContent = `Bijgewerkt: ${new Date(ts).toLocaleTimeString()}`;
+  } else if (age < 120_000) {
+    dot.className = 'orange';
+    text.textContent = `Verouderd: ${new Date(ts).toLocaleTimeString()}`;
+  } else {
+    dot.className = 'red';
+    text.textContent = `Geen data: ${new Date(ts).toLocaleTimeString()}`;
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render(snap) {
+  document.getElementById('no-data').hidden = true;
+  const sections = buildRows(snap);
+  const html = sections.map(s =>
+    sectionHeader(s.label) + tableHtml(s.rows)
+  ).join('');
+  document.getElementById('dashboard').innerHTML = html;
+  updateIndicator(snap.ts);
+  updateQualityBadge(snap);
+}
+
+function showNoData() {
+  document.getElementById('no-data').hidden = false;
+  document.getElementById('dashboard').innerHTML = '';
+  const dot  = document.getElementById('indicator-dot');
+  const text = document.getElementById('indicator-text');
+  dot.className = '';
+  text.textContent = 'Wachten op eerste Modbus-poll...';
+}
+
+// ── Poll loop ────────────────────────────────────────────────────────────────
+async function refresh() {
+  try {
+    const res = await fetch('/api/snapshot');
+    if (res.status === 204) {
+      showNoData();
+      return;
+    }
+    if (!res.ok) {
+      console.error('DashboardClient: onverwachte status', res.status);
+      return;
+    }
+    const snap = await res.json();
+    render(snap);
+  } catch (err) {
+    console.error('DashboardClient: fetch fout', err);
+    const dot  = document.getElementById('indicator-dot');
+    const text = document.getElementById('indicator-text');
+    dot.className = 'red';
+    text.textContent = 'Verbindingsfout';
+  }
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

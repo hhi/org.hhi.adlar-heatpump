@@ -1,0 +1,48 @@
+{
+  "id": "cop_trend_analysis_modbus",
+  "title": {
+    "en": "COP trend analysis",
+    "nl": "COP trend analyse",
+    "de": "COP-Trendanalyse",
+    "fr": "Analyse de tendance COP"
+  },
+  "titleFormatted": {
+    "en": "COP trend is !{{improving|stable|degrading}} over [[hours]] hours",
+    "nl": "COP trend is !{{verbeterend|stabiel|verslechterend}} over [[hours]] uur",
+    "de": "COP-Trend ist !{{verbessernd|stabil|verschlechternd}} über [[hours]] Stunden",
+    "fr": "La tendance COP est !{{en amélioration|stable|en dégradation}} sur [[hours]] heures"
+  },
+  "hint": {
+    "en": "Check the COP performance trend over a specified time period",
+    "nl": "Controleer de COP prestatie trend over een opgegeven tijdsperiode",
+    "de": "Prüfen Sie den COP-Leistungstrend über einen bestimmten Zeitraum",
+    "fr": "Vérifier la tendance de performance COP sur une période spécifiée"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "range",
+      "name": "hours",
+      "title": {
+        "en": " Time period ",
+        "nl": " Tijdsperiode ",
+        "de": " Zeitraum ",
+        "fr": " Période "
+      },
+      "min": 1,
+      "max": 168,
+      "step": 1,
+      "units": "h",
+      "placeholder": {
+        "en": "Number of hours to analyze",
+        "nl": "Aantal uur om te analyseren",
+        "de": "Anzahl der zu analysierenden Stunden",
+        "fr": "Nombre d'heures à analyser"
+      }
+    }
+  ]
+}

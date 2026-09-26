@@ -1,0 +1,48 @@
+{
+  "id": "receive_external_power_data_modbus",
+  "title": {
+    "en": "Send power data to heat pump",
+    "nl": "Stuur vermogensgegevens naar warmtepomp",
+    "de": "Leistungsdaten an Wärmepumpe senden",
+    "fr": "Envoyer les données de puissance à la pompe à chaleur"
+  },
+  "titleFormatted": {
+    "en": "Send [[power_value]]W to heat pump for COP calculation",
+    "nl": "Stuur [[power_value]]W naar warmtepomp voor COP berekening",
+    "de": "Sende [[power_value]]W an Wärmepumpe für COP-Berechnung",
+    "fr": "Envoyer [[power_value]]W à la pompe à chaleur pour le calcul COP"
+  },
+  "hint": {
+    "en": "Sends power consumption data to the heat pump for enhanced COP calculations",
+    "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor verbeterde COP-berekeningen",
+    "de": "Sendet Stromverbrauchsdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
+    "fr": "Envoie les données de consommation électrique à la pompe à chaleur pour des calculs COP améliorés"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "number",
+      "name": "power_value",
+      "title": {
+        "en": "Power consumption (W)",
+        "nl": "Stroomverbruik (W)",
+        "de": "Stromverbrauch (W)",
+        "fr": "Consommation électrique (W)"
+      },
+      "placeholder": {
+        "en": "Current power consumption in watts",
+        "nl": "Huidig stroomverbruik in watt",
+        "de": "Aktueller Stromverbrauch in Watt",
+        "fr": "Consommation électrique actuelle en watts"
+      },
+      "min": 0,
+      "max": 50000,
+      "step": 0.1
+    }
+  ]
+}

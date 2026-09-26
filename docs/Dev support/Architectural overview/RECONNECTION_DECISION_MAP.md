@@ -172,31 +172,31 @@ if (isConnected) {
 }
 ```
 
-**Threshold:** 10 minutes (600,000ms)
+**Threshold:** 15 minutes (`STALE_CONNECTION_THRESHOLD_MS`)
+**Evaluated:** every 20 seconds — `scheduleNextReconnectionAttempt()` doubles as the health loop and reschedules itself while the connection is healthy
 **Purpose:** Detect "zombie" connections claiming to be active but with no data flow
 
-#### LAYER 3: Time-Based Notifications
-
-**Lines:** 1322-1352
+#### Outage Notification (reworked in v3.1.0)
 
 ```
 if (outageStartTime > 0) {
   outageDuration = Date.now() - outageStartTime
-  
-  if (outageDuration >= 2 * 60 * 1000 && !notificationSent2Min)
-    → Send "Connection Lost" notification
-  
-  if (outageDuration >= 10 * 60 * 1000 && !notificationSent10Min)
-    → Send "Extended Outage" notification
-  
-  if (outageDuration >= 30 * 60 * 1000 && !notificationSent30Min)
-    → Send "Critical Outage" notification
+
+  if (outageDuration >= OUTAGE_NOTIFICATION_DELAY_MS   // 15 minutes
+      && !outageNotificationSent
+      && !outageNotificationInProgress)
+    → Send one "Extended Device Outage" notification
 }
 ```
 
-**Milestones:** 2 min, 10 min, 30 min
-**Purpose:** Keep user informed of outage duration
-**Notification Type:** Time-based (independent of failure count)
+**Threshold:** one alert after 15 minutes of unresolved outage
+**Recovery:** "Verbinding Hersteld" is sent only if that alert was actually delivered
+**Deduplication:** per outage — `outageNotificationSent` is cleared only when the outage is completed by `notifyRecoveryAndCompleteOutage()`
+**Purpose:** tell the user when something needs their attention, not when automatic recovery is doing its job
+
+> Prior to v3.1.0 this section fired at 2, 10 and 30 minutes, and every socket error, disconnect
+> event, stale connection and zombie detection produced its own push message. Those are now
+> logged only. See [ADR-003](../../architecture/ADR-003-TUYA-ZOMBIE-DETECTIE-EN-DEFENSIEVE-LAGEN.md).
 
 #### LAYER 4: Circuit Breaker with Cycle Limit
 
@@ -273,7 +273,7 @@ this.reconnectInterval = setTimeout(() => {
 Schedule Next Reconnection
 ├─ LAYER 1: Track outage start time
 ├─ LAYER 2: Detect stale connections
-│  ├─ If stale (>10 min no data) + claimed connected
+│  ├─ If stale (>15 min no data) + claimed connected
 │  └─ → Mark disconnected + apply 1.5x backoff
 ├─ LAYER 3: Send time-based notifications (2m, 10m, 30m)
 ├─ LAYER 4: Circuit breaker with cycle limit
@@ -603,7 +603,7 @@ if (isConnected) {
   timeSinceLastData = Date.now() - lastDataEventTime
   
   if (timeSinceLastData > STALE_CONNECTION_THRESHOLD_MS) {
-    // Threshold: 10 minutes (600,000ms)
+    // Threshold: 15 minutes (STALE_CONNECTION_THRESHOLD_MS)
     
     → Log: "Stale connection detected - no data for Xs (threshold: Ys)"
     → isConnected = false

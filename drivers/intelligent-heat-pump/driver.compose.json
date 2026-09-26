@@ -1,7 +1,7 @@
 {
   "name": {
-    "en": "intelligent-heat-pump",
-    "nl": "intelligent-heat-pump"
+    "en": "Adlar Castra Aurora Heat Pump (Tuya)",
+    "nl": "Adlar Castra Aurora-warmtepomp (Tuya)"
   },
   "class": "heatpump",
   "capabilities": [
@@ -881,11 +881,6 @@
     "small": "{{driverAssetsPath}}/images/Aurora2-drv-small.png",
     "large": "{{driverAssetsPath}}/images/Aurora2-drv-large.png",
     "xlarge": "{{driverAssetsPath}}/images/Aurora2-drv-xlarge.png"
-  },
-  "energy": {
-    "approximation": {
-      "usageConstant": 2500
-    }
   },
   "pair": [
     {

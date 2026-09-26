@@ -3,9 +3,12 @@
   "type": "number",
   "title": {
     "en": "Reference Temperature",
-    "nl": "Referentie Temperatuur"
+    "nl": "Referentie Temperatuur",
+    "de": "Referenz-Vorlauftemperatur",
+    "fr": "Température de consigne de référence"
   },
   "getable": true,
   "setable": false,
-  "uiComponent": null
+  "uiComponent": null,
+  "insights": true
 }

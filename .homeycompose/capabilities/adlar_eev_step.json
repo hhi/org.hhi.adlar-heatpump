@@ -1,0 +1,31 @@
+{
+  "id": "adlar_eev_step",
+  "type": "number",
+  "title": {
+    "en": "EEV opening steps",
+    "nl": "EEV-openingsstappen",
+    "de": "EEV-Öffnungsschritte",
+    "fr": "Pas d'ouverture EEV"
+  },
+  "icon": "/assets/pulse-steps.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "units": "steps",
+  "decimals": 0,
+  "min": 0,
+  "max": 500,
+  "description": {
+    "en": "Electronic Expansion Valve (EEV) opening position from Modbus sensor register 0x0042 (eevOpenStep), in stepper motor steps.",
+    "nl": "Openingspositie van de elektronische expansieklep (EEV) uit Modbus-sensorregister 0x0042 (eevOpenStep), in stappenmotor-stappen.",
+    "de": "Öffnungsposition des elektronischen Expansionsventils (EEV) aus Modbus-Sensorregister 0x0042 (eevOpenStep), in Schrittmotorschritten.",
+    "fr": "Position d'ouverture du détendeur électronique (EEV) depuis le registre capteur Modbus 0x0042 (eevOpenStep), en pas moteur pas à pas."
+  },
+  "insights": true,
+  "insightsTitle": {
+    "en": "Heat Pump EEV Opening",
+    "nl": "Warmtepomp EEV-opening",
+    "de": "Wärmepumpe EEV-Öffnung",
+    "fr": "Ouverture EEV pompe à chaleur"
+  }
+}

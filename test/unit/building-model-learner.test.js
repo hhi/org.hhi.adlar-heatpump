@@ -14,7 +14,7 @@ const {
   BuildingModelLearner,
   BUILDING_PROFILES,
   getDynamicPInt,
-} = require('../../.homeybuild/lib/adaptive/building-model-learner');
+} = require('../../.homeybuild/lib/shared/adaptive/building-model-learner');
 
 const FIVE_MIN_MS = 5 * 60 * 1000;
 

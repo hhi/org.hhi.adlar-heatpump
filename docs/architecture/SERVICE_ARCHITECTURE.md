@@ -11,7 +11,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 1. TuyaConnectionService
 
-**Location**: `lib/services/tuya-connection-service.ts`
+**Location**: `lib/tuya/services/tuya-connection-service.ts`
 
 **Core Responsibilities**:
 - Device communication via TuyAPI
@@ -38,7 +38,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 2. CapabilityHealthService
 
-**Location**: `lib/services/capability-health-service.ts`
+**Location**: `lib/tuya/services/capability-health-service.ts`
 
 **Responsibilities**:
 - Real-time capability health tracking (DPS-only, v1.2.3)
@@ -50,7 +50,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 3. FlowCardManagerService
 
-**Location**: `lib/services/flow-card-manager-service.ts`
+**Location**: `lib/tuya/services/flow-card-manager-service.ts`
 
 **Responsibilities**:
 - Dynamic flow card registration (64 cards across 8 categories)
@@ -60,7 +60,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 4. EnergyTrackingService
 
-**Location**: `lib/services/energy-tracking-service.ts`
+**Location**: `lib/tuya/services/energy-tracking-service.ts`
 
 **Responsibilities**:
 - External power measurement integration
@@ -70,7 +70,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 5. SettingsManagerService
 
-**Location**: `lib/services/settings-manager-service.ts`
+**Location**: `lib/shared/services/settings-manager-service.ts`
 
 **Responsibilities**:
 - Race condition prevention (deferred updates pattern)
@@ -82,7 +82,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 6. COPCalculator
 
-**Location**: `lib/services/cop-calculator.ts`
+**Location**: `lib/shared/services/cop-calculator.ts`
 
 **Responsibilities**:
 - Real-time COP calculations with 8 methods (±5% to ±30% accuracy)
@@ -93,7 +93,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 7. RollingCOPCalculator
 
-**Location**: `lib/services/rolling-cop-calculator.ts`
+**Location**: `lib/shared/services/rolling-cop-calculator.ts`
 
 **Responsibilities**:
 - Time-series analysis (daily/weekly/monthly rolling averages)
@@ -104,7 +104,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 8. SCOPCalculator
 
-**Location**: `lib/services/scop-calculator.ts`
+**Location**: `lib/tuya/services/scop-calculator.ts`
 
 **Responsibilities**:
 - Seasonal COP per EN 14825 European standard
@@ -117,7 +117,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 ### 9. AdaptiveControlService
 
-**Location**: `lib/services/adaptive-control-service.ts` (v1.3.0+)
+**Location**: `lib/tuya/services/adaptive-control-service.ts` (v1.3.0+)
 
 **Full Documentation**: [Adaptive Control Architecture Guide](../Dev%20support/Architectural%20overview/adaptive-control-architecture.md)
 
@@ -126,15 +126,15 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 - Maintains stable indoor temperature (±0.3°C deadband)
 - 5-minute control loop with intelligent adjustment accumulation
 - Persistent PI controller history (survives app restarts)
-- Integration with **HeatingController** (`lib/adaptive/heating-controller.ts`)
-- Integration with **ExternalTemperatureService** (`lib/services/external-temperature-service.ts`)
+- Integration with **HeatingController** (`lib/tuya/adaptive/heating-controller.ts`)
+- Integration with **ExternalTemperatureService** (`lib/tuya/services/external-temperature-service.ts`)
 - Flow card triggers for transparency (`adaptive_status_change`, `target_temperature_adjusted`)
 - Zero modifications to device class (external pattern)
 
 **Key Components**:
 
 #### HeatingController
-**Location**: `lib/adaptive/heating-controller.ts`
+**Location**: `lib/tuya/adaptive/heating-controller.ts`
 
 - PI algorithm with Kp=3.0, Ki=1.5
 - 24-point error history (2 hours at 5-minute intervals)
@@ -142,7 +142,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 - Deadband tolerance prevents oscillation
 
 #### ExternalTemperatureService
-**Location**: `lib/services/external-temperature-service.ts`
+**Location**: `lib/tuya/services/external-temperature-service.ts`
 
 - Receives room temperature from Homey thermostats/sensors
 - Data validation and freshness tracking (5-minute timeout)
@@ -234,7 +234,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator, eliminati
 
 #### Component 2: Building Model Learner (v1.4.0+)
 
-**Location**: `lib/adaptive/building-model-learner.ts`
+**Location**: `lib/shared/adaptive/building-model-learner.ts`
 **Status**: ✅ Complete
 
 Learns thermal properties of the building using **Recursive Least Squares (RLS)** machine learning algorithm.
@@ -279,7 +279,7 @@ P_new = (1/λ) × (P - K × X^T × P)          // Covariance update
 - **Tokens**: confidence, thermal_mass, time_constant, milestone
 - **Action**: `diagnose_building_model` - Troubleshooting diagnostic tool (v2.0.1+)
 
-**Service Wrapper**: `BuildingModelService` (`lib/services/building-model-service.ts`)
+**Service Wrapper**: `BuildingModelService` (`lib/tuya/services/building-model-service.ts`)
 - Manages learner lifecycle and device integration
 - Automatic capability updates (`adlar_building_c`, `adlar_building_ua`, `adlar_building_tau`)
 - 5-minute data collection cycle
@@ -350,7 +350,7 @@ The `diagnose_building_model` flow action provides comprehensive troubleshooting
 
 #### Component 3: Energy Price Optimizer (v1.4.0+)
 
-**Location**: `lib/adaptive/energy-price-optimizer.ts`
+**Location**: `lib/tuya/adaptive/energy-price-optimizer.ts`
 **Status**: ✅ Complete
 **⚠️ OPTIONAL** - Only useful for users with **dynamic energy pricing contracts** (e.g., day-ahead market pricing). Disabled by default.
 
@@ -405,7 +405,7 @@ Optimizes heating based on **dynamic day-ahead energy prices** from EnergyZero A
 
 #### Component 4: COP Optimizer (v1.4.0+)
 
-**Location**: `lib/adaptive/cop-optimizer.ts`
+**Location**: `lib/tuya/adaptive/cop-optimizer.ts`
 **Status**: ✅ Complete
 
 Optimizes **Coefficient of Performance (COP)** by learning historical relationships between outdoor temperature, supply temperature, and achieved COP.
@@ -463,7 +463,7 @@ if (currentCOP < minAcceptableCOP) {
 
 #### Weighted Decision Maker (v1.4.0+)
 
-**Location**: `lib/adaptive/weighted-decision-maker.ts`
+**Location**: `lib/tuya/adaptive/weighted-decision-maker.ts`
 
 Combines recommendations from all 4 controllers into a single **weighted decision** using configurable priorities.
 
@@ -575,7 +575,7 @@ Users can configure all components via device settings:
 
 ## Service Coordinator
 
-**Location**: `lib/services/service-coordinator.ts`
+**Location**: `lib/tuya/services/service-coordinator.ts`
 
 ServiceCoordinator manages initialization, lifecycle, and cross-service communication:
 
@@ -639,17 +639,17 @@ class ServiceCoordinator {
 
 ### Memory Leak Fixes (v1.0.1)
 
-1. **SCOPCalculator** (`lib/services/scop-calculator.ts`)
+1. **SCOPCalculator** (`lib/tuya/services/scop-calculator.ts`)
    - **Issue**: `dailyData` Map grew unbounded (kept 2 years of seasonal data)
    - **Impact**: ~20-30 MB memory leak over 8 hours
    - **Fix**: Added `destroy()` method to clear Map and reset season tracking
 
-2. **RollingCOPCalculator** (`lib/services/rolling-cop-calculator.ts`)
+2. **RollingCOPCalculator** (`lib/shared/services/rolling-cop-calculator.ts`)
    - **Issue**: `dataPoints` array kept 1440+ data points without cleanup
    - **Impact**: ~10-20 MB memory leak over 8 hours
    - **Fix**: Added `destroy()` method to clear circular buffer
 
-3. **EnergyTrackingService** (`lib/services/energy-tracking-service.ts`)
+3. **EnergyTrackingService** (`lib/tuya/services/energy-tracking-service.ts`)
    - **Issue**: Incomplete `destroy()` - timers not cleared
    - **Impact**: ~5-10 MB memory leak + continued timer execution
    - **Fix**: Enhanced `destroy()` to clear all intervals/timeouts
@@ -702,7 +702,7 @@ Circuit breaker entered infinite loop during sustained outages:
 
 5 integrated improvements eliminate infinite loops and guarantee auto-recovery:
 
-1. **Persistent Outage Tracking** (`lib/services/tuya-connection-service.ts:57-58`)
+1. **Persistent Outage Tracking** (`lib/tuya/services/tuya-connection-service.ts:57-58`)
    - Tracks cumulative outage duration independent of circuit breaker resets
    - Enables time-based notifications and user-visible outage timer
 

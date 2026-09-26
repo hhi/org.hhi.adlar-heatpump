@@ -1,0 +1,59 @@
+{
+  "id": "adlar_state_backwater_modbus",
+  "title": {
+    "en": "Backwater mode",
+    "nl": "Retourwater modus",
+    "de": "Rücklaufmodus",
+    "fr": "Mode retour d'eau"
+  },
+  "type": "enum",
+  "values": [
+    {
+      "id": "disable",
+      "title": {
+        "en": "Disabled",
+        "nl": "Uitgeschakeld",
+        "de": "Deaktiviert",
+        "fr": "Désactivé"
+      }
+    },
+    {
+      "id": "continuous",
+      "title": {
+        "en": "Continuous return",
+        "nl": "Continue circulatie",
+        "de": "Dauerkreislauf",
+        "fr": "Retour continu"
+      }
+    },
+    {
+      "id": "cycle",
+      "title": {
+        "en": "Cycle return",
+        "nl": "Cyclische circulatie",
+        "de": "Zyklischer Kreislauf",
+        "fr": "Retour cyclique"
+      }
+    },
+    {
+      "id": "temp_diff",
+      "title": {
+        "en": "Temperature differential return",
+        "nl": "Temperatuurverschil circulatie",
+        "de": "Temperaturdifferenz-Kreislauf",
+        "fr": "Retour différentiel de température"
+      }
+    }
+  ],
+  "setable": false,
+  "getable": true,
+  "uiComponent": "sensor",
+  "icon": "/assets/backwater-state.svg",
+  "insights": true,
+  "description": {
+    "en": "L22 (0x080B): DHW return water circulation mode",
+    "nl": "L22 (0x080B): DHW retourwater circulatiemodus",
+    "de": "L22 (0x080B): Zirkulationsmodus für Warmwasserrücklauf",
+    "fr": "L22 (0x080B) : Mode de circulation d'eau de retour ECS"
+  }
+}

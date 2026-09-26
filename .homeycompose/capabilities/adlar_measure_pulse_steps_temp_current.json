@@ -31,6 +31,9 @@
   "icon": "/assets/pulse-steps.svg",
   
   "description": {
-    "nl": "dp 16 : temp_current - EEV Open"
+    "en": "dp 16: temp_current - Electronic Expansion Valve (EEV) pulse steps",
+    "nl": "dp 16: temp_current - Elektronisch expansieventiel (EEV) pulsstappen",
+    "de": "dp 16: temp_current - Elektronisches Expansionsventil (EEV) Impulsschritte",
+    "fr": "dp 16: temp_current - Pas d'impulsion du détendeur électronique (EEV)"
   }
 }

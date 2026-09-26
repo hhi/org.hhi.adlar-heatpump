@@ -2,7 +2,7 @@
 
 **Project:** org.hhi.adlar-heatpump (Tuya local)
 **Gerelateerd:** ADR-057 W2b (sample-gating), ADR-060 (geharmoniseerd gedrag — identieke uitleg geldt voor het Modbus-project, met eigen detectiebronnen)
-**Code:** `lib/services/building-model-service.ts` → `collectAndLearn()`
+**Code:** `lib/tuya/services/building-model-service.ts` → `collectAndLearn()`
 
 Het gebouwmodel (RLS) leert vier thermische parameters — C (thermische massa), UA (warmteverlies), g (zonnewinst), P_int (interne winst) — uit de relatie tussen **toegevoerd thermisch vermogen** en **verandering van de binnentemperatuur**. Die relatie geldt alleen wanneer het thermisch vermogen daadwerkelijk het gebouw in gaat. Twee bedrijfssituaties breken die aanname structureel; daarvoor bestaan de gates `blocked_dhw_mode` en `blocked_defrost`.
 

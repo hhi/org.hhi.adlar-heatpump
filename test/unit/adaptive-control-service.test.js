@@ -15,7 +15,7 @@ Module._load = function load(request, parent, isMain) {
   return originalLoad.call(this, request, parent, isMain);
 };
 
-const { AdaptiveControlService } = require('../../.homeybuild/lib/services/adaptive-control-service');
+const { AdaptiveControlService } = require('../../.homeybuild/lib/tuya/services/adaptive-control-service');
 
 function createHomey(flowEvents) {
   return {
@@ -66,10 +66,14 @@ function createDevice() {
     store,
     getSetting: (key) => settings[key],
     getStoreValue: (key) => store[key],
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: (key) => Object.prototype.hasOwnProperty.call(capabilities, key),
-    setCapabilityValue: async (key, value) => { capabilities[key] = value; },
+    setCapabilityValue: async (key, value) => {
+      capabilities[key] = value;
+    },
     setCapabilityOptions: async () => {},
     getOutdoorTemperatureWithFallback: () => 5,
     error: () => {},
@@ -81,7 +85,9 @@ function createService(device, adjustments = []) {
   const logs = [];
   const service = new AdaptiveControlService({
     device,
-    logger: (...args) => { logs.push(args); },
+    logger: (...args) => {
+      logs.push(args);
+    },
   });
   service.__testLogs = logs;
   service.isEnabled = true;
@@ -107,7 +113,9 @@ function createService(device, adjustments = []) {
     setThermalCapacity: () => {},
   };
   service.windCorrection = {
-    calculateCorrection: () => ({ correction: 0, windSpeed: 0, deltaT: 0, alpha: 0, alphaSource: 'test', capped: false }),
+    calculateCorrection: () => ({
+      correction: 0, windSpeed: 0, deltaT: 0, alpha: 0, alphaSource: 'test', capped: false,
+    }),
   };
   service.copOptimizer = {
     calculateAction: () => null,

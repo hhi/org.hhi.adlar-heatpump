@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adlar — Stooklijn</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        nav {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 8px 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        nav a {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            border: 1px solid #334155;
+            transition: background 0.15s, color 0.15s;
+        }
+        nav a:hover { background: #334155; color: #f8fafc; }
+        nav a.active { background: #0f172a; color: #38bdf8; border-color: #38bdf8; }
+        .container {
+            max-width: 800px;
+            margin: 24px auto;
+            padding: 0 20px 40px;
+        }
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #334155;
+            border-radius: 6px;
+            display: block;
+            width: 100%;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 16px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 4px solid #22c55e;
+        }
+        .controls h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        .slider-container label { font-size: 0.88rem; color: #cbd5e1; white-space: nowrap; }
+        .slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 4px;
+            background: #334155;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #22c55e;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #22c55e;
+            cursor: pointer;
+            border: none;
+        }
+        .value-display {
+            font-weight: 700;
+            color: #22c55e;
+            min-width: 48px;
+            text-align: right;
+            font-size: 0.95rem;
+        }
+
+        /* Randvoorwaarden sectie */
+        .prereqs {
+            margin: 20px 0;
+            padding: 16px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+            transition: border-color 0.3s;
+        }
+        .prereqs.prereqs-ok { border-left-color: #22c55e; }
+        .prereqs h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .prereqs-note {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            margin-bottom: 14px;
+        }
+        .prereq-row {
+            margin: 10px 0;
+        }
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .toggle-input { display: none; }
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: #334155;
+            border-radius: 11px;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #64748b;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .toggle-input:checked + .toggle-switch { background: #22c55e; }
+        .toggle-input:checked + .toggle-switch::after { transform: translateX(18px); background: #fff; }
+        .toggle-text { font-size: 0.88rem; color: #cbd5e1; }
+        .prereq-warning {
+            margin-top: 6px;
+            margin-left: 50px;
+            font-size: 0.82rem;
+            color: #fbbf24;
+            background: #451a03;
+            border: 1px solid #92400e;
+            border-radius: 4px;
+            padding: 6px 10px;
+        }
+        .prereq-feedback {
+            margin-top: 4px;
+            margin-left: 50px;
+            font-size: 0.82rem;
+            min-height: 18px;
+        }
+        .prereq-feedback.ok   { color: #86efac; }
+        .prereq-feedback.warn { color: #fbbf24; }
+        .prereq-feedback.error { color: #fca5a5; }
+        .prereqs-status {
+            margin-top: 12px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .prereqs-status.all-ok  { background: #14532d; color: #86efac; }
+        .prereqs-status.missing { background: #422006; color: #fcd34d; }
+
+        .apply-section {
+            margin-top: 20px;
+            padding: 16px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 4px solid #f97316;
+        }
+        .apply-section strong { color: #f8fafc; }
+        .apply-desc { margin: 6px 0; font-size: 0.85rem; color: #94a3b8; }
+        .apply-btn {
+            background: #f97316;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.15s;
+        }
+        .apply-btn:hover { background: #ea580c; }
+        .apply-btn:disabled { background: #334155; color: #64748b; cursor: default; }
+        .feedback {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .feedback.ok    { background: #14532d; color: #86efac; display: block; }
+        .feedback.error { background: #450a0a; color: #fca5a5; display: block; }
+        .info {
+            margin-top: 20px;
+            padding: 16px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 4px solid #38bdf8;
+        }
+        .info h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+        .info p { font-size: 0.88rem; color: #cbd5e1; margin: 6px 0; }
+        .info em { color: #64748b; }
+        .formula {
+            font-family: ui-monospace, 'Cascadia Code', monospace;
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 10px 14px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        .formula small { color: #64748b; }
+        .load-status { margin-top: -12px; font-style: italic; }
+        @media (prefers-color-scheme: light) {
+          body { background: #f8fafc; color: #0f172a; }
+          nav { background: #ffffff; border-bottom-color: #e2e8f0; }
+          nav a { color: #475569; border-color: #e2e8f0; }
+          nav a:hover { background: #e2e8f0; color: #0f172a; }
+          nav a.active { background: #e0f2fe; color: #0284c7; border-color: #0284c7; }
+          h2 { color: #0f172a; }
+          .subtitle { color: #475569; }
+          canvas { border-color: #e2e8f0; }
+          .controls { background: #f0fdf4; border-left-color: #16a34a; }
+          .controls h3 { color: #475569; }
+          .slider-container label { color: #1e293b; }
+          .slider { background: #e2e8f0; }
+          .value-display { color: #16a34a; }
+          .prereqs { background: #fffbeb; border-left-color: #d97706; }
+          .prereqs.prereqs-ok { background: #f0fdf4; border-left-color: #16a34a; }
+          .prereqs h3 { color: #475569; }
+          .prereqs-note { color: #64748b; }
+          .toggle-switch { background: #cbd5e1; }
+          .toggle-text { color: #1e293b; }
+          .prereq-warning { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
+          .prereqs-status.all-ok  { background: #dcfce7; color: #166534; }
+          .prereqs-status.missing { background: #fef9c3; color: #854d0e; }
+          .apply-section { background: #fff7ed; border-left-color: #ea580c; }
+          .apply-section strong { color: #0f172a; }
+          .apply-desc { color: #475569; }
+          .apply-btn:disabled { background: #e2e8f0; color: #94a3b8; }
+          .feedback.ok    { background: #dcfce7; color: #166534; }
+          .feedback.error { background: #fee2e2; color: #991b1b; }
+          .info { background: #eff6ff; border-left-color: #0284c7; }
+          .info h3 { color: #475569; }
+          .info p { color: #1e293b; }
+          .info em { color: #94a3b8; }
+          .formula { background: #f1f5f9; color: #0369a1; border: 1px solid #e2e8f0; }
+          .formula small { color: #94a3b8; }
+        }
+    </style>
+</head>
+<body>
+<nav>
+  <a href="/">Dashboard</a>
+  <a href="/interactive">Interactief</a>
+  <a href="/live">Live</a>
+  <a href="/expert">Expert</a>
+  <a href="/changelog">Change Log</a>
+  <a href="/heating-curve" class="active">Stooklijn</a>
+</nav>
+    <div class="container">
+        <h2>Custom stooklijn (L28/L29)</h2>
+        <p class="subtitle">Adlar Castra / Aurora II &mdash; interactieve stooklijn instelling</p>
+        <p id="load-status" class="subtitle load-status"></p>
+
+        <div class="controls">
+            <h3>Stooklijn instellingen</h3>
+            <div class="slider-container">
+                <label for="l28-slider"><strong>L28</strong> Hellingsgraad:</label>
+                <input type="range" id="l28-slider" class="slider" min="-10" max="10" step="0.5" value="-5">
+                <span class="value-display" id="l28-value">-5</span>
+            </div>
+            <div class="slider-container">
+                <label for="l29-slider"><strong>L29</strong> Set temp bij -15°C buiten:</label>
+                <input type="range" id="l29-slider" class="slider" min="25" max="75" step="1" value="55">
+                <span class="value-display" id="l29-value">55°C</span>
+            </div>
+        </div>
+
+        <canvas id="graph" width="700" height="400"></canvas>
+
+        <div class="prereqs" id="prereqs-section">
+            <h3>Randvoorwaarden custom stooklijn</h3>
+            <p class="prereqs-note">Beide instellingen moeten actief zijn voor correcte werking van de custom stooklijn.</p>
+
+            <div class="prereq-row">
+                <label class="toggle-label" for="toggle-preset">
+                    <input type="checkbox" id="toggle-preset" class="toggle-input">
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-text"><strong>Stel stooklijn in op HL8</strong> &mdash; Heating Curve Setting (0x0314 = 18)</span>
+                </label>
+                <div class="prereq-warning" id="preset-warning" style="display:none">
+                    Preset HL8 blijft ongewijzigd op de warmtepomp staan. Stel de verwarmingsstooklijn handmatig opnieuw in via de apparaatinstellingen naar uw gewenste preset.
+                </div>
+                <div class="prereq-feedback" id="preset-feedback"></div>
+            </div>
+
+            <div class="prereq-row">
+                <label class="toggle-label" for="toggle-l27">
+                    <input type="checkbox" id="toggle-l27" class="toggle-input">
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-text"><strong>Activeer custom stooklijn (L27=0)</strong> &mdash; warmtepomp gebruikt L28/L29 in plaats van preset</span>
+                </label>
+                <div class="prereq-feedback" id="l27-feedback"></div>
+            </div>
+
+            <div class="prereqs-status missing" id="prereqs-status">
+                Beide randvoorwaarden moeten actief zijn voor correcte werking.
+            </div>
+        </div>
+
+        <div class="apply-section">
+            <strong>Toepassen op warmtepomp</strong>
+            <p class="apply-desc">Schrijft de huidige slider-waarden als L28/L29 naar de warmtepomp via Modbus.</p>
+            <button type="button" class="apply-btn" id="apply-btn">Toepassen op warmtepomp</button>
+            <div class="feedback" id="apply-feedback"></div>
+        </div>
+
+        <div class="info">
+            <h3>Stooklijn eigenschappen</h3>
+            <p><strong>Referentie-punt:</strong> (-15°C, <span id="ref-temp">55</span>°C)</p>
+            <p><strong>Richtingscoëfficiënt:</strong> <span id="slope-display">-5</span> per 10°C = <span id="slope-decimal">-0.5</span></p>
+            <p><strong>Formule:</strong></p>
+            <div class="formula" id="formula-display">
+                y = -0.5x + 47.5<br>
+                <small>waarbij x = buitentemperatuur (°C) en y = aanvoertemperatuur (°C)</small>
+            </div>
+            <p><strong>Betekenis:</strong> Voor elke 10°C stijging van de buitentemperatuur <span id="meaning-display">daalt</span> de aanvoertemperatuur met <span id="change-amount">5</span>°C</p>
+            <p><em>Capabilities worden binnen 30 seconden bijgewerkt na een schrijfactie.</em></p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graph');
+        const ctx = canvas.getContext('2d');
+        const l28Slider = document.getElementById('l28-slider');
+        const l29Slider = document.getElementById('l29-slider');
+        const l28Value = document.getElementById('l28-value');
+        const l29Value = document.getElementById('l29-value');
+        const refTemp = document.getElementById('ref-temp');
+        const slopeDisplay = document.getElementById('slope-display');
+        const slopeDecimal = document.getElementById('slope-decimal');
+        const formulaDisplay = document.getElementById('formula-display');
+        const meaningDisplay = document.getElementById('meaning-display');
+        const changeAmount = document.getElementById('change-amount');
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const margin = 60;
+        const xMin = -20, xMax = 20, yMin = 20, yMax = 80;
+        const xScale = (width - 2 * margin) / (xMax - xMin);
+        const yScale = (height - 2 * margin) / (yMax - yMin);
+
+        function toCanvas(x, y) {
+            return [
+                margin + (x - xMin) * xScale,
+                height - margin - (y - yMin) * yScale,
+            ];
+        }
+
+        function getTheme() {
+            const light = window.matchMedia('(prefers-color-scheme: light)').matches;
+            return light ? {
+                bg:       '#ffffff',
+                grid:     '#e2e8f0',
+                axis:     '#94a3b8',
+                curve:    '#0284c7',
+                refDot:   '#ea580c',
+                dot:      '#16a34a',
+                label:    '#475569',
+                axisLabel:'#64748b',
+            } : {
+                bg:       '#1a2535',
+                grid:     '#334155',
+                axis:     '#64748b',
+                curve:    '#38bdf8',
+                refDot:   '#f97316',
+                dot:      '#22c55e',
+                label:    '#94a3b8',
+                axisLabel:'#64748b',
+            };
+        }
+
+        function drawGraph(l28, l29) {
+            const t = getTheme();
+            ctx.clearRect(0, 0, width, height);
+
+            // Achtergrond
+            ctx.fillStyle = t.bg;
+            ctx.fillRect(0, 0, width, height);
+
+            // Grid
+            ctx.strokeStyle = t.grid;
+            ctx.lineWidth = 1;
+            for (let x = xMin; x <= xMax; x += 5) {
+                const [cx] = toCanvas(x, 0);
+                ctx.beginPath(); ctx.moveTo(cx, margin); ctx.lineTo(cx, height - margin); ctx.stroke();
+            }
+            for (let y = yMin; y <= yMax; y += 5) {
+                const [, cy] = toCanvas(0, y);
+                ctx.beginPath(); ctx.moveTo(margin, cy); ctx.lineTo(width - margin, cy); ctx.stroke();
+            }
+
+            // Assen
+            ctx.strokeStyle = t.axis;
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(margin, height - margin); ctx.lineTo(width - margin, height - margin); ctx.stroke();
+            const [zeroX] = toCanvas(0, 0);
+            ctx.beginPath(); ctx.moveTo(zeroX, margin); ctx.lineTo(zeroX, height - margin); ctx.stroke();
+
+            // Stooklijn
+            const slope = l28 / 10;
+            const intercept = l29 - slope * (-15);
+            ctx.strokeStyle = t.curve;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            let first = true;
+            for (let x = xMin; x <= xMax; x += 0.1) {
+                const y = slope * x + intercept;
+                if (y >= yMin && y <= yMax) {
+                    const [cx, cy] = toCanvas(x, y);
+                    if (first) { ctx.moveTo(cx, cy); first = false; } else { ctx.lineTo(cx, cy); }
+                }
+            }
+            ctx.stroke();
+
+            // Referentiepunt
+            const [rx, ry] = toCanvas(-15, l29);
+            ctx.fillStyle = t.refDot;
+            ctx.beginPath(); ctx.arc(rx, ry, 6, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = t.label;
+            ctx.font = '12px system-ui, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`(-15°C, ${l29}°C)`, rx + 10, ry - 10);
+
+            // Datapunten
+            const pts = [-10, -5, 0, 5, 10, 15];
+            ctx.fillStyle = t.dot;
+            pts.forEach(px => {
+                const py = slope * px + intercept;
+                if (py >= yMin && py <= yMax) {
+                    const [cx, cy] = toCanvas(px, py);
+                    ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2 * Math.PI); ctx.fill();
+                    ctx.fillStyle = t.label;
+                    ctx.font = '10px system-ui, sans-serif';
+                    ctx.fillText(`(${px}°C, ${py.toFixed(1)}°C)`, cx + 8, cy - 8);
+                    ctx.fillStyle = t.dot;
+                }
+            });
+
+            // Aslabels
+            ctx.fillStyle = t.axisLabel;
+            ctx.font = '13px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Buitentemperatuur (°C)', width / 2, height - 10);
+            ctx.save();
+            ctx.translate(16, height / 2 + 80);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Aanvoertemperatuur (°C)', 0, 0);
+            ctx.restore();
+
+            // X-aslabels
+            ctx.fillStyle = t.axisLabel;
+            ctx.font = '11px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            for (let x = xMin; x <= xMax; x += 5) {
+                const [cx] = toCanvas(x, 0);
+                ctx.fillText(x.toString(), cx, height - margin + 18);
+            }
+
+            // Y-aslabels
+            ctx.textAlign = 'right';
+            for (let y = yMin; y <= yMax; y += 5) {
+                const [, cy] = toCanvas(0, y);
+                ctx.fillText(y.toString(), zeroX - 8, cy + 4);
+            }
+        }
+
+        function updateDisplay(l28, l29) {
+            const slope = l28 / 10;
+            const intercept = l29 - slope * (-15);
+            l28Value.textContent = l28;
+            l29Value.textContent = l29 + '°C';
+            refTemp.textContent = l29;
+            slopeDisplay.textContent = l28;
+            slopeDecimal.textContent = slope.toFixed(1);
+            formulaDisplay.innerHTML = `y = ${slope.toFixed(1)}x + ${intercept.toFixed(1)}<br><small>waarbij x = buitentemperatuur (°C) en y = aanvoertemperatuur (°C)</small>`;
+            meaningDisplay.textContent = l28 < 0 ? 'daalt' : l28 > 0 ? 'stijgt' : 'blijft gelijk';
+            changeAmount.textContent = Math.abs(l28);
+        }
+
+        function updateGraph() {
+            const l28 = parseFloat(l28Slider.value);
+            const l29 = parseInt(l29Slider.value, 10);
+            updateDisplay(l28, l29);
+            drawGraph(l28, l29);
+        }
+
+        l28Slider.addEventListener('input', updateGraph);
+        l29Slider.addEventListener('input', updateGraph);
+        updateDisplay(-5, 55);
+        drawGraph(-5, 55);
+
+        // ── Randvoorwaarden ──────────────────────────────────────────────────────
+
+        let presetOk = false;
+        let l27Ok = false;
+
+        const prereqsSection  = document.getElementById('prereqs-section');
+        const prereqsStatus   = document.getElementById('prereqs-status');
+        const togglePreset    = document.getElementById('toggle-preset');
+        const toggleL27       = document.getElementById('toggle-l27');
+        const presetWarning   = document.getElementById('preset-warning');
+        const presetFeedback  = document.getElementById('preset-feedback');
+        const l27Feedback     = document.getElementById('l27-feedback');
+
+        function updatePrereqsUI() {
+            const bothOk = presetOk && l27Ok;
+            prereqsSection.classList.toggle('prereqs-ok', bothOk);
+            prereqsStatus.classList.toggle('all-ok', bothOk);
+            prereqsStatus.classList.toggle('missing', !bothOk);
+            if (bothOk) {
+                prereqsStatus.textContent = 'Beide randvoorwaarden zijn actief — custom stooklijn is operationeel.';
+            } else {
+                const missing = [];
+                if (!presetOk) missing.push('Preset HL8 (0x0314=18)');
+                if (!l27Ok)    missing.push('Custom stooklijn actief (L27=0)');
+                prereqsStatus.textContent = `Niet voldaan: ${missing.join(', ')}.`;
+            }
+        }
+
+        async function writeRegister(address, rawValue) {
+            const r = await fetch('/api/expert/write', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, rawValue, isCoil: false }),
+            });
+            return r.json();
+        }
+
+        togglePreset.addEventListener('change', async () => {
+            const checked = togglePreset.checked;
+            presetWarning.style.display = 'none';
+            presetFeedback.textContent = '';
+            presetFeedback.className = 'prereq-feedback';
+
+            if (checked) {
+                try {
+                    const data = await writeRegister(0x0314, 18);
+                    if (data.ok) {
+                        presetOk = true;
+                        presetFeedback.textContent = 'HL8 ingesteld (0x0314 = 18).';
+                        presetFeedback.className = 'prereq-feedback ok';
+                    } else {
+                        togglePreset.checked = false;
+                        presetOk = false;
+                        presetFeedback.textContent = `Fout: ${data.error}`;
+                        presetFeedback.className = 'prereq-feedback error';
+                    }
+                } catch (err) {
+                    togglePreset.checked = false;
+                    presetOk = false;
+                    presetFeedback.textContent = `Verbindingsfout: ${err.message}`;
+                    presetFeedback.className = 'prereq-feedback error';
+                }
+            } else {
+                // Geen schrijfactie — HL8 blijft ongewijzigd op apparaat
+                presetOk = false;
+                presetWarning.style.display = 'block';
+            }
+            updatePrereqsUI();
+        });
+
+        toggleL27.addEventListener('change', async () => {
+            const checked = toggleL27.checked;
+            l27Feedback.textContent = '';
+            l27Feedback.className = 'prereq-feedback';
+
+            try {
+                const data = await writeRegister(0x0810, checked ? 0 : 1);
+                if (data.ok) {
+                    l27Ok = checked;
+                    l27Feedback.textContent = checked
+                        ? 'Custom stooklijn actief (L27=0) — warmtepomp gebruikt L28/L29.'
+                        : 'Custom stooklijn uitgeschakeld (L27=1) — preset curve actief.';
+                    l27Feedback.className = `prereq-feedback ${checked ? 'ok' : 'warn'}`;
+                } else {
+                    toggleL27.checked = !checked;
+                    l27Feedback.textContent = `Fout: ${data.error}`;
+                    l27Feedback.className = 'prereq-feedback error';
+                }
+            } catch (err) {
+                toggleL27.checked = !checked;
+                l27Feedback.textContent = `Verbindingsfout: ${err.message}`;
+                l27Feedback.className = 'prereq-feedback error';
+            }
+            updatePrereqsUI();
+        });
+
+        // ── Initieel laden met retry ─────────────────────────────────────────────
+
+        const loadStatus = document.getElementById('load-status');
+        const MAX_ATTEMPTS = 5;
+        const RETRY_DELAY_MS = 3000;
+
+        async function loadDeviceValues(attempt = 1) {
+            if (attempt > 1) {
+                loadStatus.textContent = `Verbinding niet beschikbaar, opnieuw proberen in 3s… (${attempt - 1}/${MAX_ATTEMPTS})`;
+            } else {
+                loadStatus.textContent = 'Waarden ophalen…';
+            }
+
+            try {
+                const [rPreset, rL27, r28, r29] = await Promise.all([
+                    fetch('/api/expert/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: 0x0314, isCoil: false, multiply: 1 }) }),
+                    fetch('/api/expert/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: 0x0810, isCoil: false, multiply: 1 }) }),
+                    fetch('/api/expert/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: 0x0811, isCoil: false, multiply: 0.1 }) }),
+                    fetch('/api/expert/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: 0x0812, isCoil: false, multiply: 1 }) }),
+                ]);
+
+                if (!rPreset.ok || !rL27.ok || !r28.ok || !r29.ok) throw new Error('Verbinding mislukt');
+
+                const [dPreset, dL27, d28, d29] = await Promise.all([
+                    rPreset.json(), rL27.json(), r28.json(), r29.json(),
+                ]);
+
+                if (!dPreset.ok || !dL27.ok || !d28.ok || !d29.ok) throw new Error('Register niet beschikbaar');
+
+                // Sliders — val back op defaults als beide registers op 0 staan (niet geconfigureerd)
+                const l28Raw = d28.rawValue > 0x7FFF ? d28.rawValue - 0x10000 : d28.rawValue;
+                const l29Val = d29.rawValue;
+                const useDefaults = l28Raw === 0 && l29Val === 0;
+                const l28 = useDefaults ? -5 : l28Raw;
+                const l29 = useDefaults ? 55 : l29Val;
+                l28Slider.value = l28;
+                l29Slider.value = l29;
+                updateDisplay(l28, l29);
+                drawGraph(l28, l29);
+
+                // Randvoorwaarden
+                const presetVal = dPreset.rawValue;
+                const l27Val   = dL27.rawValue;
+                presetOk = presetVal === 18;
+                l27Ok    = l27Val === 0;
+                togglePreset.checked = presetOk;
+                toggleL27.checked    = l27Ok;
+                updatePrereqsUI();
+
+                const presetLabel = presetVal === 18 ? 'HL8 (18)' : `waarde ${presetVal}`;
+                loadStatus.textContent = `Geladen — Preset=${presetLabel}, L27=${l27Val}, L28=${l28Raw} (helling ${(l28Raw / 10).toFixed(1)}), L29=${l29Val}°C`;
+
+            } catch (e) {
+                if (attempt < MAX_ATTEMPTS) {
+                    setTimeout(() => loadDeviceValues(attempt + 1), RETRY_DELAY_MS);
+                } else {
+                    loadStatus.textContent = `Kon waarden niet ophalen (${e.message}) — standaardwaarden getoond`;
+                }
+            }
+        }
+
+        loadDeviceValues();
+
+        // Herteken canvas bij wisselen van systeem-thema
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+            drawGraph(parseFloat(l28Slider.value), parseInt(l29Slider.value, 10));
+        });
+
+        // ── Toepassen op warmtepomp ───────────────────────────────────────────────
+
+        const applyBtn      = document.getElementById('apply-btn');
+        const applyFeedback = document.getElementById('apply-feedback');
+
+        applyBtn.addEventListener('click', async () => {
+            const k = parseFloat(l28Slider.value) / 10;
+            const b = parseInt(l29Slider.value, 10);
+            applyBtn.disabled = true;
+            applyFeedback.textContent = 'Bezig…';
+            applyFeedback.className = 'feedback ok';
+            try {
+                const r = await fetch('/api/set-diy-curve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slope: k, intercept: b }),
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    applyFeedback.textContent = `Geschreven: helling ${k}, intercept ${b}°C. Capabilities worden binnen 30s bijgewerkt.`;
+                    applyFeedback.className = 'feedback ok';
+                } else {
+                    applyFeedback.textContent = `Fout: ${data.error}`;
+                    applyFeedback.className = 'feedback error';
+                }
+            } catch (err) {
+                applyFeedback.textContent = `Verbindingsfout: ${err.message}`;
+                applyFeedback.className = 'feedback error';
+            } finally {
+                applyBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

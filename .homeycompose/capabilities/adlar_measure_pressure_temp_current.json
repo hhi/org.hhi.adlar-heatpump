@@ -31,6 +31,9 @@
   "icon": "/assets/pressure.svg",
   
   "description": {
-    "nl": "dp 16 : temp_current - EEV Open"
+    "en": "dp 16: temp_current - Electronic Expansion Valve (EEV) opening steps / pressure",
+    "nl": "dp 16: temp_current - Elektronisch expansieventiel (EEV) openingsstappen / druk",
+    "de": "dp 16: temp_current - Elektronisches Expansionsventil (EEV) Öffnungsschritte / Druck",
+    "fr": "dp 16: temp_current - Pas d'ouverture du détendeur électronique (EEV) / pression"
   }
 }

@@ -176,8 +176,8 @@ Elke 5 minuten:
 
 | Bestand | Rol |
 |---|---|
-| `lib/adaptive/building-model-learner.ts` | Core RLS-algoritme |
-| `lib/services/building-model-service.ts` | Datacollectie & lifecycle |
-| `lib/services/external-temperature-service.ts` | Beheer binnentemperatuur |
-| `lib/services/energy-tracking-service.ts` | Vermogensmeting |
+| `lib/shared/adaptive/building-model-learner.ts` | Core RLS-algoritme |
+| `lib/tuya/services/building-model-service.ts` | Datacollectie & lifecycle |
+| `lib/tuya/services/external-temperature-service.ts` | Beheer binnentemperatuur |
+| `lib/tuya/services/energy-tracking-service.ts` | Vermogensmeting |
 | `drivers/intelligent-heat-pump/device.ts` | Fallback buitentemperatuur |

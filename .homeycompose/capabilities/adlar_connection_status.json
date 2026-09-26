@@ -8,10 +8,10 @@
     "fr": "État de connexion"
   },
   "desc": {
-    "en": "Current Tuya device connection state with timestamp",
-    "nl": "Huidige Tuya apparaat verbindingsstatus met tijdstempel",
-    "de": "Aktueller Tuya-Geräteverbindungsstatus mit Zeitstempel",
-    "fr": "État de connexion actuel du périphérique Tuya avec horodatage"
+    "en": "Current heat pump connection state with timestamp",
+    "nl": "Huidige warmtepomp verbindingsstatus met tijdstempel",
+    "de": "Aktueller Wärmepumpen-Verbindungsstatus mit Zeitstempel",
+    "fr": "État de connexion actuel de la pompe à chaleur avec horodatage"
   },
   "getable": true,
   "setable": false,
