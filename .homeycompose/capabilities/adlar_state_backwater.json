@@ -26,6 +26,9 @@
   },
 
   "description": {
-    "nl": "dp 31 : backwater - Backwater state"
+    "en": "dp 31: backwater - Return water flow active state",
+    "nl": "dp 31: backwater - Retourwaterstroom actieve status",
+    "de": "dp 31: backwater - Rücklaufwasserfluss-Aktivstatus",
+    "fr": "dp 31: backwater - État actif du flux d'eau de retour"
   }
 }

@@ -1,0 +1,195 @@
+modbus server pro setup voor simulatie-doeleinden
+
+
+❯ npx tsx ./test-modbus-service.ts 192.168.50.247 init
+
+Verbinden met 192.168.50.247:502 (unit 1)...
+[ModbusTCP] Connecting to 192.168.50.247:502...
+[ModbusTCP] Connected to 192.168.50.247:502 (unit 1)
+✅ Verbonden!
+
+Initialisatie: 23 registers met realistische WP testwaarden
+
+  0x0040 = 42     Compressor 42 Hz
+[ModbusTCP] FC06 WRITE 0x0040 = 42
+[ModbusTCP]   → OK
+  0x0041 = 680    Fan 680 RPM
+[ModbusTCP] FC06 WRITE 0x0041 = 680
+[ModbusTCP]   → OK
+  0x0042 = 312    EEV 312 stappen
+[ModbusTCP] FC06 WRITE 0x0042 = 312
+[ModbusTCP]   → OK
+  0x004a = 85     T1 Ambient = 8.5°C
+[ModbusTCP] FC06 WRITE 0x004a = 85
+[ModbusTCP]   → OK
+  0x004b = 52     T2 Outer coil = 5.2°C
+[ModbusTCP] FC06 WRITE 0x004b = 52
+[ModbusTCP]   → OK
+  0x004c = 380    T3 Inner coil = 38.0°C
+[ModbusTCP] FC06 WRITE 0x004c = 380
+[ModbusTCP]   → OK
+  0x004d = 120    T4 Suction = 12.0°C
+[ModbusTCP] FC06 WRITE 0x004d = 120
+[ModbusTCP]   → OK
+  0x004e = 720    T5 Exhaust = 72.0°C
+[ModbusTCP] FC06 WRITE 0x004e = 720
+[ModbusTCP]   → OK
+  0x004f = 352    T6 Inlet = 35.2°C
+[ModbusTCP] FC06 WRITE 0x004f = 352
+[ModbusTCP]   → OK
+  0x0050 = 402    T7 Outlet = 40.2°C
+[ModbusTCP] FC06 WRITE 0x0050 = 402
+[ModbusTCP]   → OK
+  0x0054 = 528    DHW Tank = 52.8°C
+[ModbusTCP] FC06 WRITE 0x0054 = 528
+[ModbusTCP]   → OK
+  0x0057 = 65     Pump 65%
+[ModbusTCP] FC06 WRITE 0x0057 = 65
+[ModbusTCP]   → OK
+  0x0058 = 18     Flow 18 L/min
+[ModbusTCP] FC06 WRITE 0x0058 = 18
+[ModbusTCP]   → OK
+  0x005a = 230    230V
+[ModbusTCP] FC06 WRITE 0x005a = 230
+[ModbusTCP]   → OK
+  0x005b = 450    Stroom 4.50A (×0.01)
+[ModbusTCP] FC06 WRITE 0x005b = 450
+[ModbusTCP]   → OK
+  0x005c = 103    Vermogen 1.03 kW (×0.01)
+[ModbusTCP] FC06 WRITE 0x005c = 103
+[ModbusTCP]   → OK
+  0x005d = 1847   Totaal 1847 kWh
+[ModbusTCP] FC06 WRITE 0x005d = 1847
+[ModbusTCP]   → OK
+  0x0300 = 70     Cooling SP = 7.0°C
+[ModbusTCP] FC06 WRITE 0x0300 = 70
+[ModbusTCP]   → OK
+  0x0301 = 400    Heating SP = 40.0°C
+[ModbusTCP] FC06 WRITE 0x0301 = 400
+[ModbusTCP]   → OK
+  0x0302 = 550    DHW SP = 55.0°C
+[ModbusTCP] FC06 WRITE 0x0302 = 550
+[ModbusTCP]   → OK
+  0x0303 = 350    Floor SP = 35.0°C
+[ModbusTCP] FC06 WRITE 0x0303 = 350
+[ModbusTCP]   → OK
+  0x0304 = 1      Mode = Verwarming
+[ModbusTCP] FC06 WRITE 0x0304 = 1
+[ModbusTCP]   → OK
+  0x0305 = 1      On/Off = AAN
+[ModbusTCP] FC06 WRITE 0x0305 = 1
+[ModbusTCP]   → OK
+
+Verificatie (steekproef):
+────────────────────────────────────────────────────────────
+Adres    Raw      Signed   Scaled       Eenheid  Label
+────────────────────────────────────────────────────────────
+[ModbusTCP] FC03 READ  0x0040 count=1
+[ModbusTCP]   → 0x0040=42
+0x0040  42      42      42          Hz      Compressor Freq
+[ModbusTCP] FC03 READ  0x004a count=1
+[ModbusTCP]   → 0x004a=85
+0x004a  85      85      8.50        °C      Ambient T1
+[ModbusTCP] FC03 READ  0x004f count=1
+[ModbusTCP]   → 0x004f=352
+0x004f  352     352     35.20       °C      Water Inlet T6
+[ModbusTCP] FC03 READ  0x0050 count=1
+[ModbusTCP]   → 0x0050=402
+0x0050  402     402     40.20       °C      Water Outlet T7
+[ModbusTCP] FC03 READ  0x005a count=1
+[ModbusTCP]   → 0x005a=230
+0x005a  230     230     230         V       Unit Voltage
+[ModbusTCP] FC03 READ  0x005b count=1
+[ModbusTCP]   → 0x005b=450
+0x005b  450     450     4.50        A       Unit Current
+[ModbusTCP] FC03 READ  0x005c count=1
+[ModbusTCP]   → 0x005c=103
+0x005c  103     103     1.03        kW      Unit Power
+[ModbusTCP] FC03 READ  0x0301 count=1
+[ModbusTCP]   → 0x0301=400
+0x0301  400     400     40.00       °C      Heating Setpoint
+[ModbusTCP] FC03 READ  0x0305 count=1
+[ModbusTCP]   → 0x0305=1
+0x0305  1       1       1                   On/Off
+────────────────────────────────────────────────────────────
+
+✅ 23 registers geïnitialiseerd. Draai nu 'poll' om alles te zien.
+
+
+
+
+
+❯ npx tsx ./test-modbus-service.ts 192.168.50.247 poll
+
+Verbinden met 192.168.50.247:502 (unit 1)...
+[ModbusTCP] Connecting to 192.168.50.247:502...
+[ModbusTCP] Connected to 192.168.50.247:502 (unit 1)
+✅ Verbonden!
+
+Poll-test: sensoren + control, 3 rondes, 5s interval
+
+[ModbusTCP] FC03 READ  0x0040 count=32
+[ModbusTCP]   → 0x0040=42, 0x0041=680, 0x0042=312, 0x0043=99, 0x0044=99, 0x0045=99, 0x0046=99, 0x0047=99 ... (+24 meer)
+[ModbusTCP] FC03 READ  0x0300 count=8
+[ModbusTCP]   → 0x0300=70, 0x0301=400, 0x0302=550, 0x0303=350, 0x0304=1, 0x0305=1, 0x0306=99, 0x0307=99
+
+── Ronde 1 (12:44:24) ──
+────────────────────────────────────────────────────────────
+Adres    Raw      Signed   Scaled       Eenheid  Label
+────────────────────────────────────────────────────────────
+0x004a  85      85      8.50        °C      Ambient T1
+0x004f  352     352     35.20       °C      Water Inlet T6
+0x0050  402     402     40.20       °C      Water Outlet T7
+0x0040  42      42      42          Hz      Compressor Freq
+0x0058  18      18      18          L/min   Water Flow
+0x005a  230     230     230         V       Unit Voltage
+0x005b  450     450     4.50        A       Unit Current
+0x005c  103     103     1.03        kW      Unit Power
+0x0301  400     400     40.00       °C      Heating Setpoint
+0x0305  1       1       1                   On/Off
+────────────────────────────────────────────────────────────
+Stats: 1 polls, 0 errors
+[ModbusTCP] FC03 READ  0x0040 count=32
+[ModbusTCP]   → 0x0040=42, 0x0041=680, 0x0042=312, 0x0043=99, 0x0044=99, 0x0045=99, 0x0046=99, 0x0047=99 ... (+24 meer)
+[ModbusTCP] FC03 READ  0x0300 count=8
+[ModbusTCP]   → 0x0300=70, 0x0301=400, 0x0302=550, 0x0303=350, 0x0304=1, 0x0305=1, 0x0306=99, 0x0307=99
+
+── Ronde 2 (12:44:29) ──
+────────────────────────────────────────────────────────────
+Adres    Raw      Signed   Scaled       Eenheid  Label
+────────────────────────────────────────────────────────────
+0x004a  85      85      8.50        °C      Ambient T1
+0x004f  352     352     35.20       °C      Water Inlet T6
+0x0050  402     402     40.20       °C      Water Outlet T7
+0x0040  42      42      42          Hz      Compressor Freq
+0x0058  18      18      18          L/min   Water Flow
+0x005a  230     230     230         V       Unit Voltage
+0x005b  450     450     4.50        A       Unit Current
+0x005c  103     103     1.03        kW      Unit Power
+0x0301  400     400     40.00       °C      Heating Setpoint
+0x0305  1       1       1                   On/Off
+────────────────────────────────────────────────────────────
+Stats: 2 polls, 0 errors
+[ModbusTCP] FC03 READ  0x0040 count=32
+[ModbusTCP]   → 0x0040=42, 0x0041=680, 0x0042=312, 0x0043=99, 0x0044=99, 0x0045=99, 0x0046=99, 0x0047=99 ... (+24 meer)
+[ModbusTCP] FC03 READ  0x0300 count=8
+[ModbusTCP]   → 0x0300=70, 0x0301=400, 0x0302=550, 0x0303=350, 0x0304=1, 0x0305=1, 0x0306=99, 0x0307=99
+
+── Ronde 3 (12:44:34) ──
+────────────────────────────────────────────────────────────
+Adres    Raw      Signed   Scaled       Eenheid  Label
+────────────────────────────────────────────────────────────
+0x004a  85      85      8.50        °C      Ambient T1
+0x004f  352     352     35.20       °C      Water Inlet T6
+0x0050  402     402     40.20       °C      Water Outlet T7
+0x0040  42      42      42          Hz      Compressor Freq
+0x0058  18      18      18          L/min   Water Flow
+0x005a  230     230     230         V       Unit Voltage
+0x005b  450     450     4.50        A       Unit Current
+0x005c  103     103     1.03        kW      Unit Power
+0x0301  400     400     40.00       °C      Heating Setpoint
+0x0305  1       1       1                   On/Off
+────────────────────────────────────────────────────────────
+Stats: 3 polls, 0 errors
+
+✅ 3 rondes voltooid. Afsluiten.

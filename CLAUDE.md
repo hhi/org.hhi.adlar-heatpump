@@ -302,11 +302,11 @@ This is a Homey app for integrating Adlar heat pump devices via Tuya's local API
 - **App Entry**: `app.ts` - Main Homey app class with debug mode support and global error handlers
 - **Driver**: `drivers/intelligent-heat-pump/driver.ts` - Handles device discovery and pairing
 - **Device**: `drivers/intelligent-heat-pump/device.ts` - Manages individual device instances, delegates to services
-- **Service Coordinator**: `lib/services/service-coordinator.ts` - Manages lifecycle of 9 services
-- **Mappings**: `lib/definitions/adlar-mapping.ts` - Maps Tuya DPS (data points) to Homey capabilities
-- **Constants**: `lib/constants.ts` - Centralized configuration constants and thresholds
-- **Error Handling**: `lib/error-types.ts` - Comprehensive error categorization and recovery system
-- **Calculator Utilities**: `lib/curve-calculator.ts`, `lib/time-schedule-calculator.ts`, `lib/seasonal-mode-calculator.ts`
+- **Service Coordinator**: `lib/tuya/services/service-coordinator.ts` - Manages lifecycle of 9 services
+- **Mappings**: `lib/tuya/definitions/adlar-mapping.ts` - Maps Tuya DPS (data points) to Homey capabilities
+- **Constants**: `lib/tuya/constants.ts` - Centralized configuration constants and thresholds
+- **Error Handling**: `lib/shared/error-types.ts` - Comprehensive error categorization and recovery system
+- **Calculator Utilities**: `lib/shared/curve-calculator.ts`, `lib/shared/time-schedule-calculator.ts`, `lib/shared/seasonal-mode-calculator.ts`
 
 ### Service-Oriented Architecture
 
@@ -501,7 +501,7 @@ The app uses **9 specialized services** managed by ServiceCoordinator:
 
 **Feature Guides**:
 - [Calculator Utilities](docs/Dev%20support/CALCULATORS.md) - Curve, time schedule, seasonal mode calculators
-- [Flow Cards Guide](docs/setup/FLOW_CARDS_GUIDE.md) - User-facing flow card usage
+- [Flow Cards Guide](docs/setup/guide/FLOW_CARDS_GUIDE.en.md) - User-facing flow card usage (also available as `.nl.md`, `.de.md`, `.fr.md`)
 - [Adaptive Control Architecture](docs/Dev%20support/Architectural%20overview/adaptive-control-architecture.md) - PI control, building model, COP/cost optimization
 
 **Development Support**:

@@ -101,7 +101,7 @@ class Device extends Homey.Device {
 
 **✅ New Pattern (v0.99.23+)**:
 ```typescript
-import { ServiceCoordinator } from './lib/services/service-coordinator';
+import { ServiceCoordinator } from './lib/tuya/services/service-coordinator';
 
 class Device extends Homey.Device {
   private serviceCoordinator: ServiceCoordinator | null = null;
@@ -386,7 +386,7 @@ class Device extends Homey.Device {
 
 **✅ After (v0.99.23+) - Extend COPCalculator service**:
 ```typescript
-// lib/services/cop-calculator.ts
+// lib/shared/services/cop-calculator.ts
 class COPCalculator extends Homey.SimpleClass {
   calculateCOP() {
     // ... existing methods 1-7 ...
@@ -444,7 +444,7 @@ class Device extends Homey.Device {
 
 **✅ After (v0.99.23+) - Extend CapabilityHealthService**:
 ```typescript
-// lib/services/capability-health-service.ts
+// lib/tuya/services/capability-health-service.ts
 class CapabilityHealthService extends Homey.SimpleClass {
   private monitoredCapabilities = [
     // ... existing capabilities ...

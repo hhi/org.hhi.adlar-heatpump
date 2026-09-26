@@ -785,7 +785,7 @@ Custom capabilities must follow the schema structure:
 ```typescript
 import Homey, { manifest } from 'homey';
 import TuyaDevice from 'tuyapi';
-import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
+import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
 
 const { allCapabilities, allArraysSwapped } = AdlarMapping;
 
@@ -938,7 +938,7 @@ module.exports = MyDevice;
 ```typescript
 import Homey from 'homey';
 import PairSession from 'homey/lib/PairSession';
-import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
+import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
 
 class MyDriver extends Homey.Driver {
   capabilities!: string[];

@@ -21,28 +21,36 @@
       "id": "H1",
       "title": {
         "en": "H1",
-        "nl": "H1"
+        "nl": "H1",
+        "de": "Stufe H1",
+        "fr": "Niveau H1"
       }
     },
     {
       "id": "H2",
       "title": {
         "en": "H2",
-        "nl": "H2"
+        "nl": "H2",
+        "de": "Stufe H2",
+        "fr": "Niveau H2"
       }
     },
     {
       "id": "H3",
       "title": {
         "en": "H3",
-        "nl": "H3"
+        "nl": "H3",
+        "de": "Stufe H3",
+        "fr": "Niveau H3"
       }
     },
     {
       "id": "H4",
       "title": {
         "en": "H4",
-        "nl": "H4"
+        "nl": "H4",
+        "de": "Stufe H4",
+        "fr": "Niveau H4"
       }
     }
   ],

@@ -26,6 +26,9 @@
   },
 
   "description": {
-    "nl": "dp 27 : compressor_state - Compressor state"
+    "en": "dp 27: compressor_state - Compressor operating state (active/inactive)",
+    "nl": "dp 27: compressor_state - Compressor bedrijfsstatus (actief/inactief)",
+    "de": "dp 27: compressor_state - Kompressor-Betriebsstatus (aktiv/inaktiv)",
+    "fr": "dp 27: compressor_state - État de fonctionnement du compresseur (actif/inactif)"
   }
 }

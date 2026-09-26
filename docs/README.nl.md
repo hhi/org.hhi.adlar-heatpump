@@ -47,6 +47,7 @@ De meeste gebruikersdocumentatie is beschikbaar in vier talen:
 - **Protocolversie Gids** — Tuya protocolversie selectie (3.3/3.4/3.5)
 - **Configuratiegids** — Complete instellingenreferentie
 - **Tuya LocalKey Handleiding** — Hoe Tuya credentials verkrijgen (PDF)
+- **Elfin EW11 Modbus Setup Guide** — [Modbus TCP Gateway Setup Guide](setup/modbus-elfin-ew11-setup.md)
 - **Snelle Probleemoplossing** — Veelvoorkomende problemen en oplossingen
 - **guide/** — Extra gedetailleerde gidsen (flow cards, adaptieve regeling, building insights)
 

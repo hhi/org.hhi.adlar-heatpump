@@ -7,7 +7,7 @@
 
 The app uses a centralized mapping system to translate Tuya DPS (Data Point System) values to Homey capabilities, with support for multi-capability mappings, scale transformations, and health tracking.
 
-**Location**: `lib/definitions/adlar-mapping.ts`
+**Location**: `lib/tuya/definitions/adlar-mapping.ts`
 
 ## DPS to Capability Mapping (Enhanced v0.99.54+)
 
@@ -74,7 +74,7 @@ Enabled:
 
 ### Scale Factor System
 
-**Location**: `lib/definitions/adlar-mapping.ts`
+**Location**: `lib/tuya/definitions/adlar-mapping.ts`
 
 ```typescript
 static dpsScales: Record<number, number> = {
@@ -193,9 +193,9 @@ public getOutdoorTemperatureWithFallback(): number | null {
 
 ### Usage Locations
 
-- [BuildingModelService](../../lib/services/building-model-service.ts#L106-L114) - Thermal mass learning
-- [BuildingModelService diagnostics](../../lib/services/building-model-service.ts#L246-L248) - Health checks
-- [AdaptiveControlService](../../lib/services/adaptive-control-service.ts#L372-L374) - COP optimization
+- [BuildingModelService](../../lib/tuya/services/building-model-service.ts#L106-L114) - Thermal mass learning
+- [BuildingModelService diagnostics](../../lib/tuya/services/building-model-service.ts#L246-L248) - Health checks
+- [AdaptiveControlService](../../lib/tuya/services/adaptive-control-service.ts#L372-L374) - COP optimization
 
 ### Flow Card Setup
 
@@ -278,7 +278,7 @@ Device with 44 total capabilities:
 2. **Dependency Chain**: Calculated values depend on sensor health - if sensors healthy but COP=null, that's a calculation issue not a communication issue
 3. **Optional Features**: External integrations are user configuration choices, not device functionality
 
-**Implementation**: [capability-health-service.ts:186-211](../../lib/services/capability-health-service.ts#L186-L211)
+**Implementation**: [capability-health-service.ts:186-211](../../lib/tuya/services/capability-health-service.ts#L186-L211)
 
 ---
 

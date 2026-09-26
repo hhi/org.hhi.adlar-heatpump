@@ -34,7 +34,7 @@
         "de": " Warmwassertemperatur (°C)",
         "fr": " Température de l'eau chaude (°C)"
       },
-      "min": 30,
+      "min": 20,
       "max": 75,
       "step": 1,
       "units": "°C",

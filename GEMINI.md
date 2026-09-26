@@ -61,7 +61,7 @@ This document provides foundational mandates and project-specific instructions f
 
 ## 🗺 Project Architecture (SOA)
 
-The app is divided into specialized services managed by `lib/services/service-coordinator.ts`:
+The app is divided into specialized services managed by `lib/tuya/services/service-coordinator.ts`:
 
 1.  **TuyaConnectionService:** Low-level TuyAPI communication, heartbeat, and reconnection logic.
 2.  **AdaptiveControlService:** PI-based temperature regulation and building model learning.
@@ -73,9 +73,9 @@ The app is divided into specialized services managed by `lib/services/service-co
 
 ### Key Files
 - `drivers/intelligent-heat-pump/device.ts`: The main device class (delegates to services).
-- `lib/definitions/adlar-mapping.ts`: Maps Tuya DPS IDs to Homey capabilities.
-- `lib/constants.ts`: Global thresholds and configuration.
-- `lib/error-types.ts`: Centralized error categorization and recovery.
+- `lib/tuya/definitions/adlar-mapping.ts`: Maps Tuya DPS IDs to Homey capabilities.
+- `lib/tuya/constants.ts`: Global thresholds and configuration.
+- `lib/shared/error-types.ts`: Centralized error categorization and recovery.
 
 ## 📊 Context Efficiency
 - `app.json` is large (~200KB). Avoid reading it in full.

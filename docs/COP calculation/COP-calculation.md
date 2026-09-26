@@ -900,7 +900,7 @@ This comprehensive approach with **7 different COP calculation methods** ensures
 
 ## COPCalculator Service Architecture (v0.99.23+)
 
-The COP calculation system is implemented as the **COPCalculator service** (`lib/services/cop-calculator.ts`), which is managed by the ServiceCoordinator and integrates with other services for data collection and quality assessment.
+The COP calculation system is implemented as the **COPCalculator service** (`lib/shared/services/cop-calculator.ts`), which is managed by the ServiceCoordinator and integrates with other services for data collection and quality assessment.
 
 ### Service Integration
 

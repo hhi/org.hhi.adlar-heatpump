@@ -564,7 +564,7 @@ class COPController {
 
 ## Component 5: Coast-Strategie (Passieve Koelmodus)
 
-> Referentie: [ADR-024 — Adaptive Control: Passieve Afkoelmodus](../../../plans/decisions/ADR-024-adaptive-cooldown-mode.md)
+> Referentie: [ADR-024 — Adaptive Control: Passieve Afkoelmodus](../../../plans/completed/ADR-024-adaptive-cooldown-mode.md)
 
 ### Probleem
 
@@ -609,7 +609,7 @@ Het resultaat is altijd negatief — het systeem stuurt het setpoint ver onder d
 
 ### ADR-040A: Conditioneel Gewicht
 
-> Referentie: [ADR-040 — Coast Effectiviteitsverbetering](../../../plans/decisions/ADR-040-coast-effectiviteitsverbetering.md)
+> Referentie: ADR-040 — Coast Effectiviteitsverbetering (geen apart ADR-document; ADR-040A/B zijn vastgelegd in [ADR-058](../../../plans/decisions/ADR-058-coast-restpunten-na-adr047.md))
 
 **Probleem:** Na elke setpoint-verlaging loopt de gemeten uitlaattemperatuur door hydraulische traagheid tijdelijk achter. In die periode is `coastAdjust = 0`, maar coast claimde toch 88% van het gewichtsbudget — waardoor de PI-controller slechts ~11% gewicht had.
 

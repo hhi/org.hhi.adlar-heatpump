@@ -14,6 +14,8 @@
   "insights": false,
   "description": {
     "en": "DPS 14: MCU mainboard firmware version (e.g., v4.3.3)",
-    "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)"
+    "nl": "DPS 14: MCU mainboard firmware versie (bijv. v4.3.3)",
+    "de": "DPS 14: MCU-Hauptplatinen-Firmwareversion (z. B. v4.3.3)",
+    "fr": "DPS 14 : Version du micrologiciel de la carte mère MCU (ex. v4.3.3)"
   }
 }

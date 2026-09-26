@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="85 55 840 840">
+  <g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M100,200 L850,170 L910,210 L910,750 L850,710 L100,740 Z" stroke-width="20"/>
+    <path d="M850,170 L850,710" stroke-width="20"/>
+    
+    <path d="M150,740 L130,770 L220,770 L240,740" />
+    <path d="M700,720 L680,780 L780,780 L800,720" />
+
+    <path d="M110,250 Q475,320 840,250" stroke-width="10" />
+
+    <circle cx="340" cy="480" r="190" stroke-width="12" opacity="0.6" />
+    <circle cx="340" cy="480" r="45" stroke-width="6" />
+    <path d="M340,290 L340,435 M340,525 L340,670" stroke-width="6" />
+    <path d="M150,480 L295,480 M385,480 L530,480" stroke-width="6" />
+
+    <rect x="630" y="450" width="130" height="200" rx="30" stroke-width="8" />
+    <path d="M695,450 L695,380 Q695,340 780,340" stroke-width="6" />
+
+    <g stroke-width="6">
+      <path d="M115,290 L835,235" />
+      <path d="M115,330 L835,275" />
+      <path d="M115,370 L835,315" />
+      <path d="M115,410 L835,355" />
+      <path d="M115,450 L835,395" />
+      <path d="M115,490 L835,435" />
+      <path d="M115,530 L835,475" />
+      <path d="M115,570 L835,515" />
+      <path d="M115,610 L835,555" />
+      <path d="M115,650 L835,595" />
+      <path d="M115,690 L835,635" />
+    </g>
+
+    <rect x="875" y="240" width="20" height="50" rx="4" stroke-width="4" />
+    
+    <rect x="420" y="730" width="70" height="12" fill="#FFD700" stroke="none" />
+  </g>
+</svg>

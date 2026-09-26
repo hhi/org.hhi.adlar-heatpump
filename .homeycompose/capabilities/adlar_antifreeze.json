@@ -1,0 +1,33 @@
+{
+  "id": "adlar_antifreeze",
+  "type": "boolean",
+  "title": {
+    "en": "Antifreeze protection active",
+    "nl": "Antivriesbeveiliging actief",
+    "de": "Frostschutz aktiv",
+    "fr": "Protection antigel active"
+  },
+  "icon": "/assets/antifreeze.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Antifreeze protection activated",
+    "nl": "Antivriesbeveiliging geactiveerd",
+    "de": "Frostschutz aktiviert",
+    "fr": "Protection antigel activée"
+  },
+  "insightsTitleFalse": {
+    "en": "Antifreeze protection deactivated",
+    "nl": "Antivriesbeveiliging uitgeschakeld",
+    "de": "Frostschutz deaktiviert",
+    "fr": "Protection antigel désactivée"
+  },
+  "description": {
+    "en": "Antifreeze protection status from Modbus status register 0x0000, bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). True when either circuit is in antifreeze mode.",
+    "nl": "Antivriesbeveiligingsstatus uit Modbus-statusregister 0x0000, bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). Waar wanneer een van beide circuits in antivriesstand staat.",
+    "de": "Frostschutzstatus aus Modbus-Statusregister 0x0000, Bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). Wahr, wenn einer der Kreise im Frostschutzmodus ist.",
+    "fr": "État de protection antigel depuis le registre de statut Modbus 0x0000, bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). Vrai si l'un des circuits est en mode antigel."
+  }
+}

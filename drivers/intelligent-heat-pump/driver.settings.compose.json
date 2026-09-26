@@ -695,16 +695,16 @@
         "id": "show_disconnect_diagnostic",
         "type": "checkbox",
         "label": {
-          "en": "Show daily disconnect count",
-          "nl": "Toon dagelijkse disconnect telling",
-          "de": "Tägliche Verbindungsabbrüche anzeigen",
-          "fr": "Afficher le nombre quotidien de déconnexions"
+          "en": "Show connection diagnostics",
+          "nl": "Toon verbindingsdiagnostiek",
+          "de": "Verbindungsdiagnose anzeigen",
+          "fr": "Afficher les diagnostics de connexion"
         },
         "hint": {
-          "en": "Display a sensor that counts daily device disconnections. Only useful for diagnosing connection stability issues.",
-          "nl": "Toon een sensor die dagelijkse apparaat disconnecties telt. Alleen nuttig voor diagnose van verbindingsstabiliteitsproblemen.",
-          "de": "Zeigen Sie einen Sensor an, der tägliche Gerätetrennungen zählt. Nur nützlich zur Diagnose von Verbindungsstabilitätsproblemen.",
-          "fr": "Afficher un capteur qui compte les déconnexions quotidiennes de l'appareil. Utile uniquement pour diagnostiquer les problèmes de stabilité de connexion."
+          "en": "Adds three diagnostic sensors: daily disconnects, daily zombie detections (connection open but silent), and the raw connection telemetry. Only useful for diagnosing connection stability.",
+          "nl": "Voegt drie diagnostische sensoren toe: dagelijkse disconnects, dagelijkse zombie-detecties (verbinding open maar stil) en de ruwe verbindingstelemetrie. Alleen nuttig voor diagnose van verbindingsstabiliteit.",
+          "de": "Fügt drei Diagnosesensoren hinzu: tägliche Verbindungsabbrüche, tägliche Zombie-Erkennungen (Verbindung offen, aber stumm) und die Rohtelemetrie. Nur zur Diagnose der Verbindungsstabilität nützlich.",
+          "fr": "Ajoute trois capteurs de diagnostic : déconnexions quotidiennes, détections de zombies quotidiennes (connexion ouverte mais silencieuse) et la télémétrie brute. Utile uniquement pour diagnostiquer la stabilité de la connexion."
         },
         "value": false
       }

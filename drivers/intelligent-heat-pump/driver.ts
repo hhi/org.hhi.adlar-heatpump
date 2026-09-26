@@ -3,7 +3,7 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import PairSession from 'homey/lib/PairSession';
-import { AdlarMapping } from '../../lib/definitions/adlar-mapping';
+import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
 
 const {
   customCapabilities,

@@ -19,7 +19,7 @@ This document provides comprehensive developer documentation for the three calcu
 
 ### Architecture
 
-**Location**: `lib/curve-calculator.ts`
+**Location**: `lib/shared/curve-calculator.ts`
 **Registration**: `app.ts:475-514` - `registerCurveCalculatorCard()`
 **Flow Card**: `.homeycompose/flow/actions/calculate_curve_value.json`
 
@@ -280,7 +280,7 @@ expect(validation.errors.length).toBeGreaterThan(0);
 
 **Technical Documentation**:
 
-- [lib/curve-calculator.ts](../../lib/curve-calculator.ts) - Implementation
+- [lib/shared/curve-calculator.ts](../../lib/shared/curve-calculator.ts) - Implementation
 - [app.ts](../../app.ts#L367-L409) - Flow card registration
 - [.homeycompose/flow/actions/calculate_curve_value.json](../../.homeycompose/flow/actions/calculate_curve_value.json) - Flow card definition
 
@@ -294,7 +294,7 @@ expect(validation.errors.length).toBeGreaterThan(0);
 
 ### Architecture
 
-**Location**: `lib/time-schedule-calculator.ts`
+**Location**: `lib/shared/time-schedule-calculator.ts`
 **Registration**: `app.ts:419-457` - `registerTimeScheduleCard()`
 **Flow Card**: `.homeycompose/flow/actions/calculate_time_based_value.json`
 
@@ -413,7 +413,7 @@ Start hour must be between 0 and 23
 
 ### Architecture
 
-**Location**: `lib/seasonal-mode-calculator.ts`
+**Location**: `lib/shared/seasonal-mode-calculator.ts`
 **Registration**: `app.ts:465-503` - `registerSeasonalModeCard()`
 **Flow Card**: `.homeycompose/flow/actions/get_seasonal_mode.json`
 

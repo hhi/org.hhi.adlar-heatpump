@@ -1,0 +1,33 @@
+{
+  "id": "adlar_running",
+  "type": "boolean",
+  "title": {
+    "en": "Unit running",
+    "nl": "Unit in bedrijf",
+    "de": "Gerät in Betrieb",
+    "fr": "Unité en marche"
+  },
+  "icon": "/assets/compressor-state.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Unit started running",
+    "nl": "Unit gestart",
+    "de": "Gerät gestartet",
+    "fr": "Unité démarrée"
+  },
+  "insightsTitleFalse": {
+    "en": "Unit stopped running",
+    "nl": "Unit gestopt",
+    "de": "Gerät gestoppt",
+    "fr": "Unité arrêtée"
+  },
+  "description": {
+    "en": "Unit running status from Modbus status register 0x0000, bit 14 (MACHINE_RUN). True when the heat pump is actively running.",
+    "nl": "Bedrijfsstatus van de unit uit Modbus-statusregister 0x0000, bit 14 (MACHINE_RUN). Waar wanneer de warmtepomp actief in bedrijf is.",
+    "de": "Betriebsstatus des Geräts aus Modbus-Statusregister 0x0000, Bit 14 (MACHINE_RUN). Wahr, wenn die Wärmepumpe aktiv in Betrieb ist.",
+    "fr": "État de fonctionnement de l'unité depuis le registre de statut Modbus 0x0000, bit 14 (MACHINE_RUN). Vrai lorsque la pompe à chaleur est en cours de fonctionnement."
+  }
+}

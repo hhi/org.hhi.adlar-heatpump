@@ -428,8 +428,8 @@ Flow tokens:
 
 | Component | Bestand | Relatie |
 |-----------|---------|--------|
-| COPOptimizer | `lib/adaptive/cop-optimizer.ts` | Levert geleerde COP per temperatuur |
-| DefrostLearner | `lib/adaptive/defrost-learner.ts` | Leert defrost-patronen uit DPS 33 events |
-| WindCorrectionService | `lib/services/wind-correction-service.ts` | Onafhankelijk — corrigeert gebouwwarmteverlies |
-| AdaptiveControlService | `lib/services/adaptive-control-service.ts` | Beheert lifecycle + persistentie |
-| ServiceCoordinator | `lib/services/service-coordinator.ts` | Routeert defrost events |
+| COPOptimizer | `lib/tuya/adaptive/cop-optimizer.ts` | Levert geleerde COP per temperatuur |
+| DefrostLearner | `lib/shared/adaptive/defrost-learner.ts` | Leert defrost-patronen uit DPS 33 events |
+| WindCorrectionService | `lib/tuya/services/wind-correction-service.ts` | Onafhankelijk — corrigeert gebouwwarmteverlies |
+| AdaptiveControlService | `lib/tuya/services/adaptive-control-service.ts` | Beheert lifecycle + persistentie |
+| ServiceCoordinator | `lib/tuya/services/service-coordinator.ts` | Routeert defrost events |

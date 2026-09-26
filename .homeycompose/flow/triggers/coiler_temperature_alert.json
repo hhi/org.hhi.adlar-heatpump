@@ -61,7 +61,7 @@
         "en": " Temperature ",
         "nl": " Temperatuur ",
         "de": " Temperatur ",
-        "fr": " Température " 
+        "fr": " Température "
       },
       "min": -20,
       "max": 80,

@@ -1,0 +1,102 @@
+{
+  "id": "evi_pulse_steps_alert_modbus",
+  "title": {
+    "en": "EVI Open pulse-steps alert",
+    "nl": "EVI-openingsstap puls-stappen alarm",
+    "de": "EVI-Öffnungspuls-Alarm",
+    "fr": "Alerte de pas d'impulsion EVI"
+  },
+  "titleFormatted": {
+    "en": "EVI Open pulse-steps [[condition]] [[pulse_steps]]",
+    "nl": "EVI-openingsstap puls-stappen [[condition]] [[pulse_steps]]",
+    "de": "EVI-Öffnungspulsschritte [[condition]] [[pulse_steps]]",
+    "fr": "Pas d'impulsion d'ouverture EVI [[condition]] [[pulse_steps]]"
+  },
+  "hint": {
+    "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan",
+    "de": "Wird ausgelöst, wenn die Enhanced Vapor Injection (EVI) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
+    "fr": "Se déclenche lorsque les pas d'impulsion Enhanced Vapor Injection (EVI) dépassent ou descendent en dessous d'un niveau spécifié"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "pulse_steps",
+      "title": {
+        "en": " Pulse-steps",
+        "nl": " Puls-stappen",
+        "de": " Schritte",
+        "fr": " Pas"
+      },
+      "min": 0,
+      "max": 500,
+      "step": 10,
+      "units": "Pulse-steps",
+      "placeholder": {
+        "en": "Pulse-steps threshold",
+        "nl": "Puls-stappen drempel",
+        "de": "Schwellenwert für Ventilschritte",
+        "fr": "Seuil de pas de valve"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_pulse_steps",
+      "title": {
+        "en": "Current EVI Open pulse-steps",
+        "nl": "Huidige EVI-openingsstap puls-stappen",
+        "de": "Aktuelle EVI-Öffnungspulsschritte",
+        "fr": "Pas d'impulsion d'ouverture EVI actuels"
+      },
+      "example": 250
+    },
+    {
+      "type": "number",
+      "name": "threshold_pulse_steps",
+      "title": {
+        "en": "Threshold pulse-steps",
+        "nl": "Drempel puls-stappen",
+        "de": "Schwellenwert Pulsschritte",
+        "fr": "Pas d'impulsion seuil"
+      },
+      "example": 200
+    }
+  ]
+}

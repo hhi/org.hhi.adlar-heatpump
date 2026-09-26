@@ -184,7 +184,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
-- **Service**: Calculated by **COPCalculator** service (`lib/services/cop-calculator.ts`)
+- **Service**: Calculated by **COPCalculator** service (`lib/shared/services/cop-calculator.ts`)
 - **Note**: Higher values indicate better efficiency. Uses 8 calculation methods with automatic quality selection and diagnostic feedback.
 
 #### adlar_cop_daily
@@ -194,7 +194,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
-- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/shared/services/rolling-cop-calculator.ts`)
 - **Added**: v0.98.5 for rolling time-series analysis
 - **Note**: Weighted by compressor runtime for accurate efficiency representation.
 
@@ -205,7 +205,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
-- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/shared/services/rolling-cop-calculator.ts`)
 - **Added**: v0.98.5 for long-term efficiency analysis
 - **Note**: Helps identify optimal operating conditions and seasonal patterns.
 
@@ -216,7 +216,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: COP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
-- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/shared/services/rolling-cop-calculator.ts`)
 - **Added**: v0.99.8 for extended seasonal analysis
 - **Note**: Ideal for detecting gradual performance changes, seasonal baseline establishment, and maintenance scheduling based on long-term efficiency trends.
 
@@ -226,7 +226,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Values**: "Strong improvement", "Moderate improvement", "Slight improvement", "Stable", "Slight decline", "Moderate decline", "Significant decline"
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
-- **Service**: Calculated by **RollingCOPCalculator** service (`lib/services/rolling-cop-calculator.ts`)
+- **Service**: Calculated by **RollingCOPCalculator** service (`lib/shared/services/rolling-cop-calculator.ts`)
 - **Added**: v0.98.5 for predictive maintenance
 - **Enhanced**: v0.98.7 with full internationalization support
 - **Note**: Analyzes 24-hour COP trends for optimization guidance and maintenance alerts.
@@ -248,7 +248,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Units**: SCOP
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights enabled
-- **Service**: Calculated by **SCOPCalculator** service (`lib/services/scop-calculator.ts`)
+- **Service**: Calculated by **SCOPCalculator** service (`lib/tuya/services/scop-calculator.ts`)
 - **Added**: v0.98.1 for seasonal efficiency monitoring
 - **Note**: Calculated using European standard EN 14825 with temperature bin method over 6+ month heating season.
 
@@ -258,7 +258,7 @@ This document provides a comprehensive overview of all device capabilities suppo
 - **Values**: Quality percentages and confidence levels ("High confidence", "Medium confidence", "Low confidence")
 - **Icon**: `/assets/data-quality.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
-- **Service**: Calculated by **SCOPCalculator** service (`lib/services/scop-calculator.ts`)
+- **Service**: Calculated by **SCOPCalculator** service (`lib/tuya/services/scop-calculator.ts`)
 - **Added**: v0.98.1 for SCOP reliability assessment
 - **Note**: Shows data quality based on measurement method mix, seasonal coverage, and total data hours available.
 
@@ -276,7 +276,7 @@ This document provides a comprehensive overview of all device capabilities suppo
   - `"No Data"` (insufficient data with diagnostic info)
 - **Icon**: `/assets/cop-efficiency.svg`
 - **Properties**: Read-only, sensor UI, insights disabled
-- **Service**: Published by **COPCalculator** service (`lib/services/cop-calculator.ts`)
+- **Service**: Published by **COPCalculator** service (`lib/shared/services/cop-calculator.ts`)
 - **Added**: v0.96.3 for calculation method transparency
 - **Enhanced**: v0.98.7 with diagnostic information and 8 calculation methods
 - **Note**: Enhanced with diagnostic feedback showing specific missing data ("No Power", "No Flow", "No Temp Δ", "Multi Fail") within 22-character display limit.
@@ -405,7 +405,7 @@ Different firmware versions may support different subsets of capabilities. The a
 ## Technical Implementation
 
 ### DPS Mapping
-All capabilities are mapped to specific Tuya DPS (Data Point) numbers through the `AdlarMapping` class in `lib/definitions/adlar-mapping.ts`. The mapping includes:
+All capabilities are mapped to specific Tuya DPS (Data Point) numbers through the `AdlarMapping` class in `lib/tuya/definitions/adlar-mapping.ts`. The mapping includes:
 
 - **Standard capabilities**: Core Homey capabilities (onoff, target_temperature, etc.)
 - **Custom capabilities**: Extended capabilities with dot notation (measure_temperature.temp_top)
@@ -423,7 +423,7 @@ Most sensor capabilities support Homey's insights system for historical data tra
 
 ### Capability Health Monitoring (v0.70.0+ / Service Architecture v0.99.23+)
 
-The app uses the **CapabilityHealthService** (`lib/services/capability-health-service.ts`) to track the availability and reliability of sensor data. This service is managed by the ServiceCoordinator and provides intelligent health monitoring with user-controlled power management.
+The app uses the **CapabilityHealthService** (`lib/tuya/services/capability-health-service.ts`) to track the availability and reliability of sensor data. This service is managed by the ServiceCoordinator and provides intelligent health monitoring with user-controlled power management.
 
 #### Service Architecture Integration
 

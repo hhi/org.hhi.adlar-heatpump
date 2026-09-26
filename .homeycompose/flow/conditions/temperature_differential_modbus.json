@@ -1,0 +1,48 @@
+{
+  "id": "temperature_differential_modbus",
+  "title": {
+    "en": "Temperature differential check",
+    "nl": "Temperatuur verschil controle",
+    "de": "Temperaturdifferenz prüfen",
+    "fr": "Vérification du différentiel de température"
+  },
+  "titleFormatted": {
+    "en": "Temperature differential is !{{above|below}} [[differential]]°C",
+    "nl": "Temperatuur verschil is !{{boven|onder}} [[differential]]°C",
+    "de": "Temperaturdifferenz ist !{{über|unter}} [[differential]]°C",
+    "fr": "Le différentiel de température est !{{au-dessus|en dessous}} de [[differential]]°C"
+  },
+  "hint": {
+    "en": "Check if the temperature difference between inlet and outlet is above or below a threshold",
+    "nl": "Controleer of het temperatuurverschil tussen inlaat en uitlaat boven of onder een drempel is",
+    "de": "Prüfen Sie, ob die Temperaturdifferenz zwischen Einlass und Auslass über oder unter einem Schwellenwert liegt",
+    "fr": "Vérifier si la différence de température entre l'entrée et la sortie est au-dessus ou en dessous d'un seuil"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "range",
+      "name": "differential",
+      "title": {
+        "en": " Temperature differential ",
+        "nl": " Temperatuur verschil ",
+        "de": " Temperaturdifferenz ",
+        "fr": " Différentiel de température "
+      },
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature differential threshold",
+        "nl": "Temperatuur verschil drempel",
+        "de": "Temperaturdifferenz-Schwellenwert",
+        "fr": "Seuil du différentiel de température"
+      }
+    }
+  ]
+}

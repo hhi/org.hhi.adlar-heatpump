@@ -1,0 +1,33 @@
+{
+  "id": "adlar_sterilization",
+  "type": "boolean",
+  "title": {
+    "en": "Sterilization mode active",
+    "nl": "Sterilisatiemodus actief",
+    "de": "Sterilisierungsmodus aktiv",
+    "fr": "Mode stérilisation actif"
+  },
+  "icon": "/assets/sterilization.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Sterilization mode started",
+    "nl": "Sterilisatiemodus gestart",
+    "de": "Sterilisierungsmodus gestartet",
+    "fr": "Mode stérilisation démarré"
+  },
+  "insightsTitleFalse": {
+    "en": "Sterilization mode stopped",
+    "nl": "Sterilisatiemodus gestopt",
+    "de": "Sterilisierungsmodus gestoppt",
+    "fr": "Mode stérilisation arrêté"
+  },
+  "description": {
+    "en": "Sterilization cycle status from Modbus status register 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). True during an active Legionella prevention cycle.",
+    "nl": "Status van de sterilisatiecyclus uit Modbus-statusregister 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Waar tijdens een actieve legionellapreventiecyclus.",
+    "de": "Status des Sterilisierungszyklus aus Modbus-Statusregister 0x0001, Bit 0 (HIGH_TEMP_STERILIZATION). Wahr während eines aktiven Legionellen-Präventionszyklus.",
+    "fr": "État du cycle de stérilisation depuis le registre de statut Modbus 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Vrai pendant un cycle actif de prévention de la légionellose."
+  }
+}

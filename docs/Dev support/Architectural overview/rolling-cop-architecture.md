@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Rolling COP (Coefficient of Performance) system provides time-series analysis of heat pump efficiency, enabling trend monitoring, performance optimization, and predictive maintenance. This system is implemented as the **RollingCOPCalculator service** (`lib/services/rolling-cop-calculator.ts`), which complements the real-time COPCalculator service by providing historical context and pattern analysis.
+The Rolling COP (Coefficient of Performance) system provides time-series analysis of heat pump efficiency, enabling trend monitoring, performance optimization, and predictive maintenance. This system is implemented as the **RollingCOPCalculator service** (`lib/shared/services/rolling-cop-calculator.ts`), which complements the real-time COPCalculator service by providing historical context and pattern analysis.
 
 ## RollingCOPCalculator Service Architecture (v0.99.23+)
 

@@ -1,0 +1,31 @@
+{
+  "id": "adlar_evi_step",
+  "type": "number",
+  "title": {
+    "en": "EVI opening steps",
+    "nl": "EVI-openingsstappen",
+    "de": "EVI-Öffnungsschritte",
+    "fr": "Pas d'ouverture EVI"
+  },
+  "icon": "/assets/pulse-steps.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "units": "steps",
+  "decimals": 0,
+  "min": 0,
+  "max": 500,
+  "description": {
+    "en": "Enhanced Vapor Injection (EVI) valve opening position from Modbus sensor register 0x0043 (eviValveOpenStep), in stepper motor steps.",
+    "nl": "Openingspositie van de EVI-klep (Enhanced Vapor Injection) uit Modbus-sensorregister 0x0043 (eviValveOpenStep), in stappenmotor-stappen.",
+    "de": "Öffnungsposition des EVI-Ventils (Enhanced Vapor Injection) aus Modbus-Sensorregister 0x0043 (eviValveOpenStep), in Schrittmotorschritten.",
+    "fr": "Position d'ouverture de la vanne EVI (Enhanced Vapor Injection) depuis le registre capteur Modbus 0x0043 (eviValveOpenStep), en pas moteur pas à pas."
+  },
+  "insights": true,
+  "insightsTitle": {
+    "en": "Heat Pump EVI Opening",
+    "nl": "Warmtepomp EVI-opening",
+    "de": "Wärmepumpe EVI-Öffnung",
+    "fr": "Ouverture EVI pompe à chaleur"
+  }
+}

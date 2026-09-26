@@ -1,0 +1,58 @@
+{
+  "id": "modbus_read_register",
+  "title": {
+    "en": "Read Modbus register",
+    "nl": "Lees Modbus register",
+    "de": "Modbus-Register lesen",
+    "fr": "Lire un registre Modbus"
+  },
+  "titleFormatted": {
+    "en": "Read Modbus register [[address]]",
+    "nl": "Lees Modbus register [[address]]",
+    "de": "Modbus-Register [[address]] lesen",
+    "fr": "Lire le registre Modbus [[address]]"
+  },
+  "hint": {
+    "en": "Reads one Modbus holding register (FC03) and returns the raw register value as a flow token. Address in hex (0x0301) or decimal (769). Temperature registers store values ×10 — divide the result by 10 for °C.",
+    "nl": "Leest één Modbus holding register (FC03) en geeft de registerwaarde terug als flow token. Adres in hex (0x0301) of decimaal (769). Temperatuurregisters zijn ×10 opgeslagen — deel het resultaat door 10 voor °C.",
+    "de": "Liest ein Modbus Holding-Register (FC03) und gibt den Registerwert als Flow-Token zurück. Adresse in Hex (0x0301) oder Dezimal (769). Temperaturregister speichern Werte ×10 — Ergebnis durch 10 teilen für °C.",
+    "fr": "Lit un registre Modbus holding (FC03) et retourne la valeur brute en tant que token de flow. Adresse en hex (0x0301) ou décimal (769). Les registres de température stockent ×10 — diviser par 10 pour obtenir °C."
+  },
+  "highlight": true,
+  "tokens": [
+    {
+      "name": "raw_value",
+      "type": "number",
+      "title": {
+        "en": "Register value",
+        "nl": "Registerwaarde",
+        "de": "Registerwert",
+        "fr": "Valeur du registre"
+      },
+      "example": 450
+    }
+  ],
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "text",
+      "name": "address",
+      "title": {
+        "en": "Register address",
+        "nl": "Registeradres",
+        "de": "Registeradresse",
+        "fr": "Adresse du registre"
+      },
+      "placeholder": {
+        "en": "e.g. 0x0301 or 769",
+        "nl": "bijv. 0x0301 of 769",
+        "de": "z.B. 0x0301 oder 769",
+        "fr": "ex. 0x0301 ou 769"
+      }
+    }
+  ]
+}

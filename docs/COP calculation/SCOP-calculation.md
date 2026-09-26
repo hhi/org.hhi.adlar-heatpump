@@ -400,7 +400,7 @@ Heat pumps are rated A+++ to D based on SCOP:
 
 ## SCOPCalculator Service Architecture (v0.99.23+)
 
-The SCOP calculation system is implemented as the **SCOPCalculator service** (`lib/services/scop-calculator.ts`), which operates independently within the ServiceCoordinator lifecycle, providing seasonal efficiency monitoring according to the EN 14825 European standard.
+The SCOP calculation system is implemented as the **SCOPCalculator service** (`lib/tuya/services/scop-calculator.ts`), which operates independently within the ServiceCoordinator lifecycle, providing seasonal efficiency monitoring according to the EN 14825 European standard.
 
 ### Service Integration
 

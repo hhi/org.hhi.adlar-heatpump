@@ -1,0 +1,252 @@
+{
+  "id": "set_curve_for_mode",
+  "title": {
+    "en": "Set curve (by mode)",
+    "nl": "Curve instellen (per modus)",
+    "de": "Kurve einstellen (nach Modus)",
+    "fr": "Régler la courbe (par mode)"
+  },
+  "titleFormatted": {
+    "en": "Set curve to [[curve]] for [[target]]",
+    "nl": "Curve instellen op [[curve]] voor [[target]]",
+    "de": "Kurve einstellen auf [[curve]] für [[target]]",
+    "fr": "Régler la courbe sur [[curve]] pour [[target]]"
+  },
+  "hint": {
+    "en": "Set the curve setting, routed to heating, cooling, floor heating, or hot water. Auto follows the heat pump's current mode.",
+    "nl": "Stel de curve-instelling in, gericht op verwarmen, koelen, vloerverwarming of warm water. Auto volgt de huidige modus van de warmtepomp.",
+    "de": "Kurveneinstellung einstellen, geleitet an Heizen, Kühlen, Fußbodenheizung oder Warmwasser. Auto folgt dem aktuellen Modus der Wärmepumpe.",
+    "fr": "Régler la courbe, dirigée vers chauffage, refroidissement, plancher chauffant ou eau chaude. Auto suit le mode actuel de la pompe à chaleur."
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "target",
+      "title": {
+        "en": "Apply to",
+        "nl": "Toepassen op",
+        "de": "Anwenden auf",
+        "fr": "Appliquer à"
+      },
+      "values": [
+        {
+          "id": "auto",
+          "label": {
+            "en": "Auto (follow current mode)",
+            "nl": "Auto (volg huidige modus)",
+            "de": "Auto (aktuellem Modus folgen)",
+            "fr": "Auto (suivre le mode actuel)"
+          }
+        },
+        {
+          "id": "heating",
+          "label": {
+            "en": "Heating",
+            "nl": "Verwarmen",
+            "de": "Heizen",
+            "fr": "Chauffage"
+          }
+        },
+        {
+          "id": "cooling",
+          "label": {
+            "en": "Cooling",
+            "nl": "Koelen",
+            "de": "Kühlen",
+            "fr": "Refroidissement"
+          }
+        },
+        {
+          "id": "floor",
+          "label": {
+            "en": "Floor heating",
+            "nl": "Vloerverwarming",
+            "de": "Fußbodenheizung",
+            "fr": "Plancher chauffant"
+          }
+        },
+        {
+          "id": "hot_water",
+          "label": {
+            "en": "Hot water",
+            "nl": "Warm water",
+            "de": "Warmwasser",
+            "fr": "Eau chaude"
+          }
+        }
+      ],
+      "value": "auto"
+    },
+    {
+      "type": "dropdown",
+      "name": "curve",
+      "title": {
+        "en": "Curve setting",
+        "nl": "Curve instelling",
+        "de": "Kurveneinstellung",
+        "fr": "Réglage de la courbe"
+      },
+      "values": [
+        {
+          "id": "OFF",
+          "title": {
+            "en": "OFF",
+            "nl": "UIT",
+            "de": "AUS",
+            "fr": "ÉTEINT"
+          }
+        },
+        {
+          "id": "H1",
+          "title": {
+            "en": "H1",
+            "nl": "H1",
+            "de": "H1",
+            "fr": "H1"
+          }
+        },
+        {
+          "id": "H2",
+          "title": {
+            "en": "H2",
+            "nl": "H2",
+            "de": "H2",
+            "fr": "H2"
+          }
+        },
+        {
+          "id": "H3",
+          "title": {
+            "en": "H3",
+            "nl": "H3",
+            "de": "H3",
+            "fr": "H3"
+          }
+        },
+        {
+          "id": "H4",
+          "title": {
+            "en": "H4",
+            "nl": "H4",
+            "de": "H4",
+            "fr": "H4"
+          }
+        },
+        {
+          "id": "H5",
+          "title": {
+            "en": "H5",
+            "nl": "H5",
+            "de": "H5",
+            "fr": "H5"
+          }
+        },
+        {
+          "id": "H6",
+          "title": {
+            "en": "H6",
+            "nl": "H6",
+            "de": "H6",
+            "fr": "H6"
+          }
+        },
+        {
+          "id": "H7",
+          "title": {
+            "en": "H7",
+            "nl": "H7",
+            "de": "H7",
+            "fr": "H7"
+          }
+        },
+        {
+          "id": "H8",
+          "title": {
+            "en": "H8",
+            "nl": "H8",
+            "de": "H8",
+            "fr": "H8"
+          }
+        },
+        {
+          "id": "L1",
+          "title": {
+            "en": "L1",
+            "nl": "L1",
+            "de": "L1",
+            "fr": "L1"
+          }
+        },
+        {
+          "id": "L2",
+          "title": {
+            "en": "L2",
+            "nl": "L2",
+            "de": "L2",
+            "fr": "L2"
+          }
+        },
+        {
+          "id": "L3",
+          "title": {
+            "en": "L3",
+            "nl": "L3",
+            "de": "L3",
+            "fr": "L3"
+          }
+        },
+        {
+          "id": "L4",
+          "title": {
+            "en": "L4",
+            "nl": "L4",
+            "de": "L4",
+            "fr": "L4"
+          }
+        },
+        {
+          "id": "L5",
+          "title": {
+            "en": "L5",
+            "nl": "L5",
+            "de": "L5",
+            "fr": "L5"
+          }
+        },
+        {
+          "id": "L6",
+          "title": {
+            "en": "L6",
+            "nl": "L6",
+            "de": "L6",
+            "fr": "L6"
+          }
+        },
+        {
+          "id": "L7",
+          "title": {
+            "en": "L7",
+            "nl": "L7",
+            "de": "L7",
+            "fr": "L7"
+          }
+        },
+        {
+          "id": "L8",
+          "title": {
+            "en": "L8 - custom curve",
+            "nl": "L8 - custom curve",
+            "de": "L8 - individuelle Kurve",
+            "fr": "L8 - courbe personnalisée"
+          }
+        }
+      ]
+    }
+  ]
+}

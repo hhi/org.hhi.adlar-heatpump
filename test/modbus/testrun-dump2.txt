@@ -1,0 +1,601 @@
+❯ npx tsx test/test-sim-registers.ts 192.168.50.247 init
+
+Verbinden met 192.168.50.247:502 (unit 1)...
+[ModbusTCP] Connecting to 192.168.50.247:502...
+[ModbusTCP] Connected to 192.168.50.247:502 (unit 1)
+✅ Verbonden!
+
+📄 Initialisatie vanuit: adlar-modbus-simuregs.mbs
+   134 registers schrijven naar 192.168.50.247:502
+
+  0x0000 = 16384  → 16384          0x0000 Running Status 1 [MACHINE_RUN=0x4000]
+[ModbusTCP] FC06 WRITE 0x0000 = 16384
+[ModbusTCP]   → OK
+  0x0001 = 1024   → 1024           0x0001 Running Status 2 [CONTROLLER_ON_OFF=0x0400]
+[ModbusTCP] FC06 WRITE 0x0001 = 1024
+[ModbusTCP]   → OK
+  0x0002 = 0                       0x0002 Fault State 1 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0002 = 0
+[ModbusTCP]   → OK
+  0x0003 = 0                       0x0003 Fault State 2 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0003 = 0
+[ModbusTCP]   → OK
+  0x0004 = 0                       0x0004 Fault State 3 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0004 = 0
+[ModbusTCP]   → OK
+  0x0005 = 0                       0x0005 Sys1 Fault State 1 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0005 = 0
+[ModbusTCP]   → OK
+  0x0006 = 0                       0x0006 Sys1 Fault State 2 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0006 = 0
+[ModbusTCP]   → OK
+  0x0007 = 0                       0x0007 Sys1 Drive Fault 1 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0007 = 0
+[ModbusTCP]   → OK
+  0x0008 = 0                       0x0008 Sys1 Drive Fault 2 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0008 = 0
+[ModbusTCP]   → OK
+  0x0009 = 0                       0x0009 Sys1 Drive Fault 3 [geen storingen]
+[ModbusTCP] FC06 WRITE 0x0009 = 0
+[ModbusTCP]   → OK
+  0x0019 = 64                      0x0019 Relay Output 1 [MAIN_CIRCULATING_PUMP=0x0040]
+[ModbusTCP] FC06 WRITE 0x0019 = 64
+[ModbusTCP]   → OK
+  0x001a = 41                      0x001A Relay Output 2 [COMP1=0x01|4WAY=0x08|FAN1=0x20 → 0x29=41]
+[ModbusTCP] FC06 WRITE 0x001a = 41
+[ModbusTCP]   → OK
+  0x001b = 0                       0x001B Relay Output 3 [geen aux relais actief]
+[ModbusTCP] FC06 WRITE 0x001b = 0
+[ModbusTCP]   → OK
+  0x001c = 0                       0x001C Relay Output 4 [geen zone-pompen actief]
+[ModbusTCP] FC06 WRITE 0x001c = 0
+[ModbusTCP]   → OK
+  0x001d = 256                     0x001D Switch Port State 1 [WATER_FLOW_SWITCH=0x0100 → OK]
+[ModbusTCP] FC06 WRITE 0x001d = 256
+[ModbusTCP]   → OK
+  0x001e = 384                     0x001E Switch Port State 2 [HP_SW1=0x80|LP_SW1=0x100 → druken OK]
+[ModbusTCP] FC06 WRITE 0x001e = 384
+[ModbusTCP]   → OK
+  0x001f = 0                       0x001F Switch Port State 3
+[ModbusTCP] FC06 WRITE 0x001f = 0
+[ModbusTCP]   → OK
+  0x0020 = 0                       0x0020 Switch Port State 4
+[ModbusTCP] FC06 WRITE 0x0020 = 0
+[ModbusTCP]   → OK
+  0x0027 = 55                      0x0027 Compressor Target Freq [55 Hz]
+[ModbusTCP] FC06 WRITE 0x0027 = 55
+[ModbusTCP]   → OK
+  0x0040 = 55     → 55 Hz          0x0040 Compressor Running Freq [55 Hz]
+[ModbusTCP] FC06 WRITE 0x0040 = 55
+[ModbusTCP]   → OK
+  0x0041 = 900    → 900 RPM        0x0041 Fan Running Speed [900 RPM = 60 Hz × 15]
+[ModbusTCP] FC06 WRITE 0x0041 = 900
+[ModbusTCP]   → OK
+  0x0042 = 280    → 280 P          0x0042 EEV Open Step [280 P]
+[ModbusTCP] FC06 WRITE 0x0042 = 280
+[ModbusTCP]   → OK
+  0x0043 = 0                       0x0043 EVI Valve Open Step [0 P, geen EVI actief]
+[ModbusTCP] FC06 WRITE 0x0043 = 0
+[ModbusTCP]   → OK
+  0x0044 = 232                     0x0044 AC Input Voltage [232 × 0.99 = 229.7 V ≈ 230 V]
+[ModbusTCP] FC06 WRITE 0x0044 = 232
+[ModbusTCP]   → OK
+  0x0045 = 65                      0x0045 AC Input Current [65 × 0.1 = 6.5 A raw; cal.curve → ~5.5 A werkelijk]
+[ModbusTCP] FC06 WRITE 0x0045 = 65
+[ModbusTCP]   → OK
+  0x0046 = 58                      0x0046 Compressor Phase Current [58 × 0.1 = 5.8 A]
+[ModbusTCP] FC06 WRITE 0x0046 = 58
+[ModbusTCP]   → OK
+  0x0047 = 350    → 35.00 °C       0x0047 Compressor IPM Temp [350 × 0.1 = 35.0 °C]
+[ModbusTCP] FC06 WRITE 0x0047 = 350
+[ModbusTCP]   → OK
+  0x0048 = 450    → 45.00 °C       0x0048 High Pressure Sat Temp [450 × 0.1 = 45.0 °C]
+[ModbusTCP] FC06 WRITE 0x0048 = 450
+[ModbusTCP]   → OK
+  0x0049 = 65486  → 6548.60 °C     0x0049 Low Pressure Sat Temp [int16: -50 = -5.0 °C (65536-50=65486)]
+[ModbusTCP] FC06 WRITE 0x0049 = 65486
+[ModbusTCP]   → OK
+  0x004a = 70     → 7.00 °C        0x004A T1 Ambient Temp [70 × 0.1 = 7.0 °C]
+[ModbusTCP] FC06 WRITE 0x004a = 70
+[ModbusTCP]   → OK
+  0x004b = 65516  → 6551.60 °C     0x004B T2 Outer Coil Temp [int16: -20 = -2.0 °C (65536-20=65516)]
+[ModbusTCP] FC06 WRITE 0x004b = 65516
+[ModbusTCP]   → OK
+  0x004c = 380    → 38.00 °C       0x004C T3 Inner Coil Temp [380 × 0.1 = 38.0 °C]
+[ModbusTCP] FC06 WRITE 0x004c = 380
+[ModbusTCP]   → OK
+  0x004d = 65511  → 6551.10 °C     0x004D T4 Suction Temp [int16: -25 = -2.5 °C (65536-25=65511)]
+[ModbusTCP] FC06 WRITE 0x004d = 65511
+[ModbusTCP]   → OK
+  0x004e = 750    → 75.00 °C       0x004E T5 Exhaust Temp [750 × 0.1 = 75.0 °C]
+[ModbusTCP] FC06 WRITE 0x004e = 750
+[ModbusTCP]   → OK
+  0x004f = 310    → 31.00 °C       0x004F T6 Water Inlet (return) [310 × 0.1 = 31.0 °C]
+[ModbusTCP] FC06 WRITE 0x004f = 310
+[ModbusTCP]   → OK
+  0x0050 = 380    → 38.00 °C       0x0050 T7 Water Outlet (aanvoer) [380 × 0.1 = 38.0 °C]
+[ModbusTCP] FC06 WRITE 0x0050 = 380
+[ModbusTCP]   → OK
+  0x0051 = 120    → 12.00 °C       0x0051 T8 Economizer Inlet [120 × 0.1 = 12.0 °C]
+[ModbusTCP] FC06 WRITE 0x0051 = 120
+[ModbusTCP]   → OK
+  0x0052 = 180    → 18.00 °C       0x0052 T9 Economizer Outlet [180 × 0.1 = 18.0 °C]
+[ModbusTCP] FC06 WRITE 0x0052 = 180
+[ModbusTCP]   → OK
+  0x0053 = 1                       0x0053 Device Tooling No
+[ModbusTCP] FC06 WRITE 0x0053 = 1
+[ModbusTCP]   → OK
+  0x0054 = 480    → 48.00 °C       0x0054 DHW Tank Temp [480 × 0.1 = 48.0 °C, warmwaterboiler standby]
+[ModbusTCP] FC06 WRITE 0x0054 = 480
+[ModbusTCP]   → OK
+  0x0055 = 600                     0x0055 Plate HX Exhaust Temp [600 × 0.1 = 60.0 °C]
+[ModbusTCP] FC06 WRITE 0x0055 = 600
+[ModbusTCP]   → OK
+  0x0056 = 1                       0x0056 Drive Manufacturer Code [1]
+[ModbusTCP] FC06 WRITE 0x0056 = 1
+[ModbusTCP]   → OK
+  0x0057 = 75     → 75 %           0x0057 Water Pump Speed [75 %PWM]
+[ModbusTCP] FC06 WRITE 0x0057 = 75
+[ModbusTCP]   → OK
+  0x0058 = 15     → 15 L/min       0x0058 Water Flow [15 L/min]
+[ModbusTCP] FC06 WRITE 0x0058 = 15
+[ModbusTCP]   → OK
+  0x0059 = 400    → 40.00 °C       0x0059 DHW Return Water Temp [400 × 0.1 = 40.0 °C]
+[ModbusTCP] FC06 WRITE 0x0059 = 400
+[ModbusTCP]   → OK
+  0x005a = 230    → 230 V          0x005A Unit Input Voltage [230 V]
+[ModbusTCP] FC06 WRITE 0x005a = 230
+[ModbusTCP]   → OK
+  0x005b = 652    → 6.52 A         0x005B Unit Input Current [652 × 0.01 = 6.52 A → 1500 W / 230 V]
+[ModbusTCP] FC06 WRITE 0x005b = 652
+[ModbusTCP]   → OK
+  0x005c = 150    → 1.50 kW        0x005C Unit Input Power [150 × 0.01 = 1.50 kW]
+[ModbusTCP] FC06 WRITE 0x005c = 150
+[ModbusTCP]   → OK
+  0x005d = 1847   → 1847 kWh       0x005D Total Energy Consumption [1847 kWh]
+[ModbusTCP] FC06 WRITE 0x005d = 1847
+[ModbusTCP]   → OK
+  0x0072 = 0                       0x0072 Solar Water Heater Temp [0 = geen sensor/zonne-energie]
+[ModbusTCP] FC06 WRITE 0x0072 = 0
+[ModbusTCP]   → OK
+  0x0073 = 200                     0x0073 Zone 2 Temp [200 × 0.1 = 20.0 °C]
+[ModbusTCP] FC06 WRITE 0x0073 = 200
+[ModbusTCP]   → OK
+  0x0074 = 350    → 35.00 °C       0x0074 Buffer Tank Temp [350 × 0.1 = 35.0 °C]
+[ModbusTCP] FC06 WRITE 0x0074 = 350
+[ModbusTCP]   → OK
+  0x0075 = 380    → 38.00 °C       0x0075 Total Water Outlet Temp [380 × 0.1 = 38.0 °C]
+[ModbusTCP] FC06 WRITE 0x0075 = 380
+[ModbusTCP]   → OK
+  0x0076 = 230                     0x0076 B Phase Input Voltage [230 V]
+[ModbusTCP] FC06 WRITE 0x0076 = 230
+[ModbusTCP]   → OK
+  0x0077 = 650                     0x0077 B Phase Input Current [650 × 0.01 = 6.50 A]
+[ModbusTCP] FC06 WRITE 0x0077 = 650
+[ModbusTCP]   → OK
+  0x0078 = 231                     0x0078 C Phase Input Voltage [231 V]
+[ModbusTCP] FC06 WRITE 0x0078 = 231
+[ModbusTCP]   → OK
+  0x0079 = 640                     0x0079 C Phase Input Current [640 × 0.01 = 6.40 A]
+[ModbusTCP] FC06 WRITE 0x0079 = 640
+[ModbusTCP]   → OK
+  0x007a = 0                       0x007A Smart Grid Status [0 = normaal]
+[ModbusTCP] FC06 WRITE 0x007a = 0
+[ModbusTCP]   → OK
+  0x007b = 0                       0x007B Zone 2 Mixing Valve Opening [0 %]
+[ModbusTCP] FC06 WRITE 0x007b = 0
+[ModbusTCP]   → OK
+  0x007c = 380                     0x007C Zone 1 Mixing Temp [380 × 0.1 = 38.0 °C]
+[ModbusTCP] FC06 WRITE 0x007c = 380
+[ModbusTCP]   → OK
+  0x007d = 0                       0x007D Zone 1 Mixing Valve Opening [0 %]
+[ModbusTCP] FC06 WRITE 0x007d = 0
+[ModbusTCP]   → OK
+  0x0100 = 0                       0x0100 P00 T1 Ambient Temp Sensor [0 = enabled]
+[ModbusTCP] FC06 WRITE 0x0100 = 0
+[ModbusTCP]   → OK
+  0x0101 = 0                       0x0101 P01 High Voltage Switch [0 = enabled]
+[ModbusTCP] FC06 WRITE 0x0101 = 0
+[ModbusTCP]   → OK
+  0x0102 = 0                       0x0102 P02 Low Pressure Switch [0 = enabled]
+[ModbusTCP] FC06 WRITE 0x0102 = 0
+[ModbusTCP]   → OK
+  0x0103 = 1                       0x0103 P03 Water Flow Switch [1 = disabled, externe flowmeter actief]
+[ModbusTCP] FC06 WRITE 0x0103 = 1
+[ModbusTCP]   → OK
+  0x0104 = 0                       0x0104 P04 Thermal Overload Protection [0 = enabled]
+[ModbusTCP] FC06 WRITE 0x0104 = 0
+[ModbusTCP]   → OK
+  0x0105 = 0                       0x0105 P05 Linkage Switch [0 = enabled]
+[ModbusTCP] FC06 WRITE 0x0105 = 0
+[ModbusTCP]   → OK
+  0x0106 = 1                       0x0106 P06 Fan Type [1 = DC]
+[ModbusTCP] FC06 WRITE 0x0106 = 1
+[ModbusTCP]   → OK
+  0x0107 = 0                       0x0107 P07 High Voltage Lock [0 = 3 locks]
+[ModbusTCP] FC06 WRITE 0x0107 = 0
+[ModbusTCP]   → OK
+  0x0108 = 0                       0x0108 P08 Low Voltage Lock [0 = 3 locks]
+[ModbusTCP] FC06 WRITE 0x0108 = 0
+[ModbusTCP]   → OK
+  0x0109 = 0                       0x0109 P09 Exhaust Lock [0 = 3 locks]
+[ModbusTCP] FC06 WRITE 0x0109 = 0
+[ModbusTCP]   → OK
+  0x010a = 0                       0x010A P10 Water Flow Lock [0 = 3 locks]
+[ModbusTCP] FC06 WRITE 0x010a = 0
+[ModbusTCP]   → OK
+  0x010b = 115                     0x010B P11 High Pressure Protection [115 °C condensatieTemp]
+[ModbusTCP] FC06 WRITE 0x010b = 115
+[ModbusTCP]   → OK
+  0x010c = 110                     0x010C P12 High Pressure Freq Limit [110 °C = P11 − 5]
+[ModbusTCP] FC06 WRITE 0x010c = 110
+[ModbusTCP]   → OK
+  0x010d = 65506                   0x010D P13 Low Pressure Protection [int16: -30 °C (65536-30=65506)]
+[ModbusTCP] FC06 WRITE 0x010d = 65506
+[ModbusTCP]   → OK
+  0x010e = 65511                   0x010E P14 Low Pressure Freq Limit [int16: -25 °C (65536-25=65511)]
+[ModbusTCP] FC06 WRITE 0x010e = 65511
+[ModbusTCP]   → OK
+  0x010f = 120                     0x010F P15 Exhaust Temp Protection [120 °C]
+[ModbusTCP] FC06 WRITE 0x010f = 120
+[ModbusTCP]   → OK
+  0x0110 = 110                     0x0110 P16 Exhaust Temp Freq Limit [110 °C = P15 − 10]
+[ModbusTCP] FC06 WRITE 0x0110 = 110
+[ModbusTCP]   → OK
+  0x011e = 0                       0x011E P30 Defrost Mode [0 = Smart]
+[ModbusTCP] FC06 WRITE 0x011e = 0
+[ModbusTCP]   → OK
+  0x0132 = 0                       0x0132 P50 Cooling Target Freq Constant A
+[ModbusTCP] FC06 WRITE 0x0132 = 0
+[ModbusTCP]   → OK
+  0x0133 = 25                      0x0133 P51 Cooling Min Freq [25 Hz]
+[ModbusTCP] FC06 WRITE 0x0133 = 25
+[ModbusTCP]   → OK
+  0x0134 = 80                      0x0134 P52 Cooling Target Freq Upper [80 Hz]
+[ModbusTCP] FC06 WRITE 0x0134 = 80
+[ModbusTCP]   → OK
+  0x0135 = 30                      0x0135 P53 Cooling Target Freq Lower [30 Hz]
+[ModbusTCP] FC06 WRITE 0x0135 = 30
+[ModbusTCP]   → OK
+  0x0136 = 0                       0x0136 P54 Heating Target Freq Constant B
+[ModbusTCP] FC06 WRITE 0x0136 = 0
+[ModbusTCP]   → OK
+  0x0137 = 90                      0x0137 P55 Heating Target Freq Upper [90 Hz]
+[ModbusTCP] FC06 WRITE 0x0137 = 90
+[ModbusTCP]   → OK
+  0x0138 = 25                      0x0138 P56 Heating Target Freq Lower [25 Hz]
+[ModbusTCP] FC06 WRITE 0x0138 = 25
+[ModbusTCP]   → OK
+  0x0139 = 25                      0x0139 P57 Heating Min Freq >0°C [25 Hz — COP-geoptimaliseerd]
+[ModbusTCP] FC06 WRITE 0x0139 = 25
+[ModbusTCP]   → OK
+  0x013a = 35                      0x013A P58 Heating Min Freq −10~0°C [35 Hz]
+[ModbusTCP] FC06 WRITE 0x013a = 35
+[ModbusTCP]   → OK
+  0x013b = 45                      0x013B P59 Heating Min Freq <−10°C [45 Hz]
+[ModbusTCP] FC06 WRITE 0x013b = 45
+[ModbusTCP]   → OK
+  0x013c = 0                       0x013C P60 DHW Target Freq Constant
+[ModbusTCP] FC06 WRITE 0x013c = 0
+[ModbusTCP]   → OK
+  0x013d = 80                      0x013D P61 DHW Target Freq Upper [80 Hz]
+[ModbusTCP] FC06 WRITE 0x013d = 80
+[ModbusTCP]   → OK
+  0x013e = 25                      0x013E P62 DHW Target Freq Lower [25 Hz]
+[ModbusTCP] FC06 WRITE 0x013e = 25
+[ModbusTCP]   → OK
+  0x013f = 25                      0x013F P63 DHW Min Freq >0°C [25 Hz]
+[ModbusTCP] FC06 WRITE 0x013f = 25
+[ModbusTCP]   → OK
+  0x0140 = 35                      0x0140 P64 DHW Min Freq −10~0°C [35 Hz]
+[ModbusTCP] FC06 WRITE 0x0140 = 35
+[ModbusTCP]   → OK
+  0x0141 = 45                      0x0141 P65 DHW Min Freq <−10°C [45 Hz]
+[ModbusTCP] FC06 WRITE 0x0141 = 45
+[ModbusTCP]   → OK
+  0x0158 = 35                      0x0158 P88 Silent Mode Compressor Freq [35 Hz]
+[ModbusTCP] FC06 WRITE 0x0158 = 35
+[ModbusTCP]   → OK
+  0x0159 = 30                      0x0159 P89 Silent Mode Fan Freq [30 Hz → 450 RPM]
+[ModbusTCP] FC06 WRITE 0x0159 = 30
+[ModbusTCP]   → OK
+  0x0165 = 1                       0x0165 P101 Pump Control Mode [1 = DC/PWM]
+[ModbusTCP] FC06 WRITE 0x0165 = 1
+[ModbusTCP]   → OK
+  0x0172 = 1                       0x0172 P114 Nr Compressors [1 = single]
+[ModbusTCP] FC06 WRITE 0x0172 = 1
+[ModbusTCP]   → OK
+  0x0173 = 0                       0x0173 P115 Model Selection [0 = double supply]
+[ModbusTCP] FC06 WRITE 0x0173 = 0
+[ModbusTCP]   → OK
+  0x0174 = 0                       0x0174 P116 Temp Control Mode [0 = inlet T6 (retour)]
+[ModbusTCP] FC06 WRITE 0x0174 = 0
+[ModbusTCP]   → OK
+  0x0175 = 5                       0x0175 P117 Antifreeze Ambient Temp [5 °C]
+[ModbusTCP] FC06 WRITE 0x0175 = 5
+[ModbusTCP]   → OK
+  0x0176 = 3                       0x0176 P118 Antifreeze Outlet Water [3 °C]
+[ModbusTCP] FC06 WRITE 0x0176 = 3
+[ModbusTCP]   → OK
+  0x0177 = 2                       0x0177 P119 Refrigerant Type [2 = R32 — Adlar Castra Aurora II]
+[ModbusTCP] FC06 WRITE 0x0177 = 2
+[ModbusTCP]   → OK
+  0x0178 = 0                       0x0178 P120 Anti-condensation Function [0]
+[ModbusTCP] FC06 WRITE 0x0178 = 0
+[ModbusTCP]   → OK
+  0x01a4 = 0                       0x01A4 P164 Energy Level Control [0 = geen beperking]
+[ModbusTCP] FC06 WRITE 0x01a4 = 0
+[ModbusTCP]   → OK
+  0x01ff = 0                       0x01FF P255 Smart Grid [0 = inactief]
+[ModbusTCP] FC06 WRITE 0x01ff = 0
+[ModbusTCP]   → OK
+  0x0200 = 0                       0x0200 P256 Smart Grid [0 = inactief]
+[ModbusTCP] FC06 WRITE 0x0200 = 0
+[ModbusTCP]   → OK
+  0x0300 = 120    → 12.00 °C       0x0300 Set Cooling Temp [120 × 0.1 = 12.0 °C]
+[ModbusTCP] FC06 WRITE 0x0300 = 120
+[ModbusTCP]   → OK
+  0x0301 = 550    → 55.00 °C       0x0301 Set Heating Temp [550 × 0.1 = 55.0 °C]
+[ModbusTCP] FC06 WRITE 0x0301 = 550
+[ModbusTCP]   → OK
+  0x0302 = 550    → 55.00 °C       0x0302 Set Hot Water Temp [550 × 0.1 = 55.0 °C]
+[ModbusTCP] FC06 WRITE 0x0302 = 550
+[ModbusTCP]   → OK
+  0x0303 = 500    → 50.00 °C       0x0303 Set Floor Heating Temp [500 × 0.1 = 50.0 °C]
+[ModbusTCP] FC06 WRITE 0x0303 = 500
+[ModbusTCP]   → OK
+  0x0304 = 1      → 1              0x0304 Mode [1 = Heating]
+[ModbusTCP] FC06 WRITE 0x0304 = 1
+[ModbusTCP]   → OK
+  0x0305 = 1      → 1              0x0305 Main Switch [1 = ON]
+[ModbusTCP] FC06 WRITE 0x0305 = 1
+[ModbusTCP]   → OK
+  0x0306 = 205    → 20.50 °C       0x0306 Indoor Temp Setpoint [205 × 0.1 = 20.5 °C]
+[ModbusTCP] FC06 WRITE 0x0306 = 205
+[ModbusTCP]   → OK
+  0x0307 = 0                       0x0307 Running Mode [0 = Standard]
+[ModbusTCP] FC06 WRITE 0x0307 = 0
+[ModbusTCP]   → OK
+  0x0313 = 0                       0x0313 Cooling Curve [0 = off]
+[ModbusTCP] FC06 WRITE 0x0313 = 0
+[ModbusTCP]   → OK
+  0x0314 = 3      → 3              0x0314 Heating Curve [3 = High Temp Curve 3]
+[ModbusTCP] FC06 WRITE 0x0314 = 3
+[ModbusTCP]   → OK
+  0x0315 = 0                       0x0315 Hot Water Curve [0 = off]
+[ModbusTCP] FC06 WRITE 0x0315 = 0
+[ModbusTCP]   → OK
+  0x0316 = 0                       0x0316 Floor Heating Curve [0 = off]
+[ModbusTCP] FC06 WRITE 0x0316 = 0
+[ModbusTCP]   → OK
+  0x0360 = 130    → 130            0x0360 Program Version [130 = V1.3.0]
+[ModbusTCP] FC06 WRITE 0x0360 = 130
+[ModbusTCP]   → OK
+  0x0361 = 0                       0x0361 Product Type [0 = Commercial Inverter]
+[ModbusTCP] FC06 WRITE 0x0361 = 0
+[ModbusTCP]   → OK
+  0x0362 = 0                       0x0362 Product Type ID [0 = 2-unit]
+[ModbusTCP] FC06 WRITE 0x0362 = 0
+[ModbusTCP]   → OK
+  0x0363 = 130    → 130            0x0363 Protocol Version [130 = coil-support + aparte curve-registers actief]
+[ModbusTCP] FC06 WRITE 0x0363 = 130
+[ModbusTCP]   → OK
+  0x0810 = 1                       0x0810 L27 Heating Low Temp Curve DIY [1 = disabled, preset curve actief]
+[ModbusTCP] FC06 WRITE 0x0810 = 1
+[ModbusTCP]   → OK
+  0x0811 = 0                       0x0811 L28 Heating Curve Coeff K [niet actief]
+[ModbusTCP] FC06 WRITE 0x0811 = 0
+[ModbusTCP]   → OK
+  0x0812 = 0                       0x0812 L29 Heating Curve Constant B [niet actief]
+[ModbusTCP] FC06 WRITE 0x0812 = 0
+[ModbusTCP]   → OK
+  0x0813 = 0                       0x0813 L30 Heating Capacity Statistics [0 = enabled]
+[ModbusTCP] FC06 WRITE 0x0813 = 0
+[ModbusTCP]   → OK
+  0x0814 = 15                      0x0814 L31 External Pump Flow Rate [15 L/min — klopt met waterflow sensor]
+[ModbusTCP] FC06 WRITE 0x0814 = 15
+[ModbusTCP]   → OK
+  0x0815 = 0                       0x0815 L32 DHW E-Heater Power [0 W — geen elektrische bijverwarming]
+[ModbusTCP] FC06 WRITE 0x0815 = 0
+[ModbusTCP]   → OK
+  0x0816 = 0                       0x0816 L33 Pipe E-Heater 1 Power [0 W]
+[ModbusTCP] FC06 WRITE 0x0816 = 0
+[ModbusTCP]   → OK
+  0x0817 = 0                       0x0817 L34 Pipe E-Heater 2 Power [0 W]
+[ModbusTCP] FC06 WRITE 0x0817 = 0
+[ModbusTCP]   → OK
+  0x0818 = 0                       0x0818 L35 Heating E-Heater Power [0 W]
+[ModbusTCP] FC06 WRITE 0x0818 = 0
+[ModbusTCP]   → OK
+  0x0819 = 50                      0x0819 L36 External Water Pump Power [50 W]
+[ModbusTCP] FC06 WRITE 0x0819 = 50
+[ModbusTCP]   → OK
+
+Verificatie (steekproef):
+──────────────────────────────────────────────────────────────────────
+Adres    Raw      Signed   Scaled       Eenheid  Label
+──────────────────────────────────────────────────────────────────────
+[ModbusTCP] FC03 READ  0x0000 count=1
+[ModbusTCP]   → 0x0000=16384
+0x0000  16384   16384   16384               Running Status 1 (bitmask)
+[ModbusTCP] FC03 READ  0x0040 count=1
+[ModbusTCP]   → 0x0040=55
+0x0040  55      55      55          Hz      Compressor Freq
+[ModbusTCP] FC03 READ  0x004a count=1
+[ModbusTCP]   → 0x004a=70
+0x004a  70      70      7.00        °C      T1 Ambient
+[ModbusTCP] FC03 READ  0x004f count=1
+[ModbusTCP]   → 0x004f=310
+0x004f  310     310     31.00       °C      T6 Water Inlet
+[ModbusTCP] FC03 READ  0x0050 count=1
+[ModbusTCP]   → 0x0050=380
+0x0050  380     380     38.00       °C      T7 Water Outlet
+[ModbusTCP] FC03 READ  0x0058 count=1
+[ModbusTCP]   → 0x0058=15
+0x0058  15      15      15          L/min   Water Flow
+[ModbusTCP] FC03 READ  0x005b count=1
+[ModbusTCP]   → 0x005b=652
+0x005b  652     652     6.52        A       Unit Current
+[ModbusTCP] FC03 READ  0x005c count=1
+[ModbusTCP]   → 0x005c=150
+0x005c  150     150     1.50        kW      Unit Power
+[ModbusTCP] FC03 READ  0x0301 count=1
+[ModbusTCP]   → 0x0301=550
+0x0301  550     550     55.00       °C      Heating Setpoint
+[ModbusTCP] FC03 READ  0x0304 count=1
+[ModbusTCP]   → 0x0304=1
+0x0304  1       1       1                   Mode (1=Verwarming)
+[ModbusTCP] FC03 READ  0x0305 count=1
+[ModbusTCP]   → 0x0305=1
+0x0305  1       1       1                   On/Off
+[ModbusTCP] FC03 READ  0x0363 count=1
+[ModbusTCP]   → 0x0363=130
+0x0363  130     130     130                 Protocol Version
+──────────────────────────────────────────────────────────────────────
+
+✅ 134 registers geschreven.
+   Draai nu 'poll' om live data te zien.
+❯ npx tsx test/test-sim-registers.ts 192.168.50.247 dump
+
+📄 adlar-modbus-simuregs.mbs — 134 registers
+
+────────────────────────────────────────────────────────────────────────────────
+#     Adres    Hex      Raw      Titel
+────────────────────────────────────────────────────────────────────────────────
+1     0x0000   0        16384    [16384 ]       0x0000 Running Status 1 [MACHINE_RUN=0x4000]
+2     0x0001   1        1024     [1024 ]        0x0001 Running Status 2 [CONTROLLER_ON_OFF=0x0400]
+3     0x0002   2        0                       0x0002 Fault State 1 [geen storingen]
+4     0x0003   3        0                       0x0003 Fault State 2 [geen storingen]
+5     0x0004   4        0                       0x0004 Fault State 3 [geen storingen]
+6     0x0005   5        0                       0x0005 Sys1 Fault State 1 [geen storingen]
+7     0x0006   6        0                       0x0006 Sys1 Fault State 2 [geen storingen]
+8     0x0007   7        0                       0x0007 Sys1 Drive Fault 1 [geen storingen]
+9     0x0008   8        0                       0x0008 Sys1 Drive Fault 2 [geen storingen]
+10    0x0009   9        0                       0x0009 Sys1 Drive Fault 3 [geen storingen]
+11    0x0019   25       64                      0x0019 Relay Output 1 [MAIN_CIRCULATING_PUMP=0x0040]
+12    0x001a   26       41                      0x001A Relay Output 2 [COMP1=0x01|4WAY=0x08|FAN1=0x20 → 0x29=41]
+13    0x001b   27       0                       0x001B Relay Output 3 [geen aux relais actief]
+14    0x001c   28       0                       0x001C Relay Output 4 [geen zone-pompen actief]
+15    0x001d   29       256                     0x001D Switch Port State 1 [WATER_FLOW_SWITCH=0x0100 → OK]
+16    0x001e   30       384                     0x001E Switch Port State 2 [HP_SW1=0x80|LP_SW1=0x100 → druken OK]
+17    0x001f   31       0                       0x001F Switch Port State 3
+18    0x0020   32       0                       0x0020 Switch Port State 4
+19    0x0027   39       55                      0x0027 Compressor Target Freq [55 Hz]
+20    0x0040   64       55       [55 Hz]        0x0040 Compressor Running Freq [55 Hz]
+21    0x0041   65       900      [900 RPM]      0x0041 Fan Running Speed [900 RPM = 60 Hz × 15]
+22    0x0042   66       280      [280 P]        0x0042 EEV Open Step [280 P]
+23    0x0043   67       0                       0x0043 EVI Valve Open Step [0 P, geen EVI actief]
+24    0x0044   68       232                     0x0044 AC Input Voltage [232 × 0.99 = 229.7 V ≈ 230 V]
+25    0x0045   69       65                      0x0045 AC Input Current [65 × 0.1 = 6.5 A raw; cal.curve → ~5.5 A werkelijk]
+26    0x0046   70       58                      0x0046 Compressor Phase Current [58 × 0.1 = 5.8 A]
+27    0x0047   71       350      [35.00 °C]     0x0047 Compressor IPM Temp [350 × 0.1 = 35.0 °C]
+28    0x0048   72       450      [45.00 °C]     0x0048 High Pressure Sat Temp [450 × 0.1 = 45.0 °C]
+29    0x0049   73       65486    [6548.60 °C]   0x0049 Low Pressure Sat Temp [int16: -50 = -5.0 °C (65536-50=65486)]
+30    0x004a   74       70       [7.00 °C]      0x004A T1 Ambient Temp [70 × 0.1 = 7.0 °C]
+31    0x004b   75       65516    [6551.60 °C]   0x004B T2 Outer Coil Temp [int16: -20 = -2.0 °C (65536-20=65516)]
+32    0x004c   76       380      [38.00 °C]     0x004C T3 Inner Coil Temp [380 × 0.1 = 38.0 °C]
+33    0x004d   77       65511    [6551.10 °C]   0x004D T4 Suction Temp [int16: -25 = -2.5 °C (65536-25=65511)]
+34    0x004e   78       750      [75.00 °C]     0x004E T5 Exhaust Temp [750 × 0.1 = 75.0 °C]
+35    0x004f   79       310      [31.00 °C]     0x004F T6 Water Inlet (return) [310 × 0.1 = 31.0 °C]
+36    0x0050   80       380      [38.00 °C]     0x0050 T7 Water Outlet (aanvoer) [380 × 0.1 = 38.0 °C]
+37    0x0051   81       120      [12.00 °C]     0x0051 T8 Economizer Inlet [120 × 0.1 = 12.0 °C]
+38    0x0052   82       180      [18.00 °C]     0x0052 T9 Economizer Outlet [180 × 0.1 = 18.0 °C]
+39    0x0053   83       1                       0x0053 Device Tooling No
+40    0x0054   84       480      [48.00 °C]     0x0054 DHW Tank Temp [480 × 0.1 = 48.0 °C, warmwaterboiler standby]
+41    0x0055   85       600                     0x0055 Plate HX Exhaust Temp [600 × 0.1 = 60.0 °C]
+42    0x0056   86       1                       0x0056 Drive Manufacturer Code [1]
+43    0x0057   87       75       [75 %]         0x0057 Water Pump Speed [75 %PWM]
+44    0x0058   88       15       [15 L/min]     0x0058 Water Flow [15 L/min]
+45    0x0059   89       400      [40.00 °C]     0x0059 DHW Return Water Temp [400 × 0.1 = 40.0 °C]
+46    0x005a   90       230      [230 V]        0x005A Unit Input Voltage [230 V]
+47    0x005b   91       652      [6.52 A]       0x005B Unit Input Current [652 × 0.01 = 6.52 A → 1500 W / 230 V]
+48    0x005c   92       150      [1.50 kW]      0x005C Unit Input Power [150 × 0.01 = 1.50 kW]
+49    0x005d   93       1847     [1847 kWh]     0x005D Total Energy Consumption [1847 kWh]
+50    0x0072   114      0                       0x0072 Solar Water Heater Temp [0 = geen sensor/zonne-energie]
+51    0x0073   115      200                     0x0073 Zone 2 Temp [200 × 0.1 = 20.0 °C]
+52    0x0074   116      350      [35.00 °C]     0x0074 Buffer Tank Temp [350 × 0.1 = 35.0 °C]
+53    0x0075   117      380      [38.00 °C]     0x0075 Total Water Outlet Temp [380 × 0.1 = 38.0 °C]
+54    0x0076   118      230                     0x0076 B Phase Input Voltage [230 V]
+55    0x0077   119      650                     0x0077 B Phase Input Current [650 × 0.01 = 6.50 A]
+56    0x0078   120      231                     0x0078 C Phase Input Voltage [231 V]
+57    0x0079   121      640                     0x0079 C Phase Input Current [640 × 0.01 = 6.40 A]
+58    0x007a   122      0                       0x007A Smart Grid Status [0 = normaal]
+59    0x007b   123      0                       0x007B Zone 2 Mixing Valve Opening [0 %]
+60    0x007c   124      380                     0x007C Zone 1 Mixing Temp [380 × 0.1 = 38.0 °C]
+61    0x007d   125      0                       0x007D Zone 1 Mixing Valve Opening [0 %]
+62    0x0100   256      0                       0x0100 P00 T1 Ambient Temp Sensor [0 = enabled]
+63    0x0101   257      0                       0x0101 P01 High Voltage Switch [0 = enabled]
+64    0x0102   258      0                       0x0102 P02 Low Pressure Switch [0 = enabled]
+65    0x0103   259      1                       0x0103 P03 Water Flow Switch [1 = disabled, externe flowmeter actief]
+66    0x0104   260      0                       0x0104 P04 Thermal Overload Protection [0 = enabled]
+67    0x0105   261      0                       0x0105 P05 Linkage Switch [0 = enabled]
+68    0x0106   262      1                       0x0106 P06 Fan Type [1 = DC]
+69    0x0107   263      0                       0x0107 P07 High Voltage Lock [0 = 3 locks]
+70    0x0108   264      0                       0x0108 P08 Low Voltage Lock [0 = 3 locks]
+71    0x0109   265      0                       0x0109 P09 Exhaust Lock [0 = 3 locks]
+72    0x010a   266      0                       0x010A P10 Water Flow Lock [0 = 3 locks]
+73    0x010b   267      115                     0x010B P11 High Pressure Protection [115 °C condensatieTemp]
+74    0x010c   268      110                     0x010C P12 High Pressure Freq Limit [110 °C = P11 − 5]
+75    0x010d   269      65506                   0x010D P13 Low Pressure Protection [int16: -30 °C (65536-30=65506)]
+76    0x010e   270      65511                   0x010E P14 Low Pressure Freq Limit [int16: -25 °C (65536-25=65511)]
+77    0x010f   271      120                     0x010F P15 Exhaust Temp Protection [120 °C]
+78    0x0110   272      110                     0x0110 P16 Exhaust Temp Freq Limit [110 °C = P15 − 10]
+79    0x011e   286      0                       0x011E P30 Defrost Mode [0 = Smart]
+80    0x0132   306      0                       0x0132 P50 Cooling Target Freq Constant A
+81    0x0133   307      25                      0x0133 P51 Cooling Min Freq [25 Hz]
+82    0x0134   308      80                      0x0134 P52 Cooling Target Freq Upper [80 Hz]
+83    0x0135   309      30                      0x0135 P53 Cooling Target Freq Lower [30 Hz]
+84    0x0136   310      0                       0x0136 P54 Heating Target Freq Constant B
+85    0x0137   311      90                      0x0137 P55 Heating Target Freq Upper [90 Hz]
+86    0x0138   312      25                      0x0138 P56 Heating Target Freq Lower [25 Hz]
+87    0x0139   313      25                      0x0139 P57 Heating Min Freq >0°C [25 Hz — COP-geoptimaliseerd]
+88    0x013a   314      35                      0x013A P58 Heating Min Freq −10~0°C [35 Hz]
+89    0x013b   315      45                      0x013B P59 Heating Min Freq <−10°C [45 Hz]
+90    0x013c   316      0                       0x013C P60 DHW Target Freq Constant
+91    0x013d   317      80                      0x013D P61 DHW Target Freq Upper [80 Hz]
+92    0x013e   318      25                      0x013E P62 DHW Target Freq Lower [25 Hz]
+93    0x013f   319      25                      0x013F P63 DHW Min Freq >0°C [25 Hz]
+94    0x0140   320      35                      0x0140 P64 DHW Min Freq −10~0°C [35 Hz]
+95    0x0141   321      45                      0x0141 P65 DHW Min Freq <−10°C [45 Hz]
+96    0x0158   344      35                      0x0158 P88 Silent Mode Compressor Freq [35 Hz]
+97    0x0159   345      30                      0x0159 P89 Silent Mode Fan Freq [30 Hz → 450 RPM]
+98    0x0165   357      1                       0x0165 P101 Pump Control Mode [1 = DC/PWM]
+99    0x0172   370      1                       0x0172 P114 Nr Compressors [1 = single]
+100   0x0173   371      0                       0x0173 P115 Model Selection [0 = double supply]
+101   0x0174   372      0                       0x0174 P116 Temp Control Mode [0 = inlet T6 (retour)]
+102   0x0175   373      5                       0x0175 P117 Antifreeze Ambient Temp [5 °C]
+103   0x0176   374      3                       0x0176 P118 Antifreeze Outlet Water [3 °C]
+104   0x0177   375      2                       0x0177 P119 Refrigerant Type [2 = R32 — Adlar Castra Aurora II]
+105   0x0178   376      0                       0x0178 P120 Anti-condensation Function [0]
+106   0x01a4   420      0                       0x01A4 P164 Energy Level Control [0 = geen beperking]
+107   0x01ff   511      0                       0x01FF P255 Smart Grid [0 = inactief]
+108   0x0200   512      0                       0x0200 P256 Smart Grid [0 = inactief]
+109   0x0300   768      120      [12.00 °C]     0x0300 Set Cooling Temp [120 × 0.1 = 12.0 °C]
+110   0x0301   769      550      [55.00 °C]     0x0301 Set Heating Temp [550 × 0.1 = 55.0 °C]
+111   0x0302   770      550      [55.00 °C]     0x0302 Set Hot Water Temp [550 × 0.1 = 55.0 °C]
+112   0x0303   771      500      [50.00 °C]     0x0303 Set Floor Heating Temp [500 × 0.1 = 50.0 °C]
+113   0x0304   772      1        [1 ]           0x0304 Mode [1 = Heating]
+114   0x0305   773      1        [1 ]           0x0305 Main Switch [1 = ON]
+115   0x0306   774      205      [20.50 °C]     0x0306 Indoor Temp Setpoint [205 × 0.1 = 20.5 °C]
+116   0x0307   775      0                       0x0307 Running Mode [0 = Standard]
+117   0x0313   787      0                       0x0313 Cooling Curve [0 = off]
+118   0x0314   788      3        [3 ]           0x0314 Heating Curve [3 = High Temp Curve 3]
+119   0x0315   789      0                       0x0315 Hot Water Curve [0 = off]
+120   0x0316   790      0                       0x0316 Floor Heating Curve [0 = off]
+121   0x0360   864      130      [130 ]         0x0360 Program Version [130 = V1.3.0]
+122   0x0361   865      0                       0x0361 Product Type [0 = Commercial Inverter]
+123   0x0362   866      0                       0x0362 Product Type ID [0 = 2-unit]
+124   0x0363   867      130      [130 ]         0x0363 Protocol Version [130 = coil-support + aparte curve-registers actief]
+125   0x0810   2064     1                       0x0810 L27 Heating Low Temp Curve DIY [1 = disabled, preset curve actief]
+126   0x0811   2065     0                       0x0811 L28 Heating Curve Coeff K [niet actief]
+127   0x0812   2066     0                       0x0812 L29 Heating Curve Constant B [niet actief]
+128   0x0813   2067     0                       0x0813 L30 Heating Capacity Statistics [0 = enabled]
+129   0x0814   2068     15                      0x0814 L31 External Pump Flow Rate [15 L/min — klopt met waterflow sensor]
+130   0x0815   2069     0                       0x0815 L32 DHW E-Heater Power [0 W — geen elektrische bijverwarming]
+131   0x0816   2070     0                       0x0816 L33 Pipe E-Heater 1 Power [0 W]
+132   0x0817   2071     0                       0x0817 L34 Pipe E-Heater 2 Power [0 W]
+133   0x0818   2072     0                       0x0818 L35 Heating E-Heater Power [0 W]
+134   0x0819   2073     50                      0x0819 L36 External Water Pump Power [50 W]
+────────────────────────────────────────────────────────────────────────────────
+
+Totaal: 134 registers

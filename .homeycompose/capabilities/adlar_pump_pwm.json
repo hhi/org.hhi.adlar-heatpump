@@ -1,0 +1,31 @@
+{
+  "id": "adlar_pump_pwm",
+  "type": "number",
+  "title": {
+    "en": "Pump PWM",
+    "nl": "Pomp PWM",
+    "de": "Pumpe PWM",
+    "fr": "PWM pompe"
+  },
+  "icon": "/assets/pump.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "units": "%",
+  "decimals": 0,
+  "min": 0,
+  "max": 100,
+  "description": {
+    "en": "Circulation pump speed from Modbus sensor register 0x0057 (waterPumpSpeedPWM), as a PWM duty cycle percentage.",
+    "nl": "Snelheid van de circulatiepomp uit Modbus-sensorregister 0x0057 (waterPumpSpeedPWM), als PWM-vulgraad in procent.",
+    "de": "Umwälzpumpendrehzahl aus Modbus-Sensorregister 0x0057 (waterPumpSpeedPWM), als PWM-Tastverhältnis in Prozent.",
+    "fr": "Vitesse de la pompe de circulation depuis le registre capteur Modbus 0x0057 (waterPumpSpeedPWM), en pourcentage de rapport cyclique PWM."
+  },
+  "insights": true,
+  "insightsTitle": {
+    "en": "Water Pump PWM",
+    "nl": "Waterpomp PWM",
+    "de": "Wasserpumpe PWM",
+    "fr": "PWM pompe à eau"
+  }
+}

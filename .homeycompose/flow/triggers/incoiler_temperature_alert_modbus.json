@@ -1,0 +1,102 @@
+{
+  "id": "incoiler_temperature_alert_modbus",
+  "title": {
+    "en": "Incoiler temperature alert",
+    "nl": "Condensor temperatuur alarm",
+    "de": "Kondensator-Temperaturalarm",
+    "fr": "Alerte de température du condenseur"
+  },
+  "titleFormatted": {
+    "en": "Incoiler temperature [[condition]] [[temperature]]°C",
+    "nl": "Condensor temperatuur [[condition]] [[temperature]]°C",
+    "de": "Kondensator-Temperatur [[condition]] [[temperature]]°C",
+    "fr": "Température du condenseur [[condition]] [[temperature]]°C"
+  },
+  "hint": {
+    "en": "Triggers when incoiler temperature goes above or below a specified level",
+    "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder een bepaald nivo gaat",
+    "de": "Wird ausgelöst, wenn die Kondensator-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+    "fr": "Se déclenche lorsque la température du condenseur dépasse ou descend en dessous d'un niveau spécifié"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-modbus"
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Condition",
+        "nl": "Conditie",
+        "de": "Bedingung",
+        "fr": "Condition"
+      },
+      "values": [
+        {
+          "id": "above",
+          "title": {
+            "en": "above",
+            "nl": "boven",
+            "de": "über",
+            "fr": "au-dessus"
+          }
+        },
+        {
+          "id": "below",
+          "title": {
+            "en": "below",
+            "nl": "onder",
+            "de": "unter",
+            "fr": "en dessous"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "name": "temperature",
+      "title": {
+        "en": " Temperature ",
+        "nl": " Temperatuur ",
+        "de": " Temperatur ",
+        "fr": " Température "
+      },
+      "min": -20,
+      "max": 80,
+      "step": 1,
+      "units": "°C",
+      "placeholder": {
+        "en": "Temperature threshold in °C",
+        "nl": "Temperatuur drempel in °C",
+        "de": "Temperaturschwellenwert in °C",
+        "fr": "Seuil de température en °C"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "number",
+      "name": "current_temperature",
+      "title": {
+        "en": "Current Incoiler temperature",
+        "nl": "Huidige Condensor temperatuur",
+        "de": "Aktuelle Kondensator-Temperatur",
+        "fr": "Température actuelle du condenseur"
+      },
+      "example": 35.5
+    },
+    {
+      "type": "number",
+      "name": "threshold_temperature",
+      "title": {
+        "en": "Threshold temperature",
+        "nl": "Drempel temperatuur",
+        "de": "Schwellenwert Temperatur",
+        "fr": "Température seuil"
+      },
+      "example": 40
+    }
+  ]
+}

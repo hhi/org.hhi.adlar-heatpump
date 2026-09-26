@@ -28,6 +28,9 @@
   },
 
   "description": {
-    "nl": "dp 101 : minitemp_set - Hot Water Set Temp"
+    "en": "dp 101: minitemp_set - Domestic hot water target temperature setting",
+    "nl": "dp 101: minitemp_set - Sanitair warmwater gewenste temperatuur instelling",
+    "de": "dp 101: minitemp_set - Brauchwarmwasser-Solltemperatureinstellung",
+    "fr": "dp 101: minitemp_set - Réglage de la température de consigne de l'eau chaude sanitaire"
   }
 }

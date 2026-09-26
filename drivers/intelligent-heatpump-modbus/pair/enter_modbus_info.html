@@ -1,0 +1,56 @@
+<div class="homey-view">
+  <header class="homey-header">
+    <h1 class="homey-title" data-i18n="pair.enter_modbus_info.title">Modbus Connection</h1>
+    <p class="homey-subtitle" data-i18n="pair.enter_modbus_info.description">Enter the IP address and port of your Elfin EW11A or Modbus TCP gateway</p>
+  </header>
+
+  <form class="homey-form" onsubmit="handleSubmit(event)">
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="host" data-i18n="pair.enter_modbus_info.host">IP Address:</label>
+      <input class="homey-form-input" type="text" id="host" placeholder="192.168.1.100" required>
+    </div>
+
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="port" data-i18n="pair.enter_modbus_info.port">TCP Port:</label>
+      <input class="homey-form-input" type="number" id="port" value="502" min="1" max="65535">
+    </div>
+
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="unitId" data-i18n="pair.enter_modbus_info.unit_id">Modbus Unit ID:</label>
+      <input class="homey-form-input" type="number" id="unitId" value="1" min="1" max="247">
+    </div>
+
+    <p id="pairError" class="homey-form-error homey-form-error-hidden" role="alert"></p>
+
+    <button class="homey-button-primary-full" type="submit" data-i18n="pair.enter_modbus_info.continue">Continue</button>
+  </form>
+</div>
+
+<script>
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const host   = document.getElementById('host').value.trim();
+    const port   = parseInt(document.getElementById('port').value, 10) || 502;
+    const unitId = parseInt(document.getElementById('unitId').value, 10) || 1;
+    const errorEl = document.getElementById('pairError');
+
+    if (!host) {
+      errorEl.textContent = 'IP address is required.';
+      errorEl.classList.remove('homey-form-error-hidden');
+      return;
+    }
+
+    errorEl.classList.add('homey-form-error-hidden');
+
+    try {
+      await Homey.emit('enter_modbus_info', { host, port: String(port), unitId: String(unitId) });
+      Homey.nextView();
+    } catch (err) {
+      errorEl.textContent = 'Failed: ' + err.message;
+      errorEl.classList.remove('homey-form-error-hidden');
+    }
+  }
+</script>
+<style>
+  .homey-form-error-hidden { display: none; }
+</style>
