@@ -121,7 +121,16 @@ export class TuyaConnectionService {
   // User-visible outage tracking: one notification after a sustained outage, then optional recovery.
   private outageId: string | null = null;
   private outageNotificationSent = false;
-  private outageNotificationInProgress = false;
+
+  // Public status follows confirmed data recovery, independently of transport retries.
+  private publicConnected: boolean | null = null;
+  private publicAvailabilityApplied = false;
+  private publicStatusChangedAt = Date.now();
+  private publicOutageStartedAt = 0;
+  private publicRecoveryAttempts = 0;
+  private publicOutageTimer: NodeJS.Timeout | null = null;
+  private publicStatusWrites: Promise<void> = Promise.resolve();
+  private publicStatusDestroyed = false;
 
   // Intervals
   private reconnectInterval: NodeJS.Timeout | null = null;
@@ -132,8 +141,6 @@ export class TuyaConnectionService {
   private lastDataEventReceived = 0;
   private lastDataEventSource: Exclude<TelemetryResponsePath, 'none'> | null = null;
   private lastSuccessfulRequestAt = 0;
-  private lastNotificationTime: number = 0;
-  private lastNotificationKey: string | null = null;
 
   // Connection health tracking (v0.99.98)
   private lastDataEventTime: number = Date.now();
@@ -233,6 +240,13 @@ export class TuyaConnectionService {
         } else {
           this.logger(`TuyaConnectionService: Stored timestamp too old (${Math.round(daysSinceLastConnection)} days), using current time`);
         }
+      }
+
+      const publicStatus = this.device.getCapabilityValue('adlar_connection_active');
+      if (typeof publicStatus === 'boolean') {
+        this.publicConnected = publicStatus;
+        const publicTimestamp = await this.device.getStoreValue('public_connection_timestamp');
+        if (typeof publicTimestamp === 'number') this.publicStatusChangedAt = publicTimestamp;
       }
 
       // Initialize daily disconnect counter from store (vNext)
@@ -373,6 +387,9 @@ export class TuyaConnectionService {
       return;
     }
 
+    this.beginPublicOutage();
+    this.publicRecoveryAttempts += 1;
+
     // v1.3.8 CRITICAL FIX: Recreate TuyAPI instance if null
     // Fixes v1.0.36 regression where disconnect() sets tuya=null but reconnection fails
     // because connectTuya() would return early without recreating the instance
@@ -503,14 +520,6 @@ export class TuyaConnectionService {
       // Notify error handler
       if (this.onErrorHandler) {
         this.onErrorHandler(categorizedError);
-      }
-
-      // Send user notification for non-recoverable errors
-      if (!categorizedError.recoverable) {
-        await this.sendCriticalNotification(
-          'Device Connection Failed',
-          categorizedError.userMessage,
-        );
       }
 
       throw categorizedError;
@@ -757,16 +766,18 @@ export class TuyaConnectionService {
    * @returns Formatted status string with timestamp in local timezone
    */
   getFormattedConnectionStatus(): string {
+    let displayStatus = 'initializing';
+    if (this.publicConnected !== null) displayStatus = this.publicConnected ? 'connected' : 'disconnected';
     // Get localized status label
-    const statusLabel = this.device.homey.__(`connection_status.${this.currentStatus}`);
+    const statusLabel = this.device.homey.__(`connection_status.${displayStatus}`);
 
     // Add context for outage duration and next reconnection time (v1.0.5, enhanced v1.0.6)
     let contextInfo = '';
     const now = Date.now();
 
     // Show outage duration for disconnected/error states
-    if ((this.currentStatus === 'disconnected' || this.currentStatus === 'error') && this.outageStartTime > 0) {
-      const outageMinutes = Math.floor((now - this.outageStartTime) / 60000);
+    if (displayStatus === 'disconnected' && this.publicOutageStartedAt > 0) {
+      const outageMinutes = Math.floor((now - this.publicOutageStartedAt) / 60000);
       contextInfo = ` [${outageMinutes} min`;
 
       // Add next reconnection time if scheduled
@@ -775,21 +786,10 @@ export class TuyaConnectionService {
         contextInfo += `, retry in ${this.formatTimeInterval(secondsUntilRetry)}`;
       }
       contextInfo += ']';
-    } else if (this.currentStatus === 'reconnecting') {
-      // Show countdown for reconnecting state
-      if (this.circuitBreakerOpen) {
-        const remainingCooldown = Math.ceil(
-          (this.circuitBreakerResetTime - (now - this.circuitBreakerOpenTime)) / 1000,
-        );
-        contextInfo = ` [retry in ${this.formatTimeInterval(remainingCooldown)}]`;
-      } else if (this.nextReconnectionTime > now) {
-        const secondsUntilRetry = Math.ceil((this.nextReconnectionTime - now) / 1000);
-        contextInfo = ` [retry in ${this.formatTimeInterval(secondsUntilRetry)}]`;
-      }
     }
 
     // Create timestamp in local timezone (not UTC)
-    const timestamp = new Date(this.lastStatusChangeTime);
+    const timestamp = new Date(this.publicStatusChangedAt);
     const nowDate = new Date();
 
     // Get Homey's configured timezone (fallback to auto-detection)
@@ -848,6 +848,8 @@ export class TuyaConnectionService {
    * @param newStatus - The new connection status
    */
   private async updateStatusTimestamp(newStatus: 'connected' | 'disconnected' | 'reconnecting' | 'error'): Promise<void> {
+    if (newStatus !== 'connected') this.beginPublicOutage();
+
     // Only update timestamp if status actually changed
     if (this.currentStatus === newStatus) {
       // Status unchanged - preserve existing timestamp (important for app updates)
@@ -862,15 +864,6 @@ export class TuyaConnectionService {
     this.lastStatusChangeTime = Date.now();
 
     this.logger(`TuyaConnectionService: Status changed to ${newStatus}, updating timestamp`);
-
-    // Update boolean capability for insights tracking (v1.0.12)
-    const isConnected = (newStatus === 'connected');
-    try {
-      await this.device.setCapabilityValue('adlar_connection_active', isConnected);
-    } catch (error) {
-      this.logger(`TuyaConnectionService: Failed to update connection_active capability: ${error}`);
-      // Non-critical error, continue operation
-    }
 
     // Update disconnect source capability for timeline visibility (v1.0.37+)
     if (newStatus === 'disconnected' && this.lastDisconnectSource) {
@@ -905,6 +898,70 @@ export class TuyaConnectionService {
       this.logger(`TuyaConnectionService: Failed to persist connection state: ${error}`);
       // Non-critical error, continue operation
     }
+  }
+
+  /** Keep transient transport failures out of the user timeline and notifications. */
+  private beginPublicOutage(): void {
+    if (this.publicStatusDestroyed || this.publicOutageStartedAt > 0) return;
+    this.publicOutageStartedAt = Date.now();
+    this.publicRecoveryAttempts = 0;
+    const check = (): void => {
+      this.publicOutageTimer = null;
+      if (this.publicStatusDestroyed || this.publicOutageStartedAt === 0) return;
+      if (Date.now() - this.publicOutageStartedAt >= DeviceConstants.OUTAGE_NOTIFICATION_DELAY_MS
+        && this.publicRecoveryAttempts >= DeviceConstants.OUTAGE_MIN_RECOVERY_ATTEMPTS) {
+        this.publishPublicConnection(false);
+      }
+      this.publicOutageTimer = this.device.homey.setTimeout(check, DeviceConstants.RECONNECTION_INTERVAL_MS);
+    };
+    this.publicOutageTimer = this.device.homey.setTimeout(check, DeviceConstants.RECONNECTION_INTERVAL_MS);
+  }
+
+  /** A socket connect or heartbeat alone does not prove measurement exchange works. */
+  private confirmPublicRecovery(): void {
+    if (this.publicStatusDestroyed) return;
+    this.publicOutageStartedAt = 0;
+    this.publicRecoveryAttempts = 0;
+    if (this.publicOutageTimer) this.device.homey.clearTimeout(this.publicOutageTimer);
+    this.publicOutageTimer = null;
+    this.publishPublicConnection(true);
+  }
+
+  private publishPublicConnection(connected: boolean): void {
+    // Serialize writes so a slow outage publication cannot overwrite newer recovery.
+    this.publicStatusWrites = this.publicStatusWrites.then(async () => {
+      if (this.publicStatusDestroyed) return;
+      if (this.publicConnected === connected && this.publicAvailabilityApplied
+        && (connected ? !this.outageNotificationSent : this.outageNotificationSent)) return;
+      if (!connected && this.publicOutageStartedAt === 0) return;
+      if (connected && this.publicOutageStartedAt > 0) return;
+      if (this.publicConnected !== connected) {
+        await this.device.setCapabilityValue('adlar_connection_active', connected);
+        this.publicConnected = connected;
+        this.publicStatusChangedAt = Date.now();
+        await this.device.setStoreValue('public_connection_timestamp', this.publicStatusChangedAt).catch((error) => {
+          this.logger('TuyaConnectionService: Failed to persist public status timestamp:', error);
+        });
+      }
+      this.publicAvailabilityApplied = false;
+      if (connected) {
+        await this.device.setAvailable();
+        if (this.outageNotificationSent) {
+          const sent = await this.sendUserNotification('Verbinding Hersteld', 'Warmtepomp wisselt weer gegevens uit.');
+          if (sent) this.outageNotificationSent = false;
+        }
+      } else {
+        await this.device.setUnavailable('Heat pump disconnected - attempting reconnection...');
+        if (this.publicStatusDestroyed || this.publicOutageStartedAt === 0) return;
+        this.outageNotificationSent = await this.sendUserNotification(
+          'Extended Device Outage',
+          'Heat pump remains offline after repeated recovery attempts.',
+        );
+      }
+      this.publicAvailabilityApplied = true;
+    }).catch((error) => {
+      this.logger('TuyaConnectionService: Failed to publish confirmed connection status:', error);
+    });
   }
 
   private getTodayKeyInHomeyTimezone(): string {
@@ -1302,6 +1359,9 @@ export class TuyaConnectionService {
       // Track data event reception for zombie detection (v1.0.16)
       this.lastDataEventReceived = Date.now();
       this.lastDataEventSource = 'data';
+      if (data.dps && typeof data.dps === 'object' && Object.keys(data.dps).length > 0) {
+        this.confirmPublicRecovery();
+      }
       this.recordConnectionTelemetry((day) => {
         day.dataEvents += 1;
       });
@@ -1329,6 +1389,9 @@ export class TuyaConnectionService {
       this.lastDataEventTime = Date.now();
       this.lastDataEventReceived = Date.now();
       this.lastDataEventSource = 'dp_refresh';
+      if (data.dps && typeof data.dps === 'object' && Object.keys(data.dps).length > 0) {
+        this.confirmPublicRecovery();
+      }
       this.recordConnectionTelemetry((day) => {
         day.dpRefreshEvents += 1;
       });
@@ -2061,25 +2124,8 @@ export class TuyaConnectionService {
       }
     }
 
-    // User-visible outage notification: one alert only after a sustained, unresolved outage.
     if (this.outageStartTime > 0) {
       const outageDuration = Date.now() - this.outageStartTime;
-
-      if (outageDuration >= DeviceConstants.OUTAGE_NOTIFICATION_DELAY_MS
-        && !this.outageNotificationSent
-        && !this.outageNotificationInProgress) {
-        this.outageNotificationInProgress = true;
-        this.sendUserNotification(
-          'Extended Device Outage',
-          'Heat pump has been offline for 15 minutes. Automatic recovery is still in progress.',
-        ).then((sent) => {
-          this.outageNotificationSent = sent;
-        }).catch((error) => {
-          this.logger('TuyaConnectionService: Failed to send outage notification:', error);
-        }).finally(() => {
-          this.outageNotificationInProgress = false;
-        });
-      }
 
       // 1-hour diagnostic (logging only, no notification)
       const oneHour = 60 * 60 * 1000;
@@ -2239,14 +2285,6 @@ export class TuyaConnectionService {
       this.resetErrorRecoveryState();
       this.logger('TuyaConnectionService: Reconnection successful, error recovery state reset');
 
-      // Mark device as available again after successful reconnection
-      try {
-        await this.device.setAvailable();
-        this.logger('TuyaConnectionService: Device marked as available after successful reconnection');
-      } catch (err) {
-        this.logger('TuyaConnectionService: Failed to set device available:', err);
-      }
-
       await this.notifyRecoveryAndCompleteOutage();
 
       // CRITICAL FIX (v1.2.1): Restart health check loop after successful reconnection
@@ -2300,29 +2338,8 @@ export class TuyaConnectionService {
    * Enhanced with time-based notifications (v1.0.5 - notifications moved to scheduleNextReconnectionAttempt).
    */
   private async handleReconnectionFailureNotification(error: CategorizedError): Promise<void> {
-    // Mark device as unavailable for non-recoverable errors
-    if (!error.recoverable && this.consecutiveFailures <= 3) {
-      try {
-        await this.device.setUnavailable(`Connection failed: ${error.userMessage}`);
-        this.logger('TuyaConnectionService: Device marked as unavailable due to non-recoverable error');
-      } catch (err) {
-        this.logger('TuyaConnectionService: Failed to set device unavailable:', err);
-      }
-      return;
-    }
-
-    // Mark device as unavailable after initial failure threshold
-    if (this.consecutiveFailures === DeviceConstants.MAX_CONSECUTIVE_FAILURES) {
-      try {
-        await this.device.setUnavailable('Heat pump disconnected - attempting reconnection...');
-        this.logger('TuyaConnectionService: Device marked as unavailable after connection loss');
-      } catch (err) {
-        this.logger('TuyaConnectionService: Failed to set device unavailable:', err);
-      }
-    }
-
-    // Time-based user notifications are handled in scheduleNextReconnectionAttempt():
-    // one alert after a 15-minute unresolved outage, plus recovery only if that alert was sent.
+    this.logger('TuyaConnectionService: Recovery attempt failed:', error.userMessage);
+    this.beginPublicOutage();
   }
 
   /**
@@ -2343,15 +2360,8 @@ export class TuyaConnectionService {
     this.passiveReconnectionAttempts = 0;
   }
 
-  /** Finish a user-visible outage only after a successful reconnection. */
+  /** Finish transport diagnostics; public recovery requires a valid data event. */
   private async notifyRecoveryAndCompleteOutage(): Promise<void> {
-    if (this.outageNotificationSent) {
-      await this.sendUserNotification(
-        'Verbinding Hersteld',
-        'Warmtepomp is weer online na een langdurige verbindingsstoring.',
-      );
-    }
-
     if (this.telemetryIncidentStartedAt > 0) {
       const recoveryDuration = Date.now() - this.telemetryIncidentStartedAt;
       this.recordConnectionTelemetry((day) => {
@@ -2366,8 +2376,6 @@ export class TuyaConnectionService {
     this.outageStartTime = 0;
     this.totalOutageDuration = 0;
     this.outageId = null;
-    this.outageNotificationSent = false;
-    this.outageNotificationInProgress = false;
   }
 
   /**
@@ -2408,30 +2416,6 @@ export class TuyaConnectionService {
     } catch (error) {
       this.logger(`Failed to send user notification (${title}):`, error);
       return false;
-    }
-  }
-
-  /**
-   * Send a device-level critical notification with anti-spam throttling.
-   */
-  private async sendCriticalNotification(title: string, message: string) {
-    const now = Date.now();
-    const notificationKey = `${title}:${message}`;
-
-    // Prevent spam - only send notifications every 30 minutes for the same device
-    // Also prevent duplicate notifications within 5 seconds (for duplicate events)
-    if (now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_THROTTLE_MS
-      || (this.lastNotificationKey !== notificationKey && now - this.lastNotificationTime > DeviceConstants.NOTIFICATION_KEY_CHANGE_THRESHOLD_MS)) {
-      try {
-        await this.device.homey.notifications.createNotification({
-          excerpt: `${this.device.getName()}: ${title}`,
-        });
-        this.lastNotificationTime = now;
-        this.lastNotificationKey = notificationKey;
-        this.logger(`Critical notification sent: ${title}`);
-      } catch (err) {
-        this.logger('Failed to send notification:', err);
-      }
     }
   }
 
@@ -2521,6 +2505,9 @@ export class TuyaConnectionService {
    */
   destroy(): void {
     this.logger('TuyaConnectionService: Destroying service');
+    this.publicStatusDestroyed = true;
+    if (this.publicOutageTimer) this.device.homey.clearTimeout(this.publicOutageTimer);
+    this.publicOutageTimer = null;
 
     this.stopReconnectInterval();
     this.stopHeartbeat();

@@ -14,6 +14,9 @@ export class DeviceConstants {
   /** Notify the user only after an outage has remained unresolved for this duration */
   static readonly OUTAGE_NOTIFICATION_DELAY_MS = 15 * 60 * 1000; // 15 minutes
 
+  /** Minimum connection attempts before an unresolved outage becomes user-visible */
+  static readonly OUTAGE_MIN_RECOVERY_ATTEMPTS = 3;
+
   /** Tuya device reconnection attempt interval */
   static readonly RECONNECTION_INTERVAL_MS = 20 * 1000; // 20 seconds
 

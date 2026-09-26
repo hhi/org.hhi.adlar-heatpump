@@ -3247,14 +3247,8 @@ class MyDevice extends Homey.Device {
         const formattedStatus = tuyaService.getFormattedConnectionStatus();
         await this.setCapabilityValue('adlar_connection_status', formattedStatus);
 
-        if (this.hasCapability('adlar_connection_active')) {
-          const isConnected = tuyaService.isDeviceConnected();
-          const currentValue = this.getCapabilityValue('adlar_connection_active');
-          if (currentValue !== isConnected) {
-            await this.setCapabilityValue('adlar_connection_active', isConnected);
-            this.debugLog(`Synchronized adlar_connection_active: ${isConnected}`);
-          }
-        }
+        // TuyaConnectionService alone publishes confirmed connection state.
+
       }
     } catch (error) {
       this.error('Failed to update connection status capability:', error);
@@ -3346,8 +3340,6 @@ class MyDevice extends Homey.Device {
    */
   async onInit() {
     try {
-      await this.setUnavailable(); // Set the device as unavailable initially
-
       // Initialize structured logger with user-configurable log level (v2.1.0)
       // CRITICAL: Use super.log/super.error to avoid infinite recursion
       const logLevelSetting = this.getSetting('log_level') || 'error';
@@ -3819,27 +3811,6 @@ class MyDevice extends Homey.Device {
         }
       }
 
-      // Always synchronize connection boolean with status string (v1.0.14 fix)
-      // This ensures correct state even if capability was added in previous version
-      if (this.hasCapability('adlar_connection_active')) {
-        try {
-          const currentStatus = this.getCapabilityValue('adlar_connection_status') as string || '';
-          const isCurrentlyConnected = currentStatus.toLowerCase().includes('connected')
-            || currentStatus.toLowerCase().includes('verbonden');
-          const currentBooleanValue = this.getCapabilityValue('adlar_connection_active');
-
-          // Only update if out of sync
-          if (currentBooleanValue !== isCurrentlyConnected) {
-            await this.setCapabilityValue('adlar_connection_active', isCurrentlyConnected);
-            this.log(`🔄 Synchronized connection boolean: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'} (was: ${currentBooleanValue}, status: "${currentStatus}")`);
-          } else {
-            this.log(`✓ Connection boolean already synchronized: ${isCurrentlyConnected ? 'Connected' : 'Disconnected'}`);
-          }
-        } catch (error) {
-          this.error('Failed to synchronize connection_active capability:', error);
-        }
-      }
-
       const { manifest } = Homey;
       const myDriver = manifest.drivers[0];
       // this.log('MyDevice overview:', myDriver);
@@ -4080,9 +4051,8 @@ class MyDevice extends Homey.Device {
         this.logger.warn('Failed to populate info settings:', error);
       }
 
-      // Set device as available after successful initialization
-      await this.setAvailable();
-      this.log('✅ Device initialization completed - device is now available in Homey');
+      // Availability is published by TuyaConnectionService after data confirmation.
+      this.log('✅ Device initialization completed');
 
     } catch (error) {
       this.error('❌ Critical error during device initialization:', error);
@@ -4198,7 +4168,6 @@ class MyDevice extends Homey.Device {
           await this.serviceCoordinator.getTuyaConnection()?.reinitialize(newConfig);
 
           this.log('✅ Device repaired successfully - reconnected with new credentials');
-          await this.setAvailable();
 
           return `Device repaired successfully!\n\nNew credentials active:\n- Device ID: ${newConfig.id}\n- IP Address: ${newConfig.ip}\n- Protocol: ${newConfig.version}\n\nConnection established.`;
 
