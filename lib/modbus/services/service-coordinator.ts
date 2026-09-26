@@ -691,9 +691,9 @@ export class ServiceCoordinator {
 
     this._setConnectionQuality('online');
 
-    if (!this._visibleConnectionConnected) {
-      this._setConnectionCapabilities(true, null);
-    }
+    // Homey may retain an offline status across app restarts even though the
+    // new coordinator's visibility flag starts as true. Sync on proven recovery.
+    this._setConnectionCapabilities(true, null);
 
     if (!this._structurallyUnsupportedFast) {
       this.device.setAvailable().catch(() => {});

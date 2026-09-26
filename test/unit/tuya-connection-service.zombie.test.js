@@ -276,3 +276,138 @@ describe('Meetbaarheid — de zombie-teller landt in een capability', () => {
     assert.strictEqual(service.testDevice.written.size, 0);
   });
 });
+
+describe('Publieke verbindingsstatus — alleen aanhoudende uitval', () => {
+  function publicService() {
+    const tuya = new FakeTuya();
+    const service = makeService(tuya);
+    const events = [];
+    const timers = new Map();
+    let timerId = 0;
+    const device = service.testDevice;
+    device.setCapabilityValue = async (id, value) => {
+      if (id === 'adlar_connection_active') events.push(value);
+    };
+    device.setAvailable = async () => { events.push('available'); };
+    device.setUnavailable = async () => { events.push('unavailable'); };
+    device.homey.notifications = {
+      createNotification: async ({ excerpt }) => { events.push(excerpt); },
+    };
+    device.homey.setTimeout = (fn) => { timers.set(++timerId, fn); return timerId; };
+    device.homey.clearTimeout = (id) => timers.delete(id);
+    service.publicConnected = true;
+    service.publicAvailabilityApplied = true;
+    service.currentStatus = 'connected';
+    const check = async () => {
+      const id = service.publicOutageTimer;
+      const callback = timers.get(id);
+      timers.delete(id);
+      callback();
+      await service.publicStatusWrites;
+    };
+    return { service, tuya, events, timers, check };
+  }
+
+  test('korte uitval en herstel bij poging 3 blijven stil', async () => {
+    const { service, tuya, events } = publicService();
+    await service.updateStatusTimestamp('disconnected');
+    service.publicRecoveryAttempts = 3;
+    await service.updateStatusTimestamp('connected');
+    tuya.emit('data', { dps: { 1: true } });
+    await service.publicStatusWrites;
+    assert.deepStrictEqual(events, []);
+    assert.strictEqual(service.publicOutageTimer, null);
+  });
+
+  test('15 minuten alleen is onvoldoende; minstens drie pogingen vereist', async () => {
+    const { service, events, check } = publicService();
+    await service.updateStatusTimestamp('error');
+    service.publicOutageStartedAt = Date.now() - 16 * 60 * 1000;
+    service.publicRecoveryAttempts = 2;
+    await check();
+    assert.deepStrictEqual(events, []);
+    service.publicRecoveryAttempts = 3;
+    await check();
+    assert.strictEqual(events[0], false);
+    assert.strictEqual(events[1], 'unavailable');
+    assert.strictEqual(events.length, 3);
+    await check();
+    assert.strictEqual(events.length, 3, 'geen dubbele melding');
+  });
+
+  test('drie pogingen voor de tijdgrens geven geen melding', async () => {
+    const { service, events, check } = publicService();
+    await service.updateStatusTimestamp('disconnected');
+    service.publicRecoveryAttempts = 3;
+    await check();
+    assert.deepStrictEqual(events, []);
+  });
+
+  test('socketstatus, heartbeat en lege data beëindigen een gemelde uitval niet', async () => {
+    const { service, tuya, events, check } = publicService();
+    await service.updateStatusTimestamp('disconnected');
+    service.publicOutageStartedAt = Date.now() - 16 * 60 * 1000;
+    service.publicRecoveryAttempts = 3;
+    await check();
+    await service.updateStatusTimestamp('connected');
+    await service.notifyRecoveryAndCompleteOutage();
+    tuya.emit('heartbeat');
+    tuya.emit('data', { dps: {} });
+    await service.publicStatusWrites;
+    assert.strictEqual(events.length, 3);
+    tuya.emit('dp-refresh', { dps: { 1: true } });
+    await service.publicStatusWrites;
+    assert.strictEqual(events[3], true);
+    assert.strictEqual(events[4], 'available');
+    assert.match(events[5], /Verbinding Hersteld/);
+    tuya.emit('data', { dps: { 1: true } });
+    await service.publicStatusWrites;
+    assert.strictEqual(events.length, 6);
+  });
+
+  test('herstel annuleert een nog niet gepubliceerde disconnect', async () => {
+    const { service, tuya, events } = publicService();
+    await service.updateStatusTimestamp('disconnected');
+    service.publishPublicConnection(false);
+    tuya.emit('data', { dps: { 1: true } });
+    await service.publicStatusWrites;
+    assert.deepStrictEqual(events, []);
+  });
+
+  test('verbindingspogingen worden geteld en gegevensherstel begint een nieuw incident', async () => {
+    const { service, tuya } = publicService();
+    service.tuya = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await assert.rejects(service.connectTuya(), /config not initialized/);
+    }
+    assert.strictEqual(service.publicRecoveryAttempts, 3);
+    tuya.emit('data', { dps: { 1: true } });
+    await service.publicStatusWrites;
+    assert.strictEqual(service.publicRecoveryAttempts, 0);
+    assert.strictEqual(service.publicOutageStartedAt, 0);
+    await assert.rejects(service.connectTuya(), /config not initialized/);
+    assert.strictEqual(service.publicRecoveryAttempts, 1);
+  });
+
+  test('een opgeslagen offline-status onderdrukt een nieuwe storingsmelding niet', async () => {
+    const { service, events, check } = publicService();
+    service.publicConnected = false;
+    await service.updateStatusTimestamp('disconnected');
+    service.publicOutageStartedAt = Date.now() - 16 * 60 * 1000;
+    service.publicRecoveryAttempts = 3;
+    await check();
+    assert.deepStrictEqual(events.slice(0, 1), ['unavailable']);
+    assert.match(events[1], /Extended Device Outage/);
+  });
+
+  test('destroy ruimt de timer op en blokkeert late publicaties', async () => {
+    const { service, events, timers } = publicService();
+    await service.updateStatusTimestamp('disconnected');
+    const timer = service.publicOutageTimer;
+    service.publishPublicConnection(false);
+    service.destroy();
+    await service.publicStatusWrites;
+    assert.strictEqual(timers.has(timer), false);
+    assert.deepStrictEqual(events, []);
+  });
+});

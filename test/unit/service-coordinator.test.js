@@ -75,149 +75,163 @@ test('ADR-061: ServiceCoordinator.destroy awaits AdaptiveControlService.destroy'
   assert.ok(calls.indexOf('adaptive-done') < calls.indexOf('modbus'), 'modbus cleanup runs after adaptive cleanup');
 });
 
-test('poll timeout marks Homey connection visibly offline without socket disconnect and recovers on snapshot', () => {
-  let degradedTimeout;
-  const capabilityWrites = [];
-  const unavailableReasons = [];
-  const availableCalls = [];
-  const warningWrites = [];
-  const appliedSnapshots = [];
-  const connectionStates = [];
-  const reconnectReasons = [];
-  const restoreCalls = [];
-  const order = [];
-  const coordinator = Object.create(ServiceCoordinator.prototype);
+for (const restart of [false, true]) {
+  test(`poll timeout recovers on snapshot ${restart ? 'after app restart' : 'within the same session'}`, () => {
+    let degradedTimeout;
+    const capabilityWrites = [];
+    const unavailableReasons = [];
+    const availableCalls = [];
+    const warningWrites = [];
+    const appliedSnapshots = [];
+    const connectionStates = [];
+    const reconnectReasons = [];
+    const restoreCalls = [];
+    const order = [];
+    const coordinator = Object.create(ServiceCoordinator.prototype);
 
-  coordinator.logger = () => {};
-  coordinator._connectionQuality = 'online';
-  coordinator._visibleConnectionConnected = true;
-  coordinator._degradedSinceTimer = null;
-  coordinator._lastDisconnectCountMs = 0;
-  coordinator._lastSuccessfulFastPollAt = null;
-  coordinator._lastErrorContext = null;
-  coordinator._consecutiveFastPollFailures = 0;
-  coordinator._consecutiveSuperfastPollFailures = 0;
-  coordinator._consecutiveNonFastRequiredFailures = 0;
-  coordinator._structurallyUnsupportedFast = false;
-  coordinator._errorCountByContext = new Map();
-  coordinator._prevDefrosting = false;
-  coordinator.snapshotTrigger = { detect: () => {} };
-  coordinator.capabilityHealth = { updateCapabilityHealth: () => {} };
-  coordinator.energyTracking = {
-    setConnectionState: async (connected) => {
-      connectionStates.push(connected);
-    },
-    updateIntelligentPowerMeasurement: async () => {},
-  };
-  coordinator.adaptiveControl = {
-    onConnectionRestored: () => {
-      restoreCalls.push(true);
-      order.push('restored');
-    },
-  };
-  coordinator.device = {
-    homey: {
-      setTimeout: (fn) => {
-        degradedTimeout = fn;
-        return 'degraded-timeout';
+    coordinator.logger = () => {};
+    coordinator._connectionQuality = 'online';
+    coordinator._visibleConnectionConnected = true;
+    coordinator._degradedSinceTimer = null;
+    coordinator._lastDisconnectCountMs = 0;
+    coordinator._lastSuccessfulFastPollAt = null;
+    coordinator._lastErrorContext = null;
+    coordinator._consecutiveFastPollFailures = 0;
+    coordinator._consecutiveSuperfastPollFailures = 0;
+    coordinator._consecutiveNonFastRequiredFailures = 0;
+    coordinator._structurallyUnsupportedFast = false;
+    coordinator._errorCountByContext = new Map();
+    coordinator._prevDefrosting = false;
+    coordinator.snapshotTrigger = { detect: () => {} };
+    coordinator.capabilityHealth = { updateCapabilityHealth: () => {} };
+    coordinator.energyTracking = {
+      setConnectionState: async (connected) => {
+        connectionStates.push(connected);
       },
-      clearTimeout: () => {},
-    },
-    hasCapability: () => true,
-    getCapabilityValue: (capability) => (capability === 'adlar_daily_disconnect_count' ? 0 : null),
-    setCapabilityValue: (capability, value) => {
-      capabilityWrites.push([capability, value]);
-      if (capability === 'adlar_connection_active' || capability === 'adlar_connection_status') {
-        order.push(`cap:${capability}:${value}`);
-      }
-      return Promise.resolve();
-    },
-    setWarning: (warning) => {
-      warningWrites.push(warning);
-      order.push(`warning:${warning}`);
-      return Promise.resolve();
-    },
-    setAvailable: () => {
-      availableCalls.push(true);
-      order.push('available');
-      return Promise.resolve();
-    },
-    setUnavailable: (reason) => {
-      unavailableReasons.push(reason);
-      return Promise.resolve();
-    },
-    applyModbusSnapshot: (snapshot) => {
-      appliedSnapshots.push(snapshot);
-      order.push('snapshot');
-    },
-  };
-  coordinator.modbusConnection = {
-    forceReconnect: async (reason) => {
-      reconnectReasons.push(reason);
-    },
-  };
+      updateIntelligentPowerMeasurement: async () => {},
+    };
+    coordinator.adaptiveControl = {
+      onConnectionRestored: () => {
+        restoreCalls.push(true);
+        order.push('restored');
+      },
+    };
+    coordinator.device = {
+      homey: {
+        setTimeout: (fn) => {
+          degradedTimeout = fn;
+          return 'degraded-timeout';
+        },
+        clearTimeout: () => {},
+      },
+      hasCapability: () => true,
+      getCapabilityValue: (capability) => (capability === 'adlar_daily_disconnect_count' ? 0 : null),
+      setCapabilityValue: (capability, value) => {
+        capabilityWrites.push([capability, value]);
+        if (capability === 'adlar_connection_active' || capability === 'adlar_connection_status') {
+          order.push(`cap:${capability}:${value}`);
+        }
+        return Promise.resolve();
+      },
+      setWarning: (warning) => {
+        warningWrites.push(warning);
+        order.push(`warning:${warning}`);
+        return Promise.resolve();
+      },
+      setAvailable: () => {
+        availableCalls.push(true);
+        order.push('available');
+        return Promise.resolve();
+      },
+      setUnavailable: (reason) => {
+        unavailableReasons.push(reason);
+        return Promise.resolve();
+      },
+      applyModbusSnapshot: (snapshot) => {
+        appliedSnapshots.push(snapshot);
+        order.push('snapshot');
+      },
+    };
+    coordinator.modbusConnection = {
+      forceReconnect: async (reason) => {
+        reconnectReasons.push(reason);
+      },
+    };
 
-  coordinator._setConnectionQuality('degraded');
-  assert.strictEqual(typeof degradedTimeout, 'function', 'degraded timer is scheduled');
+    coordinator._setConnectionQuality('degraded');
+    assert.strictEqual(typeof degradedTimeout, 'function', 'degraded timer is scheduled');
 
-  degradedTimeout();
+    degradedTimeout();
 
-  assert.strictEqual(coordinator._connectionQuality, 'offline');
-  assert.deepStrictEqual(
-    capabilityWrites.find(([capability]) => capability === 'adlar_connection_active'),
-    ['adlar_connection_active', false],
-  );
-  assert.ok(
-    capabilityWrites.some(([capability, value]) => capability === 'adlar_connection_status' && String(value).includes('poll timeout')),
-    'connection status includes poll timeout reason',
-  );
-  assert.deepStrictEqual(
-    capabilityWrites.find(([capability]) => capability === 'adlar_daily_disconnect_count'),
-    ['adlar_daily_disconnect_count', 1],
-  );
-  assert.deepStrictEqual(unavailableReasons, ['Modbus reageert niet op polling']);
-  assert.deepStrictEqual(reconnectReasons, ['poll timeout']);
+    assert.strictEqual(coordinator._connectionQuality, 'offline');
+    assert.deepStrictEqual(
+      capabilityWrites.find(([capability]) => capability === 'adlar_connection_active'),
+      ['adlar_connection_active', false],
+    );
+    assert.ok(
+      capabilityWrites.some(([capability, value]) => capability === 'adlar_connection_status' && String(value).includes('poll timeout')),
+      'connection status includes poll timeout reason',
+    );
+    assert.deepStrictEqual(
+      capabilityWrites.find(([capability]) => capability === 'adlar_daily_disconnect_count'),
+      ['adlar_daily_disconnect_count', 1],
+    );
+    assert.deepStrictEqual(unavailableReasons, ['Modbus reageert niet op polling']);
+    assert.deepStrictEqual(reconnectReasons, ['poll timeout']);
 
-  coordinator._handleModbusData({
-    sourcePollGroup: 'fast',
-    sensors: {
-      outletT7: { value: 30 },
-      inletT6: { value: 27 },
-      ambientT1: { value: 8 },
-    },
-    power: {
-      inputPowerKw: 1.2,
-    },
-    control: {
-      on: true,
-    },
-    status: {
-      defrosting: false,
-      activeFaults: [],
-    },
+    if (restart) {
+      // A new coordinator starts with these values, while Homey retains the
+      // previously written Disconnected (poll timeout) capabilities.
+      coordinator._connectionQuality = 'offline';
+      coordinator._visibleConnectionConnected = true;
+      coordinator._disconnectStatusTimer = null;
+      coordinator.serviceHealth = new Map();
+      const writesBeforeConnect = capabilityWrites.length;
+      coordinator._handleConnected();
+      assert.strictEqual(capabilityWrites.length, writesBeforeConnect, 'TCP connect alone must not clear the old status');
+    }
+
+    coordinator._handleModbusData({
+      sourcePollGroup: 'fast',
+      sensors: {
+        outletT7: { value: 30 },
+        inletT6: { value: 27 },
+        ambientT1: { value: 8 },
+      },
+      power: {
+        inputPowerKw: 1.2,
+      },
+      control: {
+        on: true,
+      },
+      status: {
+        defrosting: false,
+        activeFaults: [],
+      },
+    });
+
+    assert.strictEqual(coordinator._connectionQuality, 'online');
+    assert.ok(availableCalls.length >= 1, 'poll recovery must make the Homey device available again');
+    assert.ok(warningWrites.includes(null), 'poll recovery clears the Modbus warning');
+    assert.deepStrictEqual(
+      capabilityWrites.filter(([capability]) => capability === 'adlar_connection_active').at(-1),
+      ['adlar_connection_active', true],
+    );
+    assert.ok(
+      capabilityWrites.some(([capability, value]) => capability === 'adlar_connection_status' && String(value).startsWith('Connected:')),
+      'connection status is restored to Connected',
+    );
+    assert.strictEqual(appliedSnapshots.length, 1, 'snapshot is still forwarded after recovery');
+    assert.deepStrictEqual(connectionStates, [true]);
+    assert.deepStrictEqual(restoreCalls, [true]);
+    assert.ok(order.indexOf('available') !== -1 && order.indexOf('available') < order.indexOf('snapshot'), 'availability is restored before values are applied');
+    assert.ok(order.some((entry) => entry.startsWith('cap:adlar_connection_active:true')), 'connection capability is restored before snapshot');
+    assert.ok(
+      order.findIndex((entry) => entry.startsWith('cap:adlar_connection_active:true')) < order.indexOf('snapshot'),
+      'connection capability is restored before values are applied',
+    );
   });
-
-  assert.strictEqual(coordinator._connectionQuality, 'online');
-  assert.ok(availableCalls.length >= 1, 'poll recovery must make the Homey device available again');
-  assert.ok(warningWrites.includes(null), 'poll recovery clears the Modbus warning');
-  assert.deepStrictEqual(
-    capabilityWrites.filter(([capability]) => capability === 'adlar_connection_active').at(-1),
-    ['adlar_connection_active', true],
-  );
-  assert.ok(
-    capabilityWrites.some(([capability, value]) => capability === 'adlar_connection_status' && String(value).startsWith('Connected:')),
-    'connection status is restored to Connected',
-  );
-  assert.strictEqual(appliedSnapshots.length, 1, 'snapshot is still forwarded after recovery');
-  assert.deepStrictEqual(connectionStates, [true]);
-  assert.deepStrictEqual(restoreCalls, [true]);
-  assert.ok(order.indexOf('available') !== -1 && order.indexOf('available') < order.indexOf('snapshot'), 'availability is restored before values are applied');
-  assert.ok(order.some((entry) => entry.startsWith('cap:adlar_connection_active:true')), 'connection capability is restored before snapshot');
-  assert.ok(
-    order.findIndex((entry) => entry.startsWith('cap:adlar_connection_active:true')) < order.indexOf('snapshot'),
-    'connection capability is restored before values are applied',
-  );
-});
+}
 
 test('TCP reconnect does not mark Homey visibly connected before a valid Modbus snapshot', () => {
   const capabilityWrites = [];
