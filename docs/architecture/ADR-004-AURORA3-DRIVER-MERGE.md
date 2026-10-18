@@ -1,10 +1,10 @@
 # ADR-004 — Aurora III Modbus-driver integreren in org.hhi.adlar-heatpump
 
-- **Status**: Voorgesteld — wacht op besluiten O1 t/m O9
-- **Datum**: 2026-10-17
-- **Doelversie**: 3.2.0 (voorstel, zie O5)
+- **Status**: Aanvaard — besluiten O1 t/m O9 genomen op 2026-10-18
+- **Datum**: 2026-10-17 (voorstel), 2026-10-18 (besluit)
+- **Doelversie**: 3.2.0
 - **Bron-app**: `org.hhi.adlar3-heatpump-modbus` v1.9.4
-- **Doel-app**: `org.hhi.adlar-heatpump` v3.1.3
+- **Doel-app**: `org.hhi.adlar-heatpump` v3.1.3 (gemeten); uitvoering start op v3.1.4
 - **Voorganger**: [ADR-001](ADR-001-MODBUS-DRIVER-MERGE.md) (Aurora II Modbus, v3.0.0)
 - **Uitvoeringsplan**: [IMPLEMENTATIEPLAN-AURORA3.md](IMPLEMENTATIEPLAN-AURORA3.md)
 
@@ -248,8 +248,8 @@ aantal open poorten verdubbelt en de dashboardgids moet dat vermelden.
 moet `adlar_mode_aurora3` in de groep *Status* staan, anders valt hij stil in de restgroep.
 Dat dit risico reëel is, blijkt uit de Aurora II-versie: die noemt nog
 `adlar_enum_work_mode`, `adlar_enum_capacity_set` en `adlar_state_backwater`, ID's die in
-v3.0.0 naar `_modbus` zijn hernoemd. Die drie staan op het Aurora II-dashboard dus al in de
-verkeerde groep (bestaand, cosmetisch, buiten scope).
+v3.0.0 naar `_modbus` zijn hernoemd. Die drie stonden op het Aurora II-dashboard dus in de
+verkeerde groep; hersteld in v3.1.4.
 
 **Widget.** Beide repo's hebben widget-ID `adlar-live-operation` met identieke `api.js`,
 maar:
@@ -447,9 +447,12 @@ Eenmalige harde migratie (§8).
 - `scripts/check-capability-ownership.js` (ADR-001 §4) wordt bij drie drivers een
   noodzaak: 62 capability-definities worden straks door drie drivers gedeeld
 
-## Openstaande besluiten
+## Besluiten
 
-| # | Vraag | Voorstel |
+Alle negen voorstellen zijn op 2026-10-18 ongewijzigd aanvaard. Uitvoering per fase volgens
+het [implementatieplan](IMPLEMENTATIEPLAN-AURORA3.md); V4 blijft open tot fase 1b.
+
+| # | Vraag | Besluit |
 |---|---|---|
 | **O1** | Driver-ID | `intelligent-heatpump-aurora3` |
 | **O2** | Suffix voor gesplitste kaarten en capabilities | `_aurora3` |
