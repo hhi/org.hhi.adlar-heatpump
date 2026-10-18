@@ -15,11 +15,16 @@ API TUYA LOCAL
 - Utilisez ce pilote pour une pompe à chaleur connectée en Wi-Fi
 
 PASSERELLE MODBUS TCP
-- Sélectionnez "Adlar Castra Aurora Heat Pump (Modbus)"
+- Sélectionnez "Adlar Castra Aurora II Heat Pump (Modbus)" ou "Adlar Castra
+  Aurora III Heat Pump (Modbus)", selon le modèle indiqué sur la plaque
+  signalétique
 - Nécessite une connexion RS485/Modbus et une passerelle Modbus TCP accessible,
   telle qu'une Elfin EW11A
 - Saisissez l'adresse IP de la passerelle, le port TCP et l'ID d'unité Modbus
 - Les valeurs habituelles sont le port 502 et l'ID d'unité 1
+- Réglages série de la passerelle : 9600 8N1 pour Aurora II, 9600 8N2 pour
+  Aurora III
+- Tableaux de bord locaux : port 8090 (Aurora II) et 8091 (Aurora III)
 
 FONCTIONNALITÉS PRINCIPALES
 - Températures locales, état de fonctionnement, dégivrage, antigel,
@@ -40,8 +45,8 @@ IMPORTANT
 - Les outils d'écriture Modbus avancés peuvent modifier le comportement de la
   pompe à chaleur. Utilisez-les uniquement si vous connaissez le registre et
   avez noté sa valeur d'origine.
-- Le pilote Modbus cible la carte de registres R32 et avertit pour les autres
-  fluides frigorigènes.
+- Le pilote Aurora II cible la carte de registres R32 et avertit pour les
+  autres fluides frigorigènes.
 - Le COP peut être indisponible ou moins précis si les données de puissance ou
   de débit exploitables manquent.
 - Un bail DHCP fixe ou une adresse IP statique pour la pompe à chaleur ou la

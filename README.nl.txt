@@ -15,11 +15,15 @@ TUYA LOCAL API
 - Gebruik deze driver voor een warmtepomp met wifi-verbinding
 
 MODBUS TCP-GATEWAY
-- Kies "Adlar Castra Aurora Heat Pump (Modbus)"
+- Kies "Adlar Castra Aurora II Heat Pump (Modbus)" of "Adlar Castra Aurora III
+  Heat Pump (Modbus)", passend bij het model op het typeplaatje
 - Vereist een RS485/Modbus-aansluiting en een bereikbare Modbus TCP-gateway,
   zoals een Elfin EW11A
 - Voer het IP-adres van de gateway, de TCP-poort en de Modbus Unit ID in
 - De gebruikelijke standaardwaarden zijn poort 502 en Unit ID 1
+- Seriële instellingen van de gateway: 9600 8N1 voor Aurora II, 9600 8N2 voor
+  Aurora III
+- Lokale dashboards: poort 8090 (Aurora II) en 8091 (Aurora III)
 
 BELANGRIJKSTE FUNCTIES
 - Lokale temperaturen, bedrijfsstatus, ontdooien, antivries, sterilisatie en
@@ -40,8 +44,8 @@ BELANGRIJK
 - Geavanceerde Modbus-schrijftools kunnen het gedrag van de warmtepomp
   veranderen. Gebruik ze alleen als u het register kent en de oorspronkelijke
   waarde hebt genoteerd.
-- De Modbus-driver is gericht op de R32-registermap en waarschuwt bij andere
-  koudemiddelen.
+- De Aurora II-driver is gericht op de R32-registermap en waarschuwt bij
+  andere koudemiddelen.
 - De COP kan ontbreken of minder nauwkeurig zijn als bruikbare vermogens- of
   flowgegevens ontbreken.
 - Een vaste DHCP-lease of een statisch IP-adres voor de warmtepomp of gateway

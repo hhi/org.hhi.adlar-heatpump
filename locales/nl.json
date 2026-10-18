@@ -8,6 +8,15 @@
       "ip_address": "IP-adres",
       "protocol_version": "Protocolversie",
       "continue": "Doorgaan"
+    },
+    "enter_modbus_info": {
+      "title": "Modbus-verbinding",
+      "description": "Voer het IP-adres en de poort van uw Elfin EW11A of Modbus TCP-gateway in",
+      "model_hint": "Kies de driver die past bij het model op het typeplaatje van uw warmtepomp (Aurora II of Aurora III).",
+      "host": "IP-adres:",
+      "port": "TCP-poort:",
+      "unit_id": "Modbus Unit-ID:",
+      "continue": "Doorgaan"
     }
   },
   "cop_method": {
@@ -83,6 +92,11 @@
     "blocked_no_cop": "Geen COP-meting",
     "period_night": "Nacht",
     "period_day": "Dag",
-    "period_evening": "Avond"
+    "period_evening": "Avond",
+    "blocked_dhw_active": "Tapwater verwarmen"
+  },
+  "errors": {
+    "zone_onoff_disabled": "Aan/uit via zoneregister 2101 is experimenteel. Schakel 'Aan/uit via zonebesturing (experimenteel)' in bij de apparaatinstellingen om dit te gebruiken.",
+    "silent_level2_r290_only": "Stille modus niveau 2 is alleen beschikbaar op R290-warmtepompen."
   }
 }
