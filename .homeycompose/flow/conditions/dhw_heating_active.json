@@ -1,0 +1,28 @@
+{
+  "id": "dhw_heating_active",
+  "title": {
+    "en": "Hot water is being heated",
+    "nl": "Tapwater wordt verwarmd",
+    "de": "Warmwasser wird bereitet",
+    "fr": "L'eau chaude est en chauffe"
+  },
+  "titleFormatted": {
+    "en": "Hot water !{{is|is not}} being heated",
+    "nl": "Tapwater wordt !{{wel|niet}} verwarmd",
+    "de": "Warmwasser !{{wird|wird nicht}} bereitet",
+    "fr": "L'eau chaude !{{est|n'est pas}} en chauffe"
+  },
+  "hint": {
+    "en": "Check if the heat pump is heating domestic hot water right now",
+    "nl": "Controleer of de warmtepomp op dit moment tapwater verwarmt",
+    "de": "Prüfen, ob die Wärmepumpe gerade Warmwasser bereitet",
+    "fr": "Vérifier si la pompe à chaleur chauffe actuellement l'eau chaude sanitaire"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    }
+  ]
+}

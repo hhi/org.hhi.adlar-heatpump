@@ -23,7 +23,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_monthly"
+      "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_cop_monthly"
     },
     {
       "type": "dropdown",

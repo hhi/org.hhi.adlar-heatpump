@@ -23,7 +23,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=energy_prices_data"
+      "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=energy_prices_data"
     }
   ],
   "tokens": [

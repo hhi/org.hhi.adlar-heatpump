@@ -1,0 +1,77 @@
+{
+  "id": "heating_mode_is_aurora3",
+  "title": {
+    "en": "Heating mode is",
+    "nl": "Verwarmingsmodus is",
+    "de": "Heizmodus ist",
+    "fr": "Le mode de chauffage est"
+  },
+  "titleFormatted": {
+    "en": "Heating mode !{{is|is not}} [[mode]]",
+    "nl": "Verwarmingsmodus !{{is|is niet}} [[mode]]",
+    "de": "Heizmodus !{{ist|ist nicht}} [[mode]]",
+    "fr": "Le mode de chauffage !{{est|n'est pas}} [[mode]]"
+  },
+  "hint": {
+    "en": "Check if the heating mode matches the selected mode",
+    "nl": "Controleer of de verwarmingsmodus overeenkomt met de geselecteerde modus",
+    "de": "Prüfen Sie, ob der Heizmodus mit dem ausgewählten Modus übereinstimmt",
+    "fr": "Vérifier si le mode de chauffage correspond au mode sélectionné"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    },
+    {
+      "type": "dropdown",
+      "name": "mode",
+      "title": {
+        "en": "Heating mode",
+        "nl": "Verwarmingsmodus",
+        "de": "Heizmodus",
+        "fr": "Mode de chauffage"
+      },
+      "values": [
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "nl": "Uit",
+            "de": "Aus",
+            "fr": "Arrêt"
+          }
+        },
+        {
+          "id": "cool",
+          "title": {
+            "en": "Cooling",
+            "nl": "Koeling",
+            "de": "Kühlen",
+            "fr": "Froid"
+          }
+        },
+        {
+          "id": "heat",
+          "title": {
+            "en": "Heating",
+            "nl": "Verwarmen",
+            "de": "Heizen",
+            "fr": "Chauffage"
+          }
+        },
+        {
+          "id": "auto",
+          "title": {
+            "en": "Auto",
+            "nl": "Auto",
+            "de": "Auto",
+            "fr": "Auto"
+          }
+        }
+      ]
+    }
+  ]
+}

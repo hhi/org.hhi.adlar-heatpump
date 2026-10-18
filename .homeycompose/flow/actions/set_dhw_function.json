@@ -1,0 +1,58 @@
+{
+  "id": "set_dhw_function",
+  "title": {
+    "en": "Switch hot water function",
+    "nl": "Tapwaterfunctie schakelen",
+    "de": "Warmwasserfunktion schalten",
+    "fr": "Commuter la fonction eau chaude"
+  },
+  "titleFormatted": {
+    "en": "Switch hot water function [[state]]",
+    "nl": "Tapwaterfunctie [[state]] schakelen",
+    "de": "Warmwasserfunktion [[state]] schalten",
+    "fr": "Commuter la fonction eau chaude sur [[state]]"
+  },
+  "hint": {
+    "en": "Switches domestic hot water heating on or off",
+    "nl": "Schakelt de tapwaterverwarming aan of uit",
+    "de": "Schaltet die Warmwasserbereitung ein oder aus",
+    "fr": "Active ou désactive la production d'eau chaude sanitaire"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    },
+    {
+      "type": "dropdown",
+      "name": "state",
+      "title": {
+        "en": "State",
+        "nl": "Stand",
+        "de": "Zustand",
+        "fr": "État"
+      },
+      "values": [
+        {
+          "id": "on",
+          "title": {
+            "en": "on",
+            "nl": "aan",
+            "de": "ein",
+            "fr": "marche"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "off",
+            "nl": "uit",
+            "de": "aus",
+            "fr": "arrêt"
+          }
+        }
+      ]
+    }
+  ]
+}

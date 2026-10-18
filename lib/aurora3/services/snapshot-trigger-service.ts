@@ -6,24 +6,24 @@ import { DataSnapshot } from '../protocol/adlar3-modbus-service';
 
 const MODE_OPTIONS: Record<number, string> = {
   0: 'Off',
-  1: 'Cool',
-  2: 'Heat',
+  1: 'Cooling',
+  2: 'Heating',
   4: 'Auto',
 };
 
 const CARD_PROFILES: Record<string, { threshold: number; stateField: string }> = {
-  ambient_temperature_changed: { threshold: 0.5, stateField: 'temperature' },
-  inlet_temperature_changed: { threshold: 0.5, stateField: 'temperature' },
-  outlet_temperature_changed: { threshold: 0.5, stateField: 'temperature' },
-  coiler_temperature_alert: { threshold: 2, stateField: 'temperature' },
-  tank_temperature_alert: { threshold: 2, stateField: 'temperature' },
-  suction_temperature_alert: { threshold: 2, stateField: 'temperature' },
-  discharge_temperature_alert: { threshold: 2, stateField: 'temperature' },
-  eev_pulse_steps_alert: { threshold: 20, stateField: 'pulse_steps' },
-  evi_pulse_steps_alert: { threshold: 20, stateField: 'pulse_steps' },
-  water_flow_alert: { threshold: 1, stateField: 'flow_rate' },
-  compressor_efficiency_alert: { threshold: 5, stateField: 'frequency' },
-  fan_motor_efficiency_alert: { threshold: 5, stateField: 'frequency' },
+  ambient_temperature_changed_aurora3: { threshold: 0.5, stateField: 'temperature' },
+  inlet_temperature_changed_aurora3: { threshold: 0.5, stateField: 'temperature' },
+  outlet_temperature_changed_aurora3: { threshold: 0.5, stateField: 'temperature' },
+  coiler_temperature_alert_aurora3: { threshold: 2, stateField: 'temperature' },
+  tank_temperature_alert_aurora3: { threshold: 2, stateField: 'temperature' },
+  suction_temperature_alert_aurora3: { threshold: 2, stateField: 'temperature' },
+  discharge_temperature_alert_aurora3: { threshold: 2, stateField: 'temperature' },
+  eev_pulse_steps_alert_aurora3: { threshold: 20, stateField: 'pulse_steps' },
+  evi_pulse_steps_alert_aurora3: { threshold: 20, stateField: 'pulse_steps' },
+  water_flow_alert_aurora3: { threshold: 1, stateField: 'flow_rate' },
+  compressor_efficiency_alert_aurora3: { threshold: 5, stateField: 'frequency' },
+  fan_motor_efficiency_alert_aurora3: { threshold: 5, stateField: 'frequency' },
 };
 
 type TriggerFn = (
@@ -51,11 +51,11 @@ export class SnapshotTriggerService {
   }
 
   private _detectChangedTriggers(snap: DataSnapshot, trigger: TriggerFn): void {
-    this._detectNumericChange('ambient', snap.sensors.ambientT4?.value, 'ambient_temperature_changed', trigger, (value) => ({
+    this._detectNumericChange('ambient', snap.sensors.ambientT4?.value, 'ambient_temperature_changed_aurora3', trigger, (value) => ({
       current_temperature: this._round1(value),
     }));
-    this._detectInletOutletChange('inlet', snap.sensors.retourTE1?.value, 'inlet_temperature_changed', 'inlet_temperature_value_changed', trigger);
-    this._detectInletOutletChange('outlet', snap.sensors.aanvoerTA?.value, 'outlet_temperature_changed', 'outlet_temperature_value_changed', trigger);
+    this._detectInletOutletChange('inlet', snap.sensors.retourTE1?.value, 'inlet_temperature_changed_aurora3', 'inlet_temperature_value_changed_aurora3', trigger);
+    this._detectInletOutletChange('outlet', snap.sensors.aanvoerTA?.value, 'outlet_temperature_changed_aurora3', 'outlet_temperature_value_changed_aurora3', trigger);
 
     const mode = snap.control.mode;
     if (this._lastHeatingMode !== null && mode !== this._lastHeatingMode) {
@@ -71,7 +71,7 @@ export class SnapshotTriggerService {
     const currentFaults = snap.status.activeFaults;
     const newFaults = currentFaults.filter((f) => !this._lastActiveFaults.includes(f));
     for (const fault of newFaults) {
-      trigger('fault_detected',
+      trigger('fault_detected_aurora3',
         { fault_code: fault, fault_description: fault },
         { faultCode: fault, fault_description: fault });
     }
@@ -79,27 +79,27 @@ export class SnapshotTriggerService {
   }
 
   private _detectAlertTriggers(snap: DataSnapshot, trigger: TriggerFn): void {
-    this._detectTemperatureAlert('dhwTank', snap.sensors.dhwTankTemp?.value, 'tank_temperature_alert', trigger);
-    this._detectTemperatureAlert('outerCoil', snap.sensors.outerCoilT3?.value, 'coiler_temperature_alert', trigger);
-    this._detectTemperatureAlert('suction', snap.sensors.suctionTH?.value, 'suction_temperature_alert', trigger);
-    this._detectTemperatureAlert('exhaust', snap.sensors.dischargeTP?.value, 'discharge_temperature_alert', trigger);
-    this._detectNumericChange('eevStep', snap.sensors.eevStep?.value, 'eev_pulse_steps_alert', trigger, (value) => ({
+    this._detectTemperatureAlert('dhwTank', snap.sensors.dhwTankTemp?.value, 'tank_temperature_alert_aurora3', trigger);
+    this._detectTemperatureAlert('outerCoil', snap.sensors.outerCoilT3?.value, 'coiler_temperature_alert_aurora3', trigger);
+    this._detectTemperatureAlert('suction', snap.sensors.suctionTH?.value, 'suction_temperature_alert_aurora3', trigger);
+    this._detectTemperatureAlert('exhaust', snap.sensors.dischargeTP?.value, 'discharge_temperature_alert_aurora3', trigger);
+    this._detectNumericChange('eevStep', snap.sensors.eevStep?.value, 'eev_pulse_steps_alert_aurora3', trigger, (value) => ({
       current_pulse_steps: Math.round(value),
       threshold_pulse_steps: value,
     }));
-    this._detectNumericChange('eviStep', snap.sensors.eviStep?.value, 'evi_pulse_steps_alert', trigger, (value) => ({
+    this._detectNumericChange('eviStep', snap.sensors.eviStep?.value, 'evi_pulse_steps_alert_aurora3', trigger, (value) => ({
       current_pulse_steps: Math.round(value),
       threshold_pulse_steps: value,
     }));
-    this._detectNumericChange('waterFlow', this._flowLitersPerMinute(snap.sensors.waterFlow), 'water_flow_alert', trigger, (value) => ({
+    this._detectNumericChange('waterFlow', this._flowLitersPerMinute(snap.sensors.waterFlow), 'water_flow_alert_aurora3', trigger, (value) => ({
       current_flow_rate: this._round1(value),
       threshold_flow_rate: value,
     }));
-    this._detectNumericChange('compFreq', snap.sensors.compRunningFreq?.value, 'compressor_efficiency_alert', trigger, (value) => ({
+    this._detectNumericChange('compFreq', snap.sensors.compRunningFreq?.value, 'compressor_efficiency_alert_aurora3', trigger, (value) => ({
       current_frequency: this._round1(value),
       threshold_frequency: value,
     }));
-    this._detectNumericChange('fanSpeed', snap.sensors.fanSpeed?.value, 'fan_motor_efficiency_alert', trigger, (value) => ({
+    this._detectNumericChange('fanSpeed', snap.sensors.fanSpeed?.value, 'fan_motor_efficiency_alert_aurora3', trigger, (value) => ({
       current_fan_frequency: this._round1(value),
       threshold_frequency: value,
     }));
