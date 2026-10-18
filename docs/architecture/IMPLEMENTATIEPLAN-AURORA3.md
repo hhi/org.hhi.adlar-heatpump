@@ -128,12 +128,14 @@ Twee controlepunten horen bij deze stap:
 3. `device.ts`: klasse hernoemen naar `Aurora3ModbusDevice`; imports herschrijven (1a)
 4. `driver.compose.json` en `driver.settings.compose.json`: ongewijzigd overnemen; in de
    setting `dashboard_port` standaard en hint 8090 → 8091 (alle vier talen voluit)
-5. `pair/enter_modbus_info.html`: overnemen (driver-scoped; byte-identiek aan Aurora II),
-   alleen de waarschuwingsregel uit stap 7 toevoegen
+5. `pair/enter_modbus_info.html`: ongewijzigd overnemen (driver-scoped; byte-identiek aan
+   Aurora II); de waarschuwingsregel uit stap 7 volgt in fase 5a
 6. Drivermap-assets (`Aurora-drv-*.png`, `icon.svg`): ongewijzigd. Het icoon is identiek
    aan dat van de Aurora II-driver; een eigen icoon is optioneel (svg-icon-designer,
    iOS-richtlijnen uit CLAUDE.md)
-7. **Waarschuwingsregel bij pairen (O8)** — in het eerste pairingscherm van **beide**
+7. **Waarschuwingsregel bij pairen (O8)** — *uitgevoerd in fase 5a*, samen met de
+   drivernamen (O7): hij raakt de Aurora II-drivermap, en de verificatie van fase 1 eist
+   dat die onaangeroerd blijft. In het eerste pairingscherm van **beide**
    Modbus-drivers één gelokaliseerde regel (vier talen): *"Kies het model dat op het
    typeplaatje staat."* Eén `data-i18n`-element in beide `enter_modbus_info.html` plus één
    sleutel in `locales/*.json`. Alleen tekst, geen probe en geen wijziging in `driver.ts`. Voor
@@ -174,7 +176,10 @@ compileert de code, maar het manifest is nog niet consistent: de drivermap verwi
 ### Verificatie
 
 - `npx tsc --noEmit` groen
-- `node --test test/unit/aurora3/*.test.js` groen na build
+- `node --test test/unit/aurora3/*.test.js` groen na build, op één test na:
+  `/api/capabilities includes enum value titles` leest `adlar_silent_mode` en `adlar_mode`
+  uit `app.json` en slaagt pas na fase 2 (nieuwe capability, `adlar_mode_aurora3`). In
+  fase 2b de test meenemen in de hernoeming
 - `git diff --stat -- lib/shared lib/tuya lib/modbus drivers/intelligent-heat-pump drivers/intelligent-heatpump-modbus`
   is **leeg** — bewijs dat bestaande drivers onaangeroerd zijn
 
@@ -416,6 +421,7 @@ fragiel aanmerkte. Met drie drivers op één app is een getypeerde app-interface
 | `locales/en.json`, `nl.json` | 3 nieuwe sleutels: `building_model.blocked_dhw_active`, `errors.silent_level2_r290_only`, `errors.zone_onoff_disabled` |
 | `locales/de.json`, `fr.json` | Dezelfde 3 sleutels vertalen |
 | `es`-vertalingen in bron-manifesten | Weglaten — de app ondersteunt geen `es` |
+| Waarschuwingsregel bij pairen (O8) | Eén `data-i18n`-element in `pair/enter_modbus_info.html` van beide Modbus-drivers plus één sleutel in alle vier `locales/*.json`: *"Kies het model dat op het typeplaatje staat."* (zie 1b stap 7) |
 | Drivernamen (O7) | Aurora III: *"Adlar Castra Aurora III Heat Pump (Modbus)"*; Aurora II van *"… (Modbus)"* naar *"… Aurora II … (Modbus)"* — alleen de weergavenaam, de ID blijft |
 | Driver-manifest `de`/`fr` | `driver.compose.json` van Aurora III heeft 22 strings met alleen en/nl (drivernaam en `capabilitiesOptions`-titels); aanvullen zoals bij de twee bestaande drivers. Capabilities, flow cards en settings van de bron hebben al alle vier talen (gemeten) |
 | `.homeycompose/app.json` | Versie 3.2.0 (O5); beschrijving en `tags` beoordelen op vermelding van Modbus/Aurora III |

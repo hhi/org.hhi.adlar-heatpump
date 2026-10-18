@@ -1,0 +1,1384 @@
+{
+  "inputReg": [
+    {
+      "modbusData": {
+        "address": 0,
+        "registerValue": 125,
+        "title": "3-0000 Total Number of Modbus Registers",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 1,
+        "registerValue": 0,
+        "title": "3-0001 Third Party Thermostat Controller Type",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2,
+        "registerValue": 0,
+        "title": "3-0002 Single Zone or Two Zones Control Without Third Party Thermostat",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 3,
+        "registerValue": 0,
+        "title": "3-0003 Single Zone Control Without Third Party Thermostat",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 4,
+        "registerValue": 0,
+        "title": "3-0004 Two Zones Control Without Third Party Thermostat",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 5,
+        "registerValue": 0,
+        "title": "3-0005 Single Zone Control With Thermostat",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 6,
+        "registerValue": 0,
+        "title": "3-0006 Two Zones Control With Thermostat",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 7,
+        "registerValue": 1,
+        "title": "3-0007 Refrigerant Type",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 8,
+        "registerValue": 0,
+        "title": "3-0008 Unit Type",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 9,
+        "registerValue": 7,
+        "title": "3-0009 Effective Mode",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 10,
+        "registerValue": 180,
+        "title": "3-0010 Z1 Cooling Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 11,
+        "registerValue": 180,
+        "title": "3-0011 Z1 Cooling Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 12,
+        "registerValue": 350,
+        "title": "3-0012 Z1 Heating Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 13,
+        "registerValue": 350,
+        "title": "3-0013 Z1 Heating Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 14,
+        "registerValue": 480,
+        "title": "3-0014 DHW Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 15,
+        "registerValue": 480,
+        "title": "3-0015 DHW Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 16,
+        "registerValue": 180,
+        "title": "3-0016 Z1 Auto Cooling Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 17,
+        "registerValue": 180,
+        "title": "3-0017 Z1 Auto Cooling Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 18,
+        "registerValue": 350,
+        "title": "3-0018 Z1 Auto Heating Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 19,
+        "registerValue": 350,
+        "title": "3-0019 Z1 Auto Heating Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 20,
+        "registerValue": 180,
+        "title": "3-0020 Z2 Cooling Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 21,
+        "registerValue": 180,
+        "title": "3-0021 Z2 Cooling Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 22,
+        "registerValue": 350,
+        "title": "3-0022 Z2 Heating Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 23,
+        "registerValue": 350,
+        "title": "3-0023 Z2 Heating Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 24,
+        "registerValue": 180,
+        "title": "3-0024 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 25,
+        "registerValue": 180,
+        "title": "3-0025 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 26,
+        "registerValue": 350,
+        "title": "3-0026 Z2 Auto Cooling Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 27,
+        "registerValue": 350,
+        "title": "3-0027 Z2 Auto Cooling Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 28,
+        "registerValue": 300,
+        "title": "3-0028 Z2 Auto Heating Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 29,
+        "registerValue": 150,
+        "title": "3-0029 Z2 Auto Heating Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 30,
+        "registerValue": 0,
+        "title": "3-0030 Room Temperature Upper Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 31,
+        "registerValue": 0,
+        "title": "3-0031 Room Temperature Lower Limit",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 32,
+        "registerValue": 0,
+        "title": "3-0032 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 33,
+        "registerValue": 0,
+        "title": "3-0033 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 34,
+        "registerValue": 0,
+        "title": "3-0034 Zone 1 Terminal Type for Cooling",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 35,
+        "registerValue": 2,
+        "title": "3-0035 Zone 1 Terminal Type for Heating",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 36,
+        "registerValue": 0,
+        "title": "3-0036 Zone 2 Terminal Type for Cooling",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 37,
+        "registerValue": 2,
+        "title": "3-0037 Zone 2 Terminal Type for Heating",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 38,
+        "registerValue": 0,
+        "title": "3-0038 System Status (16-bit bitmask)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 39,
+        "registerValue": 0,
+        "title": "3-0039 Request External Heating Source (Hybrid)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 40,
+        "registerValue": 210,
+        "title": "3-0040 Room Temperature (Tldr)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 41,
+        "registerValue": 350,
+        "title": "3-0041 Total Leaving Water Temperature (TC)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 42,
+        "registerValue": 290,
+        "title": "3-0042 Return Water Temperature (TE1)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 43,
+        "registerValue": 310,
+        "title": "3-0043 Supply Water Temperature (TA)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 44,
+        "registerValue": 250,
+        "title": "3-0044 Buffer Tank Upper Part Temperature (TE2)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 45,
+        "registerValue": 250,
+        "title": "3-0045 Buffer Tank Lower Part Temperature (TW)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 46,
+        "registerValue": 480,
+        "title": "3-0046 DHW Water Tank Temperature (TZ2)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 47,
+        "registerValue": 300,
+        "title": "3-0047 Zone 2 Mixing Station Inlet Water Temperature (Tso)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 48,
+        "registerValue": 350,
+        "title": "3-0048 Solar Water Heating Temperature (T3-solar)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 49,
+        "registerValue": 80,
+        "title": "3-0049 Outdoor Unit Coil Temperature (T3)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 50,
+        "registerValue": 80,
+        "title": "3-0050 Ambient Temperature (T4)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 51,
+        "registerValue": 350,
+        "title": "3-0051 EXV Valve Outlet Temperature (T5)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 52,
+        "registerValue": 680,
+        "title": "3-0052 Compressor Discharge Temperature (TP)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 53,
+        "registerValue": 120,
+        "title": "3-0053 Compressor Suction Temperature (TH)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 54,
+        "registerValue": 0,
+        "title": "3-0054 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 55,
+        "registerValue": 0,
+        "title": "3-0055 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 56,
+        "registerValue": 350,
+        "title": "3-0056 Target Outlet Setting Temperature (TOut)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 57,
+        "registerValue": 0,
+        "title": "3-0057 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 58,
+        "registerValue": 0,
+        "title": "3-0058 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 59,
+        "registerValue": 0,
+        "title": "3-0059 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 60,
+        "registerValue": 18,
+        "title": "3-0060 Inlet Water Pressure",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 61,
+        "registerValue": 18,
+        "title": "3-0061 Outlet Water Pressure",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 62,
+        "registerValue": 55,
+        "title": "3-0062 PWM Percentage of DC Water Pump",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 63,
+        "registerValue": 550,
+        "title": "3-0063 PWM Feedback DC Water Pump",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 64,
+        "registerValue": 12,
+        "title": "3-0064 Actual Water Flow of DC Pump",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 65,
+        "registerValue": 0,
+        "title": "3-0065 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 66,
+        "registerValue": 180,
+        "title": "3-0066 Zone 1 Climate Curve Cooling Set Temperature",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 67,
+        "registerValue": 350,
+        "title": "3-0067 Zone 1 Climate Curve Heating Set Temperature",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 68,
+        "registerValue": 180,
+        "title": "3-0068 Zone 2 Climate Curve Cooling Set Temperature",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 69,
+        "registerValue": 350,
+        "title": "3-0069 Zone 2 Climate Curve Heating Set Temperature",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 70,
+        "registerValue": 180,
+        "title": "3-0070 Main EEV Open Degree",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 71,
+        "registerValue": 120,
+        "title": "3-0071 Auxiliary EEV Open Degree",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 72,
+        "registerValue": 620,
+        "title": "3-0072 Speed of No.1 DC Fan",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 73,
+        "registerValue": 0,
+        "title": "3-0073 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 74,
+        "registerValue": 230,
+        "title": "3-0074 AC Input Voltage",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 75,
+        "registerValue": 45,
+        "title": "3-0075 AC Input Current",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 76,
+        "registerValue": 325,
+        "title": "3-0076 DC Bus Voltage",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 77,
+        "registerValue": 32,
+        "title": "3-0077 Compressor Phase Current",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 78,
+        "registerValue": 45,
+        "title": "3-0078 Compressor Target Frequency",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 79,
+        "registerValue": 42,
+        "title": "3-0079 Compressor Actual Frequency",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 80,
+        "registerValue": 1,
+        "title": "3-0080 Main Water Pump On/Off",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 81,
+        "registerValue": 0,
+        "title": "3-0081 Four Way Valve On/Off",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 82,
+        "registerValue": 0,
+        "title": "3-0082 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 83,
+        "registerValue": 0,
+        "title": "3-0083 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 84,
+        "registerValue": 0,
+        "title": "3-0084 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 85,
+        "registerValue": 0,
+        "title": "3-0085 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 86,
+        "registerValue": 2600,
+        "title": "3-0086 High Pressure",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 87,
+        "registerValue": 650,
+        "title": "3-0087 Low Pressure",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 88,
+        "registerValue": 0,
+        "title": "3-0088 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 89,
+        "registerValue": 0,
+        "title": "3-0089 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 90,
+        "registerValue": 0,
+        "title": "3-0090 Error Codes E01-E16",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 91,
+        "registerValue": 0,
+        "title": "3-0091 Error Codes E17-E32",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 92,
+        "registerValue": 0,
+        "title": "3-0092 Error Codes E33-E48",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 93,
+        "registerValue": 0,
+        "title": "3-0093 Error Codes E49-E64",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 94,
+        "registerValue": 0,
+        "title": "3-0094 Error Codes E65-E80",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 95,
+        "registerValue": 0,
+        "title": "3-0095 Error Codes E81-E96",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 96,
+        "registerValue": 0,
+        "title": "3-0096 Protection Codes P01-P16",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 97,
+        "registerValue": 0,
+        "title": "3-0097 Protection Codes P17-P32",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 98,
+        "registerValue": 0,
+        "title": "3-0098 Protection Codes P33-P48",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 99,
+        "registerValue": 0,
+        "title": "3-0099 Protection Codes P49-P64",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 100,
+        "registerValue": 0,
+        "title": "3-0100 Protection Codes P65-P80",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 101,
+        "registerValue": 0,
+        "title": "3-0101 Protection Codes P81-P96",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 102,
+        "registerValue": 2,
+        "title": "3-0102 Current Target Operation Mode",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 103,
+        "registerValue": 2,
+        "title": "3-0103 Actual Operation Mode",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 104,
+        "registerValue": 0,
+        "title": "3-0104 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 105,
+        "registerValue": 0,
+        "title": "3-0105 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 106,
+        "registerValue": 0,
+        "title": "3-0106 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 107,
+        "registerValue": 0,
+        "title": "3-0107 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 108,
+        "registerValue": 0,
+        "title": "3-0108 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 109,
+        "registerValue": 0,
+        "title": "3-0109 Reserved / block padding",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    }
+  ],
+  "holdingReg": [
+    {
+      "modbusData": {
+        "address": 2100,
+        "registerValue": 2,
+        "title": "4-2100 Air Conditioning Modes",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2101,
+        "registerValue": 0,
+        "title": "4-2101 Air Conditioning Modes (Zone Control)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2102,
+        "registerValue": 1,
+        "title": "4-2102 DHW Mode On/Off",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2103,
+        "registerValue": 0,
+        "title": "4-2103 Additional Function A (Silent Mode bits 4-5)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2104,
+        "registerValue": 0,
+        "title": "4-2104 Additional Function B (Reserved)",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2105,
+        "registerValue": 500,
+        "title": "4-2105 DHW Mode Water Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2106,
+        "registerValue": 180,
+        "title": "4-2106 Zone 1 Cooling Mode Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2107,
+        "registerValue": 350,
+        "title": "4-2107 Zone 1 Heating Mode Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2108,
+        "registerValue": 180,
+        "title": "4-2108 Zone 1 Auto Mode Cooling Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2109,
+        "registerValue": 350,
+        "title": "4-2109 Zone 1 Auto Mode Heating Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2110,
+        "registerValue": 180,
+        "title": "4-2110 Zone 2 Cooling Mode Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2111,
+        "registerValue": 350,
+        "title": "4-2111 Zone 2 Heating Mode Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2112,
+        "registerValue": 180,
+        "title": "4-2112 Zone 2 Auto Mode Cooling Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2113,
+        "registerValue": 350,
+        "title": "4-2113 Zone 2 Auto Mode Heating Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    },
+    {
+      "modbusData": {
+        "address": 2114,
+        "registerValue": 210,
+        "title": "4-2114 Room Temperature Setting",
+        "dataSize": 16,
+        "displayFormat": {
+          "Decimal": {}
+        }
+      }
+    }
+  ],
+  "inputMem": [],
+  "fileVersion": "1.0",
+  "outputMem": []
+}

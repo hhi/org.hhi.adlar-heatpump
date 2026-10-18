@@ -8,7 +8,7 @@
     "build": "tsc",
     "check:caps": "node scripts/check-capability-ownership.js",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
-    "test": "npm run build && node --test test/unit/*.test.js",
+    "test": "npm run build && node --test test/unit/*.test.js test/unit/aurora3/*.test.js",
     "simulate": "npm run build && node test/simulation/adaptive-simulation.js"
   },
   "devDependencies": {

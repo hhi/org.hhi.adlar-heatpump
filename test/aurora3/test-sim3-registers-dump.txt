@@ -1,0 +1,133 @@
+❯ npx tsx test/test-sim3-registers.ts 192.168.50.247 dump
+
+adlar3-server.mbs - 110 inputReg, 15 holdingReg
+
+--------------------------------------------------------------------------------------------------------
+#     FC       Adres    Raw      Scaled           Titel
+--------------------------------------------------------------------------------------------------------
+1     input    0        125      125              3-0000 Total Number of Modbus Registers
+2     input    1        0        0                3-0001 Third Party Thermostat Controller Type
+3     input    2        0        0                3-0002 Single Zone or Two Zones Control Without Third Party Thermostat
+4     input    3        0        0                3-0003 Single Zone Control Without Third Party Thermostat
+5     input    4        0        0                3-0004 Two Zones Control Without Third Party Thermostat
+6     input    5        0        0                3-0005 Single Zone Control With Thermostat
+7     input    6        0        0                3-0006 Two Zones Control With Thermostat
+8     input    7        1        1                3-0007 Refrigerant Type
+9     input    8        0        0                3-0008 Unit Type
+10    input    9        7        7                3-0009 Effective Mode
+11    input    10       180      18.00 °C         3-0010 Z1 Cooling Upper Limit
+12    input    11       180      18.00 °C         3-0011 Z1 Cooling Lower Limit
+13    input    12       350      35.00 °C         3-0012 Z1 Heating Upper Limit
+14    input    13       350      35.00 °C         3-0013 Z1 Heating Lower Limit
+15    input    14       480      48.00 °C         3-0014 DHW Upper Limit
+16    input    15       480      48.00 °C         3-0015 DHW Lower Limit
+17    input    16       180      18.00 °C         3-0016 Z1 Auto Cooling Upper Limit
+18    input    17       180      18.00 °C         3-0017 Z1 Auto Cooling Lower Limit
+19    input    18       350      35.00 °C         3-0018 Z1 Auto Heating Upper Limit
+20    input    19       350      35.00 °C         3-0019 Z1 Auto Heating Lower Limit
+21    input    20       180      18.00 °C         3-0020 Z2 Cooling Upper Limit
+22    input    21       180      18.00 °C         3-0021 Z2 Cooling Lower Limit
+23    input    22       350      35.00 °C         3-0022 Z2 Heating Upper Limit
+24    input    23       350      35.00 °C         3-0023 Z2 Heating Lower Limit
+25    input    24       180      180              3-0024 Reserved / block padding
+26    input    25       180      180              3-0025 Reserved / block padding
+27    input    26       350      35.00 °C         3-0026 Z2 Auto Cooling Upper Limit
+28    input    27       350      35.00 °C         3-0027 Z2 Auto Cooling Lower Limit
+29    input    28       300      30.00 °C         3-0028 Z2 Auto Heating Upper Limit
+30    input    29       150      15.00 °C         3-0029 Z2 Auto Heating Lower Limit
+31    input    30       0        0.00 °C          3-0030 Room Temperature Upper Limit
+32    input    31       0        0.00 °C          3-0031 Room Temperature Lower Limit
+33    input    32       0        0                3-0032 Reserved / block padding
+34    input    33       0        0                3-0033 Reserved / block padding
+35    input    34       0        0                3-0034 Zone 1 Terminal Type for Cooling
+36    input    35       2        2                3-0035 Zone 1 Terminal Type for Heating
+37    input    36       0        0                3-0036 Zone 2 Terminal Type for Cooling
+38    input    37       2        2                3-0037 Zone 2 Terminal Type for Heating
+39    input    38       0        0                3-0038 System Status (16-bit bitmask)
+40    input    39       0        0                3-0039 Request External Heating Source (Hybrid)
+41    input    40       210      21.00 °C         3-0040 Room Temperature (Tldr)
+42    input    41       350      35.00 °C         3-0041 Total Leaving Water Temperature (TC)
+43    input    42       300      30.00 °C         3-0042 Return Water Temperature (TE1)
+44    input    43       350      35.00 °C         3-0043 Supply Water Temperature (TA)
+45    input    44       250      25.00 °C         3-0044 Buffer Tank Upper Part Temperature (TE2)
+46    input    45       250      25.00 °C         3-0045 Buffer Tank Lower Part Temperature (TW)
+47    input    46       480      48.00 °C         3-0046 DHW Water Tank Temperature (TZ2)
+48    input    47       300      30.00 °C         3-0047 Zone 2 Mixing Station Inlet Water Temperature (Tso)
+49    input    48       350      35.00 °C         3-0048 Solar Water Heating Temperature (T3-solar)
+50    input    49       80       8.00 °C          3-0049 Outdoor Unit Coil Temperature (T3)
+51    input    50       80       8.00 °C          3-0050 Ambient Temperature (T4)
+52    input    51       350      35.00 °C         3-0051 EXV Valve Outlet Temperature (T5)
+53    input    52       680      68.00 °C         3-0052 Compressor Discharge Temperature (TP)
+54    input    53       120      12.00 °C         3-0053 Compressor Suction Temperature (TH)
+55    input    54       0        0                3-0054 Reserved / block padding
+56    input    55       0        0                3-0055 Reserved / block padding
+57    input    56       350      35.00 °C         3-0056 Target Outlet Setting Temperature (TOut)
+58    input    57       0        0                3-0057 Reserved / block padding
+59    input    58       0        0                3-0058 Reserved / block padding
+60    input    59       0        0                3-0059 Reserved / block padding
+61    input    60       18       1.80 Bar         3-0060 Inlet Water Pressure
+62    input    61       18       1.80 Bar         3-0061 Outlet Water Pressure
+63    input    62       55       55 %             3-0062 PWM Percentage of DC Water Pump
+64    input    63       550      55.00            3-0063 PWM Feedback DC Water Pump
+65    input    64       12       1.20 m³/h        3-0064 Actual Water Flow of DC Pump
+66    input    65       0        0                3-0065 Reserved / block padding
+67    input    66       180      18.00 °C         3-0066 Zone 1 Climate Curve Cooling Set Temperature
+68    input    67       350      35.00 °C         3-0067 Zone 1 Climate Curve Heating Set Temperature
+69    input    68       180      18.00 °C         3-0068 Zone 2 Climate Curve Cooling Set Temperature
+70    input    69       350      35.00 °C         3-0069 Zone 2 Climate Curve Heating Set Temperature
+71    input    70       180      180 P            3-0070 Main EEV Open Degree
+72    input    71       120      120 P            3-0071 Auxiliary EEV Open Degree
+73    input    72       620      620 RPM          3-0072 Speed of No.1 DC Fan
+74    input    73       0        0                3-0073 Reserved / block padding
+75    input    74       230      230 V            3-0074 AC Input Voltage
+76    input    75       45       4.50 A           3-0075 AC Input Current
+77    input    76       325      325 V            3-0076 DC Bus Voltage
+78    input    77       32       3.20 A           3-0077 Compressor Phase Current
+79    input    78       45       45 Hz            3-0078 Compressor Target Frequency
+80    input    79       42       42 Hz            3-0079 Compressor Actual Frequency
+81    input    80       1        1                3-0080 Main Water Pump On/Off
+82    input    81       0        0                3-0081 Four Way Valve On/Off
+83    input    82       0        0                3-0082 Reserved / block padding
+84    input    83       0        0                3-0083 Reserved / block padding
+85    input    84       0        0                3-0084 Reserved / block padding
+86    input    85       0        0                3-0085 Reserved / block padding
+87    input    86       2600     2600 kPa         3-0086 High Pressure
+88    input    87       650      650 kPa          3-0087 Low Pressure
+89    input    88       0        0                3-0088 Reserved / block padding
+90    input    89       0        0                3-0089 Reserved / block padding
+91    input    90       0        0                3-0090 Error Codes E01-E16
+92    input    91       0        0                3-0091 Error Codes E17-E32
+93    input    92       0        0                3-0092 Error Codes E33-E48
+94    input    93       0        0                3-0093 Error Codes E49-E64
+95    input    94       0        0                3-0094 Error Codes E65-E80
+96    input    95       0        0                3-0095 Error Codes E81-E96
+97    input    96       0        0                3-0096 Protection Codes P01-P16
+98    input    97       0        0                3-0097 Protection Codes P17-P32
+99    input    98       0        0                3-0098 Protection Codes P33-P48
+100   input    99       0        0                3-0099 Protection Codes P49-P64
+101   input    100      0        0                3-0100 Protection Codes P65-P80
+102   input    101      0        0                3-0101 Protection Codes P81-P96
+103   input    102      2        2                3-0102 Current Target Operation Mode
+104   input    103      2        2                3-0103 Actual Operation Mode
+105   input    104      0        0                3-0104 Reserved / block padding
+106   input    105      0        0                3-0105 Reserved / block padding
+107   input    106      0        0                3-0106 Reserved / block padding
+108   input    107      0        0                3-0107 Reserved / block padding
+109   input    108      0        0                3-0108 Reserved / block padding
+110   input    109      0        0                3-0109 Reserved / block padding
+111   holding  2100     2        2                4-2100 Air Conditioning Modes
+112   holding  2101     0        0                4-2101 Air Conditioning Modes (Zone Control)
+113   holding  2102     1        1                4-2102 DHW Mode On/Off
+114   holding  2103     0        0                4-2103 Additional Function A (Silent Mode bits 4-5)
+115   holding  2104     0        0                4-2104 Additional Function B (Reserved)
+116   holding  2105     500      50.00 °C         4-2105 DHW Mode Water Temperature Setting
+117   holding  2106     180      18.00 °C         4-2106 Zone 1 Cooling Mode Temperature Setting
+118   holding  2107     350      35.00 °C         4-2107 Zone 1 Heating Mode Temperature Setting
+119   holding  2108     180      18.00 °C         4-2108 Zone 1 Auto Mode Cooling Temperature Setting
+120   holding  2109     350      35.00 °C         4-2109 Zone 1 Auto Mode Heating Temperature Setting
+121   holding  2110     180      18.00 °C         4-2110 Zone 2 Cooling Mode Temperature Setting
+122   holding  2111     350      35.00 °C         4-2111 Zone 2 Heating Mode Temperature Setting
+123   holding  2112     180      18.00 °C         4-2112 Zone 2 Auto Mode Cooling Temperature Setting
+124   holding  2113     350      35.00 °C         4-2113 Zone 2 Auto Mode Heating Temperature Setting
+125   holding  2114     210      21.00 °C         4-2114 Room Temperature Setting
+--------------------------------------------------------------------------------------------------------
