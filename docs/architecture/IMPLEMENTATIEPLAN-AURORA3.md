@@ -24,7 +24,7 @@ constante bovenaan, zodat een ander besluit één regel wijziging is.
 | Fase | 🔵 Vereist voor de merge | 🟠 Bestaande schuld / optioneel |
 |---|---|---|
 | **0** | Baseline, ownership-script voor N drivers, `verify.py` generiek | — |
-| **1** | `lib/aurora3/` (21 bestanden), drivermap onder nieuwe ID, modelprobe bij pairen (O8), assets, tests, `.homeyignore` | — |
+| **1** | `lib/aurora3/` (21 bestanden), drivermap onder nieuwe ID, waarschuwingsregel bij pairen (O8), assets, tests, `.homeyignore` | — |
 | **2** | 8 capabilities, `adlar_mode_aurora3`, 10 beschrijvingen neutraal | `icon` op `cop_optimizer_diagnostics` |
 | **3** | 57 kaarten splitsen, 17 pipe-filters uitbreiden, 3 COP-triggers, 5 nieuw | O6: COP-triggers ook voor Aurora II |
 | **4** | Tweede dashboard-instantie op eigen poort, `publicDir`-optie, widget-resolver per driver | — |
@@ -37,7 +37,7 @@ constante bovenaan, zodat een ander besluit één regel wijziging is.
 | # | Voorwaarde | Waarom |
 |---|---|---|
 | P1 | O1 t/m O9 besloten | Driver-ID en suffix zijn na publicatie permanent |
-| P5 | V4 beantwoord (probe-register per model) | Nodig voor O8 in fase 1b |
+| ~~P5~~ | ~~V4 beantwoord~~ | Vervallen: O8 zonder modelprobe |
 | P2 | `npm ci` lukt en `npm run build` + `npm test` zijn groen op `main` | Baseline; zonder groene start is geen fase aantoonbaar gedragsneutraal |
 | P3 | Homey CLI beschikbaar voor `homey app validate` | Niet aanwezig in de cloud-analyseomgeving; lokaal uitvoeren |
 | P4 | Bronrepo op een vaste commit (`58e010a`) | Wijzigingen in de bronrepo tijdens de merge maken de scripts niet-reproduceerbaar |
@@ -128,17 +128,16 @@ Twee controlepunten horen bij deze stap:
 3. `device.ts`: klasse hernoemen naar `Aurora3ModbusDevice`; imports herschrijven (1a)
 4. `driver.compose.json` en `driver.settings.compose.json`: ongewijzigd overnemen; in de
    setting `dashboard_port` standaard en hint 8090 → 8091 (alle vier talen voluit)
-5. `pair/enter_modbus_info.html`: ongewijzigd (driver-scoped; byte-identiek aan Aurora II)
+5. `pair/enter_modbus_info.html`: overnemen (driver-scoped; byte-identiek aan Aurora II),
+   alleen de waarschuwingsregel uit stap 7 toevoegen
 6. Drivermap-assets (`Aurora-drv-*.png`, `icon.svg`): ongewijzigd. Het icoon is identiek
    aan dat van de Aurora II-driver; een eigen icoon is optioneel (svg-icon-designer,
    iOS-richtlijnen uit CLAUDE.md)
-7. **Modelprobe bij pairen (O8)** — in `driver.ts` van **beide** Modbus-drivers, tussen
-   `enter_modbus_info` en `list_devices`: korte verbinding, één read op een register dat
-   alleen het eigen model heeft (keuze volgt uit V4), verbinding sluiten. Bij een
-   mismatch een gelokaliseerde fout die naar de juiste driver verwijst; bij een
-   time-out of exception géén harde blokkade maar een waarschuwing, zodat een gebruiker
-   met een afwijkende firmware niet buitengesloten wordt. Raakt alleen nieuwe pairings.
-   Voor Aurora II is dit de enige functionele wijziging in deze merge — apart testen
+7. **Waarschuwingsregel bij pairen (O8)** — in het eerste pairingscherm van **beide**
+   Modbus-drivers één gelokaliseerde regel (vier talen): *"Kies het model dat op het
+   typeplaatje staat."* Eén `data-i18n`-element in beide `enter_modbus_info.html` plus één
+   sleutel in `locales/*.json`. Alleen tekst, geen probe en geen wijziging in `driver.ts`. Voor
+   Aurora II is dit, naast de drivernaam (O7), de enige zichtbare wijziging
 
 **`device.ts` — nagelopen oppervlakken**: `homey.app` (4 casts, fase 4a),
 `homey.flow` (via `triggerFlowCard`, ID's uit 3A/3B/3C), `homey.drivers` (alleen een
@@ -513,8 +512,7 @@ en de app-afbeeldingen `WP-adlar3-modbus-*.png` (de doel-app heeft eigen app-afb
    `power_threshold_exceeded`? Zo niet: naar groep 3A verplaatsen
 6. **V2** — Widgetfilter met `driver_id` (alleen relevant als O4 = twee widgets)
 7. **V3** — Pipe-filter met drie waarden in de Flow-editor zichtbaar bij alle drie
-8. **V4** — Probe-register per model bevestigd op hardware (voorwaarde P5; uitkomst
-   vastleggen in ADR-004)
+8. ~~**V4**~~ — vervallen (O8 zonder modelprobe)
 
 ---
 
@@ -534,7 +532,7 @@ Eén Homey met een Tuya-, een Aurora II- en een Aurora III-device.
 | Aurora III `/interactive`: setpoint en stille modus wijzigen | Wijziging zichtbaar op het device en in de Homey-app; Aurora II onaangeroerd |
 | Aurora III `/expert`: één register lezen | Waarde van Aurora III, niet van Aurora II |
 | Elfin-gids stap voor stap volgen voor Aurora III (8N2) | Verbinding komt tot stand zonder aanvullende kennis |
-| Aurora III-gateway pairen met de Aurora II-driver, en omgekeerd (O8) | Pairing weigert of waarschuwt met verwijzing naar de juiste driver; er wordt niets geschreven |
+| Pairinglijst en eerste pairingscherm van beide Modbus-drivers (O7/O8) | Model staat in de drivernaam; waarschuwingsregel zichtbaar in alle vier talen |
 | Bestaand Aurora II-device na update | Ongewijzigd; alleen de drivernaam in de pairinglijst is anders (O7) |
 | Oude Aurora III-app en nieuwe driver kort naast elkaar (migratiescenario) | Gedrag zoals beschreven in de migratiehandleiding |
 
