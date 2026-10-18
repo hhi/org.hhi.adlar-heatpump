@@ -1,0 +1,8 @@
+# Bronsnapshot voor de Aurora III-merge (ADR-004, IMPLEMENTATIEPLAN-AURORA3 fase 0, P4).
+# Alle migratiescripts in deze map werken tegen precies deze commit.
+repo=https://github.com/hhi/org.hhi.adlar3-heatpump-modbus.git
+app_id=org.hhi.adlar3-heatpump-modbus
+version=1.9.4
+commit=58e010a0aaaa15a96e1e2bec5aa64edf9c470cfe
+commit_date=2026-10-15T23:09:19+02:00
+recorded=2026-10-18

@@ -1,12 +1,12 @@
 # Implementatieplan — Aurora III Modbus-driver integreren in org.hhi.adlar-heatpump
 
 - **Uitvoeringsplan bij** [ADR-004](ADR-004-AURORA3-DRIVER-MERGE.md)
-- **Doelversie**: 3.2.0 (voorstel; huidig 3.1.3)
+- **Doelversie**: 3.2.0 (huidig 3.1.4)
 - **Bron**: `org.hhi.adlar3-heatpump-modbus` v1.9.4 (commit `58e010a`)
 - **Datum**: 2026-10-17
-- **Status**: Concept — uitvoering start pas na besluit over O1 t/m O9
+- **Status**: In uitvoering — O1 t/m O9 aanvaard op 2026-10-18; fase 0 gestart
 
-In dit plan staan de voorgestelde waarden uit ADR-004 ingevuld: driver-ID
+In dit plan staan de aanvaarde waarden uit ADR-004 ingevuld: driver-ID
 `intelligent-heatpump-aurora3`, suffix `_aurora3`. De migratiescripts nemen beide als
 constante bovenaan, zodat een ander besluit één regel wijziging is.
 
