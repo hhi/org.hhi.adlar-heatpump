@@ -229,7 +229,7 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
       running,
       compressorOn,
       defrosting,
-      mode: modeLabel(capString(device, 'adlar_mode'), snapshot),
+      mode: modeLabel(capString(device, 'adlar_mode_aurora3'), snapshot),
       faultActive,
       connectionStatus,
     },

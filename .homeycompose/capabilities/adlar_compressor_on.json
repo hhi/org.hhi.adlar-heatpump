@@ -1,0 +1,33 @@
+{
+  "id": "adlar_compressor_on",
+  "type": "boolean",
+  "title": {
+    "en": "Compressor active",
+    "nl": "Compressor actief",
+    "fr": "Compresseur actif",
+    "de": "Kompressor aktiv"
+  },
+  "icon": "/assets/compressor-state.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Compressor started",
+    "nl": "Compressor gestart",
+    "fr": "Compresseur démarré",
+    "de": "Kompressor gestartet"
+  },
+  "insightsTitleFalse": {
+    "en": "Compressor stopped",
+    "nl": "Compressor gestopt",
+    "fr": "Compresseur arrêté",
+    "de": "Kompressor gestoppt"
+  },
+  "description": {
+    "en": "Compressor activity derived from compressor actual frequency in input register 3-0079.",
+    "nl": "Compressoractiviteit afgeleid van de actuele compressorfrequentie in inputregister 3-0079.",
+    "fr": "Activité du compresseur déduite de la fréquence réelle du compresseur dans le registre d’entrée 3-0079.",
+    "de": "Kompressoraktivität abgeleitet aus der aktuellen Kompressorfrequenz in Eingangsregister 3-0079."
+  }
+}

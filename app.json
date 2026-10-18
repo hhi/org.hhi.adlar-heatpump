@@ -16369,7 +16369,7 @@
         "adlar_low_pressure",
         "adlar_running",
         "adlar_compressor_on",
-        "adlar_mode",
+        "adlar_mode_aurora3",
         "adlar_state_compressor_state",
         "adlar_state_defrost_state",
         "adlar_antifreeze",
@@ -20125,10 +20125,43 @@
         "fr": "Protection antigel désactivée"
       },
       "description": {
-        "en": "Antifreeze protection status from Modbus status register 0x0000, bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). True when either circuit is in antifreeze mode.",
-        "nl": "Antivriesbeveiligingsstatus uit Modbus-statusregister 0x0000, bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). Waar wanneer een van beide circuits in antivriesstand staat.",
-        "de": "Frostschutzstatus aus Modbus-Statusregister 0x0000, Bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). Wahr, wenn einer der Kreise im Frostschutzmodus ist.",
-        "fr": "État de protection antigel depuis le registre de statut Modbus 0x0000, bits 1–2 (PRIMARY_ANTIFREEZE | SECONDARY_ANTIFREEZE). Vrai si l'un des circuits est en mode antigel."
+        "en": "Antifreeze protection status. True while the heat pump is protecting the water circuit against freezing.",
+        "nl": "Status van de vorstbeveiliging. Waar zolang de warmtepomp het watercircuit tegen bevriezing beschermt.",
+        "de": "Status des Frostschutzes. Wahr, solange die Wärmepumpe den Wasserkreis vor dem Einfrieren schützt.",
+        "fr": "État de la protection antigel. Vrai tant que la pompe à chaleur protège le circuit d'eau contre le gel."
+      }
+    },
+    "adlar_backup_heater_forced": {
+      "id": "adlar_backup_heater_forced",
+      "type": "boolean",
+      "title": {
+        "en": "Forced electric backup heater",
+        "nl": "Geforceerde elektrische bijverwarming",
+        "fr": "Appoint électrique forcé",
+        "de": "Erzwungene elektrische Zusatzheizung"
+      },
+      "icon": "/assets/backup-heater.svg",
+      "uiComponent": "toggle",
+      "getable": true,
+      "setable": true,
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Forced backup heater on",
+        "nl": "Geforceerde bijverwarming aan",
+        "fr": "Appoint forcé activé",
+        "de": "Erzwungene Zusatzheizung ein"
+      },
+      "insightsTitleFalse": {
+        "en": "Forced backup heater off",
+        "nl": "Geforceerde bijverwarming uit",
+        "fr": "Appoint forcé désactivé",
+        "de": "Erzwungene Zusatzheizung aus"
+      },
+      "description": {
+        "en": "Forces the electric backup heater on via holding register 4-2103, bit 3. Other bits of the register are kept unchanged.",
+        "nl": "Forceert de elektrische bijverwarming via holdingregister 4-2103, bit 3. De overige bits van het register blijven ongewijzigd.",
+        "fr": "Force l’appoint électrique via le registre holding 4-2103, bit 3. Les autres bits du registre restent inchangés.",
+        "de": "Erzwingt die elektrische Zusatzheizung über Holdingregister 4-2103, Bit 3. Die übrigen Bits des Registers bleiben unverändert."
       }
     },
     "adlar_building_c": {
@@ -20325,6 +20358,39 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/cheapest-block-start.svg"
+    },
+    "adlar_compressor_on": {
+      "id": "adlar_compressor_on",
+      "type": "boolean",
+      "title": {
+        "en": "Compressor active",
+        "nl": "Compressor actief",
+        "fr": "Compresseur actif",
+        "de": "Kompressor aktiv"
+      },
+      "icon": "/assets/compressor-state.svg",
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Compressor started",
+        "nl": "Compressor gestart",
+        "fr": "Compresseur démarré",
+        "de": "Kompressor gestartet"
+      },
+      "insightsTitleFalse": {
+        "en": "Compressor stopped",
+        "nl": "Compressor gestopt",
+        "fr": "Compresseur arrêté",
+        "de": "Kompressor gestoppt"
+      },
+      "description": {
+        "en": "Compressor activity derived from compressor actual frequency in input register 3-0079.",
+        "nl": "Compressoractiviteit afgeleid van de actuele compressorfrequentie in inputregister 3-0079.",
+        "fr": "Activité du compresseur déduite de la fréquence réelle du compresseur dans le registre d’entrée 3-0079.",
+        "de": "Kompressoraktivität abgeleitet aus der aktuellen Kompressorfrequenz in Eingangsregister 3-0079."
+      }
     },
     "adlar_connection_active": {
       "id": "adlar_connection_active",
@@ -20707,10 +20773,97 @@
         "fr": "Dégivrage arrêté"
       },
       "description": {
-        "en": "Defrost status from Modbus status register 0x0000, bit 8 (SYSTEM_DEFROST). True while the outdoor coil is actively being defrosted.",
-        "nl": "Ontdooistatus uit Modbus-statusregister 0x0000, bit 8 (SYSTEM_DEFROST). Waar zolang de buitenste spoel actief wordt ontdooid.",
-        "de": "Abtaustatus aus Modbus-Statusregister 0x0000, Bit 8 (SYSTEM_DEFROST). Wahr, solange der Außenluftkreis aktiv abgetaut wird.",
-        "fr": "État de dégivrage depuis le registre de statut Modbus 0x0000, bit 8 (SYSTEM_DEFROST). Vrai pendant le dégivrage actif de l'échangeur extérieur."
+        "en": "Defrost status. True while the outdoor coil is actively being defrosted.",
+        "nl": "Ontdooistatus. Waar zolang de buitenspoel actief wordt ontdooid.",
+        "de": "Abtaustatus. Wahr, solange der Außenwärmetauscher aktiv abgetaut wird.",
+        "fr": "État de dégivrage. Vrai pendant le dégivrage actif de l'échangeur extérieur."
+      }
+    },
+    "adlar_dhw_active": {
+      "id": "adlar_dhw_active",
+      "type": "boolean",
+      "title": {
+        "en": "Hot water heating active",
+        "nl": "Tapwater wordt verwarmd",
+        "fr": "Chauffage de l’eau chaude actif",
+        "de": "Warmwasserbereitung aktiv"
+      },
+      "icon": "/assets/dhw-tank.svg",
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Hot water heating started",
+        "nl": "Tapwaterverwarming gestart",
+        "fr": "Chauffage de l’eau chaude démarré",
+        "de": "Warmwasserbereitung gestartet"
+      },
+      "insightsTitleFalse": {
+        "en": "Hot water heating stopped",
+        "nl": "Tapwaterverwarming gestopt",
+        "fr": "Chauffage de l’eau chaude arrêté",
+        "de": "Warmwasserbereitung gestoppt"
+      },
+      "description": {
+        "en": "The heat pump is heating domestic hot water right now (input register 3-0009, bit 2).",
+        "nl": "De warmtepomp verwarmt op dit moment tapwater (inputregister 3-0009, bit 2).",
+        "fr": "La pompe à chaleur chauffe actuellement l’eau chaude sanitaire (registre d’entrée 3-0009, bit 2).",
+        "de": "Die Wärmepumpe bereitet gerade Warmwasser (Eingangsregister 3-0009, Bit 2)."
+      }
+    },
+    "adlar_dhw_enabled": {
+      "id": "adlar_dhw_enabled",
+      "type": "boolean",
+      "title": {
+        "en": "Hot water function",
+        "nl": "Tapwaterfunctie",
+        "fr": "Fonction eau chaude",
+        "de": "Warmwasserfunktion"
+      },
+      "icon": "/assets/dhw-tank.svg",
+      "uiComponent": "toggle",
+      "getable": true,
+      "setable": true,
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Hot water function on",
+        "nl": "Tapwaterfunctie aan",
+        "fr": "Fonction eau chaude activée",
+        "de": "Warmwasserfunktion ein"
+      },
+      "insightsTitleFalse": {
+        "en": "Hot water function off",
+        "nl": "Tapwaterfunctie uit",
+        "fr": "Fonction eau chaude désactivée",
+        "de": "Warmwasserfunktion aus"
+      },
+      "description": {
+        "en": "Switches domestic hot water heating on or off via holding register 4-2102.",
+        "nl": "Schakelt de tapwaterverwarming aan of uit via holdingregister 4-2102.",
+        "fr": "Active ou désactive la production d’eau chaude sanitaire via le registre holding 4-2102.",
+        "de": "Schaltet die Warmwasserbereitung über Holdingregister 4-2102 ein oder aus."
+      }
+    },
+    "adlar_disinfection_enabled": {
+      "id": "adlar_disinfection_enabled",
+      "type": "boolean",
+      "title": {
+        "en": "Disinfection function enabled",
+        "nl": "Desinfectiefunctie ingeschakeld",
+        "fr": "Fonction de désinfection activée",
+        "de": "Desinfektionsfunktion aktiviert"
+      },
+      "icon": "/assets/sterilization.svg",
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": false,
+      "description": {
+        "en": "Disinfection function setting read from holding register 4-2103, bit 6. Read-only.",
+        "nl": "Instelling van de desinfectiefunctie, gelezen uit holdingregister 4-2103, bit 6. Alleen-lezen.",
+        "fr": "Réglage de la fonction de désinfection lu depuis le registre holding 4-2103, bit 6. Lecture seule.",
+        "de": "Einstellung der Desinfektionsfunktion aus Holdingregister 4-2103, Bit 6. Nur lesbar."
       }
     },
     "adlar_eev_step": {
@@ -20731,10 +20884,10 @@
       "min": 0,
       "max": 500,
       "description": {
-        "en": "Electronic Expansion Valve (EEV) opening position from Modbus sensor register 0x0042 (eevOpenStep), in stepper motor steps.",
-        "nl": "Openingspositie van de elektronische expansieklep (EEV) uit Modbus-sensorregister 0x0042 (eevOpenStep), in stappenmotor-stappen.",
-        "de": "Öffnungsposition des elektronischen Expansionsventils (EEV) aus Modbus-Sensorregister 0x0042 (eevOpenStep), in Schrittmotorschritten.",
-        "fr": "Position d'ouverture du détendeur électronique (EEV) depuis le registre capteur Modbus 0x0042 (eevOpenStep), en pas moteur pas à pas."
+        "en": "Opening position of the main electronic expansion valve (EEV), in stepper motor steps.",
+        "nl": "Openingspositie van de elektronische hoofdexpansieklep (EEV), in stappenmotor-stappen.",
+        "de": "Öffnungsposition des elektronischen Hauptexpansionsventils (EEV), in Schrittmotorschritten.",
+        "fr": "Position d'ouverture du détendeur électronique principal (EEV), en pas du moteur pas à pas."
       },
       "insights": true,
       "insightsTitle": {
@@ -21480,10 +21633,10 @@
       "min": 0,
       "max": 500,
       "description": {
-        "en": "Enhanced Vapor Injection (EVI) valve opening position from Modbus sensor register 0x0043 (eviValveOpenStep), in stepper motor steps.",
-        "nl": "Openingspositie van de EVI-klep (Enhanced Vapor Injection) uit Modbus-sensorregister 0x0043 (eviValveOpenStep), in stappenmotor-stappen.",
-        "de": "Öffnungsposition des EVI-Ventils (Enhanced Vapor Injection) aus Modbus-Sensorregister 0x0043 (eviValveOpenStep), in Schrittmotorschritten.",
-        "fr": "Position d'ouverture de la vanne EVI (Enhanced Vapor Injection) depuis le registre capteur Modbus 0x0043 (eviValveOpenStep), en pas moteur pas à pas."
+        "en": "Opening position of the auxiliary expansion valve for vapour injection (EVI), in stepper motor steps.",
+        "nl": "Openingspositie van de hulpexpansieklep voor dampinjectie (EVI), in stappenmotor-stappen.",
+        "de": "Öffnungsposition des Hilfsexpansionsventils für die Dampfeinspritzung (EVI), in Schrittmotorschritten.",
+        "fr": "Position d'ouverture du détendeur auxiliaire pour l'injection de vapeur (EVI), en pas du moteur pas à pas."
       },
       "insights": true,
       "insightsTitle": {
@@ -21808,10 +21961,10 @@
       "min": 0,
       "max": 3000,
       "description": {
-        "en": "Outdoor fan speed from Modbus sensor register 0x0041 (fanRunningSpeed), in RPM.",
-        "nl": "Ventilatorsnelheid buitenunit uit Modbus-sensorregister 0x0041 (fanRunningSpeed), in RPM.",
-        "de": "Lüfterdrehzahl der Außeneinheit aus Modbus-Sensorregister 0x0041 (fanRunningSpeed), in U/min.",
-        "fr": "Vitesse du ventilateur extérieur depuis le registre capteur Modbus 0x0041 (fanRunningSpeed), en tr/min."
+        "en": "Speed of the outdoor unit fan, in RPM.",
+        "nl": "Snelheid van de ventilator in de buitenunit, in RPM.",
+        "de": "Drehzahl des Ventilators der Außeneinheit, in U/min.",
+        "fr": "Vitesse du ventilateur de l'unité extérieure, en tr/min."
       },
       "insights": true,
       "insightsTitle": {
@@ -21963,10 +22116,10 @@
       "getable": true,
       "setable": false,
       "description": {
-        "en": "Decoded fault description from Modbus fault registers 0x0002–0x0009. Shows the active fault code and name, or empty when no fault is present.",
-        "nl": "Gedecodeerde storingsbeschrijving uit Modbus-foutregisters 0x0002–0x0009. Toont de actieve storingscode en naam, of is leeg bij geen storing.",
-        "de": "Dekodierte Fehlerbeschreibung aus den Modbus-Fehlerregistern 0x0002–0x0009. Zeigt den aktiven Fehlercode und -namen oder ist leer, wenn kein Fehler vorliegt.",
-        "fr": "Description de défaut décodée depuis les registres de défaut Modbus 0x0002–0x0009. Affiche le code et le nom du défaut actif, ou vide en l'absence de défaut."
+        "en": "Active fault and protection codes with their description. Empty when no fault is present.",
+        "nl": "Actieve storings- en beveiligingscodes met omschrijving. Leeg als er geen storing is.",
+        "de": "Aktive Störungs- und Schutzcodes mit Beschreibung. Leer, wenn keine Störung vorliegt.",
+        "fr": "Codes de défaut et de protection actifs avec leur description. Vide en l'absence de défaut."
       }
     },
     "adlar_fault_shutdown": {
@@ -21996,10 +22149,10 @@
         "fr": "Arrêt sur défaut effacé"
       },
       "description": {
-        "en": "Fault shutdown status from Modbus status register 0x0000, bit 13 (FAULT_SHUTDOWN). True when the heat pump has stopped due to a fault.",
-        "nl": "Fout-stopstatus uit Modbus-statusregister 0x0000, bit 13 (FAULT_SHUTDOWN). Waar wanneer de warmtepomp door een storing is gestopt.",
-        "de": "Fehlerabschaltstatus aus Modbus-Statusregister 0x0000, Bit 13 (FAULT_SHUTDOWN). Wahr, wenn die Wärmepumpe aufgrund eines Fehlers abgeschaltet wurde.",
-        "fr": "État d'arrêt sur défaut depuis le registre de statut Modbus 0x0000, bit 13 (FAULT_SHUTDOWN). Vrai lorsque la pompe à chaleur s'est arrêtée suite à un défaut."
+        "en": "Fault shutdown status. True when the heat pump has stopped because of a fault.",
+        "nl": "Storingsstop. Waar als de warmtepomp door een storing is gestopt.",
+        "de": "Störabschaltung. Wahr, wenn die Wärmepumpe wegen einer Störung abgeschaltet hat.",
+        "fr": "Arrêt sur défaut. Vrai lorsque la pompe à chaleur s'est arrêtée à cause d'un défaut."
       }
     },
     "adlar_firmware_mcu": {
@@ -22066,6 +22219,37 @@
       "decimals": 1,
       "min": -25,
       "max": 10
+    },
+    "adlar_high_pressure": {
+      "id": "adlar_high_pressure",
+      "type": "number",
+      "title": {
+        "en": "High pressure",
+        "nl": "Hogedruk",
+        "fr": "Haute pression",
+        "de": "Hochdruck"
+      },
+      "icon": "/assets/pressure.svg",
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitle": {
+        "en": "High Pressure",
+        "nl": "Hogedruk",
+        "de": "Hochdruck",
+        "fr": "Haute pression"
+      },
+      "units": "kPa",
+      "decimals": 0,
+      "min": 0,
+      "max": 5000,
+      "description": {
+        "en": "High refrigerant pressure from Aurora III input register 3-0086.",
+        "nl": "Hoge koudemiddeldruk uit Aurora III inputregister 3-0086.",
+        "fr": "Haute pression du réfrigérant depuis le registre d’entrée Aurora III 3-0086.",
+        "de": "Hoher Kältemitteldruck aus Aurora-III-Eingangsregister 3-0086."
+      }
     },
     "adlar_hotwater": {
       "id": "adlar_hotwater",
@@ -22201,6 +22385,37 @@
       "setable": false,
       "uiComponent": null,
       "icon": "/assets/adaptive-control-diagnostics.svg"
+    },
+    "adlar_low_pressure": {
+      "id": "adlar_low_pressure",
+      "type": "number",
+      "title": {
+        "en": "Low pressure",
+        "nl": "Lagedruk",
+        "fr": "Basse pression",
+        "de": "Niederdruck"
+      },
+      "icon": "/assets/pressure.svg",
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitle": {
+        "en": "Low Pressure",
+        "nl": "Lagedruk",
+        "de": "Niederdruck",
+        "fr": "Basse pression"
+      },
+      "units": "kPa",
+      "decimals": 0,
+      "min": 0,
+      "max": 5000,
+      "description": {
+        "en": "Low refrigerant pressure from Aurora III input register 3-0087.",
+        "nl": "Lage koudemiddeldruk uit Aurora III inputregister 3-0087.",
+        "fr": "Basse pression du réfrigérant depuis le registre d’entrée Aurora III 3-0087.",
+        "de": "Niedriger Kältemitteldruck aus Aurora-III-Eingangsregister 3-0087."
+      }
     },
     "adlar_measure_pressure_effluent_temp": {
       "id": "adlar_measure_pressure_effluent_temp",
@@ -22433,6 +22648,64 @@
         "nl": "Actieve bedrijfsmodus uitgelezen uit Modbus-stuurregister 0x0304. Schrijfbaar: een wijziging stuurt een schrijfopdracht naar de warmtepomp.",
         "de": "Aktiver Betriebsmodus aus Modbus-Steuerregister 0x0304. Schreibbar: Eine Änderung sendet einen Schreibbefehl an die Wärmepumpe.",
         "fr": "Mode de fonctionnement actif lu depuis le registre de commande Modbus 0x0304. Inscriptible : une modification envoie une commande d'écriture à la pompe à chaleur."
+      }
+    },
+    "adlar_mode_aurora3": {
+      "id": "adlar_mode_aurora3",
+      "type": "enum",
+      "title": {
+        "en": "Operating mode",
+        "nl": "Bedrijfsmodus",
+        "fr": "Mode de fonctionnement",
+        "de": "Betriebsart"
+      },
+      "icon": "/assets/cop-efficiency.svg",
+      "uiComponent": "picker",
+      "getable": true,
+      "setable": true,
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off",
+            "nl": "Uit",
+            "fr": "Arrêt",
+            "de": "Aus"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "Cooling",
+            "nl": "Koeling",
+            "fr": "Refroidissement",
+            "de": "Kühlung"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "Heating",
+            "nl": "Verwarming",
+            "fr": "Chauffage",
+            "de": "Heizen"
+          }
+        },
+        {
+          "id": "4",
+          "title": {
+            "en": "Auto",
+            "nl": "Auto",
+            "fr": "Auto",
+            "de": "Auto"
+          }
+        }
+      ],
+      "description": {
+        "en": "Operating mode read from and written to holding register 4-2100. Released write values are Cooling, Heating and Auto.",
+        "nl": "Bedrijfsmodus gelezen uit en geschreven naar holdingregister 4-2100. Vrijgegeven schrijfwaarden zijn Koeling, Verwarming en Auto.",
+        "fr": "Mode de fonctionnement lu et écrit via le registre holding 4-2100. Les valeurs d’écriture autorisées sont Refroidissement, Chauffage et Auto.",
+        "de": "Betriebsart, gelesen aus und geschrieben in Holdingregister 4-2100. Freigegebene Schreibwerte sind Kühlung, Heizen und Auto."
       }
     },
     "adlar_openmeteo_last_fetch": {
@@ -22847,10 +23120,10 @@
       "min": 0,
       "max": 100,
       "description": {
-        "en": "Circulation pump speed from Modbus sensor register 0x0057 (waterPumpSpeedPWM), as a PWM duty cycle percentage.",
-        "nl": "Snelheid van de circulatiepomp uit Modbus-sensorregister 0x0057 (waterPumpSpeedPWM), als PWM-vulgraad in procent.",
-        "de": "Umwälzpumpendrehzahl aus Modbus-Sensorregister 0x0057 (waterPumpSpeedPWM), als PWM-Tastverhältnis in Prozent.",
-        "fr": "Vitesse de la pompe de circulation depuis le registre capteur Modbus 0x0057 (waterPumpSpeedPWM), en pourcentage de rapport cyclique PWM."
+        "en": "Speed of the circulation pump as a PWM duty cycle percentage.",
+        "nl": "Snelheid van de circulatiepomp als PWM-vulgraad in procent.",
+        "de": "Drehzahl der Umwälzpumpe als PWM-Tastgrad in Prozent.",
+        "fr": "Vitesse du circulateur en rapport cyclique PWM, en pourcentage."
       },
       "insights": true,
       "insightsTitle": {
@@ -22887,10 +23160,10 @@
         "fr": "Unité arrêtée"
       },
       "description": {
-        "en": "Unit running status from Modbus status register 0x0000, bit 14 (MACHINE_RUN). True when the heat pump is actively running.",
-        "nl": "Bedrijfsstatus van de unit uit Modbus-statusregister 0x0000, bit 14 (MACHINE_RUN). Waar wanneer de warmtepomp actief in bedrijf is.",
-        "de": "Betriebsstatus des Geräts aus Modbus-Statusregister 0x0000, Bit 14 (MACHINE_RUN). Wahr, wenn die Wärmepumpe aktiv in Betrieb ist.",
-        "fr": "État de fonctionnement de l'unité depuis le registre de statut Modbus 0x0000, bit 14 (MACHINE_RUN). Vrai lorsque la pompe à chaleur est en cours de fonctionnement."
+        "en": "Running status. True when the heat pump is actively running.",
+        "nl": "Bedrijfsstatus. Waar als de warmtepomp actief draait.",
+        "de": "Betriebsstatus. Wahr, wenn die Wärmepumpe aktiv läuft.",
+        "fr": "État de fonctionnement. Vrai lorsque la pompe à chaleur fonctionne activement."
       }
     },
     "adlar_scop": {
@@ -23017,6 +23290,55 @@
         "nl": "dp 11: capacity_set - Toont actuele warmwater curve instelling van apparaat (alleen-lezen sensor)",
         "de": "dp 11: capacity_set - Zeigt aktuelle Warmwasserkurveneinstellung vom Gerät (schreibgeschützter Sensor)",
         "fr": "dp 11: capacity_set - Affiche le paramètre actuel de courbe d'eau chaude de l'appareil (capteur en lecture seule)"
+      }
+    },
+    "adlar_silent_mode": {
+      "id": "adlar_silent_mode",
+      "type": "enum",
+      "title": {
+        "en": "Silent mode",
+        "nl": "Stille modus",
+        "fr": "Mode silencieux",
+        "de": "Leisemodus"
+      },
+      "icon": "/assets/silent-mode.svg",
+      "uiComponent": "picker",
+      "getable": true,
+      "setable": true,
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off",
+            "nl": "Uit",
+            "fr": "Arrêt",
+            "de": "Aus"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "Level 1",
+            "nl": "Niveau 1",
+            "fr": "Niveau 1",
+            "de": "Stufe 1"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "Level 2",
+            "nl": "Niveau 2",
+            "fr": "Niveau 2",
+            "de": "Stufe 2"
+          }
+        }
+      ],
+      "description": {
+        "en": "Silent mode level in holding register 4-2103, bits 4-5. Level 2 is only available on R290 heat pumps. Other bits of the register are kept unchanged.",
+        "nl": "Niveau van de stille modus in holdingregister 4-2103, bits 4-5. Niveau 2 is alleen beschikbaar op R290-warmtepompen. De overige bits van het register blijven ongewijzigd.",
+        "fr": "Niveau du mode silencieux dans le registre holding 4-2103, bits 4-5. Le niveau 2 n'est disponible que sur les pompes à chaleur R290. Les autres bits du registre restent inchangés.",
+        "de": "Stufe des Leisemodus in Holdingregister 4-2103, Bits 4-5. Stufe 2 ist nur bei R290-Wärmepumpen verfügbar. Die übrigen Bits des Registers bleiben unverändert."
       }
     },
     "adlar_simulated_target": {
@@ -23242,10 +23564,10 @@
         "fr": "Mode stérilisation arrêté"
       },
       "description": {
-        "en": "Sterilization cycle status from Modbus status register 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). True during an active Legionella prevention cycle.",
-        "nl": "Status van de sterilisatiecyclus uit Modbus-statusregister 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Waar tijdens een actieve legionellapreventiecyclus.",
-        "de": "Status des Sterilisierungszyklus aus Modbus-Statusregister 0x0001, Bit 0 (HIGH_TEMP_STERILIZATION). Wahr während eines aktiven Legionellen-Präventionszyklus.",
-        "fr": "État du cycle de stérilisation depuis le registre de statut Modbus 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Vrai pendant un cycle actif de prévention de la légionellose."
+        "en": "Sterilization status. True during an active Legionella prevention cycle.",
+        "nl": "Sterilisatiestatus. Waar tijdens een actieve legionellapreventiecyclus.",
+        "de": "Sterilisationsstatus. Wahr während eines aktiven Legionellen-Schutzzyklus.",
+        "fr": "État de stérilisation. Vrai pendant un cycle actif de prévention de la légionellose."
       }
     },
     "adlar_zombie_detections_daily": {

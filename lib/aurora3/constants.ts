@@ -62,7 +62,7 @@ export class DeviceConstants {
     SENSOR: 5 * 60 * 1000, // 5 minutes - measure_*, meter_* capabilities
     STATUS: 15 * 60 * 1000, // 15 minutes - adlar_connection_status, adlar_fault, etc.
     CALCULATED: 10 * 60 * 1000, // 10 minutes - adlar_cop, adlar_scop, etc.
-    CONTROL: Infinity, // Never timeout - target_temperature, onoff, adlar_mode, etc.
+    CONTROL: Infinity, // Never timeout - target_temperature, onoff, adlar_mode_aurora3, etc.
   };
 
   // Power thresholds (in watts)
