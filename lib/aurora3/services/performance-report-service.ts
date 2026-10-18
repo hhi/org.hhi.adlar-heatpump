@@ -550,7 +550,6 @@ export class PerformanceReportService {
   private scoreTelemetry(t: Translations): DomainScore & Partial<TelemetrySubCategories> {
     const inlet = this.getCapNum('measure_temperature.inlet');
     const outlet = this.getCapNum('measure_temperature.outlet');
-    const discharge = this.getCapNum('measure_temperature.exhaust');
     const ambient = this.getCapNum('measure_temperature.ambient');
     const compressorFreq = this.getCapNum('measure_frequency.compressor_freq');
     const flow = this.getCapNum('measure_water');
@@ -608,13 +607,9 @@ export class PerformanceReportService {
     };
 
     // ── Refrigerant circuit checks ──
-    let dischargeSuperHeatCheck: TelemetryCheck;
-    let condensationApproachCheck: TelemetryCheck;
-    let pressureTempSpreadCheck: TelemetryCheck;
-
-    dischargeSuperHeatCheck = { ok: true };
-    condensationApproachCheck = { ok: true };
-    pressureTempSpreadCheck = { ok: true };
+    const dischargeSuperHeatCheck: TelemetryCheck = { ok: true };
+    const condensationApproachCheck: TelemetryCheck = { ok: true };
+    const pressureTempSpreadCheck: TelemetryCheck = { ok: true };
 
     // ── Operational efficiency checks ──
     let temperatureLiftCheck: TelemetryCheck & { rating?: string };

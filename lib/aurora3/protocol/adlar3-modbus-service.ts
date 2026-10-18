@@ -79,10 +79,18 @@ const ADLAR3_POLL_SUPERFAST_DEF: RegisterPollGroupDefinition = {
   name: 'superfast',
   interval: 5_000,
   reads: [
-    { start: 38, count: 2, label: 'AIII status 3-38..3-39', fc: 'input' },
-    { start: 42, count: 2, label: 'AIII return/supply temps 3-42..3-43', fc: 'input' },
-    { start: 64, count: 1, label: 'AIII water flow 3-64', fc: 'input' },
-    { start: 79, count: 1, label: 'AIII compressor actual freq 3-79', fc: 'input' },
+    {
+      start: 38, count: 2, label: 'AIII status 3-38..3-39', fc: 'input',
+    },
+    {
+      start: 42, count: 2, label: 'AIII return/supply temps 3-42..3-43', fc: 'input',
+    },
+    {
+      start: 64, count: 1, label: 'AIII water flow 3-64', fc: 'input',
+    },
+    {
+      start: 79, count: 1, label: 'AIII compressor actual freq 3-79', fc: 'input',
+    },
   ],
 };
 
@@ -90,10 +98,18 @@ const ADLAR3_POLL_FAST_DEF: RegisterPollGroupDefinition = {
   name: 'fast',
   interval: 10_000,
   reads: [
-    { start: 40, count: 17, label: 'AIII temperatures 3-40..3-56', fc: 'input' },
-    { start: 62, count: 3, label: 'AIII pump/flow 3-62..3-64', fc: 'input' },
-    { start: 70, count: 10, label: 'AIII compressor/electric 3-70..3-79', fc: 'input' },
-    { start: 80, count: 2, label: 'AIII outputs 3-80..3-81', fc: 'input' },
+    {
+      start: 40, count: 17, label: 'AIII temperatures 3-40..3-56', fc: 'input',
+    },
+    {
+      start: 62, count: 3, label: 'AIII pump/flow 3-62..3-64', fc: 'input',
+    },
+    {
+      start: 70, count: 10, label: 'AIII compressor/electric 3-70..3-79', fc: 'input',
+    },
+    {
+      start: 80, count: 2, label: 'AIII outputs 3-80..3-81', fc: 'input',
+    },
   ],
 };
 
@@ -101,10 +117,18 @@ const ADLAR3_POLL_MEDIUM_DEF: RegisterPollGroupDefinition = {
   name: 'medium',
   interval: 30_000,
   reads: [
-    { start: 9, count: 1, label: 'AIII effective mode 3-9', fc: 'input', optional: true },
-    { start: 60, count: 2, label: 'AIII pressures 3-60..3-61', fc: 'input', optional: true },
-    { start: 86, count: 18, label: 'AIII pressure/fault/opmode 3-86..3-103', fc: 'input', optional: true },
-    { start: 2100, count: 15, label: 'AIII controls 4-2100..4-2114', fc: 'holding' },
+    {
+      start: 9, count: 1, label: 'AIII effective mode 3-9', fc: 'input', optional: true,
+    },
+    {
+      start: 60, count: 2, label: 'AIII pressures 3-60..3-61', fc: 'input', optional: true,
+    },
+    {
+      start: 86, count: 18, label: 'AIII pressure/fault/opmode 3-86..3-103', fc: 'input', optional: true,
+    },
+    {
+      start: 2100, count: 15, label: 'AIII controls 4-2100..4-2114', fc: 'holding',
+    },
   ],
 };
 
@@ -112,9 +136,13 @@ const ADLAR3_POLL_SLOW_DEF: RegisterPollGroupDefinition = {
   name: 'slow',
   interval: 300_000,
   reads: [
-    { start: 10, count: 22, label: 'AIII limits 3-10..3-31', fc: 'input', optional: true },
+    {
+      start: 10, count: 22, label: 'AIII limits 3-10..3-31', fc: 'input', optional: true,
+    },
     // Climate-curve setpoints follow the outdoor temperature, so they are re-read here.
-    { start: 66, count: 4, label: 'AIII climate curve outputs 3-66..3-69', fc: 'input', optional: true },
+    {
+      start: 66, count: 4, label: 'AIII climate curve outputs 3-66..3-69', fc: 'input', optional: true,
+    },
   ],
 };
 
@@ -122,8 +150,12 @@ const ADLAR3_POLL_ONCE_DEF: RegisterPollGroupDefinition = {
   name: 'once',
   interval: 0,
   reads: [
-    { start: 0,  count: 10, label: 'AIII config 3-0..3-9',                   fc: 'input' },
-    { start: 34, count: 4,  label: 'AIII zone terminal types 3-34..3-37',     fc: 'input' },
+    {
+      start: 0, count: 10, label: 'AIII config 3-0..3-9', fc: 'input',
+    },
+    {
+      start: 34, count: 4, label: 'AIII zone terminal types 3-34..3-37', fc: 'input',
+    },
   ],
 };
 
@@ -218,7 +250,6 @@ export interface CopSnapshot {
   valid: boolean;
   reason?: string;
 }
-
 
 export interface DiyHeatingCurve {
   active: boolean;
@@ -712,19 +743,27 @@ export class Adlar3ModbusService extends EventEmitter {
     }
 
     if (electricalPowerKw < MIN_COP_POWER_KW) {
-      return { ...base, cop: 0, valid: false, reason: 'Elektrisch vermogen niet beschikbaar of te laag.' };
+      return {
+        ...base, cop: 0, valid: false, reason: 'Elektrisch vermogen niet beschikbaar of te laag.',
+      };
     }
 
     if (defrosting) {
-      return { ...base, cop: 0, valid: false, reason: 'Ontdooicyclus actief.' };
+      return {
+        ...base, cop: 0, valid: false, reason: 'Ontdooicyclus actief.',
+      };
     }
 
     if (flowM3h < MIN_THERMAL_FLOW_M3H) {
-      return { ...base, cop: 0, valid: false, reason: `Flow ${flowM3h.toFixed(2)} m³/h < ${MIN_THERMAL_FLOW_M3H} m³/h.` };
+      return {
+        ...base, cop: 0, valid: false, reason: `Flow ${flowM3h.toFixed(2)} m³/h < ${MIN_THERMAL_FLOW_M3H} m³/h.`,
+      };
     }
 
     if (thermalMode !== 'heating') {
-      return { ...base, cop: 0, valid: false, reason: `ΔT=${deltaT.toFixed(1)}°C < ${MIN_COP_DELTA_T_C}°C.` };
+      return {
+        ...base, cop: 0, valid: false, reason: `ΔT=${deltaT.toFixed(1)}°C < ${MIN_COP_DELTA_T_C}°C.`,
+      };
     }
 
     return {
@@ -733,8 +772,6 @@ export class Adlar3ModbusService extends EventEmitter {
       valid: true,
     };
   }
-
-
 
   private buildSensors(): Record<string, SensorValue> {
     const sensors: Record<string, SensorValue> = {};

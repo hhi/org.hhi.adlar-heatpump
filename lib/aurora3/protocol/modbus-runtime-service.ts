@@ -1,3 +1,6 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 /* eslint-disable import/prefer-default-export */
 /**
  * ADR-031: ModbusRuntimeService<TSnapshot>

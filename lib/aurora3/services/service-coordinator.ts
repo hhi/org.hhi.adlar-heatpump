@@ -63,8 +63,8 @@ export class ServiceCoordinator {
   private _lastSuccessfulFastPollAt: number | null = null;
   private _consecutiveFastPollFailures = 0;
   private _consecutiveSuperfastPollFailures = 0;
-  private _consecutiveNonFastRequiredFailures = 0;  // ADR-043
-  private _structurallyUnsupportedFast = false;      // ADR-043
+  private _consecutiveNonFastRequiredFailures = 0; // ADR-043
+  private _structurallyUnsupportedFast = false; // ADR-043
   private _degradedSinceTimer: ReturnType<typeof setTimeout> | null = null; // ADR-043
   private static readonly DEGRADED_TO_OFFLINE_MS = 10 * 60 * 1000; // 10 minuten
   private _lastErrorContext: string | null = null;
@@ -460,7 +460,7 @@ export class ServiceCoordinator {
     });
 
     // Detect defrost cycle end (true → false transition)
-    const defrosting = snapshot.status.defrosting;
+    const { defrosting } = snapshot.status;
     if (defrosting && !this._prevDefrosting) {
       this._defrostStartedAt = Date.now();
     } else if (!defrosting && this._prevDefrosting && this._defrostStartedAt !== null) {
@@ -672,11 +672,9 @@ export class ServiceCoordinator {
           this._markPollTimeoutOffline();
         }, ServiceCoordinator.DEGRADED_TO_OFFLINE_MS);
       }
-    } else {
-      if (this._degradedSinceTimer) {
-        this.device.homey.clearTimeout(this._degradedSinceTimer);
-        this._degradedSinceTimer = null;
-      }
+    } else if (this._degradedSinceTimer) {
+      this.device.homey.clearTimeout(this._degradedSinceTimer);
+      this._degradedSinceTimer = null;
     }
 
     if (quality === 'online') {

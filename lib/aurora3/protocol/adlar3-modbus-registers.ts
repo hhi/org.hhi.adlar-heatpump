@@ -161,7 +161,7 @@ export function setBitFlag(raw: number, mask: number, on: boolean): number {
   return (on ? (raw | mask) : (raw & ~mask)) & 0xFFFF;
 }
 
-export const SILENT_MODE_MASK = 0x0030;     // bits 4-5
+export const SILENT_MODE_MASK = 0x0030; // bits 4-5
 export const SILENT_MODE_SHIFT = 4;
 
 export enum SilentMode {
@@ -316,7 +316,7 @@ export interface InputRegister {
   fc: 'input';
   dataType: 'U16' | 'S16';
   unit?: string;
-  multiply?: number;   // physical value = raw * multiply (after sign-extension if S16)
+  multiply?: number; // physical value = raw * multiply (after sign-extension if S16)
   name: string;
   desc?: string;
 }
@@ -324,255 +324,425 @@ export interface InputRegister {
 export const SENSOR_REGISTERS: Record<string, InputRegister> = {
   // --- Room / Indoor ---
   roomTemperature: {
-    address: 40, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 40,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Room Temperature (Tldr)',
     desc: 'Indoor room temperature. Aurora II has no equivalent (only setpoint).',
   },
 
   // --- Hydraulic Temperatures ---
   totalLeavingWaterTemp: {
-    address: 41, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 41,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Total Leaving Water Temperature (TC)',
     desc: 'Total outlet temperature after auxiliary heat source. II ≈ 0x0075.',
   },
   inletWaterTemp: {
-    address: 42, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 42,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Retour Water Temperature (TE1)',
     desc: 'Return water from installation. II ≈ 0x004F.',
   },
   outletWaterTemp: {
-    address: 43, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 43,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Aanvoer Water Temperature (TA)',
     desc: 'Supply water to installation (Temperatuur Aanvoer). II ≈ 0x0050. Used as climate.current_temperature.',
   },
   bufferTankUpperTemp: {
-    address: 44, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 44,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Buffer Tank Upper Part Temperature (TE2)',
     desc: 'Spec marks RESERVED — verify presence on actual hardware.',
   },
   bufferTankLowerTemp: {
-    address: 45, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 45,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Buffer Tank Lower Part Temperature (TW)',
     desc: 'II has only one buffer sensor (0x0074); III splits upper/lower.',
   },
   dhwTankTemp: {
-    address: 46, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 46,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'DHW Water Tank Temperature (TZ2)',
     desc: 'II ≈ 0x0054.',
   },
   zone2MixingInletTemp: {
-    address: 47, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 47,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Mixing Station Inlet Water Temperature (Tso)',
   },
   solarHeatingTemp: {
-    address: 48, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 48,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Solar Water Heating Temperature (T3-solar)',
     desc: 'Caveat: Aurora III spec uses label "T3" for both Reg 48 (solar) and Reg 49 (coil).',
   },
   outdoorCoilTemp: {
-    address: 49, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 49,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Outdoor Unit Coil Temperature (T3)',
     desc: 'II ≈ 0x004B (T2).',
   },
 
   // --- Ambient & Refrigerant ---
   ambientTemp: {
-    address: 50, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 50,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Ambient Temperature (T4)',
     desc: 'Outdoor ambient. II ≈ 0x004A (T1).',
   },
   exvOutletTemp: {
-    address: 51, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 51,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'EXV Valve Outlet Temperature (T5)',
     desc: 'II has two economizer sensors (0x0051, 0x0052); III has only this one.',
   },
   dischargeTemp: {
-    address: 52, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 52,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Compressor Discharge Temperature (TP)',
     desc: 'II ≈ 0x004E (called "Exhaust Temp T5").',
   },
   suctionTemp: {
-    address: 53, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 53,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Compressor Suction Temperature (TH)',
     desc: 'II ≈ 0x004D (T4).',
   },
 
   // --- Setpoints (read-only; controller-computed) ---
   targetOutletTemp: {
-    address: 56, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 56,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Target Outlet Setting Temperature (TOut)',
     desc: 'Controller-computed setpoint after curve+modulation. Compare with Reg 43 to assess control performance.',
   },
 
   // --- Hydraulic ---
   inletWaterPressure: {
-    address: 60, fc: 'input', dataType: 'U16', unit: 'Bar', /* @verify scale */ multiply: 0.1,
+    address: 60,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'Bar', /* @verify scale */ multiply: 0.1,
     name: 'Inlet Water Pressure',
     desc: 'Spec marks RESERVED — may not be populated on all units. @verify',
   },
   outletWaterPressure: {
-    address: 61, fc: 'input', dataType: 'U16', unit: 'Bar', /* @verify scale */ multiply: 0.1,
+    address: 61,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'Bar', /* @verify scale */ multiply: 0.1,
     name: 'Outlet Water Pressure',
     desc: 'YAML uses scale 0.1; spec does not declare scale. @verify',
   },
   pumpPwmOutput: {
-    address: 62, fc: 'input', dataType: 'U16', unit: '%', multiply: 1,
+    address: 62,
+    fc: 'input',
+    dataType: 'U16',
+    unit: '%',
+    multiply: 1,
     name: 'PWM Percentage of DC Water Pump',
     desc: 'II ≈ 0x0057.',
   },
   pumpPwmFeedback: {
-    address: 63, fc: 'input', dataType: 'U16', unit: 'm³/h', /* @verify */ multiply: 0.1,
+    address: 63,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'm³/h', /* @verify */ multiply: 0.1,
     name: 'PWM Feedback DC Water Pump',
     desc: 'Official map: scale x10, unit m³/h ("123 means 12.3 m³/h"), although the title says "percentage". '
         + 'The extended HA YAML reads it as % x1. @verify on hardware. Not used for capabilities.',
   },
   waterFlow: {
-    address: 64, fc: 'input', dataType: 'U16', unit: 'm³/h', /* @verify scale */ multiply: 0.1,
+    address: 64,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'm³/h', /* @verify scale */ multiply: 0.1,
     name: 'Actual Water Flow of DC Pump',
     desc: '⚠️ UNIT DIFFERS FROM AURORA II (II=L/min, III=m³/h, factor 60). YAML uses scale 0.1.',
   },
 
   // --- Climate Curve Outputs (read-only computed setpoints) ---
   zone1CurveCoolingSetTemp: {
-    address: 66, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 66,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 1 Climate Curve Cooling Set Temperature',
   },
   zone1CurveHeatingSetTemp: {
-    address: 67, fc: 'input', dataType: 'S16', unit: '°C',
+    address: 67,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
     /* @verify — official map says scale x1; both HA YAML references use x10 like all other °C registers. */
     multiply: TEMP_MULTIPLY,
     name: 'Zone 1 Climate Curve Heating Set Temperature',
     desc: 'Follows outdoor temperature — polled in the slow group. Scale conflict: official map x1, HA x10. @verify',
   },
   zone2CurveCoolingSetTemp: {
-    address: 68, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 68,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Climate Curve Cooling Set Temperature',
   },
   zone2CurveHeatingSetTemp: {
-    address: 69, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 69,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Climate Curve Heating Set Temperature',
   },
 
   // --- Compressor / Fan / EEV ---
   mainEevOpenDegree: {
-    address: 70, fc: 'input', dataType: 'U16', unit: 'P', multiply: 1,
+    address: 70,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'P',
+    multiply: 1,
     name: 'Main EEV Open Degree',
     desc: 'Steps. II ≈ 0x0042.',
   },
   auxEevOpenDegree: {
-    address: 71, fc: 'input', dataType: 'U16', unit: 'P', multiply: 1,
+    address: 71,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'P',
+    multiply: 1,
     name: 'Auxiliary EEV Open Degree',
     desc: 'Spec marks RESERVED but likely returns useful values. II ≈ 0x0043 (EVI valve). @verify',
   },
   fanSpeed: {
-    address: 72, fc: 'input', dataType: 'U16', unit: 'RPM', multiply: 1,
+    address: 72,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'RPM',
+    multiply: 1,
     name: 'Speed of No.1 DC Fan',
     desc: 'II ≈ 0x0041.',
   },
 
   // --- Electrical ---
   acInputVoltage: {
-    address: 74, fc: 'input', dataType: 'U16', unit: 'V', multiply: 1,
+    address: 74,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'V',
+    multiply: 1,
     name: 'AC Input Voltage',
     desc: 'Reads 0 on some firmware (extended HA YAML). '
         + 'Aurora II applies 0.99 calibration factor (~1% sensor offset). Likely also applies here. @verify',
   },
   acInputCurrent: {
-    address: 75, fc: 'input', dataType: 'U16', unit: 'A', multiply: 0.1,
+    address: 75,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'A',
+    multiply: 0.1,
     name: 'AC Input Current',
     desc: 'Reads 0 on some firmware (extended HA YAML). '
         + '⚠️ Aurora II documents non-linear sensor (38% error @4A → 18% @10A). '
         + 'III likely uses same sensor architecture. Apply calibration curve before deriving power. @verify',
   },
   dcBusVoltage: {
-    address: 76, fc: 'input', dataType: 'U16', unit: 'V', multiply: 1,
+    address: 76,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'V',
+    multiply: 1,
     name: 'DC Bus Voltage',
     desc: 'III-only continuous reading. II only reports DC bus over/undervoltage as fault bits.',
   },
   compressorCurrent: {
-    address: 77, fc: 'input', dataType: 'U16', unit: 'A', multiply: 0.1,
+    address: 77,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'A',
+    multiply: 0.1,
     name: 'Compressor Phase Current',
     desc: 'II ≈ 0x0046.',
   },
   compressorTargetFreq: {
-    address: 78, fc: 'input', dataType: 'U16', unit: 'Hz', multiply: 1,
+    address: 78,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'Hz',
+    multiply: 1,
     name: 'Compressor Target Frequency',
     desc: 'II ≈ 0x0027 (in STATUS_REGISTER_MAP).',
   },
   compressorRunningFreq: {
-    address: 79, fc: 'input', dataType: 'U16', unit: 'Hz', multiply: 1,
+    address: 79,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'Hz',
+    multiply: 1,
     name: 'Compressor Actual Frequency',
     desc: 'II ≈ 0x0040.',
   },
 
   // --- Status / Control Outputs ---
   systemStatus: {
-    address: 38, fc: 'input', dataType: 'U16',
+    address: 38,
+    fc: 'input',
+    dataType: 'U16',
     name: 'System Status (16-bit bitmask)',
     desc: 'Decode using STATUS_BITS. See Block 2 for verified bit definitions.',
   },
   ahsRequest: {
-    address: 39, fc: 'input', dataType: 'U16',
+    address: 39,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Request External Heating Source (Hybrid)',
     desc: 'Only for hybrid systems. B0 = request external heating source during anti-freezing mode, '
         + 'B1 = request external heating source during defrosting mode (official map). Not decoded into capabilities.',
   },
   mainPumpStatus: {
-    address: 80, fc: 'input', dataType: 'U16',
+    address: 80,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Main Water Pump On/Off',
     desc: 'II ≈ 0x0019 bit 6 (RELAY_1.MAIN_CIRCULATING_PUMP).',
   },
   fourWayValveStatus: {
-    address: 81, fc: 'input', dataType: 'U16',
+    address: 81,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Four Way Valve On/Off',
     desc: '0 = heating cycle, 1 = cooling or defrost cycle. II ≈ 0x001A bit 3 (RELAY_2.FOUR_WAY_VALVE_1).',
   },
 
   // --- Refrigerant Pressure (III-only direct readings) ---
   highPressure: {
-    address: 86, fc: 'input', dataType: 'U16', unit: 'kPa', /* @verify scale */ multiply: 1,
+    address: 86,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'kPa', /* @verify scale */ multiply: 1,
     name: 'High Pressure',
     desc: 'III-only direct kPa reading. II only had saturation-temperature derivative.',
   },
   lowPressure: {
-    address: 87, fc: 'input', dataType: 'U16', unit: 'kPa', multiply: 1,
+    address: 87,
+    fc: 'input',
+    dataType: 'U16',
+    unit: 'kPa',
+    multiply: 1,
     name: 'Low Pressure',
     desc: 'Same as highPressure. @verify scale',
   },
 
   // --- Fault & Protection Codes ---
   errorCodes_E01_E16: {
-    address: 90, fc: 'input', dataType: 'U16',
+    address: 90,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Error Codes E01-E16',
     desc: 'Bit field (official map: "bit by bit operation"): bit n = code E(n+1). Same layout for Reg 91-101 '
         + '(Reg 96-101 = P01-P96). Decode with decodeCodeBits().',
   },
-  errorCodes_E17_E32: { address: 91, fc: 'input', dataType: 'U16', name: 'Error Codes E17-E32' },
-  errorCodes_E33_E48: { address: 92, fc: 'input', dataType: 'U16', name: 'Error Codes E33-E48' },
-  errorCodes_E49_E64: { address: 93, fc: 'input', dataType: 'U16', name: 'Error Codes E49-E64' },
-  errorCodes_E65_E80: { address: 94, fc: 'input', dataType: 'U16', name: 'Error Codes E65-E80' },
-  errorCodes_E81_E96: { address: 95, fc: 'input', dataType: 'U16', name: 'Error Codes E81-E96' },
+  errorCodes_E17_E32: {
+    address: 91, fc: 'input', dataType: 'U16', name: 'Error Codes E17-E32',
+  },
+  errorCodes_E33_E48: {
+    address: 92, fc: 'input', dataType: 'U16', name: 'Error Codes E33-E48',
+  },
+  errorCodes_E49_E64: {
+    address: 93, fc: 'input', dataType: 'U16', name: 'Error Codes E49-E64',
+  },
+  errorCodes_E65_E80: {
+    address: 94, fc: 'input', dataType: 'U16', name: 'Error Codes E65-E80',
+  },
+  errorCodes_E81_E96: {
+    address: 95, fc: 'input', dataType: 'U16', name: 'Error Codes E81-E96',
+  },
 
   protectionCodes_P01_P16: {
-    address: 96, fc: 'input', dataType: 'U16',
+    address: 96,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Protection Codes P01-P16',
   },
-  protectionCodes_P17_P32: { address: 97, fc: 'input', dataType: 'U16', name: 'Protection Codes P17-P32' },
-  protectionCodes_P33_P48: { address: 98, fc: 'input', dataType: 'U16', name: 'Protection Codes P33-P48' },
-  protectionCodes_P49_P64: { address: 99, fc: 'input', dataType: 'U16', name: 'Protection Codes P49-P64' },
-  protectionCodes_P65_P80: { address: 100, fc: 'input', dataType: 'U16', name: 'Protection Codes P65-P80' },
-  protectionCodes_P81_P96: { address: 101, fc: 'input', dataType: 'U16', name: 'Protection Codes P81-P96' },
+  protectionCodes_P17_P32: {
+    address: 97, fc: 'input', dataType: 'U16', name: 'Protection Codes P17-P32',
+  },
+  protectionCodes_P33_P48: {
+    address: 98, fc: 'input', dataType: 'U16', name: 'Protection Codes P33-P48',
+  },
+  protectionCodes_P49_P64: {
+    address: 99, fc: 'input', dataType: 'U16', name: 'Protection Codes P49-P64',
+  },
+  protectionCodes_P65_P80: {
+    address: 100, fc: 'input', dataType: 'U16', name: 'Protection Codes P65-P80',
+  },
+  protectionCodes_P81_P96: {
+    address: 101, fc: 'input', dataType: 'U16', name: 'Protection Codes P81-P96',
+  },
 
   // --- Operation Mode Readback ---
   currentTargetOpMode: {
-    address: 102, fc: 'input', dataType: 'U16',
+    address: 102,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Current Target Operation Mode',
     desc: 'Official map: B3-B0 zone 1 (or single zone) target mode, B7-B4 zone 2 target mode '
         + '(0x0 standby, 0x1 cooling, 0x2 heating); B11-B8 DHW target mode (0x0 standby, 0x8 DHW); '
         + 'upper bits: auto target mode (map text is ambiguous). Not decoded into capabilities.',
   },
   actualOpMode: {
-    address: 103, fc: 'input', dataType: 'U16',
+    address: 103,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Actual Operation Mode',
     desc: 'Official map: B3-B0 zone 1 (or single zone) operation mode, B7-B4 zone 2 operation mode '
         + '(0x0 standby, 0x1 cooling, 0x2 heating); B11-B8 DHW operation mode (0x0 standby, 0x8 DHW). '
@@ -601,12 +771,16 @@ export interface HoldingRegister {
 export const CONTROL_REGISTERS: Record<string, HoldingRegister> = {
   // --- HVAC Mode ---
   hvacMode: {
-    address: 2100, fc: 'holding', dataType: 'U16',
+    address: 2100,
+    fc: 'holding',
+    dataType: 'U16',
     name: 'Air Conditioning Modes',
     desc: 'See HvacMode enum. Verified: 1=Cool, 2=Heat, 4=Auto. On/off is Reg 2101, not value 0.',
   },
   hvacZoneControlMode: {
-    address: 2101, fc: 'holding', dataType: 'U16',
+    address: 2101,
+    fc: 'holding',
+    dataType: 'U16',
     name: 'Air Conditioning Modes (Zone Control)',
     desc: 'See ZoneControl enum: 0=all off, 1=zone 1 on, 2=zone 2 on, 3=all on (extended HA YAML). '
         + 'Drives onoff; writes require the experimental_zone_onoff setting. @verify on hardware.',
@@ -614,19 +788,25 @@ export const CONTROL_REGISTERS: Record<string, HoldingRegister> = {
 
   // --- DHW On/Off ---
   dhwOnOff: {
-    address: 2102, fc: 'holding', dataType: 'U16',
+    address: 2102,
+    fc: 'holding',
+    dataType: 'U16',
     name: 'DHW Mode On/Off',
     desc: '0 = off, 1 = on (extended HA YAML). Aurora II uses 0x0305 mainSwitch + 0x0304 mode for the same purpose.',
   },
 
   // --- Additional Function A (bit field, see Block 3) ---
   additionalFunctionA: {
-    address: 2103, fc: 'holding', dataType: 'U16',
+    address: 2103,
+    fc: 'holding',
+    dataType: 'U16',
     name: 'Additional Function A (backup heater bit 3, silent mode bits 4-5, disinfection bit 6)',
     desc: 'Use FUNCTION_A_BITS and the silent-mode helpers. Unknown bits are preserved via RMW.',
   },
   additionalFunctionB: {
-    address: 2104, fc: 'holding', dataType: 'U16',
+    address: 2104,
+    fc: 'holding',
+    dataType: 'U16',
     name: 'Additional Function B (Reserved)',
     desc: 'Reserved additional-function register. Keep at 0 unless verified on hardware.',
     readOnly: true,
@@ -634,30 +814,52 @@ export const CONTROL_REGISTERS: Record<string, HoldingRegister> = {
 
   // --- Setpoints ---
   dhwSetTemp: {
-    address: 2105, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
-    min: 20, max: 75, /* @verify ranges — taken from Aurora II */
+    address: 2105,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
+    min: 20,
+    max: 75, /* @verify ranges — taken from Aurora II */
     name: 'DHW Mode Water Temperature Setting',
     desc: 'II ≈ 0x0302. Active limits in Reg 14/15.',
   },
   zone1CoolingSetTemp: {
-    address: 2106, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
-    min: 7, max: 25, /* @verify */
+    address: 2106,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
+    min: 7,
+    max: 25, /* @verify */
     name: 'Zone 1 Cooling Mode Temperature Setting',
     desc: 'II ≈ 0x0300. Active limits in Reg 10/11.',
   },
   zone1HeatingSetTemp: {
-    address: 2107, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
-    min: 18, max: 50, /* From YAML number platform definition */
+    address: 2107,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
+    min: 18,
+    max: 50, /* From YAML number platform definition */
     name: 'Zone 1 Heating Mode Temperature Setting',
     desc: 'II ≈ 0x0301. Used as climate.target_temperature in YAML.',
   },
   zone1AutoCoolingSetTemp: {
-    address: 2108, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 2108,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 1 Auto Mode Cooling Temperature Setting',
     desc: 'III-only. Aurora II has no auto-mode subdivision per zone.',
   },
   zone1AutoHeatingSetTemp: {
-    address: 2109, fc: 'holding', dataType: 'S16', unit: '°C',
+    address: 2109,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
     /* @verify — spec lists scale x1, almost certainly a typo (other °C registers are x10).
        This is a WRITABLE register — verify BEFORE writing or risk a 10× setpoint error. */
     multiply: TEMP_MULTIPLY,
@@ -665,24 +867,45 @@ export const CONTROL_REGISTERS: Record<string, HoldingRegister> = {
     desc: '⚠️ SPEC SCALE TYPO RISK. Confirm before write.',
   },
   zone2CoolingSetTemp: {
-    address: 2110, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 2110,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Cooling Mode Temperature Setting',
   },
   zone2HeatingSetTemp: {
-    address: 2111, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 2111,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Heating Mode Temperature Setting',
   },
   zone2AutoCoolingSetTemp: {
-    address: 2112, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 2112,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Auto Mode Cooling Temperature Setting',
   },
   zone2AutoHeatingSetTemp: {
-    address: 2113, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 2113,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Zone 2 Auto Mode Heating Temperature Setting',
   },
   roomTempSetTemp: {
-    address: 2114, fc: 'holding', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
-    min: 16, max: 28, /* From extended HA YAML; active limits in Reg 30/31 take precedence */
+    address: 2114,
+    fc: 'holding',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
+    min: 16,
+    max: 28, /* From extended HA YAML; active limits in Reg 30/31 take precedence */
     name: 'Room Temperature Setting',
     desc: 'II ≈ 0x0306 indoorTempSetpoint. May have no effect without a room thermostat (Reg 1 = 0).',
   },
@@ -702,117 +925,235 @@ export const CONTROL_REGISTERS: Record<string, HoldingRegister> = {
 // ============================================================================
 
 export const LIMIT_REGISTERS: Record<string, InputRegister> = {
-  zone1CoolingUpperLimit: { address: 10, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Cooling Upper Limit' },
-  zone1CoolingLowerLimit: { address: 11, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Cooling Lower Limit' },
-  zone1HeatingUpperLimit: { address: 12, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Heating Upper Limit' },
-  zone1HeatingLowerLimit: { address: 13, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Heating Lower Limit' },
-  dhwUpperLimit:          { address: 14, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'DHW Upper Limit' },
-  dhwLowerLimit:          { address: 15, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'DHW Lower Limit' },
+  zone1CoolingUpperLimit: {
+    address: 10, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Cooling Upper Limit',
+  },
+  zone1CoolingLowerLimit: {
+    address: 11, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Cooling Lower Limit',
+  },
+  zone1HeatingUpperLimit: {
+    address: 12, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Heating Upper Limit',
+  },
+  zone1HeatingLowerLimit: {
+    address: 13, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Heating Lower Limit',
+  },
+  dhwUpperLimit: {
+    address: 14, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'DHW Upper Limit',
+  },
+  dhwLowerLimit: {
+    address: 15, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'DHW Lower Limit',
+  },
   zone1AutoCoolingUpperLimit: {
-    address: 16, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 16,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Z1 Auto Cooling Upper Limit',
     desc: '@verify — spec lists scale x1, almost certainly typo.',
   },
-  zone1AutoCoolingLowerLimit: { address: 17, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Auto Cooling Lower Limit' },
-  zone1AutoHeatingUpperLimit: { address: 18, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Auto Heating Upper Limit' },
-  zone1AutoHeatingLowerLimit: { address: 19, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Auto Heating Lower Limit' },
-  zone2CoolingUpperLimit: { address: 20, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Cooling Upper Limit' },
-  zone2CoolingLowerLimit: { address: 21, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Cooling Lower Limit' },
-  zone2HeatingUpperLimit: { address: 22, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Heating Upper Limit' },
-  zone2HeatingLowerLimit: { address: 23, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Heating Lower Limit' },
-  zone2AutoCoolingUpperLimit: { address: 26, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Auto Cooling Upper Limit' },
+  zone1AutoCoolingLowerLimit: {
+    address: 17, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Auto Cooling Lower Limit',
+  },
+  zone1AutoHeatingUpperLimit: {
+    address: 18, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Auto Heating Upper Limit',
+  },
+  zone1AutoHeatingLowerLimit: {
+    address: 19, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z1 Auto Heating Lower Limit',
+  },
+  zone2CoolingUpperLimit: {
+    address: 20, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Cooling Upper Limit',
+  },
+  zone2CoolingLowerLimit: {
+    address: 21, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Cooling Lower Limit',
+  },
+  zone2HeatingUpperLimit: {
+    address: 22, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Heating Upper Limit',
+  },
+  zone2HeatingLowerLimit: {
+    address: 23, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Heating Lower Limit',
+  },
+  zone2AutoCoolingUpperLimit: {
+    address: 26, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Auto Cooling Upper Limit',
+  },
   zone2AutoCoolingLowerLimit: {
-    address: 27, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY,
+    address: 27,
+    fc: 'input',
+    dataType: 'S16',
+    unit: '°C',
+    multiply: TEMP_MULTIPLY,
     name: 'Z2 Auto Cooling Lower Limit',
     desc: '@verify — spec lists scale x1, almost certainly typo.',
   },
-  zone2AutoHeatingUpperLimit: { address: 28, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Auto Heating Upper Limit' },
-  zone2AutoHeatingLowerLimit: { address: 29, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Auto Heating Lower Limit' },
-  roomTempUpperLimit: { address: 30, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Room Temperature Upper Limit' },
-  roomTempLowerLimit: { address: 31, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Room Temperature Lower Limit' },
+  zone2AutoHeatingUpperLimit: {
+    address: 28, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Auto Heating Upper Limit',
+  },
+  zone2AutoHeatingLowerLimit: {
+    address: 29, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Z2 Auto Heating Lower Limit',
+  },
+  roomTempUpperLimit: {
+    address: 30, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Room Temperature Upper Limit',
+  },
+  roomTempLowerLimit: {
+    address: 31, fc: 'input', dataType: 'S16', unit: '°C', multiply: TEMP_MULTIPLY, name: 'Room Temperature Lower Limit',
+  },
 } as const;
 
 export const CONFIG_REGISTERS: Record<string, InputRegister> = {
   totalRegisterCount: {
-    address: 0, fc: 'input', dataType: 'U16',
+    address: 0,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Total Number of Modbus Registers',
     desc: 'Total register count in the Aurora III map: 110 input registers plus 15 holding registers.',
   },
   thermostatControllerType: {
-    address: 1, fc: 'input', dataType: 'U16',
+    address: 1,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Third Party Thermostat Controller Type',
     desc: '0=none, 1=single zone on/off + mode, 2=single zone on/off, 3=two zones.',
   },
   zoneControlModeWithoutThermostat: {
-    address: 2, fc: 'input', dataType: 'U16',
+    address: 2,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Single Zone or Two Zones Control Without Third Party Thermostat',
     desc: '0=single zone, 1=two zones.',
   },
-  singleZoneControlWithoutThermostat: { address: 3, fc: 'input', dataType: 'U16', name: 'Single Zone Control Without Third Party Thermostat' },
-  twoZonesControlWithoutThermostat: { address: 4, fc: 'input', dataType: 'U16', name: 'Two Zones Control Without Third Party Thermostat' },
-  singleZoneControlWithThermostat: { address: 5, fc: 'input', dataType: 'U16', name: 'Single Zone Control With Thermostat' },
-  twoZonesControlWithThermostat: { address: 6, fc: 'input', dataType: 'U16', name: 'Two Zones Control With Thermostat' },
+  singleZoneControlWithoutThermostat: {
+    address: 3, fc: 'input', dataType: 'U16', name: 'Single Zone Control Without Third Party Thermostat',
+  },
+  twoZonesControlWithoutThermostat: {
+    address: 4, fc: 'input', dataType: 'U16', name: 'Two Zones Control Without Third Party Thermostat',
+  },
+  singleZoneControlWithThermostat: {
+    address: 5, fc: 'input', dataType: 'U16', name: 'Single Zone Control With Thermostat',
+  },
+  twoZonesControlWithThermostat: {
+    address: 6, fc: 'input', dataType: 'U16', name: 'Two Zones Control With Thermostat',
+  },
   refrigerantType: {
-    address: 7, fc: 'input', dataType: 'U16',
+    address: 7,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Refrigerant Type',
     desc: '0=R32, 1=R290.',
   },
   unitType: {
-    address: 8, fc: 'input', dataType: 'U16',
+    address: 8,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Unit Type',
     desc: 'Bit field. Exact model mapping is not documented in the public register sheet. @verify.',
   },
   effectiveMode: {
-    address: 9, fc: 'input', dataType: 'U16',
+    address: 9,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Effective Mode',
     desc: 'Bit field (EFFECTIVE_MODE_BITS): bit0=cooling, bit1=heating, bit2=DHW. Dynamic — polled in the medium group.',
   },
   zone1TerminalCooling: {
-    address: 34, fc: 'input', dataType: 'U16',
+    address: 34,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Zone 1 Terminal Type for Cooling',
     desc: '0=FCU, 1=radiator, 2=floor heating circuit.',
   },
   zone1TerminalHeating: {
-    address: 35, fc: 'input', dataType: 'U16',
+    address: 35,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Zone 1 Terminal Type for Heating',
     desc: '0=FCU, 1=radiator, 2=floor heating circuit.',
   },
   zone2TerminalCooling: {
-    address: 36, fc: 'input', dataType: 'U16',
+    address: 36,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Zone 2 Terminal Type for Cooling',
     desc: '0=FCU, 1=radiator, 2=floor heating circuit.',
   },
   zone2TerminalHeating: {
-    address: 37, fc: 'input', dataType: 'U16',
+    address: 37,
+    fc: 'input',
+    dataType: 'U16',
     name: 'Zone 2 Terminal Type for Heating',
     desc: '0=FCU, 1=radiator, 2=floor heating circuit.',
   },
 } as const;
 
 export const RESERVED_INPUT_REGISTERS: Record<string, InputRegister> = {
-  reserved24: { address: 24, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved25: { address: 25, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved32: { address: 32, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved33: { address: 33, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved54: { address: 54, fc: 'input', dataType: 'S16', name: 'Reserved' },
-  reserved55: { address: 55, fc: 'input', dataType: 'S16', name: 'Reserved' },
-  reserved57: { address: 57, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved58: { address: 58, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved59: { address: 59, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved65: { address: 65, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved73: { address: 73, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved82: { address: 82, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved83: { address: 83, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved84: { address: 84, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved85: { address: 85, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved88: { address: 88, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved89: { address: 89, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved104: { address: 104, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved105: { address: 105, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved106: { address: 106, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved107: { address: 107, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved108: { address: 108, fc: 'input', dataType: 'U16', name: 'Reserved' },
-  reserved109: { address: 109, fc: 'input', dataType: 'U16', name: 'Reserved' },
+  reserved24: {
+    address: 24, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved25: {
+    address: 25, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved32: {
+    address: 32, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved33: {
+    address: 33, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved54: {
+    address: 54, fc: 'input', dataType: 'S16', name: 'Reserved',
+  },
+  reserved55: {
+    address: 55, fc: 'input', dataType: 'S16', name: 'Reserved',
+  },
+  reserved57: {
+    address: 57, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved58: {
+    address: 58, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved59: {
+    address: 59, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved65: {
+    address: 65, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved73: {
+    address: 73, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved82: {
+    address: 82, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved83: {
+    address: 83, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved84: {
+    address: 84, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved85: {
+    address: 85, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved88: {
+    address: 88, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved89: {
+    address: 89, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved104: {
+    address: 104, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved105: {
+    address: 105, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved106: {
+    address: 106, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved107: {
+    address: 107, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved108: {
+    address: 108, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
+  reserved109: {
+    address: 109, fc: 'input', dataType: 'U16', name: 'Reserved',
+  },
 } as const;
 
 // ============================================================================

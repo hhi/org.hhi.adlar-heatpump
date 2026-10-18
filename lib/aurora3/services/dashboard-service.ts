@@ -29,10 +29,18 @@ interface WritableRegisterMeta {
 }
 
 const WRITABLE_REGISTERS: Record<string, WritableRegisterMeta> = {
-  zone1HeatingSetTemp: { address: CONTROL_REGISTERS.zone1HeatingSetTemp.address, min: 18, max: 50, multiply: 0.1, name: 'Zone 1 verwarming setpoint', capability: 'target_temperature' },
-  zone1CoolingSetTemp: { address: CONTROL_REGISTERS.zone1CoolingSetTemp.address, min: 7,  max: 25, multiply: 0.1, name: 'Zone 1 koeling setpoint',    capability: 'target_temperature.cooling' },
-  dhwSetTemp:          { address: CONTROL_REGISTERS.dhwSetTemp.address,          min: 20, max: 75, multiply: 0.1, name: 'Tapwater setpoint',            capability: 'target_temperature.dhw' },
-  roomTempSetTemp:     { address: CONTROL_REGISTERS.roomTempSetTemp.address,     min: 16, max: 28, multiply: 0.1, name: 'Ruimtetemperatuur setpoint',   capability: 'target_temperature.floor' },
+  zone1HeatingSetTemp: {
+    address: CONTROL_REGISTERS.zone1HeatingSetTemp.address, min: 18, max: 50, multiply: 0.1, name: 'Zone 1 verwarming setpoint', capability: 'target_temperature',
+  },
+  zone1CoolingSetTemp: {
+    address: CONTROL_REGISTERS.zone1CoolingSetTemp.address, min: 7, max: 25, multiply: 0.1, name: 'Zone 1 koeling setpoint', capability: 'target_temperature.cooling',
+  },
+  dhwSetTemp: {
+    address: CONTROL_REGISTERS.dhwSetTemp.address, min: 20, max: 75, multiply: 0.1, name: 'Tapwater setpoint', capability: 'target_temperature.dhw',
+  },
+  roomTempSetTemp: {
+    address: CONTROL_REGISTERS.roomTempSetTemp.address, min: 16, max: 28, multiply: 0.1, name: 'Ruimtetemperatuur setpoint', capability: 'target_temperature.floor',
+  },
 };
 
 // ── Whitelist voor bediening via capability listeners (/api/control) ──────────
@@ -388,9 +396,15 @@ export class DashboardService {
   private _readBody(req: http.IncomingMessage): Promise<unknown> {
     return new Promise((resolve, reject) => {
       let body = '';
-      req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+      req.on('data', (chunk: Buffer) => {
+        body += chunk.toString();
+      });
       req.on('end', () => {
-        try { resolve(JSON.parse(body)); } catch { reject(new Error('Ongeldige JSON body')); }
+        try {
+          resolve(JSON.parse(body));
+        } catch {
+          reject(new Error('Ongeldige JSON body'));
+        }
       });
       req.on('error', reject);
     });
@@ -419,7 +433,9 @@ export class DashboardService {
 
     for (const [id, value] of Object.entries(values)) {
       if (value === null || value === undefined) continue;
-      const m = meta.get(id) ?? { title: id, unit: '', icon: '', type: 'string' };
+      const m = meta.get(id) ?? {
+        title: id, unit: '', icon: '', type: 'string',
+      };
       entries.push({
         id, title: m.title, unit: m.unit, icon: m.icon, type: m.type, values: m.values, value,
       });
@@ -473,7 +489,9 @@ export class DashboardService {
       for (const driver of drivers) {
         const opts = (driver.capabilitiesOptions ?? {}) as Record<string, Record<string, unknown>>;
         for (const [id, opt] of Object.entries(opts)) {
-          const existing = map.get(id) ?? { title: id, unit: '', icon: '', type: 'number' };
+          const existing = map.get(id) ?? {
+            title: id, unit: '', icon: '', type: 'number',
+          };
           const title = (opt.title as Record<string, string>)?.en
             || (opt.title as Record<string, string>)?.nl
             || existing.title;
@@ -510,7 +528,7 @@ export class DashboardService {
 
     for (const [id, meta] of map.entries()) {
       if (meta.title === id) {
-        const readable = id.replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const readable = id.replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
         map.set(id, { ...meta, title: readable });
       }
     }
@@ -595,7 +613,7 @@ export class DashboardService {
     };
 
     for (const [addr, entry] of this.getChangeLog(mode)) {
-      const intervals = entry.intervals;
+      const { intervals } = entry;
       const avgInterval = intervals.length > 0
         ? Math.round(intervals.reduce((a, b) => a + b, 0) / intervals.length)
         : null;
@@ -668,7 +686,9 @@ export class DashboardService {
     }
 
     let body: unknown;
-    try { body = await this._readBody(req); } catch {
+    try {
+      body = await this._readBody(req);
+    } catch {
       this._jsonError(res, 400, 'Ongeldige JSON body');
       return;
     }
@@ -714,7 +734,9 @@ export class DashboardService {
     }
 
     let body: unknown;
-    try { body = await this._readBody(req); } catch {
+    try {
+      body = await this._readBody(req);
+    } catch {
       this._jsonError(res, 400, 'Ongeldige JSON body');
       return;
     }
@@ -750,12 +772,16 @@ export class DashboardService {
     }
 
     let body: unknown;
-    try { body = await this._readBody(req); } catch {
+    try {
+      body = await this._readBody(req);
+    } catch {
       this._jsonError(res, 400, 'Ongeldige JSON body');
       return;
     }
 
-    const { address, isCoil, isInput, fc } = body as Record<string, unknown>;
+    const {
+      address, isCoil, isInput, fc,
+    } = body as Record<string, unknown>;
     if (typeof address !== 'number' || address < 0 || address > 0xFFFF) {
       this._jsonError(res, 400, 'Verplicht veld: address (number 0–65535)');
       return;
@@ -771,7 +797,9 @@ export class DashboardService {
       const wireRawValue = await this.onReadRegister(address, coil, input);
       const rawValue = decodeRegisterRawValue(wireRawValue, meta);
       const scaledValue = scaleRegisterValue(rawValue, meta);
-      this._jsonOk(res, { ok: true, wireRawValue, rawValue, scaledValue });
+      this._jsonOk(res, {
+        ok: true, wireRawValue, rawValue, scaledValue,
+      });
     } catch (err) {
       const msg = (err as Error).message;
       const status = msg === 'Niet verbonden' ? 503 : 500;
@@ -788,7 +816,9 @@ export class DashboardService {
     }
 
     let body: unknown;
-    try { body = await this._readBody(req); } catch {
+    try {
+      body = await this._readBody(req);
+    } catch {
       this._jsonError(res, 400, 'Ongeldige JSON body');
       return;
     }
