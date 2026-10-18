@@ -276,15 +276,15 @@ nav a.active { background: #07090f; color: var(--blue); border-color: var(--blue
 <script>
 // ── Capability groepen ─────────────────────────────────────────────────────
 const CAP_GROUPS = [
-  { label: 'Status',          match: id => ['onoff','adlar_running','adlar_mode','adlar_enum_work_mode','adlar_enum_countdown_set','adlar_enum_capacity_set','adlar_connection_active','adlar_connection_status'].includes(id) },
+  { label: 'Status',          match: id => ['onoff','adlar_running','adlar_mode','adlar_enum_work_mode_modbus','adlar_enum_countdown_set','adlar_enum_capacity_set_modbus','adlar_connection_active','adlar_connection_status'].includes(id) },
   { label: 'Storingen',       match: id => id.startsWith('alarm') || id.startsWith('adlar_fault') },
   { label: 'Setpoints',       match: id => id.startsWith('target_temperature') },
   { label: 'Temperaturen',    match: id => id.startsWith('measure_temperature') },
   { label: 'Vermogen',        match: id => ['measure_power','measure_voltage','measure_current','meter_power','adlar_external_power','defrost_active_power'].includes(id) || id.startsWith('measure_current.') },
-  { label: 'Mechanisch',      match: id => ['measure_water','adlar_pump_pwm','adlar_fan_speed','adlar_eev_step','adlar_evi_step'].includes(id) || id.startsWith('measure_frequency') },
+  { label: 'Mechanisch',      match: id => ['measure_water','adlar_external_flow','adlar_pump_pwm','adlar_fan_speed','adlar_eev_step','adlar_evi_step'].includes(id) || id.startsWith('measure_frequency') },
   { label: 'Prestaties',      match: id => (id.startsWith('adlar_cop') || id.startsWith('adlar_scop') || id === 'adlar_performance_score') && !id.includes('diagnostics') },
   { label: 'Stooklijn',       match: id => id.startsWith('heating_curve') },
-  { label: 'Ontdooiing',      match: id => ['adlar_defrosting','adlar_defrost_count_24h','adlar_defrost_minutes_24h','adlar_state_defrost_state','adlar_state_compressor_state','adlar_state_backwater','adlar_antifreeze','adlar_sterilization'].includes(id) },
+  { label: 'Ontdooiing',      match: id => ['adlar_defrosting','adlar_defrost_count_24h','adlar_defrost_minutes_24h','adlar_state_defrost_state','adlar_state_compressor_state','adlar_state_backwater_modbus','adlar_antifreeze','adlar_sterilization'].includes(id) },
   { label: 'Energie & Prijs', match: id => id.startsWith('adlar_energy') || id.startsWith('adlar_price') || id.startsWith('adlar_external_energy') || id.startsWith('adlar_cheapest') },
   { label: 'Extern',          match: id => id.startsWith('adlar_external') && !['adlar_external_power','adlar_external_flow'].includes(id) },
   { label: 'Gebouwmodel',     match: id => (id.startsWith('building') || id.startsWith('adlar_building') || id.startsWith('adlar_forecast') || id.startsWith('adlar_optimal') || id.startsWith('adlar_simulated')) && !id.includes('diagnostics') },

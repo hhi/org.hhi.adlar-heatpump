@@ -25,7 +25,7 @@ export function enumIdToHeatingCurve(id: string): number {
 
 /**
  * Converteert register 0x0307 (0=Standard, 1=High Power, 2=Silent)
- * naar de adlar_enum_work_mode enum-id (ECO/Normal/Boost).
+ * naar de adlar_enum_work_mode_modbus enum-id (ECO/Normal/Boost).
  */
 export function userModeToWorkModeId(raw: number): string {
   if (raw === 2) return 'ECO';
@@ -34,7 +34,7 @@ export function userModeToWorkModeId(raw: number): string {
 }
 
 /**
- * Converteert een adlar_enum_work_mode enum-id terug naar de
+ * Converteert een adlar_enum_work_mode_modbus enum-id terug naar de
  * registerwaarde voor Modbus schrijven (0x0307).
  */
 export function workModeIdToUserMode(id: string): 0 | 1 | 2 {
@@ -45,7 +45,7 @@ export function workModeIdToUserMode(id: string): 0 | 1 | 2 {
 
 /**
  * Converteert register 0x0315 (0=OFF, 1–4=H1–H4) naar
- * adlar_enum_capacity_set enum-id.
+ * adlar_enum_capacity_set_modbus enum-id.
  */
 export function hotWaterCurveToEnumId(raw: number): string {
   if (raw >= 1 && raw <= 4) return `H${raw}`;
@@ -53,7 +53,7 @@ export function hotWaterCurveToEnumId(raw: number): string {
 }
 
 /**
- * Converteert adlar_enum_capacity_set enum-id naar registerwaarde
+ * Converteert adlar_enum_capacity_set_modbus enum-id naar registerwaarde
  * voor Modbus schrijven (0x0315).
  */
 export function enumIdToHotWaterCurve(id: string): number {
@@ -62,7 +62,7 @@ export function enumIdToHotWaterCurve(id: string): number {
 }
 
 /**
- * Converteert register L22 (0x080B) naar adlar_state_backwater enum-id.
+ * Converteert register L22 (0x080B) naar adlar_state_backwater_modbus enum-id.
  * 0=disable, 1=continuous return, 2=cycle return, 3=temperature diff return
  */
 export function backwaterModeToEnumId(raw: number): string {
