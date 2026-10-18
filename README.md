@@ -1,23 +1,25 @@
 # Adlar Castra Heatpump
 
 Local control and monitoring for Adlar Castra Aurora heat pumps on Homey Pro.
-The app provides two separate device drivers, so choose the connection method
-that matches your installation:
+The app provides three separate device drivers, so choose the one that matches
+your connection method and heat-pump model:
 
 | Driver | Connection | When to choose it |
 | --- | --- | --- |
 | **Adlar Castra Aurora Heat Pump (Tuya)** | Tuya Local API over the local network | Your heat pump is connected to Wi-Fi and you have its Device ID and Local Key. |
-| **Adlar Castra Aurora Heat Pump (Modbus)** | RS485 through a Modbus TCP gateway | Your heat pump exposes Modbus/RS485 and you use a gateway such as an Elfin EW11A. |
+| **Adlar Castra Aurora II Heat Pump (Modbus)** | RS485 through a Modbus TCP gateway | Aurora I/II model with Modbus/RS485 and a gateway such as an Elfin EW11A (`9600 8N1`). |
+| **Adlar Castra Aurora III Heat Pump (Modbus)** | RS485 through a Modbus TCP gateway | Aurora III / PRO model with Modbus/RS485 and a gateway such as an Elfin EW11A (`9600 8N2`). |
 
-Both drivers operate locally. The Modbus driver does not require Tuya cloud or
-Tuya Local credentials.
+All drivers operate locally. The Modbus drivers do not require Tuya cloud or
+Tuya Local credentials. The two Modbus drivers use different register maps:
+choose the driver that matches the model on the type plate.
 
 ## Requirements
 
 - Homey Pro with firmware `12.3.0` or newer
 - An Adlar Castra Aurora-series heat pump on the same local network as Homey
 - For the Tuya driver: Device ID, Local Key, IP address and the correct Tuya protocol version
-- For the Modbus driver: a wired RS485/Modbus connection and a reachable Modbus TCP gateway
+- For the Modbus drivers: a wired RS485/Modbus connection and a reachable Modbus TCP gateway
 
 ## What the App Provides
 
@@ -63,29 +65,36 @@ how to obtain the credentials. For connection problems, use the
 1. Connect the heat pump's RS485/Modbus bus to an Elfin EW11A or equivalent
    Modbus TCP gateway.
 2. Ensure that the gateway is reachable from Homey on the local network.
-3. Select **Adlar Castra Aurora Heat Pump (Modbus)**.
+3. Select **Adlar Castra Aurora II Heat Pump (Modbus)** or
+   **Adlar Castra Aurora III Heat Pump (Modbus)**, matching your model.
 4. Enter the gateway IP address, TCP port and Modbus Unit ID.
 5. Adjust the polling intervals only when necessary.
 
 The usual defaults are TCP port `502` and Modbus Unit ID `1`. Give the gateway
 a fixed DHCP lease or static IP address to prevent avoidable reconnect issues.
-Gateway reference material is available in
+The [gateway setup guide](docs/setup/modbus-elfin-ew11-setup.md) (Dutch) covers
+both models; gateway reference material is available in
 [the Modbus documentation](docs/Heatpump%20specs/modbus/Eflin%20EW11a/).
+
+Moving from the separate Aurora III app? See the
+[migration guide](docs/setup/MIGRATION_AURORA3.en.md).
 
 ## Modbus Dashboards
 
-The Modbus driver offers local dashboards. From a browser on the same network,
-open one of the following URLs (the default port is `8090`):
+Each Modbus driver offers its own local dashboards. From a browser on the same
+network, open one of the following URLs. The default port is `8090` for
+Aurora II and `8091` for Aurora III:
 
-- `http://<homey-ip>:8090/` — live, read-only heat-pump overview
-- `http://<homey-ip>:8090/interactive` — live overview with direct setpoint controls
-- `http://<homey-ip>:8090/live` — all device capabilities grouped by category
-- `http://<homey-ip>:8090/expert` — register view with Modbus addresses and P/L parameter IDs
-- `http://<homey-ip>:8090/changelog` — observed register changes and poll recommendations
-- `http://<homey-ip>:8090/heating-curve` — DIY heating-curve editor
+- `http://<homey-ip>:<port>/` — live, read-only heat-pump overview
+- `http://<homey-ip>:<port>/interactive` — live overview with direct setpoint controls
+- `http://<homey-ip>:<port>/live` — all device capabilities grouped by category
+- `http://<homey-ip>:<port>/expert` — register view with Modbus addresses
+- `http://<homey-ip>:<port>/changelog` — observed register changes and poll recommendations
+- `http://<homey-ip>:8090/heating-curve` — DIY heating-curve editor (Aurora II only)
 
 Replace `<homey-ip>` with the IP address of your Homey Pro. If you change the
-Dashboard port setting, use that port in the URL instead.
+Dashboard port setting, use that port in the URL instead. See the
+[dashboard guide](docs/setup/MODBUS_DASHBOARD_GUIDE.en.md) for details.
 
 > **Caution:** The expert dashboard and direct Modbus read/write Flow cards can
 > change heat-pump behaviour. Only write registers when you understand their
@@ -93,14 +102,18 @@ Dashboard port setting, use that port in the URL instead.
 
 ## Important Limitations
 
-- The Modbus driver targets the R32 register map and warns when another
+- The Aurora II driver targets the R32 register map and warns when another
   refrigerant is detected.
 - The floor-heating setpoint is available as a Modbus device capability, but
   does not yet have its own Flow action.
 - COP can be unavailable or less accurate when usable power or flow data is
   missing.
 - Tuya Local and Modbus are separate drivers. A Modbus gateway cannot be used
-  with the Tuya driver, and the Modbus driver does not use Tuya credentials.
+  with the Tuya driver, and the Modbus drivers do not use Tuya credentials.
+- The Aurora II and Aurora III drivers are not interchangeable: each reads and
+  writes the register map of its own model.
+- The local dashboards have no password; anyone on the local network can open
+  them, including the write functions.
 
 ## Documentation and Support
 

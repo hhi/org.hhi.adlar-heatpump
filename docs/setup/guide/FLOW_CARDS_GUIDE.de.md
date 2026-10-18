@@ -619,6 +619,82 @@ DANN: Wert aus Kurve berechnen
 
 ---
 
+## Modbus-Modelle: Aurora II und Aurora III
+
+Die App hat für jedes Modell einen eigenen Modbus-Treiber. Viele Flow-Karten gibt es **einmal pro Treiber** mit demselben Titel: Im Flow-Editor sehen Sie die Karten des Treibers des gewählten Geräts. Ein Flow, der für ein Aurora II-Gerät erstellt wurde, funktioniert daher nicht für ein Aurora III-Gerät; erstellen Sie ihn mit der Karte des Aurora III-Geräts neu.
+
+Die folgenden Karten gibt es **nur für Aurora III**.
+
+### 11. 🔥 Erzwungene Zusatzheizung Schalten (Aurora III)
+
+**ID**: `set_backup_heater`
+**Typ**: Aktion
+
+```yaml
+THEN: Erzwungene Zusatzheizung [ein/aus] schalten
+```
+
+**Parameter**:
+
+- `state` (ein/aus): erzwingt die elektrische Zusatzheizung oder gibt sie wieder frei
+
+### 12. 🚿 Warmwasserfunktion Schalten (Aurora III)
+
+**ID**: `set_dhw_function`
+**Typ**: Aktion
+
+```yaml
+THEN: Warmwasserfunktion [ein/aus] schalten
+```
+
+**Parameter**:
+
+- `state` (ein/aus): schaltet die Warmwasserbereitung ein oder aus
+
+### 13. 🤫 Leisemodus Einstellen (Aurora III)
+
+**ID**: `set_silent_mode`
+**Typ**: Aktion
+
+```yaml
+THEN: Leisemodus einstellen auf [Aus/Stufe 1/Stufe 2]
+```
+
+**Parameter**:
+
+- `level` (Aus, Stufe 1, Stufe 2): Stufe des Leisemodus. Stufe 2 ist nur bei R290-Wärmepumpen verfügbar.
+
+### 14. 🚿 Warmwasser Wird Bereitet (Aurora III)
+
+**ID**: `dhw_heating_active`
+**Typ**: Bedingung
+
+```yaml
+IF: Warmwasser wird (nicht) bereitet
+```
+
+### 15. 🤫 Leisemodus Ist (Aurora III)
+
+**ID**: `silent_mode_is`
+**Typ**: Bedingung
+
+```yaml
+IF: Leisemodus ist (nicht) [Aus/Stufe 1/Stufe 2]
+```
+
+#### Beispiel-Flow
+
+**Nachts leise**:
+
+```text
+WHEN: Es ist 22:00
+THEN: Leisemodus einstellen auf Stufe 1
+WHEN: Es ist 07:00
+THEN: Leisemodus einstellen auf Aus
+```
+
+---
+
 ## Einstellungskonfiguration
 
 ### Leistungsschwellen-Einstellung

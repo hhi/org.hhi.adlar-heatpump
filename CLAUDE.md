@@ -295,7 +295,27 @@ and better user experience."
 
 ## Project Architecture
 
-This is a Homey app for integrating Adlar heat pump devices via Tuya's local API. The architecture follows Homey's app development patterns with TypeScript and implements a **Service-Oriented Architecture** for code organization, testability, and maintainability.
+This is a Homey app for integrating Adlar heat pump devices via Tuya's local API and via Modbus TCP. The architecture follows Homey's app development patterns with TypeScript and implements a **Service-Oriented Architecture** for code organization, testability, and maintainability.
+
+### Drivers (v3.2.0)
+
+| Driver | ID | Code | Flow-card / capability suffix |
+|---|---|---|---|
+| Tuya | `intelligent-heat-pump` | `lib/tuya/` | — |
+| Aurora II (Modbus) | `intelligent-heatpump-modbus` | `lib/modbus/` | `_modbus` |
+| Aurora III (Modbus) | `intelligent-heatpump-aurora3` | `lib/aurora3/` | `_aurora3` |
+
+Shared code lives in `lib/shared/`. Most services exist once per driver; see [SERVICE_ARCHITECTURE.md](docs/architecture/SERVICE_ARCHITECTURE.md) for which ones and [ADR-004](docs/architecture/ADR-004-AURORA3-DRIVER-MERGE.md) for the reasons.
+
+**Rules for driver-specific code:**
+
+- **Flow-card IDs are unique per driver** unless a card is deliberately shared via a pipe filter (`driver_id=a|b|c`) and only fired from device code without a per-device run listener. A card with a per-device run listener on an app-wide singleton must not be shared: the last driver to initialize would win the handler.
+- **A capability ID that has a different meaning per model gets a suffix** (e.g. `adlar_mode` for Aurora II vs `adlar_mode_aurora3`); new capabilities without a conflict get no suffix.
+- **Check ownership after changing capabilities or drivers**: `npm run check:caps` and `python3 scripts/migration/verify.py`.
+- **Aurora III register notation** is Modicon: `3-NNNN` is an input register (FC04, read-only), `4-NNNN` a holding register (FC03/FC06, read/write).
+- **Aurora III Modbus transport**: `lib/aurora3/protocol/modbus-tcp-service.ts` takes a `TimerProvider` and falls back to global timers without one; `modbus-connection-service.ts` builds it from `homey.setTimeout`/`setInterval`. Keep passing it, so Homey manages timer cleanup on restarts.
+- **Keep the Aurora III capability mapping in sync** when adding or remapping Aurora III capabilities: `docs/Dev support/modbus/adlar3-capability-modbus-register-mapping.md`.
+- **Dashboards**: Aurora II uses `app.dashboard` (port 8090, `public/`), Aurora III uses `app.aurora3Dashboard` (port 8091, `public/aurora3/`) through the typed `Aurora3AppHost` interface.
 
 ### Core Components
 

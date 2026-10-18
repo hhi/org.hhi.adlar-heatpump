@@ -4,7 +4,7 @@
 **Status:** voorgesteld  
 **Datum:** 2026-06-11  
 **Gerelateerd:** ADR-037 store-persistentie, ADR-056 building model hardening, ADR-057 learner safeguards, ADR-060 adaptive harmonisatie  
-**Codegebied:** `lib/modbus/services/building-model-service.ts`, `lib/modbus/services/adaptive-control-service.ts`, `lib/modbus/services/service-coordinator.ts`, `drivers/intelligent-heatpump-modbus/device.ts`
+**Codegebied:** `lib/modbus/services/building-model-service.ts`, `lib/modbus/services/adaptive-control-service.ts`, `lib/modbus/services/service-coordinator.ts`, `drivers/intelligent-heatpump-modbus/device.ts`; Aurora III: `lib/aurora3/services/building-model-service.ts`, `lib/aurora3/services/adaptive-control-service.ts`, `lib/aurora3/services/service-coordinator.ts`, `drivers/intelligent-heatpump-aurora3/device.ts`
 
 ## Context
 

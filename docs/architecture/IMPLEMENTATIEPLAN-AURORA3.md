@@ -4,7 +4,7 @@
 - **Doelversie**: 3.2.0 (huidig 3.1.4)
 - **Bron**: `org.hhi.adlar3-heatpump-modbus` v1.9.4 (commit `58e010a`)
 - **Datum**: 2026-10-17
-- **Status**: In uitvoering — O1 t/m O9 aanvaard op 2026-10-18; fase 0 gestart
+- **Status**: Fase 0 t/m 5 uitgevoerd (2026-10-18); fase 6 (validatie) lokaal, fase 7 (hardware) en O9 open — zie *Afwijkingen tijdens uitvoering*
 
 In dit plan staan de aanvaarde waarden uit ADR-004 ingevuld: driver-ID
 `intelligent-heatpump-aurora3`, suffix `_aurora3`. De migratiescripts nemen beide als
@@ -572,6 +572,35 @@ zonder gepairde Aurora III-devices te breken — vandaar P1.
 
 Het conceptueel moeilijke deel zit in fase 4 en in de controlepunten van fase 1a. De rest
 is volume dat met de v3.0.0-scripts als sjabloon reproduceerbaar te doen is.
+
+## Afwijkingen tijdens uitvoering
+
+Vastgelegd tijdens de uitvoering op 2026-10-18; per punt waarom het plan is bijgesteld.
+
+| Fase | Plan | Uitgevoerd | Reden |
+|---|---|---|---|
+| 1b / 5a | Waarschuwingsregel O8 in fase 1b | In fase 5a | Raakt de Aurora II-drivermap; fase 1 moet die aantoonbaar onaangeroerd laten |
+| 3A | Hernoemen op gequote tokens | Ook de 12 sleutels van `CARD_PROFILES` in `snapshot-trigger-service.ts` | Opzoeking `CARD_PROFILES[cardId]`; alleen quotes hernoemen had alle alerts stil laten terugvallen op drempel 0,5 en het verkeerde `stateField` |
+| 4c | Typecast in de terugval van `triggerFlowCard` typeren | Terugval verwijderd | De app heeft geen `…aurora3Trigger`-leden; de tak was onbereikbaar |
+| 4b | Widget: optionele blokken | Ook sensorlabels per model (T7/T6 resp. TA/TE1/T4) | De oude widget liep vast op een Aurora III-state (`regulation` ontbreekt); Aurora II-weergave is byte-gelijk gebleven |
+| 5a | 3 locale-sleutels + O8-sleutel | Ook het blok `pair.enter_modbus_info` (7 sleutels, vier talen) | De Modbus-pairingpagina verwees in alle drie de apps naar sleutels die nooit in `locales/` stonden |
+| 5a | Drivernamen in de/fr aanvullen | Alleen de twee Modbus-drivers | De Tuya-drivernaam blijft ongewijzigd (alleen en/nl, zoals voorheen) |
+| 5b | `building-model-sample-gating.md` samenvoegen | Eigen Aurora III-document plus kruisverwijzingen in alle drie | De "tweede kopie" in `Architectural overview/` is de Tuya-versie (DPS), geen duplicaat; drie transports in één document per gate wordt onleesbaar |
+| 5b | `AGENTS.md`, `GEMINI.md`, Copilot bijwerken of inkorten | Korte driversectie bovenaan met verwijzing naar `CLAUDE.md` | Geen bestaande inhoud verwijderd |
+| 5b | O9: externe ADR-reeks opnemen | **Niet uitgevoerd** | Zie hieronder |
+
+### O9 — waarom niet uitgevoerd
+
+Bij de uitvoering bleek:
+
+- de reeks staat op **drie** plekken: `ADR/` in beide bronrepo's (33 resp. 26 bestanden) en `plans/decisions/` in de Aurora II-bronrepo (o.a. ADR-057 t/m 061);
+- alle drie de locaties staan in `.gitignore`, net als `plans/` in deze repo — de beslisdocumenten worden in alle repo's bewust buiten git gehouden;
+- meerdere bestanden bevatten absolute lokale paden;
+- inhoudelijk geen nummerbotsing: elk nummer heeft in beide bronnen dezelfde titel; bij 10 nummers (ADR-033, 034, 035, 041, 045, 047b, 048, 049, 052, 053) is de inhoud na de fork uiteengelopen.
+
+Opnemen vraagt dus eerst een besluit over het buiten-git-houden en het opschonen van paden. Open punt voor de eigenaar.
+
+---
 
 ## Bijlage — Meetmethode
 

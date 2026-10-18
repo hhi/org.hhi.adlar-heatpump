@@ -614,6 +614,82 @@ ALORS : Calculer valeur depuis courbe
 
 ---
 
+## Modèles Modbus : Aurora II et Aurora III
+
+L'application dispose d'un pilote Modbus distinct par modèle. De nombreuses cartes de flux existent **une fois par pilote** avec le même titre : dans l'éditeur de Flow, vous voyez les cartes du pilote de l'appareil sélectionné. Un flow créé pour un appareil Aurora II ne fonctionne donc pas pour un appareil Aurora III ; recréez-le avec la carte de l'appareil Aurora III.
+
+Les cartes ci-dessous sont **réservées à Aurora III**.
+
+### 11. 🔥 Commuter l'Appoint Électrique Forcé (Aurora III)
+
+**ID** : `set_backup_heater`
+**Type** : Action
+
+```yaml
+THEN: Commuter l'appoint électrique forcé sur [marche/arrêt]
+```
+
+**Paramètres** :
+
+- `state` (marche/arrêt) : force l'appoint électrique ou le libère
+
+### 12. 🚿 Commuter la Fonction Eau Chaude (Aurora III)
+
+**ID** : `set_dhw_function`
+**Type** : Action
+
+```yaml
+THEN: Commuter la fonction eau chaude sur [marche/arrêt]
+```
+
+**Paramètres** :
+
+- `state` (marche/arrêt) : active ou désactive la production d'eau chaude sanitaire
+
+### 13. 🤫 Régler le Mode Silencieux (Aurora III)
+
+**ID** : `set_silent_mode`
+**Type** : Action
+
+```yaml
+THEN: Régler le mode silencieux sur [Arrêt/Niveau 1/Niveau 2]
+```
+
+**Paramètres** :
+
+- `level` (Arrêt, Niveau 1, Niveau 2) : niveau du mode silencieux. Le niveau 2 n'est disponible que sur les pompes à chaleur R290.
+
+### 14. 🚿 L'Eau Chaude Est en Chauffe (Aurora III)
+
+**ID** : `dhw_heating_active`
+**Type** : Condition
+
+```yaml
+IF: L'eau chaude (n')est (pas) en chauffe
+```
+
+### 15. 🤫 Le Mode Silencieux Est (Aurora III)
+
+**ID** : `silent_mode_is`
+**Type** : Condition
+
+```yaml
+IF: Le mode silencieux (n')est (pas) [Arrêt/Niveau 1/Niveau 2]
+```
+
+#### Exemple de flow
+
+**Silence la nuit** :
+
+```text
+WHEN: Il est 22:00
+THEN: Régler le mode silencieux sur Niveau 1
+WHEN: Il est 07:00
+THEN: Régler le mode silencieux sur Arrêt
+```
+
+---
+
 ## Configuration des paramètres
 
 ### Paramètre de seuil de puissance

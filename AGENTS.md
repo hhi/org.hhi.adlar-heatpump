@@ -1,5 +1,9 @@
 # Repository Guidelines
 
+## Drivers (v3.2.0)
+
+The app has three drivers: Tuya (`intelligent-heat-pump`, `lib/tuya/`), Aurora II via Modbus (`intelligent-heatpump-modbus`, `lib/modbus/`, suffix `_modbus`) and Aurora III via Modbus (`intelligent-heatpump-aurora3`, `lib/aurora3/`, suffix `_aurora3`). Shared code is in `lib/shared/`. Parts of this file still describe the Tuya driver only; `CLAUDE.md` (section "Drivers") is the source of truth for the multi-driver conventions.
+
 ## Project Structure & Module Organization
 The Homey app entrypoint lives in `app.ts`, which wires drivers and flow cards. Device-specific logic and adapters sit in `drivers/`, while reusable domain helpers, services, and constants are grouped under `lib/`. UI assets, icons, and capability images remain in `assets/`. All localisation strings reside in `locales/` (English and Dutch). Supporting documentation and validation utilities, including capability specs and AJV scripts, live in `docs/`. Keep environment defaults in `env.json`; never commit real device credentials.
 
