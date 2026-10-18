@@ -1,7 +1,9 @@
 {
   "name": {
-    "en": "Adlar Castra Heat Pump (Aurora-III Modbus)",
-    "nl": "Adlar Castra Warmtepomp (Aurora-III Modbus)"
+    "en": "Adlar Castra Aurora III Heat Pump (Modbus)",
+    "nl": "Adlar Castra Aurora III-warmtepomp (Modbus)",
+    "de": "Adlar Castra Aurora III Wärmepumpe (Modbus)",
+    "fr": "Pompe à chaleur Adlar Castra Aurora III (Modbus)"
   },
   "class": "heatpump",
   "capabilities": [
@@ -114,7 +116,9 @@
     "measure_frequency.compressor_freq": {
       "title": {
         "en": "Compressor frequency",
-        "nl": "Compressorfrequentie"
+        "nl": "Compressorfrequentie",
+        "de": "Kompressorfrequenz",
+        "fr": "Fréquence du compresseur"
       },
       "icon": "/assets/compressor-freq.svg",
       "type": "number",
@@ -123,13 +127,17 @@
       "insights": true,
       "insightsTitle": {
         "en": "Compressor frequency",
-        "nl": "Compressorfrequentie"
+        "nl": "Compressorfrequentie",
+        "de": "Kompressorfrequenz",
+        "fr": "Fréquence du compresseur"
       }
     },
     "measure_frequency.comp_target_freq": {
       "title": {
         "en": "Compressor target frequency",
-        "nl": "Compressor doelfrequentie"
+        "nl": "Compressor doelfrequentie",
+        "de": "Kompressor-Sollfrequenz",
+        "fr": "Fréquence cible du compresseur"
       },
       "icon": "/assets/compressor-freq.svg",
       "type": "number",
@@ -138,13 +146,17 @@
       "insights": true,
       "insightsTitle": {
         "en": "Compressor target frequency",
-        "nl": "Compressor doelfrequentie"
+        "nl": "Compressor doelfrequentie",
+        "de": "Kompressor-Sollfrequenz",
+        "fr": "Fréquence cible du compresseur"
       }
     },
     "target_temperature": {
       "title": {
         "en": "Heating setpoint",
-        "nl": "Verwarming setpoint"
+        "nl": "Verwarming setpoint",
+        "de": "Heiz-Sollwert",
+        "fr": "Consigne de chauffage"
       },
       "min": 15,
       "max": 60,
@@ -155,7 +167,9 @@
     "target_temperature.cooling": {
       "title": {
         "en": "Cooling setpoint",
-        "nl": "Koeling setpoint"
+        "nl": "Koeling setpoint",
+        "de": "Kühl-Sollwert",
+        "fr": "Consigne de refroidissement"
       },
       "min": 7,
       "max": 25,
@@ -164,7 +178,9 @@
     "target_temperature.dhw": {
       "title": {
         "en": "DHW setpoint",
-        "nl": "Warmwater setpoint"
+        "nl": "Warmwater setpoint",
+        "de": "Warmwasser-Sollwert",
+        "fr": "Consigne d'eau chaude sanitaire"
       },
       "min": 20,
       "max": 75,
@@ -173,7 +189,9 @@
     "target_temperature.floor": {
       "title": {
         "en": "Floor heating setpoint",
-        "nl": "Vloerverwarming setpoint"
+        "nl": "Vloerverwarming setpoint",
+        "de": "Fußbodenheizungs-Sollwert",
+        "fr": "Consigne du chauffage par le sol"
       },
       "min": 20,
       "max": 60,
@@ -212,79 +230,105 @@
     "measure_temperature.outlet": {
       "title": {
         "en": "Supply temperature (TA)",
-        "nl": "Aanvoertemperatuur (TA)"
+        "nl": "Aanvoertemperatuur (TA)",
+        "de": "Vorlauftemperatur (TA)",
+        "fr": "Température de départ (TA)"
       }
     },
     "measure_temperature.inlet": {
       "title": {
         "en": "Return temperature (TE1)",
-        "nl": "Retourtemperatuur (TE1)"
+        "nl": "Retourtemperatuur (TE1)",
+        "de": "Rücklauftemperatur (TE1)",
+        "fr": "Température de retour (TE1)"
       }
     },
     "measure_temperature.ambient": {
       "title": {
         "en": "Ambient temperature (T4)",
-        "nl": "Buitentemperatuur (T4)"
+        "nl": "Buitentemperatuur (T4)",
+        "de": "Außentemperatur (T4)",
+        "fr": "Température extérieure (T4)"
       }
     },
     "measure_temperature.outer_coil": {
       "title": {
         "en": "Outdoor coil temperature (T3)",
-        "nl": "Buitenspoel temperatuur (T3)"
+        "nl": "Buitenspoel temperatuur (T3)",
+        "de": "Temperatur Außenwärmetauscher (T3)",
+        "fr": "Température de l'échangeur extérieur (T3)"
       }
     },
     "measure_temperature.suction": {
       "title": {
         "en": "Suction temperature (TH)",
-        "nl": "Zuigtemperatuur (TH)"
+        "nl": "Zuigtemperatuur (TH)",
+        "de": "Sauggastemperatur (TH)",
+        "fr": "Température d'aspiration (TH)"
       }
     },
     "measure_temperature.exhaust": {
       "title": {
         "en": "Discharge temperature (TP)",
-        "nl": "Perstemperatuur (TP)"
+        "nl": "Perstemperatuur (TP)",
+        "de": "Heißgastemperatur (TP)",
+        "fr": "Température de refoulement (TP)"
       }
     },
     "measure_temperature.dhw": {
       "title": {
         "en": "DHW tank temperature (TZ2)",
-        "nl": "Warmwaterboiler temperatuur (TZ2)"
+        "nl": "Warmwaterboiler temperatuur (TZ2)",
+        "de": "Warmwasserspeichertemperatur (TZ2)",
+        "fr": "Température du ballon ECS (TZ2)"
       }
     },
     "measure_temperature.buffer_tank": {
       "title": {
         "en": "Buffer tank temperature (TW)",
-        "nl": "Buffervat temperatuur (TW)"
+        "nl": "Buffervat temperatuur (TW)",
+        "de": "Pufferspeichertemperatur (TW)",
+        "fr": "Température du ballon tampon (TW)"
       }
     },
     "measure_temperature.total_outlet": {
       "title": {
         "en": "Total outlet temperature (TC)",
-        "nl": "Totaal aanvoertemperatuur (TC)"
+        "nl": "Totaal aanvoertemperatuur (TC)",
+        "de": "Gesamtvorlauftemperatur (TC)",
+        "fr": "Température de départ totale (TC)"
       }
     },
     "measure_temperature.zone2": {
       "title": {
         "en": "Zone 2 temperature (Tso)",
-        "nl": "Zone 2 temperatuur (Tso)"
+        "nl": "Zone 2 temperatuur (Tso)",
+        "de": "Temperatur Zone 2 (Tso)",
+        "fr": "Température zone 2 (Tso)"
       }
     },
     "measure_current.comp_phase": {
       "title": {
         "en": "Compressor phase current",
-        "nl": "Compressor fasestroom"
+        "nl": "Compressor fasestroom",
+        "de": "Kompressor-Phasenstrom",
+        "fr": "Courant de phase du compresseur"
       }
     },
     "measure_current.b_phase": {
       "title": {
         "en": "B-phase current",
-        "nl": "B-fase stroom"
+        "nl": "B-fase stroom",
+        "de": "Strom Phase B",
+        "fr": "Courant phase B"
       }
     },
     "measure_current.c_phase": {
       "title": {
         "en": "C-phase current",
-        "nl": "C-fase stroom"
+        "nl": "C-fase stroom",
+        "de": "Strom Phase C",
+        "fr": "Courant phase C"
       }
     },
     "measure_power": {

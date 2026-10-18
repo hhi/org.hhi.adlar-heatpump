@@ -1,4 +1,10 @@
 {
+  "3.2.0": {
+    "en": "New driver for the Adlar Castra Aurora III heat pump via Modbus. The existing Modbus driver is now called 'Aurora II', and Aurora II devices now also get the 'COP trend detected' and 'Daily/Monthly COP efficiency changed' trigger cards.",
+    "nl": "Nieuwe driver voor de Adlar Castra Aurora III-warmtepomp via Modbus. De bestaande Modbus-driver heet nu 'Aurora II', en Aurora II-apparaten krijgen nu ook de triggerkaarten 'COP trend gedetecteerd' en 'Dagelijkse/Maandelijkse COP efficiëntie gewijzigd'.",
+    "de": "Neuer Treiber für die Adlar Castra Aurora III Wärmepumpe über Modbus. Der bestehende Modbus-Treiber heißt jetzt 'Aurora II', und Aurora II-Geräte erhalten jetzt auch die Auslöserkarten 'COP-Trend erkannt' und 'Tägliche/Monatliche COP-Effizienz geändert'.",
+    "fr": "Nouveau pilote pour la pompe à chaleur Adlar Castra Aurora III via Modbus. Le pilote Modbus existant s'appelle désormais 'Aurora II', et les appareils Aurora II disposent désormais aussi des cartes déclencheurs 'Tendance COP détectée' et 'Efficacité COP quotidienne/mensuelle changée'."
+  },
   "3.1.4": {
     "en": "Modbus live dashboard: work mode and hot water curve setting now appear under 'Status', backwater mode under 'Ontdooiing' and external water flow under 'Mechanisch' instead of under 'Overig'.",
     "nl": "Modbus live-dashboard: werkmodus en warmwatercurve-instelling staan nu onder 'Status', retourwatermodus onder 'Ontdooiing' en externe waterdoorstroming onder 'Mechanisch' in plaats van onder 'Overig'.",

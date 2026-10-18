@@ -8,6 +8,15 @@
       "ip_address": "IP-Adresse",
       "protocol_version": "Protokollversion",
       "continue": "Fortfahren"
+    },
+    "enter_modbus_info": {
+      "title": "Modbus-Verbindung",
+      "description": "Geben Sie die IP-Adresse und den Port Ihres Elfin EW11A oder Modbus-TCP-Gateways ein",
+      "model_hint": "Wählen Sie den Treiber, der zum Modell auf dem Typenschild Ihrer Wärmepumpe passt (Aurora II oder Aurora III).",
+      "host": "IP-Adresse:",
+      "port": "TCP-Port:",
+      "unit_id": "Modbus-Unit-ID:",
+      "continue": "Weiter"
     }
   },
   "cop_method": {
@@ -83,6 +92,11 @@
     "blocked_no_cop": "Keine COP-Messung",
     "period_night": "Nacht",
     "period_day": "Tag",
-    "period_evening": "Abend"
+    "period_evening": "Abend",
+    "blocked_dhw_active": "Warmwasserbereitung"
+  },
+  "errors": {
+    "zone_onoff_disabled": "Ein/Aus über das Zonenregister 2101 ist experimentell. Aktivieren Sie 'Ein/Aus über Zonensteuerung (experimentell)' in den Geräteeinstellungen, um dies zu nutzen.",
+    "silent_level2_r290_only": "Leisemodus Stufe 2 ist nur bei R290-Wärmepumpen verfügbar."
   }
 }

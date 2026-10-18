@@ -1,7 +1,9 @@
 {
   "name": {
-    "en": "Adlar Castra Aurora Heat Pump (Modbus)",
-    "nl": "Adlar Castra Aurora-warmtepomp (Modbus)"
+    "en": "Adlar Castra Aurora II Heat Pump (Modbus)",
+    "nl": "Adlar Castra Aurora II-warmtepomp (Modbus)",
+    "de": "Adlar Castra Aurora II Wärmepumpe (Modbus)",
+    "fr": "Pompe à chaleur Adlar Castra Aurora II (Modbus)"
   },
   "class": "heatpump",
   "capabilities": [

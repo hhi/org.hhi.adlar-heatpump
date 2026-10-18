@@ -8,6 +8,15 @@
       "ip_address": "Adresse IP",
       "protocol_version": "Version du protocole",
       "continue": "Continuer"
+    },
+    "enter_modbus_info": {
+      "title": "Connexion Modbus",
+      "description": "Saisissez l'adresse IP et le port de votre Elfin EW11A ou de votre passerelle Modbus TCP",
+      "model_hint": "Choisissez le pilote correspondant au modèle indiqué sur la plaque signalétique de votre pompe à chaleur (Aurora II ou Aurora III).",
+      "host": "Adresse IP :",
+      "port": "Port TCP :",
+      "unit_id": "ID d'unité Modbus :",
+      "continue": "Continuer"
     }
   },
   "cop_method": {
@@ -83,6 +92,11 @@
     "blocked_no_cop": "Pas de mesure COP",
     "period_night": "Nuit",
     "period_day": "Jour",
-    "period_evening": "Soir"
+    "period_evening": "Soir",
+    "blocked_dhw_active": "Production d'eau chaude"
+  },
+  "errors": {
+    "zone_onoff_disabled": "La marche/arrêt via le registre de zone 2101 est expérimentale. Activez 'Marche/arrêt via la commande de zone (expérimental)' dans les paramètres de l'appareil pour l'utiliser.",
+    "silent_level2_r290_only": "Le mode silencieux niveau 2 n'est disponible que sur les pompes à chaleur R290."
   }
 }
