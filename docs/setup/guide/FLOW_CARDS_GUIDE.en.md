@@ -620,6 +620,82 @@ THEN: Calculate value from curve
 
 ---
 
+## Modbus models: Aurora II and Aurora III
+
+The app has a separate Modbus driver per model. Many flow cards exist **once per driver** with the same title: in the Flow editor you see the cards of the driver of the device you selected. A flow built for an Aurora II device therefore does not work for an Aurora III device; rebuild it with the card of the Aurora III device.
+
+The cards below are **Aurora III only**.
+
+### 11. 🔥 Switch Forced Backup Heater (Aurora III)
+
+**ID**: `set_backup_heater`
+**Type**: Action
+
+```yaml
+THEN: Switch forced backup heater [on/off]
+```
+
+**Parameters**:
+
+- `state` (on/off): forces the electric backup heater on, or releases it
+
+### 12. 🚿 Switch Hot Water Function (Aurora III)
+
+**ID**: `set_dhw_function`
+**Type**: Action
+
+```yaml
+THEN: Switch hot water function [on/off]
+```
+
+**Parameters**:
+
+- `state` (on/off): switches domestic hot water heating on or off
+
+### 13. 🤫 Set Silent Mode (Aurora III)
+
+**ID**: `set_silent_mode`
+**Type**: Action
+
+```yaml
+THEN: Set silent mode to [Off/Level 1/Level 2]
+```
+
+**Parameters**:
+
+- `level` (Off, Level 1, Level 2): silent mode level. Level 2 is only available on R290 heat pumps.
+
+### 14. 🚿 Hot Water Is Being Heated (Aurora III)
+
+**ID**: `dhw_heating_active`
+**Type**: Condition
+
+```yaml
+IF: Hot water is (not) being heated
+```
+
+### 15. 🤫 Silent Mode Is (Aurora III)
+
+**ID**: `silent_mode_is`
+**Type**: Condition
+
+```yaml
+IF: Silent mode is (not) [Off/Level 1/Level 2]
+```
+
+#### Example Flow
+
+**Quiet at night**:
+
+```text
+WHEN: The time is 22:00
+THEN: Set silent mode to Level 1
+WHEN: The time is 07:00
+THEN: Set silent mode to Off
+```
+
+---
+
 ## Settings Configuration
 
 ### Power Threshold Setting

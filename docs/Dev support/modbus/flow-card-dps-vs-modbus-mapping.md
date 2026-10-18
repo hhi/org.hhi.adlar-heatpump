@@ -1,5 +1,7 @@
 # Flow Card DPS vs Modbus Mapping
 
+> **Scope (v3.2.0):** this document compares Tuya (DPS) with Aurora II (Modbus) only. For Aurora III see [adlar3-capability-modbus-register-mapping.md](adlar3-capability-modbus-register-mapping.md) and [ADR-004](../../architecture/ADR-004-AURORA3-DRIVER-MERGE.md).
+
 > Current note: the local Modbus `lib/tuya/flow-helpers.ts` legacy file has been
 > removed. Supported Modbus flow cards are registered through
 > `FlowCardManagerService` and service/device trigger hooks. Older conclusions

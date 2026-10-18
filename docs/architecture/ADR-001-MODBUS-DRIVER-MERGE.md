@@ -5,6 +5,7 @@
 - **Doelversie**: 3.0.0
 - **Bron-app**: `org.hhi.adlar-heatpump-modbus` v2.15.0
 - **Doel-app**: `org.hhi.adlar-heatpump` v2.13.1 → v3.0.0
+- **Vervolg**: [ADR-004](ADR-004-AURORA3-DRIVER-MERGE.md) (Aurora III-driver, v3.2.0)
 
 ## Context
 

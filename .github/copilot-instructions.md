@@ -1,5 +1,9 @@
 # Copilot Instructions for org.hhi.adlar-heatpump
 
+## Drivers (v3.2.0)
+
+The app has three drivers: Tuya (`intelligent-heat-pump`, `lib/tuya/`), Aurora II via Modbus (`intelligent-heatpump-modbus`, `lib/modbus/`, suffix `_modbus`) and Aurora III via Modbus (`intelligent-heatpump-aurora3`, `lib/aurora3/`, suffix `_aurora3`). Shared code is in `lib/shared/`. Parts of this file still describe the Tuya driver only; `CLAUDE.md` (section "Drivers") is the source of truth for the multi-driver conventions.
+
 ## Commands
 
 ```bash

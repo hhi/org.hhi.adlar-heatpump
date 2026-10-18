@@ -1,5 +1,7 @@
 # DPS vs Modbus Capability Mapping
 
+> **Scope (v3.2.0):** this document compares Tuya (DPS) with Aurora II (Modbus) only. For Aurora III see [adlar3-capability-modbus-register-mapping.md](adlar3-capability-modbus-register-mapping.md) and [ADR-004](../../architecture/ADR-004-AURORA3-DRIVER-MERGE.md).
+
 This document compares the DPS-based capability model from `org.hhi.adlar-heatpump`
 with the current Modbus implementation in `org.hhi.adlar-heatpump-modbus`.
 
