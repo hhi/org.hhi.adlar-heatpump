@@ -58,18 +58,18 @@ const THRESHOLD_TRIGGER_CARDS: Array<{
   thresholdArg: string;
   stateField: string;
 }> = [
-  { cardId: 'ambient_temperature_changed', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'inlet_temperature_changed', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'outlet_temperature_changed', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'coiler_temperature_alert', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'tank_temperature_alert', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'suction_temperature_alert', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'discharge_temperature_alert', thresholdArg: 'temperature', stateField: 'temperature' },
-  { cardId: 'eev_pulse_steps_alert', thresholdArg: 'pulse_steps', stateField: 'pulse_steps' },
-  { cardId: 'evi_pulse_steps_alert', thresholdArg: 'pulse_steps', stateField: 'pulse_steps' },
-  { cardId: 'water_flow_alert', thresholdArg: 'flow_rate', stateField: 'flow_rate' },
-  { cardId: 'compressor_efficiency_alert', thresholdArg: 'frequency', stateField: 'frequency' },
-  { cardId: 'fan_motor_efficiency_alert', thresholdArg: 'frequency', stateField: 'frequency' },
+  { cardId: 'ambient_temperature_changed_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'inlet_temperature_changed_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'outlet_temperature_changed_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'coiler_temperature_alert_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'tank_temperature_alert_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'suction_temperature_alert_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'discharge_temperature_alert_aurora3', thresholdArg: 'temperature', stateField: 'temperature' },
+  { cardId: 'eev_pulse_steps_alert_aurora3', thresholdArg: 'pulse_steps', stateField: 'pulse_steps' },
+  { cardId: 'evi_pulse_steps_alert_aurora3', thresholdArg: 'pulse_steps', stateField: 'pulse_steps' },
+  { cardId: 'water_flow_alert_aurora3', thresholdArg: 'flow_rate', stateField: 'flow_rate' },
+  { cardId: 'compressor_efficiency_alert_aurora3', thresholdArg: 'frequency', stateField: 'frequency' },
+  { cardId: 'fan_motor_efficiency_alert_aurora3', thresholdArg: 'frequency', stateField: 'frequency' },
 ];
 
 function hasTrigger(value: unknown): value is TriggerCardLike {
@@ -227,7 +227,7 @@ export class FlowCardManagerService {
         this.flowCardListeners.set(cardId, listener);
       }
 
-      const faultCard = this.device.homey.flow.getDeviceTriggerCard('fault_detected');
+      const faultCard = this.device.homey.flow.getDeviceTriggerCard('fault_detected_aurora3');
       const faultListener = faultCard.registerRunListener(async (args, state) => {
         const requestedCode = String((args as GenericFlowArgs).fault_code ?? '').trim().toLowerCase();
         const actualCode = String((state as GenericFlowArgs | undefined)?.faultCode ?? '').trim().toLowerCase();
@@ -235,7 +235,7 @@ export class FlowCardManagerService {
         if (!requestedCode || !actualCode) return false;
         return requestedCode === actualCode;
       });
-      this.flowCardListeners.set('fault_detected', faultListener);
+      this.flowCardListeners.set('fault_detected_aurora3', faultListener);
 
       this.logger('FlowCardManagerService: Modbus trigger run listeners registered');
     } catch (error) {
@@ -245,28 +245,28 @@ export class FlowCardManagerService {
 
   private async registerModbusSimpleActionCards(): Promise<void> {
     try {
-      this.registerCapabilityAction('set_target_temperature', async (args) => {
+      this.registerCapabilityAction('set_target_temperature_aurora3', async (args) => {
         const temperature = this.normalizeTemperatureArg(args, 'temperature', String(args.decimal_handling ?? 'round'));
         this.assertHeatingSetpointRange(temperature);
         await this.triggerSelectedDeviceCapability(args, 'target_temperature', temperature);
         return true;
       });
 
-      this.registerCapabilityAction('set_hotwater_temperature', async (args) => {
+      this.registerCapabilityAction('set_hotwater_temperature_aurora3', async (args) => {
         const temperature = this.normalizeTemperatureArg(args, 'temperature', 'round');
         this.assertSetpointRange('DHW setpoint', temperature, DHW_SETPOINT_MIN_C, DHW_SETPOINT_MAX_C);
         await this.triggerSelectedDeviceCapability(args, 'target_temperature.dhw', temperature);
         return true;
       });
 
-      this.registerCapabilityAction('set_desired_indoor_temperature', async (args) => {
+      this.registerCapabilityAction('set_desired_indoor_temperature_aurora3', async (args) => {
         const temperature = this.getRequiredNumberArg(args, 'temperature');
         this.assertSetpointRange('Desired indoor temperature', temperature, INDOOR_TARGET_MIN_C, INDOOR_TARGET_MAX_C);
         await this.triggerSelectedDeviceCapability(args, 'target_temperature.indoor', temperature);
         return true;
       });
 
-      this.registerCapabilityAction('set_heating_mode', async (args) => {
+      this.registerCapabilityAction('set_heating_mode_aurora3', async (args) => {
         const modeId = String(args.mode ?? '');
         const modbusMode = HEATING_MODE_TO_MODBUS[modeId];
         if (modbusMode === undefined) {
@@ -378,17 +378,17 @@ export class FlowCardManagerService {
   private async registerActionBasedConditionCards(): Promise<void> {
     try {
       // Device power state condition
-      const devicePowerCard = this.device.homey.flow.getConditionCard('device_power_is');
+      const devicePowerCard = this.device.homey.flow.getConditionCard('device_power_is_aurora3');
       const devicePowerListener = devicePowerCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Device power condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('onoff');
         const expectedState = args.state === 'on';
         return currentValue === expectedState;
       });
-      this.flowCardListeners.set('device_power_is', devicePowerListener);
+      this.flowCardListeners.set('device_power_is_aurora3', devicePowerListener);
 
       // Target temperature condition
-      const targetTempCard = this.device.homey.flow.getConditionCard('target_temperature_is');
+      const targetTempCard = this.device.homey.flow.getConditionCard('target_temperature_is_aurora3');
       const targetTempListener = targetTempCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Target temperature condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('target_temperature') || 0;
@@ -405,10 +405,10 @@ export class FlowCardManagerService {
             return false;
         }
       });
-      this.flowCardListeners.set('target_temperature_is', targetTempListener);
+      this.flowCardListeners.set('target_temperature_is_aurora3', targetTempListener);
 
       // Hot water temperature condition
-      const hotWaterTempCard = this.device.homey.flow.getConditionCard('hotwater_temperature_is');
+      const hotWaterTempCard = this.device.homey.flow.getConditionCard('hotwater_temperature_is_aurora3');
       const hotWaterTempListener = hotWaterTempCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Hot water temperature condition triggered', { args });
         const currentValue = this.device.getCapabilityValue('target_temperature.dhw') || 0;
@@ -425,17 +425,17 @@ export class FlowCardManagerService {
             return false;
         }
       });
-      this.flowCardListeners.set('hotwater_temperature_is', hotWaterTempListener);
+      this.flowCardListeners.set('hotwater_temperature_is_aurora3', hotWaterTempListener);
 
       // Heating mode condition
-      const heatingModeCard = this.device.homey.flow.getConditionCard('heating_mode_is');
+      const heatingModeCard = this.device.homey.flow.getConditionCard('heating_mode_is_aurora3');
       const heatingModeListener = heatingModeCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Heating mode condition triggered', { args });
         const currentValue = String(this.device.getCapabilityValue('adlar_mode_aurora3') ?? '');
         const expectedMode = HEATING_MODE_TO_MODBUS[String(args.mode ?? '')];
         return expectedMode !== undefined && currentValue === String(expectedMode);
       });
-      this.flowCardListeners.set('heating_mode_is', heatingModeListener);
+      this.flowCardListeners.set('heating_mode_is_aurora3', heatingModeListener);
 
       // Silent mode condition
       const silentModeCard = this.device.homey.flow.getConditionCard('silent_mode_is');
@@ -452,53 +452,53 @@ export class FlowCardManagerService {
       this.flowCardListeners.set('dhw_heating_active', dhwActiveListener);
 
       // Fault active condition
-      const faultActiveCard = this.device.homey.flow.getConditionCard('fault_active');
+      const faultActiveCard = this.device.homey.flow.getConditionCard('fault_active_aurora3');
       const faultActiveListener = faultActiveCard.registerRunListener(async () => {
         const faultCount = Number(this.device.getCapabilityValue('adlar_fault') ?? 0);
         const activeFaultText = String(this.device.getCapabilityValue('adlar_fault_active') ?? '').trim();
         return faultCount > 0 || activeFaultText.length > 0;
       });
-      this.flowCardListeners.set('fault_active', faultActiveListener);
+      this.flowCardListeners.set('fault_active_aurora3', faultActiveListener);
 
       // Compressor running condition
-      const compressorRunningCard = this.device.homey.flow.getConditionCard('compressor_running');
+      const compressorRunningCard = this.device.homey.flow.getConditionCard('compressor_running_aurora3');
       const compressorRunningListener = compressorRunningCard.registerRunListener(async () => {
         const compressorOn = this.device.getCapabilityValue('adlar_compressor_on');
         const compressorState = this.device.getCapabilityValue('adlar_state_compressor_state');
         const compressorFrequency = Number(this.device.getCapabilityValue('measure_frequency.compressor_freq') ?? 0);
         return compressorOn === true || compressorState === true || compressorFrequency > 0;
       });
-      this.flowCardListeners.set('compressor_running', compressorRunningListener);
+      this.flowCardListeners.set('compressor_running_aurora3', compressorRunningListener);
 
       // Ambient temperature above condition
-      const temperatureAboveCard = this.device.homey.flow.getConditionCard('temperature_above');
+      const temperatureAboveCard = this.device.homey.flow.getConditionCard('temperature_above_aurora3');
       const temperatureAboveListener = temperatureAboveCard.registerRunListener(async (args) => {
         const currentValue = Number(this.device.getCapabilityValue('measure_temperature.ambient'));
         const threshold = Number(args.temperature);
         return Number.isFinite(currentValue) && Number.isFinite(threshold) && currentValue > threshold;
       });
-      this.flowCardListeners.set('temperature_above', temperatureAboveListener);
+      this.flowCardListeners.set('temperature_above_aurora3', temperatureAboveListener);
 
       // Power above threshold condition
-      const powerAboveCard = this.device.homey.flow.getConditionCard('power_above_threshold');
+      const powerAboveCard = this.device.homey.flow.getConditionCard('power_above_threshold_aurora3');
       const powerAboveListener = powerAboveCard.registerRunListener(async (args) => {
         const currentValue = Number(this.device.getCapabilityValue('measure_power'));
         const threshold = Number(args.threshold);
         return Number.isFinite(currentValue) && Number.isFinite(threshold) && currentValue > threshold;
       });
-      this.flowCardListeners.set('power_above_threshold', powerAboveListener);
+      this.flowCardListeners.set('power_above_threshold_aurora3', powerAboveListener);
 
       // Total consumption above condition
-      const totalConsumptionCard = this.device.homey.flow.getConditionCard('total_consumption_above');
+      const totalConsumptionCard = this.device.homey.flow.getConditionCard('total_consumption_above_aurora3');
       const totalConsumptionListener = totalConsumptionCard.registerRunListener(async (args) => {
         const currentValue = Number(this.device.getCapabilityValue('meter_power'));
         const threshold = Number(args.threshold);
         return Number.isFinite(currentValue) && Number.isFinite(threshold) && currentValue > threshold;
       });
-      this.flowCardListeners.set('total_consumption_above', totalConsumptionListener);
+      this.flowCardListeners.set('total_consumption_above_aurora3', totalConsumptionListener);
 
       // COP efficiency check condition (v1.0.7)
-      const copEfficiencyCard = this.device.homey.flow.getConditionCard('cop_efficiency_check');
+      const copEfficiencyCard = this.device.homey.flow.getConditionCard('cop_efficiency_check_aurora3');
       const copEfficiencyListener = copEfficiencyCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: COP efficiency check triggered', { args });
 
@@ -517,10 +517,10 @@ export class FlowCardManagerService {
 
         return currentCOP > threshold;
       });
-      this.flowCardListeners.set('cop_efficiency_check', copEfficiencyListener);
+      this.flowCardListeners.set('cop_efficiency_check_aurora3', copEfficiencyListener);
 
       // Daily COP above threshold condition (v1.0.7)
-      const dailyCOPCard = this.device.homey.flow.getConditionCard('daily_cop_above_threshold');
+      const dailyCOPCard = this.device.homey.flow.getConditionCard('daily_cop_above_threshold_aurora3');
       const dailyCOPListener = dailyCOPCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Daily COP check triggered', { args });
 
@@ -535,10 +535,10 @@ export class FlowCardManagerService {
 
         return dailyCOP > threshold;
       });
-      this.flowCardListeners.set('daily_cop_above_threshold', dailyCOPListener);
+      this.flowCardListeners.set('daily_cop_above_threshold_aurora3', dailyCOPListener);
 
       // Monthly COP above threshold condition (v1.0.7)
-      const monthlyCOPCard = this.device.homey.flow.getConditionCard('monthly_cop_above_threshold');
+      const monthlyCOPCard = this.device.homey.flow.getConditionCard('monthly_cop_above_threshold_aurora3');
       const monthlyCOPListener = monthlyCOPCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Monthly COP check triggered', { args });
 
@@ -553,10 +553,10 @@ export class FlowCardManagerService {
 
         return monthlyCOP > threshold;
       });
-      this.flowCardListeners.set('monthly_cop_above_threshold', monthlyCOPListener);
+      this.flowCardListeners.set('monthly_cop_above_threshold_aurora3', monthlyCOPListener);
 
       // COP trend analysis condition (v1.0.8)
-      const copTrendCard = this.device.homey.flow.getConditionCard('cop_trend_analysis');
+      const copTrendCard = this.device.homey.flow.getConditionCard('cop_trend_analysis_aurora3');
       const copTrendListener = copTrendCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: COP trend analysis triggered', { args });
 
@@ -603,10 +603,10 @@ export class FlowCardManagerService {
         // This is controlled by the flow card UI selection
         return trendAnalysis.trend === 'improving';
       });
-      this.flowCardListeners.set('cop_trend_analysis', copTrendListener);
+      this.flowCardListeners.set('cop_trend_analysis_aurora3', copTrendListener);
 
       // Price in cheapest hours condition (v2.5.0)
-      const priceInCheapestHoursCard = this.device.homey.flow.getConditionCard('price_in_cheapest_hours');
+      const priceInCheapestHoursCard = this.device.homey.flow.getConditionCard('price_in_cheapest_hours_aurora3');
       const priceInCheapestHoursListener = priceInCheapestHoursCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Price in cheapest hours condition triggered', { args });
 
@@ -660,10 +660,10 @@ export class FlowCardManagerService {
 
         return isInBlock;
       });
-      this.flowCardListeners.set('price_in_cheapest_hours', priceInCheapestHoursListener);
+      this.flowCardListeners.set('price_in_cheapest_hours_aurora3', priceInCheapestHoursListener);
 
       // Price trend is condition (v2.5.0)
-      const priceTrendIsCard = this.device.homey.flow.getConditionCard('price_trend_is');
+      const priceTrendIsCard = this.device.homey.flow.getConditionCard('price_trend_is_aurora3');
       const priceTrendIsListener = priceTrendIsCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Price trend is condition triggered', { args });
 
@@ -726,10 +726,10 @@ export class FlowCardManagerService {
 
         return trendsMatch;
       });
-      this.flowCardListeners.set('price_trend_is', priceTrendIsListener);
+      this.flowCardListeners.set('price_trend_is_aurora3', priceTrendIsListener);
 
       // Price vs daily average condition (v2.5.0)
-      const priceVsDailyAverageCard = this.device.homey.flow.getConditionCard('price_vs_daily_average');
+      const priceVsDailyAverageCard = this.device.homey.flow.getConditionCard('price_vs_daily_average_aurora3');
       const priceVsDailyAverageListener = priceVsDailyAverageCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Price vs daily average condition triggered', { args });
 
@@ -808,10 +808,10 @@ export class FlowCardManagerService {
 
         return result;
       });
-      this.flowCardListeners.set('price_vs_daily_average', priceVsDailyAverageListener);
+      this.flowCardListeners.set('price_vs_daily_average_aurora3', priceVsDailyAverageListener);
 
       // Temperature differential condition (ADR-036 §4.1)
-      const temperatureDifferentialCard = this.device.homey.flow.getConditionCard('temperature_differential');
+      const temperatureDifferentialCard = this.device.homey.flow.getConditionCard('temperature_differential_aurora3');
       const temperatureDifferentialListener = temperatureDifferentialCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Temperature differential condition triggered', { args });
 
@@ -829,10 +829,10 @@ export class FlowCardManagerService {
         this.logger(`FlowCardManagerService: ΔT=${differential.toFixed(1)}°C (inlet=${inlet}°C, outlet=${outlet}°C, threshold=${threshold}°C)`);
         return differential > threshold;
       });
-      this.flowCardListeners.set('temperature_differential', temperatureDifferentialListener);
+      this.flowCardListeners.set('temperature_differential_aurora3', temperatureDifferentialListener);
 
       // Water flow rate check condition (ADR-036 §4.1)
-      const waterFlowRateCard = this.device.homey.flow.getConditionCard('water_flow_rate_check');
+      const waterFlowRateCard = this.device.homey.flow.getConditionCard('water_flow_rate_check_aurora3');
       const waterFlowRateListener = waterFlowRateCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Water flow rate check triggered', { args });
 
@@ -848,7 +848,7 @@ export class FlowCardManagerService {
         this.logger(`FlowCardManagerService: Water flow=${waterFlow} L/min, threshold=${threshold} L/min`);
         return waterFlow > threshold;
       });
-      this.flowCardListeners.set('water_flow_rate_check', waterFlowRateListener);
+      this.flowCardListeners.set('water_flow_rate_check_aurora3', waterFlowRateListener);
 
       this.logger('FlowCardManagerService: Action-based condition cards registered');
     } catch (error) {
@@ -871,7 +871,7 @@ export class FlowCardManagerService {
       // ==================== ACTION CARDS ====================
 
       // Action: Force insight analysis
-      const forceAnalysisCard = this.device.homey.flow.getActionCard('force_insight_analysis');
+      const forceAnalysisCard = this.device.homey.flow.getActionCard('force_insight_analysis_aurora3');
       const forceAnalysisListener = forceAnalysisCard.registerRunListener(async () => {
         this.logger('FlowCardManagerService: Force insight analysis action triggered');
 
@@ -885,10 +885,10 @@ export class FlowCardManagerService {
         // Return tokens for use in flows
         return result;
       });
-      this.flowCardListeners.set('force_insight_analysis', forceAnalysisListener);
+      this.flowCardListeners.set('force_insight_analysis_aurora3', forceAnalysisListener);
 
       // Action: Calculate pre-heat start time (v2.6.0)
-      const calculatePreHeatCard = this.device.homey.flow.getActionCard('calculate_preheat_time');
+      const calculatePreHeatCard = this.device.homey.flow.getActionCard('calculate_preheat_time_aurora3');
       const calculatePreHeatListener = calculatePreHeatCard.registerRunListener(async (args: PreHeatArgs) => {
         this.logger('FlowCardManagerService: Calculate pre-heat time action triggered', args);
 
@@ -970,12 +970,12 @@ export class FlowCardManagerService {
           confidence,
         };
       });
-      this.flowCardListeners.set('calculate_preheat_time', calculatePreHeatListener);
+      this.flowCardListeners.set('calculate_preheat_time_aurora3', calculatePreHeatListener);
 
       // ==================== CONDITION CARDS ====================
 
       // Condition 1: Insight is active
-      const insightActiveCard = this.device.homey.flow.getConditionCard('insight_is_active');
+      const insightActiveCard = this.device.homey.flow.getConditionCard('insight_is_active_aurora3');
       const insightActiveListener = insightActiveCard.registerRunListener(async (args: { category: string }) => {
         this.logger('FlowCardManagerService: Insight is active condition triggered', { category: args.category });
 
@@ -988,10 +988,10 @@ export class FlowCardManagerService {
         this.logger(`FlowCardManagerService: Insight ${args.category} is ${isActive ? 'active' : 'not active'}`);
         return isActive;
       });
-      this.flowCardListeners.set('insight_is_active', insightActiveListener);
+      this.flowCardListeners.set('insight_is_active_aurora3', insightActiveListener);
 
       // Condition 2: Confidence above threshold
-      const confidenceAboveCard = this.device.homey.flow.getConditionCard('confidence_above');
+      const confidenceAboveCard = this.device.homey.flow.getConditionCard('confidence_above_aurora3');
       const confidenceAboveListener = confidenceAboveCard.registerRunListener(async (args: { threshold: number }) => {
         this.logger('FlowCardManagerService: Confidence above condition triggered', { threshold: args.threshold });
 
@@ -1004,10 +1004,10 @@ export class FlowCardManagerService {
         this.logger(`FlowCardManagerService: Confidence is ${isAbove ? 'above' : 'below'} ${args.threshold}%`);
         return isAbove;
       });
-      this.flowCardListeners.set('confidence_above', confidenceAboveListener);
+      this.flowCardListeners.set('confidence_above_aurora3', confidenceAboveListener);
 
       // Condition 3: Savings above threshold
-      const savingsAboveCard = this.device.homey.flow.getConditionCard('savings_above');
+      const savingsAboveCard = this.device.homey.flow.getConditionCard('savings_above_aurora3');
       const savingsAboveListener = savingsAboveCard.registerRunListener(async (args: { category: string; threshold: number }) => {
         this.logger('FlowCardManagerService: Savings above condition triggered', { category: args.category, threshold: args.threshold });
 
@@ -1020,7 +1020,7 @@ export class FlowCardManagerService {
         this.logger(`FlowCardManagerService: Savings for ${args.category} are ${isAbove ? 'above' : 'below'} €${args.threshold}/month`);
         return isAbove;
       });
-      this.flowCardListeners.set('savings_above', savingsAboveListener);
+      this.flowCardListeners.set('savings_above_aurora3', savingsAboveListener);
 
       this.logger('FlowCardManagerService: Building Insights flow cards registered (4 actions + 3 conditions)');
     } catch (error) {
@@ -1036,18 +1036,18 @@ export class FlowCardManagerService {
   private async registerPerformanceReportCard(): Promise<void> {
     try {
       // ── Action Card: Generate Performance Report ──
-      const generateReportCard = this.device.homey.flow.getActionCard('generate_performance_report');
+      const generateReportCard = this.device.homey.flow.getActionCard('generate_performance_report_aurora3');
       const generateReportListener = generateReportCard.registerRunListener(async () => {
         this.logger('FlowCardManagerService: Generate performance report action triggered');
         return this.generateAndStoreReport();
       });
-      this.flowCardListeners.set('generate_performance_report', generateReportListener);
+      this.flowCardListeners.set('generate_performance_report_aurora3', generateReportListener);
 
       // ── Trigger Card: Performance Report Ready (daily) ──
       // Store as a dedicated class property — NOT in flowCardListeners.
       // This prevents unregisterAllFlowCards() from calling unregister() on it
       // and keeps the 23:00 timer lifecycle independent from flow card re-registration.
-      this.reportReadyTriggerCard = this.device.homey.flow.getDeviceTriggerCard('performance_report_ready');
+      this.reportReadyTriggerCard = this.device.homey.flow.getDeviceTriggerCard('performance_report_ready_aurora3');
 
       // Schedule daily report at 23:00 only if not already scheduled.
       // The timer must survive updateFlowCards() calls — it is only cleared in destroy().
@@ -1197,7 +1197,7 @@ export class FlowCardManagerService {
   private async registerUtilityActionCards(): Promise<void> {
     try {
       // Action 1: Get seasonal mode (ADR-036)
-      const getSeasonalModeCard = this.device.homey.flow.getActionCard('get_seasonal_mode');
+      const getSeasonalModeCard = this.device.homey.flow.getActionCard('get_seasonal_mode_aurora3');
       const getSeasonalModeListener = getSeasonalModeCard.registerRunListener(async () => {
         this.logger('FlowCardManagerService: Get seasonal mode action triggered');
 
@@ -1212,10 +1212,10 @@ export class FlowCardManagerService {
           days_until_season_change: result.daysUntilSeasonChange ?? 0,
         };
       });
-      this.flowCardListeners.set('get_seasonal_mode', getSeasonalModeListener);
+      this.flowCardListeners.set('get_seasonal_mode_aurora3', getSeasonalModeListener);
 
       // Action 2: Calculate curve value (ADR-036)
-      const calculateCurveCard = this.device.homey.flow.getActionCard('calculate_curve_value');
+      const calculateCurveCard = this.device.homey.flow.getActionCard('calculate_curve_value_aurora3');
       const calculateCurveListener = calculateCurveCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Calculate curve value action triggered', { args });
 
@@ -1230,10 +1230,10 @@ export class FlowCardManagerService {
 
         return { result_value: resultValue };
       });
-      this.flowCardListeners.set('calculate_curve_value', calculateCurveListener);
+      this.flowCardListeners.set('calculate_curve_value_aurora3', calculateCurveListener);
 
       // Action 3: Calculate time-based value (ADR-036)
-      const calculateTimeBasedCard = this.device.homey.flow.getActionCard('calculate_time_based_value');
+      const calculateTimeBasedCard = this.device.homey.flow.getActionCard('calculate_time_based_value_aurora3');
       const calculateTimeBasedListener = calculateTimeBasedCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Calculate time-based value action triggered', { args });
 
@@ -1243,7 +1243,7 @@ export class FlowCardManagerService {
 
         return { result_value: resultValue };
       });
-      this.flowCardListeners.set('calculate_time_based_value', calculateTimeBasedListener);
+      this.flowCardListeners.set('calculate_time_based_value_aurora3', calculateTimeBasedListener);
 
       this.logger('FlowCardManagerService: Utility action cards registered (3 cards)');
     } catch (error) {
@@ -1274,7 +1274,7 @@ export class FlowCardManagerService {
   private async registerModbusDirectAccessCards(): Promise<void> {
     try {
       // Action: Read Modbus register
-      const readCard = this.device.homey.flow.getActionCard('modbus_read_register');
+      const readCard = this.device.homey.flow.getActionCard('modbus_read_register_aurora3');
       const readListener = readCard.registerRunListener(async (args: { address: string }) => {
         const addr = this.parseModbusAddress(args.address);
         this.logger(`FlowCardManagerService: modbus_read_register addr=0x${addr.toString(16).toUpperCase()}`);
@@ -1282,10 +1282,10 @@ export class FlowCardManagerService {
         this.logger(`FlowCardManagerService: modbus_read_register result=${rawValue}`);
         return { raw_value: rawValue }; // eslint-disable-line camelcase
       });
-      this.flowCardListeners.set('modbus_read_register', readListener);
+      this.flowCardListeners.set('modbus_read_register_aurora3', readListener);
 
       // Action: Write Modbus register
-      const writeCard = this.device.homey.flow.getActionCard('modbus_write_register');
+      const writeCard = this.device.homey.flow.getActionCard('modbus_write_register_aurora3');
       const writeListener = writeCard.registerRunListener(async (args: { address: string; value: number }) => {
         const addr = this.parseModbusAddress(args.address);
         const raw = Math.round(args.value);
@@ -1294,7 +1294,7 @@ export class FlowCardManagerService {
         this.logger('FlowCardManagerService: modbus_write_register done');
         return true;
       });
-      this.flowCardListeners.set('modbus_write_register', writeListener);
+      this.flowCardListeners.set('modbus_write_register_aurora3', writeListener);
 
       this.logger('FlowCardManagerService: Modbus direct-access cards registered (2 cards)');
     } catch (error) {
@@ -1310,7 +1310,7 @@ export class FlowCardManagerService {
   private async registerExternalDataActionCards(): Promise<void> {
     try {
       // 1. Receive external power data
-      const receiveExternalPowerCard = this.device.homey.flow.getActionCard('receive_external_power_data');
+      const receiveExternalPowerCard = this.device.homey.flow.getActionCard('receive_external_power_data_aurora3');
       const receiveExternalPowerListener = receiveExternalPowerCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { power_value: number }) => {
@@ -1319,10 +1319,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_power_data', receiveExternalPowerListener);
+      this.flowCardListeners.set('receive_external_power_data_aurora3', receiveExternalPowerListener);
 
       // 2. Receive external flow data
-      const receiveExternalFlowCard = this.device.homey.flow.getActionCard('receive_external_flow_data');
+      const receiveExternalFlowCard = this.device.homey.flow.getActionCard('receive_external_flow_data_aurora3');
       const receiveExternalFlowListener = receiveExternalFlowCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { flow_value: number }) => {
@@ -1331,10 +1331,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_flow_data', receiveExternalFlowListener);
+      this.flowCardListeners.set('receive_external_flow_data_aurora3', receiveExternalFlowListener);
 
       // 3. Receive external ambient data
-      const receiveExternalAmbientCard = this.device.homey.flow.getActionCard('receive_external_ambient_data');
+      const receiveExternalAmbientCard = this.device.homey.flow.getActionCard('receive_external_ambient_data_aurora3');
       const receiveExternalAmbientListener = receiveExternalAmbientCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { temperature_value: number }) => {
@@ -1343,10 +1343,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_ambient_data', receiveExternalAmbientListener);
+      this.flowCardListeners.set('receive_external_ambient_data_aurora3', receiveExternalAmbientListener);
 
       // 4. Receive external indoor temperature
-      const receiveExternalIndoorCard = this.device.homey.flow.getActionCard('receive_external_indoor_temperature');
+      const receiveExternalIndoorCard = this.device.homey.flow.getActionCard('receive_external_indoor_temperature_aurora3');
       const receiveExternalIndoorListener = receiveExternalIndoorCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { temperature_value: number | string }) => {
@@ -1376,10 +1376,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_indoor_temperature', receiveExternalIndoorListener);
+      this.flowCardListeners.set('receive_external_indoor_temperature_aurora3', receiveExternalIndoorListener);
 
       // 5. Receive external energy prices
-      const receiveExternalPricesCard = this.device.homey.flow.getActionCard('receive_external_energy_prices');
+      const receiveExternalPricesCard = this.device.homey.flow.getActionCard('receive_external_energy_prices_aurora3');
       const receiveExternalPricesListener = receiveExternalPricesCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { prices_json: string }) => {
@@ -1388,10 +1388,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_energy_prices', receiveExternalPricesListener);
+      this.flowCardListeners.set('receive_external_energy_prices_aurora3', receiveExternalPricesListener);
 
       // 6. Receive external wind data
-      const receiveExternalWindCard = this.device.homey.flow.getActionCard('receive_external_wind_data');
+      const receiveExternalWindCard = this.device.homey.flow.getActionCard('receive_external_wind_data_aurora3');
       const receiveExternalWindListener = receiveExternalWindCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { wind_speed: number }) => {
@@ -1400,10 +1400,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_wind_data', receiveExternalWindListener);
+      this.flowCardListeners.set('receive_external_wind_data_aurora3', receiveExternalWindListener);
 
       // 7. Receive external solar power
-      const receiveExternalSolarPowerCard = this.device.homey.flow.getActionCard('receive_external_solar_power');
+      const receiveExternalSolarPowerCard = this.device.homey.flow.getActionCard('receive_external_solar_power_aurora3');
       const receiveExternalSolarPowerListener = receiveExternalSolarPowerCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { power_value: number }) => {
@@ -1412,10 +1412,10 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_solar_power', receiveExternalSolarPowerListener);
+      this.flowCardListeners.set('receive_external_solar_power_aurora3', receiveExternalSolarPowerListener);
 
       // 8. Receive external solar radiation
-      const receiveExternalSolarRadiationCard = this.device.homey.flow.getActionCard('receive_external_solar_radiation');
+      const receiveExternalSolarRadiationCard = this.device.homey.flow.getActionCard('receive_external_solar_radiation_aurora3');
       const receiveExternalSolarRadiationListener = receiveExternalSolarRadiationCard.registerRunListener(
         // eslint-disable-next-line camelcase
         async (args: { radiation_value: number }) => {
@@ -1424,7 +1424,7 @@ export class FlowCardManagerService {
           return true;
         },
       );
-      this.flowCardListeners.set('receive_external_solar_radiation', receiveExternalSolarRadiationListener);
+      this.flowCardListeners.set('receive_external_solar_radiation_aurora3', receiveExternalSolarRadiationListener);
 
       this.logger('FlowCardManagerService: External data action cards registered (8 cards)');
     } catch (error) {

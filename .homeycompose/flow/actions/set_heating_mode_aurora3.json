@@ -1,0 +1,68 @@
+{
+  "id": "set_heating_mode_aurora3",
+  "title": {
+    "en": "Set heating mode",
+    "nl": "Verwarmingsmodus instellen",
+    "de": "Heizmodus einstellen",
+    "fr": "Régler le mode de chauffage"
+  },
+  "titleFormatted": {
+    "en": "Set heating mode to [[mode]]",
+    "nl": "Verwarmingsmodus instellen op [[mode]]",
+    "de": "Heizmodus einstellen auf [[mode]]",
+    "fr": "Régler le mode de chauffage sur [[mode]]"
+  },
+  "hint": {
+    "en": "Set the heating operation mode",
+    "nl": "Stel de verwarming bedrijfsmodus in",
+    "de": "Heizbetriebsmodus einstellen",
+    "fr": "Régler le mode de fonctionnement du chauffage"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    },
+    {
+      "type": "dropdown",
+      "name": "mode",
+      "title": {
+        "en": "Heating mode",
+        "nl": "Verwarmingsmodus",
+        "de": "Heizmodus",
+        "fr": "Mode de chauffage"
+      },
+      "values": [
+        {
+          "id": "cool",
+          "title": {
+            "en": "Cooling",
+            "nl": "Koeling",
+            "de": "Kühlen",
+            "fr": "Froid"
+          }
+        },
+        {
+          "id": "heat",
+          "title": {
+            "en": "Heating",
+            "nl": "Verwarmen",
+            "de": "Heizung",
+            "fr": "Chauffage"
+          }
+        },
+        {
+          "id": "auto",
+          "title": {
+            "en": "Auto",
+            "nl": "Auto",
+            "de": "Auto",
+            "fr": "Auto"
+          }
+        }
+      ]
+    }
+  ]
+}

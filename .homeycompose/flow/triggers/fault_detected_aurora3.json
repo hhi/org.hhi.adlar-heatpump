@@ -1,0 +1,69 @@
+{
+  "id": "fault_detected_aurora3",
+  "title": {
+    "en": "Fault detected",
+    "nl": "Storing gedetecteerd",
+    "de": "Störung erkannt",
+    "fr": "Défaut détecté"
+  },
+  "titleFormatted": {
+    "en": "Fault [[fault_code]] detected",
+    "nl": "Storing [[fault_code]] gedetecteerd",
+    "de": "Störung [[fault_code]] erkannt",
+    "fr": "Défaut [[fault_code]] détecté"
+  },
+  "hint": {
+    "en": "Triggers when a system fault is detected",
+    "nl": "Wordt geactiveerd wanneer een systeem storing wordt gedetecteerd",
+    "de": "Wird ausgelöst, wenn eine Systemstörung erkannt wird",
+    "fr": "Se déclenche lorsqu'un défaut du système est détecté"
+  },
+  "highlight": true,
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    },
+    {
+      "type": "text",
+      "name": "fault_code",
+      "title": {
+        "en": " code",
+        "nl": " code",
+        "de": " code",
+        "fr": " code"
+      },
+      "placeholder": {
+        "en": "Fault code to monitor, e.g. E03 or P17",
+        "nl": "Storingscode om te monitoren, bijv. E03 of P17",
+        "de": "Störungscode zur Überwachung, z. B. E03 oder P17",
+        "fr": "Code de défaut à surveiller, p. ex. E03 ou P17"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "name": "fault_code",
+      "title": {
+        "en": "Fault code",
+        "nl": "Storing code",
+        "de": "Störungscode",
+        "fr": "Code de défaut"
+      },
+      "example": "E03"
+    },
+    {
+      "type": "string",
+      "name": "fault_description",
+      "title": {
+        "en": "Fault description",
+        "nl": "Storing beschrijving",
+        "de": "Störungsbeschreibung",
+        "fr": "Description du défaut"
+      },
+      "example": "Compressor overheating"
+    }
+  ]
+}

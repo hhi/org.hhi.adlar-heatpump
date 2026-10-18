@@ -92,7 +92,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=adlar_simulated_target"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_simulated_target"
           }
         ],
         "tokens": [
@@ -244,7 +244,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=adlar_simulated_target"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_simulated_target"
           }
         ],
         "tokens": [
@@ -298,6 +298,98 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": -30,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current ambient temperature",
+              "nl": "Huidige buitentemperatuur",
+              "de": "Aktuelle Außentemperatur",
+              "fr": "Température ambiante actuelle"
+            },
+            "example": 15.5
+          }
+        ]
+      },
+      {
+        "id": "ambient_temperature_changed_aurora3",
+        "title": {
+          "en": "Ambient temperature changed",
+          "nl": "Buitentemperatuur gewijzigd",
+          "de": "Außentemperatur geändert",
+          "fr": "Température ambiante changée"
+        },
+        "titleFormatted": {
+          "en": "Ambient temperature changed [[condition]] [[temperature]]°C ",
+          "nl": "Buitentemperatuur gewijzigd [[condition]] [[temperature]]°C ",
+          "de": "Außentemperatur geändert [[condition]] [[temperature]]°C ",
+          "fr": "Température ambiante changée [[condition]] [[temperature]]°C "
+        },
+        "hint": {
+          "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+          "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
+          "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -475,7 +567,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=building_insight_insulation"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=building_insight_insulation"
           }
         ],
         "tokens": [
@@ -566,7 +658,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=building_insight_profile"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=building_insight_profile"
           }
         ],
         "tokens": [
@@ -663,7 +755,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=energy_prices_data"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=energy_prices_data"
           }
         ],
         "tokens": [
@@ -738,6 +830,108 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Coiler temperature",
+              "nl": "Huidige Verdampingscondensator temperatuur",
+              "de": "Aktuelle Verdampfer-Temperatur",
+              "fr": "Température actuelle du serpentin"
+            },
+            "example": 45.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur",
+              "de": "Schwellenwert Temperatur",
+              "fr": "Température seuil"
+            },
+            "example": 50
+          }
+        ]
+      },
+      {
+        "id": "coiler_temperature_alert_aurora3",
+        "title": {
+          "en": "Coiler temperature alert",
+          "nl": "Verdampingscondensator temperatuur alarm",
+          "de": "Verdampfer-Temperaturalarm",
+          "fr": "Alerte de température du serpentin"
+        },
+        "titleFormatted": {
+          "en": " Coiler temperature [[condition]] [[temperature]]°C",
+          "nl": " Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+          "de": " Verdampfer-Temperatur [[condition]] [[temperature]]°C",
+          "fr": " Température du serpentin [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when electricity coiler temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat",
+          "de": "Wird ausgelöst, wenn die Verdampfer-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+          "fr": "Se déclenche lorsque la température du serpentin dépasse ou descend en dessous d'un niveau spécifié"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -942,6 +1136,108 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "frequency",
+            "title": {
+              "en": " Frequency ",
+              "nl": " Frequentie ",
+              "de": " Frequenz ",
+              "fr": " Fréquence "
+            },
+            "min": 10,
+            "max": 200,
+            "step": 5,
+            "units": "Hz",
+            "placeholder": {
+              "en": "Frequency threshold in Hz",
+              "nl": "Frequentie drempel in Hz",
+              "de": "Frequenzschwellenwert in Hz",
+              "fr": "Seuil de fréquence en Hz"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_frequency",
+            "title": {
+              "en": "Current frequency",
+              "nl": "Huidige frequentie",
+              "de": "Aktuelle Frequenz",
+              "fr": "Fréquence actuelle"
+            },
+            "example": 85
+          },
+          {
+            "type": "number",
+            "name": "threshold_frequency",
+            "title": {
+              "en": "Threshold frequency",
+              "nl": "Drempel frequentie",
+              "de": "Schwellenwert Frequenz",
+              "fr": "Fréquence seuil"
+            },
+            "example": 90
+          }
+        ]
+      },
+      {
+        "id": "compressor_efficiency_alert_aurora3",
+        "title": {
+          "en": "Compressor efficiency alert (Expert)",
+          "nl": "Compressor efficiëntie alarm (Expert)",
+          "de": "Kompressor-Effizienzalarm (Experte)",
+          "fr": "Alerte d'efficacité du compresseur (Expert)"
+        },
+        "titleFormatted": {
+          "en": "Compressor frequency [[condition]] [[frequency]] Hz (Expert)",
+          "nl": "Compressor frequentie [[condition]] [[frequency]] Hz (Expert)",
+          "de": "Kompressor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+          "fr": "Fréquence du compresseur [[condition]] [[frequency]] Hz (Expert)"
+        },
+        "hint": {
+          "en": "Triggers when compressor frequency goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+          "nl": "Wordt geactiveerd wanneer compressor frequentie boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+          "de": "Wird ausgelöst, wenn die Kompressor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+          "fr": "Se déclenche lorsque la fréquence du compresseur dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=adlar_cop"
           },
           {
             "type": "dropdown",
@@ -1345,7 +1641,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_trend"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_cop_trend"
           },
           {
             "type": "dropdown",
@@ -1458,7 +1754,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3"
           },
           {
             "type": "range",
@@ -1531,7 +1827,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_daily"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_cop_daily"
           },
           {
             "type": "dropdown",
@@ -1644,7 +1940,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=adlar_energy_cost_daily"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_energy_cost_daily"
           },
           {
             "type": "number",
@@ -1727,6 +2023,108 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": 0,
+            "max": 120,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Discharge temperature",
+              "nl": "Huidige Persgas temperatuur",
+              "de": "Aktuelle Druckgas-Temperatur",
+              "fr": "Température de refoulement actuelle"
+            },
+            "example": 75.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur",
+              "de": "Schwellenwert Temperatur",
+              "fr": "Température seuil"
+            },
+            "example": 80
+          }
+        ]
+      },
+      {
+        "id": "discharge_temperature_alert_aurora3",
+        "title": {
+          "en": "Discharge temperature alert",
+          "nl": "Persgas temperatuur alarm",
+          "de": "Druckgas-Temperaturalarm",
+          "fr": "Alerte de température de refoulement"
+        },
+        "titleFormatted": {
+          "en": "Discharge temperature [[condition]] [[temperature]]°C",
+          "nl": "Persgas temperatuur [[condition]] [[temperature]]°C",
+          "de": "Druckgas-Temperatur [[condition]] [[temperature]]°C",
+          "fr": "Température de refoulement [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when discharge temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder een bepaald nivo gaat",
+          "de": "Wird ausgelöst, wenn die Druckgas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+          "fr": "Se déclenche lorsque la température de refoulement dépasse ou descend en dessous d'un niveau spécifié"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -2417,6 +2815,108 @@
         ]
       },
       {
+        "id": "eev_pulse_steps_alert_aurora3",
+        "title": {
+          "en": "EEV Open pulse-steps alert",
+          "nl": "EEV-openingsstap puls-stappen alarm",
+          "de": "EEV-Öffnungspuls-Alarm",
+          "fr": "Alerte de pas d'impulsion EEV"
+        },
+        "titleFormatted": {
+          "en": "EEV pulse-steps [[condition]] [[pulse_steps]]",
+          "nl": "EEV puls-stappen [[condition]] [[pulse_steps]]",
+          "de": "EEV-Pulsschritte [[condition]] [[pulse_steps]]",
+          "fr": "Pas d'impulsion EEV [[condition]] [[pulse_steps]]"
+        },
+        "hint": {
+          "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan",
+          "de": "Wird ausgelöst, wenn die elektronischen Expansionsventil (EEV) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
+          "fr": "Se déclenche lorsque les pas d'impulsion du détendeur électronique (EEV) dépassent ou descendent en dessous d'un niveau spécifié"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "pulse_steps",
+            "title": {
+              "en": " Pulse-steps",
+              "nl": " Puls-stappen",
+              "de": " Schritte",
+              "fr": " Pas"
+            },
+            "min": 0,
+            "max": 500,
+            "step": 10,
+            "units": "Pulse-steps",
+            "placeholder": {
+              "en": "Pulse-steps threshold",
+              "nl": "Puls-stappen drempel",
+              "de": "Schwellenwert für Ventilschritte",
+              "fr": "Seuil de pas de valve"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_pulse_steps",
+            "title": {
+              "en": "Current EEV Open pulse-steps",
+              "nl": "Huidige EEV-openingsstap puls-stappen",
+              "de": "Aktuelle EEV-Öffnungspulsschritte",
+              "fr": "Pas d'impulsion d'ouverture EEV actuels"
+            },
+            "example": 450
+          },
+          {
+            "type": "number",
+            "name": "threshold_pulse_steps",
+            "title": {
+              "en": "Threshold pulse-steps",
+              "nl": "Drempel puls-stappen",
+              "de": "Schwellenwert Pulsschritte",
+              "fr": "Pas d'impulsion seuil"
+            },
+            "example": 400
+          }
+        ]
+      },
+      {
         "id": "eev_pulse_steps_alert_modbus",
         "title": {
           "en": "EEV Open pulse-steps alert",
@@ -2621,6 +3121,108 @@
         ]
       },
       {
+        "id": "evi_pulse_steps_alert_aurora3",
+        "title": {
+          "en": "EVI Open pulse-steps alert",
+          "nl": "EVI-openingsstap puls-stappen alarm",
+          "de": "EVI-Öffnungspuls-Alarm",
+          "fr": "Alerte de pas d'impulsion EVI"
+        },
+        "titleFormatted": {
+          "en": "EVI Open pulse-steps [[condition]] [[pulse_steps]]",
+          "nl": "EVI-openingsstap puls-stappen [[condition]] [[pulse_steps]]",
+          "de": "EVI-Öffnungspulsschritte [[condition]] [[pulse_steps]]",
+          "fr": "Pas d'impulsion d'ouverture EVI [[condition]] [[pulse_steps]]"
+        },
+        "hint": {
+          "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan",
+          "de": "Wird ausgelöst, wenn die Enhanced Vapor Injection (EVI) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
+          "fr": "Se déclenche lorsque les pas d'impulsion Enhanced Vapor Injection (EVI) dépassent ou descendent en dessous d'un niveau spécifié"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "pulse_steps",
+            "title": {
+              "en": " Pulse-steps",
+              "nl": " Puls-stappen",
+              "de": " Schritte",
+              "fr": " Pas"
+            },
+            "min": 0,
+            "max": 500,
+            "step": 10,
+            "units": "Pulse-steps",
+            "placeholder": {
+              "en": "Pulse-steps threshold",
+              "nl": "Puls-stappen drempel",
+              "de": "Schwellenwert für Ventilschritte",
+              "fr": "Seuil de pas de valve"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_pulse_steps",
+            "title": {
+              "en": "Current EVI Open pulse-steps",
+              "nl": "Huidige EVI-openingsstap puls-stappen",
+              "de": "Aktuelle EVI-Öffnungspulsschritte",
+              "fr": "Pas d'impulsion d'ouverture EVI actuels"
+            },
+            "example": 250
+          },
+          {
+            "type": "number",
+            "name": "threshold_pulse_steps",
+            "title": {
+              "en": "Threshold pulse-steps",
+              "nl": "Drempel puls-stappen",
+              "de": "Schwellenwert Pulsschritte",
+              "fr": "Pas d'impulsion seuil"
+            },
+            "example": 200
+          }
+        ]
+      },
+      {
         "id": "evi_pulse_steps_alert_modbus",
         "title": {
           "en": "EVI Open pulse-steps alert",
@@ -2747,7 +3349,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=energy_prices_data"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=energy_prices_data"
           }
         ],
         "tokens": [
@@ -2811,6 +3413,108 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "frequency",
+            "title": {
+              "en": " Frequency ",
+              "nl": " Frequentie ",
+              "de": " Frequenz ",
+              "fr": " Fréquence "
+            },
+            "min": 10,
+            "max": 100,
+            "step": 5,
+            "units": "Hz",
+            "placeholder": {
+              "en": "Frequency threshold in Hz",
+              "nl": "Frequentie drempel in Hz",
+              "de": "Frequenzschwellenwert in Hz",
+              "fr": "Seuil de fréquence en Hz"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_fan_frequency",
+            "title": {
+              "en": "Current fan frequency",
+              "nl": "Huidige ventilator frequentie",
+              "de": "Aktuelle Lüfterfrequenz",
+              "fr": "Fréquence actuelle du ventilateur"
+            },
+            "example": 75
+          },
+          {
+            "type": "number",
+            "name": "threshold_frequency",
+            "title": {
+              "en": "Threshold frequency",
+              "nl": "Drempel frequentie",
+              "de": "Schwellenwert Frequenz",
+              "fr": "Fréquence seuil"
+            },
+            "example": 80
+          }
+        ]
+      },
+      {
+        "id": "fan_motor_efficiency_alert_aurora3",
+        "title": {
+          "en": "Fan motor efficiency alert (Expert)",
+          "nl": "Ventilator motor efficiëntie alarm (Expert)",
+          "de": "Lüftermotor-Effizienzalarm (Experte)",
+          "fr": "Alerte d'efficacité du moteur de ventilateur (Expert)"
+        },
+        "titleFormatted": {
+          "en": "Fan motor frequency [[condition]] [[frequency]] Hz (Expert)",
+          "nl": "Ventilator motor frequentie [[condition]] [[frequency]] Hz (Expert)",
+          "de": "Lüftermotor-Frequenz [[condition]] [[frequency]] Hz (Experte)",
+          "fr": "Fréquence du moteur de ventilateur [[condition]] [[frequency]] Hz (Expert)"
+        },
+        "hint": {
+          "en": "Triggers when fan motor frequency goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+          "nl": "Wordt geactiveerd wanneer ventilator motor frequentie boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+          "de": "Wird ausgelöst, wenn die Lüftermotor-Frequenz einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+          "fr": "Se déclenche lorsque la fréquence du moteur de ventilateur dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=adlar_cop"
           },
           {
             "type": "dropdown",
@@ -3065,6 +3769,75 @@
         ]
       },
       {
+        "id": "fault_detected_aurora3",
+        "title": {
+          "en": "Fault detected",
+          "nl": "Storing gedetecteerd",
+          "de": "Störung erkannt",
+          "fr": "Défaut détecté"
+        },
+        "titleFormatted": {
+          "en": "Fault [[fault_code]] detected",
+          "nl": "Storing [[fault_code]] gedetecteerd",
+          "de": "Störung [[fault_code]] erkannt",
+          "fr": "Défaut [[fault_code]] détecté"
+        },
+        "hint": {
+          "en": "Triggers when a system fault is detected",
+          "nl": "Wordt geactiveerd wanneer een systeem storing wordt gedetecteerd",
+          "de": "Wird ausgelöst, wenn eine Systemstörung erkannt wird",
+          "fr": "Se déclenche lorsqu'un défaut du système est détecté"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "text",
+            "name": "fault_code",
+            "title": {
+              "en": " code",
+              "nl": " code",
+              "de": " code",
+              "fr": " code"
+            },
+            "placeholder": {
+              "en": "Fault code to monitor, e.g. E03 or P17",
+              "nl": "Storingscode om te monitoren, bijv. E03 of P17",
+              "de": "Störungscode zur Überwachung, z. B. E03 oder P17",
+              "fr": "Code de défaut à surveiller, p. ex. E03 ou P17"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "fault_code",
+            "title": {
+              "en": "Fault code",
+              "nl": "Storing code",
+              "de": "Störungscode",
+              "fr": "Code de défaut"
+            },
+            "example": "E03"
+          },
+          {
+            "type": "string",
+            "name": "fault_description",
+            "title": {
+              "en": "Fault description",
+              "nl": "Storing beschrijving",
+              "de": "Störungsbeschreibung",
+              "fr": "Description du défaut"
+            },
+            "example": "Compressor overheating"
+          }
+        ]
+      },
+      {
         "id": "fault_detected_modbus",
         "title": {
           "en": "Fault detected",
@@ -3152,7 +3925,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3"
           }
         ],
         "tokens": [
@@ -3227,7 +4000,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3"
           }
         ],
         "tokens": [
@@ -3756,6 +4529,98 @@
         ]
       },
       {
+        "id": "inlet_temperature_changed_aurora3",
+        "title": {
+          "en": "Inlet temperature changed",
+          "nl": "Water intrede temperatuur gewijzigd",
+          "de": "Vorlauftemperatur geändert",
+          "fr": "Température d'entrée changée"
+        },
+        "titleFormatted": {
+          "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
+          "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
+          "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when water inlet temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat",
+          "de": "Wird ausgelöst, wenn die Vorlauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+          "fr": "Se déclenche lorsque la température d'entrée d'eau dépasse ou descend en dessous d'un niveau spécifié"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current inlet temperature",
+              "nl": "Huidige water intrede temperatuur",
+              "de": "Aktuelle Vorlauftemperatur",
+              "fr": "Température d'entrée actuelle"
+            },
+            "example": 45.5
+          }
+        ]
+      },
+      {
         "id": "inlet_temperature_changed_modbus",
         "title": {
           "en": "Inlet temperature changed",
@@ -3906,6 +4771,64 @@
         ]
       },
       {
+        "id": "inlet_temperature_value_changed_aurora3",
+        "title": {
+          "en": "Inlet temperature is changed",
+          "nl": "Water intrede temperatuur is veranderd",
+          "de": "Vorlauftemperatur hat sich geändert",
+          "fr": "La température d'entrée a changé"
+        },
+        "hint": {
+          "en": "Triggers when water inlet temperature changes by at least 0.5°C",
+          "nl": "Wordt geactiveerd wanneer de water intrede temperatuur minimaal 0,5°C wijzigt",
+          "de": "Wird ausgelöst, wenn sich die Vorlauftemperatur um mindestens 0,5°C ändert",
+          "fr": "Se déclenche lorsque la température d'entrée d'eau change d'au moins 0,5°C"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current inlet temperature",
+              "nl": "Huidige water intrede temperatuur",
+              "de": "Aktuelle Vorlauftemperatur",
+              "fr": "Température d'entrée actuelle"
+            },
+            "example": 45.5
+          },
+          {
+            "type": "number",
+            "name": "previous_temperature",
+            "title": {
+              "en": "Previous inlet temperature",
+              "nl": "Vorige water intrede temperatuur",
+              "de": "Vorherige Vorlauftemperatur",
+              "fr": "Température d'entrée précédente"
+            },
+            "example": 44.8
+          },
+          {
+            "type": "number",
+            "name": "delta_temperature",
+            "title": {
+              "en": "Temperature change",
+              "nl": "Temperatuurverschil",
+              "de": "Temperaturänderung",
+              "fr": "Variation de température"
+            },
+            "example": 0.7
+          }
+        ],
+        "highlight": true
+      },
+      {
         "id": "learning_milestone_reached",
         "title": {
           "en": "Building model learning milestone",
@@ -3930,7 +4853,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=adlar_building_c"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_building_c"
           }
         ],
         "tokens": [
@@ -4210,7 +5133,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_monthly"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_cop_monthly"
           },
           {
             "type": "dropdown",
@@ -4324,6 +5247,98 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": -20,
+            "max": 80,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current outlet temperature",
+              "nl": "Huidige water uittrede temperatuur",
+              "de": "Aktuelle Rücklauftemperatur",
+              "fr": "Température de sortie actuelle"
+            },
+            "example": 25.5
+          }
+        ]
+      },
+      {
+        "id": "outlet_temperature_changed_aurora3",
+        "title": {
+          "en": "Outlet temperature changed",
+          "nl": "Water uittrede temperatuur gewijzigd",
+          "de": "Rücklauftemperatur geändert",
+          "fr": "Température de sortie changée"
+        },
+        "titleFormatted": {
+          "en": "Outlet temperature changed [[condition]] [[temperature]]°C",
+          "nl": "Water uittrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "de": "Rücklauftemperatur geändert [[condition]] [[temperature]]°C",
+          "fr": "Température de sortie changée [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when water outlet temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat",
+          "de": "Wird ausgelöst, wenn die Rücklauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+          "fr": "Se déclenche lorsque la température de sortie d'eau dépasse ou descend en dessous d'un niveau spécifié"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -4541,6 +5556,64 @@
         ]
       },
       {
+        "id": "outlet_temperature_value_changed_aurora3",
+        "title": {
+          "en": "Outlet temperature is changed",
+          "nl": "Water uittrede temperatuur is veranderd",
+          "de": "Rücklauftemperatur hat sich geändert",
+          "fr": "La température de sortie a changé"
+        },
+        "hint": {
+          "en": "Triggers when water outlet temperature changes by at least 0.5°C",
+          "nl": "Wordt geactiveerd wanneer de water uittrede temperatuur minimaal 0,5°C wijzigt",
+          "de": "Wird ausgelöst, wenn sich die Rücklauftemperatur um mindestens 0,5°C ändert",
+          "fr": "Se déclenche lorsque la température de sortie d'eau change d'au moins 0,5°C"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current outlet temperature",
+              "nl": "Huidige water uittrede temperatuur",
+              "de": "Aktuelle Rücklauftemperatur",
+              "fr": "Température de sortie actuelle"
+            },
+            "example": 25.5
+          },
+          {
+            "type": "number",
+            "name": "previous_temperature",
+            "title": {
+              "en": "Previous outlet temperature",
+              "nl": "Vorige water uittrede temperatuur",
+              "de": "Vorherige Rücklauftemperatur",
+              "fr": "Température de sortie précédente"
+            },
+            "example": 24.8
+          },
+          {
+            "type": "number",
+            "name": "delta_temperature",
+            "title": {
+              "en": "Temperature change",
+              "nl": "Temperatuurverschil",
+              "de": "Temperaturänderung",
+              "fr": "Variation de température"
+            },
+            "example": 0.7
+          }
+        ],
+        "highlight": true
+      },
+      {
         "id": "performance_report_ready",
         "title": {
           "en": "Performance report is ready",
@@ -4560,6 +5633,86 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "overall_score",
+            "type": "number",
+            "title": {
+              "en": "Overall score (0-100)",
+              "nl": "Totaalscore (0-100)",
+              "de": "Gesamtbewertung (0-100)",
+              "fr": "Score global (0-100)"
+            },
+            "example": 82
+          },
+          {
+            "name": "rating",
+            "type": "string",
+            "title": {
+              "en": "Rating",
+              "nl": "Beoordeling",
+              "de": "Bewertung",
+              "fr": "Évaluation"
+            },
+            "example": "Good"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "title": {
+              "en": "Summary",
+              "nl": "Samenvatting",
+              "de": "Zusammenfassung",
+              "fr": "Résumé"
+            },
+            "example": "Your heat pump is performing well (82/100)."
+          },
+          {
+            "name": "recommendations",
+            "type": "string",
+            "title": {
+              "en": "Recommendations",
+              "nl": "Aanbevelingen",
+              "de": "Empfehlungen",
+              "fr": "Recommandations"
+            },
+            "example": "COP trend is stable — good performance\nWater ΔT is high — check water flow rate and filter"
+          },
+          {
+            "name": "report_json",
+            "type": "string",
+            "title": {
+              "en": "Full report (JSON)",
+              "nl": "Volledig rapport (JSON)",
+              "de": "Vollständiger Bericht (JSON)",
+              "fr": "Rapport complet (JSON)"
+            },
+            "example": "{}"
+          }
+        ]
+      },
+      {
+        "id": "performance_report_ready_aurora3",
+        "title": {
+          "en": "Performance report is ready",
+          "nl": "Prestatierapport is beschikbaar",
+          "de": "Leistungsbericht ist verfügbar",
+          "fr": "Le rapport de performance est prêt"
+        },
+        "hint": {
+          "en": "Triggered daily at 23:00 with a comprehensive performance report. Use in combination with a notification action to receive daily performance summaries.",
+          "nl": "Wordt dagelijks om 23:00 afgevuurd met een uitgebreid prestatierapport. Gebruik in combinatie met een melding-actie om dagelijkse prestatieoverzichten te ontvangen.",
+          "de": "Wird täglich um 23:00 Uhr mit einem umfassenden Leistungsbericht ausgelöst. Verwenden Sie in Kombination mit einer Benachrichtigungsaktion für tägliche Leistungszusammenfassungen.",
+          "fr": "Déclenché quotidiennement à 23h00 avec un rapport de performance complet. Utilisez en combinaison avec une action de notification pour recevoir des résumés quotidiens."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           }
         ],
         "tokens": [
@@ -4724,7 +5877,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=measure_power"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=measure_power"
           },
           {
             "type": "range",
@@ -4791,7 +5944,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3"
           }
         ],
         "tokens": [
@@ -4876,7 +6029,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=adlar_energy_price_category"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=adlar_energy_price_category"
           }
         ],
         "tokens": [
@@ -4940,7 +6093,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus&capabilities=energy_prices_data"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3&capabilities=energy_prices_data"
           }
         ],
         "tokens": [
@@ -5004,6 +6157,108 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": -30,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Suction temperature",
+              "nl": "Huidige Zuiggas temperatuur",
+              "de": "Aktuelle Sauggas-Temperatur",
+              "fr": "Température d'aspiration actuelle"
+            },
+            "example": 5.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur",
+              "de": "Schwellenwert Temperatur",
+              "fr": "Température seuil"
+            },
+            "example": 10
+          }
+        ]
+      },
+      {
+        "id": "suction_temperature_alert_aurora3",
+        "title": {
+          "en": "Suction temperature alert",
+          "nl": "Zuiggas temperatuur alarm",
+          "de": "Sauggas-Temperaturalarm",
+          "fr": "Alerte de température d'aspiration"
+        },
+        "titleFormatted": {
+          "en": "Suction temperature [[condition]] [[temperature]]°C",
+          "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C",
+          "de": "Sauggas-Temperatur [[condition]] [[temperature]]°C",
+          "fr": "Température d'aspiration [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when suction temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat",
+          "de": "Wird ausgelöst, wenn die Sauggas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+          "fr": "Se déclenche lorsque la température d'aspiration dépasse ou descend en dessous d'un niveau spécifié"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -5286,6 +6541,109 @@
         ]
       },
       {
+        "id": "tank_temperature_alert_aurora3",
+        "title": {
+          "en": "Tank temperature alert",
+          "nl": "Tapwater temperatuur alarm",
+          "de": "Warmwasser-Temperaturalarm",
+          "fr": "Alerte de température du ballon"
+        },
+        "titleFormatted": {
+          "en": "Tank temperature [[condition]] [[temperature]]°C",
+          "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C",
+          "de": "Warmwasser-Temperatur [[condition]] [[temperature]]°C",
+          "fr": "Température du ballon [[condition]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Triggers when water tank temperature goes above or below a specified level",
+          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat",
+          "de": "Wird ausgelöst, wenn die Warmwasser-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
+          "fr": "Se déclenche lorsque la température du ballon dépasse ou descend en dessous d'un niveau spécifié"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": 0,
+            "max": 90,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature threshold in °C",
+              "nl": "Temperatuur drempel in °C",
+              "de": "Temperaturschwellenwert in °C",
+              "fr": "Seuil de température en °C"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_temperature",
+            "title": {
+              "en": "Current Tank temperature",
+              "nl": "Huidige Tapwater temperatuur",
+              "de": "Aktuelle Warmwasser-Temperatur",
+              "fr": "Température actuelle du ballon"
+            },
+            "example": 55.5
+          },
+          {
+            "type": "number",
+            "name": "threshold_temperature",
+            "title": {
+              "en": "Threshold temperature",
+              "nl": "Drempel temperatuur",
+              "de": "Schwellenwert Temperatur",
+              "fr": "Température seuil"
+            },
+            "example": 60
+          }
+        ]
+      },
+      {
         "id": "tank_temperature_alert_modbus",
         "title": {
           "en": "Tank temperature alert",
@@ -5413,7 +6771,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3"
           }
         ],
         "tokens": [
@@ -5521,7 +6879,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus"
+            "filter": "driver_id=intelligent-heat-pump|intelligent-heatpump-modbus|intelligent-heatpump-aurora3"
           },
           {
             "type": "range",
@@ -5594,6 +6952,109 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Condition",
+              "nl": "Conditie",
+              "de": "Bedingung",
+              "fr": "Condition"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above",
+                  "nl": "boven",
+                  "de": "über",
+                  "fr": "au-dessus"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below",
+                  "nl": "onder",
+                  "de": "unter",
+                  "fr": "en dessous"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "flow_rate",
+            "title": {
+              "en": " Flow rate (L/min)",
+              "nl": " Doorstroom (L/min)",
+              "de": " Durchflussrate (L/min)",
+              "fr": " Débit (L/min)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "units": "L/min",
+            "placeholder": {
+              "en": "Flow rate threshold in L/min",
+              "nl": "Doorstroom drempel in L/min",
+              "de": "Durchflussschwellenwert in L/min",
+              "fr": "Seuil de débit en L/min"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "current_flow_rate",
+            "title": {
+              "en": "Current flow rate",
+              "nl": "Huidige doorstroom",
+              "de": "Aktueller Durchfluss",
+              "fr": "Débit actuel"
+            },
+            "example": 25
+          },
+          {
+            "type": "number",
+            "name": "threshold_flow_rate",
+            "title": {
+              "en": "Threshold flow rate",
+              "nl": "Drempel doorstroom",
+              "de": "Schwellenwert Durchfluss",
+              "fr": "Débit seuil"
+            },
+            "example": 20
+          }
+        ]
+      },
+      {
+        "id": "water_flow_alert_aurora3",
+        "title": {
+          "en": "Water flow rate alert (Expert)",
+          "nl": "Water doorstroom alarm (Expert)",
+          "de": "Wasserdurchfluss-Alarm (Experte)",
+          "fr": "Alerte de débit d'eau (Expert)"
+        },
+        "titleFormatted": {
+          "en": "Water flow rate [[condition]] [[flow_rate]] L/min (Expert)",
+          "nl": "Water doorstroom [[condition]] [[flow_rate]] L/min (Expert)",
+          "de": "Wasserdurchfluss [[condition]] [[flow_rate]] L/min (Experte)",
+          "fr": "Débit d'eau [[condition]] [[flow_rate]] L/min (Expert)"
+        },
+        "hint": {
+          "en": "Triggers when water flow rate goes above or below a specified level. Requires 'Enable expert feature cards' in device settings.",
+          "nl": "Wordt geactiveerd wanneer water doorstroom boven of onder een bepaald niveau gaat. Vereist 'Expert functie kaarten inschakelen' in apparaat instellingen.",
+          "de": "Wird ausgelöst, wenn der Wasserdurchfluss einen angegebenen Schwellenwert über- oder unterschreitet. Erfordert 'Expertenfunktionskarten aktivieren' in den Geräteeinstellungen.",
+          "fr": "Se déclenche lorsque le débit d'eau dépasse ou descend en dessous d'un niveau spécifié. Nécessite 'Activer les cartes de fonctionnalités d'expert' dans les paramètres de l'appareil."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -6082,6 +7543,35 @@
         ]
       },
       {
+        "id": "compressor_running_aurora3",
+        "title": {
+          "en": "Compressor is running",
+          "nl": "Compressor draait",
+          "de": "Kompressor läuft",
+          "fr": "Le compresseur est en marche"
+        },
+        "titleFormatted": {
+          "en": "Compressor is !{{running|stopped}}",
+          "nl": "Compressor is !{{draaiend|gestopt}}",
+          "de": "Kompressor ist !{{läuft|gestoppt}}",
+          "fr": "Le compresseur est !{{en marche|arrêté}}"
+        },
+        "hint": {
+          "en": "Check if the compressor is currently running",
+          "nl": "Controleer of de compressor momenteel draait",
+          "de": "Prüfen Sie, ob der Kompressor derzeit läuft",
+          "fr": "Vérifier si le compresseur est actuellement en marche"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          }
+        ]
+      },
+      {
         "id": "compressor_running_modbus",
         "title": {
           "en": "Compressor is running",
@@ -6136,6 +7626,54 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "title": {
+              "en": "Threshold (%)",
+              "nl": "Drempel (%)",
+              "de": "Schwellenwert (%)",
+              "fr": "Seuil (%)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "placeholder": {
+              "en": "70",
+              "nl": "70",
+              "de": "70",
+              "fr": "70"
+            }
+          }
+        ]
+      },
+      {
+        "id": "confidence_above_aurora3",
+        "title": {
+          "en": "Model confidence !{{is|isn't}} above threshold",
+          "nl": "Model betrouwbaarheid !{{is|is niet}} boven drempel",
+          "de": "Modellvertrauen !{{ist|ist nicht}} über Schwellenwert",
+          "fr": "La confiance du modèle !{{est|n'est pas}} au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "Model confidence !{{is|isn't}} above [[threshold]]%",
+          "nl": "Model betrouwbaarheid !{{is|is niet}} boven [[threshold]]%",
+          "de": "Modellvertrauen !{{ist|ist nicht}} über [[threshold]]%",
+          "fr": "La confiance du modèle !{{est|n'est pas}} au-dessus de [[threshold]]%"
+        },
+        "hint": {
+          "en": "Check if building model confidence exceeds a threshold (0-100%). Use as quality gate for flows (e.g., only send notifications when confidence >80%).",
+          "nl": "Controleer of gebouwmodel betrouwbaarheid een drempel overschrijdt (0-100%). Gebruik als kwaliteitspoort voor flows (bijv. alleen notificaties versturen wanneer betrouwbaarheid >80%).",
+          "de": "Überprüfen Sie, ob das Gebäudemodellvertrauen einen Schwellenwert überschreitet (0-100%). Verwenden Sie als Qualitätsgate für Flows (z. B. nur Benachrichtigungen senden, wenn Vertrauen >80%).",
+          "fr": "Vérifier si la confiance du modèle de bâtiment dépasse un seuil (0-100%). Utiliser comme porte de qualité pour les flux (par exemple, envoyer des notifications uniquement lorsque la confiance >80%)."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "name": "threshold",
@@ -6332,6 +7870,55 @@
         ]
       },
       {
+        "id": "cop_efficiency_check_aurora3",
+        "title": {
+          "en": "COP efficiency is",
+          "nl": "COP efficiëntie is",
+          "de": "COP-Effizienz ist",
+          "fr": "L'efficacité COP est"
+        },
+        "titleFormatted": {
+          "en": "COP efficiency is !{{above|below}} [[threshold]]",
+          "nl": "COP efficiëntie is !{{boven|onder}} [[threshold]]",
+          "de": "COP-Effizienz ist !{{über|unter}} [[threshold]]",
+          "fr": "L'efficacité COP est !{{au-dessus|en dessous}} de [[threshold]]"
+        },
+        "hint": {
+          "en": "Check if the current Coefficient of Performance (COP) is above or below a threshold",
+          "nl": "Controleer of de huidige prestatiecoëfficiënt (COP) boven of onder een drempel is",
+          "de": "Prüfen Sie, ob die aktuelle Leistungszahl (COP) über oder unter einem Schwellenwert liegt",
+          "fr": "Vérifier si le coefficient de performance (COP) actuel est au-dessus ou en dessous d'un seuil"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=adlar_cop"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": " COP threshold",
+              "nl": " COP drempel",
+              "de": " COP-Schwellenwert",
+              "fr": " Seuil COP"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "COP efficiency threshold",
+              "nl": "COP efficiëntie drempel",
+              "de": "COP-Effizienzschwellenwert",
+              "fr": "Seuil d'efficacité COP"
+            }
+          }
+        ]
+      },
+      {
         "id": "cop_efficiency_check_modbus",
         "title": {
           "en": "COP efficiency is",
@@ -6429,6 +8016,54 @@
         ]
       },
       {
+        "id": "cop_trend_analysis_aurora3",
+        "title": {
+          "en": "COP trend analysis",
+          "nl": "COP trend analyse",
+          "de": "COP-Trendanalyse",
+          "fr": "Analyse de tendance COP"
+        },
+        "titleFormatted": {
+          "en": "COP trend is !{{improving|stable|degrading}} over [[hours]] hours",
+          "nl": "COP trend is !{{verbeterend|stabiel|verslechterend}} over [[hours]] uur",
+          "de": "COP-Trend ist !{{verbessernd|stabil|verschlechternd}} über [[hours]] Stunden",
+          "fr": "La tendance COP est !{{en amélioration|stable|en dégradation}} sur [[hours]] heures"
+        },
+        "hint": {
+          "en": "Check the COP performance trend over a specified time period",
+          "nl": "Controleer de COP prestatie trend over een opgegeven tijdsperiode",
+          "de": "Prüfen Sie den COP-Leistungstrend über einen bestimmten Zeitraum",
+          "fr": "Vérifier la tendance de performance COP sur une période spécifiée"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=adlar_cop_trend"
+          },
+          {
+            "type": "range",
+            "name": "hours",
+            "title": {
+              "en": " Time period ",
+              "nl": " Tijdsperiode ",
+              "de": " Zeitraum ",
+              "fr": " Période "
+            },
+            "min": 1,
+            "max": 168,
+            "step": 1,
+            "units": "h",
+            "placeholder": {
+              "en": "Number of hours to analyze",
+              "nl": "Aantal uur om te analyseren",
+              "de": "Anzahl der zu analysierenden Stunden",
+              "fr": "Nombre d'heures à analyser"
+            }
+          }
+        ]
+      },
+      {
         "id": "cop_trend_analysis_modbus",
         "title": {
           "en": "COP trend analysis",
@@ -6502,6 +8137,55 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump&capabilities=adlar_cop_daily"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": " Daily COP threshold",
+              "nl": " Dagelijkse COP drempel",
+              "de": " Täglicher COP-Schwellenwert",
+              "fr": " Seuil COP quotidien"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "Daily COP efficiency threshold",
+              "nl": "Dagelijkse COP efficiëntie drempel",
+              "de": "Täglicher COP-Effizienzschwellenwert",
+              "fr": "Seuil d'efficacité COP quotidien"
+            }
+          }
+        ]
+      },
+      {
+        "id": "daily_cop_above_threshold_aurora3",
+        "title": {
+          "en": "Daily COP above threshold",
+          "nl": "Dagelijkse COP boven drempel",
+          "de": "Tägliche COP über Schwellenwert",
+          "fr": "COP quotidien au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "Daily COP is !{{above|below}} [[threshold]]",
+          "nl": "Dagelijkse COP is !{{boven|onder}} [[threshold]]",
+          "de": "Tägliche COP ist !{{über|unter}} [[threshold]]",
+          "fr": "Le COP quotidien est !{{au-dessus|en dessous}} de [[threshold]]"
+        },
+        "hint": {
+          "en": "Check if the 24-hour average COP is above or below a threshold",
+          "nl": "Controleer of de 24-uur gemiddelde COP boven of onder een drempel is",
+          "de": "Prüfen Sie, ob die 24-Stunden-Durchschnitts-COP über oder unter einem Schwellenwert liegt",
+          "fr": "Vérifier si le COP moyen sur 24 heures est au-dessus ou en dessous d'un seuil"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=adlar_cop_daily"
           },
           {
             "type": "range",
@@ -6633,6 +8317,65 @@
         ]
       },
       {
+        "id": "device_power_is_aurora3",
+        "title": {
+          "en": "Device power is",
+          "nl": "Apparaat vermogen is",
+          "de": "Geräteleistung ist",
+          "fr": "L'alimentation de l'appareil est"
+        },
+        "titleFormatted": {
+          "en": "Device power !{{is|is not}} [[state]]",
+          "nl": "Apparaat vermogen !{{is|is niet}} [[state]]",
+          "de": "Geräteleistung !{{ist|ist nicht}} [[state]]",
+          "fr": "L'alimentation de l'appareil !{{est|n'est pas}} [[state]]"
+        },
+        "hint": {
+          "en": "Check if the device power state matches the selected state",
+          "nl": "Controleer of de apparaat vermogen status overeenkomt met de geselecteerde status",
+          "de": "Prüfen Sie, ob der Geräteleistungsstatus mit dem ausgewählten Status übereinstimmt",
+          "fr": "Vérifier si l'état d'alimentation de l'appareil correspond à l'état sélectionné"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "Power state",
+              "nl": "Vermogen status",
+              "de": "Leistungsstatus",
+              "fr": "État d'alimentation"
+            },
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "On",
+                  "nl": "Aan",
+                  "de": "Ein",
+                  "fr": "Marche"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "Off",
+                  "nl": "Uit",
+                  "de": "Aus",
+                  "fr": "Arrêt"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "device_power_is_modbus",
         "title": {
           "en": "Device power is",
@@ -6687,6 +8430,34 @@
                 }
               }
             ]
+          }
+        ]
+      },
+      {
+        "id": "dhw_heating_active",
+        "title": {
+          "en": "Hot water is being heated",
+          "nl": "Tapwater wordt verwarmd",
+          "de": "Warmwasser wird bereitet",
+          "fr": "L'eau chaude est en chauffe"
+        },
+        "titleFormatted": {
+          "en": "Hot water !{{is|is not}} being heated",
+          "nl": "Tapwater wordt !{{wel|niet}} verwarmd",
+          "de": "Warmwasser !{{wird|wird nicht}} bereitet",
+          "fr": "L'eau chaude !{{est|n'est pas}} en chauffe"
+        },
+        "hint": {
+          "en": "Check if the heat pump is heating domestic hot water right now",
+          "nl": "Controleer of de warmtepomp op dit moment tapwater verwarmt",
+          "de": "Prüfen, ob die Wärmepumpe gerade Warmwasser bereitet",
+          "fr": "Vérifier si la pompe à chaleur chauffe actuellement l'eau chaude sanitaire"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           }
         ]
       },
@@ -6765,6 +8536,35 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          }
+        ]
+      },
+      {
+        "id": "fault_active_aurora3",
+        "title": {
+          "en": "Fault is active",
+          "nl": "Fout is actief",
+          "de": "Störung ist aktiv",
+          "fr": "Un défaut est actif"
+        },
+        "titleFormatted": {
+          "en": "Fault is !{{active|inactive}}",
+          "nl": "Fout is !{{actief|inactief}}",
+          "de": "Störung ist !{{aktiv|inaktiv}}",
+          "fr": "Le défaut est !{{actif|inactif}}"
+        },
+        "hint": {
+          "en": "Check if a fault is currently active (fault code > 0)",
+          "nl": "Controleer of er momenteel een fout actief is (foutcode > 0)",
+          "de": "Prüfen Sie, ob derzeit eine Störung aktiv ist (Fehlercode > 0)",
+          "fr": "Vérifier si un défaut est actuellement actif (code défaut > 0)"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           }
         ]
       },
@@ -7287,6 +9087,83 @@
         ]
       },
       {
+        "id": "heating_mode_is_aurora3",
+        "title": {
+          "en": "Heating mode is",
+          "nl": "Verwarmingsmodus is",
+          "de": "Heizmodus ist",
+          "fr": "Le mode de chauffage est"
+        },
+        "titleFormatted": {
+          "en": "Heating mode !{{is|is not}} [[mode]]",
+          "nl": "Verwarmingsmodus !{{is|is niet}} [[mode]]",
+          "de": "Heizmodus !{{ist|ist nicht}} [[mode]]",
+          "fr": "Le mode de chauffage !{{est|n'est pas}} [[mode]]"
+        },
+        "hint": {
+          "en": "Check if the heating mode matches the selected mode",
+          "nl": "Controleer of de verwarmingsmodus overeenkomt met de geselecteerde modus",
+          "de": "Prüfen Sie, ob der Heizmodus mit dem ausgewählten Modus übereinstimmt",
+          "fr": "Vérifier si le mode de chauffage correspond au mode sélectionné"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "title": {
+              "en": "Heating mode",
+              "nl": "Verwarmingsmodus",
+              "de": "Heizmodus",
+              "fr": "Mode de chauffage"
+            },
+            "values": [
+              {
+                "id": "off",
+                "title": {
+                  "en": "Off",
+                  "nl": "Uit",
+                  "de": "Aus",
+                  "fr": "Arrêt"
+                }
+              },
+              {
+                "id": "cool",
+                "title": {
+                  "en": "Cooling",
+                  "nl": "Koeling",
+                  "de": "Kühlen",
+                  "fr": "Froid"
+                }
+              },
+              {
+                "id": "heat",
+                "title": {
+                  "en": "Heating",
+                  "nl": "Verwarmen",
+                  "de": "Heizen",
+                  "fr": "Chauffage"
+                }
+              },
+              {
+                "id": "auto",
+                "title": {
+                  "en": "Auto",
+                  "nl": "Auto",
+                  "de": "Auto",
+                  "fr": "Auto"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "heating_mode_is_modbus",
         "title": {
           "en": "Heating mode is",
@@ -7415,6 +9292,94 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "dropdown",
+            "name": "comparison",
+            "title": {
+              "en": "Comparison",
+              "nl": "Vergelijking",
+              "de": "Vergleich",
+              "fr": "Comparaison"
+            },
+            "values": [
+              {
+                "id": "equal",
+                "title": {
+                  "en": "Equal to",
+                  "nl": "Gelijk aan",
+                  "de": "Gleich",
+                  "fr": "Égal à"
+                }
+              },
+              {
+                "id": "greater",
+                "title": {
+                  "en": "Greater than",
+                  "nl": "Groter dan",
+                  "de": "Größer als",
+                  "fr": "Supérieur à"
+                }
+              },
+              {
+                "id": "less",
+                "title": {
+                  "en": "Less than",
+                  "nl": "Kleiner dan",
+                  "de": "Kleiner als",
+                  "fr": "Inférieur à"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Hot water temperature ",
+              "nl": " Warm water temperatuur ",
+              "de": " Warmwassertemperatur ",
+              "fr": " Température de l'eau chaude "
+            },
+            "min": 20,
+            "max": 75,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Hot water temperature in °C",
+              "nl": "Warm water temperatuur in °C",
+              "de": "Warmwassertemperatur in °C",
+              "fr": "Température de l'eau chaude en °C"
+            }
+          }
+        ]
+      },
+      {
+        "id": "hotwater_temperature_is_aurora3",
+        "title": {
+          "en": "Hot water temperature is",
+          "nl": "Warm water temperatuur is",
+          "de": "Warmwassertemperatur ist",
+          "fr": "La température de l'eau chaude est"
+        },
+        "titleFormatted": {
+          "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+          "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+          "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
+          "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Check if the hot water temperature matches the specified condition",
+          "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+          "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
+          "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "dropdown",
@@ -7642,6 +9607,82 @@
         ]
       },
       {
+        "id": "insight_is_active_aurora3",
+        "title": {
+          "en": "Insight !{{is|isn't}} active",
+          "nl": "Inzicht !{{is|is niet}} actief",
+          "de": "Erkenntnis !{{ist|ist nicht}} aktiv",
+          "fr": "L'aperçu !{{est|n'est pas}} actif"
+        },
+        "titleFormatted": {
+          "en": "[[category]] insight !{{is|isn't}} active",
+          "nl": "[[category]] inzicht !{{is|is niet}} actief",
+          "de": "[[category]] Erkenntnis !{{ist|ist nicht}} aktiv",
+          "fr": "L'aperçu [[category]] !{{est|n'est pas}} actif"
+        },
+        "hint": {
+          "en": "Check if a specific insight category is currently active (visible in capabilities). Returns false if dismissed or not detected.",
+          "nl": "Controleer of een specifieke inzicht categorie momenteel actief is (zichtbaar in capabilities). Retourneert onwaar als genegeerd of niet gedetecteerd.",
+          "de": "Überprüfen Sie, ob eine bestimmte Erkenntniskategorie derzeit aktiv ist (in Fähigkeiten sichtbar). Gibt falsch zurück, wenn verworfen oder nicht erkannt.",
+          "fr": "Vérifier si une catégorie d'aperçu spécifique est actuellement active (visible dans les capacités). Retourne faux si ignoré ou non détecté."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "name": "category",
+            "type": "dropdown",
+            "title": {
+              "en": "Category",
+              "nl": "Categorie",
+              "de": "Kategorie",
+              "fr": "Catégorie"
+            },
+            "values": [
+              {
+                "id": "insulation_performance",
+                "label": {
+                  "en": "Insulation performance",
+                  "nl": "Isolatieprestaties",
+                  "de": "Isolationsleistung",
+                  "fr": "Performance d'isolation"
+                }
+              },
+              {
+                "id": "pre_heating",
+                "label": {
+                  "en": "Pre-heating strategy",
+                  "nl": "Voorverwarm strategie",
+                  "de": "Vorheizstrategie",
+                  "fr": "Stratégie de préchauffage"
+                }
+              },
+              {
+                "id": "thermal_storage",
+                "label": {
+                  "en": "Thermal storage",
+                  "nl": "Thermische opslag",
+                  "de": "Wärmespeicher",
+                  "fr": "Stockage thermique"
+                }
+              },
+              {
+                "id": "profile_mismatch",
+                "label": {
+                  "en": "Building profile mismatch",
+                  "nl": "Gebouwprofiel mismatch",
+                  "de": "Gebäudeprofil-Fehlanpassung",
+                  "fr": "Incompatibilité de profil de bâtiment"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "insight_is_active_modbus",
         "title": {
           "en": "Insight !{{is|isn't}} active",
@@ -7767,6 +9808,55 @@
         ]
       },
       {
+        "id": "monthly_cop_above_threshold_aurora3",
+        "title": {
+          "en": "Monthly COP above threshold",
+          "nl": "Maandelijkse COP boven drempel",
+          "de": "Monatliche COP über Schwellenwert",
+          "fr": "COP mensuel au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "Monthly COP is !{{above|below}} [[threshold]]",
+          "nl": "Maandelijkse COP is !{{boven|onder}} [[threshold]]",
+          "de": "Monatliche COP ist !{{über|unter}} [[threshold]]",
+          "fr": "Le COP mensuel est !{{au-dessus|en dessous}} de [[threshold]]"
+        },
+        "hint": {
+          "en": "Check if the 30-day average COP is above or below a threshold",
+          "nl": "Controleer of de 30-dagen gemiddelde COP boven of onder een drempel is",
+          "de": "Prüfen Sie, ob die 30-Tage-Durchschnitts-COP über oder unter einem Schwellenwert liegt",
+          "fr": "Vérifier si le COP moyen sur 30 jours est au-dessus ou en dessous d'un seuil"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=adlar_cop_monthly"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": " Monthly COP threshold",
+              "nl": " Maandelijkse COP drempel",
+              "de": " Monatlicher COP-Schwellenwert",
+              "fr": " Seuil COP mensuel"
+            },
+            "min": 1,
+            "max": 8,
+            "step": 0.1,
+            "units": "COP",
+            "placeholder": {
+              "en": "Monthly COP efficiency threshold",
+              "nl": "Maandelijkse COP efficiëntie drempel",
+              "de": "Monatlicher COP-Effizienzschwellenwert",
+              "fr": "Seuil d'efficacité COP mensuel"
+            }
+          }
+        ]
+      },
+      {
         "id": "monthly_cop_above_threshold_modbus",
         "title": {
           "en": "Monthly COP above threshold",
@@ -7840,6 +9930,55 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": " Power threshold (W)",
+              "nl": " Vermogen drempel (W)",
+              "de": " Leistungsschwellenwert (W)",
+              "fr": " Seuil de puissance (W)"
+            },
+            "min": 100,
+            "max": 10000,
+            "step": 100,
+            "units": "W",
+            "placeholder": {
+              "en": "Power threshold in watts",
+              "nl": "Vermogen drempel in watt",
+              "de": "Leistungsschwellenwert in Watt",
+              "fr": "Seuil de puissance en watts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "power_above_threshold_aurora3",
+        "title": {
+          "en": "Power consumption above",
+          "nl": "Stroomverbruik boven",
+          "de": "Stromverbrauch über",
+          "fr": "Consommation électrique au-dessus"
+        },
+        "titleFormatted": {
+          "en": "Power consumption is !{{above|below}} [[threshold]] watts",
+          "nl": "Stroomverbruik is !{{boven|onder}} [[threshold]] watt",
+          "de": "Stromverbrauch ist !{{über|unter}} [[threshold]] Watt",
+          "fr": "La consommation électrique est !{{au-dessus|en dessous}} de [[threshold]] watts"
+        },
+        "hint": {
+          "en": "Check if current power consumption is above or below a threshold (requires power monitoring support)",
+          "nl": "Controleer of het huidige stroomverbruik boven of onder een drempel is (vereist vermogen monitoring ondersteuning)",
+          "de": "Prüfen Sie, ob der aktuelle Stromverbrauch über oder unter einem Schwellenwert liegt (erfordert Leistungsüberwachung)",
+          "fr": "Vérifier si la consommation électrique actuelle est au-dessus ou en dessous d'un seuil (nécessite le support de surveillance de puissance)"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "range",
@@ -7962,6 +10101,55 @@
         ]
       },
       {
+        "id": "price_in_cheapest_hours_aurora3",
+        "title": {
+          "en": "Price in cheapest hours",
+          "nl": "Prijs in goedkoopste uren",
+          "de": "Preis in günstigsten Stunden",
+          "fr": "Prix dans les heures les moins chères"
+        },
+        "titleFormatted": {
+          "en": "Current hour is !{{in|not in}} cheapest [[hours]] hours of today",
+          "nl": "Huidig uur is !{{in|niet in}} goedkoopste [[hours]] uren van vandaag",
+          "de": "Aktuelle Stunde ist !{{in|nicht in}} den günstigsten [[hours]] Stunden heute",
+          "fr": "L'heure actuelle est !{{dans|pas dans}} les [[hours]] heures les moins chères aujourd'hui"
+        },
+        "hint": {
+          "en": "Check if current hour is within the cheapest N-hour block today. Useful for running high-power tasks during low-price periods.",
+          "nl": "Controleer of het huidige uur binnen het goedkoopste N-uurs blok van vandaag valt. Nuttig voor het uitvoeren van energievretende taken tijdens goedkope periodes.",
+          "de": "Prüfen Sie, ob die aktuelle Stunde im günstigsten N-Stunden-Block heute liegt. Nützlich für energieintensive Aufgaben während günstiger Perioden.",
+          "fr": "Vérifier si l'heure actuelle se trouve dans le bloc de N heures les moins chères aujourd'hui. Utile pour exécuter des tâches gourmandes en énergie pendant les périodes à bas prix."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=energy_prices_data"
+          },
+          {
+            "type": "range",
+            "name": "hours",
+            "title": {
+              "en": "Block size (hours)",
+              "nl": "Blokgrootte (uren)",
+              "de": "Blockgröße (Stunden)",
+              "fr": "Taille du bloc (heures)"
+            },
+            "min": 1,
+            "max": 12,
+            "step": 1,
+            "units": "h",
+            "placeholder": {
+              "en": "Hours",
+              "nl": "Uren",
+              "de": "Stunden",
+              "fr": "Heures"
+            }
+          }
+        ]
+      },
+      {
         "id": "price_in_cheapest_hours_modbus",
         "title": {
           "en": "Price in cheapest hours",
@@ -8036,6 +10224,94 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump&capabilities=energy_prices_data"
+          },
+          {
+            "type": "range",
+            "name": "hours",
+            "title": {
+              "en": "Analysis window (hours)",
+              "nl": "Analysevenster (uren)",
+              "de": "Analysefenster (Stunden)",
+              "fr": "Fenêtre d'analyse (heures)"
+            },
+            "min": 1,
+            "max": 24,
+            "step": 1,
+            "units": "h",
+            "placeholder": {
+              "en": "Hours",
+              "nl": "Uren",
+              "de": "Stunden",
+              "fr": "Heures"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "trend",
+            "title": {
+              "en": "Trend",
+              "nl": "Trend",
+              "de": "Trend",
+              "fr": "Tendance"
+            },
+            "values": [
+              {
+                "id": "rising",
+                "title": {
+                  "en": "Rising",
+                  "nl": "Stijgend",
+                  "de": "Steigend",
+                  "fr": "En hausse"
+                }
+              },
+              {
+                "id": "falling",
+                "title": {
+                  "en": "Falling",
+                  "nl": "Dalend",
+                  "de": "Fallend",
+                  "fr": "En baisse"
+                }
+              },
+              {
+                "id": "stable",
+                "title": {
+                  "en": "Stable",
+                  "nl": "Stabiel",
+                  "de": "Stabil",
+                  "fr": "Stable"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "price_trend_is_aurora3",
+        "title": {
+          "en": "Price trend is",
+          "nl": "Prijstrend is",
+          "de": "Preistrend ist",
+          "fr": "Tendance des prix est"
+        },
+        "titleFormatted": {
+          "en": "Price trend for next [[hours]] hours !{{is|is not}} [[trend]]",
+          "nl": "Prijstrend voor komende [[hours]] uur !{{is|is niet}} [[trend]]",
+          "de": "Preistrend für nächste [[hours]] Stunden !{{ist|ist nicht}} [[trend]]",
+          "fr": "Tendance des prix pour les [[hours]] prochaines heures !{{est|n'est pas}} [[trend]]"
+        },
+        "hint": {
+          "en": "Check if electricity prices are rising, falling, or stable in the next N hours. Based on linear regression with confidence metric.",
+          "nl": "Controleer of elektriciteitsprijzen stijgen, dalen of stabiel zijn in de komende N uur. Gebaseerd op lineaire regressie met betrouwbaarheidsmeting.",
+          "de": "Prüfen Sie, ob die Strompreise in den nächsten N Stunden steigen, fallen oder stabil sind. Basierend auf linearer Regression mit Konfidenzmetrik.",
+          "fr": "Vérifier si les prix de l'électricité augmentent, diminuent ou sont stables dans les N prochaines heures. Basé sur une régression linéaire avec mesure de confiance."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=energy_prices_data"
           },
           {
             "type": "range",
@@ -8236,6 +10512,55 @@
         ]
       },
       {
+        "id": "price_vs_daily_average_aurora3",
+        "title": {
+          "en": "Price vs daily average",
+          "nl": "Prijs vs daggemiddelde",
+          "de": "Preis vs Tagesdurchschnitt",
+          "fr": "Prix vs moyenne quotidienne"
+        },
+        "titleFormatted": {
+          "en": "Current price is !{{below|above}} daily average by [[margin]]%",
+          "nl": "Huidige prijs is !{{onder|boven}} daggemiddelde met [[margin]]%",
+          "de": "Aktueller Preis ist !{{unter|über}} Tagesdurchschnitt um [[margin]]%",
+          "fr": "Le prix actuel est !{{inférieur|supérieur}} à la moyenne quotidienne de [[margin]]%"
+        },
+        "hint": {
+          "en": "Check if current electricity price deviates from the daily average by at least the specified margin percentage. Useful for detecting significantly low or high prices.",
+          "nl": "Controleer of de huidige elektriciteitsprijs afwijkt van het daggemiddelde met minimaal het opgegeven margepercentage. Nuttig voor het detecteren van aanzienlijk lage of hoge prijzen.",
+          "de": "Prüfen Sie, ob der aktuelle Strompreis vom Tagesdurchschnitt um mindestens die angegebene Marge abweicht. Nützlich zum Erkennen deutlich niedriger oder hoher Preise.",
+          "fr": "Vérifier si le prix actuel de l'électricité s'écarte de la moyenne quotidienne d'au moins le pourcentage de marge spécifié. Utile pour détecter des prix significativement bas ou élevés."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3&capabilities=energy_prices_data"
+          },
+          {
+            "type": "range",
+            "name": "margin",
+            "title": {
+              "en": "Margin (%)",
+              "nl": "Marge (%)",
+              "de": "Marge (%)",
+              "fr": "Marge (%)"
+            },
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "units": "%",
+            "placeholder": {
+              "en": "Margin (%)",
+              "nl": "Marge (%)",
+              "de": "Marge (%)",
+              "fr": "Marge (%)"
+            }
+          }
+        ]
+      },
+      {
         "id": "price_vs_daily_average_modbus",
         "title": {
           "en": "Price vs daily average",
@@ -8309,6 +10634,92 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "category",
+            "type": "dropdown",
+            "title": {
+              "en": "Category",
+              "nl": "Categorie",
+              "de": "Kategorie",
+              "fr": "Catégorie"
+            },
+            "values": [
+              {
+                "id": "insulation_performance",
+                "label": {
+                  "en": "Insulation performance",
+                  "nl": "Isolatieprestaties",
+                  "de": "Isolationsleistung",
+                  "fr": "Performance d'isolation"
+                }
+              },
+              {
+                "id": "pre_heating",
+                "label": {
+                  "en": "Pre-heating strategy",
+                  "nl": "Voorverwarm strategie",
+                  "de": "Vorheizstrategie",
+                  "fr": "Stratégie de préchauffage"
+                }
+              },
+              {
+                "id": "thermal_storage",
+                "label": {
+                  "en": "Thermal storage",
+                  "nl": "Thermische opslag",
+                  "de": "Wärmespeicher",
+                  "fr": "Stockage thermique"
+                }
+              }
+            ]
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "title": {
+              "en": "Threshold (EUR/month)",
+              "nl": "Drempel (EUR/maand)",
+              "de": "Schwellenwert (EUR/Monat)",
+              "fr": "Seuil (EUR/mois)"
+            },
+            "min": 0,
+            "max": 500,
+            "step": 10,
+            "placeholder": {
+              "en": "100",
+              "nl": "100",
+              "de": "100",
+              "fr": "100"
+            }
+          }
+        ]
+      },
+      {
+        "id": "savings_above_aurora3",
+        "title": {
+          "en": "Insight savings !{{are|aren't}} above threshold",
+          "nl": "Inzicht besparing !{{is|is niet}} boven drempel",
+          "de": "Erkenntniseinsparungen !{{sind|sind nicht}} über Schwellenwert",
+          "fr": "Les économies d'aperçu !{{sont|ne sont pas}} au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "[[category]] savings !{{are|aren't}} above €[[threshold]]/month",
+          "nl": "[[category]] besparing !{{is|is niet}} boven €[[threshold]]/maand",
+          "de": "[[category]] Einsparungen !{{sind|sind nicht}} über €[[threshold]]/Monat",
+          "fr": "Les économies [[category]] !{{sont|ne sont pas}} au-dessus de €[[threshold]]/mois"
+        },
+        "hint": {
+          "en": "Check if estimated monthly savings for an insight category exceed a threshold (in EUR/month). Use for ROI-based filtering (e.g., only act on savings >€100/month).",
+          "nl": "Controleer of geschatte maandelijkse besparing voor een inzicht categorie een drempel overschrijdt (in EUR/maand). Gebruik voor ROI-gebaseerde filtering (bijv. alleen actie bij besparing >€100/maand).",
+          "de": "Überprüfen Sie, ob die geschätzten monatlichen Einsparungen für eine Erkenntniskategorie einen Schwellenwert überschreiten (in EUR/Monat). Verwenden Sie für ROI-basierte Filterung (z. B. nur handeln bei Einsparungen >€100/Monat).",
+          "fr": "Vérifier si les économies mensuelles estimées pour une catégorie d'aperçu dépassent un seuil (en EUR/mois). Utiliser pour le filtrage basé sur le ROI (par exemple, agir uniquement sur les économies >€100/mois)."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "name": "category",
@@ -8457,6 +10868,73 @@
         ]
       },
       {
+        "id": "silent_mode_is",
+        "title": {
+          "en": "Silent mode is",
+          "nl": "Stille modus is",
+          "de": "Leisemodus ist",
+          "fr": "Le mode silencieux est"
+        },
+        "titleFormatted": {
+          "en": "Silent mode !{{is|is not}} [[level]]",
+          "nl": "Stille modus !{{is|is niet}} [[level]]",
+          "de": "Leisemodus !{{ist|ist nicht}} [[level]]",
+          "fr": "Le mode silencieux !{{est|n'est pas}} [[level]]"
+        },
+        "hint": {
+          "en": "Check the silent mode level of the heat pump",
+          "nl": "Controleer het niveau van de stille modus van de warmtepomp",
+          "de": "Prüfen Sie die Stufe des Leisemodus der Wärmepumpe",
+          "fr": "Vérifier le niveau du mode silencieux de la pompe à chaleur"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "level",
+            "title": {
+              "en": "Silent mode",
+              "nl": "Stille modus",
+              "de": "Leisemodus",
+              "fr": "Mode silencieux"
+            },
+            "values": [
+              {
+                "id": "0",
+                "title": {
+                  "en": "Off",
+                  "nl": "Uit",
+                  "de": "Aus",
+                  "fr": "Arrêt"
+                }
+              },
+              {
+                "id": "1",
+                "title": {
+                  "en": "Level 1",
+                  "nl": "Niveau 1",
+                  "de": "Stufe 1",
+                  "fr": "Niveau 1"
+                }
+              },
+              {
+                "id": "2",
+                "title": {
+                  "en": "Level 2",
+                  "nl": "Niveau 2",
+                  "de": "Stufe 2",
+                  "fr": "Niveau 2"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "system_pulse_steps_differential",
         "title": {
           "en": "System pulse-steps differential check",
@@ -8582,6 +11060,94 @@
             "min": 5,
             "max": 60,
             "step": 0.5,
+            "units": "°C",
+            "placeholder": {
+              "en": "Target temperature in °C",
+              "nl": "Doel temperatuur in °C",
+              "de": "Zieltemperatur in °C",
+              "fr": "Température cible en °C"
+            }
+          }
+        ]
+      },
+      {
+        "id": "target_temperature_is_aurora3",
+        "title": {
+          "en": "Target (setpoint) temperature is",
+          "nl": "Doel (setpoint) temperatuur is",
+          "de": "Zieltemperatur (Sollwert) ist",
+          "fr": "La température cible (consigne) est"
+        },
+        "titleFormatted": {
+          "en": "Target (setpoint) temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
+          "nl": "Doel (setpoint) temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+          "de": "Zieltemperatur (Sollwert) !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
+          "fr": "La température cible (consigne) !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Check if the target (setpoint) temperature matches the specified condition",
+          "nl": "Controleer of de doel (setpoint) temperatuur voldoet aan de opgegeven voorwaarde",
+          "de": "Prüfen Sie, ob die Zieltemperatur (Sollwert) der angegebenen Bedingung entspricht",
+          "fr": "Vérifier si la température cible (consigne) correspond à la condition spécifiée"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "comparison",
+            "title": {
+              "en": "Comparison",
+              "nl": "Vergelijking",
+              "de": "Vergleich",
+              "fr": "Comparaison"
+            },
+            "values": [
+              {
+                "id": "equal",
+                "title": {
+                  "en": "Equal to",
+                  "nl": "Gelijk aan",
+                  "de": "Gleich",
+                  "fr": "Égal à"
+                }
+              },
+              {
+                "id": "greater",
+                "title": {
+                  "en": "Greater than",
+                  "nl": "Groter dan",
+                  "de": "Größer als",
+                  "fr": "Supérieur à"
+                }
+              },
+              {
+                "id": "less",
+                "title": {
+                  "en": "Less than",
+                  "nl": "Kleiner dan",
+                  "de": "Kleiner als",
+                  "fr": "Inférieur à"
+                }
+              }
+            ]
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature ",
+              "nl": " Temperatuur ",
+              "de": " Temperatur ",
+              "fr": " Température "
+            },
+            "min": 15,
+            "max": 60,
+            "step": 1,
             "units": "°C",
             "placeholder": {
               "en": "Target temperature in °C",
@@ -8730,6 +11296,55 @@
         ]
       },
       {
+        "id": "temperature_above_aurora3",
+        "title": {
+          "en": "Ambient temperature above",
+          "nl": "Buitentemperatuur boven",
+          "de": "Umgebungstemperatur über",
+          "fr": "Température ambiante au-dessus"
+        },
+        "titleFormatted": {
+          "en": "Ambient temperature is !{{above|below}} [[temperature]]°C",
+          "nl": "Buitentemperatuur is !{{boven|onder}} [[temperature]]°C",
+          "de": "Umgebungstemperatur ist !{{über|unter}} [[temperature]]°C",
+          "fr": "La température ambiante est !{{au-dessus|en dessous}} de [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Check if the ambient temperature is above or below a specific value",
+          "nl": "Controleer of de buitentemperatuur boven of onder een specifieke waarde is",
+          "de": "Prüfen Sie, ob die Umgebungstemperatur über oder unter einem bestimmten Wert liegt",
+          "fr": "Vérifier si la température ambiante est au-dessus ou en dessous d'une valeur spécifique"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature",
+              "nl": " Temperatuur",
+              "de": " Temperatur",
+              "fr": " Température"
+            },
+            "min": -30,
+            "max": 50,
+            "step": 0.5,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature (°C)",
+              "nl": "Temperatuur (°C)",
+              "de": "Temperatur (°C)",
+              "fr": "Température (°C)"
+            }
+          }
+        ]
+      },
+      {
         "id": "temperature_above_modbus",
         "title": {
           "en": "Ambient temperature above",
@@ -8827,6 +11442,54 @@
         ]
       },
       {
+        "id": "temperature_differential_aurora3",
+        "title": {
+          "en": "Temperature differential check",
+          "nl": "Temperatuur verschil controle",
+          "de": "Temperaturdifferenz prüfen",
+          "fr": "Vérification du différentiel de température"
+        },
+        "titleFormatted": {
+          "en": "Temperature differential is !{{above|below}} [[differential]]°C",
+          "nl": "Temperatuur verschil is !{{boven|onder}} [[differential]]°C",
+          "de": "Temperaturdifferenz ist !{{über|unter}} [[differential]]°C",
+          "fr": "Le différentiel de température est !{{au-dessus|en dessous}} de [[differential]]°C"
+        },
+        "hint": {
+          "en": "Check if the temperature difference between inlet and outlet is above or below a threshold",
+          "nl": "Controleer of het temperatuurverschil tussen inlaat en uitlaat boven of onder een drempel is",
+          "de": "Prüfen Sie, ob die Temperaturdifferenz zwischen Einlass und Auslass über oder unter einem Schwellenwert liegt",
+          "fr": "Vérifier si la différence de température entre l'entrée et la sortie est au-dessus ou en dessous d'un seuil"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "range",
+            "name": "differential",
+            "title": {
+              "en": " Temperature differential ",
+              "nl": " Temperatuur verschil ",
+              "de": " Temperaturdifferenz ",
+              "fr": " Différentiel de température "
+            },
+            "min": 1,
+            "max": 50,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Temperature differential threshold",
+              "nl": "Temperatuur verschil drempel",
+              "de": "Temperaturdifferenz-Schwellenwert",
+              "fr": "Seuil du différentiel de température"
+            }
+          }
+        ]
+      },
+      {
         "id": "temperature_differential_modbus",
         "title": {
           "en": "Temperature differential check",
@@ -8899,6 +11562,55 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "threshold",
+            "title": {
+              "en": " Consumption threshold (kWh)",
+              "nl": " Verbruiksdrempel (kWh)",
+              "de": " Verbrauchsschwellenwert (kWh)",
+              "fr": " Seuil de consommation (kWh)"
+            },
+            "min": 100,
+            "max": 50000,
+            "step": 100,
+            "units": "kWh",
+            "placeholder": {
+              "en": "Total consumption threshold in kWh",
+              "nl": "Totaalverbruik drempel in kWh",
+              "de": "Gesamtverbrauchsschwellenwert in kWh",
+              "fr": "Seuil de consommation totale en kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "total_consumption_above_aurora3",
+        "title": {
+          "en": "Total consumption above threshold",
+          "nl": "Totaalverbruik boven drempel",
+          "de": "Gesamtverbrauch über Schwellenwert",
+          "fr": "Consommation totale au-dessus du seuil"
+        },
+        "titleFormatted": {
+          "en": "Total consumption is !{{above|below}} [[threshold]] kWh",
+          "nl": "Totaalverbruik is !{{boven|onder}} [[threshold]] kWh",
+          "de": "Gesamtverbrauch ist !{{über|unter}} [[threshold]] kWh",
+          "fr": "La consommation totale est !{{au-dessus|en dessous}} de [[threshold]] kWh"
+        },
+        "hint": {
+          "en": "Check if total electricity consumption is above or below a threshold",
+          "nl": "Controleer of het totale stroomverbruik boven of onder een drempel is",
+          "de": "Prüfen Sie, ob der gesamte Stromverbrauch über oder unter einem Schwellenwert liegt",
+          "fr": "Vérifier si la consommation électrique totale est au-dessus ou en dessous d'un seuil"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "range",
@@ -9083,6 +11795,54 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "flow_rate",
+            "title": {
+              "en": " Flow rate (L/min)",
+              "nl": " Doorstroming (L/min)",
+              "de": " Durchflussrate (L/min)",
+              "fr": " Débit (L/min)"
+            },
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "units": "L/min",
+            "placeholder": {
+              "en": "Water flow rate threshold",
+              "nl": "Water doorstroming drempel",
+              "de": "Wasserdurchflussrate-Schwellenwert",
+              "fr": "Seuil du débit d'eau"
+            }
+          }
+        ]
+      },
+      {
+        "id": "water_flow_rate_check_aurora3",
+        "title": {
+          "en": "Water flow rate check",
+          "nl": "Water doorstroming controle",
+          "de": "Wasserdurchflussrate prüfen",
+          "fr": "Vérification du débit d'eau"
+        },
+        "titleFormatted": {
+          "en": "Water flow rate is !{{above|below}} [[flow_rate]] L/min",
+          "nl": "Water doorstroming is !{{boven|onder}} [[flow_rate]] L/min",
+          "de": "Wasserdurchflussrate ist !{{über|unter}} [[flow_rate]] L/min",
+          "fr": "Le débit d'eau est !{{au-dessus|en dessous}} de [[flow_rate]] L/min"
+        },
+        "hint": {
+          "en": "Check if water flow rate is above or below specified threshold",
+          "nl": "Controleer of water doorstroming boven of onder een drempel is",
+          "de": "Prüfen Sie, ob die Wasserdurchflussrate über oder unter dem angegebenen Schwellenwert liegt",
+          "fr": "Vérifier si le débit d'eau est au-dessus ou en dessous du seuil spécifié"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "range",
@@ -9418,6 +12178,80 @@
             "name": "device",
             "type": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "name": "input_value",
+            "type": "text",
+            "title": {
+              "en": "Input Value",
+              "nl": "Invoer Waarde",
+              "de": "Eingabewert",
+              "fr": "Valeur d'entrée"
+            },
+            "placeholder": {
+              "en": "e.g., 5.2 or {{ outdoor_temperature }}",
+              "nl": "bijv. 5.2 of {{ buitentemperatuur + 2}}",
+              "de": "z.B. 5.2 oder {{ Außentemperatur + 2 }}",
+              "fr": "par ex. 5.2 ou {{ température_extérieure + 2 }}"
+            }
+          },
+          {
+            "name": "curve",
+            "type": "text",
+            "title": {
+              "en": "Curve Definition",
+              "nl": "Curve Definitie",
+              "de": "Kurven-Definition",
+              "fr": "Définition de courbe"
+            },
+            "placeholder": {
+              "en": "< 0 : 55, < 5 : 50, < 10 : 45, default : 35",
+              "nl": "< 0 : 55, < 5 : 50, < 10 : 45, default : 35",
+              "de": "< 0 : 55, < 5 : 50, < 10 : 45, default : 35",
+              "fr": "< 0 : 55, < 5 : 50, < 10 : 45, default : 35"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calculate_curve_value_aurora3",
+        "title": {
+          "en": "Calculate value from curve rules",
+          "nl": "Bereken waarde uit curveregels",
+          "de": "Wert aus Kurvenregeln berechnen",
+          "fr": "Calculer une valeur à partir de règles de courbe"
+        },
+        "titleFormatted": {
+          "en": "Calculate value via [[input_value]] using curve rules [[curve]]",
+          "nl": "Bereken waarde via [[input_value]] met curveregels [[curve]]",
+          "de": "Berechne Wert via [[input_value]] mit Kurvenregeln [[curve]]",
+          "fr": "Calculer une valeur via [[input_value]] avec règles de courbe [[curve]]"
+        },
+        "hint": {
+          "en": "Calculates output values based on input (e.g., outdoor temperature → heating setpoint). Format: '[operator] threshold : value'. Operators: >, >=, <, <=, ==, !=. Evaluates top to bottom, returns first match. Use 'default : value' as fallback. Example heating curve: '< 0 : 55, < 5 : 50, < 10 : 45, default : 35'",
+          "nl": "Berekent output waarden op basis van input (bijv. buitentemperatuur → verwarmingssetpoint). Formaat: '[operator] drempel : waarde'. Operatoren: >, >=, <, <=, ==, !=. Evalueert van boven naar beneden, geeft eerste match terug. Gebruik 'default : waarde' als vangnet. Voorbeeld verwarmingscurve: '< 0 : 55, < 5 : 50, < 10 : 45, default : 35'",
+          "de": "Berechnet Ausgabewerte basierend auf Eingabe (z.B. Außentemperatur → Heizsollwert). Format: '[Operator] Schwellenwert : Wert'. Operatoren: >, >=, <, <=, ==, !=. Wertet von oben nach unten aus, gibt erste Übereinstimmung zurück. Verwenden Sie 'default : Wert' als Fallback. Beispiel Heizkurve: '< 0 : 55, < 5 : 50, < 10 : 45, default : 35'",
+          "fr": "Calcule les valeurs de sortie en fonction de l'entrée (par ex. température extérieure → consigne de chauffage). Format : '[opérateur] seuil : valeur'. Opérateurs : >, >=, <, <=, ==, !=. Évalue de haut en bas, renvoie la première correspondance. Utilisez 'default : valeur' comme solution de secours. Exemple courbe de chauffage : '< 0 : 55, < 5 : 50, < 10 : 45, default : 35'"
+        },
+        "highlight": true,
+        "tokens": [
+          {
+            "name": "result_value",
+            "type": "number",
+            "title": {
+              "en": "Result Value",
+              "nl": "Resultaat Waarde",
+              "de": "Ergebnis-Wert",
+              "fr": "Valeur résultante"
+            },
+            "example": 45
+          }
+        ],
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "name": "input_value",
@@ -9839,6 +12673,115 @@
         ]
       },
       {
+        "id": "calculate_preheat_time_aurora3",
+        "title": {
+          "en": "Calculate pre-heat start time",
+          "nl": "Bereken voorverwarm starttijd",
+          "de": "Vorheiz-Startzeit berechnen",
+          "fr": "Calculer l'heure de démarrage du préchauffage"
+        },
+        "titleFormatted": {
+          "en": "Calculate when to start heating to reach [[target_indoor_temp]]°C at [[target_clock_time]]",
+          "nl": "Bereken wanneer te beginnen met verwarmen om [[target_indoor_temp]]°C te bereiken om [[target_clock_time]]",
+          "de": "Berechne wann mit dem Heizen zu beginnen um [[target_indoor_temp]]°C um [[target_clock_time]] zu erreichen",
+          "fr": "Calculer quand commencer à chauffer pour atteindre [[target_indoor_temp]]°C à [[target_clock_time]]"
+        },
+        "hint": {
+          "en": "Calculate when to start heating to reach the desired indoor temperature at a specific time. Uses the building model's thermal time constant (τ) for accurate prediction.",
+          "nl": "Bereken wanneer te beginnen met verwarmen om de gewenste binnentemperatuur op een specifiek tijdstip te bereiken. Gebruikt de thermische tijdsconstante (τ) van het gebouwmodel voor nauwkeurige voorspelling.",
+          "de": "Berechnet, wann mit dem Heizen begonnen werden soll, um die gewünschte Innentemperatur zu einer bestimmten Zeit zu erreichen. Verwendet die thermische Zeitkonstante (τ) des Gebäudemodells für genaue Vorhersage.",
+          "fr": "Calcule quand commencer à chauffer pour atteindre la température intérieure souhaitée à une heure précise. Utilise la constante de temps thermique (τ) du modèle de bâtiment pour une prédiction précise."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "number",
+            "name": "target_indoor_temp",
+            "title": {
+              "en": "Target indoor temperature (°C)",
+              "nl": "Gewenste binnentemperatuur (°C)",
+              "de": "Ziel-Innentemperatur (°C)",
+              "fr": "Température intérieure cible (°C)"
+            },
+            "min": 16,
+            "max": 28,
+            "step": 0.5
+          },
+          {
+            "type": "text",
+            "name": "target_clock_time",
+            "title": {
+              "en": "Ready at (HH:MM)",
+              "nl": "Klaar om (UU:MM)",
+              "de": "Fertig um (HH:MM)",
+              "fr": "Prêt à (HH:MM)"
+            },
+            "placeholder": {
+              "en": "07:00",
+              "nl": "07:00",
+              "de": "07:00",
+              "fr": "07:00"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "start_time",
+            "title": {
+              "en": "Start time",
+              "nl": "Starttijd",
+              "de": "Startzeit",
+              "fr": "Heure de démarrage"
+            },
+            "example": {
+              "en": "05:30",
+              "nl": "05:30",
+              "de": "05:30",
+              "fr": "05:30"
+            }
+          },
+          {
+            "type": "number",
+            "name": "duration_hours",
+            "title": {
+              "en": "Duration (hours)",
+              "nl": "Duur (uren)",
+              "de": "Dauer (Stunden)",
+              "fr": "Durée (heures)"
+            },
+            "example": 1.5
+          },
+          {
+            "type": "number",
+            "name": "suggested_setpoint_boost",
+            "title": {
+              "en": "Suggested setpoint boost (°C)",
+              "nl": "Voorgestelde setpoint verhoging (°C)",
+              "de": "Vorgeschlagene Sollwerterhöhung (°C)",
+              "fr": "Augmentation de consigne suggérée (°C)"
+            },
+            "example": 2
+          },
+          {
+            "type": "number",
+            "name": "confidence",
+            "title": {
+              "en": "Model confidence (%)",
+              "nl": "Model betrouwbaarheid (%)",
+              "de": "Modellvertrauen (%)",
+              "fr": "Confiance du modèle (%)"
+            },
+            "example": 75
+          }
+        ]
+      },
+      {
         "id": "calculate_preheat_time_modbus",
         "title": {
           "en": "Calculate pre-heat start time",
@@ -10011,6 +12954,69 @@
         ]
       },
       {
+        "id": "calculate_time_based_value_aurora3",
+        "title": {
+          "en": "Calculate value from time schedule",
+          "nl": "Bereken waarde uit tijdschema",
+          "de": "Wert aus Zeitplan berechnen",
+          "fr": "Calculer la valeur à partir du planning horaire"
+        },
+        "titleFormatted": {
+          "en": "Calculate value from time periods [[schedule]]",
+          "nl": "Bereken waarde uit tijdsperioden [[schedule]]",
+          "de": "Wert aus Zeiträumen [[schedule]] berechnen",
+          "fr": "Calculer la valeur à partir des périodes de temps [[schedule]]"
+        },
+        "hint": {
+          "en": "Evaluates current time against a daily schedule to calculate output values. Perfect for time-based temperature scheduling, time-of-use pricing, and automated daily routines.",
+          "nl": "Evalueert de huidige tijd tegen een dagschema om uitvoerwaarden te berekenen. Perfect voor tijdgebaseerde temperatuurschema's, tijd-van-gebruik tarieven en geautomatiseerde dagelijkse routines.",
+          "de": "Bewertet die aktuelle Zeit anhand eines Tagesplans, um Ausgabewerte zu berechnen. Perfekt für zeitbasierte Temperaturplanung, zeitabhängige Tarife und automatisierte tägliche Routinen.",
+          "fr": "Évalue l'heure actuelle par rapport à un planning quotidien pour calculer les valeurs de sortie. Parfait pour la planification de température basée sur le temps, la tarification à l'heure d'utilisation et les routines quotidiennes automatisées."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "text",
+            "name": "schedule",
+            "title": {
+              "en": "Time schedule",
+              "nl": "Tijdschema",
+              "de": "Zeitplan",
+              "fr": "Planning horaire"
+            },
+            "placeholder": {
+              "en": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18",
+              "nl": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18",
+              "de": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18",
+              "fr": "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "result_value",
+            "type": "number",
+            "title": {
+              "en": "Result value",
+              "nl": "Resultaat waarde",
+              "de": "Ergebniswert",
+              "fr": "Valeur résultante"
+            },
+            "example": {
+              "en": "22",
+              "nl": "22",
+              "de": "22",
+              "fr": "22"
+            }
+          }
+        ]
+      },
+      {
         "id": "calculate_time_based_value_modbus",
         "title": {
           "en": "Calculate value from time schedule",
@@ -10120,6 +13126,52 @@
         ]
       },
       {
+        "id": "force_insight_analysis_aurora3",
+        "title": {
+          "en": "Force insight analysis",
+          "nl": "Forceer inzicht analyse",
+          "de": "Erkenntnisanalyse erzwingen",
+          "fr": "Forcer l'analyse des aperçus"
+        },
+        "hint": {
+          "en": "Immediately evaluate building insights (without waiting for 50-minute interval). Returns number of insights detected and current model confidence.",
+          "nl": "Evalueer direct gebouw inzichten (zonder te wachten op 50-minuten interval). Retourneert aantal gedetecteerde inzichten en huidige model betrouwbaarheid.",
+          "de": "Sofort Gebäudeerkenntnisse auswerten (ohne auf 50-Minuten-Intervall zu warten). Gibt die Anzahl der erkannten Erkenntnisse und das aktuelle Modellvertrauen zurück.",
+          "fr": "Évaluer immédiatement les aperçus du bâtiment (sans attendre l'intervalle de 50 minutes). Retourne le nombre d'aperçus détectés et la confiance actuelle du modèle."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "insights_detected",
+            "type": "number",
+            "title": {
+              "en": "Insights detected",
+              "nl": "Inzichten gedetecteerd",
+              "de": "Erkenntnisse erkannt",
+              "fr": "Aperçus détectés"
+            },
+            "example": 2
+          },
+          {
+            "name": "confidence",
+            "type": "number",
+            "title": {
+              "en": "Model confidence (%)",
+              "nl": "Model betrouwbaarheid (%)",
+              "de": "Modellvertrauen (%)",
+              "fr": "Confiance du modèle (%)"
+            },
+            "example": 74
+          }
+        ]
+      },
+      {
         "id": "force_insight_analysis_modbus",
         "title": {
           "en": "Force insight analysis",
@@ -10185,6 +13237,86 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "overall_score",
+            "type": "number",
+            "title": {
+              "en": "Overall score (0-100)",
+              "nl": "Totaalscore (0-100)",
+              "de": "Gesamtbewertung (0-100)",
+              "fr": "Score global (0-100)"
+            },
+            "example": 82
+          },
+          {
+            "name": "rating",
+            "type": "string",
+            "title": {
+              "en": "Rating",
+              "nl": "Beoordeling",
+              "de": "Bewertung",
+              "fr": "Évaluation"
+            },
+            "example": "Good"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "title": {
+              "en": "Summary",
+              "nl": "Samenvatting",
+              "de": "Zusammenfassung",
+              "fr": "Résumé"
+            },
+            "example": "Your heat pump is performing well (82/100)."
+          },
+          {
+            "name": "recommendations",
+            "type": "string",
+            "title": {
+              "en": "Recommendations",
+              "nl": "Aanbevelingen",
+              "de": "Empfehlungen",
+              "fr": "Recommandations"
+            },
+            "example": "COP trend is stable — good performance\nWater ΔT is high — check water flow rate and filter"
+          },
+          {
+            "name": "report_json",
+            "type": "string",
+            "title": {
+              "en": "Full report (JSON)",
+              "nl": "Volledig rapport (JSON)",
+              "de": "Vollständiger Bericht (JSON)",
+              "fr": "Rapport complet (JSON)"
+            },
+            "example": "{}"
+          }
+        ]
+      },
+      {
+        "id": "generate_performance_report_aurora3",
+        "title": {
+          "en": "Generate performance report",
+          "nl": "Genereer prestatierapport",
+          "de": "Leistungsbericht erstellen",
+          "fr": "Générer un rapport de performance"
+        },
+        "hint": {
+          "en": "Generate a comprehensive heat pump performance report with scores across 7 domains (efficiency, building, defrost, energy, pricing, telemetry, health). Returns overall score, rating, and actionable recommendations.",
+          "nl": "Genereer een uitgebreid warmtepomp prestatierapport met scores over 7 domeinen (efficiëntie, gebouw, ontdooiing, energie, prijzen, telemetrie, gezondheid). Retourneert totaalscore, beoordeling en bruikbare aanbevelingen.",
+          "de": "Erstellen Sie einen umfassenden Wärmepumpen-Leistungsbericht mit Bewertungen in 7 Bereichen (Effizienz, Gebäude, Abtauung, Energie, Preise, Telemetrie, Gesundheit). Gibt Gesamtbewertung, Einstufung und umsetzbare Empfehlungen zurück.",
+          "fr": "Générez un rapport complet de performance de la pompe à chaleur avec des scores dans 7 domaines (efficacité, bâtiment, dégivrage, énergie, prix, télémétrie, santé). Retourne le score global, l'évaluation et des recommandations pratiques."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           }
         ],
         "tokens": [
@@ -10421,6 +13553,101 @@
         ]
       },
       {
+        "id": "get_seasonal_mode_aurora3",
+        "title": {
+          "en": "Get current seasonal mode",
+          "nl": "Haal huidig seizoensmodus op",
+          "de": "Aktuellen Saisonmodus abrufen",
+          "fr": "Obtenir le mode saisonnier actuel"
+        },
+        "titleFormatted": {
+          "en": "Get seasonal mode",
+          "nl": "Haal seizoensmodus op",
+          "de": "Saisonmodus abrufen",
+          "fr": "Obtenir le mode saisonnier"
+        },
+        "hint": {
+          "en": "Returns heating/cooling mode based on current date. Heating season: Oct 1 - May 15 (aligned with EN 14825 SCOP standard). Perfect for automatically switching between winter and summer schedules.",
+          "nl": "Retourneert verwarmings/koelmodus op basis van huidige datum. Stookseizoen: 1 okt - 15 mei (conform EN 14825 SCOP standaard). Perfect voor automatisch schakelen tussen winter- en zomerschema's.",
+          "de": "Gibt den Heiz-/Kühlmodus basierend auf dem aktuellen Datum zurück. Heizsaison: 1. Okt - 15. Mai (gemäß EN 14825 SCOP-Standard). Perfekt zum automatischen Umschalten zwischen Winter- und Sommerplänen.",
+          "fr": "Renvoie le mode chauffage/refroidissement basé sur la date actuelle. Saison de chauffage : 1er oct - 15 mai (conforme à la norme EN 14825 SCOP). Parfait pour basculer automatiquement entre les programmes d'hiver et d'été."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "mode",
+            "type": "string",
+            "title": {
+              "en": "Mode",
+              "nl": "Modus",
+              "de": "Modus",
+              "fr": "Mode"
+            },
+            "example": {
+              "en": "heating",
+              "nl": "heating",
+              "de": "heating",
+              "fr": "heating"
+            }
+          },
+          {
+            "name": "is_heating_season",
+            "type": "boolean",
+            "title": {
+              "en": "Is heating season",
+              "nl": "Is stookseizoen",
+              "de": "Ist Heizsaison",
+              "fr": "Est saison de chauffage"
+            },
+            "example": {
+              "en": "true",
+              "nl": "true",
+              "de": "true",
+              "fr": "true"
+            }
+          },
+          {
+            "name": "is_cooling_season",
+            "type": "boolean",
+            "title": {
+              "en": "Is cooling season",
+              "nl": "Is koelseizoen",
+              "de": "Ist Kühlsaison",
+              "fr": "Est saison de refroidissement"
+            },
+            "example": {
+              "en": "false",
+              "nl": "false",
+              "de": "false",
+              "fr": "false"
+            }
+          },
+          {
+            "name": "days_until_season_change",
+            "type": "number",
+            "title": {
+              "en": "Days until season change",
+              "nl": "Dagen tot seizoenswissel",
+              "de": "Tage bis zum Saisonwechsel",
+              "fr": "Jours avant le changement de saison"
+            },
+            "example": {
+              "en": "45",
+              "nl": "45",
+              "de": "45",
+              "fr": "45"
+            }
+          }
+        ]
+      },
+      {
         "id": "get_seasonal_mode_modbus",
         "title": {
           "en": "Get current seasonal mode",
@@ -10574,6 +13801,64 @@
         ]
       },
       {
+        "id": "modbus_read_register_aurora3",
+        "title": {
+          "en": "Read Modbus register",
+          "nl": "Lees Modbus register",
+          "de": "Modbus-Register lesen",
+          "fr": "Lire un registre Modbus"
+        },
+        "titleFormatted": {
+          "en": "Read Modbus register [[address]]",
+          "nl": "Lees Modbus register [[address]]",
+          "de": "Modbus-Register [[address]] lesen",
+          "fr": "Lire le registre Modbus [[address]]"
+        },
+        "hint": {
+          "en": "Reads one Modbus holding register (FC03) and returns the raw register value as a flow token. Address in hex (0x0301) or decimal (769). Temperature registers store values ×10 — divide the result by 10 for °C.",
+          "nl": "Leest één Modbus holding register (FC03) en geeft de registerwaarde terug als flow token. Adres in hex (0x0301) of decimaal (769). Temperatuurregisters zijn ×10 opgeslagen — deel het resultaat door 10 voor °C.",
+          "de": "Liest ein Modbus Holding-Register (FC03) und gibt den Registerwert als Flow-Token zurück. Adresse in Hex (0x0301) oder Dezimal (769). Temperaturregister speichern Werte ×10 — Ergebnis durch 10 teilen für °C.",
+          "fr": "Lit un registre Modbus holding (FC03) et retourne la valeur brute en tant que token de flow. Adresse en hex (0x0301) ou décimal (769). Les registres de température stockent ×10 — diviser par 10 pour obtenir °C."
+        },
+        "highlight": true,
+        "tokens": [
+          {
+            "name": "raw_value",
+            "type": "number",
+            "title": {
+              "en": "Register value",
+              "nl": "Registerwaarde",
+              "de": "Registerwert",
+              "fr": "Valeur du registre"
+            },
+            "example": 450
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "text",
+            "name": "address",
+            "title": {
+              "en": "Register address",
+              "nl": "Registeradres",
+              "de": "Registeradresse",
+              "fr": "Adresse du registre"
+            },
+            "placeholder": {
+              "en": "e.g. 0x0301 or 769",
+              "nl": "bijv. 0x0301 of 769",
+              "de": "z.B. 0x0301 oder 769",
+              "fr": "ex. 0x0301 ou 769"
+            }
+          }
+        ]
+      },
+      {
         "id": "modbus_write_register",
         "title": {
           "en": "Write Modbus register",
@@ -10635,6 +13920,67 @@
         ]
       },
       {
+        "id": "modbus_write_register_aurora3",
+        "title": {
+          "en": "Write Modbus register",
+          "nl": "Schrijf Modbus register",
+          "de": "Modbus-Register schreiben",
+          "fr": "Écrire dans un registre Modbus"
+        },
+        "titleFormatted": {
+          "en": "Write [[value]] to Modbus register [[address]]",
+          "nl": "Schrijf [[value]] naar Modbus register [[address]]",
+          "de": "[[value]] in Modbus-Register [[address]] schreiben",
+          "fr": "Écrire [[value]] dans le registre Modbus [[address]]"
+        },
+        "hint": {
+          "en": "Writes a raw value to one Modbus holding register (FC06). Address in hex (0x0301) or decimal (769). Temperature registers expect values ×10 — enter 450 for 45 °C. Use with care: incorrect values may affect heat pump behaviour.",
+          "nl": "Schrijft een registerwaarde naar één Modbus holding register (FC06). Adres in hex (0x0301) of decimaal (769). Temperatuurregisters verwachten ×10 — geef 450 op voor 45 °C. Gebruik met zorg: ongeldige waarden kunnen het gedrag van de warmtepomp beïnvloeden.",
+          "de": "Schreibt einen Rohwert in ein Modbus Holding-Register (FC06). Adresse in Hex (0x0301) oder Dezimal (769). Temperaturregister erwarten ×10 — 450 für 45 °C eingeben. Vorsicht: falsche Werte können das Verhalten der Wärmepumpe beeinflussen.",
+          "fr": "Écrit une valeur brute dans un registre Modbus holding (FC06). Adresse en hex (0x0301) ou décimal (769). Les registres de température attendent ×10 — saisir 450 pour 45 °C. Utiliser avec prudence."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "text",
+            "name": "address",
+            "title": {
+              "en": "Register address",
+              "nl": "Registeradres",
+              "de": "Registeradresse",
+              "fr": "Adresse du registre"
+            },
+            "placeholder": {
+              "en": "e.g. 0x0301 or 769",
+              "nl": "bijv. 0x0301 of 769",
+              "de": "z.B. 0x0301 oder 769",
+              "fr": "ex. 0x0301 ou 769"
+            }
+          },
+          {
+            "type": "number",
+            "name": "value",
+            "title": {
+              "en": "Register value",
+              "nl": "Registerwaarde",
+              "de": "Registerwert",
+              "fr": "Valeur du registre"
+            },
+            "placeholder": {
+              "en": "e.g. 450 for 45 °C",
+              "nl": "bijv. 450 voor 45 °C",
+              "de": "z.B. 450 für 45 °C",
+              "fr": "ex. 450 pour 45 °C"
+            }
+          }
+        ]
+      },
+      {
         "id": "receive_external_ambient_data",
         "title": {
           "en": "Send ambient temperature to heat pump",
@@ -10660,6 +14006,54 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "temperature_value",
+            "title": {
+              "en": "Ambient temperature (°C)",
+              "nl": "Buitentemperatuur (°C)",
+              "de": "Umgebungstemperatur (°C)",
+              "fr": "Température ambiante (°C)"
+            },
+            "placeholder": {
+              "en": "Current ambient temperature in °C",
+              "nl": "Huidige buitentemperatuur in °C",
+              "de": "Aktuelle Umgebungstemperatur in °C",
+              "fr": "Température ambiante actuelle en °C"
+            },
+            "min": -50,
+            "max": 50,
+            "step": 0.1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_ambient_data_aurora3",
+        "title": {
+          "en": "Send ambient temperature to heat pump",
+          "nl": "Stuur buitentemperatuur naar warmtepomp",
+          "de": "Umgebungstemperatur an Wärmepumpe senden",
+          "fr": "Envoyer la température ambiante à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send [[temperature_value]]°C to heat pump for COP/thermal mass calculation",
+          "nl": "Stuur [[temperature_value]]°C naar warmtepomp voor COP/thermische massa berekening",
+          "de": "Sende [[temperature_value]]°C an Wärmepumpe für COP/Thermische Masse Berechnung",
+          "fr": "Envoyer [[temperature_value]]°C à la pompe à chaleur pour le calcul COP/masse thermique"
+        },
+        "hint": {
+          "en": "Sends ambient temperature data to the heat pump for enhanced COP/thermal mass calculations",
+          "nl": "Stuurt buitentemperatuur gegevens naar de warmtepomp voor verbeterde COP/thermische massa berekeningen",
+          "de": "Sendet Umgebungstemperaturdaten an die Wärmepumpe für erweiterte COP/Thermische Masse Berechnungen",
+          "fr": "Envoie les données de température ambiante à la pompe à chaleur pour des calculs COP/masse thermique améliorés"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "number",
@@ -10776,6 +14170,51 @@
         ]
       },
       {
+        "id": "receive_external_energy_prices_aurora3",
+        "title": {
+          "en": "Send energy prices to heat pump",
+          "nl": "Stuur energieprijzen naar warmtepomp",
+          "de": "Energiepreise an Wärmepumpe senden",
+          "fr": "Envoyer les prix de l'énergie à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send external energy prices [[prices_json]] for price optimization",
+          "nl": "Stuur externe energieprijzen [[prices_json]] voor prijsoptimalisatie",
+          "de": "Externe Energiepreise [[prices_json]] für Preisoptimierung senden",
+          "fr": "Envoyer les prix de l'énergie externes [[prices_json]] pour l'optimisation des prix"
+        },
+        "hint": {
+          "en": "Sends hourly energy prices (€/kWh) from external source to enable price-based optimization. Accepts two formats: Array [0.11,0.10,...] where index=hour offset (0=current hour), or Object {\"0\":0.11,\"1\":0.10,...} with hour keys.",
+          "nl": "Stuurt uurlijkse energieprijzen (€/kWh) van externe bron om prijsgebaseerde optimalisatie mogelijk te maken. Accepteert twee formaten: Array [0.11,0.10,...] waarbij index=uur offset (0=huidig uur), of Object {\"0\":0.11,\"1\":0.10,...} met uur-keys.",
+          "de": "Sendet stündliche Energiepreise (€/kWh) von externer Quelle zur preisbasierten Optimierung. Akzeptiert zwei Formate: Array [0.11,0.10,...] wobei Index=Stundenoffset (0=aktuelle Stunde), oder Objekt {\"0\":0.11,\"1\":0.10,...} mit Stundenschlüsseln.",
+          "fr": "Envoie les prix horaires de l'énergie (€/kWh) depuis une source externe pour l'optimisation basée sur les prix. Accepte deux formats: Array [0.11,0.10,...] où index=décalage horaire (0=heure actuelle), ou Objet {\"0\":0.11,\"1\":0.10,...} avec clés horaires."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "text",
+            "name": "prices_json",
+            "title": {
+              "en": "Energy prices (JSON)",
+              "nl": "Energieprijzen (JSON)",
+              "de": "Energiepreise (JSON)",
+              "fr": "Prix de l'énergie (JSON)"
+            },
+            "placeholder": {
+              "en": "[0.11,0.10,0.09,...] or {\"0\":0.11,\"1\":0.10,...}",
+              "nl": "[0.11,0.10,0.09,...] of {\"0\":0.11,\"1\":0.10,...}",
+              "de": "[0.11,0.10,0.09,...] oder {\"0\":0.11,\"1\":0.10,...}",
+              "fr": "[0.11,0.10,0.09,...] ou {\"0\":0.11,\"1\":0.10,...}"
+            }
+          }
+        ]
+      },
+      {
         "id": "receive_external_energy_prices_modbus",
         "title": {
           "en": "Send energy prices to heat pump",
@@ -10846,6 +14285,54 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "flow_value",
+            "title": {
+              "en": "Water flow rate (L/min)",
+              "nl": "Water doorstroom (L/min)",
+              "de": "Wasserdurchflussrate (L/min)",
+              "fr": "Débit d'eau (L/min)"
+            },
+            "placeholder": {
+              "en": "Current water flow rate in L/min",
+              "nl": "Huidige water doorstroom in L/min",
+              "de": "Aktuelle Wasserdurchflussrate in L/min",
+              "fr": "Débit d'eau actuel en L/min"
+            },
+            "min": 0,
+            "max": 200,
+            "step": 0.1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_flow_data_aurora3",
+        "title": {
+          "en": "Send flow data to heat pump",
+          "nl": "Stuur doorstroom gegevens naar warmtepomp",
+          "de": "Durchflussdaten an Wärmepumpe senden",
+          "fr": "Envoyer les données de débit à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send [[flow_value]]L/min to heat pump for COP calculation",
+          "nl": "Stuur [[flow_value]]L/min naar warmtepomp voor COP berekening",
+          "de": "Sende [[flow_value]]L/min an Wärmepumpe für COP-Berechnung",
+          "fr": "Envoyer [[flow_value]]L/min à la pompe à chaleur pour le calcul COP"
+        },
+        "hint": {
+          "en": "Sends water flow data to the heat pump for enhanced COP calculations",
+          "nl": "Stuurt water doorstroom gegevens naar de warmtepomp voor verbeterde COP-berekeningen",
+          "de": "Sendet Wasserdurchflussdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
+          "fr": "Envoie les données de débit d'eau à la pompe à chaleur pour des calculs COP améliorés"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "number",
@@ -10962,6 +14449,51 @@
         ]
       },
       {
+        "id": "receive_external_indoor_temperature_aurora3",
+        "title": {
+          "en": "Send indoor temperature to heat pump",
+          "nl": "Stuur binnentemperatuur naar warmtepomp",
+          "de": "Raumtemperatur an Wärmepumpe senden",
+          "fr": "Envoyer la température intérieure à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send [[temperature_value]]°C indoor temperature for adaptive control",
+          "nl": "Stuur [[temperature_value]]°C binnentemperatuur voor adaptieve regeling",
+          "de": "Sende [[temperature_value]]°C Raumtemperatur für adaptive Steuerung",
+          "fr": "Envoyer [[temperature_value]]°C température intérieure pour contrôle adaptatif"
+        },
+        "hint": {
+          "en": "Sends current indoor/room temperature from an external sensor to enable adaptive temperature control",
+          "nl": "Stuurt huidige binnen-/kamertemperatuur van een externe sensor om adaptieve temperatuurregeling mogelijk te maken",
+          "de": "Sendet aktuelle Raum-/Innentemperatur von einem externen Sensor zur Aktivierung der adaptiven Temperatursteuerung",
+          "fr": "Envoie la température intérieure actuelle d'un capteur externe pour activer le contrôle adaptatif de la température"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "text",
+            "name": "temperature_value",
+            "title": {
+              "en": "Indoor temperature (°C)",
+              "nl": "Binnentemperatuur (°C)",
+              "de": "Raumtemperatur (°C)",
+              "fr": "Température intérieure (°C)"
+            },
+            "placeholder": {
+              "en": "e.g., 21.5 or {{ room_temperature }} or {{ (sensor1 + sensor2) / 2 }}",
+              "nl": "bijv. 21.5 of {{ kamer_temp }} of {{ (sensor1 + sensor2) / 2 }}",
+              "de": "z.B. 21.5 oder {{ Raumtemperatur }} oder {{ (sensor1 + sensor2) / 2 }}",
+              "fr": "par ex. 21.5 ou {{ température_pièce }} ou {{ (capteur1 + capteur2) / 2 }}"
+            }
+          }
+        ]
+      },
+      {
         "id": "receive_external_indoor_temperature_modbus",
         "title": {
           "en": "Send indoor temperature to heat pump",
@@ -11032,6 +14564,54 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "power_value",
+            "title": {
+              "en": "Power consumption (W)",
+              "nl": "Stroomverbruik (W)",
+              "de": "Stromverbrauch (W)",
+              "fr": "Consommation électrique (W)"
+            },
+            "placeholder": {
+              "en": "Current power consumption in watts",
+              "nl": "Huidig stroomverbruik in watt",
+              "de": "Aktueller Stromverbrauch in Watt",
+              "fr": "Consommation électrique actuelle en watts"
+            },
+            "min": 0,
+            "max": 50000,
+            "step": 0.1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_power_data_aurora3",
+        "title": {
+          "en": "Send power data to heat pump",
+          "nl": "Stuur vermogensgegevens naar warmtepomp",
+          "de": "Leistungsdaten an Wärmepumpe senden",
+          "fr": "Envoyer les données de puissance à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send [[power_value]]W to heat pump for COP calculation",
+          "nl": "Stuur [[power_value]]W naar warmtepomp voor COP berekening",
+          "de": "Sende [[power_value]]W an Wärmepumpe für COP-Berechnung",
+          "fr": "Envoyer [[power_value]]W à la pompe à chaleur pour le calcul COP"
+        },
+        "hint": {
+          "en": "Sends power consumption data to the heat pump for enhanced COP calculations",
+          "nl": "Stuurt stroomverbruikgegevens naar de warmtepomp voor verbeterde COP-berekeningen",
+          "de": "Sendet Stromverbrauchsdaten an die Wärmepumpe für erweiterte COP-Berechnungen",
+          "fr": "Envoie les données de consommation électrique à la pompe à chaleur pour des calculs COP améliorés"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "number",
@@ -11151,6 +14731,54 @@
         ]
       },
       {
+        "id": "receive_external_solar_power_aurora3",
+        "title": {
+          "en": "Send solar panel power to heat pump",
+          "nl": "Stuur zonnepaneel vermogen naar warmtepomp",
+          "de": "Solarleistung an Wärmepumpe senden",
+          "fr": "Envoyer la puissance solaire à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send solar power [[power_value]]W to heat pump",
+          "nl": "Stuur zonnepaneel vermogen [[power_value]]W naar warmtepomp",
+          "de": "Sende Solarleistung [[power_value]]W an Wärmepumpe",
+          "fr": "Envoyer puissance solaire [[power_value]]W à la pompe à chaleur"
+        },
+        "hint": {
+          "en": "Sends solar panel output for accurate solar radiation calculation. Use with SolarEdge, Enphase, etc.",
+          "nl": "Stuurt zonnepaneel opbrengst voor nauwkeurige zonnestraling berekening. Gebruik met SolarEdge, Enphase, etc.",
+          "de": "Sendet Solarertrag für genaue Sonnenstrahlungsberechnung. Verwenden mit SolarEdge, Enphase, usw.",
+          "fr": "Envoie la production solaire pour un calcul précis du rayonnement. À utiliser avec SolarEdge, Enphase, etc."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "number",
+            "name": "power_value",
+            "title": {
+              "en": "Solar panel power (W)",
+              "nl": "Zonnepaneel vermogen (W)",
+              "de": "Solarleistung (W)",
+              "fr": "Puissance solaire (W)"
+            },
+            "placeholder": {
+              "en": "Current solar output in watts",
+              "nl": "Huidige zonne-opbrengst in watt",
+              "de": "Aktuelle Solarleistung in Watt",
+              "fr": "Production solaire actuelle en watts"
+            },
+            "min": 0,
+            "max": 50000,
+            "step": 1
+          }
+        ]
+      },
+      {
         "id": "receive_external_solar_power_modbus",
         "title": {
           "en": "Send solar panel power to heat pump",
@@ -11224,6 +14852,54 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "number",
+            "name": "radiation_value",
+            "title": {
+              "en": "Solar radiation (W/m²)",
+              "nl": "Zonnestraling (W/m²)",
+              "de": "Sonnenstrahlung (W/m²)",
+              "fr": "Rayonnement solaire (W/m²)"
+            },
+            "placeholder": {
+              "en": "Current solar radiation",
+              "nl": "Huidige zonnestraling",
+              "de": "Aktuelle Sonnenstrahlung",
+              "fr": "Rayonnement solaire actuel"
+            },
+            "min": 0,
+            "max": 1500,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "receive_external_solar_radiation_aurora3",
+        "title": {
+          "en": "Send solar radiation to heat pump",
+          "nl": "Stuur zonnestraling naar warmtepomp",
+          "de": "Sonnenstrahlung an Wärmepumpe senden",
+          "fr": "Envoyer le rayonnement solaire à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send solar radiation [[radiation_value]] W/m² to heat pump",
+          "nl": "Stuur zonnestraling [[radiation_value]] W/m² naar warmtepomp",
+          "de": "Sende Sonnenstrahlung [[radiation_value]] W/m² an Wärmepumpe",
+          "fr": "Envoyer rayonnement solaire [[radiation_value]] W/m² à la pompe à chaleur"
+        },
+        "hint": {
+          "en": "Sends solar radiation data for building model. Use with KNMI weather app.",
+          "nl": "Stuurt zonnestraling voor gebouwmodel. Gebruik met KNMI weer app.",
+          "de": "Sendet Sonnenstrahlung für Gebäudemodell. Verwenden mit KNMI Wetter-App.",
+          "fr": "Envoie le rayonnement solaire pour le modèle de bâtiment. À utiliser avec l'app météo KNMI."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "number",
@@ -11343,6 +15019,54 @@
         ]
       },
       {
+        "id": "receive_external_wind_data_aurora3",
+        "title": {
+          "en": "Send wind speed data to heat pump",
+          "nl": "Stuur windsnelheid naar warmtepomp",
+          "de": "Windgeschwindigkeit an Wärmepumpe senden",
+          "fr": "Envoyer la vitesse du vent à la pompe à chaleur"
+        },
+        "titleFormatted": {
+          "en": "Send wind speed [[wind_speed]] km/h to heat pump",
+          "nl": "Stuur windsnelheid [[wind_speed]] km/u naar warmtepomp",
+          "de": "Sende Windgeschwindigkeit [[wind_speed]] km/h an Wärmepumpe",
+          "fr": "Envoyer vitesse du vent [[wind_speed]] km/h à la pompe à chaleur"
+        },
+        "hint": {
+          "en": "Sends wind speed data for heat loss correction. Use with KNMI weather app.",
+          "nl": "Stuurt windsnelheid voor warmteverlies correctie. Gebruik met KNMI weer app.",
+          "de": "Sendet Windgeschwindigkeit für Wärmeverlustkorrektur. Verwenden mit KNMI Wetter-App.",
+          "fr": "Envoie la vitesse du vent pour correction des pertes de chaleur. À utiliser avec l'app météo KNMI."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "number",
+            "name": "wind_speed",
+            "title": {
+              "en": "Wind speed (km/h)",
+              "nl": "Windsnelheid (km/u)",
+              "de": "Windgeschwindigkeit (km/h)",
+              "fr": "Vitesse du vent (km/h)"
+            },
+            "placeholder": {
+              "en": "Current wind speed",
+              "nl": "Huidige windsnelheid",
+              "de": "Aktuelle Windgeschwindigkeit",
+              "fr": "Vitesse du vent actuelle"
+            },
+            "min": 0,
+            "max": 200,
+            "step": 0.1
+          }
+        ]
+      },
+      {
         "id": "receive_external_wind_data_modbus",
         "title": {
           "en": "Send wind speed data to heat pump",
@@ -11387,6 +15111,64 @@
             "min": 0,
             "max": 200,
             "step": 0.1
+          }
+        ]
+      },
+      {
+        "id": "set_backup_heater",
+        "title": {
+          "en": "Switch forced backup heater",
+          "nl": "Geforceerde bijverwarming schakelen",
+          "de": "Erzwungene Zusatzheizung schalten",
+          "fr": "Commuter l'appoint électrique forcé"
+        },
+        "titleFormatted": {
+          "en": "Switch forced backup heater [[state]]",
+          "nl": "Geforceerde bijverwarming [[state]] schakelen",
+          "de": "Erzwungene Zusatzheizung [[state]] schalten",
+          "fr": "Commuter l'appoint électrique forcé sur [[state]]"
+        },
+        "hint": {
+          "en": "Forces the electric backup heater on or releases it",
+          "nl": "Forceert de elektrische bijverwarming of geeft deze weer vrij",
+          "de": "Erzwingt die elektrische Zusatzheizung oder gibt sie wieder frei",
+          "fr": "Force l'appoint électrique ou le libère"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "State",
+              "nl": "Stand",
+              "de": "Zustand",
+              "fr": "État"
+            },
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "on",
+                  "nl": "aan",
+                  "de": "ein",
+                  "fr": "marche"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "off",
+                  "nl": "uit",
+                  "de": "aus",
+                  "fr": "arrêt"
+                }
+              }
+            ]
           }
         ]
       },
@@ -11863,6 +15645,55 @@
         ]
       },
       {
+        "id": "set_desired_indoor_temperature_aurora3",
+        "title": {
+          "en": "Set desired indoor temperature",
+          "nl": "Gewenste binnentemperatuur instellen",
+          "de": "Gewünschte Innentemperatur einstellen",
+          "fr": "Régler la température intérieure souhaitée"
+        },
+        "titleFormatted": {
+          "en": "Set desired indoor temperature to [[temperature]]°C",
+          "nl": "Gewenste binnentemperatuur instellen op [[temperature]]°C",
+          "de": "Gewünschte Innentemperatur einstellen auf [[temperature]]°C",
+          "fr": "Régler la température intérieure souhaitée sur [[temperature]]°C"
+        },
+        "hint": {
+          "en": "Set the desired room temperature for adaptive control. The adaptive control system will adjust the heat pump setpoint to reach this temperature.",
+          "nl": "Stel de gewenste kamertemperatuur in voor adaptieve regeling. Het adaptieve systeem past het warmtepomp setpoint aan om deze temperatuur te bereiken.",
+          "de": "Stellen Sie die gewünschte Raumtemperatur für die adaptive Steuerung ein. Das adaptive System passt den Wärmepumpen-Sollwert an, um diese Temperatur zu erreichen.",
+          "fr": "Réglez la température ambiante souhaitée pour le contrôle adaptatif. Le système adaptatif ajustera la consigne de la pompe à chaleur pour atteindre cette température."
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": "Indoor Temperature ",
+              "nl": "Binnentemperatuur ",
+              "de": "Innentemperatur ",
+              "fr": "Température intérieure "
+            },
+            "min": 15,
+            "max": 25,
+            "step": 0.5,
+            "units": "°C",
+            "placeholder": {
+              "en": "Desired indoor temperature in °C",
+              "nl": "Gewenste binnentemperatuur in °C",
+              "de": "Gewünschte Innentemperatur in °C",
+              "fr": "Température intérieure souhaitée en °C"
+            }
+          }
+        ]
+      },
+      {
         "id": "set_desired_indoor_temperature_modbus",
         "title": {
           "en": "Set desired indoor temperature",
@@ -12023,6 +15854,64 @@
                   "nl": "Uit",
                   "de": "Aus",
                   "fr": "Éteint"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_dhw_function",
+        "title": {
+          "en": "Switch hot water function",
+          "nl": "Tapwaterfunctie schakelen",
+          "de": "Warmwasserfunktion schalten",
+          "fr": "Commuter la fonction eau chaude"
+        },
+        "titleFormatted": {
+          "en": "Switch hot water function [[state]]",
+          "nl": "Tapwaterfunctie [[state]] schakelen",
+          "de": "Warmwasserfunktion [[state]] schalten",
+          "fr": "Commuter la fonction eau chaude sur [[state]]"
+        },
+        "hint": {
+          "en": "Switches domestic hot water heating on or off",
+          "nl": "Schakelt de tapwaterverwarming aan of uit",
+          "de": "Schaltet die Warmwasserbereitung ein oder aus",
+          "fr": "Active ou désactive la production d'eau chaude sanitaire"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "title": {
+              "en": "State",
+              "nl": "Stand",
+              "de": "Zustand",
+              "fr": "État"
+            },
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "on",
+                  "nl": "aan",
+                  "de": "ein",
+                  "fr": "marche"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "off",
+                  "nl": "uit",
+                  "de": "aus",
+                  "fr": "arrêt"
                 }
               }
             ]
@@ -12582,6 +16471,74 @@
         ]
       },
       {
+        "id": "set_heating_mode_aurora3",
+        "title": {
+          "en": "Set heating mode",
+          "nl": "Verwarmingsmodus instellen",
+          "de": "Heizmodus einstellen",
+          "fr": "Régler le mode de chauffage"
+        },
+        "titleFormatted": {
+          "en": "Set heating mode to [[mode]]",
+          "nl": "Verwarmingsmodus instellen op [[mode]]",
+          "de": "Heizmodus einstellen auf [[mode]]",
+          "fr": "Régler le mode de chauffage sur [[mode]]"
+        },
+        "hint": {
+          "en": "Set the heating operation mode",
+          "nl": "Stel de verwarming bedrijfsmodus in",
+          "de": "Heizbetriebsmodus einstellen",
+          "fr": "Régler le mode de fonctionnement du chauffage"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "mode",
+            "title": {
+              "en": "Heating mode",
+              "nl": "Verwarmingsmodus",
+              "de": "Heizmodus",
+              "fr": "Mode de chauffage"
+            },
+            "values": [
+              {
+                "id": "cool",
+                "title": {
+                  "en": "Cooling",
+                  "nl": "Koeling",
+                  "de": "Kühlen",
+                  "fr": "Froid"
+                }
+              },
+              {
+                "id": "heat",
+                "title": {
+                  "en": "Heating",
+                  "nl": "Verwarmen",
+                  "de": "Heizung",
+                  "fr": "Chauffage"
+                }
+              },
+              {
+                "id": "auto",
+                "title": {
+                  "en": "Auto",
+                  "nl": "Auto",
+                  "de": "Auto",
+                  "fr": "Auto"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "set_heating_mode_modbus",
         "title": {
           "en": "Set heating mode",
@@ -12711,6 +16668,55 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=intelligent-heat-pump"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Hot water temperature (°C)",
+              "nl": " Warm water temperatuur (°C)",
+              "de": " Warmwassertemperatur (°C)",
+              "fr": " Température de l'eau chaude (°C)"
+            },
+            "min": 20,
+            "max": 75,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Hot water temperature in °C",
+              "nl": "Warm water temperatuur in °C",
+              "de": "Warmwassertemperatur in °C",
+              "fr": "Température de l'eau chaude en °C"
+            }
+          }
+        ]
+      },
+      {
+        "id": "set_hotwater_temperature_aurora3",
+        "title": {
+          "en": "Set hot water temperature",
+          "nl": "Warm water temperatuur instellen",
+          "de": "Warmwassertemperatur einstellen",
+          "fr": "Régler la température de l'eau chaude"
+        },
+        "titleFormatted": {
+          "en": "Set hot water temperature to [[temperature]]",
+          "nl": "Warm water temperatuur instellen op [[temperature]]",
+          "de": "Warmwassertemperatur einstellen auf [[temperature]]",
+          "fr": "Régler la température de l'eau chaude sur [[temperature]]"
+        },
+        "hint": {
+          "en": "Set the hot water temperature setting",
+          "nl": "Stel de warm water temperatuur in",
+          "de": "Warmwassertemperatureinstellung einstellen",
+          "fr": "Régler la température de l'eau chaude"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
           },
           {
             "type": "range",
@@ -12913,6 +16919,73 @@
         ]
       },
       {
+        "id": "set_silent_mode",
+        "title": {
+          "en": "Set silent mode",
+          "nl": "Stille modus instellen",
+          "de": "Leisemodus einstellen",
+          "fr": "Régler le mode silencieux"
+        },
+        "titleFormatted": {
+          "en": "Set silent mode to [[level]]",
+          "nl": "Stille modus instellen op [[level]]",
+          "de": "Leisemodus einstellen auf [[level]]",
+          "fr": "Régler le mode silencieux sur [[level]]"
+        },
+        "hint": {
+          "en": "Sets the silent mode level of the heat pump",
+          "nl": "Stelt het niveau van de stille modus van de warmtepomp in",
+          "de": "Stellt die Stufe des Leisemodus der Wärmepumpe ein",
+          "fr": "Règle le niveau du mode silencieux de la pompe à chaleur"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "dropdown",
+            "name": "level",
+            "title": {
+              "en": "Silent mode",
+              "nl": "Stille modus",
+              "de": "Leisemodus",
+              "fr": "Mode silencieux"
+            },
+            "values": [
+              {
+                "id": "0",
+                "title": {
+                  "en": "Off",
+                  "nl": "Uit",
+                  "de": "Aus",
+                  "fr": "Arrêt"
+                }
+              },
+              {
+                "id": "1",
+                "title": {
+                  "en": "Level 1",
+                  "nl": "Niveau 1",
+                  "de": "Stufe 1",
+                  "fr": "Niveau 1"
+                }
+              },
+              {
+                "id": "2",
+                "title": {
+                  "en": "Level 2",
+                  "nl": "Niveau 2",
+                  "de": "Stufe 2",
+                  "fr": "Niveau 2"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "set_target_temperature",
         "title": {
           "en": "Set target (setpoint) temperature",
@@ -12950,6 +17023,86 @@
             },
             "min": 5,
             "max": 75,
+            "step": 1,
+            "units": "°C",
+            "placeholder": {
+              "en": "Target temperature in °C",
+              "nl": "Doel temperatuur in °C",
+              "de": "Zieltemperatur in °C",
+              "fr": "Température cible en °C"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "decimal_handling",
+            "title": {
+              "en": "If decimal value",
+              "nl": "Bij decimale waarde",
+              "de": "Bei Dezimalwert",
+              "fr": "Si valeur décimale"
+            },
+            "values": [
+              {
+                "id": "round",
+                "label": {
+                  "en": "Auto-round (recommended)",
+                  "nl": "Automatisch afronden (aanbevolen)",
+                  "de": "Automatisch runden (empfohlen)",
+                  "fr": "Arrondir automatiquement (recommandé)"
+                }
+              },
+              {
+                "id": "error",
+                "label": {
+                  "en": "Show error",
+                  "nl": "Foutmelding tonen",
+                  "de": "Fehler anzeigen",
+                  "fr": "Afficher erreur"
+                }
+              }
+            ],
+            "value": "round"
+          }
+        ]
+      },
+      {
+        "id": "set_target_temperature_aurora3",
+        "title": {
+          "en": "Set target (setpoint) temperature",
+          "nl": "Doel (setpoint) temperatuur instellen",
+          "de": "Zieltemperatur (Sollwert) einstellen",
+          "fr": "Régler la température cible (consigne)"
+        },
+        "titleFormatted": {
+          "en": "Set target (setpoint) temperature to [[temperature]] [[decimal_handling]]",
+          "nl": "Doel (setpoint) temperatuur instellen op [[temperature]] [[decimal_handling]]",
+          "de": "Zieltemperatur (Sollwert) einstellen auf [[temperature]] [[decimal_handling]]",
+          "fr": "Régler la température cible (consigne) sur [[temperature]] [[decimal_handling]]"
+        },
+        "hint": {
+          "en": "Set the target (setpoint) temperature for the heat pump",
+          "nl": "Stel de doel (setpoint) temperatuur voor de warmtepomp in",
+          "de": "Zieltemperatur (Sollwert) für die Wärmepumpe einstellen",
+          "fr": "Régler la température cible (consigne) pour la pompe à chaleur"
+        },
+        "highlight": true,
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=intelligent-heatpump-aurora3"
+          },
+          {
+            "type": "range",
+            "name": "temperature",
+            "title": {
+              "en": " Temperature (°C)",
+              "nl": " Temperatuur (°C)",
+              "de": " Temperatur (°C)",
+              "fr": " Température (°C)"
+            },
+            "min": 15,
+            "max": 60,
             "step": 1,
             "units": "°C",
             "placeholder": {
