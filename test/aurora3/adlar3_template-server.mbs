@@ -1,0 +1,39 @@
+{
+  "inputReg" : [
+    {
+      "modbusData" : {
+        "address" : 38,
+        "registerValue" : 456,
+        "title" : "3-0038 input voorbeeld",
+        "dataSize" : 16,
+        "displayFormat" : {
+          "Decimal" : {
+
+          }
+        }
+      }
+    }
+  ],
+  "holdingReg" : [
+    {
+      "modbusData" : {
+        "address" : 2100,
+        "registerValue" : 123,
+        "dataSize" : 16,
+        "displayFormat" : {
+          "Decimal" : {
+
+          }
+        },
+        "title" : "4-2100 holding voorbeeld"
+      }
+    }
+  ],
+  "inputMem" : [
+
+  ],
+  "fileVersion" : "1.0",
+  "outputMem" : [
+
+  ]
+}

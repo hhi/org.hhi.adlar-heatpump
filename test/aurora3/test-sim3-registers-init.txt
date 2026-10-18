@@ -1,0 +1,121 @@
+❯  npx tsx test/test-sim3-registers.ts
+
+Gebruik:
+  npx tsx test/test-sim3-registers.ts <IP> [commando] [args...]
+
+Commando's:
+  dump [bestand.mbs]       Toon inputReg + holdingReg uit .mbs zonder verbinding
+  init [bestand.mbs]       Schrijf holdingReg naar simulator; inputReg is read-only via Modbus
+  read <register> [n]      Lees slim: input als adres in inputReg zit, anders holding
+  read-input <register> [n]    Lees n input registers via FC04
+  read-holding <register> [n]  Lees n holding registers via FC03
+  write <register> <val>   Schrijf holding register via FC06
+  poll                     Poll Aurora III sleutelblokken 3x met 5s interval
+
+Voorbeelden:
+  npx tsx test/test-sim3-registers.ts 192.168.1.100 dump
+  npx tsx test/test-sim3-registers.ts 192.168.1.100 init
+  npx tsx test/test-sim3-registers.ts 192.168.1.100 read 38
+  npx tsx test/test-sim3-registers.ts 192.168.1.100 read-holding 2107
+  npx tsx test/test-sim3-registers.ts 192.168.1.100 write 2107 350
+
+Environment:
+  MODBUS_PORT=502
+  MODBUS_UNIT=1
+  MBS_FILE=test/adlar3-server.mbs
+
+
+
+
+❯ npx tsx test/test-sim3-registers.ts 192.168.50.247 init
+Verbinden met 192.168.50.247:502 (unit 1)...
+[ModbusTCP] Connecting to 192.168.50.247:502...
+[ModbusTCP] Connected to 192.168.50.247:502 (unit 1)
+Verbonden.
+
+Initialisatie vanuit: adlar3-server.mbs
+inputReg: 60 registers staan in .mbs, maar zijn FC04 read-only via Modbus.
+holdingReg: 13 registers worden via FC06 geschreven.
+
+  4-2100 = 2      4-2100 Air Conditioning Modes
+[ModbusTCP] FC06 WRITE 0x0834 = 2
+[ModbusTCP]   → OK
+  4-2102 = 1      4-2102 DHW Mode On/Off
+[ModbusTCP] FC06 WRITE 0x0836 = 1
+[ModbusTCP]   → OK
+  4-2103 = 0      4-2103 Additional Function A (Silent Mode bits 4-5)
+[ModbusTCP] FC06 WRITE 0x0837 = 0
+[ModbusTCP]   → OK
+  4-2105 = 500    4-2105 DHW Mode Water Temperature Setting
+[ModbusTCP] FC06 WRITE 0x0839 = 500
+[ModbusTCP]   → OK
+  4-2106 = 180    4-2106 Zone 1 Cooling Mode Temperature Setting
+[ModbusTCP] FC06 WRITE 0x083a = 180
+[ModbusTCP]   → OK
+  4-2107 = 350    4-2107 Zone 1 Heating Mode Temperature Setting
+[ModbusTCP] FC06 WRITE 0x083b = 350
+[ModbusTCP]   → OK
+  4-2108 = 180    4-2108 Zone 1 Auto Mode Cooling Temperature Setting
+[ModbusTCP] FC06 WRITE 0x083c = 180
+[ModbusTCP]   → OK
+  4-2109 = 350    4-2109 Zone 1 Auto Mode Heating Temperature Setting
+[ModbusTCP] FC06 WRITE 0x083d = 350
+[ModbusTCP]   → OK
+  4-2110 = 180    4-2110 Zone 2 Cooling Mode Temperature Setting
+[ModbusTCP] FC06 WRITE 0x083e = 180
+[ModbusTCP]   → OK
+  4-2111 = 350    4-2111 Zone 2 Heating Mode Temperature Setting
+[ModbusTCP] FC06 WRITE 0x083f = 350
+[ModbusTCP]   → OK
+  4-2112 = 180    4-2112 Zone 2 Auto Mode Cooling Temperature Setting
+[ModbusTCP] FC06 WRITE 0x0840 = 180
+[ModbusTCP]   → OK
+  4-2113 = 350    4-2113 Zone 2 Auto Mode Heating Temperature Setting
+[ModbusTCP] FC06 WRITE 0x0841 = 350
+[ModbusTCP]   → OK
+  4-2114 = 210    4-2114 Room Temperature Setting
+[ModbusTCP] FC06 WRITE 0x0842 = 210
+[ModbusTCP]   → OK
+
+Klaar: 13 holding registers geschreven.
+Laad inputReg in de virtuele server via het .mbs bestand zelf; FC04-registers zijn niet schrijfbaar via Modbus.
+
+
+
+
+❯  npx tsx test/test-sim3-registers.ts 192.168.50.247 read 38
+Verbinden met 192.168.50.247:502 (unit 1)...
+[ModbusTCP] Connecting to 192.168.50.247:502...
+[ModbusTCP] Connected to 192.168.50.247:502 (unit 1)
+Verbonden.
+
+FC04 input lezen: 38, count=1
+
+[ModbusTCP] FC04 READ  0x0026 count=1
+[ModbusTCP]   → 0x0026=0
+--------------------------------------------------------------------------------------
+FC       Adres    Raw      Signed   Scaled       Eenheid  Label
+--------------------------------------------------------------------------------------
+input   38      0       0       0                   System Status (16-bit bitmask)
+--------------------------------------------------------------------------------------
+
+
+
+❯ npx tsx test/test-sim3-registers.ts 192.168.50.247 read-holding 2107
+Verbinden met 192.168.50.247:502 (unit 1)...
+[ModbusTCP] Connecting to 192.168.50.247:502...
+[ModbusTCP] Connected to 192.168.50.247:502 (unit 1)
+Verbonden.
+
+FC03 holding lezen: 2107, count=1
+
+[ModbusTCP] FC03 READ  0x083b count=1
+[ModbusTCP]   → 0x083b=350
+--------------------------------------------------------------------------------------
+FC       Adres    Raw      Signed   Scaled       Eenheid  Label
+--------------------------------------------------------------------------------------
+holding 2107    350     350     35.00       °C      Zone 1 Heating Mode Temperature Setting
+--------------------------------------------------------------------------------------
+
+
+
