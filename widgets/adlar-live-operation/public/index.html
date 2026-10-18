@@ -329,6 +329,47 @@
         return formatNumber(state.regulation.setpointDeviationC, 1);
       }
 
+      // Aurora II levert een regulation-blok; Aurora III alleen temperatures.setpointC.
+      function hasRegulation(state) {
+        return !!state.regulation;
+      }
+
+      function setpointC(state) {
+        return hasRegulation(state)
+          ? state.regulation.activeSetpointC
+          : state.temperatures.setpointC;
+      }
+
+      function regulationBlock(state) {
+        if (hasRegulation(state)) {
+          return [
+            '<div class="regulation">',
+            '<div class="regulation-line">Regeling</div>',
+            '<div class="regulation-line regulation-main">' + escapeHtml(state.regulation.summary || 'Regeling onbekend') + '</div>',
+            '<div class="regulation-line">Setpoint afwijking ' + escapeHtml(formatSetpointDeviation(state)) + ' C</div>',
+            '<div class="regulation-line">' + escapeHtml(state.regulation.hysteresisText || 'Hysterese onbekend') + '</div>',
+            '</div>',
+          ].join('');
+        }
+        var outlet = state.temperatures.outletC;
+        var setpoint = state.temperatures.setpointC;
+        var deviation = outlet !== null && outlet !== undefined && setpoint !== null && setpoint !== undefined
+          ? outlet - setpoint
+          : null;
+        return [
+          '<div class="regulation">',
+          '<div class="regulation-line">Setpoint afwijking ' + escapeHtml(formatNumber(deviation, 1)) + ' C</div>',
+          '</div>',
+        ].join('');
+      }
+
+      // Sensornamen verschillen per model: Aurora II T7/T6, Aurora III TA/TE1/T4.
+      function sensorLabels(state) {
+        return hasRegulation(state)
+          ? { outlet: 'Aanvoer (T7)', inlet: 'Retour (T6)', ambient: 'Buiten' }
+          : { outlet: 'Aanvoer (TA)', inlet: 'Retour (TE1)', ambient: 'Buiten (T4)' };
+      }
+
       function statusClass(state) {
         if (!state.ok || state.status.faultActive) return 'danger';
         if (state.status.defrosting || state.data.freshness === 'stale') return 'warn';
@@ -358,6 +399,7 @@
         var cop = state.process.liveCopEstimate !== null
           ? state.process.liveCopEstimate
           : state.process.capabilityCop;
+        var labels = sensorLabels(state);
 
         root.className = 'widget';
         root.innerHTML = [
@@ -374,12 +416,7 @@
           '<div>',
           '<div class="hero-label">Aanvoer - retour</div>',
           '<div class="delta"><span class="delta-value">' + formatValue(state.process.deltaTC, '', 1) + '</span><span class="delta-unit">C</span></div>',
-          '<div class="regulation">',
-          '<div class="regulation-line">Regeling</div>',
-          '<div class="regulation-line regulation-main">' + escapeHtml(state.regulation.summary || 'Regeling onbekend') + '</div>',
-          '<div class="regulation-line">Setpoint afwijking ' + escapeHtml(formatSetpointDeviation(state)) + ' C</div>',
-          '<div class="regulation-line">' + escapeHtml(state.regulation.hysteresisText || 'Hysterese onbekend') + '</div>',
-          '</div>',
+          regulationBlock(state),
           '</div>',
           '<div class="power-line">',
           metricBox('Input', formatNumber(state.process.electricalPowerKw, 2), 'kW'),
@@ -394,10 +431,10 @@
           '</div>',
           '</section>',
           '<section class="footer">',
-          footerItem('Aanvoer (T7)', formatValue(state.temperatures.outletC, ' C', 1)),
-          footerItem('Retour (T6)', formatValue(state.temperatures.inletC, ' C', 1)),
-          footerItem('Buiten', formatValue(state.temperatures.ambientC, ' C', 1)),
-          footerItem('Setpoint', formatValue(state.regulation.activeSetpointC, ' C', 1)),
+          footerItem(labels.outlet, formatValue(state.temperatures.outletC, ' C', 1)),
+          footerItem(labels.inlet, formatValue(state.temperatures.inletC, ' C', 1)),
+          footerItem(labels.ambient, formatValue(state.temperatures.ambientC, ' C', 1)),
+          footerItem('Setpoint', formatValue(setpointC(state), ' C', 1)),
           footerItem('Laatste poll', formatPoll(state.data.timestamp, state.data.ageMs)),
           '</section>',
         ].join('');

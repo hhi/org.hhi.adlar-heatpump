@@ -9,7 +9,7 @@ import { ServiceCoordinator } from '../../lib/aurora3/services/service-coordinat
 import { ModbusCOPService } from '../../lib/aurora3/services/modbus-cop-service';
 import { RollingCOPCalculator } from '../../lib/shared/services/rolling-cop-calculator';
 import { DeviceConstants } from '../../lib/aurora3/constants';
-import { RegisterChangeEntry } from '../../lib/aurora3/protocol/modbus-tcp-service';
+import { Aurora3AppHost } from '../../lib/aurora3/types/app-host';
 import {
   LiveOperationWidgetState,
   buildLiveOperationWidgetState,
@@ -223,8 +223,7 @@ class Aurora3ModbusDevice extends Homey.Device {
       device: this,
       logger: (msg, ...args) => this.logger.debug(msg, ...args),
       onSnapshot: (snapshot) => {
-        const app = this.homey.app as unknown as { dashboard: { setSnapshot(s: DataSnapshot): void } | null };
-        app.dashboard?.setSnapshot(snapshot);
+        this._appHost.aurora3Dashboard?.setSnapshot(snapshot);
       },
     });
 
@@ -338,12 +337,15 @@ class Aurora3ModbusDevice extends Homey.Device {
     }
   }
 
+  /** De app als Aurora III-host: eigen dashboardinstantie op een eigen poort (ADR-004 §5). */
+  private get _appHost(): Aurora3AppHost {
+    return this.homey.app as unknown as Aurora3AppHost;
+  }
+
   private async _applyDashboardPort(port: number): Promise<void> {
-    const app = this.homey.app as unknown as {
-      setDashboardPort?(dashboardPort: number): Promise<void>;
-    };
-    if (!app.setDashboardPort) return;
-    await app.setDashboardPort(port);
+    const host = this._appHost;
+    if (typeof host.setAurora3DashboardPort !== 'function') return;
+    await host.setAurora3DashboardPort(port);
   }
 
   private async _ensureCapabilities(): Promise<void> {
@@ -396,8 +398,7 @@ class Aurora3ModbusDevice extends Homey.Device {
       device: this,
       logger: (msg, ...args) => this.logger.debug(msg, ...args),
       onSnapshot: (snapshot) => {
-        const app = this.homey.app as unknown as { dashboard: { setSnapshot(s: DataSnapshot): void } | null };
-        app.dashboard?.setSnapshot(snapshot);
+        this._appHost.aurora3Dashboard?.setSnapshot(snapshot);
       },
     });
 
@@ -421,35 +422,21 @@ class Aurora3ModbusDevice extends Homey.Device {
 
   /** Bindt lees/schrijf-callbacks op het dashboard zodat HTTP-requests naar Modbus worden doorgestuurd. */
   private _registerDashboardCallbacks(): void {
-    type DashboardApp = {
-      dashboard: {
-        setWriteRegisterCallback(fn: (addr: number, rawValue: number) => Promise<void>): void;
-        setCapabilityWriteCallback(fn: (capability: string, value: number) => Promise<void>): void;
-        setCapabilityTriggerCallback(fn: (capability: string, value: boolean | string) => Promise<void>): void;
-        setReadRegisterCallback(fn: (addr: number, isCoil: boolean, isInput: boolean) => Promise<number>): void;
-        setWriteExpertCallback(fn: (addr: number, rawValue: number, isCoil: boolean) => Promise<void>): void;
-        setGetTemperatureScaleCallback(fn: () => 'x1' | 'x10'): void;
-        setGetChangeLogCallback(fn: (mode?: import('../../lib/aurora3/protocol/modbus-tcp-service').RegisterChangeLogMode) => Map<number, RegisterChangeEntry>): void;
-        setGetSnapshotCallback(fn: () => DataSnapshot | null): void;
-        setGetRegisterCacheCallback(fn: () => Map<number, number>): void;
-        setGetCapabilityValuesCallback(fn: () => Record<string, unknown>): void;
-      } | null;
-    };
-    const app = this.homey.app as unknown as DashboardApp;
-    if (!app.dashboard || !this.coordinator) return;
+    const dashboard = this._appHost.aurora3Dashboard;
+    if (!dashboard || !this.coordinator) return;
 
-    app.dashboard.setWriteRegisterCallback(async (addr, rawValue) => {
+    dashboard.setWriteRegisterCallback(async (addr, rawValue) => {
       await this.coordinator!.writeRaw(addr, rawValue, false);
     });
 
-    app.dashboard.setCapabilityWriteCallback(async (capability, value) => {
+    dashboard.setCapabilityWriteCallback(async (capability, value) => {
       if (this.hasCapability(capability)) {
         await this.setCapabilityValue(capability, value);
       }
     });
 
     // Dashboard controls run through the capability listeners (RMW on 4-2103, on/off gate).
-    app.dashboard.setCapabilityTriggerCallback(async (capability, value) => {
+    dashboard.setCapabilityTriggerCallback(async (capability, value) => {
       if (!this.hasCapability(capability)) {
         throw new Error(`Capability ${capability} is not available on this device`);
       }
@@ -457,21 +444,21 @@ class Aurora3ModbusDevice extends Homey.Device {
       await this.setCapabilityValue(capability, value);
     });
 
-    app.dashboard.setReadRegisterCallback(async (addr, isCoil, isInput) => {
+    dashboard.setReadRegisterCallback(async (addr, isCoil, isInput) => {
       if (isCoil) return this.coordinator!.readCoil(addr);
       if (isInput) return this.coordinator!.readInputRegister(addr);
       return this.coordinator!.readRegister(addr);
     });
 
-    app.dashboard.setWriteExpertCallback(async (addr, rawValue, isCoil) => {
+    dashboard.setWriteExpertCallback(async (addr, rawValue, isCoil) => {
       await this.coordinator!.writeRaw(addr, rawValue, isCoil);
     });
 
-    app.dashboard.setGetTemperatureScaleCallback(() => this.coordinator!.getTemperatureScale());
-    app.dashboard.setGetChangeLogCallback((mode) => this.coordinator!.getChangeLog(mode));
-    app.dashboard.setGetSnapshotCallback(() => this.coordinator!.getCurrentSnapshot());
-    app.dashboard.setGetRegisterCacheCallback(() => this.coordinator!.getRegisterCache());
-    app.dashboard.setGetCapabilityValuesCallback(() => {
+    dashboard.setGetTemperatureScaleCallback(() => this.coordinator!.getTemperatureScale());
+    dashboard.setGetChangeLogCallback((mode) => this.coordinator!.getChangeLog(mode));
+    dashboard.setGetSnapshotCallback(() => this.coordinator!.getCurrentSnapshot());
+    dashboard.setGetRegisterCacheCallback(() => this.coordinator!.getRegisterCache());
+    dashboard.setGetCapabilityValuesCallback(() => {
       const result: Record<string, unknown> = {};
       for (const id of this.getCapabilities()) {
         result[id] = this.getCapabilityValue(id);

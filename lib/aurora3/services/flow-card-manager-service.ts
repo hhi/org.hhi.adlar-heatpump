@@ -1475,16 +1475,9 @@ export class FlowCardManagerService {
         await (flowCard as { trigger: (device: unknown, tokens: unknown, state?: unknown) => Promise<void> }).trigger(this, tokens, { device: this });
         this.logger(`Triggered flow card: ${cardId}`, tokens);
       } else {
-        // Fallback to app-level trigger for compatibility
-        const app = this.device.homey.app as unknown as { [key: string]: { trigger?: (device: unknown, tokens: unknown) => Promise<void> } };
-        const triggerName = `${cardId.replace(/_/g, '')}Trigger`;
-
-        if (app[triggerName]?.trigger) {
-          await app[triggerName].trigger(this, tokens);
-          this.logger(`Triggered flow card via app: ${cardId}`, tokens);
-        } else {
-          this.logger(`Flow card trigger method not found: ${cardId}`);
-        }
+        // Geen terugval op app-level triggers: de app heeft er geen voor _aurora3-kaarten
+        // (ADR-004 §5, 4c), en een ongetypeerde app-cast zou dat verhullen.
+        this.logger(`Flow card trigger method not found: ${cardId}`);
       }
     } catch (error) {
       this.logger(`Failed to trigger flow card ${cardId}:`, error);

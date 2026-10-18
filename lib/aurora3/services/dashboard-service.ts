@@ -102,8 +102,13 @@ interface RegisterBlock {
 // ── DashboardService opties ────────────────────────────────────────────────────
 
 export interface DashboardServiceOptions {
-  /** __dirname van app.ts — basis voor het pad naar public/ */
+  /** __dirname van app.ts — basis voor app.json (capability-metadata) en assets/ */
   appDir: string;
+  /**
+   * Map met de dashboardpagina's; standaard `<appDir>/public`. In de gecombineerde app
+   * staan de Aurora III-pagina's in `public/aurora3/` (ADR-004 §5).
+   */
+  publicDir?: string;
   logger: (msg: string, ...args: unknown[]) => void;
   /** default 8090 */
   port?: number;
@@ -151,7 +156,7 @@ export class DashboardService {
   constructor(options: DashboardServiceOptions) {
     this.port = options.port ?? 8090;
     this.appDir = options.appDir;
-    this.publicDir = path.join(options.appDir, 'public');
+    this.publicDir = options.publicDir ?? path.join(options.appDir, 'public');
     this.logger = options.logger;
   }
 
