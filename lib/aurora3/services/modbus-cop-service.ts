@@ -127,7 +127,7 @@ export class ModbusCOPService {
   }
 
   private gatherDeviceDataSources(snap: DataSnapshot): COPDataSources {
-    const sensors = snap.sensors;
+    const { sensors } = snap;
     const externalPower = this.getNumberCapability('adlar_external_power');
     const externalFlow = this.getNumberCapability('adlar_external_flow');
     const externalAmbient = this.getNumberCapability('adlar_external_ambient');
@@ -174,7 +174,7 @@ export class ModbusCOPService {
   private addCOPMeasurement(result: COPCalculationResult, data: COPDataSources, snap: DataSnapshot): void {
     const now = Date.now();
     const ambientTemperature = data.ambientTemperature ?? 0;
-    const method = result.method;
+    const { method } = result;
 
     if (now - this.lastRollingMeasurementMs >= ROLLING_COP_MEASUREMENT_INTERVAL_MS) {
       this.lastRollingMeasurementMs = now;
