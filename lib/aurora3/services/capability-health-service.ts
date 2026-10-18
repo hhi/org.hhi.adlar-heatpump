@@ -292,7 +292,7 @@ export class CapabilityHealthService {
       capability === 'onoff'
       || capability === 'target_temperature'
       || capability === 'dim'
-      || capability === 'adlar_mode'
+      || capability === 'adlar_mode_aurora3'
       || capability.startsWith('adlar_picker_') // All picker controls (countdown, capacity, volume)
       || capability === 'target_temperature.dhw' // Hot water setpoint
     ) {

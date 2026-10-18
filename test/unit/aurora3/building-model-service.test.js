@@ -39,7 +39,7 @@ function createDevice(overrides = {}) {
     ...overrides.settings,
   };
   const capabilities = {
-    adlar_mode: '2',
+    adlar_mode_aurora3: '2',
     adlar_state_defrost_state: false,
     adlar_cop: 3,
     ...overrides.capabilities,
@@ -112,7 +112,7 @@ test('BuildingModelService skips when outdoor temperature is missing', async () 
 });
 
 test('BuildingModelService skips non-heating/cooling modes', async () => {
-  const result = await runCollect({ capabilities: { adlar_mode: '1' } });
+  const result = await runCollect({ capabilities: { adlar_mode_aurora3: '1' } });
   assert.strictEqual(result.count, 0);
   assert.match(result.status.blockingReason, /Not in heating mode/);
 });

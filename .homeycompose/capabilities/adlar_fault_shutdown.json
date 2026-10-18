@@ -25,9 +25,9 @@
     "fr": "Arrêt sur défaut effacé"
   },
   "description": {
-    "en": "Fault shutdown status from Modbus status register 0x0000, bit 13 (FAULT_SHUTDOWN). True when the heat pump has stopped due to a fault.",
-    "nl": "Fout-stopstatus uit Modbus-statusregister 0x0000, bit 13 (FAULT_SHUTDOWN). Waar wanneer de warmtepomp door een storing is gestopt.",
-    "de": "Fehlerabschaltstatus aus Modbus-Statusregister 0x0000, Bit 13 (FAULT_SHUTDOWN). Wahr, wenn die Wärmepumpe aufgrund eines Fehlers abgeschaltet wurde.",
-    "fr": "État d'arrêt sur défaut depuis le registre de statut Modbus 0x0000, bit 13 (FAULT_SHUTDOWN). Vrai lorsque la pompe à chaleur s'est arrêtée suite à un défaut."
+    "en": "Fault shutdown status. True when the heat pump has stopped because of a fault.",
+    "nl": "Storingsstop. Waar als de warmtepomp door een storing is gestopt.",
+    "de": "Störabschaltung. Wahr, wenn die Wärmepumpe wegen einer Störung abgeschaltet hat.",
+    "fr": "Arrêt sur défaut. Vrai lorsque la pompe à chaleur s'est arrêtée à cause d'un défaut."
   }
 }

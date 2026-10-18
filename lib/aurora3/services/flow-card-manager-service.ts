@@ -272,7 +272,7 @@ export class FlowCardManagerService {
         if (modbusMode === undefined) {
           throw new Error(`Unsupported heating mode: ${modeId}`);
         }
-        await this.triggerSelectedDeviceCapability(args, 'adlar_mode', String(modbusMode));
+        await this.triggerSelectedDeviceCapability(args, 'adlar_mode_aurora3', String(modbusMode));
         return true;
       });
 
@@ -431,7 +431,7 @@ export class FlowCardManagerService {
       const heatingModeCard = this.device.homey.flow.getConditionCard('heating_mode_is');
       const heatingModeListener = heatingModeCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Heating mode condition triggered', { args });
-        const currentValue = String(this.device.getCapabilityValue('adlar_mode') ?? '');
+        const currentValue = String(this.device.getCapabilityValue('adlar_mode_aurora3') ?? '');
         const expectedMode = HEATING_MODE_TO_MODBUS[String(args.mode ?? '')];
         return expectedMode !== undefined && currentValue === String(expectedMode);
       });

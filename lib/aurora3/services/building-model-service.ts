@@ -183,10 +183,10 @@ export class BuildingModelService {
 
       // ADR-057 W2b (referentieproject): Mode gate — in non-heating modes the
       // thermal power does not heat the building, so the sample would bias C/UA.
-      // Aurora III Modbus: register 4-2100 "Air Conditioning Modes" via adlar_mode.
+      // Aurora III Modbus: register 4-2100 "Air Conditioning Modes" via adlar_mode_aurora3.
       // Verified values: 0=Off, 1=Cool, 2=Heat, 4=Auto. Auto is accepted because
       // the active heating/cooling operation is not separately known here.
-      const heatingMode = this.device.getCapabilityValue('adlar_mode') as string | null;
+      const heatingMode = this.device.getCapabilityValue('adlar_mode_aurora3') as string | null;
       const nonHeatingModes = ['0', '1']; // 0=Off, 1=Cool
       if (heatingMode !== null && nonHeatingModes.includes(heatingMode)) {
         this.lastBlockingReason = `Not in heating mode (current: ${heatingMode})`;

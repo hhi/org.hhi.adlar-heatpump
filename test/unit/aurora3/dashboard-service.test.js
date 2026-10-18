@@ -111,13 +111,13 @@ test('/api/control runs whitelisted capabilities through the trigger callback', 
 
 test('/api/capabilities includes enum value titles', async () => {
   const dash = await startDashboard((service) => {
-    service.setGetCapabilityValuesCallback(() => ({ adlar_silent_mode: '1', adlar_mode: '2' }));
+    service.setGetCapabilityValuesCallback(() => ({ adlar_silent_mode: '1', adlar_mode_aurora3: '2' }));
   });
   try {
     const caps = await (await fetch(`${dash.base}/api/capabilities`)).json();
     const silent = caps.find((c) => c.id === 'adlar_silent_mode');
     assert.strictEqual(silent.values[silent.value], 'Level 1');
-    const mode = caps.find((c) => c.id === 'adlar_mode');
+    const mode = caps.find((c) => c.id === 'adlar_mode_aurora3');
     assert.strictEqual(mode.values[mode.value], 'Heating');
   } finally {
     await dash.close();

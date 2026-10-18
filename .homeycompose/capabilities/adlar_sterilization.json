@@ -25,9 +25,9 @@
     "fr": "Mode stérilisation arrêté"
   },
   "description": {
-    "en": "Sterilization cycle status from Modbus status register 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). True during an active Legionella prevention cycle.",
-    "nl": "Status van de sterilisatiecyclus uit Modbus-statusregister 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Waar tijdens een actieve legionellapreventiecyclus.",
-    "de": "Status des Sterilisierungszyklus aus Modbus-Statusregister 0x0001, Bit 0 (HIGH_TEMP_STERILIZATION). Wahr während eines aktiven Legionellen-Präventionszyklus.",
-    "fr": "État du cycle de stérilisation depuis le registre de statut Modbus 0x0001, bit 0 (HIGH_TEMP_STERILIZATION). Vrai pendant un cycle actif de prévention de la légionellose."
+    "en": "Sterilization status. True during an active Legionella prevention cycle.",
+    "nl": "Sterilisatiestatus. Waar tijdens een actieve legionellapreventiecyclus.",
+    "de": "Sterilisationsstatus. Wahr während eines aktiven Legionellen-Schutzzyklus.",
+    "fr": "État de stérilisation. Vrai pendant un cycle actif de prévention de la légionellose."
   }
 }

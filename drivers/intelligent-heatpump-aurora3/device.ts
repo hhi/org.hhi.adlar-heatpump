@@ -39,7 +39,7 @@ const DRIVER_COMPOSE_CAPABILITIES = [
   'adlar_low_pressure',
   'adlar_running',
   'adlar_compressor_on',
-  'adlar_mode',
+  'adlar_mode_aurora3',
   'adlar_state_compressor_state',
   'adlar_state_defrost_state',
   'adlar_antifreeze',
@@ -522,7 +522,7 @@ class Aurora3ModbusDevice extends Homey.Device {
       set('target_temperature.cooling', snap.control.coolingSetpointC);
       set('target_temperature.dhw', snap.control.dhwSetpointC);
       set('target_temperature.floor', snap.control.floorSetpointC);
-      set('adlar_mode', String(snap.control.mode));
+      set('adlar_mode_aurora3', String(snap.control.mode));
       set('adlar_dhw_enabled', snap.control.dhwEnabled);
       set('adlar_silent_mode', String(snap.control.silentMode));
       set('adlar_backup_heater_forced', snap.control.backupHeaterForced);
@@ -791,7 +791,7 @@ class Aurora3ModbusDevice extends Homey.Device {
       await this.coordinator.setTemperature('floor', value);
     });
 
-    this.registerCapabilityListener('adlar_mode', async (value: string) => {
+    this.registerCapabilityListener('adlar_mode_aurora3', async (value: string) => {
       this.logger.debug('Set mode:', value);
       if (!this.coordinator) return;
       await this.coordinator.setMode(parseInt(value, 10));

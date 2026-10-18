@@ -275,7 +275,7 @@ nav a.active { background: #07090f; color: var(--blue); border-color: var(--blue
 <script>
 // ── Capability groepen ─────────────────────────────────────────────────────
 const CAP_GROUPS = [
-  { label: 'Status',          match: id => ['onoff','adlar_running','adlar_mode','adlar_silent_mode','adlar_backup_heater_forced','adlar_connection_active','adlar_connection_status'].includes(id) },
+  { label: 'Status',          match: id => ['onoff','adlar_running','adlar_mode_aurora3','adlar_silent_mode','adlar_backup_heater_forced','adlar_connection_active','adlar_connection_status'].includes(id) },
   { label: 'Tapwater',        match: id => ['adlar_dhw_enabled','adlar_dhw_active','adlar_disinfection_enabled'].includes(id) },
   { label: 'Storingen',       match: id => id.startsWith('alarm') || id.startsWith('adlar_fault') },
   { label: 'Setpoints',       match: id => id.startsWith('target_temperature') },
