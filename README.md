@@ -6,9 +6,9 @@ your connection method and heat-pump model:
 
 | Driver | Connection | When to choose it |
 | --- | --- | --- |
-| **Adlar Castra Aurora Heat Pump (Tuya)** | Tuya Local API over the local network | Your heat pump is connected to Wi-Fi and you have its Device ID and Local Key. |
-| **Adlar Castra Aurora II Heat Pump (Modbus)** | RS485 through a Modbus TCP gateway | Aurora I/II model with Modbus/RS485 and a gateway such as an Elfin EW11A (`9600 8N1`). |
-| **Adlar Castra Aurora III Heat Pump (Modbus)** | RS485 through a Modbus TCP gateway | Aurora III / PRO model with Modbus/RS485 and a gateway such as an Elfin EW11A (`9600 8N2`). |
+| **Aurora I/II via Tuya** | Tuya Local API over the local network | Your heat pump is connected to Wi-Fi and you have its Device ID and Local Key. |
+| **Aurora I/II via Modbus** | RS485 through a Modbus TCP gateway | Aurora I/II model with Modbus/RS485 and a gateway such as an Elfin EW11A (`9600 8N1`). |
+| **Aurora III via Modbus** | RS485 through a Modbus TCP gateway | Aurora III / PRO model with Modbus/RS485 and a gateway such as an Elfin EW11A (`9600 8N2`). |
 
 All drivers operate locally. The Modbus drivers do not require Tuya cloud or
 Tuya Local credentials. The two Modbus drivers use different register maps:
@@ -50,7 +50,7 @@ Available measurements and controls vary by driver and heat-pump firmware.
 
 ### Tuya Local API
 
-1. Select **Adlar Castra Aurora Heat Pump (Tuya)**.
+1. Select **Aurora I/II via Tuya**.
 2. Enter the heat pump's Device ID, Local Key and local IP address.
 3. Select the Tuya protocol version. Start with `3.3`; try `3.4` or `3.5` if
    the device cannot connect.
@@ -65,8 +65,8 @@ how to obtain the credentials. For connection problems, use the
 1. Connect the heat pump's RS485/Modbus bus to an Elfin EW11A or equivalent
    Modbus TCP gateway.
 2. Ensure that the gateway is reachable from Homey on the local network.
-3. Select **Adlar Castra Aurora II Heat Pump (Modbus)** or
-   **Adlar Castra Aurora III Heat Pump (Modbus)**, matching your model.
+3. Select **Aurora I/II via Modbus** or **Aurora III via Modbus**, matching
+   your model.
 4. Enter the gateway IP address, TCP port and Modbus Unit ID.
 5. Adjust the polling intervals only when necessary.
 

@@ -1,6 +1,6 @@
 # Overstappen naar de Aurora III-driver
 
-Deze handleiding is voor gebruikers van de aparte app **Adlar Castra Warmtepomp (Aurora-III Modbus)**. Vanaf versie 3.2.0 zit de Aurora III-ondersteuning in de app **Adlar Castra Warmtepomp**, als driver *Adlar Castra Aurora III Heat Pump (Modbus)*.
+Deze handleiding is voor gebruikers van de aparte app **Adlar Castra Warmtepomp (Aurora-III Modbus)**. Vanaf versie 3.2.0 zit de Aurora III-ondersteuning in de app **Adlar Castra Warmtepomp**, als driver *Aurora III via Modbus*.
 
 Homey kan apparaten niet van de ene app naar de andere verhuizen. Overstappen betekent: het apparaat opnieuw koppelen in de nieuwe app en flows opnieuw opbouwen.
 
@@ -28,7 +28,7 @@ Doe daarom eerst één van de twee:
 ## Stap 3 — Koppelen in de nieuwe app
 
 1. Installeer of update de app **Adlar Castra Warmtepomp** naar versie 3.2.0 of hoger.
-2. Voeg een apparaat toe en kies **Adlar Castra Aurora III Heat Pump (Modbus)**. Kies niet de Aurora II-driver: die gebruikt andere registeradressen.
+2. Voeg een apparaat toe en kies **Aurora III via Modbus**. Kies niet *Aurora I/II via Modbus*: die gebruikt andere registeradressen.
 3. Vul het IP-adres, de TCP-poort en de Modbus Unit ID van de gateway in.
 4. Zet de genoteerde instellingen terug in de apparaatinstellingen.
 

@@ -9,14 +9,14 @@ gebruik.
 KIES EEN DRIVER
 
 TUYA LOCAL API
-- Kies "Adlar Castra Aurora Heat Pump (Tuya)"
+- Kies "Aurora I/II via Tuya"
 - Vereist de Device ID, Local Key, het lokale IP-adres en de Tuya-
   protocolversie (3.3, 3.4 of 3.5) van de warmtepomp
 - Gebruik deze driver voor een warmtepomp met wifi-verbinding
 
 MODBUS TCP-GATEWAY
-- Kies "Adlar Castra Aurora II Heat Pump (Modbus)" of "Adlar Castra Aurora III
-  Heat Pump (Modbus)", passend bij het model op het typeplaatje
+- Kies "Aurora I/II via Modbus" of "Aurora III via Modbus", passend bij het
+  model op het typeplaatje
 - Vereist een RS485/Modbus-aansluiting en een bereikbare Modbus TCP-gateway,
   zoals een Elfin EW11A
 - Voer het IP-adres van de gateway, de TCP-poort en de Modbus Unit ID in

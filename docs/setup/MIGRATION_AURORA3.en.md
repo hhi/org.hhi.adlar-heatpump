@@ -1,6 +1,6 @@
 # Moving to the Aurora III driver
 
-This guide is for users of the separate app **Adlar Castra Heatpump (Aurora-III Modbus)**. As of version 3.2.0, Aurora III support is part of the app **Adlar Castra Heatpump**, as the driver *Adlar Castra Aurora III Heat Pump (Modbus)*.
+This guide is for users of the separate app **Adlar Castra Heatpump (Aurora-III Modbus)**. As of version 3.2.0, Aurora III support is part of the app **Adlar Castra Heatpump**, as the driver *Aurora III via Modbus*.
 
 Homey cannot move devices from one app to another. Moving over means pairing the device again in the new app and rebuilding your flows.
 
@@ -28,7 +28,7 @@ So first do one of the following:
 ## Step 3 — Pair in the new app
 
 1. Install or update the app **Adlar Castra Heatpump** to version 3.2.0 or later.
-2. Add a device and choose **Adlar Castra Aurora III Heat Pump (Modbus)**. Do not choose the Aurora II driver: it uses different register addresses.
+2. Add a device and choose **Aurora III via Modbus**. Do not choose *Aurora I/II via Modbus*: it uses different register addresses.
 3. Enter the IP address, TCP port and Modbus Unit ID of the gateway.
 4. Restore the settings you wrote down in the device settings.
 

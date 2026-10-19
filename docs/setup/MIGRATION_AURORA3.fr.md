@@ -1,6 +1,6 @@
 # Passer au pilote Aurora III
 
-Ce guide s'adresse aux utilisateurs de l'application distincte **Adlar Castra Pompe à Chaleur (Aurora-III Modbus)**. À partir de la version 3.2.0, la prise en charge d'Aurora III fait partie de l'application **Pompe à chaleur Adlar Castra**, sous la forme du pilote *Adlar Castra Aurora III Heat Pump (Modbus)*.
+Ce guide s'adresse aux utilisateurs de l'application distincte **Adlar Castra Pompe à Chaleur (Aurora-III Modbus)**. À partir de la version 3.2.0, la prise en charge d'Aurora III fait partie de l'application **Pompe à chaleur Adlar Castra**, sous la forme du pilote *Aurora III via Modbus*.
 
 Homey ne peut pas déplacer des appareils d'une application à une autre. Passer à la nouvelle application signifie : associer à nouveau l'appareil dans la nouvelle application et recréer vos flows.
 
@@ -28,7 +28,7 @@ Faites donc d'abord l'une des deux choses suivantes :
 ## Étape 3 — Associer dans la nouvelle application
 
 1. Installez ou mettez à jour l'application **Pompe à chaleur Adlar Castra** en version 3.2.0 ou supérieure.
-2. Ajoutez un appareil et choisissez **Adlar Castra Aurora III Heat Pump (Modbus)**. Ne choisissez pas le pilote Aurora II : il utilise d'autres adresses de registres.
+2. Ajoutez un appareil et choisissez **Aurora III via Modbus**. Ne choisissez pas *Aurora I/II via Modbus* : il utilise d'autres adresses de registres.
 3. Saisissez l'adresse IP, le port TCP et l'ID d'unité Modbus de la passerelle.
 4. Rétablissez les paramètres notés dans les paramètres de l'appareil.
 

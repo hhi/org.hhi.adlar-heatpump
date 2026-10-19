@@ -422,7 +422,7 @@ fragiel aanmerkte. Met drie drivers op één app is een getypeerde app-interface
 | `locales/de.json`, `fr.json` | Dezelfde 3 sleutels vertalen |
 | `es`-vertalingen in bron-manifesten | Weglaten — de app ondersteunt geen `es` |
 | Waarschuwingsregel bij pairen (O8) | Eén `data-i18n`-element in `pair/enter_modbus_info.html` van beide Modbus-drivers plus één sleutel in alle vier `locales/*.json`: *"Kies het model dat op het typeplaatje staat."* (zie 1b stap 7) |
-| Drivernamen (O7) | Aurora III: *"Adlar Castra Aurora III Heat Pump (Modbus)"*; Aurora II van *"… (Modbus)"* naar *"… Aurora II … (Modbus)"* — alleen de weergavenaam, de ID blijft |
+| Drivernamen (O7) | Aurora III: *"Adlar Castra Aurora III Heat Pump (Modbus)"*; Aurora II van *"… (Modbus)"* naar *"… Aurora II … (Modbus)"* — alleen de weergavenaam, de ID blijft. *Bijgesteld 2026-10-19: "Aurora I/II via Tuya", "Aurora I/II via Modbus", "Aurora III via Modbus" in vier talen; zie ADR-004 §7* |
 | Driver-manifest `de`/`fr` | `driver.compose.json` van Aurora III heeft 22 strings met alleen en/nl (drivernaam en `capabilitiesOptions`-titels); aanvullen zoals bij de twee bestaande drivers. Capabilities, flow cards en settings van de bron hebben al alle vier talen (gemeten) |
 | `.homeycompose/app.json` | Versie 3.2.0 (O5); beschrijving en `tags` beoordelen op vermelding van Modbus/Aurora III |
 | `.homeychangelog.json` | Regel per CLAUDE.md-richtlijn, bijv. *"Nieuwe driver voor de Adlar Aurora III (Modbus TCP)."* |

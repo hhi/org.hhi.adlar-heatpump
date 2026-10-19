@@ -9,15 +9,14 @@ réseau local sans connexion cloud au quotidien.
 CHOISIR UN PILOTE
 
 API TUYA LOCAL
-- Sélectionnez "Adlar Castra Aurora Heat Pump (Tuya)"
+- Sélectionnez "Aurora I/II via Tuya"
 - Nécessite l'ID de l'appareil, la clé locale, l'adresse IP locale et la
   version du protocole Tuya (3.3, 3.4 ou 3.5) de la pompe à chaleur
 - Utilisez ce pilote pour une pompe à chaleur connectée en Wi-Fi
 
 PASSERELLE MODBUS TCP
-- Sélectionnez "Adlar Castra Aurora II Heat Pump (Modbus)" ou "Adlar Castra
-  Aurora III Heat Pump (Modbus)", selon le modèle indiqué sur la plaque
-  signalétique
+- Sélectionnez "Aurora I/II via Modbus" ou "Aurora III via Modbus", selon le
+  modèle indiqué sur la plaque signalétique
 - Nécessite une connexion RS485/Modbus et une passerelle Modbus TCP accessible,
   telle qu'une Elfin EW11A
 - Saisissez l'adresse IP de la passerelle, le port TCP et l'ID d'unité Modbus

@@ -9,14 +9,14 @@ Cloud-Verbindung in Ihrem lokalen Netzwerk.
 TREIBER AUSWÄHLEN
 
 TUYA LOCAL API
-- Wählen Sie "Adlar Castra Aurora Heat Pump (Tuya)"
+- Wählen Sie "Aurora I/II über Tuya"
 - Benötigt Geräte-ID, lokalen Schlüssel, lokale IP-Adresse und Tuya-
   Protokollversion (3.3, 3.4 oder 3.5) der Wärmepumpe
 - Verwenden Sie diesen Treiber für eine über WLAN verbundene Wärmepumpe
 
 MODBUS-TCP-GATEWAY
-- Wählen Sie "Adlar Castra Aurora II Heat Pump (Modbus)" oder "Adlar Castra
-  Aurora III Heat Pump (Modbus)", passend zum Modell auf dem Typenschild
+- Wählen Sie "Aurora I/II über Modbus" oder "Aurora III über Modbus", passend
+  zum Modell auf dem Typenschild
 - Benötigt einen RS485/Modbus-Anschluss und ein erreichbares Modbus-TCP-
   Gateway, etwa ein Elfin EW11A
 - Geben Sie IP-Adresse des Gateways, TCP-Port und Modbus-Unit-ID ein
