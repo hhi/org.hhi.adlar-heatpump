@@ -37,13 +37,13 @@ Als er geen Modbus-verbinding komt, controleer dan eerst of `A/B` niet omgewisse
 
 ## EW11A configuratie
 
-Gebruik de screenshots van jouw model als referentie:
+Gebruik de screenshots als referentie. Alleen de seriële instellingen verschillen per model (Stop Bit `1` of `2`); de andere twee schermen zijn gelijk voor beide modellen:
 
 | Scherm | Aurora I / II | Aurora III / PRO |
 |---|---|---|
-| Serial Port Settings | [Aurora II](<Elfin EW11 - Adlar Aurora 2/EW11 - serial port settings - Aurora II series.png>) | [Aurora III](<Elfin EW11 - Adlar Aurora 3/EW11 - serial port settings - Aurora III.png>) |
-| Communication Settings | [Aurora II](<Elfin EW11 - Adlar Aurora 2/EW11 - communication settngs - Aurora II series.png>) | [Aurora III](<Elfin EW11 - Adlar Aurora 3/EW11 - communication settngs - Aurora III.png>) |
-| System Settings | [Aurora II](<Elfin EW11 - Adlar Aurora 2/EW11 - system settings - Aurora II series.png>) | [Aurora III](<Elfin EW11 - Adlar Aurora 3/EW11 - system settings - Aurora III.png>) |
+| Serial Port Settings | [Aurora II — Stop Bit 1](<Elfin EW11 - Adlar Aurora 2/EW11 - serial port settings - Aurora II series.png>) | [Aurora III — Stop Bit 2](<Elfin EW11 - Adlar Aurora 3/EW11 - serial port settings - Aurora III.png>) |
+| Communication Settings | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - communication settngs - Aurora II series.png>) | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - communication settngs - Aurora II series.png>) |
+| System Settings | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - system settings - Aurora II series.png>) | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - system settings - Aurora II series.png>) |
 
 ## Wifi-verbinding
 
