@@ -1,0 +1,1153 @@
+# =============================================================================
+# Adlar Castra Aurora III Pro - Home Assistant Modbus package (samengevoegd)
+# =============================================================================
+# Basis: Onno's originele package (alle bestaande namen/entity_id's behouden)
+# Uitgebreid met: volledige registerset uit de officiële Adlar-documentatie,
+# tapwater/zone/bijverwarming-besturing, storingsmeldingen en extra statistiek.
+#
+# Let op:
+#  - De Jan-module stuurt register 2107 op basis van de stooklijn. Zolang die
+#    weersafhankelijke regeling actief is, worden writes naar 2107 overschreven.
+#  - Register 2114 (ruimtetemperatuur-setpoint) werkt mogelijk niet in elke
+#    configuratie (bijv. "zonder thermostaat"). Eerst testen.
+#  - Registers 74/75 (AC spanning/stroom) geven op sommige firmware 0 terug.
+# =============================================================================
+
+modbus:
+  - name: adlar_wp
+    type: tcp
+    host: <<IP van ModBus Controller>>
+    port: 8899
+    timeout: 5
+    delay: 2
+
+    sensors:
+      # =======================================================================
+      # BESTAANDE SENSOREN (namen ongewijzigd -> entity_id's blijven gelijk)
+      # =======================================================================
+      # Temperaturen
+      - name: "WP Buiten temperatuur"          # sensor.wp_buiten_temperatuur (T4)
+        address: 50
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Aanvoer temperatuur"         # sensor.wp_aanvoer_temperatuur (TB)
+        address: 43
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Retour temperatuur"          # sensor.wp_retour_temperatuur (TA)
+        address: 42
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      # Hydraulisch
+      - name: "WP Outlet water pressure"
+        address: 61
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "Bar"
+        scan_interval: 30
+
+      - name: "WP Percentage PWM output"
+        address: 62
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scale: 1
+        precision: 1
+        unit_of_measurement: "%"
+        scan_interval: 30
+
+      - name: "WP Water flow"
+        address: 64
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "m³/h"
+        scan_interval: 30
+
+      # Compressor
+      - name: "WP Compressor frequentie"       # werkelijke frequentie
+        address: 79
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "Hz"
+        scan_interval: 30
+
+      - name: "WP fan speed"
+        address: 72
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: RPM
+        scan_interval: 30
+
+      # Status bits
+      - name: "WP System status bits"
+        address: 38
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+
+      # Functie A register (hele register 2103):
+      # bit3 = geforceerde elektrische bijverwarming, bit4-5 = stille modus,
+      # bit6 = desinfectie. Naam behouden voor compatibiliteit.
+      - name: "WP Silent mode raw"
+        address: 2103
+        input_type: holding
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+
+      # =======================================================================
+      # NIEUW: CONFIGURATIE & SYSTEEMINFO (statisch, traag pollen)
+      # =======================================================================
+      - name: "WP Thermostaat type"
+        address: 1
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 600
+        # 0=geen, 1=enkele zone aan/uit+modus, 2=enkele zone aan/uit, 3=twee zones
+
+      - name: "WP Zone configuratie"
+        address: 2
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 600
+        # 0=enkele zone, 1=twee zones
+
+      - name: "WP Koudemiddel type"
+        address: 7
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 3600
+        # 0=R32, 1=R290
+
+      - name: "WP Effectieve modus raw"
+        address: 9
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 60
+        # bit0=koelen, bit1=verwarmen, bit2=tapwater
+
+      # Zone-temperatuurgrenzen
+      - name: "WP Zone1 verwarming max"
+        address: 12
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 600
+
+      - name: "WP Zone1 verwarming min"
+        address: 13
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 600
+
+      - name: "WP Tapwater max"
+        address: 14
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 600
+
+      - name: "WP Tapwater min"
+        address: 15
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 600
+
+      - name: "WP Ruimtetemperatuur max"
+        address: 30
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 600
+
+      - name: "WP Ruimtetemperatuur min"
+        address: 31
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 600
+
+      - name: "WP Zone1 afgiftesysteem"
+        address: 35
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 600
+        # 0=ventilo-convector, 1=radiator, 2=vloerverwarming
+
+      - name: "WP Externe warmtevraag raw"
+        address: 39
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+        # bit0=anti-vries extern, bit1=ontdooien extern
+
+      # =======================================================================
+      # NIEUW: TEMPERATUREN WATER & RUIMTE
+      # =======================================================================
+      - name: "WP Ruimtetemperatuur"
+        address: 40
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Totale aanvoer na bijverwarming"
+        address: 41
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Buffervat boven"
+        address: 44
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      - name: "WP Buffervat onder"
+        address: 45
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      - name: "WP Tapwater temperatuur"
+        address: 46
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      - name: "WP Zone2 mengstation"
+        address: 47
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      - name: "WP Zonneboiler temperatuur"
+        address: 48
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      # =======================================================================
+      # NIEUW: KOUDEMIDDELCIRCUIT
+      # =======================================================================
+      - name: "WP Buitenunit batterij T3"
+        address: 49
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP EXV uitgang T5"
+        address: 51
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Persgastemperatuur"
+        address: 52
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Zuiggastemperatuur"
+        address: 53
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Doel aanvoertemperatuur"
+        address: 56
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      # =======================================================================
+      # NIEUW: HYDRAULISCH
+      # =======================================================================
+      - name: "WP Inlet water pressure"
+        address: 60
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "Bar"
+        scan_interval: 60
+
+      - name: "WP Pomp PWM terugkoppeling"
+        address: 63
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "%"
+        scan_interval: 30
+
+      # =======================================================================
+      # NIEUW: STOOKLIJN (wat de Jan-module / interne curve berekent)
+      # =======================================================================
+      - name: "WP Stooklijn setpoint koelen"
+        address: 66
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      - name: "WP Stooklijn setpoint verwarmen"
+        address: 67
+        input_type: input
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 60
+
+      # =======================================================================
+      # NIEUW: COMPONENTEN
+      # =======================================================================
+      - name: "WP EEV opening"
+        address: 70
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "steps"
+        scan_interval: 30
+
+      - name: "WP Compressor stroom"
+        address: 77
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "A"
+        scan_interval: 30
+
+      - name: "WP Compressor doelfrequentie"
+        address: 78
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "Hz"
+        scan_interval: 30
+
+      # Elektrisch (74/75 geven op sommige firmware 0 terug)
+      - name: "WP AC spanning"
+        address: 74
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "V"
+        scan_interval: 60
+
+      - name: "WP AC stroom"
+        address: 75
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "A"
+        scan_interval: 60
+
+      - name: "WP DC bus spanning"
+        address: 76
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "V"
+        scan_interval: 60
+
+      # Pomp & klep
+      - name: "WP Hoofdpomp status"
+        address: 80
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+        # 0=uit, 1=aan
+
+      - name: "WP Vierwegklep status"
+        address: 81
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+        # 0=verwarmen, 1=koelen/ontdooien
+
+      # Systeemdrukken
+      - name: "WP Hoge druk"
+        address: 86
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "kPa"
+        scan_interval: 30
+
+      - name: "WP Lage druk"
+        address: 87
+        input_type: input
+        slave: 1
+        data_type: uint16
+        unit_of_measurement: "kPa"
+        scan_interval: 30
+
+      # =======================================================================
+      # NIEUW: STORINGSCODES (bitvelden)
+      # =======================================================================
+      - name: "WP Storing E01-E16"
+        address: 90
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 60
+
+      - name: "WP Storing E17-E32"
+        address: 91
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 60
+
+      - name: "WP Beveiliging P01-P16"
+        address: 96
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 60
+
+      - name: "WP Beveiliging P17-P32"
+        address: 97
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 60
+
+      # =======================================================================
+      # NIEUW: BEDRIJFSMODI
+      # =======================================================================
+      - name: "WP Doel bedrijfsmodus raw"
+        address: 101
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "WP Actuele bedrijfsmodus raw"
+        address: 103
+        input_type: input
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+
+      # =======================================================================
+      # NIEUW: SCHRIJFBARE REGISTERS (4X) uitlezen
+      # =======================================================================
+      - name: "WP HVAC modus huidig"
+        address: 2100
+        input_type: holding
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+        # 1=koelen, 2=verwarmen, 4=auto
+
+      - name: "WP Zone besturing huidig"
+        address: 2101
+        input_type: holding
+        slave: 1
+        data_type: uint16
+        scan_interval: 30
+        # 0=alles uit, 1=Z1 aan, 2=Z2 aan, 3=alles aan
+
+      - name: "WP Tapwater setpoint huidig"
+        address: 2105
+        input_type: holding
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Setpoint zone 1 huidig"
+        address: 2107
+        input_type: holding
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+      - name: "WP Ruimtetemperatuur setpoint huidig"
+        address: 2114
+        input_type: holding
+        slave: 1
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        unit_of_measurement: "°C"
+        scan_interval: 30
+
+    # =========================================================================
+    # NIEUW: tapwater aan/uit als native Modbus-switch (leest echte status)
+    # =========================================================================
+    switches:
+      - name: "WP Tapwater"
+        slave: 1
+        address: 2102
+        write_type: holding
+        command_on: 1
+        command_off: 0
+        scan_interval: 30
+        verify:
+          input_type: holding
+          address: 2102
+          state_on: 1
+          state_off: 0
+
+    # =========================================================================
+    # CLIMATE (ongewijzigd -> climate.warmtepomp)
+    # =========================================================================
+    climates:
+      - name: "Warmtepomp"
+        slave: 1
+        # huidige temperatuur = aanvoer (3X... => input register)
+        address: 43
+        input_type: input
+        data_type: int16
+        scale: 0.1
+        precision: 1
+        temperature_unit: C
+        # setpoint (4X2107)
+        target_temp_register: 2107
+        target_temp_write_registers: true
+        min_temp: 18
+        max_temp: 50
+        temp_step: 1
+        # HVAC mode (4X2100)
+        hvac_mode_register:
+          address: 2100
+          write_registers: true
+          values:
+            state_heat: 2
+            state_auto: 4
+            state_cool: 1
+
+# =============================================================================
+# TEMPLATE-ENTITEITEN
+# =============================================================================
+template:
+  - binary_sensor:
+      # ---------- Bestaand: statusbits register 38 ----------
+      - name: "WP Oil return actief"
+        state: >
+          {{ ((states('sensor.wp_system_status_bits')|int(0)) | bitwise_and(1)) > 0 }}
+
+      - name: "WP Defrost actief"
+        state: >
+          {{ ((states('sensor.wp_system_status_bits')|int(0)) | bitwise_and(2)) > 0 }}
+
+      - name: "WP Anti-freezing actief"
+        state: >
+          {{ ((states('sensor.wp_system_status_bits')|int(0)) | bitwise_and(4)) > 0 }}
+
+      - name: "WP Desinfectie actief"
+        state: >
+          {{ ((states('sensor.wp_system_status_bits')|int(0)) | bitwise_and(16)) > 0 }}
+
+      - name: "WP Buiten temp te laag (compressor geblokkeerd)"
+        state: >
+          {{ ((states('sensor.wp_system_status_bits')|int(0)) | bitwise_and(2048)) > 0 }}
+
+      # Bugfix: het commentaar dat hier eerst in de template-tekst stond is weg
+      - name: "WP Compressor draait"
+        state: >
+          {{ states('sensor.wp_compressor_frequentie')|float(0) > 0 }}
+
+      # ---------- Nieuw: effectieve modus register 9 ----------
+      - name: "WP Koelmodus actief"
+        unique_id: wp_koelmodus_actief
+        state: >
+          {{ ((states('sensor.wp_effectieve_modus_raw')|int(0)) | bitwise_and(1)) > 0 }}
+
+      - name: "WP Verwarmingsmodus actief"
+        unique_id: wp_verwarmingsmodus_actief
+        state: >
+          {{ ((states('sensor.wp_effectieve_modus_raw')|int(0)) | bitwise_and(2)) > 0 }}
+
+      - name: "WP Tapwatermodus actief"
+        unique_id: wp_tapwatermodus_actief
+        state: >
+          {{ ((states('sensor.wp_effectieve_modus_raw')|int(0)) | bitwise_and(4)) > 0 }}
+
+      # ---------- Nieuw: functie A register 2103 ----------
+      - name: "WP Desinfectie ingeschakeld"
+        unique_id: wp_desinfectie_ingeschakeld
+        state: >
+          {{ ((states('sensor.wp_silent_mode_raw')|int(0)) | bitwise_and(64)) > 0 }}
+
+      # ---------- Nieuw: pomp & klep ----------
+      - name: "WP Hoofdpomp aan"
+        unique_id: wp_hoofdpomp_aan
+        state: "{{ states('sensor.wp_hoofdpomp_status')|int(0) == 1 }}"
+
+      - name: "WP Koelcyclus (vierwegklep)"
+        unique_id: wp_koelcyclus_vierwegklep
+        state: "{{ states('sensor.wp_vierwegklep_status')|int(0) == 1 }}"
+
+      # ---------- Nieuw: storingen ----------
+      - name: "WP E-storing actief"
+        unique_id: wp_e_storing_actief
+        device_class: problem
+        state: >
+          {{ states('sensor.wp_storing_e01_e16')|int(0) > 0 or
+             states('sensor.wp_storing_e17_e32')|int(0) > 0 }}
+
+      - name: "WP P-beveiliging actief"
+        unique_id: wp_p_beveiliging_actief
+        device_class: problem
+        state: >
+          {{ states('sensor.wp_beveiliging_p01_p16')|int(0) > 0 or
+             states('sensor.wp_beveiliging_p17_p32')|int(0) > 0 }}
+
+  # ===========================================================================
+  # Berekende sensoren
+  # ===========================================================================
+  - sensor:
+      # Bestaand (ongewijzigd)
+      - name: "WP DeltaT"
+        unit_of_measurement: "°C"
+        state: >
+          {{ (states('sensor.wp_aanvoer_temperatuur')|float(0) - states('sensor.wp_retour_temperatuur')|float(0)) | round(1) }}
+
+      # Nieuw: verwarmingsvermogen (0 bij ontdooien, stilstand of lage flow)
+      - name: "WP Verwarmingsvermogen"
+        unique_id: wp_verwarmingsvermogen
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set freq = states('sensor.wp_compressor_frequentie')|float(0) %}
+          {% set flow = states('sensor.wp_water_flow')|float(0) %}
+          {% set dt = states('sensor.wp_deltat')|float(0) %}
+          {% set defrost = is_state('binary_sensor.wp_defrost_actief', 'on') %}
+          {% if freq > 0 and flow > 0.3 and dt > 0.5 and not defrost %}
+            {{ (1.163 * flow * dt) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
+
+      # Nieuw: koelvermogen
+      - name: "WP Koelvermogen"
+        unique_id: wp_koelvermogen
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set freq = states('sensor.wp_compressor_frequentie')|float(0) %}
+          {% set flow = states('sensor.wp_water_flow')|float(0) %}
+          {% set dt = states('sensor.wp_deltat')|float(0) %}
+          {% set defrost = is_state('binary_sensor.wp_defrost_actief', 'on') %}
+          {% if freq > 0 and flow > 0.3 and dt < -0.5 and not defrost %}
+            {{ (-1.163 * flow * dt) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
+
+      # Bestaand, nu gefilterd: som van verwarmen + koelen (altijd >= 0)
+      - name: "WP Thermisch vermogen"
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.wp_verwarmingsvermogen')|float(0)
+              + states('sensor.wp_koelvermogen')|float(0)) | round(2) }}
+
+      # Nieuw: met teken (+ verwarmen, - koelen) voor een tweerichtingsmeter
+      - name: "WP Thermisch vermogen signed"
+        unique_id: wp_thermisch_vermogen_signed
+        unit_of_measurement: "kW"
+        device_class: power
+        state: >
+          {{ (states('sensor.wp_verwarmingsvermogen')|float(0)
+              - states('sensor.wp_koelvermogen')|float(0)) | round(2) }}
+
+      # Bestaand: COP met je echte vermogensmeting (sensor.aurora_iii_pro_vermogen)
+      - name: "WP COP"
+        state: >
+          {% set q_kw = states('sensor.wp_thermisch_vermogen')|float(0) %}
+          {% set p_w = states('sensor.aurora_iii_pro_vermogen')|float(0) %}
+          {{ (q_kw / (p_w/1000)) | round(2) }}
+        availability: >
+          {{ states('sensor.aurora_iii_pro_vermogen')|float(0) > 50
+             and states('sensor.wp_thermisch_vermogen')|float(0) > 0 }}
+
+      # Nieuw
+      - name: "WP Drukverschil"
+        unique_id: wp_drukverschil
+        unit_of_measurement: "kPa"
+        state: >
+          {{ (states('sensor.wp_hoge_druk')|float(0)
+              - states('sensor.wp_lage_druk')|float(0)) | round(0) }}
+
+      - name: "WP Aanvoer-buiten verschil"
+        unique_id: wp_aanvoer_buiten_verschil
+        unit_of_measurement: "°C"
+        state: >
+          {{ (states('sensor.wp_aanvoer_temperatuur')|float(0)
+              - states('sensor.wp_buiten_temperatuur')|float(0)) | round(1) }}
+
+      - name: "WP HVAC modus tekst"
+        unique_id: wp_hvac_modus_tekst
+        state: >
+          {% set m = states('sensor.wp_hvac_modus_huidig')|int(0) %}
+          {% if m == 1 %}Koelen
+          {% elif m == 2 %}Verwarmen
+          {% elif m == 4 %}Auto
+          {% else %}Onbekend ({{ m }}){% endif %}
+
+      - name: "WP Zone besturing tekst"
+        unique_id: wp_zone_besturing_tekst
+        state: >
+          {% set z = states('sensor.wp_zone_besturing_huidig')|int(0) %}
+          {% if z == 0 %}Alles uit
+          {% elif z == 1 %}Zone 1 aan
+          {% elif z == 2 %}Zone 2 aan
+          {% elif z == 3 %}Alles aan
+          {% else %}Onbekend{% endif %}
+
+      - name: "WP Status"
+        unique_id: wp_status_tekst
+        icon: mdi:heat-pump
+        state: >
+          {% set freq = states('sensor.wp_compressor_frequentie')|float(0) %}
+          {% set flow = states('sensor.wp_water_flow')|float(0) %}
+          {% set dt = states('sensor.wp_deltat')|float(0) %}
+          {% set defrost = is_state('binary_sensor.wp_defrost_actief', 'on') %}
+          {% set valve = is_state('binary_sensor.wp_koelcyclus_vierwegklep', 'on') %}
+          {% set pump = is_state('binary_sensor.wp_hoofdpomp_aan', 'on') %}
+          {% set anti_freeze = is_state('binary_sensor.wp_anti_freezing_actief', 'on') %}
+          {% set oil = is_state('binary_sensor.wp_oil_return_actief', 'on') %}
+          {% set dhw = is_state('binary_sensor.wp_tapwatermodus_actief', 'on') %}
+          {% set heating_power = states('sensor.wp_verwarmingsvermogen')|float(0) %}
+          {% if defrost %}
+            Ontdooien
+          {% elif oil %}
+            Olieretour (smering compressor)
+          {% elif anti_freeze %}
+            Vorstbeveiliging actief
+          {% elif dhw %}
+            Tapwater verwarmen
+          {% elif freq > 0 and dt > 0.5 and flow > 0.3 %}
+            Verwarmen ({{ (1.163 * flow * dt) | round(1) }} kW, {{ freq|int }} Hz)
+          {% elif freq > 0 and dt < -0.5 and flow > 0.3 %}
+            Koelen ({{ (-1.163 * flow * dt) | round(1) }} kW, {{ freq|int }} Hz)
+          {% elif freq > 0 and not valve and heating_power < 0.3 %}
+            Opstarten ({{ freq|int }} Hz)
+          {% elif freq == 0 and pump and flow > 0.3 %}
+            Nadraaien pomp
+          {% elif freq == 0 and not pump %}
+            Stand-by
+          {% else %}
+            Onbekend
+          {% endif %}
+
+  # ===========================================================================
+  # SELECTS (bewaren de overige bits in register 2103)
+  # ===========================================================================
+  - select:
+      # Bestaand (naam, opties en unique_id ongewijzigd)
+      - name: "Warmtepomp stille modus"
+        unique_id: wp_silent_mode
+        icon: mdi:volume-off
+        state: >
+          {% set v = states('sensor.wp_silent_mode_raw')|int(0) %}
+          {% set level = (v // 16) % 4 %}
+          {% if level == 1 %}
+            Stil niveau 1
+          {% elif level == 2 %}
+            Stil niveau 2
+          {% else %}
+            Uit
+          {% endif %}
+        options: >
+          {{ ['Uit','Stil niveau 1','Stil niveau 2'] }}
+        select_option:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2103
+              value: >-
+                {% set current = states('sensor.wp_silent_mode_raw')|int(0) %}
+                {% set cleared = current - ((current // 16) % 4) * 16 %}
+                {% if option == 'Stil niveau 1' %}
+                  {{ cleared + 16 }}
+                {% elif option == 'Stil niveau 2' %}
+                  {{ cleared + 32 }}
+                {% else %}
+                  {{ cleared }}
+                {% endif %}
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_silent_mode_raw
+
+      # Nieuw
+      - name: "Warmtepomp zone besturing"
+        unique_id: wp_zone_besturing
+        icon: mdi:home-thermometer
+        state: "{{ states('sensor.wp_zone_besturing_tekst') }}"
+        options: "{{ ['Alles uit', 'Zone 1 aan', 'Zone 2 aan', 'Alles aan'] }}"
+        select_option:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2101
+              value: >-
+                {% if option == 'Alles uit' %}0
+                {% elif option == 'Zone 1 aan' %}1
+                {% elif option == 'Zone 2 aan' %}2
+                {% elif option == 'Alles aan' %}3
+                {% else %}1{% endif %}
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_zone_besturing_huidig
+
+  # ===========================================================================
+  # NUMBERS (tonen de echte registerwaarde, schrijven bij wijzigen)
+  # ===========================================================================
+  - number:
+      # Vervangt de oude 'number: platform: modbus' (die bestaat niet in HA)
+      - name: "WP Setpoint zone 1 verwarming"
+        unique_id: wp_setpoint_zone1_verwarming
+        icon: mdi:thermometer-lines
+        unit_of_measurement: "°C"
+        min: 18
+        max: 50
+        step: 1
+        state: "{{ states('sensor.wp_setpoint_zone_1_huidig')|float(0) }}"
+        availability: "{{ has_value('sensor.wp_setpoint_zone_1_huidig') }}"
+        set_value:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2107
+              value: "{{ (value * 10) | round(0) | int }}"
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_setpoint_zone_1_huidig
+
+      - name: "WP Tapwater setpoint"
+        unique_id: wp_tapwater_setpoint
+        icon: mdi:water-thermometer
+        unit_of_measurement: "°C"
+        min: 30
+        max: 60
+        step: 1
+        state: "{{ states('sensor.wp_tapwater_setpoint_huidig')|float(0) }}"
+        availability: "{{ has_value('sensor.wp_tapwater_setpoint_huidig') }}"
+        set_value:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2105
+              value: "{{ (value * 10) | round(0) | int }}"
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_tapwater_setpoint_huidig
+
+      # Werkt mogelijk niet in elke configuratie - eerst testen
+      - name: "WP Ruimtetemperatuur setpoint"
+        unique_id: wp_ruimtetemperatuur_setpoint
+        icon: mdi:home-thermometer
+        unit_of_measurement: "°C"
+        min: 16
+        max: 28
+        step: 0.5
+        state: "{{ states('sensor.wp_ruimtetemperatuur_setpoint_huidig')|float(0) }}"
+        availability: "{{ has_value('sensor.wp_ruimtetemperatuur_setpoint_huidig') }}"
+        set_value:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2114
+              value: "{{ (value * 10) | round(0) | int }}"
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_ruimtetemperatuur_setpoint_huidig
+
+  # ===========================================================================
+  # SWITCH: geforceerde elektrische bijverwarming (bit 3 van 2103)
+  # ===========================================================================
+  - switch:
+      - name: "WP Geforceerde elektrische bijverwarming"
+        unique_id: wp_geforceerde_bijverwarming
+        icon: mdi:radiator
+        state: >
+          {{ ((states('sensor.wp_silent_mode_raw')|int(0)) | bitwise_and(8)) > 0 }}
+        turn_on:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2103
+              value: >-
+                {% set current = states('sensor.wp_silent_mode_raw')|int(0) %}
+                {{ current | bitwise_or(8) }}
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_silent_mode_raw
+        turn_off:
+          - action: modbus.write_register
+            data:
+              hub: adlar_wp
+              slave: 1
+              address: 2103
+              value: >-
+                {% set current = states('sensor.wp_silent_mode_raw')|int(0) %}
+                {{ current - (current | bitwise_and(8)) }}
+          - delay: "00:00:02"
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.wp_silent_mode_raw
+
+# =============================================================================
+# TELLERS & UTILITY METERS
+# =============================================================================
+counter:
+  wp_starts:                       # bestaand
+    name: "WP Starts"
+    initial: 0
+    step: 1
+
+  wp_ontdooi_cycli:                # nieuw
+    name: "WP Ontdooi cycli"
+    initial: 0
+    step: 1
+
+utility_meter:
+  wp_starts_per_uur:               # bestaand
+    source: counter.wp_starts
+    cycle: hourly
+
+  wp_ontdooi_per_dag:              # nieuw
+    source: counter.wp_ontdooi_cycli
+    cycle: daily
+
+# =============================================================================
+# AUTOMATIONS
+# =============================================================================
+automation:
+  # Bestaand (alias ongewijzigd)
+  - alias: "WP Start teller"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.wp_compressor_draait
+        from: "off"
+        to: "on"
+    action:
+      - action: counter.increment
+        target:
+          entity_id: counter.wp_starts
+
+  # Nieuw
+  - alias: "WP Ontdooi teller"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.wp_defrost_actief
+        from: "off"
+        to: "on"
+    action:
+      - action: counter.increment
+        target:
+          entity_id: counter.wp_ontdooi_cycli
+
+  - alias: "WP Waterdruk te hoog"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.wp_outlet_water_pressure
+        above: 3.0
+        for: "00:01:00"
+    action:
+      - action: persistent_notification.create
+        data:
+          title: "Warmtepomp: waterdruk te hoog"
+          message: >
+            Druk is {{ states('sensor.wp_outlet_water_pressure') }} bar.
+            Het overstortventiel opent doorgaans rond 3,0 bar.
+
+  - alias: "WP E-storing melding"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.wp_e_storing_actief
+        from: "off"
+        to: "on"
+    action:
+      - action: persistent_notification.create
+        data:
+          title: "Warmtepomp storing (E)"
+          message: >
+            E01-E16: {{ states('sensor.wp_storing_e01_e16') }},
+            E17-E32: {{ states('sensor.wp_storing_e17_e32') }}.
+            Controleer het Adlar-display voor details.
+
+  - alias: "WP P-beveiliging melding"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.wp_p_beveiliging_actief
+        from: "off"
+        to: "on"
+    action:
+      - action: persistent_notification.create
+        data:
+          title: "Warmtepomp beveiliging (P)"
+          message: >
+            P01-P16: {{ states('sensor.wp_beveiliging_p01_p16') }},
+            P17-P32: {{ states('sensor.wp_beveiliging_p17_p32') }}.
+            Controleer het Adlar-display voor details.
+
+# =============================================================================
+# HISTORY STATS
+# =============================================================================
+sensor:
+  # Bestaand
+  - platform: history_stats
+    name: "WP Draaitijd laatste 24u"
+    entity_id: binary_sensor.wp_compressor_draait
+    state: "on"
+    type: time
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+
+  # Nieuw
+  - platform: history_stats
+    name: "WP Ontdooitijd laatste 24u"
+    entity_id: binary_sensor.wp_defrost_actief
+    state: "on"
+    type: time
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+
+  - platform: history_stats
+    name: "WP Tapwatertijd laatste 24u"
+    entity_id: binary_sensor.wp_tapwatermodus_actief
+    state: "on"
+    type: time
+    end: "{{ now() }}"
+    duration:
+      hours: 24
