@@ -439,7 +439,7 @@ Gemeten overlap van de 19 documentbestanden in de bronrepo:
 
 | Status | Aantal | Bestanden |
 |---|---|---|
-| Identiek aanwezig | 5 | `Heatpump specs/modbus/Eflin EW11a/*` (handleidingen gateway) |
+| Identiek aanwezig | 5 | `Heatpump specs/modbus/Elfin EW11A/*` (handleidingen gateway) |
 | Zelfde pad, andere inhoud | 4 | `Heatpump specs/modbus/Adlar III/HHi/*.xlsx` (registermap, capability-mapping, A2-vs-A3-mapping) |
 | Al aanwezig onder `docs/Dev support/modbus/`, ander pad | 2 | `adr-061-building-model-persistence.md` (alleen kop en paden anders), `building-model-sample-gating.md` (Aurora III-versie voegt de gate `blocked_dhw_active` toe) |
 | Nieuw | 8 | `capability-modbus-mapping.md`, 6 setup-afbeeldingen/pdf's, `setup/README.md` (Elfin-gids) |
@@ -478,7 +478,7 @@ daar niet getest; als algemene tip opnemen, niet als Aurora II-eis.
 | `Dev support/adr-061-building-model-persistence.md` | — (bestaat al in `docs/Dev support/modbus/`) | Inhoudelijk gelijk; alleen de kop (project, codepaden) verschilt. Niet kopiëren; in het bestaande document de regel *Codegebied* aanvullen met de `lib/aurora3/`-paden. De nummering `adr-061` hoort bij de ADR-reeks van de bronrepo's, niet bij `docs/architecture/ADR-00x` |
 | `Dev support/building-model-sample-gating.md` | `docs/Dev support/modbus/building-model-sample-gating.md` | Samenvoegen: de Aurora III-versie is een superset (extra gate `blocked_dhw_active`, sinds bron-v1.9.0). Eén document dat per gate vermeldt bij welke driver hij geldt. Er staat bovendien een tweede kopie in `docs/Dev support/Architectural overview/`; vaststellen welke de bron van waarheid is |
 | `Heatpump specs/…/Adlar III/HHi/*.xlsx` (4) | Zelfde pad | Inhoud verschilt; de bronversie is de nieuwste (laatste werk aan Aurora III vond in die repo plaats). Overschrijven na controle van de wijzigingsdatum in de bestandsmetadata; bij twijfel beide bewaren met datumsuffix |
-| `Heatpump specs/…/Eflin EW11a/*` (5) | — | Identiek, niet kopiëren |
+| `Heatpump specs/…/Elfin EW11A/*` (5) | — | Identiek, niet kopiëren |
 
 #### Architectuur- en indexdocumenten
 

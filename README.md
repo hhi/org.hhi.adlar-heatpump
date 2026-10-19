@@ -74,7 +74,7 @@ The usual defaults are TCP port `502` and Modbus Unit ID `1`. Give the gateway
 a fixed DHCP lease or static IP address to prevent avoidable reconnect issues.
 The [gateway setup guide](docs/setup/modbus-elfin-ew11-setup.md) (Dutch) covers
 both models; gateway reference material is available in
-[the Modbus documentation](docs/Heatpump%20specs/modbus/Eflin%20EW11a/).
+[the Modbus documentation](docs/Heatpump%20specs/modbus/Elfin%20EW11A/).
 
 Moving from the separate Aurora III app? See the
 [migration guide](docs/setup/MIGRATION_AURORA3.en.md).
