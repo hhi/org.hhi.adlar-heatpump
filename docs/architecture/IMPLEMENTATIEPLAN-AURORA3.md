@@ -4,7 +4,7 @@
 - **Doelversie**: 3.2.0 (huidig 3.1.4)
 - **Bron**: `org.hhi.adlar3-heatpump-modbus` v1.9.4 (commit `58e010a`)
 - **Datum**: 2026-10-17
-- **Status**: Fase 0 t/m 5 uitgevoerd (2026-10-18); fase 6 (validatie) lokaal, fase 7 (hardware) en O9 open — zie *Afwijkingen tijdens uitvoering*
+- **Status**: Fase 0 t/m 6 uitgevoerd (2026-10-18/19); fase 7 gesplitst in 7a (lokaal, simulator) en 7b (testkanaal); O9 open — zie *Afwijkingen tijdens uitvoering*
 
 In dit plan staan de aanvaarde waarden uit ADR-004 ingevuld: driver-ID
 `intelligent-heatpump-aurora3`, suffix `_aurora3`. De migratiescripts nemen beide als
@@ -522,25 +522,48 @@ en de app-afbeeldingen `WP-adlar3-modbus-*.png` (de doel-app heeft eigen app-afb
 
 ---
 
-## Fase 7 — Hardware-acceptatie
+## Fase 7 — Acceptatie
 
-Eén Homey met een Tuya-, een Aurora II- en een Aurora III-device.
+De ontwikkelaar heeft één echte unit en een Modbus-simulator. Tests die echte hardware van
+een ander model of een bestaande installatie vragen, kunnen alleen via het testkanaal van de
+Homey App Store door externe gebruikers worden gedaan. Fase 7 is daarom gesplitst (2026-10-20).
+
+### 7a — Lokaal, met simulator (ontwikkelaar)
 
 | Test | Verwacht |
 |---|---|
-| Bestaande Tuya-flow met `set_target_temperature` | Ongewijzigd |
-| Bestaande Aurora II-flow met `set_target_temperature_modbus` | Ongewijzigd |
-| Aurora III: `set_target_temperature_aurora3` | Schrijft naar Aurora III, niet naar Aurora II |
-| Gedeelde trigger `heating_mode_changed` bij alle drie | Vuurt per device, tokens consistent gespeld |
-| Herstartvolgorde wisselen (Aurora III eerst, dan Aurora II) | Geen kaart wisselt van doeldevice |
-| Gateway Aurora III loskoppelen | Aurora II en Tuya blijven werken; geen procescrash |
-| Dashboards 8090 en 8091 | Elk eigen data |
-| Aurora III `/interactive`: setpoint en stille modus wijzigen | Wijziging zichtbaar op het device en in de Homey-app; Aurora II onaangeroerd |
-| Aurora III `/expert`: één register lezen | Waarde van Aurora III, niet van Aurora II |
-| Elfin-gids stap voor stap volgen voor Aurora III (8N2) | Verbinding komt tot stand zonder aanvullende kennis |
-| Pairinglijst en eerste pairingscherm van beide Modbus-drivers (O7/O8) | Model staat in de drivernaam; waarschuwingsregel zichtbaar in alle vier talen |
-| Bestaand Aurora II-device na update | Ongewijzigd; alleen de drivernaam in de pairinglijst is anders (O7) |
-| Oude Aurora III-app en nieuwe driver kort naast elkaar (migratiescenario) | Gedrag zoals beschreven in de migratiehandleiding |
+| Pairinglijst en eerste pairingscherm van beide Modbus-drivers (O7/O8) | *Aurora I/II via Tuya*, *Aurora I/II via Modbus*, *Aurora III via Modbus*; waarschuwingsregel zichtbaar |
+| Dashboards 8090 en 8091 tegelijk | Elk eigen data |
+| Aurora III `/interactive`: setpoint en stille modus wijzigen | Wijziging zichtbaar op het device in Homey; Aurora I/II onaangeroerd |
+| Aurora III `/expert`: één register lezen | Waarde van de Aurora III-simulator |
+| Aurora III: `set_target_temperature_aurora3` | Schrijft naar Aurora III, niet naar Aurora I/II |
+| Gedeelde trigger `heating_mode_changed` | Vuurt per device; modus gespeld als *Cooling*/*Heating* |
+| Herstartvolgorde wisselen | Geen kaart wisselt van doeldevice |
+| Gateway of simulator van Aurora III loskoppelen | Aurora I/II en Tuya blijven werken; geen procescrash |
+| Widget *Live operation* voor beide Modbus-devices | Aurora III toont TA/TE1/T4 en setpoint-afwijking |
+| V3 — device-picker van een gedeelde trigger | Alle drie de drivers kiesbaar |
+
+Stand 2026-10-20: eerste test met simulator "lijkt te werken"; nog niet per regel afgevinkt.
+
+### 7b — Testkanaal, externe gebruikers
+
+Publicatie via `homey app publish` en daarna *Test* in het developerportaal. Testers krijgen
+de instructie in [`docs/testing/TEST_RELEASE_3.2.0.nl.md`](../testing/TEST_RELEASE_3.2.0.nl.md)
+(en [`.en.md`](../testing/TEST_RELEASE_3.2.0.en.md)) via community-topic 154741.
+
+| Test | Onderdeel testerinstructie |
+|---|---|
+| Registerwaarden van een echte Aurora III kloppen met de registermap | A, B |
+| Bediening (setpoint, stille modus, tapwater, bijverwarming) op echte hardware | C |
+| Flows met `_aurora3`-kaarten | D |
+| V1 — `power_threshold_exceeded` bij Aurora III met interne vermogensmeting | E |
+| Bestaand Aurora I/II- en Tuya-device na de update ongewijzigd | F |
+| Elfin-gids stap voor stap voor Aurora III (8N2) | A |
+| Oude Aurora III-app en nieuwe driver naast elkaar (migratiescenario) | G |
+
+**Versiebeleid.** Zolang er niets gepubliceerd is, blijven herstellingen in 3.2.0. Na de
+eerste `homey app publish` krijgt elke volgende build een hoger nummer (3.2.1, 3.2.2, …) met
+een eigen changelogregel; pas na 7b gaat een build naar *Live*.
 
 ---
 
