@@ -32,7 +32,7 @@ User documentation for the Adlar Castra Heatpump app. Start with the guide for y
 
 ## Folders
 
-- `Elfin EW11 - Adlar Aurora 2/` — connection pictures and EW11A screenshots (shared by both models)
+- `Elfin EW11 - Adlar Aurora 2/` — connection pictures, EW11A screenshots and the dual master hub wiring diagram (shared by both models)
 - `Elfin EW11 - Adlar Aurora 3/` — EW11A serial port screenshot for Aurora III (Stop Bit 2)
 - `images/` — screenshots used by the guides
 - Gateway manuals from the manufacturer: [`Heatpump specs/modbus/Elfin EW11A/`](<../Heatpump specs/modbus/Elfin EW11A/>)

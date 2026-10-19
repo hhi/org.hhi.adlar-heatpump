@@ -35,6 +35,18 @@ Algemene RS485-regel:
 
 Als er geen Modbus-verbinding komt, controleer dan eerst of `A/B` niet omgewisseld moet worden. RS485-labels worden in de praktijk niet altijd consequent gebruikt.
 
+### Thermostaat of bediening op dezelfde bus (dual master hub)
+
+Op een RS485-bus mag maar één Modbus-master tegelijk vragen stellen. Gebruikt de thermostaat of bediening van de warmtepomp dezelfde aansluiting (COM2) als de EW11A, dan zijn er twee masters op één bus. Dat geeft botsingen, time-outs en onbetrouwbare waarden, voor beide modellen.
+
+Een opto-geïsoleerde **Modbus dual master hub** (bijvoorbeeld RS485-HUB-2P) lost dit op. De hub zit tussen de warmtepomp en de twee masters, en laat hun vragen om beurten door:
+
+- de warmtepomp (COM2) op de slave-poort van de hub;
+- de EW11A en de thermostaat of bediening (`Th`) elk op een eigen master-poort;
+- de hub op een eigen 12 V DC-voeding.
+
+Zie het [aansluitschema met dual master hub](<Elfin EW11 - Adlar Aurora 2/dualmasterhub.png>) (onderdeel 7).
+
 ## EW11A configuratie
 
 Gebruik de screenshots als referentie. Alleen de seriële instellingen verschillen per model (Stop Bit `1` of `2`); de andere twee schermen zijn gelijk voor beide modellen:
