@@ -287,7 +287,7 @@ const CAP_GROUPS = [
   { label: 'Energie & Prijs', match: id => id.startsWith('adlar_energy') || id.startsWith('adlar_price') || id.startsWith('adlar_external_energy') || id.startsWith('adlar_cheapest') },
   { label: 'Extern',          match: id => id.startsWith('adlar_external') && !['adlar_external_power','adlar_external_flow'].includes(id) },
   { label: 'Gebouwmodel',     match: id => (id.startsWith('building') || id.startsWith('adlar_building') || id.startsWith('adlar_forecast') || id.startsWith('adlar_optimal') || id.startsWith('adlar_simulated')) && !id.includes('diagnostics') },
-  { label: 'Verbinding',      match: id => id.startsWith('adlar_connection') || id.startsWith('adlar_firmware') || id.startsWith('adlar_protocol') || id.startsWith('adlar_daily_disconnect') || id.startsWith('adlar_openmeteo') || id.startsWith('adlar_last_') },
+  { label: 'Verbinding',      match: id => id.startsWith('adlar_connection') || id.startsWith('adlar_daily_disconnect') || id.startsWith('adlar_openmeteo') || id.startsWith('adlar_last_') },
   { label: 'Diagnostiek',     match: id => id.includes('diagnostics') || id.endsWith('_data') || id === 'adlar_performance_report' },
   { label: 'Overig',          match: () => true },
 ];
