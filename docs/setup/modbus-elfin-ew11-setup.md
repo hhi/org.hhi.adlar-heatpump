@@ -1,4 +1,4 @@
-# Modbus TCP gateway setup voor Adlar Castra Aurora II en Aurora III
+# Modbus TCP gateway setup voor Adlar Castra Aurora I/II en Aurora III
 
 *De app werkt met elke gateway die RS485 (Modbus RTU) naar Modbus TCP vertaalt — zoals de Elfin EW11A, USR-W610 of een Raspberry Pi met `mbusd`. Vereisten: TCP Server mode, half-duplex serieel op `9600` baud. Aurora I/II gebruikt `8N1`, Aurora III / PRO `8N2`.*
 
@@ -53,7 +53,7 @@ Gebruik de screenshots als referentie. Alleen de seriële instellingen verschill
 
 | Scherm | Aurora I / II | Aurora III / PRO |
 |---|---|---|
-| Serial Port Settings | [Aurora II — Stop Bit 1](<Elfin EW11 - Adlar Aurora 2/EW11 - serial port settings - Aurora II series.png>) | [Aurora III — Stop Bit 2](<Elfin EW11 - Adlar Aurora 3/EW11 - serial port settings - Aurora III.png>) |
+| Serial Port Settings | [Aurora I/II — Stop Bit 1](<Elfin EW11 - Adlar Aurora 2/EW11 - serial port settings - Aurora II series.png>) | [Aurora III — Stop Bit 2](<Elfin EW11 - Adlar Aurora 3/EW11 - serial port settings - Aurora III.png>) |
 | Communication Settings | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - communication settngs - Aurora II series.png>) | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - communication settngs - Aurora II series.png>) |
 | System Settings | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - system settings - Aurora II series.png>) | [beide modellen](<Elfin EW11 - Adlar Aurora 2/EW11 - system settings - Aurora II series.png>) |
 
@@ -81,7 +81,7 @@ Voordat je de EW11 kunt configureren, moet je eerst verbinding maken met het Wif
 | Route | `UART` | `UART` |
 | Web interface | enabled, port `80` | enabled, port `80` |
 
-`Serial protocol` moet op `Modbus` staan: de EW11A vertaalt dan Modbus TCP naar Modbus RTU. Bij Aurora III is vastgesteld dat de app met `None` (transparant) geen geldige antwoorden krijgt; houd voor Aurora II dezelfde instelling aan.
+`Serial protocol` moet op `Modbus` staan: de EW11A vertaalt dan Modbus TCP naar Modbus RTU. Bij Aurora III is vastgesteld dat de app met `None` (transparant) geen geldige antwoorden krijgt; houd voor Aurora I/II dezelfde instelling aan.
 
 Netwerk:
 
@@ -109,11 +109,11 @@ Bij verbindingsproblemen:
 
 ## Dashboards openen
 
-Als er een Modbus-apparaat gekoppeld is, start Homey een lokale dashboardserver per model: standaard poort `8090` voor Aurora II en `8091` voor Aurora III. De poort is per apparaat instelbaar via de device setting `Dashboardpoort`.
+Als er een Modbus-apparaat gekoppeld is, start Homey een lokale dashboardserver per model: standaard poort `8090` voor Aurora I/II en `8091` voor Aurora III. De poort is per apparaat instelbaar via de device setting `Dashboardpoort`.
 
 Open vanaf een apparaat op hetzelfde lokale netwerk (`<poort>` = `8090` of `8091`):
 
-| URL | Doel | Aurora II | Aurora III |
+| URL | Doel | Aurora I/II | Aurora III |
 |---|---|---|---|
 | `http://<homey-ip>:<poort>/` | Live read-only dashboard met actuele warmtepompwaarden | ✓ | ✓ |
 | `http://<homey-ip>:<poort>/interactive` | Interactief dashboard voor veelgebruikte bediening; bij Aurora III ook tapwaterfunctie, stille modus, bijverwarming en (experimenteel) aan/uit | ✓ | ✓ |

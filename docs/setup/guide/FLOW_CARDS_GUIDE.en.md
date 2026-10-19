@@ -620,9 +620,9 @@ THEN: Calculate value from curve
 
 ---
 
-## Modbus models: Aurora II and Aurora III
+## Modbus models: Aurora I/II and Aurora III
 
-The app has a separate Modbus driver per model. Many flow cards exist **once per driver** with the same title: in the Flow editor you see the cards of the driver of the device you selected. A flow built for an Aurora II device therefore does not work for an Aurora III device; rebuild it with the card of the Aurora III device.
+The app has a separate Modbus driver per model. Many flow cards exist **once per driver** with the same title: in the Flow editor you see the cards of the driver of the device you selected. A flow built for an Aurora I/II device therefore does not work for an Aurora III device; rebuild it with the card of the Aurora III device.
 
 The cards below are **Aurora III only**.
 

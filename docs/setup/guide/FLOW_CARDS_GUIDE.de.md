@@ -619,9 +619,9 @@ DANN: Wert aus Kurve berechnen
 
 ---
 
-## Modbus-Modelle: Aurora II und Aurora III
+## Modbus-Modelle: Aurora I/II und Aurora III
 
-Die App hat für jedes Modell einen eigenen Modbus-Treiber. Viele Flow-Karten gibt es **einmal pro Treiber** mit demselben Titel: Im Flow-Editor sehen Sie die Karten des Treibers des gewählten Geräts. Ein Flow, der für ein Aurora II-Gerät erstellt wurde, funktioniert daher nicht für ein Aurora III-Gerät; erstellen Sie ihn mit der Karte des Aurora III-Geräts neu.
+Die App hat für jedes Modell einen eigenen Modbus-Treiber. Viele Flow-Karten gibt es **einmal pro Treiber** mit demselben Titel: Im Flow-Editor sehen Sie die Karten des Treibers des gewählten Geräts. Ein Flow, der für ein Aurora I/II-Gerät erstellt wurde, funktioniert daher nicht für ein Aurora III-Gerät; erstellen Sie ihn mit der Karte des Aurora III-Geräts neu.
 
 Die folgenden Karten gibt es **nur für Aurora III**.
 

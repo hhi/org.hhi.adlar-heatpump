@@ -99,10 +99,10 @@
           "fr": "Port des tableaux de bord"
         },
         "hint": {
-          "en": "Local HTTP port for the Aurora III dashboards. Default is 8091 (the Aurora II driver uses 8090). Change this only if the port is already in use, then open http://<homey-ip>:<port>/.",
-          "nl": "Lokale HTTP-poort voor de Aurora III-dashboards. Standaard is 8091 (de Aurora II-driver gebruikt 8090). Wijzig dit alleen als de poort al in gebruik is en open daarna http://<homey-ip>:<poort>/.",
-          "de": "Lokaler HTTP-Port für die Aurora III-Dashboards. Standard ist 8091 (der Aurora II-Treiber verwendet 8090). Ändern Sie dies nur, wenn der Port bereits belegt ist, und öffnen Sie dann http://<homey-ip>:<port>/.",
-          "fr": "Port HTTP local pour les tableaux de bord Aurora III. La valeur par défaut est 8091 (le pilote Aurora II utilise 8090). Modifiez-le uniquement si le port est déjà utilisé, puis ouvrez http://<homey-ip>:<port>/."
+          "en": "Local HTTP port for the Aurora III dashboards. Default is 8091 (the Aurora I/II driver uses 8090). Change this only if the port is already in use, then open http://<homey-ip>:<port>/.",
+          "nl": "Lokale HTTP-poort voor de Aurora III-dashboards. Standaard is 8091 (de Aurora I/II-driver gebruikt 8090). Wijzig dit alleen als de poort al in gebruik is en open daarna http://<homey-ip>:<poort>/.",
+          "de": "Lokaler HTTP-Port für die Aurora III-Dashboards. Standard ist 8091 (der Aurora I/II-Treiber verwendet 8090). Ändern Sie dies nur, wenn der Port bereits belegt ist, und öffnen Sie dann http://<homey-ip>:<port>/.",
+          "fr": "Port HTTP local pour les tableaux de bord Aurora III. La valeur par défaut est 8091 (le pilote Aurora I/II utilise 8090). Modifiez-le uniquement si le port est déjà utilisé, puis ouvrez http://<homey-ip>:<port>/."
         },
         "value": 8091,
         "attr": {

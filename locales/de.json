@@ -12,7 +12,7 @@
     "enter_modbus_info": {
       "title": "Modbus-Verbindung",
       "description": "Geben Sie die IP-Adresse und den Port Ihres Elfin EW11A oder Modbus-TCP-Gateways ein",
-      "model_hint": "Wählen Sie den Treiber, der zum Modell auf dem Typenschild Ihrer Wärmepumpe passt (Aurora II oder Aurora III).",
+      "model_hint": "Wählen Sie den Treiber, der zum Modell auf dem Typenschild Ihrer Wärmepumpe passt (Aurora I/II oder Aurora III).",
       "host": "IP-Adresse:",
       "port": "TCP-Port:",
       "unit_id": "Modbus-Unit-ID:",

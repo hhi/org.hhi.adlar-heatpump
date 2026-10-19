@@ -12,7 +12,7 @@
     "enter_modbus_info": {
       "title": "Connexion Modbus",
       "description": "Saisissez l'adresse IP et le port de votre Elfin EW11A ou de votre passerelle Modbus TCP",
-      "model_hint": "Choisissez le pilote correspondant au modèle indiqué sur la plaque signalétique de votre pompe à chaleur (Aurora II ou Aurora III).",
+      "model_hint": "Choisissez le pilote correspondant au modèle indiqué sur la plaque signalétique de votre pompe à chaleur (Aurora I/II ou Aurora III).",
       "host": "Adresse IP :",
       "port": "Port TCP :",
       "unit_id": "ID d'unité Modbus :",

@@ -7,7 +7,7 @@ User documentation for the Adlar Castra Heatpump app. Start with the guide for y
 | Driver | Start here |
 |---|---|
 | Tuya (Wi-Fi) | [Tuya LocalKey guide](Tuya_LocalKey_Homey_Guide_EN.pdf) and [protocol version guide](PROTOCOL_VERSION_GUIDE.en.md) |
-| Aurora II (Modbus) | [Modbus TCP gateway setup](modbus-elfin-ew11-setup.md) (Dutch) — `9600 8N1` |
+| Aurora I/II (Modbus) | [Modbus TCP gateway setup](modbus-elfin-ew11-setup.md) (Dutch) — `9600 8N1` |
 | Aurora III (Modbus) | [Modbus TCP gateway setup](modbus-elfin-ew11-setup.md) (Dutch) — `9600 8N2` |
 | Moving from the separate Aurora III app | [Migration guide](MIGRATION_AURORA3.en.md) |
 
@@ -15,7 +15,7 @@ User documentation for the Adlar Castra Heatpump app. Start with the guide for y
 
 | Guide | NL | EN | DE | FR |
 |---|---|---|---|---|
-| Modbus TCP gateway setup (Elfin EW11A, Aurora II and III) | [NL](modbus-elfin-ew11-setup.md) | — | — | — |
+| Modbus TCP gateway setup (Elfin EW11A, Aurora I/II and III) | [NL](modbus-elfin-ew11-setup.md) | — | — | — |
 | Modbus dashboards (ports 8090 / 8091) | [NL](MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](MODBUS_DASHBOARD_GUIDE.en.md) | [DE](MODBUS_DASHBOARD_GUIDE.de.md) | [FR](MODBUS_DASHBOARD_GUIDE.fr.md) |
 | Aurora III migration | [NL](MIGRATION_AURORA3.nl.md) | [EN](MIGRATION_AURORA3.en.md) | [DE](MIGRATION_AURORA3.de.md) | [FR](MIGRATION_AURORA3.fr.md) |
 | Tuya LocalKey (PDF) | [NL](Tuya_LocalKey_Homey_Guide_NL.pdf) | [EN](Tuya_LocalKey_Homey_Guide_EN.pdf) | [DE](Tuya_LocalKey_Homey_Guide_DE.pdf) | [FR](Tuya_LocalKey_Homey_Guide_FR.pdf) |
