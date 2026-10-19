@@ -83,14 +83,14 @@ Moving from the separate Aurora III app? See the
 
 Each Modbus driver offers its own local dashboards. From a browser on the same
 network, open one of the following URLs. The default port is `8090` for
-Aurora II and `8091` for Aurora III:
+Aurora I/II and `8091` for Aurora III:
 
 - `http://<homey-ip>:<port>/` — live, read-only heat-pump overview
 - `http://<homey-ip>:<port>/interactive` — live overview with direct setpoint controls
 - `http://<homey-ip>:<port>/live` — all device capabilities grouped by category
 - `http://<homey-ip>:<port>/expert` — register view with Modbus addresses
 - `http://<homey-ip>:<port>/changelog` — observed register changes and poll recommendations
-- `http://<homey-ip>:8090/heating-curve` — DIY heating-curve editor (Aurora II only)
+- `http://<homey-ip>:8090/heating-curve` — DIY heating-curve editor (Aurora I/II only)
 
 Replace `<homey-ip>` with the IP address of your Homey Pro. If you change the
 Dashboard port setting, use that port in the URL instead. See the
@@ -102,7 +102,7 @@ Dashboard port setting, use that port in the URL instead. See the
 
 ## Important Limitations
 
-- The Aurora II driver targets the R32 register map and warns when another
+- The Aurora I/II driver targets the R32 register map and warns when another
   refrigerant is detected.
 - The floor-heating setpoint is available as a Modbus device capability, but
   does not yet have its own Flow action.
@@ -110,7 +110,7 @@ Dashboard port setting, use that port in the URL instead. See the
   missing.
 - Tuya Local and Modbus are separate drivers. A Modbus gateway cannot be used
   with the Tuya driver, and the Modbus drivers do not use Tuya credentials.
-- The Aurora II and Aurora III drivers are not interchangeable: each reads and
+- The Aurora I/II and Aurora III drivers are not interchangeable: each reads and
   writes the register map of its own model.
 - The local dashboards have no password; anyone on the local network can open
   them, including the write functions.

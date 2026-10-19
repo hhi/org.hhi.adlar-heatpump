@@ -34,7 +34,7 @@ Der Großteil der Benutzerdokumentation ist in vier Sprachen verfügbar:
 | Konfigurationshandbuch | [NL](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) |
 | Tuya LocalKey-Anleitung | [NL](setup/Tuya_LocalKey_Homey_Guide_NL.pdf) | [EN](setup/Tuya_LocalKey_Homey_Guide_EN.pdf) | [DE](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) | [FR](setup/Tuya_LocalKey_Homey_Guide_FR.pdf) |
 | Schnelle Problemlösung | [NL](setup/USER_QUICK_FIX.nl.md) | [EN](setup/USER_QUICK_FIX.en.md) | [DE](setup/USER_QUICK_FIX.de.md) | [FR](setup/USER_QUICK_FIX.fr.md) |
-| Modbus-Dashboard-Leitfaden (Aurora II und III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
+| Modbus-Dashboard-Leitfaden (Aurora I/II und III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
 | Aurora III-Umstiegsleitfaden | [NL](setup/MIGRATION_AURORA3.nl.md) | [EN](setup/MIGRATION_AURORA3.en.md) | [DE](setup/MIGRATION_AURORA3.de.md) | [FR](setup/MIGRATION_AURORA3.fr.md) |
 
 ---
@@ -50,7 +50,7 @@ Der Großteil der Benutzerdokumentation ist in vier Sprachen verfügbar:
 - **Konfigurationshandbuch** — Vollständige Einstellungsreferenz
 - **Tuya LocalKey-Anleitung** — So erhalten Sie Tuya-Anmeldedaten (PDF)
 - **Schnelle Problemlösung** — Häufige Probleme und Lösungen
-- **Elfin EW11 Modbus-Einrichtung** — [Modbus-TCP-Gateway-Leitfaden](setup/modbus-elfin-ew11-setup.md) für Aurora II und III (Niederländisch)
+- **Elfin EW11 Modbus-Einrichtung** — [Modbus-TCP-Gateway-Leitfaden](setup/modbus-elfin-ew11-setup.md) für Aurora I/II und III (Niederländisch)
 - **Modbus-Dashboard-Leitfaden** — Lokale Dashboards pro Modbus-Modell (Ports 8090 und 8091)
 - **Aurora III-Umstiegsleitfaden** — Umstieg von der separaten Aurora III-App
 - **guide/** — Zusätzliche detaillierte Anleitungen (Flow-Karten, adaptive Regelung, Building Insights)

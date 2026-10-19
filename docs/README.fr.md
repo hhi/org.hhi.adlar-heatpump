@@ -34,7 +34,7 @@ La plupart de la documentation utilisateur est disponible en quatre langues :
 | Guide de Configuration | [NL](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) |
 | Guide Tuya LocalKey | [NL](setup/Tuya_LocalKey_Homey_Guide_NL.pdf) | [EN](setup/Tuya_LocalKey_Homey_Guide_EN.pdf) | [DE](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) | [FR](setup/Tuya_LocalKey_Homey_Guide_FR.pdf) |
 | Résolution Rapide de Problèmes | [NL](setup/USER_QUICK_FIX.nl.md) | [EN](setup/USER_QUICK_FIX.en.md) | [DE](setup/USER_QUICK_FIX.de.md) | [FR](setup/USER_QUICK_FIX.fr.md) |
-| Guide des tableaux de bord Modbus (Aurora II et III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
+| Guide des tableaux de bord Modbus (Aurora I/II et III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
 | Guide de migration Aurora III | [NL](setup/MIGRATION_AURORA3.nl.md) | [EN](setup/MIGRATION_AURORA3.en.md) | [DE](setup/MIGRATION_AURORA3.de.md) | [FR](setup/MIGRATION_AURORA3.fr.md) |
 
 ---
@@ -50,7 +50,7 @@ La plupart de la documentation utilisateur est disponible en quatre langues :
 - **Guide de Configuration** — Référence complète des paramètres
 - **Guide Tuya LocalKey** — Comment obtenir les identifiants Tuya (PDF)
 - **Résolution Rapide de Problèmes** — Problèmes courants et solutions
-- **Configuration Elfin EW11 Modbus** — [Guide de la passerelle Modbus TCP](setup/modbus-elfin-ew11-setup.md) pour Aurora II et III (en néerlandais)
+- **Configuration Elfin EW11 Modbus** — [Guide de la passerelle Modbus TCP](setup/modbus-elfin-ew11-setup.md) pour Aurora I/II et III (en néerlandais)
 - **Guide des tableaux de bord Modbus** — Tableaux de bord locaux par modèle Modbus (ports 8090 et 8091)
 - **Guide de migration Aurora III** — Passer de l'application Aurora III distincte
 - **guide/** — Guides détaillés supplémentaires (cartes de flux, contrôle adaptatif, building insights)

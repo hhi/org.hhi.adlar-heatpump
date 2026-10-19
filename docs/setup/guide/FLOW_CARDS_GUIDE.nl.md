@@ -614,9 +614,9 @@ THEN: Bereken waarde van curve
 
 ---
 
-## Modbus-modellen: Aurora II en Aurora III
+## Modbus-modellen: Aurora I/II en Aurora III
 
-De app heeft per model een eigen Modbus-driver. Veel flowkaarten bestaan **per driver één keer** met dezelfde titel: in de Flow-editor ziet u de kaarten van de driver van het gekozen apparaat. Een flow die voor een Aurora II-apparaat is gemaakt, werkt daarom niet voor een Aurora III-apparaat; bouw hem opnieuw op met de kaart van het Aurora III-apparaat.
+De app heeft per model een eigen Modbus-driver. Veel flowkaarten bestaan **per driver één keer** met dezelfde titel: in de Flow-editor ziet u de kaarten van de driver van het gekozen apparaat. Een flow die voor een Aurora I/II-apparaat is gemaakt, werkt daarom niet voor een Aurora III-apparaat; bouw hem opnieuw op met de kaart van het Aurora III-apparaat.
 
 De kaarten hieronder zijn **alleen voor Aurora III**.
 

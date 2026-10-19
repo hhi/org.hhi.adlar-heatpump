@@ -34,7 +34,7 @@ De meeste gebruikersdocumentatie is beschikbaar in vier talen:
 | Configuratiegids | [NL](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) |
 | Tuya LocalKey Handleiding | [NL](setup/Tuya_LocalKey_Homey_Guide_NL.pdf) | [EN](setup/Tuya_LocalKey_Homey_Guide_EN.pdf) | [DE](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) | [FR](setup/Tuya_LocalKey_Homey_Guide_FR.pdf) |
 | Snelle Probleemoplossing | [NL](setup/USER_QUICK_FIX.nl.md) | [EN](setup/USER_QUICK_FIX.en.md) | [DE](setup/USER_QUICK_FIX.de.md) | [FR](setup/USER_QUICK_FIX.fr.md) |
-| Modbus-dashboardgids (Aurora II en III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
+| Modbus-dashboardgids (Aurora I/II en III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
 | Migratiehandleiding Aurora III | [NL](setup/MIGRATION_AURORA3.nl.md) | [EN](setup/MIGRATION_AURORA3.en.md) | [DE](setup/MIGRATION_AURORA3.de.md) | [FR](setup/MIGRATION_AURORA3.fr.md) |
 
 ---
@@ -49,7 +49,7 @@ De meeste gebruikersdocumentatie is beschikbaar in vier talen:
 - **Protocolversie Gids** — Tuya protocolversie selectie (3.3/3.4/3.5)
 - **Configuratiegids** — Complete instellingenreferentie
 - **Tuya LocalKey Handleiding** — Hoe Tuya credentials verkrijgen (PDF)
-- **Elfin EW11 Modbus Setup Guide** — [Modbus TCP-gateway handleiding](setup/modbus-elfin-ew11-setup.md) voor Aurora II en III
+- **Elfin EW11 Modbus Setup Guide** — [Modbus TCP-gateway handleiding](setup/modbus-elfin-ew11-setup.md) voor Aurora I/II en III
 - **Snelle Probleemoplossing** — Veelvoorkomende problemen en oplossingen
 - **Modbus-dashboardgids** — Lokale dashboards per Modbus-model (poorten 8090 en 8091)
 - **Migratiehandleiding Aurora III** — Overstappen vanuit de aparte Aurora III-app

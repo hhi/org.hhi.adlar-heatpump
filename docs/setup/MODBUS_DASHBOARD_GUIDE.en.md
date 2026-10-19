@@ -1,18 +1,19 @@
 # Modbus Diagnostics & Dashboard Guide (Adlar Castra Aurora)
 
-This guide describes the built-in local diagnostic and service tools of the **Modbus drivers** in the Adlar Castra Homey app: the Aurora II driver and the Aurora III driver.
+This guide describes the built-in local diagnostic and service tools of the **Modbus drivers** in the Adlar Castra Homey app: the Aurora I/II driver and the Aurora III driver.
 
 ---
 
 ## 1. Overview
 
-Both Modbus drivers (`intelligent-heatpump-modbus` for Aurora II, `intelligent-heatpump-aurora3` for Aurora III) include an optional local HTTP service for deep diagnostics, live monitoring, and advanced register inspection. This tool runs directly on your Homey Pro and is accessible via your local web browser. Each model has its own dashboard server on its own port.
+Both Modbus drivers (`intelligent-heatpump-modbus` for Aurora I/II, `intelligent-heatpump-aurora3` for Aurora III) include an optional local HTTP service for deep diagnostics, live monitoring, and advanced register inspection. This tool runs directly on your Homey Pro and is accessible via your local web browser. Each model has its own dashboard server on its own port.
 
 ### Key Highlights
+
 - **100% Local**: No external cloud connection required.
 - **Real-time Monitoring**: Live display of all measured temperatures, pressure levels, fan speeds, and compressor states.
-- **Heating Curve Editor** (Aurora II only): Visual fine-tuning and simulation of your heating curve.
-- **Register Inspection**: Detailed insight into Modbus registers (P and L parameters on Aurora II, input and holding registers on Aurora III).
+- **Heating Curve Editor** (Aurora I/II only): Visual fine-tuning and simulation of your heating curve.
+- **Register Inspection**: Detailed insight into Modbus registers (P and L parameters on Aurora I/II, input and holding registers on Aurora III).
 
 ---
 
@@ -22,10 +23,11 @@ Both Modbus drivers (`intelligent-heatpump-modbus` for Aurora II, `intelligent-h
 
 | Model | Default port |
 |---|---|
-| Aurora II | **8090** |
+| Aurora I/II | **8090** |
 | Aurora III | **8091** |
 
 The dashboard server starts as soon as a device of that model is paired. You can change the port in the Homey app:
+
 1. Open the Homey app on your mobile device or desktop.
 2. Navigate to your Modbus heat pump device.
 3. Open **Device Settings** (gear icon) → **Advanced Settings**.
@@ -34,10 +36,11 @@ The dashboard server starts as soon as a device of that model is paired. You can
 Do not choose the same port for both models: only the first dashboard server will start.
 
 ### Opening the Dashboard
+
 Open a web browser on any computer or tablet connected to the same local network and browse to:
 
 ```text
-http://<homey-ip>:8090/   (Aurora II)
+http://<homey-ip>:8090/   (Aurora I/II)
 http://<homey-ip>:8091/   (Aurora III)
 ```
 
@@ -47,7 +50,7 @@ http://<homey-ip>:8091/   (Aurora III)
 
 ## 3. Available Views and Endpoints
 
-| Endpoint | Description | Purpose | Aurora II | Aurora III |
+| Endpoint | Description | Purpose | Aurora I/II | Aurora III |
 |---|---|---|---|---|
 | `/` | **Live Overview** | Main dashboard with real-time status, temperatures, power, and COP. | ✓ | ✓ |
 | `/interactive` | **Interactive Controls** | Direct overview with setpoint controls and operational mode toggles. On Aurora III also hot water function, silent mode, backup heater and (experimental) on/off. | ✓ | ✓ |
@@ -63,9 +66,12 @@ http://<homey-ip>:8091/   (Aurora III)
 > [!WARNING]
 > **Exercise Caution When Writing Registers**
 > Manually writing Modbus registers via the `/expert` view directly alters the heat pump controller firmware state.
+>
 > - Only modify registers if you understand Adlar's technical documentation and register specifications.
 > - Always record the original register value before applying any changes.
-> - The Aurora II driver register mapping is primarily optimized for the R32 series.
+> - The Aurora I/II driver register mapping is primarily optimized for the R32 series.
+
+<!-- aparte callouts -->
 
 > [!IMPORTANT]
 > **No password on the dashboards**

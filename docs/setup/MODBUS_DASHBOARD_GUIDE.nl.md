@@ -1,18 +1,19 @@
 # Modbus Diagnose- en Dashboardhandleiding (Adlar Castra Aurora)
 
-Deze handleiding beschrijft de ingebouwde lokale diagnose- en servicetools van de **Modbus-drivers** in de Adlar Castra Homey-app: de Aurora II-driver en de Aurora III-driver.
+Deze handleiding beschrijft de ingebouwde lokale diagnose- en servicetools van de **Modbus-drivers** in de Adlar Castra Homey-app: de Aurora I/II-driver en de Aurora III-driver.
 
 ---
 
 ## 1. Overzicht
 
-Beide Modbus-drivers (`intelligent-heatpump-modbus` voor Aurora II, `intelligent-heatpump-aurora3` voor Aurora III) bevatten een optionele, lokale HTTP-service voor diepgaande diagnose, live-monitoring en geavanceerde registerinspectie. Deze tool draait direct op uw Homey Pro en is toegankelijk via uw lokale webbrowser. Elk model heeft een eigen dashboardserver op een eigen poort.
+Beide Modbus-drivers (`intelligent-heatpump-modbus` voor Aurora I/II, `intelligent-heatpump-aurora3` voor Aurora III) bevatten een optionele, lokale HTTP-service voor diepgaande diagnose, live-monitoring en geavanceerde registerinspectie. Deze tool draait direct op uw Homey Pro en is toegankelijk via uw lokale webbrowser. Elk model heeft een eigen dashboardserver op een eigen poort.
 
 ### Belangrijkste eigenschappen
+
 - **100% lokaal**: Geen externe cloudverbinding vereist.
 - **Realtime monitoring**: Live weergave van alle gemeten temperaturen, drukwaarden, ventilatortoerentallen en compressorstatussen.
-- **Stooklijneditor** (alleen Aurora II): Visuele afstelling van de verwarmingscurve.
-- **Registerinspectie**: Gedetailleerd inzicht in Modbus-registers (P- en L-parameters bij Aurora II, input- en holdingregisters bij Aurora III).
+- **Stooklijneditor** (alleen Aurora I/II): Visuele afstelling van de verwarmingscurve.
+- **Registerinspectie**: Gedetailleerd inzicht in Modbus-registers (P- en L-parameters bij Aurora I/II, input- en holdingregisters bij Aurora III).
 
 ---
 
@@ -22,10 +23,11 @@ Beide Modbus-drivers (`intelligent-heatpump-modbus` voor Aurora II, `intelligent
 
 | Model | Standaardpoort |
 |---|---|
-| Aurora II | **8090** |
+| Aurora I/II | **8090** |
 | Aurora III | **8091** |
 
 De dashboardserver start zodra er een apparaat van dat model gekoppeld is. U kunt de poort wijzigen in de Homey-app:
+
 1. Open de Homey-app op uw smartphone of desktop.
 2. Ga naar het Modbus-warmtepompapparaat.
 3. Open **Instellingen** (tandwielicoon) → **Geavanceerde instellingen**.
@@ -34,10 +36,11 @@ De dashboardserver start zodra er een apparaat van dat model gekoppeld is. U kun
 Kies voor de twee modellen niet dezelfde poort: dan start alleen de eerste dashboardserver.
 
 ### Het dashboard openen
+
 Open een webbrowser op een computer of tablet verbonden met hetzelfde lokale netwerk en navigeer naar:
 
 ```text
-http://<homey-ip>:8090/   (Aurora II)
+http://<homey-ip>:8090/   (Aurora I/II)
 http://<homey-ip>:8091/   (Aurora III)
 ```
 
@@ -47,7 +50,7 @@ http://<homey-ip>:8091/   (Aurora III)
 
 ## 3. Beschikbare Weergaven en Endpoints
 
-| Endpoint | Omschrijving | Doel | Aurora II | Aurora III |
+| Endpoint | Omschrijving | Doel | Aurora I/II | Aurora III |
 |---|---|---|---|---|
 | `/` | **Live-overzicht** | Hoofdweergave met realtime status, temperaturen, vermogen en COP. | ✓ | ✓ |
 | `/interactive` | **Interactieve bediening** | Direct overzicht met mogelijkheid om doeltemperaturen en werkmodi in te stellen. Bij Aurora III ook tapwaterfunctie, stille modus, bijverwarming en (experimenteel) aan/uit. | ✓ | ✓ |
@@ -63,9 +66,12 @@ http://<homey-ip>:8091/   (Aurora III)
 > [!WARNING]
 > **Voorzichtigheid geboden bij registerschrijfopdrachten**
 > Het handmatig wijzigen van Modbus-registers via de `/expert` weergave beïnvloedt direct de interne werking van de warmtepompcontroller.
+>
 > - Wijzig registers uitsluitend als u bekend bent met de fabrikantspecificaties van Adlar.
 > - Noteer altijd de oorspronkelijke registerwaarde vóórdat u een wijziging doorvoert.
-> - De Aurora II-driver is standaard geoptimaliseerd voor de R32-registermap.
+> - De Aurora I/II-driver is standaard geoptimaliseerd voor de R32-registermap.
+
+<!-- aparte callouts -->
 
 > [!IMPORTANT]
 > **Geen wachtwoord op de dashboards**

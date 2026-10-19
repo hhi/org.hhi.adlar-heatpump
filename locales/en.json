@@ -12,7 +12,7 @@
     "enter_modbus_info": {
       "title": "Modbus Connection",
       "description": "Enter the IP address and port of your Elfin EW11A or Modbus TCP gateway",
-      "model_hint": "Choose the driver that matches the model on the type plate of your heat pump (Aurora II or Aurora III).",
+      "model_hint": "Choose the driver that matches the model on the type plate of your heat pump (Aurora I/II or Aurora III).",
       "host": "IP Address:",
       "port": "TCP Port:",
       "unit_id": "Modbus Unit ID:",

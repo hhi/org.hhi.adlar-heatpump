@@ -12,7 +12,7 @@
     "enter_modbus_info": {
       "title": "Modbus-verbinding",
       "description": "Voer het IP-adres en de poort van uw Elfin EW11A of Modbus TCP-gateway in",
-      "model_hint": "Kies de driver die past bij het model op het typeplaatje van uw warmtepomp (Aurora II of Aurora III).",
+      "model_hint": "Kies de driver die past bij het model op het typeplaatje van uw warmtepomp (Aurora I/II of Aurora III).",
       "host": "IP-adres:",
       "port": "TCP-poort:",
       "unit_id": "Modbus Unit-ID:",

@@ -614,9 +614,9 @@ ALORS : Calculer valeur depuis courbe
 
 ---
 
-## Modèles Modbus : Aurora II et Aurora III
+## Modèles Modbus : Aurora I/II et Aurora III
 
-L'application dispose d'un pilote Modbus distinct par modèle. De nombreuses cartes de flux existent **une fois par pilote** avec le même titre : dans l'éditeur de Flow, vous voyez les cartes du pilote de l'appareil sélectionné. Un flow créé pour un appareil Aurora II ne fonctionne donc pas pour un appareil Aurora III ; recréez-le avec la carte de l'appareil Aurora III.
+L'application dispose d'un pilote Modbus distinct par modèle. De nombreuses cartes de flux existent **une fois par pilote** avec le même titre : dans l'éditeur de Flow, vous voyez les cartes du pilote de l'appareil sélectionné. Un flow créé pour un appareil Aurora I/II ne fonctionne donc pas pour un appareil Aurora III ; recréez-le avec la carte de l'appareil Aurora III.
 
 Les cartes ci-dessous sont **réservées à Aurora III**.
 
