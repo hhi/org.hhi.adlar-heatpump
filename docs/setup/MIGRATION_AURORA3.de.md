@@ -1,6 +1,6 @@
 # Umstieg auf den Aurora III-Treiber
 
-Dieser Leitfaden richtet sich an Nutzer der separaten App **Adlar Castra Wärmepumpe (Aurora-III Modbus)**. Ab Version 3.2.0 ist die Aurora III-Unterstützung Teil der App **Adlar Castra Wärmepumpe**, als Treiber *Adlar Castra Aurora III Heat Pump (Modbus)*.
+Dieser Leitfaden richtet sich an Nutzer der separaten App **Adlar Castra Wärmepumpe (Aurora-III Modbus)**. Ab Version 3.2.0 ist die Aurora III-Unterstützung Teil der App **Adlar Castra Wärmepumpe**, als Treiber *Aurora III über Modbus*.
 
 Homey kann Geräte nicht von einer App in eine andere verschieben. Umsteigen bedeutet: das Gerät in der neuen App erneut koppeln und die Flows neu aufbauen.
 
@@ -28,7 +28,7 @@ Erledigen Sie daher zuerst eines von beiden:
 ## Schritt 3 — In der neuen App koppeln
 
 1. Installieren oder aktualisieren Sie die App **Adlar Castra Wärmepumpe** auf Version 3.2.0 oder höher.
-2. Fügen Sie ein Gerät hinzu und wählen Sie **Adlar Castra Aurora III Heat Pump (Modbus)**. Wählen Sie nicht den Aurora II-Treiber: Er verwendet andere Registeradressen.
+2. Fügen Sie ein Gerät hinzu und wählen Sie **Aurora III über Modbus**. Wählen Sie nicht *Aurora I/II über Modbus*: Er verwendet andere Registeradressen.
 3. Geben Sie IP-Adresse, TCP-Port und Modbus-Unit-ID des Gateways ein.
 4. Stellen Sie die notierten Einstellungen in den Geräteeinstellungen wieder her.
 

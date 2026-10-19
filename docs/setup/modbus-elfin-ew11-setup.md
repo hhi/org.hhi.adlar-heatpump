@@ -10,8 +10,8 @@ Kies in Homey de driver die past bij het model op het typeplaatje van de warmtep
 
 | Model | Driver in Homey | Seriële instelling | Dashboardpoort |
 |---|---|---|---|
-| Aurora I / II | *Adlar Castra Aurora II Heat Pump (Modbus)* | `9600 8N1` | `8090` |
-| Aurora III / PRO | *Adlar Castra Aurora III Heat Pump (Modbus)* | `9600 8N2` | `8091` |
+| Aurora I / II | *Aurora I/II via Modbus* | `9600 8N1` | `8090` |
+| Aurora III / PRO | *Aurora III via Modbus* | `9600 8N2` | `8091` |
 
 Met de verkeerde driver of de verkeerde seriële instelling komt er geen bruikbare verbinding, zonder duidelijke foutmelding.
 

@@ -315,6 +315,18 @@ devices veranderen niet. Ook het driver-icoon (`assets/icon.svg`) is byte-identi
 beide Modbus-drivers; alleen de drivernaam en de driverafbeeldingen onderscheiden ze in de
 pairinglijst.
 
+**Bijgesteld op 2026-10-19 (O7).** In de pairinglijst kort Homey lange namen af, waardoor het
+onderscheidende deel achteraan wegvalt. De namen beginnen nu met model en protocol, voor alle
+drie de drivers en in alle vier talen (`de`: *über*):
+
+| Driver | `name` in `driver.compose.json` |
+|---|---|
+| Tuya | Aurora I/II via Tuya |
+| Aurora II (Modbus) | Aurora I/II via Modbus |
+| Aurora III (Modbus) | Aurora III via Modbus |
+
+De Tuya-driver krijgt hiermee ook een nieuwe weergavenaam, en voor het eerst `de` en `fr`.
+
 #### Risico — verkeerd model gepaird (nieuw door de merge)
 
 Zolang elk model een eigen app had, kon een gebruiker het verkeerde model niet kiezen. Na de
@@ -470,7 +482,7 @@ voor het minimale alternatief (§7), waardoor V4 vervalt. Uitvoering per fase vo
 | **O4** | Widget: één widget met driver-dispatch, of twee widgets | Eén widget met unie-contract |
 | **O5** | Versienummer | 3.2.0 (nieuwe driver, niet-brekend voor bestaande gebruikers) |
 | **O6** | De drie COP-triggers (groep C) ook voor Aurora II openzetten | Ja, maar als losse changelog-regel en los te testen |
-| **O7** | Weergavenamen van de twee Modbus-drivers per model onderscheiden (§7) | Ja |
+| **O7** | Weergavenamen van de twee Modbus-drivers per model onderscheiden (§7) | Ja; op 2026-10-19 bijgesteld naar *model via protocol* voor alle drie de drivers (zie §7) |
 | **O8** | Modelprobe bij het pairen van beide Modbus-drivers (§7) | Nee; O7 + waarschuwingsregel in het pairingscherm. Probe eventueel later als losse release |
 | **O9** | De externe ADR-reeks (ADR-020 t/m ADR-061, nu buiten beide repo's) in de repo opnemen? | Ja, als `docs/architecture/decisions/` met herkomstvermelding per bron. Vooraf vaststellen of na de fork van Aurora II naar Aurora III hetzelfde nummer voor verschillende besluiten is gebruikt. Dit staat los van de reeks ADR-001…004 in `docs/architecture/`; die twee nummerreeksen expliciet onderscheiden (bijv. de nieuwe merge-ADR's een prefix `MERGE-` geven, of de externe reeks `LEGACY-ADR-0xx`) |
 

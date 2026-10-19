@@ -17462,8 +17462,10 @@
   "drivers": [
     {
       "name": {
-        "en": "Adlar Castra Aurora Heat Pump (Tuya)",
-        "nl": "Adlar Castra Aurora-warmtepomp (Tuya)"
+        "en": "Aurora I/II via Tuya",
+        "nl": "Aurora I/II via Tuya",
+        "de": "Aurora I/II über Tuya",
+        "fr": "Aurora I/II via Tuya"
       },
       "class": "heatpump",
       "capabilities": [
@@ -20498,10 +20500,10 @@
     },
     {
       "name": {
-        "en": "Adlar Castra Aurora III Heat Pump (Modbus)",
-        "nl": "Adlar Castra Aurora III-warmtepomp (Modbus)",
-        "de": "Adlar Castra Aurora III Wärmepumpe (Modbus)",
-        "fr": "Pompe à chaleur Adlar Castra Aurora III (Modbus)"
+        "en": "Aurora III via Modbus",
+        "nl": "Aurora III via Modbus",
+        "de": "Aurora III über Modbus",
+        "fr": "Aurora III via Modbus"
       },
       "class": "heatpump",
       "capabilities": [
@@ -22375,10 +22377,10 @@
     },
     {
       "name": {
-        "en": "Adlar Castra Aurora II Heat Pump (Modbus)",
-        "nl": "Adlar Castra Aurora II-warmtepomp (Modbus)",
-        "de": "Adlar Castra Aurora II Wärmepumpe (Modbus)",
-        "fr": "Pompe à chaleur Adlar Castra Aurora II (Modbus)"
+        "en": "Aurora I/II via Modbus",
+        "nl": "Aurora I/II via Modbus",
+        "de": "Aurora I/II über Modbus",
+        "fr": "Aurora I/II via Modbus"
       },
       "class": "heatpump",
       "capabilities": [

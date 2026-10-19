@@ -1,7 +1,9 @@
 {
   "name": {
-    "en": "Adlar Castra Aurora Heat Pump (Tuya)",
-    "nl": "Adlar Castra Aurora-warmtepomp (Tuya)"
+    "en": "Aurora I/II via Tuya",
+    "nl": "Aurora I/II via Tuya",
+    "de": "Aurora I/II über Tuya",
+    "fr": "Aurora I/II via Tuya"
   },
   "class": "heatpump",
   "capabilities": [
