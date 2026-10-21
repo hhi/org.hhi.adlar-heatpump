@@ -1,0 +1,58 @@
+{
+  "id": "set_backup_heater",
+  "title": {
+    "en": "Switch forced backup heater",
+    "nl": "Geforceerde bijverwarming schakelen",
+    "de": "Erzwungene Zusatzheizung schalten",
+    "fr": "Commuter l'appoint électrique forcé"
+  },
+  "titleFormatted": {
+    "en": "Switch forced backup heater [[state]]",
+    "nl": "Geforceerde bijverwarming [[state]] schakelen",
+    "de": "Erzwungene Zusatzheizung [[state]] schalten",
+    "fr": "Commuter l'appoint électrique forcé sur [[state]]"
+  },
+  "hint": {
+    "en": "Forces the electric backup heater on or releases it",
+    "nl": "Forceert de elektrische bijverwarming of geeft deze weer vrij",
+    "de": "Erzwingt die elektrische Zusatzheizung oder gibt sie wieder frei",
+    "fr": "Force l'appoint électrique ou le libère"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    },
+    {
+      "type": "dropdown",
+      "name": "state",
+      "title": {
+        "en": "State",
+        "nl": "Stand",
+        "de": "Zustand",
+        "fr": "État"
+      },
+      "values": [
+        {
+          "id": "on",
+          "title": {
+            "en": "on",
+            "nl": "aan",
+            "de": "ein",
+            "fr": "marche"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "off",
+            "nl": "uit",
+            "de": "aus",
+            "fr": "arrêt"
+          }
+        }
+      ]
+    }
+  ]
+}

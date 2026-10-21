@@ -11,6 +11,10 @@ import { COPCalculator, type COPDataSources, type COPCalculationResult } from '.
 import { SCOPCalculator, type COPMeasurement } from '../../lib/tuya/services/scop-calculator';
 import { RollingCOPCalculator, type COPDataPoint, type RollingCOPResult } from '../../lib/shared/services/rolling-cop-calculator';
 import { ServiceCoordinator } from '../../lib/tuya/services/service-coordinator';
+import {
+  buildLiveOperationWidgetState,
+  type LiveOperationWidgetState,
+} from '../../lib/tuya/services/widget-state-service';
 import { Logger } from '../../lib/shared/logger';
 
 /**
@@ -3230,6 +3234,18 @@ class MyDevice extends Homey.Device {
     }, 30000); // 30 seconds
 
     this.log('Connection status tracking initialized (30s interval)');
+  }
+
+  /**
+   * State for the Adlar live operation widget (v3.3.0). Read-only: no side effects.
+   */
+  public getLiveOperationWidgetState(): LiveOperationWidgetState {
+    const tuyaService = this.serviceCoordinator?.getTuyaConnection() ?? null;
+    return buildLiveOperationWidgetState({
+      device: this,
+      connected: tuyaService?.getPublicConnectionState() ?? null,
+      lastDataAt: tuyaService?.getLastDataReceivedAt() ?? null,
+    });
   }
 
   /**

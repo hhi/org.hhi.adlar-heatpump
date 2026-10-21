@@ -34,6 +34,8 @@ Most user documentation is available in four languages:
 | Configuration Guide | [NL](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](setup/advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](setup/advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md) |
 | Tuya LocalKey Guide | [NL](setup/Tuya_LocalKey_Homey_Guide_NL.pdf) | [EN](setup/Tuya_LocalKey_Homey_Guide_EN.pdf) | [DE](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) | [FR](setup/Tuya_LocalKey_Homey_Guide_FR.pdf) |
 | Quick Fix Guide | [NL](setup/USER_QUICK_FIX.nl.md) | [EN](setup/USER_QUICK_FIX.en.md) | [DE](setup/USER_QUICK_FIX.de.md) | [FR](setup/USER_QUICK_FIX.fr.md) |
+| Modbus Dashboard Guide (Aurora I/II and III) | [NL](setup/MODBUS_DASHBOARD_GUIDE.nl.md) | [EN](setup/MODBUS_DASHBOARD_GUIDE.en.md) | [DE](setup/MODBUS_DASHBOARD_GUIDE.de.md) | [FR](setup/MODBUS_DASHBOARD_GUIDE.fr.md) |
+| Aurora III Migration Guide | [NL](setup/MIGRATION_AURORA3.nl.md) | [EN](setup/MIGRATION_AURORA3.en.md) | [DE](setup/MIGRATION_AURORA3.de.md) | [FR](setup/MIGRATION_AURORA3.fr.md) |
 
 ---
 
@@ -47,8 +49,10 @@ Most user documentation is available in four languages:
 - **Protocol Version Guide** — Tuya protocol version selection (3.3/3.4/3.5)
 - **Configuration Guide** — Complete settings reference
 - **Tuya LocalKey Guide** — How to obtain Tuya credentials (PDF)
-- **Elfin EW11 Modbus Setup Guide** — [Modbus TCP Gateway Setup Guide](setup/modbus-elfin-ew11-setup.md)
+- **Elfin EW11 Modbus Setup Guide** — [Modbus TCP Gateway Setup Guide](setup/modbus-elfin-ew11-setup.md) for Aurora I/II and III (Dutch)
 - **Quick Fix Guide** — Common problems and solutions
+- **Modbus Dashboard Guide** — Local dashboards per Modbus model (ports 8090 and 8091)
+- **Aurora III Migration Guide** — Moving from the separate Aurora III app
 - **guide/** — Additional detailed guides (flow cards, adaptive control, building insights)
 
 ### 📊 COP calculation/ — Efficiency Algorithms

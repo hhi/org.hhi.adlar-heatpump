@@ -614,6 +614,82 @@ THEN: Bereken waarde van curve
 
 ---
 
+## Modbus-modellen: Aurora I/II en Aurora III
+
+De app heeft per model een eigen Modbus-driver. Veel flowkaarten bestaan **per driver één keer** met dezelfde titel: in de Flow-editor ziet u de kaarten van de driver van het gekozen apparaat. Een flow die voor een Aurora I/II-apparaat is gemaakt, werkt daarom niet voor een Aurora III-apparaat; bouw hem opnieuw op met de kaart van het Aurora III-apparaat.
+
+De kaarten hieronder zijn **alleen voor Aurora III**.
+
+### 11. 🔥 Geforceerde Bijverwarming Schakelen (Aurora III)
+
+**ID**: `set_backup_heater`
+**Type**: Actie
+
+```yaml
+THEN: Geforceerde bijverwarming [aan/uit] schakelen
+```
+
+**Parameters**:
+
+- `state` (aan/uit): forceert de elektrische bijverwarming of geeft deze weer vrij
+
+### 12. 🚿 Tapwaterfunctie Schakelen (Aurora III)
+
+**ID**: `set_dhw_function`
+**Type**: Actie
+
+```yaml
+THEN: Tapwaterfunctie [aan/uit] schakelen
+```
+
+**Parameters**:
+
+- `state` (aan/uit): schakelt de tapwaterverwarming aan of uit
+
+### 13. 🤫 Stille Modus Instellen (Aurora III)
+
+**ID**: `set_silent_mode`
+**Type**: Actie
+
+```yaml
+THEN: Stille modus instellen op [Uit/Niveau 1/Niveau 2]
+```
+
+**Parameters**:
+
+- `level` (Uit, Niveau 1, Niveau 2): niveau van de stille modus. Niveau 2 is alleen beschikbaar op R290-warmtepompen.
+
+### 14. 🚿 Tapwater Wordt Verwarmd (Aurora III)
+
+**ID**: `dhw_heating_active`
+**Type**: Voorwaarde
+
+```yaml
+IF: Tapwater wordt wel/niet verwarmd
+```
+
+### 15. 🤫 Stille Modus Is (Aurora III)
+
+**ID**: `silent_mode_is`
+**Type**: Voorwaarde
+
+```yaml
+IF: Stille modus is (niet) [Uit/Niveau 1/Niveau 2]
+```
+
+#### Voorbeeldflow
+
+**Stil 's nachts**:
+
+```text
+WHEN: Het is 22:00
+THEN: Stille modus instellen op Niveau 1
+WHEN: Het is 07:00
+THEN: Stille modus instellen op Uit
+```
+
+---
+
 ## Instellingen Configuratie
 
 ### Vermogensdrempel Instelling

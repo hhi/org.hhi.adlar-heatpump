@@ -1,0 +1,49 @@
+{
+  "id": "adlar_silent_mode",
+  "type": "enum",
+  "title": {
+    "en": "Silent mode",
+    "nl": "Stille modus",
+    "fr": "Mode silencieux",
+    "de": "Leisemodus"
+  },
+  "icon": "/assets/silent-mode.svg",
+  "uiComponent": "picker",
+  "getable": true,
+  "setable": true,
+  "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Off",
+        "nl": "Uit",
+        "fr": "Arrêt",
+        "de": "Aus"
+      }
+    },
+    {
+      "id": "1",
+      "title": {
+        "en": "Level 1",
+        "nl": "Niveau 1",
+        "fr": "Niveau 1",
+        "de": "Stufe 1"
+      }
+    },
+    {
+      "id": "2",
+      "title": {
+        "en": "Level 2",
+        "nl": "Niveau 2",
+        "fr": "Niveau 2",
+        "de": "Stufe 2"
+      }
+    }
+  ],
+  "description": {
+    "en": "Silent mode level in holding register 4-2103, bits 4-5. Level 2 is only available on R290 heat pumps. Other bits of the register are kept unchanged.",
+    "nl": "Niveau van de stille modus in holdingregister 4-2103, bits 4-5. Niveau 2 is alleen beschikbaar op R290-warmtepompen. De overige bits van het register blijven ongewijzigd.",
+    "fr": "Niveau du mode silencieux dans le registre holding 4-2103, bits 4-5. Le niveau 2 n'est disponible que sur les pompes à chaleur R290. Les autres bits du registre restent inchangés.",
+    "de": "Stufe des Leisemodus in Holdingregister 4-2103, Bits 4-5. Stufe 2 ist nur bei R290-Wärmepumpen verfügbar. Die übrigen Bits des Registers bleiben unverändert."
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "adlar_backup_heater_forced",
+  "type": "boolean",
+  "title": {
+    "en": "Forced electric backup heater",
+    "nl": "Geforceerde elektrische bijverwarming",
+    "fr": "Appoint électrique forcé",
+    "de": "Erzwungene elektrische Zusatzheizung"
+  },
+  "icon": "/assets/backup-heater.svg",
+  "uiComponent": "toggle",
+  "getable": true,
+  "setable": true,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Forced backup heater on",
+    "nl": "Geforceerde bijverwarming aan",
+    "fr": "Appoint forcé activé",
+    "de": "Erzwungene Zusatzheizung ein"
+  },
+  "insightsTitleFalse": {
+    "en": "Forced backup heater off",
+    "nl": "Geforceerde bijverwarming uit",
+    "fr": "Appoint forcé désactivé",
+    "de": "Erzwungene Zusatzheizung aus"
+  },
+  "description": {
+    "en": "Forces the electric backup heater on via holding register 4-2103, bit 3. Other bits of the register are kept unchanged.",
+    "nl": "Forceert de elektrische bijverwarming via holdingregister 4-2103, bit 3. De overige bits van het register blijven ongewijzigd.",
+    "fr": "Force l’appoint électrique via le registre holding 4-2103, bit 3. Les autres bits du registre restent inchangés.",
+    "de": "Erzwingt die elektrische Zusatzheizung über Holdingregister 4-2103, Bit 3. Die übrigen Bits des Registers bleiben unverändert."
+  }
+}

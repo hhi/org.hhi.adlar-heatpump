@@ -4,6 +4,7 @@
 **Status:** geïmplementeerd (2026-06-09, ADR-060 §5 actiepunt 3); gedrag vastgelegd in ADR-060 (gedeelde gedragsspecificatie, `plans/decisions/`).
 **Gerelateerd:** ADR-056 (building model hardening), referentieproject-ADR-057 W2b
 **Code:** `lib/modbus/services/building-model-service.ts` → `collectAndLearn()`
+**Varianten per driver:** [Tuya](<../Architectural overview/building-model-sample-gating.md>) · Aurora II (dit document) · [Aurora III](building-model-sample-gating-aurora3.md) (extra gate `blocked_dhw_active`)
 
 Het gebouwmodel (RLS) leert vier thermische parameters — C (thermische massa), UA (warmteverlies), g (zonnewinst), P_int (interne winst) — uit de relatie tussen **toegevoerd thermisch vermogen** en **verandering van de binnentemperatuur**. Die relatie geldt alleen wanneer het thermisch vermogen daadwerkelijk het gebouw in gaat. Twee bedrijfssituaties breken die aanname structureel; daarvoor bestaan de gates `blocked_dhw_mode` en `blocked_defrost`.
 

@@ -16,10 +16,10 @@
   "min": 0,
   "max": 500,
   "description": {
-    "en": "Enhanced Vapor Injection (EVI) valve opening position from Modbus sensor register 0x0043 (eviValveOpenStep), in stepper motor steps.",
-    "nl": "Openingspositie van de EVI-klep (Enhanced Vapor Injection) uit Modbus-sensorregister 0x0043 (eviValveOpenStep), in stappenmotor-stappen.",
-    "de": "Öffnungsposition des EVI-Ventils (Enhanced Vapor Injection) aus Modbus-Sensorregister 0x0043 (eviValveOpenStep), in Schrittmotorschritten.",
-    "fr": "Position d'ouverture de la vanne EVI (Enhanced Vapor Injection) depuis le registre capteur Modbus 0x0043 (eviValveOpenStep), en pas moteur pas à pas."
+    "en": "Opening position of the auxiliary expansion valve for vapour injection (EVI), in stepper motor steps.",
+    "nl": "Openingspositie van de hulpexpansieklep voor dampinjectie (EVI), in stappenmotor-stappen.",
+    "de": "Öffnungsposition des Hilfsexpansionsventils für die Dampfeinspritzung (EVI), in Schrittmotorschritten.",
+    "fr": "Position d'ouverture du détendeur auxiliaire pour l'injection de vapeur (EVI), en pas du moteur pas à pas."
   },
   "insights": true,
   "insightsTitle": {

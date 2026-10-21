@@ -1,12 +1,12 @@
 # Implementatieplan — Aurora III Modbus-driver integreren in org.hhi.adlar-heatpump
 
 - **Uitvoeringsplan bij** [ADR-004](ADR-004-AURORA3-DRIVER-MERGE.md)
-- **Doelversie**: 3.2.0 (voorstel; huidig 3.1.3)
+- **Doelversie**: 3.2.0 (huidig 3.1.4)
 - **Bron**: `org.hhi.adlar3-heatpump-modbus` v1.9.4 (commit `58e010a`)
 - **Datum**: 2026-10-17
-- **Status**: Concept — uitvoering start pas na besluit over O1 t/m O9
+- **Status**: Fase 0 t/m 6 uitgevoerd (2026-10-18/19); fase 7 gesplitst in 7a (lokaal, simulator) en 7b (testkanaal); O9 open — zie *Afwijkingen tijdens uitvoering*
 
-In dit plan staan de voorgestelde waarden uit ADR-004 ingevuld: driver-ID
+In dit plan staan de aanvaarde waarden uit ADR-004 ingevuld: driver-ID
 `intelligent-heatpump-aurora3`, suffix `_aurora3`. De migratiescripts nemen beide als
 constante bovenaan, zodat een ander besluit één regel wijziging is.
 
@@ -24,7 +24,7 @@ constante bovenaan, zodat een ander besluit één regel wijziging is.
 | Fase | 🔵 Vereist voor de merge | 🟠 Bestaande schuld / optioneel |
 |---|---|---|
 | **0** | Baseline, ownership-script voor N drivers, `verify.py` generiek | — |
-| **1** | `lib/aurora3/` (21 bestanden), drivermap onder nieuwe ID, modelprobe bij pairen (O8), assets, tests, `.homeyignore` | — |
+| **1** | `lib/aurora3/` (21 bestanden), drivermap onder nieuwe ID, waarschuwingsregel bij pairen (O8), assets, tests, `.homeyignore` | — |
 | **2** | 8 capabilities, `adlar_mode_aurora3`, 10 beschrijvingen neutraal | `icon` op `cop_optimizer_diagnostics` |
 | **3** | 57 kaarten splitsen, 17 pipe-filters uitbreiden, 3 COP-triggers, 5 nieuw | O6: COP-triggers ook voor Aurora II |
 | **4** | Tweede dashboard-instantie op eigen poort, `publicDir`-optie, widget-resolver per driver | — |
@@ -37,7 +37,7 @@ constante bovenaan, zodat een ander besluit één regel wijziging is.
 | # | Voorwaarde | Waarom |
 |---|---|---|
 | P1 | O1 t/m O9 besloten | Driver-ID en suffix zijn na publicatie permanent |
-| P5 | V4 beantwoord (probe-register per model) | Nodig voor O8 in fase 1b |
+| ~~P5~~ | ~~V4 beantwoord~~ | Vervallen: O8 zonder modelprobe |
 | P2 | `npm ci` lukt en `npm run build` + `npm test` zijn groen op `main` | Baseline; zonder groene start is geen fase aantoonbaar gedragsneutraal |
 | P3 | Homey CLI beschikbaar voor `homey app validate` | Niet aanwezig in de cloud-analyseomgeving; lokaal uitvoeren |
 | P4 | Bronrepo op een vaste commit (`58e010a`) | Wijzigingen in de bronrepo tijdens de merge maken de scripts niet-reproduceerbaar |
@@ -128,17 +128,18 @@ Twee controlepunten horen bij deze stap:
 3. `device.ts`: klasse hernoemen naar `Aurora3ModbusDevice`; imports herschrijven (1a)
 4. `driver.compose.json` en `driver.settings.compose.json`: ongewijzigd overnemen; in de
    setting `dashboard_port` standaard en hint 8090 → 8091 (alle vier talen voluit)
-5. `pair/enter_modbus_info.html`: ongewijzigd (driver-scoped; byte-identiek aan Aurora II)
+5. `pair/enter_modbus_info.html`: ongewijzigd overnemen (driver-scoped; byte-identiek aan
+   Aurora II); de waarschuwingsregel uit stap 7 volgt in fase 5a
 6. Drivermap-assets (`Aurora-drv-*.png`, `icon.svg`): ongewijzigd. Het icoon is identiek
    aan dat van de Aurora II-driver; een eigen icoon is optioneel (svg-icon-designer,
    iOS-richtlijnen uit CLAUDE.md)
-7. **Modelprobe bij pairen (O8)** — in `driver.ts` van **beide** Modbus-drivers, tussen
-   `enter_modbus_info` en `list_devices`: korte verbinding, één read op een register dat
-   alleen het eigen model heeft (keuze volgt uit V4), verbinding sluiten. Bij een
-   mismatch een gelokaliseerde fout die naar de juiste driver verwijst; bij een
-   time-out of exception géén harde blokkade maar een waarschuwing, zodat een gebruiker
-   met een afwijkende firmware niet buitengesloten wordt. Raakt alleen nieuwe pairings.
-   Voor Aurora II is dit de enige functionele wijziging in deze merge — apart testen
+7. **Waarschuwingsregel bij pairen (O8)** — *uitgevoerd in fase 5a*, samen met de
+   drivernamen (O7): hij raakt de Aurora II-drivermap, en de verificatie van fase 1 eist
+   dat die onaangeroerd blijft. In het eerste pairingscherm van **beide**
+   Modbus-drivers één gelokaliseerde regel (vier talen): *"Kies het model dat op het
+   typeplaatje staat."* Eén `data-i18n`-element in beide `enter_modbus_info.html` plus één
+   sleutel in `locales/*.json`. Alleen tekst, geen probe en geen wijziging in `driver.ts`. Voor
+   Aurora II is dit, naast de drivernaam (O7), de enige zichtbare wijziging
 
 **`device.ts` — nagelopen oppervlakken**: `homey.app` (4 casts, fase 4a),
 `homey.flow` (via `triggerFlowCard`, ID's uit 3A/3B/3C), `homey.drivers` (alleen een
@@ -175,7 +176,10 @@ compileert de code, maar het manifest is nog niet consistent: de drivermap verwi
 ### Verificatie
 
 - `npx tsc --noEmit` groen
-- `node --test test/unit/aurora3/*.test.js` groen na build
+- `node --test test/unit/aurora3/*.test.js` groen na build, op één test na:
+  `/api/capabilities includes enum value titles` leest `adlar_silent_mode` en `adlar_mode`
+  uit `app.json` en slaagt pas na fase 2 (nieuwe capability, `adlar_mode_aurora3`). In
+  fase 2b de test meenemen in de hernoeming
 - `git diff --stat -- lib/shared lib/tuya lib/modbus drivers/intelligent-heat-pump drivers/intelligent-heatpump-modbus`
   is **leeg** — bewijs dat bestaande drivers onaangeroerd zijn
 
@@ -417,7 +421,8 @@ fragiel aanmerkte. Met drie drivers op één app is een getypeerde app-interface
 | `locales/en.json`, `nl.json` | 3 nieuwe sleutels: `building_model.blocked_dhw_active`, `errors.silent_level2_r290_only`, `errors.zone_onoff_disabled` |
 | `locales/de.json`, `fr.json` | Dezelfde 3 sleutels vertalen |
 | `es`-vertalingen in bron-manifesten | Weglaten — de app ondersteunt geen `es` |
-| Drivernamen (O7) | Aurora III: *"Adlar Castra Aurora III Heat Pump (Modbus)"*; Aurora II van *"… (Modbus)"* naar *"… Aurora II … (Modbus)"* — alleen de weergavenaam, de ID blijft |
+| Waarschuwingsregel bij pairen (O8) | Eén `data-i18n`-element in `pair/enter_modbus_info.html` van beide Modbus-drivers plus één sleutel in alle vier `locales/*.json`: *"Kies het model dat op het typeplaatje staat."* (zie 1b stap 7) |
+| Drivernamen (O7) | Aurora III: *"Adlar Castra Aurora III Heat Pump (Modbus)"*; Aurora II van *"… (Modbus)"* naar *"… Aurora II … (Modbus)"* — alleen de weergavenaam, de ID blijft. *Bijgesteld 2026-10-19: "Aurora I/II via Tuya", "Aurora I/II via Modbus", "Aurora III via Modbus" in vier talen; zie ADR-004 §7* |
 | Driver-manifest `de`/`fr` | `driver.compose.json` van Aurora III heeft 22 strings met alleen en/nl (drivernaam en `capabilitiesOptions`-titels); aanvullen zoals bij de twee bestaande drivers. Capabilities, flow cards en settings van de bron hebben al alle vier talen (gemeten) |
 | `.homeycompose/app.json` | Versie 3.2.0 (O5); beschrijving en `tags` beoordelen op vermelding van Modbus/Aurora III |
 | `.homeychangelog.json` | Regel per CLAUDE.md-richtlijn, bijv. *"Nieuwe driver voor de Adlar Aurora III (Modbus TCP)."* |
@@ -434,7 +439,7 @@ Gemeten overlap van de 19 documentbestanden in de bronrepo:
 
 | Status | Aantal | Bestanden |
 |---|---|---|
-| Identiek aanwezig | 5 | `Heatpump specs/modbus/Eflin EW11a/*` (handleidingen gateway) |
+| Identiek aanwezig | 5 | `Heatpump specs/modbus/Elfin EW11A/*` (handleidingen gateway) |
 | Zelfde pad, andere inhoud | 4 | `Heatpump specs/modbus/Adlar III/HHi/*.xlsx` (registermap, capability-mapping, A2-vs-A3-mapping) |
 | Al aanwezig onder `docs/Dev support/modbus/`, ander pad | 2 | `adr-061-building-model-persistence.md` (alleen kop en paden anders), `building-model-sample-gating.md` (Aurora III-versie voegt de gate `blocked_dhw_active` toe) |
 | Nieuw | 8 | `capability-modbus-mapping.md`, 6 setup-afbeeldingen/pdf's, `setup/README.md` (Elfin-gids) |
@@ -473,7 +478,7 @@ daar niet getest; als algemene tip opnemen, niet als Aurora II-eis.
 | `Dev support/adr-061-building-model-persistence.md` | — (bestaat al in `docs/Dev support/modbus/`) | Inhoudelijk gelijk; alleen de kop (project, codepaden) verschilt. Niet kopiëren; in het bestaande document de regel *Codegebied* aanvullen met de `lib/aurora3/`-paden. De nummering `adr-061` hoort bij de ADR-reeks van de bronrepo's, niet bij `docs/architecture/ADR-00x` |
 | `Dev support/building-model-sample-gating.md` | `docs/Dev support/modbus/building-model-sample-gating.md` | Samenvoegen: de Aurora III-versie is een superset (extra gate `blocked_dhw_active`, sinds bron-v1.9.0). Eén document dat per gate vermeldt bij welke driver hij geldt. Er staat bovendien een tweede kopie in `docs/Dev support/Architectural overview/`; vaststellen welke de bron van waarheid is |
 | `Heatpump specs/…/Adlar III/HHi/*.xlsx` (4) | Zelfde pad | Inhoud verschilt; de bronversie is de nieuwste (laatste werk aan Aurora III vond in die repo plaats). Overschrijven na controle van de wijzigingsdatum in de bestandsmetadata; bij twijfel beide bewaren met datumsuffix |
-| `Heatpump specs/…/Eflin EW11a/*` (5) | — | Identiek, niet kopiëren |
+| `Heatpump specs/…/Elfin EW11A/*` (5) | — | Identiek, niet kopiëren |
 
 #### Architectuur- en indexdocumenten
 
@@ -513,30 +518,52 @@ en de app-afbeeldingen `WP-adlar3-modbus-*.png` (de doel-app heeft eigen app-afb
    `power_threshold_exceeded`? Zo niet: naar groep 3A verplaatsen
 6. **V2** — Widgetfilter met `driver_id` (alleen relevant als O4 = twee widgets)
 7. **V3** — Pipe-filter met drie waarden in de Flow-editor zichtbaar bij alle drie
-8. **V4** — Probe-register per model bevestigd op hardware (voorwaarde P5; uitkomst
-   vastleggen in ADR-004)
+8. ~~**V4**~~ — vervallen (O8 zonder modelprobe)
 
 ---
 
-## Fase 7 — Hardware-acceptatie
+## Fase 7 — Acceptatie
 
-Eén Homey met een Tuya-, een Aurora II- en een Aurora III-device.
+De ontwikkelaar heeft één echte unit en een Modbus-simulator. Tests die echte hardware van
+een ander model of een bestaande installatie vragen, kunnen alleen via het testkanaal van de
+Homey App Store door externe gebruikers worden gedaan. Fase 7 is daarom gesplitst (2026-10-20).
+
+### 7a — Lokaal, met simulator (ontwikkelaar)
 
 | Test | Verwacht |
 |---|---|
-| Bestaande Tuya-flow met `set_target_temperature` | Ongewijzigd |
-| Bestaande Aurora II-flow met `set_target_temperature_modbus` | Ongewijzigd |
-| Aurora III: `set_target_temperature_aurora3` | Schrijft naar Aurora III, niet naar Aurora II |
-| Gedeelde trigger `heating_mode_changed` bij alle drie | Vuurt per device, tokens consistent gespeld |
-| Herstartvolgorde wisselen (Aurora III eerst, dan Aurora II) | Geen kaart wisselt van doeldevice |
-| Gateway Aurora III loskoppelen | Aurora II en Tuya blijven werken; geen procescrash |
-| Dashboards 8090 en 8091 | Elk eigen data |
-| Aurora III `/interactive`: setpoint en stille modus wijzigen | Wijziging zichtbaar op het device en in de Homey-app; Aurora II onaangeroerd |
-| Aurora III `/expert`: één register lezen | Waarde van Aurora III, niet van Aurora II |
-| Elfin-gids stap voor stap volgen voor Aurora III (8N2) | Verbinding komt tot stand zonder aanvullende kennis |
-| Aurora III-gateway pairen met de Aurora II-driver, en omgekeerd (O8) | Pairing weigert of waarschuwt met verwijzing naar de juiste driver; er wordt niets geschreven |
-| Bestaand Aurora II-device na update | Ongewijzigd; alleen de drivernaam in de pairinglijst is anders (O7) |
-| Oude Aurora III-app en nieuwe driver kort naast elkaar (migratiescenario) | Gedrag zoals beschreven in de migratiehandleiding |
+| Pairinglijst en eerste pairingscherm van beide Modbus-drivers (O7/O8) | *Aurora I/II via Tuya*, *Aurora I/II via Modbus*, *Aurora III via Modbus*; waarschuwingsregel zichtbaar |
+| Dashboards 8090 en 8091 tegelijk | Elk eigen data |
+| Aurora III `/interactive`: setpoint en stille modus wijzigen | Wijziging zichtbaar op het device in Homey; Aurora I/II onaangeroerd |
+| Aurora III `/expert`: één register lezen | Waarde van de Aurora III-simulator |
+| Aurora III: `set_target_temperature_aurora3` | Schrijft naar Aurora III, niet naar Aurora I/II |
+| Gedeelde trigger `heating_mode_changed` | Vuurt per device; modus gespeld als *Cooling*/*Heating* |
+| Herstartvolgorde wisselen | Geen kaart wisselt van doeldevice |
+| Gateway of simulator van Aurora III loskoppelen | Aurora I/II en Tuya blijven werken; geen procescrash |
+| Widget *Live operation* voor beide Modbus-devices | Aurora III toont TA/TE1/T4 en setpoint-afwijking |
+| V3 — device-picker van een gedeelde trigger | Alle drie de drivers kiesbaar |
+
+Stand 2026-10-20: eerste test met simulator "lijkt te werken"; nog niet per regel afgevinkt.
+
+### 7b — Testkanaal, externe gebruikers
+
+Publicatie via `homey app publish` en daarna *Test* in het developerportaal. Testers krijgen
+de instructie in [`docs/testing/TEST_RELEASE_3.2.0.nl.md`](../testing/TEST_RELEASE_3.2.0.nl.md)
+(en [`.en.md`](../testing/TEST_RELEASE_3.2.0.en.md)) via community-topic 154741.
+
+| Test | Onderdeel testerinstructie |
+|---|---|
+| Registerwaarden van een echte Aurora III kloppen met de registermap | A, B |
+| Bediening (setpoint, stille modus, tapwater, bijverwarming) op echte hardware | C |
+| Flows met `_aurora3`-kaarten | D |
+| V1 — `power_threshold_exceeded` bij Aurora III met interne vermogensmeting | E |
+| Bestaand Aurora I/II- en Tuya-device na de update ongewijzigd | F |
+| Elfin-gids stap voor stap voor Aurora III (8N2) | A |
+| Oude Aurora III-app en nieuwe driver naast elkaar (migratiescenario) | G |
+
+**Versiebeleid.** Zolang er niets gepubliceerd is, blijven herstellingen in 3.2.0. Na de
+eerste `homey app publish` krijgt elke volgende build een hoger nummer (3.2.1, 3.2.2, …) met
+een eigen changelogregel; pas na 7b gaat een build naar *Live*.
 
 ---
 
@@ -568,6 +595,35 @@ zonder gepairde Aurora III-devices te breken — vandaar P1.
 
 Het conceptueel moeilijke deel zit in fase 4 en in de controlepunten van fase 1a. De rest
 is volume dat met de v3.0.0-scripts als sjabloon reproduceerbaar te doen is.
+
+## Afwijkingen tijdens uitvoering
+
+Vastgelegd tijdens de uitvoering op 2026-10-18; per punt waarom het plan is bijgesteld.
+
+| Fase | Plan | Uitgevoerd | Reden |
+|---|---|---|---|
+| 1b / 5a | Waarschuwingsregel O8 in fase 1b | In fase 5a | Raakt de Aurora II-drivermap; fase 1 moet die aantoonbaar onaangeroerd laten |
+| 3A | Hernoemen op gequote tokens | Ook de 12 sleutels van `CARD_PROFILES` in `snapshot-trigger-service.ts` | Opzoeking `CARD_PROFILES[cardId]`; alleen quotes hernoemen had alle alerts stil laten terugvallen op drempel 0,5 en het verkeerde `stateField` |
+| 4c | Typecast in de terugval van `triggerFlowCard` typeren | Terugval verwijderd | De app heeft geen `…aurora3Trigger`-leden; de tak was onbereikbaar |
+| 4b | Widget: optionele blokken | Ook sensorlabels per model (T7/T6 resp. TA/TE1/T4) | De oude widget liep vast op een Aurora III-state (`regulation` ontbreekt); Aurora II-weergave is byte-gelijk gebleven |
+| 5a | 3 locale-sleutels + O8-sleutel | Ook het blok `pair.enter_modbus_info` (7 sleutels, vier talen) | De Modbus-pairingpagina verwees in alle drie de apps naar sleutels die nooit in `locales/` stonden |
+| 5a | Drivernamen in de/fr aanvullen | Alleen de twee Modbus-drivers | De Tuya-drivernaam blijft ongewijzigd (alleen en/nl, zoals voorheen) |
+| 5b | `building-model-sample-gating.md` samenvoegen | Eigen Aurora III-document plus kruisverwijzingen in alle drie | De "tweede kopie" in `Architectural overview/` is de Tuya-versie (DPS), geen duplicaat; drie transports in één document per gate wordt onleesbaar |
+| 5b | `AGENTS.md`, `GEMINI.md`, Copilot bijwerken of inkorten | Korte driversectie bovenaan met verwijzing naar `CLAUDE.md` | Geen bestaande inhoud verwijderd |
+| 5b | O9: externe ADR-reeks opnemen | **Niet uitgevoerd** | Zie hieronder |
+
+### O9 — waarom niet uitgevoerd
+
+Bij de uitvoering bleek:
+
+- de reeks staat op **drie** plekken: `ADR/` in beide bronrepo's (33 resp. 26 bestanden) en `plans/decisions/` in de Aurora II-bronrepo (o.a. ADR-057 t/m 061);
+- alle drie de locaties staan in `.gitignore`, net als `plans/` in deze repo — de beslisdocumenten worden in alle repo's bewust buiten git gehouden;
+- meerdere bestanden bevatten absolute lokale paden;
+- inhoudelijk geen nummerbotsing: elk nummer heeft in beide bronnen dezelfde titel; bij 10 nummers (ADR-033, 034, 035, 041, 045, 047b, 048, 049, 052, 053) is de inhoud na de fork uiteengelopen.
+
+Opnemen vraagt dus eerst een besluit over het buiten-git-houden en het opschonen van paden. Open punt voor de eigenaar.
+
+---
 
 ## Bijlage — Meetmethode
 

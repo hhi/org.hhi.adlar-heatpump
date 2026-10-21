@@ -1,0 +1,21 @@
+{
+  "id": "adlar_disinfection_enabled",
+  "type": "boolean",
+  "title": {
+    "en": "Disinfection function enabled",
+    "nl": "Desinfectiefunctie ingeschakeld",
+    "fr": "Fonction de désinfection activée",
+    "de": "Desinfektionsfunktion aktiviert"
+  },
+  "icon": "/assets/sterilization.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": false,
+  "description": {
+    "en": "Disinfection function setting read from holding register 4-2103, bit 6. Read-only.",
+    "nl": "Instelling van de desinfectiefunctie, gelezen uit holdingregister 4-2103, bit 6. Alleen-lezen.",
+    "fr": "Réglage de la fonction de désinfection lu depuis le registre holding 4-2103, bit 6. Lecture seule.",
+    "de": "Einstellung der Desinfektionsfunktion aus Holdingregister 4-2103, Bit 6. Nur lesbar."
+  }
+}

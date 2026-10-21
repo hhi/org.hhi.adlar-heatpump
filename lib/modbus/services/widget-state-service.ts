@@ -3,6 +3,7 @@
 /* eslint-disable import/extensions */
 import { DataSnapshot } from '../protocol/adlar2-modbus-service';
 import { MODE_OPTIONS } from '../protocol/adlar-modbus-registers';
+import { WidgetConnectionState, connectionStateFromStatus } from '../../shared/widget-state-common';
 
 const THERMAL_POWER_FACTOR_KW_PER_LPM_PER_C = 0.0698;
 const DATA_FRESH_MS = 60_000;
@@ -20,9 +21,12 @@ export interface WidgetStateContext {
   isExternalCapabilityFresh?: (capabilityId: string) => boolean;
 }
 
+/** Regelvoeler: retour (T6), aanvoer (T7) of onbekend; de widget maakt er tekst van */
+export type RegulationSensor = 'return' | 'supply' | null;
+
 export interface LiveOperationWidgetState {
-  ok: boolean;
-  message?: string;
+  ok: true;
+  source: 'aurora2';
   device: {
     name: string;
   };
@@ -30,10 +34,11 @@ export interface LiveOperationWidgetState {
     running: boolean;
     compressorOn: boolean;
     defrosting: boolean;
-    mode: string;
+    /** Modusnaam uit het register (MODE_OPTIONS); null als onbekend */
+    mode: string | null;
     faultActive: string;
     connectionStatus: string;
-    connectionLabel: string;
+    connectionState: WidgetConnectionState;
   };
   temperatures: {
     outletC: number | null;
@@ -54,15 +59,13 @@ export interface LiveOperationWidgetState {
     powerSource: 'external' | 'capability' | 'snapshot' | 'none';
   };
   regulation: {
-    mode: string;
-    sensor: string;
+    mode: string | null;
+    sensor: RegulationSensor;
     hysteresisC: number | null;
-    hysteresisSource: string;
-    hysteresisText: string;
+    /** P-parameter van de actieve hysterese (P26/P27/P96); null als de modus geen hysterese kent */
+    hysteresisSource: string | null;
     activeSetpointC: number | null;
-    activeSetpointText: string;
     setpointDeviationC: number | null;
-    summary: string;
   };
   data: {
     timestamp: number | null;
@@ -119,7 +122,7 @@ function round(value: number | null, decimals: number): number | null {
   return Math.round(value * factor) / factor;
 }
 
-function modeLabel(value: string | null, snapshot: DataSnapshot | null): string {
+function modeLabel(value: string | null, snapshot: DataSnapshot | null): string | null {
   const capabilityMode = numberOrNull(value);
   if (capabilityMode !== null) {
     const label = MODE_OPTIONS[capabilityMode as keyof typeof MODE_OPTIONS];
@@ -127,30 +130,19 @@ function modeLabel(value: string | null, snapshot: DataSnapshot | null): string 
   }
   const source = value ?? snapshot?.control.modeName ?? '';
   const normalized = source.trim();
-  if (normalized === '') return 'Unknown';
+  if (normalized === '') return null;
   return normalized;
 }
 
-function connectionLabel(status: string): string {
-  const normalized = status.trim().toLowerCase();
-  if (normalized.startsWith('connected')) return 'Online';
-  if (normalized.startsWith('disconnected')) return 'Offline';
-  if (normalized === 'online') return 'Online';
-  if (normalized === 'offline') return 'Offline';
-  if (normalized === 'degraded') return 'Degraded';
-  if (normalized === '') return 'Unknown';
-  return status;
-}
-
-function regulationSensorLabel(tempControlMode: number | null | undefined): string {
-  if (tempControlMode === 0) return 'retour T6';
-  if (tempControlMode === 1) return 'aanvoer T7';
-  return 'regelbron onbekend';
+function regulationSensor(tempControlMode: number | null | undefined): RegulationSensor {
+  if (tempControlMode === 0) return 'return';
+  if (tempControlMode === 1) return 'supply';
+  return null;
 }
 
 function activeHysteresis(snapshot: DataSnapshot | null): {
   value: number | null;
-  source: string;
+  source: string | null;
 } {
   const mode = snapshot?.control.mode;
   if (mode === 2) {
@@ -162,7 +154,7 @@ function activeHysteresis(snapshot: DataSnapshot | null): {
   if (mode === 0 || mode === 1 || mode === 4 || mode === 5) {
     return { value: numberOrNull(snapshot?.control.acReturnDiffC), source: 'P26' };
   }
-  return { value: null, source: '-' };
+  return { value: null, source: null };
 }
 
 function activeSetpoint(snapshot: DataSnapshot | null): number | null {
@@ -182,21 +174,6 @@ function regulatedTemperature(
   if (tempControlMode === 0) return inletC;
   if (tempControlMode === 1) return outletC;
   return null;
-}
-
-function regulationSummary(mode: string, sensor: string, hysteresis: { value: number | null; source: string }): string {
-  return `${mode} op ${sensor}`;
-}
-
-function hysteresisText(hysteresis: { value: number | null; source: string }): string {
-  if (hysteresis.source === '-') return 'Hysterese onbekend';
-  if (hysteresis.value === null) return `${hysteresis.source} nog niet gelezen`;
-  return `${hysteresis.source} hysterese ${hysteresis.value.toFixed(1)}C`;
-}
-
-function activeSetpointText(setpointC: number | null): string {
-  if (setpointC === null) return 'Setpoint onbekend';
-  return `Setpoint ${setpointC.toFixed(1)}C`;
 }
 
 function externalNumber(
@@ -291,12 +268,11 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
   const connectionStatus = capString(device, 'adlar_connection_status')
     ?? snapshot?.diagnostics?.connectionQuality
     ?? 'unknown';
-  const shortConnectionStatus = connectionLabel(connectionStatus);
   const timestamp = snapshot?.ts ?? null;
   const ageMs = timestamp !== null ? Date.now() - timestamp : null;
   const freshness = dataFreshness(ageMs);
   const mode = modeLabel(capString(device, 'adlar_mode'), snapshot);
-  const regulationSensor = regulationSensorLabel(snapshot?.control.tempControlMode);
+  const sensor = regulationSensor(snapshot?.control.tempControlMode);
   const hysteresis = activeHysteresis(snapshot);
   const setpointC = activeSetpoint(snapshot);
   const regulatedTempC = regulatedTemperature(snapshot?.control.tempControlMode, inletC, outletC);
@@ -306,6 +282,7 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
 
   return {
     ok: true,
+    source: 'aurora2',
     device: {
       name: device.getName(),
     },
@@ -316,7 +293,7 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
       mode,
       faultActive,
       connectionStatus,
-      connectionLabel: shortConnectionStatus,
+      connectionState: connectionStateFromStatus(connectionStatus),
     },
     temperatures: {
       outletC: round(outletC, 1),
@@ -346,14 +323,11 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
     },
     regulation: {
       mode,
-      sensor: regulationSensor,
+      sensor,
       hysteresisC: round(hysteresis.value, 1),
       hysteresisSource: hysteresis.source,
-      hysteresisText: hysteresisText(hysteresis),
       activeSetpointC: round(setpointC, 1),
-      activeSetpointText: activeSetpointText(setpointC),
       setpointDeviationC: round(setpointDeviationC, 1),
-      summary: regulationSummary(mode, regulationSensor, hysteresis),
     },
     data: {
       timestamp,

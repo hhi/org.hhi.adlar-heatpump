@@ -1,0 +1,33 @@
+{
+  "id": "adlar_dhw_active",
+  "type": "boolean",
+  "title": {
+    "en": "Hot water heating active",
+    "nl": "Tapwater wordt verwarmd",
+    "fr": "Chauffage de l’eau chaude actif",
+    "de": "Warmwasserbereitung aktiv"
+  },
+  "icon": "/assets/dhw-tank.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Hot water heating started",
+    "nl": "Tapwaterverwarming gestart",
+    "fr": "Chauffage de l’eau chaude démarré",
+    "de": "Warmwasserbereitung gestartet"
+  },
+  "insightsTitleFalse": {
+    "en": "Hot water heating stopped",
+    "nl": "Tapwaterverwarming gestopt",
+    "fr": "Chauffage de l’eau chaude arrêté",
+    "de": "Warmwasserbereitung gestoppt"
+  },
+  "description": {
+    "en": "The heat pump is heating domestic hot water right now (input register 3-0009, bit 2).",
+    "nl": "De warmtepomp verwarmt op dit moment tapwater (inputregister 3-0009, bit 2).",
+    "fr": "La pompe à chaleur chauffe actuellement l’eau chaude sanitaire (registre d’entrée 3-0009, bit 2).",
+    "de": "Die Wärmepumpe bereitet gerade Warmwasser (Eingangsregister 3-0009, Bit 2)."
+  }
+}

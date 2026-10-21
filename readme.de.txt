@@ -9,17 +9,21 @@ Cloud-Verbindung in Ihrem lokalen Netzwerk.
 TREIBER AUSWÄHLEN
 
 TUYA LOCAL API
-- Wählen Sie "Adlar Castra Aurora Heat Pump (Tuya)"
+- Wählen Sie "Aurora I/II über Tuya"
 - Benötigt Geräte-ID, lokalen Schlüssel, lokale IP-Adresse und Tuya-
   Protokollversion (3.3, 3.4 oder 3.5) der Wärmepumpe
 - Verwenden Sie diesen Treiber für eine über WLAN verbundene Wärmepumpe
 
 MODBUS-TCP-GATEWAY
-- Wählen Sie "Adlar Castra Aurora Heat Pump (Modbus)"
+- Wählen Sie "Aurora I/II über Modbus" oder "Aurora III über Modbus", passend
+  zum Modell auf dem Typenschild
 - Benötigt einen RS485/Modbus-Anschluss und ein erreichbares Modbus-TCP-
   Gateway, etwa ein Elfin EW11A
 - Geben Sie IP-Adresse des Gateways, TCP-Port und Modbus-Unit-ID ein
 - Die üblichen Standardwerte sind Port 502 und Unit-ID 1
+- Serielle Einstellungen des Gateways: 9600 8N1 für Aurora I/II, 9600 8N2 für
+  Aurora III
+- Lokale Dashboards: Port 8090 (Aurora I/II) und 8091 (Aurora III)
 
 WICHTIGE FUNKTIONEN
 - Lokale Temperaturen, Betriebsstatus, Abtauen, Frostschutz, Sterilisation und
@@ -40,7 +44,7 @@ WICHTIG
 - Erweiterte Modbus-Schreibwerkzeuge können das Verhalten der Wärmepumpe
   verändern. Verwenden Sie sie nur, wenn Sie das Register kennen und den
   ursprünglichen Wert notiert haben.
-- Der Modbus-Treiber zielt auf die R32-Registerkarte und warnt bei anderen
+- Der Aurora I/II-Treiber zielt auf die R32-Registerkarte und warnt bei anderen
   Kältemitteln.
 - Der COP kann fehlen oder ungenauer sein, wenn verwendbare Leistungs- oder
   Durchflussdaten fehlen.
