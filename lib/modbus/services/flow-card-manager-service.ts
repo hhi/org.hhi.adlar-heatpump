@@ -63,7 +63,8 @@ const DHW_SETPOINT_MAX_C = 75;
 const INDOOR_TARGET_MIN_C = 15;
 const INDOOR_TARGET_MAX_C = 25;
 
-const THRESHOLD_TRIGGER_CARDS: Array<{
+/** Exported for the SnapshotTriggerService contract test: state must carry each stateField. */
+export const THRESHOLD_TRIGGER_CARDS: Array<{
   cardId: string;
   thresholdArg: string;
   stateField: string;
