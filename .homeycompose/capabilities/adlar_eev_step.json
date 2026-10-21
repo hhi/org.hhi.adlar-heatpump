@@ -16,10 +16,10 @@
   "min": 0,
   "max": 500,
   "description": {
-    "en": "Electronic Expansion Valve (EEV) opening position from Modbus sensor register 0x0042 (eevOpenStep), in stepper motor steps.",
-    "nl": "Openingspositie van de elektronische expansieklep (EEV) uit Modbus-sensorregister 0x0042 (eevOpenStep), in stappenmotor-stappen.",
-    "de": "Öffnungsposition des elektronischen Expansionsventils (EEV) aus Modbus-Sensorregister 0x0042 (eevOpenStep), in Schrittmotorschritten.",
-    "fr": "Position d'ouverture du détendeur électronique (EEV) depuis le registre capteur Modbus 0x0042 (eevOpenStep), en pas moteur pas à pas."
+    "en": "Opening position of the main electronic expansion valve (EEV), in stepper motor steps.",
+    "nl": "Openingspositie van de elektronische hoofdexpansieklep (EEV), in stappenmotor-stappen.",
+    "de": "Öffnungsposition des elektronischen Hauptexpansionsventils (EEV), in Schrittmotorschritten.",
+    "fr": "Position d'ouverture du détendeur électronique principal (EEV), en pas du moteur pas à pas."
   },
   "insights": true,
   "insightsTitle": {

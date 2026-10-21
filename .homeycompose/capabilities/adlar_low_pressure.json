@@ -1,0 +1,31 @@
+{
+  "id": "adlar_low_pressure",
+  "type": "number",
+  "title": {
+    "en": "Low pressure",
+    "nl": "Lagedruk",
+    "fr": "Basse pression",
+    "de": "Niederdruck"
+  },
+  "icon": "/assets/pressure.svg",
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitle": {
+    "en": "Low Pressure",
+    "nl": "Lagedruk",
+    "de": "Niederdruck",
+    "fr": "Basse pression"
+  },
+  "units": "kPa",
+  "decimals": 0,
+  "min": 0,
+  "max": 5000,
+  "description": {
+    "en": "Low refrigerant pressure from Aurora III input register 3-0087.",
+    "nl": "Lage koudemiddeldruk uit Aurora III inputregister 3-0087.",
+    "fr": "Basse pression du réfrigérant depuis le registre d’entrée Aurora III 3-0087.",
+    "de": "Niedriger Kältemitteldruck aus Aurora-III-Eingangsregister 3-0087."
+  }
+}

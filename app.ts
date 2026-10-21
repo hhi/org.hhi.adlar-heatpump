@@ -1,6 +1,7 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
+import path from 'path';
 import {
   App,
   FlowCardTrigger,
@@ -23,12 +24,30 @@ import { SelfHealingRegistry } from './lib/shared/self-healing-registry';
 import { enableFlowCardLogging } from './lib/shared/flow-handler-wrapper';
 import { Logger, LogLevel } from './lib/shared/logger';
 import { DashboardService } from './lib/modbus/services/dashboard-service';
-import { LiveOperationWidgetState } from './lib/modbus/services/widget-state-service';
+import { LiveOperationWidgetState as Aurora2LiveOperationWidgetState } from './lib/modbus/services/widget-state-service';
+import { DashboardService as Aurora3DashboardService } from './lib/aurora3/services/dashboard-service';
+import { LiveOperationWidgetState as Aurora3LiveOperationWidgetState } from './lib/aurora3/services/widget-state-service';
+import { LiveOperationWidgetState as TuyaLiveOperationWidgetState } from './lib/tuya/services/widget-state-service';
+import { LiveOperationWidgetEmptyState } from './lib/shared/widget-state-common';
+import { Aurora3AppHost } from './lib/aurora3/types/app-host';
 
-// ── Modbus-dashboard en -widget (fase 6) ─────────────────────────────
+// ── Modbus-dashboards en -widget ──────────────────────────────────────
 const DEFAULT_DASHBOARD_PORT = 8090;
-/** De widget is uitsluitend voor de Modbus-driver; zie IMPLEMENTATIEPLAN-v3.md §6.1 */
-const ADLAR_DRIVER_ID = 'intelligent-heatpump-modbus';
+/** Aurora III: eigen dashboardinstantie op een eigen poort (ADR-004 §5) */
+const DEFAULT_AURORA3_DASHBOARD_PORT = 8091;
+/** De widget is voor alle drie de drivers; elk device levert zijn eigen state (ADR-004 §5, v3.3.0) */
+const ADLAR_WIDGET_DRIVER_IDS = [
+  'intelligent-heat-pump',
+  'intelligent-heatpump-modbus',
+  'intelligent-heatpump-aurora3',
+];
+
+/** Unie van de state-contracten; de widget kiest labels en blokken op `source` */
+type LiveOperationWidgetState =
+  | TuyaLiveOperationWidgetState
+  | Aurora2LiveOperationWidgetState
+  | Aurora3LiveOperationWidgetState
+  | LiveOperationWidgetEmptyState;
 
 interface LiveOperationWidgetDevice {
   getData(): unknown;
@@ -60,7 +79,7 @@ interface FlowState {
   [key: string]: FlowCardTrigger | FlowCardCondition | ((...args: unknown[]) => unknown) | unknown;
 }
 
-class MyApp extends App {
+class MyApp extends App implements Aurora3AppHost {
 
   /**
    * Scope a self-healing feature name to the driver of the device the Flow card
@@ -87,6 +106,15 @@ class MyApp extends App {
 
   get dashboard(): DashboardService | null {
     return this._dashboard;
+  }
+
+  // Aurora III-dashboard (ADR-004 §5) — alleen actief met een Aurora III-device
+  private _aurora3Dashboard: Aurora3DashboardService | null = null;
+
+  private _aurora3DashboardPort = DEFAULT_AURORA3_DASHBOARD_PORT;
+
+  get aurora3Dashboard(): Aurora3DashboardService | null {
+    return this._aurora3Dashboard;
   }
 
   // Additional storage for pattern-based triggers
@@ -284,6 +312,10 @@ class MyApp extends App {
     if (this._dashboard) {
       await this._dashboard.destroy();
       this._dashboard = null;
+    }
+    if (this._aurora3Dashboard) {
+      await this._aurora3Dashboard.destroy();
+      this._aurora3Dashboard = null;
     }
 
     // Clean up self-healing registry (v1.3.5)
@@ -1413,55 +1445,7 @@ class MyApp extends App {
   getAdlarLiveOperationWidgetState(deviceId?: string): LiveOperationWidgetState {
     const devices = this._getAdlarDevices();
     if (devices.length === 0) {
-      return {
-        ok: false,
-        message: 'Geen Adlar warmtepomp gekoppeld.',
-        device: { name: '' },
-        status: {
-          running: false,
-          compressorOn: false,
-          defrosting: false,
-          mode: 'Unknown',
-          faultActive: '',
-          connectionStatus: 'unknown',
-          connectionLabel: 'Unknown',
-        },
-        temperatures: {
-          outletC: null,
-          inletC: null,
-          ambientC: null,
-          dhwC: null,
-          bufferC: null,
-        },
-        process: {
-          deltaTC: null,
-          flowLpm: null,
-          electricalPowerKw: null,
-          thermalPowerKw: null,
-          compressorHz: null,
-          liveCopEstimate: null,
-          capabilityCop: null,
-          flowSource: 'none',
-          powerSource: 'none',
-        },
-        regulation: {
-          mode: 'Unknown',
-          sensor: 'regelbron onbekend',
-          hysteresisC: null,
-          hysteresisSource: '-',
-          hysteresisText: 'Hysterese onbekend',
-          activeSetpointC: null,
-          activeSetpointText: 'Setpoint onbekend',
-          setpointDeviationC: null,
-          summary: 'Regeling onbekend',
-        },
-        data: {
-          timestamp: null,
-          ageMs: null,
-          freshness: 'no_data',
-          sourcePollGroup: null,
-        },
-      };
+      return { ok: false, messageCode: 'no_device' };
     }
 
     const device = this._findAdlarDevice(devices, deviceId) ?? devices[0];
@@ -1473,13 +1457,15 @@ class MyApp extends App {
   }
 
   private _getAdlarDevices(): LiveOperationWidgetDevice[] {
-    try {
-      return this.homey.drivers
-        .getDriver(ADLAR_DRIVER_ID)
-        .getDevices() as LiveOperationWidgetDevice[];
-    } catch {
-      return [];
-    }
+    return ADLAR_WIDGET_DRIVER_IDS.flatMap((driverId) => {
+      try {
+        return this.homey.drivers
+          .getDriver(driverId)
+          .getDevices() as LiveOperationWidgetDevice[];
+      } catch {
+        return [];
+      }
+    });
   }
 
   private _findAdlarDevice(
@@ -1521,6 +1507,30 @@ class MyApp extends App {
       port: this._dashboardPort,
     });
     this._dashboard.start();
+  }
+
+  async setAurora3DashboardPort(port: number): Promise<void> {
+    const nextPort = Number.isInteger(port) && port >= 1 && port <= 65535
+      ? port
+      : DEFAULT_AURORA3_DASHBOARD_PORT;
+
+    if (this._aurora3Dashboard && this._aurora3DashboardPort === nextPort) {
+      return;
+    }
+
+    if (this._aurora3Dashboard) {
+      await this._aurora3Dashboard.destroy();
+      this._aurora3Dashboard = null;
+    }
+
+    this._aurora3DashboardPort = nextPort;
+    this._aurora3Dashboard = new Aurora3DashboardService({
+      appDir: __dirname,
+      publicDir: path.join(__dirname, 'public', 'aurora3'),
+      logger: (msg, ...args) => this.logger.info(String(msg), ...args),
+      port: this._aurora3DashboardPort,
+    });
+    this._aurora3Dashboard.start();
   }
 }
 

@@ -1,0 +1,58 @@
+{
+  "id": "adlar_mode_aurora3",
+  "type": "enum",
+  "title": {
+    "en": "Operating mode",
+    "nl": "Bedrijfsmodus",
+    "fr": "Mode de fonctionnement",
+    "de": "Betriebsart"
+  },
+  "icon": "/assets/cop-efficiency.svg",
+  "uiComponent": "picker",
+  "getable": true,
+  "setable": true,
+  "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Off",
+        "nl": "Uit",
+        "fr": "Arrêt",
+        "de": "Aus"
+      }
+    },
+    {
+      "id": "1",
+      "title": {
+        "en": "Cooling",
+        "nl": "Koeling",
+        "fr": "Refroidissement",
+        "de": "Kühlung"
+      }
+    },
+    {
+      "id": "2",
+      "title": {
+        "en": "Heating",
+        "nl": "Verwarming",
+        "fr": "Chauffage",
+        "de": "Heizen"
+      }
+    },
+    {
+      "id": "4",
+      "title": {
+        "en": "Auto",
+        "nl": "Auto",
+        "fr": "Auto",
+        "de": "Auto"
+      }
+    }
+  ],
+  "description": {
+    "en": "Operating mode read from and written to holding register 4-2100. Released write values are Cooling, Heating and Auto.",
+    "nl": "Bedrijfsmodus gelezen uit en geschreven naar holdingregister 4-2100. Vrijgegeven schrijfwaarden zijn Koeling, Verwarming en Auto.",
+    "fr": "Mode de fonctionnement lu et écrit via le registre holding 4-2100. Les valeurs d’écriture autorisées sont Refroidissement, Chauffage et Auto.",
+    "de": "Betriebsart, gelesen aus und geschrieben in Holdingregister 4-2100. Freigegebene Schreibwerte sind Kühlung, Heizen und Auto."
+  }
+}

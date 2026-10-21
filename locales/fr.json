@@ -8,6 +8,15 @@
       "ip_address": "Adresse IP",
       "protocol_version": "Version du protocole",
       "continue": "Continuer"
+    },
+    "enter_modbus_info": {
+      "title": "Connexion Modbus",
+      "description": "Saisissez l'adresse IP et le port de votre Elfin EW11A ou de votre passerelle Modbus TCP",
+      "model_hint": "Choisissez le pilote correspondant au modèle indiqué sur la plaque signalétique de votre pompe à chaleur (Aurora I/II ou Aurora III).",
+      "host": "Adresse IP :",
+      "port": "Port TCP :",
+      "unit_id": "ID d'unité Modbus :",
+      "continue": "Continuer"
     }
   },
   "cop_method": {
@@ -83,6 +92,78 @@
     "blocked_no_cop": "Pas de mesure COP",
     "period_night": "Nuit",
     "period_day": "Jour",
-    "period_evening": "Soir"
+    "period_evening": "Soir",
+    "blocked_dhw_active": "Production d'eau chaude"
+  },
+  "errors": {
+    "zone_onoff_disabled": "La marche/arrêt via le registre de zone 2101 est expérimentale. Activez 'Marche/arrêt via la commande de zone (expérimental)' dans les paramètres de l'appareil pour l'utiliser.",
+    "silent_level2_r290_only": "Le mode silencieux niveau 2 n'est disponible que sur les pompes à chaleur R290."
+  },
+  "widget": {
+    "live_operation": {
+      "locale": "fr-FR",
+      "loading": "Chargement du fonctionnement en direct...",
+      "no_data": "Aucune donnée en direct disponible.",
+      "no_device": "Aucune pompe à chaleur Adlar associée.",
+      "load_failed": "Les données en direct n'ont pas pu être chargées.",
+      "default_device_name": "Pompe à chaleur Adlar",
+      "unknown": "Inconnu",
+      "status": {
+        "fault": "Défaut",
+        "defrost": "Dégivrage",
+        "active": "Actif",
+        "standby": "Veille"
+      },
+      "connection": {
+        "online": "En ligne",
+        "offline": "Hors ligne",
+        "degraded": "Dégradée"
+      },
+      "delta": "Départ - retour",
+      "regulation": "Régulation",
+      "regulation_summary": "__mode__ sur __sensor__",
+      "regulation_unknown": "Régulation inconnue",
+      "regulation_sensor": {
+        "return": "retour T6",
+        "supply": "départ T7",
+        "unknown": "sonde de régulation inconnue"
+      },
+      "setpoint_deviation": "Écart de consigne __value__ C",
+      "hysteresis_unknown": "Hystérésis inconnue",
+      "hysteresis_unread": "__source__ pas encore lu",
+      "hysteresis_value": "__source__ hystérésis __value__C",
+      "metric": {
+        "input": "Absorbée",
+        "output": "Fournie",
+        "flow": "Débit",
+        "compressor": "Compresseur",
+        "cop_live": "COP direct",
+        "defrost": "Dégivrage"
+      },
+      "yes": "Oui",
+      "no": "Non",
+      "label": {
+        "supply": "Départ",
+        "return": "Retour",
+        "outdoor": "Extérieur",
+        "setpoint": "Consigne",
+        "last_poll": "Dernière lecture"
+      },
+      "age": {
+        "now": "à l'instant",
+        "seconds": "s",
+        "minutes": "min",
+        "hours": "h"
+      },
+      "mode_tuya": {
+        "cold": "Froid",
+        "heating": "Chauffage",
+        "floor_heating": "Chauffage au sol",
+        "hot_water": "Eau chaude",
+        "cold_and_hotwater": "Eau froide et chaude",
+        "heating_and_hot_water": "Chauffage et eau chaude",
+        "floor_heatign_and_hot_water": "Chauffage au sol et eau chaude"
+      }
+    }
   }
 }

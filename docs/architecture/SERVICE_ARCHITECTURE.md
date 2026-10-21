@@ -7,6 +7,31 @@
 
 The app uses **9 specialized services** managed by ServiceCoordinator, eliminating code duplication and providing clear separation of concerns.
 
+## Drivers and Service Variants (v3.2.0)
+
+The app has three drivers. Each has its own ServiceCoordinator and its own copy of most services; only verified-identical code is shared ([ADR-001](ADR-001-MODBUS-DRIVER-MERGE.md), [ADR-004](ADR-004-AURORA3-DRIVER-MERGE.md)).
+
+| Driver | ID | Code | Flow-card suffix |
+|---|---|---|---|
+| Tuya | `intelligent-heat-pump` | `lib/tuya/` | — |
+| Aurora II (Modbus) | `intelligent-heatpump-modbus` | `lib/modbus/` | `_modbus` |
+| Aurora III (Modbus) | `intelligent-heatpump-aurora3` | `lib/aurora3/` | `_aurora3` |
+
+Shared by all drivers: `lib/shared/` (calculators, logger, error types, self-healing registry, `RollingCOPCalculator`, `SettingsManagerService`, `WeatherForecastService`, building-model learner, defrost learner). Aurora III also reuses the adaptive modules (`lib/modbus/adaptive/`) and `ExternalTemperatureService` / `WindCorrectionService` from `lib/modbus/services/`.
+
+**Services in three variants** (Tuya, Aurora II, Aurora III) — a fix here usually has to be applied three times:
+`adaptive-control-service`, `building-insights-service`, `building-model-service`, `capability-health-service`, `energy-tracking-service`, `flow-card-manager-service`, `performance-report-service`, `scop-calculator`, `service-coordinator`.
+
+**Services in two variants**:
+
+| Service | Variants |
+|---|---|
+| `dashboard-service`, `modbus-connection-service`, `modbus-cop-service`, `snapshot-trigger-service`, `widget-state-service` | Aurora II, Aurora III |
+| `external-temperature-service`, `wind-correction-service` | Tuya, Aurora II (Aurora III reuses Aurora II) |
+| `cop-calculator` | shared (Tuya, Aurora II), Aurora III (`power_estimation` instead of `refrigerant_circuit`) |
+
+The service descriptions below use the Tuya paths; the Modbus variants follow the same structure in their own directory. Converging the two Modbus variants is the first follow-up step after v3.2.0 (ADR-004, follow-up steps).
+
 ## Infrastructure Services (5)
 
 ### 1. TuyaConnectionService

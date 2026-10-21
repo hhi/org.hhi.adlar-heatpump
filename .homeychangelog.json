@@ -1,4 +1,16 @@
 {
+  "3.3.0": {
+    "en": "The 'Adlar Live Operation' widget now also works with 'Aurora I/II via Tuya' and is available in English, Dutch, German and French. For 'Aurora III via Modbus' the widget shows 'Online' or 'Offline' instead of e.g. 'Connected: 3-Oct 14:25'.",
+    "nl": "De widget 'Adlar Live Bedrijf' werkt nu ook met 'Aurora I/II via Tuya' en is beschikbaar in het Nederlands, Engels, Duits en Frans. Bij 'Aurora III via Modbus' toont de widget 'Online' of 'Offline' in plaats van bijv. 'Connected: 3-Oct 14:25'.",
+    "de": "Das Widget 'Adlar Live-Betrieb' funktioniert jetzt auch mit 'Aurora I/II über Tuya' und ist auf Deutsch, Englisch, Niederländisch und Französisch verfügbar. Bei 'Aurora III über Modbus' zeigt das Widget 'Online' oder 'Offline' statt z. B. 'Connected: 3-Oct 14:25'.",
+    "fr": "Le widget 'Adlar Fonctionnement en direct' fonctionne désormais aussi avec 'Aurora I/II via Tuya' et est disponible en français, anglais, néerlandais et allemand. Pour 'Aurora III via Modbus', le widget affiche 'En ligne' ou 'Hors ligne' au lieu de par ex. 'Connected: 3-Oct 14:25'."
+  },
+  "3.2.0": {
+    "en": "New driver for the Adlar Castra Aurora III via Modbus; the drivers are now named 'Aurora I/II via Tuya', 'Aurora I/II via Modbus' and 'Aurora III via Modbus'. Devices on 'Aurora I/II via Modbus' now also get the 'COP trend detected' and 'Daily/Monthly COP efficiency changed' trigger cards.",
+    "nl": "Nieuwe driver voor de Adlar Castra Aurora III via Modbus; de drivers heten nu 'Aurora I/II via Tuya', 'Aurora I/II via Modbus' en 'Aurora III via Modbus'. Apparaten op 'Aurora I/II via Modbus' krijgen nu ook de triggerkaarten 'COP trend gedetecteerd' en 'Dagelijkse/Maandelijkse COP efficiëntie gewijzigd'.",
+    "de": "Neuer Treiber für die Adlar Castra Aurora III über Modbus; die Treiber heißen jetzt 'Aurora I/II über Tuya', 'Aurora I/II über Modbus' und 'Aurora III über Modbus'. Geräte mit 'Aurora I/II über Modbus' erhalten jetzt auch die Auslöserkarten 'COP-Trend erkannt' und 'Tägliche/Monatliche COP-Effizienz geändert'.",
+    "fr": "Nouveau pilote pour l'Adlar Castra Aurora III via Modbus ; les pilotes s'appellent désormais 'Aurora I/II via Tuya', 'Aurora I/II via Modbus' et 'Aurora III via Modbus'. Les appareils sur 'Aurora I/II via Modbus' disposent désormais aussi des cartes déclencheurs 'Tendance COP détectée' et 'Efficacité COP quotidienne/mensuelle changée'."
+  },
   "3.1.4": {
     "en": "Modbus live dashboard: work mode and hot water curve setting now appear under 'Status', backwater mode under 'Ontdooiing' and external water flow under 'Mechanisch' instead of under 'Overig'.",
     "nl": "Modbus live-dashboard: werkmodus en warmwatercurve-instelling staan nu onder 'Status', retourwatermodus onder 'Ontdooiing' en externe waterdoorstroming onder 'Mechanisch' in plaats van onder 'Overig'.",

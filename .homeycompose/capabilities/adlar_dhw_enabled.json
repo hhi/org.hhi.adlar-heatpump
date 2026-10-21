@@ -1,0 +1,33 @@
+{
+  "id": "adlar_dhw_enabled",
+  "type": "boolean",
+  "title": {
+    "en": "Hot water function",
+    "nl": "Tapwaterfunctie",
+    "fr": "Fonction eau chaude",
+    "de": "Warmwasserfunktion"
+  },
+  "icon": "/assets/dhw-tank.svg",
+  "uiComponent": "toggle",
+  "getable": true,
+  "setable": true,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Hot water function on",
+    "nl": "Tapwaterfunctie aan",
+    "fr": "Fonction eau chaude activée",
+    "de": "Warmwasserfunktion ein"
+  },
+  "insightsTitleFalse": {
+    "en": "Hot water function off",
+    "nl": "Tapwaterfunctie uit",
+    "fr": "Fonction eau chaude désactivée",
+    "de": "Warmwasserfunktion aus"
+  },
+  "description": {
+    "en": "Switches domestic hot water heating on or off via holding register 4-2102.",
+    "nl": "Schakelt de tapwaterverwarming aan of uit via holdingregister 4-2102.",
+    "fr": "Active ou désactive la production d’eau chaude sanitaire via le registre holding 4-2102.",
+    "de": "Schaltet die Warmwasserbereitung über Holdingregister 4-2102 ein oder aus."
+  }
+}

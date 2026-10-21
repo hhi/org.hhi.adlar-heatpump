@@ -1,10 +1,10 @@
 # ADR-004 — Aurora III Modbus-driver integreren in org.hhi.adlar-heatpump
 
-- **Status**: Voorgesteld — wacht op besluiten O1 t/m O9
-- **Datum**: 2026-10-17
-- **Doelversie**: 3.2.0 (voorstel, zie O5)
+- **Status**: Aanvaard — besluiten O1 t/m O9 genomen op 2026-10-18
+- **Datum**: 2026-10-17 (voorstel), 2026-10-18 (besluit)
+- **Doelversie**: 3.2.0
 - **Bron-app**: `org.hhi.adlar3-heatpump-modbus` v1.9.4
-- **Doel-app**: `org.hhi.adlar-heatpump` v3.1.3
+- **Doel-app**: `org.hhi.adlar-heatpump` v3.1.3 (gemeten); uitvoering start op v3.1.4
 - **Voorganger**: [ADR-001](ADR-001-MODBUS-DRIVER-MERGE.md) (Aurora II Modbus, v3.0.0)
 - **Uitvoeringsplan**: [IMPLEMENTATIEPLAN-AURORA3.md](IMPLEMENTATIEPLAN-AURORA3.md)
 
@@ -248,8 +248,8 @@ aantal open poorten verdubbelt en de dashboardgids moet dat vermelden.
 moet `adlar_mode_aurora3` in de groep *Status* staan, anders valt hij stil in de restgroep.
 Dat dit risico reëel is, blijkt uit de Aurora II-versie: die noemt nog
 `adlar_enum_work_mode`, `adlar_enum_capacity_set` en `adlar_state_backwater`, ID's die in
-v3.0.0 naar `_modbus` zijn hernoemd. Die drie staan op het Aurora II-dashboard dus al in de
-verkeerde groep (bestaand, cosmetisch, buiten scope).
+v3.0.0 naar `_modbus` zijn hernoemd. Die drie stonden op het Aurora II-dashboard dus in de
+verkeerde groep; hersteld in v3.1.4.
 
 **Widget.** Beide repo's hebben widget-ID `adlar-live-operation` met identieke `api.js`,
 maar:
@@ -315,6 +315,18 @@ devices veranderen niet. Ook het driver-icoon (`assets/icon.svg`) is byte-identi
 beide Modbus-drivers; alleen de drivernaam en de driverafbeeldingen onderscheiden ze in de
 pairinglijst.
 
+**Bijgesteld op 2026-10-19 (O7).** In de pairinglijst kort Homey lange namen af, waardoor het
+onderscheidende deel achteraan wegvalt. De namen beginnen nu met model en protocol, voor alle
+drie de drivers en in alle vier talen (`de`: *über*):
+
+| Driver | `name` in `driver.compose.json` |
+|---|---|
+| Tuya | Aurora I/II via Tuya |
+| Aurora II (Modbus) | Aurora I/II via Modbus |
+| Aurora III (Modbus) | Aurora III via Modbus |
+
+De Tuya-driver krijgt hiermee ook een nieuwe weergavenaam, en voor het eerst `de` en `fr`.
+
 #### Risico — verkeerd model gepaird (nieuw door de merge)
 
 Zolang elk model een eigen app had, kon een gebruiker het verkeerde model niet kiezen. Na de
@@ -327,12 +339,21 @@ II-registeradressen (bijv. `CONTROL_REGISTERS.mainSwitch`, `.mode`) op een Auror
 of andersom. In het gunstige geval antwoordt de unit met een Modbus-exception; in het
 ongunstige geval bestaat het adres wel en heeft het een andere betekenis.
 
-**Voorstel (O8)**: een modelprobe in de pairing van **beide** Modbus-drivers — één read op
-een register dat alleen het eigen model heeft, met een begrijpelijke foutmelding
-(*"Dit lijkt een Aurora III; kies de Aurora III-driver"*). De keuze van het probe-register
-hoort bij de registermappen en wordt in fase 1b uitgewerkt en in fase 7 op beide modellen
-getest. De wijziging in de Aurora II-driver raakt alleen nieuwe pairings, niet bestaande
-devices. Minimaal alternatief: alleen O7 plus een waarschuwing in de pairingtekst.
+**Besluit (O8)**: geen modelprobe in 3.2.0. De keuze van de gebruiker is leidend; het risico
+wordt afgedekt met onderscheidende drivernamen (O7) en een waarschuwingsregel in het eerste
+pairingscherm van beide Modbus-drivers (*"Kies het model dat op het typeplaatje staat"*).
+
+Overwogen en voor 3.2.0 afgewezen:
+
+- **Harde probe** (pairen weigeren bij een ander model). Vereist dat V4 op beide modellen
+  op echte hardware is bevestigd; de testopstelling heeft één echte unit en een
+  Modbus-simulator, en een simulator antwoordt zoals hij is ingericht, niet zoals de
+  echte unit.
+- **Zachte probe** (alleen waarschuwen bij een Modbus-exception op een register dat de
+  eigen driver toch al pollt). Veilig bij een half geverifieerde V4 — een correcte keuze
+  kan geen onterechte waarschuwing geven — maar wijzigt `driver.ts` van de Aurora
+  II-driver, in strijd met principe 1. Kan later als losse release, als in de praktijk
+  blijkt dat gebruikers het verkeerde model kiezen.
 
 ### 8. Migratie voor Aurora III-gebruikers
 
@@ -375,7 +396,7 @@ Legenda: ✅ gemeten, geen actie of al gedekt · 🟡 gemeten, actie in het plan
 | `.homeycompose/flow/` | 84 | 🟡 | 57 splitsen, 20 delen, 5 nieuw, 2 dood | §2, plan 3 |
 | `drivers/…/driver.compose.json` | 1 | 🟡 | `pair` identiek aan Aurora II; ~22 strings zonder de/fr | Plan 1b, 5a |
 | `drivers/…/driver.settings.compose.json` | 1 | ✅ | 59 sleutels; gedeelde sleutels hebben identieke standaardwaarden en typen; alleen `dashboard_port`-hint wijzigt | Plan 1b |
-| `drivers/…/driver.ts` | 1 | 🔴 | Geen modelcontrole bij pairen | §7, O8 |
+| `drivers/…/driver.ts` | 1 | ✅ | Geen modelcontrole bij pairen; bewust zo gelaten | §7, O8 |
 | `drivers/…/device.ts` | 1 | 🟡 | Alle `homey.*`-aanroepen nagelopen; 4 app-casts; `adlar_mode`-listener en hardgecodeerde capability-lijst (`DRIVER_COMPOSE_CAPABILITIES`) | Plan 1b, 2b, 4a |
 | `drivers/…/pair/` | 1 | ✅ | Byte-identiek aan Aurora II | — |
 | `drivers/…/assets/` | 6 | ✅ | Driverafbeeldingen in juiste maten (75/500/1000); icoon identiek aan Aurora II | §7 |
@@ -422,7 +443,7 @@ Legenda: ✅ gemeten, geen actie of al gedekt · 🟡 gemeten, actie in het plan
 
 | Aspect | Status | Bevinding |
 |---|---|---|
-| Driverkeuze bij pairen | 🔴 | O7 (naam), O8 (modelprobe) |
+| Driverkeuze bij pairen | 🟡 | O7 (naam), O8 (waarschuwingstekst, geen probe) |
 | Parallelle periode oude/nieuwe app | 🟡 | §8: volgorde voorschrijven in de migratiehandleiding |
 | Gateway-instellingen per model | 🟡 | §6: 8N1 vs 8N2 |
 | Flows en Insights van Aurora III-gebruikers | ✅ | Gaan verloren; gedocumenteerd (§8) |
@@ -447,9 +468,13 @@ Eenmalige harde migratie (§8).
 - `scripts/check-capability-ownership.js` (ADR-001 §4) wordt bij drie drivers een
   noodzaak: 62 capability-definities worden straks door drie drivers gedeeld
 
-## Openstaande besluiten
+## Besluiten
 
-| # | Vraag | Voorstel |
+Op 2026-10-18 besloten. O1 t/m O7 en O9 zijn aanvaard zoals voorgesteld; bij O8 is gekozen
+voor het minimale alternatief (§7), waardoor V4 vervalt. Uitvoering per fase volgens het
+[implementatieplan](IMPLEMENTATIEPLAN-AURORA3.md).
+
+| # | Vraag | Besluit |
 |---|---|---|
 | **O1** | Driver-ID | `intelligent-heatpump-aurora3` |
 | **O2** | Suffix voor gesplitste kaarten en capabilities | `_aurora3` |
@@ -457,8 +482,8 @@ Eenmalige harde migratie (§8).
 | **O4** | Widget: één widget met driver-dispatch, of twee widgets | Eén widget met unie-contract |
 | **O5** | Versienummer | 3.2.0 (nieuwe driver, niet-brekend voor bestaande gebruikers) |
 | **O6** | De drie COP-triggers (groep C) ook voor Aurora II openzetten | Ja, maar als losse changelog-regel en los te testen |
-| **O7** | Weergavenamen van de twee Modbus-drivers per model onderscheiden (§7) | Ja |
-| **O8** | Modelprobe bij het pairen van beide Modbus-drivers (§7) | Ja; minimaal O7 + waarschuwing in pairingtekst |
+| **O7** | Weergavenamen van de twee Modbus-drivers per model onderscheiden (§7) | Ja; op 2026-10-19 bijgesteld naar *model via protocol* voor alle drie de drivers (zie §7) |
+| **O8** | Modelprobe bij het pairen van beide Modbus-drivers (§7) | Nee; O7 + waarschuwingsregel in het pairingscherm. Probe eventueel later als losse release |
 | **O9** | De externe ADR-reeks (ADR-020 t/m ADR-061, nu buiten beide repo's) in de repo opnemen? | Ja, als `docs/architecture/decisions/` met herkomstvermelding per bron. Vooraf vaststellen of na de fork van Aurora II naar Aurora III hetzelfde nummer voor verschillende besluiten is gebruikt. Dit staat los van de reeks ADR-001…004 in `docs/architecture/`; die twee nummerreeksen expliciet onderscheiden (bijv. de nieuwe merge-ADR's een prefix `MERGE-` geven, of de externe reeks `LEGACY-ADR-0xx`) |
 
 ## Te verifiëren
@@ -469,9 +494,8 @@ Eenmalige harde migratie (§8).
    Bepaalt of O4 met twee widgets alsnog haalbaar is.
 3. **V3** — Werkt een pipe-filter met drie waarden
    (`driver_id=a|b|c`) zoals met twee? V1 uit v3.0.0 bevestigde alleen twee waarden.
-4. **V4** — Welk register onderscheidt Aurora II en Aurora III betrouwbaar, en wat
-   antwoordt elk model op een read van het register van het andere model (exception of
-   waarde)? Bepaalt de uitwerking van O8.
+4. ~~**V4** — Welk register onderscheidt Aurora II en Aurora III betrouwbaar?~~ Vervallen
+   door het besluit over O8 (geen modelprobe in 3.2.0).
 
 ## Afwegingen die zijn verworpen
 

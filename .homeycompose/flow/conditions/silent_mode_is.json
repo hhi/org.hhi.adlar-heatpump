@@ -1,0 +1,67 @@
+{
+  "id": "silent_mode_is",
+  "title": {
+    "en": "Silent mode is",
+    "nl": "Stille modus is",
+    "de": "Leisemodus ist",
+    "fr": "Le mode silencieux est"
+  },
+  "titleFormatted": {
+    "en": "Silent mode !{{is|is not}} [[level]]",
+    "nl": "Stille modus !{{is|is niet}} [[level]]",
+    "de": "Leisemodus !{{ist|ist nicht}} [[level]]",
+    "fr": "Le mode silencieux !{{est|n'est pas}} [[level]]"
+  },
+  "hint": {
+    "en": "Check the silent mode level of the heat pump",
+    "nl": "Controleer het niveau van de stille modus van de warmtepomp",
+    "de": "Prüfen Sie die Stufe des Leisemodus der Wärmepumpe",
+    "fr": "Vérifier le niveau du mode silencieux de la pompe à chaleur"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=intelligent-heatpump-aurora3"
+    },
+    {
+      "type": "dropdown",
+      "name": "level",
+      "title": {
+        "en": "Silent mode",
+        "nl": "Stille modus",
+        "de": "Leisemodus",
+        "fr": "Mode silencieux"
+      },
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off",
+            "nl": "Uit",
+            "de": "Aus",
+            "fr": "Arrêt"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "Level 1",
+            "nl": "Niveau 1",
+            "de": "Stufe 1",
+            "fr": "Niveau 1"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "Level 2",
+            "nl": "Niveau 2",
+            "de": "Stufe 2",
+            "fr": "Niveau 2"
+          }
+        }
+      ]
+    }
+  ]
+}

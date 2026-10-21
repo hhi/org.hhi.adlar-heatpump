@@ -9,17 +9,20 @@ daily operation.
 CHOOSE A DRIVER
 
 TUYA LOCAL API
-- Select "Adlar Castra Aurora Heat Pump (Tuya)"
+- Select "Aurora I/II via Tuya"
 - Requires the heat pump's Device ID, Local Key, local IP address and Tuya
   protocol version (3.3, 3.4 or 3.5)
 - Use this for a Wi-Fi-connected heat pump
 
 MODBUS TCP GATEWAY
-- Select "Adlar Castra Aurora Heat Pump (Modbus)"
+- Select "Aurora I/II via Modbus" or "Aurora III via Modbus", matching the
+  model on the type plate
 - Requires an RS485/Modbus connection and a reachable Modbus TCP gateway,
   such as an Elfin EW11A
 - Enter the gateway IP address, TCP port and Modbus Unit ID
 - The usual defaults are port 502 and Unit ID 1
+- Gateway serial settings: 9600 8N1 for Aurora I/II, 9600 8N2 for Aurora III
+- Local dashboards: port 8090 (Aurora I/II) and 8091 (Aurora III)
 
 KEY FEATURES
 - Local temperatures, operating state, defrost, antifreeze, sterilization and
@@ -39,7 +42,7 @@ KEY FEATURES
 IMPORTANT
 - Advanced Modbus write tools can change heat-pump behaviour. Use them only
   when you understand the register and have recorded its original value.
-- The Modbus driver targets the R32 register map and warns for other
+- The Aurora I/II driver targets the R32 register map and warns for other
   refrigerants.
 - COP can be unavailable or less accurate if usable power or flow data is
   missing.

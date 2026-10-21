@@ -1,5 +1,7 @@
 # Driver Compose Capability Comparison: DPS vs Modbus
 
+> **Scope (v3.2.0):** this document compares Tuya (DPS) with Aurora II (Modbus) only. For Aurora III see [adlar3-capability-modbus-register-mapping.md](adlar3-capability-modbus-register-mapping.md) and [ADR-004](../../architecture/ADR-004-AURORA3-DRIVER-MERGE.md).
+
 This note compares the capability lists from:
 
 - DPS driver: `drivers/intelligent-heat-pump/driver.compose.json` (org.hhi.adlar-heatpump)

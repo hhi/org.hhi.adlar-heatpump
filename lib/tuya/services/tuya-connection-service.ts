@@ -742,6 +742,22 @@ export class TuyaConnectionService {
   }
 
   /**
+   * Bevestigde verbindingstoestand zoals getoond in adlar_connection_status (v3.3.0).
+   * @returns true/false, of null zolang er nog geen toestand is bevestigd
+   */
+  getPublicConnectionState(): boolean | null {
+    return this.publicConnected;
+  }
+
+  /**
+   * Tijdstip van de laatste ontvangen data-/dp-refresh-event van het apparaat (v3.3.0).
+   * @returns epoch-milliseconden, of null als er sinds de start nog niets is ontvangen
+   */
+  getLastDataReceivedAt(): number | null {
+    return this.lastDataEventReceived > 0 ? this.lastDataEventReceived : null;
+  }
+
+  /**
    * Format time interval in human-readable format (v1.0.6 - UX improvement).
    * @param seconds - Time interval in seconds
    * @returns Formatted string like "2m 30s" or "45s"
