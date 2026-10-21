@@ -27,17 +27,27 @@ import { DashboardService } from './lib/modbus/services/dashboard-service';
 import { LiveOperationWidgetState as Aurora2LiveOperationWidgetState } from './lib/modbus/services/widget-state-service';
 import { DashboardService as Aurora3DashboardService } from './lib/aurora3/services/dashboard-service';
 import { LiveOperationWidgetState as Aurora3LiveOperationWidgetState } from './lib/aurora3/services/widget-state-service';
+import { LiveOperationWidgetState as TuyaLiveOperationWidgetState } from './lib/tuya/services/widget-state-service';
+import { LiveOperationWidgetEmptyState } from './lib/shared/widget-state-common';
 import { Aurora3AppHost } from './lib/aurora3/types/app-host';
 
 // ── Modbus-dashboards en -widget ──────────────────────────────────────
 const DEFAULT_DASHBOARD_PORT = 8090;
 /** Aurora III: eigen dashboardinstantie op een eigen poort (ADR-004 §5) */
 const DEFAULT_AURORA3_DASHBOARD_PORT = 8091;
-/** De widget is voor de Modbus-drivers; elk device levert zijn eigen state (ADR-004 §5) */
-const ADLAR_WIDGET_DRIVER_IDS = ['intelligent-heatpump-modbus', 'intelligent-heatpump-aurora3'];
+/** De widget is voor alle drie de drivers; elk device levert zijn eigen state (ADR-004 §5, v3.3.0) */
+const ADLAR_WIDGET_DRIVER_IDS = [
+  'intelligent-heat-pump',
+  'intelligent-heatpump-modbus',
+  'intelligent-heatpump-aurora3',
+];
 
-/** Unie van de twee state-contracten; de widget toont modelspecifieke blokken alleen als ze er zijn */
-type LiveOperationWidgetState = Aurora2LiveOperationWidgetState | Aurora3LiveOperationWidgetState;
+/** Unie van de state-contracten; de widget kiest labels en blokken op `source` */
+type LiveOperationWidgetState =
+  | TuyaLiveOperationWidgetState
+  | Aurora2LiveOperationWidgetState
+  | Aurora3LiveOperationWidgetState
+  | LiveOperationWidgetEmptyState;
 
 interface LiveOperationWidgetDevice {
   getData(): unknown;
@@ -1435,55 +1445,7 @@ class MyApp extends App implements Aurora3AppHost {
   getAdlarLiveOperationWidgetState(deviceId?: string): LiveOperationWidgetState {
     const devices = this._getAdlarDevices();
     if (devices.length === 0) {
-      return {
-        ok: false,
-        message: 'Geen Adlar warmtepomp gekoppeld.',
-        device: { name: '' },
-        status: {
-          running: false,
-          compressorOn: false,
-          defrosting: false,
-          mode: 'Unknown',
-          faultActive: '',
-          connectionStatus: 'unknown',
-          connectionLabel: 'Unknown',
-        },
-        temperatures: {
-          outletC: null,
-          inletC: null,
-          ambientC: null,
-          dhwC: null,
-          bufferC: null,
-        },
-        process: {
-          deltaTC: null,
-          flowLpm: null,
-          electricalPowerKw: null,
-          thermalPowerKw: null,
-          compressorHz: null,
-          liveCopEstimate: null,
-          capabilityCop: null,
-          flowSource: 'none',
-          powerSource: 'none',
-        },
-        regulation: {
-          mode: 'Unknown',
-          sensor: 'regelbron onbekend',
-          hysteresisC: null,
-          hysteresisSource: '-',
-          hysteresisText: 'Hysterese onbekend',
-          activeSetpointC: null,
-          activeSetpointText: 'Setpoint onbekend',
-          setpointDeviationC: null,
-          summary: 'Regeling onbekend',
-        },
-        data: {
-          timestamp: null,
-          ageMs: null,
-          freshness: 'no_data',
-          sourcePollGroup: null,
-        },
-      };
+      return { ok: false, messageCode: 'no_device' };
     }
 
     const device = this._findAdlarDevice(devices, deviceId) ?? devices[0];

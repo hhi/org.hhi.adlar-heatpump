@@ -98,5 +98,72 @@
   "errors": {
     "zone_onoff_disabled": "On/off via zone control register 2101 is experimental. Enable 'On/off via zone control (experimental)' in the device settings to use it.",
     "silent_level2_r290_only": "Silent mode level 2 is only available on R290 heat pumps."
+  },
+  "widget": {
+    "live_operation": {
+      "locale": "en-GB",
+      "loading": "Loading live operation...",
+      "no_data": "No live data available.",
+      "no_device": "No Adlar heat pump paired.",
+      "load_failed": "Live data could not be loaded.",
+      "default_device_name": "Adlar heat pump",
+      "unknown": "Unknown",
+      "status": {
+        "fault": "Fault",
+        "defrost": "Defrost",
+        "active": "Active",
+        "standby": "Standby"
+      },
+      "connection": {
+        "online": "Online",
+        "offline": "Offline",
+        "degraded": "Degraded"
+      },
+      "delta": "Supply - return",
+      "regulation": "Control",
+      "regulation_summary": "__mode__ on __sensor__",
+      "regulation_unknown": "Control unknown",
+      "regulation_sensor": {
+        "return": "return T6",
+        "supply": "supply T7",
+        "unknown": "control sensor unknown"
+      },
+      "setpoint_deviation": "Setpoint deviation __value__ C",
+      "hysteresis_unknown": "Hysteresis unknown",
+      "hysteresis_unread": "__source__ not read yet",
+      "hysteresis_value": "__source__ hysteresis __value__C",
+      "metric": {
+        "input": "Input",
+        "output": "Output",
+        "flow": "Flow",
+        "compressor": "Compressor",
+        "cop_live": "COP live",
+        "defrost": "Defrost"
+      },
+      "yes": "Yes",
+      "no": "No",
+      "label": {
+        "supply": "Supply",
+        "return": "Return",
+        "outdoor": "Outdoor",
+        "setpoint": "Setpoint",
+        "last_poll": "Last poll"
+      },
+      "age": {
+        "now": "now",
+        "seconds": "s",
+        "minutes": "m",
+        "hours": "h"
+      },
+      "mode_tuya": {
+        "cold": "Cold",
+        "heating": "Heating",
+        "floor_heating": "Floor heating",
+        "hot_water": "Hot water",
+        "cold_and_hotwater": "Cold and hot water",
+        "heating_and_hot_water": "Heating and hot water",
+        "floor_heatign_and_hot_water": "Floor heating and hot water"
+      }
+    }
   }
 }

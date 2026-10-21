@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="nl">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -289,12 +289,35 @@
   </style>
 </head>
 <body>
-  <main id="root" class="empty">Live bedrijf wordt geladen...</main>
+  <main id="root" class="empty">...</main>
 
   <script>
     function onHomeyReady(Homey) {
       var root = document.getElementById('root');
       var refreshTimer = null;
+      var I18N_PREFIX = 'widget.live_operation.';
+
+      // Vertaalt een sleutel uit /locales; tokens staan in de tekst als __naam__.
+      function lookup(key, tokens) {
+        var fullKey = I18N_PREFIX + key;
+        var text = typeof Homey.__ === 'function' ? Homey.__(fullKey, tokens) : null;
+        if (typeof text !== 'string' || text === '' || text === fullKey) return null;
+        if (tokens) {
+          Object.keys(tokens).forEach(function(name) {
+            text = text.split('__' + name + '__').join(String(tokens[name]));
+          });
+        }
+        return text;
+      }
+
+      function t(key, tokens) {
+        var text = lookup(key, tokens);
+        return text === null ? key : text;
+      }
+
+      function locale() {
+        return lookup('locale') || undefined;
+      }
 
       function formatValue(value, suffix, decimals) {
         if (value === null || value === undefined || Number.isNaN(Number(value))) return '-';
@@ -309,45 +332,86 @@
       function formatAge(ageMs) {
         if (ageMs === null || ageMs === undefined) return '-';
         var seconds = Math.max(0, Math.round(ageMs / 1000));
-        if (seconds < 2) return 'nu';
-        if (seconds < 60) return seconds + 's';
-        if (seconds < 3600) return Math.round(seconds / 60) + 'm';
-        return Math.round(seconds / 3600) + 'u';
+        if (seconds < 2) return t('age.now');
+        if (seconds < 60) return seconds + t('age.seconds');
+        if (seconds < 3600) return Math.round(seconds / 60) + t('age.minutes');
+        return Math.round(seconds / 3600) + t('age.hours');
+      }
+
+      function formatTime(timestamp) {
+        var options = { hour: '2-digit', minute: '2-digit' };
+        try {
+          return new Date(timestamp).toLocaleTimeString(locale(), options);
+        } catch (error) {
+          return new Date(timestamp).toLocaleTimeString(undefined, options);
+        }
       }
 
       function formatPoll(timestamp, ageMs) {
         if (!timestamp) return '-';
-        var time = new Date(timestamp).toLocaleTimeString('nl-NL', {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-        return time + ' / ' + formatAge(ageMs);
+        return formatTime(timestamp) + ' / ' + formatAge(ageMs);
       }
 
-      function formatSetpointDeviation(state) {
-        if (!state.regulation || state.regulation.setpointDeviationC === null) return '-';
-        return formatNumber(state.regulation.setpointDeviationC, 1);
-      }
-
-      // Aurora II levert een regulation-blok; Aurora III alleen temperatures.setpointC.
-      function hasRegulation(state) {
-        return !!state.regulation;
+      function isAurora2(state) {
+        return state.source === 'aurora2';
       }
 
       function setpointC(state) {
-        return hasRegulation(state)
+        return isAurora2(state)
           ? state.regulation.activeSetpointC
           : state.temperatures.setpointC;
       }
 
+      // Modusnamen: Modbus levert de registernaam, Tuya de waarde-id van adlar_enum_mode.
+      function modeText(state) {
+        var mode = state.status.mode;
+        if (mode === null || mode === undefined || mode === '') return t('unknown');
+        if (state.source === 'tuya') return lookup('mode_tuya.' + mode) || mode;
+        return mode;
+      }
+
+      function connectionText(state) {
+        var code = state.status.connectionState;
+        if (code === 'online' || code === 'offline' || code === 'degraded') return t('connection.' + code);
+        return t('unknown');
+      }
+
+      function regulationSummary(state) {
+        var regulation = state.regulation;
+        if (regulation.sensor === null && (regulation.mode === null || regulation.mode === '')) {
+          return t('regulation_unknown');
+        }
+        var sensor = regulation.sensor === 'return' || regulation.sensor === 'supply'
+          ? t('regulation_sensor.' + regulation.sensor)
+          : t('regulation_sensor.unknown');
+        return t('regulation_summary', { mode: modeText(state), sensor: sensor });
+      }
+
+      function hysteresisText(regulation) {
+        if (!regulation.hysteresisSource) return t('hysteresis_unknown');
+        if (regulation.hysteresisC === null || regulation.hysteresisC === undefined) {
+          return t('hysteresis_unread', { source: regulation.hysteresisSource });
+        }
+        return t('hysteresis_value', {
+          source: regulation.hysteresisSource,
+          value: Number(regulation.hysteresisC).toFixed(1),
+        });
+      }
+
+      function setpointDeviationLine(deviation) {
+        return '<div class="regulation-line">'
+          + escapeHtml(t('setpoint_deviation', { value: formatNumber(deviation, 1) }))
+          + '</div>';
+      }
+
       function regulationBlock(state) {
-        if (hasRegulation(state)) {
+        if (isAurora2(state)) {
           return [
             '<div class="regulation">',
-            '<div class="regulation-line">Regeling</div>',
-            '<div class="regulation-line regulation-main">' + escapeHtml(state.regulation.summary || 'Regeling onbekend') + '</div>',
-            '<div class="regulation-line">Setpoint afwijking ' + escapeHtml(formatSetpointDeviation(state)) + ' C</div>',
-            '<div class="regulation-line">' + escapeHtml(state.regulation.hysteresisText || 'Hysterese onbekend') + '</div>',
+            '<div class="regulation-line">' + escapeHtml(t('regulation')) + '</div>',
+            '<div class="regulation-line regulation-main">' + escapeHtml(regulationSummary(state)) + '</div>',
+            setpointDeviationLine(state.regulation.setpointDeviationC),
+            '<div class="regulation-line">' + escapeHtml(hysteresisText(state.regulation)) + '</div>',
             '</div>',
           ].join('');
         }
@@ -358,16 +422,23 @@
           : null;
         return [
           '<div class="regulation">',
-          '<div class="regulation-line">Setpoint afwijking ' + escapeHtml(formatNumber(deviation, 1)) + ' C</div>',
+          setpointDeviationLine(deviation),
           '</div>',
         ].join('');
       }
 
-      // Sensornamen verschillen per model: Aurora II T7/T6, Aurora III TA/TE1/T4.
+      // Sensornamen per bron: Tuya zonder code, Aurora I/II T7/T6, Aurora III TA/TE1/T4.
       function sensorLabels(state) {
-        return hasRegulation(state)
-          ? { outlet: 'Aanvoer (T7)', inlet: 'Retour (T6)', ambient: 'Buiten' }
-          : { outlet: 'Aanvoer (TA)', inlet: 'Retour (TE1)', ambient: 'Buiten (T4)' };
+        var outlet = t('label.supply');
+        var inlet = t('label.return');
+        var ambient = t('label.outdoor');
+        if (state.source === 'aurora2') {
+          return { outlet: outlet + ' (T7)', inlet: inlet + ' (T6)', ambient: ambient };
+        }
+        if (state.source === 'aurora3') {
+          return { outlet: outlet + ' (TA)', inlet: inlet + ' (TE1)', ambient: ambient + ' (T4)' };
+        }
+        return { outlet: outlet, inlet: inlet, ambient: ambient };
       }
 
       function statusClass(state) {
@@ -379,23 +450,23 @@
 
       function renderEmpty(message) {
         root.className = 'empty';
-        root.textContent = message || 'Geen live data beschikbaar.';
+        root.textContent = message || t('no_data');
       }
 
       function render(state) {
         if (!state || !state.ok) {
-          renderEmpty(state && state.message ? state.message : 'Geen live data beschikbaar.');
+          renderEmpty(state && state.messageCode ? t(state.messageCode) : t('no_data'));
           return;
         }
 
         var cls = statusClass(state);
         var statusText = state.status.faultActive
-          ? 'Storing'
+          ? t('status.fault')
           : state.status.defrosting
-            ? 'Defrost'
+            ? t('status.defrost')
             : state.status.running || state.status.compressorOn
-              ? 'Actief'
-              : 'Standby';
+              ? t('status.active')
+              : t('status.standby');
         var cop = state.process.liveCopEstimate !== null
           ? state.process.liveCopEstimate
           : state.process.capabilityCop;
@@ -404,38 +475,38 @@
         root.className = 'widget';
         root.innerHTML = [
           '<section class="topbar">',
-          '<div class="device-name">' + escapeHtml(state.device.name || 'Adlar warmtepomp') + '</div>',
+          '<div class="device-name">' + escapeHtml(state.device.name || t('default_device_name')) + '</div>',
           '<div class="pills">',
           '<span class="pill ' + cls + '">' + escapeHtml(statusText) + '</span>',
-          '<span class="pill">' + escapeHtml(state.status.mode) + '</span>',
-          '<span class="pill ' + (state.data.freshness === 'stale' ? 'warn' : '') + '">' + escapeHtml(state.status.connectionLabel || state.status.connectionStatus) + '</span>',
+          '<span class="pill">' + escapeHtml(modeText(state)) + '</span>',
+          '<span class="pill ' + (state.data.freshness === 'stale' ? 'warn' : '') + '">' + escapeHtml(connectionText(state)) + '</span>',
           '</div>',
           '</section>',
           '<section class="main">',
           '<div class="hero">',
           '<div>',
-          '<div class="hero-label">Aanvoer - retour</div>',
+          '<div class="hero-label">' + escapeHtml(t('delta')) + '</div>',
           '<div class="delta"><span class="delta-value">' + formatValue(state.process.deltaTC, '', 1) + '</span><span class="delta-unit">C</span></div>',
           regulationBlock(state),
           '</div>',
           '<div class="power-line">',
-          metricBox('Input', formatNumber(state.process.electricalPowerKw, 2), 'kW'),
-          metricBox('Output', formatNumber(state.process.thermalPowerKw, 2), 'kW'),
+          metricBox(t('metric.input'), formatNumber(state.process.electricalPowerKw, 2), 'kW'),
+          metricBox(t('metric.output'), formatNumber(state.process.thermalPowerKw, 2), 'kW'),
           '</div>',
           '</div>',
           '<div class="grid">',
-          metricBox('Flow', formatNumber(state.process.flowLpm, 1), 'L/min'),
-          metricBox('Compressor', formatNumber(state.process.compressorHz, 0), 'Hz'),
-          metricBox('COP live', formatNumber(cop, 1), ''),
-          metricBox('Defrost', state.status.defrosting ? 'Ja' : 'Nee', ''),
+          metricBox(t('metric.flow'), formatNumber(state.process.flowLpm, 1), 'L/min'),
+          metricBox(t('metric.compressor'), formatNumber(state.process.compressorHz, 0), 'Hz'),
+          metricBox(t('metric.cop_live'), formatNumber(cop, 1), ''),
+          metricBox(t('metric.defrost'), state.status.defrosting ? t('yes') : t('no'), ''),
           '</div>',
           '</section>',
           '<section class="footer">',
           footerItem(labels.outlet, formatValue(state.temperatures.outletC, ' C', 1)),
           footerItem(labels.inlet, formatValue(state.temperatures.inletC, ' C', 1)),
           footerItem(labels.ambient, formatValue(state.temperatures.ambientC, ' C', 1)),
-          footerItem('Setpoint', formatValue(setpointC(state), ' C', 1)),
-          footerItem('Laatste poll', formatPoll(state.data.timestamp, state.data.ageMs)),
+          footerItem(t('label.setpoint'), formatValue(setpointC(state), ' C', 1)),
+          footerItem(t('label.last_poll'), formatPoll(state.data.timestamp, state.data.ageMs)),
           '</section>',
         ].join('');
       }
@@ -484,9 +555,13 @@
             render(state);
           })
           .catch(function() {
-            renderEmpty('Live data kon niet worden geladen.');
+            renderEmpty(t('load_failed'));
           });
       }
+
+      var language = locale();
+      if (language) document.documentElement.lang = language.split('-')[0];
+      root.textContent = t('loading');
 
       load();
       refreshTimer = setInterval(load, 10000);

@@ -2,6 +2,7 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
 import { DataSnapshot } from '../protocol/adlar3-modbus-service';
+import { WidgetConnectionState, connectionStateFromStatus } from '../../shared/widget-state-common';
 
 const THERMAL_POWER_FACTOR_KW_PER_LPM_PER_C = 0.0698;
 const DATA_FRESH_MS = 60_000;
@@ -20,8 +21,8 @@ export interface WidgetStateContext {
 }
 
 export interface LiveOperationWidgetState {
-  ok: boolean;
-  message?: string;
+  ok: true;
+  source: 'aurora3';
   device: {
     name: string;
   };
@@ -29,9 +30,11 @@ export interface LiveOperationWidgetState {
     running: boolean;
     compressorOn: boolean;
     defrosting: boolean;
-    mode: string;
+    /** Off/Cool/Heat/Auto; null als onbekend */
+    mode: string | null;
     faultActive: string;
     connectionStatus: string;
+    connectionState: WidgetConnectionState;
   };
   temperatures: {
     outletC: number | null;
@@ -107,7 +110,7 @@ function round(value: number | null, decimals: number): number | null {
   return Math.round(value * factor) / factor;
 }
 
-function modeLabel(value: string | null, snapshot: DataSnapshot | null): string {
+function modeLabel(value: string | null, snapshot: DataSnapshot | null): string | null {
   const source = value ?? snapshot?.control.modeName ?? '';
   const normalized = source.trim();
   switch (normalized) {
@@ -115,7 +118,7 @@ function modeLabel(value: string | null, snapshot: DataSnapshot | null): string 
     case '1': return 'Cool';
     case '2': return 'Heat';
     case '3': return 'Auto';
-    default: return normalized || 'Unknown';
+    default: return normalized || null;
   }
 }
 
@@ -222,6 +225,7 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
 
   return {
     ok: true,
+    source: 'aurora3',
     device: {
       name: device.getName(),
     },
@@ -232,6 +236,7 @@ export function buildLiveOperationWidgetState(context: WidgetStateContext): Live
       mode: modeLabel(capString(device, 'adlar_mode_aurora3'), snapshot),
       faultActive,
       connectionStatus,
+      connectionState: connectionStateFromStatus(connectionStatus),
     },
     temperatures: {
       outletC: round(outletC, 1),
