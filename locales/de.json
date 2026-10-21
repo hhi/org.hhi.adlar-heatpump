@@ -98,5 +98,72 @@
   "errors": {
     "zone_onoff_disabled": "Ein/Aus über das Zonenregister 2101 ist experimentell. Aktivieren Sie 'Ein/Aus über Zonensteuerung (experimentell)' in den Geräteeinstellungen, um dies zu nutzen.",
     "silent_level2_r290_only": "Leisemodus Stufe 2 ist nur bei R290-Wärmepumpen verfügbar."
+  },
+  "widget": {
+    "live_operation": {
+      "locale": "de-DE",
+      "loading": "Live-Betrieb wird geladen...",
+      "no_data": "Keine Live-Daten verfügbar.",
+      "no_device": "Keine Adlar-Wärmepumpe gekoppelt.",
+      "load_failed": "Live-Daten konnten nicht geladen werden.",
+      "default_device_name": "Adlar-Wärmepumpe",
+      "unknown": "Unbekannt",
+      "status": {
+        "fault": "Störung",
+        "defrost": "Abtauen",
+        "active": "Aktiv",
+        "standby": "Standby"
+      },
+      "connection": {
+        "online": "Online",
+        "offline": "Offline",
+        "degraded": "Eingeschränkt"
+      },
+      "delta": "Vorlauf - Rücklauf",
+      "regulation": "Regelung",
+      "regulation_summary": "__mode__ auf __sensor__",
+      "regulation_unknown": "Regelung unbekannt",
+      "regulation_sensor": {
+        "return": "Rücklauf T6",
+        "supply": "Vorlauf T7",
+        "unknown": "Regelfühler unbekannt"
+      },
+      "setpoint_deviation": "Sollwertabweichung __value__ C",
+      "hysteresis_unknown": "Hysterese unbekannt",
+      "hysteresis_unread": "__source__ noch nicht gelesen",
+      "hysteresis_value": "__source__ Hysterese __value__C",
+      "metric": {
+        "input": "Aufnahme",
+        "output": "Abgabe",
+        "flow": "Durchfluss",
+        "compressor": "Verdichter",
+        "cop_live": "COP live",
+        "defrost": "Abtauen"
+      },
+      "yes": "Ja",
+      "no": "Nein",
+      "label": {
+        "supply": "Vorlauf",
+        "return": "Rücklauf",
+        "outdoor": "Außen",
+        "setpoint": "Sollwert",
+        "last_poll": "Letzte Abfrage"
+      },
+      "age": {
+        "now": "jetzt",
+        "seconds": "s",
+        "minutes": "m",
+        "hours": "h"
+      },
+      "mode_tuya": {
+        "cold": "Kalt",
+        "heating": "Heizen",
+        "floor_heating": "Fußbodenheizung",
+        "hot_water": "Warmwasser",
+        "cold_and_hotwater": "Kalt- und Warmwasser",
+        "heating_and_hot_water": "Heizen und Warmwasser",
+        "floor_heatign_and_hot_water": "Fußbodenheizung und Warmwasser"
+      }
+    }
   }
 }
