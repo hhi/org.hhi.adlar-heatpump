@@ -94,7 +94,8 @@ function validCurrent(t) {
 }
 
 // Voorstel §2.7: dezelfde componentgrenzen, maar τ = 1/θ1 ∈ [1,25; 500] h en UA = θ1/θ0 ∈ [0,03; 1,5] kW/°C
-const FIXED = { tau_min: 1.25, tau_max: Number(process.env.TAU_MAX || 500), ua_min: 0.03, ua_max: 1.5 };
+// τ-bovengrens volgens ADR-062 B4 (800 h); TAU_MAX=500 reproduceert review §6.
+const FIXED = { tau_min: 1.25, tau_max: Number(process.env.TAU_MAX || 800), ua_min: 0.03, ua_max: 1.5 };
 
 function validFixed(t) {
   const b = CURRENT;

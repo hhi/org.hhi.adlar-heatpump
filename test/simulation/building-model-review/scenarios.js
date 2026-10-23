@@ -10,6 +10,7 @@
  *   node test/simulation/building-model-review/vff.js
  *   node test/simulation/building-model-review/thermal.js
  * Datavormen: ideaal, kwantisatie, mismatch, realistisch (komma-gescheiden).
+ * De getallen in review §6 zijn gemaakt met TAU_MAX=500; de standaard is 800 (ADR-062 B4).
  */
 
 'use strict';
