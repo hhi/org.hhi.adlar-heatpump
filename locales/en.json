@@ -83,6 +83,7 @@
     "status_learned": "LEARNING",
     "status_default": "DEFAULT",
     "status_blocked": "BLOCKED",
+    "blocked_prefix": "Blocked",
     "blocked_no_indoor_temp": "No indoor temp",
     "blocked_no_outdoor_temp": "No outdoor temp",
     "blocked_no_power": "No power data",
@@ -93,7 +94,8 @@
     "period_night": "Night",
     "period_day": "Day",
     "period_evening": "Evening",
-    "blocked_dhw_active": "Hot water heating"
+    "blocked_dhw_active": "Hot water heating",
+    "blocked_aux_heating": "Auxiliary heating active"
   },
   "errors": {
     "zone_onoff_disabled": "On/off via zone control register 2101 is experimental. Enable 'On/off via zone control (experimental)' in the device settings to use it.",

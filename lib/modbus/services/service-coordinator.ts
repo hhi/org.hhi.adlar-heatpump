@@ -8,11 +8,12 @@ import { CapabilityHealthService } from './capability-health-service';
 import { EnergyTrackingService } from './energy-tracking-service';
 import { ModbusConnectionService, ModbusConnectionConfig } from './modbus-connection-service';
 import { FlowCardManagerService } from './flow-card-manager-service';
-import { AdaptiveControlService } from './adaptive-control-service';
+import { AdaptiveControlService, type ActiveSetpoint } from './adaptive-control-service';
 import { BuildingInsightsService } from './building-insights-service';
 import { SnapshotTriggerService } from './snapshot-trigger-service';
 import { Adlar2ModbusService, DataSnapshot } from '../protocol/adlar2-modbus-service';
-import { TemperatureRegisterScale } from '../protocol/adlar-modbus-registers';
+import { CONTROL_REGISTERS, TemperatureRegisterScale } from '../protocol/adlar-modbus-registers';
+import { modeToSpaceSetpointTarget } from '../protocol/adlar-enum-mappers';
 import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 
@@ -96,6 +97,34 @@ export class ServiceCoordinator {
     return device.getRollingCOPCalculator?.() ?? null;
   }
 
+  /**
+   * Water setpoint the adaptive control works on, per Set Mode (register 0x0304 via adlar_mode):
+   * heating modes (1/5) → 0x0301, floor heating modes (3/7) → 0x0303.
+   * Cooling, hot water only, reserve or an unknown mode → null (control cycles pause).
+   */
+  private _resolveAdaptiveSetpoint(): ActiveSetpoint | null {
+    const modeRaw = this.device.getCapabilityValue('adlar_mode');
+    const mode = Number(modeRaw);
+    if (modeRaw === null || modeRaw === undefined || !Number.isFinite(mode)) {
+      return null;
+    }
+
+    const target = modeToSpaceSetpointTarget(mode);
+    if (target === 'heating') {
+      const reg = CONTROL_REGISTERS.tempSetHeating;
+      return {
+        capability: 'target_temperature', min: reg.min, max: reg.max, label: 'heating setpoint 0x0301',
+      };
+    }
+    if (target === 'floor') {
+      const reg = CONTROL_REGISTERS.tempSetFloorHeating;
+      return {
+        capability: 'target_temperature.floor', min: reg.min, max: reg.max, label: 'floor heating setpoint 0x0303',
+      };
+    }
+    return null;
+  }
+
   private _initializeServices(): void {
     this.logger('ServiceCoordinator: Initializing services');
 
@@ -107,6 +136,7 @@ export class ServiceCoordinator {
 
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,
+      resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
     });
 
     this.buildingInsights = new BuildingInsightsService({

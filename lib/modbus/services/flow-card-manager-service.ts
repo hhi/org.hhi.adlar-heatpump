@@ -14,6 +14,7 @@ import { TimeScheduleCalculator } from '../../shared/time-schedule-calculator';
 import {
   enumIdToHeatingCurve,
   enumIdToHotWaterCurve,
+  modeToSpaceSetpointTarget,
   workModeIdToUserMode,
 } from '../protocol/adlar-enum-mappers';
 
@@ -591,20 +592,11 @@ export class FlowCardManagerService {
       throw new Error('Cannot resolve setpoint automatically: current mode is unknown. Select heating, cooling, or floor explicitly.');
     }
 
-    const modeToCapability: Record<number, string> = {
-      0: 'target_temperature.cooling',
-      1: 'target_temperature',
-      3: 'target_temperature.floor',
-      4: 'target_temperature.cooling',
-      5: 'target_temperature',
-      7: 'target_temperature.floor',
-    };
-
-    const capability = modeToCapability[mode];
-    if (!capability) {
+    const resolved = modeToSpaceSetpointTarget(mode);
+    if (!resolved) {
       throw new Error(`Cannot resolve setpoint automatically in mode ${mode} (e.g. hot water or reserve). Select heating, cooling, or floor explicitly.`);
     }
-    return capability;
+    return explicitMap[resolved];
   }
 
   /**
@@ -636,16 +628,7 @@ export class FlowCardManagerService {
       throw new Error('Cannot resolve curve automatically: current mode is unknown. Select heating, cooling, floor, or hot water explicitly.');
     }
 
-    const modeToTarget: Record<number, 'heating' | 'cooling' | 'floor'> = {
-      0: 'cooling',
-      1: 'heating',
-      3: 'floor',
-      4: 'cooling',
-      5: 'heating',
-      7: 'floor',
-    };
-
-    const resolved = modeToTarget[mode];
+    const resolved = modeToSpaceSetpointTarget(mode);
     if (!resolved) {
       throw new Error(`Cannot resolve curve automatically in mode ${mode} (e.g. hot water or reserve). Select heating, cooling, floor, or hot water explicitly.`);
     }

@@ -136,6 +136,30 @@ test('BuildingModelService skips missing or invalid COP', async () => {
   assert.match(result.status.blockingReason, /No valid COP/);
 });
 
+test('ADR-060: BuildingModelService skips invalid COP while the compressor runs', async () => {
+  const result = await runCollect({ capabilities: { adlar_cop: 0, adlar_state_compressor_state: true } });
+  assert.strictEqual(result.count, 0);
+  assert.strictEqual(result.status.blockingReasonKey, 'building_model.blocked_no_cop');
+});
+
+test('ADR-060: BuildingModelService learns with thermal power 0 when the compressor is off', async () => {
+  const result = await runCollect({
+    capabilities: { adlar_cop: 0, adlar_state_compressor_state: false },
+    powerMeasurement: { value: 60 },
+  });
+  assert.strictEqual(result.count, 1);
+  assert.strictEqual(result.status.blockingReasonKey, null);
+});
+
+test('ADR-060: BuildingModelService skips auxiliary heating when the compressor is off', async () => {
+  const result = await runCollect({
+    capabilities: { adlar_cop: 0, adlar_state_compressor_state: false },
+    powerMeasurement: { value: 3000 },
+  });
+  assert.strictEqual(result.count, 0);
+  assert.strictEqual(result.status.blockingReasonKey, 'building_model.blocked_aux_heating');
+});
+
 test('BuildingModelService accepts a complete valid learning sample', async () => {
   const result = await runCollect({});
   assert.strictEqual(result.count, 1);
