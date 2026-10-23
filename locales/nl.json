@@ -83,6 +83,7 @@
     "status_learned": "LERENDE",
     "status_default": "STANDAARD",
     "status_blocked": "GEBLOKKEERD",
+    "blocked_prefix": "Geblokkeerd",
     "blocked_no_indoor_temp": "Geen binnentemp",
     "blocked_no_outdoor_temp": "Geen buitentemp",
     "blocked_no_power": "Geen vermogen",
@@ -93,7 +94,8 @@
     "period_night": "Nacht",
     "period_day": "Dag",
     "period_evening": "Avond",
-    "blocked_dhw_active": "Tapwater verwarmen"
+    "blocked_dhw_active": "Tapwater verwarmen",
+    "blocked_aux_heating": "Bijverwarming actief"
   },
   "errors": {
     "zone_onoff_disabled": "Aan/uit via zoneregister 2101 is experimenteel. Schakel 'Aan/uit via zonebesturing (experimenteel)' in bij de apparaatinstellingen om dit te gebruiken.",
