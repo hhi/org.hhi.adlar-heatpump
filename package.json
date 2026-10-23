@@ -9,7 +9,8 @@
     "check:caps": "node scripts/check-capability-ownership.js",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
     "test": "npm run build && node --test test/unit/*.test.js test/unit/aurora3/*.test.js",
-    "simulate": "npm run build && node test/simulation/adaptive-simulation.js"
+    "simulate": "npm run build && node test/simulation/adaptive-simulation.js",
+    "simulate:building-model": "npm run build && node test/simulation/building-model-review/adr062.js all && TAU_MAX=500 node test/simulation/building-model-review/scenarios.js all ideaal,realistisch"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.4",

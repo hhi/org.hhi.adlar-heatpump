@@ -327,7 +327,9 @@ steken op UA = 0,796, met een RMSE van 1,11 °C. Met een venster van 60 minuten
 wordt het erger: 8.562 reverts tegen 67 updates, RMSE 1,20 °C.
 
 **Restore accepteert τ = 800 u (§2.7).** De state uit §2.7 wordt hersteld met
-sampleCount 100, C = 40 en UA = 0,05. Met de bounds-fix wordt hij afgewezen.
+sampleCount 100, C = 40 en UA = 0,05. Met de bounds-fix wordt hij afgewezen. Onder
+ADR-062 B4 (τ ≤ 800 u) wordt deze state bewust geaccepteerd; de huidige code doet
+dat ook.
 
 ### 6.3 Effect van de voorgestelde wijzigingen
 
@@ -411,4 +413,5 @@ De formule `t = τ × ln((T_eq − T_start)/(T_eq − T_doel))` met
   overlappende vensters en niet geoptimaliseerd.
 - Geen Homey-runtimeproef. De scripts staan in
   `test/simulation/building-model-review/`; uitvoeren met
-  `npm run build && node test/simulation/building-model-review/scenarios.js all ideaal,realistisch`.
+  `npm run build && TAU_MAX=500 node test/simulation/building-model-review/scenarios.js all ideaal,realistisch`,
+  of `npm run simulate:building-model` voor deze sectie en ADR-062 samen.
