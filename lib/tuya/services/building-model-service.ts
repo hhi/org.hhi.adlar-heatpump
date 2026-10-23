@@ -19,6 +19,7 @@ import {
   type MeasurementData,
   type BuildingProfileType,
 } from '../../shared/adaptive/building-model-learner';
+import { DeviceConstants } from '../constants';
 
 interface EnergyTrackingService {
   getCurrentPowerMeasurement(): { value: number } | null;
@@ -239,16 +240,33 @@ export class BuildingModelService {
       // ADR-057 W2b: COP gate — thermal power = electric × COP, so any COP error
       // propagates 1:1 into C and UA. The old fallback of 3.0 is removed from the
       // LEARNING path (it remains acceptable for control in calculateThermalAdjustment).
+      // ADR-060 §2.2: skip only when COP is missing/≤ 0 WITH active power. With the compressor
+      // off (COP is 0 by definition) the building receives no heat-pump heat: learn with
+      // thermal power 0 (cooldown samples carry UA/C information), unless the electrical power
+      // indicates auxiliary electric heating. Unknown compressor state keeps the strict gate.
       const cop = this.device.getCapabilityValue('adlar_cop') as number | null;
-      if (cop === null || cop <= 0) {
-        this.lastBlockingReason = 'No valid COP measurement (required for thermal power)';
-        this.lastBlockingReasonKey = 'building_model.blocked_no_cop';
-        this.logger('BuildingModelService: ⏭️ EXIT - No valid COP, skipping sample (no fallback in learning path)');
-        await this.updateModelCapabilities(); // Update UI to show blocked status
-        return;
+      const compressorOn = this.device.getCapabilityValue('adlar_state_compressor_state') as boolean | null;
+      let thermalPower: number;
+      if (compressorOn === false) {
+        if (powerElectric > DeviceConstants.BUILDING_MODEL_AUX_HEATING_THRESHOLD_W) {
+          this.lastBlockingReason = `Compressor off with ${Math.round(powerElectric)}W power (auxiliary heating)`;
+          this.lastBlockingReasonKey = 'building_model.blocked_aux_heating';
+          this.logger(`BuildingModelService: ⏭️ EXIT - Compressor off at ${Math.round(powerElectric)}W, auxiliary heating assumed, skipping sample`);
+          await this.updateModelCapabilities(); // Update UI to show blocked status
+          return;
+        }
+        thermalPower = 0;
+        this.logger(`BuildingModelService: Compressor off (${Math.round(powerElectric)}W) — learning with thermal power 0`);
+      } else {
+        if (cop === null || cop <= 0) {
+          this.lastBlockingReason = 'No valid COP measurement (required for thermal power)';
+          this.lastBlockingReasonKey = 'building_model.blocked_no_cop';
+          this.logger('BuildingModelService: ⏭️ EXIT - No valid COP, skipping sample (no fallback in learning path)');
+          await this.updateModelCapabilities(); // Update UI to show blocked status
+          return;
+        }
+        thermalPower = (powerElectric / 1000) * cop; // Convert W to kW
       }
-
-      const thermalPower = (powerElectric / 1000) * cop; // Convert W to kW
 
       // Get solar radiation with priority cascade (panel > KNMI > estimation)
       const { radiation: solarRadiation, source: solarSource } = this.getSolarRadiationWithPriority();
@@ -275,7 +293,7 @@ export class BuildingModelService {
       this.lastBlockingReasonKey = null;
 
       const state = this.learner.getState();
-      this.logger(`BuildingModelService: ✅ Sample #${state.sampleCount} added (power: ${thermalPower.toFixed(2)}kW, COP: ${cop.toFixed(1)})`);
+      this.logger(`BuildingModelService: ✅ Sample #${state.sampleCount} added (power: ${thermalPower.toFixed(2)}kW, COP: ${compressorOn === false ? 'n/a (compressor off)' : (cop ?? 0).toFixed(1)})`);
 
       // ADR-061: Persist EVERY accepted sample — learning state is scarce (gates
       // make samples rarer since v2.13.0) and a hard restart must not lose it.
@@ -753,6 +771,7 @@ export class BuildingModelService {
     lastUpdateSamples: number;
     isDefault: boolean;
     blockingReason: string | null;
+    blockingReasonKey: string | null; // Locale key (building_model.blocked_*); null when not blocked or still collecting initial samples
   }> {
     const enabled = await this.device.getSetting('building_model_enabled');
 
@@ -781,14 +800,18 @@ export class BuildingModelService {
     // This is more accurate than re-checking sensors here, because it reflects
     // the actual last attempt to collect data (including power measurement check)
     let blockingReason: string | null = this.lastBlockingReason;
+    let blockingReasonKey: string | null = this.lastBlockingReasonKey;
     if (!enabled) {
       blockingReason = 'Learning disabled in settings';
+      blockingReasonKey = 'building_model.blocked_disabled';
     } else if (blockingReason === null) {
       // No blocking from collectAndLearn, but check initial samples phase
       if (indoorTemp === null) {
         blockingReason = 'No indoor temperature (external sensor flow not running)';
+        blockingReasonKey = 'building_model.blocked_no_indoor_temp';
       } else if (outdoorTemp === null || outdoorTemp === undefined) {
         blockingReason = 'No outdoor temperature (ambient sensor not available)';
+        blockingReasonKey = 'building_model.blocked_no_outdoor_temp';
       } else if (state.sampleCount < 10) {
         blockingReason = `Collecting initial samples (${state.sampleCount}/10)`;
       }
@@ -809,6 +832,7 @@ export class BuildingModelService {
       lastUpdateSamples: state.sampleCount % 10,
       isDefault,
       blockingReason,
+      blockingReasonKey,
     };
   }
 

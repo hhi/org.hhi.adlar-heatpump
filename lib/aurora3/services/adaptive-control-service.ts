@@ -40,9 +40,27 @@ import { DeviceConstants } from '../constants';
  * @version 1.0.0 (Fase 1 MVP)
  */
 
+/**
+ * Water setpoint the heat pump currently regulates on. Supplied per model by the
+ * owner of this service, so the service itself contains no mode or register knowledge.
+ */
+export interface ActiveSetpoint {
+  capability: string; // Capability holding the setpoint, e.g. 'target_temperature'
+  min: number; // °C, lower bound accepted by the setpoint
+  max: number; // °C, upper bound accepted by the setpoint
+  label: string; // For logging, e.g. 'heating setpoint 0x0301'
+}
+
+/**
+ * Returns the active water setpoint, or null when the current mode has no
+ * space-heating setpoint (e.g. hot water only, cooling) or the mode is unknown.
+ */
+export type ActiveSetpointResolver = () => ActiveSetpoint | null;
+
 export interface AdaptiveControlServiceConfig {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
+  resolveActiveSetpoint?: ActiveSetpointResolver; // Default: always target_temperature
 }
 
 export interface AdaptiveControlStatus {
@@ -115,6 +133,9 @@ export class AdaptiveControlService {
   private lastObservedSetpoint: number | null = null; // ADR-059 W1: Aurora III heating setpoint 4-2107 at previous cycle, for settlement-on-observation
   private static readonly ACCUMULATOR_CLAMP = 2.0; // ±°C
   private lastRecommendedTemp: number | undefined = undefined; // Change detection for temperature_adjustment_recommended
+  private resolveActiveSetpoint: ActiveSetpointResolver;
+  private activeSetpoint: ActiveSetpoint | null = null; // Setpoint used in the current control cycle
+  private lastSetpointCapability: string | null = null; // Detects a switch between setpoints (e.g. heating ↔ floor heating)
 
   // Energy price tracking (for change detection and flow card triggers)
   private lastPriceCategory: string | null = null; // Track category changes
@@ -139,6 +160,12 @@ export class AdaptiveControlService {
   constructor(config: AdaptiveControlServiceConfig) {
     this.device = config.device;
     this.logger = config.logger || (() => { });
+    this.resolveActiveSetpoint = config.resolveActiveSetpoint ?? (() => ({
+      capability: 'target_temperature',
+      min: 15,
+      max: DeviceConstants.ADAPTIVE_MAX_SETPOINT,
+      label: 'setpoint (target_temperature)',
+    }));
 
     // Initialize Component 1: Heating Controller (PI control)
     this.heatingController = new HeatingController({
@@ -260,21 +287,24 @@ export class AdaptiveControlService {
         const storedSetpoint = await this.device.getStoreValue(this.STORE_KEY_LAST_TARGET);
         if (typeof storedSetpoint === 'number') {
           await this.device.setCapabilityValue('adlar_simulated_target', storedSetpoint);
-          this.logger('AdaptiveControlService: Early restore - synced adlar_simulated_target with stored Aurora III heating setpoint 4-2107', {
+          this.logger('AdaptiveControlService: Early restore - synced adlar_simulated_target with stored active setpoint', {
             value: `${storedSetpoint}°C`,
           });
         } else {
-          // No stored value yet - try current Aurora III heating setpoint 4-2107 as fallback
-          const deviceSetpoint = this.device.getCapabilityValue('target_temperature') as number | null;
-          if (deviceSetpoint !== null) {
+          // No stored value yet - try the current active setpoint as fallback
+          const setpoint = this.resolveActiveSetpoint();
+          const deviceSetpoint = setpoint
+            ? this.device.getCapabilityValue(setpoint.capability) as number | null
+            : null;
+          if (setpoint && deviceSetpoint !== null) {
             await this.device.setCapabilityValue('adlar_simulated_target', deviceSetpoint);
-            this.logger('AdaptiveControlService: Early restore - synced adlar_simulated_target with current Aurora III heating setpoint 4-2107 (no stored value)', {
+            this.logger(`AdaptiveControlService: Early restore - synced adlar_simulated_target with current ${setpoint.label} (no stored value)`, {
               value: `${deviceSetpoint}°C`,
             });
           } else {
-            // Device not connected yet — leave capability at its last persisted value
-            // rather than writing null (null fails Advanced Flow token type validation)
-            this.logger('AdaptiveControlService: Early restore - Aurora III heating setpoint 4-2107 unavailable, leaving adlar_simulated_target at last known value');
+            // Device not connected yet or no heating setpoint in this mode — leave capability at its
+            // last persisted value rather than writing null (null fails Advanced Flow token type validation)
+            this.logger('AdaptiveControlService: Early restore - active setpoint unavailable, leaving adlar_simulated_target at last known value');
           }
         }
       }
@@ -432,22 +462,28 @@ export class AdaptiveControlService {
     await this.device.setStoreValue(this.STORE_KEY_ENABLED, true);
 
     // Simulate mode is now implicit (always true, no setting) - v2.5.0
-    // v2.4.8 Fix: ALWAYS initialize simulated target to current Aurora III heating setpoint 4-2107
-    const currentTargetTemp = this.device.getCapabilityValue('target_temperature') as number | null;
+    // v2.4.8 Fix: ALWAYS initialize simulated target to the current active setpoint
+    const setpoint = this.resolveActiveSetpoint();
+    if (setpoint) {
+      const currentTargetTemp = this.device.getCapabilityValue(setpoint.capability) as number | null;
 
-    if (currentTargetTemp === null) {
-      throw new Error('Cannot start adaptive control: target_temperature (Aurora III heating setpoint 4-2107) is not available. Device may not be connected.');
-    }
+      if (currentTargetTemp === null) {
+        throw new Error(`Cannot start adaptive control: ${setpoint.capability} (${setpoint.label}) is not available. Device may not be connected.`);
+      }
 
-    // Always start with current Aurora III heating setpoint 4-2107 as baseline
-    this.simulatedTargetTemp = currentTargetTemp;
-    this.logger('AdaptiveControlService: Simulated target initialized to current Aurora III heating setpoint 4-2107', {
-      value: `${currentTargetTemp}°C`,
-    });
+      // Always start with the current active setpoint as baseline
+      this.simulatedTargetTemp = currentTargetTemp;
+      this.logger(`AdaptiveControlService: Simulated target initialized to current ${setpoint.label}`, {
+        value: `${currentTargetTemp}°C`,
+      });
 
-    // Update simulated target capability
-    if (this.device.hasCapability('adlar_simulated_target')) {
-      await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
+      // Update simulated target capability
+      if (this.device.hasCapability('adlar_simulated_target')) {
+        await this.device.setCapabilityValue('adlar_simulated_target', this.simulatedTargetTemp);
+      }
+    } else {
+      // No heating setpoint in the current mode: control cycles pause until a heating mode is active
+      this.logger('AdaptiveControlService: No active heating setpoint in current mode — control cycles wait for a heating mode');
     }
 
     // Start control loop using Homey timer management
@@ -489,7 +525,8 @@ export class AdaptiveControlService {
 
     // Log final simulated state (v2.5.0: no commit option, always simulate mode)
     if (this.simulatedTargetTemp !== null) {
-      const actualTemp = this.device.getCapabilityValue('target_temperature') as number;
+      const setpoint = this.resolveActiveSetpoint();
+      const actualTemp = setpoint ? this.device.getCapabilityValue(setpoint.capability) as number : null;
       this.logger('AdaptiveControlService: Final simulated state', {
         simulatedTemp: this.simulatedTargetTemp.toFixed(1),
         actualTemp: actualTemp?.toFixed(1) || 'unknown',
@@ -500,6 +537,8 @@ export class AdaptiveControlService {
     // Clear simulated target and recommendation state (will be reinitialized on next start)
     this.simulatedTargetTemp = null;
     this.lastRecommendedTemp = undefined;
+    this.activeSetpoint = null;
+    this.lastSetpointCapability = null;
 
     // ADR-024/ADR-047b: Reset coast state — prevents stale state from prior session carrying over
     this._coastActive = false;
@@ -538,6 +577,16 @@ export class AdaptiveControlService {
    */
   private _getMinSetpoint(): number {
     return (this.device.getSetting('adaptive_min_setpoint') as number | null) ?? 18;
+  }
+
+  /**
+   * Clamp a recommendation to the minimum water temperature setting, the adaptive maximum,
+   * and the range accepted by the active setpoint (e.g. floor heating 20–60°C).
+   */
+  private _clampRecommendation(value: number): number {
+    const lower = Math.max(this._getMinSetpoint(), this.activeSetpoint?.min ?? -Infinity);
+    const upper = Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, this.activeSetpoint?.max ?? Infinity);
+    return Math.max(lower, Math.min(upper, value));
   }
 
   // =========================================================================
@@ -697,17 +746,37 @@ export class AdaptiveControlService {
   }
 
   private getEffectiveTargetTemp(): number | null {
-    // Always read current warmtepomp setpoint (Aurora III heating setpoint 4-2107) - this is the base for all adjustments
+    // Always read the active warmtepomp setpoint (per mode, via resolver) - this is the base for all adjustments
     // In simulate mode, we still need the real value to calculate "what would happen"
-    if (!this.device.hasCapability('target_temperature')) {
-      this.logger('AdaptiveControlService: target_temperature capability not available');
+    const setpoint = this.resolveActiveSetpoint();
+    this.activeSetpoint = setpoint;
+    if (!setpoint) {
+      this.logger('AdaptiveControlService: No active heating setpoint in current mode');
       return null;
     }
 
-    const currentSetpoint = this.device.getCapabilityValue('target_temperature') as number | null;
+    // Switching setpoint (e.g. heating ↔ floor heating) changes the absolute baseline: restart
+    // change detection so the jump is not seen as a setpoint change. The accumulator is relative
+    // and stays valid.
+    if (this.lastSetpointCapability !== null && this.lastSetpointCapability !== setpoint.capability) {
+      this.lastObservedSetpoint = null;
+      this.lastRecommendedTemp = undefined;
+      this.logger(`AdaptiveControlService: Active setpoint switched to ${setpoint.label} — change detection restarted`, {
+        from: this.lastSetpointCapability,
+        to: setpoint.capability,
+      });
+    }
+    this.lastSetpointCapability = setpoint.capability;
+
+    if (!this.device.hasCapability(setpoint.capability)) {
+      this.logger(`AdaptiveControlService: ${setpoint.capability} capability not available`);
+      return null;
+    }
+
+    const currentSetpoint = this.device.getCapabilityValue(setpoint.capability) as number | null;
 
     if (currentSetpoint === null || currentSetpoint === undefined) {
-      this.logger('AdaptiveControlService: No current warmtepomp setpoint available');
+      this.logger(`AdaptiveControlService: No current ${setpoint.label} available`);
       return null;
     }
 
@@ -735,7 +804,7 @@ export class AdaptiveControlService {
         return;
       }
 
-      // Step 3: Read current warmtepomp setpoint (simulated or actual Aurora III heating setpoint 4-2107)
+      // Step 3: Read current active warmtepomp setpoint (resolved per mode by the model's resolver)
       const currentSetpoint = this.getEffectiveTargetTemp();
       if (currentSetpoint === null) {
         this.logger('AdaptiveControlService: No warmtepomp setpoint available, skipping cycle');
@@ -1081,10 +1150,7 @@ export class AdaptiveControlService {
       // ADR-059 W1 (referentieproject): finalAdjustment is already accrued above —
       // recommendation is round(accumulator)
       const integerAdjustment = Math.round(this.accumulatedAdjustment);
-      const recommendedTemp = Math.max(
-        this._getMinSetpoint(),
-        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
-      );
+      const recommendedTemp = this._clampRecommendation(currentSetpoint + integerAdjustment);
 
       // Initialize on current setpoint so first run only triggers on real deviation (ADR-020)
       if (this.lastRecommendedTemp === undefined) {
@@ -1247,10 +1313,7 @@ export class AdaptiveControlService {
       // Calculate simulated target (what the system recommends)
       // ADR-059 W1 (referentieproject): zelfde berekening als in executeControlCycle()
       const integerAdjustment = Math.round(this.accumulatedAdjustment);
-      const simulatedTarget = Math.max(
-        this._getMinSetpoint(),
-        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
-      );
+      const simulatedTarget = this._clampRecommendation(currentSetpoint + integerAdjustment);
       const delta = simulatedTarget - currentSetpoint;
 
       const trigger = this.device.homey.flow.getDeviceTriggerCard('adaptive_simulation_update');
@@ -1595,13 +1658,14 @@ export class AdaptiveControlService {
    * Get current adaptive control status
    */
   getStatus(): AdaptiveControlStatus {
+    const setpoint = this.resolveActiveSetpoint();
     return {
       enabled: this.isEnabled,
       lastControlCycle: this.lastControlCycleTime > 0 ? this.lastControlCycleTime : null,
       controlIntervalMinutes: this.controlIntervalMs / 60000,
       hasExternalTemperature: this.externalTemperature.isConfigured(),
       currentIndoorTemp: this.externalTemperature.getIndoorTemperature(),
-      currentTargetTemp: this.device.getCapabilityValue('target_temperature') as number | null,
+      currentTargetTemp: setpoint ? this.device.getCapabilityValue(setpoint.capability) as number | null : null,
       piControllerStatus: this.heatingController.getStatus(),
     };
   }
@@ -1990,17 +2054,22 @@ export class AdaptiveControlService {
   }
 
   /**
-   * Store target_temperature value for capability synchronization
-   * Called from device.ts when target_temperature capability changes
-   * @param value - Current target_temperature value
+   * Store setpoint value for capability synchronization
+   * Called from device.ts when a water setpoint capability changes; only the setpoint
+   * that is active in the current mode is stored.
+   * @param value - New setpoint value
+   * @param capability - Capability that changed (default: target_temperature)
    * @version 2.4.9 - Fix: Store target to ensure adlar_simulated_target sync on restart
    */
-  public async storeTargetValue(value: number): Promise<void> {
+  public async storeTargetValue(value: number, capability = 'target_temperature'): Promise<void> {
+    if (this.resolveActiveSetpoint()?.capability !== capability) {
+      return;
+    }
     try {
       await this.device.setStoreValue(this.STORE_KEY_LAST_TARGET, value);
-      this.logger('AdaptiveControlService: Stored target_temperature value', { value: `${value}°C` });
+      this.logger(`AdaptiveControlService: Stored ${capability} value`, { value: `${value}°C` });
     } catch (error) {
-      this.logger('AdaptiveControlService: Failed to store target_temperature value', {
+      this.logger(`AdaptiveControlService: Failed to store ${capability} value`, {
         error: (error as Error).message,
       });
     }

@@ -292,22 +292,11 @@ export class BuildingInsightsService {
 
   /**
    * v2.8.1: Get short localized blocked reason for insight display
-   * Maps internal blocking reason strings to short user-facing text
+   * Uses the blocking reason locale key (building_model.blocked_*) from the building model
    */
-  private getShortBlockedReason(blockingReason: string, lang: string): string {
-    if (blockingReason.includes('indoor temperature')) {
-      return lang === 'nl' ? 'Geblokkeerd: Geen binnentemp' : 'Blocked: No indoor temp';
-    }
-    if (blockingReason.includes('outdoor temperature')) {
-      return lang === 'nl' ? 'Geblokkeerd: Geen buitentemp' : 'Blocked: No outdoor temp';
-    }
-    if (blockingReason.includes('power measurement')) {
-      return lang === 'nl' ? 'Geblokkeerd: Geen vermogen' : 'Blocked: No power data';
-    }
-    if (blockingReason.includes('disabled')) {
-      return lang === 'nl' ? 'Geblokkeerd: Uitgeschakeld' : 'Blocked: Disabled';
-    }
-    return lang === 'nl' ? 'Geblokkeerd' : 'Blocked';
+  private getShortBlockedReason(blockingReasonKey: string | null): string {
+    const prefix = this.device.homey.__('building_model.blocked_prefix');
+    return blockingReasonKey ? `${prefix}: ${this.device.homey.__(blockingReasonKey)}` : prefix;
   }
 
   /**
@@ -322,7 +311,7 @@ export class BuildingInsightsService {
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
     if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
-      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `insulation_blocked_${Date.now()}`,
         category: 'insulation_performance',
@@ -435,7 +424,7 @@ export class BuildingInsightsService {
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
     if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
-      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `pre_heating_blocked_${Date.now()}`,
         category: 'pre_heating',
@@ -524,7 +513,7 @@ export class BuildingInsightsService {
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
     if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
-      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `thermal_storage_blocked_${Date.now()}`,
         category: 'thermal_storage',
@@ -681,7 +670,7 @@ export class BuildingInsightsService {
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
     if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
-      const shortReason = this.getShortBlockedReason(diagnostics.blockingReason, lang);
+      const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `profile_blocked_${Date.now()}`,
         category: 'profile_mismatch',
