@@ -83,6 +83,7 @@
     "status_learned": "LERNEND",
     "status_default": "STANDARD",
     "status_blocked": "BLOCKIERT",
+    "blocked_prefix": "Blockiert",
     "blocked_no_indoor_temp": "Keine Innentemp",
     "blocked_no_outdoor_temp": "Keine Außentemp",
     "blocked_no_power": "Keine Leistung",
@@ -93,7 +94,8 @@
     "period_night": "Nacht",
     "period_day": "Tag",
     "period_evening": "Abend",
-    "blocked_dhw_active": "Warmwasserbereitung"
+    "blocked_dhw_active": "Warmwasserbereitung",
+    "blocked_aux_heating": "Zusatzheizung aktiv"
   },
   "errors": {
     "zone_onoff_disabled": "Ein/Aus über das Zonenregister 2101 ist experimentell. Aktivieren Sie 'Ein/Aus über Zonensteuerung (experimentell)' in den Geräteeinstellungen, um dies zu nutzen.",

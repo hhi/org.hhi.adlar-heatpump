@@ -129,6 +129,13 @@ export class DeviceConstants {
   /** Maximum warmtepomp setpoint (DPS 4) - cascade control safety clamp */
   static readonly ADAPTIVE_MAX_SETPOINT = 65.0; // °C (realistic radiator maximum)
 
+  /**
+   * Building model COP gate (ADR-060 §2.2): with the compressor off, electrical power above this
+   * threshold indicates auxiliary (electric) heating → sample skipped. At or below it (standby +
+   * circulation pump) the sample is learned with thermal power 0.
+   */
+  static readonly BUILDING_MODEL_AUX_HEATING_THRESHOLD_W = 300; // watts
+
   /** External temperature validation - minimum acceptable value */
   static readonly EXTERNAL_TEMP_MIN = -10.0; // °C
 

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -6761,10 +6761,10 @@
           "fr": "Contrôle adaptatif recommande un ajustement de température"
         },
         "hint": {
-          "en": "Triggered when adaptive control calculates a recommended temperature adjustment (only when significant action needed). Use building_model_confidence to filter on model confidence. Use 'Set target temperature' action to apply.",
-          "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbevolen temperatuur berekent (alleen bij significante actie nodig). Gebruik building_model_confidence om te filteren op modelbetrouwbaarheid. Gebruik 'Doel temperatuur instellen' actie om toe te passen.",
-          "de": "Wird ausgelöst, wenn adaptive Regelung eine empfohlene Temperaturanpassung berechnet (nur bei signifikanter Aktion). Verwenden Sie building_model_confidence zum Filtern. Verwenden Sie 'Zieltemperatur einstellen' zum Anwenden.",
-          "fr": "Déclenché lorsque le contrôle adaptatif calcule un ajustement recommandé (uniquement si action significative). Utilisez building_model_confidence pour filtrer. Utilisez 'Régler température' pour appliquer."
+          "en": "Triggered when adaptive control calculates a recommended temperature adjustment (only when significant action needed). Use building_model_confidence to filter on model confidence. Use the 'Set target (setpoint) temperature' action to apply. Aurora I/II via Modbus: the recommendation follows the heat pump's mode (heating setpoint in heating modes, floor heating setpoint in floor heating modes); apply it with 'Set setpoint temperature (by mode)' set to Auto.",
+          "nl": "Wordt geactiveerd wanneer adaptieve regeling een aanbevolen temperatuur berekent (alleen bij significante actie nodig). Gebruik building_model_confidence om te filteren op modelbetrouwbaarheid. Gebruik de actie 'Doel (setpoint) temperatuur instellen' om toe te passen. Aurora I/II via Modbus: de aanbeveling volgt de modus van de warmtepomp (verwarmings-setpoint in verwarmingsmodi, vloerverwarmings-setpoint in vloerverwarmingsmodi); pas toe met 'Setpoint temperatuur instellen (per modus)' op Auto.",
+          "de": "Wird ausgelöst, wenn adaptive Regelung eine empfohlene Temperaturanpassung berechnet (nur bei signifikanter Aktion). Verwenden Sie building_model_confidence zum Filtern. Verwenden Sie 'Zieltemperatur (Sollwert) einstellen' zum Anwenden. Aurora I/II via Modbus: Die Empfehlung folgt dem Modus der Wärmepumpe (Heiz-Sollwert in Heizmodi, Fußbodenheizungs-Sollwert in Fußbodenheizungsmodi); anwenden mit 'Sollwert-Temperatur einstellen (nach Modus)' auf Auto.",
+          "fr": "Déclenché lorsque le contrôle adaptatif calcule un ajustement recommandé (uniquement si action significative). Utilisez building_model_confidence pour filtrer. Utilisez 'Régler la température cible (consigne)' pour appliquer. Aurora I/II via Modbus : la recommandation suit le mode de la pompe à chaleur (consigne de chauffage en modes chauffage, consigne de plancher chauffant en modes plancher chauffant) ; appliquez-la avec 'Régler la température de consigne (par mode)' sur Auto."
         },
         "highlight": true,
         "args": [

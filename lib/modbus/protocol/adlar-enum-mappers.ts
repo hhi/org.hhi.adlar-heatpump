@@ -71,3 +71,18 @@ export function backwaterModeToEnumId(raw: number): string {
   if (raw === 3) return 'temp_diff';
   return 'disable';
 }
+
+export type SpaceSetpointTarget = 'heating' | 'cooling' | 'floor';
+
+/**
+ * Converteert register 0x0304 (Set Mode) naar het ruimte-setpoint waarop de
+ * warmtepomp in die modus regelt. Combimodi koppelen tapwater altijd aan één
+ * ruimtemodus: 4=HW+cooling, 5=HW+heating, 7=HW+floor heating.
+ * Hot water (2) en reserve (6) hebben geen ruimte-setpoint → null.
+ */
+export function modeToSpaceSetpointTarget(mode: number): SpaceSetpointTarget | null {
+  if (mode === 0 || mode === 4) return 'cooling';
+  if (mode === 1 || mode === 5) return 'heating';
+  if (mode === 3 || mode === 7) return 'floor';
+  return null;
+}

@@ -744,8 +744,8 @@ class AdlarModbusDevice extends Homey.Device {
       }
       if (!this.coordinator) return;
       await this.coordinator.setTemperature('heating', value);
-      // Persist target for adaptive control simulated-target sync on restart
-      this.coordinator.getAdaptiveControl().storeTargetValue(value).catch(() => {});
+      // Persist target for adaptive control simulated-target sync on restart (only when active in current mode)
+      this.coordinator.getAdaptiveControl().storeTargetValue(value, 'target_temperature').catch(() => {});
     });
 
     this.registerCapabilityListener('target_temperature.indoor', async (value: number) => {
@@ -780,6 +780,8 @@ class AdlarModbusDevice extends Homey.Device {
       }
       if (!this.coordinator) return;
       await this.coordinator.setTemperature('floor', value);
+      // Persist target for adaptive control simulated-target sync on restart (only when active in current mode)
+      this.coordinator.getAdaptiveControl().storeTargetValue(value, 'target_temperature.floor').catch(() => {});
     });
 
     this.registerCapabilityListener('adlar_mode', async (value: string) => {

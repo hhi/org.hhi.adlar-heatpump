@@ -8,10 +8,11 @@ import { CapabilityHealthService } from './capability-health-service';
 import { EnergyTrackingService } from './energy-tracking-service';
 import { ModbusConnectionService, ModbusConnectionConfig } from './modbus-connection-service';
 import { FlowCardManagerService } from './flow-card-manager-service';
-import { AdaptiveControlService } from './adaptive-control-service';
+import { AdaptiveControlService, type ActiveSetpoint } from './adaptive-control-service';
 import { BuildingInsightsService } from './building-insights-service';
 import { SnapshotTriggerService } from './snapshot-trigger-service';
 import { Adlar3ModbusService, DataSnapshot } from '../protocol/adlar3-modbus-service';
+import { CONTROL_REGISTERS } from '../protocol/adlar3-modbus-registers';
 import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import { DeviceFeature } from '../protocol/modbus-runtime-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
@@ -97,6 +98,19 @@ export class ServiceCoordinator {
     return device.getRollingCOPCalculator?.() ?? null;
   }
 
+  /**
+   * Water setpoint the adaptive control works on: always the Zone 1 heating setpoint
+   * (4-2107 via target_temperature), limited to its register range (18–50°C).
+   * Aurora III has no separate floor heating setpoint; target_temperature.floor is the
+   * room temperature (4-2114) and is not used here.
+   */
+  private _resolveAdaptiveSetpoint(): ActiveSetpoint {
+    const reg = CONTROL_REGISTERS.zone1HeatingSetTemp;
+    return {
+      capability: 'target_temperature', min: reg.min ?? 18, max: reg.max ?? 50, label: 'Aurora III heating setpoint 4-2107',
+    };
+  }
+
   private _initializeServices(): void {
     this.logger('ServiceCoordinator: Initializing services');
 
@@ -108,6 +122,7 @@ export class ServiceCoordinator {
 
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,
+      resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
     });
 
     this.buildingInsights = new BuildingInsightsService({
