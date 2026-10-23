@@ -1,6 +1,6 @@
 # ADR-062: Implementatie van de review-fixes voor de gebouwleermodule
 
-**Status:** Voorgesteld
+**Status:** Gedeeltelijk aangenomen (2026-10-23): B1–B6 en B10 aangenomen zoals voorgesteld; B7–B9 voorgesteld
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -28,7 +28,7 @@ ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plan
   meer leren (B4).
 - **Versies (voorstel):** A1 mee in 3.3.1; learner in 3.4.0; regelkoppeling (A3–A6) in
   3.5.0.
-- **Te beslissen:** B1–B10.
+- **Aangenomen:** B1–B6 en B10. **Nog te beslissen:** B7–B9 (fase 3).
 
 ---
 
@@ -54,7 +54,7 @@ aanvullende simulaties (`adr062.js`). Alle getallen zijn RMSE van een voorspelli
 
 ## 2. Besluiten
 
-### B1 — Venster op dT/dt
+### B1 — Venster op dT/dt (aangenomen)
 
 **Voorstel:** tijdgebaseerd venster van **60 minuten, overlappend**, in
 `BuildingModelLearner.addMeasurement()`.
@@ -83,7 +83,7 @@ aanvullende simulaties (`adr062.js`). Alle getallen zijn RMSE van een voorspelli
   geven gecorreleerde residuen; P krimpt daardoor sneller dan de informatie
   rechtvaardigt (zie B6).
 
-### B2 — Het venster bij blokkades
+### B2 — Het venster bij blokkades (aangenomen)
 
 **Voorstel:** elk geblokkeerd sample start het venster opnieuw.
 
@@ -118,7 +118,7 @@ dagelijks 40 minuten tapwater:
   herkend; het vermogen naar de boiler telt mee. Het verschil met Aurora III is klein
   (S1b 0,06 tegen 0,05), maar niet nul. Geen fix in dit ADR.
 
-### B3 — PSD-methode
+### B3 — PSD-methode (aangenomen)
 
 **Voorstel:** na de covariantie-update symmetriseren, eigen-decompositie (Jacobi 4×4,
 vast maximum aantal sweeps) en de eigenwaarden begrenzen op [`P_FLOOR`, `P_CEILING`].
@@ -130,7 +130,7 @@ Dit vervangt de diagonaal-clamp en de off-diagonaal-clip.
 - **Verworpen:** UD- of Cholesky-factorisatie. Meer code voor hetzelfde resultaat bij
   een 4×4-matrix.
 
-### B4 — Grenzen
+### B4 — Grenzen (aangenomen)
 
 **Voorstel:**
 
@@ -150,7 +150,7 @@ Dit vervangt de diagonaal-clamp en de off-diagonaal-clip.
 - **Alternatief:** 500 u aanhouden en het profiel `passive` aanpassen (UA 0,06 in plaats
   van 0,05). Dat verandert de startwaarde voor bestaande gebruikers met dat profiel.
 
-### B5 — Migratie van opgeslagen states
+### B5 — Migratie van opgeslagen states (aangenomen)
 
 **Voorstel:**
 
@@ -175,7 +175,7 @@ de nieuwe code:
 - De P-projectie maakt in deze proef geen meetbaar verschil (0,018 met en zonder), maar
   garandeert het PSD-invariant vanaf de eerste update.
 
-### B6 — Confidence
+### B6 — Confidence (aangenomen)
 
 **Voorstel:** de formule in dit ADR **niet** wijzigen.
 
@@ -228,7 +228,7 @@ de nieuwe code:
   ADR-005 fase 3. Wordt ADR-005 niet aangenomen, dan drie keer.
 - De consolidatie inclusief Tuya uit review §2.5 valt buiten dit ADR.
 
-### B10 — Versies en releases
+### B10 — Versies en releases (aangenomen)
 
 | Versie | Inhoud | Gedrag voor gebruikers |
 |---|---|---|
@@ -236,6 +236,9 @@ de nieuwe code:
 | **3.4.0** | B1–B6, §2.8, B2-hook in drie drivers, A7, §2.5 | Het gebouwmodel leert anders; parameters verschuiven |
 | ADR-005 | Eigen gedragsneutrale versie tussen 3.4.0 en 3.5.0 | Geen |
 | **3.5.0** | B7, B8 (A4, A5, A6) | Thermisch advies volgt buitentemperatuur en vermogen; mijlpaaltrigger vuurt één keer |
+
+In fase 0 alleen de capability-naam (A1); het gelijktrekken van de τ-limieten van de
+voorverwarming valt onder B8 (fase 3).
 
 Elke release eerst via het testkanaal, met hardware-acceptatie op de eigen units.
 
