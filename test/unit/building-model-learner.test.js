@@ -63,9 +63,10 @@ test('converges towards true parameters from a different profile', () => {
     C: 15, UA: 0.3, pInt: 0.3, samples: 8000,
   });
   const model = learner.getModel();
-  // Convergence is deliberately slow: the defensive layers (bounds-revert +
-  // 5%/sample rate limit) pin theta against the C lower bound for the first
-  // ~1500 samples before it climbs towards the truth (ADR-057 bevinding D).
+  // Convergence is slow: the defensive layers (bounds-revert + 5%/sample
+  // rate limit) revert part of the updates. Over these 8000 samples that is
+  // ~1550 reverts spread over the whole run, not an initial pinning phase:
+  // P already changes at sample 2 (BUILDING_MODEL_REVIEW_ADDENDUM.md, A2).
   assert.ok(model.C > 10 && model.C < 28, `C=${model.C.toFixed(1)} should move towards 15`);
   assert.ok(model.UA > 0.1 && model.UA < 0.8, `UA=${model.UA.toFixed(2)} should be physically plausible`);
   assert.ok(model.tau > 1.25 && model.tau < 500, `tau=${model.tau.toFixed(1)} within bounds`);

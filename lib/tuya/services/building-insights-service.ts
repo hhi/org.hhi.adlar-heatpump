@@ -976,7 +976,7 @@ export class BuildingInsightsService {
     // Get current temperatures
     // @ts-expect-error - Accessing private externalTemperature from adaptiveControl
     const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
-    const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
+    const targetTemp = await this.device.getCapabilityValue('target_temperature.indoor');
 
     if (indoorTemp === null || indoorTemp === undefined
       || targetTemp === null || targetTemp === undefined) {
@@ -1041,7 +1041,7 @@ export class BuildingInsightsService {
     // v2.6.0: Get dynamic temperatures instead of fixed settings
     // @ts-expect-error - Accessing private externalTemperature from adaptiveControl
     const indoorTemp = this.adaptiveControl.externalTemperature?.getIndoorTemperature();
-    const targetTemp = await this.device.getCapabilityValue('desired_indoor_temp');
+    const targetTemp = await this.device.getCapabilityValue('target_temperature.indoor');
 
     if (indoorTemp === null || indoorTemp === undefined || targetTemp === null || targetTemp === undefined) {
       this.logger('BuildingInsightsService: Missing indoor or target temperature');
