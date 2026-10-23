@@ -94,7 +94,7 @@ function validCurrent(t) {
 }
 
 // Voorstel §2.7: dezelfde componentgrenzen, maar τ = 1/θ1 ∈ [1,25; 500] h en UA = θ1/θ0 ∈ [0,03; 1,5] kW/°C
-const FIXED = { tau_min: 1.25, tau_max: 500, ua_min: 0.03, ua_max: 1.5 };
+const FIXED = { tau_min: 1.25, tau_max: Number(process.env.TAU_MAX || 500), ua_min: 0.03, ua_max: 1.5 };
 
 function validFixed(t) {
   const b = CURRENT;
@@ -251,6 +251,42 @@ function makeLearner(opts = {}) {
     };
   }
 
+  // ADR-062 B1/B2: tijdgebaseerd venster. Invoer tijdgewogen per deelinterval; een gat > 15 min
+  // start het venster opnieuw. mode 'overlap' leert elke sample, 'block' één keer per venster.
+  if (opts.windowMin) {
+    const W = opts.windowMin * 60000;
+    const mode = opts.windowMode || 'overlap';
+    let buf = [];
+    L.stats.windowResets = 0;
+    L.addMeasurement = function addMeasurement(data) {
+      const prev = buf[buf.length - 1];
+      const maxGap = (opts.maxGapMin ?? 15) * 60000;
+      if (!prev || data.timestamp - prev.timestamp > maxGap) {
+        if (prev) L.stats.windowResets++;
+        buf = [data];
+        this.lastMeasurement = data;
+        if (!prev) this.sampleCount++;
+        return;
+      }
+      buf.push(data);
+      while (buf.length > 2 && data.timestamp - buf[1].timestamp >= W) buf.shift();
+      const span = data.timestamp - buf[0].timestamp;
+      this.lastMeasurement = data;
+      this.sampleCount++;
+      if (span < W) return;
+      let wP = 0; let wD = 0; let wS = 0;
+      for (let j = 0; j < buf.length - 1; j++) {
+        const dtj = buf[j + 1].timestamp - buf[j].timestamp;
+        wP += buf[j].pHeating * dtj;
+        wD += (buf[j].tOutdoor - buf[j].tIndoor) * dtj;
+        wS += ((buf[j].solarRadiation || 0) / 1000) * dtj;
+      }
+      const y = (data.tIndoor - buf[0].tIndoor) / (span / 3600000);
+      if (Math.abs(y) <= 10) this.updateRLS([wP / span, wD / span, wS / span, 1], y);
+      if (mode === 'block') buf = [data];
+    };
+  }
+
   if (variant.bounds) {
     const baseRestore = L.restoreState.bind(L);
     L.restoreState = function restoreState(state) {
@@ -265,4 +301,6 @@ function makeLearner(opts = {}) {
   return L;
 }
 
-module.exports = { makeLearner, minEigen, validCurrent, validFixed, BuildingModelLearner };
+const projectPsd = (P) => clampSpectrum(P, P_FLOOR, P_CEILING);
+
+module.exports = { makeLearner, minEigen, projectPsd, validCurrent, validFixed, BuildingModelLearner };
