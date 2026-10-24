@@ -45,10 +45,13 @@ bij komt die de app niet meet, worden daarom overgeslagen:
 | **Tapwater tijdens een combimodus (5, 7)** | **Telt mee**: 0x0304 is de ingestelde modus, niet de actuele werking |
 | **CV-ketel stookt bij (hulpwarmtebron, AHS)** | **Telt mee**: de ketelwarmte wordt niet gemeten |
 
-De simulatie bij ADR-062 laat zien hoeveel dat kan uitmaken. Bij de poorten van Aurora II
-(tapwater niet herkend) was de voorspelfout bij koud weer 0,10 °C in plaats van 0,01 °C
-(woning S1b, rate-limiting per component). Bijstook door een ketel is in die simulatie
-niet nagebootst.
+De simulatie bij ADR-062 (`adr062.js`, B2) laat zien dat het effect vooral afhangt van
+de rate-limiting. Bij koud weer, woning S1b, met herstart bij elk ontbrekend sample:
+met de uniforme rate-limiting die ADR-062 aanhoudt, was de voorspelfout 0,06 °C bij de
+poorten van Aurora II tegenover 0,05 °C bij die van Aurora III. Met rate-limiting per
+component was dat 0,10 °C tegenover 0,01 °C; die variant staat niet in ADR-062 en is
+apart doorgerekend bij de keuze voor de rate-limiting. Bijstook door een ketel is in die
+simulatie niet nagebootst.
 
 ### 1.2 Wat Aurora II mogelijk levert
 
