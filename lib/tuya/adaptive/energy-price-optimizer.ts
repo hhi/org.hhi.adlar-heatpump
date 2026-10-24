@@ -339,11 +339,25 @@ export class EnergyPriceOptimizer {
   }
 
   /**
+   * Check whether the N price entries starting at startIndex cover consecutive clock hours
+   * (each entry exactly one hour after the previous one).
+   */
+  private isContiguousWindow(startIndex: number, hours: number): boolean {
+    for (let j = startIndex + 1; j < startIndex + hours; j++) {
+      if (this.priceData[j].timestamp - this.priceData[j - 1].timestamp !== 3600000) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Find cheapest consecutive N-hour block in available price data
    * Uses sliding window algorithm for O(n) efficiency
    *
    * @param hours - Block size in hours (1-12)
-   * @returns Block analysis with start/end times and average price, or null if insufficient data
+   * @returns Block analysis with start/end times and average price, or null if insufficient
+   *   data or no window of consecutive hours exists
    * @since v2.5.0
    * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
    */
@@ -363,10 +377,13 @@ export class EnergyPriceOptimizer {
     }
 
     let minAvgPrice = Infinity;
-    let bestStartIndex = 0;
+    let bestStartIndex = -1;
 
-    // Sliding window: calculate average effective price for each possible window position
+    // Sliding window: calculate average effective price for each window of consecutive hours.
+    // Windows spanning a gap in the price data are skipped.
     for (let i = 0; i <= this.priceData.length - hours; i++) {
+      if (!this.isContiguousWindow(i, hours)) continue;
+
       const windowPrices = this.priceData.slice(i, i + hours);
       const avgPrice = windowPrices.reduce((sum, p) => sum + this.calculateEffectivePrice(p.price), 0) / hours;
 
@@ -376,10 +393,17 @@ export class EnergyPriceOptimizer {
       }
     }
 
+    if (bestStartIndex < 0) {
+      this.logger('EnergyPriceOptimizer: No contiguous price block found', {
+        required: hours,
+        available: this.priceData.length,
+      });
+      return null;
+    }
+
     // Build result
     const startTime = new Date(this.priceData[bestStartIndex].timestamp);
-    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp);
-    endTime.setHours(endTime.getHours() + 1); // End of last hour
+    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp + 3600000); // End of last hour
 
     return {
       startTime,
@@ -394,7 +418,8 @@ export class EnergyPriceOptimizer {
    * Inverse of findCheapestBlock()
    *
    * @param hours - Block size in hours (1-12)
-   * @returns Block analysis with start/end times and average price, or null if insufficient data
+   * @returns Block analysis with start/end times and average price, or null if insufficient
+   *   data or no window of consecutive hours exists
    * @since v2.5.0
    * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
    */
@@ -414,10 +439,13 @@ export class EnergyPriceOptimizer {
     }
 
     let maxAvgPrice = -Infinity;
-    let bestStartIndex = 0;
+    let bestStartIndex = -1;
 
-    // Sliding window: calculate average effective price for each possible window position
+    // Sliding window: calculate average effective price for each window of consecutive hours.
+    // Windows spanning a gap in the price data are skipped.
     for (let i = 0; i <= this.priceData.length - hours; i++) {
+      if (!this.isContiguousWindow(i, hours)) continue;
+
       const windowPrices = this.priceData.slice(i, i + hours);
       const avgPrice = windowPrices.reduce((sum, p) => sum + this.calculateEffectivePrice(p.price), 0) / hours;
 
@@ -427,10 +455,17 @@ export class EnergyPriceOptimizer {
       }
     }
 
+    if (bestStartIndex < 0) {
+      this.logger('EnergyPriceOptimizer: No contiguous price block found', {
+        required: hours,
+        available: this.priceData.length,
+      });
+      return null;
+    }
+
     // Build result
     const startTime = new Date(this.priceData[bestStartIndex].timestamp);
-    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp);
-    endTime.setHours(endTime.getHours() + 1); // End of last hour
+    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp + 3600000); // End of last hour
 
     return {
       startTime,

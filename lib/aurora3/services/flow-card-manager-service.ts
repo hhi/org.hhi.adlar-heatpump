@@ -10,6 +10,7 @@ import { PerformanceReportService } from './performance-report-service';
 import { SeasonalModeCalculator } from '../../shared/seasonal-mode-calculator';
 import { CurveCalculator } from '../../shared/curve-calculator';
 import { TimeScheduleCalculator } from '../../shared/time-schedule-calculator';
+import { formatHourMinute, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 /* eslint-disable camelcase */
 interface PreHeatArgs {
@@ -1627,6 +1628,9 @@ export class FlowCardManagerService {
       this.logger(`FlowCardManagerService: External energy prices updated: ${priceCount} hours received`);
 
       if (this.device.hasCapability('energy_prices_data')) {
+        // Hour labels in Homey's timezone (the app process runs in UTC)
+        const timeZone = resolveHomeyTimezone(this.device.homey);
+
         // Build rich JSON schedule from EnergyPriceOptimizer data
         const priceDataArray = energyOptimizer.getPriceData();
         const cheapestBlock = energyOptimizer.findCheapestBlock(4); // 4-hour block
@@ -1635,7 +1639,7 @@ export class FlowCardManagerService {
         // Build per-hour schedule with category and advice
         const schedule = priceDataArray.map((pd: { timestamp: number; price: number; category: string }) => {
           const hourDate = new Date(pd.timestamp);
-          const hourStr = `${hourDate.getHours().toString().padStart(2, '0')}:00`;
+          const hourStr = formatHourMinute(hourDate, timeZone);
 
           // Determine advice based on category
           let advice = 'maintain';
@@ -1657,16 +1661,16 @@ export class FlowCardManagerService {
         const summary: Record<string, unknown> = {};
         if (cheapestBlock) {
           summary.cheapestBlock = {
-            start: `${cheapestBlock.startTime.getHours().toString().padStart(2, '0')}:00`,
-            end: `${cheapestBlock.endTime.getHours().toString().padStart(2, '0')}:00`,
+            start: formatHourMinute(cheapestBlock.startTime, timeZone),
+            end: formatHourMinute(cheapestBlock.endTime, timeZone),
             avgPrice: Math.round(cheapestBlock.avgPrice * 10000) / 10000,
             hours: cheapestBlock.totalHours,
           };
         }
         if (expensiveBlock) {
           summary.expensiveBlock = {
-            start: `${expensiveBlock.startTime.getHours().toString().padStart(2, '0')}:00`,
-            end: `${expensiveBlock.endTime.getHours().toString().padStart(2, '0')}:00`,
+            start: formatHourMinute(expensiveBlock.startTime, timeZone),
+            end: formatHourMinute(expensiveBlock.endTime, timeZone),
             avgPrice: Math.round(expensiveBlock.avgPrice * 10000) / 10000,
             hours: expensiveBlock.totalHours,
           };
