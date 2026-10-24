@@ -504,14 +504,14 @@
           "fr": "Apprentissage: Facteur d'Oubli (λ)"
         },
         "hint": {
-          "en": "⚠️ Advanced: How quickly the model adapts to changes. Higher = more stable, better confidence. DO NOT change unless experiencing specific learning issues. Range 0.990–0.9995. Default: 0.999",
-          "nl": "⚠️ Geavanceerd: Hoe snel het model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid. PAS NIET AAN tenzij je specifieke leerproblemen hebt. Bereik 0.990–0.9995. Standaard: 0.999",
-          "de": "⚠️ Erweitert: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen. NICHT ändern, außer bei spezifischen Lernproblemen. Bereich 0.990–0.9995. Standard: 0.999",
-          "fr": "⚠️ Avancé: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. NE PAS modifier sauf problèmes d'apprentissage spécifiques. Plage 0.990–0.9995. Défaut: 0.999"
+          "en": "⚠️ Advanced: How quickly the model adapts to changes. Higher = more stable, better confidence. DO NOT change unless experiencing specific learning issues. Range 0.9985–0.9995. Default: 0.999",
+          "nl": "⚠️ Geavanceerd: Hoe snel het model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid. PAS NIET AAN tenzij je specifieke leerproblemen hebt. Bereik 0.9985–0.9995. Standaard: 0.999",
+          "de": "⚠️ Erweitert: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen. NICHT ändern, außer bei spezifischen Lernproblemen. Bereich 0.9985–0.9995. Standard: 0.999",
+          "fr": "⚠️ Avancé: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. NE PAS modifier sauf problèmes d'apprentissage spécifiques. Plage 0.9985–0.9995. Défaut: 0.999"
         },
         "value": 0.999,
         "attr": {
-          "min": 0.99,
+          "min": 0.9985,
           "max": 0.9995,
           "step": 0.0005
         }

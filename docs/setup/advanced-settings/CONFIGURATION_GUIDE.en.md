@@ -277,7 +277,7 @@ Machine learning algorithm that learns the thermal properties of your home.
 
 ### Forgetting Factor (Expert Setting)
 - **Default**: 0.999
-- **Range**: 0.990 - 0.9995
+- **Range**: 0.9985 - 0.9995
 - **Function**: How quickly the model adapts to changes. Higher = more stable, better confidence (~75%). Lower = faster adaptation to seasonal changes.
 - **Only visible**: With "Expert HVAC function cards" enabled
 

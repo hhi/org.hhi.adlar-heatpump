@@ -277,7 +277,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 
 ### Vergeetfactor (Expert Instelling)
 - **Standaard**: 0.999
-- **Bereik**: 0.990 - 0.9995
+- **Bereik**: 0.9985 - 0.9995
 - **Functie**: Hoe snel model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid (~75%). Lager = snellere aanpassing aan seizoensveranderingen.
 - **Alleen zichtbaar**: Met "Expert HVAC functie kaarten" ingeschakeld
 

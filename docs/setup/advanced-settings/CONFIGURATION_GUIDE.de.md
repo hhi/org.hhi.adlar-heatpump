@@ -277,7 +277,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 
 ### Vergessensfaktor (Experteneinstellung)
 - **Standard**: 0.999
-- **Bereich**: 0.990 - 0.9995
+- **Bereich**: 0.9985 - 0.9995
 - **Funktion**: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen (~75%). Niedriger = schnellere Anpassung an saisonale Änderungen.
 - **Nur sichtbar**: Mit aktivierten "Expert HVAC-Funktionskarten"
 

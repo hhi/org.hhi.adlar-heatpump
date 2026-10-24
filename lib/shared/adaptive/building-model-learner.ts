@@ -85,7 +85,7 @@ export function getDynamicPInt(hour: number, basePInt: number): number {
 }
 
 export interface BuildingModelConfig {
-  forgettingFactor: number; // 0.995-0.9995, default 0.999 = balance stability/adaptivity
+  forgettingFactor: number; // 0.9985-0.9995 (clamped, ADR-062 §2.8), default 0.999
   initialCovariance: number; // 100 = high initial uncertainty
   minSamplesForConfidence: number; // 288 = 24 hours @ 5min intervals
   buildingProfile?: BuildingProfileType; // Building type for initial parameters
@@ -113,6 +113,16 @@ export interface BuildingModel {
 }
 
 /**
+ * ADR-062 §2.5: Explicit outcome of restoreState(), so callers do not have to
+ * infer a rejection from sample counts.
+ */
+export interface RestoreResult {
+  restored: boolean; // false = state rejected, learner reset to profile defaults
+  reasons: string[]; // Validation errors when rejected (empty when restored)
+  covarianceProjected: boolean; // true = stored P was not PSD and has been projected
+}
+
+/**
  * Building Model Learner using Recursive Least Squares algorithm
  */
 export class BuildingModelLearner {
@@ -135,6 +145,10 @@ export class BuildingModelLearner {
   // ADR-062 B1/B2: recent accepted measurements forming the dT/dt window (not persisted)
   private window: MeasurementData[] = [];
   private windowInterrupted = false;
+
+  // ADR-062 B6: a-priori prediction errors (°C/h) of the last 24 hours (not persisted)
+  private residuals: { timestamp: number; error: number }[] = [];
+  private currentTimestamp = 0; // Timestamp of the measurement driving the current update
 
   // =========================================================================
   // DEFENSIVE LAYER 1: Measurement Validation Bounds
@@ -160,6 +174,23 @@ export class BuildingModelLearner {
   public static readonly WINDOW = {
     WINDOW_MINUTES: 60,
     MAX_GAP_MINUTES: 7.5,
+  };
+
+  // =========================================================================
+  // ADR-062 §2.8: Forgetting factor. The former variable forgetting factor (VFF)
+  // effectively kept λ at ≥ 0.995–0.9988 for settings below 0.999; a constant
+  // λ = 0.9985 reproduces that in the simulation. λ is clamped to this range.
+  // =========================================================================
+  public static readonly LAMBDA = {
+    MIN: 0.9985,
+    MAX: 0.9995,
+    DEFAULT: 0.999,
+  };
+
+  // ADR-062 B6: rolling prediction error
+  public static readonly PREDICTION_ERROR = {
+    WINDOW_HOURS: 24,
+    MIN_RESIDUALS: 12, // About one hour of updates
   };
 
   // =========================================================================
@@ -258,11 +289,17 @@ export class BuildingModelLearner {
       [0, 0, 0, initCov],
     ];
 
-    this.lambda = config.forgettingFactor;
     this.sampleCount = 0;
     this.lastMeasurement = null;
     this.minSamplesForConfidence = config.minSamplesForConfidence;
     this.logger = config.logger || (() => { });
+
+    const { MIN, MAX, DEFAULT } = BuildingModelLearner.LAMBDA;
+    const configured = Number.isFinite(config.forgettingFactor) ? config.forgettingFactor : DEFAULT;
+    this.lambda = Math.min(MAX, Math.max(MIN, configured));
+    if (this.lambda !== configured) {
+      this.logger(`BuildingModelLearner: forgetting factor ${config.forgettingFactor} clamped to ${this.lambda} (valid: ${MIN} - ${MAX})`);
+    }
 
     this.logger(
       `BuildingModelLearner: Initialized with profile ${config.buildingProfile || 'average'} `
@@ -362,6 +399,7 @@ export class BuildingModelLearner {
       }
       const dtDt = (data.tIndoor - this.window[0].tIndoor) / (spanMs / 3600000); // °C/hour
       if (Math.abs(dtDt) <= BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max) {
+        this.currentTimestamp = data.timestamp;
         this.updateRLS(X, dtDt);
       }
     } else if (this.window.length === 2) {
@@ -377,6 +415,30 @@ export class BuildingModelLearner {
         + `confidence=${model.confidence.toFixed(0)}%`,
       );
     }
+  }
+
+  /**
+   * ADR-062 B6: Store one a-priori prediction error and drop errors older than 24 hours.
+   */
+  private recordResidual(error: number): void {
+    const cutoff = this.currentTimestamp - BuildingModelLearner.PREDICTION_ERROR.WINDOW_HOURS * 3600000;
+    this.residuals.push({ timestamp: this.currentTimestamp, error });
+    while (this.residuals.length > 0 && this.residuals[0].timestamp < cutoff) {
+      this.residuals.shift();
+    }
+  }
+
+  /**
+   * ADR-062 B6: RMSE (°C/h) of the a-priori prediction errors over the last 24 hours
+   * of updates. Diagnostic only (no capability, no gating); null until enough updates.
+   * Not persisted: after a restart it is null for about an hour.
+   */
+  public getPredictionRmse24h(): number | null {
+    if (this.residuals.length < BuildingModelLearner.PREDICTION_ERROR.MIN_RESIDUALS) {
+      return null;
+    }
+    const sumSquares = this.residuals.reduce((sum, r) => sum + r.error * r.error, 0);
+    return Math.sqrt(sumSquares / this.residuals.length);
   }
 
   /**
@@ -437,49 +499,24 @@ export class BuildingModelLearner {
    * P = (1/λ) × (P - K × X^T × P)         (Covariance update)
    */
   private updateRLS(X: number[], y: number): void {
-    // =========================================================================
-    // DEFENSIVE LAYER 3: Variable Forgetting Factor (VFF-RLS)
-    // v2.7.7: Error-based adaptive λ - key insight from scientific literature:
-    // - Small prediction error → λ → 0.9999 (stable, minimal learning)
-    // - Large prediction error → λ → 0.995 (fast tracking)
-    // This prevents both convergence stalling AND rapid divergence
-    // Reference: University of Michigan RLS research, IEEE VFF-RLS papers
-    // =========================================================================
+    // ADR-062 §2.8: constant forgetting factor (the former VFF was removed)
+    const { lambda } = this;
     const prediction = this.dotProduct(X, this.theta);
-    const predictionError = Math.abs(y - prediction);
 
-    // Normalize error: 2.0°C/h considered maximum reasonable error
-    const errorNormalized = Math.min(predictionError / 2.0, 1.0);
+    // ADR-062 B6: record the a-priori prediction error (also for updates that are reverted)
+    this.recordResidual(y - prediction);
 
-    // Sigmoid mapping: smooth transition between stable and tracking modes
-    // At error=0.5°C/h → sigmoid ≈ 0.5 (balanced)
-    // At error<0.2°C/h → sigmoid ≈ 0.1 (stable mode)
-    // At error>1.0°C/h → sigmoid ≈ 0.9 (tracking mode)
-    const sigmoid = 1 / (1 + Math.exp(-5 * (errorNormalized - 0.25)));
-
-    // Adaptive lambda: 0.9999 (stable) to 0.995 (fast tracking)
-    const vffLambda = 0.9999 - sigmoid * (0.9999 - 0.995);
-
-    // ADR-056: voormalig warmup-mechanisme (0.999 − n/100000) verwijderd — met de
-    // geconfigureerde λ ≥ 0.999 was die term vanaf sample 1 al inert.
-    // De geconfigureerde forgetting factor fungeert als ondergrens; VFF kan alleen verhogen.
-    const adaptiveLambda = Math.max(vffLambda, this.lambda);
-
-    // Log VFF activity at milestones
     if (this.sampleCount % 100 === 0) {
-      this.logger(
-        `BuildingModelLearner: VFF λ=${adaptiveLambda.toFixed(4)} `
-        + `(error=${predictionError.toFixed(3)}°C/h, sigmoid=${sigmoid.toFixed(2)})`,
-      );
+      this.logger(`BuildingModelLearner: λ=${lambda.toFixed(4)} (error=${Math.abs(y - prediction).toFixed(3)}°C/h)`);
     }
 
     // Step 1: Compute Kalman gain K = P × X / (λ + X^T × P × X)
     const PX = this.matrixVectorMultiply(this.P, X);
-    const denominator = adaptiveLambda + this.dotProduct(X, PX);
+    const denominator = lambda + this.dotProduct(X, PX);
     const K = PX.map((val) => val / denominator);
 
     // Step 2: Update parameters θ = θ + K × (y - X^T × θ)
-    const error = y - prediction; // prediction already calculated above for VFF
+    const error = y - prediction;
 
     // =========================================================================
     // DEFENSIVE LAYER 2: Save theta before update for potential reversion
@@ -572,7 +609,7 @@ export class BuildingModelLearner {
     // =========================================================================
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
-    const updated = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / adaptiveLambda));
+    const updated = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / lambda));
     this.P = BuildingModelLearner.projectCovariance(updated);
   }
 
@@ -824,7 +861,8 @@ export class BuildingModelLearner {
   }
 
   /**
-   * Restore state from persistence
+   * Restore state from persistence.
+   * ADR-062 §2.5: returns the outcome explicitly (restored, reasons, P projected).
    */
   public restoreState(state: {
     theta: number[];
@@ -836,7 +874,7 @@ export class BuildingModelLearner {
     consecutiveReverts?: number;
     totalReverts?: number;
     rateLimitActivations?: number;
-  }): void {
+  }): RestoreResult {
     // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
     let stateIsValid = true;
     const validationErrors: string[] = [];
@@ -885,9 +923,10 @@ export class BuildingModelLearner {
       this.lastMeasurement = null;
       this.window = [];
       this.windowInterrupted = false;
+      this.residuals = [];
       // theta and P already initialized with defaults in constructor
       this.logger('   ✅ State restore prevented corruption - learning will restart from sample 0');
-      return;
+      return { restored: false, reasons: validationErrors, covarianceProjected: false };
     }
 
     // State is valid - restore normally
@@ -895,7 +934,8 @@ export class BuildingModelLearner {
     // ADR-062 B3/B5: a stored P that is not positive semi-definite (states learned before
     // the spectral clamping) is projected once; a valid P is kept exactly as stored.
     const minEigen = Math.min(...BuildingModelLearner.symmetricEigen(state.P).values);
-    if (minEigen < BuildingModelLearner.RLS_COVARIANCE.P_FLOOR * (1 - 1e-6)) {
+    const covarianceProjected = minEigen < BuildingModelLearner.RLS_COVARIANCE.P_FLOOR * (1 - 1e-6);
+    if (covarianceProjected) {
       this.P = BuildingModelLearner.projectCovariance(state.P);
       this.logger(`BuildingModelLearner: Restored P was not positive semi-definite (min eigenvalue ${minEigen.toExponential(2)}) — projected`);
     } else {
@@ -905,6 +945,7 @@ export class BuildingModelLearner {
     this.lastMeasurement = state.lastMeasurement;
     this.window = []; // ADR-062 B1: the window is not persisted; it continues from lastMeasurement
     this.windowInterrupted = false;
+    this.residuals = [];
     // Restore configuration (with defaults for backward compatibility)
     this.basePInt = state.basePInt ?? 0.3;
     this.enableDynamicPInt = state.enableDynamicPInt ?? false;
@@ -913,6 +954,7 @@ export class BuildingModelLearner {
     this.totalReverts = state.totalReverts ?? 0;
     this.rateLimitActivations = state.rateLimitActivations ?? 0;
     this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
+    return { restored: true, reasons: [], covarianceProjected };
   }
 
   // ========================================================================

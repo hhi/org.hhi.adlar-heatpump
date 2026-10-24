@@ -89,7 +89,6 @@ export class BuildingInsightsService {
 
   // Timers
   private evaluationTimer: NodeJS.Timeout | null = null;
-  private preHeatRecommendationTimer: NodeJS.Timeout | null = null;
   private readonly EVALUATION_INTERVAL_MS = 50 * 60 * 1000; // 50 minutes (10 samples @ 5min)
 
   constructor(config: BuildingInsightsServiceConfig) {
@@ -135,6 +134,10 @@ export class BuildingInsightsService {
 
     // Start periodic evaluation (every 50 minutes)
     // Pre-heat recommendations are now triggered based on ΔT threshold during evaluation
+    // ADR-062 A7: a repeated initialize() replaces the running interval instead of adding one
+    if (this.evaluationTimer) {
+      this.device.homey.clearInterval(this.evaluationTimer);
+    }
     this.evaluationTimer = this.device.homey.setInterval(
       () => this.evaluateInsights().catch((err) => this.logger('BuildingInsightsService: Evaluation error:', err)),
       this.EVALUATION_INTERVAL_MS,
@@ -153,13 +156,8 @@ export class BuildingInsightsService {
 
     // Clear timers
     if (this.evaluationTimer) {
-      clearInterval(this.evaluationTimer);
+      this.device.homey.clearInterval(this.evaluationTimer);
       this.evaluationTimer = null;
-    }
-
-    if (this.preHeatRecommendationTimer) {
-      clearInterval(this.preHeatRecommendationTimer);
-      this.preHeatRecommendationTimer = null;
     }
 
     // Persist final state

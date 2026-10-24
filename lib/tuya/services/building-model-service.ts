@@ -109,21 +109,20 @@ export class BuildingModelService {
     // absent / restored (with count + confidence) / rejected (learner logs why)
     const storedState = await this.device.getStoreValue('building_model_state');
     if (storedState) {
+      // ADR-062 §2.5: the learner reports the outcome explicitly (also for a state with 0 samples)
       const sampleCountBefore = (storedState.sampleCount as number) ?? 0;
-      this.learner.restoreState(storedState);
-      const restored = this.learner.getState();
-      if (restored.sampleCount === sampleCountBefore) {
+      const result = this.learner.restoreState(storedState);
+      if (result.restored) {
         const model = this.learner.getModel();
         this.logger(
-          `BuildingModelService: ✅ State RESTORED from store — ${restored.sampleCount} samples, `
-          + `confidence ${model.confidence.toFixed(0)}%, C=${model.C.toFixed(1)} kWh/°C, τ=${model.tau.toFixed(1)}h`,
+          `BuildingModelService: ✅ State RESTORED from store — ${this.learner.getState().sampleCount} samples, `
+          + `confidence ${model.confidence.toFixed(0)}%, C=${model.C.toFixed(1)} kWh/°C, UA=${model.UA.toFixed(3)} kW/°C, `
+          + `τ=${model.tau.toFixed(1)}h${result.covarianceProjected ? ' (P projected)' : ''}`,
         );
       } else {
-        // restoreState() rejected the persisted state and reset to defaults;
-        // the learner already logged the specific validation errors
         this.logger(
-          `BuildingModelService: ⚠️ State REJECTED on restore (was ${sampleCountBefore} samples) — `
-          + 'learning restarts from profile defaults, see learner validation log above',
+          `BuildingModelService: ⚠️ State REJECTED on restore (was ${sampleCountBefore} samples): `
+          + `${result.reasons.join('; ')} — learning restarts from profile defaults`,
         );
       }
     } else {
@@ -137,6 +136,10 @@ export class BuildingModelService {
     await this.updateDiagnosticsCapability();
 
     // Start periodic updates (every 5 minutes)
+    // ADR-062 A7: a repeated initialize() replaces the running interval instead of adding one
+    if (this.updateInterval) {
+      this.device.homey.clearInterval(this.updateInterval);
+    }
     this.updateInterval = this.device.homey.setInterval(
       () => this.collectAndLearn().catch((err) => this.logger('Learning error:', err)),
       this.UPDATE_INTERVAL_MS,
@@ -777,6 +780,7 @@ export class BuildingModelService {
     isDefault: boolean;
     blockingReason: string | null;
     blockingReasonKey: string | null; // Locale key (building_model.blocked_*); null when not blocked or still collecting initial samples
+    predictionRmse24h: number | null; // ADR-062 B6: RMSE of the prediction error (°C/h) over 24 h; diagnostic only
   }> {
     const enabled = await this.device.getSetting('building_model_enabled');
 
@@ -838,6 +842,7 @@ export class BuildingModelService {
       isDefault,
       blockingReason,
       blockingReasonKey,
+      predictionRmse24h: this.learner.getPredictionRmse24h(),
     };
   }
 
@@ -1217,7 +1222,7 @@ export class BuildingModelService {
 
     // Cleanup timers
     if (this.updateInterval) {
-      clearInterval(this.updateInterval);
+      this.device.homey.clearInterval(this.updateInterval);
       this.updateInterval = null;
       this.logger('BuildingModelService: ⚠️ Timer STOPPED (clearInterval called)');
     }
