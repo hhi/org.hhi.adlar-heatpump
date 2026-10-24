@@ -6,7 +6,8 @@
  * its decision (B1–B5, §2.8, A5); when that decision is implemented the test is
  * replaced by one for the new behaviour, so every change in behaviour is visible.
  * Group N — new behaviour, replacing the K tests of the decisions implemented so far
- * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3; phase 1d: N11–N13 for B4/B5).
+ * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3; phase 1d: N11–N13 for B4/B5;
+ * phase 1e: N14–N16 for §2.8, §2.5 and B6).
  *
  * Runs against the compiled output in .homeybuild/ (npm test builds first).
  */
@@ -449,17 +450,62 @@ test('N13 (ADR-062 B4): a poorly insulated house (UA 1.0, C 10) converges, beyon
   assert.ok(Math.abs(model.UA - UA) / UA < 0.1, `UA=${model.UA.toFixed(3)} should be within 10% of ${UA}`);
 });
 
-test('K6 (review §2.8): VFF lambda stays at the configured 0.999, also with a large error', () => {
+test('N14 (ADR-062 §2.8): λ is the configured value, also with a large error; values below 0.9985 are clamped', () => {
   // Calls the private updateRLS() at a milestone sample count, where it logs the effective lambda.
   const lines = [];
   const learner = createLearner({ logger: (msg) => lines.push(String(msg)) });
   learner.sampleCount = 100;
   learner.updateRLS([2, -15, 0, 1], 9); // prediction ≈ 0, error ≈ 9 °C/h
-  const vff = lines.find((l) => l.includes('VFF λ='));
-  assert.ok(vff, 'no VFF log line at sample 100');
-  assert.match(vff, /VFF λ=0\.9990 /);
-  const error = Number(/error=([\d.]+)/.exec(vff)[1]);
-  assert.ok(error > 2, `error ${error} should be large`);
+  const lambdaLine = lines.find((l) => l.startsWith('BuildingModelLearner: λ='));
+  assert.ok(lambdaLine, 'no λ log line at sample 100');
+  assert.match(lambdaLine, /λ=0\.9990 /);
+  assert.ok(!lines.some((l) => l.includes('VFF')), 'no VFF log line any more');
+
+  for (const [configured, expected] of [[0.99, 0.9985], [0.995, 0.9985], [0.9985, 0.9985], [0.9995, 0.9995], [undefined, 0.999]]) {
+    const log = [];
+    const clamped = createLearner({ forgettingFactor: configured, logger: (msg) => log.push(String(msg)) });
+    assert.strictEqual(clamped.lambda, expected, `configured ${configured}`);
+    // A missing setting takes the default without a clamp log line
+    assert.strictEqual(log.some((l) => l.includes('clamped')), configured !== undefined && configured !== expected, `clamp log for ${configured}`);
+  }
+});
+
+test('N15 (ADR-062 §2.5): restoreState() returns the outcome explicitly', () => {
+  const theta = [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15];
+  const valid = createLearner().restoreState({ theta, P: IDENTITY, sampleCount: 100, lastMeasurement: null });
+  assert.deepStrictEqual(valid, { restored: true, reasons: [], covarianceProjected: false });
+
+  // A rejected state with 0 samples: the sample count does not change, the result still says rejected
+  const rejected = createLearner().restoreState({ theta: [0.1, 0.16, 0.04, 0.03], P: IDENTITY, sampleCount: 0, lastMeasurement: null });
+  assert.strictEqual(rejected.restored, false);
+  assert.strictEqual(rejected.covarianceProjected, false);
+  assert.match(rejected.reasons.join('; '), /UA 1\.600 kW\/°C outside/);
+
+  const indefinite = [[1, 0.9, 0.9, 0], [0.9, 1, -0.9, 0], [0.9, -0.9, 1, 0], [0, 0, 0, 1]];
+  const projected = createLearner().restoreState({ theta, P: indefinite, sampleCount: 100, lastMeasurement: null });
+  assert.deepStrictEqual(projected, { restored: true, reasons: [], covarianceProjected: true });
+});
+
+test('N16 (ADR-062 B6): prediction RMSE over 24 hours of a-priori errors, null before 12 updates', () => {
+  const learner = createLearner();
+  assert.strictEqual(learner.getPredictionRmse24h(), null);
+  const spy = [];
+  const original = learner.recordResidual.bind(learner);
+  learner.recordResidual = (error) => { spy.push({ timestamp: learner.currentTimestamp, error }); original(error); };
+
+  feed(learner, 23); // the 60-minute window spans 12 intervals: 11 updates (samples 13–23)
+  assert.strictEqual(spy.length, 11);
+  assert.strictEqual(learner.getPredictionRmse24h(), null);
+
+  feed(learner, 600, T0 + 23 * FIVE_MIN_MS); // about 52 hours in total
+  const last = spy[spy.length - 1].timestamp;
+  const recent = spy.filter((r) => r.timestamp >= last - 24 * 3600 * 1000);
+  assert.ok(recent.length < spy.length, 'older errors are dropped');
+  const expected = Math.sqrt(recent.reduce((sum, r) => sum + r.error ** 2, 0) / recent.length);
+  assert.ok(Math.abs(learner.getPredictionRmse24h() - expected) < 1e-12);
+
+  learner.restoreState(learner.getState());
+  assert.strictEqual(learner.getPredictionRmse24h(), null, 'not persisted: empty after a restore');
 });
 
 test('K7 (ADR-062 A5): restore takes enableDynamicPInt from the state', () => {

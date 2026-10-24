@@ -1,6 +1,6 @@
 # ADR-062: Implementatie van de review-fixes voor de gebouwleermodule
 
-**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24): B1–B6, B10 en B11 aangenomen; B7–B9 voorgesteld
+**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24): B1–B6, B10 en B11 aangenomen, uit B8 ook A7, §2.5 en §2.8 (fase 1e); B7–B9 verder voorgesteld
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -31,7 +31,9 @@ ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plan
 - **Uitgangspunt: precisie bij koud weer gaat voor.** Daarom vervalt de uniforme
   rate-limiting uit review §2.1; de huidige rate-limiting per component blijft, voor
   alle drivers (B11).
-- **Aangenomen:** B1–B6, B10 en B11. **Nog te beslissen:** B7–B9 (fase 3).
+- **Aangenomen:** B1–B6, B10 en B11, en uit B8 de punten A7, §2.5 en §2.8
+  (fase 1e, 3.4.0). **Nog te beslissen:** B7, de rest van B8 (A4–A6) en B9
+  (fase 3).
 
 ---
 
@@ -214,6 +216,9 @@ de nieuwe code:
 
 ### B8 — Regelkoppeling (A4, A5, A6, A7, §2.5, §2.8)
 
+A7, §2.5 en §2.8 zijn aangenomen en uitgevoerd in fase 1e (3.4.0); A4–A6
+blijven voorgesteld voor fase 3.
+
 | Punt | Voorstel |
 |---|---|
 | **A4** modelparameters naar PI en prijs | Alleen bij confidence ≥ 50%, zoals de thermische component. Daaronder expliciet de profielwaarden terugzetten. Uitgeschakeld leren betekent niet "model uit": een geleerd model boven 50% blijft in gebruik. De setters gaan vóór de berekening van PI en prijs |
@@ -221,7 +226,7 @@ de nieuwe code:
 | **A6** mijlpaaltrigger | Drempelpassage (vorige confidence < 70 ≤ huidige), met een vlag in de device store. De vlag vervalt bij een reset en bij een profielwissel |
 | **A7** timers | Overal `this.device.homey.clearInterval()` |
 | **§2.5** restore-logging | Gelijktrekken naar de Tuya-vorm, met een expliciet restore-resultaat uit de learner in plaats van een vergelijking van sample-aantallen |
-| **§2.8** VFF | Verwijderen; λ = de geconfigureerde waarde. Gedrag ongewijzigd, want VFF was bij de standaardinstelling al inert (review §6.4) |
+| **§2.8** VFF | Verwijderen; λ = de geconfigureerde waarde, begrensd op 0,9985–0,9995 (ook het bereik van de instelling). VFF was alleen inert bij een instelling vanaf 0,9988, dus ook bij de standaard 0,999 (review §6.4). Daaronder hield VFF λ op 0,995–0,9988; zonder VFF leert het model bij 0,990 veel slechter (S1b 0,24 tegen 0,03 °C). Een constante λ van 0,9985 geeft hetzelfde resultaat als VFF bij een lage instelling. |
 | **A1** doeltemperatuur Tuya | `target_temperature.indoor` op beide plekken. De τ-limieten van de twee voorverwarmingsmethoden gelijktrekken op één constante (voorstel: 0,5–250 u; passieve woningen krijgen dan, zoals nu, geen voorverwarmingsadvies) |
 
 ### B9 — Volgorde ten opzichte van ADR-005
@@ -297,7 +302,7 @@ Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschied
 | **1b** | B1 venster + B2 `interruptWindow()` + service-hook in drie drivers | Simulatie (§4); unit-tests venster en hook | Af |
 | **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie | Af |
 | **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) | Af |
-| **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Open |
+| **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Af |
 | **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware | Handmatig | Open |
 | **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
 | **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie | Open |
@@ -402,7 +407,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 3 | Venster, `interruptWindow()`, service-hook (3×) | 1b | Af |
 | 4 | PSD-projectie | 1c | Af |
 | 5 | Grenzen, restore-migratie, τ-logregel | 1d | Af |
-| 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Open |
+| 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Af |
 | 7 | npm-script `simulate:building-model` | 1a | Af |
 | 8 | Release 3.4.0 via testkanaal | 1f | Open |
 | 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |

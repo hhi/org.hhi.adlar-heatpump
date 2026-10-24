@@ -277,7 +277,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 
 ### Facteur d'Oubli (Expert)
 - **Par défaut** : 0.999
-- **Plage** : 0.990 - 0.9995
+- **Plage** : 0.9985 - 0.9995
 - **Fonction** : Rapidité d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance (~75%). Plus bas = adaptation plus rapide aux changements saisonniers.
 - **Visible uniquement** : Avec "Cartes de fonction expert HVAC" activé
 
