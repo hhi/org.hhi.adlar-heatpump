@@ -7,7 +7,7 @@
  * replaced by one for the new behaviour, so every change in behaviour is visible.
  * Group N — new behaviour, replacing the K tests of the decisions implemented so far
  * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3; phase 1d: N11–N13 for B4/B5;
- * phase 1e: N14–N16 for §2.8, §2.5 and B6; N17 for B6 after a soft reset).
+ * phase 1e: N14–N16 for §2.8, §2.5 and B6; N17 for B6 after a soft reset; phase 1g: N18–N20 for B12).
  *
  * Runs against the compiled output in .homeybuild/ (npm test builds first).
  */
@@ -431,10 +431,10 @@ test('N12 (ADR-062 B4): the "tau estimate" log line on a revert shows 1/θ[1] an
   assert.ok(Math.abs(logged - expected) <= Math.max(0.1, Math.abs(expected) * 1e-3), `logged ${logged}, 1/θ1 ${expected}`);
 });
 
-test('N13 (ADR-062 B4): a poorly insulated house (UA 1.0, C 10) converges, beyond the old UA limit of 0.8', () => {
-  // Starts from the default profile. From 'light' (C 7, close to C_min 5) this excitation
-  // stays stuck in whole-step reverts; that start-up behaviour predates phase 1d.
-  const learner = createLearner();
+test('N13 (ADR-062 B4/B12): a poorly insulated house (UA 1.0, C 10) converges from \'light\', beyond the old UA limit of 0.8', () => {
+  // From 'light' (C 7, close to C_min 5) this excitation used to stay stuck in whole-step
+  // reverts; B12 shortens the step to the bounds after 12 reverts in a row.
+  const learner = createLearner({ buildingProfile: 'light' });
   const C = 10;
   const UA = 1.0;
   const pInt = 0.3;
@@ -514,6 +514,54 @@ test('N17 (ADR-062 B6): softReset() empties the prediction errors of the old the
   assert.notStrictEqual(learner.getPredictionRmse24h(), null);
   learner.softReset('heavy');
   assert.strictEqual(learner.getPredictionRmse24h(), null);
+});
+
+/** A learner after `reverts` reverts in a row, plus an update that leaves the bounds. */
+function stuckLearner(reverts) {
+  const lines = [];
+  const learner = createLearner({ logger: (msg) => lines.push(String(msg)) });
+  learner.consecutiveReverts = reverts;
+  return { learner, lines, X: [5, -15, 0.2, 1], y: 9.5 }; // large error → step out of bounds (see N12)
+}
+
+test('N18 (ADR-062 B12): below 12 reverts in a row a step outside the bounds is still reverted', () => {
+  const { learner, X, y } = stuckLearner(11);
+  const before = JSON.parse(JSON.stringify(learner.getState()));
+  learner.updateRLS(X, y);
+  const after = learner.getState();
+  assert.deepStrictEqual(after.theta, before.theta);
+  assert.deepStrictEqual(after.P, before.P);
+  assert.strictEqual(learner.getExcitationDiagnostics().consecutiveReverts, 12);
+  assert.strictEqual(learner.getExcitationDiagnostics().boundedSteps, 0);
+});
+
+test('N19 (ADR-062 B12): after 12 reverts in a row the step is shortened to the bounds and P is updated', () => {
+  const { learner, lines, X, y } = stuckLearner(12);
+  const before = JSON.parse(JSON.stringify(learner.getState()));
+  learner.updateRLS(X, y);
+  const after = learner.getState();
+  assert.notDeepStrictEqual(after.theta, before.theta, 'theta moves');
+  assert.deepStrictEqual(BuildingModelLearner.thetaViolations(after.theta), [], 'theta stays within the bounds');
+  assert.notDeepStrictEqual(after.P, before.P, 'P is updated');
+  const excitation = learner.getExcitationDiagnostics();
+  assert.strictEqual(excitation.consecutiveReverts, 0);
+  assert.strictEqual(excitation.boundedSteps, 1);
+  assert.strictEqual(excitation.totalReverts, 0, 'a bounded step is not a revert');
+  assert.ok(lines.some((l) => /Bounded step \(α=0\.\d{3}\) after 12 reverts in a row/.test(l)));
+});
+
+test('N20 (ADR-062 B12): boundedSteps survives a round trip; an older state restores it as 0', () => {
+  const { learner, X, y } = stuckLearner(12);
+  learner.updateRLS(X, y);
+  const copy = createLearner();
+  copy.restoreState(JSON.parse(JSON.stringify(learner.getState())));
+  assert.strictEqual(copy.getExcitationDiagnostics().boundedSteps, 1);
+
+  const legacy = createLearner();
+  const { boundedSteps, ...older } = JSON.parse(JSON.stringify(learner.getState()));
+  assert.strictEqual(boundedSteps, 1);
+  legacy.restoreState(older);
+  assert.strictEqual(legacy.getExcitationDiagnostics().boundedSteps, 0);
 });
 
 test('K7 (ADR-062 A5): restore takes enableDynamicPInt from the state', () => {

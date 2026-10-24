@@ -191,9 +191,12 @@ test('ADR-057 E2: getDynamicPInt windows (night ×0.4, day ×1.0, evening ×1.8)
 test('ADR-057 W3: excitation counters start at zero and are exported in state', () => {
   const learner = createLearner();
   const excitation = learner.getExcitationDiagnostics();
-  assert.deepStrictEqual(excitation, { consecutiveReverts: 0, totalReverts: 0, rateLimitActivations: 0 });
+  assert.deepStrictEqual(excitation, {
+    consecutiveReverts: 0, totalReverts: 0, rateLimitActivations: 0, boundedSteps: 0,
+  });
   const state = learner.getState();
   assert.strictEqual(state.consecutiveReverts, 0);
   assert.strictEqual(state.totalReverts, 0);
   assert.strictEqual(state.rateLimitActivations, 0);
+  assert.strictEqual(state.boundedSteps, 0); // ADR-062 B12
 });
