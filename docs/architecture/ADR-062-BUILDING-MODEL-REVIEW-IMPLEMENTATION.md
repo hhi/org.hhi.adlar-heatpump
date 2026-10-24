@@ -303,11 +303,13 @@ Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschied
 | **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie | Af |
 | **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) | Af |
 | **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Af |
-| **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware | Handmatig | Open |
+| **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware (§10) | Handmatig | Af (voorbereid) |
 | **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
 | **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie | Open |
 
-Fase 1a t/m 1c staan op `feature/adr-062-phase1`; fase 1 komt als geheel op `main` voor 3.4.0.
+Fase 1a t/m 1f staan op `feature/adr-062-phase1`; fase 1 komt als geheel op
+`main` voor 3.4.0. 1f is voorbereid: versie, changelog en checklist (§10).
+Uitbrengen volgt na de hardwaretest van 3.3.1 en van 3.4.0.
 
 ## 4. Testaanpak
 
@@ -409,5 +411,40 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 5 | Grenzen, restore-migratie, τ-logregel | 1d | Af |
 | 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Af |
 | 7 | npm-script `simulate:building-model` | 1a | Af |
-| 8 | Release 3.4.0 via testkanaal | 1f | Open |
+| 8 | Release 3.4.0 via testkanaal (§10) | 1f | Af (voorbereid) |
 | 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |
+
+## 10. Releasechecklist 3.4.0
+
+**Volgorde:** 3.3.1 wordt eerst apart uitgebracht, met een eigen hardwaretest
+(B10). 3.4.0 volgt daarna, ook via het testkanaal. Zo blijft er een geteste
+versie om op terug te vallen.
+
+### A. Automatisch, op de branch vóór de PR
+
+| # | Commando | Verwacht |
+|---|---|---|
+| A1 | `npm test` | Alles groen |
+| A2 | `npm run lint` en ESLint op de gewijzigde TS-bestanden | Geen nieuwe fouten in de gewijzigde bestanden |
+| A3 | `homey app validate` | OK op niveau `publish` |
+| A4 | `npm run simulate:building-model` | De grenzen uit §4a: S1, S1b, S3 ≤ 0,03; S2 ≤ 0,05; S1b koud A3 ≤ 0,08; S5 > 0 updates en ≤ 0,05; 0 niet-PSD-updates; B5-states 5/5 geldig |
+| A5 | Versie in `.homeycompose/app.json`, `app.json`, `package.json` en twee keer in `package-lock.json` | Overal 3.4.0 |
+
+### B. Testkanaal en hardware, per driver (Tuya, Aurora II, Aurora III)
+
+| # | Controle |
+|---|---|
+| B1 | De eerste start na de update logt `State RESTORED` met C, UA en τ, of `State REJECTED` met de reden |
+| B2 | Ongeveer 60 minuten na de start loopt `sampleCount` op en verschijnt de logregel `λ=0.9990` |
+| B3 | Bij ontdooien, tapwater (Aurora III) of buiten de verwarmingsmodus verschijnt `Window filling`: het venster begint opnieuw |
+| B4 | De instelling "Leren: Vergeetfactor" toont het bereik 0.9985–0.9995; een lagere waarde wordt niet geaccepteerd |
+| B5 | Na een herstart van de app één keer `Initialized` en geen dubbele leercycli |
+| B6 | Na 24 uur liggen C, UA en τ in een plausibel bereik; noteer ze per unit voor vergelijking met 3.3.1 |
+
+`predictionRmse24h` (B6) is op hardware niet direct zichtbaar; het zit in
+`getDiagnosticStatus()` en is door unit-tests gedekt. ADR-063 kan het tonen.
+
+### C. Uitbrengen
+
+- PR van `feature/adr-062-phase1` naar `main`, merge na groene CI.
+- Tag en GitHub-release via `github-release-manager`, na de hardware-acceptatie.
