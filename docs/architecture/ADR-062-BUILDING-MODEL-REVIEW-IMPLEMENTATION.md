@@ -1,6 +1,6 @@
 # ADR-062: Implementatie van de review-fixes voor de gebouwleermodule
 
-**Status:** Gedeeltelijk aangenomen (2026-10-23): B1–B6 en B10 aangenomen zoals voorgesteld; B7–B9 voorgesteld
+**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24): B1–B6, B10 en B11 aangenomen; B7–B9 voorgesteld
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -28,7 +28,10 @@ ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plan
   meer leren (B4).
 - **Versies (voorstel):** A1 mee in 3.3.1; learner in 3.4.0; regelkoppeling (A3–A6) in
   3.5.0.
-- **Aangenomen:** B1–B6 en B10. **Nog te beslissen:** B7–B9 (fase 3).
+- **Uitgangspunt: precisie bij koud weer gaat voor.** Daarom vervalt de uniforme
+  rate-limiting uit review §2.1; de huidige rate-limiting per component blijft, voor
+  alle drivers (B11).
+- **Aangenomen:** B1–B6, B10 en B11. **Nog te beslissen:** B7–B9 (fase 3).
 
 ---
 
@@ -43,7 +46,13 @@ sensor met 0,1 °C is, en dat de algoritmefixes alleen werken samen met een vens
 De review laat de ontwerpkeuzes bewust open. Dit ADR maakt ze, onderbouwd met
 aanvullende simulaties (`adr062.js`). Alle getallen zijn RMSE van een voorspelling
 6 uur vooruit, gemiddeld over 5 seeds en 30 dagen leren, tenzij anders vermeld.
-"Fixes" betekent PSD-projectie, nieuwe grenzen en uniforme rate-limiting samen.
+"Fixes" betekent PSD-projectie en nieuwe grenzen; de rate-limiting per component blijft
+zoals hij is (B11). De tabellen in B1, B2, B4 en B5 zijn gemeten toen de fixes nog de
+uniforme rate-limiting uit review §2.1 bevatten; B11 geeft de waarden zonder.
+
+**Uitgangspunt.** Waar een keuze bij mild en bij koud weer verschillend uitpakt, weegt
+de nauwkeurigheid bij koud weer het zwaarst. Dan draait de warmtepomp het meest, en zijn
+de bruikbare leermomenten het schaarst.
 
 | Scenario | C (kWh/°C) | UA (kW/°C) | τ (u) | Startprofiel |
 |---|---:|---:|---:|---|
@@ -242,19 +251,58 @@ voorverwarming valt onder B8 (fase 3).
 
 Elke release eerst via het testkanaal, met hardware-acceptatie op de eigen units.
 
+### B11 — Rate-limiting (aangenomen)
+
+**Besluit:** de rate-limiting per component blijft, voor alle drivers. De uniforme
+schaling uit review §2.1 vervalt. De moduspoort blijft zoals hij is: in een combimodus
+(verwarmen of vloerverwarming + tapwater) wordt gemeten; bij alleen tapwater en bij
+koelen niet.
+
+**Wat de twee varianten doen.** Per component: elke parameter mag per stap hooguit 5%
+veranderen, los van de andere. Uniform: de hele stap wordt met één factor verkleind,
+totdat de parameter die het hardst wil bewegen precies 5% haalt.
+
+**Onderbouwing.** Venster van 60 minuten, herstart bij elk ontbrekend sample, PSD en
+grenzen; RMSE 6 u (S1 | S1b | S2 | S3):
+
+| Scenario | Per component | Uniform |
+|---|---|---|
+| Mild, geen tapwater | 0,02 / 0,02 / 0,03 / 0,03 | 0,01 / 0,01 / 0,03 / 0,02 |
+| Koud, poorten Aurora III | **0,02 / 0,01 / 0,30 / 0,03** | 0,04 / 0,05 / 0,51 / 0,03 |
+| Koud, tapwater in combimodus telt mee | 0,10 / 0,10 / 1,15 / 0,08 | 0,05 / 0,06 / 0,57 / 0,04 |
+
+- Bij ongeveer de helft van de stappen remt de rate-limiter. In 76–88% daarvan bepaalt
+  P_int/C de rem (S1b). Bij uniforme schaling remt die onrustige parameter dan ook UA
+  en C af. Bij koud weer, met 4,6 keer minder updates door ontdooien en tapwater, kost
+  dat het meest.
+- Uniform wint alleen bij mild weer (klein) en in het scenario waarin de warmtepomp in
+  een combimodus dagelijks 40 minuten een boiler verwarmt en die metingen meetellen. Hoe
+  vaak dat in de praktijk speelt, is onbekend (V2). Waar de CV-ketel het tapwater maakt,
+  speelt het niet. Speelt het wel, dan hoort de oplossing bij de bron: een tapwaterpoort
+  (ADR-063, O2), niet een algemene rem.
+- **Prijs:** bij Aurora II of Tuya met een warmtepomp die in een combimodus tapwater
+  maakt, is de schatting bij kou volgens de simulatie minder precies (S1b 0,10 tegen
+  0,06 °C).
+- **Gevolg:** geen codewijziging; de huidige code werkt al per component. De
+  doelwaarden uit §4a worden gehaald (zie daar). Dit wijkt af van review §3, rij 4.
+
 ## 3. Fasering
 
-| Fase | Inhoud | Bewijs |
-|---|---|---|
-| **0** (3.3.1) | A1, changelog-regel, testcommentaar | Unit-test A1; bestaande tests groen |
-| **1a** | Vangnet: karakteriseringstests van de huidige learner (venster-, gap- en restoregedrag) | Groen op de huidige code |
-| **1b** | B1 venster + B2 `interruptWindow()` + service-hook in drie drivers | Simulatie (§4); unit-tests venster en hook |
-| **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie |
-| **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) |
-| **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test |
-| **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware | Handmatig |
-| **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 |
-| **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie |
+Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschiedenis.
+
+| Fase | Inhoud | Bewijs | Stand |
+|---|---|---|---|
+| **0** (3.3.1) | A1, changelog-regel, testcommentaar | Unit-test A1; bestaande tests groen | Af |
+| **1a** | Vangnet: karakteriseringstests van de huidige learner (venster-, gap- en restoregedrag) | Groen op de huidige code | Af |
+| **1b** | B1 venster + B2 `interruptWindow()` + service-hook in drie drivers | Simulatie (§4); unit-tests venster en hook | Af |
+| **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie | Af |
+| **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) | Open |
+| **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Open |
+| **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware | Handmatig | Open |
+| **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
+| **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie | Open |
+
+Fase 1a t/m 1c staan op `feature/adr-062-phase1`; fase 1 komt als geheel op `main` voor 3.4.0.
 
 ## 4. Testaanpak
 
@@ -273,6 +321,11 @@ met de prototype-rij "fixes + 60 min".
 | S5 passief | `adr062.js b4` | > 0 updates; RMSE ≤ 0,05 °C |
 | Alle scenario's | alle | 0 niet-PSD-updates; 0 keer `XᵀPX < 0` |
 | Restore oude states | `adr062.js b5` | Geldige states behouden; RMSE na 10 dagen niet slechter dan zonder restore + 0,02 |
+
+Gecontroleerd zonder uniforme rate-limiting (B11): mild S1 0,02, S1b 0,02, S2 0,03, S3 0,03;
+koud (poorten Aurora III) S1b 0,01; passief S5 0,04. Alle grenzen worden gehaald. De
+prototype-rij "fixes" in `adr062.js` gebruikt vanaf fase 1c PSD en grenzen zonder uniforme
+schaling.
 
 Een nieuw npm-script `simulate:building-model` draait deze scripts na `npm run build`.
 Ze gaan niet in `npm test`, omdat ze samen ruim 10 seconden duren; ze staan wel in de
@@ -326,6 +379,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 - VFF herontwerpen (review §6.4).
 - Een state automatisch naar de grens clampen bij restore (B5).
 - Een nieuwe capability voor de voorspelfout (B6).
+- De uniforme rate-limiting uit review §2.1 (B11).
 - De consolidatie inclusief Tuya (review §2.5).
 
 ## 8. Te verifiëren
@@ -341,14 +395,14 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 
 ## 9. Actiepunten
 
-| # | Actie | Fase |
-|---|---|---|
-| 1 | A1, changelog-regel drempeltriggers, testcommentaar | 0 |
-| 2 | Karakteriseringstests learner | 1a |
-| 3 | Venster, `interruptWindow()`, service-hook (3×) | 1b |
-| 4 | PSD-projectie | 1c |
-| 5 | Grenzen, restore-migratie, τ-logregel | 1d |
-| 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e |
-| 7 | npm-script `simulate:building-model` | 1a |
-| 8 | Release 3.4.0 via testkanaal | 1f |
-| 9 | B7, B8 na ADR-005 fase 3 | 3 |
+| # | Actie | Fase | Stand |
+|---|---|---|---|
+| 1 | A1, changelog-regel drempeltriggers, testcommentaar | 0 | Af |
+| 2 | Karakteriseringstests learner | 1a | Af |
+| 3 | Venster, `interruptWindow()`, service-hook (3×) | 1b | Af |
+| 4 | PSD-projectie | 1c | Af |
+| 5 | Grenzen, restore-migratie, τ-logregel | 1d | Open |
+| 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Open |
+| 7 | npm-script `simulate:building-model` | 1a | Af |
+| 8 | Release 3.4.0 via testkanaal | 1f | Open |
+| 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |

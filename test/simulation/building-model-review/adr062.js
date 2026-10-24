@@ -14,7 +14,7 @@ const { makeLearner, minEigen } = require('./learners');
 const { runCase, table, COLS, fmt } = require('./run');
 
 const SEEDS = [7, 11, 23, 42, 77];
-const FIX = { psd: true, bounds: true, order: true };
+const FIX = { psd: true, bounds: true }; // ADR-062 B11: geen uniforme rate-limiting
 const which = process.argv[2] || 'all';
 
 const HOUSES = {
@@ -112,7 +112,7 @@ if (which === 'b5' || which === 'all') {
 }
 
 if (which === 'b4' || which === 'all') {
-  run(`B4 Passieve woning (τ ≈ 430 h), start op profiel passive (τ 600 h); TAU_MAX=${process.env.TAU_MAX || 500}`, [
+  run(`B4 Passieve woning (τ ≈ 430 h), start op profiel passive (τ 600 h); TAU_MAX=${process.env.TAU_MAX || 800}`, [
     ['huidig', {}],
     ['fixes + 60 min overlap', { ...FIX, windowMin: 60, maxGapMin: 7.5 }],
   ], { houses: ['S5'] });
