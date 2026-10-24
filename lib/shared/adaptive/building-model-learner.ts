@@ -540,37 +540,78 @@ export class BuildingModelLearner {
     // bevochten op de divergentie-incidenten die tot de v2.7.x-mitigaties leidden.
     // De confidence-formule en diagnostiekdrempels zijn op deze range geijkt
     // (trace na eerste update: ~0.0004 – 4.0).
+    //
+    // ADR-062 B3: the bounds are applied to the eigenvalues of P (spectral clamping),
+    // so P stays symmetric positive semi-definite. The former diagonal clamp plus
+    // off-diagonal clip bounded the elements but could leave P indefinite.
     // =========================================================================
-    // ADR-057 W1 (referentieproject): bounds come from RLS_COVARIANCE (single source of truth)
-    const { P_FLOOR, P_CEILING } = BuildingModelLearner.RLS_COVARIANCE;
-
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
-    this.P = this.P.map((row, i) => row.map((val, j) => {
-      const updated = (val - KXP[i][j]) / adaptiveLambda;
-      // Apply floor AND ceiling to diagonal elements
-      if (i === j) {
-        return Math.max(P_FLOOR, Math.min(P_CEILING, updated));
-      }
-      return updated;
-    }));
+    const updated = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / adaptiveLambda));
+    this.P = BuildingModelLearner.projectCovariance(updated);
+  }
 
-    // =========================================================================
-    // ADR-056: Symmetrie-afdwinging + off-diagonaal-clip
-    // De diagonale clamping hierboven kan P asymmetrisch/niet-PSD maken terwijl
-    // off-diagonalen door de λ-deling onbegrensd groeien. Twee goedkope correcties:
-    // 1. P = (P + Pᵀ)/2 — herstelt symmetrie
-    // 2. |P[i][j]| ≤ √(P[i][i]·P[j][j]) — garandeert een consistente correlatiestructuur
-    // =========================================================================
-    for (let i = 0; i < 4; i++) {
-      for (let j = i + 1; j < 4; j++) {
-        const symmetrized = (this.P[i][j] + this.P[j][i]) / 2;
-        const maxAbs = Math.sqrt(this.P[i][i] * this.P[j][j]);
-        const clipped = Math.max(-maxAbs, Math.min(maxAbs, symmetrized));
-        this.P[i][j] = clipped;
-        this.P[j][i] = clipped;
+  /**
+   * ADR-062 B3: symmetrize P and clamp its eigenvalues to [P_FLOOR, P_CEILING].
+   * ADR-057 W1 (referentieproject): bounds come from RLS_COVARIANCE (single source of truth).
+   */
+  private static projectCovariance(P: number[][]): number[][] {
+    const { P_FLOOR, P_CEILING } = BuildingModelLearner.RLS_COVARIANCE;
+    const n = P.length;
+    const { values, vectors } = BuildingModelLearner.symmetricEigen(P);
+    const clamped = values.map((v) => Math.max(P_FLOOR, Math.min(P_CEILING, v)));
+    const out: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        let sum = 0;
+        for (let k = 0; k < n; k++) sum += vectors[i][k] * clamped[k] * vectors[j][k];
+        out[i][j] = sum;
       }
     }
+    return out;
+  }
+
+  /**
+   * Eigen-decomposition of the symmetric part of a small matrix (cyclic Jacobi).
+   * Returns eigenvalues and eigenvectors as columns of `vectors`.
+   */
+  private static symmetricEigen(P: number[][]): { values: number[]; vectors: number[][] } {
+    const n = P.length;
+    const a = P.map((row, i) => row.map((x, j) => (x + P[j][i]) / 2));
+    const v: number[][] = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (__, j) => (i === j ? 1 : 0)));
+    for (let sweep = 0; sweep < 60; sweep++) {
+      let off = 0;
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) off += a[i][j] * a[i][j];
+      if (off < 1e-24) break;
+      for (let p = 0; p < n; p++) {
+        for (let q = p + 1; q < n; q++) {
+          if (Math.abs(a[p][q]) < 1e-300) continue;
+          const theta = (a[q][q] - a[p][p]) / (2 * a[p][q]);
+          const t = Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+          const c = 1 / Math.sqrt(t * t + 1);
+          const s = t * c;
+          for (let k = 0; k < n; k++) {
+            const akp = a[k][p];
+            const akq = a[k][q];
+            a[k][p] = c * akp - s * akq;
+            a[k][q] = s * akp + c * akq;
+          }
+          for (let k = 0; k < n; k++) {
+            const apk = a[p][k];
+            const aqk = a[q][k];
+            a[p][k] = c * apk - s * aqk;
+            a[q][k] = s * apk + c * aqk;
+          }
+          for (let k = 0; k < n; k++) {
+            const vkp = v[k][p];
+            const vkq = v[k][q];
+            v[k][p] = c * vkp - s * vkq;
+            v[k][q] = s * vkp + c * vkq;
+          }
+        }
+      }
+    }
+    return { values: a.map((row, i) => row[i]), vectors: v };
   }
 
   /**
@@ -842,7 +883,15 @@ export class BuildingModelLearner {
 
     // State is valid - restore normally
     this.theta = state.theta;
-    this.P = state.P;
+    // ADR-062 B3/B5: a stored P that is not positive semi-definite (states learned before
+    // the spectral clamping) is projected once; a valid P is kept exactly as stored.
+    const minEigen = Math.min(...BuildingModelLearner.symmetricEigen(state.P).values);
+    if (minEigen < BuildingModelLearner.RLS_COVARIANCE.P_FLOOR * (1 - 1e-6)) {
+      this.P = BuildingModelLearner.projectCovariance(state.P);
+      this.logger(`BuildingModelLearner: Restored P was not positive semi-definite (min eigenvalue ${minEigen.toExponential(2)}) — projected`);
+    } else {
+      this.P = state.P;
+    }
     this.sampleCount = state.sampleCount;
     this.lastMeasurement = state.lastMeasurement;
     this.window = []; // ADR-062 B1: the window is not persisted; it continues from lastMeasurement

@@ -6,7 +6,7 @@
  * its decision (B1–B5, §2.8, A5); when that decision is implemented the test is
  * replaced by one for the new behaviour, so every change in behaviour is visible.
  * Group N — new behaviour, replacing the K tests of the decisions implemented so far
- * (phase 1b: N1–N7 for B1/B2).
+ * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3).
  *
  * Runs against the compiled output in .homeybuild/ (npm test builds first).
  */
@@ -57,6 +57,47 @@ const IDENTITY = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 function quadForm(P, v) {
   return v.reduce((sum, vi, i) => sum + vi * P[i].reduce((s, pij, j) => s + pij * v[j], 0), 0);
 }
+
+/** Eigenvalues of a symmetric 4×4 matrix (cyclic Jacobi), independent of the learner's own code. */
+function eigenvalues(M) {
+  const n = M.length;
+  const a = M.map((row, i) => row.map((x, j) => (x + M[j][i]) / 2));
+  for (let sweep = 0; sweep < 100; sweep++) {
+    let off = 0;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) off += a[i][j] ** 2;
+    if (off < 1e-30) break;
+    for (let p = 0; p < n; p++) {
+      for (let q = p + 1; q < n; q++) {
+        if (a[p][q] === 0) continue;
+        const phi = 0.5 * Math.atan2(2 * a[p][q], a[q][q] - a[p][p]);
+        const c = Math.cos(phi);
+        const s = Math.sin(phi);
+        for (let k = 0; k < n; k++) {
+          const akp = a[k][p]; const akq = a[k][q];
+          a[k][p] = c * akp - s * akq; a[k][q] = s * akp + c * akq;
+        }
+        for (let k = 0; k < n; k++) {
+          const apk = a[p][k]; const aqk = a[q][k];
+          a[p][k] = c * apk - s * aqk; a[q][k] = s * apk + c * aqk;
+        }
+      }
+    }
+  }
+  return a.map((row, i) => row[i]);
+}
+
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let r = s;
+    r = Math.imul(r ^ (r >>> 15), r | 1);
+    r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const { P_FLOOR, P_CEILING } = BuildingModelLearner.RLS_COVARIANCE;
 
 // ---------------------------------------------------------------------------
 // Group I — invariants
@@ -276,15 +317,57 @@ test('N7 (ADR-062 B1): after a restore the window continues from lastMeasurement
   assert.strictEqual(late.getState().sampleCount, state.sampleCount, 'gap after restore: new reference');
 });
 
-test('K3 (ADR-062 B3): the covariance corrections can leave P not positive semi-definite', () => {
-  // Counterexample from BUILDING_MODEL_REVIEW.md §2.6 (calls the private updateRLS()).
+test('N8 (ADR-062 B3): the review §2.6 counterexample now leaves P positive semi-definite', () => {
   const learner = createLearner();
   const theta = learner.getState().theta;
   const X = [5, -15, 0.2, 1];
   const y = X.reduce((sum, x, i) => sum + x * theta[i], 0);
   learner.updateRLS(X, y);
-  const q = quadForm(learner.getState().P, [1, -1, 1, 1]);
-  assert.ok(Math.abs(q - -4.95694) < 1e-3, `vᵀPv = ${q}`);
+  const { P } = learner.getState();
+  assert.ok(quadForm(P, [1, -1, 1, 1]) >= 0, 'vᵀPv must be ≥ 0');
+  const eig = eigenvalues(P);
+  assert.ok(Math.min(...eig) >= P_FLOOR * (1 - 1e-6), `min eigenvalue ${Math.min(...eig)}`);
+  assert.ok(Math.max(...eig) <= P_CEILING * (1 + 1e-6), `max eigenvalue ${Math.max(...eig)}`);
+});
+
+test('N9 (ADR-062 B3): P stays symmetric with eigenvalues in [P_FLOOR, P_CEILING] over 2000 updates', () => {
+  const learner = createLearner({ buildingProfile: 'light' });
+  const rnd = mulberry32(42);
+  let negativeXPX = 0;
+  let applied = 0;
+  for (let i = 0; i < 2000; i++) {
+    const X = [rnd() * 8, -5 - rnd() * 25, rnd() * 0.8, 0.4 + rnd() * 1.4];
+    const revertsBefore = learner.getState().totalReverts;
+    learner.updateRLS(X, (rnd() - 0.5) * 4);
+    const reverted = learner.getState().totalReverts > revertsBefore; // a revert leaves P unchanged
+    if (!reverted) applied++;
+    const { P } = learner.getState();
+    for (let r = 0; r < 4; r++) {
+      for (let c = r + 1; c < 4; c++) assert.ok(Math.abs(P[r][c] - P[c][r]) < 1e-12, `asymmetric at update ${i}`);
+    }
+    const eig = eigenvalues(P);
+    assert.ok(Math.min(...eig) >= P_FLOOR * (1 - 1e-6), `update ${i}: min eigenvalue ${Math.min(...eig)}`);
+    if (!reverted) assert.ok(Math.max(...eig) <= P_CEILING * (1 + 1e-6), `update ${i}: max eigenvalue ${Math.max(...eig)}`);
+    if (quadForm(P, X) <= 0) negativeXPX++;
+  }
+  assert.strictEqual(negativeXPX, 0);
+  assert.ok(applied > 500, `only ${applied} of 2000 updates applied`);
+});
+
+test('N10 (ADR-062 B3/B5): restore projects a P that is not positive semi-definite and keeps a valid P', () => {
+  const theta = [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15];
+  // Diagonal ≤ 1 and pairwise |Pij| ≤ √(Pii·Pjj), yet indefinite: the old corrections allowed this.
+  const indefinite = [[1, 0.9, 0.9, 0], [0.9, 1, -0.9, 0], [0.9, -0.9, 1, 0], [0, 0, 0, 1]];
+  assert.ok(Math.min(...eigenvalues(indefinite)) < 0);
+  const projected = createLearner();
+  projected.restoreState({ theta, P: indefinite, sampleCount: 100, lastMeasurement: null });
+  assert.strictEqual(projected.getState().sampleCount, 100);
+  assert.ok(Math.min(...eigenvalues(projected.getState().P)) >= P_FLOOR * (1 - 1e-6));
+
+  const fresh = [[100, 0, 0, 0], [0, 100, 0, 0], [0, 0, 100, 0], [0, 0, 0, 100]]; // before the first update
+  const kept = createLearner();
+  kept.restoreState({ theta, P: fresh, sampleCount: 1, lastMeasurement: null });
+  assert.deepStrictEqual(kept.getState().P, fresh);
 });
 
 test('K4 (ADR-062 B4): restore accepts tau = 800 h, rejects UA = 0.85 and accepts the passive profile', () => {
