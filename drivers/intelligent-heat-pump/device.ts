@@ -16,6 +16,7 @@ import {
   type LiveOperationWidgetState,
 } from '../../lib/tuya/services/widget-state-service';
 import { Logger } from '../../lib/shared/logger';
+import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
 
 /**
  * Optional diagnostic capabilities, grouped by the device setting that gates them.
@@ -196,7 +197,6 @@ class MyDevice extends Homey.Device {
   // Memory leak prevention: tracked timers for cleanup (v2.0.1+)
   private connectionStatusInterval: NodeJS.Timeout | null = null;
   private dailyEnergyResetTimeout: NodeJS.Timeout | null = null;
-  private dailyEnergyResetInterval: NodeJS.Timeout | null = null;
   private flowCardInitRetryTimeout: NodeJS.Timeout | null = null;
 
   // State tracking for flow card triggers (v1.0.8)
@@ -4940,42 +4940,35 @@ class MyDevice extends Homey.Device {
   // Note: Cumulative energy tracking now handled by EnergyTrackingService via ServiceCoordinator
 
   /**
-   * Schedule daily energy reset at midnight
+   * Schedule daily energy reset at local midnight (Homey timezone)
+   * Rescheduled after each reset so days of 23 or 25 hours (DST changes) keep the reset at 00:00
+   *
+   * @param from - Instant to plan from; after a reset this is the midnight that just passed
    */
-  private scheduleDailyEnergyReset(): void {
-    // CRITICAL: Clear existing timers BEFORE creating new ones (v2.0.2 re-init protection)
+  private scheduleDailyEnergyReset(from: Date = new Date()): void {
+    // CRITICAL: Clear existing timer BEFORE creating a new one (v2.0.2 re-init protection)
     // Prevents multiple midnight reset timers if this function is called multiple times
     if (this.dailyEnergyResetTimeout) {
       clearTimeout(this.dailyEnergyResetTimeout);
       this.dailyEnergyResetTimeout = null;
       this.log('Cleared existing daily energy reset timeout to prevent accumulation');
     }
-    if (this.dailyEnergyResetInterval) {
-      clearInterval(this.dailyEnergyResetInterval);
-      this.dailyEnergyResetInterval = null;
-      this.log('Cleared existing daily energy reset interval to prevent accumulation');
-    }
 
-    // Calculate milliseconds until next midnight
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    const timeZone = resolveHomeyTimezone(this.homey);
+    const midnight = nextLocalMidnight(from, timeZone);
+    const msUntilMidnight = Math.max(0, midnight.getTime() - Date.now());
 
     // Schedule reset - tracked for cleanup to prevent memory leak
     this.dailyEnergyResetTimeout = this.homey.setTimeout(() => {
       this.dailyEnergyResetTimeout = null; // Clear reference after execution
       this.resetDailyEnergy()
         .catch((error) => this.error('Failed to reset daily energy at midnight:', error));
-      // Schedule recurring daily resets - tracked for cleanup
-      this.dailyEnergyResetInterval = this.homey.setInterval(() => {
-        this.resetDailyEnergy()
-          .catch((error) => this.error('Failed to reset daily energy on schedule:', error));
-      }, 24 * 60 * 60 * 1000); // 24 hours
+      // Plan from this midnight, so a timer firing a few ms early cannot pick the same midnight again
+      this.scheduleDailyEnergyReset(midnight);
     }, msUntilMidnight);
 
-    this.log(`🕛 Daily energy reset scheduled for ${tomorrow.toLocaleString()}`);
+    this.log(`🕛 Daily energy reset scheduled in ${Math.round(msUntilMidnight / 60000)} minutes `
+      + `(${formatHourMinute(midnight, timeZone)} ${timeZone})`);
   }
 
   /**
@@ -5022,12 +5015,6 @@ class MyDevice extends Homey.Device {
       clearTimeout(this.dailyEnergyResetTimeout);
       this.dailyEnergyResetTimeout = null;
       this.log('Daily energy reset timeout cleared');
-    }
-
-    if (this.dailyEnergyResetInterval) {
-      clearInterval(this.dailyEnergyResetInterval);
-      this.dailyEnergyResetInterval = null;
-      this.log('Daily energy reset interval cleared');
     }
 
     if (this.flowCardInitRetryTimeout) {

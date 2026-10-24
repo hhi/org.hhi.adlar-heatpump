@@ -1,3 +1,6 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 /**
  * Energy Price Optimizer - Component 3 of Adaptive Control System
  *
@@ -17,6 +20,8 @@
  * @version 1.4.0
  * @since 1.4.0
  */
+
+import { startOfLocalDay } from '../../shared/utils/time-format';
 
 export enum PriceCategory {
   VERY_LOW = 'very_low',
@@ -896,16 +901,16 @@ export class EnergyPriceOptimizer {
   /**
    * Calculate daily cost - now returns accumulated cost instead of estimate
    * @deprecated Use getAccumulatedDailyCost() for real-time accumulated cost
+   * @param timeZone - Timezone that defines "today" for the fallback estimate (Homey timezone)
    */
-  public calculateDailyCost(dailyConsumptionKWh: number): number {
+  public calculateDailyCost(dailyConsumptionKWh: number, timeZone?: string): number {
     // Return accumulated cost if available, otherwise fall back to estimate
     if (this.accumulatedDailyCost > 0) {
       return this.accumulatedDailyCost;
     }
 
     // Fallback: estimate using average price (legacy behavior)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfLocalDay(new Date(), timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
     const todayPrices = this.priceData.filter((p) => p.timestamp >= today.getTime());
 
     if (todayPrices.length === 0) return 0;

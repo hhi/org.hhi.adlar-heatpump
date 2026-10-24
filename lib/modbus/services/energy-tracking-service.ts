@@ -5,6 +5,7 @@
 import Homey from 'homey';
 import { DeviceConstants } from '../constants';
 import { EnergyPriceOptimizer } from '../adaptive/energy-price-optimizer';
+import { nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 export interface EnergyTrackingOptions {
   device: Homey.Device;
@@ -24,7 +25,6 @@ export class EnergyTrackingService {
   private logger: (message: string, ...args: unknown[]) => void;
   private energyTrackingInterval: NodeJS.Timeout | null = null;
   private dailyResetTimeout: NodeJS.Timeout | null = null;
-  private dailyResetInterval: NodeJS.Timeout | null = null;
   private lastExternalPowerUpdate: number = 0;
   private lastEnergyCalculation: number = 0;
   private isEnabled = false;
@@ -484,30 +484,31 @@ export class EnergyTrackingService {
 
   /**
    * Schedule midnight reset for daily counters
-   * Uses a timeout to midnight, then a 24-hour interval
+   * Uses a timeout to the next local midnight (Homey timezone), rescheduled after each reset
+   * so days of 23 or 25 hours (DST changes) keep the reset at 00:00
+   *
+   * @param from - Instant to plan from; after a reset this is the midnight that just passed
    */
-  private scheduleMidnightReset(): void {
-    // Calculate milliseconds until next midnight
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0); // Next midnight
-    const msUntilMidnight = midnight.getTime() - now.getTime();
+  private scheduleMidnightReset(from: Date = new Date()): void {
+    if (this.dailyResetTimeout) {
+      this.device.homey.clearTimeout(this.dailyResetTimeout);
+      this.dailyResetTimeout = null;
+    }
 
-    this.logger(`EnergyTrackingService: Scheduling midnight reset in ${Math.round(msUntilMidnight / 60000)} minutes`);
+    const timeZone = resolveHomeyTimezone(this.device.homey);
+    const midnight = nextLocalMidnight(from, timeZone);
+    const msUntilMidnight = Math.max(0, midnight.getTime() - Date.now());
 
-    // First: wait until midnight
+    this.logger(`EnergyTrackingService: Scheduling midnight reset in ${Math.round(msUntilMidnight / 60000)} minutes (${timeZone})`);
+
     this.dailyResetTimeout = this.device.homey.setTimeout(() => {
+      this.dailyResetTimeout = null;
       this.performDailyReset().catch((error) => {
         this.logger('EnergyTrackingService: Error in daily reset timeout:', error);
       });
 
-      // Then: repeat every 24 hours
-      this.dailyResetInterval = this.device.homey.setInterval(() => {
-        this.performDailyReset().catch((error) => {
-          this.logger('EnergyTrackingService: Error in daily reset interval:', error);
-        });
-      }, 24 * 60 * 60 * 1000); // 24 hours
-
+      // Plan from this midnight, so a timer firing a few ms early cannot pick the same midnight again
+      this.scheduleMidnightReset(midnight);
     }, msUntilMidnight);
   }
 
@@ -767,11 +768,6 @@ export class EnergyTrackingService {
     if (this.dailyResetTimeout) {
       clearTimeout(this.dailyResetTimeout);
       this.dailyResetTimeout = null;
-    }
-
-    if (this.dailyResetInterval) {
-      clearInterval(this.dailyResetInterval);
-      this.dailyResetInterval = null;
     }
 
     this.logger('EnergyTrackingService: Service destroyed - all timers cleared');
