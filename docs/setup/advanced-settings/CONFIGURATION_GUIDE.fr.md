@@ -270,7 +270,7 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 Algorithme d'apprentissage automatique qui apprend les propriétés thermiques de votre maison.
 
 ### Activer l'Apprentissage du Modèle de Bâtiment
-- **Par défaut** : Activé
+- **Par défaut** : Désactivé
 - **Fonction** : Apprend 4 paramètres thermiques (C, UA, g, P_int)
 - **Temps d'apprentissage** : 24-72 heures pour le modèle de base, 2-4 semaines pour un modèle précis
 - **Algorithme** : Moindres carrés récursifs (RLS) avec facteur d'oubli
@@ -279,7 +279,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - **Par défaut** : 0.999
 - **Plage** : 0.9985 - 0.9995
 - **Fonction** : Rapidité d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance (~75%). Plus bas = adaptation plus rapide aux changements saisonniers.
-- **Visible uniquement** : Avec "Cartes de fonction expert HVAC" activé
+- **Effet** : Après un redémarrage de l'app ou 'Réinitialiser l'apprentissage du modèle de bâtiment'
 
 ### Type de Bâtiment
 - **Par défaut** : Moyen (maison NL typique)
@@ -288,6 +288,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
   - **Moyen** : Brique, murs creux, double vitrage (maison NL typique)
   - **Lourd** : Béton/pierre, bonne isolation, verre HR++, stable
   - **Passif** : Maison passive, verre HR+++, étanche à l'air, récupération de chaleur
+- **Modification** : Prend effet immédiatement ; l'apprentissage reprend à partir des valeurs du nouveau profil, avec la moitié des échantillons collectés
 
 ### Réinitialiser l'Apprentissage du Modèle de Bâtiment
 - **Par défaut** : Désactivé
@@ -304,14 +305,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
   - Jour (06h00-18h00) : 100% (normal)
   - Soir (18h00-23h00) : 180% (cuisine, TV)
 - **Amélioration de la précision** : ~10-15%
-
-### Ajustement Saisonnier du Gain Solaire
-- **Par défaut** : Activé
-- **Fonction** : Corrige l'angle solaire changeant tout au long de l'année
-- **Multiplicateurs saisonniers** :
-  - Hiver (Dec-Fév) : 60%
-  - Été (Jun-Jul) : 130%
-- **Contribution à la précision** : 5-20% de la chaleur totale
+- **Effet** : Après 'Réinitialiser l'apprentissage du modèle de bâtiment'
 
 ---
 
@@ -320,23 +314,17 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 Analyse automatisée du modèle thermique du bâtiment avec recommandations d'économie d'énergie et estimations de ROI.
 
 ### Activer les Aperçus du Bâtiment
-- **Par défaut** : Activé
+- **Par défaut** : Désactivé
 - **Fonction** : Analyse le modèle thermique du bâtiment et fournit des recommandations d'économie d'énergie
-- **Temps d'apprentissage** : Les aperçus apparaissent après 48-72 heures d'apprentissage
+- **Temps d'apprentissage** : Les aperçus apparaissent après environ 1 à 2 jours d'apprentissage
 - **Prérequis** : L'apprentissage du modèle de bâtiment doit être activé
 
 ### Confiance Minimum
 - **Par défaut** : 70%
 - **Plage** : 50% - 90%
 - **Fonction** : Affiche les aperçus uniquement lorsque la confiance du modèle de bâtiment dépasse ce seuil
-- **70%** : ~48-72 heures d'apprentissage
+- **70%** : environ 1 à 2 jours d'apprentissage
 - **Valeurs inférieures** : Aperçus plus tôt, moins de précision
-
-### Max Aperçus Actifs
-- **Par défaut** : 3
-- **Plage** : 1 - 5
-- **Fonction** : Nombre maximum d'aperçus à afficher simultanément
-- **Priorité** : Les aperçus les plus importants sont affichés en premier
 
 ---
 

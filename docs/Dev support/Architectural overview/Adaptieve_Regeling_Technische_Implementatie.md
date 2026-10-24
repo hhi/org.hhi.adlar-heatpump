@@ -4,6 +4,13 @@
 **Datum:** December 2025
 **Voor:** Developers & System Architects
 
+> **Let op (3.4.0):** de codevoorbeelden voor de Building Model Learner zijn
+> historisch. Sinds ADR-062 leert de learner dT/dt over een venster van
+> 60 minuten, projecteert hij P op positief-semidefiniet, begrenst hij τ
+> (1,25–800 u) en UA (0,03–1,5 kW/°C) en gebruikt hij een constante λ
+> (0,9985–0,9995) zonder VFF. Zie
+> [ADR-062](../../architecture/ADR-062-BUILDING-MODEL-REVIEW-IMPLEMENTATION.md).
+
 ---
 
 ## Inhoudsopgave
@@ -129,7 +136,7 @@ e(k) = y(k) - X(k)^T × θ(k-1)
 ```
 K(k) = P(k-1) × X(k) / (λ + X(k)^T × P(k-1) × X(k))
 
-waar λ = forgetting factor (0.998)
+waar λ = forgetting factor (standaard 0.999, bereik 0.9985–0.9995)
 ```
 
 **3. Parameter Update:**
@@ -203,7 +210,7 @@ export function getSeasonalGMultiplier(month: number): number {
 class BuildingModelLearner {
   private theta: number[];                // [1/C, UA/C, g/C, P_int/C]
   private P: number[][];                  // Covariance matrix (4x4)
-  private lambda: number;                 // Forgetting factor = 0.998
+  private lambda: number;                 // Forgetting factor (default 0.999)
   private enableDynamicPInt: boolean;
   private enableSeasonalG: boolean;
   private basePInt: number;

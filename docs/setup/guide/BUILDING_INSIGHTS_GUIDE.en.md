@@ -1,6 +1,6 @@
 # Building Insights & Recommendations Guide
 
-**Version**: 2.7.0+ | **Last Updated**: January 2026
+**Version**: 3.4.0+ | **Last Updated**: October 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-The **Building Insights & Recommendations** feature transforms your heat pump from a simple temperature controller into an intelligent energy advisor. After learning your building's thermal characteristics for 48-72 hours, the system provides **concrete, actionable recommendations** with estimated savings in euros per month.
+The **Building Insights & Recommendations** feature transforms your heat pump from a simple temperature controller into an intelligent energy advisor. After learning your building's thermal characteristics for about 1–2 days, the system provides **concrete, actionable recommendations** with estimated savings in euros per month.
 
 ### Key Benefits
 
@@ -37,13 +37,13 @@ The **Building Insights & Recommendations** feature transforms your heat pump fr
 
 ## What Are Building Insights?
 
-Building Insights analyze the **6 thermal parameters** learned by the Building Model:
+Building Insights analyze the parameters of the Building Model: 4 learned parameters (C, UA, g, P_int), the time constant τ = C/UA, and the wind correction, which is learned separately:
 
 | Parameter | Symbol | Meaning | Typical Range |
 |-----------|--------|---------|---------------|
 | **Thermal Mass** | C | Heat capacity - how much energy needed for 1°C | 7-30 kWh/°C |
 | **Heat Loss Coefficient** | UA | Rate of heat loss per degree difference | 0.05-0.5 kW/°C |
-| **Time Constant** | τ (tau) | How fast building heats/cools (τ = C/UA) | 5-25 hours |
+| **Time Constant** | τ (tau) | How fast building heats/cools (τ = C/UA) | 20-600 hours (profile values) |
 | **Solar Gain Factor** | g | Effectiveness of solar radiation heating | 0.3-0.6 |
 | **Internal Heat Gains** | P_int | Heat from people, appliances, cooking | 0.2-0.5 kW |
 | **Wind Correction** | W_corr | Extra heat loss in high wind (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +59,7 @@ When optimization opportunities are detected, it generates **insights** with spe
 
 ## How It Works
 
-### Learning Phase (48-72 Hours)
+### Learning Phase (1–2 Days)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -205,21 +205,18 @@ The system provides **4 category-specific sensors** (v2.5.10+):
 
 ### 2. ⏱️ Pre-Heating Strategy Insights
 
-**What it detects:**
-- Fast thermal response (τ < 5 hours)
-- Medium thermal response (τ 5-15 hours)
-- Slow thermal response (τ > 15 hours)
+**What it detects:** six response classes, based on τ:
 
-**Example Insight (v2.6.0):**
-> "Fast (~2 hours for 2°C)" / "Normal (~4 hours for 2°C)" / "Slow (~8 hours for 2°C)"
+| Response | τ | Example insight |
+|---|---|---|
+| Very fast | <5h | Very fast (~2 hours for 2°C) |
+| Fast | 5–10h | Fast (~4 hours for 2°C) |
+| Normal | 10–20h | Normal (~8 hours for 2°C) |
+| Slow | 20–40h | Slow (~16 hours for 2°C) |
+| Very slow | 40–80h | Very slow (~24 hours for 2°C) |
+| Extremely slow | ≥80h | Extremely slow (~32 hours for 2°C) |
 
-**Recommendations by type:**
-
-| Response Type | τ | Advice |
-|---------------|---|--------|
-| Fast | <5h | Stable heating, flexible scheduling possible |
-| Normal | 5-15h | Plan 4+ hours ahead for temperature increase |
-| Slow | >15h | Continuous heating optimal for heat pump |
+No pre-heating insight is shown when τ is above 250 hours (e.g. a passive house).
 
 ---
 
@@ -258,7 +255,7 @@ Monthly savings = €5.04 × 30 = €151/month
 - >30% deviation in time constant (τ)
 
 **Example Insight:**
-> "🔄 Building behaves like 'heavy' (τ=18h vs 'average' τ=10h)"
+> "🔄 Building behaves like 'heavy' (τ=80h vs 'average' τ=50h)"
 
 **Example Recommendation:**
 > "Change building profile to 'heavy' in device settings for faster learning and better initial parameters"
@@ -707,7 +704,7 @@ Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 
 ### Q: How long does learning take?
 
-**A:** 48-72 hours for 70% confidence (default threshold). You can lower to 50% for earlier insights (less accurate). Full convergence takes 1-3 weeks.
+**A:** About 1–2 days for 70% confidence (default threshold). You can lower to 50% for earlier insights (less accurate). Full convergence takes 1-3 weeks.
 
 ### Q: Do insights update if I improve insulation?
 
@@ -720,8 +717,8 @@ Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 ### Q: Why does my τ (time constant) seem high/low?
 
 **A:** τ depends on both thermal mass (C) and heat loss (UA):
-- **High τ** (>15h): Heavy building (high C) OR excellent insulation (low UA)
-- **Low τ** (<5h): Light building (low C) OR poor insulation (high UA)
+- **High τ** (≥80h): Heavy building (high C) OR excellent insulation (low UA)
+- **Low τ** (<20h): Light building (low C) OR poor insulation (high UA)
 
 ### Q: How accurate are the savings estimates?
 

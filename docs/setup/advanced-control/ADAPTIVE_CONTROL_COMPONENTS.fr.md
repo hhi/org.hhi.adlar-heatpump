@@ -161,8 +161,8 @@ En mode coast actif :
 | Perte de chaleur | UA | kW/°C | 0.1-0.4 |
 | Facteur gain solaire | g | - | 0.3-0.6 |
 | Chaleur interne | P_int | kW | 0.2-0.5 |
-| Correction du vent | W_corr | - | 0.03-0.12 |
-| Constante de temps | τ | heure | 4-16 |
+| Correction du vent | W_corr | - | 0.03-0.12 (appris séparément par la correction du vent) |
+| Constante de temps | τ | heure | 20-600 (profil : 50) |
 
 ### Apprentissage Automatique : RLS
 
@@ -173,23 +173,18 @@ Le système utilise les **Moindres Carrés Récursifs** (RLS) :
 - ✅ Léger en calcul (fonctionne sur Homey)
 - ✅ Fournit un indicateur de confiance
 
-**Progression de l'apprentissage :**
-
-| Période | Confiance | Prédiction |
-|---------|-----------|------------|
-| Jour 1 | 25% | ±2°C |
-| Jour 3 | 45% | ±1°C |
-| Semaine 1 | 72% | ±0.5°C |
-| Semaine 4 | 91% | ±0.2°C |
+**Progression de l'apprentissage :** la confiance atteint environ 70% après 1 à 2 jours ; les paramètres continuent de s'affiner pendant 2 à 4 semaines.
 
 ### Catégories de Type de Bâtiment
 
 | Type | C (kWh/°C) | UA (kW/°C) | τ (heure) |
 |------|------------|------------|-----------|
-| Léger (bois/préfabriqué) | 5-8 | 0.35-0.45 | 2-4 |
-| Moyen (maison NL) | 10-15 | 0.25-0.35 | 4-8 |
-| Lourd (béton) | 15-25 | 0.15-0.25 | 8-16 |
-| Maison passive | 25-40 | <0.05 | 16-48 |
+| Léger (bois/préfabriqué) | 7 | 0.35 | 20 |
+| Moyen (maison NL) | 15 | 0.30 | 50 |
+| Lourd (béton) | 20 | 0.25 | 80 |
+| Maison passive | 30 | 0.05 | 600 |
+
+Valeurs de départ des profils de bâtiment ; le modèle apprend ensuite les valeurs réelles de votre logement.
 
 ---
 

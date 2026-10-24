@@ -3,6 +3,7 @@
 **Project:** org.hhi.adlar-heatpump (Tuya local)
 **Gerelateerd:** ADR-057 W2b (sample-gating), ADR-060 (geharmoniseerd gedrag — identieke uitleg geldt voor het Modbus-project, met eigen detectiebronnen)
 **Code:** `lib/tuya/services/building-model-service.ts` → `collectAndLearn()`
+**Bijgewerkt voor:** ADR-062 (3.4.0): geen VFF meer; dT/dt over een venster van 60 minuten dat bij elk geblokkeerd sample opnieuw begint.
 **Varianten per driver:** Tuya (dit document) · [Aurora II](<../modbus/building-model-sample-gating.md>) · [Aurora III](<../modbus/building-model-sample-gating-aurora3.md>) (extra gate `blocked_dhw_active`)
 
 Het gebouwmodel (RLS) leert vier thermische parameters — C (thermische massa), UA (warmteverlies), g (zonnewinst), P_int (interne winst) — uit de relatie tussen **toegevoerd thermisch vermogen** en **verandering van de binnentemperatuur**. Die relatie geldt alleen wanneer het thermisch vermogen daadwerkelijk het gebouw in gaat. Twee bedrijfssituaties breken die aanname structureel; daarvoor bestaan de gates `blocked_dhw_mode` en `blocked_defrost`.
@@ -40,7 +41,7 @@ De check zit in `collectAndLearn()` **vóór** `learner.addMeasurement()`:
 
 ### Waarom het ertoe doet
 
-Tijdens ontdooien keert de warmtepomp de koudemiddelcyclus om en **onttrekt warmte aan het afgiftesysteem** om de verdamper ijsvrij te maken. Het elektrisch verbruik is hoog, maar het thermisch effect op het gebouw is *negatief* — exact het omgekeerde van de modelaanname (`pHeating > 0`). Eén defrost-sample is daarmee "geïnverteerd": het duwt de parameters de verkeerde kant op. Extra schadelijk: defrost treedt juist op bij koud, vochtig weer — precies de condities waarin het warmteverlies (UA) het best meetbaar is. De vervuiling landt dus op het meest informatieve leermoment. En omdat een geïnverteerd sample een grote predictiefout geeft, verhoogt het VFF-λ-mechanisme ("grote fout → sneller leren") het gewicht van precies dit foute sample — dubbel schadelijk.
+Tijdens ontdooien keert de warmtepomp de koudemiddelcyclus om en **onttrekt warmte aan het afgiftesysteem** om de verdamper ijsvrij te maken. Het elektrisch verbruik is hoog, maar het thermisch effect op het gebouw is *negatief* — exact het omgekeerde van de modelaanname (`pHeating > 0`). Eén defrost-sample is daarmee "geïnverteerd": het duwt de parameters de verkeerde kant op. Extra schadelijk: defrost treedt juist op bij koud, vochtig weer — precies de condities waarin het warmteverlies (UA) het best meetbaar is. De vervuiling landt dus op het meest informatieve leermoment.
 
 ### Hoe het wordt herkend
 
@@ -52,8 +53,8 @@ Zelfde mechanisme als de modus-gate: skip vóór `addMeasurement()`, blocking re
 
 ### Impact
 
-- **Mét gate:** een defrost-cyclus duurt typisch 5–15 minuten → hooguit 1–3 gemiste samples per cyclus. Verwaarloosbaar verlies. Het eerste sample ná een korte blokkade bevat de temperatuurdip van de defrost deels in dT/dt — geaccepteerd als ruis; bij langere blokkades grijpt de dt-gap-guard (> 15 min → baseline-verversing, ADR-057 W2a) in.
-- **Zónder gate:** elke defrost injecteert een tegengesteld sample dat alle validatielagen passeert en door VFF-λ extra gewicht krijgt. Bij vriesweer (meerdere defrosts per dag) stapelt dit tot merkbare parameterdrift, gemaskeerd door de bounds-revert-laag — zichtbaar als parameters die "plakken" tegen hun fysieke grenzen (zie excitatie-tellers, ADR-057 W3).
+- **Mét gate:** een defrost-cyclus duurt typisch 5–15 minuten → hooguit 1–3 gemiste samples per cyclus. Verwaarloosbaar verlies. Sinds ADR-062 B2 (3.4.0) start elk geblokkeerd sample het venster van 60 minuten opnieuw: dT/dt overspant nooit een geblokkeerd interval, dus de dip van de defrost komt niet in het model. Na elke blokkade duurt het 60 minuten tot de volgende update.
+- **Zónder gate:** elke defrost injecteert een tegengesteld sample dat alle validatielagen passeert en het model de verkeerde kant op duwt. Bij vriesweer (meerdere defrosts per dag) stapelt dit tot merkbare parameterdrift, gemaskeerd door de bounds-revert-laag — zichtbaar als parameters die "plakken" tegen hun fysieke grenzen (zie excitatie-tellers, ADR-057 W3).
 
 ---
 
@@ -65,4 +66,4 @@ Zelfde mechanisme als de modus-gate: skip vóór `addMeasurement()`, blocking re
 | Detectie (dit project) | `adlar_enum_mode` (DPS 2) ∈ {hot_water, cold, cold_and_hotwater} | `adlar_state_defrost_state` (DPS 33) = true |
 | Frequentie | Dagelijks (DHW-cycli), structureel | Bij koud/vochtig weer, episodisch |
 | Sturing | Sample-skip + blocking reason, zelfherstellend | idem |
-| Restrisico | DHW binnen combimodus niet detecteerbaar (ruis) | Dip in eerste post-defrost-sample (ruis); lange blokkade → dt-gap-guard |
+| Restrisico | DHW binnen combimodus niet detecteerbaar (ruis) | Geen defrost-dip in dT/dt (venster start opnieuw, ADR-062 B2); 60 min zonder update na elke blokkade |

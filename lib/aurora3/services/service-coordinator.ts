@@ -16,6 +16,7 @@ import { CONTROL_REGISTERS } from '../protocol/adlar3-modbus-registers';
 import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import { DeviceFeature } from '../protocol/modbus-runtime-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
+import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 
 type TemperatureRegisterScale = 'x1' | 'x10';
 
@@ -764,6 +765,23 @@ export class ServiceCoordinator {
     }
     if (this.adaptiveControl) {
       await this.adaptiveControl.onSettings(oldSettings, newSettings, changedKeys);
+
+      // Building profile change → soft reset the building model (same as the Tuya coordinator).
+      // Runs after adaptiveControl.onSettings(), so a reset in the same save is followed by the new profile.
+      if (changedKeys.includes('building_profile')) {
+        const newProfile = newSettings.building_profile as BuildingProfileType;
+        try {
+          await this.adaptiveControl.getBuildingModelService().softReset(newProfile);
+          this.logger('ServiceCoordinator: Building model soft-reset for new profile:', newProfile);
+          if (this.buildingInsights) {
+            // Replace stale "switch to X" advice by the profile-aware verification message
+            await this.buildingInsights.evaluateInsights();
+            this.logger('ServiceCoordinator: Building insights re-evaluated after profile change');
+          }
+        } catch (error) {
+          this.logger('ServiceCoordinator: Building model soft-reset failed (non-critical)', error);
+        }
+      }
     }
     if (this.buildingInsights) {
       await this.buildingInsights.onSettingsChanged(newSettings).catch((error) => {

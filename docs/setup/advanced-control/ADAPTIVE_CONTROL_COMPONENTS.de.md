@@ -161,8 +161,8 @@ Bei aktivem Coast-Modus:
 | Wärmeverlust | UA | kW/°C | 0.1-0.4 |
 | Solargewinn-Faktor | g | - | 0.3-0.6 |
 | Interne Wärme | P_int | kW | 0.2-0.5 |
-| Windkorrektur | W_corr | - | 0.03-0.12 |
-| Zeitkonstante | τ | Stunde | 4-16 |
+| Windkorrektur | W_corr | - | 0.03-0.12 (separat von der Windkorrektur gelernt) |
+| Zeitkonstante | τ | Stunde | 20-600 (Profil: 50) |
 
 ### Maschinelles Lernen: RLS
 
@@ -173,23 +173,18 @@ Das System verwendet **Recursive Least Squares** (RLS):
 - ✅ Rechenleicht (läuft auf Homey)
 - ✅ Liefert Vertrauensindikator
 
-**Lernfortschritt:**
-
-| Zeitraum | Vertrauen | Vorhersage |
-|----------|-----------|------------|
-| Tag 1 | 25% | ±2°C |
-| Tag 3 | 45% | ±1°C |
-| Woche 1 | 72% | ±0.5°C |
-| Woche 4 | 91% | ±0.2°C |
+**Lernfortschritt:** Das Vertrauen erreicht nach 1–2 Tagen etwa 70%; die Parameter werden danach noch 2–4 Wochen genauer.
 
 ### Gebäudetyp-Kategorien
 
 | Typ | C (kWh/°C) | UA (kW/°C) | τ (Stunde) |
 |-----|------------|------------|------------|
-| Leicht (Holz/Fertig) | 5-8 | 0.35-0.45 | 2-4 |
-| Durchschnitt (NL-Haus) | 10-15 | 0.25-0.35 | 4-8 |
-| Schwer (Beton) | 15-25 | 0.15-0.25 | 8-16 |
-| Passivhaus | 25-40 | <0.05 | 16-48 |
+| Leicht (Holz/Fertig) | 7 | 0.35 | 20 |
+| Durchschnitt (NL-Haus) | 15 | 0.30 | 50 |
+| Schwer (Beton) | 20 | 0.25 | 80 |
+| Passivhaus | 30 | 0.05 | 600 |
+
+Startwerte der Gebäudeprofile; das Modell lernt danach die tatsächlichen Werte Ihres Hauses.
 
 ---
 

@@ -818,6 +818,9 @@ export class BuildingModelLearner {
 
     // lastMeasurement intentionally preserved — no gap in data continuity
 
+    // ADR-062 B6: the prediction errors belong to the old theta
+    this.residuals = [];
+
     this.logger(
       `BuildingModelLearner: Soft reset to profile '${profileType}' `
       + `(C: ${oldC.toFixed(1)} → ${profile.C}, `

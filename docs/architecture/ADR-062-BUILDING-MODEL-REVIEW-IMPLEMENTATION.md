@@ -413,6 +413,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 7 | npm-script `simulate:building-model` | 1a | Af |
 | 8 | Release 3.4.0 via testkanaal (§10) | 1f | Af (voorbereid) |
 | 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |
+| 10 | Soft reset bij profielwissel Aurora II/III, voorspelfout leeg na soft reset, gidsen en dev-docs bijgewerkt | 1f | Af |
 
 ## 10. Releasechecklist 3.4.0
 
@@ -440,6 +441,7 @@ versie om op terug te vallen.
 | B4 | De instelling "Leren: Vergeetfactor" toont het bereik 0.9985–0.9995; een lagere waarde wordt niet geaccepteerd |
 | B5 | Na een herstart van de app één keer `Initialized` en geen dubbele leercycli |
 | B6 | Na 24 uur liggen C, UA en τ in een plausibel bereik; noteer ze per unit voor vergelijking met 3.3.1 |
+| B7 | Aurora II en III: een gewijzigd gebouwtype logt `Soft reset complete` met het nieuwe profiel |
 
 `predictionRmse24h` (B6) is op hardware niet direct zichtbaar; het zit in
 `getDiagnosticStatus()` en is door unit-tests gedekt. ADR-063 kan het tonen.
