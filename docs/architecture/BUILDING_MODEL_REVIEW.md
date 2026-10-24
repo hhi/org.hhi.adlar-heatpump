@@ -415,3 +415,6 @@ De formule `t = τ × ln((T_eq − T_start)/(T_eq − T_doel))` met
   `test/simulation/building-model-review/`; uitvoeren met
   `npm run build && TAU_MAX=500 node test/simulation/building-model-review/scenarios.js all ideaal,realistisch`,
   of `npm run simulate:building-model` voor deze sectie en ADR-062 samen.
+  De rijen "huidig" gebruiken de learner uit `.homeybuild/`; sinds ADR-062 fase 1b is
+  dat de learner met het tijdvenster. De getallen in deze sectie zijn reproduceerbaar
+  op commit `f56a73a` of eerder.

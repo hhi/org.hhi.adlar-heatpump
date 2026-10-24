@@ -140,6 +140,7 @@ export class BuildingModelService {
   private async collectAndLearn(): Promise<void> {
     // Heartbeat log - fires every 5 minutes to verify timer is running
     this.logger('BuildingModelService: Timer tick - collecting data...');
+    let accepted = false;
 
     try {
       // Check if building model learning is enabled
@@ -283,6 +284,7 @@ export class BuildingModelService {
 
       // Add measurement to learner
       this.learner.addMeasurement(measurement);
+      accepted = true;
 
       // Clear blocking reason - data is flowing successfully
       this.lastBlockingReason = null;
@@ -308,6 +310,9 @@ export class BuildingModelService {
       }
     } catch (error) {
       this.logger('BuildingModelService: Error during learning:', error);
+    } finally {
+      // ADR-062 B2: a sample that did not reach the learner breaks the dT/dt window
+      if (!accepted) this.learner.interruptWindow();
     }
   }
 

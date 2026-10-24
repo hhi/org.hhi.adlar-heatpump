@@ -132,6 +132,10 @@ export class BuildingModelLearner {
   private totalReverts = 0;
   private rateLimitActivations = 0;
 
+  // ADR-062 B1/B2: recent accepted measurements forming the dT/dt window (not persisted)
+  private window: MeasurementData[] = [];
+  private windowInterrupted = false;
+
   // =========================================================================
   // DEFENSIVE LAYER 1: Measurement Validation Bounds
   // Reject physically impossible or extreme measurement values BEFORE RLS update
@@ -145,8 +149,17 @@ export class BuildingModelLearner {
     tOutdoor_min: -25.0, // Minimum outdoor temp (°C) — ADR-056: verruimd van -10, koudegolf is juist waardevol leermoment
     tOutdoor_max: 50.0, // Maximum outdoor temp (°C)
     solarRadiation_max: 1200.0, // Maximum solar radiation (W/m²)
-    dt_max_hours: 0.25, // ADR-056: max 15 min (3× meetinterval) tussen samples — daarboven is
-    // dT/dt een gemiddelde over een gat terwijl X de huidige condities beschrijft (fysisch ongeldig)
+  };
+
+  // =========================================================================
+  // ADR-062 B1/B2: dT/dt window. dT/dt is taken over the last WINDOW_MINUTES of
+  // accepted measurements, with the inputs time-weighted over the same window
+  // (value at the start of each sub-interval). A gap above MAX_GAP_MINUTES (one
+  // missed 5-minute sample) or interruptWindow() starts a new window.
+  // =========================================================================
+  public static readonly WINDOW = {
+    WINDOW_MINUTES: 60,
+    MAX_GAP_MINUTES: 7.5,
   };
 
   // =========================================================================
@@ -221,104 +234,102 @@ export class BuildingModelLearner {
   }
 
   /**
-   * Add new measurement and update model using RLS algorithm
+   * Add new measurement and update model using RLS algorithm.
+   *
+   * ADR-062 B1/B2: the RLS update uses dT/dt over the last 60 minutes of accepted
+   * measurements, with time-weighted inputs over the same window. Every accepted
+   * measurement counts in sampleCount (also while the window fills).
    */
   public addMeasurement(data: MeasurementData): void {
+    // =========================================================================
+    // DEFENSIVE LAYER 1: Measurement Validation
+    // Reject physically impossible or extreme values BEFORE they enter the window
+    // =========================================================================
+    const validationFailure = this.validateMeasurement(data);
+    if (validationFailure) {
+      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping, window restarts');
+      this.logger(`  Reason: ${validationFailure}`);
+      this.interruptWindow();
+      return;
+    }
+
     // First measurement - just store it
     // DEFENSIVE: Also treat as first if lastMeasurement is null (corrupted state recovery)
     if (this.sampleCount === 0 || this.lastMeasurement === null) {
       this.lastMeasurement = data;
+      this.window = [data];
+      this.windowInterrupted = false;
       this.sampleCount++;
       this.logger(`BuildingModelLearner: First measurement stored (count was ${this.sampleCount - 1})`);
       return;
     }
 
-    // Calculate temperature change rate (dT/dt)
     const dt = (data.timestamp - this.lastMeasurement.timestamp) / 3600000; // Convert ms to hours
     if (dt <= 0) {
       this.logger('BuildingModelLearner: Invalid time delta, skipping measurement');
       return;
     }
 
-    // ADR-056: dt-gap guard — na een app-herstart of gemiste ticks is dT/dt over het gat
-    // gemiddeld terwijl de X-vector (vermogen, temperaturen, solar) van nú is.
-    // Sample niet leren, maar wél als nieuw referentiepunt opslaan zodat de volgende meting klopt.
-    if (dt > BuildingModelLearner.MEASUREMENT_BOUNDS.dt_max_hours) {
+    // ADR-062 B2: a gap (missed sample) or an interrupted window starts a new window here.
+    // Not learned and not counted; stored as the new reference point.
+    const { WINDOW_MINUTES, MAX_GAP_MINUTES } = BuildingModelLearner.WINDOW;
+    if (this.windowInterrupted || dt * 60 > MAX_GAP_MINUTES) {
       this.logger(
-        `BuildingModelLearner: ⚠️ Time gap ${(dt * 60).toFixed(0)}min > `
-        + `${BuildingModelLearner.MEASUREMENT_BOUNDS.dt_max_hours * 60}min — skipping RLS update, `
-        + 'measurement stored as new reference point',
+        `BuildingModelLearner: ${this.windowInterrupted ? 'Window interrupted' : `Time gap ${(dt * 60).toFixed(1)}min > ${MAX_GAP_MINUTES}min`}`
+        + ' — measurement stored as new reference point',
       );
       this.lastMeasurement = data;
+      this.window = [data];
+      this.windowInterrupted = false;
       return;
     }
 
-    const dT = data.tIndoor - this.lastMeasurement!.tIndoor;
-    const dtDt = dT / dt; // °C/hour
-
-    // =========================================================================
-    // DEFENSIVE LAYER 1: Measurement Validation
-    // Reject physically impossible or extreme values BEFORE RLS update
-    // =========================================================================
-    const bounds = BuildingModelLearner.MEASUREMENT_BOUNDS;
-    let validationFailure: string | null = null;
-
-    // Check temperature change rate (most critical - indicates sensor errors)
-    if (Math.abs(dtDt) > bounds.dT_dt_max) {
-      validationFailure = `Temperature change rate too high: ${dtDt.toFixed(2)}°C/h (max: ±${bounds.dT_dt_max})`;
-    } else if (data.pHeating < bounds.pHeating_min || data.pHeating > bounds.pHeating_max) {
-      // Check heating power bounds
-      validationFailure = `Heating power out of bounds: ${data.pHeating.toFixed(2)}kW (valid: ${bounds.pHeating_min}-${bounds.pHeating_max})`;
-    } else if (data.tIndoor < bounds.tIndoor_min || data.tIndoor > bounds.tIndoor_max) {
-      // Check indoor temperature bounds
-      validationFailure = `Indoor temperature out of bounds: ${data.tIndoor.toFixed(1)}°C (valid: ${bounds.tIndoor_min}-${bounds.tIndoor_max})`;
-    } else if (data.tOutdoor < bounds.tOutdoor_min || data.tOutdoor > bounds.tOutdoor_max) {
-      // Check outdoor temperature bounds
-      validationFailure = `Outdoor temperature out of bounds: ${data.tOutdoor.toFixed(1)}°C (valid: ${bounds.tOutdoor_min}-${bounds.tOutdoor_max})`;
-    } else if (data.solarRadiation !== undefined
-      && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
-      // Check solar radiation bounds (if provided)
-      validationFailure = `Solar radiation out of bounds: ${data.solarRadiation.toFixed(0)}W/m² (valid: 0-${bounds.solarRadiation_max})`;
-    }
-
-    // If validation failed, log and skip RLS update
-    if (validationFailure) {
-      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping RLS update');
-      this.logger(`  Reason: ${validationFailure}`);
-      this.logger(
-        `  Values: dT/dt=${dtDt.toFixed(2)}°C/h, pHeating=${data.pHeating.toFixed(2)}kW, `
-        + `tIn=${data.tIndoor.toFixed(1)}°C, tOut=${data.tOutdoor.toFixed(1)}°C`,
-      );
-      // Early return - do NOT update lastMeasurement, do NOT increment sampleCount
-      // This preserves learning continuity while rejecting bad data
+    // Spike guard over the last sub-interval: a jump above the dT/dt bound is a sensor
+    // error, not building physics; a 60-minute window would otherwise smear it out.
+    const stepRate = (data.tIndoor - this.lastMeasurement.tIndoor) / dt; // °C/hour
+    if (Math.abs(stepRate) > BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max) {
+      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping, window restarts');
+      this.logger(`  Reason: Temperature change rate too high: ${stepRate.toFixed(2)}°C/h (max: ±${BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max})`);
+      this.interruptWindow();
       return;
     }
 
-    // Apply time-of-day P_int multiplier if enabled
-    const hour = new Date(data.timestamp).getHours();
-    const pIntMultiplier = this.enableDynamicPInt
-      ? getDynamicPInt(hour, this.basePInt) / this.basePInt
-      : 1.0;
+    // After a restore the window is empty: continue from the restored reference point
+    if (this.window.length === 0) {
+      this.window = [this.lastMeasurement];
+    }
+    this.window.push(data);
+    const windowMs = WINDOW_MINUTES * 60000;
+    while (this.window.length > 2 && data.timestamp - this.window[1].timestamp >= windowMs) {
+      this.window.shift();
+    }
 
-    // Build input vector X = [pHeating, (tOut - tIn), Solar_kW, constant_term]
-    // Sign convention: (tOut - tIn) is negative in winter (indoor warmer than outdoor)
-    // → θ[1] × (tOut - tIn) correctly gives negative heat loss contribution to dT/dt
-    // Solar converted to kW/m² (÷1000) to match θ[2] calibration (g/C in kW per kW/m²)
-    // v2.9.6: No seasonal multiplier — astronomical estimation already encodes seasonal variation
-    // via declination-based peak irradiance (200–800 W/m²) and correct sunrise/sunset times.
-    const X = [
-      data.pHeating, // Heating power (kW)
-      data.tOutdoor - data.tIndoor, // Temperature difference (°C) — negative in winter → heat loss subtracts
-      (data.solarRadiation || 0) / 1000, // Solar in kW/m²
-      pIntMultiplier, // Constant term scaled for time-varying P_int
-    ];
-
-    // Perform RLS update
-    this.updateRLS(X, dtDt);
-
-    // Store measurement for next iteration
     this.lastMeasurement = data;
     this.sampleCount++;
+
+    const spanMs = data.timestamp - this.window[0].timestamp;
+    if (spanMs >= windowMs) {
+      // Time-weighted inputs over the window, value at the start of each sub-interval.
+      // X = [pHeating, (tOut - tIn), Solar_kW, P_int multiplier]
+      // Sign convention: (tOut - tIn) is negative in winter (indoor warmer than outdoor)
+      // → θ[1] × (tOut - tIn) correctly gives negative heat loss contribution to dT/dt
+      // Solar converted to kW/m² (÷1000) to match θ[2] calibration (g/C in kW per kW/m²)
+      const X = [0, 0, 0, 0];
+      for (let j = 0; j < this.window.length - 1; j++) {
+        const sample = this.window[j];
+        const weight = (this.window[j + 1].timestamp - sample.timestamp) / spanMs;
+        X[0] += sample.pHeating * weight;
+        X[1] += (sample.tOutdoor - sample.tIndoor) * weight;
+        X[2] += ((sample.solarRadiation || 0) / 1000) * weight;
+        X[3] += this.pIntMultiplierAt(sample.timestamp) * weight;
+      }
+      const dtDt = (data.tIndoor - this.window[0].tIndoor) / (spanMs / 3600000); // °C/hour
+      if (Math.abs(dtDt) <= BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max) {
+        this.updateRLS(X, dtDt);
+      }
+    } else if (this.window.length === 2) {
+      this.logger(`BuildingModelLearner: Window filling (${WINDOW_MINUTES} min needed before the next update)`);
+    }
 
     // Log progress at milestones
     if (this.sampleCount % 100 === 0) {
@@ -329,6 +340,48 @@ export class BuildingModelLearner {
         + `confidence=${model.confidence.toFixed(0)}%`,
       );
     }
+  }
+
+  /**
+   * ADR-062 B2: the next accepted measurement starts a new window. Called by the
+   * service for every sample that a gate keeps from the learner (mode, defrost,
+   * hot water, missing power or COP), so dT/dt never spans a blocked interval.
+   */
+  public interruptWindow(): void {
+    this.window = [];
+    this.windowInterrupted = true;
+  }
+
+  /**
+   * Bounds check for one measurement (DEFENSIVE LAYER 1); null when valid.
+   */
+  private validateMeasurement(data: MeasurementData): string | null {
+    const bounds = BuildingModelLearner.MEASUREMENT_BOUNDS;
+    if (data.pHeating < bounds.pHeating_min || data.pHeating > bounds.pHeating_max) {
+      return `Heating power out of bounds: ${data.pHeating.toFixed(2)}kW (valid: ${bounds.pHeating_min}-${bounds.pHeating_max})`;
+    }
+    if (data.tIndoor < bounds.tIndoor_min || data.tIndoor > bounds.tIndoor_max) {
+      return `Indoor temperature out of bounds: ${data.tIndoor.toFixed(1)}°C (valid: ${bounds.tIndoor_min}-${bounds.tIndoor_max})`;
+    }
+    if (data.tOutdoor < bounds.tOutdoor_min || data.tOutdoor > bounds.tOutdoor_max) {
+      return `Outdoor temperature out of bounds: ${data.tOutdoor.toFixed(1)}°C (valid: ${bounds.tOutdoor_min}-${bounds.tOutdoor_max})`;
+    }
+    if (data.solarRadiation !== undefined
+      && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
+      return `Solar radiation out of bounds: ${data.solarRadiation.toFixed(0)}W/m² (valid: 0-${bounds.solarRadiation_max})`;
+    }
+    return null;
+  }
+
+  /**
+   * Time-of-day P_int multiplier for the RLS input (1.0 when dynamic P_int is off).
+   */
+  private pIntMultiplierAt(timestamp: number): number {
+    if (!this.enableDynamicPInt) {
+      return 1.0;
+    }
+    const hour = new Date(timestamp).getHours();
+    return getDynamicPInt(hour, this.basePInt) / this.basePInt;
   }
 
   /**
@@ -780,6 +833,8 @@ export class BuildingModelLearner {
       // Preserving sample count but not lastMeasurement causes null pointer crash in addMeasurement()
       this.sampleCount = 0;
       this.lastMeasurement = null;
+      this.window = [];
+      this.windowInterrupted = false;
       // theta and P already initialized with defaults in constructor
       this.logger('   ✅ State restore prevented corruption - learning will restart from sample 0');
       return;
@@ -790,6 +845,8 @@ export class BuildingModelLearner {
     this.P = state.P;
     this.sampleCount = state.sampleCount;
     this.lastMeasurement = state.lastMeasurement;
+    this.window = []; // ADR-062 B1: the window is not persisted; it continues from lastMeasurement
+    this.windowInterrupted = false;
     // Restore configuration (with defaults for backward compatibility)
     this.basePInt = state.basePInt ?? 0.3;
     this.enableDynamicPInt = state.enableDynamicPInt ?? false;
