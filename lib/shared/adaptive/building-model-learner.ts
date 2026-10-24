@@ -141,6 +141,7 @@ export class BuildingModelLearner {
   private consecutiveReverts = 0;
   private totalReverts = 0;
   private rateLimitActivations = 0;
+  private boundedSteps = 0; // ADR-062 B12: steps shortened to the bounds after a revert streak
 
   // ADR-062 B1/B2: recent accepted measurements forming the dT/dt window (not persisted)
   private window: MeasurementData[] = [];
@@ -185,6 +186,16 @@ export class BuildingModelLearner {
     MIN: 0.9985,
     MAX: 0.9995,
     DEFAULT: 0.999,
+  };
+
+  // =========================================================================
+  // ADR-062 B12: way out when the learner is stuck against the bounds. After
+  // AFTER_CONSECUTIVE_REVERTS reverts in a row (about one hour) the next step
+  // outside the bounds is shortened to the bounds instead of reverted.
+  // =========================================================================
+  public static readonly BOUNDED_STEP = {
+    AFTER_CONSECUTIVE_REVERTS: 12,
+    BISECTION_STEPS: 40,
   };
 
   // ADR-062 B6: rolling prediction error
@@ -261,6 +272,27 @@ export class BuildingModelLearner {
       violations.push(`θ[3] (P_int/C) ${theta[3].toFixed(6)} outside [${b.pint_c_min.toFixed(6)}, ${b.pint_c_max.toFixed(6)}]`);
     }
     return violations;
+  }
+
+  /**
+   * ADR-062 B12: largest fraction α ∈ [0, 1] of the step for which theta stays within
+   * the bounds. The valid region is convex (boxes for C, τ, g/C, P_int/C and the cone
+   * 0.03·θ[0] ≤ θ[1] ≤ 1.5·θ[0] for UA), so the valid part of the step is one interval
+   * [0, α*] and bisection finds α*. Requires a valid start point.
+   */
+  private static largestValidFraction(start: number[], step: number[]): number {
+    const at = (a: number): number[] => start.map((v, i) => v + a * step[i]);
+    let lo = 0;
+    let hi = 1;
+    for (let k = 0; k < BuildingModelLearner.BOUNDED_STEP.BISECTION_STEPS; k++) {
+      const mid = (lo + hi) / 2;
+      if (BuildingModelLearner.thetaViolations(at(mid)).length === 0) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return lo;
   }
 
   constructor(config: BuildingModelConfig) {
@@ -523,7 +555,8 @@ export class BuildingModelLearner {
     // =========================================================================
     const thetaPrevious = [...this.theta]; // Shallow copy (4 numbers)
 
-    this.theta = this.theta.map((val, i) => val + K[i] * error);
+    const step = K.map((k) => k * error);
+    this.theta = this.theta.map((val, i) => val + step[i]);
 
     // =========================================================================
     // DEFENSIVE LAYER 2: Theta Parameter Bounds Checking
@@ -531,7 +564,20 @@ export class BuildingModelLearner {
     // =========================================================================
     const violations = BuildingModelLearner.thetaViolations(this.theta);
 
-    if (violations.length > 0) {
+    // ADR-062 B12: after a revert streak, shorten the step to the bounds instead of reverting
+    const stuck = violations.length > 0
+      && this.consecutiveReverts >= BuildingModelLearner.BOUNDED_STEP.AFTER_CONSECUTIVE_REVERTS
+      && BuildingModelLearner.thetaViolations(thetaPrevious).length === 0;
+
+    if (stuck) {
+      const alpha = BuildingModelLearner.largestValidFraction(thetaPrevious, step);
+      this.theta = thetaPrevious.map((val, i) => val + alpha * step[i]);
+      this.boundedSteps++;
+      this.logger(
+        `BuildingModelLearner: Bounded step (α=${alpha.toFixed(3)}) after ${this.consecutiveReverts} reverts in a row`
+        + ` — ${violations.join('; ')}`,
+      );
+    } else if (violations.length > 0) {
       // RLS algorithm has diverged - log detailed diagnostics and revert
       const bounds = BuildingModelLearner.THETA_BOUNDS;
       const tauEstimate = 1 / this.theta[1]; // τ = C/UA = (1/θ[0]) / (θ[1]/θ[0]) = 1/θ[1]
@@ -556,7 +602,7 @@ export class BuildingModelLearner {
       return;
     }
 
-    // ADR-057 W3: Valid update — reset the consecutive revert streak
+    // ADR-057 W3: Valid (or, ADR-062 B12, bounded) update — reset the consecutive revert streak
     this.consecutiveReverts = 0;
 
     // =========================================================================
@@ -843,6 +889,7 @@ export class BuildingModelLearner {
       consecutiveReverts: this.consecutiveReverts,
       totalReverts: this.totalReverts,
       rateLimitActivations: this.rateLimitActivations,
+      boundedSteps: this.boundedSteps,
     };
   }
 
@@ -855,11 +902,13 @@ export class BuildingModelLearner {
     consecutiveReverts: number;
     totalReverts: number;
     rateLimitActivations: number;
+    boundedSteps: number;
     } {
     return {
       consecutiveReverts: this.consecutiveReverts,
       totalReverts: this.totalReverts,
       rateLimitActivations: this.rateLimitActivations,
+      boundedSteps: this.boundedSteps,
     };
   }
 
@@ -877,6 +926,7 @@ export class BuildingModelLearner {
     consecutiveReverts?: number;
     totalReverts?: number;
     rateLimitActivations?: number;
+    boundedSteps?: number;
   }): RestoreResult {
     // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
     let stateIsValid = true;
@@ -956,6 +1006,7 @@ export class BuildingModelLearner {
     this.consecutiveReverts = state.consecutiveReverts ?? 0;
     this.totalReverts = state.totalReverts ?? 0;
     this.rateLimitActivations = state.rateLimitActivations ?? 0;
+    this.boundedSteps = state.boundedSteps ?? 0; // ADR-062 B12 (0 for older states)
     this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
     return { restored: true, reasons: [], covarianceProjected };
   }

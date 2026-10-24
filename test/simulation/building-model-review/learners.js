@@ -7,6 +7,7 @@
  *   bounds — §2.7: fysische grenzen op τ = 1/θ[1] en UA = θ[1]/θ[0] (ook bij restore)
  *   order  — §2.1: uniforme 5%-schaling van Δθ vóór de bounds-check
  *   vff    — §2.8: geconfigureerde λ als nominale waarde, VFF verlaagt bij grote fout
+ *   clipAfter — ADR-062 B12: na N reverts op rij de stap inkorten tot de grens (0 = uit)
  * Alleen updateRLS() en restoreState() worden overschreven; de rest is de echte code.
  */
 
@@ -111,12 +112,12 @@ function validFixed(t) {
 // --- Variant-learner ----------------------------------------------------------
 function makeLearner(opts = {}) {
   const {
-    psd = false, bounds = false, order = false, vff = false,
+    psd = false, bounds = false, order = false, vff = false, clipAfter = 0,
     profile = 'average', lambda = 0.999,
     reimpl = false, // true: huidige semantiek via de herimplementatie (controle op gelijkheid)
   } = opts;
   const variant = { psd, bounds, order, vff };
-  const isCurrent = !reimpl && !psd && !bounds && !order && !vff;
+  const isCurrent = !reimpl && !psd && !bounds && !order && !vff && !clipAfter;
 
   const L = new BuildingModelLearner({
     forgettingFactor: lambda,
@@ -127,7 +128,7 @@ function makeLearner(opts = {}) {
     logger: () => {},
   });
 
-  L.stats = { updates: 0, reverts: 0, rateLimited: 0, negXPX: 0, negEigUpdates: 0, minEig: Infinity, lambdas: [] };
+  L.stats = { updates: 0, reverts: 0, bounded: 0, rateLimited: 0, negXPX: 0, negEigUpdates: 0, minEig: Infinity, lambdas: [] };
 
   const baseUpdate = L.updateRLS.bind(L);
 
@@ -179,12 +180,24 @@ function makeLearner(opts = {}) {
     } else {
       cand = prev.map((v, i) => v + dTheta[i]);
     }
-    const ok = variant.bounds ? validFixed(cand) : validCurrent(cand);
-    if (!ok) {
-      this.totalReverts++;
-      this.consecutiveReverts++;
-      this.stats.reverts++;
-      return; // zoals de huidige code: θ en P ongewijzigd
+    const valid = variant.bounds ? validFixed : validCurrent;
+    if (!valid(cand)) {
+      if (clipAfter > 0 && this.consecutiveReverts >= clipAfter && valid(prev)) {
+        // ADR-062 B12: het geldige gebied is convex, dus bisectie langs de stap vindt de grootste geldige fractie
+        const dir = cand.map((v, i) => v - prev[i]);
+        let lo = 0; let hi = 1;
+        for (let k = 0; k < 40; k++) {
+          const mid = (lo + hi) / 2;
+          if (valid(prev.map((v, i) => v + mid * dir[i]))) lo = mid; else hi = mid;
+        }
+        cand = prev.map((v, i) => v + lo * dir[i]);
+        this.stats.bounded++;
+      } else {
+        this.totalReverts++;
+        this.consecutiveReverts++;
+        this.stats.reverts++;
+        return; // zoals de huidige code: θ en P ongewijzigd
+      }
     }
     this.consecutiveReverts = 0;
     if (!variant.order) {

@@ -987,6 +987,7 @@ export class BuildingModelService {
         consecutiveReverts: excitation.consecutiveReverts,
         totalReverts: excitation.totalReverts,
         rateLimitActivations: excitation.rateLimitActivations,
+        boundedSteps: excitation.boundedSteps, // ADR-062 B12
       },
       validation: {
         parametersRealistic: warnings.length === 0,
