@@ -1,6 +1,6 @@
 # Gebouwinzichten & Aanbevelingen Gids
 
-**Versie**: 2.7.0+ | **Laatst bijgewerkt**: Januari 2026
+**Versie**: 3.4.0+ | **Laatst bijgewerkt**: Oktober 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Introductie
 
-De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van een simpele temperatuurregelaar naar een intelligente energieadviseur. Na 48-72 uur leren van de thermische eigenschappen van je gebouw, geeft het systeem **concrete, bruikbare aanbevelingen** met geschatte besparingen in euro's per maand.
+De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van een simpele temperatuurregelaar naar een intelligente energieadviseur. Na ongeveer 1–2 dagen leren van de thermische eigenschappen van je gebouw, geeft het systeem **concrete, bruikbare aanbevelingen** met geschatte besparingen in euro's per maand.
 
 ### Belangrijkste Voordelen
 
@@ -37,13 +37,13 @@ De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van e
 
 ## Wat zijn Gebouwinzichten?
 
-Gebouwinzichten analyseren de **6 thermische parameters** die door het Gebouwmodel worden geleerd:
+Gebouwinzichten analyseren de parameters van het Gebouwmodel: 4 geleerde parameters (C, UA, g, P_int), de tijdsconstante τ = C/UA, en de windcorrectie, die apart wordt geleerd:
 
 | Parameter | Symbool | Betekenis | Typisch Bereik |
 |-----------|---------|-----------|----------------|
 | **Thermische Massa** | C | Warmtecapaciteit - hoeveel energie nodig voor 1°C | 7-30 kWh/°C |
 | **Warmteverlies Coëfficiënt** | UA | Snelheid van warmteverlies per graad verschil | 0.05-0.5 kW/°C |
-| **Tijdsconstante** | τ (tau) | Hoe snel gebouw opwarmt/afkoelt (τ = C/UA) | 5-25 uur |
+| **Tijdsconstante** | τ (tau) | Hoe snel gebouw opwarmt/afkoelt (τ = C/UA) | 20-600 uur (profielwaarden) |
 | **Zonnewinst Factor** | g | Effectiviteit van zonnestraling opwarming | 0.3-0.6 |
 | **Interne Warmtewinst** | P_int | Warmte van mensen, apparaten, koken | 0.2-0.5 kW |
 | **Windcorrectie** | W_corr | Extra warmteverlies bij harde wind (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +59,7 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 
 ## Hoe het werkt
 
-### Leerfase (48-72 uur)
+### Leerfase (1–2 dagen)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -205,21 +205,18 @@ Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 
 ### 2. ⏱️ Voorverwarmen Strategie Inzichten
 
-**Wat het detecteert:**
-- Snelle thermische respons (τ < 5 uur)
-- Medium thermische respons (τ 5-15 uur)
-- Trage thermische respons (τ > 15 uur)
+**Wat het detecteert:** zes responsklassen, op basis van τ:
 
-**Voorbeeld Inzicht (v2.6.0):**
-> "Snel (~2 uur voor 2°C)" / "Normaal (~4 uur voor 2°C)" / "Langzaam (~8 uur voor 2°C)"
+| Respons | τ | Voorbeeld inzicht |
+|---|---|---|
+| Zeer snel | <5u | Zeer snel (~2 uur voor 2°C) |
+| Snel | 5–10u | Snel (~4 uur voor 2°C) |
+| Normaal | 10–20u | Normaal (~8 uur voor 2°C) |
+| Langzaam | 20–40u | Langzaam (~16 uur voor 2°C) |
+| Zeer langzaam | 40–80u | Zeer langzaam (~24 uur voor 2°C) |
+| Extreem langzaam | ≥80u | Extreem langzaam (~32 uur voor 2°C) |
 
-**Aanbevelingen per type:**
-
-| Respons Type | τ | Advies |
-|--------------|---|--------|
-| Snel | <5u | Stabiel stoken, flexibele planning mogelijk |
-| Normaal | 5-15u | Plan 4+ uur vooruit voor temperatuurstijging |
-| Langzaam | >15u | Continu stoken optimaal voor warmtepomp |
+Bij een τ boven 250 uur (bijv. een passiefhuis) verschijnt geen voorverwarmingsinzicht.
 
 ---
 
@@ -258,7 +255,7 @@ Maandelijkse besparing = €5.04 × 30 = €151/maand
 - >30% afwijking in tijdsconstante (τ)
 
 **Voorbeeld Inzicht:**
-> "🔄 Gebouw gedraagt zich als 'zwaar' (τ=18u vs 'gemiddeld' τ=10u)"
+> "🔄 Gebouw gedraagt zich als 'zwaar' (τ=80u vs 'gemiddeld' τ=50u)"
 
 **Voorbeeld Aanbeveling:**
 > "Wijzig gebouwprofiel naar 'zwaar' in apparaatinstellingen voor sneller leren en betere initiële parameters"
@@ -707,7 +704,7 @@ Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 
 ### V: Hoe lang duurt het leren?
 
-**A:** 48-72 uur voor 70% confidence (standaard drempel). Je kunt verlagen naar 50% voor eerdere inzichten (minder accuraat). Volledige convergentie duurt 1-3 weken.
+**A:** Ongeveer 1–2 dagen voor 70% confidence (standaard drempel). Je kunt verlagen naar 50% voor eerdere inzichten (minder accuraat). Volledige convergentie duurt 1-3 weken.
 
 ### V: Worden inzichten bijgewerkt als ik isolatie verbeter?
 
@@ -720,8 +717,8 @@ Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 ### V: Waarom lijkt mijn τ (tijdsconstante) hoog/laag?
 
 **A:** τ hangt af van zowel thermische massa (C) als warmteverlies (UA):
-- **Hoge τ** (>15u): Zwaar gebouw (hoge C) OF uitstekende isolatie (lage UA)
-- **Lage τ** (<5u): Licht gebouw (lage C) OF slechte isolatie (hoge UA)
+- **Hoge τ** (≥80u): Zwaar gebouw (hoge C) OF uitstekende isolatie (lage UA)
+- **Lage τ** (<20u): Licht gebouw (lage C) OF slechte isolatie (hoge UA)
 
 ### V: Hoe accuraat zijn de besparingschattingen?
 

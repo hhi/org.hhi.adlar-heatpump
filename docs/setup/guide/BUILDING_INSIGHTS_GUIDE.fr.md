@@ -1,6 +1,6 @@
 # Guide des Aperçus & Recommandations du Bâtiment
 
-**Version** : 2.7.0+ | **Dernière mise à jour** : Janvier 2026
+**Version** : 3.4.0+ | **Dernière mise à jour** : Octobre 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après 48-72 heures d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables** avec des économies estimées en euros par mois.
+La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après environ 1 à 2 jours d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables** avec des économies estimées en euros par mois.
 
 ### Avantages clés
 
@@ -37,13 +37,13 @@ La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre 
 
 ## Que sont les Aperçus du Bâtiment ?
 
-Les Aperçus du Bâtiment analysent les **6 paramètres thermiques** appris par le Modèle du Bâtiment :
+Les Aperçus du Bâtiment analysent les paramètres du Modèle du Bâtiment : 4 paramètres appris (C, UA, g, P_int), la constante de temps τ = C/UA et la correction du vent, apprise séparément :
 
 | Paramètre | Symbole | Signification | Plage typique |
 |-----------|---------|---------------|---------------|
 | **Masse thermique** | C | Capacité thermique - énergie nécessaire pour 1°C | 7-30 kWh/°C |
 | **Coefficient de perte thermique** | UA | Taux de perte de chaleur par degré de différence | 0,05-0,5 kW/°C |
-| **Constante de temps** | τ (tau) | Vitesse de chauffage/refroidissement (τ = C/UA) | 5-25 heures |
+| **Constante de temps** | τ (tau) | Vitesse de chauffage/refroidissement (τ = C/UA) | 20-600 heures (valeurs de profil) |
 | **Facteur de gain solaire** | g | Efficacité du rayonnement solaire | 0,3-0,6 |
 | **Gains thermiques internes** | P_int | Chaleur des personnes, appareils, cuisine | 0,2-0,5 kW |
 | **Correction du vent** | W_corr | Perte de chaleur supplémentaire par vent fort (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +59,7 @@ Lorsque des opportunités d'optimisation sont détectées, il génère des **ape
 
 ## Comment ça fonctionne
 
-### Phase d'apprentissage (48-72 heures)
+### Phase d'apprentissage (1 à 2 jours)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -205,21 +205,18 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 
 ### 2. ⏱️ Aperçus de Stratégie de Préchauffage
 
-**Ce qui est détecté :**
-- Réponse thermique rapide (τ < 5 heures)
-- Réponse thermique moyenne (τ 5-15 heures)
-- Réponse thermique lente (τ > 15 heures)
+**Ce qui est détecté :** six classes de réponse, selon τ (l'aperçu s'affiche en anglais) :
 
-**Exemple d'aperçu (v2.6.0) :**
-> « Rapide (~2 heures pour 2°C) » / « Normal (~4 heures pour 2°C) » / « Lent (~8 heures pour 2°C) »
+| Réponse | τ | Exemple d'aperçu |
+|---|---|---|
+| Très rapide | <5h | Very fast (~2 hours for 2°C) |
+| Rapide | 5–10h | Fast (~4 hours for 2°C) |
+| Normale | 10–20h | Normal (~8 hours for 2°C) |
+| Lente | 20–40h | Slow (~16 hours for 2°C) |
+| Très lente | 40–80h | Very slow (~24 hours for 2°C) |
+| Extrêmement lente | ≥80h | Extremely slow (~32 hours for 2°C) |
 
-**Recommandations par type :**
-
-| Type de réponse | τ | Conseil |
-|-----------------|---|--------|
-| Rapide | <5h | Chauffage stable, planification flexible possible |
-| Moyenne | 5-15h | Planifier 4+ heures à l'avance pour la hausse de température |
-| Lente | >15h | Chauffage continu optimal pour la pompe à chaleur |
+Aucun aperçu de préchauffage n'apparaît lorsque τ dépasse 250 heures (par ex. maison passive).
 
 ---
 
@@ -258,7 +255,7 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 - >30% de déviation dans la constante de temps (τ)
 
 **Exemple d'aperçu :**
-> « 🔄 Le bâtiment se comporte comme 'lourd' (τ=18h vs 'moyen' τ=10h) »
+> « 🔄 Le bâtiment se comporte comme 'lourd' (τ=80h vs 'moyen' τ=50h) »
 
 **Exemple de recommandation :**
 > « Changez le profil de bâtiment vers 'lourd' dans les paramètres de l'appareil pour un apprentissage plus rapide et de meilleurs paramètres initiaux »
@@ -707,7 +704,7 @@ Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 
 ### Q : Combien de temps dure l'apprentissage ?
 
-**R :** 48-72 heures pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
+**R :** Environ 1 à 2 jours pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
 
 ### Q : Les aperçus se mettent-ils à jour si j'améliore l'isolation ?
 
@@ -720,8 +717,8 @@ Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 ### Q : Pourquoi mon τ (constante de temps) semble-t-il élevé/bas ?
 
 **R :** τ dépend à la fois de la masse thermique (C) et des pertes thermiques (UA) :
-- **τ élevé** (>15h) : Bâtiment lourd (C élevé) OU excellente isolation (UA faible)
-- **τ faible** (<5h) : Bâtiment léger (C faible) OU mauvaise isolation (UA élevé)
+- **τ élevé** (≥80h) : Bâtiment lourd (C élevé) OU excellente isolation (UA faible)
+- **τ faible** (<20h) : Bâtiment léger (C faible) OU mauvaise isolation (UA élevé)
 
 ### Q : Quelle est la précision des estimations d'économies ?
 

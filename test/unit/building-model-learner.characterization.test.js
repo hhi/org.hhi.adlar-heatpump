@@ -7,7 +7,7 @@
  * replaced by one for the new behaviour, so every change in behaviour is visible.
  * Group N — new behaviour, replacing the K tests of the decisions implemented so far
  * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3; phase 1d: N11–N13 for B4/B5;
- * phase 1e: N14–N16 for §2.8, §2.5 and B6).
+ * phase 1e: N14–N16 for §2.8, §2.5 and B6; N17 for B6 after a soft reset).
  *
  * Runs against the compiled output in .homeybuild/ (npm test builds first).
  */
@@ -506,6 +506,14 @@ test('N16 (ADR-062 B6): prediction RMSE over 24 hours of a-priori errors, null b
 
   learner.restoreState(learner.getState());
   assert.strictEqual(learner.getPredictionRmse24h(), null, 'not persisted: empty after a restore');
+});
+
+test('N17 (ADR-062 B6): softReset() empties the prediction errors of the old theta', () => {
+  const learner = createLearner();
+  feed(learner, 60);
+  assert.notStrictEqual(learner.getPredictionRmse24h(), null);
+  learner.softReset('heavy');
+  assert.strictEqual(learner.getPredictionRmse24h(), null);
 });
 
 test('K7 (ADR-062 A5): restore takes enableDynamicPInt from the state', () => {

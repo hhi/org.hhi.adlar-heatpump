@@ -1,6 +1,6 @@
 # Gebäudeerkenntnisse & Empfehlungen Leitfaden
 
-**Version**: 2.7.0+ | **Zuletzt aktualisiert**: Januar 2026
+**Version**: 3.4.0+ | **Zuletzt aktualisiert**: Oktober 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Einführung
 
-Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe von einem einfachen Temperaturregler in einen intelligenten Energieberater. Nach 48-72 Stunden Lernphase der thermischen Eigenschaften Ihres Gebäudes liefert das System **konkrete, umsetzbare Empfehlungen** mit geschätzten Einsparungen in Euro pro Monat.
+Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe von einem einfachen Temperaturregler in einen intelligenten Energieberater. Nach etwa 1–2 Tagen Lernphase der thermischen Eigenschaften Ihres Gebäudes liefert das System **konkrete, umsetzbare Empfehlungen** mit geschätzten Einsparungen in Euro pro Monat.
 
 ### Hauptvorteile
 
@@ -37,13 +37,13 @@ Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe
 
 ## Was sind Gebäudeerkenntnisse?
 
-Gebäudeerkenntnisse analysieren die **6 thermischen Parameter**, die vom Gebäudemodell gelernt werden:
+Gebäudeerkenntnisse analysieren die Parameter des Gebäudemodells: 4 gelernte Parameter (C, UA, g, P_int), die Zeitkonstante τ = C/UA und die Windkorrektur, die separat gelernt wird:
 
 | Parameter | Symbol | Bedeutung | Typischer Bereich |
 |-----------|--------|-----------|-------------------|
 | **Thermische Masse** | C | Wärmekapazität - wie viel Energie für 1°C benötigt | 7-30 kWh/°C |
 | **Wärmeverlustkoeffizient** | UA | Rate des Wärmeverlusts pro Grad Differenz | 0,05-0,5 kW/°C |
-| **Zeitkonstante** | τ (tau) | Wie schnell das Gebäude heizt/kühlt (τ = C/UA) | 5-25 Stunden |
+| **Zeitkonstante** | τ (tau) | Wie schnell das Gebäude heizt/kühlt (τ = C/UA) | 20-600 Stunden (Profilwerte) |
 | **Solargewinnfaktor** | g | Effektivität der Sonneneinstrahlung | 0,3-0,6 |
 | **Interne Wärmegewinne** | P_int | Wärme von Menschen, Geräten, Kochen | 0,2-0,5 kW |
 | **Windkorrektur** | W_corr | Zusätzlicher Wärmeverlust bei starkem Wind (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +59,7 @@ Bei Optimierungsmöglichkeiten generiert es **Erkenntnisse** mit spezifischen Em
 
 ## Wie es funktioniert
 
-### Lernphase (48-72 Stunden)
+### Lernphase (1–2 Tage)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -205,21 +205,18 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 
 ### 2. ⏱️ Vorheiz-Strategie-Erkenntnisse
 
-**Was erkannt wird:**
-- Schnelle thermische Reaktion (τ < 5 Stunden)
-- Mittlere thermische Reaktion (τ 5-15 Stunden)
-- Langsame thermische Reaktion (τ > 15 Stunden)
+**Was erkannt wird:** sechs Reaktionsklassen, basierend auf τ (die Erkenntnis erscheint auf Englisch):
 
-**Beispiel-Erkenntnis (v2.6.0):**
-> „Schnell (~2 Stunden für 2°C)" / „Normal (~4 Stunden für 2°C)" / „Langsam (~8 Stunden für 2°C)"
+| Reaktion | τ | Beispiel-Erkenntnis |
+|---|---|---|
+| Sehr schnell | <5h | Very fast (~2 hours for 2°C) |
+| Schnell | 5–10h | Fast (~4 hours for 2°C) |
+| Normal | 10–20h | Normal (~8 hours for 2°C) |
+| Langsam | 20–40h | Slow (~16 hours for 2°C) |
+| Sehr langsam | 40–80h | Very slow (~24 hours for 2°C) |
+| Extrem langsam | ≥80h | Extremely slow (~32 hours for 2°C) |
 
-**Empfehlungen nach Typ:**
-
-| Reaktionstyp | τ | Empfehlung |
-|--------------|---|------------|
-| Schnell | <5h | Stabiles Heizen, flexible Planung möglich |
-| Normal | 5-15h | 4+ Stunden im Voraus für Temperaturanstieg planen |
-| Langsam | >15h | Kontinuierliches Heizen optimal für Wärmepumpe |
+Bei τ über 250 Stunden (z. B. Passivhaus) erscheint keine Vorheiz-Erkenntnis.
 
 ---
 
@@ -258,7 +255,7 @@ Monatliche Einsparung = €5,04 × 30 = €151/Monat
 - >30% Abweichung in Zeitkonstante (τ)
 
 **Beispiel-Erkenntnis:**
-> „🔄 Gebäude verhält sich wie 'schwer' (τ=18h vs 'mittel' τ=10h)"
+> „🔄 Gebäude verhält sich wie 'schwer' (τ=80h vs 'mittel' τ=50h)"
 
 **Beispiel-Empfehlung:**
 > „Ändern Sie das Gebäudeprofil in den Geräteeinstellungen auf 'schwer' für schnelleres Lernen und bessere Anfangsparameter"
@@ -707,7 +704,7 @@ Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 
 ### F: Wie lange dauert das Lernen?
 
-**A:** 48-72 Stunden für 70% Vertrauen (Standardschwelle). Sie können auf 50% senken für frühere Erkenntnisse (weniger genau). Vollständige Konvergenz dauert 1-3 Wochen.
+**A:** Etwa 1–2 Tage für 70% Vertrauen (Standardschwelle). Sie können auf 50% senken für frühere Erkenntnisse (weniger genau). Vollständige Konvergenz dauert 1-3 Wochen.
 
 ### F: Werden Erkenntnisse aktualisiert, wenn ich die Dämmung verbessere?
 
@@ -720,8 +717,8 @@ Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 ### F: Warum scheint mein τ (Zeitkonstante) hoch/niedrig?
 
 **A:** τ hängt sowohl von thermischer Masse (C) als auch Wärmeverlust (UA) ab:
-- **Hohes τ** (>15h): Schweres Gebäude (hohes C) ODER ausgezeichnete Dämmung (niedriges UA)
-- **Niedriges τ** (<5h): Leichtes Gebäude (niedriges C) ODER schlechte Dämmung (hohes UA)
+- **Hohes τ** (≥80h): Schweres Gebäude (hohes C) ODER ausgezeichnete Dämmung (niedriges UA)
+- **Niedriges τ** (<20h): Leichtes Gebäude (niedriges C) ODER schlechte Dämmung (hohes UA)
 
 ### F: Wie genau sind die Einsparungsschätzungen?
 

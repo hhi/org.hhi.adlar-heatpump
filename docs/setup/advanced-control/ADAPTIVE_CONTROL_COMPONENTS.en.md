@@ -161,8 +161,8 @@ When coast mode active:
 | Heat loss | UA | kW/°C | 0.1-0.4 |
 | Solar gain factor | g | - | 0.3-0.6 |
 | Internal heat | P_int | kW | 0.2-0.5 |
-| Wind correction | W_corr | - | 0.03-0.12 |
-| Time constant | τ | hour | 4-16 |
+| Wind correction | W_corr | - | 0.03-0.12 (learned separately by the wind correction) |
+| Time constant | τ | hour | 20-600 (profile: 50) |
 
 ### Machine Learning: RLS
 
@@ -173,23 +173,18 @@ The system uses **Recursive Least Squares** (RLS):
 - ✅ Computationally light (fits on Homey)
 - ✅ Provides confidence indicator
 
-**Learning progression:**
-
-| Period | Confidence | Prediction |
-|--------|------------|------------|
-| Day 1 | 25% | ±2°C |
-| Day 3 | 45% | ±1°C |
-| Week 1 | 72% | ±0.5°C |
-| Week 4 | 91% | ±0.2°C |
+**Learning progression:** confidence reaches about 70% after 1–2 days; the parameters keep improving for 2–4 weeks.
 
 ### Building Type Categories
 
 | Type | C (kWh/°C) | UA (kW/°C) | τ (hour) |
 |------|------------|------------|----------|
-| Light (wood/prefab) | 5-8 | 0.35-0.45 | 2-4 |
-| Average (NL house) | 10-15 | 0.25-0.35 | 4-8 |
-| Heavy (concrete) | 15-25 | 0.15-0.25 | 8-16 |
-| Passive house | 25-40 | <0.05 | 16-48 |
+| Light (wood/prefab) | 7 | 0.35 | 20 |
+| Average (NL house) | 15 | 0.30 | 50 |
+| Heavy (concrete) | 20 | 0.25 | 80 |
+| Passive house | 30 | 0.05 | 600 |
+
+Starting values of the building profiles; the model then learns the actual values of your home.
 
 ---
 

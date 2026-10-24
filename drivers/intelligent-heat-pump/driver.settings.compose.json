@@ -902,10 +902,10 @@
           "fr": "Activer l'apprentissage du modèle de bâtiment"
         },
         "hint": {
-          "en": "Learn thermal properties of your home (thermal mass, heat loss, solar gain). Enables temperature predictions and improves control accuracy over time. ⚠️ Advanced learning parameter will appear below when enabled.",
-          "nl": "Leer thermische eigenschappen van je woning (thermische massa, warmteverlies, zonnewinst). Maakt temperatuurvoorspellingen mogelijk en verbetert regelnauwkeurigheid in de loop van de tijd. ⚠️ Geavanceerde leer parameter verschijnt hieronder wanneer ingeschakeld.",
-          "de": "Lernen Sie thermische Eigenschaften Ihres Hauses (thermische Masse, Wärmeverlust, Solargewinn). Ermöglicht Temperaturvorhersagen und verbessert die Regelgenauigkeit im Laufe der Zeit. ⚠️ Erweiterter Lernparameter erscheint unten, wenn aktiviert.",
-          "fr": "Apprenez les propriétés thermiques de votre maison (masse thermique, perte de chaleur, gain solaire). Permet les prédictions de température et améliore la précision du contrôle au fil du temps. ⚠️ Le paramètre d'apprentissage avancé apparaîtra ci-dessous lorsqu'activé."
+          "en": "Learn thermal properties of your home (thermal mass, heat loss, solar gain). Enables temperature predictions and improves control accuracy over time.",
+          "nl": "Leer thermische eigenschappen van je woning (thermische massa, warmteverlies, zonnewinst). Maakt temperatuurvoorspellingen mogelijk en verbetert regelnauwkeurigheid in de loop van de tijd.",
+          "de": "Lernen Sie thermische Eigenschaften Ihres Hauses (thermische Masse, Wärmeverlust, Solargewinn). Ermöglicht Temperaturvorhersagen und verbessert die Regelgenauigkeit im Laufe der Zeit.",
+          "fr": "Apprenez les propriétés thermiques de votre maison (masse thermique, perte de chaleur, gain solaire). Permet les prédictions de température et améliore la précision du contrôle au fil du temps."
         },
         "value": false
       },
@@ -919,10 +919,10 @@
           "fr": "Apprentissage: Facteur d'Oubli"
         },
         "hint": {
-          "en": "⚠️ Advanced: How quickly the model adapts to changes. Higher = more stable, better confidence. DO NOT change unless experiencing specific learning issues. Range 0.9985–0.9995. Default: 0.999",
-          "nl": "⚠️ Geavanceerd: Hoe snel het model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid. PAS NIET AAN tenzij je specifieke leerproblemen hebt. Bereik 0.9985–0.9995. Standaard: 0.999",
-          "de": "⚠️ Erweitert: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen. NICHT ändern, außer bei spezifischen Lernproblemen. Bereich 0.9985–0.9995. Standard: 0.999",
-          "fr": "⚠️ Avancé: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. NE PAS modifier sauf problèmes d'apprentissage spécifiques. Plage 0.9985–0.9995. Défaut: 0.999"
+          "en": "⚠️ Advanced: How quickly the model adapts to changes. Higher = more stable, better confidence. DO NOT change unless experiencing specific learning issues. Range 0.9985–0.9995. Default: 0.999 Takes effect after an app restart or 'Reset building model learning'.",
+          "nl": "⚠️ Geavanceerd: Hoe snel het model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid. PAS NIET AAN tenzij je specifieke leerproblemen hebt. Bereik 0.9985–0.9995. Standaard: 0.999 Werkt pas na een herstart van de app of 'Reset gebouwmodel leren'.",
+          "de": "⚠️ Erweitert: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen. NICHT ändern, außer bei spezifischen Lernproblemen. Bereich 0.9985–0.9995. Standard: 0.999 Wirkt erst nach einem App-Neustart oder 'Gebäudemodell-Lernen zurücksetzen'.",
+          "fr": "⚠️ Avancé: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. NE PAS modifier sauf problèmes d'apprentissage spécifiques. Plage 0.9985–0.9995. Défaut: 0.999 Prend effet après un redémarrage de l'app ou 'Réinitialiser l'apprentissage du modèle de bâtiment'."
         },
         "value": 0.999,
         "attr": { "min": 0.9985, "max": 0.9995, "step": 0.0005 }
@@ -992,7 +992,7 @@
           "fr": "Réinitialiser l'apprentissage du modèle de bâtiment"
         },
         "hint": {
-          "en": "Enable to reset all learned building parameters (C, UA, τ, g, P_int and restart learning from scratch using the selected building profile. Automatically disables after reset. Use when diagnostics show corrupt state (negative values, 0% confidence with many samples).",
+          "en": "Enable to reset all learned building parameters (C, UA, τ, g, P_int) and restart learning from scratch using the selected building profile. Automatically disables after reset. Use when diagnostics show corrupt state (negative values, 0% confidence with many samples).",
           "nl": "Schakel in om alle geleerde gebouwparameters (C, UA, τ, g, P_int) te resetten en opnieuw te beginnen met het geselecteerde gebouwprofiel. Schakelt automatisch uit na reset. Gebruik wanneer diagnostics corrupte state tonen (negatieve waarden, 0% confidence met veel samples).",
           "de": "Aktivieren zum Zurücksetzen aller gelernten Gebäudeparameter (C, UA, τ, g, P_int) und Neustart des Lernens mit ausgewähltem Gebäudeprofil. Deaktiviert sich automatisch nach Reset. Verwenden wenn Diagnose korrupten Zustand zeigt (negative Werte, 0% Konfidenz mit vielen Samples).",
           "fr": "Activer pour réinitialiser tous paramètres bâtiment appris (C, UA, τ, g, P_int) et redémarrer apprentissage avec profil sélectionné. Se désactive automatiquement après reset. Utiliser quand diagnostic montre état corrompu (valeurs négatives, 0% confiance avec nombreux échantillons)."
@@ -1009,10 +1009,10 @@
           "fr": "Gains internes dynamiques"
         },
         "hint": {
-          "en": "Accounts for heat from people, cooking, appliances varying by time. Night (23-06h): 40% (sleeping), Day (06-18h): 100% (normal), Evening (18-23h): 180% (cooking, TV). Improves prediction accuracy ~10-15%.",
-          "nl": "Houdt rekening met warmte van mensen, koken, apparaten per tijdstip. Nacht (23-06u): 40% (slapen), Dag (06-18u): 100% (normaal), Avond (18-23u): 180% (koken, TV). Verbetert voorspelling ~10-15%.",
-          "de": "Berücksichtigt Wärme von Menschen, Kochen, Geräten je nach Zeit. Nacht (23-06h): 40% (schlafen), Tag (06-18h): 100% (normal), Abend (18-23h): 180% (kochen, TV). Verbessert Vorhersage ~10-15%.",
-          "fr": "Tient compte chaleur des personnes, cuisine, appareils selon heure. Nuit (23-06h): 40% (sommeil), Jour (06-18h): 100% (normal), Soir (18-23h): 180% (cuisine, TV). Améliore prévision ~10-15%."
+          "en": "Accounts for heat from people, cooking, appliances varying by time. Night (23-06h): 40% (sleeping), Day (06-18h): 100% (normal), Evening (18-23h): 180% (cooking, TV). Improves prediction accuracy ~10-15%. Takes effect after 'Reset building model learning'.",
+          "nl": "Houdt rekening met warmte van mensen, koken, apparaten per tijdstip. Nacht (23-06u): 40% (slapen), Dag (06-18u): 100% (normaal), Avond (18-23u): 180% (koken, TV). Verbetert voorspelling ~10-15%. Werkt pas na 'Reset gebouwmodel leren'.",
+          "de": "Berücksichtigt Wärme von Menschen, Kochen, Geräten je nach Zeit. Nacht (23-06h): 40% (schlafen), Tag (06-18h): 100% (normal), Abend (18-23h): 180% (kochen, TV). Verbessert Vorhersage ~10-15%. Wirkt erst nach 'Gebäudemodell-Lernen zurücksetzen'.",
+          "fr": "Tient compte chaleur des personnes, cuisine, appareils selon heure. Nuit (23-06h): 40% (sommeil), Jour (06-18h): 100% (normal), Soir (18-23h): 180% (cuisine, TV). Améliore prévision ~10-15%. Prend effet après 'Réinitialiser l'apprentissage du modèle de bâtiment'."
         },
         "value": true
       }
