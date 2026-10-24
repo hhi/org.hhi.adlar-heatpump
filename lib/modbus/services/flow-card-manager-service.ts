@@ -11,7 +11,7 @@ import { PerformanceReportService } from './performance-report-service';
 import { SeasonalModeCalculator } from '../../shared/seasonal-mode-calculator';
 import { CurveCalculator } from '../../shared/curve-calculator';
 import { TimeScheduleCalculator } from '../../shared/time-schedule-calculator';
-import { formatHourMinute, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { formatHourMinute, nextLocalTime, resolveHomeyTimezone } from '../../shared/utils/time-format';
 import {
   enumIdToHeatingCurve,
   enumIdToHotWaterCurve,
@@ -1254,16 +1254,13 @@ export class FlowCardManagerService {
           throw new Error('Unable to calculate pre-heat time');
         }
 
-        // Calculate start time
-        const targetTime = new Date();
-        targetTime.setHours(targetHour, targetMinute, 0, 0);
-        if (targetTime <= new Date()) {
-          // Target is in the past, assume next day
-          targetTime.setDate(targetTime.getDate() + 1);
-        }
+        // Calculate start time in Homey's timezone (the app process runs in UTC).
+        // A target time that has already passed today means the next day.
+        const timeZone = resolveHomeyTimezone(this.device.homey);
+        const targetTime = nextLocalTime(targetHour, targetMinute, timeZone);
 
         const startTime = new Date(targetTime.getTime() - durationHours * 3600 * 1000);
-        const startTimeStr = `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')}`;
+        const startTimeStr = formatHourMinute(startTime, timeZone);
 
         // Calculate suggested setpoint boost based on duration
         const suggestedBoost = Math.min(3.0, Math.max(1.0, tempDelta * 0.5));

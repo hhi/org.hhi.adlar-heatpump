@@ -16,6 +16,7 @@ import { CONTROL_REGISTERS } from '../protocol/adlar3-modbus-registers';
 import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import { DeviceFeature } from '../protocol/modbus-runtime-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
+import { nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 type TemperatureRegisterScale = 'x1' | 'x10';
 
@@ -369,19 +370,25 @@ export class ServiceCoordinator {
     }, 60_000);
   }
 
-  private _scheduleDailyDisconnectReset(): void {
+  /**
+   * Reset the daily disconnect count at local midnight (Homey timezone)
+   *
+   * @param from - Instant to plan from; after a reset this is the midnight that just passed
+   */
+  private _scheduleDailyDisconnectReset(from: Date = new Date()): void {
     if (this._disconnectDailyResetTimer) {
       this.device.homey.clearTimeout(this._disconnectDailyResetTimer);
     }
-    const now = new Date();
-    const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+    const midnight = nextLocalMidnight(from, resolveHomeyTimezone(this.device.homey));
+    const msUntilMidnight = Math.max(0, midnight.getTime() - Date.now());
     this._disconnectDailyResetTimer = this.device.homey.setTimeout(() => {
       this._disconnectDailyResetTimer = null;
       if (this.device.hasCapability('adlar_daily_disconnect_count')) {
         this.device.setCapabilityValue('adlar_daily_disconnect_count', 0).catch(() => {});
         this.logger('ServiceCoordinator: Daily disconnect count reset at midnight');
       }
-      this._scheduleDailyDisconnectReset();
+      // Plan from this midnight, so a timer firing a few ms early cannot pick the same midnight again
+      this._scheduleDailyDisconnectReset(midnight);
     }, msUntilMidnight);
   }
 
