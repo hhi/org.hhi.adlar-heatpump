@@ -166,3 +166,19 @@ test('BuildingModelService accepts a complete valid learning sample', async () =
   assert.strictEqual(result.store.building_model_state.sampleCount, 1);
   assert.match(result.status.blockingReason, /Collecting initial samples/);
 });
+
+test('ADR-062 B2: a blocked sample interrupts the learning window, an accepted one does not', async () => {
+  for (const [capabilities, expected] of [[{ adlar_state_defrost_state: true }, 1], [{}, 0]]) {
+    const service = new BuildingModelService({
+      device: createDevice({ capabilities }),
+      enableDynamicPInt: false,
+      logger: () => {},
+    });
+    const learner = service.getLearner();
+    const original = learner.interruptWindow.bind(learner);
+    let calls = 0;
+    learner.interruptWindow = () => { calls++; original(); };
+    await service.collectAndLearn();
+    assert.strictEqual(calls, expected, JSON.stringify(capabilities));
+  }
+});

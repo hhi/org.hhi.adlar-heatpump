@@ -206,3 +206,19 @@ test('BuildingModelService writes capability options only when they change and k
   await service.collectAndLearn();
   assert.strictEqual(writes.length, firstWrites, 'unchanged titles are not written again');
 });
+
+test('ADR-062 B2: a blocked sample interrupts the learning window, an accepted one does not', async () => {
+  for (const [capabilities, expected] of [[{ adlar_state_defrost_state: true }, 1], [{}, 0]]) {
+    const service = new BuildingModelService({
+      device: createDevice({ capabilities }),
+      enableDynamicPInt: false,
+      logger: () => {},
+    });
+    const learner = service.getLearner();
+    const original = learner.interruptWindow.bind(learner);
+    let calls = 0;
+    learner.interruptWindow = () => { calls++; original(); };
+    await service.collectAndLearn();
+    assert.strictEqual(calls, expected, JSON.stringify(capabilities));
+  }
+});
