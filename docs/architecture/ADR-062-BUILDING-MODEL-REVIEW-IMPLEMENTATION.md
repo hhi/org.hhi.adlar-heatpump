@@ -296,7 +296,7 @@ Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschied
 | **1a** | Vangnet: karakteriseringstests van de huidige learner (venster-, gap- en restoregedrag) | Groen op de huidige code | Af |
 | **1b** | B1 venster + B2 `interruptWindow()` + service-hook in drie drivers | Simulatie (§4); unit-tests venster en hook | Af |
 | **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie | Af |
-| **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) | Open |
+| **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) | Af |
 | **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Open |
 | **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware | Handmatig | Open |
 | **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
@@ -401,7 +401,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 2 | Karakteriseringstests learner | 1a | Af |
 | 3 | Venster, `interruptWindow()`, service-hook (3×) | 1b | Af |
 | 4 | PSD-projectie | 1c | Af |
-| 5 | Grenzen, restore-migratie, τ-logregel | 1d | Open |
+| 5 | Grenzen, restore-migratie, τ-logregel | 1d | Af |
 | 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Open |
 | 7 | npm-script `simulate:building-model` | 1a | Af |
 | 8 | Release 3.4.0 via testkanaal | 1f | Open |

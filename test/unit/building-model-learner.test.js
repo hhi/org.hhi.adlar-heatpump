@@ -68,7 +68,7 @@ test('converges towards true parameters from a different profile', () => {
   // it ended at C ≈ 15.0, UA ≈ 0.46 after ~1550 reverts (BUILDING_MODEL_REVIEW_ADDENDUM.md, A2).
   assert.ok(Math.abs(model.C - 15) / 15 < 0.05, `C=${model.C.toFixed(2)} should be within 5% of 15`);
   assert.ok(Math.abs(model.UA - 0.3) / 0.3 < 0.05, `UA=${model.UA.toFixed(3)} should be within 5% of 0.3`);
-  assert.ok(model.tau > 1.25 && model.tau < 500, `tau=${model.tau.toFixed(1)} within bounds`);
+  assert.ok(model.tau >= 1.25 && model.tau <= 800, `tau=${model.tau.toFixed(1)} within bounds`);
 
   // ADR-057 W3: the excitation counters are exported
   const excitation = learner.getExcitationDiagnostics();

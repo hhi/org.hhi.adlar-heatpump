@@ -181,19 +181,56 @@ export class BuildingModelLearner {
   // DEFENSIVE LAYER 2: Theta Parameter Bounds
   // Detect RLS algorithm divergence by checking physical parameter ranges
   // Derived from BUILDING_PROFILES (lines 37-62)
+  // ADR-062 B4: θ[1] is bounded through τ = 1/θ[1] and UA = θ[1]/θ[0] directly
+  // (previously theta1_* and a θ[1]/θ[0] ratio, which capped UA at 0.8 kW/°C)
   // =========================================================================
   private static readonly THETA_BOUNDS = {
     theta0_min: 1 / 40, // Min 1/C (max C = 40 kWh/°C, passive house)
     theta0_max: 1 / 5, // Max 1/C (min C = 5 kWh/°C, light building)
-    theta1_min: 0.05 / 40, // Min UA/C (UA=0.05 kW/°C, C=40) - v2.7.1: tightened from 0.02
-    theta1_max: 1.0 / 5, // Max UA/C (UA=1.0 kW/°C poor insulation, C=5)
-    theta1_theta0_ratio_min: 0.002, // θ[1]/θ[0] > 0.002 ensures τ < 500h (v2.7.1: NEW)
-    theta1_theta0_ratio_max: 0.8, // θ[1]/θ[0] < 0.8 ensures τ > 1.25h
+    tau_min: 1.25, // Min τ = C/UA in hours
+    tau_max: 800, // Max τ in hours (passive house: C 30, UA 0.05 → τ 600h)
+    ua_min: 0.03, // Min UA in kW/°C
+    ua_max: 1.5, // Max UA in kW/°C (poorly insulated detached house)
     g_c_min: 0.2 / 40, // Min g/C (g=0.2 lowest base profile value) - ADR-057 E4: seasonal multiplier removed in v2.9.6
     g_c_max: 0.8 / 5, // Max g/C (g=0.8 highest plausible base value)
     pint_c_min: 0.1 / 40, // Min P_int/C (0.1kW base × 0.4 night)
     pint_c_max: 0.6 / 5, // Max P_int/C (0.6kW base × 1.8 evening)
   };
+
+  /**
+   * ADR-062 B4/B5: Single bounds check for runtime updates and restore.
+   * Bounds are inclusive. Returns one message per violated bound (empty = valid).
+   */
+  private static thetaViolations(theta: number[]): string[] {
+    const b = BuildingModelLearner.THETA_BOUNDS;
+    const violations: string[] = [];
+    const outside = (value: number, min: number, max: number): boolean => !(value >= min && value <= max);
+
+    if (outside(theta[0], b.theta0_min, b.theta0_max)) {
+      violations.push(`C ${(1 / theta[0]).toFixed(2)} kWh/°C outside [${1 / b.theta0_max}, ${1 / b.theta0_min}]`);
+    }
+    if (!(theta[1] > 0)) {
+      violations.push(`θ[1] (UA/C) ${theta[1]} not positive`);
+    } else {
+      const tau = 1 / theta[1];
+      if (outside(tau, b.tau_min, b.tau_max)) {
+        violations.push(`τ ${tau.toFixed(1)}h outside [${b.tau_min}, ${b.tau_max}]`);
+      }
+      if (theta[0] > 0) {
+        const ua = theta[1] / theta[0];
+        if (outside(ua, b.ua_min, b.ua_max)) {
+          violations.push(`UA ${ua.toFixed(3)} kW/°C outside [${b.ua_min}, ${b.ua_max}]`);
+        }
+      }
+    }
+    if (outside(theta[2], b.g_c_min, b.g_c_max)) {
+      violations.push(`θ[2] (g/C) ${theta[2].toFixed(6)} outside [${b.g_c_min.toFixed(6)}, ${b.g_c_max.toFixed(6)}]`);
+    }
+    if (outside(theta[3], b.pint_c_min, b.pint_c_max)) {
+      violations.push(`θ[3] (P_int/C) ${theta[3].toFixed(6)} outside [${b.pint_c_min.toFixed(6)}, ${b.pint_c_max.toFixed(6)}]`);
+    }
+    return violations;
+  }
 
   constructor(config: BuildingModelConfig) {
     // Get building profile (default to 'average' if not specified)
@@ -455,31 +492,19 @@ export class BuildingModelLearner {
     // DEFENSIVE LAYER 2: Theta Parameter Bounds Checking
     // Detect RLS divergence by validating physical parameter ranges
     // =========================================================================
-    const bounds = BuildingModelLearner.THETA_BOUNDS;
-    const theta0Valid = this.theta[0] >= bounds.theta0_min && this.theta[0] <= bounds.theta0_max;
-    const theta1Valid = this.theta[1] >= bounds.theta1_min && this.theta[1] <= bounds.theta1_max;
-    const theta2Valid = this.theta[2] >= bounds.g_c_min && this.theta[2] <= bounds.g_c_max;
-    const theta3Valid = this.theta[3] >= bounds.pint_c_min && this.theta[3] <= bounds.pint_c_max;
-    // v2.7.1: Added ratio minimum check to prevent τ > 500h (θ[1]/θ[0] > 0.002)
-    const ratioMinValid = this.theta[1] > this.theta[0] * bounds.theta1_theta0_ratio_min;
-    const ratioMaxValid = this.theta[1] < this.theta[0] * bounds.theta1_theta0_ratio_max;
+    const violations = BuildingModelLearner.thetaViolations(this.theta);
 
-    const allValid = theta0Valid && theta1Valid && theta2Valid && theta3Valid && ratioMinValid && ratioMaxValid;
-
-    if (!allValid) {
+    if (violations.length > 0) {
       // RLS algorithm has diverged - log detailed diagnostics and revert
-      const tauEstimate = this.theta[0] / this.theta[1]; // 1/C ÷ UA/C = 1/UA × C/1 = C/UA = τ
+      const bounds = BuildingModelLearner.THETA_BOUNDS;
+      const tauEstimate = 1 / this.theta[1]; // τ = C/UA = (1/θ[0]) / (θ[1]/θ[0]) = 1/θ[1]
       this.logger('BuildingModelLearner: ⚠️ RLS DIVERGENCE DETECTED - reverting theta');
-      this.logger(`  θ[0] (1/C):     ${this.theta[0].toFixed(6)} [valid: ${bounds.theta0_min.toFixed(6)} - ${bounds.theta0_max.toFixed(6)}] ${theta0Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[1] (UA/C):    ${this.theta[1].toFixed(6)} [valid: ${bounds.theta1_min.toFixed(6)} - ${bounds.theta1_max.toFixed(6)}] ${theta1Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[2] (g/C):     ${this.theta[2].toFixed(6)} [valid: ${bounds.g_c_min.toFixed(6)} - ${bounds.g_c_max.toFixed(6)}] ${theta2Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[3] (P_int/C): ${this.theta[3].toFixed(6)} [valid: ${bounds.pint_c_min.toFixed(6)} - ${bounds.pint_c_max.toFixed(6)}] ${theta3Valid ? '✅' : '❌'}`);
+      violations.forEach((violation) => this.logger(`  ❌ ${violation}`));
       this.logger(
-        `  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)}`
-        + ` [valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}]`
-        + ` ${ratioMinValid && ratioMaxValid ? '✅' : '❌'}`,
+        `  Candidate: C ${(1 / this.theta[0]).toFixed(2)} kWh/°C, UA ${(this.theta[1] / this.theta[0]).toFixed(3)} kW/°C`
+        + `, θ[2] ${this.theta[2].toFixed(6)}, θ[3] ${this.theta[3].toFixed(6)}`,
       );
-      this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: 1.25 - 500]`);
+      this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: ${bounds.tau_min} - ${bounds.tau_max}]`);
       this.logger('  Action: Reverted to previous theta, kept P matrix for uncertainty tracking');
 
       // REVERT: Restore previous theta (keep P matrix to maintain uncertainty)
@@ -819,27 +844,11 @@ export class BuildingModelLearner {
     // ADR-057 E5 (referentieproject): Validate theta against the SAME physical bounds
     // as runtime (THETA_BOUNDS) — previously only positivity and τ>1h were checked, so
     // an out-of-bounds persisted state could re-enter the algorithm via restore.
-    const bounds = BuildingModelLearner.THETA_BOUNDS;
+    // ADR-062 B5: same thetaViolations() as runtime; no data conversion needed.
     if (state.theta && state.theta.length === 4) {
-      if (state.theta[0] < bounds.theta0_min || state.theta[0] > bounds.theta0_max) {
-        validationErrors.push(`θ[0]=${state.theta[0]} outside [${bounds.theta0_min.toFixed(6)}, ${bounds.theta0_max.toFixed(6)}] (1/C)`);
-        stateIsValid = false;
-      }
-      if (state.theta[1] < bounds.theta1_min || state.theta[1] > bounds.theta1_max) {
-        validationErrors.push(`θ[1]=${state.theta[1]} outside [${bounds.theta1_min.toFixed(6)}, ${bounds.theta1_max.toFixed(6)}] (UA/C)`);
-        stateIsValid = false;
-      }
-      if (state.theta[2] < bounds.g_c_min || state.theta[2] > bounds.g_c_max) {
-        validationErrors.push(`θ[2]=${state.theta[2]} outside [${bounds.g_c_min.toFixed(6)}, ${bounds.g_c_max.toFixed(6)}] (g/C)`);
-        stateIsValid = false;
-      }
-      if (state.theta[3] < bounds.pint_c_min || state.theta[3] > bounds.pint_c_max) {
-        validationErrors.push(`θ[3]=${state.theta[3]} outside [${bounds.pint_c_min.toFixed(6)}, ${bounds.pint_c_max.toFixed(6)}] (P_int/C)`);
-        stateIsValid = false;
-      }
-      const ratio = state.theta[0] > 0 ? state.theta[1] / state.theta[0] : -1;
-      if (ratio < bounds.theta1_theta0_ratio_min || ratio > bounds.theta1_theta0_ratio_max) {
-        validationErrors.push(`θ[1]/θ[0]=${ratio.toFixed(6)} outside [${bounds.theta1_theta0_ratio_min}, ${bounds.theta1_theta0_ratio_max}] (τ range)`);
+      const violations = BuildingModelLearner.thetaViolations(state.theta);
+      if (violations.length > 0) {
+        validationErrors.push(...violations);
         stateIsValid = false;
       }
     } else {
