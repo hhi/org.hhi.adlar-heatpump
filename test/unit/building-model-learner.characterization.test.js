@@ -6,7 +6,7 @@
  * its decision (B1–B5, §2.8, A5); when that decision is implemented the test is
  * replaced by one for the new behaviour, so every change in behaviour is visible.
  * Group N — new behaviour, replacing the K tests of the decisions implemented so far
- * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3).
+ * (phase 1b: N1–N7 for B1/B2; phase 1c: N8–N10 for B3; phase 1d: N11–N13 for B4/B5).
  *
  * Runs against the compiled output in .homeybuild/ (npm test builds first).
  */
@@ -370,32 +370,83 @@ test('N10 (ADR-062 B3/B5): restore projects a P that is not positive semi-defini
   assert.deepStrictEqual(kept.getState().P, fresh);
 });
 
-test('K4 (ADR-062 B4): restore accepts tau = 800 h, rejects UA = 0.85 and accepts the passive profile', () => {
-  const tau800 = createLearner();
-  tau800.restoreState({ theta: [0.025, 0.00125, 0.01, 0.0075], P: IDENTITY, sampleCount: 100, lastMeasurement: null });
-  assert.strictEqual(tau800.getState().sampleCount, 100);
-  assert.ok(Math.abs(tau800.getModel().tau - 800) < 1e-6);
-
-  const ua085 = createLearner();
-  ua085.restoreState({ theta: [0.1, 0.085, 0.04, 0.03], P: IDENTITY, sampleCount: 100, lastMeasurement: null });
-  assert.strictEqual(ua085.getState().sampleCount, 0);
-
-  const passive = createLearner({ buildingProfile: 'passive' });
-  feed(passive, 2);
-  const copy = createLearner({ buildingProfile: 'passive' });
-  copy.restoreState(JSON.parse(JSON.stringify(passive.getState())));
-  assert.strictEqual(copy.getState().sampleCount, 2);
-});
-
-test('K5 (ADR-062 B4): the "tau estimate" log line on a revert shows 1/UA', () => {
+/** Restore a theta with valid g/C and P_int/C; returns the learner and its log lines. */
+function restoreTheta(theta0, theta1) {
   const lines = [];
   const learner = createLearner({ logger: (msg) => lines.push(String(msg)) });
-  learner.updateRLS([5, -15, 0.2, 1], 9.5); // large error → step out of bounds → revert
+  learner.restoreState({ theta: [theta0, theta1, 0.04, 0.03], P: IDENTITY, sampleCount: 100, lastMeasurement: null });
+  return { learner, text: lines.join('\n') };
+}
+
+test('N11 (ADR-062 B4/B5): restore checks tau = 1/θ[1] in [1.25, 800] h and UA = θ[1]/θ[0] in [0.03, 1.5]', () => {
+  const accepted = [
+    ['tau 800 h, UA 0.05', 1 / 40, 0.05 / 40],
+    ['UA 0.85', 0.1, 0.085],
+    ['UA 1.2', 0.1, 0.12],
+  ];
+  for (const [label, theta0, theta1] of accepted) {
+    const { learner } = restoreTheta(theta0, theta1);
+    assert.strictEqual(learner.getState().sampleCount, 100, `${label} should be accepted`);
+  }
+  assert.ok(Math.abs(restoreTheta(1 / 40, 0.05 / 40).learner.getModel().tau - 800) < 1e-6);
+
+  const rejected = [
+    ['UA 1.6', 0.1, 0.16, /UA 1\.600 kW\/°C outside \[0\.03, 1\.5\]/],
+    ['UA 0.018', 0.2, 0.0036, /UA 0\.018 kW\/°C outside \[0\.03, 1\.5\]/],
+    ['tau 1000 h', 1 / 40, 0.001, /τ 1000\.0h outside \[1\.25, 800\]/],
+  ];
+  for (const [label, theta0, theta1, reason] of rejected) {
+    const { learner, text } = restoreTheta(theta0, theta1);
+    assert.strictEqual(learner.getState().sampleCount, 0, `${label} should be rejected`);
+    assert.match(text, reason, `${label}: the log names the violated bound`);
+  }
+
+  const passive = createLearner({ buildingProfile: 'passive' });
+  feed(passive, 48);
+  const copy = createLearner({ buildingProfile: 'passive' });
+  copy.restoreState(JSON.parse(JSON.stringify(passive.getState())));
+  assert.strictEqual(copy.getState().sampleCount, 48);
+});
+
+test('N12 (ADR-062 B4): the "tau estimate" log line on a revert shows 1/θ[1] and the bound 1.25 - 800', () => {
+  const lines = [];
+  const learner = createLearner({ logger: (msg) => lines.push(String(msg)) });
+  const thetaBefore = [...learner.getState().theta];
+  // Same step as the learner takes, to know the candidate θ[1] that is reverted
+  const X = [5, -15, 0.2, 1];
+  const y = 9.5;
+  const { P } = learner.getState();
+  const PX = P.map((row) => row.reduce((s, pij, j) => s + pij * X[j], 0));
+  const den = 0.999 + X.reduce((s, xi, i) => s + xi * PX[i], 0);
+  const err = y - X.reduce((s, xi, i) => s + xi * thetaBefore[i], 0);
+  const candidateTheta1 = thetaBefore[1] + (PX[1] / den) * err;
+
+  learner.updateRLS(X, y); // large error → step out of bounds → revert
   const text = lines.join('\n');
-  const theta0 = Number(/θ\[0\] \(1\/C\):\s+([\d.]+)/.exec(text)[1]);
-  const theta1 = Number(/θ\[1\] \(UA\/C\):\s+([\d.e-]+)/.exec(text)[1]);
-  const logged = Number(/τ estimate: ([\d.e+-]+)h/.exec(text)[1]);
-  assert.ok(Math.abs(logged - theta0 / theta1) <= Math.max(0.1, Math.abs(theta0 / theta1) * 1e-3), `logged ${logged}, θ0/θ1 ${theta0 / theta1}`);
+  assert.match(text, /RLS DIVERGENCE DETECTED/);
+  assert.deepStrictEqual(learner.getState().theta, thetaBefore);
+  const logged = Number(/τ estimate: ([\d.e+-]+)h \[valid: 1\.25 - 800\]/.exec(text)[1]);
+  const expected = 1 / candidateTheta1;
+  assert.ok(Math.abs(logged - expected) <= Math.max(0.1, Math.abs(expected) * 1e-3), `logged ${logged}, 1/θ1 ${expected}`);
+});
+
+test('N13 (ADR-062 B4): a poorly insulated house (UA 1.0, C 10) converges, beyond the old UA limit of 0.8', () => {
+  // Starts from the default profile. From 'light' (C 7, close to C_min 5) this excitation
+  // stays stuck in whole-step reverts; that start-up behaviour predates phase 1d.
+  const learner = createLearner();
+  const C = 10;
+  const UA = 1.0;
+  const pInt = 0.3;
+  let tIndoor = 20;
+  for (let i = 0; i < 8000; i++) {
+    const pHeating = Math.max(0, 15 + 5 * Math.sin(i / 20) + 3 * Math.sin(i / 7));
+    const tOutdoor = 5 + 5 * Math.sin(i / 60);
+    learner.addMeasurement(measurement(T0 + i * FIVE_MIN_MS, tIndoor, tOutdoor, pHeating));
+    tIndoor += ((pHeating - UA * (tIndoor - tOutdoor) + pInt) / C) * (5 / 60);
+  }
+  const model = learner.getModel();
+  assert.ok(Math.abs(model.C - C) / C < 0.1, `C=${model.C.toFixed(2)} should be within 10% of ${C}`);
+  assert.ok(Math.abs(model.UA - UA) / UA < 0.1, `UA=${model.UA.toFixed(3)} should be within 10% of ${UA}`);
 });
 
 test('K6 (review §2.8): VFF lambda stays at the configured 0.999, also with a large error', () => {
