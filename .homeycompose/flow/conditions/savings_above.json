@@ -1,5 +1,6 @@
 {
   "id": "savings_above",
+  "deprecated": true,
   "title": {
     "en": "Insight savings !{{are|aren't}} above threshold",
     "nl": "Inzicht besparing !{{is|is niet}} boven drempel",

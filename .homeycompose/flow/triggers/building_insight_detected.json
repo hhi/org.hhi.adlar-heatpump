@@ -80,12 +80,12 @@
       "name": "estimated_savings_eur_month",
       "type": "number",
       "title": {
-        "en": "Est. Savings (€/month)",
-        "nl": "Geschatte Besparing (€/maand)",
-        "de": "Geschätzte Einsparungen (€/Monat)",
-        "fr": "Économies Estimées (€/mois)"
+        "en": "Est. Savings (€/month, no longer calculated)",
+        "nl": "Geschatte Besparing (€/maand, niet meer berekend)",
+        "de": "Geschätzte Einsparungen (€/Monat, nicht mehr berechnet)",
+        "fr": "Économies Estimées (€/mois, plus calculées)"
       },
-      "example": 95
+      "example": 0
     }
   ]
 }

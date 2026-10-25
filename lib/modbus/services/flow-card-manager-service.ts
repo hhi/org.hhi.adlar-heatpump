@@ -1046,7 +1046,9 @@ export class FlowCardManagerService {
             getAdaptiveControl: () => {
               getEnergyPriceOptimizer: () => {
                 getCurrentPrice: (timestamp: number) => { price: number; category: string } | null;
-                getPriceStatistics: () => { avg: number; sampleSize: number } | null;
+                getDeviationFromAverage: (timestamp: number, minSamples?: number) => {
+                  current: number; average: number; deviationPercent: number; sampleSize: number;
+                } | null;
               } | null;
             } | null;
           };
@@ -1072,26 +1074,19 @@ export class FlowCardManagerService {
         const margin = args.margin || 10;
         const now = Date.now();
 
-        const currentPriceData = energyOptimizer.getCurrentPrice(now);
-        if (!currentPriceData) {
+        if (!energyOptimizer.getCurrentPrice(now)) {
           this.logger('FlowCardManagerService: No current price available');
           return false;
         }
 
-        const priceStats = energyOptimizer.getPriceStatistics();
-        if (!priceStats || priceStats.sampleSize < 6) {
-          this.logger('FlowCardManagerService: Insufficient price data for daily average', {
-            sampleSize: priceStats?.sampleSize || 0,
-            required: 6,
-          });
+        // v3.4.1: current and average both as effective price; no division by an average near zero
+        const deviation = energyOptimizer.getDeviationFromAverage(now, 6);
+        if (!deviation) {
+          this.logger('FlowCardManagerService: Insufficient price data for daily average', { required: 6 });
           return false;
         }
 
-        const currentPrice = currentPriceData.price;
-        const dailyAverage = priceStats.avg;
-
-        // Calculate percentage deviation from average
-        const deviationPercent = ((currentPrice - dailyAverage) / dailyAverage) * 100;
+        const { current: currentPrice, average: dailyAverage, deviationPercent } = deviation;
         const absDeviationPercent = Math.abs(deviationPercent);
 
         // Check if deviation meets the margin requirement
