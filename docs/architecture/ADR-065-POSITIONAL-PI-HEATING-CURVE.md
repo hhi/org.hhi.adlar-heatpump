@@ -1,0 +1,305 @@
+# ADR-065: Positionele PI met integraal naast de stooklijn
+
+**Status:** Concept (voorgesteld, 2026-10-25)
+**Datum:** 2026-10-25
+**Beslissers:** -
+**Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
+(accumulator, comfortanker); ADR-060 (geharmoniseerde regeling); lokaal in `plans/decisions/`,
+niet in git; [ADR-062](ADR-062-BUILDING-MODEL-REVIEW-IMPLEMENTATION.md) A4 (modelparameters
+zonder confidence-gate)
+**Simulatie:** `test/simulation/coast-closed-loop.js` (closed loop: woning, watercircuit,
+warmtepomp met interne thermostaat, regelcyclus van 5 minuten, flow, hele graden)
+
+---
+
+## Samenvatting voor de eigenaar
+
+- **Wat:** het advies voor het setpoint wordt **stooklijn + PI-correctie**, met een
+  echte integraal en anti-windup. Nu is het advies **huidig setpoint + opgetelde
+  PI-uitvoer**: de PI-uitvoer wordt elke 5 minuten opnieuw bij het setpoint opgeteld.
+- **Waarom:** als de flow het advies uitvoert, slingert het setpoint in de huidige opzet
+  dagelijks tussen 20 en 60 °C. Dat kost comfort en energie. In de simulatie halveert
+  de voorgestelde PI de comfortfout (RMSE 0,35 → 0,17 °C bij radiatoren), verdwijnt de
+  onderkoeling bij kou, en daalt het verbruik met 0–24% (het minst bij vloerverwarming
+  in de kou).
+- **Coast:** blijft beschikbaar, maar als optie voor vloerverwarming. Bij radiatoren
+  voegt coast naast deze PI niets toe en geeft het meer compressorstarts.
+- **Wat het niet oplost:** een slechte stooklijn wordt opgevangen, maar een stooklijn
+  met de verkeerde vorm (te steil of te vlak) laat een afwijking die met het weer
+  meeloopt. Tapwater en ontdooien zijn niet gesimuleerd.
+
+---
+
+## 1. Context
+
+### 1.1 Huidige regeling
+
+Per cyclus van 5 minuten (`adaptive-control-service.ts`, Aurora II; Tuya en Aurora III
+gelijk):
+
+```text
+PI:          u = Kp·e + Ki·gem(e)            gem(e) = gemiddelde van ≤ 24 fouten buiten de deadband
+weging:      Δ = 0,6·u  (comfortanker, ADR-059 W2)   of met coast: 0,2·0,6·u + 0,8·coast
+accumulator: acc = begrens(acc + Δ, ±2)
+advies:      setpoint_nieuw = setpoint_huidig + round(acc)
+verrekening: na uitvoering door de flow: acc −= toegepaste stap (ADR-059 W1)
+```
+
+De PI berekent een **positie**-correctie, maar die wordt elke cyclus opnieuw bij het
+setpoint opgeteld. Het setpoint wordt zo de integraal van de PI-uitvoer: ongeveer
+0,6 × 5 = 3 °C per cyclus per °C fout, oftewel 36 °C per uur.
+
+Daarnaast doet de PI in een zone van ongeveer 0,9 °C niets
+(`heating-controller.ts`):
+
+- **onder het doel:** overshoot-preventie bij 0 < fout < 0,48 °C (τ afgetopt op 8 uur);
+- **boven het doel:** dynamische deadband `0,25 + 0,5·UA`, bij UA 0,40 dus 0,45 °C. Die
+  hangt aan het gebouwmodel, zonder controle op de confidence (ADR-062 A4).
+
+### 1.2 Coast
+
+Coast (ADR-024, 040A/B, 047b, 058) is ingevoerd omdat de PI te laat reageerde bij
+oververhitting. Bij kamer > doel + 0,3 (2 cycli, stijgende trend) trekt coast het
+setpoint naar uitlaat − 1 °C, met 80% van het gewicht, zodat de compressor uit blijft.
+Exits: hard (kamer < doel + 0,15), zacht (kamer daalt en kleine correctie), watchdog
+(2 uur).
+
+### 1.3 Waarneming op de testinstallatie
+
+Insights van de Self-Hosted Server, Aurora I/II via Modbus, 18–25 oktober 2026:
+
+- het setpoint (`target_temperature`) bleef tussen 40 en 45 °C en volgde de
+  buitentemperatuur, zoals een stooklijn;
+- het advies (`adlar_simulated_target`) week uren achtereen 2–3 °C af van het setpoint
+  (25 oktober 03:00–14:00: advies 39–40, setpoint 42);
+- de binnentemperatuur lag vrijwel steeds 0,5–1 °C boven het doel.
+
+Het advies wordt daar dus niet (volledig) uitgevoerd; de lus is open. Daardoor is het
+slingeren uit §3 op deze installatie niet te zien. Een gebruiker wiens flow elk advies
+uitvoert, krijgt het wel.
+
+## 2. Besluiten (voorstel)
+
+### D1 — Advies = basis + PI-correctie
+
+```text
+advies = round( begrens( basis + u, setpointgrenzen ) )
+```
+
+De **basis** is de stooklijn: het setpoint dat de warmtepomp of de app bij de huidige
+buitentemperatuur zou kiezen zonder adaptieve regeling (O2). De PI corrigeert alleen
+de afwijking daarvan.
+
+### D2 — PI met echte integraal
+
+```text
+u = begrens( Kp·e + I, ±Umax )
+I = begrens( I + Ki·e, ±Imax )          per cyclus, met Ki = Kp / (Ti in cycli)
+```
+
+Standaard: Kp 3 K/K (gelijk aan de huidige Kp 5 × comfortanker 0,6), Ti 3 uur,
+Imax 6 K, Umax 8 K. Kp en Ti blijven instelbaar.
+
+### D3 — Anti-windup
+
+De integraal wordt **niet** bijgewerkt:
+
+1. als |e| ≤ 0,1 °C;
+2. als het setpoint meer dan 1 °C van het vorige advies af staat (de flow loopt achter of
+   voert niet uit);
+3. als het advies tegen een setpointgrens staat in de richting van de fout.
+
+Punt 2 is nodig omdat de app het setpoint niet zelf schrijft, maar via de flow van de
+gebruiker (flow-assisted). Zonder deze regel loopt de integraal door op een advies dat
+niet wordt uitgevoerd. Dat is precies de situatie op de testinstallatie (§1.3).
+
+### D4 — Geen brede dode zone meer
+
+De overshoot-preventie (0,48 °C onder het doel) en de dynamische deadband (UA-afhankelijk)
+vervallen voor de PI. Alleen de integratiedrempel van D3.1 blijft. Daarmee verdwijnt
+ook de afhankelijkheid van een onbetrouwbaar gebouwmodel (ADR-062 A4) uit de PI.
+
+### D5 — De accumulator vervalt voor de PI
+
+De optelling en verrekening van ADR-059 W1 zijn voor de PI niet meer nodig: het advies
+is per cyclus een positie, geen stap. De kleine bijdragen van de optimizers (COP, prijs,
+thermisch) worden onderdeel van de correctie op de basis, binnen hun eigen budget
+(ADR-059 W2) (O4).
+
+### D6 — Coast als optie per afgiftesysteem
+
+Coast blijft bestaan met de huidige activatie- en exitregels, en verdringt de PI zoals
+nu, maar **alleen zolang de coast-correctie negatief is** (ADR-040A). Standaard:
+
+- **radiatoren:** coast uit;
+- **vloerverwarming:** coast aan.
+
+Tijdens coast wordt de integraal bevroren. Bij vloerverwarming, waar coast standaard aan
+staat, is dat iets beter dan doorintegreren (RMSE 0,206 tegen 0,213 mild; 0,195 tegen
+0,211 koud). Bij radiatoren is doorintegreren beter (0,184 tegen 0,222), maar daar staat
+coast standaard uit (O6).
+
+### D7 — Ti per afgiftesysteem (optioneel)
+
+Een snelle integraal past bij radiatoren, een langzame bij vloerverwarming (§3.3).
+Voorstel: Ti 3 uur als standaard; via de instelling van het afgiftesysteem eventueel
+1,5 uur (radiatoren) of 6 uur (vloer) (O3).
+
+## 3. Onderbouwing: simulatie
+
+### 3.1 Opzet
+
+`test/simulation/coast-closed-loop.js`, 14 dagen, 5 seeds:
+
+| Onderdeel | Model |
+|---|---|
+| Woning | C 20 kWh/K, UA 0,30 kW/K, P_int 0,30 kW; zon op ongeveer de helft van de dagen (piek 1,5–3 kW rond 13:00) |
+| Afgifte | Radiatoren: He 0,25 kW/K, Cw 0,25 kWh/K. Vloer: He 0,6 kW/K, Cw 4 kWh/K |
+| Warmtepomp | Inverter stuurt de uitlaat naar het setpoint, 2–7 kW; start bij uitlaat < setpoint − 2 (na ≥ 5 min uit), stopt bij Qmin en uitlaat > setpoint + 1 (na ≥ 10 min aan); COP als fractie van Carnot |
+| Buiten | De gemeten reeks van de testinstallatie; "koud" = die reeks min 8 K |
+| Stooklijn | Het setpoint waarbij de woning zonder zon op 21 °C blijft, plus een vaste afwijking: in §3.2 radiator +2 K en vloer +1 K; in §3.3 voor beide +2 K, en 0 en +4 K |
+| Regeling | De gecompileerde `HeatingController` en `WeightedDecisionMaker`; coast, accumulator, afronding, begrenzing en verrekening zoals in de app. Binnen op 0,1 °C, uitlaat op hele graden |
+| Flow | Direct (elk gewijzigd advies) of beperkt (hooguit 1 °C per 30 min) |
+
+De varianten "incr." zijn de huidige code; "pos. PI-I" is het voorstel. De controle:
+de incrementele rijen veranderen niet door de toegevoegde varianten.
+
+### 3.2 Resultaten (per dag, directe flow, mild)
+
+| Variant | Afgifte | RMSE (°C) | Uren > +0,5 | Uren < −0,5 | Starts | kWh el | Setpoint |
+|---|---|---|---|---|---|---|---|
+| incr. PI (huidig) | radiator | 0,353 | 2,72 | 1,25 | 2,0 | 17,8 | 20–60 |
+| incr. PI + coast (huidig) | radiator | 0,322 | 1,88 | 0,45 | 2,5 | 17,0 | 20–60 |
+| **pos. PI-I** | radiator | **0,167** | **0,36** | **0,00** | 3,0 | **13,5** | 23–43 |
+| pos. PI-I + coast | radiator | 0,222 | 1,09 | 0,00 | 10,8 | 13,6 | 24–43 |
+| alleen stooklijn | radiator | 1,180 | 22,5 | 0,00 | 0,3 | 16,7 | 30–44 |
+| incr. PI (huidig) | vloer | 0,594 | 8,35 | 3,25 | 0,6 | 12,3 | 20–60 |
+| incr. PI + coast (huidig) | vloer | 0,562 | 8,00 | 3,42 | 0,6 | 12,1 | 20–60 |
+| pos. PI-I | vloer | 0,211 | 0,31 | 0,32 | 1,0 | 10,8 | 20–33 |
+| **pos. PI-I + coast** | vloer | **0,184** | 0,40 | **0,00** | 1,7 | **10,7** | 21–32 |
+
+Met een beperkte flow (1 °C per 30 min) is PI-I vrijwel gelijk (radiator 0,166). De
+huidige regeling wordt dan slechter (radiator 0,463, onderkoeling 4,0 uur per dag).
+
+**Conclusies:**
+
+1. De huidige regeling slingert dagelijks tussen 20 en 60 °C. Dat kost comfort en
+   energie: een setpoint van 60 °C heeft een lage COP.
+2. PI-I houdt het setpoint rustig en dicht bij de stooklijn, en werkt de afwijking van
+   de stooklijn weg. In het dagverloop (radiator, zonder zon) blijft de kamer tussen
+   20,98 en 21,07 °C, en moduleert de warmtepomp zonder te stoppen.
+3. Een positionele PI **zonder** echte integraal (alleen het venstergemiddelde) laat bij
+   radiatoren een blijvende oververhitting (RMSE 0,53): de PI-uitvoer is begrensd op
+   ±3 °C (na weging ±1,8 K), minder dan de afwijking van de stooklijn. De integraal is
+   daarom noodzakelijk.
+
+### 3.3 Gevoeligheid
+
+Eén factor tegelijk rond Kp 3, Ti 3 uur, afwijking +2 K; RMSE in °C (directe flow).
+
+| Instelling | Rad. mild | Rad. koud | Vloer mild | Vloer koud |
+|---|---|---|---|---|
+| *Huidig incr. + coast* | *0,322* | *0,343* | *0,562* | *0,598* |
+| PI-I basis | 0,167 | 0,168 | 0,204 | 0,191 |
+| Ti 1,5 u | **0,149** | **0,149** | 0,253 | 0,257 |
+| Ti 6 u | 0,192 | 0,194 | **0,172** | **0,167** |
+| Kp 2 | 0,201 | 0,203 | 0,199 | 0,194 |
+| Kp 4 | **0,148** | **0,149** | 0,202 | 0,183 |
+| Afwijking 0 K | 0,161 | 0,161 | 0,219 | 0,172 |
+| Afwijking +4 K | 0,170 | 0,170 | 0,180 | 0,186 |
+| PI-I + coast, basis | 0,222 | 0,212 | 0,206 | 0,195 |
+| PI-I + coast, afwijking 0 K | 0,178 | 0,186 | **0,177** | **0,162** |
+
+- **Onderkoeling bij kou** (uren < −0,5 °C per dag): huidig 2,8 (radiator) en 8,9 (vloer);
+  PI-I 0.
+- **Verbruik:** radiator −20% (mild) en −7% (koud); vloer −12% (mild) en gelijk (koud).
+- **Starts:** bij kou 0,1–0,2 per dag (doorlopend moduleren); bij mild weer met zon
+  1–3 per dag. Met coast bij radiatoren in mild weer 10,8 per dag.
+
+**Conclusies:**
+
+1. PI-I is bij alle getoetste instellingen beter dan de huidige regeling, en ongevoelig
+   voor de afwijking van de stooklijn (0 tot +4 K).
+2. Ti hangt af van het afgiftesysteem: Ti 1,5 uur is het best voor radiatoren, maar
+   maakt vloerverwarming onrustig (setpoint tot 45 °C, meer onderkoeling); daar is Ti
+   6 uur het best (D7).
+3. Coast helpt alleen bij vloerverwarming, en het meest bij een juiste stooklijn.
+
+### 3.4 Correctie tijdens de toets
+
+In een eerdere versie van de simulatie gaf coast ook gewicht als de coast-correctie 0
+was. Dat duwde het setpoint omhoog (PI-I + coast bij afwijking +4 K: RMSE 1,03). Na
+correctie volgens ADR-040A: 0,26. D6 legt deze voorwaarde daarom expliciet vast.
+
+## 4. Wat het oplost en wat niet
+
+| | |
+|---|---|
+| ✔ Slingeren van het setpoint (20–60 °C) | Opgelost (§3.2) |
+| ✔ Brede dode zone van de PI | Opgelost (D4) |
+| ✔ Afhankelijkheid van een onbetrouwbaar gebouwmodel in de PI | Opgelost (D4) |
+| ✔ Een vaste afwijking van de stooklijn | Opgelost door de integraal (§3.3) |
+| ✔ Onderkoeling na coast en bij kou | Opgelost (§3.3) |
+| ✔ Advies dat niet wordt uitgevoerd | Geen windup meer (D3.2) |
+| ◐ Oververhitting door zon bij vloerverwarming | Verkleind met coast (D6) |
+| ✖ Een stooklijn met de verkeerde vorm | Een afwijking die met het weer verloopt; de integraal volgt traag (Ti) |
+| ✖ Tapwater, ontdooien, bijstook | Niet gesimuleerd |
+
+## 5. Kanttekeningen
+
+- **Eén woning:** C 20, UA 0,30. Lichte en zeer zware woningen zijn niet getoetst.
+- **Ideale vorm van de stooklijn:** alleen de vaste afwijking is gevarieerd.
+- **Interne thermostaat van de warmtepomp:** vereenvoudigd (start −2 K, stop +1 K,
+  minimale tijden). De werkelijke regeling van de Adlar kan anders zijn.
+- **Zon als enige verstoring.** Geen bewoners, open deuren, houtkachel of nachtverlaging.
+- **De binnensensor** meet zonder vertraging. Een sensor met een eigen traagheid maakt de
+  lus trager.
+- **De optimizers** (COP, prijs, thermisch) staan uit, zoals bij een nieuw gebouwmodel.
+  Hun werking op de basis + correctie (D5) is niet getoetst.
+- **Overgang:** bestaande gebruikers hebben een opgebouwde accumulator en ingestelde Kp,
+  Ki en deadband. Hoe die worden overgezet, is open (O5).
+
+## 6. Open punten
+
+| # | Vraag | Voorstel |
+|---|---|---|
+| O1 | Versie | 3.5.0 (samen met ADR-062 fase 3), of eigen minor |
+| O2 | Bron van de basis | Aurora II/III: de aanvoertemperatuur van de stooklijn van de warmtepomp, als die uit te lezen is; anders de stooklijn van de app (`heating_curve_*`, `set_diy_heating_curve`). Tuya: nagaan |
+| O3 | Ti per afgiftesysteem | Standaard 3 uur; 1,5 / 6 uur via het afgiftesysteem (D7) |
+| O4 | Optimizers | Als correctie op de basis binnen hun budget (ADR-059 W2); eigen toets |
+| O5 | Migratie | Accumulator op 0 bij overgang; Kp 5 → 3 (comfortanker vervalt in de PI); oude deadband en Ki als instelling verbergen of omrekenen |
+| O6 | Coast standaard | Radiator uit, vloer aan; bestaande gebruikers houden hun instelling |
+| O7 | Flow-assisted of direct schrijven | Ongewijzigd flow-assisted; D3.2 vangt een flow op die niet of beperkt uitvoert |
+| O8 | Diagnostiek | Basis, P-term, I-term, anti-windupreden en coast-aandeel in `adaptive_control_diagnostics` |
+
+## 7. Testaanpak
+
+1. **Simulatie** (`coast-closed-loop.js`):
+   - regressie op §3.2 en §3.3 (grenzen bijvoorbeeld: RMSE ≤ 0,20 radiator, ≤ 0,25 vloer;
+     0 uur onderkoeling bij kou; setpoint nooit tegen 20 en 60 °C tegelijk op één dag);
+   - aanvullen met een lichte (C 7) en een zware woning (C 30), nachtverlaging, en een
+     te steile en te vlakke stooklijn;
+   - de prototypevariant vervangen door de echte TypeScript-implementatie zodra die er
+     is (zoals bij ADR-062).
+2. **Unit-tests** voor de nieuwe PI:
+   - integraal en begrenzing (Imax, Umax);
+   - elk van de drie anti-windupregels (D3);
+   - geen dode zone behalve de integratiedrempel (D4);
+   - coast-gewicht alleen bij negatieve correctie (D6);
+   - advies = basis + u, afgerond en begrensd (D1).
+3. **Bestaande tests:** `adaptive-control-service.test.js`, `weighted-decision-maker.test.js`
+   (drivers Tuya, Aurora II, Aurora III) aanpassen waar de accumulator verdwijnt.
+4. **Hardware:**
+   - een week op de testinstallatie met een flow die het advies uitvoert, naast de huidige
+     week (§1.3);
+   - meten: binnentemperatuur, setpoint, compressorstarts, verbruik;
+   - eerst radiatoren of vloer, afhankelijk van de installatie; Tuya apart.
+
+## 8. Niet doen
+
+- Coast verwijderen: bij vloerverwarming verbetert het de regeling nog (§3.3).
+- De huidige incrementele opzet behouden met alleen een kleinere Kp: die blijft een
+  integrator zonder anti-windup.
+- Een positionele PI zonder echte integraal (§3.2, conclusie 3).
+- De PI laten afhangen van UA en τ van het gebouwmodel zolang de confidence niet wordt
+  meegewogen (ADR-062 A4).
