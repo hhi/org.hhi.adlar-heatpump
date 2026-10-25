@@ -372,7 +372,14 @@ export class AdaptiveControlService {
       const storedPrices = await this.device.getStoreValue('external_energy_prices');
       if (storedPrices && typeof storedPrices === 'object') {
         try {
-          this.energyOptimizer.setExternalPrices(storedPrices);
+          // v3.4.1: the offsets are relative to the moment of receipt, not to this restart
+          const receivedAt = await this.device.getStoreValue('external_energy_prices_timestamp');
+          if (typeof receivedAt === 'number' && Number.isFinite(receivedAt)) {
+            this.energyOptimizer.setExternalPrices(storedPrices, receivedAt);
+          } else {
+            this.logger('AdaptiveControlService: Stored energy prices have no receipt time - restoring relative to now');
+            this.energyOptimizer.setExternalPrices(storedPrices);
+          }
 
           // Also update capabilities immediately based on these restored prices
           await this.updateEnergyPriceCapabilities();

@@ -10,3 +10,4 @@ plans/*
 .github/*
 test/*
 scripts/*
+tmp/*

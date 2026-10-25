@@ -1,5 +1,6 @@
 {
   "id": "savings_above_aurora3",
+  "deprecated": true,
   "title": {
     "en": "Insight savings !{{are|aren't}} above threshold",
     "nl": "Inzicht besparing !{{is|is niet}} boven drempel",

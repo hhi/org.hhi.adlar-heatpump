@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.4.0",
+  "version": "3.4.2",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -630,12 +630,12 @@
             "name": "estimated_savings_eur_month",
             "type": "number",
             "title": {
-              "en": "Est. Savings (€/month)",
-              "nl": "Geschatte Besparing (€/maand)",
-              "de": "Geschätzte Einsparungen (€/Monat)",
-              "fr": "Économies Estimées (€/mois)"
+              "en": "Est. Savings (€/month, no longer calculated)",
+              "nl": "Geschatte Besparing (€/maand, niet meer berekend)",
+              "de": "Geschätzte Einsparungen (€/Monat, nicht mehr berechnet)",
+              "fr": "Économies Estimées (€/mois, plus calculées)"
             },
-            "example": 95
+            "example": 0
           }
         ]
       },
@@ -10611,6 +10611,7 @@
       },
       {
         "id": "savings_above",
+        "deprecated": true,
         "title": {
           "en": "Insight savings !{{are|aren't}} above threshold",
           "nl": "Inzicht besparing !{{is|is niet}} boven drempel",
@@ -10697,6 +10698,7 @@
       },
       {
         "id": "savings_above_aurora3",
+        "deprecated": true,
         "title": {
           "en": "Insight savings !{{are|aren't}} above threshold",
           "nl": "Inzicht besparing !{{is|is niet}} boven drempel",
@@ -10783,6 +10785,7 @@
       },
       {
         "id": "savings_above_modbus",
+        "deprecated": true,
         "title": {
           "en": "Insight savings !{{are|aren't}} above threshold",
           "nl": "Inzicht besparing !{{is|is niet}} boven drempel",

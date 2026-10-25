@@ -119,6 +119,9 @@ export interface PriceTrendAnalysis {
  * recommendations based on price categories.
  */
 export class EnergyPriceOptimizer {
+  // v3.4.1: plausible range for external day-ahead prices (€/kWh, excl. VAT); negative prices are valid
+  public static readonly EXTERNAL_PRICE_RANGE = { MIN: -1, MAX: 5 };
+
   private config: EnergyOptimizerConfig;
   private priceData: PriceData[] = [];
   private lastFetch: number = 0;
@@ -933,11 +936,24 @@ export class EnergyPriceOptimizer {
    * {"0": 0.11, "1": 0.10, "2": 0.09, ...}
    * where keys are hour offsets from now (0 = current hour, 1 = next hour, etc.)
    *
+   * v3.4.1: negative prices are valid (hours with surplus wind and solar). Only values
+   * outside EXTERNAL_PRICE_RANGE are skipped. The offsets are relative to `receivedAt`
+   * (the moment the prices were received); hours that have already ended are dropped,
+   * so restoring stored prices after a restart keeps their clock times.
+   *
    * @param pricesObject - Object with hour offsets as keys and prices (€/kWh) as values
+   * @param receivedAt - When the prices were received (ms); defaults to now
    * @throws Error if prices object is invalid or empty
    */
-  public setExternalPrices(pricesObject: Record<string, number>): void {
+  public setExternalPrices(pricesObject: Record<string, number>, receivedAt?: number): void {
     const now = Date.now();
+    const anchor = new Date(receivedAt ?? now);
+    anchor.setMinutes(0, 0, 0);
+    const currentHourStart = new Date(now);
+    currentHourStart.setMinutes(0, 0, 0);
+    const { MIN, MAX } = EnergyPriceOptimizer.EXTERNAL_PRICE_RANGE;
+    let skippedPrices = 0;
+    let expiredHours = 0;
 
     // Validate input
     if (!pricesObject || typeof pricesObject !== 'object') {
@@ -960,17 +976,21 @@ export class EnergyPriceOptimizer {
         continue;
       }
 
-      // Validate price value
-      if (typeof price !== 'number' || Number.isNaN(price) || price < 0) {
-        this.logger(`EnergyPriceOptimizer: Skipping invalid price for hour ${hourOffset}: ${price}`);
+      // Validate price value (v3.4.1: negative market prices are valid)
+      if (typeof price !== 'number' || !Number.isFinite(price) || price < MIN || price > MAX) {
+        this.logger(`EnergyPriceOptimizer: Skipping invalid price for hour ${hourOffset}: ${price} (valid: ${MIN} to ${MAX} €/kWh)`);
+        skippedPrices++;
         continue;
       }
 
-      // Calculate timestamp for this hour
-      // Round current time to start of hour, then add offset
-      const hourStart = new Date(now);
-      hourStart.setMinutes(0, 0, 0);
-      const timestamp = hourStart.getTime() + (hourOffset * 3600000);
+      // Calculate timestamp for this hour: start of the hour of receipt plus the offset
+      const timestamp = anchor.getTime() + (hourOffset * 3600000);
+
+      // v3.4.1: drop hours that have already ended (e.g. stored prices restored after a restart)
+      if (timestamp < currentHourStart.getTime()) {
+        expiredHours++;
+        continue;
+      }
 
       // Create price data entry (use price as-is, no VAT or adjustments)
       // Note: category is stored for backwards compatibility but getCurrentPrice()
@@ -995,8 +1015,35 @@ export class EnergyPriceOptimizer {
 
     this.logger(
       `EnergyPriceOptimizer: Set ${newPriceData.length} external prices `
-      + `(hours ${Object.keys(pricesObject).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).join(', ')})`,
+      + `(hours ${Object.keys(pricesObject).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).join(', ')})`
+      + `${expiredHours > 0 ? `, ${expiredHours} past hours dropped` : ''}`,
     );
+    // v3.4.1: make it visible when a large part of the input is rejected
+    if (skippedPrices > 0 && skippedPrices >= entries.length / 4) {
+      this.logger(`⚠️ EnergyPriceOptimizer: ${skippedPrices} of ${entries.length} prices were outside ${MIN} to ${MAX} €/kWh and were skipped`);
+    }
+  }
+
+  /**
+   * v3.4.1: Deviation of the current effective price from the average effective price.
+   * Both sides use the effective price (the price mode applies to both). The percentage
+   * is taken relative to max(|average|, 0.005 €/kWh), so an average around zero (hours
+   * with negative prices) does not blow up or flip the sign.
+   *
+   * @returns null without a price for the current hour or with fewer than `minSamples` prices
+   */
+  public getDeviationFromAverage(timestamp: number, minSamples = 6): {
+    current: number; average: number; deviationPercent: number; sampleSize: number;
+  } | null {
+    if (!this.getCurrentPrice(timestamp)) return null;
+    const stats = this.getPriceStatistics();
+    if (!stats || stats.sampleSize < minSamples) return null;
+    const current = this.getEffectivePrice(timestamp);
+    const average = stats.avg;
+    const deviationPercent = ((current - average) / Math.max(Math.abs(average), 0.005)) * 100;
+    return {
+      current, average, deviationPercent, sampleSize: stats.sampleSize,
+    };
   }
 
   /**

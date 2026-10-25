@@ -9,5 +9,6 @@ todo
 todo/
 plans
 plans/
+/tmp/
 .claude/settings.local.json
 .DS_Store
