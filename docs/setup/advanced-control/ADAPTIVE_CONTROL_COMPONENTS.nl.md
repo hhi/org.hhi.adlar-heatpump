@@ -161,8 +161,8 @@ Bij coast-modus actief:
 | Warmteverlies | UA | kW/°C | 0.1-0.4 |
 | Zonnewinst factor | g | - | 0.3-0.6 |
 | Interne warmte | P_int | kW | 0.2-0.5 |
-| Windcorrectie | W_corr | - | 0.03-0.12 |
-| Tijdsconstante | τ | uur | 4-16 |
+| Windcorrectie | W_corr | - | 0.03-0.12 (apart geleerd door de windcorrectie) |
+| Tijdsconstante | τ | uur | 20-600 (profiel: 50) |
 
 ### Machine Learning: RLS
 
@@ -173,23 +173,18 @@ Het systeem gebruikt **Recursive Least Squares** (RLS):
 - ✅ Computationeel licht (past op Homey)
 - ✅ Geeft betrouwbaarheid indicator
 
-**Leerprogressie:**
-
-| Periode | Confidence | Voorspelling |
-|---------|------------|--------------|
-| Dag 1 | 25% | ±2°C |
-| Dag 3 | 45% | ±1°C |
-| Week 1 | 72% | ±0.5°C |
-| Week 4 | 91% | ±0.2°C |
+**Leerprogressie:** de betrouwbaarheid bereikt ongeveer 70% na 1–2 dagen; de parameters worden daarna nog 2–4 weken nauwkeuriger.
 
 ### Gebouwtype Categorieën
 
 | Type | C (kWh/°C) | UA (kW/°C) | τ (uur) |
 |------|------------|------------|---------|
-| Licht (hout/prefab) | 5-8 | 0.35-0.45 | 2-4 |
-| Gemiddeld (NL woning) | 10-15 | 0.25-0.35 | 4-8 |
-| Zwaar (beton) | 15-25 | 0.15-0.25 | 8-16 |
-| Passiefhuis | 25-40 | <0.05 | 16-48 |
+| Licht (hout/prefab) | 7 | 0.35 | 20 |
+| Gemiddeld (NL woning) | 15 | 0.30 | 50 |
+| Zwaar (beton) | 20 | 0.25 | 80 |
+| Passiefhuis | 30 | 0.05 | 600 |
+
+Startwaarden van de gebouwprofielen; het model leert daarna de werkelijke waarden van je woning.
 
 ---
 

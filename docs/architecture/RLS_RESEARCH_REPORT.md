@@ -1,5 +1,11 @@
 # RLS Algoritme Wetenschappelijk Onderzoek
 
+> **Historisch onderzoek.** Dit verslag beschrijft de afwegingen vóór ADR-062.
+> Sinds 3.4.0 is de variabele forgetting factor (VFF) verwijderd en gebruikt
+> de learner een constante λ (0,9985–0,9995), een venster van 60 minuten,
+> PSD-projectie en grenzen op τ en UA. Zie
+> [ADR-062](ADR-062-BUILDING-MODEL-REVIEW-IMPLEMENTATION.md).
+
 ## Probleemstelling
 
 De huidige implementatie gebruikt een **vaste forgetting factor λ = 0.999**, wat twee tegenstrijdige problemen veroorzaakt:

@@ -107,16 +107,24 @@ export class BuildingModelService {
     // Restore state from device store
     const storedState = await this.device.getStoreValue('building_model_state');
     if (storedState) {
-      this.learner.restoreState(storedState);
-      const restoredModel = this.learner.getModel();
-      const restoredState = this.learner.getState();
-      this.logger(
-        'BuildingModelService: Restored state from storage '
-        + `(samples=${restoredState.sampleCount}, confidence=${restoredModel.confidence.toFixed(0)}%, `
-        + `C=${restoredModel.C.toFixed(1)}, UA=${restoredModel.UA.toFixed(3)}, tau=${restoredModel.tau.toFixed(1)}h)`,
-      );
+      // ADR-062 §2.5: the learner reports the outcome explicitly (also for a state with 0 samples)
+      const sampleCountBefore = (storedState.sampleCount as number) ?? 0;
+      const result = this.learner.restoreState(storedState);
+      if (result.restored) {
+        const model = this.learner.getModel();
+        this.logger(
+          `BuildingModelService: ✅ State RESTORED from store — ${this.learner.getState().sampleCount} samples, `
+          + `confidence ${model.confidence.toFixed(0)}%, C=${model.C.toFixed(1)} kWh/°C, UA=${model.UA.toFixed(3)} kW/°C, `
+          + `τ=${model.tau.toFixed(1)}h${result.covarianceProjected ? ' (P projected)' : ''}`,
+        );
+      } else {
+        this.logger(
+          `BuildingModelService: ⚠️ State REJECTED on restore (was ${sampleCountBefore} samples): `
+          + `${result.reasons.join('; ')} — learning restarts from profile defaults`,
+        );
+      }
     } else {
-      this.logger('BuildingModelService: No stored building_model_state found - starting from profile defaults');
+      this.logger('BuildingModelService: ℹ️ No persisted state found — fresh start from profile defaults');
     }
 
     // Update capabilities with current model
@@ -126,6 +134,10 @@ export class BuildingModelService {
     await this.updateDiagnosticsCapability();
 
     // Start periodic updates (every 5 minutes)
+    // ADR-062 A7: a repeated initialize() replaces the running interval instead of adding one
+    if (this.updateInterval) {
+      this.device.homey.clearInterval(this.updateInterval);
+    }
     this.updateInterval = this.device.homey.setInterval(
       () => this.collectAndLearn().catch((err) => this.logger('Learning error:', err)),
       this.UPDATE_INTERVAL_MS,
@@ -140,6 +152,7 @@ export class BuildingModelService {
   private async collectAndLearn(): Promise<void> {
     // Heartbeat log - fires every 5 minutes to verify timer is running
     this.logger('BuildingModelService: Timer tick - collecting data...');
+    let accepted = false;
 
     try {
       // Check if building model learning is enabled
@@ -273,6 +286,7 @@ export class BuildingModelService {
 
       // Add measurement to learner
       this.learner.addMeasurement(measurement);
+      accepted = true;
 
       // Clear blocking reason - data is flowing successfully
       this.lastBlockingReason = null;
@@ -298,6 +312,9 @@ export class BuildingModelService {
       }
     } catch (error) {
       this.logger('BuildingModelService: Error during learning:', error);
+    } finally {
+      // ADR-062 B2: a sample that did not reach the learner breaks the dT/dt window
+      if (!accepted) this.learner.interruptWindow();
     }
   }
 
@@ -758,6 +775,7 @@ export class BuildingModelService {
     isDefault: boolean;
     blockingReason: string | null;
     blockingReasonKey: string | null; // Locale key (building_model.blocked_*); null when not blocked or still collecting initial samples
+    predictionRmse24h: number | null; // ADR-062 B6: RMSE of the prediction error (°C/h) over 24 h; diagnostic only
   }> {
     const enabled = await this.device.getSetting('building_model_enabled');
 
@@ -819,6 +837,7 @@ export class BuildingModelService {
       isDefault,
       blockingReason,
       blockingReasonKey,
+      predictionRmse24h: this.learner.getPredictionRmse24h(),
     };
   }
 
@@ -963,6 +982,7 @@ export class BuildingModelService {
         consecutiveReverts: excitation.consecutiveReverts,
         totalReverts: excitation.totalReverts,
         rateLimitActivations: excitation.rateLimitActivations,
+        boundedSteps: excitation.boundedSteps, // ADR-062 B12
       },
       validation: {
         parametersRealistic: warnings.length === 0,

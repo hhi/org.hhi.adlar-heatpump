@@ -138,6 +138,10 @@ We behandelen building model persistence als een expliciet lifecycle-contract:
 
 - Bij corrupte persisted state is in logs/diagnostics zichtbaar waarom het model op defaults start.
 
+**Stand (3.4.0):** gerealiseerd in ADR-062 fase 1e (§2.5). `restoreState()` geeft
+`{ restored, reasons, covarianceProjected }` terug; alle drie de drivers loggen
+`State RESTORED` (met C, UA, τ) of `State REJECTED` met de reden.
+
 ### 4. Homey settings versus learned state
 
 **Huidig gedrag:** settings staan in `driver.settings.compose.json`; learned state staat in store.  

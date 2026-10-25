@@ -14,6 +14,7 @@ import {
 } from '../adaptive/weighted-decision-maker';
 import { WindCorrectionService } from './wind-correction-service';
 import { WeatherForecastService, type ForecastAdvice } from '../../shared/services/weather-forecast-service';
+import { formatHourMinute, resolveHomeyTimezone, startOfLocalDay } from '../../shared/utils/time-format';
 import { DeviceConstants } from '../constants';
 
 /**
@@ -371,7 +372,14 @@ export class AdaptiveControlService {
       const storedPrices = await this.device.getStoreValue('external_energy_prices');
       if (storedPrices && typeof storedPrices === 'object') {
         try {
-          this.energyOptimizer.setExternalPrices(storedPrices);
+          // v3.4.1: the offsets are relative to the moment of receipt, not to this restart
+          const receivedAt = await this.device.getStoreValue('external_energy_prices_timestamp');
+          if (typeof receivedAt === 'number' && Number.isFinite(receivedAt)) {
+            this.energyOptimizer.setExternalPrices(storedPrices, receivedAt);
+          } else {
+            this.logger('AdaptiveControlService: Stored energy prices have no receipt time - restoring relative to now');
+            this.energyOptimizer.setExternalPrices(storedPrices);
+          }
 
           // Also update capabilities immediately based on these restored prices
           await this.updateEnergyPriceCapabilities();
@@ -2119,9 +2127,8 @@ export class AdaptiveControlService {
         const blockHours = (await this.device.getSetting('adaptive_price_block_hours')) || 4;
         const cheapestBlock = this.energyOptimizer.findCheapestBlock(blockHours);
         if (cheapestBlock) {
-          const formatTime = (date: Date) => {
-            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-          };
+          const timeZone = resolveHomeyTimezone(this.device.homey);
+          const formatTime = (date: Date) => formatHourMinute(date, timeZone);
           // v2.7.8: Show full block range (e.g., "01:00-05:00") instead of just start time
           await this.device.setCapabilityValue('adlar_cheapest_block_start',
             `${formatTime(cheapestBlock.startTime)}-${formatTime(cheapestBlock.endTime)}`);
@@ -2194,8 +2201,9 @@ export class AdaptiveControlService {
   private async checkDailyCostThreshold(): Promise<void> {
     try {
       const now = Date.now();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Start of today in Homey's timezone (the app process runs in UTC)
+      const timeZone = resolveHomeyTimezone(this.device.homey);
+      const today = startOfLocalDay(new Date(now), timeZone);
 
       // Reset trigger flag at midnight
       if (now - today.getTime() < this.controlIntervalMs) {
@@ -2214,7 +2222,7 @@ export class AdaptiveControlService {
         return; // No consumption data available
       }
 
-      const dailyCost = this.energyOptimizer.calculateDailyCost(dailyConsumption);
+      const dailyCost = this.energyOptimizer.calculateDailyCost(dailyConsumption, timeZone);
 
       // Check against user-defined threshold (default €10)
       const costThreshold = (await this.device.getSetting('daily_cost_threshold')) || 10;
@@ -2331,9 +2339,8 @@ export class AdaptiveControlService {
 
         if (isInBlock && isNewBlock) {
           // Format times as HH:MM
-          const formatTime = (date: Date) => {
-            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-          };
+          const timeZone = resolveHomeyTimezone(this.device.homey);
+          const formatTime = (date: Date) => formatHourMinute(date, timeZone);
 
           this.logger(
             `💰 Cheapest ${blockHours}-hour block started: ${formatTime(cheapestBlock.startTime)} - ${formatTime(cheapestBlock.endTime)} `
@@ -2370,9 +2377,8 @@ export class AdaptiveControlService {
         const isNewWarning = this.lastExpensiveBlockWarning !== blockStart;
 
         if (isWarningTime && isNewWarning) {
-          const formatTime = (date: Date) => {
-            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-          };
+          const timeZone = resolveHomeyTimezone(this.device.homey);
+          const formatTime = (date: Date) => formatHourMinute(date, timeZone);
 
           this.logger(
             `⚠️ Expensive period approaching: starts at ${formatTime(expensiveBlock.startTime)} `

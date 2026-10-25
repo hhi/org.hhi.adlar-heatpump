@@ -1,6 +1,6 @@
 # Gebouwinzichten & Aanbevelingen Gids
 
-**Versie**: 2.7.0+ | **Laatst bijgewerkt**: Januari 2026
+**Versie**: 3.4.0+ | **Laatst bijgewerkt**: Oktober 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Introductie
 
-De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van een simpele temperatuurregelaar naar een intelligente energieadviseur. Na 48-72 uur leren van de thermische eigenschappen van je gebouw, geeft het systeem **concrete, bruikbare aanbevelingen** met geschatte besparingen in euro's per maand.
+De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van een simpele temperatuurregelaar naar een intelligente energieadviseur. Na ongeveer 1–2 dagen leren van de thermische eigenschappen van je gebouw, geeft het systeem **concrete, bruikbare aanbevelingen**.
 
 ### Belangrijkste Voordelen
 
@@ -31,19 +31,18 @@ De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van e
 | 💰 Isolatie-inzichten | 10-30% |
 | ⏱️ Voorverwarmen optimalisatie | 5-10% |
 | 🏠 Thermische opslag strategieën | 10-25% (met dynamische prijzen) |
-| 📊 ROI transparantie | Elke aanbeveling incl. maandelijkse besparing |
 
 ---
 
 ## Wat zijn Gebouwinzichten?
 
-Gebouwinzichten analyseren de **6 thermische parameters** die door het Gebouwmodel worden geleerd:
+Gebouwinzichten analyseren de parameters van het Gebouwmodel: 4 geleerde parameters (C, UA, g, P_int), de tijdsconstante τ = C/UA, en de windcorrectie, die apart wordt geleerd:
 
 | Parameter | Symbool | Betekenis | Typisch Bereik |
 |-----------|---------|-----------|----------------|
 | **Thermische Massa** | C | Warmtecapaciteit - hoeveel energie nodig voor 1°C | 7-30 kWh/°C |
 | **Warmteverlies Coëfficiënt** | UA | Snelheid van warmteverlies per graad verschil | 0.05-0.5 kW/°C |
-| **Tijdsconstante** | τ (tau) | Hoe snel gebouw opwarmt/afkoelt (τ = C/UA) | 5-25 uur |
+| **Tijdsconstante** | τ (tau) | Hoe snel gebouw opwarmt/afkoelt (τ = C/UA) | 20-600 uur (profielwaarden) |
 | **Zonnewinst Factor** | g | Effectiviteit van zonnestraling opwarming | 0.3-0.6 |
 | **Interne Warmtewinst** | P_int | Warmte van mensen, apparaten, koken | 0.2-0.5 kW |
 | **Windcorrectie** | W_corr | Extra warmteverlies bij harde wind (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +58,7 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 
 ## Hoe het werkt
 
-### Leerfase (48-72 uur)
+### Leerfase (1–2 dagen)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -95,7 +94,7 @@ Bij optimalisatiekansen genereert het **inzichten** met specifieke aanbevelingen
 **Inzichten generatie:**
 - Systeem evalueert elke 50 minuten (10 samples)
 - Detecteert patronen: slechte isolatie, thermische opslag potentieel, voorverwarmen kansen
-- Genereert aanbevelingen met ROI schattingen
+- Genereert aanbevelingen
 
 ### Continue Monitoring
 
@@ -189,7 +188,7 @@ Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 > "🏠 Hoog warmteverlies - UA 0.52 kW/°C (verwacht: 0.30)"
 
 **Voorbeeld Aanbeveling:**
-> "Overweeg isolatie upgrades: dak (25% besparing), muren (15%), ramen (10%). Geschatte besparing: €120/maand"
+> "🔴 Hoog verlies • Dak/muren/ramen"
 
 **Wanneer het triggert:**
 - Confidence ≥ 70%
@@ -197,29 +196,25 @@ Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 
 **Wat te doen:**
 1. **Verificeer de meting** - Check of deuren/ramen open stonden tijdens leren
-2. **Prioriteer upgrades** - Dakisolatie geeft hoogste ROI (25% van totale besparing)
-3. **Vraag offertes** - Gebruik €120/maand schatting om terugverdientijd te berekenen
-4. **Implementeer nachtverlaging** - Reduceer warmteverlies tijdens onbewoonde uren
+2. **Prioriteer upgrades** - Dakisolatie geeft hoogste ROI
+3. **Implementeer nachtverlaging** - Reduceer warmteverlies tijdens onbewoonde uren
 
 ---
 
 ### 2. ⏱️ Voorverwarmen Strategie Inzichten
 
-**Wat het detecteert:**
-- Snelle thermische respons (τ < 5 uur)
-- Medium thermische respons (τ 5-15 uur)
-- Trage thermische respons (τ > 15 uur)
+**Wat het detecteert:** zes responsklassen, op basis van τ:
 
-**Voorbeeld Inzicht (v2.6.0):**
-> "Snel (~2 uur voor 2°C)" / "Normaal (~4 uur voor 2°C)" / "Langzaam (~8 uur voor 2°C)"
+| Respons | τ | Voorbeeld inzicht |
+|---|---|---|
+| Zeer snel | <5u | Zeer snel (~2 uur voor 2°C) |
+| Snel | 5–10u | Snel (~4 uur voor 2°C) |
+| Normaal | 10–20u | Normaal (~8 uur voor 2°C) |
+| Langzaam | 20–40u | Langzaam (~16 uur voor 2°C) |
+| Zeer langzaam | 40–80u | Zeer langzaam (~24 uur voor 2°C) |
+| Extreem langzaam | ≥80u | Extreem langzaam (~32 uur voor 2°C) |
 
-**Aanbevelingen per type:**
-
-| Respons Type | τ | Advies |
-|--------------|---|--------|
-| Snel | <5u | Stabiel stoken, flexibele planning mogelijk |
-| Normaal | 5-15u | Plan 4+ uur vooruit voor temperatuurstijging |
-| Langzaam | >15u | Continu stoken optimaal voor warmtepomp |
+Bij een τ boven 250 uur (bijv. een passiefhuis) verschijnt geen voorverwarmingsinzicht.
 
 ---
 
@@ -233,21 +228,13 @@ Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 > "💰 Thermische opslag potentieel - C=24 kWh/°C, τ=18u"
 
 **Voorbeeld Aanbeveling:**
-> "Voorverwarmen +2°C tijdens goedkope uren (02:00-06:00), coasten -1°C tijdens piek (17:00-21:00). Geschatte besparing: €95/maand"
+> "🟢 Grote buffer • Weinig verlies"
 
 **Voorbeeld Inzicht (zonder dynamische prijzen):**
 > "💡 Gebouw geschikt voor thermische opslag - C=24 kWh/°C, τ=18u"
 
 **Voorbeeld Aanbeveling:**
-> "Voeg dynamische energieprijzen toe via flow kaart 'Ontvang externe energieprijzen' om kostenoptimalisatie in te schakelen. Potentiële besparing: 15-25%"
-
-**Thermische Opslag Berekening:**
-```
-Opgeslagen energie = C × Temp verschuiving = 24 kWh/°C × 2°C = 48 kWh
-Dagelijkse besparing = Opgeslagen energie × Prijsverschil × Benuttingsfactor
-                     = 48 kWh × €0.15/kWh × 0.70 = €5.04/dag
-Maandelijkse besparing = €5.04 × 30 = €151/maand
-```
+> "🟢 Grote buffer • Weinig verlies • Voeg dynamische prijzen toe"
 
 ---
 
@@ -258,7 +245,7 @@ Maandelijkse besparing = €5.04 × 30 = €151/maand
 - >30% afwijking in tijdsconstante (τ)
 
 **Voorbeeld Inzicht:**
-> "🔄 Gebouw gedraagt zich als 'zwaar' (τ=18u vs 'gemiddeld' τ=10u)"
+> "🔄 Gebouw gedraagt zich als 'zwaar' (τ=80u vs 'gemiddeld' τ=50u)"
 
 **Voorbeeld Aanbeveling:**
 > "Wijzig gebouwprofiel naar 'zwaar' in apparaatinstellingen voor sneller leren en betere initiële parameters"
@@ -304,7 +291,7 @@ Maandelijkse besparing = €5.04 × 30 = €151/maand
 
 Inzichten worden gerangschikt 0-100 op basis van:
 - **Confidence** (30%) — Model zekerheid
-- **Energiebesparing potentieel** (40%) — €/maand schatting
+- **Energiebesparing potentieel** (40%) — op basis van het type inzicht
 - **Actie eenvoud** (20%) — Hoe makkelijk te implementeren
 - **Directe impact** (10%) — Snel vs. lange termijn voordeel
 
@@ -321,8 +308,8 @@ Inzichten worden gerangschikt 0-100 op basis van:
 | Termijn | Acties |
 |---------|--------|
 | **Direct** (0-1 week) | ✅ Nachtverlaging inschakelen<br/>✅ Luchtlekken checken en afdichten |
-| **Korte termijn** (1-3 maanden) | ✅ Offertes voor dakisolatie (€3000-6000, terugverdientijd 2-4 jaar)<br/>✅ Spouwmuurisolatie overwegen (€1500-3000)<br/>✅ Ramen evalueren voor HR++ glas |
-| **Lange termijn** (6-12 maanden) | ✅ Uitgebreid isolatiepakket plannen<br/>✅ Subsidies checken (ISDE, gemeentelijke regelingen)<br/>✅ Totale ROI berekenen met maandelijkse besparing |
+| **Korte termijn** (1-3 maanden) | ✅ Offertes voor dakisolatie (€3000-6000)<br/>✅ Spouwmuurisolatie overwegen (€1500-3000)<br/>✅ Ramen evalueren voor HR++ glas |
+| **Lange termijn** (6-12 maanden) | ✅ Uitgebreid isolatiepakket plannen<br/>✅ Subsidies checken (ISDE, gemeentelijke regelingen) |
 
 #### Voor Voorverwarmen Inzichten:
 
@@ -390,7 +377,6 @@ THEN
 ```
 WHEN Nieuw gebouwinzicht gedetecteerd
 
-AND {{estimated_savings_eur_month}} is groter dan 70
 AND {{priority}} is groter dan 70
 
 THEN
@@ -398,7 +384,6 @@ THEN
     "💰 Energiebesparing Kans!"
     "{{insight}}"
     "Actie: {{recommendation}}"
-    "Potentieel: €{{estimated_savings_eur_month}}/maand"
 ```
 
 ---
@@ -437,32 +422,10 @@ THEN
 
 **Use case:** Direct controleren na grote veranderingen (weer, instellingen) zonder 50 minuten te wachten.
 
----
-
-### Flow 6: Alleen Hoge ROI Inzichten Notificeren (Condition)
-
-```
-WHEN Gebouwinzicht gedetecteerd
-
-AND Geschatte besparing is boven €100/maand
-  (conditie: Savings above threshold - category, €100)
-
-AND Model confidence is boven 75%
-  (conditie: Confidence above threshold - 75%)
-
-THEN
-  Stuur pushbericht:
-    "💰 Grote Besparingskans!"
-    "{{insight}}"
-    "Actie: {{recommendation}}"
-    "Potentieel: €{{estimated_savings_eur_month}}/maand"
-```
-
-**Use case:** Filter "advies-ruis" - alleen notificaties voor significante besparingen met hoge zekerheid.
 
 ---
 
-### Flow 7: Thermische Opslag Alleen Wanneer Actief (Condition)
+### Flow 6: Thermische Opslag Alleen Wanneer Actief (Condition)
 
 ```
 WHEN Goedkoopste energieblok gestart
@@ -498,7 +461,7 @@ ELSE
 - `recommendation` (string) - Aanbevolen actie
 - `priority` (number 0-100) - Prioriteitsscore
 - `confidence` (number 0-100) - Model betrouwbaarheid
-- `estimated_savings_eur_month` (number) - Maandelijkse besparing in EUR (indien van toepassing)
+- `estimated_savings_eur_month` (number) - Sinds 3.4.2 niet meer berekend, altijd 0 (blijft bestaan zodat bestaande flows blijven werken)
 
 **Frequentie:** Max 1× per categorie per 24 uur (advice fatigue prevention)
 
@@ -609,18 +572,9 @@ THEN
 
 ---
 
-#### 3. Geschatte besparing is boven drempel
+#### 3. Geschatte besparing is boven drempel (verouderd)
 
-**Functie:** ROI-gebaseerde filtering
-
-**Parameters:**
-
-- `category` (dropdown) - Categorie om te checken (insulation_performance / pre_heating / thermal_storage)
-- `threshold` (number 0-500) - EUR/maand drempel
-
-**Returns:** `true` als geschatte maandelijkse besparing > threshold
-
-**Gebruik:** Filter voor significante besparingen (bijv. alleen notificeren als >€100/maand)
+Sinds 3.4.2 kan deze conditie niet meer aan nieuwe flows worden toegevoegd. In bestaande flows geeft hij altijd `false`, omdat inzichten geen besparing meer schatten: bij dynamische prijzen is de besparing vooraf niet bekend.
 
 ---
 
@@ -685,14 +639,6 @@ Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 | Gebouw presteert exact zoals verwacht | Goed nieuws! Geen optimalisatie nodig |
 | Ontbrekende databronnen | Zorg dat externe binnentemp sensor verbonden is |
 
-### Inzichten Tonen Verkeerde Besparing Schattingen
-
-| Oorzaak | Impact | Oplossing |
-|---------|--------|-----------|
-| Energieprijs ≠ €0.30/kWh | Schattingen proportioneel | Vermenigvuldig met (jouw prijs / 0.30) |
-| COP ≠ 3.5 | Hogere COP = hogere besparing | Schattingen zijn conservatief |
-| Stookuren ≠ 4000u/jaar | Meer uren = hogere besparing | Monitor werkelijke besparing na 1 maand |
-
 ### Voorverwarmen Aanbeveling Triggert Niet
 
 | Oorzaak | Oplossing |
@@ -707,7 +653,7 @@ Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 
 ### V: Hoe lang duurt het leren?
 
-**A:** 48-72 uur voor 70% confidence (standaard drempel). Je kunt verlagen naar 50% voor eerdere inzichten (minder accuraat). Volledige convergentie duurt 1-3 weken.
+**A:** Ongeveer 1–2 dagen voor 70% confidence (standaard drempel). Je kunt verlagen naar 50% voor eerdere inzichten (minder accuraat). Volledige convergentie duurt 1-3 weken.
 
 ### V: Worden inzichten bijgewerkt als ik isolatie verbeter?
 
@@ -720,12 +666,12 @@ Voorverwarmen_duur = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 uur → gemaximeerd
 ### V: Waarom lijkt mijn τ (tijdsconstante) hoog/laag?
 
 **A:** τ hangt af van zowel thermische massa (C) als warmteverlies (UA):
-- **Hoge τ** (>15u): Zwaar gebouw (hoge C) OF uitstekende isolatie (lage UA)
-- **Lage τ** (<5u): Licht gebouw (lage C) OF slechte isolatie (hoge UA)
+- **Hoge τ** (≥80u): Zwaar gebouw (hoge C) OF uitstekende isolatie (lage UA)
+- **Lage τ** (<20u): Licht gebouw (lage C) OF slechte isolatie (hoge UA)
 
-### V: Hoe accuraat zijn de besparingschattingen?
+### V: Waarom tonen inzichten geen besparingsbedrag?
 
-**A:** Doelnauwkeurigheid is ±20%. Ze zijn gebaseerd op conservatieve aannames (COP 3.5, 4000 stookuren, €0.30/kWh). Monitor werkelijke besparing via Homey Energy na implementatie.
+**A:** Sinds 3.4.2 tonen inzichten geen bedrag in euro's meer. Een voorspelde besparing is niet te onderbouwen: bij dynamische prijzen zijn de prijzen vooraf niet bekend, en de warmtepomp draait niet elk uur. Meet de werkelijke besparing achteraf via Homey Energie.
 
 ### V: Wat gebeurt er als ik apparaatinstellingen wijzig tijdens leren?
 

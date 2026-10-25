@@ -174,7 +174,7 @@
 | `recommendation` | string | Empfehlung |
 | `priority` | number | Priorität (0-100) |
 | `confidence` | number | Vertrauen (%) |
-| `estimated_savings_eur_month` | number | Geschätzte Einsparungen €/Monat |
+| `estimated_savings_eur_month` | number | Nicht mehr berechnet (immer 0, seit 3.4.2) |
 
 #### `pre_heat_recommendation` - Tokens (v2.6.0)
 | Token | Typ | Beschreibung |
@@ -359,7 +359,7 @@ THEN Solarstrahlung an Wärmepumpe senden ({{radiation}})
 | `price_in_cheapest_hours` | `flow-card-manager-service.ts:506` |
 | `price_vs_daily_average` | `flow-card-manager-service.ts:629` |
 | `price_trend_is` | `flow-card-manager-service.ts:563` |
-| `savings_above` | `flow-card-manager-service.ts:830` |
+| `savings_above` (veraltet seit 3.4.2) | `flow-card-manager-service.ts` |
 
 ---
 

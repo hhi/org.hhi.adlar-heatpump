@@ -63,17 +63,16 @@ test('converges towards true parameters from a different profile', () => {
     C: 15, UA: 0.3, pInt: 0.3, samples: 8000,
   });
   const model = learner.getModel();
-  // Convergence is slow: the defensive layers (bounds-revert + 5%/sample
-  // rate limit) revert part of the updates. Over these 8000 samples that is
-  // ~1550 reverts spread over the whole run, not an initial pinning phase:
-  // P already changes at sample 2 (BUILDING_MODEL_REVIEW_ADDENDUM.md, A2).
-  assert.ok(model.C > 10 && model.C < 28, `C=${model.C.toFixed(1)} should move towards 15`);
-  assert.ok(model.UA > 0.1 && model.UA < 0.8, `UA=${model.UA.toFixed(2)} should be physically plausible`);
-  assert.ok(model.tau > 1.25 && model.tau < 500, `tau=${model.tau.toFixed(1)} within bounds`);
+  // ADR-062 phase 1c: with the 60-minute dT/dt window and the PSD projection this
+  // noise-free run converges to the true parameters without reverts. Before phase 1b
+  // it ended at C ≈ 15.0, UA ≈ 0.46 after ~1550 reverts (BUILDING_MODEL_REVIEW_ADDENDUM.md, A2).
+  assert.ok(Math.abs(model.C - 15) / 15 < 0.05, `C=${model.C.toFixed(2)} should be within 5% of 15`);
+  assert.ok(Math.abs(model.UA - 0.3) / 0.3 < 0.05, `UA=${model.UA.toFixed(3)} should be within 5% of 0.3`);
+  assert.ok(model.tau >= 1.25 && model.tau <= 800, `tau=${model.tau.toFixed(1)} within bounds`);
 
-  // ADR-057 W3: the excitation counters must have registered the pinning phase
+  // ADR-057 W3: the excitation counters are exported
   const excitation = learner.getExcitationDiagnostics();
-  assert.ok(excitation.totalReverts > 0, 'bound-pinning phase must be visible in revert counter');
+  assert.ok(Number.isInteger(excitation.totalReverts) && excitation.totalReverts >= 0);
 });
 
 test('ADR-057 W2a: gap larger than dt_max refreshes baseline without learning', () => {
@@ -192,9 +191,12 @@ test('ADR-057 E2: getDynamicPInt windows (night ×0.4, day ×1.0, evening ×1.8)
 test('ADR-057 W3: excitation counters start at zero and are exported in state', () => {
   const learner = createLearner();
   const excitation = learner.getExcitationDiagnostics();
-  assert.deepStrictEqual(excitation, { consecutiveReverts: 0, totalReverts: 0, rateLimitActivations: 0 });
+  assert.deepStrictEqual(excitation, {
+    consecutiveReverts: 0, totalReverts: 0, rateLimitActivations: 0, boundedSteps: 0,
+  });
   const state = learner.getState();
   assert.strictEqual(state.consecutiveReverts, 0);
   assert.strictEqual(state.totalReverts, 0);
   assert.strictEqual(state.rateLimitActivations, 0);
+  assert.strictEqual(state.boundedSteps, 0); // ADR-062 B12
 });

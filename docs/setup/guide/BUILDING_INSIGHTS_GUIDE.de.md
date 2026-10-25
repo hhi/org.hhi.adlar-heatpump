@@ -1,6 +1,6 @@
 # Gebäudeerkenntnisse & Empfehlungen Leitfaden
 
-**Version**: 2.7.0+ | **Zuletzt aktualisiert**: Januar 2026
+**Version**: 3.4.0+ | **Zuletzt aktualisiert**: Oktober 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Einführung
 
-Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe von einem einfachen Temperaturregler in einen intelligenten Energieberater. Nach 48-72 Stunden Lernphase der thermischen Eigenschaften Ihres Gebäudes liefert das System **konkrete, umsetzbare Empfehlungen** mit geschätzten Einsparungen in Euro pro Monat.
+Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe von einem einfachen Temperaturregler in einen intelligenten Energieberater. Nach etwa 1–2 Tagen Lernphase der thermischen Eigenschaften Ihres Gebäudes liefert das System **konkrete, umsetzbare Empfehlungen**.
 
 ### Hauptvorteile
 
@@ -31,19 +31,18 @@ Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe
 | 💰 Dämmungserkenntnisse | 10-30% |
 | ⏱️ Vorheizoptimierung | 5-10% |
 | 🏠 Thermische Speicherstrategien | 10-25% (mit dynamischen Preisen) |
-| 📊 ROI-Transparenz | Jede Empfehlung enthält monatliche Einsparungen |
 
 ---
 
 ## Was sind Gebäudeerkenntnisse?
 
-Gebäudeerkenntnisse analysieren die **6 thermischen Parameter**, die vom Gebäudemodell gelernt werden:
+Gebäudeerkenntnisse analysieren die Parameter des Gebäudemodells: 4 gelernte Parameter (C, UA, g, P_int), die Zeitkonstante τ = C/UA und die Windkorrektur, die separat gelernt wird:
 
 | Parameter | Symbol | Bedeutung | Typischer Bereich |
 |-----------|--------|-----------|-------------------|
 | **Thermische Masse** | C | Wärmekapazität - wie viel Energie für 1°C benötigt | 7-30 kWh/°C |
 | **Wärmeverlustkoeffizient** | UA | Rate des Wärmeverlusts pro Grad Differenz | 0,05-0,5 kW/°C |
-| **Zeitkonstante** | τ (tau) | Wie schnell das Gebäude heizt/kühlt (τ = C/UA) | 5-25 Stunden |
+| **Zeitkonstante** | τ (tau) | Wie schnell das Gebäude heizt/kühlt (τ = C/UA) | 20-600 Stunden (Profilwerte) |
 | **Solargewinnfaktor** | g | Effektivität der Sonneneinstrahlung | 0,3-0,6 |
 | **Interne Wärmegewinne** | P_int | Wärme von Menschen, Geräten, Kochen | 0,2-0,5 kW |
 | **Windkorrektur** | W_corr | Zusätzlicher Wärmeverlust bei starkem Wind (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +58,7 @@ Bei Optimierungsmöglichkeiten generiert es **Erkenntnisse** mit spezifischen Em
 
 ## Wie es funktioniert
 
-### Lernphase (48-72 Stunden)
+### Lernphase (1–2 Tage)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -95,7 +94,7 @@ Bei Optimierungsmöglichkeiten generiert es **Erkenntnisse** mit spezifischen Em
 **Erkenntniserzeugung:**
 - System evaluiert alle 50 Minuten (10 Messungen)
 - Erkennt Muster: schlechte Dämmung, thermisches Speicherpotenzial, Vorheizmöglichkeiten
-- Generiert Empfehlungen mit ROI-Schätzungen
+- Generiert Empfehlungen
 
 ### Kontinuierliche Überwachung
 
@@ -189,7 +188,7 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 > „🏠 Hoher Wärmeverlust - UA 0,52 kW/°C (erwartet: 0,30)"
 
 **Beispiel-Empfehlung:**
-> „Erwägen Sie Dämmungsupgrades: Dach (25% Einsparung), Wände (15%), Fenster (10%). Gesch. Einsparung: €120/Monat"
+> „🔴 High loss • Roof/walls/windows"
 
 **Wann es auslöst:**
 - Vertrauen ≥ 70%
@@ -197,29 +196,25 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 
 **Was zu tun ist:**
 1. **Messung überprüfen** - Prüfen, ob Türen/Fenster während des Lernens offen standen
-2. **Upgrades priorisieren** - Dachdämmung bietet höchsten ROI (25% der Gesamteinsparung)
-3. **Angebote einholen** - €120/Monat-Schätzung zur Berechnung der Amortisationszeit nutzen
-4. **Nachtabsenkung implementieren** - Wärmeverlust während unbewohnter Stunden reduzieren
+2. **Upgrades priorisieren** - Dachdämmung bietet höchsten ROI
+3. **Nachtabsenkung implementieren** - Wärmeverlust während unbewohnter Stunden reduzieren
 
 ---
 
 ### 2. ⏱️ Vorheiz-Strategie-Erkenntnisse
 
-**Was erkannt wird:**
-- Schnelle thermische Reaktion (τ < 5 Stunden)
-- Mittlere thermische Reaktion (τ 5-15 Stunden)
-- Langsame thermische Reaktion (τ > 15 Stunden)
+**Was erkannt wird:** sechs Reaktionsklassen, basierend auf τ (die Erkenntnis erscheint auf Englisch):
 
-**Beispiel-Erkenntnis (v2.6.0):**
-> „Schnell (~2 Stunden für 2°C)" / „Normal (~4 Stunden für 2°C)" / „Langsam (~8 Stunden für 2°C)"
+| Reaktion | τ | Beispiel-Erkenntnis |
+|---|---|---|
+| Sehr schnell | <5h | Very fast (~2 hours for 2°C) |
+| Schnell | 5–10h | Fast (~4 hours for 2°C) |
+| Normal | 10–20h | Normal (~8 hours for 2°C) |
+| Langsam | 20–40h | Slow (~16 hours for 2°C) |
+| Sehr langsam | 40–80h | Very slow (~24 hours for 2°C) |
+| Extrem langsam | ≥80h | Extremely slow (~32 hours for 2°C) |
 
-**Empfehlungen nach Typ:**
-
-| Reaktionstyp | τ | Empfehlung |
-|--------------|---|------------|
-| Schnell | <5h | Stabiles Heizen, flexible Planung möglich |
-| Normal | 5-15h | 4+ Stunden im Voraus für Temperaturanstieg planen |
-| Langsam | >15h | Kontinuierliches Heizen optimal für Wärmepumpe |
+Bei τ über 250 Stunden (z. B. Passivhaus) erscheint keine Vorheiz-Erkenntnis.
 
 ---
 
@@ -233,21 +228,13 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 > „💰 Thermisches Speicherpotenzial - C=24 kWh/°C, τ=18h"
 
 **Beispiel-Empfehlung:**
-> „Vorheizen +2°C während günstiger Stunden (02:00-06:00), Ausrollen -1°C während Spitze (17:00-21:00). Gesch. Einsparung: €95/Monat"
+> „🟢 Large buffer • Low loss"
 
 **Beispiel-Erkenntnis (ohne dynamische Preise):**
 > „💡 Gebäude geeignet für thermische Speicherung - C=24 kWh/°C, τ=18h"
 
 **Beispiel-Empfehlung:**
-> „Fügen Sie dynamische Energiepreise über Flow-Karte 'Externe Energiepreise empfangen' hinzu, um Kostenoptimierung zu aktivieren. Potenzielle Einsparung: 15-25%"
-
-**Thermische Speicherberechnung:**
-```
-Gespeicherte Energie = C × Temp-Verschiebung = 24 kWh/°C × 2°C = 48 kWh
-Tägliche Einsparung = Gespeicherte Energie × Preisdifferenz × Nutzungsfaktor
-                    = 48 kWh × €0,15/kWh × 0,70 = €5,04/Tag
-Monatliche Einsparung = €5,04 × 30 = €151/Monat
-```
+> „🟢 Large buffer • Low loss • Add dynamic pricing"
 
 ---
 
@@ -258,7 +245,7 @@ Monatliche Einsparung = €5,04 × 30 = €151/Monat
 - >30% Abweichung in Zeitkonstante (τ)
 
 **Beispiel-Erkenntnis:**
-> „🔄 Gebäude verhält sich wie 'schwer' (τ=18h vs 'mittel' τ=10h)"
+> „🔄 Gebäude verhält sich wie 'schwer' (τ=80h vs 'mittel' τ=50h)"
 
 **Beispiel-Empfehlung:**
 > „Ändern Sie das Gebäudeprofil in den Geräteeinstellungen auf 'schwer' für schnelleres Lernen und bessere Anfangsparameter"
@@ -304,7 +291,7 @@ Monatliche Einsparung = €5,04 × 30 = €151/Monat
 
 Erkenntnisse werden 0-100 bewertet basierend auf:
 - **Vertrauen** (30%) — Modellsicherheit
-- **Energieeinsparungspotenzial** (40%) — €/Monat-Schätzung
+- **Energieeinsparungspotenzial** (40%) — anhand der Art der Erkenntnis
 - **Maßnahmeneinfachheit** (20%) — Wie einfach zu implementieren
 - **Sofortwirkung** (10%) — Schneller vs. langfristiger Nutzen
 
@@ -321,8 +308,8 @@ Erkenntnisse werden 0-100 bewertet basierend auf:
 | Zeitrahmen | Maßnahmen |
 |------------|-----------|
 | **Sofort** (0-1 Woche) | ✅ Nachtabsenkung aktivieren<br/>✅ Luftlecks prüfen und abdichten |
-| **Kurzfristig** (1-3 Monate) | ✅ Angebote für Dachdämmung einholen (€3000-6000, Amortisation 2-4 Jahre)<br/>✅ Hohlwanddämmung erwägen (€1500-3000)<br/>✅ Fenster auf HR++ Glas bewerten |
-| **Langfristig** (6-12 Monate) | ✅ Umfassendes Dämmungspaket planen<br/>✅ Förderungen prüfen (BAFA, KfW, lokale Programme)<br/>✅ Gesamt-ROI mit monatlichen Einsparungen berechnen |
+| **Kurzfristig** (1-3 Monate) | ✅ Angebote für Dachdämmung einholen (€3000-6000)<br/>✅ Hohlwanddämmung erwägen (€1500-3000)<br/>✅ Fenster auf HR++ Glas bewerten |
+| **Langfristig** (6-12 Monate) | ✅ Umfassendes Dämmungspaket planen<br/>✅ Förderungen prüfen (BAFA, KfW, lokale Programme) |
 
 #### Für Vorheiz-Erkenntnisse:
 
@@ -390,7 +377,6 @@ DANN
 ```
 WENN Neue Gebäudeerkenntnis erkannt
 
-UND {{estimated_savings_eur_month}} ist größer als 70
 UND {{priority}} ist größer als 70
 
 DANN
@@ -398,7 +384,6 @@ DANN
     „💰 Energieeinsparungsmöglichkeit!"
     „{{insight}}"
     „Maßnahme: {{recommendation}}"
-    „Potenzial: €{{estimated_savings_eur_month}}/Monat"
 ```
 
 ---
@@ -437,32 +422,10 @@ DANN
 
 **Use case:** Sofort nach größeren Änderungen (Wetter, Einstellungen) prüfen, ohne 50 Minuten zu warten.
 
----
-
-### Flow 6: Nur hohe ROI-Erkenntnisse benachrichtigen (Condition)
-
-```
-WENN Gebäudeerkenntnis erkannt
-
-UND Geschätzte Einsparung ist über €100/Monat
-  (Bedingung: Savings above threshold - category, €100)
-
-UND Modellvertrauen ist über 75%
-  (Bedingung: Confidence above threshold - 75%)
-
-DANN
-  Push-Benachrichtigung senden:
-    "💰 Große Einsparchance!"
-    "{{insight}}"
-    "Aktion: {{recommendation}}"
-    "Potenzial: €{{estimated_savings_eur_month}}/Monat"
-```
-
-**Use case:** "Beratungsrauschen" filtern - nur Benachrichtigungen für signifikante Einsparungen mit hoher Sicherheit.
 
 ---
 
-### Flow 7: Thermische Speicherung nur wenn aktiv (Condition)
+### Flow 6: Thermische Speicherung nur wenn aktiv (Condition)
 
 ```
 WENN Günstigster Energieblock gestartet
@@ -498,7 +461,7 @@ SONST
 - `recommendation` (string) - Empfohlene Maßnahme
 - `priority` (number 0-100) - Prioritätswert
 - `confidence` (number 0-100) - Modellzuverlässigkeit
-- `estimated_savings_eur_month` (number) - Monatliche Einsparung in EUR (falls zutreffend)
+- `estimated_savings_eur_month` (number) - Seit 3.4.2 nicht mehr berechnet, immer 0 (bleibt bestehen, damit vorhandene Flows weiter funktionieren)
 
 **Häufigkeit:** Max. 1× pro Kategorie pro 24 Stunden (Beratungsmüdigkeitsprävention)
 
@@ -609,18 +572,9 @@ DANN
 
 ---
 
-#### 3. Geschätzte Einsparung ist über Schwelle
+#### 3. Geschätzte Einsparung ist über Schwelle (veraltet)
 
-**Funktion:** ROI-basierte Filterung
-
-**Parameter:**
-
-- `category` (Dropdown) - Zu prüfende Kategorie (insulation_performance / pre_heating / thermal_storage)
-- `threshold` (number 0-500) - €/Monat Schwelle
-
-**Rückgabe:** `true` wenn geschätzte monatliche Einsparung > Schwelle
-
-**Verwendung:** Filter für signifikante Einsparungen (z.B. nur benachrichtigen wenn >€100/Monat)
+Seit 3.4.2 kann diese Bedingung nicht mehr zu neuen Flows hinzugefügt werden. In bestehenden Flows liefert sie immer `false`, weil Erkenntnisse keine Einsparung mehr schätzen: Bei dynamischen Preisen ist die Einsparung vorab nicht bekannt.
 
 ---
 
@@ -685,14 +639,6 @@ Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 | Gebäude verhält sich genau wie erwartet | Gute Nachricht! Keine Optimierung nötig |
 | Fehlende Datenquellen | Sicherstellen, dass externer Innentemperatursensor verbunden ist |
 
-### Erkenntnisse zeigen falsche Einsparungsschätzungen
-
-| Ursache | Auswirkung | Lösung |
-|---------|------------|--------|
-| Energiepreis ≠ €0,30/kWh | Schätzungen proportional | Mit (Ihr Preis / 0,30) multiplizieren |
-| COP ≠ 3,5 | Höherer COP = höhere Einsparung | Schätzungen sind konservativ |
-| Heizstunden ≠ 4000h/Jahr | Mehr Stunden = höhere Einsparung | Tatsächliche Einsparung nach 1 Monat überwachen |
-
 ### Vorheiz-Empfehlung löst nicht aus
 
 | Ursache | Lösung |
@@ -707,7 +653,7 @@ Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 
 ### F: Wie lange dauert das Lernen?
 
-**A:** 48-72 Stunden für 70% Vertrauen (Standardschwelle). Sie können auf 50% senken für frühere Erkenntnisse (weniger genau). Vollständige Konvergenz dauert 1-3 Wochen.
+**A:** Etwa 1–2 Tage für 70% Vertrauen (Standardschwelle). Sie können auf 50% senken für frühere Erkenntnisse (weniger genau). Vollständige Konvergenz dauert 1-3 Wochen.
 
 ### F: Werden Erkenntnisse aktualisiert, wenn ich die Dämmung verbessere?
 
@@ -720,12 +666,12 @@ Vorheiz_Dauer = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 Stunden → begrenzt
 ### F: Warum scheint mein τ (Zeitkonstante) hoch/niedrig?
 
 **A:** τ hängt sowohl von thermischer Masse (C) als auch Wärmeverlust (UA) ab:
-- **Hohes τ** (>15h): Schweres Gebäude (hohes C) ODER ausgezeichnete Dämmung (niedriges UA)
-- **Niedriges τ** (<5h): Leichtes Gebäude (niedriges C) ODER schlechte Dämmung (hohes UA)
+- **Hohes τ** (≥80h): Schweres Gebäude (hohes C) ODER ausgezeichnete Dämmung (niedriges UA)
+- **Niedriges τ** (<20h): Leichtes Gebäude (niedriges C) ODER schlechte Dämmung (hohes UA)
 
-### F: Wie genau sind die Einsparungsschätzungen?
+### F: Warum zeigen Erkenntnisse keinen Einsparungsbetrag?
 
-**A:** Zielgenauigkeit ist ±20%. Sie basieren auf konservativen Annahmen (COP 3,5, 4000 Heizstunden, €0,30/kWh). Überwachen Sie tatsächliche Einsparungen via Homey Energy nach Implementierung.
+**A:** Seit 3.4.2 zeigen Erkenntnisse keinen Betrag in Euro mehr. Eine vorhergesagte Einsparung lässt sich nicht belegen: Bei dynamischen Preisen sind die Preise vorab nicht bekannt, und die Wärmepumpe läuft nicht jede Stunde. Messen Sie die tatsächliche Einsparung nachträglich über Homey Energie.
 
 ### F: Was passiert, wenn ich Geräteeinstellungen während des Lernens ändere?
 

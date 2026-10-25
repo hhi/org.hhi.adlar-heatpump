@@ -1,3 +1,6 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 /**
  * Energy Price Optimizer - Component 3 of Adaptive Control System
  *
@@ -17,6 +20,8 @@
  * @version 1.4.0
  * @since 1.4.0
  */
+
+import { startOfLocalDay } from '../../shared/utils/time-format';
 
 export enum PriceCategory {
   VERY_LOW = 'very_low',
@@ -114,6 +119,9 @@ export interface PriceTrendAnalysis {
  * recommendations based on price categories.
  */
 export class EnergyPriceOptimizer {
+  // v3.4.1: plausible range for external day-ahead prices (€/kWh, excl. VAT); negative prices are valid
+  public static readonly EXTERNAL_PRICE_RANGE = { MIN: -1, MAX: 5 };
+
   private config: EnergyOptimizerConfig;
   private priceData: PriceData[] = [];
   private lastFetch: number = 0;
@@ -339,11 +347,25 @@ export class EnergyPriceOptimizer {
   }
 
   /**
+   * Check whether the N price entries starting at startIndex cover consecutive clock hours
+   * (each entry exactly one hour after the previous one).
+   */
+  private isContiguousWindow(startIndex: number, hours: number): boolean {
+    for (let j = startIndex + 1; j < startIndex + hours; j++) {
+      if (this.priceData[j].timestamp - this.priceData[j - 1].timestamp !== 3600000) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Find cheapest consecutive N-hour block in available price data
    * Uses sliding window algorithm for O(n) efficiency
    *
    * @param hours - Block size in hours (1-12)
-   * @returns Block analysis with start/end times and average price, or null if insufficient data
+   * @returns Block analysis with start/end times and average price, or null if insufficient
+   *   data or no window of consecutive hours exists
    * @since v2.5.0
    * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
    */
@@ -363,10 +385,13 @@ export class EnergyPriceOptimizer {
     }
 
     let minAvgPrice = Infinity;
-    let bestStartIndex = 0;
+    let bestStartIndex = -1;
 
-    // Sliding window: calculate average effective price for each possible window position
+    // Sliding window: calculate average effective price for each window of consecutive hours.
+    // Windows spanning a gap in the price data are skipped.
     for (let i = 0; i <= this.priceData.length - hours; i++) {
+      if (!this.isContiguousWindow(i, hours)) continue;
+
       const windowPrices = this.priceData.slice(i, i + hours);
       const avgPrice = windowPrices.reduce((sum, p) => sum + this.calculateEffectivePrice(p.price), 0) / hours;
 
@@ -376,10 +401,17 @@ export class EnergyPriceOptimizer {
       }
     }
 
+    if (bestStartIndex < 0) {
+      this.logger('EnergyPriceOptimizer: No contiguous price block found', {
+        required: hours,
+        available: this.priceData.length,
+      });
+      return null;
+    }
+
     // Build result
     const startTime = new Date(this.priceData[bestStartIndex].timestamp);
-    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp);
-    endTime.setHours(endTime.getHours() + 1); // End of last hour
+    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp + 3600000); // End of last hour
 
     return {
       startTime,
@@ -394,7 +426,8 @@ export class EnergyPriceOptimizer {
    * Inverse of findCheapestBlock()
    *
    * @param hours - Block size in hours (1-12)
-   * @returns Block analysis with start/end times and average price, or null if insufficient data
+   * @returns Block analysis with start/end times and average price, or null if insufficient
+   *   data or no window of consecutive hours exists
    * @since v2.5.0
    * @version 2.5.0 - Bug fix: now uses effective prices based on priceMode
    */
@@ -414,10 +447,13 @@ export class EnergyPriceOptimizer {
     }
 
     let maxAvgPrice = -Infinity;
-    let bestStartIndex = 0;
+    let bestStartIndex = -1;
 
-    // Sliding window: calculate average effective price for each possible window position
+    // Sliding window: calculate average effective price for each window of consecutive hours.
+    // Windows spanning a gap in the price data are skipped.
     for (let i = 0; i <= this.priceData.length - hours; i++) {
+      if (!this.isContiguousWindow(i, hours)) continue;
+
       const windowPrices = this.priceData.slice(i, i + hours);
       const avgPrice = windowPrices.reduce((sum, p) => sum + this.calculateEffectivePrice(p.price), 0) / hours;
 
@@ -427,10 +463,17 @@ export class EnergyPriceOptimizer {
       }
     }
 
+    if (bestStartIndex < 0) {
+      this.logger('EnergyPriceOptimizer: No contiguous price block found', {
+        required: hours,
+        available: this.priceData.length,
+      });
+      return null;
+    }
+
     // Build result
     const startTime = new Date(this.priceData[bestStartIndex].timestamp);
-    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp);
-    endTime.setHours(endTime.getHours() + 1); // End of last hour
+    const endTime = new Date(this.priceData[bestStartIndex + hours - 1].timestamp + 3600000); // End of last hour
 
     return {
       startTime,
@@ -861,16 +904,16 @@ export class EnergyPriceOptimizer {
   /**
    * Calculate daily cost - now returns accumulated cost instead of estimate
    * @deprecated Use getAccumulatedDailyCost() for real-time accumulated cost
+   * @param timeZone - Timezone that defines "today" for the fallback estimate (Homey timezone)
    */
-  public calculateDailyCost(dailyConsumptionKWh: number): number {
+  public calculateDailyCost(dailyConsumptionKWh: number, timeZone?: string): number {
     // Return accumulated cost if available, otherwise fall back to estimate
     if (this.accumulatedDailyCost > 0) {
       return this.accumulatedDailyCost;
     }
 
     // Fallback: estimate using average price (legacy behavior)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfLocalDay(new Date(), timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
     const todayPrices = this.priceData.filter((p) => p.timestamp >= today.getTime());
 
     if (todayPrices.length === 0) return 0;
@@ -893,11 +936,24 @@ export class EnergyPriceOptimizer {
    * {"0": 0.11, "1": 0.10, "2": 0.09, ...}
    * where keys are hour offsets from now (0 = current hour, 1 = next hour, etc.)
    *
+   * v3.4.1: negative prices are valid (hours with surplus wind and solar). Only values
+   * outside EXTERNAL_PRICE_RANGE are skipped. The offsets are relative to `receivedAt`
+   * (the moment the prices were received); hours that have already ended are dropped,
+   * so restoring stored prices after a restart keeps their clock times.
+   *
    * @param pricesObject - Object with hour offsets as keys and prices (€/kWh) as values
+   * @param receivedAt - When the prices were received (ms); defaults to now
    * @throws Error if prices object is invalid or empty
    */
-  public setExternalPrices(pricesObject: Record<string, number>): void {
+  public setExternalPrices(pricesObject: Record<string, number>, receivedAt?: number): void {
     const now = Date.now();
+    const anchor = new Date(receivedAt ?? now);
+    anchor.setMinutes(0, 0, 0);
+    const currentHourStart = new Date(now);
+    currentHourStart.setMinutes(0, 0, 0);
+    const { MIN, MAX } = EnergyPriceOptimizer.EXTERNAL_PRICE_RANGE;
+    let skippedPrices = 0;
+    let expiredHours = 0;
 
     // Validate input
     if (!pricesObject || typeof pricesObject !== 'object') {
@@ -920,17 +976,21 @@ export class EnergyPriceOptimizer {
         continue;
       }
 
-      // Validate price value
-      if (typeof price !== 'number' || Number.isNaN(price) || price < 0) {
-        this.logger(`EnergyPriceOptimizer: Skipping invalid price for hour ${hourOffset}: ${price}`);
+      // Validate price value (v3.4.1: negative market prices are valid)
+      if (typeof price !== 'number' || !Number.isFinite(price) || price < MIN || price > MAX) {
+        this.logger(`EnergyPriceOptimizer: Skipping invalid price for hour ${hourOffset}: ${price} (valid: ${MIN} to ${MAX} €/kWh)`);
+        skippedPrices++;
         continue;
       }
 
-      // Calculate timestamp for this hour
-      // Round current time to start of hour, then add offset
-      const hourStart = new Date(now);
-      hourStart.setMinutes(0, 0, 0);
-      const timestamp = hourStart.getTime() + (hourOffset * 3600000);
+      // Calculate timestamp for this hour: start of the hour of receipt plus the offset
+      const timestamp = anchor.getTime() + (hourOffset * 3600000);
+
+      // v3.4.1: drop hours that have already ended (e.g. stored prices restored after a restart)
+      if (timestamp < currentHourStart.getTime()) {
+        expiredHours++;
+        continue;
+      }
 
       // Create price data entry (use price as-is, no VAT or adjustments)
       // Note: category is stored for backwards compatibility but getCurrentPrice()
@@ -955,8 +1015,35 @@ export class EnergyPriceOptimizer {
 
     this.logger(
       `EnergyPriceOptimizer: Set ${newPriceData.length} external prices `
-      + `(hours ${Object.keys(pricesObject).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).join(', ')})`,
+      + `(hours ${Object.keys(pricesObject).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).join(', ')})`
+      + `${expiredHours > 0 ? `, ${expiredHours} past hours dropped` : ''}`,
     );
+    // v3.4.1: make it visible when a large part of the input is rejected
+    if (skippedPrices > 0 && skippedPrices >= entries.length / 4) {
+      this.logger(`⚠️ EnergyPriceOptimizer: ${skippedPrices} of ${entries.length} prices were outside ${MIN} to ${MAX} €/kWh and were skipped`);
+    }
+  }
+
+  /**
+   * v3.4.1: Deviation of the current effective price from the average effective price.
+   * Both sides use the effective price (the price mode applies to both). The percentage
+   * is taken relative to max(|average|, 0.005 €/kWh), so an average around zero (hours
+   * with negative prices) does not blow up or flip the sign.
+   *
+   * @returns null without a price for the current hour or with fewer than `minSamples` prices
+   */
+  public getDeviationFromAverage(timestamp: number, minSamples = 6): {
+    current: number; average: number; deviationPercent: number; sampleSize: number;
+  } | null {
+    if (!this.getCurrentPrice(timestamp)) return null;
+    const stats = this.getPriceStatistics();
+    if (!stats || stats.sampleSize < minSamples) return null;
+    const current = this.getEffectivePrice(timestamp);
+    const average = stats.avg;
+    const deviationPercent = ((current - average) / Math.max(Math.abs(average), 0.005)) * 100;
+    return {
+      current, average, deviationPercent, sampleSize: stats.sampleSize,
+    };
   }
 
   /**
