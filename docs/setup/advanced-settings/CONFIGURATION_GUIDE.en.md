@@ -270,16 +270,16 @@ Automatic target temperature regulation based on external indoor temperature sen
 Machine learning algorithm that learns the thermal properties of your home.
 
 ### Enable Building Model Learning
-- **Default**: Enabled
+- **Default**: Disabled
 - **Function**: Learns 4 thermal parameters (C, UA, g, P_int)
 - **Learning time**: 24-72 hours for basic model, 2-4 weeks for accurate model
 - **Algorithm**: Recursive Least Squares (RLS) with forgetting factor
 
 ### Forgetting Factor (Expert Setting)
 - **Default**: 0.999
-- **Range**: 0.990 - 0.9995
+- **Range**: 0.9985 - 0.9995
 - **Function**: How quickly the model adapts to changes. Higher = more stable, better confidence (~75%). Lower = faster adaptation to seasonal changes.
-- **Only visible**: With "Expert HVAC function cards" enabled
+- **Applies**: After an app restart or 'Reset building model learning'
 
 ### Building Type
 - **Default**: Average (typical NL house)
@@ -288,6 +288,7 @@ Machine learning algorithm that learns the thermal properties of your home.
   - **Average**: Brick, cavity walls, double glazing (typical NL house)
   - **Heavy**: Concrete/stone, good insulation, HR++ glass, stable
   - **Passive**: Passive house, HR+++ glass, airtight, heat recovery
+- **Change**: Takes effect immediately; learning continues from the new profile values with half of the collected samples
 
 ### Reset Building Model Learning
 - **Default**: Disabled
@@ -304,14 +305,7 @@ Machine learning algorithm that learns the thermal properties of your home.
   - Day (06:00-18:00): 100% (normal)
   - Evening (18:00-23:00): 180% (cooking, TV)
 - **Accuracy improvement**: ~10-15%
-
-### Seasonal Solar Gain Adjustment
-- **Default**: Enabled
-- **Function**: Corrects for changing solar angle throughout the year
-- **Seasonal Multipliers**:
-  - Winter (Dec-Feb): 60%
-  - Summer (Jun-Jul): 130%
-- **Accuracy contribution**: 5-20% of total heat
+- **Applies**: After 'Reset building model learning'
 
 ---
 
@@ -320,23 +314,17 @@ Machine learning algorithm that learns the thermal properties of your home.
 Automated analysis of the thermal building model with energy-saving recommendations and ROI estimates.
 
 ### Enable Building Insights
-- **Default**: Enabled
+- **Default**: Disabled
 - **Function**: Analyze thermal building model and provide energy-saving recommendations
-- **Learning time**: Insights appear after 48-72 hours of learning
+- **Learning time**: Insights appear after about 1–2 days of learning
 - **Requirements**: Building model learning must be enabled
 
 ### Minimum Confidence
 - **Default**: 70%
 - **Range**: 50% - 90%
 - **Function**: Only show insights when building model confidence exceeds this threshold
-- **70%**: ~48-72 hours of learning
+- **70%**: about 1–2 days of learning
 - **Lower values**: Earlier insights, less accuracy
-
-### Max Active Insights
-- **Default**: 3
-- **Range**: 1 - 5
-- **Function**: Maximum number of insights to display simultaneously
-- **Priority**: Most important insights are shown first
 
 ---
 

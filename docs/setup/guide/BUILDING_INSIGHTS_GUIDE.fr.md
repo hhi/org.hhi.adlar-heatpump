@@ -1,6 +1,6 @@
 # Guide des Aperçus & Recommandations du Bâtiment
 
-**Version** : 2.7.0+ | **Dernière mise à jour** : Janvier 2026
+**Version** : 3.4.0+ | **Dernière mise à jour** : Octobre 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après 48-72 heures d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables** avec des économies estimées en euros par mois.
+La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre pompe à chaleur d'un simple contrôleur de température en un conseiller énergétique intelligent. Après environ 1 à 2 jours d'apprentissage des caractéristiques thermiques de votre bâtiment, le système fournit des **recommandations concrètes et exploitables**.
 
 ### Avantages clés
 
@@ -31,19 +31,18 @@ La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre 
 | 💰 Aperçus d'isolation | 10-30% |
 | ⏱️ Optimisation du préchauffage | 5-10% |
 | 🏠 Stratégies de stockage thermique | 10-25% (avec tarification dynamique) |
-| 📊 Transparence du ROI | Chaque recommandation inclut les économies mensuelles |
 
 ---
 
 ## Que sont les Aperçus du Bâtiment ?
 
-Les Aperçus du Bâtiment analysent les **6 paramètres thermiques** appris par le Modèle du Bâtiment :
+Les Aperçus du Bâtiment analysent les paramètres du Modèle du Bâtiment : 4 paramètres appris (C, UA, g, P_int), la constante de temps τ = C/UA et la correction du vent, apprise séparément :
 
 | Paramètre | Symbole | Signification | Plage typique |
 |-----------|---------|---------------|---------------|
 | **Masse thermique** | C | Capacité thermique - énergie nécessaire pour 1°C | 7-30 kWh/°C |
 | **Coefficient de perte thermique** | UA | Taux de perte de chaleur par degré de différence | 0,05-0,5 kW/°C |
-| **Constante de temps** | τ (tau) | Vitesse de chauffage/refroidissement (τ = C/UA) | 5-25 heures |
+| **Constante de temps** | τ (tau) | Vitesse de chauffage/refroidissement (τ = C/UA) | 20-600 heures (valeurs de profil) |
 | **Facteur de gain solaire** | g | Efficacité du rayonnement solaire | 0,3-0,6 |
 | **Gains thermiques internes** | P_int | Chaleur des personnes, appareils, cuisine | 0,2-0,5 kW |
 | **Correction du vent** | W_corr | Perte de chaleur supplémentaire par vent fort (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +58,7 @@ Lorsque des opportunités d'optimisation sont détectées, il génère des **ape
 
 ## Comment ça fonctionne
 
-### Phase d'apprentissage (48-72 heures)
+### Phase d'apprentissage (1 à 2 jours)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -95,7 +94,7 @@ Lorsque des opportunités d'optimisation sont détectées, il génère des **ape
 **Génération des aperçus :**
 - Le système évalue toutes les 50 minutes (10 échantillons)
 - Détecte les patterns : mauvaise isolation, potentiel de stockage thermique, opportunités de préchauffage
-- Génère des recommandations avec estimations de ROI
+- Génère des recommandations
 
 ### Surveillance continue
 
@@ -189,7 +188,7 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 > « 🏠 Perte de chaleur élevée - UA 0,52 kW/°C (attendu : 0,30) »
 
 **Exemple de recommandation :**
-> « Envisagez des améliorations d'isolation : toit (25% d'économies), murs (15%), fenêtres (10%). Économies est. : €120/mois »
+> « 🔴 High loss • Roof/walls/windows »
 
 **Quand ça se déclenche :**
 - Confiance ≥ 70%
@@ -197,29 +196,25 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 
 **Que faire :**
 1. **Vérifier la mesure** - Vérifier si portes/fenêtres étaient ouvertes pendant l'apprentissage
-2. **Prioriser les améliorations** - L'isolation du toit offre le meilleur ROI (25% des économies totales)
-3. **Obtenir des devis** - Utiliser l'estimation €120/mois pour calculer le délai d'amortissement
-4. **Implémenter la réduction nocturne** - Réduire les pertes pendant les heures inoccupées
+2. **Prioriser les améliorations** - L'isolation du toit offre le meilleur ROI
+3. **Implémenter la réduction nocturne** - Réduire les pertes pendant les heures inoccupées
 
 ---
 
 ### 2. ⏱️ Aperçus de Stratégie de Préchauffage
 
-**Ce qui est détecté :**
-- Réponse thermique rapide (τ < 5 heures)
-- Réponse thermique moyenne (τ 5-15 heures)
-- Réponse thermique lente (τ > 15 heures)
+**Ce qui est détecté :** six classes de réponse, selon τ (l'aperçu s'affiche en anglais) :
 
-**Exemple d'aperçu (v2.6.0) :**
-> « Rapide (~2 heures pour 2°C) » / « Normal (~4 heures pour 2°C) » / « Lent (~8 heures pour 2°C) »
+| Réponse | τ | Exemple d'aperçu |
+|---|---|---|
+| Très rapide | <5h | Very fast (~2 hours for 2°C) |
+| Rapide | 5–10h | Fast (~4 hours for 2°C) |
+| Normale | 10–20h | Normal (~8 hours for 2°C) |
+| Lente | 20–40h | Slow (~16 hours for 2°C) |
+| Très lente | 40–80h | Very slow (~24 hours for 2°C) |
+| Extrêmement lente | ≥80h | Extremely slow (~32 hours for 2°C) |
 
-**Recommandations par type :**
-
-| Type de réponse | τ | Conseil |
-|-----------------|---|--------|
-| Rapide | <5h | Chauffage stable, planification flexible possible |
-| Moyenne | 5-15h | Planifier 4+ heures à l'avance pour la hausse de température |
-| Lente | >15h | Chauffage continu optimal pour la pompe à chaleur |
+Aucun aperçu de préchauffage n'apparaît lorsque τ dépasse 250 heures (par ex. maison passive).
 
 ---
 
@@ -233,21 +228,13 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 > « 💰 Potentiel de stockage thermique - C=24 kWh/°C, τ=18h »
 
 **Exemple de recommandation :**
-> « Préchauffez +2°C pendant les heures creuses (02:00-06:00), coastez -1°C pendant les pointes (17:00-21:00). Économies est. : €95/mois »
+> « 🟢 Large buffer • Low loss »
 
 **Exemple d'aperçu (sans tarification dynamique) :**
 > « 💡 Bâtiment adapté au stockage thermique - C=24 kWh/°C, τ=18h »
 
 **Exemple de recommandation :**
-> « Ajoutez les prix de l'énergie dynamiques via la carte Flow 'Recevoir les prix de l'énergie externes' pour activer l'optimisation des coûts. Économies potentielles : 15-25% »
-
-**Calcul du stockage thermique :**
-```
-Énergie stockée = C × Décalage temp = 24 kWh/°C × 2°C = 48 kWh
-Économies quotidiennes = Énergie stockée × Différentiel de prix × Facteur d'utilisation
-                       = 48 kWh × €0,15/kWh × 0,70 = €5,04/jour
-Économies mensuelles = €5,04 × 30 = €151/mois
-```
+> « 🟢 Large buffer • Low loss • Add dynamic pricing »
 
 ---
 
@@ -258,7 +245,7 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 - >30% de déviation dans la constante de temps (τ)
 
 **Exemple d'aperçu :**
-> « 🔄 Le bâtiment se comporte comme 'lourd' (τ=18h vs 'moyen' τ=10h) »
+> « 🔄 Le bâtiment se comporte comme 'lourd' (τ=80h vs 'moyen' τ=50h) »
 
 **Exemple de recommandation :**
 > « Changez le profil de bâtiment vers 'lourd' dans les paramètres de l'appareil pour un apprentissage plus rapide et de meilleurs paramètres initiaux »
@@ -304,7 +291,7 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 
 Les aperçus sont classés 0-100 basé sur :
 - **Confiance** (30%) — Certitude du modèle
-- **Potentiel d'économies d'énergie** (40%) — Estimation €/mois
+- **Potentiel d'économies d'énergie** (40%) — selon le type d'aperçu
 - **Simplicité d'action** (20%) — Facilité d'implémentation
 - **Impact immédiat** (10%) — Bénéfice rapide vs long terme
 
@@ -321,8 +308,8 @@ Les aperçus sont classés 0-100 basé sur :
 | Délai | Actions |
 |-------|---------|
 | **Immédiat** (0-1 semaine) | ✅ Activer la réduction nocturne<br/>✅ Vérifier les fuites d'air et les colmater |
-| **Court terme** (1-3 mois) | ✅ Obtenir des devis pour l'isolation du toit (€3000-6000, amortissement 2-4 ans)<br/>✅ Envisager l'isolation des murs creux (€1500-3000)<br/>✅ Évaluer les fenêtres pour verre HR++ |
-| **Long terme** (6-12 mois) | ✅ Planifier un package d'isolation complet<br/>✅ Vérifier les subventions (MaPrimeRénov', aides locales)<br/>✅ Calculer le ROI total avec les économies mensuelles |
+| **Court terme** (1-3 mois) | ✅ Obtenir des devis pour l'isolation du toit (€3000-6000)<br/>✅ Envisager l'isolation des murs creux (€1500-3000)<br/>✅ Évaluer les fenêtres pour verre HR++ |
+| **Long terme** (6-12 mois) | ✅ Planifier un package d'isolation complet<br/>✅ Vérifier les subventions (MaPrimeRénov', aides locales) |
 
 #### Pour les aperçus de préchauffage :
 
@@ -390,7 +377,6 @@ ALORS
 ```
 QUAND Nouvel aperçu du bâtiment détecté
 
-ET {{estimated_savings_eur_month}} est supérieur à 70
 ET {{priority}} est supérieur à 70
 
 ALORS
@@ -398,7 +384,6 @@ ALORS
     « 💰 Opportunité d'économies d'énergie ! »
     « {{insight}} »
     « Action : {{recommendation}} »
-    « Potentiel : €{{estimated_savings_eur_month}}/mois »
 ```
 
 ---
@@ -437,32 +422,10 @@ ALORS
 
 **Use case :** Vérifier immédiatement après des changements majeurs (météo, réglages) sans attendre 50 minutes.
 
----
-
-### Flow 6 : Notifier Seulement les Aperçus à Fort ROI (Condition)
-
-```
-QUAND Aperçu du bâtiment détecté
-
-ET Économies estimées au-dessus de €100/mois
-  (condition : Savings above threshold - category, €100)
-
-ET Confiance du modèle au-dessus de 75%
-  (condition : Confidence above threshold - 75%)
-
-ALORS
-  Envoyer une notification push :
-    "💰 Grande opportunité d'économies !"
-    "{{insight}}"
-    "Action : {{recommendation}}"
-    "Potentiel : €{{estimated_savings_eur_month}}/mois"
-```
-
-**Use case :** Filtrer le "bruit" des conseils - seulement les notifications pour des économies significatives avec forte certitude.
 
 ---
 
-### Flow 7 : Stockage Thermique Seulement Quand Actif (Condition)
+### Flow 6 : Stockage Thermique Seulement Quand Actif (Condition)
 
 ```
 QUAND Bloc d'énergie le moins cher démarré
@@ -498,7 +461,7 @@ SINON
 - `recommendation` (string) - Action recommandée
 - `priority` (number 0-100) - Score de priorité
 - `confidence` (number 0-100) - Fiabilité du modèle
-- `estimated_savings_eur_month` (number) - Économies mensuelles en EUR (si applicable)
+- `estimated_savings_eur_month` (number) - Plus calculé depuis 3.4.2, toujours 0 (conservé pour que les flows existants continuent de fonctionner)
 
 **Fréquence :** Max 1× par catégorie par 24 heures (prévention de la fatigue des conseils)
 
@@ -609,18 +572,9 @@ ALORS
 
 ---
 
-#### 3. Les économies estimées sont au-dessus du seuil
+#### 3. Les économies estimées sont au-dessus du seuil (obsolète)
 
-**Fonction :** Filtrage basé sur le ROI
-
-**Paramètres :**
-
-- `category` (liste déroulante) - Catégorie à vérifier (insulation_performance / pre_heating / thermal_storage)
-- `threshold` (number 0-500) - Seuil €/mois
-
-**Retourne :** `true` si économies mensuelles estimées > seuil
-
-**Usage :** Filtre pour économies significatives (ex : notifier uniquement si >€100/mois)
+Depuis 3.4.2, cette condition ne peut plus être ajoutée à de nouveaux flows. Dans les flows existants, elle renvoie toujours `false`, car les aperçus n'estiment plus d'économies : avec des prix dynamiques, l'économie n'est pas connue à l'avance.
 
 ---
 
@@ -685,14 +639,6 @@ Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 | Le bâtiment se comporte exactement comme prévu | Bonne nouvelle ! Pas d'optimisation nécessaire |
 | Sources de données manquantes | S'assurer que le capteur de température intérieure externe est connecté |
 
-### Les aperçus montrent de mauvaises estimations d'économies
-
-| Cause | Impact | Solution |
-|-------|--------|----------|
-| Prix de l'énergie ≠ €0,30/kWh | Estimations proportionnelles | Multiplier par (votre prix / 0,30) |
-| COP ≠ 3,5 | COP plus élevé = économies plus élevées | Les estimations sont conservatives |
-| Heures de chauffage ≠ 4000h/an | Plus d'heures = économies plus élevées | Surveiller les économies réelles après 1 mois |
-
 ### La recommandation de préchauffage ne se déclenche pas
 
 | Cause | Solution |
@@ -707,7 +653,7 @@ Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 
 ### Q : Combien de temps dure l'apprentissage ?
 
-**R :** 48-72 heures pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
+**R :** Environ 1 à 2 jours pour 70% de confiance (seuil par défaut). Vous pouvez baisser à 50% pour des aperçus plus précoces (moins précis). La convergence complète prend 1-3 semaines.
 
 ### Q : Les aperçus se mettent-ils à jour si j'améliore l'isolation ?
 
@@ -720,12 +666,12 @@ Durée_préchauffage = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 heures → plafonné
 ### Q : Pourquoi mon τ (constante de temps) semble-t-il élevé/bas ?
 
 **R :** τ dépend à la fois de la masse thermique (C) et des pertes thermiques (UA) :
-- **τ élevé** (>15h) : Bâtiment lourd (C élevé) OU excellente isolation (UA faible)
-- **τ faible** (<5h) : Bâtiment léger (C faible) OU mauvaise isolation (UA élevé)
+- **τ élevé** (≥80h) : Bâtiment lourd (C élevé) OU excellente isolation (UA faible)
+- **τ faible** (<20h) : Bâtiment léger (C faible) OU mauvaise isolation (UA élevé)
 
-### Q : Quelle est la précision des estimations d'économies ?
+### Q : Pourquoi les aperçus n'affichent-ils pas de montant d'économies ?
 
-**R :** La précision cible est de ±20%. Elles sont basées sur des hypothèses conservatives (COP 3,5, 4000 heures de chauffage, €0,30/kWh). Surveillez les économies réelles via Homey Energy après implémentation.
+**R :** Depuis 3.4.2, les aperçus n'affichent plus de montant en euros. Une économie prévue ne peut pas être étayée : avec des prix dynamiques, les prix ne sont pas connus à l'avance, et la pompe à chaleur ne fonctionne pas à chaque heure. Mesurez les économies réelles après coup via Homey Énergie.
 
 ### Q : Que se passe-t-il si je modifie les paramètres de l'appareil pendant l'apprentissage ?
 

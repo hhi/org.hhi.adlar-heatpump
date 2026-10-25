@@ -2,7 +2,10 @@
 
 Overzicht van alle invoer-capabilities en databronnen die de gebouw-leermodule (RLS-algoritme) gebruikt.
 
-**Zie ook:** [RLS_RESEARCH_REPORT.md](RLS_RESEARCH_REPORT.md) voor het algoritme zelf en λ-trade-offs.
+**Zie ook:** [RLS_RESEARCH_REPORT.md](RLS_RESEARCH_REPORT.md) voor het algoritme
+zelf en λ-trade-offs;
+[ADR-062](ADR-062-BUILDING-MODEL-REVIEW-IMPLEMENTATION.md) voor het venster,
+de PSD-projectie en de grenzen sinds 3.4.0.
 
 ---
 
@@ -40,9 +43,9 @@ Blokkeer-conditie: niet beschikbaar → leren stopt.
 | 1e | `measure_temperature.indoor` | Externe sensor via flow card |
 | 2e | `adlar_external_indoor_temperature` | Legacy naamgeving (backwards compat) |
 
-**Rol in algoritme:** Berekening van `dT/dt = (T_indoor_nu − T_indoor_vorig) / Δt` en de warmteverliesterm `(T_outdoor − T_indoor)`.
+**Rol in algoritme:** Berekening van dT/dt over het venster van 60 minuten (`(T_indoor_nu − T_indoor_venster_start) / Δt`, ADR-062 B1) en de warmteverliesterm `(T_outdoor − T_indoor)`.
 
-**Validatiebounds:** 5 °C – 30 °C
+**Validatiebounds:** 5 °C – 35 °C
 
 ---
 
@@ -57,7 +60,7 @@ Blokkeer-conditie: niet beschikbaar → leren stopt.
 
 **Rol in algoritme:** Vormt de warmteverliesterm `X[1] = (T_outdoor − T_indoor)`. Hierdoor kan de RLS het UA-koefficënt leren: hoe groter het verschil, hoe meer warmte er verloren gaat.
 
-**Validatiebounds:** −10 °C – +50 °C
+**Validatiebounds:** −25 °C – +50 °C
 
 > De interne pomp-sensor (`temp_ambient`, DPS) is de enige warmtepomp-temperatuur die de gebouwmodule direct gebruikt. Alle overige DPS-temperatuursensoren (aanvoer, retour, koelmiddel, compressor) worden niet door de gebouwmodule gebruikt — die dienen voor COP-berekening en telemetrie-scoring.
 
@@ -138,11 +141,11 @@ Elke 5 minuten:
 ├─ Lees binnensensor (measure_temperature.indoor)
 ├─ Lees buitentemperatuur (adlar_external_ambient → temp_ambient)
 ├─ Lees elektrisch vermogen (adlar_external_power → DPS 104 → schatting)
-├─ Bereken thermisch vermogen = elektrisch / adlar_cop
+├─ Bereken thermisch vermogen = elektrisch × adlar_cop (0 bij stilstaande compressor)
 ├─ Haal zonnestraling op (4-staps prioriteitscascade, TTL 1h)
-├─ Bereken dT/dt = (T_indoor_nu − T_indoor_vorig) / Δt
-├─ Valideer alle waarden binnen bounds
-├─ Stel X-vector samen en voer RLS-update uit
+├─ Valideer alle waarden binnen bounds (geblokkeerd sample → venster start opnieuw)
+├─ Voeg de meting toe aan het venster van 60 minuten
+├─ Venster vol: dT/dt over het venster, X tijdgewogen, RLS-update
 └─ Elke 10 samples (~50 min): update capabilities + persist state
 ```
 
@@ -162,9 +165,9 @@ Elke 5 minuten:
 
 | Setting | Type | Rol | Standaard |
 |---|---|---|---|
-| `building_model_enabled` | boolean | Aan/uitzetten leren | `true` |
+| `building_model_enabled` | boolean | Aan/uitzetten leren | `false` |
 | `building_profile` | enum | Initiële prior-parameters | `'average'` |
-| `building_model_forgetting_factor` | number | RLS λ (leersnelheid) | `0.999` |
+| `building_model_forgetting_factor` | number | RLS λ (leersnelheid), 0.9985–0.9995 | `0.999` |
 | `enable_dynamic_pint` | boolean | Tijdvak P_int multiplier | `true` |
 | `forecast_location_lat` | number | Breedtegraad voor astronomie | `52.37` |
 | `solar_panel_wp` | number | Piekstroom zonnepanelen (W) | `0` |

@@ -2,11 +2,12 @@
 
 /**
  * Aanvullende simulaties voor ADR-062.
- *   node test/simulation/building-model-review/adr062.js <b1|b2|b5|b3b6|all>
+ *   node test/simulation/building-model-review/adr062.js <b1|b2|b5|b3b6|b12|all>
  * B1  — vensterlengte en -vorm (overlappend / blokken), zonder blokkades
  * B2  — het venster bij ontdooien en tapwater (poorten zoals Aurora II en Aurora III)
  * B5  — restore van een state die met de huidige code is geleerd
  * B3/B6 — rekentijd per update en confidence/trace
+ * B12 — uitweg bij vastlopen: lek huis vanaf een ver startprofiel, en S1–S5 met en zonder B12
  */
 
 const { simulateHouse, asLearnerInput, applyGates } = require('./house');
@@ -14,7 +15,7 @@ const { makeLearner, minEigen } = require('./learners');
 const { runCase, table, COLS, fmt } = require('./run');
 
 const SEEDS = [7, 11, 23, 42, 77];
-const FIX = { psd: true, bounds: true, order: true };
+const FIX = { psd: true, bounds: true, clipAfter: 12 }; // ADR-062 B11: geen uniforme rate-limiting; B12: inkorten na 12 reverts
 const which = process.argv[2] || 'all';
 
 const HOUSES = {
@@ -22,6 +23,9 @@ const HOUSES = {
   S1b: [{ C: 15, UA: 0.3, g: 0.5, pInt: 0.3 }, 'light'],
   S2: [{ C: 10, UA: 1.0, g: 0.4, pInt: 0.3 }, 'light'],
   S3: [{ C: 24, UA: 0.15, g: 0.5, pInt: 0.3 }, 'heavy'],
+  // ADR-062 B12: het lekke huis van S2 vanaf een ver startprofiel
+  'S2-passive': [{ C: 10, UA: 1.0, g: 0.4, pInt: 0.3 }, 'passive'],
+  'S2-heavy': [{ C: 10, UA: 1.0, g: 0.4, pInt: 0.3 }, 'heavy'],
 };
 
 function run(title, variants, { houses = ['S1b', 'S2', 'S3'], tOutMean = 4, events = {}, gates = 'geen' } = {}) {
@@ -112,7 +116,7 @@ if (which === 'b5' || which === 'all') {
 }
 
 if (which === 'b4' || which === 'all') {
-  run(`B4 Passieve woning (τ ≈ 430 h), start op profiel passive (τ 600 h); TAU_MAX=${process.env.TAU_MAX || 500}`, [
+  run(`B4 Passieve woning (τ ≈ 430 h), start op profiel passive (τ 600 h); TAU_MAX=${process.env.TAU_MAX || 800}`, [
     ['huidig', {}],
     ['fixes + 60 min overlap', { ...FIX, windowMin: 60, maxGapMin: 7.5 }],
   ], { houses: ['S5'] });
@@ -141,4 +145,21 @@ if (which === 'b3b6' || which === 'all') {
   const t1 = process.hrtime.bigint();
   for (let k = 0; k < n; k++) projectPsd(P);
   console.log(`- alleen de PSD-projectie (Jacobi 4×4): ${(Number(process.hrtime.bigint() - t1) / n / 1000).toFixed(2)} µs per aanroep (deze Mac)`);
+}
+
+if (which === 'b12' || which === 'all') {
+  const V = [
+    ['huidig', {}],
+    ['fixes zonder B12', { ...FIX, clipAfter: 0, windowMin: 60, maxGapMin: 7.5 }],
+    ['fixes + B12', { ...FIX, windowMin: 60, maxGapMin: 7.5 }],
+  ];
+  const ev = { defrost: true, dhw: true };
+  run('B12 Lek huis vanaf een ver startprofiel (geen blokkades)', V, { houses: ['S2-passive', 'S2-heavy'] });
+  run('B12 Lek huis vanaf een ver startprofiel, koud weer, poorten Aurora III', V, {
+    houses: ['S2-passive', 'S2-heavy'], tOutMean: 0, events: ev, gates: 'A3',
+  });
+  run('B12 S1b, S2, S3 en S5 met en zonder B12 (geen blokkades)', V, { houses: ['S1b', 'S2', 'S3', 'S5'] });
+  run('B12 S1b, S2, S3 en S5 met en zonder B12, koud weer, poorten Aurora III', V, {
+    houses: ['S1b', 'S2', 'S3', 'S5'], tOutMean: 0, events: ev, gates: 'A3',
+  });
 }

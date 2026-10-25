@@ -1,6 +1,6 @@
 # Building Insights & Recommendations Guide
 
-**Version**: 2.7.0+ | **Last Updated**: January 2026
+**Version**: 3.4.0+ | **Last Updated**: October 2026
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-The **Building Insights & Recommendations** feature transforms your heat pump from a simple temperature controller into an intelligent energy advisor. After learning your building's thermal characteristics for 48-72 hours, the system provides **concrete, actionable recommendations** with estimated savings in euros per month.
+The **Building Insights & Recommendations** feature transforms your heat pump from a simple temperature controller into an intelligent energy advisor. After learning your building's thermal characteristics for about 1–2 days, the system provides **concrete, actionable recommendations**.
 
 ### Key Benefits
 
@@ -31,19 +31,18 @@ The **Building Insights & Recommendations** feature transforms your heat pump fr
 | 💰 Insulation insights | 10-30% |
 | ⏱️ Pre-heating optimization | 5-10% |
 | 🏠 Thermal storage strategies | 10-25% (with dynamic pricing) |
-| 📊 ROI transparency | Every recommendation includes monthly savings |
 
 ---
 
 ## What Are Building Insights?
 
-Building Insights analyze the **6 thermal parameters** learned by the Building Model:
+Building Insights analyze the parameters of the Building Model: 4 learned parameters (C, UA, g, P_int), the time constant τ = C/UA, and the wind correction, which is learned separately:
 
 | Parameter | Symbol | Meaning | Typical Range |
 |-----------|--------|---------|---------------|
 | **Thermal Mass** | C | Heat capacity - how much energy needed for 1°C | 7-30 kWh/°C |
 | **Heat Loss Coefficient** | UA | Rate of heat loss per degree difference | 0.05-0.5 kW/°C |
-| **Time Constant** | τ (tau) | How fast building heats/cools (τ = C/UA) | 5-25 hours |
+| **Time Constant** | τ (tau) | How fast building heats/cools (τ = C/UA) | 20-600 hours (profile values) |
 | **Solar Gain Factor** | g | Effectiveness of solar radiation heating | 0.3-0.6 |
 | **Internal Heat Gains** | P_int | Heat from people, appliances, cooking | 0.2-0.5 kW |
 | **Wind Correction** | W_corr | Extra heat loss in high wind (v2.7.0+) | 0-50 W/°C |
@@ -59,7 +58,7 @@ When optimization opportunities are detected, it generates **insights** with spe
 
 ## How It Works
 
-### Learning Phase (48-72 Hours)
+### Learning Phase (1–2 Days)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -95,7 +94,7 @@ When optimization opportunities are detected, it generates **insights** with spe
 **Insight generation:**
 - System evaluates every 50 minutes (10 samples)
 - Detects patterns: poor insulation, thermal storage potential, pre-heating opportunities
-- Generates recommendations with ROI estimates
+- Generates recommendations
 
 ### Continuous Monitoring
 
@@ -189,7 +188,7 @@ The system provides **4 category-specific sensors** (v2.5.10+):
 > "🏠 High heat loss - UA 0.52 kW/°C (expected: 0.30)"
 
 **Example Recommendation:**
-> "Consider insulation upgrades: roof (25% savings), walls (15%), windows (10%). Est. savings: €120/month"
+> "🔴 High loss • Roof/walls/windows"
 
 **When it triggers:**
 - Confidence ≥ 70%
@@ -197,29 +196,25 @@ The system provides **4 category-specific sensors** (v2.5.10+):
 
 **What to do:**
 1. **Verify the measurement** - Check if doors/windows were left open during learning
-2. **Prioritize upgrades** - Roof insulation gives highest ROI (25% of total savings)
-3. **Get quotes** - Use €120/month estimate to calculate payback period
-4. **Implement night setback** - Reduce heat loss during unoccupied hours
+2. **Prioritize upgrades** - Roof insulation gives highest ROI
+3. **Implement night setback** - Reduce heat loss during unoccupied hours
 
 ---
 
 ### 2. ⏱️ Pre-Heating Strategy Insights
 
-**What it detects:**
-- Fast thermal response (τ < 5 hours)
-- Medium thermal response (τ 5-15 hours)
-- Slow thermal response (τ > 15 hours)
+**What it detects:** six response classes, based on τ:
 
-**Example Insight (v2.6.0):**
-> "Fast (~2 hours for 2°C)" / "Normal (~4 hours for 2°C)" / "Slow (~8 hours for 2°C)"
+| Response | τ | Example insight |
+|---|---|---|
+| Very fast | <5h | Very fast (~2 hours for 2°C) |
+| Fast | 5–10h | Fast (~4 hours for 2°C) |
+| Normal | 10–20h | Normal (~8 hours for 2°C) |
+| Slow | 20–40h | Slow (~16 hours for 2°C) |
+| Very slow | 40–80h | Very slow (~24 hours for 2°C) |
+| Extremely slow | ≥80h | Extremely slow (~32 hours for 2°C) |
 
-**Recommendations by type:**
-
-| Response Type | τ | Advice |
-|---------------|---|--------|
-| Fast | <5h | Stable heating, flexible scheduling possible |
-| Normal | 5-15h | Plan 4+ hours ahead for temperature increase |
-| Slow | >15h | Continuous heating optimal for heat pump |
+No pre-heating insight is shown when τ is above 250 hours (e.g. a passive house).
 
 ---
 
@@ -233,21 +228,13 @@ The system provides **4 category-specific sensors** (v2.5.10+):
 > "💰 Thermal storage potential - C=24 kWh/°C, τ=18h"
 
 **Example Recommendation:**
-> "Pre-heat +2°C during cheap hours (02:00-06:00), coast -1°C during peak (17:00-21:00). Est. savings: €95/month"
+> "🟢 Large buffer • Low loss"
 
 **Example Insight (without dynamic pricing):**
 > "💡 Building suitable for thermal storage - C=24 kWh/°C, τ=18h"
 
 **Example Recommendation:**
-> "Add dynamic energy prices via flow card 'Receive external energy prices' to enable cost optimization. Potential savings: 15-25%"
-
-**Thermal Storage Calculation:**
-```
-Stored energy = C × Temp shift = 24 kWh/°C × 2°C = 48 kWh
-Daily savings = Stored energy × Price differential × Utilization factor
-             = 48 kWh × €0.15/kWh × 0.70 = €5.04/day
-Monthly savings = €5.04 × 30 = €151/month
-```
+> "🟢 Large buffer • Low loss • Add dynamic pricing"
 
 ---
 
@@ -258,7 +245,7 @@ Monthly savings = €5.04 × 30 = €151/month
 - >30% deviation in time constant (τ)
 
 **Example Insight:**
-> "🔄 Building behaves like 'heavy' (τ=18h vs 'average' τ=10h)"
+> "🔄 Building behaves like 'heavy' (τ=80h vs 'average' τ=50h)"
 
 **Example Recommendation:**
 > "Change building profile to 'heavy' in device settings for faster learning and better initial parameters"
@@ -304,7 +291,7 @@ Monthly savings = €5.04 × 30 = €151/month
 
 Insights are ranked 0-100 based on:
 - **Confidence** (30%) — Model certainty
-- **Energy savings potential** (40%) — €/month estimate
+- **Energy savings potential** (40%) — based on the insight type
 - **Action simplicity** (20%) — How easy to implement
 - **Immediate impact** (10%) — Quick vs. long-term benefit
 
@@ -321,8 +308,8 @@ Insights are ranked 0-100 based on:
 | Timeframe | Actions |
 |-----------|---------|
 | **Immediate** (0-1 week) | ✅ Enable night setback<br/>✅ Check air leaks and seal |
-| **Short-term** (1-3 months) | ✅ Get quotes for roof insulation (€3000-6000, payback 2-4 years)<br/>✅ Consider cavity wall insulation (€1500-3000)<br/>✅ Evaluate windows for HR++ glass |
-| **Long-term** (6-12 months) | ✅ Plan comprehensive insulation package<br/>✅ Check subsidies (ISDE, local grants)<br/>✅ Calculate total ROI with monthly savings |
+| **Short-term** (1-3 months) | ✅ Get quotes for roof insulation (€3000-6000)<br/>✅ Consider cavity wall insulation (€1500-3000)<br/>✅ Evaluate windows for HR++ glass |
+| **Long-term** (6-12 months) | ✅ Plan comprehensive insulation package<br/>✅ Check subsidies (ISDE, local grants) |
 
 #### For Pre-Heating Insights:
 
@@ -390,7 +377,6 @@ THEN
 ```
 WHEN New building insight detected
 
-AND {{estimated_savings_eur_month}} is greater than 70
 AND {{priority}} is greater than 70
 
 THEN
@@ -398,7 +384,6 @@ THEN
     "💰 Energy Savings Opportunity!"
     "{{insight}}"
     "Action: {{recommendation}}"
-    "Potential: €{{estimated_savings_eur_month}}/month"
 ```
 
 ---
@@ -437,32 +422,10 @@ THEN
 
 **Use case:** Check immediately after major changes (weather, settings) without waiting 50 minutes.
 
----
-
-### Flow 6: Only Notify High ROI Insights (Condition)
-
-```
-WHEN Building insight detected
-
-AND Estimated savings is above €100/month
-  (condition: Savings above threshold - category, €100)
-
-AND Model confidence is above 75%
-  (condition: Confidence above threshold - 75%)
-
-THEN
-  Send push notification:
-    "💰 Large Savings Opportunity!"
-    "{{insight}}"
-    "Action: {{recommendation}}"
-    "Potential: €{{estimated_savings_eur_month}}/month"
-```
-
-**Use case:** Filter "advice noise" - only notifications for significant savings with high certainty.
 
 ---
 
-### Flow 7: Thermal Storage Only When Active (Condition)
+### Flow 6: Thermal Storage Only When Active (Condition)
 
 ```
 WHEN Cheapest energy block started
@@ -498,7 +461,7 @@ ELSE
 - `recommendation` (string) - Recommended action
 - `priority` (number 0-100) - Priority score
 - `confidence` (number 0-100) - Model reliability
-- `estimated_savings_eur_month` (number) - Monthly savings in EUR (if applicable)
+- `estimated_savings_eur_month` (number) - No longer calculated since 3.4.2, always 0 (kept so existing flows keep working)
 
 **Frequency:** Max 1× per category per 24 hours (advice fatigue prevention)
 
@@ -609,18 +572,9 @@ THEN
 
 ---
 
-#### 3. Estimated savings is above threshold
+#### 3. Estimated savings is above threshold (deprecated)
 
-**Function:** ROI-based filtering
-
-**Parameters:**
-
-- `category` (dropdown) - Category to check (insulation_performance / pre_heating / thermal_storage)
-- `threshold` (number 0-500) - EUR/month threshold
-
-**Returns:** `true` if estimated monthly savings > threshold
-
-**Use:** Filter for significant savings (e.g., only notify if >€100/month)
+Since 3.4.2 this condition can no longer be added to new flows. In existing flows it always returns `false`, because insights no longer estimate a saving: with dynamic prices the saving is not known in advance.
 
 ---
 
@@ -685,14 +639,6 @@ Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 | Building performs exactly as expected | Good news! No optimization needed |
 | Missing data sources | Ensure external indoor temp sensor is connected |
 
-### Insights Show Wrong Savings Estimates
-
-| Cause | Impact | Solution |
-|-------|--------|----------|
-| Energy price ≠ €0.30/kWh | Estimates proportional | Multiply by (your price / 0.30) |
-| COP ≠ 3.5 | Higher COP = higher savings | Estimates are conservative |
-| Heating hours ≠ 4000h/year | More hours = higher savings | Monitor actual savings after 1 month |
-
 ### Pre-Heating Recommendation Not Triggering
 
 | Cause | Solution |
@@ -707,7 +653,7 @@ Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 
 ### Q: How long does learning take?
 
-**A:** 48-72 hours for 70% confidence (default threshold). You can lower to 50% for earlier insights (less accurate). Full convergence takes 1-3 weeks.
+**A:** About 1–2 days for 70% confidence (default threshold). You can lower to 50% for earlier insights (less accurate). Full convergence takes 1-3 weeks.
 
 ### Q: Do insights update if I improve insulation?
 
@@ -720,12 +666,12 @@ Pre_heat_duration = 10 × ln(3 / 0.3) = 10 × 2.30 = 23 hours → capped
 ### Q: Why does my τ (time constant) seem high/low?
 
 **A:** τ depends on both thermal mass (C) and heat loss (UA):
-- **High τ** (>15h): Heavy building (high C) OR excellent insulation (low UA)
-- **Low τ** (<5h): Light building (low C) OR poor insulation (high UA)
+- **High τ** (≥80h): Heavy building (high C) OR excellent insulation (low UA)
+- **Low τ** (<20h): Light building (low C) OR poor insulation (high UA)
 
-### Q: How accurate are the savings estimates?
+### Q: Why do insights show no savings amount?
 
-**A:** Target accuracy is ±20%. They're based on conservative assumptions (COP 3.5, 4000 heating hours, €0.30/kWh). Monitor actual savings via Homey Energy after implementation.
+**A:** Since 3.4.2 insights no longer show an amount in euros. A predicted saving cannot be substantiated: with dynamic prices the prices are not known in advance, and the heat pump does not run every hour. Measure actual savings afterwards via Homey Energy.
 
 ### Q: What happens if I change device settings during learning?
 

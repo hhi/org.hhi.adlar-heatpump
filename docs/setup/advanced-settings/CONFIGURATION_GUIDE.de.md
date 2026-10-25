@@ -270,16 +270,16 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses lernt.
 
 ### Gebäudemodell-Lernen aktivieren
-- **Standard**: Aktiviert
+- **Standard**: Deaktiviert
 - **Funktion**: Lernt 4 thermische Parameter (C, UA, g, P_int)
 - **Lernzeit**: 24-72 Stunden für Basismodell, 2-4 Wochen für genaues Modell
 - **Algorithmus**: Recursive Least Squares (RLS) mit Vergessensfaktor
 
 ### Vergessensfaktor (Experteneinstellung)
 - **Standard**: 0.999
-- **Bereich**: 0.990 - 0.9995
+- **Bereich**: 0.9985 - 0.9995
 - **Funktion**: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen (~75%). Niedriger = schnellere Anpassung an saisonale Änderungen.
-- **Nur sichtbar**: Mit aktivierten "Expert HVAC-Funktionskarten"
+- **Wirkung**: Erst nach einem App-Neustart oder 'Gebäudemodell-Lernen zurücksetzen'
 
 ### Gebäudetyp
 - **Standard**: Durchschnitt (typisches NL-Haus)
@@ -288,6 +288,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
   - **Durchschnitt**: Ziegel, Hohlwand, Doppelverglasung (typisches NL-Haus)
   - **Schwer**: Beton/Stein, gute Dämmung, HR++-Glas, stabil
   - **Passiv**: Passivhaus, HR+++-Glas, luftdicht, Wärmerückgewinnung
+- **Ändern**: Wirkt sofort; das Lernen setzt mit den Werten des neuen Profils fort, mit der Hälfte der gesammelten Samples
 
 ### Gebäudemodell-Lernen zurücksetzen
 - **Standard**: Deaktiviert
@@ -304,14 +305,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
   - Tag (06:00-18:00): 100% (normal)
   - Abend (18:00-23:00): 180% (Kochen, TV)
 - **Genauigkeitsverbesserung**: ~10-15%
-
-### Saisonale Solargewinn-Anpassung
-- **Standard**: Aktiviert
-- **Funktion**: Korrigiert wechselnden Sonnenwinkel im Jahresverlauf
-- **Saisonale Multiplikatoren**:
-  - Winter (Dez-Feb): 60%
-  - Sommer (Jun-Jul): 130%
-- **Genauigkeitsbeitrag**: 5-20% der Gesamtwärme
+- **Wirkung**: Erst nach 'Gebäudemodell-Lernen zurücksetzen'
 
 ---
 
@@ -320,23 +314,17 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 Automatisierte Analyse des thermischen Gebäudemodells mit Energiespar-Empfehlungen und ROI-Schätzungen.
 
 ### Gebäude-Einblicke aktivieren
-- **Standard**: Aktiviert
+- **Standard**: Deaktiviert
 - **Funktion**: Analysiert thermisches Gebäudemodell und liefert Energiespar-Empfehlungen
-- **Lernzeit**: Einblicke erscheinen nach 48-72 Stunden Lernen
+- **Lernzeit**: Einblicke erscheinen nach etwa 1–2 Tagen Lernen
 - **Voraussetzungen**: Gebäudemodell-Lernen muss aktiviert sein
 
 ### Mindestvertrauen
 - **Standard**: 70%
 - **Bereich**: 50% - 90%
 - **Funktion**: Zeigt Einblicke nur, wenn Gebäudemodell-Vertrauen diesen Schwellenwert überschreitet
-- **70%**: ~48-72 Stunden Lernen
+- **70%**: etwa 1–2 Tage Lernen
 - **Niedrigere Werte**: Frühere Einblicke, weniger Genauigkeit
-
-### Max Aktive Einblicke
-- **Standard**: 3
-- **Bereich**: 1 - 5
-- **Funktion**: Maximale Anzahl gleichzeitig anzuzeigender Einblicke
-- **Priorität**: Wichtigste Einblicke werden zuerst angezeigt
 
 ---
 

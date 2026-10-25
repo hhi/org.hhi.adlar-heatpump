@@ -270,16 +270,16 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 
 ### Gebouwmodel Leren Inschakelen
-- **Standaard**: Ingeschakeld
+- **Standaard**: Uitgeschakeld
 - **Functie**: Leert 4 thermische parameters (C, UA, g, P_int)
 - **Leertijd**: 24-72 uur voor basismodel, 2-4 weken voor nauwkeurig model
 - **Algoritme**: Recursive Least Squares (RLS) met forgetting factor
 
 ### Vergeetfactor (Expert Instelling)
 - **Standaard**: 0.999
-- **Bereik**: 0.990 - 0.9995
+- **Bereik**: 0.9985 - 0.9995
 - **Functie**: Hoe snel model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid (~75%). Lager = snellere aanpassing aan seizoensveranderingen.
-- **Alleen zichtbaar**: Met "Expert HVAC functie kaarten" ingeschakeld
+- **Werking**: Pas na een herstart van de app of 'Reset gebouwmodel leren'
 
 ### Gebouwtype
 - **Standaard**: Gemiddeld (typisch NL huis)
@@ -288,6 +288,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
   - **Gemiddeld**: Baksteen, spouwmuur, dubbel glas (typisch NL huis)
   - **Zwaar**: Beton/steen, goede isolatie, HR++ glas, stabiel
   - **Passief**: Passiefhuis, HR+++ glas, luchtdicht, WTW
+- **Wijzigen**: Werkt direct; het leren gaat verder vanaf de waarden van het nieuwe profiel, met de helft van de verzamelde samples
 
 ### Reset Gebouwmodel Leren
 - **Standaard**: Uitgeschakeld
@@ -304,14 +305,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
   - Dag (06:00-18:00): 100% (normaal)
   - Avond (18:00-23:00): 180% (koken, TV)
 - **Nauwkeurigheid verbetering**: ~10-15%
-
-### Seizoensgebonden Zonnewinst Aanpassing
-- **Standaard**: Ingeschakeld
-- **Functie**: Corrigeert voor veranderende zonnehoek door het jaar
-- **Seizoens Multipliers**:
-  - Winter (Dec-Feb): 60%
-  - Zomer (Jun-Jul): 130%
-- **Nauwkeurigheid bijdrage**: 5-20% van totale warmte
+- **Werking**: Pas na 'Reset gebouwmodel leren'
 
 ---
 
@@ -320,23 +314,17 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 Geautomatiseerde analyse van het thermische gebouwmodel met energie-besparende aanbevelingen en ROI-schattingen.
 
 ### Gebouw Inzichten Inschakelen
-- **Standaard**: Ingeschakeld
+- **Standaard**: Uitgeschakeld
 - **Functie**: Analyseer thermisch gebouwmodel en geef energie-besparende aanbevelingen
-- **Leertijd**: Inzichten verschijnen na 48-72 uur leren
+- **Leertijd**: Inzichten verschijnen na ongeveer 1–2 dagen leren
 - **Vereisten**: Gebouwmodel leren moet ingeschakeld zijn
 
 ### Minimale Betrouwbaarheid
 - **Standaard**: 70%
 - **Bereik**: 50% - 90%
 - **Functie**: Toon alleen inzichten wanneer gebouwmodel betrouwbaarheid deze drempel overschrijdt
-- **70%**: ~48-72 uur leren
+- **70%**: ongeveer 1–2 dagen leren
 - **Lagere waarden**: Eerdere inzichten, minder nauwkeurigheid
-
-### Max Actieve Inzichten
-- **Standaard**: 3
-- **Bereik**: 1 - 5
-- **Functie**: Maximum aantal inzichten om tegelijkertijd weer te geven
-- **Prioriteit**: Belangrijkste inzichten worden eerst getoond
 
 ---
 

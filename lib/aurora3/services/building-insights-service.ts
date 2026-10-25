@@ -43,7 +43,6 @@ export interface Insight {
   detectedAt: number; // timestamp
   insight: string; // Human-readable message
   recommendation: string; // Actionable advice
-  estimatedSavings?: number; // EUR/month
   status: InsightStatus;
   dismissedUntil?: number; // timestamp
 }
@@ -89,7 +88,6 @@ export class BuildingInsightsService {
 
   // Timers
   private evaluationTimer: NodeJS.Timeout | null = null;
-  private preHeatRecommendationTimer: NodeJS.Timeout | null = null;
   private readonly EVALUATION_INTERVAL_MS = 50 * 60 * 1000; // 50 minutes (10 samples @ 5min)
 
   constructor(config: BuildingInsightsServiceConfig) {
@@ -135,6 +133,10 @@ export class BuildingInsightsService {
 
     // Start periodic evaluation (every 50 minutes)
     // Pre-heat recommendations are now triggered based on ΔT threshold during evaluation
+    // ADR-062 A7: a repeated initialize() replaces the running interval instead of adding one
+    if (this.evaluationTimer) {
+      this.device.homey.clearInterval(this.evaluationTimer);
+    }
     this.evaluationTimer = this.device.homey.setInterval(
       () => this.evaluateInsights().catch((err) => this.logger('BuildingInsightsService: Evaluation error:', err)),
       this.EVALUATION_INTERVAL_MS,
@@ -153,13 +155,8 @@ export class BuildingInsightsService {
 
     // Clear timers
     if (this.evaluationTimer) {
-      clearInterval(this.evaluationTimer);
+      this.device.homey.clearInterval(this.evaluationTimer);
       this.evaluationTimer = null;
-    }
-
-    if (this.preHeatRecommendationTimer) {
-      clearInterval(this.preHeatRecommendationTimer);
-      this.preHeatRecommendationTimer = null;
     }
 
     // Persist final state
@@ -358,11 +355,10 @@ export class BuildingInsightsService {
 
     // High heat loss detected (UA > 1.5× expected OR absolute high)
     if (model.UA > expectedUA * 1.5 || model.UA > 0.5) {
-      const savingsEstimate = this.estimateInsulationSavings(model.UA, expectedUA);
-
+      // v3.4.2: no estimated amount; a predicted saving cannot be substantiated
       const recommendation = lang === 'nl'
-        ? `🔴 Hoog verlies • Dak/muren/ramen • €${savingsEstimate}/mnd`
-        : `🔴 High loss • Roof/walls/windows • €${savingsEstimate}/mo`;
+        ? '🔴 Hoog verlies • Dak/muren/ramen'
+        : '🔴 High loss • Roof/walls/windows';
 
       return {
         id: `insulation_poor_${Date.now()}`,
@@ -372,7 +368,6 @@ export class BuildingInsightsService {
         detectedAt: Date.now(),
         insight: recommendation,
         recommendation,
-        estimatedSavings: savingsEstimate,
         status: 'new',
       };
     }
@@ -630,13 +625,8 @@ export class BuildingInsightsService {
     const lossText = lang === 'nl' ? lossTexts[lossCategory].nl : lossTexts[lossCategory].en;
     let recommendation = `${emoji} ${bufferText} • ${lossText}`;
 
-    // If suitable and dynamic pricing available, add savings estimate
+    // v3.4.2: no estimated amount; with dynamic prices the saving is not known in advance
     if (suitableForOptimization && hasDynamicPricing) {
-      const optimalBoost = Math.min(2.5, model.C / 15 + tau / 20);
-      const savingsEstimate = this.estimateThermalStorageSavingsWithBoost(model.C, optimalBoost);
-      recommendation += lang === 'nl'
-        ? ` • €${savingsEstimate}/mnd`
-        : ` • €${savingsEstimate}/mo`;
       priority = 90;
     } else if (suitableForOptimization && !hasDynamicPricing) {
       // Suitable but no dynamic pricing configured
@@ -881,7 +871,7 @@ export class BuildingInsightsService {
             recommendation: insight.recommendation,
             priority: insight.priority,
             confidence: insight.confidence,
-            estimated_savings_eur_month: insight.estimatedSavings || 0,
+            estimated_savings_eur_month: 0, // v3.4.2: no longer calculated; kept so existing flows keep working
           });
 
         this.logger(`BuildingInsightsService: Triggered insight_detected flow card for ${insight.category}`);
@@ -1133,117 +1123,6 @@ export class BuildingInsightsService {
   }
 
   /**
-   * Estimate insulation savings (EUR/month)
-   * - Calculate excess heat loss
-   * - Apply typical heating hours and COP
-   * - Convert to monthly cost
-   */
-  private estimateInsulationSavings(actualUA: number, targetUA: number): number {
-    // Defensive: Validate inputs
-    if (!Number.isFinite(actualUA) || !Number.isFinite(targetUA) || actualUA <= 0 || targetUA <= 0) {
-      this.logger('BuildingInsightsService: Invalid UA values for savings estimation');
-      return 0;
-    }
-
-    const excessHeatLoss = actualUA - targetUA; // kW/°C
-
-    // No savings if already better than target
-    if (excessHeatLoss <= 0) {
-      return 0;
-    }
-
-    const avgTempDiff = 15; // Average indoor-outdoor delta (°C)
-    const heatingHours = 4000; // Annual heating hours (typical)
-    const avgCOP = 3.5;
-    const energyPrice = 0.30; // €/kWh
-
-    const annualExcessEnergy = (excessHeatLoss * avgTempDiff * heatingHours) / avgCOP; // kWh
-    const annualCost = annualExcessEnergy * energyPrice;
-    const monthlySavings = annualCost / 12;
-
-    // Defensive: Validate result is reasonable (0-500 EUR/month)
-    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 500) {
-      this.logger('BuildingInsightsService: Unrealistic insulation savings calculated:', monthlySavings);
-      return 0;
-    }
-
-    return Math.round(monthlySavings);
-  }
-
-  /**
-   * Estimate thermal storage savings (EUR/month)
-   * - Calculate stored energy capacity
-   * - Apply price differential between peak/off-peak
-   * - Apply utilization factor
-   */
-  private estimateThermalStorageSavings(C: number, tau: number): number {
-    // Defensive: Validate inputs
-    if (!Number.isFinite(C) || C <= 0 || !Number.isFinite(tau) || tau <= 0) {
-      this.logger('BuildingInsightsService: Invalid C or tau for thermal storage savings');
-      return 0;
-    }
-
-    const avgTempShift = 2.0; // °C shift during cheap hours
-    const storedEnergy = C * avgTempShift; // kWh stored
-
-    // Defensive: Validate stored energy is reasonable (should be < 200 kWh for residential)
-    if (!Number.isFinite(storedEnergy) || storedEnergy <= 0 || storedEnergy > 200) {
-      this.logger('BuildingInsightsService: Unrealistic stored energy calculated:', storedEnergy);
-      return 0;
-    }
-
-    const dailyStorageCycles = 1; // Once per day
-    const priceDifferential = 0.15; // €/kWh (peak - off-peak)
-    const utilizationFactor = 0.7; // 70% of stored energy used during peak
-
-    const dailySavings = storedEnergy * dailyStorageCycles * priceDifferential * utilizationFactor;
-    const monthlySavings = dailySavings * 30;
-
-    // Defensive: Validate result is reasonable (0-300 EUR/month)
-    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 300) {
-      this.logger('BuildingInsightsService: Unrealistic thermal storage savings calculated:', monthlySavings);
-      return 0;
-    }
-
-    return Math.round(monthlySavings);
-  }
-
-  /**
-   * Estimate thermal storage savings with dynamic boost value (EUR/month)
-   * v2.6.0: Uses calculated optimal boost instead of fixed 2°C
-   */
-  private estimateThermalStorageSavingsWithBoost(C: number, boost: number): number {
-    // Defensive: Validate inputs
-    if (!Number.isFinite(C) || C <= 0 || !Number.isFinite(boost) || boost <= 0) {
-      this.logger('BuildingInsightsService: Invalid C or boost for savings calculation');
-      return 0;
-    }
-
-    const storedEnergy = C * boost; // kWh stored
-
-    // Defensive: Validate stored energy
-    if (!Number.isFinite(storedEnergy) || storedEnergy <= 0 || storedEnergy > 250) {
-      this.logger('BuildingInsightsService: Unrealistic stored energy:', storedEnergy);
-      return 0;
-    }
-
-    const dailyStorageCycles = 1;
-    const priceDifferential = 0.15; // €/kWh (peak - off-peak)
-    const utilizationFactor = 0.7;
-
-    const dailySavings = storedEnergy * dailyStorageCycles * priceDifferential * utilizationFactor;
-    const monthlySavings = dailySavings * 30;
-
-    // Defensive: Validate result (0-400 EUR/month)
-    if (!Number.isFinite(monthlySavings) || monthlySavings < 0 || monthlySavings > 400) {
-      this.logger('BuildingInsightsService: Unrealistic savings:', monthlySavings);
-      return 0;
-    }
-
-    return Math.round(monthlySavings);
-  }
-
-  /**
    * Persist current state to device store
    */
   private async persistState(): Promise<void> {
@@ -1340,26 +1219,10 @@ export class BuildingInsightsService {
    * Used by: savings_above flow condition card
    */
   public areSavingsAbove(category: InsightCategory, threshold: number): boolean {
-    // Defensive: Validate threshold
-    if (typeof threshold !== 'number' || threshold < 0 || threshold > 500) {
-      this.logger('BuildingInsightsService: Invalid savings threshold for condition:', threshold);
-      return false;
-    }
-
-    const insight = this.activeInsights.get(category);
-
-    if (!insight) {
-      return false; // No insight = no savings
-    }
-
-    if (insight.status !== 'active') {
-      return false; // Dismissed insight = don't consider savings
-    }
-
-    // estimatedSavings is optional (profile_mismatch doesn't have savings)
-    const savings = insight.estimatedSavings || 0;
-
-    return savings > threshold;
+    // v3.4.2: insights no longer estimate a saving in euros (it cannot be substantiated with
+    // dynamic prices). The condition card is deprecated; existing flows get false.
+    this.logger(`BuildingInsightsService: 'savings above' condition is deprecated - no estimate available (${category}, threshold ${threshold})`);
+    return false;
   }
 
   /**

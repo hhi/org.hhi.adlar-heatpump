@@ -1,6 +1,6 @@
 # ADR-062: Implementatie van de review-fixes voor de gebouwleermodule
 
-**Status:** Gedeeltelijk aangenomen (2026-10-23): B1–B6 en B10 aangenomen zoals voorgesteld; B7–B9 voorgesteld
+**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24 en 2026-10-25): B1–B6, B10, B11 en B12 aangenomen, uit B8 ook A7, §2.5 en §2.8 (fase 1e); B7–B9 verder voorgesteld
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -28,7 +28,12 @@ ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plan
   meer leren (B4).
 - **Versies (voorstel):** A1 mee in 3.3.1; learner in 3.4.0; regelkoppeling (A3–A6) in
   3.5.0.
-- **Aangenomen:** B1–B6 en B10. **Nog te beslissen:** B7–B9 (fase 3).
+- **Uitgangspunt: precisie bij koud weer gaat voor.** Daarom vervalt de uniforme
+  rate-limiting uit review §2.1; de huidige rate-limiting per component blijft, voor
+  alle drivers (B11).
+- **Aangenomen:** B1–B6, B10, B11 en B12, en uit B8 de punten A7, §2.5 en §2.8
+  (fase 1e en 1g, 3.4.0). **Nog te beslissen:** B7, de rest van B8 (A4–A6) en B9
+  (fase 3).
 
 ---
 
@@ -43,7 +48,13 @@ sensor met 0,1 °C is, en dat de algoritmefixes alleen werken samen met een vens
 De review laat de ontwerpkeuzes bewust open. Dit ADR maakt ze, onderbouwd met
 aanvullende simulaties (`adr062.js`). Alle getallen zijn RMSE van een voorspelling
 6 uur vooruit, gemiddeld over 5 seeds en 30 dagen leren, tenzij anders vermeld.
-"Fixes" betekent PSD-projectie, nieuwe grenzen en uniforme rate-limiting samen.
+"Fixes" betekent PSD-projectie en nieuwe grenzen; de rate-limiting per component blijft
+zoals hij is (B11). De tabellen in B1, B2, B4 en B5 zijn gemeten toen de fixes nog de
+uniforme rate-limiting uit review §2.1 bevatten; B11 geeft de waarden zonder.
+
+**Uitgangspunt.** Waar een keuze bij mild en bij koud weer verschillend uitpakt, weegt
+de nauwkeurigheid bij koud weer het zwaarst. Dan draait de warmtepomp het meest, en zijn
+de bruikbare leermomenten het schaarst.
 
 | Scenario | C (kWh/°C) | UA (kW/°C) | τ (u) | Startprofiel |
 |---|---:|---:|---:|---|
@@ -55,6 +66,9 @@ aanvullende simulaties (`adr062.js`). Alle getallen zijn RMSE van een voorspelli
 ## 2. Besluiten
 
 ### B1 — Venster op dT/dt (aangenomen)
+
+De cijfers in B1 en B2 zijn berekend vóór B12; met B12 wijken ze in de tweede
+decimaal af.
 
 **Voorstel:** tijdgebaseerd venster van **60 minuten, overlappend**, in
 `BuildingModelLearner.addMeasurement()`.
@@ -205,6 +219,9 @@ de nieuwe code:
 
 ### B8 — Regelkoppeling (A4, A5, A6, A7, §2.5, §2.8)
 
+A7, §2.5 en §2.8 zijn aangenomen en uitgevoerd in fase 1e (3.4.0); A4–A6
+blijven voorgesteld voor fase 3.
+
 | Punt | Voorstel |
 |---|---|
 | **A4** modelparameters naar PI en prijs | Alleen bij confidence ≥ 50%, zoals de thermische component. Daaronder expliciet de profielwaarden terugzetten. Uitgeschakeld leren betekent niet "model uit": een geleerd model boven 50% blijft in gebruik. De setters gaan vóór de berekening van PI en prijs |
@@ -212,7 +229,7 @@ de nieuwe code:
 | **A6** mijlpaaltrigger | Drempelpassage (vorige confidence < 70 ≤ huidige), met een vlag in de device store. De vlag vervalt bij een reset en bij een profielwissel |
 | **A7** timers | Overal `this.device.homey.clearInterval()` |
 | **§2.5** restore-logging | Gelijktrekken naar de Tuya-vorm, met een expliciet restore-resultaat uit de learner in plaats van een vergelijking van sample-aantallen |
-| **§2.8** VFF | Verwijderen; λ = de geconfigureerde waarde. Gedrag ongewijzigd, want VFF was bij de standaardinstelling al inert (review §6.4) |
+| **§2.8** VFF | Verwijderen; λ = de geconfigureerde waarde, begrensd op 0,9985–0,9995 (ook het bereik van de instelling). VFF was alleen inert bij een instelling vanaf 0,9988, dus ook bij de standaard 0,999 (review §6.4). Daaronder hield VFF λ op 0,995–0,9988; zonder VFF leert het model bij 0,990 veel slechter (S1b 0,24 tegen 0,03 °C). Een constante λ van 0,9985 geeft hetzelfde resultaat als VFF bij een lage instelling. |
 | **A1** doeltemperatuur Tuya | `target_temperature.indoor` op beide plekken. De τ-limieten van de twee voorverwarmingsmethoden gelijktrekken op één constante (voorstel: 0,5–250 u; passieve woningen krijgen dan, zoals nu, geen voorverwarmingsadvies) |
 
 ### B9 — Volgorde ten opzichte van ADR-005
@@ -242,19 +259,106 @@ voorverwarming valt onder B8 (fase 3).
 
 Elke release eerst via het testkanaal, met hardware-acceptatie op de eigen units.
 
+### B11 — Rate-limiting (aangenomen)
+
+**Besluit:** de rate-limiting per component blijft, voor alle drivers. De uniforme
+schaling uit review §2.1 vervalt. De moduspoort blijft zoals hij is: in een combimodus
+(verwarmen of vloerverwarming + tapwater) wordt gemeten; bij alleen tapwater en bij
+koelen niet.
+
+**Wat de twee varianten doen.** Per component: elke parameter mag per stap hooguit 5%
+veranderen, los van de andere. Uniform: de hele stap wordt met één factor verkleind,
+totdat de parameter die het hardst wil bewegen precies 5% haalt.
+
+**Onderbouwing.** Venster van 60 minuten, herstart bij elk ontbrekend sample, PSD en
+grenzen; RMSE 6 u (S1 | S1b | S2 | S3):
+
+| Scenario | Per component | Uniform |
+|---|---|---|
+| Mild, geen tapwater | 0,02 / 0,02 / 0,03 / 0,03 | 0,01 / 0,01 / 0,03 / 0,02 |
+| Koud, poorten Aurora III | **0,02 / 0,01 / 0,30 / 0,03** | 0,04 / 0,05 / 0,51 / 0,03 |
+| Koud, tapwater in combimodus telt mee | 0,10 / 0,10 / 1,15 / 0,08 | 0,05 / 0,06 / 0,57 / 0,04 |
+
+- Bij ongeveer de helft van de stappen remt de rate-limiter. In 76–88% daarvan bepaalt
+  P_int/C de rem (S1b). Bij uniforme schaling remt die onrustige parameter dan ook UA
+  en C af. Bij koud weer, met 4,6 keer minder updates door ontdooien en tapwater, kost
+  dat het meest.
+- Uniform wint alleen bij mild weer (klein) en in het scenario waarin de warmtepomp in
+  een combimodus dagelijks 40 minuten een boiler verwarmt en die metingen meetellen. Hoe
+  vaak dat in de praktijk speelt, is onbekend (V2). Waar de CV-ketel het tapwater maakt,
+  speelt het niet. Speelt het wel, dan hoort de oplossing bij de bron: een tapwaterpoort
+  (ADR-063, O2), niet een algemene rem.
+- **Prijs:** bij Aurora II of Tuya met een warmtepomp die in een combimodus tapwater
+  maakt, is de schatting bij kou volgens de simulatie minder precies (S1b 0,10 tegen
+  0,06 °C).
+- **Gevolg:** geen codewijziging; de huidige code werkt al per component. De
+  doelwaarden uit §4a worden gehaald (zie daar). Dit wijkt af van review §3, rij 4.
+
+### B12 — Uitweg bij vastlopen tegen de grenzen (aangenomen)
+
+**Besluit:** een stap buiten de grenzen wordt teruggedraaid zoals nu. Na 12 reverts
+op rij (±1 uur) wordt de volgende stap buiten de grenzen niet teruggedraaid, maar
+ingekort tot de grens: θ = θ_vorig + α·Δθ, met α de grootste fractie waarvoor alle
+grenzen gelden. Daarna volgen de rate-limiting per component en de P-update zoals
+bij een gewone stap.
+
+**Probleem.** Een revert gooit de hele stap weg, en P blijft dan ongewijzigd. Ligt
+het startpunt ver van de werkelijke woning, dan schiet elke stap opnieuw over een
+grens en komt het model niet los:
+
+- ideale data, C 10 / UA 1,0, start `light`: C 6,1 en UA 0,39 na 8.000 samples
+  (5.974 reverts);
+- lekke woning (UA 1,0) vanaf `passive`: in 3 van 5 runs na 30 dagen UA 0,12–0,27,
+  met C tegen de ondergrens.
+
+**Waarom inkorten tot de grens werkt.** Het geldige gebied is convex: C, τ, g/C en
+P_int/C zijn vakken, UA is de kegel 0,03·θ0 ≤ θ1 ≤ 1,5·θ0. Langs de stap is de
+geldige fractie dus één interval [0, α*], dat met bisectie te vinden is.
+
+**Onderbouwing.** Prototype op de gecompileerde learner (controlevariant exact gelijk
+aan de echte learner), 5 seeds, RMSE 6 u op dag 30:
+
+| Situatie | Revert | Altijd inkorten | Inkorten na 12 |
+|---|---|---|---|
+| Lek vanaf passive, warm | 4,42 (3/5 vast) | 0,033 | 0,032 |
+| Lek vanaf passive, koud A3 | 5,50 (4/5 vast) | 0,54 | 0,51 |
+| S1 / S1b / S2 koud A3 | 0,017 / 0,013 / 0,290 | 0,017 / 0,014 / 0,354 | 0,015 / 0,013 / 0,287 |
+| S1 koud A2 | 0,102 | 0,106 | 0,086 |
+| S3 warm | 0,033 | 0,024 | 0,037 |
+
+- **Niet altijd inkorten:** bij kou slechter (S2 A3 +22%). Een revert gooit ook ruis
+  weg; bij weinig en onrustige data is die bescherming nuttig.
+- **Niet eerst rate-limiting en daarna de grenscontrole:** warm beter, maar koud
+  S2 A3 0,47 en S1 A2 0,20.
+- **Niet inkorten zonder P-update:** lost de vastloper niet op (5/5 vast).
+- **Drempel 12 en niet 24 of 36:** bij een vastloper in de kou 0,51 tegen 1,89. De
+  prijs is S3 warm 0,033 → 0,037; de grens in §4a wordt daarvoor ≤ 0,04 (precisie
+  bij kou gaat voor, B11).
+
+**Gevolg:** `BuildingModelLearner.BOUNDED_STEP` (12 reverts, 40 bisectiestappen) en
+de teller `boundedSteps` (in de state, in `getExcitationDiagnostics()` en in het
+diagnostiek-JSON). Een ingekorte stap telt niet als revert en zet de reeks op 0.
+
 ## 3. Fasering
 
-| Fase | Inhoud | Bewijs |
-|---|---|---|
-| **0** (3.3.1) | A1, changelog-regel, testcommentaar | Unit-test A1; bestaande tests groen |
-| **1a** | Vangnet: karakteriseringstests van de huidige learner (venster-, gap- en restoregedrag) | Groen op de huidige code |
-| **1b** | B1 venster + B2 `interruptWindow()` + service-hook in drie drivers | Simulatie (§4); unit-tests venster en hook |
-| **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie |
-| **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) |
-| **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test |
-| **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware | Handmatig |
-| **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 |
-| **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie |
+Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschiedenis.
+
+| Fase | Inhoud | Bewijs | Stand |
+|---|---|---|---|
+| **0** (3.3.1) | A1, changelog-regel, testcommentaar | Unit-test A1; bestaande tests groen | Af |
+| **1a** | Vangnet: karakteriseringstests van de huidige learner (venster-, gap- en restoregedrag) | Groen op de huidige code | Af |
+| **1b** | B1 venster + B2 `interruptWindow()` + service-hook in drie drivers | Simulatie (§4); unit-tests venster en hook | Af |
+| **1c** | B3 PSD-projectie | PSD-eigenschapstest; simulatie | Af |
+| **1d** | B4 grenzen + B5 restore-migratie + τ-logregel | Restore-tests (geldig, ongeldig, passief profiel) | Af |
+| **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Af |
+| **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware (§10) | Handmatig | Af (voorbereid) |
+| **1g** | B12 uitweg bij vastlopen | Unit-tests N13, N18–N20; simulatie `adr062.js b12` | Af |
+| **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
+| **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie | Open |
+
+Fase 1a t/m 1g staan op `feature/adr-062-phase1`; fase 1 komt als geheel op
+`main` voor 3.4.0. 1f is voorbereid: versie, changelog en checklist (§10).
+Uitbrengen volgt na de hardwaretest van 3.3.1 en van 3.4.0.
 
 ## 4. Testaanpak
 
@@ -267,12 +371,23 @@ met de prototype-rij "fixes + 60 min".
 
 | Scenario | Script | Grens na fase 1 |
 |---|---|---|
-| S1, S1b, S3 realistisch | `scenarios.js`, `adr062.js b1` | RMSE ≤ 0,03 °C |
+| S1, S1b realistisch | `scenarios.js`, `adr062.js b1` | RMSE ≤ 0,03 °C |
+| S3 realistisch | idem | RMSE ≤ 0,04 °C (B12) |
 | S2 realistisch | idem | RMSE ≤ 0,05 °C |
 | S1b koud, poorten Aurora III | `adr062.js b2` | RMSE ≤ 0,08 °C |
 | S5 passief | `adr062.js b4` | > 0 updates; RMSE ≤ 0,05 °C |
 | Alle scenario's | alle | 0 niet-PSD-updates; 0 keer `XᵀPX < 0` |
 | Restore oude states | `adr062.js b5` | Geldige states behouden; RMSE na 10 dagen niet slechter dan zonder restore + 0,02 |
+| Vastlopers | `adr062.js b12` | Lek huis vanaf `passive`, warm: RMSE ≤ 0,05 °C; unit-test N13 (start `light`) binnen 10% |
+
+Gecontroleerd zonder uniforme rate-limiting (B11): mild S1 0,02, S1b 0,02, S2 0,03, S3 0,03;
+koud (poorten Aurora III) S1b 0,01; passief S5 0,04. Alle grenzen worden gehaald. De
+prototype-rij "fixes" in `adr062.js` gebruikt vanaf fase 1c PSD en grenzen zonder uniforme
+schaling.
+
+Met B12 (fase 1g): mild S1 0,02, S1b 0,02, S2 0,03, S3 0,04; koud (poorten Aurora III)
+S1b 0,01; passief S5 0,03; lek huis vanaf `passive` 0,03 (warm) en 0,52 (koud A3).
+De prototype-rij "fixes" gebruikt dan ook `clipAfter: 12`.
 
 Een nieuw npm-script `simulate:building-model` draait deze scripts na `npm run build`.
 Ze gaan niet in `npm test`, omdat ze samen ruim 10 seconden duren; ze staan wel in de
@@ -326,6 +441,9 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 - VFF herontwerpen (review §6.4).
 - Een state automatisch naar de grens clampen bij restore (B5).
 - Een nieuwe capability voor de voorspelfout (B6).
+- De uniforme rate-limiting uit review §2.1 (B11).
+- Een stap altijd inkorten tot de grens, de rate-limiting vóór de grenscontrole zetten,
+  of inkorten zonder P-update (B12).
 - De consolidatie inclusief Tuya (review §2.5).
 
 ## 8. Te verifiëren
@@ -341,14 +459,53 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 
 ## 9. Actiepunten
 
-| # | Actie | Fase |
+| # | Actie | Fase | Stand |
+|---|---|---|---|
+| 1 | A1, changelog-regel drempeltriggers, testcommentaar | 0 | Af |
+| 2 | Karakteriseringstests learner | 1a | Af |
+| 3 | Venster, `interruptWindow()`, service-hook (3×) | 1b | Af |
+| 4 | PSD-projectie | 1c | Af |
+| 5 | Grenzen, restore-migratie, τ-logregel | 1d | Af |
+| 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Af |
+| 7 | npm-script `simulate:building-model` | 1a | Af |
+| 8 | Release 3.4.0 via testkanaal (§10) | 1f | Af (voorbereid) |
+| 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |
+| 10 | Soft reset bij profielwissel Aurora II/III, voorspelfout leeg na soft reset, gidsen en dev-docs bijgewerkt | 1f | Af |
+| 11 | B12 uitweg bij vastlopen tegen de grenzen | 1g | Af |
+
+## 10. Releasechecklist 3.4.0
+
+**Volgorde:** 3.3.1 wordt eerst apart uitgebracht, met een eigen hardwaretest
+(B10). 3.4.0 volgt daarna, ook via het testkanaal. Zo blijft er een geteste
+versie om op terug te vallen.
+
+### A. Automatisch, op de branch vóór de PR
+
+| # | Commando | Verwacht |
 |---|---|---|
-| 1 | A1, changelog-regel drempeltriggers, testcommentaar | 0 |
-| 2 | Karakteriseringstests learner | 1a |
-| 3 | Venster, `interruptWindow()`, service-hook (3×) | 1b |
-| 4 | PSD-projectie | 1c |
-| 5 | Grenzen, restore-migratie, τ-logregel | 1d |
-| 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e |
-| 7 | npm-script `simulate:building-model` | 1a |
-| 8 | Release 3.4.0 via testkanaal | 1f |
-| 9 | B7, B8 na ADR-005 fase 3 | 3 |
+| A1 | `npm test` | Alles groen |
+| A2 | `npm run lint` en ESLint op de gewijzigde TS-bestanden | Geen nieuwe fouten in de gewijzigde bestanden |
+| A3 | `homey app validate` | OK op niveau `publish` |
+| A4 | `npm run simulate:building-model` | De grenzen uit §4a: S1, S1b ≤ 0,03; S3 ≤ 0,04; S2 ≤ 0,05; S1b koud A3 ≤ 0,08; S5 > 0 updates en ≤ 0,05; lek vanaf `passive` warm ≤ 0,05; 0 niet-PSD-updates; B5-states 5/5 geldig |
+| A5 | Versie in `.homeycompose/app.json`, `app.json`, `package.json` en twee keer in `package-lock.json` | Overal 3.4.0 |
+
+### B. Testkanaal en hardware, per driver (Tuya, Aurora II, Aurora III)
+
+| # | Controle |
+|---|---|
+| B1 | De eerste start na de update logt `State RESTORED` met C, UA en τ, of `State REJECTED` met de reden |
+| B2 | Ongeveer 60 minuten na de start loopt `sampleCount` op en verschijnt de logregel `λ=0.9990` |
+| B3 | Bij ontdooien, tapwater (Aurora III) of buiten de verwarmingsmodus verschijnt `Window filling`: het venster begint opnieuw |
+| B4 | De instelling "Leren: Vergeetfactor" toont het bereik 0.9985–0.9995; een lagere waarde wordt niet geaccepteerd |
+| B5 | Na een herstart van de app één keer `Initialized` en geen dubbele leercycli |
+| B6 | Na 24 uur liggen C, UA en τ in een plausibel bereik; noteer ze per unit voor vergelijking met 3.3.1 |
+| B7 | Aurora II en III: een gewijzigd gebouwtype logt `Soft reset complete` met het nieuwe profiel |
+| B8 | Geen lange reeks `RLS DIVERGENCE DETECTED`: na 12 op rij volgt `Bounded step` |
+
+`predictionRmse24h` (B6) is op hardware niet direct zichtbaar; het zit in
+`getDiagnosticStatus()` en is door unit-tests gedekt. ADR-063 kan het tonen.
+
+### C. Uitbrengen
+
+- PR van `feature/adr-062-phase1` naar `main`, merge na groene CI.
+- Tag en GitHub-release via `github-release-manager`, na de hardware-acceptatie.

@@ -85,7 +85,7 @@ export function getDynamicPInt(hour: number, basePInt: number): number {
 }
 
 export interface BuildingModelConfig {
-  forgettingFactor: number; // 0.995-0.9995, default 0.999 = balance stability/adaptivity
+  forgettingFactor: number; // 0.9985-0.9995 (clamped, ADR-062 §2.8), default 0.999
   initialCovariance: number; // 100 = high initial uncertainty
   minSamplesForConfidence: number; // 288 = 24 hours @ 5min intervals
   buildingProfile?: BuildingProfileType; // Building type for initial parameters
@@ -113,6 +113,16 @@ export interface BuildingModel {
 }
 
 /**
+ * ADR-062 §2.5: Explicit outcome of restoreState(), so callers do not have to
+ * infer a rejection from sample counts.
+ */
+export interface RestoreResult {
+  restored: boolean; // false = state rejected, learner reset to profile defaults
+  reasons: string[]; // Validation errors when rejected (empty when restored)
+  covarianceProjected: boolean; // true = stored P was not PSD and has been projected
+}
+
+/**
  * Building Model Learner using Recursive Least Squares algorithm
  */
 export class BuildingModelLearner {
@@ -131,6 +141,15 @@ export class BuildingModelLearner {
   private consecutiveReverts = 0;
   private totalReverts = 0;
   private rateLimitActivations = 0;
+  private boundedSteps = 0; // ADR-062 B12: steps shortened to the bounds after a revert streak
+
+  // ADR-062 B1/B2: recent accepted measurements forming the dT/dt window (not persisted)
+  private window: MeasurementData[] = [];
+  private windowInterrupted = false;
+
+  // ADR-062 B6: a-priori prediction errors (°C/h) of the last 24 hours (not persisted)
+  private residuals: { timestamp: number; error: number }[] = [];
+  private currentTimestamp = 0; // Timestamp of the measurement driving the current update
 
   // =========================================================================
   // DEFENSIVE LAYER 1: Measurement Validation Bounds
@@ -145,8 +164,44 @@ export class BuildingModelLearner {
     tOutdoor_min: -25.0, // Minimum outdoor temp (°C) — ADR-056: verruimd van -10, koudegolf is juist waardevol leermoment
     tOutdoor_max: 50.0, // Maximum outdoor temp (°C)
     solarRadiation_max: 1200.0, // Maximum solar radiation (W/m²)
-    dt_max_hours: 0.25, // ADR-056: max 15 min (3× meetinterval) tussen samples — daarboven is
-    // dT/dt een gemiddelde over een gat terwijl X de huidige condities beschrijft (fysisch ongeldig)
+  };
+
+  // =========================================================================
+  // ADR-062 B1/B2: dT/dt window. dT/dt is taken over the last WINDOW_MINUTES of
+  // accepted measurements, with the inputs time-weighted over the same window
+  // (value at the start of each sub-interval). A gap above MAX_GAP_MINUTES (one
+  // missed 5-minute sample) or interruptWindow() starts a new window.
+  // =========================================================================
+  public static readonly WINDOW = {
+    WINDOW_MINUTES: 60,
+    MAX_GAP_MINUTES: 7.5,
+  };
+
+  // =========================================================================
+  // ADR-062 §2.8: Forgetting factor. The former variable forgetting factor (VFF)
+  // effectively kept λ at ≥ 0.995–0.9988 for settings below 0.999; a constant
+  // λ = 0.9985 reproduces that in the simulation. λ is clamped to this range.
+  // =========================================================================
+  public static readonly LAMBDA = {
+    MIN: 0.9985,
+    MAX: 0.9995,
+    DEFAULT: 0.999,
+  };
+
+  // =========================================================================
+  // ADR-062 B12: way out when the learner is stuck against the bounds. After
+  // AFTER_CONSECUTIVE_REVERTS reverts in a row (about one hour) the next step
+  // outside the bounds is shortened to the bounds instead of reverted.
+  // =========================================================================
+  public static readonly BOUNDED_STEP = {
+    AFTER_CONSECUTIVE_REVERTS: 12,
+    BISECTION_STEPS: 40,
+  };
+
+  // ADR-062 B6: rolling prediction error
+  public static readonly PREDICTION_ERROR = {
+    WINDOW_HOURS: 24,
+    MIN_RESIDUALS: 12, // About one hour of updates
   };
 
   // =========================================================================
@@ -168,19 +223,77 @@ export class BuildingModelLearner {
   // DEFENSIVE LAYER 2: Theta Parameter Bounds
   // Detect RLS algorithm divergence by checking physical parameter ranges
   // Derived from BUILDING_PROFILES (lines 37-62)
+  // ADR-062 B4: θ[1] is bounded through τ = 1/θ[1] and UA = θ[1]/θ[0] directly
+  // (previously theta1_* and a θ[1]/θ[0] ratio, which capped UA at 0.8 kW/°C)
   // =========================================================================
   private static readonly THETA_BOUNDS = {
     theta0_min: 1 / 40, // Min 1/C (max C = 40 kWh/°C, passive house)
     theta0_max: 1 / 5, // Max 1/C (min C = 5 kWh/°C, light building)
-    theta1_min: 0.05 / 40, // Min UA/C (UA=0.05 kW/°C, C=40) - v2.7.1: tightened from 0.02
-    theta1_max: 1.0 / 5, // Max UA/C (UA=1.0 kW/°C poor insulation, C=5)
-    theta1_theta0_ratio_min: 0.002, // θ[1]/θ[0] > 0.002 ensures τ < 500h (v2.7.1: NEW)
-    theta1_theta0_ratio_max: 0.8, // θ[1]/θ[0] < 0.8 ensures τ > 1.25h
+    tau_min: 1.25, // Min τ = C/UA in hours
+    tau_max: 800, // Max τ in hours (passive house: C 30, UA 0.05 → τ 600h)
+    ua_min: 0.03, // Min UA in kW/°C
+    ua_max: 1.5, // Max UA in kW/°C (poorly insulated detached house)
     g_c_min: 0.2 / 40, // Min g/C (g=0.2 lowest base profile value) - ADR-057 E4: seasonal multiplier removed in v2.9.6
     g_c_max: 0.8 / 5, // Max g/C (g=0.8 highest plausible base value)
     pint_c_min: 0.1 / 40, // Min P_int/C (0.1kW base × 0.4 night)
     pint_c_max: 0.6 / 5, // Max P_int/C (0.6kW base × 1.8 evening)
   };
+
+  /**
+   * ADR-062 B4/B5: Single bounds check for runtime updates and restore.
+   * Bounds are inclusive. Returns one message per violated bound (empty = valid).
+   */
+  private static thetaViolations(theta: number[]): string[] {
+    const b = BuildingModelLearner.THETA_BOUNDS;
+    const violations: string[] = [];
+    const outside = (value: number, min: number, max: number): boolean => !(value >= min && value <= max);
+
+    if (outside(theta[0], b.theta0_min, b.theta0_max)) {
+      violations.push(`C ${(1 / theta[0]).toFixed(2)} kWh/°C outside [${1 / b.theta0_max}, ${1 / b.theta0_min}]`);
+    }
+    if (!(theta[1] > 0)) {
+      violations.push(`θ[1] (UA/C) ${theta[1]} not positive`);
+    } else {
+      const tau = 1 / theta[1];
+      if (outside(tau, b.tau_min, b.tau_max)) {
+        violations.push(`τ ${tau.toFixed(1)}h outside [${b.tau_min}, ${b.tau_max}]`);
+      }
+      if (theta[0] > 0) {
+        const ua = theta[1] / theta[0];
+        if (outside(ua, b.ua_min, b.ua_max)) {
+          violations.push(`UA ${ua.toFixed(3)} kW/°C outside [${b.ua_min}, ${b.ua_max}]`);
+        }
+      }
+    }
+    if (outside(theta[2], b.g_c_min, b.g_c_max)) {
+      violations.push(`θ[2] (g/C) ${theta[2].toFixed(6)} outside [${b.g_c_min.toFixed(6)}, ${b.g_c_max.toFixed(6)}]`);
+    }
+    if (outside(theta[3], b.pint_c_min, b.pint_c_max)) {
+      violations.push(`θ[3] (P_int/C) ${theta[3].toFixed(6)} outside [${b.pint_c_min.toFixed(6)}, ${b.pint_c_max.toFixed(6)}]`);
+    }
+    return violations;
+  }
+
+  /**
+   * ADR-062 B12: largest fraction α ∈ [0, 1] of the step for which theta stays within
+   * the bounds. The valid region is convex (boxes for C, τ, g/C, P_int/C and the cone
+   * 0.03·θ[0] ≤ θ[1] ≤ 1.5·θ[0] for UA), so the valid part of the step is one interval
+   * [0, α*] and bisection finds α*. Requires a valid start point.
+   */
+  private static largestValidFraction(start: number[], step: number[]): number {
+    const at = (a: number): number[] => start.map((v, i) => v + a * step[i]);
+    let lo = 0;
+    let hi = 1;
+    for (let k = 0; k < BuildingModelLearner.BOUNDED_STEP.BISECTION_STEPS; k++) {
+      const mid = (lo + hi) / 2;
+      if (BuildingModelLearner.thetaViolations(at(mid)).length === 0) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return lo;
+  }
 
   constructor(config: BuildingModelConfig) {
     // Get building profile (default to 'average' if not specified)
@@ -208,11 +321,17 @@ export class BuildingModelLearner {
       [0, 0, 0, initCov],
     ];
 
-    this.lambda = config.forgettingFactor;
     this.sampleCount = 0;
     this.lastMeasurement = null;
     this.minSamplesForConfidence = config.minSamplesForConfidence;
     this.logger = config.logger || (() => { });
+
+    const { MIN, MAX, DEFAULT } = BuildingModelLearner.LAMBDA;
+    const configured = Number.isFinite(config.forgettingFactor) ? config.forgettingFactor : DEFAULT;
+    this.lambda = Math.min(MAX, Math.max(MIN, configured));
+    if (this.lambda !== configured) {
+      this.logger(`BuildingModelLearner: forgetting factor ${config.forgettingFactor} clamped to ${this.lambda} (valid: ${MIN} - ${MAX})`);
+    }
 
     this.logger(
       `BuildingModelLearner: Initialized with profile ${config.buildingProfile || 'average'} `
@@ -221,104 +340,103 @@ export class BuildingModelLearner {
   }
 
   /**
-   * Add new measurement and update model using RLS algorithm
+   * Add new measurement and update model using RLS algorithm.
+   *
+   * ADR-062 B1/B2: the RLS update uses dT/dt over the last 60 minutes of accepted
+   * measurements, with time-weighted inputs over the same window. Every accepted
+   * measurement counts in sampleCount (also while the window fills).
    */
   public addMeasurement(data: MeasurementData): void {
+    // =========================================================================
+    // DEFENSIVE LAYER 1: Measurement Validation
+    // Reject physically impossible or extreme values BEFORE they enter the window
+    // =========================================================================
+    const validationFailure = this.validateMeasurement(data);
+    if (validationFailure) {
+      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping, window restarts');
+      this.logger(`  Reason: ${validationFailure}`);
+      this.interruptWindow();
+      return;
+    }
+
     // First measurement - just store it
     // DEFENSIVE: Also treat as first if lastMeasurement is null (corrupted state recovery)
     if (this.sampleCount === 0 || this.lastMeasurement === null) {
       this.lastMeasurement = data;
+      this.window = [data];
+      this.windowInterrupted = false;
       this.sampleCount++;
       this.logger(`BuildingModelLearner: First measurement stored (count was ${this.sampleCount - 1})`);
       return;
     }
 
-    // Calculate temperature change rate (dT/dt)
     const dt = (data.timestamp - this.lastMeasurement.timestamp) / 3600000; // Convert ms to hours
     if (dt <= 0) {
       this.logger('BuildingModelLearner: Invalid time delta, skipping measurement');
       return;
     }
 
-    // ADR-056: dt-gap guard — na een app-herstart of gemiste ticks is dT/dt over het gat
-    // gemiddeld terwijl de X-vector (vermogen, temperaturen, solar) van nú is.
-    // Sample niet leren, maar wél als nieuw referentiepunt opslaan zodat de volgende meting klopt.
-    if (dt > BuildingModelLearner.MEASUREMENT_BOUNDS.dt_max_hours) {
+    // ADR-062 B2: a gap (missed sample) or an interrupted window starts a new window here.
+    // Not learned and not counted; stored as the new reference point.
+    const { WINDOW_MINUTES, MAX_GAP_MINUTES } = BuildingModelLearner.WINDOW;
+    if (this.windowInterrupted || dt * 60 > MAX_GAP_MINUTES) {
       this.logger(
-        `BuildingModelLearner: ⚠️ Time gap ${(dt * 60).toFixed(0)}min > `
-        + `${BuildingModelLearner.MEASUREMENT_BOUNDS.dt_max_hours * 60}min — skipping RLS update, `
-        + 'measurement stored as new reference point',
+        `BuildingModelLearner: ${this.windowInterrupted ? 'Window interrupted' : `Time gap ${(dt * 60).toFixed(1)}min > ${MAX_GAP_MINUTES}min`}`
+        + ' — measurement stored as new reference point',
       );
       this.lastMeasurement = data;
+      this.window = [data];
+      this.windowInterrupted = false;
       return;
     }
 
-    const dT = data.tIndoor - this.lastMeasurement!.tIndoor;
-    const dtDt = dT / dt; // °C/hour
-
-    // =========================================================================
-    // DEFENSIVE LAYER 1: Measurement Validation
-    // Reject physically impossible or extreme values BEFORE RLS update
-    // =========================================================================
-    const bounds = BuildingModelLearner.MEASUREMENT_BOUNDS;
-    let validationFailure: string | null = null;
-
-    // Check temperature change rate (most critical - indicates sensor errors)
-    if (Math.abs(dtDt) > bounds.dT_dt_max) {
-      validationFailure = `Temperature change rate too high: ${dtDt.toFixed(2)}°C/h (max: ±${bounds.dT_dt_max})`;
-    } else if (data.pHeating < bounds.pHeating_min || data.pHeating > bounds.pHeating_max) {
-      // Check heating power bounds
-      validationFailure = `Heating power out of bounds: ${data.pHeating.toFixed(2)}kW (valid: ${bounds.pHeating_min}-${bounds.pHeating_max})`;
-    } else if (data.tIndoor < bounds.tIndoor_min || data.tIndoor > bounds.tIndoor_max) {
-      // Check indoor temperature bounds
-      validationFailure = `Indoor temperature out of bounds: ${data.tIndoor.toFixed(1)}°C (valid: ${bounds.tIndoor_min}-${bounds.tIndoor_max})`;
-    } else if (data.tOutdoor < bounds.tOutdoor_min || data.tOutdoor > bounds.tOutdoor_max) {
-      // Check outdoor temperature bounds
-      validationFailure = `Outdoor temperature out of bounds: ${data.tOutdoor.toFixed(1)}°C (valid: ${bounds.tOutdoor_min}-${bounds.tOutdoor_max})`;
-    } else if (data.solarRadiation !== undefined
-      && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
-      // Check solar radiation bounds (if provided)
-      validationFailure = `Solar radiation out of bounds: ${data.solarRadiation.toFixed(0)}W/m² (valid: 0-${bounds.solarRadiation_max})`;
-    }
-
-    // If validation failed, log and skip RLS update
-    if (validationFailure) {
-      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping RLS update');
-      this.logger(`  Reason: ${validationFailure}`);
-      this.logger(
-        `  Values: dT/dt=${dtDt.toFixed(2)}°C/h, pHeating=${data.pHeating.toFixed(2)}kW, `
-        + `tIn=${data.tIndoor.toFixed(1)}°C, tOut=${data.tOutdoor.toFixed(1)}°C`,
-      );
-      // Early return - do NOT update lastMeasurement, do NOT increment sampleCount
-      // This preserves learning continuity while rejecting bad data
+    // Spike guard over the last sub-interval: a jump above the dT/dt bound is a sensor
+    // error, not building physics; a 60-minute window would otherwise smear it out.
+    const stepRate = (data.tIndoor - this.lastMeasurement.tIndoor) / dt; // °C/hour
+    if (Math.abs(stepRate) > BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max) {
+      this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping, window restarts');
+      this.logger(`  Reason: Temperature change rate too high: ${stepRate.toFixed(2)}°C/h (max: ±${BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max})`);
+      this.interruptWindow();
       return;
     }
 
-    // Apply time-of-day P_int multiplier if enabled
-    const hour = new Date(data.timestamp).getHours();
-    const pIntMultiplier = this.enableDynamicPInt
-      ? getDynamicPInt(hour, this.basePInt) / this.basePInt
-      : 1.0;
+    // After a restore the window is empty: continue from the restored reference point
+    if (this.window.length === 0) {
+      this.window = [this.lastMeasurement];
+    }
+    this.window.push(data);
+    const windowMs = WINDOW_MINUTES * 60000;
+    while (this.window.length > 2 && data.timestamp - this.window[1].timestamp >= windowMs) {
+      this.window.shift();
+    }
 
-    // Build input vector X = [pHeating, (tOut - tIn), Solar_kW, constant_term]
-    // Sign convention: (tOut - tIn) is negative in winter (indoor warmer than outdoor)
-    // → θ[1] × (tOut - tIn) correctly gives negative heat loss contribution to dT/dt
-    // Solar converted to kW/m² (÷1000) to match θ[2] calibration (g/C in kW per kW/m²)
-    // v2.9.6: No seasonal multiplier — astronomical estimation already encodes seasonal variation
-    // via declination-based peak irradiance (200–800 W/m²) and correct sunrise/sunset times.
-    const X = [
-      data.pHeating, // Heating power (kW)
-      data.tOutdoor - data.tIndoor, // Temperature difference (°C) — negative in winter → heat loss subtracts
-      (data.solarRadiation || 0) / 1000, // Solar in kW/m²
-      pIntMultiplier, // Constant term scaled for time-varying P_int
-    ];
-
-    // Perform RLS update
-    this.updateRLS(X, dtDt);
-
-    // Store measurement for next iteration
     this.lastMeasurement = data;
     this.sampleCount++;
+
+    const spanMs = data.timestamp - this.window[0].timestamp;
+    if (spanMs >= windowMs) {
+      // Time-weighted inputs over the window, value at the start of each sub-interval.
+      // X = [pHeating, (tOut - tIn), Solar_kW, P_int multiplier]
+      // Sign convention: (tOut - tIn) is negative in winter (indoor warmer than outdoor)
+      // → θ[1] × (tOut - tIn) correctly gives negative heat loss contribution to dT/dt
+      // Solar converted to kW/m² (÷1000) to match θ[2] calibration (g/C in kW per kW/m²)
+      const X = [0, 0, 0, 0];
+      for (let j = 0; j < this.window.length - 1; j++) {
+        const sample = this.window[j];
+        const weight = (this.window[j + 1].timestamp - sample.timestamp) / spanMs;
+        X[0] += sample.pHeating * weight;
+        X[1] += (sample.tOutdoor - sample.tIndoor) * weight;
+        X[2] += ((sample.solarRadiation || 0) / 1000) * weight;
+        X[3] += this.pIntMultiplierAt(sample.timestamp) * weight;
+      }
+      const dtDt = (data.tIndoor - this.window[0].tIndoor) / (spanMs / 3600000); // °C/hour
+      if (Math.abs(dtDt) <= BuildingModelLearner.MEASUREMENT_BOUNDS.dT_dt_max) {
+        this.currentTimestamp = data.timestamp;
+        this.updateRLS(X, dtDt);
+      }
+    } else if (this.window.length === 2) {
+      this.logger(`BuildingModelLearner: Window filling (${WINDOW_MINUTES} min needed before the next update)`);
+    }
 
     // Log progress at milestones
     if (this.sampleCount % 100 === 0) {
@@ -329,6 +447,72 @@ export class BuildingModelLearner {
         + `confidence=${model.confidence.toFixed(0)}%`,
       );
     }
+  }
+
+  /**
+   * ADR-062 B6: Store one a-priori prediction error and drop errors older than 24 hours.
+   */
+  private recordResidual(error: number): void {
+    const cutoff = this.currentTimestamp - BuildingModelLearner.PREDICTION_ERROR.WINDOW_HOURS * 3600000;
+    this.residuals.push({ timestamp: this.currentTimestamp, error });
+    while (this.residuals.length > 0 && this.residuals[0].timestamp < cutoff) {
+      this.residuals.shift();
+    }
+  }
+
+  /**
+   * ADR-062 B6: RMSE (°C/h) of the a-priori prediction errors over the last 24 hours
+   * of updates. Diagnostic only (no capability, no gating); null until enough updates.
+   * Not persisted: after a restart it is null for about an hour.
+   */
+  public getPredictionRmse24h(): number | null {
+    if (this.residuals.length < BuildingModelLearner.PREDICTION_ERROR.MIN_RESIDUALS) {
+      return null;
+    }
+    const sumSquares = this.residuals.reduce((sum, r) => sum + r.error * r.error, 0);
+    return Math.sqrt(sumSquares / this.residuals.length);
+  }
+
+  /**
+   * ADR-062 B2: the next accepted measurement starts a new window. Called by the
+   * service for every sample that a gate keeps from the learner (mode, defrost,
+   * hot water, missing power or COP), so dT/dt never spans a blocked interval.
+   */
+  public interruptWindow(): void {
+    this.window = [];
+    this.windowInterrupted = true;
+  }
+
+  /**
+   * Bounds check for one measurement (DEFENSIVE LAYER 1); null when valid.
+   */
+  private validateMeasurement(data: MeasurementData): string | null {
+    const bounds = BuildingModelLearner.MEASUREMENT_BOUNDS;
+    if (data.pHeating < bounds.pHeating_min || data.pHeating > bounds.pHeating_max) {
+      return `Heating power out of bounds: ${data.pHeating.toFixed(2)}kW (valid: ${bounds.pHeating_min}-${bounds.pHeating_max})`;
+    }
+    if (data.tIndoor < bounds.tIndoor_min || data.tIndoor > bounds.tIndoor_max) {
+      return `Indoor temperature out of bounds: ${data.tIndoor.toFixed(1)}°C (valid: ${bounds.tIndoor_min}-${bounds.tIndoor_max})`;
+    }
+    if (data.tOutdoor < bounds.tOutdoor_min || data.tOutdoor > bounds.tOutdoor_max) {
+      return `Outdoor temperature out of bounds: ${data.tOutdoor.toFixed(1)}°C (valid: ${bounds.tOutdoor_min}-${bounds.tOutdoor_max})`;
+    }
+    if (data.solarRadiation !== undefined
+      && (data.solarRadiation < 0 || data.solarRadiation > bounds.solarRadiation_max)) {
+      return `Solar radiation out of bounds: ${data.solarRadiation.toFixed(0)}W/m² (valid: 0-${bounds.solarRadiation_max})`;
+    }
+    return null;
+  }
+
+  /**
+   * Time-of-day P_int multiplier for the RLS input (1.0 when dynamic P_int is off).
+   */
+  private pIntMultiplierAt(timestamp: number): number {
+    if (!this.enableDynamicPInt) {
+      return 1.0;
+    }
+    const hour = new Date(timestamp).getHours();
+    return getDynamicPInt(hour, this.basePInt) / this.basePInt;
   }
 
   /**
@@ -347,86 +531,63 @@ export class BuildingModelLearner {
    * P = (1/λ) × (P - K × X^T × P)         (Covariance update)
    */
   private updateRLS(X: number[], y: number): void {
-    // =========================================================================
-    // DEFENSIVE LAYER 3: Variable Forgetting Factor (VFF-RLS)
-    // v2.7.7: Error-based adaptive λ - key insight from scientific literature:
-    // - Small prediction error → λ → 0.9999 (stable, minimal learning)
-    // - Large prediction error → λ → 0.995 (fast tracking)
-    // This prevents both convergence stalling AND rapid divergence
-    // Reference: University of Michigan RLS research, IEEE VFF-RLS papers
-    // =========================================================================
+    // ADR-062 §2.8: constant forgetting factor (the former VFF was removed)
+    const { lambda } = this;
     const prediction = this.dotProduct(X, this.theta);
-    const predictionError = Math.abs(y - prediction);
 
-    // Normalize error: 2.0°C/h considered maximum reasonable error
-    const errorNormalized = Math.min(predictionError / 2.0, 1.0);
+    // ADR-062 B6: record the a-priori prediction error (also for updates that are reverted)
+    this.recordResidual(y - prediction);
 
-    // Sigmoid mapping: smooth transition between stable and tracking modes
-    // At error=0.5°C/h → sigmoid ≈ 0.5 (balanced)
-    // At error<0.2°C/h → sigmoid ≈ 0.1 (stable mode)
-    // At error>1.0°C/h → sigmoid ≈ 0.9 (tracking mode)
-    const sigmoid = 1 / (1 + Math.exp(-5 * (errorNormalized - 0.25)));
-
-    // Adaptive lambda: 0.9999 (stable) to 0.995 (fast tracking)
-    const vffLambda = 0.9999 - sigmoid * (0.9999 - 0.995);
-
-    // ADR-056: voormalig warmup-mechanisme (0.999 − n/100000) verwijderd — met de
-    // geconfigureerde λ ≥ 0.999 was die term vanaf sample 1 al inert.
-    // De geconfigureerde forgetting factor fungeert als ondergrens; VFF kan alleen verhogen.
-    const adaptiveLambda = Math.max(vffLambda, this.lambda);
-
-    // Log VFF activity at milestones
     if (this.sampleCount % 100 === 0) {
-      this.logger(
-        `BuildingModelLearner: VFF λ=${adaptiveLambda.toFixed(4)} `
-        + `(error=${predictionError.toFixed(3)}°C/h, sigmoid=${sigmoid.toFixed(2)})`,
-      );
+      this.logger(`BuildingModelLearner: λ=${lambda.toFixed(4)} (error=${Math.abs(y - prediction).toFixed(3)}°C/h)`);
     }
 
     // Step 1: Compute Kalman gain K = P × X / (λ + X^T × P × X)
     const PX = this.matrixVectorMultiply(this.P, X);
-    const denominator = adaptiveLambda + this.dotProduct(X, PX);
+    const denominator = lambda + this.dotProduct(X, PX);
     const K = PX.map((val) => val / denominator);
 
     // Step 2: Update parameters θ = θ + K × (y - X^T × θ)
-    const error = y - prediction; // prediction already calculated above for VFF
+    const error = y - prediction;
 
     // =========================================================================
     // DEFENSIVE LAYER 2: Save theta before update for potential reversion
     // =========================================================================
     const thetaPrevious = [...this.theta]; // Shallow copy (4 numbers)
 
-    this.theta = this.theta.map((val, i) => val + K[i] * error);
+    const step = K.map((k) => k * error);
+    this.theta = this.theta.map((val, i) => val + step[i]);
 
     // =========================================================================
     // DEFENSIVE LAYER 2: Theta Parameter Bounds Checking
     // Detect RLS divergence by validating physical parameter ranges
     // =========================================================================
-    const bounds = BuildingModelLearner.THETA_BOUNDS;
-    const theta0Valid = this.theta[0] >= bounds.theta0_min && this.theta[0] <= bounds.theta0_max;
-    const theta1Valid = this.theta[1] >= bounds.theta1_min && this.theta[1] <= bounds.theta1_max;
-    const theta2Valid = this.theta[2] >= bounds.g_c_min && this.theta[2] <= bounds.g_c_max;
-    const theta3Valid = this.theta[3] >= bounds.pint_c_min && this.theta[3] <= bounds.pint_c_max;
-    // v2.7.1: Added ratio minimum check to prevent τ > 500h (θ[1]/θ[0] > 0.002)
-    const ratioMinValid = this.theta[1] > this.theta[0] * bounds.theta1_theta0_ratio_min;
-    const ratioMaxValid = this.theta[1] < this.theta[0] * bounds.theta1_theta0_ratio_max;
+    const violations = BuildingModelLearner.thetaViolations(this.theta);
 
-    const allValid = theta0Valid && theta1Valid && theta2Valid && theta3Valid && ratioMinValid && ratioMaxValid;
+    // ADR-062 B12: after a revert streak, shorten the step to the bounds instead of reverting
+    const stuck = violations.length > 0
+      && this.consecutiveReverts >= BuildingModelLearner.BOUNDED_STEP.AFTER_CONSECUTIVE_REVERTS
+      && BuildingModelLearner.thetaViolations(thetaPrevious).length === 0;
 
-    if (!allValid) {
-      // RLS algorithm has diverged - log detailed diagnostics and revert
-      const tauEstimate = this.theta[0] / this.theta[1]; // 1/C ÷ UA/C = 1/UA × C/1 = C/UA = τ
-      this.logger('BuildingModelLearner: ⚠️ RLS DIVERGENCE DETECTED - reverting theta');
-      this.logger(`  θ[0] (1/C):     ${this.theta[0].toFixed(6)} [valid: ${bounds.theta0_min.toFixed(6)} - ${bounds.theta0_max.toFixed(6)}] ${theta0Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[1] (UA/C):    ${this.theta[1].toFixed(6)} [valid: ${bounds.theta1_min.toFixed(6)} - ${bounds.theta1_max.toFixed(6)}] ${theta1Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[2] (g/C):     ${this.theta[2].toFixed(6)} [valid: ${bounds.g_c_min.toFixed(6)} - ${bounds.g_c_max.toFixed(6)}] ${theta2Valid ? '✅' : '❌'}`);
-      this.logger(`  θ[3] (P_int/C): ${this.theta[3].toFixed(6)} [valid: ${bounds.pint_c_min.toFixed(6)} - ${bounds.pint_c_max.toFixed(6)}] ${theta3Valid ? '✅' : '❌'}`);
+    if (stuck) {
+      const alpha = BuildingModelLearner.largestValidFraction(thetaPrevious, step);
+      this.theta = thetaPrevious.map((val, i) => val + alpha * step[i]);
+      this.boundedSteps++;
       this.logger(
-        `  θ[1]/θ[0] ratio: ${(this.theta[1] / this.theta[0]).toFixed(6)}`
-        + ` [valid: ${bounds.theta1_theta0_ratio_min} - ${bounds.theta1_theta0_ratio_max}]`
-        + ` ${ratioMinValid && ratioMaxValid ? '✅' : '❌'}`,
+        `BuildingModelLearner: Bounded step (α=${alpha.toFixed(3)}) after ${this.consecutiveReverts} reverts in a row`
+        + ` — ${violations.join('; ')}`,
       );
-      this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: 1.25 - 500]`);
+    } else if (violations.length > 0) {
+      // RLS algorithm has diverged - log detailed diagnostics and revert
+      const bounds = BuildingModelLearner.THETA_BOUNDS;
+      const tauEstimate = 1 / this.theta[1]; // τ = C/UA = (1/θ[0]) / (θ[1]/θ[0]) = 1/θ[1]
+      this.logger('BuildingModelLearner: ⚠️ RLS DIVERGENCE DETECTED - reverting theta');
+      violations.forEach((violation) => this.logger(`  ❌ ${violation}`));
+      this.logger(
+        `  Candidate: C ${(1 / this.theta[0]).toFixed(2)} kWh/°C, UA ${(this.theta[1] / this.theta[0]).toFixed(3)} kW/°C`
+        + `, θ[2] ${this.theta[2].toFixed(6)}, θ[3] ${this.theta[3].toFixed(6)}`,
+      );
+      this.logger(`  τ estimate: ${tauEstimate.toFixed(1)}h [valid: ${bounds.tau_min} - ${bounds.tau_max}]`);
       this.logger('  Action: Reverted to previous theta, kept P matrix for uncertainty tracking');
 
       // REVERT: Restore previous theta (keep P matrix to maintain uncertainty)
@@ -441,7 +602,7 @@ export class BuildingModelLearner {
       return;
     }
 
-    // ADR-057 W3: Valid update — reset the consecutive revert streak
+    // ADR-057 W3: Valid (or, ADR-062 B12, bounded) update — reset the consecutive revert streak
     this.consecutiveReverts = 0;
 
     // =========================================================================
@@ -487,37 +648,78 @@ export class BuildingModelLearner {
     // bevochten op de divergentie-incidenten die tot de v2.7.x-mitigaties leidden.
     // De confidence-formule en diagnostiekdrempels zijn op deze range geijkt
     // (trace na eerste update: ~0.0004 – 4.0).
+    //
+    // ADR-062 B3: the bounds are applied to the eigenvalues of P (spectral clamping),
+    // so P stays symmetric positive semi-definite. The former diagonal clamp plus
+    // off-diagonal clip bounded the elements but could leave P indefinite.
     // =========================================================================
-    // ADR-057 W1 (referentieproject): bounds come from RLS_COVARIANCE (single source of truth)
-    const { P_FLOOR, P_CEILING } = BuildingModelLearner.RLS_COVARIANCE;
-
     const KX = this.outerProduct(K, X);
     const KXP = this.matrixMultiply(KX, this.P);
-    this.P = this.P.map((row, i) => row.map((val, j) => {
-      const updated = (val - KXP[i][j]) / adaptiveLambda;
-      // Apply floor AND ceiling to diagonal elements
-      if (i === j) {
-        return Math.max(P_FLOOR, Math.min(P_CEILING, updated));
-      }
-      return updated;
-    }));
+    const updated = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / lambda));
+    this.P = BuildingModelLearner.projectCovariance(updated);
+  }
 
-    // =========================================================================
-    // ADR-056: Symmetrie-afdwinging + off-diagonaal-clip
-    // De diagonale clamping hierboven kan P asymmetrisch/niet-PSD maken terwijl
-    // off-diagonalen door de λ-deling onbegrensd groeien. Twee goedkope correcties:
-    // 1. P = (P + Pᵀ)/2 — herstelt symmetrie
-    // 2. |P[i][j]| ≤ √(P[i][i]·P[j][j]) — garandeert een consistente correlatiestructuur
-    // =========================================================================
-    for (let i = 0; i < 4; i++) {
-      for (let j = i + 1; j < 4; j++) {
-        const symmetrized = (this.P[i][j] + this.P[j][i]) / 2;
-        const maxAbs = Math.sqrt(this.P[i][i] * this.P[j][j]);
-        const clipped = Math.max(-maxAbs, Math.min(maxAbs, symmetrized));
-        this.P[i][j] = clipped;
-        this.P[j][i] = clipped;
+  /**
+   * ADR-062 B3: symmetrize P and clamp its eigenvalues to [P_FLOOR, P_CEILING].
+   * ADR-057 W1 (referentieproject): bounds come from RLS_COVARIANCE (single source of truth).
+   */
+  private static projectCovariance(P: number[][]): number[][] {
+    const { P_FLOOR, P_CEILING } = BuildingModelLearner.RLS_COVARIANCE;
+    const n = P.length;
+    const { values, vectors } = BuildingModelLearner.symmetricEigen(P);
+    const clamped = values.map((v) => Math.max(P_FLOOR, Math.min(P_CEILING, v)));
+    const out: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        let sum = 0;
+        for (let k = 0; k < n; k++) sum += vectors[i][k] * clamped[k] * vectors[j][k];
+        out[i][j] = sum;
       }
     }
+    return out;
+  }
+
+  /**
+   * Eigen-decomposition of the symmetric part of a small matrix (cyclic Jacobi).
+   * Returns eigenvalues and eigenvectors as columns of `vectors`.
+   */
+  private static symmetricEigen(P: number[][]): { values: number[]; vectors: number[][] } {
+    const n = P.length;
+    const a = P.map((row, i) => row.map((x, j) => (x + P[j][i]) / 2));
+    const v: number[][] = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (__, j) => (i === j ? 1 : 0)));
+    for (let sweep = 0; sweep < 60; sweep++) {
+      let off = 0;
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) off += a[i][j] * a[i][j];
+      if (off < 1e-24) break;
+      for (let p = 0; p < n; p++) {
+        for (let q = p + 1; q < n; q++) {
+          if (Math.abs(a[p][q]) < 1e-300) continue;
+          const theta = (a[q][q] - a[p][p]) / (2 * a[p][q]);
+          const t = Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+          const c = 1 / Math.sqrt(t * t + 1);
+          const s = t * c;
+          for (let k = 0; k < n; k++) {
+            const akp = a[k][p];
+            const akq = a[k][q];
+            a[k][p] = c * akp - s * akq;
+            a[k][q] = s * akp + c * akq;
+          }
+          for (let k = 0; k < n; k++) {
+            const apk = a[p][k];
+            const aqk = a[q][k];
+            a[p][k] = c * apk - s * aqk;
+            a[q][k] = s * apk + c * aqk;
+          }
+          for (let k = 0; k < n; k++) {
+            const vkp = v[k][p];
+            const vkq = v[k][q];
+            v[k][p] = c * vkp - s * vkq;
+            v[k][q] = s * vkp + c * vkq;
+          }
+        }
+      }
+    }
+    return { values: a.map((row, i) => row[i]), vectors: v };
   }
 
   /**
@@ -662,6 +864,9 @@ export class BuildingModelLearner {
 
     // lastMeasurement intentionally preserved — no gap in data continuity
 
+    // ADR-062 B6: the prediction errors belong to the old theta
+    this.residuals = [];
+
     this.logger(
       `BuildingModelLearner: Soft reset to profile '${profileType}' `
       + `(C: ${oldC.toFixed(1)} → ${profile.C}, `
@@ -684,6 +889,7 @@ export class BuildingModelLearner {
       consecutiveReverts: this.consecutiveReverts,
       totalReverts: this.totalReverts,
       rateLimitActivations: this.rateLimitActivations,
+      boundedSteps: this.boundedSteps,
     };
   }
 
@@ -696,16 +902,19 @@ export class BuildingModelLearner {
     consecutiveReverts: number;
     totalReverts: number;
     rateLimitActivations: number;
+    boundedSteps: number;
     } {
     return {
       consecutiveReverts: this.consecutiveReverts,
       totalReverts: this.totalReverts,
       rateLimitActivations: this.rateLimitActivations,
+      boundedSteps: this.boundedSteps,
     };
   }
 
   /**
-   * Restore state from persistence
+   * Restore state from persistence.
+   * ADR-062 §2.5: returns the outcome explicitly (restored, reasons, P projected).
    */
   public restoreState(state: {
     theta: number[];
@@ -717,7 +926,8 @@ export class BuildingModelLearner {
     consecutiveReverts?: number;
     totalReverts?: number;
     rateLimitActivations?: number;
-  }): void {
+    boundedSteps?: number;
+  }): RestoreResult {
     // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
     let stateIsValid = true;
     const validationErrors: string[] = [];
@@ -725,27 +935,11 @@ export class BuildingModelLearner {
     // ADR-057 E5 (referentieproject): Validate theta against the SAME physical bounds
     // as runtime (THETA_BOUNDS) — previously only positivity and τ>1h were checked, so
     // an out-of-bounds persisted state could re-enter the algorithm via restore.
-    const bounds = BuildingModelLearner.THETA_BOUNDS;
+    // ADR-062 B5: same thetaViolations() as runtime; no data conversion needed.
     if (state.theta && state.theta.length === 4) {
-      if (state.theta[0] < bounds.theta0_min || state.theta[0] > bounds.theta0_max) {
-        validationErrors.push(`θ[0]=${state.theta[0]} outside [${bounds.theta0_min.toFixed(6)}, ${bounds.theta0_max.toFixed(6)}] (1/C)`);
-        stateIsValid = false;
-      }
-      if (state.theta[1] < bounds.theta1_min || state.theta[1] > bounds.theta1_max) {
-        validationErrors.push(`θ[1]=${state.theta[1]} outside [${bounds.theta1_min.toFixed(6)}, ${bounds.theta1_max.toFixed(6)}] (UA/C)`);
-        stateIsValid = false;
-      }
-      if (state.theta[2] < bounds.g_c_min || state.theta[2] > bounds.g_c_max) {
-        validationErrors.push(`θ[2]=${state.theta[2]} outside [${bounds.g_c_min.toFixed(6)}, ${bounds.g_c_max.toFixed(6)}] (g/C)`);
-        stateIsValid = false;
-      }
-      if (state.theta[3] < bounds.pint_c_min || state.theta[3] > bounds.pint_c_max) {
-        validationErrors.push(`θ[3]=${state.theta[3]} outside [${bounds.pint_c_min.toFixed(6)}, ${bounds.pint_c_max.toFixed(6)}] (P_int/C)`);
-        stateIsValid = false;
-      }
-      const ratio = state.theta[0] > 0 ? state.theta[1] / state.theta[0] : -1;
-      if (ratio < bounds.theta1_theta0_ratio_min || ratio > bounds.theta1_theta0_ratio_max) {
-        validationErrors.push(`θ[1]/θ[0]=${ratio.toFixed(6)} outside [${bounds.theta1_theta0_ratio_min}, ${bounds.theta1_theta0_ratio_max}] (τ range)`);
+      const violations = BuildingModelLearner.thetaViolations(state.theta);
+      if (violations.length > 0) {
+        validationErrors.push(...violations);
         stateIsValid = false;
       }
     } else {
@@ -780,16 +974,31 @@ export class BuildingModelLearner {
       // Preserving sample count but not lastMeasurement causes null pointer crash in addMeasurement()
       this.sampleCount = 0;
       this.lastMeasurement = null;
+      this.window = [];
+      this.windowInterrupted = false;
+      this.residuals = [];
       // theta and P already initialized with defaults in constructor
       this.logger('   ✅ State restore prevented corruption - learning will restart from sample 0');
-      return;
+      return { restored: false, reasons: validationErrors, covarianceProjected: false };
     }
 
     // State is valid - restore normally
     this.theta = state.theta;
-    this.P = state.P;
+    // ADR-062 B3/B5: a stored P that is not positive semi-definite (states learned before
+    // the spectral clamping) is projected once; a valid P is kept exactly as stored.
+    const minEigen = Math.min(...BuildingModelLearner.symmetricEigen(state.P).values);
+    const covarianceProjected = minEigen < BuildingModelLearner.RLS_COVARIANCE.P_FLOOR * (1 - 1e-6);
+    if (covarianceProjected) {
+      this.P = BuildingModelLearner.projectCovariance(state.P);
+      this.logger(`BuildingModelLearner: Restored P was not positive semi-definite (min eigenvalue ${minEigen.toExponential(2)}) — projected`);
+    } else {
+      this.P = state.P;
+    }
     this.sampleCount = state.sampleCount;
     this.lastMeasurement = state.lastMeasurement;
+    this.window = []; // ADR-062 B1: the window is not persisted; it continues from lastMeasurement
+    this.windowInterrupted = false;
+    this.residuals = [];
     // Restore configuration (with defaults for backward compatibility)
     this.basePInt = state.basePInt ?? 0.3;
     this.enableDynamicPInt = state.enableDynamicPInt ?? false;
@@ -797,7 +1006,9 @@ export class BuildingModelLearner {
     this.consecutiveReverts = state.consecutiveReverts ?? 0;
     this.totalReverts = state.totalReverts ?? 0;
     this.rateLimitActivations = state.rateLimitActivations ?? 0;
+    this.boundedSteps = state.boundedSteps ?? 0; // ADR-062 B12 (0 for older states)
     this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
+    return { restored: true, reasons: [], covarianceProjected };
   }
 
   // ========================================================================
