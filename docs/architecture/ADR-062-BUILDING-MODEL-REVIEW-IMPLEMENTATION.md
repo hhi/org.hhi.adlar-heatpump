@@ -1,6 +1,6 @@
 # ADR-062: Implementatie van de review-fixes voor de gebouwleermodule
 
-**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24 en 2026-10-25): B1–B6, B10, B11 en B12 aangenomen, uit B8 ook A7, §2.5 en §2.8 (fase 1e); B7–B9 verder voorgesteld
+**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24 en 2026-10-25): B1–B6, B10, B11 en B12 aangenomen, uit B8 ook A7, §2.5 en §2.8 (fase 1e); B7–B9 en B13 verder voorgesteld
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -8,7 +8,7 @@ en het [addendum](BUILDING_MODEL_REVIEW_ADDENDUM.md);
 ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plans/decisions/`, niet in git);
 [ADR-005](ADR-005-MODBUS-CONVERGENCE.md) (gedeelde rekenservices)
 **Simulaties:** `test/simulation/building-model-review/` — `scenarios.js` (review §6) en
-`adr062.js` (B1, B2, B4, B5, B3/B6 in dit ADR)
+`adr062.js` (B1, B2, B4, B5, B3/B6 in dit ADR) en `adr062-b13.js` (B13)
 
 ---
 
@@ -33,7 +33,7 @@ ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plan
   alle drivers (B11).
 - **Aangenomen:** B1–B6, B10, B11 en B12, en uit B8 de punten A7, §2.5 en §2.8
   (fase 1e en 1g, 3.4.0). **Nog te beslissen:** B7, de rest van B8 (A4–A6) en B9
-  (fase 3).
+  (fase 3), en B13: P bijwerken met de werkelijk genomen stap (fase 1h).
 
 ---
 
@@ -339,6 +339,132 @@ aan de echte learner), 5 seeds, RMSE 6 u op dag 30:
 de teller `boundedSteps` (in de state, in `getExcitationDiagnostics()` en in het
 diagnostiek-JSON). Een ingekorte stap telt niet als revert en zet de reeks op 0.
 
+### B13 — P-update met de werkelijk genomen stap (voorgesteld)
+
+**Voorstel:** de covariantie P wordt bijgewerkt met de stap die θ werkelijk heeft
+genomen, per component. Na de grenscontrole, B12 en de rate-limiting per component
+(B11) geldt voor elke component i:
+
+```text
+s_i   = (θ_nieuw,i − θ_vorig,i) / Δθ_i        met Δθ = K·e, begrensd op [0, 1]; s_i = 1 als Δθ_i = 0
+K_eff = s ⊙ K
+P⁺    = [(I − K_eff·Xᵀ) · P · (I − K_eff·Xᵀ)ᵀ + λ · K_eff·K_effᵀ] / λ      (Joseph-vorm)
+```
+
+daarna de PSD-projectie zoals nu (B3). De volgorde van de stappen en de stap van θ
+zelf veranderen niet. Bij een stap die niet is afgeremd is K_eff = K, en dan is de
+Joseph-vorm algebraïsch gelijk aan de huidige update `(P − K·Xᵀ·P) / λ`.
+
+**Probleem.** De rate-limiter remt ongeveer de helft van de stappen af (B11), meestal
+in de richting van P_int/C. θ beweegt dan hooguit 5% per component, maar P wordt
+bijgewerkt alsof de volle stap is genomen. Het model wordt daardoor zekerder dan de
+genomen stap rechtvaardigt, precies in de richting die werd afgeremd. Op de
+testinstallatie gebeurde dat 679 keer (ADR-064 §3.5).
+
+**Waarom de Joseph-vorm.** De standaardupdate is alleen juist voor de optimale gain.
+Met een andere gain kan hij P asymmetrisch of indefiniet maken. De Joseph-vorm blijft
+voor elke gain symmetrisch en PSD, en is gelijk aan de standaardupdate bij de optimale
+gain.
+
+**Waarom per component en niet met één factor.** Eén factor s voor de hele gain (de
+projectie van de werkelijke stap op de volle stap) laat P in alle richtingen minder
+krimpen, ook in die van C. Het model wordt dan te onzeker en loopt vaker vast. Dit
+sluit aan bij B11: ook daar verloor de uniforme aanpak van de aanpak per component.
+
+**Onderbouwing.** Prototype op de gecompileerde learner (3.4.2), alleen `updateRLS()`
+vervangen. De controlevariant is in alle 15 combinaties van woning × weer exact gelijk
+aan de echte learner (RMSE, reverts, bounded steps, spoor van P). 5 seeds, venster van
+60 minuten, RMSE 6 u op dag 30 (tussen haakjes |UA-fout|):
+
+| Scenario | Weer | Huidig | Per component (B13) | Eén factor |
+|---|---|---|---|---|
+| S1 | warm | 0,024 (3%) | **0,019** (2%) | 0,032 (2%) |
+| S1b | warm | 0,024 (3%) | **0,019** (2%) | 0,032 (2%) |
+| S2 | warm | 0,032 (1%) | 0,032 (1%) | 0,032 (1%) |
+| S3 | warm | 0,037 (6%) | **0,025** (4%) | 0,040 (12%) |
+| S5 | warm | 0,029 (22%) | **0,023** (22%) | 0,023 (20%) |
+| S1 | koud A3 | 0,015 (3%) | **0,010** (3%) | 0,025 (3%) |
+| S1b | koud A3 | 0,013 (3%) | **0,010** (2%) | 0,025 (3%) |
+| S2 | koud A3 | 0,287 (7%) | **0,016** (1%) | 0,021 (1%) |
+| S3 | koud A3 | 0,032 (14%) | **0,022** (14%) | 0,036 (13%) |
+| S5 | koud A3 | 0,038 (21%) | ⚠ 0,045 (14%) | 0,042 (21%) |
+| S1 | koud A2 | 0,086 (10%) | **0,033** (5%) | 0,129 (16%) |
+| S1b | koud A2 | 0,104 (10%) | **0,034** (4%) | 0,074 (8%) |
+| S2 | koud A2 | 0,837 (25%) | 0,792 (24%) | 0,754 (19%) |
+| S3 | koud A2 | 0,079 (25%) | **0,048** (18%) | 0,088 (38%) |
+| S5 | koud A2 | 0,043 (28%) | 0,043 (33%) | 0,046 (34%) |
+
+- Minder reverts (S2 koud A3: 324 → 0; S1 koud A3: 135 → 57), en een spoor van P dat
+  ongeveer 25% groter blijft.
+- Bij een afgeremde stap is s gemiddeld 0,8–0,9: P krimpt daar 10–20% minder dan nu.
+
+**Profiel × woning** (5 woningen × 4 startprofielen, RMSE dag 1 / dag 30):
+
+- **Sneller op weg bij een verkeerd startprofiel.** Dag 1: licht vanaf `passive`
+  0,602 → 0,075; gemiddeld vanaf `passive` 0,163 → 0,028; lek vanaf `passive` (warm)
+  4,09 → 0,17.
+- **Geen vastlopers meer bij het lekke huis in de kou.** Koud A3 vanaf `light`,
+  `average` en `passive`: 0,287 / 0,289 / 0,512 (elk 1 van 5 vast) →
+  0,016 / 0,015 / 0,017 (geen vast).
+- **Zwaar huis beter:** dag 30 warm 0,031–0,037 → 0,013–0,025.
+
+**Nadelen.**
+
+- **Passieve woning in de kou.** Dag 30 bij koud A3: 0,038–0,043 → 0,037–0,048, in drie
+  van de vier startprofielen iets slechter. S5 koud A3 0,038 → 0,045, binnen de grens
+  van §4a (≤ 0,05), terwijl de UA-fout daalt (21% → 14%).
+- **Passieve woning vanaf `light`, warm:** 3 van 5 runs met een UA-fout boven 25% op
+  dag 30, tegen 2 van 5 nu. Bij de passieve woning blijft de UA-fout in alle varianten
+  hoog (14–34%), omdat UA daar zo klein is (0,07 kW/°C).
+- **S2 koud A2** (lek huis, tapwater in een combimodus telt mee) blijft slecht
+  (0,84 → 0,79). Daar zit het probleem in de invoer (ADR-064 D8), niet in P.
+- **Het trage herstel vanuit een vervuilde stand** (ADR-064 §3.5) verandert niet:
+  vanuit de stand van de testinstallatie zijn UA en P_int na 14 dagen gelijk aan nu
+  (0,313 / 0,45 bij P_diag 0,01). De stappen zijn daar klein en worden zelden
+  afgeremd. B13 kan wel voorkomen dat P door afgeremde stappen té klein wordt; dat
+  laat deze proef niet zien, omdat de start-P is opgelegd.
+
+**Grenzen §4a met B13:** mild S1 0,019, S1b 0,019, S2 0,032, S3 0,025; koud (poorten
+Aurora III) S1b 0,010; passief S5 0,023 (warm) en 0,045 (koud A3); lek huis vanaf
+`passive` 0,031 (warm) en 0,017 (koud A3). Alle grenzen worden gehaald.
+
+**Gevolg (bij aanname):**
+
+- Alleen `updateRLS()` in `building-model-learner.ts`: K_eff na de rate-limiting, en de
+  P-update in Joseph-vorm. Geen nieuwe instellingen, geen migratie van states.
+- Rekenwerk: twee extra 4×4-matrixvermenigvuldigingen per update; verwaarloosbaar
+  naast de PSD-projectie (V1).
+- Geleerde waarden verschuiven na de update; bestaande states blijven geldig.
+- Nieuwe teller in de diagnostiek: het gemiddelde van s over afgeremde stappen, zodat
+  op hardware zichtbaar is hoeveel P minder krimpt.
+
+**Testaanpak.**
+
+1. **Unit-tests learner:**
+   - zonder afremming is P na B13 gelijk aan de huidige update (verschil ≤ 1e-12);
+   - met afremming van één component krimpt P alleen in die richting minder (vóór de
+     PSD-projectie): de diagonaal van die component is groter dan nu, de elementen
+     zonder die component zijn gelijk binnen 1e-9;
+   - PSD-invariant over een reeks willekeurige X met afgeremde stappen (kleinste
+     eigenwaarde ≥ 0);
+   - na een B12-stap (α < 1) is s_i ≤ α voor elke component;
+   - bij een revert blijven θ en P ongewijzigd (zoals nu).
+2. **Bestaande tests:** karakterisering N11–N20 en de convergentietest blijven groen;
+   N13 (ideale data, start `light`) binnen 10%.
+3. **Simulatie:** de prototype-rij in `adr062-b13.js` wordt de referentie; bij aanname
+   krijgt `learners.js` een optie `effGain`; regressie op §4a, de matrix profiel × woning en de vastlopers (`b12`).
+   Extra rij in §4a: "passief S5 koud A3 ≤ 0,05".
+4. **ADR-064:** `adr064-ident-real.js` en `adr064-restart.js` met B13, om te zien of
+   de koppeling UA–P_int bij echte buitentemperatuur verandert.
+5. **Hardware:** na invoering en een volledige reset het verloop van C, UA en P_int,
+   en het gemiddelde van s, volgen naast de proef van ADR-064 §3.6.
+
+**Open punten.**
+
+- **Versie:** nog te kiezen (3.4.3 als losse patch, of samen met ADR-064 in 3.5.0).
+- **Volgorde met de proef van ADR-064 §3.6:** B13 invoeren tijdens die proef maakt de
+  uitkomst moeilijker te lezen. Voorstel: eerst de proef afronden (ongeveer 6 dagen).
+
 ## 3. Fasering
 
 Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschiedenis.
@@ -353,6 +479,7 @@ Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschied
 | **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Af |
 | **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware (§10) | Handmatig | Af (voorbereid) |
 | **1g** | B12 uitweg bij vastlopen | Unit-tests N13, N18–N20; simulatie `adr062.js b12` | Af |
+| **1h** | B13 P-update met de werkelijk genomen stap | Unit-tests B13; simulatie `adr062-b13.js` | Open |
 | **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
 | **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie | Open |
 
@@ -388,6 +515,10 @@ schaling.
 Met B12 (fase 1g): mild S1 0,02, S1b 0,02, S2 0,03, S3 0,04; koud (poorten Aurora III)
 S1b 0,01; passief S5 0,03; lek huis vanaf `passive` 0,03 (warm) en 0,52 (koud A3).
 De prototype-rij "fixes" gebruikt dan ook `clipAfter: 12`.
+
+Met B13 (prototype `adr062-b13.js`): mild S1 0,02, S1b 0,02, S2 0,03, S3 0,03; koud
+(poorten Aurora III) S1b 0,01; passief S5 0,02 (warm) en 0,05 (koud A3); lek huis vanaf
+`passive` 0,03 (warm) en 0,02 (koud A3).
 
 Een nieuw npm-script `simulate:building-model` draait deze scripts na `npm run build`.
 Ze gaan niet in `npm test`, omdat ze samen ruim 10 seconden duren; ze staan wel in de
@@ -445,6 +576,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 - Een stap altijd inkorten tot de grens, de rate-limiting vóór de grenscontrole zetten,
   of inkorten zonder P-update (B12).
 - De consolidatie inclusief Tuya (review §2.5).
+- Een P-update met één factor voor de hele gain (B13).
 
 ## 8. Te verifiëren
 
@@ -472,6 +604,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |
 | 10 | Soft reset bij profielwissel Aurora II/III, voorspelfout leeg na soft reset, gidsen en dev-docs bijgewerkt | 1f | Af |
 | 11 | B12 uitweg bij vastlopen tegen de grenzen | 1g | Af |
+| 12 | B13 P-update met de werkelijk genomen stap | 1h | Open |
 
 ## 10. Releasechecklist 3.4.0
 
