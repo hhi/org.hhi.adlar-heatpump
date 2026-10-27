@@ -287,6 +287,17 @@ No pre-heating insight is shown when τ is above 250 hours (e.g. a passive house
 | Dismissed | 🚫 | Hidden for 30 days |
 | Resolved | ✔️ | Action implemented |
 
+### Blocked
+
+When the building model temporarily cannot learn, insights show **🚫 Blocked: …**
+with the reason.
+
+- **Missing source or setting** (no indoor or outdoor temperature, no power,
+  learning disabled): shown immediately, because this needs action from you.
+- **Short interruption during normal operation** (no COP reading at compressor
+  start, defrost, hot water, auxiliary heating): shown only when it lasts longer
+  than 30 minutes (since 3.4.3). Until then the regular insight stays.
+
 ### Priority System
 
 Insights are ranked 0-100 based on:

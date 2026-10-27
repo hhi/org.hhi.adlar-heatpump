@@ -19,6 +19,7 @@ import {
   type MeasurementData,
   type BuildingProfileType,
 } from '../../shared/adaptive/building-model-learner';
+import { isTransientBlockingKey } from '../../shared/adaptive/building-model-blocking';
 import { DeviceConstants } from '../constants';
 
 interface EnergyTrackingService {
@@ -70,6 +71,9 @@ export class BuildingModelService {
   private lastBlockingReason: string | null = null;
   // Locale key for the blocking reason (used in Tau title)
   private lastBlockingReasonKey: string | null = null;
+  // v3.4.3: consecutive cycles without an accepted sample (reset by an accepted sample);
+  // insights show a transient blocking reason only once this streak persists
+  private blockingStreak = 0;
 
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
@@ -325,6 +329,9 @@ export class BuildingModelService {
     } finally {
       // ADR-062 B2: a sample that did not reach the learner breaks the dT/dt window
       if (!accepted) this.learner.interruptWindow();
+      // v3.4.3: count consecutive blocked cycles; an accepted sample ends the streak
+      if (accepted) this.blockingStreak = 0;
+      else if (this.lastBlockingReasonKey !== null) this.blockingStreak++;
     }
   }
 
@@ -785,6 +792,8 @@ export class BuildingModelService {
     blockingReason: string | null;
     blockingReasonKey: string | null; // Locale key (building_model.blocked_*); null when not blocked or still collecting initial samples
     predictionRmse24h: number | null; // ADR-062 B6: RMSE of the prediction error (°C/h) over 24 h; diagnostic only
+    blockingStreak: number; // v3.4.3: consecutive cycles without an accepted sample
+    blockingTransient: boolean; // v3.4.3: blocking reason belongs to normal operation (no COP, defrost, hot water, aux heating)
   }> {
     const enabled = await this.device.getSetting('building_model_enabled');
 
@@ -847,6 +856,8 @@ export class BuildingModelService {
       blockingReason,
       blockingReasonKey,
       predictionRmse24h: this.learner.getPredictionRmse24h(),
+      blockingStreak: this.blockingStreak,
+      blockingTransient: isTransientBlockingKey(blockingReasonKey),
     };
   }
 
@@ -945,6 +956,8 @@ export class BuildingModelService {
         confidence: status.confidence,
         isDefault: status.isDefault,
         blockingReason: status.blockingReason,
+        blockingStreak: status.blockingStreak,
+        blockingTransient: status.blockingTransient,
         nextUpdateIn: {
           samples: 10 - status.lastUpdateSamples,
           minutes: (10 - status.lastUpdateSamples) * 5,

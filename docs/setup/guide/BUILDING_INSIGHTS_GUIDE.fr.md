@@ -287,6 +287,19 @@ Aucun aperçu de préchauffage n'apparaît lorsque τ dépasse 250 heures (par e
 | Rejeté | 🚫 | Masqué pour 30 jours |
 | Résolu | ✔️ | Action implémentée |
 
+### Bloqué
+
+Lorsque le modèle du bâtiment ne peut temporairement pas apprendre, les aperçus
+affichent **🚫 Bloqué : …** avec la raison.
+
+- **Source ou réglage manquant** (pas de température intérieure ou extérieure,
+  pas de puissance, apprentissage désactivé) : affiché immédiatement, car une
+  action de votre part est nécessaire.
+- **Brève interruption en fonctionnement normal** (pas de mesure du COP au
+  démarrage du compresseur, dégivrage, eau chaude, chauffage d'appoint) :
+  affiché seulement s'il dure plus de 30 minutes (depuis 3.4.3). Jusque-là,
+  l'aperçu habituel reste affiché.
+
 ### Système de priorité
 
 Les aperçus sont classés 0-100 basé sur :

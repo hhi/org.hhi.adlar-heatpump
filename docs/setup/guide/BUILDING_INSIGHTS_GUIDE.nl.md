@@ -287,6 +287,19 @@ Bij een τ boven 250 uur (bijv. een passiefhuis) verschijnt geen voorverwarmings
 | Afgewezen | 🚫 | Verborgen voor 30 dagen |
 | Opgelost | ✔️ | Actie geïmplementeerd |
 
+### Geblokkeerd
+
+Kan het gebouwmodel even niet leren, dan tonen de inzichten **🚫 Geblokkeerd: …**
+met de reden.
+
+- **Ontbrekende bron of instelling** (geen binnen- of buitentemperatuur, geen
+  vermogen, leren uitgeschakeld): direct zichtbaar, want hier is een actie van
+  jou nodig.
+- **Korte onderbreking tijdens normaal bedrijf** (geen COP-meting bij de start
+  van de compressor, ontdooien, tapwater, bijverwarming): pas zichtbaar als die
+  langer dan 30 minuten aanhoudt (vanaf 3.4.3). Daarvoor blijft het gewone
+  inzicht staan.
+
 ### Prioriteit Systeem
 
 Inzichten worden gerangschikt 0-100 op basis van:
