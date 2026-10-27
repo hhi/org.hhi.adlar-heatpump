@@ -26,11 +26,11 @@ Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe
 
 ### Hauptvorteile
 
-| Vorteil | Einsparung |
-|---------|------------|
-| 💰 Dämmungserkenntnisse | 10-30% |
-| ⏱️ Vorheizoptimierung | 5-10% |
-| 🏠 Thermische Speicherstrategien | 10-25% (mit dynamischen Preisen) |
+| Vorteil | Was es bietet |
+|---------|---------------|
+| 💰 Dämmungserkenntnisse | Einblick in Wärmeverlust und Dämmung |
+| ⏱️ Vorheizoptimierung | Startzeit für das Vorheizen |
+| 🏠 Thermische Speicherstrategien | Wärme puffern bei dynamischen Preisen |
 
 ---
 
@@ -302,11 +302,9 @@ Blockiert: …** mit dem Grund.
 
 ### Prioritätssystem
 
-Erkenntnisse werden 0-100 bewertet basierend auf:
-- **Vertrauen** (30%) — Modellsicherheit
-- **Energieeinsparungspotenzial** (40%) — anhand der Art der Erkenntnis
-- **Maßnahmeneinfachheit** (20%) — Wie einfach zu implementieren
-- **Sofortwirkung** (10%) — Schneller vs. langfristiger Nutzen
+Jede Erkenntnis hat eine feste Priorität (0–100), die von Art und Ergebnis
+abhängt, zum Beispiel 90 für einen großen Puffer mit geringem Verlust, 85 für
+hohen Wärmeverlust und 10 während des Lernens oder bei einer Blockierung.
 
 **Anzeigeregel:** Jede Kategorie hat ihren eigenen Sensor - alle Erkenntnisse werden parallel angezeigt (v2.5.10)
 

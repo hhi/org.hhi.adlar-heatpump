@@ -120,7 +120,6 @@ DANN: [Intelligent Heat Pump] Sende externe Energiepreise {{Preise}} für Preiso
 - ✅ Automatische Preisoptimierung
 - ✅ Vorheizen während günstiger Stunden
 - ✅ Vermeidung von Spitzenpreisen
-- ✅ Geschätzte Einsparungen: 400-600€/Jahr
 
 ---
 
@@ -157,7 +156,7 @@ DANN: [Intelligent Heat Pump] Sende Sonnenstrahlung {{Strahlungsintensität}} W/
 >
 > - Gebäudemodell: g-Faktor repräsentiert tatsächliche Glasfläche und Ausrichtung
 > - Vorhersagen: Bessere Antizipation sonniger Perioden
-> - Energieeinsparung: Bis zu 5-10% Reduktion des Heizbedarfs an sonnigen Tagen
+> - Regelung: Solargewinn wird an sonnigen Tagen im Wärmebedarf berücksichtigt
 >
 > **Fazit:** Externe Kopplung ist *optional*, bietet aber deutlich bessere Solargewinn-Modellierung.
 

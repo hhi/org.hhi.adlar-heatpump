@@ -336,7 +336,6 @@ Automatische Optimierung basierend auf Day-Ahead-Energiepreisen (dynamischer Ver
 - **Standard**: Deaktiviert
 - **Funktion**: Nutzt niedrige Preise, vermeidet hohe Preise
 - **Datenquelle**: EnergyZero API (kostenlos, kein Konto erforderlich)
-- **Geschätzte Einsparungen**: 400-600€ pro Jahr
 
 ### Preisberechnungsmodus
 - **Standard**: All-in-Preis (komplette Kosten)
@@ -418,7 +417,6 @@ Automatische Vorlauftemperatur-Optimierung für maximale Effizienz.
   - COP-Berechnung aktiv
   - Mindestens 1 Woche Daten
   - Adaptive Regelung aktiviert
-- **Geschätzte Einsparungen**: 200-300€/Jahr
 - **Lernzeit**: 2-4 Wochen für zuverlässige Optimierung
 
 ### Minimal Akzeptabler COP

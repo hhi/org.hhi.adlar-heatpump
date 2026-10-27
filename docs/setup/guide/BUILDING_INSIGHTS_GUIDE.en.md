@@ -26,11 +26,11 @@ The **Building Insights & Recommendations** feature transforms your heat pump fr
 
 ### Key Benefits
 
-| Benefit | Savings |
-|---------|---------|
-| 💰 Insulation insights | 10-30% |
-| ⏱️ Pre-heating optimization | 5-10% |
-| 🏠 Thermal storage strategies | 10-25% (with dynamic pricing) |
+| Benefit | What it provides |
+|---------|------------------|
+| 💰 Insulation insights | Insight into heat loss and insulation |
+| ⏱️ Pre-heating optimization | Start time for pre-heating |
+| 🏠 Thermal storage strategies | Heat buffering with dynamic pricing |
 
 ---
 
@@ -300,11 +300,9 @@ with the reason.
 
 ### Priority System
 
-Insights are ranked 0-100 based on:
-- **Confidence** (30%) — Model certainty
-- **Energy savings potential** (40%) — based on the insight type
-- **Action simplicity** (20%) — How easy to implement
-- **Immediate impact** (10%) — Quick vs. long-term benefit
+Each insight has a fixed priority (0–100) that depends on its type and outcome,
+for example 90 for a large buffer with low loss, 85 for high heat loss and 10
+while learning or when blocked.
 
 **Display rule:** Each category has its own sensor - all insights are shown in parallel (v2.5.10)
 
