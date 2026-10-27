@@ -287,6 +287,19 @@ Bei τ über 250 Stunden (z. B. Passivhaus) erscheint keine Vorheiz-Erkenntnis.
 | Abgelehnt | 🚫 | Für 30 Tage ausgeblendet |
 | Gelöst | ✔️ | Maßnahme implementiert |
 
+### Blockiert
+
+Kann das Gebäudemodell vorübergehend nicht lernen, zeigen die Erkenntnisse **🚫
+Blockiert: …** mit dem Grund.
+
+- **Fehlende Quelle oder Einstellung** (keine Innen- oder Außentemperatur, keine
+  Leistung, Lernen deaktiviert): sofort sichtbar, da hier eine Aktion von Ihnen
+  nötig ist.
+- **Kurze Unterbrechung im normalen Betrieb** (keine COP-Messung beim
+  Kompressorstart, Abtauen, Warmwasser, Zusatzheizung): erst sichtbar, wenn sie
+  länger als 30 Minuten anhält (ab 3.4.3). Bis dahin bleibt die normale
+  Erkenntnis stehen.
+
 ### Prioritätssystem
 
 Erkenntnisse werden 0-100 bewertet basierend auf:
