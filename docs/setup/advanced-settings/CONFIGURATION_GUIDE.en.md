@@ -336,7 +336,6 @@ Automatic optimization based on day-ahead energy prices (dynamic contract requir
 - **Default**: Disabled
 - **Function**: Utilize low prices, avoid high prices
 - **Data source**: EnergyZero API (free, no account needed)
-- **Estimated savings**: €400-600 per year
 
 ### Price Calculation Mode
 - **Default**: All-in price (complete costs)
@@ -418,7 +417,6 @@ Automatic supply temperature optimization for maximum efficiency.
   - COP calculation active
   - Minimum 1 week of data
   - Adaptive control enabled
-- **Estimated savings**: €200-300/year
 - **Learning time**: 2-4 weeks for reliable optimization
 
 ### Minimum Acceptable COP

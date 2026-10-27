@@ -336,7 +336,6 @@ Optimisation automatique basée sur les prix de l'énergie day-ahead (contrat dy
 - **Par défaut** : Désactivé
 - **Fonction** : Utilise les prix bas, évite les prix élevés
 - **Source de données** : API EnergyZero (gratuit, pas de compte nécessaire)
-- **Économies estimées** : 400-600€ par an
 
 ### Mode de Calcul des Prix
 - **Par défaut** : Prix tout compris (coûts complets)
@@ -418,7 +417,6 @@ Optimisation automatique de la température de départ pour une efficacité maxi
   - Calcul COP actif
   - Minimum 1 semaine de données
   - Contrôle adaptatif activé
-- **Économies estimées** : 200-300€/an
 - **Temps d'apprentissage** : 2-4 semaines pour une optimisation fiable
 
 ### COP Minimum Acceptable

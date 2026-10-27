@@ -186,3 +186,61 @@ for (const driver of ['tuya', 'modbus', 'aurora3']) {
     assert.strictEqual(insight.insight, BLOCKED('building_model.blocked_no_indoor_temp'));
   });
 }
+
+// v3.4.3 (G12): diagnostics status follows the insights rule and the confidence threshold
+// v3.4.3 (G12b): the performance report reads confidence from learning.confidence
+const T = {
+  domainNames: { building: 'building' },
+  ratings: {
+    excellent: 'excellent', good: 'good', fair: 'fair', poor: 'poor',
+  },
+};
+
+for (const driver of ['tuya', 'modbus', 'aurora3']) {
+  // A learned model: past the initial phase, with a fixed confidence (private in TS; isolates the status rule)
+  const learnedService = (confidence) => {
+    const { service, env } = createModelService(driver);
+    service.learner.sampleCount = 300;
+    service.learner.calculateConfidence = () => confidence;
+    return { service, env };
+  };
+
+  test(`${driver}: diagnostics status is 'learning' below the confidence threshold`, async () => {
+    const { service } = learnedService(40);
+    assert.strictEqual((await service.getDiagnostics()).status, 'learning');
+  });
+
+  test(`${driver}: diagnostics status is 'converged' from the confidence threshold`, async () => {
+    const { service } = learnedService(85);
+    assert.strictEqual((await service.getDiagnostics()).status, 'converged');
+  });
+
+  test(`${driver}: a single transient block does not make the status 'insufficient_data'`, async () => {
+    const { service, env } = learnedService(85);
+    env.capabilities.adlar_cop = 0;
+    await service.collectAndLearn();
+    assert.strictEqual((await service.getDiagnostics()).status, 'converged');
+    for (let i = 0; i < 5; i++) await service.collectAndLearn();
+    assert.strictEqual((await service.getDiagnostics()).status, 'insufficient_data');
+  });
+
+  test(`${driver}: performance report uses the confidence from learning.confidence`, () => {
+    const { PerformanceReportService } = require(`../../.homeybuild/lib/${driver}/services/performance-report-service`);
+    const caps = {
+      adlar_building_ua: 0.2,
+      adlar_building_tau: 130,
+      building_model_diagnostics: JSON.stringify({ learning: { confidence: 99 } }),
+    };
+    const device = {
+      getSetting: (key) => ({ adaptive_control_enabled: true, building_profile: 'average' })[key] ?? null,
+      hasCapability: (key) => key in caps,
+      getCapabilityValue: (key) => caps[key] ?? null,
+      homey: { i18n: { getLanguage: () => 'en' } },
+    };
+    const report = new PerformanceReportService({ device, logger: () => {} });
+    assert.strictEqual(report.scoreBuilding(T).score, 99);
+
+    caps.building_model_diagnostics = JSON.stringify({ learning: { confidence: 20 } });
+    assert.strictEqual(report.scoreBuilding(T).status, 'learning');
+  });
+}

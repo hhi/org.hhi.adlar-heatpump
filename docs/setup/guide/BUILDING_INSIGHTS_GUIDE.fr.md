@@ -26,11 +26,11 @@ La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre 
 
 ### Avantages clés
 
-| Avantage | Économies |
-|----------|-----------|
-| 💰 Aperçus d'isolation | 10-30% |
-| ⏱️ Optimisation du préchauffage | 5-10% |
-| 🏠 Stratégies de stockage thermique | 10-25% (avec tarification dynamique) |
+| Avantage | Ce que cela apporte |
+|----------|---------------------|
+| 💰 Aperçus d'isolation | Aperçu des pertes de chaleur et de l'isolation |
+| ⏱️ Optimisation du préchauffage | Heure de début du préchauffage |
+| 🏠 Stratégies de stockage thermique | Stockage de chaleur avec prix dynamiques |
 
 ---
 
@@ -302,11 +302,9 @@ affichent **🚫 Bloqué : …** avec la raison.
 
 ### Système de priorité
 
-Les aperçus sont classés 0-100 basé sur :
-- **Confiance** (30%) — Certitude du modèle
-- **Potentiel d'économies d'énergie** (40%) — selon le type d'aperçu
-- **Simplicité d'action** (20%) — Facilité d'implémentation
-- **Impact immédiat** (10%) — Bénéfice rapide vs long terme
+Chaque aperçu a une priorité fixe (0–100) qui dépend de son type et du résultat,
+par exemple 90 pour un grand tampon avec peu de pertes, 85 pour des pertes de
+chaleur élevées et 10 pendant l'apprentissage ou en cas de blocage.
 
 **Règle d'affichage :** Chaque catégorie a son propre capteur - tous les aperçus sont affichés en parallèle (v2.5.10)
 

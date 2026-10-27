@@ -336,7 +336,6 @@ Automatische optimalisatie op basis van day-ahead energieprijzen (dynamisch cont
 - **Standaard**: Uitgeschakeld
 - **Functie**: Benut lage prijzen, vermijd hoge prijzen
 - **Data bron**: EnergyZero API (gratis, geen account nodig)
-- **Geschatte besparing**: €400-600 per jaar
 
 ### Prijsberekening Modus
 - **Standaard**: All-in prijs (complete kosten)
@@ -418,7 +417,6 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
   - COP berekening actief
   - Minimaal 1 week data
   - Adaptive control ingeschakeld
-- **Geschatte besparing**: €200-300/jaar
 - **Leertijd**: 2-4 weken voor betrouwbare optimalisatie
 
 ### Minimaal Acceptabele COP

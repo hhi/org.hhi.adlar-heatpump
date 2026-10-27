@@ -19,7 +19,7 @@ import {
   type MeasurementData,
   type BuildingProfileType,
 } from '../../shared/adaptive/building-model-learner';
-import { isTransientBlockingKey } from '../../shared/adaptive/building-model-blocking';
+import { isTransientBlockingKey, shouldShowBlocked } from '../../shared/adaptive/building-model-blocking';
 import { DeviceConstants } from '../constants';
 
 interface EnergyTrackingService {
@@ -862,12 +862,15 @@ export class BuildingModelService {
     const model = this.learner.getModel();
 
     // Determine learning status
+    // v3.4.3: a blocking reason counts only when insights would show it (transient reasons
+    // only once they persist), and 'converged' requires the insights confidence threshold
+    const minConfidence = (this.device.getSetting('insights_min_confidence') as number | null) ?? 70;
     let learningStatus: string;
     if (!status.enabled) {
       learningStatus = 'disabled';
-    } else if (status.blockingReason) {
+    } else if (shouldShowBlocked(status)) {
       learningStatus = 'insufficient_data';
-    } else if (status.isDefault) {
+    } else if (status.isDefault || status.confidence < minConfidence) {
       learningStatus = 'learning';
     } else {
       learningStatus = 'converged';

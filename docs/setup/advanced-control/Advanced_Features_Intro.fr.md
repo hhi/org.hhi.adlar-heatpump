@@ -120,7 +120,6 @@ ALORS : [Intelligent Heat Pump] Envoyer les prix d'énergie externes {{Prix}} po
 - ✅ Optimisation automatique des prix
 - ✅ Préchauffage pendant les heures bon marché
 - ✅ Évitement des prix de pointe
-- ✅ Économies estimées : 400-600€/an
 
 ---
 
@@ -157,7 +156,7 @@ ALORS : [Intelligent Heat Pump] Envoyer rayonnement solaire {{Intensité rayonne
 >
 > - Modèle de bâtiment : le facteur g représente la surface et l'orientation réelles du vitrage
 > - Prévisions : Meilleure anticipation des périodes ensoleillées
-> - Économie d'énergie : Jusqu'à 5-10% de réduction du besoin de chauffage les jours ensoleillés
+> - Régulation : le gain solaire est pris en compte dans le besoin de chaleur les jours ensoleillés
 >
 > **Conclusion :** La connexion externe est *optionnelle* mais offre une modélisation du gain solaire nettement meilleure.
 

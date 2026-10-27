@@ -120,7 +120,6 @@ THEN: [Intelligent Heat Pump] Send external energy prices {{Prices}} for price o
 - ✅ Automatic price optimization
 - ✅ Pre-heating during cheap hours
 - ✅ Avoiding peak prices
-- ✅ Estimated savings: €400-600/year
 
 ---
 
@@ -157,7 +156,7 @@ THEN: [Intelligent Heat Pump] Send solar radiation {{Radiation intensity}} W/m²
 >
 > - Building model: g-factor represents actual glass surface and orientation
 > - Predictions: Better anticipation of sunny periods
-> - Energy savings: Up to 5-10% heating demand reduction on sunny days
+> - Control: solar gain is taken into account in the heat demand on sunny days
 >
 > **Conclusion:** External connection is *optional* but provides significantly better solar gain modeling.
 
