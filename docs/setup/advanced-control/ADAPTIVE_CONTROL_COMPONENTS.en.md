@@ -14,14 +14,6 @@ This system intelligently controls your Adlar Castra heat pump for:
 - **COP maximization** for maximum efficiency
 - **Automatic learning** how your home responds
 
-### Estimated Savings
-
-| Component | Savings/year |
-|-----------|-------------|
-| Energy Price Optimization | €400-600 |
-| COP Optimization | €200-300 |
-| **Total** | **€600-900** |
-
 ---
 
 ## Architecture
@@ -211,15 +203,11 @@ Starting values of the building profiles; the model then learns the actual value
 | Market price+ | Spot + markup + VAT |
 | **All-in** | Spot + markup + tax + VAT |
 
-### Example Savings
+### Tracking actual costs
 
-```
-WITHOUT optimization: €18/day
-WITH optimization:    €10/day
-─────────────────────────────
-Savings:              €8/day = ~€2,900/year (max)
-Realistic:            €400-600/year
-```
+Track the actual costs with Homey Energy and the daily costs in the app. Estimating
+a saving in advance is not reliable: prices are not known in advance and the heat
+pump does not run every hour.
 
 ---
 

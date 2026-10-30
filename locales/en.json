@@ -99,7 +99,8 @@
   },
   "errors": {
     "zone_onoff_disabled": "On/off via zone control register 2101 is experimental. Enable 'On/off via zone control (experimental)' in the device settings to use it.",
-    "silent_level2_r290_only": "Silent mode level 2 is only available on R290 heat pumps."
+    "silent_level2_r290_only": "Silent mode level 2 is only available on R290 heat pumps.",
+    "adaptive_setpoint_range": "The maximum water temperature must be at least __gap__°C above the minimum water temperature."
   },
   "widget": {
     "live_operation": {

@@ -26,11 +26,11 @@ De **Gebouwinzichten & Aanbevelingen** functie transformeert je warmtepomp van e
 
 ### Belangrijkste Voordelen
 
-| Voordeel | Besparing |
-|----------|-----------|
-| 💰 Isolatie-inzichten | 10-30% |
-| ⏱️ Voorverwarmen optimalisatie | 5-10% |
-| 🏠 Thermische opslag strategieën | 10-25% (met dynamische prijzen) |
+| Voordeel | Wat het oplevert |
+|----------|------------------|
+| 💰 Isolatie-inzichten | Inzicht in warmteverlies en isolatie |
+| ⏱️ Voorverwarmen optimalisatie | Starttijd voor het voorverwarmen |
+| 🏠 Thermische opslag strategieën | Warmte bufferen bij dynamische prijzen |
 
 ---
 
@@ -287,13 +287,24 @@ Bij een τ boven 250 uur (bijv. een passiefhuis) verschijnt geen voorverwarmings
 | Afgewezen | 🚫 | Verborgen voor 30 dagen |
 | Opgelost | ✔️ | Actie geïmplementeerd |
 
+### Geblokkeerd
+
+Kan het gebouwmodel even niet leren, dan tonen de inzichten **🚫 Geblokkeerd: …**
+met de reden.
+
+- **Ontbrekende bron of instelling** (geen binnen- of buitentemperatuur, geen
+  vermogen, leren uitgeschakeld): direct zichtbaar, want hier is een actie van
+  jou nodig.
+- **Korte onderbreking tijdens normaal bedrijf** (geen COP-meting bij de start
+  van de compressor, ontdooien, tapwater, bijverwarming): pas zichtbaar als die
+  langer dan 30 minuten aanhoudt (vanaf 3.4.3). Daarvoor blijft het gewone
+  inzicht staan.
+
 ### Prioriteit Systeem
 
-Inzichten worden gerangschikt 0-100 op basis van:
-- **Confidence** (30%) — Model zekerheid
-- **Energiebesparing potentieel** (40%) — op basis van het type inzicht
-- **Actie eenvoud** (20%) — Hoe makkelijk te implementeren
-- **Directe impact** (10%) — Snel vs. lange termijn voordeel
+Elk inzicht heeft een vaste prioriteit (0–100) die afhangt van het type en de
+uitkomst, bijvoorbeeld 90 voor een grote buffer met weinig verlies, 85 voor een
+hoog warmteverlies en 10 tijdens het leren of bij een blokkade.
 
 **Weergave regel:** Elke categorie heeft zijn eigen sensor - alle inzichten worden parallel getoond (v2.5.10)
 

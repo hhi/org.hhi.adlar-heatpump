@@ -22,6 +22,7 @@ import { getPreHeatCategory, calculatePreHeatDuration } from '../../shared/utils
 import type { BuildingModelService } from './building-model-service';
 import type { AdaptiveControlService } from './adaptive-control-service';
 import { BUILDING_PROFILES, type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
+import { shouldShowBlocked } from '../../shared/adaptive/building-model-blocking';
 
 type BuildingModelDiagnostics = Awaited<ReturnType<BuildingModelService['getDiagnosticStatus']>>;
 
@@ -307,7 +308,8 @@ export class BuildingInsightsService {
     const lang = this.getLanguage();
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
-    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+    // v3.4.3: transient reasons (no COP, defrost, hot water, aux heating) only once they persist
+    if (shouldShowBlocked(diagnostics)) {
       const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `insulation_blocked_${Date.now()}`,
@@ -418,7 +420,8 @@ export class BuildingInsightsService {
     const lang = this.getLanguage();
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
-    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+    // v3.4.3: transient reasons (no COP, defrost, hot water, aux heating) only once they persist
+    if (shouldShowBlocked(diagnostics)) {
       const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `pre_heating_blocked_${Date.now()}`,
@@ -507,7 +510,8 @@ export class BuildingInsightsService {
     const lang = this.getLanguage();
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
-    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+    // v3.4.3: transient reasons (no COP, defrost, hot water, aux heating) only once they persist
+    if (shouldShowBlocked(diagnostics)) {
       const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `thermal_storage_blocked_${Date.now()}`,
@@ -659,7 +663,8 @@ export class BuildingInsightsService {
     const lang = this.getLanguage();
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
-    if (diagnostics.blockingReason && diagnostics.blockingReason !== `Collecting initial samples (${diagnostics.sampleCount}/10)`) {
+    // v3.4.3: transient reasons (no COP, defrost, hot water, aux heating) only once they persist
+    if (shouldShowBlocked(diagnostics)) {
       const shortReason = this.getShortBlockedReason(diagnostics.blockingReasonKey);
       return {
         id: `profile_blocked_${Date.now()}`,

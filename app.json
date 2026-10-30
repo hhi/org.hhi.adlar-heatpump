@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -19194,6 +19194,27 @@
               "units": "°C"
             },
             {
+              "id": "adaptive_max_setpoint",
+              "type": "number",
+              "label": {
+                "en": "Maximum water temperature",
+                "nl": "Maximale watertemperatuur",
+                "de": "Maximale Wassertemperatur",
+                "fr": "Température d'eau maximale"
+              },
+              "hint": {
+                "en": "The highest water temperature the adaptive control will recommend. For floor heating: set minimum and maximum around the range of your own heating curve (e.g. 2°C below and 3°C above) and leave room for cold weather. Must be at least 2°C above the minimum. Range: 25–65°C. Default: 65°C.",
+                "nl": "De hoogste watertemperatuur die de adaptieve regeling kan aanbevelen. Bij vloerverwarming: stel minimum en maximum in rond het bereik van uw eigen stooklijn (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer. Moet minstens 2°C boven het minimum liggen. Bereik: 25–65°C. Standaard: 65°C.",
+                "de": "Die höchste Wassertemperatur, die die adaptive Regelung empfehlen kann. Bei Fußbodenheizung: Minimum und Maximum um den Bereich Ihrer eigenen Heizkurve einstellen (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen. Muss mindestens 2°C über dem Minimum liegen. Bereich: 25–65°C. Standard: 65°C.",
+                "fr": "La température d'eau maximale que la régulation adaptative peut recommander. Pour le chauffage au sol : réglez le minimum et le maximum autour de la plage de votre propre courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la marge pour le temps froid. Doit être au moins 2°C au-dessus du minimum. Plage: 25–65°C. Défaut: 65°C."
+              },
+              "value": 65,
+              "min": 25,
+              "max": 65,
+              "step": 1,
+              "units": "°C"
+            },
+            {
               "id": "adaptive_cooldown_offset",
               "type": "number",
               "label": {
@@ -21272,6 +21293,28 @@
               }
             },
             {
+              "id": "adaptive_max_setpoint",
+              "type": "number",
+              "label": {
+                "en": "Maximum water temperature (°C)",
+                "nl": "Maximale watertemperatuur (°C)",
+                "de": "Maximale Wassertemperatur (°C)",
+                "fr": "Température d'eau maximale (°C)"
+              },
+              "hint": {
+                "en": "The highest water temperature the adaptive control will recommend. For floor heating: set minimum and maximum around the range of your own heating curve (e.g. 2°C below and 3°C above) and leave room for cold weather. Must be at least 2°C above the minimum. Range: 25–60°C. Default: 60°C.",
+                "nl": "De hoogste watertemperatuur die de adaptieve regeling kan aanbevelen. Bij vloerverwarming: stel minimum en maximum in rond het bereik van uw eigen stooklijn (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer. Moet minstens 2°C boven het minimum liggen. Bereik: 25–60°C. Standaard: 60°C.",
+                "de": "Die höchste Wassertemperatur, die die adaptive Regelung empfehlen kann. Bei Fußbodenheizung: Minimum und Maximum um den Bereich Ihrer eigenen Heizkurve einstellen (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen. Muss mindestens 2°C über dem Minimum liegen. Bereich: 25–60°C. Standard: 60°C.",
+                "fr": "La température d'eau maximale que la régulation adaptative peut recommander. Pour le chauffage au sol : réglez le minimum et le maximum autour de la plage de votre propre courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la marge pour le temps froid. Doit être au moins 2°C au-dessus du minimum. Plage: 25–60°C. Défaut: 60°C."
+              },
+              "value": 60,
+              "attr": {
+                "min": 25,
+                "max": 60,
+                "step": 1
+              }
+            },
+            {
               "id": "adaptive_cooldown_offset",
               "type": "number",
               "label": {
@@ -23222,6 +23265,28 @@
               "attr": {
                 "min": 15,
                 "max": 30,
+                "step": 1
+              }
+            },
+            {
+              "id": "adaptive_max_setpoint",
+              "type": "number",
+              "label": {
+                "en": "Maximum water temperature (°C)",
+                "nl": "Maximale watertemperatuur (°C)",
+                "de": "Maximale Wassertemperatur (°C)",
+                "fr": "Température d'eau maximale (°C)"
+              },
+              "hint": {
+                "en": "The highest water temperature the adaptive control will recommend. For floor heating: set minimum and maximum around the range of your own heating curve (e.g. 2°C below and 3°C above) and leave room for cold weather. Must be at least 2°C above the minimum. Range: 25–60°C. Default: 60°C.",
+                "nl": "De hoogste watertemperatuur die de adaptieve regeling kan aanbevelen. Bij vloerverwarming: stel minimum en maximum in rond het bereik van uw eigen stooklijn (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer. Moet minstens 2°C boven het minimum liggen. Bereik: 25–60°C. Standaard: 60°C.",
+                "de": "Die höchste Wassertemperatur, die die adaptive Regelung empfehlen kann. Bei Fußbodenheizung: Minimum und Maximum um den Bereich Ihrer eigenen Heizkurve einstellen (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen. Muss mindestens 2°C über dem Minimum liegen. Bereich: 25–60°C. Standard: 60°C.",
+                "fr": "La température d'eau maximale que la régulation adaptative peut recommander. Pour le chauffage au sol : réglez le minimum et le maximum autour de la plage de votre propre courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la marge pour le temps froid. Doit être au moins 2°C au-dessus du minimum. Plage: 25–60°C. Défaut: 60°C."
+              },
+              "value": 60,
+              "attr": {
+                "min": 25,
+                "max": 60,
                 "step": 1
               }
             },

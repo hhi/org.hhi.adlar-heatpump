@@ -6,6 +6,7 @@ import Homey from 'homey';
 import TuyaDevice from 'tuyapi';
 import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
 import { DeviceConstants } from '../../lib/tuya/constants';
+import { isSetpointRangeValid, resolveMaxSetpoint, SETPOINT_RANGE_MIN_GAP } from '../../lib/shared/adaptive/setpoint-range';
 import { TuyaErrorCategorizer, type CategorizedError } from '../../lib/shared/error-types';
 import { COPCalculator, type COPDataSources, type COPCalculationResult } from '../../lib/shared/services/cop-calculator';
 import { SCOPCalculator, type COPMeasurement } from '../../lib/tuya/services/scop-calculator';
@@ -4104,6 +4105,18 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+
+    // Reject a maximum water temperature that is not at least SETPOINT_RANGE_MIN_GAP above the minimum
+    if (changedKeys.includes('adaptive_min_setpoint') || changedKeys.includes('adaptive_max_setpoint')) {
+      const minSetpoint = (newSettings.adaptive_min_setpoint as number | null | undefined) ?? 18;
+      const maxSetpoint = resolveMaxSetpoint(
+        newSettings.adaptive_max_setpoint as number | null | undefined,
+        DeviceConstants.ADAPTIVE_MAX_SETPOINT,
+      );
+      if (!isSetpointRangeValid(minSetpoint, maxSetpoint)) {
+        throw new Error(this.homey.__('errors.adaptive_setpoint_range', { gap: SETPOINT_RANGE_MIN_GAP }));
+      }
+    }
 
     // Handle log level changes (v2.1.0)
     if (changedKeys.includes('log_level')) {

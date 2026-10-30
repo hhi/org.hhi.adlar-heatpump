@@ -422,8 +422,10 @@ export class PerformanceReportService {
       const diagJson = this.device.getCapabilityValue('building_model_diagnostics') as string | null;
       if (diagJson) {
         const diag = JSON.parse(diagJson);
-        if (typeof diag.confidence === 'number') {
-          confidence = diag.confidence;
+        // v3.4.3: the diagnostics JSON keeps confidence under learning.confidence
+        const diagConfidence = diag.learning?.confidence ?? diag.confidence;
+        if (typeof diagConfidence === 'number') {
+          confidence = diagConfidence;
         }
       }
     } catch { /* diagnostics not available */ }

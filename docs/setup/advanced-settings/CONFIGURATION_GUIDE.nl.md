@@ -246,6 +246,18 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - **Bereik**: 0.1 - 1.0°C
 - **Functie**: Tolerantie voordat aanpassingen worden gemaakt
 
+#### Minimale en Maximale Watertemperatuur (v3.4.3+)
+
+- **Minimum — standaard**: 18°C, **bereik**: 15 - 30°C
+- **Maximum — standaard**: 60°C (Tuya: 65°C), **bereik**: 25 - 60°C (Tuya: 25 -
+  65°C)
+- **Functie**: Laagste en hoogste watertemperatuur die de adaptieve regeling kan
+  aanbevelen
+- **Regel**: Het maximum moet minstens 2°C boven het minimum liggen; anders
+  wordt de wijziging geweigerd
+- **Vloerverwarming**: Stel beide in rond het bereik van uw eigen stooklijn
+  (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer
+
 #### Coast Offset (v2.8.0+)
 - **Standaard**: 1.0°C
 - **Bereik**: 0.5 - 5.0°C
@@ -336,7 +348,6 @@ Automatische optimalisatie op basis van day-ahead energieprijzen (dynamisch cont
 - **Standaard**: Uitgeschakeld
 - **Functie**: Benut lage prijzen, vermijd hoge prijzen
 - **Data bron**: EnergyZero API (gratis, geen account nodig)
-- **Geschatte besparing**: €400-600 per jaar
 
 ### Prijsberekening Modus
 - **Standaard**: All-in prijs (complete kosten)
@@ -418,7 +429,6 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
   - COP berekening actief
   - Minimaal 1 week data
   - Adaptive control ingeschakeld
-- **Geschatte besparing**: €200-300/jaar
 - **Leertijd**: 2-4 weken voor betrouwbare optimalisatie
 
 ### Minimaal Acceptabele COP
