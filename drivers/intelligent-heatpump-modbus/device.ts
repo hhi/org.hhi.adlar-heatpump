@@ -20,6 +20,7 @@ import { FAULT_DESCRIPTIONS } from '../../lib/modbus/protocol/adlar-fault-descri
 import { ModbusCOPService } from '../../lib/modbus/services/modbus-cop-service';
 import { RollingCOPCalculator } from '../../lib/shared/services/rolling-cop-calculator';
 import { DeviceConstants } from '../../lib/modbus/constants';
+import { isSetpointRangeValid, resolveMaxSetpoint, SETPOINT_RANGE_MIN_GAP } from '../../lib/shared/adaptive/setpoint-range';
 import {
   LiveOperationWidgetState,
   buildLiveOperationWidgetState,
@@ -175,6 +176,8 @@ interface DeviceSettings {
   dashboard_port: number;
   log_level: string;
   enable_power_measurements: boolean;
+  adaptive_min_setpoint: number;
+  adaptive_max_setpoint: number;
 }
 /* eslint-enable camelcase */
 
@@ -273,6 +276,18 @@ class AdlarModbusDevice extends Homey.Device {
 
   async onSettings({ newSettings, changedKeys }: { newSettings: Partial<DeviceSettings>; changedKeys: string[] }) {
     this.logger.info('Settings changed:', changedKeys);
+
+    // Reject a maximum water temperature that is not at least SETPOINT_RANGE_MIN_GAP above the minimum
+    if (changedKeys.includes('adaptive_min_setpoint') || changedKeys.includes('adaptive_max_setpoint')) {
+      const minSetpoint = (newSettings.adaptive_min_setpoint as number | null | undefined) ?? 18;
+      const maxSetpoint = resolveMaxSetpoint(
+        newSettings.adaptive_max_setpoint as number | null | undefined,
+        DeviceConstants.ADAPTIVE_MAX_SETPOINT,
+      );
+      if (!isSetpointRangeValid(minSetpoint, maxSetpoint)) {
+        throw new Error(this.homey.__('errors.adaptive_setpoint_range', { gap: SETPOINT_RANGE_MIN_GAP }));
+      }
+    }
 
     if (changedKeys.includes('log_level')) {
       const logLevelMap: Record<string, LogLevel> = {

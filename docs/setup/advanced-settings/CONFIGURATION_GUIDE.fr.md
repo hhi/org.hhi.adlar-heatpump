@@ -246,6 +246,19 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 - **Plage** : 0.1 - 1.0°C
 - **Fonction** : Tolérance avant que les ajustements soient effectués
 
+#### Température d'Eau Minimale et Maximale (v3.4.3+)
+
+- **Minimum — par défaut** : 18°C, **plage** : 15 - 30°C
+- **Maximum — par défaut** : 60°C (Tuya : 65°C), **plage** : 25 - 60°C (Tuya :
+  25 - 65°C)
+- **Fonction** : Température d'eau la plus basse et la plus haute que la
+  régulation adaptative peut recommander
+- **Règle** : Le maximum doit être au moins 2°C au-dessus du minimum ; sinon la
+  modification est refusée
+- **Chauffage au sol** : Réglez les deux autour de la plage de votre propre
+  courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la
+  marge pour le temps froid
+
 #### Coast Offset (v2.8.0+)
 - **Par défaut** : 1,0°C
 - **Plage** : 0,5 - 5,0°C

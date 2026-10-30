@@ -9,6 +9,7 @@ import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { DefrostLearner } from '../../shared/adaptive/defrost-learner';
+import { resolveMaxSetpoint } from '../../shared/adaptive/setpoint-range';
 import {
   WeightedDecisionMaker, type ConfidenceMetrics, type CoastAction, type CombinedAction,
 } from '../adaptive/weighted-decision-maker';
@@ -185,7 +186,7 @@ export class AdaptiveControlService {
       targetCOP: 3.5,
       strategy: 'balanced',
       minSupplyTemp: this._getMinSetpoint(),
-      maxSupplyTemp: 55,
+      maxSupplyTemp: Math.min(55, this._getMaxSetpoint()),
       historySize: 1000,
       logger: this.logger,
       // v2.6.1: Callback to update cop_optimizer_diagnostics capability
@@ -546,6 +547,14 @@ export class AdaptiveControlService {
    */
   private _getMinSetpoint(): number {
     return (this.device.getSetting('adaptive_min_setpoint') as number | null) ?? 18;
+  }
+
+  /** Maximum water temperature setting, never above DeviceConstants.ADAPTIVE_MAX_SETPOINT. */
+  private _getMaxSetpoint(): number {
+    return resolveMaxSetpoint(
+      this.device.getSetting('adaptive_max_setpoint') as number | null,
+      DeviceConstants.ADAPTIVE_MAX_SETPOINT,
+    );
   }
 
   // =========================================================================
@@ -1084,7 +1093,7 @@ export class AdaptiveControlService {
       const integerAdjustment = Math.round(this.accumulatedAdjustment);
       const recommendedTemp = Math.max(
         this._getMinSetpoint(),
-        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
+        Math.min(this._getMaxSetpoint(), currentSetpoint + integerAdjustment),
       );
 
       // Initialize on current setpoint so first run only triggers on real deviation (ADR-020)
@@ -1250,7 +1259,7 @@ export class AdaptiveControlService {
       const integerAdjustment = Math.round(this.accumulatedAdjustment);
       const simulatedTarget = Math.max(
         this._getMinSetpoint(),
-        Math.min(DeviceConstants.ADAPTIVE_MAX_SETPOINT, currentSetpoint + integerAdjustment),
+        Math.min(this._getMaxSetpoint(), currentSetpoint + integerAdjustment),
       );
       const delta = simulatedTarget - currentSetpoint;
 
@@ -1696,6 +1705,18 @@ export class AdaptiveControlService {
         newValue: `${newMinSetpoint}°C`,
       });
       this.copOptimizer.updateMinSupplyTemp(newMinSetpoint);
+    }
+
+    // Handle adaptive_max_setpoint changes (range check against the minimum is done in the device)
+    if (changedKeys.includes('adaptive_max_setpoint')) {
+      const newMaxSetpoint = resolveMaxSetpoint(
+        newSettings.adaptive_max_setpoint as number | null,
+        DeviceConstants.ADAPTIVE_MAX_SETPOINT,
+      );
+      this.logger('AdaptiveControlService: Max setpoint changed', {
+        newValue: `${newMaxSetpoint}°C`,
+      });
+      this.copOptimizer.updateMaxSupplyTemp(Math.min(55, newMaxSetpoint));
     }
 
     // Handle energy price settings changes
