@@ -99,7 +99,8 @@
   },
   "errors": {
     "zone_onoff_disabled": "Ein/Aus über das Zonenregister 2101 ist experimentell. Aktivieren Sie 'Ein/Aus über Zonensteuerung (experimentell)' in den Geräteeinstellungen, um dies zu nutzen.",
-    "silent_level2_r290_only": "Leisemodus Stufe 2 ist nur bei R290-Wärmepumpen verfügbar."
+    "silent_level2_r290_only": "Leisemodus Stufe 2 ist nur bei R290-Wärmepumpen verfügbar.",
+    "adaptive_setpoint_range": "Die maximale Wassertemperatur muss mindestens __gap__°C über der minimalen Wassertemperatur liegen."
   },
   "widget": {
     "live_operation": {

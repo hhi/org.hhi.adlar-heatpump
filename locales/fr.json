@@ -99,7 +99,8 @@
   },
   "errors": {
     "zone_onoff_disabled": "La marche/arrêt via le registre de zone 2101 est expérimentale. Activez 'Marche/arrêt via la commande de zone (expérimental)' dans les paramètres de l'appareil pour l'utiliser.",
-    "silent_level2_r290_only": "Le mode silencieux niveau 2 n'est disponible que sur les pompes à chaleur R290."
+    "silent_level2_r290_only": "Le mode silencieux niveau 2 n'est disponible que sur les pompes à chaleur R290.",
+    "adaptive_setpoint_range": "La température d'eau maximale doit être d'au moins __gap__°C supérieure à la température d'eau minimale."
   },
   "widget": {
     "live_operation": {
