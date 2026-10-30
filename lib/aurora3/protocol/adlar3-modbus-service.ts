@@ -223,6 +223,8 @@ export interface ControlSnapshot {
   floorSetpointC: number;
   /** Zone 1 heating limits Reg 13..12; null when not read or implausible. */
   heatingLimits: WaterTempLimits | null;
+  /** Zone 1 climate curve heating setpoint Reg 67 (scale unverified, see VERIFICATION_TASKS); null when not read. */
+  curveHeatingSetpointC: number | null;
   /** Reg 2102 = 1. */
   dhwEnabled: boolean;
   /** Reg 2103 bits 4-5, see SilentMode. */
@@ -700,6 +702,9 @@ export class Adlar3ModbusService extends EventEmitter {
       },
       floorSetpointC: this.readScaledValue(CONTROL_REGISTERS.roomTempSetTemp, true),
       heatingLimits: this.heatingLimits(),
+      curveHeatingSetpointC: this.tcp.has(SENSOR_REGISTERS.zone1CurveHeatingSetTemp.address)
+        ? this.readScaledValue(SENSOR_REGISTERS.zone1CurveHeatingSetTemp, true)
+        : null,
       dhwEnabled: this.tcp.u16(CONTROL_REGISTERS.dhwOnOff.address) === 1,
       silentMode: decodeSilentMode(functionA),
       silentLevel2Allowed: this.isR290(),

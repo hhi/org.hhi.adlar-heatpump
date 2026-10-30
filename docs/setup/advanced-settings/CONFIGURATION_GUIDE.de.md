@@ -262,6 +262,29 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 - **Fußbodenheizung**: Beide um den Bereich Ihrer eigenen Heizkurve einstellen
   (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen
 
+#### Regelmodus, Wärmeabgabesystem und Heizkurve (v3.5.0+)
+
+- **Regelmodus — Standard**: Klassisch
+  - **Klassisch**: addiert die PI-Ausgabe in jedem Zyklus zum Sollwert
+    (bisheriges Verhalten)
+  - **Positionell**: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral,
+    ohne breite Totzone; der Sollwert bleibt ruhig, auch mit einem Flow, der
+    jede Empfehlung ausführt
+- **Wärmeabgabesystem — Standard**: Manuell
+  - **Heizkörper**: Kp 3, Ti 3 h, Coast aus
+  - **Fußbodenheizung**: Kp 3, Ti 6 h, Coast an
+  - **Manuell**: Positioneller PI Kp und Ti und der Schalter Coast unten
+  - Im klassischen Modus folgt nur Coast dieser Auswahl
+- **Heizkurve (positioneller Modus) — Standard**: Automatisch
+  - **Automatisch**: die eigene Heizkurve der Wärmepumpe (Aurora I/II: DIY-Kurve
+    L28/L29; Aurora III: Klimakurve), sonst der Sollwert beim Einschalten des
+    positionellen Modus (Tuya)
+  - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen
+- **Empfehlung**: Bei Tuya die App-Kurve einstellen; eine flache Basis
+  funktioniert, aber weniger gut
+- **Diagnose**: `adaptive_control_diagnostics` zeigt den Modus, das
+  Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis und die P- und I-Anteile
+
 #### Coast Offset (v2.8.0+)
 - **Standard**: 1,0°C
 - **Bereich**: 0,5 - 5,0°C

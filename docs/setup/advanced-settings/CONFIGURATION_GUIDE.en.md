@@ -261,6 +261,28 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Floor heating**: Set both around the range of your own heating curve (e.g.
   2°C below and 3°C above) and leave room for cold weather
 
+#### Control Mode, Emitter System and Heating Curve (v3.5.0+)
+
+- **Control mode — default**: Classic
+  - **Classic**: adds the PI output to the setpoint every cycle (previous
+    behaviour)
+  - **Positional**: advice = heating curve + PI correction with a true integral,
+    without a wide dead zone; the setpoint stays calm, also with a flow that
+    applies every advice
+- **Emitter system — default**: Manual
+  - **Radiators**: Kp 3, Ti 3 h, coast off
+  - **Floor heating**: Kp 3, Ti 6 h, coast on
+  - **Manual**: Positional PI Kp and Ti and the Coast switch below
+  - In the classic mode only coast follows this choice
+- **Heating curve (positional mode) — default**: Automatic
+  - **Automatic**: the heat pump's own curve (Aurora I/II: DIY curve L28/L29;
+    Aurora III: climate curve), otherwise the setpoint when the positional mode
+    started (Tuya)
+  - **App curve**: water temperature at −15 °C and at +15 °C outdoor
+- **Advice**: with Tuya, set the app curve; a flat basis works, but less well
+- **Diagnostics**: `adaptive_control_diagnostics` shows the mode, the emitter
+  system, Kp and Ti with their source, the basis and the P and I terms
+
 #### Coast Offset (v2.8.0+)
 - **Default**: 1.0°C
 - **Range**: 0.5 - 5.0°C

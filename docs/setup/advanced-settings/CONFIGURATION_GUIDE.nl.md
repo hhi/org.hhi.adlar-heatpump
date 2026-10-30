@@ -262,6 +262,29 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - **Vloerverwarming**: Stel beide in rond het bereik van uw eigen stooklijn
   (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer
 
+#### Regelmodus, Afgiftesysteem en Stooklijn (v3.5.0+)
+
+- **Regelmodus — standaard**: Klassiek
+  - **Klassiek**: telt de PI-uitvoer elke cyclus bij het setpoint op (bestaand
+    gedrag)
+  - **Positioneel**: advies = stooklijn + PI-correctie met een echte integraal,
+    zonder brede dode zone; het setpoint blijft rustig, ook met een flow die elk
+    advies uitvoert
+- **Afgiftesysteem — standaard**: Handmatig
+  - **Radiatoren**: Kp 3, Ti 3 u, coast uit
+  - **Vloerverwarming**: Kp 3, Ti 6 u, coast aan
+  - **Handmatig**: Positionele PI Kp en Ti en de schakelaar Coast hieronder
+  - In de klassieke modus volgt alleen coast deze keuze
+- **Stooklijn (positionele modus) — standaard**: Automatisch
+  - **Automatisch**: de eigen stooklijn van de warmtepomp (Aurora I/II:
+    DIY-stooklijn L28/L29; Aurora III: klimaatcurve), anders het setpoint bij
+    het inschakelen van de positionele modus (Tuya)
+  - **App-stooklijn**: watertemperatuur bij −15 °C en bij +15 °C buiten
+- **Advies**: stel bij Tuya de app-stooklijn in; een vlakke basis werkt, maar
+  minder goed
+- **Diagnostiek**: `adaptive_control_diagnostics` toont de modus, het
+  afgiftesysteem, Kp en Ti met hun bron, de basis en de P- en I-term
+
 #### Coast Offset (v2.8.0+)
 - **Standaard**: 1.0°C
 - **Bereik**: 0.5 - 5.0°C
