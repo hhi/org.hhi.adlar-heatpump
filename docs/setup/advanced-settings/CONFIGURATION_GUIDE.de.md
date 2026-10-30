@@ -255,6 +255,10 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   Regelung empfehlen kann
 - **Regel**: Das Maximum muss mindestens 2°C über dem Minimum liegen; sonst wird
   die Änderung abgelehnt
+- **Grenzen der Wärmepumpe (v3.4.4+)**: Die Empfehlung bleibt auch innerhalb der
+  in der Wärmepumpe eingestellten Heizgrenzen (Aurora I/II: P110/P111, Aurora
+  III: Grenzen von Zone 1). Die Diagnose der adaptiven Regelung zeigt, welche
+  Grenze gilt
 - **Fußbodenheizung**: Beide um den Bereich Ihrer eigenen Heizkurve einstellen
   (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen
 

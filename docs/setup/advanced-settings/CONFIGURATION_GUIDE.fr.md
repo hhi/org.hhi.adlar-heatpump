@@ -255,6 +255,10 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   régulation adaptative peut recommander
 - **Règle** : Le maximum doit être au moins 2°C au-dessus du minimum ; sinon la
   modification est refusée
+- **Limites de la pompe à chaleur (v3.4.4+)** : La recommandation reste aussi
+  dans les limites de chauffage réglées dans la pompe à chaleur (Aurora I/II :
+  P110/P111, Aurora III : limites de la zone 1). Le diagnostic de la régulation
+  adaptative indique quelle limite s'applique
 - **Chauffage au sol** : Réglez les deux autour de la plage de votre propre
   courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la
   marge pour le temps froid

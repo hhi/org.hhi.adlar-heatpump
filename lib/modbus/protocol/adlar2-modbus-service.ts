@@ -40,6 +40,7 @@ import {
   scaleRegisterValue,
   validateRefrigerant,
 } from './adlar-modbus-registers';
+import { plausibleHeatingLimits, type WaterTempLimits } from '../../shared/adaptive/setpoint-range';
 
 interface CalibrationPoint {
   raw: number;
@@ -160,6 +161,8 @@ export interface ControlSnapshot {
   dhwReturnDiffC: number | null;
   hotWaterHeatSourceReturnDiffC: number | null;
   heatingHeatSourceReturnDiffC: number | null;
+  /** Active heating limits 0x00FB..0x00FA computed by the controller; null when not read or implausible. */
+  heatingLimits: WaterTempLimits | null;
 }
 
 export type PowerSource = 'unit-direct' | 'unit-derived' | 'ac-derived' | 'none';
@@ -695,6 +698,10 @@ export class Adlar2ModbusService extends EventEmitter {
       dhwReturnDiffC: optionalScaled(P_PARAMETERS.P96_hotWaterReturnDiff),
       hotWaterHeatSourceReturnDiffC: optionalScaled(P_PARAMETERS.P151_returnDiffHwSource),
       heatingHeatSourceReturnDiffC: optionalScaled(P_PARAMETERS.P152_returnDiffHeatSource),
+      heatingLimits: plausibleHeatingLimits(
+        optionalScaled(SENSOR_REGISTERS.heatingTempLowerLimit),
+        optionalScaled(SENSOR_REGISTERS.heatingTempUpperLimit),
+      ),
     };
   }
 
