@@ -192,7 +192,7 @@ liggen pas vast na P4.
 | Situatie | Standaard |
 |---|---|
 | Bestaand apparaat (migratie) | Handmatig: de afgestemde waarden blijven gelden |
-| Nieuw apparaat, Aurora II | Uit de modus 0x0304: 3 (vloerverwarming) → Vloerverwarming; anders Radiatoren |
+| Nieuw apparaat, Aurora II | Uit de modus 0x0304: 3 (vloerverwarming) of 7 (tapwater + vloerverwarming) → Vloerverwarming; anders Radiatoren |
 | Nieuw apparaat, Aurora III | Uit het afgiftetype van zone 1 bij verwarmen (3-0035): 2 (vloer) → Vloerverwarming; 1 (radiator) of 0 (FCU) → Radiatoren |
 | Nieuw apparaat, Tuya | Uit `adlar_enum_mode`: `floor_heating` of `floor_heatign_and_hot_water` → Vloerverwarming; anders Radiatoren (O10) |
 
