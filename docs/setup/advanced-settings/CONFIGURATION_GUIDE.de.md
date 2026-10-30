@@ -246,6 +246,18 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 - **Bereich**: 0,1 - 1,0°C
 - **Funktion**: Toleranz bevor Anpassungen vorgenommen werden
 
+#### Minimale und Maximale Wassertemperatur (v3.4.3+)
+
+- **Minimum — Standard**: 18°C, **Bereich**: 15 - 30°C
+- **Maximum — Standard**: 60°C (Tuya: 65°C), **Bereich**: 25 - 60°C (Tuya: 25 -
+  65°C)
+- **Funktion**: Niedrigste und höchste Wassertemperatur, die die adaptive
+  Regelung empfehlen kann
+- **Regel**: Das Maximum muss mindestens 2°C über dem Minimum liegen; sonst wird
+  die Änderung abgelehnt
+- **Fußbodenheizung**: Beide um den Bereich Ihrer eigenen Heizkurve einstellen
+  (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen
+
 #### Coast Offset (v2.8.0+)
 - **Standard**: 1,0°C
 - **Bereich**: 0,5 - 5,0°C
@@ -336,7 +348,6 @@ Automatische Optimierung basierend auf Day-Ahead-Energiepreisen (dynamischer Ver
 - **Standard**: Deaktiviert
 - **Funktion**: Nutzt niedrige Preise, vermeidet hohe Preise
 - **Datenquelle**: EnergyZero API (kostenlos, kein Konto erforderlich)
-- **Geschätzte Einsparungen**: 400-600€ pro Jahr
 
 ### Preisberechnungsmodus
 - **Standard**: All-in-Preis (komplette Kosten)
@@ -418,7 +429,6 @@ Automatische Vorlauftemperatur-Optimierung für maximale Effizienz.
   - COP-Berechnung aktiv
   - Mindestens 1 Woche Daten
   - Adaptive Regelung aktiviert
-- **Geschätzte Einsparungen**: 200-300€/Jahr
 - **Lernzeit**: 2-4 Wochen für zuverlässige Optimierung
 
 ### Minimal Akzeptabler COP

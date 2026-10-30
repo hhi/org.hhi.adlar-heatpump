@@ -564,6 +564,11 @@ export class COPOptimizer {
     this.logger(`COPOptimizer: minSupplyTemp updated to ${minTemp}°C`);
   }
 
+  public updateMaxSupplyTemp(maxTemp: number): void {
+    this.config.maxSupplyTemp = maxTemp;
+    this.logger(`COPOptimizer: maxSupplyTemp updated to ${maxTemp}°C`);
+  }
+
   public updateMinAcceptableCOP(value: number): void {
     this.config.minAcceptableCOP = value;
     this.logger(`COPOptimizer: minAcceptableCOP updated to ${value}`);

@@ -211,3 +211,33 @@ test('AdaptiveControlService coast helpers enforce activation, step limit and ex
   assert.strictEqual(service._isStaleCoast(-0.2), true, 'falling room + negligible coast triggers soft exit');
   assert.strictEqual(service._isStaleCoast(-0.8), false, 'large coast adjustment is not stale');
 });
+
+test('AdaptiveControlService caps recommendations at adaptive_max_setpoint', async () => {
+  const device = createDevice();
+  device.settings.adaptive_max_setpoint = 36;
+  const service = createService(device, [2, 0]);
+
+  await service.executeControlCycle();
+  assert.strictEqual(service.lastRecommendedTemp, 36, 'advice 35 + 2 must be capped at the configured maximum');
+  assert.strictEqual(device.capabilities.adlar_simulated_target, 36);
+});
+
+test('AdaptiveControlService falls back to the hard maximum without adaptive_max_setpoint', async () => {
+  const device = createDevice();
+  device.capabilities.target_temperature = 64;
+  const service = createService(device, [2, 0]);
+
+  await service.executeControlCycle();
+  assert.strictEqual(service.lastRecommendedTemp, 65, 'without the setting the Tuya hard maximum of 65°C applies');
+});
+
+test('AdaptiveControlService passes a changed adaptive_max_setpoint to the COP optimizer', async () => {
+  const device = createDevice();
+  const service = createService(device, [0]);
+  const received = [];
+  service.copOptimizer.updateMaxSupplyTemp = (value) => received.push(value);
+
+  await service.onSettings({}, { adaptive_max_setpoint: 32 }, ['adaptive_max_setpoint']);
+  await service.onSettings({}, { adaptive_max_setpoint: 65 }, ['adaptive_max_setpoint']);
+  assert.deepStrictEqual(received, [32, 55], 'COP optimizer range follows the maximum, never above 55°C');
+});

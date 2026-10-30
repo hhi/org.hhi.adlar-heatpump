@@ -246,6 +246,18 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Range**: 0.1 - 1.0°C
 - **Function**: Tolerance before adjustments are made
 
+#### Minimum and Maximum Water Temperature (v3.4.3+)
+
+- **Minimum — default**: 18°C, **range**: 15 - 30°C
+- **Maximum — default**: 60°C (Tuya: 65°C), **range**: 25 - 60°C (Tuya: 25 -
+  65°C)
+- **Function**: Lowest and highest water temperature the adaptive control will
+  recommend
+- **Rule**: The maximum must be at least 2°C above the minimum; otherwise the
+  change is rejected
+- **Floor heating**: Set both around the range of your own heating curve (e.g.
+  2°C below and 3°C above) and leave room for cold weather
+
 #### Coast Offset (v2.8.0+)
 - **Default**: 1.0°C
 - **Range**: 0.5 - 5.0°C
@@ -336,7 +348,6 @@ Automatic optimization based on day-ahead energy prices (dynamic contract requir
 - **Default**: Disabled
 - **Function**: Utilize low prices, avoid high prices
 - **Data source**: EnergyZero API (free, no account needed)
-- **Estimated savings**: €400-600 per year
 
 ### Price Calculation Mode
 - **Default**: All-in price (complete costs)
@@ -418,7 +429,6 @@ Automatic supply temperature optimization for maximum efficiency.
   - COP calculation active
   - Minimum 1 week of data
   - Adaptive control enabled
-- **Estimated savings**: €200-300/year
 - **Learning time**: 2-4 weeks for reliable optimization
 
 ### Minimum Acceptable COP

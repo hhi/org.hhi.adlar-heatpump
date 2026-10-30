@@ -26,11 +26,11 @@ Die Funktion **Gebäudeerkenntnisse & Empfehlungen** verwandelt Ihre Wärmepumpe
 
 ### Hauptvorteile
 
-| Vorteil | Einsparung |
-|---------|------------|
-| 💰 Dämmungserkenntnisse | 10-30% |
-| ⏱️ Vorheizoptimierung | 5-10% |
-| 🏠 Thermische Speicherstrategien | 10-25% (mit dynamischen Preisen) |
+| Vorteil | Was es bietet |
+|---------|---------------|
+| 💰 Dämmungserkenntnisse | Einblick in Wärmeverlust und Dämmung |
+| ⏱️ Vorheizoptimierung | Startzeit für das Vorheizen |
+| 🏠 Thermische Speicherstrategien | Wärme puffern bei dynamischen Preisen |
 
 ---
 
@@ -287,13 +287,24 @@ Bei τ über 250 Stunden (z. B. Passivhaus) erscheint keine Vorheiz-Erkenntnis.
 | Abgelehnt | 🚫 | Für 30 Tage ausgeblendet |
 | Gelöst | ✔️ | Maßnahme implementiert |
 
+### Blockiert
+
+Kann das Gebäudemodell vorübergehend nicht lernen, zeigen die Erkenntnisse **🚫
+Blockiert: …** mit dem Grund.
+
+- **Fehlende Quelle oder Einstellung** (keine Innen- oder Außentemperatur, keine
+  Leistung, Lernen deaktiviert): sofort sichtbar, da hier eine Aktion von Ihnen
+  nötig ist.
+- **Kurze Unterbrechung im normalen Betrieb** (keine COP-Messung beim
+  Kompressorstart, Abtauen, Warmwasser, Zusatzheizung): erst sichtbar, wenn sie
+  länger als 30 Minuten anhält (ab 3.4.3). Bis dahin bleibt die normale
+  Erkenntnis stehen.
+
 ### Prioritätssystem
 
-Erkenntnisse werden 0-100 bewertet basierend auf:
-- **Vertrauen** (30%) — Modellsicherheit
-- **Energieeinsparungspotenzial** (40%) — anhand der Art der Erkenntnis
-- **Maßnahmeneinfachheit** (20%) — Wie einfach zu implementieren
-- **Sofortwirkung** (10%) — Schneller vs. langfristiger Nutzen
+Jede Erkenntnis hat eine feste Priorität (0–100), die von Art und Ergebnis
+abhängt, zum Beispiel 90 für einen großen Puffer mit geringem Verlust, 85 für
+hohen Wärmeverlust und 10 während des Lernens oder bei einer Blockierung.
 
 **Anzeigeregel:** Jede Kategorie hat ihren eigenen Sensor - alle Erkenntnisse werden parallel angezeigt (v2.5.10)
 

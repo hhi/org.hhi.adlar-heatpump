@@ -14,14 +14,6 @@ Ce système contrôle intelligemment votre pompe à chaleur Adlar Castra pour :
 - **Maximisation du COP** pour une efficacité maximale
 - **Apprentissage automatique** de la réponse de votre maison
 
-### Économies Estimées
-
-| Composant | Économies/an |
-|-----------|--------------|
-| Optimisation du Prix de l'Énergie | 400-600€ |
-| Optimisation COP | 200-300€ |
-| **Total** | **600-900€** |
-
 ---
 
 ## Architecture
@@ -211,15 +203,11 @@ Valeurs de départ des profils de bâtiment ; le modèle apprend ensuite les val
 | Prix du marché+ | Spot + marge + TVA |
 | **Tout compris** | Spot + marge + taxe + TVA |
 
-### Exemple d'Économies
+### Suivre les coûts réels
 
-```
-SANS optimisation : 18€/jour
-AVEC optimisation : 10€/jour
-─────────────────────────────
-Économies :         8€/jour = ~2 900€/an (max)
-Réaliste :          400-600€/an
-```
+Suivez les coûts réels avec Homey Énergie et les coûts journaliers dans l'app.
+Estimer une économie à l'avance n'est pas fiable : les prix ne sont pas connus à
+l'avance et la pompe à chaleur ne fonctionne pas à chaque heure.
 
 ---
 

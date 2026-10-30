@@ -14,14 +14,6 @@ Dit systeem regelt je Adlar Castra warmtepomp intelligent voor:
 - **COP maximalisatie** voor maximale efficiëntie
 - **Automatisch leren** hoe jouw woning reageert
 
-### Geschatte Besparingen
-
-| Onderdeel | Besparing/jaar |
-|-----------|---------------|
-| Energie Prijs Optimalisatie | €400-600 |
-| COP Optimalisatie | €200-300 |
-| **Totaal** | **€600-900** |
-
 ---
 
 ## Architectuur
@@ -211,15 +203,11 @@ Startwaarden van de gebouwprofielen; het model leert daarna de werkelijke waarde
 | Marktprijs+ | Spot + opslag + BTW |
 | **All-in** | Spot + opslag + belasting + BTW |
 
-### Voorbeeld Besparing
+### Werkelijke kosten volgen
 
-```
-ZONDER optimalisatie: €18/dag
-MET optimalisatie:    €10/dag
-─────────────────────────────
-Besparing:            €8/dag = ~€2.900/jaar (max)
-Realistisch:          €400-600/jaar
-```
+De werkelijke kosten volg je met Homey Energy en de dagkosten in de app. Een
+besparing vooraf schatten is niet betrouwbaar: de prijzen zijn vooraf niet bekend
+en de warmtepomp draait niet elk uur.
 
 ---
 

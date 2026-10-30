@@ -26,11 +26,11 @@ The **Building Insights & Recommendations** feature transforms your heat pump fr
 
 ### Key Benefits
 
-| Benefit | Savings |
-|---------|---------|
-| 💰 Insulation insights | 10-30% |
-| ⏱️ Pre-heating optimization | 5-10% |
-| 🏠 Thermal storage strategies | 10-25% (with dynamic pricing) |
+| Benefit | What it provides |
+|---------|------------------|
+| 💰 Insulation insights | Insight into heat loss and insulation |
+| ⏱️ Pre-heating optimization | Start time for pre-heating |
+| 🏠 Thermal storage strategies | Heat buffering with dynamic pricing |
 
 ---
 
@@ -287,13 +287,22 @@ No pre-heating insight is shown when τ is above 250 hours (e.g. a passive house
 | Dismissed | 🚫 | Hidden for 30 days |
 | Resolved | ✔️ | Action implemented |
 
+### Blocked
+
+When the building model temporarily cannot learn, insights show **🚫 Blocked: …**
+with the reason.
+
+- **Missing source or setting** (no indoor or outdoor temperature, no power,
+  learning disabled): shown immediately, because this needs action from you.
+- **Short interruption during normal operation** (no COP reading at compressor
+  start, defrost, hot water, auxiliary heating): shown only when it lasts longer
+  than 30 minutes (since 3.4.3). Until then the regular insight stays.
+
 ### Priority System
 
-Insights are ranked 0-100 based on:
-- **Confidence** (30%) — Model certainty
-- **Energy savings potential** (40%) — based on the insight type
-- **Action simplicity** (20%) — How easy to implement
-- **Immediate impact** (10%) — Quick vs. long-term benefit
+Each insight has a fixed priority (0–100) that depends on its type and outcome,
+for example 90 for a large buffer with low loss, 85 for high heat loss and 10
+while learning or when blocked.
 
 **Display rule:** Each category has its own sensor - all insights are shown in parallel (v2.5.10)
 

@@ -14,14 +14,6 @@ Dieses System steuert Ihre Adlar Castra Wärmepumpe intelligent für:
 - **COP-Maximierung** für maximale Effizienz
 - **Automatisches Lernen** wie Ihr Haus reagiert
 
-### Geschätzte Einsparungen
-
-| Komponente | Einsparungen/Jahr |
-|------------|-------------------|
-| Energiepreis-Optimierung | 400-600€ |
-| COP-Optimierung | 200-300€ |
-| **Gesamt** | **600-900€** |
-
 ---
 
 ## Architektur
@@ -211,15 +203,11 @@ Startwerte der Gebäudeprofile; das Modell lernt danach die tatsächlichen Werte
 | Marktpreis+ | Spot + Aufschlag + MwSt. |
 | **All-in** | Spot + Aufschlag + Steuer + MwSt. |
 
-### Beispiel Einsparungen
+### Tatsächliche Kosten verfolgen
 
-```
-OHNE Optimierung: 18€/Tag
-MIT Optimierung:  10€/Tag
-─────────────────────────────
-Einsparung:       8€/Tag = ~2.900€/Jahr (max)
-Realistisch:      400-600€/Jahr
-```
+Die tatsächlichen Kosten verfolgen Sie mit Homey Energy und den Tageskosten in der
+App. Eine Einsparung im Voraus zu schätzen ist nicht zuverlässig: Die Preise sind
+vorab nicht bekannt, und die Wärmepumpe läuft nicht jede Stunde.
 
 ---
 

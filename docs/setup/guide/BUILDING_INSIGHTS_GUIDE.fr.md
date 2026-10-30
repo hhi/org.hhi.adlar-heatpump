@@ -26,11 +26,11 @@ La fonctionnalité **Aperçus & Recommandations du Bâtiment** transforme votre 
 
 ### Avantages clés
 
-| Avantage | Économies |
-|----------|-----------|
-| 💰 Aperçus d'isolation | 10-30% |
-| ⏱️ Optimisation du préchauffage | 5-10% |
-| 🏠 Stratégies de stockage thermique | 10-25% (avec tarification dynamique) |
+| Avantage | Ce que cela apporte |
+|----------|---------------------|
+| 💰 Aperçus d'isolation | Aperçu des pertes de chaleur et de l'isolation |
+| ⏱️ Optimisation du préchauffage | Heure de début du préchauffage |
+| 🏠 Stratégies de stockage thermique | Stockage de chaleur avec prix dynamiques |
 
 ---
 
@@ -287,13 +287,24 @@ Aucun aperçu de préchauffage n'apparaît lorsque τ dépasse 250 heures (par e
 | Rejeté | 🚫 | Masqué pour 30 jours |
 | Résolu | ✔️ | Action implémentée |
 
+### Bloqué
+
+Lorsque le modèle du bâtiment ne peut temporairement pas apprendre, les aperçus
+affichent **🚫 Bloqué : …** avec la raison.
+
+- **Source ou réglage manquant** (pas de température intérieure ou extérieure,
+  pas de puissance, apprentissage désactivé) : affiché immédiatement, car une
+  action de votre part est nécessaire.
+- **Brève interruption en fonctionnement normal** (pas de mesure du COP au
+  démarrage du compresseur, dégivrage, eau chaude, chauffage d'appoint) :
+  affiché seulement s'il dure plus de 30 minutes (depuis 3.4.3). Jusque-là,
+  l'aperçu habituel reste affiché.
+
 ### Système de priorité
 
-Les aperçus sont classés 0-100 basé sur :
-- **Confiance** (30%) — Certitude du modèle
-- **Potentiel d'économies d'énergie** (40%) — selon le type d'aperçu
-- **Simplicité d'action** (20%) — Facilité d'implémentation
-- **Impact immédiat** (10%) — Bénéfice rapide vs long terme
+Chaque aperçu a une priorité fixe (0–100) qui dépend de son type et du résultat,
+par exemple 90 pour un grand tampon avec peu de pertes, 85 pour des pertes de
+chaleur élevées et 10 pendant l'apprentissage ou en cas de blocage.
 
 **Règle d'affichage :** Chaque catégorie a son propre capteur - tous les aperçus sont affichés en parallèle (v2.5.10)
 

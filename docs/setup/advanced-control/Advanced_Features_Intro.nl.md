@@ -125,7 +125,6 @@ DAN: [Intelligent Heat Pump] Stuur externe energieprijzen {{Prijzen}} voor prijs
 - ✅ Automatische prijsoptimalisatie
 - ✅ Voorverwarmen tijdens goedkope uren
 - ✅ Vermijden van piekprijzen
-- ✅ Geschatte besparing: €400-600/jaar
 
 ---
 
@@ -162,7 +161,7 @@ DAN: [Intelligent Heat Pump] Stuur zonnestraling {{Stralingsintensiteit}} W/m² 
 >
 > - Gebouwmodel: g-factor representeert daadwerkelijke glasoppervlak en oriëntatie
 > - Voorspellingen: Betere anticipatie op zonnige perioden
-> - Energiebesparing: Tot 5-10% reductie verwarmingsbehoefte op zonnige dagen
+> - Regeling: zonnewinst wordt op zonnige dagen meegenomen in de warmtevraag
 >
 > **Conclusie:** Externe koppeling is *optioneel* maar geeft aanzienlijk betere zonnewinst-modellering.
 
