@@ -9,6 +9,7 @@
  *   node test/simulation/coast-closed-loop.js [radiator|vloer|all]
  *   SENS=1 [FLOW=beperkt] node test/simulation/coast-closed-loop.js
  *   TRACE=<dag> VARIANT='<naam>' FLOW=<direct|beperkt> node test/simulation/coast-closed-loop.js radiator
+ *   P4=1 node test/simulation/coast-closed-loop.js   (ADR-065 P4 on the app's PositionalPIController)
  *
  * Fysica (stap 30 s):
  *   - woning: C · dT/dt = He·(Tw − Tin) − UA·(Tin − Tout) + P_int + zon
@@ -37,6 +38,7 @@ const path = require('path');
 
 const { HeatingController } = require('../../.homeybuild/lib/modbus/adaptive/heating-controller');
 const { WeightedDecisionMaker } = require('../../.homeybuild/lib/modbus/adaptive/weighted-decision-maker');
+const { PositionalPIController, EMITTER_PRESETS } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 
 const TOUT = JSON.parse(fs.readFileSync(path.join(__dirname, 'building-model-review/adr064-buitentemp-2026-10-18.json'), 'utf8')).slice(0, 168);
 const DT = 30; // s
@@ -78,6 +80,15 @@ const VARIANTS = {
   'pos. PI-I': { mode: 'posI', coast: false, ua: 0, tau: 0 },
   'pos. PI-I + coast': { mode: 'posI', coast: true, ua: 0, tau: 0 },
   'alleen stooklijn': { mode: 'curve', coast: false, ua: 0, tau: 0 },
+  // ADR-065 as built: the app's PositionalPIController (lib/shared/adaptive/positional-pi-controller.ts)
+  'pos. app': { mode: 'posTS', coast: false, ua: 0, tau: 0 },
+  'pos. app + coast': { mode: 'posTS', coast: true, ua: 0, tau: 0 },
+};
+// P4 houses (ADR-065 §5/§7): the reference house plus a light and a heavy one
+const HOUSES = {
+  referentie: HOUSE,
+  licht: { C: 7, UA: 0.35, pInt: 0.3 },
+  zwaar: { C: 30, UA: 0.25, pInt: 0.3 },
 };
 // Positional PI with a true integral (alternative, not in the app):
 //   u = Kp·e + I, I += Ki·e per cycle; Kp 3 K/K (= Kp 5 × comfort anchor 0,6), Ti 3 h
@@ -102,15 +113,30 @@ const toutAt = (h) => {
 };
 
 /** Heating curve: the outlet setpoint that keeps the house at TARGET without sun, plus a bias. */
-function curve(em, tOut, bias = em.curveBias) {
-  const q = Math.max(0, HOUSE.UA * (TARGET - tOut) - HOUSE.pInt);
+function curve(em, tOut, bias = em.curveBias, house = HOUSE) {
+  const q = Math.max(0, house.UA * (TARGET - tOut) - house.pInt);
   return TARGET + q / em.He + q / (2 * HP.flowK) + bias;
 }
+
+/**
+ * P4 curve shape: shape 1 = the ideal form; > 1 too steep, < 1 too flat, pivoting at 7 °C outdoor
+ * so that only the slope is wrong.
+ */
+function shapedCurve(em, tOut, bias, house, shape = 1) {
+  const pivot = curve(em, 7, bias, house);
+  return pivot + shape * (curve(em, tOut, bias, house) - pivot);
+}
+
+/** P4 night setback: 19 °C between 23:00 and 07:00, otherwise TARGET. */
+const targetAt = (hod, setback) => (setback && (hod >= 23 || hod < 7) ? 19 : TARGET);
 
 /** One run; returns the comfort, coast and heat-pump statistics. */
 async function simulate(variantName, emitterName, seed, flow = 'direct', opts = {}) {
   // opts (gevoeligheid): Kp, Ti (uren), bias (stooklijnafwijking K), toutShift (K op de buitenreeks)
+  // opts (P4): house, setback (nachtverlaging), shape (stooklijnvorm), flatBasis (vlakke basis)
   const P = { ...PII, ...(opts.Kp !== undefined ? { Kp: opts.Kp } : {}) };
+  const house = opts.house ?? HOUSE;
+  const pc = new PositionalPIController({ kp: P.Kp, tiHours: opts.Ti ?? 3 });
   P.Ki = P.Kp / ((opts.Ti ?? 3) * 12);
   const bias = opts.bias;
   const shift = opts.toutShift ?? 0;
@@ -131,7 +157,8 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
 
   // Physical state
   let tIn = TARGET; let tw = TARGET + 12; let on = false; let onS = 0; let offS = 1e9;
-  let sp = v.mode === 'incr' ? em.sp0 : Math.round(curve(em, toutAt(0) + shift, bias));
+  let sp = v.mode === 'incr' ? em.sp0 : Math.round(curve(em, toutAt(0) + shift, bias, house));
+  const flatValue = Math.round(curve(em, toutAt(0) + shift, bias, house));
   // Controller state
   let acc = 0; let lastObserved = null; let lastRecommended;
   let coastActive = false; let cooldownCount = 0; let coastCycles = 0;
@@ -171,10 +198,11 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     // --- Water loop and house ---
     const qEm = em.He * (tw - tIn);
     tw += ((q - qEm) / em.Cw) * (DT / 3600);
-    tIn += ((qEm - HOUSE.UA * (tIn - tOut) + HOUSE.pInt + sun) / HOUSE.C) * (DT / 3600);
+    tIn += ((qEm - house.UA * (tIn - tOut) + house.pInt + sun) / house.C) * (DT / 3600);
 
-    // --- Comfort statistics (true temperature) ---
-    const e = tIn - TARGET;
+    // --- Comfort statistics (true temperature, against the target of the moment) ---
+    const target = targetAt(hod, opts.setback);
+    const e = tIn - target;
     st.sumSq += e * e; st.n++;
     if (e > 0.5) st.over05 += DT / 3600;
     if (e < -0.5) st.under05 += DT / 3600;
@@ -190,7 +218,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     cycleNo++;
     const indoorM = Math.round((tIn + 0.03 * gauss()) * 10) / 10;
     const outletM = Math.round(outletTrue);
-    const base = curve(em, tOut, bias);
+    const base = opts.flatBasis ? flatValue : shapedCurve(em, tOut, bias, house, opts.shape ?? 1);
 
     // Settlement on observation (ADR-059 W1)
     if (lastObserved !== null && sp !== lastObserved) {
@@ -205,10 +233,10 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     const dropRate = outHist.length < COAST.outletN ? 0 : (outHist[outHist.length - 1] - outHist[0]) / COAST.outletN;
     const mult = dropRate < 0 ? Math.max(0.3, 1.0 + dropRate * 0.5) : 1.0;
     // posI: PI output from the previous cycle's state (for the coast reference)
-    const ePos = TARGET - indoorM;
-    const uPrev = Math.max(-P.Umax, Math.min(P.Umax, P.Kp * ePos + integ));
+    const ePos = target - indoorM;
+    const uPrev = v.mode === 'posTS' ? pc.output(ePos) : Math.max(-P.Umax, Math.min(P.Umax, P.Kp * ePos + integ));
     let coastAdj;
-    if (v.mode === 'posI') {
+    if (v.mode === 'posI' || v.mode === 'posTS') {
       coastAdj = Math.min(0, (outletM - COAST.offset) - (base + uPrev)) * mult;
     } else if (v.mode === 'pos') {
       // Positional: relative to what the curve plus PI alone would ask; the flow limits the rate
@@ -224,20 +252,20 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         if (v.mode === 'pos' && process.env.POS_EXIT_RESET === '1') piHeld = 0;
         exitWatch = { untilS: tS + 6 * 3600, min: Infinity };
       };
-      if (coastActive && indoorM < TARGET + COAST.hysteresis / 2) exitAt('hard');
+      if (coastActive && indoorM < target + COAST.hysteresis / 2) exitAt('hard');
       const falling = inHist.length >= COAST.trendN && inHist[inHist.length - 1] < inHist[0];
       if (coastActive && falling && Math.abs(coastAdj) < COAST.staleThreshold) exitAt('soft');
       if (coastActive && coastCycles >= COAST.maxCycles) exitAt('watchdog');
       if (!coastActive) {
         const rising = inHist.length < COAST.trendN ? true : inHist[inHist.length - 1] >= inHist[0];
-        if (indoorM > TARGET + COAST.hysteresis && rising) cooldownCount++; else cooldownCount = 0;
+        if (indoorM > target + COAST.hysteresis && rising) cooldownCount++; else cooldownCount = 0;
         coastActive = cooldownCount >= 2;
         if (coastActive) coastCycles = 0;
       }
       if (coastActive) { coastCycles++; st.coastOnCycles++; }
     }
 
-    let heatingAction = await pi.calculateAction({ indoorTemp: indoorM, targetTemp: TARGET, timestamp: tS * 1000 });
+    let heatingAction = await pi.calculateAction({ indoorTemp: indoorM, targetTemp: target, timestamp: tS * 1000 });
     if (v.mode === 'pos') {
       // Positional: inside the deadband the last PI output stays (frozen), it does not drop to 0
       if (heatingAction) piHeld = heatingAction.temperatureAdjustment;
@@ -269,6 +297,19 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
       // Coast displaces the PI as in the decision maker: (1 − strength)·u + strength·coastAdj,
       // only while coast actually contributes (coastAdj < 0, ADR-040A)
       const corr = (v.coast && coastActive && coastAdj < 0) ? (1 - COAST.strength) * u + COAST.strength * coastAdj : u;
+      lastRecRaw = base + corr;
+      recommended = Math.max(SP_MIN, Math.min(SP_MAX, Math.round(lastRecRaw)));
+    } else if (v.mode === 'posTS') {
+      // The app's controller: same anti-windup rules, with the clamped previous recommendation (as the service)
+      const step = pc.step({
+        error: ePos,
+        currentSetpoint: sp,
+        lastRecommendation: lastRecommended ?? null,
+        lastRawRecommendation: lastRecRaw,
+        range: { min: SP_MIN, max: SP_MAX },
+        pause: (v.coast && coastActive) ? 'coast' : null,
+      });
+      const corr = (v.coast && coastActive && coastAdj < 0) ? (1 - COAST.strength) * step.u + COAST.strength * coastAdj : step.u;
       lastRecRaw = base + corr;
       recommended = Math.max(SP_MIN, Math.min(SP_MAX, Math.round(lastRecRaw)));
     } else {
@@ -374,7 +415,56 @@ async function sensitivity() {
   }
 }
 
-if (process.env.SENS) {
+/**
+ * ADR-065 P4: the app's PositionalPIController with the emitter preset (radiator Ti 3 h without coast,
+ * floor Ti 6 h with coast) against the current incremental regulation, per scenario and weather.
+ */
+async function p4() {
+  const SCENARIOS = [
+    ['referentiewoning', {}],
+    ['lichte woning (C 7)', { house: HOUSES.licht }],
+    ['zware woning (C 30)', { house: HOUSES.zwaar }],
+    ['nachtverlaging 19 °C', { setback: true }],
+    ['stooklijn te steil (×1,3)', { shape: 1.3 }],
+    ['stooklijn te vlak (×0,7)', { shape: 0.7 }],
+    ['vlakke basis', { flatBasis: true }],
+  ];
+  const WEATHER = [['mild', 0], ['koud (−8 K)', -8]];
+  const flow = process.env.FLOW || 'direct';
+  for (const em of ['radiator', 'vloer']) {
+    const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
+    const appVariant = preset.coastEnabled ? 'pos. app + coast' : 'pos. app';
+    for (const [wName, shift] of WEATHER) {
+      console.log(`\n### P4 ${EMITTERS[em].label}; ${wName}; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${preset.coastEnabled ? 'aan' : 'uit'}; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log('scenario | variant | RMSE (°C) | uren > +0,5 /dag | uren < −0,5 /dag | starts/dag | kWh el/dag | setpoint min–max');
+      console.log('--- | --- | --- | --- | --- | --- | --- | ---');
+      for (const [label, o] of SCENARIOS) {
+        for (const name of ['incr. PI + coast (huidig)', appVariant]) {
+          const runs = [];
+          for (const seed of SEEDS) {
+            runs.push(await simulate(name, em, seed, flow, {
+              Kp: preset.kp, Ti: preset.tiHours, bias: EMITTERS[em].curveBias, toutShift: shift, ...o,
+            }));
+          }
+          const a = (fn) => avg(runs.map(fn));
+          console.log([
+            label, name,
+            f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
+            f(a((s) => s.over05 / DAYS)),
+            f(a((s) => s.under05 / DAYS)),
+            f(a((s) => s.starts / DAYS), 1),
+            f(a((s) => s.elKwh / DAYS)),
+            `${Math.min(...runs.map((s) => s.spMin))}–${Math.max(...runs.map((s) => s.spMax))}`,
+          ].join(' | '));
+        }
+      }
+    }
+  }
+}
+
+if (process.env.P4) {
+  p4();
+} else if (process.env.SENS) {
   sensitivity();
 } else if (process.env.TRACE) {
   simulate(process.env.VARIANT || 'incr. PI (huidig)', process.argv[2] || 'radiator', SEEDS[0], process.env.FLOW || 'direct');

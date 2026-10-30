@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.4.4",
+  "version": "3.5.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -19113,6 +19113,89 @@
               "value": false
             },
             {
+              "id": "adaptive_control_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Control mode",
+                "nl": "Regelmodus",
+                "de": "Regelmodus",
+                "fr": "Mode de régulation"
+              },
+              "hint": {
+                "en": "Classic: adds the PI output to the setpoint every cycle (previous behaviour). Positional: advice = heating curve + PI correction with a true integral, without a wide dead zone. Default: Classic.",
+                "nl": "Klassiek: telt de PI-uitvoer elke cyclus bij het setpoint op (bestaand gedrag). Positioneel: advies = stooklijn + PI-correctie met een echte integraal, zonder brede dode zone. Standaard: Klassiek.",
+                "de": "Klassisch: addiert die PI-Ausgabe in jedem Zyklus zum Sollwert (bisheriges Verhalten). Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne breite Totzone. Standard: Klassisch.",
+                "fr": "Classique : ajoute la sortie PI à la consigne à chaque cycle (comportement existant). Positionnel : recommandation = courbe de chauffe + correction PI avec une vraie intégrale, sans large zone morte. Défaut : Classique."
+              },
+              "value": "classic",
+              "values": [
+                {
+                  "id": "classic",
+                  "label": {
+                    "en": "Classic (incremental)",
+                    "nl": "Klassiek (incrementeel)",
+                    "de": "Klassisch (inkrementell)",
+                    "fr": "Classique (incrémental)"
+                  }
+                },
+                {
+                  "id": "positional",
+                  "label": {
+                    "en": "Positional (heating curve + PI)",
+                    "nl": "Positioneel (stooklijn + PI)",
+                    "de": "Positionell (Heizkurve + PI)",
+                    "fr": "Positionnel (courbe de chauffe + PI)"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_emitter_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Emitter system",
+                "nl": "Afgiftesysteem",
+                "de": "Wärmeabgabesystem",
+                "fr": "Système d'émission"
+              },
+              "hint": {
+                "en": "Sets Kp, Ti and coast at once. Radiators: Kp 3, Ti 3 h, coast off. Floor heating: Kp 3, Ti 6 h, coast on. Manual: your own values. In the classic control mode only coast follows this choice. Default: Manual.",
+                "nl": "Zet Kp, Ti en coast in één keer. Radiatoren: Kp 3, Ti 3 u, coast uit. Vloerverwarming: Kp 3, Ti 6 u, coast aan. Handmatig: uw eigen waarden. In de klassieke regelmodus volgt alleen coast deze keuze. Standaard: Handmatig.",
+                "de": "Setzt Kp, Ti und Coast auf einmal. Heizkörper: Kp 3, Ti 3 h, Coast aus. Fußbodenheizung: Kp 3, Ti 6 h, Coast an. Manuell: Ihre eigenen Werte. Im klassischen Regelmodus folgt nur Coast dieser Auswahl. Standard: Manuell.",
+                "fr": "Règle Kp, Ti et coast en une fois. Radiateurs : Kp 3, Ti 3 h, coast désactivé. Plancher chauffant : Kp 3, Ti 6 h, coast activé. Manuel : vos propres valeurs. En mode classique, seul coast suit ce choix. Défaut : Manuel."
+              },
+              "value": "manual",
+              "values": [
+                {
+                  "id": "radiator",
+                  "label": {
+                    "en": "Radiators",
+                    "nl": "Radiatoren",
+                    "de": "Heizkörper",
+                    "fr": "Radiateurs"
+                  }
+                },
+                {
+                  "id": "floor",
+                  "label": {
+                    "en": "Floor heating",
+                    "nl": "Vloerverwarming",
+                    "de": "Fußbodenheizung",
+                    "fr": "Plancher chauffant"
+                  }
+                },
+                {
+                  "id": "manual",
+                  "label": {
+                    "en": "Manual",
+                    "nl": "Handmatig",
+                    "de": "Manuell",
+                    "fr": "Manuel"
+                  }
+                }
+              ]
+            },
+            {
               "id": "adaptive_pi_kp",
               "type": "number",
               "label": {
@@ -19122,10 +19205,10 @@
                 "fr": "Contrôleur PI: Gain Proportionnel (Kp)"
               },
               "hint": {
-                "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 3.0",
-                "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 3.0",
-                "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 3.0",
-                "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 3.0"
+                "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 3.0. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 3.0. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 3.0. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 3.0 Utilisé uniquement en mode de régulation classique."
               },
               "value": 5,
               "min": 0.5,
@@ -19142,10 +19225,10 @@
                 "fr": "Contrôleur PI: Gain Intégral (Ki)"
               },
               "hint": {
-                "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5",
-                "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5",
-                "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5",
-                "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5"
+                "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5 Utilisé uniquement en mode de régulation classique."
               },
               "value": 1.5,
               "min": 0.1,
@@ -19162,15 +19245,55 @@
                 "fr": "Contrôleur PI: Zone Morte (°C)"
               },
               "hint": {
-                "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C",
-                "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C",
-                "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C",
-                "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C"
+                "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C Utilisé uniquement en mode de régulation classique."
               },
               "value": 0.3,
               "min": 0.1,
               "max": 1,
               "step": 0.1
+            },
+            {
+              "id": "adaptive_pos_kp",
+              "type": "number",
+              "label": {
+                "en": "Positional PI: Kp (K/K)",
+                "nl": "Positionele PI: Kp (K/K)",
+                "de": "Positioneller PI: Kp (K/K)",
+                "fr": "PI positionnel : Kp (K/K)"
+              },
+              "hint": {
+                "en": "Only used with Control mode = Positional and Emitter system = Manual. Degrees of water temperature per degree of indoor deviation. Default: 3.",
+                "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Graden watertemperatuur per graad afwijking binnen. Standaard: 3.",
+                "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Grad Wassertemperatur pro Grad Innenabweichung. Standard: 3.",
+                "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Degrés de température d'eau par degré d'écart intérieur. Défaut : 3."
+              },
+              "value": 3,
+              "min": 1,
+              "max": 8,
+              "step": 0.5
+            },
+            {
+              "id": "adaptive_pos_ti",
+              "type": "number",
+              "label": {
+                "en": "Positional PI: integral time Ti (hours)",
+                "nl": "Positionele PI: integratietijd Ti (uren)",
+                "de": "Positioneller PI: Integrationszeit Ti (Stunden)",
+                "fr": "PI positionnel : temps d'intégration Ti (heures)"
+              },
+              "hint": {
+                "en": "Only used with Control mode = Positional and Emitter system = Manual. Longer for slow emitters (floor heating about 6 h). Default: 3.",
+                "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Langer bij trage afgifte (vloerverwarming ongeveer 6 u). Standaard: 3.",
+                "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Länger bei träger Wärmeabgabe (Fußbodenheizung etwa 6 h). Standard: 3.",
+                "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Plus long pour une émission lente (plancher chauffant environ 6 h). Défaut : 3."
+              },
+              "value": 3,
+              "min": 1,
+              "max": 12,
+              "step": 0.5
             },
             {
               "id": "adaptive_min_setpoint",
@@ -19213,6 +19336,102 @@
               "max": 65,
               "step": 1,
               "units": "°C"
+            },
+            {
+              "id": "adaptive_curve_source",
+              "type": "dropdown",
+              "label": {
+                "en": "Heating curve (positional mode)",
+                "nl": "Stooklijn (positionele modus)",
+                "de": "Heizkurve (positioneller Modus)",
+                "fr": "Courbe de chauffe (mode positionnel)"
+              },
+              "hint": {
+                "en": "Basis of the positional advice. Automatic: the setpoint when the positional mode started (this model provides no heating curve). App curve: the two values below. Default: Automatic.",
+                "nl": "Basis van het positionele advies. Automatisch: het setpoint bij het inschakelen van de positionele modus (dit model levert geen stooklijn). App-stooklijn: de twee waarden hieronder. Standaard: Automatisch.",
+                "de": "Basis der positionellen Empfehlung. Automatisch: der Sollwert beim Einschalten des positionellen Modus (dieses Modell liefert keine Heizkurve). App-Kurve: die beiden Werte unten. Standard: Automatisch.",
+                "fr": "Base de la recommandation positionnelle. Automatique : la consigne au démarrage du mode positionnel (ce modèle ne fournit pas de courbe de chauffe). Courbe de l'app : les deux valeurs ci-dessous. Défaut : Automatique."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic",
+                    "nl": "Automatisch",
+                    "de": "Automatisch",
+                    "fr": "Automatique"
+                  }
+                },
+                {
+                  "id": "app",
+                  "label": {
+                    "en": "App curve",
+                    "nl": "App-stooklijn",
+                    "de": "App-Kurve",
+                    "fr": "Courbe de l'app"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_curve_at_minus15",
+              "type": "number",
+              "label": {
+                "en": "App curve: water temperature at −15 °C outdoor (°C)",
+                "nl": "App-stooklijn: watertemperatuur bij −15 °C buiten (°C)",
+                "de": "App-Kurve: Wassertemperatur bei −15 °C außen (°C)",
+                "fr": "Courbe de l'app : température d'eau à −15 °C extérieur (°C)"
+              },
+              "hint": {
+                "en": "Only used with Heating curve = App curve. Default: 40.",
+                "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 40.",
+                "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 40.",
+                "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 40."
+              },
+              "value": 40,
+              "min": 20,
+              "max": 65,
+              "step": 1,
+              "units": "°C"
+            },
+            {
+              "id": "adaptive_curve_at_plus15",
+              "type": "number",
+              "label": {
+                "en": "App curve: water temperature at +15 °C outdoor (°C)",
+                "nl": "App-stooklijn: watertemperatuur bij +15 °C buiten (°C)",
+                "de": "App-Kurve: Wassertemperatur bei +15 °C außen (°C)",
+                "fr": "Courbe de l'app : température d'eau à +15 °C extérieur (°C)"
+              },
+              "hint": {
+                "en": "Only used with Heating curve = App curve. Default: 25.",
+                "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 25.",
+                "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 25.",
+                "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 25."
+              },
+              "value": 25,
+              "min": 15,
+              "max": 50,
+              "step": 1,
+              "units": "°C"
+            },
+            {
+              "id": "adaptive_coast_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Coast (passive cooldown)",
+                "nl": "Coast (passief afkoelen)",
+                "de": "Coast (passives Abkühlen)",
+                "fr": "Coast (refroidissement passif)"
+              },
+              "hint": {
+                "en": "Only used with Emitter system = Manual; the presets set coast themselves. When off, coast never activates. Default: on.",
+                "nl": "Alleen gebruikt bij Afgiftesysteem = Handmatig; de voorinstellingen zetten coast zelf. Uit: coast wordt nooit actief. Standaard: aan.",
+                "de": "Nur verwendet bei Wärmeabgabesystem = Manuell; die Voreinstellungen setzen Coast selbst. Aus: Coast wird nie aktiv. Standard: an.",
+                "fr": "Utilisé uniquement avec Système d'émission = Manuel ; les préréglages règlent coast eux-mêmes. Désactivé : coast ne s'active jamais. Défaut : activé."
+              },
+              "value": true
             },
             {
               "id": "adaptive_cooldown_offset",
@@ -21205,6 +21424,89 @@
               "value": false
             },
             {
+              "id": "adaptive_control_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Control mode",
+                "nl": "Regelmodus",
+                "de": "Regelmodus",
+                "fr": "Mode de régulation"
+              },
+              "hint": {
+                "en": "Classic: adds the PI output to the setpoint every cycle (previous behaviour). Positional: advice = heating curve + PI correction with a true integral, without a wide dead zone. Default: Classic.",
+                "nl": "Klassiek: telt de PI-uitvoer elke cyclus bij het setpoint op (bestaand gedrag). Positioneel: advies = stooklijn + PI-correctie met een echte integraal, zonder brede dode zone. Standaard: Klassiek.",
+                "de": "Klassisch: addiert die PI-Ausgabe in jedem Zyklus zum Sollwert (bisheriges Verhalten). Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne breite Totzone. Standard: Klassisch.",
+                "fr": "Classique : ajoute la sortie PI à la consigne à chaque cycle (comportement existant). Positionnel : recommandation = courbe de chauffe + correction PI avec une vraie intégrale, sans large zone morte. Défaut : Classique."
+              },
+              "value": "classic",
+              "values": [
+                {
+                  "id": "classic",
+                  "label": {
+                    "en": "Classic (incremental)",
+                    "nl": "Klassiek (incrementeel)",
+                    "de": "Klassisch (inkrementell)",
+                    "fr": "Classique (incrémental)"
+                  }
+                },
+                {
+                  "id": "positional",
+                  "label": {
+                    "en": "Positional (heating curve + PI)",
+                    "nl": "Positioneel (stooklijn + PI)",
+                    "de": "Positionell (Heizkurve + PI)",
+                    "fr": "Positionnel (courbe de chauffe + PI)"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_emitter_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Emitter system",
+                "nl": "Afgiftesysteem",
+                "de": "Wärmeabgabesystem",
+                "fr": "Système d'émission"
+              },
+              "hint": {
+                "en": "Sets Kp, Ti and coast at once. Radiators: Kp 3, Ti 3 h, coast off. Floor heating: Kp 3, Ti 6 h, coast on. Manual: your own values. In the classic control mode only coast follows this choice. Default: Manual.",
+                "nl": "Zet Kp, Ti en coast in één keer. Radiatoren: Kp 3, Ti 3 u, coast uit. Vloerverwarming: Kp 3, Ti 6 u, coast aan. Handmatig: uw eigen waarden. In de klassieke regelmodus volgt alleen coast deze keuze. Standaard: Handmatig.",
+                "de": "Setzt Kp, Ti und Coast auf einmal. Heizkörper: Kp 3, Ti 3 h, Coast aus. Fußbodenheizung: Kp 3, Ti 6 h, Coast an. Manuell: Ihre eigenen Werte. Im klassischen Regelmodus folgt nur Coast dieser Auswahl. Standard: Manuell.",
+                "fr": "Règle Kp, Ti et coast en une fois. Radiateurs : Kp 3, Ti 3 h, coast désactivé. Plancher chauffant : Kp 3, Ti 6 h, coast activé. Manuel : vos propres valeurs. En mode classique, seul coast suit ce choix. Défaut : Manuel."
+              },
+              "value": "manual",
+              "values": [
+                {
+                  "id": "radiator",
+                  "label": {
+                    "en": "Radiators",
+                    "nl": "Radiatoren",
+                    "de": "Heizkörper",
+                    "fr": "Radiateurs"
+                  }
+                },
+                {
+                  "id": "floor",
+                  "label": {
+                    "en": "Floor heating",
+                    "nl": "Vloerverwarming",
+                    "de": "Fußbodenheizung",
+                    "fr": "Plancher chauffant"
+                  }
+                },
+                {
+                  "id": "manual",
+                  "label": {
+                    "en": "Manual",
+                    "nl": "Handmatig",
+                    "de": "Manuell",
+                    "fr": "Manuel"
+                  }
+                }
+              ]
+            },
+            {
               "id": "adaptive_pi_kp",
               "type": "number",
               "label": {
@@ -21214,10 +21516,10 @@
                 "fr": "Contrôleur PI: Gain Proportionnel (Kp)"
               },
               "hint": {
-                "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 5.0",
-                "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 5.0",
-                "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 5.0",
-                "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 5.0"
+                "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 5.0. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 5.0. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 5.0. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 5.0 Utilisé uniquement en mode de régulation classique."
               },
               "value": 5,
               "attr": {
@@ -21236,10 +21538,10 @@
                 "fr": "Contrôleur PI: Gain Intégral (Ki)"
               },
               "hint": {
-                "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5",
-                "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5",
-                "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5",
-                "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5"
+                "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5 Utilisé uniquement en mode de régulation classique."
               },
               "value": 1.5,
               "attr": {
@@ -21258,16 +21560,60 @@
                 "fr": "Contrôleur PI: Zone Morte (°C)"
               },
               "hint": {
-                "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C",
-                "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C",
-                "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C",
-                "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C"
+                "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C Utilisé uniquement en mode de régulation classique."
               },
               "value": 0.3,
               "attr": {
                 "min": 0.1,
                 "max": 1,
                 "step": 0.1
+              }
+            },
+            {
+              "id": "adaptive_pos_kp",
+              "type": "number",
+              "label": {
+                "en": "Positional PI: Kp (K/K)",
+                "nl": "Positionele PI: Kp (K/K)",
+                "de": "Positioneller PI: Kp (K/K)",
+                "fr": "PI positionnel : Kp (K/K)"
+              },
+              "hint": {
+                "en": "Only used with Control mode = Positional and Emitter system = Manual. Degrees of water temperature per degree of indoor deviation. Default: 3.",
+                "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Graden watertemperatuur per graad afwijking binnen. Standaard: 3.",
+                "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Grad Wassertemperatur pro Grad Innenabweichung. Standard: 3.",
+                "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Degrés de température d'eau par degré d'écart intérieur. Défaut : 3."
+              },
+              "value": 3,
+              "attr": {
+                "min": 1,
+                "max": 8,
+                "step": 0.5
+              }
+            },
+            {
+              "id": "adaptive_pos_ti",
+              "type": "number",
+              "label": {
+                "en": "Positional PI: integral time Ti (hours)",
+                "nl": "Positionele PI: integratietijd Ti (uren)",
+                "de": "Positioneller PI: Integrationszeit Ti (Stunden)",
+                "fr": "PI positionnel : temps d'intégration Ti (heures)"
+              },
+              "hint": {
+                "en": "Only used with Control mode = Positional and Emitter system = Manual. Longer for slow emitters (floor heating about 6 h). Default: 3.",
+                "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Langer bij trage afgifte (vloerverwarming ongeveer 6 u). Standaard: 3.",
+                "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Länger bei träger Wärmeabgabe (Fußbodenheizung etwa 6 h). Standard: 3.",
+                "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Plus long pour une émission lente (plancher chauffant environ 6 h). Défaut : 3."
+              },
+              "value": 3,
+              "attr": {
+                "min": 1,
+                "max": 12,
+                "step": 0.5
               }
             },
             {
@@ -21313,6 +21659,104 @@
                 "max": 60,
                 "step": 1
               }
+            },
+            {
+              "id": "adaptive_curve_source",
+              "type": "dropdown",
+              "label": {
+                "en": "Heating curve (positional mode)",
+                "nl": "Stooklijn (positionele modus)",
+                "de": "Heizkurve (positioneller Modus)",
+                "fr": "Courbe de chauffe (mode positionnel)"
+              },
+              "hint": {
+                "en": "Basis of the positional advice. Automatic: the heat pump's own heating curve (Aurora I/II: DIY curve L28/L29; Aurora III: climate curve) when available, otherwise the setpoint when the positional mode started. App curve: the two values below. Default: Automatic.",
+                "nl": "Basis van het positionele advies. Automatisch: de eigen stooklijn van de warmtepomp (Aurora I/II: DIY-stooklijn L28/L29; Aurora III: klimaatcurve) als die beschikbaar is, anders het setpoint bij het inschakelen van de positionele modus. App-stooklijn: de twee waarden hieronder. Standaard: Automatisch.",
+                "de": "Basis der positionellen Empfehlung. Automatisch: die eigene Heizkurve der Wärmepumpe (Aurora I/II: DIY-Kurve L28/L29; Aurora III: Klimakurve), falls verfügbar, sonst der Sollwert beim Einschalten des positionellen Modus. App-Kurve: die beiden Werte unten. Standard: Automatisch.",
+                "fr": "Base de la recommandation positionnelle. Automatique : la courbe de chauffe de la pompe à chaleur (Aurora I/II : courbe DIY L28/L29 ; Aurora III : courbe climatique) si disponible, sinon la consigne au démarrage du mode positionnel. Courbe de l'app : les deux valeurs ci-dessous. Défaut : Automatique."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic",
+                    "nl": "Automatisch",
+                    "de": "Automatisch",
+                    "fr": "Automatique"
+                  }
+                },
+                {
+                  "id": "app",
+                  "label": {
+                    "en": "App curve",
+                    "nl": "App-stooklijn",
+                    "de": "App-Kurve",
+                    "fr": "Courbe de l'app"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_curve_at_minus15",
+              "type": "number",
+              "label": {
+                "en": "App curve: water temperature at −15 °C outdoor (°C)",
+                "nl": "App-stooklijn: watertemperatuur bij −15 °C buiten (°C)",
+                "de": "App-Kurve: Wassertemperatur bei −15 °C außen (°C)",
+                "fr": "Courbe de l'app : température d'eau à −15 °C extérieur (°C)"
+              },
+              "hint": {
+                "en": "Only used with Heating curve = App curve. Default: 40.",
+                "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 40.",
+                "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 40.",
+                "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 40."
+              },
+              "value": 40,
+              "attr": {
+                "min": 20,
+                "max": 65,
+                "step": 1
+              }
+            },
+            {
+              "id": "adaptive_curve_at_plus15",
+              "type": "number",
+              "label": {
+                "en": "App curve: water temperature at +15 °C outdoor (°C)",
+                "nl": "App-stooklijn: watertemperatuur bij +15 °C buiten (°C)",
+                "de": "App-Kurve: Wassertemperatur bei +15 °C außen (°C)",
+                "fr": "Courbe de l'app : température d'eau à +15 °C extérieur (°C)"
+              },
+              "hint": {
+                "en": "Only used with Heating curve = App curve. Default: 25.",
+                "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 25.",
+                "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 25.",
+                "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 25."
+              },
+              "value": 25,
+              "attr": {
+                "min": 15,
+                "max": 50,
+                "step": 1
+              }
+            },
+            {
+              "id": "adaptive_coast_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Coast (passive cooldown)",
+                "nl": "Coast (passief afkoelen)",
+                "de": "Coast (passives Abkühlen)",
+                "fr": "Coast (refroidissement passif)"
+              },
+              "hint": {
+                "en": "Only used with Emitter system = Manual; the presets set coast themselves. When off, coast never activates. Default: on.",
+                "nl": "Alleen gebruikt bij Afgiftesysteem = Handmatig; de voorinstellingen zetten coast zelf. Uit: coast wordt nooit actief. Standaard: aan.",
+                "de": "Nur verwendet bei Wärmeabgabesystem = Manuell; die Voreinstellungen setzen Coast selbst. Aus: Coast wird nie aktiv. Standard: an.",
+                "fr": "Utilisé uniquement avec Système d'émission = Manuel ; les préréglages règlent coast eux-mêmes. Désactivé : coast ne s'active jamais. Défaut : activé."
+              },
+              "value": true
             },
             {
               "id": "adaptive_cooldown_offset",
@@ -23181,6 +23625,89 @@
               "value": false
             },
             {
+              "id": "adaptive_control_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Control mode",
+                "nl": "Regelmodus",
+                "de": "Regelmodus",
+                "fr": "Mode de régulation"
+              },
+              "hint": {
+                "en": "Classic: adds the PI output to the setpoint every cycle (previous behaviour). Positional: advice = heating curve + PI correction with a true integral, without a wide dead zone. Default: Classic.",
+                "nl": "Klassiek: telt de PI-uitvoer elke cyclus bij het setpoint op (bestaand gedrag). Positioneel: advies = stooklijn + PI-correctie met een echte integraal, zonder brede dode zone. Standaard: Klassiek.",
+                "de": "Klassisch: addiert die PI-Ausgabe in jedem Zyklus zum Sollwert (bisheriges Verhalten). Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne breite Totzone. Standard: Klassisch.",
+                "fr": "Classique : ajoute la sortie PI à la consigne à chaque cycle (comportement existant). Positionnel : recommandation = courbe de chauffe + correction PI avec une vraie intégrale, sans large zone morte. Défaut : Classique."
+              },
+              "value": "classic",
+              "values": [
+                {
+                  "id": "classic",
+                  "label": {
+                    "en": "Classic (incremental)",
+                    "nl": "Klassiek (incrementeel)",
+                    "de": "Klassisch (inkrementell)",
+                    "fr": "Classique (incrémental)"
+                  }
+                },
+                {
+                  "id": "positional",
+                  "label": {
+                    "en": "Positional (heating curve + PI)",
+                    "nl": "Positioneel (stooklijn + PI)",
+                    "de": "Positionell (Heizkurve + PI)",
+                    "fr": "Positionnel (courbe de chauffe + PI)"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_emitter_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Emitter system",
+                "nl": "Afgiftesysteem",
+                "de": "Wärmeabgabesystem",
+                "fr": "Système d'émission"
+              },
+              "hint": {
+                "en": "Sets Kp, Ti and coast at once. Radiators: Kp 3, Ti 3 h, coast off. Floor heating: Kp 3, Ti 6 h, coast on. Manual: your own values. In the classic control mode only coast follows this choice. Default: Manual.",
+                "nl": "Zet Kp, Ti en coast in één keer. Radiatoren: Kp 3, Ti 3 u, coast uit. Vloerverwarming: Kp 3, Ti 6 u, coast aan. Handmatig: uw eigen waarden. In de klassieke regelmodus volgt alleen coast deze keuze. Standaard: Handmatig.",
+                "de": "Setzt Kp, Ti und Coast auf einmal. Heizkörper: Kp 3, Ti 3 h, Coast aus. Fußbodenheizung: Kp 3, Ti 6 h, Coast an. Manuell: Ihre eigenen Werte. Im klassischen Regelmodus folgt nur Coast dieser Auswahl. Standard: Manuell.",
+                "fr": "Règle Kp, Ti et coast en une fois. Radiateurs : Kp 3, Ti 3 h, coast désactivé. Plancher chauffant : Kp 3, Ti 6 h, coast activé. Manuel : vos propres valeurs. En mode classique, seul coast suit ce choix. Défaut : Manuel."
+              },
+              "value": "manual",
+              "values": [
+                {
+                  "id": "radiator",
+                  "label": {
+                    "en": "Radiators",
+                    "nl": "Radiatoren",
+                    "de": "Heizkörper",
+                    "fr": "Radiateurs"
+                  }
+                },
+                {
+                  "id": "floor",
+                  "label": {
+                    "en": "Floor heating",
+                    "nl": "Vloerverwarming",
+                    "de": "Fußbodenheizung",
+                    "fr": "Plancher chauffant"
+                  }
+                },
+                {
+                  "id": "manual",
+                  "label": {
+                    "en": "Manual",
+                    "nl": "Handmatig",
+                    "de": "Manuell",
+                    "fr": "Manuel"
+                  }
+                }
+              ]
+            },
+            {
               "id": "adaptive_pi_kp",
               "type": "number",
               "label": {
@@ -23190,10 +23717,10 @@
                 "fr": "Contrôleur PI: Gain Proportionnel (Kp)"
               },
               "hint": {
-                "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 5.0",
-                "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 5.0",
-                "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 5.0",
-                "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 5.0"
+                "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 5.0. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 5.0. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 5.0. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 5.0 Utilisé uniquement en mode de régulation classique."
               },
               "value": 5,
               "attr": {
@@ -23212,10 +23739,10 @@
                 "fr": "Contrôleur PI: Gain Intégral (Ki)"
               },
               "hint": {
-                "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5",
-                "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5",
-                "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5",
-                "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5"
+                "en": "⚠️ Advanced: How the system eliminates persistent temperature offsets. Higher = stronger correction of steady-state errors. Only adjust if you understand PI control. Default: 1.5. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Hoe het systeem blijvende temperatuur afwijkingen corrigeert. Hoger = sterkere correctie van stationaire fouten. Pas alleen aan als je PI regeling begrijpt. Standaard: 1.5. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Wie das System persistente Temperaturabweichungen eliminiert. Höher = stärkere Korrektur stationärer Fehler. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 1.5. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: Comment le système élimine les décalages de température persistants. Plus élevé = correction plus forte des erreurs en régime permanent. N'ajuster que si vous comprenez le contrôle PI. Défaut: 1.5 Utilisé uniquement en mode de régulation classique."
               },
               "value": 1.5,
               "attr": {
@@ -23234,16 +23761,60 @@
                 "fr": "Contrôleur PI: Zone Morte (°C)"
               },
               "hint": {
-                "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C",
-                "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C",
-                "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C",
-                "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C"
+                "en": "⚠️ Advanced: Temperature tolerance before adjustments are made. Prevents unnecessary adjustments for small fluctuations. Only adjust if you understand PI control. Default: 0.3°C. Only used in the classic control mode.",
+                "nl": "⚠️ Geavanceerd: Temperatuur tolerantie voordat aanpassingen worden gemaakt. Voorkomt onnodige aanpassingen bij kleine fluctuaties. Pas alleen aan als je PI regeling begrijpt. Standaard: 0.3°C. Alleen gebruikt in de klassieke regelmodus.",
+                "de": "⚠️ Erweitert: Temperaturtoleranz vor Anpassungen. Verhindert unnötige Anpassungen bei kleinen Schwankungen. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 0.3°C. Nur im klassischen Regelmodus verwendet.",
+                "fr": "⚠️ Avancé: Tolérance de température avant ajustements. Évite les ajustements inutiles pour petites fluctuations. N'ajuster que si vous comprenez le contrôle PI. Défaut: 0.3°C Utilisé uniquement en mode de régulation classique."
               },
               "value": 0.3,
               "attr": {
                 "min": 0.1,
                 "max": 1,
                 "step": 0.1
+              }
+            },
+            {
+              "id": "adaptive_pos_kp",
+              "type": "number",
+              "label": {
+                "en": "Positional PI: Kp (K/K)",
+                "nl": "Positionele PI: Kp (K/K)",
+                "de": "Positioneller PI: Kp (K/K)",
+                "fr": "PI positionnel : Kp (K/K)"
+              },
+              "hint": {
+                "en": "Only used with Control mode = Positional and Emitter system = Manual. Degrees of water temperature per degree of indoor deviation. Default: 3.",
+                "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Graden watertemperatuur per graad afwijking binnen. Standaard: 3.",
+                "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Grad Wassertemperatur pro Grad Innenabweichung. Standard: 3.",
+                "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Degrés de température d'eau par degré d'écart intérieur. Défaut : 3."
+              },
+              "value": 3,
+              "attr": {
+                "min": 1,
+                "max": 8,
+                "step": 0.5
+              }
+            },
+            {
+              "id": "adaptive_pos_ti",
+              "type": "number",
+              "label": {
+                "en": "Positional PI: integral time Ti (hours)",
+                "nl": "Positionele PI: integratietijd Ti (uren)",
+                "de": "Positioneller PI: Integrationszeit Ti (Stunden)",
+                "fr": "PI positionnel : temps d'intégration Ti (heures)"
+              },
+              "hint": {
+                "en": "Only used with Control mode = Positional and Emitter system = Manual. Longer for slow emitters (floor heating about 6 h). Default: 3.",
+                "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Langer bij trage afgifte (vloerverwarming ongeveer 6 u). Standaard: 3.",
+                "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Länger bei träger Wärmeabgabe (Fußbodenheizung etwa 6 h). Standard: 3.",
+                "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Plus long pour une émission lente (plancher chauffant environ 6 h). Défaut : 3."
+              },
+              "value": 3,
+              "attr": {
+                "min": 1,
+                "max": 12,
+                "step": 0.5
               }
             },
             {
@@ -23289,6 +23860,104 @@
                 "max": 60,
                 "step": 1
               }
+            },
+            {
+              "id": "adaptive_curve_source",
+              "type": "dropdown",
+              "label": {
+                "en": "Heating curve (positional mode)",
+                "nl": "Stooklijn (positionele modus)",
+                "de": "Heizkurve (positioneller Modus)",
+                "fr": "Courbe de chauffe (mode positionnel)"
+              },
+              "hint": {
+                "en": "Basis of the positional advice. Automatic: the heat pump's own heating curve (Aurora I/II: DIY curve L28/L29; Aurora III: climate curve) when available, otherwise the setpoint when the positional mode started. App curve: the two values below. Default: Automatic.",
+                "nl": "Basis van het positionele advies. Automatisch: de eigen stooklijn van de warmtepomp (Aurora I/II: DIY-stooklijn L28/L29; Aurora III: klimaatcurve) als die beschikbaar is, anders het setpoint bij het inschakelen van de positionele modus. App-stooklijn: de twee waarden hieronder. Standaard: Automatisch.",
+                "de": "Basis der positionellen Empfehlung. Automatisch: die eigene Heizkurve der Wärmepumpe (Aurora I/II: DIY-Kurve L28/L29; Aurora III: Klimakurve), falls verfügbar, sonst der Sollwert beim Einschalten des positionellen Modus. App-Kurve: die beiden Werte unten. Standard: Automatisch.",
+                "fr": "Base de la recommandation positionnelle. Automatique : la courbe de chauffe de la pompe à chaleur (Aurora I/II : courbe DIY L28/L29 ; Aurora III : courbe climatique) si disponible, sinon la consigne au démarrage du mode positionnel. Courbe de l'app : les deux valeurs ci-dessous. Défaut : Automatique."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic",
+                    "nl": "Automatisch",
+                    "de": "Automatisch",
+                    "fr": "Automatique"
+                  }
+                },
+                {
+                  "id": "app",
+                  "label": {
+                    "en": "App curve",
+                    "nl": "App-stooklijn",
+                    "de": "App-Kurve",
+                    "fr": "Courbe de l'app"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_curve_at_minus15",
+              "type": "number",
+              "label": {
+                "en": "App curve: water temperature at −15 °C outdoor (°C)",
+                "nl": "App-stooklijn: watertemperatuur bij −15 °C buiten (°C)",
+                "de": "App-Kurve: Wassertemperatur bei −15 °C außen (°C)",
+                "fr": "Courbe de l'app : température d'eau à −15 °C extérieur (°C)"
+              },
+              "hint": {
+                "en": "Only used with Heating curve = App curve. Default: 40.",
+                "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 40.",
+                "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 40.",
+                "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 40."
+              },
+              "value": 40,
+              "attr": {
+                "min": 20,
+                "max": 65,
+                "step": 1
+              }
+            },
+            {
+              "id": "adaptive_curve_at_plus15",
+              "type": "number",
+              "label": {
+                "en": "App curve: water temperature at +15 °C outdoor (°C)",
+                "nl": "App-stooklijn: watertemperatuur bij +15 °C buiten (°C)",
+                "de": "App-Kurve: Wassertemperatur bei +15 °C außen (°C)",
+                "fr": "Courbe de l'app : température d'eau à +15 °C extérieur (°C)"
+              },
+              "hint": {
+                "en": "Only used with Heating curve = App curve. Default: 25.",
+                "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 25.",
+                "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 25.",
+                "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 25."
+              },
+              "value": 25,
+              "attr": {
+                "min": 15,
+                "max": 50,
+                "step": 1
+              }
+            },
+            {
+              "id": "adaptive_coast_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Coast (passive cooldown)",
+                "nl": "Coast (passief afkoelen)",
+                "de": "Coast (passives Abkühlen)",
+                "fr": "Coast (refroidissement passif)"
+              },
+              "hint": {
+                "en": "Only used with Emitter system = Manual; the presets set coast themselves. When off, coast never activates. Default: on.",
+                "nl": "Alleen gebruikt bij Afgiftesysteem = Handmatig; de voorinstellingen zetten coast zelf. Uit: coast wordt nooit actief. Standaard: aan.",
+                "de": "Nur verwendet bei Wärmeabgabesystem = Manuell; die Voreinstellungen setzen Coast selbst. Aus: Coast wird nie aktiv. Standard: an.",
+                "fr": "Utilisé uniquement avec Système d'émission = Manuel ; les préréglages règlent coast eux-mêmes. Désactivé : coast ne s'active jamais. Défaut : activé."
+              },
+              "value": true
             },
             {
               "id": "adaptive_cooldown_offset",

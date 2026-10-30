@@ -1,4 +1,10 @@
 {
+  "3.5.0": {
+    "en": "New setting 'Control mode' for the adaptive control: Positional (heating curve + PI correction) as an alternative to Classic; Classic stays the default. New settings 'Emitter system' (radiators, floor heating, manual) and 'Heating curve' (automatic or app curve) for the positional mode, plus a switch for coast.",
+    "nl": "Nieuwe instelling 'Regelmodus' voor de adaptieve regeling: Positioneel (stooklijn + PI-correctie) naast Klassiek; Klassiek blijft de standaard. Nieuwe instellingen 'Afgiftesysteem' (radiatoren, vloerverwarming, handmatig) en 'Stooklijn' (automatisch of app-stooklijn) voor de positionele modus, plus een schakelaar voor coast.",
+    "de": "Neue Einstellung 'Regelmodus' für die adaptive Regelung: Positionell (Heizkurve + PI-Korrektur) neben Klassisch; Klassisch bleibt der Standard. Neue Einstellungen 'Wärmeabgabesystem' (Heizkörper, Fußbodenheizung, manuell) und 'Heizkurve' (automatisch oder App-Kurve) für den positionellen Modus, sowie ein Schalter für Coast.",
+    "fr": "Nouveau réglage 'Mode de régulation' pour la régulation adaptative : Positionnel (courbe de chauffe + correction PI) à côté de Classique ; Classique reste le défaut. Nouveaux réglages 'Système d'émission' (radiateurs, plancher chauffant, manuel) et 'Courbe de chauffe' (automatique ou courbe de l'app) pour le mode positionnel, ainsi qu'un interrupteur pour coast."
+  },
   "3.4.4": {
     "en": "The adaptive control no longer recommends a water temperature outside the heating limits set in the heat pump (Aurora I/II: P110/P111, Aurora III: zone 1 limits). The adaptive control diagnostics show which limit applies.",
     "nl": "De adaptieve regeling adviseert geen watertemperatuur meer buiten de verwarmingsgrenzen die in de warmtepomp zijn ingesteld (Aurora I/II: P110/P111, Aurora III: grenzen van zone 1). De diagnostiek van de adaptieve regeling toont welke grens geldt.",

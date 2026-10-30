@@ -263,6 +263,29 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la
   marge pour le temps froid
 
+#### Mode de Régulation, Système d'Émission et Courbe de Chauffe (v3.5.0+)
+
+- **Mode de régulation — par défaut** : Classique
+  - **Classique** : ajoute la sortie PI à la consigne à chaque cycle
+    (comportement existant)
+  - **Positionnel** : recommandation = courbe de chauffe + correction PI avec
+    une vraie intégrale, sans large zone morte ; la consigne reste stable, même
+    avec un flow qui applique chaque recommandation
+- **Système d'émission — par défaut** : Manuel
+  - **Radiateurs** : Kp 3, Ti 3 h, coast désactivé
+  - **Plancher chauffant** : Kp 3, Ti 6 h, coast activé
+  - **Manuel** : Kp et Ti du PI positionnel et l'interrupteur Coast ci-dessous
+  - En mode classique, seul coast suit ce choix
+- **Courbe de chauffe (mode positionnel) — par défaut** : Automatique
+  - **Automatique** : la courbe de la pompe à chaleur (Aurora I/II : courbe DIY
+    L28/L29 ; Aurora III : courbe climatique), sinon la consigne au démarrage du
+    mode positionnel (Tuya)
+  - **Courbe de l'app** : température d'eau à −15 °C et à +15 °C extérieur
+- **Conseil** : avec Tuya, réglez la courbe de l'app ; une base plate
+  fonctionne, mais moins bien
+- **Diagnostic** : `adaptive_control_diagnostics` affiche le mode, le système
+  d'émission, Kp et Ti avec leur source, la base et les termes P et I
+
 #### Coast Offset (v2.8.0+)
 - **Par défaut** : 1,0°C
 - **Plage** : 0,5 - 5,0°C

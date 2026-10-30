@@ -73,6 +73,8 @@ export class ServiceCoordinator {
   private static readonly DEGRADED_TO_OFFLINE_MS = 10 * 60 * 1000; // 10 minuten
   private _lastErrorContext: string | null = null;
   private _heatingLimits: WaterTempLimits | null = null; // Zone 1 heating limits from the latest snapshot
+  private _curveHeatingSetpoint: number | null = null; // ADR-065: climate curve output Reg 67 from the latest snapshot
+  private _integralPause: 'defrost' | 'dhw' | null = null; // ADR-065: defrost / hot water pause the integral
   private _errorCountByContext = new Map<string, number>();
 
   // Dashboard snapshot callback (ADR-041a)
@@ -131,6 +133,8 @@ export class ServiceCoordinator {
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,
       resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
+      resolveHeatPumpCurve: () => this._curveHeatingSetpoint,
+      resolvePauseReason: () => this._integralPause,
     });
 
     this.buildingInsights = new BuildingInsightsService({
@@ -431,6 +435,9 @@ export class ServiceCoordinator {
 
   private _handleModbusData(snapshot: DataSnapshot): void {
     this._heatingLimits = snapshot.control.heatingLimits;
+    this._curveHeatingSetpoint = snapshot.control.curveHeatingSetpointC;
+    if (snapshot.status.defrosting) this._integralPause = 'defrost';
+    else this._integralPause = snapshot.status.dhwActive ? 'dhw' : null;
     if (snapshot.sourcePollGroup === 'medium') {
       this._handleMediumSnapshot(snapshot);
       return;

@@ -104,6 +104,17 @@ export class ServiceCoordinator {
    * heating modes (1/5) → 0x0301, floor heating modes (3/7) → 0x0303.
    * Cooling, hot water only, reserve or an unknown mode → null (control cycles pause).
    */
+  /**
+   * ADR-065 O2: the DIY heating curve k·(T1 + 15) + b (L28/L29) at the heat pump's own ambient sensor T1,
+   * or at the app's outdoor temperature when T1 is unknown. Readable also while the curve is switched
+   * off; the caller rejects implausible values (unset parameters).
+   */
+  private _resolveHeatPumpCurve(outdoorTemp: number | null): number | null {
+    const diy = this._latestSnapshot?.diy;
+    const ambient = this._latestSnapshot?.sensors.ambientT1?.value ?? outdoorTemp;
+    return diy && ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
+  }
+
   private _resolveAdaptiveSetpoint(): ActiveSetpoint | null {
     const modeRaw = this.device.getCapabilityValue('adlar_mode');
     const mode = Number(modeRaw);
@@ -147,6 +158,8 @@ export class ServiceCoordinator {
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,
       resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
+      resolveHeatPumpCurve: (outdoorTemp) => this._resolveHeatPumpCurve(outdoorTemp),
+      resolvePauseReason: () => (this._latestSnapshot?.status.defrosting ? 'defrost' : null),
     });
 
     this.buildingInsights = new BuildingInsightsService({
