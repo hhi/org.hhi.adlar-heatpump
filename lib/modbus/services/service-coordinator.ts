@@ -115,13 +115,21 @@ export class ServiceCoordinator {
     if (target === 'heating') {
       const reg = CONTROL_REGISTERS.tempSetHeating;
       return {
-        capability: 'target_temperature', min: reg.min, max: reg.max, label: 'heating setpoint 0x0301',
+        capability: 'target_temperature',
+        min: reg.min,
+        max: reg.max,
+        label: 'heating setpoint 0x0301',
+        heatPumpLimits: this._latestSnapshot?.control.heatingLimits ?? null,
       };
     }
     if (target === 'floor') {
       const reg = CONTROL_REGISTERS.tempSetFloorHeating;
       return {
-        capability: 'target_temperature.floor', min: reg.min, max: reg.max, label: 'floor heating setpoint 0x0303',
+        capability: 'target_temperature.floor',
+        min: reg.min,
+        max: reg.max,
+        label: 'floor heating setpoint 0x0303',
+        heatPumpLimits: this._latestSnapshot?.control.heatingLimits ?? null,
       };
     }
     return null;
