@@ -1,6 +1,6 @@
 # ADR-065: Positionele PI met integraal naast de stooklijn
 
-**Status:** Concept (voorgesteld, 2026-10-25)
+**Status:** Concept (voorgesteld, 2026-10-25; aangevuld met D8, 2026-10-30)
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -24,6 +24,9 @@ warmtepomp met interne thermostaat, regelcyclus van 5 minuten, flow, hele graden
   in de kou).
 - **Coast:** blijft beschikbaar, maar als optie voor vloerverwarming. Bij radiatoren
   voegt coast naast deze PI niets toe en geeft het meer compressorstarts.
+- **Afgiftesysteem:** een keuzelijst (radiatoren, vloerverwarming, handmatig) zet Kp, Ti
+  en coast in één keer. Ti en coast hangen sterk van het afgiftesysteem af, Kp weinig
+  (D8).
 - **Wat het niet oplost:** een slechte stooklijn wordt opgevangen, maar een stooklijn
   met de verkeerde vorm (te steil of te vlak) laat een afwijking die met het weer
   meeloopt. Tapwater en ontdooien zijn niet gesimuleerd.
@@ -129,7 +132,8 @@ thermisch) worden onderdeel van de correctie op de basis, binnen hun eigen budge
 ### D6 — Coast als optie per afgiftesysteem
 
 Coast blijft bestaan met de huidige activatie- en exitregels, en verdringt de PI zoals
-nu, maar **alleen zolang de coast-correctie negatief is** (ADR-040A). Standaard:
+nu, maar **alleen zolang de coast-correctie negatief is** (ADR-040A). Standaard, via het
+afgiftesysteem (D8):
 
 - **radiatoren:** coast uit;
 - **vloerverwarming:** coast aan.
@@ -139,11 +143,78 @@ staat, is dat iets beter dan doorintegreren (RMSE 0,206 tegen 0,213 mild; 0,195 
 0,211 koud). Bij radiatoren is doorintegreren beter (0,184 tegen 0,222), maar daar staat
 coast standaard uit (O6).
 
-### D7 — Ti per afgiftesysteem (optioneel)
+### D7 — Ti per afgiftesysteem
 
-Een snelle integraal past bij radiatoren, een langzame bij vloerverwarming (§3.3).
-Voorstel: Ti 3 uur als standaard; via de instelling van het afgiftesysteem eventueel
-1,5 uur (radiatoren) of 6 uur (vloer) (O3).
+Een snelle integraal past bij radiatoren, een langzame bij vloerverwarming (§3.3). Ti
+volgt daarom uit het afgiftesysteem (D8): radiatoren 3 uur, vloerverwarming 6 uur. Bij
+"Handmatig" geldt de eigen instelling (standaard 3 uur) (O3).
+
+### D8 — Keuzelijst "Afgiftesysteem"
+
+Een nieuwe instelling `adaptive_emitter_type` (label "Afgiftesysteem") zet de waarden die
+het sterkst van het afgiftesysteem afhangen in één keer:
+
+| Keuze | Kp (K/K) | Ti | Coast |
+|---|---|---|---|
+| Radiatoren (`radiator`) | 3 | 3 uur | Uit |
+| Vloerverwarming (`floor`) | 3 | 6 uur | Aan |
+| Handmatig (`manual`) | eigen instelling | eigen instelling | eigen instelling |
+
+**Waarom een set en niet alleen Kp.** In de simulatie (§3.3) verschilt Kp weinig per
+afgiftesysteem (radiator 0,148–0,201, vloer 0,183–0,204). Ti en coast verschillen sterk:
+Ti 1,5 uur is het best bij radiatoren en maakt vloerverwarming onrustig; coast helpt
+alleen bij vloerverwarming. Een keuzelijst die alleen Kp zet, stuurt de minst gevoelige
+waarde.
+
+**Waarden.** Voorlopig, uit één gesimuleerde woning. Voor radiatoren was Ti 1,5 uur en
+Kp 4 in §3.3 net iets beter; de preset houdt Ti 3 uur en Kp 3 aan tot P4 (aanvullende
+simulatie met lichte en zware woningen) dat bevestigt of bijstelt. De presetwaarden
+liggen pas vast na P4.
+
+**Werking:**
+
+1. **Preset intern, velden ongemoeid.** Bij "Radiatoren" of "Vloerverwarming" gebruikt de
+   regeling de presetwaarden; de velden Kp, Ti en coast houden hun eigen waarde en gelden
+   alleen bij "Handmatig". De app schrijft geen instellingen vanuit `onSettings()`
+   (`setSettings` daar geeft race conditions, zie `docs/architecture/KEY_PATTERNS.md`).
+2. **Velden blijven zichtbaar.** Het instellingenscherm van Homey kan velden niet
+   verbergen op basis van een keuzelijst. De hint bij Kp, Ti en coast vermeldt: "Alleen
+   gebruikt bij Afgiftesysteem = Handmatig" (4 talen).
+3. **Werkelijke waarden zichtbaar.** `adaptive_control_diagnostics` toont het
+   afgiftesysteem en de gebruikte Kp, Ti en coast, met hun bron (preset of handmatig)
+   (O8).
+4. **Coast uit.** Coast kent nu geen uit-stand: de sterkte loopt van 0,60 tot 0,95.
+   Voor "Handmatig" komt er een schakelaar `adaptive_coast_enabled` (standaard aan, het
+   huidige gedrag). De presets zetten coast intern aan of uit.
+
+**Standaardkeuze:**
+
+| Situatie | Standaard |
+|---|---|
+| Bestaand apparaat (migratie) | Handmatig: de afgestemde waarden blijven gelden |
+| Nieuw apparaat, Aurora II | Uit de modus 0x0304: 3 (vloerverwarming) → Vloerverwarming; anders Radiatoren |
+| Nieuw apparaat, Aurora III | Uit het afgiftetype van zone 1 bij verwarmen (3-0035): 2 (vloer) → Vloerverwarming; 1 (radiator) of 0 (FCU) → Radiatoren |
+| Nieuw apparaat, Tuya | Uit `adlar_enum_mode`: `floor_heating` of `floor_heatign_and_hot_water` → Vloerverwarming; anders Radiatoren (O10) |
+
+De hardware stelt alleen de standaard voor; de gebruiker kan altijd een andere keuze
+maken. De app leest het register eenmalig bij het koppelen en stuurt de keuze daarna
+niet meer bij.
+
+**Gescheiden van het gebouwprofiel.** `building_profile` (licht, gemiddeld, zwaar,
+passief) beschrijft de massa van het **huis**; het afgiftesysteem de traagheid van het
+**water en de afgifte**. Een zwaar huis met radiatoren en een licht huis met
+vloerverwarming komen allebei voor. Twee aparte keuzes voorkomen dat de ene wordt
+gebruikt om de andere te corrigeren.
+
+**Gemengde installaties** (beneden vloer, boven radiatoren) zijn niet gesimuleerd.
+Advies voorlopig: "Vloerverwarming" als de vloer de grootste of traagste afgifte is
+(lange Ti en coast zijn de voorzichtige kant). Een vierde keuze "Gemengd" alleen als P4
+daar een eigen set waarden voor oplevert (O9).
+
+**Klassieke regeling.** De presets horen bij de positionele PI. In de klassieke
+(incrementele) regeling betekenen Kp en Ki iets anders, omdat de uitvoer elke cyclus
+wordt opgeteld (§1.1). Daar zet de keuzelijst alleen coast aan of uit; Kp en Ki blijven
+de eigen instelling.
 
 ## 3. Onderbouwing: simulatie
 
@@ -258,6 +329,8 @@ correctie volgens ADR-040A: 0,26. D6 legt deze voorwaarde daarom expliciet vast.
   Hun werking op de basis + correctie (D5) is niet getoetst.
 - **Overgang:** bestaande gebruikers hebben een opgebouwde accumulator en ingestelde Kp,
   Ki en deadband. Hoe die worden overgezet, is open (O5).
+- **Presets van het afgiftesysteem** (D8) komen uit dezelfde ene woning. Gemengde
+  installaties en ventilatorconvectoren (FCU) zijn niet gesimuleerd.
 
 ## 6. Open punten
 
@@ -265,12 +338,14 @@ correctie volgens ADR-040A: 0,26. D6 legt deze voorwaarde daarom expliciet vast.
 |---|---|---|
 | O1 | Versie | 3.5.0 (samen met ADR-062 fase 3), of eigen minor |
 | O2 | Bron van de basis | Aurora II/III: de aanvoertemperatuur van de stooklijn van de warmtepomp, als die uit te lezen is; anders de stooklijn van de app (`heating_curve_*`, `set_diy_heating_curve`). Tuya: nagaan |
-| O3 | Ti per afgiftesysteem | Standaard 3 uur; 1,5 / 6 uur via het afgiftesysteem (D7) |
+| O3 | Ti per afgiftesysteem | Via de keuzelijst (D8): radiatoren 3 uur, vloer 6 uur, handmatig eigen waarde (standaard 3 uur). Radiatoren 1,5 uur en Kp 4 na P4 heroverwegen |
 | O4 | Optimizers | Als correctie op de basis binnen hun budget (ADR-059 W2); eigen toets |
 | O5 | Migratie | Accumulator op 0 bij overgang; Kp 5 → 3 (comfortanker vervalt in de PI); oude deadband en Ki als instelling verbergen of omrekenen |
-| O6 | Coast standaard | Radiator uit, vloer aan; bestaande gebruikers houden hun instelling |
+| O6 | Coast standaard | Via de keuzelijst (D8): radiatoren uit, vloer aan. Bestaande gebruikers krijgen "Handmatig" met `adaptive_coast_enabled` aan, en houden zo hun huidige gedrag |
 | O7 | Flow-assisted of direct schrijven | Ongewijzigd flow-assisted; D3.2 vangt een flow op die niet of beperkt uitvoert |
-| O8 | Diagnostiek | Basis, P-term, I-term, anti-windupreden en coast-aandeel in `adaptive_control_diagnostics` |
+| O8 | Diagnostiek | Basis, P-term, I-term, anti-windupreden en coast-aandeel in `adaptive_control_diagnostics`; daarnaast het afgiftesysteem en de gebruikte Kp, Ti en coast met hun bron (D8) |
+| O9 | Gemengde installaties en FCU | Voorlopig "Vloerverwarming" adviseren bij gemengd, "Radiatoren" bij FCU; een keuze "Gemengd" alleen als P4 er een eigen set voor oplevert. Aurora III kent een tweede zone (3-0037) waaruit gemengd is af te leiden |
+| O10 | Standaard uit de hardware | Aurora II 0x0304, Aurora III 3-0035, Tuya `adlar_enum_mode` (D8). Nagaan of de modus bij gebruikers het afgiftesysteem echt weergeeft (vloerverwarming kan ook in modus "verwarmen" draaien) |
 
 ## 7. Testaanpak
 
@@ -286,7 +361,11 @@ correctie volgens ADR-040A: 0,26. D6 legt deze voorwaarde daarom expliciet vast.
    - elk van de drie anti-windupregels (D3);
    - geen dode zone behalve de integratiedrempel (D4);
    - coast-gewicht alleen bij negatieve correctie (D6);
-   - advies = basis + u, afgerond en begrensd (D1).
+   - advies = basis + u, afgerond en begrensd (D1);
+   - presets van het afgiftesysteem: radiatoren en vloer gebruiken de presetwaarden en
+     negeren de velden; handmatig gebruikt de velden; de standaard voor nieuwe apparaten
+     volgt de modus of het afgiftetype per driver; een bestaand apparaat krijgt
+     "Handmatig" (D8).
 3. **Bestaande tests:** `adaptive-control-service.test.js`, `weighted-decision-maker.test.js`
    (drivers Tuya, Aurora II, Aurora III) aanpassen waar de accumulator verdwijnt.
 4. **Hardware:**
