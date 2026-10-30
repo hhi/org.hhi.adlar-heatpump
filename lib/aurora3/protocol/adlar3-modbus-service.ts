@@ -34,6 +34,7 @@ import {
   statusBitSet,
 } from './adlar3-modbus-registers';
 import { DeviceFeature } from './modbus-runtime-service';
+import { plausibleHeatingLimits, type WaterTempLimits } from '../../shared/adaptive/setpoint-range';
 
 type TemperatureRegisterScale = 'x10';
 
@@ -220,6 +221,8 @@ export interface ControlSnapshot {
   /** Allowed DHW setpoint range: active limits Reg 15..14 when plausible, else the static range. */
   dhwSetpointRange: { min: number; max: number };
   floorSetpointC: number;
+  /** Zone 1 heating limits Reg 13..12; null when not read or implausible. */
+  heatingLimits: WaterTempLimits | null;
   /** Reg 2102 = 1. */
   dhwEnabled: boolean;
   /** Reg 2103 bits 4-5, see SilentMode. */
@@ -629,6 +632,17 @@ export class Adlar3ModbusService extends EventEmitter {
     return plausible ? { min: +min.toFixed(1), max: +max.toFixed(1) } : null;
   }
 
+  /** Zone 1 heating limits (Reg 13..12): outer bound for the adaptive recommendation, not for writes. */
+  private heatingLimits(): WaterTempLimits | null {
+    const upper = LIMIT_REGISTERS.zone1HeatingUpperLimit.address;
+    const lower = LIMIT_REGISTERS.zone1HeatingLowerLimit.address;
+    if (!this.tcp.has(upper) || !this.tcp.has(lower)) return null;
+    return plausibleHeatingLimits(
+      decodeS16(this.tcp.u16(lower)) * TEMP_MULTIPLY,
+      decodeS16(this.tcp.u16(upper)) * TEMP_MULTIPLY,
+    );
+  }
+
   setExternalFlow(lpm: number | null): void {
     this.externalFlowLpm = lpm;
   }
@@ -685,6 +699,7 @@ export class Adlar3ModbusService extends EventEmitter {
         max: CONTROL_REGISTERS.dhwSetTemp.max ?? 0,
       },
       floorSetpointC: this.readScaledValue(CONTROL_REGISTERS.roomTempSetTemp, true),
+      heatingLimits: this.heatingLimits(),
       dhwEnabled: this.tcp.u16(CONTROL_REGISTERS.dhwOnOff.address) === 1,
       silentMode: decodeSilentMode(functionA),
       silentLevel2Allowed: this.isR290(),

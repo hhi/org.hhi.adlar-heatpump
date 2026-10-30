@@ -255,6 +255,10 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   aanbevelen
 - **Regel**: Het maximum moet minstens 2°C boven het minimum liggen; anders
   wordt de wijziging geweigerd
+- **Grenzen warmtepomp (v3.4.4+)**: Het advies blijft ook binnen de
+  verwarmingsgrenzen die in de warmtepomp zijn ingesteld (Aurora I/II:
+  P110/P111, Aurora III: grenzen van zone 1). De diagnostiek van de adaptieve
+  regeling toont welke grens geldt
 - **Vloerverwarming**: Stel beide in rond het bereik van uw eigen stooklijn
   (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer
 
