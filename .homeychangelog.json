@@ -1,4 +1,10 @@
 {
+  "3.4.4": {
+    "en": "The adaptive control no longer recommends a water temperature outside the heating limits set in the heat pump (Aurora I/II: P110/P111, Aurora III: zone 1 limits). The adaptive control diagnostics show which limit applies.",
+    "nl": "De adaptieve regeling adviseert geen watertemperatuur meer buiten de verwarmingsgrenzen die in de warmtepomp zijn ingesteld (Aurora I/II: P110/P111, Aurora III: grenzen van zone 1). De diagnostiek van de adaptieve regeling toont welke grens geldt.",
+    "de": "Die adaptive Regelung empfiehlt keine Wassertemperatur mehr außerhalb der in der Wärmepumpe eingestellten Heizgrenzen (Aurora I/II: P110/P111, Aurora III: Grenzen von Zone 1). Die Diagnose der adaptiven Regelung zeigt, welche Grenze gilt.",
+    "fr": "La régulation adaptative ne recommande plus de température d'eau en dehors des limites de chauffage réglées dans la pompe à chaleur (Aurora I/II : P110/P111, Aurora III : limites de la zone 1). Le diagnostic de la régulation adaptative indique quelle limite s'applique."
+  },
   "3.4.3": {
     "en": "Building insights show 'Blocked' for a short interruption during normal operation (such as defrost or a compressor start) only when it lasts longer than 30 minutes. A missing indoor or outdoor temperature is still shown immediately. The building score in the performance report now uses the actual confidence of the building model. New setting 'Maximum water temperature' for the adaptive control (default unchanged: 60°C, Tuya 65°C).",
     "nl": "Gebouwinzichten tonen 'Geblokkeerd' bij een korte onderbreking tijdens normaal bedrijf (zoals ontdooien of de start van de compressor) pas als die langer dan 30 minuten aanhoudt. Een ontbrekende binnen- of buitentemperatuur wordt nog steeds direct getoond. De gebouwscore in het prestatierapport gebruikt nu de werkelijke confidence van het gebouwmodel. Nieuwe instelling 'Maximale watertemperatuur' voor de adaptieve regeling (standaard ongewijzigd: 60°C, Tuya 65°C).",

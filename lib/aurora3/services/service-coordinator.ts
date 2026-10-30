@@ -18,6 +18,7 @@ import { DeviceFeature } from '../protocol/modbus-runtime-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 import { nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { type WaterTempLimits } from '../../shared/adaptive/setpoint-range';
 
 type TemperatureRegisterScale = 'x1' | 'x10';
 
@@ -71,6 +72,7 @@ export class ServiceCoordinator {
   private _degradedSinceTimer: ReturnType<typeof setTimeout> | null = null; // ADR-043
   private static readonly DEGRADED_TO_OFFLINE_MS = 10 * 60 * 1000; // 10 minuten
   private _lastErrorContext: string | null = null;
+  private _heatingLimits: WaterTempLimits | null = null; // Zone 1 heating limits from the latest snapshot
   private _errorCountByContext = new Map<string, number>();
 
   // Dashboard snapshot callback (ADR-041a)
@@ -109,7 +111,11 @@ export class ServiceCoordinator {
   private _resolveAdaptiveSetpoint(): ActiveSetpoint {
     const reg = CONTROL_REGISTERS.zone1HeatingSetTemp;
     return {
-      capability: 'target_temperature', min: reg.min ?? 18, max: reg.max ?? 50, label: 'Aurora III heating setpoint 4-2107',
+      capability: 'target_temperature',
+      min: reg.min ?? 18,
+      max: reg.max ?? 50,
+      label: 'Aurora III heating setpoint 4-2107',
+      heatPumpLimits: this._heatingLimits,
     };
   }
 
@@ -424,6 +430,7 @@ export class ServiceCoordinator {
   }
 
   private _handleModbusData(snapshot: DataSnapshot): void {
+    this._heatingLimits = snapshot.control.heatingLimits;
     if (snapshot.sourcePollGroup === 'medium') {
       this._handleMediumSnapshot(snapshot);
       return;

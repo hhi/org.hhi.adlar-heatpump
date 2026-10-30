@@ -255,6 +255,9 @@ Automatic target temperature regulation based on external indoor temperature sen
   recommend
 - **Rule**: The maximum must be at least 2°C above the minimum; otherwise the
   change is rejected
+- **Heat pump limits (v3.4.4+)**: The recommendation also stays within the
+  heating limits set in the heat pump (Aurora I/II: P110/P111, Aurora III: zone
+  1 limits). The adaptive control diagnostics show which limit applies
 - **Floor heating**: Set both around the range of your own heating curve (e.g.
   2°C below and 3°C above) and leave room for cold weather
 

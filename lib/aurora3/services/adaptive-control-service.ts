@@ -9,7 +9,12 @@ import { BuildingModelService } from './building-model-service';
 import { EnergyPriceOptimizer, type PriceTrend } from '../../modbus/adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../../modbus/adaptive/cop-optimizer';
 import { DefrostLearner } from '../../shared/adaptive/defrost-learner';
-import { resolveMaxSetpoint } from '../../shared/adaptive/setpoint-range';
+import {
+  resolveEffectiveRange,
+  resolveMaxSetpoint,
+  type EffectiveSetpointRange,
+  type WaterTempLimits,
+} from '../../shared/adaptive/setpoint-range';
 import {
   WeightedDecisionMaker, type ConfidenceMetrics, type CoastAction, type CombinedAction,
 } from '../../modbus/adaptive/weighted-decision-maker';
@@ -51,6 +56,7 @@ export interface ActiveSetpoint {
   min: number; // °C, lower bound accepted by the setpoint
   max: number; // °C, upper bound accepted by the setpoint
   label: string; // For logging, e.g. 'heating setpoint 0x0301'
+  heatPumpLimits?: WaterTempLimits | null; // Heating limits read from the heat pump, null when unknown
 }
 
 /**
@@ -597,13 +603,21 @@ export class AdaptiveControlService {
   }
 
   /**
-   * Clamp a recommendation to the minimum and maximum water temperature settings
-   * and the range accepted by the active setpoint (e.g. floor heating 20–60°C).
+   * Effective recommendation range: the range accepted by the active setpoint (e.g. floor heating 20–60°C),
+   * the heat pump's own heating limits and the minimum/maximum water temperature settings.
    */
+  private _effectiveRange(): EffectiveSetpointRange {
+    return resolveEffectiveRange(
+      { min: this.activeSetpoint?.min ?? -Infinity, max: this.activeSetpoint?.max ?? Infinity },
+      this.activeSetpoint?.heatPumpLimits ?? null,
+      { min: this._getMinSetpoint(), max: this._getMaxSetpoint() },
+    );
+  }
+
+  /** Clamp a recommendation to the effective range. */
   private _clampRecommendation(value: number): number {
-    const lower = Math.max(this._getMinSetpoint(), this.activeSetpoint?.min ?? -Infinity);
-    const upper = Math.min(this._getMaxSetpoint(), this.activeSetpoint?.max ?? Infinity);
-    return Math.max(lower, Math.min(upper, value));
+    const { min, max } = this._effectiveRange();
+    return Math.max(min, Math.min(max, value));
   }
 
   // =========================================================================
@@ -1944,6 +1958,7 @@ export class AdaptiveControlService {
           },
           configuration: copDiag.configuration,
         },
+        setpointRange: this._getSetpointRangeDiagnostics(),
         buildingModel: await this.getBuildingModelDiagnostics(),
       };
 
@@ -1958,6 +1973,14 @@ export class AdaptiveControlService {
       this.device.error('⚠️ Failed to update diagnostic capability:', error);
       // Non-critical: don't throw, just log warning
     }
+  }
+
+  /** Effective recommendation range and the layer that determines each bound, for adaptive_control_diagnostics. */
+  private _getSetpointRangeDiagnostics(): EffectiveSetpointRange & { heatPump: WaterTempLimits | null } {
+    return {
+      ...this._effectiveRange(),
+      heatPump: this.activeSetpoint?.heatPumpLimits ?? null,
+    };
   }
 
   /**
