@@ -79,8 +79,11 @@ export interface ActiveSetpoint {
  */
 export type ActiveSetpointResolver = () => ActiveSetpoint | null;
 
-/** ADR-065: the heat pump's own heating curve at the given outdoor temperature (°C), null when unknown. */
-export type HeatPumpCurveResolver = (outdoorTemp: number | null) => number | null;
+/**
+ * ADR-065: the heat pump's own heating curve at the given outdoor temperature (°C), null when not usable,
+ * 'pending' while its registers have not been read yet after a (re)start.
+ */
+export type HeatPumpCurveResolver = (outdoorTemp: number | null) => number | null | 'pending';
 
 export interface AdaptiveControlServiceConfig {
   device: Homey.Device;
@@ -707,12 +710,18 @@ export class AdaptiveControlService {
     await this.device.setStoreValue(this.STORE_KEY_CONTROL_MODE, mode);
   }
 
-  /** Basis of the positional advice: heat pump curve, app curve or flat (ADR-065 D1/O2). */
-  private async _resolvePositionalBasis(currentSetpoint: number): Promise<CurveBasis> {
+  /**
+   * Basis of the positional advice: heat pump curve, app curve or flat (ADR-065 D1/O2).
+   * Null while the heat pump curve is chosen but not read yet: the cycle waits instead of falling back.
+   */
+  private async _resolvePositionalBasis(currentSetpoint: number): Promise<CurveBasis | null> {
     const outdoorTemp = await this.getEffectiveOutdoorTemp();
+    const curveSource = this.device.getSetting('adaptive_curve_source') === 'auto' ? 'auto' : 'app';
+    const heatPumpCurve = curveSource === 'auto' ? this.resolveHeatPumpCurve(outdoorTemp) : null;
+    if (heatPumpCurve === 'pending') return null;
     const basis = resolveBasis({
-      curveSource: this.device.getSetting('adaptive_curve_source') === 'auto' ? 'auto' : 'app',
-      heatPumpCurve: this.resolveHeatPumpCurve(outdoorTemp),
+      curveSource,
+      heatPumpCurve,
       appCurve: {
         atMinus15: (this.device.getSetting('adaptive_curve_at_minus15') as number | null) ?? APP_CURVE_DEFAULTS.atMinus15,
         atPlus15: (this.device.getSetting('adaptive_curve_at_plus15') as number | null) ?? APP_CURVE_DEFAULTS.atPlus15,
@@ -1014,6 +1023,10 @@ export class AdaptiveControlService {
       await this._handleControlMode(control.mode, currentSetpoint);
       this.positionalPI.setParams({ kp: control.kp, tiHours: control.tiHours });
       const basis = positional ? await this._resolvePositionalBasis(currentSetpoint) : null;
+      if (positional && basis === null) {
+        this.logger('AdaptiveControlService: heat pump curve not read yet after start, skipping cycle');
+        return;
+      }
 
       // ADR-059 W1 (referentieproject): Settlement-on-observation — when setpoint-register 0x0301 moved towards
       // our last recommendation since the previous cycle, the user flow has applied it and
