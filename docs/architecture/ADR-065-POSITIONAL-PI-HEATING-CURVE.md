@@ -2,6 +2,9 @@
 
 **Status:** Aangenomen (2026-10-30). Gebouwd in 3.5.0 als opt-in: de klassieke regeling
 blijft de standaard (O11). Eerder: concept (2026-10-25), aangevuld met D8 (2026-10-30).
+Bijgewerkt 2026-10-31: D9 (één instelling Regelmodus) vervangt de keuzelijst van D8,
+app-stooklijn als standaard basis met startwaarden per afgiftesysteem, O4 getoetst,
+schaduwtest op Aurora II.
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -25,16 +28,20 @@ warmtepomp met interne thermostaat, regelcyclus van 5 minuten, flow, hele graden
   in de kou).
 - **Coast:** blijft beschikbaar, maar als optie voor vloerverwarming. Bij radiatoren
   voegt coast naast deze PI niets toe en geeft het meer compressorstarts.
-- **Afgiftesysteem:** een keuzelijst (radiatoren, vloerverwarming, handmatig) zet Kp, Ti
-  en coast in één keer. Ti en coast hangen sterk van het afgiftesysteem af, Kp weinig
-  (D8).
+- **Regelmodus:** één instelling met Klassiek (standaard), Positioneel – Radiatoren,
+  – Vloerverwarming en – Handmatig. De presets zetten Kp, Ti en coast in één keer; Ti en
+  coast hangen sterk van het afgiftesysteem af, Kp weinig (D9, vervangt D8).
+- **Basis:** standaard de app-stooklijn met startwaarden per afgiftesysteem; de
+  stooklijn van de warmtepomp is een keuze (D1).
 - **Wat het niet oplost:** een slechte stooklijn wordt opgevangen, maar een stooklijn
   met de verkeerde vorm (te steil of te vlak) laat een afwijking die met het weer
   meeloopt. Tapwater en ontdooien zijn niet gesimuleerd.
 - **Stand (3.5.0):** gebouwd voor Tuya, Aurora II en Aurora III achter de instelling
   "Regelmodus" (klassiek standaard, positioneel opt-in). De simulatie draait op de echte
   implementatie; P4 (§3.5) bevestigt de verbetering voor lichte en zware woningen en
-  voor een stooklijn met de verkeerde vorm. Een hardwareweek (§7.4) volgt.
+  voor een stooklijn met de verkeerde vorm; O4 (§3.6) dat positioneel stabiel blijft met
+  de optimizers aan. Schaduwtest op Aurora II gedaan (§7). Een externe test met
+  vloerverwarming volgt, de hardwareweek (§7.4) later.
 
 ---
 
@@ -98,15 +105,21 @@ De **basis** is de stooklijn: het setpoint dat de warmtepomp of de app bij de hu
 buitentemperatuur zou kiezen zonder adaptieve regeling (O2). De PI corrigeert alleen
 de afwijking daarvan.
 
-**Uitwerking (3.5.0).** Instelling `adaptive_curve_source`:
+**Uitwerking (3.5.0, bijgewerkt 2026-10-31).** Instelling `adaptive_curve_source`
+(Aurora II en III; Tuya rekent altijd met de app-stooklijn):
 
 | Keuze | Basis |
 |---|---|
-| Automatisch (standaard) | Aurora II: DIY-stooklijn k·(T1 + 15) + b uit L28/L29, op de eigen buitensensor T1 (ook leesbaar als de stooklijn uit staat). Aurora III: klimaatcurve Reg 67 (schaal nog niet geverifieerd). Tuya: geen stooklijn beschikbaar |
-| App-stooklijn | Een rechte lijn door de watertemperatuur bij −15 °C en bij +15 °C buiten (`adaptive_curve_at_minus15`, standaard 40; `adaptive_curve_at_plus15`, standaard 25), dezelfde vorm als de DIY-stooklijn |
-| Terugval | Een waarde buiten 15–70 °C (niet ingesteld, verkeerde schaal) of geen buitentemperatuur: een vlakke lijn op het setpoint bij het inschakelen van de positionele modus |
+| App-stooklijn (`app`, standaard) | Een rechte lijn door de watertemperatuur bij −15 °C en bij +15 °C buiten (`adaptive_curve_at_minus15` / `_at_plus15`, standaard 45 / 30), dezelfde vorm als de DIY-stooklijn. Bij de keuze van een preset voorgevuld met Radiatoren 50 / 35 of Vloerverwarming 35 / 27, zolang de gebruiker de velden niet zelf aanpaste (store `adaptive_curve_user_set`) |
+| Stooklijn van de warmtepomp (`auto`) | Aurora II: DIY-stooklijn k·(T1 + 15) + b uit L28/L29 op de buitensensor T1, alleen als de DIY-schakelaar (0x0810) op DIY staat en k < 0; anders zijn k en b restwaarden. Na een start wacht de cyclus tot die registers gelezen zijn (`'pending'`). Aurora III: klimaatcurve Reg 67 (schaal nog niet geverifieerd: officieel x1, Home Assistant x10; een verkeerde schaal valt buiten 15–70 °C en geeft de app-stooklijn) |
+| Terugval | Stooklijn van de warmtepomp niet bruikbaar (buiten 15–70 °C, DIY uit): de app-stooklijn. Geen buitentemperatuur: een vlakke lijn op het setpoint bij het inschakelen |
 
-Bij Tuya is de app-stooklijn het advies: een vlakke basis werkt, maar minder goed (§3.5).
+**Voorwaarde voor uitvoeren.** Aurora II en Tuya houden een geschreven setpoint alleen
+vast als de stooklijnkeuze (0x0314, Tuya DPS 13) op OFF staat; de DIY-schakelaar mag
+aan blijven. Na OFF is een vaste curve (HH1–HH8, HL1–HL8) niet meer uitleesbaar. De
+handleiding geeft daarom een overstaptabel van elke vaste curve naar de twee velden van
+de app-stooklijn; tussen −15 en +15 °C volgt de rechte lijn die curves exact
+(`docs/Dev support/adlar-climate-curves.md`).
 
 ### D2 — PI met echte integraal
 
@@ -162,8 +175,8 @@ klassieke regeling (instellingen, grenzen van de warmtepomp, setpointregister).
 ### D6 — Coast als optie per afgiftesysteem
 
 Coast blijft bestaan met de huidige activatie- en exitregels, en verdringt de PI zoals
-nu, maar **alleen zolang de coast-correctie negatief is** (ADR-040A). Standaard, via het
-afgiftesysteem (D8):
+nu, maar **alleen zolang de coast-correctie negatief is** (ADR-040A). Standaard, via de
+preset van de regelmodus (D9):
 
 - **radiatoren:** coast uit;
 - **vloerverwarming:** coast aan.
@@ -176,10 +189,14 @@ coast standaard uit (O6).
 ### D7 — Ti per afgiftesysteem
 
 Een snelle integraal past bij radiatoren, een langzame bij vloerverwarming (§3.3). Ti
-volgt daarom uit het afgiftesysteem (D8): radiatoren 3 uur, vloerverwarming 6 uur. Bij
-"Handmatig" geldt de eigen instelling (standaard 3 uur) (O3).
+volgt daarom uit de preset (D9): radiatoren 3 uur, vloerverwarming 6 uur. Bij
+"Positioneel – Handmatig" geldt de eigen instelling (standaard 3 uur) (O3).
 
 ### D8 — Keuzelijst "Afgiftesysteem"
+
+**Vervangen door D9 (2026-10-31).** De aparte instelling `adaptive_emitter_type` is niet
+uitgebracht. De waarden en de onderbouwing hieronder gelden nog; de keuze zit nu in de
+regelmodus.
 
 Een nieuwe instelling `adaptive_emitter_type` (label "Afgiftesysteem") zet de waarden die
 het sterkst van het afgiftesysteem afhangen in één keer:
@@ -250,6 +267,26 @@ velden vermeldt "Alleen gebruikt in de klassieke regelmodus".
 (incrementele) regeling betekenen Kp en Ki iets anders, omdat de uitvoer elke cyclus
 wordt opgeteld (§1.1). Daar zet de keuzelijst alleen coast aan of uit; Kp en Ki blijven
 de eigen instelling.
+
+### D9 — Eén instelling "Regelmodus" (opzet B)
+
+`adaptive_control_mode` combineert de regelmodus en het afgiftesysteem:
+
+| Waarde | Regeling | Kp | Ti | Coast |
+|---|---|---|---|---|
+| `classic` (standaard) | Klassiek (§1.1) | klassieke velden | klassieke velden | `adaptive_coast_enabled` |
+| `positional_radiator` | Positioneel | 3 | 3 uur | Uit |
+| `positional_floor` | Positioneel | 3 | 6 uur | Aan |
+| `positional_manual` | Positioneel | `adaptive_pos_kp` | `adaptive_pos_ti` | `adaptive_coast_enabled` |
+
+- **Waarom één instelling.** Met twee keuzes (regelmodus en afgiftesysteem) gold het
+  afgiftesysteem alleen in de positionele modus, en kon een gebruiker een combinatie
+  kiezen die niets deed. Eén lijst maakt de keuze in één stap en laat geen
+  betekenisloze combinaties toe.
+- **Onbekende waarde** (ook de vroegere `positional` uit een testversie): Klassiek.
+- **Keuzehulp** in de handleiding (4 talen): welke regelmodus bij welke situatie, met de
+  voorwaarde "stooklijnkeuze op OFF" voor Aurora II en Tuya.
+- **Standaard uit de hardware** (D8, "Standaardkeuze") is niet gebouwd (O10).
 
 ## 3. Onderbouwing: simulatie
 
@@ -374,8 +411,31 @@ Onderkoeling bij kou (uren < −0,5 °C per dag), huidig → positioneel: refere
    19 °C en terug niet kan volgen; dat geldt voor beide regelingen.
 4. In de lichte woning bij kou loopt het setpoint bij radiatoren tot 60 °C (de grens).
 
-Niet getoetst: de optimizers (COP, prijs, thermisch), gemengde installaties, tapwater en
+Niet getoetst in P4: de optimizers (zie §3.6), gemengde installaties, tapwater en
 ontdooien, en een beperkte flow voor de P4-scenario's.
+
+### 3.6 O4: optimizers in de positionele modus (3.5.0)
+
+Simulatie `O4=1` (`O4_SETBACK=1` met nachtverlaging): de echte `COPOptimizer` en
+`EnergyPriceOptimizer`, de thermische component huidig en volgens ADR-062 B7, prioriteiten
+50/15/15/20, 14 dagen, 5 seeds. De volledige tabellen staan niet in git; ze zijn opnieuw
+te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
+
+| Woning, weer | Klassiek, geen | Klassiek, alles | Positioneel, geen | Positioneel, alles |
+|---|---|---|---|---|
+| Radiatoren, mild | 0,328 | 0,303–0,307 | 0,167 | 0,168–0,170 |
+| Radiatoren, koud | 0,339 | 0,295–0,308 | 0,168 | 0,171–0,173 |
+| Vloer, mild | 0,562 | 0,517–0,520 | 0,178 | 0,180–0,182 |
+| Vloer, koud | 0,593 | 0,553–0,568 | 0,170 | 0,171–0,172 |
+
+1. Positioneel blijft stabiel met alle optimizers aan; geen onderkoeling, setpoint binnen
+   23–54 °C (klassiek 20–60 °C).
+2. De optimizers doen in de positionele modus weinig: het aandeel elektriciteit in dure
+   uren daalt met de prijsoptimalisatie hooguit van 32 naar 26% (vloer mild), bij
+   radiatoren nauwelijks. De I-term werkt de verschuiving weg (O14).
+3. De thermische component, huidig en B7, heeft in geen enkel scenario een meetbaar
+   effect. B7 gaat daarom niet in de regeling (ADR-062 B7).
+4. Controle: de O4-modus zonder optimizers komt exact uit op P4 (0,167 en 0,178).
 
 ## 4. Wat het oplost en wat niet
 
@@ -403,35 +463,46 @@ ontdooien, en een beperkte flow voor de P4-scenario's.
   houtkachel.
 - **De binnensensor** meet zonder vertraging. Een sensor met een eigen traagheid maakt de
   lus trager.
-- **De optimizers** (COP, prijs, thermisch) staan uit, zoals bij een nieuw gebouwmodel.
-  Hun werking op de basis + correctie (D5) is niet getoetst.
+- **De optimizers** (COP, prijs, thermisch) doen in de positionele modus weinig: de
+  I-term werkt hun verschuiving weg (O4, O14).
 - **Overgang:** bestaande gebruikers houden de klassieke regeling. Wie overstapt, begint
   met accumulator en integraal op 0 (O5).
-- **Presets van het afgiftesysteem** (D8) komen uit dezelfde ene woning. Gemengde
+- **Presets van het afgiftesysteem** (D8/D9) komen uit dezelfde ene woning. Gemengde
   installaties en ventilatorconvectoren (FCU) zijn niet gesimuleerd.
 
 ## 6. Open punten
 
 | # | Vraag | Besluit of stand |
 |---|---|---|
-| O1 | Versie | **Besloten:** 3.5.0, eigen minor (ADR-062 fase 3 wordt na ADR-065 bekeken) |
-| O2 | Bron van de basis | **Besloten:** automatisch uit de warmtepomp (Aurora II DIY L28/L29, Aurora III Reg 67), anders een vlakke lijn; of een app-stooklijn door twee punten (D1) |
-| O3 | Ti per afgiftesysteem | **Gebouwd** via de presets (D8). P4 bevestigt radiatoren 3 uur en vloer 6 uur; radiatoren 1,5 uur en Kp 4 blijven een optie na de hardwareweek |
-| O4 | Optimizers | **Gebouwd** binnen hun budget via de decision maker (D5); **nog niet getoetst** |
+| O1 | Versie | **Besloten:** 3.5.0, één bundel met ADR-062 fase 3 (B13, A4–A6, F2/F3), uitgebracht als testversie |
+| O2 | Bron van de basis | **Besloten (bijgewerkt 2026-10-31):** standaard de app-stooklijn met startwaarden per preset; de stooklijn van de warmtepomp als keuze (Aurora II DIY alleen bij DIY aan, Aurora III Reg 67), met terugval op de app-stooklijn (D1) |
+| O3 | Ti per afgiftesysteem | **Gebouwd** via de presets (D9). P4 bevestigt radiatoren 3 uur en vloer 6 uur; radiatoren 1,5 uur en Kp 4 blijven een optie na de hardwareweek |
+| O4 | Optimizers | **Getoetst (2026-10-31):** positioneel blijft stabiel met alle optimizers aan (RMSE 0,17–0,20 tegen klassiek 0,30–0,59), maar de optimizers verschuiven weinig; de thermische component heeft geen meetbaar effect (ADR-062 B7). Zie O14 |
 | O5 | Migratie | **Besloten:** bestaande apparaten blijven klassiek. Bij een wissel van modus gaan accumulator en integraal naar 0. Positioneel heeft eigen velden voor Kp en Ti; de klassieke velden blijven (D8) |
 | O6 | Coast standaard | **Besloten:** radiatoren uit, vloer aan. "Handmatig" (standaard) met `adaptive_coast_enabled` aan houdt het huidige gedrag |
 | O7 | Flow-assisted of direct schrijven | Ongewijzigd flow-assisted; D3.2 vangt een flow op die niet of beperkt uitvoert |
-| O8 | Diagnostiek | **Gebouwd:** blok `control` in `adaptive_control_diagnostics` met modus, afgiftesysteem, bron, Kp, Ti, basis, P, I, u en `integralHold`. Het coast-aandeel staat al in `breakdown` |
+| O8 | Diagnostiek | **Gebouwd:** blok `control` in `adaptive_control_diagnostics` met modus, afgiftesysteem (`emitter`), bron, Kp, Ti, basis met bron, P, I, u en `integralHold`. Het coast-aandeel staat al in `breakdown` |
 | O9 | Gemengde installaties en FCU | Open. Voorlopig "Vloerverwarming" adviseren bij gemengd, "Radiatoren" bij FCU; een keuze "Gemengd" alleen als een toets er een eigen set voor oplevert. Aurora III kent een tweede zone (3-0037) waaruit gemengd is af te leiden |
-| O10 | Standaard uit de hardware | Open; niet gebouwd. De standaard is "Handmatig" voor alle apparaten. Eerst nagaan of de modus het afgiftesysteem echt weergeeft (vloerverwarming kan ook in modus "verwarmen" draaien) |
+| O10 | Standaard uit de hardware | Open; niet gebouwd. De standaard is Klassiek voor alle apparaten (D9). Eerst nagaan of de modus het afgiftesysteem echt weergeeft (vloerverwarming kan ook in modus "verwarmen" draaien) |
 | O11 | Standaard regelmodus | **Besloten:** klassiek voor iedereen, positioneel opt-in. Over de standaard wordt beslist na de hardwareweek en praktijkdata |
-| O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4) |
+| O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4). Aurora II pauzeert bij ontdooien, nog niet bij tapwater (tapwaterbit onbekend) |
+| O14 | Optimizers in de positionele modus | Open: prijs en COP verschuiven het advies, de I-term werkt dat weg. Ontwerp nodig (bijvoorbeeld de verschuiving in het doel in plaats van in het advies) |
+| O16 | Kamerdoel in de basis | Idee voor 3.6.0: de basis schuift mee met het kamerdoel, zodat nachtverlaging en een ander doel niet op de I-term wachten. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
+| O17 | Aurora III na een start | Open: tot Reg 67 (slow-pollgroep, 300 s) gelezen is, rekent de basis met de app-stooklijn. Zelfde oplossing als Aurora II (`'pending'`) |
 
 ## 7. Testaanpak
 
 Stand 3.5.0: punt 1 en 2 zijn gedaan (P4 in §3.5; unit-tests in
-`test/unit/positional-pi-controller.test.js` en de service-tests van Tuya en Aurora III);
-punt 4 volgt.
+`test/unit/positional-pi-controller.test.js`, de service-tests van Tuya en Aurora III en
+de basistests van Aurora II in `service-coordinator.test.js`); punt 4 volgt.
+
+**Schaduwtest Aurora II (2026-10-31, Positioneel – Radiatoren, zonder uitvoerende flow).**
+Basis 42,5 uit de DIY-lijn bij T1 10 °C, P −2,1 bij 0,7 °C te warm, I vast op −0,11
+(`flow_behind`), advies 40 tegen setpoint 42. Na een herstart kwam de integraal terug
+(−0,11, plus één integratie omdat de vorige aanbeveling na een start onbekend is).
+Gevonden en opgelost: DIY-restwaarden als basis (nu alleen bij DIY aan), tijden in UTC,
+en de eerste cyclus na een start met de app-stooklijn (advies 34 in plaats van 39; nu
+wacht de cyclus op de DIY-registers).
 
 1. **Simulatie** (`coast-closed-loop.js`, `P4=1` voor de scenario's van §3.5):
    - regressie op §3.2 en §3.3 (grenzen bijvoorbeeld: RMSE ≤ 0,20 radiator, ≤ 0,25 vloer;

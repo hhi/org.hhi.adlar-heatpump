@@ -230,7 +230,7 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 **Alleen zichtbaar met "Expert HVAC functie kaarten" ingeschakeld**
 
 #### Proportionele Versterking (Kp)
-- **Standaard**: 3.0
+- **Standaard**: 5.0
 - **Bereik**: 0.5 - 10.0
 - **Functie**: Bepaalt hoe snel systeem reageert op huidige fout
 - **Hogere waarde**: Snellere correctie, risico op overshoot
@@ -635,7 +635,7 @@ Beheer van energie tellers voor tracking en rapportage.
 ### Scenario 1: "Ik wil gewoon een stabiele kamertemperatuur"
 ```
 ✅ Adaptieve Temperatuur Regeling: AAN
-   - Kp: 3.0, Ki: 1.5, Deadband: 0.3°C
+   - Kp: 5.0, Ki: 1.5, Deadband: 0.3°C
 ✅ Gebouwmodel Leren: AAN
    - Building type: Average (of jouw type)
    - Dynamic P_int: AAN

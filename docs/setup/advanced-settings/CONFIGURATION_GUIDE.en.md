@@ -230,7 +230,7 @@ Automatic target temperature regulation based on external indoor temperature sen
 **Only visible with "Expert HVAC function cards" enabled**
 
 #### Proportional Gain (Kp)
-- **Default**: 3.0
+- **Default**: 5.0
 - **Range**: 0.5 - 10.0
 - **Function**: Determines how quickly system responds to current error
 - **Higher value**: Faster correction, risk of overshoot
@@ -633,7 +633,7 @@ Management of energy counters for tracking and reporting.
 ### Scenario 1: "I just want a stable room temperature"
 ```
 ✅ Adaptive Temperature Control: ON
-   - Kp: 3.0, Ki: 1.5, Deadband: 0.3°C
+   - Kp: 5.0, Ki: 1.5, Deadband: 0.3°C
 ✅ Building Model Learning: ON
    - Building type: Average (or your type)
    - Dynamic P_int: ON
