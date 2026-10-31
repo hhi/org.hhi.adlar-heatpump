@@ -281,9 +281,10 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
     Startwaarden: Radiatoren 50 / 35, Vloerverwarming 35 / 27, anders 45 / 30;
     voorgevuld bij de keuze van de regelmodus, zolang u ze niet zelf heeft
     aangepast
-  - **Stooklijn van de warmtepomp** (Aurora I/II: DIY-stooklijn L28/L29; Aurora
-    III: klimaatcurve): alleen als u die zelf heeft ingesteld; is hij niet
-    bruikbaar, dan geldt de app-stooklijn. Tuya heeft deze keuze niet
+  - **Stooklijn van de warmtepomp** (Aurora I/II: DIY-stooklijn, alleen als
+    DIY aan staat; Aurora III: klimaatcurve): alleen als u die zelf heeft
+    ingesteld; staat DIY uit of is hij niet bruikbaar, dan geldt de
+    app-stooklijn. Tuya heeft deze keuze niet
 - **Diagnostiek**: `adaptive_control_diagnostics` toont de modus, het
   afgiftesysteem, Kp en Ti met hun bron, de basis met zijn bron en de P- en
   I-term
@@ -301,6 +302,27 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   de diagnostiek wijst een I-term die structureel boven 0 ligt op een te lage
   stooklijn, onder 0 op een te hoge
 
+##### Overstappen van een vaste curve
+
+Gebruikte u een vaste curve van de warmtepomp (Aurora I/II: stooklijnkeuze
+HH1–HH8 of HL1–HL8; Tuya: verwarmingscurve H1–H8 of L1–L8)? Noteer die curve,
+vul de twee waarden uit de tabel in bij de app-stooklijn en zet daarna de
+stooklijnkeuze op OFF. Na OFF kan de app de curve niet meer uitlezen.
+
+| Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Overgenomen uit de grafieken in de handleiding van de warmtepomp en afgerond
+  op hele graden; afwijking ongeveer 1 °C
+
 **Welke regelmodus kies ik?**
 
 | Situatie | Keuze |
@@ -314,8 +336,9 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - **Aurora I/II en Tuya**: de warmtepomp houdt een nieuw setpoint alleen vast
   als de stooklijnkeuze (Tuya: verwarmingscurve) op OFF staat; anders voert geen
   van beide modi het advies uit. De app rekent de stooklijn dan zelf uit
-- **Stooklijn van de warmtepomp** alleen bij een eigen DIY-stooklijn: met een
-  vaste curve (stooklijnkeuze 1–18) bevatten L28/L29 meestal niet uw stooklijn
+- **Stooklijn van de warmtepomp** alleen bij een eigen DIY-stooklijn: staat DIY
+  uit, dan rekent de app met de app-stooklijn. Een vaste curve neemt u over met
+  de tabel hierboven
 - **Veilig proberen**: zet de flow die het advies uitvoert uit, kies een
   positionele regelmodus en vergelijk een dag het gesimuleerde doel
   (`adlar_simulated_target`) met de stooklijn

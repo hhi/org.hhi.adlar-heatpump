@@ -106,13 +106,15 @@ export class ServiceCoordinator {
    */
   /**
    * ADR-065 O2: the DIY heating curve k·(T1 + 15) + b (L28/L29) at the heat pump's own ambient sensor T1,
-   * or at the app's outdoor temperature when T1 is unknown. Readable also while the curve is switched
-   * off; the caller rejects implausible values (unset parameters).
+   * or at the app's outdoor temperature when T1 is unknown. Only while the DIY switch (0x0810) is on DIY
+   * and k is negative: otherwise L28/L29 hold leftover values, and the basis falls back to the app curve.
+   * The setpoint holds on the heating curve selection 0x0314 alone, so the DIY switch may stay on.
    */
   private _resolveHeatPumpCurve(outdoorTemp: number | null): number | null {
     const diy = this._latestSnapshot?.diy;
+    if (!diy?.active || !(diy.slopeK < 0)) return null;
     const ambient = this._latestSnapshot?.sensors.ambientT1?.value ?? outdoorTemp;
-    return diy && ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
+    return ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
   }
 
   private _resolveAdaptiveSetpoint(): ActiveSetpoint | null {

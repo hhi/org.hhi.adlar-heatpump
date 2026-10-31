@@ -944,10 +944,10 @@
           "fr": "Courbe de l'app : température d'eau à −15 °C extérieur (°C)"
         },
         "hint": {
-          "en": "Used by the positional modes. Starting value: Radiators 50, Floor heating 35, otherwise 45; prefilled when you choose the control mode, as long as you have not changed it yourself. Too cold in frosty weather: raise this value by 1–2 °C. Default: 45.",
-          "nl": "Gebruikt door de positionele modi. Startwaarde: Radiatoren 50, Vloerverwarming 35, anders 45; voorgevuld bij de keuze van de regelmodus, zolang u de waarde niet zelf heeft aangepast. Te koud bij vorst: verhoog deze waarde met 1–2 °C. Standaard: 45.",
-          "de": "Von den positionellen Modi verwendet. Startwert: Heizkörper 50, Fußbodenheizung 35, sonst 45; bei der Wahl des Regelmodus vorausgefüllt, solange Sie den Wert nicht selbst geändert haben. Zu kalt bei Frost: diesen Wert um 1–2 °C erhöhen. Standard: 45.",
-          "fr": "Utilisé par les modes positionnels. Valeur de départ : Radiateurs 50, Plancher chauffant 35, sinon 45 ; préremplie au choix du mode de régulation, tant que vous ne l'avez pas modifiée. Trop froid par temps de gel : augmentez cette valeur de 1–2 °C. Défaut : 45."
+          "en": "Used by the positional modes. Starting value: Radiators 50, Floor heating 35, otherwise 45; prefilled when you choose the control mode, as long as you have not changed it yourself. Too cold in frosty weather: raise this value by 1–2 °C. Used a fixed heating curve (H1–H8, L1–L8)? Take its two values from the table in the configuration guide. Default: 45.",
+          "nl": "Gebruikt door de positionele modi. Startwaarde: Radiatoren 50, Vloerverwarming 35, anders 45; voorgevuld bij de keuze van de regelmodus, zolang u de waarde niet zelf heeft aangepast. Te koud bij vorst: verhoog deze waarde met 1–2 °C. Gebruikte u een vaste verwarmingscurve (H1–H8, L1–L8)? Neem de twee waarden over uit de tabel in de handleiding. Standaard: 45.",
+          "de": "Von den positionellen Modi verwendet. Startwert: Heizkörper 50, Fußbodenheizung 35, sonst 45; bei der Wahl des Regelmodus vorausgefüllt, solange Sie den Wert nicht selbst geändert haben. Zu kalt bei Frost: diesen Wert um 1–2 °C erhöhen. Haben Sie eine feste Heizkurve (H1–H8, L1–L8) verwendet? Übernehmen Sie ihre beiden Werte aus der Tabelle in der Anleitung. Standard: 45.",
+          "fr": "Utilisé par les modes positionnels. Valeur de départ : Radiateurs 50, Plancher chauffant 35, sinon 45 ; préremplie au choix du mode de régulation, tant que vous ne l'avez pas modifiée. Trop froid par temps de gel : augmentez cette valeur de 1–2 °C. Vous utilisiez une courbe de chauffage fixe (H1–H8, L1–L8) ? Reprenez ses deux valeurs dans le tableau du guide. Défaut : 45."
         },
         "value": 45,
         "min": 20,

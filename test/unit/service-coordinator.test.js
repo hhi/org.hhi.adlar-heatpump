@@ -285,3 +285,23 @@ test('TCP reconnect does not mark Homey visibly connected before a valid Modbus 
   assert.strictEqual(coordinator._consecutiveNonFastRequiredFailures, 0);
   assert.strictEqual(coordinator._errorCountByContext.size, 0);
 });
+
+test('ADR-065: heat pump curve uses the DIY line only while the DIY switch is on and k is negative', () => {
+  const coordinator = Object.create(ServiceCoordinator.prototype);
+  const snapshot = (diy) => ({
+    sensors: { ambientT1: { value: 13 } },
+    diy: { ...diy, calcSetpoint: (t) => diy.slopeK * (t + 15) + diy.interceptB },
+  });
+
+  coordinator._latestSnapshot = snapshot({ active: true, slopeK: -0.5, interceptB: 55 });
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), 41);
+
+  coordinator._latestSnapshot = snapshot({ active: false, slopeK: -0.5, interceptB: 55 });
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), null);
+
+  coordinator._latestSnapshot = snapshot({ active: true, slopeK: 0, interceptB: 40 });
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), null);
+
+  coordinator._latestSnapshot = { sensors: {}, diy: undefined };
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), null);
+});
