@@ -344,7 +344,7 @@ Machine learning algorithm that learns the thermal properties of your home.
 - **Default**: 0.999
 - **Range**: 0.9985 - 0.9995
 - **Function**: How quickly the model adapts to changes. Higher = more stable, better confidence (~75%). Lower = faster adaptation to seasonal changes.
-- **Applies**: After an app restart or 'Reset building model learning'
+- **Applies**: Immediately (v3.5.0+)
 
 ### Building Type
 - **Default**: Average (typical NL house)
@@ -365,12 +365,13 @@ Machine learning algorithm that learns the thermal properties of your home.
 ### Dynamic Internal Heat Gains
 - **Default**: Enabled
 - **Function**: Accounts for varying heat from people/appliances by time of day
-- **Day Pattern**:
+- **Day Pattern** (times in the Homey time zone, v3.5.0+):
   - Night (23:00-06:00): 40% (sleeping)
   - Day (06:00-18:00): 100% (normal)
   - Evening (18:00-23:00): 180% (cooking, TV)
 - **Accuracy improvement**: ~10-15%
-- **Applies**: After 'Reset building model learning'
+- **Applies**: Immediately (v3.5.0+); learning continues from the values of the
+  building profile, with half of the collected samples
 
 ---
 

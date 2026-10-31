@@ -323,3 +323,16 @@ test('ADR-065: app heating curve as basis', async () => {
   assert.strictEqual(service.lastRecommendedTemp, 30);
   assert.strictEqual(service.lastBasis.source, 'app_curve');
 });
+
+test('ADR-062 A4: model parameters reach the PI and the price optimizer only from 50% confidence', async () => {
+  const { BUILDING_PROFILES } = require('../../.homeybuild/lib/shared/adaptive/building-model-learner');
+  for (const [confidence, expectedC] of [[30, BUILDING_PROFILES.average.C], [80, 15]]) {
+    const device = createDevice();
+    const service = createService(device, [0]);
+    service.buildingModel.getDiagnosticStatus = async () => ({ confidence });
+    let capacity = null;
+    service.energyOptimizer.setThermalCapacity = (c) => { capacity = c; };
+    await service.executeControlCycle();
+    assert.strictEqual(capacity, expectedC, `confidence ${confidence}`);
+  }
+});

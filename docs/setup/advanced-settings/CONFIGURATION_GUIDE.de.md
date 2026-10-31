@@ -346,7 +346,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 - **Standard**: 0.999
 - **Bereich**: 0.9985 - 0.9995
 - **Funktion**: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen (~75%). Niedriger = schnellere Anpassung an saisonale Änderungen.
-- **Wirkung**: Erst nach einem App-Neustart oder 'Gebäudemodell-Lernen zurücksetzen'
+- **Wirkung**: Sofort (v3.5.0+)
 
 ### Gebäudetyp
 - **Standard**: Durchschnitt (typisches NL-Haus)
@@ -367,12 +367,13 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 ### Dynamische Interne Wärmegewinne
 - **Standard**: Aktiviert
 - **Funktion**: Berücksichtigt variierende Wärme von Personen/Geräten nach Tageszeit
-- **Tagesmuster**:
+- **Tagesmuster** (Zeiten in der Zeitzone des Homey, v3.5.0+):
   - Nacht (23:00-06:00): 40% (Schlaf)
   - Tag (06:00-18:00): 100% (normal)
   - Abend (18:00-23:00): 180% (Kochen, TV)
 - **Genauigkeitsverbesserung**: ~10-15%
-- **Wirkung**: Erst nach 'Gebäudemodell-Lernen zurücksetzen'
+- **Wirkung**: Sofort (v3.5.0+); das Lernen geht von den Werten des
+  Gebäudeprofils weiter, mit der Hälfte der gesammelten Samples
 
 ---
 

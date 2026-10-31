@@ -349,7 +349,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - **Par défaut** : 0.999
 - **Plage** : 0.9985 - 0.9995
 - **Fonction** : Rapidité d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance (~75%). Plus bas = adaptation plus rapide aux changements saisonniers.
-- **Effet** : Après un redémarrage de l'app ou 'Réinitialiser l'apprentissage du modèle de bâtiment'
+- **Effet** : Immédiat (v3.5.0+)
 
 ### Type de Bâtiment
 - **Par défaut** : Moyen (maison NL typique)
@@ -370,12 +370,13 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 ### Gains de Chaleur Internes Dynamiques
 - **Par défaut** : Activé
 - **Fonction** : Prend en compte la chaleur variable des personnes/appareils selon l'heure
-- **Modèle journalier** :
+- **Modèle journalier** (heures dans le fuseau horaire du Homey, v3.5.0+) :
   - Nuit (23h00-06h00) : 40% (sommeil)
   - Jour (06h00-18h00) : 100% (normal)
   - Soir (18h00-23h00) : 180% (cuisine, TV)
 - **Amélioration de la précision** : ~10-15%
-- **Effet** : Après 'Réinitialiser l'apprentissage du modèle de bâtiment'
+- **Effet** : Immédiat (v3.5.0+) ; l'apprentissage reprend à partir des valeurs
+  du profil de bâtiment, avec la moitié des échantillons collectés
 
 ---
 

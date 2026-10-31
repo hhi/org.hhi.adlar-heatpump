@@ -6,6 +6,7 @@ import Homey from 'homey';
 import { HeatingController, SensorData, type ControllerAction } from '../../modbus/adaptive/heating-controller';
 import { ExternalTemperatureService } from '../../modbus/services/external-temperature-service';
 import { BuildingModelService } from './building-model-service';
+import { BUILDING_PROFILES, type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 import { EnergyPriceOptimizer, type PriceTrend } from '../../modbus/adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../../modbus/adaptive/cop-optimizer';
 import { DefrostLearner } from '../../shared/adaptive/defrost-learner';
@@ -1231,7 +1232,12 @@ export class AdaptiveControlService {
         );
 
         // Step 5B: Building Model Integration
-        const buildingModel = this.buildingModel.getLearner().getModel();
+        // ADR-062 A4: the learned parameters only from 50% confidence, below that the profile values
+        const learned = this.buildingModel.getLearner().getModel();
+        const profileKey = (this.device.getSetting('building_profile') || 'average') as BuildingProfileType;
+        const buildingModel = buildingDiagnostics.confidence >= 50
+          ? learned
+          : (BUILDING_PROFILES[profileKey] ?? BUILDING_PROFILES.average);
         const tau = buildingModel.UA > 0 ? buildingModel.C / buildingModel.UA : 0;
 
         this.heatingController.setThermalInertia(tau);
@@ -2041,6 +2047,11 @@ export class AdaptiveControlService {
       this.copOptimizer.updateStrategy(strategy ?? 'balanced');
     }
 
+    // ADR-062 A5: learning settings take effect directly (values from newSettings)
+    if (changedKeys.includes('building_model_forgetting_factor') || changedKeys.includes('enable_dynamic_pint')) {
+      await this.buildingModel.applyLearningSettings(newSettings, changedKeys);
+    }
+
     // Handle building model reset toggle
     if (changedKeys.includes('reset_building_model')) {
       const shouldReset = newSettings.reset_building_model as boolean;
@@ -2048,7 +2059,11 @@ export class AdaptiveControlService {
         this.logger('AdaptiveControlService: Building model reset requested via settings');
         try {
           // Execute reset
-          await this.buildingModel.reset();
+          await this.buildingModel.reset({
+            buildingProfile: newSettings.building_profile as BuildingProfileType | undefined,
+            enableDynamicPInt: newSettings.enable_dynamic_pint as boolean | undefined,
+            forgettingFactor: newSettings.building_model_forgetting_factor as number | undefined,
+          });
           this.logger('✅ Building model reset complete');
         } catch (error) {
           this.device.error('❌ Building model reset failed:', error);
