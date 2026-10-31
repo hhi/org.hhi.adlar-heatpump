@@ -263,19 +263,21 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la
   marge pour le temps froid
 
-#### Mode de Régulation, Système d'Émission et Courbe de Chauffe (v3.5.0+)
+#### Mode de Régulation et Courbe de Chauffe (v3.5.0+)
 
 - **Mode de régulation — par défaut** : Classique
-  - **Classique** : ajoute la sortie PI à la consigne à chaque cycle
-    (comportement existant)
-  - **Positionnel** : recommandation = courbe de chauffe + correction PI avec
-    une vraie intégrale, sans large zone morte ; la consigne reste stable, même
-    avec un flow qui applique chaque recommandation
-- **Système d'émission — par défaut** : Manuel
-  - **Radiateurs** : Kp 3, Ti 3 h, coast désactivé
-  - **Plancher chauffant** : Kp 3, Ti 6 h, coast activé
-  - **Manuel** : Kp et Ti du PI positionnel et l'interrupteur Coast ci-dessous
-  - En mode classique, seul coast suit ce choix
+  - **Classique** : un petit pas vers le haut ou le bas à chaque cycle ; les pas
+    s'additionnent (comportement existant)
+  - **Positionnel – Radiateurs** (expérimental) : Kp 3, Ti 3 h, coast désactivé
+  - **Positionnel – Plancher chauffant** (expérimental) : Kp 3, Ti 6 h, coast
+    activé
+  - **Positionnel – Manuel** (expérimental) : Kp et Ti du PI positionnel et
+    l'interrupteur Coast ci-dessous
+  - Positionnel : recommandation = courbe de chauffe + correction PI avec une
+    vraie intégrale, sans large zone morte ; la consigne reste stable, même avec
+    un flow qui applique chaque recommandation
+- **Coast** : en mode Classique et Positionnel – Manuel, l'interrupteur Coast
+  s'applique ; Radiateurs et Plancher chauffant règlent coast eux-mêmes
 - **Courbe de chauffe (mode positionnel) — par défaut** : Automatique
   - **Automatique** : la courbe de la pompe à chaleur (Aurora I/II : courbe DIY
     L28/L29 ; Aurora III : courbe climatique), sinon la consigne au démarrage du
@@ -285,6 +287,34 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   fonctionne, mais moins bien
 - **Diagnostic** : `adaptive_control_diagnostics` affiche le mode, le système
   d'émission, Kp et Ti avec leur source, la base et les termes P et I
+
+**Quel mode de régulation choisir ?**
+
+| Situation | Choix |
+| --- | --- |
+| Aucun flow n'applique la recommandation | Peu importe : simple conseil |
+| La régulation actuelle fonctionne bien | Classique |
+| Consigne qui dérive, radiateurs | Positionnel – Radiateurs |
+| Consigne qui dérive, plancher chauffant | Positionnel – Plancher chauffant |
+| Tuya sans courbe de l'app | Classique, ou réglez la courbe de l'app |
+
+- **Aurora I/II** : la pompe à chaleur ne conserve une nouvelle consigne que si
+  la sélection de courbe de chauffe est sur OFF ; sinon aucun des deux modes
+  n'applique la recommandation. L'app calcule alors elle-même la courbe de
+  chauffe (Automatique : avec les valeurs de L28/L29)
+- **Courbe fixe de la pompe à chaleur** (sélection de courbe 1–18, pas de courbe
+  DIY) : choisissez Courbe de l'app ; L28/L29 ne contiennent alors généralement
+  pas votre courbe de chauffe
+- **Essayer sans risque** : désactivez le flow qui applique la recommandation,
+  choisissez un mode de régulation positionnel et comparez pendant une journée
+  la cible simulée (`adlar_simulated_target`) avec la courbe de chauffe
+- **Revenir en arrière** est toujours possible ; l'intégrale et la correction
+  cumulée repartent alors de 0
+- **Réduit de nuit** : déconseillé avec un plancher chauffant ; le mode
+  Positionnel réchauffe alors le matin, avec plus de démarrages du compresseur
+- **Optimiseurs** (prix, COP, modèle du bâtiment) : participent en mode
+  Positionnel, mais décalent moins la recommandation qu'en mode Classique
+- **Expérimental** : le mode Positionnel a encore peu été testé en pratique
 
 #### Coast Offset (v2.8.0+)
 - **Par défaut** : 1,0°C

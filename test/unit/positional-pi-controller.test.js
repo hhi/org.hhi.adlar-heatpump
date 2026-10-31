@@ -93,24 +93,28 @@ test('restoreIntegral clamps and rejects invalid values; output() does not integ
   near(pi.getIntegral(), 1, 'output() leaves the integral alone');
 });
 
-test('emitter presets set Kp, Ti and coast; manual uses the fields', () => {
-  assert.deepStrictEqual(resolveControlParams({ adaptive_control_mode: 'positional', adaptive_emitter_type: 'radiator', adaptive_pos_kp: 5 }), {
+test('the control setting selects the preset; positional_manual uses the fields', () => {
+  assert.deepStrictEqual(resolveControlParams({ adaptive_control_mode: 'positional_radiator', adaptive_pos_kp: 5 }), {
     mode: 'positional', emitter: 'radiator', source: 'preset', kp: 3, tiHours: 3, coastEnabled: false,
   });
-  assert.deepStrictEqual(resolveControlParams({ adaptive_control_mode: 'positional', adaptive_emitter_type: 'floor', adaptive_coast_enabled: false }), {
+  assert.deepStrictEqual(resolveControlParams({ adaptive_control_mode: 'positional_floor', adaptive_coast_enabled: false }), {
     mode: 'positional', emitter: 'floor', source: 'preset', kp: 3, tiHours: 6, coastEnabled: true,
   });
   assert.deepStrictEqual(resolveControlParams({
-    adaptive_control_mode: 'positional', adaptive_emitter_type: 'manual', adaptive_pos_kp: 4, adaptive_pos_ti: 1.5, adaptive_coast_enabled: false,
+    adaptive_control_mode: 'positional_manual', adaptive_pos_kp: 4, adaptive_pos_ti: 1.5, adaptive_coast_enabled: false,
   }), {
     mode: 'positional', emitter: 'manual', source: 'manual', kp: 4, tiHours: 1.5, coastEnabled: false,
   });
 });
 
-test('missing settings give the classic mode, manual emitter and coast on (unchanged behaviour)', () => {
+test('classic keeps its own coast switch; missing or unknown values give classic with coast on', () => {
   assert.deepStrictEqual(resolveControlParams({}), {
     mode: 'classic', emitter: 'manual', source: 'manual', kp: 3, tiHours: 3, coastEnabled: true,
   });
+  assert.deepStrictEqual(resolveControlParams({ adaptive_control_mode: 'classic', adaptive_coast_enabled: false }), {
+    mode: 'classic', emitter: 'manual', source: 'manual', kp: 3, tiHours: 3, coastEnabled: false,
+  });
+  assert.strictEqual(resolveControlParams({ adaptive_control_mode: 'positional' }).mode, 'classic', 'unknown value');
 });
 
 test('app curve runs through the two points, like the DIY form k·(T + 15) + b', () => {
