@@ -275,14 +275,30 @@ Automatic target temperature regulation based on external indoor temperature sen
     applies every advice
 - **Coast**: with Classic and Positional – Manual the Coast switch applies;
   Radiators and Floor heating set coast themselves
-- **Heating curve (positional mode) — default**: Automatic
-  - **Automatic**: the heat pump's own curve (Aurora I/II: DIY curve L28/L29;
-    Aurora III: climate curve), otherwise the setpoint when the positional mode
-    started (Tuya)
-  - **App curve**: water temperature at −15 °C and at +15 °C outdoor
-- **Advice**: with Tuya, set the app curve; a flat basis works, but less well
+- **Heating curve (positional modes) — default**: App curve
+  - **App curve**: water temperature at −15 °C and at +15 °C outdoor. Starting
+    values: Radiators 50 / 35, Floor heating 35 / 27, otherwise 45 / 30;
+    prefilled when you choose the control mode, as long as you have not changed
+    them yourself
+  - **Heat pump curve** (Aurora I/II: DIY curve L28/L29; Aurora III: climate
+    curve): only when you have set it yourself; when it is not usable, the app
+    curve applies. Tuya does not have this choice
 - **Diagnostics**: `adaptive_control_diagnostics` shows the mode, the emitter
-  system, Kp and Ti with their source, the basis and the P and I terms
+  system, Kp and Ti with their source, the basis with its source and the P and I
+  terms
+
+##### Adjusting the heating curve
+
+| What you notice | Adjustment |
+| --- | --- |
+| Too cold in frost, fine in mild weather | Value at −15 °C +1–2 |
+| Too cold in mild weather | Value at +15 °C +1–2 |
+| Slightly too cold everywhere | Both values +1 |
+| Too warm | The other way round: lower |
+
+- Change one value at a time and wait a day (floor heating: two days). In the
+  diagnostics, an I term that stays above 0 points to a heating curve that is
+  too low, below 0 to one that is too high
 
 **Which control mode do I choose?**
 
@@ -292,14 +308,13 @@ Automatic target temperature regulation based on external indoor temperature sen
 | The current control works well | Classic |
 | Setpoint creeps away or swings, radiators | Positional – Radiators |
 | Setpoint creeps away, floor heating | Positional – Floor heating |
-| Tuya without app curve | Classic, or set the app curve |
+| Heating curve unknown | Starting values, then adjust |
 
-- **Aurora I/II**: the heat pump only keeps a new setpoint when the heating
-  curve selection is OFF; otherwise neither mode applies the advice. The app
-  then calculates the heating curve itself (Automatic: with the values of
-  L28/L29)
-- **Fixed curve of the heat pump** (curve selection 1–18, no DIY curve): choose
-  App curve; L28/L29 then usually do not hold your heating curve
+- **Aurora I/II and Tuya**: the heat pump only keeps a new setpoint when the
+  heating curve selection (Tuya: heating curve) is OFF; otherwise neither mode
+  applies the advice. The app then calculates the heating curve itself
+- **Heat pump curve** only with your own DIY curve: with a fixed curve (curve
+  selection 1–18), L28/L29 usually do not hold your heating curve
 - **Trying it safely**: turn off the flow that applies the advice, choose a
   positional control mode and compare the simulated target
   (`adlar_simulated_target`) with the heating curve for a day

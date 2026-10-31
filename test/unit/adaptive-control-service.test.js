@@ -277,6 +277,7 @@ test('ADR-065: positional advice is basis + PI output, without the accumulator',
   const device = createDevice();
   device.settings.adaptive_control_mode = 'positional_radiator';
   const service = createPositionalService(device, 19.5);
+  service.getEffectiveOutdoorTemp = async () => null; // no outdoor temperature: flat basis
 
   await service.executeControlCycle();
   // flat basis = setpoint 35 at activation; u = 3·0.5 + 0.5·3/36 ≈ 1.54 → 36.54 → 37
@@ -335,4 +336,23 @@ test('ADR-062 A4: model parameters reach the PI and the price optimizer only fro
     await service.executeControlCycle();
     assert.strictEqual(capacity, expectedC, `confidence ${confidence}`);
   }
+});
+
+test('ADR-065: choosing a positional preset prefills the app curve until the user sets it himself', async () => {
+  const device = createDevice();
+  device.setSettings = async (values) => { Object.assign(device.settings, values); };
+  const service = createService(device, [0]);
+
+  await service.onSettings({}, { adaptive_control_mode: 'positional_floor' }, ['adaptive_control_mode']);
+  assert.strictEqual(device.settings.adaptive_curve_at_minus15, 35);
+  assert.strictEqual(device.settings.adaptive_curve_at_plus15, 27);
+
+  await service.onSettings({}, { adaptive_control_mode: 'positional_radiator' }, ['adaptive_control_mode']);
+  assert.strictEqual(device.settings.adaptive_curve_at_minus15, 50, 'a new preset replaces the prefilled values');
+
+  await service.onSettings({}, { adaptive_curve_at_minus15: 55 }, ['adaptive_curve_at_minus15']);
+  device.settings.adaptive_curve_at_minus15 = 55;
+  await service.onSettings({}, { adaptive_control_mode: 'positional_floor' }, ['adaptive_control_mode']);
+  assert.strictEqual(device.settings.adaptive_curve_at_minus15, 55, 'the user value stays');
+  assert.strictEqual(device.store.adaptive_curve_user_set, true);
 });

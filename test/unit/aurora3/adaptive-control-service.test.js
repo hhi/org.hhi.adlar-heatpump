@@ -239,6 +239,7 @@ test('ADR-065: positional advice is basis + PI output, without the accumulator',
   const device = createDevice();
   device.settings.adaptive_control_mode = 'positional_radiator';
   const service = createPositionalService(device, 19.5);
+  service.getEffectiveOutdoorTemp = async () => null; // no outdoor temperature: flat basis
 
   await service.executeControlCycle();
   // flat basis = setpoint 35 at activation; u = 3·0.5 + 0.5·3/36 ≈ 1.54 → 36.54 → 37
@@ -288,6 +289,7 @@ test('ADR-065: app heating curve as basis', async () => {
 
 test('ADR-065: the heat pump curve is the basis when plausible', async () => {
   const device = createDevice();
+  device.settings.adaptive_curve_source = 'auto';
   const service = createPositionalService(device, 20);
   service.resolveHeatPumpCurve = () => 33;
 

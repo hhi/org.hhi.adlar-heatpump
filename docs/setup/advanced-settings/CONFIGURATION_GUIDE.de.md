@@ -276,15 +276,29 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
     Empfehlung ausführt
 - **Coast**: bei Klassisch und Positionell – Manuell gilt der Schalter Coast;
   Heizkörper und Fußbodenheizung setzen Coast selbst
-- **Heizkurve (positioneller Modus) — Standard**: Automatisch
-  - **Automatisch**: die eigene Heizkurve der Wärmepumpe (Aurora I/II: DIY-Kurve
-    L28/L29; Aurora III: Klimakurve), sonst der Sollwert beim Einschalten des
-    positionellen Modus (Tuya)
-  - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen
-- **Empfehlung**: Bei Tuya die App-Kurve einstellen; eine flache Basis
-  funktioniert, aber weniger gut
+- **Heizkurve (positionelle Modi) — Standard**: App-Kurve
+  - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen. Startwerte:
+    Heizkörper 50 / 35, Fußbodenheizung 35 / 27, sonst 45 / 30; bei der Wahl des
+    Regelmodus vorausgefüllt, solange Sie sie nicht selbst geändert haben
+  - **Heizkurve der Wärmepumpe** (Aurora I/II: DIY-Kurve L28/L29; Aurora III:
+    Klimakurve): nur, wenn Sie sie selbst eingestellt haben; ist sie nicht
+    brauchbar, gilt die App-Kurve. Tuya hat diese Wahl nicht
 - **Diagnose**: `adaptive_control_diagnostics` zeigt den Modus, das
-  Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis und die P- und I-Anteile
+  Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis mit Quelle und die P- und
+  I-Anteile
+
+##### Heizkurve anpassen
+
+| Was Sie bemerken | Anpassung |
+| --- | --- |
+| Zu kalt bei Frost, gut bei mildem Wetter | Wert bei −15 °C +1–2 |
+| Zu kalt bei mildem Wetter | Wert bei +15 °C +1–2 |
+| Überall etwas zu kalt | Beide Werte +1 |
+| Zu warm | Umgekehrt: senken |
+
+- Ändern Sie einen Wert pro Mal und warten Sie einen Tag (Fußbodenheizung: zwei
+  Tage). In der Diagnose weist ein I-Anteil, der dauerhaft über 0 liegt, auf
+  eine zu niedrige Heizkurve hin, unter 0 auf eine zu hohe
 
 **Welchen Regelmodus wähle ich?**
 
@@ -294,14 +308,13 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 | Die aktuelle Regelung funktioniert gut | Klassisch |
 | Sollwert driftet oder schwankt, Heizkörper | Positionell – Heizkörper |
 | Sollwert driftet, Fußbodenheizung | Positionell – Fußbodenheizung |
-| Tuya ohne App-Kurve | Klassisch, oder App-Kurve einstellen |
+| Heizkurve unbekannt | Startwerte, danach anpassen |
 
-- **Aurora I/II**: Die Wärmepumpe behält einen neuen Sollwert nur, wenn die
-  Heizkurvenauswahl auf OFF steht; sonst führt keiner der beiden Modi die
-  Empfehlung aus. Die App berechnet die Heizkurve dann selbst (Automatisch: mit
-  den Werten von L28/L29)
-- **Feste Kurve der Wärmepumpe** (Heizkurvenauswahl 1–18, keine DIY-Kurve):
-  App-Kurve wählen; L28/L29 enthalten dann meist nicht Ihre Heizkurve
+- **Aurora I/II und Tuya**: Die Wärmepumpe behält einen neuen Sollwert nur, wenn
+  die Heizkurvenauswahl (Tuya: Heizkurve) auf OFF steht; sonst führt keiner der
+  beiden Modi die Empfehlung aus. Die App berechnet die Heizkurve dann selbst
+- **Heizkurve der Wärmepumpe** nur mit eigener DIY-Kurve: bei einer festen Kurve
+  (Heizkurvenauswahl 1–18) enthalten L28/L29 meist nicht Ihre Heizkurve
 - **Sicher ausprobieren**: Schalten Sie den Flow aus, der die Empfehlung
   ausführt, wählen Sie einen positionellen Regelmodus und vergleichen Sie einen
   Tag lang das simulierte Ziel (`adlar_simulated_target`) mit der Heizkurve
