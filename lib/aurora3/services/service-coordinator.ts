@@ -17,7 +17,7 @@ import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '..
 import { DeviceFeature } from '../protocol/modbus-runtime-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
-import { nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 import { type WaterTempLimits } from '../../shared/adaptive/setpoint-range';
 
 type TemperatureRegisterScale = 'x1' | 'x10';
@@ -575,11 +575,7 @@ export class ServiceCoordinator {
   private _setConnectionCapabilities(connected: boolean, reason: string | null): void {
     this._visibleConnectionConnected = connected;
 
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.toLocaleString('en-US', { month: 'short' });
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const timestamp = `${day}-${month} ${time}`;
+    const timestamp = formatDayMonthTime(new Date(), resolveHomeyTimezone(this.device.homey));
     const status = connected ? `Connected: ${timestamp}` : `Disconnected: ${timestamp}${reason ? ` (${reason})` : ''}`;
 
     if (this.device.hasCapability('adlar_connection_active')) {

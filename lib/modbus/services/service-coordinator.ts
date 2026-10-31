@@ -17,7 +17,7 @@ import { modeToSpaceSetpointTarget } from '../protocol/adlar-enum-mappers';
 import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
-import { nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 // ADR-042: Verbindingskwaliteit als expliciete runtime-state
 export type ConnectionQuality = 'online' | 'degraded' | 'offline';
@@ -572,11 +572,7 @@ export class ServiceCoordinator {
   private _setConnectionCapabilities(connected: boolean, reason: string | null): void {
     this._visibleConnectionConnected = connected;
 
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.toLocaleString('en-US', { month: 'short' });
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const timestamp = `${day}-${month} ${time}`;
+    const timestamp = formatDayMonthTime(new Date(), resolveHomeyTimezone(this.device.homey));
     const status = connected ? `Connected: ${timestamp}` : `Disconnected: ${timestamp}${reason ? ` (${reason})` : ''}`;
 
     if (this.device.hasCapability('adlar_connection_active')) {

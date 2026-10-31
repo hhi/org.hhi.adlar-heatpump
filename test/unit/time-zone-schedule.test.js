@@ -22,7 +22,7 @@ Module._load = function load(request, parent, isMain) {
 };
 
 const {
-  zonedTimeToUtc, startOfLocalDay, nextLocalMidnight, nextLocalTime,
+  zonedTimeToUtc, startOfLocalDay, nextLocalMidnight, nextLocalTime, formatDayMonthTime,
 } = require('../../.homeybuild/lib/shared/utils/time-format');
 const { calculatePreHeatDuration } = require('../../.homeybuild/lib/shared/utils/preheat-calculator');
 const { EnergyTrackingService: TuyaEnergyTracking } = require('../../.homeybuild/lib/tuya/services/energy-tracking-service');
@@ -175,6 +175,28 @@ for (const [driver, ServiceCoordinator] of coordinatorDrivers) {
     assert.strictEqual(values.adlar_daily_disconnect_count, 0);
     assert.strictEqual(homey.timeouts.length, 1);
     assert.strictEqual(homey.timeouts[0].ms, 23 * HOUR_MS, 'next midnight is 00:00 CEST = 22:00Z');
+  });
+}
+
+test('formatDayMonthTime: local date and time, also across midnight and the month boundary', () => {
+  assert.strictEqual(formatDayMonthTime(new Date('2026-10-31T21:38:00Z'), TZ), '31-Oct 22:38');
+  assert.strictEqual(formatDayMonthTime(new Date('2026-10-31T23:30:00Z'), TZ), '1-Nov 00:30');
+  assert.strictEqual(formatDayMonthTime(new Date('2026-07-01T05:07:00Z'), TZ), '1-Jul 07:07');
+});
+
+for (const [driver, ServiceCoordinator] of coordinatorDrivers) {
+  test(`${driver}: connection status shows Homey's local time`, () => {
+    const values = {};
+    const fakeCoordinator = {
+      device: {
+        homey: createHomey(),
+        hasCapability: () => true,
+        setCapabilityValue: async (id, value) => { values[id] = value; },
+      },
+    };
+
+    withNow('2026-10-31T21:38:00Z', () => ServiceCoordinator.prototype._setConnectionCapabilities.call(fakeCoordinator, true, null));
+    assert.strictEqual(values.adlar_connection_status, 'Connected: 31-Oct 22:38');
   });
 }
 

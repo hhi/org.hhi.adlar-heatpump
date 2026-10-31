@@ -43,6 +43,17 @@ export function formatHourMinute(date: Date, timeZone: string): string {
 }
 
 /**
+ * Format a date as "D-Mon HH:MM" in the given timezone, for the connection status
+ *
+ * @example formatDayMonthTime(new Date('2026-10-31T23:30:00Z'), 'Europe/Amsterdam') // "1-Nov 00:30"
+ */
+export function formatDayMonthTime(date: Date, timeZone: string): string {
+  const day = new Intl.DateTimeFormat('en-US', { day: 'numeric', timeZone }).format(date);
+  const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone }).format(date);
+  return `${day}-${month} ${formatHourMinute(date, timeZone)}`;
+}
+
+/**
  * Wall-clock date and time of an instant in a timezone (month is 1-12)
  */
 interface ZonedParts {
