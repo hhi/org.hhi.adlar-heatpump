@@ -397,7 +397,7 @@ export class BuildingModelService {
 
     // Get localized short month name using browser's locale
     const lang = this.device.homey.i18n.getLanguage();
-    const monthName = now.toLocaleDateString(lang, { month: 'short' });
+    const monthName = now.toLocaleDateString(lang, { month: 'short', timeZone: resolveHomeyTimezone(this.device.homey) });
     await this.updateCapabilityIfPresent('adlar_building_g', model.g, {
       title: `${this.device.homey.__('building_model.solar_gain_title')} (${monthName})`,
     });
@@ -984,7 +984,7 @@ export class BuildingModelService {
 
     return {
       timestamp: Date.now(),
-      timestampReadable: new Date().toLocaleString('nl-NL'),
+      timestampReadable: new Date().toLocaleString('nl-NL', { timeZone: resolveHomeyTimezone(this.device.homey) }),
       enabled: status.enabled,
       status: learningStatus,
       dataAvailability: {
