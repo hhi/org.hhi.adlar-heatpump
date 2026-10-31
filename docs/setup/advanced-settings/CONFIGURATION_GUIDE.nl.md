@@ -346,7 +346,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 - **Standaard**: 0.999
 - **Bereik**: 0.9985 - 0.9995
 - **Functie**: Hoe snel model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid (~75%). Lager = snellere aanpassing aan seizoensveranderingen.
-- **Werking**: Pas na een herstart van de app of 'Reset gebouwmodel leren'
+- **Werking**: Werkt direct (v3.5.0+)
 
 ### Gebouwtype
 - **Standaard**: Gemiddeld (typisch NL huis)
@@ -367,12 +367,13 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 ### Dynamische Interne Warmtewinsten
 - **Standaard**: Ingeschakeld
 - **Functie**: Houdt rekening met variërende warmte van mensen/apparaten per tijdstip
-- **Dag Patroon**:
+- **Dag Patroon** (tijden in de tijdzone van de Homey, v3.5.0+):
   - Nacht (23:00-06:00): 40% (slapen)
   - Dag (06:00-18:00): 100% (normaal)
   - Avond (18:00-23:00): 180% (koken, TV)
 - **Nauwkeurigheid verbetering**: ~10-15%
-- **Werking**: Pas na 'Reset gebouwmodel leren'
+- **Werking**: Werkt direct (v3.5.0+); het leren gaat verder vanaf de waarden van
+  het gebouwprofiel, met de helft van de verzamelde samples
 
 ---
 

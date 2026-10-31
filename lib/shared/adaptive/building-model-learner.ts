@@ -1,3 +1,6 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 /**
  * Building Model Learner - Component 2 of Adaptive Control System
  *
@@ -17,6 +20,8 @@
  * @version 2.2.0 - Added building profiles, dynamic P_int, seasonal g-factor
  * @since 1.4.0
  */
+
+import { getZonedHour } from '../utils/time-format';
 
 /**
  * Building type profiles with typical parameter ranges
@@ -90,6 +95,7 @@ export interface BuildingModelConfig {
   minSamplesForConfidence: number; // 288 = 24 hours @ 5min intervals
   buildingProfile?: BuildingProfileType; // Building type for initial parameters
   enableDynamicPInt?: boolean; // Enable time-of-day P_int adjustment
+  timeZone?: string; // ADR-062 F2: Homey's timezone for the P_int windows (the process runs in UTC)
   logger?: (msg: string, ...args: unknown[]) => void;
 }
 
@@ -134,6 +140,7 @@ export class BuildingModelLearner {
   private minSamplesForConfidence: number;
   private logger: (message: string, ...args: unknown[]) => void;
   private enableDynamicPInt: boolean;
+  private timeZone: string;
   private basePInt: number; // Base P_int value for dynamic calculation
 
   // ADR-057 W3 (referentieproject): excitation diagnostics — structural reverts mean
@@ -311,6 +318,7 @@ export class BuildingModelLearner {
 
     this.basePInt = profile.pInt; // Store for dynamic P_int calculation
     this.enableDynamicPInt = config.enableDynamicPInt ?? false;
+    this.timeZone = config.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Initialize covariance matrix with high uncertainty
     const initCov = config.initialCovariance;
@@ -511,7 +519,8 @@ export class BuildingModelLearner {
     if (!this.enableDynamicPInt) {
       return 1.0;
     }
-    const hour = new Date(timestamp).getHours();
+    // ADR-062 F2: the windows are wall-clock hours in Homey's timezone, not UTC
+    const hour = Math.floor(getZonedHour(new Date(timestamp), this.timeZone));
     return getDynamicPInt(hour, this.basePInt) / this.basePInt;
   }
 
@@ -653,9 +662,22 @@ export class BuildingModelLearner {
     // so P stays symmetric positive semi-definite. The former diagonal clamp plus
     // off-diagonal clip bounded the elements but could leave P indefinite.
     // =========================================================================
-    const KX = this.outerProduct(K, X);
-    const KXP = this.matrixMultiply(KX, this.P);
-    const updated = this.P.map((row, i) => row.map((val, j) => (val - KXP[i][j]) / lambda));
+    //
+    // ADR-062 B13: P follows the step θ actually took. Per component s_i = taken / proposed
+    // step (B12 bounding, B11 rate limiting), K_eff = s ⊙ K, and the Joseph form
+    //   P⁺ = [(I − K_eff·Xᵀ)·P·(I − K_eff·Xᵀ)ᵀ + λ·K_eff·K_effᵀ] / λ
+    // which equals (P − K·Xᵀ·P) / λ when no step was shortened (K_eff = K).
+    // =========================================================================
+    const kEff = K.map((k, i) => {
+      if (step[i] === 0) return k;
+      const taken = (this.theta[i] - thetaPrevious[i]) / step[i];
+      return k * Math.max(0, Math.min(1, taken));
+    });
+    const A = this.outerProduct(kEff, X).map((row, i) => row.map((val, j) => (i === j ? 1 : 0) - val));
+    const AP = this.matrixMultiply(A, this.P);
+    const APAt = AP.map((row) => A.map((aRow) => this.dotProduct(row, aRow)));
+    const KKt = this.outerProduct(kEff, kEff);
+    const updated = APAt.map((row, i) => row.map((val, j) => (val + lambda * KKt[i][j]) / lambda));
     this.P = BuildingModelLearner.projectCovariance(updated);
   }
 
@@ -875,6 +897,28 @@ export class BuildingModelLearner {
   }
 
   /**
+   * ADR-062 A5: apply a changed forgetting factor directly (same clamp as the constructor)
+   */
+  public setForgettingFactor(value: number): void {
+    const { MIN, MAX, DEFAULT } = BuildingModelLearner.LAMBDA;
+    const configured = Number.isFinite(value) ? value : DEFAULT;
+    this.lambda = Math.min(MAX, Math.max(MIN, configured));
+    this.logger(`BuildingModelLearner: forgetting factor set to ${this.lambda}`);
+  }
+
+  /**
+   * ADR-062 A5: switch dynamic P_int; θ[3] changes meaning, so a change soft-resets to the profile.
+   * Returns true when the setting changed. softReset false: the caller soft-resets itself
+   * (a profile change in the same save).
+   */
+  public setDynamicPInt(enabled: boolean, profileType: BuildingProfileType, softReset = true): boolean {
+    if (this.enableDynamicPInt === enabled) return false;
+    this.enableDynamicPInt = enabled;
+    if (softReset) this.softReset(profileType);
+    return true;
+  }
+
+  /**
    * Export state for persistence
    */
   public getState() {
@@ -1001,7 +1045,7 @@ export class BuildingModelLearner {
     this.residuals = [];
     // Restore configuration (with defaults for backward compatibility)
     this.basePInt = state.basePInt ?? 0.3;
-    this.enableDynamicPInt = state.enableDynamicPInt ?? false;
+    // ADR-062 A5: the setting is leading; state.enableDynamicPInt is no longer restored
     // ADR-057 W3: restore excitation counters (default 0 for pre-existing states)
     this.consecutiveReverts = state.consecutiveReverts ?? 0;
     this.totalReverts = state.totalReverts ?? 0;
