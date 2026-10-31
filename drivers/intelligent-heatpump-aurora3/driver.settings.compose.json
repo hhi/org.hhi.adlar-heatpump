@@ -298,10 +298,10 @@
           "fr": "Mode de régulation"
         },
         "hint": {
-          "en": "Classic: adds the PI output to the setpoint every cycle (previous behaviour). Positional: advice = heating curve + PI correction with a true integral, without a wide dead zone. Default: Classic.",
-          "nl": "Klassiek: telt de PI-uitvoer elke cyclus bij het setpoint op (bestaand gedrag). Positioneel: advies = stooklijn + PI-correctie met een echte integraal, zonder brede dode zone. Standaard: Klassiek.",
-          "de": "Klassisch: addiert die PI-Ausgabe in jedem Zyklus zum Sollwert (bisheriges Verhalten). Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne breite Totzone. Standard: Klassisch.",
-          "fr": "Classique : ajoute la sortie PI à la consigne à chaque cycle (comportement existant). Positionnel : recommandation = courbe de chauffe + correction PI avec une vraie intégrale, sans large zone morte. Défaut : Classique."
+          "en": "Determines how the water temperature advice is calculated. Classic: a small step up or down every cycle; the steps add up. Positional (experimental): the advice follows the heating curve with a correction for the indoor temperature, so it stays steady. With Positional, choose your emitter system: Radiators (Kp 3, Ti 3 h, coast off) or Floor heating (Kp 3, Ti 6 h, coast on); Manual uses the fields below. Choose Positional if a flow applies the advice and the setpoint creeps away or swings in Classic. Without such a flow it is advice only. You can switch back at any time. Default: Classic.",
+          "nl": "Bepaalt hoe het advies voor de watertemperatuur wordt berekend. Klassiek: elke cyclus een kleine stap omhoog of omlaag; die stappen tellen op. Positioneel (experimenteel): het advies volgt de stooklijn met een correctie voor de binnentemperatuur en blijft daardoor rustig. Kies bij Positioneel uw afgiftesysteem: Radiatoren (Kp 3, Ti 3 u, coast uit) of Vloerverwarming (Kp 3, Ti 6 u, coast aan); Handmatig gebruikt de velden hieronder. Kies Positioneel als een flow het advies uitvoert en het setpoint bij Klassiek wegkruipt of slingert. Zonder zo'n flow is het alleen een advies. Terugzetten kan altijd. Standaard: Klassiek.",
+          "de": "Legt fest, wie die Empfehlung für die Wassertemperatur berechnet wird. Klassisch: in jedem Zyklus ein kleiner Schritt nach oben oder unten; die Schritte summieren sich. Positionell (experimentell): die Empfehlung folgt der Heizkurve mit einer Korrektur für die Innentemperatur und bleibt dadurch ruhig. Wählen Sie bei Positionell Ihr Wärmeabgabesystem: Heizkörper (Kp 3, Ti 3 h, Coast aus) oder Fußbodenheizung (Kp 3, Ti 6 h, Coast an); Manuell verwendet die Felder unten. Wählen Sie Positionell, wenn ein Flow die Empfehlung ausführt und der Sollwert bei Klassisch wegdriftet oder schwankt. Ohne einen solchen Flow ist es nur eine Empfehlung. Zurückstellen ist jederzeit möglich. Standard: Klassisch.",
+          "fr": "Détermine comment la recommandation de température d'eau est calculée. Classique : un petit pas vers le haut ou le bas à chaque cycle ; les pas s'additionnent. Positionnel (expérimental) : la recommandation suit la courbe de chauffe avec une correction selon la température intérieure, et reste donc stable. En mode Positionnel, choisissez votre système d'émission : Radiateurs (Kp 3, Ti 3 h, coast désactivé) ou Plancher chauffant (Kp 3, Ti 6 h, coast activé) ; Manuel utilise les champs ci-dessous. Choisissez Positionnel si un flow applique la recommandation et que la consigne dérive ou oscille en mode Classique. Sans un tel flow, ce n'est qu'une recommandation. Vous pouvez revenir en arrière à tout moment. Défaut : Classique."
         },
         "value": "classic",
         "values": [
@@ -315,58 +315,30 @@
             }
           },
           {
-            "id": "positional",
+            "id": "positional_radiator",
             "label": {
-              "en": "Positional (heating curve + PI)",
-              "nl": "Positioneel (stooklijn + PI)",
-              "de": "Positionell (Heizkurve + PI)",
-              "fr": "Positionnel (courbe de chauffe + PI)"
-            }
-          }
-        ]
-      },
-      {
-        "id": "adaptive_emitter_type",
-        "type": "dropdown",
-        "label": {
-          "en": "Emitter system",
-          "nl": "Afgiftesysteem",
-          "de": "Wärmeabgabesystem",
-          "fr": "Système d'émission"
-        },
-        "hint": {
-          "en": "Sets Kp, Ti and coast at once. Radiators: Kp 3, Ti 3 h, coast off. Floor heating: Kp 3, Ti 6 h, coast on. Manual: your own values. In the classic control mode only coast follows this choice. Default: Manual.",
-          "nl": "Zet Kp, Ti en coast in één keer. Radiatoren: Kp 3, Ti 3 u, coast uit. Vloerverwarming: Kp 3, Ti 6 u, coast aan. Handmatig: uw eigen waarden. In de klassieke regelmodus volgt alleen coast deze keuze. Standaard: Handmatig.",
-          "de": "Setzt Kp, Ti und Coast auf einmal. Heizkörper: Kp 3, Ti 3 h, Coast aus. Fußbodenheizung: Kp 3, Ti 6 h, Coast an. Manuell: Ihre eigenen Werte. Im klassischen Regelmodus folgt nur Coast dieser Auswahl. Standard: Manuell.",
-          "fr": "Règle Kp, Ti et coast en une fois. Radiateurs : Kp 3, Ti 3 h, coast désactivé. Plancher chauffant : Kp 3, Ti 6 h, coast activé. Manuel : vos propres valeurs. En mode classique, seul coast suit ce choix. Défaut : Manuel."
-        },
-        "value": "manual",
-        "values": [
-          {
-            "id": "radiator",
-            "label": {
-              "en": "Radiators",
-              "nl": "Radiatoren",
-              "de": "Heizkörper",
-              "fr": "Radiateurs"
+              "en": "Positional – Radiators (experimental)",
+              "nl": "Positioneel – Radiatoren (experimenteel)",
+              "de": "Positionell – Heizkörper (experimentell)",
+              "fr": "Positionnel – Radiateurs (expérimental)"
             }
           },
           {
-            "id": "floor",
+            "id": "positional_floor",
             "label": {
-              "en": "Floor heating",
-              "nl": "Vloerverwarming",
-              "de": "Fußbodenheizung",
-              "fr": "Plancher chauffant"
+              "en": "Positional – Floor heating (experimental)",
+              "nl": "Positioneel – Vloerverwarming (experimenteel)",
+              "de": "Positionell – Fußbodenheizung (experimentell)",
+              "fr": "Positionnel – Plancher chauffant (expérimental)"
             }
           },
           {
-            "id": "manual",
+            "id": "positional_manual",
             "label": {
-              "en": "Manual",
-              "nl": "Handmatig",
-              "de": "Manuell",
-              "fr": "Manuel"
+              "en": "Positional – Manual (experimental)",
+              "nl": "Positioneel – Handmatig (experimenteel)",
+              "de": "Positionell – Manuell (experimentell)",
+              "fr": "Positionnel – Manuel (expérimental)"
             }
           }
         ]
@@ -447,10 +419,10 @@
           "fr": "PI positionnel : Kp (K/K)"
         },
         "hint": {
-          "en": "Only used with Control mode = Positional and Emitter system = Manual. Degrees of water temperature per degree of indoor deviation. Default: 3.",
-          "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Graden watertemperatuur per graad afwijking binnen. Standaard: 3.",
-          "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Grad Wassertemperatur pro Grad Innenabweichung. Standard: 3.",
-          "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Degrés de température d'eau par degré d'écart intérieur. Défaut : 3."
+          "en": "Only used with Control mode = Positional – Manual. Degrees of water temperature per degree of indoor deviation. Default: 3.",
+          "nl": "Alleen gebruikt bij Regelmodus = Positioneel – Handmatig. Graden watertemperatuur per graad afwijking binnen. Standaard: 3.",
+          "de": "Nur verwendet bei Regelmodus = Positionell – Manuell. Grad Wassertemperatur pro Grad Innenabweichung. Standard: 3.",
+          "fr": "Utilisé uniquement avec Mode de régulation = Positionnel – Manuel. Degrés de température d'eau par degré d'écart intérieur. Défaut : 3."
         },
         "value": 3,
         "attr": {
@@ -469,10 +441,10 @@
           "fr": "PI positionnel : temps d'intégration Ti (heures)"
         },
         "hint": {
-          "en": "Only used with Control mode = Positional and Emitter system = Manual. Longer for slow emitters (floor heating about 6 h). Default: 3.",
-          "nl": "Alleen gebruikt bij Regelmodus = Positioneel en Afgiftesysteem = Handmatig. Langer bij trage afgifte (vloerverwarming ongeveer 6 u). Standaard: 3.",
-          "de": "Nur verwendet bei Regelmodus = Positionell und Wärmeabgabesystem = Manuell. Länger bei träger Wärmeabgabe (Fußbodenheizung etwa 6 h). Standard: 3.",
-          "fr": "Utilisé uniquement avec Mode de régulation = Positionnel et Système d'émission = Manuel. Plus long pour une émission lente (plancher chauffant environ 6 h). Défaut : 3."
+          "en": "Only used with Control mode = Positional – Manual. Longer for slow emitters (floor heating about 6 h). Default: 3.",
+          "nl": "Alleen gebruikt bij Regelmodus = Positioneel – Handmatig. Langer bij trage afgifte (vloerverwarming ongeveer 6 u). Standaard: 3.",
+          "de": "Nur verwendet bei Regelmodus = Positionell – Manuell. Länger bei träger Wärmeabgabe (Fußbodenheizung etwa 6 h). Standard: 3.",
+          "fr": "Utilisé uniquement avec Mode de régulation = Positionnel – Manuel. Plus long pour une émission lente (plancher chauffant environ 6 h). Défaut : 3."
         },
         "value": 3,
         "attr": {
@@ -616,10 +588,10 @@
           "fr": "Coast (refroidissement passif)"
         },
         "hint": {
-          "en": "Only used with Emitter system = Manual; the presets set coast themselves. When off, coast never activates. Default: on.",
-          "nl": "Alleen gebruikt bij Afgiftesysteem = Handmatig; de voorinstellingen zetten coast zelf. Uit: coast wordt nooit actief. Standaard: aan.",
-          "de": "Nur verwendet bei Wärmeabgabesystem = Manuell; die Voreinstellungen setzen Coast selbst. Aus: Coast wird nie aktiv. Standard: an.",
-          "fr": "Utilisé uniquement avec Système d'émission = Manuel ; les préréglages règlent coast eux-mêmes. Désactivé : coast ne s'active jamais. Défaut : activé."
+          "en": "Used with Classic and with Positional – Manual; Radiators and Floor heating set coast themselves (off and on). When off, coast never activates. Default: on.",
+          "nl": "Gebruikt bij Klassiek en bij Positioneel – Handmatig; Radiatoren en Vloerverwarming zetten coast zelf (uit en aan). Uit: coast wordt nooit actief. Standaard: aan.",
+          "de": "Verwendet bei Klassisch und bei Positionell – Manuell; Heizkörper und Fußbodenheizung setzen Coast selbst (aus und an). Aus: Coast wird nie aktiv. Standard: an.",
+          "fr": "Utilisé en mode Classique et Positionnel – Manuel ; Radiateurs et Plancher chauffant règlent coast eux-mêmes (désactivé et activé). Désactivé : coast ne s'active jamais. Défaut : activé."
         },
         "value": true
       },

@@ -262,19 +262,20 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 - **Fußbodenheizung**: Beide um den Bereich Ihrer eigenen Heizkurve einstellen
   (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen
 
-#### Regelmodus, Wärmeabgabesystem und Heizkurve (v3.5.0+)
+#### Regelmodus und Heizkurve (v3.5.0+)
 
 - **Regelmodus — Standard**: Klassisch
-  - **Klassisch**: addiert die PI-Ausgabe in jedem Zyklus zum Sollwert
-    (bisheriges Verhalten)
-  - **Positionell**: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral,
-    ohne breite Totzone; der Sollwert bleibt ruhig, auch mit einem Flow, der
-    jede Empfehlung ausführt
-- **Wärmeabgabesystem — Standard**: Manuell
-  - **Heizkörper**: Kp 3, Ti 3 h, Coast aus
-  - **Fußbodenheizung**: Kp 3, Ti 6 h, Coast an
-  - **Manuell**: Positioneller PI Kp und Ti und der Schalter Coast unten
-  - Im klassischen Modus folgt nur Coast dieser Auswahl
+  - **Klassisch**: in jedem Zyklus ein kleiner Schritt nach oben oder unten; die
+    Schritte summieren sich (bisheriges Verhalten)
+  - **Positionell – Heizkörper** (experimentell): Kp 3, Ti 3 h, Coast aus
+  - **Positionell – Fußbodenheizung** (experimentell): Kp 3, Ti 6 h, Coast an
+  - **Positionell – Manuell** (experimentell): Positioneller PI Kp und Ti und
+    der Schalter Coast unten
+  - Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne
+    breite Totzone; der Sollwert bleibt ruhig, auch mit einem Flow, der jede
+    Empfehlung ausführt
+- **Coast**: bei Klassisch und Positionell – Manuell gilt der Schalter Coast;
+  Heizkörper und Fußbodenheizung setzen Coast selbst
 - **Heizkurve (positioneller Modus) — Standard**: Automatisch
   - **Automatisch**: die eigene Heizkurve der Wärmepumpe (Aurora I/II: DIY-Kurve
     L28/L29; Aurora III: Klimakurve), sonst der Sollwert beim Einschalten des
@@ -284,6 +285,33 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   funktioniert, aber weniger gut
 - **Diagnose**: `adaptive_control_diagnostics` zeigt den Modus, das
   Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis und die P- und I-Anteile
+
+**Welchen Regelmodus wähle ich?**
+
+| Situation | Wahl |
+| --- | --- |
+| Kein Flow, der die Empfehlung ausführt | Egal: nur Empfehlung |
+| Die aktuelle Regelung funktioniert gut | Klassisch |
+| Sollwert driftet oder schwankt, Heizkörper | Positionell – Heizkörper |
+| Sollwert driftet, Fußbodenheizung | Positionell – Fußbodenheizung |
+| Tuya ohne App-Kurve | Klassisch, oder App-Kurve einstellen |
+
+- **Aurora I/II**: Die Wärmepumpe behält einen neuen Sollwert nur, wenn die
+  Heizkurvenauswahl auf OFF steht; sonst führt keiner der beiden Modi die
+  Empfehlung aus. Die App berechnet die Heizkurve dann selbst (Automatisch: mit
+  den Werten von L28/L29)
+- **Feste Kurve der Wärmepumpe** (Heizkurvenauswahl 1–18, keine DIY-Kurve):
+  App-Kurve wählen; L28/L29 enthalten dann meist nicht Ihre Heizkurve
+- **Sicher ausprobieren**: Schalten Sie den Flow aus, der die Empfehlung
+  ausführt, wählen Sie einen positionellen Regelmodus und vergleichen Sie einen
+  Tag lang das simulierte Ziel (`adlar_simulated_target`) mit der Heizkurve
+- **Zurückstellen** ist jederzeit möglich; das Integral und die aufsummierte
+  Korrektur beginnen dann bei 0
+- **Nachtabsenkung**: bei Fußbodenheizung nicht empfohlen; Positionell heizt
+  dann morgens auf, mit mehr Kompressorstarts
+- **Optimierer** (Preis, COP, Gebäudemodell): wirken bei Positionell mit,
+  verschieben die Empfehlung aber weniger als bei Klassisch
+- **Experimentell**: Positionell ist in der Praxis noch wenig getestet
 
 #### Coast Offset (v2.8.0+)
 - **Standard**: 1,0°C

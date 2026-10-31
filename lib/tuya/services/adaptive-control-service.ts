@@ -609,7 +609,6 @@ export class AdaptiveControlService {
   private _getControlParams(): ControlParams {
     return resolveControlParams({
       adaptive_control_mode: this.device.getSetting('adaptive_control_mode'),
-      adaptive_emitter_type: this.device.getSetting('adaptive_emitter_type'),
       adaptive_pos_kp: this.device.getSetting('adaptive_pos_kp'),
       adaptive_pos_ti: this.device.getSetting('adaptive_pos_ti'),
       adaptive_coast_enabled: this.device.getSetting('adaptive_coast_enabled'),
@@ -989,12 +988,12 @@ export class AdaptiveControlService {
         outletDropRate: coastDropRate,
       } = this._computeCoastAdjustment(coastReference, !positional);
 
-      // ADR-065 D8: coast switched off (emitter preset or adaptive_coast_enabled) ends an active coast
+      // ADR-065 D8: coast switched off (radiator preset or adaptive_coast_enabled) ends an active coast
       if (!control.coastEnabled && this._coastActive) {
         this._coastActive = false;
         this._cooldownCycleCount = 0;
         this._coastCycleCount = 0;
-        this.logger('AdaptiveControl: coast disabled for this emitter type — coast ended');
+        this.logger('AdaptiveControl: coast disabled for this control setting — coast ended');
       }
 
       // ADR-047: Stap 3 — Harde exit (bestaand)

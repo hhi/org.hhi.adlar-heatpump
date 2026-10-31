@@ -261,19 +261,20 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Floor heating**: Set both around the range of your own heating curve (e.g.
   2°C below and 3°C above) and leave room for cold weather
 
-#### Control Mode, Emitter System and Heating Curve (v3.5.0+)
+#### Control Mode and Heating Curve (v3.5.0+)
 
 - **Control mode — default**: Classic
-  - **Classic**: adds the PI output to the setpoint every cycle (previous
+  - **Classic**: a small step up or down every cycle; the steps add up (previous
     behaviour)
-  - **Positional**: advice = heating curve + PI correction with a true integral,
+  - **Positional – Radiators** (experimental): Kp 3, Ti 3 h, coast off
+  - **Positional – Floor heating** (experimental): Kp 3, Ti 6 h, coast on
+  - **Positional – Manual** (experimental): Positional PI Kp and Ti and the
+    Coast switch below
+  - Positional: advice = heating curve + PI correction with a true integral,
     without a wide dead zone; the setpoint stays calm, also with a flow that
     applies every advice
-- **Emitter system — default**: Manual
-  - **Radiators**: Kp 3, Ti 3 h, coast off
-  - **Floor heating**: Kp 3, Ti 6 h, coast on
-  - **Manual**: Positional PI Kp and Ti and the Coast switch below
-  - In the classic mode only coast follows this choice
+- **Coast**: with Classic and Positional – Manual the Coast switch applies;
+  Radiators and Floor heating set coast themselves
 - **Heating curve (positional mode) — default**: Automatic
   - **Automatic**: the heat pump's own curve (Aurora I/II: DIY curve L28/L29;
     Aurora III: climate curve), otherwise the setpoint when the positional mode
@@ -282,6 +283,33 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Advice**: with Tuya, set the app curve; a flat basis works, but less well
 - **Diagnostics**: `adaptive_control_diagnostics` shows the mode, the emitter
   system, Kp and Ti with their source, the basis and the P and I terms
+
+**Which control mode do I choose?**
+
+| Situation | Choice |
+| --- | --- |
+| No flow that applies the advice | Does not matter: advice only |
+| The current control works well | Classic |
+| Setpoint creeps away or swings, radiators | Positional – Radiators |
+| Setpoint creeps away, floor heating | Positional – Floor heating |
+| Tuya without app curve | Classic, or set the app curve |
+
+- **Aurora I/II**: the heat pump only keeps a new setpoint when the heating
+  curve selection is OFF; otherwise neither mode applies the advice. The app
+  then calculates the heating curve itself (Automatic: with the values of
+  L28/L29)
+- **Fixed curve of the heat pump** (curve selection 1–18, no DIY curve): choose
+  App curve; L28/L29 then usually do not hold your heating curve
+- **Trying it safely**: turn off the flow that applies the advice, choose a
+  positional control mode and compare the simulated target
+  (`adlar_simulated_target`) with the heating curve for a day
+- **Switching back** is always possible; the integral and the accumulated
+  correction then start at 0
+- **Night setback**: not recommended with floor heating; Positional then heats
+  up in the morning, with more compressor starts
+- **Optimizers** (price, COP, building model): take part in Positional, but
+  shift the advice less than in Classic
+- **Experimental**: Positional has seen little testing in practice
 
 #### Coast Offset (v2.8.0+)
 - **Default**: 1.0°C

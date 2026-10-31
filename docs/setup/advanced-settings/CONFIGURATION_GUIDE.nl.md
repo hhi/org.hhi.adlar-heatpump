@@ -262,19 +262,20 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - **Vloerverwarming**: Stel beide in rond het bereik van uw eigen stooklijn
   (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer
 
-#### Regelmodus, Afgiftesysteem en Stooklijn (v3.5.0+)
+#### Regelmodus en Stooklijn (v3.5.0+)
 
 - **Regelmodus — standaard**: Klassiek
-  - **Klassiek**: telt de PI-uitvoer elke cyclus bij het setpoint op (bestaand
-    gedrag)
-  - **Positioneel**: advies = stooklijn + PI-correctie met een echte integraal,
+  - **Klassiek**: elke cyclus een kleine stap omhoog of omlaag; de stappen
+    tellen op (bestaand gedrag)
+  - **Positioneel – Radiatoren** (experimenteel): Kp 3, Ti 3 u, coast uit
+  - **Positioneel – Vloerverwarming** (experimenteel): Kp 3, Ti 6 u, coast aan
+  - **Positioneel – Handmatig** (experimenteel): Positionele PI Kp en Ti en de
+    schakelaar Coast hieronder
+  - Positioneel: advies = stooklijn + PI-correctie met een echte integraal,
     zonder brede dode zone; het setpoint blijft rustig, ook met een flow die elk
     advies uitvoert
-- **Afgiftesysteem — standaard**: Handmatig
-  - **Radiatoren**: Kp 3, Ti 3 u, coast uit
-  - **Vloerverwarming**: Kp 3, Ti 6 u, coast aan
-  - **Handmatig**: Positionele PI Kp en Ti en de schakelaar Coast hieronder
-  - In de klassieke modus volgt alleen coast deze keuze
+- **Coast**: bij Klassiek en Positioneel – Handmatig geldt de schakelaar Coast;
+  Radiatoren en Vloerverwarming zetten coast zelf
 - **Stooklijn (positionele modus) — standaard**: Automatisch
   - **Automatisch**: de eigen stooklijn van de warmtepomp (Aurora I/II:
     DIY-stooklijn L28/L29; Aurora III: klimaatcurve), anders het setpoint bij
@@ -284,6 +285,33 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   minder goed
 - **Diagnostiek**: `adaptive_control_diagnostics` toont de modus, het
   afgiftesysteem, Kp en Ti met hun bron, de basis en de P- en I-term
+
+**Welke regelmodus kies ik?**
+
+| Situatie | Keuze |
+| --- | --- |
+| Geen flow die het advies uitvoert | Maakt niet uit: alleen advies |
+| De huidige regeling werkt goed | Klassiek |
+| Setpoint kruipt weg of slingert, radiatoren | Positioneel – Radiatoren |
+| Setpoint kruipt weg, vloerverwarming | Positioneel – Vloerverwarming |
+| Tuya zonder app-stooklijn | Klassiek, of stel de app-stooklijn in |
+
+- **Aurora I/II**: de warmtepomp houdt een nieuw setpoint alleen vast als de
+  stooklijnkeuze op OFF staat; anders voert geen van beide modi het advies uit.
+  De app rekent de stooklijn dan zelf uit (Automatisch: met de waarden van
+  L28/L29)
+- **Vaste curve van de warmtepomp** (stooklijnkeuze 1–18, geen DIY-stooklijn):
+  kies App-stooklijn; L28/L29 bevatten dan meestal niet uw stooklijn
+- **Veilig proberen**: zet de flow die het advies uitvoert uit, kies een
+  positionele regelmodus en vergelijk een dag het gesimuleerde doel
+  (`adlar_simulated_target`) met de stooklijn
+- **Terugzetten** kan altijd; de integraal en de opgetelde correctie beginnen
+  dan op 0
+- **Nachtverlaging**: bij vloerverwarming afgeraden; Positioneel warmt dan in de
+  ochtend op, met meer compressorstarts
+- **Optimizers** (prijs, COP, gebouwmodel): werken in Positioneel mee, maar
+  verschuiven het advies minder dan in Klassiek
+- **Experimenteel**: Positioneel is nog weinig in de praktijk getest
 
 #### Coast Offset (v2.8.0+)
 - **Standaard**: 1.0°C

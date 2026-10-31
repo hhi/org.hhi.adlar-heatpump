@@ -228,7 +228,7 @@ function passThroughDecisionMaker() {
 }
 
 function createPositionalService(device, indoor) {
-  device.settings.adaptive_control_mode = 'positional';
+  device.settings.adaptive_control_mode ??= 'positional_manual';
   const service = createService(device, [0]);
   service.decisionMaker = passThroughDecisionMaker();
   service.externalTemperature = { getIndoorTemperature: () => indoor };
@@ -237,7 +237,7 @@ function createPositionalService(device, indoor) {
 
 test('ADR-065: positional advice is basis + PI output, without the accumulator', async () => {
   const device = createDevice();
-  device.settings.adaptive_emitter_type = 'radiator';
+  device.settings.adaptive_control_mode = 'positional_radiator';
   const service = createPositionalService(device, 19.5);
 
   await service.executeControlCycle();
@@ -255,7 +255,7 @@ test('ADR-065: switching from classic to positional resets the accumulator', asy
   await service.executeControlCycle();
   assert.ok(service.accumulatedAdjustment > 0.39, 'classic cycle accrued');
 
-  device.settings.adaptive_control_mode = 'positional';
+  device.settings.adaptive_control_mode = 'positional_manual';
   service.decisionMaker = passThroughDecisionMaker();
   await service.executeControlCycle();
   assert.strictEqual(service.accumulatedAdjustment, 0);
@@ -266,7 +266,7 @@ test('ADR-065: switching from classic to positional resets the accumulator', asy
 test('ADR-065: the radiator preset keeps coast off, the floor preset allows it', async () => {
   for (const [emitter, expected] of [['radiator', false], ['floor', true]]) {
     const device = createDevice();
-    device.settings.adaptive_emitter_type = emitter;
+    device.settings.adaptive_control_mode = `positional_${emitter}`;
     const service = createPositionalService(device, 21.5);
     for (let i = 0; i < 3; i++) await service.executeControlCycle();
     assert.strictEqual(service._coastActive, expected, emitter);

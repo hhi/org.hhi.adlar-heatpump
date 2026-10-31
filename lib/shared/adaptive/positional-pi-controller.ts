@@ -153,7 +153,6 @@ export const POSITIONAL_DEFAULTS = { kp: 3, tiHours: 3 };
 /* eslint-disable camelcase */
 export interface ControlSettings {
   adaptive_control_mode?: unknown;
-  adaptive_emitter_type?: unknown;
   adaptive_pos_kp?: unknown;
   adaptive_pos_ti?: unknown;
   adaptive_coast_enabled?: unknown;
@@ -172,24 +171,23 @@ const asNumber = (value: unknown, fallback: number): number => (
 );
 
 /**
- * Effective control parameters: radiator and floor use their preset and ignore the fields;
- * manual uses adaptive_pos_kp, adaptive_pos_ti and adaptive_coast_enabled. In the classic mode
- * only coast follows the emitter type; Kp and Ki keep their own (classic) settings.
+ * Effective control parameters from the single control setting (ADR-065 D8, opzet B):
+ * positional_radiator and positional_floor use their preset and ignore the fields;
+ * positional_manual uses adaptive_pos_kp, adaptive_pos_ti and adaptive_coast_enabled. Classic
+ * (also for a missing or unknown value) keeps its own Kp and Ki; only the coast switch applies.
  */
 export function resolveControlParams(settings: ControlSettings): ControlParams {
-  const mode: ControlMode = settings.adaptive_control_mode === 'positional' ? 'positional' : 'classic';
-  const emitter: EmitterType = settings.adaptive_emitter_type === 'radiator' || settings.adaptive_emitter_type === 'floor'
-    ? settings.adaptive_emitter_type
-    : 'manual';
-  if (emitter !== 'manual') {
+  const value = settings.adaptive_control_mode;
+  if (value === 'positional_radiator' || value === 'positional_floor') {
+    const emitter = value === 'positional_radiator' ? 'radiator' : 'floor';
     const preset = EMITTER_PRESETS[emitter];
     return {
-      mode, emitter, source: 'preset', kp: preset.kp, tiHours: preset.tiHours, coastEnabled: preset.coastEnabled,
+      mode: 'positional', emitter, source: 'preset', kp: preset.kp, tiHours: preset.tiHours, coastEnabled: preset.coastEnabled,
     };
   }
   return {
-    mode,
-    emitter,
+    mode: value === 'positional_manual' ? 'positional' : 'classic',
+    emitter: 'manual',
     source: 'manual',
     kp: asNumber(settings.adaptive_pos_kp, POSITIONAL_DEFAULTS.kp),
     tiHours: asNumber(settings.adaptive_pos_ti, POSITIONAL_DEFAULTS.tiHours),
