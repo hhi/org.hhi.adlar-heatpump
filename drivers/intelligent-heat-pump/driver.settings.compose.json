@@ -802,10 +802,10 @@
           "fr": "Contrôleur PI: Gain Proportionnel (Kp)"
         },
         "hint": {
-          "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 3.0. Only used in the classic control mode.",
-          "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 3.0. Alleen gebruikt in de klassieke regelmodus.",
-          "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 3.0. Nur im klassischen Regelmodus verwendet.",
-          "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 3.0 Utilisé uniquement en mode de régulation classique."
+          "en": "⚠️ Advanced: How aggressively the system responds to temperature errors. Higher = faster response, risk of overshooting. Only adjust if you understand PI control. Default: 5.0. Only used in the classic control mode.",
+          "nl": "⚠️ Geavanceerd: Hoe agressief het systeem reageert op temperatuur afwijkingen. Hoger = snellere reactie, risico op overshoot. Pas alleen aan als je PI regeling begrijpt. Standaard: 5.0. Alleen gebruikt in de klassieke regelmodus.",
+          "de": "⚠️ Erweitert: Wie aggressiv das System auf Temperaturfehler reagiert. Höher = schnellere Reaktion, Überschwingungsrisiko. Nur anpassen, wenn Sie PI-Regelung verstehen. Standard: 5.0. Nur im klassischen Regelmodus verwendet.",
+          "fr": "⚠️ Avancé: L'agressivité de réponse du système aux erreurs de température. Plus élevé = réponse plus rapide, risque de dépassement. N'ajuster que si vous comprenez le contrôle PI. Défaut: 5.0 Utilisé uniquement en mode de régulation classique."
         },
         "value": 5.0,
         "min": 0.5,

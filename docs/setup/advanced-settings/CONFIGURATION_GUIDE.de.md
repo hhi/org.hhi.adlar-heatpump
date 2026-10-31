@@ -230,7 +230,7 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 **Nur sichtbar mit aktivierten "Expert HVAC-Funktionskarten"**
 
 #### Proportionalverstärkung (Kp)
-- **Standard**: 3.0
+- **Standard**: 5.0
 - **Bereich**: 0.5 - 10.0
 - **Funktion**: Bestimmt, wie schnell das System auf aktuelle Fehler reagiert
 - **Höherer Wert**: Schnellere Korrektur, Überschwingungsrisiko
@@ -635,7 +635,7 @@ Verwaltung von Energiezählern für Tracking und Berichterstattung.
 ### Szenario 1: "Ich möchte einfach eine stabile Raumtemperatur"
 ```
 ✅ Adaptive Temperaturregelung: EIN
-   - Kp: 3,0, Ki: 1,5, Totzone: 0,3°C
+   - Kp: 5,0, Ki: 1,5, Totzone: 0,3°C
 ✅ Gebäudemodell-Lernen: EIN
    - Gebäudetyp: Durchschnitt (oder Ihr Typ)
    - Dynamisches P_int: EIN

@@ -230,7 +230,7 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 **Visible uniquement avec "Cartes de fonction expert HVAC" activé**
 
 #### Gain Proportionnel (Kp)
-- **Par défaut** : 3.0
+- **Par défaut** : 5.0
 - **Plage** : 0.5 - 10.0
 - **Fonction** : Détermine la rapidité de réponse du système à l'erreur actuelle
 - **Valeur plus élevée** : Correction plus rapide, risque de dépassement
@@ -639,7 +639,7 @@ Gestion des compteurs d'énergie pour le suivi et les rapports.
 ### Scénario 1 : "Je veux juste une température de pièce stable"
 ```
 ✅ Contrôle Adaptatif de Température : ON
-   - Kp : 3.0, Ki : 1.5, Bande morte : 0.3°C
+   - Kp : 5.0, Ki : 1.5, Bande morte : 0.3°C
 ✅ Apprentissage du Modèle de Bâtiment : ON
    - Type de bâtiment : Moyen (ou votre type)
    - P_int dynamique : ON
