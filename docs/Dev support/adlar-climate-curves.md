@@ -4,8 +4,9 @@
 (stooklijnen)", overgenomen uit een foto van de grafieken (31 okt 2026).
 **Nauwkeurigheid:** ±1 °C per waarde en ±2 °C buiten per knikpunt. Niet
 gemeten op de warmtepomp.
-**Doel:** basis voor "Stooklijn van de warmtepomp" bij de vaste curves
-(gepland voor 3.6.0, punt G15).
+**Doel:** vertaaltabel van een vaste curve naar de twee velden van de
+app-stooklijn (3.5.0: tabel in de handleiding; 3.6.0, punt G15: keuzelijst die
+de velden invult).
 
 ## Vorm
 
@@ -53,17 +54,33 @@ gemeten op de warmtepomp.
 Aurora III levert de berekende waarde van zijn klimaatcurve direct (Reg 67) en
 heeft deze tabel niet nodig.
 
-## Gebruik in de app (voorstel 3.6.0)
+## Gebruik in de app
 
-- Basis = de waarde van de gekozen curve bij T1, met lineaire interpolatie
-  tussen "vlak tot" en "vlak vanaf"; afronden zoals de warmtepomp (hele
-  graden) is niet nodig, de app rondt het advies zelf af
-- Bij een setpoint dat moet blijven staan, staat de curve zelf op OFF: de app
-  kent dan de laatst gekozen curve niet meer. Bewaar de curve daarom bij het
-  overstappen, of laat de gebruiker hem kiezen als startwaarde voor de
-  app-stooklijn
-- Startwaarden van 3.5.0 liggen in het midden van deze curves: Radiatoren
-  50 / 35 (rond HH7), Vloerverwarming 35 / 27 (rond HL4–HL6)
+Tussen de vlakke stukken loopt elke curve recht. De app-stooklijn (waarde bij
+−15 en +15 °C buiten) volgt hem daar dus exact, op de traptreden van ±0,5 °C na.
+Een aparte rekenmethode voor deze curves is daarom niet nodig.
+
+| Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Lineair geïnterpoleerd tussen "vlak tot" en "vlak vanaf", afgerond op hele
+  graden (de velden gaan per 1 °C; ,5 naar boven)
+- Na OFF kan de app de gekozen curve niet meer uitlezen: de gebruiker neemt de
+  waarden over vóór hij de stooklijnkeuze op OFF zet
+- Startwaarden van 3.5.0: Radiatoren 50 / 35 (rond HH7), Vloerverwarming
+  35 / 27 (rond HL4–HL6)
+- Boven +15 °C buiten blijft de curve vlak en daalt de app-lijn door; bij dat
+  weer is de warmtevraag klein en begrenst de warmtepomp het setpoint
+- DIY (Aurora I/II): de app gebruikt de DIY-lijn alleen als de DIY-schakelaar
+  (0x0810) op DIY staat en k negatief is; anders zijn k en b restwaarden
 
 ## Toetsen
 

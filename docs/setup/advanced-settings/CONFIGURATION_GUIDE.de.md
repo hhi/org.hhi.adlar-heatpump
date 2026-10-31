@@ -280,9 +280,10 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen. Startwerte:
     Heizkörper 50 / 35, Fußbodenheizung 35 / 27, sonst 45 / 30; bei der Wahl des
     Regelmodus vorausgefüllt, solange Sie sie nicht selbst geändert haben
-  - **Heizkurve der Wärmepumpe** (Aurora I/II: DIY-Kurve L28/L29; Aurora III:
-    Klimakurve): nur, wenn Sie sie selbst eingestellt haben; ist sie nicht
-    brauchbar, gilt die App-Kurve. Tuya hat diese Wahl nicht
+  - **Heizkurve der Wärmepumpe** (Aurora I/II: DIY-Kurve, nur wenn DIY
+    eingeschaltet ist; Aurora III: Klimakurve): nur, wenn Sie sie selbst
+    eingestellt haben; ist DIY aus oder die Kurve nicht brauchbar, gilt die
+    App-Kurve. Tuya hat diese Wahl nicht
 - **Diagnose**: `adaptive_control_diagnostics` zeigt den Modus, das
   Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis mit Quelle und die P- und
   I-Anteile
@@ -300,6 +301,28 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   Tage). In der Diagnose weist ein I-Anteil, der dauerhaft über 0 liegt, auf
   eine zu niedrige Heizkurve hin, unter 0 auf eine zu hohe
 
+##### Umstieg von einer festen Kurve
+
+Haben Sie eine feste Kurve der Wärmepumpe verwendet (Aurora I/II:
+Heizkurvenauswahl HH1–HH8 oder HL1–HL8; Tuya: Heizkurve H1–H8 oder L1–L8)?
+Notieren Sie diese Kurve, tragen Sie die beiden Werte aus der Tabelle bei der
+App-Kurve ein und stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF
+kann die App die Kurve nicht mehr auslesen.
+
+| Kurve | −15 °C | +15 °C | Kurve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Aus den Grafiken in der Anleitung der Wärmepumpe übernommen und auf ganze
+  Grad gerundet; Abweichung etwa 1 °C
+
 **Welchen Regelmodus wähle ich?**
 
 | Situation | Wahl |
@@ -313,8 +336,9 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 - **Aurora I/II und Tuya**: Die Wärmepumpe behält einen neuen Sollwert nur, wenn
   die Heizkurvenauswahl (Tuya: Heizkurve) auf OFF steht; sonst führt keiner der
   beiden Modi die Empfehlung aus. Die App berechnet die Heizkurve dann selbst
-- **Heizkurve der Wärmepumpe** nur mit eigener DIY-Kurve: bei einer festen Kurve
-  (Heizkurvenauswahl 1–18) enthalten L28/L29 meist nicht Ihre Heizkurve
+- **Heizkurve der Wärmepumpe** nur mit eigener DIY-Kurve: ist DIY aus, rechnet
+  die App mit der App-Kurve. Eine feste Kurve übernehmen Sie mit der Tabelle
+  oben
 - **Sicher ausprobieren**: Schalten Sie den Flow aus, der die Empfehlung
   ausführt, wählen Sie einen positionellen Regelmodus und vergleichen Sie einen
   Tag lang das simulierte Ziel (`adlar_simulated_target`) mit der Heizkurve

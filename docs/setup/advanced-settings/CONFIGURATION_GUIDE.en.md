@@ -280,9 +280,10 @@ Automatic target temperature regulation based on external indoor temperature sen
     values: Radiators 50 / 35, Floor heating 35 / 27, otherwise 45 / 30;
     prefilled when you choose the control mode, as long as you have not changed
     them yourself
-  - **Heat pump curve** (Aurora I/II: DIY curve L28/L29; Aurora III: climate
-    curve): only when you have set it yourself; when it is not usable, the app
-    curve applies. Tuya does not have this choice
+  - **Heat pump curve** (Aurora I/II: DIY curve, only while DIY is switched
+    on; Aurora III: climate curve): only when you have set it yourself; when DIY
+    is off or the curve is not usable, the app curve applies. Tuya does not have
+    this choice
 - **Diagnostics**: `adaptive_control_diagnostics` shows the mode, the emitter
   system, Kp and Ti with their source, the basis with its source and the P and I
   terms
@@ -300,6 +301,27 @@ Automatic target temperature regulation based on external indoor temperature sen
   diagnostics, an I term that stays above 0 points to a heating curve that is
   too low, below 0 to one that is too high
 
+##### Switching from a fixed curve
+
+Did you use a fixed curve of the heat pump (Aurora I/II: curve selection
+HH1–HH8 or HL1–HL8; Tuya: heating curve H1–H8 or L1–L8)? Note that curve,
+enter the two values from the table in the app curve and then set the curve
+selection to OFF. After OFF, the app can no longer read the curve.
+
+| Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Taken from the graphs in the heat pump manual and rounded to whole degrees;
+  deviation about 1 °C
+
 **Which control mode do I choose?**
 
 | Situation | Choice |
@@ -313,8 +335,8 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Aurora I/II and Tuya**: the heat pump only keeps a new setpoint when the
   heating curve selection (Tuya: heating curve) is OFF; otherwise neither mode
   applies the advice. The app then calculates the heating curve itself
-- **Heat pump curve** only with your own DIY curve: with a fixed curve (curve
-  selection 1–18), L28/L29 usually do not hold your heating curve
+- **Heat pump curve** only with your own DIY curve: when DIY is off, the app
+  uses the app curve. Take over a fixed curve with the table above
 - **Trying it safely**: turn off the flow that applies the advice, choose a
   positional control mode and compare the simulated target
   (`adlar_simulated_target`) with the heating curve for a day

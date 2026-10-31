@@ -283,10 +283,10 @@ Régulation automatique de la température cible basée sur un capteur de tempé
     Valeurs de départ : Radiateurs 50 / 35, Plancher chauffant 35 / 27, sinon 45
     / 30 ; préremplies au choix du mode de régulation, tant que vous ne les avez
     pas modifiées
-  - **Courbe de la pompe à chaleur** (Aurora I/II : courbe DIY L28/L29 ; Aurora
-    III : courbe climatique) : uniquement si vous l'avez réglée vous-même ; si
-    elle n'est pas utilisable, la courbe de l'app s'applique. Tuya n'a pas ce
-    choix
+  - **Courbe de la pompe à chaleur** (Aurora I/II : courbe DIY, uniquement si
+    DIY est activé ; Aurora III : courbe climatique) : uniquement si vous l'avez
+    réglée vous-même ; si DIY est désactivé ou si la courbe n'est pas
+    utilisable, la courbe de l'app s'applique. Tuya n'a pas ce choix
 - **Diagnostic** : `adaptive_control_diagnostics` affiche le mode, le système
   d'émission, Kp et Ti avec leur source, la base avec sa source et les termes P
   et I
@@ -304,6 +304,28 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   jours). Dans le diagnostic, un terme I qui reste au-dessus de 0 indique une
   courbe trop basse, en dessous de 0 une courbe trop haute
 
+##### Passer d'une courbe fixe
+
+Vous utilisiez une courbe fixe de la pompe à chaleur (Aurora I/II : sélection de
+courbe HH1–HH8 ou HL1–HL8 ; Tuya : courbe de chauffage H1–H8 ou L1–L8) ? Notez
+cette courbe, saisissez les deux valeurs du tableau dans la courbe de l'app,
+puis mettez la sélection de courbe sur OFF. Après OFF, l'app ne peut plus lire
+la courbe.
+
+| Courbe | −15 °C | +15 °C | Courbe | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Repris des graphiques du manuel de la pompe à chaleur et arrondi au degré
+  près ; écart d'environ 1 °C
+
 **Quel mode de régulation choisir ?**
 
 | Situation | Choix |
@@ -319,8 +341,8 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   OFF ; sinon aucun des deux modes n'applique la recommandation. L'app calcule
   alors elle-même la courbe de chauffe
 - **Courbe de la pompe à chaleur** uniquement avec votre propre courbe DIY :
-  avec une courbe fixe (sélection de courbe 1–18), L28/L29 ne contiennent
-  généralement pas votre courbe de chauffe
+  si DIY est désactivé, l'app calcule avec la courbe de l'app. Reprenez une
+  courbe fixe avec le tableau ci-dessus
 - **Essayer sans risque** : désactivez le flow qui applique la recommandation,
   choisissez un mode de régulation positionnel et comparez pendant une journée
   la cible simulée (`adlar_simulated_target`) avec la courbe de chauffe
