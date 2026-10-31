@@ -71,6 +71,7 @@ export class ServiceCoordinator {
   private _lastErrorContext: string | null = null;
   private _errorCountByContext = new Map<string, number>();
   private _latestSnapshot: DataSnapshot | null = null;
+  private _diyPolled = false; // ADR-065: the medium poll group (DIY curve L27–L29) has been read since start
 
   // Dashboard snapshot callback (ADR-041a)
   private readonly onSnapshot?: (snapshot: DataSnapshot) => void;
@@ -109,9 +110,11 @@ export class ServiceCoordinator {
    * or at the app's outdoor temperature when T1 is unknown. Only while the DIY switch (0x0810) is on DIY
    * and k is negative: otherwise L28/L29 hold leftover values, and the basis falls back to the app curve.
    * The setpoint holds on the heating curve selection 0x0314 alone, so the DIY switch may stay on.
+   * 'pending' until the DIY registers have been read after a start, so the first cycle does not fall back.
    */
-  private _resolveHeatPumpCurve(outdoorTemp: number | null): number | null {
+  private _resolveHeatPumpCurve(outdoorTemp: number | null): number | null | 'pending' {
     const diy = this._latestSnapshot?.diy;
+    if (!diy && !this._diyPolled) return 'pending';
     if (!diy?.active || !(diy.slopeK < 0)) return null;
     const ambient = this._latestSnapshot?.sensors.ambientT1?.value ?? outdoorTemp;
     return ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
@@ -515,6 +518,7 @@ export class ServiceCoordinator {
       lastErrorContext: this._lastErrorContext,
     };
     this._latestSnapshot = snapshot;
+    if (sourcePollGroup === 'medium') this._diyPolled = true;
 
     // Forward naar dashboard (ADR-041a)
     this.onSnapshot?.(snapshot);
