@@ -276,15 +276,30 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
     advies uitvoert
 - **Coast**: bij Klassiek en Positioneel – Handmatig geldt de schakelaar Coast;
   Radiatoren en Vloerverwarming zetten coast zelf
-- **Stooklijn (positionele modus) — standaard**: Automatisch
-  - **Automatisch**: de eigen stooklijn van de warmtepomp (Aurora I/II:
-    DIY-stooklijn L28/L29; Aurora III: klimaatcurve), anders het setpoint bij
-    het inschakelen van de positionele modus (Tuya)
-  - **App-stooklijn**: watertemperatuur bij −15 °C en bij +15 °C buiten
-- **Advies**: stel bij Tuya de app-stooklijn in; een vlakke basis werkt, maar
-  minder goed
+- **Stooklijn (positionele modi) — standaard**: App-stooklijn
+  - **App-stooklijn**: watertemperatuur bij −15 °C en bij +15 °C buiten.
+    Startwaarden: Radiatoren 50 / 35, Vloerverwarming 35 / 27, anders 45 / 30;
+    voorgevuld bij de keuze van de regelmodus, zolang u ze niet zelf heeft
+    aangepast
+  - **Stooklijn van de warmtepomp** (Aurora I/II: DIY-stooklijn L28/L29; Aurora
+    III: klimaatcurve): alleen als u die zelf heeft ingesteld; is hij niet
+    bruikbaar, dan geldt de app-stooklijn. Tuya heeft deze keuze niet
 - **Diagnostiek**: `adaptive_control_diagnostics` toont de modus, het
-  afgiftesysteem, Kp en Ti met hun bron, de basis en de P- en I-term
+  afgiftesysteem, Kp en Ti met hun bron, de basis met zijn bron en de P- en
+  I-term
+
+##### Stooklijn bijstellen
+
+| Wat u merkt | Aanpassing |
+| --- | --- |
+| Te koud bij vorst, goed bij zacht weer | Waarde bij −15 °C +1–2 |
+| Te koud bij zacht weer | Waarde bij +15 °C +1–2 |
+| Overal iets te koud | Beide waarden +1 |
+| Te warm | Omgekeerd: verlagen |
+
+- Pas één waarde per keer aan en wacht een dag (vloerverwarming: twee dagen). In
+  de diagnostiek wijst een I-term die structureel boven 0 ligt op een te lage
+  stooklijn, onder 0 op een te hoge
 
 **Welke regelmodus kies ik?**
 
@@ -294,14 +309,13 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 | De huidige regeling werkt goed | Klassiek |
 | Setpoint kruipt weg of slingert, radiatoren | Positioneel – Radiatoren |
 | Setpoint kruipt weg, vloerverwarming | Positioneel – Vloerverwarming |
-| Tuya zonder app-stooklijn | Klassiek, of stel de app-stooklijn in |
+| Stooklijn onbekend | Startwaarden, daarna bijstellen |
 
-- **Aurora I/II**: de warmtepomp houdt een nieuw setpoint alleen vast als de
-  stooklijnkeuze op OFF staat; anders voert geen van beide modi het advies uit.
-  De app rekent de stooklijn dan zelf uit (Automatisch: met de waarden van
-  L28/L29)
-- **Vaste curve van de warmtepomp** (stooklijnkeuze 1–18, geen DIY-stooklijn):
-  kies App-stooklijn; L28/L29 bevatten dan meestal niet uw stooklijn
+- **Aurora I/II en Tuya**: de warmtepomp houdt een nieuw setpoint alleen vast
+  als de stooklijnkeuze (Tuya: verwarmingscurve) op OFF staat; anders voert geen
+  van beide modi het advies uit. De app rekent de stooklijn dan zelf uit
+- **Stooklijn van de warmtepomp** alleen bij een eigen DIY-stooklijn: met een
+  vaste curve (stooklijnkeuze 1–18) bevatten L28/L29 meestal niet uw stooklijn
 - **Veilig proberen**: zet de flow die het advies uitvoert uit, kies een
   positionele regelmodus en vergelijk een dag het gesimuleerde doel
   (`adlar_simulated_target`) met de stooklijn

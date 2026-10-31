@@ -501,28 +501,19 @@
         "id": "adaptive_curve_source",
         "type": "dropdown",
         "label": {
-          "en": "Heating curve (positional mode)",
-          "nl": "Stooklijn (positionele modus)",
-          "de": "Heizkurve (positioneller Modus)",
-          "fr": "Courbe de chauffe (mode positionnel)"
+          "en": "Heating curve (positional modes)",
+          "nl": "Stooklijn (positionele modi)",
+          "de": "Heizkurve (positionelle Modi)",
+          "fr": "Courbe de chauffe (modes positionnels)"
         },
         "hint": {
-          "en": "Basis of the positional advice. Automatic: the heat pump's own heating curve (Aurora I/II: DIY curve L28/L29; Aurora III: climate curve) when available, otherwise the setpoint when the positional mode started. App curve: the two values below. Default: Automatic.",
-          "nl": "Basis van het positionele advies. Automatisch: de eigen stooklijn van de warmtepomp (Aurora I/II: DIY-stooklijn L28/L29; Aurora III: klimaatcurve) als die beschikbaar is, anders het setpoint bij het inschakelen van de positionele modus. App-stooklijn: de twee waarden hieronder. Standaard: Automatisch.",
-          "de": "Basis der positionellen Empfehlung. Automatisch: die eigene Heizkurve der Wärmepumpe (Aurora I/II: DIY-Kurve L28/L29; Aurora III: Klimakurve), falls verfügbar, sonst der Sollwert beim Einschalten des positionellen Modus. App-Kurve: die beiden Werte unten. Standard: Automatisch.",
-          "fr": "Base de la recommandation positionnelle. Automatique : la courbe de chauffe de la pompe à chaleur (Aurora I/II : courbe DIY L28/L29 ; Aurora III : courbe climatique) si disponible, sinon la consigne au démarrage du mode positionnel. Courbe de l'app : les deux valeurs ci-dessous. Défaut : Automatique."
+          "en": "Basis of the positional advice. App curve: the two values below, prefilled for Positional – Radiators (50 / 35) and – Floor heating (35 / 27) as long as you have not changed them yourself. Heat pump curve: the climate curve of the heat pump; only choose this when you have set that curve yourself. Default: App curve.",
+          "nl": "Basis van het positionele advies. App-stooklijn: de twee waarden hieronder, voorgevuld bij Positioneel – Radiatoren (50 / 35) en – Vloerverwarming (35 / 27) zolang u ze niet zelf heeft aangepast. Stooklijn van de warmtepomp: de klimaatcurve van de warmtepomp; kies dit alleen als u die curve zelf heeft ingesteld. Standaard: App-stooklijn.",
+          "de": "Basis der positionellen Empfehlung. App-Kurve: die beiden Werte unten, vorausgefüllt bei Positionell – Heizkörper (50 / 35) und – Fußbodenheizung (35 / 27), solange Sie sie nicht selbst geändert haben. Heizkurve der Wärmepumpe: die Klimakurve der Wärmepumpe; nur wählen, wenn Sie diese Kurve selbst eingestellt haben. Standard: App-Kurve.",
+          "fr": "Base de la recommandation positionnelle. Courbe de l'app : les deux valeurs ci-dessous, préremplies pour Positionnel – Radiateurs (50 / 35) et – Plancher chauffant (35 / 27) tant que vous ne les avez pas modifiées. Courbe de la pompe à chaleur : la courbe climatique de la pompe à chaleur ; à choisir uniquement si vous avez réglé cette courbe vous-même. Défaut : Courbe de l'app."
         },
-        "value": "auto",
+        "value": "app",
         "values": [
-          {
-            "id": "auto",
-            "label": {
-              "en": "Automatic",
-              "nl": "Automatisch",
-              "de": "Automatisch",
-              "fr": "Automatique"
-            }
-          },
           {
             "id": "app",
             "label": {
@@ -530,6 +521,15 @@
               "nl": "App-stooklijn",
               "de": "App-Kurve",
               "fr": "Courbe de l'app"
+            }
+          },
+          {
+            "id": "auto",
+            "label": {
+              "en": "Heat pump curve",
+              "nl": "Stooklijn van de warmtepomp",
+              "de": "Heizkurve der Wärmepumpe",
+              "fr": "Courbe de la pompe à chaleur"
             }
           }
         ]
@@ -544,12 +544,12 @@
           "fr": "Courbe de l'app : température d'eau à −15 °C extérieur (°C)"
         },
         "hint": {
-          "en": "Only used with Heating curve = App curve. Default: 40.",
-          "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 40.",
-          "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 40.",
-          "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 40."
+          "en": "Used by the positional modes. Starting value: Radiators 50, Floor heating 35, otherwise 45; prefilled when you choose the control mode, as long as you have not changed it yourself. Too cold in frosty weather: raise this value by 1–2 °C. Default: 45.",
+          "nl": "Gebruikt door de positionele modi. Startwaarde: Radiatoren 50, Vloerverwarming 35, anders 45; voorgevuld bij de keuze van de regelmodus, zolang u de waarde niet zelf heeft aangepast. Te koud bij vorst: verhoog deze waarde met 1–2 °C. Standaard: 45.",
+          "de": "Von den positionellen Modi verwendet. Startwert: Heizkörper 50, Fußbodenheizung 35, sonst 45; bei der Wahl des Regelmodus vorausgefüllt, solange Sie den Wert nicht selbst geändert haben. Zu kalt bei Frost: diesen Wert um 1–2 °C erhöhen. Standard: 45.",
+          "fr": "Utilisé par les modes positionnels. Valeur de départ : Radiateurs 50, Plancher chauffant 35, sinon 45 ; préremplie au choix du mode de régulation, tant que vous ne l'avez pas modifiée. Trop froid par temps de gel : augmentez cette valeur de 1–2 °C. Défaut : 45."
         },
-        "value": 40,
+        "value": 45,
         "attr": {
           "min": 20,
           "max": 65,
@@ -566,12 +566,12 @@
           "fr": "Courbe de l'app : température d'eau à +15 °C extérieur (°C)"
         },
         "hint": {
-          "en": "Only used with Heating curve = App curve. Default: 25.",
-          "nl": "Alleen gebruikt bij Stooklijn = App-stooklijn. Standaard: 25.",
-          "de": "Nur verwendet bei Heizkurve = App-Kurve. Standard: 25.",
-          "fr": "Utilisé uniquement avec Courbe de chauffe = Courbe de l'app. Défaut : 25."
+          "en": "Used by the positional modes. Starting value: Radiators 35, Floor heating 27, otherwise 30; prefilled when you choose the control mode, as long as you have not changed it yourself. Too cold in mild weather: raise this value by 1–2 °C. Default: 30.",
+          "nl": "Gebruikt door de positionele modi. Startwaarde: Radiatoren 35, Vloerverwarming 27, anders 30; voorgevuld bij de keuze van de regelmodus, zolang u de waarde niet zelf heeft aangepast. Te koud bij zacht weer: verhoog deze waarde met 1–2 °C. Standaard: 30.",
+          "de": "Von den positionellen Modi verwendet. Startwert: Heizkörper 35, Fußbodenheizung 27, sonst 30; bei der Wahl des Regelmodus vorausgefüllt, solange Sie den Wert nicht selbst geändert haben. Zu kalt bei mildem Wetter: diesen Wert um 1–2 °C erhöhen. Standard: 30.",
+          "fr": "Utilisé par les modes positionnels. Valeur de départ : Radiateurs 35, Plancher chauffant 27, sinon 30 ; préremplie au choix du mode de régulation, tant que vous ne l'avez pas modifiée. Trop froid par temps doux : augmentez cette valeur de 1–2 °C. Défaut : 30."
         },
-        "value": 25,
+        "value": 30,
         "attr": {
           "min": 15,
           "max": 50,

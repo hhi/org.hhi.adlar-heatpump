@@ -11,6 +11,8 @@ const {
   PositionalPIController,
   resolveControlParams,
   resolveBasis,
+  CURVE_PRESETS,
+  APP_CURVE_DEFAULTS,
   appCurveValue,
   plausibleCurveValue,
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
@@ -123,14 +125,25 @@ test('app curve runs through the two points, like the DIY form k·(T + 15) + b',
   near(appCurveValue(40, 25, 0), 32.5, 'halfway');
 });
 
+test('curve presets per emitter and the generic default', () => {
+  assert.deepStrictEqual(CURVE_PRESETS.radiator, { atMinus15: 50, atPlus15: 35 });
+  assert.deepStrictEqual(CURVE_PRESETS.floor, { atMinus15: 35, atPlus15: 27 });
+  assert.deepStrictEqual(APP_CURVE_DEFAULTS, { atMinus15: 45, atPlus15: 30 });
+  near(appCurveValue(50, 35, 0), 42.5, 'radiators at 0 °C');
+  near(appCurveValue(35, 27, 0), 31, 'floor at 0 °C');
+});
+
 test('basis: heat pump curve, app curve or flat fallback', () => {
   const inputs = {
     curveSource: 'auto', heatPumpCurve: 36, appCurve: { atMinus15: 40, atPlus15: 25 }, outdoorTemp: 0, flatBasis: 38,
   };
   assert.deepStrictEqual(resolveBasis(inputs), { value: 36, source: 'heat_pump_curve' });
-  assert.deepStrictEqual(resolveBasis({ ...inputs, heatPumpCurve: 3.6 }), { value: 38, source: 'flat' }, 'implausible (wrong scale)');
+  assert.deepStrictEqual(resolveBasis({ ...inputs, heatPumpCurve: 3.6 }), { value: 32.5, source: 'app_curve' }, 'implausible → app curve');
   assert.deepStrictEqual(resolveBasis({ ...inputs, curveSource: 'app' }), { value: 32.5, source: 'app_curve' });
   assert.deepStrictEqual(resolveBasis({ ...inputs, curveSource: 'app', outdoorTemp: null }), { value: 38, source: 'flat' });
-  assert.strictEqual(resolveBasis({ ...inputs, heatPumpCurve: null, flatBasis: null }), null);
+  assert.deepStrictEqual(resolveBasis({ ...inputs, heatPumpCurve: null, outdoorTemp: null }), { value: 38, source: 'flat' });
+  assert.strictEqual(resolveBasis({
+    ...inputs, heatPumpCurve: null, outdoorTemp: null, flatBasis: null,
+  }), null);
   assert.strictEqual(plausibleCurveValue(80), null);
 });

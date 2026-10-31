@@ -278,15 +278,31 @@ Régulation automatique de la température cible basée sur un capteur de tempé
     un flow qui applique chaque recommandation
 - **Coast** : en mode Classique et Positionnel – Manuel, l'interrupteur Coast
   s'applique ; Radiateurs et Plancher chauffant règlent coast eux-mêmes
-- **Courbe de chauffe (mode positionnel) — par défaut** : Automatique
-  - **Automatique** : la courbe de la pompe à chaleur (Aurora I/II : courbe DIY
-    L28/L29 ; Aurora III : courbe climatique), sinon la consigne au démarrage du
-    mode positionnel (Tuya)
-  - **Courbe de l'app** : température d'eau à −15 °C et à +15 °C extérieur
-- **Conseil** : avec Tuya, réglez la courbe de l'app ; une base plate
-  fonctionne, mais moins bien
+- **Courbe de chauffe (modes positionnels) — par défaut** : Courbe de l'app
+  - **Courbe de l'app** : température d'eau à −15 °C et à +15 °C extérieur.
+    Valeurs de départ : Radiateurs 50 / 35, Plancher chauffant 35 / 27, sinon 45
+    / 30 ; préremplies au choix du mode de régulation, tant que vous ne les avez
+    pas modifiées
+  - **Courbe de la pompe à chaleur** (Aurora I/II : courbe DIY L28/L29 ; Aurora
+    III : courbe climatique) : uniquement si vous l'avez réglée vous-même ; si
+    elle n'est pas utilisable, la courbe de l'app s'applique. Tuya n'a pas ce
+    choix
 - **Diagnostic** : `adaptive_control_diagnostics` affiche le mode, le système
-  d'émission, Kp et Ti avec leur source, la base et les termes P et I
+  d'émission, Kp et Ti avec leur source, la base avec sa source et les termes P
+  et I
+
+##### Ajuster la courbe de chauffe
+
+| Ce que vous constatez | Ajustement |
+| --- | --- |
+| Trop froid par gel, bien par temps doux | Valeur à −15 °C +1–2 |
+| Trop froid par temps doux | Valeur à +15 °C +1–2 |
+| Un peu trop froid partout | Les deux valeurs +1 |
+| Trop chaud | À l'inverse : baisser |
+
+- Modifiez une valeur à la fois et attendez un jour (plancher chauffant : deux
+  jours). Dans le diagnostic, un terme I qui reste au-dessus de 0 indique une
+  courbe trop basse, en dessous de 0 une courbe trop haute
 
 **Quel mode de régulation choisir ?**
 
@@ -296,15 +312,15 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 | La régulation actuelle fonctionne bien | Classique |
 | Consigne qui dérive, radiateurs | Positionnel – Radiateurs |
 | Consigne qui dérive, plancher chauffant | Positionnel – Plancher chauffant |
-| Tuya sans courbe de l'app | Classique, ou réglez la courbe de l'app |
+| Courbe de chauffe inconnue | Valeurs de départ, puis ajuster |
 
-- **Aurora I/II** : la pompe à chaleur ne conserve une nouvelle consigne que si
-  la sélection de courbe de chauffe est sur OFF ; sinon aucun des deux modes
-  n'applique la recommandation. L'app calcule alors elle-même la courbe de
-  chauffe (Automatique : avec les valeurs de L28/L29)
-- **Courbe fixe de la pompe à chaleur** (sélection de courbe 1–18, pas de courbe
-  DIY) : choisissez Courbe de l'app ; L28/L29 ne contiennent alors généralement
-  pas votre courbe de chauffe
+- **Aurora I/II et Tuya** : la pompe à chaleur ne conserve une nouvelle consigne
+  que si la sélection de courbe de chauffe (Tuya : courbe de chauffe) est sur
+  OFF ; sinon aucun des deux modes n'applique la recommandation. L'app calcule
+  alors elle-même la courbe de chauffe
+- **Courbe de la pompe à chaleur** uniquement avec votre propre courbe DIY :
+  avec une courbe fixe (sélection de courbe 1–18), L28/L29 ne contiennent
+  généralement pas votre courbe de chauffe
 - **Essayer sans risque** : désactivez le flow qui applique la recommandation,
   choisissez un mode de régulation positionnel et comparez pendant une journée
   la cible simulée (`adlar_simulated_target`) avec la courbe de chauffe

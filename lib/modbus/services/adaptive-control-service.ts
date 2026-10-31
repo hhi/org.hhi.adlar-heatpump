@@ -15,6 +15,7 @@ import {
   POSITIONAL_DEFAULTS,
   PositionalPIController,
   resolveBasis,
+  curvePresetFor,
   resolveControlParams,
   type ControlMode,
   type ControlParams,
@@ -190,6 +191,7 @@ export class AdaptiveControlService {
   private readonly STORE_KEY_POSITIONAL_INTEGRAL = 'adaptive_positional_integral'; // ADR-065
   private readonly STORE_KEY_FLAT_BASIS = 'adaptive_positional_flat_basis'; // ADR-065
   private readonly STORE_KEY_CONTROL_MODE = 'adaptive_control_mode_last'; // ADR-065: detects a mode switch across restarts
+  private readonly STORE_KEY_CURVE_USER_SET = 'adaptive_curve_user_set'; // ADR-065: the user set the app curve himself
   private readonly STORE_KEY_LAST_TARGET = 'adaptive_last_target'; // v2.5.1: Store last known target_temperature for capability sync
 
   /**
@@ -709,7 +711,7 @@ export class AdaptiveControlService {
   private async _resolvePositionalBasis(currentSetpoint: number): Promise<CurveBasis> {
     const outdoorTemp = await this.getEffectiveOutdoorTemp();
     const basis = resolveBasis({
-      curveSource: this.device.getSetting('adaptive_curve_source') === 'app' ? 'app' : 'auto',
+      curveSource: this.device.getSetting('adaptive_curve_source') === 'auto' ? 'auto' : 'app',
       heatPumpCurve: this.resolveHeatPumpCurve(outdoorTemp),
       appCurve: {
         atMinus15: (this.device.getSetting('adaptive_curve_at_minus15') as number | null) ?? APP_CURVE_DEFAULTS.atMinus15,
@@ -2045,6 +2047,22 @@ export class AdaptiveControlService {
     if (changedKeys.includes('cop_strategy')) {
       const strategy = newSettings.cop_strategy as 'conservative' | 'balanced' | 'aggressive';
       this.copOptimizer.updateStrategy(strategy ?? 'balanced');
+    }
+
+    // ADR-065: prefill the app curve with the starting values of the chosen positional mode, unless the
+    // user set the curve himself (store flag). A curve change in the same save counts as his own.
+    if (changedKeys.includes('adaptive_curve_at_minus15') || changedKeys.includes('adaptive_curve_at_plus15')) {
+      await this.device.setStoreValue(this.STORE_KEY_CURVE_USER_SET, true);
+    } else if (changedKeys.includes('adaptive_control_mode') && !this.device.getStoreValue(this.STORE_KEY_CURVE_USER_SET)) {
+      const preset = curvePresetFor(newSettings.adaptive_control_mode);
+      if (preset) {
+        // Defer setSettings to avoid race condition with onSettings() still pending
+        this.device.homey.setTimeout(() => {
+          this.device.setSettings({ adaptive_curve_at_minus15: preset.atMinus15, adaptive_curve_at_plus15: preset.atPlus15 })
+            .then(() => this.logger(`AdaptiveControlService: app curve prefilled (${preset.atMinus15} / ${preset.atPlus15} °C)`))
+            .catch((err: unknown) => this.device.error('Failed to prefill the app curve:', err));
+        }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+      }
     }
 
     // ADR-062 A5: learning settings take effect directly (values from newSettings)

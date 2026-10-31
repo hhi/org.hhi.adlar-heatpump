@@ -207,7 +207,24 @@ export interface CurveBasis {
 }
 
 /** Default app curve (°C at −15 °C and +15 °C outdoor); the integral absorbs an offset (ADR-065 §3.3). */
-export const APP_CURVE_DEFAULTS = { atMinus15: 40, atPlus15: 25 };
+export const APP_CURVE_DEFAULTS = { atMinus15: 45, atPlus15: 30 };
+
+/**
+ * Starting app curve per emitter preset, prefilled when the control mode is chosen and the user has
+ * not changed the curve fields himself. A start within a few degrees is enough: P and I correct it.
+ * The values lie in the middle of Adlar's own climate curves (about HH7 and HL4–HL6).
+ */
+export const CURVE_PRESETS: Record<Exclude<EmitterType, 'manual'>, { atMinus15: number; atPlus15: number }> = {
+  radiator: { atMinus15: 50, atPlus15: 35 },
+  floor: { atMinus15: 35, atPlus15: 27 },
+};
+
+/** Starting app curve for a control setting, or null for classic and positional_manual. */
+export function curvePresetFor(controlMode: unknown): { atMinus15: number; atPlus15: number } | null {
+  if (controlMode === 'positional_radiator') return CURVE_PRESETS.radiator;
+  if (controlMode === 'positional_floor') return CURVE_PRESETS.floor;
+  return null;
+}
 
 /** Plausible range for a curve setpoint (°C). */
 const CURVE_PLAUSIBLE_MIN_C = 15;
@@ -237,18 +254,19 @@ export interface BasisInputs {
 }
 
 /**
- * Basis for the recommendation. 'auto': the heat pump's curve when plausible, else a flat line on
- * the setpoint at activation. 'app': the app curve at the current outdoor temperature (flat when
- * no outdoor temperature is known). Null when nothing is available yet.
+ * Basis for the recommendation. 'app' (default): the app curve at the current outdoor temperature.
+ * 'auto' (heat pump curve): the heat pump's own curve when plausible, else the app curve. A flat line
+ * on the setpoint at activation only when no outdoor temperature is known. Null when nothing is
+ * available yet.
  */
 export function resolveBasis(inputs: BasisInputs): CurveBasis | null {
-  if (inputs.curveSource === 'app' && inputs.outdoorTemp !== null) {
-    const value = plausibleCurveValue(appCurveValue(inputs.appCurve.atMinus15, inputs.appCurve.atPlus15, inputs.outdoorTemp));
-    if (value !== null) return { value, source: 'app_curve' };
-  }
   if (inputs.curveSource === 'auto') {
     const value = plausibleCurveValue(inputs.heatPumpCurve);
     if (value !== null) return { value, source: 'heat_pump_curve' };
+  }
+  if (inputs.outdoorTemp !== null) {
+    const value = plausibleCurveValue(appCurveValue(inputs.appCurve.atMinus15, inputs.appCurve.atPlus15, inputs.outdoorTemp));
+    if (value !== null) return { value, source: 'app_curve' };
   }
   return inputs.flatBasis !== null ? { value: inputs.flatBasis, source: 'flat' } : null;
 }
