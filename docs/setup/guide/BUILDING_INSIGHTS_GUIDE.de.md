@@ -216,6 +216,17 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 
 Bei τ über 250 Stunden (z. B. Passivhaus) erscheint keine Vorheiz-Erkenntnis.
 
+**Mit gemessener Leistung (ab 3.6.0):** nach einem Tag mit Leistungsmessungen rechnet die App
+auch mit der Außentemperatur und der höchsten stündlichen Durchschnittsleistung der
+Wärmepumpe in der vergangenen Woche. Die Erkenntnis nennt dann die Zeit für 2 °C beim
+aktuellen Wetter, zum Beispiel `Very slow (~24 hours for 2°C) · at 5°C outside now ~14 hours`.
+
+- Der Trigger „Vorheizzeit-Empfehlung" und die Aktionskarte „Vorheiz-Dauer berechnen"
+  verwenden dieselbe Berechnung.
+- Bei einem Anstieg bis 0,5 °C gilt die Zeit aus der Tabelle.
+- Ein größerer Anstieg ergibt nie eine kürzere Zeit.
+- Ist das Ziel mit der gemessenen Leistung nicht erreichbar, lautet das Ergebnis 48 Stunden.
+
 ---
 
 ### 3. 💰 Thermische Speicheroptimierungs-Erkenntnisse

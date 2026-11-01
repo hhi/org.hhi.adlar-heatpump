@@ -197,7 +197,7 @@
 | Flow ID | Titel | Beschreibung |
 |---------|-------|--------------|
 | `force_insight_analysis` | Erkenntnisanalyse erzwingen | Sofort auswerten (Tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Vorheiz-Dauer berechnen | Berechnet Zeit für ±X°C Erwärmung (v2.6.0) |
+| `calculate_preheat_time` ⭐ | Vorheiz-Dauer berechnen | Berechnet Zeit für ±X°C Erwärmung (v2.6.0); ab 3.6.0 mit Außentemperatur und gemessener Leistung |
 
 #### `calculate_preheat_time` - Parameter & Rückgabe
 | Parameter | Typ | Beschreibung |

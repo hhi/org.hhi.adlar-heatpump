@@ -197,7 +197,7 @@
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Forcer l'analyse des aperçus | Évaluer immédiatement (tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Calculer durée préchauffage | Calcule le temps nécessaire pour ±X°C (v2.6.0) |
+| `calculate_preheat_time` ⭐ | Calculer durée préchauffage | Calcule le temps nécessaire pour ±X°C (v2.6.0) ; à partir de 3.6.0 avec température extérieure et puissance mesurée |
 
 #### `calculate_preheat_time` - Paramètres & Retours
 | Paramètre | Type | Description |

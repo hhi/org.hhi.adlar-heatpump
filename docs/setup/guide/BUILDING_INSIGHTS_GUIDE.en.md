@@ -216,6 +216,17 @@ The system provides **4 category-specific sensors** (v2.5.10+):
 
 No pre-heating insight is shown when τ is above 250 hours (e.g. a passive house).
 
+**With measured power (from 3.6.0):** after one day of power measurements the app also uses
+the outdoor temperature and the heat pump's highest hourly mean power of the past week. The
+insight then names the time for 2 °C at the current weather, for example
+`Very slow (~24 hours for 2°C) · at 5°C outside now ~14 hours`.
+
+- The trigger "Pre-heating time recommendation" and the action card "Calculate pre-heat
+  duration" use the same calculation.
+- For a rise of up to 0.5 °C the time from the table applies.
+- A larger rise never gives a shorter time.
+- When the target cannot be reached with the measured power, the result is 48 hours.
+
 ---
 
 ### 3. 💰 Thermal Storage Optimization Insights

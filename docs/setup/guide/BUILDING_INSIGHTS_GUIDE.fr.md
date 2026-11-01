@@ -216,6 +216,18 @@ Le système fournit **4 capteurs spécifiques par catégorie** (v2.5.10+) :
 
 Aucun aperçu de préchauffage n'apparaît lorsque τ dépasse 250 heures (par ex. maison passive).
 
+**Avec la puissance mesurée (à partir de 3.6.0) :** après une journée de mesures de puissance,
+l'app tient aussi compte de la température extérieure et de la puissance moyenne horaire la
+plus élevée de la pompe à chaleur au cours de la semaine passée. L'aperçu indique alors le
+temps pour 2 °C avec la météo actuelle, par exemple
+`Very slow (~24 hours for 2°C) · at 5°C outside now ~14 hours`.
+
+- Le déclencheur « Recommandation d'heure de préchauffage » et la carte d'action « Calculer
+  durée préchauffage » utilisent le même calcul.
+- Pour une hausse jusqu'à 0,5 °C, le temps du tableau s'applique.
+- Une hausse plus grande ne donne jamais un temps plus court.
+- Si l'objectif n'est pas atteignable avec la puissance mesurée, le résultat est de 48 heures.
+
 ---
 
 ### 3. 💰 Aperçus d'Optimisation du Stockage Thermique

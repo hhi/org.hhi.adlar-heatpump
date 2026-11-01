@@ -197,7 +197,7 @@
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
 | `force_insight_analysis` | Forceer inzicht analyse | Direct evalueren (tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Bereken voorverwarmen duur | Berekent tijd nodig om ±X°C op te warmen (v2.6.0) |
+| `calculate_preheat_time` ⭐ | Bereken voorverwarmen duur | Berekent tijd nodig om ±X°C op te warmen (v2.6.0); vanaf 3.6.0 met buitentemperatuur en gemeten vermogen |
 
 #### `calculate_preheat_time` - Parameters & Returns
 | Parameter | Type | Beschrijving |
