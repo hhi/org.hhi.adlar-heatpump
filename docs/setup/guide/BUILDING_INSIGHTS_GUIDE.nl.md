@@ -537,29 +537,31 @@ ELSE
 
 ---
 
-#### 2. Bereken voorverwarmen duur (v2.6.0)
+#### 2. Bereken voorverwarm starttijd (v2.6.0)
 
-**Functie:** Berekent de tijd nodig om X°C temperatuurstijging te bereiken
+**Functie:** Berekent wanneer het verwarmen moet beginnen om een binnentemperatuur op een
+tijdstip te halen. Vanaf 3.6.0 met de buitentemperatuur en het gemeten vermogen.
 
 **Parameters:**
 
-- `temperature_rise` (number) - Gewenste temperatuurstijging in °C (bijv. 2.0)
+- `target_indoor_temp` (number) - Gewenste binnentemperatuur in °C (16–28)
+- `target_clock_time` (text) - Klaar om, als UU:MM (bijv. 07:00)
 
 **Returns:**
 
-- `preheat_hours` (number) - Voorverwarmen duur in uren
+- `start_time` (string) - Starttijd als UU:MM, of `Now` als de temperatuur al gehaald is
+- `duration_hours` (number) - Voorverwarmduur in uren (maximaal 48)
+- `suggested_setpoint_boost` (number) - Voorgestelde verhoging van het setpoint (°C)
 - `confidence` (number) - Model betrouwbaarheid (%)
-- `building_tau` (number) - Thermische tijdsconstante τ (uren)
 
-**Gebruik:** Voorverwarmen plannen voor specifieke tijdstippen, thermische opslag automatisering
+**Gebruik:** Voorverwarmen plannen voor specifieke tijdstippen
 
 **Voorbeeld flow:**
 ```
-WHEN Goedkoopste prijsblok nadert (2 uur van tevoren)
+WHEN Tijd is 21:00
 THEN
-  1. Bereken voorverwarmen duur (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Start voorverwarmen nu
+  1. Bereken voorverwarm starttijd (21 °C, klaar om 07:00)
+  2. Notificatie: "Begin om {{start_time}} ({{duration_hours}} u)"
 ```
 
 ---

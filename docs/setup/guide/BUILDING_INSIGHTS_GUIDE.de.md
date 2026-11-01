@@ -537,29 +537,31 @@ SONST
 
 ---
 
-#### 2. Vorheizdauer berechnen (v2.6.0)
+#### 2. Vorheiz-Startzeit berechnen (v2.6.0)
 
-**Funktion:** Berechnet Zeit für X°C Temperaturanstieg
+**Funktion:** Berechnet, wann das Heizen beginnen muss, um eine Innentemperatur zu einer
+Uhrzeit zu erreichen. Ab 3.6.0 mit der Außentemperatur und der gemessenen Leistung.
 
 **Parameter:**
 
-- `temperature_rise` (number) - Gewünschter Temperaturanstieg in °C (z.B. 2.0)
+- `target_indoor_temp` (number) - Ziel-Innentemperatur in °C (16–28)
+- `target_clock_time` (text) - Fertig um, als HH:MM (z. B. 07:00)
 
 **Rückgabe:**
 
-- `preheat_hours` (number) - Vorheizdauer in Stunden
+- `start_time` (string) - Startzeit als HH:MM, oder `Now`, wenn die Temperatur schon erreicht ist
+- `duration_hours` (number) - Vorheizdauer in Stunden (höchstens 48)
+- `suggested_setpoint_boost` (number) - Vorgeschlagene Sollwerterhöhung (°C)
 - `confidence` (number) - Modellzuverlässigkeit (%)
-- `building_tau` (number) - Thermische Zeitkonstante τ (Stunden)
 
-**Verwendung:** Vorheizen für bestimmte Zeiten planen, thermische Speicher-Automatisierung
+**Verwendung:** Vorheizen für bestimmte Zeiten planen
 
 **Beispiel-Flow:**
 ```
-WENN Günstigster Preisblock nähert sich (2 Stunden vorher)
+WENN Uhrzeit ist 21:00
 DANN
-  1. Vorheizdauer berechnen (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Jetzt vorheizen starten
+  1. Vorheiz-Startzeit berechnen (21 °C, fertig um 07:00)
+  2. Benachrichtigung: "Beginnen um {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---

@@ -197,27 +197,27 @@
 | Flow ID | Titel | Beschrijving |
 |---------|-------|--------------|
 | `force_insight_analysis` | Forceer inzicht analyse | Direct evalueren (tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Bereken voorverwarmen duur | Berekent tijd nodig om ±X°C op te warmen (v2.6.0); vanaf 3.6.0 met buitentemperatuur en gemeten vermogen |
+| `calculate_preheat_time` ⭐ | Bereken voorverwarm starttijd | Berekent wanneer het verwarmen moet beginnen om een binnentemperatuur op een tijdstip te halen (v2.6.0); vanaf 3.6.0 met buitentemperatuur en gemeten vermogen |
 
 #### `calculate_preheat_time` - Parameters & Returns
 | Parameter | Type | Beschrijving |
 |-----------|------|--------------|
-| `temperature_rise` | number | Gewenste temperatuurstijging in °C (bijv. 2.0) |
+| `target_indoor_temp` | number | Gewenste binnentemperatuur in °C (16–28, stap 0,5) |
+| `target_clock_time` | text | Klaar om, als UU:MM (bijv. 07:00); een tijdstip dat vandaag al voorbij is, geldt voor morgen |
 
 | Return Token | Type | Beschrijving |
 |--------------|------|--------------|
-| `preheat_hours` | number | Voorverwarmen duur in uren |
+| `start_time` | string | Starttijd als UU:MM, of `Now` als de temperatuur al gehaald is |
+| `duration_hours` | number | Voorverwarmduur in uren (maximaal 48) |
+| `suggested_setpoint_boost` | number | Voorgestelde verhoging van het setpoint (1–3 °C) |
 | `confidence` | number | Model betrouwbaarheid (%) |
-| `building_tau` | number | Thermische tijdsconstante τ (uren) |
 
 **Voorbeeld flow:**
 ```
-WHEN Goedkoopste prijsblok nadert (2 uur van tevoren)
+WHEN Tijd is 21:00
 THEN
-  1. Bereken voorverwarmen duur (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Start voorverwarmen nu
-  3. Notificatie: "Voorverwarmen duurt {{preheat_hours}}u"
+  1. Bereken voorverwarm starttijd (21 °C, klaar om 07:00)
+  2. Notificatie: "Begin om {{start_time}} ({{duration_hours}} u)"
 ```
 
 ---

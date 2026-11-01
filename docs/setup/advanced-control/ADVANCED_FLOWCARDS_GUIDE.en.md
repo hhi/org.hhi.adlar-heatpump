@@ -197,27 +197,27 @@
 | Flow ID | Title | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Force insight analysis | Evaluate immediately (tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Calculate pre-heat duration | Calculates time needed to warm up ±X°C (v2.6.0); from 3.6.0 with outdoor temperature and measured power |
+| `calculate_preheat_time` ⭐ | Calculate pre-heat start time | Calculates when to start heating to reach an indoor temperature at a given time (v2.6.0); from 3.6.0 with outdoor temperature and measured power |
 
 #### `calculate_preheat_time` - Parameters & Returns
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `temperature_rise` | number | Desired temperature rise in °C (e.g., 2.0) |
+| `target_indoor_temp` | number | Target indoor temperature in °C (16–28, step 0.5) |
+| `target_clock_time` | text | Ready at, as HH:MM (e.g. 07:00); a time already passed today means tomorrow |
 
 | Return Token | Type | Description |
 |--------------|------|-------------|
-| `preheat_hours` | number | Pre-heat duration in hours |
+| `start_time` | string | Start time as HH:MM, or `Now` when the temperature is already reached |
+| `duration_hours` | number | Pre-heat duration in hours (at most 48) |
+| `suggested_setpoint_boost` | number | Suggested setpoint boost (1–3 °C) |
 | `confidence` | number | Model confidence (%) |
-| `building_tau` | number | Thermal time constant τ (hours) |
 
 **Example flow:**
 ```
-WHEN Cheapest price block approaching (2 hours ahead)
+WHEN Time is 21:00
 THEN
-  1. Calculate pre-heat duration (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Start pre-heating now
-  3. Notification: "Pre-heating takes {{preheat_hours}}h"
+  1. Calculate pre-heat start time (21 °C, ready at 07:00)
+  2. Notification: "Start at {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---

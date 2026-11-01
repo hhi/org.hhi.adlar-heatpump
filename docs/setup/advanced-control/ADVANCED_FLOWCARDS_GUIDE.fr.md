@@ -197,27 +197,27 @@
 | Flow ID | Titre | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Forcer l'analyse des aperçus | Évaluer immédiatement (tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Calculer durée préchauffage | Calcule le temps nécessaire pour ±X°C (v2.6.0) ; à partir de 3.6.0 avec température extérieure et puissance mesurée |
+| `calculate_preheat_time` ⭐ | Calculer l'heure de démarrage du préchauffage | Calcule quand commencer à chauffer pour atteindre une température intérieure à une heure donnée (v2.6.0) ; à partir de 3.6.0 avec température extérieure et puissance mesurée |
 
 #### `calculate_preheat_time` - Paramètres & Retours
 | Paramètre | Type | Description |
 |-----------|------|-------------|
-| `temperature_rise` | number | Élévation de température souhaitée en °C (ex: 2.0) |
+| `target_indoor_temp` | number | Température intérieure cible en °C (16–28, pas de 0,5) |
+| `target_clock_time` | text | Prêt à, au format HH:MM (ex. 07:00) ; une heure déjà passée aujourd'hui vaut pour demain |
 
 | Token de Retour | Type | Description |
 |-----------------|------|-------------|
-| `preheat_hours` | number | Durée de préchauffage en heures |
+| `start_time` | string | Heure de démarrage au format HH:MM, ou `Now` si la température est déjà atteinte |
+| `duration_hours` | number | Durée de préchauffage en heures (48 au maximum) |
+| `suggested_setpoint_boost` | number | Augmentation de consigne suggérée (1–3 °C) |
 | `confidence` | number | Confiance du modèle (%) |
-| `building_tau` | number | Constante de temps thermique τ (heures) |
 
 **Exemple de flow :**
 ```
-WHEN Bloc de prix le moins cher approche (2 heures à l'avance)
+WHEN L'heure est 21:00
 THEN
-  1. Calculer durée de préchauffage (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Démarrer le préchauffage maintenant
-  3. Notification : "Le préchauffage dure {{preheat_hours}}h"
+  1. Calculer l'heure de démarrage du préchauffage (21 °C, prêt à 07:00)
+  2. Notification : "Commencer à {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---

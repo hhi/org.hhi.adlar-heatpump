@@ -538,29 +538,31 @@ SINON
 
 ---
 
-#### 2. Calculer la durée de préchauffage (v2.6.0)
+#### 2. Calculer l'heure de démarrage du préchauffage (v2.6.0)
 
-**Fonction :** Calcule le temps nécessaire pour X°C de hausse de température
+**Fonction :** Calcule quand commencer à chauffer pour atteindre une température intérieure
+à une heure donnée. À partir de 3.6.0 avec la température extérieure et la puissance mesurée.
 
 **Paramètres :**
 
-- `temperature_rise` (number) - Hausse de température souhaitée en °C (ex : 2.0)
+- `target_indoor_temp` (number) - Température intérieure cible en °C (16–28)
+- `target_clock_time` (text) - Prêt à, au format HH:MM (ex. 07:00)
 
-**Retourne :**
+**Retours :**
 
-- `preheat_hours` (number) - Durée de préchauffage en heures
-- `confidence` (number) - Fiabilité du modèle (%)
-- `building_tau` (number) - Constante de temps thermique τ (heures)
+- `start_time` (string) - Heure de démarrage au format HH:MM, ou `Now` si la température est déjà atteinte
+- `duration_hours` (number) - Durée de préchauffage en heures (48 au maximum)
+- `suggested_setpoint_boost` (number) - Augmentation de consigne suggérée (°C)
+- `confidence` (number) - Confiance du modèle (%)
 
-**Usage :** Planifier le préchauffage pour des moments spécifiques, automatisation du stockage thermique
+**Utilisation :** Planifier le préchauffage pour des heures précises
 
 **Exemple de flow :**
 ```
-QUAND Bloc le moins cher approche (2 heures à l'avance)
+QUAND L'heure est 21:00
 ALORS
-  1. Calculer la durée de préchauffage (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Démarrer le préchauffage maintenant
+  1. Calculer l'heure de démarrage du préchauffage (21 °C, prêt à 07:00)
+  2. Notification : "Commencer à {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---
