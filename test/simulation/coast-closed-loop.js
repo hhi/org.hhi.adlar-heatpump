@@ -11,6 +11,7 @@
  *   TRACE=<dag> VARIANT='<naam>' FLOW=<direct|beperkt> node test/simulation/coast-closed-loop.js radiator
  *   P4=1 node test/simulation/coast-closed-loop.js   (ADR-065 P4 on the app's PositionalPIController)
  *   O4=1 node test/simulation/coast-closed-loop.js   (ADR-065 O4: optimizers on, both control modes)
+ *   PROTOCOL=1 node test/simulation/coast-closed-loop.js   (test protocol 3.5: shadow, transfer table, COP 0, restart)
  *
  * Fysica (stap 30 s):
  *   - woning: C · dT/dt = He·(Tw − Tin) − UA·(Tin − Tout) + P_int + zon
@@ -39,7 +40,7 @@ const path = require('path');
 
 const { HeatingController } = require('../../.homeybuild/lib/modbus/adaptive/heating-controller');
 const { WeightedDecisionMaker } = require('../../.homeybuild/lib/modbus/adaptive/weighted-decision-maker');
-const { PositionalPIController, EMITTER_PRESETS } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
+const { PositionalPIController, EMITTER_PRESETS, appCurveValue } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 const { COPOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/cop-optimizer');
 const { EnergyPriceOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/energy-price-optimizer');
 
@@ -201,6 +202,9 @@ function percentile(values, p) {
 async function simulate(variantName, emitterName, seed, flow = 'direct', opts = {}) {
   // opts (gevoeligheid): Kp, Ti (uren), bias (stooklijnafwijking K), toutShift (K op de buitenreeks)
   // opts (P4): house, setback (nachtverlaging), shape (stooklijnvorm), flatBasis (vlakke basis)
+  // opts (protocol): appCurve { atMinus15, atPlus15 } (basis = de app-stooklijn), shadow (niemand voert
+  // het advies uit; de warmtepomp volgt { atMinus15, atPlus15 } of houdt { fixed }), copGuard (3.5.1),
+  // restartAtH (herstart van de app op dat uur)
   const P = { ...PII, ...(opts.Kp !== undefined ? { Kp: opts.Kp } : {}) };
   const house = opts.house ?? HOUSE;
   const pc = new PositionalPIController({ kp: P.Kp, tiHours: opts.Ti ?? 3 });
@@ -248,7 +252,13 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
 
   // Physical state
   let tIn = TARGET; let tw = TARGET + 12; let on = false; let onS = 0; let offS = 1e9;
+  const appBase = (t) => appCurveValue(opts.appCurve.atMinus15, opts.appCurve.atPlus15, t);
+  // Shadow: the heat pump's own setpoint, its fixed curve or a fixed value
+  const shadowSp = (t) => Math.max(SP_MIN, Math.min(SP_MAX, Math.round(opts.shadow.fixed
+    ?? appCurveValue(opts.shadow.atMinus15, opts.shadow.atPlus15, t))));
   let sp = v.mode === 'incr' ? em.sp0 : Math.round(curve(em, toutAt(0) + shift, bias, house));
+  if (opts.appCurve) sp = Math.round(appBase(toutAt(0) + shift));
+  if (opts.shadow) sp = shadowSp(toutAt(0) + shift);
   const flatValue = Math.round(curve(em, toutAt(0) + shift, bias, house));
   // Controller state
   let acc = 0; let lastObserved = null; let lastRecommended;
@@ -261,7 +271,24 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     starts: 0, heatKwh: 0, elKwh: 0, sumSq: 0, n: 0, over05: 0, under05: 0, maxOver: [], minUnder: [],
     coastOnCycles: 0, exits: { hard: 0, soft: 0, watchdog: 0 }, afterExitMin: [], spChanges: 0, spMin: Infinity, spMax: -Infinity,
     elExpensive: 0, // O4: electricity in the very-high-price hours (≥ 0,12 €/kWh)
+    // Protocol: hold reasons per cycle, advice range and jumps, gap to the setpoint, longest runs
+    holds: {},
+    advMin: Infinity,
+    advMax: -Infinity,
+    maxJump: 0,
+    maxGap: 0,
+    coldRunMaxH: 0,
+    limitRunMaxH: 0,
+    copDecreaseOff: 0, // cycles in which the COP optimizer lowered the setpoint with the compressor off
+    iEnd: 0,
+    restart: null, // { iBefore, iAfter, spBefore, maxStep2h, maxDev2h }
+    rmseWindow: NaN,
   };
+  let prevCoast = false;
+  let coldRunS = 0; let limitRunCycles = 0; let restartDone = false; let afterRestart = -1;
+  // RMSE over the 24 h from restartAtH (or windowAtH, the same window without a restart)
+  const winH = opts.restartAtH ?? opts.windowAtH;
+  let sumSqAfter = 0; let nAfter = 0;
   let exitWatch = null; // { untilS, min }
   let dayMax = -Infinity; let dayMin = Infinity;
 
@@ -308,6 +335,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     if (e > 0.5) st.over05 += DT / 3600;
     if (e < -0.5) st.under05 += DT / 3600;
     dayMax = Math.max(dayMax, e); dayMin = Math.min(dayMin, e);
+    coldRunS = e < -1 ? coldRunS + DT : 0;
+    st.coldRunMaxH = Math.max(st.coldRunMaxH, coldRunS / 3600);
+    if (winH !== undefined && tS >= winH * 3600 && tS < (winH + 24) * 3600) { sumSqAfter += e * e; nAfter++; }
     if ((i + 1) % (86400 / DT) === 0) { st.maxOver.push(dayMax); st.minUnder.push(dayMin); dayMax = -Infinity; dayMin = Infinity; }
     if (exitWatch) {
       exitWatch.min = Math.min(exitWatch.min, e);
@@ -319,7 +349,21 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     cycleNo++;
     const indoorM = Math.round((tIn + 0.03 * gauss()) * 10) / 10;
     const outletM = Math.round(outletTrue);
-    const base = opts.flatBasis ? flatValue : shapedCurve(em, tOut, bias, house, opts.shape ?? 1);
+    let base = opts.flatBasis ? flatValue : shapedCurve(em, tOut, bias, house, opts.shape ?? 1);
+    if (opts.appCurve) base = appBase(Math.round(tOut * 10) / 10);
+
+    // Restart of the app: the integral survives (store), the previous recommendation, the coast
+    // state and the histories do not (as _restorePositionalState and a fresh service)
+    if (opts.restartAtH !== undefined && !restartDone && h >= opts.restartAtH) {
+      restartDone = true; afterRestart = 0;
+      st.restart = {
+        iBefore: pc.getIntegral(), iAfter: null, spBefore: sp, maxStep2h: 0, maxDev2h: 0,
+      };
+      lastRecommended = undefined; lastRecRaw = null; lastObserved = null;
+      coastActive = false; cooldownCount = 0; coastCycles = 0;
+      inHist.length = 0; outHist.length = 0;
+      pi.resetHistory();
+    }
 
     // Settlement on observation (ADR-059 W1)
     if (lastObserved !== null && sp !== lastObserved) {
@@ -386,7 +430,12 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         }
         if (copOpt) {
           const currentCop = on ? Math.round(cop * 10) / 10 : 0;
-          copAction = copOpt.calculateAction(currentCop, copDay.prevRatio, Math.round(tOut * 10) / 10, sp);
+          // 3.5.1: without a valid COP measurement (0) the optimizer is skipped
+          if (!opts.copGuard || currentCop > 0) {
+            const daily = opts.copGuard && !(copDay.prevRatio > 0) ? currentCop : copDay.prevRatio;
+            copAction = copOpt.calculateAction(currentCop, daily, Math.round(tOut * 10) / 10, sp);
+            if (!on && copAction.action === 'decrease') st.copDecreaseOff++;
+          }
           if (on) {
             copOpt.addMeasurement({
               timestamp: Date.now(), outdoorTemp: Math.round(tOut * 10) / 10, supplyTemp: outletM, cop: currentCop, compressorFreq: 50,
@@ -421,6 +470,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         range: { min: SP_MIN, max: SP_MAX },
         pause: (v.coast && coastActive) ? 'coast' : null,
       });
+      const hold = step.holdReason ?? 'geen';
+      st.holds[hold] = (st.holds[hold] ?? 0) + 1;
+      if (afterRestart === 0) st.restart.iAfter = step.i;
       heatingAction = {
         temperatureAdjustment: step.u / dm.getComfortAnchor(), reason: 'pos', priority: 'medium', controller: 'heating',
       };
@@ -480,17 +532,38 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     }
     if (lastRecommended === undefined) lastRecommended = sp;
     const changed = recommended !== lastRecommended;
+    if (cycleNo > 1 && afterRestart !== 0 && Math.abs(recommended - lastRecommended) > st.maxJump) {
+      st.maxJump = Math.abs(recommended - lastRecommended);
+      st.maxJumpCtx = { day, hod: Number(hod.toFixed(2)), from: lastRecommended, to: recommended, coastBefore: prevCoast, coastNow: coastActive };
+    }
+    prevCoast = coastActive;
+    st.advMin = Math.min(st.advMin, recommended); st.advMax = Math.max(st.advMax, recommended);
+    st.maxGap = Math.max(st.maxGap, Math.abs(recommended - sp));
     lastRecommended = recommended;
-    // The user flow applies the recommendation: directly when it changes, or limited to 1 °C per 30 min
+    // The user flow applies the recommendation: directly when it changes, or limited to 1 °C per 30 min.
+    // Shadow: nobody applies it; the heat pump keeps its own setpoint.
     let next = sp;
-    if (flow === 'direct') {
+    if (opts.shadow) {
+      next = shadowSp(tOut);
+    } else if (flow === 'direct') {
       if (changed || v.mode !== 'incr') next = recommended;
     } else if (recommended !== sp && cycleNo - lastFlowCycle >= FLOW_LIMIT.everyCycles) {
       next = sp + Math.sign(recommended - sp) * Math.min(FLOW_LIMIT.step, Math.abs(recommended - sp));
       lastFlowCycle = cycleNo;
     }
-    if (next !== sp) { sp = next; st.spChanges++; }
+    if (next !== sp) {
+      if (afterRestart >= 0 && afterRestart < 24) st.restart.maxStep2h = Math.max(st.restart.maxStep2h, Math.abs(next - sp));
+      sp = next; st.spChanges++;
+    }
     st.spMin = Math.min(st.spMin, sp); st.spMax = Math.max(st.spMax, sp);
+    limitRunCycles = (sp <= SP_MIN || sp >= SP_MAX) ? limitRunCycles + 1 : 0;
+    st.limitRunMaxH = Math.max(st.limitRunMaxH, (limitRunCycles * CYCLE) / 3600);
+    if (afterRestart >= 0 && afterRestart < 24) {
+      st.restart.maxDev2h = Math.max(st.restart.maxDev2h, Math.abs(sp - st.restart.spBefore));
+      afterRestart++;
+    }
+    st.iEnd = pc.getIntegral();
+    if (opts.keepTrace) (st.spTrace ??= []).push(sp);
 
     // TRACE=<dag> prints every cycle of that day for the first seed
     if (process.env.TRACE && Number(process.env.TRACE) === day && seed === SEEDS[0]) {
@@ -499,6 +572,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         + ` | advies ${recommended} | stooklijn ${base.toFixed(1)}${coastActive ? ' | COAST' : ''}`);
     }
   }
+  if (nAfter > 0) st.rmseWindow = Math.sqrt(sumSqAfter / nAfter);
   return st;
 }
 
@@ -675,7 +749,144 @@ async function o4() {
   }
 }
 
-if (process.env.O4) {
+/**
+ * Test protocol 3.5 (docs/setup/advanced-control/TESTPROTOCOL_3.5.nl.md), floor heating with the preset
+ * (Kp 3, Ti 6 h, coast on) and the service's decision maker, without optimizers unless stated:
+ *   1. shadow: the app advises, the heat pump keeps its own curve or setpoint
+ *   2. closed loop with an app curve from the transfer table (HH/HL) or the floor preset 35/27
+ *   3. compressor off with the COP optimizer on: before (COP 0 counts as too low) and after 3.5.1
+ *   4. restart of the app halfway through the closed loop, against the same run without a restart
+ */
+async function protocol() {
+  const em = 'vloer';
+  const preset = EMITTER_PRESETS.floor;
+  const variant = 'pos. app (dm) + coast';
+  const CURVES = {
+    'voorinstelling 35/27': { atMinus15: 35, atPlus15: 27 },
+    'HH8 40/35': { atMinus15: 40, atPlus15: 35 },
+    'HL2 35/30': { atMinus15: 35, atPlus15: 30 },
+    'HL5 33/28': { atMinus15: 33, atPlus15: 28 },
+    'HL8 29/24': { atMinus15: 29, atPlus15: 24 },
+  };
+  const WEATHER = [['mild', 0], ['koud (−8 K)', -8]];
+  const base = { Kp: preset.kp, Ti: preset.tiHours, bias: EMITTERS[em].curveBias };
+  const runAll = async (name, o) => {
+    const runs = [];
+    for (const seed of SEEDS) runs.push(await simulate(name, em, seed, 'direct', { ...base, ...o }));
+    return runs;
+  };
+  const range = (runs, lo, hi) => `${Math.min(...runs.map(lo))}–${Math.max(...runs.map(hi))}`;
+  const holdShare = (runs) => {
+    const tot = {}; let n = 0;
+    for (const s of runs) for (const [k, c] of Object.entries(s.holds)) { tot[k] = (tot[k] ?? 0) + c; n += c; }
+    return Object.entries(tot).sort((x, y) => y[1] - x[1]).map(([k, c]) => `${k} ${f((100 * c) / n, 0)}%`).join(', ');
+  };
+  console.log(`# Testprotocol 3.5, droog: ${EMITTERS[em].label}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast aan; ${DAYS} dagen, ${SEEDS.length} seeds`);
+
+  // 1. Shadow
+  const SHADOW = [
+    ['vaste curve HL5, app-stooklijn HL5 (tabel)', { shadow: CURVES['HL5 33/28'], appCurve: CURVES['HL5 33/28'] }],
+    ['vaste curve HL2, app-stooklijn HL2 (tabel)', { shadow: CURVES['HL2 35/30'], appCurve: CURVES['HL2 35/30'] }],
+    ['vaste curve HL2, app-stooklijn 35/27 (geen idee)', { shadow: CURVES['HL2 35/30'], appCurve: CURVES['voorinstelling 35/27'] }],
+    ['vast setpoint 30, app-stooklijn 35/27', { shadow: { fixed: 30 }, appCurve: CURVES['voorinstelling 35/27'] }],
+  ];
+  for (const [wName, shift] of WEATHER) {
+    console.log(`\n## 1. Schaduw; ${wName}\n`);
+    console.log('situatie | advies min–max | setpoint min–max | max |advies − setpoint| | max sprong/cyclus | integraal vastgehouden | I eind | uren < −0,5 /dag');
+    console.log('--- | --- | --- | --- | --- | --- | --- | ---');
+    for (const [label, o] of SHADOW) {
+      const runs = await runAll(variant, { ...o, toutShift: shift });
+      const a = (fn) => avg(runs.map(fn));
+      console.log([
+        label,
+        range(runs, (s) => s.advMin, (s) => s.advMax),
+        range(runs, (s) => s.spMin, (s) => s.spMax),
+        Math.max(...runs.map((s) => s.maxGap)),
+        Math.max(...runs.map((s) => s.maxJump)),
+        holdShare(runs),
+        f(a((s) => s.iEnd)),
+        f(a((s) => s.under05 / DAYS)),
+      ].join(' | '));
+    }
+  }
+
+  // 2. Closed loop with the transfer table
+  for (const [wName, shift] of WEATHER) {
+    console.log(`\n## 2. Gesloten lus met de overstaptabel; ${wName}; flow direct\n`);
+    console.log('app-stooklijn | RMSE (°C) | uren < −0,5 /dag | uren > +0,5 /dag | langst > 1 °C te koud (u) | setpoint min–max | langst op een grens (u) | max sprong/cyclus | I eind | starts/dag');
+    console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
+    const classic = await runAll('incr. PI + coast (huidig)', { toutShift: shift });
+    const row = (label, runs) => {
+      const a = (fn) => avg(runs.map(fn));
+      console.log([
+        label,
+        f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
+        f(a((s) => s.under05 / DAYS)),
+        f(a((s) => s.over05 / DAYS)),
+        f(Math.max(...runs.map((s) => s.coldRunMaxH)), 1),
+        range(runs, (s) => s.spMin, (s) => s.spMax),
+        f(Math.max(...runs.map((s) => s.limitRunMaxH)), 1),
+        Math.max(...runs.map((s) => s.maxJump)),
+        f(a((s) => s.iEnd)),
+        f(a((s) => s.starts / DAYS), 1),
+      ].join(' | '));
+    };
+    for (const [label, c] of Object.entries(CURVES)) row(label, await runAll(variant, { appCurve: c, toutShift: shift }));
+    row('Klassiek (referentie)', classic);
+  }
+
+  // 3. COP 0 with the compressor off
+  for (const [wName, shift] of WEATHER) {
+    console.log(`\n## 3. COP-optimalisatie aan, compressor uit; ${wName}; flow direct\n`);
+    console.log('app-stooklijn | versie | RMSE (°C) | uren < −0,5 /dag | verlaging bij compressor uit (cycli/dag) | setpoint min–max | starts/dag | kWh el/dag');
+    console.log('--- | --- | --- | --- | --- | --- | --- | ---');
+    for (const label of ['voorinstelling 35/27', 'HL5 33/28']) {
+      for (const [ver, guard] of [['3.5.0', false], ['3.5.1', true]]) {
+        const runs = await runAll(variant, {
+          appCurve: CURVES[label], toutShift: shift, optim: { cop: true }, copGuard: guard,
+        });
+        const a = (fn) => avg(runs.map(fn));
+        console.log([
+          label, ver,
+          f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
+          f(a((s) => s.under05 / DAYS)),
+          f(a((s) => s.copDecreaseOff / DAYS), 0),
+          range(runs, (s) => s.spMin, (s) => s.spMax),
+          f(a((s) => s.starts / DAYS), 1),
+          f(a((s) => s.elKwh / DAYS)),
+        ].join(' | '));
+      }
+    }
+  }
+
+  // 4. Restart
+  console.log('\n## 4. Herstart op dag 7; mild; app-stooklijn 35/27; flow direct\n');
+  console.log('herstart om | I voor → na 1e cyclus | max setpointstap ≤ 2 u | max verschil setpoint met zonder herstart ≤ 2 u / ≤ 24 u | RMSE 24 u na herstart / zonder herstart');
+  console.log('--- | --- | --- | --- | ---');
+  for (const hod of [3, 13, 18]) {
+    const at = 6 * 24 + hod;
+    const rows = [];
+    for (const seed of SEEDS) {
+      const o = { ...base, appCurve: CURVES['voorinstelling 35/27'], keepTrace: true };
+      const r = await simulate(variant, em, seed, 'direct', { ...o, restartAtH: at });
+      const ref = await simulate(variant, em, seed, 'direct', { ...o, windowAtH: at });
+      const c0 = Math.ceil((at * 3600) / CYCLE) - 1;
+      const diff = (n) => Math.max(...r.spTrace.slice(c0, c0 + n).map((x, k) => Math.abs(x - ref.spTrace[c0 + k])));
+      rows.push({ r, ref, d2: diff(24), d24: diff(288) });
+    }
+    console.log([
+      `${hod}:00`,
+      `${f(avg(rows.map((x) => x.r.restart.iBefore)))} → ${f(avg(rows.map((x) => x.r.restart.iAfter)))}`,
+      Math.max(...rows.map((x) => x.r.restart.maxStep2h)),
+      `${Math.max(...rows.map((x) => x.d2))} / ${Math.max(...rows.map((x) => x.d24))}`,
+      `${f(avg(rows.map((x) => x.r.rmseWindow)), 3)} / ${f(avg(rows.map((x) => x.ref.rmseWindow)), 3)}`,
+    ].join(' | '));
+  }
+}
+
+if (process.env.PROTOCOL) {
+  protocol();
+} else if (process.env.O4) {
   o4();
 } else if (process.env.P4) {
   p4();
