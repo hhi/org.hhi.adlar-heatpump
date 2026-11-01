@@ -100,7 +100,7 @@ test('the control setting selects the preset; positional_manual uses the fields'
     mode: 'positional', emitter: 'radiator', source: 'preset', kp: 3, tiHours: 3, coastEnabled: false,
   });
   assert.deepStrictEqual(resolveControlParams({ adaptive_control_mode: 'positional_floor', adaptive_coast_enabled: false }), {
-    mode: 'positional', emitter: 'floor', source: 'preset', kp: 3, tiHours: 6, coastEnabled: true,
+    mode: 'positional', emitter: 'floor', source: 'preset', kp: 3, tiHours: 6, coastEnabled: false,
   });
   assert.deepStrictEqual(resolveControlParams({
     adaptive_control_mode: 'positional_manual', adaptive_pos_kp: 4, adaptive_pos_ti: 1.5, adaptive_coast_enabled: false,
