@@ -293,9 +293,6 @@ export class WeightedDecisionMaker {
   }
 
   /**
-   * Get current priorities (normalized)
-   */
-  /**
    * Fixed weight of the comfort (PI) component without coast (ADR-059 W2): comfort / (comfort + efficiency + cost).
    * ADR-065: the positional PI output is divided by this anchor so that its weighted share equals the output itself.
    */
@@ -304,6 +301,9 @@ export class WeightedDecisionMaker {
     return trioTotal > 0 ? this.priorities.comfort / trioTotal : 0.6;
   }
 
+  /**
+   * Get current priorities (normalized)
+   */
   public getPriorities(): WeightedPriorities {
     return { ...this.priorities };
   }
