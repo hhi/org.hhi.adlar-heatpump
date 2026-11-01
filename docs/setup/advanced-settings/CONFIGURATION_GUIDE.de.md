@@ -346,8 +346,11 @@ kann die App die Kurve nicht mehr auslesen.
   Korrektur beginnen dann bei 0
 - **Nachtabsenkung**: bei Fußbodenheizung nicht empfohlen; Positionell heizt
   dann morgens auf, mit mehr Kompressorstarts
-- **Optimierer** (Preis, COP, Gebäudemodell): wirken bei Positionell mit,
-  verschieben die Empfehlung aber weniger als bei Klassisch
+- **Optimierer** (Preis, COP, Gebäudemodell): haben bei Positionell wenig
+  Wirkung. Das Integral gleicht ihre Verschiebung innerhalb weniger Stunden
+  aus, sodass die Preisoptimierung den Verbrauch kaum in günstige Stunden
+  verlagert. Der Komfort bleibt gleich. Eine Anpassung folgt in einer späteren
+  Version
 - **Experimentell**: Positionell ist in der Praxis noch wenig getestet
 
 #### Coast Offset (v2.8.0+)
