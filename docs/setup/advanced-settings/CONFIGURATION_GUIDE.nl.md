@@ -268,14 +268,14 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   - **Klassiek**: elke cyclus een kleine stap omhoog of omlaag; de stappen
     tellen op (bestaand gedrag)
   - **Positioneel – Radiatoren** (experimenteel): Kp 3, Ti 3 u, coast uit
-  - **Positioneel – Vloerverwarming** (experimenteel): Kp 3, Ti 6 u, coast aan
+  - **Positioneel – Vloerverwarming** (experimenteel): Kp 3, Ti 6 u, coast uit
   - **Positioneel – Handmatig** (experimenteel): Positionele PI Kp en Ti en de
     schakelaar Coast hieronder
   - Positioneel: advies = stooklijn + PI-correctie met een echte integraal,
     zonder brede dode zone; het setpoint blijft rustig, ook met een flow die elk
     advies uitvoert
 - **Coast**: bij Klassiek en Positioneel – Handmatig geldt de schakelaar Coast;
-  Radiatoren en Vloerverwarming zetten coast zelf
+  Radiatoren en Vloerverwarming zetten coast uit
 - **Stooklijn (positionele modi) — standaard**: App-stooklijn
   - **App-stooklijn**: watertemperatuur bij −15 °C en bij +15 °C buiten.
     Startwaarden: Radiatoren 50 / 35, Vloerverwarming 35 / 27, anders 45 / 30;
