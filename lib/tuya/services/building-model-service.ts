@@ -21,6 +21,7 @@ import {
 } from '../../shared/adaptive/building-model-learner';
 import { isTransientBlockingKey, shouldShowBlocked } from '../../shared/adaptive/building-model-blocking';
 import { DeviceConstants } from '../constants';
+import { getSolarHour, getZonedHour, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 interface EnergyTrackingService {
   getCurrentPowerMeasurement(): { value: number } | null;
@@ -74,6 +75,9 @@ export class BuildingModelService {
   // v3.4.3: consecutive cycles without an accepted sample (reset by an accepted sample);
   // insights show a transient blocking reason only once this streak persists
   private blockingStreak = 0;
+  // ADR-062 A6: confidence at the previous capability update (null until initialised)
+  private lastConfidence: number | null = null;
+  private static readonly MILESTONE_STORE_KEY = 'building_model_milestone_70';
 
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
@@ -93,6 +97,7 @@ export class BuildingModelService {
       minSamplesForConfidence: 288, // 24 hours @ 5min intervals
       buildingProfile: config.buildingProfile || 'average', // Default to average building
       enableDynamicPInt: config.enableDynamicPInt ?? true, // Enable by default
+      timeZone: resolveHomeyTimezone(this.device.homey), // ADR-062 F2: P_int windows in local time
       logger: this.logger,
     };
 
@@ -132,6 +137,9 @@ export class BuildingModelService {
     } else {
       this.logger('BuildingModelService: ℹ️ No persisted state found — fresh start from profile defaults');
     }
+
+    // ADR-062 A6: a restored model above 70% does not fire the milestone again
+    this.lastConfidence = this.learner.getModel().confidence;
 
     // Update capabilities with current model
     await this.updateModelCapabilities();
@@ -385,11 +393,11 @@ export class BuildingModelService {
 
     // g: solar gain factor (v2.9.6 - seasonal multiplier removed, astronomical estimation encodes seasonality)
     const now = new Date();
-    const hour = now.getHours();
+    const hour = Math.floor(getZonedHour(now, resolveHomeyTimezone(this.device.homey))); // ADR-062 F2
 
     // Get localized short month name using browser's locale
     const lang = this.device.homey.i18n.getLanguage();
-    const monthName = now.toLocaleDateString(lang, { month: 'short' });
+    const monthName = now.toLocaleDateString(lang, { month: 'short', timeZone: resolveHomeyTimezone(this.device.homey) });
     await this.updateCapabilityIfPresent('adlar_building_g', model.g, {
       title: `${this.device.homey.__('building_model.solar_gain_title')} (${monthName})`,
     });
@@ -419,8 +427,12 @@ export class BuildingModelService {
       + `confidence=${model.confidence.toFixed(0)}%`,
     );
 
-    // Trigger milestone flow card at 70% confidence
-    if (model.confidence >= 70 && model.confidence < 75) {
+    // ADR-062 A6: fire once when the confidence crosses 70%; the flag is cleared by a reset or soft reset
+    const previousConfidence = this.lastConfidence;
+    this.lastConfidence = model.confidence;
+    if (previousConfidence !== null && previousConfidence < 70 && model.confidence >= 70
+      && !this.device.getStoreValue(BuildingModelService.MILESTONE_STORE_KEY)) {
+      await this.device.setStoreValue(BuildingModelService.MILESTONE_STORE_KEY, true);
       await this.device.homey.flow
         .getDeviceTriggerCard('learning_milestone_reached')
         .trigger(this.device, {
@@ -514,6 +526,35 @@ export class BuildingModelService {
     await this.device.setCapabilityOptions(capability, { ...current, ...patch });
   }
 
+  /** ADR-062 A6: a reset or soft reset makes the 70% milestone fire again on the next crossing. */
+  private async _clearMilestone(): Promise<void> {
+    this.lastConfidence = this.learner.getModel().confidence;
+    await this.device.setStoreValue(BuildingModelService.MILESTONE_STORE_KEY, false);
+  }
+
+  /**
+   * ADR-062 A5: changed learning settings take effect directly, with the values from newSettings.
+   * A change of dynamic P_int soft-resets (θ[3] changes meaning), unless the profile changes in the
+   * same save: the ServiceCoordinator soft-resets for that afterwards.
+   */
+  public async applyLearningSettings(newSettings: Record<string, unknown>, changedKeys: string[]): Promise<void> {
+    if (changedKeys.includes('building_model_forgetting_factor')) {
+      this.learner.setForgettingFactor((newSettings.building_model_forgetting_factor as number | null) ?? 0.999);
+    }
+    if (changedKeys.includes('enable_dynamic_pint')) {
+      const enabled = (newSettings.enable_dynamic_pint as boolean | null) ?? true;
+      const profile = ((newSettings.building_profile as BuildingProfileType | null)
+        ?? this.device.getSetting('building_profile') ?? 'average') as BuildingProfileType;
+      const ownReset = !changedKeys.includes('building_profile');
+      if (this.learner.setDynamicPInt(enabled, profile, ownReset)) {
+        this.logger(`BuildingModelService: dynamic P_int ${enabled ? 'on' : 'off'}${ownReset ? ' — soft reset' : ''}`);
+        if (ownReset) await this._clearMilestone();
+        await this.persistState();
+        await this.updateModelCapabilities();
+      }
+    }
+  }
+
   /**
    * Persist learner state to device store
    */
@@ -578,7 +619,7 @@ export class BuildingModelService {
     // v2.6.0: Apply g and pInt corrections to thermal prediction
     // g = solar gain coefficient (kW per kW/m² radiation)
     // pInt = internal gains (kW from occupants/appliances)
-    const hour = new Date().getHours();
+    const hour = Math.floor(getZonedHour(new Date(), resolveHomeyTimezone(this.device.homey))); // ADR-062 F2
 
     // ADR-057 E2: reuse the learner's time-of-day curve (night ×0.4 / day ×1.0 /
     // evening 18-23h ×1.8) — previously this used a divergent 17-22h window
@@ -760,7 +801,9 @@ export class BuildingModelService {
 
     // Priority 4: Astronomical estimation (last fallback - location & season aware)
     const nowDate = new Date();
-    const hour = nowDate.getHours() + nowDate.getMinutes() / 60;
+    // ADR-062 F3: mean solar time from the longitude (solar noon ≈ 12:00), not UTC or the wall clock
+    const lon = (this.device.getSetting('forecast_location_lon') as number | null) ?? 4.90;
+    const hour = getSolarHour(nowDate, lon);
     const lat = (this.device.getSetting('forecast_location_lat') as number) ?? 52.37;
     const dayOfYear = this.getDayOfYear(nowDate);
     const radiation = this.estimateSolarRadiation(hour, lat, dayOfYear);
@@ -941,7 +984,7 @@ export class BuildingModelService {
 
     return {
       timestamp: Date.now(),
-      timestampReadable: new Date().toLocaleString('nl-NL'),
+      timestampReadable: new Date().toLocaleString('nl-NL', { timeZone: resolveHomeyTimezone(this.device.homey) }),
       enabled: status.enabled,
       status: learningStatus,
       dataAvailability: {
@@ -1133,6 +1176,7 @@ export class BuildingModelService {
 
       // Perform soft reset on learner
       this.learner.softReset(newProfile);
+      await this._clearMilestone(); // ADR-062 A6
 
       // Log new values after soft reset
       const newModel = this.learner.getModel();
@@ -1164,7 +1208,11 @@ export class BuildingModelService {
    * Reset building model - reinitialize learner with building profile defaults
    * Clears all learned parameters and restarts learning from scratch
    */
-  public async reset(): Promise<void> {
+  public async reset(overrides: {
+    buildingProfile?: BuildingProfileType;
+    enableDynamicPInt?: boolean;
+    forgettingFactor?: number;
+  } = {}): Promise<void> {
     this.logger('BuildingModelService: Resetting to building profile defaults...');
 
     try {
@@ -1181,9 +1229,10 @@ export class BuildingModelService {
       this.logger('═══════════════════════════════════════');
 
       // Get current settings for building profile and features
-      const buildingProfile = this.device.getSetting('building_profile') || 'average';
-      const enableDynamicPInt = this.device.getSetting('enable_dynamic_pint') ?? true;
-      const forgettingFactor = this.device.getSetting('building_model_forgetting_factor') ?? 0.999;
+      // ADR-062 A5: values from the settings being saved win over the stored ones
+      const buildingProfile = overrides.buildingProfile ?? this.device.getSetting('building_profile') ?? 'average';
+      const enableDynamicPInt = overrides.enableDynamicPInt ?? this.device.getSetting('enable_dynamic_pint') ?? true;
+      const forgettingFactor = overrides.forgettingFactor ?? this.device.getSetting('building_model_forgetting_factor') ?? 0.999;
 
       // Create new learner instance with building profile defaults (no restored state)
       const learnerConfig: BuildingModelConfig = {
@@ -1192,10 +1241,12 @@ export class BuildingModelService {
         minSamplesForConfidence: 288, // 24 hours @ 5min intervals
         buildingProfile, // Will use profile defaults
         enableDynamicPInt,
+        timeZone: resolveHomeyTimezone(this.device.homey), // ADR-062 F2
         logger: this.logger,
       };
 
       this.learner = new BuildingModelLearner(learnerConfig);
+      await this._clearMilestone(); // ADR-062 A6
 
       // Log new default values
       const newModel = this.learner.getModel();

@@ -564,14 +564,14 @@ test('N20 (ADR-062 B12): boundedSteps survives a round trip; an older state rest
   assert.strictEqual(legacy.getExcitationDiagnostics().boundedSteps, 0);
 });
 
-test('K7 (ADR-062 A5): restore takes enableDynamicPInt from the state', () => {
+test('A5 (ADR-062, replaces K7): the configured enableDynamicPInt wins over the state', () => {
   const fromState = createLearner({ enableDynamicPInt: true });
   fromState.restoreState({
     theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: IDENTITY, sampleCount: 10, lastMeasurement: null, enableDynamicPInt: false,
   });
-  assert.strictEqual(fromState.getState().enableDynamicPInt, false);
+  assert.strictEqual(fromState.getState().enableDynamicPInt, true);
 
   const legacy = createLearner({ enableDynamicPInt: true });
   legacy.restoreState({ theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: IDENTITY, sampleCount: 10, lastMeasurement: null });
-  assert.strictEqual(legacy.getState().enableDynamicPInt, false);
+  assert.strictEqual(legacy.getState().enableDynamicPInt, true);
 });

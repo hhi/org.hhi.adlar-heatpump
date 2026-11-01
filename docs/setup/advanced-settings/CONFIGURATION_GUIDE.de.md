@@ -230,7 +230,7 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 **Nur sichtbar mit aktivierten "Expert HVAC-Funktionskarten"**
 
 #### Proportionalverstärkung (Kp)
-- **Standard**: 3.0
+- **Standard**: 5.0
 - **Bereich**: 0.5 - 10.0
 - **Funktion**: Bestimmt, wie schnell das System auf aktuelle Fehler reagiert
 - **Höherer Wert**: Schnellere Korrektur, Überschwingungsrisiko
@@ -261,6 +261,94 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   Grenze gilt
 - **Fußbodenheizung**: Beide um den Bereich Ihrer eigenen Heizkurve einstellen
   (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen
+
+#### Regelmodus und Heizkurve (v3.5.0+)
+
+- **Regelmodus — Standard**: Klassisch
+  - **Klassisch**: in jedem Zyklus ein kleiner Schritt nach oben oder unten; die
+    Schritte summieren sich (bisheriges Verhalten)
+  - **Positionell – Heizkörper** (experimentell): Kp 3, Ti 3 h, Coast aus
+  - **Positionell – Fußbodenheizung** (experimentell): Kp 3, Ti 6 h, Coast an
+  - **Positionell – Manuell** (experimentell): Positioneller PI Kp und Ti und
+    der Schalter Coast unten
+  - Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne
+    breite Totzone; der Sollwert bleibt ruhig, auch mit einem Flow, der jede
+    Empfehlung ausführt
+- **Coast**: bei Klassisch und Positionell – Manuell gilt der Schalter Coast;
+  Heizkörper und Fußbodenheizung setzen Coast selbst
+- **Heizkurve (positionelle Modi) — Standard**: App-Kurve
+  - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen. Startwerte:
+    Heizkörper 50 / 35, Fußbodenheizung 35 / 27, sonst 45 / 30; bei der Wahl des
+    Regelmodus vorausgefüllt, solange Sie sie nicht selbst geändert haben
+  - **Heizkurve der Wärmepumpe** (Aurora I/II: DIY-Kurve, nur wenn DIY
+    eingeschaltet ist; Aurora III: Klimakurve): nur, wenn Sie sie selbst
+    eingestellt haben; ist DIY aus oder die Kurve nicht brauchbar, gilt die
+    App-Kurve. Tuya hat diese Wahl nicht
+- **Diagnose**: `adaptive_control_diagnostics` zeigt den Modus, das
+  Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis mit Quelle und die P- und
+  I-Anteile
+
+##### Heizkurve anpassen
+
+| Was Sie bemerken | Anpassung |
+| --- | --- |
+| Zu kalt bei Frost, gut bei mildem Wetter | Wert bei −15 °C +1–2 |
+| Zu kalt bei mildem Wetter | Wert bei +15 °C +1–2 |
+| Überall etwas zu kalt | Beide Werte +1 |
+| Zu warm | Umgekehrt: senken |
+
+- Ändern Sie einen Wert pro Mal und warten Sie einen Tag (Fußbodenheizung: zwei
+  Tage). In der Diagnose weist ein I-Anteil, der dauerhaft über 0 liegt, auf
+  eine zu niedrige Heizkurve hin, unter 0 auf eine zu hohe
+
+##### Umstieg von einer festen Kurve
+
+Haben Sie eine feste Kurve der Wärmepumpe verwendet (Aurora I/II:
+Heizkurvenauswahl HH1–HH8 oder HL1–HL8; Tuya: Heizkurve H1–H8 oder L1–L8)?
+Notieren Sie diese Kurve, tragen Sie die beiden Werte aus der Tabelle bei der
+App-Kurve ein und stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF
+kann die App die Kurve nicht mehr auslesen.
+
+| Kurve | −15 °C | +15 °C | Kurve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Aus den Grafiken in der Anleitung der Wärmepumpe übernommen und auf ganze
+  Grad gerundet; Abweichung etwa 1 °C
+
+**Welchen Regelmodus wähle ich?**
+
+| Situation | Wahl |
+| --- | --- |
+| Kein Flow, der die Empfehlung ausführt | Egal: nur Empfehlung |
+| Die aktuelle Regelung funktioniert gut | Klassisch |
+| Sollwert driftet oder schwankt, Heizkörper | Positionell – Heizkörper |
+| Sollwert driftet, Fußbodenheizung | Positionell – Fußbodenheizung |
+| Heizkurve unbekannt | Startwerte, danach anpassen |
+
+- **Aurora I/II und Tuya**: Die Wärmepumpe behält einen neuen Sollwert nur, wenn
+  die Heizkurvenauswahl (Tuya: Heizkurve) auf OFF steht; sonst führt keiner der
+  beiden Modi die Empfehlung aus. Die App berechnet die Heizkurve dann selbst
+- **Heizkurve der Wärmepumpe** nur mit eigener DIY-Kurve: ist DIY aus, rechnet
+  die App mit der App-Kurve. Eine feste Kurve übernehmen Sie mit der Tabelle
+  oben
+- **Sicher ausprobieren**: Schalten Sie den Flow aus, der die Empfehlung
+  ausführt, wählen Sie einen positionellen Regelmodus und vergleichen Sie einen
+  Tag lang das simulierte Ziel (`adlar_simulated_target`) mit der Heizkurve
+- **Zurückstellen** ist jederzeit möglich; das Integral und die aufsummierte
+  Korrektur beginnen dann bei 0
+- **Nachtabsenkung**: bei Fußbodenheizung nicht empfohlen; Positionell heizt
+  dann morgens auf, mit mehr Kompressorstarts
+- **Optimierer** (Preis, COP, Gebäudemodell): wirken bei Positionell mit,
+  verschieben die Empfehlung aber weniger als bei Klassisch
+- **Experimentell**: Positionell ist in der Praxis noch wenig getestet
 
 #### Coast Offset (v2.8.0+)
 - **Standard**: 1,0°C
@@ -295,7 +383,7 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 - **Standard**: 0.999
 - **Bereich**: 0.9985 - 0.9995
 - **Funktion**: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen (~75%). Niedriger = schnellere Anpassung an saisonale Änderungen.
-- **Wirkung**: Erst nach einem App-Neustart oder 'Gebäudemodell-Lernen zurücksetzen'
+- **Wirkung**: Sofort (v3.5.0+)
 
 ### Gebäudetyp
 - **Standard**: Durchschnitt (typisches NL-Haus)
@@ -316,12 +404,13 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 ### Dynamische Interne Wärmegewinne
 - **Standard**: Aktiviert
 - **Funktion**: Berücksichtigt variierende Wärme von Personen/Geräten nach Tageszeit
-- **Tagesmuster**:
+- **Tagesmuster** (Zeiten in der Zeitzone des Homey, v3.5.0+):
   - Nacht (23:00-06:00): 40% (Schlaf)
   - Tag (06:00-18:00): 100% (normal)
   - Abend (18:00-23:00): 180% (Kochen, TV)
 - **Genauigkeitsverbesserung**: ~10-15%
-- **Wirkung**: Erst nach 'Gebäudemodell-Lernen zurücksetzen'
+- **Wirkung**: Sofort (v3.5.0+); das Lernen geht von den Werten des
+  Gebäudeprofils weiter, mit der Hälfte der gesammelten Samples
 
 ---
 
@@ -546,7 +635,7 @@ Verwaltung von Energiezählern für Tracking und Berichterstattung.
 ### Szenario 1: "Ich möchte einfach eine stabile Raumtemperatur"
 ```
 ✅ Adaptive Temperaturregelung: EIN
-   - Kp: 3,0, Ki: 1,5, Totzone: 0,3°C
+   - Kp: 5,0, Ki: 1,5, Totzone: 0,3°C
 ✅ Gebäudemodell-Lernen: EIN
    - Gebäudetyp: Durchschnitt (oder Ihr Typ)
    - Dynamisches P_int: EIN

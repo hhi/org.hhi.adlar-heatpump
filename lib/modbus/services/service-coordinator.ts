@@ -17,7 +17,7 @@ import { modeToSpaceSetpointTarget } from '../protocol/adlar-enum-mappers';
 import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
-import { nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 // ADR-042: Verbindingskwaliteit als expliciete runtime-state
 export type ConnectionQuality = 'online' | 'degraded' | 'offline';
@@ -71,6 +71,7 @@ export class ServiceCoordinator {
   private _lastErrorContext: string | null = null;
   private _errorCountByContext = new Map<string, number>();
   private _latestSnapshot: DataSnapshot | null = null;
+  private _diyPolled = false; // ADR-065: the medium poll group (DIY curve L27–L29) has been read since start
 
   // Dashboard snapshot callback (ADR-041a)
   private readonly onSnapshot?: (snapshot: DataSnapshot) => void;
@@ -104,6 +105,21 @@ export class ServiceCoordinator {
    * heating modes (1/5) → 0x0301, floor heating modes (3/7) → 0x0303.
    * Cooling, hot water only, reserve or an unknown mode → null (control cycles pause).
    */
+  /**
+   * ADR-065 O2: the DIY heating curve k·(T1 + 15) + b (L28/L29) at the heat pump's own ambient sensor T1,
+   * or at the app's outdoor temperature when T1 is unknown. Only while the DIY switch (0x0810) is on DIY
+   * and k is negative: otherwise L28/L29 hold leftover values, and the basis falls back to the app curve.
+   * The setpoint holds on the heating curve selection 0x0314 alone, so the DIY switch may stay on.
+   * 'pending' until the DIY registers have been read after a start, so the first cycle does not fall back.
+   */
+  private _resolveHeatPumpCurve(outdoorTemp: number | null): number | null | 'pending' {
+    const diy = this._latestSnapshot?.diy;
+    if (!diy && !this._diyPolled) return 'pending';
+    if (!diy?.active || !(diy.slopeK < 0)) return null;
+    const ambient = this._latestSnapshot?.sensors.ambientT1?.value ?? outdoorTemp;
+    return ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
+  }
+
   private _resolveAdaptiveSetpoint(): ActiveSetpoint | null {
     const modeRaw = this.device.getCapabilityValue('adlar_mode');
     const mode = Number(modeRaw);
@@ -147,6 +163,8 @@ export class ServiceCoordinator {
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,
       resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
+      resolveHeatPumpCurve: (outdoorTemp) => this._resolveHeatPumpCurve(outdoorTemp),
+      resolvePauseReason: () => (this._latestSnapshot?.status.defrosting ? 'defrost' : null),
     });
 
     this.buildingInsights = new BuildingInsightsService({
@@ -500,6 +518,7 @@ export class ServiceCoordinator {
       lastErrorContext: this._lastErrorContext,
     };
     this._latestSnapshot = snapshot;
+    if (sourcePollGroup === 'medium') this._diyPolled = true;
 
     // Forward naar dashboard (ADR-041a)
     this.onSnapshot?.(snapshot);
@@ -557,11 +576,7 @@ export class ServiceCoordinator {
   private _setConnectionCapabilities(connected: boolean, reason: string | null): void {
     this._visibleConnectionConnected = connected;
 
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.toLocaleString('en-US', { month: 'short' });
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const timestamp = `${day}-${month} ${time}`;
+    const timestamp = formatDayMonthTime(new Date(), resolveHomeyTimezone(this.device.homey));
     const status = connected ? `Connected: ${timestamp}` : `Disconnected: ${timestamp}${reason ? ` (${reason})` : ''}`;
 
     if (this.device.hasCapability('adlar_connection_active')) {

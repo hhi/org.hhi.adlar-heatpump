@@ -21,7 +21,7 @@ export interface HomeyClockProvider {
  * Resolve Homey's configured timezone, falling back to the process timezone
  */
 export function resolveHomeyTimezone(homey: HomeyClockProvider): string {
-  return homey.clock.getTimezone() || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return homey?.clock?.getTimezone?.() || Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
 /**
@@ -40,6 +40,17 @@ export function formatHourMinute(date: Date, timeZone: string): string {
   const hour = parts.find((p) => p.type === 'hour')?.value ?? '00';
   const minute = parts.find((p) => p.type === 'minute')?.value ?? '00';
   return `${hour}:${minute}`;
+}
+
+/**
+ * Format a date as "D-Mon HH:MM" in the given timezone, for the connection status
+ *
+ * @example formatDayMonthTime(new Date('2026-10-31T23:30:00Z'), 'Europe/Amsterdam') // "1-Nov 00:30"
+ */
+export function formatDayMonthTime(date: Date, timeZone: string): string {
+  const day = new Intl.DateTimeFormat('en-US', { day: 'numeric', timeZone }).format(date);
+  const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone }).format(date);
+  return `${day}-${month} ${formatHourMinute(date, timeZone)}`;
 }
 
 /**
@@ -143,4 +154,24 @@ export function nextLocalTime(hour: number, minute: number, timeZone: string, no
     return today;
   }
   return zonedTimeToUtc(p.year, p.month, p.day + 1, hour, minute, timeZone);
+}
+
+/**
+ * Wall-clock hour of an instant in the given timezone, as a fraction (14.5 = 14:30)
+ *
+ * @example getZonedHour(new Date('2026-10-24T18:30:00Z'), 'Europe/Amsterdam') // 20.5
+ */
+export function getZonedHour(date: Date, timeZone: string): number {
+  const p = getZonedParts(date, timeZone);
+  return p.hour + p.minute / 60;
+}
+
+/**
+ * Mean solar time in hours at a longitude (solar noon ≈ 12.0); the equation of time is ignored
+ *
+ * @example getSolarHour(new Date('2026-10-24T11:40:00Z'), 5) // 12.0
+ */
+export function getSolarHour(date: Date, longitude: number): number {
+  const utc = date.getUTCHours() + date.getUTCMinutes() / 60;
+  return (((utc + longitude / 15) % 24) + 24) % 24;
 }

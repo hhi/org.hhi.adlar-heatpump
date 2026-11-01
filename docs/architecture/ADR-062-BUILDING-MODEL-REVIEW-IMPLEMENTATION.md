@@ -1,6 +1,9 @@
 # ADR-062: Implementatie van de review-fixes voor de gebouwleermodule
 
-**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24 en 2026-10-25): B1–B6, B10, B11 en B12 aangenomen, uit B8 ook A7, §2.5 en §2.8 (fase 1e); B7–B9 en B13 verder voorgesteld
+**Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24, 2026-10-25 en
+2026-10-31): B1–B6, B10–B13 aangenomen, uit B8 A4–A7, §2.5 en §2.8, en F2/F3 (B14). B13,
+A4–A6 en B14 zijn gebouwd in 3.5.0 (fase 1h en 3). B7 gaat niet in de regeling: in
+3.6.0 als voorverwarmduur. B9 vervalt
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -32,8 +35,10 @@ ADR-056, ADR-057, ADR-060, ADR-061 (learner, gates, persistence; lokaal in `plan
   rate-limiting uit review §2.1; de huidige rate-limiting per component blijft, voor
   alle drivers (B11).
 - **Aangenomen:** B1–B6, B10, B11 en B12, en uit B8 de punten A7, §2.5 en §2.8
-  (fase 1e en 1g, 3.4.0). **Nog te beslissen:** B7, de rest van B8 (A4–A6) en B9
-  (fase 3), en B13: P bijwerken met de werkelijk genomen stap (fase 1h).
+  (fase 1e en 1g, 3.4.0). **In 3.5.0 (2026-10-31):** B13 (P bijwerken met de werkelijk
+  genomen stap), A4–A6 uit B8 en B14 (tijdzone en zonnetijd). B7 niet in de regeling:
+  de simulatie van ADR-065 O4 laat geen meetbaar effect zien; de formule komt in 3.6.0
+  terug als voorverwarmduur.
 
 ---
 
@@ -204,7 +209,13 @@ de nieuwe code:
 
 ### B7 — Thermische correctie (A3)
 
-**Voorstel:** een fysische voorspelling in plaats van de heuristiek.
+**Besluit (2026-10-31): niet in de regeling.** In de simulatie van ADR-065 O4 heeft de
+thermische component, zowel de huidige heuristiek als deze formule, in geen enkel
+scenario een meetbaar effect op comfort of verbruik. De formule gaat in 3.6.0 naar de
+voorverwarmduur (`lib/shared/utils/preheat-calculator.ts`, nu vaste τ-klassen), waar
+hij een zichtbaar getal oplevert.
+
+**Voorstel (oorspronkelijk):** een fysische voorspelling in plaats van de heuristiek.
 
 - `T_eq = T_out + (P + G)/UA` en `t = τ × ln((T_eq − T_in)/(T_eq − T_doel))`.
 - P = het **waargenomen** thermisch vermogen bij draaiende compressor: het 90e
@@ -219,8 +230,16 @@ de nieuwe code:
 
 ### B8 — Regelkoppeling (A4, A5, A6, A7, §2.5, §2.8)
 
-A7, §2.5 en §2.8 zijn aangenomen en uitgevoerd in fase 1e (3.4.0); A4–A6
-blijven voorgesteld voor fase 3.
+A7, §2.5 en §2.8 zijn aangenomen en uitgevoerd in fase 1e (3.4.0). A4–A6 zijn
+aangenomen en gebouwd in 3.5.0 (fase 3), voor de drie drivers. Uitwerking:
+
+- **A4:** τ, UA en C gaan pas vanaf 50% confidence naar de PI en de prijsoptimalisatie;
+  daaronder de waarden van `BUILDING_PROFILES` voor het ingestelde profiel.
+- **A5:** reset en soft reset gebruiken de waarden uit `newSettings`. Een wijziging van
+  `enable_dynamic_pint` geeft een soft reset, behalve als het gebouwprofiel in dezelfde
+  opslag ook verandert (dan volgt de soft reset van de profielwissel).
+- **A6:** `lastConfidence` en de vlag `building_model_milestone_70` in de store; de vlag
+  vervalt bij een reset en een soft reset.
 
 | Punt | Voorstel |
 |---|---|
@@ -233,6 +252,9 @@ blijven voorgesteld voor fase 3.
 | **A1** doeltemperatuur Tuya | `target_temperature.indoor` op beide plekken. De τ-limieten van de twee voorverwarmingsmethoden gelijktrekken op één constante (voorstel: 0,5–250 u; passieve woningen krijgen dan, zoals nu, geen voorverwarmingsadvies) |
 
 ### B9 — Volgorde ten opzichte van ADR-005
+
+**Vervallen (2026-10-31):** A4–A6 zijn in 3.5.0 in de drie services gebouwd, zonder op
+ADR-005 fase 3 te wachten. Hieronder het oorspronkelijke voorstel.
 
 **Voorstel:**
 
@@ -339,7 +361,11 @@ aan de echte learner), 5 seeds, RMSE 6 u op dag 30:
 de teller `boundedSteps` (in de state, in `getExcitationDiagnostics()` en in het
 diagnostiek-JSON). Een ingekorte stap telt niet als revert en zet de reeks op 0.
 
-### B13 — P-update met de werkelijk genomen stap (voorgesteld)
+### B13 — P-update met de werkelijk genomen stap (aangenomen, 3.5.0)
+
+Gebouwd zoals hieronder voorgesteld (`updateRLS()` in `building-model-learner.ts`).
+Op de testinstallatie is de stand na de reset van 25 oktober het nulpunt voor de
+beoordeling (identificatie, reverts, P_int van de ondergrens af).
 
 **Voorstel:** de covariantie P wordt bijgewerkt met de stap die θ werkelijk heeft
 genomen, per component. Na de grenscontrole, B12 en de rate-limiting per component
@@ -465,9 +491,24 @@ Aurora III) S1b 0,010; passief S5 0,023 (warm) en 0,045 (koud A3); lek huis vana
 - **Volgorde met de proef van ADR-064 §3.6:** B13 invoeren tijdens die proef maakt de
   uitkomst moeilijker te lezen. Voorstel: eerst de proef afronden (ongeveer 6 dagen).
 
+### B14 — Tijdzone en zonnetijd (F2, F3; aangenomen, 3.5.0)
+
+Het Homey-proces draait in UTC. Twee tijden in het model gingen daardoor een uur
+(zomer: twee uur) mis:
+
+- **F2:** de vensters voor de interne warmte (dag 06–18, avond 18–23, nacht 23–06)
+  gebruiken het uur in de tijdzone van de Homey (`getZonedHour()`), bij het leren per
+  sample en bij de titel van de tegel.
+- **F3:** de zonneschatting gebruikt de zonnetijd: UTC + lengtegraad/15
+  (`getSolarHour()`, lengtegraad uit `forecast_location_lon`, anders 4,90).
+
+Ook de tijdstempel in de diagnostiek en de maandnaam in de titel van de zonwinst
+volgen de tijdzone van de Homey. Gecontroleerd op de testinstallatie (31 oktober):
+titel "Avond" om 22:38, verversing na 23:00 "Nacht".
+
 ## 3. Fasering
 
-Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschiedenis.
+Stand bijgewerkt op 2026-10-31. De wijzigingen per fase staan in de git-geschiedenis.
 
 | Fase | Inhoud | Bewijs | Stand |
 |---|---|---|---|
@@ -479,9 +520,9 @@ Stand bijgewerkt op 2026-10-24. De wijzigingen per fase staan in de git-geschied
 | **1e** | §2.8 VFF weg, A7, §2.5, B6 diagnostisch veld | Bestaande tests; λ-test | Af |
 | **1f** | Release 3.4.0: lint, `homey app validate`, testkanaal, hardware (§10) | Handmatig | Af (voorbereid) |
 | **1g** | B12 uitweg bij vastlopen | Unit-tests N13, N18–N20; simulatie `adr062.js b12` | Af |
-| **1h** | B13 P-update met de werkelijk genomen stap | Unit-tests B13; simulatie `adr062-b13.js` | Open |
-| **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open |
-| **3** (3.5.0) | B7, B8 | Unit-tests per punt; thermische simulatie | Open |
+| **1h** | B13 P-update met de werkelijk genomen stap | Unit-tests B13; simulatie `adr062-b13.js` | Af (3.5.0) |
+| **2** | ADR-005 fase 1–3 (eigen ADR) | Zie ADR-005 | Open; geen voorwaarde meer voor fase 3 |
+| **3** (3.5.0) | A4–A6 uit B8, B14 | `test/unit/building-model-fase3.test.js`; O4-simulatie (ADR-065) | Af; B7 naar 3.6.0 |
 
 Fase 1a t/m 1g staan op `feature/adr-062-phase1`; fase 1 komt als geheel op
 `main` voor 3.4.0. 1f is voorbereid: versie, changelog en checklist (§10).
@@ -601,10 +642,10 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 6 | VFF weg, timers, restore-logging, diagnostisch veld | 1e | Af |
 | 7 | npm-script `simulate:building-model` | 1a | Af |
 | 8 | Release 3.4.0 via testkanaal (§10) | 1f | Af (voorbereid) |
-| 9 | B7, B8 na ADR-005 fase 3 | 3 | Open |
+| 9 | A4–A6 en B14; B7 naar 3.6.0 (voorverwarmduur) | 3 | Af (3.5.0) |
 | 10 | Soft reset bij profielwissel Aurora II/III, voorspelfout leeg na soft reset, gidsen en dev-docs bijgewerkt | 1f | Af |
 | 11 | B12 uitweg bij vastlopen tegen de grenzen | 1g | Af |
-| 12 | B13 P-update met de werkelijk genomen stap | 1h | Open |
+| 12 | B13 P-update met de werkelijk genomen stap | 1h | Af (3.5.0) |
 
 ## 10. Releasechecklist 3.4.0
 
