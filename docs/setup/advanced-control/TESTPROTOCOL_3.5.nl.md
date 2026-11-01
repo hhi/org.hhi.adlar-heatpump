@@ -59,17 +59,22 @@ De app rekent het advies uit, maar niets schrijft het naar de warmtepomp.
   `app_curve`. Bij Aurora III met "Stooklijn van de warmtepomp" en toch
   `app_curve`: graag melden (de schaal van de klimaatcurve is nog niet
   bevestigd).
-- `integralHold` staat op `flow_behind`. Dat is normaal: niemand voert
-  het advies uit, dus de I-term wacht.
-- Het advies ligt bij vloerverwarming meestal tussen 23 en 37 °C en
-  verschilt een paar graden van het huidige setpoint.
+- `integralHold` staat meestal op `flow_behind` (niemand voert het advies
+  uit, dus de I-term wacht) of op `coast` (het huis is warmer dan het
+  doel). Af en toe leeg is ook normaal: dan ligt het advies binnen 1 °C
+  van het setpoint en loopt de I-term gewoon door.
+- Het advies ligt bij vloerverwarming tussen 20 en 37 °C. Is het huis nu
+  te warm of te koud, dan kan het advies tot ongeveer 10 °C van het
+  huidige setpoint afwijken: de app wil het verschil wegwerken.
 
 ### Melden als
 
 - `control.basis.source` op `flat` staat.
 - Het advies tussen twee cycli (5 minuten) meer dan 5 °C springt zonder
   dat binnen- of buitentemperatuur veranderde.
-- Het advies wekenlang tegen 20 of 50 °C aan ligt.
+- Het advies wekenlang tegen een grens aan ligt: de ondergrens
+  (vloerverwarming 20 °C) of de maximale watertemperatuur (standaard
+  60 °C), terwijl het huis op temperatuur is.
 
 ## Fase 2: gesloten lus (1–2 weken)
 
@@ -97,18 +102,26 @@ De app rekent het advies uit, maar niets schrijft het naar de warmtepomp.
 | Wat | Doel |
 | --- | --- |
 | Binnentemperatuur (laagste, hoogste) | Meestal binnen ±0,5 °C van het doel |
-| Setpoint (laagste, hoogste) | Rustig, geen sprongen tussen de grenzen |
+| Setpoint (laagste, hoogste) | Meestal rustig; zie coast hieronder |
 | `control.i` | Loopt langzaam op of af en blijft daarna rond één waarde |
 | Compressorstarts (als zichtbaar) | Niet duidelijk meer dan in Klassiek |
 
-`integralHold` staat nu meestal op `null` of `small_error`. Een tijdelijke
-`flow_behind` na een handmatige wijziging is normaal.
+`integralHold` staat nu meestal op `null`, `small_error` of `coast`. Een
+tijdelijke `flow_behind` na een handmatige wijziging is normaal.
 
-### Stoppen en terugzetten als
+Na een zonnige dag houdt coast het setpoint laag. Stopt coast ('s avonds),
+dan springt het setpoint in één keer enkele graden omhoog (tot ongeveer
+9 °C). Dat is normaal.
+
+### Stoppen, terugzetten of bijstellen als
 
 - Het meer dan 6 uur meer dan 1 °C te koud is.
+- Het meer dan 6 uur meer dan 1 °C te warm is.
+- `control.i` dagenlang op −6 of +6 staat: de I-term kan niet verder
+  corrigeren. Zet de app-stooklijn 2–3 °C lager (bij −6) of hoger (bij +6).
 - Het setpoint langer dan een dag tegen een grens aan ligt.
-- De compressor duidelijk vaker start dan in Klassiek.
+- De compressor duidelijk vaker start dan in Klassiek. Meestal staat de
+  app-stooklijn dan te hoog: zet beide waarden 2–3 °C lager.
 
 ## Terugzetten
 
