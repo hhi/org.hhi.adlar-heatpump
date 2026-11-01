@@ -350,11 +350,11 @@ la courbe.
   cumulée repartent alors de 0
 - **Réduit de nuit** : déconseillé avec un plancher chauffant ; le mode
   Positionnel réchauffe alors le matin, avec plus de démarrages du compresseur
-- **Optimiseurs** (prix, COP, modèle du bâtiment) : ont peu d'effet en mode
-  Positionnel. L'intégrale annule leur décalage en quelques heures, si bien que
-  l'optimisation du prix déplace à peine la consommation vers les heures bon
-  marché. Le confort reste le même. Une adaptation suivra dans une version
-  ultérieure
+- **Optimiseurs** (prix, COP) : décalent la consigne de la pièce en mode
+  Positionnel, d'au plus 1,5 °C ; la courbe de chauffe suit. Avec
+  l'optimisation COP active, la maison peut rester en moyenne un peu sous la
+  consigne. La composante thermique du modèle du bâtiment ne participe pas en
+  mode Positionnel
 - **Expérimental** : le mode Positionnel a encore peu été testé en pratique
 
 #### Coast Offset (v2.8.0+)

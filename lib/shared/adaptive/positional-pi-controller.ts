@@ -273,3 +273,41 @@ export function resolveBasis(inputs: BasisInputs): CurveBasis | null {
   }
   return inputs.flatBasis !== null ? { value: inputs.flatBasis, source: 'flat' } : null;
 }
+
+// ============================================================================
+// Optimizers through the room target (ADR-065 O14/O16, 3.6.0)
+// ============================================================================
+
+/** Largest room-target shift the optimizers may cause (°C). */
+export const ROOM_TARGET_SHIFT_LIMIT_C = 1.5;
+
+/** Steepest curve slope used for the feed-forward (°C supply per °C outdoor). */
+const CURVE_SLOPE_MAX = 3;
+
+/**
+ * Room-target shift from the decision maker's weighted price and COP contributions. Both express a
+ * target temperature adjustment; added to the recommendation, the integral would work them away.
+ */
+export function roomTargetShift(contributions: { efficiency: number; cost: number }): number {
+  const shift = contributions.efficiency + contributions.cost;
+  return Number.isFinite(shift) ? clamp(shift, ROOM_TARGET_SHIFT_LIMIT_C) : 0;
+}
+
+/** Slope of the app curve: how much warmer the supply gets per °C colder outdoors, within 0–3. */
+export function appCurveSlope(appCurve: { atMinus15: number; atPlus15: number }): number {
+  const slope = (appCurve.atMinus15 - appCurve.atPlus15) / 30;
+  return Number.isFinite(slope) ? Math.max(0, Math.min(CURVE_SLOPE_MAX, slope)) : 0;
+}
+
+/**
+ * Feed-forward on the basis for a room-target shift (O16): on a heating curve the supply rises by
+ * (1 + slope) per °C room target. The slope comes from the app curve; a flat basis has none.
+ */
+export function basisFeedforward(
+  shift: number,
+  basis: CurveBasis,
+  appCurve: { atMinus15: number; atPlus15: number },
+): number {
+  const slope = basis.source === 'flat' ? 0 : appCurveSlope(appCurve);
+  return (1 + slope) * shift;
+}

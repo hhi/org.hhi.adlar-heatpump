@@ -344,10 +344,10 @@ selection to OFF. After OFF, the app can no longer read the curve.
   correction then start at 0
 - **Night setback**: not recommended with floor heating; Positional then heats
   up in the morning, with more compressor starts
-- **Optimizers** (price, COP, building model): have little effect in
-  Positional. The integral cancels their shift within a few hours, so the price
-  optimizer hardly moves consumption to cheap hours. Comfort stays the same. An
-  adjustment follows in a later version
+- **Optimizers** (price, COP): shift the room target in Positional, by at most
+  1.5 °C; the heating curve follows. With the COP optimizer on, the house can
+  stay slightly below the room target on average. The thermal component of the
+  building model does not take part in Positional
 - **Experimental**: Positional has seen little testing in practice
 
 #### Coast Offset (v2.8.0+)
