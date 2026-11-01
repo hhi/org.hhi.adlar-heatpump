@@ -348,8 +348,12 @@ la courbe.
   la cible simulée (`adlar_simulated_target`) avec la courbe de chauffe
 - **Revenir en arrière** est toujours possible ; l'intégrale et la correction
   cumulée repartent alors de 0
-- **Réduit de nuit** : déconseillé avec un plancher chauffant ; le mode
-  Positionnel réchauffe alors le matin, avec plus de démarrages du compresseur
+- **Réduit de nuit et programme du thermostat** : une pompe à chaleur a besoin
+  de plusieurs heures pour réchauffer la maison, dans tous les modes de
+  régulation. Avec des radiateurs, faites monter le programme 2 à 4 heures avant
+  l'heure souhaitée. Avec un plancher chauffant, gardez-le constant ou baissez
+  d'au plus 1 °C ; sinon le mode Positionnel réchauffe le matin, avec plus de
+  démarrages du compresseur
 - **Optimiseurs** (prix, COP) : décalent la consigne de la pièce en mode
   Positionnel, d'au plus 1,5 °C ; la courbe de chauffe suit. Avec
   l'optimisation COP active, la maison peut rester en moyenne un peu sous la

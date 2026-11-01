@@ -8,7 +8,8 @@ schaduwtest op Aurora II. Bijgewerkt 2026-11-01 (3.5.2): coast ook bij
 vloerverwarming standaard uit (D6 herzien, O19/O20). Bijgewerkt 2026-11-01 (3.6.0): D10,
 prijs en COP verschuiven in de positionele modus het kamerdoel (O14, O16 deels);
 Aurora III wacht na een start op zijn stooklijn (O17); meeschuiven bij nachtverlaging
-getoetst en niet gebouwd (O16, §3.8).
+en bij een weekprogramma getoetst en niet gebouwd (O16, §3.8); eerder opwarmen als open
+punt O21.
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -569,6 +570,53 @@ per dag, elektriciteit:
 nachtverlaging laat zien dat het huis 's ochtends lang te koud blijft. Dan B, alleen bij de
 preset Vloerverwarming.
 
+#### 3.8.1 Weekprogramma van een thermostaat
+
+Vraag: verandert het beeld als een thermostaat het kamerdoel meerdere keren per dag
+verschuift? Dat is gebruikelijk: een weekprogramma per dag en tijdslot, via een flow
+doorgegeven aan het kamerdoel.
+
+Simulatie `O16=1 O16_WEEK=1`, verder als hierboven. Programma: werkdag 6:30 21 °C,
+9:00 19 °C, 17:00 21 °C, 22:30 18 °C; weekend 8:00 21 °C, 23:30 18 °C. Extra varianten:
+
+- **zacht omlaag / zacht beide:** het doel van de regelaar volgt een daling (of ook een
+  stijging) met hooguit 0,5 °C per uur;
+- **eerder omhoog (2 of 4 uur):** de regelaar neemt het hoogste van het huidige doel en
+  het doel over 2 of 4 uur; omlaag gaat op het afgesproken moment. Dit vraagt dat de
+  regelaar het programma kent.
+
+Uren per dag meer dan 0,5 °C onder het doel tijdens de tijdsloten van 21 °C:
+
+| Variant | Radiatoren, mild | Radiatoren, koud | Vloer, mild | Vloer, koud |
+|---|---|---|---|---|
+| Geen programma | 0 | 0 | 0,1 | 0 |
+| Klassiek | 5,3 | 10,0 | 5,1 | 9,9 |
+| Nu | 6,7 | 6,9 | 6,2 | 9,8 |
+| B: mediaan 7 d | 5,2 | 6,4 | 5,6 | 9,9 |
+| Zacht omlaag | 4,6 | 4,8 | 7,4 | 8,7 |
+| B + zacht omlaag | 3,2 | 3,8 | 4,4 | 8,8 |
+| Nu, 2 u eerder omhoog | 3,8 | 4,7 | 4,5 | 9,3 |
+| Nu, 4 u eerder omhoog | **0** | **1,6** | **2,6** | 7,1 |
+| Zacht omlaag, 2 u eerder | **0** | **0,8** | 4,4 | **6,6** |
+
+1. Het programma verbruikt 7–12% minder elektriciteit dan geen programma, maar het huis
+   is in elke modus, ook klassiek, 5–10 van de ongeveer 10 comforturen per dag te koud.
+2. Meeschuiven (B) en een zachte overgang geven vooral de besparing terug. B + zacht
+   omlaag bij radiatoren in mild weer: 3,2 uur te koud bij hetzelfde verbruik als zonder
+   programma.
+3. Zacht omlaag bij radiatoren: minder starts (mild 7,6 → 6,8, koud 1,7 → 0,1 per dag)
+   voor ongeveer 3% meer verbruik. Bij vloer in mild weer slechter.
+4. Alleen eerder omhoog lost de kou op. Bij radiatoren met 4 uur geen of bijna geen
+   kou, met nog 2–3% minder verbruik dan zonder programma. Bij vloerverwarming blijft
+   het huis te traag voor stappen van 3 °C.
+
+**Besluit:** het besluit hierboven blijft, ook voor een weekprogramma. Meeschuiven en een
+zachte overgang worden niet gebouwd. Eerder opwarmen is het enige wat werkt, maar de
+regelaar kent het programma niet: een thermostaat geeft via een flow alleen het huidige
+doel door. Dat wordt open punt O21. Tot die tijd een advies in de handleiding: bij
+radiatoren het programma 2–4 uur eerder omhoog laten gaan, bij vloerverwarming constant
+of hooguit 1 °C verlagen.
+
 ## 4. Wat het oplost en wat niet
 
 | | |
@@ -582,7 +630,7 @@ preset Vloerverwarming.
 | ◐ Oververhitting door zon bij vloerverwarming | Verkleind met coast (D6) |
 | ✖ Een stooklijn met de verkeerde vorm | Een afwijking die met het weer verloopt; de integraal volgt traag (Ti) |
 | ✖ Tapwater, ontdooien, bijstook | Niet gesimuleerd |
-| ✖ Nachtverlaging | De woning volgt de stap niet; meeschuiven van de basis helpt alleen bij vloer in mild weer (§3.8) |
+| ✖ Nachtverlaging en weekprogramma | De woning volgt de stap niet; meeschuiven helpt alleen bij vloer in mild weer, alleen eerder opwarmen lost de kou op (§3.8, O21) |
 
 ## 5. Kanttekeningen
 
@@ -621,10 +669,11 @@ preset Vloerverwarming.
 | O11 | Standaard regelmodus | **Besloten:** klassiek voor iedereen, positioneel opt-in. Over de standaard wordt beslist na de hardwareweek en praktijkdata |
 | O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4). Aurora II pauzeert bij ontdooien, nog niet bij tapwater (tapwaterbit onbekend) |
 | O14 | Optimizers in de positionele modus | **Gebouwd in 3.6.0 (D10, §3.7):** prijs en COP verschuiven het kamerdoel, de basis schuift mee, de thermische component doet niet mee. Open: extra compressorstarts bij radiatoren in mild weer |
-| O16 | Kamerdoel in de basis | **Deels gebouwd in 3.6.0 (D10.2):** de basis schuift mee met de verschuiving door de optimizers. **Meeschuiven met het eigen kamerdoel (nachtverlaging): getoetst, niet gebouwd (§3.8).** Opnieuw bekijken met praktijkdata van vloerverwarming met nachtverlaging. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
+| O16 | Kamerdoel in de basis | **Deels gebouwd in 3.6.0 (D10.2):** de basis schuift mee met de verschuiving door de optimizers. **Meeschuiven met het eigen kamerdoel (nachtverlaging, weekprogramma): getoetst, niet gebouwd (§3.8).** Opnieuw bekijken met praktijkdata van vloerverwarming met nachtverlaging. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
 | O19 | Coast slingert met de compressor | **Opgelost in 3.5.2:** coast uit bij de vloerpreset (D6). Bij "Handmatig" met coast aan blijft het gedrag; een eigen oplossing voor coast is alleen nodig als iemand coast bij positioneel wil |
 | O20 | Sprong bij het einde van coast | **Opgelost in 3.5.2** met O19 |
 | O17 | Aurora III na een start | **Opgelost in 3.6.0:** tot de slow-pollgroep (Reg 67, 300 s) na een start gelezen is, geeft de coordinator `'pending'` en slaat de regeling de cyclus over, zoals bij Aurora II. Ontbreekt Reg 67 daarna (optioneel blok), dan valt de basis terug op de app-stooklijn. Alleen bij "Stooklijn van de warmtepomp" |
+| O21 | Eerder opwarmen bij een weekprogramma | Open, niet voor 3.6.0 (§3.8.1). De app leert het weekpatroon van het kamerdoel en zet het doel van de regelaar op tijd omhoog, met de voorverwarmduur uit het gebouwmodel (G14). Eerst praktijkdata: herkent de app een patroon uit een flow die alleen het huidige doel doorgeeft? |
 
 ## 7. Testaanpak
 

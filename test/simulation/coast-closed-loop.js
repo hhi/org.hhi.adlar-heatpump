@@ -14,6 +14,7 @@
  *   PROTOCOL=1 node test/simulation/coast-closed-loop.js   (test protocol 3.5: shadow, transfer table, COP 0, restart)
  *   O14=1 node test/simulation/coast-closed-loop.js   (ADR-065 O14/O16: optimizers through the room target, 3.6.0)
  *   O16=1 node test/simulation/coast-closed-loop.js   (ADR-065 O16: the basis follows the user's room target, night setback)
+ *   O16=1 O16_WEEK=1 node test/simulation/coast-closed-loop.js   (O16 with a thermostat week program, soft transitions)
  *
  * Fysica (stap 30 s):
  *   - woning: C · dT/dt = He·(Tw − Tin) − UA·(Tin − Tout) + P_int + zon
@@ -150,6 +151,18 @@ function shapedCurve(em, tOut, bias, house, shape = 1) {
 const targetAt = (hod, setback) => (setback && (hod >= 23 || hod < 7) ? 19 : TARGET);
 
 /**
+ * O16 thermostat week program: weekdays 6:30 21, 9:00 19 (away), 17:00 21, 22:30 18;
+ * weekend (days 5 and 6) 8:00 21, 23:30 18.
+ */
+function weekTarget(day, hod) {
+  if (day % 7 >= 5) return hod >= 8 && hod < 23.5 ? TARGET : 18;
+  if (hod >= 6.5 && hod < 9) return TARGET;
+  if (hod >= 9 && hod < 17) return 19;
+  if (hod >= 17 && hod < 22.5) return TARGET;
+  return 18;
+}
+
+/**
  * O4 day-ahead price (€/kWh, market) against the service's thresholds 0,04/0,06/0,10/0,12:
  * normal at night, very high in the morning and evening peak, low at midday (very low on sunny days).
  */
@@ -212,7 +225,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   // het advies uit; de warmtepomp volgt { atMinus15, atPlus15 } of houdt { fixed }), copGuard (3.5.1),
   // restartAtH (herstart van de app op dat uur)
   // opts (O16): o16Ref = 'ideal' (21, the curve's own room temperature) | 'fixed20' | 'median' (7 days);
-  // o16Hold: the integral pauses while the target differs from the 7-day median and until the house is back
+  // o16Hold: the integral pauses while the target differs from the 7-day median and until the house is back;
+  // week (thermostat week program); ramp = 'both' | 'down' (the controller's target moves 0,5 °C/h);
+  // lead (hours): the controller raises the target that much earlier (look-ahead), lowers it on time
   const P = { ...PII, ...(opts.Kp !== undefined ? { Kp: opts.Kp } : {}) };
   const house = opts.house ?? HOUSE;
   const pc = new PositionalPIController({ kp: P.Kp, tiHours: opts.Ti ?? 3 });
@@ -284,6 +299,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     elCheap: 0, // O14: electricity in the low-price hours (≤ 0,06 €/kWh)
     shiftSum: 0, // O14: sum of the room-target shift per cycle
     underMorning: 0, // O16: hours more than 0,5 °C below the target between 07:00 and 11:00
+    underComfort: 0, // O16: hours more than 0,5 °C below the target while the target is 21 °C
     overEvening: 0, // O16: hours more than 0,5 °C above the target between 23:00 and 03:00
     iMin: Infinity, // O16: lowest and highest integral from day 3 on
     iMax: -Infinity,
@@ -309,6 +325,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   let dayMax = -Infinity; let dayMin = Infinity;
   const targetHist = []; // O16: room target per cycle, last 7 days
   let o16Pause = false; // O16: integral paused for a deviating room target
+  let ctrlTarget = null; // O16: the controller's target (ramped towards the room target)
 
   const steps = (DAYS * 86400) / DT;
   for (let i = 0; i < steps; i++) {
@@ -349,12 +366,13 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     tIn += ((qEm - house.UA * (tIn - tOut) + house.pInt + sun) / house.C) * (DT / 3600);
 
     // --- Comfort statistics (true temperature, against the target of the moment) ---
-    const target = targetAt(hod, opts.setback);
+    const target = opts.week ? weekTarget(day, hod) : targetAt(hod, opts.setback);
     const e = tIn - target;
     st.sumSq += e * e; st.n++;
     if (e > 0.5) st.over05 += DT / 3600;
     if (e < -0.5) st.under05 += DT / 3600;
     if (e < -0.5 && hod >= 7 && hod < 11) st.underMorning += DT / 3600;
+    if (e < -0.5 && target === TARGET) st.underComfort += DT / 3600;
     if (e > 0.5 && (hod >= 23 || hod < 3)) st.overEvening += DT / 3600;
     dayMax = Math.max(dayMax, e); dayMin = Math.min(dayMin, e);
     coldRunS = e < -1 ? coldRunS + DT : 0;
@@ -369,6 +387,17 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     // --- Control cycle every 5 minutes (as executeControlCycle) ---
     if ((i + 1) % (CYCLE / DT) !== 0) continue;
     cycleNo++;
+    // O16: soft transition, the controller's target moves at most 0,5 °C/h (down only, or both ways)
+    const rampStep = 0.5 * (CYCLE / 3600);
+    let aimed = target;
+    if (opts.week && opts.lead) {
+      const ahead = h + opts.lead;
+      aimed = Math.max(target, weekTarget(Math.floor(ahead / 24), ahead % 24));
+    }
+    if (ctrlTarget === null || !opts.ramp) ctrlTarget = aimed;
+    else if (aimed < ctrlTarget) ctrlTarget = Math.max(aimed, ctrlTarget - rampStep);
+    else if (opts.ramp === 'both') ctrlTarget = Math.min(aimed, ctrlTarget + rampStep);
+    else ctrlTarget = aimed;
     const indoorM = Math.round((tIn + 0.03 * gauss()) * 10) / 10;
     const outletM = Math.round(outletTrue);
     let base = opts.flatBasis ? flatValue : shapedCurve(em, tOut, bias, house, opts.shape ?? 1);
@@ -400,7 +429,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     const dropRate = outHist.length < COAST.outletN ? 0 : (outHist[outHist.length - 1] - outHist[0]) / COAST.outletN;
     const mult = dropRate < 0 ? Math.max(0.3, 1.0 + dropRate * 0.5) : 1.0;
     // posI: PI output from the previous cycle's state (for the coast reference)
-    let ePos = target - indoorM;
+    let ePos = ctrlTarget - indoorM;
     const uPrev = (v.mode === 'posTS' || v.mode === 'posApp') ? pc.output(ePos) : Math.max(-P.Umax, Math.min(P.Umax, P.Kp * ePos + integ));
     let coastAdj;
     if (v.mode === 'posI' || v.mode === 'posTS' || v.mode === 'posApp') {
@@ -497,7 +526,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
       if (opts.o16Ref === 'ideal') ref = TARGET;
       if (opts.o16Ref === 'fixed20') ref = 20;
       if (opts.o16Ref === 'median') ref = percentile(targetHist, 0.5);
-      feedforward += (1 + slope) * (target - ref);
+      feedforward += (1 + slope) * (ctrlTarget - ref);
       if (opts.o16Hold) {
         const median = percentile(targetHist, 0.5);
         if (target !== median) o16Pause = true;
@@ -984,7 +1013,21 @@ async function o14() {
 }
 
 async function o16() {
-  const ROWS = [
+  const WEEK_ROWS = [
+    ['geen programma', 'pos. app O14', {}, false],
+    ['klassiek', 'incr. PI + coast (huidig)', { week: true }, true],
+    ['nu', 'pos. app O14', { week: true }, true],
+    ['ideaal (21)', 'pos. app O14', { week: true, o16Ref: 'ideal' }, true],
+    ['B: mediaan 7 d', 'pos. app O14', { week: true, o16Ref: 'median' }, true],
+    ['zacht omlaag', 'pos. app O14', { week: true, ramp: 'down' }, true],
+    ['zacht beide', 'pos. app O14', { week: true, ramp: 'both' }, true],
+    ['B + zacht omlaag', 'pos. app O14', { week: true, o16Ref: 'median', ramp: 'down' }, true],
+    ['ideaal + zacht omlaag', 'pos. app O14', { week: true, o16Ref: 'ideal', ramp: 'down' }, true],
+    ['nu, 2 u eerder omhoog', 'pos. app O14', { week: true, lead: 2 }, true],
+    ['nu, 4 u eerder omhoog', 'pos. app O14', { week: true, lead: 4 }, true],
+    ['zacht omlaag, 2 u eerder', 'pos. app O14', { week: true, ramp: 'down', lead: 2 }, true],
+  ];
+  const ROWS = process.env.O16_WEEK ? WEEK_ROWS : [
     ['geen nachtverlaging', 'pos. app O14', {}, false],
     ['geen nachtverlaging', 'pos. app O14 A', { o16Ref: 'fixed20' }, false],
     ['klassiek', 'incr. PI + coast (huidig)', {}, true],
@@ -1002,9 +1045,10 @@ async function o16() {
   for (const em of (process.argv[2] && process.argv[2] !== 'all' ? [process.argv[2]] : ['radiator', 'vloer'])) {
     const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
     for (const [wName, shift] of WEATHER) {
-      console.log(`\n### O16 ${EMITTERS[em].label}; ${wName}; nachtverlaging 19 °C (23–7 u); flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
-      console.log('variant | RMSE (°C) | uren < −0,5 /dag | waarvan 7–11 u | uren > +0,5 /dag | waarvan 23–3 u | starts/dag | kWh el/dag | I min–max (vanaf dag 3)');
-      console.log('--- | --- | --- | --- | --- | --- | --- | --- | ---');
+      const program = process.env.O16_WEEK ? 'weekprogramma (werkdag 6:30 21, 9 19, 17 21, 22:30 18; weekend 8 21, 23:30 18)' : 'nachtverlaging 19 °C (23–7 u)';
+      console.log(`\n### O16 ${EMITTERS[em].label}; ${wName}; ${program}; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log('variant | RMSE (°C) | uren < −0,5 /dag | waarvan 7–11 u | waarvan bij 21 °C | uren > +0,5 /dag | waarvan 23–3 u | starts/dag | kWh el/dag | I min–max (vanaf dag 3)');
+      console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
       for (const [label, rawName, o, setback] of ROWS) {
         const name = rawName === 'pos. app O14 A' ? 'pos. app O14' : rawName;
         const runs = [];
@@ -1019,6 +1063,7 @@ async function o16() {
           f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
           f(a((s) => s.under05 / DAYS)),
           f(a((s) => s.underMorning / DAYS)),
+          f(a((s) => s.underComfort / DAYS)),
           f(a((s) => s.over05 / DAYS)),
           f(a((s) => s.overEvening / DAYS)),
           f(a((s) => s.starts / DAYS), 1),
