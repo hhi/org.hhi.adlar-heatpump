@@ -1190,8 +1190,14 @@ export class AdaptiveControlService {
           if (outdoorTemp === null) {
             this.logger('AdaptiveControlService: No outdoor temperature available — skipping COP optimizer this cycle');
           } else {
-            // COP optimizer uses current warmtepomp setpoint for efficiency calculation
-            copAction = this.copOptimizer.calculateAction(currentCOP, dailyCOP, outdoorTemp, currentSetpoint);
+            // v3.5.1: adlar_cop 0 means no valid measurement (compressor off, outlier, not calculated yet),
+            // not a very low COP — skip the advice; an unknown daily COP falls back to the current COP
+            if (currentCOP > 0) {
+              // COP optimizer uses current warmtepomp setpoint for efficiency calculation
+              copAction = this.copOptimizer.calculateAction(currentCOP, dailyCOP > 0 ? dailyCOP : currentCOP, outdoorTemp, currentSetpoint);
+            } else {
+              this.logger('AdaptiveControlService: No valid COP measurement — skipping COP optimizer this cycle');
+            }
 
             // Collect COP measurement for learning
             const compressorFreq = (this.device.getCapabilityValue('measure_frequency.compressor_freq') as number) || 0;

@@ -356,3 +356,22 @@ test('ADR-065: choosing a positional preset prefills the app curve until the use
   assert.strictEqual(device.settings.adaptive_curve_at_minus15, 55, 'the user value stays');
   assert.strictEqual(device.store.adaptive_curve_user_set, true);
 });
+
+test('v3.5.1: without a valid COP measurement the COP optimizer gives no advice', async () => {
+  const device = createDevice();
+  device.settings.cop_optimizer_enabled = true;
+  const service = createService(device, [0, 0, 0]);
+  service.getEffectiveOutdoorTemp = async () => 5;
+  const calls = [];
+  service.copOptimizer.calculateAction = (...args) => { calls.push(args); return null; };
+
+  await service.executeControlCycle(); // adlar_cop not calculated yet (null)
+  device.capabilities.adlar_cop = 0; // compressor off, outlier or failed calculation
+  await service.executeControlCycle();
+  assert.strictEqual(calls.length, 0);
+
+  device.capabilities.adlar_cop = 3.1; // valid COP, daily COP still unknown
+  await service.executeControlCycle();
+  assert.strictEqual(calls.length, 1);
+  assert.deepStrictEqual(calls[0].slice(0, 2), [3.1, 3.1]);
+});
