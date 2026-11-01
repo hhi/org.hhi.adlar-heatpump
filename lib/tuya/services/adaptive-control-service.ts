@@ -16,6 +16,7 @@ import {
   PositionalPIController,
   resolveBasis,
   curvePresetFor,
+  fixedCurveFor,
   basisFeedforward,
   roomTargetShift,
   resolveControlParams,
@@ -1991,7 +1992,21 @@ export class AdaptiveControlService {
 
     // ADR-065: prefill the app curve with the starting values of the chosen positional mode, unless the
     // user set the curve himself (store flag). A curve change in the same save counts as his own.
-    if (changedKeys.includes('adaptive_curve_at_minus15') || changedKeys.includes('adaptive_curve_at_plus15')) {
+    // G15: a chosen fixed curve fills both fields once and the list returns to "—".
+    const fixedCurve = changedKeys.includes('adaptive_curve_fixed') ? fixedCurveFor(newSettings.adaptive_curve_fixed) : null;
+    if (fixedCurve) {
+      await this.device.setStoreValue(this.STORE_KEY_CURVE_USER_SET, true);
+      // Defer setSettings to avoid race condition with onSettings() still pending
+      this.device.homey.setTimeout(() => {
+        this.device.setSettings({
+          adaptive_curve_at_minus15: fixedCurve.atMinus15,
+          adaptive_curve_at_plus15: fixedCurve.atPlus15,
+          adaptive_curve_fixed: 'none',
+        })
+          .then(() => this.logger(`AdaptiveControlService: app curve set from fixed curve ${String(newSettings.adaptive_curve_fixed)} (${fixedCurve.atMinus15} / ${fixedCurve.atPlus15} °C)`))
+          .catch((err: unknown) => this.device.error('Failed to set the app curve from a fixed curve:', err));
+      }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+    } else if (changedKeys.includes('adaptive_curve_at_minus15') || changedKeys.includes('adaptive_curve_at_plus15')) {
       await this.device.setStoreValue(this.STORE_KEY_CURVE_USER_SET, true);
     } else if (changedKeys.includes('adaptive_control_mode') && !this.device.getStoreValue(this.STORE_KEY_CURVE_USER_SET)) {
       const preset = curvePresetFor(newSettings.adaptive_control_mode);

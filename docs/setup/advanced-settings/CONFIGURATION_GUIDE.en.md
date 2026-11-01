@@ -304,23 +304,26 @@ Automatic target temperature regulation based on external indoor temperature sen
 ##### Switching from a fixed curve
 
 Did you use a fixed curve of the heat pump (Aurora I/II: curve selection
-HH1–HH8 or HL1–HL8; Tuya: heating curve H1–H8 or L1–L8)? Note that curve,
-enter the two values from the table in the app curve and then set the curve
-selection to OFF. After OFF, the app can no longer read the curve.
+HH1–HH8 or HL1–HL8; Tuya: heating curve H1–H8 or L1–L8)? Note that curve and
+choose it at **App curve: fill in from a fixed curve**: after saving, the app
+fills in the two values from the table. Then set the curve selection to OFF.
+After OFF, the app can no longer read the curve.
 
 | Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
 | --- | --- | --- | --- | --- | --- |
-| HH1 | 55 | 50 | HL1 | 38 | 32 |
-| HH2 | 54 | 46 | HL2 | 35 | 30 |
-| HH3 | 54 | 41 | HL3 | 33 | 30 |
-| HH4 | 50 | 46 | HL4 | 35 | 29 |
-| HH5 | 49 | 41 | HL5 | 33 | 28 |
-| HH6 | 45 | 40 | HL6 | 31 | 26 |
-| HH7 | 44 | 36 | HL7 | 29 | 26 |
-| HH8 | 40 | 35 | HL8 | 29 | 24 |
+| HH1 | 54 | 51 | HL1 | 37 | 33 |
+| HH2 | 54 | 46 | HL2 | 34 | 31 |
+| HH3 | 53 | 42 | HL3 | 32 | 30 |
+| HH4 | 49 | 46 | HL4 | 34 | 29 |
+| HH5 | 49 | 41 | HL5 | 32 | 29 |
+| HH6 | 44 | 41 | HL6 | 30 | 27 |
+| HH7 | 44 | 36 | HL7 | 28 | 27 |
+| HH8 | 39 | 36 | HL8 | 28 | 25 |
 
-- Taken from the graphs in the heat pump manual and rounded to whole degrees;
-  deviation about 1 °C
+- Each curve is a staircase of 1 °C steps; the values follow the middle of
+  that staircase in the graphs of the heat pump manual, rounded to whole
+  degrees
+- The new values show once you reopen the settings
 
 **Which control mode do I choose?**
 

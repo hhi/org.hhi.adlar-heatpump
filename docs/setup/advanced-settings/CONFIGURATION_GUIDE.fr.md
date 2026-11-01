@@ -308,23 +308,26 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 
 Vous utilisiez une courbe fixe de la pompe à chaleur (Aurora I/II : sélection de
 courbe HH1–HH8 ou HL1–HL8 ; Tuya : courbe de chauffage H1–H8 ou L1–L8) ? Notez
-cette courbe, saisissez les deux valeurs du tableau dans la courbe de l'app,
-puis mettez la sélection de courbe sur OFF. Après OFF, l'app ne peut plus lire
-la courbe.
+cette courbe et choisissez-la dans **Courbe de l'app : remplir depuis une
+courbe fixe** : après l'enregistrement, l'app remplit les deux valeurs du
+tableau. Mettez ensuite la sélection de courbe sur OFF. Après OFF, l'app ne
+peut plus lire la courbe.
 
 | Courbe | −15 °C | +15 °C | Courbe | −15 °C | +15 °C |
 | --- | --- | --- | --- | --- | --- |
-| HH1 | 55 | 50 | HL1 | 38 | 32 |
-| HH2 | 54 | 46 | HL2 | 35 | 30 |
-| HH3 | 54 | 41 | HL3 | 33 | 30 |
-| HH4 | 50 | 46 | HL4 | 35 | 29 |
-| HH5 | 49 | 41 | HL5 | 33 | 28 |
-| HH6 | 45 | 40 | HL6 | 31 | 26 |
-| HH7 | 44 | 36 | HL7 | 29 | 26 |
-| HH8 | 40 | 35 | HL8 | 29 | 24 |
+| HH1 | 54 | 51 | HL1 | 37 | 33 |
+| HH2 | 54 | 46 | HL2 | 34 | 31 |
+| HH3 | 53 | 42 | HL3 | 32 | 30 |
+| HH4 | 49 | 46 | HL4 | 34 | 29 |
+| HH5 | 49 | 41 | HL5 | 32 | 29 |
+| HH6 | 44 | 41 | HL6 | 30 | 27 |
+| HH7 | 44 | 36 | HL7 | 28 | 27 |
+| HH8 | 39 | 36 | HL8 | 28 | 25 |
 
-- Repris des graphiques du manuel de la pompe à chaleur et arrondi au degré
-  près ; écart d'environ 1 °C
+- Chaque courbe est un escalier de marches de 1 °C ; les valeurs suivent le
+  milieu de cet escalier dans les graphiques du manuel de la pompe à chaleur,
+  arrondies au degré près
+- Les nouvelles valeurs apparaissent quand vous rouvrez les paramètres
 
 **Quel mode de régulation choisir ?**
 

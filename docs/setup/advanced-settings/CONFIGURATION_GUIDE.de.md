@@ -305,23 +305,26 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 
 Haben Sie eine feste Kurve der Wärmepumpe verwendet (Aurora I/II:
 Heizkurvenauswahl HH1–HH8 oder HL1–HL8; Tuya: Heizkurve H1–H8 oder L1–L8)?
-Notieren Sie diese Kurve, tragen Sie die beiden Werte aus der Tabelle bei der
-App-Kurve ein und stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF
-kann die App die Kurve nicht mehr auslesen.
+Notieren Sie diese Kurve und wählen Sie sie bei **App-Kurve: aus einer festen
+Kurve ausfüllen**: Nach dem Speichern trägt die App die beiden Werte aus der
+Tabelle ein. Stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF kann
+die App die Kurve nicht mehr auslesen.
 
 | Kurve | −15 °C | +15 °C | Kurve | −15 °C | +15 °C |
 | --- | --- | --- | --- | --- | --- |
-| HH1 | 55 | 50 | HL1 | 38 | 32 |
-| HH2 | 54 | 46 | HL2 | 35 | 30 |
-| HH3 | 54 | 41 | HL3 | 33 | 30 |
-| HH4 | 50 | 46 | HL4 | 35 | 29 |
-| HH5 | 49 | 41 | HL5 | 33 | 28 |
-| HH6 | 45 | 40 | HL6 | 31 | 26 |
-| HH7 | 44 | 36 | HL7 | 29 | 26 |
-| HH8 | 40 | 35 | HL8 | 29 | 24 |
+| HH1 | 54 | 51 | HL1 | 37 | 33 |
+| HH2 | 54 | 46 | HL2 | 34 | 31 |
+| HH3 | 53 | 42 | HL3 | 32 | 30 |
+| HH4 | 49 | 46 | HL4 | 34 | 29 |
+| HH5 | 49 | 41 | HL5 | 32 | 29 |
+| HH6 | 44 | 41 | HL6 | 30 | 27 |
+| HH7 | 44 | 36 | HL7 | 28 | 27 |
+| HH8 | 39 | 36 | HL8 | 28 | 25 |
 
-- Aus den Grafiken in der Anleitung der Wärmepumpe übernommen und auf ganze
-  Grad gerundet; Abweichung etwa 1 °C
+- Jede Kurve ist eine Treppe mit Stufen von 1 °C; die Werte folgen der Mitte
+  dieser Treppe in den Grafiken der Anleitung der Wärmepumpe, auf ganze Grad
+  gerundet
+- Die neuen Werte sind sichtbar, sobald Sie die Einstellungen erneut öffnen
 
 **Welchen Regelmodus wähle ich?**
 
