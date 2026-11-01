@@ -74,6 +74,7 @@ export class ServiceCoordinator {
   private _lastErrorContext: string | null = null;
   private _heatingLimits: WaterTempLimits | null = null; // Zone 1 heating limits from the latest snapshot
   private _curveHeatingSetpoint: number | null = null; // ADR-065: climate curve output Reg 67 from the latest snapshot
+  private _curvePolled = false; // ADR-065 O17: the slow poll group (climate curve outputs 3-66..3-69) has been read since start
   private _integralPause: 'defrost' | 'dhw' | null = null; // ADR-065: defrost / hot water pause the integral
   private _errorCountByContext = new Map<string, number>();
 
@@ -121,6 +122,15 @@ export class ServiceCoordinator {
     };
   }
 
+  /**
+   * ADR-065 O17: the climate curve output Reg 67, or 'pending' until the slow poll group has been read after a
+   * start, so the first cycles do not fall back to the app curve. Afterwards a missing Reg 67 (optional block)
+   * is null and the basis falls back to the app curve as before.
+   */
+  private _resolveHeatPumpCurve(): number | null | 'pending' {
+    return this._curvePolled ? this._curveHeatingSetpoint : 'pending';
+  }
+
   private _initializeServices(): void {
     this.logger('ServiceCoordinator: Initializing services');
 
@@ -133,7 +143,7 @@ export class ServiceCoordinator {
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,
       resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
-      resolveHeatPumpCurve: () => this._curveHeatingSetpoint,
+      resolveHeatPumpCurve: () => this._resolveHeatPumpCurve(),
       resolvePauseReason: () => this._integralPause,
     });
 
@@ -436,6 +446,7 @@ export class ServiceCoordinator {
   private _handleModbusData(snapshot: DataSnapshot): void {
     this._heatingLimits = snapshot.control.heatingLimits;
     this._curveHeatingSetpoint = snapshot.control.curveHeatingSetpointC;
+    if (snapshot.sourcePollGroup === 'slow') this._curvePolled = true;
     if (snapshot.status.defrosting) this._integralPause = 'defrost';
     else this._integralPause = snapshot.status.dhwActive ? 'dhw' : null;
     if (snapshot.sourcePollGroup === 'medium') {

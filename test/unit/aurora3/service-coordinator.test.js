@@ -279,3 +279,17 @@ test('medium snapshot updates capabilities and dashboard without touching fast-p
   assert.strictEqual(coordinator._consecutiveFastPollFailures, 3);
   assert.strictEqual(coordinator._lastSuccessfulFastPollAt, 1234);
 });
+
+test('ADR-065 O17: heat pump curve is pending until the slow poll group has been read after a start', () => {
+  const coordinator = Object.create(ServiceCoordinator.prototype);
+  coordinator._curvePolled = false;
+  coordinator._curveHeatingSetpoint = null;
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(), 'pending');
+
+  // After the slow poll group: Reg 67, or null when the optional block is not supported
+  coordinator._curvePolled = true;
+  coordinator._curveHeatingSetpoint = 38;
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(), 38);
+  coordinator._curveHeatingSetpoint = null;
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(), null);
+});

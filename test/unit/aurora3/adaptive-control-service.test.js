@@ -357,6 +357,27 @@ test('ADR-065: the heat pump curve is the basis when plausible', async () => {
   assert.strictEqual(service.lastBasis.source, 'heat_pump_curve');
 });
 
+test('ADR-065 O17: a pending heat pump curve skips the cycle; the app curve does not wait', async () => {
+  const device = createDevice();
+  device.settings.adaptive_curve_source = 'auto';
+  const service = createPositionalService(device, 20);
+  service.resolveHeatPumpCurve = () => 'pending';
+
+  await service.executeControlCycle();
+  assert.strictEqual(service.lastBasis, null, 'no basis while pending');
+  assert.strictEqual(service.lastRecommendedTemp, undefined, 'no recommendation while pending');
+
+  service.resolveHeatPumpCurve = () => 33;
+  await service.executeControlCycle();
+  assert.strictEqual(service.lastRecommendedTemp, 33);
+  assert.strictEqual(service.lastBasis.source, 'heat_pump_curve');
+
+  device.settings.adaptive_curve_source = 'app';
+  service.resolveHeatPumpCurve = () => 'pending';
+  await service.executeControlCycle();
+  assert.strictEqual(service.lastBasis.source, 'app_curve', 'the app curve does not wait');
+});
+
 test('ADR-065: defrost and hot water pause the integral', async () => {
   const device = createDevice();
   const service = createPositionalService(device, 19.5);
