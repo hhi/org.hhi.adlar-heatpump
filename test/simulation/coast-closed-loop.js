@@ -751,7 +751,8 @@ async function o4() {
 
 /**
  * Test protocol 3.5 (docs/setup/advanced-control/TESTPROTOCOL_3.5.nl.md), floor heating with the preset
- * (Kp 3, Ti 6 h, coast on) and the service's decision maker, without optimizers unless stated:
+ * (Kp 3, Ti 6 h, coast as in the preset; COAST=1 forces it on) and the service's decision maker,
+ * without optimizers unless stated:
  *   1. shadow: the app advises, the heat pump keeps its own curve or setpoint
  *   2. closed loop with an app curve from the transfer table (HH/HL) or the floor preset 35/27
  *   3. compressor off with the COP optimizer on: before (COP 0 counts as too low) and after 3.5.1
@@ -760,7 +761,8 @@ async function o4() {
 async function protocol() {
   const em = 'vloer';
   const preset = EMITTER_PRESETS.floor;
-  const variant = 'pos. app (dm) + coast';
+  const coast = preset.coastEnabled || process.env.COAST === '1';
+  const variant = coast ? 'pos. app (dm) + coast' : 'pos. app (dm)';
   const CURVES = {
     'voorinstelling 35/27': { atMinus15: 35, atPlus15: 27 },
     'HH8 40/35': { atMinus15: 40, atPlus15: 35 },
@@ -781,7 +783,7 @@ async function protocol() {
     for (const s of runs) for (const [k, c] of Object.entries(s.holds)) { tot[k] = (tot[k] ?? 0) + c; n += c; }
     return Object.entries(tot).sort((x, y) => y[1] - x[1]).map(([k, c]) => `${k} ${f((100 * c) / n, 0)}%`).join(', ');
   };
-  console.log(`# Testprotocol 3.5, droog: ${EMITTERS[em].label}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast aan; ${DAYS} dagen, ${SEEDS.length} seeds`);
+  console.log(`# Testprotocol 3.5, droog: ${EMITTERS[em].label}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${coast ? 'aan' : 'uit'}; ${DAYS} dagen, ${SEEDS.length} seeds`);
 
   // 1. Shadow
   const SHADOW = [

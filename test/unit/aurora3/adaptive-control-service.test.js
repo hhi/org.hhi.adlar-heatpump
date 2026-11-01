@@ -264,8 +264,8 @@ test('ADR-065: switching from classic to positional resets the accumulator', asy
   assert.strictEqual(device.store.adaptive_control_mode_last, 'positional');
 });
 
-test('ADR-065: the radiator preset keeps coast off, the floor preset allows it', async () => {
-  for (const [emitter, expected] of [['radiator', false], ['floor', true]]) {
+test('ADR-065: both presets keep coast off (3.5.2), Manual follows the coast switch', async () => {
+  for (const [emitter, expected] of [['radiator', false], ['floor', false], ['manual', true]]) {
     const device = createDevice();
     device.settings.adaptive_control_mode = `positional_${emitter}`;
     const service = createPositionalService(device, 21.5);

@@ -267,14 +267,14 @@ Automatic target temperature regulation based on external indoor temperature sen
   - **Classic**: a small step up or down every cycle; the steps add up (previous
     behaviour)
   - **Positional – Radiators** (experimental): Kp 3, Ti 3 h, coast off
-  - **Positional – Floor heating** (experimental): Kp 3, Ti 6 h, coast on
+  - **Positional – Floor heating** (experimental): Kp 3, Ti 6 h, coast off
   - **Positional – Manual** (experimental): Positional PI Kp and Ti and the
     Coast switch below
   - Positional: advice = heating curve + PI correction with a true integral,
     without a wide dead zone; the setpoint stays calm, also with a flow that
     applies every advice
 - **Coast**: with Classic and Positional – Manual the Coast switch applies;
-  Radiators and Floor heating set coast themselves
+  Radiators and Floor heating switch coast off
 - **Heating curve (positional modes) — default**: App curve
   - **App curve**: water temperature at −15 °C and at +15 °C outdoor. Starting
     values: Radiators 50 / 35, Floor heating 35 / 27, otherwise 45 / 30;

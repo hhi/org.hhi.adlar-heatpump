@@ -141,10 +141,13 @@ export class PositionalPIController {
 export type ControlMode = 'classic' | 'positional';
 export type EmitterType = 'radiator' | 'floor' | 'manual';
 
-/** Preset per emitter type: Ti and coast depend strongly on the emitter, Kp hardly (ADR-065 §3.3). */
+/**
+ * Preset per emitter type: Ti depends strongly on the emitter, Kp hardly (ADR-065 §3.3). Coast is off in both:
+ * with a heating curve that does not fit, it swings with the compressor (ADR-065 D6, revised in 3.5.2).
+ */
 export const EMITTER_PRESETS: Record<Exclude<EmitterType, 'manual'>, PositionalPIParams & { coastEnabled: boolean }> = {
   radiator: { kp: 3, tiHours: 3, coastEnabled: false },
-  floor: { kp: 3, tiHours: 6, coastEnabled: true },
+  floor: { kp: 3, tiHours: 6, coastEnabled: false },
 };
 
 export const POSITIONAL_DEFAULTS = { kp: 3, tiHours: 3 };

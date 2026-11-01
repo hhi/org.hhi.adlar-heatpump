@@ -268,14 +268,14 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   - **Klassisch**: in jedem Zyklus ein kleiner Schritt nach oben oder unten; die
     Schritte summieren sich (bisheriges Verhalten)
   - **Positionell – Heizkörper** (experimentell): Kp 3, Ti 3 h, Coast aus
-  - **Positionell – Fußbodenheizung** (experimentell): Kp 3, Ti 6 h, Coast an
+  - **Positionell – Fußbodenheizung** (experimentell): Kp 3, Ti 6 h, Coast aus
   - **Positionell – Manuell** (experimentell): Positioneller PI Kp und Ti und
     der Schalter Coast unten
   - Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne
     breite Totzone; der Sollwert bleibt ruhig, auch mit einem Flow, der jede
     Empfehlung ausführt
 - **Coast**: bei Klassisch und Positionell – Manuell gilt der Schalter Coast;
-  Heizkörper und Fußbodenheizung setzen Coast selbst
+  Heizkörper und Fußbodenheizung schalten Coast aus
 - **Heizkurve (positionelle Modi) — Standard**: App-Kurve
   - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen. Startwerte:
     Heizkörper 50 / 35, Fußbodenheizung 35 / 27, sonst 45 / 30; bei der Wahl des

@@ -1,4 +1,10 @@
 {
+  "3.5.2": {
+    "en": "Adaptive control: with Positional – Floor heating, coast is now off.",
+    "nl": "Adaptieve regeling: bij Positioneel – Vloerverwarming staat coast nu uit.",
+    "de": "Adaptive Regelung: bei Positionell – Fußbodenheizung ist Coast jetzt aus.",
+    "fr": "Régulation adaptative : avec Positionnel – Plancher chauffant, coast est désormais désactivé."
+  },
   "3.5.1": {
     "en": "Adaptive control: without a valid COP measurement (e.g. compressor off), the COP optimisation no longer lowers the water temperature.",
     "nl": "Adaptieve regeling: zonder geldige COP-meting (bijv. compressor uit) verlaagt de COP-optimalisatie de watertemperatuur niet meer.",

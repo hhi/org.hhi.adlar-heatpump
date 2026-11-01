@@ -1,7 +1,7 @@
 # Testprotocol 3.5: positionele regeling bij vloerverwarming
 
 Voor wie: een tester met **Aurora I/II** of **Aurora III** en vloerverwarming.
-Versie: testversie **3.5.1** (bevat 3.5.0).
+Versie: testversie **3.5.2** (bevat 3.5.0 en 3.5.1).
 
 | Fase | Wat | Duur |
 | --- | --- | --- |
@@ -59,10 +59,9 @@ De app rekent het advies uit, maar niets schrijft het naar de warmtepomp.
   `app_curve`. Bij Aurora III met "Stooklijn van de warmtepomp" en toch
   `app_curve`: graag melden (de schaal van de klimaatcurve is nog niet
   bevestigd).
-- `integralHold` staat meestal op `flow_behind` (niemand voert het advies
-  uit, dus de I-term wacht) of op `coast` (het huis is warmer dan het
-  doel). Af en toe leeg is ook normaal: dan ligt het advies binnen 1 °C
-  van het setpoint en loopt de I-term gewoon door.
+- `integralHold` staat meestal op `flow_behind`: niemand voert het advies
+  uit, dus de I-term wacht. Af en toe leeg is ook normaal: dan ligt het
+  advies binnen 1 °C van het setpoint en loopt de I-term gewoon door.
 - Het advies ligt bij vloerverwarming tussen 20 en 37 °C. Is het huis nu
   te warm of te koud, dan kan het advies tot ongeveer 10 °C van het
   huidige setpoint afwijken: de app wil het verschil wegwerken.
@@ -102,16 +101,13 @@ De app rekent het advies uit, maar niets schrijft het naar de warmtepomp.
 | Wat | Doel |
 | --- | --- |
 | Binnentemperatuur (laagste, hoogste) | Meestal binnen ±0,5 °C van het doel |
-| Setpoint (laagste, hoogste) | Meestal rustig; zie coast hieronder |
+| Setpoint (laagste, hoogste) | Rustig, stappen van 1–2 °C |
 | `control.i` | Loopt langzaam op of af en blijft daarna rond één waarde |
 | Compressorstarts (als zichtbaar) | Niet duidelijk meer dan in Klassiek |
 
-`integralHold` staat nu meestal op `null`, `small_error` of `coast`. Een
-tijdelijke `flow_behind` na een handmatige wijziging is normaal.
-
-Na een zonnige dag houdt coast het setpoint laag. Stopt coast ('s avonds),
-dan springt het setpoint in één keer enkele graden omhoog (tot ongeveer
-9 °C). Dat is normaal.
+`integralHold` staat nu meestal op `null` of `small_error`. Een tijdelijke
+`flow_behind` na een handmatige wijziging is normaal. Coast staat bij
+Vloerverwarming uit (sinds 3.5.2), dus `coast` hoort hier niet te staan.
 
 ### Stoppen, terugzetten of bijstellen als
 

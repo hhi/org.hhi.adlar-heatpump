@@ -4,7 +4,8 @@
 blijft de standaard (O11). Eerder: concept (2026-10-25), aangevuld met D8 (2026-10-30).
 Bijgewerkt 2026-10-31: D9 (één instelling Regelmodus) vervangt de keuzelijst van D8,
 app-stooklijn als standaard basis met startwaarden per afgiftesysteem, O4 getoetst,
-schaduwtest op Aurora II.
+schaduwtest op Aurora II. Bijgewerkt 2026-11-01 (3.5.2): coast ook bij
+vloerverwarming standaard uit (D6 herzien, O19/O20).
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -26,8 +27,9 @@ warmtepomp met interne thermostaat, regelcyclus van 5 minuten, flow, hele graden
   de voorgestelde PI de comfortfout (RMSE 0,35 → 0,17 °C bij radiatoren), verdwijnt de
   onderkoeling bij kou, en daalt het verbruik met 0–24% (het minst bij vloerverwarming
   in de kou).
-- **Coast:** blijft beschikbaar, maar als optie voor vloerverwarming. Bij radiatoren
-  voegt coast naast deze PI niets toe en geeft het meer compressorstarts.
+- **Coast:** blijft beschikbaar bij Klassiek en bij "Positioneel – Handmatig". Bij
+  beide presets staat coast uit: naast deze PI voegt coast weinig toe, en bij een
+  stooklijn die niet past geeft het veel compressorstarts (D6, herzien in 3.5.2).
 - **Regelmodus:** één instelling met Klassiek (standaard), Positioneel – Radiatoren,
   – Vloerverwarming en – Handmatig. De presets zetten Kp, Ti en coast in één keer; Ti en
   coast hangen sterk van het afgiftesysteem af, Kp weinig (D9, vervangt D8).
@@ -179,12 +181,29 @@ nu, maar **alleen zolang de coast-correctie negatief is** (ADR-040A). Standaard,
 preset van de regelmodus (D9):
 
 - **radiatoren:** coast uit;
-- **vloerverwarming:** coast aan.
+- **vloerverwarming:** coast uit (sinds 3.5.2; in 3.5.0 en 3.5.1 aan).
 
-Tijdens coast wordt de integraal bevroren. Bij vloerverwarming, waar coast standaard aan
-staat, is dat iets beter dan doorintegreren (RMSE 0,206 tegen 0,213 mild; 0,195 tegen
-0,211 koud). Bij radiatoren is doorintegreren beter (0,184 tegen 0,222), maar daar staat
-coast standaard uit (O6).
+Tijdens coast wordt de integraal bevroren. Bij vloerverwarming is dat iets beter dan
+doorintegreren (RMSE 0,206 tegen 0,213 mild; 0,195 tegen 0,211 koud). Bij radiatoren is
+doorintegreren beter (0,184 tegen 0,222) (O6).
+
+**Herzien 2026-11-01 (3.5.2): coast ook bij vloerverwarming uit.** De keuze "aan" kwam
+uit simulaties met een ideale stooklijn; daar maakt coast weinig uit. De droge toets van
+het testprotocol (`PROTOCOL=1`) gebruikt de app-stooklijn met twee punten, zoals bij
+gebruikers. Bij een stooklijn die te hoog staat, gaat coast heen en weer met de
+compressor: start de compressor, dan stijgt de uitlaat boven het advies en valt coast
+weg (ADR-040A); stopt hij, dan trekt coast het advies weer naar uitlaat − 1. Dat gaf
+14–23 starts per dag (O19). Bij het einde van coast sprong het advies in één cyclus tot
+9 °C omhoog (O20).
+
+Toets op 24 scenario's (referentie, lichte en zware woning; mild en koud; ideale
+stooklijn, 35/27, HL2 te hoog, HL8 te laag; 5 seeds, 14 dagen), coast uit tegen aan:
+RMSE 11× beter, 9× gelijk (±0,01), 4× iets slechter (alle bij HL8: tot ongeveer 1 uur
+per dag meer dan 0,5 °C te koud bij mild weer); gemiddeld 0,4 tegen 2,9 starts per dag;
+nooit een sprong van meer dan 1 °C. Bekeken en verworpen: het coast-doel vastzetten op
+zijn laagste waarde (slechter), het advies na coast geleidelijk laten stijgen (helpt
+nauwelijks) en alleen de integraal pauzeren zonder het advies omlaag te trekken
+(slechter bij een te hoge stooklijn).
 
 ### D7 — Ti per afgiftesysteem
 
@@ -204,7 +223,7 @@ het sterkst van het afgiftesysteem afhangen in één keer:
 | Keuze | Kp (K/K) | Ti | Coast |
 |---|---|---|---|
 | Radiatoren (`radiator`) | 3 | 3 uur | Uit |
-| Vloerverwarming (`floor`) | 3 | 6 uur | Aan |
+| Vloerverwarming (`floor`) | 3 | 6 uur | Aan (uit sinds 3.5.2, D6) |
 | Handmatig (`manual`) | eigen instelling | eigen instelling | eigen instelling |
 
 **Waarom een set en niet alleen Kp.** In de simulatie (§3.3) verschilt Kp weinig per
@@ -479,7 +498,7 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
 | O3 | Ti per afgiftesysteem | **Gebouwd** via de presets (D9). P4 bevestigt radiatoren 3 uur en vloer 6 uur; radiatoren 1,5 uur en Kp 4 blijven een optie na de hardwareweek |
 | O4 | Optimizers | **Getoetst (2026-10-31):** positioneel blijft stabiel met alle optimizers aan (RMSE 0,17–0,20 tegen klassiek 0,30–0,59), maar de optimizers verschuiven weinig; de thermische component heeft geen meetbaar effect (ADR-062 B7). Zie O14 |
 | O5 | Migratie | **Besloten:** bestaande apparaten blijven klassiek. Bij een wissel van modus gaan accumulator en integraal naar 0. Positioneel heeft eigen velden voor Kp en Ti; de klassieke velden blijven (D8) |
-| O6 | Coast standaard | **Besloten:** radiatoren uit, vloer aan. "Handmatig" (standaard) met `adaptive_coast_enabled` aan houdt het huidige gedrag |
+| O6 | Coast standaard | **Besloten (herzien 2026-11-01):** radiatoren en vloer uit (D6). "Handmatig" met `adaptive_coast_enabled` (standaard aan) houdt het eigen gedrag |
 | O7 | Flow-assisted of direct schrijven | Ongewijzigd flow-assisted; D3.2 vangt een flow op die niet of beperkt uitvoert |
 | O8 | Diagnostiek | **Gebouwd:** blok `control` in `adaptive_control_diagnostics` met modus, afgiftesysteem (`emitter`), bron, Kp, Ti, basis met bron, P, I, u en `integralHold`. Het coast-aandeel staat al in `breakdown` |
 | O9 | Gemengde installaties en FCU | Open. Voorlopig "Vloerverwarming" adviseren bij gemengd, "Radiatoren" bij FCU; een keuze "Gemengd" alleen als een toets er een eigen set voor oplevert. Aurora III kent een tweede zone (3-0037) waaruit gemengd is af te leiden |
@@ -488,6 +507,8 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
 | O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4). Aurora II pauzeert bij ontdooien, nog niet bij tapwater (tapwaterbit onbekend) |
 | O14 | Optimizers in de positionele modus | Open: prijs en COP verschuiven het advies, de I-term werkt dat weg. Ontwerp nodig (bijvoorbeeld de verschuiving in het doel in plaats van in het advies) |
 | O16 | Kamerdoel in de basis | Idee voor 3.6.0: de basis schuift mee met het kamerdoel, zodat nachtverlaging en een ander doel niet op de I-term wachten. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
+| O19 | Coast slingert met de compressor | **Opgelost in 3.5.2:** coast uit bij de vloerpreset (D6). Bij "Handmatig" met coast aan blijft het gedrag; een eigen oplossing voor coast is alleen nodig als iemand coast bij positioneel wil |
+| O20 | Sprong bij het einde van coast | **Opgelost in 3.5.2** met O19 |
 | O17 | Aurora III na een start | Open: tot Reg 67 (slow-pollgroep, 300 s) gelezen is, rekent de basis met de app-stooklijn. Zelfde oplossing als Aurora II (`'pending'`) |
 
 ## 7. Testaanpak

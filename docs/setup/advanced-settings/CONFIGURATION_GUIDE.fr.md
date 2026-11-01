@@ -270,14 +270,14 @@ Régulation automatique de la température cible basée sur un capteur de tempé
     s'additionnent (comportement existant)
   - **Positionnel – Radiateurs** (expérimental) : Kp 3, Ti 3 h, coast désactivé
   - **Positionnel – Plancher chauffant** (expérimental) : Kp 3, Ti 6 h, coast
-    activé
+    désactivé
   - **Positionnel – Manuel** (expérimental) : Kp et Ti du PI positionnel et
     l'interrupteur Coast ci-dessous
   - Positionnel : recommandation = courbe de chauffe + correction PI avec une
     vraie intégrale, sans large zone morte ; la consigne reste stable, même avec
     un flow qui applique chaque recommandation
 - **Coast** : en mode Classique et Positionnel – Manuel, l'interrupteur Coast
-  s'applique ; Radiateurs et Plancher chauffant règlent coast eux-mêmes
+  s'applique ; Radiateurs et Plancher chauffant désactivent coast
 - **Courbe de chauffe (modes positionnels) — par défaut** : Courbe de l'app
   - **Courbe de l'app** : température d'eau à −15 °C et à +15 °C extérieur.
     Valeurs de départ : Radiateurs 50 / 35, Plancher chauffant 35 / 27, sinon 45
