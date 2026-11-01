@@ -7,7 +7,8 @@ app-stooklijn als standaard basis met startwaarden per afgiftesysteem, O4 getoet
 schaduwtest op Aurora II. Bijgewerkt 2026-11-01 (3.5.2): coast ook bij
 vloerverwarming standaard uit (D6 herzien, O19/O20). Bijgewerkt 2026-11-01 (3.6.0): D10,
 prijs en COP verschuiven in de positionele modus het kamerdoel (O14, O16 deels);
-Aurora III wacht na een start op zijn stooklijn (O17).
+Aurora III wacht na een start op zijn stooklijn (O17); meeschuiven bij nachtverlaging
+getoetst en niet gebouwd (O16, §3.8).
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -513,6 +514,61 @@ alleen prijsoptimalisatie:
 5. De thermische component als kamerdoelverschuiving gaf alleen een blijvende verlaging
    van 0,05–0,1 °C, zonder effect op de prijs; vandaar D10.3.
 
+### 3.8 O16: de basis schuift mee met het eigen kamerdoel (getoetst, niet gebouwd)
+
+Vraag: moet de basis ook meeschuiven als de gebruiker zelf het kamerdoel verandert, zoals
+bij nachtverlaging? Daarvoor is een referentiekamertemperatuur nodig: de kamertemperatuur
+waarvoor de stooklijn geldt. Meeschuiven = (1 + helling) × (kamerdoel − referentie).
+
+Simulatie `O16=1`: nachtverlaging naar 19 °C van 23 tot 7 uur, presets van 3.5.2, zonder
+optimizers, 14 dagen, 5 seeds, directe flow. Varianten:
+
+- **nu:** niet meeschuiven (3.6.0);
+- **ideaal:** referentie 21 °C, de kamertemperatuur van de gesimuleerde stooklijn;
+- **A:** vaste referentie 20 °C;
+- **B:** de mediaan van het kamerdoel over 7 dagen (een verlaging korter dan 12 uur
+  telt niet mee);
+- **I-pauze:** de integraal pauzeert zolang het kamerdoel van de mediaan afwijkt en tot
+  het huis weer binnen 0,3 °C van het doel is; met en zonder B.
+
+Nu → B; uren per dag meer dan 0,5 °C onder het doel (waarvan 7–11 uur), compressorstarts
+per dag, elektriciteit:
+
+| Woning, weer | Uren < −0,5 °C | Waarvan 7–11 u | Starts/dag | Elektriciteit |
+|---|---|---|---|---|
+| Vloer, mild | 5,2 → 1,9 | 2,5 → 0,9 | 1,1 → 1,1 | +7% |
+| Vloer, koud | 10,7 → 11,8 | 3,2 → 3,3 | 0,8 → 0,9 | gelijk |
+| Radiatoren, mild | 4,9 → 6,8 | 3,5 → 3,7 | 5,5 → 3,7 | +6% |
+| Radiatoren, koud | 5,4 → 7,7 | 3,6 → 3,7 | 1,1 → 1,3 | +1% |
+
+1. Alleen vloerverwarming in mild weer wint duidelijk; daar zit de integraal niet meer
+   tegen −6. Bij radiatoren zijn er minder starts, maar is het vaker te koud. Bij kou
+   helpt meeschuiven geen van beide.
+2. B ligt overal binnen 0,5 uur per dag van de ideale referentie: de mediaan werkt als
+   referentie.
+3. A valt af: zonder nachtverlaging duwt de vaste afwijking de integraal blijvend naar
+   zijn ondergrens (radiatoren −6 tot −3,6 in plaats van −5,8 tot −0,7).
+4. De I-pauze valt af: bij vloerverwarming in koud weer blijft de integraal op −6 staan
+   (15,5 uur per dag te koud).
+5. Geen enkele variant lost het grootste probleem op: de woning volgt een stap van 2 °C in
+   8 uur niet. Elke nacht is het 8 uur te warm ten opzichte van 19 °C en elke ochtend 3–4
+   uur te koud, ook in klassiek. De fout blijft 's nachts negatief, zodat de integraal ook
+   met meeschuiven terugloopt.
+
+**Besluit: niet bouwen.**
+
+- De winst zit in één van de vier situaties (vloer, mild).
+- Meeschuiven kost in mild weer 6–7% meer elektriciteit; wie nachtverlaging instelt,
+  verwacht meestal het omgekeerde.
+- B vraagt een verborgen geschiedenis van 7 dagen die een herstart moet overleven, voor
+  een kleine winst.
+- De externe test met vloerverwarming op 3.5.2 loopt nog; pas met praktijkdata is te zien
+  of de winst bij vloer bestaat.
+
+**Opnieuw bekijken als** praktijkdata van een gebruiker met vloerverwarming en
+nachtverlaging laat zien dat het huis 's ochtends lang te koud blijft. Dan B, alleen bij de
+preset Vloerverwarming.
+
 ## 4. Wat het oplost en wat niet
 
 | | |
@@ -526,6 +582,7 @@ alleen prijsoptimalisatie:
 | ◐ Oververhitting door zon bij vloerverwarming | Verkleind met coast (D6) |
 | ✖ Een stooklijn met de verkeerde vorm | Een afwijking die met het weer verloopt; de integraal volgt traag (Ti) |
 | ✖ Tapwater, ontdooien, bijstook | Niet gesimuleerd |
+| ✖ Nachtverlaging | De woning volgt de stap niet; meeschuiven van de basis helpt alleen bij vloer in mild weer (§3.8) |
 
 ## 5. Kanttekeningen
 
@@ -564,7 +621,7 @@ alleen prijsoptimalisatie:
 | O11 | Standaard regelmodus | **Besloten:** klassiek voor iedereen, positioneel opt-in. Over de standaard wordt beslist na de hardwareweek en praktijkdata |
 | O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4). Aurora II pauzeert bij ontdooien, nog niet bij tapwater (tapwaterbit onbekend) |
 | O14 | Optimizers in de positionele modus | **Gebouwd in 3.6.0 (D10, §3.7):** prijs en COP verschuiven het kamerdoel, de basis schuift mee, de thermische component doet niet mee. Open: extra compressorstarts bij radiatoren in mild weer |
-| O16 | Kamerdoel in de basis | **Deels gebouwd in 3.6.0 (D10.2):** de basis schuift mee met de verschuiving door de optimizers. Open: meeschuiven met een ander kamerdoel van de gebruiker (nachtverlaging); daarvoor is een referentiekamertemperatuur van de stooklijn nodig. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
+| O16 | Kamerdoel in de basis | **Deels gebouwd in 3.6.0 (D10.2):** de basis schuift mee met de verschuiving door de optimizers. **Meeschuiven met het eigen kamerdoel (nachtverlaging): getoetst, niet gebouwd (§3.8).** Opnieuw bekijken met praktijkdata van vloerverwarming met nachtverlaging. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
 | O19 | Coast slingert met de compressor | **Opgelost in 3.5.2:** coast uit bij de vloerpreset (D6). Bij "Handmatig" met coast aan blijft het gedrag; een eigen oplossing voor coast is alleen nodig als iemand coast bij positioneel wil |
 | O20 | Sprong bij het einde van coast | **Opgelost in 3.5.2** met O19 |
 | O17 | Aurora III na een start | **Opgelost in 3.6.0:** tot de slow-pollgroep (Reg 67, 300 s) na een start gelezen is, geeft de coordinator `'pending'` en slaat de regeling de cyclus over, zoals bij Aurora II. Ontbreekt Reg 67 daarna (optioneel blok), dan valt de basis terug op de app-stooklijn. Alleen bij "Stooklijn van de warmtepomp" |
