@@ -5,7 +5,8 @@ blijft de standaard (O11). Eerder: concept (2026-10-25), aangevuld met D8 (2026-
 Bijgewerkt 2026-10-31: D9 (één instelling Regelmodus) vervangt de keuzelijst van D8,
 app-stooklijn als standaard basis met startwaarden per afgiftesysteem, O4 getoetst,
 schaduwtest op Aurora II. Bijgewerkt 2026-11-01 (3.5.2): coast ook bij
-vloerverwarming standaard uit (D6 herzien, O19/O20).
+vloerverwarming standaard uit (D6 herzien, O19/O20). Bijgewerkt 2026-11-01 (3.6.0): D10,
+prijs en COP verschuiven in de positionele modus het kamerdoel (O14, O16 deels).
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -35,6 +36,9 @@ warmtepomp met interne thermostaat, regelcyclus van 5 minuten, flow, hele graden
   coast hangen sterk van het afgiftesysteem af, Kp weinig (D9, vervangt D8).
 - **Basis:** standaard de app-stooklijn met startwaarden per afgiftesysteem; de
   stooklijn van de warmtepomp is een keuze (D1).
+- **Optimizers (3.6.0):** prijs en COP verschuiven in de positionele modus het kamerdoel
+  in plaats van het advies, en de basis schuift mee. De I-term werkt hun effect dan niet
+  meer weg; de thermische component doet niet mee (D10, §3.7).
 - **Wat het niet oplost:** een slechte stooklijn wordt opgevangen, maar een stooklijn
   met de verkeerde vorm (te steil of te vlak) laat een afwijking die met het weer
   meeloopt. Tapwater en ontdooien zijn niet gesimuleerd.
@@ -295,7 +299,7 @@ de eigen instelling.
 |---|---|---|---|---|
 | `classic` (standaard) | Klassiek (§1.1) | klassieke velden | klassieke velden | `adaptive_coast_enabled` |
 | `positional_radiator` | Positioneel | 3 | 3 uur | Uit |
-| `positional_floor` | Positioneel | 3 | 6 uur | Aan |
+| `positional_floor` | Positioneel | 3 | 6 uur | Uit (sinds 3.5.2, D6) |
 | `positional_manual` | Positioneel | `adaptive_pos_kp` | `adaptive_pos_ti` | `adaptive_coast_enabled` |
 
 - **Waarom één instelling.** Met twee keuzes (regelmodus en afgiftesysteem) gold het
@@ -306,6 +310,31 @@ de eigen instelling.
 - **Keuzehulp** in de handleiding (4 talen): welke regelmodus bij welke situatie, met de
   voorwaarde "stooklijnkeuze op OFF" voor Aurora II en Tuya.
 - **Standaard uit de hardware** (D8, "Standaardkeuze") is niet gebouwd (O10).
+
+### D10 — Optimizers via het kamerdoel (3.6.0, O14)
+
+In de positionele modus telden prijs en COP hun verschuiving bij het advies op. De I-term
+zag die verschuiving als een fout in de kamertemperatuur en werkte hem binnen enkele uren
+weg (§3.6). Daarom, alleen in de positionele modus:
+
+1. **Prijs en COP verschuiven het kamerdoel.** De gewogen bijdragen van de beslisser
+   (`breakdown.efficiency + breakdown.cost`) zijn samen de verschuiving van het kamerdoel,
+   begrensd op ±1,5 °C. Beide optimizers geven al een aanpassing van de doeltemperatuur;
+   de weging blijft zoals ze was (ADR-059 W2). De PI rekent met kamerdoel + verschuiving.
+2. **De basis schuift mee (O16, deels).** Op een stooklijn stijgt de aanvoer met
+   (1 + helling) per °C kamerdoel. De helling komt uit de twee punten van de app-stooklijn,
+   begrensd op 0–3 (ook als de stooklijn van de warmtepomp de basis is); bij een vlakke
+   basis is de factor 1. Advies = basis + (1 + helling) × verschuiving + PI.
+3. **De thermische component doet niet mee.** Zijn huidige vuistregel geeft −0,3 zodra het
+   huis net onder het doel zit; als kamerdoelverschuiving werd dat een blijvende verlaging
+   zonder voordeel (§3.7). De beslisser krijgt `thermalExcluded`; het gewicht gaat naar
+   prijs en COP. De voorverwarmduur van ADR-062 B7 komt als inzicht in 3.6.0 (G14).
+4. **Volgorde in de regelcyclus.** De PI rekent pas na de optimizers. Geen optimizer
+   gebruikt de uitkomst van de PI.
+5. **Diagnostiek.** Het blok `control` krijgt `targetShift` (verschuiving van het
+   kamerdoel) en `feedforward` (meeschuiven van de basis).
+
+Klassiek blijft ongewijzigd: daar telt de accumulator de verschuiving elke cyclus op.
 
 ## 3. Onderbouwing: simulatie
 
@@ -456,6 +485,33 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
    effect. B7 gaat daarom niet in de regeling (ADR-062 B7).
 4. Controle: de O4-modus zonder optimizers komt exact uit op P4 (0,167 en 0,178).
 
+### 3.7 O14: optimizers via het kamerdoel (3.6.0)
+
+Simulatie `O14=1`: de echte optimizers en beslisser, de presets van 3.5.2, prioriteiten
+50/15/15/20, gebouwmodel geconvergeerd, 14 dagen, 5 seeds, directe flow. Getoetst tegen
+drie varianten (verschuiving zonder meeschuiven van de basis; dezelfde waterverschuiving
+als in 3.5; de gewogen uitvoer direct als kamerdoelverschuiving). D10 is de laatste, met
+het meeschuiven van de basis. Aandeel van de elektriciteit in dure uren (≥ 0,12 €/kWh),
+alleen prijsoptimalisatie:
+
+| Woning, weer | Positioneel, geen | 3.5 | D10 | Klassiek, geen → prijs |
+|---|---|---|---|---|
+| Radiatoren, mild | 31% | 30% | 24% | 28% → 16% |
+| Radiatoren, koud | 31% | 30% | 27% | 30% → 24% |
+| Vloer, mild | 32% | 27% | 10% | 31% → 30% |
+| Vloer, koud | 31% | 29% | 20% | 30% → 29% |
+
+1. Het totale verbruik blijft gelijk (±2%): het verbruik verschuift naar goedkope uren.
+2. De afwijking van het kamerdoel neemt opzettelijk toe: RMSE 0,20–0,28 °C tegen 0,17–0,19
+   in 3.5, en blijft kleiner dan klassiek (0,30–0,59).
+3. Bij radiatoren in mild weer stijgt het aantal compressorstarts van 3 naar 5–6 per dag;
+   bij vloerverwarming blijft het rond 1.
+4. Met de COP-optimalisatie aan blijft het huis gemiddeld 0,1–0,2 °C onder het kamerdoel
+   (vloer, mild: 1,1 uur per dag meer dan 0,5 °C eronder). In 3.5 werkte de I-term die
+   verlaging weg.
+5. De thermische component als kamerdoelverschuiving gaf alleen een blijvende verlaging
+   van 0,05–0,1 °C, zonder effect op de prijs; vandaar D10.3.
+
 ## 4. Wat het oplost en wat niet
 
 | | |
@@ -482,8 +538,9 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
   houtkachel.
 - **De binnensensor** meet zonder vertraging. Een sensor met een eigen traagheid maakt de
   lus trager.
-- **De optimizers** (COP, prijs, thermisch) doen in de positionele modus weinig: de
-  I-term werkt hun verschuiving weg (O4, O14).
+- **De optimizers** werken sinds 3.6.0 via het kamerdoel (D10). Het prijsprofiel in de
+  simulatie is zelf gemaakt; lichte en zware woningen en een beperkte flow zijn voor D10
+  niet getoetst.
 - **Overgang:** bestaande gebruikers houden de klassieke regeling. Wie overstapt, begint
   met accumulator en integraal op 0 (O5).
 - **Presets van het afgiftesysteem** (D8/D9) komen uit dezelfde ene woning. Gemengde
@@ -496,7 +553,7 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
 | O1 | Versie | **Besloten:** 3.5.0, één bundel met ADR-062 fase 3 (B13, A4–A6, F2/F3), uitgebracht als testversie |
 | O2 | Bron van de basis | **Besloten (bijgewerkt 2026-10-31):** standaard de app-stooklijn met startwaarden per preset; de stooklijn van de warmtepomp als keuze (Aurora II DIY alleen bij DIY aan, Aurora III Reg 67), met terugval op de app-stooklijn (D1) |
 | O3 | Ti per afgiftesysteem | **Gebouwd** via de presets (D9). P4 bevestigt radiatoren 3 uur en vloer 6 uur; radiatoren 1,5 uur en Kp 4 blijven een optie na de hardwareweek |
-| O4 | Optimizers | **Getoetst (2026-10-31):** positioneel blijft stabiel met alle optimizers aan (RMSE 0,17–0,20 tegen klassiek 0,30–0,59), maar de optimizers verschuiven weinig; de thermische component heeft geen meetbaar effect (ADR-062 B7). Zie O14 |
+| O4 | Optimizers | **Getoetst (2026-10-31):** positioneel blijft stabiel met alle optimizers aan (RMSE 0,17–0,20 tegen klassiek 0,30–0,59), maar de optimizers verschuiven weinig; de thermische component heeft geen meetbaar effect (ADR-062 B7). Opgelost met O14 |
 | O5 | Migratie | **Besloten:** bestaande apparaten blijven klassiek. Bij een wissel van modus gaan accumulator en integraal naar 0. Positioneel heeft eigen velden voor Kp en Ti; de klassieke velden blijven (D8) |
 | O6 | Coast standaard | **Besloten (herzien 2026-11-01):** radiatoren en vloer uit (D6). "Handmatig" met `adaptive_coast_enabled` (standaard aan) houdt het eigen gedrag |
 | O7 | Flow-assisted of direct schrijven | Ongewijzigd flow-assisted; D3.2 vangt een flow op die niet of beperkt uitvoert |
@@ -505,8 +562,8 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
 | O10 | Standaard uit de hardware | Open; niet gebouwd. De standaard is Klassiek voor alle apparaten (D9). Eerst nagaan of de modus het afgiftesysteem echt weergeeft (vloerverwarming kan ook in modus "verwarmen" draaien) |
 | O11 | Standaard regelmodus | **Besloten:** klassiek voor iedereen, positioneel opt-in. Over de standaard wordt beslist na de hardwareweek en praktijkdata |
 | O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4). Aurora II pauzeert bij ontdooien, nog niet bij tapwater (tapwaterbit onbekend) |
-| O14 | Optimizers in de positionele modus | Open, eerste stap van 3.6.0: prijs en COP verschuiven het advies, de I-term werkt dat weg. Wie een optimizer ooit aanzette en daarna Positioneel kiest, verliest het effect zonder dat te zien (2026-11-01; vermeld in de handleiding). Ontwerp: de verschuiving in het doel in plaats van in het advies, samen met O16 |
-| O16 | Kamerdoel in de basis | Idee voor 3.6.0: de basis schuift mee met het kamerdoel, zodat nachtverlaging en een ander doel niet op de I-term wachten. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
+| O14 | Optimizers in de positionele modus | **Gebouwd in 3.6.0 (D10, §3.7):** prijs en COP verschuiven het kamerdoel, de basis schuift mee, de thermische component doet niet mee. Open: extra compressorstarts bij radiatoren in mild weer |
+| O16 | Kamerdoel in de basis | **Deels gebouwd in 3.6.0 (D10.2):** de basis schuift mee met de verschuiving door de optimizers. Open: meeschuiven met een ander kamerdoel van de gebruiker (nachtverlaging); daarvoor is een referentiekamertemperatuur van de stooklijn nodig. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
 | O19 | Coast slingert met de compressor | **Opgelost in 3.5.2:** coast uit bij de vloerpreset (D6). Bij "Handmatig" met coast aan blijft het gedrag; een eigen oplossing voor coast is alleen nodig als iemand coast bij positioneel wil |
 | O20 | Sprong bij het einde van coast | **Opgelost in 3.5.2** met O19 |
 | O17 | Aurora III na een start | Open: tot Reg 67 (slow-pollgroep, 300 s) gelezen is, rekent de basis met de app-stooklijn. Zelfde oplossing als Aurora II (`'pending'`) |

@@ -41,6 +41,7 @@ export interface ConfidenceMetrics {
   copConfidence: number; // 0.0 - 1.0 (COP optimizer confidence based on sample quality)
   buildingModelConfidence: number; // 0.0 - 1.0 (Building model confidence from RLS)
   priceDataAvailable: boolean; // Whether energy price data is available
+  thermalExcluded?: boolean; // ADR-065 O14: the positional mode leaves the thermal component out
 }
 
 export interface CoastAction {
@@ -173,7 +174,9 @@ export class WeightedDecisionMaker {
     // optimizer redistributes to the other optimizers, never to comfort
     const rawEfficiency = basePriorities.efficiency * confidenceMetrics.copConfidence;
     const rawCost = basePriorities.cost * costMultiplier * (confidenceMetrics.priceDataAvailable ? 1.0 : 0.0);
-    const rawThermal = basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0);
+    const rawThermal = confidenceMetrics.thermalExcluded
+      ? 0
+      : basePriorities.thermal * (confidenceMetrics.buildingModelConfidence >= 0.5 ? 1.0 : 0.0);
     const rawOptimizerSum = rawEfficiency + rawCost + rawThermal;
     const optimizerBudget = (1 - comfortAnchor) * existingScale;
 
@@ -204,7 +207,9 @@ export class WeightedDecisionMaker {
     if (priceAction && priceAction.action !== 'maintain') {
       reasoning.push(`Cost (${costPct}%${costMultiplierStr}): ${priceAction.reason}`);
     }
-    if (thermalAction && thermalAction.adjustment !== 0) {
+    if (confidenceMetrics.thermalExcluded) {
+      reasoning.push('Thermal (0%): not used in the positional mode');
+    } else if (thermalAction && thermalAction.adjustment !== 0) {
       reasoning.push(`Thermal (${thermalPct}%): ${thermalAction.reason}`);
     } else if (confidenceMetrics.buildingModelConfidence < 0.5) {
       reasoning.push('⚠️ Thermal (0%): conf <50%, disabled');

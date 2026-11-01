@@ -12,6 +12,7 @@
  *   P4=1 node test/simulation/coast-closed-loop.js   (ADR-065 P4 on the app's PositionalPIController)
  *   O4=1 node test/simulation/coast-closed-loop.js   (ADR-065 O4: optimizers on, both control modes)
  *   PROTOCOL=1 node test/simulation/coast-closed-loop.js   (test protocol 3.5: shadow, transfer table, COP 0, restart)
+ *   O14=1 node test/simulation/coast-closed-loop.js   (ADR-065 O14/O16: optimizers through the room target, 3.6.0)
  *
  * Fysica (stap 30 s):
  *   - woning: C · dT/dt = He·(Tw − Tin) − UA·(Tin − Tout) + P_int + zon
@@ -40,7 +41,9 @@ const path = require('path');
 
 const { HeatingController } = require('../../.homeybuild/lib/modbus/adaptive/heating-controller');
 const { WeightedDecisionMaker } = require('../../.homeybuild/lib/modbus/adaptive/weighted-decision-maker');
-const { PositionalPIController, EMITTER_PRESETS, appCurveValue } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
+const {
+  PositionalPIController, EMITTER_PRESETS, appCurveValue, roomTargetShift,
+} = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 const { COPOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/cop-optimizer');
 const { EnergyPriceOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/energy-price-optimizer');
 
@@ -90,6 +93,8 @@ const VARIANTS = {
   // ADR-065 O4: as the service, the PI output divided by the comfort anchor into the decision maker
   'pos. app (dm)': { mode: 'posApp', coast: false, ua: 0, tau: 0 },
   'pos. app (dm) + coast': { mode: 'posApp', coast: true, ua: 0, tau: 0 },
+  // ADR-065 O14/O16 (3.6.0): price and COP shift the room target, the basis follows, no thermal component
+  'pos. app O14': { mode: 'posO14', coast: false, ua: 0, tau: 0 },
 };
 // O4: the service's priorities (priority_* settings 50/15/15/20) and optimizer configuration
 const APP_PRIORITIES = {
@@ -250,6 +255,8 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   const rp = rng(seed + 1000); // own stream, so the other noise is the same as without optimizers
   const priceNoise = Array.from({ length: DAYS * 24 + 48 }, () => 0.01 * (rp() + rp() + rp() - 1.5));
 
+  // O14/O16: slope of the two-point curve through −15 and +15 °C, as the app curve gives it
+  const slope = Math.max(0, Math.min(3, (shapedCurve(em, -15, bias, house, 1) - shapedCurve(em, 15, bias, house, 1)) / 30));
   // Physical state
   let tIn = TARGET; let tw = TARGET + 12; let on = false; let onS = 0; let offS = 1e9;
   const appBase = (t) => appCurveValue(opts.appCurve.atMinus15, opts.appCurve.atPlus15, t);
@@ -271,6 +278,8 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     starts: 0, heatKwh: 0, elKwh: 0, sumSq: 0, n: 0, over05: 0, under05: 0, maxOver: [], minUnder: [],
     coastOnCycles: 0, exits: { hard: 0, soft: 0, watchdog: 0 }, afterExitMin: [], spChanges: 0, spMin: Infinity, spMax: -Infinity,
     elExpensive: 0, // O4: electricity in the very-high-price hours (≥ 0,12 €/kWh)
+    elCheap: 0, // O14: electricity in the low-price hours (≤ 0,06 €/kWh)
+    shiftSum: 0, // O14: sum of the room-target shift per cycle
     // Protocol: hold reasons per cycle, advice range and jumps, gap to the setpoint, longest runs
     holds: {},
     advMin: Infinity,
@@ -315,7 +324,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     st.heatKwh += q * DT / 3600; st.elKwh += (q > 0 ? q / cop : 0) * DT / 3600;
     if (optim) {
       const el = (q > 0 ? q / cop : 0) * DT / 3600;
-      if (priceAt(hod, sunny[day], priceNoise[Math.floor(h)]) >= 0.12) st.elExpensive += el;
+      const priceNow = priceAt(hod, sunny[day], priceNoise[Math.floor(h)]);
+      if (priceNow >= 0.12) st.elExpensive += el;
+      if (priceNow <= 0.06) st.elCheap += el;
       if (day !== copDay.day) {
         copDay.prevRatio = copDay.el > 0 ? copDay.heat / copDay.el : copDay.prevRatio;
         copDay.heat = 0; copDay.el = 0; copDay.day = day;
@@ -378,7 +389,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     const dropRate = outHist.length < COAST.outletN ? 0 : (outHist[outHist.length - 1] - outHist[0]) / COAST.outletN;
     const mult = dropRate < 0 ? Math.max(0.3, 1.0 + dropRate * 0.5) : 1.0;
     // posI: PI output from the previous cycle's state (for the coast reference)
-    const ePos = target - indoorM;
+    let ePos = target - indoorM;
     const uPrev = (v.mode === 'posTS' || v.mode === 'posApp') ? pc.output(ePos) : Math.max(-P.Umax, Math.min(P.Umax, P.Kp * ePos + integ));
     let coastAdj;
     if (v.mode === 'posI' || v.mode === 'posTS' || v.mode === 'posApp') {
@@ -459,8 +470,19 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
       }
     }
 
+    // O14: as the service, the optimizers first; price and COP shift the room target of the PI
+    const o14 = v.mode === 'posO14';
+    const decisionMetrics = o14 ? { ...metrics, thermalExcluded: true } : metrics;
+    let feedforward = 0;
+    if (o14) {
+      const pre = dm.combineActionsWithThermal(null, copAction, priceAction, null, decisionMetrics, null);
+      const shift = roomTargetShift(pre.breakdown);
+      feedforward = (1 + slope) * shift;
+      ePos += shift;
+      st.shiftSum += shift;
+    }
     let heatingAction = await pi.calculateAction({ indoorTemp: indoorM, targetTemp: target, timestamp: tS * 1000 });
-    if (v.mode === 'posApp') {
+    if (v.mode === 'posApp' || o14) {
       // As _positionalHeatingAction: the PI output divided by the comfort anchor
       const step = pc.step({
         error: ePos,
@@ -487,7 +509,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     const coastAction = (v.coast && coastActive) ? {
       adjustment: coastAdj, reason: 'coast', priority: 'high', strength: COAST.strength,
     } : null;
-    const combined = dm.combineActionsWithThermal(heatingAction, copAction, priceAction, thermalAction, metrics, coastAction);
+    const combined = dm.combineActionsWithThermal(heatingAction, copAction, priceAction, o14 ? null : thermalAction, decisionMetrics, coastAction);
 
     let recommended;
     if (v.mode === 'incr') {
@@ -509,6 +531,10 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
       // only while coast actually contributes (coastAdj < 0, ADR-040A)
       const corr = (v.coast && coastActive && coastAdj < 0) ? (1 - COAST.strength) * u + COAST.strength * coastAdj : u;
       lastRecRaw = base + corr;
+      recommended = Math.max(SP_MIN, Math.min(SP_MAX, Math.round(lastRecRaw)));
+    } else if (o14) {
+      // The optimizers act through the room target: their share is replaced by the basis feed-forward
+      lastRecRaw = base + feedforward + combined.finalAdjustment - combined.breakdown.efficiency - combined.breakdown.cost;
       recommended = Math.max(SP_MIN, Math.min(SP_MAX, Math.round(lastRecRaw)));
     } else if (v.mode === 'posApp') {
       // As _positionalRecommendation: basis + the decision maker's correction
@@ -886,7 +912,56 @@ async function protocol() {
   }
 }
 
-if (process.env.PROTOCOL) {
+/**
+ * ADR-065 O14/O16 (3.6.0): the optimizers through the room target against 3.5 (added to the advice) and the
+ * incremental regulation; share of the electricity in expensive and cheap hours. Converged building model,
+ * presets of the emitter, the service's priorities.
+ */
+async function o14() {
+  const SETS = [
+    ['geen', {}],
+    ['prijs', { price: true }],
+    ['prijs + COP', { cop: true, price: true }],
+    ['alles', { cop: true, price: true, thermal: 'heuristic' }],
+  ];
+  const WEATHER = [['mild', 0], ['koud (−8 K)', -8]];
+  const flow = process.env.FLOW || 'direct';
+  for (const em of (process.argv[2] && process.argv[2] !== 'all' ? [process.argv[2]] : ['radiator', 'vloer'])) {
+    const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
+    for (const [wName, shift] of WEATHER) {
+      console.log(`\n### O14 ${EMITTERS[em].label}; ${wName}; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log('optimizers | variant | RMSE (°C) | uren < −0,5 /dag | uren > +0,5 /dag | starts/dag | kWh el/dag | el in dure uren | el in goedkope uren | kamerdoelverschuiving gem.');
+      console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
+      for (const [label, o] of SETS) {
+        for (const name of ['incr. PI + coast (huidig)', 'pos. app (dm)', 'pos. app O14']) {
+          if (label === 'geen' && name === 'pos. app O14') continue;
+          const runs = [];
+          for (const seed of SEEDS) {
+            runs.push(await simulate(name, em, seed, flow, {
+              Kp: preset.kp, Ti: preset.tiHours, bias: EMITTERS[em].curveBias, toutShift: shift, optim: o,
+            }));
+          }
+          const a = (fn) => avg(runs.map(fn));
+          console.log([
+            label, name,
+            f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
+            f(a((s) => s.under05 / DAYS)),
+            f(a((s) => s.over05 / DAYS)),
+            f(a((s) => s.starts / DAYS), 1),
+            f(a((s) => s.elKwh / DAYS)),
+            `${f(a((s) => (s.elKwh > 0 ? (100 * s.elExpensive) / s.elKwh : 0)), 0)}%`,
+            `${f(a((s) => (s.elKwh > 0 ? (100 * s.elCheap) / s.elKwh : 0)), 0)}%`,
+            f(a((s) => s.shiftSum / (s.n / (CYCLE / DT)))),
+          ].join(' | '));
+        }
+      }
+    }
+  }
+}
+
+if (process.env.O14) {
+  o14();
+} else if (process.env.PROTOCOL) {
   protocol();
 } else if (process.env.O4) {
   o4();

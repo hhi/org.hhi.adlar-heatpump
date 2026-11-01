@@ -346,10 +346,10 @@ stooklijnkeuze op OFF. Na OFF kan de app de curve niet meer uitlezen.
   dan op 0
 - **Nachtverlaging**: bij vloerverwarming afgeraden; Positioneel warmt dan in de
   ochtend op, met meer compressorstarts
-- **Optimizers** (prijs, COP, gebouwmodel): hebben in Positioneel weinig
-  effect. De integraal werkt hun verschuiving binnen enkele uren weg, zodat de
-  prijsoptimalisatie het verbruik nauwelijks naar goedkope uren verplaatst. Het
-  comfort blijft gelijk. Een aanpassing volgt in een volgende versie
+- **Optimizers** (prijs, COP): verschuiven in Positioneel het kamerdoel, met
+  hooguit 1,5 °C; de stooklijn schuift mee. Met de COP-optimalisatie aan kan het
+  huis gemiddeld iets onder het kamerdoel blijven. De thermische component van
+  het gebouwmodel doet in Positioneel niet mee
 - **Experimenteel**: Positioneel is nog weinig in de praktijk getest
 
 #### Coast Offset (v2.8.0+)
