@@ -216,6 +216,17 @@ Het systeem biedt **4 categorie-specifieke sensors** (v2.5.10+):
 
 Bij een τ boven 250 uur (bijv. een passiefhuis) verschijnt geen voorverwarmingsinzicht.
 
+**Met gemeten vermogen (vanaf 3.6.0):** na een dag met vermogensmetingen rekent de app ook
+met de buitentemperatuur en het hoogste uurgemiddelde vermogen van de warmtepomp in de
+afgelopen week. Het inzicht noemt dan de tijd voor 2 °C bij het weer van nu, bijvoorbeeld
+`Zeer langzaam (~24 uur voor 2°C) · bij 5°C buiten nu ~14 uur`.
+
+- Dezelfde berekening geldt voor de trigger "Voorverwarmen tijd aanbeveling" en de
+  actiekaart "Bereken voorverwarmen duur".
+- Bij een stijging tot 0,5 °C blijft de tijd uit de tabel gelden.
+- Een grotere stijging geeft nooit een kortere tijd.
+- Is het doel met het gemeten vermogen niet haalbaar, dan is de uitkomst 48 uur.
+
 ---
 
 ### 3. 💰 Thermische Opslag Optimalisatie Inzichten

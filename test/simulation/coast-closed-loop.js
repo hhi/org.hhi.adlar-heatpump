@@ -15,6 +15,7 @@
  *   O14=1 node test/simulation/coast-closed-loop.js   (ADR-065 O14/O16: optimizers through the room target, 3.6.0)
  *   O16=1 node test/simulation/coast-closed-loop.js   (ADR-065 O16: the basis follows the user's room target, night setback)
  *   O16=1 O16_WEEK=1 node test/simulation/coast-closed-loop.js   (O16 with a thermostat week program, soft transitions)
+ *   G14=1 node test/simulation/coast-closed-loop.js   (ADR-062 B7 as pre-heat duration: which observed power predicts warm-up)
  *
  * Fysica (stap 30 s):
  *   - woning: C · dT/dt = He·(Tw − Tin) − UA·(Tin − Tout) + P_int + zon
@@ -48,6 +49,7 @@ const {
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 const { COPOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/cop-optimizer');
 const { EnergyPriceOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/energy-price-optimizer');
+const { calculatePreHeatDuration } = require('../../.homeybuild/lib/shared/utils/preheat-calculator');
 
 const TOUT = JSON.parse(fs.readFileSync(path.join(__dirname, 'building-model-review/adr064-buitentemp-2026-10-18.json'), 'utf8')).slice(0, 168);
 const DT = 30; // s
@@ -228,6 +230,8 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   // o16Hold: the integral pauses while the target differs from the 7-day median and until the house is back;
   // week (thermostat week program); ramp = 'both' | 'down' (the controller's target moves 0,5 °C/h);
   // lead (hours): the controller raises the target that much earlier (look-ahead), lowers it on time
+  // opts (G14): g14 (record warm-up events and the observed power), oneSetback (18 °C once, day 10 23:00 – day 11 07:00),
+  // away (16 °C from day 9 12:00 to day 11 12:00, a few days away)
   const P = { ...PII, ...(opts.Kp !== undefined ? { Kp: opts.Kp } : {}) };
   const house = opts.house ?? HOUSE;
   const pc = new PositionalPIController({ kp: P.Kp, tiHours: opts.Ti ?? 3 });
@@ -326,6 +330,11 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   const targetHist = []; // O16: room target per cycle, last 7 days
   let o16Pause = false; // O16: integral paused for a deviating room target
   let ctrlTarget = null; // O16: the controller's target (ramped towards the room target)
+  // G14: thermal power per cycle with the compressor running (A), hourly mean power including off time (B),
+  // and warm-up events from day 7 on (a full week of history)
+  const g14 = opts.g14 ? {
+    samples: [], hourly: [], hourSum: 0, hourN: 0, prevTarget: null, open: null, events: [],
+  } : null;
 
   const steps = (DAYS * 86400) / DT;
   for (let i = 0; i < steps; i++) {
@@ -366,8 +375,18 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     tIn += ((qEm - house.UA * (tIn - tOut) + house.pInt + sun) / house.C) * (DT / 3600);
 
     // --- Comfort statistics (true temperature, against the target of the moment) ---
-    const target = opts.week ? weekTarget(day, hod) : targetAt(hod, opts.setback);
+    const oneSetback = opts.oneSetback && ((day === 10 && hod >= 23) || (day === 11 && hod < 7));
+    const away = opts.away && h >= 9 * 24 + 12 && h < 11 * 24 + 12;
+    const target = opts.week ? weekTarget(day, hod) : (oneSetback ? 18 : (away ? 16 : targetAt(hod, opts.setback)));
     const e = tIn - target;
+    if (g14?.open) {
+      // G14: reached within 0,3 °C, or the target went down first (not reached in this window)
+      const ev = g14.open;
+      ev.qSum = (ev.qSum ?? 0) + qEm; ev.qN = (ev.qN ?? 0) + 1; ev.qHouse = ev.qSum / ev.qN;
+      ev.twMax = Math.max(ev.twMax ?? -Infinity, tw); ev.spMax = Math.max(ev.spMax ?? -Infinity, sp);
+      if (tIn >= ev.goal) { ev.actual = (tS - ev.startS) / 3600; g14.events.push(ev); g14.open = null; }
+      else if (target < ev.target) { ev.actual = Infinity; ev.window = (tS - ev.startS) / 3600; g14.events.push(ev); g14.open = null; }
+    }
     st.sumSq += e * e; st.n++;
     if (e > 0.5) st.over05 += DT / 3600;
     if (e < -0.5) st.under05 += DT / 3600;
@@ -387,6 +406,22 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     // --- Control cycle every 5 minutes (as executeControlCycle) ---
     if ((i + 1) % (CYCLE / DT) !== 0) continue;
     cycleNo++;
+    if (g14) {
+      // As BuildingModelService: one sample per 5 minutes, thermal power when the compressor runs
+      if (on) { g14.samples.push(q); if (g14.samples.length > 7 * 288) g14.samples.shift(); }
+      g14.hourSum += on ? q : 0; g14.hourN++;
+      if (g14.hourN === 12) {
+        g14.hourly.push(g14.hourSum / 12); if (g14.hourly.length > 168) g14.hourly.shift();
+        g14.hourSum = 0; g14.hourN = 0;
+      }
+      if (g14.prevTarget !== null && target > g14.prevTarget + 0.5 && day >= 7 && !g14.open) {
+        g14.open = {
+          startS: tS, tIn, tOut, target, goal: target - 0.3,
+          pA: percentile(g14.samples, 0.9), pB: g14.hourly.length ? Math.max(...g14.hourly) : null,
+        };
+      }
+      g14.prevTarget = target;
+    }
     // O16: soft transition, the controller's target moves at most 0,5 °C/h (down only, or both ways)
     const rampStep = 0.5 * (CYCLE / 3600);
     let aimed = target;
@@ -652,6 +687,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     }
   }
   if (nAfter > 0) st.rmseWindow = Math.sqrt(sumSqAfter / nAfter);
+  if (g14) st.g14 = g14.events;
   return st;
 }
 
@@ -1075,7 +1111,185 @@ async function o16() {
   }
 }
 
-if (process.env.O16) {
+/**
+ * G14 (ADR-062 B7 as pre-heat duration): t = τ·ln((T_eq − T_in)/(T_eq − T_goal)), T_eq = T_out + (P + P_int)/UA,
+ * goal = target − 0,3 °C, no sun (the future is unknown). Infinity when T_eq ≤ goal.
+ */
+function b7Hours(ev, house, p) {
+  if (p === null) return null;
+  if (ev.tIn >= ev.goal) return 0;
+  const tEq = ev.tOut + (p + house.pInt) / house.UA;
+  if (tEq <= ev.goal) return Infinity;
+  return (house.C / house.UA) * Math.log((tEq - ev.tIn) / (tEq - ev.goal));
+}
+
+/**
+ * G14 smooth transition: the classes up to a step of 0,5 °C, B7 with the highest hourly mean from 1,5 °C,
+ * linearly mixed in between, so that a larger step never jumps to a much shorter time at one threshold.
+ */
+function g14Blend(ev, house) {
+  const delta = ev.target - ev.tIn;
+  const classes = calculatePreHeatDuration(house.C / house.UA, delta);
+  const b7 = b7Hours(ev, house, ev.pB);
+  if (b7 === null) return classes;
+  const w = Math.max(0, Math.min(1, (delta - 0.5) / 1.0));
+  if (w === 0) return classes;
+  if (!Number.isFinite(b7)) return Infinity;
+  return (1 - w) * classes + w * b7;
+}
+
+/** G14 smooth transition, never shorter than for a smaller step (running maximum in steps of 0,05 °C). */
+function g14BlendMono(ev, house) {
+  const delta = ev.target - ev.tIn;
+  let best = g14Blend(ev, house);
+  for (let d = 0.5; d < delta; d += 0.05) {
+    best = Math.max(best, g14Blend({ ...ev, tIn: ev.target - d }, house));
+  }
+  return best;
+}
+
+/**
+ * G14 physics plus tail: B7 (highest hourly mean) for the warm-up to 0,5 °C below the target, plus the
+ * classes for the last ≤ 0,5 °C that the control loop closes slowly. Both parts grow with the step.
+ */
+function g14Sum(ev, house) {
+  const delta = ev.target - ev.tIn;
+  if (delta <= 0) return 0;
+  const tau = house.C / house.UA;
+  const tail = calculatePreHeatDuration(tau, Math.min(delta, 0.5));
+  if (delta <= 0.5) return tail;
+  if (ev.pB === null) return calculatePreHeatDuration(tau, delta);
+  const bulk = b7Hours({ ...ev, goal: ev.target - 0.5 }, house, ev.pB);
+  return bulk + tail;
+}
+
+/** A prediction is good within 1 h or 30 %; for a target not reached in its window, when it predicts longer. */
+function g14Good(pred, ev) {
+  if (pred === null) return false;
+  if (!Number.isFinite(ev.actual)) return pred > ev.window;
+  if (!Number.isFinite(pred)) return false;
+  return Math.abs(pred - ev.actual) <= Math.max(1, 0.3 * ev.actual);
+}
+
+/** G14: predicted hours per step size for one situation, to check that a larger step never gives a shorter time. */
+function g14Monotonic() {
+  const house = HOUSE; const target = 21;
+  console.log('\n### G14 monotonie: referentiewoning, buiten 10 °C, vermogen 4,9 kW (hoogste uur)\n');
+  console.log('stap (°C) | klassen | B7 | harde grens 1 °C | vloeiend | fysica + staart');
+  console.log('--- | --- | --- | --- | --- | ---');
+  for (const delta of [0.4, 0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5, 2.0, 3.0]) {
+    const ev = { tIn: target - delta, tOut: 10, target, goal: target - 0.3, pB: 4.9 };
+    const classes = calculatePreHeatDuration(house.C / house.UA, delta);
+    const b7 = b7Hours(ev, house, ev.pB);
+    console.log([f(delta, 1), f(classes, 1), f(b7, 1), f(delta < 1 ? classes : b7, 1), f(g14Blend(ev, house), 1), f(g14Sum(ev, house), 1)].join(' | '));
+  }
+}
+
+/** G14: per method, the cases (house × outdoor × power) in which a larger step gives a shorter time. */
+function g14MonotonicGrid() {
+  const methods = {
+    'harde grens 1 °C': (ev, house) => (ev.target - ev.tIn < 1
+      ? calculatePreHeatDuration(house.C / house.UA, ev.target - ev.tIn) : b7Hours(ev, house, ev.pB)),
+    'vloeiend 0,5–1,5 °C': g14Blend,
+    'fysica + staart': g14Sum,
+    'vloeiend, nooit korter': g14BlendMono,
+  };
+  console.log('\n### G14 monotonie over woning (licht, referentie, zwaar) × buiten (−5, 5, 15 °C) × vermogen (3, 5, 7 kW), stap 0,1–4 °C\n');
+  console.log('methode | gevallen met een daling | grootste daling (u)');
+  console.log('--- | --- | ---');
+  for (const [name, fn] of Object.entries(methods)) {
+    let cases = 0; let worst = 0;
+    for (const house of Object.values(HOUSES)) {
+      for (const tOut of [-5, 5, 15]) {
+        for (const p of [3, 5, 7]) {
+          let prev = 0; let drop = 0;
+          for (let d = 0.1; d <= 4.001; d += 0.05) {
+            const t = fn({ tIn: 21 - d, tOut, target: 21, goal: 20.7, pB: p }, house);
+            if (Number.isFinite(t) && Number.isFinite(prev) && t < prev - 1e-9) drop = Math.max(drop, prev - t);
+            prev = t;
+          }
+          if (drop > 0) { cases++; worst = Math.max(worst, drop); }
+        }
+      }
+    }
+    console.log(`${name} | ${cases} van 27 | ${f(worst, 1)}`);
+  }
+}
+
+async function g14() {
+  g14Monotonic();
+  g14MonotonicGrid();
+  const SCENARIOS = [
+    ['weekprogramma', { week: true }],
+    ['nachtverlaging 19 °C', { setback: true }],
+    ['constant, eenmalig 18 °C', { oneSetback: true }],
+    ['2 dagen weg op 16 °C', { away: true }],
+  ];
+  const CASES = [
+    ['radiator', 'referentie'], ['vloer', 'referentie'], ['radiator', 'licht'], ['radiator', 'zwaar'],
+  ];
+  const WEATHER = [['mild', 0], ['koud (−8 K)', -8]];
+  const METHODS = [
+    ['klassen (nu)', (ev, house) => calculatePreHeatDuration(house.C / house.UA, ev.target - ev.tIn)],
+    ['A: P90', (ev, house) => b7Hours(ev, house, ev.pA)],
+    ['B: hoogste uur', (ev, house) => b7Hours(ev, house, ev.pB)],
+    ['echt max. 7 kW', (ev, house) => b7Hours(ev, house, HP.Qmax)],
+    ['B, klassen onder 1 °C', (ev, house) => (ev.target - ev.tIn < 1
+      ? calculatePreHeatDuration(house.C / house.UA, ev.target - ev.tIn) : b7Hours(ev, house, ev.pB))],
+    ['vloeiend 0,5–1,5 °C', (ev, house) => g14Blend(ev, house)],
+    ['fysica + staart', (ev, house) => g14Sum(ev, house)],
+    ['vloeiend, nooit korter', (ev, house) => g14BlendMono(ev, house)],
+  ];
+  const median = (a) => percentile(a, 0.5);
+  console.log(`\n### G14 voorverwarmduur: voorspeld tegen gesimuleerd; ${process.env.G14_VARIANT || 'positioneel (preset)'}, flow direct; ${DAYS} dagen, ${SEEDS.length} seeds, stappen omhoog vanaf dag 7\n`);
+  console.log('Goed = binnen 1 uur of 30%; bij een doel dat niet gehaald wordt: als de voorspelling langer is dan het tijdslot. Factor = mediaan van voorspeld / werkelijk.\n');
+  console.log(`scenario | afgifte, woning (τ) | weer | stappen | gehaald | werkelijk (mediaan u) | P A / P B (kW) | ${METHODS.map(([m]) => `${m}: goed, factor`).join(' | ')}`);
+  console.log(`--- | --- | --- | --- | --- | --- | --- | ${METHODS.map(() => '---').join(' | ')}`);
+  for (const [scName, so] of SCENARIOS) {
+    for (const [em, houseName] of CASES) {
+      const house = HOUSES[houseName];
+      const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
+      for (const [wName, shift] of WEATHER) {
+        const events = [];
+        for (const seed of SEEDS) {
+          const st = await simulate(process.env.G14_VARIANT || 'pos. app O14', em, seed, 'direct', {
+            Kp: preset.kp, Ti: preset.tiHours, bias: EMITTERS[em].curveBias, toutShift: shift, house, g14: true, ...so,
+          });
+          events.push(...st.g14);
+          if (process.env.G14_DEBUG && seed === SEEDS[0]) {
+            for (const ev of st.g14.slice(0, 3)) {
+              console.log(`  debug ${scName} ${em} ${houseName} ${wName}: dag ${f(ev.startS / 86400, 2)} Tin ${f(ev.tIn)} Tout ${f(ev.tOut, 1)} doel ${ev.target} `
+                + `A ${f(ev.pA, 1)} B ${f(ev.pB, 1)} → ${f(b7Hours(ev, house, ev.pB), 1)} u (B), ${f(b7Hours(ev, house, HP.Qmax), 1)} u (7 kW); werkelijk ${f(ev.actual, 1)} u; `
+                + `warmte naar huis ${f(ev.qHouse, 2)} kW, water ${f(ev.twMax, 1)} °C max, setpoint ${ev.spMax} max`);
+            }
+          }
+        }
+        const reached = events.filter((ev) => Number.isFinite(ev.actual));
+        const cols = METHODS.map(([, fn]) => {
+          const preds = events.map((ev) => fn(ev, house));
+          const good = events.filter((ev, k) => g14Good(preds[k], ev)).length;
+          const ratios = reached.map((ev) => {
+            const pr = fn(ev, house);
+            return pr === null ? NaN : pr / Math.max(0.25, ev.actual);
+          }).filter((x) => !Number.isNaN(x));
+          const m = median(ratios);
+          return `${Math.round((100 * good) / Math.max(1, events.length))}%, ${m === Infinity ? 'nooit' : f(m, 1)}`;
+        });
+        console.log([
+          scName, `${em}, ${houseName} (${Math.round(house.C / house.UA)} u)`, wName, events.length,
+          `${Math.round((100 * reached.length) / Math.max(1, events.length))}%`,
+          f(median(reached.map((ev) => ev.actual)), 1),
+          `${f(median(events.map((ev) => ev.pA ?? NaN).filter(Number.isFinite)), 1)} / ${f(median(events.map((ev) => ev.pB ?? NaN).filter(Number.isFinite)), 1)}`,
+          ...cols,
+        ].join(' | '));
+      }
+    }
+  }
+}
+
+if (process.env.G14) {
+  g14();
+} else if (process.env.O16) {
   o16();
 } else if (process.env.O14) {
   o14();

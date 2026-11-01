@@ -3,7 +3,7 @@
 **Status:** Gedeeltelijk aangenomen (2026-10-23, aangevuld 2026-10-24, 2026-10-25 en
 2026-10-31): B1–B6, B10–B13 aangenomen, uit B8 A4–A7, §2.5 en §2.8, en F2/F3 (B14). B13,
 A4–A6 en B14 zijn gebouwd in 3.5.0 (fase 1h en 3). B7 gaat niet in de regeling: in
-3.6.0 als voorverwarmduur. B9 vervalt
+3.6.0 gebouwd als voorverwarmduur (G14, §B7, 2026-11-02). B9 vervalt
 **Datum:** 2026-10-23
 **Beslissers:** -
 **Gerelateerd:** [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
@@ -214,6 +214,56 @@ thermische component, zowel de huidige heuristiek als deze formule, in geen enke
 scenario een meetbaar effect op comfort of verbruik. De formule gaat in 3.6.0 naar de
 voorverwarmduur (`lib/shared/utils/preheat-calculator.ts`, nu vaste τ-klassen), waar
 hij een zichtbaar getal oplevert.
+
+**Uitvoering in 3.6.0 (G14, 2026-11-02):** de voorverwarmduur rekent met de formule, met
+een vloeiende overgang vanaf de τ-klassen.
+
+- **Vermogen P:** het hoogste uurgemiddelde thermisch vermogen van de afgelopen 7 dagen,
+  met uren met uitgeschakelde compressor als 0 kW. Dus niet het 90e percentiel bij
+  draaiende compressor: bij een modulerende warmtepomp volgt dat de vraag en niet het
+  vermogen, en het voorspelt te kort. Een uur telt met minstens 6 van de 12 samples.
+  Per sample is de COP begrensd op 8 en het vermogen op 20 kW, zodat één verkeerde
+  COP-waarde het uurgemiddelde weinig verhoogt. Onder 24 uren geldt alleen de klasse.
+- **Doel:** doeltemperatuur − 0,3 °C; geen zon in de voorspelling; P_int is de geleerde
+  basiswaarde; T_out de buitentemperatuur van nu.
+- **Overgang:** tot 0,5 °C stijging alleen de klassen. Tussen 0,5 en 1,5 °C schuift het
+  gewicht lineair naar de formule, en vanaf 1,5 °C geldt alleen de formule. Bij een
+  kleine stijging bepaalt de traag uitlopende I-term van de regeling de tijd, en dat
+  voorspelt geen woningformule goed.
+- **Nooit korter:** de uitkomst is het maximum over alle kleinere stijgingen (stappen
+  van 0,05 °C). Zo geeft een grotere stijging nooit een kortere tijd.
+- **Onbereikbaar** (`T_eq ≤ doel`): 48 uur, het bestaande maximum.
+- **Gebruik:** de actiekaart `calculate_preheat_time`, de trigger `pre_heat_recommendation`
+  en het voorverwarmingsinzicht. Het inzicht noemt de tijd voor 2 °C bij het weer van
+  nu. De regeling verandert niet.
+- **Code:** `estimatePreHeatDuration()` in `lib/shared/utils/preheat-calculator.ts`;
+  `HeatingPowerHistory` in `lib/shared/adaptive/heating-power-history.ts`; de
+  uurbuffer staat per apparaat in de store (`preheat_power_history`), los van de
+  learner, en blijft bij een modelreset staan.
+
+**Toetsing** (`G14=1 node test/simulation/coast-closed-loop.js`): het aandeel goede
+voorspellingen, binnen 1 uur of 30%, gemiddeld over 8 gevallen, met positionele en
+klassieke regeling:
+
+| Scenario | Klassen | Harde grens 1 °C | Vloeiend, nooit korter |
+|---|---|---|---|
+| 2 dagen weg op 16 °C | 18% / 28% | 65% / 62% | 65% / 62% |
+| Nachtverlaging | 34% / 28% | 33% / 34% | 37% / 45% |
+| Eén nacht 18 °C | 18% / 32% | 15% / 48% | 32% / 55% |
+| Weekprogramma | 86% / 76% | 77% / 74% | 84% / 81% |
+
+Over 27 combinaties van woning, buitentemperatuur en vermogen gaf de harde grens in 13
+gevallen een kortere tijd bij een grotere stijging, met een daling van maximaal 11,7 uur.
+Bij de vloeiende overgang zonder "nooit korter" waren dat 10 gevallen, met maximaal
+0,6 uur. Met "nooit korter" is het 0. De unit-test controleert dit over 243 combinaties
+(`test/unit/preheat-estimate.test.js`). De appfunctie rekent in 4050 gevallen precies
+hetzelfde als de simulatiemethode.
+
+**Gekozen, niet afgeleid:** de grenzen 0,5 en 1,5 °C, de marge van 0,3 °C, de
+begrenzing op COP 8 en 20 kW, en het minimum van 24 uren. **Beperkingen:** kleine
+stijgingen blijven slecht voorspelbaar (37–45% goed). De simulatie kent één
+warmtepomp (2–7 kW) en geen ontdooiing. In de app is P elektrisch vermogen × COP en dus
+ruiser dan in de simulatie. Praktijkdata moeten de grenzen bevestigen.
 
 **Voorstel (oorspronkelijk):** een fysische voorspelling in plaats van de heuristiek.
 
@@ -646,6 +696,7 @@ checklist van fase 1f. De resultaten zijn reproduceerbaar (vaste seeds).
 | 10 | Soft reset bij profielwissel Aurora II/III, voorspelfout leeg na soft reset, gidsen en dev-docs bijgewerkt | 1f | Af |
 | 11 | B12 uitweg bij vastlopen tegen de grenzen | 1g | Af |
 | 12 | B13 P-update met de werkelijk genomen stap | 1h | Af (3.5.0) |
+| 13 | B7 als voorverwarmduur (G14): uurbuffer vermogen, vloeiende overgang, nooit korter | — | Af (3.6.0) |
 
 ## 10. Releasechecklist 3.4.0
 

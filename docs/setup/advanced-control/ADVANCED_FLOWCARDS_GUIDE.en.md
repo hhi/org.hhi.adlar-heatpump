@@ -197,7 +197,7 @@
 | Flow ID | Title | Description |
 |---------|-------|-------------|
 | `force_insight_analysis` | Force insight analysis | Evaluate immediately (tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Calculate pre-heat duration | Calculates time needed to warm up ±X°C (v2.6.0) |
+| `calculate_preheat_time` ⭐ | Calculate pre-heat duration | Calculates time needed to warm up ±X°C (v2.6.0); from 3.6.0 with outdoor temperature and measured power |
 
 #### `calculate_preheat_time` - Parameters & Returns
 | Parameter | Type | Description |
