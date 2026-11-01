@@ -230,7 +230,7 @@ Automatic target temperature regulation based on external indoor temperature sen
 **Only visible with "Expert HVAC function cards" enabled**
 
 #### Proportional Gain (Kp)
-- **Default**: 3.0
+- **Default**: 5.0
 - **Range**: 0.5 - 10.0
 - **Function**: Determines how quickly system responds to current error
 - **Higher value**: Faster correction, risk of overshoot
@@ -260,6 +260,93 @@ Automatic target temperature regulation based on external indoor temperature sen
   1 limits). The adaptive control diagnostics show which limit applies
 - **Floor heating**: Set both around the range of your own heating curve (e.g.
   2°C below and 3°C above) and leave room for cold weather
+
+#### Control Mode and Heating Curve (v3.5.0+)
+
+- **Control mode — default**: Classic
+  - **Classic**: a small step up or down every cycle; the steps add up (previous
+    behaviour)
+  - **Positional – Radiators** (experimental): Kp 3, Ti 3 h, coast off
+  - **Positional – Floor heating** (experimental): Kp 3, Ti 6 h, coast on
+  - **Positional – Manual** (experimental): Positional PI Kp and Ti and the
+    Coast switch below
+  - Positional: advice = heating curve + PI correction with a true integral,
+    without a wide dead zone; the setpoint stays calm, also with a flow that
+    applies every advice
+- **Coast**: with Classic and Positional – Manual the Coast switch applies;
+  Radiators and Floor heating set coast themselves
+- **Heating curve (positional modes) — default**: App curve
+  - **App curve**: water temperature at −15 °C and at +15 °C outdoor. Starting
+    values: Radiators 50 / 35, Floor heating 35 / 27, otherwise 45 / 30;
+    prefilled when you choose the control mode, as long as you have not changed
+    them yourself
+  - **Heat pump curve** (Aurora I/II: DIY curve, only while DIY is switched
+    on; Aurora III: climate curve): only when you have set it yourself; when DIY
+    is off or the curve is not usable, the app curve applies. Tuya does not have
+    this choice
+- **Diagnostics**: `adaptive_control_diagnostics` shows the mode, the emitter
+  system, Kp and Ti with their source, the basis with its source and the P and I
+  terms
+
+##### Adjusting the heating curve
+
+| What you notice | Adjustment |
+| --- | --- |
+| Too cold in frost, fine in mild weather | Value at −15 °C +1–2 |
+| Too cold in mild weather | Value at +15 °C +1–2 |
+| Slightly too cold everywhere | Both values +1 |
+| Too warm | The other way round: lower |
+
+- Change one value at a time and wait a day (floor heating: two days). In the
+  diagnostics, an I term that stays above 0 points to a heating curve that is
+  too low, below 0 to one that is too high
+
+##### Switching from a fixed curve
+
+Did you use a fixed curve of the heat pump (Aurora I/II: curve selection
+HH1–HH8 or HL1–HL8; Tuya: heating curve H1–H8 or L1–L8)? Note that curve,
+enter the two values from the table in the app curve and then set the curve
+selection to OFF. After OFF, the app can no longer read the curve.
+
+| Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Taken from the graphs in the heat pump manual and rounded to whole degrees;
+  deviation about 1 °C
+
+**Which control mode do I choose?**
+
+| Situation | Choice |
+| --- | --- |
+| No flow that applies the advice | Does not matter: advice only |
+| The current control works well | Classic |
+| Setpoint creeps away or swings, radiators | Positional – Radiators |
+| Setpoint creeps away, floor heating | Positional – Floor heating |
+| Heating curve unknown | Starting values, then adjust |
+
+- **Aurora I/II and Tuya**: the heat pump only keeps a new setpoint when the
+  heating curve selection (Tuya: heating curve) is OFF; otherwise neither mode
+  applies the advice. The app then calculates the heating curve itself
+- **Heat pump curve** only with your own DIY curve: when DIY is off, the app
+  uses the app curve. Take over a fixed curve with the table above
+- **Trying it safely**: turn off the flow that applies the advice, choose a
+  positional control mode and compare the simulated target
+  (`adlar_simulated_target`) with the heating curve for a day
+- **Switching back** is always possible; the integral and the accumulated
+  correction then start at 0
+- **Night setback**: not recommended with floor heating; Positional then heats
+  up in the morning, with more compressor starts
+- **Optimizers** (price, COP, building model): take part in Positional, but
+  shift the advice less than in Classic
+- **Experimental**: Positional has seen little testing in practice
 
 #### Coast Offset (v2.8.0+)
 - **Default**: 1.0°C
@@ -294,7 +381,7 @@ Machine learning algorithm that learns the thermal properties of your home.
 - **Default**: 0.999
 - **Range**: 0.9985 - 0.9995
 - **Function**: How quickly the model adapts to changes. Higher = more stable, better confidence (~75%). Lower = faster adaptation to seasonal changes.
-- **Applies**: After an app restart or 'Reset building model learning'
+- **Applies**: Immediately (v3.5.0+)
 
 ### Building Type
 - **Default**: Average (typical NL house)
@@ -315,12 +402,13 @@ Machine learning algorithm that learns the thermal properties of your home.
 ### Dynamic Internal Heat Gains
 - **Default**: Enabled
 - **Function**: Accounts for varying heat from people/appliances by time of day
-- **Day Pattern**:
+- **Day Pattern** (times in the Homey time zone, v3.5.0+):
   - Night (23:00-06:00): 40% (sleeping)
   - Day (06:00-18:00): 100% (normal)
   - Evening (18:00-23:00): 180% (cooking, TV)
 - **Accuracy improvement**: ~10-15%
-- **Applies**: After 'Reset building model learning'
+- **Applies**: Immediately (v3.5.0+); learning continues from the values of the
+  building profile, with half of the collected samples
 
 ---
 
@@ -545,7 +633,7 @@ Management of energy counters for tracking and reporting.
 ### Scenario 1: "I just want a stable room temperature"
 ```
 ✅ Adaptive Temperature Control: ON
-   - Kp: 3.0, Ki: 1.5, Deadband: 0.3°C
+   - Kp: 5.0, Ki: 1.5, Deadband: 0.3°C
 ✅ Building Model Learning: ON
    - Building type: Average (or your type)
    - Dynamic P_int: ON

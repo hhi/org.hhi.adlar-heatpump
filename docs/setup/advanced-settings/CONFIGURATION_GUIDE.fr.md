@@ -230,7 +230,7 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 **Visible uniquement avec "Cartes de fonction expert HVAC" activé**
 
 #### Gain Proportionnel (Kp)
-- **Par défaut** : 3.0
+- **Par défaut** : 5.0
 - **Plage** : 0.5 - 10.0
 - **Fonction** : Détermine la rapidité de réponse du système à l'erreur actuelle
 - **Valeur plus élevée** : Correction plus rapide, risque de dépassement
@@ -262,6 +262,97 @@ Régulation automatique de la température cible basée sur un capteur de tempé
 - **Chauffage au sol** : Réglez les deux autour de la plage de votre propre
   courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la
   marge pour le temps froid
+
+#### Mode de Régulation et Courbe de Chauffe (v3.5.0+)
+
+- **Mode de régulation — par défaut** : Classique
+  - **Classique** : un petit pas vers le haut ou le bas à chaque cycle ; les pas
+    s'additionnent (comportement existant)
+  - **Positionnel – Radiateurs** (expérimental) : Kp 3, Ti 3 h, coast désactivé
+  - **Positionnel – Plancher chauffant** (expérimental) : Kp 3, Ti 6 h, coast
+    activé
+  - **Positionnel – Manuel** (expérimental) : Kp et Ti du PI positionnel et
+    l'interrupteur Coast ci-dessous
+  - Positionnel : recommandation = courbe de chauffe + correction PI avec une
+    vraie intégrale, sans large zone morte ; la consigne reste stable, même avec
+    un flow qui applique chaque recommandation
+- **Coast** : en mode Classique et Positionnel – Manuel, l'interrupteur Coast
+  s'applique ; Radiateurs et Plancher chauffant règlent coast eux-mêmes
+- **Courbe de chauffe (modes positionnels) — par défaut** : Courbe de l'app
+  - **Courbe de l'app** : température d'eau à −15 °C et à +15 °C extérieur.
+    Valeurs de départ : Radiateurs 50 / 35, Plancher chauffant 35 / 27, sinon 45
+    / 30 ; préremplies au choix du mode de régulation, tant que vous ne les avez
+    pas modifiées
+  - **Courbe de la pompe à chaleur** (Aurora I/II : courbe DIY, uniquement si
+    DIY est activé ; Aurora III : courbe climatique) : uniquement si vous l'avez
+    réglée vous-même ; si DIY est désactivé ou si la courbe n'est pas
+    utilisable, la courbe de l'app s'applique. Tuya n'a pas ce choix
+- **Diagnostic** : `adaptive_control_diagnostics` affiche le mode, le système
+  d'émission, Kp et Ti avec leur source, la base avec sa source et les termes P
+  et I
+
+##### Ajuster la courbe de chauffe
+
+| Ce que vous constatez | Ajustement |
+| --- | --- |
+| Trop froid par gel, bien par temps doux | Valeur à −15 °C +1–2 |
+| Trop froid par temps doux | Valeur à +15 °C +1–2 |
+| Un peu trop froid partout | Les deux valeurs +1 |
+| Trop chaud | À l'inverse : baisser |
+
+- Modifiez une valeur à la fois et attendez un jour (plancher chauffant : deux
+  jours). Dans le diagnostic, un terme I qui reste au-dessus de 0 indique une
+  courbe trop basse, en dessous de 0 une courbe trop haute
+
+##### Passer d'une courbe fixe
+
+Vous utilisiez une courbe fixe de la pompe à chaleur (Aurora I/II : sélection de
+courbe HH1–HH8 ou HL1–HL8 ; Tuya : courbe de chauffage H1–H8 ou L1–L8) ? Notez
+cette courbe, saisissez les deux valeurs du tableau dans la courbe de l'app,
+puis mettez la sélection de courbe sur OFF. Après OFF, l'app ne peut plus lire
+la courbe.
+
+| Courbe | −15 °C | +15 °C | Courbe | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Repris des graphiques du manuel de la pompe à chaleur et arrondi au degré
+  près ; écart d'environ 1 °C
+
+**Quel mode de régulation choisir ?**
+
+| Situation | Choix |
+| --- | --- |
+| Aucun flow n'applique la recommandation | Peu importe : simple conseil |
+| La régulation actuelle fonctionne bien | Classique |
+| Consigne qui dérive, radiateurs | Positionnel – Radiateurs |
+| Consigne qui dérive, plancher chauffant | Positionnel – Plancher chauffant |
+| Courbe de chauffe inconnue | Valeurs de départ, puis ajuster |
+
+- **Aurora I/II et Tuya** : la pompe à chaleur ne conserve une nouvelle consigne
+  que si la sélection de courbe de chauffe (Tuya : courbe de chauffe) est sur
+  OFF ; sinon aucun des deux modes n'applique la recommandation. L'app calcule
+  alors elle-même la courbe de chauffe
+- **Courbe de la pompe à chaleur** uniquement avec votre propre courbe DIY :
+  si DIY est désactivé, l'app calcule avec la courbe de l'app. Reprenez une
+  courbe fixe avec le tableau ci-dessus
+- **Essayer sans risque** : désactivez le flow qui applique la recommandation,
+  choisissez un mode de régulation positionnel et comparez pendant une journée
+  la cible simulée (`adlar_simulated_target`) avec la courbe de chauffe
+- **Revenir en arrière** est toujours possible ; l'intégrale et la correction
+  cumulée repartent alors de 0
+- **Réduit de nuit** : déconseillé avec un plancher chauffant ; le mode
+  Positionnel réchauffe alors le matin, avec plus de démarrages du compresseur
+- **Optimiseurs** (prix, COP, modèle du bâtiment) : participent en mode
+  Positionnel, mais décalent moins la recommandation qu'en mode Classique
+- **Expérimental** : le mode Positionnel a encore peu été testé en pratique
 
 #### Coast Offset (v2.8.0+)
 - **Par défaut** : 1,0°C
@@ -296,7 +387,7 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - **Par défaut** : 0.999
 - **Plage** : 0.9985 - 0.9995
 - **Fonction** : Rapidité d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance (~75%). Plus bas = adaptation plus rapide aux changements saisonniers.
-- **Effet** : Après un redémarrage de l'app ou 'Réinitialiser l'apprentissage du modèle de bâtiment'
+- **Effet** : Immédiat (v3.5.0+)
 
 ### Type de Bâtiment
 - **Par défaut** : Moyen (maison NL typique)
@@ -317,12 +408,13 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 ### Gains de Chaleur Internes Dynamiques
 - **Par défaut** : Activé
 - **Fonction** : Prend en compte la chaleur variable des personnes/appareils selon l'heure
-- **Modèle journalier** :
+- **Modèle journalier** (heures dans le fuseau horaire du Homey, v3.5.0+) :
   - Nuit (23h00-06h00) : 40% (sommeil)
   - Jour (06h00-18h00) : 100% (normal)
   - Soir (18h00-23h00) : 180% (cuisine, TV)
 - **Amélioration de la précision** : ~10-15%
-- **Effet** : Après 'Réinitialiser l'apprentissage du modèle de bâtiment'
+- **Effet** : Immédiat (v3.5.0+) ; l'apprentissage reprend à partir des valeurs
+  du profil de bâtiment, avec la moitié des échantillons collectés
 
 ---
 
@@ -547,7 +639,7 @@ Gestion des compteurs d'énergie pour le suivi et les rapports.
 ### Scénario 1 : "Je veux juste une température de pièce stable"
 ```
 ✅ Contrôle Adaptatif de Température : ON
-   - Kp : 3.0, Ki : 1.5, Bande morte : 0.3°C
+   - Kp : 5.0, Ki : 1.5, Bande morte : 0.3°C
 ✅ Apprentissage du Modèle de Bâtiment : ON
    - Type de bâtiment : Moyen (ou votre type)
    - P_int dynamique : ON

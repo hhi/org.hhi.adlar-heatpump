@@ -230,7 +230,7 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 **Alleen zichtbaar met "Expert HVAC functie kaarten" ingeschakeld**
 
 #### Proportionele Versterking (Kp)
-- **Standaard**: 3.0
+- **Standaard**: 5.0
 - **Bereik**: 0.5 - 10.0
 - **Functie**: Bepaalt hoe snel systeem reageert op huidige fout
 - **Hogere waarde**: Snellere correctie, risico op overshoot
@@ -261,6 +261,94 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   regeling toont welke grens geldt
 - **Vloerverwarming**: Stel beide in rond het bereik van uw eigen stooklijn
   (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer
+
+#### Regelmodus en Stooklijn (v3.5.0+)
+
+- **Regelmodus — standaard**: Klassiek
+  - **Klassiek**: elke cyclus een kleine stap omhoog of omlaag; de stappen
+    tellen op (bestaand gedrag)
+  - **Positioneel – Radiatoren** (experimenteel): Kp 3, Ti 3 u, coast uit
+  - **Positioneel – Vloerverwarming** (experimenteel): Kp 3, Ti 6 u, coast aan
+  - **Positioneel – Handmatig** (experimenteel): Positionele PI Kp en Ti en de
+    schakelaar Coast hieronder
+  - Positioneel: advies = stooklijn + PI-correctie met een echte integraal,
+    zonder brede dode zone; het setpoint blijft rustig, ook met een flow die elk
+    advies uitvoert
+- **Coast**: bij Klassiek en Positioneel – Handmatig geldt de schakelaar Coast;
+  Radiatoren en Vloerverwarming zetten coast zelf
+- **Stooklijn (positionele modi) — standaard**: App-stooklijn
+  - **App-stooklijn**: watertemperatuur bij −15 °C en bij +15 °C buiten.
+    Startwaarden: Radiatoren 50 / 35, Vloerverwarming 35 / 27, anders 45 / 30;
+    voorgevuld bij de keuze van de regelmodus, zolang u ze niet zelf heeft
+    aangepast
+  - **Stooklijn van de warmtepomp** (Aurora I/II: DIY-stooklijn, alleen als
+    DIY aan staat; Aurora III: klimaatcurve): alleen als u die zelf heeft
+    ingesteld; staat DIY uit of is hij niet bruikbaar, dan geldt de
+    app-stooklijn. Tuya heeft deze keuze niet
+- **Diagnostiek**: `adaptive_control_diagnostics` toont de modus, het
+  afgiftesysteem, Kp en Ti met hun bron, de basis met zijn bron en de P- en
+  I-term
+
+##### Stooklijn bijstellen
+
+| Wat u merkt | Aanpassing |
+| --- | --- |
+| Te koud bij vorst, goed bij zacht weer | Waarde bij −15 °C +1–2 |
+| Te koud bij zacht weer | Waarde bij +15 °C +1–2 |
+| Overal iets te koud | Beide waarden +1 |
+| Te warm | Omgekeerd: verlagen |
+
+- Pas één waarde per keer aan en wacht een dag (vloerverwarming: twee dagen). In
+  de diagnostiek wijst een I-term die structureel boven 0 ligt op een te lage
+  stooklijn, onder 0 op een te hoge
+
+##### Overstappen van een vaste curve
+
+Gebruikte u een vaste curve van de warmtepomp (Aurora I/II: stooklijnkeuze
+HH1–HH8 of HL1–HL8; Tuya: verwarmingscurve H1–H8 of L1–L8)? Noteer die curve,
+vul de twee waarden uit de tabel in bij de app-stooklijn en zet daarna de
+stooklijnkeuze op OFF. Na OFF kan de app de curve niet meer uitlezen.
+
+| Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
+| --- | --- | --- | --- | --- | --- |
+| HH1 | 55 | 50 | HL1 | 38 | 32 |
+| HH2 | 54 | 46 | HL2 | 35 | 30 |
+| HH3 | 54 | 41 | HL3 | 33 | 30 |
+| HH4 | 50 | 46 | HL4 | 35 | 29 |
+| HH5 | 49 | 41 | HL5 | 33 | 28 |
+| HH6 | 45 | 40 | HL6 | 31 | 26 |
+| HH7 | 44 | 36 | HL7 | 29 | 26 |
+| HH8 | 40 | 35 | HL8 | 29 | 24 |
+
+- Overgenomen uit de grafieken in de handleiding van de warmtepomp en afgerond
+  op hele graden; afwijking ongeveer 1 °C
+
+**Welke regelmodus kies ik?**
+
+| Situatie | Keuze |
+| --- | --- |
+| Geen flow die het advies uitvoert | Maakt niet uit: alleen advies |
+| De huidige regeling werkt goed | Klassiek |
+| Setpoint kruipt weg of slingert, radiatoren | Positioneel – Radiatoren |
+| Setpoint kruipt weg, vloerverwarming | Positioneel – Vloerverwarming |
+| Stooklijn onbekend | Startwaarden, daarna bijstellen |
+
+- **Aurora I/II en Tuya**: de warmtepomp houdt een nieuw setpoint alleen vast
+  als de stooklijnkeuze (Tuya: verwarmingscurve) op OFF staat; anders voert geen
+  van beide modi het advies uit. De app rekent de stooklijn dan zelf uit
+- **Stooklijn van de warmtepomp** alleen bij een eigen DIY-stooklijn: staat DIY
+  uit, dan rekent de app met de app-stooklijn. Een vaste curve neemt u over met
+  de tabel hierboven
+- **Veilig proberen**: zet de flow die het advies uitvoert uit, kies een
+  positionele regelmodus en vergelijk een dag het gesimuleerde doel
+  (`adlar_simulated_target`) met de stooklijn
+- **Terugzetten** kan altijd; de integraal en de opgetelde correctie beginnen
+  dan op 0
+- **Nachtverlaging**: bij vloerverwarming afgeraden; Positioneel warmt dan in de
+  ochtend op, met meer compressorstarts
+- **Optimizers** (prijs, COP, gebouwmodel): werken in Positioneel mee, maar
+  verschuiven het advies minder dan in Klassiek
+- **Experimenteel**: Positioneel is nog weinig in de praktijk getest
 
 #### Coast Offset (v2.8.0+)
 - **Standaard**: 1.0°C
@@ -295,7 +383,7 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 - **Standaard**: 0.999
 - **Bereik**: 0.9985 - 0.9995
 - **Functie**: Hoe snel model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid (~75%). Lager = snellere aanpassing aan seizoensveranderingen.
-- **Werking**: Pas na een herstart van de app of 'Reset gebouwmodel leren'
+- **Werking**: Werkt direct (v3.5.0+)
 
 ### Gebouwtype
 - **Standaard**: Gemiddeld (typisch NL huis)
@@ -316,12 +404,13 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 ### Dynamische Interne Warmtewinsten
 - **Standaard**: Ingeschakeld
 - **Functie**: Houdt rekening met variërende warmte van mensen/apparaten per tijdstip
-- **Dag Patroon**:
+- **Dag Patroon** (tijden in de tijdzone van de Homey, v3.5.0+):
   - Nacht (23:00-06:00): 40% (slapen)
   - Dag (06:00-18:00): 100% (normaal)
   - Avond (18:00-23:00): 180% (koken, TV)
 - **Nauwkeurigheid verbetering**: ~10-15%
-- **Werking**: Pas na 'Reset gebouwmodel leren'
+- **Werking**: Werkt direct (v3.5.0+); het leren gaat verder vanaf de waarden van
+  het gebouwprofiel, met de helft van de verzamelde samples
 
 ---
 
@@ -546,7 +635,7 @@ Beheer van energie tellers voor tracking en rapportage.
 ### Scenario 1: "Ik wil gewoon een stabiele kamertemperatuur"
 ```
 ✅ Adaptieve Temperatuur Regeling: AAN
-   - Kp: 3.0, Ki: 1.5, Deadband: 0.3°C
+   - Kp: 5.0, Ki: 1.5, Deadband: 0.3°C
 ✅ Gebouwmodel Leren: AAN
    - Building type: Average (of jouw type)
    - Dynamic P_int: AAN

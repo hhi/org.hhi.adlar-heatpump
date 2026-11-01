@@ -15,6 +15,7 @@ Module._load = function load(request, parent, isMain) {
 };
 
 const { ServiceCoordinator } = require('../../.homeybuild/lib/modbus/services/service-coordinator');
+const { AdaptiveControlService } = require('../../.homeybuild/lib/modbus/services/adaptive-control-service');
 
 function deferred() {
   let resolve;
@@ -284,4 +285,58 @@ test('TCP reconnect does not mark Homey visibly connected before a valid Modbus 
   assert.strictEqual(coordinator._consecutiveSuperfastPollFailures, 0);
   assert.strictEqual(coordinator._consecutiveNonFastRequiredFailures, 0);
   assert.strictEqual(coordinator._errorCountByContext.size, 0);
+});
+
+test('ADR-065: heat pump curve uses the DIY line only while the DIY switch is on and k is negative', () => {
+  const coordinator = Object.create(ServiceCoordinator.prototype);
+  const snapshot = (diy) => ({
+    sensors: { ambientT1: { value: 13 } },
+    diy: { ...diy, calcSetpoint: (t) => diy.slopeK * (t + 15) + diy.interceptB },
+  });
+
+  coordinator._latestSnapshot = snapshot({ active: true, slopeK: -0.5, interceptB: 55 });
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), 41);
+
+  coordinator._latestSnapshot = snapshot({ active: false, slopeK: -0.5, interceptB: 55 });
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), null);
+
+  coordinator._latestSnapshot = snapshot({ active: true, slopeK: 0, interceptB: 40 });
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), null);
+
+  coordinator._diyPolled = true;
+  coordinator._latestSnapshot = { sensors: {}, diy: undefined };
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), null, 'DIY registers not supported');
+});
+
+test('ADR-065: heat pump curve is pending until the DIY registers have been read after a start', () => {
+  const coordinator = Object.create(ServiceCoordinator.prototype);
+  coordinator._diyPolled = false;
+  coordinator._latestSnapshot = { sensors: { ambientT1: { value: 12 } }, diy: undefined };
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), 'pending');
+
+  // After the medium poll group: the DIY line once read, or null when the registers are not supported
+  coordinator._diyPolled = true;
+  coordinator._latestSnapshot = {
+    sensors: { ambientT1: { value: 12 } },
+    diy: { active: true, slopeK: -0.5, interceptB: 55, calcSetpoint: (t) => -0.5 * (t + 15) + 55 },
+  };
+  assert.strictEqual(coordinator._resolveHeatPumpCurve(5), 41.5);
+});
+
+test('ADR-065: the positional basis waits for a pending heat pump curve instead of falling back', async () => {
+  const settings = { adaptive_curve_source: 'auto', adaptive_curve_at_minus15: 50, adaptive_curve_at_plus15: 35 };
+  const service = Object.create(AdaptiveControlService.prototype);
+  service.device = { getSetting: (key) => settings[key] };
+  service.getEffectiveOutdoorTemp = async () => 12;
+  service.flatBasis = null;
+
+  service.resolveHeatPumpCurve = () => 'pending';
+  assert.strictEqual(await service._resolvePositionalBasis(42), null);
+
+  service.resolveHeatPumpCurve = () => 41.5;
+  assert.deepStrictEqual(await service._resolvePositionalBasis(42), { value: 41.5, source: 'heat_pump_curve' });
+
+  settings.adaptive_curve_source = 'app';
+  service.resolveHeatPumpCurve = () => 'pending';
+  assert.deepStrictEqual(await service._resolvePositionalBasis(42), { value: 36.5, source: 'app_curve' });
 });

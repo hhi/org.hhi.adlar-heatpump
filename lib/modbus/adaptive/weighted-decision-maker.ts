@@ -167,8 +167,7 @@ export class WeightedDecisionMaker {
     // the denominator — the constructor normalizes over all four priorities (total 1.2),
     // which silently lowered the anchor to 0.5 and the effective loop gain to Kp × 0.5.
     // Thermal competes within the optimizer budget like the other optimizers.
-    const trioTotal = this.priorities.comfort + this.priorities.efficiency + this.priorities.cost;
-    const comfortAnchor = trioTotal > 0 ? this.priorities.comfort / trioTotal : 0.6;
+    const comfortAnchor = this.getComfortAnchor();
 
     // Optimizers renormalize within their own budget (1 - anchor); an unavailable
     // optimizer redistributes to the other optimizers, never to comfort
@@ -285,6 +284,15 @@ export class WeightedDecisionMaker {
       cost: priorities.cost / total,
       thermal: priorities.thermal ? priorities.thermal / total : undefined,
     };
+  }
+
+  /**
+   * Fixed weight of the comfort (PI) component without coast (ADR-059 W2): comfort / (comfort + efficiency + cost).
+   * ADR-065: the positional PI output is divided by this anchor so that its weighted share equals the output itself.
+   */
+  public getComfortAnchor(): number {
+    const trioTotal = this.priorities.comfort + this.priorities.efficiency + this.priorities.cost;
+    return trioTotal > 0 ? this.priorities.comfort / trioTotal : 0.6;
   }
 
   /**
