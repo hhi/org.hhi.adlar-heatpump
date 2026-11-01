@@ -6,7 +6,8 @@ Bijgewerkt 2026-10-31: D9 (één instelling Regelmodus) vervangt de keuzelijst v
 app-stooklijn als standaard basis met startwaarden per afgiftesysteem, O4 getoetst,
 schaduwtest op Aurora II. Bijgewerkt 2026-11-01 (3.5.2): coast ook bij
 vloerverwarming standaard uit (D6 herzien, O19/O20). Bijgewerkt 2026-11-01 (3.6.0): D10,
-prijs en COP verschuiven in de positionele modus het kamerdoel (O14, O16 deels).
+prijs en COP verschuiven in de positionele modus het kamerdoel (O14, O16 deels);
+Aurora III wacht na een start op zijn stooklijn (O17).
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** ADR-024, ADR-040A/B, ADR-047b, ADR-058 (coast); ADR-059 W1/W2
@@ -566,7 +567,7 @@ alleen prijsoptimalisatie:
 | O16 | Kamerdoel in de basis | **Deels gebouwd in 3.6.0 (D10.2):** de basis schuift mee met de verschuiving door de optimizers. Open: meeschuiven met een ander kamerdoel van de gebruiker (nachtverlaging); daarvoor is een referentiekamertemperatuur van de stooklijn nodig. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
 | O19 | Coast slingert met de compressor | **Opgelost in 3.5.2:** coast uit bij de vloerpreset (D6). Bij "Handmatig" met coast aan blijft het gedrag; een eigen oplossing voor coast is alleen nodig als iemand coast bij positioneel wil |
 | O20 | Sprong bij het einde van coast | **Opgelost in 3.5.2** met O19 |
-| O17 | Aurora III na een start | Open: tot Reg 67 (slow-pollgroep, 300 s) gelezen is, rekent de basis met de app-stooklijn. Zelfde oplossing als Aurora II (`'pending'`) |
+| O17 | Aurora III na een start | **Opgelost in 3.6.0:** tot de slow-pollgroep (Reg 67, 300 s) na een start gelezen is, geeft de coordinator `'pending'` en slaat de regeling de cyclus over, zoals bij Aurora II. Ontbreekt Reg 67 daarna (optioneel blok), dan valt de basis terug op de app-stooklijn. Alleen bij "Stooklijn van de warmtepomp" |
 
 ## 7. Testaanpak
 
