@@ -505,7 +505,7 @@ te maken met `test/simulation/coast-closed-loop.js`. RMSE in °C:
 | O10 | Standaard uit de hardware | Open; niet gebouwd. De standaard is Klassiek voor alle apparaten (D9). Eerst nagaan of de modus het afgiftesysteem echt weergeeft (vloerverwarming kan ook in modus "verwarmen" draaien) |
 | O11 | Standaard regelmodus | **Besloten:** klassiek voor iedereen, positioneel opt-in. Over de standaard wordt beslist na de hardwareweek en praktijkdata |
 | O12 | Pauze bij ontdooien voor Tuya | Open: de Tuya-driver geeft de service nog geen ontdooisignaal (D3.4). Aurora II pauzeert bij ontdooien, nog niet bij tapwater (tapwaterbit onbekend) |
-| O14 | Optimizers in de positionele modus | Open: prijs en COP verschuiven het advies, de I-term werkt dat weg. Ontwerp nodig (bijvoorbeeld de verschuiving in het doel in plaats van in het advies) |
+| O14 | Optimizers in de positionele modus | Open, eerste stap van 3.6.0: prijs en COP verschuiven het advies, de I-term werkt dat weg. Wie een optimizer ooit aanzette en daarna Positioneel kiest, verliest het effect zonder dat te zien (2026-11-01; vermeld in de handleiding). Ontwerp: de verschuiving in het doel in plaats van in het advies, samen met O16 |
 | O16 | Kamerdoel in de basis | Idee voor 3.6.0: de basis schuift mee met het kamerdoel, zodat nachtverlaging en een ander doel niet op de I-term wachten. Een gebogen (natuurkundige) stooklijn levert ≤ 1,2 °C (radiatoren) en ≤ 0,2 °C (vloer) op en hoeft niet |
 | O19 | Coast slingert met de compressor | **Opgelost in 3.5.2:** coast uit bij de vloerpreset (D6). Bij "Handmatig" met coast aan blijft het gedrag; een eigen oplossing voor coast is alleen nodig als iemand coast bij positioneel wil |
 | O20 | Sprong bij het einde van coast | **Opgelost in 3.5.2** met O19 |

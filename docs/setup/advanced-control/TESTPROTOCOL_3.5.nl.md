@@ -21,6 +21,9 @@ Stop op elk moment als iets niet goed voelt: zie "Terugzetten" onderaan.
        de DIY-stooklijn aan staat.
      - Aurora III: of de klimaatcurve van zone 1 aan staat.
    - Het **setpoint** van de warmtepomp en het **kamerdoel**.
+   - Of de **prijsoptimalisatie**, de **COP-optimalisatie** en het
+     **gebouwmodel** aan staan. In de positionele modus hebben die weinig
+     effect; we willen weten of ze meespelen.
 3. Controleer dat de app een binnentemperatuur krijgt: de tegel
    "Laatste Binnentemperatuur (Flow Kaart)" moet een tijd van de laatste
    minuten tonen.
