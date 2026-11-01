@@ -344,8 +344,11 @@ kann die App die Kurve nicht mehr auslesen.
   Tag lang das simulierte Ziel (`adlar_simulated_target`) mit der Heizkurve
 - **Zurückstellen** ist jederzeit möglich; das Integral und die aufsummierte
   Korrektur beginnen dann bei 0
-- **Nachtabsenkung**: bei Fußbodenheizung nicht empfohlen; Positionell heizt
-  dann morgens auf, mit mehr Kompressorstarts
+- **Nachtabsenkung und Thermostatprogramm**: Eine Wärmepumpe braucht Stunden,
+  um das Haus wieder aufzuheizen, in jedem Regelmodus. Lassen Sie das Programm
+  bei Heizkörpern 2–4 Stunden vor dem gewünschten Zeitpunkt hochgehen. Halten
+  Sie es bei Fußbodenheizung konstant oder senken Sie höchstens um 1 °C ab;
+  sonst heizt Positionell morgens auf, mit mehr Kompressorstarts
 - **Optimierer** (Preis, COP): verschieben bei Positionell das Raumziel, um
   höchstens 1,5 °C; die Heizkurve verschiebt sich mit. Mit eingeschalteter
   COP-Optimierung kann das Haus im Mittel etwas unter dem Raumziel bleiben. Die

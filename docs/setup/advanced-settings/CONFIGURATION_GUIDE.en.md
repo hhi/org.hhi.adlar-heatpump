@@ -342,8 +342,11 @@ selection to OFF. After OFF, the app can no longer read the curve.
   (`adlar_simulated_target`) with the heating curve for a day
 - **Switching back** is always possible; the integral and the accumulated
   correction then start at 0
-- **Night setback**: not recommended with floor heating; Positional then heats
-  up in the morning, with more compressor starts
+- **Night setback and thermostat schedule**: a heat pump needs hours to warm the
+  house up again, in every control mode. With radiators, let the schedule go up
+  2–4 hours before the desired time. With floor heating, keep it constant or
+  lower it by at most 1 °C; otherwise Positional heats up in the morning, with
+  more compressor starts
 - **Optimizers** (price, COP): shift the room target in Positional, by at most
   1.5 °C; the heating curve follows. With the COP optimizer on, the house can
   stay slightly below the room target on average. The thermal component of the

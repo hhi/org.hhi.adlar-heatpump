@@ -344,8 +344,11 @@ stooklijnkeuze op OFF. Na OFF kan de app de curve niet meer uitlezen.
   (`adlar_simulated_target`) met de stooklijn
 - **Terugzetten** kan altijd; de integraal en de opgetelde correctie beginnen
   dan op 0
-- **Nachtverlaging**: bij vloerverwarming afgeraden; Positioneel warmt dan in de
-  ochtend op, met meer compressorstarts
+- **Nachtverlaging en thermostaatprogramma**: een warmtepomp heeft uren nodig om
+  de woning weer op te warmen, in elke regelmodus. Laat het programma bij
+  radiatoren 2–4 uur vóór het gewenste moment omhooggaan. Houd het bij
+  vloerverwarming constant of verlaag hooguit 1 °C; Positioneel warmt anders in
+  de ochtend op, met meer compressorstarts
 - **Optimizers** (prijs, COP): verschuiven in Positioneel het kamerdoel, met
   hooguit 1,5 °C; de stooklijn schuift mee. Met de COP-optimalisatie aan kan het
   huis gemiddeld iets onder het kamerdoel blijven. De thermische component van
