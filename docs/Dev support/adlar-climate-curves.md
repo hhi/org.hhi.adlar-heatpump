@@ -1,12 +1,15 @@
 # Adlar klimaatcurves (stooklijnen HH1–HH8, HL1–HL8)
 
 **Bron:** handleiding Adlar Castra, § 4.10.1 "Klimaattemperatuurcurves
-(stooklijnen)", overgenomen uit een foto van de grafieken (31 okt 2026).
+(stooklijnen)", overgenomen uit een foto van de grafieken (31 okt 2026):
+[adlar-climate-curves-4.10.1.jpg](adlar-climate-curves-4.10.1.jpg). Treden
+opnieuw afgelezen op 1 nov 2026.
 **Nauwkeurigheid:** ±1 °C per waarde en ±2 °C buiten per knikpunt. Niet
 gemeten op de warmtepomp.
 **Doel:** vertaaltabel van een vaste curve naar de twee velden van de
-app-stooklijn (3.5.0: tabel in de handleiding; 3.6.0, punt G15: keuzelijst die
-de velden invult).
+app-stooklijn (3.5.0: tabel in de handleiding; 3.6.0, punt G15: keuzelijst
+`adaptive_curve_fixed` die de velden invult, tabel `FIXED_CURVES` in
+`lib/shared/adaptive/positional-pi-controller.ts`).
 
 ## Vorm
 
@@ -17,6 +20,22 @@ de velden invult).
   weer
 - Daartussen dalen de stappen gelijkmatig: in grote lijnen een rechte lijn,
   afgerond op hele graden
+- Binnen één curve zijn de treden even breed, en curves met evenveel treden
+  hebben ze op dezelfde plaatsen. Dat wijst op een formule (een rechte lijn,
+  afgerond), niet op een met de hand afgestemde vorm. Geen verhoging rond 0 °C
+  te zien
+
+| Curve | Treden bij (°C buiten) | Afstand |
+| --- | --- | --- |
+| HH1 | −16, −8½, −1, +6½, +15 | 7½ – 7½ – 7½ – 8½ |
+| HH6 | −16, −8½, −1, +7, +15 | 7½ – 7½ – 8 – 8 |
+| HH8 | −17, −9, −½, +7, +15 | 8 – 8½ – 7½ – 8 |
+| HL1 | −16½, −10½, −4, +3, +9½, +16 | 6 – 6½ – 7 – 6½ – 6½ |
+
+- De eerste trede valt direct na het koude vlakke stuk, de laatste precies bij
+  het begin van het zachte vlakke stuk. Het midden van de trap ligt daardoor
+  een halve graad onder de waarde bij kou en een halve graad boven de waarde
+  bij zacht weer
 
 ## Hoge watertemperatuur (HH1–HH8)
 
@@ -57,22 +76,28 @@ heeft deze tabel niet nodig.
 ## Gebruik in de app
 
 Tussen de vlakke stukken loopt elke curve recht. De app-stooklijn (waarde bij
-−15 en +15 °C buiten) volgt hem daar dus exact, op de traptreden van ±0,5 °C na.
-Een aparte rekenmethode voor deze curves is daarom niet nodig.
+−15 en +15 °C buiten) volgt het midden van de trap, op de traptreden van
+±0,5 °C na. Een aparte rekenmethode voor deze curves is daarom niet nodig.
 
 | Curve | −15 °C | +15 °C | Curve | −15 °C | +15 °C |
 | --- | --- | --- | --- | --- | --- |
-| HH1 | 55 | 50 | HL1 | 38 | 32 |
-| HH2 | 54 | 46 | HL2 | 35 | 30 |
-| HH3 | 54 | 41 | HL3 | 33 | 30 |
-| HH4 | 50 | 46 | HL4 | 35 | 29 |
-| HH5 | 49 | 41 | HL5 | 33 | 28 |
-| HH6 | 45 | 40 | HL6 | 31 | 26 |
-| HH7 | 44 | 36 | HL7 | 29 | 26 |
-| HH8 | 40 | 35 | HL8 | 29 | 24 |
+| HH1 | 54 | 51 | HL1 | 37 | 33 |
+| HH2 | 54 | 46 | HL2 | 34 | 31 |
+| HH3 | 53 | 42 | HL3 | 32 | 30 |
+| HH4 | 49 | 46 | HL4 | 34 | 29 |
+| HH5 | 49 | 41 | HL5 | 32 | 29 |
+| HH6 | 44 | 41 | HL6 | 30 | 27 |
+| HH7 | 44 | 36 | HL7 | 28 | 27 |
+| HH8 | 39 | 36 | HL8 | 28 | 25 |
 
-- Lineair geïnterpoleerd tussen "vlak tot" en "vlak vanaf", afgerond op hele
-  graden (de velden gaan per 1 °C; ,5 naar boven)
+- Middenlijn van de trap: lineair van (vlak tot, kou − 0,5) naar (vlak vanaf,
+  zacht weer + 0,5), afgerond op hele graden (de velden gaan per 1 °C; ,5 naar
+  boven). De test `test/unit/fixed-curve.test.js` rekent dit na
+- Bij HH2, HH5 en HH7 valt een trede rond −15 °C; daar ligt de trap bij −15 °C
+  1 °C lager dan de tabel
+- Tot 3.6.0 stond hier de lijn tussen de hoeken van de vlakke stukken. Die was
+  bij 13 van de 16 curves 1 °C te steil: bij −15 °C 1 °C te hoog, bij +15 °C
+  vaak 1 °C te laag
 - Na OFF kan de app de gekozen curve niet meer uitlezen: de gebruiker neemt de
   waarden over vóór hij de stooklijnkeuze op OFF zet
 - Startwaarden van 3.5.0: Radiatoren 50 / 35 (rond HH7), Vloerverwarming

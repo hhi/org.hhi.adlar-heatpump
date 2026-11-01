@@ -229,6 +229,37 @@ export function curvePresetFor(controlMode: unknown): { atMinus15: number; atPlu
   return null;
 }
 
+/**
+ * Adlar's fixed climate curves as app-curve values (°C at −15 °C and +15 °C outdoor, G15).
+ * Each curve is a staircase of 1 °C steps of equal width (manual §4.10.1); the values are the
+ * middle line of that staircase, rounded to whole degrees. Tuya H1–H8/L1–L8 = HH1–HH8/HL1–HL8.
+ * Source and method: docs/Dev support/adlar-climate-curves.md.
+ */
+export const FIXED_CURVES: Record<string, { atMinus15: number; atPlus15: number }> = {
+  hh1: { atMinus15: 54, atPlus15: 51 },
+  hh2: { atMinus15: 54, atPlus15: 46 },
+  hh3: { atMinus15: 53, atPlus15: 42 },
+  hh4: { atMinus15: 49, atPlus15: 46 },
+  hh5: { atMinus15: 49, atPlus15: 41 },
+  hh6: { atMinus15: 44, atPlus15: 41 },
+  hh7: { atMinus15: 44, atPlus15: 36 },
+  hh8: { atMinus15: 39, atPlus15: 36 },
+  hl1: { atMinus15: 37, atPlus15: 33 },
+  hl2: { atMinus15: 34, atPlus15: 31 },
+  hl3: { atMinus15: 32, atPlus15: 30 },
+  hl4: { atMinus15: 34, atPlus15: 29 },
+  hl5: { atMinus15: 32, atPlus15: 29 },
+  hl6: { atMinus15: 30, atPlus15: 27 },
+  hl7: { atMinus15: 28, atPlus15: 27 },
+  hl8: { atMinus15: 28, atPlus15: 25 },
+};
+
+/** App-curve values for a fixed curve id ('hh1' … 'hl8'), or null for 'none' and unknown ids. */
+export function fixedCurveFor(curveId: unknown): { atMinus15: number; atPlus15: number } | null {
+  if (typeof curveId !== 'string' || !Object.prototype.hasOwnProperty.call(FIXED_CURVES, curveId)) return null;
+  return FIXED_CURVES[curveId];
+}
+
 /** Plausible range for a curve setpoint (°C). */
 const CURVE_PLAUSIBLE_MIN_C = 15;
 const CURVE_PLAUSIBLE_MAX_C = 70;
