@@ -1833,14 +1833,6 @@ export class FlowCardManagerService {
   }
 
   /**
-   * Update internal registration based on changed settings.
-   * @param changedKeys - array of settings keys that were modified
-   */
-  async updateSettings(changedKeys: string[]): Promise<void> {
-    void changedKeys;
-  }
-
-  /**
    * Destroy service and unregister flow cards/listeners.
    */
   destroy(): void {

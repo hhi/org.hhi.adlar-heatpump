@@ -535,29 +535,31 @@ ELSE
 
 ---
 
-#### 2. Calculate pre-heat duration (v2.6.0)
+#### 2. Calculate pre-heat start time (v2.6.0)
 
-**Function:** Calculates time needed for X°C temperature rise
+**Function:** Calculates when to start heating to reach an indoor temperature at a given
+time. From 3.6.0 with the outdoor temperature and the measured power.
 
 **Parameters:**
 
-- `temperature_rise` (number) - Desired temperature rise in °C (e.g., 2.0)
+- `target_indoor_temp` (number) - Target indoor temperature in °C (16–28)
+- `target_clock_time` (text) - Ready at, as HH:MM (e.g. 07:00)
 
 **Returns:**
 
-- `preheat_hours` (number) - Pre-heat duration in hours
-- `confidence` (number) - Model reliability (%)
-- `building_tau` (number) - Thermal time constant τ (hours)
+- `start_time` (string) - Start time as HH:MM, or `Now` when the temperature is already reached
+- `duration_hours` (number) - Pre-heat duration in hours (at most 48)
+- `suggested_setpoint_boost` (number) - Suggested setpoint boost (°C)
+- `confidence` (number) - Model confidence (%)
 
-**Use:** Plan pre-heating for specific times, thermal storage automation
+**Use:** Planning pre-heating for specific times
 
 **Example flow:**
 ```
-WHEN Cheapest price block approaching (2 hours ahead)
+WHEN Time is 21:00
 THEN
-  1. Calculate pre-heat duration (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Start pre-heating now
+  1. Calculate pre-heat start time (21 °C, ready at 07:00)
+  2. Notification: "Start at {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---

@@ -197,27 +197,27 @@
 | Flow ID | Titel | Beschreibung |
 |---------|-------|--------------|
 | `force_insight_analysis` | Erkenntnisanalyse erzwingen | Sofort auswerten (Tokens: insights_detected, confidence) |
-| `calculate_preheat_time` ⭐ | Vorheiz-Dauer berechnen | Berechnet Zeit für ±X°C Erwärmung (v2.6.0); ab 3.6.0 mit Außentemperatur und gemessener Leistung |
+| `calculate_preheat_time` ⭐ | Vorheiz-Startzeit berechnen | Berechnet, wann das Heizen beginnen muss, um eine Innentemperatur zu einer Uhrzeit zu erreichen (v2.6.0); ab 3.6.0 mit Außentemperatur und gemessener Leistung |
 
 #### `calculate_preheat_time` - Parameter & Rückgabe
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
-| `temperature_rise` | number | Gewünschte Temperaturerhöhung in °C (z.B. 2.0) |
+| `target_indoor_temp` | number | Ziel-Innentemperatur in °C (16–28, Schritt 0,5) |
+| `target_clock_time` | text | Fertig um, als HH:MM (z. B. 07:00); eine heute schon vergangene Uhrzeit gilt für morgen |
 
 | Rückgabe-Token | Typ | Beschreibung |
 |----------------|-----|--------------|
-| `preheat_hours` | number | Vorheiz-Dauer in Stunden |
+| `start_time` | string | Startzeit als HH:MM, oder `Now`, wenn die Temperatur schon erreicht ist |
+| `duration_hours` | number | Vorheiz-Dauer in Stunden (höchstens 48) |
+| `suggested_setpoint_boost` | number | Vorgeschlagene Sollwerterhöhung (1–3 °C) |
 | `confidence` | number | Modellvertrauen (%) |
-| `building_tau` | number | Thermische Zeitkonstante τ (Stunden) |
 
 **Beispiel-Flow:**
 ```
-WHEN Günstigster Preisblock nähert sich (2 Stunden vorher)
+WHEN Uhrzeit ist 21:00
 THEN
-  1. Vorheiz-Dauer berechnen (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Jetzt vorheizen starten
-  3. Benachrichtigung: "Vorheizen dauert {{preheat_hours}}h"
+  1. Vorheiz-Startzeit berechnen (21 °C, fertig um 07:00)
+  2. Benachrichtigung: "Beginnen um {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---
