@@ -27,6 +27,8 @@ La pompe à chaleur Adlar peut recevoir des données de mesure externes d'autres
 
 **Délai d'expiration du Service** : Les demandes de données externes expirent après 5 secondes (`DeviceConstants.EXTERNAL_DEVICE_QUERY_TIMEOUT_MS`), configurable dans les paramètres de l'appareil.
 
+**Température extérieure : au moins toutes les heures.** Si aucune nouvelle température extérieure n'arrive pendant 1 heure, l'app utilise à nouveau le capteur extérieur de la pompe à chaleur, moins précis. Cela vaut pour le COP, le modèle du bâtiment, les aperçus et la durée de préchauffage ; la régulation adaptative utilise d'abord la prévision météo Open-Meteo. Après un redémarrage de l'app, la dernière valeur n'est restaurée que si elle a moins de 4 heures. Par temps stable, la température peut rester identique plus d'une heure ; un déclencheur « température modifiée » n'envoie alors rien. Envoyez donc (aussi) la température extérieure avec un déclencheur horaire, par exemple toutes les 15 minutes. La ligne de diagnostic « Dernière Température Extérieure (Carte Flux) » indique quand la dernière valeur est arrivée.
+
 ## Configuration de Base (Partage de Données Direct)
 
 ### Étape 1 : Créer un Flux de Données Externes
@@ -82,6 +84,7 @@ Ce flux permet aux compteurs électriques externes de partager automatiquement l
 - Vérifier que le flux est activé et fonctionne
 - Vérifier que l'appareil externe est en ligne et signale des données
 - Tester le flux manuellement pour s'assurer que la carte d'action s'exécute
+- Température extérieure : vérifier que le flux envoie une valeur au moins toutes les heures (voir [Fraîcheur des Données](#️-important--fraîcheur-des-données))
 
 ### ❌ "Les valeurs de données semblent incorrectes"
 
