@@ -24,7 +24,7 @@ Module._load = function load(request, parent, isMain) {
 const {
   zonedTimeToUtc, startOfLocalDay, nextLocalMidnight, nextLocalTime, formatDayMonthTime,
 } = require('../../.homeybuild/lib/shared/utils/time-format');
-const { calculatePreHeatDuration } = require('../../.homeybuild/lib/shared/utils/preheat-calculator');
+const { calculatePreHeatDuration, estimatePreHeatDuration } = require('../../.homeybuild/lib/shared/utils/preheat-calculator');
 const { EnergyTrackingService: TuyaEnergyTracking } = require('../../.homeybuild/lib/tuya/services/energy-tracking-service');
 const { EnergyTrackingService: ModbusEnergyTracking } = require('../../.homeybuild/lib/modbus/services/energy-tracking-service');
 const { EnergyTrackingService: Aurora3EnergyTracking } = require('../../.homeybuild/lib/aurora3/services/energy-tracking-service');
@@ -211,7 +211,7 @@ const preHeatDrivers = [
 /**
  * Register the building insights cards on a mock device and return the pre-heat run listener
  */
-async function getPreHeatListener(FlowCardManagerService, cardId) {
+async function getPreHeatListener(FlowCardManagerService, cardId, conditions = undefined) {
   const listeners = {};
   const card = (id) => ({
     registerRunListener: (fn) => { listeners[id] = fn; return card(id); },
@@ -237,7 +237,10 @@ async function getPreHeatListener(FlowCardManagerService, cardId) {
     serviceCoordinator: {
       getAdaptiveControl: () => ({
         // tau = C / UA = 15 h → 8 h per 2 °C
-        getBuildingModelService: () => ({ getLearner: () => ({ getModel: () => ({ C: 15, UA: 1, confidence: 80 }) }) }),
+        getBuildingModelService: () => ({
+          getLearner: () => ({ getModel: () => ({ C: 15, UA: 1, confidence: 80 }) }),
+          ...(conditions !== undefined ? { getPreHeatConditions: () => conditions } : {}),
+        }),
         getExternalTemperatureService: () => ({ getIndoorTemperature: () => 19 }),
       }),
     },
@@ -262,6 +265,19 @@ for (const [driver, FlowCardManagerService, cardId] of preHeatDrivers) {
     } finally {
       mock.timers.reset();
     }
+  });
+
+  test(`${driver}: pre-heat duration uses the measured heating power (G14)`, async () => {
+    // τ 15 h, UA 1 kW/°C, 6 kW at 5 °C outside → T_eq 11.5 °C: 21 °C is out of reach
+    const weak = { UA: 1, pInt: 0.5, outdoorTemp: 5, maxHeatingPowerKw: 6 };
+    const listener = await getPreHeatListener(FlowCardManagerService, cardId, weak);
+    const result = await listener({ target_clock_time: '07:00', target_indoor_temp: 21 });
+    assert.strictEqual(result.duration_hours, 48);
+
+    const strong = { ...weak, maxHeatingPowerKw: 20 };
+    const strongListener = await getPreHeatListener(FlowCardManagerService, cardId, strong);
+    const strongResult = await strongListener({ target_clock_time: '07:00', target_indoor_temp: 21 });
+    assert.strictEqual(strongResult.duration_hours, Number(estimatePreHeatDuration(15, 19, 21, strong).toFixed(1)));
   });
 
   test(`${driver}: pre-heat start time across the DST change`, async () => {

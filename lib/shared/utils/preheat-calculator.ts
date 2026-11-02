@@ -79,3 +79,99 @@ export function calculatePreHeatDuration(
   // Scale linearly with temperature delta, cap at maxHours
   return Math.min(maxHours, (hoursFor2DegC * tempDelta) / 2.0);
 }
+
+/**
+ * Current conditions for the physical pre-heat estimate (G14, ADR-062 B7)
+ */
+export interface PreHeatConditions {
+  /** Heat loss coefficient (kW/°C) */
+  UA: number;
+  /** Internal gains (kW) */
+  pInt: number;
+  /** Current outdoor temperature (°C) */
+  outdoorTemp: number;
+  /** Highest hourly mean thermal power of the past week (kW) */
+  maxHeatingPowerKw: number;
+}
+
+/** The room counts as warm 0.3 °C below the target */
+export const PREHEAT_GOAL_MARGIN = 0.3;
+/** Up to this rise the classes alone apply; the control loop's slow tail sets the time there */
+export const PREHEAT_BLEND_START = 0.5;
+/** Over this range the weight shifts from the classes to the physical estimate */
+export const PREHEAT_BLEND_WIDTH = 1.0;
+/** Step for the "never shorter than a smaller rise" scan */
+const PREHEAT_MONOTONE_STEP = 0.05;
+
+/**
+ * Hours to reach the goal at full heating power: t = τ·ln((T_eq − T_in) / (T_eq − goal)),
+ * with T_eq = T_out + (P + P_int) / UA. Infinity when the goal lies at or above T_eq.
+ */
+function physicalPreHeatHours(tau: number, indoorTemp: number, targetTemp: number, c: PreHeatConditions): number {
+  const goal = targetTemp - PREHEAT_GOAL_MARGIN;
+  if (indoorTemp >= goal) return 0;
+  const tEq = c.outdoorTemp + (c.maxHeatingPowerKw + c.pInt) / c.UA;
+  if (tEq <= goal) return Infinity;
+  return tau * Math.log((tEq - indoorTemp) / (tEq - goal));
+}
+
+function blendedPreHeatHours(
+  tau: number,
+  indoorTemp: number,
+  targetTemp: number,
+  c: PreHeatConditions,
+  maxHours: number,
+): number {
+  const delta = targetTemp - indoorTemp;
+  const classes = calculatePreHeatDuration(tau, delta, maxHours);
+  const w = Math.max(0, Math.min(1, (delta - PREHEAT_BLEND_START) / PREHEAT_BLEND_WIDTH));
+  if (w === 0) return classes;
+  const physical = physicalPreHeatHours(tau, indoorTemp, targetTemp, c);
+  if (!Number.isFinite(physical)) return Infinity;
+  return (1 - w) * classes + w * physical;
+}
+
+function isValidConditions(c: PreHeatConditions | null | undefined): c is PreHeatConditions {
+  return !!c
+    && Number.isFinite(c.UA) && c.UA > 0
+    && Number.isFinite(c.pInt)
+    && Number.isFinite(c.outdoorTemp)
+    && Number.isFinite(c.maxHeatingPowerKw) && c.maxHeatingPowerKw > 0;
+}
+
+/**
+ * Pre-heat duration from the building model, the outdoor temperature and the measured heating power
+ * (G14, ADR-062 B7). Without conditions it falls back to the empirical classes.
+ *
+ * - Rises up to 0.5 °C use the classes; from 1.5 °C the physical estimate; a smooth blend in between.
+ * - The result is never shorter than for a smaller rise, so a larger rise never gives an earlier start.
+ * - Unreachable with the measured power (goal at or above the equilibrium temperature): maxHours.
+ *
+ * @param tau - Building time constant in hours (C/UA)
+ * @param indoorTemp - Current indoor temperature (°C)
+ * @param targetTemp - Target indoor temperature (°C)
+ * @param conditions - Current conditions, or null when no power history is available yet
+ * @param maxHours - Maximum duration cap (default: 48 hours)
+ */
+export function estimatePreHeatDuration(
+  tau: number,
+  indoorTemp: number,
+  targetTemp: number,
+  conditions: PreHeatConditions | null,
+  maxHours: number = 48,
+): number {
+  const delta = targetTemp - indoorTemp;
+  if (!isValidConditions(conditions)) {
+    return calculatePreHeatDuration(tau, delta, maxHours);
+  }
+  if (!Number.isFinite(delta) || delta <= 0) {
+    return 0;
+  }
+  const effectiveTau = Number.isFinite(tau) && tau > 0 ? tau : 20;
+
+  let hours = blendedPreHeatHours(effectiveTau, indoorTemp, targetTemp, conditions, maxHours);
+  for (let d = PREHEAT_BLEND_START; d < delta && hours < maxHours; d += PREHEAT_MONOTONE_STEP) {
+    hours = Math.max(hours, blendedPreHeatHours(effectiveTau, targetTemp - d, targetTemp, conditions, maxHours));
+  }
+  return Math.min(maxHours, hours);
+}

@@ -4,7 +4,7 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { TuyaErrorCategorizer } from '../../shared/error-types';
-import { calculatePreHeatDuration } from '../../shared/utils/preheat-calculator';
+import { estimatePreHeatDuration, type PreHeatConditions } from '../../shared/utils/preheat-calculator';
 import { CapabilityCategories } from '../types/shared-interfaces';
 import { PerformanceReportService } from './performance-report-service';
 import { formatHourMinute, nextLocalTime, resolveHomeyTimezone } from '../../shared/utils/time-format';
@@ -40,6 +40,7 @@ interface DeviceServiceCoordinator {
     } | null;
     getBuildingModelService?: () => {
       getLearner: () => { getModel: () => { C: number; UA: number; confidence: number } };
+      getPreHeatConditions?: () => PreHeatConditions | null;
     } | null;
     getExternalTemperatureService?: () => {
       getIndoorTemperature: () => number | null;
@@ -796,8 +797,13 @@ export class FlowCardManagerService {
           };
         }
 
-        // Use central helper for empirical pre-heat time calculation
-        const durationHours = calculatePreHeatDuration(tau, tempDelta);
+        // G14 (ADR-062 B7): estimate from the measured heating power, empirical classes as fallback
+        const durationHours = estimatePreHeatDuration(
+          tau,
+          indoorTemp,
+          args.target_indoor_temp,
+          buildingModelService.getPreHeatConditions?.() ?? null,
+        );
 
         // Validate result is reasonable
         if (!Number.isFinite(durationHours) || durationHours < 0) {

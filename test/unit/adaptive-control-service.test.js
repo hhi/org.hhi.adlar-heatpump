@@ -325,6 +325,65 @@ test('ADR-065: app heating curve as basis', async () => {
   assert.strictEqual(service.lastBasis.source, 'app_curve');
 });
 
+/** Decision maker with a fixed weighted price contribution; records every call. */
+function priceDecisionMaker(cost, calls) {
+  return {
+    getComfortAnchor: () => 0.6,
+    combineActionsWithThermal: (heating, cop, price, thermal, metrics) => {
+      calls.push({ heating, thermal, metrics });
+      const comfort = (heating?.temperatureAdjustment ?? 0) * 0.6;
+      return {
+        finalAdjustment: comfort + cost,
+        priority: 'medium',
+        reasoning: [],
+        breakdown: {
+          comfort, efficiency: 0, cost, thermal: 0, coast: 0, wind: 0,
+        },
+        effectiveWeights: {
+          comfort: 0.6, efficiency: 0, cost: 0.4, thermal: 0, coast: 0,
+        },
+      };
+    },
+  };
+}
+
+test('ADR-065 O14/O16: price shifts the room target, the basis follows and the thermal component stays out', async () => {
+  const device = createDevice();
+  Object.assign(device.settings, {
+    adaptive_curve_source: 'app', adaptive_curve_at_minus15: 40, adaptive_curve_at_plus15: 25,
+  });
+  const service = createPositionalService(device, 20);
+  const calls = [];
+  service.decisionMaker = priceDecisionMaker(-0.4, calls);
+
+  await service.executeControlCycle();
+  // basis 30 (outdoor 5 °C); room target 20 − 0.4: P 3·(−0.4) = −1.2, I −0.4·3/36;
+  // the basis follows (1 + 15/30)·(−0.4) = −0.6 → 30 − 0.6 − 1.233 = 28.17 → 28
+  assert.strictEqual(service.lastRecommendedTemp, 28);
+  assert.ok(Math.abs(service.lastTargetShift + 0.4) < 1e-9, 'room target shift');
+  assert.ok(Math.abs(service.lastFeedforward + 0.6) < 1e-9, 'basis feed-forward');
+  assert.ok(Math.abs(device.store.adaptive_positional_integral + (0.4 * 3) / 36) < 1e-9, 'integral on the shifted target');
+  assert.strictEqual(calls.length, 2, 'optimizers first, then with the PI');
+  assert.strictEqual(calls[0].heating, null);
+  assert.ok(calls.every((c) => c.thermal === null && c.metrics.thermalExcluded === true), 'thermal component left out');
+  const control = service._getControlDiagnostics();
+  assert.strictEqual(control.targetShift, -0.4);
+  assert.strictEqual(control.feedforward, -0.6);
+});
+
+test('ADR-065 O14: classic keeps the optimizers on the recommendation and the thermal component', async () => {
+  const device = createDevice();
+  const service = createService(device, [0]);
+  const calls = [];
+  service.decisionMaker = priceDecisionMaker(-0.4, calls);
+
+  await service.executeControlCycle();
+  assert.strictEqual(calls.length, 1);
+  assert.notStrictEqual(calls[0].thermal, null);
+  assert.strictEqual(calls[0].metrics.thermalExcluded, undefined);
+  assert.strictEqual(service.lastTargetShift, 0);
+});
+
 test('ADR-062 A4: model parameters reach the PI and the price optimizer only from 50% confidence', async () => {
   const { BUILDING_PROFILES } = require('../../.homeybuild/lib/shared/adaptive/building-model-learner');
   for (const [confidence, expectedC] of [[30, BUILDING_PROFILES.average.C], [80, 15]]) {

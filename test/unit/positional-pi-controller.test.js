@@ -15,6 +15,10 @@ const {
   APP_CURVE_DEFAULTS,
   appCurveValue,
   plausibleCurveValue,
+  roomTargetShift,
+  appCurveSlope,
+  basisFeedforward,
+  ROOM_TARGET_SHIFT_LIMIT_C,
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 
 const near = (actual, expected, msg) => assert.ok(Math.abs(actual - expected) < 1e-9, `${msg}: ${actual} ≠ ${expected}`);
@@ -146,4 +150,22 @@ test('basis: heat pump curve, app curve or flat fallback', () => {
     ...inputs, heatPumpCurve: null, outdoorTemp: null, flatBasis: null,
   }), null);
   assert.strictEqual(plausibleCurveValue(80), null);
+});
+
+test('O14/O16: price and COP shift the room target, the basis follows with (1 + slope)', () => {
+  near(roomTargetShift({ efficiency: -0.1, cost: -0.3 }), -0.4, 'sum of price and COP');
+  assert.strictEqual(ROOM_TARGET_SHIFT_LIMIT_C, 1.5);
+  near(roomTargetShift({ efficiency: 2, cost: 1 }), 1.5, 'clamped at +1.5');
+  near(roomTargetShift({ efficiency: -2, cost: -1 }), -1.5, 'clamped at −1.5');
+  assert.strictEqual(roomTargetShift({ efficiency: NaN, cost: 0 }), 0);
+
+  near(appCurveSlope({ atMinus15: 50, atPlus15: 35 }), 0.5, 'radiator preset');
+  near(appCurveSlope({ atMinus15: 35, atPlus15: 27 }), 8 / 30, 'floor preset');
+  assert.strictEqual(appCurveSlope({ atMinus15: 30, atPlus15: 35 }), 0, 'rising curve → 0');
+  assert.strictEqual(appCurveSlope({ atMinus15: 200, atPlus15: 20 }), 3, 'capped at 3');
+
+  const appCurve = { atMinus15: 50, atPlus15: 35 };
+  near(basisFeedforward(-0.4, { value: 40, source: 'app_curve' }, appCurve), -0.6, 'app curve: 1.5 × −0.4');
+  near(basisFeedforward(-0.4, { value: 40, source: 'heat_pump_curve' }, appCurve), -0.6, 'heat pump curve: slope of the app curve');
+  near(basisFeedforward(-0.4, { value: 40, source: 'flat' }, appCurve), -0.4, 'flat basis: factor 1');
 });

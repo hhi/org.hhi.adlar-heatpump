@@ -18,7 +18,7 @@
  */
 
 import Homey from 'homey';
-import { getPreHeatCategory, calculatePreHeatDuration } from '../../shared/utils/preheat-calculator';
+import { getPreHeatCategory, estimatePreHeatDuration } from '../../shared/utils/preheat-calculator';
 import type { BuildingModelService } from './building-model-service';
 import type { AdaptiveControlService } from './adaptive-control-service';
 import { BUILDING_PROFILES, type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
@@ -482,9 +482,23 @@ export class BuildingInsightsService {
       very_slow_response: { nl: 'Zeer langzaam (~24 uur voor 2°C)', en: 'Very slow (~24 hours for 2°C)' },
       extremely_slow_response: { nl: 'Extreem langzaam (~32 uur voor 2°C)', en: 'Extremely slow (~32 hours for 2°C)' },
     };
-    const recommendation = lang === 'nl'
+    let recommendation = lang === 'nl'
       ? recommendationTexts[category]?.nl || `~${hoursFor2DegC} uur voor 2°C`
       : recommendationTexts[category]?.en || `~${hoursFor2DegC} hours for 2°C`;
+
+    // G14 (ADR-062 B7): the time for 2 °C at the current weather and the measured heating power
+    const conditions = this.buildingModel.getPreHeatConditions?.() ?? null;
+    const targetTemp = this.device.getCapabilityValue('target_temperature.indoor') as number | null;
+    if (conditions && typeof targetTemp === 'number') {
+      const hoursNow = estimatePreHeatDuration(tau, targetTemp - 2, targetTemp, conditions);
+      if (hoursNow < 48) {
+        const hours = Math.max(1, Math.round(hoursNow));
+        const outdoor = Math.round(conditions.outdoorTemp);
+        recommendation += lang === 'nl'
+          ? ` · bij ${outdoor}°C buiten nu ~${hours} uur`
+          : ` · at ${outdoor}°C outside now ~${hours} hours`;
+      }
+    }
 
     return {
       id: `pre_heating_${category}_${Date.now()}`,
@@ -1052,8 +1066,13 @@ export class BuildingInsightsService {
       return;
     }
 
-    // Use central helper for pre-heat duration calculation
-    const preHeatHours = calculatePreHeatDuration(tau, tempDelta);
+    // G14 (ADR-062 B7): estimate from the measured heating power, empirical classes as fallback
+    const preHeatHours = estimatePreHeatDuration(
+      tau,
+      indoorTemp,
+      targetTemp,
+      this.buildingModel.getPreHeatConditions?.() ?? null,
+    );
 
     // Defensive: Validate preHeatHours is reasonable
     if (!Number.isFinite(preHeatHours) || preHeatHours < 0.25) {

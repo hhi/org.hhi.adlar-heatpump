@@ -305,23 +305,26 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 
 Haben Sie eine feste Kurve der Wärmepumpe verwendet (Aurora I/II:
 Heizkurvenauswahl HH1–HH8 oder HL1–HL8; Tuya: Heizkurve H1–H8 oder L1–L8)?
-Notieren Sie diese Kurve, tragen Sie die beiden Werte aus der Tabelle bei der
-App-Kurve ein und stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF
-kann die App die Kurve nicht mehr auslesen.
+Notieren Sie diese Kurve und wählen Sie sie bei **App-Kurve: aus einer festen
+Kurve ausfüllen**: Nach dem Speichern trägt die App die beiden Werte aus der
+Tabelle ein. Stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF kann
+die App die Kurve nicht mehr auslesen.
 
 | Kurve | −15 °C | +15 °C | Kurve | −15 °C | +15 °C |
 | --- | --- | --- | --- | --- | --- |
-| HH1 | 55 | 50 | HL1 | 38 | 32 |
-| HH2 | 54 | 46 | HL2 | 35 | 30 |
-| HH3 | 54 | 41 | HL3 | 33 | 30 |
-| HH4 | 50 | 46 | HL4 | 35 | 29 |
-| HH5 | 49 | 41 | HL5 | 33 | 28 |
-| HH6 | 45 | 40 | HL6 | 31 | 26 |
-| HH7 | 44 | 36 | HL7 | 29 | 26 |
-| HH8 | 40 | 35 | HL8 | 29 | 24 |
+| HH1 | 54 | 51 | HL1 | 37 | 33 |
+| HH2 | 54 | 46 | HL2 | 34 | 31 |
+| HH3 | 53 | 42 | HL3 | 32 | 30 |
+| HH4 | 49 | 46 | HL4 | 34 | 29 |
+| HH5 | 49 | 41 | HL5 | 32 | 29 |
+| HH6 | 44 | 41 | HL6 | 30 | 27 |
+| HH7 | 44 | 36 | HL7 | 28 | 27 |
+| HH8 | 39 | 36 | HL8 | 28 | 25 |
 
-- Aus den Grafiken in der Anleitung der Wärmepumpe übernommen und auf ganze
-  Grad gerundet; Abweichung etwa 1 °C
+- Jede Kurve ist eine Treppe mit Stufen von 1 °C; die Werte folgen der Mitte
+  dieser Treppe in den Grafiken der Anleitung der Wärmepumpe, auf ganze Grad
+  gerundet
+- Die neuen Werte sind sichtbar, sobald Sie die Einstellungen erneut öffnen
 
 **Welchen Regelmodus wähle ich?**
 
@@ -344,13 +347,15 @@ kann die App die Kurve nicht mehr auslesen.
   Tag lang das simulierte Ziel (`adlar_simulated_target`) mit der Heizkurve
 - **Zurückstellen** ist jederzeit möglich; das Integral und die aufsummierte
   Korrektur beginnen dann bei 0
-- **Nachtabsenkung**: bei Fußbodenheizung nicht empfohlen; Positionell heizt
-  dann morgens auf, mit mehr Kompressorstarts
-- **Optimierer** (Preis, COP, Gebäudemodell): haben bei Positionell wenig
-  Wirkung. Das Integral gleicht ihre Verschiebung innerhalb weniger Stunden
-  aus, sodass die Preisoptimierung den Verbrauch kaum in günstige Stunden
-  verlagert. Der Komfort bleibt gleich. Eine Anpassung folgt in einer späteren
-  Version
+- **Nachtabsenkung und Thermostatprogramm**: Eine Wärmepumpe braucht Stunden,
+  um das Haus wieder aufzuheizen, in jedem Regelmodus. Lassen Sie das Programm
+  bei Heizkörpern 2–4 Stunden vor dem gewünschten Zeitpunkt hochgehen. Halten
+  Sie es bei Fußbodenheizung konstant oder senken Sie höchstens um 1 °C ab;
+  sonst heizt Positionell morgens auf, mit mehr Kompressorstarts
+- **Optimierer** (Preis, COP): verschieben bei Positionell das Raumziel, um
+  höchstens 1,5 °C; die Heizkurve verschiebt sich mit. Mit eingeschalteter
+  COP-Optimierung kann das Haus im Mittel etwas unter dem Raumziel bleiben. Die
+  thermische Komponente des Gebäudemodells wirkt bei Positionell nicht mit
 - **Experimentell**: Positionell ist in der Praxis noch wenig getestet
 
 #### Coast Offset (v2.8.0+)
