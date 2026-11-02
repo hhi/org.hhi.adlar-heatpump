@@ -5,6 +5,7 @@
 import Homey from 'homey';
 import { DeviceConstants } from '../../tuya/constants';
 import { DefrostLearner } from '../adaptive/defrost-learner';
+import { formatDateTimeMinutes, resolveHomeyTimezone } from '../utils/time-format';
 
 /**
  * Hourly temperature forecast data point
@@ -194,16 +195,7 @@ export class WeatherForecastService {
       if (this.device.hasCapability('adlar_openmeteo_last_fetch')) {
         const current = hourly[0];
         const d = new Date(now);
-        const tsDate = [
-          d.getFullYear(),
-          String(d.getMonth() + 1).padStart(2, '0'),
-          String(d.getDate()).padStart(2, '0'),
-        ].join('-');
-        const tsTime = [
-          String(d.getHours()).padStart(2, '0'),
-          String(d.getMinutes()).padStart(2, '0'),
-        ].join(':');
-        const ts = `${tsDate} ${tsTime}`;
+        const ts = formatDateTimeMinutes(d, resolveHomeyTimezone(this.device.homey));
         const temp = current?.temperature != null ? `T:${current.temperature.toFixed(1)}°C` : 'T:?';
         const wind = current?.windSpeed != null ? `W:${current.windSpeed.toFixed(0)}km/h` : 'W:?';
         const solar = current?.solarRadiation != null ? `S:${current.solarRadiation.toFixed(0)}W/m²` : 'S:?';
