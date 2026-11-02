@@ -10,7 +10,9 @@ import { PerformanceReportService } from './performance-report-service';
 import { SeasonalModeCalculator } from '../../shared/seasonal-mode-calculator';
 import { CurveCalculator } from '../../shared/curve-calculator';
 import { TimeScheduleCalculator } from '../../shared/time-schedule-calculator';
-import { formatHourMinute, nextLocalTime, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import {
+  formatDateTimeMinutes, formatHourMinute, nextLocalTime, resolveHomeyTimezone,
+} from '../../shared/utils/time-format';
 
 /* eslint-disable camelcase */
 interface PreHeatArgs {
@@ -129,13 +131,7 @@ export class FlowCardManagerService {
   }
 
   private formatDiagnosticTimestamp(date: Date = new Date()): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    return formatDateTimeMinutes(date, resolveHomeyTimezone(this.device.homey));
   }
 
   /**
@@ -1235,7 +1231,7 @@ export class FlowCardManagerService {
       const calculateTimeBasedListener = calculateTimeBasedCard.registerRunListener(async (args) => {
         this.logger('FlowCardManagerService: Calculate time-based value action triggered', { args });
 
-        const resultValue = TimeScheduleCalculator.evaluate(args.schedule);
+        const resultValue = TimeScheduleCalculator.evaluate(args.schedule, new Date(), resolveHomeyTimezone(this.device.homey));
 
         this.logger(`FlowCardManagerService: Time schedule result: ${resultValue}`);
 

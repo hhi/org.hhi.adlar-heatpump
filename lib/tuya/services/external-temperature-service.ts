@@ -3,6 +3,7 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
 import Homey from 'homey';
+import { formatDateTimeMinutes, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
 /**
  * ExternalTemperatureService - External Indoor Temperature Management
@@ -134,16 +135,7 @@ export class ExternalTemperatureService {
       // Update diagnostic capability
       if (this.device.hasCapability('adlar_last_indoor_temp_received')) {
         const d = new Date(this.lastReceivedTimestamp);
-        const tsDate = [
-          d.getFullYear(),
-          String(d.getMonth() + 1).padStart(2, '0'),
-          String(d.getDate()).padStart(2, '0'),
-        ].join('-');
-        const tsTime = [
-          String(d.getHours()).padStart(2, '0'),
-          String(d.getMinutes()).padStart(2, '0'),
-        ].join(':');
-        const ts = `${tsDate} ${tsTime}`;
+        const ts = formatDateTimeMinutes(d, resolveHomeyTimezone(this.device.homey));
         await this.device.setCapabilityValue('adlar_last_indoor_temp_received', `${ts} | ${temperature.toFixed(1)}°C`);
       }
 

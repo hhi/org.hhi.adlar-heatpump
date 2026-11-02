@@ -89,6 +89,35 @@ function getZonedParts(date: Date, timeZone: string): ZonedParts {
 }
 
 /**
+ * Format a date as "YYYY-MM-DD HH:MM" in the given timezone, for the "last received" diagnostics
+ *
+ * @example formatDateTimeMinutes(new Date('2026-11-02T16:45:00Z'), 'Europe/Amsterdam') // "2026-11-02 17:45"
+ */
+export function formatDateTimeMinutes(date: Date, timeZone: string): string {
+  const p = getZonedParts(date, timeZone);
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${p.year}-${pad(p.month)}-${pad(p.day)} ${pad(p.hour)}:${pad(p.minute)}`;
+}
+
+/**
+ * Wall-clock minutes since midnight of an instant in the given timezone (0-1439)
+ *
+ * @example getZonedMinuteOfDay(new Date('2026-11-02T05:30:00Z'), 'Europe/Amsterdam') // 390 (06:30)
+ */
+export function getZonedMinuteOfDay(date: Date, timeZone: string): number {
+  const p = getZonedParts(date, timeZone);
+  return p.hour * 60 + p.minute;
+}
+
+/**
+ * Wall-clock calendar date of an instant in the given timezone (month is 1-12)
+ */
+export function getZonedDate(date: Date, timeZone: string): { year: number; month: number; day: number } {
+  const p = getZonedParts(date, timeZone);
+  return { year: p.year, month: p.month, day: p.day };
+}
+
+/**
  * Offset of the timezone from UTC at the given instant, in milliseconds (e.g. +7200000 for CEST)
  */
 function getTimezoneOffsetMs(date: Date, timeZone: string): number {

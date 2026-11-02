@@ -19,6 +19,7 @@ import {
 } from './lib/tuya/flow-helpers';
 import { CurveCalculator } from './lib/shared/curve-calculator';
 import { TimeScheduleCalculator } from './lib/shared/time-schedule-calculator';
+import { resolveHomeyTimezone } from './lib/shared/utils/time-format';
 import { SeasonalModeCalculator } from './lib/shared/seasonal-mode-calculator';
 import { SelfHealingRegistry } from './lib/shared/self-healing-registry';
 import { enableFlowCardLogging } from './lib/shared/flow-handler-wrapper';
@@ -819,7 +820,7 @@ class MyApp extends App implements Aurora3AppHost {
         }
 
         // Evaluate schedule using TimeScheduleCalculator utility
-        const resultValue = TimeScheduleCalculator.evaluate(schedule);
+        const resultValue = TimeScheduleCalculator.evaluate(schedule, new Date(), resolveHomeyTimezone(this.homey));
 
         // Log result (only in debug mode)
         this.debugLog(`Time schedule calculation: ${resultValue}`, {

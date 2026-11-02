@@ -1,4 +1,7 @@
 /* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable node/no-missing-import */
+/* eslint-disable import/extensions */
 /**
  * TimeScheduleCalculator - Production-ready utility for time-based value calculation
  *
@@ -11,6 +14,8 @@
  * const schedule = "06:00-09:00: 22, 09:00-17:00: 19, 17:00-23:00: 21, 23:00-06:00: 18";
  * const targetTemp = TimeScheduleCalculator.evaluate(schedule);
  */
+
+import { getZonedMinuteOfDay } from './utils/time-format';
 
 /**
  * Single time range entry in a schedule definition
@@ -298,13 +303,18 @@ export class TimeScheduleCalculator {
    * // Evaluate for specific time
    * const testTime = new Date('2024-01-15T14:30:00');
    * const targetTemp = TimeScheduleCalculator.evaluate(schedule, testTime);
+   *
+   * @param timeZone - Homey timezone (e.g. 'Europe/Amsterdam'); the app process runs in UTC, so
+   *   without it the schedule is evaluated in the process timezone
    */
-  static evaluate(scheduleString: string, now: Date = new Date()): number {
+  static evaluate(scheduleString: string, now: Date = new Date(), timeZone?: string): number {
     // Parse schedule
     const entries = this.parseSchedule(scheduleString);
 
     // Calculate current time in minutes since midnight (0-1439)
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const currentMinutes = timeZone
+      ? getZonedMinuteOfDay(now, timeZone)
+      : now.getHours() * 60 + now.getMinutes();
 
     // Evaluate entries from top to bottom (first match wins)
     for (const entry of entries) {
@@ -314,7 +324,7 @@ export class TimeScheduleCalculator {
     }
 
     // No match found and no default
-    const currentTimeStr = this.formatTime(now.getHours(), now.getMinutes());
+    const currentTimeStr = this.formatTime(Math.floor(currentMinutes / 60), currentMinutes % 60);
     throw new Error(
       `No matching time range found for current time: ${currentTimeStr}\n`
       + 'Suggestion: Add \'default: <value>\' as last line to provide a fallback',
