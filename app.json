@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.5.2",
+  "version": "3.6.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -19310,6 +19310,178 @@
               "units": "°C"
             },
             {
+              "id": "adaptive_curve_fixed",
+              "type": "dropdown",
+              "label": {
+                "en": "App curve: fill in from a fixed curve",
+                "nl": "App-stooklijn: invullen vanuit een vaste curve",
+                "de": "App-Kurve: aus einer festen Kurve ausfüllen",
+                "fr": "Courbe de l'app : remplir depuis une courbe fixe"
+              },
+              "hint": {
+                "en": "Used a fixed heating curve of the heat pump (H1–H8, L1–L8)? Choose it here: after saving, the app fills in the two values below and this list returns to \"—\". Reopen the settings to see the new values. Then set the heating curve of the heat pump to OFF.",
+                "nl": "Gebruikte u een vaste stooklijn van de warmtepomp (H1–H8, L1–L8)? Kies die hier: na het opslaan vult de app de twee waarden hieronder in en springt deze lijst terug naar \"—\". Open de instellingen opnieuw om de nieuwe waarden te zien. Zet daarna de verwarmingscurve van de warmtepomp op OFF.",
+                "de": "Haben Sie eine feste Heizkurve der Wärmepumpe (H1–H8, L1–L8) verwendet? Wählen Sie sie hier: Nach dem Speichern trägt die App die beiden Werte unten ein und diese Liste springt zurück auf \"—\". Öffnen Sie die Einstellungen erneut, um die neuen Werte zu sehen. Stellen Sie danach die Heizkurve der Wärmepumpe auf OFF.",
+                "fr": "Vous utilisiez une courbe de chauffe fixe de la pompe à chaleur (H1–H8, L1–L8) ? Choisissez-la ici : après l'enregistrement, l'app remplit les deux valeurs ci-dessous et cette liste revient à « — ». Rouvrez les paramètres pour voir les nouvelles valeurs. Réglez ensuite la courbe de chauffe de la pompe à chaleur sur OFF."
+              },
+              "value": "none",
+              "values": [
+                {
+                  "id": "none",
+                  "label": {
+                    "en": "— (no change)",
+                    "nl": "— (geen wijziging)",
+                    "de": "— (keine Änderung)",
+                    "fr": "— (aucun changement)"
+                  }
+                },
+                {
+                  "id": "hh1",
+                  "label": {
+                    "en": "H1",
+                    "nl": "H1",
+                    "de": "H1",
+                    "fr": "H1"
+                  }
+                },
+                {
+                  "id": "hh2",
+                  "label": {
+                    "en": "H2",
+                    "nl": "H2",
+                    "de": "H2",
+                    "fr": "H2"
+                  }
+                },
+                {
+                  "id": "hh3",
+                  "label": {
+                    "en": "H3",
+                    "nl": "H3",
+                    "de": "H3",
+                    "fr": "H3"
+                  }
+                },
+                {
+                  "id": "hh4",
+                  "label": {
+                    "en": "H4",
+                    "nl": "H4",
+                    "de": "H4",
+                    "fr": "H4"
+                  }
+                },
+                {
+                  "id": "hh5",
+                  "label": {
+                    "en": "H5",
+                    "nl": "H5",
+                    "de": "H5",
+                    "fr": "H5"
+                  }
+                },
+                {
+                  "id": "hh6",
+                  "label": {
+                    "en": "H6",
+                    "nl": "H6",
+                    "de": "H6",
+                    "fr": "H6"
+                  }
+                },
+                {
+                  "id": "hh7",
+                  "label": {
+                    "en": "H7",
+                    "nl": "H7",
+                    "de": "H7",
+                    "fr": "H7"
+                  }
+                },
+                {
+                  "id": "hh8",
+                  "label": {
+                    "en": "H8",
+                    "nl": "H8",
+                    "de": "H8",
+                    "fr": "H8"
+                  }
+                },
+                {
+                  "id": "hl1",
+                  "label": {
+                    "en": "L1",
+                    "nl": "L1",
+                    "de": "L1",
+                    "fr": "L1"
+                  }
+                },
+                {
+                  "id": "hl2",
+                  "label": {
+                    "en": "L2",
+                    "nl": "L2",
+                    "de": "L2",
+                    "fr": "L2"
+                  }
+                },
+                {
+                  "id": "hl3",
+                  "label": {
+                    "en": "L3",
+                    "nl": "L3",
+                    "de": "L3",
+                    "fr": "L3"
+                  }
+                },
+                {
+                  "id": "hl4",
+                  "label": {
+                    "en": "L4",
+                    "nl": "L4",
+                    "de": "L4",
+                    "fr": "L4"
+                  }
+                },
+                {
+                  "id": "hl5",
+                  "label": {
+                    "en": "L5",
+                    "nl": "L5",
+                    "de": "L5",
+                    "fr": "L5"
+                  }
+                },
+                {
+                  "id": "hl6",
+                  "label": {
+                    "en": "L6",
+                    "nl": "L6",
+                    "de": "L6",
+                    "fr": "L6"
+                  }
+                },
+                {
+                  "id": "hl7",
+                  "label": {
+                    "en": "L7",
+                    "nl": "L7",
+                    "de": "L7",
+                    "fr": "L7"
+                  }
+                },
+                {
+                  "id": "hl8",
+                  "label": {
+                    "en": "L8",
+                    "nl": "L8",
+                    "de": "L8",
+                    "fr": "L8"
+                  }
+                }
+              ]
+            },
+            {
               "id": "adaptive_curve_at_minus15",
               "type": "number",
               "label": {
@@ -19319,10 +19491,10 @@
                 "fr": "Courbe de l'app : température d'eau à −15 °C extérieur (°C)"
               },
               "hint": {
-                "en": "Used by the positional modes. Starting value: Radiators 50, Floor heating 35, otherwise 45; prefilled when you choose the control mode, as long as you have not changed it yourself. Too cold in frosty weather: raise this value by 1–2 °C. Used a fixed heating curve (H1–H8, L1–L8)? Take its two values from the table in the configuration guide. Default: 45.",
-                "nl": "Gebruikt door de positionele modi. Startwaarde: Radiatoren 50, Vloerverwarming 35, anders 45; voorgevuld bij de keuze van de regelmodus, zolang u de waarde niet zelf heeft aangepast. Te koud bij vorst: verhoog deze waarde met 1–2 °C. Gebruikte u een vaste verwarmingscurve (H1–H8, L1–L8)? Neem de twee waarden over uit de tabel in de handleiding. Standaard: 45.",
-                "de": "Von den positionellen Modi verwendet. Startwert: Heizkörper 50, Fußbodenheizung 35, sonst 45; bei der Wahl des Regelmodus vorausgefüllt, solange Sie den Wert nicht selbst geändert haben. Zu kalt bei Frost: diesen Wert um 1–2 °C erhöhen. Haben Sie eine feste Heizkurve (H1–H8, L1–L8) verwendet? Übernehmen Sie ihre beiden Werte aus der Tabelle in der Anleitung. Standard: 45.",
-                "fr": "Utilisé par les modes positionnels. Valeur de départ : Radiateurs 50, Plancher chauffant 35, sinon 45 ; préremplie au choix du mode de régulation, tant que vous ne l'avez pas modifiée. Trop froid par temps de gel : augmentez cette valeur de 1–2 °C. Vous utilisiez une courbe de chauffage fixe (H1–H8, L1–L8) ? Reprenez ses deux valeurs dans le tableau du guide. Défaut : 45."
+                "en": "Used by the positional modes. Starting value: Radiators 50, Floor heating 35, otherwise 45; prefilled when you choose the control mode, as long as you have not changed it yourself. Too cold in frosty weather: raise this value by 1–2 °C. Used a fixed heating curve (H1–H8, L1–L8)? Choose it in the list above. Default: 45.",
+                "nl": "Gebruikt door de positionele modi. Startwaarde: Radiatoren 50, Vloerverwarming 35, anders 45; voorgevuld bij de keuze van de regelmodus, zolang u de waarde niet zelf heeft aangepast. Te koud bij vorst: verhoog deze waarde met 1–2 °C. Gebruikte u een vaste verwarmingscurve (H1–H8, L1–L8)? Kies die in de lijst hierboven. Standaard: 45.",
+                "de": "Von den positionellen Modi verwendet. Startwert: Heizkörper 50, Fußbodenheizung 35, sonst 45; bei der Wahl des Regelmodus vorausgefüllt, solange Sie den Wert nicht selbst geändert haben. Zu kalt bei Frost: diesen Wert um 1–2 °C erhöhen. Haben Sie eine feste Heizkurve (H1–H8, L1–L8) verwendet? Wählen Sie sie in der Liste oben. Standard: 45.",
+                "fr": "Utilisé par les modes positionnels. Valeur de départ : Radiateurs 50, Plancher chauffant 35, sinon 45 ; préremplie au choix du mode de régulation, tant que vous ne l'avez pas modifiée. Trop froid par temps de gel : augmentez cette valeur de 1–2 °C. Vous utilisiez une courbe de chauffage fixe (H1–H8, L1–L8) ? Choisissez-la dans la liste ci-dessus. Défaut : 45."
               },
               "value": 45,
               "min": 20,
@@ -23750,10 +23922,10 @@
                 "fr": "Courbe de chauffe (modes positionnels)"
               },
               "hint": {
-                "en": "Basis of the positional advice. App curve: the two values below, prefilled for Positional – Radiators (50 / 35) and – Floor heating (35 / 27) as long as you have not changed them yourself. Heat pump curve: the DIY heating curve of the heat pump, only while DIY is switched on; otherwise the app curve is used. Used a fixed curve (HH1–HH8, HL1–HL8)? Enter its two values below, see the table in the configuration guide. Default: App curve.",
-                "nl": "Basis van het positionele advies. App-stooklijn: de twee waarden hieronder, voorgevuld bij Positioneel – Radiatoren (50 / 35) en – Vloerverwarming (35 / 27) zolang u ze niet zelf heeft aangepast. Stooklijn van de warmtepomp: de DIY-stooklijn van de warmtepomp, alleen als DIY aan staat; anders geldt de app-stooklijn. Gebruikte u een vaste curve (HH1–HH8, HL1–HL8)? Vul dan de twee waarden hieronder in, zie de tabel in de handleiding. Standaard: App-stooklijn.",
-                "de": "Basis der positionellen Empfehlung. App-Kurve: die beiden Werte unten, vorausgefüllt bei Positionell – Heizkörper (50 / 35) und – Fußbodenheizung (35 / 27), solange Sie sie nicht selbst geändert haben. Heizkurve der Wärmepumpe: die DIY-Heizkurve der Wärmepumpe, nur wenn DIY eingeschaltet ist; sonst gilt die App-Kurve. Haben Sie eine feste Kurve (HH1–HH8, HL1–HL8) verwendet? Tragen Sie ihre beiden Werte unten ein, siehe die Tabelle in der Anleitung. Standard: App-Kurve.",
-                "fr": "Base de la recommandation positionnelle. Courbe de l'app : les deux valeurs ci-dessous, préremplies pour Positionnel – Radiateurs (50 / 35) et – Plancher chauffant (35 / 27) tant que vous ne les avez pas modifiées. Courbe de la pompe à chaleur : la courbe DIY de la pompe à chaleur, uniquement si DIY est activé ; sinon la courbe de l'app s'applique. Vous utilisiez une courbe fixe (HH1–HH8, HL1–HL8) ? Saisissez ses deux valeurs ci-dessous, voir le tableau du guide. Défaut : Courbe de l'app."
+                "en": "Basis of the positional advice. App curve: the two values below, prefilled for Positional – Radiators (50 / 35) and – Floor heating (35 / 27) as long as you have not changed them yourself. Heat pump curve: the DIY heating curve of the heat pump, only while DIY is switched on; otherwise the app curve is used. Used a fixed curve (HH1–HH8, HL1–HL8)? Choose it in the list below; the app fills in the two values. Default: App curve.",
+                "nl": "Basis van het positionele advies. App-stooklijn: de twee waarden hieronder, voorgevuld bij Positioneel – Radiatoren (50 / 35) en – Vloerverwarming (35 / 27) zolang u ze niet zelf heeft aangepast. Stooklijn van de warmtepomp: de DIY-stooklijn van de warmtepomp, alleen als DIY aan staat; anders geldt de app-stooklijn. Gebruikte u een vaste curve (HH1–HH8, HL1–HL8)? Kies die in de lijst hieronder; de app vult de twee waarden in. Standaard: App-stooklijn.",
+                "de": "Basis der positionellen Empfehlung. App-Kurve: die beiden Werte unten, vorausgefüllt bei Positionell – Heizkörper (50 / 35) und – Fußbodenheizung (35 / 27), solange Sie sie nicht selbst geändert haben. Heizkurve der Wärmepumpe: die DIY-Heizkurve der Wärmepumpe, nur wenn DIY eingeschaltet ist; sonst gilt die App-Kurve. Haben Sie eine feste Kurve (HH1–HH8, HL1–HL8) verwendet? Wählen Sie sie in der Liste unten; die App trägt die beiden Werte ein. Standard: App-Kurve.",
+                "fr": "Base de la recommandation positionnelle. Courbe de l'app : les deux valeurs ci-dessous, préremplies pour Positionnel – Radiateurs (50 / 35) et – Plancher chauffant (35 / 27) tant que vous ne les avez pas modifiées. Courbe de la pompe à chaleur : la courbe DIY de la pompe à chaleur, uniquement si DIY est activé ; sinon la courbe de l'app s'applique. Vous utilisiez une courbe fixe (HH1–HH8, HL1–HL8) ? Choisissez-la dans la liste ci-dessous ; l'app remplit les deux valeurs. Défaut : Courbe de l'app."
               },
               "value": "app",
               "values": [
@@ -23773,6 +23945,178 @@
                     "nl": "Stooklijn van de warmtepomp",
                     "de": "Heizkurve der Wärmepumpe",
                     "fr": "Courbe de la pompe à chaleur"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "adaptive_curve_fixed",
+              "type": "dropdown",
+              "label": {
+                "en": "App curve: fill in from a fixed curve",
+                "nl": "App-stooklijn: invullen vanuit een vaste curve",
+                "de": "App-Kurve: aus einer festen Kurve ausfüllen",
+                "fr": "Courbe de l'app : remplir depuis une courbe fixe"
+              },
+              "hint": {
+                "en": "Used a fixed heating curve of the heat pump (HH1–HH8, HL1–HL8)? Choose it here: after saving, the app fills in the two values below and this list returns to \"—\". Reopen the settings to see the new values. Then set the heating curve selection of the heat pump to OFF.",
+                "nl": "Gebruikte u een vaste stooklijn van de warmtepomp (HH1–HH8, HL1–HL8)? Kies die hier: na het opslaan vult de app de twee waarden hieronder in en springt deze lijst terug naar \"—\". Open de instellingen opnieuw om de nieuwe waarden te zien. Zet daarna de stooklijnkeuze van de warmtepomp op OFF.",
+                "de": "Haben Sie eine feste Heizkurve der Wärmepumpe (HH1–HH8, HL1–HL8) verwendet? Wählen Sie sie hier: Nach dem Speichern trägt die App die beiden Werte unten ein und diese Liste springt zurück auf \"—\". Öffnen Sie die Einstellungen erneut, um die neuen Werte zu sehen. Stellen Sie danach die Heizkurvenauswahl der Wärmepumpe auf OFF.",
+                "fr": "Vous utilisiez une courbe de chauffe fixe de la pompe à chaleur (HH1–HH8, HL1–HL8) ? Choisissez-la ici : après l'enregistrement, l'app remplit les deux valeurs ci-dessous et cette liste revient à « — ». Rouvrez les paramètres pour voir les nouvelles valeurs. Réglez ensuite la sélection de courbe de la pompe à chaleur sur OFF."
+              },
+              "value": "none",
+              "values": [
+                {
+                  "id": "none",
+                  "label": {
+                    "en": "— (no change)",
+                    "nl": "— (geen wijziging)",
+                    "de": "— (keine Änderung)",
+                    "fr": "— (aucun changement)"
+                  }
+                },
+                {
+                  "id": "hh1",
+                  "label": {
+                    "en": "HH1",
+                    "nl": "HH1",
+                    "de": "HH1",
+                    "fr": "HH1"
+                  }
+                },
+                {
+                  "id": "hh2",
+                  "label": {
+                    "en": "HH2",
+                    "nl": "HH2",
+                    "de": "HH2",
+                    "fr": "HH2"
+                  }
+                },
+                {
+                  "id": "hh3",
+                  "label": {
+                    "en": "HH3",
+                    "nl": "HH3",
+                    "de": "HH3",
+                    "fr": "HH3"
+                  }
+                },
+                {
+                  "id": "hh4",
+                  "label": {
+                    "en": "HH4",
+                    "nl": "HH4",
+                    "de": "HH4",
+                    "fr": "HH4"
+                  }
+                },
+                {
+                  "id": "hh5",
+                  "label": {
+                    "en": "HH5",
+                    "nl": "HH5",
+                    "de": "HH5",
+                    "fr": "HH5"
+                  }
+                },
+                {
+                  "id": "hh6",
+                  "label": {
+                    "en": "HH6",
+                    "nl": "HH6",
+                    "de": "HH6",
+                    "fr": "HH6"
+                  }
+                },
+                {
+                  "id": "hh7",
+                  "label": {
+                    "en": "HH7",
+                    "nl": "HH7",
+                    "de": "HH7",
+                    "fr": "HH7"
+                  }
+                },
+                {
+                  "id": "hh8",
+                  "label": {
+                    "en": "HH8",
+                    "nl": "HH8",
+                    "de": "HH8",
+                    "fr": "HH8"
+                  }
+                },
+                {
+                  "id": "hl1",
+                  "label": {
+                    "en": "HL1",
+                    "nl": "HL1",
+                    "de": "HL1",
+                    "fr": "HL1"
+                  }
+                },
+                {
+                  "id": "hl2",
+                  "label": {
+                    "en": "HL2",
+                    "nl": "HL2",
+                    "de": "HL2",
+                    "fr": "HL2"
+                  }
+                },
+                {
+                  "id": "hl3",
+                  "label": {
+                    "en": "HL3",
+                    "nl": "HL3",
+                    "de": "HL3",
+                    "fr": "HL3"
+                  }
+                },
+                {
+                  "id": "hl4",
+                  "label": {
+                    "en": "HL4",
+                    "nl": "HL4",
+                    "de": "HL4",
+                    "fr": "HL4"
+                  }
+                },
+                {
+                  "id": "hl5",
+                  "label": {
+                    "en": "HL5",
+                    "nl": "HL5",
+                    "de": "HL5",
+                    "fr": "HL5"
+                  }
+                },
+                {
+                  "id": "hl6",
+                  "label": {
+                    "en": "HL6",
+                    "nl": "HL6",
+                    "de": "HL6",
+                    "fr": "HL6"
+                  }
+                },
+                {
+                  "id": "hl7",
+                  "label": {
+                    "en": "HL7",
+                    "nl": "HL7",
+                    "de": "HL7",
+                    "fr": "HL7"
+                  }
+                },
+                {
+                  "id": "hl8",
+                  "label": {
+                    "en": "HL8",
+                    "nl": "HL8",
+                    "de": "HL8",
+                    "fr": "HL8"
                   }
                 }
               ]

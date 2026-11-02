@@ -216,6 +216,17 @@ Das System bietet **4 kategoriespezifische Sensoren** (v2.5.10+):
 
 Bei τ über 250 Stunden (z. B. Passivhaus) erscheint keine Vorheiz-Erkenntnis.
 
+**Mit gemessener Leistung (ab 3.6.0):** nach einem Tag mit Leistungsmessungen rechnet die App
+auch mit der Außentemperatur und der höchsten stündlichen Durchschnittsleistung der
+Wärmepumpe in der vergangenen Woche. Die Erkenntnis nennt dann die Zeit für 2 °C beim
+aktuellen Wetter, zum Beispiel `Very slow (~24 hours for 2°C) · at 5°C outside now ~14 hours`.
+
+- Der Trigger „Vorheizzeit-Empfehlung" und die Aktionskarte „Vorheiz-Dauer berechnen"
+  verwenden dieselbe Berechnung.
+- Bei einem Anstieg bis 0,5 °C gilt die Zeit aus der Tabelle.
+- Ein größerer Anstieg ergibt nie eine kürzere Zeit.
+- Ist das Ziel mit der gemessenen Leistung nicht erreichbar, lautet das Ergebnis 48 Stunden.
+
 ---
 
 ### 3. 💰 Thermische Speicheroptimierungs-Erkenntnisse
@@ -526,29 +537,31 @@ SONST
 
 ---
 
-#### 2. Vorheizdauer berechnen (v2.6.0)
+#### 2. Vorheiz-Startzeit berechnen (v2.6.0)
 
-**Funktion:** Berechnet Zeit für X°C Temperaturanstieg
+**Funktion:** Berechnet, wann das Heizen beginnen muss, um eine Innentemperatur zu einer
+Uhrzeit zu erreichen. Ab 3.6.0 mit der Außentemperatur und der gemessenen Leistung.
 
 **Parameter:**
 
-- `temperature_rise` (number) - Gewünschter Temperaturanstieg in °C (z.B. 2.0)
+- `target_indoor_temp` (number) - Ziel-Innentemperatur in °C (16–28)
+- `target_clock_time` (text) - Fertig um, als HH:MM (z. B. 07:00)
 
 **Rückgabe:**
 
-- `preheat_hours` (number) - Vorheizdauer in Stunden
+- `start_time` (string) - Startzeit als HH:MM, oder `Now`, wenn die Temperatur schon erreicht ist
+- `duration_hours` (number) - Vorheizdauer in Stunden (höchstens 48)
+- `suggested_setpoint_boost` (number) - Vorgeschlagene Sollwerterhöhung (°C)
 - `confidence` (number) - Modellzuverlässigkeit (%)
-- `building_tau` (number) - Thermische Zeitkonstante τ (Stunden)
 
-**Verwendung:** Vorheizen für bestimmte Zeiten planen, thermische Speicher-Automatisierung
+**Verwendung:** Vorheizen für bestimmte Zeiten planen
 
 **Beispiel-Flow:**
 ```
-WENN Günstigster Preisblock nähert sich (2 Stunden vorher)
+WENN Uhrzeit ist 21:00
 DANN
-  1. Vorheizdauer berechnen (temperature_rise = 2.0)
-  2. IF preheat_hours < 3 THEN
-       → Jetzt vorheizen starten
+  1. Vorheiz-Startzeit berechnen (21 °C, fertig um 07:00)
+  2. Benachrichtigung: "Beginnen um {{start_time}} ({{duration_hours}} h)"
 ```
 
 ---

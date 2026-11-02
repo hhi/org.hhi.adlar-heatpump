@@ -16,6 +16,9 @@ import {
   PositionalPIController,
   resolveBasis,
   curvePresetFor,
+  fixedCurveFor,
+  basisFeedforward,
+  roomTargetShift,
   resolveControlParams,
   type ControlMode,
   type ControlParams,
@@ -174,6 +177,8 @@ export class AdaptiveControlService {
   private lastRawRecommendation: number | null = null; // Before rounding/clamping, for the at-limit anti-windup rule
   private lastPositionalStep: PositionalPIStep | null = null;
   private lastBasis: CurveBasis | null = null;
+  private lastTargetShift = 0; // ADR-065 O14: room-target shift from price and COP in the last cycle (°C)
+  private lastFeedforward = 0; // ADR-065 O16: the basis following that shift (°C)
   private flatBasis: number | null = null; // Setpoint when the positional mode started (basis fallback)
   private lastControlMode: ControlMode | null = null;
 
@@ -722,10 +727,7 @@ export class AdaptiveControlService {
     const basis = resolveBasis({
       curveSource,
       heatPumpCurve,
-      appCurve: {
-        atMinus15: (this.device.getSetting('adaptive_curve_at_minus15') as number | null) ?? APP_CURVE_DEFAULTS.atMinus15,
-        atPlus15: (this.device.getSetting('adaptive_curve_at_plus15') as number | null) ?? APP_CURVE_DEFAULTS.atPlus15,
-      },
+      appCurve: this._appCurve(),
       outdoorTemp,
       flatBasis: this.flatBasis,
     }) ?? { value: currentSetpoint, source: 'flat' };
@@ -758,6 +760,14 @@ export class AdaptiveControlService {
     };
   }
 
+  /** The app curve from the settings (°C at −15 °C and +15 °C outdoor). */
+  private _appCurve(): { atMinus15: number; atPlus15: number } {
+    return {
+      atMinus15: (this.device.getSetting('adaptive_curve_at_minus15') as number | null) ?? APP_CURVE_DEFAULTS.atMinus15,
+      atPlus15: (this.device.getSetting('adaptive_curve_at_plus15') as number | null) ?? APP_CURVE_DEFAULTS.atPlus15,
+    };
+  }
+
   /** Positional recommendation: basis + correction, rounded and clamped to the effective range. */
   private _positionalRecommendation(basis: CurveBasis, correction: number): number {
     this.lastRawRecommendation = basis.value + correction;
@@ -781,6 +791,8 @@ export class AdaptiveControlService {
         i: step ? Number(step.i.toFixed(2)) : null,
         u: step ? Number(step.u.toFixed(2)) : null,
         integralHold: step?.holdReason ?? null,
+        targetShift: Number(this.lastTargetShift.toFixed(2)),
+        feedforward: Number(this.lastFeedforward.toFixed(2)),
       } : {}),
     };
   }
@@ -1058,7 +1070,7 @@ export class AdaptiveControlService {
       // ADR-047b: Stap 2 — Compute coastAdj vóór exit-checks (zachte exit heeft coastAdj nodig)
       // ADR-065 D6: in the positional mode coast is relative to basis + PI output, without step limit
       const coastReference = basis
-        ? basis.value + this.positionalPI.output(desiredIndoorTemp - indoorTemp)
+        ? basis.value + this.lastFeedforward + this.positionalPI.output(desiredIndoorTemp + this.lastTargetShift - indoorTemp)
         : currentSetpoint;
       const {
         adj: coastAdj, outletTemp: outletTempForCoast, dropRate: coastDropRate, dropRateMultiplier: coastDropRateMultiplier,
@@ -1148,10 +1160,9 @@ export class AdaptiveControlService {
         timestamp: Date.now(),
       };
 
-      // ADR-065: the positional PI replaces the incremental PI and its dead zone (D2–D4)
-      const heatingAction = positional
-        ? await this._positionalHeatingAction(desiredIndoorTemp - indoorTemp, currentSetpoint)
-        : await this.heatingController.calculateAction(sensorData);
+      // ADR-065: the positional PI replaces the incremental PI and its dead zone (D2–D4). It runs after
+      // the optimizers, which shift its room target (O14).
+      let heatingAction: ControllerAction | null = positional ? null : await this.heatingController.calculateAction(sensorData);
 
       // Step 4B: Component 3 - Energy Price Optimizer (if enabled)
       let priceAction = null;
@@ -1316,14 +1327,31 @@ export class AdaptiveControlService {
       }
 
       // Step 6: Combine actions using Weighted Decision Maker with 5-way weighting (v2.10.0: coast added)
+      // ADR-065 O14/O16 (3.6.0): in the positional mode price and COP shift the room target instead of the
+      // recommendation, so the integral does not work them away, and the basis follows that shift. The
+      // thermal component does not take part; its weight goes to price and COP.
+      const decisionMetrics: ConfidenceMetrics = positional ? { ...confidenceMetrics, thermalExcluded: true } : confidenceMetrics;
+      if (positional && basis) {
+        const optimizers = this.decisionMaker.combineActionsWithThermal(null, copAction, priceAction, null, decisionMetrics, coastAction);
+        this.lastTargetShift = roomTargetShift(optimizers.breakdown);
+        this.lastFeedforward = basisFeedforward(this.lastTargetShift, basis, this._appCurve());
+        heatingAction = await this._positionalHeatingAction(desiredIndoorTemp + this.lastTargetShift - indoorTemp, currentSetpoint);
+      }
       const combinedAction = this.decisionMaker.combineActionsWithThermal(
         heatingAction,
         copAction,
         priceAction,
-        thermalAction,
-        confidenceMetrics,
+        positional ? null : thermalAction,
+        decisionMetrics,
         coastAction,
       );
+      if (positional) {
+        // The optimizers act through the room target: replace their share by the basis feed-forward
+        combinedAction.finalAdjustment += this.lastFeedforward - combinedAction.breakdown.efficiency - combinedAction.breakdown.cost;
+        combinedAction.reasoning.push(
+          `Room target shift (price/COP): ${this.lastTargetShift.toFixed(2)}°C, basis follows ${this.lastFeedforward.toFixed(2)}°C`,
+        );
+      }
 
       // ADR-059 W3 (referentieproject): Wind correction as unweighted additive term —
       // independent of building model confidence and the weight normalization above
@@ -2070,7 +2098,21 @@ export class AdaptiveControlService {
 
     // ADR-065: prefill the app curve with the starting values of the chosen positional mode, unless the
     // user set the curve himself (store flag). A curve change in the same save counts as his own.
-    if (changedKeys.includes('adaptive_curve_at_minus15') || changedKeys.includes('adaptive_curve_at_plus15')) {
+    // G15: a chosen fixed curve fills both fields once and the list returns to "—".
+    const fixedCurve = changedKeys.includes('adaptive_curve_fixed') ? fixedCurveFor(newSettings.adaptive_curve_fixed) : null;
+    if (fixedCurve) {
+      await this.device.setStoreValue(this.STORE_KEY_CURVE_USER_SET, true);
+      // Defer setSettings to avoid race condition with onSettings() still pending
+      this.device.homey.setTimeout(() => {
+        this.device.setSettings({
+          adaptive_curve_at_minus15: fixedCurve.atMinus15,
+          adaptive_curve_at_plus15: fixedCurve.atPlus15,
+          adaptive_curve_fixed: 'none',
+        })
+          .then(() => this.logger(`AdaptiveControlService: app curve set from fixed curve ${String(newSettings.adaptive_curve_fixed)} (${fixedCurve.atMinus15} / ${fixedCurve.atPlus15} °C)`))
+          .catch((err: unknown) => this.device.error('Failed to set the app curve from a fixed curve:', err));
+      }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
+    } else if (changedKeys.includes('adaptive_curve_at_minus15') || changedKeys.includes('adaptive_curve_at_plus15')) {
       await this.device.setStoreValue(this.STORE_KEY_CURVE_USER_SET, true);
     } else if (changedKeys.includes('adaptive_control_mode') && !this.device.getStoreValue(this.STORE_KEY_CURVE_USER_SET)) {
       const preset = curvePresetFor(newSettings.adaptive_control_mode);

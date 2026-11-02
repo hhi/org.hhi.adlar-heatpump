@@ -20,6 +20,8 @@ import {
   type BuildingProfileType,
 } from '../../shared/adaptive/building-model-learner';
 import { isTransientBlockingKey, shouldShowBlocked } from '../../shared/adaptive/building-model-blocking';
+import { HeatingPowerHistory } from '../../shared/adaptive/heating-power-history';
+import type { PreHeatConditions } from '../../shared/utils/preheat-calculator';
 import { DeviceConstants } from '../constants';
 import { getSolarHour, getZonedHour, resolveHomeyTimezone } from '../../shared/utils/time-format';
 
@@ -78,6 +80,9 @@ export class BuildingModelService {
   // ADR-062 A6: confidence at the previous capability update (null until initialised)
   private lastConfidence: number | null = null;
   private static readonly MILESTONE_STORE_KEY = 'building_model_milestone_70';
+  /** G14: hourly mean thermal power of the past week, for the pre-heat estimate */
+  private static readonly POWER_HISTORY_STORE_KEY = 'preheat_power_history';
+  private powerHistory = new HeatingPowerHistory();
 
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
@@ -136,6 +141,11 @@ export class BuildingModelService {
       }
     } else {
       this.logger('BuildingModelService: ℹ️ No persisted state found — fresh start from profile defaults');
+    }
+
+    // G14: the power history is separate from the learner and survives a model reset
+    if (this.powerHistory.restoreState(await this.device.getStoreValue(BuildingModelService.POWER_HISTORY_STORE_KEY))) {
+      this.logger(`BuildingModelService: Power history restored — ${this.powerHistory.getHourCount()} hours`);
     }
 
     // ADR-062 A6: a restored model above 70% does not fire the milestone again
@@ -304,6 +314,12 @@ export class BuildingModelService {
       // Add measurement to learner
       this.learner.addMeasurement(measurement);
       accepted = true;
+
+      // G14: an hour completed in the power history is persisted (not every sample)
+      const heatPumpPower = HeatingPowerHistory.thermalPowerKw(powerElectric, compressorOn === false ? null : cop);
+      if (this.powerHistory.addSample(measurement.timestamp, heatPumpPower)) {
+        await this.persistPowerHistory();
+      }
 
       // Clear blocking reason - data is flowing successfully
       this.lastBlockingReason = null;
@@ -561,6 +577,33 @@ export class BuildingModelService {
   private async persistState(): Promise<void> {
     const state = this.learner.getState();
     await this.device.setStoreValue('building_model_state', state);
+  }
+
+  /**
+   * G14: persist the power history; a failure is logged and never blocks learning
+   */
+  private async persistPowerHistory(): Promise<void> {
+    try {
+      await this.device.setStoreValue(BuildingModelService.POWER_HISTORY_STORE_KEY, this.powerHistory.getState());
+    } catch (error) {
+      this.logger('BuildingModelService: ⚠️ Failed to persist power history:', error);
+    }
+  }
+
+  /**
+   * G14 (ADR-062 B7): conditions for the physical pre-heat estimate, or null while the power
+   * history holds less than a day or no outdoor temperature is available
+   */
+  public getPreHeatConditions(): PreHeatConditions | null {
+    const maxHeatingPowerKw = this.powerHistory.getMaxHourlyMeanKw(Date.now());
+    if (maxHeatingPowerKw === null) return null;
+    // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
+    const outdoorTemp = this.device.getOutdoorTemperatureWithFallback() as number | null;
+    if (outdoorTemp === null || outdoorTemp === undefined) return null;
+    const model = this.learner.getModel();
+    return {
+      UA: model.UA, pInt: model.pInt, outdoorTemp, maxHeatingPowerKw,
+    };
   }
 
   /**
@@ -1287,6 +1330,7 @@ export class BuildingModelService {
     } catch (error) {
       this.logger('BuildingModelService: Failed to persist final state:', error);
     }
+    await this.persistPowerHistory();
 
     // Cleanup timers
     if (this.updateInterval) {
