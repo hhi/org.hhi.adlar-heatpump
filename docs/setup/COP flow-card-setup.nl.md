@@ -27,6 +27,8 @@ De Adlar Warmtepomp kan externe meetgegevens ontvangen van andere Homey apparate
 
 **Service Timeout**: Externe data verzoeken verlopen na 5 seconden (`DeviceConstants.EXTERNAL_DEVICE_QUERY_TIMEOUT_MS`), configureerbaar in apparaatinstellingen.
 
+**Buitentemperatuur: minstens elk uur.** Komt er 1 uur lang geen nieuwe buitentemperatuur binnen, dan gebruikt de app weer de eigen buitensensor van de warmtepomp, die minder nauwkeurig is. Dat geldt voor de COP, het gebouwmodel, de inzichten en de voorverwarmduur; de adaptieve regeling gebruikt dan eerst de Open-Meteo-weersvoorspelling. Na een herstart van de app wordt de laatste waarde alleen teruggezet als die jonger is dan 4 uur. Bij stabiel weer kan de temperatuur langer dan een uur gelijk blijven; een trigger "temperatuur is veranderd" stuurt dan niets. Stuur de buitentemperatuur daarom (ook) met een tijdtrigger, bijvoorbeeld elke 15 minuten. De diagnoseregel "Laatste Buitentemperatuur (Flow Kaart)" toont wanneer de laatste waarde binnenkwam.
+
 ## Basis Setup (Directe Data Uitwisseling)
 
 ### Stap 1: Maak Externe Data Flow
@@ -82,6 +84,7 @@ Deze flow stelt externe vermogensmeters in staat om automatisch hun metingen te 
 - Controleer of flow is ingeschakeld en werkt
 - Verifieer dat extern apparaat online is en data rapporteert
 - Test flow handmatig om te verzekeren dat actiekaart wordt uitgevoerd
+- Buitentemperatuur: controleer of de flow minstens elk uur een waarde stuurt (zie [Data Versheid](#️-belangrijk-data-versheid))
 
 ### ❌ "Datawaarden lijken incorrect"
 

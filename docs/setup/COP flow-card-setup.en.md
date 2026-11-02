@@ -27,6 +27,8 @@ The Adlar Heat Pump can receive external measurement data from other Homey devic
 
 **Service Timeout**: External data requests timeout after 5 seconds (`DeviceConstants.EXTERNAL_DEVICE_QUERY_TIMEOUT_MS`), configurable in device settings.
 
+**Outdoor temperature: at least every hour.** When no new outdoor temperature arrives for 1 hour, the app uses the heat pump's own outdoor sensor again, which is less accurate. This applies to the COP, the building model, the insights and the pre-heat duration; adaptive control first uses the Open-Meteo weather forecast. After an app restart, the last value is restored only when it is younger than 4 hours. In stable weather the temperature can stay the same for more than an hour; a "temperature changed" trigger then sends nothing. Therefore (also) send the outdoor temperature with a time trigger, for example every 15 minutes. The diagnostic line "Last Outdoor Temperature (Flow Card)" shows when the last value arrived.
+
 ## Basic Setup (Direct Data Sharing)
 
 ### Step 1: Create External Data Flow
@@ -82,6 +84,7 @@ This flow enables external power meters to automatically share their measurement
 - Check flow is enabled and working
 - Verify external device is online and reporting data
 - Test flow manually to ensure action card executes
+- Outdoor temperature: check that the flow sends a value at least every hour (see [Data Freshness](#️-important-data-freshness))
 
 ### ❌ "Data values seem incorrect"
 
