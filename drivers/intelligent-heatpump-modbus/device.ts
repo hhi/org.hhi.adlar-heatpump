@@ -617,7 +617,7 @@ class AdlarModbusDevice extends Homey.Device {
     if (from('fast') && this.hasCapability('adlar_external_ambient')) {
       const extAmbient = this.getCapabilityValue('adlar_external_ambient');
       if (extAmbient !== null && extAmbient !== undefined) {
-        const ts = this.externalDataTimestamps.get('adlar_external_ambient') ?? 0;
+        const ts = this.getExternalDataTimestamp('adlar_external_ambient');
         if (Date.now() - ts > DeviceConstants.EXTERNAL_DATA_TTL_MS) {
           this.setCapabilityValue('adlar_external_ambient', null).catch(() => {});
           this.externalDataTimestamps.delete('adlar_external_ambient');
@@ -726,6 +726,20 @@ class AdlarModbusDevice extends Homey.Device {
 
   public getRollingCOPCalculator(): RollingCOPCalculator | null {
     return this.copService?.getRollingCOPCalculator() ?? null;
+  }
+
+  /**
+   * Tijdstempel van de laatste flowwaarde voor externalCap. Na een herstart is de map leeg; voor de
+   * buitentemperatuur staat het tijdstempel dan nog in de store, zodat de TTL doortelt over de herstart.
+   */
+  private getExternalDataTimestamp(externalCap: string): number {
+    const ts = this.externalDataTimestamps.get(externalCap);
+    if (ts !== undefined) return ts;
+    if (externalCap === 'adlar_external_ambient') {
+      const stored = this.getStoreValue('external_outdoor_temp_timestamp');
+      if (typeof stored === 'number' && Number.isFinite(stored)) return stored;
+    }
+    return 0;
   }
 
   public registerExternalDataReceived(externalCap: string): void {

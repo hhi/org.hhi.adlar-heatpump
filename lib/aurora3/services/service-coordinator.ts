@@ -18,6 +18,7 @@ import { DeviceFeature } from '../protocol/modbus-runtime-service';
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { isExternalValueFresh } from '../../shared/utils/external-value-age';
 import { type WaterTempLimits } from '../../shared/adaptive/setpoint-range';
 
 type TemperatureRegisterScale = 'x1' | 'x10';
@@ -334,15 +335,15 @@ export class ServiceCoordinator {
     const outdoorTemp = await this.device.getStoreValue('external_outdoor_temp') as number | null;
     const outdoorTs = await this.device.getStoreValue('external_outdoor_temp_timestamp') as number | null;
     if (typeof outdoorTemp === 'number') {
-      const age = outdoorTs ? Date.now() - outdoorTs : null;
-      if (age === null || age <= TEMP_TTL_MS) {
+      if (isExternalValueFresh(outdoorTs, Date.now(), TEMP_TTL_MS)) {
         if (this.device.hasCapability('adlar_external_ambient')) {
+          // Geen registerExternalDataReceived: de TTL telt door vanaf het opgeslagen tijdstempel
           await this.device.setCapabilityValue('adlar_external_ambient', outdoorTemp);
-          (this.device as unknown as { registerExternalDataReceived(cap: string): void }).registerExternalDataReceived('adlar_external_ambient');
         }
         this.logger(`ServiceCoordinator: Restored external outdoor temp: ${outdoorTemp}°C`);
       } else {
-        this.logger(`ServiceCoordinator: External outdoor temp too old (${Math.round(age / 60000)}min) — skipped`);
+        const ageText = typeof outdoorTs === 'number' ? `${Math.round((Date.now() - outdoorTs) / 60000)}min` : 'unknown age';
+        this.logger(`ServiceCoordinator: External outdoor temp too old (${ageText}) — skipped`);
       }
     }
 

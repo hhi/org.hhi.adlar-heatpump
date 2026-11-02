@@ -18,6 +18,7 @@ import {
 } from '../../lib/tuya/services/widget-state-service';
 import { Logger } from '../../lib/shared/logger';
 import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
+import { isExternalValueFresh } from '../../lib/shared/utils/external-value-age';
 
 /**
  * Optional diagnostic capabilities, grouped by the device setting that gates them.
@@ -1355,10 +1356,13 @@ class MyDevice extends Homey.Device {
       }
 
       // Initialize external ambient temperature capability with default value
-      // Restore from store to survive app updates
+      // Restore from store to survive app updates, but only when the flow card sent it recently
       if (this.hasCapability('adlar_external_ambient')) {
         const storedOutdoorTemp = await this.getStoreValue('external_outdoor_temp');
-        if (storedOutdoorTemp !== null && storedOutdoorTemp !== undefined) {
+        const storedOutdoorTs = await this.getStoreValue('external_outdoor_temp_timestamp');
+        const restorable = storedOutdoorTemp !== null && storedOutdoorTemp !== undefined
+          && isExternalValueFresh(storedOutdoorTs, Date.now(), DeviceConstants.EXTERNAL_DATA_RESTORE_TTL_MS);
+        if (restorable) {
           await this.setCapabilityValue('adlar_external_ambient', storedOutdoorTemp);
           this.categoryLog('cop', `External ambient capability restored from store: ${storedOutdoorTemp}°C`);
         } else {
@@ -1641,12 +1645,28 @@ class MyDevice extends Homey.Device {
   }
 
   /**
+   * Clear the external outdoor temperature when no flow card sent it within the TTL (1 hour),
+   * so the building model, COP and insights fall back to the heat pump's own ambient sensor.
+   * Uses the stored timestamp, so the age also counts across app restarts.
+   */
+  private async expireStaleExternalAmbient(): Promise<void> {
+    if (!this.hasCapability('adlar_external_ambient')) return;
+    const value = this.getCapabilityValue('adlar_external_ambient');
+    if (value === null || value === undefined) return;
+    const timestamp = this.getStoreValue('external_outdoor_temp_timestamp');
+    if (isExternalValueFresh(timestamp, Date.now(), DeviceConstants.EXTERNAL_DATA_TTL_MS)) return;
+    await this.setCapabilityValue('adlar_external_ambient', null);
+    this.logger.info('External ambient expired (TTL 1h), building model/COP revert to the heat pump ambient sensor');
+  }
+
+  /**
    * Start COP calculation interval
    */
   private startCOPCalculationInterval(): void {
     try {
       const interval = this.homey.setInterval(async () => {
         try {
+          await this.expireStaleExternalAmbient();
           await this.calculateAndUpdateCOP();
         } catch (error) {
           this.error('Error during COP calculation:', error);
@@ -3303,7 +3323,7 @@ class MyDevice extends Homey.Device {
    *
    * Priority order (most accurate first):
    * 1. External ambient sensor (adlar_external_ambient) - weather station, external thermometer
-   * 2. Heat pump's own sensor (measure_temperature.temp_ambient) - less accurate due to compressor heat
+   * 2. Heat pump's own sensor (measure_temperature.around_temp) - less accurate due to compressor heat
    *
    * @returns {number | null} Outdoor temperature in °C, or null if unavailable
    */
@@ -3314,7 +3334,7 @@ class MyDevice extends Homey.Device {
 
     if (outdoorTemp === null || outdoorTemp === undefined) {
       // Priority 2: Heat pump's own sensor (fallback)
-      outdoorTemp = this.getCapabilityValue('measure_temperature.temp_ambient') as number | null;
+      outdoorTemp = this.getCapabilityValue('measure_temperature.around_temp') as number | null;
       source = 'internal';
     }
 

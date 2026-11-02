@@ -182,6 +182,13 @@ export class DeviceConstants {
   /** COP calculation update interval */
   static readonly COP_CALCULATION_INTERVAL_MS = 30 * 1000; // 30 seconds
 
+  /** TTL for the external outdoor temperature. After this period without a new flow-card update
+   *  the value is considered stale and the heat pump's own ambient sensor takes over again. */
+  static readonly EXTERNAL_DATA_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+  /** Maximum age of the stored external outdoor temperature to restore it after a restart */
+  static readonly EXTERNAL_DATA_RESTORE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+
   /** External device query timeout */
   static readonly EXTERNAL_DEVICE_QUERY_TIMEOUT_MS = 5 * 1000; // 5 seconds
 
