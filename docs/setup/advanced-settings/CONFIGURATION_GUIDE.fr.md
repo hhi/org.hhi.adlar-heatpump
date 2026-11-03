@@ -328,6 +328,11 @@ peut plus lire la courbe.
   milieu de cet escalier dans les graphiques du manuel de la pompe à chaleur,
   arrondies au degré près
 - Les nouvelles valeurs apparaissent quand vous rouvrez les paramètres
+- Aurora I/II avec une courbe de chauffe DIY : choisissez **Courbe de chauffe
+  DIY de la pompe à chaleur (L28/L29)**. L'app reprend L29 comme valeur à
+  −15 °C et L29 + 30 × L28 comme valeur à +15 °C (p. ex. L28 = −0,5 et L29 = 55
+  donne 55 / 40). Une pente qui n'est pas négative, ou des valeurs hors de la
+  courbe de l'app, sont refusées
 
 **Quel mode de régulation choisir ?**
 

@@ -260,6 +260,26 @@ export function fixedCurveFor(curveId: unknown): { atMinus15: number; atPlus15: 
   return FIXED_CURVES[curveId];
 }
 
+/** Ranges of the two app-curve settings (°C), from driver.settings.compose.json. */
+const APP_CURVE_LIMITS = {
+  atMinus15: { min: 20, max: 65 },
+  atPlus15: { min: 15, max: 50 },
+};
+
+/**
+ * App-curve values from the Aurora I/II DIY curve k·(T + 15) + b (L28 = k, L29 = b, G16):
+ * at −15 °C = b, at +15 °C = b + 30·k, rounded to whole degrees like the settings.
+ * Null when k is not negative (leftover values) or a value falls outside the app-curve settings.
+ */
+export function diyCurveToAppCurve(slopeK: number, interceptB: number): { atMinus15: number; atPlus15: number } | null {
+  if (!Number.isFinite(slopeK) || !Number.isFinite(interceptB) || !(slopeK < 0)) return null;
+  const atMinus15 = Math.round(interceptB);
+  const atPlus15 = Math.round(interceptB + 30 * slopeK);
+  const fits = (value: number, range: { min: number; max: number }) => value >= range.min && value <= range.max;
+  if (!fits(atMinus15, APP_CURVE_LIMITS.atMinus15) || !fits(atPlus15, APP_CURVE_LIMITS.atPlus15)) return null;
+  return { atMinus15, atPlus15 };
+}
+
 /** Plausible range for a curve setpoint (°C). */
 const CURVE_PLAUSIBLE_MIN_C = 15;
 const CURVE_PLAUSIBLE_MAX_C = 70;

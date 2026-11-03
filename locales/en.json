@@ -103,7 +103,9 @@
   "errors": {
     "zone_onoff_disabled": "On/off via zone control register 2101 is experimental. Enable 'On/off via zone control (experimental)' in the device settings to use it.",
     "silent_level2_r290_only": "Silent mode level 2 is only available on R290 heat pumps.",
-    "adaptive_setpoint_range": "The maximum water temperature must be at least __gap__°C above the minimum water temperature."
+    "adaptive_setpoint_range": "The maximum water temperature must be at least __gap__°C above the minimum water temperature.",
+    "diy_curve_not_read": "The DIY heating curve (L28/L29) has not been read yet. Try again in a minute.",
+    "diy_curve_unusable": "The DIY heating curve (L28/L29) cannot be used: the slope L28 is not negative, or the values fall outside the app curve (20–65 °C at −15 °C, 15–50 °C at +15 °C)."
   },
   "widget": {
     "live_operation": {

@@ -325,6 +325,11 @@ die App die Kurve nicht mehr auslesen.
   dieser Treppe in den Grafiken der Anleitung der Wärmepumpe, auf ganze Grad
   gerundet
 - Die neuen Werte sind sichtbar, sobald Sie die Einstellungen erneut öffnen
+- Aurora I/II mit einer DIY-Heizkurve: wählen Sie **DIY-Heizkurve der
+  Wärmepumpe (L28/L29)**. Die App übernimmt L29 als Wert bei −15 °C und
+  L29 + 30 × L28 als Wert bei +15 °C (z. B. L28 = −0,5 und L29 = 55 ergibt
+  55 / 40). Eine Steigung, die nicht negativ ist, oder Werte außerhalb der
+  App-Kurve werden abgelehnt
 
 **Welchen Regelmodus wähle ich?**
 

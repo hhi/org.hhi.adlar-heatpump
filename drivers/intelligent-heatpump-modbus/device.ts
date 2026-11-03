@@ -178,6 +178,7 @@ interface DeviceSettings {
   enable_power_measurements: boolean;
   adaptive_min_setpoint: number;
   adaptive_max_setpoint: number;
+  adaptive_curve_fixed: string;
 }
 /* eslint-enable camelcase */
 
@@ -287,6 +288,13 @@ class AdlarModbusDevice extends Homey.Device {
       if (!isSetpointRangeValid(minSetpoint, maxSetpoint)) {
         throw new Error(this.homey.__('errors.adaptive_setpoint_range', { gap: SETPOINT_RANGE_MIN_GAP }));
       }
+    }
+
+    // G16: the DIY curve must have been read and fit the app curve before it can fill the two fields
+    if (changedKeys.includes('adaptive_curve_fixed') && newSettings.adaptive_curve_fixed === 'diy') {
+      const diyCurve = this.coordinator ? this.coordinator.getDiyAppCurve() : 'pending';
+      if (diyCurve === 'pending') throw new Error(this.homey.__('errors.diy_curve_not_read'));
+      if (!diyCurve) throw new Error(this.homey.__('errors.diy_curve_unusable'));
     }
 
     if (changedKeys.includes('log_level')) {

@@ -19,6 +19,7 @@ import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculat
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 import { isExternalValueFresh } from '../../shared/utils/external-value-age';
+import { diyCurveToAppCurve } from '../../shared/adaptive/positional-pi-controller';
 
 // ADR-042: Verbindingskwaliteit als expliciete runtime-state
 export type ConnectionQuality = 'online' | 'degraded' | 'offline';
@@ -121,6 +122,16 @@ export class ServiceCoordinator {
     return ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
   }
 
+  /**
+   * G16: the DIY heating curve (L28/L29) as app-curve values, regardless of the DIY switch L27:
+   * null when not usable (not supported, k not negative, outside the app curve), 'pending' until read.
+   */
+  getDiyAppCurve(): { atMinus15: number; atPlus15: number } | null | 'pending' {
+    const diy = this._latestSnapshot?.diy;
+    if (!diy) return this._diyPolled ? null : 'pending';
+    return diyCurveToAppCurve(diy.slopeK, diy.interceptB);
+  }
+
   private _resolveAdaptiveSetpoint(): ActiveSetpoint | null {
     const modeRaw = this.device.getCapabilityValue('adlar_mode');
     const mode = Number(modeRaw);
@@ -165,6 +176,7 @@ export class ServiceCoordinator {
       ...opts,
       resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
       resolveHeatPumpCurve: (outdoorTemp) => this._resolveHeatPumpCurve(outdoorTemp),
+      resolveDiyAppCurve: () => this.getDiyAppCurve(),
       resolvePauseReason: () => (this._latestSnapshot?.status.defrosting ? 'defrost' : null),
     });
 
