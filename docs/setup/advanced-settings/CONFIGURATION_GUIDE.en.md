@@ -324,6 +324,10 @@ After OFF, the app can no longer read the curve.
   that staircase in the graphs of the heat pump manual, rounded to whole
   degrees
 - The new values show once you reopen the settings
+- Aurora I/II with a DIY heating curve: choose **DIY heating curve of the heat
+  pump (L28/L29)**. The app takes L29 as the value at −15 °C and L29 + 30 × L28
+  as the value at +15 °C (e.g. L28 = −0.5 and L29 = 55 gives 55 / 40). A slope
+  that is not negative, or values outside the app curve, are rejected
 
 **Which control mode do I choose?**
 

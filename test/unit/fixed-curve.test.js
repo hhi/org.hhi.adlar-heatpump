@@ -63,11 +63,13 @@ test('fixedCurveFor returns the values of a known curve and null otherwise', () 
 });
 
 /** Minimal `this` for onSettings: only the curve branch runs for these keys. */
-function createContext(store = {}) {
+function createContext(Service, store = {}, diyCurve = null) {
   const settings = {};
   return {
     settings,
     store,
+    _fixedCurveFrom: Service.prototype._fixedCurveFrom, // Aurora II only (G16); undefined for Tuya
+    resolveDiyAppCurve: () => diyCurve,
     STORE_KEY_CURVE_USER_SET: 'adaptive_curve_user_set',
     logger: () => {},
     device: {
@@ -82,7 +84,7 @@ function createContext(store = {}) {
 
 for (const [name, Service] of [['Tuya', TuyaService], ['Aurora II', ModbusService]]) {
   test(`${name}: a chosen fixed curve fills both fields and the list returns to "—"`, async () => {
-    const ctx = createContext();
+    const ctx = createContext(Service);
     await Service.prototype.onSettings.call(ctx, {}, { adaptive_curve_fixed: 'hh7' }, ['adaptive_curve_fixed']);
     await new Promise((resolve) => setImmediate(resolve));
     assert.deepStrictEqual(ctx.settings, {
@@ -92,7 +94,7 @@ for (const [name, Service] of [['Tuya', TuyaService], ['Aurora II', ModbusServic
   });
 
   test(`${name}: the fixed curve wins over a mode preset and over fields changed in the same save`, async () => {
-    const ctx = createContext();
+    const ctx = createContext(Service);
     await Service.prototype.onSettings.call(
       ctx,
       {},
@@ -105,10 +107,20 @@ for (const [name, Service] of [['Tuya', TuyaService], ['Aurora II', ModbusServic
   });
 
   test(`${name}: "—" changes nothing`, async () => {
-    const ctx = createContext();
+    const ctx = createContext(Service);
     await Service.prototype.onSettings.call(ctx, {}, { adaptive_curve_fixed: 'none' }, ['adaptive_curve_fixed']);
     await new Promise((resolve) => setImmediate(resolve));
     assert.deepStrictEqual(ctx.settings, {});
     assert.strictEqual(ctx.store.adaptive_curve_user_set, undefined);
   });
 }
+
+test('Aurora II: "DIY heating curve" fills both fields from L28/L29 and the list returns to "—" (G16)', async () => {
+  const ctx = createContext(ModbusService, {}, { atMinus15: 55, atPlus15: 40 });
+  await ModbusService.prototype.onSettings.call(ctx, {}, { adaptive_curve_fixed: 'diy' }, ['adaptive_curve_fixed']);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepStrictEqual(ctx.settings, {
+    adaptive_curve_at_minus15: 55, adaptive_curve_at_plus15: 40, adaptive_curve_fixed: 'none',
+  });
+  assert.strictEqual(ctx.store.adaptive_curve_user_set, true);
+});

@@ -103,7 +103,9 @@
   "errors": {
     "zone_onoff_disabled": "La marche/arrêt via le registre de zone 2101 est expérimentale. Activez 'Marche/arrêt via la commande de zone (expérimental)' dans les paramètres de l'appareil pour l'utiliser.",
     "silent_level2_r290_only": "Le mode silencieux niveau 2 n'est disponible que sur les pompes à chaleur R290.",
-    "adaptive_setpoint_range": "La température d'eau maximale doit être d'au moins __gap__°C supérieure à la température d'eau minimale."
+    "adaptive_setpoint_range": "La température d'eau maximale doit être d'au moins __gap__°C supérieure à la température d'eau minimale.",
+    "diy_curve_not_read": "La courbe de chauffe DIY (L28/L29) n'a pas encore été lue. Réessayez dans une minute.",
+    "diy_curve_unusable": "La courbe de chauffe DIY (L28/L29) n'est pas utilisable : la pente L28 n'est pas négative, ou les valeurs sont hors de la courbe de l'app (20–65 °C à −15 °C, 15–50 °C à +15 °C)."
   },
   "widget": {
     "live_operation": {
