@@ -302,7 +302,8 @@ temps pour 2 °C avec la météo actuelle, par exemple
 ### Bloqué
 
 Lorsque le modèle du bâtiment ne peut temporairement pas apprendre, les aperçus
-affichent **🚫 Bloqué : …** avec la raison.
+affichent 🚫 avec la raison, p. ex. **🚫 Pas de temp int** (depuis 3.6.0 sans
+le mot « Bloqué »).
 
 - **Source ou réglage manquant** (pas de température intérieure ou extérieure,
   pas de puissance, apprentissage désactivé) : affiché immédiatement, car une

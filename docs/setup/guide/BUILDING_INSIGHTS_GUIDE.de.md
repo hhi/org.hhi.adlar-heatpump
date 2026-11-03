@@ -300,8 +300,9 @@ aktuellen Wetter, zum Beispiel `Very slow (~24 hours for 2°C) · at 5°C outsid
 
 ### Blockiert
 
-Kann das Gebäudemodell vorübergehend nicht lernen, zeigen die Erkenntnisse **🚫
-Blockiert: …** mit dem Grund.
+Kann das Gebäudemodell vorübergehend nicht lernen, zeigen die Erkenntnisse 🚫
+mit dem Grund, z. B. **🚫 Keine Innentemp** (ab 3.6.0 ohne das Wort
+"Blockiert").
 
 - **Fehlende Quelle oder Einstellung** (keine Innen- oder Außentemperatur, keine
   Leistung, Lernen deaktiviert): sofort sichtbar, da hier eine Aktion von Ihnen
