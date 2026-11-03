@@ -334,8 +334,13 @@ OFF. Na OFF kan de app de curve niet meer uitlezen.
 | De huidige regeling werkt goed | Klassiek |
 | Setpoint kruipt weg of slingert, radiatoren | Positioneel – Radiatoren |
 | Setpoint kruipt weg, vloerverwarming | Positioneel – Vloerverwarming |
+| Gemengd: vloer en radiatoren | Zie hieronder |
+| Ventilatorconvectoren | Positioneel – Radiatoren |
 | Stooklijn onbekend | Startwaarden, daarna bijstellen |
 
+- **Gemengd of ventilatorconvectoren**: niet getoetst. Bij gemengd
+  Positioneel – Vloerverwarming als de vloer de grootste of traagste afgifte is,
+  anders Positioneel – Radiatoren
 - **Aurora I/II en Tuya**: de warmtepomp houdt een nieuw setpoint alleen vast
   als de stooklijnkeuze (Tuya: verwarmingscurve) op OFF staat; anders voert geen
   van beide modi het advies uit. De app rekent de stooklijn dan zelf uit

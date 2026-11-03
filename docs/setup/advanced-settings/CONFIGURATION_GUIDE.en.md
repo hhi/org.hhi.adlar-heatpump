@@ -333,8 +333,13 @@ After OFF, the app can no longer read the curve.
 | The current control works well | Classic |
 | Setpoint creeps away or swings, radiators | Positional – Radiators |
 | Setpoint creeps away, floor heating | Positional – Floor heating |
+| Mixed: floor and radiators | See below |
+| Fan coil units | Positional – Radiators |
 | Heating curve unknown | Starting values, then adjust |
 
+- **Mixed or fan coil units**: not tested. With mixed emitters, Positional –
+  Floor heating if the floor is the largest or slowest emitter, otherwise
+  Positional – Radiators
 - **Aurora I/II and Tuya**: the heat pump only keeps a new setpoint when the
   heating curve selection (Tuya: heating curve) is OFF; otherwise neither mode
   applies the advice. The app then calculates the heating curve itself
