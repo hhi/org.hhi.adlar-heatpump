@@ -334,8 +334,13 @@ die App die Kurve nicht mehr auslesen.
 | Die aktuelle Regelung funktioniert gut | Klassisch |
 | Sollwert driftet oder schwankt, Heizkörper | Positionell – Heizkörper |
 | Sollwert driftet, Fußbodenheizung | Positionell – Fußbodenheizung |
+| Gemischt: Boden und Heizkörper | Siehe unten |
+| Gebläsekonvektoren | Positionell – Heizkörper |
 | Heizkurve unbekannt | Startwerte, danach anpassen |
 
+- **Gemischt oder Gebläsekonvektoren**: nicht getestet. Bei gemischter
+  Wärmeabgabe Positionell – Fußbodenheizung, wenn der Boden die größte oder
+  trägste Wärmeabgabe ist, sonst Positionell – Heizkörper
 - **Aurora I/II und Tuya**: Die Wärmepumpe behält einen neuen Sollwert nur, wenn
   die Heizkurvenauswahl (Tuya: Heizkurve) auf OFF steht; sonst führt keiner der
   beiden Modi die Empfehlung aus. Die App berechnet die Heizkurve dann selbst

@@ -337,8 +337,13 @@ peut plus lire la courbe.
 | La régulation actuelle fonctionne bien | Classique |
 | Consigne qui dérive, radiateurs | Positionnel – Radiateurs |
 | Consigne qui dérive, plancher chauffant | Positionnel – Plancher chauffant |
+| Mixte : plancher et radiateurs | Voir ci-dessous |
+| Ventilo-convecteurs | Positionnel – Radiateurs |
 | Courbe de chauffe inconnue | Valeurs de départ, puis ajuster |
 
+- **Mixte ou ventilo-convecteurs** : non testé. Avec des émetteurs mixtes,
+  Positionnel – Plancher chauffant si le plancher est l'émetteur le plus grand
+  ou le plus lent, sinon Positionnel – Radiateurs
 - **Aurora I/II et Tuya** : la pompe à chaleur ne conserve une nouvelle consigne
   que si la sélection de courbe de chauffe (Tuya : courbe de chauffe) est sur
   OFF ; sinon aucun des deux modes n'applique la recommandation. L'app calcule
