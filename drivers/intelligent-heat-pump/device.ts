@@ -19,6 +19,7 @@ import {
 import { Logger } from '../../lib/shared/logger';
 import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
 import { isExternalValueFresh } from '../../lib/shared/utils/external-value-age';
+import { formatCopMethodDisplay } from '../../lib/shared/utils/cop-method-display';
 
 /**
  * Optional diagnostic capabilities, grouped by the device setting that gates them.
@@ -582,51 +583,6 @@ class MyDevice extends Homey.Device {
   // Note: Energy tracking methods now delegated to EnergyTrackingService via ServiceCoordinator
 
   // Note: Capability diagnostic reporting now handled by CapabilityHealthService via ServiceCoordinator
-
-  /**
-   * Format COP method for user-friendly display with internationalization and diagnostics
-   */
-  private formatCOPMethodDisplay(method: string, confidence: string, diagnosticInfo?: { primaryIssue?: string }): string {
-    // Get localized method names using Homey's i18n system
-    const getLocalizedMethodName = (methodKey: string): string => {
-      const i18nKey = `cop_method.${methodKey}`;
-      try {
-        return this.homey.__(i18nKey) || methodKey;
-      } catch (error) {
-        // Fallback to English if translation fails
-        const fallbackNames: Record<string, string> = {
-          direct_thermal: 'Direct Thermal',
-          power_module: 'Power Module',
-          power_estimation: 'Power Estimation',
-          refrigerant_circuit: 'Refrigerant Circuit',
-          carnot_estimation: 'Carnot Estimation',
-          valve_correlation: 'Valve Correlation',
-          temperature_difference: 'Temperature Difference',
-          insufficient_data: 'Insufficient Data',
-        };
-        return fallbackNames[methodKey] || methodKey;
-      }
-    };
-
-    let methodName = getLocalizedMethodName(method);
-
-    // For insufficient_data, add diagnostic information if available
-    if (method === 'insufficient_data' && diagnosticInfo?.primaryIssue) {
-      const diagnosticKey = `cop_diagnostics.${diagnosticInfo.primaryIssue}`;
-      const localizedDiagnostic = this.homey.__(diagnosticKey) || diagnosticInfo.primaryIssue;
-      methodName = `${methodName} ${localizedDiagnostic}`;
-    }
-
-    // Format with confidence indicator
-    let confidenceIndicator = '🔴'; // default low confidence
-    if (confidence === 'high') {
-      confidenceIndicator = '🟢';
-    } else if (confidence === 'medium') {
-      confidenceIndicator = '🟡';
-    }
-
-    return `${methodName} ${confidenceIndicator}`;
-  }
 
   /**
    * Add COP measurement to SCOP calculator and update seasonal performance
@@ -1986,7 +1942,7 @@ class MyDevice extends Homey.Device {
         this.lastCOPValue = roundedCOP;
 
         // Update COP method capability
-        const methodDisplayName = this.formatCOPMethodDisplay(copResult.method, copResult.confidence, copResult.diagnosticInfo);
+        const methodDisplayName = formatCopMethodDisplay(copResult, (key) => this.homey.__(key));
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
         this.categoryLog('cop', `✅ COP updated: ${roundedCOP} (method: ${copResult.method}, confidence: ${copResult.confidence})`);
@@ -2008,7 +1964,7 @@ class MyDevice extends Homey.Device {
         await this.setCapabilityValue('adlar_cop', 0);
 
         // Update COP method capability to show outlier status
-        const methodDisplayName = `${this.formatCOPMethodDisplay(copResult.method, 'low', copResult.diagnosticInfo)} (Outlier)`;
+        const methodDisplayName = formatCopMethodDisplay(copResult, (key) => this.homey.__(key));
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
         this.categoryLog('cop', '✅ COP set to 0 due to outlier detection');
@@ -2029,11 +1985,7 @@ class MyDevice extends Homey.Device {
 
         // Update capabilities to reflect failed calculation (always set to 0, never leave null)
         await this.setCapabilityValue('adlar_cop', 0);
-        const failedMethodName = this.formatCOPMethodDisplay(
-          copResult.method === 'insufficient_data' ? 'insufficient_data' : copResult.method,
-          'low',
-          copResult.diagnosticInfo,
-        );
+        const failedMethodName = formatCopMethodDisplay(copResult, (key) => this.homey.__(key));
         await this.setCapabilityValue('adlar_cop_method', failedMethodName);
         this.categoryLog('cop', `✅ COP set to 0 due to failed calculation (${copResult.method})`);
       }

@@ -27,7 +27,10 @@
     "carnot_estimation": "Carnot Schatting",
     "valve_correlation": "Klep Correlatie",
     "temperature_difference": "Temperatuur Verschil",
-    "insufficient_data": "!"
+    "insufficient_data": "!",
+    "idle_mode": "Compressor uit",
+    "outlier": "Uitschieter",
+    "disabled": "Uitgeschakeld"
   },
   "cop_method_description": {
     "direct_thermal": "Directe thermische berekening met water doorstroming en temperatuur verschil (±5% nauwkeurigheid)",
