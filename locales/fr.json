@@ -27,7 +27,10 @@
     "carnot_estimation": "Estimation de Carnot",
     "valve_correlation": "Corrélation de Vanne",
     "temperature_difference": "Différence de Température",
-    "insufficient_data": "!"
+    "insufficient_data": "!",
+    "idle_mode": "Compresseur arrêté",
+    "outlier": "Valeur aberrante",
+    "disabled": "Désactivé"
   },
   "cop_method_description": {
     "direct_thermal": "Calcul thermique direct utilisant le débit d'eau et la différence de température (précision ±5%)",

@@ -27,7 +27,10 @@
     "carnot_estimation": "Carnot-Schätzung",
     "valve_correlation": "Ventil-Korrelation",
     "temperature_difference": "Temperaturdifferenz",
-    "insufficient_data": "!"
+    "insufficient_data": "!",
+    "idle_mode": "Kompressor aus",
+    "outlier": "Ausreißer",
+    "disabled": "Deaktiviert"
   },
   "cop_method_description": {
     "direct_thermal": "Direkte thermische Berechnung mit Wasserdurchfluss und Temperaturdifferenz (±5% Genauigkeit)",

@@ -11,6 +11,7 @@ import {
   type COPDataSources,
 } from '../../shared/services/cop-calculator';
 import { RollingCOPCalculator, type COPDataPoint } from '../../shared/services/rolling-cop-calculator';
+import { formatCopMethodDisplay } from '../../shared/utils/cop-method-display';
 import { SCOPCalculator, type COPMeasurement } from './scop-calculator';
 
 type CapabilitySetter = (capability: string, value: unknown) => void;
@@ -97,7 +98,7 @@ export class ModbusCOPService {
   public processSnapshot(snap: DataSnapshot, set: CapabilitySetter): void {
     const data = this.gatherDeviceDataSources(snap);
     const result = COPCalculator.calculateCOP(data, { enableOutlierDetection: true });
-    const methodDisplay = this.formatCOPMethodDisplay(result);
+    const methodDisplay = formatCopMethodDisplay(result, (key) => this.device.homey.__(key));
 
     if (result.cop > 0 && !result.isOutlier) {
       set('adlar_cop', Number(result.cop.toFixed(2)));
@@ -223,23 +224,6 @@ export class ModbusCOPService {
     }
   }
 
-  private formatCOPMethodDisplay(result: COPCalculationResult): string {
-    if (result.isOutlier && result.outlierReason) {
-      return `${this.translate(`cop_method.${result.method}`, result.method)} ⚠ ${result.outlierReason}`;
-    }
-
-    if (result.method === 'idle_mode') {
-      return 'Idle - compressor uit';
-    }
-
-    const method = this.translate(`cop_method.${result.method}`, result.method);
-    const issueKey = result.diagnosticInfo?.primaryIssue;
-    if (!issueKey) return method;
-
-    const issue = this.translate(`cop_diagnostics.${issueKey}`, issueKey);
-    return `${method} ${issue} 🔴`;
-  }
-
   private inferPowerModuleType(
     internalPowerW: number | undefined,
     voltageB: number | undefined,
@@ -264,11 +248,6 @@ export class ModbusCOPService {
 
   private firstDefined(...values: Array<number | undefined>): number | undefined {
     return values.find((value) => value !== undefined && Number.isFinite(value));
-  }
-
-  private translate(key: string, fallback: string): string {
-    const translated = this.device.homey.__(key);
-    return translated === key ? fallback : translated;
   }
 
   private async triggerFlowCard(
