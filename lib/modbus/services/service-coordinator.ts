@@ -18,6 +18,8 @@ import { ModbusBlockError, RegisterChangeEntry, RegisterChangeLogMode } from '..
 import { RollingCOPCalculator } from '../../shared/services/rolling-cop-calculator';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import { isExternalValueFresh } from '../../shared/utils/external-value-age';
+import { diyCurveToAppCurve } from '../../shared/adaptive/positional-pi-controller';
 
 // ADR-042: Verbindingskwaliteit als expliciete runtime-state
 export type ConnectionQuality = 'online' | 'degraded' | 'offline';
@@ -120,6 +122,16 @@ export class ServiceCoordinator {
     return ambient !== null && ambient !== undefined ? diy.calcSetpoint(ambient) : null;
   }
 
+  /**
+   * G16: the DIY heating curve (L28/L29) as app-curve values, regardless of the DIY switch L27:
+   * null when not usable (not supported, k not negative, outside the app curve), 'pending' until read.
+   */
+  getDiyAppCurve(): { atMinus15: number; atPlus15: number } | null | 'pending' {
+    const diy = this._latestSnapshot?.diy;
+    if (!diy) return this._diyPolled ? null : 'pending';
+    return diyCurveToAppCurve(diy.slopeK, diy.interceptB);
+  }
+
   private _resolveAdaptiveSetpoint(): ActiveSetpoint | null {
     const modeRaw = this.device.getCapabilityValue('adlar_mode');
     const mode = Number(modeRaw);
@@ -164,6 +176,7 @@ export class ServiceCoordinator {
       ...opts,
       resolveActiveSetpoint: () => this._resolveAdaptiveSetpoint(),
       resolveHeatPumpCurve: (outdoorTemp) => this._resolveHeatPumpCurve(outdoorTemp),
+      resolveDiyAppCurve: () => this.getDiyAppCurve(),
       resolvePauseReason: () => (this._latestSnapshot?.status.defrosting ? 'defrost' : null),
     });
 
@@ -355,14 +368,14 @@ export class ServiceCoordinator {
     const outdoorTemp = await this.device.getStoreValue('external_outdoor_temp') as number | null;
     const outdoorTs = await this.device.getStoreValue('external_outdoor_temp_timestamp') as number | null;
     if (typeof outdoorTemp === 'number') {
-      const age = outdoorTs ? Date.now() - outdoorTs : null;
-      if (age === null || age <= TEMP_TTL_MS) {
+      if (isExternalValueFresh(outdoorTs, Date.now(), TEMP_TTL_MS)) {
         if (this.device.hasCapability('adlar_external_ambient')) {
           await this.device.setCapabilityValue('adlar_external_ambient', outdoorTemp);
         }
         this.logger(`ServiceCoordinator: Restored external outdoor temp: ${outdoorTemp}°C`);
       } else {
-        this.logger(`ServiceCoordinator: External outdoor temp too old (${Math.round(age / 60000)}min) — skipped`);
+        const ageText = typeof outdoorTs === 'number' ? `${Math.round((Date.now() - outdoorTs) / 60000)}min` : 'unknown age';
+        this.logger(`ServiceCoordinator: External outdoor temp too old (${ageText}) — skipped`);
       }
     }
 

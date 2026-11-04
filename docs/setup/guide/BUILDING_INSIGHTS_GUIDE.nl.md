@@ -300,8 +300,8 @@ afgelopen week. Het inzicht noemt dan de tijd voor 2 °C bij het weer van nu, bi
 
 ### Geblokkeerd
 
-Kan het gebouwmodel even niet leren, dan tonen de inzichten **🚫 Geblokkeerd: …**
-met de reden.
+Kan het gebouwmodel even niet leren, dan tonen de inzichten 🚫 met de reden,
+bijv. **🚫 Geen binnentemp** (vanaf 3.6.0 zonder het woord "Geblokkeerd").
 
 - **Ontbrekende bron of instelling** (geen binnen- of buitentemperatuur, geen
   vermogen, leren uitgeschakeld): direct zichtbaar, want hier is een actie van

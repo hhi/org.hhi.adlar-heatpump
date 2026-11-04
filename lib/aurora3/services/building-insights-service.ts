@@ -291,10 +291,12 @@ export class BuildingInsightsService {
   /**
    * v2.8.1: Get short localized blocked reason for insight display
    * Uses the blocking reason locale key (building_model.blocked_*) from the building model
+   * v3.6.0: the reason alone after 🚫, without the "Blocked" prefix (fits on a phone screen)
    */
   private getShortBlockedReason(blockingReasonKey: string | null): string {
-    const prefix = this.device.homey.__('building_model.blocked_prefix');
-    return blockingReasonKey ? `${prefix}: ${this.device.homey.__(blockingReasonKey)}` : prefix;
+    return blockingReasonKey
+      ? this.device.homey.__(blockingReasonKey)
+      : this.device.homey.__('building_model.blocked_prefix');
   }
 
   /**
