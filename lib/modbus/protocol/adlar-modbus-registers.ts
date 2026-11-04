@@ -159,9 +159,9 @@ export const STATUS_1_BITS = {
   FAULT_ALARM: 0x0008, // Bit3: Storingsalarm
   SYSTEM_OIL_RETURN: 0x0010, // Bit4: Systeem olie terugvoer
   SYSTEM_DEFROST: 0x0100, // Bit8: Ontdooiing actief
-  CONST_TEMP_SHUTDOWN: 0x1000, // Bit12: Constant temp bereikt, compressor uit
+  CONST_TEMP_SHUTDOWN: 0x1000, // Bit12: Constant temp bereikt (R16: ook gezet terwijl de compressor draait)
   FAULT_SHUTDOWN: 0x2000, // Bit13: Uitgeschakeld na storing
-  MACHINE_RUN: 0x4000, // Bit14: Unit in bedrijf
+  MACHINE_RUN: 0x4000, // Bit14: Unit in bedrijf (R16: niet door alle firmware gezet)
   MACHINE_WAIT: 0x8000, // Bit15: Unit wacht op operatie
 } as const;
 
