@@ -27,7 +27,10 @@
     "carnot_estimation": "Carnot-Schätzung",
     "valve_correlation": "Ventil-Korrelation",
     "temperature_difference": "Temperaturdifferenz",
-    "insufficient_data": "!"
+    "insufficient_data": "!",
+    "idle_mode": "Kompressor aus",
+    "outlier": "Ausreißer",
+    "disabled": "Deaktiviert"
   },
   "cop_method_description": {
     "direct_thermal": "Direkte thermische Berechnung mit Wasserdurchfluss und Temperaturdifferenz (±5% Genauigkeit)",
@@ -100,7 +103,9 @@
   "errors": {
     "zone_onoff_disabled": "Ein/Aus über das Zonenregister 2101 ist experimentell. Aktivieren Sie 'Ein/Aus über Zonensteuerung (experimentell)' in den Geräteeinstellungen, um dies zu nutzen.",
     "silent_level2_r290_only": "Leisemodus Stufe 2 ist nur bei R290-Wärmepumpen verfügbar.",
-    "adaptive_setpoint_range": "Die maximale Wassertemperatur muss mindestens __gap__°C über der minimalen Wassertemperatur liegen."
+    "adaptive_setpoint_range": "Die maximale Wassertemperatur muss mindestens __gap__°C über der minimalen Wassertemperatur liegen.",
+    "diy_curve_not_read": "Die DIY-Heizkurve (L28/L29) wurde noch nicht ausgelesen. Versuchen Sie es in einer Minute erneut.",
+    "diy_curve_unusable": "Die DIY-Heizkurve (L28/L29) ist nicht verwendbar: die Steigung L28 ist nicht negativ, oder die Werte liegen außerhalb der App-Kurve (20–65 °C bei −15 °C, 15–50 °C bei +15 °C)."
   },
   "widget": {
     "live_operation": {

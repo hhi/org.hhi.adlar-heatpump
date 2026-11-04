@@ -7,6 +7,7 @@ import TuyAPI from 'tuyapi';
 import { promises as dnsPromises } from 'dns';
 import { DeviceConstants } from '../constants';
 import { TuyaErrorCategorizer, CategorizedError } from '../../shared/error-types';
+import { getZonedDate } from '../../shared/utils/time-format';
 
 export interface TuyaConnectionOptions {
   device: Homey.Device;
@@ -814,7 +815,11 @@ export class TuyaConnectionService {
 
     // If status changed today, show only time (HH:MM:SS)
     // If status changed on a different day, show date and time (D-MMM HH:MM)
-    const isSameDay = timestamp.toDateString() === nowDate.toDateString();
+    const changedDate = getZonedDate(timestamp, homeyTimezone);
+    const todayDate = getZonedDate(nowDate, homeyTimezone);
+    const isSameDay = changedDate.year === todayDate.year
+      && changedDate.month === todayDate.month
+      && changedDate.day === todayDate.day;
 
     // Detect language from Homey (support en, nl, de, fr with fallback to 'en')
     const detectedLanguage = this.device.homey.i18n.getLanguage();
@@ -843,8 +848,8 @@ export class TuyaConnectionService {
         fr: ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'],
       };
 
-      const monthAbbr = monthAbbreviations[language][timestamp.getMonth()];
-      const day = timestamp.getDate();
+      const monthAbbr = monthAbbreviations[language][changedDate.month - 1];
+      const { day } = changedDate;
       const time = timestamp.toLocaleTimeString(language, {
         hour: '2-digit',
         minute: '2-digit',

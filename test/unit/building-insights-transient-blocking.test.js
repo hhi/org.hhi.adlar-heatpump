@@ -99,7 +99,7 @@ function createInsightsService(driver) {
 const diag = (blockingReasonKey, blockingStreak, blockingReason = 'blocked') => ({
   confidence: 90, sampleCount: 500, blockingReason, blockingReasonKey, blockingStreak,
 });
-const BLOCKED = (key) => `🚫 building_model.blocked_prefix: ${key}`;
+const BLOCKED = (key) => `🚫 ${key}`;
 
 test('shared: classification and threshold', () => {
   assert.strictEqual(TRANSIENT_BLOCK_CYCLES, 6);

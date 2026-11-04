@@ -179,6 +179,20 @@ class Aurora3ModbusDevice extends Homey.Device {
   private internalPowerZeroSamples = 0;
   private internalPowerZeroLogged = false;
 
+  /**
+   * Tijdstempel van de laatste flowwaarde voor externalCap. Na een herstart is de map leeg; voor de
+   * buitentemperatuur staat het tijdstempel dan nog in de store, zodat de TTL doortelt over de herstart.
+   */
+  private getExternalDataTimestamp(externalCap: string): number {
+    const ts = this.externalDataTimestamps.get(externalCap);
+    if (ts !== undefined) return ts;
+    if (externalCap === 'adlar_external_ambient') {
+      const stored = this.getStoreValue('external_outdoor_temp_timestamp');
+      if (typeof stored === 'number' && Number.isFinite(stored)) return stored;
+    }
+    return 0;
+  }
+
   public registerExternalDataReceived(cap: string): void {
     this.externalDataTimestamps.set(cap, Date.now());
   }
@@ -188,7 +202,7 @@ class Aurora3ModbusDevice extends Homey.Device {
       device: this,
       snapshot: this.coordinator?.getCurrentSnapshot() ?? null,
       isExternalCapabilityFresh: (capabilityId) => {
-        const timestamp = this.externalDataTimestamps.get(capabilityId) ?? 0;
+        const timestamp = this.getExternalDataTimestamp(capabilityId);
         return timestamp > 0 && Date.now() - timestamp <= DeviceConstants.EXTERNAL_DATA_TTL_MS;
       },
     });
@@ -509,7 +523,7 @@ class Aurora3ModbusDevice extends Homey.Device {
       if (!this.hasCapability(externalCap)) return;
       const val = this.getCapabilityValue(externalCap);
       if (val === null || val === undefined) return;
-      const ts = this.externalDataTimestamps.get(externalCap) ?? 0;
+      const ts = this.getExternalDataTimestamp(externalCap);
       if (Date.now() - ts > DeviceConstants.EXTERNAL_DATA_TTL_MS) {
         this.setCapabilityValue(externalCap, null).catch(() => {});
         this.externalDataTimestamps.delete(externalCap);

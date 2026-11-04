@@ -7,7 +7,9 @@ import { TuyaErrorCategorizer } from '../../shared/error-types';
 import { estimatePreHeatDuration, type PreHeatConditions } from '../../shared/utils/preheat-calculator';
 import { CapabilityCategories } from '../types/shared-interfaces';
 import { PerformanceReportService } from './performance-report-service';
-import { formatHourMinute, nextLocalTime, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import {
+  formatDateTimeMinutes, formatHourMinute, nextLocalTime, resolveHomeyTimezone,
+} from '../../shared/utils/time-format';
 import type { BuildingInsightsService, InsightCategory } from './building-insights-service';
 
 type PerformanceReportFlowTokens = {
@@ -134,16 +136,7 @@ export class FlowCardManagerService {
   }
 
   private formatDiagnosticTimestamp(date: Date): string {
-    const datePart = [
-      date.getFullYear(),
-      String(date.getMonth() + 1).padStart(2, '0'),
-      String(date.getDate()).padStart(2, '0'),
-    ].join('-');
-    const timePart = [
-      String(date.getHours()).padStart(2, '0'),
-      String(date.getMinutes()).padStart(2, '0'),
-    ].join(':');
-    return `${datePart} ${timePart}`;
+    return formatDateTimeMinutes(date, resolveHomeyTimezone(this.device.homey));
   }
 
   /**

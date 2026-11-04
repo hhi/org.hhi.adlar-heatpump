@@ -514,10 +514,10 @@
           "fr": "Courbe de l'app : remplir depuis une courbe fixe"
         },
         "hint": {
-          "en": "Used a fixed heating curve of the heat pump (HH1–HH8, HL1–HL8)? Choose it here: after saving, the app fills in the two values below and this list returns to \"—\". Reopen the settings to see the new values. Then set the heating curve selection of the heat pump to OFF.",
-          "nl": "Gebruikte u een vaste stooklijn van de warmtepomp (HH1–HH8, HL1–HL8)? Kies die hier: na het opslaan vult de app de twee waarden hieronder in en springt deze lijst terug naar \"—\". Open de instellingen opnieuw om de nieuwe waarden te zien. Zet daarna de stooklijnkeuze van de warmtepomp op OFF.",
-          "de": "Haben Sie eine feste Heizkurve der Wärmepumpe (HH1–HH8, HL1–HL8) verwendet? Wählen Sie sie hier: Nach dem Speichern trägt die App die beiden Werte unten ein und diese Liste springt zurück auf \"—\". Öffnen Sie die Einstellungen erneut, um die neuen Werte zu sehen. Stellen Sie danach die Heizkurvenauswahl der Wärmepumpe auf OFF.",
-          "fr": "Vous utilisiez une courbe de chauffe fixe de la pompe à chaleur (HH1–HH8, HL1–HL8) ? Choisissez-la ici : après l'enregistrement, l'app remplit les deux valeurs ci-dessous et cette liste revient à « — ». Rouvrez les paramètres pour voir les nouvelles valeurs. Réglez ensuite la sélection de courbe de la pompe à chaleur sur OFF."
+          "en": "Used a fixed heating curve of the heat pump (HH1–HH8, HL1–HL8) or its DIY curve (L28/L29)? Choose it here: after saving, the app fills in the two values below and this list returns to \"—\". Reopen the settings to see the new values. Then set the heating curve selection of the heat pump to OFF.",
+          "nl": "Gebruikte u een vaste stooklijn van de warmtepomp (HH1–HH8, HL1–HL8) of de DIY-stooklijn (L28/L29)? Kies die hier: na het opslaan vult de app de twee waarden hieronder in en springt deze lijst terug naar \"—\". Open de instellingen opnieuw om de nieuwe waarden te zien. Zet daarna de stooklijnkeuze van de warmtepomp op OFF.",
+          "de": "Haben Sie eine feste Heizkurve der Wärmepumpe (HH1–HH8, HL1–HL8) oder ihre DIY-Kurve (L28/L29) verwendet? Wählen Sie sie hier: Nach dem Speichern trägt die App die beiden Werte unten ein und diese Liste springt zurück auf \"—\". Öffnen Sie die Einstellungen erneut, um die neuen Werte zu sehen. Stellen Sie danach die Heizkurvenauswahl der Wärmepumpe auf OFF.",
+          "fr": "Vous utilisiez une courbe de chauffe fixe de la pompe à chaleur (HH1–HH8, HL1–HL8) ou sa courbe DIY (L28/L29) ? Choisissez-la ici : après l'enregistrement, l'app remplit les deux valeurs ci-dessous et cette liste revient à « — ». Rouvrez les paramètres pour voir les nouvelles valeurs. Réglez ensuite la sélection de courbe de la pompe à chaleur sur OFF."
         },
         "value": "none",
         "values": [
@@ -528,6 +528,15 @@
               "nl": "— (geen wijziging)",
               "de": "— (keine Änderung)",
               "fr": "— (aucun changement)"
+            }
+          },
+          {
+            "id": "diy",
+            "label": {
+              "en": "DIY heating curve of the heat pump (L28/L29)",
+              "nl": "DIY-stooklijn van de warmtepomp (L28/L29)",
+              "de": "DIY-Heizkurve der Wärmepumpe (L28/L29)",
+              "fr": "Courbe de chauffe DIY de la pompe à chaleur (L28/L29)"
             }
           },
           {

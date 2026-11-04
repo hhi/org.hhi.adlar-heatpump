@@ -300,8 +300,8 @@ insight then names the time for 2 °C at the current weather, for example
 
 ### Blocked
 
-When the building model temporarily cannot learn, insights show **🚫 Blocked: …**
-with the reason.
+When the building model temporarily cannot learn, insights show 🚫 with the
+reason, e.g. **🚫 No indoor temp** (since 3.6.0 without the word "Blocked").
 
 - **Missing source or setting** (no indoor or outdoor temperature, no power,
   learning disabled): shown immediately, because this needs action from you.

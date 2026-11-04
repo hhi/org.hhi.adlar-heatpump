@@ -88,12 +88,16 @@ export type ActiveSetpointResolver = () => ActiveSetpoint | null;
  */
 export type HeatPumpCurveResolver = (outdoorTemp: number | null) => number | null | 'pending';
 
+/** G16: the heat pump's DIY curve as app-curve values; null when not usable, 'pending' before it was read. */
+export type DiyAppCurveResolver = () => { atMinus15: number; atPlus15: number } | null | 'pending';
+
 export interface AdaptiveControlServiceConfig {
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
   resolveActiveSetpoint?: ActiveSetpointResolver; // Default: always target_temperature
   resolveHeatPumpCurve?: HeatPumpCurveResolver; // ADR-065: default none (basis falls back to the app curve or flat)
   resolvePauseReason?: () => IntegralPauseReason | null; // ADR-065: defrost / hot water pause the integral
+  resolveDiyAppCurve?: DiyAppCurveResolver; // G16: default none (the DIY choice then changes nothing)
 }
 
 export interface AdaptiveControlStatus {
@@ -173,6 +177,7 @@ export class AdaptiveControlService {
   // ADR-065: positional PI on top of the heating curve
   private readonly resolveHeatPumpCurve: HeatPumpCurveResolver;
   private readonly resolvePauseReason: () => IntegralPauseReason | null;
+  private readonly resolveDiyAppCurve: DiyAppCurveResolver;
   private positionalPI = new PositionalPIController(POSITIONAL_DEFAULTS);
   private lastRawRecommendation: number | null = null; // Before rounding/clamping, for the at-limit anti-windup rule
   private lastPositionalStep: PositionalPIStep | null = null;
@@ -217,6 +222,7 @@ export class AdaptiveControlService {
     }));
     this.resolveHeatPumpCurve = config.resolveHeatPumpCurve ?? (() => null);
     this.resolvePauseReason = config.resolvePauseReason ?? (() => null);
+    this.resolveDiyAppCurve = config.resolveDiyAppCurve ?? (() => null);
 
     // Initialize Component 1: Heating Controller (PI control)
     this.heatingController = new HeatingController({
@@ -713,6 +719,13 @@ export class AdaptiveControlService {
     }
     this.lastControlMode = mode;
     await this.device.setStoreValue(this.STORE_KEY_CONTROL_MODE, mode);
+  }
+
+  /** App-curve values for the fixed-curve list: a fixed curve (G15) or the heat pump's DIY curve (G16). */
+  private _fixedCurveFrom(curveId: unknown): { atMinus15: number; atPlus15: number } | null {
+    if (curveId !== 'diy') return fixedCurveFor(curveId);
+    const diyCurve = this.resolveDiyAppCurve();
+    return diyCurve === 'pending' ? null : diyCurve;
   }
 
   /**
@@ -1613,7 +1626,7 @@ export class AdaptiveControlService {
 
   /**
    * Get effective outdoor temperature with TTL-based source priority:
-   * 1. Flow card (adlar_external_ambient) — if received within 2 hours
+   * 1. Flow card (adlar_external_ambient) — if received within 1 hour
    * 2. Open-Meteo current hour — already fetched, no extra API cost
    * 3. Heat pump internal sensor — last resort
    *
@@ -2099,7 +2112,8 @@ export class AdaptiveControlService {
     // ADR-065: prefill the app curve with the starting values of the chosen positional mode, unless the
     // user set the curve himself (store flag). A curve change in the same save counts as his own.
     // G15: a chosen fixed curve fills both fields once and the list returns to "—".
-    const fixedCurve = changedKeys.includes('adaptive_curve_fixed') ? fixedCurveFor(newSettings.adaptive_curve_fixed) : null;
+    // G16: the same for the heat pump's DIY curve (L28/L29); the device rejects the save when it is not usable.
+    const fixedCurve = changedKeys.includes('adaptive_curve_fixed') ? this._fixedCurveFrom(newSettings.adaptive_curve_fixed) : null;
     if (fixedCurve) {
       await this.device.setStoreValue(this.STORE_KEY_CURVE_USER_SET, true);
       // Defer setSettings to avoid race condition with onSettings() still pending

@@ -27,6 +27,8 @@ Die Adlar-Wärmepumpe kann externe Messdaten von anderen Homey-Geräten über Fl
 
 **Service-Timeout**: Anfragen für externe Daten haben ein Timeout von 5 Sekunden (`DeviceConstants.EXTERNAL_DEVICE_QUERY_TIMEOUT_MS`), konfigurierbar in den Geräteeinstellungen.
 
+**Außentemperatur: mindestens jede Stunde.** Kommt 1 Stunde lang keine neue Außentemperatur an, verwendet die App wieder den eigenen Außensensor der Wärmepumpe, der weniger genau ist. Das gilt für den COP, das Gebäudemodell, die Erkenntnisse und die Vorheizdauer; die adaptive Regelung verwendet zuerst die Open-Meteo-Wettervorhersage. Nach einem Neustart der App wird der letzte Wert nur wiederhergestellt, wenn er jünger als 4 Stunden ist. Bei stabilem Wetter kann die Temperatur länger als eine Stunde gleich bleiben; ein Auslöser „Temperatur geändert" sendet dann nichts. Senden Sie die Außentemperatur deshalb (auch) mit einem Zeitauslöser, zum Beispiel alle 15 Minuten. Die Diagnosezeile „Letzte Außentemperatur (Flow-Karte)" zeigt, wann der letzte Wert ankam.
+
 ## Basis-Einrichtung (Direkter Datenaustausch)
 
 ### Schritt 1: Externen Daten-Flow erstellen
@@ -82,6 +84,7 @@ Dieser Flow ermöglicht es externen Stromzählern, ihre Messungen automatisch mi
 - Überprüfen Sie, ob Flow aktiviert ist und funktioniert
 - Überprüfen Sie, ob externes Gerät online ist und Daten meldet
 - Testen Sie Flow manuell, um sicherzustellen, dass Aktionskarte ausgeführt wird
+- Außentemperatur: Prüfen Sie, ob der Flow mindestens jede Stunde einen Wert sendet (siehe [Datenaktualität](#️-wichtig-datenaktualität))
 
 ### ❌ "Datenwerte scheinen inkorrekt"
 

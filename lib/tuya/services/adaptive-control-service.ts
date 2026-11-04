@@ -1523,7 +1523,7 @@ export class AdaptiveControlService {
 
   /**
    * Get effective outdoor temperature with TTL-based source priority:
-   * 1. Flow card (adlar_external_ambient) — if received within 2 hours
+   * 1. Flow card (adlar_external_ambient) — if received within 1 hour
    * 2. Open-Meteo current hour — already fetched, no extra API cost
    * 3. Heat pump internal sensor — last resort
    *

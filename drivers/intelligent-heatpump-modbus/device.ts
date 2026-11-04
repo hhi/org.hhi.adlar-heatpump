@@ -178,6 +178,7 @@ interface DeviceSettings {
   enable_power_measurements: boolean;
   adaptive_min_setpoint: number;
   adaptive_max_setpoint: number;
+  adaptive_curve_fixed: string;
 }
 /* eslint-enable camelcase */
 
@@ -287,6 +288,13 @@ class AdlarModbusDevice extends Homey.Device {
       if (!isSetpointRangeValid(minSetpoint, maxSetpoint)) {
         throw new Error(this.homey.__('errors.adaptive_setpoint_range', { gap: SETPOINT_RANGE_MIN_GAP }));
       }
+    }
+
+    // G16: the DIY curve must have been read and fit the app curve before it can fill the two fields
+    if (changedKeys.includes('adaptive_curve_fixed') && newSettings.adaptive_curve_fixed === 'diy') {
+      const diyCurve = this.coordinator ? this.coordinator.getDiyAppCurve() : 'pending';
+      if (diyCurve === 'pending') throw new Error(this.homey.__('errors.diy_curve_not_read'));
+      if (!diyCurve) throw new Error(this.homey.__('errors.diy_curve_unusable'));
     }
 
     if (changedKeys.includes('log_level')) {
@@ -617,7 +625,7 @@ class AdlarModbusDevice extends Homey.Device {
     if (from('fast') && this.hasCapability('adlar_external_ambient')) {
       const extAmbient = this.getCapabilityValue('adlar_external_ambient');
       if (extAmbient !== null && extAmbient !== undefined) {
-        const ts = this.externalDataTimestamps.get('adlar_external_ambient') ?? 0;
+        const ts = this.getExternalDataTimestamp('adlar_external_ambient');
         if (Date.now() - ts > DeviceConstants.EXTERNAL_DATA_TTL_MS) {
           this.setCapabilityValue('adlar_external_ambient', null).catch(() => {});
           this.externalDataTimestamps.delete('adlar_external_ambient');
@@ -726,6 +734,20 @@ class AdlarModbusDevice extends Homey.Device {
 
   public getRollingCOPCalculator(): RollingCOPCalculator | null {
     return this.copService?.getRollingCOPCalculator() ?? null;
+  }
+
+  /**
+   * Tijdstempel van de laatste flowwaarde voor externalCap. Na een herstart is de map leeg; voor de
+   * buitentemperatuur staat het tijdstempel dan nog in de store, zodat de TTL doortelt over de herstart.
+   */
+  private getExternalDataTimestamp(externalCap: string): number {
+    const ts = this.externalDataTimestamps.get(externalCap);
+    if (ts !== undefined) return ts;
+    if (externalCap === 'adlar_external_ambient') {
+      const stored = this.getStoreValue('external_outdoor_temp_timestamp');
+      if (typeof stored === 'number' && Number.isFinite(stored)) return stored;
+    }
+    return 0;
   }
 
   public registerExternalDataReceived(externalCap: string): void {

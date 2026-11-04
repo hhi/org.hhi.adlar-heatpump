@@ -325,6 +325,10 @@ OFF. Na OFF kan de app de curve niet meer uitlezen.
   die trap uit de grafieken in de handleiding van de warmtepomp, afgerond op
   hele graden
 - De nieuwe waarden zijn pas zichtbaar als u de instellingen opnieuw opent
+- Aurora I/II met een DIY-stooklijn: kies **DIY-stooklijn van de warmtepomp
+  (L28/L29)**. De app neemt L29 over als waarde bij −15 °C en L29 + 30 × L28 als
+  waarde bij +15 °C (bijv. L28 = −0,5 en L29 = 55 geeft 55 / 40). Een helling
+  die niet negatief is, of waarden buiten de app-stooklijn, worden geweigerd
 
 **Welke regelmodus kies ik?**
 
@@ -334,8 +338,13 @@ OFF. Na OFF kan de app de curve niet meer uitlezen.
 | De huidige regeling werkt goed | Klassiek |
 | Setpoint kruipt weg of slingert, radiatoren | Positioneel – Radiatoren |
 | Setpoint kruipt weg, vloerverwarming | Positioneel – Vloerverwarming |
+| Gemengd: vloer en radiatoren | Zie hieronder |
+| Ventilatorconvectoren | Positioneel – Radiatoren |
 | Stooklijn onbekend | Startwaarden, daarna bijstellen |
 
+- **Gemengd of ventilatorconvectoren**: niet getoetst. Bij gemengd
+  Positioneel – Vloerverwarming als de vloer de grootste of traagste afgifte is,
+  anders Positioneel – Radiatoren
 - **Aurora I/II en Tuya**: de warmtepomp houdt een nieuw setpoint alleen vast
   als de stooklijnkeuze (Tuya: verwarmingscurve) op OFF staat; anders voert geen
   van beide modi het advies uit. De app rekent de stooklijn dan zelf uit
