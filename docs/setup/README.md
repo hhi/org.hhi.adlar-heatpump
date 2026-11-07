@@ -24,6 +24,7 @@ User documentation for the Adlar Castra Heatpump app. Start with the guide for y
 | COP Flow card setup | [NL](<COP flow-card-setup.nl.md>) | [EN](<COP flow-card-setup.en.md>) | [DE](<COP flow-card-setup.de.md>) | [FR](<COP flow-card-setup.fr.md>) |
 | Configuration (all settings) | [NL](advanced-settings/CONFIGURATION_GUIDE.nl.md) | [EN](advanced-settings/CONFIGURATION_GUIDE.en.md) | [DE](advanced-settings/CONFIGURATION_GUIDE.de.md) | [FR](advanced-settings/CONFIGURATION_GUIDE.fr.md) |
 | Flow cards | [NL](guide/FLOW_CARDS_GUIDE.nl.md) | [EN](guide/FLOW_CARDS_GUIDE.en.md) | [DE](guide/FLOW_CARDS_GUIDE.de.md) | [FR](guide/FLOW_CARDS_GUIDE.fr.md) |
+| Adaptive control settings: control mode, heating curve, coast | [NL](guide/CONTROL_SETTINGS_GUIDE.nl.md) | [EN](guide/CONTROL_SETTINGS_GUIDE.en.md) | [DE](guide/CONTROL_SETTINGS_GUIDE.de.md) | [FR](guide/CONTROL_SETTINGS_GUIDE.fr.md) |
 | Adaptive control | [NL](guide/ADAPTIVE_CONTROL_GUIDE.nl.md) | [EN](guide/ADAPTIVE_CONTROL_GUIDE.en.md) | [DE](guide/ADAPTIVE_CONTROL_GUIDE.de.md) | [FR](guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
 | Building insights | [NL](guide/BUILDING_INSIGHTS_GUIDE.nl.md) | [EN](guide/BUILDING_INSIGHTS_GUIDE.en.md) | [DE](guide/BUILDING_INSIGHTS_GUIDE.de.md) | [FR](guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
 | Advanced features introduction | [NL](advanced-control/Advanced_Features_Intro.nl.md) | [EN](advanced-control/Advanced_Features_Intro.en.md) | [DE](advanced-control/Advanced_Features_Intro.de.md) | [FR](advanced-control/Advanced_Features_Intro.fr.md) |

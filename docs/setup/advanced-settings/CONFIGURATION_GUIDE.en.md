@@ -12,12 +12,12 @@ This guide describes all configurable settings of the Adlar Heat Pump Homey app.
 | 2 | **COP Settings** | - | Power measurement (for accuracy) |
 | 3 | **Feature Settings** | App restart | - |
 | 4 | **Flow Card Controls** | App restart | - |
-| 5 | **Adaptive Temperature Control** | External temp sensor | - |
+| 5 | **Adaptive control** (six groups; weighting factors: row 10) | Indoor temperature via flow card, Desired Indoor Temperature | - |
 | 6 | **Building Model Learning** | - | - |
 | 7 | **Building Insights** | Building Model Learning ON | Min. confidence |
 | 8 | **Energy Price Optimization** | Adaptive Control ON, Internet | Dynamic tariff |
 | 9 | **COP Optimization** | COP Calculation ON, Adaptive Control | 1+ week data |
-| 10 | **Weighting Factors** | Adaptive Control ON | - |
+| 10 | **Adaptive control: weighting factors** | Adaptive control on | - |
 | 11 | **Diagnostics** | - | - |
 | 12 | **Energy Management** | - | Power measurement |
 
@@ -59,12 +59,12 @@ This guide describes all configurable settings of the Adlar Heat Pump Homey app.
 2. [COP (Coefficient of Performance) Settings](#2-cop-coefficient-of-performance-settings)
 3. [Feature Settings](#3-feature-settings)
 4. [Flow Card Handling](#4-flow-card-handling)
-5. [Adaptive Temperature Control](#5-adaptive-temperature-control)
+5. [Adaptive control](#5-adaptive-control)
 6. [Building Model Learning](#6-building-model-learning)
 7. [Building Insights & Recommendations](#7-building-insights--recommendations)
 8. [Energy Price Optimization](#8-energy-price-optimization)
 9. [COP Optimization](#9-cop-optimization)
-10. [Adaptive Control Weighting Factors](#10-adaptive-control-weighting-factors)
+10. [Adaptive control: weighting factors](#10-adaptive-control-weighting-factors)
 11. [Diagnostics](#11-diagnostics)
 12. [Energy Management](#12-energy-management)
 
@@ -212,41 +212,68 @@ Determines which flow cards are visible in the Homey Flow editor. **Restart reco
 
 ---
 
-## 5. Adaptive Temperature Control
+## 5. Adaptive control
 
-Automatic target temperature regulation based on external indoor temperature sensor.
+Calculates a recommended water temperature (Simulated Target Temperature) every
+5 minutes. The app does not change the setpoint itself: only a flow with the
+card **Adaptive control recommends temperature adjustment** carries out the
+recommendation. A step-by-step explanation is in the
+[control settings guide](../guide/CONTROL_SETTINGS_GUIDE.en.md).
 
-### Enable Adaptive Temperature Control
+Since 3.6.2 the settings are in six groups. Homey always shows all of them; the
+group title says in which control mode they count.
+
+| Group | Settings | Counts in |
+| --- | --- | --- |
+| Adaptive control | Adaptive control on, control mode, lowest and highest water temperature | All modes |
+| Adaptive control: heating curve (Positional) | Basis of the recommendation, copy once, water at −15 °C and +15 °C | Positional |
+| Adaptive control: fine-tuning (Positional – Manual) | Kp, Ti | Positional – Manual |
+| Adaptive control: fine-tuning (Classic) | Kp, Ki, deadband | Classic |
+| Adaptive control: coast (Classic, Positional – Manual) | Coast on, recommendation below the water temperature, start threshold, share, maximum duration | Classic, Positional – Manual |
+| Adaptive control: weighting factors | See [section 10](#10-adaptive-control-weighting-factors) | See per factor |
+
+### Adaptive control on
+
 - **Default**: Disabled
-- **Function**: PI (Proportional-Integral) controller for stable indoor temperature
+- **Function**: Turns the calculation of the recommendation on
 - **Requirements**:
-  - External temperature sensor (via flow card)
-  - Target temperature set
-  - Flow "Send indoor temperature" active
-- **Performance**: ±0.3°C stability (deadband adjustable)
+  - Indoor temperature via the card **Send indoor temperature to heat pump**
+  - A value for **Desired Indoor Temperature**; without it, every cycle is
+    skipped (only visible in the debug log)
+  - A flow that carries out the recommendation, if the app is to actually
+    control
+- **Building model**: has its own switch and also learns while the control is
+  off
 
-### PI Controller Parameters (Expert Settings)
+### Fine-tuning (Classic)
 
-**Only visible with "Expert HVAC function cards" enabled**
+Group **Adaptive control: fine-tuning (Classic)**. Only counts in the control
+mode Classic.
 
-#### Proportional Gain (Kp)
+#### Kp: proportional gain
+
 - **Default**: 5.0
 - **Range**: 0.5 - 10.0
 - **Function**: Determines how quickly system responds to current error
 - **Higher value**: Faster correction, risk of overshoot
 - **Lower value**: More stable control, slower correction
 
-#### Integral Gain (Ki)
+#### Ki: integral gain
+
 - **Default**: 1.5
 - **Range**: 0.1 - 5.0
 - **Function**: Eliminates persistent deviations (steady-state error)
 
 #### Deadband
+
 - **Default**: 0.3°C
 - **Range**: 0.1 - 1.0°C
 - **Function**: Tolerance before adjustments are made
 
-#### Minimum and Maximum Water Temperature (v3.4.3+)
+### Lowest and highest water temperature in the recommendation (v3.4.3+)
+
+Group **Adaptive control**. Counts in all control modes.
+
 
 - **Minimum — default**: 18°C, **range**: 15 - 30°C
 - **Maximum — default**: 60°C (Tuya: 65°C), **range**: 25 - 60°C (Tuya: 25 -
@@ -261,26 +288,26 @@ Automatic target temperature regulation based on external indoor temperature sen
 - **Floor heating**: Set both around the range of your own heating curve (e.g.
   2°C below and 3°C above) and leave room for cold weather
 
-#### Control Mode and Heating Curve (v3.5.0+)
+### Control mode and heating curve (v3.5.0+)
 
 - **Control mode — default**: Classic
   - **Classic**: a small step up or down every cycle; the steps add up (previous
     behaviour)
   - **Positional – Radiators** (experimental): Kp 3, Ti 3 h, coast off
   - **Positional – Floor heating** (experimental): Kp 3, Ti 6 h, coast off
-  - **Positional – Manual** (experimental): Positional PI Kp and Ti and the
-    Coast switch below
+  - **Positional – Manual** (experimental): Kp and Ti from the group
+    fine-tuning (Positional – Manual) and the switch **Coast on**
   - Positional: advice = heating curve + PI correction with a true integral,
     without a wide dead zone; the setpoint stays calm, also with a flow that
     applies every advice
-- **Coast**: with Classic and Positional – Manual the Coast switch applies;
+- **Coast**: with Classic and Positional – Manual the switch **Coast on** applies;
   Radiators and Floor heating switch coast off
-- **Heating curve (positional modes) — default**: App curve
+- **Basis of the recommendation — default**: App curve
   - **App curve**: water temperature at −15 °C and at +15 °C outdoor. Starting
     values: Radiators 50 / 35, Floor heating 35 / 27, otherwise 45 / 30;
     prefilled when you choose the control mode, as long as you have not changed
     them yourself
-  - **Heat pump curve** (Aurora I/II: DIY curve, only while DIY is switched
+  - **Heat pump curve (followed continuously)** (Aurora I/II: DIY curve, only while DIY is switched
     on; Aurora III: climate curve): only when you have set it yourself; when DIY
     is off or the curve is not usable, the app curve applies. Tuya does not have
     this choice
@@ -288,7 +315,7 @@ Automatic target temperature regulation based on external indoor temperature sen
   system, Kp and Ti with their source, the basis with its source and the P and I
   terms
 
-##### Adjusting the heating curve
+#### Adjusting the heating curve
 
 | What you notice | Adjustment |
 | --- | --- |
@@ -301,11 +328,11 @@ Automatic target temperature regulation based on external indoor temperature sen
   diagnostics, an I term that stays above 0 points to a heating curve that is
   too low, below 0 to one that is too high
 
-##### Switching from a fixed curve
+#### Switching from a fixed curve
 
 Did you use a fixed curve of the heat pump (Aurora I/II: curve selection
 HH1–HH8 or HL1–HL8; Tuya: heating curve H1–H8 or L1–L8)? Note that curve and
-choose it at **App curve: fill in from a fixed curve**: after saving, the app
+choose it at **Copy once into the app curve**: after saving, the app
 fills in the two values from the table. Then set the curve selection to OFF.
 After OFF, the app can no longer read the curve.
 
@@ -365,22 +392,60 @@ After OFF, the app can no longer read the curve.
   building model does not take part in Positional
 - **Experimental**: Positional has seen little testing in practice
 
-#### Coast Offset (v2.8.0+)
+### Fine-tuning (Positional – Manual)
+
+Group **Adaptive control: fine-tuning (Positional – Manual)**. Only counts in
+Positional – Manual; Radiators and Floor heating use fixed values.
+
+#### Kp: degrees of water per degree indoors
+
+- **Default**: 3, **range**: 1 - 8
+- **Function**: The recommendation rises by this many degrees per degree that it
+  is too cold indoors
+
+#### Ti: integration time
+
+- **Default**: 3 hours, **range**: 1 - 12 hours
+- **Function**: How fast a persistent indoor deviation is removed; shorter is
+  faster
+
+### Coast (Classic, Positional – Manual)
+
+Group **Adaptive control: coast (Classic, Positional – Manual)**. Radiators and
+Floor heating do not use coast.
+
+#### Coast on
+
+- **Default**: On
+- **Function**: When it is too warm indoors, coast sets the recommendation below
+  the current water temperature, so the compressor stays off and the house cools
+  down by itself
+
+#### Coast: recommendation below the water temperature (v2.8.0+)
+
 - **Default**: 1.0°C
 - **Range**: 0.5 - 5.0°C
 - **Function**: Degrees below outlet temperature for coast target value
 - **Lower**: Compressor stops sooner, less heating
 - **Higher**: More cautious coast, more margin
 
-#### Coast Hysteresis (v2.8.0+)
+#### Coast: start threshold above desired (v2.8.0+)
+
 - **Default**: 0.3°C
 - **Range**: 0.1 - 1.0°C
 - **Function**: Overshoot margin above setpoint for coast mode activation
 
-#### Coast Strength (v2.8.0+)
+#### Coast: share in the recommendation (v2.8.0+)
+
 - **Default**: 0.80
 - **Range**: 0.60 - 0.95
 - **Function**: Weight share of coast in weighted decision (dominant when active)
+
+#### Coast: maximum duration (Aurora)
+
+- **Default**: 24 cycles of 5 minutes (2 hours), **range**: 6 - 48
+- **Function**: Coast stops after this many cycles at the latest, even if it is
+  still too warm indoors. Tuya does not have this setting
 
 ---
 
@@ -398,7 +463,9 @@ Machine learning algorithm that learns the thermal properties of your home.
 - **Default**: 0.999
 - **Range**: 0.9985 - 0.9995
 - **Function**: How quickly the model adapts to changes. Higher = more stable, better confidence (~75%). Lower = faster adaptation to seasonal changes.
-- **Applies**: Immediately (v3.5.0+)
+- **Applies**: Immediately (v3.5.0+); the learned model is kept
+- **Migration (v3.6.2)**: A value below 0.9985 from an older version is set to
+  0.999. Since v3.4.2 such a value blocked saving any setting on that device
 
 ### Building Type
 - **Default**: Average (typical NL house)
@@ -558,23 +625,26 @@ Automatic supply temperature optimization for maximum efficiency.
 
 ---
 
-## 10. Adaptive Control Weighting Factors
+## 10. Adaptive control: weighting factors
 
-These five priorities together determine how the system makes decisions. **Values are automatically normalized to total 100%.** When coast mode is active, the coast component dominates (80% default).
+These four weighting factors together determine how the control makes decisions. **Values are automatically normalized to total 100%.** Comfort and Building model only count in Classic. In Positional, Efficiency and Cost only shift the room target, by at most 1.5 °C together. When coast mode is active, the coast component dominates (80% default).
 
-### Comfort Priority
+### Comfort — Classic only
+
 - **Default**: 50%
 - **Range**: 0 - 100%
 - **Function**: Weight for PI temperature control
 - **High comfort** (70-80%): Temperature always stable within ±0.3°C
 
-### Efficiency Priority
+### Efficiency
+
 - **Default**: 15%
 - **Range**: 0 - 100%
 - **Function**: Weight for COP optimization
 - **High efficiency** (30-40%): Focus on maximum COP
 
-### Cost Priority
+### Cost
+
 - **Default**: 15%
 - **Range**: 0 - 100%
 - **Function**: Weight for price optimization
@@ -583,7 +653,8 @@ These five priorities together determine how the system makes decisions. **Value
   - LOW prices (preheat): weight ×1.2 to ×1.5
 - **High cost** (25-35%): Maximum savings on energy costs
 
-### Thermal Prediction Priority
+### Building model — Classic only
+
 - **Default**: 20%
 - **Range**: 0 - 50%
 - **Function**: Weight for thermal predictions (τ/C/UA)

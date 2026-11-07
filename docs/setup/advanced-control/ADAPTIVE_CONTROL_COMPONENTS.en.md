@@ -262,7 +262,7 @@ The app uses built-in COP capabilities:
 
 ### Priorities & Weights
 
-The weighting factors are **configurable** via Device Settings → Adaptive Control Weighting Factors:
+The weighting factors are **configurable** via Device Settings → Adaptive control: weighting factors:
 
 | Priority | Default | Range | Function |
 |----------|---------|-------|----------|

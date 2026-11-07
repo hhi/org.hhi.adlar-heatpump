@@ -5,6 +5,7 @@ import os from 'os';
 import Homey from 'homey';
 import { DataSnapshot } from '../../lib/modbus/protocol/adlar2-modbus-service';
 import { Logger, LogLevel } from '../../lib/shared/logger';
+import { BuildingModelLearner } from '../../lib/shared/adaptive/building-model-learner';
 import { ServiceCoordinator } from '../../lib/modbus/services/service-coordinator';
 import {
   heatingCurveToEnumId,
@@ -217,6 +218,9 @@ class AdlarModbusDevice extends Homey.Device {
 
     this.logger.info('Device initializing:', this.getName());
 
+    // Migration v3.6.2 (R25): before the services start, so the learner gets the new value
+    await this._migrateForgettingFactor();
+
     await this._applyDashboardPort(settings.dashboard_port ?? 8090);
     await this._ensureCapabilities();
     await this._applyPowerCapabilities(settings.enable_power_measurements ?? true);
@@ -368,6 +372,19 @@ class AdlarModbusDevice extends Homey.Device {
     };
     if (!app.setDashboardPort) return;
     await app.setDashboardPort(port);
+  }
+
+  /** Migration v3.6.2 (R25): a forgetting factor outside 0.9985–0.9995 (minimum raised in 3.4.2) blocks every settings save. */
+  private async _migrateForgettingFactor(): Promise<void> {
+    const stored: unknown = this.getSetting('building_model_forgetting_factor');
+    const replacement = BuildingModelLearner.forgettingFactorMigration(stored);
+    if (replacement === null) return;
+    try {
+      await this.setSettings({ building_model_forgetting_factor: replacement });
+      this.logger.info(`Migration v3.6.2: forgetting factor ${String(stored)} set to ${replacement}`);
+    } catch (error) {
+      this.logger.warn('Migration v3.6.2: failed to update the forgetting factor:', error);
+    }
   }
 
   private async _ensureCapabilities(): Promise<void> {
