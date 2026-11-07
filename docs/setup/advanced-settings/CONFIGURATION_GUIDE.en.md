@@ -12,7 +12,7 @@ This guide describes all configurable settings of the Adlar Heat Pump Homey app.
 | 2 | **COP Settings** | - | Power measurement (for accuracy) |
 | 3 | **Feature Settings** | App restart | - |
 | 4 | **Flow Card Controls** | App restart | - |
-| 5 | **Adaptive control** (five groups) | Indoor temperature via flow card, Desired Indoor Temperature | - |
+| 5 | **Adaptive control** (six groups; weighting factors: row 10) | Indoor temperature via flow card, Desired Indoor Temperature | - |
 | 6 | **Building Model Learning** | - | - |
 | 7 | **Building Insights** | Building Model Learning ON | Min. confidence |
 | 8 | **Energy Price Optimization** | Adaptive Control ON, Internet | Dynamic tariff |

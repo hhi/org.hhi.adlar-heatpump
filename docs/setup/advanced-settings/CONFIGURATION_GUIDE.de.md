@@ -12,7 +12,7 @@ Dieses Handbuch beschreibt alle konfigurierbaren Einstellungen der Adlar Wärmep
 | 2 | **COP Einstellungen** | - | Leistungsmessung (für Genauigkeit) |
 | 3 | **Funktionseinstellungen** | App-Neustart | - |
 | 4 | **Flow-Karten-Verwaltung** | App-Neustart | - |
-| 5 | **Adaptive Regelung** (fünf Gruppen) | Raumtemperatur über Flow-Karte, Gewünschte Innentemperatur | - |
+| 5 | **Adaptive Regelung** (sechs Gruppen; Gewichtungsfaktoren: Zeile 10) | Raumtemperatur über Flow-Karte, Gewünschte Innentemperatur | - |
 | 6 | **Gebäudemodell-Lernen** | - | - |
 | 7 | **Gebäude-Einblicke** | Gebäudemodell ON | Min. Vertrauen |
 | 8 | **Energiepreis-Optimierung** | Adaptive Regelung ON, Internet | Dynamischer Tarif |

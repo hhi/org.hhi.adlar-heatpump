@@ -12,7 +12,7 @@ Ce guide décrit tous les paramètres configurables de l'application Homey Adlar
 | 2 | **Paramètres COP** | - | Mesure de puissance (pour précision) |
 | 3 | **Paramètres de Fonctionnalités** | Redémarrage app | - |
 | 4 | **Gestion des Cartes de Flux** | Redémarrage app | - |
-| 5 | **Contrôle adaptatif** (cinq groupes) | Température intérieure via carte de flux, Température Intérieure Souhaitée | - |
+| 5 | **Contrôle adaptatif** (six groupes ; facteurs de pondération : ligne 10) | Température intérieure via carte de flux, Température Intérieure Souhaitée | - |
 | 6 | **Apprentissage du Modèle de Bâtiment** | - | - |
 | 7 | **Aperçus du Bâtiment** | Modèle Bâtiment ON | Confiance min. |
 | 8 | **Optimisation du Prix de l'Énergie** | Contrôle Adaptatif ON, Internet | Tarif dynamique |
