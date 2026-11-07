@@ -12,7 +12,7 @@ Deze gids beschrijft alle configureerbare instellingen van de Adlar Warmtepomp H
 | 2 | **COP Instellingen** | - | Vermogensmeting (voor nauwkeurigheid) |
 | 3 | **Functie Instellingen** | App herstart | - |
 | 4 | **Flow Kaart Afhandeling** | App herstart | - |
-| 5 | **Adaptieve regeling** (vijf groepen) | Binnentemperatuur via flowkaart, Binnentemperatuur gewenst | - |
+| 5 | **Adaptieve regeling** (zes groepen; wegingsfactoren: rij 10) | Binnentemperatuur via flowkaart, Binnentemperatuur gewenst | - |
 | 6 | **Gebouwmodel Leren** | - | - |
 | 7 | **Gebouw Inzichten** | Gebouwmodel Leren AAN | Min. betrouwbaarheid |
 | 8 | **Energieprijs Optimalisatie** | Adaptive Control AAN, Internet | Dynamisch tarief |
