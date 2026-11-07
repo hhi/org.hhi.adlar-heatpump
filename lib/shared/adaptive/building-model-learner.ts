@@ -195,6 +195,17 @@ export class BuildingModelLearner {
     DEFAULT: 0.999,
   };
 
+  /**
+   * R25 (3.6.2): replacement for a stored forgetting factor outside the setting's range, or null when it is valid.
+   * 3.4.2 raised the minimum from 0.990 to 0.9985; Homey then rejects every settings save on that device.
+   * An out-of-range value becomes the default, not the bound (simulation: same accuracy, calmer parameters).
+   */
+  public static forgettingFactorMigration(value: unknown): number | null {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    const { MIN, MAX, DEFAULT } = BuildingModelLearner.LAMBDA;
+    return value < MIN || value > MAX ? DEFAULT : null;
+  }
+
   // =========================================================================
   // ADR-062 B12: way out when the learner is stuck against the bounds. After
   // AFTER_CONSECUTIVE_REVERTS reverts in a row (about one hour) the next step

@@ -191,8 +191,8 @@ THEN: Adlar Heat Pump → Envoyer température intérieure
 ### Étape 2: Activer
 
 1. Ouvrez **Adlar Heat Pump** → **Paramètres** ⚙️
-2. Faites défiler jusqu'à **Adaptive Temperature Control**
-3. Cochez: **Enable adaptive temperature control** ✅
+2. Faites défiler jusqu'au groupe **Contrôle adaptatif**
+3. Cochez : **Contrôle adaptatif activé** ✅
 4. Cliquez sur **Enregistrer**
 
 ### Étape 3: Vérifier
@@ -290,25 +290,26 @@ THEN: Envoyer notification "✅ Contrôle adaptatif activé"
 
 | Paramètre | Par défaut | Description |
 |-----------|------------|-------------|
-| Enable adaptive temperature control | Désactivé | Interrupteur principal |
+| Contrôle adaptatif activé (groupe **Contrôle adaptatif**) | Désactivé | Interrupteur principal |
+| Température Intérieure Souhaitée (sur l'appareil) | — | Cible de la pièce ; sans valeur, la régulation ne calcule pas |
 
-### Paramètres Expert
+### Réglage fin (Classique)
 
-> [!IMPORTANT]
-> Les paramètres Expert ne sont visibles qu'avec **Cartes de fonction HVAC Expert** activées.
+> [!NOTE]
+> Groupe **Contrôle adaptatif : réglage fin (Classique)**. Compte uniquement dans le mode de régulation Classique ; Homey affiche toujours les réglages. Pour les modes positionnels, voir le [guide des réglages de régulation](CONTROL_SETTINGS_GUIDE.fr.md).
 
 | Paramètre | Par défaut | Plage | Description |
 |-----------|------------|-------|-------------|
-| **Kp** (Proportional Gain) | 3,0 | 0,5 - 10,0 | Réaction directe à l'écart |
-| **Ki** (Integral Gain) | 1,5 | 0,1 - 5,0 | Correction écart de longue durée |
-| **Deadband** | 0,3°C | 0,1 - 1,0°C | Zone de tolérance |
+| **Kp : gain proportionnel** | 5,0 | 0,5 - 10,0 | Réaction directe à l'écart |
+| **Ki : gain intégral** | 1,5 | 0,1 - 5,0 | Correction écart de longue durée |
+| **Zone morte** | 0,3°C | 0,1 - 1,0°C | Zone de tolérance |
 
 **Conseils de réglage:**
 
 | Problème | Solution |
 |----------|----------|
-| Oscillation/dépassement | Diminuez Kp (par ex. 3,0 → 2,0) |
-| Réaction trop lente | Augmentez Kp (par ex. 3,0 → 4,0) |
+| Oscillation/dépassement | Diminuez Kp (par ex. 5,0 → 4,0) |
+| Réaction trop lente | Augmentez Kp (par ex. 5,0 → 6,0) |
 | Écart structurel | Augmentez Ki (par ex. 1,5 → 2,0) |
 | Trop de petites corrections | Augmentez deadband (par ex. 0,3 → 0,5) |
 

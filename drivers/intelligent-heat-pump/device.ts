@@ -17,6 +17,7 @@ import {
   type LiveOperationWidgetState,
 } from '../../lib/tuya/services/widget-state-service';
 import { Logger } from '../../lib/shared/logger';
+import { BuildingModelLearner } from '../../lib/shared/adaptive/building-model-learner';
 import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
 import { isExternalValueFresh } from '../../lib/shared/utils/external-value-age';
 import { formatCopMethodDisplay } from '../../lib/shared/utils/cop-method-display';
@@ -3327,6 +3328,19 @@ class MyDevice extends Homey.Device {
   /**
    * onInit is called when the device is initialized.
    */
+  /** Migration v3.6.2 (R25): a forgetting factor outside 0.9985–0.9995 (minimum raised in 3.4.2) blocks every settings save. */
+  private async _migrateForgettingFactor(): Promise<void> {
+    const stored: unknown = this.getSetting('building_model_forgetting_factor');
+    const replacement = BuildingModelLearner.forgettingFactorMigration(stored);
+    if (replacement === null) return;
+    try {
+      await this.setSettings({ building_model_forgetting_factor: replacement });
+      this.logger.info(`Migration v3.6.2: forgetting factor ${String(stored)} set to ${replacement}`);
+    } catch (error) {
+      this.logger.warn('Migration v3.6.2: failed to update the forgetting factor:', error);
+    }
+  }
+
   async onInit() {
     try {
       // Initialize structured logger with user-configurable log level (v2.1.0)
@@ -3340,6 +3354,9 @@ class MyDevice extends Homey.Device {
         'Device',
       );
       this.logger.info('Device initializing with log level:', Logger.levelToString(logLevel));
+
+      // Migration v3.6.2 (R25): before the services start, so the learner gets the new value
+      await this._migrateForgettingFactor();
 
       // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
       // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors

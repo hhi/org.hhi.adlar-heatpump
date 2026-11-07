@@ -191,8 +191,8 @@ THEN: Adlar Heat Pump → Stuur binnentemperatuur
 ### Stap 2: Inschakelen
 
 1. Open **Adlar Heat Pump** → **Instellingen** ⚙️
-2. Scroll naar **Adaptive Temperature Control**
-3. Vink aan: **Enable adaptive temperature control** ✅
+2. Scroll naar de groep **Adaptieve regeling**
+3. Vink aan: **Adaptieve regeling aan** ✅
 4. Klik **Opslaan**
 
 ### Stap 3: Controleren
@@ -290,25 +290,26 @@ THEN: Stuur notificatie "✅ Adaptive control geactiveerd"
 
 | Instelling | Standaard | Beschrijving |
 |------------|-----------|--------------|
-| Enable adaptive temperature control | Uit | Hoofdschakelaar |
+| Adaptieve regeling aan (groep **Adaptieve regeling**) | Uit | Hoofdschakelaar |
+| Binnentemperatuur gewenst (op het apparaat) | — | Kamerdoel; zonder waarde rekent de regeling niet |
 
-### Expert Instellingen
+### Fijnafstelling (Klassiek)
 
-> [!IMPORTANT]
-> Expert instellingen zijn alleen zichtbaar met **Expert HVAC functie kaarten** ingeschakeld.
+> [!NOTE]
+> Groep **Adaptieve regeling: fijnafstelling (Klassiek)**. Telt alleen bij de regelmodus Klassiek; Homey toont de instellingen altijd. Voor de positionele modi, zie de [handleiding regelinstellingen](CONTROL_SETTINGS_GUIDE.nl.md).
 
 | Instelling | Standaard | Bereik | Beschrijving |
 |------------|-----------|--------|--------------|
-| **Kp** (Proportional Gain) | 3.0 | 0.5 - 10.0 | Directe reactie op afwijking |
-| **Ki** (Integral Gain) | 1.5 | 0.1 - 5.0 | Correctie langdurige afwijking |
-| **Deadband** | 0.3°C | 0.1 - 1.0°C | Tolerantie zone |
+| **Kp: proportionele versterking** | 5.0 | 0.5 - 10.0 | Directe reactie op afwijking |
+| **Ki: integrale versterking** | 1.5 | 0.1 - 5.0 | Correctie langdurige afwijking |
+| **Dode zone** | 0.3°C | 0.1 - 1.0°C | Tolerantie zone |
 
 **Tuning tips:**
 
 | Probleem | Oplossing |
 |----------|-----------|
-| Oscillatie/overshoot | Verlaag Kp (bijv. 3.0 → 2.0) |
-| Te trage reactie | Verhoog Kp (bijv. 3.0 → 4.0) |
+| Oscillatie/overshoot | Verlaag Kp (bijv. 5.0 → 4.0) |
+| Te trage reactie | Verhoog Kp (bijv. 5.0 → 6.0) |
 | Structurele afwijking | Verhoog Ki (bijv. 1.5 → 2.0) |
 | Te veel kleine correcties | Verhoog deadband (bijv. 0.3 → 0.5) |
 

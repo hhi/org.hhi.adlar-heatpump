@@ -12,12 +12,12 @@ Ce guide décrit tous les paramètres configurables de l'application Homey Adlar
 | 2 | **Paramètres COP** | - | Mesure de puissance (pour précision) |
 | 3 | **Paramètres de Fonctionnalités** | Redémarrage app | - |
 | 4 | **Gestion des Cartes de Flux** | Redémarrage app | - |
-| 5 | **Contrôle Adaptatif de Température** | Capteur temp externe | - |
+| 5 | **Contrôle adaptatif** (six groupes ; facteurs de pondération : ligne 10) | Température intérieure via carte de flux, Température Intérieure Souhaitée | - |
 | 6 | **Apprentissage du Modèle de Bâtiment** | - | - |
 | 7 | **Aperçus du Bâtiment** | Modèle Bâtiment ON | Confiance min. |
 | 8 | **Optimisation du Prix de l'Énergie** | Contrôle Adaptatif ON, Internet | Tarif dynamique |
 | 9 | **Optimisation COP** | Calcul COP ON, Contrôle Adaptatif | 1+ semaine données |
-| 10 | **Facteurs de Pondération** | Contrôle Adaptatif ON | - |
+| 10 | **Contrôle adaptatif : facteurs de pondération** | Contrôle adaptatif activé | - |
 | 11 | **Diagnostics** | - | - |
 | 12 | **Gestion de l'Énergie** | - | Mesure de puissance |
 
@@ -59,12 +59,12 @@ Ce guide décrit tous les paramètres configurables de l'application Homey Adlar
 2. [Paramètres COP (Coefficient de Performance)](#2-paramètres-cop-coefficient-de-performance)
 3. [Paramètres de Fonctionnalités](#3-paramètres-de-fonctionnalités)
 4. [Gestion des Cartes de Flux](#4-gestion-des-cartes-de-flux)
-5. [Contrôle Adaptatif de Température](#5-contrôle-adaptatif-de-température)
+5. [Contrôle adaptatif](#5-contrôle-adaptatif)
 6. [Apprentissage du Modèle de Bâtiment](#6-apprentissage-du-modèle-de-bâtiment)
 7. [Aperçus et Recommandations du Bâtiment](#7-aperçus-et-recommandations-du-bâtiment)
 8. [Optimisation du Prix de l'Énergie](#8-optimisation-du-prix-de-lénergie)
 9. [Optimisation COP](#9-optimisation-cop)
-10. [Facteurs de Pondération du Contrôle Adaptatif](#10-facteurs-de-pondération-du-contrôle-adaptatif)
+10. [Contrôle adaptatif : facteurs de pondération](#10-contrôle-adaptatif--facteurs-de-pondération)
 11. [Diagnostics](#11-diagnostics)
 12. [Gestion de l'Énergie](#12-gestion-de-lénergie)
 
@@ -212,41 +212,69 @@ Détermine quelles cartes de flux sont visibles dans l'éditeur de flux Homey. *
 
 ---
 
-## 5. Contrôle Adaptatif de Température
+## 5. Contrôle adaptatif
 
-Régulation automatique de la température cible basée sur un capteur de température intérieure externe.
+Calcule toutes les 5 minutes une recommandation de température d'eau
+(Température Cible Simulée). L'app ne modifie pas elle-même la consigne : seul
+un flow avec la carte **Contrôle adaptatif recommande un ajustement de
+température** applique la recommandation. Une explication pas à pas se trouve
+dans le [guide des réglages de régulation](../guide/CONTROL_SETTINGS_GUIDE.fr.md).
 
-### Activer le Contrôle Adaptatif de Température
+Depuis 3.6.2, les réglages sont répartis en six groupes. Homey les affiche
+toujours tous ; le titre du groupe indique dans quel mode de régulation ils
+comptent.
+
+| Groupe | Réglages | Compte dans |
+| --- | --- | --- |
+| Contrôle adaptatif | Contrôle adaptatif activé, mode de régulation, température d'eau la plus basse et la plus haute | Tous les modes |
+| Contrôle adaptatif : courbe de chauffe (Positionnel) | Base de la recommandation, copier une fois, eau à −15 °C et +15 °C | Positionnel |
+| Contrôle adaptatif : réglage fin (Positionnel – Manuel) | Kp, Ti | Positionnel – Manuel |
+| Contrôle adaptatif : réglage fin (Classique) | Kp, Ki, zone morte | Classique |
+| Contrôle adaptatif : coast (Classique, Positionnel – Manuel) | Coast activé, recommandation sous la température d'eau, seuil de démarrage, part, durée maximale | Classique, Positionnel – Manuel |
+| Contrôle adaptatif : facteurs de pondération | Voir [section 10](#10-contrôle-adaptatif--facteurs-de-pondération) | Voir par facteur |
+
+### Contrôle adaptatif activé
+
 - **Par défaut** : Désactivé
-- **Fonction** : Contrôleur PI (Proportionnel-Intégral) pour une température intérieure stable
+- **Fonction** : Active le calcul de la recommandation
 - **Prérequis** :
-  - Capteur de température externe (via carte de flux)
-  - Température cible définie
-  - Flux "Envoyer température intérieure" actif
-- **Performance** : Stabilité ±0.3°C (bande morte ajustable)
+  - Température intérieure via la carte **Envoyer la température intérieure à
+    la pompe à chaleur**
+  - Une valeur pour **Température Intérieure Souhaitée** ; sans elle, chaque
+    cycle est ignoré (visible seulement dans le journal de débogage)
+  - Un flow qui applique la recommandation, si l'app doit réellement réguler
+- **Modèle du bâtiment** : a son propre interrupteur et apprend aussi quand la
+  régulation est désactivée
 
-### Paramètres du Contrôleur PI (Expert)
+### Réglage fin (Classique)
 
-**Visible uniquement avec "Cartes de fonction expert HVAC" activé**
+Groupe **Contrôle adaptatif : réglage fin (Classique)**. Compte uniquement dans
+le mode de régulation Classique.
 
-#### Gain Proportionnel (Kp)
+#### Kp : gain proportionnel
+
 - **Par défaut** : 5.0
 - **Plage** : 0.5 - 10.0
 - **Fonction** : Détermine la rapidité de réponse du système à l'erreur actuelle
 - **Valeur plus élevée** : Correction plus rapide, risque de dépassement
 - **Valeur plus basse** : Contrôle plus stable, correction plus lente
 
-#### Gain Intégral (Ki)
+#### Ki : gain intégral
+
 - **Par défaut** : 1.5
 - **Plage** : 0.1 - 5.0
 - **Fonction** : Élimine les déviations persistantes (erreur à l'état stable)
 
-#### Bande Morte
+#### Zone morte
+
 - **Par défaut** : 0.3°C
 - **Plage** : 0.1 - 1.0°C
 - **Fonction** : Tolérance avant que les ajustements soient effectués
 
-#### Température d'Eau Minimale et Maximale (v3.4.3+)
+### Température d'eau la plus basse et la plus haute recommandée (v3.4.3+)
+
+Groupe **Contrôle adaptatif**. Compte dans tous les modes de régulation.
+
 
 - **Minimum — par défaut** : 18°C, **plage** : 15 - 30°C
 - **Maximum — par défaut** : 60°C (Tuya : 65°C), **plage** : 25 - 60°C (Tuya :
@@ -263,7 +291,7 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   courbe de chauffe (p. ex. 2°C en dessous et 3°C au-dessus) et laissez de la
   marge pour le temps froid
 
-#### Mode de Régulation et Courbe de Chauffe (v3.5.0+)
+### Mode de régulation et courbe de chauffe (v3.5.0+)
 
 - **Mode de régulation — par défaut** : Classique
   - **Classique** : un petit pas vers le haut ou le bas à chaque cycle ; les pas
@@ -271,19 +299,19 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   - **Positionnel – Radiateurs** (expérimental) : Kp 3, Ti 3 h, coast désactivé
   - **Positionnel – Plancher chauffant** (expérimental) : Kp 3, Ti 6 h, coast
     désactivé
-  - **Positionnel – Manuel** (expérimental) : Kp et Ti du PI positionnel et
-    l'interrupteur Coast ci-dessous
+  - **Positionnel – Manuel** (expérimental) : Kp et Ti du groupe réglage fin
+    (Positionnel – Manuel) et l'interrupteur **Coast activé**
   - Positionnel : recommandation = courbe de chauffe + correction PI avec une
     vraie intégrale, sans large zone morte ; la consigne reste stable, même avec
     un flow qui applique chaque recommandation
-- **Coast** : en mode Classique et Positionnel – Manuel, l'interrupteur Coast
+- **Coast** : en mode Classique et Positionnel – Manuel, l'interrupteur **Coast activé**
   s'applique ; Radiateurs et Plancher chauffant désactivent coast
-- **Courbe de chauffe (modes positionnels) — par défaut** : Courbe de l'app
+- **Base de la recommandation — par défaut** : Courbe de l'app
   - **Courbe de l'app** : température d'eau à −15 °C et à +15 °C extérieur.
     Valeurs de départ : Radiateurs 50 / 35, Plancher chauffant 35 / 27, sinon 45
     / 30 ; préremplies au choix du mode de régulation, tant que vous ne les avez
     pas modifiées
-  - **Courbe de la pompe à chaleur** (Aurora I/II : courbe DIY, uniquement si
+  - **Courbe de la pompe à chaleur (suivie en continu)** (Aurora I/II : courbe DIY, uniquement si
     DIY est activé ; Aurora III : courbe climatique) : uniquement si vous l'avez
     réglée vous-même ; si DIY est désactivé ou si la courbe n'est pas
     utilisable, la courbe de l'app s'applique. Tuya n'a pas ce choix
@@ -291,7 +319,7 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   d'émission, Kp et Ti avec leur source, la base avec sa source et les termes P
   et I
 
-##### Ajuster la courbe de chauffe
+#### Ajuster la courbe de chauffe
 
 | Ce que vous constatez | Ajustement |
 | --- | --- |
@@ -304,12 +332,12 @@ Régulation automatique de la température cible basée sur un capteur de tempé
   jours). Dans le diagnostic, un terme I qui reste au-dessus de 0 indique une
   courbe trop basse, en dessous de 0 une courbe trop haute
 
-##### Passer d'une courbe fixe
+#### Passer d'une courbe fixe
 
 Vous utilisiez une courbe fixe de la pompe à chaleur (Aurora I/II : sélection de
 courbe HH1–HH8 ou HL1–HL8 ; Tuya : courbe de chauffage H1–H8 ou L1–L8) ? Notez
-cette courbe et choisissez-la dans **Courbe de l'app : remplir depuis une
-courbe fixe** : après l'enregistrement, l'app remplit les deux valeurs du
+cette courbe et choisissez-la dans **Copier une fois dans la courbe de
+l'app** : après l'enregistrement, l'app remplit les deux valeurs du
 tableau. Mettez ensuite la sélection de courbe sur OFF. Après OFF, l'app ne
 peut plus lire la courbe.
 
@@ -374,22 +402,61 @@ peut plus lire la courbe.
   mode Positionnel
 - **Expérimental** : le mode Positionnel a encore peu été testé en pratique
 
-#### Coast Offset (v2.8.0+)
+### Réglage fin (Positionnel – Manuel)
+
+Groupe **Contrôle adaptatif : réglage fin (Positionnel – Manuel)**. Compte
+uniquement en Positionnel – Manuel ; Radiateurs et Plancher chauffant utilisent
+des valeurs fixes.
+
+#### Kp : degrés d'eau par degré intérieur
+
+- **Par défaut** : 3, **plage** : 1 - 8
+- **Fonction** : La recommandation monte d'autant de degrés par degré manquant à
+  l'intérieur
+
+#### Ti : temps d'intégration
+
+- **Par défaut** : 3 heures, **plage** : 1 - 12 heures
+- **Fonction** : Vitesse à laquelle un écart intérieur persistant est corrigé ;
+  plus court est plus rapide
+
+### Coast (Classique, Positionnel – Manuel)
+
+Groupe **Contrôle adaptatif : coast (Classique, Positionnel – Manuel)**.
+Radiateurs et Plancher chauffant n'utilisent pas le coast.
+
+#### Coast activé
+
+- **Par défaut** : Activé
+- **Fonction** : Lorsqu'il fait trop chaud à l'intérieur, le coast place la
+  recommandation sous la température d'eau actuelle, pour que le compresseur
+  reste arrêté et que la maison se refroidisse d'elle-même
+
+#### Coast : recommandation sous la température d'eau (v2.8.0+)
+
 - **Par défaut** : 1,0°C
 - **Plage** : 0,5 - 5,0°C
 - **Fonction** : Degrés en dessous de la température de sortie pour la valeur cible coast
 - **Plus bas** : Compresseur s’arrête plus tôt, moins de chauffage
 - **Plus haut** : Coast plus prudent, plus de marge
 
-#### Coast Hystérésis (v2.8.0+)
+#### Coast : seuil de démarrage au-dessus du souhaité (v2.8.0+)
+
 - **Par défaut** : 0,3°C
 - **Plage** : 0,1 - 1,0°C
 - **Fonction** : Marge de dépassement au-dessus de la consigne pour l’activation du mode coast
 
-#### Coast Force (v2.8.0+)
+#### Coast : part dans la recommandation (v2.8.0+)
+
 - **Par défaut** : 0,80
 - **Plage** : 0,60 - 0,95
 - **Fonction** : Part de poids du coast dans la décision pondérée (dominant lors de l’activation)
+
+#### Coast : durée maximale (Aurora)
+
+- **Par défaut** : 24 cycles de 5 minutes (2 heures), **plage** : 6 - 48
+- **Fonction** : Le coast s'arrête au plus tard après ce nombre de cycles, même
+  s'il fait encore trop chaud à l'intérieur. Tuya n'a pas ce réglage
 
 ---
 
@@ -407,7 +474,10 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
 - **Par défaut** : 0.999
 - **Plage** : 0.9985 - 0.9995
 - **Fonction** : Rapidité d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance (~75%). Plus bas = adaptation plus rapide aux changements saisonniers.
-- **Effet** : Immédiat (v3.5.0+)
+- **Effet** : Immédiat (v3.5.0+) ; le modèle appris est conservé
+- **Migration (v3.6.2)** : Une valeur inférieure à 0.9985 d'une ancienne version
+  est remplacée par 0.999. Depuis v3.4.2, une telle valeur bloquait
+  l'enregistrement de tout réglage sur cet appareil
 
 ### Type de Bâtiment
 - **Par défaut** : Moyen (maison NL typique)
@@ -567,23 +637,26 @@ Optimisation automatique de la température de départ pour une efficacité maxi
 
 ---
 
-## 10. Facteurs de Pondération du Contrôle Adaptatif
+## 10. Contrôle adaptatif : facteurs de pondération
 
-Ces cinq priorités déterminent ensemble comment le système prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.** En mode coast actif, le composant coast domine (80% par défaut).
+Ces quatre facteurs de pondération déterminent ensemble comment la régulation prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.** Confort et Modèle du bâtiment ne comptent qu'en Classique. En Positionnel, Efficacité et Coût décalent seulement la température intérieure visée, d'au plus 1,5 °C ensemble. En mode coast actif, le composant coast domine (80% par défaut).
 
-### Priorité Confort
+### Confort — Classique uniquement
+
 - **Par défaut** : 50%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour le contrôle de température PI
 - **Confort élevé** (70-80%) : Température toujours stable dans ±0.3°C
 
-### Priorité Efficacité
+### Efficacité
+
 - **Par défaut** : 15%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour l'optimisation COP
 - **Haute efficacité** (30-40%) : Focus sur le COP maximum
 
-### Priorité Coût
+### Coût
+
 - **Par défaut** : 15%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour l'optimisation des prix
@@ -592,7 +665,8 @@ Ces cinq priorités déterminent ensemble comment le système prend des décisio
   - Prix BAS (préchauffer) : poids ×1.2 à ×1.5
 - **Coût élevé** (25-35%) : Économies maximales sur les coûts énergétiques
 
-### Priorité Prédiction Thermique
+### Modèle du bâtiment — Classique uniquement
+
 - **Par défaut** : 20%
 - **Plage** : 0 - 50%
 - **Fonction** : Poids pour les prédictions thermiques (τ/C/UA)
