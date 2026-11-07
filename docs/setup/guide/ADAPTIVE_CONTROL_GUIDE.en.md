@@ -191,8 +191,8 @@ THEN: Adlar Heat Pump → Send indoor temperature
 ### Step 2: Enable
 
 1. Open **Adlar Heat Pump** → **Settings** ⚙️
-2. Scroll to **Adaptive Temperature Control**
-3. Check: **Enable adaptive temperature control** ✅
+2. Scroll to the group **Adaptive control**
+3. Check: **Adaptive control on** ✅
 4. Click **Save**
 
 ### Step 3: Verify
@@ -290,25 +290,26 @@ THEN: Send notification "✅ Adaptive control activated"
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| Enable adaptive temperature control | Off | Main switch |
+| Adaptive control on (group **Adaptive control**) | Off | Main switch |
+| Desired Indoor Temperature (on the device) | — | Room target; without a value the control does not calculate |
 
-### Expert Settings
+### Fine-tuning (Classic)
 
-> [!IMPORTANT]
-> Expert settings are only visible with **Expert HVAC function cards** enabled.
+> [!NOTE]
+> Group **Adaptive control: fine-tuning (Classic)**. Only counts in the control mode Classic; Homey always shows the settings. For the positional modes, see the [control settings guide](CONTROL_SETTINGS_GUIDE.en.md).
 
 | Setting | Default | Range | Description |
 |---------|---------|-------|-------------|
-| **Kp** (Proportional Gain) | 3.0 | 0.5 - 10.0 | Direct response to deviation |
-| **Ki** (Integral Gain) | 1.5 | 0.1 - 5.0 | Correction of long-term deviation |
+| **Kp: proportional gain** | 5.0 | 0.5 - 10.0 | Direct response to deviation |
+| **Ki: integral gain** | 1.5 | 0.1 - 5.0 | Correction of long-term deviation |
 | **Deadband** | 0.3°C | 0.1 - 1.0°C | Tolerance zone |
 
 **Tuning tips:**
 
 | Problem | Solution |
 |---------|----------|
-| Oscillation/overshoot | Decrease Kp (e.g., 3.0 → 2.0) |
-| Too slow response | Increase Kp (e.g., 3.0 → 4.0) |
+| Oscillation/overshoot | Decrease Kp (e.g., 5.0 → 4.0) |
+| Too slow response | Increase Kp (e.g., 5.0 → 6.0) |
 | Structural deviation | Increase Ki (e.g., 1.5 → 2.0) |
 | Too many small corrections | Increase deadband (e.g., 0.3 → 0.5) |
 

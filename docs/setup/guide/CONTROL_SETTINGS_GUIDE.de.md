@@ -1,9 +1,9 @@
 # Adaptive Regelung einrichten
 
-Eine Anleitung zu den Einstellungen in den Gruppen **Adaptive
-Temperatursteuerung** und **Adaptive Regelung Gewichtungsfaktoren**: welche
-Wahl Sie treffen, welche Einstellungen dabei zählen und welche Sie stehen lassen
-können. Gilt für Version 3.6.1 und für alle drei Treiber (Tuya, Aurora I/II und
+Eine Anleitung zu den Einstellungen der adaptiven Regelung: den sechs Gruppen,
+deren Titel mit **Adaptive Regelung** beginnt. Welche Wahl Sie treffen, welche
+Einstellungen dabei zählen und welche Sie stehen lassen können. Gilt für
+Version 3.6.2 und für alle drei Treiber (Tuya, Aurora I/II und
 Aurora III); Unterschiede stehen unter [Unterschiede je
 Treiber](#unterschiede-je-treiber).
 
@@ -40,10 +40,11 @@ Treiber](#unterschiede-je-treiber).
 - Ein Flow, der alle paar Minuten die Raumtemperatur mit der Karte
   **Raumtemperatur an Wärmepumpe senden** schickt. Ohne Raumtemperatur startet
   die Regelung nicht.
-- Schalten Sie **Adaptive Temperatursteuerung aktivieren** ein. Ist sie aus,
-  wird keine Empfehlung berechnet und die übrigen Einstellungen zählen nicht.
-- Das Raumziel stellen Sie mit der Karte **Gewünschte Innentemperatur
-  einstellen** ein (15–25 °C).
+- Schalten Sie **Adaptive Regelung ein** ein. Ist sie aus, wird keine
+  Empfehlung berechnet und die übrigen Einstellungen zählen nicht.
+- Das Raumziel ist **Gewünschte Innentemperatur** am Gerät. Sie stellen es dort
+  ein oder mit der Karte **Gewünschte Innentemperatur einstellen** (15–25 °C).
+  Ohne Raumziel wird jeder Zyklus übersprungen.
 
 ### 2. Nur Empfehlung oder wirklich regeln?
 
@@ -78,13 +79,13 @@ möglich.
 
 | Was die Wärmepumpe jetzt verwendet | Was Sie wählen |
 | --- | --- |
-| Eine feste Kurve (HH1–HH8, HL1–HL8; Tuya H1–H8, L1–L8) | **App-Kurve: aus einer festen Kurve ausfüllen** → diese Kurve. Danach die Heizkurvenwahl auf OFF |
-| Eine eigene DIY-Heizkurve (Aurora I/II, L28/L29) | Einmal übernehmen mit **…festen Kurve → DIY-Heizkurve**, oder laufend folgen mit **Heizkurve der Wärmepumpe**. Siehe [Einmal übernehmen oder laufend folgen](#einmal-übernehmen-oder-laufend-folgen) |
+| Eine feste Kurve (HH1–HH8, HL1–HL8; Tuya H1–H8, L1–L8) | **Einmalig in die App-Kurve übernehmen** → diese Kurve. Danach die Heizkurvenwahl auf OFF |
+| Eine eigene DIY-Heizkurve (Aurora I/II, L28/L29) | Einmal übernehmen mit **Einmalig in die App-Kurve übernehmen** → **DIY-Heizkurve**, oder laufend folgen mit **Grundlage der Empfehlung** → **Heizkurve der Wärmepumpe (laufend gefolgt)**. Siehe [Einmal übernehmen oder laufend folgen](#einmal-übernehmen-oder-laufend-folgen) |
 | Weiß ich nicht | Nichts: Die App füllt bei der Wahl des Regelmodus eine Startkurve aus |
 
 ### 5. Grenzen
 
-Stellen Sie **Minimale** und **Maximale Wassertemperatur** ein. Bei
+Stellen Sie **Niedrigste** und **Höchste Wassertemperatur in der Empfehlung** ein. Bei
 Fußbodenheizung: um den Bereich Ihrer eigenen Heizkurve herum, zum Beispiel 2 °C
 darunter und 3 °C darüber, mit Spielraum für kaltes Wetter.
 
@@ -100,19 +101,19 @@ darunter und 3 °C darüber, mit Spielraum für kaltes Wetter.
 
 ## Welche Einstellung in welchem Regelmodus zählt
 
-Homey zeigt immer alle Einstellungen. Diese Tabelle zeigt, welche zählen.
+Homey zeigt immer alle Einstellungen. Sie stehen in sechs Gruppen; der Titel
+einer Gruppe sagt, bei welchem Regelmodus sie zählt. Diese Tabelle zeigt,
+welche zählen.
 
-| Einstellung | Klassisch | Positionell – Heizkörper / Fußbodenheizung | Positionell – Manuell |
+| Gruppe: Einstellungen | Klassisch | Positionell – Heizkörper / Fußbodenheizung | Positionell – Manuell |
 | --- | --- | --- | --- |
-| PI-Regler: Kp, Ki, Totzone | Ja | Nein | Nein |
-| Positioneller PI: Kp, Ti | Nein | Nein, feste Werte | Ja |
-| Minimale und maximale Wassertemperatur | Ja | Ja | Ja |
-| Heizkurve (positionelle Modi) | Nein | Ja | Ja |
-| App-Kurve: feste Kurve, Wert bei −15 °C und +15 °C | Nein | Ja | Ja |
-| Coast und die Abkühleinstellungen | Ja | Nein, Coast ist immer aus | Ja |
-| Komfort-Priorität | Ja | Nein | Nein |
-| Effizienz- und Kosten-Priorität | Ja | Ja, nur für die Verschiebung des Raumziels | Ja, ebenso |
-| Thermische Vorhersage-Priorität | Ja | Nein | Nein |
+| Adaptive Regelung: ein, Regelmodus, niedrigste und höchste Wassertemperatur | Ja | Ja | Ja |
+| Heizkurve (Positionell): Grundlage der Empfehlung, einmalig übernehmen, Wasser bei −15 °C und +15 °C | Nein | Ja | Ja |
+| Feineinstellung (Positionell – Manuell): Kp, Ti | Nein | Nein, feste Werte | Ja |
+| Feineinstellung (Klassisch): Kp, Ki, Totzone | Ja | Nein | Nein |
+| Coast (Klassisch, Positionell – Manuell) | Ja | Nein, Coast ist immer aus | Ja |
+| Gewichtungsfaktoren: Komfort, Gebäudemodell | Ja | Nein | Nein |
+| Gewichtungsfaktoren: Effizienz, Kosten | Ja | Ja, nur für die Verschiebung des Raumziels | Ja, ebenso |
 
 ## Klassisch und Positionell
 
@@ -150,7 +151,7 @@ vorige Empfehlung noch nicht übernommen hat.
 | --- | --- | --- | --- |
 | Kp | 3 | 3 | Einstellung, Standard 3 |
 | Ti | 3 Stunden | 6 Stunden | Einstellung, Standard 3 Stunden |
-| Coast | Aus | Aus | Schalter Coast, **Standard an** |
+| Coast | Aus | Aus | Schalter **Coast ein**, **Standard an** |
 | Startkurve | 50 / 35 | 35 / 27 | Keine |
 
 Nur Ti unterscheidet sich zwischen den Abgabesystemen: Ein Fußboden reagiert
@@ -158,7 +159,7 @@ erst nach Stunden, also muss der I-Anteil langsamer wachsen. Kp hängt kaum vom
 Abgabesystem ab.
 
 Achtung bei **Manuell**: Mit den Standardwerten entspricht es Heizkörper,
-**aber mit Coast an**. Wenn Sie das nicht möchten, schalten Sie Coast aus.
+**aber mit Coast an**. Wenn Sie das nicht möchten, schalten Sie **Coast ein** aus.
 
 ## Die Heizkurve bei Positionell
 
@@ -176,7 +177,7 @@ später den Modus wechseln.
 
 ### Feste Kurve übernehmen
 
-**App-Kurve: aus einer festen Kurve ausfüllen** füllt die beiden Werte einmal
+**Einmalig in die App-Kurve übernehmen** füllt die beiden Werte einmal
 aus einer Kurve der Wärmepumpe aus. Danach springt die Liste zurück auf "—".
 Öffnen Sie die Einstellungen erneut, um die neuen Werte zu sehen.
 
@@ -206,7 +207,7 @@ Bei der Aurora I/II können Sie eine DIY-Heizkurve auf zwei Arten verwenden:
 
 | | Einmal übernehmen | Laufend folgen |
 | --- | --- | --- |
-| Einstellung | Feste Kurve → **DIY-Heizkurve der Wärmepumpe** | Heizkurve (positionelle Modi) → **Heizkurve der Wärmepumpe** |
+| Einstellung | Einmalig in die App-Kurve übernehmen → **DIY-Heizkurve der Wärmepumpe** | Grundlage der Empfehlung → **Heizkurve der Wärmepumpe (laufend gefolgt)** |
 | Was die App tut | Übernimmt die DIY-Werte einmal in die App-Kurve | Rechnet in jedem Zyklus mit der DIY-Heizkurve der Wärmepumpe |
 | Außentemperatur | Die der App (siehe [Außentemperatur](#außentemperatur)) | Der Sensor der Wärmepumpe |
 | Sie ändern die DIY-Heizkurve später | Die App übernimmt es nicht; erneut übernehmen | Die App folgt sofort |
@@ -236,11 +237,12 @@ Tuya hat diese Wahl nicht.
 ### Was Coast tut
 
 Coast lässt das Haus passiv abkühlen, wenn es zu warm wird. Liegt der Raum zwei
-Zyklen hintereinander mehr als die Hysterese (Standard 0,3 °C) über dem Raumziel
-und sinkt nicht, zieht Coast die Empfehlung auf die aktuelle Wassertemperatur
-minus den Offset (Standard 1 °C). Die Wärmepumpe hört dann auf zu heizen.
+Zyklen hintereinander mehr als die Startschwelle (**Coast: Startschwelle über
+der Wunschtemperatur**, Standard 0,3 °C) über dem Raumziel und sinkt nicht,
+zieht Coast die Empfehlung auf die aktuelle Wassertemperatur minus **Coast:
+Empfehlung unter der Wassertemperatur** (Standard 1 °C). Die Wärmepumpe hört dann auf zu heizen.
 
-Coast endet, wenn der Raum unter das Raumziel plus die halbe Hysterese fällt
+Coast endet, wenn der Raum unter das Raumziel plus die halbe Startschwelle fällt
 (standardmäßig 21,15 °C bei einem Ziel von 21 °C), wenn der Raum sinkt und Coast
 kaum noch etwas bewirkt, oder nach der maximalen Anzahl Zyklen (Aurora: Standard
 24, 2 Stunden).
@@ -303,40 +305,48 @@ kam aus Simulationen mit einer genau passenden Heizkurve; dort macht Coast wenig
 aus. Mit der App-Kurve aus zwei Punkten, wie Nutzer sie haben, zeigte sich das
 Schwingen. Seit 3.5.2 ist Coast in beiden Presets aus.
 
-**Trotzdem Coast?** Wählen Sie Positionell – Manuell und schalten Sie Coast ein.
+**Trotzdem Coast?** Wählen Sie Positionell – Manuell und schalten Sie **Coast ein** ein.
 Das oben beschriebene Schwingen kann dann weiterhin auftreten. Es wurde keine
 Situation getestet, in der Coast bei Positionell besser abschneidet.
 
-Die Presets schalten Coast aus, was der Schalter Coast auch sagt. Bei Klassisch
+Die Presets schalten Coast aus, was der Schalter **Coast ein** auch sagt. Bei Klassisch
 und Manuell gilt der Schalter.
 
 ## Die Einstellungen einzeln
 
+In der Reihenfolge der Gruppen.
+
 | Einstellung | Was sie tut | Zählt bei | Standard |
 | --- | --- | --- | --- |
-| Adaptive Temperatursteuerung aktivieren | Schaltet die Berechnung der Empfehlung ein | Allen | Aus |
+| **Gruppe Adaptive Regelung** | | | |
+| Adaptive Regelung ein | Schaltet die Berechnung der Empfehlung ein | Allen | Aus |
 | Regelmodus | Klassisch oder eine der drei positionellen Varianten | Allen | Klassisch |
-| PI-Regler: Kp | Größe der Korrektur je Grad Abweichung | Klassisch | 5,0 |
-| PI-Regler: Ki | Wie stark eine bleibende Abweichung nachgeregelt wird | Klassisch | 1,5 |
-| PI-Regler: Totzone | Abweichung, innerhalb der sich nichts ändert | Klassisch | 0,3 °C |
-| Positioneller PI: Kp | Grad Wassertemperatur je Grad Abweichung innen | Manuell | 3 |
-| Positioneller PI: Ti | Wie langsam der I-Anteil wächst | Manuell | 3 Stunden |
-| Minimale Wassertemperatur | Niedrigste Empfehlung; auf P111 abstimmen | Allen | 18 °C |
-| Maximale Wassertemperatur | Höchste Empfehlung; mindestens 2 °C über dem Minimum | Allen | 60 °C (Tuya 65 °C) |
-| Heizkurve (positionelle Modi) | App-Kurve oder Heizkurve der Wärmepumpe | Positionell | App-Kurve |
-| App-Kurve: aus einer festen Kurve ausfüllen | Füllt die beiden Werte darunter einmal aus | Positionell | — |
-| App-Kurve: bei −15 °C / bei +15 °C | Die beiden Punkte der App-Kurve | Positionell | 45 / 30, oder die Startkurve des Modus |
-| Coast | Coast an oder aus | Klassisch, Manuell | An |
-| Wassertemperatur-Offset beim Abkühlen | Wie viele Grad unter der Wassertemperatur Coast zielt | Klassisch, Manuell | 1 °C |
-| Hysterese für Abkühlmodus | Spielraum über dem Raumziel, bevor Coast beginnt | Klassisch, Manuell | 0,3 °C |
-| Coast-Stärke beim Abkühlen | Wie stark Coast gewichtet wird | Klassisch, Manuell | 0,80 |
-| Maximale Coast-Dauer (Aurora) | Höchstzahl an 5-Minuten-Zyklen | Klassisch, Manuell | 24 |
-| Komfort-Priorität | Gewicht der Temperaturregelung | Klassisch | 50 % |
-| Effizienz-Priorität | Gewicht der COP-Optimierung | Allen | 15 % |
-| Kosten-Priorität | Gewicht der Preisoptimierung | Allen | 15 % |
-| Thermische Vorhersage-Priorität | Gewicht des Gebäudemodells | Klassisch | 20 % |
+| Niedrigste Wassertemperatur in der Empfehlung | Niedrigste Empfehlung; auf P111 abstimmen | Allen | 18 °C |
+| Höchste Wassertemperatur in der Empfehlung | Höchste Empfehlung; mindestens 2 °C über dem Minimum | Allen | 60 °C (Tuya 65 °C) |
+| **Gruppe Heizkurve (Positionell)** | | | |
+| Grundlage der Empfehlung | App-Kurve oder Heizkurve der Wärmepumpe (laufend gefolgt) | Positionell | App-Kurve |
+| Einmalig in die App-Kurve übernehmen | Füllt die beiden Werte darunter einmal aus | Positionell | — |
+| App-Kurve: Wasser bei −15 °C / +15 °C außen | Die beiden Punkte der App-Kurve | Positionell | 45 / 30, oder die Startkurve des Modus |
+| **Gruppe Feineinstellung (Positionell – Manuell)** | | | |
+| Kp: Grad Wasser pro Grad innen | Grad Wassertemperatur je Grad Abweichung innen | Manuell | 3 |
+| Ti: Nachstellzeit | Wie langsam der I-Anteil wächst | Manuell | 3 Stunden |
+| **Gruppe Feineinstellung (Klassisch)** | | | |
+| Kp: Proportionalverstärkung | Größe der Korrektur je Grad Abweichung | Klassisch | 5,0 |
+| Ki: Integralverstärkung | Wie stark eine bleibende Abweichung nachgeregelt wird | Klassisch | 1,5 |
+| Totzone | Abweichung, innerhalb der sich nichts ändert | Klassisch | 0,3 °C |
+| **Gruppe Coast** | | | |
+| Coast ein | Coast an oder aus | Klassisch, Manuell | An |
+| Coast: Empfehlung unter der Wassertemperatur | Wie viele Grad unter der Wassertemperatur Coast zielt | Klassisch, Manuell | 1 °C |
+| Coast: Startschwelle über der Wunschtemperatur | Spielraum über dem Raumziel, bevor Coast beginnt | Klassisch, Manuell | 0,3 °C |
+| Coast: Anteil an der Empfehlung | Wie stark Coast gewichtet wird | Klassisch, Manuell | 0,80 |
+| Coast: maximale Dauer (Aurora) | Höchstzahl an 5-Minuten-Zyklen | Klassisch, Manuell | 24 |
+| **Gruppe Gewichtungsfaktoren** | | | |
+| Komfort — nur Klassisch | Gewicht der Temperaturregelung | Klassisch | 50 % |
+| Effizienz | Gewicht der COP-Optimierung | Allen | 15 % |
+| Kosten | Gewicht der Preisoptimierung | Allen | 15 % |
+| Gebäudemodell — nur Klassisch | Gewicht des Gebäudemodells | Klassisch | 20 % |
 
-Die Prioritäten werden zusammen auf 100 % umgerechnet. Effizienz und Kosten
+Die Gewichtungsfaktoren werden zusammen auf 100 % umgerechnet. Effizienz und Kosten
 wirken nur, wenn die COP- oder Preisoptimierung an ist. Bei Positionell
 verschieben sie das Raumziel, um höchstens 1,5 °C; die Heizkurve verschiebt
 sich mit.
@@ -364,10 +374,10 @@ Wärmepumpe.
 
 | | Tuya | Aurora I/II | Aurora III |
 | --- | --- | --- | --- |
-| Heizkurve (positionelle Modi) | Nicht vorhanden: immer die App-Kurve | App-Kurve oder DIY-Heizkurve | App-Kurve oder Klimakurve |
-| Feste Kurve übernehmen | H1–H8, L1–L8 | HH1–HH8, HL1–HL8 und DIY (L28/L29) | Nicht vorhanden |
-| Maximale Coast-Dauer | Nicht einstellbar | Einstellbar | Einstellbar |
-| Maximale Wassertemperatur | 25–65 °C, Standard 65 °C | 25–60 °C, Standard 60 °C | 25–60 °C, Standard 60 °C |
+| Grundlage der Empfehlung | Nicht vorhanden: immer die App-Kurve | App-Kurve oder DIY-Heizkurve | App-Kurve oder Klimakurve |
+| Einmalig übernehmen | H1–H8, L1–L8 | HH1–HH8, HL1–HL8 und DIY (L28/L29) | Nicht vorhanden |
+| Coast: maximale Dauer | Nicht einstellbar | Einstellbar | Einstellbar |
+| Höchste Wassertemperatur in der Empfehlung | 25–65 °C, Standard 65 °C | 25–60 °C, Standard 60 °C | 25–60 °C, Standard 60 °C |
 | Sollwert bleibt nur bei | Heizkurve OFF | Heizkurvenwahl OFF | — |
 
 ## Fragen
@@ -381,12 +391,21 @@ Die Heizkurvenwahl (Tuya: Heizkurve) steht nicht auf OFF. Die Wärmepumpe setzt
 dann ihren eigenen Heizkurvenwert zurück.
 
 **Die Empfehlung steht still.**
-Ist **Adaptive Temperatursteuerung aktivieren** an, und kommt die
-Raumtemperatur an? Ohne beides wird keine neue Empfehlung berechnet.
+Ist **Adaptive Regelung ein** an, kommt die Raumtemperatur an, und hat
+**Gewünschte Innentemperatur** einen Wert? Ohne alle drei wird keine neue
+Empfehlung berechnet. Die Regelung meldet das nur im Debug-Log.
 
 **Ich habe Kp geändert, aber nichts ändert sich.**
-Bei Positionell zählt **PI-Regler: Kp** nicht; dort gilt **Positioneller PI:
-Kp**, und nur bei Manuell.
+Bei Positionell zählt **Kp: Proportionalverstärkung** (Gruppe Feineinstellung
+Klassisch) nicht; dort gilt **Kp: Grad Wasser pro Grad innen**, und nur bei
+Manuell.
+
+**Ich habe eine Einstellung gespeichert, aber nichts ändert sich.**
+Öffnen Sie den Einstellungsbildschirm erneut und prüfen Sie, ob der Wert
+gespeichert wurde. Nach einer Fehlermeldung zeigt der Bildschirm manchmal noch
+den eingegebenen Wert, während die App den alten behält. Vor 3.6.2 blockierte
+ein Vergissfaktor unter 0,9985 jedes Speichern; 3.6.2 setzt einen solchen Wert
+auf 0,999.
 
 **Ich habe Coast aus- oder eingeschaltet, aber nichts ändert sich.**
 Bei Positionell – Heizkörper und – Fußbodenheizung ist Coast immer aus.

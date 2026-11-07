@@ -191,8 +191,8 @@ THEN: Adlar Heat Pump → Raumtemperatur senden
 ### Schritt 2: Aktivieren
 
 1. Öffnen Sie **Adlar Heat Pump** → **Einstellungen** ⚙️
-2. Scrollen Sie zu **Adaptive Temperature Control**
-3. Aktivieren Sie: **Enable adaptive temperature control** ✅
+2. Scrollen Sie zur Gruppe **Adaptive Regelung**
+3. Aktivieren Sie: **Adaptive Regelung ein** ✅
 4. Klicken Sie **Speichern**
 
 ### Schritt 3: Überprüfen
@@ -290,25 +290,26 @@ THEN: Benachrichtigung senden "✅ Adaptive Control aktiviert"
 
 | Einstellung | Standard | Beschreibung |
 |-------------|----------|--------------|
-| Enable adaptive temperature control | Aus | Hauptschalter |
+| Adaptive Regelung ein (Gruppe **Adaptive Regelung**) | Aus | Hauptschalter |
+| Gewünschte Innentemperatur (am Gerät) | — | Raumziel; ohne Wert rechnet die Regelung nicht |
 
-### Expert-Einstellungen
+### Feineinstellung (Klassisch)
 
-> [!IMPORTANT]
-> Expert-Einstellungen sind nur sichtbar mit **Expert HVAC Funktionskarten** aktiviert.
+> [!NOTE]
+> Gruppe **Adaptive Regelung: Feineinstellung (Klassisch)**. Zählt nur beim Regelmodus Klassisch; Homey zeigt die Einstellungen immer. Für die positionellen Modi siehe die [Anleitung zu den Regeleinstellungen](CONTROL_SETTINGS_GUIDE.de.md).
 
 | Einstellung | Standard | Bereich | Beschreibung |
 |-------------|----------|---------|--------------|
-| **Kp** (Proportional Gain) | 3,0 | 0,5 - 10,0 | Direkte Reaktion auf Abweichung |
-| **Ki** (Integral Gain) | 1,5 | 0,1 - 5,0 | Korrektur langfristiger Abweichung |
-| **Deadband** | 0,3°C | 0,1 - 1,0°C | Toleranzzone |
+| **Kp: Proportionalverstärkung** | 5,0 | 0,5 - 10,0 | Direkte Reaktion auf Abweichung |
+| **Ki: Integralverstärkung** | 1,5 | 0,1 - 5,0 | Korrektur langfristiger Abweichung |
+| **Totzone** | 0,3°C | 0,1 - 1,0°C | Toleranzzone |
 
 **Tuning-Tipps:**
 
 | Problem | Lösung |
 |---------|--------|
-| Oszillation/Überschwingen | Verringern Sie Kp (z.B. 3,0 → 2,0) |
-| Zu langsame Reaktion | Erhöhen Sie Kp (z.B. 3,0 → 4,0) |
+| Oszillation/Überschwingen | Verringern Sie Kp (z.B. 5,0 → 4,0) |
+| Zu langsame Reaktion | Erhöhen Sie Kp (z.B. 5,0 → 6,0) |
 | Strukturelle Abweichung | Erhöhen Sie Ki (z.B. 1,5 → 2,0) |
 | Zu viele kleine Korrekturen | Erhöhen Sie Deadband (z.B. 0,3 → 0,5) |
 
