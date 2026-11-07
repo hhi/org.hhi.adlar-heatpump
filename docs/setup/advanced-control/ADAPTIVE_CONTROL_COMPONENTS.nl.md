@@ -262,7 +262,7 @@ De app gebruikt ingebouwde COP capabilities:
 
 ### Prioriteiten & Gewichten
 
-De wegingsfactoren zijn **configureerbaar** via Apparaatinstellingen → Adaptieve Regeling Wegingsfactoren:
+De wegingsfactoren zijn **configureerbaar** via Apparaatinstellingen → Adaptieve regeling: wegingsfactoren:
 
 | Prioriteit | Standaard | Bereik | Functie |
 |------------|-----------|--------|---------|

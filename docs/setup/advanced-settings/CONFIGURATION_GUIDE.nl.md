@@ -12,12 +12,12 @@ Deze gids beschrijft alle configureerbare instellingen van de Adlar Warmtepomp H
 | 2 | **COP Instellingen** | - | Vermogensmeting (voor nauwkeurigheid) |
 | 3 | **Functie Instellingen** | App herstart | - |
 | 4 | **Flow Kaart Afhandeling** | App herstart | - |
-| 5 | **Adaptieve Temperatuur Regeling** | Externe temp sensor | - |
+| 5 | **Adaptieve regeling** (vijf groepen) | Binnentemperatuur via flowkaart, Binnentemperatuur gewenst | - |
 | 6 | **Gebouwmodel Leren** | - | - |
 | 7 | **Gebouw Inzichten** | Gebouwmodel Leren AAN | Min. betrouwbaarheid |
 | 8 | **Energieprijs Optimalisatie** | Adaptive Control AAN, Internet | Dynamisch tarief |
 | 9 | **COP Optimalisatie** | COP Berekening AAN, Adaptive Control | 1+ week data |
-| 10 | **Wegingsfactoren** | Adaptive Control AAN | - |
+| 10 | **Adaptieve regeling: wegingsfactoren** | Adaptieve regeling aan | - |
 | 11 | **Diagnostiek** | - | - |
 | 12 | **Energie Beheer** | - | Vermogensmeting |
 
@@ -59,12 +59,12 @@ Deze gids beschrijft alle configureerbare instellingen van de Adlar Warmtepomp H
 2. [COP (Prestatiecoëfficiënt) Instellingen](#2-cop-prestatiecoëfficiënt-instellingen)
 3. [Functie Instellingen](#3-functie-instellingen)
 4. [Flow Kaart Afhandeling](#4-flow-kaart-afhandeling)
-5. [Adaptieve Temperatuur Regeling](#5-adaptieve-temperatuur-regeling)
+5. [Adaptieve regeling](#5-adaptieve-regeling)
 6. [Gebouwmodel Leren](#6-gebouwmodel-leren)
 7. [Gebouw Inzichten & Aanbevelingen](#7-gebouw-inzichten--aanbevelingen)
 8. [Energieprijs Optimalisatie](#8-energieprijs-optimalisatie)
 9. [COP Optimalisatie](#9-cop-optimalisatie)
-10. [Adaptieve Regeling Wegingsfactoren](#10-adaptieve-regeling-wegingsfactoren)
+10. [Adaptieve regeling: wegingsfactoren](#10-adaptieve-regeling-wegingsfactoren)
 11. [Diagnostiek](#11-diagnostiek)
 12. [Energie Beheer](#12-energie-beheer)
 
@@ -212,41 +212,67 @@ Bepaalt welke flow kaarten zichtbaar zijn in de Homey Flow editor. **Herstart aa
 
 ---
 
-## 5. Adaptieve Temperatuur Regeling
+## 5. Adaptieve regeling
 
-Automatische regeling van de doeltemperatuur op basis van externe binnentemperatuur sensor.
+Berekent elke 5 minuten een advies voor de watertemperatuur (Gesimuleerde
+Doeltemperatuur). De app past het setpoint niet zelf aan: alleen een flow met de
+kaart **Adaptieve regeling beveelt temperatuur aanpassing aan** voert het advies
+uit. Een stap-voor-stap uitleg staat in de
+[handleiding regelinstellingen](../guide/CONTROL_SETTINGS_GUIDE.nl.md).
 
-### Adaptieve Temperatuurregeling Inschakelen
+Sinds 3.6.2 staan de instellingen in zes groepen. Homey toont ze altijd allemaal;
+de groepstitel zegt bij welke regelmodus ze tellen.
+
+| Groep | Instellingen | Telt bij |
+| --- | --- | --- |
+| Adaptieve regeling | Adaptieve regeling aan, regelmodus, laagste en hoogste watertemperatuur | Alle modi |
+| Adaptieve regeling: stooklijn (Positioneel) | Basis van het advies, eenmalig overnemen, water bij −15 °C en +15 °C | Positioneel |
+| Adaptieve regeling: fijnafstelling (Positioneel – Handmatig) | Kp, Ti | Positioneel – Handmatig |
+| Adaptieve regeling: fijnafstelling (Klassiek) | Kp, Ki, dode zone | Klassiek |
+| Adaptieve regeling: coast (Klassiek, Positioneel – Handmatig) | Coast aan, advies onder de watertemperatuur, startdrempel, aandeel, maximale duur | Klassiek, Positioneel – Handmatig |
+| Adaptieve regeling: wegingsfactoren | Zie [sectie 10](#10-adaptieve-regeling-wegingsfactoren) | Zie per factor |
+
+### Adaptieve regeling aan
+
 - **Standaard**: Uitgeschakeld
-- **Functie**: PI (Proportioneel-Integraal) regelaar voor stabiele binnentemperatuur
+- **Functie**: Zet de berekening van het advies aan
 - **Vereisten**:
-  - Externe temperatuur sensor (via flow kaart)
-  - Target temperatuur ingesteld
-  - Flow "Stuur binnentemperatuur" actief
-- **Prestaties**: ±0.3°C stabiliteit (deadband instelbaar)
+  - Binnentemperatuur via de kaart **Stuur binnentemperatuur naar warmtepomp**
+  - Een waarde bij **Binnentemperatuur gewenst**; zonder die waarde slaat de
+    regeling elke cyclus over (alleen zichtbaar in de debuglog)
+  - Een flow die het advies uitvoert, als de app echt moet regelen
+- **Gebouwmodel**: heeft een eigen schakelaar en leert ook als de regeling uit
+  staat
 
-### PI Regelaar Parameters (Expert Instellingen)
+### Fijnafstelling (Klassiek)
 
-**Alleen zichtbaar met "Expert HVAC functie kaarten" ingeschakeld**
+Groep **Adaptieve regeling: fijnafstelling (Klassiek)**. Telt alleen bij de
+regelmodus Klassiek.
 
-#### Proportionele Versterking (Kp)
+#### Kp: proportionele versterking
+
 - **Standaard**: 5.0
 - **Bereik**: 0.5 - 10.0
 - **Functie**: Bepaalt hoe snel systeem reageert op huidige fout
 - **Hogere waarde**: Snellere correctie, risico op overshoot
 - **Lagere waarde**: Stabielere regeling, langzamere correctie
 
-#### Integrale Versterking (Ki)
+#### Ki: integrale versterking
+
 - **Standaard**: 1.5
 - **Bereik**: 0.1 - 5.0
 - **Functie**: Elimineert blijvende afwijkingen (steady-state error)
 
-#### Deadband (Dode Zone)
+#### Dode zone
+
 - **Standaard**: 0.3°C
 - **Bereik**: 0.1 - 1.0°C
 - **Functie**: Tolerantie voordat aanpassingen worden gemaakt
 
-#### Minimale en Maximale Watertemperatuur (v3.4.3+)
+### Laagste en hoogste watertemperatuur in het advies (v3.4.3+)
+
+Groep **Adaptieve regeling**. Telt bij alle regelmodi.
+
 
 - **Minimum — standaard**: 18°C, **bereik**: 15 - 30°C
 - **Maximum — standaard**: 60°C (Tuya: 65°C), **bereik**: 25 - 60°C (Tuya: 25 -
@@ -262,26 +288,26 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
 - **Vloerverwarming**: Stel beide in rond het bereik van uw eigen stooklijn
   (bijv. 2°C eronder en 3°C erboven) en laat ruimte voor koud weer
 
-#### Regelmodus en Stooklijn (v3.5.0+)
+### Regelmodus en stooklijn (v3.5.0+)
 
 - **Regelmodus — standaard**: Klassiek
   - **Klassiek**: elke cyclus een kleine stap omhoog of omlaag; de stappen
     tellen op (bestaand gedrag)
   - **Positioneel – Radiatoren** (experimenteel): Kp 3, Ti 3 u, coast uit
   - **Positioneel – Vloerverwarming** (experimenteel): Kp 3, Ti 6 u, coast uit
-  - **Positioneel – Handmatig** (experimenteel): Positionele PI Kp en Ti en de
-    schakelaar Coast hieronder
+  - **Positioneel – Handmatig** (experimenteel): Kp en Ti uit de groep
+    fijnafstelling (Positioneel – Handmatig) en de schakelaar **Coast aan**
   - Positioneel: advies = stooklijn + PI-correctie met een echte integraal,
     zonder brede dode zone; het setpoint blijft rustig, ook met een flow die elk
     advies uitvoert
-- **Coast**: bij Klassiek en Positioneel – Handmatig geldt de schakelaar Coast;
+- **Coast**: bij Klassiek en Positioneel – Handmatig geldt de schakelaar **Coast aan**;
   Radiatoren en Vloerverwarming zetten coast uit
-- **Stooklijn (positionele modi) — standaard**: App-stooklijn
+- **Basis van het advies — standaard**: App-stooklijn
   - **App-stooklijn**: watertemperatuur bij −15 °C en bij +15 °C buiten.
     Startwaarden: Radiatoren 50 / 35, Vloerverwarming 35 / 27, anders 45 / 30;
     voorgevuld bij de keuze van de regelmodus, zolang u ze niet zelf heeft
     aangepast
-  - **Stooklijn van de warmtepomp** (Aurora I/II: DIY-stooklijn, alleen als
+  - **Stooklijn van de warmtepomp (steeds gevolgd)** (Aurora I/II: DIY-stooklijn, alleen als
     DIY aan staat; Aurora III: klimaatcurve): alleen als u die zelf heeft
     ingesteld; staat DIY uit of is hij niet bruikbaar, dan geldt de
     app-stooklijn. Tuya heeft deze keuze niet
@@ -289,7 +315,7 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   afgiftesysteem, Kp en Ti met hun bron, de basis met zijn bron en de P- en
   I-term
 
-##### Stooklijn bijstellen
+#### Stooklijn bijstellen
 
 | Wat u merkt | Aanpassing |
 | --- | --- |
@@ -302,11 +328,11 @@ Automatische regeling van de doeltemperatuur op basis van externe binnentemperat
   de diagnostiek wijst een I-term die structureel boven 0 ligt op een te lage
   stooklijn, onder 0 op een te hoge
 
-##### Overstappen van een vaste curve
+#### Overstappen van een vaste curve
 
 Gebruikte u een vaste curve van de warmtepomp (Aurora I/II: stooklijnkeuze
 HH1–HH8 of HL1–HL8; Tuya: verwarmingscurve H1–H8 of L1–L8)? Noteer die curve en
-kies hem bij **App-stooklijn: invullen vanuit een vaste curve**: na het opslaan
+kies hem bij **Eenmalig overnemen in de app-stooklijn**: na het opslaan
 vult de app de twee waarden uit de tabel in. Zet daarna de stooklijnkeuze op
 OFF. Na OFF kan de app de curve niet meer uitlezen.
 
@@ -367,22 +393,60 @@ OFF. Na OFF kan de app de curve niet meer uitlezen.
   het gebouwmodel doet in Positioneel niet mee
 - **Experimenteel**: Positioneel is nog weinig in de praktijk getest
 
-#### Coast Offset (v2.8.0+)
+### Fijnafstelling (Positioneel – Handmatig)
+
+Groep **Adaptieve regeling: fijnafstelling (Positioneel – Handmatig)**. Telt
+alleen bij Positioneel – Handmatig; Radiatoren en Vloerverwarming gebruiken
+vaste waarden.
+
+#### Kp: graden water per graad binnen
+
+- **Standaard**: 3, **bereik**: 1 - 8
+- **Functie**: Zoveel graden gaat het advies omhoog per graad dat het binnen te
+  koud is
+
+#### Ti: integratietijd
+
+- **Standaard**: 3 uur, **bereik**: 1 - 12 uur
+- **Functie**: Hoe snel een blijvende afwijking binnen wordt weggewerkt; korter
+  is sneller
+
+### Coast (Klassiek, Positioneel – Handmatig)
+
+Groep **Adaptieve regeling: coast (Klassiek, Positioneel – Handmatig)**.
+Radiatoren en Vloerverwarming gebruiken geen coast.
+
+#### Coast aan
+
+- **Standaard**: Aan
+- **Functie**: Is het binnen te warm, dan zet coast het advies onder de huidige
+  watertemperatuur, zodat de compressor stil blijft en het huis zelf afkoelt
+
+#### Coast: advies onder de watertemperatuur (v2.8.0+)
+
 - **Standaard**: 1.0°C
 - **Bereik**: 0.5 - 5.0°C
 - **Functie**: Graden onder uitlaattemperatuur voor coast-doelwaarde
 - **Lager**: Eerder stoppen van compressor, minder verwarming
 - **Hoger**: Voorzichtiger coast, meer marge
 
-#### Coast Hysterese (v2.8.0+)
+#### Coast: startdrempel boven gewenst (v2.8.0+)
+
 - **Standaard**: 0.3°C
 - **Bereik**: 0.1 - 1.0°C
 - **Functie**: Overshoot-marge boven setpoint voor activatie coast-modus
 
-#### Coast Sterkte (v2.8.0+)
+#### Coast: aandeel in het advies (v2.8.0+)
+
 - **Standaard**: 0.80
 - **Bereik**: 0.60 - 0.95
 - **Functie**: Gewichtsaandeel van coast in gewogen beslissing (dominant bij activatie)
+
+#### Coast: maximale duur (Aurora)
+
+- **Standaard**: 24 cycli van 5 minuten (2 uur), **bereik**: 6 - 48
+- **Functie**: Coast stopt uiterlijk na dit aantal cycli, ook als het binnen nog
+  te warm is. Tuya heeft deze instelling niet
 
 ---
 
@@ -400,7 +464,10 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
 - **Standaard**: 0.999
 - **Bereik**: 0.9985 - 0.9995
 - **Functie**: Hoe snel model zich aanpast aan veranderingen. Hoger = stabieler, betere betrouwbaarheid (~75%). Lager = snellere aanpassing aan seizoensveranderingen.
-- **Werking**: Werkt direct (v3.5.0+)
+- **Werking**: Werkt direct (v3.5.0+); het geleerde model blijft behouden
+- **Migratie (v3.6.2)**: Een waarde onder 0.9985 uit een oudere versie zet de
+  app op 0.999. Zo'n waarde blokkeerde sinds v3.4.2 het opslaan van elke
+  instelling op dat apparaat
 
 ### Gebouwtype
 - **Standaard**: Gemiddeld (typisch NL huis)
@@ -560,23 +627,26 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
 
 ---
 
-## 10. Adaptieve Regeling Wegingsfactoren
+## 10. Adaptieve regeling: wegingsfactoren
 
-Deze vijf prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.** Bij actieve coast-modus domineert de coast-component (80% standaard).
+Deze vier wegingsfactoren bepalen samen hoe de regeling beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.** Comfort en Gebouwmodel tellen alleen bij Klassiek. Efficiëntie en Kosten verschuiven bij Positioneel alleen het kamerdoel, samen hooguit 1,5 °C. Bij actieve coast-modus domineert de coast-component (80% standaard).
 
-### Comfort Prioriteit
+### Comfort — alleen Klassiek
+
 - **Standaard**: 50%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor PI temperatuurregeling
 - **Hoog comfort** (70-80%): Temperatuur altijd stabiel binnen ±0.3°C
 
-### Efficiëntie Prioriteit
+### Efficiëntie
+
 - **Standaard**: 15%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor COP optimalisatie
 - **Hoge efficiency** (30-40%): Focus op maximale COP
 
-### Kosten Prioriteit
+### Kosten
+
 - **Standaard**: 15%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor prijsoptimalisatie
@@ -585,7 +655,8 @@ Deze vijf prioriteiten bepalen samen hoe het systeem beslissingen maakt. **Waard
   - Bij LAGE prijzen (preheat): gewicht ×1.2 tot ×1.5
 - **Hoge cost** (25-35%): Maximale besparing op energiekosten
 
-### Thermische Voorspelling Prioriteit
+### Gebouwmodel — alleen Klassiek
+
 - **Standaard**: 20%
 - **Bereik**: 0 - 50%
 - **Functie**: Gewicht voor thermische voorspellingen (τ/C/UA)

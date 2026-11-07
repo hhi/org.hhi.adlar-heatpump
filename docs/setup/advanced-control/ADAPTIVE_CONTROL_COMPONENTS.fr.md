@@ -262,7 +262,7 @@ L'application utilise des capacités COP intégrées :
 
 ### Priorités & Pondérations
 
-Les facteurs de pondération sont **configurables** via Paramètres de l'Appareil → Facteurs de Pondération du Contrôle Adaptatif :
+Les facteurs de pondération sont **configurables** via Paramètres de l'Appareil → Contrôle adaptatif : facteurs de pondération :
 
 | Priorité | Défaut | Plage | Fonction |
 |----------|--------|-------|----------|

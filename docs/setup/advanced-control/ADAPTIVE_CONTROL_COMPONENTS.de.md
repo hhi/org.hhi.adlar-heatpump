@@ -262,7 +262,7 @@ Die App verwendet eingebaute COP-Fähigkeiten:
 
 ### Prioritäten & Gewichtungen
 
-Die Gewichtungsfaktoren sind **konfigurierbar** über Geräteeinstellungen → Gewichtungsfaktoren der Adaptiven Regelung:
+Die Gewichtungsfaktoren sind **konfigurierbar** über Geräteeinstellungen → Adaptive Regelung: Gewichtungsfaktoren:
 
 | Priorität | Standard | Bereich | Funktion |
 |-----------|----------|---------|----------|

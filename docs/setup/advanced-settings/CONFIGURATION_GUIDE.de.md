@@ -12,12 +12,12 @@ Dieses Handbuch beschreibt alle konfigurierbaren Einstellungen der Adlar Wärmep
 | 2 | **COP Einstellungen** | - | Leistungsmessung (für Genauigkeit) |
 | 3 | **Funktionseinstellungen** | App-Neustart | - |
 | 4 | **Flow-Karten-Verwaltung** | App-Neustart | - |
-| 5 | **Adaptive Temperaturregelung** | Externer Temp-Sensor | - |
+| 5 | **Adaptive Regelung** (fünf Gruppen) | Raumtemperatur über Flow-Karte, Gewünschte Innentemperatur | - |
 | 6 | **Gebäudemodell-Lernen** | - | - |
 | 7 | **Gebäude-Einblicke** | Gebäudemodell ON | Min. Vertrauen |
 | 8 | **Energiepreis-Optimierung** | Adaptive Regelung ON, Internet | Dynamischer Tarif |
 | 9 | **COP-Optimierung** | COP-Berechnung ON, Adaptive Regelung | 1+ Woche Daten |
-| 10 | **Gewichtungsfaktoren** | Adaptive Regelung ON | - |
+| 10 | **Adaptive Regelung: Gewichtungsfaktoren** | Adaptive Regelung ein | - |
 | 11 | **Diagnose** | - | - |
 | 12 | **Energiemanagement** | - | Leistungsmessung |
 
@@ -59,12 +59,12 @@ Dieses Handbuch beschreibt alle konfigurierbaren Einstellungen der Adlar Wärmep
 2. [COP (Leistungszahl) Einstellungen](#2-cop-leistungszahl-einstellungen)
 3. [Funktionseinstellungen](#3-funktionseinstellungen)
 4. [Flow-Karten-Verwaltung](#4-flow-karten-verwaltung)
-5. [Adaptive Temperaturregelung](#5-adaptive-temperaturregelung)
+5. [Adaptive Regelung](#5-adaptive-regelung)
 6. [Gebäudemodell-Lernen](#6-gebäudemodell-lernen)
 7. [Gebäude-Einblicke & Empfehlungen](#7-gebäude-einblicke--empfehlungen)
 8. [Energiepreis-Optimierung](#8-energiepreis-optimierung)
 9. [COP-Optimierung](#9-cop-optimierung)
-10. [Gewichtungsfaktoren der Adaptiven Regelung](#10-gewichtungsfaktoren-der-adaptiven-regelung)
+10. [Adaptive Regelung: Gewichtungsfaktoren](#10-adaptive-regelung-gewichtungsfaktoren)
 11. [Diagnose](#11-diagnose)
 12. [Energiemanagement](#12-energiemanagement)
 
@@ -212,41 +212,67 @@ Bestimmt, welche Flow-Karten im Homey Flow-Editor sichtbar sind. **Neustart nach
 
 ---
 
-## 5. Adaptive Temperaturregelung
+## 5. Adaptive Regelung
 
-Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor.
+Berechnet alle 5 Minuten eine Empfehlung für die Wassertemperatur (Simulierte
+Zieltemperatur). Die App ändert den Sollwert nicht selbst: Nur ein Flow mit der
+Karte **Adaptive Regelung empfiehlt Temperaturanpassung** setzt die Empfehlung
+um. Eine Schritt-für-Schritt-Erklärung steht in der
+[Anleitung zu den Regeleinstellungen](../guide/CONTROL_SETTINGS_GUIDE.de.md).
 
-### Adaptive Temperaturregelung aktivieren
+Seit 3.6.2 stehen die Einstellungen in sechs Gruppen. Homey zeigt immer alle;
+der Gruppentitel sagt, bei welchem Regelmodus sie zählen.
+
+| Gruppe | Einstellungen | Zählt bei |
+| --- | --- | --- |
+| Adaptive Regelung | Adaptive Regelung ein, Regelmodus, niedrigste und höchste Wassertemperatur | Allen Modi |
+| Adaptive Regelung: Heizkurve (Positionell) | Grundlage der Empfehlung, einmalig übernehmen, Wasser bei −15 °C und +15 °C | Positionell |
+| Adaptive Regelung: Feineinstellung (Positionell – Manuell) | Kp, Ti | Positionell – Manuell |
+| Adaptive Regelung: Feineinstellung (Klassisch) | Kp, Ki, Totzone | Klassisch |
+| Adaptive Regelung: Coast (Klassisch, Positionell – Manuell) | Coast ein, Empfehlung unter der Wassertemperatur, Startschwelle, Anteil, maximale Dauer | Klassisch, Positionell – Manuell |
+| Adaptive Regelung: Gewichtungsfaktoren | Siehe [Abschnitt 10](#10-adaptive-regelung-gewichtungsfaktoren) | Siehe je Faktor |
+
+### Adaptive Regelung ein
+
 - **Standard**: Deaktiviert
-- **Funktion**: PI (Proportional-Integral) Regler für stabile Innentemperatur
+- **Funktion**: Schaltet die Berechnung der Empfehlung ein
 - **Voraussetzungen**:
-  - Externer Temperatursensor (über Flow-Karte)
-  - Zieltemperatur eingestellt
-  - Flow "Innentemperatur senden" aktiv
-- **Leistung**: ±0.3°C Stabilität (Totzone einstellbar)
+  - Raumtemperatur über die Karte **Raumtemperatur an Wärmepumpe senden**
+  - Ein Wert bei **Gewünschte Innentemperatur**; ohne diesen Wert wird jeder
+    Zyklus übersprungen (nur im Debug-Log sichtbar)
+  - Ein Flow, der die Empfehlung umsetzt, wenn die App wirklich regeln soll
+- **Gebäudemodell**: hat einen eigenen Schalter und lernt auch, wenn die
+  Regelung aus ist
 
-### PI-Reglerparameter (Experteneinstellungen)
+### Feineinstellung (Klassisch)
 
-**Nur sichtbar mit aktivierten "Expert HVAC-Funktionskarten"**
+Gruppe **Adaptive Regelung: Feineinstellung (Klassisch)**. Zählt nur beim
+Regelmodus Klassisch.
 
-#### Proportionalverstärkung (Kp)
+#### Kp: Proportionalverstärkung
+
 - **Standard**: 5.0
 - **Bereich**: 0.5 - 10.0
 - **Funktion**: Bestimmt, wie schnell das System auf aktuelle Fehler reagiert
 - **Höherer Wert**: Schnellere Korrektur, Überschwingungsrisiko
 - **Niedrigerer Wert**: Stabilere Regelung, langsamere Korrektur
 
-#### Integralverstärkung (Ki)
+#### Ki: Integralverstärkung
+
 - **Standard**: 1.5
 - **Bereich**: 0.1 - 5.0
 - **Funktion**: Beseitigt anhaltende Abweichungen (stationärer Fehler)
 
 #### Totzone
+
 - **Standard**: 0,3°C
 - **Bereich**: 0,1 - 1,0°C
 - **Funktion**: Toleranz bevor Anpassungen vorgenommen werden
 
-#### Minimale und Maximale Wassertemperatur (v3.4.3+)
+### Niedrigste und höchste Wassertemperatur in der Empfehlung (v3.4.3+)
+
+Gruppe **Adaptive Regelung**. Zählt bei allen Regelmodi.
+
 
 - **Minimum — Standard**: 18°C, **Bereich**: 15 - 30°C
 - **Maximum — Standard**: 60°C (Tuya: 65°C), **Bereich**: 25 - 60°C (Tuya: 25 -
@@ -262,25 +288,25 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
 - **Fußbodenheizung**: Beide um den Bereich Ihrer eigenen Heizkurve einstellen
   (z. B. 2°C darunter und 3°C darüber) und Spielraum für kaltes Wetter lassen
 
-#### Regelmodus und Heizkurve (v3.5.0+)
+### Regelmodus und Heizkurve (v3.5.0+)
 
 - **Regelmodus — Standard**: Klassisch
   - **Klassisch**: in jedem Zyklus ein kleiner Schritt nach oben oder unten; die
     Schritte summieren sich (bisheriges Verhalten)
   - **Positionell – Heizkörper** (experimentell): Kp 3, Ti 3 h, Coast aus
   - **Positionell – Fußbodenheizung** (experimentell): Kp 3, Ti 6 h, Coast aus
-  - **Positionell – Manuell** (experimentell): Positioneller PI Kp und Ti und
-    der Schalter Coast unten
+  - **Positionell – Manuell** (experimentell): Kp und Ti aus der Gruppe
+    Feineinstellung (Positionell – Manuell) und der Schalter **Coast ein**
   - Positionell: Empfehlung = Heizkurve + PI-Korrektur mit echtem Integral, ohne
     breite Totzone; der Sollwert bleibt ruhig, auch mit einem Flow, der jede
     Empfehlung ausführt
-- **Coast**: bei Klassisch und Positionell – Manuell gilt der Schalter Coast;
+- **Coast**: bei Klassisch und Positionell – Manuell gilt der Schalter **Coast ein**;
   Heizkörper und Fußbodenheizung schalten Coast aus
-- **Heizkurve (positionelle Modi) — Standard**: App-Kurve
+- **Grundlage der Empfehlung — Standard**: App-Kurve
   - **App-Kurve**: Wassertemperatur bei −15 °C und bei +15 °C außen. Startwerte:
     Heizkörper 50 / 35, Fußbodenheizung 35 / 27, sonst 45 / 30; bei der Wahl des
     Regelmodus vorausgefüllt, solange Sie sie nicht selbst geändert haben
-  - **Heizkurve der Wärmepumpe** (Aurora I/II: DIY-Kurve, nur wenn DIY
+  - **Heizkurve der Wärmepumpe (laufend gefolgt)** (Aurora I/II: DIY-Kurve, nur wenn DIY
     eingeschaltet ist; Aurora III: Klimakurve): nur, wenn Sie sie selbst
     eingestellt haben; ist DIY aus oder die Kurve nicht brauchbar, gilt die
     App-Kurve. Tuya hat diese Wahl nicht
@@ -288,7 +314,7 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   Wärmeabgabesystem, Kp und Ti mit Quelle, die Basis mit Quelle und die P- und
   I-Anteile
 
-##### Heizkurve anpassen
+#### Heizkurve anpassen
 
 | Was Sie bemerken | Anpassung |
 | --- | --- |
@@ -301,12 +327,12 @@ Automatische Zieltemperaturregelung basierend auf externem Innentemperatursensor
   Tage). In der Diagnose weist ein I-Anteil, der dauerhaft über 0 liegt, auf
   eine zu niedrige Heizkurve hin, unter 0 auf eine zu hohe
 
-##### Umstieg von einer festen Kurve
+#### Umstieg von einer festen Kurve
 
 Haben Sie eine feste Kurve der Wärmepumpe verwendet (Aurora I/II:
 Heizkurvenauswahl HH1–HH8 oder HL1–HL8; Tuya: Heizkurve H1–H8 oder L1–L8)?
-Notieren Sie diese Kurve und wählen Sie sie bei **App-Kurve: aus einer festen
-Kurve ausfüllen**: Nach dem Speichern trägt die App die beiden Werte aus der
+Notieren Sie diese Kurve und wählen Sie sie bei **Einmalig in die App-Kurve
+übernehmen**: Nach dem Speichern trägt die App die beiden Werte aus der
 Tabelle ein. Stellen Sie danach die Heizkurvenauswahl auf OFF. Nach OFF kann
 die App die Kurve nicht mehr auslesen.
 
@@ -368,22 +394,60 @@ die App die Kurve nicht mehr auslesen.
   thermische Komponente des Gebäudemodells wirkt bei Positionell nicht mit
 - **Experimentell**: Positionell ist in der Praxis noch wenig getestet
 
-#### Coast Offset (v2.8.0+)
+### Feineinstellung (Positionell – Manuell)
+
+Gruppe **Adaptive Regelung: Feineinstellung (Positionell – Manuell)**. Zählt nur
+bei Positionell – Manuell; Heizkörper und Fußbodenheizung verwenden feste Werte.
+
+#### Kp: Grad Wasser pro Grad innen
+
+- **Standard**: 3, **Bereich**: 1 - 8
+- **Funktion**: Um so viele Grad steigt die Empfehlung pro Grad, das es innen zu
+  kalt ist
+
+#### Ti: Nachstellzeit
+
+- **Standard**: 3 Stunden, **Bereich**: 1 - 12 Stunden
+- **Funktion**: Wie schnell eine bleibende Abweichung innen ausgeglichen wird;
+  kürzer ist schneller
+
+### Coast (Klassisch, Positionell – Manuell)
+
+Gruppe **Adaptive Regelung: Coast (Klassisch, Positionell – Manuell)**.
+Heizkörper und Fußbodenheizung verwenden kein Coast.
+
+#### Coast ein
+
+- **Standard**: Ein
+- **Funktion**: Ist es innen zu warm, setzt Coast die Empfehlung unter die
+  aktuelle Wassertemperatur, sodass der Kompressor aus bleibt und das Haus von
+  selbst abkühlt
+
+#### Coast: Empfehlung unter der Wassertemperatur (v2.8.0+)
+
 - **Standard**: 1,0°C
 - **Bereich**: 0,5 - 5,0°C
 - **Funktion**: Grad unter Auslasstemperatur für Coast-Zielwert
 - **Niedriger**: Kompressor stoppt früher, weniger Heizung
 - **Höher**: Vorsichtigerer Coast, mehr Spielraum
 
-#### Coast Hysterese (v2.8.0+)
+#### Coast: Startschwelle über der Wunschtemperatur (v2.8.0+)
+
 - **Standard**: 0,3°C
 - **Bereich**: 0,1 - 1,0°C
 - **Funktion**: Überschwingungsmarge über Sollwert für Coast-Modus-Aktivierung
 
-#### Coast Stärke (v2.8.0+)
+#### Coast: Anteil an der Empfehlung (v2.8.0+)
+
 - **Standard**: 0,80
 - **Bereich**: 0,60 - 0,95
 - **Funktion**: Gewichtsanteil von Coast in gewichteter Entscheidung (dominant bei Aktivierung)
+
+#### Coast: maximale Dauer (Aurora)
+
+- **Standard**: 24 Zyklen à 5 Minuten (2 Stunden), **Bereich**: 6 - 48
+- **Funktion**: Coast endet spätestens nach dieser Anzahl Zyklen, auch wenn es
+  innen noch zu warm ist. Tuya hat diese Einstellung nicht
 
 ---
 
@@ -401,7 +465,10 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
 - **Standard**: 0.999
 - **Bereich**: 0.9985 - 0.9995
 - **Funktion**: Wie schnell sich das Modell an Änderungen anpasst. Höher = stabiler, besseres Vertrauen (~75%). Niedriger = schnellere Anpassung an saisonale Änderungen.
-- **Wirkung**: Sofort (v3.5.0+)
+- **Wirkung**: Sofort (v3.5.0+); das gelernte Modell bleibt erhalten
+- **Migration (v3.6.2)**: Ein Wert unter 0.9985 aus einer älteren Version wird
+  auf 0.999 gesetzt. Seit v3.4.2 blockierte ein solcher Wert das Speichern jeder
+  Einstellung auf diesem Gerät
 
 ### Gebäudetyp
 - **Standard**: Durchschnitt (typisches NL-Haus)
@@ -561,23 +628,26 @@ Automatische Vorlauftemperatur-Optimierung für maximale Effizienz.
 
 ---
 
-## 10. Gewichtungsfaktoren der Adaptiven Regelung
+## 10. Adaptive Regelung: Gewichtungsfaktoren
 
-Diese fünf Prioritäten bestimmen gemeinsam, wie das System Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.** Bei aktivem Coast-Modus dominiert die Coast-Komponente (80% Standard).
+Diese vier Gewichtungsfaktoren bestimmen gemeinsam, wie die Regelung Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.** Komfort und Gebäudemodell zählen nur bei Klassisch. Bei Positionell verschieben Effizienz und Kosten nur das Raumziel, zusammen höchstens 1,5 °C. Bei aktivem Coast-Modus dominiert die Coast-Komponente (80% Standard).
 
-### Komfort-Priorität
+### Komfort — nur Klassisch
+
 - **Standard**: 50%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für PI-Temperaturregelung
 - **Hoher Komfort** (70-80%): Temperatur immer stabil innerhalb ±0,3°C
 
-### Effizienz-Priorität
+### Effizienz
+
 - **Standard**: 15%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für COP-Optimierung
 - **Hohe Effizienz** (30-40%): Fokus auf maximalen COP
 
-### Kosten-Priorität
+### Kosten
+
 - **Standard**: 15%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für Preisoptimierung
@@ -586,7 +656,8 @@ Diese fünf Prioritäten bestimmen gemeinsam, wie das System Entscheidungen trif
   - NIEDRIGE Preise (vorheizen): Gewicht ×1,2 bis ×1,5
 - **Hohe Kosten** (25-35%): Maximale Einsparungen bei Energiekosten
 
-### Thermische Vorhersage-Priorität
+### Gebäudemodell — nur Klassisch
+
 - **Standard**: 20%
 - **Bereich**: 0 - 50%
 - **Funktion**: Gewicht für thermische Vorhersagen (τ/C/UA)

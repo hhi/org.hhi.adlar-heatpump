@@ -1,9 +1,9 @@
 # Configurer le contrôle adaptatif
 
-Un guide des réglages des groupes **Contrôle Adaptatif de Température** et
-**Facteurs de Pondération du Contrôle Adaptatif** : quel choix faire, quels
-réglages comptent pour ce choix et lesquels vous pouvez laisser tels quels.
-S'applique à la version 3.6.1 et aux trois pilotes (Tuya, Aurora I/II et
+Un guide des réglages du contrôle adaptatif : les six groupes dont le titre
+commence par **Contrôle adaptatif**. Quel choix faire, quels réglages comptent
+pour ce choix et lesquels vous pouvez laisser tels quels.
+S'applique à la version 3.6.2 et aux trois pilotes (Tuya, Aurora I/II et
 Aurora III) ; les différences figurent sous [Différences par
 pilote](#différences-par-pilote).
 
@@ -41,11 +41,11 @@ pilote](#différences-par-pilote).
 - Un flow qui envoie la température intérieure toutes les quelques minutes avec
   la carte **Envoyer la température intérieure à la pompe à chaleur**. Sans
   température intérieure, la régulation ne démarre pas.
-- Activez **Activer le contrôle adaptatif de température**. Tant qu'il est
-  désactivé, aucune recommandation n'est calculée et les autres réglages ne
-  comptent pas.
-- Réglez la cible de la pièce avec la carte **Régler la température intérieure
-  souhaitée** (15–25 °C).
+- Activez **Contrôle adaptatif activé**. Tant qu'il est désactivé, aucune
+  recommandation n'est calculée et les autres réglages ne comptent pas.
+- La cible de la pièce est **Température Intérieure Souhaitée** sur l'appareil.
+  Réglez-la là ou avec la carte **Régler la température intérieure souhaitée**
+  (15–25 °C). Sans cible, chaque cycle est ignoré.
 
 ### 2. Recommandation seule ou vraie régulation ?
 
@@ -80,13 +80,13 @@ possible.
 
 | Ce que la pompe à chaleur utilise actuellement | Ce que vous choisissez |
 | --- | --- |
-| Une courbe fixe (HH1–HH8, HL1–HL8 ; Tuya H1–H8, L1–L8) | **Courbe de l'app : remplir depuis une courbe fixe** → cette courbe. Ensuite, la sélection de courbe de chauffe sur OFF |
-| Sa propre courbe de chauffe DIY (Aurora I/II, L28/L29) | Copier une fois avec **…courbe fixe → Courbe de chauffe DIY**, ou suivre en continu avec **Courbe de la pompe à chaleur**. Voir [Copier une fois ou suivre en continu](#copier-une-fois-ou-suivre-en-continu) |
+| Une courbe fixe (HH1–HH8, HL1–HL8 ; Tuya H1–H8, L1–L8) | **Copier une fois dans la courbe de l'app** → cette courbe. Ensuite, la sélection de courbe de chauffe sur OFF |
+| Sa propre courbe de chauffe DIY (Aurora I/II, L28/L29) | Copier une fois avec **Copier une fois dans la courbe de l'app** → **Courbe de chauffe DIY**, ou suivre en continu avec **Base de la recommandation** → **Courbe de la pompe à chaleur (suivie en continu)**. Voir [Copier une fois ou suivre en continu](#copier-une-fois-ou-suivre-en-continu) |
 | Je ne sais pas | Rien : l'app remplit une courbe de départ lorsque vous choisissez le mode de régulation |
 
 ### 5. Limites
 
-Réglez **Température d'eau minimale** et **maximale**. Avec un plancher
+Réglez **Température d'eau la plus basse recommandée** et **la plus haute**. Avec un plancher
 chauffant : autour de la plage de votre propre courbe de chauffe, par exemple
 2 °C en dessous et 3 °C au-dessus, avec de la marge pour le temps froid.
 
@@ -103,19 +103,19 @@ chauffant : autour de la plage de votre propre courbe de chauffe, par exemple
 
 ## Quel réglage compte dans quel mode
 
-Homey affiche toujours tous les réglages. Ce tableau montre lesquels comptent.
+Homey affiche toujours tous les réglages. Ils sont répartis en six groupes ; le
+titre d'un groupe indique dans quel mode de régulation il compte. Ce tableau
+montre lesquels comptent.
 
-| Réglage | Classique | Positionnel – Radiateurs / Plancher chauffant | Positionnel – Manuel |
+| Groupe : réglages | Classique | Positionnel – Radiateurs / Plancher chauffant | Positionnel – Manuel |
 | --- | --- | --- | --- |
-| Contrôleur PI : Kp, Ki, Zone Morte | Oui | Non | Non |
-| PI positionnel : Kp, Ti | Non | Non, valeurs fixes | Oui |
-| Température d'eau minimale et maximale | Oui | Oui | Oui |
-| Courbe de chauffe (modes positionnels) | Non | Oui | Oui |
-| Courbe de l'app : courbe fixe, valeur à −15 °C et +15 °C | Non | Oui | Oui |
-| Coast et les réglages de refroidissement | Oui | Non, coast est toujours désactivé | Oui |
-| Priorité Confort | Oui | Non | Non |
-| Priorité Efficacité et Coût | Oui | Oui, uniquement pour le décalage de la cible de la pièce | Oui, idem |
-| Priorité Prédiction Thermique | Oui | Non | Non |
+| Contrôle adaptatif : activé, mode de régulation, température d'eau la plus basse et la plus haute | Oui | Oui | Oui |
+| Courbe de chauffe (Positionnel) : base de la recommandation, copier une fois, eau à −15 °C et +15 °C | Non | Oui | Oui |
+| Réglage fin (Positionnel – Manuel) : Kp, Ti | Non | Non, valeurs fixes | Oui |
+| Réglage fin (Classique) : Kp, Ki, zone morte | Oui | Non | Non |
+| Coast (Classique, Positionnel – Manuel) | Oui | Non, coast est toujours désactivé | Oui |
+| Facteurs de pondération : Confort, Modèle du bâtiment | Oui | Non | Non |
+| Facteurs de pondération : Efficacité, Coût | Oui | Oui, uniquement pour le décalage de la cible de la pièce | Oui, idem |
 
 ## Classique et Positionnel
 
@@ -155,7 +155,7 @@ pas encore repris la recommandation précédente.
 | --- | --- | --- | --- |
 | Kp | 3 | 3 | Réglage, 3 par défaut |
 | Ti | 3 heures | 6 heures | Réglage, 3 heures par défaut |
-| Coast | Désactivé | Désactivé | Interrupteur Coast, **activé par défaut** |
+| Coast | Désactivé | Désactivé | Interrupteur **Coast activé**, **activé par défaut** |
 | Courbe de départ | 50 / 35 | 35 / 27 | Aucune |
 
 Seul Ti diffère entre les types d'émetteurs : un plancher ne réagit qu'après
@@ -164,7 +164,7 @@ d'émetteur.
 
 Attention avec **Manuel** : avec les valeurs par défaut, il équivaut à
 Radiateurs, **mais avec coast activé**. Si vous ne le souhaitez pas, désactivez
-Coast.
+**Coast activé**.
 
 ## La courbe de chauffe en Positionnel
 
@@ -182,7 +182,7 @@ si vous changez de mode plus tard.
 
 ### Reprendre une courbe fixe
 
-**Courbe de l'app : remplir depuis une courbe fixe** remplit une fois les deux
+**Copier une fois dans la courbe de l'app** remplit une fois les deux
 valeurs à partir d'une courbe de la pompe à chaleur. La liste revient ensuite à
 "—". Rouvrez les réglages pour voir les nouvelles valeurs.
 
@@ -213,7 +213,7 @@ manières :
 
 | | Copier une fois | Suivre en continu |
 | --- | --- | --- |
-| Réglage | Courbe fixe → **Courbe de chauffe DIY de la pompe à chaleur** | Courbe de chauffe (modes positionnels) → **Courbe de la pompe à chaleur** |
+| Réglage | Copier une fois dans la courbe de l'app → **Courbe de chauffe DIY de la pompe à chaleur** | Base de la recommandation → **Courbe de la pompe à chaleur (suivie en continu)** |
 | Ce que fait l'app | Reprend une fois les valeurs DIY dans la courbe de l'app | Calcule à chaque cycle avec la courbe DIY de la pompe à chaleur |
 | Température extérieure | Celle de l'app (voir [Température extérieure](#température-extérieure)) | Le capteur de la pompe à chaleur |
 | Vous modifiez la courbe DIY plus tard | L'app ne la reprend pas ; copier à nouveau | L'app suit immédiatement |
@@ -243,13 +243,15 @@ jours).
 ### Ce que fait coast
 
 Coast laisse la maison refroidir passivement lorsqu'il fait trop chaud. Si la
-pièce dépasse la cible de plus que l'hystérésis (0,3 °C par défaut) pendant deux
-cycles de suite et ne baisse pas, coast tire la recommandation vers la
-température actuelle de l'eau moins le décalage (1 °C par défaut). La pompe à
+pièce dépasse la cible de plus que le seuil de démarrage (**Coast : seuil de
+démarrage au-dessus du souhaité**, 0,3 °C par défaut) pendant deux cycles de
+suite et ne baisse pas, coast tire la recommandation vers la température
+actuelle de l'eau moins **Coast : recommandation sous la température d'eau**
+(1 °C par défaut). La pompe à
 chaleur arrête alors de chauffer.
 
-Coast s'arrête lorsque la pièce descend sous la cible plus la moitié de
-l'hystérésis (par défaut 21,15 °C pour une cible de 21 °C), lorsque la pièce
+Coast s'arrête lorsque la pièce descend sous la cible plus la moitié du
+seuil de démarrage (par défaut 21,15 °C pour une cible de 21 °C), lorsque la pièce
 baisse et que coast n'agit presque plus, ou après le nombre maximal de cycles
 (Aurora : 24 par défaut, 2 heures).
 
@@ -312,40 +314,48 @@ là, coast change peu de choses. Avec la courbe de l'app à deux points, telle q
 les utilisateurs l'ont, l'oscillation est apparue. Depuis 3.5.2, coast est
 désactivé dans les deux préréglages.
 
-**Coast malgré tout ?** Choisissez Positionnel – Manuel et activez Coast.
+**Coast malgré tout ?** Choisissez Positionnel – Manuel et activez **Coast activé**.
 L'oscillation décrite ci-dessus peut alors toujours se produire. Aucune
 situation n'a été testée dans laquelle coast fait mieux en Positionnel.
 
-Les préréglages désactivent coast, quoi qu'indique l'interrupteur Coast. En
+Les préréglages désactivent coast, quoi qu'indique l'interrupteur **Coast activé**. En
 Classique et en Manuel, l'interrupteur compte.
 
 ## Les réglages un par un
 
+Dans l'ordre des groupes.
+
 | Réglage | Ce qu'il fait | Compte dans | Par défaut |
 | --- | --- | --- | --- |
-| Activer le contrôle adaptatif de température | Active le calcul de la recommandation | Tous | Désactivé |
+| **Groupe Contrôle adaptatif** | | | |
+| Contrôle adaptatif activé | Active le calcul de la recommandation | Tous | Désactivé |
 | Mode de régulation | Classique ou l'une des trois variantes positionnelles | Tous | Classique |
-| Contrôleur PI : Kp | Taille de la correction par degré d'écart | Classique | 5,0 |
-| Contrôleur PI : Ki | Force de la correction d'un écart durable | Classique | 1,5 |
-| Contrôleur PI : Zone Morte | Écart à l'intérieur duquel rien ne change | Classique | 0,3 °C |
-| PI positionnel : Kp | Degrés de température d'eau par degré d'écart intérieur | Manuel | 3 |
-| PI positionnel : Ti | Lenteur de croissance du terme I | Manuel | 3 heures |
-| Température d'eau minimale | Recommandation la plus basse ; à accorder avec P111 | Tous | 18 °C |
-| Température d'eau maximale | Recommandation la plus haute ; au moins 2 °C au-dessus du minimum | Tous | 60 °C (Tuya 65 °C) |
-| Courbe de chauffe (modes positionnels) | Courbe de l'app ou courbe de la pompe à chaleur | Positionnel | Courbe de l'app |
-| Courbe de l'app : remplir depuis une courbe fixe | Remplit une fois les deux valeurs ci-dessous | Positionnel | — |
-| Courbe de l'app : à −15 °C / à +15 °C | Les deux points de la courbe de l'app | Positionnel | 45 / 30, ou la courbe de départ du mode |
-| Coast | Coast activé ou désactivé | Classique, Manuel | Activé |
-| Décalage température eau lors du refroidissement | De combien de degrés sous la température de l'eau coast vise | Classique, Manuel | 1 °C |
-| Hystérésis d'activation du refroidissement | Marge au-dessus de la cible avant que coast ne démarre | Classique, Manuel | 0,3 °C |
-| Force du signal coast lors du refroidissement | Poids de coast | Classique, Manuel | 0,80 |
-| Durée maximale coast (Aurora) | Nombre maximal de cycles de 5 minutes | Classique, Manuel | 24 |
-| Priorité Confort | Poids de la régulation de température | Classique | 50 % |
-| Priorité Efficacité | Poids de l'optimisation COP | Tous | 15 % |
-| Priorité Coût | Poids de l'optimisation des prix | Tous | 15 % |
-| Priorité Prédiction Thermique | Poids du modèle de bâtiment | Classique | 20 % |
+| Température d'eau la plus basse recommandée | Recommandation la plus basse ; à accorder avec P111 | Tous | 18 °C |
+| Température d'eau la plus haute recommandée | Recommandation la plus haute ; au moins 2 °C au-dessus du minimum | Tous | 60 °C (Tuya 65 °C) |
+| **Groupe courbe de chauffe (Positionnel)** | | | |
+| Base de la recommandation | Courbe de l'app ou courbe de la pompe à chaleur (suivie en continu) | Positionnel | Courbe de l'app |
+| Copier une fois dans la courbe de l'app | Remplit une fois les deux valeurs ci-dessous | Positionnel | — |
+| Courbe de l'app : eau à −15 °C / +15 °C extérieur | Les deux points de la courbe de l'app | Positionnel | 45 / 30, ou la courbe de départ du mode |
+| **Groupe réglage fin (Positionnel – Manuel)** | | | |
+| Kp : degrés d'eau par degré intérieur | Degrés de température d'eau par degré d'écart intérieur | Manuel | 3 |
+| Ti : temps d'intégration | Lenteur de croissance du terme I | Manuel | 3 heures |
+| **Groupe réglage fin (Classique)** | | | |
+| Kp : gain proportionnel | Taille de la correction par degré d'écart | Classique | 5,0 |
+| Ki : gain intégral | Force de la correction d'un écart durable | Classique | 1,5 |
+| Zone morte | Écart à l'intérieur duquel rien ne change | Classique | 0,3 °C |
+| **Groupe coast** | | | |
+| Coast activé | Coast activé ou désactivé | Classique, Manuel | Activé |
+| Coast : recommandation sous la température d'eau | De combien de degrés sous la température de l'eau coast vise | Classique, Manuel | 1 °C |
+| Coast : seuil de démarrage au-dessus du souhaité | Marge au-dessus de la cible avant que coast ne démarre | Classique, Manuel | 0,3 °C |
+| Coast : part dans la recommandation | Poids de coast | Classique, Manuel | 0,80 |
+| Coast : durée maximale (Aurora) | Nombre maximal de cycles de 5 minutes | Classique, Manuel | 24 |
+| **Groupe facteurs de pondération** | | | |
+| Confort — Classique uniquement | Poids de la régulation de température | Classique | 50 % |
+| Efficacité | Poids de l'optimisation COP | Tous | 15 % |
+| Coût | Poids de l'optimisation des prix | Tous | 15 % |
+| Modèle du bâtiment — Classique uniquement | Poids du modèle de bâtiment | Classique | 20 % |
 
-Les priorités sont ramenées ensemble à 100 %. Efficacité et Coût n'agissent que
+Les facteurs de pondération sont ramenés ensemble à 100 %. Efficacité et Coût n'agissent que
 si l'optimisation COP ou des prix est activée. En Positionnel, elles décalent la
 cible de la pièce, d'au plus 1,5 °C ; la courbe de chauffe suit.
 
@@ -372,10 +382,10 @@ pompe à chaleur.
 
 | | Tuya | Aurora I/II | Aurora III |
 | --- | --- | --- | --- |
-| Courbe de chauffe (modes positionnels) | Absent : toujours la courbe de l'app | Courbe de l'app ou courbe DIY | Courbe de l'app ou courbe climatique |
-| Reprendre une courbe fixe | H1–H8, L1–L8 | HH1–HH8, HL1–HL8 et DIY (L28/L29) | Absent |
-| Durée maximale coast | Non réglable | Réglable | Réglable |
-| Température d'eau maximale | 25–65 °C, 65 °C par défaut | 25–60 °C, 60 °C par défaut | 25–60 °C, 60 °C par défaut |
+| Base de la recommandation | Absent : toujours la courbe de l'app | Courbe de l'app ou courbe DIY | Courbe de l'app ou courbe climatique |
+| Copier une fois | H1–H8, L1–L8 | HH1–HH8, HL1–HL8 et DIY (L28/L29) | Absent |
+| Coast : durée maximale | Non réglable | Réglable | Réglable |
+| Température d'eau la plus haute recommandée | 25–65 °C, 65 °C par défaut | 25–60 °C, 60 °C par défaut | 25–60 °C, 60 °C par défaut |
 | La consigne ne reste qu'avec | Courbe de chauffe OFF | Sélection de courbe de chauffe OFF | — |
 
 ## Questions
@@ -389,13 +399,21 @@ La sélection de courbe de chauffe (Tuya : courbe de chauffe) n'est pas sur OFF.
 La pompe à chaleur remet alors sa propre valeur de courbe.
 
 **La recommandation ne bouge pas.**
-**Activer le contrôle adaptatif de température** est-il activé, et la
-température intérieure arrive-t-elle ? Sans les deux, aucune nouvelle
-recommandation n'est calculée.
+**Contrôle adaptatif activé** est-il activé, la température intérieure
+arrive-t-elle, et **Température Intérieure Souhaitée** a-t-elle une valeur ?
+Sans les trois, aucune nouvelle recommandation n'est calculée. La régulation ne
+le signale que dans le journal de débogage.
 
 **J'ai modifié Kp, mais rien ne change.**
-En Positionnel, **Contrôleur PI : Kp** ne compte pas ; c'est **PI positionnel :
-Kp** qui s'applique, et seulement en Manuel.
+En Positionnel, **Kp : gain proportionnel** (groupe réglage fin Classique) ne
+compte pas ; c'est **Kp : degrés d'eau par degré intérieur** qui s'applique, et
+seulement en Manuel.
+
+**J'ai enregistré un réglage, mais rien ne change.**
+Rouvrez l'écran des réglages et vérifiez que la valeur a été conservée. Après
+un message d'erreur, l'écran peut encore afficher la valeur saisie alors que
+l'app garde l'ancienne. Avant 3.6.2, un facteur d'oubli inférieur à 0,9985
+bloquait chaque enregistrement ; 3.6.2 remplace une telle valeur par 0,999.
 
 **J'ai désactivé, ou activé, coast, mais rien ne change.**
 En Positionnel – Radiateurs et – Plancher chauffant, coast est toujours

@@ -1,8 +1,8 @@
 # Setting up adaptive control
 
-A guide to the settings in the groups **Adaptive Temperature Control** and
-**Adaptive Control Weighting Factors**: which choice to make, which settings
-count for that choice and which you can leave alone. Applies to version 3.6.1
+A guide to the settings of adaptive control: the six groups whose title starts
+with **Adaptive control**. Which choice to make, which settings count for that
+choice and which you can leave alone. Applies to version 3.6.2
 and to all three drivers (Tuya, Aurora I/II and Aurora III); differences are
 listed under [Differences per driver](#differences-per-driver).
 
@@ -38,10 +38,11 @@ listed under [Differences per driver](#differences-per-driver).
 - A flow that sends the indoor temperature every few minutes with the card
   **Send indoor temperature to heat pump**. Without an indoor temperature the
   control does not start.
-- Turn on **Enable adaptive temperature control**. While it is off, no advice
-  is calculated and the other settings do not count.
-- Set the room target with the card **Set desired indoor temperature**
-  (15–25 °C).
+- Turn on **Adaptive control on**. While it is off, no advice is calculated
+  and the other settings do not count.
+- The room target is **Desired Indoor Temperature** on the device. Set it there
+  or with the card **Set desired indoor temperature** (15–25 °C). Without a
+  room target, every cycle is skipped.
 
 ### 2. Advice only, or real control?
 
@@ -75,13 +76,13 @@ simulation, but little tested in practice. You can always switch back.
 
 | What the heat pump uses now | What you choose |
 | --- | --- |
-| A fixed curve (HH1–HH8, HL1–HL8; Tuya H1–H8, L1–L8) | **App curve: fill in from a fixed curve** → that curve. Then set the heating curve selection to OFF |
-| Its own DIY heating curve (Aurora I/II, L28/L29) | Copy once with **…fixed curve → DIY heating curve**, or follow continuously with **Heat pump curve**. See [Copy once or follow continuously](#copy-once-or-follow-continuously) |
+| A fixed curve (HH1–HH8, HL1–HL8; Tuya H1–H8, L1–L8) | **Copy once into the app curve** → that curve. Then set the heating curve selection to OFF |
+| Its own DIY heating curve (Aurora I/II, L28/L29) | Copy once with **Copy once into the app curve** → **DIY heating curve**, or follow continuously with **Basis of the recommendation** → **Heat pump curve (followed continuously)**. See [Copy once or follow continuously](#copy-once-or-follow-continuously) |
 | I don't know | Nothing: the app fills in a starting curve when you choose the control mode |
 
 ### 5. Limits
 
-Set **Minimum** and **Maximum water temperature**. With floor heating: around
+Set **Lowest** and **Highest water temperature in the recommendation**. With floor heating: around
 the range of your own heating curve, for example 2 °C below and 3 °C above, with
 room for cold weather.
 
@@ -97,19 +98,18 @@ room for cold weather.
 
 ## Which setting counts in which control mode
 
-Homey always shows all settings. This table shows which ones count.
+Homey always shows all settings. They are in six groups; a group's title says
+in which control mode it counts. This table shows which ones count.
 
-| Setting | Classic | Positional – Radiators / Floor heating | Positional – Manual |
+| Group: settings | Classic | Positional – Radiators / Floor heating | Positional – Manual |
 | --- | --- | --- | --- |
-| PI Controller: Kp, Ki, Deadband | Yes | No | No |
-| Positional PI: Kp, Ti | No | No, fixed values | Yes |
-| Minimum and maximum water temperature | Yes | Yes | Yes |
-| Heating curve (positional modes) | No | Yes | Yes |
-| App curve: fixed curve, value at −15 °C and +15 °C | No | Yes | Yes |
-| Coast and the cooldown settings | Yes | No, coast is always off | Yes |
-| Comfort Priority | Yes | No | No |
-| Efficiency and Cost Priority | Yes | Yes, only for shifting the room target | Yes, same |
-| Thermal Prediction Priority | Yes | No | No |
+| Adaptive control: on, control mode, lowest and highest water temperature | Yes | Yes | Yes |
+| Heating curve (Positional): basis of the recommendation, copy once, water at −15 °C and +15 °C | No | Yes | Yes |
+| Fine-tuning (Positional – Manual): Kp, Ti | No | No, fixed values | Yes |
+| Fine-tuning (Classic): Kp, Ki, deadband | Yes | No | No |
+| Coast (Classic, Positional – Manual) | Yes | No, coast is always off | Yes |
+| Weighting factors: Comfort, Building model | Yes | No | No |
+| Weighting factors: Efficiency, Cost | Yes | Yes, only for shifting the room target | Yes, same |
 
 ## Classic and Positional
 
@@ -146,14 +146,14 @@ previous advice.
 | --- | --- | --- | --- |
 | Kp | 3 | 3 | Setting, default 3 |
 | Ti | 3 hours | 6 hours | Setting, default 3 hours |
-| Coast | Off | Off | Coast switch, **default on** |
+| Coast | Off | Off | Switch **Coast on**, **default on** |
 | Starting curve | 50 / 35 | 35 / 27 | None |
 
 Only Ti differs between the emitter types: a floor reacts only after hours, so
 the I-term must grow more slowly. Kp hardly depends on the emitter type.
 
 Note for **Manual**: with the default values it equals Radiators, **but with
-coast on**. If you do not want that, turn Coast off.
+coast on**. If you do not want that, turn **Coast on** off.
 
 ## The heating curve in Positional
 
@@ -170,7 +170,7 @@ filled in from a fixed curve, they stay, also when you later switch modes.
 
 ### Copying a fixed curve
 
-**App curve: fill in from a fixed curve** fills in the two values once from a
+**Copy once into the app curve** fills in the two values once from a
 curve of the heat pump. The list then jumps back to "—". Open the settings again
 to see the new values.
 
@@ -200,7 +200,7 @@ With the Aurora I/II you can use a DIY heating curve in two ways:
 
 | | Copy once | Follow continuously |
 | --- | --- | --- |
-| Setting | Fixed curve → **DIY heating curve of the heat pump** | Heating curve (positional modes) → **Heat pump curve** |
+| Setting | Copy once into the app curve → **DIY heating curve of the heat pump** | Basis of the recommendation → **Heat pump curve (followed continuously)** |
 | What the app does | Puts the DIY values into the app curve once | Calculates every cycle with the DIY curve of the heat pump |
 | Outdoor temperature | The app's (see [Outdoor temperature](#outdoor-temperature)) | The heat pump's sensor |
 | You change the DIY curve later | The app does not pick it up; copy again | The app follows at once |
@@ -228,11 +228,12 @@ Change one value at a time and wait a day (floor heating: two days).
 ### What coast does
 
 Coast lets the house cool down passively when it gets too warm. If the room is
-more than the hysteresis (default 0.3 °C) above the room target for two cycles in
-a row and is not falling, coast pulls the advice to the current water
-temperature minus the offset (default 1 °C). The heat pump then stops heating.
+more than the start threshold (**Coast: start threshold above desired**, default
+0.3 °C) above the room target for two cycles in a row and is not falling, coast
+pulls the advice to the current water temperature minus **Coast: recommendation
+below the water temperature** (default 1 °C). The heat pump then stops heating.
 
-Coast stops when the room drops below the room target plus half the hysteresis
+Coast stops when the room drops below the room target plus half the start threshold
 (by default 21.15 °C with a target of 21 °C), when the room is falling and coast
 hardly does anything any more, or after the maximum number of cycles (Aurora:
 default 24, 2 hours).
@@ -291,40 +292,48 @@ from simulations with a heating curve that fits exactly; there coast makes
 little difference. With the two-point app curve, as users have it, the swinging
 showed up. Since 3.5.2 coast is off in both presets.
 
-**Coast anyway?** Choose Positional – Manual and turn Coast on. The swinging
+**Coast anyway?** Choose Positional – Manual and turn **Coast on** on. The swinging
 described above can then still happen. No situation has been tested in which
 coast does better in Positional.
 
-The presets turn coast off, whatever the Coast switch says. In Classic and
+The presets turn coast off, whatever the switch **Coast on** says. In Classic and
 Manual the switch does count.
 
 ## The settings one by one
 
+In the order of the groups.
+
 | Setting | What it does | Counts in | Default |
 | --- | --- | --- | --- |
-| Enable adaptive temperature control | Turns the calculation of the advice on | All | Off |
+| **Group Adaptive control** | | | |
+| Adaptive control on | Turns the calculation of the advice on | All | Off |
 | Control mode | Classic or one of the three positional variants | All | Classic |
-| PI Controller: Kp | Size of the correction per degree of deviation | Classic | 5.0 |
-| PI Controller: Ki | How strongly a lasting deviation is corrected | Classic | 1.5 |
-| PI Controller: Deadband | Deviation within which nothing changes | Classic | 0.3 °C |
-| Positional PI: Kp | Degrees of water temperature per degree of indoor deviation | Manual | 3 |
-| Positional PI: Ti | How slowly the I-term grows | Manual | 3 hours |
-| Minimum water temperature | Lowest advice; match it to P111 | All | 18 °C |
-| Maximum water temperature | Highest advice; at least 2 °C above the minimum | All | 60 °C (Tuya 65 °C) |
-| Heating curve (positional modes) | App curve or heat pump curve | Positional | App curve |
-| App curve: fill in from a fixed curve | Fills in the two values below once | Positional | — |
-| App curve: at −15 °C / at +15 °C | The two points of the app curve | Positional | 45 / 30, or the mode's starting curve |
-| Coast | Coast on or off | Classic, Manual | On |
-| Cooldown water temperature offset | How many degrees below the water temperature coast aims | Classic, Manual | 1 °C |
-| Cooldown activation hysteresis | Margin above the room target before coast starts | Classic, Manual | 0.3 °C |
-| Cooldown coast strength | How heavily coast weighs | Classic, Manual | 0.80 |
-| Coast max. duration (Aurora) | Maximum number of 5-minute cycles | Classic, Manual | 24 |
-| Comfort Priority | Weight of the temperature control | Classic | 50 % |
-| Efficiency Priority | Weight of the COP optimization | All | 15 % |
-| Cost Priority | Weight of the price optimization | All | 15 % |
-| Thermal Prediction Priority | Weight of the building model | Classic | 20 % |
+| Lowest water temperature in the recommendation | Lowest advice; match it to P111 | All | 18 °C |
+| Highest water temperature in the recommendation | Highest advice; at least 2 °C above the minimum | All | 60 °C (Tuya 65 °C) |
+| **Group heating curve (Positional)** | | | |
+| Basis of the recommendation | App curve or heat pump curve (followed continuously) | Positional | App curve |
+| Copy once into the app curve | Fills in the two values below once | Positional | — |
+| App curve: water at −15 °C / +15 °C outdoor | The two points of the app curve | Positional | 45 / 30, or the mode's starting curve |
+| **Group fine-tuning (Positional – Manual)** | | | |
+| Kp: degrees of water per degree indoors | Degrees of water temperature per degree of indoor deviation | Manual | 3 |
+| Ti: integration time | How slowly the I-term grows | Manual | 3 hours |
+| **Group fine-tuning (Classic)** | | | |
+| Kp: proportional gain | Size of the correction per degree of deviation | Classic | 5.0 |
+| Ki: integral gain | How strongly a lasting deviation is corrected | Classic | 1.5 |
+| Deadband | Deviation within which nothing changes | Classic | 0.3 °C |
+| **Group coast** | | | |
+| Coast on | Coast on or off | Classic, Manual | On |
+| Coast: recommendation below the water temperature | How many degrees below the water temperature coast aims | Classic, Manual | 1 °C |
+| Coast: start threshold above desired | Margin above the room target before coast starts | Classic, Manual | 0.3 °C |
+| Coast: share in the recommendation | How heavily coast weighs | Classic, Manual | 0.80 |
+| Coast: maximum duration (Aurora) | Maximum number of 5-minute cycles | Classic, Manual | 24 |
+| **Group weighting factors** | | | |
+| Comfort — Classic only | Weight of the temperature control | Classic | 50 % |
+| Efficiency | Weight of the COP optimization | All | 15 % |
+| Cost | Weight of the price optimization | All | 15 % |
+| Building model — Classic only | Weight of the building model | Classic | 20 % |
 
-The priorities are scaled together to 100 %. Efficiency and Cost only do
+The weighting factors are scaled together to 100 %. Efficiency and Cost only do
 something while COP or price optimization is on. In Positional they shift the
 room target, by at most 1.5 °C; the heating curve shifts along.
 
@@ -348,10 +357,10 @@ Exception: **Heat pump curve** uses the outdoor sensor of the heat pump.
 
 | | Tuya | Aurora I/II | Aurora III |
 | --- | --- | --- | --- |
-| Heating curve (positional modes) | Not present: always the app curve | App curve or DIY heating curve | App curve or climate curve |
-| Copy a fixed curve | H1–H8, L1–L8 | HH1–HH8, HL1–HL8 and DIY (L28/L29) | Not present |
-| Coast max. duration | Not adjustable | Adjustable | Adjustable |
-| Maximum water temperature | 25–65 °C, default 65 °C | 25–60 °C, default 60 °C | 25–60 °C, default 60 °C |
+| Basis of the recommendation | Not present: always the app curve | App curve or DIY heating curve | App curve or climate curve |
+| Copy once | H1–H8, L1–L8 | HH1–HH8, HL1–HL8 and DIY (L28/L29) | Not present |
+| Coast: maximum duration | Not adjustable | Adjustable | Adjustable |
+| Highest water temperature in the recommendation | 25–65 °C, default 65 °C | 25–60 °C, default 60 °C | 25–60 °C, default 60 °C |
 | Setpoint only stays with | Heating curve OFF | Heating curve selection OFF | — |
 
 ## Questions
@@ -365,12 +374,20 @@ The heating curve selection (Tuya: heating curve) is not set to OFF. The heat
 pump then puts back its own heating curve value.
 
 **The advice stands still.**
-Is **Enable adaptive temperature control** on, and does the indoor temperature
-come in? Without both, no new advice is calculated.
+Is **Adaptive control on** on, does the indoor temperature come in, and does
+**Desired Indoor Temperature** have a value? Without all three, no new advice
+is calculated. The control only reports this in the debug log.
 
 **I changed Kp, but nothing changes.**
-In Positional, **PI Controller: Kp** does not count; there **Positional PI: Kp**
-applies, and only in Manual.
+In Positional, **Kp: proportional gain** (group fine-tuning Classic) does not
+count; there **Kp: degrees of water per degree indoors** applies, and only in
+Manual.
+
+**I saved a setting, but nothing changes.**
+Open the settings screen again and check that the value was kept. After an
+error message the screen may still show the value you entered while the app
+keeps the old one. Before 3.6.2, a forgetting factor below 0.9985 blocked every
+save; 3.6.2 sets such a value to 0.999.
 
 **I turned coast off, or on, but nothing changes.**
 In Positional – Radiators and – Floor heating, coast is always off.

@@ -1,4 +1,10 @@
 {
+  "3.6.2": {
+    "en": "Adaptive control settings are now split into six groups; each title names the control mode it applies to (e.g. 'Adaptive control: fine-tuning (Classic)'). Labels and descriptions are rewritten (e.g. 'Enable adaptive temperature control' is now 'Adaptive control on'). A forgetting factor below 0.9985 is set to 0.999; with such a value, no setting of the device could be saved.",
+    "nl": "De instellingen van de adaptieve regeling staan nu in zes groepen; de titel noemt de regelmodus waarvoor ze gelden (bijv. 'Adaptieve regeling: fijnafstelling (Klassiek)'). Labels en uitleg zijn herschreven (bijv. 'Adaptieve temperatuurregeling inschakelen' heet nu 'Adaptieve regeling aan'). Een vergeetfactor onder 0,9985 wordt op 0,999 gezet; met zo'n waarde kon geen enkele instelling van het apparaat worden opgeslagen.",
+    "de": "Die Einstellungen der adaptiven Regelung stehen jetzt in sechs Gruppen; der Titel nennt den Regelmodus, für den sie gelten (z. B. 'Adaptive Regelung: Feineinstellung (Klassisch)'). Bezeichnungen und Erklärungen sind neu geschrieben (z. B. 'Adaptive Temperatursteuerung aktivieren' heißt jetzt 'Adaptive Regelung ein'). Ein Vergissfaktor unter 0,9985 wird auf 0,999 gesetzt; mit einem solchen Wert konnte keine Einstellung des Geräts gespeichert werden.",
+    "fr": "Les réglages du contrôle adaptatif sont désormais répartis en six groupes ; le titre indique le mode de régulation concerné (p. ex. « Contrôle adaptatif : réglage fin (Classique) »). Les libellés et explications ont été réécrits (p. ex. « Activer le contrôle adaptatif de température » devient « Contrôle adaptatif activé »). Un facteur d'oubli inférieur à 0,9985 est remplacé par 0,999 ; avec une telle valeur, aucun réglage de l'appareil ne pouvait être enregistré."
+  },
   "3.6.1": {
     "en": "Aurora I/II: 'Unit running' now shows Yes while the compressor runs, also on heat pumps that do not report this status.",
     "nl": "Aurora I/II: 'Unit in bedrijf' staat nu op Ja zolang de compressor draait, ook bij warmtepompen die deze status niet melden.",
