@@ -346,6 +346,9 @@ temperature. The app takes the first one available:
 2. the Open-Meteo weather forecast for the current hour;
 3. the outdoor sensor of the heat pump.
 
+While the location is still the default (Amsterdam), the outdoor sensor of the
+heat pump goes before the weather forecast (since v3.7.1).
+
 The forecast is fetched every hour, also while **Enable weather forecast
 integration** is off; that switch only shows or hides the forecast sensors. The
 forecast applies to the location in the settings. Enter your own location there,

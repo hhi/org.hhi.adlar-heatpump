@@ -348,6 +348,9 @@ buitentemperatuur. De app neemt de eerste die beschikbaar is:
 2. de weersvoorspelling van Open-Meteo voor het huidige uur;
 3. de buitensensor van de warmtepomp.
 
+Staat de locatie nog op de standaardwaarde (Amsterdam), dan gaat de
+buitensensor van de warmtepomp vóór de weersvoorspelling (sinds v3.7.1).
+
 De weersvoorspelling wordt elk uur opgehaald, ook als **Weersvoorspelling
 integratie inschakelen** uit staat; die schakelaar toont of verbergt alleen de
 voorspellingssensoren. De voorspelling geldt voor de locatie in de instellingen. Vul daar uw eigen locatie

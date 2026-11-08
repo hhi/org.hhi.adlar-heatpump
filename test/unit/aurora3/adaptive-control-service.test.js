@@ -88,6 +88,7 @@ function createService(device, adjustments = []) {
   service.externalTemperature = { getIndoorTemperature: () => 20 };
   service.weatherForecast = {
     getTempAt: () => null,
+    isLocationUserSet: () => false, // v3.7.1 (R21)
     hasFreshForecast: () => true,
     updateForecast: async () => {},
     calculateAdvice: () => null,

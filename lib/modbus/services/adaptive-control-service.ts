@@ -169,6 +169,7 @@ export class AdaptiveControlService {
   private controlIntervalMs: number = 5 * 60 * 1000; // 5 minutes default
   private accumulatedAdjustment: number = 0; // ADR-059 W1 (referentieproject): accumulates fractional adjustments across cycles (settled when user flow applies)
   private lastObservedSetpoint: number | null = null; // ADR-059 W1: setpoint-register 0x0301 at previous cycle, for settlement-on-observation
+  private lastSkipReason: string | null = null; // v3.7.1 (R24): last reported reason for a skipped cycle
   private static readonly ACCUMULATOR_CLAMP = 2.0; // ±°C
   private lastRecommendedTemp: number | undefined = undefined; // Change detection for temperature_adjustment_recommended
   private resolveActiveSetpoint: ActiveSetpointResolver;
@@ -1026,6 +1027,7 @@ export class AdaptiveControlService {
       const indoorTemp = this.externalTemperature.getIndoorTemperature();
       if (indoorTemp === null) {
         this.logger('AdaptiveControlService: No external temperature available, skipping cycle');
+        await this.reportSkippedCycle('no_indoor_temperature');
         return;
       }
 
@@ -1033,6 +1035,7 @@ export class AdaptiveControlService {
       const currentSetpoint = this.getEffectiveTargetTemp();
       if (currentSetpoint === null) {
         this.logger('AdaptiveControlService: No warmtepomp setpoint available, skipping cycle');
+        await this.reportSkippedCycle('no_heat_pump_setpoint');
         return;
       }
 
@@ -1040,6 +1043,7 @@ export class AdaptiveControlService {
       const desiredIndoorTemp = this.device.getCapabilityValue('target_temperature.indoor') as number | null;
       if (desiredIndoorTemp === null) {
         this.logger('AdaptiveControlService: No desired indoor temperature set, skipping cycle');
+        await this.reportSkippedCycle('no_desired_indoor_temperature');
         return;
       }
 
@@ -1051,6 +1055,7 @@ export class AdaptiveControlService {
       const basis = positional ? await this._resolvePositionalBasis(currentSetpoint) : null;
       if (positional && basis === null) {
         this.logger('AdaptiveControlService: heat pump curve not read yet after start, skipping cycle');
+        await this.reportSkippedCycle('heat_pump_curve_not_read');
         return;
       }
 
@@ -1634,6 +1639,8 @@ export class AdaptiveControlService {
    * ADR-058: retourneert null wanneer geen enkele bron beschikbaar is — aanroepers slaan
    * de betreffende deelberekening over i.p.v. met een fictieve 0°C te rekenen.
    *
+   * v3.7.1 (R21): without a user-set forecast location the heat pump sensor goes before Open-Meteo.
+   *
    * @version 2.10.0
    */
   private async getEffectiveOutdoorTemp(): Promise<number | null> {
@@ -1649,6 +1656,19 @@ export class AdaptiveControlService {
           ageMin: Math.round((Date.now() - storedTs) / 60000),
         });
         return flowTemp;
+      }
+    }
+
+    // v3.7.1 (R21): without a user-set forecast location the forecast is for the default
+    // location (Amsterdam); the heat pump's own sensor then goes before Open-Meteo.
+    if (this.weatherForecast && !this.weatherForecast.isLocationUserSet()) {
+      // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)
+      const sensorTemp = this.device.getOutdoorTemperatureWithFallback() as number | null;
+      if (sensorTemp !== null && sensorTemp !== undefined) {
+        this.logger('AdaptiveControlService: Using heat pump outdoor temp (forecast location not set)', {
+          temp: sensorTemp.toFixed(1),
+        });
+        return sensorTemp;
       }
     }
 
@@ -2175,6 +2195,24 @@ export class AdaptiveControlService {
   }
 
   /**
+   * v3.7.1 (R24): make a skipped control cycle visible in adaptive_control_diagnostics.
+   * Written once per new reason; the next full cycle replaces it with the normal diagnostics.
+   */
+  private async reportSkippedCycle(reason: string): Promise<void> {
+    if (reason === this.lastSkipReason) return;
+    this.lastSkipReason = reason;
+    try {
+      if (!this.device.hasCapability('adaptive_control_diagnostics')) return;
+      await this.device.setCapabilityValue('adaptive_control_diagnostics', JSON.stringify({
+        timestamp: new Date().toISOString(),
+        cycleSkipped: reason,
+      }));
+    } catch (error) {
+      this.device.error('⚠️ Failed to report skipped control cycle:', error);
+    }
+  }
+
+  /**
    * Update diagnostic capability with weighted decision breakdown
    *
    * Provides real-time transparency into adaptive control decision-making process
@@ -2190,6 +2228,7 @@ export class AdaptiveControlService {
   private async updateDiagnosticsCapability(
     combinedAction: CombinedAction,
   ): Promise<void> {
+    this.lastSkipReason = null;
     try {
       // Check if capability exists (should always be true, but defensive)
       if (!this.device.hasCapability('adaptive_control_diagnostics')) {
