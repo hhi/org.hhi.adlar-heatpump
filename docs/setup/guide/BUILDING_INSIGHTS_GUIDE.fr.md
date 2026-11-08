@@ -46,6 +46,7 @@ Les Aperçus du Bâtiment analysent les paramètres du Modèle du Bâtiment : 4 
 | **Facteur de gain solaire** | g | Efficacité du rayonnement solaire | 0,3-0,6 |
 | **Gains thermiques internes** | P_int | Chaleur des personnes, appareils, cuisine | 0,2-0,5 kW |
 | **Correction du vent** | W_corr | Perte de chaleur supplémentaire par vent fort (v2.7.0+) | 0-50 W/°C |
+| **Retard d'émission** | — | Temps entre la chaleur fournie et la chaleur atteignant la pièce (ballon tampon, plancher) (v3.7.0+) | 0-360 min |
 
 Le système compare les valeurs apprises avec :
 - **Votre profil de bâtiment sélectionné** (Léger/Moyen/Lourd/Passif)
@@ -261,6 +262,14 @@ temps pour 2 °C avec la météo actuelle, par exemple
 
 **Exemple de recommandation :**
 > « Changez le profil de bâtiment vers 'lourd' dans les paramètres de l'appareil pour un apprentissage plus rapide et de meilleurs paramètres initiaux »
+
+**Remarque (v3.7.0+) :** avec un ballon tampon ou un plancher chauffant,
+réglez d'abord **Système d'Émission** et **Ballon Tampon** (sous
+**Apprentissage du Modèle de Bâtiment**) et attendez quelques jours de
+chauffage. Sans ce retard d'émission, la masse thermique (C) et la constante
+de temps (τ) paraissent trop grandes, et ce message suggère à tort un profil
+plus lourd. Voir
+[Système d'Émission et Ballon Tampon](../advanced-settings/CONFIGURATION_GUIDE.fr.md#système-démission-et-ballon-tampon-v370).
 
 **Caractéristiques des profils :**
 
