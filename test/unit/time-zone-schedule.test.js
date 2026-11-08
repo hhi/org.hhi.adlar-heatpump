@@ -280,6 +280,20 @@ for (const [driver, FlowCardManagerService, cardId] of preHeatDrivers) {
     assert.strictEqual(strongResult.duration_hours, Number(estimatePreHeatDuration(15, 19, 21, strong).toFixed(1)));
   });
 
+  test(`${driver}: a pre-heat start time that has passed gives 'Now' (R20)`, async () => {
+    const listener = await getPreHeatListener(FlowCardManagerService, cardId);
+
+    // 14:00 CEST, target 16:00 local, 1 °C to go → 4 h → start 12:00 has passed
+    mock.timers.enable({ apis: ['Date'], now: new Date('2026-07-15T12:00:00Z') });
+    try {
+      const result = await listener({ target_clock_time: '16:00', target_indoor_temp: 20 });
+      assert.strictEqual(result.start_time, 'Now');
+      assert.strictEqual(result.duration_hours, 4);
+    } finally {
+      mock.timers.reset();
+    }
+  });
+
   test(`${driver}: pre-heat start time across the DST change`, async () => {
     const listener = await getPreHeatListener(FlowCardManagerService, cardId);
 

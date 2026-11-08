@@ -368,6 +368,9 @@ température extérieure. L'app prend la première disponible :
 2. la prévision météo d'Open-Meteo pour l'heure en cours ;
 3. le capteur extérieur de la pompe à chaleur.
 
+Tant que la localisation est celle par défaut (Amsterdam), le capteur extérieur
+de la pompe à chaleur passe avant la prévision météo (depuis v3.7.1).
+
 La prévision est récupérée toutes les heures, même lorsque **Activer
 l'intégration des prévisions météo** est désactivé ; cet interrupteur ne fait
 qu'afficher ou masquer les capteurs de prévision. La prévision vaut pour la

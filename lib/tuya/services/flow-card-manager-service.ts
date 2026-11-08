@@ -809,7 +809,12 @@ export class FlowCardManagerService {
         const targetTime = nextLocalTime(targetHour, targetMinute, timeZone);
 
         const startTime = new Date(targetTime.getTime() - durationHours * 3600 * 1000);
-        const startTimeStr = formatHourMinute(startTime, timeZone);
+        // v3.7.1 (R20): a start time that has already passed means start now, not a time in the past
+        const startNow = startTime.getTime() <= Date.now();
+        const startTimeStr = startNow ? 'Now' : formatHourMinute(startTime, timeZone);
+        if (startNow) {
+          this.logger(`FlowCardManagerService: Pre-heat start time ${formatHourMinute(startTime, timeZone)} has passed, start now`);
+        }
 
         // Calculate suggested setpoint boost based on duration
         const suggestedBoost = Math.min(3.0, Math.max(1.0, tempDelta * 0.5));

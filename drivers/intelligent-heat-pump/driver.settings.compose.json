@@ -1684,10 +1684,10 @@
           "fr": "Localisation: Latitude"
         },
         "hint": {
-          "en": "Latitude coordinate for weather forecast (e.g., Amsterdam = 52.37). Find your coordinates at maps.google.com.",
-          "nl": "Breedtegraad coördinaat voor weerprognose (bijv. Amsterdam = 52.37). Vind je coördinaten op maps.google.com.",
-          "de": "Breitengrad für Wettervorhersage (z.B. Amsterdam = 52.37). Finden Sie Ihre Koordinaten auf maps.google.com.",
-          "fr": "Latitude pour la prévision météo (ex. Amsterdam = 52.37). Trouvez vos coordonnées sur maps.google.com."
+          "en": "Latitude coordinate for weather forecast (e.g., Amsterdam = 52.37). Find your coordinates at maps.google.com. As long as the default location (Amsterdam) is set, adaptive control uses the heat pump's own outdoor sensor instead of the forecast.",
+          "nl": "Breedtegraad coördinaat voor weerprognose (bijv. Amsterdam = 52.37). Vind je coördinaten op maps.google.com. Zolang de standaardlocatie (Amsterdam) is ingesteld, gebruikt de adaptieve regeling de buitensensor van de warmtepomp in plaats van de prognose.",
+          "de": "Breitengrad für Wettervorhersage (z.B. Amsterdam = 52.37). Finden Sie Ihre Koordinaten auf maps.google.com. Solange der Standardort (Amsterdam) eingestellt ist, verwendet die adaptive Steuerung den Außenfühler der Wärmepumpe statt der Vorhersage.",
+          "fr": "Latitude pour la prévision météo (ex. Amsterdam = 52.37). Trouvez vos coordonnées sur maps.google.com. Tant que l'emplacement par défaut (Amsterdam) est défini, la régulation adaptative utilise la sonde extérieure de la pompe à chaleur au lieu de la prévision."
         },
         "value": 52.37,
         "min": -90,
