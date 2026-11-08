@@ -46,6 +46,7 @@ Gebouwinzichten analyseren de parameters van het Gebouwmodel: 4 geleerde paramet
 | **Zonnewinst Factor** | g | Effectiviteit van zonnestraling opwarming | 0.3-0.6 |
 | **Interne Warmtewinst** | P_int | Warmte van mensen, apparaten, koken | 0.2-0.5 kW |
 | **Windcorrectie** | W_corr | Extra warmteverlies bij harde wind (v2.7.0+) | 0-50 W/°C |
+| **Afgiftevertraging** | — | Tijd tussen de geleverde warmte en de warmte in de kamer (buffervat, vloer) (v3.7.0+) | 0-360 min |
 
 Het systeem vergelijkt geleerde waarden met:
 - **Je geselecteerde gebouwprofiel** (Licht/Gemiddeld/Zwaar/Passief)
@@ -260,6 +261,13 @@ afgelopen week. Het inzicht noemt dan de tijd voor 2 °C bij het weer van nu, bi
 
 **Voorbeeld Aanbeveling:**
 > "Wijzig gebouwprofiel naar 'zwaar' in apparaatinstellingen voor sneller leren en betere initiële parameters"
+
+**Let op (v3.7.0+):** heb je een buffervat of vloerverwarming, vul dan eerst
+**Afgiftesysteem** en **Buffervat** in (onder **Gebouwmodel Leren**) en wacht
+een paar dagen met verwarming. Zonder die afgiftevertraging lijken de
+thermische massa (C) en de tijdsconstante (τ) te groot, en wijst deze melding
+ten onrechte op een zwaarder profiel. Zie
+[Afgiftesysteem en buffervat](../advanced-settings/CONFIGURATION_GUIDE.nl.md#afgiftesysteem-en-buffervat-v370).
 
 **Profiel Kenmerken:**
 
