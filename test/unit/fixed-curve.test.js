@@ -72,6 +72,7 @@ function createContext(Service, store = {}, diyCurve = null) {
     resolveDiyAppCurve: () => diyCurve,
     STORE_KEY_CURVE_USER_SET: 'adaptive_curve_user_set',
     logger: () => {},
+    buildingModel: { applyLearningSettings: async () => {} }, // ADR-066: a mode change updates the emitter delay
     device: {
       homey: { setTimeout: (fn) => { fn(); return { mocked: true }; } },
       getStoreValue: (key) => store[key],

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.6.2",
+  "version": "3.7.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -17538,6 +17538,7 @@
         "adlar_building_tau",
         "adlar_building_g",
         "adlar_building_pint",
+        "adlar_building_emitter_delay",
         "adlar_energy_price_current",
         "adlar_energy_price_next",
         "adlar_energy_price_category",
@@ -19868,6 +19869,80 @@
               ]
             },
             {
+              "id": "building_model_emitter_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Emitter System",
+                "nl": "Afgiftesysteem",
+                "de": "Wärmeabgabesystem",
+                "fr": "Système d'Émission"
+              },
+              "hint": {
+                "en": "Start value for the emitter delay: the time between the heat the heat pump delivers and the heat that reaches the room. Radiators 30 min, floor heating 180 min. Automatic uses the control mode (Positional – Radiators/Floor heating), otherwise the heat pump mode when it tells floor from radiators. The building model then learns the actual delay itself (after about 3 days).",
+                "nl": "Startwaarde voor de afgiftevertraging: de tijd tussen de warmte die de warmtepomp levert en de warmte die de kamer bereikt. Radiatoren 30 min, vloerverwarming 180 min. Automatisch gebruikt de regelmodus (Positioneel – Radiatoren/Vloerverwarming), anders de modus van de warmtepomp als die vloer en radiatoren onderscheidt. Het gebouwmodel leert de werkelijke vertraging daarna zelf (na ongeveer 3 dagen).",
+                "de": "Startwert für die Wärmeabgabe-Verzögerung: die Zeit zwischen der von der Wärmepumpe gelieferten Wärme und der Wärme, die den Raum erreicht. Heizkörper 30 min, Fußbodenheizung 180 min. Automatisch nutzt den Regelmodus (Positionell – Heizkörper/Fußbodenheizung), sonst den Modus der Wärmepumpe, wenn dieser Fußboden und Heizkörper unterscheidet. Das Gebäudemodell lernt die tatsächliche Verzögerung danach selbst (nach etwa 3 Tagen).",
+                "fr": "Valeur initiale du retard d'émission : le temps entre la chaleur fournie par la pompe à chaleur et la chaleur qui atteint la pièce. Radiateurs 30 min, plancher chauffant 180 min. Automatique utilise le mode de régulation (Positionnel – Radiateurs/Plancher chauffant), sinon le mode de la pompe à chaleur s'il distingue plancher et radiateurs. Le modèle du bâtiment apprend ensuite lui-même le retard réel (après environ 3 jours)."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic",
+                    "nl": "Automatisch",
+                    "de": "Automatisch",
+                    "fr": "Automatique"
+                  }
+                },
+                {
+                  "id": "radiator",
+                  "label": {
+                    "en": "Radiators / convectors",
+                    "nl": "Radiatoren / convectoren",
+                    "de": "Heizkörper / Konvektoren",
+                    "fr": "Radiateurs / convecteurs"
+                  }
+                },
+                {
+                  "id": "floor",
+                  "label": {
+                    "en": "Floor heating",
+                    "nl": "Vloerverwarming",
+                    "de": "Fußbodenheizung",
+                    "fr": "Plancher chauffant"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "building_model_buffer_volume",
+              "type": "number",
+              "label": {
+                "en": "Buffer Tank",
+                "nl": "Buffervat",
+                "de": "Pufferspeicher",
+                "fr": "Ballon Tampon"
+              },
+              "hint": {
+                "en": "Volume of a buffer tank between the heat pump and the emitters, in litres. 0 = no buffer tank. Each litre adds 1 minute to the start value of the emitter delay. The building model then learns the actual delay itself.",
+                "nl": "Inhoud van een buffervat tussen de warmtepomp en de afgifte, in liter. 0 = geen buffervat. Elke liter telt 1 minuut op bij de startwaarde van de afgiftevertraging. Het gebouwmodel leert de werkelijke vertraging daarna zelf.",
+                "de": "Inhalt eines Pufferspeichers zwischen Wärmepumpe und Wärmeabgabe, in Litern. 0 = kein Pufferspeicher. Jeder Liter addiert 1 Minute zum Startwert der Wärmeabgabe-Verzögerung. Das Gebäudemodell lernt die tatsächliche Verzögerung danach selbst.",
+                "fr": "Volume d'un ballon tampon entre la pompe à chaleur et les émetteurs, en litres. 0 = pas de ballon tampon. Chaque litre ajoute 1 minute à la valeur initiale du retard d'émission. Le modèle du bâtiment apprend ensuite lui-même le retard réel."
+              },
+              "value": 0,
+              "units": {
+                "en": "L",
+                "nl": "L",
+                "de": "L",
+                "fr": "L"
+              },
+              "attr": {
+                "min": 0,
+                "max": 2000,
+                "step": 10
+              }
+            },
+            {
               "id": "reset_building_model",
               "type": "checkbox",
               "label": {
@@ -20990,6 +21065,7 @@
         "adlar_building_g",
         "adlar_building_c",
         "adlar_building_pint",
+        "adlar_building_emitter_delay",
         "building_model_diagnostics",
         "building_insight_insulation",
         "building_insight_preheating",
@@ -22225,6 +22301,80 @@
               ]
             },
             {
+              "id": "building_model_emitter_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Emitter System",
+                "nl": "Afgiftesysteem",
+                "de": "Wärmeabgabesystem",
+                "fr": "Système d'Émission"
+              },
+              "hint": {
+                "en": "Start value for the emitter delay: the time between the heat the heat pump delivers and the heat that reaches the room. Radiators 30 min, floor heating 180 min. Automatic uses the control mode (Positional – Radiators/Floor heating), otherwise the heat pump mode when it tells floor from radiators. The building model then learns the actual delay itself (after about 3 days).",
+                "nl": "Startwaarde voor de afgiftevertraging: de tijd tussen de warmte die de warmtepomp levert en de warmte die de kamer bereikt. Radiatoren 30 min, vloerverwarming 180 min. Automatisch gebruikt de regelmodus (Positioneel – Radiatoren/Vloerverwarming), anders de modus van de warmtepomp als die vloer en radiatoren onderscheidt. Het gebouwmodel leert de werkelijke vertraging daarna zelf (na ongeveer 3 dagen).",
+                "de": "Startwert für die Wärmeabgabe-Verzögerung: die Zeit zwischen der von der Wärmepumpe gelieferten Wärme und der Wärme, die den Raum erreicht. Heizkörper 30 min, Fußbodenheizung 180 min. Automatisch nutzt den Regelmodus (Positionell – Heizkörper/Fußbodenheizung), sonst den Modus der Wärmepumpe, wenn dieser Fußboden und Heizkörper unterscheidet. Das Gebäudemodell lernt die tatsächliche Verzögerung danach selbst (nach etwa 3 Tagen).",
+                "fr": "Valeur initiale du retard d'émission : le temps entre la chaleur fournie par la pompe à chaleur et la chaleur qui atteint la pièce. Radiateurs 30 min, plancher chauffant 180 min. Automatique utilise le mode de régulation (Positionnel – Radiateurs/Plancher chauffant), sinon le mode de la pompe à chaleur s'il distingue plancher et radiateurs. Le modèle du bâtiment apprend ensuite lui-même le retard réel (après environ 3 jours)."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic",
+                    "nl": "Automatisch",
+                    "de": "Automatisch",
+                    "fr": "Automatique"
+                  }
+                },
+                {
+                  "id": "radiator",
+                  "label": {
+                    "en": "Radiators / convectors",
+                    "nl": "Radiatoren / convectoren",
+                    "de": "Heizkörper / Konvektoren",
+                    "fr": "Radiateurs / convecteurs"
+                  }
+                },
+                {
+                  "id": "floor",
+                  "label": {
+                    "en": "Floor heating",
+                    "nl": "Vloerverwarming",
+                    "de": "Fußbodenheizung",
+                    "fr": "Plancher chauffant"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "building_model_buffer_volume",
+              "type": "number",
+              "label": {
+                "en": "Buffer Tank",
+                "nl": "Buffervat",
+                "de": "Pufferspeicher",
+                "fr": "Ballon Tampon"
+              },
+              "hint": {
+                "en": "Volume of a buffer tank between the heat pump and the emitters, in litres. 0 = no buffer tank. Each litre adds 1 minute to the start value of the emitter delay. The building model then learns the actual delay itself.",
+                "nl": "Inhoud van een buffervat tussen de warmtepomp en de afgifte, in liter. 0 = geen buffervat. Elke liter telt 1 minuut op bij de startwaarde van de afgiftevertraging. Het gebouwmodel leert de werkelijke vertraging daarna zelf.",
+                "de": "Inhalt eines Pufferspeichers zwischen Wärmepumpe und Wärmeabgabe, in Litern. 0 = kein Pufferspeicher. Jeder Liter addiert 1 Minute zum Startwert der Wärmeabgabe-Verzögerung. Das Gebäudemodell lernt die tatsächliche Verzögerung danach selbst.",
+                "fr": "Volume d'un ballon tampon entre la pompe à chaleur et les émetteurs, en litres. 0 = pas de ballon tampon. Chaque litre ajoute 1 minute à la valeur initiale du retard d'émission. Le modèle du bâtiment apprend ensuite lui-même le retard réel."
+              },
+              "value": 0,
+              "units": {
+                "en": "L",
+                "nl": "L",
+                "de": "L",
+                "fr": "L"
+              },
+              "attr": {
+                "min": 0,
+                "max": 2000,
+                "step": 10
+              }
+            },
+            {
               "id": "reset_building_model",
               "type": "checkbox",
               "label": {
@@ -23144,6 +23294,7 @@
         "adlar_building_g",
         "adlar_building_c",
         "adlar_building_pint",
+        "adlar_building_emitter_delay",
         "building_model_diagnostics",
         "building_insight_insulation",
         "building_insight_preheating",
@@ -24627,6 +24778,80 @@
               ]
             },
             {
+              "id": "building_model_emitter_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Emitter System",
+                "nl": "Afgiftesysteem",
+                "de": "Wärmeabgabesystem",
+                "fr": "Système d'Émission"
+              },
+              "hint": {
+                "en": "Start value for the emitter delay: the time between the heat the heat pump delivers and the heat that reaches the room. Radiators 30 min, floor heating 180 min. Automatic uses the control mode (Positional – Radiators/Floor heating), otherwise the heat pump mode when it tells floor from radiators. The building model then learns the actual delay itself (after about 3 days).",
+                "nl": "Startwaarde voor de afgiftevertraging: de tijd tussen de warmte die de warmtepomp levert en de warmte die de kamer bereikt. Radiatoren 30 min, vloerverwarming 180 min. Automatisch gebruikt de regelmodus (Positioneel – Radiatoren/Vloerverwarming), anders de modus van de warmtepomp als die vloer en radiatoren onderscheidt. Het gebouwmodel leert de werkelijke vertraging daarna zelf (na ongeveer 3 dagen).",
+                "de": "Startwert für die Wärmeabgabe-Verzögerung: die Zeit zwischen der von der Wärmepumpe gelieferten Wärme und der Wärme, die den Raum erreicht. Heizkörper 30 min, Fußbodenheizung 180 min. Automatisch nutzt den Regelmodus (Positionell – Heizkörper/Fußbodenheizung), sonst den Modus der Wärmepumpe, wenn dieser Fußboden und Heizkörper unterscheidet. Das Gebäudemodell lernt die tatsächliche Verzögerung danach selbst (nach etwa 3 Tagen).",
+                "fr": "Valeur initiale du retard d'émission : le temps entre la chaleur fournie par la pompe à chaleur et la chaleur qui atteint la pièce. Radiateurs 30 min, plancher chauffant 180 min. Automatique utilise le mode de régulation (Positionnel – Radiateurs/Plancher chauffant), sinon le mode de la pompe à chaleur s'il distingue plancher et radiateurs. Le modèle du bâtiment apprend ensuite lui-même le retard réel (après environ 3 jours)."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic",
+                    "nl": "Automatisch",
+                    "de": "Automatisch",
+                    "fr": "Automatique"
+                  }
+                },
+                {
+                  "id": "radiator",
+                  "label": {
+                    "en": "Radiators / convectors",
+                    "nl": "Radiatoren / convectoren",
+                    "de": "Heizkörper / Konvektoren",
+                    "fr": "Radiateurs / convecteurs"
+                  }
+                },
+                {
+                  "id": "floor",
+                  "label": {
+                    "en": "Floor heating",
+                    "nl": "Vloerverwarming",
+                    "de": "Fußbodenheizung",
+                    "fr": "Plancher chauffant"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "building_model_buffer_volume",
+              "type": "number",
+              "label": {
+                "en": "Buffer Tank",
+                "nl": "Buffervat",
+                "de": "Pufferspeicher",
+                "fr": "Ballon Tampon"
+              },
+              "hint": {
+                "en": "Volume of a buffer tank between the heat pump and the emitters, in litres. 0 = no buffer tank. Each litre adds 1 minute to the start value of the emitter delay. The building model then learns the actual delay itself.",
+                "nl": "Inhoud van een buffervat tussen de warmtepomp en de afgifte, in liter. 0 = geen buffervat. Elke liter telt 1 minuut op bij de startwaarde van de afgiftevertraging. Het gebouwmodel leert de werkelijke vertraging daarna zelf.",
+                "de": "Inhalt eines Pufferspeichers zwischen Wärmepumpe und Wärmeabgabe, in Litern. 0 = kein Pufferspeicher. Jeder Liter addiert 1 Minute zum Startwert der Wärmeabgabe-Verzögerung. Das Gebäudemodell lernt die tatsächliche Verzögerung danach selbst.",
+                "fr": "Volume d'un ballon tampon entre la pompe à chaleur et les émetteurs, en litres. 0 = pas de ballon tampon. Chaque litre ajoute 1 minute à la valeur initiale du retard d'émission. Le modèle du bâtiment apprend ensuite lui-même le retard réel."
+              },
+              "value": 0,
+              "units": {
+                "en": "L",
+                "nl": "L",
+                "de": "L",
+                "fr": "L"
+              },
+              "attr": {
+                "min": 0,
+                "max": 2000,
+                "step": 10
+              }
+            },
+            {
               "id": "reset_building_model",
               "type": "checkbox",
               "label": {
@@ -25573,6 +25798,41 @@
         "fr": "Masse Thermique du Bâtiment"
       },
       "icon": "/assets/building-thermal-mass.svg"
+    },
+    "adlar_building_emitter_delay": {
+      "id": "adlar_building_emitter_delay",
+      "type": "number",
+      "title": {
+        "en": "ML Emitter Delay",
+        "nl": "ML Afgiftevertraging",
+        "de": "ML Wärmeabgabe-Verzögerung",
+        "fr": "Retard d'Émission ML"
+      },
+      "units": {
+        "en": "min",
+        "nl": "min",
+        "de": "min",
+        "fr": "min"
+      },
+      "desc": {
+        "en": "Time between the heat measured at the heat pump and the heat that reaches the room (buffer tank, radiators, floor)",
+        "nl": "Tijd tussen de warmte die bij de warmtepomp gemeten wordt en de warmte die de kamer bereikt (buffervat, radiatoren, vloer)",
+        "de": "Zeit zwischen der an der Wärmepumpe gemessenen Wärme und der Wärme, die den Raum erreicht (Pufferspeicher, Heizkörper, Fußboden)",
+        "fr": "Temps entre la chaleur mesurée à la pompe à chaleur et la chaleur qui atteint la pièce (ballon tampon, radiateurs, plancher)"
+      },
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "chartType": "stepLine",
+      "insights": true,
+      "insightsTitle": {
+        "en": "Emitter Delay",
+        "nl": "Afgiftevertraging",
+        "de": "Wärmeabgabe-Verzögerung",
+        "fr": "Retard d'Émission"
+      },
+      "icon": "/assets/building-emitter-delay.svg"
     },
     "adlar_building_g": {
       "id": "adlar_building_g",

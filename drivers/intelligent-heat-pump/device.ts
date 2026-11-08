@@ -3515,6 +3515,7 @@ class MyDevice extends Homey.Device {
         'adlar_building_tau',
         'adlar_building_g',
         'adlar_building_pint',
+        'adlar_building_emitter_delay', // ADR-066 (3.7.0)
       ];
 
       for (const capability of buildingModelCapabilities) {
@@ -4605,6 +4606,7 @@ class MyDevice extends Homey.Device {
       'adlar_building_tau',
       'adlar_building_g',
       'adlar_building_pint',
+      'adlar_building_emitter_delay', // ADR-066 (3.7.0)
       'building_model_diagnostics',
       'adlar_external_wind_speed', // v2.7.2: Wind correction input
       'adlar_external_solar_power', // v2.7.2: Solar radiation input
