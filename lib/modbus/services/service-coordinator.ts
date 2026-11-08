@@ -20,6 +20,10 @@ import { type BuildingProfileType } from '../../shared/adaptive/building-model-l
 import { formatDayMonthTime, nextLocalMidnight, resolveHomeyTimezone } from '../../shared/utils/time-format';
 import { isExternalValueFresh } from '../../shared/utils/external-value-age';
 import { diyCurveToAppCurve } from '../../shared/adaptive/positional-pi-controller';
+import { Defrost24hCounter } from '../../shared/defrost-24h-counter';
+
+/** Store key for the 24h defrost history (same key as the Tuya driver) */
+const DEFROST_24H_STORE_KEY = 'defrost_24h_history';
 
 // ADR-042: Verbindingskwaliteit als expliciete runtime-state
 export type ConnectionQuality = 'online' | 'degraded' | 'offline';
@@ -60,6 +64,9 @@ export class ServiceCoordinator {
   private _disconnectDailyResetTimer: NodeJS.Timeout | null = null;
   private _prevDefrosting = false;
   private _defrostStartedAt: number | null = null;
+  // v3.7.1 (R17): rolling 24h defrost counters (adlar_defrost_count_24h / adlar_defrost_minutes_24h)
+  private defrost24h = new Defrost24hCounter();
+  private defrost24hInterval: NodeJS.Timeout | null = null;
 
   // ADR-042: Connection quality state machine
   private _connectionQuality: ConnectionQuality = 'offline';
@@ -347,6 +354,7 @@ export class ServiceCoordinator {
       }
 
       this._startHealthMonitoring();
+      await this._startDefrost24h();
       this.isInitialized = true;
 
       this.logger('ServiceCoordinator: Initialization complete', {
@@ -404,6 +412,38 @@ export class ServiceCoordinator {
         await this.device.setCapabilityValue('adlar_external_solar_radiation', solarRadiation);
       }
       this.logger(`ServiceCoordinator: Restored external solar radiation: ${solarRadiation} W/m²`);
+    }
+  }
+
+  /**
+   * v3.7.1 (R17): restore the 24h defrost history and refresh the counters every 30 minutes,
+   * so they also decrease when no new defrost cycle occurs.
+   */
+  private async _startDefrost24h(): Promise<void> {
+    if (!this.device.hasCapability('adlar_defrost_count_24h') && !this.device.hasCapability('adlar_defrost_minutes_24h')) {
+      return;
+    }
+    this.defrost24h = Defrost24hCounter.restore(await this.device.getStoreValue(DEFROST_24H_STORE_KEY));
+    this._updateDefrost24hCapabilities();
+    this.defrost24hInterval = this.device.homey.setInterval(() => this._updateDefrost24hCapabilities(), 30 * 60 * 1000);
+  }
+
+  private _recordDefrost24h(durationSec: number): void {
+    this.defrost24h.record(durationSec);
+    this.device.setStoreValue(DEFROST_24H_STORE_KEY, this.defrost24h.getEvents()).catch((e: unknown) => {
+      this.logger('ServiceCoordinator: Failed to persist defrost 24h history', e);
+    });
+    this._updateDefrost24hCapabilities();
+  }
+
+  private _updateDefrost24hCapabilities(): void {
+    const { count, minutes } = this.defrost24h.getStats();
+    for (const [capability, value] of [['adlar_defrost_count_24h', count], ['adlar_defrost_minutes_24h', minutes]] as const) {
+      if (this.device.hasCapability(capability)) {
+        this.device.setCapabilityValue(capability, value).catch((e: unknown) => {
+          this.logger(`ServiceCoordinator: Failed to update ${capability}`, e);
+        });
+      }
     }
   }
 
@@ -516,6 +556,7 @@ export class ServiceCoordinator {
       const durationSec = (Date.now() - this._defrostStartedAt) / 1000;
       const outdoorTemp = snapshot.sensors.ambientT1?.value ?? 0;
       this._defrostStartedAt = null;
+      this._recordDefrost24h(durationSec);
       this.adaptiveControl.onDefrostComplete(outdoorTemp, durationSec).catch((e) => {
         this.logger('ServiceCoordinator: onDefrostComplete failed', e);
       });
@@ -925,6 +966,11 @@ export class ServiceCoordinator {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
       this.healthCheckInterval = null;
+    }
+
+    if (this.defrost24hInterval) {
+      this.device.homey.clearInterval(this.defrost24hInterval);
+      this.defrost24hInterval = null;
     }
 
     if (this._disconnectStatusTimer) {

@@ -361,6 +361,9 @@ Außentemperatur. Die App nimmt die erste verfügbare:
 2. die Wettervorhersage von Open-Meteo für die aktuelle Stunde;
 3. den Außensensor der Wärmepumpe.
 
+Solange der Standort noch auf dem Standardwert (Amsterdam) steht, geht der
+Außensensor der Wärmepumpe vor der Wettervorhersage (seit v3.7.1).
+
 Die Vorhersage wird jede Stunde abgerufen, auch wenn
 **Wettervorhersage-Integration aktivieren** aus ist; dieser Schalter blendet nur
 die Vorhersagesensoren ein oder aus. Die Vorhersage gilt für den Standort in den

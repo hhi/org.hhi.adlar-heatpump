@@ -82,6 +82,10 @@ export class WeatherForecastService {
   private static readonly MAX_CACHE_AGE_MS = 6 * 60 * 60 * 1000; // 6 hours fallback
   private static readonly FORECAST_HOURS = 48;
 
+  /** Default forecast location (Amsterdam), the setting's value until the user changes it */
+  public static readonly DEFAULT_LAT = 52.37;
+  public static readonly DEFAULT_LON = 4.90;
+
   // COP estimation fallback curve (used when no learned data available)
   // Based on typical air-source heat pump performance
   private static readonly COP_REFERENCE_TEMP = 7; // °C (A7/W35 standard)
@@ -159,8 +163,8 @@ export class WeatherForecastService {
    */
   public async updateForecast(): Promise<WeatherForecast | null> {
     const settings = this.device.getSettings();
-    const lat = settings.forecast_location_lat ?? 52.37;
-    const lon = settings.forecast_location_lon ?? 4.90;
+    const lat = settings.forecast_location_lat ?? WeatherForecastService.DEFAULT_LAT;
+    const lon = settings.forecast_location_lon ?? WeatherForecastService.DEFAULT_LON;
 
     const hourlyParams = 'temperature_2m,relative_humidity_2m,wind_speed_10m,shortwave_radiation';
     const url = `${WeatherForecastService.API_BASE}?latitude=${lat}&longitude=${lon}&hourly=${hourlyParams}&forecast_hours=${WeatherForecastService.FORECAST_HOURS}&timezone=auto`;
@@ -240,6 +244,21 @@ export class WeatherForecastService {
     } finally {
       this.device.homey.clearTimeout(timeout);
     }
+  }
+
+  /**
+   * Whether the user set the forecast location (v3.7.1, R21).
+   *
+   * The settings start at the default location (Amsterdam). Until the user changes
+   * them, the forecast describes a place that can be far from the house.
+   */
+  public isLocationUserSet(): boolean {
+    const settings = this.device.getSettings();
+    const lat = settings.forecast_location_lat as number | null | undefined;
+    const lon = settings.forecast_location_lon as number | null | undefined;
+    if (typeof lat !== 'number' || typeof lon !== 'number') return false;
+    return Math.abs(lat - WeatherForecastService.DEFAULT_LAT) > 0.005
+      || Math.abs(lon - WeatherForecastService.DEFAULT_LON) > 0.005;
   }
 
   /**

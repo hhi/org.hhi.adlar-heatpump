@@ -5,6 +5,7 @@
 import Homey from 'homey';
 import { TuyaErrorCategorizer } from '../../shared/error-types';
 import { estimatePreHeatDuration } from '../../shared/utils/preheat-calculator';
+import { clampIndoorTarget } from '../../shared/utils/indoor-target';
 import type { BuildingInsightsService, InsightCategory } from './building-insights-service';
 import { PerformanceReportService } from './performance-report-service';
 import { SeasonalModeCalculator } from '../../shared/seasonal-mode-calculator';
@@ -53,8 +54,6 @@ const HEATING_SETPOINT_MIN_C = 15;
 const HEATING_SETPOINT_MAX_C = 60;
 const DHW_SETPOINT_MIN_C = 20;
 const DHW_SETPOINT_MAX_C = 75;
-const INDOOR_TARGET_MIN_C = 15;
-const INDOOR_TARGET_MAX_C = 25;
 
 const THRESHOLD_TRIGGER_CARDS: Array<{
   cardId: string;
@@ -257,8 +256,12 @@ export class FlowCardManagerService {
       });
 
       this.registerCapabilityAction('set_desired_indoor_temperature_aurora3', async (args) => {
-        const temperature = this.getRequiredNumberArg(args, 'temperature');
-        this.assertSetpointRange('Desired indoor temperature', temperature, INDOOR_TARGET_MIN_C, INDOOR_TARGET_MAX_C);
+        const requested = this.getRequiredNumberArg(args, 'temperature');
+        // v3.7.1 (R9): limit to 15–25 °C instead of failing (e.g. thermostat frost protection 7 °C)
+        const { value: temperature, clamped } = clampIndoorTarget(requested);
+        if (clamped) {
+          this.logger(`FlowCardManagerService: Desired indoor temperature ${requested}°C limited to ${temperature}°C`);
+        }
         await this.triggerSelectedDeviceCapability(args, 'target_temperature.indoor', temperature);
         return true;
       });
@@ -950,7 +953,12 @@ export class FlowCardManagerService {
         const targetTime = nextLocalTime(targetHour, targetMinute, timeZone);
 
         const startTime = new Date(targetTime.getTime() - durationHours * 3600 * 1000);
-        const startTimeStr = formatHourMinute(startTime, timeZone);
+        // v3.7.1 (R20): a start time that has already passed means start now, not a time in the past
+        const startNow = startTime.getTime() <= Date.now();
+        const startTimeStr = startNow ? 'Now' : formatHourMinute(startTime, timeZone);
+        if (startNow) {
+          this.logger(`FlowCardManagerService: Pre-heat start time ${formatHourMinute(startTime, timeZone)} has passed, start now`);
+        }
 
         // Calculate suggested setpoint boost based on duration
         const suggestedBoost = Math.min(3.0, Math.max(1.0, tempDelta * 0.5));
