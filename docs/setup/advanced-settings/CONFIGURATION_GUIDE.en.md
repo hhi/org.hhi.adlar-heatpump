@@ -476,6 +476,31 @@ Machine learning algorithm that learns the thermal properties of your home.
   - **Passive**: Passive house, HR+++ glass, airtight, heat recovery
 - **Change**: Takes effect immediately; learning continues from the new profile values with half of the collected samples
 
+### Emitter System and Buffer Tank (v3.7.0+)
+
+- **Function**: Start value for the emitter delay, the time between the heat the
+  heat pump delivers and the heat that reaches the room. Without this delay the
+  model sees the heat of a buffer tank or floor only later, and makes the
+  thermal mass (C), the heat loss (UA) and the internal gains too large
+- **Emitter system**: Automatic (default), Radiators / convectors or Floor
+  heating. Radiators start at 30 min, floor heating at 180 min. Automatic takes
+  the control mode (Positional – Radiators/Floor heating), otherwise the heat
+  pump mode when it tells floor from radiators; otherwise 60 min
+- **Buffer tank**: Volume in litres (0–2000, default 0). Each litre adds 1
+  minute
+- **Example**: Radiators with a 120 litre buffer tank: 30 + 120 = 150 min
+- **Learning**: After about 3 days of heating the model chooses the delay that
+  explains the measurements best (0–360 min). See "ML Emitter Delay"; the title
+  says whether the value is learned or the start value
+- **Changing**: Takes effect immediately; a learned value is dropped and
+  determined again within 6 hours. If the delay changes by 60 minutes or more,
+  the building model starts again from the selected building type (keeping half
+  of the samples)
+- **On the update to 3.7.0**: A model that is stuck (thermal mass at 40 kWh/°C,
+  time constant above 500 hours or internal gains above 1 kW) starts again from
+  the building type. Fill in the buffer tank before the update; then there is
+  only one restart
+
 ### Reset Building Model Learning
 - **Default**: Disabled
 - **Type**: One-time action (checkbox)

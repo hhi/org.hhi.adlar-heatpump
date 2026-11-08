@@ -479,6 +479,35 @@ Machine-Learning-Algorithmus, der die thermischen Eigenschaften Ihres Hauses ler
   - **Passiv**: Passivhaus, HR+++-Glas, luftdicht, Wärmerückgewinnung
 - **Ändern**: Wirkt sofort; das Lernen setzt mit den Werten des neuen Profils fort, mit der Hälfte der gesammelten Samples
 
+### Wärmeabgabesystem und Pufferspeicher (v3.7.0+)
+
+- **Funktion**: Startwert für die Wärmeabgabe-Verzögerung, die Zeit zwischen der
+  von der Wärmepumpe gelieferten Wärme und der Wärme, die den Raum erreicht.
+  Ohne diese Verzögerung sieht das Modell die Wärme eines Pufferspeichers oder
+  Fußbodens erst später und macht die thermische Masse (C), den Wärmeverlust
+  (UA) und die internen Gewinne zu groß
+- **Wärmeabgabesystem**: Automatisch (Standard), Heizkörper / Konvektoren oder
+  Fußbodenheizung. Heizkörper beginnen bei 30 min, Fußbodenheizung bei 180 min.
+  Automatisch nimmt den Regelmodus (Positionell – Heizkörper/Fußbodenheizung),
+  sonst den Modus der Wärmepumpe, wenn dieser Fußboden und Heizkörper
+  unterscheidet; sonst 60 min
+- **Pufferspeicher**: Inhalt in Litern (0–2000, Standard 0). Jeder Liter addiert
+  1 Minute
+- **Beispiel**: Heizkörper mit einem Pufferspeicher von 120 Litern: 30 + 120 =
+  150 min
+- **Lernen**: Nach etwa 3 Tagen mit Heizbetrieb wählt das Modell selbst die
+  Verzögerung, die die Messungen am besten erklärt (0–360 min). Siehe
+  "ML Wärmeabgabe-Verzögerung"; der Titel zeigt, ob der Wert gelernt oder der
+  Startwert ist
+- **Ändern**: Wirkt sofort; ein gelernter Wert entfällt und wird innerhalb von
+  6 Stunden neu bestimmt. Ändert sich die Verzögerung um 60 Minuten oder mehr,
+  beginnt das Gebäudemodell neu beim gewählten Gebäudetyp (mit der Hälfte der
+  Samples)
+- **Beim Update auf 3.7.0**: Ein festgefahrenes Modell (thermische Masse bei
+  40 kWh/°C, Zeitkonstante über 500 Stunden oder interne Gewinne über 1 kW)
+  beginnt neu beim Gebäudetyp. Tragen Sie den Pufferspeicher vor dem Update ein;
+  dann bleibt es bei einem Neustart
+
 ### Gebäudemodell-Lernen zurücksetzen
 - **Standard**: Deaktiviert
 - **Typ**: Einmalige Aktion (Checkbox)

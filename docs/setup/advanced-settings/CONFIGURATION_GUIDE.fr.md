@@ -488,6 +488,34 @@ Algorithme d'apprentissage automatique qui apprend les propriétés thermiques d
   - **Passif** : Maison passive, verre HR+++, étanche à l'air, récupération de chaleur
 - **Modification** : Prend effet immédiatement ; l'apprentissage reprend à partir des valeurs du nouveau profil, avec la moitié des échantillons collectés
 
+### Système d'Émission et Ballon Tampon (v3.7.0+)
+
+- **Fonction** : Valeur initiale du retard d'émission, le temps entre la chaleur
+  fournie par la pompe à chaleur et la chaleur qui atteint la pièce. Sans ce
+  retard, le modèle ne voit la chaleur d'un ballon tampon ou d'un plancher que
+  plus tard, et surestime la masse thermique (C), les pertes (UA) et les gains
+  internes
+- **Système d'émission** : Automatique (par défaut), Radiateurs / convecteurs ou
+  Plancher chauffant. Les radiateurs commencent à 30 min, le plancher chauffant
+  à 180 min. Automatique prend le mode de régulation (Positionnel –
+  Radiateurs/Plancher chauffant), sinon le mode de la pompe à chaleur s'il
+  distingue plancher et radiateurs ; sinon 60 min
+- **Ballon tampon** : Volume en litres (0–2000, par défaut 0). Chaque litre
+  ajoute 1 minute
+- **Exemple** : Radiateurs avec un ballon tampon de 120 litres : 30 + 120 = 150
+  min
+- **Apprentissage** : Après environ 3 jours de chauffage, le modèle choisit le
+  retard qui explique le mieux les mesures (0–360 min). Voir « ML Retard
+  d'Émission » ; le titre indique si la valeur est apprise ou la valeur initiale
+- **Modification** : Prend effet immédiatement ; une valeur apprise est
+  abandonnée et déterminée à nouveau dans les 6 heures. Si le retard change de
+  60 minutes ou plus, le modèle du bâtiment repart du type de bâtiment choisi (en
+  gardant la moitié des échantillons)
+- **Lors de la mise à jour vers 3.7.0** : Un modèle bloqué (masse thermique à
+  40 kWh/°C, constante de temps au-delà de 500 heures ou gains internes
+  au-delà de 1 kW) repart du type de bâtiment. Renseignez le ballon tampon avant
+  la mise à jour ; il n'y aura alors qu'un seul redémarrage
+
 ### Réinitialiser l'Apprentissage du Modèle de Bâtiment
 - **Par défaut** : Désactivé
 - **Type** : Action unique (case à cocher)

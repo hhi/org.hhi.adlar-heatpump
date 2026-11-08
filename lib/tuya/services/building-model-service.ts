@@ -21,6 +21,7 @@ import {
 } from '../../shared/adaptive/building-model-learner';
 import { isTransientBlockingKey, shouldShowBlocked } from '../../shared/adaptive/building-model-blocking';
 import { HeatingPowerHistory } from '../../shared/adaptive/heating-power-history';
+import { EmitterDelayTracker, EMITTER_DELAY_SETTING_KEYS } from '../../shared/adaptive/emitter-delay-tracker';
 import type { PreHeatConditions } from '../../shared/utils/preheat-calculator';
 import { DeviceConstants } from '../constants';
 import { getSolarHour, getZonedHour, resolveHomeyTimezone } from '../../shared/utils/time-format';
@@ -83,6 +84,8 @@ export class BuildingModelService {
   /** G14: hourly mean thermal power of the past week, for the pre-heat estimate */
   private static readonly POWER_HISTORY_STORE_KEY = 'preheat_power_history';
   private powerHistory = new HeatingPowerHistory();
+  /** ADR-066: emitter delay (start value from the settings, learned from the samples) */
+  private emitterDelay: EmitterDelayTracker;
 
   constructor(config: BuildingModelServiceConfig) {
     this.device = config.device;
@@ -95,6 +98,9 @@ export class BuildingModelService {
       ?? this.device.getSetting('building_model_forgetting_factor')
       ?? 0.999;
 
+    // ADR-066: heat-pump mode for the 'auto' emitter type
+    this.emitterDelay = new EmitterDelayTracker(this.device, 'adlar_enum_mode', this.logger);
+
     // Configure learner with optimal parameters
     const learnerConfig: BuildingModelConfig = {
       forgettingFactor, // From settings or default
@@ -103,6 +109,7 @@ export class BuildingModelService {
       buildingProfile: config.buildingProfile || 'average', // Default to average building
       enableDynamicPInt: config.enableDynamicPInt ?? true, // Enable by default
       timeZone: resolveHomeyTimezone(this.device.homey), // ADR-062 F2: P_int windows in local time
+      emitterDelayMinutes: this.emitterDelay.getDelayMinutes(), // ADR-066 D1
       logger: this.logger,
     };
 
@@ -147,6 +154,11 @@ export class BuildingModelService {
     if (this.powerHistory.restoreState(await this.device.getStoreValue(BuildingModelService.POWER_HISTORY_STORE_KEY))) {
       this.logger(`BuildingModelService: Power history restored — ${this.powerHistory.getHourCount()} hours`);
     }
+
+    // ADR-066: the estimator is separate from the learner and survives a model reset
+    await this.emitterDelay.restore();
+    this.emitterDelay.refreshStart();
+    await this._applyEmitterDelay();
 
     // ADR-062 A6: a restored model above 70% does not fire the milestone again
     this.lastConfidence = this.learner.getModel().confidence;
@@ -315,6 +327,13 @@ export class BuildingModelService {
       this.learner.addMeasurement(measurement);
       accepted = true;
 
+      // ADR-066 D3: the estimator gets the measured power; a new delay goes to the learner
+      const delay = await this.emitterDelay.addSample({
+        ...measurement,
+        pIntMultiplier: this.learner.pIntMultiplierAt(measurement.timestamp),
+      });
+      if (delay.delayChanged) await this._applyEmitterDelay();
+
       // G14: an hour completed in the power history is persisted (not every sample)
       const heatPumpPower = HeatingPowerHistory.thermalPowerKw(powerElectric, compressorOn === false ? null : cop);
       if (this.powerHistory.addSample(measurement.timestamp, heatPumpPower)) {
@@ -347,7 +366,10 @@ export class BuildingModelService {
       this.logger('BuildingModelService: Error during learning:', error);
     } finally {
       // ADR-062 B2: a sample that did not reach the learner breaks the dT/dt window
-      if (!accepted) this.learner.interruptWindow();
+      if (!accepted) {
+        this.learner.interruptWindow();
+        this.emitterDelay.interrupt(); // ADR-066: the hour is not usable either
+      }
       // v3.4.3: count consecutive blocked cycles; an accepted sample ends the streak
       if (accepted) this.blockingStreak = 0;
       else if (this.lastBlockingReasonKey !== null) this.blockingStreak++;
@@ -405,6 +427,14 @@ export class BuildingModelService {
 
     await this.updateCapabilityIfPresent('adlar_building_tau', model.tau, {
       title: tauTitle,
+    });
+
+    // ADR-066 D6: emitter delay, learned or start value
+    const emitterSource = this.emitterDelay.getDiagnostics().source === 'learned'
+      ? 'building_model.emitter_delay_learned'
+      : 'building_model.emitter_delay_start';
+    await this.updateCapabilityIfPresent('adlar_building_emitter_delay', this.emitterDelay.getDelayMinutes(), {
+      title: `${this.device.homey.__('building_model.emitter_delay_title')} (${this.device.homey.__(emitterSource)})`,
     });
 
     // g: solar gain factor (v2.9.6 - seasonal multiplier removed, astronomical estimation encodes seasonality)
@@ -554,6 +584,14 @@ export class BuildingModelService {
    * same save: the ServiceCoordinator soft-resets for that afterwards.
    */
   public async applyLearningSettings(newSettings: Record<string, unknown>, changedKeys: string[]): Promise<void> {
+    // ADR-066 D5: emitter type, buffer tank or control mode change the start value of the emitter delay
+    if (EMITTER_DELAY_SETTING_KEYS.some((key) => changedKeys.includes(key))) {
+      if (this.emitterDelay.refreshStart(newSettings)) {
+        await this._applyEmitterDelay((newSettings.building_profile as BuildingProfileType | null) ?? undefined);
+      }
+      await this.emitterDelay.persist();
+      await this.updateModelCapabilities();
+    }
     if (changedKeys.includes('building_model_forgetting_factor')) {
       this.learner.setForgettingFactor((newSettings.building_model_forgetting_factor as number | null) ?? 0.999);
     }
@@ -569,6 +607,23 @@ export class BuildingModelService {
         await this.updateModelCapabilities();
       }
     }
+  }
+
+  /**
+   * ADR-066 D7: pass the active emitter delay to the learner. A jump of 60 minutes or more, or a
+   * model from before 3.7.0 pinned at the bounds, restarts from the building profile (soft reset).
+   */
+  private async _applyEmitterDelay(profile?: BuildingProfileType): Promise<void> {
+    const profileType = (profile ?? this.device.getSetting('building_profile') ?? 'average') as BuildingProfileType;
+    const restart = this.learner.applyEmitterDelay(this.emitterDelay.getDelayMinutes(), profileType);
+    if (!restart) return;
+    this.logger(
+      `BuildingModelService: ${restart === 'jump' ? 'emitter delay changed by 60 min or more' : 'model from before 3.7.0 pinned at the bounds'}`
+      + ` — soft reset to profile '${profileType}'`,
+    );
+    await this._clearMilestone();
+    await this.persistState();
+    await this.updateModelCapabilities();
   }
 
   /**
@@ -1091,6 +1146,7 @@ export class BuildingModelService {
         rateLimitActivations: excitation.rateLimitActivations,
         boundedSteps: excitation.boundedSteps, // ADR-062 B12
       },
+      emitterDelay: this.emitterDelay.getDiagnostics(), // ADR-066 D6
       validation: {
         parametersRealistic: warnings.length === 0,
         warnings,
@@ -1285,6 +1341,7 @@ export class BuildingModelService {
         buildingProfile, // Will use profile defaults
         enableDynamicPInt,
         timeZone: resolveHomeyTimezone(this.device.homey), // ADR-062 F2
+        emitterDelayMinutes: this.emitterDelay.getDelayMinutes(), // ADR-066: the delay survives a reset
         logger: this.logger,
       };
 
@@ -1331,6 +1388,7 @@ export class BuildingModelService {
       this.logger('BuildingModelService: Failed to persist final state:', error);
     }
     await this.persistPowerHistory();
+    await this.emitterDelay.persist(); // ADR-066
 
     // Cleanup timers
     if (this.updateInterval) {

@@ -106,6 +106,7 @@ function createService(device, adjustments = []) {
       }),
     }),
     calculateThermalAdjustment: () => ({ adjustment: 0, reason: 'test thermal', priority: 'low' }),
+    applyLearningSettings: async () => {}, // ADR-066: a control-mode change updates the emitter delay
   };
   service.energyOptimizer = {
     getPriceData: () => [],

@@ -7,6 +7,7 @@ import { HeatingController, SensorData, type ControllerAction } from '../adaptiv
 import { ExternalTemperatureService } from './external-temperature-service';
 import { BuildingModelService } from './building-model-service';
 import { BUILDING_PROFILES, type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
+import { EMITTER_DELAY_SETTING_KEYS } from '../../shared/adaptive/emitter-delay-tracker';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
 import { DefrostLearner } from '../../shared/adaptive/defrost-learner';
@@ -2021,7 +2022,8 @@ export class AdaptiveControlService {
     }
 
     // ADR-062 A5: learning settings take effect directly (values from newSettings)
-    if (changedKeys.includes('building_model_forgetting_factor') || changedKeys.includes('enable_dynamic_pint')) {
+    if (changedKeys.includes('building_model_forgetting_factor') || changedKeys.includes('enable_dynamic_pint')
+      || EMITTER_DELAY_SETTING_KEYS.some((key) => changedKeys.includes(key))) { // ADR-066 D5
       await this.buildingModel.applyLearningSettings(newSettings, changedKeys);
     }
 

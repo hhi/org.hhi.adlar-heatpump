@@ -230,3 +230,67 @@ test('ADR-062 B6: getDiagnosticStatus() reports the prediction RMSE (null before
   assert.ok(Object.prototype.hasOwnProperty.call(result.status, 'predictionRmse24h'));
   assert.strictEqual(result.status.predictionRmse24h, null);
 });
+
+test('ADR-066 D2: the start value of the emitter delay comes from the settings and the heat-pump mode', async () => {
+  const cases = [
+    [{ building_model_emitter_type: 'auto', building_model_buffer_volume: 120 }, { adlar_mode: '1' }, 150],
+    [{ building_model_emitter_type: 'auto', building_model_buffer_volume: 0 }, { adlar_mode: '3' }, 180],
+    [{ building_model_emitter_type: 'radiator', building_model_buffer_volume: 0 }, { adlar_mode: '7' }, 30],
+    [{}, { adlar_mode: '1' }, 30],
+  ];
+  for (const [settings, capabilities, expected] of cases) {
+    const device = createDevice({ settings, capabilities });
+    device.hasCapability = (key) => key === 'adlar_mode';
+    const service = new BuildingModelService({ device, enableDynamicPInt: false, logger: () => {} });
+    assert.strictEqual(service.getLearner().getEmitterDelay(), expected, JSON.stringify({ settings, capabilities }));
+  }
+});
+
+test('ADR-066 D5: a changed buffer tank setting updates the learner and the diagnostics', async () => {
+  const device = createDevice({ settings: { building_model_emitter_type: 'radiator', building_model_buffer_volume: 0 } });
+  const service = new BuildingModelService({ device, enableDynamicPInt: false, logger: () => {} });
+  assert.strictEqual(service.getLearner().getEmitterDelay(), 30);
+  await service.applyLearningSettings(
+    { building_model_emitter_type: 'radiator', building_model_buffer_volume: 200 },
+    ['building_model_buffer_volume'],
+  );
+  assert.strictEqual(service.getLearner().getEmitterDelay(), 230);
+  const diagnostics = await service.getDiagnostics();
+  assert.strictEqual(diagnostics.emitterDelay.delayMinutes, 230);
+  assert.strictEqual(diagnostics.emitterDelay.source, 'start');
+  assert.ok(device.store.building_model_emitter_delay, 'the estimator state is persisted');
+});
+
+test('ADR-066: a heat-pump mode without a heating circuit keeps the emitter type found before', async () => {
+  const capabilities = { adlar_mode: '3' }; // Floor heating
+  const device = createDevice({ settings: { building_model_emitter_type: 'auto', building_model_buffer_volume: 0 }, capabilities });
+  device.hasCapability = (key) => key === 'adlar_mode';
+  device.getCapabilityValue = (key) => capabilities[key] ?? null;
+  const service = new BuildingModelService({ device, enableDynamicPInt: false, logger: () => {} });
+  assert.strictEqual(service.getLearner().getEmitterDelay(), 180);
+  capabilities.adlar_mode = '2'; // Hot water only
+  await service.applyLearningSettings({ building_model_emitter_type: 'auto', building_model_buffer_volume: 0 }, ['adaptive_control_mode']);
+  assert.strictEqual(service.getLearner().getEmitterDelay(), 180);
+  capabilities.adlar_mode = '1'; // Heating: a real change
+  await service.applyLearningSettings({ building_model_emitter_type: 'auto', building_model_buffer_volume: 0 }, ['adaptive_control_mode']);
+  assert.strictEqual(service.getLearner().getEmitterDelay(), 30);
+});
+
+test('ADR-066 D7: a stored model from before 3.7.0 pinned at the bounds restarts from the profile at start-up', async () => {
+  const identity = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+  const pinned = [1 / 39.9, 0.2 / 39.9, 4.8 / 39.9, 1.4 / 39.9];
+  const lines = [];
+  const device = createDevice({
+    settings: { building_profile: 'average', building_model_emitter_type: 'radiator', building_model_buffer_volume: 0 },
+    store: { building_model_state: { theta: pinned, P: identity, sampleCount: 2600, lastMeasurement: null } },
+  });
+  trackIntervals(device);
+  const service = new BuildingModelService({ device, enableDynamicPInt: false, logger: (msg) => lines.push(String(msg)) });
+  await service.initialize();
+  await service.destroy();
+  assert.match(lines.join('\n'), /model from before 3\.7\.0 pinned at the bounds — soft reset to profile 'average'/);
+  const stored = device.store.building_model_state;
+  assert.ok(Math.abs(stored.theta[0] - 1 / 15) < 1e-12, 'θ from the average profile');
+  assert.strictEqual(stored.emitterDelayMinutes, 30);
+  assert.strictEqual(stored.sampleCount, 1300);
+});

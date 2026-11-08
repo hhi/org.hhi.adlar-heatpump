@@ -139,6 +139,7 @@ const DRIVER_COMPOSE_CAPABILITIES = [
   'adlar_building_g',
   'adlar_building_c',
   'adlar_building_pint',
+  'adlar_building_emitter_delay', // ADR-066 (3.7.0)
   'building_model_diagnostics',
   'building_insight_insulation',
   'building_insight_preheating',
