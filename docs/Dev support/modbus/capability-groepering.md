@@ -17,7 +17,7 @@ Logische volgorde van capabilities in `driver.compose.json`. Gebruik deze volgor
 | 11 | Energieprijzen | `adlar_energy_price_current`, `adlar_energy_price_next`, `adlar_energy_price_category`, `adlar_price_forecast_4h`, `adlar_price_forecast_24h`, `energy_prices_data`, `adlar_cheapest_block_start`, `adlar_price_savings_potential` |
 | 12 | Energiekosten | `adlar_energy_cost_daily`, `adlar_energy_cost_hourly`, `adlar_external_energy_daily`, `adlar_external_energy_total` |
 | 13 | Adaptieve regeling | `adlar_simulated_target`, `adaptive_control_diagnostics`, `cop_optimizer_diagnostics`, `adlar_optimal_delay` |
-| 14 | Gebouwmodel | `adlar_building_ua`, `adlar_building_tau`, `adlar_building_g`, `adlar_building_c`, `adlar_building_pint`, `building_model_diagnostics`, `building_insight_insulation`, `building_insight_preheating`, `building_insight_profile`, `building_insight_thermal_storage`, `building_insights_diagnostics` |
+| 14 | Gebouwmodel | `adlar_building_ua`, `adlar_building_tau`, `adlar_building_g`, `adlar_building_c`, `adlar_building_pint`, `adlar_building_emitter_delay` (3.7.0), `building_model_diagnostics`, `building_insight_insulation`, `building_insight_preheating`, `building_insight_profile`, `building_insight_thermal_storage`, `building_insights_diagnostics` |
 | 15 | Prognose | `adlar_forecast_advice`, `adlar_forecast_cop_correction` |
 | 16 | Prestaties | `adlar_performance_report`, `adlar_performance_score` |
 | 17 | Verbinding & monitoring | `adlar_connection_status`, `adlar_connection_active`, `adlar_daily_disconnect_count`, `adlar_firmware_mcu`, `adlar_protocol_version`, `adlar_openmeteo_last_fetch` |
