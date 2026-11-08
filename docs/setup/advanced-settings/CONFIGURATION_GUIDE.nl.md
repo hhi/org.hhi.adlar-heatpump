@@ -478,6 +478,32 @@ Machine learning algoritme dat de thermische eigenschappen van je woning leert.
   - **Passief**: Passiefhuis, HR+++ glas, luchtdicht, WTW
 - **Wijzigen**: Werkt direct; het leren gaat verder vanaf de waarden van het nieuwe profiel, met de helft van de verzamelde samples
 
+### Afgiftesysteem en buffervat (v3.7.0+)
+
+- **Functie**: Startwaarde voor de afgiftevertraging, de tijd tussen de warmte
+  die de warmtepomp levert en de warmte die de kamer bereikt. Zonder die
+  vertraging ziet het model de warmte van een buffervat of vloer pas later
+  terug, en maakt het de thermische massa (C), het warmteverlies (UA) en de
+  interne winst te groot
+- **Afgiftesysteem**: Automatisch (standaard), Radiatoren / convectoren of
+  Vloerverwarming. Radiatoren beginnen bij 30 min, vloerverwarming bij 180 min.
+  Automatisch neemt de regelmodus (Positioneel – Radiatoren/Vloerverwarming),
+  anders de modus van de warmtepomp als die vloer en radiatoren onderscheidt;
+  anders 60 min
+- **Buffervat**: Inhoud in liter (0–2000, standaard 0). Elke liter telt 1 minuut
+  op
+- **Voorbeeld**: Radiatoren met een buffervat van 120 liter: 30 + 120 = 150 min
+- **Leren**: Na ongeveer 3 dagen met verwarming kiest het model zelf de
+  vertraging die de metingen het best verklaart (0–360 min). Zie "ML
+  Afgiftevertraging"; de titel zegt of de waarde geleerd is of de startwaarde
+- **Wijzigen**: Werkt direct; een geleerde waarde vervalt en wordt binnen 6 uur
+  opnieuw bepaald. Verandert de vertraging 60 minuten of meer, dan begint het
+  gebouwmodel opnieuw vanaf het gekozen gebouwtype (met de helft van de samples)
+- **Bij de update naar 3.7.0**: Een model dat vastzit (thermische massa tegen
+  40 kWh/°C, tijdsconstante boven 500 uur of interne winst boven 1 kW) begint
+  opnieuw vanaf het gebouwtype. Vul het buffervat in vóór de update; dan blijft
+  het bij één herstart
+
 ### Reset Gebouwmodel Leren
 - **Standaard**: Uitgeschakeld
 - **Type**: Eenmalige actie (checkbox)

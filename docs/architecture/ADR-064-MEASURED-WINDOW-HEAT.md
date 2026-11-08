@@ -486,7 +486,7 @@ getoonde waarden iets laten afwijken van §3.5.
 | O3 | Venster-COP | Diagnostiek; capability later |
 | O4 | Dekkingsdrempel | 80% per interval van 5 min |
 | O5 | ~~Negatieve ΔT als 0 tellen~~ | **Vervallen:** meetellen (D1), ΔT ≤ −2 K uitsluiten (D6); zie §3.4 |
-| O6 | Afgiftevertraging | Eigen besluit: afgiftefilter (review §2.3). Het effect op C is robuust; het effect op UA en P_int hangt af van de opzet (§3.2, §3.5). Testinstallatie: radiatoren, 15–60 min verhoogt C tot +38% |
+| O6 | Afgiftevertraging | Eigen besluit: afgiftefilter (review §2.3). Het effect op C is robuust; het effect op UA en P_int hangt af van de opzet (§3.2, §3.5). Testinstallatie: radiatoren, 15–60 min verhoogt C tot +38%. **Uitgewerkt in [ADR-066](ADR-066-EMITTER-DELAY.md) (3.7.0):** de testinstallatie heeft ook een buffervat van 120 liter; de vertraging is daar 2½–4 uur |
 | O7 | Tapwaterbit | Op hardware nagaan welk bit van 0x0019 bij tapwater schakelt, en of dat per installatie verschilt (D8) |
 | O8 | CV-ketel als bijstook | Signaal kiezen: instelling, flowkaart of externe sensor (D9) |
 | O9 | Koppeling UA–P_int en traag herstel | Eigen besluit. De correlatie bepaalt niet alleen of UA en P_int te scheiden zijn, maar ook hoe lang een fout langs de kam blijft staan (§3.5: 10–28 dagen). Opties: (a) corr θ2–θ4 en de volledige P in de diagnostiek (nu alleen `P_diag`, afgerond); (b) inzichten over UA en P_int markeren als "nog niet te scheiden" boven ongeveer 0,98; (c) P_int bij hoge correlatie naar de profielwaarde trekken; (d) P langs de kam vergroten, zodat de learner in die richting sneller bijstuurt; (e) een volledige reset aanbevelen na een wijziging van de invoer, zoals de invoering van ADR-064 (§3.6) |

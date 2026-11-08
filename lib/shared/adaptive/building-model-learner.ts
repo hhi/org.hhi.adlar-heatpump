@@ -96,6 +96,7 @@ export interface BuildingModelConfig {
   buildingProfile?: BuildingProfileType; // Building type for initial parameters
   enableDynamicPInt?: boolean; // Enable time-of-day P_int adjustment
   timeZone?: string; // ADR-062 F2: Homey's timezone for the P_int windows (the process runs in UTC)
+  emitterDelayMinutes?: number; // ADR-066: first-order delay of the measured power (0 = none)
   logger?: (msg: string, ...args: unknown[]) => void;
 }
 
@@ -142,6 +143,8 @@ export class BuildingModelLearner {
   private enableDynamicPInt: boolean;
   private timeZone: string;
   private basePInt: number; // Base P_int value for dynamic calculation
+  private emitterDelayMinutes: number; // ADR-066 D1: delay between measured heat and the room
+  private legacyState = false; // ADR-066 D7: restored state from before 3.7.0 (learned without a filter)
 
   // ADR-057 W3 (referentieproject): excitation diagnostics — structural reverts mean
   // theta is pinned against physical bounds (poor excitation), which the revert masks
@@ -207,6 +210,22 @@ export class BuildingModelLearner {
   }
 
   // =========================================================================
+  // ADR-066 D1: emitter filter. Delay range, and the gap after which the filter restarts at the
+  // measured power. The filtered power is stored in lastMeasurement, so it survives a restart.
+  public static readonly EMITTER_FILTER = {
+    MAX_MINUTES: 360,
+    RESET_GAP_MINUTES: 60,
+  } as const;
+
+  // ADR-066 D7: θ learned with a very different delay (or without a filter, before 3.7.0, while
+  // pinned at the bounds) is an accumulated error: the model restarts from the building profile.
+  public static readonly EMITTER_RESTART = {
+    MIN_JUMP_MINUTES: 60,
+    SUSPECT_C: 39.5, // kWh/°C, at the upper bound of 40
+    SUSPECT_TAU_HOURS: 500,
+    SUSPECT_PINT_KW: 1.0,
+  } as const;
+
   // ADR-062 B12: way out when the learner is stuck against the bounds. After
   // AFTER_CONSECUTIVE_REVERTS reverts in a row (about one hour) the next step
   // outside the bounds is shortened to the bounds instead of reverted.
@@ -330,6 +349,7 @@ export class BuildingModelLearner {
     this.basePInt = profile.pInt; // Store for dynamic P_int calculation
     this.enableDynamicPInt = config.enableDynamicPInt ?? false;
     this.timeZone = config.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.emitterDelayMinutes = BuildingModelLearner.clampEmitterDelay(config.emitterDelayMinutes ?? 0);
 
     // Initialize covariance matrix with high uncertainty
     const initCov = config.initialCovariance;
@@ -365,18 +385,21 @@ export class BuildingModelLearner {
    * measurements, with time-weighted inputs over the same window. Every accepted
    * measurement counts in sampleCount (also while the window fills).
    */
-  public addMeasurement(data: MeasurementData): void {
+  public addMeasurement(measured: MeasurementData): void {
     // =========================================================================
     // DEFENSIVE LAYER 1: Measurement Validation
     // Reject physically impossible or extreme values BEFORE they enter the window
     // =========================================================================
-    const validationFailure = this.validateMeasurement(data);
+    const validationFailure = this.validateMeasurement(measured);
     if (validationFailure) {
       this.logger('BuildingModelLearner: ⚠️ INVALID MEASUREMENT - skipping, window restarts');
       this.logger(`  Reason: ${validationFailure}`);
       this.interruptWindow();
       return;
     }
+
+    // ADR-066 D1: from here on the power is the heat that reaches the room (filtered)
+    const data: MeasurementData = { ...measured, pHeating: this.filterEmitterPower(measured) };
 
     // First measurement - just store it
     // DEFENSIVE: Also treat as first if lastMeasurement is null (corrupted state recovery)
@@ -493,6 +516,69 @@ export class BuildingModelLearner {
   }
 
   /**
+   * ADR-066 D1: first-order filter of the measured power with the emitter delay. Continues from
+   * the filtered power of the previous accepted measurement; restarts at the measured power for
+   * the first measurement, after a gap above RESET_GAP_MINUTES and without a delay.
+   */
+  private filterEmitterPower(data: MeasurementData): number {
+    const previous = this.lastMeasurement;
+    if (this.emitterDelayMinutes <= 0 || !previous || !Number.isFinite(previous.pHeating)) {
+      return data.pHeating;
+    }
+    const gapMinutes = (data.timestamp - previous.timestamp) / 60000;
+    if (!(gapMinutes > 0) || gapMinutes > BuildingModelLearner.EMITTER_FILTER.RESET_GAP_MINUTES) {
+      return data.pHeating;
+    }
+    const alpha = 1 - Math.exp(-gapMinutes / this.emitterDelayMinutes);
+    return previous.pHeating + alpha * (data.pHeating - previous.pHeating);
+  }
+
+  private static clampEmitterDelay(minutes: number): number {
+    if (!Number.isFinite(minutes)) return 0;
+    return Math.min(BuildingModelLearner.EMITTER_FILTER.MAX_MINUTES, Math.max(0, minutes));
+  }
+
+  /**
+   * ADR-066 D4: a new emitter delay applies from the next measurement, without a reset.
+   */
+  public setEmitterDelay(minutes: number): void {
+    const next = BuildingModelLearner.clampEmitterDelay(minutes);
+    if (next === this.emitterDelayMinutes) return;
+    this.logger(`BuildingModelLearner: emitter delay ${this.emitterDelayMinutes} → ${next} min`);
+    this.emitterDelayMinutes = next;
+  }
+
+  /**
+   * ADR-066 D7: apply a new emitter delay and soft-reset to the profile when θ was learned with a
+   * very different delay (a jump of at least MIN_JUMP_MINUTES), or when a state from before 3.7.0
+   * is pinned at the bounds (C at the bound, τ or P_int implausibly high). Small steps of the
+   * estimator keep θ (D4). Returns the reason of a restart, or null.
+   */
+  public applyEmitterDelay(minutes: number, profileType: BuildingProfileType): 'jump' | 'legacy_suspect' | null {
+    const next = BuildingModelLearner.clampEmitterDelay(minutes);
+    const jump = Math.abs(next - this.emitterDelayMinutes) >= BuildingModelLearner.EMITTER_RESTART.MIN_JUMP_MINUTES;
+    const suspect = this.legacyState && this.isPinned();
+    this.legacyState = false;
+    this.setEmitterDelay(next);
+    if (!jump && !suspect) return null;
+    this.softReset(profileType);
+    return jump ? 'jump' : 'legacy_suspect';
+  }
+
+  /** ADR-066 D7: θ against the bound of C, or τ or P_int implausibly high */
+  private isPinned(): boolean {
+    const { SUSPECT_C, SUSPECT_TAU_HOURS, SUSPECT_PINT_KW } = BuildingModelLearner.EMITTER_RESTART;
+    const C = 1 / this.theta[0];
+    const tau = this.theta[1] > 0 ? 1 / this.theta[1] : Infinity;
+    const pInt = this.theta[3] * C;
+    return C >= SUSPECT_C || tau > SUSPECT_TAU_HOURS || pInt > SUSPECT_PINT_KW;
+  }
+
+  public getEmitterDelay(): number {
+    return this.emitterDelayMinutes;
+  }
+
+  /**
    * ADR-062 B2: the next accepted measurement starts a new window. Called by the
    * service for every sample that a gate keeps from the learner (mode, defrost,
    * hot water, missing power or COP), so dT/dt never spans a blocked interval.
@@ -525,8 +611,9 @@ export class BuildingModelLearner {
 
   /**
    * Time-of-day P_int multiplier for the RLS input (1.0 when dynamic P_int is off).
+   * Public for the emitter delay estimator (ADR-066), which uses the same rhythm.
    */
-  private pIntMultiplierAt(timestamp: number): number {
+  public pIntMultiplierAt(timestamp: number): number {
     if (!this.enableDynamicPInt) {
       return 1.0;
     }
@@ -945,6 +1032,7 @@ export class BuildingModelLearner {
       totalReverts: this.totalReverts,
       rateLimitActivations: this.rateLimitActivations,
       boundedSteps: this.boundedSteps,
+      emitterDelayMinutes: this.emitterDelayMinutes, // ADR-066 D7: the delay θ is learned with
     };
   }
 
@@ -982,6 +1070,7 @@ export class BuildingModelLearner {
     totalReverts?: number;
     rateLimitActivations?: number;
     boundedSteps?: number;
+    emitterDelayMinutes?: number;
   }): RestoreResult {
     // DEFENSIVE VALIDATION: Prevent corrupt state from being restored
     let stateIsValid = true;
@@ -1062,6 +1151,9 @@ export class BuildingModelLearner {
     this.totalReverts = state.totalReverts ?? 0;
     this.rateLimitActivations = state.rateLimitActivations ?? 0;
     this.boundedSteps = state.boundedSteps ?? 0; // ADR-062 B12 (0 for older states)
+    // ADR-066 D7: a state from before 3.7.0 was learned without a filter (delay 0)
+    this.legacyState = state.emitterDelayMinutes === undefined;
+    this.emitterDelayMinutes = BuildingModelLearner.clampEmitterDelay(state.emitterDelayMinutes ?? 0);
     this.logger(`BuildingModelLearner: Restored VALID state with ${this.sampleCount} samples`);
     return { restored: true, reasons: [], covarianceProjected };
   }

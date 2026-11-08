@@ -1,0 +1,35 @@
+{
+  "id": "adlar_building_emitter_delay",
+  "type": "number",
+  "title": {
+    "en": "ML Emitter Delay",
+    "nl": "ML Afgiftevertraging",
+    "de": "ML Wärmeabgabe-Verzögerung",
+    "fr": "Retard d'Émission ML"
+  },
+  "units": {
+    "en": "min",
+    "nl": "min",
+    "de": "min",
+    "fr": "min"
+  },
+  "desc": {
+    "en": "Time between the heat measured at the heat pump and the heat that reaches the room (buffer tank, radiators, floor)",
+    "nl": "Tijd tussen de warmte die bij de warmtepomp gemeten wordt en de warmte die de kamer bereikt (buffervat, radiatoren, vloer)",
+    "de": "Zeit zwischen der an der Wärmepumpe gemessenen Wärme und der Wärme, die den Raum erreicht (Pufferspeicher, Heizkörper, Fußboden)",
+    "fr": "Temps entre la chaleur mesurée à la pompe à chaleur et la chaleur qui atteint la pièce (ballon tampon, radiateurs, plancher)"
+  },
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "chartType": "stepLine",
+  "insights": true,
+  "insightsTitle": {
+    "en": "Emitter Delay",
+    "nl": "Afgiftevertraging",
+    "de": "Wärmeabgabe-Verzögerung",
+    "fr": "Retard d'Émission"
+  },
+  "icon": "/assets/building-emitter-delay.svg"
+}
