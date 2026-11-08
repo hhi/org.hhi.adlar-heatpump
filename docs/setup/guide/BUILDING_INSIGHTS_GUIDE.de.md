@@ -46,6 +46,7 @@ Gebäudeerkenntnisse analysieren die Parameter des Gebäudemodells: 4 gelernte P
 | **Solargewinnfaktor** | g | Effektivität der Sonneneinstrahlung | 0,3-0,6 |
 | **Interne Wärmegewinne** | P_int | Wärme von Menschen, Geräten, Kochen | 0,2-0,5 kW |
 | **Windkorrektur** | W_corr | Zusätzlicher Wärmeverlust bei starkem Wind (v2.7.0+) | 0-50 W/°C |
+| **Wärmeabgabe-Verzögerung** | — | Zeit zwischen gelieferter Wärme und der Wärme im Raum (Pufferspeicher, Fußboden) (v3.7.0+) | 0-360 min |
 
 Das System vergleicht gelernte Werte mit:
 - **Ihrem ausgewählten Gebäudeprofil** (Leicht/Mittel/Schwer/Passiv)
@@ -260,6 +261,14 @@ aktuellen Wetter, zum Beispiel `Very slow (~24 hours for 2°C) · at 5°C outsid
 
 **Beispiel-Empfehlung:**
 > „Ändern Sie das Gebäudeprofil in den Geräteeinstellungen auf 'schwer' für schnelleres Lernen und bessere Anfangsparameter"
+
+**Hinweis (v3.7.0+):** Bei einem Pufferspeicher oder einer Fußbodenheizung
+zuerst **Wärmeabgabesystem** und **Pufferspeicher** (unter
+**Gebäudemodell-Lernen**) einstellen und einige Tage mit Heizbetrieb abwarten.
+Ohne diese Wärmeabgabe-Verzögerung erscheinen die thermische Masse (C) und die
+Zeitkonstante (τ) zu groß, und diese Meldung weist fälschlich auf ein
+schwereres Profil hin. Siehe
+[Wärmeabgabesystem und Pufferspeicher](../advanced-settings/CONFIGURATION_GUIDE.de.md#wärmeabgabesystem-und-pufferspeicher-v370).
 
 **Profileigenschaften:**
 

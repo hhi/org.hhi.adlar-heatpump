@@ -46,6 +46,7 @@ Building Insights analyze the parameters of the Building Model: 4 learned parame
 | **Solar Gain Factor** | g | Effectiveness of solar radiation heating | 0.3-0.6 |
 | **Internal Heat Gains** | P_int | Heat from people, appliances, cooking | 0.2-0.5 kW |
 | **Wind Correction** | W_corr | Extra heat loss in high wind (v2.7.0+) | 0-50 W/°C |
+| **Emitter Delay** | — | Time between the heat delivered and the heat reaching the room (buffer tank, floor) (v3.7.0+) | 0-360 min |
 
 The system compares learned values with:
 - **Your selected building profile** (Light/Average/Heavy/Passive)
@@ -260,6 +261,13 @@ insight then names the time for 2 °C at the current weather, for example
 
 **Example Recommendation:**
 > "Change building profile to 'heavy' in device settings for faster learning and better initial parameters"
+
+**Note (v3.7.0+):** with a buffer tank or floor heating, first set
+**Emitter System** and **Buffer Tank** (under **Building Model Learning**) and
+wait a few days with heating. Without that emitter delay, the thermal mass (C)
+and the time constant (τ) appear too large, and this insight wrongly points to
+a heavier profile. See
+[Emitter System and Buffer Tank](../advanced-settings/CONFIGURATION_GUIDE.en.md#emitter-system-and-buffer-tank-v370).
 
 **Profile Characteristics:**
 
