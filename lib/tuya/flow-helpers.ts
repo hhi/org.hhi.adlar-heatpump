@@ -4,6 +4,8 @@ import {
   FlowCardAction,
   FlowCardCondition,
 } from 'homey';
+// eslint-disable-next-line import/no-unresolved, import/extensions, node/no-missing-import
+import { clampIndoorTarget } from '../shared/utils/indoor-target';
 
 /**
  * Helper functions for pattern-based flow card registration
@@ -32,6 +34,8 @@ export interface FlowCardPattern {
   sensorType?: string;
   /** Optional capability that must exist for this card to be available */
   requiresCapability?: string;
+  /** Limit the value to the desired indoor temperature range (v3.7.1, R9) */
+  limitToIndoorTargetRange?: boolean;
 }
 
 /**
@@ -132,7 +136,17 @@ export function registerSimpleActions(app: App, patterns: FlowCardPattern[]) {
         // Extract the value from args (assumes first argument contains the value)
         const argKeys = Object.keys(args).filter((key) => key !== 'device');
         const valueKey = argKeys[0];
-        const value = args[valueKey];
+        let value = args[valueKey];
+
+        // v3.7.1 (R9): limit to 15–25 °C instead of failing (e.g. thermostat frost protection 7 °C)
+        if (pattern.limitToIndoorTargetRange) {
+          const requested = Number(value);
+          const limited = clampIndoorTarget(requested);
+          if (limited.clamped) {
+            app.log(`Action ${pattern.cardId}: desired indoor temperature ${requested}°C limited to ${limited.value}°C`);
+          }
+          value = limited.value;
+        }
 
         try {
           // Trigger the capability listener to send command to device (not just update Homey value)
@@ -272,7 +286,9 @@ export const FLOW_PATTERNS = {
    */
   simpleActions: [
     { cardId: 'set_target_temperature', pattern: 'simple_action' as const, capabilityName: 'target_temperature' },
-    { cardId: 'set_desired_indoor_temperature', pattern: 'simple_action' as const, capabilityName: 'target_temperature.indoor' },
+    {
+      cardId: 'set_desired_indoor_temperature', pattern: 'simple_action' as const, capabilityName: 'target_temperature.indoor', limitToIndoorTargetRange: true,
+    },
     { cardId: 'set_hotwater_temperature', pattern: 'simple_action' as const, capabilityName: 'adlar_hotwater' },
     { cardId: 'set_heating_mode', pattern: 'simple_action' as const, capabilityName: 'adlar_enum_mode' },
     { cardId: 'set_work_mode', pattern: 'simple_action' as const, capabilityName: 'adlar_enum_work_mode' },
