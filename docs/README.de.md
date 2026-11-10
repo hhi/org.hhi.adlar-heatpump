@@ -2,6 +2,40 @@
 
 Willkommen zur Dokumentation der Adlar-Wärmepumpe-Homey-App.
 
+[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+
+## Beginnen Sie mit Ihrem Treiber
+
+Diese App unterstützt drei Treiber. Wählen Sie die Anleitung für Ihr Modell
+und Ihren Anschluss; Tuya und Modbus benötigen unterschiedliche Kopplungsdaten.
+
+| Treiber | Installation | Standard-Dashboard |
+| --- | --- | --- |
+| Aurora I/II über Tuya | [Lokaler Schlüssel und Gerätedaten](setup/Tuya_LocalKey_Homey_Guide_DE.pdf), [Protokollversion](setup/PROTOCOL_VERSION_GUIDE.de.md) | `http://HOMEY-IP:8092` |
+| Aurora I/II über Modbus | [RS485 und Modbus-TCP-Gateway](setup/modbus-elfin-ew11-setup.md) (Niederländisch), Einstellungen für Aurora I/II verwenden | `http://HOMEY-IP:8090` |
+| Aurora III über Modbus | [RS485 und Modbus-TCP-Gateway](setup/modbus-elfin-ew11-setup.md) (Niederländisch), Einstellungen für Aurora III verwenden | `http://HOMEY-IP:8091` |
+
+Ersetzen Sie HOMEY-IP durch die lokale IP-Adresse Ihres Homey Pro. Verwenden
+Sie Ihren eingestellten Port, falls Sie ihn geändert haben. Beachten Sie die
+[Dashboard-Übersicht für alle drei Treiber](../README.md#local-dashboards)
+(Englisch) und den [Modbus-Dashboard-Leitfaden](setup/MODBUS_DASHBOARD_GUIDE.de.md).
+Die [Tuya-Dashboard-Entscheidung](architecture/ADR-068-TUYA-DASHBOARD.md)
+(Niederländisch) beschreibt den technischen Aufbau und die Einschränkungen von Tuya.
+
+## Finden Sie die passende Anleitung
+
+| Ihre Frage | Dokumentation |
+| --- | --- |
+| Einstellungen und tägliche Nutzung | [Konfiguration](setup/advanced-settings/CONFIGURATION_GUIDE.de.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.de.md), [erweiterte Flow-Karten](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.de.md) |
+| Heizkurven und adaptive Regelung | [Erweiterte Funktionen](setup/advanced-control/Advanced_Features_Intro.de.md), [Regelungsübersicht](ADAPTIVE_CONTROL_OVERVIEW.de.md), [praktische Anleitung](setup/guide/ADAPTIVE_CONTROL_GUIDE.de.md) |
+| COP, SCOP und Gebäudeeinblicke | [COP einrichten](setup/COP%20flow-card-setup.de.md), [Berechnungsmethoden](COP%20calculation/), [Gebäudemodell](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md), [Gebäudeeinblicke nutzen](setup/guide/BUILDING_INSIGHTS_GUIDE.de.md) |
+| Probleme oder Umstieg | [Tuya-Fehlerbehebung](setup/USER_QUICK_FIX.de.md), [Modbus-Diagnose](setup/MODBUS_DASHBOARD_GUIDE.de.md), [Aurora-III-Migration](setup/MIGRATION_AURORA3.de.md) |
+| Technische Details und Entwicklung | [Spezifikationen und Zuordnungen](Heatpump%20specs/), [Architektur und Entwurfsentscheidungen](architecture/), [Entwicklerressourcen](Dev%20support/), [Verifikation und Testszenarien](testing/) |
+
+Funktionen und Einstellungen unterscheiden sich je nach Treiber und
+Wärmepumpenmodell. Die meisten Benutzeranleitungen sind übersetzt; einige
+technische Referenzen sind nur auf Niederländisch oder Englisch verfügbar.
+
 ---
 
 ## 🗂️ Verzeichnisübersicht
@@ -89,15 +123,6 @@ Der Großteil der Benutzerdokumentation ist in vier Sprachen verfügbar:
 
 ---
 
-## 🚀 Schnellstart
 
-**Neuer Benutzer?** Beginnen Sie hier:
-1. [Tuya LocalKey-Anleitung](setup/Tuya_LocalKey_Homey_Guide_DE.pdf) — Holen Sie sich Ihre Anmeldedaten
-2. [Protokollversions-Leitfaden](setup/PROTOCOL_VERSION_GUIDE.de.md) — Wählen Sie das richtige Protokoll
-3. [Einführung Erweiterte Funktionen](setup/advanced-control/Advanced_Features_Intro.de.md) — Schalten Sie die volle Funktionalität frei
 
-**Probleme?** Prüfen Sie die [Schnelle Problemlösung](setup/USER_QUICK_FIX.de.md)
-
----
-
-*Letzte Aktualisierung: 2026-01-29*
+*Letzte Aktualisierung: 2026-11-10*

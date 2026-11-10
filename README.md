@@ -79,30 +79,60 @@ both models; gateway reference material is available in
 Moving from the separate Aurora III app? See the
 [migration guide](docs/setup/MIGRATION_AURORA3.en.md).
 
-## Modbus Dashboards
+## Local Dashboards
 
-Each Modbus driver offers its own local dashboards. From a browser on the same
-network, open one of the following URLs. The default port is `8090` for
-Aurora I/II and `8091` for Aurora III:
+All three drivers offer local dashboards. From a browser on the same network,
+open the address for your driver:
 
-- `http://<homey-ip>:<port>/` — live, read-only heat-pump overview
-- `http://<homey-ip>:<port>/interactive` — live overview with direct setpoint controls
-- `http://<homey-ip>:<port>/live` — all device capabilities grouped by category
-- `http://<homey-ip>:<port>/expert` — register view with Modbus addresses
-- `http://<homey-ip>:<port>/changelog` — observed register changes and poll recommendations
-- `http://<homey-ip>:8090/heating-curve` — DIY heating-curve editor (Aurora I/II only)
+| Driver | Default dashboard address |
+| --- | --- |
+| Aurora I/II via Tuya | `http://<homey-ip>:8092` |
+| Aurora I/II via Modbus | `http://<homey-ip>:8090` |
+| Aurora III via Modbus | `http://<homey-ip>:8091` |
 
-Replace `<homey-ip>` with the IP address of your Homey Pro. If you change the
-Dashboard port setting, use that port in the URL instead. See the
-[dashboard guide](docs/setup/MODBUS_DASHBOARD_GUIDE.en.md) for details.
+Replace `<homey-ip>` with the local IP address of your Homey Pro. If you change
+the Dashboard port setting, use that port instead.
 
-> **Caution:** The expert dashboard and direct Modbus read/write Flow cards can
-> change heat-pump behaviour. Only write registers when you understand their
-> purpose and have recorded the original value.
+The following pages are available for all three drivers:
+
+- `/` — heat-pump overview with available measurements and operating status
+- `/interactive` — controls for supported settings
+- `/live` — device capabilities grouped by category
+- `/expert` — searchable overview of Tuya DPS datapoints or model-specific
+  Modbus registers, with supported write controls
+- `/changelog` — an overview per datapoint or register, with current and previous
+  values and change statistics
+
+Tuya Expert supports searches by DPS number, name, unit, value and capability.
+It offers views by DPS number, function and unit, plus a writable-only filter.
+The Tuya Changes page supports searching, sorting, a changed-only filter and
+filtered JSON or Markdown exports. Statistics are kept while the app runs,
+including when the page is closed, and reset when the app restarts.
+
+Heating-curve pages differ by driver:
+
+- Tuya: `http://<homey-ip>:8092/heating-curve` shows the reported Tuya curve
+  selections and the app's linear heating curve when its parameters are
+  available. It does not reconstruct the Tuya H/L preset curves.
+- Aurora I/II via Modbus: `http://<homey-ip>:8090/heating-curve` provides the
+  DIY heating-curve editor.
+- Aurora III via Modbus has no separate heating-curve dashboard page.
+
+Tuya uses the existing device connection and received DPS values. Modbus
+register tools and poll recommendations are specific to the Modbus drivers.
+Available measurements and controls depend on the driver and heat-pump model.
+
+See the [Modbus dashboard guide](docs/setup/MODBUS_DASHBOARD_GUIDE.en.md) for
+Modbus-specific instructions. The [Tuya dashboard architecture decision](docs/architecture/ADR-068-TUYA-DASHBOARD.md)
+describes the Tuya implementation and its limitations.
+
+> **Caution:** Dashboard write controls and direct Modbus read/write Flow cards
+> can change heat-pump behaviour. Check the meaning of a setting and record its
+> original value before changing it.
 
 ## Important Limitations
 
-- The Aurora I/II driver targets the R32 register map and warns when another
+- The Aurora I/II Modbus driver targets the R32 register map and warns when another
   refrigerant is detected.
 - The floor-heating setpoint is available as a Modbus device capability, but
   does not yet have its own Flow action.
@@ -117,17 +147,29 @@ Dashboard port setting, use that port in the URL instead. See the
 
 ## Documentation and Support
 
-The [documentation portal](docs/README.en.md) contains configuration, COP,
-Flow-card, adaptive-control and building-insights guides in English, Dutch,
-German and French.
+The `docs/` directory contains installation and user guides, troubleshooting,
+efficiency calculations, device specifications and developer documentation.
+Start with the documentation index in your preferred language:
 
-- [Advanced features introduction](docs/setup/advanced-control/Advanced_Features_Intro.en.md)
-- [COP Flow Card setup](docs/setup/COP%20flow-card-setup.en.md)
-- [Configuration guide](docs/setup/advanced-settings/CONFIGURATION_GUIDE.en.md)
-- [Flow Cards guide](docs/setup/guide/FLOW_CARDS_GUIDE.en.md)
+[Nederlands](docs/README.nl.md) · [English](docs/README.en.md) ·
+[Deutsch](docs/README.de.md) · [Français](docs/README.fr.md)
+
+Most user guides are available in these four languages. Technical reference
+material and some installation guides are available in one language only.
+Use the instructions for your driver and model; Tuya credentials and DPS
+references differ from Modbus gateway settings and register maps.
+
+| What do you want to do? | Start here |
+| --- | --- |
+| Connect a heat pump | [Choose a driver and pair it](#installation), [Tuya LocalKey guide](docs/setup/Tuya_LocalKey_Homey_Guide_EN.pdf), [Modbus gateway setup for Aurora I/II and III](docs/setup/modbus-elfin-ew11-setup.md) (Dutch) |
+| Use dashboards, settings and Flows | [Dashboards for all three drivers](#local-dashboards), [Modbus dashboard guide](docs/setup/MODBUS_DASHBOARD_GUIDE.en.md), [configuration reference](docs/setup/advanced-settings/CONFIGURATION_GUIDE.en.md), [Flow Cards guide](docs/setup/guide/FLOW_CARDS_GUIDE.en.md) |
+| Configure control and understand efficiency | [Advanced features](docs/setup/advanced-control/Advanced_Features_Intro.en.md), [COP setup](docs/setup/COP%20flow-card-setup.en.md), [COP/SCOP methodology](docs/COP%20calculation/), [adaptive control](docs/ADAPTIVE_CONTROL_OVERVIEW.en.md), [building model and insights](docs/BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md) |
+| Resolve problems or migrate | [Tuya quick fixes](docs/setup/USER_QUICK_FIX.en.md), [Tuya protocol versions](docs/setup/PROTOCOL_VERSION_GUIDE.en.md), [Modbus diagnostics](docs/setup/MODBUS_DASHBOARD_GUIDE.en.md), [Aurora III migration](docs/setup/MIGRATION_AURORA3.en.md) |
+| Explore technical details or contribute | [Heat-pump specifications and mappings](docs/Heatpump%20specs/), [architecture and design decisions](docs/architecture/), [developer resources](docs/Dev%20support/), [verification and test scenarios](docs/testing/) |
 
 Please report bugs and feature requests through the repository's GitHub
-[issues](https://github.com/hhi/org.hhi.adlar-heatpump/issues).
+[issues](https://github.com/hhi/org.hhi.adlar-heatpump/issues). Include the driver,
+heat-pump model, app version and steps needed to reproduce the problem.
 
 ## Development
 

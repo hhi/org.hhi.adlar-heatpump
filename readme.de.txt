@@ -1,60 +1,49 @@
-Steuern und überwachen Sie Ihre Adlar Castra Aurora Wärmepumpe lokal mit Homey
-Pro. Diese eine App unterstützt zwei Verbindungsmethoden: Tuya Local API und
-Modbus RS485 über ein Modbus-TCP-Gateway. Wählen Sie den zu Ihrer Installation
-passenden Gerätetreiber; beide arbeiten für den täglichen Betrieb ohne
-Cloud-Verbindung in Ihrem lokalen Netzwerk.
+Steuern und überwachen Sie Ihre Adlar Castra Aurora Wärmepumpe lokal mit Homey Pro.
+Diese App enthält drei Treiber für die Anbindung über Tuya oder Modbus.
+Die tägliche Kommunikation erfolgt über Ihr lokales Netzwerk.
 
-🇬🇧 English  🇩🇪 Deutsch 🇫🇷 Français 🇳🇱 Nederlands
+WÄHLEN SIE IHREN TREIBER
 
-TREIBER AUSWÄHLEN
+Aurora I/II über Tuya
+Für eine Aurora I/II mit Tuya-WLAN-Verbindung. Benötigt werden die Geräte-ID, der lokale Schlüssel, die lokale IP-Adresse und die Tuya-Protokollversion der Wärmepumpe.
+Lokales Dashboard: http://HOMEY-IP:8092
 
-TUYA LOCAL API
-- Wählen Sie "Aurora I/II über Tuya"
-- Benötigt Geräte-ID, lokalen Schlüssel, lokale IP-Adresse und Tuya-
-  Protokollversion (3.3, 3.4 oder 3.5) der Wärmepumpe
-- Verwenden Sie diesen Treiber für eine über WLAN verbundene Wärmepumpe
+Aurora I/II über Modbus
+Für eine Aurora I/II mit RS485/Modbus-Anschluss. Ein Modbus-TCP-Gateway ist erforderlich. Geben Sie beim Koppeln die IP-Adresse des Gateways, den TCP-Port und die Modbus-Unit-ID ein.
+Lokales Dashboard: http://HOMEY-IP:8090
 
-MODBUS-TCP-GATEWAY
-- Wählen Sie "Aurora I/II über Modbus" oder "Aurora III über Modbus", passend
-  zum Modell auf dem Typenschild
-- Benötigt einen RS485/Modbus-Anschluss und ein erreichbares Modbus-TCP-
-  Gateway, etwa ein Elfin EW11A
-- Geben Sie IP-Adresse des Gateways, TCP-Port und Modbus-Unit-ID ein
-- Die üblichen Standardwerte sind Port 502 und Unit-ID 1
-- Serielle Einstellungen des Gateways: 9600 8N1 für Aurora I/II, 9600 8N2 für
-  Aurora III
-- Lokale Dashboards: Port 8090 (Aurora I/II) und 8091 (Aurora III)
+Aurora III über Modbus
+Für eine Aurora III mit RS485/Modbus-Anschluss. Ein Modbus-TCP-Gateway ist erforderlich. Dieser Treiber verwendet die eigene Registerbelegung der Aurora III. Geben Sie beim Koppeln die IP-Adresse des Gateways, den TCP-Port und die Modbus-Unit-ID ein.
+Lokales Dashboard: http://HOMEY-IP:8091
 
-WICHTIGE FUNKTIONEN
-- Lokale Temperaturen, Betriebsstatus, Abtauen, Frostschutz, Sterilisation und
-  dekodierte Fehlerinformationen
-- Messungen von Leistung, Energie, Spannung, Strom, Kompressor, Lüfter, Ventil,
-  Pumpe und Wasserdurchfluss, sofern von der Wärmepumpe unterstützt
-- Steuerung von Ein/Aus, Betriebsmodus sowie Heiz-, Kühl- und
-  Warmwasser-Sollwerten und unterstützten Heiz- und Warmwasserkurven
-- COP- und saisonale Effizienzüberwachung mit verfügbaren Leistungs-,
-  Temperaturdifferenz- und Durchflussdaten
-- Homey-Flow-Karten für Warnungen, Fehler, Sollwerte, externe Daten und
-  erweiterte Kurven-, Zeitplan- und Saisonberechnungen
-- Optionale adaptive Temperatursteuerung, Gebäudemodell-Lernen, Energiepreis-
-  und COP-Optimierung sowie wetterbasierte Empfehlungen
-- Erweiterte lokale Diagnose- und Registerwerkzeuge für Modbus-Installationen
+Ersetzen Sie HOMEY-IP durch die lokale IP-Adresse Ihres Homey Pro. Die angegebenen Ports sind die Standardwerte. Falls Sie den Port geändert haben, verwenden Sie Ihren eingestellten Port.
 
-WICHTIG
-- Erweiterte Modbus-Schreibwerkzeuge können das Verhalten der Wärmepumpe
-  verändern. Verwenden Sie sie nur, wenn Sie das Register kennen und den
-  ursprünglichen Wert notiert haben.
-- Der Aurora I/II-Treiber zielt auf die R32-Registerkarte und warnt bei anderen
-  Kältemitteln.
-- Der COP kann fehlen oder ungenauer sein, wenn verwendbare Leistungs- oder
-  Durchflussdaten fehlen.
-- Eine feste DHCP-Zuweisung oder statische IP-Adresse für Wärmepumpe oder
-  Gateway hilft, Wiederverbindungsprobleme zu vermeiden.
+ÜBERWACHUNG UND STEUERUNG
+
+Sehen Sie Temperaturen, Betriebsstatus, Störungen und verfügbare Messwerte für Leistung, Energieverbrauch und Wasserdurchfluss ein. Steuern Sie Ein/Aus, Betriebsmodus, Sollwerte und unterstützte Heizkurvenoptionen.
+
+Nutzen Sie Homey Flows für Steuerung, Benachrichtigungen und externe Messdaten. Verfolgen Sie COP und saisonale Effizienz oder nutzen Sie die optionale adaptive Regelung, das Lernen des Gebäudemodells sowie Energiepreis- und COP-Optimierung.
+
+Verfügbare Messwerte, Einstellungen und Flow-Karten unterscheiden sich je nach Modell und Treiber. COP-Berechnungen setzen verwertbare Leistungs-, Temperatur- und Wasserdurchflussdaten voraus.
+
+LOKALE DASHBOARDS
+
+Alle drei Treiber bieten Dashboard-Seiten zur Überwachung, Steuerung und Diagnose.
+
+Dashboard und Live zeigen verfügbare Werte und den Betriebsstatus. Die interaktive Seite ermöglicht die Bedienung unterstützter Einstellungen. Expert bietet eine durchsuchbare Übersicht der Datenpunkte oder Register. Die Änderungsübersicht zeigt Werte und aufgezeichnete Änderungen. Die Heizkurvenseite gibt Einblick in die verfügbaren Kurveneinstellungen und die Regelung.
+
+Tuya zeigt DPS-Datenpunkte. Die Modbus-Treiber zeigen die Register des jeweiligen Wärmepumpenmodells. Die verfügbaren Dashboard-Funktionen unterscheiden sich je nach Treiber.
+
+INSTALLATION
+
+Wählen Sie beim Hinzufügen eines Geräts den Treiber, der zu Ihrem Wärmepumpenmodell und Anschluss passt.
+
+Für Tuya werden die lokalen Gerätedaten benötigt. Bei Modbus muss das Gateway zuvor korrekt angeschlossen und konfiguriert sein. Beachten Sie die Installationsanleitung für Ihr Modell.
+
+Eine feste lokale IP-Adresse oder DHCP-Reservierung für die Wärmepumpe oder das Gateway hilft, Verbindungsprobleme zu vermeiden.
+
+Erweiterte Schreibfunktionen können Einstellungen der Wärmepumpe verändern. Prüfen Sie die Bedeutung einer Einstellung und notieren Sie den ursprünglichen Wert, bevor Sie sie ändern.
 
 DOKUMENTATION
 
-Auf der Quellcode-Seite finden Sie Einrichtungs-, Flow-, COP-, Heizkurven- und
-erweiterte Steuerungsanleitungen, einschließlich des Modbus-Diagnose- und
-Dashboard-Leitfadens: /docs/setup/MODBUS_DASHBOARD_GUIDE.de.md.
-Für die Tuya-Kopplung: /docs/setup/Tuya_LocalKey_Homey_Guide_DE.pdf
-und /docs/setup/PROTOCOL_VERSION_GUIDE.de.md.
+Auf der Quellcode-Seite finden Sie Anleitungen zur Tuya-Kopplung, Modbus-Anbindung, Gateway-Konfiguration, zu Dashboards, Homey Flows, Störungsdiagnose, COP, Heizkurven und adaptiver Regelung.

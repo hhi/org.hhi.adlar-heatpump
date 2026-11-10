@@ -3,7 +3,10 @@
 /* eslint-disable import/extensions */
 import os from 'os';
 import Homey from 'homey';
+import { createHash } from 'crypto';
 import TuyaDevice from 'tuyapi';
+import { TuyaDashboardDevice, CapabilityMeta } from '../../lib/tuya/services/dashboard-device';
+import { TuyaDashboardHost } from '../../lib/tuya/services/dashboard-service';
 import { AdlarMapping } from '../../lib/tuya/definitions/adlar-mapping';
 import { DeviceConstants } from '../../lib/tuya/constants';
 import { isSetpointRangeValid, resolveMaxSetpoint, SETPOINT_RANGE_MIN_GAP } from '../../lib/shared/adaptive/setpoint-range';
@@ -168,6 +171,31 @@ function getFaultDescription(faultCode: number, language: 'en' | 'nl' = 'en'): s
 }
 
 class MyDevice extends Homey.Device {
+  private dashboardState: TuyaDashboardDevice | null = null;
+
+  private dashboardId(): string {
+    return createHash('sha256').update(JSON.stringify(this.getData())).digest('hex');
+  }
+
+  private async registerDashboard(): Promise<void> {
+    const app = this.homey.app as unknown as TuyaDashboardHost;
+    try {
+      this.dashboardState = app.tuyaDashboard.register(this.dashboardId(), {
+        name: () => this.getName(),
+        values: () => Object.fromEntries(this.getCapabilities().map((id) => [id, this.getCapabilityValue(id)])),
+        options: (id) => this.getCapabilityOptions(id) as CapabilityMeta,
+        snapshot: () => this.getLiveOperationWidgetState(),
+        adaptiveEnabled: () => this.getSetting('adaptive_control_enabled') === true,
+        write: (id, value) => this.triggerCapabilityListener(id, value),
+      });
+      if (app.tuyaDashboard.listeningPort === null) {
+        await app.setTuyaDashboardPort(Number(this.getSetting('dashboard_port') ?? 8092));
+      }
+    } catch (error) {
+      this.error('Tuya dashboard unavailable; device operation continues', error);
+    }
+  }
+
   tuya: TuyaDevice | undefined;
   allCapabilities: Record<string, number[]> = allCapabilities;
   allArraysSwapped: Record<number, string> = allArraysSwapped;
@@ -3971,6 +3999,8 @@ class MyDevice extends Homey.Device {
       const ip = (this.getStoreValue('ip_address') || '').toString().trim();
       const version = (this.getStoreValue('protocol_version') || '3.3').toString().trim();
 
+      await this.registerDashboard();
+
       if (!id || !key) {
         this.error('Tuya credentials missing: device_id or local_key not set.');
         await this.setUnavailable('Missing Tuya credentials');
@@ -3981,6 +4011,8 @@ class MyDevice extends Homey.Device {
       this.serviceCoordinator = new ServiceCoordinator({
         device: this,
         logger: this.logger.debug.bind(this.logger),
+        onDashboardData: (dps) => this.dashboardState?.receive(dps),
+        onDashboardConnection: (connected) => this.dashboardState?.connection(connected),
       });
 
       // Initialize services via coordinator
@@ -4095,6 +4127,10 @@ class MyDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('MyDevice settings changed:', changedKeys);
+    if (changedKeys.includes('dashboard_port')) {
+      const app = this.homey.app as unknown as TuyaDashboardHost;
+      await app.setTuyaDashboardPort(Number(newSettings.dashboard_port ?? 8092));
+    }
 
     // Reject a maximum water temperature that is not at least SETPOINT_RANGE_MIN_GAP above the minimum
     if (changedKeys.includes('adaptive_min_setpoint') || changedKeys.includes('adaptive_max_setpoint')) {
@@ -5007,6 +5043,13 @@ class MyDevice extends Homey.Device {
    */
   async onDeleted() {
     this.log('MyDevice has been deleted');
+    this.dashboardState?.destroy();
+    this.dashboardState = null;
+    try {
+      await (this.homey.app as unknown as TuyaDashboardHost).tuyaDashboard.unregister(this.dashboardId());
+    } catch (error) {
+      this.error('Tuya dashboard cleanup failed', error);
+    }
 
     // Memory leak prevention: Stop all tracked timers (v2.0.1+)
     if (this.connectionStatusInterval) {
