@@ -1,0 +1,80 @@
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #080d18; color: #dde8f8; min-height: 100vh; padding: 1.5rem; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f0f6ff; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 0.85rem; color: #5a7a9a; margin-bottom: 1.5rem; }
+  .status-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #5a7a9a; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+  .dot.ok { background: #22c55e; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 1.25rem; }
+  .card-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #5a7a9a; margin-bottom: 0.5rem; }
+  .card-value { font-size: 1.6rem; font-weight: 700; color: #dde8f8; }
+  .card-unit { font-size: 0.85rem; color: #5a7a9a; margin-left: 0.25rem; }
+  .section-title { font-size: 0.85rem; font-weight: 700; color: #5cb3e8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #22334f; }
+  .write-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+  .write-card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 1.25rem; }
+  .write-card label { display: block; font-size: 0.8rem; font-weight: 600; color: #5a7a9a; margin-bottom: 0.5rem; }
+  .write-row { display: flex; gap: 0.5rem; align-items: center; }
+  .write-row input { flex: 1; background: #080d18; border: 1px solid #22334f; border-radius: 6px; color: #dde8f8; padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+  .write-row input:focus { outline: none; border-color: #3b82f6; }
+  .write-row .unit { font-size: 0.8rem; color: #5a7a9a; white-space: nowrap; }
+  .btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+  .feedback { font-size: 0.78rem; margin-top: 0.4rem; height: 1em; transition: color 0.2s; }
+  .feedback.ok { color: #22c55e; }
+  .feedback.err { color: #ef4444; }
+  .range-hint { font-size: 0.72rem; color: #3d5070; margin-top: 0.25rem; }
+  nav { margin: -1.5rem -1.5rem 1.5rem; padding: 8px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; gap: 8px; flex-wrap: wrap; }
+  nav a { font-size: 12px; font-weight: 600; color: #94a3b8; text-decoration: none; padding: 4px 12px; border-radius: 9999px; border: 1px solid #334155; transition: background 0.15s, color 0.15s; }
+  nav a:hover { background: #334155; color: #f8fafc; }
+  nav a.active { background: #0f172a; color: #38bdf8; border-color: #38bdf8; }
+  /* ── Live overzicht ── */
+  .live-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+  .live-card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 3px; border-left: 4px solid #22334f; transition: border-left-color 0.8s ease; }
+  .live-card-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #5a7a9a; }
+  .live-card-value { font-size: 1.5rem; font-weight: 700; color: #dde8f8; line-height: 1; }
+  .live-card-unit { font-size: 0.75rem; color: #5a7a9a; }
+  .live-card-spark { margin-top: 5px; width: 100%; height: 24px; display: block; }
+  .live-cop { font-size: 2.2rem; color: #22c55e; }
+  .live-cop.avg { color: #fbbf24; }
+  .live-cop.low { color: #ef4444; }
+  .machine-row { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .machine-card { background: #0d1624; border: 1px solid #22334f; border-radius: 10px; padding: 0.9rem 1.25rem; flex: 1; min-width: 140px; }
+  .machine-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #5a7a9a; margin-bottom: 6px; }
+  .machine-value { font-size: 1.1rem; font-weight: 700; color: #dde8f8; }
+  .machine-unit { font-size: 0.72rem; color: #5a7a9a; }
+  .bar-track { height: 6px; background: #22334f; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease, background-color 0.5s; width: 0%; }
+  .machine-val-row { display: flex; align-items: baseline; gap: 5px; }
+  .bar-fill-blue { background: #38bdf8; }
+  @media (prefers-color-scheme: light) {
+    body { background: #f1f5f9; color: #0f172a; }
+    h1 { color: #0f172a; }
+    .subtitle { color: #64748b; }
+    .status-bar { color: #64748b; }
+    .live-card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .live-card-label { color: #64748b; }
+    .live-card-value { color: #0f172a; }
+    .live-card-unit { color: #64748b; }
+    .machine-card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .machine-label { color: #64748b; }
+    .machine-value { color: #0f172a; }
+    .bar-track { background: #e2e8f0; }
+    .grid .card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .card-label { color: #64748b; }
+    .card-value { color: #0f172a; }
+    .card-unit  { color: #64748b; }
+    .section-title { color: #1d4ed8; border-bottom-color: #cbd5e1; }
+    .write-card, .write-grid .write-card { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .write-card label { color: #64748b; }
+    .write-row input { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+    .write-row .unit { color: #64748b; }
+    .range-hint { color: #94a3b8; }
+    nav { background: #ffffff; border-bottom-color: #cbd5e1; }
+    nav a { color: #475569; border-color: #e2e8f0; }
+    nav a:hover { background: #e2e8f0; color: #0f172a; }
+    nav a.active { background: #e0f2fe; color: #0284c7; border-color: #0284c7; }
+  }

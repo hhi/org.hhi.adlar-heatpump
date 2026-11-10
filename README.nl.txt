@@ -1,60 +1,49 @@
 Bedien en monitor uw Adlar Castra Aurora-warmtepomp lokaal met Homey Pro.
-Deze ene app ondersteunt twee verbindingsmethoden: de Tuya Local API en Modbus
-RS485 via een Modbus TCP-gateway. Kies de apparaatdriver die bij uw installatie
-past; beide werken via uw lokale netwerk zonder cloudverbinding voor dagelijks
-gebruik.
+Deze app bevat drie drivers voor aansluiting via Tuya of Modbus.
+De dagelijkse communicatie verloopt via uw lokale netwerk.
 
-🇬🇧 English  🇩🇪 Deutsch 🇫🇷 Français 🇳🇱 Nederlands
+KIES UW DRIVER
 
-KIES EEN DRIVER
+Aurora I/II via Tuya
+Voor een Aurora I/II met een Tuya-wifiverbinding. Vereist de Device ID, Local Key, het lokale IP-adres en de Tuya-protocolversie van de warmtepomp.
+Lokaal dashboard: http://HOMEY-IP:8092
 
-TUYA LOCAL API
-- Kies "Aurora I/II via Tuya"
-- Vereist de Device ID, Local Key, het lokale IP-adres en de Tuya-
-  protocolversie (3.3, 3.4 of 3.5) van de warmtepomp
-- Gebruik deze driver voor een warmtepomp met wifi-verbinding
+Aurora I/II via Modbus
+Voor een Aurora I/II met een RS485/Modbus-aansluiting. Vereist een Modbus TCP-gateway. Bij het koppelen voert u het IP-adres van de gateway, de TCP-poort en de Modbus Unit ID in.
+Lokaal dashboard: http://HOMEY-IP:8090
 
-MODBUS TCP-GATEWAY
-- Kies "Aurora I/II via Modbus" of "Aurora III via Modbus", passend bij het
-  model op het typeplaatje
-- Vereist een RS485/Modbus-aansluiting en een bereikbare Modbus TCP-gateway,
-  zoals een Elfin EW11A
-- Voer het IP-adres van de gateway, de TCP-poort en de Modbus Unit ID in
-- De gebruikelijke standaardwaarden zijn poort 502 en Unit ID 1
-- Seriële instellingen van de gateway: 9600 8N1 voor Aurora I/II, 9600 8N2 voor
-  Aurora III
-- Lokale dashboards: poort 8090 (Aurora I/II) en 8091 (Aurora III)
+Aurora III via Modbus
+Voor een Aurora III met een RS485/Modbus-aansluiting. Vereist een Modbus TCP-gateway en gebruikt de eigen Aurora III-registerindeling. Bij het koppelen voert u het IP-adres van de gateway, de TCP-poort en de Modbus Unit ID in.
+Lokaal dashboard: http://HOMEY-IP:8091
 
-BELANGRIJKSTE FUNCTIES
-- Lokale temperaturen, bedrijfsstatus, ontdooien, antivries, sterilisatie en
-  gedecodeerde storingsinformatie
-- Metingen van vermogen, energie, spanning, stroom, compressor, ventilator,
-  klep, pomp en waterflow wanneer de warmtepomp deze ondersteunt
-- Bediening van aan/uit, bedrijfsmodus, setpunten voor verwarmen, koelen en
-  warm water, en ondersteunde verwarmings- en warmwatercurven
-- COP- en seizoensrendementsbewaking met beschikbare vermogens-,
-  temperatuurverschil- en waterflowgegevens
-- Homey Flow-kaarten voor meldingen, storingen, setpunten, externe gegevens en
-  geavanceerde curve-, tijdschema- en seizoensberekeningen
-- Optionele adaptieve temperatuurregeling, gebouwmodel-leren, energieprijs- en
-  COP-optimalisatie en weersafhankelijk advies
-- Geavanceerde lokale diagnose- en registertools voor Modbus-installaties
+Vervang HOMEY-IP door het lokale IP-adres van uw Homey Pro. De genoemde poorten zijn de standaardwaarden. Gebruik uw eigen poort als u deze heeft gewijzigd.
 
-BELANGRIJK
-- Geavanceerde Modbus-schrijftools kunnen het gedrag van de warmtepomp
-  veranderen. Gebruik ze alleen als u het register kent en de oorspronkelijke
-  waarde hebt genoteerd.
-- De Aurora I/II-driver is gericht op de R32-registermap en waarschuwt bij
-  andere koudemiddelen.
-- De COP kan ontbreken of minder nauwkeurig zijn als bruikbare vermogens- of
-  flowgegevens ontbreken.
-- Een vaste DHCP-lease of een statisch IP-adres voor de warmtepomp of gateway
-  voorkomt onnodige herverbindingsproblemen.
+MONITORING EN BEDIENING
+
+Bekijk temperaturen, bedrijfsstatus, storingen en beschikbare metingen van vermogen, energieverbruik en waterflow. Bedien aan/uit, bedrijfsmodus, setpunten en ondersteunde stooklijnkeuzes.
+
+Gebruik Homey Flows voor bediening, meldingen en externe meetgegevens. Volg COP en seizoensrendement of gebruik de optionele adaptieve regeling, gebouwmodel-leren en energieprijs- en COP-optimalisatie.
+
+Beschikbare metingen, instellingen en Flow-kaarten verschillen per model en driver. COP-berekeningen zijn afhankelijk van bruikbare vermogens-, temperatuur- en waterflowgegevens.
+
+LOKALE DASHBOARDS
+
+Alle drie de drivers bieden dashboardpagina's voor monitoring, bediening en diagnose.
+
+Dashboard en Live tonen beschikbare waarden en bedrijfsstatus. Interactief biedt bediening van ondersteunde instellingen. Expert geeft een doorzoekbaar overzicht van datapunten of registers. Wijzigingen toont waarden en geregistreerde veranderingen. Stooklijn geeft inzicht in de beschikbare curve-instellingen en regeling.
+
+Tuya toont DPS-datapunten. De Modbus-drivers tonen de registers van het betreffende warmtepompmodel. De beschikbare dashboardfuncties verschillen per driver.
+
+INSTALLATIE
+
+Kies bij het toevoegen van een apparaat de driver die overeenkomt met uw warmtepompmodel en aansluiting.
+
+Voor Tuya zijn de lokale apparaatgegevens nodig. Voor Modbus moet de gateway vooraf correct zijn aangesloten en ingesteld. Raadpleeg de installatiehandleiding van uw model.
+
+Een vast lokaal IP-adres of een DHCP-reservering voor de warmtepomp of gateway helpt verbindingsproblemen te voorkomen.
+
+Geavanceerde schrijfbediening kan instellingen van de warmtepomp veranderen. Controleer de betekenis en noteer de oorspronkelijke waarde voordat u een instelling wijzigt.
 
 DOCUMENTATIE
 
-Op de broncodepagina staan installatie-, Flow-, COP-, stooklijn- en
-geavanceerde regelingshandleidingen, inclusief de Modbus diagnose- en
-dashboardgids: /docs/setup/MODBUS_DASHBOARD_GUIDE.nl.md.
-Voor Tuya-koppeling: /docs/setup/Tuya_LocalKey_Homey_Guide_NL.pdf
-en /docs/setup/PROTOCOL_VERSION_GUIDE.nl.md.
+Via de broncodepagina vindt u handleidingen voor Tuya-koppeling, Modbus-aansluiting, gatewayconfiguratie, dashboards, Homey Flows, storingsdiagnose, COP, stooklijnen en adaptieve regeling.

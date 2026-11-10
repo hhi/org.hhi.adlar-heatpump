@@ -1431,7 +1431,11 @@
           "fr": "⚠️ Avancé: Vitesse d'adaptation du modèle aux changements. Plus haut = plus stable, meilleure confiance. NE PAS modifier sauf problèmes d'apprentissage spécifiques. Plage 0.9985–0.9995. Défaut: 0.999. Prend effet immédiatement ; le modèle appris est conservé."
         },
         "value": 0.999,
-        "attr": { "min": 0.9985, "max": 0.9995, "step": 0.0005 }
+        "attr": {
+          "min": 0.9985,
+          "max": 0.9995,
+          "step": 0.0005
+        }
       },
       {
         "id": "building_profile",
@@ -1709,7 +1713,7 @@
           "de": "Längengrad für Wettervorhersage (z.B. Amsterdam = 4.90). Finden Sie Ihre Koordinaten auf maps.google.com.",
           "fr": "Longitude pour la prévision météo (ex. Amsterdam = 4.90). Trouvez vos coordonnées sur maps.google.com."
         },
-        "value": 4.90,
+        "value": 4.9,
         "min": -180,
         "max": 180,
         "step": 0.01
@@ -2586,5 +2590,21 @@
         "value": ""
       }
     ]
+  },
+  {
+    "id": "dashboard_port",
+    "type": "number",
+    "label": {
+      "en": "Tuya dashboard port",
+      "nl": "Tuya-dashboardpoort"
+    },
+    "hint": {
+      "en": "Open http://HOMEY-IP:8092 (or this port). Shared by all Tuya devices. At startup the first device selects the port; changing this setting moves the shared dashboard.",
+      "nl": "Open http://HOMEY-IP:8092 (of deze poort). Gedeeld door alle Tuya-apparaten. Bij opstarten kiest het eerste apparaat de poort; wijzigen van deze instelling verplaatst het gezamenlijke dashboard."
+    },
+    "value": 8092,
+    "min": 1,
+    "max": 65535,
+    "step": 1
   }
 ]

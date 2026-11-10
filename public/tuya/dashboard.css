@@ -1,0 +1,64 @@
+/* Aurora II supplies typography, colours, navigation, cards and tables through
+   /styles/*.css. These rules adapt the shared layout to Tuya's language selector
+   and data-driven markup; do not create a second dashboard theme here. */
+:root { --panel: #1e293b; --line: #334155; }
+body:not([data-page="live"]) { --muted: #94a3b8; --accent: #38bdf8; }
+body[data-page="live"] { --panel: var(--surface); --line: var(--border); }
+main { min-width: 0; }
+body[data-page="live"] main { padding: 14px 16px 32px; }
+body[data-page="heating-curve"] main { max-width: 800px; margin: 24px auto; padding: 0 20px 40px; }
+.heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.heading > div:first-child { min-width: 0; }
+#device-name { overflow-wrap: anywhere; }
+body[data-page="dashboard"] #device-name { color: #94a3b8; font-size: 12px; margin-top: 4px; }
+body[data-page="live"] h1 { font-size: 1.4rem; margin-bottom: 4px; }
+body[data-page="live"] #device-name { color: var(--muted); font-size: 0.85rem; margin-bottom: 14px; }
+body[data-page="heating-curve"] h1 { font-size: 1.4rem; margin-bottom: 4px; }
+.selectors { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; font-size: 0.8rem; color: var(--muted); }
+.status-connection { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.status-connection::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
+.status-connection.online::before { background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
+.status-connection.offline::before { background: #ef4444; }
+.muted { color: var(--muted); font-size: 0.78rem; margin: 8px 0 16px; }
+#freshness { font-size: 0.75rem; }
+#error,#alarm { color: #fbbf24; border: 1px solid #854d0e; border-radius: 6px; padding: 10px 16px; margin: 12px 0; font-size: 0.8rem; }
+:where(input,select,button) { font-family: inherit; font-size: 0.8rem; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.75rem; max-width: 100%; }
+:where(button) { cursor: pointer; }
+:where(button:disabled) { opacity: 0.4; cursor: not-allowed; }
+:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+.table-wrap { overflow-x: auto; }
+td { overflow-wrap: anywhere; }
+td small { display: block; color: var(--muted); }
+body[data-page="live"] .summary { margin-bottom: 14px; }
+body[data-page="live"] .cap-unit { overflow-wrap: anywhere; }
+body[data-page="live"] .cap-title { max-width: 100%; }
+body[data-page="live"] .cap-value.long { -webkit-line-clamp: unset; white-space: pre-wrap; font-size: 0.72rem; }
+body[data-page="live"] .rubric-section { align-items: start; }
+.write-card { min-width: 0; }
+.write-card small { display: block; margin-bottom: 10px; color: var(--muted); font-size: 0.75rem; }
+.write-row { display: flex; align-items: center; gap: 0.5rem; }
+.write-row input,.write-row select { min-width: 0; flex: 1; }
+body[data-page="expert"] .write-row input,body[data-page="expert"] .write-row select { margin-bottom: 0; }
+body[data-page="expert"] .write-row button { background: #3b82f6; color: #fff; border: 0; font-weight: 600; }
+#commands p { margin: 12px 0; padding: 10px 14px; border-left: 2px solid var(--accent); background: var(--panel); font-size: 0.8rem; }
+body[data-page="heating-curve"] .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; margin: 20px 0; }
+body[data-page="heating-curve"] .card { padding: 16px; background: var(--panel); border-radius: 6px; }
+body[data-page="heating-curve"] .card-label { color: var(--muted); text-transform: uppercase; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 6px; }
+body[data-page="heating-curve"] .card-value { font-size: 1.1rem; font-weight: 700; }
+.curve { width: 100%; display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+dialog { margin: auto; max-width: min(420px,calc(100vw - 32px)); }
+#close-dialog { margin-top: 12px; }
+@media (prefers-color-scheme: light) {
+  :root { --panel: #fff; --line: #cbd5e1; }
+  body:not([data-page="live"]) { --muted: #64748b; --accent: #0284c7; }
+  body[data-page="dashboard"] #device-name { color: #475569; }
+  #error,#alarm { background: #fff7ed; border-color: #fed7aa; color: #92400e; }
+}
+@media (max-width: 560px) {
+  .heading { align-items: flex-start; flex-wrap: wrap; }
+  .selectors select { min-width: 0; }
+  body[data-page="interactive"] .write-grid { grid-template-columns: minmax(0,1fr); }
+  body[data-page="heating-curve"] .grid { grid-template-columns: minmax(0,1fr); }
+}
+
+body[data-page="changelog"] .sort-column { border: 0; border-radius: 0; padding: 0; background: transparent; font: inherit; color: inherit; text-align: left; }

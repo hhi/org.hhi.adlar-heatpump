@@ -2,6 +2,39 @@
 
 Welcome to the documentation for the Adlar Heat Pump Homey app.
 
+[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+
+## Start with your driver
+
+This app supports three drivers. Choose the instructions for your model and
+connection; Tuya and Modbus require different pairing details.
+
+| Driver | Installation | Default dashboard |
+| --- | --- | --- |
+| Aurora I/II via Tuya | [Local Key and device details](setup/Tuya_LocalKey_Homey_Guide_EN.pdf), [protocol version](setup/PROTOCOL_VERSION_GUIDE.en.md) | `http://HOMEY-IP:8092` |
+| Aurora I/II via Modbus | [RS485 and Modbus TCP gateway](setup/modbus-elfin-ew11-setup.md) (Dutch), follow the Aurora I/II settings | `http://HOMEY-IP:8090` |
+| Aurora III via Modbus | [RS485 and Modbus TCP gateway](setup/modbus-elfin-ew11-setup.md) (Dutch), follow the Aurora III settings | `http://HOMEY-IP:8091` |
+
+Replace HOMEY-IP with your Homey Pro's local IP address. Use your configured
+port if you have changed it. See the [dashboard overview for all three
+drivers](../README.md#local-dashboards) and the
+[Modbus dashboard guide](setup/MODBUS_DASHBOARD_GUIDE.en.md).
+The [Tuya dashboard decision](architecture/ADR-068-TUYA-DASHBOARD.md) (Dutch)
+describes the technical design and limitations of Tuya.
+
+## Find the right guide
+
+| Your question | Documentation |
+| --- | --- |
+| Settings and everyday use | [Configuration](setup/advanced-settings/CONFIGURATION_GUIDE.en.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.en.md), [advanced Flow cards](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.en.md) |
+| Heating curves and adaptive control | [Advanced features](setup/advanced-control/Advanced_Features_Intro.en.md), [control overview](ADAPTIVE_CONTROL_OVERVIEW.en.md), [practical guide](setup/guide/ADAPTIVE_CONTROL_GUIDE.en.md) |
+| COP, SCOP and building insights | [COP setup](setup/COP%20flow-card-setup.en.md), [calculation methods](COP%20calculation/), [building model](BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md), [using building insights](setup/guide/BUILDING_INSIGHTS_GUIDE.en.md) |
+| Problems or migration | [Tuya troubleshooting](setup/USER_QUICK_FIX.en.md), [Modbus diagnostics](setup/MODBUS_DASHBOARD_GUIDE.en.md), [Aurora III migration](setup/MIGRATION_AURORA3.en.md) |
+| Technical details and development | [Specifications and mappings](Heatpump%20specs/), [architecture and design decisions](architecture/), [developer resources](Dev%20support/), [verification and test scenarios](testing/) |
+
+Features and settings vary by driver and heat-pump model. Most user guides
+are translated; some technical references are available only in Dutch or English.
+
 ---
 
 ## 🗂️ Directory Overview
@@ -89,15 +122,6 @@ Most user documentation is available in four languages:
 
 ---
 
-## 🚀 Quick Start
 
-**New user?** Start here:
-1. [Tuya LocalKey Guide](setup/Tuya_LocalKey_Homey_Guide_EN.pdf) — Get your credentials
-2. [Protocol Version Guide](setup/PROTOCOL_VERSION_GUIDE.en.md) — Choose the right protocol
-3. [Advanced Features Introduction](setup/advanced-control/Advanced_Features_Intro.en.md) — Unlock full functionality
 
-**Having issues?** Check the [Quick Fix Guide](setup/USER_QUICK_FIX.en.md)
-
----
-
-*Last updated: 2026-01-29*
+*Last updated: 2026-11-10*
