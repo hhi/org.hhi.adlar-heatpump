@@ -16,6 +16,8 @@ import { AdlarMapping } from '../definitions/adlar-mapping';
 import { type BuildingProfileType } from '../../shared/adaptive/building-model-learner';
 
 export interface ServiceCoordinatorOptions {
+  onDashboardData?: (dps: Record<number, unknown>) => void;
+  onDashboardConnection?: (connected: boolean) => void;
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
 }
@@ -60,7 +62,7 @@ export class ServiceCoordinator {
    * @param options.device - owning Homey device
    * @param options.logger - optional logger
    */
-  constructor(options: ServiceCoordinatorOptions) {
+  constructor(private readonly options: ServiceCoordinatorOptions) {
     this.device = options.device;
     this.logger = options.logger || (() => { });
 
@@ -325,6 +327,8 @@ export class ServiceCoordinator {
       return;
     }
 
+    this.options.onDashboardData?.(data.dps);
+
     // Diagnostic logging (v1.3.13 - trigger debugging)
     this.logger('ServiceCoordinator: handleTuyaData called with DPS keys:', Object.keys(data.dps));
 
@@ -360,6 +364,7 @@ export class ServiceCoordinator {
    * Tuya connection lifecycle handlers (connected).
    */
   private handleTuyaConnected(): void {
+    this.options.onDashboardConnection?.(true);
     this.logger('ServiceCoordinator: Tuya device connected');
     this.serviceHealth.set('tuya', true);
     this.energyTracking.setConnectionState(true).catch((err) => {
@@ -375,6 +380,7 @@ export class ServiceCoordinator {
    * Tuya connection lifecycle handlers (disconnected).
    */
   private handleTuyaDisconnected(): void {
+    this.options.onDashboardConnection?.(false);
     this.logger('ServiceCoordinator: Tuya device disconnected');
     this.serviceHealth.set('tuya', false);
     this.energyTracking.setConnectionState(false).catch((err) => {

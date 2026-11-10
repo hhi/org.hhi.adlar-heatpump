@@ -1,60 +1,49 @@
-Pilotez et surveillez localement votre pompe à chaleur Adlar Castra Aurora avec
-Homey Pro. Cette application unique prend en charge deux méthodes de connexion :
-l'API Tuya Local et Modbus RS485 via une passerelle Modbus TCP. Choisissez le
-pilote correspondant à votre installation ; les deux fonctionnent sur votre
-réseau local sans connexion cloud au quotidien.
+Pilotez et surveillez localement votre pompe à chaleur Adlar Castra Aurora avec Homey Pro.
+Cette application comprend trois pilotes pour une connexion via Tuya ou Modbus.
+Les communications quotidiennes passent par votre réseau local.
 
-🇬🇧 English  🇩🇪 Deutsch 🇫🇷 Français 🇳🇱 Nederlands
+CHOISISSEZ VOTRE PILOTE
 
-CHOISIR UN PILOTE
+Aurora I/II via Tuya
+Pour une Aurora I/II avec une connexion Wi-Fi Tuya. Nécessite l'ID de l'appareil, la clé locale, l'adresse IP locale et la version du protocole Tuya de la pompe à chaleur.
+Tableau de bord local : http://HOMEY-IP:8092
 
-API TUYA LOCAL
-- Sélectionnez "Aurora I/II via Tuya"
-- Nécessite l'ID de l'appareil, la clé locale, l'adresse IP locale et la
-  version du protocole Tuya (3.3, 3.4 ou 3.5) de la pompe à chaleur
-- Utilisez ce pilote pour une pompe à chaleur connectée en Wi-Fi
+Aurora I/II via Modbus
+Pour une Aurora I/II avec une connexion RS485/Modbus. Nécessite une passerelle Modbus TCP. Lors de l'appairage, saisissez l'adresse IP de la passerelle, le port TCP et l'ID d'unité Modbus.
+Tableau de bord local : http://HOMEY-IP:8090
 
-PASSERELLE MODBUS TCP
-- Sélectionnez "Aurora I/II via Modbus" ou "Aurora III via Modbus", selon le
-  modèle indiqué sur la plaque signalétique
-- Nécessite une connexion RS485/Modbus et une passerelle Modbus TCP accessible,
-  telle qu'une Elfin EW11A
-- Saisissez l'adresse IP de la passerelle, le port TCP et l'ID d'unité Modbus
-- Les valeurs habituelles sont le port 502 et l'ID d'unité 1
-- Réglages série de la passerelle : 9600 8N1 pour Aurora I/II, 9600 8N2 pour
-  Aurora III
-- Tableaux de bord locaux : port 8090 (Aurora I/II) et 8091 (Aurora III)
+Aurora III via Modbus
+Pour une Aurora III avec une connexion RS485/Modbus. Nécessite une passerelle Modbus TCP et utilise la table de registres propre à l'Aurora III. Lors de l'appairage, saisissez l'adresse IP de la passerelle, le port TCP et l'ID d'unité Modbus.
+Tableau de bord local : http://HOMEY-IP:8091
 
-FONCTIONNALITÉS PRINCIPALES
-- Températures locales, état de fonctionnement, dégivrage, antigel,
-  stérilisation et informations de défaut décodées
-- Mesures de puissance, énergie, tension, courant, compresseur, ventilateur,
-  vanne, pompe et débit d'eau lorsque la pompe à chaleur les prend en charge
-- Commande marche/arrêt, mode de fonctionnement, consignes de chauffage, de
-  refroidissement et d'eau chaude, ainsi que les courbes prises en charge
-- Suivi du COP et de l'efficacité saisonnière avec les données disponibles de
-  puissance, d'écart de température et de débit d'eau
-- Cartes Flow Homey pour alertes, défauts, consignes, données externes et
-  calculs avancés de courbe, de planning et de saison
-- Régulation de température adaptative facultative, apprentissage du modèle du
-  bâtiment, optimisation COP et du prix de l'énergie, et conseils météo
-- Outils locaux avancés de diagnostic et d'inspection des registres pour Modbus
+Remplacez HOMEY-IP par l'adresse IP locale de votre Homey Pro. Les ports indiqués sont les valeurs par défaut. Si vous avez modifié le port, utilisez celui que vous avez configuré.
 
-IMPORTANT
-- Les outils d'écriture Modbus avancés peuvent modifier le comportement de la
-  pompe à chaleur. Utilisez-les uniquement si vous connaissez le registre et
-  avez noté sa valeur d'origine.
-- Le pilote Aurora I/II cible la carte de registres R32 et avertit pour les
-  autres fluides frigorigènes.
-- Le COP peut être indisponible ou moins précis si les données de puissance ou
-  de débit exploitables manquent.
-- Un bail DHCP fixe ou une adresse IP statique pour la pompe à chaleur ou la
-  passerelle aide à éviter les problèmes de reconnexion.
+SURVEILLANCE ET COMMANDE
+
+Consultez les températures, l'état de fonctionnement, les défauts et les mesures disponibles de puissance, de consommation d'énergie et de débit d'eau. Commandez la marche et l'arrêt, le mode de fonctionnement, les consignes et les choix de courbe de chauffe pris en charge.
+
+Utilisez les Flows Homey pour la commande, les notifications et les mesures externes. Suivez le COP et l'efficacité saisonnière ou utilisez la régulation adaptative facultative, l'apprentissage du modèle du bâtiment et l'optimisation du prix de l'énergie et du COP.
+
+Les mesures, réglages et cartes Flow disponibles varient selon le modèle et le pilote. Les calculs du COP dépendent de données exploitables de puissance, de température et de débit d'eau.
+
+TABLEAUX DE BORD LOCAUX
+
+Les trois pilotes proposent des pages de tableau de bord pour la surveillance, la commande et le diagnostic.
+
+Dashboard et Live affichent les valeurs disponibles et l'état de fonctionnement. La page interactive permet de modifier les réglages pris en charge. Expert offre une vue consultable par recherche des points de données ou des registres. La vue des modifications affiche les valeurs et les changements enregistrés. La page de courbe de chauffe présente les réglages de courbe et la régulation disponibles.
+
+Tuya affiche les points de données DPS. Les pilotes Modbus affichent les registres du modèle de pompe à chaleur correspondant. Les fonctions disponibles dans les tableaux de bord varient selon le pilote.
+
+INSTALLATION
+
+Lors de l'ajout d'un appareil, choisissez le pilote correspondant au modèle de votre pompe à chaleur et à sa connexion.
+
+Tuya nécessite les informations locales de l'appareil. Pour Modbus, la passerelle doit d'abord être correctement raccordée et configurée. Consultez le guide d'installation de votre modèle.
+
+Une adresse IP locale fixe ou une réservation DHCP pour la pompe à chaleur ou la passerelle aide à éviter les problèmes de connexion.
+
+Les commandes d'écriture avancées peuvent modifier les réglages de la pompe à chaleur. Vérifiez la fonction d'un réglage et notez sa valeur d'origine avant de le modifier.
 
 DOCUMENTATION
 
-La page du code source contient les guides d'installation, de Flows, de COP, de
-courbe de chauffe et de régulation avancée, y compris le guide de diagnostic et
-du tableau de bord Modbus : /docs/setup/MODBUS_DASHBOARD_GUIDE.fr.md.
-Pour l'appairage Tuya : /docs/setup/Tuya_LocalKey_Homey_Guide_FR.pdf et
-/docs/setup/PROTOCOL_VERSION_GUIDE.fr.md.
+La page du code source propose des guides sur l'appairage Tuya, les connexions Modbus, la configuration des passerelles, les tableaux de bord, les Flows Homey, le diagnostic des défauts, le COP, les courbes de chauffe et la régulation adaptative.

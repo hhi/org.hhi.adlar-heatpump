@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Aurora I/II · Tuya</title>
+  <link rel="icon" href="data:,">
+  <!-- PAGE_STYLE -->
+  <link rel="stylesheet" href="/dashboard.css">
+  <script src="/dashboard.js" defer></script>
+</head>
+<body data-page="dashboard">
+  <nav id="nav" aria-label="Dashboard"></nav>
+  <main>
+    <div class="heading"><div><h1 id="title"></h1><p id="device-name" class="subtitle"></p></div><div id="connection" class="status-connection"></div></div>
+    <div class="selectors">
+      <label id="language-label" for="language"></label><select id="language"><option value="nl">Nederlands</option><option value="en">English</option></select></div>
+    <p id="freshness" class="muted"></p>
+    <p id="alarm" role="alert" hidden></p>
+    <p id="error" role="alert" hidden></p>
+    <div id="toolbar"></div>
+    <div id="content" aria-live="polite"></div>
+    <section id="commands" aria-live="polite"></section>
+    <p id="footnote" class="muted"></p>
+  </main>
+  <dialog id="control-dialog"><div id="dialog-content"></div><button id="close-dialog" type="button"></button></dialog>
+</body>
+</html>

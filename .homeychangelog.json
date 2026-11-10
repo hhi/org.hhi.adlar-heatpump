@@ -1,4 +1,10 @@
 {
+  "3.8.0": {
+    "en": "Aurora I/II via Tuya now has dashboard pages for live values, control, DPS diagnostics, changes and heating curves. COP settings and the maximum preheat setting are now applied at startup and when changed.",
+    "nl": "Aurora I/II via Tuya heeft nu dashboardpagina’s voor livewaarden, bediening, DPS-diagnostiek, wijzigingen en stooklijnen. De COP-instellingen en de instelling voor maximale voorverwarming worden nu bij het starten en bij wijzigingen toegepast.",
+    "de": "Aurora I/II über Tuya bietet jetzt Dashboard-Seiten für Live-Werte, Bedienung, DPS-Diagnose, Änderungen und Heizkurven. Die COP-Einstellungen und die Einstellung für die maximale Vorheizung werden jetzt beim Start und bei Änderungen angewendet.",
+    "fr": "Aurora I/II via Tuya dispose désormais de pages de tableau de bord pour les valeurs en direct, les commandes, le diagnostic DPS, les changements et les courbes de chauffe. Les réglages du COP et du préchauffage maximal sont désormais appliqués au démarrage et lors des modifications."
+  },
   "3.7.1": {
     "en": "'Set desired indoor temperature' now limits a value outside 15–25 °C (e.g. 7 °C becomes 15 °C), and 'Calculate pre-heat start time' gives 'Now' when the start time has passed. Without your own location under 'Weather Forecast', adaptive control uses the heat pump's outdoor sensor; Aurora I/II now fills 'Defrost cycles (24h)' and 'Defrost duration (24h)', and the adaptive control diagnostics show why a cycle is skipped (e.g. 'no_desired_indoor_temperature').",
     "nl": "'Gewenste binnentemperatuur instellen' begrenst nu een waarde buiten 15–25 °C (bijv. 7 °C wordt 15 °C), en 'Bereken voorverwarm starttijd' geeft 'Now' als de starttijd al voorbij is. Zonder eigen locatie onder 'Weerprognose' gebruikt de adaptieve regeling de buitensensor van de warmtepomp; Aurora I/II vult nu 'Ontdooicycli (24u)' en 'Ontdooitijd (24u)', en de diagnose van de adaptieve regeling noemt waarom een cyclus wordt overgeslagen (bijv. 'no_desired_indoor_temperature').",

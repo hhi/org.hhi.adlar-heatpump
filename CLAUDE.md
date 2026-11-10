@@ -315,7 +315,7 @@ Shared code lives in `lib/shared/`. Most services exist once per driver; see [SE
 - **Aurora III register notation** is Modicon: `3-NNNN` is an input register (FC04, read-only), `4-NNNN` a holding register (FC03/FC06, read/write).
 - **Aurora III Modbus transport**: `lib/aurora3/protocol/modbus-tcp-service.ts` takes a `TimerProvider` and falls back to global timers without one; `modbus-connection-service.ts` builds it from `homey.setTimeout`/`setInterval`. Keep passing it, so Homey manages timer cleanup on restarts.
 - **Keep the Aurora III capability mapping in sync** when adding or remapping Aurora III capabilities: `docs/Dev support/modbus/adlar3-capability-modbus-register-mapping.md`.
-- **Dashboards**: Aurora II uses `app.dashboard` (port 8090, `public/`), Aurora III uses `app.aurora3Dashboard` (port 8091, `public/aurora3/`) through the typed `Aurora3AppHost` interface.
+- **Dashboards**: Aurora II uses `app.dashboard` (port 8090, `public/`), Aurora III uses `app.aurora3Dashboard` (port 8091, `public/aurora3/`) through the typed `Aurora3AppHost` interface. Tuya uses `app.tuyaDashboard` (default port 8092, `public/tuya/`) through `TuyaDashboardHost`, with per-device registrations and the existing Tuya connection (ADR-068). Aurora II and Tuya share the page stylesheets in `public/styles/`; keep Tuya-specific layout adaptations in `public/tuya/dashboard.css`.
 
 ### Core Components
 

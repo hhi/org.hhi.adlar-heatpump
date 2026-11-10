@@ -2,6 +2,40 @@
 
 Welkom bij de documentatie voor de Adlar Warmtepomp Homey app.
 
+[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+
+## Begin bij uw driver
+
+Deze app ondersteunt drie drivers. Kies de handleiding die past bij uw model
+en aansluiting; Tuya en Modbus gebruiken verschillende koppelgegevens.
+
+| Driver | Installatie | Dashboard, standaard |
+| --- | --- | --- |
+| Aurora I/II via Tuya | [Local Key en apparaatgegevens](setup/Tuya_LocalKey_Homey_Guide_NL.pdf), [protocolversie](setup/PROTOCOL_VERSION_GUIDE.nl.md) | `http://HOMEY-IP:8092` |
+| Aurora I/II via Modbus | [RS485 en Modbus TCP-gateway](setup/modbus-elfin-ew11-setup.md), volg de Aurora I/II-instellingen | `http://HOMEY-IP:8090` |
+| Aurora III via Modbus | [RS485 en Modbus TCP-gateway](setup/modbus-elfin-ew11-setup.md), volg de Aurora III-instellingen | `http://HOMEY-IP:8091` |
+
+Vervang HOMEY-IP door het lokale IP-adres van Homey Pro. Gebruik uw ingestelde
+poort als u deze hebt gewijzigd. Bekijk het [dashboardoverzicht voor alle drie
+drivers](../README.md#local-dashboards) (Engels) en de
+[Modbus-dashboardhandleiding](setup/MODBUS_DASHBOARD_GUIDE.nl.md).
+De [Tuya-dashboardbeslissing](architecture/ADR-068-TUYA-DASHBOARD.md) beschrijft
+de technische opzet en beperkingen van Tuya.
+
+## Vind de juiste handleiding
+
+| Uw vraag | Documentatie |
+| --- | --- |
+| Instellingen en dagelijks gebruik | [Configuratie](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.nl.md), [geavanceerde Flow-kaarten](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md) |
+| Stooklijnen en adaptieve regeling | [Geavanceerde functies](setup/advanced-control/Advanced_Features_Intro.nl.md), [overzicht regeling](ADAPTIVE_CONTROL_OVERVIEW.nl.md), [praktische handleiding](setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md) |
+| COP, SCOP en gebouwinzichten | [COP instellen](setup/COP%20flow-card-setup.nl.md), [berekeningsmethoden](COP%20calculation/), [gebouwmodel](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md), [gebouwinzichten gebruiken](setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md) |
+| Problemen of overstappen | [Tuya-probleemoplossing](setup/USER_QUICK_FIX.nl.md), [Modbus-diagnose](setup/MODBUS_DASHBOARD_GUIDE.nl.md), [Aurora III-migratie](setup/MIGRATION_AURORA3.nl.md) |
+| Technische verdieping en ontwikkeling | [Specificaties en mappings](Heatpump%20specs/), [architectuur en ontwerpbesluiten](architecture/), [ontwikkelaarshulpmiddelen](Dev%20support/), [verificatie en testscenario's](testing/) |
+
+Functies en instellingen verschillen per driver en warmtepompmodel. De meeste
+gebruikershandleidingen zijn vertaald; technische referenties zijn soms alleen
+in het Nederlands of Engels beschikbaar.
+
 ---
 
 ## 🗂️ Mappenstructuur Overzicht
@@ -89,15 +123,6 @@ De meeste gebruikersdocumentatie is beschikbaar in vier talen:
 
 ---
 
-## 🚀 Snel Starten
 
-**Nieuwe gebruiker?** Begin hier:
-1. [Tuya LocalKey Handleiding](setup/Tuya_LocalKey_Homey_Guide_NL.pdf) — Verkrijg je credentials
-2. [Protocolversie Gids](setup/PROTOCOL_VERSION_GUIDE.nl.md) — Kies het juiste protocol
-3. [Introductie Geavanceerde Functies](setup/advanced-control/Advanced_Features_Intro.nl.md) — Ontgrendel volledige functionaliteit
 
-**Problemen?** Check de [Snelle Probleemoplossing](setup/USER_QUICK_FIX.nl.md)
-
----
-
-*Laatst bijgewerkt: 2026-01-29*
+*Laatst bijgewerkt: 2026-11-10*

@@ -25,6 +25,7 @@ import { SelfHealingRegistry } from './lib/shared/self-healing-registry';
 import { enableFlowCardLogging } from './lib/shared/flow-handler-wrapper';
 import { Logger, LogLevel } from './lib/shared/logger';
 import { DashboardService } from './lib/modbus/services/dashboard-service';
+import { TuyaDashboardService } from './lib/tuya/services/dashboard-service';
 import { LiveOperationWidgetState as Aurora2LiveOperationWidgetState } from './lib/modbus/services/widget-state-service';
 import { DashboardService as Aurora3DashboardService } from './lib/aurora3/services/dashboard-service';
 import { LiveOperationWidgetState as Aurora3LiveOperationWidgetState } from './lib/aurora3/services/widget-state-service';
@@ -116,6 +117,30 @@ class MyApp extends App implements Aurora3AppHost {
 
   get aurora3Dashboard(): Aurora3DashboardService | null {
     return this._aurora3Dashboard;
+  }
+
+  private _tuyaDashboard: TuyaDashboardService | null = null;
+
+  get tuyaDashboard(): TuyaDashboardService {
+    if (!this._tuyaDashboard) {
+      this._tuyaDashboard = new TuyaDashboardService({
+        appDir: __dirname,
+        timers: { setTimeout: (callback, ms) => this.homey.setTimeout(callback, ms) },
+        logger: (message, ...args) => {
+          if (args[0] instanceof Error) this.logger.error(message, ...args);
+          else this.logger.info(message, ...args);
+        },
+      });
+    }
+    return this._tuyaDashboard;
+  }
+
+  async setTuyaDashboardPort(port: number): Promise<void> {
+    if (!Number.isInteger(port) || port < 1 || port > 65535
+      || port === this._dashboardPort || port === this._aurora3DashboardPort) {
+      throw new Error(this.homey.__('tuya_dashboard.port_error'));
+    }
+    await this.tuyaDashboard.start(port);
   }
 
   // Additional storage for pattern-based triggers
@@ -310,6 +335,10 @@ class MyApp extends App implements Aurora3AppHost {
   }
 
   async onUninit() {
+    if (this._tuyaDashboard) {
+      await this._tuyaDashboard.destroy();
+      this._tuyaDashboard = null;
+    }
     if (this._dashboard) {
       await this._dashboard.destroy();
       this._dashboard = null;
@@ -1488,6 +1517,9 @@ class MyApp extends App implements Aurora3AppHost {
   }
 
   async setDashboardPort(port: number): Promise<void> {
+    if (port === this._tuyaDashboard?.listeningPort) {
+      throw new Error(this.homey.__('tuya_dashboard.port_error'));
+    }
     const nextPort = Number.isInteger(port) && port >= 1 && port <= 65535
       ? port
       : DEFAULT_DASHBOARD_PORT;
@@ -1511,6 +1543,9 @@ class MyApp extends App implements Aurora3AppHost {
   }
 
   async setAurora3DashboardPort(port: number): Promise<void> {
+    if (port === this._tuyaDashboard?.listeningPort) {
+      throw new Error(this.homey.__('tuya_dashboard.port_error'));
+    }
     const nextPort = Number.isInteger(port) && port >= 1 && port <= 65535
       ? port
       : DEFAULT_AURORA3_DASHBOARD_PORT;

@@ -746,6 +746,15 @@ export class EnergyPriceOptimizer {
   }
 
   /**
+   * Highest pre-heat (setting price_max_preheat_offset, ADR-067 D1). Used while the learned thermal
+   * capacity is 15 kWh/°C or lower; above that the boost follows min(2.0, C / 20).
+   */
+  public setMaxPreHeatOffset(offset: number): void {
+    this.config.maxPreHeatOffset = offset;
+    this.logger(`EnergyPriceOptimizer: maxPreHeatOffset updated to ${offset}°C`);
+  }
+
+  /**
    * Set thermal capacity from building model
    * v2.6.0: Building model integration for thermal storage optimization
    *

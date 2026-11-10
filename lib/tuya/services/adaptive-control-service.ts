@@ -10,6 +10,13 @@ import { BUILDING_PROFILES, type BuildingProfileType } from '../../shared/adapti
 import { EMITTER_DELAY_SETTING_KEYS } from '../../shared/adaptive/emitter-delay-tracker';
 import { EnergyPriceOptimizer, type PriceTrend } from '../adaptive/energy-price-optimizer';
 import { COPOptimizer } from '../adaptive/cop-optimizer';
+import {
+  resolveCopMinAcceptable,
+  resolveCopOptimizerSettings,
+  resolveCopStrategy,
+  resolveCopTarget,
+  resolveMaxPreHeatOffset,
+} from '../../shared/adaptive/optimizer-settings';
 import { DefrostLearner } from '../../shared/adaptive/defrost-learner';
 import {
   APP_CURVE_DEFAULTS,
@@ -216,7 +223,7 @@ export class AdaptiveControlService {
         normal: 0.10, // P70 percentile
         high: 0.12, // P90 percentile
       },
-      maxPreHeatOffset: 1.5,
+      maxPreHeatOffset: resolveMaxPreHeatOffset(this.device.getSetting('price_max_preheat_offset')),
       maxReduceOffset: -1.0,
       lookAheadHours: 4,
       logger: this.logger,
@@ -224,9 +231,8 @@ export class AdaptiveControlService {
 
     // Initialize Component 4: COP Optimizer
     this.copOptimizer = new COPOptimizer({
-      minAcceptableCOP: 2.5,
-      targetCOP: 3.5,
-      strategy: 'balanced',
+      // ADR-067 D1: the stored settings, so a changed value survives a restart
+      ...resolveCopOptimizerSettings((key) => this.device.getSetting(key)),
       minSupplyTemp: this._getMinSetpoint(),
       maxSupplyTemp: Math.min(55, this._getMaxSetpoint()),
       historySize: 1000,
@@ -2008,6 +2014,22 @@ export class AdaptiveControlService {
         normal: `€${(newSettings.price_threshold_normal as number)?.toFixed(2) || '0.10'}/kWh`,
         high: `€${(newSettings.price_threshold_high as number)?.toFixed(2) || '0.12'}/kWh`,
       });
+    }
+
+    // Handle COP optimizer parameter changes (ADR-067 D1)
+    if (changedKeys.includes('cop_min_acceptable')) {
+      this.copOptimizer.updateMinAcceptableCOP(resolveCopMinAcceptable(newSettings.cop_min_acceptable));
+    }
+    if (changedKeys.includes('cop_target')) {
+      this.copOptimizer.updateTargetCOP(resolveCopTarget(newSettings.cop_target));
+    }
+    if (changedKeys.includes('cop_strategy')) {
+      this.copOptimizer.updateStrategy(resolveCopStrategy(newSettings.cop_strategy));
+    }
+
+    // ADR-067 D1: highest pre-heat of the price optimizer
+    if (changedKeys.includes('price_max_preheat_offset')) {
+      this.energyOptimizer.setMaxPreHeatOffset(resolveMaxPreHeatOffset(newSettings.price_max_preheat_offset));
     }
 
     // ADR-065: prefill the app curve with the starting values of the chosen positional mode, unless the
