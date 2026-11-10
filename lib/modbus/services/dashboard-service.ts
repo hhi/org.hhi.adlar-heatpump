@@ -10,6 +10,7 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { DASHBOARD_PAGE_STYLES } from '../../shared/dashboard-styles';
 import { DataSnapshot } from '../protocol/adlar2-modbus-service';
 import { RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import {
@@ -270,6 +271,11 @@ export class DashboardService {
     const method = (req.method ?? 'GET').toUpperCase();
 
     this._setCors(res);
+
+    if (method === 'GET' && Object.values(DASHBOARD_PAGE_STYLES).some((name) => url === `/styles/${name}`)) {
+      await this._serveFile(res, url.slice(1));
+      return;
+    }
 
     // OPTIONS preflight
     if (method === 'OPTIONS') {
@@ -701,7 +707,7 @@ export class DashboardService {
           res.writeHead(500, { 'Content-Type': 'text/plain' });
           res.end(`Error loading ${filename}`);
         } else {
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.writeHead(200, { 'Content-Type': filename.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8' });
           res.end(content);
         }
         resolve();

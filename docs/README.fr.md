@@ -2,6 +2,41 @@
 
 Bienvenue dans la documentation de l'application Homey Adlar Heat Pump.
 
+[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+
+## Commencez par votre pilote
+
+Cette application prend en charge trois pilotes. Choisissez les instructions
+adaptées à votre modèle et à votre connexion ; Tuya et Modbus nécessitent des
+informations d'appairage différentes.
+
+| Pilote | Installation | Tableau de bord par défaut |
+| --- | --- | --- |
+| Aurora I/II via Tuya | [Clé locale et informations de l'appareil](setup/Tuya_LocalKey_Homey_Guide_FR.pdf), [version du protocole](setup/PROTOCOL_VERSION_GUIDE.fr.md) | `http://HOMEY-IP:8092` |
+| Aurora I/II via Modbus | [RS485 et passerelle Modbus TCP](setup/modbus-elfin-ew11-setup.md) (néerlandais), suivre les réglages Aurora I/II | `http://HOMEY-IP:8090` |
+| Aurora III via Modbus | [RS485 et passerelle Modbus TCP](setup/modbus-elfin-ew11-setup.md) (néerlandais), suivre les réglages Aurora III | `http://HOMEY-IP:8091` |
+
+Remplacez HOMEY-IP par l'adresse IP locale de votre Homey Pro. Utilisez le port
+configuré si vous l'avez modifié. Consultez la [présentation des tableaux de
+bord des trois pilotes](../README.md#local-dashboards) (anglais) et le
+[guide des tableaux de bord Modbus](setup/MODBUS_DASHBOARD_GUIDE.fr.md).
+La [décision sur le tableau de bord Tuya](architecture/ADR-068-TUYA-DASHBOARD.md)
+(néerlandais) décrit sa conception technique et ses limites.
+
+## Trouvez le bon guide
+
+| Votre question | Documentation |
+| --- | --- |
+| Réglages et utilisation quotidienne | [Configuration](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md), [Flows Homey](setup/guide/FLOW_CARDS_GUIDE.fr.md), [cartes Flow avancées](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.fr.md) |
+| Courbes de chauffe et régulation adaptative | [Fonctions avancées](setup/advanced-control/Advanced_Features_Intro.fr.md), [présentation de la régulation](ADAPTIVE_CONTROL_OVERVIEW.fr.md), [guide pratique](setup/guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
+| COP, SCOP et analyse du bâtiment | [Configurer le COP](setup/COP%20flow-card-setup.fr.md), [méthodes de calcul](COP%20calculation/), [modèle du bâtiment](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md), [utiliser les analyses du bâtiment](setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
+| Problèmes ou migration | [Dépannage Tuya](setup/USER_QUICK_FIX.fr.md), [Diagnostic Modbus](setup/MODBUS_DASHBOARD_GUIDE.fr.md), [migration Aurora III](setup/MIGRATION_AURORA3.fr.md) |
+| Détails techniques et développement | [Spécifications et correspondances](Heatpump%20specs/), [architecture et décisions de conception](architecture/), [ressources pour développeurs](Dev%20support/), [vérification et scénarios de test](testing/) |
+
+Les fonctions et réglages varient selon le pilote et le modèle de pompe à
+chaleur. La plupart des guides utilisateur sont traduits ; certaines références
+techniques sont disponibles uniquement en néerlandais ou en anglais.
+
 ---
 
 ## 🗂️ Aperçu des Répertoires
@@ -89,15 +124,6 @@ La plupart de la documentation utilisateur est disponible en quatre langues :
 
 ---
 
-## 🚀 Démarrage Rapide
 
-**Nouvel utilisateur ?** Commencez ici :
-1. [Guide Tuya LocalKey](setup/Tuya_LocalKey_Homey_Guide_FR.pdf) — Obtenez vos identifiants
-2. [Guide Version du Protocole](setup/PROTOCOL_VERSION_GUIDE.fr.md) — Choisissez le bon protocole
-3. [Introduction Fonctions Avancées](setup/advanced-control/Advanced_Features_Intro.fr.md) — Débloquez toutes les fonctionnalités
 
-**Des problèmes ?** Consultez la [Résolution Rapide de Problèmes](setup/USER_QUICK_FIX.fr.md)
-
----
-
-*Dernière mise à jour : 2026-01-29*
+*Dernière mise à jour : 2026-11-10*

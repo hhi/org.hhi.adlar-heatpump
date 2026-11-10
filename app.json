@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.7.1",
+  "version": "3.8.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -20966,6 +20966,22 @@
               "value": ""
             }
           ]
+        },
+        {
+          "id": "dashboard_port",
+          "type": "number",
+          "label": {
+            "en": "Tuya dashboard port",
+            "nl": "Tuya-dashboardpoort"
+          },
+          "hint": {
+            "en": "Open http://HOMEY-IP:8092 (or this port). Shared by all Tuya devices. At startup the first device selects the port; changing this setting moves the shared dashboard.",
+            "nl": "Open http://HOMEY-IP:8092 (of deze poort). Gedeeld door alle Tuya-apparaten. Bij opstarten kiest het eerste apparaat de poort; wijzigen van deze instelling verplaatst het gezamenlijke dashboard."
+          },
+          "value": 8092,
+          "min": 1,
+          "max": 65535,
+          "step": 1
         }
       ]
     },
