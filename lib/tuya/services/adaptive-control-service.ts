@@ -28,6 +28,7 @@ import {
   basisFeedforward,
   roomTargetShift,
   resolveControlParams,
+  roundRecommendation,
   type ControlMode,
   type ControlParams,
   type CurveBasis,
@@ -715,10 +716,13 @@ export class AdaptiveControlService {
     };
   }
 
-  /** Positional recommendation: basis + correction, rounded and clamped to the effective range. */
+  /**
+   * Positional recommendation: basis + correction, rounded with hysteresis against the previous
+   * recommendation (ADR-067 D3) and clamped to the effective range.
+   */
   private _positionalRecommendation(basis: CurveBasis, correction: number): number {
     this.lastRawRecommendation = basis.value + correction;
-    return this._clampRecommendation(Math.round(this.lastRawRecommendation));
+    return this._clampRecommendation(roundRecommendation(this.lastRawRecommendation, this.lastRecommendedTemp));
   }
 
   /** Control mode, emitter, parameters and the positional terms for adaptive_control_diagnostics (ADR-065 O8). */

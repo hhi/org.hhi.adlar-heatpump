@@ -45,7 +45,7 @@ const path = require('path');
 const { HeatingController } = require('../../.homeybuild/lib/modbus/adaptive/heating-controller');
 const { WeightedDecisionMaker } = require('../../.homeybuild/lib/modbus/adaptive/weighted-decision-maker');
 const {
-  PositionalPIController, EMITTER_PRESETS, appCurveValue, roomTargetShift,
+  PositionalPIController, EMITTER_PRESETS, appCurveValue, roomTargetShift, roundRecommendation,
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 const { COPOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/cop-optimizer');
 const { EnergyPriceOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/energy-price-optimizer');
@@ -622,7 +622,11 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     } else if (o14) {
       // The optimizers act through the room target: their share is replaced by the basis feed-forward
       lastRecRaw = base + feedforward + combined.finalAdjustment - combined.breakdown.efficiency - combined.breakdown.cost;
-      recommended = Math.max(SP_MIN, Math.min(SP_MAX, Math.round(lastRecRaw)));
+      // O22 (ADR-067 D3): opts.roundHyst is the hysteresis threshold; without it plain rounding (the app before 3.9.0)
+      const rounded = opts.roundHyst === undefined
+        ? Math.round(lastRecRaw)
+        : roundRecommendation(lastRecRaw, lastRecommended, opts.roundHyst);
+      recommended = Math.max(SP_MIN, Math.min(SP_MAX, rounded));
     } else if (v.mode === 'posApp') {
       // As _positionalRecommendation: basis + the decision maker's correction
       lastRecRaw = base + combined.finalAdjustment;
@@ -1112,6 +1116,42 @@ async function o16() {
 }
 
 /**
+ * O22 (ADR-067 D3): rounding hysteresis on the positional recommendation. Without a night setback, so
+ * every setpoint change comes from the controller. Thresholds: O22_HYST=0.6,0.75,0.9 (default below).
+ */
+async function o22() {
+  const thresholds = (process.env.O22_HYST || '0.6,0.75,0.9,1').split(',').map(Number);
+  const ROWS = [['afronden (was)', undefined], ...thresholds.map((t) => [`hysterese ${String(t).replace('.', ',')} °C`, t])];
+  const flow = process.env.FLOW || 'direct';
+  for (const em of (process.argv[2] && process.argv[2] !== 'all' ? [process.argv[2]] : ['radiator', 'vloer'])) {
+    const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
+    for (const [wName, shift] of [['mild', 0], ['koud (−8 K)', -8]]) {
+      console.log(`\n### O22 ${EMITTERS[em].label}; ${wName}; geen nachtverlaging; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log('variant | wijzigingen/dag | RMSE (°C) | uren < −0,5 /dag | uren > +0,5 /dag | starts/dag | kWh el/dag');
+      console.log('--- | --- | --- | --- | --- | --- | ---');
+      for (const [label, roundHyst] of ROWS) {
+        const runs = [];
+        for (const seed of SEEDS) {
+          runs.push(await simulate('pos. app O14', em, seed, flow, {
+            Kp: preset.kp, Ti: preset.tiHours, bias: EMITTERS[em].curveBias, toutShift: shift, setback: false, roundHyst,
+          }));
+        }
+        const a = (fn) => avg(runs.map(fn));
+        console.log([
+          label,
+          f(a((s) => s.spChanges / DAYS), 1),
+          f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
+          f(a((s) => s.under05 / DAYS)),
+          f(a((s) => s.over05 / DAYS)),
+          f(a((s) => s.starts / DAYS), 1),
+          f(a((s) => s.elKwh / DAYS)),
+        ].join(' | '));
+      }
+    }
+  }
+}
+
+/**
  * G14 (ADR-062 B7 as pre-heat duration): t = τ·ln((T_eq − T_in)/(T_eq − T_goal)), T_eq = T_out + (P + P_int)/UA,
  * goal = target − 0,3 °C, no sun (the future is unknown). Infinity when T_eq ≤ goal.
  */
@@ -1289,6 +1329,8 @@ async function g14() {
 
 if (process.env.G14) {
   g14();
+} else if (process.env.O22) {
+  o22();
 } else if (process.env.O16) {
   o16();
 } else if (process.env.O14) {
