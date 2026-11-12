@@ -19,6 +19,8 @@ const {
   appCurveSlope,
   basisFeedforward,
   ROOM_TARGET_SHIFT_LIMIT_C,
+  roundRecommendation,
+  RECOMMENDATION_HYSTERESIS_C,
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 
 const near = (actual, expected, msg) => assert.ok(Math.abs(actual - expected) < 1e-9, `${msg}: ${actual} ≠ ${expected}`);
@@ -169,3 +171,33 @@ test('O14/O16: price and COP shift the room target, the basis follows with (1 + 
   near(basisFeedforward(-0.4, { value: 40, source: 'heat_pump_curve' }, appCurve), -0.6, 'heat pump curve: slope of the app curve');
   near(basisFeedforward(-0.4, { value: 40, source: 'flat' }, appCurve), -0.4, 'flat basis: factor 1');
 });
+
+test('ADR-067 D3: the recommendation keeps its value until the unrounded value is 0.75 °C away', () => {
+  assert.strictEqual(RECOMMENDATION_HYSTERESIS_C, 0.75);
+  // Around a half: plain rounding would flip 41 ↔ 42 on every 0.3 °C step of the PI
+  const raws = [41.4, 41.6, 41.3, 41.7, 41.4, 41.74];
+  let previous = 41;
+  for (const raw of raws) {
+    previous = roundRecommendation(raw, previous);
+    assert.strictEqual(previous, 41, `raw ${raw}`);
+  }
+  assert.strictEqual(roundRecommendation(41.75, 41), 42, 'at the threshold it moves');
+  assert.strictEqual(roundRecommendation(41.4, 42), 42, 'and stays there on the way back');
+  assert.strictEqual(roundRecommendation(41.25, 42), 41, 'until it is 0.75 °C below');
+  assert.strictEqual(roundRecommendation(40.26, 41), 41);
+  assert.strictEqual(roundRecommendation(40.25, 41), 40);
+});
+
+test('ADR-067 D3: a real step is followed at once and lands on the rounded value', () => {
+  assert.strictEqual(roundRecommendation(44.2, 41), 44);
+  assert.strictEqual(roundRecommendation(36.6, 41), 37);
+});
+
+test('ADR-067 D3: without a previous recommendation it rounds; the threshold can be set', () => {
+  assert.strictEqual(roundRecommendation(41.6, undefined), 42);
+  assert.strictEqual(roundRecommendation(41.6, null), 42);
+  assert.strictEqual(roundRecommendation(41.6, Number.NaN), 42);
+  assert.strictEqual(roundRecommendation(41.6, 41, 0.5), 42, 'threshold 0.5 behaves like plain rounding here');
+  assert.strictEqual(roundRecommendation(41.6, 41, 1), 41);
+});
+

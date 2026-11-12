@@ -133,3 +133,19 @@ for (const [name, Service] of DRIVERS) {
     assert.strictEqual(balanced.magnitude, 2, 'balanced: 2 °C lower');
   });
 }
+
+// ADR-067 D3: all three services round the positional recommendation with hysteresis
+for (const [name, Service] of DRIVERS) {
+  test(`${name}: the positional recommendation holds around a half and still respects the range`, () => {
+    const ctx = { lastRecommendedTemp: 41, lastRawRecommendation: null, _clampRecommendation: (value) => Math.min(value, 45) };
+    const recommend = (basis, correction) => Service.prototype._positionalRecommendation.call(ctx, { value: basis, source: 'app_curve' }, correction);
+    assert.strictEqual(recommend(45.6, -4.0), 41, '41.6 stays 41 (plain rounding gave 42)');
+    assert.strictEqual(ctx.lastRawRecommendation, 45.6 - 4.0, 'the unrounded value is kept for the at-limit rule');
+    assert.strictEqual(recommend(45.6, -3.8), 42, '41.8 moves to 42');
+    ctx.lastRecommendedTemp = undefined;
+    assert.strictEqual(recommend(45.6, -4.0), 42, 'first cycle: plain rounding');
+    ctx.lastRecommendedTemp = 47;
+    assert.strictEqual(recommend(50, -3.4), 45, 'a kept value above the range is clamped');
+  });
+}
+

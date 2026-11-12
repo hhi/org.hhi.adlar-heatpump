@@ -326,6 +326,32 @@ export function resolveBasis(inputs: BasisInputs): CurveBasis | null {
 }
 
 // ============================================================================
+// Rounding the recommendation (ADR-067 D3)
+// ============================================================================
+
+/**
+ * The recommendation only changes when the unrounded value lies at least this far (°C) from the
+ * previous recommendation. Plain rounding flips between two whole degrees whenever the unrounded
+ * value hovers around a half: the room sensor moves in steps of 0.1 °C, which is 0.3 °C in the
+ * recommendation at Kp 3.
+ */
+export const RECOMMENDATION_HYSTERESIS_C = 0.75;
+
+/**
+ * Whole-degree recommendation with hysteresis: keeps the previous recommendation while the
+ * unrounded value stays within RECOMMENDATION_HYSTERESIS_C of it, and rounds otherwise. Without a
+ * previous recommendation (first cycle, after a reset) it rounds.
+ */
+export function roundRecommendation(
+  raw: number,
+  previous: number | null | undefined,
+  hysteresis: number = RECOMMENDATION_HYSTERESIS_C,
+): number {
+  if (previous === null || previous === undefined || !Number.isFinite(previous)) return Math.round(raw);
+  return Math.abs(raw - previous) < hysteresis ? previous : Math.round(raw);
+}
+
+// ============================================================================
 // Optimizers through the room target (ADR-065 O14/O16, 3.6.0)
 // ============================================================================
 
