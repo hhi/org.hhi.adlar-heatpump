@@ -45,7 +45,7 @@ const path = require('path');
 const { HeatingController } = require('../../.homeybuild/lib/modbus/adaptive/heating-controller');
 const { WeightedDecisionMaker } = require('../../.homeybuild/lib/modbus/adaptive/weighted-decision-maker');
 const {
-  PositionalPIController, EMITTER_PRESETS, appCurveValue, roomTargetShift, roundRecommendation,
+  PositionalPIController, EMITTER_PRESETS, appCurveValue, roomTargetShift, limitTargetShift, roundRecommendation,
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 const { COPOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/cop-optimizer');
 const { EnergyPriceOptimizer } = require('../../.homeybuild/lib/modbus/adaptive/energy-price-optimizer');
@@ -251,9 +251,10 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   // O4 (opts.optim = { cop, price, thermal: 'heuristic' | 'b7' | undefined }): the service's
   // priorities and optimizers; otherwise the P1–P4 setup without optimizers
   const optim = opts.optim ?? null;
-  const dm = new WeightedDecisionMaker(optim ? APP_PRIORITIES : {
+  // O23: opts.priorities replaces the service's default priorities
+  const dm = new WeightedDecisionMaker(opts.priorities ?? (optim ? APP_PRIORITIES : {
     comfort: 0.60, efficiency: 0.25, cost: 0.15, thermal: 0.20,
-  });
+  }));
   const metrics = { copConfidence: 0, priceDataAvailable: false, buildingModelConfidence: 0 };
   const noop = () => {};
   const copOpt = optim?.cop ? new COPOptimizer({
@@ -293,6 +294,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   let acc = 0; let lastObserved = null; let lastRecommended;
   let coastActive = false; let cooldownCount = 0; let coastCycles = 0;
   let piHeld = 0; let cycleNo = 0; let lastFlowCycle = -1e9;
+  let lastShift = 0; // O23: room-target shift of the previous cycle
   let integ = 0; let lastRecRaw = null; // posI: integral state and last unrounded recommendation
   const inHist = []; const outHist = [];
   // Statistics
@@ -551,7 +553,12 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     let feedforward = 0;
     if (o14) {
       const pre = dm.combineActionsWithThermal(null, copAction, priceAction, null, decisionMetrics, null);
-      const shift = roomTargetShift(pre.breakdown);
+      let shift = roomTargetShift(pre.breakdown);
+      // ADR-067 D10 as built: the shift moves at most 0.24 °C per hour. opts.shiftRate: null = unlimited
+      // (the app before 3.9.0), a number = another limit per cycle (°C)
+      if (opts.shiftRate === undefined) shift = limitTargetShift(shift, lastShift, CYCLE * 1000);
+      else if (opts.shiftRate !== null) shift = Math.max(lastShift - opts.shiftRate, Math.min(lastShift + opts.shiftRate, shift));
+      lastShift = shift;
       feedforward = (1 + slope) * shift;
       ePos += shift;
       st.shiftSum += shift;
@@ -1152,6 +1159,65 @@ async function o22() {
 }
 
 /**
+ * O23 (tester feedback, 13 nov): how much the price optimizer moves the positional recommendation and what
+ * that costs in compressor starts, per cost priority. Without a night setback, rounding hysteresis as
+ * built (O22), the COP guard of 3.5.1, the service's priorities 50/15/15 unless a row says otherwise.
+ * O23_RATE=0.02,0.05,0.1 instead compares limits on the room-target shift per cycle (°C).
+ */
+async function o23() {
+  const prio = (cost, efficiency = 0.15) => ({
+    comfort: 0.50, efficiency, cost, thermal: 0.20,
+  });
+  const both = { cop: true, price: true };
+  const ROWS = process.env.O23_RATE ? [
+    ['geen optimizers', {}, undefined, undefined],
+    ['15/15, onbegrensd (was)', both, prio(0.15), null],
+    ['15/15, zoals gebouwd (0,24 °C per uur)', both, prio(0.15), undefined],
+    ...process.env.O23_RATE.split(',').map(Number).map((r) => [`15/15, ${String(r).replace('.', ',')} °C per cyclus`, both, prio(0.15), r]),
+    ['5/15, onbegrensd', both, prio(0.05), null],
+  ] : [
+    ['geen optimizers', {}, undefined],
+    ['COP, 15%', { cop: true }, prio(0.15)],
+    ['prijs 15% + COP 15% (standaard)', both, prio(0.15)],
+    ['prijs 10% + COP 15%', both, prio(0.10)],
+    ['prijs 5% + COP 15%', both, prio(0.05)],
+    ['prijs 5% + COP 5%', both, prio(0.05, 0.05)],
+    ['prijs 15%, zonder COP', { price: true }, prio(0.15)],
+  ];
+  const flow = process.env.FLOW || 'direct';
+  for (const em of (process.argv[2] && process.argv[2] !== 'all' ? [process.argv[2]] : ['vloer', 'radiator'])) {
+    const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
+    for (const [wName, shift] of [['mild', 0], ['koud (−8 K)', -8]]) {
+      console.log(`\n### O23 ${EMITTERS[em].label}; ${wName}; geen nachtverlaging; hysterese 0,75 °C; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log('variant | starts/dag | wijzigingen/dag | grootste sprong (°C) | advies min–max | RMSE (°C) | uren < −0,5 /dag | uren > +0,5 /dag | kWh el/dag | el in dure uren | el in goedkope uren');
+      console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
+      for (const [label, optim, priorities, shiftRate] of ROWS) {
+        const runs = [];
+        for (const seed of SEEDS) {
+          runs.push(await simulate('pos. app O14', em, seed, flow, {
+            Kp: preset.kp, Ti: preset.tiHours, bias: EMITTERS[em].curveBias, toutShift: shift, setback: false, roundHyst: 0.75, copGuard: true, optim, priorities, shiftRate,
+          }));
+        }
+        const a = (fn) => avg(runs.map(fn));
+        console.log([
+          label,
+          f(a((s) => s.starts / DAYS), 1),
+          f(a((s) => s.spChanges / DAYS), 1),
+          Math.max(...runs.map((s) => s.maxJump)),
+          `${Math.min(...runs.map((s) => s.advMin))}–${Math.max(...runs.map((s) => s.advMax))}`,
+          f(a((s) => Math.sqrt(s.sumSq / s.n)), 3),
+          f(a((s) => s.under05 / DAYS)),
+          f(a((s) => s.over05 / DAYS)),
+          f(a((s) => s.elKwh / DAYS)),
+          `${f(a((s) => (s.elKwh > 0 ? (100 * s.elExpensive) / s.elKwh : 0)), 0)}%`,
+          `${f(a((s) => (s.elKwh > 0 ? (100 * s.elCheap) / s.elKwh : 0)), 0)}%`,
+        ].join(' | '));
+      }
+    }
+  }
+}
+
+/**
  * G14 (ADR-062 B7 as pre-heat duration): t = τ·ln((T_eq − T_in)/(T_eq − T_goal)), T_eq = T_out + (P + P_int)/UA,
  * goal = target − 0,3 °C, no sun (the future is unknown). Infinity when T_eq ≤ goal.
  */
@@ -1327,7 +1393,9 @@ async function g14() {
   }
 }
 
-if (process.env.G14) {
+if (process.env.O23) {
+  o23();
+} else if (process.env.G14) {
   g14();
 } else if (process.env.O22) {
   o22();

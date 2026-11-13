@@ -318,7 +318,18 @@ test('ADR-065 O14/O16: price shifts the room target, the basis follows and the t
   const service = createPositionalService(device, 20);
   const calls = [];
   service.decisionMaker = priceDecisionMaker(-0.4, calls);
+  // ADR-067 D10: a new shift is approached at 0.24 °C per hour
+  await service.executeControlCycle();
+  assert.ok(Math.abs(service.lastTargetShift + 0.02) < 1e-9, 'first cycle: 0.02 °C of the −0.4');
+  assert.ok(Math.abs(service.lastFeedforward + 0.03) < 1e-9, 'the basis follows the limited shift');
 
+  // The shift reached: the state after 100 minutes at this price
+  service.lastTargetShift = -0.4;
+  service.lastRecommendedTemp = undefined;
+  service.lastRawRecommendation = null;
+  device.store.adaptive_positional_integral = 0;
+  service.positionalPI.reset();
+  calls.length = 0;
   await service.executeControlCycle();
   // basis 30 (outdoor 5 °C); room target 20 − 0.4: P 3·(−0.4) = −1.2, I −0.4·3/36;
   // the basis follows (1 + 15/30)·(−0.4) = −0.6 → 30 − 0.6 − 1.233 = 28.17 → 28

@@ -370,6 +370,20 @@ export function roomTargetShift(contributions: { efficiency: number; cost: numbe
   return Number.isFinite(shift) ? clamp(shift, ROOM_TARGET_SHIFT_LIMIT_C) : 0;
 }
 
+/** Fastest change of the room-target shift (°C per hour): 0.02 °C per five-minute cycle (ADR-067 D10). */
+export const ROOM_TARGET_SHIFT_RATE_C_PER_HOUR = 0.24;
+
+/**
+ * Room-target shift limited in how far it moves from the previous cycle's shift. A price change
+ * otherwise moves the recommendation by several whole degrees in one cycle.
+ */
+export function limitTargetShift(shift: number, previous: number, intervalMs: number): number {
+  if (!Number.isFinite(shift)) return 0;
+  if (!Number.isFinite(previous) || !Number.isFinite(intervalMs) || intervalMs <= 0) return shift;
+  const maxStep = ROOM_TARGET_SHIFT_RATE_C_PER_HOUR * (intervalMs / 3_600_000);
+  return Math.max(previous - maxStep, Math.min(previous + maxStep, shift));
+}
+
 /** Slope of the app curve: how much warmer the supply gets per °C colder outdoors, within 0–3. */
 export function appCurveSlope(appCurve: { atMinus15: number; atPlus15: number }): number {
   const slope = (appCurve.atMinus15 - appCurve.atPlus15) / 30;

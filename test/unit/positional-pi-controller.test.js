@@ -16,6 +16,8 @@ const {
   appCurveValue,
   plausibleCurveValue,
   roomTargetShift,
+  limitTargetShift,
+  ROOM_TARGET_SHIFT_RATE_C_PER_HOUR,
   appCurveSlope,
   basisFeedforward,
   ROOM_TARGET_SHIFT_LIMIT_C,
@@ -152,6 +154,24 @@ test('basis: heat pump curve, app curve or flat fallback', () => {
     ...inputs, heatPumpCurve: null, outdoorTemp: null, flatBasis: null,
   }), null);
   assert.strictEqual(plausibleCurveValue(80), null);
+});
+
+test('ADR-067 D10: the room-target shift moves at most 0.24 °C per hour', () => {
+  const FIVE_MIN = 5 * 60 * 1000;
+  assert.strictEqual(ROOM_TARGET_SHIFT_RATE_C_PER_HOUR, 0.24);
+  near(limitTargetShift(-0.28, 0.45, FIVE_MIN), 0.43, 'very cheap to very expensive: 0.02 °C down per cycle');
+  near(limitTargetShift(0.45, 0, FIVE_MIN), 0.02, 'up as slowly as down');
+  near(limitTargetShift(0.01, 0, FIVE_MIN), 0.01, 'a small change passes unchanged');
+  near(limitTargetShift(0, 0.015, FIVE_MIN), 0, 'back to zero within the step');
+  near(limitTargetShift(-0.28, 0.45, 10 * 60 * 1000), 0.41, 'a longer cycle moves proportionally further');
+  let shift = 0.45;
+  for (let cycle = 0; cycle < 12; cycle++) shift = limitTargetShift(-0.28, shift, FIVE_MIN);
+  near(shift, 0.21, 'one hour: 0.24 °C');
+  for (let cycle = 0; cycle < 36; cycle++) shift = limitTargetShift(-0.28, shift, FIVE_MIN);
+  near(shift, -0.28, 'the full shift is reached and held');
+  assert.strictEqual(limitTargetShift(NaN, 0.3, FIVE_MIN), 0);
+  assert.strictEqual(limitTargetShift(0.4, NaN, FIVE_MIN), 0.4, 'no usable previous shift: unlimited');
+  assert.strictEqual(limitTargetShift(0.4, 0, 0), 0.4, 'no usable interval: unlimited');
 });
 
 test('O14/O16: price and COP shift the room target, the basis follows with (1 + slope)', () => {
