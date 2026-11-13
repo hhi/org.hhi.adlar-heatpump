@@ -747,16 +747,16 @@
         "id": "priority_comfort",
         "type": "number",
         "label": {
-          "en": "Comfort (%) — Classic only",
-          "nl": "Comfort (%) — alleen Klassiek",
-          "de": "Komfort (%) — nur Klassisch",
-          "fr": "Confort (%) — Classique uniquement"
+          "en": "Comfort (%)",
+          "nl": "Comfort (%)",
+          "de": "Komfort (%)",
+          "fr": "Confort (%)"
         },
         "hint": {
-          "en": "How much steering on the indoor temperature weighs. Positional always steers on the indoor temperature and does not use this value. The four values are rescaled to 100% together. Default: 50%.",
-          "nl": "Hoe zwaar het bijsturen op de binnentemperatuur weegt. Positioneel stuurt altijd op de binnentemperatuur en gebruikt deze waarde niet. De vier waarden worden samen naar 100% herrekend. Standaard: 50%.",
-          "de": "Wie stark die Regelung auf die Raumtemperatur gewichtet wird. Positionell regelt immer auf die Raumtemperatur und verwendet diesen Wert nicht. Die vier Werte werden zusammen auf 100% umgerechnet. Standard: 50%.",
-          "fr": "Poids de la régulation sur la température intérieure. Le mode Positionnel régule toujours sur la température intérieure et n'utilise pas cette valeur. Les quatre valeurs sont ramenées ensemble à 100%. Par défaut : 50%."
+          "en": "How much steering on the indoor temperature weighs. Positional always steers on the indoor temperature; there this value sets how much room efficiency and cost get to shift the desired room temperature: a lower value gives them more room. The four values are rescaled to 100% together. Default: 50%.",
+          "nl": "Hoe zwaar het bijsturen op de binnentemperatuur weegt. Positioneel stuurt altijd op de binnentemperatuur; daar bepaalt deze waarde hoeveel ruimte efficiëntie en kosten krijgen om het gewenste kamerdoel te verschuiven: een lagere waarde geeft ze meer ruimte. De vier waarden worden samen naar 100% herrekend. Standaard: 50%.",
+          "de": "Wie stark die Regelung auf die Raumtemperatur gewichtet wird. Positionell regelt immer auf die Raumtemperatur; dort bestimmt dieser Wert, wie viel Spielraum Effizienz und Kosten erhalten, um die gewünschte Raumtemperatur zu verschieben: Ein niedrigerer Wert gibt ihnen mehr Spielraum. Die vier Werte werden zusammen auf 100% umgerechnet. Standard: 50%.",
+          "fr": "Poids de la régulation sur la température intérieure. Le mode Positionnel régule toujours sur la température intérieure ; cette valeur y détermine la marge laissée à l'efficacité et au coût pour décaler la température intérieure visée : une valeur plus basse leur laisse plus de marge. Les quatre valeurs sont ramenées ensemble à 100%. Par défaut : 50%."
         },
         "value": 50,
         "attr": {

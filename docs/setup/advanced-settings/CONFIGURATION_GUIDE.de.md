@@ -659,14 +659,15 @@ Automatische Vorlauftemperatur-Optimierung für maximale Effizienz.
 
 ## 10. Adaptive Regelung: Gewichtungsfaktoren
 
-Diese vier Gewichtungsfaktoren bestimmen gemeinsam, wie die Regelung Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.** Komfort und Gebäudemodell zählen nur bei Klassisch. Bei Positionell verschieben Effizienz und Kosten nur das Raumziel, zusammen höchstens 1,5 °C. Bei aktivem Coast-Modus dominiert die Coast-Komponente (80% Standard).
+Diese vier Gewichtungsfaktoren bestimmen gemeinsam, wie die Regelung Entscheidungen trifft. **Werte werden automatisch auf insgesamt 100% normalisiert.** Das Gebäudemodell zählt nur bei Klassisch. Bei Positionell verschieben Effizienz und Kosten nur das Raumziel, zusammen höchstens 1,5 °C; Komfort bestimmt dort, wie viel Spielraum sie dafür erhalten. Bei aktivem Coast-Modus dominiert die Coast-Komponente (80% Standard).
 
-### Komfort — nur Klassisch
+### Komfort
 
 - **Standard**: 50%
 - **Bereich**: 0 - 100%
 - **Funktion**: Gewicht für PI-Temperaturregelung
 - **Hoher Komfort** (70-80%): Temperatur immer stabil innerhalb ±0,3°C
+- **Bei Positionell**: bestimmt, wie viel Spielraum Effizienz und Kosten erhalten, um das Raumziel zu verschieben; ein niedrigerer Wert gibt ihnen mehr Spielraum (50/15/15 → 37,5%, 100/15/15 → 23%)
 
 ### Effizienz
 

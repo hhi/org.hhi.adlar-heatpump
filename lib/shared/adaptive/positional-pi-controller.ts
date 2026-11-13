@@ -326,6 +326,32 @@ export function resolveBasis(inputs: BasisInputs): CurveBasis | null {
 }
 
 // ============================================================================
+// Rounding the recommendation (ADR-067 D3)
+// ============================================================================
+
+/**
+ * The recommendation only changes when the unrounded value lies at least this far (°C) from the
+ * previous recommendation. Plain rounding flips between two whole degrees whenever the unrounded
+ * value hovers around a half: the room sensor moves in steps of 0.1 °C, which is 0.3 °C in the
+ * recommendation at Kp 3.
+ */
+export const RECOMMENDATION_HYSTERESIS_C = 0.75;
+
+/**
+ * Whole-degree recommendation with hysteresis: keeps the previous recommendation while the
+ * unrounded value stays within RECOMMENDATION_HYSTERESIS_C of it, and rounds otherwise. Without a
+ * previous recommendation (first cycle, after a reset) it rounds.
+ */
+export function roundRecommendation(
+  raw: number,
+  previous: number | null | undefined,
+  hysteresis: number = RECOMMENDATION_HYSTERESIS_C,
+): number {
+  if (previous === null || previous === undefined || !Number.isFinite(previous)) return Math.round(raw);
+  return Math.abs(raw - previous) < hysteresis ? previous : Math.round(raw);
+}
+
+// ============================================================================
 // Optimizers through the room target (ADR-065 O14/O16, 3.6.0)
 // ============================================================================
 
@@ -342,6 +368,20 @@ const CURVE_SLOPE_MAX = 3;
 export function roomTargetShift(contributions: { efficiency: number; cost: number }): number {
   const shift = contributions.efficiency + contributions.cost;
   return Number.isFinite(shift) ? clamp(shift, ROOM_TARGET_SHIFT_LIMIT_C) : 0;
+}
+
+/** Fastest change of the room-target shift (°C per hour): 0.02 °C per five-minute cycle (ADR-067 D10). */
+export const ROOM_TARGET_SHIFT_RATE_C_PER_HOUR = 0.24;
+
+/**
+ * Room-target shift limited in how far it moves from the previous cycle's shift. A price change
+ * otherwise moves the recommendation by several whole degrees in one cycle.
+ */
+export function limitTargetShift(shift: number, previous: number, intervalMs: number): number {
+  if (!Number.isFinite(shift)) return 0;
+  if (!Number.isFinite(previous) || !Number.isFinite(intervalMs) || intervalMs <= 0) return shift;
+  const maxStep = ROOM_TARGET_SHIFT_RATE_C_PER_HOUR * (intervalMs / 3_600_000);
+  return Math.max(previous - maxStep, Math.min(previous + maxStep, shift));
 }
 
 /** Slope of the app curve: how much warmer the supply gets per °C colder outdoors, within 0–3. */

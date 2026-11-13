@@ -328,14 +328,15 @@ In the order of the groups.
 | Coast: share in the recommendation | How heavily coast weighs | Classic, Manual | 0.80 |
 | Coast: maximum duration (Aurora) | Maximum number of 5-minute cycles | Classic, Manual | 24 |
 | **Group weighting factors** | | | |
-| Comfort — Classic only | Weight of the temperature control | Classic | 50 % |
+| Comfort | Weight of the temperature control; in Positional the room for Efficiency and Cost | All | 50 % |
 | Efficiency | Weight of the COP optimization | All | 15 % |
 | Cost | Weight of the price optimization | All | 15 % |
 | Building model — Classic only | Weight of the building model | Classic | 20 % |
 
 The weighting factors are scaled together to 100 %. Efficiency and Cost only do
 something while COP or price optimization is on. In Positional they shift the
-room target, by at most 1.5 °C; the heating curve shifts along.
+room target, by at most 1.5 °C; the heating curve shifts along. Comfort sets
+how much room they get there: a lower value gives them more room.
 
 ## Outdoor temperature
 

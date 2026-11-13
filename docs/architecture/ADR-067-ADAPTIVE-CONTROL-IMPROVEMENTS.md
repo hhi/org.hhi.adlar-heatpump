@@ -1,7 +1,8 @@
 # ADR-067: Verbeteringen aan de adaptieve regeling
 
-**Status:** Voorstel (2026-11-09). D1 is gebouwd op 2026-11-10 (voor 3.8.0); de
-rest niet. Per besluit staat erbij of het getoetst is.
+**Status:** Voorstel (2026-11-09). D1 is gebouwd op 2026-11-10 (in 3.8.0), D3
+en D10 op 2026-11-13 (voor 3.9.0, nog niet uitgebracht); de rest niet. Per besluit
+staat erbij of het getoetst is.
 **Datum:** 2026-11-09
 **Beslissers:** -
 **Gerelateerd:** [ADR-065](ADR-065-POSITIONAL-PI-HEATING-CURVE.md) (positionele
@@ -9,9 +10,9 @@ PI, presets, optimizers via het kamerdoel, open punten O10, O11, O12, O21);
 [ADR-066](ADR-066-EMITTER-DELAY.md) (afgiftevertraging, live toets);
 [ADR-062](ADR-062-BUILDING-MODEL-REVIEW-IMPLEMENTATION.md) (gebouwmodel);
 [BUILDING_MODEL_REVIEW.md](BUILDING_MODEL_REVIEW.md)
-**Simulatie:** `test/simulation/coast-closed-loop.js` met `O16=1`, in een kopie
-met twee extra varianten en een teller (§6). De wijziging aan het script staat
-in §6.2; ze zit nog niet in de repo.
+**Simulatie:** `test/simulation/coast-closed-loop.js`. D3 staat in de repo als
+`O22=1`. D4 is getoetst in een kopie met een extra variant (§6.2); die zit niet
+in de repo.
 **Stand van de code:** `main` op `d2311cb` (v3.7.1)
 
 ---
@@ -29,7 +30,7 @@ in §6.2; ze zit nog niet in de repo.
     wordt door geen enkele driver gelezen.
   - Een stilgevallen binnensensor wordt niet herkend (D2). De regeling rekent
     door met de laatste waarde.
-- **Eén kleine verbetering die getoetst is:** het advies wisselt nu 54–67 keer
+- **Eén kleine verbetering die getoetst is:** het advies wisselt nu 27–34 keer
   per dag tussen twee hele graden. Een afrondhysterese halveert dat bij
   radiatoren en brengt het bij vloerverwarming terug tot een derde, met
   0,004–0,011 °C meer afwijking van de kamer (D3).
@@ -54,6 +55,7 @@ in §6.2; ze zit nog niet in de repo.
 | D7 | Positioneel de standaard voor nieuwe apparaten | Bestaand (O10, O11) | ADR-065 | Klein | Na de live toets |
 | D8 | Zon vooruit meenemen bij vloerverwarming | Idee | Nee | Groot | Eerst simuleren |
 | D9 | Klassiek niet verder verbeteren | Besluit | — | — | Vastleggen |
+| D10 | Verschuiving van het kamerdoel begrensd per uur | Verbetering | Simulatie | Klein | 3.9.0 (gebouwd) |
 
 ---
 
@@ -220,9 +222,16 @@ en voor blokkades in het gebouwmodel uitbreiden met deze reden.
 dat 0,3 °C in het advies. Ligt de ongeronde waarde rond een halve graad, dan
 wisselt het advies bij elke sensorstap tussen twee hele graden.
 
-**Gemeten.** In de simulatie 54–67 wijzigingen van het advies per dag, zonder
+**Gemeten.** In de simulatie 27–34 wijzigingen van het advies per dag, zonder
 nachtverlaging. Elke wijziging is een flowtrigger en een schrijfactie naar de
-warmtepomp.
+warmtepomp. In de live toets (Aurora I/II, Positioneel – Radiatoren): 34
+wijzigingen in 24 uur op 11 november en 51 op 12 november, waarvan ongeveer 40
+heen-en-weer tussen twee hele graden.
+
+**Correctie (2026-11-13).** De eerste versie van deze tabel gaf het dubbele
+aantal wijzigingen (54–67 zonder hysterese). De teller in de kopie van het
+script telde elke wijziging twee keer. De getallen hieronder komen uit het
+script in de repo (`O22=1`); de RMSE en de verhoudingen zijn ongewijzigd.
 
 **Voorstel.** Het advies alleen wijzigen als de ongeronde waarde 0,75 °C of meer
 van het vorige advies af ligt; anders blijft het vorige advies staan.
@@ -231,11 +240,11 @@ van het vorige advies af ligt; anders blijft het vorige advies staan.
 
 | Drempel (°C) | Radiator mild | Radiator koud | Vloer mild | Vloer koud |
 | --- | --- | --- | --- | --- |
-| 0,5 (nu) | 66,7 / 0,167 | 67,1 / 0,168 | 55,9 / 0,179 | 54,1 / 0,157 |
-| 0,6 | 40,1 / 0,168 | 39,8 / 0,169 | 26,6 / 0,181 | 26,2 / 0,159 |
-| **0,75** | **31,7 / 0,171** | **31,3 / 0,172** | **16,2 / 0,186** | **15,7 / 0,168** |
-| 0,9 | 29,9 / 0,173 | 29,9 / 0,175 | 14,9 / 0,192 | 14,2 / 0,176 |
-| 1,0 | 29,3 / 0,175 | 28,7 / 0,176 | 13,6 / 0,197 | 13,2 / 0,184 |
+| Afronden (was) | 33,3 / 0,167 | 33,6 / 0,168 | 27,9 / 0,179 | 27,0 / 0,157 |
+| 0,6 | 20,0 / 0,168 | 19,9 / 0,169 | 13,3 / 0,181 | 13,1 / 0,159 |
+| **0,75** | **15,9 / 0,171** | **15,6 / 0,172** | **8,1 / 0,186** | **7,8 / 0,168** |
+| 0,9 | 15,0 / 0,173 | 14,9 / 0,175 | 7,4 / 0,192 | 7,1 / 0,176 |
+| 1,0 | 14,6 / 0,175 | 14,4 / 0,176 | 6,8 / 0,197 | 6,6 / 0,184 |
 
 Per cel: wijzigingen per dag / RMSE van de kamertemperatuur (°C). Boven 0,75
 neemt het aantal wijzigingen nauwelijks meer af en loopt de afwijking op.
@@ -249,10 +258,8 @@ Bij 0,75 verder: compressorstarts 3,0 → 2,8 per dag (radiator mild) en 1,0 →
 - "Flow loopt achter" vergelijkt het setpoint met het vorige advies (meer dan 1
   °C). Het advies blijft een hele graad, dus die regel verandert niet.
 - "Aan de setpointgrens" gebruikt de ongeronde waarde; ook ongewijzigd.
-- Bij de start en bij een wissel van regelmodus begint de wijzigingsdetectie op
-  het huidige setpoint (`_handleControlMode`, stap 7 van de regelcyclus). De
-  hysterese vergelijkt dan met dat setpoint: het eerste advies volgt pas als de
-  berekende waarde er 0,75 °C of meer van af ligt.
+- Bij de start en bij een wissel van regelmodus is er nog geen vorig advies. Het
+  eerste advies wordt dan gewoon afgerond; de hysterese werkt vanaf het tweede.
 
 **Zwakte.**
 
@@ -260,8 +267,8 @@ Bij 0,75 verder: compressorstarts 3,0 → 2,8 per dag (radiator mild) en 1,0 →
 - Het advies kan tot 0,75 °C van de berekende waarde af staan in plaats van 0,5
   °C.
 - Eén gesimuleerde woning; de drempel is op deze vier scenario's gekozen.
-- Het aantal wijzigingen is in de praktijk niet gemeten. De live toets kan het
-  tellen uit de Insights van `adlar_simulated_target`.
+- In de praktijk twee etmalen geteld op één installatie, vóór de wijziging; het
+  effect van de hysterese zelf is nog niet in de praktijk gemeten.
 
 **Alternatief.** Een minimale tijd tussen twee wijzigingen (bijvoorbeeld 15
 minuten). Eenvoudiger uit te leggen, maar vertraagt ook een echte stap, en haalt
@@ -274,8 +281,14 @@ Als dat zo is, weegt het aantal schrijfacties zwaarder dan hier aangenomen.
 `adaptive_simulation_update` gaat elke cyclus af en verandert niet.
 
 **Toets.** Unit-test op de drempel (binnen de band blijft het advies, erbuiten
-volgt het) en op het eerste advies na een moduswissel; de simulatievariant in de
-repo opnemen (§6.2).
+volgt het) en op het eerste advies zonder voorganger; de simulatievariant staat
+in de repo (`O22=1`).
+
+**Gebouwd (2026-11-13).** `roundRecommendation` in
+`lib/shared/adaptive/positional-pi-controller.ts`, aangeroepen door
+`_positionalRecommendation` in de drie services. Toetsen in
+`test/unit/positional-pi-controller.test.js` en
+`test/unit/optimizer-settings.test.js`.
 
 ### D4 — Integraal stil bij negatieve fout en compressor uit
 
@@ -315,6 +328,45 @@ Zonder nachtverlaging verandert er vrijwel niets (vloer mild: uren boven +0,5 °
 **Advies.** Niet nu. Het is een keuze tussen warmere ochtenden en verbruik, en
 hoort bij het open punt "eerder opwarmen bij een weekprogramma" (O21). Opnieuw
 bekijken met praktijkgegevens van vloerverwarming met nachtverlaging.
+
+### D10 — Verschuiving van het kamerdoel begrensd per uur
+
+Toegevoegd op 2026-11-13, na een terugmelding van een tester met
+vloerverwarming (positioneel, prijsoptimalisatie aan): het advies schakelt te
+fors en de compressor valt uit.
+
+**Oorzaak.** Prijs en COP verschuiven het kamerdoel (ADR-065 O14). Het advies
+volgt die verschuiving met Kp + 1 + de helling van de stooklijn, ongeveer 4,3
+keer. Een prijswissel verzet de verschuiving in één cyclus; in de simulatie
+springt het advies daardoor tot 5 °C (wegingen 50/15/15).
+
+**Besluit.** De verschuiving beweegt hooguit 0,24 °C per uur
+(`limitTargetShift`, 0,02 °C per cyclus van vijf minuten), in de drie drivers.
+Geen instelling.
+
+**Getoetst** (`O23=1 O23_RATE=0.01,0.02,0.05,0.1`, vloerverwarming, mild, 14
+dagen, 5 seeds, hysterese van D3 aan):
+
+| Grens per cyclus | Grootste sprong | Stroom in dure uren | Uren > +0,5 °C per dag | Starts per dag |
+| --- | --- | --- | --- | --- |
+| Geen optimizers | 1 °C | 32% | 0,37 | 0,8 |
+| Onbegrensd (was) | 5 °C | 15% | 1,02 | 1,1 |
+| 0,01 °C | 1 °C | 23% | 0,25 | 1,1 |
+| 0,02 °C (gebouwd) | 1 °C | 17% | 0,59 | 1,1 |
+| 0,05 °C | 2 °C | 16% | 0,80 | 1,1 |
+| 0,1 °C | 2 °C | 16% | 0,93 | 1,1 |
+
+Radiatoren met 0,02 °C: starts 4,4 → 3,3 per dag (mild) en 0,7 → 0,1 (koud),
+wijzigingen van het advies 55 → 21 per dag (koud).
+
+**Zwaktes.**
+
+- De volle verschuiving duurt ruim drie uur; een prijspiek van één uur telt
+  voor ongeveer een derde mee.
+- Eén gesimuleerde woning met uurprijzen; kwartierprijzen zijn niet getoetst.
+- De simulatie laat de sprong zien, niet het uitvallen van de compressor dat
+  de tester meldt. De starts bij vloerverwarming veranderen niet.
+- Na een herstart begint de verschuiving bij nul.
 
 ---
 
@@ -481,27 +533,18 @@ als het ongewijzigde script.
 
 ### 6.2 Wijziging aan het script
 
-In een kopie buiten de repo. Op te nemen in de repo samen met D3:
+D3 staat in de repo: `O22=1 node test/simulation/coast-closed-loop.js all`
+(optie `roundHyst`, drempels via `O22_HYST`). D4 is getoetst in een kopie buiten
+de repo, met deze wijziging:
 
 ```js
 // D4: extra pauzereden (regel 580)
 pause: (v.coast && coastActive) ? 'coast'
   : (o16Pause ? 'target_step'
     : ((opts.satHold && ePos < 0 && !on) ? 'target_step' : null)),
-
-// D3: afrondhysterese in de tak 'o14' (na regel 622)
-if (opts.roundHyst && lastRecommended !== undefined
-  && Math.abs(lastRecRaw - lastRecommended)
-    < Number(process.env.HYST || 0.75)) {
-  recommended = lastRecommended;
-}
-
-// teller (na 'const changed = …')
-if (changed) st.spChanges = (st.spChanges ?? 0) + 1;
 ```
 
-Plus de rijen `{ satHold: true }` en `{ roundHyst: true }` in de tabel van
-`O16`, en de kolom "setpointwijzigingen/dag".
+Plus de rij `{ satHold: true }` in de tabel van `O16`.
 
 ### 6.3 Grenzen
 

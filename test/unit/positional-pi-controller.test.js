@@ -16,9 +16,13 @@ const {
   appCurveValue,
   plausibleCurveValue,
   roomTargetShift,
+  limitTargetShift,
+  ROOM_TARGET_SHIFT_RATE_C_PER_HOUR,
   appCurveSlope,
   basisFeedforward,
   ROOM_TARGET_SHIFT_LIMIT_C,
+  roundRecommendation,
+  RECOMMENDATION_HYSTERESIS_C,
 } = require('../../.homeybuild/lib/shared/adaptive/positional-pi-controller');
 
 const near = (actual, expected, msg) => assert.ok(Math.abs(actual - expected) < 1e-9, `${msg}: ${actual} ≠ ${expected}`);
@@ -152,6 +156,24 @@ test('basis: heat pump curve, app curve or flat fallback', () => {
   assert.strictEqual(plausibleCurveValue(80), null);
 });
 
+test('ADR-067 D10: the room-target shift moves at most 0.24 °C per hour', () => {
+  const FIVE_MIN = 5 * 60 * 1000;
+  assert.strictEqual(ROOM_TARGET_SHIFT_RATE_C_PER_HOUR, 0.24);
+  near(limitTargetShift(-0.28, 0.45, FIVE_MIN), 0.43, 'very cheap to very expensive: 0.02 °C down per cycle');
+  near(limitTargetShift(0.45, 0, FIVE_MIN), 0.02, 'up as slowly as down');
+  near(limitTargetShift(0.01, 0, FIVE_MIN), 0.01, 'a small change passes unchanged');
+  near(limitTargetShift(0, 0.015, FIVE_MIN), 0, 'back to zero within the step');
+  near(limitTargetShift(-0.28, 0.45, 10 * 60 * 1000), 0.41, 'a longer cycle moves proportionally further');
+  let shift = 0.45;
+  for (let cycle = 0; cycle < 12; cycle++) shift = limitTargetShift(-0.28, shift, FIVE_MIN);
+  near(shift, 0.21, 'one hour: 0.24 °C');
+  for (let cycle = 0; cycle < 36; cycle++) shift = limitTargetShift(-0.28, shift, FIVE_MIN);
+  near(shift, -0.28, 'the full shift is reached and held');
+  assert.strictEqual(limitTargetShift(NaN, 0.3, FIVE_MIN), 0);
+  assert.strictEqual(limitTargetShift(0.4, NaN, FIVE_MIN), 0.4, 'no usable previous shift: unlimited');
+  assert.strictEqual(limitTargetShift(0.4, 0, 0), 0.4, 'no usable interval: unlimited');
+});
+
 test('O14/O16: price and COP shift the room target, the basis follows with (1 + slope)', () => {
   near(roomTargetShift({ efficiency: -0.1, cost: -0.3 }), -0.4, 'sum of price and COP');
   assert.strictEqual(ROOM_TARGET_SHIFT_LIMIT_C, 1.5);
@@ -169,3 +191,33 @@ test('O14/O16: price and COP shift the room target, the basis follows with (1 + 
   near(basisFeedforward(-0.4, { value: 40, source: 'heat_pump_curve' }, appCurve), -0.6, 'heat pump curve: slope of the app curve');
   near(basisFeedforward(-0.4, { value: 40, source: 'flat' }, appCurve), -0.4, 'flat basis: factor 1');
 });
+
+test('ADR-067 D3: the recommendation keeps its value until the unrounded value is 0.75 °C away', () => {
+  assert.strictEqual(RECOMMENDATION_HYSTERESIS_C, 0.75);
+  // Around a half: plain rounding would flip 41 ↔ 42 on every 0.3 °C step of the PI
+  const raws = [41.4, 41.6, 41.3, 41.7, 41.4, 41.74];
+  let previous = 41;
+  for (const raw of raws) {
+    previous = roundRecommendation(raw, previous);
+    assert.strictEqual(previous, 41, `raw ${raw}`);
+  }
+  assert.strictEqual(roundRecommendation(41.75, 41), 42, 'at the threshold it moves');
+  assert.strictEqual(roundRecommendation(41.4, 42), 42, 'and stays there on the way back');
+  assert.strictEqual(roundRecommendation(41.25, 42), 41, 'until it is 0.75 °C below');
+  assert.strictEqual(roundRecommendation(40.26, 41), 41);
+  assert.strictEqual(roundRecommendation(40.25, 41), 40);
+});
+
+test('ADR-067 D3: a real step is followed at once and lands on the rounded value', () => {
+  assert.strictEqual(roundRecommendation(44.2, 41), 44);
+  assert.strictEqual(roundRecommendation(36.6, 41), 37);
+});
+
+test('ADR-067 D3: without a previous recommendation it rounds; the threshold can be set', () => {
+  assert.strictEqual(roundRecommendation(41.6, undefined), 42);
+  assert.strictEqual(roundRecommendation(41.6, null), 42);
+  assert.strictEqual(roundRecommendation(41.6, Number.NaN), 42);
+  assert.strictEqual(roundRecommendation(41.6, 41, 0.5), 42, 'threshold 0.5 behaves like plain rounding here');
+  assert.strictEqual(roundRecommendation(41.6, 41, 1), 41);
+});
+
