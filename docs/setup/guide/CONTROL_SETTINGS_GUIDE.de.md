@@ -341,7 +341,7 @@ In der Reihenfolge der Gruppen.
 | Coast: Anteil an der Empfehlung | Wie stark Coast gewichtet wird | Klassisch, Manuell | 0,80 |
 | Coast: maximale Dauer (Aurora) | Höchstzahl an 5-Minuten-Zyklen | Klassisch, Manuell | 24 |
 | **Gruppe Gewichtungsfaktoren** | | | |
-| Komfort — nur Klassisch | Gewicht der Temperaturregelung | Klassisch | 50 % |
+| Komfort | Gewicht der Temperaturregelung; bei Positionell der Spielraum für Effizienz und Kosten | Alle | 50 % |
 | Effizienz | Gewicht der COP-Optimierung | Allen | 15 % |
 | Kosten | Gewicht der Preisoptimierung | Allen | 15 % |
 | Gebäudemodell — nur Klassisch | Gewicht des Gebäudemodells | Klassisch | 20 % |
@@ -349,7 +349,8 @@ In der Reihenfolge der Gruppen.
 Die Gewichtungsfaktoren werden zusammen auf 100 % umgerechnet. Effizienz und Kosten
 wirken nur, wenn die COP- oder Preisoptimierung an ist. Bei Positionell
 verschieben sie das Raumziel, um höchstens 1,5 °C; die Heizkurve verschiebt
-sich mit.
+sich mit. Komfort bestimmt dort, wie viel Spielraum sie erhalten: Ein niedrigerer
+Wert gibt ihnen mehr Spielraum.
 
 ## Außentemperatur
 

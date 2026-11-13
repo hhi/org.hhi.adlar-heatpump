@@ -330,7 +330,7 @@ In de volgorde van de groepen.
 | Coast: aandeel in het advies | Hoe zwaar coast meeweegt | Klassiek, Handmatig | 0,80 |
 | Coast: maximale duur (Aurora) | Maximaal aantal cycli van 5 minuten | Klassiek, Handmatig | 24 |
 | **Groep wegingsfactoren** | | | |
-| Comfort — alleen Klassiek | Gewicht van de temperatuurregeling | Klassiek | 50 % |
+| Comfort | Gewicht van de temperatuurregeling; bij Positioneel de ruimte voor Efficiëntie en Kosten | Alle | 50 % |
 | Efficiëntie | Gewicht van de COP-optimalisatie | Alle | 15 % |
 | Kosten | Gewicht van de prijsoptimalisatie | Alle | 15 % |
 | Gebouwmodel — alleen Klassiek | Gewicht van het gebouwmodel | Klassiek | 20 % |
@@ -338,6 +338,8 @@ In de volgorde van de groepen.
 De wegingsfactoren worden samen naar 100 % omgerekend. Efficiëntie en Kosten doen
 alleen iets als de COP- of prijsoptimalisatie aan staat. Bij Positioneel
 verschuiven ze het kamerdoel, met hooguit 1,5 °C; de stooklijn schuift mee.
+Comfort bepaalt daar hoeveel ruimte ze krijgen: een lagere waarde geeft ze meer
+ruimte.
 
 ## Buitentemperatuur
 
