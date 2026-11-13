@@ -652,14 +652,15 @@ Automatic supply temperature optimization for maximum efficiency.
 
 ## 10. Adaptive control: weighting factors
 
-These four weighting factors together determine how the control makes decisions. **Values are automatically normalized to total 100%.** Comfort and Building model only count in Classic. In Positional, Efficiency and Cost only shift the room target, by at most 1.5 °C together. When coast mode is active, the coast component dominates (80% default).
+These four weighting factors together determine how the control makes decisions. **Values are automatically normalized to total 100%.** Building model only counts in Classic. In Positional, Efficiency and Cost only shift the room target, by at most 1.5 °C together; Comfort sets how much room they get for that. When coast mode is active, the coast component dominates (80% default).
 
-### Comfort — Classic only
+### Comfort
 
 - **Default**: 50%
 - **Range**: 0 - 100%
 - **Function**: Weight for PI temperature control
 - **High comfort** (70-80%): Temperature always stable within ±0.3°C
+- **In Positional**: sets how much room Efficiency and Cost get to shift the room target; a lower value gives them more room (50/15/15 → 37.5%, 100/15/15 → 23%)
 
 ### Efficiency
 

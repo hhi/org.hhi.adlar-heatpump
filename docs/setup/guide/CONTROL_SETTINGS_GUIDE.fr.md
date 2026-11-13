@@ -350,14 +350,16 @@ Dans l'ordre des groupes.
 | Coast : part dans la recommandation | Poids de coast | Classique, Manuel | 0,80 |
 | Coast : durée maximale (Aurora) | Nombre maximal de cycles de 5 minutes | Classique, Manuel | 24 |
 | **Groupe facteurs de pondération** | | | |
-| Confort — Classique uniquement | Poids de la régulation de température | Classique | 50 % |
+| Confort | Poids de la régulation de température ; en Positionnel, la marge laissée à Efficacité et Coût | Tous | 50 % |
 | Efficacité | Poids de l'optimisation COP | Tous | 15 % |
 | Coût | Poids de l'optimisation des prix | Tous | 15 % |
 | Modèle du bâtiment — Classique uniquement | Poids du modèle de bâtiment | Classique | 20 % |
 
 Les facteurs de pondération sont ramenés ensemble à 100 %. Efficacité et Coût n'agissent que
 si l'optimisation COP ou des prix est activée. En Positionnel, elles décalent la
-cible de la pièce, d'au plus 1,5 °C ; la courbe de chauffe suit.
+cible de la pièce, d'au plus 1,5 °C ; la courbe de chauffe suit. Confort y
+détermine la marge qui leur est laissée : une valeur plus basse leur laisse plus
+de marge.
 
 ## Température extérieure
 

@@ -667,14 +667,15 @@ Optimisation automatique de la température de départ pour une efficacité maxi
 
 ## 10. Contrôle adaptatif : facteurs de pondération
 
-Ces quatre facteurs de pondération déterminent ensemble comment la régulation prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.** Confort et Modèle du bâtiment ne comptent qu'en Classique. En Positionnel, Efficacité et Coût décalent seulement la température intérieure visée, d'au plus 1,5 °C ensemble. En mode coast actif, le composant coast domine (80% par défaut).
+Ces quatre facteurs de pondération déterminent ensemble comment la régulation prend des décisions. **Les valeurs sont automatiquement normalisées à 100% au total.** Modèle du bâtiment ne compte qu'en Classique. En Positionnel, Efficacité et Coût décalent seulement la température intérieure visée, d'au plus 1,5 °C ensemble ; Confort y détermine la marge qui leur est laissée. En mode coast actif, le composant coast domine (80% par défaut).
 
-### Confort — Classique uniquement
+### Confort
 
 - **Par défaut** : 50%
 - **Plage** : 0 - 100%
 - **Fonction** : Poids pour le contrôle de température PI
 - **Confort élevé** (70-80%) : Température toujours stable dans ±0.3°C
+- **En Positionnel** : détermine la marge laissée à Efficacité et Coût pour décaler la température intérieure visée ; une valeur plus basse leur laisse plus de marge (50/15/15 → 37,5%, 100/15/15 → 23%)
 
 ### Efficacité
 

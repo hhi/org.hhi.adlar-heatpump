@@ -655,14 +655,15 @@ Automatische optimalisatie van aanvoertemperatuur voor maximale efficiency.
 
 ## 10. Adaptieve regeling: wegingsfactoren
 
-Deze vier wegingsfactoren bepalen samen hoe de regeling beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.** Comfort en Gebouwmodel tellen alleen bij Klassiek. Efficiëntie en Kosten verschuiven bij Positioneel alleen het kamerdoel, samen hooguit 1,5 °C. Bij actieve coast-modus domineert de coast-component (80% standaard).
+Deze vier wegingsfactoren bepalen samen hoe de regeling beslissingen maakt. **Waarden worden automatisch genormaliseerd naar totaal 100%.** Gebouwmodel telt alleen bij Klassiek. Efficiëntie en Kosten verschuiven bij Positioneel alleen het kamerdoel, samen hooguit 1,5 °C; Comfort bepaalt daar hoeveel ruimte ze daarvoor krijgen. Bij actieve coast-modus domineert de coast-component (80% standaard).
 
-### Comfort — alleen Klassiek
+### Comfort
 
 - **Standaard**: 50%
 - **Bereik**: 0 - 100%
 - **Functie**: Gewicht voor PI temperatuurregeling
 - **Hoog comfort** (70-80%): Temperatuur altijd stabiel binnen ±0.3°C
+- **Bij Positioneel**: bepaalt hoeveel ruimte Efficiëntie en Kosten krijgen om het kamerdoel te verschuiven; een lagere waarde geeft ze meer ruimte (50/15/15 → 37,5%, 100/15/15 → 23%)
 
 ### Efficiëntie
 
