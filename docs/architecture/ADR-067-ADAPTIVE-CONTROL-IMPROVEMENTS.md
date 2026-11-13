@@ -1,7 +1,7 @@
 # ADR-067: Verbeteringen aan de adaptieve regeling
 
 **Status:** Voorstel (2026-11-09). D1 is gebouwd op 2026-11-10 (in 3.8.0), D3
-op 2026-11-13 (voor 3.9.0, nog niet uitgebracht); de rest niet. Per besluit
+en D10 op 2026-11-13 (voor 3.9.0, nog niet uitgebracht); de rest niet. Per besluit
 staat erbij of het getoetst is.
 **Datum:** 2026-11-09
 **Beslissers:** -
@@ -55,6 +55,7 @@ in de repo.
 | D7 | Positioneel de standaard voor nieuwe apparaten | Bestaand (O10, O11) | ADR-065 | Klein | Na de live toets |
 | D8 | Zon vooruit meenemen bij vloerverwarming | Idee | Nee | Groot | Eerst simuleren |
 | D9 | Klassiek niet verder verbeteren | Besluit | — | — | Vastleggen |
+| D10 | Verschuiving van het kamerdoel begrensd per uur | Verbetering | Simulatie | Klein | 3.9.0 (gebouwd) |
 
 ---
 
@@ -327,6 +328,45 @@ Zonder nachtverlaging verandert er vrijwel niets (vloer mild: uren boven +0,5 °
 **Advies.** Niet nu. Het is een keuze tussen warmere ochtenden en verbruik, en
 hoort bij het open punt "eerder opwarmen bij een weekprogramma" (O21). Opnieuw
 bekijken met praktijkgegevens van vloerverwarming met nachtverlaging.
+
+### D10 — Verschuiving van het kamerdoel begrensd per uur
+
+Toegevoegd op 2026-11-13, na een terugmelding van een tester met
+vloerverwarming (positioneel, prijsoptimalisatie aan): het advies schakelt te
+fors en de compressor valt uit.
+
+**Oorzaak.** Prijs en COP verschuiven het kamerdoel (ADR-065 O14). Het advies
+volgt die verschuiving met Kp + 1 + de helling van de stooklijn, ongeveer 4,3
+keer. Een prijswissel verzet de verschuiving in één cyclus; in de simulatie
+springt het advies daardoor tot 5 °C (wegingen 50/15/15).
+
+**Besluit.** De verschuiving beweegt hooguit 0,24 °C per uur
+(`limitTargetShift`, 0,02 °C per cyclus van vijf minuten), in de drie drivers.
+Geen instelling.
+
+**Getoetst** (`O23=1 O23_RATE=0.01,0.02,0.05,0.1`, vloerverwarming, mild, 14
+dagen, 5 seeds, hysterese van D3 aan):
+
+| Grens per cyclus | Grootste sprong | Stroom in dure uren | Uren > +0,5 °C per dag | Starts per dag |
+| --- | --- | --- | --- | --- |
+| Geen optimizers | 1 °C | 32% | 0,37 | 0,8 |
+| Onbegrensd (was) | 5 °C | 15% | 1,02 | 1,1 |
+| 0,01 °C | 1 °C | 23% | 0,25 | 1,1 |
+| 0,02 °C (gebouwd) | 1 °C | 17% | 0,59 | 1,1 |
+| 0,05 °C | 2 °C | 16% | 0,80 | 1,1 |
+| 0,1 °C | 2 °C | 16% | 0,93 | 1,1 |
+
+Radiatoren met 0,02 °C: starts 4,4 → 3,3 per dag (mild) en 0,7 → 0,1 (koud),
+wijzigingen van het advies 55 → 21 per dag (koud).
+
+**Zwaktes.**
+
+- De volle verschuiving duurt ruim drie uur; een prijspiek van één uur telt
+  voor ongeveer een derde mee.
+- Eén gesimuleerde woning met uurprijzen; kwartierprijzen zijn niet getoetst.
+- De simulatie laat de sprong zien, niet het uitvallen van de compressor dat
+  de tester meldt. De starts bij vloerverwarming veranderen niet.
+- Na een herstart begint de verschuiving bij nul.
 
 ---
 

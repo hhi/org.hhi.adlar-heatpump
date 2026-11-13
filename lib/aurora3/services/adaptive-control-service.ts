@@ -26,6 +26,7 @@ import {
   curvePresetFor,
   basisFeedforward,
   roomTargetShift,
+  limitTargetShift,
   resolveControlParams,
   roundRecommendation,
   type ControlMode,
@@ -1348,7 +1349,8 @@ export class AdaptiveControlService {
       const decisionMetrics: ConfidenceMetrics = positional ? { ...confidenceMetrics, thermalExcluded: true } : confidenceMetrics;
       if (positional && basis) {
         const optimizers = this.decisionMaker.combineActionsWithThermal(null, copAction, priceAction, null, decisionMetrics, coastAction);
-        this.lastTargetShift = roomTargetShift(optimizers.breakdown);
+        // ADR-067 D10: the shift moves at most 0.24 °C per hour, so a price change does not jump the recommendation
+        this.lastTargetShift = limitTargetShift(roomTargetShift(optimizers.breakdown), this.lastTargetShift, this.controlIntervalMs);
         this.lastFeedforward = basisFeedforward(this.lastTargetShift, basis, this._appCurve());
         heatingAction = await this._positionalHeatingAction(desiredIndoorTemp + this.lastTargetShift - indoorTemp, currentSetpoint);
       }
