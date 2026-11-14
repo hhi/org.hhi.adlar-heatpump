@@ -49,6 +49,7 @@ function createDevice(overrides = {}) {
     getIndoorTemperature: () => (
       Object.prototype.hasOwnProperty.call(overrides, 'indoorTemp') ? overrides.indoorTemp : 20
     ),
+    getIndoorStaleness: () => overrides.indoorStaleness ?? 'fresh',
   };
   const adaptiveControl = {
     getExternalTemperatureService: () => externalTemperatureService,
@@ -104,6 +105,18 @@ test('BuildingModelService skips when indoor temperature is missing', async () =
   const result = await runCollect({ indoorTemp: null });
   assert.strictEqual(result.count, 0);
   assert.match(result.status.blockingReason, /No indoor temperature/);
+});
+
+test('ADR-067 D2: BuildingModelService does not learn from an indoor temperature unchanged for 24 h', async () => {
+  const result = await runCollect({ indoorStaleness: 'stale' });
+  assert.strictEqual(result.count, 0);
+  assert.match(result.status.blockingReason, /Indoor temperature unchanged for 24 h/);
+  assert.strictEqual(result.status.blockingReasonKey, 'building_model.blocked_indoor_temp_unchanged');
+});
+
+test('ADR-067 D2: BuildingModelService keeps learning while the indoor temperature is only 12 h unchanged', async () => {
+  const result = await runCollect({ indoorStaleness: 'warn' });
+  assert.doesNotMatch(result.status.blockingReason ?? '', /unchanged/);
 });
 
 test('BuildingModelService skips when outdoor temperature is missing', async () => {

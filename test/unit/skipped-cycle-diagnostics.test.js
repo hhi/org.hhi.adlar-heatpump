@@ -43,7 +43,7 @@ function createService(ServiceClass, { indoorTemp, desired }) {
   };
   const service = new ServiceClass({ device, logger: () => {} });
   service.isEnabled = true;
-  service.externalTemperature = { getIndoorTemperature: () => indoorTemp };
+  service.externalTemperature = { getIndoorTemperature: () => indoorTemp, getIndoorStaleness: () => 'fresh' };
   service.getEffectiveTargetTemp = () => 35;
   return { service, writes, capabilities };
 }
@@ -70,7 +70,7 @@ for (const [name, ServiceClass] of drivers) {
   test(`${name}: a different reason is written again`, async () => {
     const { service, writes } = createService(ServiceClass, { indoorTemp: null, desired: null });
     await service.executeControlCycle();
-    service.externalTemperature = { getIndoorTemperature: () => 20 };
+    service.externalTemperature = { getIndoorTemperature: () => 20, getIndoorStaleness: () => 'fresh' };
     await service.executeControlCycle();
     assert.deepStrictEqual(writes.map((w) => w.cycleSkipped), ['no_indoor_temperature', 'no_desired_indoor_temperature']);
   });

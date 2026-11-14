@@ -46,7 +46,7 @@ function createService(driver, conditions = undefined) {
     getDiagnosticStatus: async () => ({ confidence: 80 }),
   };
   if (conditions !== undefined) buildingModelService.getPreHeatConditions = () => conditions;
-  const adaptiveControlService = { externalTemperature: { getIndoorTemperature: () => 19 } };
+  const adaptiveControlService = { externalTemperature: { getIndoorTemperature: () => 19, getIndoorStaleness: () => 'fresh' } };
   const service = new BuildingInsightsService({
     device, buildingModelService, adaptiveControlService, logger: () => {},
   });
