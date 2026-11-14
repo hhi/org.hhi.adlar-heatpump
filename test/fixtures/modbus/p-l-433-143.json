@@ -1,0 +1,6080 @@
+{
+  "schemaVersion": 1,
+  "device": {
+    "model": "SolarEast BLN-006TB1 / Adlar Castra Aurora II",
+    "refrigerant": "R32",
+    "programRaw": 433,
+    "protocolRaw": 143,
+    "serial": null,
+    "firmwareBuild": null
+  },
+  "measurement": {
+    "date": "2026-11-11",
+    "additionalMaskDate": "2026-11-14",
+    "functionCode": 3,
+    "atomic": false,
+    "writeLimitsEnforced": null,
+    "applicability": "one unit only; not a runtime write policy"
+  },
+  "source": "docs/Dev support/p-l-parameter-bank-architectuur-en-live-dump.md",
+  "baseline": {
+    "commit": "53266692e9d2c9963fb928946f3feabbf90a3e3e",
+    "pCompared": 263,
+    "pDifferences": 60,
+    "lCompared": 26,
+    "lDifferences": 7,
+    "lNumericRanges": 25,
+    "repository": "org.hhi.adlar-heatpump"
+  },
+  "parameters": [
+    {
+      "parameter": "P000",
+      "address": 256,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1024,
+      "maxRaw": 10,
+      "minAddress": 1536,
+      "minRaw": 0,
+      "baselineKey": "P00_ambientTempSensor",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P001",
+      "address": 257,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1025,
+      "maxRaw": 1,
+      "minAddress": 1537,
+      "minRaw": 0,
+      "baselineKey": "P01_highVoltageSwitch",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P002",
+      "address": 258,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1026,
+      "maxRaw": 1,
+      "minAddress": 1538,
+      "minRaw": 0,
+      "baselineKey": "P02_lowPressureSwitch",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P003",
+      "address": 259,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1027,
+      "maxRaw": 1,
+      "minAddress": 1539,
+      "minRaw": 0,
+      "baselineKey": "P03_waterFlowSwitch",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P004",
+      "address": 260,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1028,
+      "maxRaw": 10,
+      "minAddress": 1540,
+      "minRaw": 0,
+      "baselineKey": "P04_thermalOverload",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P005",
+      "address": 261,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1029,
+      "maxRaw": 4,
+      "minAddress": 1541,
+      "minRaw": 0,
+      "baselineKey": "P05_linkageSwitch",
+      "baselineRange": {
+        "min": 0,
+        "max": 3
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P006",
+      "address": 262,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1030,
+      "maxRaw": 3,
+      "minAddress": 1542,
+      "minRaw": 0,
+      "baselineKey": "P06_fanType",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P007",
+      "address": 263,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1031,
+      "maxRaw": 1,
+      "minAddress": 1543,
+      "minRaw": 0,
+      "baselineKey": "P07_highVoltageLock",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P008",
+      "address": 264,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1032,
+      "maxRaw": 1,
+      "minAddress": 1544,
+      "minRaw": 0,
+      "baselineKey": "P08_lowVoltageLock",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P009",
+      "address": 265,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1033,
+      "maxRaw": 1,
+      "minAddress": 1545,
+      "minRaw": 0,
+      "baselineKey": "P09_exhaustLock",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P010",
+      "address": 266,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1034,
+      "maxRaw": 1,
+      "minAddress": 1546,
+      "minRaw": 0,
+      "baselineKey": "P10_waterFlowLock",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P011",
+      "address": 267,
+      "currentRaw": 65,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1035,
+      "maxRaw": 150,
+      "minAddress": 1547,
+      "minRaw": 40,
+      "baselineKey": "P11_highPressureProtect",
+      "baselineRange": {
+        "min": 40,
+        "max": 150
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P012",
+      "address": 268,
+      "currentRaw": 59,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1036,
+      "maxRaw": 150,
+      "minAddress": 1548,
+      "minRaw": 40,
+      "baselineKey": "P12_highPressureFreqLimit",
+      "baselineRange": {
+        "min": 40,
+        "max": 150
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P013",
+      "address": 269,
+      "currentRaw": 65496,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1037,
+      "maxRaw": 65526,
+      "minAddress": 1549,
+      "minRaw": 65486,
+      "baselineKey": "P13_lowPressureProtect",
+      "baselineRange": {
+        "min": -50,
+        "max": -10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P014",
+      "address": 270,
+      "currentRaw": 65501,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1038,
+      "maxRaw": 65526,
+      "minAddress": 1550,
+      "minRaw": 65486,
+      "baselineKey": "P14_lowPressureFreqLimit",
+      "baselineRange": {
+        "min": -50,
+        "max": -10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P015",
+      "address": 271,
+      "currentRaw": 115,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1039,
+      "maxRaw": 120,
+      "minAddress": 1551,
+      "minRaw": 100,
+      "baselineKey": "P15_exhaustTempProtect",
+      "baselineRange": {
+        "min": 100,
+        "max": 130
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P016",
+      "address": 272,
+      "currentRaw": 95,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1040,
+      "maxRaw": 120,
+      "minAddress": 1552,
+      "minRaw": 90,
+      "baselineKey": "P16_exhaustTempFreqLimit",
+      "baselineRange": {
+        "min": 90,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P017",
+      "address": 273,
+      "currentRaw": 37,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1041,
+      "maxRaw": 60,
+      "minAddress": 1553,
+      "minRaw": 0,
+      "baselineKey": "P17_coolingFanSpeedIncrease",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P018",
+      "address": 274,
+      "currentRaw": 32,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1042,
+      "maxRaw": 60,
+      "minAddress": 1554,
+      "minRaw": 0,
+      "baselineKey": "P18_coolingFanSpeedReduction",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P019",
+      "address": 275,
+      "currentRaw": 12,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1043,
+      "maxRaw": 60,
+      "minAddress": 1555,
+      "minRaw": 0,
+      "baselineKey": "P19_heatingFanSpeedReduction",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P020",
+      "address": 276,
+      "currentRaw": 8,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1044,
+      "maxRaw": 60,
+      "minAddress": 1556,
+      "minRaw": 0,
+      "baselineKey": "P20_heatingFanSpeedIncrease",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P021",
+      "address": 277,
+      "currentRaw": 65510,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1045,
+      "maxRaw": 10,
+      "minAddress": 1557,
+      "minRaw": 65496,
+      "baselineKey": "P21_lowTempProhibitStart",
+      "baselineRange": {
+        "min": -40,
+        "max": -10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P022",
+      "address": 278,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1046,
+      "maxRaw": 40,
+      "minAddress": 1558,
+      "minRaw": 65521,
+      "baselineKey": "P22_eHeatingStartAmb",
+      "baselineRange": {
+        "min": -15,
+        "max": 40
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P023",
+      "address": 279,
+      "currentRaw": 12,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1047,
+      "maxRaw": 30,
+      "minAddress": 1559,
+      "minRaw": 10,
+      "baselineKey": "P23_excessiveTempDiff",
+      "baselineRange": {
+        "min": 10,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P024",
+      "address": 280,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1048,
+      "maxRaw": 10,
+      "minAddress": 1560,
+      "minRaw": 65526,
+      "baselineKey": "P24_returnWaterCompensation",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P025",
+      "address": 281,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1049,
+      "maxRaw": 10,
+      "minAddress": 1561,
+      "minRaw": 65526,
+      "baselineKey": "P25_outletWaterCompensation",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P026",
+      "address": 282,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1050,
+      "maxRaw": 10,
+      "minAddress": 1562,
+      "minRaw": 0,
+      "baselineKey": "P26_acReturnDiff",
+      "baselineRange": {
+        "min": 0,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P027",
+      "address": 283,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1051,
+      "maxRaw": 10,
+      "minAddress": 1563,
+      "minRaw": 0,
+      "baselineKey": "P27_floorReturnDiff",
+      "baselineRange": {
+        "min": 0,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P028",
+      "address": 284,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1052,
+      "maxRaw": 4,
+      "minAddress": 1564,
+      "minRaw": 0,
+      "baselineKey": "P28_pumpAtShutdown",
+      "baselineRange": {
+        "min": 0,
+        "max": 4
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P029",
+      "address": 285,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1053,
+      "maxRaw": 10,
+      "minAddress": 1565,
+      "minRaw": 0,
+      "baselineKey": "P29_antifreezePumpTime",
+      "baselineRange": {
+        "min": 0,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P030",
+      "address": 286,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1054,
+      "maxRaw": 3,
+      "minAddress": 1566,
+      "minRaw": 0,
+      "baselineKey": "P30_defrostMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 3
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P031",
+      "address": 287,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1055,
+      "maxRaw": 120,
+      "minAddress": 1567,
+      "minRaw": 0,
+      "baselineKey": "P31_defrostAccumThreshold",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P032",
+      "address": 288,
+      "currentRaw": 65531,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1056,
+      "maxRaw": 0,
+      "minAddress": 1568,
+      "minRaw": 65506,
+      "baselineKey": "P32_defrostEntryCoilTemp",
+      "baselineRange": {
+        "min": -30,
+        "max": 0
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P033",
+      "address": 289,
+      "currentRaw": 9,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1057,
+      "maxRaw": 20,
+      "minAddress": 1569,
+      "minRaw": 0,
+      "baselineKey": "P33_defrostEntryDiff1",
+      "baselineRange": {
+        "min": 0,
+        "max": 20
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P034",
+      "address": 290,
+      "currentRaw": 9,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1058,
+      "maxRaw": 20,
+      "minAddress": 1570,
+      "minRaw": 0,
+      "baselineKey": "P34_defrostEntryDiff2",
+      "baselineRange": {
+        "min": 0,
+        "max": 20
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P035",
+      "address": 291,
+      "currentRaw": 10,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1059,
+      "maxRaw": 30,
+      "minAddress": 1571,
+      "minRaw": 0,
+      "baselineKey": "P35_defrostMaxTime",
+      "baselineRange": {
+        "min": 0,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P036",
+      "address": 292,
+      "currentRaw": 12,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1060,
+      "maxRaw": 30,
+      "minAddress": 1572,
+      "minRaw": 0,
+      "baselineKey": "P36_defrostExitCoilTemp",
+      "baselineRange": {
+        "min": 0,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P037",
+      "address": 293,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1061,
+      "maxRaw": 2,
+      "minAddress": 1573,
+      "minRaw": 0,
+      "baselineKey": "P37_shutdownMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P038",
+      "address": 294,
+      "currentRaw": 300,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1062,
+      "maxRaw": 999,
+      "minAddress": 1574,
+      "minRaw": 64537,
+      "baselineKey": "P38_heatingMainValveOpeningConst",
+      "baselineRange": {
+        "min": -999,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P039",
+      "address": 295,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1063,
+      "maxRaw": 2,
+      "minAddress": 1575,
+      "minRaw": 0,
+      "baselineKey": "P39_pressureSensor",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P040",
+      "address": 296,
+      "currentRaw": 65534,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1064,
+      "maxRaw": 10,
+      "minAddress": 1576,
+      "minRaw": 65526,
+      "baselineKey": "P40_coolingSuperheatCorrection",
+      "baselineRange": {
+        "min": -5,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P041",
+      "address": 297,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1065,
+      "maxRaw": 10,
+      "minAddress": 1577,
+      "minRaw": 65526,
+      "baselineKey": "P41_heatingHpFreqLimitCorrection",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P042",
+      "address": 298,
+      "currentRaw": 65535,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1066,
+      "maxRaw": 10,
+      "minAddress": 1578,
+      "minRaw": 65526,
+      "baselineKey": "P42_heatingSuperheatCorrection",
+      "baselineRange": {
+        "min": -5,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P043",
+      "address": 299,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1067,
+      "maxRaw": 1,
+      "minAddress": 1579,
+      "minRaw": 0,
+      "baselineKey": "P43_mvSwitch",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P044",
+      "address": 300,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1068,
+      "maxRaw": 1,
+      "minAddress": 1580,
+      "minRaw": 0,
+      "baselineKey": "P44_waterFlowFailDetect",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P045",
+      "address": 301,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1069,
+      "maxRaw": 256,
+      "minAddress": 1581,
+      "minRaw": 1,
+      "baselineKey": "P45_commAddress",
+      "baselineRange": {
+        "min": 1,
+        "max": 16
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P046",
+      "address": 302,
+      "currentRaw": 8,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1070,
+      "maxRaw": 15,
+      "minAddress": 1582,
+      "minRaw": 0,
+      "baselineKey": "P46_liquidInjectionReturnDiff",
+      "baselineRange": {
+        "min": 0,
+        "max": 15
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P047",
+      "address": 303,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1071,
+      "maxRaw": 12,
+      "minAddress": 1583,
+      "minRaw": 0,
+      "baselineKey": "P47_eviTargetSuperheat",
+      "baselineRange": {
+        "min": 0,
+        "max": 12
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P048",
+      "address": 304,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1072,
+      "maxRaw": 2,
+      "minAddress": 1584,
+      "minRaw": 0,
+      "baselineKey": "P48_dhwTankTempSensor",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P049",
+      "address": 305,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1073,
+      "maxRaw": 100,
+      "minAddress": 1585,
+      "minRaw": 0,
+      "baselineKey": "P49_hotWaterFreqPercentage",
+      "baselineRange": {
+        "min": 30,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P050",
+      "address": 306,
+      "currentRaw": 10,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1074,
+      "maxRaw": 100,
+      "minAddress": 1586,
+      "minRaw": 65436,
+      "baselineKey": "P50_coolingFreqConstantA",
+      "baselineRange": {
+        "min": -100,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P051",
+      "address": 307,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1075,
+      "maxRaw": 60,
+      "minAddress": 1587,
+      "minRaw": 15,
+      "baselineKey": "P51_coolingMinFreq",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P052",
+      "address": 308,
+      "currentRaw": 70,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1076,
+      "maxRaw": 120,
+      "minAddress": 1588,
+      "minRaw": 40,
+      "baselineKey": "P52_coolingTargetFreqUpper",
+      "baselineRange": {
+        "min": 40,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P053",
+      "address": 309,
+      "currentRaw": 42,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1077,
+      "maxRaw": 120,
+      "minAddress": 1589,
+      "minRaw": 15,
+      "baselineKey": "P53_coolingTargetFreqLower",
+      "baselineRange": {
+        "min": 15,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P054",
+      "address": 310,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1078,
+      "maxRaw": 150,
+      "minAddress": 1590,
+      "minRaw": 65436,
+      "baselineKey": "P54_heatingFreqConstantB",
+      "baselineRange": {
+        "min": -100,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P055",
+      "address": 311,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1079,
+      "maxRaw": 120,
+      "minAddress": 1591,
+      "minRaw": 50,
+      "baselineKey": "P55_heatingTargetFreqUpper",
+      "baselineRange": {
+        "min": 50,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P056",
+      "address": 312,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1080,
+      "maxRaw": 120,
+      "minAddress": 1592,
+      "minRaw": 20,
+      "baselineKey": "P56_heatingTargetFreqLower",
+      "baselineRange": {
+        "min": 20,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P057",
+      "address": 313,
+      "currentRaw": 20,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1081,
+      "maxRaw": 60,
+      "minAddress": 1593,
+      "minRaw": 15,
+      "baselineKey": "P57_heatingMinFreq_above0",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P058",
+      "address": 314,
+      "currentRaw": 35,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1082,
+      "maxRaw": 60,
+      "minAddress": 1594,
+      "minRaw": 15,
+      "baselineKey": "P58_heatingMinFreq_neg10to0",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P059",
+      "address": 315,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1083,
+      "maxRaw": 60,
+      "minAddress": 1595,
+      "minRaw": 15,
+      "baselineKey": "P59_heatingMinFreq_below10",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P060",
+      "address": 316,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1084,
+      "maxRaw": 100,
+      "minAddress": 1596,
+      "minRaw": 65436,
+      "baselineKey": "P60_hotWaterFreqConstant",
+      "baselineRange": {
+        "min": -100,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P061",
+      "address": 317,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1085,
+      "maxRaw": 120,
+      "minAddress": 1597,
+      "minRaw": 50,
+      "baselineKey": "P61_hotWaterFreqUpper",
+      "baselineRange": {
+        "min": 50,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P062",
+      "address": 318,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1086,
+      "maxRaw": 120,
+      "minAddress": 1598,
+      "minRaw": 15,
+      "baselineKey": "P62_hotWaterFreqLower",
+      "baselineRange": {
+        "min": 15,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P063",
+      "address": 319,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1087,
+      "maxRaw": 60,
+      "minAddress": 1599,
+      "minRaw": 15,
+      "baselineKey": "P63_hotWaterMinFreq_above0",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P064",
+      "address": 320,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1088,
+      "maxRaw": 60,
+      "minAddress": 1600,
+      "minRaw": 15,
+      "baselineKey": "P64_hotWaterMinFreq_neg10to0",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P065",
+      "address": 321,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1089,
+      "maxRaw": 60,
+      "minAddress": 1601,
+      "minRaw": 15,
+      "baselineKey": "P65_hotWaterMinFreq_below10",
+      "baselineRange": {
+        "min": 15,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P066",
+      "address": 322,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1090,
+      "maxRaw": 60,
+      "minAddress": 1602,
+      "minRaw": 20,
+      "baselineKey": "P66_dcFanInitFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P067",
+      "address": 323,
+      "currentRaw": 20,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1091,
+      "maxRaw": 60,
+      "minAddress": 1603,
+      "minRaw": 20,
+      "baselineKey": "P67_dcFanHeatMinFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P068",
+      "address": 324,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1092,
+      "maxRaw": 80,
+      "minAddress": 1604,
+      "minRaw": 20,
+      "baselineKey": "P68_dcFanHeatMaxFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P069",
+      "address": 325,
+      "currentRaw": 20,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1093,
+      "maxRaw": 60,
+      "minAddress": 1605,
+      "minRaw": 20,
+      "baselineKey": "P69_dcFanCoolMinFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P070",
+      "address": 326,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1094,
+      "maxRaw": 80,
+      "minAddress": 1606,
+      "minRaw": 20,
+      "baselineKey": "P70_dcFanCoolMaxFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P071",
+      "address": 327,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1095,
+      "maxRaw": 80,
+      "minAddress": 1607,
+      "minRaw": 20,
+      "baselineKey": "P71_enthalpyOnFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P072",
+      "address": 328,
+      "currentRaw": 35,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1096,
+      "maxRaw": 80,
+      "minAddress": 1608,
+      "minRaw": 20,
+      "baselineKey": "P72_enthalpyStopFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P073",
+      "address": 329,
+      "currentRaw": 400,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1097,
+      "maxRaw": 480,
+      "minAddress": 1609,
+      "minRaw": 0,
+      "baselineKey": "P73_coolingMainValveOpening1",
+      "baselineRange": {
+        "min": 20,
+        "max": 480
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P074",
+      "address": 330,
+      "currentRaw": 300,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1098,
+      "maxRaw": 480,
+      "minAddress": 1610,
+      "minRaw": 0,
+      "baselineKey": "P74_coolingMainValveOpening2",
+      "baselineRange": {
+        "min": 20,
+        "max": 480
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P075",
+      "address": 331,
+      "currentRaw": 350,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1099,
+      "maxRaw": 480,
+      "minAddress": 1611,
+      "minRaw": 0,
+      "baselineKey": "P75_coolingMainValveOpening3",
+      "baselineRange": {
+        "min": 20,
+        "max": 480
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P076",
+      "address": 332,
+      "currentRaw": 100,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1100,
+      "maxRaw": 300,
+      "minAddress": 1612,
+      "minRaw": 0,
+      "baselineKey": "P76_coolingMainValveMinOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 300
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P077",
+      "address": 333,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1101,
+      "maxRaw": 300,
+      "minAddress": 1613,
+      "minRaw": 0,
+      "baselineKey": "P77_heatingMainValveMinOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 300
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P078",
+      "address": 334,
+      "currentRaw": 480,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1102,
+      "maxRaw": 500,
+      "minAddress": 1614,
+      "minRaw": 100,
+      "baselineKey": "P78_mainValveMaxOpening",
+      "baselineRange": {
+        "min": 100,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P079",
+      "address": 335,
+      "currentRaw": 80,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1103,
+      "maxRaw": 300,
+      "minAddress": 1615,
+      "minRaw": 20,
+      "baselineKey": "P79_mainValveOpeningConstC",
+      "baselineRange": {
+        "min": 20,
+        "max": 300
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P080",
+      "address": 336,
+      "currentRaw": 60,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1104,
+      "maxRaw": 999,
+      "minAddress": 1616,
+      "minRaw": 64537,
+      "baselineKey": "P80_mainValveOpeningCoeffA",
+      "baselineRange": {
+        "min": -999,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P081",
+      "address": 337,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1105,
+      "maxRaw": 999,
+      "minAddress": 1617,
+      "minRaw": 64537,
+      "baselineKey": "P81_mainValveOpeningCoeffB",
+      "baselineRange": {
+        "min": -999,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P082",
+      "address": 338,
+      "currentRaw": 480,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1106,
+      "maxRaw": 500,
+      "minAddress": 1618,
+      "minRaw": 100,
+      "baselineKey": "P82_auxValveMaxOpening",
+      "baselineRange": {
+        "min": 100,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P083",
+      "address": 339,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1107,
+      "maxRaw": 480,
+      "minAddress": 1619,
+      "minRaw": 0,
+      "baselineKey": "P83_auxValveMinOpening",
+      "baselineRange": {
+        "min": 50,
+        "max": 300
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P084",
+      "address": 340,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1108,
+      "maxRaw": 120,
+      "minAddress": 1620,
+      "minRaw": 10,
+      "baselineKey": "P84_mainValveRegulationPeriod",
+      "baselineRange": {
+        "min": 10,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P085",
+      "address": 341,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1109,
+      "maxRaw": 900,
+      "minAddress": 1621,
+      "minRaw": 65336,
+      "baselineKey": "P85_auxValveOpeningConstC",
+      "baselineRange": {
+        "min": -200,
+        "max": 900
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P086",
+      "address": 342,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1110,
+      "maxRaw": 999,
+      "minAddress": 1622,
+      "minRaw": 64537,
+      "baselineKey": "P86_auxValveOpeningCoeffA",
+      "baselineRange": {
+        "min": -999,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P087",
+      "address": 343,
+      "currentRaw": 20,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1111,
+      "maxRaw": 999,
+      "minAddress": 1623,
+      "minRaw": 64537,
+      "baselineKey": "P87_auxValveOpeningCoeffB",
+      "baselineRange": {
+        "min": -999,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P088",
+      "address": 344,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1112,
+      "maxRaw": 70,
+      "minAddress": 1624,
+      "minRaw": 20,
+      "baselineKey": "P88_silentCompressorFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 70
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P089",
+      "address": 345,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1113,
+      "maxRaw": 60,
+      "minAddress": 1625,
+      "minRaw": 20,
+      "baselineKey": "P89_silentFanFreq",
+      "baselineRange": {
+        "min": 20,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P090",
+      "address": 346,
+      "currentRaw": 23,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1114,
+      "maxRaw": 45,
+      "minAddress": 1626,
+      "minRaw": 0,
+      "baselineKey": "P90_eviEntryAmbientTemp",
+      "baselineRange": {
+        "min": 0,
+        "max": 45
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P091",
+      "address": 347,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1115,
+      "maxRaw": 30,
+      "minAddress": 1627,
+      "minRaw": 0,
+      "baselineKey": "P91_eviForbidEntryTime",
+      "baselineRange": {
+        "min": 0,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P092",
+      "address": 348,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1116,
+      "maxRaw": 60,
+      "minAddress": 1628,
+      "minRaw": 0,
+      "baselineKey": "P92_eviEntryTempDiff",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P093",
+      "address": 349,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1117,
+      "maxRaw": 20,
+      "minAddress": 1629,
+      "minRaw": 0,
+      "baselineKey": "P93_eviCompressorRunTime",
+      "baselineRange": {
+        "min": 0,
+        "max": 20
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P094",
+      "address": 350,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1118,
+      "maxRaw": 120,
+      "minAddress": 1630,
+      "minRaw": 10,
+      "baselineKey": "P94_auxValveAdjCycle",
+      "baselineRange": {
+        "min": 10,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P095",
+      "address": 351,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1119,
+      "maxRaw": 1,
+      "minAddress": 1631,
+      "minRaw": 0,
+      "baselineKey": "P95_networkPumpMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P096",
+      "address": 352,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1120,
+      "maxRaw": 10,
+      "minAddress": 1632,
+      "minRaw": 0,
+      "baselineKey": "P96_hotWaterReturnDiff",
+      "baselineRange": {
+        "min": 0,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P097",
+      "address": 353,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1121,
+      "maxRaw": 1,
+      "minAddress": 1633,
+      "minRaw": 0,
+      "baselineKey": "P97_tankTempAutoCompensation",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P098",
+      "address": 354,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1122,
+      "maxRaw": 10,
+      "minAddress": 1634,
+      "minRaw": 65526,
+      "baselineKey": "P98_tankTempManualCompensation",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P099",
+      "address": 355,
+      "currentRaw": 7,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1123,
+      "maxRaw": 10,
+      "minAddress": 1635,
+      "minRaw": 2,
+      "baselineKey": "P99_pumpSpeedTempDiff",
+      "baselineRange": {
+        "min": 2,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P100",
+      "address": 356,
+      "currentRaw": 70,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1124,
+      "maxRaw": 80,
+      "minAddress": 1636,
+      "minRaw": 20,
+      "baselineKey": "P100_pumpMinSpeed",
+      "baselineRange": {
+        "min": 20,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P101",
+      "address": 357,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1125,
+      "maxRaw": 1,
+      "minAddress": 1637,
+      "minRaw": 0,
+      "baselineKey": "P101_pumpControlMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P102",
+      "address": 358,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1126,
+      "maxRaw": 1,
+      "minAddress": 1638,
+      "minRaw": 0,
+      "baselineKey": "P102_fourWayValveMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P103",
+      "address": 359,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1127,
+      "maxRaw": 10,
+      "minAddress": 1639,
+      "minRaw": 0,
+      "baselineKey": "P103_modeSwitchMinRun",
+      "baselineRange": {
+        "min": 0,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P104",
+      "address": 360,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1128,
+      "maxRaw": 100,
+      "minAddress": 1640,
+      "minRaw": 20,
+      "baselineKey": "P104_modeSwitchFreqPct",
+      "baselineRange": {
+        "min": 20,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P105",
+      "address": 361,
+      "currentRaw": 14,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1129,
+      "maxRaw": 60,
+      "minAddress": 1641,
+      "minRaw": 10,
+      "baselineKey": "P105_coolingAmbientLimit",
+      "baselineRange": {
+        "min": 10,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P106",
+      "address": 362,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1130,
+      "maxRaw": 60,
+      "minAddress": 1642,
+      "minRaw": 10,
+      "baselineKey": "P106_heatingAmbientLimit",
+      "baselineRange": {
+        "min": 10,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P107",
+      "address": 363,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1131,
+      "maxRaw": 60,
+      "minAddress": 1643,
+      "minRaw": 10,
+      "baselineKey": "P107_hotWaterAmbientLimit",
+      "baselineRange": {
+        "min": 10,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P108",
+      "address": 364,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1132,
+      "maxRaw": 75,
+      "minAddress": 1644,
+      "minRaw": 30,
+      "baselineKey": "P108_hotWaterTempUpper",
+      "baselineRange": {
+        "min": 30,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P109",
+      "address": 365,
+      "currentRaw": 20,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1133,
+      "maxRaw": 30,
+      "minAddress": 1645,
+      "minRaw": 10,
+      "baselineKey": "P109_hotWaterTempLower",
+      "baselineRange": {
+        "min": 10,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P110",
+      "address": 366,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1134,
+      "maxRaw": 75,
+      "minAddress": 1646,
+      "minRaw": 30,
+      "baselineKey": "P110_heatingTempUpper",
+      "baselineRange": {
+        "min": 30,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P111",
+      "address": 367,
+      "currentRaw": 15,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1135,
+      "maxRaw": 30,
+      "minAddress": 1647,
+      "minRaw": 15,
+      "baselineKey": "P111_heatingTempLower",
+      "baselineRange": {
+        "min": 15,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P112",
+      "address": 368,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1136,
+      "maxRaw": 40,
+      "minAddress": 1648,
+      "minRaw": 20,
+      "baselineKey": "P112_coolingTempUpper",
+      "baselineRange": {
+        "min": 20,
+        "max": 40
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P113",
+      "address": 369,
+      "currentRaw": 18,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1137,
+      "maxRaw": 25,
+      "minAddress": 1649,
+      "minRaw": 5,
+      "baselineKey": "P113_coolingTempLower",
+      "baselineRange": {
+        "min": 5,
+        "max": 20
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P114",
+      "address": 370,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1138,
+      "maxRaw": 2,
+      "minAddress": 1650,
+      "minRaw": 1,
+      "baselineKey": "P114_nrCompressors",
+      "baselineRange": {
+        "min": 1,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P115",
+      "address": 371,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1139,
+      "maxRaw": 2,
+      "minAddress": 1651,
+      "minRaw": 0,
+      "baselineKey": "P115_modelSelection",
+      "baselineRange": {
+        "min": 0,
+        "max": 5
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P116",
+      "address": 372,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1140,
+      "maxRaw": 1,
+      "minAddress": 1652,
+      "minRaw": 0,
+      "baselineKey": "P116_tempControlMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P117",
+      "address": 373,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1141,
+      "maxRaw": 10,
+      "minAddress": 1653,
+      "minRaw": 0,
+      "baselineKey": "P117_antifreezeAmbient",
+      "baselineRange": {
+        "min": 0,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P118",
+      "address": 374,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1142,
+      "maxRaw": 20,
+      "minAddress": 1654,
+      "minRaw": 0,
+      "baselineKey": "P118_antifreezeOutlet",
+      "baselineRange": {
+        "min": 0,
+        "max": 20
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P119",
+      "address": 375,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1143,
+      "maxRaw": 20,
+      "minAddress": 1655,
+      "minRaw": 0,
+      "baselineKey": "P119_refrigerantType",
+      "baselineRange": {
+        "min": 1,
+        "max": 3
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P120",
+      "address": 376,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1144,
+      "maxRaw": 1,
+      "minAddress": 1656,
+      "minRaw": 0,
+      "baselineKey": "P120_antiCondensation",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P121",
+      "address": 377,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1145,
+      "maxRaw": 120,
+      "minAddress": 1657,
+      "minRaw": 0,
+      "baselineKey": "P121_heatingFreqShield1Low",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P122",
+      "address": 378,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1146,
+      "maxRaw": 120,
+      "minAddress": 1658,
+      "minRaw": 0,
+      "baselineKey": "P122_heatingFreqShield1High",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P123",
+      "address": 379,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1147,
+      "maxRaw": 120,
+      "minAddress": 1659,
+      "minRaw": 0,
+      "baselineKey": "P123_heatingFreqShield2Low",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P124",
+      "address": 380,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1148,
+      "maxRaw": 120,
+      "minAddress": 1660,
+      "minRaw": 0,
+      "baselineKey": "P124_heatingFreqShield2High",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P125",
+      "address": 381,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1149,
+      "maxRaw": 120,
+      "minAddress": 1661,
+      "minRaw": 0,
+      "baselineKey": "P125_heatingFreqShield3Low",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P126",
+      "address": 382,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1150,
+      "maxRaw": 120,
+      "minAddress": 1662,
+      "minRaw": 0,
+      "baselineKey": "P126_heatingFreqShield3High",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P127",
+      "address": 383,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1151,
+      "maxRaw": 120,
+      "minAddress": 1663,
+      "minRaw": 0,
+      "baselineKey": "P127_coolingFreqShield1Low",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P128",
+      "address": 384,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1152,
+      "maxRaw": 120,
+      "minAddress": 1664,
+      "minRaw": 0,
+      "baselineKey": "P128_coolingFreqShield1High",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P129",
+      "address": 385,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1153,
+      "maxRaw": 120,
+      "minAddress": 1665,
+      "minRaw": 0,
+      "baselineKey": "P129_coolingFreqShield2Low",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P130",
+      "address": 386,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1154,
+      "maxRaw": 120,
+      "minAddress": 1666,
+      "minRaw": 0,
+      "baselineKey": "P130_coolingFreqShield2High",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P131",
+      "address": 387,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1155,
+      "maxRaw": 120,
+      "minAddress": 1667,
+      "minRaw": 0,
+      "baselineKey": "P131_coolingFreqShield3Low",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P132",
+      "address": 388,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1156,
+      "maxRaw": 120,
+      "minAddress": 1668,
+      "minRaw": 0,
+      "baselineKey": "P132_coolingFreqShield3High",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P133",
+      "address": 389,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1157,
+      "maxRaw": 1,
+      "minAddress": 1669,
+      "minRaw": 0,
+      "baselineKey": "P133_fanModule",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P134",
+      "address": 390,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1158,
+      "maxRaw": 100,
+      "minAddress": 1670,
+      "minRaw": 0,
+      "baselineKey": "P134_lowWaterFlow",
+      "baselineRange": {
+        "min": 0,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P135",
+      "address": 391,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1159,
+      "maxRaw": 50,
+      "minAddress": 1671,
+      "minRaw": 0,
+      "baselineKey": "P135_antiCondensationTempDiff",
+      "baselineRange": {
+        "min": 0,
+        "max": 50
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P136",
+      "address": 392,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1160,
+      "maxRaw": 50,
+      "minAddress": 1672,
+      "minRaw": 65516,
+      "baselineKey": "P136_throttleBypassAmbientTemp",
+      "baselineRange": {
+        "min": -20,
+        "max": 50
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P137",
+      "address": 393,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1161,
+      "maxRaw": 999,
+      "minAddress": 1673,
+      "minRaw": 0,
+      "baselineKey": "P137_throttleBypassDelay",
+      "baselineRange": {
+        "min": 0,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P138",
+      "address": 394,
+      "currentRaw": 70,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1162,
+      "maxRaw": 120,
+      "minAddress": 1674,
+      "minRaw": 40,
+      "baselineKey": "P138_defrostCompressorFreq",
+      "baselineRange": {
+        "min": 40,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P139",
+      "address": 395,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1163,
+      "maxRaw": 2,
+      "minAddress": 1675,
+      "minRaw": 0,
+      "baselineKey": "P139_bufferTankEHeating",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P140",
+      "address": 396,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1164,
+      "maxRaw": 3,
+      "minAddress": 1676,
+      "minRaw": 0,
+      "baselineKey": "P140_dhwEHeating",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P141",
+      "address": 397,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1165,
+      "maxRaw": 60,
+      "minAddress": 1677,
+      "minRaw": 0,
+      "baselineKey": "P141_dewPointDefrostDuration",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P142",
+      "address": 398,
+      "currentRaw": 11,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1166,
+      "maxRaw": 60,
+      "minAddress": 1678,
+      "minRaw": 0,
+      "baselineKey": "P142_dewPointDefrostConstant",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P143",
+      "address": 399,
+      "currentRaw": 7,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1167,
+      "maxRaw": 60,
+      "minAddress": 1679,
+      "minRaw": 0,
+      "baselineKey": "P143_waterTempEnterDefrost",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P144",
+      "address": 400,
+      "currentRaw": 17,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1168,
+      "maxRaw": 30,
+      "minAddress": 1680,
+      "minRaw": 65516,
+      "baselineKey": "P144_ambientTempEnterDefrost",
+      "baselineRange": {
+        "min": -20,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P145",
+      "address": 401,
+      "currentRaw": 65506,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1169,
+      "maxRaw": 10,
+      "minAddress": 1681,
+      "minRaw": 65506,
+      "baselineKey": "P145_outletAntifreezeProtection",
+      "baselineRange": {
+        "min": -20,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P146",
+      "address": 402,
+      "currentRaw": 35,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1170,
+      "maxRaw": 150,
+      "minAddress": 1682,
+      "minRaw": 0,
+      "baselineKey": "P146_pumpRangeSetting",
+      "baselineRange": {
+        "min": 0,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P147",
+      "address": 403,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1171,
+      "maxRaw": 3,
+      "minAddress": 1683,
+      "minRaw": 0,
+      "baselineKey": "P147_coolingAntifreezeMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P148",
+      "address": 404,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1172,
+      "maxRaw": 10,
+      "minAddress": 1684,
+      "minRaw": 0,
+      "baselineKey": "P148_coolingAntifreezeTemp",
+      "baselineRange": {
+        "min": -30,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P149",
+      "address": 405,
+      "currentRaw": 58,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1173,
+      "maxRaw": 85,
+      "minAddress": 1685,
+      "minRaw": 40,
+      "baselineKey": "P149_outletHighLimitTemp",
+      "baselineRange": {
+        "min": 40,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P150",
+      "address": 406,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1174,
+      "maxRaw": 4,
+      "minAddress": 1686,
+      "minRaw": 1,
+      "baselineKey": "P150_secondaryHeatingPump",
+      "baselineRange": {
+        "min": 0,
+        "max": 3
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P151",
+      "address": 407,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1175,
+      "maxRaw": 40,
+      "minAddress": 1687,
+      "minRaw": 0,
+      "baselineKey": "P151_returnDiffHwSource",
+      "baselineRange": {
+        "min": 0,
+        "max": 40
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P152",
+      "address": 408,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1176,
+      "maxRaw": 40,
+      "minAddress": 1688,
+      "minRaw": 0,
+      "baselineKey": "P152_returnDiffHeatSource",
+      "baselineRange": {
+        "min": 0,
+        "max": 40
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P153",
+      "address": 409,
+      "currentRaw": 70,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1177,
+      "maxRaw": 75,
+      "minAddress": 1689,
+      "minRaw": 15,
+      "baselineKey": "P153_dhwHeatSourceUpperTemp",
+      "baselineRange": {
+        "min": 15,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P154",
+      "address": 410,
+      "currentRaw": 60,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1178,
+      "maxRaw": 75,
+      "minAddress": 1690,
+      "minRaw": 15,
+      "baselineKey": "P154_heatingHeatSourceUpperTemp",
+      "baselineRange": {
+        "min": 15,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P155",
+      "address": 411,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1179,
+      "maxRaw": 9999,
+      "minAddress": 1691,
+      "minRaw": 0,
+      "baselineKey": "P155_compressorCode",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P156",
+      "address": 412,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1180,
+      "maxRaw": 1,
+      "minAddress": 1692,
+      "minRaw": 0,
+      "baselineKey": "P156_auxEevSelection",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P157",
+      "address": 413,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1181,
+      "maxRaw": 99,
+      "minAddress": 1693,
+      "minRaw": 0,
+      "baselineKey": "P157_auxEevTempDiffReduce",
+      "baselineRange": {
+        "min": 0,
+        "max": 99
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P158",
+      "address": 414,
+      "currentRaw": 65521,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1182,
+      "maxRaw": 30,
+      "minAddress": 1694,
+      "minRaw": 65491,
+      "baselineKey": "P158_heatingLimitWaterTempStartAmb",
+      "baselineRange": {
+        "min": -45,
+        "max": 30
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P159",
+      "address": 415,
+      "currentRaw": 68,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1183,
+      "maxRaw": 150,
+      "minAddress": 1695,
+      "minRaw": 40,
+      "baselineKey": "P159_limitTempConstant",
+      "baselineRange": {
+        "min": 0,
+        "max": 150
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P160",
+      "address": 416,
+      "currentRaw": 14,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1184,
+      "maxRaw": 500,
+      "minAddress": 1696,
+      "minRaw": 65036,
+      "baselineKey": "P160_limitTempCoefficient",
+      "baselineRange": {
+        "min": -500,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P161",
+      "address": 417,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1185,
+      "maxRaw": 4,
+      "minAddress": 1697,
+      "minRaw": 0,
+      "baselineKey": "P161_auxPumpSelection",
+      "baselineRange": {
+        "min": 0,
+        "max": 4
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P162",
+      "address": 418,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1186,
+      "maxRaw": 360,
+      "minAddress": 1698,
+      "minRaw": 0,
+      "baselineKey": "P162_antifreezeDHWInterval",
+      "baselineRange": {
+        "min": 0,
+        "max": 360
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P163",
+      "address": 419,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1187,
+      "maxRaw": 150,
+      "minAddress": 1699,
+      "minRaw": 0,
+      "baselineKey": "P163_pumpMinSpeedFeedback",
+      "baselineRange": {
+        "min": 0,
+        "max": 70
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P164",
+      "address": 420,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1188,
+      "maxRaw": 3,
+      "minAddress": 1700,
+      "minRaw": 0,
+      "baselineKey": "P164_energyLevelControl",
+      "baselineRange": {
+        "min": 0,
+        "max": 3
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P165",
+      "address": 421,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1189,
+      "maxRaw": 15,
+      "minAddress": 1701,
+      "minRaw": 1,
+      "baselineKey": "P165_loadReturnDiff",
+      "baselineRange": {
+        "min": 1,
+        "max": 15
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P166",
+      "address": 422,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1190,
+      "maxRaw": 15,
+      "minAddress": 1702,
+      "minRaw": 1,
+      "baselineKey": "P166_loadSheddingHysteresis",
+      "baselineRange": {
+        "min": 1,
+        "max": 15
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P167",
+      "address": 423,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1191,
+      "maxRaw": 15,
+      "minAddress": 1703,
+      "minRaw": 1,
+      "baselineKey": "P167_emergencyStopReturnDiff",
+      "baselineRange": {
+        "min": 1,
+        "max": 15
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P168",
+      "address": 424,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1192,
+      "maxRaw": 100,
+      "minAddress": 1704,
+      "minRaw": 1,
+      "baselineKey": "P168_hotWaterStartRatio",
+      "baselineRange": {
+        "min": 1,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P169",
+      "address": 425,
+      "currentRaw": 100,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1193,
+      "maxRaw": 100,
+      "minAddress": 1705,
+      "minRaw": 1,
+      "baselineKey": "P169_nonHotWaterStartRatio",
+      "baselineRange": {
+        "min": 1,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P170",
+      "address": 426,
+      "currentRaw": 7,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1194,
+      "maxRaw": 60,
+      "minAddress": 1706,
+      "minRaw": 3,
+      "baselineKey": "P170_loadingCycle",
+      "baselineRange": {
+        "min": 3,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P171",
+      "address": 427,
+      "currentRaw": 65506,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1195,
+      "maxRaw": 0,
+      "minAddress": 1707,
+      "minRaw": 65486,
+      "baselineKey": "P171_shieldLowVoltageAmbient",
+      "baselineRange": {
+        "min": -50,
+        "max": 0
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P172",
+      "address": 428,
+      "currentRaw": 65,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1196,
+      "maxRaw": 70,
+      "minAddress": 1708,
+      "minRaw": 40,
+      "baselineKey": "P172_dcFanTargetFreqConstC",
+      "baselineRange": {
+        "min": 40,
+        "max": 70
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P173",
+      "address": 429,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1197,
+      "maxRaw": 65,
+      "minAddress": 1709,
+      "minRaw": 20,
+      "baselineKey": "P173_heatingFanFreqLowerLimit",
+      "baselineRange": {
+        "min": 20,
+        "max": 65
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P174",
+      "address": 430,
+      "currentRaw": 450,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1198,
+      "maxRaw": 500,
+      "minAddress": 1710,
+      "minRaw": 0,
+      "baselineKey": "P174_defrostOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 480
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P175",
+      "address": 431,
+      "currentRaw": 10,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1199,
+      "maxRaw": 240,
+      "minAddress": 1711,
+      "minRaw": 1,
+      "baselineKey": "P175_constTempOperationCycle",
+      "baselineRange": {
+        "min": 0,
+        "max": 360
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P176",
+      "address": 432,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1200,
+      "maxRaw": 999,
+      "minAddress": 1712,
+      "minRaw": 0,
+      "baselineKey": "P176_minDefrostTime",
+      "baselineRange": {
+        "min": 0,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P177",
+      "address": 433,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1201,
+      "maxRaw": 80,
+      "minAddress": 1713,
+      "minRaw": 0,
+      "baselineKey": "P177_defrostSegmentedWaterTemp",
+      "baselineRange": {
+        "min": 0,
+        "max": 80
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P178",
+      "address": 434,
+      "currentRaw": 70,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1202,
+      "maxRaw": 120,
+      "minAddress": 1714,
+      "minRaw": 40,
+      "baselineKey": "P178_highWaterTempDefrostFreq",
+      "baselineRange": {
+        "min": 40,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P179",
+      "address": 435,
+      "currentRaw": 15,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1203,
+      "maxRaw": 40,
+      "minAddress": 1715,
+      "minRaw": 0,
+      "baselineKey": "P179_strongModeFreqIncrease",
+      "baselineRange": {
+        "min": 0,
+        "max": 40
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P180",
+      "address": 436,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1204,
+      "maxRaw": 40,
+      "minAddress": 1716,
+      "minRaw": 0,
+      "baselineKey": "P180_powerfulModeFreqCap",
+      "baselineRange": {
+        "min": 0,
+        "max": 40
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P181",
+      "address": 437,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1205,
+      "maxRaw": 2,
+      "minAddress": 1717,
+      "minRaw": 0,
+      "baselineKey": "P181_defrostEvapSide",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P182",
+      "address": 438,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1206,
+      "maxRaw": 4,
+      "minAddress": 1718,
+      "minRaw": 0,
+      "baselineKey": "P182_pipeEHeatingOption",
+      "baselineRange": {
+        "min": 0,
+        "max": 3
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P183",
+      "address": 439,
+      "currentRaw": null,
+      "currentEncoding": "redacted",
+      "maxAddress": 1207,
+      "maxRaw": 999,
+      "minAddress": 1719,
+      "minRaw": 0,
+      "baselineKey": "P183_parameterPassword",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P184",
+      "address": 440,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1208,
+      "maxRaw": 120,
+      "minAddress": 1720,
+      "minRaw": 0,
+      "baselineKey": "P184_35D_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P185",
+      "address": 441,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1209,
+      "maxRaw": 120,
+      "minAddress": 1721,
+      "minRaw": 1,
+      "baselineKey": "P185_35C_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P186",
+      "address": 442,
+      "currentRaw": 39,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1210,
+      "maxRaw": 120,
+      "minAddress": 1722,
+      "minRaw": 1,
+      "baselineKey": "P186_35B_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P187",
+      "address": 443,
+      "currentRaw": 78,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1211,
+      "maxRaw": 120,
+      "minAddress": 1723,
+      "minRaw": 1,
+      "baselineKey": "P187_35A_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P188",
+      "address": 444,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1212,
+      "maxRaw": 120,
+      "minAddress": 1724,
+      "minRaw": 1,
+      "baselineKey": "P188_35E_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P189",
+      "address": 445,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1213,
+      "maxRaw": 120,
+      "minAddress": 1725,
+      "minRaw": 1,
+      "baselineKey": "P189_55D_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P190",
+      "address": 446,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1214,
+      "maxRaw": 120,
+      "minAddress": 1726,
+      "minRaw": 1,
+      "baselineKey": "P190_55C_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P191",
+      "address": 447,
+      "currentRaw": 39,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1215,
+      "maxRaw": 120,
+      "minAddress": 1727,
+      "minRaw": 1,
+      "baselineKey": "P191_55B_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P192",
+      "address": 448,
+      "currentRaw": 78,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1216,
+      "maxRaw": 120,
+      "minAddress": 1728,
+      "minRaw": 1,
+      "baselineKey": "P192_55A_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P193",
+      "address": 449,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1217,
+      "maxRaw": 120,
+      "minAddress": 1729,
+      "minRaw": 1,
+      "baselineKey": "P193_55E_compressorFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 120
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P194",
+      "address": 450,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1218,
+      "maxRaw": 60,
+      "minAddress": 1730,
+      "minRaw": 0,
+      "baselineKey": "P194_35D_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P195",
+      "address": 451,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1219,
+      "maxRaw": 60,
+      "minAddress": 1731,
+      "minRaw": 0,
+      "baselineKey": "P195_35C_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P196",
+      "address": 452,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1220,
+      "maxRaw": 60,
+      "minAddress": 1732,
+      "minRaw": 0,
+      "baselineKey": "P196_35B_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P197",
+      "address": 453,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1221,
+      "maxRaw": 60,
+      "minAddress": 1733,
+      "minRaw": 0,
+      "baselineKey": "P197_35A_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P198",
+      "address": 454,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1222,
+      "maxRaw": 60,
+      "minAddress": 1734,
+      "minRaw": 0,
+      "baselineKey": "P198_35E_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P199",
+      "address": 455,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1223,
+      "maxRaw": 60,
+      "minAddress": 1735,
+      "minRaw": 0,
+      "baselineKey": "P199_55D_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P200",
+      "address": 456,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1224,
+      "maxRaw": 60,
+      "minAddress": 1736,
+      "minRaw": 0,
+      "baselineKey": "P200_55C_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P201",
+      "address": 457,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1225,
+      "maxRaw": 60,
+      "minAddress": 1737,
+      "minRaw": 0,
+      "baselineKey": "P201_55B_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P202",
+      "address": 458,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1226,
+      "maxRaw": 60,
+      "minAddress": 1738,
+      "minRaw": 0,
+      "baselineKey": "P202_55A_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P203",
+      "address": 459,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1227,
+      "maxRaw": 60,
+      "minAddress": 1739,
+      "minRaw": 0,
+      "baselineKey": "P203_55E_fanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P204",
+      "address": 460,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1228,
+      "maxRaw": 10,
+      "minAddress": 1740,
+      "minRaw": 65526,
+      "baselineKey": "P204_35D_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P205",
+      "address": 461,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1229,
+      "maxRaw": 10,
+      "minAddress": 1741,
+      "minRaw": 65526,
+      "baselineKey": "P205_35C_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P206",
+      "address": 462,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1230,
+      "maxRaw": 10,
+      "minAddress": 1742,
+      "minRaw": 65526,
+      "baselineKey": "P206_35B_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P207",
+      "address": 463,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1231,
+      "maxRaw": 10,
+      "minAddress": 1743,
+      "minRaw": 65526,
+      "baselineKey": "P207_35A_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P208",
+      "address": 464,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1232,
+      "maxRaw": 500,
+      "minAddress": 1744,
+      "minRaw": 65526,
+      "baselineKey": "P208_35E_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P209",
+      "address": 465,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1233,
+      "maxRaw": 500,
+      "minAddress": 1745,
+      "minRaw": 65526,
+      "baselineKey": "P209_55D_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P210",
+      "address": 466,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1234,
+      "maxRaw": 100,
+      "minAddress": 1746,
+      "minRaw": 65526,
+      "baselineKey": "P210_55C_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P211",
+      "address": 467,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1235,
+      "maxRaw": 100,
+      "minAddress": 1747,
+      "minRaw": 65526,
+      "baselineKey": "P211_55B_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P212",
+      "address": 468,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1236,
+      "maxRaw": 100,
+      "minAddress": 1748,
+      "minRaw": 65526,
+      "baselineKey": "P212_55A_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P213",
+      "address": 469,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1237,
+      "maxRaw": 100,
+      "minAddress": 1749,
+      "minRaw": 65526,
+      "baselineKey": "P213_55E_mainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P214",
+      "address": 470,
+      "currentRaw": 130,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1238,
+      "maxRaw": 500,
+      "minAddress": 1750,
+      "minRaw": 0,
+      "baselineKey": "P214_35D_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P215",
+      "address": 471,
+      "currentRaw": 90,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1239,
+      "maxRaw": 500,
+      "minAddress": 1751,
+      "minRaw": 0,
+      "baselineKey": "P215_35C_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P216",
+      "address": 472,
+      "currentRaw": 100,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1240,
+      "maxRaw": 500,
+      "minAddress": 1752,
+      "minRaw": 0,
+      "baselineKey": "P216_35B_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P217",
+      "address": 473,
+      "currentRaw": 150,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1241,
+      "maxRaw": 500,
+      "minAddress": 1753,
+      "minRaw": 0,
+      "baselineKey": "P217_35A_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P218",
+      "address": 474,
+      "currentRaw": 130,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1242,
+      "maxRaw": 500,
+      "minAddress": 1754,
+      "minRaw": 0,
+      "baselineKey": "P218_35E_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P219",
+      "address": 475,
+      "currentRaw": 110,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1243,
+      "maxRaw": 500,
+      "minAddress": 1755,
+      "minRaw": 0,
+      "baselineKey": "P219_55D_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P220",
+      "address": 476,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1244,
+      "maxRaw": 500,
+      "minAddress": 1756,
+      "minRaw": 0,
+      "baselineKey": "P220_55C_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P221",
+      "address": 477,
+      "currentRaw": 90,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1245,
+      "maxRaw": 500,
+      "minAddress": 1757,
+      "minRaw": 0,
+      "baselineKey": "P221_55B_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P222",
+      "address": 478,
+      "currentRaw": 120,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1246,
+      "maxRaw": 500,
+      "minAddress": 1758,
+      "minRaw": 0,
+      "baselineKey": "P222_55A_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P223",
+      "address": 479,
+      "currentRaw": 100,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1247,
+      "maxRaw": 500,
+      "minAddress": 1759,
+      "minRaw": 0,
+      "baselineKey": "P223_55E_mainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P224",
+      "address": 480,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1248,
+      "maxRaw": 60,
+      "minAddress": 1760,
+      "minRaw": 65526,
+      "baselineKey": "P224_35D_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P225",
+      "address": 481,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1249,
+      "maxRaw": 60,
+      "minAddress": 1761,
+      "minRaw": 65526,
+      "baselineKey": "P225_35C_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P226",
+      "address": 482,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1250,
+      "maxRaw": 60,
+      "minAddress": 1762,
+      "minRaw": 65526,
+      "baselineKey": "P226_35B_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P227",
+      "address": 483,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1251,
+      "maxRaw": 10,
+      "minAddress": 1763,
+      "minRaw": 65526,
+      "baselineKey": "P227_35A_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P228",
+      "address": 484,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1252,
+      "maxRaw": 10,
+      "minAddress": 1764,
+      "minRaw": 65526,
+      "baselineKey": "P228_35E_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P229",
+      "address": 485,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1253,
+      "maxRaw": 10,
+      "minAddress": 1765,
+      "minRaw": 65526,
+      "baselineKey": "P229_55D_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P230",
+      "address": 486,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1254,
+      "maxRaw": 10,
+      "minAddress": 1766,
+      "minRaw": 65526,
+      "baselineKey": "P230_55C_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P231",
+      "address": 487,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1255,
+      "maxRaw": 10,
+      "minAddress": 1767,
+      "minRaw": 65526,
+      "baselineKey": "P231_55B_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P232",
+      "address": 488,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1256,
+      "maxRaw": 10,
+      "minAddress": 1768,
+      "minRaw": 65526,
+      "baselineKey": "P232_55A_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P233",
+      "address": 489,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1257,
+      "maxRaw": 10,
+      "minAddress": 1769,
+      "minRaw": 65526,
+      "baselineKey": "P233_55E_auxValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P234",
+      "address": 490,
+      "currentRaw": 125,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1258,
+      "maxRaw": 500,
+      "minAddress": 1770,
+      "minRaw": 0,
+      "baselineKey": "P234_35D_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P235",
+      "address": 491,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1259,
+      "maxRaw": 500,
+      "minAddress": 1771,
+      "minRaw": 0,
+      "baselineKey": "P235_35C_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P236",
+      "address": 492,
+      "currentRaw": 35,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1260,
+      "maxRaw": 500,
+      "minAddress": 1772,
+      "minRaw": 0,
+      "baselineKey": "P236_35B_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P237",
+      "address": 493,
+      "currentRaw": 65,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1261,
+      "maxRaw": 500,
+      "minAddress": 1773,
+      "minRaw": 0,
+      "baselineKey": "P237_35A_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P238",
+      "address": 494,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1262,
+      "maxRaw": 500,
+      "minAddress": 1774,
+      "minRaw": 0,
+      "baselineKey": "P238_35E_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P239",
+      "address": 495,
+      "currentRaw": 140,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1263,
+      "maxRaw": 500,
+      "minAddress": 1775,
+      "minRaw": 0,
+      "baselineKey": "P239_55D_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P240",
+      "address": 496,
+      "currentRaw": 330,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1264,
+      "maxRaw": 500,
+      "minAddress": 1776,
+      "minRaw": 0,
+      "baselineKey": "P240_55C_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P241",
+      "address": 497,
+      "currentRaw": 200,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1265,
+      "maxRaw": 500,
+      "minAddress": 1777,
+      "minRaw": 0,
+      "baselineKey": "P241_55B_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P242",
+      "address": 498,
+      "currentRaw": 350,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1266,
+      "maxRaw": 500,
+      "minAddress": 1778,
+      "minRaw": 0,
+      "baselineKey": "P242_55A_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P243",
+      "address": 499,
+      "currentRaw": 350,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1267,
+      "maxRaw": 500,
+      "minAddress": 1779,
+      "minRaw": 0,
+      "baselineKey": "P243_55E_auxValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P244",
+      "address": 500,
+      "currentRaw": 22,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1268,
+      "maxRaw": 100,
+      "minAddress": 1780,
+      "minRaw": 0,
+      "baselineKey": "P244_35lowWaterFlow",
+      "baselineRange": {
+        "min": 0,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P245",
+      "address": 501,
+      "currentRaw": 15,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1269,
+      "maxRaw": 100,
+      "minAddress": 1781,
+      "minRaw": 0,
+      "baselineKey": "P245_55highWaterFlow",
+      "baselineRange": {
+        "min": 0,
+        "max": 100
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P246",
+      "address": 502,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1270,
+      "maxRaw": 60,
+      "minAddress": 1782,
+      "minRaw": 0,
+      "baselineKey": "P246_35ratedFanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P247",
+      "address": 503,
+      "currentRaw": 220,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1271,
+      "maxRaw": 500,
+      "minAddress": 1783,
+      "minRaw": 0,
+      "baselineKey": "P247_35ratedMainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P248",
+      "address": 504,
+      "currentRaw": 50,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1272,
+      "maxRaw": 60,
+      "minAddress": 1784,
+      "minRaw": 0,
+      "baselineKey": "P248_55ratedFanFreq",
+      "baselineRange": {
+        "min": 0,
+        "max": 60
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P249",
+      "address": 505,
+      "currentRaw": 170,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1273,
+      "maxRaw": 500,
+      "minAddress": 1785,
+      "minRaw": 0,
+      "baselineKey": "P249_55ratedMainValveOpening",
+      "baselineRange": {
+        "min": 0,
+        "max": 500
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P250",
+      "address": 506,
+      "currentRaw": 4,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1274,
+      "maxRaw": 10,
+      "minAddress": 1786,
+      "minRaw": 65526,
+      "baselineKey": "P250_35ratedMainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P251",
+      "address": 507,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1275,
+      "maxRaw": 50,
+      "minAddress": 1787,
+      "minRaw": 0,
+      "baselineKey": "P251_pfcShutdownCurrent",
+      "baselineRange": {
+        "min": 0,
+        "max": 50
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P252",
+      "address": 508,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1276,
+      "maxRaw": 10,
+      "minAddress": 1788,
+      "minRaw": 65526,
+      "baselineKey": "P252_55ratedMainValveSuperheat",
+      "baselineRange": {
+        "min": -10,
+        "max": 10
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P253",
+      "address": 509,
+      "currentRaw": 6,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1277,
+      "maxRaw": 50,
+      "minAddress": 1789,
+      "minRaw": 0,
+      "baselineKey": "P253_pfcTurnOnCurrent",
+      "baselineRange": {
+        "min": 0,
+        "max": 50
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P254",
+      "address": 510,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1278,
+      "maxRaw": 1,
+      "minAddress": 1790,
+      "minRaw": 0,
+      "baselineKey": "P254_heatingMedium",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P255",
+      "address": 511,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1279,
+      "maxRaw": 2,
+      "minAddress": 1791,
+      "minRaw": 0,
+      "baselineKey": "P255_smartGridOptions",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P256",
+      "address": 512,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1280,
+      "maxRaw": 999,
+      "minAddress": 1792,
+      "minRaw": 30,
+      "baselineKey": "P256_peakGridRuntime",
+      "baselineRange": {
+        "min": 30,
+        "max": 999
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P257",
+      "address": 513,
+      "currentRaw": 2,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1281,
+      "maxRaw": 3,
+      "minAddress": 1793,
+      "minRaw": 0,
+      "baselineKey": "P257_dualZoneSelection",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P258",
+      "address": 514,
+      "currentRaw": 7,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1282,
+      "maxRaw": 20,
+      "minAddress": 1794,
+      "minRaw": 1,
+      "baselineKey": "P258_mixingValveCycle",
+      "baselineRange": {
+        "min": 5,
+        "max": 20
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P259",
+      "address": 515,
+      "currentRaw": 120,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1283,
+      "maxRaw": 180,
+      "minAddress": 1795,
+      "minRaw": 30,
+      "baselineKey": "P259_mixingValveFullCycle",
+      "baselineRange": {
+        "min": 0,
+        "max": 180
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P260",
+      "address": 516,
+      "currentRaw": 99,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1284,
+      "maxRaw": 99,
+      "minAddress": 1796,
+      "minRaw": 50,
+      "baselineKey": "P260_pumpMaxSpeed",
+      "baselineRange": {
+        "min": 50,
+        "max": 99
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P261",
+      "address": 517,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1285,
+      "maxRaw": 99,
+      "minAddress": 1797,
+      "minRaw": 20,
+      "baselineKey": "P261_pumpConstTempSpeed",
+      "baselineRange": {
+        "min": 20,
+        "max": 99
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P262",
+      "address": 518,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1286,
+      "maxRaw": 2,
+      "minAddress": 1798,
+      "minRaw": 0,
+      "baselineKey": "P262_floorHeatingTestMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P263",
+      "address": 519,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1287,
+      "maxRaw": 240,
+      "minAddress": 1799,
+      "minRaw": 3,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P264",
+      "address": 520,
+      "currentRaw": 100,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1288,
+      "maxRaw": 100,
+      "minAddress": 1800,
+      "minRaw": 30,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P265",
+      "address": 521,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1289,
+      "maxRaw": 10,
+      "minAddress": 1801,
+      "minRaw": 1,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P266",
+      "address": 522,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1290,
+      "maxRaw": 1,
+      "minAddress": 1802,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P267",
+      "address": 523,
+      "currentRaw": 5,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1291,
+      "maxRaw": 30,
+      "minAddress": 1803,
+      "minRaw": 1,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P268",
+      "address": 524,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1292,
+      "maxRaw": 1,
+      "minAddress": 1804,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P269",
+      "address": 525,
+      "currentRaw": 125,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1293,
+      "maxRaw": 125,
+      "minAddress": 1805,
+      "minRaw": 95,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P270",
+      "address": 526,
+      "currentRaw": 85,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1294,
+      "maxRaw": 125,
+      "minAddress": 1806,
+      "minRaw": 85,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P271",
+      "address": 527,
+      "currentRaw": 400,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1295,
+      "maxRaw": 500,
+      "minAddress": 1807,
+      "minRaw": 50,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P272",
+      "address": 528,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1296,
+      "maxRaw": 500,
+      "minAddress": 1808,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P273",
+      "address": 529,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1297,
+      "maxRaw": 500,
+      "minAddress": 1809,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P274",
+      "address": 530,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1298,
+      "maxRaw": 500,
+      "minAddress": 1810,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P275",
+      "address": 531,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1299,
+      "maxRaw": 240,
+      "minAddress": 1811,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P276",
+      "address": 532,
+      "currentRaw": 10,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1300,
+      "maxRaw": 240,
+      "minAddress": 1812,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P277",
+      "address": 533,
+      "currentRaw": 80,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1301,
+      "maxRaw": 200,
+      "minAddress": 1813,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P278",
+      "address": 534,
+      "currentRaw": 60,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1302,
+      "maxRaw": 200,
+      "minAddress": 1814,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P279",
+      "address": 535,
+      "currentRaw": 120,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1303,
+      "maxRaw": 200,
+      "minAddress": 1815,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P280",
+      "address": 536,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1304,
+      "maxRaw": 30,
+      "minAddress": 1816,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P281",
+      "address": 537,
+      "currentRaw": 15,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1305,
+      "maxRaw": 30,
+      "minAddress": 1817,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P282",
+      "address": 538,
+      "currentRaw": 70,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1306,
+      "maxRaw": 100,
+      "minAddress": 1818,
+      "minRaw": 5,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P283",
+      "address": 539,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1307,
+      "maxRaw": 1,
+      "minAddress": 1819,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P284",
+      "address": 540,
+      "currentRaw": 25,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1308,
+      "maxRaw": 100,
+      "minAddress": 1820,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P285",
+      "address": 541,
+      "currentRaw": 30,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1309,
+      "maxRaw": 100,
+      "minAddress": 1821,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P286",
+      "address": 542,
+      "currentRaw": 35,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1310,
+      "maxRaw": 100,
+      "minAddress": 1822,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P287",
+      "address": 543,
+      "currentRaw": 40,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1311,
+      "maxRaw": 100,
+      "minAddress": 1823,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P288",
+      "address": 544,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1312,
+      "maxRaw": 100,
+      "minAddress": 1824,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P289",
+      "address": 545,
+      "currentRaw": 3,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1313,
+      "maxRaw": 10,
+      "minAddress": 1825,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P290",
+      "address": 546,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1314,
+      "maxRaw": 10,
+      "minAddress": 1826,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P291",
+      "address": 547,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1315,
+      "maxRaw": 10,
+      "minAddress": 1827,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P292",
+      "address": 548,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1316,
+      "maxRaw": 10,
+      "minAddress": 1828,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P293",
+      "address": 549,
+      "currentRaw": 1,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1317,
+      "maxRaw": 10,
+      "minAddress": 1829,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P294",
+      "address": 550,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1318,
+      "maxRaw": 100,
+      "minAddress": 1830,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P295",
+      "address": 551,
+      "currentRaw": 55,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1319,
+      "maxRaw": 75,
+      "minAddress": 1831,
+      "minRaw": 20,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P296",
+      "address": 552,
+      "currentRaw": 45,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1320,
+      "maxRaw": 75,
+      "minAddress": 1832,
+      "minRaw": 20,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P297",
+      "address": 553,
+      "currentRaw": 20,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1321,
+      "maxRaw": 20,
+      "minAddress": 1833,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P298",
+      "address": 554,
+      "currentRaw": 10,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1322,
+      "maxRaw": 30,
+      "minAddress": 1834,
+      "minRaw": 65526,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P299",
+      "address": 555,
+      "currentRaw": 8,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1323,
+      "maxRaw": 30,
+      "minAddress": 1835,
+      "minRaw": 65526,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P300",
+      "address": 556,
+      "currentRaw": 6,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1324,
+      "maxRaw": 30,
+      "minAddress": 1836,
+      "minRaw": 65526,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P301",
+      "address": 557,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1325,
+      "maxRaw": 0,
+      "minAddress": 1837,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P302",
+      "address": 558,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1326,
+      "maxRaw": 0,
+      "minAddress": 1838,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "P303",
+      "address": 559,
+      "currentRaw": 0,
+      "currentEncoding": "encoded from transcribed int16",
+      "maxAddress": 1327,
+      "maxRaw": 0,
+      "minAddress": 1839,
+      "minRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "3.4 and 6.2"
+    },
+    {
+      "parameter": "L11",
+      "address": 2048,
+      "currentRaw": 30,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2176,
+      "minRaw": 1,
+      "maxAddress": 2112,
+      "maxRaw": 300,
+      "baselineKey": "L11_pipeElecHeatingTime",
+      "baselineRange": {
+        "min": 1,
+        "max": 300
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L12",
+      "address": 2049,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2177,
+      "minRaw": 0,
+      "maxAddress": 2113,
+      "maxRaw": 2,
+      "baselineKey": "L12_sterilizationMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L13",
+      "address": 2050,
+      "currentRaw": 7,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2178,
+      "minRaw": 1,
+      "maxAddress": 2114,
+      "maxRaw": 999,
+      "baselineKey": "L13_sterilizationInterval",
+      "baselineRange": {
+        "min": 5,
+        "max": 30
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L14",
+      "address": 2051,
+      "currentRaw": 23,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2179,
+      "minRaw": 0,
+      "maxAddress": 2115,
+      "maxRaw": 23,
+      "baselineKey": "L14_sterilizationStartTime",
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L15",
+      "address": 2052,
+      "currentRaw": 10,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2180,
+      "minRaw": 0,
+      "maxAddress": 2116,
+      "maxRaw": 999,
+      "baselineKey": "L15_sterilizationRunTime",
+      "baselineRange": {
+        "min": 0,
+        "max": 50
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L16",
+      "address": 2053,
+      "currentRaw": 70,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2181,
+      "minRaw": 50,
+      "maxAddress": 2117,
+      "maxRaw": 80,
+      "baselineKey": "L16_sterilizationTemp",
+      "baselineRange": {
+        "min": 50,
+        "max": 80
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L17",
+      "address": 2054,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2182,
+      "minRaw": 0,
+      "maxAddress": 2118,
+      "maxRaw": 2,
+      "baselineKey": "L17_waterLevelControl",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L18",
+      "address": 2055,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2183,
+      "minRaw": 0,
+      "maxAddress": 2119,
+      "maxRaw": 1,
+      "baselineKey": "L18_hydrationControl",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L19",
+      "address": 2056,
+      "currentRaw": 45,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2184,
+      "minRaw": 20,
+      "maxAddress": 2120,
+      "maxRaw": 50,
+      "baselineKey": "L19_allowWaterTemp",
+      "baselineRange": {
+        "min": 0,
+        "max": 99
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L20",
+      "address": 2057,
+      "currentRaw": 5,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2185,
+      "minRaw": 1,
+      "maxAddress": 2121,
+      "maxRaw": 15,
+      "baselineKey": "L20_hysteresisReplenishment",
+      "baselineRange": {
+        "min": 0,
+        "max": 20
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L21",
+      "address": 2058,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2186,
+      "minRaw": 0,
+      "maxAddress": 2122,
+      "maxRaw": 2,
+      "baselineKey": "L21_lowWaterCutoff",
+      "baselineRange": {
+        "min": 0,
+        "max": 2
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L22",
+      "address": 2059,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2187,
+      "minRaw": 0,
+      "maxAddress": 2123,
+      "maxRaw": 3,
+      "baselineKey": "L22_backwaterMode",
+      "baselineRange": {
+        "min": 0,
+        "max": 3
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L23",
+      "address": 2060,
+      "currentRaw": 40,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2188,
+      "minRaw": 30,
+      "maxAddress": 2124,
+      "maxRaw": 65,
+      "baselineKey": "L23_backwaterSetTemp",
+      "baselineRange": {
+        "min": 20,
+        "max": 65
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L24",
+      "address": 2061,
+      "currentRaw": 5,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2189,
+      "minRaw": 1,
+      "maxAddress": 2125,
+      "maxRaw": 15,
+      "baselineKey": "L24_backwaterHysteresis",
+      "baselineRange": {
+        "min": 1,
+        "max": 15
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L25",
+      "address": 2062,
+      "currentRaw": 30,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2190,
+      "minRaw": 3,
+      "maxAddress": 2126,
+      "maxRaw": 90,
+      "baselineKey": "L25_backwaterCycle",
+      "baselineRange": {
+        "min": 3,
+        "max": 90
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L26",
+      "address": 2063,
+      "currentRaw": 5,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2191,
+      "minRaw": 1,
+      "maxAddress": 2127,
+      "maxRaw": 30,
+      "baselineKey": "L26_backwaterReturnTime",
+      "baselineRange": {
+        "min": 1,
+        "max": 30
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L27",
+      "address": 2064,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2192,
+      "minRaw": 0,
+      "maxAddress": 2128,
+      "maxRaw": 1,
+      "baselineKey": "L27_heatingLowTempCurveDIY",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L28",
+      "address": 2065,
+      "currentRaw": 65531,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2193,
+      "minRaw": 65486,
+      "maxAddress": 2129,
+      "maxRaw": 0,
+      "baselineKey": "L28_heatingCurveCoeffK",
+      "baselineRange": {
+        "min": -50,
+        "max": 0
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L29",
+      "address": 2066,
+      "currentRaw": 55,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2194,
+      "minRaw": 30,
+      "maxAddress": 2130,
+      "maxRaw": 80,
+      "baselineKey": "L29_heatingCurveConstantB",
+      "baselineRange": {
+        "min": 30,
+        "max": 80
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L30",
+      "address": 2067,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2195,
+      "minRaw": 0,
+      "maxAddress": 2131,
+      "maxRaw": 0,
+      "baselineKey": "L30_heatingCapacityStats",
+      "baselineRange": {
+        "min": 0,
+        "max": 1
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L31",
+      "address": 2068,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2196,
+      "minRaw": 0,
+      "maxAddress": 2132,
+      "maxRaw": 999,
+      "baselineKey": "L31_externalPumpFlowRate",
+      "baselineRange": {
+        "min": 0,
+        "max": 999
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L32",
+      "address": 2069,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2197,
+      "minRaw": 0,
+      "maxAddress": 2133,
+      "maxRaw": 9999,
+      "baselineKey": "L32_dhwEHeaterPower",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L33",
+      "address": 2070,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2198,
+      "minRaw": 0,
+      "maxAddress": 2134,
+      "maxRaw": 9999,
+      "baselineKey": "L33_pipeEHeater1Power",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L34",
+      "address": 2071,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2199,
+      "minRaw": 0,
+      "maxAddress": 2135,
+      "maxRaw": 9999,
+      "baselineKey": "L34_pipeEHeater2Power",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L35",
+      "address": 2072,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2200,
+      "minRaw": 0,
+      "maxAddress": 2136,
+      "maxRaw": 9999,
+      "baselineKey": "L35_heatingEHeaterPower",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L36",
+      "address": 2073,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2201,
+      "minRaw": 0,
+      "maxAddress": 2137,
+      "maxRaw": 9999,
+      "baselineKey": "L36_externalPumpPower",
+      "baselineRange": {
+        "min": 0,
+        "max": 9999
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L37",
+      "address": 2074,
+      "currentRaw": 65531,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2202,
+      "minRaw": 65486,
+      "maxAddress": 2138,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L38",
+      "address": 2075,
+      "currentRaw": 50,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2203,
+      "minRaw": 30,
+      "maxAddress": 2139,
+      "maxRaw": 80,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L39",
+      "address": 2076,
+      "currentRaw": 22,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2204,
+      "minRaw": 0,
+      "maxAddress": 2140,
+      "maxRaw": 23,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L40",
+      "address": 2077,
+      "currentRaw": 22,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2205,
+      "minRaw": 0,
+      "maxAddress": 2141,
+      "maxRaw": 23,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L41",
+      "address": 2078,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2206,
+      "minRaw": 0,
+      "maxAddress": 2142,
+      "maxRaw": 1,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L42",
+      "address": 2079,
+      "currentRaw": 55,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2207,
+      "minRaw": 15,
+      "maxAddress": 2143,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L43",
+      "address": 2080,
+      "currentRaw": 52,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2208,
+      "minRaw": 15,
+      "maxAddress": 2144,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L44",
+      "address": 2081,
+      "currentRaw": 49,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2209,
+      "minRaw": 15,
+      "maxAddress": 2145,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L45",
+      "address": 2082,
+      "currentRaw": 46,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2210,
+      "minRaw": 15,
+      "maxAddress": 2146,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L46",
+      "address": 2083,
+      "currentRaw": 43,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2211,
+      "minRaw": 15,
+      "maxAddress": 2147,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L47",
+      "address": 2084,
+      "currentRaw": 40,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2212,
+      "minRaw": 15,
+      "maxAddress": 2148,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L48",
+      "address": 2085,
+      "currentRaw": 37,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2213,
+      "minRaw": 15,
+      "maxAddress": 2149,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L49",
+      "address": 2086,
+      "currentRaw": 34,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2214,
+      "minRaw": 15,
+      "maxAddress": 2150,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L50",
+      "address": 2087,
+      "currentRaw": 31,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2215,
+      "minRaw": 15,
+      "maxAddress": 2151,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L51",
+      "address": 2088,
+      "currentRaw": 28,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2216,
+      "minRaw": 15,
+      "maxAddress": 2152,
+      "maxRaw": 75,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L52",
+      "address": 2089,
+      "currentRaw": 5,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2217,
+      "minRaw": 3,
+      "maxAddress": 2153,
+      "maxRaw": 60,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L53",
+      "address": 2090,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2218,
+      "minRaw": 0,
+      "maxAddress": 2154,
+      "maxRaw": 1,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L54",
+      "address": 2091,
+      "currentRaw": 420,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2219,
+      "minRaw": 0,
+      "maxAddress": 2155,
+      "maxRaw": 2000,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L55",
+      "address": 2092,
+      "currentRaw": 65531,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2220,
+      "minRaw": 0,
+      "maxAddress": 2156,
+      "maxRaw": 240,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L56",
+      "address": 2093,
+      "currentRaw": 65531,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2221,
+      "minRaw": 65486,
+      "maxAddress": 2157,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L57",
+      "address": 2094,
+      "currentRaw": 30,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2222,
+      "minRaw": 10,
+      "maxAddress": 2158,
+      "maxRaw": 80,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L58",
+      "address": 2095,
+      "currentRaw": 1,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2223,
+      "minRaw": 0,
+      "maxAddress": 2159,
+      "maxRaw": 1,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L59",
+      "address": 2096,
+      "currentRaw": 65531,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2224,
+      "minRaw": 65516,
+      "maxAddress": 2160,
+      "maxRaw": 65535,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L60",
+      "address": 2097,
+      "currentRaw": 50,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2225,
+      "minRaw": 20,
+      "maxAddress": 2161,
+      "maxRaw": 80,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L61",
+      "address": 2098,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2226,
+      "minRaw": 0,
+      "maxAddress": 2162,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L62",
+      "address": 2099,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2227,
+      "minRaw": 0,
+      "maxAddress": 2163,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L63",
+      "address": 2100,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2228,
+      "minRaw": 0,
+      "maxAddress": 2164,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L64",
+      "address": 2101,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2229,
+      "minRaw": 0,
+      "maxAddress": 2165,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L65",
+      "address": 2102,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2230,
+      "minRaw": 0,
+      "maxAddress": 2166,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L66",
+      "address": 2103,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2231,
+      "minRaw": 0,
+      "maxAddress": 2167,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L67",
+      "address": 2104,
+      "currentRaw": 65531,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2232,
+      "minRaw": 0,
+      "maxAddress": 2168,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L68",
+      "address": 2105,
+      "currentRaw": 50,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2233,
+      "minRaw": 0,
+      "maxAddress": 2169,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L69",
+      "address": 2106,
+      "currentRaw": 6,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2234,
+      "minRaw": 0,
+      "maxAddress": 2170,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L70",
+      "address": 2107,
+      "currentRaw": 22,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2235,
+      "minRaw": 0,
+      "maxAddress": 2171,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L71",
+      "address": 2108,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2236,
+      "minRaw": 0,
+      "maxAddress": 2172,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L72",
+      "address": 2109,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2237,
+      "minRaw": 0,
+      "maxAddress": 2173,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L73",
+      "address": 2110,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2238,
+      "minRaw": 0,
+      "maxAddress": 2174,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    },
+    {
+      "parameter": "L74",
+      "address": 2111,
+      "currentRaw": 0,
+      "currentEncoding": "uint16 dump",
+      "minAddress": 2239,
+      "minRaw": 0,
+      "maxAddress": 2175,
+      "maxRaw": 0,
+      "baselineKey": null,
+      "baselineRange": {
+        "min": null,
+        "max": null
+      },
+      "sourceSection": "6.1"
+    }
+  ],
+  "flags": [
+    {
+      "start": 880,
+      "raw": [
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+      ],
+      "date": "2026-11-14"
+    },
+    {
+      "start": 896,
+      "raw": [
+        65535,
+        65535,
+        8191,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "date": "2026-11-11"
+    },
+    {
+      "start": 2240,
+      "raw": [
+        65535,
+        65535,
+        65535,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "date": "2026-11-11"
+    }
+  ],
+  "otherSamples": [
+    {
+      "start": 576,
+      "raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "start": 640,
+      "raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "start": 2304,
+      "raw": [
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+      ]
+    },
+    {
+      "start": 2320,
+      "raw": [
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535,
+        65535
+      ]
+    }
+  ],
+  "unknowns": [
+    "individual flag meaning",
+    "FC06 enforcement of reported limits",
+    "other device or firmware applicability",
+    "P263-P300 semantics",
+    "L37-L74 semantics and L55 anomaly"
+  ]
+}

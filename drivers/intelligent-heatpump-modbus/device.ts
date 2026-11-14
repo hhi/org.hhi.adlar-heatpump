@@ -473,6 +473,11 @@ class AdlarModbusDevice extends Homey.Device {
         setGetChangeLogCallback(fn: (mode?: import('../../lib/modbus/protocol/modbus-tcp-service').RegisterChangeLogMode) => Map<number, RegisterChangeEntry>): void;
         setGetSnapshotCallback(fn: () => DataSnapshot | null): void;
         setGetRegisterCacheCallback(fn: () => Map<number, number>): void;
+        setParameterBankCallbacks(
+          read: (addresses: number[], refresh: boolean) => Promise<import('../../lib/modbus/protocol/parameter-bank-service').ParameterBankRange[]>,
+          cached: () => import('../../lib/modbus/protocol/parameter-bank-service').ParameterBankRange[],
+          words: (start: number, count: number) => Promise<number[]>,
+        ): void;
         setGetCapabilityValuesCallback(fn: () => Record<string, unknown>): void;
       } | null;
     };
@@ -506,6 +511,11 @@ class AdlarModbusDevice extends Homey.Device {
     app.dashboard.setGetChangeLogCallback((mode) => this.coordinator!.getChangeLog(mode));
     app.dashboard.setGetSnapshotCallback(() => this.coordinator!.getCurrentSnapshot());
     app.dashboard.setGetRegisterCacheCallback(() => this.coordinator!.getRegisterCache());
+    app.dashboard.setParameterBankCallbacks(
+      (addresses, refresh) => this.coordinator!.readParameterRanges(addresses, refresh),
+      () => this.coordinator!.getParameterRanges(),
+      (start, count) => this.coordinator!.readParameterBankWords(start, count),
+    );
     app.dashboard.setGetCapabilityValuesCallback(() => {
       const result: Record<string, unknown> = {};
       for (const id of this.getCapabilities()) {

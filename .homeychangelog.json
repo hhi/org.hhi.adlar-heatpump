@@ -1,4 +1,10 @@
 {
+  "3.10.0": {
+    "en": "The Modbus expert dashboard automatically reads P/L limits, shows app and heat pump limits separately, and includes the full User Control block, heat pump clock and suspected heating curve parameters. Modbus connections close correctly during reconnection and app shutdown.",
+    "nl": "Het Modbus-expertdashboard leest P/L-grenzen automatisch mee, toont app- en warmtepompgrenzen apart en bevat het volledige User Control-blok, kloktijd en vermoedelijke stooklijnparameters. Modbus-verbindingen worden correct afgesloten bij herverbinden en stoppen van de app.",
+    "de": "Das Modbus-Expertendashboard liest P/L-Grenzwerte automatisch mit, zeigt App- und Wärmepumpengrenzen getrennt und enthält den vollständigen User-Control-Block, die Wärmepumpenuhr und vermutete Heizkurvenparameter. Modbus-Verbindungen werden beim erneuten Verbinden und Beenden der App korrekt geschlossen.",
+    "fr": "Le tableau de bord expert Modbus lit automatiquement les limites P/L, affiche séparément les limites de l’app et de la pompe à chaleur, et inclut le bloc User Control complet, l’horloge et les paramètres présumés des courbes de chauffe. Les connexions Modbus sont fermées correctement lors de la reconnexion et de l’arrêt de l’app."
+  },
   "3.9.1": {
     "en": "An indoor temperature that stays exactly the same for 12 hours now gives a notification in the timeline. After 24 hours without a change adaptive control no longer corrects on it (Positional follows the heating curve only, Classic leaves the setpoint alone) and the building model stops learning, until a different value arrives.",
     "nl": "Een binnentemperatuur die 12 uur exact gelijk blijft, geeft nu een melding in de tijdlijn. Na 24 uur zonder verandering stuurt de adaptieve regeling er niet meer op bij (Positioneel volgt alleen de stooklijn, Klassiek laat het setpoint staan) en leert het gebouwmodel niet meer, tot er een andere waarde binnenkomt.",
