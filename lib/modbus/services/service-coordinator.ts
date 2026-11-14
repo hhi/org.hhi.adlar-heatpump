@@ -3,6 +3,7 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
 import Homey from 'homey';
+import { ParameterBankRange } from '../protocol/parameter-bank-service';
 import { SettingsManagerService } from '../../shared/services/settings-manager-service';
 import { CapabilityHealthService } from './capability-health-service';
 import { EnergyTrackingService } from './energy-tracking-service';
@@ -922,6 +923,18 @@ export class ServiceCoordinator {
 
   getChangeLog(mode?: RegisterChangeLogMode): Map<number, RegisterChangeEntry> {
     return this.modbusConnection.getChangeLog(mode);
+  }
+
+  async readParameterBankWords(start: number, count: number): Promise<number[]> {
+    return this.modbusConnection.readParameterBankWords(start, count);
+  }
+
+  getParameterRanges(): ParameterBankRange[] {
+    return this.modbusConnection.getParameterRanges();
+  }
+
+  async readParameterRanges(addresses: number[], refresh = false): Promise<ParameterBankRange[]> {
+    return this.modbusConnection.readParameterRanges(addresses, refresh);
   }
 
   getRegisterCache(): Map<number, number> {

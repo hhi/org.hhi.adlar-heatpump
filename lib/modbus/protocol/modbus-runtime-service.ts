@@ -2,6 +2,7 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
 /* eslint-disable import/prefer-default-export */
+import { ParameterBankRange } from './parameter-bank-service';
 import { RegisterChangeEntry, RegisterChangeLogMode } from './modbus-tcp-service';
 
 /**
@@ -49,6 +50,9 @@ export interface ModbusRuntimeService<TSnapshot> {
   on(event: 'data', cb: (snapshot: TSnapshot) => void): this;
   on(event: 'poll-group-succeeded', cb: (groupName: string) => void): this;
 
+  getParameterRanges?(): ParameterBankRange[];
+  readParameterBankWords?(start: number, count: number): Promise<number[]>;
+  readParameterRanges?(addresses: number[], refresh?: boolean): Promise<ParameterBankRange[]>;
   getSnapshot(): TSnapshot;
   getChangeLog(mode?: RegisterChangeLogMode): Map<number, RegisterChangeEntry>;
   getRegisterCache(): Map<number, number>;

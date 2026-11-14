@@ -10,6 +10,7 @@
  */
 
 import { EventEmitter } from 'events';
+import ParameterBankService, { ParameterBankRange, parameterBankWord, validParameterBankRead, PARAMETER_LIMIT_BANKS } from './parameter-bank-service';
 
 import {
   ModbusTcpConfig, ModbusTcpService, PollBlock, PollGroup, RegisterChangeEntry, TimerProvider,
@@ -341,10 +342,12 @@ function formatPackedVersion(raw: number | null): string | null {
 export class Adlar2ModbusService extends EventEmitter {
 
   private readonly tcp: ModbusTcpService;
+  private readonly parameterBanks: ParameterBankService;
   private temperatureRegisterScale: TemperatureRegisterScale;
   private externalFlowLpm: number | null = null;
   private lastFaults: string[] = [];
   private hasBaseSnapshot = false;
+  private lifecycleGeneration = 0;
 
   constructor(config: Adlar2ModbusConfig) {
     super();
@@ -352,17 +355,27 @@ export class Adlar2ModbusService extends EventEmitter {
     this.temperatureRegisterScale = config.temperatureRegisterScale ?? 'x1';
     this.tcp = new ModbusTcpService({ ...config.transport, timerProvider: config.timerProvider });
 
-    this.tcp.on('disconnected', (reason) => this.emit('disconnected', reason));
+    this.parameterBanks = new ParameterBankService((start, count) => this.tcp.readHoldingRegisterValues(start, count));
+
+    this.tcp.on('disconnected', (reason) => {
+      this.clearParameterBanks();
+      this.lifecycleGeneration++;
+      this.emit('disconnected', reason);
+    });
     this.tcp.on('reconnecting', (attempt, delayMs) => this.emit('reconnecting', attempt, delayMs));
     this.tcp.on('error', (err, ctx) => this.emit('error', err, ctx));
 
     this.tcp.on('connected', () => {
-      this.runInitValidation()
+      this.clearParameterBanks();
+      const generation = this.lifecycleGeneration;
+      this.runInitValidation(generation)
         .then(() => {
-          this.emit('connected');
+          if (this.tcp.connected && generation === this.lifecycleGeneration) this.emit('connected');
         })
         .catch((err) => {
-          this.emit('error', err as Error, 'init-validation');
+          if (this.tcp.connected && generation === this.lifecycleGeneration) {
+            this.emit('error', err as Error, 'init-validation');
+          }
         });
     });
 
@@ -444,12 +457,16 @@ export class Adlar2ModbusService extends EventEmitter {
   }
 
   async disconnect(): Promise<void> {
+    this.clearParameterBanks();
+    this.lifecycleGeneration++;
     await this.tcp.disconnect();
   }
 
   async destroy(): Promise<void> {
-    this.removeAllListeners();
+    this.clearParameterBanks();
+    this.lifecycleGeneration++;
     await this.tcp.destroy();
+    this.removeAllListeners();
   }
 
   getChangeLog(mode?: import('./modbus-tcp-service').RegisterChangeLogMode): Map<number, RegisterChangeEntry> {
@@ -480,12 +497,48 @@ export class Adlar2ModbusService extends EventEmitter {
     return this.tcp.u16(VERSION_REGISTERS.protocolVersion.address);
   }
 
+  private clearParameterBanks(): void {
+    this.parameterBanks.clear();
+    for (const bank of PARAMETER_LIMIT_BANKS) this.tcp.clearRegisterCache(bank.start, bank.count);
+  }
+
+  getParameterRanges(): ParameterBankRange[] {
+    return this.parameterBanks.getRanges();
+  }
+
+  async readParameterRanges(addresses: number[], refresh = false): Promise<ParameterBankRange[]> {
+    if (!this.tcp.connected) throw new Error('Niet verbonden');
+    return this.parameterBanks.readRanges(addresses, refresh);
+  }
+
+  async readParameterBankWords(start: number, count: number): Promise<number[]> {
+    if (!validParameterBankRead(start, count)) throw new Error('Invalid parameter bank read');
+    const generation = this.lifecycleGeneration;
+    try {
+      const words = await this.tcp.readHoldingRegisterValues(start, count);
+      if (generation !== this.lifecycleGeneration) throw new Error('Modbus session closed');
+      words.forEach((raw, index) => this.parameterBanks.observeWord(start + index, raw));
+      return words;
+    } catch (error) {
+      if (generation === this.lifecycleGeneration) this.parameterBanks.invalidateWords(start, count);
+      throw error;
+    }
+  }
+
   async readRegister(addr: number): Promise<number> {
+    if (parameterBankWord(addr)) {
+      const [word] = await this.readParameterBankWords(addr, 1);
+      return word > 0x7FFF ? word - 0x10000 : word;
+    }
+    const generation = this.lifecycleGeneration;
     await this.tcp.readHoldingRegisters(addr, 1, 'expert-read');
+    if (generation !== this.lifecycleGeneration) throw new Error('Modbus session closed');
+    this.parameterBanks.observeWord(addr, this.tcp.u16(addr));
     return this.tcp.s16(addr);
   }
 
   async writeRegister(addr: number, value: number): Promise<void> {
+    if (parameterBankWord(addr)) throw new Error('Parameter limit banks are read-only');
     await this.tcp.writeSingleRegister(addr, value);
   }
 
@@ -607,8 +660,10 @@ export class Adlar2ModbusService extends EventEmitter {
     this.externalFlowLpm = lpm;
   }
 
-  private async runInitValidation(): Promise<void> {
+  private async runInitValidation(generation: number): Promise<void> {
+    const active = () => this.tcp.connected && generation === this.lifecycleGeneration;
     for (const block of ADLAR2_POLL_ONCE.blocks) {
+      if (!active()) return;
       try {
         await this.tcp.readHoldingRegisters(block.start, block.count);
       } catch {
@@ -616,7 +671,9 @@ export class Adlar2ModbusService extends EventEmitter {
       }
     }
 
+    if (!active()) return;
     const refrigerant = await this.validateRefrigerant();
+    if (!active()) return;
     this.temperatureRegisterScale = refrigerantToTemperatureScale(refrigerant.type);
     if (!refrigerant.valid) {
       this.emit(

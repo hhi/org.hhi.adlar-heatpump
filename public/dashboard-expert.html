@@ -38,6 +38,8 @@
     <span class="roe-switch"></span>
     &#8635; Lezen bij uitklappen
   </label>
+  <button type="button" class="btn-read btn-expand" id="bank-read-btn" onclick="readParameterLimits()" disabled>Grenswaarden ophalen</button>
+  <span class="read-progress" id="bank-read-status" role="status" aria-live="polite"></span>
   <button type="button" class="btn-read btn-expand" id="report-btn" onclick="openReportDialog()" disabled title="Nog geen cache- of directwaarden beschikbaar">Markdown rapport</button>
 </div>
 
@@ -115,6 +117,135 @@ let activeReadAddr = null;
 let cacheRefreshTimer = null;
 let cacheRefreshInFlight = false;
 const CACHE_REFRESH_MS = 5000;
+const bankRanges = new Map();
+let bankTexts = null;
+let bankReadBusy = false;
+let bankFingerprint = '';
+
+function bankText(key, values = {}) {
+  const fallback = { bank: 'Warmtepomp', definition: 'Appdefinitie', appRange: 'Appgrenzen', deviceRange: 'Warmtepompgrenzen', unread: 'Niet gelezen' };
+  let text = bankTexts?.[key] || fallback[key] || '';
+  for (const [name, value] of Object.entries(values)) text = text.replaceAll('{' + name + '}', String(value));
+  return text;
+}
+
+function isBankParameter(reg) {
+  return !reg.isCoil && ((reg.address >= 0x100 && reg.address <= 0x2FF) || (reg.address >= 0x800 && reg.address <= 0x83F));
+}
+
+function effectiveRange(reg, useBank = true) {
+  const bank = useBank ? bankRanges.get(reg.address) : null;
+  return bank?.status === 'available' ? bank : reg;
+}
+
+function parameterValue(reg, rawValue, scaledValue, wireRawValue) {
+  if (!reg || bankRanges.get(reg.address)?.status !== 'available' || reg.isCoil) return { rawValue, scaledValue };
+  const word = wireRawValue & 0xFFFF;
+  const decoded = word > 0x7FFF ? word - 0x10000 : word;
+  return { rawValue: decoded, scaledValue: Math.round(decoded * scaleMultiply(reg) * 10) / 10 };
+}
+
+function recheckParameterRanges() {
+  for (const [address, entry] of readRegisters) {
+    const reg = blocks.flatMap(block => block.registers).find(reg => reg.address === address);
+    const value = parameterValue(reg, entry.rawValue, entry.scaledValue, entry.wireRawValue ?? entry.rawValue);
+    updateRangeWarning(address, value.scaledValue);
+  }
+}
+
+function acceptParameterRanges(ranges) {
+  bankFingerprint = '';
+  for (const range of ranges) {
+    bankRanges.set(range.address, range);
+    const reg = findVisibleRegister(range.address);
+    const cell = document.getElementById('range-device-' + range.address);
+    if (reg && cell) cell.innerHTML = renderParameterRange(reg);
+  }
+}
+
+async function prepareParameterLimits(registers) {
+  const addresses = [...new Set(registers.filter(isBankParameter).map(reg => reg.address))]
+    .sort((a, b) => a - b);
+  try {
+    for (let offset = 0; offset < addresses.length; offset += 32) {
+      const response = await fetch('/api/parameter-ranges', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addresses: addresses.slice(offset, offset + 32), refresh: false }),
+      });
+      if (!response.ok) throw new Error(bankText('error'));
+      const data = await response.json();
+      acceptParameterRanges(data.ranges);
+      if (!data.ranges.some(range => range.status === 'available')) break;
+      if (offset + 32 < addresses.length) await sleep(120);
+    }
+    recheckParameterRanges();
+  } catch {
+    document.getElementById('bank-read-status').textContent = bankText('error');
+  }
+}
+
+async function loadParameterLimits(render = true) {
+  const response = await fetch('/api/parameter-ranges');
+  if (!response.ok) return;
+  const data = await response.json();
+  bankTexts = data.texts;
+  const button = document.getElementById('bank-read-btn');
+  button.textContent = bankText('button');
+  button.title = bankText('help');
+  button.disabled = bankReadBusy || data.supported === false;
+  const fingerprint = JSON.stringify(data.ranges);
+  if (fingerprint === bankFingerprint) return;
+  bankFingerprint = fingerprint;
+  bankRanges.clear();
+  for (const range of data.ranges) bankRanges.set(range.address, range);
+  if (render) {
+    const openBlocks = [...document.querySelectorAll('.block.open')].map(element => element.id);
+    recheckParameterRanges();
+    renderBlocks();
+    for (const id of openBlocks) document.getElementById(id)?.classList.add('open');
+    if (!data.ranges.length && !bankReadBusy) document.getElementById('bank-read-status').textContent = '';
+    updateRangeSummary();
+  }
+}
+
+async function readParameterLimits() {
+  if (bankReadBusy || !bankTexts) return;
+  // Freeze the visible selection: range filters may change as data arrives.
+  const addresses = [...new Set(visibleBlocks.flatMap(block => block.registers).filter(isBankParameter).map(reg => reg.address))];
+  const status = document.getElementById('bank-read-status');
+  if (!addresses.length) { status.textContent = bankText('empty'); return; }
+  bankReadBusy = true;
+  document.getElementById('bank-read-btn').disabled = true;
+  status.textContent = bankText('loading');
+  let done = 0;
+  try {
+    while (done < addresses.length) {
+      const batch = addresses.slice(done, done + 32);
+      const response = await fetch('/api/parameter-ranges', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addresses: batch, refresh: true }),
+      });
+      if (!response.ok) throw new Error(bankText('error'));
+      const data = await response.json();
+      done += batch.length;
+      await loadParameterLimits();
+      status.textContent = bankText('progress', { done, total: addresses.length });
+      if (!data.ranges.some(range => range.status === 'available')) {
+        status.textContent += ' · ' + bankText('stopped');
+        return;
+      }
+      await sleep(120);
+    }
+    const available = addresses.filter(address => bankRanges.get(address)?.status === 'available').length;
+    status.textContent = bankText('complete', { available, fallback: addresses.length - available });
+  } catch {
+    status.textContent = bankText('error');
+  } finally {
+    bankReadBusy = false;
+    document.getElementById('bank-read-btn').disabled = false;
+  }
+}
+
 
 // ── Init ───────────────────────────────────────────────────────────────────────
 async function init() {
@@ -125,6 +256,7 @@ async function init() {
       throw new Error(body?.error || r.statusText);
     }
     blocks = await r.json();
+    await loadParameterLimits(false).catch(() => {});
     functionalBlocks = buildFunctionalBlocks(blocks);
     unitBlocks = buildUnitBlocks(blocks);
     visibleBlocks = blocks;
@@ -208,7 +340,7 @@ function renderBlocks() {
       <div class="block-body">
         <table>
           <thead><tr>
-            <th>Adres</th><th>ID</th><th>Naam</th><th>Poll</th><th>Wire raw</th><th>Registerwaarde</th><th>Geschaald</th><th>Eenheid</th><th>Bereik</th><th></th>
+            <th>Adres</th><th>ID</th><th>Naam</th><th>Poll</th><th>Wire raw</th><th>Registerwaarde</th><th>Geschaald</th><th>Eenheid</th><th>${esc(bankText('appRange'))}</th><th>${esc(bankText('deviceRange'))}</th><th></th>
           </tr></thead>
           <tbody id="tbody-${block.id}">
             ${block.registers.map(reg => renderRow(block, reg)).join('')}
@@ -250,7 +382,7 @@ function buildFunctionalBlocks(sourceBlocks) {
   ];
 
   const flat = [];
-  for (const block of sourceBlocks) {
+  for (const block of sourceBlocks.filter(block => !block.definitionBank)) {
     for (const reg of block.registers) {
       flat.push({ ...reg, sourceBlockId: block.id, sourceBlockLabel: block.label, readOnly: reg.readOnly || block.readOnly });
     }
@@ -293,12 +425,12 @@ function buildFunctionalBlocks(sourceBlocks) {
     });
   }
 
-  return result;
+  return result.concat(sourceBlocks.filter(block => block.definitionBank));
 }
 
 function buildUnitBlocks(sourceBlocks) {
   const flat = [];
-  for (const block of sourceBlocks) {
+  for (const block of sourceBlocks.filter(block => !block.definitionBank)) {
     for (const reg of block.registers) {
       flat.push({ ...reg, sourceBlockId: block.id, sourceBlockLabel: block.label, readOnly: reg.readOnly || block.readOnly });
     }
@@ -337,7 +469,7 @@ function buildUnitBlocks(sourceBlocks) {
     });
   }
 
-  return result;
+  return result.concat(sourceBlocks.filter(block => block.definitionBank));
 }
 
 function hasAny(reg, terms) {
@@ -351,7 +483,6 @@ function inAddress(reg, start, end) {
 
 function renderRow(block, reg) {
   const addrHex = '0x' + reg.address.toString(16).toUpperCase().padStart(4, '0');
-  const range = rangeStr(reg);
   const rangeWarningTip = rangeWarningTips.get(reg.address);
   const rangeWarningAttrs = outOfRangeRegisters.has(reg.address)
     ? ` style="display:inline-block"${rangeWarningTip ? ` data-tip="${esc(rangeWarningTip)}"` : ''}`
@@ -379,13 +510,14 @@ function renderRow(block, reg) {
       <td class="val-raw" id="raw-${reg.address}">—</td>
       <td class="val-scaled" id="scaled-${reg.address}">—</td>
       <td class="unit">${esc(reg.unit||'')}</td>
-      <td class="unit">${range}</td>
+      <td class="unit">${esc(rangeStr(reg, false))}</td>
+      <td class="unit" id="range-device-${reg.address}">${renderParameterRange(reg)}</td>
       <td class="actions-cell">
         <button class="btn-read" data-tip="${esc(readTip)}" onclick="readRow(${reg.address},${!!reg.isCoil},${reg.multiply||1})">&#8635;</button>
         ${writeBtn}
       </td>
     </tr>
-    ${hasBits ? `<tr class="bits-row" id="bits-${reg.address}"><td colspan="10">${renderBitsTable(reg)}</td></tr>` : ''}`;
+    ${hasBits ? `<tr class="bits-row" id="bits-${reg.address}"><td colspan="11">${renderBitsTable(reg)}</td></tr>` : ''}`;
 }
 
 function renderPollGroups(pollGroups) {
@@ -410,13 +542,35 @@ function renderBitsTable(reg) {
   return `<table class="bits-table">${rows}</table>`;
 }
 
-function rangeStr(reg) {
+function rangeStr(reg, useBank = true) {
+  const range = effectiveRange(reg, useBank);
   if (reg.isCoil) return 'bool';
-  if (reg.min != null && reg.max != null) {
+  if (range.min != null && range.max != null) {
     const mul = scaleMultiply(reg);
-    return `${(reg.min*mul).toFixed(mul<1?1:0)}–${(reg.max*mul).toFixed(mul<1?1:0)}`;
+    return `${(range.min*mul).toFixed(mul<1?1:0)}–${(range.max*mul).toFixed(mul<1?1:0)}`;
   }
   return '—';
+}
+
+function renderParameterRange(reg) {
+  if (!isBankParameter(reg)) return '—';
+  const bank = bankRanges.get(reg.address);
+  if (bank?.status === 'available') {
+    const time = new Date(bank.readAt).toLocaleString();
+    return `<span data-tip="${esc(bankText('readAt', { time }))}">${esc(rangeStr(reg))}</span>`;
+  }
+  if (bank?.status === 'partial') {
+    const format = value => value == null ? bankText('unread') : String(value * scaleMultiply(reg));
+    return `${esc(bankText('minimum'))}: ${esc(format(bank.min))}<br>${esc(bankText('maximum'))}: ${esc(format(bank.max))}`;
+  }
+  const reason = bank ? bankText(bank.status) : bankText('unread');
+  return `<span data-tip="${esc(bankText('unreadHelp'))}">${esc(reason)}</span>`;
+}
+
+function reportRange(reg) {
+  if (!isBankParameter(reg)) return rangeStr(reg);
+  const source = bankRanges.get(reg.address)?.status === 'available' ? 'bank' : 'definition';
+  return rangeStr(reg) + ' (' + bankText(source) + ')';
 }
 
 function scaleMultiply(reg) {
@@ -473,6 +627,7 @@ async function loadRegisterCache() {
   if (cacheRefreshInFlight) return;
   cacheRefreshInFlight = true;
   try {
+    await loadParameterLimits().catch(() => {});
     const r = await fetch('/api/register-cache');
     if (!r.ok) return;
     const entries = await r.json();
@@ -509,6 +664,8 @@ function applyRegisterCacheToVisibleRows() {
 }
 
 function applyRegisterValue(addr, rawValue, scaledValue, isCoil, source, wireRawValue = rawValue) {
+  const reg = findVisibleRegister(addr);
+  ({ rawValue, scaledValue } = parameterValue(reg, rawValue, scaledValue, wireRawValue));
   const wireEl = document.getElementById('wire-' + addr);
   const rawEl = document.getElementById('raw-' + addr);
   const scEl  = document.getElementById('scaled-' + addr);
@@ -517,13 +674,13 @@ function applyRegisterValue(addr, rawValue, scaledValue, isCoil, source, wireRaw
   const displayValue = isCoil ? (rawValue ? '1 (aan)' : '0 (uit)') : String(rawValue);
   wireEl.textContent = String(wireRawValue);
   rawEl.innerHTML = `${displayValue} <span class="value-source ${source}">${source === 'direct' ? 'direct' : 'cache'}</span>`;
-  scEl.textContent = isCoil ? '' : String(scaledValue);
+  scEl.textContent = isCoil ? '' : formatRegisterValue(reg, scaledValue, wireRawValue);
   recordRegisterRead(addr, rawValue, isCoil ? null : scaledValue, isCoil, source, wireRawValue);
   updateRangeWarning(addr, isCoil ? null : scaledValue);
   updateBits(addr, rawValue);
 }
 
-async function readRow(addr, isCoil, multiply) {
+async function readRow(addr, isCoil, multiply, includeParameterRange = true) {
   const rawEl = document.getElementById('raw-' + addr);
   const scEl  = document.getElementById('scaled-' + addr);
   directReadInFlight.add(addr);
@@ -535,19 +692,20 @@ async function readRow(addr, isCoil, multiply) {
         const r = await fetch('/api/expert/read', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address: addr, isCoil, multiply }),
+          body: JSON.stringify({ address: addr, isCoil, multiply, includeParameterRange }),
         });
         const j = await r.json();
         if (j.ok) {
+          if (j.parameterRange) acceptParameterRanges([j.parameterRange]);
           cachedRegisters.set(addr, {
             address: addr,
-            wireRawValue: j.rawValue,
+            wireRawValue: j.wireRawValue ?? j.rawValue,
             rawValue: j.rawValue,
             scaledValue: isCoil ? null : j.scaledValue,
             isCoil,
             source: 'direct',
           });
-          applyRegisterValue(addr, j.rawValue, isCoil ? null : j.scaledValue, isCoil, 'direct');
+          applyRegisterValue(addr, j.rawValue, isCoil ? null : j.scaledValue, isCoil, 'direct', j.wireRawValue ?? j.rawValue);
           flashRow(addr);
           return;
         }
@@ -606,19 +764,59 @@ function updateReportButton() {
 async function readBlock(blockId, progress = null) {
   const block = visibleBlocks.find(b => b.id === blockId);
   if (!block) return;
+  if (block.definitionBank) return readDefinitionBankBlock(block, progress);
   const ownProgress = progress === null;
   const activeProgress = progress || startReadProgress(block.registers.length, 'Blok lezen');
+  await prepareParameterLimits(block.registers);
 
   // Lees registers met korte pauze om Modbus niet te overbelasten
   for (const reg of block.registers) {
     setReadProgressCurrent(activeProgress, reg);
     setActiveReadRow(reg.address);
-    await readRow(reg.address, !!reg.isCoil, reg.multiply || 1);
+    // Limits were prefetched in batches; a failed bank read must not be retried for each row.
+    await readRow(reg.address, !!reg.isCoil, reg.multiply || 1, false);
     incrementReadProgress(activeProgress);
     await sleep(120);
   }
 
   if (ownProgress) finishReadProgress(activeProgress);
+}
+
+async function readDefinitionBankBlock(block, progress) {
+  const ownProgress = progress === null;
+  const activeProgress = progress || startReadProgress(block.registers.length, block.label);
+  const registers = [...block.registers].sort((a, b) => a.address - b.address);
+  let offset = 0;
+  try {
+    while (offset < registers.length) {
+      const batch = [registers[offset++]];
+      while (offset < registers.length && batch.length < 32 && registers[offset].address === batch[batch.length - 1].address + 1) {
+        batch.push(registers[offset++]);
+      }
+      setReadProgressCurrent(activeProgress, batch[0]);
+      const response = await fetch('/api/parameter-bank-block', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start: batch[0].address, count: batch.length }),
+      });
+      const data = await response.json();
+      if (!response.ok || !Array.isArray(data.words) || data.words.length !== batch.length) throw new Error(data.error || bankText('error'));
+      for (let index = 0; index < batch.length; index++) {
+        const reg = batch[index];
+        const wireRawValue = data.words[index];
+        const rawValue = wireRawValue > 0x7FFF ? wireRawValue - 0x10000 : wireRawValue;
+        const entry = { address: reg.address, wireRawValue, rawValue, scaledValue: rawValue, isCoil: false, source: 'direct' };
+        cachedRegisters.set(reg.address, entry);
+        applyRegisterValue(reg.address, rawValue, rawValue, false, 'direct', wireRawValue);
+        incrementReadProgress(activeProgress);
+      }
+      await sleep(120);
+    }
+  } catch (error) {
+    document.getElementById('bank-read-status').textContent = error.message;
+  } finally {
+    await loadParameterLimits().catch(() => {});
+    if (ownProgress) finishReadProgress(activeProgress);
+  }
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -668,7 +866,8 @@ function getRangeEligibleRegisterCount() {
   const source = viewMode === 'functional' ? functionalBlocks : viewMode === 'unit' ? unitBlocks : blocks;
   source.forEach(block => {
     block.registers.forEach(reg => {
-      if (!reg.isCoil && (reg.min != null || reg.max != null)) seen.add(reg.address);
+      const range = effectiveRange(reg);
+      if (!reg.isCoil && (range.min != null || range.max != null)) seen.add(reg.address);
     });
   });
   return seen.size;
@@ -687,7 +886,8 @@ function updateRangeSummary() {
   const hint = filterOutOfRange && checked === 0
     ? ' Nog geen bereikcontrole uitgevoerd. Lees eerst een blok of gebruik Alles uitklappen.'
     : '';
-  el.innerHTML = `Bereikcontrole: ${checked} van ${total} registers met gedocumenteerd bereik gecontroleerd. <strong>${out}</strong> buiten bereik.${hint}`;
+  el.innerHTML = bankRanges.size ? esc(bankText('summary', { checked, total, out })) + hint
+    : `Bereikcontrole: ${checked} van ${total} registers met gedocumenteerd bereik gecontroleerd. <strong>${out}</strong> buiten bereik.${hint}`;
 }
 
 function findVisibleRegister(addr) {
@@ -697,32 +897,29 @@ function findVisibleRegister(addr) {
 
 function updateRangeWarning(addr, scaledValue) {
   const warn = document.getElementById('range-warn-' + addr);
-  if (!warn) return;
-
-  const reg = findVisibleRegister(addr);
+  const reg = blocks.flatMap(block => block.registers).find(reg => reg.address === addr);
+  const range = reg ? effectiveRange(reg) : {};
   const value = Number(scaledValue);
-  if (!reg || reg.isCoil || !Number.isFinite(value) || (reg.min == null && reg.max == null)) {
+  if (!reg || reg.isCoil || !Number.isFinite(value) || (range.min == null && range.max == null)) {
     rangeCheckedRegisters.delete(addr);
     outOfRangeRegisters.delete(addr);
     rangeWarningTips.delete(addr);
-    warn.style.display = 'none';
-    warn.removeAttribute('data-tip');
+    if (warn) { warn.style.display = 'none'; warn.removeAttribute('data-tip'); }
     updateRangeSummary();
     return;
   }
 
   rangeCheckedRegisters.add(addr);
   const mul = scaleMultiply(reg);
-  const min = reg.min == null ? null : reg.min * mul;
-  const max = reg.max == null ? null : reg.max * mul;
+  const min = range.min == null ? null : range.min * mul;
+  const max = range.max == null ? null : range.max * mul;
   const below = min != null && value < min;
   const above = max != null && value > max;
 
   if (!below && !above) {
     outOfRangeRegisters.delete(addr);
     rangeWarningTips.delete(addr);
-    warn.style.display = 'none';
-    warn.removeAttribute('data-tip');
+    if (warn) { warn.style.display = 'none'; warn.removeAttribute('data-tip'); }
     updateRangeSummary();
     return;
   }
@@ -732,10 +929,11 @@ function updateRangeWarning(addr, scaledValue) {
     ? `${formatRangeNumber(min, mul)}–${formatRangeNumber(max, mul)}`
     : (min != null ? `minimaal ${formatRangeNumber(min, mul)}` : `maximaal ${formatRangeNumber(max, mul)}`);
   const unit = reg.unit ? ` ${reg.unit}` : '';
-  const tip = `Waarde buiten gedocumenteerd bereik: ${value}${unit}, verwacht ${expected}${unit}`;
+  const tip = bankRanges.get(addr)?.status === 'available'
+    ? bankText('warning', { source: bankText('bank'), value: `${value}${unit}`, range: `${expected}${unit}` })
+    : `Waarde buiten gedocumenteerd bereik: ${value}${unit}, verwacht ${expected}${unit}`;
   rangeWarningTips.set(addr, tip);
-  warn.style.display = 'inline-block';
-  warn.setAttribute('data-tip', tip);
+  if (warn) { warn.style.display = 'inline-block'; warn.setAttribute('data-tip', tip); }
   updateRangeSummary();
 }
 
@@ -826,7 +1024,7 @@ function buildMarkdownReport() {
     lines.push('| Register | Adres | Naam | Waarde | Bereik | Eenheid |');
     lines.push('|---|---:|---|---:|---:|---|');
     outOfRangeRows.forEach(row => {
-      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(reportValue(row))} | ${md(rangeStr(row.reg))} | ${md(row.reg.unit || '')} |`);
+      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(reportValue(row))} | ${md(reportRange(row.reg))} | ${md(row.reg.unit || '')} |`);
     });
   }
   lines.push('');
@@ -852,7 +1050,7 @@ function buildMarkdownReport() {
     lines.push('| Register | Adres | Naam | Wire raw | Raw | Geschaald | Bron | Bereik | Status | Tijd |');
     lines.push('|---|---:|---|---:|---:|---:|---|---|---|---|');
     visibleReadRows.forEach(row => {
-      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(String(row.read.wireRawValue ?? row.read.rawValue))} | ${md(String(row.read.rawValue))} | ${md(reportValue(row))} | ${md(row.read.source === 'direct' ? 'direct' : 'cache')} | ${md(rangeStr(row.reg))} | ${md(reportStatus(row.reg))} | ${formatDateTime(row.read.readAt)} |`);
+      lines.push(`| ${md(row.reg.registerId || row.reg.key)} | ${formatAddress(row.reg.address)} | ${md(row.reg.name || row.reg.key)} | ${md(String(row.read.wireRawValue ?? row.read.rawValue))} | ${md(String(row.read.rawValue))} | ${md(reportValue(row))} | ${md(row.read.source === 'direct' ? 'direct' : 'cache')} | ${md(reportRange(row.reg))} | ${md(reportStatus(row.reg))} | ${formatDateTime(row.read.readAt)} |`);
     });
   }
 
@@ -900,7 +1098,19 @@ function activeFilterDescription() {
 
 function reportValue(row) {
   if (row.read.isCoil) return row.read.rawValue ? 'aan' : 'uit';
-  return String(row.read.scaledValue);
+  return formatRegisterValue(row.reg, row.read.scaledValue, row.read.wireRawValue ?? row.read.rawValue);
+}
+
+function formatRegisterValue(reg, scaledValue, wireRawValue) {
+  if (reg?.valueFormat === 'hourMinute' && Number.isInteger(wireRawValue) && wireRawValue >= 0 && wireRawValue <= 0xFFFF) {
+    const hour = wireRawValue >> 8;
+    const minute = wireRawValue & 0xFF;
+    if (hour < 24 && minute < 60) {
+      const hex = wireRawValue.toString(16).toUpperCase().padStart(4, '0');
+      return `0x${hex} = ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    }
+  }
+  return String(scaledValue);
 }
 
 function reportStatus(reg) {
@@ -1016,7 +1226,7 @@ function openWriteDialog(addr) {
     inputEl.step = mul < 1 ? String(mul) : '1';
     if (reg.min != null) inputEl.min = String(reg.min * mul);
     if (reg.max != null) inputEl.max = String(reg.max * mul);
-    document.getElementById('dlg-range').textContent = rangeStr(reg) + (reg.unit ? ' ' + reg.unit : '');
+    document.getElementById('dlg-range').textContent = (bankRanges.has(reg.address) ? bankText('inputRange') + ': ' : '') + rangeStr(reg, false) + (reg.unit ? ' ' + reg.unit : '');
     inputEl.oninput = () => updateRawPreview(reg);
     updateRawPreview(reg);
   }

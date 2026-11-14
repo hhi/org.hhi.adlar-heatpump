@@ -148,6 +148,8 @@ export interface PollGroup {
 const BACKOFF_BASE = 2_000;
 const BACKOFF_MAX = 60_000;
 
+type BatchDelayResolver = () => void;
+
 // ============================================================================
 // MODBUS TCP SERVICE
 // ============================================================================
@@ -198,6 +200,11 @@ export class ModbusTcpService extends EventEmitter {
 
   private _connected = false;
   private _destroyed = false;
+  private _stopped = false;
+  private _sessionGeneration = 0;
+  private _connecting?: Promise<void>;
+  private _closing?: Promise<void>;
+  private readonly _batchTimers = new Map<ReturnType<typeof setTimeout>, BatchDelayResolver>();
   private _reconnectN = 0;
   private _reconnectTm?: ReturnType<typeof setTimeout>;
   private _pollTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -236,7 +243,10 @@ export class ModbusTcpService extends EventEmitter {
   // ── Socket event wiring ────────────────────────────────────────────────────
 
   private _wireSocketEvents(): void {
-    this.socket.on('connect', () => {
+    const { socket } = this;
+    const current = () => socket === this.socket && !this._stopped && !this._destroyed;
+    socket.on('connect', () => {
+      if (!current() || socket.destroyed) return;
       this._connected = true;
       this._reconnectN = 0;
       this.stats.lastPollMs = Date.now();
@@ -244,49 +254,73 @@ export class ModbusTcpService extends EventEmitter {
       this.emit('connected');
     });
 
-    this.socket.on('close', (hadError: boolean) => {
-      if (!this._connected) return;
+    socket.on('close', (hadError: boolean) => {
+      if (!current() || !this._connected) return;
       this._connected = false;
+      this._sessionGeneration++;
+      this._stopPolling();
+      this._cancelBatchDelays();
       this._log(`Disconnected (hadError=${hadError})`);
       this.emit('disconnected', hadError ? 'socket error' : 'remote closed');
       if (!this._destroyed) this._scheduleReconnect();
     });
 
-    this.socket.on('error', (err: Error) => {
+    socket.on('error', (err: Error) => {
+      // Keep a socket error listener through close, including after service cleanup.
+      if (!current()) return;
       this._log(`Socket error: ${err.message}`);
       this.emit('error', err, 'socket');
     });
 
-    this.socket.on('timeout', () => {
+    socket.on('timeout', () => {
+      if (!current()) return;
       this._log('Socket timeout');
       this.emit('error', new Error('Socket timeout'), 'socket:timeout');
       // destroy(err) zorgt dat 'error' event geëmit wordt → connect() promise rejectt
-      this.socket.destroy(new Error('Connection timeout'));
+      socket.destroy(new Error('Connection timeout'));
     });
   }
 
   // ── Verbindingsbeheer ──────────────────────────────────────────────────────
 
-  connect(): Promise<void> {
-    if (this._connected) return Promise.resolve();
-    if (this._destroyed) return Promise.reject(new Error('Service destroyed'));
+  async connect(): Promise<void> {
+    if (this._destroyed) throw new Error('Service destroyed');
+    if (this._closing) await this._closing;
+    if (this._destroyed) throw new Error('Service destroyed');
+    if (this._connecting) {
+      await this._connecting;
+      return;
+    }
+    this._stopped = false;
+    if (this._connected) return;
+    this._clearBackoff();
+    if (this.socket.destroyed) {
+      this.socket = new net.Socket();
+      this.client = new Modbus.client.TCP(this.socket, this.cfg.unitId, this.cfg.timeoutMs);
+      this._wireSocketEvents();
+    }
+    const { socket } = this;
 
     this._log(`Connecting to ${this.cfg.host}:${this.cfg.port}...`);
 
-    return new Promise((resolve, reject) => {
+    const connecting = new Promise<void>((resolve, reject) => {
       let onConnect: () => void;
       let onError: (err: Error) => void;
       let onClose: () => void;
 
       const cleanup = () => {
-        this.socket.removeListener('connect', onConnect);
-        this.socket.removeListener('error', onError);
-        this.socket.removeListener('close', onClose);
+        socket.removeListener('connect', onConnect);
+        socket.removeListener('error', onError);
+        socket.removeListener('close', onClose);
       };
 
       onConnect = () => {
         cleanup();
-        this.socket.setTimeout(0); // Clear idle timeout so we don't drop TCP when WP is quiet
+        if (!this._isActive(socket)) {
+          reject(new Error('Modbus session closed'));
+          return;
+        }
+        socket.setTimeout(0); // Clear idle timeout so we don't drop TCP when WP is quiet
         resolve();
       };
 
@@ -300,55 +334,75 @@ export class ModbusTcpService extends EventEmitter {
         reject(new Error('Socket closed during connect'));
       };
 
-      this.socket.once('connect', onConnect);
-      this.socket.once('error', onError);
-      this.socket.once('close', onClose);
+      socket.once('connect', onConnect);
+      socket.once('error', onError);
+      socket.once('close', onClose);
 
       // Enable TCP Keep-Alive so we detect silent WiFi drops of the Elfin
-      this.socket.setKeepAlive(true, 10000);
-      this.socket.connect({ host: this.cfg.host, port: this.cfg.port });
-      this.socket.setTimeout(this.cfg.timeoutMs);
+      socket.setKeepAlive(true, 10000);
+      socket.setTimeout(this.cfg.timeoutMs);
+      socket.connect({ host: this.cfg.host, port: this.cfg.port });
     });
+    this._connecting = connecting;
+    try {
+      await connecting;
+    } finally {
+      if (this._connecting === connecting) this._connecting = undefined;
+    }
   }
 
   async disconnect(): Promise<void> {
+    const wasConnected = this._connected;
+    this._stopped = true;
+    this._sessionGeneration++;
+    this._connected = false;
     this._stopPolling();
     this._clearBackoff();
-    this._destroyed = false;
-    if (this._connected) {
-      this._connected = false;
-      this._gracefulClose();
-      this.emit('disconnected', 'manual');
-    }
+    this._cancelBatchDelays();
+    const closing = this._closeSocket();
+    if (wasConnected && !this._destroyed) this.emit('disconnected', 'manual');
+    await closing;
   }
 
   async destroy(): Promise<void> {
     this._destroyed = true;
-    this._stopPolling();
-    this._clearBackoff();
-    if (this._connected) {
-      this._connected = false;
-      this._gracefulClose();
-    } else {
-      this.socket.destroy();
-    }
+    await this.disconnect();
     this.removeAllListeners();
   }
 
-  private _gracefulClose(): void {
-    // socket.end() stuurt FIN zodat Modbus bridges de sessie netjes kunnen opruimen.
-    // Na 1s alsnog destroy() als de remote niet antwoordt.
+  private async _closeSocket(): Promise<void> {
+    if (this._closing) {
+      await this._closing;
+      return;
+    }
+    const { socket } = this;
+    if (socket.closed) return;
+    // Never end() with jsmodbus requests pending: its timeout can flush the queue
+    // into an ended stream. destroy() closes both sides; jsmodbus handles close
+    // first, rejects its pending requests and clears the active request timeout.
+    const closing = new Promise<void>((resolve) => {
+      socket.once('close', resolve);
+      socket.destroy();
+    });
+    this._closing = closing;
     try {
-      const { socket } = this;
-      socket.end();
-      this._timers.setTimeout(() => socket.destroy(), 1_000);
-    } catch {
-      this.socket.destroy();
+      await closing;
+    } finally {
+      if (this._closing === closing) this._closing = undefined;
     }
   }
 
+  private _isActive(socket: net.Socket): boolean {
+    return socket === this.socket && this._connected && !this._stopped
+      && !this._destroyed && !socket.destroyed && !socket.writableEnded;
+  }
+
+  private _assertActive(socket: net.Socket): void {
+    if (!this._isActive(socket)) throw new Error('Modbus session closed');
+  }
+
   private _scheduleReconnect(): void {
-    if (this._destroyed) return;
+    if (this._destroyed || this._stopped || this._reconnectTm) return;
     this._reconnectN++;
     this.stats.reconnects++;
 
@@ -362,9 +416,18 @@ export class ModbusTcpService extends EventEmitter {
     this._log(`Reconnect #${this._reconnectN} in ${ms}ms`);
     this.emit('reconnecting', this._reconnectN, ms);
 
-    this._reconnectTm = this._timers.setTimeout(() => {
+    if (this._destroyed || this._stopped) return;
+
+    const generation = this._sessionGeneration;
+    const { socket } = this;
+    const timer = this._timers.setTimeout(() => {
+      if (this._reconnectTm !== timer) return;
+      this._reconnectTm = undefined;
+      if (generation !== this._sessionGeneration || socket !== this.socket
+        || this._destroyed || this._stopped || this._connected) return;
       this._attemptReconnect().catch(() => {});
     }, ms);
+    this._reconnectTm = timer;
   }
 
   private _clearBackoff(): void {
@@ -375,13 +438,10 @@ export class ModbusTcpService extends EventEmitter {
   }
 
   private async _attemptReconnect(): Promise<void> {
-    this.socket = new net.Socket();
-    this.client = new Modbus.client.TCP(this.socket, this.cfg.unitId, this.cfg.timeoutMs);
-    this._wireSocketEvents();
-
+    if (this._destroyed || this._stopped || this._connected) return;
     try {
       await this.connect();
-      if (this._pollGroups.length > 0) {
+      if (this._isActive(this.socket) && this._pollGroups.length > 0) {
         this.startPolling(this._pollGroups);
       }
     } catch {
@@ -395,13 +455,12 @@ export class ModbusTcpService extends EventEmitter {
    * direct een herverbindingspoging gedaan — zonder backoff-vertraging.
    */
   private async _ensureConnected(): Promise<void> {
-    if (this._connected) return;
     if (this._destroyed) throw new Error('Service destroyed');
+    if (this._stopped) throw new Error('Modbus session closed');
+    if (this._isActive(this.socket)) return;
     this._clearBackoff();
-    this.socket = new net.Socket();
-    this.client = new Modbus.client.TCP(this.socket, this.cfg.unitId, this.cfg.timeoutMs);
-    this._wireSocketEvents();
     await this.connect();
+    this._assertActive(this.socket);
     if (this._pollGroups.length > 0) {
       this.startPolling(this._pollGroups);
     }
@@ -417,13 +476,15 @@ export class ModbusTcpService extends EventEmitter {
    * afhankelijk van de jsmodbus versie.
    */
   async readHoldingRegisters(startAddr: number, count: number, source?: RegisterChangeSource): Promise<void> {
-    if (!this._connected) throw new Error('Niet verbonden');
+    const { socket } = this;
+    this._assertActive(socket);
 
     const addrHex = `0x${startAddr.toString(16).padStart(4, '0')}`;
     this._log(`FC03 READ  ${addrHex} count=${count}`);
 
     try {
       const resp = await this.client.readHoldingRegisters(startAddr, count);
+      this._assertActive(socket);
       const { values } = resp.response.body;
 
       for (let i = 0; i < count; i++) {
@@ -458,8 +519,21 @@ export class ModbusTcpService extends EventEmitter {
     }
   }
 
+  /** Read a diagnostic block over the existing session, respecting bridge delay. */
+  async readHoldingRegisterValues(start: number, count: number): Promise<number[]> {
+    const { socket } = this;
+    await this.readHoldingRegisters(start, count);
+    this._assertActive(socket);
+    const values = Array.from({ length: count }, (_, index) => this.u16(start + index));
+    await this._batchDelay();
+    this._assertActive(socket);
+    return values;
+  }
+
   private async _readHoldingRegistersAndDetectChange(startAddr: number, count: number): Promise<boolean> {
+    const { socket } = this;
     await this.readHoldingRegisters(startAddr, count, 'poll');
+    this._assertActive(socket);
 
     const now = Date.now();
     let anyChanged = false;
@@ -499,6 +573,11 @@ export class ModbusTcpService extends EventEmitter {
     return mode === 'cache' ? this.cacheChangeLog : this.changeLog;
   }
 
+  /** Invalidate cached diagnostics without discarding operational register values. */
+  clearRegisterCache(start: number, count: number): void {
+    for (let address = start; address < start + count; address++) this.cache.delete(address);
+  }
+
   getRegisterCache(): Map<number, number> {
     return new Map(this.cache);
   }
@@ -508,13 +587,18 @@ export class ModbusTcpService extends EventEmitter {
    * Cache wordt synchroon bijgewerkt na succesvolle write.
    */
   async writeSingleRegister(addr: number, value: number): Promise<void> {
+    const session = this._sessionGeneration;
     await this._ensureConnected();
+    const { socket } = this;
+    this._assertActive(socket);
+    if (session !== this._sessionGeneration) throw new Error('Modbus session closed');
     const raw = value & 0xFFFF;
     const addrHex = `0x${addr.toString(16).padStart(4, '0')}`;
     this._log(`FC06 WRITE ${addrHex} = ${raw}`);
 
     try {
       await this.client.writeSingleRegister(addr, raw);
+      this._assertActive(socket);
       const previous = this.cache.get(addr);
       this.cache.set(addr, raw);
       this._recordCacheObservation(addr, previous, raw, 'expert-write');
@@ -524,7 +608,7 @@ export class ModbusTcpService extends EventEmitter {
     } catch (err) {
       this.stats.errors++;
       this._log(`  ✗ FC06 ${addrHex}: ${(err as Error).message}`);
-      this.emit('error', err as Error, `fc06:${addrHex}`);
+      if (this._isActive(socket)) this.emit('error', err as Error, `fc06:${addrHex}`);
       throw err;
     }
   }
@@ -534,12 +618,14 @@ export class ModbusTcpService extends EventEmitter {
    * Retourneert 1 als de coil actief is, 0 anders.
    */
   async readSingleCoil(coilAddr: number, source?: RegisterChangeSource): Promise<number> {
-    if (!this._connected) throw new Error('Niet verbonden');
+    const { socket } = this;
+    this._assertActive(socket);
     const addrHex = `0x${coilAddr.toString(16).padStart(4, '0')}`;
     this._log(`FC01 COIL  ${addrHex} lezen`);
 
     try {
       const resp = await this.client.readCoils(coilAddr, 1);
+      this._assertActive(socket);
       const { values } = resp.response.body;
       let result: number;
       if (Array.isArray(values)) {
@@ -566,12 +652,17 @@ export class ModbusTcpService extends EventEmitter {
    * FC05 — Write Single Coil.
    */
   async writeSingleCoil(coilAddr: number, state: boolean): Promise<void> {
+    const session = this._sessionGeneration;
     await this._ensureConnected();
+    const { socket } = this;
+    this._assertActive(socket);
+    if (session !== this._sessionGeneration) throw new Error('Modbus session closed');
     const addrHex = `0x${coilAddr.toString(16).padStart(4, '0')}`;
     this._log(`FC05 COIL  ${addrHex} = ${state ? 'ON' : 'OFF'}`);
 
     try {
       await this.client.writeSingleCoil(coilAddr, state);
+      this._assertActive(socket);
       const raw = state ? 1 : 0;
       const previous = this.cacheChangeLog.get(coilAddr)?.lastValue;
       this._recordCacheObservation(coilAddr, previous, raw, 'expert-write');
@@ -581,7 +672,7 @@ export class ModbusTcpService extends EventEmitter {
     } catch (err) {
       this.stats.errors++;
       this._log(`  ✗ FC05 ${addrHex}: ${(err as Error).message}`);
-      this.emit('error', err as Error, `fc05:${addrHex}`);
+      if (this._isActive(socket)) this.emit('error', err as Error, `fc05:${addrHex}`);
       throw err;
     }
   }
@@ -651,7 +742,21 @@ export class ModbusTcpService extends EventEmitter {
   }
 
   private _batchDelay(): Promise<void> {
-    return new Promise((r) => this._timers.setTimeout(r, this.cfg.batchDelayMs));
+    return new Promise((resolve) => {
+      const timer = this._timers.setTimeout(() => {
+        this._batchTimers.delete(timer);
+        resolve();
+      }, this.cfg.batchDelayMs);
+      this._batchTimers.set(timer, resolve);
+    });
+  }
+
+  private _cancelBatchDelays(): void {
+    for (const [timer, resolve] of this._batchTimers) {
+      this._timers.clearTimeout(timer);
+      resolve();
+    }
+    this._batchTimers.clear();
   }
 
   // ── Cache helpers ──────────────────────────────────────────────────────────
@@ -690,13 +795,14 @@ export class ModbusTcpService extends EventEmitter {
   startPolling(groups: PollGroup[], staggerMs = 0): void {
     this._stopPolling();
     this._pollGroups = groups;
+    if (!this._isActive(this.socket)) return;
     const pollGeneration = this._pollGeneration;
 
     let staggerIndex = 0;
     for (const group of groups) {
       if (group.intervalMs <= 0) {
         // Eenmalig uitvoeren (bijv. versie-info)
-        this._runPollGroup(group).catch(() => {});
+        this._runPollGroup(group, pollGeneration).catch(() => {});
         continue;
       }
 
@@ -722,7 +828,7 @@ export class ModbusTcpService extends EventEmitter {
       }
 
       this._pollTimers.delete(group.name);
-      this._runPollGroup(group)
+      this._runPollGroup(group, pollGeneration)
         .then((changed) => {
           if (
             this._destroyed
@@ -752,17 +858,22 @@ export class ModbusTcpService extends EventEmitter {
     this._pollTimers.set(group.name, timer);
   }
 
-  private async _runPollGroup(group: PollGroup): Promise<boolean> {
-    if (!this._connected) return false;
+  private async _runPollGroup(group: PollGroup, pollGeneration = this._pollGeneration): Promise<boolean> {
+    const { socket } = this;
+    const active = () => this._isActive(socket) && pollGeneration === this._pollGeneration;
+    if (!active()) return false;
     let requiredFailed = false;
     let optionalFailed = false;
     let changed = false;
 
     for (const blk of group.blocks) {
+      if (!active()) return changed;
       try {
         changed = (await this._readHoldingRegistersAndDetectChange(blk.start, blk.count)) || changed;
+        if (!active()) return changed;
         await this._batchDelay();
       } catch (e) {
+        if (!active()) return changed;
         const blockError = new ModbusBlockError(
           (e as Error).message,
           classifyError(e as Error),
@@ -780,6 +891,7 @@ export class ModbusTcpService extends EventEmitter {
       }
     }
 
+    if (!active()) return changed;
     if (requiredFailed) return changed; // Geen poll-complete — ModbusBlockError is al geëmit
 
     this.stats.polls++;
