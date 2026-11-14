@@ -91,7 +91,7 @@ function createService(device, adjustments = []) {
   });
   service.__testLogs = logs;
   service.isEnabled = true;
-  service.externalTemperature = { getIndoorTemperature: () => 20 };
+  service.externalTemperature = { getIndoorTemperature: () => 20, getIndoorStaleness: () => 'fresh' };
   service.weatherForecast = {
     getTempAt: () => null,
     isLocationUserSet: () => false, // v3.7.1 (R21)
@@ -271,7 +271,7 @@ function createPositionalService(device, indoor) {
   device.settings.adaptive_control_mode ??= 'positional_manual';
   const service = createService(device, [0]);
   service.decisionMaker = passThroughDecisionMaker();
-  service.externalTemperature = { getIndoorTemperature: () => indoor };
+  service.externalTemperature = { getIndoorTemperature: () => indoor, getIndoorStaleness: () => 'fresh' };
   return service;
 }
 

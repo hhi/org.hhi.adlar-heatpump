@@ -29,6 +29,8 @@ Die Adlar-Wärmepumpe kann externe Messdaten von anderen Homey-Geräten über Fl
 
 **Außentemperatur: mindestens jede Stunde.** Kommt 1 Stunde lang keine neue Außentemperatur an, verwendet die App wieder den eigenen Außensensor der Wärmepumpe, der weniger genau ist. Das gilt für den COP, das Gebäudemodell, die Erkenntnisse und die Vorheizdauer; die adaptive Regelung verwendet zuerst die Open-Meteo-Wettervorhersage, wenn Sie für die Wettervorhersage einen eigenen Standort eingetragen haben. Nach einem Neustart der App wird der letzte Wert nur wiederhergestellt, wenn er jünger als 4 Stunden ist. Bei stabilem Wetter kann die Temperatur länger als eine Stunde gleich bleiben; ein Auslöser „Temperatur geändert" sendet dann nichts. Senden Sie die Außentemperatur deshalb (auch) mit einem Zeitauslöser, zum Beispiel alle 15 Minuten. Die Diagnosezeile „Letzte Außentemperatur (Flow-Karte)" zeigt, wann der letzte Wert ankam.
 
+**Innentemperatur: ein Wert, der sich nicht ändert.** Die App vertraut dem Wert, den Ihr Flow sendet. Bleibt er 12 Stunden exakt gleich, erhalten Sie eine Benachrichtigung in der Zeitleiste. Nach 24 Stunden ohne Änderung korrigiert die adaptive Regelung nicht mehr darauf: Positionell folgt dann nur der Heizkurve, Klassisch lässt den Sollwert stehen, und das Gebäudemodell lernt nicht mehr. Das erholt sich von selbst mit dem ersten abweichenden Wert. Ein Flow, der den letzten Wert zeitgesteuert wiederholt, ändert daran nichts; prüfen Sie nach einer Benachrichtigung den Sensor (Batterie) und den Flow.
+
 ## Basis-Einrichtung (Direkter Datenaustausch)
 
 ### Schritt 1: Externen Daten-Flow erstellen

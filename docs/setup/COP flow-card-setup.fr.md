@@ -29,6 +29,8 @@ La pompe à chaleur Adlar peut recevoir des données de mesure externes d'autres
 
 **Température extérieure : au moins toutes les heures.** Si aucune nouvelle température extérieure n'arrive pendant 1 heure, l'app utilise à nouveau le capteur extérieur de la pompe à chaleur, moins précis. Cela vaut pour le COP, le modèle du bâtiment, les aperçus et la durée de préchauffage ; la régulation adaptative utilise d'abord la prévision météo Open-Meteo, si vous avez saisi votre propre localisation pour la prévision météo. Après un redémarrage de l'app, la dernière valeur n'est restaurée que si elle a moins de 4 heures. Par temps stable, la température peut rester identique plus d'une heure ; un déclencheur « température modifiée » n'envoie alors rien. Envoyez donc (aussi) la température extérieure avec un déclencheur horaire, par exemple toutes les 15 minutes. La ligne de diagnostic « Dernière Température Extérieure (Carte Flux) » indique quand la dernière valeur est arrivée.
 
+**Température intérieure : une valeur qui ne change pas.** L'app fait confiance à la valeur envoyée par votre flow. Si elle reste exactement identique pendant 12 heures, vous recevez une notification dans la chronologie. Après 24 heures sans changement, la régulation adaptative ne corrige plus sur cette valeur : Positionnel suit alors uniquement la courbe de chauffe, Classique laisse la consigne telle quelle, et le modèle du bâtiment n'apprend plus. Cela se rétablit de lui-même à la première valeur différente. Un flow qui répète la dernière valeur à intervalles réguliers n'y change rien ; après une notification, vérifiez le capteur (pile) et le flow.
+
 ## Configuration de Base (Partage de Données Direct)
 
 ### Étape 1 : Créer un Flux de Données Externes

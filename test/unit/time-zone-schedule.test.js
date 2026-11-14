@@ -241,7 +241,7 @@ async function getPreHeatListener(FlowCardManagerService, cardId, conditions = u
           getLearner: () => ({ getModel: () => ({ C: 15, UA: 1, confidence: 80 }) }),
           ...(conditions !== undefined ? { getPreHeatConditions: () => conditions } : {}),
         }),
-        getExternalTemperatureService: () => ({ getIndoorTemperature: () => 19 }),
+        getExternalTemperatureService: () => ({ getIndoorTemperature: () => 19, getIndoorStaleness: () => 'fresh' }),
       }),
     },
   };
