@@ -248,7 +248,7 @@ function expertContext() {
     document: { getElementById: element }, Date, setTimeout, clearTimeout, setInterval, clearInterval,
   });
   const html = fs.readFileSync(path.join(__dirname, '../../public/dashboard-expert.html'), 'utf8');
-  const script = html.match(/<script>([\s\S]*?)<\/script>/)[1].replace(/\ninit\(\);\s*$/, '\n');
+  const script = html.match(/<script>([\s\S]*?)<\/script>/i)[1].replace(/\ninit\(\);\s*$/, '\n');
   vm.runInContext(script, context);
   context.texts = require('../../locales/nl.json').modbusParameterBanks;
   vm.runInContext('bankTexts = texts;', context);
