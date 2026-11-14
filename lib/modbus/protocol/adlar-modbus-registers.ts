@@ -740,8 +740,10 @@ export const P_PARAMETERS = {
     name: 'Linkage switch (host)',
     desc: '0=enable, 1=disable, 2=thermostatic, 3=heating thermostat',
   }, // v2.2: max 23
+  // Display metadata observed on Aurora II R32, program 433 / protocol 143.
+  // Bank ranges do not establish safe write limits on other firmware or models.
   P06_fanType: {
-    address: 0x0106, min: 0, max: 2, default: 1, name: 'Fan type', desc: '0=AC, 1=DC, 2=EC',
+    address: 0x0106, min: 0, max: 3, default: 1, name: 'Fan type', desc: '0=AC, 1=DC, 2=EC, 3=unknown (observed on program 433)',
   },
   P07_highVoltageLock: {
     address: 0x0107, min: 0, max: 1, default: 0, name: 'High voltage lock', desc: '0=3 locks, 1=no lock',
@@ -1207,7 +1209,7 @@ export const P_PARAMETERS = {
     address: 0x0167, min: 0, max: 10, unit: 'min', name: 'Mode switch min run time', desc: '0=unlimited',
   },
   P49_hotWaterFreqPercentage: {
-    address: 0x0131, min: 30, max: 100, default: 30, unit: '%', name: 'Hot water freq running percentage',
+    address: 0x0131, min: 0, max: 100, default: 30, unit: '%', name: 'Hot water freq running percentage',
   }, // v2.2
   P151_returnDiffHwSource: {
     address: 0x0197, min: 0, max: 40, default: 0, unit: '°C', name: 'Return diff - hot water heat source',
@@ -1317,7 +1319,7 @@ export const P_PARAMETERS = {
     address: 0x0152, min: 100, max: 500, unit: 'P', name: 'EEV aux valve max opening',
   },
   P83_auxValveMinOpening: {
-    address: 0x0153, min: 50, max: 300, unit: 'P', name: 'EEV aux valve min opening',
+    address: 0x0153, min: 0, max: 480, unit: 'P', name: 'EEV aux valve min opening',
   },
   P84_mainValveRegulationPeriod: {
     address: 0x0154, min: 10, max: 120, unit: 's', name: 'EEV main valve regulation period',
@@ -1794,7 +1796,7 @@ export const P_PARAMETERS_EXTRA = {
     address: 0x0190, min: -20, max: 30, unit: '°C', name: 'Ambient temp to enter defrost',
   },
   P145_outletAntifreezeProtection: {
-    address: 0x0191, min: -20, max: 10, unit: '°C', name: 'Outlet water antifreeze protection',
+    address: 0x0191, min: -30, max: 10, unit: '°C', name: 'Outlet water antifreeze protection',
   },
   P175_constTempOperationCycle: {
     address: 0x01AF, min: 0, max: 360, unit: 'min', name: 'Constant temp operation cycle',
@@ -1909,9 +1911,12 @@ export const L_PARAMETERS = {
   }, // v2.2: default
   L14_sterilizationStartTime: {
     address: 0x0803,
-    default: 2300,
+    min: 0,
+    max: 23,
+    default: 23,
+    unit: 'h',
     name: 'Sterilization start time',
-    desc: 'Format: HHMM (bijv. 2300 = 23:00). Default: 23:00',
+    desc: 'Hour 0..23 (23 = 23:00), observed on program 433 / protocol 143; older specification used HHMM 2300',
   }, // v2.2: default
   L15_sterilizationRunTime: {
     address: 0x0804, min: 0, max: 50, default: 10, unit: 'min', name: 'Sterilization run time',

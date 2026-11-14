@@ -90,11 +90,20 @@ The clamp sensor is non-linear (up to ~38 % low below ~5 A). Interpolate the raw
 
 ---
 
-## 4. Register 0x0309 — undocumented day/minute counter
+## 4. Register 0x0309 — heat pump clock (observed)
 
-`0x0309` is **not in the register model** and was not polled, but field observation suggests a
-**minutes-of-day counter** (wraps at midnight). Probe `0x0308–0x030B` (the gap between `runningMode`
-0x0307 and the legacy curve pair 0x030C/0x030D) and validate empirically before relying on it.
+The expert dashboard labels `0x0309` as **Heat pump clock**. Observed encoding:
+`value = hour * 256 + minute`, with the hour in the high byte and minute in the low byte.
+For example, decimal `5411` = `0x1523` = **21:35**; `5412` = `0x1524` = **21:36**.
+A read on 14 November 2026 at 21:38:36 local time returned `5414` = `0x1526` = **21:38**.
+
+This replaces the earlier minutes-of-day hypothesis. The OEM table still calls the
+address reserved; the clock interpretation is based on observed behaviour, not a
+confirmed OEM definition. Hour and midnight rollover have not yet been measured.
+At an hour rollover the expected numeric increment is 197 (e.g. 21:59 to 22:00),
+not 1. The dashboard keeps the numeric raw value and shows the valid decoded value
+as `0x1523 = 21:35`, including in its Markdown report. Invalid hour/minute bytes
+remain numeric. The register is exposed read-only; the polling schedule is unchanged.
 
 ---
 

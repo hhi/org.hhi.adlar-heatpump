@@ -10,6 +10,11 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import parameterDescription, { parameterName, suspectedLParameter, unknownControlRegister } from '../protocol/parameter-descriptions';
+import {
+  ParameterBankRange, parameterBankAddresses, parameterBankWord, validParameterBankRead, PARAMETER_LIMIT_BANKS,
+} from '../protocol/parameter-bank-service';
+import parameterBankTexts from '../protocol/parameter-bank-texts';
 import { DASHBOARD_PAGE_STYLES } from '../../shared/dashboard-styles';
 import { DataSnapshot } from '../protocol/adlar2-modbus-service';
 import { RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
@@ -102,11 +107,18 @@ interface RegisterMeta {
   isCoil?: boolean;
   serviceOnly?: boolean;
   readOnly?: boolean;
+  meaningUnknown?: boolean;
+  signed?: boolean;
+  valueFormat?: 'hourMinute';
+  parameterAddress?: number;
+  unconfirmedParameter?: boolean;
+  bankRole?: 'min' | 'max';
   bits?: Record<string, number>;
   pollGroups?: string[];
 }
 
 interface RegisterBlock {
+  definitionBank?: (typeof PARAMETER_LIMIT_BANKS)[number];
   id: string;
   label: string;
   readOnly: boolean;
@@ -165,6 +177,9 @@ export class DashboardService {
   private getChangeLog: ((mode?: RegisterChangeLogMode) => Map<number, RegisterChangeEntry>) | null = null;
   private getSnapshot: (() => DataSnapshot | null) | null = null;
   private getRegisterCache: (() => Map<number, number>) | null = null;
+  private readParameterRanges: ((addresses: number[], refresh: boolean) => Promise<ParameterBankRange[]>) | null = null;
+  private getParameterRanges: (() => ParameterBankRange[]) | null = null;
+  private readParameterBankWords: ((start: number, count: number) => Promise<number[]>) | null = null;
 
   private readonly appDir: string;
   private capabilityMeta: Map<string, { title: string; unit: string; icon: string; type: string }> | null = null;
@@ -213,6 +228,16 @@ export class DashboardService {
 
   setGetRegisterCacheCallback(fn: () => Map<number, number>): void {
     this.getRegisterCache = fn;
+  }
+
+  setParameterBankCallbacks(
+    read: (addresses: number[], refresh: boolean) => Promise<ParameterBankRange[]>,
+    cached: () => ParameterBankRange[],
+    words?: (start: number, count: number) => Promise<number[]>,
+  ): void {
+    this.readParameterRanges = read;
+    this.getParameterRanges = cached;
+    this.readParameterBankWords = words ?? null;
   }
 
   setGetCapabilityValuesCallback(fn: () => Record<string, unknown>): void {
@@ -304,6 +329,25 @@ export class DashboardService {
       return;
     }
 
+    // Cached GET never contacts the heat pump; POST is an explicit diagnostic read.
+    if (url === '/api/parameter-ranges' && method === 'GET') {
+      this._jsonOk(res, {
+        ranges: this.getParameterRanges?.() ?? [],
+        supported: this.readParameterRanges !== null,
+        texts: parameterBankTexts(req.headers?.['accept-language']),
+      });
+      return;
+    }
+    if (url === '/api/parameter-ranges' && method === 'POST') {
+      await this._handleParameterRanges(req, res);
+      return;
+    }
+
+    if (url === '/api/parameter-bank-block' && method === 'POST') {
+      await this._handleParameterBankBlock(req, res);
+      return;
+    }
+
     // ADR-046: expert dashboard
     if (method === 'GET' && (url === '/expert' || url === '/expert.html')) {
       await this._serveFile(res, 'dashboard-expert.html');
@@ -312,7 +356,31 @@ export class DashboardService {
     if (method === 'GET' && url === '/api/registers') {
       const tempScale = this._getTemperatureScale();
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(buildRegisterBlocks(tempScale)));
+      const blocks = buildRegisterBlocks(tempScale);
+      const texts = parameterBankTexts(req.headers?.['accept-language']);
+      for (const block of blocks) {
+        if (block.definitionBank) {
+          block.label = texts[block.definitionBank.id];
+          for (const register of block.registers) {
+            register.name = `${register.registerId} — ${texts[register.bankRole === 'min' ? 'minimum' : 'maximum']}`;
+            if (register.unconfirmedParameter) {
+              register.name += ` — ${texts.unconfirmedPosition}`;
+              register.desc = texts.unconfirmedPositionHelp;
+            }
+          }
+        }
+        for (const register of block.registers) {
+          if (register.meaningUnknown) Object.assign(register, unknownControlRegister(req.headers?.['accept-language']));
+          register.name = parameterName(register.address, req.headers?.['accept-language']) ?? register.name;
+          register.desc = parameterDescription(register.address, req.headers?.['accept-language']) ?? register.desc;
+          const annotation = suspectedLParameter(register.parameterAddress ?? register.address, req.headers?.['accept-language']);
+          if (annotation) {
+            if (!block.definitionBank) register.name = annotation.name;
+            register.desc = block.definitionBank ? annotation.name : annotation.desc;
+          }
+        }
+      }
+      res.end(JSON.stringify(blocks));
       return;
     }
     if (method === 'GET' && url === '/api/register-cache') {
@@ -442,13 +510,15 @@ export class DashboardService {
 
     const tempScale = this._getTemperatureScale();
     const registerMeta = this._buildRegisterMetaMap(tempScale);
+    const bankRanges = new Map((this.getParameterRanges?.() ?? []).map((range) => [range.address, range]));
     const changeLog = this.getChangeLog?.() ?? new Map();
     const entries: object[] = [];
 
     for (const [address, wireRawValue] of this.getRegisterCache()) {
       const meta = registerMeta.get(address);
       const multiply = meta?.multiply ?? 1;
-      const isSigned = meta?.isTemperatureRegister === true || (meta?.min !== undefined && meta.min < 0);
+      const bankRange = bankRanges.get(address);
+      const isSigned = meta?.signed === true || bankRange?.status === 'available' || meta?.isTemperatureRegister === true || (meta?.min !== undefined && meta.min < 0);
       const rawValue = isSigned && wireRawValue > 0x7FFF ? wireRawValue - 0x10000 : wireRawValue;
       const scaledValue = meta?.isCoil
         ? null
@@ -636,7 +706,7 @@ export class DashboardService {
     for (const block of buildRegisterBlocks()) {
       if (!block.readOnly) {
         for (const reg of block.registers) {
-          writable.add(reg.address);
+          if (!reg.readOnly) writable.add(reg.address);
         }
       }
     }
@@ -815,6 +885,68 @@ export class DashboardService {
     }
   }
 
+  private async _handleParameterBankBlock(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const texts = parameterBankTexts(req.headers?.['accept-language']);
+    if (!this.readParameterBankWords) {
+      this._jsonError(res, 503, texts.unavailable);
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await this._readBody(req);
+    } catch {
+      this._jsonError(res, 400, texts.error);
+      return;
+    }
+    if (!body || typeof body !== 'object') {
+      this._jsonError(res, 400, texts.error);
+      return;
+    }
+    const { start, count } = body as Record<string, unknown>;
+    if (typeof start !== 'number' || typeof count !== 'number' || !validParameterBankRead(start, count)) {
+      this._jsonError(res, 400, texts.error);
+      return;
+    }
+    try {
+      const words = await this.readParameterBankWords(start, count);
+      this._jsonOk(res, { words });
+    } catch {
+      this._jsonError(res, 503, texts.unavailable);
+    }
+  }
+
+  private async _handleParameterRanges(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const texts = parameterBankTexts(req.headers?.['accept-language']);
+    if (!this.readParameterRanges) {
+      this._jsonError(res, 503, texts.unavailable);
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await this._readBody(req);
+    } catch {
+      this._jsonError(res, 400, texts.error);
+      return;
+    }
+    if (!body || typeof body !== 'object') {
+      this._jsonError(res, 400, texts.error);
+      return;
+    }
+    const { addresses, refresh } = body as Record<string, unknown>;
+    const known = this._buildRegisterMetaMap(this._getTemperatureScale());
+    if (!Array.isArray(addresses) || addresses.length === 0 || addresses.length > 32
+      || addresses.some((address) => typeof address !== 'number' || !parameterBankAddresses(address) || !known.has(address))) {
+      this._jsonError(res, 400, texts.error);
+      return;
+    }
+    try {
+      const ranges = await this.readParameterRanges(addresses, refresh === true);
+      this._jsonOk(res, { ranges });
+    } catch {
+      this._jsonError(res, 503, texts.unavailable);
+    }
+  }
+
   // ── ADR-046: POST /api/expert/read ───────────────────────────────────────────
 
   private async _handleExpertRead(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -831,7 +963,9 @@ export class DashboardService {
       return;
     }
 
-    const { address, isCoil, multiply } = body as Record<string, unknown>;
+    const {
+      address, isCoil, multiply, includeParameterRange,
+    } = body as Record<string, unknown>;
     if (typeof address !== 'number' || address < 0 || address > 0xFFFF) {
       this._jsonError(res, 400, 'Verplicht veld: address (number 0–65535)');
       return;
@@ -844,7 +978,21 @@ export class DashboardService {
     try {
       const rawValue = await this.onReadRegister(address, coil);
       const scaledValue = Math.round(scaleRegisterValue(address, rawValue, tempScale, multiplyFactor) * 10) / 10;
-      this._jsonOk(res, { ok: true, rawValue, scaledValue });
+      const pair = coil ? null : parameterBankAddresses(address);
+      let parameterRange = pair ? this.getParameterRanges?.().find((range) => range.address === address) : undefined;
+      if (pair && includeParameterRange !== false && this.readParameterRanges) {
+        try {
+          [parameterRange] = await this.readParameterRanges([address], false);
+        } catch {
+          // Missing metadata must never turn a successful value read into an error.
+          parameterRange = {
+            address, ...pair, status: 'unavailable', readAt: Date.now(),
+          };
+        }
+      }
+      this._jsonOk(res, {
+        ok: true, rawValue, wireRawValue: rawValue & 0xFFFF, scaledValue, parameterRange,
+      });
     } catch (err) {
       const msg = (err as Error).message;
       const status = msg === 'Niet verbonden' ? 503 : 500;
@@ -878,6 +1026,19 @@ export class DashboardService {
       return;
     }
     const coil = isCoil === true;
+    if (!coil && address === 0x0309) {
+      this._jsonError(res, 403, parameterDescription(address, req.headers?.['accept-language'])!);
+      return;
+    }
+    if (!coil && address >= 0x0300 && address <= 0x032F
+      && !Object.values(CONTROL_REGISTERS).some((register) => register.address === address)) {
+      this._jsonError(res, 403, unknownControlRegister(req.headers?.['accept-language']).desc);
+      return;
+    }
+    if (!coil && parameterBankWord(address)) {
+      this._jsonError(res, 403, parameterBankTexts(req.headers?.['accept-language']).readOnly);
+      return;
+    }
     const clampedRaw = Math.round(rawValue) & 0xFFFF;
 
     if (coil && clampedRaw > 1) {
@@ -939,7 +1100,7 @@ export class DashboardService {
 // ── Registermetadata builder voor /api/registers ─────────────────────────────
 
 function buildRegisterBlocks(tempScale: TemperatureRegisterScale = 'x1'): RegisterBlock[] {
-  return [
+  const blocks: RegisterBlock[] = [
     {
       id: 'blok1_status',
       label: 'Blok 1 — Status & Fault (0x0000–0x0028)',
@@ -972,7 +1133,7 @@ function buildRegisterBlocks(tempScale: TemperatureRegisterScale = 'x1'): Regist
     },
     {
       id: 'blok3_control',
-      label: 'Blok 3 — User Control (0x0300–0x0319)',
+      label: 'Blok 3 — User Control (0x0300–0x032F)',
       readOnly: false,
       registers: Object.entries(CONTROL_REGISTERS).map(([key, def]) => ({
         key,
@@ -1145,6 +1306,59 @@ function buildRegisterBlocks(tempScale: TemperatureRegisterScale = 'x1'): Regist
       }),
     },
   ];
+  const controlBlock = blocks.find((block) => block.id === 'blok3_control')!;
+  controlBlock.registers.push({
+    key: 'heatPumpClock',
+    address: 0x0309,
+    name: 'Heat pump clock',
+    desc: 'Observed clock: value = hour * 256 + minute; 0x1523 = 21:35. Read-only display.',
+    readOnly: true,
+    valueFormat: 'hourMinute',
+    pollGroups: _pollGroupsForAddress(0x0309),
+  });
+  const knownControlRegisters = new Map(controlBlock.registers.map((register) => [register.address, register]));
+  controlBlock.registers = Array.from({ length: 0x30 }, (_, index) => {
+    const address = 0x0300 + index;
+    return knownControlRegisters.get(address) ?? {
+      key: `unknownControl_${address.toString(16)}`,
+      address,
+      ...unknownControlRegister(),
+      readOnly: true,
+      meaningUnknown: true,
+      pollGroups: _pollGroupsForAddress(address),
+    };
+  });
+  const parameters = new Map(blocks.flatMap((block) => block.registers)
+    .filter((register) => parameterBankAddresses(register.address))
+    .map((register) => [register.address, register]));
+  for (const bank of PARAMETER_LIMIT_BANKS) {
+    blocks.push({
+      id: `definition_${bank.id}`,
+      label: parameterBankTexts('nl')[bank.id],
+      readOnly: true,
+      definitionBank: bank,
+      registers: Array.from({ length: bank.count }, (_, index) => {
+        const parameterAddress = bank.parameterStart + index;
+        const parameter = parameters.get(parameterAddress);
+        const registerId = bank.kind === 'P' ? `P${String(index).padStart(3, '0')}` : `L${index + 11}`;
+        return {
+          key: `${registerId}_${bank.role}`,
+          registerId,
+          address: bank.start + index,
+          name: `${registerId} ${bank.role}`,
+          desc: parameter?.name,
+          unit: parameter?.unit,
+          signed: true,
+          readOnly: true,
+          parameterAddress,
+          unconfirmedParameter: bank.kind === 'L' && index >= 50,
+          bankRole: bank.role,
+          pollGroups: [],
+        };
+      }),
+    });
+  }
+  return blocks;
 }
 
 function _pollGroupsForAddress(address: number): string[] {
