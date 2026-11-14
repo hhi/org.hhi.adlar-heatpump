@@ -215,6 +215,20 @@ export class BuildingModelService {
       }
       this.logger(`BuildingModelService: ✅ Indoor temp OK: ${indoorTemp.toFixed(1)}°C`);
 
+      // ADR-067 D2 (R27): a reading that has stayed the same for 24 h is not a measurement of the room
+      // @ts-expect-error - Accessing MyDevice.serviceCoordinator (not in Homey.Device base type)
+      const indoorStaleness = this.device.serviceCoordinator
+        .getAdaptiveControl()
+        .getExternalTemperatureService()
+        .getIndoorStaleness();
+      if (indoorStaleness === 'stale') {
+        this.lastBlockingReason = 'Indoor temperature unchanged for 24 h (sensor or flow stopped)';
+        this.lastBlockingReasonKey = 'building_model.blocked_indoor_temp_unchanged';
+        this.logger('BuildingModelService: ❌ EXIT - Indoor temp unchanged for 24 h, skipping');
+        await this.updateModelCapabilities(); // Update UI to show blocked status
+        return;
+      }
+
       // Get outdoor temperature with priority fallback (v2.0.2)
       // Uses device helper method: external sensor → heat pump sensor
       // @ts-expect-error - Accessing MyDevice.getOutdoorTemperatureWithFallback() (not in Homey.Device base type)

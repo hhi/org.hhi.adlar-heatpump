@@ -36,6 +36,9 @@ import {
   type PositionalPIStep,
 } from '../../shared/adaptive/positional-pi-controller';
 import {
+  INDOOR_UNCHANGED_STALE_HOURS, SKIP_REASON_INDOOR_UNCHANGED, type IndoorStaleness,
+} from '../../shared/adaptive/indoor-staleness';
+import {
   resolveEffectiveRange,
   resolveMaxSetpoint,
   type EffectiveSetpointRange,
@@ -174,6 +177,8 @@ export class AdaptiveControlService {
   private accumulatedAdjustment: number = 0; // ADR-059 W1 (referentieproject): accumulates fractional adjustments across cycles (settled when user flow applies)
   private lastObservedSetpoint: number | null = null; // ADR-059 W1: Aurora III heating setpoint 4-2107 at previous cycle, for settlement-on-observation
   private lastSkipReason: string | null = null; // v3.7.1 (R24): last reported reason for a skipped cycle
+  private lastIndoorStaleness: IndoorStaleness | null = null; // ADR-067 D2: last reported state; null until read from the store
+  private readonly STORE_KEY_INDOOR_STALENESS = 'adaptive_indoor_staleness'; // ADR-067 D2
   private static readonly ACCUMULATOR_CLAMP = 2.0; // ±°C
   private lastRecommendedTemp: number | undefined = undefined; // Change detection for temperature_adjustment_recommended
   private resolveActiveSetpoint: ActiveSetpointResolver;
@@ -1053,6 +1058,16 @@ export class AdaptiveControlService {
       if (positional && basis === null) {
         this.logger('AdaptiveControlService: heat pump curve not read yet after start, skipping cycle');
         await this.reportSkippedCycle('heat_pump_curve_not_read');
+        return;
+      }
+
+      // ADR-067 D2 (R27): an indoor temperature that stays the same value is reported after 12 h;
+      // after 24 h the control stops correcting on it (positional: bare curve, classic: no change)
+      const indoorStaleness = this.externalTemperature.getIndoorStaleness();
+      await this._trackIndoorStaleness(indoorStaleness);
+      if (indoorStaleness === 'stale') {
+        this.logger('AdaptiveControlService: Indoor temperature unchanged for 24 h, not correcting on it');
+        await this._indoorUnchangedFallback(basis, currentSetpoint);
         return;
       }
 
@@ -2197,6 +2212,75 @@ export class AdaptiveControlService {
     } catch (error) {
       this.device.error('⚠️ Failed to report skipped control cycle:', error);
     }
+  }
+
+  /**
+   * ADR-067 D2 (R27): follow how long the indoor temperature has been the same value and tell the
+   * user once per transition: after 12 h, after 24 h (control stops correcting) and on recovery.
+   */
+  private async _trackIndoorStaleness(staleness: IndoorStaleness): Promise<void> {
+    if (this.lastIndoorStaleness === null) {
+      const stored: unknown = await this.device.getStoreValue(this.STORE_KEY_INDOOR_STALENESS);
+      this.lastIndoorStaleness = stored === 'warn' || stored === 'stale' ? stored : 'fresh';
+    }
+    if (staleness === this.lastIndoorStaleness) return;
+    const previous = this.lastIndoorStaleness;
+    this.lastIndoorStaleness = staleness;
+    await this.device.setStoreValue(this.STORE_KEY_INDOOR_STALENESS, staleness);
+    this.logger(`AdaptiveControlService: indoor temperature staleness ${previous} → ${staleness}`);
+
+    let messageKey: string | null = null;
+    if (staleness === 'stale') messageKey = 'adaptive_control.indoor_unchanged_stale';
+    else if (staleness === 'warn' && previous === 'fresh') messageKey = 'adaptive_control.indoor_unchanged_warn';
+    else if (staleness === 'fresh' && previous === 'stale') messageKey = 'adaptive_control.indoor_changed_again';
+    if (messageKey === null) return;
+    try {
+      await this.device.homey.notifications.createNotification({
+        excerpt: `${this.device.getName()}: ${this.device.homey.__(messageKey)}`,
+      });
+    } catch (error) {
+      this.logger('AdaptiveControlService: Failed to send indoor temperature notification', {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  /**
+   * ADR-067 D2 (R27): the indoor temperature has not changed for 24 h, so the control no longer
+   * corrects on it. Positional follows the bare curve (no PI, no optimizer shift); classic leaves
+   * the setpoint alone. Ends by itself with the first reading that differs.
+   */
+  private async _indoorUnchangedFallback(basis: CurveBasis | null, currentSetpoint: number): Promise<void> {
+    await this.reportSkippedCycle(SKIP_REASON_INDOOR_UNCHANGED);
+    if (basis === null) return;
+
+    this.positionalPI.reset();
+    await this.device.setStoreValue(this.STORE_KEY_POSITIONAL_INTEGRAL, 0);
+    this.lastTargetShift = 0;
+
+    const recommendedTemp = this._positionalRecommendation(basis, 0);
+    this.simulatedTargetTemp = recommendedTemp;
+    if (this.device.hasCapability('adlar_simulated_target')) {
+      await this.device.setCapabilityValue('adlar_simulated_target', recommendedTemp);
+    }
+    if (this.lastRecommendedTemp === undefined) {
+      this.lastRecommendedTemp = currentSetpoint;
+    }
+    if (recommendedTemp !== this.lastRecommendedTemp) {
+      this.lastRecommendedTemp = recommendedTemp;
+      await this.triggerTemperatureRecommendation(
+        currentSetpoint,
+        recommendedTemp,
+        {
+          finalAdjustment: 0,
+          reasoning: [`Indoor temperature unchanged for ${INDOOR_UNCHANGED_STALE_HOURS} h: following the heating curve`],
+          priority: 'medium',
+        },
+        0,
+        'heating',
+      );
+    }
+    this.lastControlCycleTime = Date.now();
   }
 
   /**

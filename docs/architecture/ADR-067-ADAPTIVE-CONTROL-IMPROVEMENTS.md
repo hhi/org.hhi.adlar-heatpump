@@ -1,7 +1,8 @@
 # ADR-067: Verbeteringen aan de adaptieve regeling
 
 **Status:** Voorstel (2026-11-09). D1 is gebouwd op 2026-11-10 (in 3.8.0), D3
-en D10 op 2026-11-13 (voor 3.9.0, nog niet uitgebracht); de rest niet. Per besluit
+en D10 op 2026-11-13 (in 3.9.0), D2 op 2026-11-14 (voor 3.9.1); de
+rest niet. Per besluit
 staat erbij of het getoetst is.
 **Datum:** 2026-11-09
 **Beslissers:** -
@@ -47,7 +48,7 @@ in de repo.
 | # | Besluit | Soort | Getoetst | Omvang | Voorstel |
 | --- | --- | --- | --- | --- | --- |
 | D1 | Instellingen van de optimizers laten werken | Fout | Code gelezen | Klein | 3.8.0 |
-| D2 | Stilgevallen binnensensor herkennen (R27) | Fout | Code gelezen | Klein | 3.8.0 |
+| D2 | Stilgevallen binnensensor herkennen (R27) | Fout | Code gelezen; unit-tests | Klein | 3.9.1 |
 | D3 | Afrondhysterese op het advies | Verbetering | Simulatie | Klein | 3.8.0 |
 | D4 | Integraal stil bij negatieve fout en compressor uit | Verbetering | Simulatie, gemengd | Klein | Niet nu; bij O21 |
 | D5 | COP-optimizer vergelijkt met de verwachte COP | Verbetering | Nee | Middel | Eerst simuleren |
@@ -208,6 +209,40 @@ valt weg" kan later.
 
 **Toets.** Unit-test op de tijdgrens; de bestaande tests voor overgeslagen cycli
 en voor blokkades in het gebouwmodel uitbreiden met deze reden.
+
+**Besluit en bouw (2026-11-14).** Anders gebouwd dan het voorstel hierboven.
+
+- **Uitgangspunt van de eigenaar:** de inkomende flow wordt vertrouwd. Stilte
+  alleen is geen signaal: een stabiele kamer en een dode sensor zijn dan niet te
+  onderscheiden (in de live toets stond de waarde een nacht 5 uur vlak). Wel een
+  signaal is een waarde die onwaarschijnlijk lang exact gelijk blijft.
+- **Criterium:** de tijd sinds de ontvangen waarde voor het laatst verschilde
+  van de vorige, niet de tijd sinds de laatste aanroep. Dat vangt ook een flow
+  die de laatste waarde op tijd blijft herhalen. Het advies om elk uur te
+  sturen (punt 3) vervalt daarmee.
+- **Grenzen:** 12 uur gelijk geeft een melding in de tijdlijn; 24 uur gelijk de
+  ingreep. Beide zijn een inschatting, geen meting.
+- **Ingreep na 24 uur:** Positioneel volgt de kale stooklijn (correctie 0,
+  integraal en kamerdoelverschuiving op nul) en blijft de buitentemperatuur
+  volgen; Klassiek slaat de cyclus over; het gebouwmodel blokkeert met een
+  eigen reden. Herstel vanzelf bij de eerste afwijkende waarde, met een melding.
+- **Code:** `lib/shared/adaptive/indoor-staleness.ts` (grenzen en indeling);
+  `getIndoorStaleness()` in de twee `external-temperature-service.ts`, met het
+  tijdstip in de store (`external_indoor_temp_changed_at`);
+  `_trackIndoorStaleness` en `_indoorUnchangedFallback` in de drie
+  regelservices; de blokkade in de drie `building-model-service.ts`.
+- **Flowkaarten:** geen nieuwe of gewijzigde kaart. `temperature_adjustment_recommended`
+  gaat bij Positioneel af wanneer de stooklijnwaarde verandert, bij Klassiek
+  niet tot het herstel. `adaptive_simulation_update` gaat tijdens de ingreep
+  niet af.
+- **Zwaktes:** Klassiek is niet beschermd, die kan de setpointgrens al binnen
+  enkele uren bereiken. Het gebouwmodel heeft dan 24 uur van een vlakke kamer
+  geleerd. Zonder bekend tijdstip (eerste keer na de update) begint de klok bij
+  de update. De 4-uursregel bij opstarten geldt nog alleen voor de Aurora's,
+  niet voor Tuya.
+- **Toets:** `test/unit/indoor-staleness.test.js` en twee tests in elk van de
+  drie tests voor het gebouwmodel. Niet gesimuleerd en niet op een Homey
+  getoetst.
 
 ---
 
@@ -582,7 +617,7 @@ Elke stap moet ook naar de zuster-app (alleen Aurora I/II).
 
 | # | Punt | Wie beslist |
 | --- | --- | --- |
-| 1 | Tijdgrens voor de binnentemperatuur (D2): 1, 3 of 6 uur | Eigenaar |
+| 1 | Tijdgrens voor de binnentemperatuur (D2): besloten 2026-11-14, melding na 12 uur en ingreep na 24 uur zonder verandering | Afgerond |
 | 2 | Drempel van de afrondhysterese (D3): 0,75 °C of een andere waarde | Eigenaar, na de tabel in §3 |
 | 3 | COP-optimizer in de positionele stand: relatieve regel (D5) of uitzetten | Na simulatie |
 | 4 | Bewaart de warmtepomp elk geschreven setpoint in vast geheugen? | Uitzoeken (handleiding, leverancier) |

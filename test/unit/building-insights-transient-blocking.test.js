@@ -43,7 +43,7 @@ function mockDevice(driver) {
   const device = {
     serviceCoordinator: {
       getAdaptiveControl: () => ({
-        getExternalTemperatureService: () => ({ getIndoorTemperature: () => env.indoor }),
+        getExternalTemperatureService: () => ({ getIndoorTemperature: () => env.indoor, getIndoorStaleness: () => 'fresh' }),
       }),
       getEnergyTracking: () => ({ getCurrentPowerMeasurement: () => ({ value: 1200 }) }),
     },

@@ -91,6 +91,7 @@
     "status_blocked": "BLOCKED",
     "blocked_prefix": "Blocked",
     "blocked_no_indoor_temp": "No indoor temp",
+    "blocked_indoor_temp_unchanged": "Indoor temp unchanged",
     "blocked_no_outdoor_temp": "No outdoor temp",
     "blocked_no_power": "No power data",
     "blocked_disabled": "Disabled",
@@ -102,6 +103,11 @@
     "period_evening": "Evening",
     "blocked_dhw_active": "Hot water heating",
     "blocked_aux_heating": "Auxiliary heating active"
+  },
+  "adaptive_control": {
+    "indoor_unchanged_warn": "The indoor temperature has been the same value for 12 hours. Check the sensor and the flow that sends it.",
+    "indoor_unchanged_stale": "The indoor temperature has not changed for 24 hours. The adaptive control no longer corrects on it and the building model has stopped learning, until a different value arrives.",
+    "indoor_changed_again": "The indoor temperature is changing again. The adaptive control and the building model use it again."
   },
   "errors": {
     "zone_onoff_disabled": "On/off via zone control register 2101 is experimental. Enable 'On/off via zone control (experimental)' in the device settings to use it.",

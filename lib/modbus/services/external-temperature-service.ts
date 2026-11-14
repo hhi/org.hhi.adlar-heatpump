@@ -4,6 +4,9 @@
 /* eslint-disable import/extensions */
 import Homey from 'homey';
 import { formatDateTimeMinutes, resolveHomeyTimezone } from '../../shared/utils/time-format';
+import {
+  classifyIndoorStaleness, sameIndoorReading, STORE_KEY_INDOOR_CHANGED_AT, type IndoorStaleness,
+} from '../../shared/adaptive/indoor-staleness';
 
 /**
  * ExternalTemperatureService - External Indoor Temperature Management
@@ -39,6 +42,7 @@ export class ExternalTemperatureService {
   private device: Homey.Device;
   private logger: (message: string, ...args: unknown[]) => void;
   private lastReceivedTimestamp: number = 0;
+  private lastChangedTimestamp: number = 0; // ADR-067 D2: last time the received value differed from the previous one
 
   /**
    * @param config.device - Owning Homey device
@@ -47,6 +51,12 @@ export class ExternalTemperatureService {
   constructor(config: ExternalTemperatureServiceConfig) {
     this.device = config.device;
     this.logger = config.logger || (() => {});
+
+    // ADR-067 D2: the time of the last change survives a restart
+    const storedChangedAt: unknown = this.device.getStoreValue(STORE_KEY_INDOOR_CHANGED_AT);
+    if (typeof storedChangedAt === 'number' && storedChangedAt > 0) {
+      this.lastChangedTimestamp = storedChangedAt;
+    }
 
     this.logger('ExternalTemperatureService: Initialized (flow card pattern)');
   }
@@ -145,6 +155,12 @@ export class ExternalTemperatureService {
         throw new Error(`Temperature out of valid range: ${temperature}°C (must be -10°C to +50°C)`);
       }
 
+      // ADR-067 D2: compare with the previous reading before it is overwritten
+      const previous = this.device.hasCapability('measure_temperature.indoor')
+        ? this.device.getCapabilityValue('measure_temperature.indoor') as number | null
+        : null;
+      const changed = this.lastChangedTimestamp === 0 || !sameIndoorReading(previous, temperature);
+
       // Update NEW capability (v2.3.5+)
       if (this.device.hasCapability('measure_temperature.indoor')) {
         await this.device.setCapabilityValue('measure_temperature.indoor', temperature);
@@ -160,6 +176,10 @@ export class ExternalTemperatureService {
       await this.device.setStoreValue('external_indoor_temp_timestamp', Date.now());
 
       this.lastReceivedTimestamp = Date.now();
+      if (changed) {
+        this.lastChangedTimestamp = this.lastReceivedTimestamp;
+        await this.device.setStoreValue(STORE_KEY_INDOOR_CHANGED_AT, this.lastChangedTimestamp);
+      }
 
       this.logger('ExternalTemperatureService: Received external indoor temperature', {
         temperature,
@@ -239,6 +259,23 @@ export class ExternalTemperatureService {
   }
 
   /**
+   * ADR-067 D2 (R27): how long the indoor temperature has been the same value.
+   * Without a known time of change (first use after an update) the clock starts now.
+   *
+   * @param now - Current time in ms (for tests)
+   * @returns 'warn' from 12 h and 'stale' from 24 h without a change; 'fresh' otherwise or without a value
+   */
+  getIndoorStaleness(now: number = Date.now()): IndoorStaleness {
+    if (this.getIndoorTemperature() === null) return 'fresh';
+    if (this.lastChangedTimestamp === 0) {
+      this.lastChangedTimestamp = now;
+      Promise.resolve(this.device.setStoreValue(STORE_KEY_INDOOR_CHANGED_AT, now)).catch(() => {});
+      return 'fresh';
+    }
+    return classifyIndoorStaleness(now - this.lastChangedTimestamp);
+  }
+
+  /**
    * Check if external temperature is configured and has data
    *
    * @returns true if capability exists and has valid temperature
@@ -265,6 +302,7 @@ export class ExternalTemperatureService {
    */
   destroy(): void {
     this.lastReceivedTimestamp = 0;
+    this.lastChangedTimestamp = 0;
     this.logger('ExternalTemperatureService: Destroyed');
   }
 }

@@ -91,6 +91,7 @@
     "status_blocked": "BLOQUÉ",
     "blocked_prefix": "Bloqué",
     "blocked_no_indoor_temp": "Pas de temp int",
+    "blocked_indoor_temp_unchanged": "Temp int inchangée",
     "blocked_no_outdoor_temp": "Pas de temp ext",
     "blocked_no_power": "Pas de puissance",
     "blocked_disabled": "Désactivé",
@@ -102,6 +103,11 @@
     "period_evening": "Soir",
     "blocked_dhw_active": "Production d'eau chaude",
     "blocked_aux_heating": "Chauffage d'appoint actif"
+  },
+  "adaptive_control": {
+    "indoor_unchanged_warn": "La température intérieure a la même valeur depuis 12 heures. Vérifiez le capteur et le flow qui envoie la valeur.",
+    "indoor_unchanged_stale": "La température intérieure n'a pas changé depuis 24 heures. La régulation adaptative ne corrige plus sur cette valeur et le modèle du bâtiment n'apprend plus, jusqu'à l'arrivée d'une autre valeur.",
+    "indoor_changed_again": "La température intérieure change à nouveau. La régulation adaptative et le modèle du bâtiment utilisent de nouveau la valeur."
   },
   "errors": {
     "zone_onoff_disabled": "La marche/arrêt via le registre de zone 2101 est expérimentale. Activez 'Marche/arrêt via la commande de zone (expérimental)' dans les paramètres de l'appareil pour l'utiliser.",
