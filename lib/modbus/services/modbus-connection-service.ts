@@ -4,6 +4,7 @@
 /* eslint-disable import/extensions */
 import { EventEmitter } from 'events';
 import Homey from 'homey';
+import { ParameterBankRange, parameterBankWord } from '../protocol/parameter-bank-service';
 import { DataSnapshot } from '../protocol/adlar2-modbus-service';
 import { TemperatureRegisterScale } from '../protocol/adlar-modbus-registers';
 import { RegisterChangeEntry, RegisterChangeLogMode, TimerProvider } from '../protocol/modbus-tcp-service';
@@ -318,6 +319,20 @@ export class ModbusConnectionService<TSnapshot = DataSnapshot> extends EventEmit
     return (this.service as unknown as { getChangeLog(m?: RegisterChangeLogMode): Map<number, RegisterChangeEntry> } | null)?.getChangeLog(mode) ?? new Map();
   }
 
+  async readParameterBankWords(start: number, count: number): Promise<number[]> {
+    if (!this.service?.readParameterBankWords) throw new Error('Niet verbonden');
+    return this.service.readParameterBankWords(start, count);
+  }
+
+  getParameterRanges(): ParameterBankRange[] {
+    return this.service?.getParameterRanges?.() ?? [];
+  }
+
+  async readParameterRanges(addresses: number[], refresh = false): Promise<ParameterBankRange[]> {
+    if (!this.service?.readParameterRanges) throw new Error('Niet verbonden');
+    return this.service.readParameterRanges(addresses, refresh);
+  }
+
   getRegisterCache(): Map<number, number> {
     return this.service?.getRegisterCache() ?? new Map();
   }
@@ -336,6 +351,7 @@ export class ModbusConnectionService<TSnapshot = DataSnapshot> extends EventEmit
 
   /** FC06 of FC05 — schrijf één register of coil met de ruwe waarde. */
   async writeRaw(addr: number, rawValue: number, isCoil: boolean): Promise<void> {
+    if (!isCoil && this.service?.readParameterBankWords && parameterBankWord(addr)) throw new Error(this.device.homey.__('modbusParameterBanks.readOnly'));
     if (!this.service) throw new Error('Niet verbonden');
     if (isCoil) {
       return (this.service as unknown as { writeCoil(a: number, s: boolean): Promise<void> }).writeCoil(addr, rawValue === 1);
