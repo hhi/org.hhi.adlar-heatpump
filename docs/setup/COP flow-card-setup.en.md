@@ -29,6 +29,8 @@ The Adlar Heat Pump can receive external measurement data from other Homey devic
 
 **Outdoor temperature: at least every hour.** When no new outdoor temperature arrives for 1 hour, the app uses the heat pump's own outdoor sensor again, which is less accurate. This applies to the COP, the building model, the insights and the pre-heat duration; adaptive control first uses the Open-Meteo weather forecast, if you entered your own location for the weather forecast. After an app restart, the last value is restored only when it is younger than 4 hours. In stable weather the temperature can stay the same for more than an hour; a "temperature changed" trigger then sends nothing. Therefore (also) send the outdoor temperature with a time trigger, for example every 15 minutes. The diagnostic line "Last Outdoor Temperature (Flow Card)" shows when the last value arrived.
 
+**Indoor temperature: a value that does not change.** The app trusts the value your flow sends. When it stays exactly the same for 12 hours, you get a notification in the timeline. After 24 hours without a change adaptive control no longer corrects on it: Positional then follows the heating curve only, Classic leaves the setpoint alone, and the building model stops learning. This recovers by itself with the first value that differs. A flow that repeats the last value on a timer makes no difference here; after a notification, check the sensor (battery) and the flow.
+
 ## Basic Setup (Direct Data Sharing)
 
 ### Step 1: Create External Data Flow

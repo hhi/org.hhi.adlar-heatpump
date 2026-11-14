@@ -30,7 +30,7 @@ function mockDevice(store) {
   };
   const serviceCoordinator = {
     getAdaptiveControl: () => ({
-      getExternalTemperatureService: () => ({ getIndoorTemperature: () => 20.1 }),
+      getExternalTemperatureService: () => ({ getIndoorTemperature: () => 20.1, getIndoorStaleness: () => 'fresh' }),
     }),
     getEnergyTracking: () => ({ getCurrentPowerMeasurement: () => ({ value: 1200 }) }),
   };

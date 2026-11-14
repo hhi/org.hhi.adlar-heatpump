@@ -29,6 +29,8 @@ De Adlar Warmtepomp kan externe meetgegevens ontvangen van andere Homey apparate
 
 **Buitentemperatuur: minstens elk uur.** Komt er 1 uur lang geen nieuwe buitentemperatuur binnen, dan gebruikt de app weer de eigen buitensensor van de warmtepomp, die minder nauwkeurig is. Dat geldt voor de COP, het gebouwmodel, de inzichten en de voorverwarmduur; de adaptieve regeling gebruikt dan eerst de Open-Meteo-weersvoorspelling, als u bij de weerprognose een eigen locatie heeft ingevuld. Na een herstart van de app wordt de laatste waarde alleen teruggezet als die jonger is dan 4 uur. Bij stabiel weer kan de temperatuur langer dan een uur gelijk blijven; een trigger "temperatuur is veranderd" stuurt dan niets. Stuur de buitentemperatuur daarom (ook) met een tijdtrigger, bijvoorbeeld elke 15 minuten. De diagnoseregel "Laatste Buitentemperatuur (Flow Kaart)" toont wanneer de laatste waarde binnenkwam.
 
+**Binnentemperatuur: een waarde die niet verandert.** De app vertrouwt de waarde die je flow stuurt. Blijft die 12 uur exact gelijk, dan krijg je een melding in de tijdlijn. Na 24 uur zonder verandering stuurt de adaptieve regeling er niet meer op bij: Positioneel volgt dan alleen de stooklijn, Klassiek laat het setpoint staan, en het gebouwmodel leert niet meer. Dat herstelt vanzelf bij de eerste waarde die afwijkt. Een flow die de laatste waarde op tijd herhaalt, verandert hier niets aan; controleer bij een melding de sensor (batterij) en de flow.
+
 ## Basis Setup (Directe Data Uitwisseling)
 
 ### Stap 1: Maak Externe Data Flow

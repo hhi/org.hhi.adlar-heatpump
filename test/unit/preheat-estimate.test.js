@@ -184,7 +184,7 @@ function mockDevice(store, outdoor = 5) {
   const capabilities = { adlar_enum_mode: 'heating', adlar_state_defrost_state: false, adlar_cop: 3.5 };
   return {
     serviceCoordinator: {
-      getAdaptiveControl: () => ({ getExternalTemperatureService: () => ({ getIndoorTemperature: () => 20.1 }) }),
+      getAdaptiveControl: () => ({ getExternalTemperatureService: () => ({ getIndoorTemperature: () => 20.1, getIndoorStaleness: () => 'fresh' }) }),
       getEnergyTracking: () => ({ getCurrentPowerMeasurement: () => ({ value: 1200 }) }),
     },
     getSetting: (key) => settings[key] ?? null,
