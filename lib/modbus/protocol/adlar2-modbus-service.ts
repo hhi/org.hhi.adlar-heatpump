@@ -37,7 +37,8 @@ import {
   encodeTemperatureRaw,
   interpolateCalibration,
   protocolSupportsCoils,
-  refrigerantToTemperatureScale,
+  resolveTemperatureScale,
+  ADLAR2_TEMPERATURE_REGISTER_ADDRESSES,
   scaleRegisterValue,
   validateRefrigerant,
 } from './adlar-modbus-registers';
@@ -344,6 +345,8 @@ export class Adlar2ModbusService extends EventEmitter {
   private readonly tcp: ModbusTcpService;
   private readonly parameterBanks: ParameterBankService;
   private temperatureRegisterScale: TemperatureRegisterScale;
+  // P119 en setpoint spreken elkaar tegen: temperatuurwaarden niet schrijven tot de volgende verbinding
+  private temperatureScaleConflict: string | null = null;
   private externalFlowLpm: number | null = null;
   private lastFaults: string[] = [];
   private hasBaseSnapshot = false;
@@ -539,6 +542,7 @@ export class Adlar2ModbusService extends EventEmitter {
 
   async writeRegister(addr: number, value: number): Promise<void> {
     if (parameterBankWord(addr)) throw new Error('Parameter limit banks are read-only');
+    if (ADLAR2_TEMPERATURE_REGISTER_ADDRESSES.has(addr)) this.assertTemperatureWritable();
     await this.tcp.writeSingleRegister(addr, value);
   }
 
@@ -563,7 +567,19 @@ export class Adlar2ModbusService extends EventEmitter {
     await this.tcp.writeSingleRegister(CONTROL_REGISTERS.mode.address, mode);
   }
 
+  /** Weiger temperatuurwaarden schrijven zolang P119 en het setpoint elkaar tegenspreken. */
+  private assertTemperatureWritable(): void {
+    if (this.temperatureScaleConflict) {
+      throw new Error(`Temperatuur schrijven geblokkeerd: ${this.temperatureScaleConflict}`);
+    }
+  }
+
+  get temperatureScaleBlocked(): string | null {
+    return this.temperatureScaleConflict;
+  }
+
   async setTemperature(type: SetpointType, tempC: number): Promise<void> {
+    this.assertTemperatureWritable();
     const def = SETPOINT_DEFINITIONS[type];
     assertRange(def, tempC);
     await this.tcp.writeSingleRegister(def.address, encodeTemperatureRaw(tempC, this.temperatureRegisterScale));
@@ -634,6 +650,7 @@ export class Adlar2ModbusService extends EventEmitter {
   }
 
   async setDiyHeatingCurve(k: number, b: number): Promise<void> {
+    this.assertTemperatureWritable();
     const rawK = Math.round(k * 10);
     assertRange(L_PARAMETERS.L28_heatingCurveCoeffK, rawK);
     assertRange(L_PARAMETERS.L29_heatingCurveConstantB, b);
@@ -674,12 +691,43 @@ export class Adlar2ModbusService extends EventEmitter {
     if (!active()) return;
     const refrigerant = await this.validateRefrigerant();
     if (!active()) return;
-    this.temperatureRegisterScale = refrigerantToTemperatureScale(refrigerant.type);
+    await this.detectTemperatureScale(refrigerant.type);
+    if (!active()) return;
     if (!refrigerant.valid) {
       this.emit(
         'error',
         new Error(`P119=${refrigerant.type} — onverwacht koelmiddel (verwacht 2=R32)`),
         'validate:refrigerant',
+      );
+    }
+  }
+
+  /**
+   * Temperatuurschaal uit P119 en het verwarmingssetpoint (0x0301): R32 bepaalt x1 en het setpoint
+   * controleert; bij een ander koelmiddel beslist het setpoint. Bij een conflict blijft x1 staan voor
+   * het lezen en wordt het schrijven van temperaturen geblokkeerd tot de volgende verbinding.
+   */
+  private async detectTemperatureScale(p119: number | null): Promise<void> {
+    const { address } = CONTROL_REGISTERS.tempSetHeating;
+    let setpointRaw: number | null = null;
+    try {
+      await this.tcp.readHoldingRegisters(address, 1);
+      setpointRaw = this.tcp.u16(address);
+    } catch {
+      // onleesbaar: P119 of de huidige schaal beslist
+    }
+    const decision = resolveTemperatureScale(p119, setpointRaw, this.temperatureRegisterScale);
+    this.temperatureRegisterScale = decision.scale;
+    this.temperatureScaleConflict = decision.conflict
+      ? `P119=${p119} (R32, hele graden) maar 0x0301=${setpointRaw} (tienden)`
+      : null;
+    if (decision.conflict) {
+      this.emit('error', new Error(`${this.temperatureScaleConflict} — temperatuurschaal x1, temperatuur schrijven geblokkeerd`), 'validate:temperature-scale');
+    } else if (decision.source === 'unchanged' || (decision.source === 'refrigerant' && !decision.setpointScale)) {
+      this.emit(
+        'error',
+        new Error(`0x0301=${setpointRaw ?? 'onleesbaar'} — temperatuurschaal niet uit het setpoint te controleren, blijft ${decision.scale}`),
+        'validate:temperature-scale',
       );
     }
   }
