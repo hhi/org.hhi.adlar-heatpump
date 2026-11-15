@@ -193,7 +193,13 @@ Startwerte der Gebäudeprofile; das Modell lernt danach die tatsächlichen Werte
 | Sehr Hoch | >0.12€/kWh | Reduzieren MAX | -1.0°C |
 
 > [!NOTE]
-> Die Schwellen basieren auf 2024 Spotpreis-Perzentilen.
+> Die Tabelle zeigt die festen Schwellen (reiner Marktpreis ohne MwSt. und
+> Aufschläge, Standardwerte aus 2024). Mit der Einstellung **Preisschwellen**
+> auf *Automatisch* (Standard für neu hinzugefügte Geräte) gelten
+> P10/P30/P70/P90 der Preise von 12 Stunden zurück bis 12 Stunden voraus. Mit
+> weniger als 12 Preisen gelten die festen Schwellen; bei weniger als €0,03/kWh
+> Spanne gilt jede Stunde als Normal. Bestehende Geräte stehen nach dem Update
+> auf 3.11.0 auf *Fest*.
 
 ### Kostenberechnungsmodi
 
@@ -357,6 +363,7 @@ Gesamt:            -3.31°C → Sollwert << P111 → Kompressor stoppt ✅
 {
   "price_optimizer_enabled": true,
   "price_calculation_mode": "all_in",
+  "price_threshold_mode": "auto",
   "price_threshold_very_low": 0.04,
   "price_threshold_low": 0.06,
   "price_threshold_normal": 0.10,

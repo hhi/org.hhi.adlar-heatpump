@@ -337,7 +337,8 @@ module.exports = function lifecycleTests(modulePath) {
       assert.equal(connected, 1);
       assert.equal(old.tcp.socket.requests.length, 1);
       assert.deepEqual(old.tcp.socket.errors, []);
-      assert.deepEqual(errors, []);
+      // The mock answers every register with 2, so 0x0301 cannot confirm the temperature scale (logged only).
+      assert.deepEqual(errors.filter((err) => !/temperatuurschaal/.test(err.message)), []);
       await connection.destroy();
       assert.equal(provider.active.size, 0);
     });

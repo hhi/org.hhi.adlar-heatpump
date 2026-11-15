@@ -125,9 +125,49 @@ export function encodeTemperatureRaw(tempC: number, scale: TemperatureRegisterSc
   return scale === 'x10' ? Math.round(tempC * 10) : Math.round(tempC);
 }
 
-/** Leid de temperatuurschaal af uit het P119 koelmiddel type. R290 = x10, overige = x1. */
-export function refrigerantToTemperatureScale(p119: number): TemperatureRegisterScale {
-  return p119 === 3 ? 'x10' : 'x1';
+/**
+ * Temperatuurschaal uit het verwarmingssetpoint (0x0301): 10–90 → x1, 100–900 → x10,
+ * anders onbekend (null). De bereiken overlappen niet.
+ */
+export function temperatureScaleFromSetpoint(raw: number): TemperatureRegisterScale | null {
+  if (raw >= 10 && raw <= 90) return 'x1';
+  if (raw >= 100 && raw <= 900) return 'x10';
+  return null;
+}
+
+export interface TemperatureScaleDecision {
+  scale: TemperatureRegisterScale;
+  /** refrigerant: P119 = R32 bepaalt x1; setpoint: 0x0301 bepaalt; unchanged: geen bruikbare bron */
+  source: 'refrigerant' | 'setpoint' | 'unchanged';
+  /** P119 zegt R32 (hele graden) maar het setpoint staat in tienden */
+  conflict: boolean;
+  setpointScale: TemperatureRegisterScale | null;
+}
+
+/**
+ * Temperatuurschaal uit twee bronnen. R32 (P119 = 2, getest) bepaalt x1 en het setpoint controleert:
+ * wijst dat op tienden, dan is er een conflict. Bij een ander koelmiddel beslist het setpoint; is dat
+ * niet bruikbaar, dan blijft de huidige schaal.
+ */
+export function resolveTemperatureScale(
+  p119: number | null,
+  setpointRaw: number | null,
+  current: TemperatureRegisterScale,
+): TemperatureScaleDecision {
+  const setpointScale = setpointRaw === null ? null : temperatureScaleFromSetpoint(setpointRaw);
+  if (p119 === 2) {
+    return {
+      scale: 'x1', source: 'refrigerant', conflict: setpointScale === 'x10', setpointScale,
+    };
+  }
+  if (setpointScale) {
+    return {
+      scale: setpointScale, source: 'setpoint', conflict: false, setpointScale,
+    };
+  }
+  return {
+    scale: current, source: 'unchanged', conflict: false, setpointScale,
+  };
 }
 
 /**

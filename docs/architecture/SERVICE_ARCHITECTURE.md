@@ -413,7 +413,8 @@ Optimizes heating based on **dynamic day-ahead energy prices** from EnergyZero A
 
 **State Persistence**:
 - `energy_optimizer_state` in device store
-- Contains: price data array, last fetch timestamp
+- Contains: price data array, last fetch timestamp, ended hours of the last 12
+  hours (`recentPrices`, v3.11.0)
 - Survives app restarts with 7-day expiration
 
 **Flow Card Integration**:
@@ -561,10 +562,15 @@ Users can configure all components via device settings:
 
 **Energy Price Optimization**:
 - `energy_optimizer_enabled` (default: false) - Enable/disable price optimization
-- `price_threshold_very_low` (default: €0.10/kWh)
-- `price_threshold_low` (default: €0.15/kWh)
-- `price_threshold_normal` (default: €0.25/kWh)
-- `price_threshold_high` (default: €0.35/kWh)
+- `price_threshold_mode` (v3.11.0, `auto`/`fixed`; default `auto` for new
+  devices, existing devices migrated to `fixed`) - `auto` uses P10/P30/P70/P90
+  of the raw prices from 12 hours back to 12 hours ahead (fixed thresholds below
+  12 prices, all Normal below €0.03/kWh spread)
+- `price_threshold_very_low` (default: €0.04/kWh, raw market price, only with
+  `fixed`)
+- `price_threshold_low` (default: €0.06/kWh)
+- `price_threshold_normal` (default: €0.10/kWh)
+- `price_threshold_high` (default: €0.12/kWh)
 - `price_max_preheat_offset` (default: 1.5°C)
 
 **COP Optimization**:
