@@ -58,7 +58,7 @@ export interface ActiveThresholds {
 
 export interface PriceData {
   timestamp: number; // Unix timestamp (ms)
-  price: number; // €/kWh (including VAT)
+  price: number; // €/kWh raw market price (excl. VAT and fees; calculateEffectivePrice() adds them)
   category: PriceCategory;
 }
 
