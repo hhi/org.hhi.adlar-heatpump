@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -20116,10 +20116,10 @@
                 "fr": "Activer l'optimisation des prix"
               },
               "hint": {
-                "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year. ⚠️ Requires: 'Adaptive control on' (group 'Adaptive control').",
-                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar. ⚠️ Vereist: 'Adaptieve regeling aan' (groep 'Adaptieve regeling').",
-                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr. ⚠️ Voraussetzung: 'Adaptive Regelung ein' (Gruppe 'Adaptive Regelung').",
-                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an. ⚠️ Prérequis : 'Contrôle adaptatif activé' (groupe 'Contrôle adaptatif')."
+                "en": "Optimize heating based on day-ahead energy prices (received via the flow card 'Send energy prices to heat pump'). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400-600/year. ⚠️ Requires: 'Adaptive control on' (group 'Adaptive control').",
+                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (ontvangen via de flowkaart 'Stuur energieprijzen naar warmtepomp'). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400-600/jaar. ⚠️ Vereist: 'Adaptieve regeling aan' (groep 'Adaptieve regeling').",
+                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (empfangen über die Flow-Karte 'Energiepreise an Wärmepumpe senden'). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400-600/Jahr. ⚠️ Voraussetzung: 'Adaptive Regelung ein' (Gruppe 'Adaptive Regelung').",
+                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (reçus via la carte de flux 'Envoyer les prix de l'énergie à la pompe à chaleur'). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400-600/an. ⚠️ Prérequis : 'Contrôle adaptatif activé' (groupe 'Contrôle adaptatif')."
               },
               "value": false
             },
@@ -20230,6 +20230,43 @@
               "step": 1
             },
             {
+              "id": "price_threshold_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Price thresholds",
+                "nl": "Prijsdrempels",
+                "de": "Preisschwellen",
+                "fr": "Seuils de prix"
+              },
+              "hint": {
+                "en": "Automatic: of the hours from 12 hours back to 12 hours ahead, the cheapest 10% count as 'very low', the next 20% as 'low', the most expensive 10% as 'very high' and the 20% below that as 'high'. With fewer than 12 known prices the fixed amounts apply; with less than €0.03/kWh difference every hour counts as 'normal'. Fixed: the four amounts below.",
+                "nl": "Automatisch: van de uren van 12 uur terug tot 12 uur vooruit gelden de goedkoopste 10% als 'zeer laag', de volgende 20% als 'laag', de duurste 10% als 'zeer hoog' en de 20% daaronder als 'hoog'. Met minder dan 12 bekende prijzen gelden de vaste bedragen; bij minder dan €0,03/kWh verschil geldt elk uur als 'normaal'. Vast: de vier bedragen hieronder.",
+                "de": "Automatisch: Von den Stunden 12 Stunden zurück bis 12 Stunden voraus gelten die günstigsten 10% als 'sehr niedrig', die nächsten 20% als 'niedrig', die teuersten 10% als 'sehr hoch' und die 20% darunter als 'hoch'. Mit weniger als 12 bekannten Preisen gelten die festen Beträge; bei weniger als €0,03/kWh Unterschied gilt jede Stunde als 'normal'. Fest: die vier Beträge unten.",
+                "fr": "Automatique : parmi les heures de 12 heures avant à 12 heures après, les 10% les moins chères comptent comme 'très bas', les 20% suivantes comme 'bas', les 10% les plus chères comme 'très élevé' et les 20% en dessous comme 'élevé'. Avec moins de 12 prix connus, les montants fixes s'appliquent ; avec moins de €0,03/kWh d'écart, chaque heure compte comme 'normal'. Fixe : les quatre montants ci-dessous."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic (relative to surrounding hours)",
+                    "nl": "Automatisch (ten opzichte van de uren eromheen)",
+                    "de": "Automatisch (relativ zu den umliegenden Stunden)",
+                    "fr": "Automatique (par rapport aux heures voisines)"
+                  }
+                },
+                {
+                  "id": "fixed",
+                  "label": {
+                    "en": "Fixed (amounts below)",
+                    "nl": "Vast (bedragen hieronder)",
+                    "de": "Fest (Beträge unten)",
+                    "fr": "Fixe (montants ci-dessous)"
+                  }
+                }
+              ]
+            },
+            {
               "id": "price_threshold_very_low",
               "type": "number",
               "label": {
@@ -20239,10 +20276,10 @@
                 "fr": "Seuil de Prix Très Bas "
               },
               "hint": {
-                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Based on P10 percentile of 2024 spot prices. Default: €0.04/kWh",
-                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Gebaseerd op P10 percentiel van 2024 spotprijzen. Standaard: €0.04/kWh",
-                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Basierend auf P10-Perzentil der Spotpreise 2024. Standard: €0.04/kWh",
-                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Basé sur le percentile P10 des prix spot 2024. Défaut: €0.04/kWh"
+                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.04/kWh",
+                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.04/kWh",
+                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.04/kWh",
+                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.04/kWh"
               },
               "value": 0.04,
               "min": -0.1,
@@ -20265,10 +20302,10 @@
                 "fr": "Seuil de Prix Bas "
               },
               "hint": {
-                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Based on P30 percentile. Default: €0.06/kWh",
-                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Gebaseerd op P30 percentiel. Standaard: €0.06/kWh",
-                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Basierend auf P30-Perzentil. Standard: €0.06/kWh",
-                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Basé sur le percentile P30. Défaut: €0.06/kWh"
+                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.06/kWh",
+                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.06/kWh",
+                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.06/kWh",
+                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.06/kWh"
               },
               "value": 0.06,
               "min": -0.05,
@@ -20291,10 +20328,10 @@
                 "fr": "Seuil de Prix Normal "
               },
               "hint": {
-                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Based on P70 percentile. Default: €0.10/kWh",
-                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Gebaseerd op P70 percentiel. Standaard: €0.10/kWh",
-                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Basierend auf P70-Perzentil. Standard: €0.10/kWh",
-                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Basé sur le percentile P70. Défaut: €0.10/kWh"
+                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.10/kWh",
+                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.10/kWh",
+                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.10/kWh",
+                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.10/kWh"
               },
               "value": 0.1,
               "min": 0,
@@ -20317,10 +20354,10 @@
                 "fr": "Seuil de Prix Élevé "
               },
               "hint": {
-                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Based on P90 percentile. Default: €0.12/kWh",
-                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Gebaseerd op P90 percentiel. Standaard: €0.12/kWh",
-                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Basierend auf P90-Perzentil. Standard: €0.12/kWh",
-                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Basé sur le percentile P90. Défaut: €0.12/kWh"
+                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.12/kWh",
+                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.12/kWh",
+                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.12/kWh",
+                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.12/kWh"
               },
               "value": 0.12,
               "min": 0,
@@ -22572,10 +22609,10 @@
                 "fr": "Activer l'optimisation des prix"
               },
               "hint": {
-                "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400–600/year. ⚠️ Requires: 'Adaptive control on' (group 'Adaptive control').",
-                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400–600/jaar. ⚠️ Vereist: 'Adaptieve regeling aan' (groep 'Adaptieve regeling').",
-                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400–600/Jahr. ⚠️ Voraussetzung: 'Adaptive Regelung ein' (Gruppe 'Adaptive Regelung').",
-                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400–600/an. ⚠️ Prérequis : 'Contrôle adaptatif activé' (groupe 'Contrôle adaptatif')."
+                "en": "Optimize heating based on day-ahead energy prices (received via the flow card 'Send energy prices to heat pump'). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400–600/year. ⚠️ Requires: 'Adaptive control on' (group 'Adaptive control').",
+                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (ontvangen via de flowkaart 'Stuur energieprijzen naar warmtepomp'). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400–600/jaar. ⚠️ Vereist: 'Adaptieve regeling aan' (groep 'Adaptieve regeling').",
+                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (empfangen über die Flow-Karte 'Energiepreise an Wärmepumpe senden'). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400–600/Jahr. ⚠️ Voraussetzung: 'Adaptive Regelung ein' (Gruppe 'Adaptive Regelung').",
+                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (reçus via la carte de flux 'Envoyer les prix de l'énergie à la pompe à chaleur'). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400–600/an. ⚠️ Prérequis : 'Contrôle adaptatif activé' (groupe 'Contrôle adaptatif')."
               },
               "value": false
             },
@@ -22692,6 +22729,43 @@
               }
             },
             {
+              "id": "price_threshold_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Price thresholds",
+                "nl": "Prijsdrempels",
+                "de": "Preisschwellen",
+                "fr": "Seuils de prix"
+              },
+              "hint": {
+                "en": "Automatic: of the hours from 12 hours back to 12 hours ahead, the cheapest 10% count as 'very low', the next 20% as 'low', the most expensive 10% as 'very high' and the 20% below that as 'high'. With fewer than 12 known prices the fixed amounts apply; with less than €0.03/kWh difference every hour counts as 'normal'. Fixed: the four amounts below.",
+                "nl": "Automatisch: van de uren van 12 uur terug tot 12 uur vooruit gelden de goedkoopste 10% als 'zeer laag', de volgende 20% als 'laag', de duurste 10% als 'zeer hoog' en de 20% daaronder als 'hoog'. Met minder dan 12 bekende prijzen gelden de vaste bedragen; bij minder dan €0,03/kWh verschil geldt elk uur als 'normaal'. Vast: de vier bedragen hieronder.",
+                "de": "Automatisch: Von den Stunden 12 Stunden zurück bis 12 Stunden voraus gelten die günstigsten 10% als 'sehr niedrig', die nächsten 20% als 'niedrig', die teuersten 10% als 'sehr hoch' und die 20% darunter als 'hoch'. Mit weniger als 12 bekannten Preisen gelten die festen Beträge; bei weniger als €0,03/kWh Unterschied gilt jede Stunde als 'normal'. Fest: die vier Beträge unten.",
+                "fr": "Automatique : parmi les heures de 12 heures avant à 12 heures après, les 10% les moins chères comptent comme 'très bas', les 20% suivantes comme 'bas', les 10% les plus chères comme 'très élevé' et les 20% en dessous comme 'élevé'. Avec moins de 12 prix connus, les montants fixes s'appliquent ; avec moins de €0,03/kWh d'écart, chaque heure compte comme 'normal'. Fixe : les quatre montants ci-dessous."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic (relative to surrounding hours)",
+                    "nl": "Automatisch (ten opzichte van de uren eromheen)",
+                    "de": "Automatisch (relativ zu den umliegenden Stunden)",
+                    "fr": "Automatique (par rapport aux heures voisines)"
+                  }
+                },
+                {
+                  "id": "fixed",
+                  "label": {
+                    "en": "Fixed (amounts below)",
+                    "nl": "Vast (bedragen hieronder)",
+                    "de": "Fest (Beträge unten)",
+                    "fr": "Fixe (montants ci-dessous)"
+                  }
+                }
+              ]
+            },
+            {
               "id": "price_threshold_very_low",
               "type": "number",
               "label": {
@@ -22701,10 +22775,10 @@
                 "fr": "Seuil de Prix Très Bas (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Based on P10 percentile of 2024 spot prices. Default: €0.04/kWh",
-                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Gebaseerd op P10 percentiel van 2024 spotprijzen. Standaard: €0.04/kWh",
-                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Basierend auf P10-Perzentil der Spotpreise 2024. Standard: €0.04/kWh",
-                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Basé sur le percentile P10 des prix spot 2024. Défaut: €0.04/kWh"
+                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.04/kWh",
+                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.04/kWh",
+                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.04/kWh",
+                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.04/kWh"
               },
               "value": 0.04,
               "attr": {
@@ -22723,10 +22797,10 @@
                 "fr": "Seuil de Prix Bas (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Based on P30 percentile. Default: €0.06/kWh",
-                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Gebaseerd op P30 percentiel. Standaard: €0.06/kWh",
-                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Basierend auf P30-Perzentil. Standard: €0.06/kWh",
-                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Basé sur le percentile P30. Défaut: €0.06/kWh"
+                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.06/kWh",
+                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.06/kWh",
+                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.06/kWh",
+                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.06/kWh"
               },
               "value": 0.06,
               "attr": {
@@ -22745,10 +22819,10 @@
                 "fr": "Seuil de Prix Normal (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Based on P70 percentile. Default: €0.10/kWh",
-                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Gebaseerd op P70 percentiel. Standaard: €0.10/kWh",
-                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Basierend auf P70-Perzentil. Standard: €0.10/kWh",
-                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Basé sur le percentile P70. Défaut: €0.10/kWh"
+                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.10/kWh",
+                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.10/kWh",
+                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.10/kWh",
+                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.10/kWh"
               },
               "value": 0.1,
               "attr": {
@@ -22767,10 +22841,10 @@
                 "fr": "Seuil de Prix Élevé (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Based on P90 percentile. Default: €0.12/kWh",
-                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Gebaseerd op P90 percentiel. Standaard: €0.12/kWh",
-                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Basierend auf P90-Perzentil. Standard: €0.12/kWh",
-                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Basé sur le percentile P90. Défaut: €0.12/kWh"
+                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.12/kWh",
+                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.12/kWh",
+                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.12/kWh",
+                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.12/kWh"
               },
               "value": 0.12,
               "attr": {
@@ -25049,10 +25123,10 @@
                 "fr": "Activer l'optimisation des prix"
               },
               "hint": {
-                "en": "Optimize heating based on day-ahead energy prices (EnergyZero API). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400–600/year. ⚠️ Requires: 'Adaptive control on' (group 'Adaptive control').",
-                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (EnergyZero API). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400–600/jaar. ⚠️ Vereist: 'Adaptieve regeling aan' (groep 'Adaptieve regeling').",
-                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (EnergyZero API). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400–600/Jahr. ⚠️ Voraussetzung: 'Adaptive Regelung ein' (Gruppe 'Adaptive Regelung').",
-                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (API EnergyZero). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400–600/an. ⚠️ Prérequis : 'Contrôle adaptatif activé' (groupe 'Contrôle adaptatif')."
+                "en": "Optimize heating based on day-ahead energy prices (received via the flow card 'Send energy prices to heat pump'). Pre-heats during low-price periods, reduces during high-price periods. Requires dynamic energy contract. Estimated savings: €400–600/year. ⚠️ Requires: 'Adaptive control on' (group 'Adaptive control').",
+                "nl": "Optimaliseer verwarming op basis van day-ahead energieprijzen (ontvangen via de flowkaart 'Stuur energieprijzen naar warmtepomp'). Voorverwarmt tijdens lage-prijs periodes, vermindert tijdens hoge-prijs periodes. Vereist dynamisch energiecontract. Geschatte besparing: €400–600/jaar. ⚠️ Vereist: 'Adaptieve regeling aan' (groep 'Adaptieve regeling').",
+                "de": "Optimieren Sie die Heizung basierend auf Day-Ahead-Energiepreisen (empfangen über die Flow-Karte 'Energiepreise an Wärmepumpe senden'). Vorheizen während niedriger Preisperioden, Reduzierung während hoher Preisperioden. Erfordert dynamischen Energievertrag. Geschätzte Einsparungen: €400–600/Jahr. ⚠️ Voraussetzung: 'Adaptive Regelung ein' (Gruppe 'Adaptive Regelung').",
+                "fr": "Optimisez le chauffage en fonction des prix de l'énergie day-ahead (reçus via la carte de flux 'Envoyer les prix de l'énergie à la pompe à chaleur'). Préchauffe pendant les périodes à bas prix, réduit pendant les périodes à prix élevés. Nécessite un contrat d'énergie dynamique. Économies estimées: €400–600/an. ⚠️ Prérequis : 'Contrôle adaptatif activé' (groupe 'Contrôle adaptatif')."
               },
               "value": false
             },
@@ -25169,6 +25243,43 @@
               }
             },
             {
+              "id": "price_threshold_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Price thresholds",
+                "nl": "Prijsdrempels",
+                "de": "Preisschwellen",
+                "fr": "Seuils de prix"
+              },
+              "hint": {
+                "en": "Automatic: of the hours from 12 hours back to 12 hours ahead, the cheapest 10% count as 'very low', the next 20% as 'low', the most expensive 10% as 'very high' and the 20% below that as 'high'. With fewer than 12 known prices the fixed amounts apply; with less than €0.03/kWh difference every hour counts as 'normal'. Fixed: the four amounts below.",
+                "nl": "Automatisch: van de uren van 12 uur terug tot 12 uur vooruit gelden de goedkoopste 10% als 'zeer laag', de volgende 20% als 'laag', de duurste 10% als 'zeer hoog' en de 20% daaronder als 'hoog'. Met minder dan 12 bekende prijzen gelden de vaste bedragen; bij minder dan €0,03/kWh verschil geldt elk uur als 'normaal'. Vast: de vier bedragen hieronder.",
+                "de": "Automatisch: Von den Stunden 12 Stunden zurück bis 12 Stunden voraus gelten die günstigsten 10% als 'sehr niedrig', die nächsten 20% als 'niedrig', die teuersten 10% als 'sehr hoch' und die 20% darunter als 'hoch'. Mit weniger als 12 bekannten Preisen gelten die festen Beträge; bei weniger als €0,03/kWh Unterschied gilt jede Stunde als 'normal'. Fest: die vier Beträge unten.",
+                "fr": "Automatique : parmi les heures de 12 heures avant à 12 heures après, les 10% les moins chères comptent comme 'très bas', les 20% suivantes comme 'bas', les 10% les plus chères comme 'très élevé' et les 20% en dessous comme 'élevé'. Avec moins de 12 prix connus, les montants fixes s'appliquent ; avec moins de €0,03/kWh d'écart, chaque heure compte comme 'normal'. Fixe : les quatre montants ci-dessous."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Automatic (relative to surrounding hours)",
+                    "nl": "Automatisch (ten opzichte van de uren eromheen)",
+                    "de": "Automatisch (relativ zu den umliegenden Stunden)",
+                    "fr": "Automatique (par rapport aux heures voisines)"
+                  }
+                },
+                {
+                  "id": "fixed",
+                  "label": {
+                    "en": "Fixed (amounts below)",
+                    "nl": "Vast (bedragen hieronder)",
+                    "de": "Fest (Beträge unten)",
+                    "fr": "Fixe (montants ci-dessous)"
+                  }
+                }
+              ]
+            },
+            {
               "id": "price_threshold_very_low",
               "type": "number",
               "label": {
@@ -25178,10 +25289,10 @@
                 "fr": "Seuil de Prix Très Bas (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Based on P10 percentile of 2024 spot prices. Default: €0.04/kWh",
-                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Gebaseerd op P10 percentiel van 2024 spotprijzen. Standaard: €0.04/kWh",
-                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Basierend auf P10-Perzentil der Spotpreise 2024. Standard: €0.04/kWh",
-                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Basé sur le percentile P10 des prix spot 2024. Défaut: €0.04/kWh"
+                "en": "Maximum price considered 'very low' for maximum pre-heating (+1.5°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.04/kWh",
+                "nl": "Maximum prijs beschouwd als 'zeer laag' voor maximaal voorverwarmen (+1.5°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.04/kWh",
+                "de": "Maximaler Preis als 'sehr niedrig' für maximales Vorheizen (+1.5°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.04/kWh",
+                "fr": "Prix maximum considéré comme 'très bas' pour préchauffage maximum (+1.5°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.04/kWh"
               },
               "value": 0.04,
               "attr": {
@@ -25200,10 +25311,10 @@
                 "fr": "Seuil de Prix Bas (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Based on P30 percentile. Default: €0.06/kWh",
-                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Gebaseerd op P30 percentiel. Standaard: €0.06/kWh",
-                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Basierend auf P30-Perzentil. Standard: €0.06/kWh",
-                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Basé sur le percentile P30. Défaut: €0.06/kWh"
+                "en": "Maximum price considered 'low' for moderate pre-heating (+0.75°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.06/kWh",
+                "nl": "Maximum prijs beschouwd als 'laag' voor matig voorverwarmen (+0.75°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.06/kWh",
+                "de": "Maximaler Preis als 'niedrig' für mäßiges Vorheizen (+0.75°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.06/kWh",
+                "fr": "Prix maximum considéré comme 'bas' pour préchauffage modéré (+0.75°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.06/kWh"
               },
               "value": 0.06,
               "attr": {
@@ -25222,10 +25333,10 @@
                 "fr": "Seuil de Prix Normal (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Based on P70 percentile. Default: €0.10/kWh",
-                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Gebaseerd op P70 percentiel. Standaard: €0.10/kWh",
-                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Basierend auf P70-Perzentil. Standard: €0.10/kWh",
-                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Basé sur le percentile P70. Défaut: €0.10/kWh"
+                "en": "Maximum price considered 'normal' for maintaining temperature (0°C adjustment). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.10/kWh",
+                "nl": "Maximum prijs beschouwd als 'normaal' voor temperatuur handhaven (0°C aanpassing). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.10/kWh",
+                "de": "Maximaler Preis als 'normal' für Temperaturerhaltung (0°C Anpassung). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.10/kWh",
+                "fr": "Prix maximum considéré comme 'normal' pour maintenir la température (ajustement 0°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.10/kWh"
               },
               "value": 0.1,
               "attr": {
@@ -25244,10 +25355,10 @@
                 "fr": "Seuil de Prix Élevé (€/kWh)"
               },
               "hint": {
-                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Based on P90 percentile. Default: €0.12/kWh",
-                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Gebaseerd op P90 percentiel. Standaard: €0.12/kWh",
-                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Basierend auf P90-Perzentil. Standard: €0.12/kWh",
-                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Basé sur le percentile P90. Défaut: €0.12/kWh"
+                "en": "Maximum price considered 'high' before 'very high' reduction (-1.0°C). Market price excl. VAT and fees, only used with 'Fixed'. Default: €0.12/kWh",
+                "nl": "Maximum prijs beschouwd als 'hoog' voor 'zeer hoog' reductie (-1.0°C). Marktprijs zonder btw en opslagen, alleen gebruikt bij 'Vast'. Standaard: €0.12/kWh",
+                "de": "Maximaler Preis als 'hoch' vor 'sehr hoch' Reduzierung (-1.0°C). Marktpreis ohne MwSt. und Aufschläge, nur bei 'Fest' verwendet. Standard: €0.12/kWh",
+                "fr": "Prix maximum considéré comme 'élevé' avant réduction 'très élevé' (-1.0°C). Prix du marché hors TVA et frais, utilisé uniquement avec 'Fixe'. Défaut: €0.12/kWh"
               },
               "value": 0.12,
               "attr": {

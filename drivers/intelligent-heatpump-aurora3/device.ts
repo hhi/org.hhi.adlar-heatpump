@@ -11,6 +11,7 @@ import { ModbusCOPService } from '../../lib/aurora3/services/modbus-cop-service'
 import { RollingCOPCalculator } from '../../lib/shared/services/rolling-cop-calculator';
 import { DeviceConstants } from '../../lib/aurora3/constants';
 import { isSetpointRangeValid, resolveMaxSetpoint, SETPOINT_RANGE_MIN_GAP } from '../../lib/shared/adaptive/setpoint-range';
+import { migratePriceThresholdMode, useAutoThresholdsForNewDevice } from '../../lib/shared/adaptive/price-threshold-mode-migration';
 import { Aurora3AppHost } from '../../lib/aurora3/types/app-host';
 import {
   LiveOperationWidgetState,
@@ -232,6 +233,9 @@ class Aurora3ModbusDevice extends Homey.Device {
     // Migration v3.6.2 (R25): before the services start, so the learner gets the new value
     await this._migrateForgettingFactor();
 
+    // Migration v3.11.0: existing devices keep the fixed price thresholds (before the services start)
+    await this._migratePriceThresholdMode();
+
     await this._applyDashboardPort(settings.dashboard_port ?? 8091);
     await this._ensureCapabilities();
     await this._applyPowerCapabilities(settings.enable_power_measurements ?? true);
@@ -380,6 +384,33 @@ class Aurora3ModbusDevice extends Homey.Device {
     const host = this._appHost;
     if (typeof host.setAurora3DashboardPort !== 'function') return;
     await host.setAurora3DashboardPort(port);
+  }
+
+  /** Called by Homey after pairing, after onInit. */
+  async onAdded(): Promise<void> {
+    await this._useAutoPriceThresholds();
+  }
+
+  /** Migration v3.11.0: existing devices keep the fixed price thresholds; new devices get 'auto' in onAdded. */
+  private async _migratePriceThresholdMode(): Promise<void> {
+    try {
+      if (await migratePriceThresholdMode(this)) {
+        this.logger.info('Migration v3.11.0: price thresholds set to fixed');
+      }
+    } catch (error) {
+      this.logger.warn('Migration v3.11.0: failed to set the price threshold mode:', error);
+    }
+  }
+
+  /** v3.11.0: a newly paired device uses the automatic price thresholds (onInit has already run). */
+  private async _useAutoPriceThresholds(): Promise<void> {
+    try {
+      await useAutoThresholdsForNewDevice(this);
+      this.coordinator?.getAdaptiveControl().getEnergyOptimizer().setThresholdMode('auto');
+      this.logger.info('New device: automatic price thresholds');
+    } catch (error) {
+      this.logger.warn('Failed to set automatic price thresholds:', error);
+    }
   }
 
   /** Migration v3.6.2 (R25): a forgetting factor outside 0.9985–0.9995 (minimum raised in 3.4.2) blocks every settings save. */

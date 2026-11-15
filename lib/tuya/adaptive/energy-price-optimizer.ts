@@ -17,6 +17,12 @@
  * Note: Thresholds apply to RAW market price (excl. VAT/fees).
  * The 2024 NL average was ~€0.077/kWh with σ≈€0.028/kWh.
  *
+ * v3.11.0: threshold mode 'auto' replaces the fixed amounts with the P10/P30/P70/P90
+ * percentiles of the raw prices from 12 hours back to 12 hours ahead. The effective
+ * price is an increasing function of the raw price, so the category is the same in
+ * every price mode. With fewer than 12 prices in that window the fixed thresholds
+ * apply; with a spread (P90 − P10) below €0.03/kWh every hour counts as normal.
+ *
  * @version 1.4.0
  * @since 1.4.0
  */
@@ -36,6 +42,18 @@ export interface PriceThresholds {
   low: number; // €0.06/kWh (P30 percentile)
   normal: number; // €0.10/kWh (P70 percentile)
   high: number; // €0.12/kWh (P90 percentile)
+}
+
+/** v3.11.0: 'auto' = percentiles of the surrounding prices, 'fixed' = the four amounts from the settings */
+export type PriceThresholdMode = 'auto' | 'fixed';
+
+/** v3.11.0: where the thresholds in use come from */
+export type ThresholdSource = 'fixed' | 'auto' | 'flat' | 'fallback';
+
+export interface ActiveThresholds {
+  thresholds: PriceThresholds;
+  source: ThresholdSource;
+  sampleSize: number;
 }
 
 export interface PriceData {
@@ -122,9 +140,17 @@ export class EnergyPriceOptimizer {
   // v3.4.1: plausible range for external day-ahead prices (€/kWh, excl. VAT); negative prices are valid
   public static readonly EXTERNAL_PRICE_RANGE = { MIN: -1, MAX: 5 };
 
+  // v3.11.0: automatic thresholds — window (hours each side), minimum prices, minimum spread (€/kWh, raw)
+  public static readonly AUTO_THRESHOLDS = { WINDOW_HOURS: 12, MIN_SAMPLES: 12, MIN_SPREAD: 0.03 };
+
   private config: EnergyOptimizerConfig;
   private priceData: PriceData[] = [];
   private lastFetch: number = 0;
+
+  // v3.11.0: threshold mode and the prices of hours that have ended (max WINDOW_HOURS back)
+  private thresholdMode: PriceThresholdMode = 'fixed';
+  private recentPrices: PriceData[] = [];
+  private lastThresholdSource: ThresholdSource | null = null;
   private logger: (msg: string, ...args: unknown[]) => void;
 
   // Cost accumulation state
@@ -176,13 +202,114 @@ export class EnergyPriceOptimizer {
   }
 
   /**
-   * Categorize price into bands
+   * v3.11.0: Select fixed thresholds (from the settings) or automatic thresholds (percentiles)
    */
-  private categorizePrice(price: number): PriceCategory {
-    if (price < this.config.thresholds.veryLow) return PriceCategory.VERY_LOW;
-    if (price < this.config.thresholds.low) return PriceCategory.LOW;
-    if (price < this.config.thresholds.normal) return PriceCategory.NORMAL;
-    if (price < this.config.thresholds.high) return PriceCategory.HIGH;
+  public setThresholdMode(mode: PriceThresholdMode): void {
+    this.thresholdMode = mode === 'auto' ? 'auto' : 'fixed';
+    this.lastThresholdSource = null;
+    this.logger(`EnergyPriceOptimizer: Threshold mode set to ${this.thresholdMode}`);
+  }
+
+  public getThresholdMode(): PriceThresholdMode {
+    return this.thresholdMode;
+  }
+
+  /**
+   * v3.11.0: Linear-interpolated percentile of an ascending sorted list
+   */
+  private static percentile(sorted: number[], q: number): number {
+    const pos = (sorted.length - 1) * q;
+    const lo = Math.floor(pos);
+    const hi = Math.ceil(pos);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  }
+
+  /**
+   * v3.11.0: Raw prices from WINDOW_HOURS before to WINDOW_HOURS after the hour of `timestamp`
+   * (ended hours from the buffer plus the received prices; one price per hour)
+   */
+  private getWindowPrices(timestamp: number): number[] {
+    const hourStart = new Date(timestamp);
+    hourStart.setMinutes(0, 0, 0);
+    const span = EnergyPriceOptimizer.AUTO_THRESHOLDS.WINDOW_HOURS * 3600000;
+    const from = hourStart.getTime() - span;
+    const to = hourStart.getTime() + span;
+    const byHour = new Map<number, number>();
+    for (const p of [...this.recentPrices, ...this.priceData]) {
+      if (p.timestamp >= from && p.timestamp <= to) byHour.set(p.timestamp, p.price);
+    }
+    return [...byHour.values()];
+  }
+
+  /**
+   * v3.11.0: Thresholds in use at `timestamp`.
+   * - fixed: the amounts from the settings
+   * - auto: P10/P30/P70/P90 of the raw prices in the window
+   * - flat: spread below MIN_SPREAD, every price counts as normal
+   * - fallback: auto mode with fewer than MIN_SAMPLES prices, the fixed amounts apply
+   */
+  public getActiveThresholds(timestamp: number = Date.now()): ActiveThresholds {
+    const fixed = this.config.thresholds;
+    if (this.thresholdMode !== 'auto') {
+      return { thresholds: fixed, source: 'fixed', sampleSize: 0 };
+    }
+
+    const { MIN_SAMPLES, MIN_SPREAD } = EnergyPriceOptimizer.AUTO_THRESHOLDS;
+    const prices = this.getWindowPrices(timestamp).sort((a, b) => a - b);
+    let result: ActiveThresholds;
+    if (prices.length < MIN_SAMPLES) {
+      result = { thresholds: fixed, source: 'fallback', sampleSize: prices.length };
+    } else {
+      const p10 = EnergyPriceOptimizer.percentile(prices, 0.1);
+      const p90 = EnergyPriceOptimizer.percentile(prices, 0.9);
+      result = p90 - p10 < MIN_SPREAD
+        ? {
+          thresholds: {
+            veryLow: -Infinity, low: -Infinity, normal: Infinity, high: Infinity,
+          },
+          source: 'flat',
+          sampleSize: prices.length,
+        }
+        : {
+          thresholds: {
+            veryLow: p10,
+            low: EnergyPriceOptimizer.percentile(prices, 0.3),
+            normal: EnergyPriceOptimizer.percentile(prices, 0.7),
+            high: p90,
+          },
+          source: 'auto',
+          sampleSize: prices.length,
+        };
+    }
+
+    if (result.source !== this.lastThresholdSource) {
+      this.lastThresholdSource = result.source;
+      if (result.source === 'fallback') {
+        this.logger(`⚠️ EnergyPriceOptimizer: only ${prices.length} prices within ±12 hours, fixed thresholds used`);
+      } else if (result.source === 'flat') {
+        this.logger('EnergyPriceOptimizer: price spread below €0.03/kWh, all hours count as normal');
+      } else {
+        this.logger(`EnergyPriceOptimizer: automatic thresholds from ${prices.length} prices`, {
+          veryLow: `€${result.thresholds.veryLow.toFixed(4)}/kWh`,
+          low: `€${result.thresholds.low.toFixed(4)}/kWh`,
+          normal: `€${result.thresholds.normal.toFixed(4)}/kWh`,
+          high: `€${result.thresholds.high.toFixed(4)}/kWh`,
+        });
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Categorize price into bands
+   * @version 3.11.0 - Uses the thresholds in use at `timestamp` (fixed or automatic)
+   */
+  private categorizePrice(price: number, timestamp: number = Date.now()): PriceCategory {
+    const { thresholds } = this.getActiveThresholds(timestamp);
+    if (price < thresholds.veryLow) return PriceCategory.VERY_LOW;
+    if (price < thresholds.low) return PriceCategory.LOW;
+    if (price < thresholds.normal) return PriceCategory.NORMAL;
+    if (price < thresholds.high) return PriceCategory.HIGH;
     return PriceCategory.VERY_HIGH;
   }
 
@@ -319,13 +446,14 @@ export class EnergyPriceOptimizer {
     // This ensures threshold changes and restarts use correct categories
     return {
       ...found,
-      category: this.categorizePrice(found.price),
+      category: this.categorizePrice(found.price, timestamp),
     };
   }
 
   /**
    * Get average price for next N hours
    * @version 2.5.0 - Bug fix: now returns effective price based on priceMode
+   * @version 3.11.0 - Category from the average RAW price, like the current price
    */
   public getAveragePrice(timestamp: number, hoursAhead: number): PriceData | null {
     const endTime = timestamp + hoursAhead * 3600000;
@@ -337,7 +465,8 @@ export class EnergyPriceOptimizer {
     // Calculate effective prices and average them
     const effectivePrices = futurePrices.map((p) => this.calculateEffectivePrice(p.price));
     const avgPrice = effectivePrices.reduce((sum, p) => sum + p, 0) / effectivePrices.length;
-    const avgCategory = this.categorizePrice(avgPrice);
+    const avgRawPrice = futurePrices.reduce((sum, p) => sum + p.price, 0) / futurePrices.length;
+    const avgCategory = this.categorizePrice(avgRawPrice, timestamp);
 
     return {
       timestamp: timestamp + (hoursAhead / 2) * 3600000,
@@ -1018,6 +1147,9 @@ export class EnergyPriceOptimizer {
     // Sort by timestamp (ascending)
     newPriceData.sort((a, b) => a.timestamp - b.timestamp);
 
+    // v3.11.0: keep the hours that have ended (max WINDOW_HOURS back) for the automatic thresholds
+    this.keepRecentPrices(currentHourStart.getTime());
+
     // Replace existing price data
     this.priceData = newPriceData;
     this.lastFetch = now;
@@ -1031,6 +1163,19 @@ export class EnergyPriceOptimizer {
     if (skippedPrices > 0 && skippedPrices >= entries.length / 4) {
       this.logger(`⚠️ EnergyPriceOptimizer: ${skippedPrices} of ${entries.length} prices were outside ${MIN} to ${MAX} €/kWh and were skipped`);
     }
+  }
+
+  /**
+   * v3.11.0: Move ended hours of the current price data into the buffer and drop
+   * buffer entries older than WINDOW_HOURS before the current hour.
+   */
+  private keepRecentPrices(currentHourStart: number): void {
+    const oldest = currentHourStart - EnergyPriceOptimizer.AUTO_THRESHOLDS.WINDOW_HOURS * 3600000;
+    const byHour = new Map<number, PriceData>();
+    for (const p of [...this.recentPrices, ...this.priceData]) {
+      if (p.timestamp >= oldest && p.timestamp < currentHourStart) byHour.set(p.timestamp, p);
+    }
+    this.recentPrices = [...byHour.values()].sort((a, b) => a.timestamp - b.timestamp);
   }
 
   /**
@@ -1062,6 +1207,7 @@ export class EnergyPriceOptimizer {
     return {
       priceData: this.priceData,
       lastFetch: this.lastFetch,
+      recentPrices: this.recentPrices,
       accumulatedDailyCost: this.accumulatedDailyCost,
       lastEnergyTotal: this.lastEnergyTotal,
       financialComponents: this.financialComponents,
@@ -1079,6 +1225,7 @@ export class EnergyPriceOptimizer {
   public restoreState(state: {
     priceData: PriceData[];
     lastFetch: number;
+    recentPrices?: PriceData[];
     accumulatedDailyCost?: number;
     lastEnergyTotal?: number;
     financialComponents?: FinancialComponents;
@@ -1089,6 +1236,10 @@ export class EnergyPriceOptimizer {
   }): void {
     this.priceData = state.priceData || [];
     this.lastFetch = state.lastFetch || 0;
+    // v3.11.0: optional field; older stored states have no buffer
+    this.recentPrices = Array.isArray(state.recentPrices)
+      ? state.recentPrices.filter((p) => Number.isFinite(p?.timestamp) && Number.isFinite(p?.price))
+      : [];
     this.accumulatedDailyCost = state.accumulatedDailyCost || 0;
     this.lastEnergyTotal = state.lastEnergyTotal || 0;
     if (state.financialComponents) {
@@ -1123,6 +1274,7 @@ export class EnergyPriceOptimizer {
     const dataSize = this.priceData.length;
 
     this.priceData = [];
+    this.recentPrices = [];
     this.lastFetch = 0;
 
     this.logger(`EnergyPriceOptimizer: Destroyed - released ${dataSize} price data points`);

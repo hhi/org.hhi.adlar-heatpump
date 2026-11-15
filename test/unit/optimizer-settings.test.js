@@ -149,3 +149,26 @@ for (const [name, Service] of DRIVERS) {
   });
 }
 
+
+// v3.11.0: the threshold mode reaches the price optimizer at start and when changed
+for (const [name, Service] of DRIVERS) {
+  test(`${name}: the stored threshold mode is loaded, a missing one counts as fixed`, async () => {
+    const auto = new Service({ device: createDevice({ price_threshold_mode: 'auto' }), logger: () => {} });
+    await auto.loadPriceSettings();
+    assert.strictEqual(auto.energyOptimizer.getThresholdMode(), 'auto');
+
+    const missing = new Service({ device: createDevice(), logger: () => {} });
+    await missing.loadPriceSettings();
+    assert.strictEqual(missing.energyOptimizer.getThresholdMode(), 'fixed');
+  });
+
+  test(`${name}: a changed threshold mode is read from the new settings`, async () => {
+    // getSetting keeps returning the old value, as Homey does while onSettings runs
+    const service = new Service({ device: createDevice({ price_threshold_mode: 'fixed' }), logger: () => {} });
+    await service.loadPriceSettings();
+    await service.onSettings({}, { price_threshold_mode: 'auto' }, ['price_threshold_mode']);
+    assert.strictEqual(service.energyOptimizer.getThresholdMode(), 'auto');
+    await service.onSettings({}, { price_threshold_mode: 'fixed' }, ['price_threshold_mode']);
+    assert.strictEqual(service.energyOptimizer.getThresholdMode(), 'fixed');
+  });
+}
