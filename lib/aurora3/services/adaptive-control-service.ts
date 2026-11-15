@@ -1884,6 +1884,10 @@ export class AdaptiveControlService {
       // Apply price mode to optimizer
       this.energyOptimizer.setPriceMode(priceMode as 'market' | 'market_plus' | 'all_in');
 
+      // v3.11.0: automatic or fixed thresholds (existing devices are migrated to 'fixed')
+      const thresholdMode = (await this.device.getSetting('price_threshold_mode')) === 'auto' ? 'auto' : 'fixed';
+      this.energyOptimizer.setThresholdMode(thresholdMode);
+
       // Apply financial components to optimizer
       this.energyOptimizer.setFinancialComponents({
         storageFee: supplierFee,
@@ -1901,6 +1905,7 @@ export class AdaptiveControlService {
 
       this.logger('AdaptiveControlService: Price settings loaded from device settings', {
         priceMode,
+        thresholdMode,
         supplierFee: `€${supplierFee.toFixed(4)}/kWh`,
         energyTax: `€${energyTax.toFixed(5)}/kWh`,
         vatPercentage: `${vatPercentage}%`,
@@ -1917,6 +1922,7 @@ export class AdaptiveControlService {
       });
       // Fallback to defaults from settings schema (driver.settings.compose.json)
       this.energyOptimizer.setPriceMode('all_in');
+      this.energyOptimizer.setThresholdMode('fixed');
       this.energyOptimizer.setFinancialComponents({
         storageFee: 0.0182,
         energyTax: 0.11085,
@@ -2098,6 +2104,11 @@ export class AdaptiveControlService {
     if (changedKeys.includes('price_calculation_mode')) {
       const mode = newSettings.price_calculation_mode as 'market' | 'market_plus' | 'all_in';
       this.energyOptimizer.setPriceMode(mode);
+    }
+
+    // v3.11.0: automatic or fixed thresholds (value from newSettings, not getSetting)
+    if (changedKeys.includes('price_threshold_mode')) {
+      this.energyOptimizer.setThresholdMode(newSettings.price_threshold_mode === 'auto' ? 'auto' : 'fixed');
     }
 
     // Handle financial component changes

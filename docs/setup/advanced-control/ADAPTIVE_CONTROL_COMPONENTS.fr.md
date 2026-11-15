@@ -193,7 +193,13 @@ Valeurs de départ des profils de bâtiment ; le modèle apprend ensuite les val
 | Très Élevé | >0.12€/kWh | Réduire MAX | -1.0°C |
 
 > [!NOTE]
-> Les seuils sont basés sur les percentiles des prix spot 2024.
+> Le tableau montre les seuils fixes (prix du marché brut hors TVA et frais,
+> valeurs par défaut de 2024). Avec le réglage **Seuils de prix** sur
+> *Automatique* (par défaut pour les nouveaux appareils), les P10/P30/P70/P90
+> des prix de 12 heures avant à 12 heures après s'appliquent. Avec moins de 12
+> prix, les seuils fixes s'appliquent ; avec moins de €0,03/kWh d'écart, chaque
+> heure compte comme Normal. Les appareils existants passent sur *Fixe* lors de
+> la mise à jour vers 3.11.0.
 
 ### Modes de Calcul des Coûts
 
@@ -357,6 +363,7 @@ Total :            -3.31°C → Consigne << P111 → compresseur s'arrête ✅
 {
   "price_optimizer_enabled": true,
   "price_calculation_mode": "all_in",
+  "price_threshold_mode": "auto",
   "price_threshold_very_low": 0.04,
   "price_threshold_low": 0.06,
   "price_threshold_normal": 0.10,
