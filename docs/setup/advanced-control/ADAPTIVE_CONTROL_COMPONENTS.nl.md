@@ -193,7 +193,13 @@ Startwaarden van de gebouwprofielen; het model leert daarna de werkelijke waarde
 | Zeer Hoog | >€0.12/kWh | Reduceren MAX | -1.0°C |
 
 > [!NOTE]
-> Drempels zijn gebaseerd op 2024 spotprijs percentielen.
+> De tabel toont de vaste drempels (kale marktprijs zonder btw en opslagen,
+> standaardwaarden uit 2024). Met de instelling **Prijsdrempels** op
+> *Automatisch* (standaard voor nieuw toegevoegde apparaten) gelden
+> P10/P30/P70/P90 van de prijzen van 12 uur terug tot 12 uur vooruit. Met minder
+> dan 12 prijzen gelden de vaste drempels; bij minder dan €0,03/kWh spreiding
+> geldt elk uur als Normaal. Bestaande apparaten staan na de update naar 3.11.0
+> op *Vast*.
 
 ### Kostenberekening Modi
 
@@ -357,6 +363,7 @@ Totaal:            -3.31°C → Setpoint << P111 → compressor stopt ✅
 {
   "price_optimizer_enabled": true,
   "price_calculation_mode": "all_in",
+  "price_threshold_mode": "auto",
   "price_threshold_very_low": 0.04,
   "price_threshold_low": 0.06,
   "price_threshold_normal": 0.10,

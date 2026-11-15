@@ -21,6 +21,7 @@ import {
 } from '../../lib/tuya/services/widget-state-service';
 import { Logger } from '../../lib/shared/logger';
 import { BuildingModelLearner } from '../../lib/shared/adaptive/building-model-learner';
+import { migratePriceThresholdMode, useAutoThresholdsForNewDevice } from '../../lib/shared/adaptive/price-threshold-mode-migration';
 import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
 import { isExternalValueFresh } from '../../lib/shared/utils/external-value-age';
 import { formatCopMethodDisplay } from '../../lib/shared/utils/cop-method-display';
@@ -3356,6 +3357,28 @@ class MyDevice extends Homey.Device {
   /**
    * onInit is called when the device is initialized.
    */
+  /** Migration v3.11.0: existing devices keep the fixed price thresholds; new devices get 'auto' in onAdded. */
+  private async _migratePriceThresholdMode(): Promise<void> {
+    try {
+      if (await migratePriceThresholdMode(this)) {
+        this.logger.info('Migration v3.11.0: price thresholds set to fixed');
+      }
+    } catch (error) {
+      this.logger.warn('Migration v3.11.0: failed to set the price threshold mode:', error);
+    }
+  }
+
+  /** v3.11.0: a newly paired device uses the automatic price thresholds (onInit has already run). */
+  private async _useAutoPriceThresholds(): Promise<void> {
+    try {
+      await useAutoThresholdsForNewDevice(this);
+      this.serviceCoordinator?.getAdaptiveControl().getEnergyOptimizer().setThresholdMode('auto');
+      this.logger.info('New device: automatic price thresholds');
+    } catch (error) {
+      this.logger.warn('Failed to set automatic price thresholds:', error);
+    }
+  }
+
   /** Migration v3.6.2 (R25): a forgetting factor outside 0.9985–0.9995 (minimum raised in 3.4.2) blocks every settings save. */
   private async _migrateForgettingFactor(): Promise<void> {
     const stored: unknown = this.getSetting('building_model_forgetting_factor');
@@ -3385,6 +3408,9 @@ class MyDevice extends Homey.Device {
 
       // Migration v3.6.2 (R25): before the services start, so the learner gets the new value
       await this._migrateForgettingFactor();
+
+      // Migration v3.11.0: existing devices keep the fixed price thresholds (before the services start)
+      await this._migratePriceThresholdMode();
 
       // Migrate adlar_connection_status from enum to string type (v0.99.61 migration)
       // Existing devices have the old enum-type capability which causes "unknown_error_getting_file" errors
@@ -4107,6 +4133,7 @@ class MyDevice extends Homey.Device {
    */
   async onAdded() {
     this.log('MyDevice has been added');
+    await this._useAutoPriceThresholds();
   }
 
   /**

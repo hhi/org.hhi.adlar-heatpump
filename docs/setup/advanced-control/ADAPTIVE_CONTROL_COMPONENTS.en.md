@@ -193,7 +193,12 @@ Starting values of the building profiles; the model then learns the actual value
 | Very High | >€0.12/kWh | Reduce MAX | -1.0°C |
 
 > [!NOTE]
-> Thresholds are based on 2024 spot price percentiles.
+> The table shows the fixed thresholds (raw market price excl. VAT and fees,
+> defaults from 2024). With the setting **Price thresholds** on *Automatic*
+> (default for newly added devices) the P10/P30/P70/P90 of the prices from 12
+> hours back to 12 hours ahead apply. With fewer than 12 prices the fixed
+> thresholds apply; with less than €0.03/kWh spread every hour counts as Normal.
+> Existing devices are set to *Fixed* by the update to 3.11.0.
 
 ### Cost Calculation Modes
 
@@ -357,6 +362,7 @@ Total:            -3.31°C → Setpoint << P111 → compressor stops ✅
 {
   "price_optimizer_enabled": true,
   "price_calculation_mode": "all_in",
+  "price_threshold_mode": "auto",
   "price_threshold_very_low": 0.04,
   "price_threshold_low": 0.06,
   "price_threshold_normal": 0.10,
