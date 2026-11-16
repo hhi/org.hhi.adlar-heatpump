@@ -7,4 +7,5 @@ export const DASHBOARD_PAGE_STYLES: Record<string, string> = {
   '/expert': 'dashboard-expert.css',
   '/changelog': 'dashboard-changelog.css',
   '/heating-curve': 'heating_curve_line.css',
+  '/processchema': 'dashboard-schema.css',
 };

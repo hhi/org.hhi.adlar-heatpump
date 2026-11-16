@@ -16,6 +16,7 @@ import {
 } from '../protocol/parameter-bank-service';
 import parameterBankTexts from '../protocol/parameter-bank-texts';
 import { DASHBOARD_PAGE_STYLES } from '../../shared/dashboard-styles';
+import { SchemaHistoryBuffer } from '../../shared/dashboard-history';
 import { DataSnapshot } from '../protocol/adlar2-modbus-service';
 import { RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import {
@@ -184,6 +185,7 @@ export class DashboardService {
   private readonly appDir: string;
   private capabilityMeta: Map<string, { title: string; unit: string; icon: string; type: string }> | null = null;
   private getCapabilityValues: (() => Record<string, unknown>) | null = null;
+  private readonly historyBuffer = new SchemaHistoryBuffer();
 
   constructor(options: DashboardServiceOptions) {
     this.port = options.port ?? 8090;
@@ -247,6 +249,22 @@ export class DashboardService {
   /** Sla de meest recente snapshot op (overschrijft de vorige). */
   setSnapshot(snapshot: DataSnapshot): void {
     this.snapshot = snapshot;
+    this._recordHistory(snapshot);
+  }
+
+  private _recordHistory(snapshot: DataSnapshot): void {
+    const caps = this.getCapabilityValues?.() ?? {};
+    const roomVal = caps['measure_temperature.indoor_modbus'] ?? caps['measure_temperature.indoor'];
+    this.historyBuffer.record({
+      ts: snapshot.ts || Date.now(),
+      t1: snapshot.sensors?.ambientT1?.value ?? snapshot.cop?.ambientTempC ?? null,
+      t6: snapshot.sensors?.inletT6?.value ?? null,
+      t7: snapshot.sensors?.outletT7?.value ?? null,
+      dhw: snapshot.sensors?.dhwTankTemp?.value ?? null,
+      room: typeof roomVal === 'number' ? roomVal : null,
+      hz: snapshot.sensors?.compRunningFreq?.value ?? null,
+      cop: snapshot.cop?.cop ?? null,
+    });
   }
 
   /** Start de HTTP-server. */
@@ -429,6 +447,16 @@ export class DashboardService {
     }
     if (method === 'POST' && url === '/api/set-diy-curve') {
       await this._handleSetDiyCurve(req, res);
+      return;
+    }
+
+    // Processchema (thermodynamisch & hydronisch systeemoverzicht)
+    if (method === 'GET' && (url === '/processchema' || url === '/processchema.html')) {
+      await this._serveFile(res, 'dashboard-schema.html');
+      return;
+    }
+    if (method === 'GET' && url === '/schema-renderer.js') {
+      await this._serveFile(res, 'schema-renderer.js');
       return;
     }
 
@@ -777,7 +805,10 @@ export class DashboardService {
           res.writeHead(500, { 'Content-Type': 'text/plain' });
           res.end(`Error loading ${filename}`);
         } else {
-          res.writeHead(200, { 'Content-Type': filename.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8' });
+          let contentType = 'text/html; charset=utf-8';
+          if (filename.endsWith('.css')) contentType = 'text/css; charset=utf-8';
+          if (filename.endsWith('.js')) contentType = 'text/javascript; charset=utf-8';
+          res.writeHead(200, { 'Content-Type': contentType });
           res.end(content);
         }
         resolve();
@@ -793,6 +824,7 @@ export class DashboardService {
       return;
     }
     this.snapshot = snapshot;
+    this._recordHistory(snapshot);
     // ADR-041b: JSON-replacer om floating point-getallen af te ronden.
     // Dit voorkomt weergaveproblemen zoals 1.2000000000000002 op het dashboard.
     const replacer = (_key: string, value: unknown): unknown => {
@@ -802,7 +834,12 @@ export class DashboardService {
       }
       return value;
     };
-    const json = JSON.stringify({ ...snapshot, serverNowMs: Date.now() }, replacer);
+    const json = JSON.stringify({
+      ...snapshot,
+      temperatureScale: this._getTemperatureScale(),
+      history: this.historyBuffer.getAll(),
+      serverNowMs: Date.now(),
+    }, replacer);
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(json);
   }
