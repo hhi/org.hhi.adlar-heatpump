@@ -2,9 +2,12 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
+/* eslint-disable no-use-before-define -- the register helpers are hoisted function declarations below the class */
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { DASHBOARD_PAGE_STYLES } from '../../shared/dashboard-styles';
+import { SchemaHistoryBuffer } from '../../shared/dashboard-history';
 import { DataSnapshot, pollGroupsForAddress } from '../protocol/adlar3-modbus-service';
 import { RegisterChangeEntry, RegisterChangeLogMode } from '../protocol/modbus-tcp-service';
 import {
@@ -160,6 +163,7 @@ export class DashboardService {
   private getCapabilityValues: (() => Record<string, unknown>) | null = null;
   private getSnapshotCallback: (() => DataSnapshot | null) | null = null;
   private getRegisterCache: (() => Map<number, number>) | null = null;
+  private readonly historyBuffer = new SchemaHistoryBuffer();
 
   constructor(options: DashboardServiceOptions) {
     this.port = options.port ?? 8090;
@@ -213,6 +217,24 @@ export class DashboardService {
   /** Sla de meest recente snapshot op (overschrijft de vorige). */
   setSnapshot(snapshot: DataSnapshot): void {
     this.snapshot = snapshot;
+    this._recordHistory(snapshot);
+  }
+
+  private _recordHistory(snapshot: DataSnapshot): void {
+    const caps = this.getCapabilityValues?.() ?? {};
+    const roomVal = snapshot.sensors?.roomTemp?.value
+      ?? caps['measure_temperature.indoor_aurora3']
+      ?? caps['measure_temperature.indoor'];
+    this.historyBuffer.record({
+      ts: snapshot.ts || Date.now(),
+      t1: snapshot.sensors?.ambientT4?.value ?? snapshot.cop?.ambientTempC ?? null,
+      t6: snapshot.sensors?.retourTE1?.value ?? null,
+      t7: snapshot.sensors?.aanvoerTA?.value ?? null,
+      dhw: snapshot.sensors?.dhwTankTemp?.value ?? null,
+      room: typeof roomVal === 'number' ? roomVal : null,
+      hz: snapshot.sensors?.compRunningFreq?.value ?? null,
+      cop: snapshot.cop?.cop ?? null,
+    });
   }
 
   /** Start de HTTP-server. */
@@ -343,6 +365,21 @@ export class DashboardService {
       return;
     }
 
+    // Shared stylesheets & processchema
+    const sharedStyle = Object.values(DASHBOARD_PAGE_STYLES).find((name) => url === `/styles/${name}`);
+    if (method === 'GET' && sharedStyle) {
+      await this._serveSharedPublicFile(res, path.join('styles', sharedStyle), 'text/css; charset=utf-8');
+      return;
+    }
+    if (method === 'GET' && url === '/schema-renderer.js') {
+      await this._serveSharedPublicFile(res, 'schema-renderer.js', 'text/javascript; charset=utf-8');
+      return;
+    }
+    if (method === 'GET' && (url === '/processchema' || url === '/processchema.html')) {
+      await this._serveFile(res, 'dashboard-schema.html');
+      return;
+    }
+
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
   }
@@ -372,6 +409,23 @@ export class DashboardService {
     });
   }
 
+  private _serveSharedPublicFile(res: http.ServerResponse, relPath: string, contentType: string): Promise<void> {
+    return new Promise((resolve) => {
+      const filePath = path.join(this.appDir, 'public', relPath);
+      fs.readFile(filePath, (err, content) => {
+        if (err) {
+          this.logger(`DashboardService: Fout bij laden shared ${relPath}:`, err.message);
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Not found');
+        } else {
+          res.writeHead(200, { 'Content-Type': contentType });
+          res.end(content);
+        }
+        resolve();
+      });
+    });
+  }
+
   private _serveSnapshot(res: http.ServerResponse): void {
     const snapshot = this.snapshot ?? this.getSnapshotCallback?.() ?? null;
     if (!snapshot) {
@@ -380,6 +434,7 @@ export class DashboardService {
       return;
     }
     this.snapshot = snapshot;
+    this._recordHistory(snapshot);
     // ADR-041b: JSON-replacer om floating point-getallen af te ronden.
     // Dit voorkomt weergaveproblemen zoals 1.2000000000000002 op het dashboard.
     const replacer = (key: string, value: unknown): unknown => {
@@ -388,7 +443,12 @@ export class DashboardService {
       }
       return value;
     };
-    const json = JSON.stringify({ ...snapshot, serverNowMs: Date.now() }, replacer);
+    const json = JSON.stringify({
+      ...snapshot,
+      temperatureScale: this.getTemperatureScale?.() ?? 'x10',
+      history: this.historyBuffer.getAll(),
+      serverNowMs: Date.now(),
+    }, replacer);
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(json);
   }
