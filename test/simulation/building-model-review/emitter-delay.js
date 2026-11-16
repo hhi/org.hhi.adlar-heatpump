@@ -21,8 +21,13 @@ const { BuildingModelLearner, getPIntMultiplier } = require(path.join(build, 'bu
 const { EmitterDelayEstimator } = require(path.join(build, 'emitter-delay'));
 const { mulberry32 } = require('./house');
 
-const TRUTH = { C: 20, UA: 0.14, g: 1.0, pIntBase: 0.35 };
-const pIntPattern = (h) => (h >= 23 || h < 6 ? 0.5 : h < 18 ? 1.0 : 1.6);
+const TRUTH = {
+  C: 20, UA: 0.14, g: 1.0, pIntBase: 0.35,
+};
+const pIntPattern = (h) => {
+  if (h >= 23 || h < 6) return 0.5;
+  return h < 18 ? 1.0 : 1.6;
+};
 const T0 = Date.UTC(2026, 9, 26, 0, 0);
 
 function simulate({
@@ -34,7 +39,9 @@ function simulate({
   for (let m = 0; m <= days * 1440; m++) {
     const h = (m / 60) % 24;
     const d = m / 1440;
-    if (m % 60 === 0) { drift = 0.97 * drift + (rnd() - 0.5) * 0.5; pIntNoise = (rnd() - 0.5) * 0.2; }
+    if (m % 60 === 0) {
+      drift = 0.97 * drift + (rnd() - 0.5) * 0.5; pIntNoise = (rnd() - 0.5) * 0.2;
+    }
     if (m % 1440 === 0) cloud = 0.1 + 0.9 * rnd();
     const tOut = 13 - 6 * (d / days) + drift * 2 + 3 * Math.sin((2 * Math.PI * (h - 9)) / 24);
     const solar = h > 8 && h < 17 ? 450 * cloud * Math.sin((Math.PI * (h - 8)) / 9) : 0;
@@ -77,7 +84,9 @@ for (const [lag, label, opts] of [
 ]) {
   const cells = [3, 7, 14].map((days) => SEEDS.map((seed) => {
     const est = new EmitterDelayEstimator(60);
-    for (const s of simulate({ days, seed, lagMin: lag, ...opts })) est.addSample(s);
+    for (const s of simulate({
+      days, seed, lagMin: lag, ...opts,
+    })) est.addSample(s);
     return est.getDelayMinutes();
   }).join(', '));
   console.log(`${lag} | ${label} | ${cells.join(' | ')}`);

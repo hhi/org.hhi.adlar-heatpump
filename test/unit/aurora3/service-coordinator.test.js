@@ -18,7 +18,9 @@ const { ServiceCoordinator } = require('../../../.homeybuild/lib/aurora3/service
 
 function deferred() {
   let resolve;
-  const promise = new Promise((res) => { resolve = res; });
+  const promise = new Promise((res) => {
+    resolve = res;
+  });
   return { promise, resolve };
 }
 
@@ -62,7 +64,9 @@ test('ADR-061: ServiceCoordinator.destroy awaits AdaptiveControlService.destroy'
   coordinator.modbusConnection = { destroy: async () => calls.push('modbus') };
 
   let resolved = false;
-  const destroyPromise = coordinator.destroy().then(() => { resolved = true; });
+  const destroyPromise = coordinator.destroy().then(() => {
+    resolved = true;
+  });
   await waitUntil(() => calls.includes('adaptive-start'));
 
   assert.strictEqual(resolved, false, 'destroy must not resolve before adaptive cleanup resolves');

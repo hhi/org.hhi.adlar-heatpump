@@ -133,7 +133,9 @@ function createFlowCardDevice(optimizer, timeZone) {
     capabilities,
     homey: { clock: { getTimezone: () => timeZone } },
     hasCapability: (id) => id === 'energy_prices_data',
-    setCapabilityValue: async (id, value) => { capabilities[id] = value; },
+    setCapabilityValue: async (id, value) => {
+      capabilities[id] = value;
+    },
     error: () => {},
     serviceCoordinator: {
       getAdaptiveControl: () => ({ getEnergyPriceOptimizer: () => optimizer }),

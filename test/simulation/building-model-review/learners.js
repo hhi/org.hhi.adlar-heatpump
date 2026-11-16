@@ -78,11 +78,16 @@ function clampSpectrum(P, lo, hi) {
 
 // --- Grenzen ----------------------------------------------------------------
 const CURRENT = {
-  theta0_min: 1 / 40, theta0_max: 1 / 5,
-  theta1_min: 0.05 / 40, theta1_max: 1.0 / 5,
-  ratio_min: 0.002, ratio_max: 0.8, // werkt in de huidige code op UA = θ1/θ0
-  g_c_min: 0.2 / 40, g_c_max: 0.8 / 5,
-  pint_c_min: 0.1 / 40, pint_c_max: 0.6 / 5,
+  theta0_min: 1 / 40,
+  theta0_max: 1 / 5,
+  theta1_min: 0.05 / 40,
+  theta1_max: 1.0 / 5,
+  ratio_min: 0.002,
+  ratio_max: 0.8, // werkt in de huidige code op UA = θ1/θ0
+  g_c_min: 0.2 / 40,
+  g_c_max: 0.8 / 5,
+  pint_c_min: 0.1 / 40,
+  pint_c_max: 0.6 / 5,
 };
 
 function validCurrent(t) {
@@ -96,7 +101,9 @@ function validCurrent(t) {
 
 // Voorstel §2.7: dezelfde componentgrenzen, maar τ = 1/θ1 ∈ [1,25; 500] h en UA = θ1/θ0 ∈ [0,03; 1,5] kW/°C
 // τ-bovengrens volgens ADR-062 B4 (800 h); TAU_MAX=500 reproduceert review §6.
-const FIXED = { tau_min: 1.25, tau_max: Number(process.env.TAU_MAX || 800), ua_min: 0.03, ua_max: 1.5 };
+const FIXED = {
+  tau_min: 1.25, tau_max: Number(process.env.TAU_MAX || 800), ua_min: 0.03, ua_max: 1.5,
+};
 
 function validFixed(t) {
   const b = CURRENT;
@@ -116,7 +123,9 @@ function makeLearner(opts = {}) {
     profile = 'average', lambda = 0.999,
     reimpl = false, // true: huidige semantiek via de herimplementatie (controle op gelijkheid)
   } = opts;
-  const variant = { psd, bounds, order, vff };
+  const variant = {
+    psd, bounds, order, vff,
+  };
   const isCurrent = !reimpl && !psd && !bounds && !order && !vff && !clipAfter;
 
   const L = new BuildingModelLearner({
@@ -128,7 +137,9 @@ function makeLearner(opts = {}) {
     logger: () => {},
   });
 
-  L.stats = { updates: 0, reverts: 0, bounded: 0, rateLimited: 0, negXPX: 0, negEigUpdates: 0, minEig: Infinity, lambdas: [] };
+  L.stats = {
+    updates: 0, reverts: 0, bounded: 0, rateLimited: 0, negXPX: 0, negEigUpdates: 0, minEig: Infinity, lambdas: [],
+  };
 
   const baseUpdate = L.updateRLS.bind(L);
 
@@ -139,7 +150,9 @@ function makeLearner(opts = {}) {
       if (this.dotProduct(X, PX) < 0) this.stats.negXPX++;
       const revertsBefore = this.totalReverts;
       baseUpdate(X, y);
-      if (this.totalReverts > revertsBefore) { this.stats.reverts++; return; }
+      if (this.totalReverts > revertsBefore) {
+        this.stats.reverts++; return;
+      }
       this.stats.updates++;
       const me = minEigen(this.P);
       this.stats.minEig = Math.min(this.stats.minEig, me);
@@ -204,10 +217,14 @@ function makeLearner(opts = {}) {
       for (let i = 0; i < 4; i++) {
         const maxCh = Math.abs(prev[i]) * 0.05;
         const ch = cand[i] - prev[i];
-        if (Math.abs(ch) > maxCh && maxCh > 0) { cand[i] = prev[i] + Math.sign(ch) * maxCh; limited = true; }
+        if (Math.abs(ch) > maxCh && maxCh > 0) {
+          cand[i] = prev[i] + Math.sign(ch) * maxCh; limited = true;
+        }
       }
     }
-    if (limited) { this.rateLimitActivations++; this.stats.rateLimited++; }
+    if (limited) {
+      this.rateLimitActivations++; this.stats.rateLimited++;
+    }
     this.theta = cand;
     this.stats.updates++;
 
@@ -246,7 +263,9 @@ function makeLearner(opts = {}) {
       }
       buf.push(data);
       if (buf.length > windowN + 1) buf.shift();
-      if (buf.length < windowN + 1) { this.lastMeasurement = data; this.sampleCount++; return; }
+      if (buf.length < windowN + 1) {
+        this.lastMeasurement = data; this.sampleCount++; return;
+      }
       const base = buf[0];
       const inputs = buf.slice(0, windowN); // samples aan het begin van elk deelinterval
       const hours = (data.timestamp - base.timestamp) / 3600000;
@@ -317,4 +336,6 @@ function makeLearner(opts = {}) {
 
 const projectPsd = (P) => clampSpectrum(P, P_FLOOR, P_CEILING);
 
-module.exports = { makeLearner, minEigen, projectPsd, validCurrent, validFixed, BuildingModelLearner };
+module.exports = {
+  makeLearner, minEigen, projectPsd, validCurrent, validFixed, BuildingModelLearner,
+};

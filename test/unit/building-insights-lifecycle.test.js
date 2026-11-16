@@ -28,7 +28,9 @@ function createService(driver) {
         active.add(handle);
         return handle;
       },
-      clearInterval: (handle) => { active.delete(handle); },
+      clearInterval: (handle) => {
+        active.delete(handle);
+      },
     },
     getSetting: (key) => settings[key],
   };

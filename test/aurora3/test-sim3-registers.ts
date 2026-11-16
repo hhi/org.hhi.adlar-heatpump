@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define -- the command dispatch is at the top; the helpers it calls are function
+   declarations further down, which are hoisted */
 /**
  * Test CLI — Aurora III simulatie-registers vanuit adlar3-server.mbs.
  *
@@ -41,11 +43,12 @@ const PORT = parseInt(process.env.MODBUS_PORT ?? '502', 10);
 const UNIT_ID = parseInt(process.env.MODBUS_UNIT ?? '1', 10);
 
 const DEFAULT_MBS = path.resolve(process.cwd(), 'test', 'aurora3', 'adlar3-server.mbs');
-const MBS_FILE = process.env.MBS_FILE
-  ? path.resolve(process.env.MBS_FILE)
-  : (ARGS[0] && ARGS[0].endsWith('.mbs'))
-    ? path.resolve(ARGS[0])
-    : DEFAULT_MBS;
+function resolveMbsFile(): string {
+  if (process.env.MBS_FILE) return path.resolve(process.env.MBS_FILE);
+  if (ARGS[0] && ARGS[0].endsWith('.mbs')) return path.resolve(ARGS[0]);
+  return DEFAULT_MBS;
+}
+const MBS_FILE = resolveMbsFile();
 
 if (!HOST) {
   console.log(`
@@ -387,11 +390,21 @@ async function pollAurora3(svc: ModbusTcpService): Promise<void> {
       name: 'adlar3-test',
       intervalMs: 5_000,
       blocks: [
-        { start: 38, count: 2, label: 'status', fc: 'input' },
-        { start: 40, count: 17, label: 'temperatures', fc: 'input' },
-        { start: 62, count: 3, label: 'pump/flow', fc: 'input' },
-        { start: 70, count: 10, label: 'compressor/electric', fc: 'input' },
-        { start: 2100, count: 15, label: 'control', fc: 'holding' },
+        {
+          start: 38, count: 2, label: 'status', fc: 'input',
+        },
+        {
+          start: 40, count: 17, label: 'temperatures', fc: 'input',
+        },
+        {
+          start: 62, count: 3, label: 'pump/flow', fc: 'input',
+        },
+        {
+          start: 70, count: 10, label: 'compressor/electric', fc: 'input',
+        },
+        {
+          start: 2100, count: 15, label: 'control', fc: 'holding',
+        },
       ],
     },
   ];

@@ -43,18 +43,19 @@ import { ModbusTcpService, PollGroup } from '../../lib/modbus/protocol/modbus-tc
 // ── CLI parsing ──────────────────────────────────────────────────────────────
 
 const HOST = process.argv[2];
-const CMD  = process.argv[3] ?? 'init';
+const CMD = process.argv[3] ?? 'init';
 const ARGS = process.argv.slice(4);
 
-const PORT    = parseInt(process.env.MODBUS_PORT ?? '502', 10);
+const PORT = parseInt(process.env.MODBUS_PORT ?? '502', 10);
 const UNIT_ID = parseInt(process.env.MODBUS_UNIT ?? '1', 10);
 
 const DEFAULT_MBS = path.resolve(__dirname, 'adlar-modbus-simuregs.mbs');
-const MBS_FILE    = process.env.MBS_FILE
-  ? path.resolve(process.env.MBS_FILE)
-  : (CMD === 'init' && ARGS[0] && ARGS[0].endsWith('.mbs'))
-    ? path.resolve(ARGS[0])
-    : DEFAULT_MBS;
+function resolveMbsFile(): string {
+  if (process.env.MBS_FILE) return path.resolve(process.env.MBS_FILE);
+  if (CMD === 'init' && ARGS[0] && ARGS[0].endsWith('.mbs')) return path.resolve(ARGS[0]);
+  return DEFAULT_MBS;
+}
+const MBS_FILE = resolveMbsFile();
 
 if (!HOST) {
   console.log(`
@@ -102,7 +103,7 @@ function loadMbs(filePath: string): MbsEntry[] {
   try {
     // Strip JS-stijl commentaren (// ...) die JSON.parse niet accepteert
     raw = fs.readFileSync(filePath, 'utf-8')
-      .replace(/\/\/[^\n]*/g, '')   // verwijder // commentaar
+      .replace(/\/\/[^\n]*/g, '') // verwijder // commentaar
       .replace(/,(\s*[}\]])/g, '$1'); // trailing commas opruimen
   } catch (err) {
     console.error(`❌ Leesfout ${filePath}:`, (err as Error).message);
@@ -118,64 +119,64 @@ function loadMbs(filePath: string): MbsEntry[] {
   }
 
   const entries = parsed.holdingReg ?? [];
-  return entries.map(e => ({
+  return entries.map((e) => ({
     address: e.modbusData.address,
-    value:   e.modbusData.registerValue,
-    title:   e.modbusData.title ?? `0x${e.modbusData.address.toString(16).padStart(4, '0')}`,
+    value: e.modbusData.registerValue,
+    title: e.modbusData.title ?? `0x${e.modbusData.address.toString(16).padStart(4, '0')}`,
   }));
 }
 
 // ── Schaalfactoren ───────────────────────────────────────────────────────────
 
 const SCALES: Record<number, { multiply: number; unit: string; label: string }> = {
-  0x0000: { multiply: 1,    unit: '',      label: 'Running Status 1 (bitmask)' },
-  0x0001: { multiply: 1,    unit: '',      label: 'Running Status 2 (bitmask)' },
-  0x0040: { multiply: 1,    unit: 'Hz',    label: 'Compressor Freq' },
-  0x0041: { multiply: 1,    unit: 'RPM',   label: 'Fan Speed' },
-  0x0042: { multiply: 1,    unit: 'P',     label: 'EEV Open Step' },
-  0x0047: { multiply: 0.1,  unit: '°C',    label: 'IPM Temp' },
-  0x0048: { multiply: 0.1,  unit: '°C',    label: 'HP Sat Temp' },
-  0x0049: { multiply: 0.1,  unit: '°C',    label: 'LP Sat Temp' },
-  0x004A: { multiply: 0.1,  unit: '°C',    label: 'T1 Ambient' },
-  0x004B: { multiply: 0.1,  unit: '°C',    label: 'T2 Outer Coil' },
-  0x004C: { multiply: 0.1,  unit: '°C',    label: 'T3 Inner Coil' },
-  0x004D: { multiply: 0.1,  unit: '°C',    label: 'T4 Suction' },
-  0x004E: { multiply: 0.1,  unit: '°C',    label: 'T5 Exhaust' },
-  0x004F: { multiply: 0.1,  unit: '°C',    label: 'T6 Water Inlet' },
-  0x0050: { multiply: 0.1,  unit: '°C',    label: 'T7 Water Outlet' },
-  0x0051: { multiply: 0.1,  unit: '°C',    label: 'T8 Econ Inlet' },
-  0x0052: { multiply: 0.1,  unit: '°C',    label: 'T9 Econ Outlet' },
-  0x0054: { multiply: 0.1,  unit: '°C',    label: 'DHW Tank Temp' },
-  0x0057: { multiply: 1,    unit: '%',     label: 'Pump PWM' },
-  0x0058: { multiply: 1,    unit: 'L/min', label: 'Water Flow' },
-  0x0059: { multiply: 0.1,  unit: '°C',    label: 'DHW Return Temp' },
-  0x005A: { multiply: 1,    unit: 'V',     label: 'Unit Voltage' },
-  0x005B: { multiply: 0.01, unit: 'A',     label: 'Unit Current' },
-  0x005C: { multiply: 0.01, unit: 'kW',    label: 'Unit Power' },
-  0x005D: { multiply: 1,    unit: 'kWh',   label: 'Total Energy' },
-  0x0074: { multiply: 0.1,  unit: '°C',    label: 'Buffer Tank Temp' },
-  0x0075: { multiply: 0.1,  unit: '°C',    label: 'Total Outlet Temp' },
-  0x0300: { multiply: 0.1,  unit: '°C',    label: 'Cooling Setpoint' },
-  0x0301: { multiply: 0.1,  unit: '°C',    label: 'Heating Setpoint' },
-  0x0302: { multiply: 0.1,  unit: '°C',    label: 'DHW Setpoint' },
-  0x0303: { multiply: 0.1,  unit: '°C',    label: 'Floor Setpoint' },
-  0x0304: { multiply: 1,    unit: '',      label: 'Mode (1=Verwarming)' },
-  0x0305: { multiply: 1,    unit: '',      label: 'On/Off' },
-  0x0306: { multiply: 0.1,  unit: '°C',    label: 'Indoor Setpoint' },
-  0x0314: { multiply: 1,    unit: '',      label: 'Heating Curve' },
-  0x0360: { multiply: 1,    unit: '',      label: 'Program Version' },
-  0x0363: { multiply: 1,    unit: '',      label: 'Protocol Version' },
+  0x0000: { multiply: 1, unit: '', label: 'Running Status 1 (bitmask)' },
+  0x0001: { multiply: 1, unit: '', label: 'Running Status 2 (bitmask)' },
+  0x0040: { multiply: 1, unit: 'Hz', label: 'Compressor Freq' },
+  0x0041: { multiply: 1, unit: 'RPM', label: 'Fan Speed' },
+  0x0042: { multiply: 1, unit: 'P', label: 'EEV Open Step' },
+  0x0047: { multiply: 0.1, unit: '°C', label: 'IPM Temp' },
+  0x0048: { multiply: 0.1, unit: '°C', label: 'HP Sat Temp' },
+  0x0049: { multiply: 0.1, unit: '°C', label: 'LP Sat Temp' },
+  0x004A: { multiply: 0.1, unit: '°C', label: 'T1 Ambient' },
+  0x004B: { multiply: 0.1, unit: '°C', label: 'T2 Outer Coil' },
+  0x004C: { multiply: 0.1, unit: '°C', label: 'T3 Inner Coil' },
+  0x004D: { multiply: 0.1, unit: '°C', label: 'T4 Suction' },
+  0x004E: { multiply: 0.1, unit: '°C', label: 'T5 Exhaust' },
+  0x004F: { multiply: 0.1, unit: '°C', label: 'T6 Water Inlet' },
+  0x0050: { multiply: 0.1, unit: '°C', label: 'T7 Water Outlet' },
+  0x0051: { multiply: 0.1, unit: '°C', label: 'T8 Econ Inlet' },
+  0x0052: { multiply: 0.1, unit: '°C', label: 'T9 Econ Outlet' },
+  0x0054: { multiply: 0.1, unit: '°C', label: 'DHW Tank Temp' },
+  0x0057: { multiply: 1, unit: '%', label: 'Pump PWM' },
+  0x0058: { multiply: 1, unit: 'L/min', label: 'Water Flow' },
+  0x0059: { multiply: 0.1, unit: '°C', label: 'DHW Return Temp' },
+  0x005A: { multiply: 1, unit: 'V', label: 'Unit Voltage' },
+  0x005B: { multiply: 0.01, unit: 'A', label: 'Unit Current' },
+  0x005C: { multiply: 0.01, unit: 'kW', label: 'Unit Power' },
+  0x005D: { multiply: 1, unit: 'kWh', label: 'Total Energy' },
+  0x0074: { multiply: 0.1, unit: '°C', label: 'Buffer Tank Temp' },
+  0x0075: { multiply: 0.1, unit: '°C', label: 'Total Outlet Temp' },
+  0x0300: { multiply: 0.1, unit: '°C', label: 'Cooling Setpoint' },
+  0x0301: { multiply: 0.1, unit: '°C', label: 'Heating Setpoint' },
+  0x0302: { multiply: 0.1, unit: '°C', label: 'DHW Setpoint' },
+  0x0303: { multiply: 0.1, unit: '°C', label: 'Floor Setpoint' },
+  0x0304: { multiply: 1, unit: '', label: 'Mode (1=Verwarming)' },
+  0x0305: { multiply: 1, unit: '', label: 'On/Off' },
+  0x0306: { multiply: 0.1, unit: '°C', label: 'Indoor Setpoint' },
+  0x0314: { multiply: 1, unit: '', label: 'Heating Curve' },
+  0x0360: { multiply: 1, unit: '', label: 'Program Version' },
+  0x0363: { multiply: 1, unit: '', label: 'Protocol Version' },
 };
 
 function formatRegister(addr: number, svc: ModbusTcpService): string {
-  const raw    = svc.u16(addr);
+  const raw = svc.u16(addr);
   const signed = svc.s16(addr);
-  const info   = SCALES[addr];
+  const info = SCALES[addr];
   const scaled = info
     ? (signed * info.multiply).toFixed(info.multiply < 1 ? 2 : 0)
     : signed.toString();
-  const unit   = info?.unit  ?? '';
-  const label  = info?.label ?? '';
+  const unit = info?.unit ?? '';
+  const label = info?.label ?? '';
 
   return [
     `0x${addr.toString(16).padStart(4, '0')}`.padEnd(8),
@@ -211,9 +212,9 @@ async function main() {
     );
     console.log('─'.repeat(80));
     entries.forEach((e, i) => {
-      const hex   = `0x${e.address.toString(16).padStart(4, '0')}`;
-      const info  = SCALES[e.address];
-      const scale = info ? (e.value * info.multiply).toFixed(info.multiply < 1 ? 2 : 0) + ' ' + info.unit : '';
+      const hex = `0x${e.address.toString(16).padStart(4, '0')}`;
+      const info = SCALES[e.address];
+      const scale = info ? `${(e.value * info.multiply).toFixed(info.multiply < 1 ? 2 : 0)} ${info.unit}` : '';
       console.log(
         (i + 1).toString().padEnd(5),
         hex.padEnd(8),
@@ -230,17 +231,17 @@ async function main() {
 
   // Alle andere commando's vereisen een verbinding
   const svc = new ModbusTcpService({
-    host:        HOST,
-    port:        PORT,
-    unitId:      UNIT_ID,
-    timeoutMs:   5_000,
+    host: HOST,
+    port: PORT,
+    unitId: UNIT_ID,
+    timeoutMs: 5_000,
     batchDelayMs: 90,
   });
 
   svc.setDebug(process.env.DEBUG !== '0');
-  svc.on('connected',    ()                                => console.log('✅ Verbonden!\n'));
-  svc.on('disconnected', (reason: string)                 => console.log(`\n❌ Verbroken: ${reason}`));
-  svc.on('error',        (err: Error, ctx: string)        => console.error(`⚠️  [${ctx}] ${err.message}`));
+  svc.on('connected', () => console.log('✅ Verbonden!\n'));
+  svc.on('disconnected', (reason: string) => console.log(`\n❌ Verbroken: ${reason}`));
+  svc.on('error', (err: Error, ctx: string) => console.error(`⚠️  [${ctx}] ${err.message}`));
 
   console.log(`\nVerbinden met ${HOST}:${PORT} (unit ${UNIT_ID})...`);
 
@@ -266,7 +267,7 @@ async function main() {
 
         for (const entry of entries) {
           const hex = `0x${entry.address.toString(16).padStart(4, '0')}`;
-          const info  = SCALES[entry.address];
+          const info = SCALES[entry.address];
           const scale = info
             ? ` → ${(entry.value * info.multiply).toFixed(info.multiply < 1 ? 2 : 0)} ${info.unit}`
             : '';
@@ -295,7 +296,7 @@ async function main() {
           0x0304, // Mode
           0x0305, // On/Off
           0x0363, // Protocol Version
-        ].filter(a => entries.some(e => e.address === a));
+        ].filter((a) => entries.some((e) => e.address === a));
 
         if (verifyAddrs.length > 0) {
           console.log('\nVerificatie (steekproef):');
@@ -314,7 +315,7 @@ async function main() {
 
       case 'read': {
         const register = parseInt(ARGS[0] ?? '0x0050', 16);
-        const count    = parseInt(ARGS[1] ?? '1', 10);
+        const count = parseInt(ARGS[1] ?? '1', 10);
         console.log(`Lezen: 0x${register.toString(16).padStart(4, '0')}, count=${count}\n`);
 
         await svc.readHoldingRegisters(register, count);
@@ -329,7 +330,7 @@ async function main() {
 
       case 'write': {
         const register = parseInt(ARGS[0] ?? '0', 16);
-        const value    = parseInt(ARGS[1] ?? '0', 10);
+        const value = parseInt(ARGS[1] ?? '0', 10);
         console.log(`Schrijven: 0x${register.toString(16).padStart(4, '0')} = ${value}\n`);
 
         await svc.writeSingleRegister(register, value);
@@ -347,13 +348,13 @@ async function main() {
 
         const groups: PollGroup[] = [
           {
-            name:       'sensors',
+            name: 'sensors',
             intervalMs: 5_000,
             blocks: [
-              { start: 0x0000, count: 2,  label: 'status' },
+              { start: 0x0000, count: 2, label: 'status' },
               { start: 0x0040, count: 30, label: 'sensors' },
               { start: 0x0072, count: 12, label: 'aux/zone' },
-              { start: 0x0300, count: 8,  label: 'control' },
+              { start: 0x0300, count: 8, label: 'control' },
             ],
           },
         ];
@@ -391,7 +392,7 @@ async function main() {
         });
 
         svc.startPolling(groups);
-        await new Promise(r => setTimeout(r, 30_000));
+        await new Promise((r) => setTimeout(r, 30_000));
         break;
       }
 

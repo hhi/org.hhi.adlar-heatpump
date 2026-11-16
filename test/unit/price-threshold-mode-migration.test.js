@@ -18,8 +18,12 @@ function createDevice({ settings = {}, store = {}, failSettings = false } = {}) 
   return {
     settings: { price_threshold_mode: 'auto', ...settings }, // Homey fills in the default of a new setting
     store: { ...store },
-    getStoreValue(key) { return this.store[key]; },
-    async setStoreValue(key, value) { this.store[key] = value; },
+    getStoreValue(key) {
+      return this.store[key];
+    },
+    async setStoreValue(key, value) {
+      this.store[key] = value;
+    },
     async setSettings(values) {
       if (failSettings) throw new Error('settings save failed');
       Object.assign(this.settings, values);

@@ -160,7 +160,9 @@ test('I5: a time step of zero or less is ignored', () => {
 });
 
 test('I6: restoreState rejects a corrupt state', () => {
-  const valid = { theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: IDENTITY, sampleCount: 50, lastMeasurement: null };
+  const valid = {
+    theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: IDENTITY, sampleCount: 50, lastMeasurement: null,
+  };
   const corrupt = [
     ['theta of length 3', { ...valid, theta: valid.theta.slice(0, 3) }],
     ['P of 3×3', { ...valid, P: [[1, 0, 0], [0, 1, 0], [0, 0, 1]] }],
@@ -179,7 +181,9 @@ test('I6: restoreState rejects a corrupt state', () => {
 test('I7: after a restore without lastMeasurement the next measurement counts as the first', () => {
   const learner = createLearner();
   const theta = [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15];
-  learner.restoreState({ theta, P: IDENTITY, sampleCount: 100, lastMeasurement: null });
+  learner.restoreState({
+    theta, P: IDENTITY, sampleCount: 100, lastMeasurement: null,
+  });
   learner.addMeasurement(measurement(T0, 20));
   assert.strictEqual(learner.getState().sampleCount, 101);
   assert.deepStrictEqual(learner.getState().theta, theta);
@@ -216,7 +220,9 @@ function regular(learner, n, {
 function spyUpdates(learner) {
   const calls = [];
   const original = learner.updateRLS.bind(learner);
-  learner.updateRLS = (X, y) => { calls.push({ X: [...X], y }); original(X, y); };
+  learner.updateRLS = (X, y) => {
+    calls.push({ X: [...X], y }); original(X, y);
+  };
   return calls;
 }
 
@@ -320,7 +326,7 @@ test('N7 (ADR-062 B1): after a restore the window continues from lastMeasurement
 
 test('N8 (ADR-062 B3): the review §2.6 counterexample now leaves P positive semi-definite', () => {
   const learner = createLearner();
-  const theta = learner.getState().theta;
+  const { theta } = learner.getState();
   const X = [5, -15, 0.2, 1];
   const y = X.reduce((sum, x, i) => sum + x * theta[i], 0);
   learner.updateRLS(X, y);
@@ -361,13 +367,17 @@ test('N10 (ADR-062 B3/B5): restore projects a P that is not positive semi-defini
   const indefinite = [[1, 0.9, 0.9, 0], [0.9, 1, -0.9, 0], [0.9, -0.9, 1, 0], [0, 0, 0, 1]];
   assert.ok(Math.min(...eigenvalues(indefinite)) < 0);
   const projected = createLearner();
-  projected.restoreState({ theta, P: indefinite, sampleCount: 100, lastMeasurement: null });
+  projected.restoreState({
+    theta, P: indefinite, sampleCount: 100, lastMeasurement: null,
+  });
   assert.strictEqual(projected.getState().sampleCount, 100);
   assert.ok(Math.min(...eigenvalues(projected.getState().P)) >= P_FLOOR * (1 - 1e-6));
 
   const fresh = [[100, 0, 0, 0], [0, 100, 0, 0], [0, 0, 100, 0], [0, 0, 0, 100]]; // before the first update
   const kept = createLearner();
-  kept.restoreState({ theta, P: fresh, sampleCount: 1, lastMeasurement: null });
+  kept.restoreState({
+    theta, P: fresh, sampleCount: 1, lastMeasurement: null,
+  });
   assert.deepStrictEqual(kept.getState().P, fresh);
 });
 
@@ -375,7 +385,9 @@ test('N10 (ADR-062 B3/B5): restore projects a P that is not positive semi-defini
 function restoreTheta(theta0, theta1) {
   const lines = [];
   const learner = createLearner({ logger: (msg) => lines.push(String(msg)) });
-  learner.restoreState({ theta: [theta0, theta1, 0.04, 0.03], P: IDENTITY, sampleCount: 100, lastMeasurement: null });
+  learner.restoreState({
+    theta: [theta0, theta1, 0.04, 0.03], P: IDENTITY, sampleCount: 100, lastMeasurement: null,
+  });
   return { learner, text: lines.join('\n') };
 }
 
@@ -472,17 +484,23 @@ test('N14 (ADR-062 §2.8): λ is the configured value, also with a large error; 
 
 test('N15 (ADR-062 §2.5): restoreState() returns the outcome explicitly', () => {
   const theta = [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15];
-  const valid = createLearner().restoreState({ theta, P: IDENTITY, sampleCount: 100, lastMeasurement: null });
+  const valid = createLearner().restoreState({
+    theta, P: IDENTITY, sampleCount: 100, lastMeasurement: null,
+  });
   assert.deepStrictEqual(valid, { restored: true, reasons: [], covarianceProjected: false });
 
   // A rejected state with 0 samples: the sample count does not change, the result still says rejected
-  const rejected = createLearner().restoreState({ theta: [0.1, 0.16, 0.04, 0.03], P: IDENTITY, sampleCount: 0, lastMeasurement: null });
+  const rejected = createLearner().restoreState({
+    theta: [0.1, 0.16, 0.04, 0.03], P: IDENTITY, sampleCount: 0, lastMeasurement: null,
+  });
   assert.strictEqual(rejected.restored, false);
   assert.strictEqual(rejected.covarianceProjected, false);
   assert.match(rejected.reasons.join('; '), /UA 1\.600 kW\/°C outside/);
 
   const indefinite = [[1, 0.9, 0.9, 0], [0.9, 1, -0.9, 0], [0.9, -0.9, 1, 0], [0, 0, 0, 1]];
-  const projected = createLearner().restoreState({ theta, P: indefinite, sampleCount: 100, lastMeasurement: null });
+  const projected = createLearner().restoreState({
+    theta, P: indefinite, sampleCount: 100, lastMeasurement: null,
+  });
   assert.deepStrictEqual(projected, { restored: true, reasons: [], covarianceProjected: true });
 });
 
@@ -491,7 +509,9 @@ test('N16 (ADR-062 B6): prediction RMSE over 24 hours of a-priori errors, null b
   assert.strictEqual(learner.getPredictionRmse24h(), null);
   const spy = [];
   const original = learner.recordResidual.bind(learner);
-  learner.recordResidual = (error) => { spy.push({ timestamp: learner.currentTimestamp, error }); original(error); };
+  learner.recordResidual = (error) => {
+    spy.push({ timestamp: learner.currentTimestamp, error }); original(error);
+  };
 
   feed(learner, 23); // the 60-minute window spans 12 intervals: 11 updates (samples 13–23)
   assert.strictEqual(spy.length, 11);
@@ -521,7 +541,9 @@ function stuckLearner(reverts) {
   const lines = [];
   const learner = createLearner({ logger: (msg) => lines.push(String(msg)) });
   learner.consecutiveReverts = reverts;
-  return { learner, lines, X: [5, -15, 0.2, 1], y: 9.5 }; // large error → step out of bounds (see N12)
+  return {
+    learner, lines, X: [5, -15, 0.2, 1], y: 9.5,
+  }; // large error → step out of bounds (see N12)
 }
 
 test('N18 (ADR-062 B12): below 12 reverts in a row a step outside the bounds is still reverted', () => {
@@ -536,7 +558,9 @@ test('N18 (ADR-062 B12): below 12 reverts in a row a step outside the bounds is 
 });
 
 test('N19 (ADR-062 B12): after 12 reverts in a row the step is shortened to the bounds and P is updated', () => {
-  const { learner, lines, X, y } = stuckLearner(12);
+  const {
+    learner, lines, X, y,
+  } = stuckLearner(12);
   const before = JSON.parse(JSON.stringify(learner.getState()));
   learner.updateRLS(X, y);
   const after = learner.getState();
@@ -572,6 +596,8 @@ test('A5 (ADR-062, replaces K7): the configured enableDynamicPInt wins over the 
   assert.strictEqual(fromState.getState().enableDynamicPInt, true);
 
   const legacy = createLearner({ enableDynamicPInt: true });
-  legacy.restoreState({ theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: IDENTITY, sampleCount: 10, lastMeasurement: null });
+  legacy.restoreState({
+    theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: IDENTITY, sampleCount: 10, lastMeasurement: null,
+  });
   assert.strictEqual(legacy.getState().enableDynamicPInt, true);
 });

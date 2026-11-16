@@ -19,7 +19,9 @@ const { AdaptiveControlService } = require('../../.homeybuild/lib/modbus/service
 
 function deferred() {
   let resolve;
-  const promise = new Promise((res) => { resolve = res; });
+  const promise = new Promise((res) => {
+    resolve = res;
+  });
   return { promise, resolve };
 }
 
@@ -63,7 +65,9 @@ test('ADR-061: ServiceCoordinator.destroy awaits AdaptiveControlService.destroy'
   coordinator.modbusConnection = { destroy: async () => calls.push('modbus') };
 
   let resolved = false;
-  const destroyPromise = coordinator.destroy().then(() => { resolved = true; });
+  const destroyPromise = coordinator.destroy().then(() => {
+    resolved = true;
+  });
   await waitUntil(() => calls.includes('adaptive-start'));
 
   assert.strictEqual(resolved, false, 'destroy must not resolve before adaptive cleanup resolves');
@@ -318,7 +322,9 @@ test('ADR-065: heat pump curve is pending until the DIY registers have been read
   coordinator._diyPolled = true;
   coordinator._latestSnapshot = {
     sensors: { ambientT1: { value: 12 } },
-    diy: { active: true, slopeK: -0.5, interceptB: 55, calcSetpoint: (t) => -0.5 * (t + 15) + 55 },
+    diy: {
+      active: true, slopeK: -0.5, interceptB: 55, calcSetpoint: (t) => -0.5 * (t + 15) + 55,
+    },
   };
   assert.strictEqual(coordinator._resolveHeatPumpCurve(5), 41.5);
 });
