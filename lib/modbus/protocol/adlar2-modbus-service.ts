@@ -10,7 +10,9 @@
  */
 
 import { EventEmitter } from 'events';
-import ParameterBankService, { ParameterBankRange, parameterBankWord, validParameterBankRead, PARAMETER_LIMIT_BANKS } from './parameter-bank-service';
+import ParameterBankService, {
+  ParameterBankRange, parameterBankWord, validParameterBankRead, PARAMETER_LIMIT_BANKS,
+} from './parameter-bank-service';
 
 import {
   ModbusTcpConfig, ModbusTcpService, PollBlock, PollGroup, RegisterChangeEntry, TimerProvider,
@@ -876,9 +878,10 @@ export class Adlar2ModbusService extends EventEmitter {
     const deltaT = outletTemp - inletTemp;
 
     const rawFlow = this.tcp.u16(SENSOR_REGISTERS.waterFlow.address);
+    const registerFlow = rawFlow > 0 ? rawFlow : 0;
     const flow = (this.externalFlowLpm !== null && this.externalFlowLpm > 0)
       ? this.externalFlowLpm
-      : (rawFlow > 0 ? rawFlow : 0);
+      : registerFlow;
     const thermalPowerKw = Math.abs(deltaT) * flow * WATER_THERMAL_FACTOR;
 
     const power = this.buildPower();

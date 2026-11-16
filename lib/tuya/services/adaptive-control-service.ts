@@ -915,7 +915,9 @@ export class AdaptiveControlService {
 
     return {
       adjustment: coastAdj,
-      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${coastAdj.toFixed(1)}°C (dropRate: ${outletDropRate.toFixed(2)}°C/cyclus, multiplier: ${dropRateMultiplier.toFixed(2)}, staplimiet: ${AdaptiveControlService.COAST_STEP_LIMIT}°C)`,
+      reason: `Coast: uitlaattemp ${outletTemp.toFixed(1)}°C − offset ${offset}°C → delta ${coastAdj.toFixed(1)}°C `
+        + `(dropRate: ${outletDropRate.toFixed(2)}°C/cyclus, multiplier: ${dropRateMultiplier.toFixed(2)}, `
+        + `staplimiet: ${AdaptiveControlService.COAST_STEP_LIMIT}°C)`,
       priority: 'high',
       strength,
     };
