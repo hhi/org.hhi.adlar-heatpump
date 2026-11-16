@@ -1,4 +1,10 @@
 {
+  "3.12.1": {
+    "en": "The pre-heat time (insight, flow card 'Calculate pre-heat start time' and trigger 'Pre-heating time recommendation') is now calculated from the building model averaged over the past 24 hours (e.g. over the same two days 7.6–9.9 hours for 2 °C instead of 7.5–14.2 hours).",
+    "nl": "De voorverwarmtijd (inzicht, flowkaart 'Bereken voorverwarm starttijd' en trigger 'Voorverwarm tijd aanbeveling') wordt nu berekend met het gebouwmodel gemiddeld over de laatste 24 uur (bijv. over dezelfde twee dagen 7,6–9,9 uur voor 2 °C in plaats van 7,5–14,2 uur).",
+    "de": "Die Vorheizzeit (Einblick, Flow-Karte 'Vorheiz-Startzeit berechnen' und Trigger 'Vorheizzeit-Empfehlung') wird jetzt mit dem über die letzten 24 Stunden gemittelten Gebäudemodell berechnet (z. B. über dieselben zwei Tage 7,6–9,9 Stunden für 2 °C statt 7,5–14,2 Stunden).",
+    "fr": "Le temps de préchauffage (aperçu, carte Flow « Calculer l'heure de démarrage du préchauffage » et déclencheur « Recommandation de temps de préchauffage ») est désormais calculé avec le modèle du bâtiment moyenné sur les dernières 24 heures (p. ex. sur les deux mêmes jours 7,6–9,9 heures pour 2 °C au lieu de 7,5–14,2 heures)."
+  },
   "3.12.0": {
     "en": "The local dashboards for Aurora I/II (Tuya and Modbus) and Aurora III now include a 'Process schema' page (/processchema) with the refrigerant cycle, water circuit, building model, 24-hour temperature and compressor history, and active heating curve in dark and light mode.",
     "nl": "De lokale dashboards voor Aurora I/II (Tuya en Modbus) en Aurora III hebben nu een pagina 'Processchema' (/processchema) met de koudemiddelcyclus, het watercircuit, het gebouwmodel, het 24-uurs temperatuur- en compressorverloop en de actieve stooklijn in donkere en lichte weergave.",

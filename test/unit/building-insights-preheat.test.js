@@ -43,6 +43,7 @@ function createService(driver, conditions = undefined) {
   };
   const buildingModelService = {
     getLearner: () => ({ getModel: () => model }),
+    getPreHeatModel: () => model,
     getDiagnosticStatus: async () => ({ confidence: 80 }),
   };
   if (conditions !== undefined) buildingModelService.getPreHeatConditions = () => conditions;

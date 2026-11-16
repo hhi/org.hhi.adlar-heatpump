@@ -418,7 +418,7 @@ export class BuildingInsightsService {
    * - Always returns an insight (learning/fast/medium/slow)
    */
   private detectPreHeatingInsights(diagnostics: BuildingModelDiagnostics): Insight | null {
-    const model = this.buildingModel.getLearner().getModel();
+    const model = this.buildingModel.getPreHeatModel(); // G19: mean over the past day
     const lang = this.getLanguage();
 
     // v2.8.1: Guard rail - show blocked status if external data source not connected
@@ -1027,7 +1027,7 @@ export class BuildingInsightsService {
       return;
     }
 
-    const model = this.buildingModel.getLearner().getModel();
+    const model = this.buildingModel.getPreHeatModel(); // G19: mean over the past day
     const diagnostics = await this.buildingModel.getDiagnosticStatus();
 
     if (diagnostics.confidence < this.minConfidence) {

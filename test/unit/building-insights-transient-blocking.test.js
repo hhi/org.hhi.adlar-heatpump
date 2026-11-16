@@ -90,7 +90,7 @@ function createInsightsService(driver) {
   };
   return new BuildingInsightsService({
     device,
-    buildingModelService: { getLearner: () => ({ getModel: () => model }) },
+    buildingModelService: { getLearner: () => ({ getModel: () => model }), getPreHeatModel: () => model },
     adaptiveControlService: { hasDynamicPricing: () => false },
     logger: () => {},
   });
