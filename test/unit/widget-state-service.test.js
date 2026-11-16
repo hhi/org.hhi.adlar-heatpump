@@ -98,7 +98,9 @@ test('Aurora II: regulation delivers codes and numbers, no text', () => {
       control: {
         mode: 1, modeName: 'Heating', tempControlMode: 0, acReturnDiffC: 2, heatingSetpointC: 33,
       },
-      status: { running: true, compressorOn: true, defrosting: false, activeFaults: [] },
+      status: {
+        running: true, compressorOn: true, defrosting: false, activeFaults: [],
+      },
       diagnostics: { connectionQuality: 'online' },
       power: {},
       cop: {},

@@ -11,7 +11,9 @@ function feed(L, samples) {
   for (const s of samples) {
     L.addMeasurement(s);
     const day = Math.floor((s.timestamp - samples[0].timestamp) / 86400000);
-    if (day !== lastDay) { lastDay = day; daily.push({ day, ...L.getModel() }); }
+    if (day !== lastDay) {
+      lastDay = day; daily.push({ day, ...L.getModel() });
+    }
   }
   return daily;
 }
@@ -40,9 +42,13 @@ function runCase(label, learnerOpts, samples, holdout, truth) {
   const m = L.getModel();
   return {
     label,
-    C: m.C, UA: m.UA, tau: m.tau, pInt: m.pInt, conf: m.confidence,
-    errC: (m.C - truth.C) / truth.C * 100,
-    errUA: (m.UA - truth.UA) / truth.UA * 100,
+    C: m.C,
+    UA: m.UA,
+    tau: m.tau,
+    pInt: m.pInt,
+    conf: m.confidence,
+    errC: ((m.C - truth.C) / truth.C) * 100,
+    errUA: ((m.UA - truth.UA) / truth.UA) * 100,
     rmse: predictionRmse(m, holdout),
     ...L.stats,
     daily,
@@ -73,4 +79,6 @@ const COLS = [
   ['conf %', (r) => fmt(r.conf, 0)],
 ];
 
-module.exports = { asLearnerInput, runCase, table, COLS, fmt, predictionRmse, feed, simulateHouse, makeLearner };
+module.exports = {
+  asLearnerInput, runCase, table, COLS, fmt, predictionRmse, feed, simulateHouse, makeLearner,
+};

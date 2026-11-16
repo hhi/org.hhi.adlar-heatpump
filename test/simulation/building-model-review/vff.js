@@ -4,9 +4,13 @@
 const { simulateHouse, asLearnerInput } = require('./house');
 const { makeLearner } = require('./learners');
 
-const truth = { C: 15, UA: 0.3, g: 0.5, pInt: 0.3 };
+const truth = {
+  C: 15, UA: 0.3, g: 0.5, pInt: 0.3,
+};
 const SEEDS = [7, 11, 23, 42, 77];
-const best = { psd: true, bounds: true, order: true, window: 12 };
+const best = {
+  psd: true, bounds: true, order: true, window: 12,
+};
 const variants = [
   ['huidig, λ 0,999', { lambda: 0.999 }],
   ['fixes+venster, λ 0,999 (VFF zoals nu: inert)', { ...best, lambda: 0.999 }],
@@ -17,9 +21,13 @@ const variants = [
 console.log('variant | UA dag 19 | UA dag 25 | UA dag 30 | UA dag 50 | dagen tot |UA−0,20| < 10% | λ gem. | λ min');
 console.log('--- | --- | --- | --- | --- | --- | --- | ---');
 for (const [label, opts] of variants) {
-  const acc = { d19: 0, d25: 0, d30: 0, d50: 0, reach: [], lamAvg: 0, lamMin: 1 };
+  const acc = {
+    d19: 0, d25: 0, d30: 0, d50: 0, reach: [], lamAvg: 0, lamMin: 1,
+  };
   for (const seed of SEEDS) {
-    const s = asLearnerInput(simulateHouse({ ...truth, days: 50, seed, change: { atDay: 20, UA: 0.2 } }), 'realistisch');
+    const s = asLearnerInput(simulateHouse({
+      ...truth, days: 50, seed, change: { atDay: 20, UA: 0.2 },
+    }), 'realistisch');
     const L = makeLearner({ profile: 'average', ...opts });
     const t0 = s[0].timestamp;
     let reach = null;

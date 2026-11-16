@@ -26,14 +26,22 @@ function createCoordinator(driver) {
     settingsManager: { onSettings: async () => {} },
     energyTracking: { onSettings: async () => {} },
     adaptiveControl: {
-      onSettings: async () => { calls.push('adaptiveControl.onSettings'); },
+      onSettings: async () => {
+        calls.push('adaptiveControl.onSettings');
+      },
       getBuildingModelService: () => ({
-        softReset: async (profile) => { calls.push(`softReset:${profile}`); },
+        softReset: async (profile) => {
+          calls.push(`softReset:${profile}`);
+        },
       }),
     },
     buildingInsights: {
-      onSettingsChanged: async () => { calls.push('insights.onSettingsChanged'); },
-      evaluateInsights: async () => { calls.push('insights.evaluateInsights'); },
+      onSettingsChanged: async () => {
+        calls.push('insights.onSettingsChanged');
+      },
+      evaluateInsights: async () => {
+        calls.push('insights.evaluateInsights');
+      },
     },
   });
   return { coordinator, calls };

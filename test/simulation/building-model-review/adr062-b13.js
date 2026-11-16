@@ -100,11 +100,21 @@ class ProtoLearner extends BuildingModelLearner {
 const SEEDS = [7, 11, 23, 42, 77];
 const WEATHER = { warm: [4, {}, 'geen'], koudA3: [0, { defrost: true, dhw: true }, 'A3'], koudA2: [0, { defrost: true, dhw: true }, 'A2'] };
 const HOUSES = {
-  licht: { C: 7, UA: 0.35, g: 0.4, pInt: 0.3 },
-  gemiddeld: { C: 15, UA: 0.3, g: 0.5, pInt: 0.3 },
-  lek: { C: 10, UA: 1.0, g: 0.4, pInt: 0.3 },
-  zwaar: { C: 24, UA: 0.15, g: 0.5, pInt: 0.3 },
-  passief: { C: 30, UA: 0.07, g: 0.6, pInt: 0.25 },
+  licht: {
+    C: 7, UA: 0.35, g: 0.4, pInt: 0.3,
+  },
+  gemiddeld: {
+    C: 15, UA: 0.3, g: 0.5, pInt: 0.3,
+  },
+  lek: {
+    C: 10, UA: 1.0, g: 0.4, pInt: 0.3,
+  },
+  zwaar: {
+    C: 24, UA: 0.15, g: 0.5, pInt: 0.3,
+  },
+  passief: {
+    C: 30, UA: 0.07, g: 0.6, pInt: 0.25,
+  },
 };
 const cfg = (profile) => ({
   forgettingFactor: 0.999, initialCovariance: 100, minSamplesForConfidence: 288, buildingProfile: profile, enableDynamicPInt: false,
@@ -118,8 +128,12 @@ function run(variant, truth, profile, w, days = [1, 30]) {
   let reverts = 0; let bounded = 0; let stuck = 0; let tr = 0; let limited = 0; let sMean = 0;
   for (const seed of SEEDS) {
     const L = make(variant, profile);
-    const s = asLearnerInput(applyGates(simulateHouse({ ...truth, days: Math.max(...days), seed, tOutMean: tOut, events: ev }), gates), 'realistisch');
-    const h = simulateHouse({ ...truth, days: 5, seed: seed + 1000, tOutMean: tOut, events: ev });
+    const s = asLearnerInput(applyGates(simulateHouse({
+      ...truth, days: Math.max(...days), seed, tOutMean: tOut, events: ev,
+    }), gates), 'realistisch');
+    const h = simulateHouse({
+      ...truth, days: 5, seed: seed + 1000, tOutMean: tOut, events: ev,
+    });
     const t0 = s[0].timestamp; let next = 0;
     for (const x of s) {
       L.addMeasurement(x);
@@ -138,12 +152,19 @@ function run(variant, truth, profile, w, days = [1, 30]) {
   }
   const n = SEEDS.length;
   return {
-    d: acc.map((a) => ({ rmse: a.rmse / n, ua: 100 * a.ua / n, pint: a.pint / n })),
-    reverts: Math.round(reverts / n), bounded: Math.round(bounded / n), stuck, trace: tr / n, limited: Math.round(limited / n), s: sMean / n,
+    d: acc.map((a) => ({ rmse: a.rmse / n, ua: (100 * a.ua) / n, pint: a.pint / n })),
+    reverts: Math.round(reverts / n),
+    bounded: Math.round(bounded / n),
+    stuck,
+    trace: tr / n,
+    limited: Math.round(limited / n),
+    s: sMean / n,
   };
 }
 const f = (x, d = 4) => x.toFixed(d);
-const PROFILE_OF = { licht: 'light', gemiddeld: 'average', lek: 'light', zwaar: 'heavy', passief: 'passive' };
+const PROFILE_OF = {
+  licht: 'light', gemiddeld: 'average', lek: 'light', zwaar: 'heavy', passief: 'passive',
+};
 
 if (mode === 'check') {
   console.log('## Controle: prototype "mirror" tegen de echte learner (RMSE dag 30, reverts, bounded, trace P)');
@@ -163,14 +184,19 @@ if (mode === 'check') {
 const VARIANTS = (process.argv[3] || 'mirror,effDiag,effScalar').split(',');
 
 if (mode === 'regress') {
-  const SC = { S1: ['gemiddeld', 'average'], S1b: ['gemiddeld', 'light'], S2: ['lek', 'light'], S3: ['zwaar', 'heavy'], S5: ['passief', 'passive'] };
+  const SC = {
+    S1: ['gemiddeld', 'average'], S1b: ['gemiddeld', 'light'], S2: ['lek', 'light'], S3: ['zwaar', 'heavy'], S5: ['passief', 'passive'],
+  };
   for (const w of Object.keys(WEATHER)) {
     console.log(`\n## S1–S5 ${w}: RMSE 6 u dag 30 · |UA-fout| % · |P_int-fout| kW · reverts/bounded · trace P · afgeremde stappen (gem. s)`);
     console.log(`scenario | ${VARIANTS.join(' | ')}`);
     for (const [s, [k, p]] of Object.entries(SC)) {
       const cells = VARIANTS.map((v) => {
         const r = run(v, HOUSES[k], p, w, [30]);
-        return `${f(r.d[0].rmse, 3)} · ${r.d[0].ua.toFixed(0)}% · ${r.d[0].pint.toFixed(2)} · ${r.reverts}/${r.bounded} · ${r.trace.toExponential(1)}${v === 'mirror' ? '' : ` · ${r.limited} (${r.s.toFixed(2)})`}`;
+        return [
+          `${f(r.d[0].rmse, 3)} · ${r.d[0].ua.toFixed(0)}% · ${r.d[0].pint.toFixed(2)} · ${r.reverts}/${r.bounded} · ${r.trace.toExponential(1)}`,
+          v === 'mirror' ? '' : ` · ${r.limited} (${r.s.toFixed(2)})`,
+        ].join('');
       });
       console.log(`${s} | ${cells.join(' | ')}`);
     }
@@ -198,39 +224,57 @@ if (mode === 'restart') {
   const fs = require('fs');
   const TOUT = JSON.parse(fs.readFileSync(path.join(__dirname, 'adr064-buitentemp-2026-10-18.json'), 'utf8')).slice(0, 168);
   const THETA = [0.037858, 0.014989, 0.013145, 0.046989];
-  const toutAt = (h) => { const i = Math.floor(h) % 168; const fr = h - Math.floor(h); return TOUT[i] * (1 - fr) + TOUT[(i + 1) % 168] * fr; };
-  const rng = (a) => () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const toutAt = (h) => {
+    const i = Math.floor(h) % 168; const fr = h - Math.floor(h); return TOUT[i] * (1 - fr) + TOUT[(i + 1) % 168] * fr;
+  };
+  const rng = (a) => () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
   const restart = (variant, seed, pDiag) => {
     const C = 20; const UA = 0.3; const pInt = 0.3;
-    const r = rng(seed); const g = () => { let s = 0; for (let i = 0; i < 6; i++) s += r(); return s - 3; };
+    const r = rng(seed); const g = () => {
+      let s = 0; for (let i = 0; i < 6; i++) s += r(); return s - 3;
+    };
     const L = make(variant, 'average');
-    if (pDiag !== null) { L.theta = [...THETA]; L.P = [0, 1, 2, 3].map((i) => [0, 1, 2, 3].map((j) => (i === j ? (i === 2 ? 0.099 : pDiag) : 0))); }
+    if (pDiag !== null) {
+      L.theta = [...THETA]; L.P = [0, 1, 2, 3].map((i) => [0, 1, 2, 3].map((j) => {
+        if (i !== j) return 0; return i === 2 ? 0.099 : pDiag;
+      }));
+    }
     let tIn = 21.7; let on = false; let level = 3; let acc = 0; let n = 0; let prev = null; const out = {};
     const DT = 5; const steps = (28 * 86400) / DT;
     for (let i = 0; i < steps; i++) {
       const h = (i * DT) / 3600; const tOut = toutAt(h);
       const target = (h % 24) > 6 && (h % 24) < 23 ? 21.8 : 21.4;
-      if (!on && tIn < target - 0.2) { on = true; level = Math.max(2, Math.min(8, 1.8 * UA * (target - tOut) + 2 + g() * 0.4)); }
+      if (!on && tIn < target - 0.2) {
+        on = true; level = Math.max(2, Math.min(8, 1.8 * UA * (target - tOut) + 2 + g() * 0.4));
+      }
       if (on && tIn > target + 0.2) on = false;
       const q = on ? Math.max(0, level * (1 + 0.08 * Math.sin(h * 7.3) + 0.05 * g())) : 0;
       tIn += ((q - UA * (tIn - tOut) + pInt) / C) * (DT / 3600);
       acc += q; n++;
       if ((i + 1) % 60 === 0) {
         const cur = { timestamp: Date.UTC(2026, 9, 1) + (i + 1) * DT * 1000, tIndoor: Math.round(tIn * 10) / 10, tOutdoor: tOut };
-        if (prev) L.addMeasurement({ ...prev, pHeating: acc / n, solarRadiation: 0, deltaTPerHour: 0 });
+        if (prev) {
+          L.addMeasurement({
+            ...prev, pHeating: acc / n, solarRadiation: 0, deltaTPerHour: 0,
+          });
+        }
         prev = cur; acc = 0; n = 0;
       }
-      const day = (i + 1) * DT / 86400;
+      const day = ((i + 1) * DT) / 86400;
       if ([2, 6, 14, 28].includes(day)) out[day] = L.getModel();
     }
     return out;
   };
   for (const pd of [null, 1e-2, 1e-3, 1e-4]) {
     console.log(`\n## ${pd === null ? 'Verse start (profiel average)' : `Start installatiestand, P_diag ${pd}`}: C · UA · P_int (gem. 3 seeds)`);
-    console.log(`variant | dag 2 | dag 6 | dag 14 | dag 28`);
+    console.log('variant | dag 2 | dag 6 | dag 14 | dag 28');
     for (const v of VARIANTS) {
       const runs = [7, 11, 23].map((s) => restart(v, s, pd));
-      const cell = (d) => { const a = (k) => runs.reduce((x, r) => x + r[d][k], 0) / runs.length; return `${a('C').toFixed(1)} · ${a('UA').toFixed(3)} · ${a('pInt').toFixed(2)}`; };
+      const cell = (d) => {
+        const a = (k) => runs.reduce((x, r) => x + r[d][k], 0) / runs.length; return `${a('C').toFixed(1)} · ${a('UA').toFixed(3)} · ${a('pInt').toFixed(2)}`;
+      };
       console.log(`${v} | ${[2, 6, 14, 28].map(cell).join(' | ')}`);
     }
   }

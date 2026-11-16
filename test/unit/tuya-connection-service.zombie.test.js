@@ -46,7 +46,9 @@ function makeDevice({ capabilities = [] } = {}) {
     getName: () => 'Test heatpump',
     getCapabilityValue: () => false,
     hasCapability: (id) => capabilities.includes(id),
-    setCapabilityValue: async (id, value) => { written.set(id, value); },
+    setCapabilityValue: async (id, value) => {
+      written.set(id, value);
+    },
     setStoreValue: async () => undefined,
     getStoreValue: async () => undefined,
     homey: {
@@ -114,8 +116,8 @@ describe('F0-2 — waitForDataEvent meet het juiste venster', () => {
     const tuya = new FakeTuya({ mode: 'data' });
     const service = makeService(tuya);
 
-    const previous = service.lastDataEventReceived;   // venster opent hier
-    await tuya.get({ schema: true });                 // event is nu al gepasseerd
+    const previous = service.lastDataEventReceived; // venster opent hier
+    await tuya.get({ schema: true }); // event is nu al gepasseerd
 
     const fresh = await service.waitForDataEvent(WINDOW_MS, previous);
 
@@ -179,7 +181,7 @@ describe('F0-4 — de TuyAPI-instance wordt nooit hergebruikt', () => {
   test('disconnect ruimt op, ook wanneer isConnected al false is', async () => {
     const tuya = new FakeTuya({ mode: 'data' });
     const service = makeService(tuya);
-    service.isConnected = false;   // het Layer 0-herstelpad
+    service.isConnected = false; // het Layer 0-herstelpad
 
     await service.disconnect();
 
@@ -242,7 +244,7 @@ describe('Incidentadministratie — een hersteld incident wordt afgesloten', () 
     const beforeZombie = day.disconnectsZombie;
     const beforeDetector = day.detectors.layer1;
 
-    service.recordDetector('layer1', false);   // get()/set() gaven een timeout
+    service.recordDetector('layer1', false); // get()/set() gaven een timeout
 
     assert.strictEqual(service.getTelemetryDay().detectors.layer1, beforeDetector + 1,
       'de detector telt wel');
@@ -258,7 +260,7 @@ describe('Meetbaarheid — de zombie-teller landt in een capability', () => {
     });
 
     service.recordDetector('layer1', true);
-    await new Promise((resolve) => setTimeout(resolve, 20));   // flush is fire-and-forget
+    await new Promise((resolve) => setTimeout(resolve, 20)); // flush is fire-and-forget
 
     assert.strictEqual(service.testDevice.written.get('adlar_zombie_detections_daily'), 1);
 
@@ -268,7 +270,7 @@ describe('Meetbaarheid — de zombie-teller landt in een capability', () => {
   });
 
   test('zonder de capabilities gebeurt er niets', async () => {
-    const service = makeService(new FakeTuya({ mode: 'data' }));   // geen capabilities
+    const service = makeService(new FakeTuya({ mode: 'data' })); // geen capabilities
 
     service.recordDetector('layer1', true);
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -288,12 +290,20 @@ describe('Publieke verbindingsstatus — alleen aanhoudende uitval', () => {
     device.setCapabilityValue = async (id, value) => {
       if (id === 'adlar_connection_active') events.push(value);
     };
-    device.setAvailable = async () => { events.push('available'); };
-    device.setUnavailable = async () => { events.push('unavailable'); };
-    device.homey.notifications = {
-      createNotification: async ({ excerpt }) => { events.push(excerpt); },
+    device.setAvailable = async () => {
+      events.push('available');
     };
-    device.homey.setTimeout = (fn) => { timers.set(++timerId, fn); return timerId; };
+    device.setUnavailable = async () => {
+      events.push('unavailable');
+    };
+    device.homey.notifications = {
+      createNotification: async ({ excerpt }) => {
+        events.push(excerpt);
+      },
+    };
+    device.homey.setTimeout = (fn) => {
+      timers.set(++timerId, fn); return timerId;
+    };
     device.homey.clearTimeout = (id) => timers.delete(id);
     service.publicConnected = true;
     service.publicAvailabilityApplied = true;
@@ -305,7 +315,9 @@ describe('Publieke verbindingsstatus — alleen aanhoudende uitval', () => {
       callback();
       await service.publicStatusWrites;
     };
-    return { service, tuya, events, timers, check };
+    return {
+      service, tuya, events, timers, check,
+    };
   }
 
   test('korte uitval en herstel bij poging 3 blijven stil', async () => {
@@ -344,7 +356,9 @@ describe('Publieke verbindingsstatus — alleen aanhoudende uitval', () => {
   });
 
   test('socketstatus, heartbeat en lege data beëindigen een gemelde uitval niet', async () => {
-    const { service, tuya, events, check } = publicService();
+    const {
+      service, tuya, events, check,
+    } = publicService();
     await service.updateStatusTimestamp('disconnected');
     service.publicOutageStartedAt = Date.now() - 16 * 60 * 1000;
     service.publicRecoveryAttempts = 3;

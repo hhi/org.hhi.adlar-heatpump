@@ -22,8 +22,8 @@
  * window energy / window duration — the quantity the real implementation will supply.
  */
 
-
 const { BuildingModelLearner } = require('../../../.homeybuild/lib/shared/adaptive/building-model-learner');
+
 const MODE = process.argv[2] || 'main';
 
 const K = 4.186 / 60; // kW per (l/min · K)
@@ -34,7 +34,7 @@ function mulberry32(a) {
   return () => {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
@@ -48,8 +48,14 @@ function simulate(opts) {
     C, UA, pInt, tOutMean, days, seed, quant = 'round', retVar = 1.0, emitterH = 0, flowScale = 1, clampNeg = true, flowNom = 20, sensNoise = 0.05,
   } = opts;
   const rnd = mulberry32(seed);
-  const gauss = () => { let s = 0; for (let i = 0; i < 6; i++) s += rnd(); return s - 3; };
-  const q = (x) => (quant === 'round' ? Math.round(x) : quant === 'floor' ? Math.floor(x) : x);
+  const gauss = () => {
+    let s = 0; for (let i = 0; i < 6; i++) s += rnd(); return s - 3;
+  };
+  const q = (x) => {
+    if (quant === 'round') return Math.round(x);
+    if (quant === 'floor') return Math.floor(x);
+    return x;
+  };
   const steps = (days * 86400) / DT_S;
   const perSample = SAMPLE_S / DT_S;
   let tIn = 21;
@@ -66,7 +72,9 @@ function simulate(opts) {
     const h = (i * DT_S) / 3600;
     const tOut = tOutMean + 4 * Math.sin((2 * Math.PI * (h - 9)) / 24) + 1.5 * Math.sin(h / 37);
     const target = (h % 24) > 6 && (h % 24) < 23 ? 21.5 : 20.5;
-    if (!on && tIn < target - 0.3) { on = true; runS = 0; level = Math.max(2, Math.min(8, 1.8 * UA * (target - tOut) + 2 + gauss() * 0.4)); }
+    if (!on && tIn < target - 0.3) {
+      on = true; runS = 0; level = Math.max(2, Math.min(8, 1.8 * UA * (target - tOut) + 2 + gauss() * 0.4));
+    }
     if (on && tIn > target + 0.3) on = false;
     if (on) runS += DT_S;
     const modulation = 1 + 0.08 * Math.sin(h * 7.3) + 0.05 * gauss();
@@ -84,7 +92,9 @@ function simulate(opts) {
     // Measured (whole degrees, whole l/min, small sensor noise before quantisation)
     const flowM = Math.round(flowTrue * flowScale); // flowScale < 1: register reads systematically low
     const dTm = q(tSup + gauss() * sensNoise) - q(tRet + gauss() * sensNoise);
-    const pollHeat = flowM > 0 ? (clampNeg ? Math.max(0, flowM * dTm * K) : flowM * dTm * K) : 0;
+    const rawHeat = flowM * dTm * K;
+    const clampedHeat = clampNeg ? Math.max(0, rawHeat) : rawHeat;
+    const pollHeat = flowM > 0 ? clampedHeat : 0;
     const cop = 2.6 + 0.09 * (tOut + 5);
     const pEl = on ? produced / cop + 0.02 : 0.011; // kW, kWh meter
     acc.ideal += produced; acc.poll += pollHeat; acc.n++;
@@ -125,7 +135,9 @@ function learn(samples, variant, profile = 'average') {
       if (!snap.on) p = 0;
       else {
         const copSnap = snap.pollHeat / snap.pEl;
-        if (snap.pollHeat <= 0 || copSnap > 8 || copSnap < 1) { skipped++; L.interruptWindow(); continue; }
+        if (snap.pollHeat <= 0 || copSnap > 8 || copSnap < 1) {
+          skipped++; L.interruptWindow(); continue;
+        }
         p = snap.pEl * copSnap; // = snapshot heat
       }
     }
@@ -156,10 +168,18 @@ const SEEDS = [7, 11, 23, 42, 77];
 
 function scenario(label, extra, variants = ['ideaal', 'huidig', 'venster']) {
   const rows = {};
-  for (const v of variants) rows[v] = { C: [], UA: [], pInt: [], rmse: [], skip: [] };
+  for (const v of variants) {
+    rows[v] = {
+      C: [], UA: [], pInt: [], rmse: [], skip: [],
+    };
+  }
   for (const seed of SEEDS) {
-    const train = simulate({ ...TRUTH, days: 30, seed, ...extra });
-    const hold = simulate({ ...TRUTH, days: 5, seed: seed + 1000, ...extra, emitterH: 0 });
+    const train = simulate({
+      ...TRUTH, days: 30, seed, ...extra,
+    });
+    const hold = simulate({
+      ...TRUTH, days: 5, seed: seed + 1000, ...extra, emitterH: 0,
+    });
     for (const v of variants) {
       const { model, skipped } = learn(train, v);
       rows[v].C.push(model.C); rows[v].UA.push(model.UA); rows[v].pInt.push(model.pInt);
@@ -189,10 +209,16 @@ if (MODE === 'sens' || MODE === 'all') {
 if (MODE === 'clamp' || MODE === 'all') {
   scenario('Mild, hele graden, afkappen negatieve ΔT naar 0 (20 l/min)', { tOutMean: 12, quant: 'round' }, ['ideaal', 'venster']);
   scenario('Mild, hele graden, negatieve ΔT behouden (20 l/min)', { tOutMean: 12, quant: 'round', clampNeg: false }, ['ideaal', 'venster']);
-  scenario('Mild, hele graden, sensorruis 0,4 K, 45 l/min, afkappen', { tOutMean: 12, quant: 'round', flowNom: 45, sensNoise: 0.4 }, ['ideaal', 'huidig', 'venster']);
-  scenario('Mild, hele graden, sensorruis 0,4 K, 45 l/min, behouden', { tOutMean: 12, quant: 'round', flowNom: 45, sensNoise: 0.4, clampNeg: false }, ['ideaal', 'venster']);
+  scenario('Mild, hele graden, sensorruis 0,4 K, 45 l/min, afkappen', {
+    tOutMean: 12, quant: 'round', flowNom: 45, sensNoise: 0.4,
+  }, ['ideaal', 'huidig', 'venster']);
+  scenario('Mild, hele graden, sensorruis 0,4 K, 45 l/min, behouden', {
+    tOutMean: 12, quant: 'round', flowNom: 45, sensNoise: 0.4, clampNeg: false,
+  }, ['ideaal', 'venster']);
   scenario('Mild, hele graden, afkappen, hoog debiet 45 l/min (kleine ΔT)', { tOutMean: 12, quant: 'round', flowNom: 45 }, ['ideaal', 'venster']);
-  scenario('Mild, hele graden, behouden, hoog debiet 45 l/min (kleine ΔT)', { tOutMean: 12, quant: 'round', flowNom: 45, clampNeg: false }, ['ideaal', 'venster']);
+  scenario('Mild, hele graden, behouden, hoog debiet 45 l/min (kleine ΔT)', {
+    tOutMean: 12, quant: 'round', flowNom: 45, clampNeg: false,
+  }, ['ideaal', 'venster']);
 }
 if (MODE === 'bias' || MODE === 'all') {
   scenario('Mild 12 °C, hele graden, warmte systematisch 40% te laag gemeten (debiet × 0,6)', { tOutMean: 12, quant: 'round', flowScale: 0.6 });

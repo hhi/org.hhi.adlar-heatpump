@@ -43,10 +43,14 @@ function createDevice(settings = {}) {
     },
     getSetting: (key) => settings[key],
     getStoreValue: (key) => store[key],
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: (key) => Object.prototype.hasOwnProperty.call(capabilities, key),
-    setCapabilityValue: async (key, value) => { capabilities[key] = value; },
+    setCapabilityValue: async (key, value) => {
+      capabilities[key] = value;
+    },
     setCapabilityOptions: async () => {},
     getOutdoorTemperatureWithFallback: () => 5,
     error: () => {},
@@ -148,7 +152,6 @@ for (const [name, Service] of DRIVERS) {
     assert.strictEqual(recommend(50, -3.4), 45, 'a kept value above the range is clamped');
   });
 }
-
 
 // v3.11.0: the threshold mode reaches the price optimizer at start and when changed
 for (const [name, Service] of DRIVERS) {

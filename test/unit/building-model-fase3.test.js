@@ -103,12 +103,20 @@ function createService(store = {}) {
     homey: {
       __: (key) => key,
       i18n: { getLanguage: () => 'en' },
-      flow: { getDeviceTriggerCard: () => ({ trigger: async (_d, tokens) => { triggered.push(tokens); } }) },
+      flow: {
+        getDeviceTriggerCard: () => ({
+          trigger: async (_d, tokens) => {
+            triggered.push(tokens);
+          },
+        }),
+      },
     },
     store,
     getSetting: () => undefined,
     getStoreValue: (key) => store[key],
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: () => null,
     hasCapability: () => false,
     setCapabilityValue: async () => {},

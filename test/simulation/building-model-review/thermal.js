@@ -4,16 +4,27 @@
 const Module = require('module');
 
 const origLoad = Module._load;
-Module._load = function load(req, parent, isMain) { return req === 'homey' ? {} : origLoad.call(this, req, parent, isMain); };
+Module._load = function load(req, parent, isMain) {
+  return req === 'homey' ? {} : origLoad.call(this, req, parent, isMain);
+};
 const { BuildingModelService } = require('../../../.homeybuild/lib/modbus/services/building-model-service');
 
-const truth = { C: 15, UA: 0.3, g: 0.5, pInt: 0.3 };
+const truth = {
+  C: 15, UA: 0.3, g: 0.5, pInt: 0.3,
+};
 const P_ON = truth.UA * 22; // zelfde warmtepomp als in de simulator: 6,6 kW thermisch
 
 const device = {
-  homey: { __: (k) => k, i18n: { getLanguage: () => 'en' }, setInterval: () => ({}), clearInterval: () => {}, flow: { getDeviceTriggerCard: () => ({ trigger: async () => {} }) } },
-  getSetting: () => undefined, getStoreValue: () => undefined, setStoreValue: async () => {},
-  getCapabilityValue: () => null, hasCapability: () => false, setCapabilityValue: async () => {}, setCapabilityOptions: async () => {},
+  homey: {
+    __: (k) => k, i18n: { getLanguage: () => 'en' }, setInterval: () => ({}), clearInterval: () => {}, flow: { getDeviceTriggerCard: () => ({ trigger: async () => {} }) },
+  },
+  getSetting: () => undefined,
+  getStoreValue: () => undefined,
+  setStoreValue: async () => {},
+  getCapabilityValue: () => null,
+  hasCapability: () => false,
+  setCapabilityValue: async () => {},
+  setCapabilityOptions: async () => {},
 };
 const svc = new BuildingModelService({ device, enableDynamicPInt: false, logger: () => {} });
 svc.getSolarRadiationWithPriority = () => ({ radiation: 0, source: 'estimation' }); // nacht/bewolkt: geen zon
@@ -22,7 +33,10 @@ svc.getLearner().restoreState({
   theta: [1 / truth.C, truth.UA / truth.C, truth.g / truth.C, truth.pInt / truth.C], P: P4, sampleCount: 3000, lastMeasurement: null,
 });
 const realGetHours = Date.prototype.getHours;
-Date.prototype.getHours = function getHours() { return 12; }; // dagvenster: P_int-multiplier 1,0
+// eslint-disable-next-line no-extend-native -- the simulation pins the hour of day; restored at the end
+Date.prototype.getHours = function getHours() {
+  return 12;
+}; // dagvenster: P_int-multiplier 1,0
 
 function trueHours(tStart, tTarget, tOut, pHeat) {
   // Werkelijke 1R1C-woning, warmtepomp continu aan, tot binnen 0,3 °C van het doel (zoals de formule)
@@ -42,7 +56,15 @@ for (const [tIn, target] of [[19.8, 21], [20.5, 21]]) {
     const r = svc.calculateThermalAdjustment({ indoorTemp: tIn, targetIndoorTemp: target, outdoorTemp: tOut });
     const hrs = (r.reason.match(/([\d.]+)h to target/) || [])[1];
     const fmtH = (h) => (Number.isFinite(h) ? `${h.toFixed(1)} h` : 'nooit (evenwicht < doel)');
-    console.log(`${tIn} → ${target} | ${tOut} °C | ${fmtH(trueHours(tIn, target, tOut, P_ON))} | ${fmtH(trueHours(tIn, target, tOut, 3))} | ${hrs ? `${hrs} h` : '—'} | ${r.adjustment > 0 ? '+' : ''}${r.adjustment} °C (${r.reason})`);
+    console.log([
+      `${tIn} → ${target}`,
+      `${tOut} °C`,
+      `${fmtH(trueHours(tIn, target, tOut, P_ON))}`,
+      `${fmtH(trueHours(tIn, target, tOut, 3))}`,
+      `${hrs ? `${hrs} h` : '—'}`,
+      `${r.adjustment > 0 ? '+' : ''}${r.adjustment} °C (${r.reason})`,
+    ].join(' | '));
   }
 }
+// eslint-disable-next-line no-extend-native -- restores the original
 Date.prototype.getHours = realGetHours;

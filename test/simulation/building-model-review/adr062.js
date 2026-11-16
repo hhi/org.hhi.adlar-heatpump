@@ -12,41 +12,71 @@
 
 const { simulateHouse, asLearnerInput, applyGates } = require('./house');
 const { makeLearner, minEigen } = require('./learners');
-const { runCase, table, COLS, fmt } = require('./run');
+const {
+  runCase, table, COLS, fmt,
+} = require('./run');
 
 const SEEDS = [7, 11, 23, 42, 77];
 const FIX = { psd: true, bounds: true, clipAfter: 12 }; // ADR-062 B11: geen uniforme rate-limiting; B12: inkorten na 12 reverts
 const which = process.argv[2] || 'all';
 
 const HOUSES = {
-  S5: [{ C: 30, UA: 0.07, g: 0.6, pInt: 0.25 }, 'passive'],
-  S1b: [{ C: 15, UA: 0.3, g: 0.5, pInt: 0.3 }, 'light'],
-  S2: [{ C: 10, UA: 1.0, g: 0.4, pInt: 0.3 }, 'light'],
-  S3: [{ C: 24, UA: 0.15, g: 0.5, pInt: 0.3 }, 'heavy'],
+  S5: [{
+    C: 30, UA: 0.07, g: 0.6, pInt: 0.25,
+  }, 'passive'],
+  S1b: [{
+    C: 15, UA: 0.3, g: 0.5, pInt: 0.3,
+  }, 'light'],
+  S2: [{
+    C: 10, UA: 1.0, g: 0.4, pInt: 0.3,
+  }, 'light'],
+  S3: [{
+    C: 24, UA: 0.15, g: 0.5, pInt: 0.3,
+  }, 'heavy'],
   // ADR-062 B12: het lekke huis van S2 vanaf een ver startprofiel
-  'S2-passive': [{ C: 10, UA: 1.0, g: 0.4, pInt: 0.3 }, 'passive'],
-  'S2-heavy': [{ C: 10, UA: 1.0, g: 0.4, pInt: 0.3 }, 'heavy'],
+  'S2-passive': [{
+    C: 10, UA: 1.0, g: 0.4, pInt: 0.3,
+  }, 'passive'],
+  'S2-heavy': [{
+    C: 10, UA: 1.0, g: 0.4, pInt: 0.3,
+  }, 'heavy'],
 };
 
-function run(title, variants, { houses = ['S1b', 'S2', 'S3'], tOutMean = 4, events = {}, gates = 'geen' } = {}) {
+function run(title, variants, {
+  houses = ['S1b', 'S2', 'S3'], tOutMean = 4, events = {}, gates = 'geen',
+} = {}) {
   console.log(`\n### ${title}\n`);
   for (const key of houses) {
     const [truth, profile] = HOUSES[key];
     const agg = [];
     for (const [label, opts] of variants) {
       const rows = SEEDS.map((seed) => {
-        const raw = simulateHouse({ ...truth, days: 30, seed, tOutMean, events });
+        const raw = simulateHouse({
+          ...truth, days: 30, seed, tOutMean, events,
+        });
         const s = asLearnerInput(applyGates(raw, gates), 'realistisch');
-        const h = simulateHouse({ ...truth, days: 5, seed: seed + 1000, tOutMean, events });
+        const h = simulateHouse({
+          ...truth, days: 5, seed: seed + 1000, tOutMean, events,
+        });
         return runCase(label, { profile, ...opts }, s, h, truth);
       });
       const avg = (k) => rows.reduce((a, r) => a + (r[k] ?? 0), 0) / rows.length;
       const absAvg = (k) => rows.reduce((a, r) => a + Math.abs(r[k]), 0) / rows.length;
       agg.push({
-        label, C: avg('C'), UA: avg('UA'), tau: avg('tau'), errC: absAvg('errC'), errUA: absAvg('errUA'),
-        rmse: avg('rmse'), reverts: Math.round(avg('reverts')), updates: Math.round(avg('updates')),
-        negXPX: Math.round(avg('negXPX')), negEigUpdates: Math.round(avg('negEigUpdates')),
-        minEig: Math.min(...rows.map((r) => r.minEig)), conf: avg('conf'), resets: Math.round(avg('windowResets')),
+        label,
+        C: avg('C'),
+        UA: avg('UA'),
+        tau: avg('tau'),
+        errC: absAvg('errC'),
+        errUA: absAvg('errUA'),
+        rmse: avg('rmse'),
+        reverts: Math.round(avg('reverts')),
+        updates: Math.round(avg('updates')),
+        negXPX: Math.round(avg('negXPX')),
+        negEigUpdates: Math.round(avg('negEigUpdates')),
+        minEig: Math.min(...rows.map((r) => r.minEig)),
+        conf: avg('conf'),
+        resets: Math.round(avg('windowResets')),
       });
     }
     console.log(`**${key}** (C=${truth.C}, UA=${truth.UA}; Tout gem. ${tOutMean} °C; events ${JSON.stringify(events)}; poorten ${gates})\n`);
@@ -85,7 +115,9 @@ if (which === 'b5' || which === 'all') {
   console.log('--- | --- | --- | --- | --- | ---');
   for (const key of ['S1b', 'S2', 'S3', 'S5']) {
     const [truth, profile] = HOUSES[key];
-    const res = { a: 0, b: 0, c: 0, valid: 0, tau: 0, ua: 0, eig: 0 };
+    const res = {
+      a: 0, b: 0, c: 0, valid: 0, tau: 0, ua: 0, eig: 0,
+    };
     for (const seed of SEEDS) {
       const learnOld = asLearnerInput(simulateHouse({ ...truth, days: 30, seed }), 'realistisch');
       const old = makeLearner({ profile });
@@ -137,7 +169,11 @@ if (which === 'b3b6' || which === 'all') {
     }
     const ns = Number(process.hrtime.bigint() - t0);
     const updates = L.stats.updates + L.stats.reverts;
-    console.log(`- ${label}: ${(ns / updates / 1000).toFixed(1)} µs per update (incl. meetcode met eigenwaarden), trace P per dag ${traces.map((x) => x.toFixed(3)).join(' ')}, confidence ${L.getModel().confidence.toFixed(0)}%`);
+    console.log([
+      `- ${label}: ${(ns / updates / 1000).toFixed(1)} µs per update (incl. meetcode met eigenwaarden)`,
+      `trace P per dag ${traces.map((x) => x.toFixed(3)).join(' ')}`,
+      `confidence ${L.getModel().confidence.toFixed(0)}%`,
+    ].join(', '));
   }
   const { projectPsd } = require('./learners');
   const P = [[0.5, 0.1, 0.0, 0.2], [0.1, 0.3, 0.05, 0.0], [0.0, 0.05, 0.9, 0.1], [0.2, 0.0, 0.1, 0.7]];
@@ -150,7 +186,9 @@ if (which === 'b3b6' || which === 'all') {
 if (which === 'b12' || which === 'all') {
   const V = [
     ['huidig', {}],
-    ['fixes zonder B12', { ...FIX, clipAfter: 0, windowMin: 60, maxGapMin: 7.5 }],
+    ['fixes zonder B12', {
+      ...FIX, clipAfter: 0, windowMin: 60, maxGapMin: 7.5,
+    }],
     ['fixes + B12', { ...FIX, windowMin: 60, maxGapMin: 7.5 }],
   ];
   const ev = { defrost: true, dhw: true };

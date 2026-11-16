@@ -79,7 +79,11 @@ test('a larger rise never gives a shorter time', () => {
   const cases = [];
   for (const UA of [0.15, 0.3, 0.6]) {
     for (const outdoorTemp of [-5, 5, 12]) {
-      for (const maxHeatingPowerKw of [3, 6, 10]) cases.push({ ...CONDITIONS, UA, outdoorTemp, maxHeatingPowerKw });
+      for (const maxHeatingPowerKw of [3, 6, 10]) {
+        cases.push({
+          ...CONDITIONS, UA, outdoorTemp, maxHeatingPowerKw,
+        });
+      }
     }
   }
   for (const c of cases) {
@@ -189,7 +193,9 @@ function mockDevice(store, outdoor = 5) {
     },
     getSetting: (key) => settings[key] ?? null,
     getStoreValue: async (key) => store[key] ?? null,
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: () => false,
     getOutdoorTemperatureWithFallback: () => outdoor,

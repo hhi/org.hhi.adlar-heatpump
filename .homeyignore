@@ -11,3 +11,4 @@ plans/*
 test/*
 scripts/*
 tmp/*
+tsconfig.eslint.json
