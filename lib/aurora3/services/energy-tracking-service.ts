@@ -623,6 +623,9 @@ export class EnergyTrackingService {
     _newSettings: Record<string, unknown>,
     _changedKeys: string[],
   ): Promise<void> {
+    // Intentionally empty: this service derives all its state from the Modbus poll
+    // cycle, so no settings change requires action here. The method exists to satisfy
+    // the service lifecycle contract shared with the other services.
   }
 
   /**
