@@ -469,7 +469,8 @@ export const SENSOR_REGISTERS: Record<string, InputRegister> = {
     address: 60,
     fc: 'input',
     dataType: 'U16',
-    unit: 'Bar', /* @verify scale */ multiply: 0.1,
+    unit: 'Bar',
+    multiply: 0.1, // @verify scale
     name: 'Inlet Water Pressure',
     desc: 'Spec marks RESERVED — may not be populated on all units. @verify',
   },
@@ -477,7 +478,8 @@ export const SENSOR_REGISTERS: Record<string, InputRegister> = {
     address: 61,
     fc: 'input',
     dataType: 'U16',
-    unit: 'Bar', /* @verify scale */ multiply: 0.1,
+    unit: 'Bar',
+    multiply: 0.1, // @verify scale
     name: 'Outlet Water Pressure',
     desc: 'YAML uses scale 0.1; spec does not declare scale. @verify',
   },
@@ -494,7 +496,8 @@ export const SENSOR_REGISTERS: Record<string, InputRegister> = {
     address: 63,
     fc: 'input',
     dataType: 'U16',
-    unit: 'm³/h', /* @verify */ multiply: 0.1,
+    unit: 'm³/h',
+    multiply: 0.1, // @verify
     name: 'PWM Feedback DC Water Pump',
     desc: 'Official map: scale x10, unit m³/h ("123 means 12.3 m³/h"), although the title says "percentage". '
         + 'The extended HA YAML reads it as % x1. @verify on hardware. Not used for capabilities.',
@@ -503,7 +506,8 @@ export const SENSOR_REGISTERS: Record<string, InputRegister> = {
     address: 64,
     fc: 'input',
     dataType: 'U16',
-    unit: 'm³/h', /* @verify scale */ multiply: 0.1,
+    unit: 'm³/h',
+    multiply: 0.1, // @verify scale
     name: 'Actual Water Flow of DC Pump',
     desc: '⚠️ UNIT DIFFERS FROM AURORA II (II=L/min, III=m³/h, factor 60). YAML uses scale 0.1.',
   },
@@ -668,7 +672,8 @@ export const SENSOR_REGISTERS: Record<string, InputRegister> = {
     address: 86,
     fc: 'input',
     dataType: 'U16',
-    unit: 'kPa', /* @verify scale */ multiply: 1,
+    unit: 'kPa',
+    multiply: 1, // @verify scale
     name: 'High Pressure',
     desc: 'III-only direct kPa reading. II only had saturation-temperature derivative.',
   },

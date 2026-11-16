@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file -- ModbusBlockError is the error type of this transport and belongs with it */
 /**
  * Generic Modbus TCP Service — jsmodbus transport layer
  *
@@ -838,9 +839,10 @@ export class ModbusTcpService extends EventEmitter {
             return;
           }
 
-          const nextDelay = group.adaptive?.enabled
-            ? (changed ? group.adaptive.activeIntervalMs : group.adaptive.idleIntervalMs)
-            : group.intervalMs;
+          let nextDelay = group.intervalMs;
+          if (group.adaptive?.enabled) {
+            nextDelay = changed ? group.adaptive.activeIntervalMs : group.adaptive.idleIntervalMs;
+          }
           this._schedulePollGroup(group, nextDelay, pollGeneration);
         })
         .catch(() => {
