@@ -245,6 +245,7 @@ async function getPreHeatListener(FlowCardManagerService, cardId, conditions = u
         // tau = C / UA = 15 h → 8 h per 2 °C
         getBuildingModelService: () => ({
           getLearner: () => ({ getModel: () => ({ C: 15, UA: 1, confidence: 80 }) }),
+          getPreHeatModel: () => ({ C: 15, UA: 1, pInt: 0.3 }),
           ...(conditions !== undefined ? { getPreHeatConditions: () => conditions } : {}),
         }),
         getExternalTemperatureService: () => ({ getIndoorTemperature: () => 19, getIndoorStaleness: () => 'fresh' }),
