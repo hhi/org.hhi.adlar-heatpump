@@ -198,6 +198,16 @@ export class TuyaDashboardService {
       res.end(css);
       return;
     }
+    if (method === 'GET' && route === '/schema-renderer.js') {
+      const js = await fs.promises.readFile(path.join(this.options.appDir, 'public', 'schema-renderer.js'));
+      res.writeHead(200, {
+        'Content-Type': 'text/javascript; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      res.end(js);
+      return;
+    }
     const file = pages.includes(route) ? 'index.html' : ({
       '/dashboard.js': 'dashboard.js', '/dashboard.css': 'dashboard.css',
     } as Record<string, string>)[route];

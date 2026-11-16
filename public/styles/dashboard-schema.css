@@ -1,0 +1,373 @@
+:root,
+[data-theme="dark"] {
+  --bg: #07090f;
+  --surface: #0d1624;
+  --surface2: #162032;
+  --border: #22334f;
+  --text: #dde8f8;
+  --muted: #5a7a9a;
+  --accent: #5cb3e8;
+  --blue: #38bdf8;
+  --green: #22c55e;
+  --orange: #f97316;
+  --red: #ef4444;
+  --amber: #fbbf24;
+
+  /* Processchema SVG tokens (Dark Mode) */
+  --c-bg-deep: #060911;
+  --c-bg-top: #07090f;
+  --c-surface-inner: #080d18;
+  --c-card-bot: #0b1320;
+  --c-nav-bg: #0d1624;
+  --c-card-top: #0f1a2c;
+  --c-zone-hydro-2: #121c2d;
+  --c-panel-alt: #121e31;
+  --c-badge-slate: #162032;
+  --c-zone-refrig-1: #091526;
+  --c-zone-refrig-2: #0c1d33;
+  --c-zone-hydro-1: #0c1928;
+  --c-border: #22334f;
+  --c-border-strong: #1e3a5f;
+  --c-border-pill: #334155;
+  --c-border-muted: #475569;
+  --c-tint-green-1: #052e16;
+  --c-tint-green-2: #082419;
+  --c-tint-blue-1: #082f49;
+  --c-tint-blue-2: #091d2c;
+  --c-tint-indigo: #1e1b4b;
+  --c-tint-purple: #3b0764;
+  --c-tint-orange: #1f1209;
+  --c-tint-amber: #422006;
+  --c-text-strong: #ffffff;
+  --c-text-title: #f8fafc;
+  --c-text-h1: #f0f6ff;
+  --c-text-main: #dde8f8;
+  --c-text-sec: #cbd5e1;
+  --c-text-muted: #94a3b8;
+  --c-text-dim: #64748b;
+  --c-text-label: #5a7a9a;
+  --c-sky-light: #7dd3fc;
+  --c-sky-pale: #bae6fd;
+  --c-sky: #38bdf8;
+  --c-sky-sec: #5cb3e8;
+  --c-green-light: #4ade80;
+  --c-green: #22c55e;
+  --c-teal: #2dd4bf;
+  --c-teal-pale: #99f6e4;
+  --c-orange-light: #fb923c;
+  --c-orange-pale: #fdba74;
+  --c-orange-arrow: #fed7aa;
+  --c-coil-stroke: #ffedd5;
+  --c-orange: #f97316;
+  --c-amber-light: #fbbf24;
+  --c-amber-pale: #fde68a;
+  --c-amber: #f59e0b;
+  --c-purple-light: #c084fc;
+  --c-purple-pale: #d8b4fe;
+  --c-purple-soft: #e9d5ff;
+  --c-purple: #a855f7;
+  --c-indigo-light: #818cf8;
+  --c-indigo-pale: #a5b4fc;
+  --c-red-light: #fca5a5;
+  --c-red: #ef4444;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --border: #cbd5e1;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #1d4ed8;
+    --blue: #0284c7;
+    --green: #16a34a;
+    --orange: #ea580c;
+    --red: #dc2626;
+    --amber: #d97706;
+
+    --c-bg-deep: #f1f5f9;
+    --c-bg-top: #e0f2fe;
+    --c-surface-inner: #ffffff;
+    --c-card-bot: #f8fafc;
+    --c-nav-bg: #ffffff;
+    --c-card-top: #ffffff;
+    --c-zone-hydro-2: #ffedd5;
+    --c-panel-alt: #f8fafc;
+    --c-badge-slate: #f1f5f9;
+    --c-zone-refrig-1: #f0f9ff;
+    --c-zone-refrig-2: #e0f2fe;
+    --c-zone-hydro-1: #fff7ed;
+    --c-border: #cbd5e1;
+    --c-border-strong: #94a3b8;
+    --c-border-pill: #cbd5e1;
+    --c-border-muted: #94a3b8;
+    --c-tint-green-1: #dcfce7;
+    --c-tint-green-2: #dcfce7;
+    --c-tint-blue-1: #e0f2fe;
+    --c-tint-blue-2: #e0f2fe;
+    --c-tint-indigo: #eef2ff;
+    --c-tint-purple: #f3e8ff;
+    --c-tint-orange: #ffedd5;
+    --c-tint-amber: #fef3c7;
+    --c-text-strong: #0f172a;
+    --c-text-title: #0f172a;
+    --c-text-h1: #0f172a;
+    --c-text-main: #1e293b;
+    --c-text-sec: #334155;
+    --c-text-muted: #475569;
+    --c-text-dim: #64748b;
+    --c-text-label: #475569;
+    --c-sky-light: #0369a1;
+    --c-sky-pale: #0284c7;
+    --c-sky: #0284c7;
+    --c-sky-sec: #0369a1;
+    --c-green-light: #15803d;
+    --c-green: #16a34a;
+    --c-teal: #0f766e;
+    --c-teal-pale: #0d9488;
+    --c-orange-light: #ea580c;
+    --c-orange-pale: #c2410c;
+    --c-orange-arrow: #ea580c;
+    --c-coil-stroke: #ffffff;
+    --c-orange: #ea580c;
+    --c-amber-light: #b45309;
+    --c-amber-pale: #d97706;
+    --c-amber: #d97706;
+    --c-purple-light: #7e22ce;
+    --c-purple-pale: #6b21a8;
+    --c-purple-soft: #581c87;
+    --c-purple: #7e22ce;
+    --c-indigo-light: #4338ca;
+    --c-indigo-pale: #3730a3;
+    --c-red-light: #b91c1c;
+    --c-red: #dc2626;
+  }
+}
+
+[data-theme="light"] {
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --blue: #0284c7;
+  --green: #16a34a;
+  --orange: #ea580c;
+  --red: #dc2626;
+  --amber: #d97706;
+
+  --c-bg-deep: #f1f5f9;
+  --c-bg-top: #e0f2fe;
+  --c-surface-inner: #ffffff;
+  --c-card-bot: #f8fafc;
+  --c-nav-bg: #ffffff;
+  --c-card-top: #ffffff;
+  --c-zone-hydro-2: #ffedd5;
+  --c-panel-alt: #f8fafc;
+  --c-badge-slate: #f1f5f9;
+  --c-zone-refrig-1: #f0f9ff;
+  --c-zone-refrig-2: #e0f2fe;
+  --c-zone-hydro-1: #fff7ed;
+  --c-border: #cbd5e1;
+  --c-border-strong: #94a3b8;
+  --c-border-pill: #cbd5e1;
+  --c-border-muted: #94a3b8;
+  --c-tint-green-1: #dcfce7;
+  --c-tint-green-2: #dcfce7;
+  --c-tint-blue-1: #e0f2fe;
+  --c-tint-blue-2: #e0f2fe;
+  --c-tint-indigo: #eef2ff;
+  --c-tint-purple: #f3e8ff;
+  --c-tint-orange: #ffedd5;
+  --c-tint-amber: #fef3c7;
+  --c-text-strong: #0f172a;
+  --c-text-title: #0f172a;
+  --c-text-h1: #0f172a;
+  --c-text-main: #1e293b;
+  --c-text-sec: #334155;
+  --c-text-muted: #475569;
+  --c-text-dim: #64748b;
+  --c-text-label: #475569;
+  --c-sky-light: #0369a1;
+  --c-sky-pale: #0284c7;
+  --c-sky: #0284c7;
+  --c-sky-sec: #0369a1;
+  --c-green-light: #15803d;
+  --c-green: #16a34a;
+  --c-teal: #0f766e;
+  --c-teal-pale: #0d9488;
+  --c-orange-light: #ea580c;
+  --c-orange-pale: #c2410c;
+  --c-orange-arrow: #ea580c;
+  --c-coil-stroke: #ffffff;
+  --c-orange: #ea580c;
+  --c-amber-light: #b45309;
+  --c-amber-pale: #d97706;
+  --c-amber: #d97706;
+  --c-purple-light: #7e22ce;
+  --c-purple-pale: #6b21a8;
+  --c-purple-soft: #581c87;
+  --c-purple: #7e22ce;
+  --c-indigo-light: #4338ca;
+  --c-indigo-pale: #3730a3;
+  --c-red-light: #b91c1c;
+  --c-red: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--c-bg-deep);
+  color: var(--c-text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Navigation Bar ── */
+nav {
+  padding: 8px 20px;
+  background: var(--c-nav-bg);
+  border-bottom: 1px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+nav a {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--c-border-pill);
+  transition: background 0.15s, color 0.15s;
+}
+
+nav a:hover {
+  background: var(--c-badge-slate);
+  color: var(--c-text-strong);
+}
+
+nav a.active {
+  background: var(--c-bg-top);
+  color: var(--c-sky);
+  border-color: var(--c-sky);
+}
+
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.schema-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--c-badge-slate);
+  border: 1px solid var(--c-border);
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+.schema-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.schema-btn:hover {
+  color: var(--c-text-strong);
+}
+
+.schema-btn.active {
+  background: var(--c-bg-top);
+  color: var(--c-sky);
+  border-color: var(--c-sky);
+}
+
+.nav-conn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-text-label);
+  display: inline-block;
+  transition: background 0.3s;
+}
+
+#conn-dot.online {
+  background: var(--c-green);
+  box-shadow: 0 0 6px var(--c-green);
+}
+
+#conn-dot.degraded {
+  background: var(--c-orange);
+}
+
+#conn-dot.offline {
+  background: var(--c-red);
+}
+
+#conn-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--c-text-main);
+}
+
+/* ── Processchema Main Mount ── */
+#schema-wrap {
+  flex: 1;
+  width: 100%;
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 4px 12px 24px;
+}
+
+.schema-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Animated Refrigerant & Hydronic Flow Pipes ── */
+@keyframes schemaFlowAnim {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.schema-pipe-anim.flow-active {
+  stroke-dasharray: 14 10;
+  animation: schemaFlowAnim 1.1s linear infinite;
+}
+
+/* ── Tuya single-page host integration (body[data-page="processchema"]) ── */
+body[data-page="processchema"] main {
+  max-width: 1520px;
+}

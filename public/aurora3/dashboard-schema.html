@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Adlar Aurora III — Processchema</title>
+  <link rel="stylesheet" href="/styles/dashboard-schema.css">
+  <script src="/schema-renderer.js" defer></script>
+</head>
+<body data-driver="aurora3" data-schema-title="Adlar Castra Aurora III — Thermodynamisch &amp; Hydronisch Processchema">
+
+<nav>
+  <a href="/">Dashboard</a>
+  <a href="/interactive">Interactief</a>
+  <a href="/live">Live</a>
+  <a href="/expert">Expert</a>
+  <a href="/changelog">Change Log</a>
+  <a href="/processchema" class="active">Processchema</a>
+  <div class="nav-right">
+    <div class="schema-toolbar" title="Weergavemodus: Live apparaatdata of Referentiedata">
+      <button type="button" class="schema-btn active" data-set-mode="live">⚡ Live</button>
+      <button type="button" class="schema-btn" data-set-mode="demo">📊 Demo</button>
+    </div>
+    <div class="schema-toolbar" title="Thema: Donker, Licht of Systeemvoorkeur">
+      <button type="button" class="schema-btn" data-set-theme="dark">🌙 Dark</button>
+      <button type="button" class="schema-btn" data-set-theme="light">☀️ Light</button>
+      <button type="button" class="schema-btn active" data-set-theme="auto">⚙️ Auto</button>
+    </div>
+    <span class="nav-conn">
+      <span id="conn-dot"></span><span id="conn-label">Verbinden…</span>
+    </span>
+  </div>
+</nav>
+
+<main id="schema-wrap"></main>
+
+</body>
+</html>

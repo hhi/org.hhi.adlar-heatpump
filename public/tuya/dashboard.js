@@ -4,7 +4,7 @@
 'use strict';
 
 (() => {
-  const pages = ['dashboard', 'interactive', 'live', 'expert', 'changelog', 'heating-curve'];
+  const pages = ['dashboard', 'interactive', 'live', 'expert', 'changelog', 'heating-curve', 'processchema'];
   const page = window.location.pathname.slice(1) || 'dashboard';
   let language = localStorage.getItem('tuya-dashboard-language') || (navigator.language.startsWith('nl') ? 'nl' : 'en');
   let texts = {};
@@ -389,9 +389,29 @@
     if (page === 'expert') renderExpert();
     if (page === 'changelog') renderChanges();
     if (page === 'heating-curve') renderCurve();
+    if (page === 'processchema' && window.AdlarSchemaRenderer) {
+      window.AdlarSchemaRenderer.updateFromTuya($('content'), snapshot, capabilities, payload);
+    }
   }
   function buildToolbar() {
     $('toolbar').replaceChildren();
+    if (page === 'processchema' && window.AdlarSchemaRenderer) {
+      const bar = el('div', undefined, 'nav-right');
+      const modeGroup = el('div', undefined, 'schema-toolbar');
+      [['live', '⚡ Live', true], ['demo', '📊 Demo', false]].forEach(([m, lbl, act]) => {
+        const b = el('button', lbl, `schema-btn${act ? ' active' : ''}`);
+        b.type = 'button'; b.dataset.setMode = m; modeGroup.append(b);
+      });
+      const themeGroup = el('div', undefined, 'schema-toolbar');
+      [['dark', '🌙 Dark', false], ['light', '☀️ Light', false], ['auto', '⚙️ Auto', true]].forEach(([th, lbl, act]) => {
+        const b = el('button', lbl, `schema-btn${act ? ' active' : ''}`);
+        b.type = 'button'; b.dataset.setTheme = th; themeGroup.append(b);
+      });
+      bar.append(modeGroup, themeGroup);
+      $('toolbar').append(bar);
+      window.AdlarSchemaRenderer.wireToolbar();
+      return;
+    }
     if (!['expert', 'changelog'].includes(page)) return;
     const toolbar = el('div', undefined, page === 'expert' ? 'filter-bar' : 'toolbar');
     const input = el('input', undefined, page === 'expert' ? 'filter-search' : ''); input.type = 'search'; input.placeholder = t('search'); input.setAttribute('aria-label', t('search'));
@@ -449,7 +469,9 @@
   }
   async function refresh(token = generation) {
     if (!deviceId || document.hidden) return;
-    const resource = ({ expert: 'dps', changelog: 'changes', 'heating-curve': 'heating-curve' })[page];
+    const resource = ({
+      expert: 'dps', changelog: 'changes', 'heating-curve': 'heating-curve', processchema: 'heating-curve',
+    })[page];
     try {
       const results = await Promise.all([request(api('snapshot')), request(api('capabilities')), resource ? request(api(resource)) : Promise.resolve([])]);
       if (token !== generation) return;
@@ -502,7 +524,13 @@
     window.addEventListener('pagehide', () => {
       generation += 1; window.clearTimeout(timer);
     });
-    if (devices.length) useDevice(devices[0]); else $('content').append(el('p', t('no_devices')));
+    if (devices.length) {
+      useDevice(devices[0]);
+    } else if (page === 'processchema' && window.AdlarSchemaRenderer) {
+      window.AdlarSchemaRenderer.mount($('content'), 'tuya');
+    } else {
+      $('content').append(el('p', t('no_devices')));
+    }
   }
   init().catch((error) => showError(error.message));
 })();
