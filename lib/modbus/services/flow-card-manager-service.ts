@@ -1207,9 +1207,9 @@ export class FlowCardManagerService {
           throw new Error('Building model service not available');
         }
 
-        const model = buildingModelService.getLearner().getModel();
+        const { confidence } = buildingModelService.getLearner().getModel();
+        const model = buildingModelService.getPreHeatModel(); // G19: mean over the past day
         const tau = model.C / model.UA; // Time constant in hours
-        const { confidence } = model;
 
         // Get current indoor temperature
         // @ts-expect-error - Accessing MyDevice.serviceCoordinator

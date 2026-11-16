@@ -243,7 +243,7 @@ for (const [name, Service] of [['Tuya', TuyaBuildingModel], ['Aurora II', Modbus
     const ctx = {
       powerHistory,
       device: mockDevice({}, -2),
-      learner: { getModel: () => ({ UA: 0.25, pInt: 0.4 }) },
+      getPreHeatModel: () => ({ C: 15, UA: 0.25, pInt: 0.4 }), // G19: the model averaged over the past day
     };
     assert.deepStrictEqual(Service.prototype.getPreHeatConditions.call(ctx), {
       UA: 0.25, pInt: 0.4, outdoorTemp: -2, maxHeatingPowerKw: 7,
