@@ -41,7 +41,7 @@ function createService(driver, model, lang = 'nl') {
   };
   const service = new BuildingInsightsService({
     device,
-    buildingModelService: { getLearner: () => ({ getModel: () => model }) },
+    buildingModelService: { getLearner: () => ({ getModel: () => model }), getPreHeatModel: () => model },
     adaptiveControlService: { hasDynamicPricing: () => true },
     logger: () => {},
   });
