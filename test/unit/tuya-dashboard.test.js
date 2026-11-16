@@ -150,7 +150,7 @@ const post = (base, route, body) => fetch(base + route, {
 test('HTTP routes serve all pages, metadata and translations; commands are device-scoped', async () => {
   const s = await server();
   try {
-    for (const route of ['/', '/live', '/interactive', '/expert', '/changelog', '/heating-curve', '/dashboard.js', '/dashboard.css']) {
+    for (const route of ['/', '/live', '/interactive', '/expert', '/changelog', '/heating-curve', '/processchema', '/dashboard.js', '/schema-renderer.js', '/dashboard.css']) {
       const res = await fetch(s.base + route); assert.equal(res.status, 200, route); await res.text();
     }
     const texts = await (await fetch(`${s.base}/api/texts`)).json();

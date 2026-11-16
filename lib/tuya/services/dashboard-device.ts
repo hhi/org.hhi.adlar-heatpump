@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unresolved, node/no-missing-import, import/extensions */
 import { randomUUID } from 'crypto';
+import { SchemaHistoryBuffer } from '../../shared/dashboard-history';
 import { DashboardError } from './dashboard-error';
 import { AdlarMapping } from '../definitions/adlar-mapping';
 import { DeviceConstants } from '../constants';
@@ -69,6 +70,7 @@ export class TuyaDashboardDevice {
   private connected: boolean | null = null;
   private disposed = false;
   private reportedOptionErrors = new Set<string>();
+  private readonly historyBuffer = new SchemaHistoryBuffer();
 
   // TypeScript parameter properties initialize the adapter and dependencies.
   // eslint-disable-next-line no-useless-constructor, no-empty-function
@@ -184,6 +186,17 @@ export class TuyaDashboardDevice {
     const values = this.adapter.values();
     // The widget defaults unknown booleans to false. Dashboards must retain unknowns.
     const boolean = (id: string) => (typeof values[id] === 'boolean' ? values[id] : null);
+    const roomVal = values['measure_temperature.indoor'];
+    this.historyBuffer.record({
+      ts: state.data?.timestamp ?? Date.now(),
+      t1: state.temperatures?.ambientC ?? null,
+      t6: state.temperatures?.inletC ?? null,
+      t7: state.temperatures?.outletC ?? null,
+      dhw: state.temperatures?.dhwC ?? null,
+      room: typeof roomVal === 'number' ? roomVal : null,
+      hz: state.process?.compressorHz ?? null,
+      cop: state.process?.capabilityCop ?? state.process?.liveCopEstimate ?? null,
+    });
     return {
       ...state,
       status: {
@@ -199,6 +212,7 @@ export class TuyaDashboardDevice {
         liveCopEstimate: boolean('adlar_state_compressor_state') === null || boolean('adlar_state_defrost_state') === null ? null : state.process.liveCopEstimate,
       },
       adaptiveEnabled: this.adapter.adaptiveEnabled(),
+      history: this.historyBuffer.getAll(),
     };
   }
 
