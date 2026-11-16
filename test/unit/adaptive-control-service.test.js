@@ -404,7 +404,9 @@ test('ADR-062 A4: model parameters reach the PI and the price optimizer only fro
     const service = createService(device, [0]);
     service.buildingModel.getDiagnosticStatus = async () => ({ confidence });
     let capacity = null;
-    service.energyOptimizer.setThermalCapacity = (c) => { capacity = c; };
+    service.energyOptimizer.setThermalCapacity = (c) => {
+      capacity = c;
+    };
     await service.executeControlCycle();
     assert.strictEqual(capacity, expectedC, `confidence ${confidence}`);
   }
@@ -412,7 +414,9 @@ test('ADR-062 A4: model parameters reach the PI and the price optimizer only fro
 
 test('ADR-065: choosing a positional preset prefills the app curve until the user sets it himself', async () => {
   const device = createDevice();
-  device.setSettings = async (values) => { Object.assign(device.settings, values); };
+  device.setSettings = async (values) => {
+    Object.assign(device.settings, values);
+  };
   const service = createService(device, [0]);
 
   await service.onSettings({}, { adaptive_control_mode: 'positional_floor' }, ['adaptive_control_mode']);
@@ -435,7 +439,9 @@ test('v3.5.1: without a valid COP measurement the COP optimizer gives no advice'
   const service = createService(device, [0, 0, 0]);
   service.getEffectiveOutdoorTemp = async () => 5;
   const calls = [];
-  service.copOptimizer.calculateAction = (...args) => { calls.push(args); return null; };
+  service.copOptimizer.calculateAction = (...args) => {
+    calls.push(args); return null;
+  };
 
   await service.executeControlCycle(); // adlar_cop not calculated yet (null)
   device.capabilities.adlar_cop = 0; // compressor off, outlier or failed calculation

@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file -- the test doubles for the services under test live in this file */
 /**
  * Unit tests for times shown to the user and the Time Schedule flow card in Homey's timezone.
  *

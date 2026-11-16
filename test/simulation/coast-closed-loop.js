@@ -80,25 +80,57 @@ const SP_MAX = 60;
 const FLOW_LIMIT = { step: 1, everyCycles: 6 }; // beperkte flow: 1 °C per 30 min
 
 const VARIANTS = {
-  'incr. PI (huidig)': { mode: 'incr', coast: false, ua: 0.40, tau: 67 },
-  'incr. PI + coast (huidig)': { mode: 'incr', coast: true, ua: 0.40, tau: 67 },
-  'incr. PI smal': { mode: 'incr', coast: false, ua: 0, tau: 0 },
-  'incr. PI smal + coast': { mode: 'incr', coast: true, ua: 0, tau: 0 },
-  'pos. PI': { mode: 'pos', coast: false, ua: 0.40, tau: 67 },
-  'pos. PI + coast': { mode: 'pos', coast: true, ua: 0.40, tau: 67 },
-  'pos. PI smal': { mode: 'pos', coast: false, ua: 0, tau: 0 },
-  'pos. PI smal + coast': { mode: 'pos', coast: true, ua: 0, tau: 0 },
-  'pos. PI-I': { mode: 'posI', coast: false, ua: 0, tau: 0 },
-  'pos. PI-I + coast': { mode: 'posI', coast: true, ua: 0, tau: 0 },
-  'alleen stooklijn': { mode: 'curve', coast: false, ua: 0, tau: 0 },
+  'incr. PI (huidig)': {
+    mode: 'incr', coast: false, ua: 0.40, tau: 67,
+  },
+  'incr. PI + coast (huidig)': {
+    mode: 'incr', coast: true, ua: 0.40, tau: 67,
+  },
+  'incr. PI smal': {
+    mode: 'incr', coast: false, ua: 0, tau: 0,
+  },
+  'incr. PI smal + coast': {
+    mode: 'incr', coast: true, ua: 0, tau: 0,
+  },
+  'pos. PI': {
+    mode: 'pos', coast: false, ua: 0.40, tau: 67,
+  },
+  'pos. PI + coast': {
+    mode: 'pos', coast: true, ua: 0.40, tau: 67,
+  },
+  'pos. PI smal': {
+    mode: 'pos', coast: false, ua: 0, tau: 0,
+  },
+  'pos. PI smal + coast': {
+    mode: 'pos', coast: true, ua: 0, tau: 0,
+  },
+  'pos. PI-I': {
+    mode: 'posI', coast: false, ua: 0, tau: 0,
+  },
+  'pos. PI-I + coast': {
+    mode: 'posI', coast: true, ua: 0, tau: 0,
+  },
+  'alleen stooklijn': {
+    mode: 'curve', coast: false, ua: 0, tau: 0,
+  },
   // ADR-065 as built: the app's PositionalPIController (lib/shared/adaptive/positional-pi-controller.ts)
-  'pos. app': { mode: 'posTS', coast: false, ua: 0, tau: 0 },
-  'pos. app + coast': { mode: 'posTS', coast: true, ua: 0, tau: 0 },
+  'pos. app': {
+    mode: 'posTS', coast: false, ua: 0, tau: 0,
+  },
+  'pos. app + coast': {
+    mode: 'posTS', coast: true, ua: 0, tau: 0,
+  },
   // ADR-065 O4: as the service, the PI output divided by the comfort anchor into the decision maker
-  'pos. app (dm)': { mode: 'posApp', coast: false, ua: 0, tau: 0 },
-  'pos. app (dm) + coast': { mode: 'posApp', coast: true, ua: 0, tau: 0 },
+  'pos. app (dm)': {
+    mode: 'posApp', coast: false, ua: 0, tau: 0,
+  },
+  'pos. app (dm) + coast': {
+    mode: 'posApp', coast: true, ua: 0, tau: 0,
+  },
   // ADR-065 O14/O16 (3.6.0): price and COP shift the room target, the basis follows, no thermal component
-  'pos. app O14': { mode: 'posO14', coast: false, ua: 0, tau: 0 },
+  'pos. app O14': {
+    mode: 'posO14', coast: false, ua: 0, tau: 0,
+  },
 };
 // O4: the service's priorities (priority_* settings 50/15/15/20) and optimizer configuration
 const APP_PRIORITIES = {
@@ -125,7 +157,7 @@ function rng(a) {
   return () => {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
@@ -236,14 +268,16 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   const house = opts.house ?? HOUSE;
   const pc = new PositionalPIController({ kp: P.Kp, tiHours: opts.Ti ?? 3 });
   P.Ki = P.Kp / ((opts.Ti ?? 3) * 12);
-  const bias = opts.bias;
+  const { bias } = opts;
   const shift = opts.toutShift ?? 0;
   const v = VARIANTS[variantName];
   const em = EMITTERS[emitterName];
   const r = rng(seed);
   const sunny = Array.from({ length: DAYS }, () => r() < 0.5);
   const sunPeak = Array.from({ length: DAYS }, () => 1.5 + 1.5 * r()); // kW piek
-  const gauss = () => { let s = 0; for (let i = 0; i < 6; i++) s += r(); return s - 3; };
+  const gauss = () => {
+    let s = 0; for (let i = 0; i < 6; i++) s += r(); return s - 3;
+  };
 
   const pi = new HeatingController({ Kp: 5, Ki: 1.5, deadband: 0.3 });
   pi.setThermalInertia(v.tau);
@@ -274,7 +308,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     priceOpt?.setThermalCapacity(house.C);
   }
   const powerOn = []; // B7: thermal power per cycle with the compressor running, last 7 days
-  const copDay = { heat: 0, el: 0, prevRatio: 0, day: 0 };
+  const copDay = {
+    heat: 0, el: 0, prevRatio: 0, day: 0,
+  };
   const rp = rng(seed + 1000); // own stream, so the other noise is the same as without optimizers
   const priceNoise = Array.from({ length: DAYS * 24 + 48 }, () => 0.01 * (rp() + rp() + rp() - 1.5));
 
@@ -299,8 +335,21 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
   const inHist = []; const outHist = [];
   // Statistics
   const st = {
-    starts: 0, heatKwh: 0, elKwh: 0, sumSq: 0, n: 0, over05: 0, under05: 0, maxOver: [], minUnder: [],
-    coastOnCycles: 0, exits: { hard: 0, soft: 0, watchdog: 0 }, afterExitMin: [], spChanges: 0, spMin: Infinity, spMax: -Infinity,
+    starts: 0,
+    heatKwh: 0,
+    elKwh: 0,
+    sumSq: 0,
+    n: 0,
+    over05: 0,
+    under05: 0,
+    maxOver: [],
+    minUnder: [],
+    coastOnCycles: 0,
+    exits: { hard: 0, soft: 0, watchdog: 0 },
+    afterExitMin: [],
+    spChanges: 0,
+    spMin: Infinity,
+    spMax: -Infinity,
     elExpensive: 0, // O4: electricity in the very-high-price hours (≥ 0,12 €/kWh)
     elCheap: 0, // O14: electricity in the low-price hours (≤ 0,06 €/kWh)
     shiftSum: 0, // O14: sum of the room-target shift per cycle
@@ -350,17 +399,19 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     if (on) {
       q = Math.max(HP.Qmin, Math.min(HP.Qmax, k2 * (sp - tw)));
       const outlet = tw + q / k2;
-      if (onS >= HP.minOnS && k2 * (sp - tw) <= HP.Qmin && outlet > sp + HP.stopAbove) { on = false; offS = 0; q = 0; }
+      if (onS >= HP.minOnS && k2 * (sp - tw) <= HP.Qmin && outlet > sp + HP.stopAbove) {
+        on = false; offS = 0; q = 0;
+      }
     } else if (offS >= HP.minOffS && tw < sp - HP.startBelow) {
       on = true; onS = 0; st.starts++;
       q = Math.max(HP.Qmin, Math.min(HP.Qmax, k2 * (sp - tw)));
     }
     if (on) onS += DT; else offS += DT;
     const outletTrue = tw + q / k2;
-    const cop = Math.max(1.5, Math.min(7, 0.45 * (outletTrue + 273.15) / Math.max(5, outletTrue - tOut + 5)));
-    st.heatKwh += q * DT / 3600; st.elKwh += (q > 0 ? q / cop : 0) * DT / 3600;
+    const cop = Math.max(1.5, Math.min(7, (0.45 * (outletTrue + 273.15)) / Math.max(5, outletTrue - tOut + 5)));
+    st.heatKwh += (q * DT) / 3600; st.elKwh += ((q > 0 ? q / cop : 0) * DT) / 3600;
     if (optim) {
-      const el = (q > 0 ? q / cop : 0) * DT / 3600;
+      const el = ((q > 0 ? q / cop : 0) * DT) / 3600;
       const priceNow = priceAt(hod, sunny[day], priceNoise[Math.floor(h)]);
       if (priceNow >= 0.12) st.elExpensive += el;
       if (priceNow <= 0.06) st.elCheap += el;
@@ -368,7 +419,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         copDay.prevRatio = copDay.el > 0 ? copDay.heat / copDay.el : copDay.prevRatio;
         copDay.heat = 0; copDay.el = 0; copDay.day = day;
       }
-      copDay.heat += q * DT / 3600; copDay.el += el;
+      copDay.heat += (q * DT) / 3600; copDay.el += el;
     }
 
     // --- Water loop and house ---
@@ -379,15 +430,22 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     // --- Comfort statistics (true temperature, against the target of the moment) ---
     const oneSetback = opts.oneSetback && ((day === 10 && hod >= 23) || (day === 11 && hod < 7));
     const away = opts.away && h >= 9 * 24 + 12 && h < 11 * 24 + 12;
-    const target = opts.week ? weekTarget(day, hod) : (oneSetback ? 18 : (away ? 16 : targetAt(hod, opts.setback)));
+    let target;
+    if (opts.week) target = weekTarget(day, hod);
+    else if (oneSetback) target = 18;
+    else if (away) target = 16;
+    else target = targetAt(hod, opts.setback);
     const e = tIn - target;
     if (g14?.open) {
       // G14: reached within 0,3 °C, or the target went down first (not reached in this window)
       const ev = g14.open;
       ev.qSum = (ev.qSum ?? 0) + qEm; ev.qN = (ev.qN ?? 0) + 1; ev.qHouse = ev.qSum / ev.qN;
       ev.twMax = Math.max(ev.twMax ?? -Infinity, tw); ev.spMax = Math.max(ev.spMax ?? -Infinity, sp);
-      if (tIn >= ev.goal) { ev.actual = (tS - ev.startS) / 3600; g14.events.push(ev); g14.open = null; }
-      else if (target < ev.target) { ev.actual = Infinity; ev.window = (tS - ev.startS) / 3600; g14.events.push(ev); g14.open = null; }
+      if (tIn >= ev.goal) {
+        ev.actual = (tS - ev.startS) / 3600; g14.events.push(ev); g14.open = null;
+      } else if (target < ev.target) {
+        ev.actual = Infinity; ev.window = (tS - ev.startS) / 3600; g14.events.push(ev); g14.open = null;
+      }
     }
     st.sumSq += e * e; st.n++;
     if (e > 0.5) st.over05 += DT / 3600;
@@ -398,11 +456,17 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     dayMax = Math.max(dayMax, e); dayMin = Math.min(dayMin, e);
     coldRunS = e < -1 ? coldRunS + DT : 0;
     st.coldRunMaxH = Math.max(st.coldRunMaxH, coldRunS / 3600);
-    if (winH !== undefined && tS >= winH * 3600 && tS < (winH + 24) * 3600) { sumSqAfter += e * e; nAfter++; }
-    if ((i + 1) % (86400 / DT) === 0) { st.maxOver.push(dayMax); st.minUnder.push(dayMin); dayMax = -Infinity; dayMin = Infinity; }
+    if (winH !== undefined && tS >= winH * 3600 && tS < (winH + 24) * 3600) {
+      sumSqAfter += e * e; nAfter++;
+    }
+    if ((i + 1) % (86400 / DT) === 0) {
+      st.maxOver.push(dayMax); st.minUnder.push(dayMin); dayMax = -Infinity; dayMin = Infinity;
+    }
     if (exitWatch) {
       exitWatch.min = Math.min(exitWatch.min, e);
-      if (tS >= exitWatch.untilS) { st.afterExitMin.push(exitWatch.min); exitWatch = null; }
+      if (tS >= exitWatch.untilS) {
+        st.afterExitMin.push(exitWatch.min); exitWatch = null;
+      }
     }
 
     // --- Control cycle every 5 minutes (as executeControlCycle) ---
@@ -410,7 +474,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     cycleNo++;
     if (g14) {
       // As BuildingModelService: one sample per 5 minutes, thermal power when the compressor runs
-      if (on) { g14.samples.push(q); if (g14.samples.length > 7 * 288) g14.samples.shift(); }
+      if (on) {
+        g14.samples.push(q); if (g14.samples.length > 7 * 288) g14.samples.shift();
+      }
       g14.hourSum += on ? q : 0; g14.hourN++;
       if (g14.hourN === 12) {
         g14.hourly.push(g14.hourSum / 12); if (g14.hourly.length > 168) g14.hourly.shift();
@@ -418,8 +484,13 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
       }
       if (g14.prevTarget !== null && target > g14.prevTarget + 0.5 && day >= 7 && !g14.open) {
         g14.open = {
-          startS: tS, tIn, tOut, target, goal: target - 0.3,
-          pA: percentile(g14.samples, 0.9), pB: g14.hourly.length ? Math.max(...g14.hourly) : null,
+          startS: tS,
+          tIn,
+          tOut,
+          target,
+          goal: target - 0.3,
+          pA: percentile(g14.samples, 0.9),
+          pB: g14.hourly.length ? Math.max(...g14.hourly) : null,
         };
       }
       g14.prevTarget = target;
@@ -480,6 +551,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     }
 
     if (v.coast) {
+      // eslint-disable-next-line no-loop-func -- helper for this simulation step, only called within the same iteration
       const exitAt = (kind) => {
         pi.resetHistory(); coastActive = false; cooldownCount = 0; coastCycles = 0; st.exits[kind]++;
         if (v.mode === 'pos' && process.env.POS_EXIT_RESET === '1') piHeld = 0;
@@ -495,7 +567,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         coastActive = cooldownCount >= 2;
         if (coastActive) coastCycles = 0;
       }
-      if (coastActive) { coastCycles++; st.coastOnCycles++; }
+      if (coastActive) {
+        coastCycles++; st.coastOnCycles++;
+      }
     }
 
     // O4: the optimizers of executeControlCycle, at the simulated time
@@ -531,11 +605,13 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
           }
           // calculateCOPConfidence(): high buckets 1, medium 0,5, low 0
           const d = copOpt.getDiagnostics();
-          const w = d.bucketDetails.map((b) => (b.confidence === 'high' ? 1 : (b.confidence === 'medium' ? 0.5 : 0)));
+          const w = d.bucketDetails.map((b) => ({ high: 1, medium: 0.5 }[b.confidence] || 0));
           metrics.copConfidence = d.bucketsLearned === 0 || w.length === 0 ? 0 : w.reduce((x, y) => x + y, 0) / w.length;
         }
         if (optim.thermal) {
-          if (on) { powerOn.push(q); if (powerOn.length > 7 * 288) powerOn.shift(); }
+          if (on) {
+            powerOn.push(q); if (powerOn.length > 7 * 288) powerOn.shift();
+          }
           const gains = house.pInt + sun;
           const adj = optim.thermal === 'b7'
             ? thermalB7(indoorM, target, tOut, house, gains, percentile(powerOn, 0.9))
@@ -584,7 +660,7 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
         lastRecommendation: lastRecommended ?? null,
         lastRawRecommendation: lastRecRaw,
         range: { min: SP_MIN, max: SP_MAX },
-        pause: (v.coast && coastActive) ? 'coast' : (o16Pause ? 'target_step' : null),
+        pause: ((v.coast && coastActive) && 'coast') || (o16Pause ? 'target_step' : null),
       });
       const hold = step.holdReason ?? 'geen';
       st.holds[hold] = (st.holds[hold] ?? 0) + 1;
@@ -658,7 +734,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
     const changed = recommended !== lastRecommended;
     if (cycleNo > 1 && afterRestart !== 0 && Math.abs(recommended - lastRecommended) > st.maxJump) {
       st.maxJump = Math.abs(recommended - lastRecommended);
-      st.maxJumpCtx = { day, hod: Number(hod.toFixed(2)), from: lastRecommended, to: recommended, coastBefore: prevCoast, coastNow: coastActive };
+      st.maxJumpCtx = {
+        day, hod: Number(hod.toFixed(2)), from: lastRecommended, to: recommended, coastBefore: prevCoast, coastNow: coastActive,
+      };
     }
     prevCoast = coastActive;
     st.advMin = Math.min(st.advMin, recommended); st.advMax = Math.max(st.advMax, recommended);
@@ -687,7 +765,9 @@ async function simulate(variantName, emitterName, seed, flow = 'direct', opts = 
       afterRestart++;
     }
     st.iEnd = pc.getIntegral();
-    if (day >= 2) { st.iMin = Math.min(st.iMin, st.iEnd); st.iMax = Math.max(st.iMax, st.iEnd); }
+    if (day >= 2) {
+      st.iMin = Math.min(st.iMin, st.iEnd); st.iMax = Math.max(st.iMax, st.iEnd);
+    }
     if (opts.keepTrace) (st.spTrace ??= []).push(sp);
 
     // TRACE=<dag> prints every cycle of that day for the first seed
@@ -712,7 +792,20 @@ async function main() {
   for (const em of emitters) {
     for (const flow of flows) {
       console.log(`\n### ${EMITTERS[em].label}; flow ${flow === 'direct' ? 'direct' : 'hooguit 1 °C per 30 min'}; ${DAYS} dagen, ${SEEDS.length} seeds, doel ${TARGET} °C, zon op ~50% van de dagen\n`);
-      console.log('variant | RMSE (°C) | max boven doel/dag | uren > +0,5 /dag | min onder doel/dag | uren < −0,5 /dag | min ≤ 6 u na coast-exit | starts/dag | kWh el/dag | coast-uren/dag | setpoint min–max | setpointwijzigingen/dag');
+      console.log([
+        'variant',
+        'RMSE (°C)',
+        'max boven doel/dag',
+        'uren > +0,5 /dag',
+        'min onder doel/dag',
+        'uren < −0,5 /dag',
+        'min ≤ 6 u na coast-exit',
+        'starts/dag',
+        'kWh el/dag',
+        'coast-uren/dag',
+        'setpoint min–max',
+        'setpointwijzigingen/dag',
+      ].join(' | '));
       console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
       for (const name of Object.keys(VARIANTS)) {
         const runs = [];
@@ -728,7 +821,7 @@ async function main() {
           f(a((s) => (s.afterExitMin.length ? Math.min(...s.afterExitMin) : NaN))),
           f(a((s) => s.starts / DAYS), 1),
           f(a((s) => s.elKwh / DAYS)),
-          f(a((s) => s.coastOnCycles * 5 / 60 / DAYS)),
+          f(a((s) => (s.coastOnCycles * 5) / 60 / DAYS)),
           `${Math.min(...runs.map((s) => s.spMin))}–${Math.max(...runs.map((s) => s.spMax))}`,
           f(a((s) => s.spChanges / DAYS), 1),
         ].join(' | '));
@@ -770,7 +863,7 @@ async function sensitivity() {
           f(a((s) => avg(s.minUnder))),
           f(a((s) => s.starts / DAYS), 1),
           f(a((s) => s.elKwh / DAYS)),
-          f(a((s) => s.coastOnCycles * 5 / 60 / DAYS)),
+          f(a((s) => (s.coastOnCycles * 5) / 60 / DAYS)),
           `${Math.min(...runs.map((s) => s.spMin))}–${Math.max(...runs.map((s) => s.spMax))}`,
         ].join(' | '));
       }
@@ -798,7 +891,13 @@ async function p4() {
     const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
     const appVariant = preset.coastEnabled ? 'pos. app + coast' : 'pos. app';
     for (const [wName, shift] of WEATHER) {
-      console.log(`\n### P4 ${EMITTERS[em].label}; ${wName}; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${preset.coastEnabled ? 'aan' : 'uit'}; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log([
+        `\n### P4 ${EMITTERS[em].label}`,
+        `${wName}`,
+        `flow ${flow}`,
+        `preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${preset.coastEnabled ? 'aan' : 'uit'}`,
+        `${DAYS} dagen, ${SEEDS.length} seeds\n`,
+      ].join('; '));
       console.log('scenario | variant | RMSE (°C) | uren > +0,5 /dag | uren < −0,5 /dag | starts/dag | kWh el/dag | setpoint min–max');
       console.log('--- | --- | --- | --- | --- | --- | --- | ---');
       for (const [label, o] of SCENARIOS) {
@@ -846,7 +945,14 @@ async function o4() {
     const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
     const appVariant = preset.coastEnabled ? 'pos. app (dm) + coast' : 'pos. app (dm)';
     for (const [wName, shift] of WEATHER) {
-      console.log(`\n### O4 ${EMITTERS[em].label}; ${wName}; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${preset.coastEnabled ? 'aan' : 'uit'}; prioriteiten 50/15/15/20; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
+      console.log([
+        `\n### O4 ${EMITTERS[em].label}`,
+        `${wName}`,
+        `flow ${flow}`,
+        `preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${preset.coastEnabled ? 'aan' : 'uit'}`,
+        'prioriteiten 50/15/15/20',
+        `${DAYS} dagen, ${SEEDS.length} seeds\n`,
+      ].join('; '));
       console.log('optimizers | variant | RMSE (°C) | uren > +0,5 /dag | uren < −0,5 /dag | starts/dag | kWh el/dag | aandeel el in dure uren | setpoint min–max | setpointwijzigingen/dag');
       console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
       for (const [label, o] of SETS) {
@@ -906,7 +1012,11 @@ async function protocol() {
   const range = (runs, lo, hi) => `${Math.min(...runs.map(lo))}–${Math.max(...runs.map(hi))}`;
   const holdShare = (runs) => {
     const tot = {}; let n = 0;
-    for (const s of runs) for (const [k, c] of Object.entries(s.holds)) { tot[k] = (tot[k] ?? 0) + c; n += c; }
+    for (const s of runs) {
+      for (const [k, c] of Object.entries(s.holds)) {
+        tot[k] = (tot[k] ?? 0) + c; n += c;
+      }
+    }
     return Object.entries(tot).sort((x, y) => y[1] - x[1]).map(([k, c]) => `${k} ${f((100 * c) / n, 0)}%`).join(', ');
   };
   console.log(`# Testprotocol 3.5, droog: ${EMITTERS[em].label}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u, coast ${coast ? 'aan' : 'uit'}; ${DAYS} dagen, ${SEEDS.length} seeds`);
@@ -1000,7 +1110,9 @@ async function protocol() {
       const ref = await simulate(variant, em, seed, 'direct', { ...o, windowAtH: at });
       const c0 = Math.ceil((at * 3600) / CYCLE) - 1;
       const diff = (n) => Math.max(...r.spTrace.slice(c0, c0 + n).map((x, k) => Math.abs(x - ref.spTrace[c0 + k])));
-      rows.push({ r, ref, d2: diff(24), d24: diff(288) });
+      rows.push({
+        r, ref, d2: diff(24), d24: diff(288),
+      });
     }
     console.log([
       `${hod}:00`,
@@ -1188,8 +1300,28 @@ async function o23() {
   for (const em of (process.argv[2] && process.argv[2] !== 'all' ? [process.argv[2]] : ['vloer', 'radiator'])) {
     const preset = EMITTER_PRESETS[em === 'radiator' ? 'radiator' : 'floor'];
     for (const [wName, shift] of [['mild', 0], ['koud (−8 K)', -8]]) {
-      console.log(`\n### O23 ${EMITTERS[em].label}; ${wName}; geen nachtverlaging; hysterese 0,75 °C; flow ${flow}; preset Kp ${preset.kp}, Ti ${preset.tiHours} u; ${DAYS} dagen, ${SEEDS.length} seeds\n`);
-      console.log('variant | starts/dag | wijzigingen/dag | grootste sprong (°C) | advies min–max | RMSE (°C) | uren < −0,5 /dag | uren > +0,5 /dag | kWh el/dag | el in dure uren | el in goedkope uren');
+      console.log([
+        `\n### O23 ${EMITTERS[em].label}`,
+        `${wName}`,
+        'geen nachtverlaging',
+        'hysterese 0,75 °C',
+        `flow ${flow}`,
+        `preset Kp ${preset.kp}, Ti ${preset.tiHours} u`,
+        `${DAYS} dagen, ${SEEDS.length} seeds\n`,
+      ].join('; '));
+      console.log([
+        'variant',
+        'starts/dag',
+        'wijzigingen/dag',
+        'grootste sprong (°C)',
+        'advies min–max',
+        'RMSE (°C)',
+        'uren < −0,5 /dag',
+        'uren > +0,5 /dag',
+        'kWh el/dag',
+        'el in dure uren',
+        'el in goedkope uren',
+      ].join(' | '));
       console.log('--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---');
       for (const [label, optim, priorities, shiftRate] of ROWS) {
         const runs = [];
@@ -1284,7 +1416,9 @@ function g14Monotonic() {
   console.log('stap (°C) | klassen | B7 | harde grens 1 °C | vloeiend | fysica + staart');
   console.log('--- | --- | --- | --- | --- | ---');
   for (const delta of [0.4, 0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5, 2.0, 3.0]) {
-    const ev = { tIn: target - delta, tOut: 10, target, goal: target - 0.3, pB: 4.9 };
+    const ev = {
+      tIn: target - delta, tOut: 10, target, goal: target - 0.3, pB: 4.9,
+    };
     const classes = calculatePreHeatDuration(house.C / house.UA, delta);
     const b7 = b7Hours(ev, house, ev.pB);
     console.log([f(delta, 1), f(classes, 1), f(b7, 1), f(delta < 1 ? classes : b7, 1), f(g14Blend(ev, house), 1), f(g14Sum(ev, house), 1)].join(' | '));
@@ -1310,11 +1444,15 @@ function g14MonotonicGrid() {
         for (const p of [3, 5, 7]) {
           let prev = 0; let drop = 0;
           for (let d = 0.1; d <= 4.001; d += 0.05) {
-            const t = fn({ tIn: 21 - d, tOut, target: 21, goal: 20.7, pB: p }, house);
+            const t = fn({
+              tIn: 21 - d, tOut, target: 21, goal: 20.7, pB: p,
+            }, house);
             if (Number.isFinite(t) && Number.isFinite(prev) && t < prev - 1e-9) drop = Math.max(drop, prev - t);
             prev = t;
           }
-          if (drop > 0) { cases++; worst = Math.max(worst, drop); }
+          if (drop > 0) {
+            cases++; worst = Math.max(worst, drop);
+          }
         }
       }
     }
@@ -1347,7 +1485,12 @@ async function g14() {
     ['vloeiend, nooit korter', (ev, house) => g14BlendMono(ev, house)],
   ];
   const median = (a) => percentile(a, 0.5);
-  console.log(`\n### G14 voorverwarmduur: voorspeld tegen gesimuleerd; ${process.env.G14_VARIANT || 'positioneel (preset)'}, flow direct; ${DAYS} dagen, ${SEEDS.length} seeds, stappen omhoog vanaf dag 7\n`);
+  console.log([
+    `\n### G14 voorverwarmduur: voorspeld tegen gesimuleerd; ${process.env.G14_VARIANT || 'positioneel (preset)'}`,
+    `flow direct; ${DAYS} dagen`,
+    `${SEEDS.length} seeds`,
+    'stappen omhoog vanaf dag 7\n',
+  ].join(', '));
   console.log('Goed = binnen 1 uur of 30%; bij een doel dat niet gehaald wordt: als de voorspelling langer is dan het tijdslot. Factor = mediaan van voorspeld / werkelijk.\n');
   console.log(`scenario | afgifte, woning (τ) | weer | stappen | gehaald | werkelijk (mediaan u) | P A / P B (kW) | ${METHODS.map(([m]) => `${m}: goed, factor`).join(' | ')}`);
   console.log(`--- | --- | --- | --- | --- | --- | --- | ${METHODS.map(() => '---').join(' | ')}`);

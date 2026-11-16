@@ -52,8 +52,12 @@ test('resolveTemperatureScale: another refrigerant follows the setpoint, else ke
 function createService(setpointRaw, { readFails = false } = {}) {
   const service = new Adlar2ModbusService({ transport: { host: '127.0.0.1' } });
   const writes = [];
-  service.tcp.writeSingleRegister = async (addr, value) => { writes.push([addr, value]); };
-  service.tcp.readHoldingRegisters = async () => { if (readFails) throw new Error('timeout'); };
+  service.tcp.writeSingleRegister = async (addr, value) => {
+    writes.push([addr, value]);
+  };
+  service.tcp.readHoldingRegisters = async () => {
+    if (readFails) throw new Error('timeout');
+  };
   if (setpointRaw !== null) service.tcp.cache.set(0x0301, setpointRaw);
   const errors = [];
   service.on('error', (err, ctx) => errors.push([ctx, err.message]));

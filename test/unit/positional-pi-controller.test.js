@@ -41,8 +41,8 @@ test('u = Kp·e + I, with the integral updated before the output', () => {
   const pi = new PositionalPIController({ kp: 3, tiHours: 3 });
   const step = pi.step(free(0.5));
   near(step.p, 1.5, 'P-term');
-  near(step.i, 0.5 * 3 / 36, 'I-term after one cycle');
-  near(step.u, 1.5 + 0.5 * 3 / 36, 'output');
+  near(step.i, (0.5 * 3) / 36, 'I-term after one cycle');
+  near(step.u, 1.5 + (0.5 * 3) / 36, 'output');
   assert.strictEqual(step.integrated, true);
   assert.strictEqual(step.holdReason, null);
 });
@@ -220,4 +220,3 @@ test('ADR-067 D3: without a previous recommendation it rounds; the threshold can
   assert.strictEqual(roundRecommendation(41.6, 41, 0.5), 42, 'threshold 0.5 behaves like plain rounding here');
   assert.strictEqual(roundRecommendation(41.6, 41, 1), 41);
 });
-

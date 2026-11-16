@@ -202,7 +202,12 @@ test('D3: state survives a save and restore; a corrupt state is ignored', () => 
   assert.strictEqual(copy.getDelayMinutes(), est.getDelayMinutes());
   assert.strictEqual(copy.getDiagnostics().usableHours, est.getDiagnostics().usableHours);
   const fresh = new EmitterDelayEstimator(60);
-  assert.strictEqual(fresh.restoreState({ version: 1, rows: [{ hour: 1, p: [1], d: 0, s: 0, dT: 0 }] }), false);
+  assert.strictEqual(fresh.restoreState({
+    version: 1,
+    rows: [{
+      hour: 1, p: [1], d: 0, s: 0, dT: 0,
+    }],
+  }), false);
   assert.strictEqual(fresh.restoreState(null), false);
   assert.strictEqual(fresh.getDiagnostics().usableHours, 0);
 });

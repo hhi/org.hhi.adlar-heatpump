@@ -30,7 +30,9 @@ function fakeDevice({ capabilities = {}, store = {} } = {}) {
     caps,
     hasCapability: (id) => id in caps,
     getCapabilityValue: (id) => caps[id] ?? null,
-    setCapabilityValue: async (id, value) => { caps[id] = value; },
+    setCapabilityValue: async (id, value) => {
+      caps[id] = value;
+    },
     getStoreValue: (key) => store[key] ?? null,
     debugLog: () => {},
     logger: { info: () => {} },

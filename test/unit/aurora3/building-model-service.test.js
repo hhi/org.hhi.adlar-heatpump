@@ -71,7 +71,9 @@ function createDevice(overrides = {}) {
     },
     getSetting: (key) => settings[key],
     getStoreValue: (key) => store[key],
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: () => false,
     setCapabilityValue: async () => {},
@@ -230,7 +232,9 @@ test('ADR-062 B2: a blocked sample interrupts the learning window, an accepted o
     const learner = service.getLearner();
     const original = learner.interruptWindow.bind(learner);
     let calls = 0;
-    learner.interruptWindow = () => { calls++; original(); };
+    learner.interruptWindow = () => {
+      calls++; original();
+    };
     await service.collectAndLearn();
     assert.strictEqual(calls, expected, JSON.stringify(capabilities));
   }
@@ -244,7 +248,9 @@ function trackIntervals(device) {
     active.add(handle);
     return handle;
   };
-  device.homey.clearInterval = (handle) => { active.delete(handle); };
+  device.homey.clearInterval = (handle) => {
+    active.delete(handle);
+  };
   return active;
 }
 
@@ -262,10 +268,14 @@ test('ADR-062 A7: initialize() twice keeps one interval and destroy() clears it 
 test('ADR-062 §2.5: restore logs RESTORED or REJECTED from the learner result, also for 0 samples', async () => {
   const identity = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
   const cases = [
-    [{ theta: [0.1, 0.16, 0.04, 0.03], P: identity, sampleCount: 0, lastMeasurement: null },
-      /State REJECTED on restore \(was 0 samples\): UA 1\.600 kW\/°C outside \[0\.03, 1\.5\]/],
-    [{ theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: identity, sampleCount: 5, lastMeasurement: null },
-      /State RESTORED from store — 5 samples/],
+    [{
+      theta: [0.1, 0.16, 0.04, 0.03], P: identity, sampleCount: 0, lastMeasurement: null,
+    },
+    /State REJECTED on restore \(was 0 samples\): UA 1\.600 kW\/°C outside \[0\.03, 1\.5\]/],
+    [{
+      theta: [1 / 15, 0.3 / 15, 0.5 / 15, 0.3 / 15], P: identity, sampleCount: 5, lastMeasurement: null,
+    },
+    /State RESTORED from store — 5 samples/],
   ];
   for (const [state, expected] of cases) {
     const lines = [];

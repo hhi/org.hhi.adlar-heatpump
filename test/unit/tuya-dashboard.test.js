@@ -11,6 +11,7 @@ const { buildLiveOperationWidgetState } = require('../../.homeybuild/lib/tuya/se
 
 const appDir = path.resolve(__dirname, '../..');
 const metadata = require('../../app.json').capabilities;
+
 const timers = { setTimeout: schedule };
 function fixture(name = 'Tuya A') {
   const values = {
@@ -30,9 +31,14 @@ function fixture(name = 'Tuya A') {
   const writes = [];
   const reader = { getName: () => name, hasCapability: (id) => id in values, getCapabilityValue: (id) => values[id] };
   const adapter = {
-    name: () => name, values: () => values, options: () => ({}), adaptiveEnabled: () => false,
+    name: () => name,
+    values: () => values,
+    options: () => ({}),
+    adaptiveEnabled: () => false,
     snapshot: () => buildLiveOperationWidgetState({ device: reader, connected: true, lastDataAt: Date.now() }),
-    write: async (id, value) => { writes.push({ id, value }); values[id] = value; },
+    write: async (id, value) => {
+      writes.push({ id, value }); values[id] = value;
+    },
   };
   return { values, writes, adapter };
 }
@@ -53,7 +59,9 @@ test('partial DPS updates preserve reception age, scaling and all capability map
     assert.equal(state.getEvents().filter((e) => e.key === '11').length, 2);
     assert.equal(state.getEvents()[0].kind, 'initial');
     assert.equal(state.capabilities().find((cap) => cap.id === 'measure_power').receivedAt, null);
-  } finally { state.destroy(); }
+  } finally {
+    state.destroy();
+  }
 });
 
 test('unknown states and missing curve parameters remain unknown', () => {
@@ -67,7 +75,9 @@ test('unknown states and missing curve parameters remain unknown', () => {
     f.values.heating_curve_slope = -0.5; f.values.heating_curve_intercept = 47.5;
     assert.deepEqual(state.heatingCurve().appCurve, { slope: -0.5, intercept: 47.5 });
     assert.equal(state.heatingCurve().presetCurve, null);
-  } finally { state.destroy(); }
+  } finally {
+    state.destroy();
+  }
 });
 
 test('server validation rejects unsafe controls, invalid types, ranges, steps and enums', () => {
@@ -80,7 +90,9 @@ test('server validation rejects unsafe controls, invalid types, ranges, steps an
     assert.equal(f.writes.length, 0);
     f.adapter.snapshot = () => ({ status: { connectionState: 'offline' } });
     assert.throws(() => state.command('onoff', false), { status: 503 });
-  } finally { state.destroy(); }
+  } finally {
+    state.destroy();
+  }
 });
 
 test('optimistic capability updates never count as received device feedback', async () => {
@@ -96,18 +108,28 @@ test('optimistic capability updates never count as received device feedback', as
     state.receive({ 4: 39 }); assert.equal(command.status, 'sent');
     state.receive({ 4: 40 }); assert.equal(command.status, 'observed');
     assert.equal(f.writes.length, 1);
-  } finally { state.destroy(); }
+  } finally {
+    state.destroy();
+  }
 });
 
 test('feedback during send is retained; send rejection and timeout are separate terminal outcomes', async () => {
   const f = fixture(); let expire;
-  const clock = { setTimeout: (fn) => { expire = fn; return schedule(fn, 60000); } };
+  const clock = {
+    setTimeout: (fn) => {
+      expire = fn; return schedule(fn, 60000);
+    },
+  };
   const state = new TuyaDashboardDevice(f.adapter, metadata, clock);
   try {
-    f.adapter.write = async () => { state.receive({ 4: 41 }); };
+    f.adapter.write = async () => {
+      state.receive({ 4: 41 });
+    };
     const observed = state.command('target_temperature', 41); await flush();
     assert.equal(observed.status, 'observed');
-    f.adapter.write = async () => { throw new Error('transport error containing secret'); };
+    f.adapter.write = async () => {
+      throw new Error('transport error containing secret');
+    };
     const failed = state.command('onoff', false); await flush();
     assert.equal(failed.status, 'failed');
     assert.ok(!JSON.stringify(state.getEvents()).includes('secret'));
@@ -115,7 +137,9 @@ test('feedback during send is retained; send rejection and timeout are separate 
     const timedOut = state.command('onoff', false); await flush(); expire();
     assert.equal(timedOut.status, 'unconfirmed');
     state.receive({ 1: false }); assert.equal(timedOut.status, 'unconfirmed');
-  } finally { state.destroy(); }
+  } finally {
+    state.destroy();
+  }
 });
 
 test('bounded logs, bounded command history and disposal', async () => {
@@ -141,7 +165,9 @@ async function server() {
   const a = fixture('A'); const b = fixture('B');
   const stateA = service.register('a', a.adapter); const stateB = service.register('b', b.adapter);
   await service.start(0);
-  return { service, a, b, stateA, stateB, base: `http://127.0.0.1:${service.listeningPort}` };
+  return {
+    service, a, b, stateA, stateB, base: `http://127.0.0.1:${service.listeningPort}`,
+  };
 }
 const post = (base, route, body) => fetch(base + route, {
   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -175,7 +201,9 @@ test('HTTP routes serve all pages, metadata and translations; commands are devic
     await s.service.unregister('a'); assert.notEqual(s.service.listeningPort, null);
     assert.equal((await fetch(`${s.base}/api/devices/a/snapshot`)).status, 404);
     await s.service.unregister('b'); assert.equal(s.service.listeningPort, null);
-  } finally { await s.service.destroy(); }
+  } finally {
+    await s.service.destroy();
+  }
 });
 
 test('occupied port leaves existing dashboard running and registrations intact', async () => {
@@ -188,9 +216,10 @@ test('occupied port leaves existing dashboard running and registrations intact',
     assert.equal((await fetch(`${s.base}/api/devices`)).status, 200);
     const replaced = s.service.register('a', fixture('Replacement').adapter);
     assert.notEqual(replaced, s.stateA); assert.deepEqual(s.stateA.getEvents(), []);
-  } finally { await s.service.destroy(); await new Promise((resolve) => blocker.close(resolve)); }
+  } finally {
+    await s.service.destroy(); await new Promise((resolve) => blocker.close(resolve));
+  }
 });
-
 
 test('missing runtime capability options fall back to manifest without breaking the dashboard', async () => {
   const s = await server();
@@ -211,7 +240,9 @@ test('missing runtime capability options fall back to manifest without breaking 
     const rejected = await post(s.base, '/api/devices/a/commands', { capability: 'adlar_enum_mode', value: 'invalid' });
     assert.equal(rejected.status, 400);
     assert.equal(s.a.writes.length, 0);
-  } finally { await s.service.destroy(); }
+  } finally {
+    await s.service.destroy();
+  }
 });
 
 test('parameter overview tracks all DPS, previous values and bounded change intervals', () => {
@@ -252,7 +283,9 @@ test('parameter overview tracks all DPS, previous values and bounded change inte
     state.destroy();
     assert.equal(row(104).firstSeen, null);
     assert.equal(row(250), undefined);
-  } finally { state.destroy(); }
+  } finally {
+    state.destroy();
+  }
 });
 
 test('change overview API keeps observations isolated between devices', async () => {
@@ -269,5 +302,7 @@ test('change overview API keeps observations isolated between devices', async ()
       assert.equal(dp.value, value);
       assert.equal(dp.changeCount, count);
     }
-  } finally { await s.service.destroy(); }
+  } finally {
+    await s.service.destroy();
+  }
 });

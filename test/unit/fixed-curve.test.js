@@ -74,10 +74,18 @@ function createContext(Service, store = {}, diyCurve = null) {
     logger: () => {},
     buildingModel: { applyLearningSettings: async () => {} }, // ADR-066: a mode change updates the emitter delay
     device: {
-      homey: { setTimeout: (fn) => { fn(); return { mocked: true }; } },
+      homey: {
+        setTimeout: (fn) => {
+          fn(); return { mocked: true };
+        },
+      },
       getStoreValue: (key) => store[key],
-      setStoreValue: async (key, value) => { store[key] = value; },
-      setSettings: async (values) => { Object.assign(settings, values); },
+      setStoreValue: async (key, value) => {
+        store[key] = value;
+      },
+      setSettings: async (values) => {
+        Object.assign(settings, values);
+      },
       error: () => {},
     },
   };

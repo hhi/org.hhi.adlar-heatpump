@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file -- the test doubles for the services under test live in this file */
 /**
  * Display text of the adlar_cop_method capability, shared by the Tuya, Aurora I/II and Aurora III drivers.
  *

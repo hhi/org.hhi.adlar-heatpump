@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file -- the test doubles for the services under test live in this file */
 /**
  * G16: fill the app curve from the Aurora I/II DIY heating curve k·(T + 15) + b (L28 = k, L29 = b).
  * At −15 °C = b, at +15 °C = b + 30·k; rejected when k is not negative or a value falls outside
