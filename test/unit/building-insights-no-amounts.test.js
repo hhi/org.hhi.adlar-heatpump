@@ -30,7 +30,9 @@ function createService(driver, model, lang = 'nl') {
       clearInterval: () => {},
       flow: {
         getDeviceTriggerCard: (id) => ({
-          trigger: async (_device, tokens) => { triggers.push({ id, tokens }); },
+          trigger: async (_device, tokens) => {
+            triggers.push({ id, tokens });
+          },
         }),
       },
     },

@@ -178,8 +178,12 @@ async function expertRead(dashboard, body) {
   dashboard._readBody = async () => body;
   await dashboard._handleRequest({ method: 'POST', url: '/api/expert/read', headers: {} }, {
     setHeader() {},
-    writeHead(code) { status = code; },
-    end(text) { json = JSON.parse(text); },
+    writeHead(code) {
+      status = code;
+    },
+    end(text) {
+      json = JSON.parse(text);
+    },
   });
   return { status, json };
 }
@@ -212,7 +216,9 @@ test('manual P/L reads fetch missing limits once and reuse the runtime cache; ot
 
 test('limit failures preserve a successful value; failed value reads never trigger metadata reads', async () => {
   let bankReads = 0;
-  const banks = new ParameterBankService(async () => { bankReads++; throw new Error('Illegal data address'); });
+  const banks = new ParameterBankService(async () => {
+    bankReads++; throw new Error('Illegal data address');
+  });
   const dashboard = new DashboardService({ appDir: process.cwd(), logger: () => {} });
   dashboard.setReadRegisterCallback(async () => 5);
   dashboard.setParameterBankCallbacks((addresses, refresh) => banks.readRanges(addresses, refresh), () => banks.getRanges());
@@ -223,11 +229,15 @@ test('limit failures preserve a successful value; failed value reads never trigg
     assert.equal(response.json.parameterRange.status, 'unavailable');
   }
   assert.equal(bankReads, 1, 'unavailable limits are cached too');
-  dashboard.setReadRegisterCallback(async () => { throw new Error('Value read failed'); });
+  dashboard.setReadRegisterCallback(async () => {
+    throw new Error('Value read failed');
+  });
   assert.equal((await expertRead(dashboard, { address: 0x101 })).status, 500);
   assert.equal(bankReads, 1);
   dashboard.setReadRegisterCallback(async () => 5);
-  dashboard.setParameterBankCallbacks(async () => { throw new Error('Session closed'); }, () => []);
+  dashboard.setParameterBankCallbacks(async () => {
+    throw new Error('Session closed');
+  }, () => []);
   const stale = await expertRead(dashboard, { address: 0x100 });
   assert.equal(stale.status, 200);
   assert.equal(stale.json.rawValue, 5);
@@ -260,10 +270,19 @@ test('a manual row read immediately shows returned limits and checks against the
   const requests = [];
   context.fetch = async (_url, options) => {
     requests.push(JSON.parse(options.body));
-    return { json: async () => ({ ok: true, rawValue: 5, wireRawValue: 5, scaledValue: 5,
-      parameterRange: { address: 0x100, min: 0, max: 10, status: 'available', readAt: 1 } }) };
+    return {
+      json: async () => ({
+        ok: true,
+        rawValue: 5,
+        wireRawValue: 5,
+        scaledValue: 5,
+        parameterRange: {
+          address: 0x100, min: 0, max: 10, status: 'available', readAt: 1,
+        },
+      }),
+    };
   };
-  run(`const p = {address:0x100,name:'P000',min:0,max:1}; blocks=[{id:'p',registers:[p]}]; visibleBlocks=blocks; flashRow=()=>{};`);
+  run('const p = {address:0x100,name:\'P000\',min:0,max:1}; blocks=[{id:\'p\',registers:[p]}]; visibleBlocks=blocks; flashRow=()=>{};');
   await run('readRow(0x100, false, 1)');
   assert.equal(requests[0].includeParameterRange, true);
   assert.match(element('range-device-256').innerHTML, />0–10</);
@@ -296,7 +315,9 @@ test('block limits are requested in batches and cached by the runtime; failures 
   assert.equal(reader.calls.length, 4, 'cached block limits generate no additional Modbus reads');
   const valueReads = [];
   context.fetch = async () => ({ ok: false });
-  context.readRow = async (...args) => { valueReads.push(args); };
+  context.readRow = async (...args) => {
+    valueReads.push(args);
+  };
   context.setActiveReadRow = () => {};
   context.finishReadProgress = () => {};
   run('blocks=[{id:"p",registers:parameters.slice(0,2)}]; visibleBlocks=blocks;');
@@ -327,15 +348,21 @@ test('heat pump clock metadata is localized and remains readable while expert wr
   const dashboard = new DashboardService({ appDir: process.cwd(), logger: () => {} });
   let writes = 0;
   dashboard.setReadRegisterCallback(async () => 5411);
-  dashboard.setWriteExpertCallback(async () => { writes++; });
+  dashboard.setWriteExpertCallback(async () => {
+    writes++;
+  });
   async function request(method, url, body, lang = 'nl') {
     let status;
     let json;
     dashboard._readBody = async () => body;
     await dashboard._handleRequest({ method, url, headers: { 'accept-language': lang } }, {
       setHeader() {},
-      writeHead(code) { status = code; },
-      end(text) { json = JSON.parse(text); },
+      writeHead(code) {
+        status = code;
+      },
+      end(text) {
+        json = JSON.parse(text);
+      },
     });
     return { status, json };
   }
@@ -360,16 +387,24 @@ test('User Control covers every address through 0x032F, preserving known definit
   const dashboard = new DashboardService({ appDir: process.cwd(), logger: () => {} });
   const writes = [];
   const reads = [];
-  dashboard.setReadRegisterCallback(async (address) => { reads.push(address); return 1234; });
-  dashboard.setWriteExpertCallback(async (...args) => { writes.push(args); });
+  dashboard.setReadRegisterCallback(async (address) => {
+    reads.push(address); return 1234;
+  });
+  dashboard.setWriteExpertCallback(async (...args) => {
+    writes.push(args);
+  });
   async function request(method, url, body, lang = 'nl') {
     let status;
     let json;
     dashboard._readBody = async () => body;
     await dashboard._handleRequest({ method, url, headers: { 'accept-language': lang } }, {
       setHeader() {},
-      writeHead(code) { status = code; },
-      end(text) { json = JSON.parse(text); },
+      writeHead(code) {
+        status = code;
+      },
+      end(text) {
+        json = JSON.parse(text);
+      },
     });
     return { status, json };
   }

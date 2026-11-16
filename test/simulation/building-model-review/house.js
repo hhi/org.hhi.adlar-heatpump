@@ -62,14 +62,20 @@ function simulateHouse(opts) {
     if (tIn < setpoint - 0.3) on = true;
     if (tIn > setpoint + 0.3) on = false;
     // Ontdooien: bij Tout < 3 °C na elke 50 min compressorloop 8 min, warmte uit het systeem.
-    if (events.defrost && defrostLeft === 0 && on && tOut < 3 && runMin >= 50) { defrostLeft = 8; runMin = 0; }
+    if (events.defrost && defrostLeft === 0 && on && tOut < 3 && runMin >= 50) {
+      defrostLeft = 8; runMin = 0;
+    }
     const defrost = defrostLeft > 0;
     // Tapwater: dagelijks 13:00–13:40; de warmtepomp levert aan de boiler, niet aan de woning.
     const dhw = !!events.dhw && hour >= 13 && hour < 13 + 40 / 60;
     let P = on ? P_ON : 0; // werkelijk vermogen naar de woning
     let pMeasured = P; // wat de service als thermisch vermogen ziet
-    if (defrost) { P = -1.0; pMeasured = 0; defrostLeft--; }
-    if (dhw) { P = 0; pMeasured = P_ON; }
+    if (defrost) {
+      P = -1.0; pMeasured = 0; defrostLeft--;
+    }
+    if (dhw) {
+      P = 0; pMeasured = P_ON;
+    }
     if (on && !defrost && !dhw) runMin++;
     if (m % 5 === 0) {
       samples.push({
@@ -82,7 +88,9 @@ function simulateHouse(opts) {
         dhw,
         solarRadiation: solar,
         deltaTPerHour: 0,
-        truth: { C: curC, UA: curUA, g, pInt },
+        truth: {
+          C: curC, UA: curUA, g, pInt,
+        },
         // Gemiddelden over het afgelopen interval (m−5, m]
         mean: accN > 0 ? { p: accP / accN, diff: accDiff / accN, solar: accSolar / accN } : { p: P, diff: tOut - tIn, solar },
       });
@@ -130,4 +138,6 @@ function applyGates(samples, gates) {
   return samples;
 }
 
-module.exports = { simulateHouse, asLearnerInput, applyGates, mulberry32 };
+module.exports = {
+  simulateHouse, asLearnerInput, applyGates, mulberry32,
+};

@@ -68,7 +68,7 @@ function mulberry32(seed) {
   return function next() {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
@@ -144,7 +144,7 @@ function runGatingModelSimulation({
 
   for (let i = 0; i < STEPS; i++) {
     const tMs = i * STEP_MIN * 60 * 1000;
-    const hourOfDay = (i * STEP_MIN) / 60 % 24;
+    const hourOfDay = ((i * STEP_MIN) / 60) % 24;
     const dayHourAbs = (i * STEP_MIN) / 60;
 
     const tOutdoor = 2 + 4 * Math.sin(((hourOfDay - 9) / 24) * 2 * Math.PI) + (rnd() - 0.5) * 0.4;
@@ -198,7 +198,7 @@ function runGatingModelSimulation({
         hour: Math.round(dayHourAbs),
         tIndoor,
         tOutdoor,
-        status: inDefrost ? 'defrost ' : inDHW ? 'DHW     ' : heatingOn ? 'verwarmt' : 'uit     ',
+        status: (inDefrost && 'defrost ') || (inDHW && 'DHW     ') || (heatingOn ? 'verwarmt' : 'uit     '),
         gated: gated.getModel(),
         ungated: ungated.getModel(),
       });
@@ -247,8 +247,14 @@ function scenarioA() {
 
   console.log('\n  Eindresultaat na 4 dagen:');
   console.log(`             ${pad('C (waar 12.0)', 16)} ${pad('UA (waar 0.250)', 16)} ${pad('τ (waar 48h)', 14)} ${pad('confidence', 11)} ${pad('reverts', 8)}`);
-  console.log(`    GATED:   ${pad(fmt(a1.gated.C, 1), 16)} ${pad(fmt(a1.gated.UA, 3), 16)} ${pad(fmt(a1.gated.tau, 1), 14)} ${pad(`${fmt(a1.gated.confidence, 0)}%`, 11)} ${pad(a1.gatedExcitation.totalReverts, 8)}`);
-  console.log(`    UNGATED: ${pad(fmt(a1.ungated.C, 1), 16)} ${pad(fmt(a1.ungated.UA, 3), 16)} ${pad(fmt(a1.ungated.tau, 1), 14)} ${pad(`${fmt(a1.ungated.confidence, 0)}%`, 11)} ${pad(a1.ungatedExcitation.totalReverts, 8)}`);
+  console.log([
+    `    GATED:   ${pad(fmt(a1.gated.C, 1), 16)} ${pad(fmt(a1.gated.UA, 3), 16)} ${pad(fmt(a1.gated.tau, 1), 14)}`,
+    `${pad(`${fmt(a1.gated.confidence, 0)}%`, 11)} ${pad(a1.gatedExcitation.totalReverts, 8)}`,
+  ].join(' '));
+  console.log([
+    `    UNGATED: ${pad(fmt(a1.ungated.C, 1), 16)} ${pad(fmt(a1.ungated.UA, 3), 16)} ${pad(fmt(a1.ungated.tau, 1), 14)}`,
+    `${pad(`${fmt(a1.ungated.confidence, 0)}%`, 11)} ${pad(a1.ungatedExcitation.totalReverts, 8)}`,
+  ].join(' '));
   console.log(`\n  Guard-activaties (gated learner): dt-gap=${a1.guardLog.dtGap}×, invalid=${a1.guardLog.invalid}×, divergence=${a1.guardLog.divergence}×`);
 
   const a1GatedScore = modelScore(a1.gated, TRUE);
@@ -256,7 +262,10 @@ function scenarioA() {
   const errC = { gated: Math.abs(a1.gated.C - TRUE.C), ungated: Math.abs(a1.ungated.C - TRUE.C) };
   const errUA = { gated: Math.abs(a1.gated.UA - TRUE.UA), ungated: Math.abs(a1.ungated.UA - TRUE.UA) };
   check(a1GatedScore < a1UngatedScore,
-    `A1 gating verbetert gecombineerde score (${fmt(a1GatedScore, 2)} vs ${fmt(a1UngatedScore, 2)}; |ΔC| ${fmt(errC.gated, 2)} vs ${fmt(errC.ungated, 2)}, |ΔUA| ${fmt(errUA.gated, 3)} vs ${fmt(errUA.ungated, 3)})`);
+    [
+      `A1 gating verbetert gecombineerde score (${fmt(a1GatedScore, 2)} vs ${fmt(a1UngatedScore, 2)};`,
+      `|ΔC| ${fmt(errC.gated, 2)} vs ${fmt(errC.ungated, 2)}, |ΔUA| ${fmt(errUA.gated, 3)} vs ${fmt(errUA.ungated, 3)})`,
+    ].join(' '));
   check(errC.gated < 3.0, `A1 gated C binnen 3 kWh/°C van waarheid (Δ=${fmt(errC.gated, 2)})`);
   check(a1.restartDone && a1.guardLog.dtGap >= 1,
     `A1 dt-gap-guard actief: herstart + eerste sample na elk gated DHW/defrost-venster (${a1.guardLog.dtGap}× baseline-verversing)`);
@@ -499,7 +508,7 @@ function scenarioD() {
     let tIndoor = 20.0;
     for (let i = 0; i < SAMPLES; i++) {
       const excited = kind === 'excited' || kind === 'dynamic-regressors';
-      const hourOfDay = (i * 5) / 60 % 24;
+      const hourOfDay = ((i * 5) / 60) % 24;
       const tOutdoor = excited ? 5 + 5 * Math.sin(i / 60) : 5;
       const solar = kind === 'dynamic-regressors' && hourOfDay > 8 && hourOfDay < 17
         ? Math.max(0, 450 * Math.sin(((hourOfDay - 8) / 9) * Math.PI)) : 0;
@@ -588,7 +597,7 @@ function scenarioE() {
   let dhwSamples = 0;
 
   for (let i = 0; i < STEPS; i++) {
-    const hourOfDay = (i * STEP_MIN) / 60 % 24;
+    const hourOfDay = ((i * STEP_MIN) / 60) % 24;
     const tOutdoor = 2 + 4 * Math.sin(((hourOfDay - 9) / 24) * 2 * Math.PI) + (rnd() - 0.5) * 0.4;
     const solar = hourOfDay > 8 && hourOfDay < 17
       ? Math.max(0, 400 * Math.sin(((hourOfDay - 8) / 9) * Math.PI)) : 0;
@@ -599,7 +608,7 @@ function scenarioE() {
 
     // Verborgen DHW binnen gecombineerde modus 5/7: configured mode blijft heating-capable.
     const inHiddenDhw = (hourOfDay >= 7 && hourOfDay < 7.5) || (hourOfDay >= 19 && hourOfDay < 19.5);
-    const pHouse = inHiddenDhw ? 0 : heatingOn ? P_THERMAL : 0;
+    const pHouse = (!inHiddenDhw && heatingOn) ? P_THERMAL : 0;
     const phantomPHeating = (heatingOn || inHiddenDhw) ? P_THERMAL : 0;
 
     tIndoor += (STEP_H / TRUE.C)
@@ -817,7 +826,6 @@ async function scenarioH() {
   let accumulator = 0;
   let coastActive = false;
   let cooldownCycleCount = 0;
-  let coastCycleCount = 0;
   const indoorHistory = [];
   const outletHistory = [];
   const appliedDeltas = [];
@@ -893,7 +901,6 @@ async function scenarioH() {
       pi.resetHistory();
       coastActive = false;
       cooldownCycleCount = 0;
-      coastCycleCount = 0;
       hardExitAt = cycle;
     }
 
@@ -901,17 +908,13 @@ async function scenarioH() {
       pi.resetHistory();
       coastActive = false;
       cooldownCycleCount = 0;
-      coastCycleCount = 0;
       softExitSeen = true;
     }
 
     if (!coastActive && cooldownConfirmed()) {
       coastActive = true;
-      coastCycleCount = 0;
       if (activatedAt === null) activatedAt = cycle;
     }
-
-    if (coastActive) coastCycleCount++;
 
     const heating = await pi.calculateAction({
       indoorTemp,

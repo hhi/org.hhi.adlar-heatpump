@@ -1,4 +1,37 @@
 {
   "extends": "athom/homey-app",
-  "ignorePatterns": ["test/"]
+  "overrides": [
+    {
+      // test/ is outside tsconfig.json (it is not part of the app build), so it gets its own project file.
+      "files": ["test/**/*.js", "test/**/*.ts"],
+      "parserOptions": {
+        "project": "./tsconfig.eslint.json"
+      },
+      "rules": {
+        // node:test returns a promise from every test() and describe(); the runner awaits it.
+        "@typescript-eslint/no-floating-promises": "off",
+        // Tests and simulations load devDependencies and the compiled app from .homeybuild.
+        "node/no-unpublished-require": "off",
+        "node/no-unpublished-import": "off",
+        // Tests load the compiled module per driver, inside the test, from a computed path.
+        "global-require": "off",
+        "import/no-dynamic-require": "off",
+        // Simulations and register tools are command-line programs: they print and exit with a status code.
+        "no-console": "off",
+        "no-process-exit": "off",
+        // There is no Homey instance in a test, so no homey.setTimeout.
+        "homey-app/global-timers": "off"
+      }
+    },
+    {
+      // The import resolver only knows .js; TypeScript itself checks these imports.
+      // The app code switches the same three rules off per file.
+      "files": ["test/**/*.ts"],
+      "rules": {
+        "import/no-unresolved": "off",
+        "import/extensions": "off",
+        "node/no-missing-import": "off"
+      }
+    }
+  ]
 }

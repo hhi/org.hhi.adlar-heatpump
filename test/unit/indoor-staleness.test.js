@@ -48,10 +48,14 @@ function createTemperatureDevice(store = {}) {
     capabilities,
     homey: { clock: { getTimezone: () => 'UTC' }, i18n: { getLanguage: () => 'en' } },
     getStoreValue: (key) => store[key] ?? null,
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: (key) => Object.prototype.hasOwnProperty.call(capabilities, key),
-    setCapabilityValue: async (key, value) => { capabilities[key] = value; },
+    setCapabilityValue: async (key, value) => {
+      capabilities[key] = value;
+    },
   };
 }
 
@@ -112,14 +116,26 @@ function createControl(Service, settings = {}) {
       setInterval: () => ({}),
       clearInterval: () => {},
       setTimeout: () => ({}),
-      flow: { getDeviceTriggerCard: (id) => ({ trigger: async (_device, tokens) => { triggers.push({ id, tokens }); } }) },
-      notifications: { createNotification: async ({ excerpt }) => { notifications.push(excerpt); } },
+      flow: {
+        getDeviceTriggerCard: (id) => ({
+          trigger: async (_device, tokens) => {
+            triggers.push({ id, tokens });
+          },
+        }),
+      },
+      notifications: {
+        createNotification: async ({ excerpt }) => {
+          notifications.push(excerpt);
+        },
+      },
     },
     getName: () => 'Heat pump',
     getSetting: (key) => settings[key],
     getSettings: () => settings,
     getStoreValue: (key) => store[key] ?? null,
-    setStoreValue: async (key, value) => { store[key] = value; },
+    setStoreValue: async (key, value) => {
+      store[key] = value;
+    },
     getCapabilityValue: (key) => capabilities[key] ?? null,
     hasCapability: (key) => Object.prototype.hasOwnProperty.call(capabilities, key),
     setCapabilityValue: async (key, value) => {
@@ -137,7 +153,15 @@ function createControl(Service, settings = {}) {
   service.getEffectiveTargetTemp = () => 35;
   service.getEffectiveOutdoorTemp = async () => 5;
   return {
-    service, store, capabilities, diagnostics, triggers, notifications, setStaleness: (value) => { staleness = value; },
+    service,
+    store,
+    capabilities,
+    diagnostics,
+    triggers,
+    notifications,
+    setStaleness: (value) => {
+      staleness = value;
+    },
   };
 }
 

@@ -39,7 +39,11 @@ function registerTuyaCard(cardId) {
   const app = {
     homey: {
       flow: {
-        getActionCard: (id) => ({ registerRunListener: (fn) => { listeners[id] = fn; } }),
+        getActionCard: (id) => ({
+          registerRunListener: (fn) => {
+            listeners[id] = fn;
+          },
+        }),
       },
     },
     log: (msg) => logs.push(msg),
@@ -57,7 +61,9 @@ function fakeDevice() {
     getName: () => 'test',
     hasCapability: () => true,
     setCapabilityValue: async () => {},
-    triggerCapabilityListener: async (capability, value) => { calls.push({ capability, value }); },
+    triggerCapabilityListener: async (capability, value) => {
+      calls.push({ capability, value });
+    },
   };
 }
 
