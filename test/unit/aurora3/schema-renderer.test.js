@@ -106,7 +106,9 @@ test('Aurora III process schema uses real FC04 sensor mapping, units and output 
   assert.equal(p.text('sc-z2-ahs'), 'Aan');
   assert.equal(p.text('sc-hx-temp'), '—', 'outlet temperature is not an HX measurement');
   assert.equal(p.text('sc-z1-ipm'), '');
-  const labels = p.markup().replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '');
+  // Visible text: drop the comments (they contain arrows such as '->'), then collect the text between tags
+  const withoutComments = p.markup().split('<!--').map((part, i) => (i === 0 ? part : part.slice(part.indexOf('-->') + 3))).join('');
+  const labels = [...withoutComments.matchAll(/>([^<]*)</g)].map((m) => m[1]).join(' ');
   assert.doesNotMatch(labels, /0x[0-9a-f]+|L27|P119|marnie|DRUKVERZADIGING|EVI/i);
   assert.match(p.markup(), /3-43|3-42|3-79/);
 });
