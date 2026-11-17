@@ -1,4 +1,10 @@
 {
+  "3.12.2": {
+    "en": "Kp, Ki and deadband of the Classic control are now applied at start-up as well (before, they fell back to 5.0, 1.5 and 0.3 °C after every restart or update). The deadband setting now counts when 'Enable building model learning' is off; with the building model on, the deadband stays 0.3–0.8 °C, derived from the heat loss.",
+    "nl": "Kp, Ki en dode zone van de regeling Klassiek worden nu ook bij het starten toegepast (voorheen vielen ze na elke herstart of update terug naar 5,0, 1,5 en 0,3 °C). De instelling 'Dode zone' telt nu als 'Gebouwmodel leren inschakelen' uit staat; met het gebouwmodel aan blijft de dode zone 0,3–0,8 °C, berekend uit het warmteverlies.",
+    "de": "Kp, Ki und Totzone der Regelung Klassisch werden jetzt auch beim Start übernommen (bisher fielen sie nach jedem Neustart oder Update auf 5,0, 1,5 und 0,3 °C zurück). Die Einstellung 'Totzone' zählt jetzt, wenn 'Gebäudemodell-Lernen aktivieren' aus ist; mit eingeschaltetem Gebäudemodell bleibt die Totzone 0,3–0,8 °C, berechnet aus dem Wärmeverlust.",
+    "fr": "Kp, Ki et la zone morte de la régulation Classique sont désormais aussi appliqués au démarrage (auparavant, ils revenaient à 5,0, 1,5 et 0,3 °C après chaque redémarrage ou mise à jour). Le réglage « Zone morte » compte désormais lorsque « Activer l'apprentissage du modèle de bâtiment » est désactivé ; avec le modèle activé, la zone morte reste de 0,3–0,8 °C, calculée à partir des pertes thermiques."
+  },
   "3.12.1": {
     "en": "The pre-heat time (insight, flow card 'Calculate pre-heat start time' and trigger 'Pre-heating time recommendation') is now calculated from the building model averaged over the past 24 hours (e.g. over the same two days 7.6–9.9 hours for 2 °C instead of 7.5–14.2 hours).",
     "nl": "De voorverwarmtijd (inzicht, flowkaart 'Bereken voorverwarm starttijd' en trigger 'Voorverwarm tijd aanbeveling') wordt nu berekend met het gebouwmodel gemiddeld over de laatste 24 uur (bijv. over dezelfde twee dagen 7,6–9,9 uur voor 2 °C in plaats van 7,5–14,2 uur).",

@@ -87,7 +87,7 @@ De **PI (Proportional-Integral) controller** combineert:
 |-----------|---------|--------|--------|
 | Kp | 3.0 | 1.0-5.0 | Snelheid reactie |
 | Ki | 1.5 | 0.5-3.0 | Lange-termijn correctie |
-| Deadband | 0.3°C | 0.1-1.0°C | Tolerantie zone |
+| Deadband | 0.3°C | 0.1-1.0°C | Tolerantie zone (alleen met gebouwmodel uit) |
 | Min Wait | 20 min | 10-60 min | Anti-oscillatie |
 
 ### Tuning Profielen

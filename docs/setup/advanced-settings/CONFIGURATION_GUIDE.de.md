@@ -268,6 +268,8 @@ Regelmodus Klassisch.
 - **Standard**: 0,3°C
 - **Bereich**: 0,1 - 1,0°C
 - **Funktion**: Toleranz bevor Anpassungen vorgenommen werden
+- **Wann**: Zählt nur bei ausgeschaltetem Gebäudemodell; mit eingeschaltetem
+  Gebäudemodell berechnet die App die Totzone aus dem Wärmeverlust (0,3–0,8 °C).
 
 ### Niedrigste und höchste Wassertemperatur in der Empfehlung (v3.4.3+)
 
