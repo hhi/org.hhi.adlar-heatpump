@@ -177,6 +177,8 @@ const SENSOR_DESCRIPTORS: readonly SensorDescriptor[] = [
   { key: 'eevStep', def: SENSOR_REGISTERS.mainEevOpenDegree },
   { key: 'eviStep', def: SENSOR_REGISTERS.auxEevOpenDegree },
   { key: 'fanSpeed', def: SENSOR_REGISTERS.fanSpeed },
+  { key: 'mainPumpState', def: SENSOR_REGISTERS.mainPumpStatus },
+  { key: 'fourWayValveState', def: SENSOR_REGISTERS.fourWayValveStatus },
   { key: 'acVoltage', def: SENSOR_REGISTERS.acInputVoltage },
   { key: 'acCurrent', def: SENSOR_REGISTERS.acInputCurrent },
   { key: 'compPhaseI', def: SENSOR_REGISTERS.compressorCurrent },
