@@ -1,4 +1,10 @@
 {
+  "3.12.3": {
+    "en": "Aurora III process schema (/processchema) now shows the Aurora III sensor names, register numbers and units, including the state of the main pump and the four-way valve. In Live mode, no sample values appear before the first measurement.",
+    "nl": "Het processchema van Aurora III (/processchema) toont nu de sensornamen, registernummers en eenheden van Aurora III, met de stand van de hoofdpomp en de vierwegklep. In Live verschijnen geen voorbeeldwaarden meer vóór de eerste meting.",
+    "de": "Das Prozessschema von Aurora III (/processchema) zeigt jetzt die Sensornamen, Registernummern und Einheiten von Aurora III, einschließlich des Zustands der Hauptpumpe und des Vierwegeventils. Im Live-Modus erscheinen vor der ersten Messung keine Beispielwerte mehr.",
+    "fr": "Le schéma de process d'Aurora III (/processchema) affiche désormais les noms de capteurs, numéros de registres et unités d'Aurora III, avec l'état de la pompe principale et de la vanne 4 voies. En mode Live, aucune valeur d'exemple n'apparaît avant la première mesure."
+  },
   "3.12.2": {
     "en": "Kp, Ki and deadband of the Classic control are now applied at start-up as well (before, they fell back to 5.0, 1.5 and 0.3 °C after every restart or update). The deadband setting now counts when 'Enable building model learning' is off; with the building model on, the deadband stays 0.3–0.8 °C, derived from the heat loss.",
     "nl": "Kp, Ki en dode zone van de regeling Klassiek worden nu ook bij het starten toegepast (voorheen vielen ze na elke herstart of update terug naar 5,0, 1,5 en 0,3 °C). De instelling 'Dode zone' telt nu als 'Gebouwmodel leren inschakelen' uit staat; met het gebouwmodel aan blijft de dode zone 0,3–0,8 °C, berekend uit het warmteverlies.",
