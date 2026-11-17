@@ -122,7 +122,9 @@ welche zählen.
 Alle 5 Minuten berechnet die App eine kleine Korrektur und addiert sie zur
 aktuellen Empfehlung. Diese Schritte summieren sich: Nach einer kalten Nacht
 kann die Empfehlung weit gestiegen sein, und es dauert, bis sie wieder sinkt.
-Innerhalb der Totzone (Standard 0,3 °C) ändert sich nichts. Klassisch braucht
+Innerhalb der Totzone ändert sich nichts: 0,3–0,8 °C, berechnet aus dem
+Wärmeverlust des Gebäudemodells (bei ausgeschaltetem Gebäudemodell: die
+Einstellung, Standard 0,3 °C). Klassisch braucht
 keine Heizkurve.
 
 ### Positionell
@@ -333,7 +335,7 @@ In der Reihenfolge der Gruppen.
 | **Gruppe Feineinstellung (Klassisch)** | | | |
 | Kp: Proportionalverstärkung | Größe der Korrektur je Grad Abweichung | Klassisch | 5,0 |
 | Ki: Integralverstärkung | Wie stark eine bleibende Abweichung nachgeregelt wird | Klassisch | 1,5 |
-| Totzone | Abweichung, innerhalb der sich nichts ändert | Klassisch | 0,3 °C |
+| Totzone ohne Gebäudemodell | Abweichung, innerhalb der sich nichts ändert; zählt nur bei ausgeschaltetem Gebäudemodell | Klassisch | 0,3 °C |
 | **Gruppe Coast** | | | |
 | Coast ein | Coast an oder aus | Klassisch, Manuell | An |
 | Coast: Empfehlung unter der Wassertemperatur | Wie viele Grad unter der Wassertemperatur Coast zielt | Klassisch, Manuell | 1 °C |

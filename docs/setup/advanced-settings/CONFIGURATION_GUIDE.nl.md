@@ -268,6 +268,8 @@ regelmodus Klassiek.
 - **Standaard**: 0.3°C
 - **Bereik**: 0.1 - 1.0°C
 - **Functie**: Tolerantie voordat aanpassingen worden gemaakt
+- **Wanneer**: Telt alleen als het gebouwmodel uit staat; met het gebouwmodel
+  aan berekent de app de dode zone uit het warmteverlies (0,3–0,8 °C).
 
 ### Laagste en hoogste watertemperatuur in het advies (v3.4.3+)
 

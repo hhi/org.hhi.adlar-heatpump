@@ -87,7 +87,7 @@ The **PI (Proportional-Integral) controller** combines:
 |-----------|---------|-------|--------|
 | Kp | 3.0 | 1.0-5.0 | Response speed |
 | Ki | 1.5 | 0.5-3.0 | Long-term correction |
-| Deadband | 0.3°C | 0.1-1.0°C | Tolerance zone |
+| Deadband | 0.3°C | 0.1-1.0°C | Tolerance zone (only with the building model off) |
 | Min Wait | 20 min | 10-60 min | Anti-oscillation |
 
 ### Tuning Profiles

@@ -302,7 +302,7 @@ THEN: Send notification "✅ Adaptive control activated"
 |---------|---------|-------|-------------|
 | **Kp: proportional gain** | 5.0 | 0.5 - 10.0 | Direct response to deviation |
 | **Ki: integral gain** | 1.5 | 0.1 - 5.0 | Correction of long-term deviation |
-| **Deadband** | 0.3°C | 0.1 - 1.0°C | Tolerance zone |
+| **Deadband** | 0.3°C | 0.1 - 1.0°C | Tolerance zone (only with the building model off) |
 
 **Tuning tips:**
 
@@ -507,7 +507,9 @@ Corrects long-term deviations that P-term doesn't solve.
 
 #### Deadband
 
-Zone within which no action is taken.
+Zone within which no action is taken. Counts only while the building model is
+off; with the building model on, the app derives the dead zone from the heat
+loss (0.3–0.8 °C).
 
 **Example** (target 21.0°C, deadband 0.3°C):
 - 20.8°C: Within zone → No action ✅

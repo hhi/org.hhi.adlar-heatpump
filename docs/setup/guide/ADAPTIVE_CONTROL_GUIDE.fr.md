@@ -302,7 +302,7 @@ THEN: Envoyer notification "✅ Contrôle adaptatif activé"
 |-----------|------------|-------|-------------|
 | **Kp : gain proportionnel** | 5,0 | 0,5 - 10,0 | Réaction directe à l'écart |
 | **Ki : gain intégral** | 1,5 | 0,1 - 5,0 | Correction écart de longue durée |
-| **Zone morte** | 0,3°C | 0,1 - 1,0°C | Zone de tolérance |
+| **Zone morte** | 0,3°C | 0,1 - 1,0°C | Zone de tolérance (seulement avec le modèle de bâtiment désactivé) |
 
 **Conseils de réglage:**
 
@@ -507,7 +507,9 @@ Corrige les écarts de longue durée que le terme P ne résout pas.
 
 #### Deadband
 
-Zone dans laquelle aucune action n'est entreprise.
+Zone dans laquelle aucune action n'est entreprise. Ne compte que si le modèle de
+bâtiment est désactivé ; avec le modèle activé, l'app calcule la zone morte à
+partir des pertes thermiques (0,3–0,8 °C).
 
 **Exemple** (objectif 21,0°C, deadband 0,3°C):
 - 20,8°C: Dans la zone → Pas d'action ✅
