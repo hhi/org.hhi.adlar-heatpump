@@ -302,7 +302,7 @@ THEN: Benachrichtigung senden "✅ Adaptive Control aktiviert"
 |-------------|----------|---------|--------------|
 | **Kp: Proportionalverstärkung** | 5,0 | 0,5 - 10,0 | Direkte Reaktion auf Abweichung |
 | **Ki: Integralverstärkung** | 1,5 | 0,1 - 5,0 | Korrektur langfristiger Abweichung |
-| **Totzone** | 0,3°C | 0,1 - 1,0°C | Toleranzzone |
+| **Totzone** | 0,3°C | 0,1 - 1,0°C | Toleranzzone (nur bei ausgeschaltetem Gebäudemodell) |
 
 **Tuning-Tipps:**
 
@@ -507,7 +507,9 @@ Korrigiert langfristige Abweichungen, die P-Term nicht löst.
 
 #### Deadband
 
-Zone, in der keine Aktion unternommen wird.
+Zone, in der keine Aktion unternommen wird. Zählt nur bei ausgeschaltetem
+Gebäudemodell; mit eingeschaltetem Gebäudemodell berechnet die App die Totzone
+aus dem Wärmeverlust (0,3–0,8 °C).
 
 **Beispiel** (Ziel 21,0°C, Deadband 0,3°C):
 - 20,8°C: Innerhalb Zone → Keine Aktion ✅

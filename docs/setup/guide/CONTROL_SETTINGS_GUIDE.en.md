@@ -117,8 +117,10 @@ in which control mode it counts. This table shows which ones count.
 
 Every 5 minutes the app calculates a small correction and adds it to the current
 advice. These steps add up: after a cold night the advice can have climbed a
-long way, and it takes a while to come down again. Within the deadband (default
-0.3 °C) nothing changes. Classic does not need a heating curve.
+long way, and it takes a while to come down again. Within the deadband nothing
+changes: 0.3–0.8 °C, derived from the heat loss of the building model (with the
+building model off: the setting, default 0.3 °C). Classic does not need a
+heating curve.
 
 ### Positional
 
@@ -320,7 +322,7 @@ In the order of the groups.
 | **Group fine-tuning (Classic)** | | | |
 | Kp: proportional gain | Size of the correction per degree of deviation | Classic | 5.0 |
 | Ki: integral gain | How strongly a lasting deviation is corrected | Classic | 1.5 |
-| Deadband | Deviation within which nothing changes | Classic | 0.3 °C |
+| Deadband without building model | Deviation within which nothing changes; counts only with the building model off | Classic | 0.3 °C |
 | **Group coast** | | | |
 | Coast on | Coast on or off | Classic, Manual | On |
 | Coast: recommendation below the water temperature | How many degrees below the water temperature coast aims | Classic, Manual | 1 °C |

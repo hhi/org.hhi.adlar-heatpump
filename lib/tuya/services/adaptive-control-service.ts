@@ -17,6 +17,7 @@ import {
   resolveCopTarget,
   resolveMaxPreHeatOffset,
 } from '../../shared/adaptive/optimizer-settings';
+import { resolvePiControllerSettings } from '../../shared/adaptive/pi-controller-settings';
 import { DefrostLearner } from '../../shared/adaptive/defrost-learner';
 import {
   APP_CURVE_DEFAULTS,
@@ -203,8 +204,10 @@ export class AdaptiveControlService {
     this.resolvePauseReason = config.resolvePauseReason ?? (() => null);
 
     // Initialize Component 1: Heating Controller (PI control)
+    // R31: Kp, Ki and the dead zone from the settings at construction, so they survive a restart
     this.heatingController = new HeatingController({
       logger: this.logger,
+      ...resolvePiControllerSettings((key) => this.device.getSetting(key)),
     });
 
     this.externalTemperature = new ExternalTemperatureService({
@@ -1219,7 +1222,8 @@ export class AdaptiveControlService {
         const tau = buildingModel.UA > 0 ? buildingModel.C / buildingModel.UA : 0;
 
         this.heatingController.setThermalInertia(tau);
-        this.heatingController.setDynamicDeadbandUA(buildingModel.UA);
+        // R30: with the building model switched off the dead zone setting counts; otherwise the UA decides
+        this.heatingController.setDynamicDeadbandUA(buildingDiagnostics.enabled ? buildingModel.UA : 0);
         this.energyOptimizer.setThermalCapacity(buildingModel.C);
 
         // Get outdoor temperature for thermal calculation with TTL-based source priority (v2.10.0)
@@ -1981,9 +1985,7 @@ export class AdaptiveControlService {
 
     // Handle PI parameter changes (Expert Mode)
     if (changedKeys.includes('adaptive_pi_kp') || changedKeys.includes('adaptive_pi_ki') || changedKeys.includes('adaptive_pi_deadband')) {
-      const Kp = newSettings.adaptive_pi_kp as number || 5.0; // ADR-059 W2: default recalibrated for fixed comfort anchor
-      const Ki = newSettings.adaptive_pi_ki as number || 1.5;
-      const deadband = newSettings.adaptive_pi_deadband as number || 0.3;
+      const { Kp, Ki, deadband } = resolvePiControllerSettings((key) => newSettings[key]);
       this.updatePIParameters(Kp, Ki, deadband);
     }
 

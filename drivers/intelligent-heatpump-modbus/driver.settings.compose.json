@@ -751,16 +751,16 @@
         "id": "adaptive_pi_deadband",
         "type": "number",
         "label": {
-          "en": "Deadband (°C)",
-          "nl": "Dode zone (°C)",
-          "de": "Totzone (°C)",
-          "fr": "Zone morte (°C)"
+          "en": "Deadband without building model (°C)",
+          "nl": "Dode zone zonder gebouwmodel (°C)",
+          "de": "Totzone ohne Gebäudemodell (°C)",
+          "fr": "Zone morte sans modèle de bâtiment (°C)"
         },
         "hint": {
-          "en": "Within this deviation from the desired indoor temperature, the recommendation does not change. Range 0.1–1.0 °C. Default: 0.3 °C.",
-          "nl": "Binnen deze afwijking van de gewenste binnentemperatuur verandert het advies niet. Bereik 0,1–1,0 °C. Standaard: 0,3 °C.",
-          "de": "Innerhalb dieser Abweichung von der gewünschten Raumtemperatur ändert sich die Empfehlung nicht. Bereich 0,1–1,0 °C. Standard: 0,3 °C.",
-          "fr": "Dans cet écart par rapport à la température intérieure souhaitée, la recommandation ne change pas. Plage 0,1–1,0 °C. Par défaut : 0,3 °C."
+          "en": "Within this deviation from the desired indoor temperature, the recommendation does not change. Counts only while 'Enable building model learning' is off; with the building model on, the app derives the dead zone from the heat loss (0.3–0.8 °C). Range 0.1–1.0 °C. Default: 0.3 °C.",
+          "nl": "Binnen deze afwijking van de gewenste binnentemperatuur verandert het advies niet. Telt alleen als 'Gebouwmodel leren inschakelen' uit staat; met het gebouwmodel aan berekent de app de dode zone uit het warmteverlies (0,3–0,8 °C). Bereik 0,1–1,0 °C. Standaard: 0,3 °C.",
+          "de": "Innerhalb dieser Abweichung von der gewünschten Raumtemperatur ändert sich die Empfehlung nicht. Zählt nur, wenn 'Gebäudemodell-Lernen aktivieren' aus ist; mit eingeschaltetem Gebäudemodell berechnet die App die Totzone aus dem Wärmeverlust (0,3–0,8 °C). Bereich 0,1–1,0 °C. Standard: 0,3 °C.",
+          "fr": "Dans cet écart par rapport à la température intérieure souhaitée, la recommandation ne change pas. Ne compte que si « Activer l'apprentissage du modèle de bâtiment » est désactivé ; avec le modèle de bâtiment activé, l'app calcule la zone morte à partir des pertes thermiques (0,3–0,8 °C). Plage 0,1–1,0 °C. Par défaut : 0,3 °C."
         },
         "value": 0.3,
         "attr": { "min": 0.1, "max": 1.0, "step": 0.1 }

@@ -269,6 +269,8 @@ mode Classic.
 - **Default**: 0.3°C
 - **Range**: 0.1 - 1.0°C
 - **Function**: Tolerance before adjustments are made
+- **When**: Counts only while the building model is off; with the building model
+  on, the app derives the dead zone from the heat loss (0.3–0.8 °C).
 
 ### Lowest and highest water temperature in the recommendation (v3.4.3+)
 
