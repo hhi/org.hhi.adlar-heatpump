@@ -124,8 +124,9 @@ montre lesquels comptent.
 Toutes les 5 minutes, l'app calcule une petite correction et l'ajoute à la
 recommandation actuelle. Ces pas s'additionnent : après une nuit froide, la
 recommandation peut être montée très haut, et il faut un moment pour qu'elle
-redescende. À l'intérieur de la zone morte (0,3 °C par défaut), rien ne change.
-Classique n'a pas besoin de courbe de chauffe.
+redescende. À l'intérieur de la zone morte, rien ne change : 0,3–0,8 °C,
+calculée à partir des pertes thermiques du modèle de bâtiment (modèle
+désactivé : le réglage, 0,3 °C par défaut). Classique n'a pas besoin de courbe de chauffe.
 
 ### Positionnel
 
@@ -342,7 +343,7 @@ Dans l'ordre des groupes.
 | **Groupe réglage fin (Classique)** | | | |
 | Kp : gain proportionnel | Taille de la correction par degré d'écart | Classique | 5,0 |
 | Ki : gain intégral | Force de la correction d'un écart durable | Classique | 1,5 |
-| Zone morte | Écart à l'intérieur duquel rien ne change | Classique | 0,3 °C |
+| Zone morte sans modèle de bâtiment | Écart à l'intérieur duquel rien ne change ; ne compte qu'avec le modèle de bâtiment désactivé | Classique | 0,3 °C |
 | **Groupe coast** | | | |
 | Coast activé | Coast activé ou désactivé | Classique, Manuel | Activé |
 | Coast : recommandation sous la température d'eau | De combien de degrés sous la température de l'eau coast vise | Classique, Manuel | 1 °C |

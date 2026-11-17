@@ -116,8 +116,10 @@ groep zegt bij welke regelmodus hij telt. Deze tabel laat zien welke meetellen.
 
 Elke 5 minuten berekent de app een kleine correctie en telt die op bij het
 huidige advies. Die stappen tellen op: na een koude nacht kan het advies ver
-omhoog zijn gelopen, en het duurt even voordat het weer zakt. Binnen de dode zone
-(standaard 0,3 °C) verandert er niets. Klassiek heeft geen stooklijn nodig.
+omhoog zijn gelopen, en het duurt even voordat het weer zakt. Binnen de dode
+zone verandert er niets: 0,3–0,8 °C, berekend uit het warmteverlies van het
+gebouwmodel (met het gebouwmodel uit: de instelling, standaard 0,3 °C). Klassiek
+heeft geen stooklijn nodig.
 
 ### Positioneel
 
@@ -322,7 +324,7 @@ In de volgorde van de groepen.
 | **Groep fijnafstelling (Klassiek)** | | | |
 | Kp: proportionele versterking | Grootte van de correctie per graad afwijking | Klassiek | 5,0 |
 | Ki: integrale versterking | Hoe sterk een blijvende afwijking wordt bijgestuurd | Klassiek | 1,5 |
-| Dode zone | Afwijking waarbinnen niets verandert | Klassiek | 0,3 °C |
+| Dode zone zonder gebouwmodel | Afwijking waarbinnen niets verandert; telt alleen met het gebouwmodel uit | Klassiek | 0,3 °C |
 | **Groep coast** | | | |
 | Coast aan | Coast aan of uit | Klassiek, Handmatig | Aan |
 | Coast: advies onder de watertemperatuur | Hoeveel graden onder de watertemperatuur coast richt | Klassiek, Handmatig | 1 °C |

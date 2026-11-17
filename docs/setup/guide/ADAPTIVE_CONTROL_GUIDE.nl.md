@@ -302,7 +302,7 @@ THEN: Stuur notificatie "✅ Adaptive control geactiveerd"
 |------------|-----------|--------|--------------|
 | **Kp: proportionele versterking** | 5.0 | 0.5 - 10.0 | Directe reactie op afwijking |
 | **Ki: integrale versterking** | 1.5 | 0.1 - 5.0 | Correctie langdurige afwijking |
-| **Dode zone** | 0.3°C | 0.1 - 1.0°C | Tolerantie zone |
+| **Dode zone** | 0.3°C | 0.1 - 1.0°C | Tolerantie zone (alleen met gebouwmodel uit) |
 
 **Tuning tips:**
 
@@ -507,7 +507,9 @@ Corrigeert langdurige afwijkingen die P-term niet oplost.
 
 #### Deadband
 
-Zone waarbinnen geen actie wordt ondernomen.
+Zone waarbinnen geen actie wordt ondernomen. Telt alleen als het gebouwmodel uit
+staat; met het gebouwmodel aan berekent de app de dode zone uit het
+warmteverlies (0,3–0,8 °C).
 
 **Voorbeeld** (doel 21.0°C, deadband 0.3°C):
 - 20.8°C: Binnen zone → Geen actie ✅

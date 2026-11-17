@@ -270,6 +270,9 @@ le mode de régulation Classique.
 - **Par défaut** : 0.3°C
 - **Plage** : 0.1 - 1.0°C
 - **Fonction** : Tolérance avant que les ajustements soient effectués
+- **Quand** : Ne compte que si le modèle de bâtiment est désactivé ; avec le
+  modèle activé, l'app calcule la zone morte à partir des pertes thermiques
+  (0,3–0,8 °C).
 
 ### Température d'eau la plus basse et la plus haute recommandée (v3.4.3+)
 
