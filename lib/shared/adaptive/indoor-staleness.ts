@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 /**
  * ADR-067 D2 (R27): an indoor sensor that has stopped (empty battery, a flow that keeps sending the
  * last value) shows up as an indoor temperature that does not change. The incoming flow is trusted;
