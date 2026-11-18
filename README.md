@@ -1,5 +1,16 @@
 # Adlar Castra Heatpump
 
+[![Validate](https://img.shields.io/github/actions/workflow/status/hhi/org.hhi.adlar-heatpump/homey-app-validate.yml?branch=main&label=validate)](https://github.com/hhi/org.hhi.adlar-heatpump/actions/workflows/homey-app-validate.yml)
+[![Release](https://img.shields.io/github/v/release/hhi/org.hhi.adlar-heatpump)](https://github.com/hhi/org.hhi.adlar-heatpump/releases/latest)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
+[![Homey App Store](https://img.shields.io/badge/Homey-App%20Store-00a7e1)](https://homey.app/a/org.hhi.adlar-heatpump)
+
+**Supported languages:**
+🇬🇧 [English](docs/README.en.md) ·
+🇩🇪 [Deutsch](docs/README.de.md) ·
+🇫🇷 [Français](docs/README.fr.md) ·
+🇳🇱 [Nederlands](docs/README.nl.md)
+
 Local control and monitoring for Adlar Castra Aurora heat pumps on Homey Pro.
 The app provides three separate device drivers, so choose the one that matches
 your connection method and heat-pump model:

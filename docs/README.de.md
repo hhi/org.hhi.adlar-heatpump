@@ -2,7 +2,11 @@
 
 Willkommen zur Dokumentation der Adlar-Wärmepumpe-Homey-App.
 
-[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+**Unterstützte Sprachen:**
+🇬🇧 [English](README.en.md) ·
+🇩🇪 [Deutsch](README.de.md) ·
+🇫🇷 [Français](README.fr.md) ·
+🇳🇱 [Nederlands](README.nl.md)
 
 ## Beginnen Sie mit Ihrem Treiber
 

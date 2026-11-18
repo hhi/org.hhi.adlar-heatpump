@@ -2,7 +2,11 @@
 
 Welkom bij de documentatie voor de Adlar Warmtepomp Homey app.
 
-[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+**Ondersteunde talen:**
+🇬🇧 [English](README.en.md) ·
+🇩🇪 [Deutsch](README.de.md) ·
+🇫🇷 [Français](README.fr.md) ·
+🇳🇱 [Nederlands](README.nl.md)
 
 ## Begin bij uw driver
 
