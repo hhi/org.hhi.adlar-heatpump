@@ -56,26 +56,26 @@
     "id": "local_dashboards",
     "type": "group",
     "label": {
-      "en": "Local Dashboards",
-      "nl": "Lokale dashboards",
-      "de": "Lokale Dashboards",
-      "fr": "Tableaux de bord locaux"
+      "en": "Live monitoring",
+      "nl": "Live monitoring",
+      "de": "Live-Monitoring",
+      "fr": "Surveillance en direct"
     },
     "children": [
       {
         "id": "dashboard_port",
         "type": "number",
         "label": {
-          "en": "Dashboard port",
-          "nl": "Dashboardpoort",
-          "de": "Dashboard-Port",
-          "fr": "Port des tableaux de bord"
+          "en": "Live monitoring port",
+          "nl": "Poort live monitoring",
+          "de": "Port für Live-Monitoring",
+          "fr": "Port de la surveillance en direct"
         },
         "hint": {
-          "en": "Local HTTP port for the dashboards. Default is 8090 (the Aurora III driver uses 8091). Change this only if the port is already in use, then open http://<homey-ip>:<port>/.",
-          "nl": "Lokale HTTP-poort voor de dashboards. Standaard is 8090 (de Aurora III-driver gebruikt 8091). Wijzig dit alleen als de poort al in gebruik is en open daarna http://<homey-ip>:<poort>/.",
-          "de": "Lokaler HTTP-Port für die Dashboards. Standard ist 8090 (der Aurora III-Treiber verwendet 8091). Ändern Sie dies nur, wenn der Port bereits belegt ist, und öffnen Sie dann http://<homey-ip>:<port>/.",
-          "fr": "Port HTTP local pour les tableaux de bord. La valeur par défaut est 8090 (le pilote Aurora III utilise 8091). Modifiez-le uniquement si le port est déjà utilisé, puis ouvrez http://<homey-ip>:<port>/."
+          "en": "Default 8090 (the Aurora III driver uses 8091). Change only if this port is already in use. See the guide on the source code page.",
+          "nl": "Standaard 8090 (de Aurora III-driver gebruikt 8091). Wijzig alleen als deze poort al in gebruik is. Zie de handleiding op de broncodepagina.",
+          "de": "Standard 8090 (der Aurora III-Treiber verwendet 8091). Nur ändern, wenn dieser Port bereits belegt ist. Siehe die Anleitung auf der Quellcode-Seite.",
+          "fr": "Par défaut 8090 (le pilote Aurora III utilise 8091). À modifier uniquement si ce port est déjà utilisé. Voir le guide sur la page du code source."
         },
         "value": 8090,
         "attr": {
