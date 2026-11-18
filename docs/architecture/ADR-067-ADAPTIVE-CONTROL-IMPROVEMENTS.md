@@ -1,9 +1,13 @@
 # ADR-067: Verbeteringen aan de adaptieve regeling
 
-**Status:** Voorstel (2026-11-09). D1 is gebouwd op 2026-11-10 (in 3.8.0), D3
-en D10 op 2026-11-13 (in 3.9.0), D2 op 2026-11-14 (voor 3.9.1); de
-rest niet. Per besluit
-staat erbij of het getoetst is.
+**Status:** Deels gebouwd (bijgewerkt 2026-11-17). D1 in 3.8.0, D3 en D10 in
+3.9.0, D2 in 3.9.1, alle vier ook in de zuster-app. Open: D7 (punt O11 in
+`todo/stand/punten.md`, wacht op praktijkgegevens), D5 (niet gebouwd), D4, D6
+en D8 (later, met gegevens). Van de open punten in §8 zijn 2, 5 en 6
+beantwoord: drempel 0,75 °C gebouwd; 22 wijzigingen van het advies in 24 uur
+(14 nov); integraal −1,2 en −1,7 K in de live toets. De actuele stand staat in
+`todo/stand-van-zaken.md`; de rest van dit stuk beschrijft de stand van
+9 november. Per besluit staat erbij of het getoetst is.
 **Datum:** 2026-11-09
 **Beslissers:** -
 **Gerelateerd:** [ADR-065](ADR-065-POSITIONAL-PI-HEATING-CURVE.md) (positionele
@@ -14,7 +18,7 @@ PI, presets, optimizers via het kamerdoel, open punten O10, O11, O12, O21);
 **Simulatie:** `test/simulation/coast-closed-loop.js`. D3 staat in de repo als
 `O22=1`. D4 is getoetst in een kopie met een extra variant (§6.2); die zit niet
 in de repo.
-**Stand van de code:** `main` op `d2311cb` (v3.7.1)
+**Stand van de code bij het voorstel:** `main` op `d2311cb` (v3.7.1)
 
 ---
 

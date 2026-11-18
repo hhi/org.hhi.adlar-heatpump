@@ -1,6 +1,11 @@
 # ADR-064: Gemeten vensterwarmte als invoer voor het gebouwmodel
 
-**Status:** Concept (voorgesteld, 2026-10-25; aangevuld 2026-10-25)
+**Status:** Aangehouden (2026-11-16), niet gebouwd. Voorgesteld en aangevuld
+op 2026-10-25. Na de live toets van 3.7.0 besloten het nu niet te bouwen:
+P_int is niet structureel te laag (0,18–0,30 kW) en de voorspelfout is niet
+uit de opgeslagen gegevens te halen. Punt G3 in `todo/stand/punten.md`. De
+afgiftevertraging (O6) is apart gebouwd als [ADR-066](ADR-066-EMITTER-DELAY.md)
+in 3.7.0. De voorgestelde versie 3.5.0 (O1) vervalt.
 **Datum:** 2026-10-25
 **Beslissers:** -
 **Gerelateerd:** [ADR-062](ADR-062-BUILDING-MODEL-REVIEW-IMPLEMENTATION.md) (B1 venster
