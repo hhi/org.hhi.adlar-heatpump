@@ -11,6 +11,7 @@ import {
   formatDateTimeMinutes, formatHourMinute, nextLocalTime, resolveHomeyTimezone,
 } from '../../shared/utils/time-format';
 import type { BuildingInsightsService, InsightCategory } from './building-insights-service';
+import { notifyOnce, SAVINGS_ABOVE_NOTICE_MESSAGE_KEY, SAVINGS_ABOVE_NOTICE_STORE_KEY } from '../../shared/deprecated-card-notice';
 
 type PerformanceReportFlowTokens = {
   'overall_score': number;
@@ -874,6 +875,13 @@ export class FlowCardManagerService {
       const savingsAboveCard = this.device.homey.flow.getConditionCard('savings_above');
       const savingsAboveListener = savingsAboveCard.registerRunListener(async (args: { category: string; threshold: number }) => {
         this.logger('FlowCardManagerService: Savings above condition triggered', { category: args.category, threshold: args.threshold });
+
+        // v3.13.1: the condition is deprecated and always false; tell the user once per device.
+        try {
+          await notifyOnce(this.device, SAVINGS_ABOVE_NOTICE_STORE_KEY, SAVINGS_ABOVE_NOTICE_MESSAGE_KEY);
+        } catch (error) {
+          this.logger('FlowCardManagerService: Failed to send the savings_above notice', { error: (error as Error).message });
+        }
 
         if (!this.buildingInsightsService) {
           this.logger('FlowCardManagerService: Building Insights service not available, returning false');

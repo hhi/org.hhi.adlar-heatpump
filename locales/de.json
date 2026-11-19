@@ -183,6 +183,9 @@
       }
     }
   },
+  "flow_notices": {
+    "savings_above_deprecated": "Die Bedingung 'Erkenntniseinsparungen sind über Schwellenwert' funktioniert nicht mehr: Sie ist immer falsch und umgekehrt ('sind nicht über') immer wahr. Entfernen Sie sie aus Ihren Flows."
+  },
   "live_monitoring": {
     "not_available": "Nicht verfügbar: Port __port__ ist bereits belegt. Wählen Sie oben einen anderen Port.",
     "address_unknown": "Adresse unbekannt; verwenden Sie die IP-Adresse Ihres Homey mit Port __port__."

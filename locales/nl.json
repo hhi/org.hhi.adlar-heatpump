@@ -298,6 +298,9 @@
     "view_unit": "Eenheid",
     "no_unit": "Geen eenheid"
   },
+  "flow_notices": {
+    "savings_above_deprecated": "De conditie 'Inzicht besparing boven drempel' werkt niet meer: ze is altijd onwaar, en omgekeerd ('is niet boven') altijd waar. Verwijder haar uit uw flows."
+  },
   "live_monitoring": {
     "not_available": "Niet beschikbaar: poort __port__ is al in gebruik. Kies hierboven een andere poort.",
     "address_unknown": "Adres onbekend; gebruik het IP-adres van uw Homey met poort __port__."
