@@ -206,7 +206,7 @@ Set `DEBUG=1` environment variable to enable debug features in the Homey app.
 ### Changelog Management
 
 When updating `.homeychangelog.json`, follow skill `changelog` (end users: state what changed,
-no why or how, 1–2 sentences).
+no why or how, 1–2 sentences; clean up only at certification, owner decides).
 
 ## Project Architecture
 

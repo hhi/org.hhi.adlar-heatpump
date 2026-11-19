@@ -1,9 +1,9 @@
 ---
 name: changelog
-description: How to write entries in .homeychangelog.json for this Homey app: end-user audience, state what changed, no why/how, examples of good and bad entries.
+description: How to write entries in .homeychangelog.json for this Homey app: end-user audience, state what changed, no why/how, four languages, and when to clean up the changelog (only at certification, owner decides); examples of good and bad entries.
 ---
 
-### Changelog Management
+# Changelog Management
 
 When updating `.homeychangelog.json`:
 
@@ -21,7 +21,21 @@ When updating `.homeychangelog.json`:
 - ❌ **Do NOT add marketing language** - No justifications or
   selling points
 
-**Structure**: Keep entries concise (1-2 sentences maximum)
+**Structure**: Keep entries concise (1-2 sentences maximum). A cleanup summary
+at certification (see below) may be a short paragraph.
+
+**Languages and wording**: Every entry in all four languages (en, nl, de, fr).
+No technical terms (DPS, registers), no developer prefixes such as "Fixed:",
+no file paths, and no references to dashboards or local web pages (call it
+"live monitoring").
+
+**Per version or cleaned up**:
+
+- During development, each version gets its own short entry.
+- At certification, the owner may decide to clean up the changelog to a summary
+  since the last published version plus a few milestones (as done for 3.12.4).
+  Propose this when a certification is coming up; never do it on your own.
+- Details per version belong in the GitHub release, not in the changelog.
 
 **Good Examples**:
 
