@@ -1,7 +1,9 @@
-# Flow Cards Implementatiegids: Basis Device Flow Cards (v2.7.x)
+# Flow Cards Implementatiegids: Basis Device Flow Cards
 
 > **Scope**: Deze gids documenteert **basis device flow cards** voor apparaatmonitoring, energie tracking en calculators.
 > **Geavanceerde features**: Zie [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md) voor adaptieve regeling, building model, COP optimizer, energy optimizer, building insights en wind/solar integratie.
+> **Alle kaarten**: Zie de [naslag Flow-kaarten](FLOW_CARDS_REFERENCE.nl.md)
+> voor elke kaart met velden, tokens en een voorbeeld.
 
 Deze gids biedt praktische voorbeelden, configuratietips en probleemoplossingadvies voor de basis flow cards van de Adlar Warmtepomp app.
 

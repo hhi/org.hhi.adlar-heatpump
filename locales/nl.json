@@ -298,6 +298,10 @@
     "view_unit": "Eenheid",
     "no_unit": "Geen eenheid"
   },
+  "live_monitoring": {
+    "not_available": "Niet beschikbaar: poort __port__ is al in gebruik. Kies hierboven een andere poort.",
+    "address_unknown": "Adres onbekend; gebruik het IP-adres van uw Homey met poort __port__."
+  },
   "modbusRegisterDescriptions": {
     "fan_type": "0=AC, 1=DC, 2=EC, 3=onbekend (gemeten op programma 433).",
     "sterilization_start_hour": "Startuur 0..23 (23 = 23:00), gemeten op programma 433 / protocol 143. De oudere specificatie noemde HHMM 2300.",

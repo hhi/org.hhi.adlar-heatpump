@@ -82,6 +82,23 @@
           "min": 1024,
           "max": 65535
         }
+      },
+      {
+        "id": "live_monitoring_address",
+        "type": "label",
+        "label": {
+          "en": "Live monitoring address",
+          "nl": "Adres live monitoring",
+          "de": "Adresse Live-Monitoring",
+          "fr": "Adresse de la surveillance en direct"
+        },
+        "hint": {
+          "en": "Filled in by the app. Open this address in a browser on your home network; it cannot be reached from outside.",
+          "nl": "Vult de app zelf in. Open dit adres in een browser binnen uw thuisnetwerk; van buitenaf is het niet bereikbaar.",
+          "de": "Wird von der App ausgefüllt. Öffnen Sie diese Adresse in einem Browser in Ihrem Heimnetz; von außen ist sie nicht erreichbar.",
+          "fr": "Renseignée par l'application. Ouvrez cette adresse dans un navigateur de votre réseau domestique ; elle n'est pas accessible depuis l'extérieur."
+        },
+        "value": ""
       }
     ]
   },

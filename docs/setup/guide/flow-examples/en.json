@@ -1,0 +1,854 @@
+{
+  "heating_mode_changed": {
+    "text": "get a notification when someone changes the mode on the control panel.",
+    "flow": [
+      "WHEN Heating mode changed",
+      "THEN Send a push notification \"Mode is now [Heating mode]\""
+    ]
+  },
+  "water_mode_changed": {
+    "text": "this is an installation setting that normally does not change; create a notification when it does.",
+    "flow": [
+      "WHEN Water mode changed",
+      "THEN Create a notification \"Water mode changed to [Water mode]\""
+    ]
+  },
+  "work_mode_changed": {
+    "text": "keep track of when Boost switches on.",
+    "flow": [
+      "WHEN Work mode changed",
+      "AND Work mode is Boost",
+      "THEN Send a push notification \"Boost is on\""
+    ]
+  },
+  "capacity_setting_is": {
+    "text": "switch the hot water curve back on in the evening if it is off.",
+    "flow": [
+      "WHEN The time is 22:00",
+      "AND Hot water curve setting is OFF",
+      "THEN Set hot water curve setting to H2"
+    ]
+  },
+  "compressor_running": {
+    "text": "get a notification if the compressor is still running when an expensive period starts.",
+    "flow": [
+      "WHEN Expensive period approaching",
+      "AND Compressor is running",
+      "THEN Send a push notification \"The heat pump runs in the expensive period\""
+    ]
+  },
+  "device_power_is": {
+    "text": "only lower the setpoint when the heat pump is on.",
+    "flow": [
+      "WHEN The last person leaves",
+      "AND Device power is On",
+      "THEN Set target (setpoint) temperature to 30"
+    ]
+  },
+  "dhw_heating_active": {
+    "text": "only switch on silent mode once the heat pump is no longer heating hot water.",
+    "flow": [
+      "WHEN The time is 22:00",
+      "AND Hot water is not being heated",
+      "THEN Set silent mode to Level 2"
+    ]
+  },
+  "heating_curve_is": {
+    "text": "only change the setpoint when the heating curve is OFF; with a heating curve the heat pump sets the supply temperature itself and does not keep a setpoint you set.",
+    "flow": [
+      "WHEN The time is 06:00",
+      "AND Heating curve setting is OFF",
+      "THEN Set target (setpoint) temperature to 40"
+    ]
+  },
+  "heating_mode_is": {
+    "text": "switch to hot water only in May, but only if the heat pump is still on heating and hot water. The Aurora III has other modes (Cooling, Heating, Auto) and no separate hot water mode.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND The day and month are 1 May",
+      "AND Heating mode is Heating and hot water",
+      "THEN Set heating mode to Hot water"
+    ]
+  },
+  "hotwater_temperature_is": {
+    "text": "the card compares the hot water setpoint, not the measured tank temperature. Set the setpoint back if it stayed too high after a boost.",
+    "flow": [
+      "WHEN The time is 23:00",
+      "AND Hot water temperature is Greater than 50°C",
+      "THEN Set hot water temperature to 48"
+    ]
+  },
+  "silent_mode_is": {
+    "text": "switch silent mode off in the morning if it is still on.",
+    "flow": [
+      "WHEN The time is 07:00",
+      "AND Silent mode is not Off",
+      "THEN Set silent mode to Off"
+    ]
+  },
+  "target_temperature_is": {
+    "text": "only lower the setpoint at night if it is higher than the night value.",
+    "flow": [
+      "WHEN The time is 23:00",
+      "AND Target (setpoint) temperature is Greater than 35°C",
+      "THEN Set target (setpoint) temperature to 32"
+    ]
+  },
+  "volume_setting_is": {
+    "text": "this setting tells which power module the heat pump has (0 = none, 1 = single-phase, 2 = three-phase). Use the card to check that the value is still right, for example after a fault.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND Electricity consumption checking is not Equal to 1",
+      "THEN Send a push notification \"Power module setting has changed\""
+    ]
+  },
+  "water_mode_is": {
+    "text": "this is an installation setting; use the card to report an unexpected value.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND Water control mode is not Equal to 0",
+      "THEN Send a push notification \"Water control mode is 1\""
+    ]
+  },
+  "work_mode_is": {
+    "text": "set the heat pump back to Normal in the morning if it is still on ECO.",
+    "flow": [
+      "WHEN The time is 07:00",
+      "AND Work mode is ECO",
+      "THEN Set work mode to Normal"
+    ]
+  },
+  "set_backup_heater": {
+    "text": "force the electric backup heater in severe frost and release it when it is less cold.",
+    "flow": [
+      "WHEN Ambient temperature changed below -10°C",
+      "THEN Switch forced backup heater on",
+      "",
+      "WHEN Ambient temperature changed above -5°C",
+      "THEN Switch forced backup heater off"
+    ]
+  },
+  "set_capacity": {
+    "text": "a higher hot water curve in the morning for the shower peak.",
+    "flow": [
+      "WHEN The time is 05:30",
+      "THEN Set hot water curve setting to H3",
+      "",
+      "WHEN The time is 09:00",
+      "THEN Set hot water curve setting to H1"
+    ]
+  },
+  "set_curve_for_mode": {
+    "text": "set the floor heating curve at the start of the heating season.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND The day and month are 1 October",
+      "THEN Set curve to L3 for Floor heating"
+    ]
+  },
+  "set_device_onoff": {
+    "text": "switch the heat pump on and off with a virtual button.",
+    "flow": [
+      "WHEN Virtual button Heat pump is turned off",
+      "THEN Set device power to Off"
+    ]
+  },
+  "set_dhw_function": {
+    "text": "switch hot water heating off during the holidays, with a Yes/No variable Holiday.",
+    "flow": [
+      "WHEN A variable has changed (Holiday)",
+      "AND Holiday is equal to yes",
+      "THEN Switch hot water function off"
+    ]
+  },
+  "set_diy_heating_curve": {
+    "text": "set a custom heating curve at the start of the heating season. The card also switches the custom curve on; a slope of -0.5 and 50 °C at -15 °C outside gives 40 °C supply at 5 °C outside.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND The day and month are 1 October",
+      "THEN Set Custom heating curve: slope -0.5, intercept 50°C"
+    ]
+  },
+  "set_heating_curve": {
+    "text": "a higher heating curve from the start of the heating season.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND The day and month are 1 October",
+      "THEN Set heating curve setting to H4"
+    ]
+  },
+  "set_heating_mode": {
+    "text": "switch back to heating and hot water at the start of the heating season. On the Aurora III choose Heating here.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND The day and month are 1 October",
+      "THEN Set heating mode to Heating and hot water"
+    ]
+  },
+  "set_hotwater_temperature": {
+    "text": "heat the hot water extra in the cheapest block.",
+    "flow": [
+      "WHEN Cheapest block started",
+      "THEN Set hot water temperature to 55",
+      "",
+      "WHEN Expensive period approaching",
+      "THEN Set hot water temperature to 48"
+    ]
+  },
+  "set_setpoint_for_mode": {
+    "text": "a lower floor heating setpoint at night. The setpoint only stays if the heating curve is OFF.",
+    "flow": [
+      "WHEN The time is 23:00",
+      "THEN Set setpoint to 30 for Floor heating",
+      "    Auto-round (recommended)"
+    ]
+  },
+  "set_silent_mode": {
+    "text": "run more quietly at night.",
+    "flow": [
+      "WHEN The time is 22:00",
+      "THEN Set silent mode to Level 2",
+      "",
+      "WHEN The time is 07:00",
+      "THEN Set silent mode to Off"
+    ]
+  },
+  "set_target_temperature": {
+    "text": "this is how you apply the recommendation of adaptive control: the control does not set the setpoint itself but gives a recommendation that your flow carries out. On the Aurora I/II the setpoint only stays if the heating curve is OFF. Do not also set the setpoint from another flow, or the two work against each other.",
+    "flow": [
+      "WHEN Adaptive control recommends temperature adjustment",
+      "THEN Set target (setpoint) temperature to [Recommended target temperature]",
+      "    Auto-round (recommended)"
+    ]
+  },
+  "set_volume": {
+    "text": "this setting tells which power module the heat pump has (0 = none, 1 = single-phase, 2 = three-phase). Only change it when the installer says so; do not use the card in an automatic flow."
+  },
+  "set_water_mode": {
+    "text": "this is an installation setting. Only change it when the installer says so; do not use the card in an automatic flow."
+  },
+  "set_work_mode": {
+    "text": "Boost in the cheapest block, ECO in the expensive period.",
+    "flow": [
+      "WHEN Cheapest block started",
+      "THEN Set work mode to Boost",
+      "",
+      "WHEN Expensive period approaching",
+      "THEN Set work mode to ECO"
+    ]
+  },
+  "ambient_temperature_changed": {
+    "text": "switch a virtual switch Heating season off when it gets warm outside. A switch that is already off stays off, so repeats do no harm.",
+    "flow": [
+      "WHEN Ambient temperature changed above 18°C",
+      "THEN Turn Heating season off (virtual switch)"
+    ]
+  },
+  "coiler_temperature_alert": {
+    "text": "record when the outdoor coil gets very cold, to help look for icing.",
+    "flow": [
+      "WHEN Coiler temperature below -15°C",
+      "THEN Create a notification \"[Current Coiler temperature] °C\""
+    ]
+  },
+  "compressor_efficiency_alert": {
+    "text": "record when the compressor runs at high speed. The Tuya version needs the Expert cards setting switched on.",
+    "flow": [
+      "WHEN Compressor frequency above 90 Hz",
+      "THEN Create a notification \"Compressor at [Current frequency] Hz\""
+    ]
+  },
+  "discharge_temperature_alert": {
+    "text": "send a notification when the compressor gets too hot.",
+    "flow": [
+      "WHEN Discharge temperature above 105°C",
+      "THEN Send a push notification \"Discharge above 105 °C, check the heat pump\""
+    ]
+  },
+  "economizer_inlet_temperature_alert": {
+    "text": "follow the economizer (EVI heat exchanger) when looking for a fault.",
+    "flow": [
+      "WHEN Economizer inlet temperature below -10°C",
+      "THEN Create a notification \"[Current Economizer inlet temperature] °C\""
+    ]
+  },
+  "economizer_outlet_temperature_alert": {
+    "text": "follow the economizer (EVI heat exchanger) when looking for a fault.",
+    "flow": [
+      "WHEN Economizer outlet temperature above 60°C",
+      "THEN Create a notification \"[Current Economizer outlet temperature] °C\""
+    ]
+  },
+  "eev_pulse_steps_alert": {
+    "text": "record when the expansion valve closes far, to help look for a fault.",
+    "flow": [
+      "WHEN EEV pulse-steps below 50",
+      "THEN Create a notification \"EEV [Current EEV Open pulse-steps]\""
+    ]
+  },
+  "evi_pulse_steps_alert": {
+    "text": "record how far the EVI valve opens, to help look for a fault.",
+    "flow": [
+      "WHEN EVI Open pulse-steps above 300",
+      "THEN Create a notification \"EVI [Current EVI Open pulse-steps]\""
+    ]
+  },
+  "fan_motor_efficiency_alert": {
+    "text": "record when the fan runs at high speed. The Tuya version needs the Expert cards setting switched on.",
+    "flow": [
+      "WHEN Fan motor frequency above 60 Hz",
+      "THEN Create a notification \"Fan at [Current fan frequency] Hz\""
+    ]
+  },
+  "fault_detected": {
+    "text": "get a notification for a specific fault. On the Modbus drivers the code is text as on the display (for example F1.1 or E03), on Tuya a number. For every fault at once, use the condition Fault is active.",
+    "flow": [
+      "WHEN Fault F1.1 detected",
+      "THEN Send a push notification \"Fault [Fault code]: [Fault description]\""
+    ]
+  },
+  "high_pressure_temperature_alert": {
+    "text": "record when the high-pressure side gets very warm.",
+    "flow": [
+      "WHEN High pressure temperature above 55°C",
+      "THEN Create a notification \"[Current High pressure temperature] °C\""
+    ]
+  },
+  "incoiler_temperature_alert": {
+    "text": "record when the condenser gets very warm.",
+    "flow": [
+      "WHEN Incoiler temperature above 60°C",
+      "THEN Create a notification \"Condenser [Current Incoiler temperature] °C\""
+    ]
+  },
+  "inlet_temperature_changed": {
+    "text": "switch a virtual switch Return warm on once the return water is warm enough.",
+    "flow": [
+      "WHEN Inlet temperature changed above 30°C",
+      "THEN Turn Return warm on (virtual switch)"
+    ]
+  },
+  "inlet_temperature_value_changed": {
+    "text": "keep the return temperature in a number variable, for example for another flow. The card fires on every change of at least 0.5 °C.",
+    "flow": [
+      "WHEN Inlet temperature has changed",
+      "THEN Set a number variable: Return to [Current inlet temperature]"
+    ]
+  },
+  "low_pressure_temperature_alert": {
+    "text": "record when the low-pressure side gets very cold.",
+    "flow": [
+      "WHEN Low pressure temperature below -20°C",
+      "THEN Create a notification \"[Current Low pressure temperature] °C\""
+    ]
+  },
+  "outlet_temperature_changed": {
+    "text": "warn when the supply gets too warm for floor heating. The card fires again on every further rise of 0.5 °C.",
+    "flow": [
+      "WHEN Outlet temperature changed above 45°C",
+      "AND Heating mode is Floor heating",
+      "THEN Send a push notification \"Supply [Current outlet temperature] °C\""
+    ]
+  },
+  "outlet_temperature_value_changed": {
+    "text": "keep the supply temperature in a number variable. The card fires on every change of at least 0.5 °C.",
+    "flow": [
+      "WHEN Outlet temperature has changed",
+      "THEN Set a number variable: Supply to [Current outlet temperature]"
+    ]
+  },
+  "suction_temperature_alert": {
+    "text": "record when the suction gas gets very cold.",
+    "flow": [
+      "WHEN Suction temperature below -20°C",
+      "THEN Create a notification \"Suction [Current Suction temperature] °C\""
+    ]
+  },
+  "tank_temperature_alert": {
+    "text": "show with a virtual switch whether the tank is warm.",
+    "flow": [
+      "WHEN Tank temperature above 50°C",
+      "THEN Turn Tank warm on (virtual switch)",
+      "",
+      "WHEN Tank temperature below 40°C",
+      "THEN Turn Tank warm off"
+    ]
+  },
+  "water_flow_alert": {
+    "text": "one notification for too little flow, with a Yes/No variable Flow alert against repeats. The Tuya version needs the Expert cards setting switched on.",
+    "flow": [
+      "WHEN Water flow rate below 10 L/min",
+      "AND Compressor is running",
+      "AND Flow alert is equal to no",
+      "THEN Send a push notification \"Low flow: [Current flow rate] L/min\"",
+      "AND Set a Yes/No variable: Flow alert to yes",
+      "",
+      "WHEN Water flow rate above 15 L/min",
+      "THEN Set a Yes/No variable: Flow alert to no"
+    ]
+  },
+  "electrical_balance_check": {
+    "text": "check daily whether the three phases carry about the same load.",
+    "flow": [
+      "WHEN The time is 12:00",
+      "AND Compressor is running",
+      "AND 3-phase electrical balance is outside 10% tolerance",
+      "THEN Send a push notification \"Phases unevenly loaded\""
+    ]
+  },
+  "fault_active": {
+    "text": "get a reminder every morning as long as a fault is still active.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND Fault is active",
+      "THEN Send a push notification \"The heat pump still reports a fault\""
+    ]
+  },
+  "system_pulse_steps_differential": {
+    "text": "record the difference between the EEV and EVI valves, to help look for a fault.",
+    "flow": [
+      "WHEN The time is 14:00",
+      "AND System pulse-steps differential is above 300",
+      "THEN Create a notification \"Large difference EEV and EVI\""
+    ]
+  },
+  "temperature_above": {
+    "text": "heat the hot water extra in the cheapest block, but only when it is cold outside.",
+    "flow": [
+      "WHEN Cheapest block started",
+      "AND Ambient temperature is below 5°C",
+      "THEN Set hot water temperature to 55",
+      "AND Set hot water temperature to 48 (delay 4 hours)"
+    ]
+  },
+  "temperature_differential": {
+    "text": "a large difference between supply and return can point to too little flow.",
+    "flow": [
+      "WHEN The time is 14:00",
+      "AND Compressor is running",
+      "AND Temperature differential is above 8°C",
+      "THEN Send a push notification \"Large difference supply and return\""
+    ]
+  },
+  "water_flow_rate_check": {
+    "text": "check the flow at a fixed time while the compressor runs.",
+    "flow": [
+      "WHEN The time is 10:00",
+      "AND Compressor is running",
+      "AND Water flow rate is below 15 L/min",
+      "THEN Send a push notification \"Low flow, check the filter\""
+    ]
+  },
+  "cop_efficiency_changed": {
+    "text": "record a low COP, with the calculation method used. The card looks at every change of at least 0.3.",
+    "flow": [
+      "WHEN COP efficiency changed below 2",
+      "AND Compressor is running",
+      "THEN Create a notification \"COP [Current COP] ([Calculation method used])\""
+    ]
+  },
+  "cop_outlier_detected": {
+    "text": "an outlier often points to a sensor that is wrong or a missing power measurement; record it in the timeline.",
+    "flow": [
+      "WHEN COP outlier detected",
+      "THEN Create a notification \"COP [Outlier COP value]: [Outlier reason]\""
+    ]
+  },
+  "cop_trend_detected": {
+    "text": "get a notification when efficiency clearly declines over the last 24 hours.",
+    "flow": [
+      "WHEN COP trend detected: degrading",
+      "THEN Send a push notification \"[Trend description]\""
+    ]
+  },
+  "daily_consumption_threshold": {
+    "text": "get one notification a day once consumption reaches a limit.",
+    "flow": [
+      "WHEN Daily consumption reached 30 kWh",
+      "THEN Send a push notification \"Already [Daily consumption] kWh today\""
+    ]
+  },
+  "daily_cop_efficiency_changed": {
+    "text": "record when the daily COP drops below a limit. The card looks at every change of at least 0.2.",
+    "flow": [
+      "WHEN Daily COP efficiency changed below 3",
+      "THEN Create a notification \"Daily COP [Current daily COP]\""
+    ]
+  },
+  "daily_cost_threshold": {
+    "text": "get one notification a day when energy costs exceed an amount. Only works with price optimization and an external energy measurement.",
+    "flow": [
+      "WHEN Daily cost exceeded €5",
+      "THEN Send a push notification \"Cost today € [Today's Total Cost (€)]\""
+    ]
+  },
+  "monthly_cop_efficiency_changed": {
+    "text": "follow efficiency over 30 days. The card looks at every change of at least 0.2.",
+    "flow": [
+      "WHEN Monthly COP efficiency changed below 3",
+      "THEN Send a push notification \"Monthly COP [Current monthly COP]\""
+    ]
+  },
+  "performance_report_ready": {
+    "text": "receive a short summary every evening at 23:00.",
+    "flow": [
+      "WHEN Performance report is ready",
+      "THEN Send a push notification \"[Rating]: [Summary]\""
+    ]
+  },
+  "power_threshold_exceeded": {
+    "text": "record when the heat pump draws a lot of power. The card fires once when the threshold is crossed and again only after the power has dropped first. Requires a power measurement.",
+    "flow": [
+      "WHEN Power consumption exceeded 3000 W",
+      "THEN Create a notification \"Power [Current power consumption] W\""
+    ]
+  },
+  "total_consumption_milestone": {
+    "text": "a reminder at a consumption milestone, for example for maintenance.",
+    "flow": [
+      "WHEN Total consumption reached 10000 kWh",
+      "THEN Send a push notification \"[Total consumption] kWh: plan maintenance\""
+    ]
+  },
+  "cop_calculation_method_is": {
+    "text": "only react to a low COP when it was calculated from measured flow, temperatures and power.",
+    "flow": [
+      "WHEN COP efficiency changed below 2",
+      "AND COP calculation method is Direct thermal (most accurate)",
+      "THEN Send a push notification \"Low COP: [Current COP]\""
+    ]
+  },
+  "cop_efficiency_check": {
+    "text": "heat the hot water extra in the afternoon when the heat pump runs efficiently at that moment, and set the setpoint back in the evening.",
+    "flow": [
+      "WHEN The time is 14:00",
+      "AND COP efficiency is above 4",
+      "THEN Set hot water temperature to 55",
+      "",
+      "WHEN The time is 18:00",
+      "THEN Set hot water temperature to 48"
+    ]
+  },
+  "cop_trend_analysis": {
+    "text": "a weekly efficiency check.",
+    "flow": [
+      "WHEN The time is 10:00",
+      "AND Today is a Sunday",
+      "AND COP trend is degrading over 168 hours",
+      "THEN Send a push notification \"Efficiency is declining this week\""
+    ]
+  },
+  "daily_cop_above_threshold": {
+    "text": "add a warning to the evening report when the daily COP was low.",
+    "flow": [
+      "WHEN Performance report is ready",
+      "AND Daily COP is below 2.5",
+      "THEN Send a push notification \"Low daily COP: [Summary]\""
+    ]
+  },
+  "monthly_cop_above_threshold": {
+    "text": "record when the monthly COP is below a limit.",
+    "flow": [
+      "WHEN Performance report is ready",
+      "AND Monthly COP is below 3",
+      "THEN Create a notification \"Monthly COP below 3\""
+    ]
+  },
+  "power_above_threshold": {
+    "text": "set the heat pump to ECO when it draws a lot of power in the expensive period. Requires a power measurement; the Aurora III has no ECO mode.",
+    "flow": [
+      "WHEN Expensive period approaching",
+      "AND Power consumption is above 1500 watts",
+      "THEN Set work mode to ECO"
+    ]
+  },
+  "total_consumption_above": {
+    "text": "a yearly reminder once total consumption has passed a limit.",
+    "flow": [
+      "WHEN The time is 08:00",
+      "AND The day and month are 1 September",
+      "AND Total consumption is above 20000 kWh",
+      "THEN Send a push notification \"Time for maintenance\""
+    ]
+  },
+  "generate_performance_report": {
+    "text": "create the report at another time than 23:00 and pass on the result.",
+    "flow": [
+      "WHEN The time is 18:00",
+      "AND Today is a Sunday",
+      "THEN Generate performance report",
+      "AND Send a push notification \"[Rating]: [Summary]\""
+    ]
+  },
+  "cheapest_block_started": {
+    "text": "heat the hot water extra in the cheapest block and set it back afterwards, with a delay on the second action card. The block length is set in Price Block Size (hours), default 4. Only works when adaptive control is running (with an indoor temperature), price optimization is on, and prices come in through Send external energy prices.",
+    "flow": [
+      "WHEN Cheapest block started",
+      "THEN Set hot water temperature to 55",
+      "AND Set hot water temperature to 48 (delay 4 hours)"
+    ]
+  },
+  "expensive_block_approaching": {
+    "text": "set the heat pump to ECO before the expensive period starts. How many hours ahead the card fires is set in Expensive Block Warning Time (hours), default 2. The Aurora III has no ECO. Only works when adaptive control is running (with an indoor temperature), price optimization is on, and prices come in through Send external energy prices.",
+    "flow": [
+      "WHEN Expensive period approaching",
+      "THEN Set work mode to ECO",
+      "AND Send a push notification \"Expensive from [Block Start Time]\""
+    ]
+  },
+  "price_threshold_crossed": {
+    "text": "ECO at a very high price and back to Normal at any other category. The category is a code: very_low, low, normal, high or very_high. Only works when adaptive control is running (with an indoor temperature), price optimization is on, and prices come in through Send external energy prices.",
+    "flow": [
+      "WHEN Energy price crossed threshold",
+      "AND [Price Category] is exactly very_high",
+      "THEN Set work mode to ECO",
+      "ELSE Set work mode to Normal"
+    ]
+  },
+  "price_trend_changed": {
+    "text": "create a notification when prices start rising or falling. Only works when adaptive control is running (with an indoor temperature), price optimization is on, and prices come in through Send external energy prices.",
+    "flow": [
+      "WHEN Price trend changed",
+      "THEN Create a notification \"Price trend [Previous Trend] to [New Trend]\""
+    ]
+  },
+  "price_in_cheapest_hours": {
+    "text": "only heat the hot water in the three cheapest hours of the day. Requires prices through Send external energy prices.",
+    "flow": [
+      "WHEN Every 1 hour",
+      "AND Current hour is in cheapest 3 hours of today",
+      "THEN Set hot water temperature to 55",
+      "ELSE Set hot water temperature to 48"
+    ]
+  },
+  "price_trend_is": {
+    "text": "heat the hot water in the morning when prices rise in the coming hours, and set it back later. Requires prices through Send external energy prices.",
+    "flow": [
+      "WHEN The time is 06:00",
+      "AND Price trend for next 6 hours is Rising",
+      "THEN Set hot water temperature to 55",
+      "AND Set hot water temperature to 48 (delay 3 hours)"
+    ]
+  },
+  "price_vs_daily_average": {
+    "text": "Boost when the price is well below the daily average, otherwise Normal. Requires prices through Send external energy prices; the Aurora III has no Boost.",
+    "flow": [
+      "WHEN Every 1 hour",
+      "AND Current price is below daily average by 20%",
+      "THEN Set work mode to Boost",
+      "ELSE Set work mode to Normal"
+    ]
+  },
+  "savings_above": {
+    "text": "since version 3.4.2 the app no longer estimates a saving in euros, because it cannot be substantiated with dynamic prices. The card always returns false. Use Insight is active instead."
+  },
+  "receive_external_energy_prices": {
+    "text": "the app does not fetch prices itself. Send them as text from another app, a variable or an HTTP request, for example [0.21,0.19,0.18,...] in €/kWh, where the first number is the current hour. The prices apply from the moment they are received; send new ones when they are available, for example every afternoon after tomorrow's prices are published.",
+    "flow": [
+      "WHEN The time is 14:30",
+      "THEN Send external energy prices [Prices] for price optimization"
+    ]
+  },
+  "temperature_adjustment_recommended": {
+    "text": "this is the core of adaptive control: the control does not set the setpoint itself, this flow carries out the recommendation. On the Aurora I/II via Modbus the recommendation follows the mode; use Set setpoint temperature (by mode) on Auto there. On the Aurora I/II the setpoint only stays if the heating curve is OFF.",
+    "flow": [
+      "WHEN Adaptive control recommends temperature adjustment",
+      "THEN Set target (setpoint) temperature to [Recommended target temperature]",
+      "    Auto-round (recommended)"
+    ]
+  },
+  "adaptive_simulation_update": {
+    "text": "the card fires every control cycle (about every 5 minutes). Use it to keep track of values, not for notifications.",
+    "flow": [
+      "WHEN Simulated target temperature updated",
+      "THEN Set a number variable: Advice to [Simulated Target (°C)]"
+    ]
+  },
+  "adaptive_status_change": {
+    "text": "get a notification when adaptive control switches on or off.",
+    "flow": [
+      "WHEN Adaptive control status changed",
+      "THEN Send a push notification \"Adaptive control [Status]: [Reason]\""
+    ]
+  },
+  "building_insight_detected": {
+    "text": "receive a new insight about the house as soon as the building model is reliable enough (setting Minimum Confidence (%), default 70%).",
+    "flow": [
+      "WHEN New building insight detected",
+      "THEN Send a push notification \"[Insight] [Recommendation]\""
+    ]
+  },
+  "building_profile_mismatch": {
+    "text": "the learned behaviour does not match the chosen building type. Choose the suggested type in the settings (Building Type) to learn faster.",
+    "flow": [
+      "WHEN Building profile mismatch detected",
+      "THEN Send a push notification \"Building type [Suggested Profile] fits better\""
+    ]
+  },
+  "forecast_heating_advice": {
+    "text": "receive the advice based on the expected outdoor temperature: wait because it gets warmer and so more efficient later, or heat now. The card fires when the advice changes. Requires the weather forecast in the settings. The advice text is currently always in Dutch.",
+    "flow": [
+      "WHEN Forecast heating advice available",
+      "THEN Create a notification \"[Advice]\""
+    ]
+  },
+  "learning_milestone_reached": {
+    "text": "get one notification when the building model reaches 70% confidence. After learning starts over, the card fires again.",
+    "flow": [
+      "WHEN Building model learning milestone",
+      "THEN Send a push notification \"Building model: [Milestone]\""
+    ]
+  },
+  "pre_heat_recommendation": {
+    "text": "the card fires when it is more than 1.5 °C colder than desired and the building model is reliable enough (setting Minimum Confidence (%), default 70%), at most once every 4 hours.",
+    "flow": [
+      "WHEN Pre-heating time recommendation",
+      "THEN Send a push notification \"Warming up takes [Duration (hours)] hours\""
+    ]
+  },
+  "confidence_above": {
+    "text": "only carry out the recommendation when the building model is reliable enough.",
+    "flow": [
+      "WHEN Adaptive control recommends temperature adjustment",
+      "AND Model confidence is above 70%",
+      "THEN Set target (setpoint) temperature to [Recommended target temperature]",
+      "    Auto-round (recommended)"
+    ]
+  },
+  "insight_is_active": {
+    "text": "a weekly reminder of an open insight.",
+    "flow": [
+      "WHEN The time is 09:00",
+      "AND Today is a Monday",
+      "AND Insulation performance insight is active",
+      "THEN Send a push notification \"There is an insight about the insulation\""
+    ]
+  },
+  "calculate_preheat_time": {
+    "text": "calculate at night when heating has to start to reach 21 °C at 07:00. Enter the time as HH:MM.",
+    "flow": [
+      "WHEN The time is 04:00",
+      "THEN Calculate when to start heating to reach 21°C at 07:00",
+      "AND Send a push notification \"Start at [Start time]\""
+    ]
+  },
+  "force_insight_analysis": {
+    "text": "update the insights right away instead of waiting for the next analysis (every 50 minutes).",
+    "flow": [
+      "WHEN The time is 08:00",
+      "THEN Force insight analysis",
+      "AND Create a notification \"[Insights detected] insights\""
+    ]
+  },
+  "set_desired_indoor_temperature": {
+    "text": "a lower desired indoor temperature at night. Adaptive control adjusts its recommendation to it.",
+    "flow": [
+      "WHEN The time is 22:30",
+      "THEN Set desired indoor temperature to 19°C",
+      "",
+      "WHEN The time is 06:30",
+      "THEN Set desired indoor temperature to 21°C"
+    ]
+  },
+  "receive_external_indoor_temperature": {
+    "text": "adaptive control only works with an indoor temperature. Send it on every change of a room sensor, preferably with the sensor's token. If the value stays the same for 12 hours the app reports it; after 24 hours the control no longer corrects on it. If you type a value yourself, use a point (21.5).",
+    "flow": [
+      "WHEN The temperature has changed (living room sensor)",
+      "THEN Send [Temperature]°C indoor temperature for adaptive control"
+    ]
+  },
+  "receive_external_ambient_data": {
+    "text": "use your own outdoor sensor instead of the heat pump's sensor. A value counts for an hour; after that adaptive control falls back to the weather forecast and the heat pump's sensor.",
+    "flow": [
+      "WHEN The temperature has changed (outdoor sensor)",
+      "THEN Send [Temperature]°C to heat pump for COP/thermal mass calculation"
+    ]
+  },
+  "receive_external_power_data": {
+    "text": "send the measured power of a kWh meter or smart plug, also when it drops to 0 W. This gives the most accurate COP calculation and fills daily consumption and daily cost. For the COP a value counts for an hour; daily consumption keeps counting with the last value received.",
+    "flow": [
+      "WHEN The power has changed (heat pump kWh meter)",
+      "THEN Send [Power]W to heat pump for COP calculation"
+    ]
+  },
+  "receive_external_flow_data": {
+    "text": "send the flow of an external flow meter, if the heat pump does not measure it itself. A value counts for an hour.",
+    "flow": [
+      "WHEN (trigger of your flow meter on a new reading)",
+      "THEN Send [Flow]L/min to heat pump for COP calculation"
+    ]
+  },
+  "receive_external_solar_power": {
+    "text": "the app converts the power of the solar panels into solar radiation for the building model. Fill in Solar panel system size (Wp) in the settings for this. A value counts for an hour; after that the app falls back to the weather forecast.",
+    "flow": [
+      "WHEN The power has changed (solar inverter)",
+      "THEN Send solar power [Power]W to heat pump"
+    ]
+  },
+  "receive_external_solar_radiation": {
+    "text": "send the measured solar radiation, for example from a weather app. Solar panels take precedence if they also send data. A value counts for an hour.",
+    "flow": [
+      "WHEN Every 15 minutes",
+      "THEN Send solar radiation [Solar radiation from your weather app] W/m²",
+      "    to heat pump"
+    ]
+  },
+  "receive_external_wind_data": {
+    "text": "send the wind speed for the heat loss correction. The card expects km/h; a value in m/s times 3.6 is km/h. A value counts for an hour; after that the app falls back to the weather forecast.",
+    "flow": [
+      "WHEN Every 15 minutes",
+      "THEN Send wind speed [Wind speed from your weather app] km/h to heat pump"
+    ]
+  },
+  "calculate_curve_value": {
+    "text": "make your own heating curve in steps: the first rule that matches decides the result. On the Aurora I/II the setpoint only stays if the heat pump's heating curve is OFF; do not use this together with adaptive control.",
+    "flow": [
+      "WHEN Every 30 minutes",
+      "THEN Calculate value via [Ambient temperature of the heat pump]",
+      "    using curve rules < 0 : 55, < 5 : 50, < 10 : 45, default : 35",
+      "AND Set target (setpoint) temperature to [Result Value]",
+      "    Auto-round (recommended)"
+    ]
+  },
+  "calculate_linear_heating_curve": {
+    "text": "calculate the supply temperature of a straight heating curve like the heat pump's custom curve: L29 is the supply at -15 °C outside, L28 the slope per 10 °C. With 55 and -5, 5 °C outside gives 45 °C supply. Useful to try out a curve first.",
+    "flow": [
+      "WHEN Every 30 minutes",
+      "THEN Calculate heating curve: L29=55°C at -15°C, L28=-5/10°C",
+      "    with outdoor temp [Ambient temperature of the heat pump]",
+      "AND Create a notification \"Curve gives [Supply Temperature] °C\""
+    ]
+  },
+  "calculate_time_based_value": {
+    "text": "a daily schedule for the desired indoor temperature. Periods across midnight are allowed; default : value catches the rest.",
+    "flow": [
+      "WHEN Every 30 minutes",
+      "THEN Calculate value from time periods",
+      "    06:00-22:00: 21, 22:00-06:00: 19",
+      "AND Set desired indoor temperature to [Result value]°C"
+    ]
+  },
+  "get_seasonal_mode": {
+    "text": "the heating season runs from 1 October to 15 May. Store the result in a Yes/No variable, so other flows can test it.",
+    "flow": [
+      "WHEN The time is 00:05",
+      "THEN Get seasonal mode",
+      "AND Set a Yes/No variable: Heating season to [Is heating season]"
+    ]
+  },
+  "modbus_read_register": {
+    "text": "read a register the app does not show. On the Aurora I/II the address is hex or decimal (0x0301 = 769, the heating setpoint); temperatures are stored ×10. On the Aurora III use the number after 4- (4-2100 becomes 2100); input registers (3-) cannot be read with this card.",
+    "flow": [
+      "WHEN The time is 12:00",
+      "THEN Read Modbus register 0x0301",
+      "AND Create a notification \"Register 0x0301: [Register value]\""
+    ]
+  },
+  "modbus_write_register": {
+    "text": "only write to a register when you know what it does; a wrong value can upset the heat pump. Temperatures are ×10: 350 is 35 °C. On the Aurora I/II the heating setpoint (0x0301) only stays if the heating curve is OFF.",
+    "flow": [
+      "WHEN The time is 06:00",
+      "THEN Write 350 to Modbus register 0x0301"
+    ]
+  }
+}

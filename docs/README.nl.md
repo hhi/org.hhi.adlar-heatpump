@@ -30,7 +30,7 @@ de technische opzet en beperkingen van Tuya.
 
 | Uw vraag | Documentatie |
 | --- | --- |
-| Instellingen en dagelijks gebruik | [Configuratie](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.nl.md), [geavanceerde Flow-kaarten](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md) |
+| Instellingen en dagelijks gebruik | [Configuratie](setup/advanced-settings/CONFIGURATION_GUIDE.nl.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.nl.md), [naslag Flow-kaarten](setup/guide/FLOW_CARDS_REFERENCE.nl.md), [geavanceerde Flow-kaarten](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.nl.md) |
 | Stooklijnen en adaptieve regeling | [Geavanceerde functies](setup/advanced-control/Advanced_Features_Intro.nl.md), [overzicht regeling](ADAPTIVE_CONTROL_OVERVIEW.nl.md), [praktische handleiding](setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md) |
 | COP, SCOP en gebouwinzichten | [COP instellen](setup/COP%20flow-card-setup.nl.md), [berekeningsmethoden](COP%20calculation/), [gebouwmodel](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md), [gebouwinzichten gebruiken](setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md) |
 | Problemen of overstappen | [Tuya-probleemoplossing](setup/USER_QUICK_FIX.nl.md), [Modbus-diagnose](setup/MODBUS_DASHBOARD_GUIDE.nl.md), [Aurora III-migratie](setup/MIGRATION_AURORA3.nl.md) |
@@ -65,6 +65,7 @@ De meeste gebruikersdocumentatie is beschikbaar in vier talen:
 | **Adaptieve Regeling Overzicht** | [NL](ADAPTIVE_CONTROL_OVERVIEW.nl.md) | [EN](ADAPTIVE_CONTROL_OVERVIEW.en.md) | [DE](ADAPTIVE_CONTROL_OVERVIEW.de.md) | [FR](ADAPTIVE_CONTROL_OVERVIEW.fr.md) |
 | **Gebouwmodel & Insights Overzicht** | [NL](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md) | [EN](BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md) | [DE](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md) | [FR](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md) |
 | Flow Cards Implementatiegids | [NL](setup/guide/FLOW_CARDS_GUIDE.nl.md) | [EN](setup/guide/FLOW_CARDS_GUIDE.en.md) | [DE](setup/guide/FLOW_CARDS_GUIDE.de.md) | [FR](setup/guide/FLOW_CARDS_GUIDE.fr.md) |
+| Naslag Flow-kaarten | [NL](setup/guide/FLOW_CARDS_REFERENCE.nl.md) | [EN](setup/guide/FLOW_CARDS_REFERENCE.en.md) | [DE](setup/guide/FLOW_CARDS_REFERENCE.de.md) | [FR](setup/guide/FLOW_CARDS_REFERENCE.fr.md) |
 | Adaptieve Regeling Gids | [NL](setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md) | [EN](setup/guide/ADAPTIVE_CONTROL_GUIDE.en.md) | [DE](setup/guide/ADAPTIVE_CONTROL_GUIDE.de.md) | [FR](setup/guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
 | Building Insights Gids | [NL](setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md) | [EN](setup/guide/BUILDING_INSIGHTS_GUIDE.en.md) | [DE](setup/guide/BUILDING_INSIGHTS_GUIDE.de.md) | [FR](setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
 | COP Flow Card Setup | [NL](setup/COP%20flow-card-setup.nl.md) | [EN](setup/COP%20flow-card-setup.en.md) | [DE](setup/COP%20flow-card-setup.de.md) | [FR](setup/COP%20flow-card-setup.fr.md) |

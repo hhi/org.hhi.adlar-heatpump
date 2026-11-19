@@ -1,7 +1,9 @@
-# Flow Cards Implementation Guide: Basic Device Flow Cards (v2.7.x)
+# Flow Cards Implementation Guide: Basic Device Flow Cards
 
 > **Scope**: This guide documents **basic device flow cards** for device monitoring, energy tracking and calculators.
 > **Advanced features**: See [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.en.md) for adaptive control, building model, COP optimizer, energy optimizer, building insights and wind/solar integration.
+> **All cards**: See the [Flow cards reference](FLOW_CARDS_REFERENCE.en.md) for
+> every card with its fields, tokens and an example.
 
 This guide provides practical examples, configuration tips, and troubleshooting advice for the basic flow cards of the Adlar Heat Pump app.
 

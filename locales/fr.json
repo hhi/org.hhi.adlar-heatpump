@@ -183,6 +183,10 @@
       }
     }
   },
+  "live_monitoring": {
+    "not_available": "Indisponible : le port __port__ est déjà utilisé. Choisissez un autre port ci-dessus.",
+    "address_unknown": "Adresse inconnue ; utilisez l'adresse IP de votre Homey avec le port __port__."
+  },
   "modbusRegisterDescriptions": {
     "fan_type": "0=AC, 1=DC, 2=EC, 3=inconnu (mesuré avec le programme 433).",
     "sterilization_start_hour": "Heure de début 0..23 (23 = 23:00), mesurée avec le programme 433 / protocole 143. L’ancienne spécification indiquait HHMM 2300.",

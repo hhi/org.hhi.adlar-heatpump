@@ -1,0 +1,873 @@
+{
+  "heating_mode_changed": {
+    "text": "recevez une notification quand quelqu'un change le mode sur le panneau de commande.",
+    "flow": [
+      "QUAND Mode de chauffage changé",
+      "ALORS Envoyer une notification push « Mode actuel : [Mode de chauffage] »"
+    ]
+  },
+  "water_mode_changed": {
+    "text": "c'est un réglage d'installation qui ne change normalement pas ; créez une notification quand il change.",
+    "flow": [
+      "QUAND Mode d'eau changé",
+      "ALORS Créer une notification « Mode d'eau changé en [Mode d'eau] »"
+    ]
+  },
+  "work_mode_changed": {
+    "text": "gardez une trace du moment où Boost s'active.",
+    "flow": [
+      "QUAND Mode de fonctionnement changé",
+      "ET Le mode de fonctionnement est Boost",
+      "ALORS Envoyer une notification push « Boost est actif »"
+    ]
+  },
+  "capacity_setting_is": {
+    "text": "réactivez la courbe d'eau chaude le soir si elle est arrêtée.",
+    "flow": [
+      "QUAND L'heure est 22:00",
+      "ET Le réglage de la courbe d'eau chaude est ARRÊT",
+      "ALORS Régler la courbe d'eau chaude sur H2"
+    ]
+  },
+  "compressor_running": {
+    "text": "recevez une notification si le compresseur tourne encore quand une période coûteuse commence.",
+    "flow": [
+      "QUAND Période coûteuse approche",
+      "ET Le compresseur est en marche",
+      "ALORS Envoyer une notification push « La pompe tourne en période coûteuse »"
+    ]
+  },
+  "device_power_is": {
+    "text": "n'abaissez la consigne que si la pompe à chaleur est en marche.",
+    "flow": [
+      "QUAND La dernière personne part",
+      "ET L'alimentation de l'appareil est Marche",
+      "ALORS Régler la température cible (consigne) sur 30"
+    ]
+  },
+  "dhw_heating_active": {
+    "text": "n'activez le mode silencieux qu'une fois que la pompe à chaleur ne chauffe plus l'eau chaude.",
+    "flow": [
+      "QUAND L'heure est 22:00",
+      "ET L'eau chaude n'est pas en chauffe",
+      "ALORS Régler le mode silencieux sur Niveau 2"
+    ]
+  },
+  "heating_curve_is": {
+    "text": "ne modifiez la consigne que si la courbe de chauffage est sur ARRÊT ; avec une courbe, la pompe à chaleur fixe elle-même la température de départ et ne garde pas une consigne réglée.",
+    "flow": [
+      "QUAND L'heure est 06:00",
+      "ET Le réglage de la courbe de chauffage est ARRÊT",
+      "ALORS Régler la température cible (consigne) sur 40"
+    ]
+  },
+  "heating_mode_is": {
+    "text": "passez en mai à l'eau chaude seule, mais seulement si la pompe à chaleur est encore sur chauffage et eau chaude. L'Aurora III a d'autres modes (Refroidissement, Chauffage, Auto) et pas de mode eau chaude séparé.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le jour et le mois sont 1er mai",
+      "ET Le mode de chauffage est Chauffage et eau chaude",
+      "ALORS Régler le mode de chauffage sur Eau chaude"
+    ]
+  },
+  "hotwater_temperature_is": {
+    "text": "la carte compare la consigne d'eau chaude, pas la température mesurée du ballon. Remettez la consigne si elle est restée trop haute après une hausse.",
+    "flow": [
+      "QUAND L'heure est 23:00",
+      "ET La température de l'eau chaude est Supérieur à 50°C",
+      "ALORS Régler la température de l'eau chaude sur 48"
+    ]
+  },
+  "silent_mode_is": {
+    "text": "désactivez le mode silencieux le matin s'il est encore actif.",
+    "flow": [
+      "QUAND L'heure est 07:00",
+      "ET Le mode silencieux n'est pas Arrêt",
+      "ALORS Régler le mode silencieux sur Arrêt"
+    ]
+  },
+  "target_temperature_is": {
+    "text": "n'abaissez la consigne la nuit que si elle est plus haute que la valeur de nuit.",
+    "flow": [
+      "QUAND L'heure est 23:00",
+      "ET La température cible (consigne) est Supérieur à 35°C",
+      "ALORS Régler la température cible (consigne) sur 32"
+    ]
+  },
+  "volume_setting_is": {
+    "text": "ce réglage indique quel module de puissance équipe la pompe à chaleur (0 = aucun, 1 = monophasé, 2 = triphasé). Utilisez la carte pour vérifier que la valeur est toujours correcte, par exemple après un défaut.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET La vérification de la consommation électrique n'est pas Égal à 1",
+      "ALORS Envoyer une notification push « Réglage du module de puissance modifié »"
+    ]
+  },
+  "water_mode_is": {
+    "text": "c'est un réglage d'installation ; utilisez la carte pour signaler une valeur inattendue.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le mode de contrôle de l'eau n'est pas Égal à 0",
+      "ALORS Envoyer une notification push « Mode de contrôle de l'eau sur 1 »"
+    ]
+  },
+  "work_mode_is": {
+    "text": "remettez la pompe à chaleur sur Normal le matin si elle est encore sur ECO.",
+    "flow": [
+      "QUAND L'heure est 07:00",
+      "ET Le mode de fonctionnement est ECO",
+      "ALORS Régler le mode de fonctionnement sur Normal"
+    ]
+  },
+  "set_backup_heater": {
+    "text": "forcez l'appoint électrique par grand froid et libérez-le quand il fait moins froid.",
+    "flow": [
+      "QUAND Température ambiante changée en dessous -10°C",
+      "ALORS Commuter l'appoint électrique forcé sur marche",
+      "",
+      "QUAND Température ambiante changée au-dessus -5°C",
+      "ALORS Commuter l'appoint électrique forcé sur arrêt"
+    ]
+  },
+  "set_capacity": {
+    "text": "une courbe d'eau chaude plus haute le matin pour le pic des douches.",
+    "flow": [
+      "QUAND L'heure est 05:30",
+      "ALORS Régler la courbe d'eau chaude sur H3",
+      "",
+      "QUAND L'heure est 09:00",
+      "ALORS Régler la courbe d'eau chaude sur H1"
+    ]
+  },
+  "set_curve_for_mode": {
+    "text": "réglez la courbe du plancher chauffant au début de la saison de chauffage.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le jour et le mois sont 1er octobre",
+      "ALORS Régler la courbe sur L3 pour Plancher chauffant"
+    ]
+  },
+  "set_device_onoff": {
+    "text": "allumez et éteignez la pompe à chaleur avec un bouton virtuel.",
+    "flow": [
+      "QUAND Le bouton virtuel Pompe à chaleur est éteint",
+      "ALORS Régler l'alimentation de l'appareil sur Éteint"
+    ]
+  },
+  "set_dhw_function": {
+    "text": "coupez la production d'eau chaude pendant les vacances, avec une variable Oui/Non Vacances.",
+    "flow": [
+      "QUAND Une variable a changé (Vacances)",
+      "ET Vacances est égal à oui",
+      "ALORS Commuter la fonction eau chaude sur arrêt"
+    ]
+  },
+  "set_diy_heating_curve": {
+    "text": "réglez une courbe de chauffe personnalisée au début de la saison de chauffage. La carte active aussi la courbe personnalisée ; une pente de -0,5 et 50 °C à -15 °C extérieur donne 40 °C de départ à 5 °C extérieur.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le jour et le mois sont 1er octobre",
+      "ALORS Régler la courbe de chauffe personnalisée: pente -0.5, ordonnée 50°C"
+    ]
+  },
+  "set_heating_curve": {
+    "text": "une courbe de chauffage plus haute dès la saison de chauffage.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le jour et le mois sont 1er octobre",
+      "ALORS Régler la courbe de chauffage sur H4"
+    ]
+  },
+  "set_heating_mode": {
+    "text": "revenez au chauffage et à l'eau chaude au début de la saison de chauffage. Sur l'Aurora III, choisissez ici Chauffage.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le jour et le mois sont 1er octobre",
+      "ALORS Régler le mode de chauffage sur Chauffage et eau chaude"
+    ]
+  },
+  "set_hotwater_temperature": {
+    "text": "chauffez davantage l'eau chaude dans le bloc le moins cher.",
+    "flow": [
+      "QUAND Bloc le moins cher commencé",
+      "ALORS Régler la température de l'eau chaude sur 55",
+      "",
+      "QUAND Période coûteuse approche",
+      "ALORS Régler la température de l'eau chaude sur 48"
+    ]
+  },
+  "set_setpoint_for_mode": {
+    "text": "une consigne plus basse pour le plancher chauffant la nuit. La consigne ne reste que si la courbe de chauffage est sur ARRÊT.",
+    "flow": [
+      "QUAND L'heure est 23:00",
+      "ALORS Régler la consigne sur 30 pour Plancher chauffant",
+      "    Arrondir automatiquement (recommandé)"
+    ]
+  },
+  "set_silent_mode": {
+    "text": "fonctionner plus silencieusement la nuit.",
+    "flow": [
+      "QUAND L'heure est 22:00",
+      "ALORS Régler le mode silencieux sur Niveau 2",
+      "",
+      "QUAND L'heure est 07:00",
+      "ALORS Régler le mode silencieux sur Arrêt"
+    ]
+  },
+  "set_target_temperature": {
+    "text": "c'est ainsi que vous appliquez la recommandation du contrôle adaptatif : le contrôle ne règle pas lui-même la consigne, il donne une recommandation que votre flow exécute. Sur l'Aurora I/II, la consigne ne reste que si la courbe de chauffage est sur ARRÊT. Ne réglez pas aussi la consigne avec un autre flow, sinon les deux se contrarient.",
+    "flow": [
+      "QUAND Contrôle adaptatif recommande un ajustement de température",
+      "ALORS Régler la température cible (consigne) sur",
+      "    [Température cible recommandée] Arrondir automatiquement (recommandé)"
+    ]
+  },
+  "set_volume": {
+    "text": "ce réglage indique quel module de puissance équipe la pompe à chaleur (0 = aucun, 1 = monophasé, 2 = triphasé). Ne le modifiez que sur indication de l'installateur ; n'utilisez pas la carte dans un flow automatique."
+  },
+  "set_water_mode": {
+    "text": "c'est un réglage d'installation. Ne le modifiez que sur indication de l'installateur ; n'utilisez pas la carte dans un flow automatique."
+  },
+  "set_work_mode": {
+    "text": "Boost dans le bloc le moins cher, ECO dans la période coûteuse.",
+    "flow": [
+      "QUAND Bloc le moins cher commencé",
+      "ALORS Régler le mode de fonctionnement sur Boost",
+      "",
+      "QUAND Période coûteuse approche",
+      "ALORS Régler le mode de fonctionnement sur ECO"
+    ]
+  },
+  "ambient_temperature_changed": {
+    "text": "éteignez un interrupteur virtuel Saison de chauffage quand il fait chaud dehors. Un interrupteur déjà éteint reste éteint, les répétitions ne posent donc pas de problème.",
+    "flow": [
+      "QUAND Température ambiante changée au-dessus 18°C",
+      "ALORS Éteindre Saison de chauffage (interrupteur virtuel)"
+    ]
+  },
+  "coiler_temperature_alert": {
+    "text": "notez quand le serpentin extérieur devient très froid, pour aider à rechercher le givrage.",
+    "flow": [
+      "QUAND Température du serpentin en dessous -15°C",
+      "ALORS Créer une notification « [Température actuelle du serpentin] °C »"
+    ]
+  },
+  "compressor_efficiency_alert": {
+    "text": "notez quand le compresseur tourne à haut régime. La version Tuya exige que le réglage des cartes Expert soit activé.",
+    "flow": [
+      "QUAND Fréquence du compresseur au-dessus 90 Hz",
+      "ALORS Créer une notification « Compresseur à [Fréquence actuelle] Hz »"
+    ]
+  },
+  "discharge_temperature_alert": {
+    "text": "envoyez une notification quand le compresseur devient trop chaud.",
+    "flow": [
+      "QUAND Température de refoulement au-dessus 105°C",
+      "ALORS Envoyer une notification push « Refoulement au-dessus de 105 °C »"
+    ]
+  },
+  "economizer_inlet_temperature_alert": {
+    "text": "suivez l'économiseur (échangeur EVI) lors de la recherche d'un défaut.",
+    "flow": [
+      "QUAND Température d'entrée de l'économiseur en dessous -10°C",
+      "ALORS Créer une notification",
+      "    « [Température d'entrée actuelle de l'économiseur] °C »"
+    ]
+  },
+  "economizer_outlet_temperature_alert": {
+    "text": "suivez l'économiseur (échangeur EVI) lors de la recherche d'un défaut.",
+    "flow": [
+      "QUAND Température de sortie de l'économiseur au-dessus 60°C",
+      "ALORS Créer une notification",
+      "    « [Température de sortie actuelle de l'économiseur] °C »"
+    ]
+  },
+  "eev_pulse_steps_alert": {
+    "text": "notez quand le détendeur se ferme fortement, pour aider à rechercher un défaut.",
+    "flow": [
+      "QUAND Pas d'impulsion EEV en dessous 50",
+      "ALORS Créer une notification « EEV [Pas d'impulsion d'ouverture EEV actuels] »"
+    ]
+  },
+  "evi_pulse_steps_alert": {
+    "text": "notez à quel point la vanne EVI s'ouvre, pour aider à rechercher un défaut.",
+    "flow": [
+      "QUAND Pas d'impulsion d'ouverture EVI au-dessus 300",
+      "ALORS Créer une notification « EVI [Pas d'impulsion d'ouverture EVI actuels] »"
+    ]
+  },
+  "fan_motor_efficiency_alert": {
+    "text": "notez quand le ventilateur tourne à haut régime. La version Tuya exige que le réglage des cartes Expert soit activé.",
+    "flow": [
+      "QUAND Fréquence du moteur de ventilateur au-dessus 60 Hz",
+      "ALORS Créer une notification",
+      "    « Ventilateur à [Fréquence actuelle du ventilateur] Hz »"
+    ]
+  },
+  "fault_detected": {
+    "text": "recevez une notification pour un défaut précis. Sur les pilotes Modbus, le code est un texte comme sur l'afficheur (par exemple F1.1 ou E03), sur Tuya un nombre. Pour tous les défauts ensemble, utilisez la condition Le défaut est actif.",
+    "flow": [
+      "QUAND Défaut F1.1 détecté",
+      "ALORS Envoyer une notification push",
+      "    « Défaut [Code de défaut] : [Description du défaut] »"
+    ]
+  },
+  "high_pressure_temperature_alert": {
+    "text": "notez quand le côté haute pression devient très chaud.",
+    "flow": [
+      "QUAND Température haute pression au-dessus 55°C",
+      "ALORS Créer une notification « [Température haute pression actuelle] °C »"
+    ]
+  },
+  "incoiler_temperature_alert": {
+    "text": "notez quand le condenseur devient très chaud.",
+    "flow": [
+      "QUAND Température du condenseur au-dessus 60°C",
+      "ALORS Créer une notification",
+      "    « Condenseur [Température actuelle du condenseur] °C »"
+    ]
+  },
+  "inlet_temperature_changed": {
+    "text": "allumez un interrupteur virtuel Retour chaud dès que l'eau de retour est assez chaude.",
+    "flow": [
+      "QUAND Température d'entrée changée au-dessus 30°C",
+      "ALORS Allumer Retour chaud (interrupteur virtuel)"
+    ]
+  },
+  "inlet_temperature_value_changed": {
+    "text": "gardez la température de retour dans une variable numérique, par exemple pour un autre flow. La carte se déclenche à chaque variation d'au moins 0,5 °C.",
+    "flow": [
+      "QUAND La température d'entrée a changé",
+      "ALORS Définir une variable numérique : Retour sur",
+      "    [Température d'entrée actuelle]"
+    ]
+  },
+  "low_pressure_temperature_alert": {
+    "text": "notez quand le côté basse pression devient très froid.",
+    "flow": [
+      "QUAND Température basse pression en dessous -20°C",
+      "ALORS Créer une notification « [Température basse pression actuelle] °C »"
+    ]
+  },
+  "outlet_temperature_changed": {
+    "text": "avertissez quand le départ devient trop chaud pour le plancher chauffant. La carte se déclenche à nouveau à chaque hausse supplémentaire de 0,5 °C.",
+    "flow": [
+      "QUAND Température de sortie changée au-dessus 45°C",
+      "ET Le mode de chauffage est Chauffage au sol",
+      "ALORS Envoyer une notification push",
+      "    « Départ [Température de sortie actuelle] °C »"
+    ]
+  },
+  "outlet_temperature_value_changed": {
+    "text": "gardez la température de départ dans une variable numérique. La carte se déclenche à chaque variation d'au moins 0,5 °C.",
+    "flow": [
+      "QUAND La température de sortie a changé",
+      "ALORS Définir une variable numérique : Départ sur",
+      "    [Température de sortie actuelle]"
+    ]
+  },
+  "suction_temperature_alert": {
+    "text": "notez quand le gaz d'aspiration devient très froid.",
+    "flow": [
+      "QUAND Température d'aspiration en dessous -20°C",
+      "ALORS Créer une notification",
+      "    « Aspiration [Température d'aspiration actuelle] °C »"
+    ]
+  },
+  "tank_temperature_alert": {
+    "text": "indiquez avec un interrupteur virtuel si le ballon est chaud.",
+    "flow": [
+      "QUAND Température du ballon au-dessus 50°C",
+      "ALORS Allumer Ballon chaud (interrupteur virtuel)",
+      "",
+      "QUAND Température du ballon en dessous 40°C",
+      "ALORS Éteindre Ballon chaud"
+    ]
+  },
+  "water_flow_alert": {
+    "text": "une seule notification en cas de débit trop faible, avec une variable Oui/Non Alerte débit contre les répétitions. La version Tuya exige que le réglage des cartes Expert soit activé.",
+    "flow": [
+      "QUAND Débit d'eau en dessous 10 L/min",
+      "ET Le compresseur est en marche",
+      "ET Alerte débit est égal à non",
+      "ALORS Envoyer une notification push « Débit faible : [Débit actuel] L/min »",
+      "ET Définir une variable Oui/Non : Alerte débit sur oui",
+      "",
+      "QUAND Débit d'eau au-dessus 15 L/min",
+      "ALORS Définir une variable Oui/Non : Alerte débit sur non"
+    ]
+  },
+  "electrical_balance_check": {
+    "text": "vérifiez chaque jour si les trois phases sont chargées à peu près également.",
+    "flow": [
+      "QUAND L'heure est 12:00",
+      "ET Le compresseur est en marche",
+      "ET L'équilibre électrique triphasé est hors de 10% de tolérance",
+      "ALORS Envoyer une notification push « Phases chargées inégalement »"
+    ]
+  },
+  "fault_active": {
+    "text": "recevez un rappel chaque matin tant qu'un défaut est encore actif.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le défaut est actif",
+      "ALORS Envoyer une notification push",
+      "    « La pompe à chaleur signale encore un défaut »"
+    ]
+  },
+  "system_pulse_steps_differential": {
+    "text": "notez la différence entre les vannes EEV et EVI, pour aider à rechercher un défaut.",
+    "flow": [
+      "QUAND L'heure est 14:00",
+      "ET Le différentiel des pas d'impulsion est au-dessus de 300",
+      "ALORS Créer une notification « Grand écart EEV et EVI »"
+    ]
+  },
+  "temperature_above": {
+    "text": "chauffez davantage l'eau chaude dans le bloc le moins cher, mais seulement quand il fait froid dehors.",
+    "flow": [
+      "QUAND Bloc le moins cher commencé",
+      "ET La température ambiante est en dessous de 5°C",
+      "ALORS Régler la température de l'eau chaude sur 55",
+      "ET Régler la température de l'eau chaude sur 48 (délai 4 heures)"
+    ]
+  },
+  "temperature_differential": {
+    "text": "un grand écart entre départ et retour peut indiquer un débit trop faible.",
+    "flow": [
+      "QUAND L'heure est 14:00",
+      "ET Le compresseur est en marche",
+      "ET Le différentiel de température est au-dessus de 8°C",
+      "ALORS Envoyer une notification push « Grand écart départ et retour »"
+    ]
+  },
+  "water_flow_rate_check": {
+    "text": "vérifiez le débit à heure fixe pendant que le compresseur tourne.",
+    "flow": [
+      "QUAND L'heure est 10:00",
+      "ET Le compresseur est en marche",
+      "ET Le débit d'eau est en dessous de 15 L/min",
+      "ALORS Envoyer une notification push « Débit faible, vérifiez le filtre »"
+    ]
+  },
+  "cop_efficiency_changed": {
+    "text": "notez un COP bas, avec la méthode de calcul utilisée. La carte réagit à chaque variation d'au moins 0,3.",
+    "flow": [
+      "QUAND Efficacité COP changée en dessous 2",
+      "ET Le compresseur est en marche",
+      "ALORS Créer une notification « COP [COP actuel] ([Méthode de calcul utilisée]) »"
+    ]
+  },
+  "cop_outlier_detected": {
+    "text": "une valeur aberrante indique souvent un capteur faux ou une mesure de puissance manquante ; notez-la dans la chronologie.",
+    "flow": [
+      "QUAND Valeur aberrante COP détectée",
+      "ALORS Créer une notification",
+      "    « COP [Valeur COP aberrante] : [Raison de l'aberration] »"
+    ]
+  },
+  "cop_trend_detected": {
+    "text": "recevez une notification quand le rendement baisse nettement sur les dernières 24 heures.",
+    "flow": [
+      "QUAND Tendance COP détectée: détérioration",
+      "ALORS Envoyer une notification push « [Description de la tendance] »"
+    ]
+  },
+  "daily_consumption_threshold": {
+    "text": "recevez une notification par jour dès que la consommation atteint une limite.",
+    "flow": [
+      "QUAND Consommation quotidienne atteinte 30 kWh",
+      "ALORS Envoyer une notification push",
+      "    « Déjà [Consommation quotidienne] kWh aujourd'hui »"
+    ]
+  },
+  "daily_cop_efficiency_changed": {
+    "text": "notez quand le COP quotidien passe sous une limite. La carte réagit à chaque variation d'au moins 0,2.",
+    "flow": [
+      "QUAND Efficacité COP quotidienne changée en dessous 3",
+      "ALORS Créer une notification « COP quotidien [COP quotidien actuel] »"
+    ]
+  },
+  "daily_cost_threshold": {
+    "text": "recevez une notification par jour quand les coûts d'énergie dépassent un montant. Fonctionne seulement avec l'optimisation des prix et une mesure d'énergie externe.",
+    "flow": [
+      "QUAND Coût quotidien dépassé €5",
+      "ALORS Envoyer une notification push",
+      "    « Coût aujourd'hui € [Coût Total Aujourd'hui (€)] »"
+    ]
+  },
+  "monthly_cop_efficiency_changed": {
+    "text": "suivez le rendement sur 30 jours. La carte réagit à chaque variation d'au moins 0,2.",
+    "flow": [
+      "QUAND Efficacité COP mensuelle changée en dessous 3",
+      "ALORS Envoyer une notification push « COP mensuel [COP mensuel actuel] »"
+    ]
+  },
+  "performance_report_ready": {
+    "text": "recevez un court résumé chaque soir à 23:00.",
+    "flow": [
+      "QUAND Le rapport de performance est prêt",
+      "ALORS Envoyer une notification push « [Évaluation] : [Résumé] »"
+    ]
+  },
+  "power_threshold_exceeded": {
+    "text": "notez quand la pompe à chaleur demande beaucoup de puissance. La carte se déclenche une fois au dépassement, et à nouveau seulement après une baisse de la puissance. Nécessite une mesure de puissance.",
+    "flow": [
+      "QUAND Consommation dépassée 3000 W",
+      "ALORS Créer une notification « Puissance [Consommation actuelle] W »"
+    ]
+  },
+  "total_consumption_milestone": {
+    "text": "un rappel à un jalon de consommation, par exemple pour l'entretien.",
+    "flow": [
+      "QUAND Consommation totale atteinte 10000 kWh",
+      "ALORS Envoyer une notification push",
+      "    « [Consommation totale] kWh : prévoir l'entretien »"
+    ]
+  },
+  "cop_calculation_method_is": {
+    "text": "ne réagissez à un COP bas que s'il a été calculé à partir du débit, des températures et de la consommation mesurés.",
+    "flow": [
+      "QUAND Efficacité COP changée en dessous 2",
+      "ET La méthode de calcul COP est Thermique direct (plus précis)",
+      "ALORS Envoyer une notification push « COP bas : [COP actuel] »"
+    ]
+  },
+  "cop_efficiency_check": {
+    "text": "chauffez davantage l'eau chaude l'après-midi si la pompe à chaleur est efficace à ce moment-là, et remettez la consigne le soir.",
+    "flow": [
+      "QUAND L'heure est 14:00",
+      "ET L'efficacité COP est au-dessus de 4",
+      "ALORS Régler la température de l'eau chaude sur 55",
+      "",
+      "QUAND L'heure est 18:00",
+      "ALORS Régler la température de l'eau chaude sur 48"
+    ]
+  },
+  "cop_trend_analysis": {
+    "text": "un contrôle hebdomadaire du rendement.",
+    "flow": [
+      "QUAND L'heure est 10:00",
+      "ET Aujourd'hui est un dimanche",
+      "ET La tendance COP est en dégradation sur 168 heures",
+      "ALORS Envoyer une notification push « Le rendement baisse cette semaine »"
+    ]
+  },
+  "daily_cop_above_threshold": {
+    "text": "ajoutez un avertissement au rapport du soir si le COP quotidien était bas.",
+    "flow": [
+      "QUAND Le rapport de performance est prêt",
+      "ET Le COP quotidien est en dessous de 2,5",
+      "ALORS Envoyer une notification push « COP quotidien bas : [Résumé] »"
+    ]
+  },
+  "monthly_cop_above_threshold": {
+    "text": "notez quand le COP mensuel est sous une limite.",
+    "flow": [
+      "QUAND Le rapport de performance est prêt",
+      "ET Le COP mensuel est en dessous de 3",
+      "ALORS Créer une notification « COP mensuel sous 3 »"
+    ]
+  },
+  "power_above_threshold": {
+    "text": "passez la pompe à chaleur en ECO si elle demande beaucoup de puissance en période coûteuse. Nécessite une mesure de puissance ; l'Aurora III n'a pas de mode ECO.",
+    "flow": [
+      "QUAND Période coûteuse approche",
+      "ET La consommation électrique est au-dessus de 1500 watts",
+      "ALORS Régler le mode de fonctionnement sur ECO"
+    ]
+  },
+  "total_consumption_above": {
+    "text": "un rappel annuel dès que la consommation totale a dépassé une limite.",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ET Le jour et le mois sont 1er septembre",
+      "ET La consommation totale est au-dessus de 20000 kWh",
+      "ALORS Envoyer une notification push « C'est l'heure de l'entretien »"
+    ]
+  },
+  "generate_performance_report": {
+    "text": "créez le rapport à un autre moment que 23:00 et transmettez le résultat.",
+    "flow": [
+      "QUAND L'heure est 18:00",
+      "ET Aujourd'hui est un dimanche",
+      "ALORS Générer un rapport de performance",
+      "ET Envoyer une notification push « [Évaluation] : [Résumé] »"
+    ]
+  },
+  "cheapest_block_started": {
+    "text": "chauffez davantage l'eau chaude dans le bloc le moins cher et remettez-la ensuite, avec un délai sur la deuxième carte d'action. La durée du bloc se règle dans Taille du Bloc de Prix (heures), 4 par défaut. Fonctionne seulement si le contrôle adaptatif tourne (avec une température intérieure), si l'optimisation des prix est activée et si les prix arrivent par Envoyer les prix de l'énergie externes.",
+    "flow": [
+      "QUAND Bloc le moins cher commencé",
+      "ALORS Régler la température de l'eau chaude sur 55",
+      "ET Régler la température de l'eau chaude sur 48 (délai 4 heures)"
+    ]
+  },
+  "expensive_block_approaching": {
+    "text": "passez la pompe à chaleur en ECO avant le début de la période coûteuse. Le nombre d'heures d'avance se règle dans Temps d'Avertissement Bloc Coûteux (heures), 2 par défaut. L'Aurora III n'a pas d'ECO. Fonctionne seulement si le contrôle adaptatif tourne (avec une température intérieure), si l'optimisation des prix est activée et si les prix arrivent par Envoyer les prix de l'énergie externes.",
+    "flow": [
+      "QUAND Période coûteuse approche",
+      "ALORS Régler le mode de fonctionnement sur ECO",
+      "ET Envoyer une notification push « Cher à partir de [Heure de Début du Bloc] »"
+    ]
+  },
+  "price_threshold_crossed": {
+    "text": "ECO à un prix très élevé et retour à Normal pour toute autre catégorie. La catégorie est un code : very_low, low, normal, high ou very_high. Fonctionne seulement si le contrôle adaptatif tourne (avec une température intérieure), si l'optimisation des prix est activée et si les prix arrivent par Envoyer les prix de l'énergie externes.",
+    "flow": [
+      "QUAND Seuil de prix de l'énergie franchi",
+      "ET [Catégorie de Prix] est exactement very_high",
+      "ALORS Régler le mode de fonctionnement sur ECO",
+      "SINON Régler le mode de fonctionnement sur Normal"
+    ]
+  },
+  "price_trend_changed": {
+    "text": "créez une notification quand les prix commencent à monter ou à baisser. Fonctionne seulement si le contrôle adaptatif tourne (avec une température intérieure), si l'optimisation des prix est activée et si les prix arrivent par Envoyer les prix de l'énergie externes.",
+    "flow": [
+      "QUAND Tendance des prix changée",
+      "ALORS Créer une notification",
+      "    « Tendance [Tendance Précédente] vers [Nouvelle Tendance] »"
+    ]
+  },
+  "price_in_cheapest_hours": {
+    "text": "ne chauffez l'eau chaude que pendant les trois heures les moins chères de la journée. Nécessite des prix via Envoyer les prix de l'énergie externes.",
+    "flow": [
+      "QUAND Toutes les 1 heure",
+      "ET L'heure actuelle est dans les 3 heures les moins chères aujourd'hui",
+      "ALORS Régler la température de l'eau chaude sur 55",
+      "SINON Régler la température de l'eau chaude sur 48"
+    ]
+  },
+  "price_trend_is": {
+    "text": "chauffez l'eau chaude le matin si les prix montent dans les prochaines heures, et remettez-la plus tard. Nécessite des prix via Envoyer les prix de l'énergie externes.",
+    "flow": [
+      "QUAND L'heure est 06:00",
+      "ET Tendance des prix pour les 6 prochaines heures est En hausse",
+      "ALORS Régler la température de l'eau chaude sur 55",
+      "ET Régler la température de l'eau chaude sur 48 (délai 3 heures)"
+    ]
+  },
+  "price_vs_daily_average": {
+    "text": "Boost quand le prix est nettement sous la moyenne du jour, sinon Normal. Nécessite des prix via Envoyer les prix de l'énergie externes ; l'Aurora III n'a pas de Boost.",
+    "flow": [
+      "QUAND Toutes les 1 heure",
+      "ET Le prix actuel est inférieur à la moyenne quotidienne de 20%",
+      "ALORS Régler le mode de fonctionnement sur Boost",
+      "SINON Régler le mode de fonctionnement sur Normal"
+    ]
+  },
+  "savings_above": {
+    "text": "depuis la version 3.4.2, l'application n'estime plus d'économie en euros, car elle ne peut pas être justifiée avec des prix dynamiques. La carte renvoie toujours faux. Utilisez plutôt L'aperçu est actif."
+  },
+  "receive_external_energy_prices": {
+    "text": "l'application ne récupère pas elle-même les prix. Envoyez-les sous forme de texte depuis une autre application, une variable ou une requête HTTP, par exemple [0.21,0.19,0.18,...] en €/kWh, le premier nombre étant l'heure actuelle. Les prix s'appliquent à partir de leur réception ; envoyez-en de nouveaux dès qu'ils sont disponibles, par exemple chaque après-midi après la publication des prix du lendemain.",
+    "flow": [
+      "QUAND L'heure est 14:30",
+      "ALORS Envoyer les prix de l'énergie externes [Prix] pour l'optimisation des prix"
+    ]
+  },
+  "temperature_adjustment_recommended": {
+    "text": "c'est le cœur du contrôle adaptatif : le contrôle ne règle pas lui-même la consigne, ce flow exécute la recommandation. Sur l'Aurora I/II via Modbus, la recommandation suit le mode ; utilisez-y Régler la température de consigne (par mode) sur Auto. Sur l'Aurora I/II, la consigne ne reste que si la courbe de chauffage est sur ARRÊT.",
+    "flow": [
+      "QUAND Contrôle adaptatif recommande un ajustement de température",
+      "ALORS Régler la température cible (consigne) sur",
+      "    [Température cible recommandée] Arrondir automatiquement (recommandé)"
+    ]
+  },
+  "adaptive_simulation_update": {
+    "text": "la carte se déclenche à chaque cycle de régulation (environ toutes les 5 minutes). Utilisez-la pour garder des valeurs, pas pour des notifications.",
+    "flow": [
+      "QUAND Température cible simulée mise à jour",
+      "ALORS Définir une variable numérique : Conseil sur [Cible Simulée (°C)]"
+    ]
+  },
+  "adaptive_status_change": {
+    "text": "recevez une notification quand le contrôle adaptatif s'active ou se désactive.",
+    "flow": [
+      "QUAND État du contrôle adaptatif modifié",
+      "ALORS Envoyer une notification push « Contrôle adaptatif [État] : [Raison] »"
+    ]
+  },
+  "building_insight_detected": {
+    "text": "recevez un nouvel aperçu sur le logement dès que le modèle de bâtiment est assez fiable (réglage Confiance Minimale (%), 70% par défaut).",
+    "flow": [
+      "QUAND Nouvel aperçu du bâtiment détecté",
+      "ALORS Envoyer une notification push « [Aperçu] [Recommandation] »"
+    ]
+  },
+  "building_profile_mismatch": {
+    "text": "le comportement appris ne correspond pas au type de bâtiment choisi. Choisissez le type proposé dans les réglages (Type de Bâtiment) pour apprendre plus vite.",
+    "flow": [
+      "QUAND Désaccord de profil de bâtiment détecté",
+      "ALORS Envoyer une notification push « Le type [Profil Suggéré] convient mieux »"
+    ]
+  },
+  "forecast_heating_advice": {
+    "text": "recevez le conseil basé sur la température extérieure prévue : attendre parce qu'il fera plus chaud et donc plus efficace plus tard, ou chauffer maintenant. La carte se déclenche quand le conseil change. Nécessite les prévisions météo dans les réglages. Le texte du conseil est actuellement toujours en néerlandais.",
+    "flow": [
+      "QUAND Conseil de chauffage prévisionnel disponible",
+      "ALORS Créer une notification « [Conseil] »"
+    ]
+  },
+  "learning_milestone_reached": {
+    "text": "recevez une notification quand le modèle de bâtiment atteint 70% de confiance. Après un nouveau départ de l'apprentissage, la carte se déclenche à nouveau.",
+    "flow": [
+      "QUAND Jalon d'apprentissage du modèle de bâtiment",
+      "ALORS Envoyer une notification push « Modèle de bâtiment : [Jalon] »"
+    ]
+  },
+  "pre_heat_recommendation": {
+    "text": "la carte se déclenche quand il fait plus de 1,5 °C de moins que souhaité et que le modèle de bâtiment est assez fiable (réglage Confiance Minimale (%), 70% par défaut), au plus une fois toutes les 4 heures.",
+    "flow": [
+      "QUAND Recommandation de temps de préchauffage",
+      "ALORS Envoyer une notification push",
+      "    « Le réchauffage dure [Durée (heures)] heures »"
+    ]
+  },
+  "confidence_above": {
+    "text": "n'exécutez la recommandation que si le modèle de bâtiment est assez fiable.",
+    "flow": [
+      "QUAND Contrôle adaptatif recommande un ajustement de température",
+      "ET La confiance du modèle est au-dessus de 70%",
+      "ALORS Régler la température cible (consigne) sur",
+      "    [Température cible recommandée] Arrondir automatiquement (recommandé)"
+    ]
+  },
+  "insight_is_active": {
+    "text": "un rappel hebdomadaire d'un aperçu ouvert.",
+    "flow": [
+      "QUAND L'heure est 09:00",
+      "ET Aujourd'hui est un lundi",
+      "ET L'aperçu Performance d'isolation est actif",
+      "ALORS Envoyer une notification push « Il y a un aperçu sur l'isolation »"
+    ]
+  },
+  "calculate_preheat_time": {
+    "text": "calculez la nuit quand le chauffage doit démarrer pour atteindre 21 °C à 07:00. Saisissez l'heure au format HH:MM.",
+    "flow": [
+      "QUAND L'heure est 04:00",
+      "ALORS Calculer quand commencer à chauffer pour atteindre 21°C à 07:00",
+      "ET Envoyer une notification push « Démarrer à [Heure de démarrage] »"
+    ]
+  },
+  "force_insight_analysis": {
+    "text": "mettez à jour les aperçus tout de suite au lieu d'attendre la prochaine analyse (toutes les 50 minutes).",
+    "flow": [
+      "QUAND L'heure est 08:00",
+      "ALORS Forcer l'analyse des aperçus",
+      "ET Créer une notification « [Aperçus détectés] aperçus »"
+    ]
+  },
+  "set_desired_indoor_temperature": {
+    "text": "une température intérieure souhaitée plus basse la nuit. Le contrôle adaptatif adapte sa recommandation en conséquence.",
+    "flow": [
+      "QUAND L'heure est 22:30",
+      "ALORS Régler la température intérieure souhaitée sur 19°C",
+      "",
+      "QUAND L'heure est 06:30",
+      "ALORS Régler la température intérieure souhaitée sur 21°C"
+    ]
+  },
+  "receive_external_indoor_temperature": {
+    "text": "le contrôle adaptatif ne fonctionne qu'avec une température intérieure. Envoyez-la à chaque changement d'un capteur de pièce, de préférence avec le token du capteur. Si la valeur reste identique pendant 12 heures, l'application le signale ; après 24 heures, le contrôle ne corrige plus dessus. Si vous saisissez une valeur vous-même, utilisez un point (21.5).",
+    "flow": [
+      "QUAND La température a changé (capteur du salon)",
+      "ALORS Envoyer [Température]°C température intérieure pour contrôle adaptatif"
+    ]
+  },
+  "receive_external_ambient_data": {
+    "text": "utilisez votre propre capteur extérieur au lieu du capteur de la pompe à chaleur. Une valeur compte pendant une heure ; ensuite, le contrôle adaptatif revient aux prévisions météo et au capteur de la pompe à chaleur.",
+    "flow": [
+      "QUAND La température a changé (capteur extérieur)",
+      "ALORS Envoyer [Température]°C à la pompe à chaleur pour le calcul COP/masse",
+      "    thermique"
+    ]
+  },
+  "receive_external_power_data": {
+    "text": "envoyez la puissance mesurée d'un compteur kWh ou d'une prise connectée, même quand elle tombe à 0 W. Cela donne le calcul COP le plus précis et alimente la consommation et le coût du jour. Pour le COP, une valeur compte pendant une heure ; la consommation du jour continue de compter avec la dernière valeur reçue.",
+    "flow": [
+      "QUAND La puissance a changé (compteur kWh de la pompe à chaleur)",
+      "ALORS Envoyer [Puissance]W à la pompe à chaleur pour le calcul COP"
+    ]
+  },
+  "receive_external_flow_data": {
+    "text": "envoyez le débit d'un débitmètre externe, si la pompe à chaleur ne le mesure pas elle-même. Une valeur compte pendant une heure.",
+    "flow": [
+      "QUAND (déclencheur de votre débitmètre à chaque nouvelle mesure)",
+      "ALORS Envoyer [Débit]L/min à la pompe à chaleur pour le calcul COP"
+    ]
+  },
+  "receive_external_solar_power": {
+    "text": "l'application convertit la puissance des panneaux solaires en rayonnement solaire pour le modèle de bâtiment. Renseignez pour cela Taille du système solaire (Wp) dans les réglages. Une valeur compte pendant une heure ; ensuite, l'application revient aux prévisions météo.",
+    "flow": [
+      "QUAND La puissance a changé (onduleur solaire)",
+      "ALORS Envoyer puissance solaire [Puissance]W à la pompe à chaleur"
+    ]
+  },
+  "receive_external_solar_radiation": {
+    "text": "envoyez le rayonnement solaire mesuré, par exemple depuis une application météo. Les panneaux solaires sont prioritaires s'ils envoient aussi des données. Une valeur compte pendant une heure.",
+    "flow": [
+      "QUAND Toutes les 15 minutes",
+      "ALORS Envoyer rayonnement solaire [Rayonnement de votre application météo]",
+      "    W/m² à la pompe à chaleur"
+    ]
+  },
+  "receive_external_wind_data": {
+    "text": "envoyez la vitesse du vent pour la correction des pertes de chaleur. La carte attend des km/h ; une valeur en m/s multipliée par 3,6 donne des km/h. Une valeur compte pendant une heure ; ensuite, l'application revient aux prévisions météo.",
+    "flow": [
+      "QUAND Toutes les 15 minutes",
+      "ALORS Envoyer vitesse du vent [Vent de votre application météo] km/h à la",
+      "    pompe à chaleur"
+    ]
+  },
+  "calculate_curve_value": {
+    "text": "créez votre propre courbe de chauffe par paliers : la première règle qui correspond détermine le résultat. Sur l'Aurora I/II, la consigne ne reste que si la courbe de la pompe à chaleur est sur ARRÊT ; ne l'utilisez pas avec le contrôle adaptatif.",
+    "flow": [
+      "QUAND Toutes les 30 minutes",
+      "ALORS Calculer une valeur via [Température ambiante de la pompe à chaleur]",
+      "    avec règles de courbe < 0 : 55, < 5 : 50, < 10 : 45, default : 35",
+      "ET Régler la température cible (consigne) sur [Valeur résultante]",
+      "    Arrondir automatiquement (recommandé)"
+    ]
+  },
+  "calculate_linear_heating_curve": {
+    "text": "calculez la température de départ d'une courbe droite comme la courbe personnalisée de la pompe à chaleur : L29 est le départ à -15 °C extérieur, L28 la pente par 10 °C. Avec 55 et -5, 5 °C extérieur donne 45 °C de départ. Pratique pour essayer une courbe d'abord.",
+    "flow": [
+      "QUAND Toutes les 30 minutes",
+      "ALORS Calculer courbe de chauffage: L29=55°C à -15°C, L28=-5/10°C",
+      "    avec temp extérieure [Température ambiante de la pompe à chaleur]",
+      "ET Créer une notification « La courbe donne [Température de départ] °C »"
+    ]
+  },
+  "calculate_time_based_value": {
+    "text": "un programme journalier pour la température intérieure souhaitée. Les périodes à cheval sur minuit sont permises ; default : valeur couvre le reste.",
+    "flow": [
+      "QUAND Toutes les 30 minutes",
+      "ALORS Calculer la valeur à partir des périodes de temps",
+      "    06:00-22:00: 21, 22:00-06:00: 19",
+      "ET Régler la température intérieure souhaitée sur [Valeur résultante]°C"
+    ]
+  },
+  "get_seasonal_mode": {
+    "text": "la saison de chauffage va du 1er octobre au 15 mai. Enregistrez le résultat dans une variable Oui/Non, pour que d'autres flows puissent la tester.",
+    "flow": [
+      "QUAND L'heure est 00:05",
+      "ALORS Obtenir le mode saisonnier",
+      "ET Définir une variable Oui/Non : Saison de chauffage sur",
+      "    [Est saison de chauffage]"
+    ]
+  },
+  "modbus_read_register": {
+    "text": "lisez un registre que l'application n'affiche pas. Sur l'Aurora I/II, l'adresse est en hexadécimal ou décimal (0x0301 = 769, la consigne de chauffage) ; les températures sont stockées ×10. Sur l'Aurora III, utilisez le nombre après 4- (4-2100 devient 2100) ; les registres d'entrée (3-) ne sont pas lisibles avec cette carte.",
+    "flow": [
+      "QUAND L'heure est 12:00",
+      "ALORS Lire le registre Modbus 0x0301",
+      "ET Créer une notification « Registre 0x0301 : [Valeur du registre] »"
+    ]
+  },
+  "modbus_write_register": {
+    "text": "n'écrivez que dans un registre dont vous savez ce qu'il fait ; une valeur erronée peut dérégler la pompe à chaleur. Les températures sont ×10 : 350 vaut 35 °C. Sur l'Aurora I/II, la consigne de chauffage (0x0301) ne reste que si la courbe de chauffage est sur ARRÊT.",
+    "flow": [
+      "QUAND L'heure est 06:00",
+      "ALORS Écrire 350 dans le registre Modbus 0x0301"
+    ]
+  }
+}

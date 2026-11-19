@@ -1,4 +1,10 @@
 {
+  "3.13.0": {
+    "en": "The device settings now show the address of live monitoring. Live monitoring shows the same COP and power as Homey, and energy use only counts measured values.",
+    "nl": "De apparaatinstellingen tonen nu het adres van live monitoring. Live monitoring toont dezelfde COP en hetzelfde vermogen als Homey, en het energieverbruik telt alleen nog gemeten waarden.",
+    "de": "Die Geräteeinstellungen zeigen jetzt die Adresse des Live-Monitorings. Das Live-Monitoring zeigt dieselbe COP und dieselbe Leistung wie Homey, und der Energieverbrauch zählt nur noch gemessene Werte.",
+    "fr": "Les réglages de l'appareil affichent désormais l'adresse de la surveillance en direct. La surveillance en direct affiche le même COP et la même puissance que Homey, et la consommation d'énergie ne compte plus que des valeurs mesurées."
+  },
   "3.12.4": {
     "en": "Since 2.13.1 the app also works via Modbus, alongside Tuya, and also supports the Aurora III. You can follow your heat pump live. Adaptive control learns how your home warms up and cools down, and takes energy prices and the weather into account. The settings are arranged in six groups.",
     "nl": "Sinds 2.13.1 werkt de app ook via Modbus, naast Tuya, en ondersteunt hij ook de Aurora III. U volgt de warmtepomp live. De adaptieve regeling leert hoe uw woning opwarmt en afkoelt, en houdt rekening met energieprijzen en het weer. De instellingen zijn ingedeeld in zes groepen.",

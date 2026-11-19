@@ -12,6 +12,7 @@ import { RollingCOPCalculator } from '../../lib/shared/services/rolling-cop-calc
 import { DeviceConstants } from '../../lib/aurora3/constants';
 import { isSetpointRangeValid, resolveMaxSetpoint, SETPOINT_RANGE_MIN_GAP } from '../../lib/shared/adaptive/setpoint-range';
 import { migratePriceThresholdMode, useAutoThresholdsForNewDevice } from '../../lib/shared/adaptive/price-threshold-mode-migration';
+import { updateLiveMonitoringAddress } from '../../lib/shared/live-monitoring-address';
 import { Aurora3AppHost } from '../../lib/aurora3/types/app-host';
 import {
   LiveOperationWidgetState,
@@ -248,6 +249,7 @@ class Aurora3ModbusDevice extends Homey.Device {
     await this._migratePriceThresholdMode();
 
     await this._applyDashboardPort(settings.dashboard_port ?? 8091);
+    await this.showLiveMonitoringAddress();
     await this._ensureCapabilities();
     await this._applyPowerCapabilities(settings.enable_power_measurements ?? true);
 
@@ -341,6 +343,7 @@ class Aurora3ModbusDevice extends Homey.Device {
     if (changedKeys.includes('dashboard_port')) {
       await this._applyDashboardPort((newSettings.dashboard_port ?? 8091) as number);
       this._registerDashboardCallbacks();
+      this._scheduleLiveMonitoringAddressRefresh();
     }
 
     // Restart connection if connection settings changed
@@ -395,6 +398,35 @@ class Aurora3ModbusDevice extends Homey.Device {
     const host = this._appHost;
     if (typeof host.setAurora3DashboardPort !== 'function') return;
     await host.setAurora3DashboardPort(port);
+  }
+
+  /** v3.13.0: shows the live monitoring address in the read-only device setting. */
+  async showLiveMonitoringAddress(): Promise<void> {
+    try {
+      const dashboard = this._appHost.aurora3Dashboard;
+      await updateLiveMonitoringAddress(
+        this,
+        dashboard?.listeningPort ?? null,
+        (this.getSetting('dashboard_port') as number | null) ?? 8091,
+      );
+    } catch (error) {
+      this.logger.warn('Live monitoring address not shown:', error);
+    }
+  }
+
+  /**
+   * After a port change every device of this driver shows the new address: they share one
+   * dashboard. Deferred, because Homey saves the settings only after onSettings returns and
+   * would undo a setSettings() made now.
+   */
+  private _scheduleLiveMonitoringAddressRefresh(): void {
+    this.homey.setTimeout(() => {
+      for (const device of this.driver.getDevices()) {
+        if (device instanceof Aurora3ModbusDevice) {
+          device.showLiveMonitoringAddress().catch(() => {});
+        }
+      }
+    }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
   }
 
   /** Called by Homey after pairing, after onInit. */

@@ -30,7 +30,7 @@ Die [Tuya-Dashboard-Entscheidung](architecture/ADR-068-TUYA-DASHBOARD.md)
 
 | Ihre Frage | Dokumentation |
 | --- | --- |
-| Einstellungen und tägliche Nutzung | [Konfiguration](setup/advanced-settings/CONFIGURATION_GUIDE.de.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.de.md), [erweiterte Flow-Karten](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.de.md) |
+| Einstellungen und tägliche Nutzung | [Konfiguration](setup/advanced-settings/CONFIGURATION_GUIDE.de.md), [Homey Flows](setup/guide/FLOW_CARDS_GUIDE.de.md), [Nachschlagewerk Flow-Karten](setup/guide/FLOW_CARDS_REFERENCE.de.md), [erweiterte Flow-Karten](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.de.md) |
 | Heizkurven und adaptive Regelung | [Erweiterte Funktionen](setup/advanced-control/Advanced_Features_Intro.de.md), [Regelungsübersicht](ADAPTIVE_CONTROL_OVERVIEW.de.md), [praktische Anleitung](setup/guide/ADAPTIVE_CONTROL_GUIDE.de.md) |
 | COP, SCOP und Gebäudeeinblicke | [COP einrichten](setup/COP%20flow-card-setup.de.md), [Berechnungsmethoden](COP%20calculation/), [Gebäudemodell](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md), [Gebäudeeinblicke nutzen](setup/guide/BUILDING_INSIGHTS_GUIDE.de.md) |
 | Probleme oder Umstieg | [Tuya-Fehlerbehebung](setup/USER_QUICK_FIX.de.md), [Modbus-Diagnose](setup/MODBUS_DASHBOARD_GUIDE.de.md), [Aurora-III-Migration](setup/MIGRATION_AURORA3.de.md) |
@@ -65,6 +65,7 @@ Der Großteil der Benutzerdokumentation ist in vier Sprachen verfügbar:
 | **Adaptive Regelung Übersicht** | [NL](ADAPTIVE_CONTROL_OVERVIEW.nl.md) | [EN](ADAPTIVE_CONTROL_OVERVIEW.en.md) | [DE](ADAPTIVE_CONTROL_OVERVIEW.de.md) | [FR](ADAPTIVE_CONTROL_OVERVIEW.fr.md) |
 | **Gebäudemodell & Insights Übersicht** | [NL](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md) | [EN](BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md) | [DE](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md) | [FR](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md) |
 | Flow-Karten-Implementierungsleitfaden | [NL](setup/guide/FLOW_CARDS_GUIDE.nl.md) | [EN](setup/guide/FLOW_CARDS_GUIDE.en.md) | [DE](setup/guide/FLOW_CARDS_GUIDE.de.md) | [FR](setup/guide/FLOW_CARDS_GUIDE.fr.md) |
+| Nachschlagewerk Flow-Karten | [NL](setup/guide/FLOW_CARDS_REFERENCE.nl.md) | [EN](setup/guide/FLOW_CARDS_REFERENCE.en.md) | [DE](setup/guide/FLOW_CARDS_REFERENCE.de.md) | [FR](setup/guide/FLOW_CARDS_REFERENCE.fr.md) |
 | Adaptive Regelung Leitfaden | [NL](setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md) | [EN](setup/guide/ADAPTIVE_CONTROL_GUIDE.en.md) | [DE](setup/guide/ADAPTIVE_CONTROL_GUIDE.de.md) | [FR](setup/guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
 | Building Insights Leitfaden | [NL](setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md) | [EN](setup/guide/BUILDING_INSIGHTS_GUIDE.en.md) | [DE](setup/guide/BUILDING_INSIGHTS_GUIDE.de.md) | [FR](setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
 | COP Flow-Karten-Einrichtung | [NL](setup/COP%20flow-card-setup.nl.md) | [EN](setup/COP%20flow-card-setup.en.md) | [DE](setup/COP%20flow-card-setup.de.md) | [FR](setup/COP%20flow-card-setup.fr.md) |

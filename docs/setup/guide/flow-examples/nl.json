@@ -1,0 +1,856 @@
+{
+  "discharge_temperature_alert": {
+    "text": "stuur een melding als de compressor te heet wordt.",
+    "flow": [
+      "WANNEER Persgastemperatuur boven 105°C",
+      "DAN Stuur een pushmelding \"Persgas boven 105 °C, controleer de warmtepomp\""
+    ]
+  },
+  "set_heating_curve": {
+    "text": "vanaf het stookseizoen een hogere stooklijn.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN De dag en maand zijn 1 oktober",
+      "DAN Verwarmingscurve (stooklijn) instellen op H4"
+    ]
+  },
+  "heating_mode_changed": {
+    "text": "krijg een melding als iemand de modus op het bedieningspaneel verandert.",
+    "flow": [
+      "WANNEER Verwarmingsmodus gewijzigd",
+      "DAN Stuur een pushmelding \"Modus is nu [Verwarmingsmodus]\""
+    ]
+  },
+  "work_mode_changed": {
+    "text": "houd bij wanneer Boost aan gaat.",
+    "flow": [
+      "WANNEER Bedrijfsmodus gewijzigd",
+      "EN Bedrijfsmodus is Boost",
+      "DAN Stuur een pushmelding \"Boost staat aan\""
+    ]
+  },
+  "water_mode_changed": {
+    "text": "dit is een installatie-instelling die normaal niet verandert; maak bij een wijziging een notificatie.",
+    "flow": [
+      "WANNEER Watermodus gewijzigd",
+      "DAN Maak een notificatie \"Watermodus gewijzigd naar [Watermodus]\""
+    ]
+  },
+  "capacity_setting_is": {
+    "text": "zet de warmwatercurve 's avonds weer aan als hij uit staat.",
+    "flow": [
+      "WANNEER De tijd is 22:00",
+      "EN Warmwater curve instelling is UIT",
+      "DAN Warmwater curve instellen op H2"
+    ]
+  },
+  "compressor_running": {
+    "text": "krijg een melding als de compressor nog draait wanneer een dure periode begint.",
+    "flow": [
+      "WANNEER Dure periode nadert",
+      "EN Compressor is draaiend",
+      "DAN Stuur een pushmelding \"De warmtepomp draait in de dure periode\""
+    ]
+  },
+  "device_power_is": {
+    "text": "zet het setpoint alleen omlaag als de warmtepomp aan staat.",
+    "flow": [
+      "WANNEER De laatste persoon weggaat",
+      "EN Apparaat vermogen is Aan",
+      "DAN Doel (setpoint) temperatuur instellen op 30"
+    ]
+  },
+  "dhw_heating_active": {
+    "text": "zet de stille modus pas aan als de warmtepomp geen tapwater meer verwarmt.",
+    "flow": [
+      "WANNEER De tijd is 22:00",
+      "EN Tapwater wordt niet verwarmd",
+      "DAN Stille modus instellen op Niveau 2"
+    ]
+  },
+  "heating_curve_is": {
+    "text": "pas het setpoint alleen aan als de stooklijn op UIT staat; met een stooklijn bepaalt de warmtepomp de aanvoertemperatuur zelf en houdt hij een ingesteld setpoint niet vast.",
+    "flow": [
+      "WANNEER De tijd is 06:00",
+      "EN Verwarmingscurve (stooklijn) instelling is UIT",
+      "DAN Doel (setpoint) temperatuur instellen op 40"
+    ]
+  },
+  "heating_mode_is": {
+    "text": "schakel in mei over op alleen warm water, maar alleen als de warmtepomp nog op verwarmen en warm water staat. De Aurora III kent andere modi (Koeling, Verwarmen, Auto) en geen aparte warmwatermodus.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN De dag en maand zijn 1 mei",
+      "EN Verwarmingsmodus is Verwarmen en warm water",
+      "DAN Verwarmingsmodus instellen op Warm water"
+    ]
+  },
+  "hotwater_temperature_is": {
+    "text": "de kaart vergelijkt het ingestelde warmwatersetpoint, niet de gemeten boilertemperatuur. Zet het setpoint terug als het na een verhoging te hoog is blijven staan.",
+    "flow": [
+      "WANNEER De tijd is 23:00",
+      "EN Warmwatertemperatuur is Groter dan 50°C",
+      "DAN Warmwatertemperatuur instellen op 48"
+    ]
+  },
+  "silent_mode_is": {
+    "text": "zet 's ochtends de stille modus uit als hij nog aan staat.",
+    "flow": [
+      "WANNEER De tijd is 07:00",
+      "EN Stille modus is niet Uit",
+      "DAN Stille modus instellen op Uit"
+    ]
+  },
+  "target_temperature_is": {
+    "text": "verlaag het setpoint 's nachts alleen als het hoger staat dan de nachtwaarde.",
+    "flow": [
+      "WANNEER De tijd is 23:00",
+      "EN Doel (setpoint) temperatuur is Groter dan 35°C",
+      "DAN Doel (setpoint) temperatuur instellen op 32"
+    ]
+  },
+  "volume_setting_is": {
+    "text": "deze instelling geeft aan welke stroommodule in de warmtepomp zit (0 = geen, 1 = eenfase, 2 = driefase). Gebruik de kaart om te controleren of die waarde nog klopt, bijvoorbeeld na een storing.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN Stroomverbruik controleren is niet Gelijk aan 1",
+      "DAN Stuur een pushmelding \"Instelling stroommodule is gewijzigd\""
+    ]
+  },
+  "water_mode_is": {
+    "text": "dit is een installatie-instelling; gebruik de kaart om een onverwachte waarde te melden.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN Water controle modus is niet Gelijk aan 0",
+      "DAN Stuur een pushmelding \"Water controle modus staat op 1\""
+    ]
+  },
+  "work_mode_is": {
+    "text": "zet de warmtepomp 's ochtends terug op Normaal als hij nog op ECO staat.",
+    "flow": [
+      "WANNEER De tijd is 07:00",
+      "EN Bedrijfsmodus is ECO",
+      "DAN Bedrijfsmodus instellen op Normaal"
+    ]
+  },
+  "set_backup_heater": {
+    "text": "forceer bij strenge vorst de elektrische bijverwarming en geef hem weer vrij als het minder koud is.",
+    "flow": [
+      "WANNEER Buitentemperatuur gewijzigd onder -10°C",
+      "DAN Geforceerde bijverwarming aan schakelen",
+      "",
+      "WANNEER Buitentemperatuur gewijzigd boven -5°C",
+      "DAN Geforceerde bijverwarming uit schakelen"
+    ]
+  },
+  "set_capacity": {
+    "text": "'s ochtends een hogere warmwatercurve voor de douchepiek.",
+    "flow": [
+      "WANNEER De tijd is 05:30",
+      "DAN Warmwater curve instellen op H3",
+      "",
+      "WANNEER De tijd is 09:00",
+      "DAN Warmwater curve instellen op H1"
+    ]
+  },
+  "set_curve_for_mode": {
+    "text": "zet bij de start van het stookseizoen de stooklijn voor vloerverwarming.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN De dag en maand zijn 1 oktober",
+      "DAN Curve instellen op L3 voor Vloerverwarming"
+    ]
+  },
+  "set_device_onoff": {
+    "text": "zet de warmtepomp aan en uit met een virtuele knop.",
+    "flow": [
+      "WANNEER Virtuele knop Warmtepomp is uitgezet",
+      "DAN Apparaat vermogen instellen op Uit"
+    ]
+  },
+  "set_dhw_function": {
+    "text": "zet de tapwaterverwarming uit tijdens de vakantie, met een Ja/Nee-variabele Vakantie.",
+    "flow": [
+      "WANNEER Een variabele is veranderd (Vakantie)",
+      "EN Vakantie is gelijk aan ja",
+      "DAN Tapwaterfunctie uit schakelen"
+    ]
+  },
+  "set_diy_heating_curve": {
+    "text": "stel bij de start van het stookseizoen een eigen stooklijn in. De kaart zet de eigen stooklijn ook aan; een helling van -0,5 en 50 °C bij -15 °C buiten geeft bij 5 °C buiten 40 °C aanvoer.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN De dag en maand zijn 1 oktober",
+      "DAN Stel Custom stooklijn in: helling -0.5, intercept 50°C"
+    ]
+  },
+  "set_heating_mode": {
+    "text": "schakel bij de start van het stookseizoen terug naar verwarmen en warm water. Bij de Aurora III kies je hier Verwarmen.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN De dag en maand zijn 1 oktober",
+      "DAN Verwarmingsmodus instellen op Verwarmen en warm water"
+    ]
+  },
+  "set_hotwater_temperature": {
+    "text": "verwarm het tapwater extra in het goedkoopste blok.",
+    "flow": [
+      "WANNEER Goedkoopste blok gestart",
+      "DAN Warmwatertemperatuur instellen op 55",
+      "",
+      "WANNEER Dure periode nadert",
+      "DAN Warmwatertemperatuur instellen op 48"
+    ]
+  },
+  "set_setpoint_for_mode": {
+    "text": "een lager setpoint voor vloerverwarming 's nachts. Het setpoint blijft alleen staan als de stooklijn op UIT staat.",
+    "flow": [
+      "WANNEER De tijd is 23:00",
+      "DAN Setpoint instellen op 30 voor Vloerverwarming",
+      "    Automatisch afronden (aanbevolen)"
+    ]
+  },
+  "set_silent_mode": {
+    "text": "'s nachts stiller draaien.",
+    "flow": [
+      "WANNEER De tijd is 22:00",
+      "DAN Stille modus instellen op Niveau 2",
+      "",
+      "WANNEER De tijd is 07:00",
+      "DAN Stille modus instellen op Uit"
+    ]
+  },
+  "set_target_temperature": {
+    "text": "zo pas je de aanbeveling van de adaptieve regeling toe: de regeling stelt het setpoint niet zelf in, maar geeft een aanbeveling die je flow uitvoert. Bij de Aurora I/II blijft het setpoint alleen staan als de stooklijn op UIT staat. Zet het setpoint niet ook nog met een andere flow, anders werken de twee elkaar tegen.",
+    "flow": [
+      "WANNEER Adaptieve regeling beveelt temperatuur aanpassing aan",
+      "DAN Doel (setpoint) temperatuur instellen op [Aanbevolen doeltemperatuur]",
+      "    Automatisch afronden (aanbevolen)"
+    ]
+  },
+  "set_volume": {
+    "text": "deze instelling geeft aan welke stroommodule in de warmtepomp zit (0 = geen, 1 = eenfase, 2 = driefase). Wijzig hem alleen als de installateur dat aangeeft; gebruik de kaart niet in een automatische flow."
+  },
+  "set_water_mode": {
+    "text": "dit is een installatie-instelling. Wijzig hem alleen als de installateur dat aangeeft; gebruik de kaart niet in een automatische flow."
+  },
+  "set_work_mode": {
+    "text": "Boost in het goedkoopste blok, ECO in de dure periode.",
+    "flow": [
+      "WANNEER Goedkoopste blok gestart",
+      "DAN Bedrijfsmodus instellen op Boost",
+      "",
+      "WANNEER Dure periode nadert",
+      "DAN Bedrijfsmodus instellen op ECO"
+    ]
+  },
+  "ambient_temperature_changed": {
+    "text": "zet een virtuele schakelaar Stookseizoen uit als het buiten warm wordt. Een schakelaar die al uit staat, blijft uit, dus herhaling is geen probleem.",
+    "flow": [
+      "WANNEER Buitentemperatuur gewijzigd boven 18°C",
+      "DAN Zet Stookseizoen uit (virtuele schakelaar)"
+    ]
+  },
+  "coiler_temperature_alert": {
+    "text": "leg vast wanneer de buitenbatterij erg koud wordt, als hulp bij het zoeken naar ijsvorming.",
+    "flow": [
+      "WANNEER Verdampingscondensatortemperatuur onder -15°C",
+      "DAN Maak een notificatie \"[Huidige verdampingscondensatortemperatuur] °C\""
+    ]
+  },
+  "compressor_efficiency_alert": {
+    "text": "leg vast wanneer de compressor hoog toeren draait. Bij de Tuya-versie moet de instelling voor Expert-kaarten aan staan.",
+    "flow": [
+      "WANNEER Compressor frequentie boven 90 Hz",
+      "DAN Maak een notificatie \"Compressor op [Huidige frequentie] Hz\""
+    ]
+  },
+  "economizer_inlet_temperature_alert": {
+    "text": "volg de EVI-warmtewisselaar bij het zoeken naar een storing.",
+    "flow": [
+      "WANNEER Zuiggastemperatuur EVI-warmtewisselaar onder -10°C",
+      "DAN Maak een notificatie \"[Huidige zuiggastemperatuur EVI-warmtewisselaar] °C\""
+    ]
+  },
+  "economizer_outlet_temperature_alert": {
+    "text": "volg de EVI-warmtewisselaar bij het zoeken naar een storing.",
+    "flow": [
+      "WANNEER Persgastemperatuur EVI-warmtewisselaar boven 60°C",
+      "DAN Maak een notificatie \"[Huidige persgastemperatuur EVI-warmtewisselaar] °C\""
+    ]
+  },
+  "eev_pulse_steps_alert": {
+    "text": "leg vast wanneer de expansieklep ver dichtgaat, als hulp bij het zoeken naar een storing.",
+    "flow": [
+      "WANNEER EEV puls-stappen onder 50",
+      "DAN Maak een notificatie \"EEV [Huidige EEV-openingsstap puls-stappen]\""
+    ]
+  },
+  "evi_pulse_steps_alert": {
+    "text": "leg vast hoe ver de EVI-klep opengaat, als hulp bij het zoeken naar een storing.",
+    "flow": [
+      "WANNEER EVI-openingsstap puls-stappen boven 300",
+      "DAN Maak een notificatie \"EVI [Huidige EVI-openingsstap puls-stappen]\""
+    ]
+  },
+  "fan_motor_efficiency_alert": {
+    "text": "leg vast wanneer de ventilator hoog toeren draait. Bij de Tuya-versie moet de instelling voor Expert-kaarten aan staan.",
+    "flow": [
+      "WANNEER Ventilator motor frequentie boven 60 Hz",
+      "DAN Maak een notificatie \"Ventilator op [Huidige ventilator frequentie] Hz\""
+    ]
+  },
+  "fault_detected": {
+    "text": "krijg een melding bij een bepaalde storing. Bij de Modbus-drivers is de code tekst zoals in het display (bijvoorbeeld F1.1 of E03), bij Tuya een getal. Voor elke storing samen: gebruik de voorwaarde Fout is actief.",
+    "flow": [
+      "WANNEER Storing F1.1 gedetecteerd",
+      "DAN Stuur een pushmelding \"Storing [Storing code]: [Storing beschrijving]\""
+    ]
+  },
+  "high_pressure_temperature_alert": {
+    "text": "leg vast wanneer de hogedrukzijde erg warm wordt.",
+    "flow": [
+      "WANNEER Hogedruk verzadigingstemperatuur boven 55°C",
+      "DAN Maak een notificatie \"[Huidige Hogedruk verzadigingstemperatuur] °C\""
+    ]
+  },
+  "incoiler_temperature_alert": {
+    "text": "leg vast wanneer de condensor erg warm wordt.",
+    "flow": [
+      "WANNEER Condensortemperatuur boven 60°C",
+      "DAN Maak een notificatie \"Condensor [Huidige condensortemperatuur] °C\""
+    ]
+  },
+  "inlet_temperature_changed": {
+    "text": "zet een virtuele schakelaar Retour warm aan zodra het retourwater warm genoeg is.",
+    "flow": [
+      "WANNEER Waterintredetemperatuur gewijzigd boven 30°C",
+      "DAN Zet Retour warm aan (virtuele schakelaar)"
+    ]
+  },
+  "inlet_temperature_value_changed": {
+    "text": "houd de retourtemperatuur bij in een numerieke variabele, bijvoorbeeld voor een andere flow. De kaart gaat af bij elke verandering van minstens 0,5 °C.",
+    "flow": [
+      "WANNEER Waterintredetemperatuur is veranderd",
+      "DAN Zet een numerieke variabele: Retour op [Huidige waterintredetemperatuur]"
+    ]
+  },
+  "low_pressure_temperature_alert": {
+    "text": "leg vast wanneer de lagedrukzijde erg koud wordt.",
+    "flow": [
+      "WANNEER Lagedruk verzadigingstemperatuur onder -20°C",
+      "DAN Maak een notificatie \"[Huidige Lagedruk verzadigingstemperatuur] °C\""
+    ]
+  },
+  "outlet_temperature_changed": {
+    "text": "waarschuw als de aanvoer te warm wordt voor vloerverwarming. De kaart gaat opnieuw af bij elke verdere stijging van 0,5 °C.",
+    "flow": [
+      "WANNEER Wateruittredetemperatuur gewijzigd boven 45°C",
+      "EN Verwarmingsmodus is Vloerverwarming",
+      "DAN Stuur een pushmelding \"Aanvoer [Huidige wateruittredetemperatuur] °C\""
+    ]
+  },
+  "outlet_temperature_value_changed": {
+    "text": "houd de aanvoertemperatuur bij in een numerieke variabele. De kaart gaat af bij elke verandering van minstens 0,5 °C.",
+    "flow": [
+      "WANNEER Wateruittredetemperatuur is veranderd",
+      "DAN Zet een numerieke variabele: Aanvoer op [Huidige wateruittredetemperatuur]"
+    ]
+  },
+  "suction_temperature_alert": {
+    "text": "leg vast wanneer het zuiggas erg koud wordt.",
+    "flow": [
+      "WANNEER Zuiggastemperatuur onder -20°C",
+      "DAN Maak een notificatie \"Zuiggas [Huidige zuiggastemperatuur] °C\""
+    ]
+  },
+  "tank_temperature_alert": {
+    "text": "toon met een virtuele schakelaar of de boiler warm is.",
+    "flow": [
+      "WANNEER Tapwatertemperatuur boven 50°C",
+      "DAN Zet Boiler warm aan (virtuele schakelaar)",
+      "",
+      "WANNEER Tapwatertemperatuur onder 40°C",
+      "DAN Zet Boiler warm uit"
+    ]
+  },
+  "water_flow_alert": {
+    "text": "één melding bij te weinig doorstroming, met een Ja/Nee-variabele Doorstroommelding tegen herhaling. Bij de Tuya-versie moet de instelling voor Expert-kaarten aan staan.",
+    "flow": [
+      "WANNEER Water doorstroom onder 10 L/min",
+      "EN Compressor is draaiend",
+      "EN Doorstroommelding is gelijk aan nee",
+      "DAN Stuur een pushmelding \"Weinig doorstroming: [Huidige doorstroom] L/min\"",
+      "EN Zet een Ja/Nee variabele: Doorstroommelding op ja",
+      "",
+      "WANNEER Water doorstroom boven 15 L/min",
+      "DAN Zet een Ja/Nee variabele: Doorstroommelding op nee"
+    ]
+  },
+  "electrical_balance_check": {
+    "text": "controleer dagelijks of de drie fasen ongeveer even zwaar belast worden.",
+    "flow": [
+      "WANNEER De tijd is 12:00",
+      "EN Compressor is draaiend",
+      "EN 3-fase elektrische balans is buiten 10% tolerantie",
+      "DAN Stuur een pushmelding \"Fasen ongelijk belast\""
+    ]
+  },
+  "fault_active": {
+    "text": "krijg elke ochtend een herinnering zolang er nog een storing actief is.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN Fout is actief",
+      "DAN Stuur een pushmelding \"De warmtepomp meldt nog een storing\""
+    ]
+  },
+  "system_pulse_steps_differential": {
+    "text": "leg het verschil tussen de EEV- en EVI-klep vast als hulp bij het zoeken naar een storing.",
+    "flow": [
+      "WANNEER De tijd is 14:00",
+      "EN Systeem puls-stappen verschil is boven 300",
+      "DAN Maak een notificatie \"Groot verschil EEV en EVI\""
+    ]
+  },
+  "temperature_above": {
+    "text": "verwarm het tapwater extra in het goedkoopste blok, maar alleen als het buiten koud is.",
+    "flow": [
+      "WANNEER Goedkoopste blok gestart",
+      "EN Buitentemperatuur is onder 5°C",
+      "DAN Warmwatertemperatuur instellen op 55",
+      "EN Warmwatertemperatuur instellen op 48 (vertraging 4 uur)"
+    ]
+  },
+  "temperature_differential": {
+    "text": "een groot verschil tussen aanvoer en retour kan op te weinig doorstroming wijzen.",
+    "flow": [
+      "WANNEER De tijd is 14:00",
+      "EN Compressor is draaiend",
+      "EN Temperatuur verschil is boven 8°C",
+      "DAN Stuur een pushmelding \"Groot verschil aanvoer en retour\""
+    ]
+  },
+  "water_flow_rate_check": {
+    "text": "controleer de doorstroming op een vast moment terwijl de compressor draait.",
+    "flow": [
+      "WANNEER De tijd is 10:00",
+      "EN Compressor is draaiend",
+      "EN Water doorstroming is onder 15 L/min",
+      "DAN Stuur een pushmelding \"Weinig doorstroming, controleer het filter\""
+    ]
+  },
+  "cop_efficiency_changed": {
+    "text": "leg een lage COP vast, met de gebruikte berekeningsmethode erbij. De kaart kijkt bij elke verandering van minstens 0,3.",
+    "flow": [
+      "WANNEER COP efficiëntie gewijzigd onder 2",
+      "EN Compressor is draaiend",
+      "DAN Maak een notificatie \"COP [Huidige COP] ([Gebruikte berekeningsmethode])\""
+    ]
+  },
+  "cop_outlier_detected": {
+    "text": "een uitschieter wijst vaak op een sensor die niet klopt of een ontbrekende vermogensmeting; leg hem vast in de tijdlijn.",
+    "flow": [
+      "WANNEER COP uitschieter gedetecteerd",
+      "DAN Maak een notificatie \"COP [Uitschieter COP waarde]: [Reden uitschieter]\""
+    ]
+  },
+  "cop_trend_detected": {
+    "text": "krijg een melding als het rendement over de laatste 24 uur duidelijk achteruitgaat.",
+    "flow": [
+      "WANNEER COP trend gedetecteerd: verslechterend",
+      "DAN Stuur een pushmelding \"[Trend beschrijving]\""
+    ]
+  },
+  "daily_consumption_threshold": {
+    "text": "krijg één melding per dag zodra het verbruik een grens bereikt.",
+    "flow": [
+      "WANNEER Dagverbruik bereikte 30 kWh",
+      "DAN Stuur een pushmelding \"Vandaag al [Dagverbruik] kWh\""
+    ]
+  },
+  "daily_cop_efficiency_changed": {
+    "text": "leg vast wanneer de dag-COP onder een grens zakt. De kaart kijkt bij elke verandering van minstens 0,2.",
+    "flow": [
+      "WANNEER Dagelijkse COP efficiëntie gewijzigd onder 3",
+      "DAN Maak een notificatie \"Dag-COP [Huidige dagelijkse COP]\""
+    ]
+  },
+  "daily_cost_threshold": {
+    "text": "krijg één melding per dag als de energiekosten een bedrag overschrijden. Werkt alleen met prijsoptimalisatie en een externe energiemeting.",
+    "flow": [
+      "WANNEER Dagelijkse kosten overschreden €5",
+      "DAN Stuur een pushmelding \"Kosten vandaag € [Totale Kosten Vandaag (€)]\""
+    ]
+  },
+  "monthly_cop_efficiency_changed": {
+    "text": "volg het rendement over 30 dagen. De kaart kijkt bij elke verandering van minstens 0,2.",
+    "flow": [
+      "WANNEER Maandelijkse COP efficiëntie gewijzigd onder 3",
+      "DAN Stuur een pushmelding \"Maand-COP [Huidige maandelijkse COP]\""
+    ]
+  },
+  "performance_report_ready": {
+    "text": "ontvang elke avond om 23:00 een korte samenvatting.",
+    "flow": [
+      "WANNEER Prestatierapport is beschikbaar",
+      "DAN Stuur een pushmelding \"[Beoordeling]: [Samenvatting]\""
+    ]
+  },
+  "power_threshold_exceeded": {
+    "text": "leg vast wanneer de warmtepomp veel vermogen vraagt. De kaart gaat één keer af bij het overschrijden en pas weer als het vermogen eerst is gezakt. Vereist een vermogensmeting.",
+    "flow": [
+      "WANNEER Stroomverbruik overschreed 3000 W",
+      "DAN Maak een notificatie \"Vermogen [Huidig stroomverbruik] W\""
+    ]
+  },
+  "total_consumption_milestone": {
+    "text": "een herinnering bij een verbruiksmijlpaal, bijvoorbeeld voor onderhoud.",
+    "flow": [
+      "WANNEER Totaalverbruik bereikte 10000 kWh",
+      "DAN Stuur een pushmelding \"[Totaalverbruik] kWh: plan onderhoud\""
+    ]
+  },
+  "cop_calculation_method_is": {
+    "text": "reageer alleen op een lage COP als die is berekend uit gemeten doorstroming, temperaturen en stroomverbruik.",
+    "flow": [
+      "WANNEER COP efficiëntie gewijzigd onder 2",
+      "EN COP berekeningsmethode is Directe thermische (meest nauwkeurig)",
+      "DAN Stuur een pushmelding \"Lage COP: [Huidige COP]\""
+    ]
+  },
+  "cop_efficiency_check": {
+    "text": "warm het tapwater 's middags extra op als de warmtepomp op dat moment efficiënt draait, en zet het setpoint 's avonds terug.",
+    "flow": [
+      "WANNEER De tijd is 14:00",
+      "EN COP efficiëntie is boven 4",
+      "DAN Warmwatertemperatuur instellen op 55",
+      "",
+      "WANNEER De tijd is 18:00",
+      "DAN Warmwatertemperatuur instellen op 48"
+    ]
+  },
+  "cop_trend_analysis": {
+    "text": "een wekelijkse controle van het rendement.",
+    "flow": [
+      "WANNEER De tijd is 10:00",
+      "EN Vandaag is een zondag",
+      "EN COP trend is verslechterend over 168 uur",
+      "DAN Stuur een pushmelding \"Het rendement loopt deze week terug\""
+    ]
+  },
+  "daily_cop_above_threshold": {
+    "text": "voeg een waarschuwing toe aan het avondrapport als de dag-COP laag was.",
+    "flow": [
+      "WANNEER Prestatierapport is beschikbaar",
+      "EN Dagelijkse COP is onder 2,5",
+      "DAN Stuur een pushmelding \"Lage dag-COP: [Samenvatting]\""
+    ]
+  },
+  "monthly_cop_above_threshold": {
+    "text": "leg vast als de maand-COP onder een grens ligt.",
+    "flow": [
+      "WANNEER Prestatierapport is beschikbaar",
+      "EN Maandelijkse COP is onder 3",
+      "DAN Maak een notificatie \"Maand-COP onder 3\""
+    ]
+  },
+  "power_above_threshold": {
+    "text": "zet de warmtepomp op ECO als hij in de dure periode veel vermogen vraagt. Vereist een vermogensmeting; de Aurora III kent geen ECO-modus.",
+    "flow": [
+      "WANNEER Dure periode nadert",
+      "EN Stroomverbruik is boven 1500 watt",
+      "DAN Bedrijfsmodus instellen op ECO"
+    ]
+  },
+  "total_consumption_above": {
+    "text": "een jaarlijkse herinnering zodra het totaalverbruik een grens voorbij is.",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "EN De dag en maand zijn 1 september",
+      "EN Totaalverbruik is boven 20000 kWh",
+      "DAN Stuur een pushmelding \"Tijd voor onderhoud\""
+    ]
+  },
+  "generate_performance_report": {
+    "text": "maak het rapport op een ander moment dan 23:00 en stuur de uitkomst door.",
+    "flow": [
+      "WANNEER De tijd is 18:00",
+      "EN Vandaag is een zondag",
+      "DAN Genereer prestatierapport",
+      "EN Stuur een pushmelding \"[Beoordeling]: [Samenvatting]\""
+    ]
+  },
+  "receive_external_energy_prices": {
+    "text": "de app haalt zelf geen prijzen op. Stuur ze als tekst vanuit een andere app, een variabele of een HTTP-verzoek, bijvoorbeeld [0.21,0.19,0.18,...] in €/kWh, waarbij het eerste getal het huidige uur is. De prijzen gelden vanaf het moment van ontvangen; stuur nieuwe zodra die er zijn, bijvoorbeeld elke middag na de publicatie van de prijzen voor morgen.",
+    "flow": [
+      "WANNEER De tijd is 14:30",
+      "DAN Stuur externe energieprijzen [Prijzen] voor prijsoptimalisatie"
+    ]
+  },
+  "cheapest_block_started": {
+    "text": "verwarm het tapwater extra in het goedkoopste blok en zet het daarna terug, met een vertraging op de tweede actiekaart. De lengte van het blok stel je in bij Prijsblok Grootte (uren), standaard 4. Werkt alleen als de adaptieve regeling draait (met een binnentemperatuur) en de prijsoptimalisatie aan staat, en er prijzen binnenkomen via Stuur externe energieprijzen.",
+    "flow": [
+      "WANNEER Goedkoopste blok gestart",
+      "DAN Warmwatertemperatuur instellen op 55",
+      "EN Warmwatertemperatuur instellen op 48 (vertraging 4 uur)"
+    ]
+  },
+  "expensive_block_approaching": {
+    "text": "zet de warmtepomp op ECO voordat de dure periode begint. Hoeveel uur vooraf de kaart afgaat, stel je in bij de prijsinstellingen (standaard 2 uur). De Aurora III kent geen ECO. Werkt alleen als de adaptieve regeling draait (met een binnentemperatuur) en de prijsoptimalisatie aan staat, en er prijzen binnenkomen via Stuur externe energieprijzen.",
+    "flow": [
+      "WANNEER Dure periode nadert",
+      "DAN Bedrijfsmodus instellen op ECO",
+      "EN Stuur een pushmelding \"Duur vanaf [Blok Starttijd]\""
+    ]
+  },
+  "price_threshold_crossed": {
+    "text": "ECO bij een zeer hoge prijs en terug naar Normaal bij elke andere categorie. De categorie is een code: very_low, low, normal, high of very_high. Werkt alleen als de adaptieve regeling draait (met een binnentemperatuur) en de prijsoptimalisatie aan staat, en er prijzen binnenkomen via Stuur externe energieprijzen.",
+    "flow": [
+      "WANNEER Energieprijs drempel overschreden",
+      "EN [Prijs Categorie] is precies very_high",
+      "DAN Bedrijfsmodus instellen op ECO",
+      "ANDERS Bedrijfsmodus instellen op Normaal"
+    ]
+  },
+  "price_trend_changed": {
+    "text": "maak een notificatie als de prijzen gaan stijgen of dalen. Werkt alleen als de adaptieve regeling draait (met een binnentemperatuur) en de prijsoptimalisatie aan staat, en er prijzen binnenkomen via Stuur externe energieprijzen.",
+    "flow": [
+      "WANNEER Prijstrend veranderd",
+      "DAN Maak een notificatie \"Prijstrend [Vorige Trend] naar [Nieuwe Trend]\""
+    ]
+  },
+  "price_in_cheapest_hours": {
+    "text": "verwarm het tapwater alleen in de drie goedkoopste uren van de dag. Vereist prijzen via Stuur externe energieprijzen.",
+    "flow": [
+      "WANNEER Elke 1 uur",
+      "EN Huidig uur is in goedkoopste 3 uren van vandaag",
+      "DAN Warmwatertemperatuur instellen op 55",
+      "ANDERS Warmwatertemperatuur instellen op 48"
+    ]
+  },
+  "price_trend_is": {
+    "text": "warm het tapwater 's ochtends op als de prijzen de komende uren stijgen, en zet het later terug. Vereist prijzen via Stuur externe energieprijzen.",
+    "flow": [
+      "WANNEER De tijd is 06:00",
+      "EN Prijstrend voor komende 6 uur is Stijgend",
+      "DAN Warmwatertemperatuur instellen op 55",
+      "EN Warmwatertemperatuur instellen op 48 (vertraging 3 uur)"
+    ]
+  },
+  "price_vs_daily_average": {
+    "text": "Boost als de prijs ruim onder het daggemiddelde ligt, anders Normaal. Vereist prijzen via Stuur externe energieprijzen; de Aurora III kent geen Boost.",
+    "flow": [
+      "WANNEER Elke 1 uur",
+      "EN Huidige prijs is onder daggemiddelde met 20%",
+      "DAN Bedrijfsmodus instellen op Boost",
+      "ANDERS Bedrijfsmodus instellen op Normaal"
+    ]
+  },
+  "savings_above": {
+    "text": "sinds versie 3.4.2 schat de app geen besparing in euro's meer, omdat die met dynamische prijzen niet te onderbouwen is. De kaart geeft altijd onwaar. Gebruik in plaats daarvan Inzicht is actief."
+  },
+  "temperature_adjustment_recommended": {
+    "text": "dit is de kern van de adaptieve regeling: de regeling stelt het setpoint niet zelf in, deze flow voert de aanbeveling uit. Bij de Aurora I/II via Modbus volgt de aanbeveling de modus; gebruik daar Setpoint temperatuur instellen (per modus) op Auto. Bij de Aurora I/II blijft het setpoint alleen staan als de stooklijn op UIT staat.",
+    "flow": [
+      "WANNEER Adaptieve regeling beveelt temperatuur aanpassing aan",
+      "DAN Doel (setpoint) temperatuur instellen op [Aanbevolen doeltemperatuur]",
+      "    Automatisch afronden (aanbevolen)"
+    ]
+  },
+  "adaptive_simulation_update": {
+    "text": "de kaart gaat elke regelronde af (ongeveer elke 5 minuten). Gebruik hem om waarden bij te houden, niet voor meldingen.",
+    "flow": [
+      "WANNEER Gesimuleerde doeltemperatuur bijgewerkt",
+      "DAN Zet een numerieke variabele: Advies op [Gesimuleerd Doel (°C)]"
+    ]
+  },
+  "adaptive_status_change": {
+    "text": "krijg een melding als de adaptieve regeling aan of uit gaat.",
+    "flow": [
+      "WANNEER Adaptieve regeling status gewijzigd",
+      "DAN Stuur een pushmelding \"Adaptieve regeling [Status]: [Reden]\""
+    ]
+  },
+  "building_insight_detected": {
+    "text": "ontvang een nieuw inzicht over de woning zodra het gebouwmodel betrouwbaar genoeg is (instelling Minimale Betrouwbaarheid (%), standaard 70%).",
+    "flow": [
+      "WANNEER Nieuw gebouw inzicht gedetecteerd",
+      "DAN Stuur een pushmelding \"[Inzicht] [Aanbeveling]\""
+    ]
+  },
+  "building_profile_mismatch": {
+    "text": "het geleerde gedrag past niet bij het gekozen gebouwtype. Kies het voorgestelde type in de instellingen (Gebouwtype) om sneller te leren.",
+    "flow": [
+      "WANNEER Gebouwprofiel mismatch gedetecteerd",
+      "DAN Stuur een pushmelding \"Gebouwtype [Voorgesteld Profiel] past beter\""
+    ]
+  },
+  "forecast_heating_advice": {
+    "text": "ontvang het advies op basis van de verwachte buitentemperatuur: wachten omdat het later warmer en dus zuiniger is, of juist nu verwarmen. De kaart gaat af als het advies verandert. Vereist de weerprognose in de instellingen.",
+    "flow": [
+      "WANNEER Forecast verwarmingsadvies beschikbaar",
+      "DAN Maak een notificatie \"[Advies]\""
+    ]
+  },
+  "learning_milestone_reached": {
+    "text": "krijg één melding als het gebouwmodel 70% vertrouwen bereikt. Na het opnieuw beginnen met leren gaat de kaart opnieuw af.",
+    "flow": [
+      "WANNEER Gebouwmodel leer mijlpaal",
+      "DAN Stuur een pushmelding \"Gebouwmodel: [Mijlpaal]\""
+    ]
+  },
+  "pre_heat_recommendation": {
+    "text": "de kaart gaat af als het meer dan 1,5 °C kouder is dan gewenst en het gebouwmodel betrouwbaar genoeg is (instelling Minimale Betrouwbaarheid (%), standaard 70%), hooguit eens per 4 uur.",
+    "flow": [
+      "WANNEER Voorverwarm tijd aanbeveling",
+      "DAN Stuur een pushmelding \"Opwarmen duurt [Duur (uren)] uur\""
+    ]
+  },
+  "confidence_above": {
+    "text": "voer de aanbeveling pas uit als het gebouwmodel betrouwbaar genoeg is.",
+    "flow": [
+      "WANNEER Adaptieve regeling beveelt temperatuur aanpassing aan",
+      "EN Model betrouwbaarheid is boven 70%",
+      "DAN Doel (setpoint) temperatuur instellen op [Aanbevolen doeltemperatuur]",
+      "    Automatisch afronden (aanbevolen)"
+    ]
+  },
+  "insight_is_active": {
+    "text": "herinner wekelijks aan een openstaand inzicht.",
+    "flow": [
+      "WANNEER De tijd is 09:00",
+      "EN Vandaag is een maandag",
+      "EN Isolatieprestaties inzicht is actief",
+      "DAN Stuur een pushmelding \"Er is een inzicht over de isolatie\""
+    ]
+  },
+  "calculate_preheat_time": {
+    "text": "bereken 's nachts wanneer de verwarming moet beginnen om om 07:00 21 °C te halen. De tijd vul je in als UU:MM.",
+    "flow": [
+      "WANNEER De tijd is 04:00",
+      "DAN Bereken wanneer te beginnen met verwarmen om 21°C te bereiken",
+      "    om 07:00",
+      "EN Stuur een pushmelding \"Start om [Starttijd]\""
+    ]
+  },
+  "force_insight_analysis": {
+    "text": "laat de inzichten direct bijwerken in plaats van te wachten op de volgende analyse (elke 50 minuten).",
+    "flow": [
+      "WANNEER De tijd is 08:00",
+      "DAN Forceer inzicht analyse",
+      "EN Maak een notificatie \"[Inzichten gedetecteerd] inzichten\""
+    ]
+  },
+  "set_desired_indoor_temperature": {
+    "text": "een lagere gewenste binnentemperatuur 's nachts. De adaptieve regeling past haar aanbeveling daarop aan.",
+    "flow": [
+      "WANNEER De tijd is 22:30",
+      "DAN Gewenste binnentemperatuur instellen op 19°C",
+      "",
+      "WANNEER De tijd is 06:30",
+      "DAN Gewenste binnentemperatuur instellen op 21°C"
+    ]
+  },
+  "receive_external_indoor_temperature": {
+    "text": "de adaptieve regeling werkt alleen met een binnentemperatuur. Stuur die bij elke verandering van een kamersensor, het liefst met het token van de sensor. Blijft de waarde 12 uur gelijk, dan meldt de app dat; na 24 uur corrigeert de regeling er niet meer op. Typ je zelf een waarde, gebruik dan een punt (21.5).",
+    "flow": [
+      "WANNEER De temperatuur is veranderd (kamersensor woonkamer)",
+      "DAN Stuur [Temperatuur] °C binnentemperatuur voor adaptieve regeling"
+    ]
+  },
+  "receive_external_ambient_data": {
+    "text": "gebruik een eigen buitensensor in plaats van de sensor van de warmtepomp. Een waarde geldt een uur; daarna valt de adaptieve regeling terug op de weerprognose en de sensor van de warmtepomp.",
+    "flow": [
+      "WANNEER De temperatuur is veranderd (buitensensor)",
+      "DAN Stuur [Temperatuur]°C naar warmtepomp voor COP/thermische massa",
+      "    berekening"
+    ]
+  },
+  "receive_external_power_data": {
+    "text": "stuur het gemeten vermogen van een kWh-meter of slimme stekker, ook als het naar 0 W zakt. Dit geeft de nauwkeurigste COP-berekening en vult het dagverbruik en de dagkosten. Voor de COP telt een waarde een uur mee; het dagverbruik rekent door met de laatst ontvangen waarde.",
+    "flow": [
+      "WANNEER Het vermogen is veranderd (kWh-meter warmtepomp)",
+      "DAN Stuur [Vermogen]W naar warmtepomp voor COP berekening"
+    ]
+  },
+  "receive_external_flow_data": {
+    "text": "stuur de doorstroming van een externe flowmeter, als de warmtepomp die zelf niet meet. Een waarde geldt een uur.",
+    "flow": [
+      "WANNEER (trigger van je flowmeter bij een nieuwe meting)",
+      "DAN Stuur [Doorstroming]L/min naar warmtepomp voor COP berekening"
+    ]
+  },
+  "receive_external_solar_power": {
+    "text": "de app rekent het vermogen van de zonnepanelen om naar zonnestraling voor het gebouwmodel. Vul daarvoor Zonnepaneel systeem grootte (Wp) in bij de instellingen. Een waarde geldt een uur; daarna valt de app terug op de weerprognose.",
+    "flow": [
+      "WANNEER Het vermogen is veranderd (omvormer zonnepanelen)",
+      "DAN Stuur zonnepaneel vermogen [Vermogen]W naar warmtepomp"
+    ]
+  },
+  "receive_external_solar_radiation": {
+    "text": "stuur de gemeten zonnestraling, bijvoorbeeld uit een weer-app. Zonnepanelen gaan voor als die ook gegevens sturen. Een waarde geldt een uur.",
+    "flow": [
+      "WANNEER Elke 15 minuten",
+      "DAN Stuur zonnestraling [Zonnestraling van je weer-app] W/m² naar",
+      "    warmtepomp"
+    ]
+  },
+  "receive_external_wind_data": {
+    "text": "stuur de windsnelheid voor de correctie van het warmteverlies. De kaart verwacht km/u; een waarde in m/s maal 3,6 is km/u. Een waarde geldt een uur; daarna valt de app terug op de weerprognose.",
+    "flow": [
+      "WANNEER Elke 15 minuten",
+      "DAN Stuur windsnelheid [Windsnelheid van je weer-app] km/u naar warmtepomp"
+    ]
+  },
+  "calculate_curve_value": {
+    "text": "maak een eigen stooklijn in stappen: de eerste regel die past, bepaalt de uitkomst. Het setpoint blijft bij de Aurora I/II alleen staan als de stooklijn van de warmtepomp op UIT staat; gebruik dit niet samen met de adaptieve regeling.",
+    "flow": [
+      "WANNEER Elke 30 minuten",
+      "DAN Bereken waarde via [Buitentemperatuur van de warmtepomp]",
+      "    met curveregels < 0 : 55, < 5 : 50, < 10 : 45, default : 35",
+      "EN Doel (setpoint) temperatuur instellen op [Resultaat Waarde]",
+      "    Automatisch afronden (aanbevolen)"
+    ]
+  },
+  "calculate_linear_heating_curve": {
+    "text": "bereken de aanvoertemperatuur van een rechte stooklijn zoals de eigen stooklijn van de warmtepomp: L29 is de aanvoer bij -15 °C buiten, L28 de helling per 10 °C. Met 55 en -5 geeft 5 °C buiten 45 °C aanvoer. Handig om een stooklijn eerst uit te proberen.",
+    "flow": [
+      "WANNEER Elke 30 minuten",
+      "DAN Bereken stooklijn: L29=55°C bij -15°C, L28=-5/10°C",
+      "    met buitentemp [Buitentemperatuur van de warmtepomp]",
+      "EN Maak een notificatie \"Stooklijn geeft [Aanvoertemperatuur] °C\""
+    ]
+  },
+  "calculate_time_based_value": {
+    "text": "een dagschema voor de gewenste binnentemperatuur. Periodes over middernacht mogen; met default : waarde vang je de rest op.",
+    "flow": [
+      "WANNEER Elke 30 minuten",
+      "DAN Bereken waarde uit tijdsperioden",
+      "    06:00-22:00: 21, 22:00-06:00: 19",
+      "EN Gewenste binnentemperatuur instellen op [Resultaat waarde]°C"
+    ]
+  },
+  "get_seasonal_mode": {
+    "text": "het stookseizoen loopt van 1 oktober tot 15 mei. Bewaar de uitkomst in een Ja/Nee-variabele, zodat andere flows erop kunnen testen.",
+    "flow": [
+      "WANNEER De tijd is 00:05",
+      "DAN Haal seizoensmodus op",
+      "EN Zet een Ja/Nee variabele: Stookseizoen op [Is stookseizoen]"
+    ]
+  },
+  "modbus_read_register": {
+    "text": "lees een register dat de app zelf niet toont. Bij de Aurora I/II is het adres hex of decimaal (0x0301 = 769, het verwarmingssetpoint); temperaturen zijn ×10 opgeslagen. Bij de Aurora III gebruik je het getal na 4- (4-2100 wordt 2100); input-registers (3-) zijn met deze kaart niet te lezen.",
+    "flow": [
+      "WANNEER De tijd is 12:00",
+      "DAN Lees Modbus register 0x0301",
+      "EN Maak een notificatie \"Register 0x0301: [Registerwaarde]\""
+    ]
+  },
+  "modbus_write_register": {
+    "text": "schrijf alleen naar een register waarvan je weet wat het doet; een verkeerde waarde kan de warmtepomp ontregelen. Temperaturen zijn ×10: 350 is 35 °C. Het verwarmingssetpoint (0x0301) blijft bij de Aurora I/II alleen staan als de stooklijn op UIT staat.",
+    "flow": [
+      "WANNEER De tijd is 06:00",
+      "DAN Schrijf 350 naar Modbus register 0x0301"
+    ]
+  }
+}
