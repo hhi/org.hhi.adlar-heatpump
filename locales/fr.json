@@ -183,6 +183,9 @@
       }
     }
   },
+  "flow_notices": {
+    "savings_above_deprecated": "La condition 'Les économies d'aperçu sont au-dessus du seuil' ne fonctionne plus : elle est toujours fausse, et inversée ('ne sont pas au-dessus') toujours vraie. Supprimez-la de vos flows."
+  },
   "live_monitoring": {
     "not_available": "Indisponible : le port __port__ est déjà utilisé. Choisissez un autre port ci-dessus.",
     "address_unknown": "Adresse inconnue ; utilisez l'adresse IP de votre Homey avec le port __port__."

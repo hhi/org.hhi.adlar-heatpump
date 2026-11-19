@@ -1,4 +1,10 @@
 {
+  "3.13.1": {
+    "en": "If a flow still uses the condition 'Insight savings are above threshold', a notice now appears once in the timeline.",
+    "nl": "Gebruikt een flow nog de conditie 'Inzicht besparing boven drempel', dan verschijnt nu één keer een melding in de tijdlijn.",
+    "de": "Verwendet ein Flow noch die Bedingung 'Erkenntniseinsparungen sind über Schwellenwert', erscheint jetzt einmal eine Meldung in der Zeitleiste.",
+    "fr": "Si un flow utilise encore la condition 'Les économies d'aperçu sont au-dessus du seuil', un message apparaît désormais une fois dans la chronologie."
+  },
   "3.13.0": {
     "en": "The device settings now show the address of live monitoring. Live monitoring shows the same COP and power as Homey, and energy use only counts measured values.",
     "nl": "De apparaatinstellingen tonen nu het adres van live monitoring. Live monitoring toont dezelfde COP en hetzelfde vermogen als Homey, en het energieverbruik telt alleen nog gemeten waarden.",
