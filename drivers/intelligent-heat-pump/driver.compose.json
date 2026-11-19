@@ -366,7 +366,7 @@
     "measure_temperature.around_temp_f": {
       "title": {
         "en": "Tank temp",
-        "nl": "Tapwater temperatuur",
+        "nl": "Tapwatertemperatuur",
         "de": "Tanktemperatur",
         "fr": "Température du réservoir"
       },
@@ -375,7 +375,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Tank temp",
-        "nl": "Tapwater temperatuur",
+        "nl": "Tapwatertemperatuur",
         "de": "Tanktemperatur",
         "fr": "Température du réservoir"
       },
@@ -406,7 +406,7 @@
     "measure_temperature.temp_top": {
       "title": {
         "en": "Inlet temp",
-        "nl": "Water intrede temperatuur",
+        "nl": "Waterintredetemperatuur",
         "de": "Einlasstemperatur",
         "fr": "Température d'entrée"
       },
@@ -415,7 +415,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Inlet temp",
-        "nl": "Water intrede temperatuur",
+        "nl": "Waterintredetemperatuur",
         "de": "Einlasstemperatur",
         "fr": "Température d'entrée"
       },
@@ -446,7 +446,7 @@
     "measure_temperature.bottom_temp_f": {
       "title": {
         "en": "Incoiler temp",
-        "nl": "Condensor temperatuur",
+        "nl": "Condensortemperatuur",
         "de": "Kondensatortemperatur",
         "fr": "Température du condenseur"
       },
@@ -455,7 +455,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Incoiler temp",
-        "nl": "Condensor temperatuur",
+        "nl": "Condensortemperatuur",
         "de": "Kondensatortemperatur",
         "fr": "Température du condenseur"
       },
@@ -466,7 +466,7 @@
     "measure_temperature.coiler_temp_f": {
       "title": {
         "en": "Suction Temp",
-        "nl": "Zuiggas temperatuur",
+        "nl": "Zuiggastemperatuur",
         "de": "Saugtemperatur",
         "fr": "Température d'aspiration"
       },
@@ -475,7 +475,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Suction Temp",
-        "nl": "Zuiggas temperatuur",
+        "nl": "Zuiggastemperatuur",
         "de": "Saugtemperatur",
         "fr": "Température d'aspiration"
       },
@@ -506,7 +506,7 @@
     "measure_temperature.coiler_temp": {
       "title": {
         "en": "Coiler temp",
-        "nl": "Verdampingscondensator temperatuur",
+        "nl": "Verdampingscondensatortemperatuur",
         "de": "Verdampfer-Kondensatortemperatur",
         "fr": "Température du condenseur évaporateur"
       },
@@ -515,7 +515,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Coiler temp",
-        "nl": "Verdampingscondensator temperatuur",
+        "nl": "Verdampingscondensatortemperatuur",
         "de": "Verdampfer-Kondensatortemperatur",
         "fr": "Température du condenseur évaporateur"
       },
@@ -526,7 +526,7 @@
     "measure_temperature.evlin": {
       "title": {
         "en": "Economizer inlet Temp",
-        "nl": "EVI wamtewisselaar zuiggas temperatuur",
+        "nl": "Zuiggastemperatuur EVI-warmtewisselaar",
         "de": "Economizer-Einlasstemperatur",
         "fr": "Température d'entrée de l'économiseur"
       },
@@ -535,7 +535,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Economizer inlet Temp",
-        "nl": "EVI wamtewisselaar zuiggas temperatuur",
+        "nl": "Zuiggastemperatuur EVI-warmtewisselaar",
         "de": "Economizer-Einlasstemperatur",
         "fr": "Température d'entrée de l'économiseur"
       },
@@ -546,7 +546,7 @@
     "measure_temperature.venting_temp": {
       "title": {
         "en": "Discharge temp",
-        "nl": "Persgas temperatuur",
+        "nl": "Persgastemperatuur",
         "de": "Austrittstemperatur",
         "fr": "Température de refoulement"
       },
@@ -555,7 +555,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Discharge temp",
-        "nl": "Persgas temperatuur",
+        "nl": "Persgastemperatuur",
         "de": "Austrittstemperatur",
         "fr": "Température de refoulement"
       },
@@ -566,7 +566,7 @@
     "measure_temperature.temp_bottom": {
       "title": {
         "en": "Outlet temp",
-        "nl": "Water uittrede temperatuur",
+        "nl": "Wateruittredetemperatuur",
         "de": "Auslasstemperatur",
         "fr": "Température de sortie"
       },
@@ -575,7 +575,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Outlet temp",
-        "nl": "Water uittrede temperatuur",
+        "nl": "Wateruittredetemperatuur",
         "de": "Auslasstemperatur",
         "fr": "Température de sortie"
       },
@@ -586,7 +586,7 @@
     "measure_temperature.eviout": {
       "title": {
         "en": "Economizer outlet Temp",
-        "nl": "EVI wamtewisselaar persgas temperatuur",
+        "nl": "Persgastemperatuur EVI-warmtewisselaar",
         "de": "Economizer-Auslasstemperatur",
         "fr": "Température de sortie de l'économiseur"
       },
@@ -595,7 +595,7 @@
       "insights": true,
       "insightsTitle": {
         "en": "Economizer outlet Temp",
-        "nl": "EVI wamtewisselaar persgas temperatuur",
+        "nl": "Persgastemperatuur EVI-warmtewisselaar",
         "de": "Economizer-Auslasstemperatur",
         "fr": "Température de sortie de l'économiseur"
       },

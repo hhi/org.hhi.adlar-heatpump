@@ -2,19 +2,19 @@
   "id": "economizer_inlet_temperature_alert_modbus",
   "title": {
     "en": "Economizer inlet temperature alert",
-    "nl": "EVI warmtewisselaar zuiggas temperatuur alarm",
+    "nl": "Alarm zuiggastemperatuur EVI-warmtewisselaar",
     "de": "Economizer-Einlass-Temperaturalarm",
     "fr": "Alerte de température d'entrée de l'économiseur"
   },
   "titleFormatted": {
     "en": "Economizer inlet temperature [[condition]] [[temperature]]°C",
-    "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C",
+    "nl": "Zuiggastemperatuur EVI-warmtewisselaar [[condition]] [[temperature]]°C",
     "de": "Economizer-Einlass-Temperatur [[condition]] [[temperature]]°C",
     "fr": "Température d'entrée de l'économiseur [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when economizer inlet temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder een bepaald nivo gaat",
+    "nl": "Wordt geactiveerd wanneer de zuiggastemperatuur van de EVI-warmtewisselaar boven of onder een bepaald niveau gaat",
     "de": "Wird ausgelöst, wenn die Economizer-Einlass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
     "fr": "Se déclenche lorsque la température d'entrée de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
   },
@@ -81,7 +81,7 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Economizer inlet temperature",
-        "nl": "Huidige EVI warmtewisselaar zuiggas temperatuur",
+        "nl": "Huidige zuiggastemperatuur EVI-warmtewisselaar",
         "de": "Aktuelle Economizer-Einlass-Temperatur",
         "fr": "Température d'entrée actuelle de l'économiseur"
       },

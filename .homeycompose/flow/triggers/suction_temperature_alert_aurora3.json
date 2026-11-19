@@ -2,19 +2,19 @@
   "id": "suction_temperature_alert_aurora3",
   "title": {
     "en": "Suction temperature alert",
-    "nl": "Zuiggas temperatuur alarm",
+    "nl": "Alarm zuiggastemperatuur",
     "de": "Sauggas-Temperaturalarm",
     "fr": "Alerte de température d'aspiration"
   },
   "titleFormatted": {
     "en": "Suction temperature [[condition]] [[temperature]]°C",
-    "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C",
+    "nl": "Zuiggastemperatuur [[condition]] [[temperature]]°C",
     "de": "Sauggas-Temperatur [[condition]] [[temperature]]°C",
     "fr": "Température d'aspiration [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when suction temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat",
+    "nl": "Wordt geactiveerd wanneer zuiggastemperatuur boven of onder een bepaald niveau gaat",
     "de": "Wird ausgelöst, wenn die Sauggas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
     "fr": "Se déclenche lorsque la température d'aspiration dépasse ou descend en dessous d'un niveau spécifié"
   },
@@ -81,7 +81,7 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Suction temperature",
-        "nl": "Huidige Zuiggas temperatuur",
+        "nl": "Huidige zuiggastemperatuur",
         "de": "Aktuelle Sauggas-Temperatur",
         "fr": "Température d'aspiration actuelle"
       },

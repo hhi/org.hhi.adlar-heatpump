@@ -2,13 +2,13 @@
   "id": "outlet_temperature_value_changed_aurora3",
   "title": {
     "en": "Outlet temperature is changed",
-    "nl": "Water uittrede temperatuur is veranderd",
+    "nl": "Wateruittredetemperatuur is veranderd",
     "de": "Rücklauftemperatur hat sich geändert",
     "fr": "La température de sortie a changé"
   },
   "hint": {
     "en": "Triggers when water outlet temperature changes by at least 0.5°C",
-    "nl": "Wordt geactiveerd wanneer de water uittrede temperatuur minimaal 0,5°C wijzigt",
+    "nl": "Wordt geactiveerd wanneer de wateruittredetemperatuur minimaal 0,5°C wijzigt",
     "de": "Wird ausgelöst, wenn sich die Rücklauftemperatur um mindestens 0,5°C ändert",
     "fr": "Se déclenche lorsque la température de sortie d'eau change d'au moins 0,5°C"
   },
@@ -25,7 +25,7 @@
       "name": "current_temperature",
       "title": {
         "en": "Current outlet temperature",
-        "nl": "Huidige water uittrede temperatuur",
+        "nl": "Huidige wateruittredetemperatuur",
         "de": "Aktuelle Rücklauftemperatur",
         "fr": "Température de sortie actuelle"
       },
@@ -36,7 +36,7 @@
       "name": "previous_temperature",
       "title": {
         "en": "Previous outlet temperature",
-        "nl": "Vorige water uittrede temperatuur",
+        "nl": "Vorige wateruittredetemperatuur",
         "de": "Vorherige Rücklauftemperatur",
         "fr": "Température de sortie précédente"
       },

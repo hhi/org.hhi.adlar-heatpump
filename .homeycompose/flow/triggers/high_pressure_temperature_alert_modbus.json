@@ -14,7 +14,7 @@
   },
   "hint": {
     "en": "Triggers when high pressure saturation temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+    "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald niveau gaat",
     "de": "Wird ausgelöst, wenn die Hochdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
     "fr": "Se déclenche lorsque la température de saturation haute pression dépasse ou descend en dessous d'un niveau spécifié"
   },

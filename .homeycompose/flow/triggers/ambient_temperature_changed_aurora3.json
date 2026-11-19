@@ -14,7 +14,7 @@
   },
   "hint": {
     "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
-    "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+    "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald niveau - nuttig voor weercompensatie",
     "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
     "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
   },

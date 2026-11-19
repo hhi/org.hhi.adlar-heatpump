@@ -270,7 +270,7 @@
     "measure_temperature.outer_coil": {
       "title": {
         "en": "Outer coil temperature (T2)",
-        "nl": "Buitenste spoel temperatuur (T2)",
+        "nl": "Temperatuur buitenste spoel (T2)",
         "de": "Temperatur Außenwärmetauscher (T2)",
         "fr": "Température de l'échangeur extérieur (T2)"
       }
@@ -278,7 +278,7 @@
     "measure_temperature.inner_coil": {
       "title": {
         "en": "Inner coil temperature (T3)",
-        "nl": "Binnenste spoel temperatuur (T3)",
+        "nl": "Temperatuur binnenste spoel (T3)",
         "de": "Temperatur Innenwärmetauscher (T3)",
         "fr": "Température de l'échangeur intérieur (T3)"
       }
@@ -342,7 +342,7 @@
     "measure_temperature.ipm": {
       "title": {
         "en": "IPM temperature",
-        "nl": "IPM temperatuur",
+        "nl": "IPM-temperatuur",
         "de": "IPM-Temperatur",
         "fr": "Température IPM"
       }
@@ -350,7 +350,7 @@
     "measure_temperature.plate_hx": {
       "title": {
         "en": "Plate heat exchanger temperature",
-        "nl": "Plaatwarmtewisselaar temperatuur",
+        "nl": "Temperatuur plaatwarmtewisselaar",
         "de": "Plattenwärmetauscher-Temperatur",
         "fr": "Température de l'échangeur à plaques"
       }
