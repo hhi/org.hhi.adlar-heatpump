@@ -85,7 +85,15 @@ export class ServiceCoordinator {
 
     this.settingsManager = new SettingsManagerService(serviceOptions);
     this.capabilityHealth = new CapabilityHealthService(serviceOptions);
-    this.energyTracking = new EnergyTrackingService(serviceOptions);
+    this.energyTracking = new EnergyTrackingService({
+      ...serviceOptions,
+      readInternalPower: () => {
+        const timestamp = this.tuyaConnection?.getLastDataReceivedAt();
+        const value = this.device.hasCapability('measure_power.internal')
+          ? this.device.getCapabilityValue('measure_power.internal') : null;
+        return typeof value === 'number' && timestamp ? { value, timestamp } : null;
+      },
+    });
     this.adaptiveControl = new AdaptiveControlService(serviceOptions);
 
     // BuildingInsightsService requires BuildingModelService and AdaptiveControlService
@@ -494,7 +502,6 @@ export class ServiceCoordinator {
     const reportDomainKeys = [
       'cop_calculation_enabled',
       'adaptive_control_enabled',
-      'enable_intelligent_energy_tracking',
       'price_optimizer_enabled',
     ];
     if (changedKeys.some((k) => reportDomainKeys.includes(k))) {

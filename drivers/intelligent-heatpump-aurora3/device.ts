@@ -201,7 +201,7 @@ class Aurora3ModbusDevice extends Homey.Device {
   }
 
   public getLiveOperationWidgetState(): LiveOperationWidgetState {
-    return buildLiveOperationWidgetState({
+    const state = buildLiveOperationWidgetState({
       device: this,
       snapshot: this.coordinator?.getCurrentSnapshot() ?? null,
       isExternalCapabilityFresh: (capabilityId) => {
@@ -209,6 +209,17 @@ class Aurora3ModbusDevice extends Homey.Device {
         return timestamp > 0 && Date.now() - timestamp <= DeviceConstants.EXTERNAL_DATA_TTL_MS;
       },
     });
+    const measurement = this.coordinator?.getEnergyTracking()?.getCurrentPowerMeasurement() ?? null;
+    let powerSource: LiveOperationWidgetState['process']['powerSource'] = 'none';
+    if (measurement) powerSource = measurement.source === 'external' ? 'external' : 'capability';
+    return {
+      ...state,
+      process: {
+        ...state.process,
+        electricalPowerKw: measurement ? measurement.value / 1000 : null,
+        powerSource,
+      },
+    };
   }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -536,6 +547,10 @@ class Aurora3ModbusDevice extends Homey.Device {
     dashboard.setGetChangeLogCallback((mode) => this.coordinator!.getChangeLog(mode));
     dashboard.setGetSnapshotCallback(() => this.coordinator!.getCurrentSnapshot());
     dashboard.setGetRegisterCacheCallback(() => this.coordinator!.getRegisterCache());
+    dashboard.setGetLiveOperationStateCallback(() => ({
+      ...this.getLiveOperationWidgetState(),
+      copDiagnostic: this.copService?.getCOPDiagnostic() ?? null,
+    }));
     dashboard.setGetCapabilityValuesCallback(() => {
       const result: Record<string, unknown> = {};
       for (const id of this.getCapabilities()) {
@@ -634,10 +649,8 @@ class Aurora3ModbusDevice extends Homey.Device {
       set('measure_temperature.zone2', s.zone2Temp?.value);
     }
 
-    // Power — altijd Modbus (voltage × current), nooit externe prioriteit
-    if (from('superfast', 'fast')) {
-      set('measure_power', snap.power.derivedPowerKw * 1000);
-    }
+    // Power — selected by EnergyTrackingService; raw voltage/current remain available.
+    // EnergyTrackingService owns measure_power and selects the external/internal source.
     if (from('fast')) {
       this._checkInternalPowerRegisters(snap);
     }
@@ -751,6 +764,10 @@ class Aurora3ModbusDevice extends Homey.Device {
 
   private _initCOPCalculators(): void {
     this.copService = new ModbusCOPService({
+      isExternalCapabilityFresh: (cap) => {
+        const timestamp = this.getExternalDataTimestamp(cap);
+        return timestamp > 0 && Date.now() - timestamp <= DeviceConstants.EXTERNAL_DATA_TTL_MS;
+      },
       logger: (msg, ...args) => this.logger.debug(msg, ...args),
       device: this,
     });

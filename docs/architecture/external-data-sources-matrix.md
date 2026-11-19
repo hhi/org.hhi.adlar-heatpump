@@ -14,11 +14,14 @@ Dit overzicht documenteert welke feature toggles in de geavanceerde instellingen
 | **Stooklijn regeling**<br>`enable_curve_controls`                         | **Buitentemperatuur**         | **1.** Externe Sensor (`adlar_external_ambient`) <br> **2.** Interne WP Sensor (`measure_temperature.temp_ambient`)                                  |
 | **Prijsoptimalisatie**<br>`price_optimizer_enabled`                       | **Energieprijzen**            | **1.** Flow Triggercard _"Ontvang Externe Energie Prijzen"_ (input via bijv. EPEX Spot, Power by the Hour)                                           |
 | **Weersverwachting integratie**<br>`enable_weather_forecast`              | **Weer & Omgeving**           | **1.** Invoer via flows (Windsnelheid, Zonnestraling, Zonne-energie) <br> **2.** Fallback / API: OpenMeteo integratie (`adlar_openmeteo_last_fetch`) |
-| **Intelligente Energie Tracking**<br>`enable_intelligent_energy_tracking` | **Stroomverbruik / Vermogen** | **1.** Externe P1 / kWh Meter (via Homey flows) <br> **2.** Interne stroommeting van de warmtepomp (indien ondersteund)                              |
-| **COP Berekening**<br>`cop_calculation_enabled`                           | **Stroomverbruik / Vermogen** | **1.** Externe P1 / kWh Meter (via Homey flows) <br> **2.** Interne stroommeting van de warmtepomp                                                   |
+| **Energietracking (altijd actief)** | **Stroomverbruik / Vermogen** | **1.** Externe vermogensmeter van uitsluitend de warmtepomp (W, via Homey flows) <br> **2.** Interne stroommeting van de warmtepomp (indien ondersteund)                              |
+| **COP Berekening**<br>`cop_calculation_enabled`                           | **Stroomverbruik / Vermogen** | **1.** Externe vermogensmeter van uitsluitend de warmtepomp (W, via Homey flows) <br> **2.** Interne stroommeting van de warmtepomp                                                   |
 
 ### Toelichting Databronnen
 
 1. **Externe Sensor (`adlar_external_ambient` of subcapabilities):** Externe databronnen zoals gekoppelde lokale weerstations, temperatuursensoren of slimme thermostaten in Homey hebben altijd de hoogste prioriteit omdat ze de werkelijkheid beter benaderen.
 2. **Interne WP Sensor (`measure_temperature.temp_ambient`):** De sensoren van de warmtepomp zelf zijn een uiterste fallback-mechanisme. Voor buitentemperatuur kan deze onnauwkeurig zijn omdat de compressor warmte afgeeft tijdens operatie of een ontdooicyclus.
 3. **Legacy Sensoren:** Voor backwards backward-compatibility blijven oudere specifieke variabelen (zoals `adlar_external_indoor_temperature`) behouden, maar deze hebben een lagere prioriteit.
+
+Energietracking heeft geen aan/uit-instelling. Een actuele externe meting gaat voor de interne meting;
+0 W is geldig. Zonder bruikbare meting blijven vermogen en het verbruik over dat meetgat onbekend.

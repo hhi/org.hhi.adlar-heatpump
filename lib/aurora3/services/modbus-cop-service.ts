@@ -3,6 +3,7 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable import/extensions */
 import Homey from 'homey';
+import { COPDiagnostic, describeCOP } from '../../shared/cop-diagnostics';
 import { DataSnapshot } from '../protocol/adlar3-modbus-service';
 import {
   COPCalculator,
@@ -16,6 +17,7 @@ import { SCOPCalculator, type COPMeasurement } from './scop-calculator';
 type CapabilitySetter = (capability: string, value: unknown) => void;
 
 interface ModbusCOPServiceOptions {
+  isExternalCapabilityFresh?: (capabilityId: string) => boolean;
   device: Homey.Device;
   logger?: (message: string, ...args: unknown[]) => void;
 }
@@ -38,15 +40,23 @@ const SCOP_SUPPORTED_METHODS = new Set<COPMeasurement['method']>([
 
 export class ModbusCOPService {
   private readonly device: Homey.Device;
+  private readonly isExternalCapabilityFresh: (capabilityId: string) => boolean;
   private readonly logger: (message: string, ...args: unknown[]) => void;
   private readonly rollingCOP: RollingCOPCalculator;
   private readonly scopCalc: SCOPCalculator;
   private lastCapabilityUpdateMs = 0;
+  private diagnostic: COPDiagnostic | null = null;
+
+  public getCOPDiagnostic(): COPDiagnostic | null {
+    return this.diagnostic;
+  }
+
   private lastRollingMeasurementMs = 0;
   private lastScopMeasurementMs = 0;
 
   constructor(options: ModbusCOPServiceOptions) {
     this.device = options.device;
+    this.isExternalCapabilityFresh = options.isExternalCapabilityFresh ?? (() => true);
     this.logger = options.logger || (() => {});
     this.rollingCOP = new RollingCOPCalculator({
       logger: this.logger,
@@ -101,7 +111,17 @@ export class ModbusCOPService {
     }
 
     const data = this.gatherDeviceDataSources(snap);
+    // An explicit zero from an external meter must not fall through to an internal estimate.
+    if (data.electricalPower === 0) {
+      this.diagnostic = describeCOP({ cop: 0, method: 'insufficient_data', isOutlier: false }, data);
+      set('adlar_cop', null);
+      set('adlar_cop_method', formatCopMethodDisplay({
+        cop: 0, method: 'insufficient_data', confidence: 'low', isOutlier: false,
+      }, (key) => this.device.homey.__(key)));
+      return;
+    }
     const result = COPCalculator.calculateCOP(data, { enableOutlierDetection: true });
+    this.diagnostic = describeCOP(result, data);
     const methodDisplay = formatCopMethodDisplay(result, (key) => this.device.homey.__(key));
 
     if (result.cop > 0 && !result.isOutlier) {
@@ -112,11 +132,12 @@ export class ModbusCOPService {
       return;
     }
 
-    set('adlar_cop', 0);
+    set('adlar_cop', this.diagnostic.acceptedCOP);
     set('adlar_cop_method', methodDisplay);
   }
 
   private clearCOPCapabilities(set: CapabilitySetter): void {
+    this.diagnostic = null;
     set('adlar_cop', 0);
     set('adlar_cop_method', formatCopMethodDisabled((key) => this.device.homey.__(key)));
     set('adlar_cop_daily', 0);
@@ -129,8 +150,8 @@ export class ModbusCOPService {
 
   private gatherDeviceDataSources(snap: DataSnapshot): COPDataSources {
     const { sensors } = snap;
-    const externalPower = this.getNumberCapability('adlar_external_power');
-    const externalFlow = this.getNumberCapability('adlar_external_flow');
+    const externalPower = (this.isExternalCapabilityFresh('adlar_external_power') ? this.getNumberCapability('adlar_external_power') : undefined);
+    const externalFlow = (this.isExternalCapabilityFresh('adlar_external_flow') ? this.getNumberCapability('adlar_external_flow') : undefined);
     const externalAmbient = this.getNumberCapability('adlar_external_ambient');
 
     const internalPowerW = this.firstPositive(
@@ -146,7 +167,7 @@ export class ModbusCOPService {
     const currentC = this.firstPositive(sensors.cPhaseCurrent?.value);
 
     return {
-      electricalPower: this.firstPositive(externalPower, internalPowerW),
+      electricalPower: externalPower !== undefined && externalPower >= 0 ? externalPower : internalPowerW,
       waterFlowRate: this.firstPositive(externalFlow, this.toLitersPerMinute(sensors.waterFlow)),
       inletTemperature: sensors.retourTE1?.value,
       outletTemperature: sensors.aanvoerTA?.value,

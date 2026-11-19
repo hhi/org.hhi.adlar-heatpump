@@ -408,7 +408,8 @@
         b.type = 'button'; b.dataset.setTheme = th; themeGroup.append(b);
       });
       bar.append(modeGroup, themeGroup);
-      $('toolbar').append(bar);
+      bar.append($('connection'));
+      $('nav').append(bar);
       window.AdlarSchemaRenderer.wireToolbar();
       return;
     }
@@ -492,7 +493,7 @@
   function useDevice(device) {
     generation += 1; window.clearTimeout(timer);
     deviceId = device.id;
-    $('device-name').textContent = `${t('app_title')} — ${device.name}`;
+    $('device-name').textContent = page === 'processchema' ? device.name : `${t('app_title')} — ${device.name}`;
     $('content').replaceChildren(); $('commands').replaceChildren(); $('control-dialog').close();
     try {
       commandIds = JSON.parse(sessionStorage.getItem(`tuya-commands-${deviceId}`) || '[]');
@@ -504,7 +505,7 @@
   async function init() {
     texts = await request('/api/texts');
     document.documentElement.lang = language;
-    document.title = `${t(page)} — ${t('app_title')}`;
+    document.title = page === 'processchema' ? `Adlar Aurora I/II (Tuya) — ${t(page)}` : `${t(page)} — ${t('app_title')}`;
     $('title').textContent = t(page);
     $('language-label').textContent = t('language'); $('language').value = language;
     $('close-dialog').textContent = t('close'); $('close-dialog').addEventListener('click', () => $('control-dialog').close());

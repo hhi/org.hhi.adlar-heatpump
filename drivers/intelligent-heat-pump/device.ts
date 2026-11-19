@@ -20,6 +20,7 @@ import {
   type LiveOperationWidgetState,
 } from '../../lib/tuya/services/widget-state-service';
 import { Logger } from '../../lib/shared/logger';
+import { COPDiagnostic, describeCOP } from '../../lib/shared/cop-diagnostics';
 import { BuildingModelLearner } from '../../lib/shared/adaptive/building-model-learner';
 import { migratePriceThresholdMode, useAutoThresholdsForNewDevice } from '../../lib/shared/adaptive/price-threshold-mode-migration';
 import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
@@ -173,6 +174,7 @@ function getFaultDescription(faultCode: number, language: 'en' | 'nl' = 'en'): s
 
 class MyDevice extends Homey.Device {
   private dashboardState: TuyaDashboardDevice | null = null;
+  private copDiagnostic: COPDiagnostic | null = null;
 
   private dashboardId(): string {
     return createHash('sha256').update(JSON.stringify(this.getData())).digest('hex');
@@ -186,6 +188,7 @@ class MyDevice extends Homey.Device {
         values: () => Object.fromEntries(this.getCapabilities().map((id) => [id, this.getCapabilityValue(id)])),
         options: (id) => this.getCapabilityOptions(id) as CapabilityMeta,
         snapshot: () => this.getLiveOperationWidgetState(),
+        copDiagnostic: () => (this.copSettings?.enableCOP === false ? null : this.copDiagnostic),
         adaptiveEnabled: () => this.getSetting('adaptive_control_enabled') === true,
         write: (id, value) => this.triggerCapabilityListener(id, value),
       });
@@ -229,7 +232,7 @@ class MyDevice extends Homey.Device {
 
   // Memory leak prevention: tracked timers for cleanup (v2.0.1+)
   private connectionStatusInterval: NodeJS.Timeout | null = null;
-  private dailyEnergyResetTimeout: NodeJS.Timeout | null = null;
+  private dailyConnectionResetTimeout: NodeJS.Timeout | null = null;
   private flowCardInitRetryTimeout: NodeJS.Timeout | null = null;
 
   // State tracking for flow card triggers (v1.0.8)
@@ -1923,6 +1926,7 @@ class MyDevice extends Homey.Device {
       this.categoryLog('cop', 'COP calculation config:', copConfig);
 
       const copResult = COPCalculator.calculateCOP(combinedData, copConfig);
+      this.copDiagnostic = describeCOP(copResult, combinedData);
 
       // Note: External device source enhancement removed in simplified approach
 
@@ -1990,14 +1994,14 @@ class MyDevice extends Homey.Device {
         this.categoryLog('cop', `⚠️ COP outlier detected (${copResult.cop.toFixed(2)}): ${copResult.outlierReason}`);
         this.categoryLog('cop', 'Outlier data sources:', copResult.dataSources);
 
-        // Set COP to 0 to prevent null state (outliers are not reliable)
-        await this.setCapabilityValue('adlar_cop', 0);
+        // An unavailable measurement must not be presented as a measured zero.
+        await this.setCapabilityValue('adlar_cop', null);
 
         // Update COP method capability to show outlier status
         const methodDisplayName = formatCopMethodDisplay(copResult, (key) => this.homey.__(key));
         await this.setCapabilityValue('adlar_cop_method', methodDisplayName);
 
-        this.categoryLog('cop', '✅ COP set to 0 due to outlier detection');
+        this.categoryLog('cop', 'COP unavailable due to outlier detection');
 
         // Trigger outlier flow card if configured (fire-and-forget)
         if (this.hasCapability('adlar_cop')) {
@@ -2013,11 +2017,11 @@ class MyDevice extends Homey.Device {
         this.categoryLog('cop', `❌ COP calculation failed: ${copResult.method}`);
         this.categoryLog('cop', 'Failed calculation data:', combinedData);
 
-        // Update capabilities to reflect failed calculation (always set to 0, never leave null)
-        await this.setCapabilityValue('adlar_cop', 0);
+        // Preserve an explicit idle zero; failed measurements remain unknown.
+        await this.setCapabilityValue('adlar_cop', this.copDiagnostic.acceptedCOP);
         const failedMethodName = formatCopMethodDisplay(copResult, (key) => this.homey.__(key));
         await this.setCapabilityValue('adlar_cop_method', failedMethodName);
-        this.categoryLog('cop', `✅ COP set to 0 due to failed calculation (${copResult.method})`);
+        this.categoryLog('cop', `COP calculation unavailable (${copResult.method})`);
       }
 
       // Trigger COP efficiency flow card if thresholds are met
@@ -3244,11 +3248,22 @@ class MyDevice extends Homey.Device {
    */
   public getLiveOperationWidgetState(): LiveOperationWidgetState {
     const tuyaService = this.serviceCoordinator?.getTuyaConnection() ?? null;
-    return buildLiveOperationWidgetState({
+    const state = buildLiveOperationWidgetState({
       device: this,
       connected: tuyaService?.getPublicConnectionState() ?? null,
       lastDataAt: tuyaService?.getLastDataReceivedAt() ?? null,
     });
+    const measurement = this.serviceCoordinator?.getEnergyTracking()?.getCurrentPowerMeasurement() ?? null;
+    let powerSource: LiveOperationWidgetState['process']['powerSource'] = 'none';
+    if (measurement) powerSource = measurement.source === 'external' ? 'external' : 'capability';
+    return {
+      ...state,
+      process: {
+        ...state.process,
+        electricalPowerKw: measurement ? measurement.value / 1000 : null,
+        powerSource,
+      },
+    };
   }
 
   /**
@@ -4087,11 +4102,8 @@ class MyDevice extends Homey.Device {
       // Force refresh trend capability to ensure proper translation
       await this.forceRefreshTrendCapability();
 
-      // Initialize intelligent energy tracking if enabled
-      if (this.getSetting('enable_intelligent_energy_tracking')) {
-        await this.initializeEnergyTracking();
-        this.log('🔋 Intelligent energy tracking initialized');
-      }
+      // EnergyTrackingService owns energy counters; this timer only resets connection statistics.
+      this.scheduleDailyConnectionReset();
 
       // Populate read-only info settings with runtime values
       try {
@@ -4201,7 +4213,6 @@ class MyDevice extends Homey.Device {
     }
 
     // Handle energy tracking settings changes first
-    await this.handleEnergyTrackingSettings(changedKeys, newSettings);
 
     // Handle reset external energy total
     if (changedKeys.includes('reset_external_energy_total') && newSettings.reset_external_energy_total === true) {
@@ -4909,115 +4920,17 @@ class MyDevice extends Homey.Device {
   // Note: Power estimation calculation now handled by EnergyTrackingService via ServiceCoordinator
 
   /**
-   * Handle settings changes for intelligent energy tracking
-   */
-  private async handleEnergyTrackingSettings(changedKeys: string[], newSettings: Record<string, unknown>): Promise<void> {
-    if (changedKeys.includes('enable_intelligent_energy_tracking')) {
-      const enabled = newSettings.enable_intelligent_energy_tracking;
-      this.log(`🔋 Intelligent energy tracking ${enabled ? 'enabled' : 'disabled'}`);
-
-      if (enabled) {
-        // Initialize energy tracking when enabled
-        await this.initializeEnergyTracking();
-        // Note: Energy tracking interval managed by ServiceCoordinator's EnergyTrackingService
-        // Immediately update power measurement when enabled
-        await this.updateIntelligentPowerMeasurement();
-      } else {
-        // Note: Energy tracking interval stop managed by ServiceCoordinator's EnergyTrackingService
-      }
-    }
-  }
-
-  /**
-   * Initialize software energy tracking system
-   */
-  private async initializeEnergyTracking(): Promise<void> {
-    try {
-      // Initialize energy tracking timestamp if not exists
-      const lastUpdate = await this.getStoreValue('last_energy_update');
-      if (!lastUpdate) {
-        await this.setStoreValue('last_energy_update', Date.now());
-        this.log('🔋 Energy tracking initialized');
-      }
-
-      // Initialize external energy tracking timestamp if not exists
-      const lastExternalUpdate = await this.getStoreValue('last_external_energy_update');
-      if (!lastExternalUpdate) {
-        await this.setStoreValue('last_external_energy_update', Date.now());
-        this.log('🔌 External energy tracking initialized');
-      }
-
-      // Initialize cumulative energy if meter capabilities are zero/null
-      if (this.hasCapability('meter_power.electric_total')) {
-        const currentTotal = this.getCapabilityValue('meter_power.electric_total');
-        if (!currentTotal || currentTotal === 0) {
-          // Check if we have stored cumulative energy from previous sessions
-          const storedTotal = await this.getStoreValue('cumulative_energy_kwh') || 0;
-          if (storedTotal > 0) {
-            await this.setCapabilityValue('meter_power.electric_total', storedTotal);
-            this.log(`🔋 Restored cumulative energy: ${storedTotal} kWh`);
-          }
-        }
-      }
-
-      // Initialize external energy tracking capability
-      if (this.hasCapability('adlar_external_energy_total')) {
-        const currentExternalTotal = this.getCapabilityValue('adlar_external_energy_total');
-        if (!currentExternalTotal || currentExternalTotal === 0) {
-          // Check if we have stored external energy from previous sessions
-          const storedExternalTotal = await this.getStoreValue('external_cumulative_energy_kwh') || 0;
-          if (storedExternalTotal > 0) {
-            await this.setCapabilityValue('adlar_external_energy_total', storedExternalTotal);
-            this.log(`🔌 Restored external energy: ${storedExternalTotal} kWh`);
-          }
-        }
-      }
-
-      // Initialize external daily energy tracking capability
-      if (this.hasCapability('adlar_external_energy_daily')) {
-        // ALWAYS check store value for corruption, even if capability has a value
-        const storedExternalDaily = await this.getStoreValue('external_daily_consumption_kwh') || 0;
-        const currentExternalDaily = this.getCapabilityValue('adlar_external_energy_daily') || 0;
-
-        // Sanity check: daily consumption > 150 kWh is unrealistic (likely corrupt data)
-        // Realistic max for heat pump: ~80 kWh/day, theoretical max 24/7: ~240 kWh
-        const MAX_REALISTIC_DAILY_KWH = 150;
-
-        // Check both store AND capability for corruption
-        if (storedExternalDaily > MAX_REALISTIC_DAILY_KWH || currentExternalDaily > MAX_REALISTIC_DAILY_KWH) {
-          // Corrupt data detected - reset to 0 and clear store
-          await this.setCapabilityValue('adlar_external_energy_daily', 0);
-          await this.setStoreValue('external_daily_consumption_kwh', 0);
-          this.log(`⚠️ Corrupt daily energy data detected (store: ${storedExternalDaily} kWh, capability: ${currentExternalDaily} kWh) - reset to 0`);
-        } else if (currentExternalDaily === 0 && storedExternalDaily > 0) {
-          // Valid stored data and capability is 0 - restore from store
-          await this.setCapabilityValue('adlar_external_energy_daily', storedExternalDaily);
-          this.log(`🔌 Restored external daily energy: ${storedExternalDaily} kWh`);
-        }
-      }
-
-      // Reset daily energy at midnight
-      this.scheduleDailyEnergyReset();
-
-    } catch (error) {
-      this.error('Error initializing energy tracking:', error);
-    }
-  }
-
-  // Note: Cumulative energy tracking now handled by EnergyTrackingService via ServiceCoordinator
-
-  /**
-   * Schedule daily energy reset at local midnight (Homey timezone)
+   * Schedule daily connection-statistics reset at local midnight (Homey timezone)
    * Rescheduled after each reset so days of 23 or 25 hours (DST changes) keep the reset at 00:00
    *
    * @param from - Instant to plan from; after a reset this is the midnight that just passed
    */
-  private scheduleDailyEnergyReset(from: Date = new Date()): void {
+  private scheduleDailyConnectionReset(from: Date = new Date()): void {
     // CRITICAL: Clear existing timer BEFORE creating a new one (v2.0.2 re-init protection)
     // Prevents multiple midnight reset timers if this function is called multiple times
-    if (this.dailyEnergyResetTimeout) {
-      clearTimeout(this.dailyEnergyResetTimeout);
-      this.dailyEnergyResetTimeout = null;
+    if (this.dailyConnectionResetTimeout) {
+      this.homey.clearTimeout(this.dailyConnectionResetTimeout);
+      this.dailyConnectionResetTimeout = null;
       this.log('Cleared existing daily energy reset timeout to prevent accumulation');
     }
 
@@ -5026,12 +4939,12 @@ class MyDevice extends Homey.Device {
     const msUntilMidnight = Math.max(0, midnight.getTime() - Date.now());
 
     // Schedule reset - tracked for cleanup to prevent memory leak
-    this.dailyEnergyResetTimeout = this.homey.setTimeout(() => {
-      this.dailyEnergyResetTimeout = null; // Clear reference after execution
-      this.resetDailyEnergy()
+    this.dailyConnectionResetTimeout = this.homey.setTimeout(() => {
+      this.dailyConnectionResetTimeout = null; // Clear reference after execution
+      this.resetDailyConnectionCounter()
         .catch((error) => this.error('Failed to reset daily energy at midnight:', error));
       // Plan from this midnight, so a timer firing a few ms early cannot pick the same midnight again
-      this.scheduleDailyEnergyReset(midnight);
+      this.scheduleDailyConnectionReset(midnight);
     }, msUntilMidnight);
 
     this.log(`🕛 Daily energy reset scheduled in ${Math.round(msUntilMidnight / 60000)} minutes `
@@ -5039,24 +4952,10 @@ class MyDevice extends Homey.Device {
   }
 
   /**
-   * Reset daily energy consumption at midnight
+   * Reset daily connection statistics at midnight
    */
-  private async resetDailyEnergy(): Promise<void> {
+  private async resetDailyConnectionCounter(): Promise<void> {
     try {
-      // Reset internal daily energy consumption
-      if (this.hasCapability('meter_power.power_consumption')) {
-        await this.setCapabilityValue('meter_power.power_consumption', 0);
-        await this.setStoreValue('daily_consumption_kwh', 0);
-        this.log('🔄 Internal daily energy consumption reset to 0 kWh');
-      }
-
-      // Reset external daily energy consumption
-      if (this.hasCapability('adlar_external_energy_daily')) {
-        await this.setCapabilityValue('adlar_external_energy_daily', 0);
-        await this.setStoreValue('external_daily_consumption_kwh', 0);
-        this.log('🔄 External daily energy consumption reset to 0 kWh');
-      }
-
       // Reset daily disconnect counter at midnight (v2.9.18)
       await this.serviceCoordinator?.getTuyaConnection()?.resetDailyDisconnectCounter();
       this.log('🔄 Daily disconnect counter reset to 0');
@@ -5085,9 +4984,9 @@ class MyDevice extends Homey.Device {
       this.log('Connection status interval cleared');
     }
 
-    if (this.dailyEnergyResetTimeout) {
-      clearTimeout(this.dailyEnergyResetTimeout);
-      this.dailyEnergyResetTimeout = null;
+    if (this.dailyConnectionResetTimeout) {
+      this.homey.clearTimeout(this.dailyConnectionResetTimeout);
+      this.dailyConnectionResetTimeout = null;
       this.log('Daily energy reset timeout cleared');
     }
 

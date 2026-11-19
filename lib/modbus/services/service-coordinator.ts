@@ -178,7 +178,19 @@ export class ServiceCoordinator {
 
     this.settingsManager = new SettingsManagerService(opts);
     this.capabilityHealth = new CapabilityHealthService(opts);
-    this.energyTracking = new EnergyTrackingService(opts);
+    this.energyTracking = new EnergyTrackingService({
+      ...opts,
+      readInternalPower: () => {
+        const snapshot = this.getCurrentSnapshot();
+        const timestamp = this._lastSuccessfulFastPollAt;
+        if (!snapshot || !timestamp) return null;
+        const value = snapshot.power.inputPowerKw * 1000;
+        const s = snapshot.sensors;
+        const zeroMeasured = (s.acVoltage?.value > 0 && s.acCurrent?.value === 0)
+          || (s.unitVoltage?.value > 0 && s.unitCurrent?.value === 0);
+        return value > 0 || zeroMeasured ? { value, timestamp } : null;
+      },
+    });
 
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,

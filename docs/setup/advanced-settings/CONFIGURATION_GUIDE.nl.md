@@ -808,7 +808,7 @@ Prioriteiten:
 
 ### Scenario 4: "Vaak weg, minimaal toezicht"
 ```
-✅ Intelligente energie tracking: AAN
+✅ Energietracking: altijd actief, externe meting krijgt voorrang
 ✅ COP berekening: AAN
    - Outlier detection: AAN
 ✅ Gebouwmodel: AAN (voor insights)

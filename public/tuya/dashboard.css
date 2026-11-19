@@ -62,3 +62,9 @@ dialog { margin: auto; max-width: min(420px,calc(100vw - 32px)); }
 }
 
 body[data-page="changelog"] .sort-column { border: 0; border-radius: 0; padding: 0; background: transparent; font: inherit; color: inherit; text-align: left; }
+
+/* The process-schema toolbar shares the Modbus navigation position and theme tokens. */
+body[data-page="processchema"] { --panel: var(--surface); --line: var(--border); --muted: var(--c-text-muted); --accent: var(--c-sky); }
+body[data-page="processchema"] .heading h1 { display: none; }
+body[data-page="processchema"] .heading { margin-top: 10px; }
+body[data-page="processchema"] #nav .status-connection { font-size: 11px; }
