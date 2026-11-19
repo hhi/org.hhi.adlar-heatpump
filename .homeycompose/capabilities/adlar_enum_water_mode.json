@@ -18,7 +18,7 @@
 
   "description": {
     "en": "dp 10: water_mode - Hot water control temperature setting",
-    "nl": "dp 10: water_mode - Warm water temperatuurregeling instelling",
+    "nl": "dp 10: water_mode - Warmwatertemperatuurregeling instelling",
     "de": "dp 10: water_mode - Warmwasser-Temperaturregelungseinstellung",
     "fr": "dp 10: water_mode - Réglage de la température de régulation d'eau chaude"
   }

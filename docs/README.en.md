@@ -2,7 +2,11 @@
 
 Welcome to the documentation for the Adlar Heat Pump Homey app.
 
-[Nederlands](README.nl.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md)
+**Supported languages:**
+🇬🇧 [English](README.en.md) ·
+🇩🇪 [Deutsch](README.de.md) ·
+🇫🇷 [Français](README.fr.md) ·
+🇳🇱 [Nederlands](README.nl.md)
 
 ## Start with your driver
 

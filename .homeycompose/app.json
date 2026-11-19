@@ -1,6 +1,6 @@
 {
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.12.3",
+  "version": "3.12.4",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -13,10 +13,10 @@
     "fr": "Pompe à chaleur Adlar Castra"
   },
   "description": {
-    "en": "Local access to the Adlar Castra series heatpump device.",
-    "nl": "Lokale toegang tot het Adlar Castra-serie warmtepompapparaat.",
-    "de": "Lokaler Zugriff auf das Adlar Castra Wärmepumpengerät.",
-    "fr": "Accès local à la pompe à chaleur de la série Adlar Castra."
+    "en": "Local control of your heat pump, with smart heating based on prices and weather.",
+    "nl": "Lokale bediening van uw warmtepomp, met slimme regeling op prijs en weer.",
+    "de": "Lokale Steuerung Ihrer Wärmepumpe, mit smarter Regelung nach Preis und Wetter.",
+    "fr": "Pilotage local de votre pompe à chaleur, avec une régulation selon prix et météo."
   },
   "category": [
     "climate"

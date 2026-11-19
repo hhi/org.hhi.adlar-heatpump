@@ -318,7 +318,7 @@
         },
         "hint": {
           "en": "Show/hide 3 slider control capabilities (hot water temperature, water mode, volume settings). Disable for cleaner interface if you don't need manual control sliders. Requires app restart to take effect.",
-          "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben.",
+          "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwatertemperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben.",
           "de": "Zeigen/Verbergen Sie 3 Schieberegler-Steuerungen (Warmwassertemperatur, Wassermodus, Volumeneinstellungen). Deaktivieren Sie für eine übersichtlichere Oberfläche, wenn Sie keine manuellen Schieberegler benötigen. Erfordert App-Neustart zur Aktivierung.",
           "fr": "Afficher/Masquer 3 contrôles curseur (température eau chaude, mode eau, réglages volume). Désactiver pour une interface plus claire si vous n'avez pas besoin de curseurs de contrôle manuel. Nécessite un redémarrage de l'app pour prendre effet."
         },
@@ -2632,12 +2632,16 @@
     "id": "dashboard_port",
     "type": "number",
     "label": {
-      "en": "Tuya dashboard port",
-      "nl": "Tuya-dashboardpoort"
+      "en": "Live monitoring port",
+      "nl": "Poort live monitoring",
+      "de": "Port für Live-Monitoring",
+      "fr": "Port de la surveillance en direct"
     },
     "hint": {
-      "en": "Open http://HOMEY-IP:8092 (or this port). Shared by all Tuya devices. At startup the first device selects the port; changing this setting moves the shared dashboard.",
-      "nl": "Open http://HOMEY-IP:8092 (of deze poort). Gedeeld door alle Tuya-apparaten. Bij opstarten kiest het eerste apparaat de poort; wijzigen van deze instelling verplaatst het gezamenlijke dashboard."
+      "en": "Default 8092. Shared by all Tuya devices; at startup the first device selects the port. Change only if this port is already in use. See the guide on the source code page.",
+      "nl": "Standaard 8092. Gedeeld door alle Tuya-apparaten; bij het opstarten kiest het eerste apparaat de poort. Wijzig alleen als deze poort al in gebruik is. Zie de handleiding op de broncodepagina.",
+      "de": "Standard 8092. Wird von allen Tuya-Geräten gemeinsam genutzt; beim Start wählt das erste Gerät den Port. Nur ändern, wenn dieser Port bereits belegt ist. Siehe die Anleitung auf der Quellcode-Seite.",
+      "fr": "Par défaut 8092. Partagé par tous les appareils Tuya ; au démarrage, le premier appareil choisit le port. À modifier uniquement si ce port est déjà utilisé. Voir le guide sur la page du code source."
     },
     "value": 8092,
     "min": 1,

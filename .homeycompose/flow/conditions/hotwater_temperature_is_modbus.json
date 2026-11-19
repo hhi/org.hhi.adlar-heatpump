@@ -2,19 +2,19 @@
   "id": "hotwater_temperature_is_modbus",
   "title": {
     "en": "Hot water temperature is",
-    "nl": "Warm water temperatuur is",
+    "nl": "Warmwatertemperatuur is",
     "de": "Warmwassertemperatur ist",
     "fr": "La température de l'eau chaude est"
   },
   "titleFormatted": {
     "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-    "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+    "nl": "Warmwatertemperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
     "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
     "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
   },
   "hint": {
     "en": "Check if the hot water temperature matches the specified condition",
-    "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+    "nl": "Controleer of de warmwatertemperatuur voldoet aan de opgegeven voorwaarde",
     "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
     "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
   },
@@ -68,7 +68,7 @@
       "name": "temperature",
       "title": {
         "en": " Hot water temperature ",
-        "nl": " Warm water temperatuur ",
+        "nl": " Warmwatertemperatuur ",
         "de": " Warmwassertemperatur ",
         "fr": " Température de l'eau chaude "
       },
@@ -78,7 +78,7 @@
       "units": "°C",
       "placeholder": {
         "en": "Hot water temperature in °C",
-        "nl": "Warm water temperatuur in °C",
+        "nl": "Warmwatertemperatuur in °C",
         "de": "Warmwassertemperatur in °C",
         "fr": "Température de l'eau chaude en °C"
       }

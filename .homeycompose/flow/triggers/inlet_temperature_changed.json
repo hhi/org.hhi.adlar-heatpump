@@ -2,19 +2,19 @@
   "id": "inlet_temperature_changed",
   "title": {
     "en": "Inlet temperature changed",
-    "nl": "Water intrede temperatuur gewijzigd",
+    "nl": "Waterintredetemperatuur gewijzigd",
     "de": "Vorlauftemperatur geändert",
     "fr": "Température d'entrée changée"
   },
   "titleFormatted": {
     "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
-    "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+    "nl": "Waterintredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
     "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
     "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when water inlet temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat",
+    "nl": "Wordt geactiveerd wanneer waterintredetemperatuur boven of onder een bepaald niveau gaat",
     "de": "Wird ausgelöst, wenn die Vorlauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
     "fr": "Se déclenche lorsque la température d'entrée d'eau dépasse ou descend en dessous d'un niveau spécifié"
   },
@@ -81,7 +81,7 @@
       "name": "current_temperature",
       "title": {
         "en": "Current inlet temperature",
-        "nl": "Huidige water intrede temperatuur",
+        "nl": "Huidige waterintredetemperatuur",
         "de": "Aktuelle Vorlauftemperatur",
         "fr": "Température d'entrée actuelle"
       },

@@ -255,7 +255,7 @@
     "measure_temperature.outer_coil": {
       "title": {
         "en": "Outdoor coil temperature (T3)",
-        "nl": "Buitenspoel temperatuur (T3)",
+        "nl": "Buitenspoeltemperatuur (T3)",
         "de": "Temperatur Außenwärmetauscher (T3)",
         "fr": "Température de l'échangeur extérieur (T3)"
       }

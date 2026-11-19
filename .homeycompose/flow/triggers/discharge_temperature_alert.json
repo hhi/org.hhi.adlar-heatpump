@@ -2,19 +2,19 @@
   "id": "discharge_temperature_alert",
   "title": {
     "en": "Discharge temperature alert",
-    "nl": "Persgas temperatuur alarm",
+    "nl": "Alarm persgastemperatuur",
     "de": "Druckgas-Temperaturalarm",
     "fr": "Alerte de température de refoulement"
   },
   "titleFormatted": {
     "en": "Discharge temperature [[condition]] [[temperature]]°C",
-    "nl": "Persgas temperatuur [[condition]] [[temperature]]°C",
+    "nl": "Persgastemperatuur [[condition]] [[temperature]]°C",
     "de": "Druckgas-Temperatur [[condition]] [[temperature]]°C",
     "fr": "Température de refoulement [[condition]] [[temperature]]°C"
   },
   "hint": {
     "en": "Triggers when discharge temperature goes above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder een bepaald nivo gaat",
+    "nl": "Wordt geactiveerd wanneer persgastemperatuur boven of onder een bepaald niveau gaat",
     "de": "Wird ausgelöst, wenn die Druckgas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
     "fr": "Se déclenche lorsque la température de refoulement dépasse ou descend en dessous d'un niveau spécifié"
   },
@@ -81,7 +81,7 @@
       "name": "current_temperature",
       "title": {
         "en": "Current Discharge temperature",
-        "nl": "Huidige Persgas temperatuur",
+        "nl": "Huidige persgastemperatuur",
         "de": "Aktuelle Druckgas-Temperatur",
         "fr": "Température de refoulement actuelle"
       },

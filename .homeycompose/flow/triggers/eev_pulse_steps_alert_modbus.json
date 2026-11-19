@@ -14,7 +14,7 @@
   },
   "hint": {
     "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan",
+    "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald niveau gaan",
     "de": "Wird ausgelöst, wenn die elektronischen Expansionsventil (EEV) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
     "fr": "Se déclenche lorsque les pas d'impulsion du détendeur électronique (EEV) dépassent ou descendent en dessous d'un niveau spécifié"
   },

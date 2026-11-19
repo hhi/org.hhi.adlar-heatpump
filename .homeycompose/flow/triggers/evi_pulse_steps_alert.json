@@ -14,7 +14,7 @@
   },
   "hint": {
     "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
-    "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan",
+    "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald niveau gaan",
     "de": "Wird ausgelöst, wenn die Enhanced Vapor Injection (EVI) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
     "fr": "Se déclenche lorsque les pas d'impulsion Enhanced Vapor Injection (EVI) dépassent ou descendent en dessous d'un niveau spécifié"
   },

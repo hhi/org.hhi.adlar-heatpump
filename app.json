@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "org.hhi.adlar-heatpump",
-  "version": "3.12.3",
+  "version": "3.12.4",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -14,10 +14,10 @@
     "fr": "Pompe à chaleur Adlar Castra"
   },
   "description": {
-    "en": "Local access to the Adlar Castra series heatpump device.",
-    "nl": "Lokale toegang tot het Adlar Castra-serie warmtepompapparaat.",
-    "de": "Lokaler Zugriff auf das Adlar Castra Wärmepumpengerät.",
-    "fr": "Accès local à la pompe à chaleur de la série Adlar Castra."
+    "en": "Local control of your heat pump, with smart heating based on prices and weather.",
+    "nl": "Lokale bediening van uw warmtepomp, met slimme regeling op prijs en weer.",
+    "de": "Lokale Steuerung Ihrer Wärmepumpe, mit smarter Regelung nach Preis und Wetter.",
+    "fr": "Pilotage local de votre pompe à chaleur, avec une régulation selon prix et météo."
   },
   "category": [
     "climate"
@@ -288,7 +288,7 @@
         },
         "hint": {
           "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
-          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald niveau - nuttig voor weercompensatie",
           "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
           "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
         },
@@ -380,7 +380,7 @@
         },
         "hint": {
           "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
-          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald niveau - nuttig voor weercompensatie",
           "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
           "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
         },
@@ -472,7 +472,7 @@
         },
         "hint": {
           "en": "Triggered when ambient temperature has changed above or below a specified level - useful for weather compensation",
-          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald nivo  - nuttig voor weercompensatie",
+          "nl": "Wordt geactiveerd wanneer buitentemperatuur is gewijzigd boven of onder een bepaald niveau - nuttig voor weercompensatie",
           "de": "Wird ausgelöst, wenn die Außentemperatur über oder unter einen bestimmten Wert fällt – nützlich für Wetterkompensation",
           "fr": "Déclenché lorsque la température ambiante change au-dessus ou en dessous d'un niveau spécifié - utile pour la compensation météorologique"
         },
@@ -809,19 +809,19 @@
         "id": "coiler_temperature_alert",
         "title": {
           "en": "Coiler temperature alert",
-          "nl": "Verdampingscondensator temperatuur alarm",
+          "nl": "Alarm verdampingscondensatortemperatuur",
           "de": "Verdampfer-Temperaturalarm",
           "fr": "Alerte de température du serpentin"
         },
         "titleFormatted": {
           "en": " Coiler temperature [[condition]] [[temperature]]°C",
-          "nl": " Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+          "nl": " Verdampingscondensatortemperatuur [[condition]] [[temperature]]°C",
           "de": " Verdampfer-Temperatur [[condition]] [[temperature]]°C",
           "fr": " Température du serpentin [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when electricity coiler temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer verdampingscondensatortemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Verdampfer-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du serpentin dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -888,7 +888,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Coiler temperature",
-              "nl": "Huidige Verdampingscondensator temperatuur",
+              "nl": "Huidige verdampingscondensatortemperatuur",
               "de": "Aktuelle Verdampfer-Temperatur",
               "fr": "Température actuelle du serpentin"
             },
@@ -911,19 +911,19 @@
         "id": "coiler_temperature_alert_aurora3",
         "title": {
           "en": "Coiler temperature alert",
-          "nl": "Verdampingscondensator temperatuur alarm",
+          "nl": "Alarm verdampingscondensatortemperatuur",
           "de": "Verdampfer-Temperaturalarm",
           "fr": "Alerte de température du serpentin"
         },
         "titleFormatted": {
           "en": " Coiler temperature [[condition]] [[temperature]]°C",
-          "nl": " Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+          "nl": " Verdampingscondensatortemperatuur [[condition]] [[temperature]]°C",
           "de": " Verdampfer-Temperatur [[condition]] [[temperature]]°C",
           "fr": " Température du serpentin [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when electricity coiler temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer verdampingscondensatortemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Verdampfer-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du serpentin dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -990,7 +990,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Coiler temperature",
-              "nl": "Huidige Verdampingscondensator temperatuur",
+              "nl": "Huidige verdampingscondensatortemperatuur",
               "de": "Aktuelle Verdampfer-Temperatur",
               "fr": "Température actuelle du serpentin"
             },
@@ -1013,19 +1013,19 @@
         "id": "coiler_temperature_alert_modbus",
         "title": {
           "en": "Coiler temperature alert",
-          "nl": "Verdampingscondensator temperatuur alarm",
+          "nl": "Alarm verdampingscondensatortemperatuur",
           "de": "Verdampfer-Temperaturalarm",
           "fr": "Alerte de température du serpentin"
         },
         "titleFormatted": {
           "en": " Coiler temperature [[condition]] [[temperature]]°C",
-          "nl": " Verdampingscondensator temperatuur [[condition]] [[temperature]]°C",
+          "nl": " Verdampingscondensatortemperatuur [[condition]] [[temperature]]°C",
           "de": " Verdampfer-Temperatur [[condition]] [[temperature]]°C",
           "fr": " Température du serpentin [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when electricity coiler temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer verdampingscondensator temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer verdampingscondensatortemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Verdampfer-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du serpentin dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -1092,7 +1092,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Coiler temperature",
-              "nl": "Huidige Verdampingscondensator temperatuur",
+              "nl": "Huidige verdampingscondensatortemperatuur",
               "de": "Aktuelle Verdampfer-Temperatur",
               "fr": "Température actuelle du serpentin"
             },
@@ -2002,19 +2002,19 @@
         "id": "discharge_temperature_alert",
         "title": {
           "en": "Discharge temperature alert",
-          "nl": "Persgas temperatuur alarm",
+          "nl": "Alarm persgastemperatuur",
           "de": "Druckgas-Temperaturalarm",
           "fr": "Alerte de température de refoulement"
         },
         "titleFormatted": {
           "en": "Discharge temperature [[condition]] [[temperature]]°C",
-          "nl": "Persgas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Persgastemperatuur [[condition]] [[temperature]]°C",
           "de": "Druckgas-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température de refoulement [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when discharge temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer persgastemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Druckgas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de refoulement dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2081,7 +2081,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Discharge temperature",
-              "nl": "Huidige Persgas temperatuur",
+              "nl": "Huidige persgastemperatuur",
               "de": "Aktuelle Druckgas-Temperatur",
               "fr": "Température de refoulement actuelle"
             },
@@ -2104,19 +2104,19 @@
         "id": "discharge_temperature_alert_aurora3",
         "title": {
           "en": "Discharge temperature alert",
-          "nl": "Persgas temperatuur alarm",
+          "nl": "Alarm persgastemperatuur",
           "de": "Druckgas-Temperaturalarm",
           "fr": "Alerte de température de refoulement"
         },
         "titleFormatted": {
           "en": "Discharge temperature [[condition]] [[temperature]]°C",
-          "nl": "Persgas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Persgastemperatuur [[condition]] [[temperature]]°C",
           "de": "Druckgas-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température de refoulement [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when discharge temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer persgastemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Druckgas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de refoulement dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2183,7 +2183,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Discharge temperature",
-              "nl": "Huidige Persgas temperatuur",
+              "nl": "Huidige persgastemperatuur",
               "de": "Aktuelle Druckgas-Temperatur",
               "fr": "Température de refoulement actuelle"
             },
@@ -2206,19 +2206,19 @@
         "id": "discharge_temperature_alert_modbus",
         "title": {
           "en": "Discharge temperature alert",
-          "nl": "Persgas temperatuur alarm",
+          "nl": "Alarm persgastemperatuur",
           "de": "Druckgas-Temperaturalarm",
           "fr": "Alerte de température de refoulement"
         },
         "titleFormatted": {
           "en": "Discharge temperature [[condition]] [[temperature]]°C",
-          "nl": "Persgas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Persgastemperatuur [[condition]] [[temperature]]°C",
           "de": "Druckgas-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température de refoulement [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when discharge temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer persgas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer persgastemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Druckgas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de refoulement dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2285,7 +2285,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Discharge temperature",
-              "nl": "Huidige Persgas temperatuur",
+              "nl": "Huidige persgastemperatuur",
               "de": "Aktuelle Druckgas-Temperatur",
               "fr": "Température de refoulement actuelle"
             },
@@ -2308,19 +2308,19 @@
         "id": "economizer_inlet_temperature_alert",
         "title": {
           "en": "Economizer inlet temperature alert",
-          "nl": "EVI warmtewisselaar zuiggas temperatuur alarm",
+          "nl": "Alarm zuiggastemperatuur EVI-warmtewisselaar",
           "de": "Economizer-Einlass-Temperaturalarm",
           "fr": "Alerte de température d'entrée de l'économiseur"
         },
         "titleFormatted": {
           "en": "Economizer inlet temperature [[condition]] [[temperature]]°C",
-          "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Zuiggastemperatuur EVI-warmtewisselaar [[condition]] [[temperature]]°C",
           "de": "Economizer-Einlass-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température d'entrée de l'économiseur [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when economizer inlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer de zuiggastemperatuur van de EVI-warmtewisselaar boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Economizer-Einlass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'entrée de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2387,7 +2387,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Economizer inlet temperature",
-              "nl": "Huidige EVI warmtewisselaar zuiggas temperatuur",
+              "nl": "Huidige zuiggastemperatuur EVI-warmtewisselaar",
               "de": "Aktuelle Economizer-Einlass-Temperatur",
               "fr": "Température d'entrée actuelle de l'économiseur"
             },
@@ -2410,19 +2410,19 @@
         "id": "economizer_inlet_temperature_alert_modbus",
         "title": {
           "en": "Economizer inlet temperature alert",
-          "nl": "EVI warmtewisselaar zuiggas temperatuur alarm",
+          "nl": "Alarm zuiggastemperatuur EVI-warmtewisselaar",
           "de": "Economizer-Einlass-Temperaturalarm",
           "fr": "Alerte de température d'entrée de l'économiseur"
         },
         "titleFormatted": {
           "en": "Economizer inlet temperature [[condition]] [[temperature]]°C",
-          "nl": "EVI warmtewisselaar zuiggas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Zuiggastemperatuur EVI-warmtewisselaar [[condition]] [[temperature]]°C",
           "de": "Economizer-Einlass-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température d'entrée de l'économiseur [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when economizer inlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar zuiggas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer de zuiggastemperatuur van de EVI-warmtewisselaar boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Economizer-Einlass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'entrée de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2489,7 +2489,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Economizer inlet temperature",
-              "nl": "Huidige EVI warmtewisselaar zuiggas temperatuur",
+              "nl": "Huidige zuiggastemperatuur EVI-warmtewisselaar",
               "de": "Aktuelle Economizer-Einlass-Temperatur",
               "fr": "Température d'entrée actuelle de l'économiseur"
             },
@@ -2512,19 +2512,19 @@
         "id": "economizer_outlet_temperature_alert",
         "title": {
           "en": "Economizer outlet temperature alert",
-          "nl": "EVI warmtewisselaar persgas temperatuur alarm",
+          "nl": "Alarm persgastemperatuur EVI-warmtewisselaar",
           "de": "Economizer-Auslass-Temperaturalarm",
           "fr": "Alerte de température de sortie de l'économiseur"
         },
         "titleFormatted": {
           "en": "Economizer outlet temperature [[condition]] [[temperature]]°C",
-          "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Persgastemperatuur EVI-warmtewisselaar [[condition]] [[temperature]]°C",
           "de": "Economizer-Auslass-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température de sortie de l'économiseur [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when economizer outlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer de persgastemperatuur van de EVI-warmtewisselaar boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Economizer-Auslass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de sortie de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2591,7 +2591,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Economizer outlet temperature",
-              "nl": "Huidige EVI warmtewisselaar persgas temperatuur",
+              "nl": "Huidige persgastemperatuur EVI-warmtewisselaar",
               "de": "Aktuelle Economizer-Auslass-Temperatur",
               "fr": "Température de sortie actuelle de l'économiseur"
             },
@@ -2614,19 +2614,19 @@
         "id": "economizer_outlet_temperature_alert_modbus",
         "title": {
           "en": "Economizer outlet temperature alert",
-          "nl": "EVI warmtewisselaar persgas temperatuur alarm",
+          "nl": "Alarm persgastemperatuur EVI-warmtewisselaar",
           "de": "Economizer-Auslass-Temperaturalarm",
           "fr": "Alerte de température de sortie de l'économiseur"
         },
         "titleFormatted": {
           "en": "Economizer outlet temperature [[condition]] [[temperature]]°C",
-          "nl": "EVI warmtewisselaar persgas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Persgastemperatuur EVI-warmtewisselaar [[condition]] [[temperature]]°C",
           "de": "Economizer-Auslass-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température de sortie de l'économiseur [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when economizer outlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer EVI warmtewisselaar persgas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer de persgastemperatuur van de EVI-warmtewisselaar boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Economizer-Auslass-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de sortie de l'économiseur dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -2693,7 +2693,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Economizer outlet temperature",
-              "nl": "Huidige EVI warmtewisselaar persgas temperatuur",
+              "nl": "Huidige persgastemperatuur EVI-warmtewisselaar",
               "de": "Aktuelle Economizer-Auslass-Temperatur",
               "fr": "Température de sortie actuelle de l'économiseur"
             },
@@ -2728,7 +2728,7 @@
         },
         "hint": {
           "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan",
+          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald niveau gaan",
           "de": "Wird ausgelöst, wenn die elektronischen Expansionsventil (EEV) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
           "fr": "Se déclenche lorsque les pas d'impulsion du détendeur électronique (EEV) dépassent ou descendent en dessous d'un niveau spécifié"
         },
@@ -2830,7 +2830,7 @@
         },
         "hint": {
           "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan",
+          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald niveau gaan",
           "de": "Wird ausgelöst, wenn die elektronischen Expansionsventil (EEV) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
           "fr": "Se déclenche lorsque les pas d'impulsion du détendeur électronique (EEV) dépassent ou descendent en dessous d'un niveau spécifié"
         },
@@ -2932,7 +2932,7 @@
         },
         "hint": {
           "en": "Triggers when Electronic Expansion Valve (EEV) pulse-steps go above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald nivo gaan",
+          "nl": "Wordt geactiveerd wanneer elektronische expansieklep (EEV) puls-stappen boven of onder een bepaald niveau gaan",
           "de": "Wird ausgelöst, wenn die elektronischen Expansionsventil (EEV) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
           "fr": "Se déclenche lorsque les pas d'impulsion du détendeur électronique (EEV) dépassent ou descendent en dessous d'un niveau spécifié"
         },
@@ -3034,7 +3034,7 @@
         },
         "hint": {
           "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan",
+          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald niveau gaan",
           "de": "Wird ausgelöst, wenn die Enhanced Vapor Injection (EVI) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
           "fr": "Se déclenche lorsque les pas d'impulsion Enhanced Vapor Injection (EVI) dépassent ou descendent en dessous d'un niveau spécifié"
         },
@@ -3136,7 +3136,7 @@
         },
         "hint": {
           "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan",
+          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald niveau gaan",
           "de": "Wird ausgelöst, wenn die Enhanced Vapor Injection (EVI) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
           "fr": "Se déclenche lorsque les pas d'impulsion Enhanced Vapor Injection (EVI) dépassent ou descendent en dessous d'un niveau spécifié"
         },
@@ -3238,7 +3238,7 @@
         },
         "hint": {
           "en": "Triggers when Enhanced Vapor Injection (EVI) pulse-steps go above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald nivo gaan",
+          "nl": "Wordt geactiveerd wanneer Enhanced Vapor Injection (EVI) puls-stappen boven of onder een bepaald niveau gaan",
           "de": "Wird ausgelöst, wenn die Enhanced Vapor Injection (EVI) Pulsschritte einen angegebenen Schwellenwert über- oder unterschreiten",
           "fr": "Se déclenche lorsque les pas d'impulsion Enhanced Vapor Injection (EVI) dépassent ou descendent en dessous d'un niveau spécifié"
         },
@@ -4044,7 +4044,7 @@
         },
         "hint": {
           "en": "Triggers when high pressure saturation temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Hochdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de saturation haute pression dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4146,7 +4146,7 @@
         },
         "hint": {
           "en": "Triggers when high pressure saturation temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer hogedruk verzadigingstemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Hochdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de saturation haute pression dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4237,19 +4237,19 @@
         "id": "incoiler_temperature_alert",
         "title": {
           "en": "Incoiler temperature alert",
-          "nl": "Condensor temperatuur alarm",
+          "nl": "Alarm condensortemperatuur",
           "de": "Kondensator-Temperaturalarm",
           "fr": "Alerte de température du condenseur"
         },
         "titleFormatted": {
           "en": "Incoiler temperature [[condition]] [[temperature]]°C",
-          "nl": "Condensor temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Condensortemperatuur [[condition]] [[temperature]]°C",
           "de": "Kondensator-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température du condenseur [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when incoiler temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer condensortemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Kondensator-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du condenseur dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4316,7 +4316,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Incoiler temperature",
-              "nl": "Huidige Condensor temperatuur",
+              "nl": "Huidige condensortemperatuur",
               "de": "Aktuelle Kondensator-Temperatur",
               "fr": "Température actuelle du condenseur"
             },
@@ -4339,19 +4339,19 @@
         "id": "incoiler_temperature_alert_modbus",
         "title": {
           "en": "Incoiler temperature alert",
-          "nl": "Condensor temperatuur alarm",
+          "nl": "Alarm condensortemperatuur",
           "de": "Kondensator-Temperaturalarm",
           "fr": "Alerte de température du condenseur"
         },
         "titleFormatted": {
           "en": "Incoiler temperature [[condition]] [[temperature]]°C",
-          "nl": "Condensor temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Condensortemperatuur [[condition]] [[temperature]]°C",
           "de": "Kondensator-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température du condenseur [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when incoiler temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer condensor temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer condensortemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Kondensator-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du condenseur dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4418,7 +4418,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Incoiler temperature",
-              "nl": "Huidige Condensor temperatuur",
+              "nl": "Huidige condensortemperatuur",
               "de": "Aktuelle Kondensator-Temperatur",
               "fr": "Température actuelle du condenseur"
             },
@@ -4441,19 +4441,19 @@
         "id": "inlet_temperature_changed",
         "title": {
           "en": "Inlet temperature changed",
-          "nl": "Water intrede temperatuur gewijzigd",
+          "nl": "Waterintredetemperatuur gewijzigd",
           "de": "Vorlauftemperatur geändert",
           "fr": "Température d'entrée changée"
         },
         "titleFormatted": {
           "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
-          "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "nl": "Waterintredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
           "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
           "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water inlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer waterintredetemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Vorlauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'entrée d'eau dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4520,7 +4520,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current inlet temperature",
-              "nl": "Huidige water intrede temperatuur",
+              "nl": "Huidige waterintredetemperatuur",
               "de": "Aktuelle Vorlauftemperatur",
               "fr": "Température d'entrée actuelle"
             },
@@ -4532,19 +4532,19 @@
         "id": "inlet_temperature_changed_aurora3",
         "title": {
           "en": "Inlet temperature changed",
-          "nl": "Water intrede temperatuur gewijzigd",
+          "nl": "Waterintredetemperatuur gewijzigd",
           "de": "Vorlauftemperatur geändert",
           "fr": "Température d'entrée changée"
         },
         "titleFormatted": {
           "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
-          "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "nl": "Waterintredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
           "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
           "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water inlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer waterintredetemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Vorlauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'entrée d'eau dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4612,7 +4612,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current inlet temperature",
-              "nl": "Huidige water intrede temperatuur",
+              "nl": "Huidige waterintredetemperatuur",
               "de": "Aktuelle Vorlauftemperatur",
               "fr": "Température d'entrée actuelle"
             },
@@ -4624,19 +4624,19 @@
         "id": "inlet_temperature_changed_modbus",
         "title": {
           "en": "Inlet temperature changed",
-          "nl": "Water intrede temperatuur gewijzigd",
+          "nl": "Waterintredetemperatuur gewijzigd",
           "de": "Vorlauftemperatur geändert",
           "fr": "Température d'entrée changée"
         },
         "titleFormatted": {
           "en": "Inlet temperature changed [[condition]] [[temperature]]°C",
-          "nl": "Water intrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "nl": "Waterintredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
           "de": "Vorlauftemperatur geändert [[condition]] [[temperature]]°C",
           "fr": "Température d'entrée changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water inlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water intrede temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer waterintredetemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Vorlauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'entrée d'eau dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -4703,7 +4703,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current inlet temperature",
-              "nl": "Huidige water intrede temperatuur",
+              "nl": "Huidige waterintredetemperatuur",
               "de": "Aktuelle Vorlauftemperatur",
               "fr": "Température d'entrée actuelle"
             },
@@ -4716,13 +4716,13 @@
         "id": "inlet_temperature_value_changed",
         "title": {
           "en": "Inlet temperature has changed",
-          "nl": "Water intrede temperatuur is veranderd",
+          "nl": "Waterintredetemperatuur is veranderd",
           "de": "Vorlauftemperatur hat sich geändert",
           "fr": "La température d'entrée a changé"
         },
         "hint": {
           "en": "Triggers when water inlet temperature changes by at least 0.5°C",
-          "nl": "Wordt geactiveerd wanneer de water intrede temperatuur minimaal 0,5°C wijzigt",
+          "nl": "Wordt geactiveerd wanneer de waterintredetemperatuur minimaal 0,5°C wijzigt",
           "de": "Wird ausgelöst, wenn sich die Vorlauftemperatur um mindestens 0,5°C ändert",
           "fr": "Se déclenche lorsque la température d'entrée d'eau change d'au moins 0,5°C"
         },
@@ -4740,7 +4740,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current inlet temperature",
-              "nl": "Huidige water intrede temperatuur",
+              "nl": "Huidige waterintredetemperatuur",
               "de": "Aktuelle Vorlauftemperatur",
               "fr": "Température d'entrée actuelle"
             },
@@ -4751,7 +4751,7 @@
             "name": "previous_temperature",
             "title": {
               "en": "Previous inlet temperature",
-              "nl": "Vorige water intrede temperatuur",
+              "nl": "Vorige waterintredetemperatuur",
               "de": "Vorherige Vorlauftemperatur",
               "fr": "Température d'entrée précédente"
             },
@@ -4774,13 +4774,13 @@
         "id": "inlet_temperature_value_changed_aurora3",
         "title": {
           "en": "Inlet temperature is changed",
-          "nl": "Water intrede temperatuur is veranderd",
+          "nl": "Waterintredetemperatuur is veranderd",
           "de": "Vorlauftemperatur hat sich geändert",
           "fr": "La température d'entrée a changé"
         },
         "hint": {
           "en": "Triggers when water inlet temperature changes by at least 0.5°C",
-          "nl": "Wordt geactiveerd wanneer de water intrede temperatuur minimaal 0,5°C wijzigt",
+          "nl": "Wordt geactiveerd wanneer de waterintredetemperatuur minimaal 0,5°C wijzigt",
           "de": "Wird ausgelöst, wenn sich die Vorlauftemperatur um mindestens 0,5°C ändert",
           "fr": "Se déclenche lorsque la température d'entrée d'eau change d'au moins 0,5°C"
         },
@@ -4797,7 +4797,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current inlet temperature",
-              "nl": "Huidige water intrede temperatuur",
+              "nl": "Huidige waterintredetemperatuur",
               "de": "Aktuelle Vorlauftemperatur",
               "fr": "Température d'entrée actuelle"
             },
@@ -4808,7 +4808,7 @@
             "name": "previous_temperature",
             "title": {
               "en": "Previous inlet temperature",
-              "nl": "Vorige water intrede temperatuur",
+              "nl": "Vorige waterintredetemperatuur",
               "de": "Vorherige Vorlauftemperatur",
               "fr": "Température d'entrée précédente"
             },
@@ -4919,7 +4919,7 @@
         },
         "hint": {
           "en": "Triggers when low pressure saturation temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Niederdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de saturation basse pression dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -5021,7 +5021,7 @@
         },
         "hint": {
           "en": "Triggers when low pressure saturation temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer lagedruk verzadigingstemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Niederdruck-Sättigungstemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de saturation basse pression dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -5226,19 +5226,19 @@
         "id": "outlet_temperature_changed",
         "title": {
           "en": "Outlet temperature changed",
-          "nl": "Water uittrede temperatuur gewijzigd",
+          "nl": "Wateruittredetemperatuur gewijzigd",
           "de": "Rücklauftemperatur geändert",
           "fr": "Température de sortie changée"
         },
         "titleFormatted": {
           "en": "Outlet temperature changed [[condition]] [[temperature]]°C",
-          "nl": "Water uittrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "nl": "Wateruittredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
           "de": "Rücklauftemperatur geändert [[condition]] [[temperature]]°C",
           "fr": "Température de sortie changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water outlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer wateruittredetemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Rücklauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de sortie d'eau dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -5305,7 +5305,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current outlet temperature",
-              "nl": "Huidige water uittrede temperatuur",
+              "nl": "Huidige wateruittredetemperatuur",
               "de": "Aktuelle Rücklauftemperatur",
               "fr": "Température de sortie actuelle"
             },
@@ -5317,19 +5317,19 @@
         "id": "outlet_temperature_changed_aurora3",
         "title": {
           "en": "Outlet temperature changed",
-          "nl": "Water uittrede temperatuur gewijzigd",
+          "nl": "Wateruittredetemperatuur gewijzigd",
           "de": "Rücklauftemperatur geändert",
           "fr": "Température de sortie changée"
         },
         "titleFormatted": {
           "en": "Outlet temperature changed [[condition]] [[temperature]]°C",
-          "nl": "Water uittrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "nl": "Wateruittredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
           "de": "Rücklauftemperatur geändert [[condition]] [[temperature]]°C",
           "fr": "Température de sortie changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water outlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer wateruittredetemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Rücklauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de sortie d'eau dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -5397,7 +5397,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current outlet temperature",
-              "nl": "Huidige water uittrede temperatuur",
+              "nl": "Huidige wateruittredetemperatuur",
               "de": "Aktuelle Rücklauftemperatur",
               "fr": "Température de sortie actuelle"
             },
@@ -5409,19 +5409,19 @@
         "id": "outlet_temperature_changed_modbus",
         "title": {
           "en": "Outlet temperature changed",
-          "nl": "Water uittrede temperatuur gewijzigd",
+          "nl": "Wateruittredetemperatuur gewijzigd",
           "de": "Rücklauftemperatur geändert",
           "fr": "Température de sortie changée"
         },
         "titleFormatted": {
           "en": "Outlet temperature changed [[condition]] [[temperature]]°C",
-          "nl": "Water uittrede temperatuur gewijzigd [[condition]] [[temperature]]°C",
+          "nl": "Wateruittredetemperatuur gewijzigd [[condition]] [[temperature]]°C",
           "de": "Rücklauftemperatur geändert [[condition]] [[temperature]]°C",
           "fr": "Température de sortie changée [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water outlet temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer water uittrede temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer wateruittredetemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Rücklauftemperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température de sortie d'eau dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -5488,7 +5488,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current outlet temperature",
-              "nl": "Huidige water uittrede temperatuur",
+              "nl": "Huidige wateruittredetemperatuur",
               "de": "Aktuelle Rücklauftemperatur",
               "fr": "Température de sortie actuelle"
             },
@@ -5501,13 +5501,13 @@
         "id": "outlet_temperature_value_changed",
         "title": {
           "en": "Outlet temperature has changed",
-          "nl": "Water uittrede temperatuur is veranderd",
+          "nl": "Wateruittredetemperatuur is veranderd",
           "de": "Rücklauftemperatur hat sich geändert",
           "fr": "La température de sortie a changé"
         },
         "hint": {
           "en": "Triggers when water outlet temperature changes by at least 0.5°C",
-          "nl": "Wordt geactiveerd wanneer de water uittrede temperatuur minimaal 0,5°C wijzigt",
+          "nl": "Wordt geactiveerd wanneer de wateruittredetemperatuur minimaal 0,5°C wijzigt",
           "de": "Wird ausgelöst, wenn sich die Rücklauftemperatur um mindestens 0,5°C ändert",
           "fr": "Se déclenche lorsque la température de sortie d'eau change d'au moins 0,5°C"
         },
@@ -5525,7 +5525,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current outlet temperature",
-              "nl": "Huidige water uittrede temperatuur",
+              "nl": "Huidige wateruittredetemperatuur",
               "de": "Aktuelle Rücklauftemperatur",
               "fr": "Température de sortie actuelle"
             },
@@ -5536,7 +5536,7 @@
             "name": "previous_temperature",
             "title": {
               "en": "Previous outlet temperature",
-              "nl": "Vorige water uittrede temperatuur",
+              "nl": "Vorige wateruittredetemperatuur",
               "de": "Vorherige Rücklauftemperatur",
               "fr": "Température de sortie précédente"
             },
@@ -5559,13 +5559,13 @@
         "id": "outlet_temperature_value_changed_aurora3",
         "title": {
           "en": "Outlet temperature is changed",
-          "nl": "Water uittrede temperatuur is veranderd",
+          "nl": "Wateruittredetemperatuur is veranderd",
           "de": "Rücklauftemperatur hat sich geändert",
           "fr": "La température de sortie a changé"
         },
         "hint": {
           "en": "Triggers when water outlet temperature changes by at least 0.5°C",
-          "nl": "Wordt geactiveerd wanneer de water uittrede temperatuur minimaal 0,5°C wijzigt",
+          "nl": "Wordt geactiveerd wanneer de wateruittredetemperatuur minimaal 0,5°C wijzigt",
           "de": "Wird ausgelöst, wenn sich die Rücklauftemperatur um mindestens 0,5°C ändert",
           "fr": "Se déclenche lorsque la température de sortie d'eau change d'au moins 0,5°C"
         },
@@ -5582,7 +5582,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current outlet temperature",
-              "nl": "Huidige water uittrede temperatuur",
+              "nl": "Huidige wateruittredetemperatuur",
               "de": "Aktuelle Rücklauftemperatur",
               "fr": "Température de sortie actuelle"
             },
@@ -5593,7 +5593,7 @@
             "name": "previous_temperature",
             "title": {
               "en": "Previous outlet temperature",
-              "nl": "Vorige water uittrede temperatuur",
+              "nl": "Vorige wateruittredetemperatuur",
               "de": "Vorherige Rücklauftemperatur",
               "fr": "Température de sortie précédente"
             },
@@ -6136,19 +6136,19 @@
         "id": "suction_temperature_alert",
         "title": {
           "en": "Suction temperature alert",
-          "nl": "Zuiggas temperatuur alarm",
+          "nl": "Alarm zuiggastemperatuur",
           "de": "Sauggas-Temperaturalarm",
           "fr": "Alerte de température d'aspiration"
         },
         "titleFormatted": {
           "en": "Suction temperature [[condition]] [[temperature]]°C",
-          "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Zuiggastemperatuur [[condition]] [[temperature]]°C",
           "de": "Sauggas-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température d'aspiration [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when suction temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer zuiggastemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Sauggas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'aspiration dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -6215,7 +6215,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Suction temperature",
-              "nl": "Huidige Zuiggas temperatuur",
+              "nl": "Huidige zuiggastemperatuur",
               "de": "Aktuelle Sauggas-Temperatur",
               "fr": "Température d'aspiration actuelle"
             },
@@ -6238,19 +6238,19 @@
         "id": "suction_temperature_alert_aurora3",
         "title": {
           "en": "Suction temperature alert",
-          "nl": "Zuiggas temperatuur alarm",
+          "nl": "Alarm zuiggastemperatuur",
           "de": "Sauggas-Temperaturalarm",
           "fr": "Alerte de température d'aspiration"
         },
         "titleFormatted": {
           "en": "Suction temperature [[condition]] [[temperature]]°C",
-          "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Zuiggastemperatuur [[condition]] [[temperature]]°C",
           "de": "Sauggas-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température d'aspiration [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when suction temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer zuiggastemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Sauggas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'aspiration dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -6317,7 +6317,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Suction temperature",
-              "nl": "Huidige Zuiggas temperatuur",
+              "nl": "Huidige zuiggastemperatuur",
               "de": "Aktuelle Sauggas-Temperatur",
               "fr": "Température d'aspiration actuelle"
             },
@@ -6340,19 +6340,19 @@
         "id": "suction_temperature_alert_modbus",
         "title": {
           "en": "Suction temperature alert",
-          "nl": "Zuiggas temperatuur alarm",
+          "nl": "Alarm zuiggastemperatuur",
           "de": "Sauggas-Temperaturalarm",
           "fr": "Alerte de température d'aspiration"
         },
         "titleFormatted": {
           "en": "Suction temperature [[condition]] [[temperature]]°C",
-          "nl": "Zuiggas temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Zuiggastemperatuur [[condition]] [[temperature]]°C",
           "de": "Sauggas-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température d'aspiration [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when suction temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer zuiggas temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer zuiggastemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Sauggas-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température d'aspiration dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -6419,7 +6419,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Suction temperature",
-              "nl": "Huidige Zuiggas temperatuur",
+              "nl": "Huidige zuiggastemperatuur",
               "de": "Aktuelle Sauggas-Temperatur",
               "fr": "Température d'aspiration actuelle"
             },
@@ -6442,19 +6442,19 @@
         "id": "tank_temperature_alert",
         "title": {
           "en": "Tank temperature alert",
-          "nl": "Tapwater temperatuur alarm",
+          "nl": "Alarm tapwatertemperatuur",
           "de": "Warmwasser-Temperaturalarm",
           "fr": "Alerte de température du ballon"
         },
         "titleFormatted": {
           "en": "Tank temperature [[condition]] [[temperature]]°C",
-          "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Tapwatertemperatuur [[condition]] [[temperature]]°C",
           "de": "Warmwasser-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température du ballon [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water tank temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer tapwatertemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Warmwasser-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du ballon dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -6521,7 +6521,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Tank temperature",
-              "nl": "Huidige Tapwater temperatuur",
+              "nl": "Huidige tapwatertemperatuur",
               "de": "Aktuelle Warmwasser-Temperatur",
               "fr": "Température actuelle du ballon"
             },
@@ -6544,19 +6544,19 @@
         "id": "tank_temperature_alert_aurora3",
         "title": {
           "en": "Tank temperature alert",
-          "nl": "Tapwater temperatuur alarm",
+          "nl": "Alarm tapwatertemperatuur",
           "de": "Warmwasser-Temperaturalarm",
           "fr": "Alerte de température du ballon"
         },
         "titleFormatted": {
           "en": "Tank temperature [[condition]] [[temperature]]°C",
-          "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Tapwatertemperatuur [[condition]] [[temperature]]°C",
           "de": "Warmwasser-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température du ballon [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water tank temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer tapwatertemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Warmwasser-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du ballon dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -6624,7 +6624,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Tank temperature",
-              "nl": "Huidige Tapwater temperatuur",
+              "nl": "Huidige tapwatertemperatuur",
               "de": "Aktuelle Warmwasser-Temperatur",
               "fr": "Température actuelle du ballon"
             },
@@ -6647,19 +6647,19 @@
         "id": "tank_temperature_alert_modbus",
         "title": {
           "en": "Tank temperature alert",
-          "nl": "Tapwater temperatuur alarm",
+          "nl": "Alarm tapwatertemperatuur",
           "de": "Warmwasser-Temperaturalarm",
           "fr": "Alerte de température du ballon"
         },
         "titleFormatted": {
           "en": "Tank temperature [[condition]] [[temperature]]°C",
-          "nl": "Tapwater temperatuur [[condition]] [[temperature]]°C",
+          "nl": "Tapwatertemperatuur [[condition]] [[temperature]]°C",
           "de": "Warmwasser-Temperatur [[condition]] [[temperature]]°C",
           "fr": "Température du ballon [[condition]] [[temperature]]°C"
         },
         "hint": {
           "en": "Triggers when water tank temperature goes above or below a specified level",
-          "nl": "Wordt geactiveerd wanneer tapwater temperatuur boven of onder een bepaald nivo gaat",
+          "nl": "Wordt geactiveerd wanneer tapwatertemperatuur boven of onder een bepaald niveau gaat",
           "de": "Wird ausgelöst, wenn die Warmwasser-Temperatur einen angegebenen Schwellenwert über- oder unterschreitet",
           "fr": "Se déclenche lorsque la température du ballon dépasse ou descend en dessous d'un niveau spécifié"
         },
@@ -6726,7 +6726,7 @@
             "name": "current_temperature",
             "title": {
               "en": "Current Tank temperature",
-              "nl": "Huidige Tapwater temperatuur",
+              "nl": "Huidige tapwatertemperatuur",
               "de": "Aktuelle Warmwasser-Temperatur",
               "fr": "Température actuelle du ballon"
             },
@@ -9271,19 +9271,19 @@
         "id": "hotwater_temperature_is",
         "title": {
           "en": "Hot water temperature is",
-          "nl": "Warm water temperatuur is",
+          "nl": "Warmwatertemperatuur is",
           "de": "Warmwassertemperatur ist",
           "fr": "La température de l'eau chaude est"
         },
         "titleFormatted": {
           "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-          "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+          "nl": "Warmwatertemperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
           "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
           "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
         },
         "hint": {
           "en": "Check if the hot water temperature matches the specified condition",
-          "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+          "nl": "Controleer of de warmwatertemperatuur voldoet aan de opgegeven voorwaarde",
           "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
           "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
         },
@@ -9337,7 +9337,7 @@
             "name": "temperature",
             "title": {
               "en": " Hot water temperature ",
-              "nl": " Warm water temperatuur ",
+              "nl": " Warmwatertemperatuur ",
               "de": " Warmwassertemperatur ",
               "fr": " Température de l'eau chaude "
             },
@@ -9347,7 +9347,7 @@
             "units": "°C",
             "placeholder": {
               "en": "Hot water temperature in °C",
-              "nl": "Warm water temperatuur in °C",
+              "nl": "Warmwatertemperatuur in °C",
               "de": "Warmwassertemperatur in °C",
               "fr": "Température de l'eau chaude en °C"
             }
@@ -9358,19 +9358,19 @@
         "id": "hotwater_temperature_is_aurora3",
         "title": {
           "en": "Hot water temperature is",
-          "nl": "Warm water temperatuur is",
+          "nl": "Warmwatertemperatuur is",
           "de": "Warmwassertemperatur ist",
           "fr": "La température de l'eau chaude est"
         },
         "titleFormatted": {
           "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-          "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+          "nl": "Warmwatertemperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
           "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
           "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
         },
         "hint": {
           "en": "Check if the hot water temperature matches the specified condition",
-          "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+          "nl": "Controleer of de warmwatertemperatuur voldoet aan de opgegeven voorwaarde",
           "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
           "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
         },
@@ -9425,7 +9425,7 @@
             "name": "temperature",
             "title": {
               "en": " Hot water temperature ",
-              "nl": " Warm water temperatuur ",
+              "nl": " Warmwatertemperatuur ",
               "de": " Warmwassertemperatur ",
               "fr": " Température de l'eau chaude "
             },
@@ -9435,7 +9435,7 @@
             "units": "°C",
             "placeholder": {
               "en": "Hot water temperature in °C",
-              "nl": "Warm water temperatuur in °C",
+              "nl": "Warmwatertemperatuur in °C",
               "de": "Warmwassertemperatur in °C",
               "fr": "Température de l'eau chaude en °C"
             }
@@ -9446,19 +9446,19 @@
         "id": "hotwater_temperature_is_modbus",
         "title": {
           "en": "Hot water temperature is",
-          "nl": "Warm water temperatuur is",
+          "nl": "Warmwatertemperatuur is",
           "de": "Warmwassertemperatur ist",
           "fr": "La température de l'eau chaude est"
         },
         "titleFormatted": {
           "en": "Hot water temperature !{{is|is not}} [[comparison]] [[temperature]]°C",
-          "nl": "Warm water temperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
+          "nl": "Warmwatertemperatuur !{{is|is niet}} [[comparison]] [[temperature]]°C",
           "de": "Warmwassertemperatur !{{ist|ist nicht}} [[comparison]] [[temperature]]°C",
           "fr": "La température de l'eau chaude !{{est|n'est pas}} [[comparison]] [[temperature]]°C"
         },
         "hint": {
           "en": "Check if the hot water temperature matches the specified condition",
-          "nl": "Controleer of de warm water temperatuur voldoet aan de opgegeven voorwaarde",
+          "nl": "Controleer of de warmwatertemperatuur voldoet aan de opgegeven voorwaarde",
           "de": "Prüfen Sie, ob die Warmwassertemperatur der angegebenen Bedingung entspricht",
           "fr": "Vérifier si la température de l'eau chaude correspond à la condition spécifiée"
         },
@@ -9512,7 +9512,7 @@
             "name": "temperature",
             "title": {
               "en": " Hot water temperature ",
-              "nl": " Warm water temperatuur ",
+              "nl": " Warmwatertemperatuur ",
               "de": " Warmwassertemperatur ",
               "fr": " Température de l'eau chaude "
             },
@@ -9522,7 +9522,7 @@
             "units": "°C",
             "placeholder": {
               "en": "Hot water temperature in °C",
-              "nl": "Warm water temperatuur in °C",
+              "nl": "Warmwatertemperatuur in °C",
               "de": "Warmwassertemperatur in °C",
               "fr": "Température de l'eau chaude en °C"
             }
@@ -16649,19 +16649,19 @@
         "id": "set_hotwater_temperature",
         "title": {
           "en": "Set hot water temperature",
-          "nl": "Warm water temperatuur instellen",
+          "nl": "Warmwatertemperatuur instellen",
           "de": "Warmwassertemperatur einstellen",
           "fr": "Régler la température de l'eau chaude"
         },
         "titleFormatted": {
           "en": "Set hot water temperature to [[temperature]]",
-          "nl": "Warm water temperatuur instellen op [[temperature]]",
+          "nl": "Warmwatertemperatuur instellen op [[temperature]]",
           "de": "Warmwassertemperatur einstellen auf [[temperature]]",
           "fr": "Régler la température de l'eau chaude sur [[temperature]]"
         },
         "hint": {
           "en": "Set the hot water temperature setting",
-          "nl": "Stel de warm water temperatuur in",
+          "nl": "Stel de warmwatertemperatuur in",
           "de": "Warmwassertemperatureinstellung einstellen",
           "fr": "Régler la température de l'eau chaude"
         },
@@ -16677,7 +16677,7 @@
             "name": "temperature",
             "title": {
               "en": " Hot water temperature (°C)",
-              "nl": " Warm water temperatuur (°C)",
+              "nl": " Warmwatertemperatuur (°C)",
               "de": " Warmwassertemperatur (°C)",
               "fr": " Température de l'eau chaude (°C)"
             },
@@ -16687,7 +16687,7 @@
             "units": "°C",
             "placeholder": {
               "en": "Hot water temperature in °C",
-              "nl": "Warm water temperatuur in °C",
+              "nl": "Warmwatertemperatuur in °C",
               "de": "Warmwassertemperatur in °C",
               "fr": "Température de l'eau chaude en °C"
             }
@@ -16698,19 +16698,19 @@
         "id": "set_hotwater_temperature_aurora3",
         "title": {
           "en": "Set hot water temperature",
-          "nl": "Warm water temperatuur instellen",
+          "nl": "Warmwatertemperatuur instellen",
           "de": "Warmwassertemperatur einstellen",
           "fr": "Régler la température de l'eau chaude"
         },
         "titleFormatted": {
           "en": "Set hot water temperature to [[temperature]]",
-          "nl": "Warm water temperatuur instellen op [[temperature]]",
+          "nl": "Warmwatertemperatuur instellen op [[temperature]]",
           "de": "Warmwassertemperatur einstellen auf [[temperature]]",
           "fr": "Régler la température de l'eau chaude sur [[temperature]]"
         },
         "hint": {
           "en": "Set the hot water temperature setting",
-          "nl": "Stel de warm water temperatuur in",
+          "nl": "Stel de warmwatertemperatuur in",
           "de": "Warmwassertemperatureinstellung einstellen",
           "fr": "Régler la température de l'eau chaude"
         },
@@ -16726,7 +16726,7 @@
             "name": "temperature",
             "title": {
               "en": " Hot water temperature (°C)",
-              "nl": " Warm water temperatuur (°C)",
+              "nl": " Warmwatertemperatuur (°C)",
               "de": " Warmwassertemperatur (°C)",
               "fr": " Température de l'eau chaude (°C)"
             },
@@ -16736,7 +16736,7 @@
             "units": "°C",
             "placeholder": {
               "en": "Hot water temperature in °C",
-              "nl": "Warm water temperatuur in °C",
+              "nl": "Warmwatertemperatuur in °C",
               "de": "Warmwassertemperatur in °C",
               "fr": "Température de l'eau chaude en °C"
             }
@@ -16747,19 +16747,19 @@
         "id": "set_hotwater_temperature_modbus",
         "title": {
           "en": "Set hot water temperature",
-          "nl": "Warm water temperatuur instellen",
+          "nl": "Warmwatertemperatuur instellen",
           "de": "Warmwassertemperatur einstellen",
           "fr": "Régler la température de l'eau chaude"
         },
         "titleFormatted": {
           "en": "Set hot water temperature to [[temperature]]",
-          "nl": "Warm water temperatuur instellen op [[temperature]]",
+          "nl": "Warmwatertemperatuur instellen op [[temperature]]",
           "de": "Warmwassertemperatur einstellen auf [[temperature]]",
           "fr": "Régler la température de l'eau chaude sur [[temperature]]"
         },
         "hint": {
           "en": "Set the hot water temperature setting",
-          "nl": "Stel de warm water temperatuur in",
+          "nl": "Stel de warmwatertemperatuur in",
           "de": "Warmwassertemperatureinstellung einstellen",
           "fr": "Régler la température de l'eau chaude"
         },
@@ -16775,7 +16775,7 @@
             "name": "temperature",
             "title": {
               "en": " Hot water temperature (°C)",
-              "nl": " Warm water temperatuur (°C)",
+              "nl": " Warmwatertemperatuur (°C)",
               "de": " Warmwassertemperatur (°C)",
               "fr": " Température de l'eau chaude (°C)"
             },
@@ -16785,7 +16785,7 @@
             "units": "°C",
             "placeholder": {
               "en": "Hot water temperature in °C",
-              "nl": "Warm water temperatuur in °C",
+              "nl": "Warmwatertemperatuur in °C",
               "de": "Warmwassertemperatur in °C",
               "fr": "Température de l'eau chaude en °C"
             }
@@ -17831,7 +17831,7 @@
         "measure_temperature.around_temp_f": {
           "title": {
             "en": "Tank temp",
-            "nl": "Tapwater temperatuur",
+            "nl": "Tapwatertemperatuur",
             "de": "Tanktemperatur",
             "fr": "Température du réservoir"
           },
@@ -17840,7 +17840,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Tank temp",
-            "nl": "Tapwater temperatuur",
+            "nl": "Tapwatertemperatuur",
             "de": "Tanktemperatur",
             "fr": "Température du réservoir"
           },
@@ -17871,7 +17871,7 @@
         "measure_temperature.temp_top": {
           "title": {
             "en": "Inlet temp",
-            "nl": "Water intrede temperatuur",
+            "nl": "Waterintredetemperatuur",
             "de": "Einlasstemperatur",
             "fr": "Température d'entrée"
           },
@@ -17880,7 +17880,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Inlet temp",
-            "nl": "Water intrede temperatuur",
+            "nl": "Waterintredetemperatuur",
             "de": "Einlasstemperatur",
             "fr": "Température d'entrée"
           },
@@ -17911,7 +17911,7 @@
         "measure_temperature.bottom_temp_f": {
           "title": {
             "en": "Incoiler temp",
-            "nl": "Condensor temperatuur",
+            "nl": "Condensortemperatuur",
             "de": "Kondensatortemperatur",
             "fr": "Température du condenseur"
           },
@@ -17920,7 +17920,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Incoiler temp",
-            "nl": "Condensor temperatuur",
+            "nl": "Condensortemperatuur",
             "de": "Kondensatortemperatur",
             "fr": "Température du condenseur"
           },
@@ -17931,7 +17931,7 @@
         "measure_temperature.coiler_temp_f": {
           "title": {
             "en": "Suction Temp",
-            "nl": "Zuiggas temperatuur",
+            "nl": "Zuiggastemperatuur",
             "de": "Saugtemperatur",
             "fr": "Température d'aspiration"
           },
@@ -17940,7 +17940,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Suction Temp",
-            "nl": "Zuiggas temperatuur",
+            "nl": "Zuiggastemperatuur",
             "de": "Saugtemperatur",
             "fr": "Température d'aspiration"
           },
@@ -17971,7 +17971,7 @@
         "measure_temperature.coiler_temp": {
           "title": {
             "en": "Coiler temp",
-            "nl": "Verdampingscondensator temperatuur",
+            "nl": "Verdampingscondensatortemperatuur",
             "de": "Verdampfer-Kondensatortemperatur",
             "fr": "Température du condenseur évaporateur"
           },
@@ -17980,7 +17980,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Coiler temp",
-            "nl": "Verdampingscondensator temperatuur",
+            "nl": "Verdampingscondensatortemperatuur",
             "de": "Verdampfer-Kondensatortemperatur",
             "fr": "Température du condenseur évaporateur"
           },
@@ -17991,7 +17991,7 @@
         "measure_temperature.evlin": {
           "title": {
             "en": "Economizer inlet Temp",
-            "nl": "EVI wamtewisselaar zuiggas temperatuur",
+            "nl": "Zuiggastemperatuur EVI-warmtewisselaar",
             "de": "Economizer-Einlasstemperatur",
             "fr": "Température d'entrée de l'économiseur"
           },
@@ -18000,7 +18000,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Economizer inlet Temp",
-            "nl": "EVI wamtewisselaar zuiggas temperatuur",
+            "nl": "Zuiggastemperatuur EVI-warmtewisselaar",
             "de": "Economizer-Einlasstemperatur",
             "fr": "Température d'entrée de l'économiseur"
           },
@@ -18011,7 +18011,7 @@
         "measure_temperature.venting_temp": {
           "title": {
             "en": "Discharge temp",
-            "nl": "Persgas temperatuur",
+            "nl": "Persgastemperatuur",
             "de": "Austrittstemperatur",
             "fr": "Température de refoulement"
           },
@@ -18020,7 +18020,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Discharge temp",
-            "nl": "Persgas temperatuur",
+            "nl": "Persgastemperatuur",
             "de": "Austrittstemperatur",
             "fr": "Température de refoulement"
           },
@@ -18031,7 +18031,7 @@
         "measure_temperature.temp_bottom": {
           "title": {
             "en": "Outlet temp",
-            "nl": "Water uittrede temperatuur",
+            "nl": "Wateruittredetemperatuur",
             "de": "Auslasstemperatur",
             "fr": "Température de sortie"
           },
@@ -18040,7 +18040,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Outlet temp",
-            "nl": "Water uittrede temperatuur",
+            "nl": "Wateruittredetemperatuur",
             "de": "Auslasstemperatur",
             "fr": "Température de sortie"
           },
@@ -18051,7 +18051,7 @@
         "measure_temperature.eviout": {
           "title": {
             "en": "Economizer outlet Temp",
-            "nl": "EVI wamtewisselaar persgas temperatuur",
+            "nl": "Persgastemperatuur EVI-warmtewisselaar",
             "de": "Economizer-Auslasstemperatur",
             "fr": "Température de sortie de l'économiseur"
           },
@@ -18060,7 +18060,7 @@
           "insights": true,
           "insightsTitle": {
             "en": "Economizer outlet Temp",
-            "nl": "EVI wamtewisselaar persgas temperatuur",
+            "nl": "Persgastemperatuur EVI-warmtewisselaar",
             "de": "Economizer-Auslasstemperatur",
             "fr": "Température de sortie de l'économiseur"
           },
@@ -18694,7 +18694,7 @@
               },
               "hint": {
                 "en": "Show/hide 3 slider control capabilities (hot water temperature, water mode, volume settings). Disable for cleaner interface if you don't need manual control sliders. Requires app restart to take effect.",
-                "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwater temperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben.",
+                "nl": "Toon/verberg 3 schuifbalk besturing capabilities (warmwatertemperatuur, water modus, volume instellingen). Uitschakelen voor schonere interface als u geen handmatige schuifbalken nodig heeft. Vereist app herstart om effect te hebben.",
                 "de": "Zeigen/Verbergen Sie 3 Schieberegler-Steuerungen (Warmwassertemperatur, Wassermodus, Volumeneinstellungen). Deaktivieren Sie für eine übersichtlichere Oberfläche, wenn Sie keine manuellen Schieberegler benötigen. Erfordert App-Neustart zur Aktivierung.",
                 "fr": "Afficher/Masquer 3 contrôles curseur (température eau chaude, mode eau, réglages volume). Désactiver pour une interface plus claire si vous n'avez pas besoin de curseurs de contrôle manuel. Nécessite un redémarrage de l'app pour prendre effet."
               },
@@ -21008,12 +21008,16 @@
           "id": "dashboard_port",
           "type": "number",
           "label": {
-            "en": "Tuya dashboard port",
-            "nl": "Tuya-dashboardpoort"
+            "en": "Live monitoring port",
+            "nl": "Poort live monitoring",
+            "de": "Port für Live-Monitoring",
+            "fr": "Port de la surveillance en direct"
           },
           "hint": {
-            "en": "Open http://HOMEY-IP:8092 (or this port). Shared by all Tuya devices. At startup the first device selects the port; changing this setting moves the shared dashboard.",
-            "nl": "Open http://HOMEY-IP:8092 (of deze poort). Gedeeld door alle Tuya-apparaten. Bij opstarten kiest het eerste apparaat de poort; wijzigen van deze instelling verplaatst het gezamenlijke dashboard."
+            "en": "Default 8092. Shared by all Tuya devices; at startup the first device selects the port. Change only if this port is already in use. See the guide on the source code page.",
+            "nl": "Standaard 8092. Gedeeld door alle Tuya-apparaten; bij het opstarten kiest het eerste apparaat de poort. Wijzig alleen als deze poort al in gebruik is. Zie de handleiding op de broncodepagina.",
+            "de": "Standard 8092. Wird von allen Tuya-Geräten gemeinsam genutzt; beim Start wählt das erste Gerät den Port. Nur ändern, wenn dieser Port bereits belegt ist. Siehe die Anleitung auf der Quellcode-Seite.",
+            "fr": "Par défaut 8092. Partagé par tous les appareils Tuya ; au démarrage, le premier appareil choisit le port. À modifier uniquement si ce port est déjà utilisé. Voir le guide sur la page du code source."
           },
           "value": 8092,
           "min": 1,
@@ -21279,7 +21283,7 @@
         "measure_temperature.outer_coil": {
           "title": {
             "en": "Outdoor coil temperature (T3)",
-            "nl": "Buitenspoel temperatuur (T3)",
+            "nl": "Buitenspoeltemperatuur (T3)",
             "de": "Temperatur Außenwärmetauscher (T3)",
             "fr": "Température de l'échangeur extérieur (T3)"
           }
@@ -21498,26 +21502,26 @@
           "id": "local_dashboards",
           "type": "group",
           "label": {
-            "en": "Local Dashboards",
-            "nl": "Lokale dashboards",
-            "de": "Lokale Dashboards",
-            "fr": "Tableaux de bord locaux"
+            "en": "Live monitoring",
+            "nl": "Live monitoring",
+            "de": "Live-Monitoring",
+            "fr": "Surveillance en direct"
           },
           "children": [
             {
               "id": "dashboard_port",
               "type": "number",
               "label": {
-                "en": "Dashboard port",
-                "nl": "Dashboardpoort",
-                "de": "Dashboard-Port",
-                "fr": "Port des tableaux de bord"
+                "en": "Live monitoring port",
+                "nl": "Poort live monitoring",
+                "de": "Port für Live-Monitoring",
+                "fr": "Port de la surveillance en direct"
               },
               "hint": {
-                "en": "Local HTTP port for the Aurora III dashboards. Default is 8091 (the Aurora I/II driver uses 8090). Change this only if the port is already in use, then open http://<homey-ip>:<port>/.",
-                "nl": "Lokale HTTP-poort voor de Aurora III-dashboards. Standaard is 8091 (de Aurora I/II-driver gebruikt 8090). Wijzig dit alleen als de poort al in gebruik is en open daarna http://<homey-ip>:<poort>/.",
-                "de": "Lokaler HTTP-Port für die Aurora III-Dashboards. Standard ist 8091 (der Aurora I/II-Treiber verwendet 8090). Ändern Sie dies nur, wenn der Port bereits belegt ist, und öffnen Sie dann http://<homey-ip>:<port>/.",
-                "fr": "Port HTTP local pour les tableaux de bord Aurora III. La valeur par défaut est 8091 (le pilote Aurora I/II utilise 8090). Modifiez-le uniquement si le port est déjà utilisé, puis ouvrez http://<homey-ip>:<port>/."
+                "en": "Default 8091 (the Aurora I/II driver uses 8090). Change only if this port is already in use. See the guide on the source code page.",
+                "nl": "Standaard 8091 (de Aurora I/II-driver gebruikt 8090). Wijzig alleen als deze poort al in gebruik is. Zie de handleiding op de broncodepagina.",
+                "de": "Standard 8091 (der Aurora I/II-Treiber verwendet 8090). Nur ändern, wenn dieser Port bereits belegt ist. Siehe die Anleitung auf der Quellcode-Seite.",
+                "fr": "Par défaut 8091 (le pilote Aurora I/II utilise 8090). À modifier uniquement si ce port est déjà utilisé. Voir le guide sur la page du code source."
               },
               "value": 8091,
               "attr": {
@@ -23550,7 +23554,7 @@
         "measure_temperature.outer_coil": {
           "title": {
             "en": "Outer coil temperature (T2)",
-            "nl": "Buitenste spoel temperatuur (T2)",
+            "nl": "Temperatuur buitenste spoel (T2)",
             "de": "Temperatur Außenwärmetauscher (T2)",
             "fr": "Température de l'échangeur extérieur (T2)"
           }
@@ -23558,7 +23562,7 @@
         "measure_temperature.inner_coil": {
           "title": {
             "en": "Inner coil temperature (T3)",
-            "nl": "Binnenste spoel temperatuur (T3)",
+            "nl": "Temperatuur binnenste spoel (T3)",
             "de": "Temperatur Innenwärmetauscher (T3)",
             "fr": "Température de l'échangeur intérieur (T3)"
           }
@@ -23622,7 +23626,7 @@
         "measure_temperature.ipm": {
           "title": {
             "en": "IPM temperature",
-            "nl": "IPM temperatuur",
+            "nl": "IPM-temperatuur",
             "de": "IPM-Temperatur",
             "fr": "Température IPM"
           }
@@ -23630,7 +23634,7 @@
         "measure_temperature.plate_hx": {
           "title": {
             "en": "Plate heat exchanger temperature",
-            "nl": "Plaatwarmtewisselaar temperatuur",
+            "nl": "Temperatuur plaatwarmtewisselaar",
             "de": "Plattenwärmetauscher-Temperatur",
             "fr": "Température de l'échangeur à plaques"
           }
@@ -23814,26 +23818,26 @@
           "id": "local_dashboards",
           "type": "group",
           "label": {
-            "en": "Local Dashboards",
-            "nl": "Lokale dashboards",
-            "de": "Lokale Dashboards",
-            "fr": "Tableaux de bord locaux"
+            "en": "Live monitoring",
+            "nl": "Live monitoring",
+            "de": "Live-Monitoring",
+            "fr": "Surveillance en direct"
           },
           "children": [
             {
               "id": "dashboard_port",
               "type": "number",
               "label": {
-                "en": "Dashboard port",
-                "nl": "Dashboardpoort",
-                "de": "Dashboard-Port",
-                "fr": "Port des tableaux de bord"
+                "en": "Live monitoring port",
+                "nl": "Poort live monitoring",
+                "de": "Port für Live-Monitoring",
+                "fr": "Port de la surveillance en direct"
               },
               "hint": {
-                "en": "Local HTTP port for the dashboards. Default is 8090 (the Aurora III driver uses 8091). Change this only if the port is already in use, then open http://<homey-ip>:<port>/.",
-                "nl": "Lokale HTTP-poort voor de dashboards. Standaard is 8090 (de Aurora III-driver gebruikt 8091). Wijzig dit alleen als de poort al in gebruik is en open daarna http://<homey-ip>:<poort>/.",
-                "de": "Lokaler HTTP-Port für die Dashboards. Standard ist 8090 (der Aurora III-Treiber verwendet 8091). Ändern Sie dies nur, wenn der Port bereits belegt ist, und öffnen Sie dann http://<homey-ip>:<port>/.",
-                "fr": "Port HTTP local pour les tableaux de bord. La valeur par défaut est 8090 (le pilote Aurora III utilise 8091). Modifiez-le uniquement si le port est déjà utilisé, puis ouvrez http://<homey-ip>:<port>/."
+                "en": "Default 8090 (the Aurora III driver uses 8091). Change only if this port is already in use. See the guide on the source code page.",
+                "nl": "Standaard 8090 (de Aurora III-driver gebruikt 8091). Wijzig alleen als deze poort al in gebruik is. Zie de handleiding op de broncodepagina.",
+                "de": "Standard 8090 (der Aurora III-Treiber verwendet 8091). Nur ändern, wenn dieser Port bereits belegt ist. Siehe die Anleitung auf der Quellcode-Seite.",
+                "fr": "Par défaut 8090 (le pilote Aurora III utilise 8091). À modifier uniquement si ce port est déjà utilisé. Voir le guide sur la page du code source."
               },
               "value": 8090,
               "attr": {
@@ -27274,7 +27278,7 @@
       "uiComponent": "slider",
       "description": {
         "en": "dp 10: water_mode - Hot water control temperature setting",
-        "nl": "dp 10: water_mode - Warm water temperatuurregeling instelling",
+        "nl": "dp 10: water_mode - Warmwatertemperatuurregeling instelling",
         "de": "dp 10: water_mode - Warmwasser-Temperaturregelungseinstellung",
         "fr": "dp 10: water_mode - Réglage de la température de régulation d'eau chaude"
       }
@@ -27560,7 +27564,7 @@
       "id": "adlar_external_indoor_temperature",
       "title": {
         "en": "External Indoor Temperature",
-        "nl": "Externe Binnen Temperatuur",
+        "nl": "Externe binnentemperatuur",
         "de": "Externe Raumtemperatur",
         "fr": "Température intérieure externe"
       },
