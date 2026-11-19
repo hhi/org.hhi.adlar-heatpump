@@ -1,7 +1,10 @@
-# Guide d'implémentation des cartes Flow : cartes flow de base (v2.7.x)
+# Guide d'implémentation des cartes Flow : cartes flow de base
 
 > **Portée**: Ce guide documente les **cartes flow de base** pour la surveillance de l'appareil, le suivi de l'énergie et les calculateurs.
 > **Fonctionnalités avancées**: Voir [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.fr.md) pour le contrôle adaptatif, le modèle du bâtiment, l'optimiseur COP, l'optimiseur d'énergie, les insights bâtiment et l'intégration vent/solaire.
+> **Toutes les cartes**: Voir la
+> [référence des cartes Flow](FLOW_CARDS_REFERENCE.fr.md) pour chaque carte
+> avec ses champs, ses tokens et un exemple.
 
 Ce guide fournit des exemples pratiques, des conseils de configuration et des conseils de dépannage pour les cartes flow de base de l'application Adlar Heat Pump.
 

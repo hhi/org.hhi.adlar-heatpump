@@ -31,7 +31,7 @@ La [décision sur le tableau de bord Tuya](architecture/ADR-068-TUYA-DASHBOARD.m
 
 | Votre question | Documentation |
 | --- | --- |
-| Réglages et utilisation quotidienne | [Configuration](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md), [Flows Homey](setup/guide/FLOW_CARDS_GUIDE.fr.md), [cartes Flow avancées](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.fr.md) |
+| Réglages et utilisation quotidienne | [Configuration](setup/advanced-settings/CONFIGURATION_GUIDE.fr.md), [Flows Homey](setup/guide/FLOW_CARDS_GUIDE.fr.md), [référence des cartes Flow](setup/guide/FLOW_CARDS_REFERENCE.fr.md), [cartes Flow avancées](setup/advanced-control/ADVANCED_FLOWCARDS_GUIDE.fr.md) |
 | Courbes de chauffe et régulation adaptative | [Fonctions avancées](setup/advanced-control/Advanced_Features_Intro.fr.md), [présentation de la régulation](ADAPTIVE_CONTROL_OVERVIEW.fr.md), [guide pratique](setup/guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
 | COP, SCOP et analyse du bâtiment | [Configurer le COP](setup/COP%20flow-card-setup.fr.md), [méthodes de calcul](COP%20calculation/), [modèle du bâtiment](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md), [utiliser les analyses du bâtiment](setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
 | Problèmes ou migration | [Dépannage Tuya](setup/USER_QUICK_FIX.fr.md), [Diagnostic Modbus](setup/MODBUS_DASHBOARD_GUIDE.fr.md), [migration Aurora III](setup/MIGRATION_AURORA3.fr.md) |
@@ -66,6 +66,7 @@ La plupart de la documentation utilisateur est disponible en quatre langues :
 | **Aperçu Contrôle Adaptatif** | [NL](ADAPTIVE_CONTROL_OVERVIEW.nl.md) | [EN](ADAPTIVE_CONTROL_OVERVIEW.en.md) | [DE](ADAPTIVE_CONTROL_OVERVIEW.de.md) | [FR](ADAPTIVE_CONTROL_OVERVIEW.fr.md) |
 | **Aperçu Modèle Bâtiment & Insights** | [NL](BUILDINGMODEL_INSIGHTS_OVERVIEW.nl.md) | [EN](BUILDINGMODEL_INSIGHTS_OVERVIEW.en.md) | [DE](BUILDINGMODEL_INSIGHTS_OVERVIEW.de.md) | [FR](BUILDINGMODEL_INSIGHTS_OVERVIEW.fr.md) |
 | Guide d'implémentation des cartes Flow | [NL](setup/guide/FLOW_CARDS_GUIDE.nl.md) | [EN](setup/guide/FLOW_CARDS_GUIDE.en.md) | [DE](setup/guide/FLOW_CARDS_GUIDE.de.md) | [FR](setup/guide/FLOW_CARDS_GUIDE.fr.md) |
+| Référence des cartes Flow | [NL](setup/guide/FLOW_CARDS_REFERENCE.nl.md) | [EN](setup/guide/FLOW_CARDS_REFERENCE.en.md) | [DE](setup/guide/FLOW_CARDS_REFERENCE.de.md) | [FR](setup/guide/FLOW_CARDS_REFERENCE.fr.md) |
 | Guide du contrôle adaptatif | [NL](setup/guide/ADAPTIVE_CONTROL_GUIDE.nl.md) | [EN](setup/guide/ADAPTIVE_CONTROL_GUIDE.en.md) | [DE](setup/guide/ADAPTIVE_CONTROL_GUIDE.de.md) | [FR](setup/guide/ADAPTIVE_CONTROL_GUIDE.fr.md) |
 | Guide Building Insights | [NL](setup/guide/BUILDING_INSIGHTS_GUIDE.nl.md) | [EN](setup/guide/BUILDING_INSIGHTS_GUIDE.en.md) | [DE](setup/guide/BUILDING_INSIGHTS_GUIDE.de.md) | [FR](setup/guide/BUILDING_INSIGHTS_GUIDE.fr.md) |
 | Configuration Cartes de Flux COP | [NL](setup/COP%20flow-card-setup.nl.md) | [EN](setup/COP%20flow-card-setup.en.md) | [DE](setup/COP%20flow-card-setup.de.md) | [FR](setup/COP%20flow-card-setup.fr.md) |

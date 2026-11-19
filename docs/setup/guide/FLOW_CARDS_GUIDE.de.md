@@ -1,7 +1,10 @@
-# Flow-Karten Implementierungsleitfaden: Basis Device Flow Cards (v2.7.x)
+# Flow-Karten Implementierungsleitfaden: Basis Device Flow Cards
 
 > **Scope**: Dieser Leitfaden dokumentiert **Basis-Device-Flow-Karten** für Geräte-Monitoring, Energy Tracking und Calculatoren.
 > **Erweiterte Features**: Siehe [Advanced Flow Cards Guide](../advanced-control/ADVANCED_FLOWCARDS_GUIDE.de.md) für adaptive Regelung, Gebäudemodell, COP-Optimierer, Energieoptimierer, Gebäudeerkenntnisse und Wind/Solar-Integration.
+> **Alle Karten**: Siehe das
+> [Nachschlagewerk Flow-Karten](FLOW_CARDS_REFERENCE.de.md) für jede Karte
+> mit Feldern, Tokens und einem Beispiel.
 
 Dieser Leitfaden bietet praktische Beispiele, Konfigurationstipps und Hilfe zur Fehlerbehebung für die Basis-Flow-Karten der Adlar Wärmepumpen-App.
 
