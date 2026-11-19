@@ -1,6 +1,7 @@
 /* eslint-disable import/no-unresolved, node/no-missing-import, import/extensions */
 import { randomUUID } from 'crypto';
 import { SchemaHistoryBuffer } from '../../shared/dashboard-history';
+import { COPDiagnostic } from '../../shared/cop-diagnostics';
 import { DashboardError } from './dashboard-error';
 import { AdlarMapping } from '../definitions/adlar-mapping';
 import { DeviceConstants } from '../constants';
@@ -23,6 +24,7 @@ export interface DashboardAdapter {
   options(id: string): CapabilityMeta;
   snapshot(): LiveOperationWidgetState;
   adaptiveEnabled(): boolean;
+  copDiagnostic?(): COPDiagnostic | null;
   write(id: string, value: string | number | boolean): Promise<unknown>;
 }
 export interface DashboardTimers {
@@ -195,10 +197,11 @@ export class TuyaDashboardDevice {
       dhw: state.temperatures?.dhwC ?? null,
       room: typeof roomVal === 'number' ? roomVal : null,
       hz: state.process?.compressorHz ?? null,
-      cop: state.process?.capabilityCop ?? state.process?.liveCopEstimate ?? null,
+      cop: state.process?.capabilityCop ?? null,
     });
     return {
       ...state,
+      copDiagnostic: this.adapter.copDiagnostic?.() ?? null,
       status: {
         ...state.status,
         running: boolean('onoff'),

@@ -80,10 +80,11 @@
     '  <!-- Card 1: Realtime COP -->',
     '  <rect x="28" y="158" width="244" height="92" rx="10" fill="url(#cardSurface)" stroke="var(--c-border)" stroke-width="1"/>',
     '  <rect x="28" y="158" width="5" height="92" rx="2.5" fill="var(--c-green)" stroke="none"/>',
-    '  <text x="46" y="178" fill="var(--c-text-label)" font-family="sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.6">REALTIME COP (DIRECT THERMAL)</text>',
+    '  <text x="46" y="178" fill="var(--c-text-label)" font-family="sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.6" id="sc-cop-label">REALTIME COP</text>',
     '  <text id="sc-kpi-cop" x="46" y="214" fill="var(--c-green)" font-family="sans-serif" font-size="32" font-weight="800">4,35</text>',
     '  <text x="132" y="204" fill="var(--c-text-main)" font-family="sans-serif" font-size="11.5" font-weight="600" id="sc-kpi-scop">SCOP: 4,12</text>',
     '  <text x="132" y="220" fill="var(--c-text-label)" font-family="sans-serif" font-size="11" id="sc-kpi-cop24">24u-gem: 4,18</text>',
+    '  <text id="sc-cop-raw" x="46" y="239" fill="var(--c-amber-light)" font-family="sans-serif" font-size="10"></text>',
     '  <polyline points="46,238 80,235 115,239 150,232 185,230 220,227 254,225" fill="none" stroke="var(--c-green)" stroke-width="1.8"/>',
     '',
     '  <!-- Card 2: Compressor & Drive -->',
@@ -158,7 +159,7 @@
     '  <text x="832" y="248" fill="var(--c-text-label)" font-family="sans-serif" font-size="10">Hernieuwbare bronwarmte</text>',
     '',
     '  <rect x="820" y="264" width="160" height="58" rx="7" fill="var(--c-surface-inner)" stroke="var(--c-tint-amber)" stroke-width="1.2"/>',
-    '  <text x="832" y="282" fill="var(--c-amber-light)" font-family="sans-serif" font-size="10.5" font-weight="700">2. Elektrisch (0x005C)</text>',
+    '  <text x="832" y="282" fill="var(--c-amber-light)" font-family="sans-serif" font-size="10.5" font-weight="700" id="sc-power-label">2. Elektrisch</text>',
     '  <text id="sc-sankey-elec" x="832" y="303" fill="var(--c-text-main)" font-family="sans-serif" font-size="18" font-weight="800">1,42 kW <tspan font-size="11" fill="var(--c-amber-light)" font-weight="600">(23%)</tspan></text>',
     '  <text x="832" y="316" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" id="sc-sankey-elec-sub">231 V · 6,2 A · Totaal 1.184 kWh</text>',
     '',
@@ -382,7 +383,7 @@
     '',
     '  <!-- Floor Heating / Emitter Box -->',
     '  <rect x="1146" y="690" width="256" height="78" rx="8" fill="var(--c-panel-alt)" stroke="var(--c-orange)" stroke-width="1.2"/>',
-    '  <text x="1160" y="710" fill="var(--c-orange-pale)" font-family="sans-serif" font-size="11" font-weight="700">Vloerverwarming &amp; Parallelbuffer</text>',
+    '  <text x="1160" y="710" fill="var(--c-orange-pale)" font-family="sans-serif" font-size="11" font-weight="700">CV-afgifte (schematisch)</text>',
     '  <text id="sc-emit-temps" x="1160" y="730" fill="var(--c-text-main)" font-family="sans-serif" font-size="12">Aanvoer: <tspan fill="var(--c-orange)" font-weight="700">34,8 °C</tspan>   |   Retour: <tspan fill="var(--c-sky)" font-weight="700">29,9 °C</tspan></text>',
     '  <!-- Serpentine floor heating coil graphic -->',
     '  <path d="M 1160 744 H 1384 A 5 5 0 0 1 1384 754 H 1160" fill="none" stroke="var(--c-orange-light)" stroke-width="2" stroke-opacity="0.75"/>',
@@ -394,7 +395,7 @@
     '  <text x="1160" y="822" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Kamertemperatuur:</text>',
     '  <text x="1388" y="822" fill="var(--c-text-strong)" font-family="sans-serif" font-size="12.5" font-weight="800" text-anchor="end" id="sc-pi-room">20,6 °C (Doel 20,5°)</text>',
     '',
-    '  <text x="1160" y="842" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Stooklijn L4 + PI-correctie:</text>',
+    '  <text x="1160" y="842" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Aanvoerdoel:</text>',
     '  <text x="1388" y="842" fill="var(--c-teal)" font-family="sans-serif" font-size="11.5" font-weight="700" text-anchor="end" id="sc-pi-offset">35,0 °C (+0,0 K)</text>',
     '',
     '  <text x="1160" y="862" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Thermische capaciteit (C):</text>',
@@ -406,11 +407,11 @@
     '  <text x="1160" y="902" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Thermische tijdconstante (τ):</text>',
     '  <text x="1388" y="902" fill="var(--c-purple-light)" font-family="sans-serif" font-size="11.5" font-weight="700" text-anchor="end" id="sc-bm-tau">67,4 uur</text>',
     '',
-    '  <text x="1160" y="922" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Open-Meteo 6u:</text>',
+    '  <text x="1160" y="922" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Weerprognose 6u:</text>',
     '  <text x="1388" y="922" fill="var(--c-sky)" font-family="sans-serif" font-size="11" font-weight="600" text-anchor="end" id="sc-bm-weather">+6,2 °C (Geen pre-heat)</text>',
     '',
     '  <!-- Model Confidence Bar -->',
-    '  <text x="1160" y="946" fill="var(--c-text-label)" font-family="sans-serif" font-size="10">RLS Model-betrouwbaarheid (Vergeetfactor λ=0,995):</text>',
+    '  <text x="1160" y="946" fill="var(--c-text-label)" font-family="sans-serif" font-size="10">RLS Model-betrouwbaarheid:</text>',
     '  <rect x="1160" y="953" width="188" height="7" rx="3.5" fill="var(--c-border)" stroke="none"/>',
     '  <rect id="sc-rls-bar" x="1160" y="953" width="165" height="7" rx="3.5" fill="var(--c-purple)" stroke="none"/>',
     '  <text x="1388" y="960" fill="var(--c-purple-light)" font-family="sans-serif" font-size="10.5" font-weight="700" text-anchor="end" id="sc-rls-pct">88%</text>',
@@ -434,7 +435,7 @@
     '  <line x1="938" y1="1040" x2="956" y2="1040" stroke="var(--c-sky)" stroke-width="3.5"/>',
     '  <text x="962" y="1044" fill="var(--c-text-main)" font-family="sans-serif" font-size="11">Retour (T6)</text>',
     '  <line x1="1038" y1="1040" x2="1056" y2="1040" stroke="var(--c-orange-light)" stroke-width="2.5" stroke-dasharray="4 3"/>',
-    '  <text x="1062" y="1044" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">SWW-Laadcircuit (Stand-by)</text>',
+    '  <text x="1062" y="1044" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">SWW-Laadcircuit</text>',
     '',
     '',
     '  <!-- ==================== LAAG 3: ONDERBALK IN 3 KOLOMMEN (24U GRAFIEK + STOOKLIJN-KRUISDRAAD + POLL-DIAGNOSTIEK) ==================== -->',
@@ -443,8 +444,8 @@
     '',
     '  <!-- Kolom 1 (Links, x=28..668): 24u Temperatuur & Compressor Grafiek -->',
     '  <rect x="28" y="1124" width="640" height="420" rx="10" fill="url(#cardSurface)" stroke="var(--c-border)" stroke-width="1"/>',
-    '  <text x="48" y="1150" fill="var(--c-text-h1)" font-family="sans-serif" font-size="14" font-weight="700">24-Uurs Verloop — Temperaturen (°C) &amp; Compressor (Hz)</text>',
-    '  <text x="648" y="1150" fill="var(--c-text-label)" font-family="sans-serif" font-size="11" text-anchor="end">SUPERFAST / Insights (5 s)</text>',
+    '  <text x="48" y="1150" fill="var(--c-text-h1)" font-family="sans-serif" font-size="14" font-weight="700">Gemeten historie — Temperaturen (°C) &amp; Compressor (Hz)</text>',
+    '  <text x="648" y="1150" fill="var(--c-text-label)" font-family="sans-serif" font-size="11" text-anchor="end">Gemeten historie sinds appstart</text>',
     '',
     '  <!-- Chart Axes (x=72..638, y=1180..1410) -->',
     '  <text x="62" y="1184" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" text-anchor="end">60°</text>',
@@ -474,9 +475,9 @@
     '  <!-- T1 Ambient 7.4°C -->',
     '  <path id="sc-chart-t1" d="M 70 1332 C 160 1342, 260 1344, 380 1326 C 480 1318, 560 1328, 642 1332" fill="none" stroke="var(--c-teal)" stroke-width="2"/>',
     '',
-    '  <text x="70" y="1372" fill="var(--c-text-label)" font-family="sans-serif" font-size="10">-24u (20:15)</text>',
-    '  <text x="356" y="1372" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" text-anchor="middle">-12u (08:15)</text>',
-    '  <text x="642" y="1372" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" text-anchor="end">Nu (20:15)</text>',
+    '  <text x="70" y="1372" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" id="sc-time-start">—</text>',
+    '  <text x="356" y="1372" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" text-anchor="middle" id="sc-time-middle">—</text>',
+    '  <text x="642" y="1372" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" text-anchor="end" id="sc-time-end">—</text>',
     '',
     '  <!-- Compact Legend strip under chart -->',
     '  <rect x="48" y="1390" width="600" height="134" rx="8" fill="var(--c-surface-inner)" stroke="var(--c-border)" stroke-width="1"/>',
@@ -505,8 +506,8 @@
     '',
     '  <!-- Kolom 2 (Midden, x=684..1068): Stooklijn Visualisatie & Werkpunt (heating_curve_line.html stijl) -->',
     '  <rect x="684" y="1124" width="384" height="420" rx="10" fill="url(#cardSurface)" stroke="var(--c-border)" stroke-width="1"/>',
-    '  <text x="704" y="1150" fill="var(--c-text-h1)" font-family="sans-serif" font-size="14" font-weight="700">Actieve Stooklijn (L4 &amp; DIY L27–L29)</text>',
-    '  <text x="704" y="1168" fill="var(--c-text-label)" font-family="sans-serif" font-size="11">Weersafhankelijke aanvoerregeling + Adaptieve PI-offset</text>',
+    '  <text x="704" y="1150" fill="var(--c-text-h1)" font-family="sans-serif" font-size="14" font-weight="700">Stooklijn &amp; werkpunt</text>',
+    '  <text x="704" y="1168" fill="var(--c-text-label)" font-family="sans-serif" font-size="11">Curve alleen bij bekende parameters</text>',
     '',
     '  <!-- Heating Curve Grid (x=730..1044, y=1195..1395; X: -15°C to +20°C, Y: 55°C to 20°C) -->',
     '  <text x="722" y="1200" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" text-anchor="end">55°</text>',
@@ -523,7 +524,7 @@
     '',
     '  <!-- Reference High Curve H4 (dimmed) -->',
     '  <polyline points="730,1196 775,1196 998,1328 1044,1328" fill="none" stroke="var(--c-border-muted)" stroke-width="1.5" stroke-dasharray="4 4"/>',
-    '  <text x="785" y="1212" fill="var(--c-text-dim)" font-family="sans-serif" font-size="9.5">Referentie H4</text>',
+    '  <text x="785" y="1212" fill="var(--c-text-dim)" font-family="sans-serif" font-size="9.5" id="sc-hc-reference">Voorbeeldcurve</text>',
     '',
     '  <!-- Active Low Curve L4 -->',
     '  <polyline points="730,1244 775,1244 998,1352 1044,1352" fill="none" stroke="var(--c-sky)" stroke-width="3"/>',
@@ -548,7 +549,7 @@
     '  <text x="1032" y="1472" fill="var(--c-sky)" font-family="sans-serif" font-size="11.5" font-weight="700" text-anchor="end" id="sc-hc-curve-val">Curve L4 (Lage temp)</text>',
     '  <text x="720" y="1494" fill="var(--c-text-muted)" font-family="sans-serif" font-size="11">Native DIY-registers (L27–L29):</text>',
     '  <text x="1032" y="1494" fill="var(--c-text-main)" font-family="sans-serif" font-size="11" font-weight="600" text-anchor="end" id="sc-hc-diy-val">0x0810–0x0812 beschikbaar</text>',
-    '  <text x="720" y="1514" fill="var(--c-text-label)" font-family="sans-serif" font-size="10">Formule: T_set = -k · (T_ambient + 15) + b + ΔT_PI</text>',
+    '  <text x="720" y="1514" fill="var(--c-text-label)" font-family="sans-serif" font-size="10" id="sc-hc-formula">—</text>',
     '',
     '',
     '  <!-- Kolom 3 (Rechts, x=1084..1452): Modbus Poll-Groepen & Kalibratie Diagnostiek -->',
@@ -655,7 +656,7 @@
     ['Retourwater (0x0059):', 'Dagverbruik (DPS 18):'],
     ['48,2 °C', '14,20 kWh'],
     ['HISTORIE, STOOKLIJN-WERKPUNT &amp; MODBUS POLL-DIAGNOSTIEK', 'HISTORIE, STOOKLIJN-WERKPUNT &amp; TUYAPI DPS-DIAGNOSTIEK'],
-    ['SUPERFAST / Insights (5 s)', 'TuyAPI Event-Stream (5 s)'],
+    ['SUPERFAST / Insights (5 s)', 'Gemeten historie sinds appstart'],
     ['Aanvoer T7 (0x0050):', 'Aanvoer (DPS 22):'],
     ['Retour T6 (0x004F):', 'Retour (DPS 21):'],
     ['SWW (0x0054):', 'SWW (DPS 38):'],
@@ -674,7 +675,7 @@
     ['>10 s · OK</text>', '>28 DPS · &lt;60s</text>'],
     ['>MEDIUM</text>', '>ENERGIE</text>'],
     ['>Faults, Relais &amp; Control 0x0300</text>', '>DPS 18 / 102 / 103 / 104 / 105</text>'],
-    ['>30 s · OK</text>', '>÷10 / ÷1000</text>'],
+    ['>30 s · OK</text>', '>÷10 / ÷100</text>'],
     ['>SLOW / P&amp;L</text>', '>CURVES</text>'],
     ['>P-bank 0x0100 &amp; L-bank 0x0810</text>', '>DPS 11 (SWW) &amp; DPS 13 (CV)</text>'],
     ['>120 s · OK</text>', '>H2 / L4 actief</text>'],
@@ -728,7 +729,7 @@
     ['SWW-Laadcircuit (Stand-by)', 'SWW-Laadcircuit'],
     ['Vloerverwarming &amp; Parallelbuffer', 'CV-afgifte &amp; Buffer TW (3-45)'],
     ['Stooklijn L4 + PI-correctie:', 'Aanvoerdoel + PI-correctie:'],
-    ['RLS Model-betrouwbaarheid (Vergeetfactor λ=0,995):', 'RLS Model-betrouwbaarheid:'],
+    ['RLS Model-betrouwbaarheid:', 'RLS Model-betrouwbaarheid:'],
     ['24-Uurs Verloop — Temperaturen (°C) &amp; Compressor (Hz)', 'Temperatuur- &amp; compressorhistorie (max. 24u)'],
     ['SUPERFAST / Insights (5 s)', 'Historie sinds appstart'],
     ['-24u (20:15)', 'Begin historie'],
@@ -768,14 +769,19 @@
     return out;
   }
 
-  const getTemplateForDriver = (driverType) => {
-    if (driverType === 'aurora3') return getAurora3Template();
-    if (driverType !== 'tuya') return SVG_TEMPLATE;
-    let out = SVG_TEMPLATE;
-    TUYA_TEMPLATE_SWAPS.forEach(([oldStr, newStr]) => {
-      out = out.replace(oldStr, newStr);
-    });
-    return out;
+  const getTemplateForDriver = (driverType, demo = false) => {
+    let out = driverType === 'aurora3' ? getAurora3Template() : SVG_TEMPLATE;
+    if (driverType === 'tuya') {
+      TUYA_TEMPLATE_SWAPS.forEach(([a, b]) => {
+        out = out.replace(a, b);
+      });
+    }
+    if (demo) return out;
+    out = out.replace(/(<text\b[^>]*\bid="sc-[^"]+"[^>]*>)[\s\S]*?<\/text>/g, '$1—</text>');
+    out = out.replace(/<polyline\b[^>]*\/>/g, '');
+    out = out.replace(/(<path\b[^>]*\bid="sc-chart-[^"]+"[^>]*\bd=")[^"]*/g, '$1');
+    out = out.replace(/(<(?:circle|line)\b[^>]*\bid="sc-hc-(?:dot|ring|vline|hline)"[^>]*)(\/>)/g, '$1 visibility="hidden"$2');
+    return out.replace('</svg>', '<text id="sc-cop-diagnostic" x="64" y="1090" fill="var(--c-amber-light)" font-family="sans-serif" font-size="11"></text><path id="sc-hc-curve" d="" fill="none" stroke="var(--c-sky)" stroke-width="2"/></svg>');
   };
 
   let currentMode = 'live';
@@ -824,9 +830,25 @@
     return null;
   };
 
+  const knownState = (value, yes, no) => {
+    if (value === null || value === undefined) return '—';
+    return value ? yes : no;
+  };
+
+  function selectPower(driver, snap, caps, proc) {
+    if (Object.prototype.hasOwnProperty.call(proc, 'electricalPowerKw')) {
+      return { kw: proc.electricalPowerKw, source: proc.electricalPowerKw === null ? '—' : knownState(proc.powerSource === 'external', 'Externe meter', 'Interne Modbus-meting') };
+    }
+    const external = pickCap(caps, 'adlar_external_power', driver);
+    if (typeof external === 'number' && Number.isFinite(external) && external >= 0) {
+      return { kw: external / 1000, source: 'Externe meter' };
+    }
+    return { kw: snap?.power?.inputPowerKw ?? snap?.power?.derivedPowerKw ?? null, source: snap?.power ? 'Interne Modbus-meting' : '—' };
+  }
+
   function modbusFlowLpm(snap, isAurora3) {
     const sensor = snap?.sensors?.waterFlow;
-    if (!isAurora3) return sensor?.value ?? snap?.cop?.flowLpm ?? 0;
+    if (!isAurora3) return snap?.cop?.flowLpm ?? sensor?.value ?? null;
     // COP carries the effective flow, including an external flow meter when configured.
     if (snap?.cop?.flowLpm !== undefined && snap.cop.flowLpm !== null) return snap.cop.flowLpm;
     if (sensor?.value === undefined || sensor.value === null) return null;
@@ -837,6 +859,8 @@
     const caps = capMapFromList(capList);
     const s = snap?.sensors || {};
     const isA3 = driver.endsWith('3');
+    const proc = snap?.liveOperation?.process || {};
+    const power = selectPower(driver, snap, caps, proc);
 
     const t1 = (isA3 ? s.ambientT4?.value : s.ambientT1?.value) ?? snap?.cop?.ambientTempC ?? null;
     const t2 = (isA3 ? s.outerCoilT3?.value : s.outerCoilT2?.value) ?? null;
@@ -849,33 +873,31 @@
     const t9 = isA3 ? null : (s.econOutT9?.value ?? null);
     const dhwTemp = s.dhwTankTemp?.value ?? pickCap(caps, 'measure_temperature.dhw', driver);
     const dhwRet = isA3 ? null : (s.dhwReturnTemp?.value ?? null);
-    const plateHx = isA3 ? null : (s.plateHxTemp?.value ?? t7);
+    const plateHx = isA3 ? null : (s.plateHxTemp?.value ?? null);
 
     const compHz = s.compRunningFreq?.value
       ?? pickCap(caps, isA3 ? 'measure_frequency.compressor_freq' : 'measure_frequency.compressor', driver)
-      ?? (isA3 ? null : 0);
+      ?? null;
     const compTargetHz = s.compTargetFreq?.value ?? (isA3 ? null : compHz);
     const compAmps = s.compPhaseI?.value ?? s.acCurrent?.value ?? snap?.power?.inputCurrentA ?? null;
     const ipmTemp = isA3 ? null : (s.ipmTemp?.value ?? null);
-    const fanRpm = s.fanSpeed?.value ?? (isA3 ? null : 0);
+    const fanRpm = s.fanSpeed?.value ?? null;
     const eevStep = s.eevStep?.value ?? null;
     const eviStep = s.eviStep?.value ?? null;
     const pumpPwm = s.pumpPwm?.value ?? null;
-    const flowLpm = modbusFlowLpm(snap, isA3);
+    const flowLpm = Object.prototype.hasOwnProperty.call(proc, 'flowLpm') ? proc.flowLpm : (pickCap(caps, 'adlar_external_flow', driver) ?? modbusFlowLpm(snap, isA3));
 
     const hdSat = isA3 ? null : (s.hpSatTemp?.value ?? null);
     const ldSat = isA3 ? null : (s.lpSatTemp?.value ?? null);
 
-    const elecKw = snap?.cop?.electricalPowerKw ?? snap?.power?.inputPowerKw ?? snap?.power?.derivedPowerKw ?? (isA3 ? null : 0);
-    const thKw = snap?.cop?.thermalPowerKw ?? (isA3 ? null : 0);
-    const cop = (snap?.cop?.cop && snap.cop.cop > 0)
-      ? snap.cop.cop
-      : (pickCap(caps, 'adlar_cop', driver) ?? null);
+    const elecKw = power.kw;
+    const thKw = proc.thermalPowerKw ?? snap?.cop?.thermalPowerKw ?? null;
+    const cop = proc.capabilityCop ?? pickCap(caps, 'adlar_cop', driver);
     const scop = pickCap(caps, 'adlar_scop', driver);
     const cop24 = pickCap(caps, 'adlar_cop_daily', driver);
 
     const roomTemp = pickCap(caps, 'measure_temperature.indoor', driver) ?? (isA3 ? s.roomTemp?.value ?? null : null);
-    const roomTarget = pickCap(caps, 'target_temperature.indoor', driver) ?? (isA3 ? null : 20.5);
+    const roomTarget = pickCap(caps, 'target_temperature.indoor', driver) ?? null;
     const heatSetpoint = snap?.control?.heatingSetpointC ?? pickCap(caps, 'target_temperature', driver);
     const dhwSetpoint = snap?.control?.dhwSetpointC ?? pickCap(caps, 'target_temperature.dhw', driver);
 
@@ -887,25 +909,20 @@
     const priceNow = pickCap(caps, 'adlar_energy_price_current', driver);
 
     const faults = snap?.status?.activeFaults || [];
-    const running = isA3
-      ? Boolean(snap?.status?.compressorOn || compHz > 0)
-      : Boolean(snap?.status?.running || compHz > 0);
-    const defrosting = Boolean(snap?.status?.defrosting);
-    const dhwActive = Boolean(snap?.status?.dhwActive || snap?.control?.modeName === 'Hot Water');
+    const running = snap?.status?.compressorOn ?? (compHz === null ? null : compHz > 0);
+    const defrosting = snap?.status?.defrosting ?? null;
+    const dhwActive = snap?.status?.dhwActive ?? (snap?.control?.modeName ? snap.control.modeName === 'Hot Water' : null);
     const curveNum = snap?.control?.heatingCurve ?? null;
     const dhwCurveNum = snap?.control?.hotWaterCurve ?? null;
-    let curveLabel = 'Stooklijn';
-    if (curveNum) {
-      curveLabel = `L${curveNum}`;
-    } else if (snap?.diy?.active) {
-      curveLabel = 'DIY L27–L29';
-    }
+    let curveLabel = '—';
+    if (snap?.diy?.active) curveLabel = 'DIY L27–L29';
+    else if (curveNum !== null) curveLabel = curveNum === 0 ? 'Uit' : `L${curveNum}`;
 
     return {
       driver,
       title: document.body?.dataset?.schemaTitle
-        || 'Adlar Castra Aurora II — Thermodynamisch & Hydronisch Processchema',
-      modeName: snap?.control?.modeName || (running ? 'Verwarmen' : 'Stand-by'),
+        || `Adlar Aurora ${isA3 ? 'III' : 'I/II'} (Modbus) — Processchema`,
+      modeName: snap?.control?.modeName || '—',
       curveLabel,
       dhwCurveLabel: dhwCurveNum ? `H${dhwCurveNum}` : 'SWW',
       running,
@@ -942,7 +959,11 @@
       voltageV: snap?.power?.inputVoltageV ?? snap?.power?.acVoltageV ?? s.acVoltage?.value ?? null,
       currentA: snap?.power?.inputCurrentA ?? snap?.power?.acCurrentA ?? s.acCurrent?.value ?? null,
       totalElecKwh: snap?.power?.totalEnergyKwh ?? pickCap(caps, 'meter_power.electric_total', driver) ?? null,
-      powerSource: snap?.power?.powerSource || (isA3 ? 'AC-spanning × AC-stroom (3-74 / 3-75)' : 'Modbus'),
+      powerSource: power.source,
+      copMethod: pickCap(caps, 'adlar_cop_method', driver),
+      copDiagnostic: snap?.liveOperation?.copDiagnostic ?? null,
+      appCurve: snap?.diy?.active ? { slope: -snap.diy.slopeK, intercept: snap.diy.interceptB - 15 * snap.diy.slopeK } : null,
+      powerDetail: snap?.power?.powerSource ?? null,
       roomTemp,
       roomTarget,
       heatSetpoint,
@@ -953,11 +974,11 @@
       bmConf,
       forecast6h,
       priceNow,
-      faultCount: faults.length,
-      tempScale: snap?.temperatureScale || (isA3 ? 'x10' : 'x1'),
-      protocolVer: snap?.version?.protocolVersionFormatted || (isA3 ? 'FC04 / FC03' : 'v1.34'),
-      coilsAvailable: snap?.control?.coilsAvailable ?? !isA3,
-      fastFailures: snap?.diagnostics?.consecutiveFastPollFailures ?? 0,
+      faultCount: snap?.status?.activeFaults ? faults.length : null,
+      tempScale: snap?.temperatureScale || (isA3 ? 'x10' : null),
+      protocolVer: snap?.version?.protocolVersionFormatted || (isA3 ? 'FC04 / FC03' : '—'),
+      coilsAvailable: snap?.control?.coilsAvailable ?? null,
+      fastFailures: snap?.diagnostics?.consecutiveFastPollFailures ?? null,
       history: Array.isArray(snap?.history) ? snap.history : [],
       ...(isA3 ? {
         highPressure: s.highPressure?.value ?? null,
@@ -991,20 +1012,20 @@
     const t9 = caps['measure_temperature.eviout'] ?? null;
     const dhwTemp = temps.dhwC ?? caps['measure_temperature.around_temp_f'] ?? null;
 
-    const compHz = proc.compressorHz ?? caps['measure_frequency.compressor_strength'] ?? 0;
-    const fanRpm = caps['measure_frequency.fan_motor_frequency'] ?? 0;
+    const compHz = proc.compressorHz ?? caps['measure_frequency.compressor_strength'] ?? null;
+    const fanRpm = caps['measure_frequency.fan_motor_frequency'] ?? null;
     const eevStep = caps.adlar_measure_pulse_steps_temp_current ?? null;
     const eviStep = caps.adlar_measure_pulse_steps_effluent_temp ?? null;
-    const flowLpm = proc.flowLpm ?? caps.measure_water ?? 0;
+    const flowLpm = proc.flowLpm ?? caps.measure_water ?? null;
 
-    const elecKw = proc.electricalPowerKw ?? (typeof caps.measure_power === 'number' ? caps.measure_power / 1000 : 0);
-    const thKw = proc.thermalPowerKw ?? 0;
-    const cop = proc.capabilityCop ?? proc.liveCopEstimate ?? caps.adlar_cop ?? null;
+    const elecKw = proc.electricalPowerKw ?? (typeof caps.measure_power === 'number' ? caps.measure_power / 1000 : null);
+    const thKw = proc.thermalPowerKw ?? null;
+    const cop = proc.capabilityCop ?? caps.adlar_cop ?? null;
     const scop = caps.adlar_scop ?? null;
     const cop24 = caps.adlar_cop_daily ?? null;
 
     const roomTemp = caps['measure_temperature.indoor'] ?? null;
-    const roomTarget = caps['target_temperature.indoor'] ?? 20.5;
+    const roomTarget = caps['target_temperature.indoor'] ?? null;
     const heatSetpoint = temps.setpointC ?? caps.target_temperature ?? null;
     const dhwSetpoint = caps.adlar_hotwater ?? null;
 
@@ -1015,20 +1036,20 @@
     const forecast6h = caps['measure_temperature.weather_forecast_6h'] ?? null;
     const priceNow = caps.adlar_energy_price_current ?? null;
 
-    const running = Boolean(stat.running || stat.compressorOn || compHz > 0);
-    const defrosting = Boolean(stat.defrosting);
+    const running = stat.compressorOn ?? (compHz === null ? null : compHz > 0);
+    const defrosting = stat.defrosting ?? null;
     const faultVal = stat.faultActive;
-    const faultCount = faultVal && Number(faultVal) > 0 ? 1 : 0;
+    const faultCount = faultVal === null || faultVal === undefined ? null : Number(Number(faultVal) > 0);
 
     return {
       driver: 'tuya',
-      title: 'Adlar Castra Aurora I/II (Tuya) — Thermodynamisch & Hydronisch Processchema',
-      modeName: String(caps.adlar_enum_mode || (running ? 'Verwarmen' : 'Stand-by')),
+      title: document.body?.dataset?.page === 'processchema' ? document.title : 'Adlar Aurora I/II (Tuya) — Processchema',
+      modeName: String(caps.adlar_enum_mode || '—'),
       curveLabel: String(hcPayload?.heating || caps.adlar_enum_work_mode || 'Stooklijn'),
       dhwCurveLabel: String(hcPayload?.hotWater || caps.adlar_enum_water_mode || 'SWW'),
       running,
       defrosting,
-      dhwActive: false,
+      dhwActive: caps.adlar_enum_mode ? /water|dhw|sww/i.test(caps.adlar_enum_mode) : null,
       t1,
       t2,
       t3,
@@ -1040,7 +1061,7 @@
       t9,
       dhwTemp,
       dhwRet: caps['meter_power.power_consumption'] ?? null,
-      plateHx: t3 ?? t7,
+      plateHx: t3,
       compHz,
       compTargetHz: compHz,
       compAmps: caps['measure_current.cur_current'] ?? null,
@@ -1065,7 +1086,12 @@
       voltageV: caps['measure_voltage.voltage_current'] ?? null,
       currentA: caps['measure_current.cur_current'] ?? null,
       totalElecKwh: caps['meter_power.electric_total'] ?? null,
-      powerSource: proc.powerSource || 'Tuya DPS',
+      powerSource: ({ external: 'Externe meter', capability: 'Tuya vermogensmeting' })[proc.powerSource] ?? '—',
+      copMethod: caps.adlar_cop_method ?? null,
+      copDiagnostic: snap?.copDiagnostic ?? null,
+      powerDetail: null,
+      tuyaOn: caps.onoff ?? null,
+      backwater: caps.adlar_state_backwater ?? null,
       roomTemp,
       roomTarget,
       heatSetpoint,
@@ -1090,48 +1116,45 @@
     mountedDriver = driverType;
     if (!container.querySelector('.schema-svg')) {
       container.innerHTML = getTemplateForDriver(driverType);
-      if (driverType === 'aurora3') update(normalizeModbus('aurora3', {}, []));
+      update(driverType === 'tuya' ? normalizeTuya({}, [], {}) : normalizeModbus(driverType, {}, []));
     }
   }
 
   function updateHistoryChart(history) {
+    ['dhw', 't7', 't6', 'room', 't1', 'comp-area'].forEach((key) => setAttr(`sc-chart-${key}`, 'd', ''));
+    ['start', 'middle', 'end'].forEach((key) => setText(`sc-time-${key}`, '—'));
     if (!Array.isArray(history) || history.length < 2) return;
-    const xAt = (idx) => Math.round(70 + (idx / (history.length - 1)) * (642 - 70));
-    const yTemp = (deg) => {
-      const clamped = Math.max(-15, Math.min(65, Number(deg)));
-      return Math.round(1354 - clamped * 2.9);
-    };
-    const yHz = (hz) => {
-      const clamped = Math.max(0, Math.min(90, Number(hz) || 0));
-      return Math.round(1354 - (clamped / 90) * 110);
-    };
-
-    const buildPath = (key, yFn) => {
-      const pts = [];
-      history.forEach((pt, idx) => {
-        if (pt[key] !== null && pt[key] !== undefined && Number.isFinite(Number(pt[key]))) {
-          pts.push(`${pts.length === 0 ? 'M' : 'L'} ${xAt(idx)} ${yFn(pt[key])}`);
+    const points = history.filter((p) => Number.isFinite(p.ts)).sort((a, b) => a.ts - b.ts);
+    if (points.length < 2) return;
+    const start = points[0].ts;
+    const end = points[points.length - 1].ts;
+    if (end <= start) return;
+    const xAt = (p) => Math.round(70 + ((p.ts - start) / (end - start)) * 572);
+    const time = (ts) => new Date(ts).toLocaleString('nl-NL', {
+      day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+    });
+    setText('sc-time-start', time(start));
+    setText('sc-time-middle', time((start + end) / 2));
+    setText('sc-time-end', time(end));
+    const buildPath = (key, yAt) => {
+      let penDown = false;
+      return points.map((p) => {
+        if (typeof p[key] !== 'number' || !Number.isFinite(p[key])) {
+          penDown = false; return '';
         }
-      });
-      return pts.length >= 2 ? pts.join(' ') : null;
+        const command = penDown ? 'L' : 'M';
+        penDown = true;
+        return `${command} ${xAt(p)} ${yAt(p[key])}`;
+      }).filter(Boolean).join(' ');
     };
-
-    const dhwPath = buildPath('dhw', yTemp);
-    const t7Path = buildPath('t7', yTemp);
-    const t6Path = buildPath('t6', yTemp);
-    const roomPath = buildPath('room', yTemp);
-    const t1Path = buildPath('t1', yTemp);
-
-    if (dhwPath) setAttr('sc-chart-dhw', 'd', dhwPath);
-    if (t7Path) setAttr('sc-chart-t7', 'd', t7Path);
-    if (t6Path) setAttr('sc-chart-t6', 'd', t6Path);
-    if (roomPath) setAttr('sc-chart-room', 'd', roomPath);
-    if (t1Path) setAttr('sc-chart-t1', 'd', t1Path);
-
-    const hzPts = history.map((pt, idx) => `${xAt(idx)} ${yHz(pt.hz)}`);
-    if (hzPts.length >= 2) {
-      setAttr('sc-chart-comp-area', 'd', `M 70 1354 L ${hzPts.join(' L ')} L 642 1354 Z`);
-    }
+    ['dhw', 't7', 't6', 'room', 't1'].forEach((key) => {
+      setAttr(`sc-chart-${key}`, 'd', buildPath(key, (v) => Math.round(1354 - Math.max(-15, Math.min(65, v)) * 2.9)));
+    });
+    // A line avoids filling across gaps where compressor readings are unknown.
+    setAttr('sc-chart-comp-area', 'fill', 'none');
+    setAttr('sc-chart-comp-area', 'stroke', 'var(--c-sky)');
+    setAttr('sc-chart-comp-area', 'stroke-width', '1.5');
+    setAttr('sc-chart-comp-area', 'd', buildPath('hz', (v) => Math.round(1354 - (Math.max(0, Math.min(90, v)) / 90) * 110)));
   }
 
   function update(vm) {
@@ -1140,11 +1163,20 @@
     setText('sc-title', vm.title);
     setText('sc-chip-mode', isTuya ? `DPS 2: ${vm.modeName}` : `Modus: ${vm.modeName}`);
     setText('sc-chip-curve', isTuya ? `DPS 13: ${vm.curveLabel}` : `Stooklijn: ${vm.curveLabel}`);
-    let eviChip = vm.running ? 'Actief' : 'Stand-by';
+    let eviChip = knownState(vm.eviStep === null ? null : vm.eviStep > 0, 'Open', 'Gesloten');
     if (vm.eviStep && vm.eviStep > 0) eviChip = `${fmt(vm.eviStep, 0)} P`;
     setText('sc-chip-evi', isTuya ? `DPS 5: ${vm.workMode || eviChip}` : `EVI-Injectie: ${eviChip}`);
 
-    setText('sc-kpi-cop', fmt(vm.cop, 2));
+    setText('sc-cop-label', `COP · ${vm.copMethod ?? 'Homey / —'}`);
+    const diagnostic = vm.copDiagnostic;
+    const rejected = diagnostic && ['outlier', 'insufficient_data'].includes(diagnostic.quality);
+    const displayCOP = rejected ? null : vm.cop;
+    setText('sc-kpi-cop', fmt(displayCOP, 2));
+    setText('sc-cop-raw', rejected && diagnostic.rawCOP > 0 ? `Berekend: ${fmt(diagnostic.rawCOP, 2)} · controle nodig` : '');
+    setText('sc-cop-diagnostic', rejected ? `COP-controle: ${diagnostic.reason ?? 'Geen geldige meting'} · Berekend: ${fmt(diagnostic.rawCOP, 2)} · ${fmt(diagnostic.electricalPowerW, 0)} W · ${fmt(diagnostic.flowLpm, 1)} L/min · ΔT ${fmt(diagnostic.deltaTC, 1)} K` : '');
+    let powerLabel = '2. Elektrisch';
+    if (vm.elecKw !== null) powerLabel += vm.powerSource === 'Externe meter' ? ' (extern)' : ' (intern)';
+    setText('sc-power-label', powerLabel);
     setText('sc-kpi-scop', `SCOP: ${fmt(vm.scop, 2)}`);
     setText('sc-kpi-cop24', `24u-gem: ${fmt(vm.cop24, 2)}`);
 
@@ -1174,22 +1206,22 @@
     setText('sc-kpi-room-target', `Doel: ${fmt(vm.roomTarget, 1)} °C`);
     setText('sc-kpi-tau', `τ = ${fmt(vm.bmTau, 1)} u (${fmt(vm.bmConf, 0)}%)`);
 
-    const elecKw = Number(vm.elecKw) || 0;
-    const thKw = Number(vm.thKw) || 0;
-    const envKw = Math.max(0, thKw - elecKw);
+    const { elecKw, thKw } = vm;
+    const envKw = thKw !== null && elecKw !== null ? Math.max(0, thKw - elecKw) : null;
     const totalOut = thKw > 0.05 ? thKw : 1;
     const envPct = thKw > 0.05 ? Math.round((envKw / totalOut) * 100) : 0;
     const elecPct = thKw > 0.05 ? (100 - envPct) : 0;
-    setText('sc-sankey-cop', `×${fmt(vm.cop, 2)}`);
-    setText('sc-sankey-env', `${fmt(envKw, 2)} kW (${envPct}%)`);
-    setText('sc-sankey-elec', `${fmt(elecKw, 2)} kW (${elecPct}%)`);
-    setText('sc-sankey-elec-sub', `${fmt(vm.voltageV, 0)} V · ${fmt(vm.currentA, 1)} A · Totaal ${fmt(vm.totalElecKwh, 0)} kWh`);
+    setText('sc-sankey-cop', displayCOP === null ? '—' : `×${fmt(displayCOP, 2)}`);
+    setText('sc-sankey-env', `${fmt(envKw, 2)} kW${envKw !== null ? ` (${envPct}%)` : ''}`);
+    setText('sc-sankey-elec', `${fmt(elecKw, 2)} kW${elecKw !== null && thKw > 0 ? ` (${elecPct}%)` : ''}`);
+    setText('sc-sankey-elec-sub', `Intern: ${fmt(vm.voltageV, 0)} V · ${fmt(vm.currentA, 1)} A · ${fmt(vm.totalElecKwh, 0)} kWh`);
     setText('sc-sankey-th', `${fmt(thKw, 2)} kW_th`);
     setText('sc-sankey-th-sub', `${fmt(vm.flowLpm, 1)} L/min × ΔT ${fmt(dt, 1)} K`);
-    if (vm.priceNow && vm.cop && vm.cop > 0) {
-      const thPrice = vm.priceNow / vm.cop;
-      setText('sc-sankey-price', `€ ${fmt(vm.priceNow, 2)}/kWh_el → € ${fmt(thPrice, 3)}/kWh_th`);
-    }
+    setText('sc-sankey-th-total', '');
+    const price = typeof vm.priceNow === 'number' && Number.isFinite(vm.priceNow) ? vm.priceNow : null;
+    const hourlyCost = price !== null && elecKw !== null ? price * elecKw : null;
+    setText('sc-sankey-footer', `Bron: ${vm.powerSource} (${fmt(elecKw === null ? null : elecKw * 1000, 0)} W) · Tarief: € ${fmt(price, 2)}/kWh · Kosten nu: € ${fmt(hourlyCost, 2)}/uur`);
+    setText('sc-sankey-price', price !== null && displayCOP > 0 ? `€ ${fmt(price, 2)}/kWh_el → € ${fmt(price / displayCOP, 3)}/kWh_th` : 'Warmtetarief: —');
 
     setText('sc-z1-t4', `${fmt(vm.t4, 1)} °C`);
     setText('sc-z1-t5', `${fmt(vm.t5, 1)} °C`);
@@ -1201,7 +1233,7 @@
     setText('sc-z1-t1', isTuya ? `Buiten (DPS 26): ${fmt(vm.t1, 1)} °C` : `Buitenlucht T1: ${fmt(vm.t1, 1)} °C`);
     setText('sc-z1-t2', isTuya ? `Coiler (DPS 23): ${fmt(vm.t2, 1)} °C` : `Outer Coil T2: ${fmt(vm.t2, 1)} °C`);
     setText('sc-z1-t3', isTuya ? `Incoiler (DPS 37): ${fmt(vm.t3, 1)} °C` : `Inner Coil T3: ${fmt(vm.t3, 1)} °C`);
-    setText('sc-z1-defrost', vm.defrosting ? '⚠ Ontdooiing: ACTIEF' : '✓ Ontdooiing: Inactief');
+    setText('sc-z1-defrost', `Ontdooiing: ${knownState(vm.defrosting, 'Actief', 'Inactief')}`);
     setText('sc-z1-t8', isTuya ? `Evlin Inlaat (DPS 107): ${fmt(vm.t8, 1)} °C` : `Inlaat T8: ${fmt(vm.t8, 1)} °C`);
     setText('sc-z1-t9', isTuya ? `Eviout Uitlaat (DPS 108): ${fmt(vm.t9, 1)} °C` : `Uitlaat T9: ${fmt(vm.t9, 1)} °C`);
     setText('sc-z1-evi', isTuya ? `EVI-Expansieklep (DPS 25): ${fmt(vm.eviStep, 0)} P` : `EVI-Expansieklep: ${fmt(vm.eviStep, 0)} P`);
@@ -1212,15 +1244,15 @@
 
     setText('sc-z2-t7', `${fmt(vm.t7, 1)} °C`);
     setText('sc-z2-pump', vm.pumpPwm !== null ? `Pomp: ${fmt(vm.pumpPwm, 0)}% PWM` : `Debiet: ${fmt(vm.flowLpm, 1)} L/m`);
-    setText('sc-z2-valve', vm.dhwActive ? 'Stand: SWW' : 'Stand: CV');
+    setText('sc-z2-valve', `Bedrijf: ${knownState(vm.dhwActive, 'SWW', 'CV')}`);
     setText('sc-z2-t6', `${fmt(vm.t6, 1)} °C`);
     setText('sc-z2-flow', `${fmt(vm.flowLpm, 1)} L/min`);
-    setText('sc-z2-faults', `${vm.faultCount} storingen`);
+    setText('sc-z2-faults', `${fmt(vm.faultCount, 0)} storingen`);
 
     setText('sc-dhw-temp', `${fmt(vm.dhwTemp, 1)} °C`);
     setText('sc-dhw-set', `Setpoint: ${fmt(vm.dhwSetpoint, 1)} °C · Curve: ${vm.dhwCurveLabel}`);
     setText('sc-dhw-ret', isTuya ? `Dagverbruik (DPS 18): ${fmt(vm.dhwRet, 2)} kWh` : `Retourwater: ${fmt(vm.dhwRet, 1)} °C`);
-    setText('sc-dhw-status', vm.dhwActive ? '🔥 Tapwater-lading actief' : '✓ Stand-by / Op temperatuur');
+    setText('sc-dhw-status', knownState(vm.dhwActive, 'Tapwaterbedrijf actief', 'Geen tapwaterbedrijf'));
 
     setText('sc-emit-temps', `Aanvoer: ${fmt(vm.t7, 1)} °C   |   Retour: ${fmt(vm.t6, 1)} °C`);
     setText('sc-pi-room', `${fmt(vm.roomTemp, 1)} °C (Doel ${fmt(vm.roomTarget, 1)}°)`);
@@ -1294,13 +1326,35 @@
       setText('sc-cal-curr', vm.powerModule ? `${vm.powerModule}` : 'Intern');
       setText('sc-cal-volt', 'W (÷10) · kWh (÷100)');
       setText('sc-cal-proto', `${fmt(vm.voltageV, 0)} V · ${fmt(vm.currentA, 1)} A`);
-      setText('sc-cal-err', `${vm.faultCount} storingen`);
+      setText('sc-cal-err', `${fmt(vm.faultCount, 0)} storingen`);
     } else {
-      setText('sc-cal-scale', `Schaal: ${vm.tempScale}`);
+      setText('sc-cal-scale', vm.tempScale ? `Schaal: ${vm.tempScale}` : '—');
       setText('sc-cal-volt', `Spanning: ${fmt(vm.voltageV, 0)} V`);
-      setText('sc-cal-proto', `${vm.protocolVer} (${vm.coilsAvailable ? 'Coils ja' : 'Registers'})`);
+      setText('sc-cal-proto', `${vm.protocolVer} (${knownState(vm.coilsAvailable, 'Coils ja', '—')})`);
       setText('sc-cal-err', `${vm.fastFailures} fouten`);
     }
+    ['sf', 'fast', 'med', 'slow'].forEach((key) => setText(`sc-poll-${key}`, '—'));
+    setText('sc-hc-reference', '');
+    setText('sc-hc-formula', '');
+    setText('sc-dhw-circulation', isTuya ? `Backwater (DPS 31): ${knownState(vm.backwater, 'Actief', 'Uit')}` : 'Circulatie: —');
+    setText('sc-z2-eheater', isTuya ? `${knownState(vm.tuyaOn, 'Aan', 'Uit')} · ${vm.modeName}` : '—');
+    setText('sc-z2-ahs', isTuya ? `${vm.workMode ?? '—'} / ${vm.waterMode ?? '—'}` : '—');
+    setText('sc-z2-protection', '—');
+    setText('sc-cal-err', `${fmt(vm.fastFailures, 0)} fouten`);
+    if (isTuya) setText('sc-cal-err', '—');
+    else setText('sc-cal-curr', vm.powerDetail === 'ac-derived' ? 'Actief (intern)' : 'Interne curve');
+    setText('sc-hc-diy-val', vm.appCurve ? `y = ${fmt(vm.appCurve.slope, 2)}·x + ${fmt(vm.appCurve.intercept, 1)} °C` : '—');
+    let curvePath = '';
+    if (vm.appCurve && Number.isFinite(vm.appCurve.slope) && Number.isFinite(vm.appCurve.intercept)) {
+      curvePath = [-15, -5, 5, 20].map((ambient, index) => {
+        const target = Math.max(20, Math.min(55, vm.appCurve.slope * ambient + vm.appCurve.intercept));
+        return `${index ? 'L' : 'M'} ${Math.round(730 + ((ambient + 15) / 35) * 314)} ${Math.round(1394 - ((target - 20) / 35) * 198)}`;
+      }).join(' ');
+      setText('sc-hc-formula', 'Curve uit ingestelde parameters');
+    }
+    setAttr('sc-hc-curve', 'd', curvePath);
+    const hasWorkpoint = vm.t1 !== null && vm.heatSetpoint !== null;
+    ['vline', 'hline', 'dot', 'ring'].forEach((key) => setAttr(`sc-hc-${key}`, 'visibility', hasWorkpoint ? 'visible' : 'hidden'));
     if (vm.driver === 'aurora3') updateAurora3(vm);
   }
 
@@ -1328,14 +1382,14 @@
     setText('sc-z1-evi', `4-wegklep (3-81): ${valve}`);
     setText('sc-hx-temp', '—');
     setText('sc-z2-pump', `Pomp: ${onOff(vm.mainPumpState)} · ${fmt(vm.pumpPwm, 0)}% PWM`);
-    setText('sc-z2-valve', vm.dhwActive ? 'Bedrijf: SWW' : 'Bedrijf: CV');
+    setText('sc-z2-valve', `Bedrijf: ${knownState(vm.dhwActive, 'SWW', 'CV')}`);
     setText('sc-z2-eheater', onOff(vm.backupHeaterForced));
     setText('sc-z2-ahs', onOff(vm.mainPumpState));
     setText('sc-z2-protection', `${onOff(vm.antifreeze)} / ${onOff(vm.sterilization)}`);
     setText('sc-dhw-set', `Setpoint: ${fmt(vm.dhwSetpoint, 1)} °C`);
     setText('sc-dhw-ret', `Buffer TW (3-45): ${fmt(vm.bufferTemp, 1)} °C`);
     setText('sc-dhw-circulation', `Totale aanvoer TC (3-41): ${fmt(vm.totalOutlet, 1)} °C`);
-    setText('sc-dhw-status', vm.dhwActive ? 'Tapwater-lading actief (3-9)' : 'Geen tapwaterbedrijf (3-9)');
+    setText('sc-dhw-status', knownState(vm.dhwActive, 'Tapwater-lading actief (3-9)', 'Geen tapwaterbedrijf (3-9)'));
     setText('sc-leg-t7', `Aanvoer TA (3-43): ${fmt(vm.t7, 1)} °C`);
     setText('sc-leg-t6', `Retour TE1 (3-42): ${fmt(vm.t6, 1)} °C`);
     setText('sc-leg-dhw', `SWW (3-46): ${fmt(vm.dhwTemp, 1)} °C`);
@@ -1353,9 +1407,9 @@
     setText('sc-sankey-elec', `${fmt(vm.elecKw, 2)} kW`);
     setText('sc-sankey-th', `${fmt(vm.thKw, 2)} kW_th`);
     if (vm.elecKw === null || vm.thKw === null) setText('sc-sankey-env', '— kW');
-    setText('sc-sankey-footer', `Vermogensbron: ${vm.powerSource}`);
+
     setText('sc-sankey-th-total', '');
-    setText('sc-sankey-price', vm.priceNow !== null ? `€ ${fmt(vm.priceNow, 2)}/kWh_el` : '');
+
     const hasWorkpoint = vm.t1 !== null && vm.heatSetpoint !== null;
     ['vline', 'hline', 'dot', 'ring'].forEach((key) => setAttr(`sc-hc-${key}`, 'visibility', hasWorkpoint ? 'visible' : 'hidden'));
   }
@@ -1423,11 +1477,12 @@
         currentMode = btn.getAttribute('data-set-mode');
         document.querySelectorAll('[data-set-mode]').forEach((b) => b.classList.toggle('active', b === btn));
         if (currentMode === 'demo' && mountedContainer) {
-          mountedContainer.innerHTML = getTemplateForDriver(mountedDriver);
+          mountedContainer.innerHTML = getTemplateForDriver(mountedDriver, true);
+          setText('sc-title', `DEMO — ${mountedDriver} · Voorbeelddata`);
           if (mountedDriver === 'aurora3') renderAurora3Demo();
         } else if (currentMode === 'live') {
-          if (lastLiveVm) update(lastLiveVm);
-          else if (mountedDriver === 'aurora3') update(normalizeModbus('aurora3', {}, []));
+          mountedContainer.innerHTML = getTemplateForDriver(mountedDriver);
+          update(lastLiveVm || (mountedDriver === 'tuya' ? normalizeTuya({}, [], {}) : normalizeModbus(mountedDriver, {}, [])));
         }
       });
     });
@@ -1443,7 +1498,7 @@
       const lbl = document.getElementById('conn-label');
       if (snapRes.status === 204 || !snapRes.ok) {
         if (dot) dot.className = 'degraded';
-        if (lbl) lbl.textContent = mountedDriver === 'aurora3' ? 'Wachten op eerste poll' : 'Wachten op eerste poll (Demo getoond)';
+        if (lbl) lbl.textContent = 'Wachten op eerste meting';
         return;
       }
       const snap = await snapRes.json();
@@ -1451,7 +1506,7 @@
       const q = snap?.diagnostics?.connectionQuality || 'online';
       if (dot) dot.className = q;
       if (lbl) lbl.textContent = q === 'online' ? 'Verbonden · Live (5 s)' : `Status: ${q}`;
-      if (lbl && currentMode === 'demo' && mountedDriver === 'aurora3') lbl.textContent = 'Voorbeelddata · Demo';
+      if (lbl && currentMode === 'demo') lbl.textContent = 'Voorbeelddata · Demo';
 
       lastLiveVm = normalizeModbus(mountedDriver, snap, caps);
       if (currentMode === 'live') {

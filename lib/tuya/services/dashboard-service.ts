@@ -2,6 +2,7 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { serveDashboardFavicon, withDashboardFavicon } from '../../shared/dashboard-favicon';
 import { DASHBOARD_PAGE_STYLES } from '../../shared/dashboard-styles';
 import { DashboardError } from './dashboard-error';
 import {
@@ -156,6 +157,10 @@ export class TuyaDashboardService {
     const url = new URL(req.url ?? '/', 'http://localhost');
     const route = url.pathname;
     const method = req.method ?? 'GET';
+    if (method === 'GET' && route === '/favicon.png') {
+      await serveDashboardFavicon(this.options.appDir, res);
+      return;
+    }
     if (method === 'GET' && route === '/api/texts') {
       this.json(res, 200, this.texts); return;
     }
@@ -220,9 +225,10 @@ export class TuyaDashboardService {
       'X-Content-Type-Options': 'nosniff',
       'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'",
     });
-    res.end(file === 'index.html' ? content.toString('utf8')
+    res.end(file === 'index.html' ? withDashboardFavicon(content.toString('utf8')
       .replace('<!-- PAGE_STYLE -->', `<link rel="stylesheet" href="/styles/${DASHBOARD_PAGE_STYLES[route]}">`)
-      .replace('data-page="dashboard"', `data-page="${route.slice(1) || 'dashboard'}"`) : content);
+      .replace('data-page="dashboard"', `data-page="${route.slice(1) || 'dashboard'}"`)
+      .replace(/<title>.*?<\/title>/, route === '/processchema' ? '<title>Adlar Aurora I/II (Tuya) — Processchema</title>' : '<title>Aurora I/II · Tuya</title>')) : content);
   }
 }
 

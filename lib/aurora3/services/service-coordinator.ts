@@ -139,7 +139,16 @@ export class ServiceCoordinator {
 
     this.settingsManager = new SettingsManagerService(opts);
     this.capabilityHealth = new CapabilityHealthService(opts);
-    this.energyTracking = new EnergyTrackingService(opts);
+    this.energyTracking = new EnergyTrackingService({
+      ...opts,
+      readInternalPower: () => {
+        const snapshot = this.getCurrentSnapshot();
+        const timestamp = this._lastSuccessfulFastPollAt;
+        if (!snapshot || !timestamp || !snapshot.sensors.acVoltage || !snapshot.sensors.acCurrent) return null;
+        const value = snapshot.power.derivedPowerKw * 1000;
+        return snapshot.power.inputVoltageV > 0 ? { value, timestamp } : null;
+      },
+    });
 
     this.adaptiveControl = new AdaptiveControlService({
       ...opts,

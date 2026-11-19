@@ -510,6 +510,7 @@ class AdlarModbusDevice extends Homey.Device {
           words: (start: number, count: number) => Promise<number[]>,
         ): void;
         setGetCapabilityValuesCallback(fn: () => Record<string, unknown>): void;
+        setGetLiveOperationStateCallback(fn: () => unknown): void;
       } | null;
     };
     const app = this.homey.app as unknown as DashboardApp;
@@ -547,6 +548,10 @@ class AdlarModbusDevice extends Homey.Device {
       () => this.coordinator!.getParameterRanges(),
       (start, count) => this.coordinator!.readParameterBankWords(start, count),
     );
+    app.dashboard.setGetLiveOperationStateCallback(() => ({
+      ...this.getLiveOperationWidgetState(),
+      copDiagnostic: this.copService?.getCOPDiagnostic() ?? null,
+    }));
     app.dashboard.setGetCapabilityValuesCallback(() => {
       const result: Record<string, unknown> = {};
       for (const id of this.getCapabilities()) {
@@ -641,9 +646,7 @@ class AdlarModbusDevice extends Homey.Device {
     }
 
     // Power
-    if (from('superfast', 'fast')) {
-      set('measure_power', snap.power.inputPowerKw * 1000);
-    }
+    // EnergyTrackingService owns measure_power and selects the external/internal source.
     // meter_power is written exclusively by EnergyTrackingService (ETS).
     // ETS abstracts internal/external power sources and handles hardware that lacks register 0x005D.
     if (from('fast')) {
@@ -770,6 +773,10 @@ class AdlarModbusDevice extends Homey.Device {
 
   private _initCOPCalculators(): void {
     this.copService = new ModbusCOPService({
+      isExternalCapabilityFresh: (cap) => {
+        const timestamp = this.getExternalDataTimestamp(cap);
+        return timestamp > 0 && Date.now() - timestamp <= DeviceConstants.EXTERNAL_DATA_TTL_MS;
+      },
       logger: (msg, ...args) => this.logger.debug(msg, ...args),
       device: this,
     });
@@ -814,7 +821,7 @@ class AdlarModbusDevice extends Homey.Device {
   }
 
   public getLiveOperationWidgetState(): LiveOperationWidgetState {
-    return buildLiveOperationWidgetState({
+    const state = buildLiveOperationWidgetState({
       device: this,
       snapshot: this.coordinator?.getCurrentSnapshot() ?? null,
       isExternalCapabilityFresh: (capabilityId) => {
@@ -822,6 +829,17 @@ class AdlarModbusDevice extends Homey.Device {
         return timestamp > 0 && Date.now() - timestamp <= DeviceConstants.EXTERNAL_DATA_TTL_MS;
       },
     });
+    const measurement = this.coordinator?.getEnergyTracking()?.getCurrentPowerMeasurement() ?? null;
+    let powerSource: LiveOperationWidgetState['process']['powerSource'] = 'none';
+    if (measurement) powerSource = measurement.source === 'external' ? 'external' : 'capability';
+    return {
+      ...state,
+      process: {
+        ...state.process,
+        electricalPowerKw: measurement ? measurement.value / 1000 : null,
+        powerSource,
+      },
+    };
   }
 
   // ── Capability listeners ───────────────────────────────────────────────────

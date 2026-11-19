@@ -1091,12 +1091,6 @@ export class FlowCardManagerService {
           const device = this.resolveDevice(args);
           await this.handleReceiveExternalPowerData(device, args);
 
-          // Trigger intelligent power update if enabled
-          const energyTrackingEnabled = device.getSetting('enable_intelligent_energy_tracking');
-          if (energyTrackingEnabled) {
-            // @ts-expect-error - updateIntelligentPowerMeasurement exists in MyDevice
-            await device.updateIntelligentPowerMeasurement?.();
-          }
           return true;
         },
       );

@@ -62,17 +62,22 @@ async function page(snapshot, driver = 'aurora3', caps = []) {
     }),
   };
   vm.runInNewContext(renderer, context);
-  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => {
+    setImmediate(resolve);
+  });
   return {
     text: (id) => elements.get(id)?.textContent,
     attr: (id, key) => elements.get(id)?.attributes[key],
     active: (id) => elements.get(id)?.classList['flow-active'],
-    tuya: (snap, values) => context.window.AdlarSchemaRenderer.updateFromTuya(container, snap, values, {}),
+    tuya: (snap, values, curve = {}) => context.window.AdlarSchemaRenderer.updateFromTuya(container, snap, values, curve),
     markup: () => markup,
-    async refresh(next) {
+    async refresh(next, nextCaps = caps) {
       snapshot = next;
+      caps = nextCaps;
       poll();
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => {
+        setImmediate(resolve);
+      });
     },
     mode: (mode) => modes.find((button) => button.mode === mode).click(),
   };
@@ -166,7 +171,7 @@ test('pump-only operation is not compressor operation; defrost valve state is ex
 
 test('live history is restored after demo and missing history removes the old series', async () => {
   const s = snapshot();
-  s.history = [{ t7: 34, hz: 45 }, { t7: 35, hz: 48 }];
+  s.history = [{ ts: 1700000000000, t7: 34, hz: 45 }, { ts: 1700000300000, t7: 35, hz: 48 }];
   const p = await page(s);
   const history = p.attr('sc-chart-t7', 'd');
   assert.match(history, /^M .* L /);

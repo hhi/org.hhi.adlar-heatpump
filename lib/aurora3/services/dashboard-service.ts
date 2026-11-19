@@ -6,6 +6,7 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { serveDashboardFavicon, withDashboardFavicon } from '../../shared/dashboard-favicon';
 import { DASHBOARD_PAGE_STYLES } from '../../shared/dashboard-styles';
 import { SchemaHistoryBuffer } from '../../shared/dashboard-history';
 import { DataSnapshot, pollGroupsForAddress } from '../protocol/adlar3-modbus-service';
@@ -161,6 +162,7 @@ export class DashboardService {
   private getTemperatureScale: (() => TemperatureRegisterScale) | null = null;
   private getChangeLog: ((mode?: RegisterChangeLogMode) => Map<number, RegisterChangeEntry>) | null = null;
   private getCapabilityValues: (() => Record<string, unknown>) | null = null;
+  private getLiveOperationState: (() => unknown) | null = null;
   private getSnapshotCallback: (() => DataSnapshot | null) | null = null;
   private getRegisterCache: (() => Map<number, number>) | null = null;
   private readonly historyBuffer = new SchemaHistoryBuffer();
@@ -200,6 +202,10 @@ export class DashboardService {
 
   setGetChangeLogCallback(fn: (mode?: RegisterChangeLogMode) => Map<number, RegisterChangeEntry>): void {
     this.getChangeLog = fn;
+  }
+
+  setGetLiveOperationStateCallback(fn: () => unknown): void {
+    this.getLiveOperationState = fn;
   }
 
   setGetCapabilityValuesCallback(fn: () => Record<string, unknown>): void {
@@ -285,6 +291,11 @@ export class DashboardService {
     const method = (req.method ?? 'GET').toUpperCase();
 
     this._setCors(res);
+
+    if (method === 'GET' && url === '/favicon.png') {
+      await serveDashboardFavicon(this.appDir, res);
+      return;
+    }
 
     // OPTIONS preflight
     if (method === 'OPTIONS') {
@@ -402,7 +413,7 @@ export class DashboardService {
           res.end(`Error loading ${filename}`);
         } else {
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end(content);
+          res.end(filename.endsWith('.html') ? withDashboardFavicon(content.toString('utf8')) : content);
         }
         resolve();
       });
@@ -448,6 +459,7 @@ export class DashboardService {
       temperatureScale: this.getTemperatureScale?.() ?? 'x10',
       history: this.historyBuffer.getAll(),
       serverNowMs: Date.now(),
+      liveOperation: this.getLiveOperationState?.() ?? null,
     }, replacer);
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(json);

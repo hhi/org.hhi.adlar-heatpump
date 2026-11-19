@@ -10,6 +10,7 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { serveDashboardFavicon, withDashboardFavicon } from '../../shared/dashboard-favicon';
 import parameterDescription, { parameterName, suspectedLParameter, unknownControlRegister } from '../protocol/parameter-descriptions';
 import {
   ParameterBankRange, parameterBankAddresses, parameterBankWord, validParameterBankRead, PARAMETER_LIMIT_BANKS,
@@ -185,6 +186,7 @@ export class DashboardService {
   private readonly appDir: string;
   private capabilityMeta: Map<string, { title: string; unit: string; icon: string; type: string }> | null = null;
   private getCapabilityValues: (() => Record<string, unknown>) | null = null;
+  private getLiveOperationState: (() => unknown) | null = null;
   private readonly historyBuffer = new SchemaHistoryBuffer();
 
   constructor(options: DashboardServiceOptions) {
@@ -240,6 +242,10 @@ export class DashboardService {
     this.readParameterRanges = read;
     this.getParameterRanges = cached;
     this.readParameterBankWords = words ?? null;
+  }
+
+  setGetLiveOperationStateCallback(fn: () => unknown): void {
+    this.getLiveOperationState = fn;
   }
 
   setGetCapabilityValuesCallback(fn: () => Record<string, unknown>): void {
@@ -314,6 +320,11 @@ export class DashboardService {
     const method = (req.method ?? 'GET').toUpperCase();
 
     this._setCors(res);
+
+    if (method === 'GET' && url === '/favicon.png') {
+      await serveDashboardFavicon(this.appDir, res);
+      return;
+    }
 
     if (method === 'GET' && Object.values(DASHBOARD_PAGE_STYLES).some((name) => url === `/styles/${name}`)) {
       await this._serveFile(res, url.slice(1));
@@ -809,7 +820,7 @@ export class DashboardService {
           if (filename.endsWith('.css')) contentType = 'text/css; charset=utf-8';
           if (filename.endsWith('.js')) contentType = 'text/javascript; charset=utf-8';
           res.writeHead(200, { 'Content-Type': contentType });
-          res.end(content);
+          res.end(filename.endsWith('.html') ? withDashboardFavicon(content.toString('utf8')) : content);
         }
         resolve();
       });
@@ -839,6 +850,7 @@ export class DashboardService {
       temperatureScale: this._getTemperatureScale(),
       history: this.historyBuffer.getAll(),
       serverNowMs: Date.now(),
+      liveOperation: this.getLiveOperationState?.() ?? null,
     }, replacer);
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(json);

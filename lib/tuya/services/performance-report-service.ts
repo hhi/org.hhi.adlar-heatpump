@@ -489,11 +489,6 @@ export class PerformanceReportService {
   }
 
   private scoreEnergy(t: Translations): DomainScore {
-    const trackingEnabled = this.device.getSetting('enable_intelligent_energy_tracking');
-    if (trackingEnabled === false) {
-      return { status: 'disabled', reason: t.domainNames.energy };
-    }
-
     const costDaily = this.getCapNum('adlar_energy_cost_daily');
     const energyDaily = this.getCapNum('adlar_external_energy_daily');
     const power = this.getCapNum('measure_power');

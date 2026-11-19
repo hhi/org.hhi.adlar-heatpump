@@ -230,23 +230,6 @@
           "fr": "Afficher/Masquer les capacités de mesure de puissance (consommation). Désactiver pour une interface plus claire si votre appareil n'a pas de surveillance de puissance."
         },
         "value": true
-      },
-      {
-        "id": "enable_intelligent_energy_tracking",
-        "type": "checkbox",
-        "label": {
-          "en": "Enable intelligent energy tracking",
-          "nl": "Intelligente energie tracking inschakelen",
-          "de": "Intelligente Energieverfolgung aktivieren",
-          "fr": "Activer le suivi intelligent de l'énergie"
-        },
-        "hint": {
-          "en": "Automatically prioritize external power measurements when available via flow cards, fall back to internal sensors. Makes device appear in Homey Energy dashboard with accurate power consumption data.",
-          "nl": "Prioriteer automatisch externe vermogensmetingen wanneer beschikbaar via flow kaarten, val terug op interne sensoren. Laat apparaat verschijnen in Homey Energie dashboard met nauwkeurige stroomverbruik data.",
-          "de": "Priorisieren Sie automatisch externe Leistungsmessungen, wenn über Flow-Karten verfügbar, greifen Sie auf interne Sensoren zurück. Lässt das Gerät im Homey Energie-Dashboard mit genauen Stromverbrauchsdaten erscheinen.",
-          "fr": "Prioriser automatiquement les mesures de puissance externes lorsqu'elles sont disponibles via les cartes de flux, revenir aux capteurs internes. Fait apparaître l'appareil dans le tableau de bord Homey Énergie avec des données de consommation précises."
-        },
-        "value": true
       }
     ]
   },
