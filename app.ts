@@ -1539,7 +1539,7 @@ class MyApp extends App implements Aurora3AppHost {
       logger: (msg, ...args) => this.logger.info(String(msg), ...args),
       port: this._dashboardPort,
     });
-    this._dashboard.start();
+    await this._dashboard.start();
   }
 
   async setAurora3DashboardPort(port: number): Promise<void> {
@@ -1566,7 +1566,7 @@ class MyApp extends App implements Aurora3AppHost {
       logger: (msg, ...args) => this.logger.info(String(msg), ...args),
       port: this._aurora3DashboardPort,
     });
-    this._aurora3Dashboard.start();
+    await this._aurora3Dashboard.start();
   }
 }
 

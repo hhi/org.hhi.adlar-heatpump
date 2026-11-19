@@ -26,6 +26,7 @@ import { migratePriceThresholdMode, useAutoThresholdsForNewDevice } from '../../
 import { formatHourMinute, nextLocalMidnight, resolveHomeyTimezone } from '../../lib/shared/utils/time-format';
 import { isExternalValueFresh } from '../../lib/shared/utils/external-value-age';
 import { formatCopMethodDisplay } from '../../lib/shared/utils/cop-method-display';
+import { updateLiveMonitoringAddress } from '../../lib/shared/live-monitoring-address';
 
 /**
  * Optional diagnostic capabilities, grouped by the device setting that gates them.
@@ -198,6 +199,36 @@ class MyDevice extends Homey.Device {
     } catch (error) {
       this.error('Tuya dashboard unavailable; device operation continues', error);
     }
+    await this.showLiveMonitoringAddress();
+  }
+
+  /** v3.13.0: shows the live monitoring address in the read-only device setting. */
+  async showLiveMonitoringAddress(): Promise<void> {
+    const app = this.homey.app as unknown as TuyaDashboardHost;
+    try {
+      await updateLiveMonitoringAddress(
+        this,
+        app.tuyaDashboard.listeningPort,
+        Number(this.getSetting('dashboard_port') ?? 8092),
+      );
+    } catch (error) {
+      this.logger.warn('Live monitoring address not shown:', error);
+    }
+  }
+
+  /**
+   * After a port change every Tuya device shows the new address: they share one dashboard.
+   * Deferred, because Homey saves the settings only after onSettings returns and would undo a
+   * setSettings() made now.
+   */
+  private scheduleLiveMonitoringAddressRefresh(): void {
+    this.homey.setTimeout(() => {
+      for (const device of this.driver.getDevices()) {
+        if (device instanceof MyDevice) {
+          device.showLiveMonitoringAddress().catch(() => {});
+        }
+      }
+    }, DeviceConstants.SETTINGS_DEFER_DELAY_MS);
   }
 
   tuya: TuyaDevice | undefined;
@@ -4169,6 +4200,7 @@ class MyDevice extends Homey.Device {
     if (changedKeys.includes('dashboard_port')) {
       const app = this.homey.app as unknown as TuyaDashboardHost;
       await app.setTuyaDashboardPort(Number(newSettings.dashboard_port ?? 8092));
+      this.scheduleLiveMonitoringAddressRefresh();
     }
 
     // Reject a maximum water temperature that is not at least SETPOINT_RANGE_MIN_GAP above the minimum

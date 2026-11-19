@@ -369,5 +369,7 @@ nav a.active {
 
 /* ── Tuya single-page host integration (body[data-page="processchema"]) ── */
 body[data-page="processchema"] main {
+  width: 100%;
   max-width: 1520px;
+  margin: 0 auto;
 }

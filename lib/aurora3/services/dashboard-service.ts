@@ -243,8 +243,17 @@ export class DashboardService {
     });
   }
 
-  /** Start de HTTP-server. */
-  start(): void {
+  /** Poort waarop de server werkelijk luistert, of null als hij niet (meer) draait. */
+  get listeningPort(): number | null {
+    const address = this.server?.listening ? this.server.address() : null;
+    return address && typeof address !== 'string' ? address.port : null;
+  }
+
+  /**
+   * Start de HTTP-server. De promise wordt vervuld zodra de server luistert of het starten
+   * mislukt (bijv. poort bezet); daarna geeft `listeningPort` de uitkomst.
+   */
+  start(): Promise<void> {
     this.server = http.createServer((req, res) => {
       this._handleRequest(req, res).catch((err: Error) => {
         this.logger('DashboardService: Onverwachte fout:', err.message);
@@ -263,8 +272,13 @@ export class DashboardService {
       }
     });
 
-    this.server.listen(this.port, () => {
-      this.logger(`DashboardService: Gestart op http://localhost:${this.port}/`);
+    const { server } = this;
+    return new Promise((resolve) => {
+      server.once('error', () => resolve());
+      server.listen(this.port, () => {
+        this.logger(`DashboardService: Gestart op http://localhost:${this.port}/`);
+        resolve();
+      });
     });
   }
 

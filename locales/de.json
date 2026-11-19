@@ -183,6 +183,10 @@
       }
     }
   },
+  "live_monitoring": {
+    "not_available": "Nicht verfügbar: Port __port__ ist bereits belegt. Wählen Sie oben einen anderen Port.",
+    "address_unknown": "Adresse unbekannt; verwenden Sie die IP-Adresse Ihres Homey mit Port __port__."
+  },
   "modbusRegisterDescriptions": {
     "fan_type": "0=AC, 1=DC, 2=EC, 3=unbekannt (bei Programm 433 gemessen).",
     "sterilization_start_hour": "Startstunde 0..23 (23 = 23:00), bei Programm 433 / Protokoll 143 gemessen. Die ältere Spezifikation nannte HHMM 2300.",

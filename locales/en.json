@@ -298,6 +298,10 @@
     "view_unit": "Unit",
     "no_unit": "No unit"
   },
+  "live_monitoring": {
+    "not_available": "Not available: port __port__ is already in use. Choose another port above.",
+    "address_unknown": "Address unknown; use the IP address of your Homey with port __port__."
+  },
   "modbusRegisterDescriptions": {
     "fan_type": "0=AC, 1=DC, 2=EC, 3=unknown (observed on program 433).",
     "sterilization_start_hour": "Start hour 0..23 (23 = 23:00), observed on program 433 / protocol 143. Older specification used HHMM 2300.",
